@@ -1,0 +1,8 @@
+/* WindDial — canvas-only renderer; styles can be scoped via widget container.
+
+   This file is intentionally minimal. The renderer reads:
+   - --dyni-font
+   - --dyni-fg / --instrument-fg / --mainfg
+
+   Add theme-specific overrides here if needed.
+*/
