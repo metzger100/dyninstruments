@@ -1,6 +1,6 @@
 # dyninstruments – Modern Instrument Widgets for AvNav
 
-`dyninstruments` is an AvNav plugin that provides a modern, highly legible instrument panel with cluster-based widgets and canvas-based graphics (e.g. CompassGauge, WindDial).  
+`dyninstruments` is an [AvNav](https://github.com/wellenvogel/avnav) plugin that provides a modern, highly legible instrument panel with cluster-based widgets and canvas-based graphics (e.g. CompassGauge, WindDial).  
 The goal is: **maximum readability at the helm**, minimal configuration overhead.
 
 > ⚠️ **Status**: Work in progress / pre-release. APIs and widget names might still change.
