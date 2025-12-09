@@ -9,21 +9,20 @@ The goal is: **maximum readability at the helm**, minimal configuration overhead
 
 ## Features
 
-- 🧱 **Cluster-Widgets statt Widget-Flut**
+- 🧱 **Cluster-Widgets**
   - Thematische Cluster wie `courseHeading`, `speed`, `position`, `wind`, `nav`, `anchor`, `vessel`.
   - Pro Cluster wählst du im Editor nur noch ein `kind` (z. B. `COG`, `HDT`, `SOG`, `STW`), statt für jeden Wert ein eigenes Widget zu haben.
 
 - 🔍 **Optimierte Lesbarkeit**
   - Caption, Value, Unit werden automatisch so groß wie möglich gesetzt.
-  - Layout passt sich der verfügbaren Fläche an (sehr flach, normal, hoch).
+  - Layout passt sich der verfügbaren Fläche an (flach, normal, hoch).
   - Fokus auf der Zahl, Beschriftung nur so präsent wie nötig.
 
 - 🎯 **Canvas-basierte Spezial-Instrumente**
   - **WindDial** – runder Windanzeiger mit gut sichtbarem Zeiger.
   - **CompassGauge** – 360°-Kompassanzeige mit deutlich hervorgehobener Kursmarke.
-  - Interne Cores (`PolarCore`, `RadialGaugeCore`, `ListCore`, `MiniHistory`) sorgen für wiederverwendbare Zeichenlogik.
 
-- ⚙️ **Sinnvolle Editor-Optionen**
+- ⚙️ **Editor-Optionen**
   - Pro Cluster-Widget:
     - `kind` (welcher Wert aus dem Cluster angezeigt wird)
     - `caption` (Beschriftung)
@@ -84,7 +83,7 @@ Danach den **AvNav-Server neu starten** (über die AvNav Web-Oberfläche oder pe
 
 1. Öffne AvNav im Browser.
 
-2. Wechsle auf das **Instrumenten-Layout**, das du anpassen möchtest.
+2. Wechsle im Edit-Mode auf das **Instrumenten-Layout**, das du anpassen möchtest.
 
 3. In der Widget-Liste findest du neue Einträge mit dem Präfix:
 
@@ -102,46 +101,6 @@ Danach den **AvNav-Server neu starten** (über die AvNav Web-Oberfläche oder pe
    * `dyninstruments_anchor`
    * `dyninstruments_vessel`
 
-### Editor-Optionen (Cluster-Widgets)
-
-Am Beispiel `dyninstruments_courseHeading`:
-
-* **kind**
-
-  * Mögliche Werte (Beispiele): `COG`, `HDT`, `HDM`, `BRG`.
-  * Bestimmt, welcher Kurs-Wert im Cluster angezeigt wird.
-* **caption**
-
-  * Textbeschriftung (z. B. `COG`, `HDT`, `BRG` oder ein Klartext wie `Heading`).
-* **unit**
-
-  * Optional, Standard ist meist `°` oder was der Formatter liefert.
-* **leadingZero** (falls verfügbar)
-
-  * Anzeige mit führender Null (z. B. `005°` statt `5°`).
-
-Analog funktioniert es bei anderen Clustern:
-
-* `dyninstruments_speed`: `kind` = `SOG` oder `STW`.
-* `dyninstruments_wind`: `kind` z. B. `TWA`, `AWA`, `TWS`, `AWS`.
-* `dyninstruments_nav`: `kind` z. B. `eta`, `rteEta`, `dst`, `rteDistance`, `vmg`, `clock`.
-* `dyninstruments_anchor`: z. B. Anker-Distanz oder Anker-Wache.
-* `dyninstruments_vessel`: Boots- und WP-Position, später evtl. Attitude/Systemwerte.
-
-### Spezielle Canvas-Instrumente
-
-* **CompassGauge**
-
-  * Wird typischerweise im Cluster `courseHeading` verwendet.
-  * Stellt einen 360°-Kompass mit hervorgehobener Kursmarke dar.
-* **WindDial**
-
-  * Visualisiert wahre/scheinbare Windrichtung in einem runden Dial, inkl. klarer Zeigerfarbe.
-* Beide respektieren:
-
-  * Caption/Value/Unit-Zeile über bzw. um die Gauge.
-  * Responsive Verhalten – nutzen den verfügbaren Platz bestmöglich.
-
 ---
 
 ## Architektur (Kurzüberblick)
@@ -155,12 +114,9 @@ Analog funktioniert es bei anderen Clustern:
 
   * Canvas-Renderer für klassische Anzeigen mit **Caption / Value / Unit**.
   * Verantwortlich für Auto-Scaling und Layout abhängig vom Widget-Seitenverhältnis.
-* **PolarCore / RadialGaugeCore**
+* **"Core"-Files**
 
-  * Wiederverwendbare Bausteine für 360°-Skalen, Ticks und Gauge-Zeiger (z. B. Compass, WindDial).
-* **ListCore / MiniHistory** (geplant/teilweise umgesetzt)
-
-  * Basis für tabellenartige Widgets (z. B. AIS-Listen) und kleine Trendverläufe.
+  * Wiederverwendbare Bausteine, beispielweise 360°-Skalen, Ticks und Gauge-Zeiger (z. B. Compass, WindDial).
 
 Die Module werden von `plugin.js` als UMD-Module geladen und über die AvNav-API (`renderCanvas`, `registerWidget`, …) eingebunden.
 
@@ -175,10 +131,10 @@ Geplante bzw. im Aufbau befindliche Instrumente:
   * `radGauge_Speed`
   * `radGauge_Temperature`
   * `radGauge_Voltage`
+  * `radGauge_Wind`
 * Wind-Instrumente:
 
-  * `WindDial` (Dial)
-  * `WindGraphics` (graphische Darstellung, z. B. History/Trends)
+  * `WindTrend` (graphische Darstellung, z. B. History/Trends)
 * Navigations- und Status-Widgets:
 
   * `XteCanvas`
@@ -194,37 +150,3 @@ Geplante bzw. im Aufbau befindliche Instrumente:
   * `Alarm`-/Status-Widgets
 
 Die tatsächliche Implementierung kann von dieser Liste abweichen; siehe GitHub-Issues und Commits für den aktuellen Stand.
-
----
-
-## Known Limitations
-
-* **Android-App**: Das Plugin wird dort (Stand jetzt) nicht geladen.
-* **Anpassbarkeit per CSS**:
-
-  * Canvas-Widgets lassen sich naturgemäß weniger granular per CSS verändern als reine DOM-Widgets.
-  * Ziel ist, dass das Standard-Design „out of the box“ gut nutzbar ist.
-
----
-
-## Development
-
-1. Repository klonen:
-
-   ```bash
-   git clone https://github.com/<user>/dyninstruments.git
-   cd dyninstruments
-   ```
-
-2. Für schnelle Tests:
-
-   * Das Verzeichnis `dyninstruments/` direkt in das AvNav-Plugin-Verzeichnis kopieren.
-   * AvNav neu starten.
-   * Browser-Dev-Tools verwenden (Konsole, Network, Canvas-Profiling).
-
-3. Code-Basis:
-
-   * Plain JavaScript (ES6+, UMD-Module).
-   * Keine zwingende Build-Pipeline nötig – die Plugindateien werden direkt vom AvNav-Server ausgeliefert.
-
-Pull Requests, Bug Reports und UX-Feedback sind ausdrücklich willkommen. 🙂
