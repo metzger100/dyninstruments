@@ -29,7 +29,6 @@ The goal is: **maximum readability at the helm**, minimal configuration overhead
     - `caption` (Beschriftung)
     - `unit` (Einheit, optional überschreibbar)
     - weitere Optionen wie `leadingZero` für Heading/Winkel, je nach Instrument.
-  - Kein Zoo an Einstellungen – nur das, was im Cockpit wirklich hilft.
 
 - 🎨 **Integriert sich in AvNav**
   - Styles sind auf die eigenen Widgets gescoped (kein Einfluss auf Standard-Instrumente).
