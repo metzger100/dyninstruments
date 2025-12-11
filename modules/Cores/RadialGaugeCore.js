@@ -9,15 +9,9 @@
   "use strict";
 
   function create(def, Helpers) {
-    const basicsMod = (Helpers && Helpers.getModule && Helpers.getModule("GaugeBasicsCore"))
-      || ((typeof window !== "undefined" && window.DyniModules && window.DyniModules.DyniGaugeBasicsCore)
-        ? window.DyniModules.DyniGaugeBasicsCore
-        : undefined);
+    const basicsMod = Helpers && Helpers.getModule && Helpers.getModule("GaugeBasicsCore");
     const Basics = basicsMod && basicsMod.create && basicsMod.create(def, Helpers);
-    const polarMod = (Helpers && Helpers.getModule && Helpers.getModule("PolarCore"))
-      || ((typeof window !== "undefined" && window.DyniModules && window.DyniModules.DyniPolarCore)
-        ? window.DyniModules.DyniPolarCore
-        : undefined);
+    const polarMod = Helpers && Helpers.getModule && Helpers.getModule("PolarCore");
     const Polar = polarMod && polarMod.create && polarMod.create(def, Helpers);
     if (!Basics || !Polar) throw new Error("RadialGaugeCore needs GaugeBasicsCore and PolarCore");
 
