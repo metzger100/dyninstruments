@@ -40,7 +40,7 @@
         tickLineWidth: 1,
         fontFamily: Basics.resolveFontFamily(ctx.canvas),
         needleWidth: 2.5,
-        needleColor: fg
+        needleColor: "#ff2b2b"
       };
       const m = mode || "normal";
       if (m === "flat") {
@@ -53,12 +53,16 @@
       return Object.assign(base, overrides || {});
     }
 
-    function valueToCanvasAngle(v, cfg){
-      const hasVal = Basics.isFiniteNumber(v);
+    function valueToAngleRad(value, cfg){
+      const hasVal = Basics.isFiniteNumber(value);
       if (!hasVal) return null;
-      const clamped = Basics.clamp(v, cfg.minValue, cfg.maxValue);
-      const t = Basics.mapRange(clamped, cfg.minValue, cfg.maxValue, 0, 1);
-      const angleDeg = Basics.lerp(cfg.startAngleDeg, cfg.endAngleDeg, t);
+      const min = cfg.minValue;
+      const max = cfg.maxValue;
+      const span = (max - min) || 1;
+      const t = Basics.clamp((value - min) / span, 0, 1);
+      const startDeg = (typeof cfg.startAngleDeg === "number") ? cfg.startAngleDeg : -90;
+      const endDeg   = (typeof cfg.endAngleDeg === "number")   ? cfg.endAngleDeg   : 90;
+      const angleDeg = startDeg + t * (endDeg - startDeg);
       return Polar.toCanvasAngle(angleDeg, 0);
     }
 
@@ -68,7 +72,7 @@
       const minorStep = cfg.minorTickStep || 10;
       for (let v = cfg.minValue; v <= cfg.maxValue + 1e-6; v += minorStep){
         const isMajor = Math.abs((v - cfg.minValue) % majorStep) < 1e-6;
-        const angleRad = valueToCanvasAngle(v, cfg);
+        const angleRad = valueToAngleRad(v, cfg);
         ticks.push({ angleRad, isMajor });
       }
       return ticks;
@@ -78,7 +82,7 @@
       const labels = [];
       if (!Basics.isFiniteNumber(cfg.labelStep) || cfg.labelStep <= 0) return labels;
       for (let v = cfg.minValue; v <= cfg.maxValue + 1e-6; v += cfg.labelStep){
-        const angleRad = valueToCanvasAngle(v, cfg);
+        const angleRad = valueToAngleRad(v, cfg);
         labels.push({ angleRad, text: String(Math.round(v)) });
       }
       return labels;
@@ -122,26 +126,22 @@
       ctx.beginPath();
       const startRad = Polar.toCanvasAngle(cfg.startAngleDeg, 0);
       const endRad = Polar.toCanvasAngle(cfg.endAngleDeg, 0);
-      const anticlockwise = (typeof cfg.anticlockwise === "boolean") ? cfg.anticlockwise : (startRad > endRad);
+      const anticlockwise = false;
       ctx.lineWidth = style.rimLineWidth;
       ctx.arc(cx, cy, radius, startRad, endRad, anticlockwise);
       ctx.stroke();
 
       // Warning/alarm sectors
-      if (cfg.warningSector){
-        const from = Basics.clamp(cfg.warningSector.from, cfg.minValue, cfg.maxValue);
-        const to = Basics.clamp(cfg.warningSector.to, cfg.minValue, cfg.maxValue);
-        const a0 = valueToCanvasAngle(from, cfg);
-        const a1 = valueToCanvasAngle(to, cfg);
-        Basics.drawCircularSector(ctx, cx, cy, radius*0.88, radius*0.98, a0, a1, { fillStyle: style.warningColor });
+      function drawSector(sector, color){
+        if (!sector) return;
+        const from = Basics.clamp(sector.from, cfg.minValue, cfg.maxValue);
+        const to = Basics.clamp(sector.to, cfg.minValue, cfg.maxValue);
+        const a0 = valueToAngleRad(from, cfg);
+        const a1 = valueToAngleRad(to, cfg);
+        Basics.drawCircularSector(ctx, cx, cy, radius*0.88, radius*0.98, a0, a1, { fillStyle: color });
       }
-      if (cfg.alarmSector){
-        const from = Basics.clamp(cfg.alarmSector.from, cfg.minValue, cfg.maxValue);
-        const to = Basics.clamp(cfg.alarmSector.to, cfg.minValue, cfg.maxValue);
-        const a0 = valueToCanvasAngle(from, cfg);
-        const a1 = valueToCanvasAngle(to, cfg);
-        Basics.drawCircularSector(ctx, cx, cy, radius*0.88, radius*0.98, a0, a1, { fillStyle: style.alarmColor });
-      }
+      drawSector(cfg.warningSector, style.warningColor);
+      drawSector(cfg.alarmSector, style.alarmColor);
 
       // Ticks & labels
       const ticks = buildTicks(cfg);
@@ -163,7 +163,7 @@
 
       // Needle
       if (hasValue){
-        const ang = valueToCanvasAngle(cfg.value, cfg);
+        const ang = valueToAngleRad(cfg.value, cfg);
         Basics.drawPointerAtRim(ctx, cx, cy, radius, ang, {
           color: needleColor,
           alpha: 1,

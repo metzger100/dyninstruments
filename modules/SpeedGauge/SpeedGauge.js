@@ -36,6 +36,12 @@
     function deriveSectors(minValue, maxValue, warningStart, alarmStart){
       let warn = warningStart;
       let alarm = alarmStart;
+      // derive sensible defaults if neither is supplied
+      if (warn === null && alarm === null){
+        const span = (maxValue - minValue) || 1;
+        warn = minValue + span * 0.7;
+        alarm = minValue + span * 0.85;
+      }
       warn = warn !== null && warn !== undefined ? Basics.clamp(warn, minValue, maxValue) : null;
       alarm = alarm !== null && alarm !== undefined ? Basics.clamp(alarm, minValue, maxValue) : null;
       let warningSector = null;
@@ -64,10 +70,12 @@
 
       function drawBox(text, box){
         if (!text || box.height <= 0 || box.width <= 0) return 0;
-        const px = Basics.fitTextInBox(ctx, text, box, { bold: true, family: family });
+        const px = Basics.fitTextInBox ? Basics.fitTextInBox(ctx, text, box, { bold: true, family: family }) : 0;
+        const usePx = (px && px > 0) ? px : Math.max(6, Math.floor(box.height * 0.6));
+        Basics.setFont(ctx, usePx, { bold: true, family });
         ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.fillText(text, box.x + box.width/2, box.y + box.height/2);
-        return px;
+        return usePx;
       }
 
       if (mode === "flat" && areas.text){
@@ -185,16 +193,15 @@
       }
       else {
         gaugeBounds = bounds;
-        textBounds = { x: bounds.x + bounds.width*0.15, y: bounds.y + bounds.height*0.4, width: bounds.width*0.7, height: bounds.height*0.4 };
+        textBounds = { x: bounds.x + bounds.width*0.15, y: bounds.y + bounds.height*0.4, width: bounds.width*0.7, height: bounds.height*0.45 };
       }
 
       const radialConfig = {
         minValue,
         maxValue,
         value: props.value,
-        startAngleDeg: 90,
-        endAngleDeg: -90,
-        anticlockwise: true,
+        startAngleDeg: -90,
+        endAngleDeg: 90,
         majorTickStep: props.majorTickStep || 2,
         minorTickStep: props.minorTickStep || 0.5,
         labelStep: props.labelStep || 2,
@@ -207,8 +214,7 @@
         style: Object.assign({}, props.style || {}, {
           fgColor: color,
           tickColor: color,
-          labelColor: color,
-          needleColor: color
+          labelColor: color
         })
       };
 
