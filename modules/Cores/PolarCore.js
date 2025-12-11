@@ -9,8 +9,11 @@
   "use strict";
 
   function create(def, Helpers) {
-    const BasicsModule = Helpers && Helpers.getModule && Helpers.getModule("GaugeBasicsCore");
-    const Basics = BasicsModule && BasicsModule.create && BasicsModule.create(def, Helpers);
+    const basicsMod = (Helpers && Helpers.getModule && Helpers.getModule("GaugeBasicsCore"))
+      || ((typeof window !== "undefined" && window.DyniModules && window.DyniModules.DyniGaugeBasicsCore)
+        ? window.DyniModules.DyniGaugeBasicsCore
+        : undefined);
+    const Basics = basicsMod && basicsMod.create && basicsMod.create(def, Helpers);
     if (!Basics) throw new Error("GaugeBasicsCore is required by PolarCore");
 
     // ---- math utils ---------------------------------------------------------
