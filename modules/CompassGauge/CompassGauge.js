@@ -25,7 +25,10 @@
   "use strict";
 
   function create(def, Helpers) {
-    const Polar = Helpers.getModule('PolarCore') && Helpers.getModule('PolarCore').create();
+    const PolarModule = Helpers.getModule('PolarCore');
+    const Polar = PolarModule && typeof PolarModule.create === 'function'
+      ? PolarModule.create(def, Helpers)
+      : undefined;
 
     // ---------- utils --------------------------------------------------------
     function setFont(ctx, px, bold, family){ ctx.font = (bold ? '700 ' : '400 ') + px + 'px ' + family; }
