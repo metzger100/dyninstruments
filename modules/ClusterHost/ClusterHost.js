@@ -53,14 +53,20 @@
     if (!compassMod || typeof compassMod.create !== 'function') {
       throw new Error('ClusterHost: CompassGauge module not available');
     }
+    const speedGaugeMod = Helpers.getModule('SpeedGauge');
+    if (!speedGaugeMod || typeof speedGaugeMod.create !== 'function') {
+      throw new Error('ClusterHost: SpeedGauge module not available');
+    }
 
     const threeSpec   = three.create(def, Helpers);
     const dialSpec    = windDialMod.create(def, Helpers);
     const compassSpec = compassMod.create(def, Helpers);
+    const speedSpec   = speedGaugeMod.create(def, Helpers);
 
     const wantsHide = !!(threeSpec && threeSpec.wantsHideNativeHead) ||
                       !!(dialSpec && dialSpec.wantsHideNativeHead)   ||
-                      !!(compassSpec && compassSpec.wantsHideNativeHead);
+                      !!(compassSpec && compassSpec.wantsHideNativeHead) ||
+                      !!(speedSpec && speedSpec.wantsHideNativeHead);
 
     function out(v, cap, unit, formatter, formatterParameters){
       const o = {};
@@ -106,8 +112,30 @@
 
       if (cluster === 'speed'){
         const effKind = p.kind;
-        const val = p[effKind];
         const uni = unit(effKind);
+
+        if (effKind === 'sogGraphic' || effKind === 'stwGraphic'){
+          const val = effKind === 'sogGraphic' ? p.sog : p.stw;
+          return {
+            renderer: 'SpeedGauge',
+            value: val,
+            caption: cap(effKind),
+            unit: uni,
+            mode: p.mode,
+            minValue: p.minValue,
+            maxValue: p.maxValue,
+            warningStart: p.warningStart,
+            alarmStart: p.alarmStart,
+            speedRatioThresholdNormal: p.speedRatioThresholdNormal,
+            speedRatioThresholdFlat: p.speedRatioThresholdFlat,
+            majorTickStep: p.majorTickStep,
+            minorTickStep: p.minorTickStep,
+            labelStep: p.labelStep,
+            style: p.style
+          };
+        }
+
+        const val = p[effKind];
         return out(val, cap(effKind), uni, 'formatSpeed', [uni]);
       }
 
@@ -225,6 +253,7 @@
     function pickRenderer(props){
       if (props && props.renderer === 'WindDial')    return dialSpec;
       if (props && props.renderer === 'CompassGauge')return compassSpec;
+      if (props && props.renderer === 'SpeedGauge')  return speedSpec;
       return threeSpec;
     }
 
@@ -236,7 +265,7 @@
     }
 
     function finalizeFunction(){
-      [threeSpec, dialSpec, compassSpec].forEach(sub => {
+      [threeSpec, dialSpec, compassSpec, speedSpec].forEach(sub => {
         if (sub && typeof sub.finalizeFunction === 'function') {
           try { sub.finalizeFunction.apply(this, arguments); } catch(e){}
         }

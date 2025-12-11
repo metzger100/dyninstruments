@@ -140,7 +140,8 @@
     ThreeElements: { js:  BASE + "modules/ThreeElements/ThreeElements.js", css: BASE + "modules/ThreeElements/ThreeElements.css", globalKey: "DyniThreeElements" },
     WindDial: { js:  BASE + "modules/WindDial/WindDial.js", css: BASE + "modules/WindDial/WindDial.css", globalKey: "DyniWindDial", deps: ["PolarCore"] },
     CompassGauge: { js:  BASE + "modules/CompassGauge/CompassGauge.js", css: BASE + "modules/CompassGauge/CompassGauge.css", globalKey: "DyniCompassGauge", deps: ["PolarCore"] },
-    ClusterHost: { js:  BASE + "modules/ClusterHost/ClusterHost.js", css: BASE + "modules/ClusterHost/ClusterHost.css", globalKey: "DyniClusterHost", deps: ["ThreeElements","WindDial","CompassGauge"] }
+    SpeedGauge: { js:  BASE + "modules/SpeedGauge/SpeedGauge.js", css: BASE + "modules/SpeedGauge/SpeedGauge.css", globalKey: "DyniSpeedGauge", deps: ["GaugeBasicsCore","RadialGaugeCore"] },
+    ClusterHost: { js:  BASE + "modules/ClusterHost/ClusterHost.js", css: BASE + "modules/ClusterHost/ClusterHost.css", globalKey: "DyniClusterHost", deps: ["ThreeElements","WindDial","CompassGauge","SpeedGauge"] }
   };
 
   // ---------- Per-kind editable helpers ------------------------------------
@@ -175,7 +176,9 @@
   };
   const SPEED_KIND = {
     sog: { cap: 'SOG', unit: 'kn' },
-    stw: { cap: 'STW', unit: 'kn' }
+    stw: { cap: 'STW', unit: 'kn' },
+    sogGraphic: { cap: 'SOG', unit: 'kn' },
+    stwGraphic: { cap: 'STW', unit: 'kn' }
   };
   const POSITION_KIND = {
     boat: { cap: 'POS', unit: '' },
@@ -320,7 +323,7 @@
       module: "ClusterHost",
       def: {
         name: "dyninstruments_Speed",
-        description: "SOG/STW selection (knots)",
+        description: "SOG/STW selection (knots) incl. speed gauge",
         caption: "", unit: "", default: "---",
         cluster: "speed",
         storeKeys: { sog: "nav.gps.speed", stw: "nav.gps.waterSpeed" },
@@ -329,11 +332,22 @@
             type: "SELECT",
             list: [
               opt("Speed over ground (SOG)", "sog"),
-              opt("Speed through water (STW)", "stw")
+              opt("Speed through water (STW)", "stw"),
+              opt("Speed over ground (SOG) [Graphic]", "sogGraphic"),
+              opt("Speed through water (STW) [Graphic]", "stwGraphic")
             ],
             default: "sog",
             name: "Kind"
           },
+          minValue: { type: "FLOAT", default: 0, name: "Gauge minimum (kn)", condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }] },
+          maxValue: { type: "FLOAT", default: 15, name: "Gauge maximum (kn)", condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }] },
+          warningStart: { type: "FLOAT", default: null, name: "Warning start (kn)", condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }] },
+          alarmStart: { type: "FLOAT", default: null, name: "Alarm start (kn)", condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }] },
+          speedRatioThresholdNormal: { type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0, name: "Gauge 3-Rows Threshold", condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }] },
+          speedRatioThresholdFlat: { type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.4, name: "Gauge 1-Row Threshold", condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }] },
+          majorTickStep: { type: "FLOAT", min: 0.5, max: 20, step: 0.5, default: 2, name: "Major tick step", condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }] },
+          minorTickStep: { type: "FLOAT", min: 0.1, max: 10, step: 0.1, default: 0.5, name: "Minor tick step", condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }] },
+          labelStep: { type: "FLOAT", min: 0.5, max: 20, step: 0.5, default: 2, name: "Label step", condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }] },
           caption: false,
           unit: false,
           formatter: false,
