@@ -108,13 +108,16 @@
       const fgColor = style.fgColor || ctx.strokeStyle;
       const tickColor = style.tickColor || fgColor;
       const labelColor = style.labelColor || fgColor;
-      const needleColor = style.needleColor || fgColor;
 
       const minSide = Math.min(bounds.width, bounds.height);
       const margin = Math.max(0, (cfg.marginFactor || 0) * minSide);
       const radius = Math.max(1, Math.min((bounds.width - 2*margin)/2, bounds.height - 2*margin));
       const cx = bounds.x + bounds.width / 2;
       const cy = bounds.y + margin + radius;
+
+      const startRad = Polar.toCanvasAngle(cfg.startAngleDeg, 0);
+      const endRad = Polar.toCanvasAngle(cfg.endAngleDeg, 0);
+      const layout = { cx, cy, radius, startRad, endRad };
 
       ctx.save();
       ctx.strokeStyle = fgColor;
@@ -124,24 +127,26 @@
 
       // Rim
       ctx.beginPath();
-      const startRad = Polar.toCanvasAngle(cfg.startAngleDeg, 0);
-      const endRad = Polar.toCanvasAngle(cfg.endAngleDeg, 0);
-      const anticlockwise = false;
       ctx.lineWidth = style.rimLineWidth;
-      ctx.arc(cx, cy, radius, startRad, endRad, anticlockwise);
+      ctx.arc(cx, cy, radius, startRad, endRad, false);
       ctx.stroke();
 
-      // Warning/alarm sectors
-      function drawSector(sector, color){
-        if (!sector) return;
-        const from = Basics.clamp(sector.from, cfg.minValue, cfg.maxValue);
-        const to = Basics.clamp(sector.to, cfg.minValue, cfg.maxValue);
-        const a0 = valueToAngleRad(from, cfg);
-        const a1 = valueToAngleRad(to, cfg);
-        Basics.drawCircularSector(ctx, cx, cy, radius*0.88, radius*0.98, a0, a1, { fillStyle: color });
+      // Warning/alarm sectors (fallback or delegating hook)
+      if (typeof cfg.drawSectors === "function"){
+        cfg.drawSectors(ctx, layout, cfg, style);
+      } else {
+        function drawSector(sector, color){
+          if (!sector) return;
+          const from = Basics.clamp(sector.from, cfg.minValue, cfg.maxValue);
+          const to = Basics.clamp(sector.to, cfg.minValue, cfg.maxValue);
+          if (to <= from) return;
+          const a0 = valueToAngleRad(from, cfg);
+          const a1 = valueToAngleRad(to, cfg);
+          Basics.drawCircularSector(ctx, cx, cy, radius*0.88, radius*0.98, a0, a1, { fillStyle: color });
+        }
+        drawSector(cfg.warningSector, style.warningColor);
+        drawSector(cfg.alarmSector, style.alarmColor);
       }
-      drawSector(cfg.warningSector, style.warningColor);
-      drawSector(cfg.alarmSector, style.alarmColor);
 
       // Ticks & labels
       const ticks = buildTicks(cfg);
@@ -150,6 +155,18 @@
         minor: { len: Math.max(5, Math.floor(radius*0.05)), width: style.tickLineWidth },
         strokeStyle: tickColor
       });
+      // Needle
+      if (typeof cfg.drawNeedle === "function"){
+        cfg.drawNeedle(ctx, layout, cfg, style);
+      } else if (hasValue){
+        const ang = valueToAngleRad(cfg.value, cfg);
+        Basics.drawPointerAtRim(ctx, cx, cy, radius, ang, {
+          color: style.needleColor,
+          alpha: 1,
+          variant: cfg.mode === "high" ? "long" : "normal"
+        });
+      }
+
       const labels = buildLabels(cfg);
       if (labels.length){
         Basics.drawLabels(ctx, cx, cy, radius, labels, {
@@ -158,16 +175,6 @@
           offset: Math.max(16, Math.floor(radius*0.18)),
           fillStyle: labelColor,
           family: style.fontFamily
-        });
-      }
-
-      // Needle
-      if (hasValue){
-        const ang = valueToAngleRad(cfg.value, cfg);
-        Basics.drawPointerAtRim(ctx, cx, cy, radius, ang, {
-          color: needleColor,
-          alpha: 1,
-          variant: cfg.mode === "high" ? "long" : "normal"
         });
       }
 
@@ -207,7 +214,7 @@
       ctx.restore();
     }
 
-    return { id: "RadialGaugeCore", version: "1.0.0", drawRadialGauge };
+    return { id: "RadialGaugeCore", version: "1.0.0", drawRadialGauge, valueToAngleRad };
   }
 
   return { id: "RadialGaugeCore", create };
