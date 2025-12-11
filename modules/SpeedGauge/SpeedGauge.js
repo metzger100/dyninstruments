@@ -22,8 +22,12 @@
     function computeMode(props, bounds){
       if (props && typeof props.mode === "string") return props.mode;
       const ratio = bounds.width / Math.max(1, bounds.height);
-      const tN = Basics.isFiniteNumber(props && props.ratioThresholdNormal) ? props.ratioThresholdNormal : 0.9;
-      const tF = Basics.isFiniteNumber(props && props.ratioThresholdFlat) ? props.ratioThresholdFlat : 2.5;
+      const tN = Basics.isFiniteNumber(props && props.speedRatioThresholdNormal)
+        ? props.speedRatioThresholdNormal
+        : (Basics.isFiniteNumber(props && props.ratioThresholdNormal) ? props.ratioThresholdNormal : 0.9);
+      const tF = Basics.isFiniteNumber(props && props.speedRatioThresholdFlat)
+        ? props.speedRatioThresholdFlat
+        : (Basics.isFiniteNumber(props && props.ratioThresholdFlat) ? props.ratioThresholdFlat : 2.5);
       if (ratio < tN) return "high";
       if (ratio > tF) return "flat";
       return "normal";
@@ -156,6 +160,11 @@
       const bounds = { x: 0, y: 0, width: W, height: H };
       const mode = computeMode(props || {}, bounds);
 
+      const family = Helpers.resolveFontFamily ? Helpers.resolveFontFamily(canvas) : Basics.resolveFontFamily(canvas);
+      const color  = Helpers.resolveTextColor ? Helpers.resolveTextColor(canvas) : ctx.strokeStyle;
+      ctx.fillStyle = color;
+      ctx.strokeStyle = color;
+
       const minValue = (typeof props.minValue === "number") ? props.minValue : 0;
       const maxValue = (typeof props.maxValue === "number") ? props.maxValue : 15;
       const warningStart = (typeof props.warningStart === "number") ? props.warningStart : null;
@@ -176,15 +185,16 @@
       }
       else {
         gaugeBounds = bounds;
-        textBounds = { x: bounds.x + bounds.width*0.15, y: bounds.y + bounds.height*0.35, width: bounds.width*0.7, height: bounds.height*0.55 };
+        textBounds = { x: bounds.x + bounds.width*0.15, y: bounds.y + bounds.height*0.4, width: bounds.width*0.7, height: bounds.height*0.4 };
       }
 
       const radialConfig = {
         minValue,
         maxValue,
         value: props.value,
-        startAngleDeg: -90,
-        endAngleDeg: 90,
+        startAngleDeg: 90,
+        endAngleDeg: -90,
+        anticlockwise: true,
         majorTickStep: props.majorTickStep || 2,
         minorTickStep: props.minorTickStep || 0.5,
         labelStep: props.labelStep || 2,
@@ -194,14 +204,15 @@
         unit: "",
         showValue: false,
         mode: mode,
-        style: props.style || {}
+        style: Object.assign({}, props.style || {}, {
+          fgColor: color,
+          tickColor: color,
+          labelColor: color,
+          needleColor: color
+        })
       };
 
       Radial.drawRadialGauge(ctx, gaugeBounds, radialConfig);
-
-      const family = Basics.resolveFontFamily(canvas);
-      const color  = Helpers.resolveTextColor ? Helpers.resolveTextColor(canvas) : ctx.fillStyle;
-      ctx.fillStyle = color;
 
       const hasValue = Basics.isFiniteNumber(props.value);
       const valText = hasValue ? (Basics.clamp(props.value, minValue, maxValue)).toFixed(1) : "";

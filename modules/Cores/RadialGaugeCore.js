@@ -25,10 +25,11 @@
     }
 
     function resolveStyle(ctx, mode, overrides){
-      const fg = resolveColor(ctx, ["--instrument-fg","--dyni-fg","--mainfg"], "#e0e0e0");
+      const fg = (overrides && overrides.fgColor)
+        || resolveColor(ctx, ["--instrument-fg","--dyni-fg","--mainfg"], ctx.strokeStyle || "#000");
       const base = {
         fgColor: fg,
-        bgColor: resolveColor(ctx, ["--instrument-bg","--dyni-bg"], "#000"),
+        bgColor: resolveColor(ctx, ["--instrument-bg","--dyni-bg"], ctx.fillStyle || "#000"),
         tickColor: fg,
         labelColor: fg,
         valueColor: fg,
@@ -38,7 +39,8 @@
         rimLineWidth: 1,
         tickLineWidth: 1,
         fontFamily: Basics.resolveFontFamily(ctx.canvas),
-        needleWidth: 2.5
+        needleWidth: 2.5,
+        needleColor: fg
       };
       const m = mode || "normal";
       if (m === "flat") {
@@ -99,6 +101,10 @@
         marginFactor: 0.08
       }, config || {});
       const style = resolveStyle(ctx, cfg.mode, cfg.style);
+      const fgColor = style.fgColor || ctx.strokeStyle;
+      const tickColor = style.tickColor || fgColor;
+      const labelColor = style.labelColor || fgColor;
+      const needleColor = style.needleColor || fgColor;
 
       const minSide = Math.min(bounds.width, bounds.height);
       const margin = Math.max(0, (cfg.marginFactor || 0) * minSide);
@@ -107,8 +113,8 @@
       const cy = bounds.y + margin + radius;
 
       ctx.save();
-      ctx.strokeStyle = style.fgColor;
-      ctx.fillStyle = style.fgColor;
+      ctx.strokeStyle = fgColor;
+      ctx.fillStyle = fgColor;
 
       const hasValue = Basics.isFiniteNumber(cfg.value);
 
@@ -116,7 +122,7 @@
       ctx.beginPath();
       const startRad = Polar.toCanvasAngle(cfg.startAngleDeg, 0);
       const endRad = Polar.toCanvasAngle(cfg.endAngleDeg, 0);
-      const anticlockwise = startRad > endRad;
+      const anticlockwise = (typeof cfg.anticlockwise === "boolean") ? cfg.anticlockwise : (startRad > endRad);
       ctx.lineWidth = style.rimLineWidth;
       ctx.arc(cx, cy, radius, startRad, endRad, anticlockwise);
       ctx.stroke();
@@ -142,7 +148,7 @@
       Basics.drawTicks(ctx, cx, cy, radius*0.85, radius, ticks, {
         major: { len: Math.max(8, Math.floor(radius*0.08)), width: style.tickLineWidth*2 },
         minor: { len: Math.max(5, Math.floor(radius*0.05)), width: style.tickLineWidth },
-        strokeStyle: style.tickColor
+        strokeStyle: tickColor
       });
       const labels = buildLabels(cfg);
       if (labels.length){
@@ -150,7 +156,7 @@
           fontPx: Math.max(10, Math.floor(radius*0.12)),
           bold: true,
           offset: Math.max(16, Math.floor(radius*0.18)),
-          fillStyle: style.labelColor,
+          fillStyle: labelColor,
           family: style.fontFamily
         });
       }
@@ -159,7 +165,7 @@
       if (hasValue){
         const ang = valueToCanvasAngle(cfg.value, cfg);
         Basics.drawPointerAtRim(ctx, cx, cy, radius, ang, {
-          color: style.fgColor,
+          color: needleColor,
           alpha: 1,
           variant: cfg.mode === "high" ? "long" : "normal"
         });
