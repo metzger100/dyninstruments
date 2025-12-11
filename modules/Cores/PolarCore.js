@@ -9,10 +9,7 @@
   "use strict";
 
   function create(def, Helpers) {
-    const basicsMod = (Helpers && Helpers.getModule && Helpers.getModule("GaugeBasicsCore"))
-      || ((typeof window !== "undefined" && window.DyniModules && window.DyniModules.DyniGaugeBasicsCore)
-        ? window.DyniModules.DyniGaugeBasicsCore
-        : undefined);
+    const basicsMod = Helpers && Helpers.getModule && Helpers.getModule("GaugeBasicsCore");
     const Basics = basicsMod && basicsMod.create && basicsMod.create(def, Helpers);
     if (!Basics) throw new Error("GaugeBasicsCore is required by PolarCore");
 
