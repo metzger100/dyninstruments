@@ -131,8 +131,9 @@
 
   // ---------- Module registry (UMD namespaces + deps) -----------------------
   const MODULES = {
-    PolarCore: { js:  BASE + "modules/Cores/PolarCore.js", css: undefined, globalKey: "DyniPolarCore" },
-    RadialGaugeCore: { js:  BASE + "modules/Cores/RadialGaugeCore.js", css: undefined, globalKey: "DyniRadialGaugeCore" },
+    GaugeBasicsCore: { js: BASE + "modules/Cores/GaugeBasicsCore.js", css: undefined, globalKey: "DyniGaugeBasicsCore" },
+    PolarCore: { js:  BASE + "modules/Cores/PolarCore.js", css: undefined, globalKey: "DyniPolarCore", deps: ["GaugeBasicsCore"] },
+    RadialGaugeCore: { js:  BASE + "modules/Cores/RadialGaugeCore.js", css: undefined, globalKey: "DyniRadialGaugeCore", deps: ["GaugeBasicsCore","PolarCore"] },
     ListCore: { js:  BASE + "modules/Cores/ListCore.js", css: BASE + "modules/Cores/ListCore.css", globalKey: "DyniListCore" },
     MiniHistory: { js:  BASE + "modules/Cores/MiniHistory.js", css: undefined, globalKey: "DyniMiniHistory" },
 
