@@ -1,10 +1,12 @@
 /*!
  * WindDial (UMD) — compact dial for AWA/AWS and TWA/TWS
  *
+ * Updated: uses InstrumentComponents instead of PolarCore.
+ *
  * Modes:
  *  - Flat:   Angle caption (left top), value+unit (left bottom), dial centered,
  *            Speed caption (right top), value+unit (right bottom).
- *            The dial stays maximal. In flat mode the side boxes now:
+ *            The dial stays maximal. In flat mode the side boxes:
  *              1) maximize Value+Unit up to the dial edge (width-constrained),
  *              2) maximize Caption in its own top box (width/height-constrained),
  *                 additionally capped at (ValuePx * captionUnitScale) to keep relation.
@@ -22,7 +24,7 @@
   "use strict";
 
   function create(def, Helpers) {
-    const Polar = Helpers.getModule('PolarCore') && Helpers.getModule('PolarCore').create();
+    const IC = Helpers.getModule('InstrumentComponents') && Helpers.getModule('InstrumentComponents').create();
 
     // --------- util ----------------------------------------------------------
     function setFont(ctx, px, bold, family){ ctx.font = (bold ? '700 ' : '400 ') + px + 'px ' + family; }
@@ -44,82 +46,6 @@
       }
       const n = Number(v); if (!isFinite(n)) return '---';
       return n.toFixed(1) + ' ' + (unit || 'kn');
-    }
-
-    function toCanvasAngle(deg){
-      const d = ((deg - 90) % 360 + 360) % 360;
-      return (d * Math.PI) / 180;
-    }
-
-    function drawRing(ctx, cx, cy, r, lw){
-      ctx.beginPath(); ctx.lineWidth = lw; ctx.arc(cx, cy, r, 0, Math.PI*2, false); ctx.stroke();
-    }
-
-    function drawSector(ctx, cx, cy, rOuter, thickness, startDeg, endDeg){
-      const a0 = toCanvasAngle(startDeg);
-      const a1 = toCanvasAngle(endDeg);
-      const rInner = Math.max(1, rOuter - thickness);
-      ctx.beginPath();
-      ctx.arc(cx, cy, rOuter, a0, a1, false);
-      ctx.arc(cx, cy, rInner, a1, a0, true);
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    function drawTicksLabels(ctx, cx, cy, r, opts){
-      const o = Object.assign({
-        stepMajor: 30,
-        stepMinor: 10,
-        majorLen: 9,
-        minorLen: 5,
-        labelEvery: 30,
-        labelInset: 18,
-        fontPx: 11,
-        bold: true,
-        family: 'sans-serif'
-      }, opts || {});
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.lineCap = 'butt';
-
-      // minor ticks
-      ctx.beginPath(); ctx.lineWidth = 1;
-      for (let a=-180; a<=180; a+=o.stepMinor){
-        if (a % o.stepMajor === 0) continue;
-        const t = toCanvasAngle(a);
-        const x1 = Math.cos(t) * (r - o.minorLen);
-        const y1 = Math.sin(t) * (r - o.minorLen);
-        const x2 = Math.cos(t) * r;
-        const y2 = Math.sin(t) * r;
-        ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
-      }
-      ctx.stroke();
-
-      // major ticks
-      ctx.beginPath(); ctx.lineWidth = 2;
-      for (let a=-180; a<=180; a+=o.stepMajor){
-        const t = toCanvasAngle(a);
-        const x1 = Math.cos(t) * (r - o.majorLen);
-        const y1 = Math.sin(t) * (r - o.majorLen);
-        const x2 = Math.cos(t) * r;
-        const y2 = Math.sin(t) * r;
-        ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
-      }
-      ctx.stroke();
-
-      // labels
-      ctx.font = (o.bold ? '700 ' : '400 ') + o.fontPx + 'px ' + o.family;
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      for (let a=-180; a<=180; a+=o.labelEvery){
-        if (a === -180 || a === 180) continue;
-        const t = toCanvasAngle(a);
-        const rr = r - o.labelInset;
-        const x = Math.cos(t) * rr;
-        const y = Math.sin(t) * rr;
-        ctx.fillText(String(a), x, y);
-      }
-
-      ctx.restore();
     }
 
     function fitTextPx(ctx, text, maxW, maxH, family, bold){
@@ -218,6 +144,7 @@
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
       if (!W || !H) return;
       ctx.clearRect(0,0,W,H);
+
       const family = Helpers.resolveFontFamily(canvas);
       const color  = Helpers.resolveTextColor(canvas);
       ctx.fillStyle = color; ctx.strokeStyle = color;
@@ -282,23 +209,67 @@
 
       // Dial frame & sectors first
       ctx.save();
-      drawRing(ctx, cx, cy, rOuter, 1);
-      ctx.globalAlpha = 1.0; ctx.fillStyle = "#82b683";  // green
-      if (layMax > layMin) drawSector(ctx, cx, cy, rOuter, ringW,  layMin,  layMax);
-      ctx.fillStyle = "#ff7a76";                           // red
-      if (layMax > layMin) drawSector(ctx, cx, cy, rOuter, ringW, -layMax, -layMin);
-      ctx.globalAlpha = 1.0; ctx.fillStyle = color;
 
-      // Red wind pointer (tip outward) BEFORE labels so labels stay on top
-      if (isFiniteN(props.angle)) { ctx.save(); Polar.drawPointerAtRim(ctx, cx, cy, rOuter, props.angle, { depth: needleDepth, color: "#ff2b2b", variant: "long", sideFactor: 0.25, lengthFactor: 2 }); ctx.restore(); }
+      if (IC){
+        // ring
+        IC.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
 
-      // Ticks + labels AFTER pointer → labels above the red pointer
-      const labelInsetVal = Math.max(18, Math.floor(ringW * 1.8));
-      drawTicksLabels(ctx, cx, cy, tickR, {
-        stepMajor: 30, stepMinor: 10, labelEvery: 30,
-        labelInset: labelInsetVal,
-        fontPx: Math.max(10, Math.floor(R * 0.14)), bold: true, family
-      });
+        // sectors (annular)
+        if (layMax > layMin){
+          IC.drawAnnularSector(ctx, cx, cy, rOuter, {
+            startDeg:  layMin,
+            endDeg:    layMax,
+            thickness: ringW,
+            fillStyle: "#82b683",
+            alpha: 1
+          });
+          IC.drawAnnularSector(ctx, cx, cy, rOuter, {
+            startDeg: -layMax,
+            endDeg:   -layMin,
+            thickness: ringW,
+            fillStyle: "#ff7a76",
+            alpha: 1
+          });
+        }
+
+        // red wind pointer (tip outward) BEFORE labels so labels stay on top
+        if (isFiniteN(props.angle)) {
+          IC.drawPointerAtRim(ctx, cx, cy, rOuter, props.angle, {
+            depth: needleDepth,
+            color: "#ff2b2b",
+            variant: "long",
+            sideFactor: 0.25,
+            lengthFactor: 2
+          });
+        }
+
+        // ticks
+        IC.drawTicks(ctx, cx, cy, tickR, {
+          startDeg: -180, endDeg: 180,
+          stepMajor: 30, stepMinor: 10,
+          includeEnd: true,
+          major: { len: 9, width: 2 },
+          minor: { len: 5, width: 1 }
+        });
+
+        // labels (skip endpoints)
+        const labelInsetVal = Math.max(18, Math.floor(ringW * 1.8));
+        IC.drawLabels(ctx, cx, cy, tickR, {
+          startDeg: -180, endDeg: 180,
+          step: 30,
+          includeEnd: true,
+          radiusOffset: labelInsetVal,
+          fontPx: Math.max(10, Math.floor(R * 0.14)),
+          bold: true,
+          family,
+          labelFormatter: (deg) => String(deg),
+          labelFilter: (deg) => deg !== -180 && deg !== 180
+        });
+      }
+      else {
+        // Fallback: if InstrumentComponents is not available, do nothing (dial stays empty).
+        // This avoids crashes during refactoring.
+      }
 
       ctx.restore();
 
@@ -353,7 +324,8 @@
           }
           return best;
         }
-        function drawInline(x, y, w, h, cap, val, uni, align){
+
+        function drawInline(x, y, w, h, cap, val, uni){
           const fit = fitInlineCapValUnit(ctx, cap, val, uni, w, h, secScale, family);
           const total = (() => {
             setFont(ctx, fit.cPx, true, family); const cW = cap ? ctx.measureText(cap).width : 0;
@@ -364,12 +336,14 @@
           let xStart = x + Math.floor((w - total)/2);
           const yMid = y + Math.floor(h/2);
 
+          ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+
           if (cap){
-            setFont(ctx, fit.cPx, true, family); ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            setFont(ctx, fit.cPx, true, family);
             ctx.fillText(cap, xStart, yMid);
             xStart += Math.floor(ctx.measureText(cap).width + fit.g1);
           }
-          setFont(ctx, fit.vPx, true, family); ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+          setFont(ctx, fit.vPx, true, family);
           ctx.fillText(val, xStart, yMid);
           xStart += Math.floor(ctx.measureText(val).width);
           if (uni){
@@ -379,8 +353,8 @@
           }
         }
 
-        if (g.top)    drawInline(g.top.x,    g.top.y,    g.top.w,    g.top.h,    capTop, valTop, uniTop, 'left');
-        if (g.bottom) drawInline(g.bottom.x, g.bottom.y, g.bottom.w, g.bottom.h, capBot, valBot, uniBot, 'right');
+        if (g.top)    drawInline(g.top.x,    g.top.y,    g.top.w,    g.top.h,    capTop, valTop, uniTop);
+        if (g.bottom) drawInline(g.bottom.x, g.bottom.y, g.bottom.w, g.bottom.h, capBot, valBot, uniBot);
         return;
       }
 
@@ -469,7 +443,7 @@
 
     return {
       id: "WindDial",
-      version: "1.7.3",
+      version: "1.8.0",
       wantsHideNativeHead: true,
       renderCanvas,
       translateFunction

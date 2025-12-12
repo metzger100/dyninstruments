@@ -1,6 +1,8 @@
 /*!
  * CompassGauge (UMD) — rotating compass card with upright cardinal labels
  *
+ * Updated: uses InstrumentComponents instead of PolarCore.
+ *
  * Visual:
  *  - The disc (ticks + cardinal/intercardinal letters) rotates by -heading.
  *  - Cardinal letters are always upright.
@@ -25,7 +27,7 @@
   "use strict";
 
   function create(def, Helpers) {
-    const Polar = Helpers.getModule('PolarCore') && Helpers.getModule('PolarCore').create();
+    const IC = Helpers.getModule('InstrumentComponents') && Helpers.getModule('InstrumentComponents').create();
 
     // ---------- utils --------------------------------------------------------
     function setFont(ctx, px, bold, family){ ctx.font = (bold ? '700 ' : '400 ') + px + 'px ' + family; }
@@ -193,41 +195,57 @@
       const leftStrip   = Math.max(0, Math.floor((W - 2*pad - 2*R) / 2));
       const rightStrip  = leftStrip;
       const topStrip    = Math.max(0, Math.floor((H - 2*pad - 2*R) / 2));
-      const bottomStrip = topStrip;
 
       // ---- Dial: rotated ticks + upright labels layering with pointer -------
-      ctx.save();
-      const rotationDeg = isFiniteN(heading) ? -heading : 0;
+      if (IC){
+        const rotationDeg = isFiniteN(heading) ? -heading : 0;
 
-      // Frame (ring + ticks) first
-      Polar.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
-      Polar.drawTicks(ctx, cx, cy, rOuter, rotationDeg, {
-        stepMajor: 30,
-        stepMinor: 10,
-        major: { len: 9, width: 2 },
-        minor: { len: 5, width: 1 }
-      });
+        // Frame (ring + ticks)
+        IC.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
 
-      // Red lubber pointer (tip outward) fixed at 0°, behind labels
-      Polar.drawPointerAtRim(ctx, cx, cy, rOuter, 0, { depth: lubber, color: "#ff2b2b", rotationDeg: 0, variant: "long", sideFactor: 0.25, lengthFactor: 2 });
+        IC.drawTicks(ctx, cx, cy, rOuter, {
+          rotationDeg,
+          startDeg: 0, endDeg: 360,
+          stepMajor: 30, stepMinor: 10,
+          major: { len: 9, width: 2 },
+          minor: { len: 5, width: 1 }
+        });
 
-      // Optional target marker behind labels
-      if (isFiniteN(marker) && isFiniteN(heading)){
-        Polar.drawMarker(ctx, cx, cy, rOuter, (marker - heading), {
-          len: Math.max(12, Math.floor(ringW * 0.9)),
-          width: Math.max(3, Math.floor(ringW * 0.40)),
-          rotationDeg: 0
+        // Fixed red lubber pointer at 0° (north), behind labels
+        IC.drawPointerAtRim(ctx, cx, cy, rOuter, 0, {
+          depth: lubber,
+          color: "#ff2b2b",
+          variant: "long",
+          sideFactor: 0.25,
+          lengthFactor: 2
+        });
+
+        // Optional target marker (bearing/course) relative to rotating card: (marker - heading)
+        if (isFiniteN(marker) && isFiniteN(heading)){
+          IC.drawRimMarker(ctx, cx, cy, rOuter, (marker - heading), {
+            len: Math.max(12, Math.floor(ringW * 0.9)),
+            width: Math.max(3, Math.floor(ringW * 0.40))
+          });
+        }
+
+        // Labels last → always readable above pointer/marker.
+        // Because we pass rotationDeg, label positions rotate with the card,
+        // but the text remains upright (default).
+        const labels = { 0:"N",45:"NE",90:"E",135:"SE",180:"S",225:"SW",270:"W",315:"NW" };
+        const labelPx = Math.max(10, Math.floor(R * 0.16));
+        IC.drawLabels(ctx, cx, cy, rOuter, {
+          rotationDeg,
+          startDeg: 0, endDeg: 360,
+          step: 45,
+          radiusOffset: Math.max(16, Math.floor(ringW * 1.6)),
+          fontPx: labelPx,
+          bold: true,
+          family,
+          labelsMap: labels,
+          labelFormatter: (deg) => String(deg),
+          textRotation: "upright"
         });
       }
-
-      // Labels last → always readable above pointer/marker
-      const labels = { 0:"N",45:"NE",90:"E",135:"SE",180:"S",225:"SW",270:"W",315:"NW" };
-      const labelPx = Math.max(10, Math.floor(R * 0.16));
-      Polar.drawLabels(ctx, cx, cy, rOuter, rotationDeg, {
-        fontPx: labelPx, bold: true, step: 45, labels, offset: Math.max(16, Math.floor(ringW * 1.6))
-      });
-
-      ctx.restore();
 
       // ---- Texts -------------------------------------------------------------
       const caption = (props.caption || '').trim();
@@ -245,14 +263,18 @@
 
           const fit = measureValueUnitFit(ctx, family, value, unit, bottomBox.w, bottomBox.h, secScale);
           drawCaptionMax(ctx, family, topBox.x, topBox.y, topBox.w, topBox.h, caption, Math.floor(fit.vPx * secScale));
+
           (function drawValueUnit(){
-            const vPx = fit.vPx, uPx = fit.uPx, gap = fit.gap;
+            const vPx = fit.vPx, uPx = fit.uPx;
             setFont(ctx, vPx, true, family); const vW = ctx.measureText(value).width;
-            setFont(ctx, uPx, true, family); const uW = unit ? ctx.measureText(unit).width : 0;
-            const xStart = bottomBox.x; const yBase = bottomBox.y + Math.floor((bottomBox.h - vPx)/2);
+            const xStart = bottomBox.x;
+            const yBase = bottomBox.y + Math.floor((bottomBox.h - vPx)/2);
             ctx.textAlign = 'left'; ctx.textBaseline = 'top';
             setFont(ctx, vPx, true, family); ctx.fillText(value, xStart, yBase);
-            if (unit){ setFont(ctx, uPx, true, family); ctx.fillText(unit, xStart + vW + fit.gap, yBase + Math.max(0, Math.floor(vPx*0.08))); }
+            if (unit){
+              setFont(ctx, uPx, true, family);
+              ctx.fillText(unit, xStart + vW + fit.gap, yBase + Math.max(0, Math.floor(vPx*0.08)));
+            }
           })();
         }
         if (props.disconnect) drawDisconnectOverlay(ctx, W, H, family, color);
@@ -316,7 +338,10 @@
           const yBase = pad + Math.floor((th - fit.vPx)/2);
           ctx.textAlign = 'left'; ctx.textBaseline = 'top';
           setFont(ctx, fit.vPx, true, family); ctx.fillText(value, xStart, yBase);
-          if (unit){ setFont(ctx, fit.uPx, true, family); ctx.fillText(unit, xStart + ctx.measureText(value).width + fit.gap, yBase + Math.max(0, Math.floor(fit.vPx*0.08))); }
+          if (unit){
+            setFont(ctx, fit.uPx, true, family);
+            ctx.fillText(unit, xStart + ctx.measureText(value).width + fit.gap, yBase + Math.max(0, Math.floor(fit.vPx*0.08)));
+          }
           if (props.disconnect) drawDisconnectOverlay(ctx, W, H, family, color);
           return;
         }
@@ -367,7 +392,7 @@
 
     return {
       id: "CompassGauge",
-      version: "1.1.4",
+      version: "1.2.0",
       wantsHideNativeHead: true,
       renderCanvas,
       translateFunction
