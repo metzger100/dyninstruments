@@ -162,11 +162,18 @@
       deps: ["InstrumentComponents"]
     },
 
+    DepthGauge: {
+      js:  BASE + "modules/DepthGauge/DepthGauge.js",
+      css: undefined,
+      globalKey: "DyniDepthGauge",
+      deps: ["InstrumentComponents"]
+    },
+
     ClusterHost: {
       js:  BASE + "modules/ClusterHost/ClusterHost.js",
       css: BASE + "modules/ClusterHost/ClusterHost.css",
       globalKey: "DyniClusterHost",
-      deps: ["ThreeElements","WindDial","CompassGauge","SpeedGauge"]
+      deps: ["ThreeElements","WindDial","CompassGauge","SpeedGauge","DepthGauge"]
     }
   };
 
@@ -219,6 +226,7 @@
   };
   const ENV_KIND = {
     depth:    { cap: 'DPT',  unit: 'm'   },
+    depthGraphic:{ cap: 'DPT', unit: 'm' },
     wtemp:    { cap: 'TEMP', unit: '°C'  },
     pressure: { cap: 'PRES', unit: 'hPa' }
   };
@@ -544,30 +552,125 @@
             type: "SELECT",
             list: [
               opt("Depth below transducer", "depth"),
+              opt("Depth gauge (graphic)", "depthGraphic"),
               opt("Water temperature", "wtemp"),
               opt("Pressure (SignalK)", "pressure")
             ],
             default: "depth",
             name: "Kind"
           },
+
+          // SignalK only
           value: {
             type: "KEY",
             default: "",
             name: "SignalK path",
             condition: { kind: "pressure" }
           },
+
+          // -------- DepthGauge (graphic) settings --------------------------------
+          minValue: {
+            type: "FLOAT", min: 0, max: 200, step: 0.5, default: 0,
+            name: "Min depth",
+            condition: { kind: "depthGraphic" }
+          },
+          maxValue: {
+            type: "FLOAT", min: 1, max: 500, step: 0.5, default: 30,
+            name: "Max depth",
+            condition: { kind: "depthGraphic" }
+          },
+
+          tickMajor: {
+            type: "FLOAT", min: 0.5, max: 200, step: 0.5, default: 5,
+            name: "Major tick step",
+            condition: { kind: "depthGraphic" }
+          },
+          tickMinor: {
+            type: "FLOAT", min: 0.1, max: 100, step: 0.1, default: 1,
+            name: "Minor tick step",
+            condition: { kind: "depthGraphic" }
+          },
+
+          showEndLabels: {
+            type: "BOOLEAN",
+            default: false,
+            name: "Show min/max labels",
+            condition: { kind: "depthGraphic" }
+          },
+
+          // shallow-side zones:
+          // Alarm (red):   min..alarmFrom
+          // Warning (yellow): alarmFrom..warningFrom
+          alarmFrom: {
+            type: "FLOAT", min: 0, max: 500, step: 0.5, default: 2.0,
+            name: "Alarm to (shallow)",
+            condition: { kind: "depthGraphic" }
+          },
+          warningFrom: {
+            type: "FLOAT", min: 0, max: 500, step: 0.5, default: 5.0,
+            name: "Warning to (shallow)",
+            condition: { kind: "depthGraphic" }
+          },
+
+          decimals: {
+            type: "FLOAT", min: 0, max: 3, step: 1, default: 1,
+            name: "Decimals",
+            condition: { kind: "depthGraphic" }
+          },
+
+          depthRatioThresholdNormal: {
+            type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+            name: "DepthGauge: Normal Threshold",
+            condition: { kind: "depthGraphic" }
+          },
+          depthRatioThresholdFlat: {
+            type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+            name: "DepthGauge: Flat Threshold",
+            condition: { kind: "depthGraphic" }
+          },
+
+          // Shared caption/unit-to-value scale (numeric + graphic)
+          captionUnitScale: {
+            type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
+            name: "Caption/Unit to Value scale"
+          },
+
+          // hide low-levels
           caption: false,
           unit: false,
           formatter: false,
           formatterParameters: false,
           className: true,
+
+          // per-kind caption/unit
           ...makePerKindTextParams(ENV_KIND),
-          ...commonThreeElementsEditables
+
+          // ThreeElements thresholds — only numeric kinds (optional but clean)
+          ratioThresholdNormal: {
+            type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+            name: "3-Rows Threshold (numeric)",
+            condition: [{ kind: "depth" }, { kind: "wtemp" }, { kind: "pressure" }]
+          },
+          ratioThresholdFlat: {
+            type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
+            name: "1-Row Threshold (numeric)",
+            condition: [{ kind: "depth" }, { kind: "wtemp" }, { kind: "pressure" }]
+          }
         },
+
         updateFunction: function(values){
           const out = values ? { ...values } : {};
           const kind = (values && values.kind) || "depth";
-          if (out && out.storeKeys && kind !== "pressure") {
+
+          if (!out.storeKeys) out.storeKeys = {};
+
+          if (kind === "pressure") {
+            // ensure storeKeys.value follows the selected SignalK KEY
+            if (typeof out.value === "string" && out.value.trim()) {
+              out.storeKeys = { ...out.storeKeys, value: out.value.trim() };
+            }
+          } else {
+            // remove leftover pressure subscription when switching away
             if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
               const sk = { ...out.storeKeys };
               delete sk.value;
