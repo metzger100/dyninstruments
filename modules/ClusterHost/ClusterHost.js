@@ -54,13 +54,20 @@
       throw new Error('ClusterHost: CompassGauge module not available');
     }
 
+    const speedGaugeMod = Helpers.getModule('SpeedGauge');
+    if (!speedGaugeMod || typeof speedGaugeMod.create !== 'function') {
+      throw new Error('ClusterHost: SpeedGauge module not available');
+    }
+
     const threeSpec   = three.create(def, Helpers);
     const dialSpec    = windDialMod.create(def, Helpers);
     const compassSpec = compassMod.create(def, Helpers);
+    const speedGaugeSpec = speedGaugeMod.create(def, Helpers);
 
     const wantsHide = !!(threeSpec && threeSpec.wantsHideNativeHead) ||
-                      !!(dialSpec && dialSpec.wantsHideNativeHead)   ||
-                      !!(compassSpec && compassSpec.wantsHideNativeHead);
+                      !!(dialSpec && dialSpec.wantsHideNativeHead) ||
+                      !!(compassSpec && compassSpec.wantsHideNativeHead) ||
+                      !!(speedGaugeSpec && speedGaugeSpec.wantsHideNativeHead);
 
     function out(v, cap, unit, formatter, formatterParameters){
       const o = {};
@@ -106,6 +113,41 @@
 
       if (cluster === 'speed'){
         const effKind = p.kind;
+
+        if (effKind === 'sogGraphic' || effKind === 'stwGraphic'){
+          const baseKind = (effKind === 'sogGraphic') ? 'sog' : 'stw';
+          const val = p[baseKind];
+          return {
+            renderer: 'SpeedGauge',
+            value: val,
+            caption: cap(effKind),
+            unit: unit(effKind),
+
+            // layout thresholds
+            speedRatioThresholdNormal: Number(p.speedRatioThresholdNormal),
+            speedRatioThresholdFlat:   Number(p.speedRatioThresholdFlat),
+            captionUnitScale:          Number(p.captionUnitScale),
+
+            // range/arc
+            minValue: Number(p.minValue),
+            maxValue: Number(p.maxValue),
+            startAngleDeg: Number(p.startAngleDeg),
+            endAngleDeg:   Number(p.endAngleDeg),
+
+            // ticks
+            tickMajor: Number(p.tickMajor),
+            tickMinor: Number(p.tickMinor),
+            showEndLabels: !!p.showEndLabels,
+
+            // sectors
+            warningFrom: Number(p.warningFrom),
+            warningTo:   (p.warningTo === '' || p.warningTo == null) ? undefined : Number(p.warningTo),
+            alarmFrom:   Number(p.alarmFrom),
+            alarmTo:     (p.alarmTo === '' || p.alarmTo == null) ? undefined : Number(p.alarmTo)
+          };
+        }
+
+        // numeric -> ThreeElements
         const val = p[effKind];
         const uni = unit(effKind);
         return out(val, cap(effKind), uni, 'formatSpeed', [uni]);
@@ -225,6 +267,7 @@
     function pickRenderer(props){
       if (props && props.renderer === 'WindDial')    return dialSpec;
       if (props && props.renderer === 'CompassGauge')return compassSpec;
+      if (props && props.renderer === 'SpeedGauge')   return speedGaugeSpec;
       return threeSpec;
     }
 
