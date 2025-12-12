@@ -59,15 +59,22 @@
       throw new Error('ClusterHost: SpeedGauge module not available');
     }
 
+    const depthMod = Helpers.getModule('DepthGauge');
+    if (!depthMod || typeof depthMod.create !== 'function') {
+      throw new Error('ClusterHost: DepthGauge module not available');
+    }
+
     const threeSpec   = three.create(def, Helpers);
     const dialSpec    = windDialMod.create(def, Helpers);
     const compassSpec = compassMod.create(def, Helpers);
     const speedGaugeSpec = speedGaugeMod.create(def, Helpers);
+    const depthSpec   = depthMod.create(def, Helpers);
 
     const wantsHide = !!(threeSpec && threeSpec.wantsHideNativeHead) ||
                       !!(dialSpec && dialSpec.wantsHideNativeHead) ||
                       !!(compassSpec && compassSpec.wantsHideNativeHead) ||
-                      !!(speedGaugeSpec && speedGaugeSpec.wantsHideNativeHead);
+                      !!(speedGaugeSpec && speedGaugeSpec.wantsHideNativeHead) ||
+                      !!(depthSpec && depthSpec.wantsHideNativeHead);
 
     function out(v, cap, unit, formatter, formatterParameters){
       const o = {};
@@ -171,6 +178,34 @@
 
       if (cluster === 'environment'){
         const req = p.kind;
+
+        // NEU: Graphic depth
+        if (req === 'depthGraphic'){
+          return {
+            renderer: 'DepthGauge',
+            value: p.depth,                 // DepthGauge liest value oder depth
+            caption: cap('depthGraphic'),
+            unit: unit('depthGraphic'),
+
+            minValue: Number(p.minValue),
+            maxValue: Number(p.maxValue),
+            tickMajor: Number(p.tickMajor),
+            tickMinor: Number(p.tickMinor),
+            showEndLabels: !!p.showEndLabels,
+
+            // shallow-side sectors
+            alarmFrom: Number(p.alarmFrom),
+            warningFrom: Number(p.warningFrom),
+
+            decimals: Number(p.decimals),
+
+            depthRatioThresholdNormal: Number(p.depthRatioThresholdNormal),
+            depthRatioThresholdFlat:   Number(p.depthRatioThresholdFlat),
+            captionUnitScale:          Number(p.captionUnitScale)
+          };
+        }
+
+        // Numeric (ThreeElements)
         if (req === 'wtemp') {
           return out(p.wtemp, cap('wtemp'), unit('wtemp'), 'formatTemperature', ['celsius']);
         }
@@ -268,6 +303,7 @@
       if (props && props.renderer === 'WindDial')    return dialSpec;
       if (props && props.renderer === 'CompassGauge')return compassSpec;
       if (props && props.renderer === 'SpeedGauge')   return speedGaugeSpec;
+      if (props && props.renderer === 'DepthGauge')   return depthSpec;
       return threeSpec;
     }
 
