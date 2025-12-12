@@ -143,7 +143,6 @@
       globalKey: "DyniThreeElements"
     },
 
-    // Updated deps
     WindDial: {
       js:  BASE + "modules/WindDial/WindDial.js",
       css: BASE + "modules/WindDial/WindDial.css",
