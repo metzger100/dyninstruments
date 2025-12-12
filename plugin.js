@@ -131,15 +131,38 @@
 
   // ---------- Module registry (UMD namespaces + deps) -----------------------
   const MODULES = {
-    PolarCore: { js:  BASE + "modules/Cores/PolarCore.js", css: undefined, globalKey: "DyniPolarCore" },
-    RadialGaugeCore: { js:  BASE + "modules/Cores/RadialGaugeCore.js", css: undefined, globalKey: "DyniRadialGaugeCore" },
-    ListCore: { js:  BASE + "modules/Cores/ListCore.js", css: BASE + "modules/Cores/ListCore.css", globalKey: "DyniListCore" },
-    MiniHistory: { js:  BASE + "modules/Cores/MiniHistory.js", css: undefined, globalKey: "DyniMiniHistory" },
+    InstrumentComponents: {
+      js:  BASE + "modules/Cores/InstrumentComponents.js",
+      css: undefined,
+      globalKey: "DyniInstrumentComponents"
+    },
 
-    ThreeElements: { js:  BASE + "modules/ThreeElements/ThreeElements.js", css: BASE + "modules/ThreeElements/ThreeElements.css", globalKey: "DyniThreeElements" },
-    WindDial: { js:  BASE + "modules/WindDial/WindDial.js", css: BASE + "modules/WindDial/WindDial.css", globalKey: "DyniWindDial", deps: ["PolarCore"] },
-    CompassGauge: { js:  BASE + "modules/CompassGauge/CompassGauge.js", css: BASE + "modules/CompassGauge/CompassGauge.css", globalKey: "DyniCompassGauge", deps: ["PolarCore"] },
-    ClusterHost: { js:  BASE + "modules/ClusterHost/ClusterHost.js", css: BASE + "modules/ClusterHost/ClusterHost.css", globalKey: "DyniClusterHost", deps: ["ThreeElements","WindDial","CompassGauge"] }
+    ThreeElements: { 
+      js:  BASE + "modules/ThreeElements/ThreeElements.js",
+      css: BASE + "modules/ThreeElements/ThreeElements.css",
+      globalKey: "DyniThreeElements"
+    },
+
+    // Updated deps
+    WindDial: {
+      js:  BASE + "modules/WindDial/WindDial.js",
+      css: BASE + "modules/WindDial/WindDial.css",
+      globalKey: "DyniWindDial",
+      deps: ["InstrumentComponents"]
+    },
+    CompassGauge: {
+      js:  BASE + "modules/CompassGauge/CompassGauge.js",
+      css: BASE + "modules/CompassGauge/CompassGauge.css",
+      globalKey: "DyniCompassGauge",
+      deps: ["InstrumentComponents"]
+    },
+
+    ClusterHost: {
+      js:  BASE + "modules/ClusterHost/ClusterHost.js",
+      css: BASE + "modules/ClusterHost/ClusterHost.css",
+      globalKey: "DyniClusterHost",
+      deps: ["ThreeElements","WindDial","CompassGauge"]
+    }
   };
 
   // ---------- Per-kind editable helpers ------------------------------------
