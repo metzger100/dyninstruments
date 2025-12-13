@@ -75,27 +75,43 @@
 
     function almostInt(x, eps){ return Math.abs(x - Math.round(x)) <= (eps || 1e-6); }
 
-    // --- Temperature formatting (keeps pointer synced with displayed value) ---
-    function formatTempString(raw, decimals){
-      const n = Number(raw);
-      if (!isFinite(n)) return '---';
-      const d = (typeof decimals === 'number' && isFinite(decimals)) ? Math.max(0, Math.min(6, Math.floor(decimals))) : 1;
-      return n.toFixed(d);
+    // --- Temperature formatting (Kelvin -> Celsius; pointer == text number) ---
+    function extractNumberText(s){
+        const m = String(s).match(/-?\d+(?:\.\d+)?/);
+        return m ? m[0] : '';
     }
 
-    function extractNumberText(s){
-      const m = String(s).match(/-?\d+(?:\.\d+)?/);
-      return m ? m[0] : '';
+    // returns display temp in °C as number (best-effort)
+    function toCelsiusNumber(raw){
+        const n = Number(raw);
+        if (!isFinite(n)) return NaN;
+
+        // Prefer AvNav formatter (SignalK temps are typically Kelvin)
+        if (window.avnav && avnav.api && avnav.api.formatter && typeof avnav.api.formatter.formatTemperature === "function"){
+            try {
+                const s = String(avnav.api.formatter.formatTemperature(n, "celsius"));
+                const t = extractNumberText(s);
+                const num = t ? Number(t) : NaN;
+                if (isFinite(num)) return num;
+            } catch(e){}
+        }
+
+        // Fallback heuristic:
+        // Kelvin is typically > 200; if it looks already like °C, keep it.
+        if (n > 200) return n - 273.15;
+        return n;
     }
 
     function displayTempFromRaw(raw, decimals){
-      const s = formatTempString(raw, decimals);
-      const t = extractNumberText(s);
-      const num = t ? Number(t) : NaN;
-      if (isFinite(num)) return { num, text: t };
-      const n = Number(raw);
-      if (isFinite(n)) return { num: n, text: String(n) };
-      return { num: NaN, text: '---' };
+        const c = toCelsiusNumber(raw);
+        if (!isFinite(c)) return { num: NaN, text: '---' };
+
+        const d = (typeof decimals === 'number' && isFinite(decimals))
+            ? Math.max(0, Math.min(6, Math.floor(decimals)))
+            : 1;
+
+        const txt = c.toFixed(d);
+        return { num: c, text: txt };
     }
 
     // --- Drawing primitives --------------------------------------------------
