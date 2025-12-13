@@ -68,6 +68,10 @@
     if (!tempMod || typeof tempMod.create !== 'function') {
       throw new Error('ClusterHost: TemperatureGauge module not available');
     }
+    const voltageMod = Helpers.getModule('VoltageGauge');
+    if (!voltageMod || typeof voltageMod.create !== 'function') {
+      throw new Error('ClusterHost: VoltageGauge module not available');
+    }
 
     const threeSpec   = three.create(def, Helpers);
     const dialSpec    = windDialMod.create(def, Helpers);
@@ -75,13 +79,15 @@
     const speedGaugeSpec = speedGaugeMod.create(def, Helpers);
     const depthSpec   = depthMod.create(def, Helpers);
     const tempSpec    = tempMod.create(def, Helpers);
+    const voltageSpec = voltageMod.create(def, Helpers);
 
     const wantsHide = !!(threeSpec && threeSpec.wantsHideNativeHead) ||
                       !!(dialSpec && dialSpec.wantsHideNativeHead) ||
                       !!(compassSpec && compassSpec.wantsHideNativeHead) ||
                       !!(speedGaugeSpec && speedGaugeSpec.wantsHideNativeHead) ||
                       !!(depthSpec && depthSpec.wantsHideNativeHead) ||
-                      !!(tempSpec && tempSpec.wantsHideNativeHead);
+                      !!(tempSpec && tempSpec.wantsHideNativeHead) ||
+                      !!(voltageSpec && voltageSpec.wantsHideNativeHead);
 
     function out(v, cap, unit, formatter, formatterParameters){
       const o = {};
@@ -267,9 +273,9 @@
             speedCaption: isTrue ? p.speedCaption_TWS : p.speedCaption_AWS,
             angleUnit: p.angleUnitGraphic,
             speedUnit: p.speedUnitGraphic,
-            layEnabled: layEnabled,
-            layMin: layEnabled ? Number(p.layMin) : undefined,
-            layMax: layEnabled ? Number(p.layMax) : undefined,
+            layEnabled: !!p.windLayEnabled,
+            layMin: Number(p.layMin),
+            layMax: Number(p.layMax),
             dialRatioThresholdNormal: Number(p.dialRatioThresholdNormal),
             dialRatioThresholdFlat:   Number(p.dialRatioThresholdFlat),
             captionUnitScale:         Number(p.captionUnitScale),
@@ -330,7 +336,37 @@
 
       if (cluster === 'vessel'){
         const req = p.kind;
-        if (req === 'voltage') { const u = unit('voltage'); return out(p.value, cap('voltage'), u, 'formatDecimal', [3,1,true]); }
+
+        if (req === 'voltageGraphic'){
+          const warnEnabled  = !!p.voltageWarningEnabled;
+          const alarmEnabled = !!p.voltageAlarmEnabled;
+          return {
+            renderer: 'VoltageGauge',
+            value: (typeof p.value !== 'undefined') ? p.value : p.voltage, // je nach deinem Mapping
+            caption: cap('voltageGraphic'),
+            unit: unit('voltageGraphic'),
+
+            minValue: Number(p.voltageMinValue),
+            maxValue: Number(p.voltageMaxValue),
+            tickMajor: Number(p.voltageTickMajor),
+            tickMinor: Number(p.voltageTickMinor),
+            showEndLabels: !!p.voltageShowEndLabels,
+
+            // low-end sectors (DepthGauge-Regeln)
+            warningFrom: warnEnabled  ? Number(p.voltageWarningFrom) : undefined,
+            alarmFrom:   alarmEnabled ? Number(p.voltageAlarmFrom)   : undefined,
+
+            voltageRatioThresholdNormal: Number(p.voltageRatioThresholdNormal),
+            voltageRatioThresholdFlat:   Number(p.voltageRatioThresholdFlat),
+            captionUnitScale:            Number(p.captionUnitScale)
+          };
+        }
+
+        if (req === 'voltage') {
+          const u = unit('voltage');
+          return out(p.value, cap('voltage'), u, 'formatDecimal', [3,1,true]);
+        }
+
         return {};
       }
 
@@ -343,6 +379,7 @@
       if (props && props.renderer === 'SpeedGauge')   return speedGaugeSpec;
       if (props && props.renderer === 'DepthGauge')   return depthSpec;
       if (props && props.renderer === 'TemperatureGauge') return tempSpec;
+      if (props && props.renderer === 'VoltageGauge') return voltageSpec;
       return threeSpec;
     }
 
@@ -354,7 +391,7 @@
     }
 
     function finalizeFunction(){
-      [threeSpec, dialSpec, compassSpec, speedGaugeSpec, depthSpec, tempSpec].forEach(sub => {
+      [threeSpec, dialSpec, compassSpec, speedGaugeSpec, depthSpec, tempSpec, voltageSpec].forEach(sub => {
         if (sub && typeof sub.finalizeFunction === 'function') {
           try { sub.finalizeFunction.apply(this, arguments); } catch(e){}
         }
