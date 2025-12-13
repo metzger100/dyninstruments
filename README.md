@@ -1,164 +1,198 @@
 # dyninstruments – Modern Instrument Widgets for AvNav
 
-`dyninstruments` is an [AvNav](https://github.com/wellenvogel/avnav) plugin that provides a modern, highly legible instrument panel with cluster-based widgets and canvas-based graphics (e.g., CompassGauge, WindDial).
-The goal is: **maximum readability at the helm**, with minimal configuration overhead.
+`dyninstruments` is an [AvNav](https://github.com/wellenvogel/avnav) plugin that provides a modern, highly legible instrument panel with cluster-based widgets and canvas-based gauges (e.g. WindDial, CompassGauge, SpeedGauge, DepthGauge, TemperatureGauge).
+The goal is **maximum readability at the helm** with **minimal configuration overhead**.
 
-> ⚠️ **Status**: Work in progress / pre-release. APIs and widget names may still change.
+> ⚠️ **Status**: Work in progress / pre-release. APIs, widget names, and editor options may still change.
 
 ---
 
 ## Features
 
-* 🧱 **Cluster widgets**
+### 🧱 Cluster widgets (one widget per topic)
 
-  * Thematic clusters like `courseHeading`, `speed`, `position`, `wind`, `nav`, `anchor`, `vessel`.
-  * Per cluster, you only select a `kind` in the editor (e.g., `COG`, `HDT`, `SOG`, `STW`) instead of needing a separate widget for every value.
+* The plugin groups related values into thematic clusters:
 
-* 🔍 **Optimized readability**
+  * `courseHeading`, `speed`, `position`, `distance`, `environment`, `wind`, `time`, `nav`, `anchor`, `vessel`
+* In the editor you typically select only a `kind` (e.g. `COG`, `HDT`, `SOG`, `STW`, `tempGraphic`) instead of creating separate widgets for every single value.
 
-  * Caption, value, and unit are automatically sized as large as possible.
-  * Layout adapts to the available space (flat, normal, tall).
-  * Focus on the number; the label is only as prominent as necessary.
+### 🔍 Maximum readability (auto layout & scaling)
 
-* 🎯 **Canvas-based specialized instruments**
+* Caption / value / unit are auto-scaled to be as large as possible.
+* Layout adapts to the available aspect ratio (flat / normal / high).
+* The number is always the primary focus; labels stay present but unobtrusive.
 
-  * **WindDial** – circular wind indicator with a clearly visible pointer.
-  * **CompassGauge** – 360° compass display with a clearly highlighted course marker.
+### 🎯 Canvas-based gauges (graphics where it matters)
 
-* ⚙️ **Editor options**
+* **WindDial** – compact wind dial for AWA/AWS and TWA/TWS with optional layline sectors.
+* **CompassGauge** – compass gauge for HDT/HDM (graphic kinds).
+* **SpeedGauge** – semicircle speedometer with warning/alarm sectors (fixed arc; “to” values are derived).
+* **DepthGauge** – semicircle depth gauge with shallow-side warning/alarm sectors.
+* **TemperatureGauge** – semicircle temperature gauge with optional high-end warning/alarm sectors.
 
-  * Per cluster widget:
+### ⚙️ Editor options (sane defaults, per-kind settings)
 
-    * `kind` (which value from the cluster to display)
-    * `caption` (label)
-    * `unit` (unit, optionally overrideable)
-    * additional options like `leadingZero` for headings/angles, depending on the instrument.
+* **Per cluster widget**
 
-* 🎨 **Integrates with AvNav**
+  * `kind` selection (what to show)
+  * per-kind `caption_*` and `unit_*` overrides
+  * shared layout options like `captionUnitScale`
+* **Angle formatting**
 
-  * Styles are scoped to these widgets (no impact on AvNav’s standard instruments).
-  * Respects AvNav day/night theming.
+  * `leadingZero` for headings/angles where applicable (e.g., `005°`)
+* **Gauges**
+
+  * range (`minValue`, `maxValue`) and tick steps
+  * optional sectors controlled via **enable toggles**
+
+    * **SpeedGauge**: `speedWarningEnabled`, `speedAlarmEnabled` (default enabled)
+    * **DepthGauge**: `depthWarningEnabled`, `depthAlarmEnabled` (default enabled)
+    * **TemperatureGauge**: `tempWarningEnabled`, `tempAlarmEnabled` (default disabled)
+    * **WindDial**: `windLayEnabled` + `layMin`/`layMax` (default enabled)
+* **SignalK paths**
+
+  * `KEY` fields in the editor allow overriding SignalK sources (e.g., pressure, temperature, voltage)
+  * `environment` supports selecting a temperature path that applies to both numeric and graphic kinds.
+
+### 🎨 Integrates cleanly with AvNav
+
+* Styling is scoped to plugin widgets (no impact on AvNav’s standard instruments).
+* Respects AvNav day/night theming (colors/fonts resolved from CSS / computed styles).
 
 ---
 
 ## Requirements
 
-* **AvNav** as a server installation (Raspberry Pi, Linux, Windows desktop).
-* **No support for the standalone Android app** (AvNav plugins are currently not loaded there).
-* A **browser** with:
+* **AvNav** server installation (Raspberry Pi, Linux, Windows Desktop).
+* **No support for the pure Android app** (AvNav plugins are currently not loaded there).
+* Browser requirements:
 
   * Canvas 2D
-  * ES6+ (modern JavaScript support)
+  * ES6+ JavaScript support
 
 ---
 
 ## Installation
 
-### 1. Download the ZIP
+### 1) Download ZIP
 
-1. Download the current `dyninstruments` release as a ZIP from the GitHub Releases page.
-2. Extract the archive — it must contain a `dyninstruments/` directory with at least:
+1. Download the latest `dyninstruments` ZIP from the GitHub Releases page.
+2. Unzip it. It must contain a folder `dyninstruments/` with at least:
 
    * `plugin.js`
    * `plugin.css`
-   * additional JS modules (`*.js`) and assets in subfolders
+   * `modules/…` (JS modules and assets)
 
-### 2. Install into AvNav
+### 2) Copy into AvNav plugin directory
 
-On a **Raspberry Pi** with the standard setup:
+**Raspberry Pi (default setup):**
 
 ```bash
 cd /home/pi/avnav/data/plugins
 unzip /path/to/dyninstruments.zip
-# Result: /home/pi/avnav/data/plugins/dyninstruments/
+# result: /home/pi/avnav/data/plugins/dyninstruments/
 ```
 
-On **another Linux system**:
+**Other Linux setups (example):**
 
 ```bash
 cd /home/<user>/avnav/plugins
 unzip /path/to/dyninstruments.zip
-# Result: /home/<user>/avnav/plugins/dyninstruments/
+# result: /home/<user>/avnav/plugins/dyninstruments/
 ```
 
-Then **restart the AvNav server** (via the AvNav web UI or as a system service).
+Then **restart the AvNav server** (via AvNav UI or system service).
 
 ---
 
 ## Usage
 
-### Widgets in the layout editor
+### Add widgets in the layout editor
 
 1. Open AvNav in your browser.
-2. In edit mode, switch to the **instrument layout** you want to modify.
-3. In the widget list, you will find new entries with the prefix:
+2. Enter edit mode and open the instrument layout you want to modify.
+3. In the widget list you’ll find new widgets prefixed with:
 
-   ```text
-   dyninstruments_…
-   ```
+```text
+dyninstruments_…
+```
 
-   Examples (depending on the current development state):
+Current widgets (depending on your build):
 
-   * `dyninstruments_courseHeading`
-   * `dyninstruments_speed`
-   * `dyninstruments_position`
-   * `dyninstruments_wind`
-   * `dyninstruments_nav`
-   * `dyninstruments_anchor`
-   * `dyninstruments_vessel`
+* `dyninstruments_CourseHeading`
+* `dyninstruments_Speed`
+* `dyninstruments_Position`
+* `dyninstruments_Distance`
+* `dyninstruments_Environment`
+* `dyninstruments_Wind`
+* `dyninstruments_LargeTime`
+* `dyninstruments_Nav`
+* `dyninstruments_Anchor`
+* `dyninstruments_Vessel`
+
+### Typical workflow
+
+* Add one cluster widget (e.g. `dyninstruments_Wind`)
+* Choose a `kind` (e.g. numeric `angleTrue` or graphic `angleTrueGraphic`)
+* Optionally adjust captions/units and enable/disable gauge sectors
 
 ---
 
-## Architecture (quick overview)
+## Architecture (short overview)
 
-`dyninstruments` is based on a modular structure:
+`dyninstruments` is modular and loaded dynamically by `plugin.js` as UMD modules.
+
+* **plugin.js**
+
+  * loads JS/CSS modules (with dependency resolution)
+  * provides `Helpers` for canvas setup, text color/font resolution, and formatter application
+  * registers widgets via `avnav.api.registerWidget`
+  * builds default values from `editableParameters`
 
 * **ClusterHost**
 
-  * Handles data sources, formatters, and the translation between `kind` and internal data keys.
+  * the central “router” that translates `cluster + kind` into renderer props
+  * delegates rendering to:
 
-* **ThreeElements**
+    * **ThreeElements** for numeric text layouts
+    * gauge modules (WindDial, CompassGauge, SpeedGauge, DepthGauge, TemperatureGauge) for graphics
 
-  * Canvas renderer for classic **Caption / Value / Unit** displays.
-  * Responsible for auto-scaling and layout based on widget aspect ratio.
+* **InstrumentComponents (core)**
 
-* **“Core” files**
-
-  * Reusable building blocks, e.g., 360° scales, ticks, and gauge pointers (used by Compass, WindDial, etc.).
-
-Modules are loaded as UMD modules by `plugin.js` and integrated via the AvNav API (e.g., `renderCanvas`, `registerWidget`, …).
+  * reusable drawing primitives (ticks, rings, pointers, sectors, labels)
+  * shared by the gauge modules
 
 ---
 
-## Roadmap
+## Configuration notes
 
-Planned / in-progress instruments:
+### Per-kind captions/units
 
-* More canvas gauges:
+Each cluster defines editor fields like:
 
-  * `radGauge_Speed`
-  * `radGauge_Temperature`
-  * `radGauge_Voltage`
-  * `radGauge_Wind`
+* `caption_<kind>` (e.g. `caption_hdtGraphic`)
+* `unit_<kind>` (e.g. `unit_sogGraphic`)
 
-* Wind instruments:
+This avoids hardcoding captions/units inside renderers.
 
-  * `WindTrend` (visualization, e.g., history/trends)
+### Sector toggles
 
-* Navigation and status widgets:
+Some gauges expose enable toggles so you can hide warning/alarm ranges completely:
 
-  * `XteCanvas`
-  * `RouteStatus`, `RouteList`
-  * `TimeStatus`, `LargeTime` variants
+* SpeedGauge: defaults enabled
+* DepthGauge: defaults enabled
+* TemperatureGauge: defaults disabled
+* WindDial layline sectors: defaults enabled
 
-* AIS & map:
+---
 
-  * `AisTarget` (table with CPA/TCPA)
-  * `MapControls`, `MapOverlay`
+## Roadmap (subject to change)
 
-* System/attitude:
+Planned / in progress:
 
-  * `SignalKAttitude` (roll/pitch)
-  * alarm/status widgets
+* Additional gauges and cluster refinements
+* More navigation/status widgets
+* AIS and map-related widgets
+* Attitude and alarm/status widgets
 
-Actual implementation may differ from this list; see GitHub issues and commits for the current state.
+The actual implementation may differ. Check issues/commits for the current state.
