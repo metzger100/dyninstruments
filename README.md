@@ -1,97 +1,103 @@
 # dyninstruments – Modern Instrument Widgets for AvNav
 
-`dyninstruments` is an [AvNav](https://github.com/wellenvogel/avnav) plugin that provides a modern, highly legible instrument panel with cluster-based widgets and canvas-based graphics (e.g. CompassGauge, WindDial).  
-The goal is: **maximum readability at the helm**, minimal configuration overhead.
+`dyninstruments` is an [AvNav](https://github.com/wellenvogel/avnav) plugin that provides a modern, highly legible instrument panel with cluster-based widgets and canvas-based graphics (e.g., CompassGauge, WindDial).
+The goal is: **maximum readability at the helm**, with minimal configuration overhead.
 
-> ⚠️ **Status**: Work in progress / pre-release. APIs and widget names might still change.
+> ⚠️ **Status**: Work in progress / pre-release. APIs and widget names may still change.
 
 ---
 
 ## Features
 
-- 🧱 **Cluster-Widgets**
-  - Thematische Cluster wie `courseHeading`, `speed`, `position`, `wind`, `nav`, `anchor`, `vessel`.
-  - Pro Cluster wählst du im Editor nur noch ein `kind` (z. B. `COG`, `HDT`, `SOG`, `STW`), statt für jeden Wert ein eigenes Widget zu haben.
+* 🧱 **Cluster widgets**
 
-- 🔍 **Optimierte Lesbarkeit**
-  - Caption, Value, Unit werden automatisch so groß wie möglich gesetzt.
-  - Layout passt sich der verfügbaren Fläche an (flach, normal, hoch).
-  - Fokus auf der Zahl, Beschriftung nur so präsent wie nötig.
+  * Thematic clusters like `courseHeading`, `speed`, `position`, `wind`, `nav`, `anchor`, `vessel`.
+  * Per cluster, you only select a `kind` in the editor (e.g., `COG`, `HDT`, `SOG`, `STW`) instead of needing a separate widget for every value.
 
-- 🎯 **Canvas-basierte Spezial-Instrumente**
-  - **WindDial** – runder Windanzeiger mit gut sichtbarem Zeiger.
-  - **CompassGauge** – 360°-Kompassanzeige mit deutlich hervorgehobener Kursmarke.
+* 🔍 **Optimized readability**
 
-- ⚙️ **Editor-Optionen**
-  - Pro Cluster-Widget:
-    - `kind` (welcher Wert aus dem Cluster angezeigt wird)
-    - `caption` (Beschriftung)
-    - `unit` (Einheit, optional überschreibbar)
-    - weitere Optionen wie `leadingZero` für Heading/Winkel, je nach Instrument.
+  * Caption, value, and unit are automatically sized as large as possible.
+  * Layout adapts to the available space (flat, normal, tall).
+  * Focus on the number; the label is only as prominent as necessary.
 
-- 🎨 **Integriert sich in AvNav**
-  - Styles sind auf die eigenen Widgets gescoped (kein Einfluss auf Standard-Instrumente).
-  - Respektiert Day/Night-Theming von AvNav.
+* 🎯 **Canvas-based specialized instruments**
+
+  * **WindDial** – circular wind indicator with a clearly visible pointer.
+  * **CompassGauge** – 360° compass display with a clearly highlighted course marker.
+
+* ⚙️ **Editor options**
+
+  * Per cluster widget:
+
+    * `kind` (which value from the cluster to display)
+    * `caption` (label)
+    * `unit` (unit, optionally overrideable)
+    * additional options like `leadingZero` for headings/angles, depending on the instrument.
+
+* 🎨 **Integrates with AvNav**
+
+  * Styles are scoped to these widgets (no impact on AvNav’s standard instruments).
+  * Respects AvNav day/night theming.
 
 ---
 
 ## Requirements
 
-- **AvNav** als Server-Installation (Raspberry Pi, Linux, Windows Desktop).
-- **Kein Support für die reine Android-App** (AvNav-Plugins werden dort aktuell nicht geladen).
-- **Browser** mit:
-  - Canvas 2D
-  - ES6+ (aktueller JavaScript-Stand)
+* **AvNav** as a server installation (Raspberry Pi, Linux, Windows desktop).
+* **No support for the standalone Android app** (AvNav plugins are currently not loaded there).
+* A **browser** with:
+
+  * Canvas 2D
+  * ES6+ (modern JavaScript support)
 
 ---
 
 ## Installation
 
-### 1. ZIP herunterladen
+### 1. Download the ZIP
 
-1. Lade die aktuelle `dyninstruments`-Version als ZIP von der GitHub-Releases-Seite herunter.
-2. Entpacke das Archiv – es muss ein Verzeichnis `dyninstruments/` enthalten, in dem sich mindestens folgende Dateien befinden:
-   - `plugin.js`
-   - `plugin.css`
-   - weitere JS-Module (`*.js`) und Assets in Ordnern
+1. Download the current `dyninstruments` release as a ZIP from the GitHub Releases page.
+2. Extract the archive — it must contain a `dyninstruments/` directory with at least:
 
-### 2. In AvNav einspielen
+   * `plugin.js`
+   * `plugin.css`
+   * additional JS modules (`*.js`) and assets in subfolders
 
-Auf einem **Raspberry Pi** mit Standard-Setup:
+### 2. Install into AvNav
+
+On a **Raspberry Pi** with the standard setup:
 
 ```bash
 cd /home/pi/avnav/data/plugins
-unzip /pfad/zu/dyninstruments.zip
-# Ergebnis: /home/pi/avnav/data/plugins/dyninstruments/
-````
+unzip /path/to/dyninstruments.zip
+# Result: /home/pi/avnav/data/plugins/dyninstruments/
+```
 
-Auf einem **anderen Linux-System**:
+On **another Linux system**:
 
 ```bash
 cd /home/<user>/avnav/plugins
-unzip /pfad/zu/dyninstruments.zip
-# Ergebnis: /home/<user>/avnav/plugins/dyninstruments/
+unzip /path/to/dyninstruments.zip
+# Result: /home/<user>/avnav/plugins/dyninstruments/
 ```
 
-Danach den **AvNav-Server neu starten** (über die AvNav Web-Oberfläche oder per Systemdienst).
+Then **restart the AvNav server** (via the AvNav web UI or as a system service).
 
 ---
 
-## Benutzung
+## Usage
 
-### Widgets im Layout-Editor
+### Widgets in the layout editor
 
-1. Öffne AvNav im Browser.
-
-2. Wechsle im Edit-Mode auf das **Instrumenten-Layout**, das du anpassen möchtest.
-
-3. In der Widget-Liste findest du neue Einträge mit dem Präfix:
+1. Open AvNav in your browser.
+2. In edit mode, switch to the **instrument layout** you want to modify.
+3. In the widget list, you will find new entries with the prefix:
 
    ```text
    dyninstruments_…
    ```
 
-   Beispiele (je nach Stand der Entwicklung):
+   Examples (depending on the current development state):
 
    * `dyninstruments_courseHeading`
    * `dyninstruments_speed`
@@ -103,50 +109,56 @@ Danach den **AvNav-Server neu starten** (über die AvNav Web-Oberfläche oder pe
 
 ---
 
-## Architektur (Kurzüberblick)
+## Architecture (quick overview)
 
-`dyninstruments` basiert auf einer modularen Struktur:
+`dyninstruments` is based on a modular structure:
 
 * **ClusterHost**
 
-  * Kümmert sich um Datenquellen, Formatter und die Übersetzung zwischen `kind` und internem Daten-Key.
+  * Handles data sources, formatters, and the translation between `kind` and internal data keys.
+
 * **ThreeElements**
 
-  * Canvas-Renderer für klassische Anzeigen mit **Caption / Value / Unit**.
-  * Verantwortlich für Auto-Scaling und Layout abhängig vom Widget-Seitenverhältnis.
-* **"Core"-Files**
+  * Canvas renderer for classic **Caption / Value / Unit** displays.
+  * Responsible for auto-scaling and layout based on widget aspect ratio.
 
-  * Wiederverwendbare Bausteine, beispielweise 360°-Skalen, Ticks und Gauge-Zeiger (z. B. Compass, WindDial).
+* **“Core” files**
 
-Die Module werden von `plugin.js` als UMD-Module geladen und über die AvNav-API (`renderCanvas`, `registerWidget`, …) eingebunden.
+  * Reusable building blocks, e.g., 360° scales, ticks, and gauge pointers (used by Compass, WindDial, etc.).
+
+Modules are loaded as UMD modules by `plugin.js` and integrated via the AvNav API (e.g., `renderCanvas`, `registerWidget`, …).
 
 ---
 
 ## Roadmap
 
-Geplante bzw. im Aufbau befindliche Instrumente:
+Planned / in-progress instruments:
 
-* Weitere Canvas-Gauges:
+* More canvas gauges:
 
   * `radGauge_Speed`
   * `radGauge_Temperature`
   * `radGauge_Voltage`
   * `radGauge_Wind`
-* Wind-Instrumente:
 
-  * `WindTrend` (graphische Darstellung, z. B. History/Trends)
-* Navigations- und Status-Widgets:
+* Wind instruments:
+
+  * `WindTrend` (visualization, e.g., history/trends)
+
+* Navigation and status widgets:
 
   * `XteCanvas`
   * `RouteStatus`, `RouteList`
-  * `TimeStatus`, `LargeTime`-Varianten
-* AIS & Map:
+  * `TimeStatus`, `LargeTime` variants
 
-  * `AisTarget` (Tabelle mit CPA/TCPA)
+* AIS & map:
+
+  * `AisTarget` (table with CPA/TCPA)
   * `MapControls`, `MapOverlay`
-* System/Attitude:
 
-  * `SignalKAttitude` (Roll/Pitch)
-  * `Alarm`-/Status-Widgets
+* System/attitude:
 
-Die tatsächliche Implementierung kann von dieser Liste abweichen; siehe GitHub-Issues und Commits für den aktuellen Stand.
+  * `SignalKAttitude` (roll/pitch)
+  * alarm/status widgets
+
+Actual implementation may differ from this list; see GitHub issues and commits for the current state.
