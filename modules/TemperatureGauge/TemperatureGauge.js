@@ -1,22 +1,27 @@
 /*!
- * DepthGauge (UMD) — n-shaped semicircle depth gauge with warning/alarm sectors (low end / towards 0)
+ * TemperatureGauge (UMD) — n-shaped semicircle temperature gauge with optional high-end warning/alarm sectors
  *
- * Semantics (DISPLAY units, e.g. meters):
+ * Semantics (DISPLAY units, default °C):
  *  - Range: minValue .. maxValue
- *  - Alarm zone (red):   minValue .. alarmFrom
- *  - Warning zone (matte yellow): alarmFrom .. warningFrom
- *    (if alarmFrom/ warningFrom are missing or ordered wrong, sectors collapse safely)
+ *  - Warning zone (matte yellow): warningFrom .. warningTo
+ *      warningTo is FIXED = alarmFrom (if valid and > warningFrom) else maxValue
+ *  - Alarm zone (matte red): alarmFrom .. maxValue
+ *      alarmTo is FIXED = maxValue
  *
- * Layout modes (like WindDial/CompassGauge/SpeedGauge):
+ * Layout modes (like WindDial/CompassGauge/SpeedGauge/DepthGauge):
  *  - Flat:   text column next to gauge (gauge stays maximal)
  *  - Normal: caption/value/unit inside the semicircle (gauge stays maximal)
  *  - High:   one inline row under the gauge (gauge stays maximal)
+ *
+ * Use cases:
+ *  - Defaults are water temperature: sensible range, sectors OFF by default.
+ *    Other use cases (air/engine/fridge) are covered by min/max + optional thresholds.
  */
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniDepthGauge = factory(); }
+  else { (root.DyniModules = root.DyniModules || {}).DyniTemperatureGauge = factory(); }
 }(this, function () {
   "use strict";
 
@@ -60,18 +65,18 @@
 
     function niceTickSteps(range){
       if (!isFinite(range) || range <= 0) return { major: 10, minor: 2 };
-      if (range <= 6)   return { major: 1,  minor: 0.5 };
-      if (range <= 12)  return { major: 2,  minor: 1 };
-      if (range <= 30)  return { major: 5,  minor: 1 };
-      if (range <= 60)  return { major: 10, minor: 2 };
-      if (range <= 120) return { major: 20, minor: 5 };
+      if (range <= 8)   return { major: 1,  minor: 0.5 };
+      if (range <= 20)  return { major: 2,  minor: 1 };
+      if (range <= 50)  return { major: 5,  minor: 1 };
+      if (range <= 100) return { major: 10, minor: 2 };
+      if (range <= 200) return { major: 20, minor: 5 };
       return { major: 50, minor: 10 };
     }
 
     function almostInt(x, eps){ return Math.abs(x - Math.round(x)) <= (eps || 1e-6); }
 
-    // --- Depth formatting (keeps pointer synced with displayed value) --------
-    function formatDepthString(raw, decimals){
+    // --- Temperature formatting (keeps pointer synced with displayed value) ---
+    function formatTempString(raw, decimals){
       const n = Number(raw);
       if (!isFinite(n)) return '---';
       const d = (typeof decimals === 'number' && isFinite(decimals)) ? Math.max(0, Math.min(6, Math.floor(decimals))) : 1;
@@ -83,8 +88,8 @@
       return m ? m[0] : '';
     }
 
-    function displayDepthFromRaw(raw, decimals){
-      const s = formatDepthString(raw, decimals);
+    function displayTempFromRaw(raw, decimals){
+      const s = formatTempString(raw, decimals);
       const t = extractNumberText(s);
       const num = t ? Number(t) : NaN;
       if (isFinite(num)) return { num, text: t };
@@ -93,7 +98,7 @@
       return { num: NaN, text: '---' };
     }
 
-    // --- Drawing primitives (WindDial-like style) ----------------------------
+    // --- Drawing primitives --------------------------------------------------
     function drawArcRing(ctx, cx, cy, r, startDeg, endDeg, lineWidth){
       ctx.save();
       ctx.lineWidth = lineWidth || 1;
@@ -409,27 +414,28 @@
       const availW = Math.max(1, W - 2*pad);
       const availH = Math.max(1, H - 2*pad);
 
-      // Mode thresholds
+      // Mode thresholds (owned by TemperatureGauge)
       const ratio = W / Math.max(1, H);
-      const tN = Number(props.depthRatioThresholdNormal ?? 1.1);
-      const tF = Number(props.depthRatioThresholdFlat   ?? 3.5);
+      const tN = Number(props.tempRatioThresholdNormal ?? 1.1);
+      const tF = Number(props.tempRatioThresholdFlat   ?? 3.5);
       let mode; // 'flat'|'normal'|'high'
       if (ratio < tN) mode = 'high';
       else if (ratio > tF) mode = 'flat';
       else mode = 'normal';
 
       const caption = (props.caption || '').trim();
-      const unit    = (props.unit || 'm').trim();
+      const unit    = (props.unit || '°C').trim();
       const decimals = 1;
 
-      const raw = (typeof props.value !== 'undefined') ? props.value : props.depth;
-      const disp = displayDepthFromRaw(raw, decimals);
+      const raw = (typeof props.value !== 'undefined') ? props.value : props.temp;
+      const disp = displayTempFromRaw(raw, decimals);
       const valueText = (disp.text && disp.text.trim()) ? disp.text.trim() : (props.default || '---');
       const valueNum  = isFiniteN(disp.num) ? disp.num : NaN;
 
       // Range (DISPLAY units)
+      // Defaults for water temp: 0..35°C, no sectors by default (warning/alarm undefined)
       let minV = Number(props.minValue ?? 0);
-      let maxV = Number(props.maxValue ?? 30);
+      let maxV = Number(props.maxValue ?? 35);
       if (!isFinite(minV)) minV = 0;
       if (!isFinite(maxV)) maxV = minV + 1;
       if (maxV <= minV) maxV = minV + 1;
@@ -461,23 +467,17 @@
         ? (arc.startDeg + (arc.endDeg - arc.startDeg) * ((vClamped - minV) / (maxV - minV)))
         : NaN;
 
-      // --- LOW-END sectors (towards 0) ---------------------------------------
-      const warningFrom = Number(props.warningFrom); // higher threshold (end of warning zone)
-      const alarmFrom   = Number(props.alarmFrom);   // lower threshold (end of alarm zone)
+      // --- HIGH-END sectors (SpeedGauge rules) --------------------------------
+      const warningFrom = Number(props.warningFrom);
+      const alarmFrom   = Number(props.alarmFrom);
 
-      const alarmToEff = isFinite(alarmFrom) ? alarmFrom : NaN;
+      const alarmToEff = maxV;
 
-      let warningToEff = NaN;
-      if (isFinite(warningFrom)) warningToEff = warningFrom;
+      let warningToEff = maxV;
+      if (isFinite(alarmFrom) && isFinite(warningFrom) && alarmFrom > warningFrom) warningToEff = alarmFrom;
 
-      // enforce order: min .. alarm .. warning
-      const aTo = isFinite(alarmToEff) ? Math.max(minV, Math.min(maxV, alarmToEff)) : NaN;
-      const wTo = isFinite(warningToEff) ? Math.max(minV, Math.min(maxV, warningToEff)) : NaN;
-
-      const alarm  = (isFinite(aTo) && aTo > minV) ? sectorAngles(minV, aTo, minV, maxV, arc) : null;
-      const warn   = (isFinite(aTo) && isFinite(wTo) && wTo > aTo) ? sectorAngles(aTo, wTo, minV, maxV, arc) : null;
-      // If alarm missing but warning exists: warning is min..warningFrom
-      const warnOnly = (!alarm && isFinite(wTo) && wTo > minV) ? sectorAngles(minV, wTo, minV, maxV, arc) : null;
+      const warn  = (isFinite(warningFrom) ? sectorAngles(warningFrom, warningToEff, minV, maxV, arc) : null);
+      const alarm = (isFinite(alarmFrom)   ? sectorAngles(alarmFrom,   alarmToEff,   minV, maxV, arc) : null);
 
       // Ticks/labels
       const ticks = buildValueTickAngles(minV, maxV, tickMajor, tickMinor, arc);
@@ -486,10 +486,9 @@
       // ---- DRAW: gauge first ------------------------------------------------
       drawArcRing(ctx, cx, cy, rOuter, arc.startDeg, arc.endDeg, 1);
 
-      // sectors (matte palette like WindDial)
-      if (alarm)    drawAnnularSector(ctx, cx, cy, rOuter, ringW, alarm.a0,    alarm.a1,    "#ff7a76"); // matte red
-      if (warn)     drawAnnularSector(ctx, cx, cy, rOuter, ringW, warn.a0,     warn.a1,     "#e7c66a"); // matte yellow
-      if (warnOnly) drawAnnularSector(ctx, cx, cy, rOuter, ringW, warnOnly.a0, warnOnly.a1, "#e7c66a");
+      // matte palette (WindDial style)
+      if (warn)  drawAnnularSector(ctx, cx, cy, rOuter, ringW, warn.a0,  warn.a1,  "#e7c66a"); // matte yellow
+      if (alarm) drawAnnularSector(ctx, cx, cy, rOuter, ringW, alarm.a0, alarm.a1, "#ff7a76"); // matte red
 
       if (isFiniteN(aNow)){
         drawPointerAtRim(ctx, cx, cy, rOuter, aNow, {
@@ -608,7 +607,7 @@
     function translateFunction(){ return {}; }
 
     return {
-      id: "DepthGauge",
+      id: "TemperatureGauge",
       version: "0.1.0",
       wantsHideNativeHead: true,
       renderCanvas,
@@ -616,5 +615,5 @@
     };
   }
 
-  return { id: "DepthGauge", create };
+  return { id: "TemperatureGauge", create };
 }));

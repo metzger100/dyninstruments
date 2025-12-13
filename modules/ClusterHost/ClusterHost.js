@@ -64,17 +64,24 @@
       throw new Error('ClusterHost: DepthGauge module not available');
     }
 
+    const tempMod = Helpers.getModule('TemperatureGauge');
+    if (!tempMod || typeof tempMod.create !== 'function') {
+      throw new Error('ClusterHost: TemperatureGauge module not available');
+    }
+
     const threeSpec   = three.create(def, Helpers);
     const dialSpec    = windDialMod.create(def, Helpers);
     const compassSpec = compassMod.create(def, Helpers);
     const speedGaugeSpec = speedGaugeMod.create(def, Helpers);
     const depthSpec   = depthMod.create(def, Helpers);
+    const tempSpec    = tempMod.create(def, Helpers);
 
     const wantsHide = !!(threeSpec && threeSpec.wantsHideNativeHead) ||
                       !!(dialSpec && dialSpec.wantsHideNativeHead) ||
                       !!(compassSpec && compassSpec.wantsHideNativeHead) ||
                       !!(speedGaugeSpec && speedGaugeSpec.wantsHideNativeHead) ||
-                      !!(depthSpec && depthSpec.wantsHideNativeHead);
+                      !!(depthSpec && depthSpec.wantsHideNativeHead) ||
+                      !!(tempSpec && tempSpec.wantsHideNativeHead);
 
     function out(v, cap, unit, formatter, formatterParameters){
       const o = {};
@@ -124,6 +131,10 @@
         if (effKind === 'sogGraphic' || effKind === 'stwGraphic'){
           const baseKind = (effKind === 'sogGraphic') ? 'sog' : 'stw';
           const val = p[baseKind];
+
+          const warnOn  = (p.speedWarningEnabled !== false);
+          const alarmOn = (p.speedAlarmEnabled  !== false);
+
           return {
             renderer: 'SpeedGauge',
             value: val,
@@ -147,10 +158,8 @@
             showEndLabels: !!p.showEndLabels,
 
             // sectors
-            warningFrom: Number(p.warningFrom),
-            warningTo:   (p.warningTo === '' || p.warningTo == null) ? undefined : Number(p.warningTo),
-            alarmFrom:   Number(p.alarmFrom),
-            alarmTo:     (p.alarmTo === '' || p.alarmTo == null) ? undefined : Number(p.alarmTo)
+            warningFrom: warnOn  ? Number(p.warningFrom) : undefined,
+            alarmFrom:   alarmOn ? Number(p.alarmFrom)   : undefined
           };
         }
 
@@ -179,25 +188,25 @@
       if (cluster === 'environment'){
         const req = p.kind;
 
-        // NEU: Graphic depth
         if (req === 'depthGraphic'){
+          const depthWarnOn  = (p.depthWarningEnabled !== false);
+          const depthAlarmOn = (p.depthAlarmEnabled  !== false);
+
           return {
             renderer: 'DepthGauge',
-            value: p.depth,                 // DepthGauge liest value oder depth
+            value: p.depth,
             caption: cap('depthGraphic'),
             unit: unit('depthGraphic'),
 
-            minValue: Number(p.minValue),
-            maxValue: Number(p.maxValue),
-            tickMajor: Number(p.tickMajor),
-            tickMinor: Number(p.tickMinor),
-            showEndLabels: !!p.showEndLabels,
+            minValue: Number(p.depthMinValue),
+            maxValue: Number(p.depthMaxValue),
+            tickMajor: Number(p.depthTickMajor),
+            tickMinor: Number(p.depthTickMinor),
+            showEndLabels: !!p.depthShowEndLabels,
 
             // shallow-side sectors
-            alarmFrom: Number(p.alarmFrom),
-            warningFrom: Number(p.warningFrom),
-
-            decimals: Number(p.decimals),
+            alarmFrom:   depthAlarmOn ? Number(p.depthAlarmFrom)   : undefined,
+            warningFrom: depthWarnOn  ? Number(p.depthWarningFrom) : undefined,
 
             depthRatioThresholdNormal: Number(p.depthRatioThresholdNormal),
             depthRatioThresholdFlat:   Number(p.depthRatioThresholdFlat),
@@ -205,9 +214,35 @@
           };
         }
 
+        if (req === 'tempGraphic'){
+          const tempWarnOn  = (p.tempWarningEnabled === true);
+          const tempAlarmOn = (p.tempAlarmEnabled  === true);
+          return {
+            renderer: 'TemperatureGauge',
+            value: p.temp,
+
+            caption: cap('tempGraphic'),
+            unit: unit('tempGraphic'),
+
+            minValue: Number(p.tempMinValue),
+            maxValue: Number(p.tempMaxValue),
+            tickMajor: Number(p.tempTickMajor),
+            tickMinor: Number(p.tempTickMinor),
+            showEndLabels: !!p.tempShowEndLabels,
+
+            warningFrom: tempWarnOn  ? Number(p.tempWarningFrom) : undefined,
+            alarmFrom:   tempAlarmOn ? Number(p.tempAlarmFrom)   : undefined,
+
+            tempRatioThresholdNormal: Number(p.tempRatioThresholdNormal),
+            tempRatioThresholdFlat:   Number(p.tempRatioThresholdFlat),
+
+            captionUnitScale: Number(p.captionUnitScale)
+          };
+        }
+
         // Numeric (ThreeElements)
-        if (req === 'wtemp') {
-          return out(p.wtemp, cap('wtemp'), unit('wtemp'), 'formatTemperature', ['celsius']);
+        if (req === 'temp') {
+          return out(p.wtemp, cap('temp'), unit('temp'), 'formatTemperature', ['celsius']);
         }
         if (req === 'pressure') {
           return out(p.value, cap('pressure'), unit('pressure'), 'skPressure', ['hPa']);
@@ -218,6 +253,8 @@
       // ----------------- WIND -------------------------------------------------
       if (cluster === 'wind'){
         const req = p.kind;
+
+        const layEnabled = (p.windLayEnabled !== false);
 
         // Graphic kinds → delegate to WindDial
         if (req === 'angleTrueGraphic' || req === 'angleApparentGraphic'){
@@ -230,8 +267,9 @@
             speedCaption: isTrue ? p.speedCaption_TWS : p.speedCaption_AWS,
             angleUnit: p.angleUnitGraphic,
             speedUnit: p.speedUnitGraphic,
-            layMin: Number(p.layMin),
-            layMax: Number(p.layMax),
+            layEnabled: layEnabled,
+            layMin: layEnabled ? Number(p.layMin) : undefined,
+            layMax: layEnabled ? Number(p.layMax) : undefined,
             dialRatioThresholdNormal: Number(p.dialRatioThresholdNormal),
             dialRatioThresholdFlat:   Number(p.dialRatioThresholdFlat),
             captionUnitScale:         Number(p.captionUnitScale),
@@ -304,6 +342,7 @@
       if (props && props.renderer === 'CompassGauge')return compassSpec;
       if (props && props.renderer === 'SpeedGauge')   return speedGaugeSpec;
       if (props && props.renderer === 'DepthGauge')   return depthSpec;
+      if (props && props.renderer === 'TemperatureGauge') return tempSpec;
       return threeSpec;
     }
 
@@ -315,7 +354,7 @@
     }
 
     function finalizeFunction(){
-      [threeSpec, dialSpec, compassSpec].forEach(sub => {
+      [threeSpec, dialSpec, compassSpec, speedGaugeSpec, depthSpec, tempSpec].forEach(sub => {
         if (sub && typeof sub.finalizeFunction === 'function') {
           try { sub.finalizeFunction.apply(this, arguments); } catch(e){}
         }
