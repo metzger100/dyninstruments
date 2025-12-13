@@ -204,6 +204,7 @@
       }
 
       // Laylines (symmetric)
+      const layEnabled = (props.layEnabled !== false);
       const layMin = clamp(props.layMin, 0, 180);
       const layMax = clamp(props.layMax, 0, 180);
 
@@ -215,7 +216,7 @@
         IC.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
 
         // sectors (annular)
-        if (layMax > layMin){
+        if (layEnabled && layMax > layMin){
           IC.drawAnnularSector(ctx, cx, cy, rOuter, {
             startDeg:  layMin,
             endDeg:    layMax,
