@@ -242,7 +242,7 @@
 
         // Numeric (ThreeElements)
         if (req === 'temp') {
-          return out(p.wtemp, cap('temp'), unit('temp'), 'formatTemperature', ['celsius']);
+          return out(p.temp, cap('temp'), unit('temp'), 'formatTemperature', ['celsius']);
         }
         if (req === 'pressure') {
           return out(p.value, cap('pressure'), unit('pressure'), 'skPressure', ['hPa']);
