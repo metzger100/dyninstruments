@@ -164,28 +164,6 @@ Current widgets (depending on your build):
 
 ---
 
-## Configuration notes
-
-### Per-kind captions/units
-
-Each cluster defines editor fields like:
-
-* `caption_<kind>` (e.g. `caption_hdtGraphic`)
-* `unit_<kind>` (e.g. `unit_sogGraphic`)
-
-This avoids hardcoding captions/units inside renderers.
-
-### Sector toggles
-
-Some gauges expose enable toggles so you can hide warning/alarm ranges completely:
-
-* SpeedGauge: defaults enabled
-* DepthGauge: defaults enabled
-* TemperatureGauge: defaults disabled
-* WindDial layline sectors: defaults enabled
-
----
-
 ## Roadmap (subject to change)
 
 There will also be changes in the clusters planned:
