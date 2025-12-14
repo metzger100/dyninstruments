@@ -203,7 +203,6 @@ The actual implementation may differ. Check issues/commits for the current state
 | DepthDisplay                 | dyninstruments_Environment → `depth`                                         | ✅ covered                                  |
 | DST                          | dyninstruments_Distance → `dst`                                              | ✅ covered                                  |
 | EditRoute                    | —                                                                            | ❌ not covered yet                          |
-| Empty                        | —                                                                            | ❌ not covered yet                          |
 | ETA                          | dyninstruments_Nav → `eta`                                                   | ✅ covered                                  |
 | HDM                          | dyninstruments_CourseHeading → `hdm`                                         | ✅ covered                                  |
 | HDT                          | dyninstruments_CourseHeading → `hdt`                                         | ✅ covered                                  |
@@ -219,7 +218,6 @@ The actual implementation may differ. Check issues/commits for the current state
 | radGauge_Voltage             | dyninstruments_Vessel → `voltageGraphic`                                     | ✅ covered                                  |
 | RadialGauge                  | —                                                                            | ❌ not covered yet                          |
 | RoutePoints                  | —                                                                            | ❌ not covered yet                          |
-| RteCombine                   | —                                                                            | ❌ not covered yet                          |
 | RteDistance                  | dyninstruments_Nav → `rteDistance`                                           | ✅ covered                                  |
 | RteEta                       | dyninstruments_Nav → `rteEta`                                                | ✅ covered                                  |
 | signalKCelsius               | dyninstruments_Environment → `temp`                                          | ✅ covered                                  |
@@ -228,11 +226,7 @@ The actual implementation may differ. Check issues/commits for the current state
 | signalKRoll                  | —                                                                            | ❌ not covered yet                          |
 | SOG                          | dyninstruments_Speed → `sog`                                                 | ✅ covered                                  |
 | STW                          | dyninstruments_Speed → `stw`                                                 | ✅ covered                                  |
-| testPlugin_CourseWidget      | —                                                                            | ❌ not covered yet                          |
-| testPlugin_ServerWidget      | —                                                                            | ❌ not covered yet                          |
-| testPlugin_SimpleWidget      | —                                                                            | ❌ not covered yet                          |
 | TimeStatus                   | —                                                                            | ❌ not covered yet                          |
-| Undefined                    | —                                                                            | ❌ not covered yet                          |
 | VMG                          | dyninstruments_Nav → `vmg`                                                   | ✅ covered                                  |
 | WaterTemp                    | dyninstruments_Environment → `temp`                                          | ✅ covered                                  |
 | WindAngle                    | dyninstruments_Wind → `angleApparent`                                        | ✅ covered                                  |
