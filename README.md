@@ -188,11 +188,67 @@ Some gauges expose enable toggles so you can hide warning/alarm ranges completel
 
 ## Roadmap (subject to change)
 
-Planned / in progress:
-
-* Additional gauges and cluster refinements
-* More navigation/status widgets
-* AIS and map-related widgets
-* Attitude and alarm/status widgets
+There will also be changes in the clusters planned:
+- Move LargeTime to a existing cluster like Vessel
+- Merge Distance into existing clusters
+- Merge Position into a existing cluster like Nav
+- Redo the Postion Widget to be more dynamic
 
 The actual implementation may differ. Check issues/commits for the current state.
+
+| AvNav Widget                 | dyninstruments            (Widget → Kind)                                    | Renderer/Modul                                                                  | Coverage                                    |
+| ---------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------- |
+| ActiveRoute                  | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| AisTarget                    | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| Alarm                        | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| AnchorBearing                | dyninstruments_Anchor → `bearing`                                            | `modules/ClusterHost/ClusterHost.js` → `modules/ThreeElements/ThreeElements.js` | ✅ covered                                  |
+| AnchorDistance               | dyninstruments_Anchor → `distance`                                           | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| AnchorWatchDistance          | dyninstruments_Anchor → `watch`                                              | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| BRG                          | dyninstruments_CourseHeading → `brg`                                         | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| CenterDisplay                | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| COG                          | dyninstruments_CourseHeading → `cog`                                         | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| CombinedWidget               | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| DateTime                     | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| Default                      | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| DepthDisplay                 | dyninstruments_Environment → `depth`                                         | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| DST                          | dyninstruments_Distance → `dst`                                              | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| EditRoute                    | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| Empty                        | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| ETA                          | dyninstruments_Nav → `eta`                                                   | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| HDM                          | dyninstruments_CourseHeading → `hdm`                                         | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| HDT                          | dyninstruments_CourseHeading → `hdt`                                         | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| LargeTime                    | dyninstruments_LargeTime                                                     | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| linGauge_Compass             | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| linGauge_Compass180          | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| linGauge_Temperature         | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| linGauge_Voltage             | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| Position                     | dyninstruments_Position → `boat`                                             | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| radGauge_Compass             | dyninstruments_CourseHeading → `hdtGraphic`                                  | `modules/ClusterHost/ClusterHost.js` → `modules/CompassGauge/CompassGauge.js`   | ✅ covered                                  |
+| radGauge_Speed               | dyninstruments_Speed → `sogGraphic`/`stwGraphic`                             | ClusterHost → `modules/SpeedGauge/SpeedGauge.js`                                | ✅ covered                                  |
+| radGauge_Temperature         | dyninstruments_Environment → `tempGraphic`                                   | ClusterHost → `modules/TemperatureGauge/TemperatureGauge.js`                    | ✅ covered                                  |
+| radGauge_Voltage             | dyninstruments_Vessel → `voltageGraphic`                                     | ClusterHost → `modules/VoltageGauge/VoltageGauge.js`                            | ✅ covered                                  |
+| RadialGauge                  | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| RoutePoints                  | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| RteCombine                   | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| RteDistance                  | dyninstruments_Nav → `rteDistance`                                           | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| RteEta                       | dyninstruments_Nav → `rteEta`                                                | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| signalKCelsius               | dyninstruments_Environment → `temp`                                          | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| signalKPitch                 | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| signalKPressureHpa           | dyninstruments_Environment → `pressure`                                      | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| signalKRoll                  | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| SOG                          | dyninstruments_Speed → `sog`                                                 | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| STW                          | dyninstruments_Speed → `stw`                                                 | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| testPlugin_CourseWidget      | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| testPlugin_ServerWidget      | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| testPlugin_SimpleWidget      | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| TimeStatus                   | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| Undefined                    | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| VMG                          | dyninstruments_Nav → `vmg`                                                   | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| WaterTemp                    | dyninstruments_Environment → `temp`                                          | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| WindAngle                    | dyninstruments_Wind → `angleApparent`                                        | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| WindDisplay                  | dyninstruments_Wind → `angleApparentGraphic`                                 | ClusterHost → `modules/WindDial/WindDial.js`                                    | ✅ covered                                  |
+| WindGraphics                 | dyninstruments_Wind → `angleApparentGraphic`/`angleTrueGraphic`              | ClusterHost → WindDial                                                          | ✅ covered                                  |
+| WindSpeed                    | dyninstruments_Wind → `speedApparent`                                        | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| WpPosition                   | dyninstruments_Position → `wp`                                               | ClusterHost → ThreeElements                                                     | ✅ covered                                  |
+| XteDisplay                   | —                                                                            | —                                                                               | ❌ not covered yet                          |
+| Zoom                         | —                                                                            | —                                                                               | ❌ not covered yet                          |
