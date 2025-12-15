@@ -236,3 +236,42 @@ The actual implementation may differ. Check issues/commits for the current state
 | WpPosition                   | dyninstruments_Position → `wp`                                               | ✅ covered                                  |
 | XteDisplay                   | —                                                                            | ❌ not covered yet                          |
 | Zoom                         | —                                                                            | ❌ not covered yet                          |
+
+## Development
+
+clone avnav from github
+clone dyninstruments into /avnav-master/run/avnavdata/plugins folder
+
+cd avnav-master/viewer
+npm install
+
+Use a launch file like this to start the avnav-server:
+```
+{
+  "version": "0.2.0",
+  "compounds": [
+    {
+      "name": "AVNav Dev (Viewer+Server)",
+      "configurations": ["viewer:watch", "server:run"]
+    }
+  ],
+  "configurations": [
+    {
+      "type": "node-terminal",
+      "name": "viewer:watch",
+      "request": "launch",
+      "command": "npm run watch",
+      "cwd": "~/avnav-master//viewer"
+    },
+    {
+      "type": "python",
+      "name": "server:run",
+      "request": "launch",
+      "program": "~/avnav-master//server/avnav_server.py",
+      "args": ["-w", "~/avnav-master//run/avnavdata", "-o", "8080", "-u", "viewer=~/avnav-master//viewer/build/debug,user=~/avnav-master//run/avnavdata/user"],
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}
+```
