@@ -237,15 +237,36 @@ The actual implementation may differ. Check issues/commits for the current state
 | XteDisplay                   | —                                                                            | ❌ not covered yet                          |
 | Zoom                         | —                                                                            | ❌ not covered yet                          |
 
+---
+
 ## Development
 
-clone avnav from github
-clone dyninstruments into /avnav-master/run/avnavdata/plugins folder
+### Local development setup (AvNav + dyninstruments)
 
-cd avnav-master/viewer
-npm install
+1. **Clone AvNav and place dyninstruments into the runtime plugin folder**
 
-Use a launch file like this to start the avnav-server:
+* Clone AvNav:
+
+  * `git clone https://github.com/wellenvogel/avnav.git avnav-master`
+* Clone (or symlink) this plugin into AvNav’s runtime plugins directory so the server can load it:
+
+  * `mkdir /avnav-master/run/avnavdata/plugins`
+  * `git clone https://github.com/metzger100/dyninstruments`
+
+2. **Install viewer dependencies and run the watcher**
+
+* Go to the AvNav viewer directory:
+
+  * `cd avnav-master/viewer`
+* Install dependencies:
+
+  * `npm install`
+
+3. **Run the AvNav server against the debug viewer build**
+
+A practical way is using a VS Code launch configuration that runs the viewer watcher and the Python server in parallel (example below is known to work with AvNav’s typical layout):
+
+Use a launch file like this to start the avnav-server (make sure the paths are right):
 ```
 {
   "version": "0.2.0",
