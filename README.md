@@ -248,7 +248,7 @@ The actual implementation may differ. Check issues/commits for the current state
   * `git clone https://github.com/wellenvogel/avnav.git avnav-master`
 * Clone (or symlink) this plugin into AvNav’s runtime plugins directory so the server can load it:
 
-  * `mkdir /avnav-master/run/avnavdata/plugins`
+  * `mkdir -p /avnav-master/run/avnavdata/plugins`
   * `git clone https://github.com/metzger100/dyninstruments`
 
 2. **Install viewer dependencies and run the watcher**
