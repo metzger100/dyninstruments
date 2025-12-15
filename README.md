@@ -262,7 +262,13 @@ The actual implementation may differ. Check issues/commits for the current state
 
 3. **Run the AvNav server against the debug viewer build**
 
-A practical way is using a VS Code launch configuration that runs the viewer watcher and the Python server in parallel (example below is known to work with AvNav’s typical layout):
+Start the server so it serves:
+
+* runtime data from `avnav-master/run/avnavdata`
+* the viewer UI from `viewer/build/debug`
+* your plugin from `run/avnavdata/plugins/dyninstruments`
+
+A practical way is using a VS Code launch configuration that runs the viewer watcher and the Python server in parallel.
 
 Use a launch file like this to start the avnav-server (make sure the paths are right):
 ```js
