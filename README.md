@@ -241,8 +241,6 @@ The actual implementation may differ. Check issues/commits for the current state
 
 ## Development
 
-### Local development setup (AvNav + dyninstruments)
-
 1. **Clone AvNav and place dyninstruments into the runtime plugin folder**
 
 * Clone AvNav:
