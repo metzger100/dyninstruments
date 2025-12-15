@@ -267,7 +267,7 @@ The actual implementation may differ. Check issues/commits for the current state
 A practical way is using a VS Code launch configuration that runs the viewer watcher and the Python server in parallel (example below is known to work with AvNav’s typical layout):
 
 Use a launch file like this to start the avnav-server (make sure the paths are right):
-```
+```js
 {
   "version": "0.2.0",
   "compounds": [
