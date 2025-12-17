@@ -166,23 +166,43 @@ Current widgets (depending on your build):
 
 ## Roadmap (subject to change)
 
-There will also be changes in the clusters planned:
-- Move LargeTime to a existing cluster like Vessel
-- Merge Distance into existing clusters
-- Merge Position into a existing cluster like Nav
-- Redo the Postion Widget to be more dynamic
-- Offer a windGraphic with TWA,TWS,AWA and AWS Values in the four corners.
+There are planned structural changes before adding the remaining AvNav widgets. Backward compatibility is **not** a goal yet (pre-release).
 
-There are some additional widgets planned which are not available in the core:
-- obp60 Instruments:
-  - RollPitch Graphical
-  - Clock Graphical
-  - Rudder Graphical
-  - Keel Graphical
-- C-net 2000 Multi Instruments:
-  - History Graphs for all kinds of Instruments
-  - Interactive Regatta Clock (If technically possible)
-  - Nav Plot but for Anchors to see where the boat is in the Anchor Circle
+### Phase 1 — Cluster refactor (foundation)
+
+1. **Move `LargeTime` into an existing cluster (likely `vessel`)**
+   - `dyninstruments_LargeTime` becomes a `kind` (e.g. `clock`) inside `dyninstruments_Vessel`.
+
+2. **Merge `distance` into existing clusters**
+   - Waypoint/route distances move into `nav` (`dst`, `rteDistance`).
+   - Anchor distances stay in `anchor` (`distance`, `watch`).
+   - The standalone `distance` cluster/widget will be removed.
+
+3. **Merge `position` into an existing cluster (likely `nav`)**
+   - Boat/WP positions become `kinds` inside `dyninstruments_Nav`.
+   - A “more dynamic” position widget will be built on top of this (switchable sources, consistent formatting).
+
+### Phase 2 — Assign missing AvNav widgets to target clusters
+
+After the refactor, the missing core widgets will be integrated as `kinds` into clusters (and new clusters will be introduced if it improves UX), e.g.:
+
+- `vessel`: `datetime`, `timeStatus`, `signalKPitch`, `signalKRoll`
+- `nav`: `activeRoute`, `routePoints`, `xteDisplay`, `editRoute`
+- new clusters (planned): `ais` (e.g. `aisTarget`), `map` (e.g. `zoom`, `centerDisplay`)
+- `default`: likely a dedicated “utility/default” widget rather than a cluster kind
+
+### Phase 3 — Implementation order (practical milestones)
+
+1. **Quick wins (text/ThreeElements-based)**: `DateTime`, `TimeStatus`, `signalKPitch`, `signalKRoll`
+2. **High-impact canvas visuals**: `XteDisplay`, `ActiveRoute`
+3. **Lists & controls (interaction-heavy)**: `RoutePoints`, `EditRoute`, `Zoom`, `CenterDisplay`
+4. **AIS**: `AisTarget` (requires more data/logic + responsive layout)
+
+### Additional non-core widgets (planned)
+
+- **OBP60-style instruments**: graphical Roll/Pitch, Clock, Rudder, Keel
+- **C-net 2000 multi instruments**: history graphs, interactive regatta clock (if feasible), anchor “nav plot” (boat track inside anchor circle)
+- **Wind**: a “4-corner” wind graphic showing `TWA/TWS/AWA/AWS` simultaneously
 
 The actual implementation may differ. Check issues/commits for the current state.
 
