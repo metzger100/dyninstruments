@@ -74,9 +74,9 @@ User selects "kind" in AvNav editor
 
 **Architecture:** [module-system.md](architecture/module-system.md), [cluster-system.md](architecture/cluster-system.md)
 
-**Gauges:** [gauge-style-guide.md](gauges/gauge-style-guide.md), [gauge-shared-api.md](gauges/gauge-shared-api.md), [semicircle-gauges.md](gauges/semicircle-gauges.md)
+**Gauges:** [gauge-style-guide.md](gauges/gauge-style-guide.md), [gauge-shared-api.md](gauges/gauge-shared-api.md)
 
-**Shared:** [helpers.md](shared/helpers.md), [dial-primitives.md](shared/dial-primitives.md), [css-theming.md](shared/css-theming.md)
+**Shared:** [helpers.md](shared/helpers.md), [css-theming.md](shared/css-theming.md)
 
 **Guides:** [add-new-gauge.md](guides/add-new-gauge.md), [add-new-cluster.md](guides/add-new-cluster.md)
 
