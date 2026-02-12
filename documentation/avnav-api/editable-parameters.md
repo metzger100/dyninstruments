@@ -1,170 +1,151 @@
 # Editable Parameters
 
-**Status:** ✅ Reference document | External API (AvNav widget editor)
+**Status:** ✅ Reference | Covers official AvNav API + dyninstruments extensions (marked separately)
 
 ## Overview
 
-editableParameters define the widget configuration UI in AvNav's editor. Passed as second argument to `avnav.api.registerWidget(def, editableParameters)`.
+editableParameters define the widget configuration UI in AvNav's Layout Editor. Passed as second argument to `avnav.api.registerWidget(def, editableParameters)`. Parameter values are available in renderHtml/renderCanvas props (exception: KEY type provides the store-read value, not the path).
 
-## Parameter Types
+## Parameter Definition
 
-### SELECT
+Each parameter is an object with the key being the parameter name (used both as editor label and property name in render functions):
 
-Dropdown menu. The `list` array contains `{ name, value }` objects.
+```javascript
+{
+  paramName: { type: "...", default: ..., ... }
+}
+```
+
+## Parameter Types (AvNav API)
+
+| Type | Editor UI | Value Type | Notes |
+|---|---|---|---|
+| `STRING` | Text input | string | |
+| `NUMBER` | Number input | number | Integer |
+| `FLOAT` | Number input | number | With min/max/step |
+| `BOOLEAN` | Toggle | boolean | |
+| `SELECT` | Dropdown | string | Requires `list` |
+| `KEY` | Store key browser | any | **Special:** render functions receive the *value read from store*, not the path string |
+| `ARRAY` | Text input (comma-separated) | array | |
+| `COLOR` | Color picker | string | CSS color value, e.g. `"rgba(200, 50, 50, .75)"` |
+
+### SELECT Details
+
+`list` accepts three forms:
+- Array of strings: `["option1", "option2"]`
+- Array of objects: `[{ name: "Display Name", value: "val" }, ...]`
+- Function returning array (or function returning Promise that resolves to array)
 
 ```javascript
 kind: {
   type: "SELECT",
   list: [
     { name: "Speed over ground (SOG)", value: "sog" },
-    { name: "Speed through water (STW)", value: "stw" },
-    { name: "Speed gauge (SOG) [Graphic]", value: "sogGraphic" }
+    { name: "Speed gauge [Graphic]", value: "sogGraphic" }
   ],
-  default: "sog",
-  name: "Kind"
+  default: "sog"
 }
 ```
 
-### BOOLEAN
-
-Toggle switch. Value is `true` / `false`.
+### FLOAT Details
 
 ```javascript
-showEndLabels: {
-  type: "BOOLEAN",
-  default: false,
-  name: "Show min/max labels",
-  condition: { kind: "sogGraphic" }
-}
+minValue: { type: "FLOAT", min: 0, max: 100, step: 0.5, default: 0 }
 ```
 
-### FLOAT
+### KEY Details
 
-Numeric input with min/max/step constraints.
+Shows a browser for currently available AvNav store keys. The render function receives the **store value** (not the key path). In dyninstruments, KEY params require `updateFunction` to set storeKeys dynamically — see [plugin-lifecycle.md](plugin-lifecycle.md).
 
 ```javascript
-minValue: {
-  type: "FLOAT", min: 0, max: 100, step: 0.5, default: 0,
-  name: "Min speed",
-  condition: { kind: "sogGraphic" }
-}
+value: { type: "KEY", default: "" }
 ```
 
-### STRING
-
-Free text input. Used for captions and units.
+### COLOR Details
 
 ```javascript
-caption_sog: {
-  type: "STRING",
-  displayName: "Caption",      // Note: uses displayName, not name
-  default: "SOG",
-  condition: { kind: "sog" }
-}
+bgColor: { type: "COLOR", default: "rgba(200, 50, 50, .75)" }
 ```
 
-### KEY
+## Pre-defined Parameters (AvNav Built-in)
 
-SignalK path selector. AvNav shows a key browser/autocomplete. Used when the data source is user-configurable (not hardcoded in storeKeys).
+These are well-known to AvNav and need no type definition — just `true` (show in editor) or `false` (hide):
 
-```javascript
-value: {
-  type: "KEY",
-  default: "",
-  name: "SignalK path (pressure)",
-  condition: { kind: "pressure" }
-}
-```
-
-**Important:** KEY-type params require `updateFunction` to dynamically set storeKeys at runtime. See [plugin-lifecycle.md](plugin-lifecycle.md).
-
-## Conditions
-
-Conditions control when a parameter is visible in the editor. Only shown when ALL conditions match.
-
-### Single Condition
-
-```javascript
-condition: { kind: "sogGraphic" }
-// Visible only when kind === "sogGraphic"
-```
-
-### Multiple Conditions (OR logic)
-
-Array of objects → parameter visible if ANY condition matches:
-
-```javascript
-condition: [{ kind: "sog" }, { kind: "stw" }]
-// Visible when kind is "sog" OR "stw"
-```
-
-### Compound Condition (AND logic)
-
-Multiple keys in one object → ALL must match:
-
-```javascript
-condition: { kind: "depthGraphic", depthAlarmEnabled: true }
-// Visible only when kind === "depthGraphic" AND depthAlarmEnabled === true
-```
-
-### No Condition
-
-```javascript
-condition: []     // Always visible (explicit empty)
-// OR simply omit condition → always visible
-```
-
-## Suppressing Built-in Parameters
-
-Set built-in parameter names to `false` to hide AvNav's default editor fields:
+| Name | Type | Description |
+|---|---|---|
+| `caption` | STRING | Widget caption |
+| `unit` | STRING | Widget unit |
+| `formatter` | SELECT | Formatter picker (all registered formatters) |
+| `formatterParameters` | ARRAY | Parameters passed to formatter |
+| `value` | KEY | Store key selector |
+| `className` | STRING | CSS class name |
 
 ```javascript
 editableParameters: {
-  caption: false,           // Hide default caption editor
-  unit: false,              // Hide default unit editor
-  formatter: false,         // Hide formatter picker
-  formatterParameters: false, // Hide formatter params
-  className: true,          // Keep CSS class editor
-  value: true               // Keep SignalK value selector
+  caption: false,            // Hide default caption editor
+  unit: false,               // Hide default unit editor
+  formatter: false,          // Hide formatter picker
+  formatterParameters: true, // Show formatter params
+  value: true,               // Show store key selector
+  className: true            // Show CSS class editor
 }
 ```
 
-## Per-Kind Caption/Unit Pattern
+---
 
-Helper function `makePerKindTextParams(KIND_MAP)` generates per-kind caption and unit STRING parameters:
+## dyninstruments Extensions (Not Part of Official AvNav Docs)
 
+### condition (Undocumented AvNav Feature)
+
+`condition` is used extensively in dyninstruments but **not documented in the official AvNav API**. It controls when a parameter is visible in the editor.
+
+**Single condition** — visible when match:
 ```javascript
-// Input KIND_MAP:
-const SPEED_KIND = {
-  sog: { cap: 'SOG', unit: 'kn' },
-  stw: { cap: 'STW', unit: 'kn' }
-};
-
-// Generated parameters:
-caption_sog: { type: 'STRING', displayName: 'Caption', default: 'SOG', condition: { kind: 'sog' } }
-unit_sog:    { type: 'STRING', displayName: 'Unit',    default: 'kn',  condition: { kind: 'sog' } }
-caption_stw: { type: 'STRING', displayName: 'Caption', default: 'STW', condition: { kind: 'stw' } }
-unit_stw:    { type: 'STRING', displayName: 'Unit',    default: 'kn',  condition: { kind: 'stw' } }
+condition: { kind: "sogGraphic" }
 ```
 
-ClusterHost resolves these in translateFunction via `p['caption_' + kindName]` and `p['unit_' + kindName]`.
+**OR logic** — array of objects, visible if ANY matches:
+```javascript
+condition: [{ kind: "sog" }, { kind: "stw" }]
+```
 
-## Common ThreeElements Editables
+**AND logic** — multiple keys in one object, ALL must match:
+```javascript
+condition: { kind: "depthGraphic", depthAlarmEnabled: true }
+```
 
-Shared layout thresholds used by all numeric (ThreeElements) kinds:
+**Always visible:**
+```javascript
+condition: []   // or omit condition entirely
+```
+
+### Per-Kind Caption/Unit Pattern (dyninstruments-internal)
+
+Helper `makePerKindTextParams(KIND_MAP)` generates per-kind STRING parameters:
+
+```javascript
+const SPEED_KIND = { sog: { cap: 'SOG', unit: 'kn' }, stw: { cap: 'STW', unit: 'kn' } };
+// Generates:
+// caption_sog: { type: 'STRING', displayName: 'Caption', default: 'SOG', condition: { kind: 'sog' } }
+// unit_sog:    { type: 'STRING', displayName: 'Unit',    default: 'kn',  condition: { kind: 'sog' } }
+```
+
+ClusterHost resolves via `p['caption_' + kindName]` and `p['unit_' + kindName]`.
+
+### Common ThreeElements Editables (dyninstruments-internal)
+
+Shared layout thresholds for numeric (ThreeElements) kinds:
 
 ```javascript
 const commonThreeElementsEditables = {
-  ratioThresholdNormal: { type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
-                          name: "3-Rows Threshold (higher = flatter)" },
-  ratioThresholdFlat:   { type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
-                          name: "1-Row Threshold (higher = flatter)" },
-  captionUnitScale:     { type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
-                          name: "Caption/Unit to Value scale" }
+  ratioThresholdNormal: { type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0 },
+  ratioThresholdFlat:   { type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0 },
+  captionUnitScale:     { type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8 }
 };
 ```
 
 ## Related
 
-- [plugin-lifecycle.md](plugin-lifecycle.md) — How updateFunction uses KEY params
+- [plugin-lifecycle.md](plugin-lifecycle.md) — Widget registration, updateFunction for KEY params
+- [formatters.md](formatters.md) — Formatter registration
 - [../widgets/cluster-definitions.md](../widgets/cluster-definitions.md) — All cluster configs
