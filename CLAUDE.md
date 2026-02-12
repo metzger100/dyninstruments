@@ -35,13 +35,8 @@ documentation/
 │   └── cluster-system.md           # ClusterHost, kind→renderer routing
 ├── gauges/
 │   ├── gauge-style-guide.md        # Proportions, colors, pointer, layout modes
-│   ├── gauge-shared-api.md         # GaugeUtils.js function reference (Phase 1)
-│   └── semicircle-gauges.md        # Speed/Depth/Temp/Voltage gauge specifics
-├── widgets/
-│   ├── numeric-display.md          # ThreeElements (Caption/Value/Unit)
-│   └── cluster-definitions.md      # All cluster configs, storeKeys, kinds
+│   └── gauge-shared-api.md         # GaugeUtils.js function reference (Phase 1)
 ├── shared/
-│   ├── dial-primitives.md          # InstrumentComponents API reference
 │   ├── helpers.md                  # Helpers object (setupCanvas, resolveTextColor)
 │   └── css-theming.md              # CSS vars, day/night, font stack
 └── guides/
