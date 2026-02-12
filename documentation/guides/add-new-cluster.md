@@ -171,5 +171,4 @@ To add a kind to an existing cluster without creating a new cluster:
 ## Related
 
 - [add-new-gauge.md](add-new-gauge.md) — Creating the graphic renderer module
-- [../widgets/cluster-definitions.md](../widgets/cluster-definitions.md) — Existing clusters reference
 - [../avnav-api/editable-parameters.md](../avnav-api/editable-parameters.md) — Parameter types
