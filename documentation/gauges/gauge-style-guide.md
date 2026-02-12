@@ -166,4 +166,3 @@ When `props.disconnect === true` or value is invalid, `drawDisconnectOverlay()` 
 ## Related
 
 - [gauge-shared-api.md](gauge-shared-api.md) — GaugeUtils function reference (Phase 1)
-- [../shared/dial-primitives.md](../shared/dial-primitives.md) — InstrumentComponents API
