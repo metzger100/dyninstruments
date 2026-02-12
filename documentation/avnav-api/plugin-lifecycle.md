@@ -1,10 +1,13 @@
 # AvNav Plugin Lifecycle
 
-**Status:** ✅ Reference document | External API, not controlled by this project
+**Status:** ✅ Reference | Covers official AvNav API + dyninstruments extensions (marked separately)
 
-## Overview
+## Global Variables
 
-AvNav plugins register widgets via `avnav.api.registerWidget()`. The plugin JS is loaded via `<script>` tag; `AVNAV_BASE_URL` is a global string set by AvNav.
+| Variable | Scope | Description |
+|---|---|---|
+| `AVNAV_BASE_URL` | plugin.js, user.js | URL to directory the JS file was loaded from. Use to load assets: `AVNAV_BASE_URL + "/myLib.js"`. Reach plugin API: `AVNAV_BASE_URL + "/api"` |
+| `AVNAV_PLUGIN_NAME` | plugin.js only | Name of the plugin |
 
 ## Widget Registration
 
@@ -14,102 +17,110 @@ avnav.api.registerWidget(definition, editableParameters)
 
 ### definition Object
 
-| Field | Type | Description |
-|---|---|---|
-| name | string | Unique widget name (e.g. `"dyninstruments_Speed"`) |
-| description | string | Display text in AvNav widget picker |
-| caption | string | Default caption (empty string if per-kind) |
-| unit | string | Default unit (empty string if per-kind) |
-| default | string | Fallback display value (e.g. `"---"`) |
-| storeKeys | object | SignalK path mapping `{ key: "nav.gps.speed" }` |
-| className | string | CSS classes for the widget container |
-| renderCanvas | fn(canvas, props) | Canvas rendering callback |
-| renderHtml | fn(element, props) | HTML rendering callback (alternative to canvas) |
-| initFunction | fn(element) | Called once when widget is created |
-| finalizeFunction | fn(element) | Called when widget is removed |
-| translateFunction | fn(props) → object | Transform props before renderCanvas |
-| updateFunction | fn(values) → object | Transform editor values; can modify storeKeys |
-| cluster | string | Internal cluster ID (used by ClusterHost dispatch) |
+| Field | Type | Widget Types | Description |
+|---|---|---|---|
+| name | string | all | Unique widget name |
+| type | string (opt) | all | `"radialGauge"`, `"linearGauge"`, `"map"`. Omit → defaultWidget (if no renderHtml/renderCanvas) or userWidget (if render fn provided) |
+| storeKeys | object | all | Keys to read from AvNav internal store. Values passed to render functions |
+| caption | string (opt) | all | Default caption |
+| unit | string (opt) | all | Default unit |
+| formatter | function (opt) | defaultWidget, radialGauge, linearGauge | Value formatter. **Required** for defaultWidget |
+| translateFunction | fn(props) → obj (opt) | all except map | Called with current store values; returns transformed values before rendering |
+| renderHtml | fn(props) → string (opt) | userWidget | Returns HTML string. `this` = WidgetContext |
+| renderCanvas | fn(canvas, props) (opt) | userWidget, map | Draws on canvas. `this` = WidgetContext. For map: canvas is an overlay shared by all map widgets (use save/restore) |
+| initFunction | fn(props) (opt) | userWidget, map | Called once when widget created. `this` = WidgetContext, 1st param = WidgetContext. Since 20210422: 2nd param = widget properties (incl. editableParameters) |
+| finalizeFunction | fn() (opt) | userWidget, map | Called before widget destroyed. `this` = WidgetContext, 1st param = WidgetContext |
 
-### wantsHideNativeHead
-
-When a module returns `wantsHideNativeHead: true`, the registration wrapper in plugin.js sets `data-dyni` attribute on the widget root. CSS then hides AvNav's native `.widgetHead` and `.valueData` elements, giving the plugin full control over rendering.
-
-## Render Cycle
-
-```
-1. User changes editableParameter in AvNav editor
-   → updateFunction(editorValues) called
-   → Can modify storeKeys dynamically (e.g. KEY type → custom SignalK path)
-   → Returns modified values object
-
-2. AvNav reads SignalK values via storeKeys
-   → Each key maps to a SignalK path
-   → Values appear in props as { keyName: signalKValue }
-
-3. translateFunction(mergedProps) called
-   → Receives ALL: editableParameter values + storeKey values + definition defaults
-   → Returns transformed props (e.g. picks renderer, sets formatter, resolves per-kind caption/unit)
-   → For graphic kinds: sets { renderer: "SpeedGauge", value: ..., caption: ..., ... }
-   → For numeric kinds: sets { value, caption, unit, formatter, formatterParameters }
-
-4. renderCanvas(canvas, translatedProps) called
-   → Draws on canvas using Canvas 2D API
-   → Props contain everything from step 3 merged with original props
-```
-
-## Props in renderCanvas
-
-The `props` object contains ALL merged values:
-
-- **editableParameter values:** `kind`, `minValue`, `maxValue`, `warningFrom`, `leadingZero`, etc.
-- **storeKey values:** `value`, `speed`, `awa`, `twa`, `depth`, etc. (as named in storeKeys)
-- **translateFunction outputs:** `caption`, `unit`, `formatter`, `formatterParameters`, `renderer`
-- **Definition defaults:** `className`, `default`, `cluster`
-- **AvNav-injected:** `disconnect` (boolean, true when no data)
+**Critical:** All functions must use `function` keyword (not arrow functions) for correct `this` binding to WidgetContext.
 
 ## storeKeys
 
-Maps symbolic names to SignalK paths. AvNav resolves them to live values:
+Maps symbolic names to AvNav internal store paths. AvNav resolves them to live values:
 
 ```javascript
 storeKeys: {
-  sog: "nav.gps.course",      // → props.sog = current SOG value
-  depth: "nav.gps.depthBelowTransducer"  // → props.depth = current depth
+  speed: "nav.gps.speed",                    // → props.speed = current value
+  depth: "nav.gps.depthBelowTransducer"      // → props.depth = current value
 }
 ```
 
-Dynamic storeKeys can be set via `updateFunction`:
+**Store path convention:** All keys starting with `gps.` in the AvNav server store are automatically forwarded to the WebApp as `nav.gps.*`. Plugin-registered keys appear under their registered path.
+
+## Widget Context
+
+Created per widget instance. Available as `this` in initFunction, finalizeFunction, renderHtml, renderCanvas. User data can be stored on the context object between calls.
+
+| Property/Method | Widget Type | Description |
+|---|---|---|
+| `eventHandler` | userWidget | Object (not function). Register HTML event handlers: `this.eventHandler.myHandler = function(ev){...}`. Use in renderHtml: `<button onclick="myHandler">` (handler name only, not JS code) |
+| `triggerRedraw()` | userWidget | Force re-render (e.g. after async data fetch) |
+| `triggerRender()` | map | Same as triggerRedraw for map widgets |
+| `lonLatToPixel(lon, lat)` | map | Coordinates → canvas pixels `[x, y]` |
+| `pixelToLonLat(x, y)` | map | Canvas pixels → coordinates `[lon, lat]` |
+| `getScale()` | map | Display scale factor (>1 for HiDPI) |
+| `getRotation()` | map | Map rotation in radians |
+| `getContext()` | map | Canvas renderingContext2D (only during renderCanvas) |
+| `getDimensions()` | map | Canvas size `[width, height]` |
+
+## Render Cycle (AvNav Standard)
+
+```
+1. AvNav reads store values per storeKeys
+2. translateFunction(storeValues) called (if defined)
+   → Returns transformed values
+3. renderCanvas(canvas, mergedProps) or renderHtml(mergedProps) called
+   → Props = editableParameter values + store values + translateFunction output
+   → renderHtml returns HTML string; renderCanvas draws on canvas
+   → Functions re-called whenever store values change
+```
+
+---
+
+## dyninstruments Extensions (Not Part of AvNav API)
+
+### updateFunction (dyninstruments-internal)
+
 ```javascript
-updateFunction: function(values) {
-  const out = { ...values };
-  if (values.kind === "pressure" && values.value) {
-    out.storeKeys = { ...out.storeKeys, value: values.value.trim() };
-  }
-  return out;
-}
+updateFunction: function(values) → object
 ```
 
-## Module create() Pattern
+Called when editor values change. Can dynamically modify `storeKeys` (e.g. for KEY-type parameters). Composed with module's updateFunction via `composeUpdates()` in plugin.js.
 
-AvNav calls `mod.create(def, Helpers)` where `def` is the cluster definition and `Helpers` is the shared helper object. The module returns an object with callbacks:
+### cluster (dyninstruments-internal)
+
+Internal cluster ID string (e.g. `"speed"`, `"wind"`). Used by ClusterHost for dispatch routing. Not an AvNav concept.
+
+### wantsHideNativeHead (dyninstruments-internal)
+
+When `true`, plugin.js sets `data-dyni` attribute on widget root → CSS hides AvNav's native `.widgetHead` and `.valueData` → plugin takes full rendering control.
+
+### Module create() Pattern (dyninstruments-internal)
+
+dyninstruments wraps AvNav widgets in a UMD module system. Each module exports `create(def, Helpers)`:
 
 ```javascript
 function create(def, Helpers) {
-  // Setup, get dependencies
   function renderCanvas(canvas, props) { /* ... */ }
-  function translateFunction(props) { /* ... */ }
-  return {
-    id: "ModuleName",
-    wantsHideNativeHead: true,
-    renderCanvas,
-    translateFunction
-  };
+  return { id: "ModuleName", wantsHideNativeHead: true, renderCanvas };
 }
+```
+
+plugin.js calls `registerInstrument()` which merges the module output with the cluster definition and calls `avnav.api.registerWidget()`.
+
+### dyninstruments Render Cycle
+
+```
+1. User changes editableParameter → updateFunction(values) — can modify storeKeys
+2. AvNav reads store values via storeKeys
+3. ClusterHost.translateFunction(mergedProps):
+   → Checks props.cluster + props.kind
+   → Graphic kinds: { renderer: "SpeedGauge", value, caption, unit, ... }
+   → Numeric kinds: { value, caption, unit, formatter, formatterParameters }
+4. ClusterHost.renderCanvas → pickRenderer(props) → delegates to sub-renderer
 ```
 
 ## Related
 
 - [editable-parameters.md](editable-parameters.md) — Parameter types and conditions
-- [formatters.md](formatters.md) — Available formatters
-- [architecture/cluster-system.md](../architecture/cluster-system.md) — How ClusterHost dispatches
+- [formatters.md](formatters.md) — Formatter registration and built-in formatters
+- [../architecture/cluster-system.md](../architecture/cluster-system.md) — ClusterHost dispatch
