@@ -148,4 +148,3 @@ const commonThreeElementsEditables = {
 
 - [plugin-lifecycle.md](plugin-lifecycle.md) — Widget registration, updateFunction for KEY params
 - [formatters.md](formatters.md) — Formatter registration
-- [../widgets/cluster-definitions.md](../widgets/cluster-definitions.md) — All cluster configs
