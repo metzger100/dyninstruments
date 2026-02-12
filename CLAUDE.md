@@ -14,7 +14,7 @@
 - **No ES modules, no import/export** — Must use IIFE or UMD wrappers
 - **HiDPI** — `Helpers.setupCanvas()` handles devicePixelRatio scaling
 - **Browser-only** — No Node.js, no server-side code
-- **No tests** — No test framework; verify by loading plugin in AvNav
+- **No tests** — No test framework
 
 ---
 
