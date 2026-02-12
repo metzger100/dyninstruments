@@ -168,7 +168,21 @@ Current widgets (depending on your build):
 
 There are planned structural changes before adding the remaining AvNav widgets. Backward compatibility is **not** a goal yet (pre-release).
 
-### Phase 1 — Cluster refactor (foundation)
+### Complete the Documentation for AI
+
+There is documentation missing for existing code like the already existing widgets
+
+### Refactor existing Files to reduce duplications and make it more friendly for AI 
+
+plugin.js is to long. Split the different jobs and configs up in smaller modules.
+
+Refactor the existing gauge elements to use the a new GaugeUtils which shall replace InstrumentComponents. SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge share identical functions.
+
+Remove dead Fallbacks.
+
+Fixing naming schemes.
+
+### Cluster refactor (foundation)
 
 1. **Move `LargeTime` into an existing cluster (likely `vessel`)**
    - `dyninstruments_LargeTime` becomes a `kind` (e.g. `clock`) inside `dyninstruments_Vessel`.
@@ -182,7 +196,7 @@ There are planned structural changes before adding the remaining AvNav widgets. 
    - Boat/WP positions become `kinds` inside `dyninstruments_Nav`.
    - A “more dynamic” position widget will be built on top of this (switchable sources, consistent formatting).
 
-### Phase 2 — Assign missing AvNav widgets to target clusters
+### Assign missing AvNav widgets to target clusters
 
 After the refactor, the missing core widgets will be integrated as `kinds` into clusters (and new clusters will be introduced if it improves UX), e.g.:
 
@@ -191,7 +205,7 @@ After the refactor, the missing core widgets will be integrated as `kinds` into 
 - new clusters (planned): `ais` (e.g. `aisTarget`), `map` (e.g. `zoom`, `centerDisplay`)
 - `default`: likely a dedicated “utility/default” widget rather than a cluster kind
 
-### Phase 3 — Implementation order (practical milestones)
+### Implementation order (practical milestones)
 
 1. **Quick wins (text/ThreeElements-based)**: `DateTime`, `TimeStatus`, `signalKPitch`, `signalKRoll`
 2. **High-impact canvas visuals**: `XteDisplay`, `ActiveRoute`
