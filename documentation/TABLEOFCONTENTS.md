@@ -27,27 +27,10 @@
 
 ## Gauge Widgets (Semicircle)
 
-- **SpeedGauge, DepthGauge, TemperatureGauge, VoltageGauge details** → [gauges/semicircle-gauges.md](gauges/semicircle-gauges.md)
 - **Visual style: proportions, colors, pointer config** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md)
 - **Layout modes (flat/normal/high)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#layout-modes)
 - **Sector logic (warning/alarm placement)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#sector-logic)
 - **Shared drawing functions (GaugeUtils)** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
-
-## Dial Widgets (Full Circle)
-
-- **WindDial (wind angle/speed graphic)** → [gauges/dial-gauges.md](gauges/dial-gauges.md)
-- **CompassGauge (heading graphic)** → [gauges/dial-gauges.md](gauges/dial-gauges.md)
-- **InstrumentComponents drawing primitives** → [shared/dial-primitives.md](shared/dial-primitives.md)
-
-## Numeric Display
-
-- **ThreeElements (Caption/Value/Unit renderer)** → [widgets/numeric-display.md](widgets/numeric-display.md)
-- **How does the 3-row / 2-row / flat layout work?** → [widgets/numeric-display.md](widgets/numeric-display.md)
-
-## Cluster Configuration
-
-- **All clusters, storeKeys, kinds, editableParameters** → [widgets/cluster-definitions.md](widgets/cluster-definitions.md)
-- **KIND maps (COURSE_KIND, SPEED_KIND, ENV_KIND...)** → [widgets/cluster-definitions.md](widgets/cluster-definitions.md#kind-maps)
 
 ## Styling & Theming
 
@@ -63,11 +46,10 @@
 
 ## Feature-Specific Lookups
 
-**"How do I add warning/alarm sectors to a gauge?"** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#sector-logic), [gauges/semicircle-gauges.md](gauges/semicircle-gauges.md)
+**"How do I add warning/alarm sectors to a gauge?"** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#sector-logic),
 **"How do I make a gauge respond to aspect ratio?"** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#layout-modes)
 **"How does the pointer/needle work?"** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#pointer-configuration)
 **"How does day/night theming work?"** → [shared/css-theming.md](shared/css-theming.md), [shared/helpers.md](shared/helpers.md)
 **"How does HiDPI canvas scaling work?"** → [shared/helpers.md](shared/helpers.md#setupcanvas)
-**"What SignalK paths are used?"** → [widgets/cluster-definitions.md](widgets/cluster-definitions.md)
 **"How do I hide the native AvNav widget header?"** → [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md#wantshidenativehead)
 **"How do I add a SignalK KEY selector to the editor?"** → [avnav-api/editable-parameters.md](avnav-api/editable-parameters.md#key-type)
