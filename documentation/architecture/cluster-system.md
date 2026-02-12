@@ -115,4 +115,3 @@ To add a new graphic renderer (e.g. BarometerGauge):
 
 - [module-system.md](module-system.md) — How modules and dependencies are loaded
 - [../avnav-api/plugin-lifecycle.md](../avnav-api/plugin-lifecycle.md) — translateFunction in render cycle
-- [../widgets/cluster-definitions.md](../widgets/cluster-definitions.md) — All cluster configs
