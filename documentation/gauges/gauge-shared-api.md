@@ -1,6 +1,6 @@
 # InstrumentComponents API Reference
 
-**Status:** ✅ Implemented | `modules/Cores/InstrumentComponents.js` (661 lines)
+**Status:** ✅ Implemented | `modules/Cores/InstrumentComponents.js`
 
 ## Overview
 
