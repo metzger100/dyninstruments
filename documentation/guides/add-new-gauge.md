@@ -259,7 +259,7 @@ function create(def, Helpers) {
 }
 ```
 
-**Target size:** ~150-200 lines (vs current ~650 lines per gauge).
+**Target size:** ~150-200 lines.
 
 ## Related
 
