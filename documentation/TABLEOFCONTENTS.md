@@ -43,6 +43,10 @@
 - **How does the rotating compass card work?** → [modules/compass-gauge.md](modules/compass-gauge.md)
 - **How does compass rotation with upright labels work?** → [modules/compass-gauge.md](modules/compass-gauge.md#compass-dial-drawing-via-ic)
 - **What props does CompassGauge accept?** → [modules/compass-gauge.md](modules/compass-gauge.md#props)
+- **How do the semicircle gauges work (Speed/Depth/Temp/Voltage)?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md)
+- **What differs between the 4 gauges (sectors, formatting, defaults)?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md#gauge-specific-differences)
+- **What props do the semicircle gauges receive?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md#props)
+- **What is duplicated across gauges (Phase 1 scope)?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md#duplicated-local-functions)
 
 ## Styling & Theming
 
