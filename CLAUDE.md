@@ -87,7 +87,7 @@ Task: Add new BarometerGauge
 
 ## 4. Mandatory File Headers
 
-Every JS module file MUST have:
+For **new or modified** JS module files (anything touched in a refactor), add a short header block at the top. Every JS module file MUST have:
 
 ```javascript
 /**
