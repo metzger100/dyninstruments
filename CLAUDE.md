@@ -40,6 +40,7 @@ documentation/
 │   ├── helpers.md                  # Helpers object (setupCanvas, resolveTextColor)
 │   └── css-theming.md              # CSS vars, day/night, font stack
 ├── modules/
+│   ├── semicircle-gauges.md        # Speed/Depth/Temperature/Voltage shared 
 │   ├── three-elements.md           # ThreeElements numeric renderer
 │   ├── wind-dial.md                # WindDial full-circle wind compass
 │   └── compass-gauge.md            # CompassGauge rotating compass card
