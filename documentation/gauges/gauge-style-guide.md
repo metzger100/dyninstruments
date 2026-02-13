@@ -165,4 +165,4 @@ When `props.disconnect === true` or value is invalid, `drawDisconnectOverlay()` 
 
 ## Related
 
-- [gauge-shared-api.md](gauge-shared-api.md) — GaugeUtils function reference (Phase 1)
+- [gauge-shared-api.md](gauge-shared-api.md) — InstrumentComponents documentation
