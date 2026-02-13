@@ -21,7 +21,6 @@ plugin.js (entry point)
 └── registerInstrument() — registers widgets with avnav.api
 
 modules/
-├── Shared/GaugeUtils.js        ← Phase 1 target (extract from gauge modules)
 ├── Cores/InstrumentComponents.js  — Drawing primitives for full-circle dials
 ├── ThreeElements/              — Caption/Value/Unit numeric renderer
 ├── ClusterHost/                — Dispatcher: kind → renderer routing
