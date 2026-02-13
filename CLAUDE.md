@@ -260,7 +260,6 @@ When adding new documentation:
 
 These issues exist in the current codebase and are being resolved incrementally:
 
-- **Vibecoding inconsistencies:** in plugin.js it sometimes uses `name` oder `displayName`.
 - **Massive duplication:** SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge share ~25 identical functions (~350 lines each). Also WindDial and CompassDial share 9 identical fucntions.
 - **Dead fallbacks:** `drawPointerAtRimFallback` exists in all 4 gauge files but never executes (IC is always loaded). Will be removed.
 - **plugin.js monolith:** 1310 lines; ~800 lines are inline editableParameters. Will be split into per-cluster config files.
