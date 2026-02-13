@@ -76,6 +76,7 @@ Task: Add new BarometerGauge
 - Shared drawing/layout code → `modules/Shared/GaugeUtils.js`
 - Gauge-specific code only in individual gauge module files
 - Cluster configs → separate files under `config/clusters/` (planned)
+- Target after refactoring. Current files exceed this
 
 ---
 
