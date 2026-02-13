@@ -161,6 +161,17 @@ ratio > thresholdFlat    →  "flat"   (gauge left, text right)
 else                     →  "normal" (text inside semicircle)
 ```
 
+### Other conventions
+
+Dont use optional Chaining (?.). Use &&-Guards instead
+
+Example:
+
+```
+const IC = Helpers.getModule('InstrumentComponents') 
+        && Helpers.getModule('InstrumentComponents').create();
+```
+
 ---
 
 ## 6. Token-Efficient Documentation Format
@@ -248,9 +259,11 @@ When adding new documentation:
 
 These issues exist in the current codebase and are being resolved incrementally:
 
-- **Massive duplication:** SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge share ~25 identical functions (~350 lines each).
+- **Vibecoding inconsistencies:** in plugin.js it sometimes uses `name` oder `displayName`. Wind-Cluster doesn't use `makePerKindTextParams(KIND_MAP)`.
+- **Massive duplication:** SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge share ~25 identical functions (~350 lines each). Also WindDial and CompassDial share 9 identical fucntions.
 - **Dead fallbacks:** `drawPointerAtRimFallback` exists in all 4 gauge files but never executes (IC is always loaded). Will be removed.
 - **plugin.js monolith:** 1310 lines; ~800 lines are inline editableParameters. Will be split into per-cluster config files.
+- **ClusterHost.js monolith:** 412 lines
 - **LEGACY array:** Always empty, `EXPOSE_LEGACY = false`. Will be removed.
 
 ---
