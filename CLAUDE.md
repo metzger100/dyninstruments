@@ -95,7 +95,6 @@ Example:
 ```javascript
 /**
  * Module: SpeedGauge — Semicircle speedometer with warning/alarm sectors
- * Documentation: documentation/gauges/semicircle-gauges.md
  * Style Guide: documentation/gauges/gauge-style-guide.md
  * Depends: GaugeUtils, InstrumentComponents (drawPointerAtRim only)
  */
