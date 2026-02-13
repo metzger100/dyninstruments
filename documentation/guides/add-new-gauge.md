@@ -244,17 +244,13 @@ In `ClusterHost.js`:
 
 ## Refactored Gauge Structure
 
-After Phase 1 (GaugeUtils extraction), the template simplifies significantly:
-
 ```javascript
 function create(def, Helpers) {
-  const GU = Helpers.getModule('GaugeUtils')?.create();
   const IC = Helpers.getModule('InstrumentComponents')?.create();
 
   function displayValueFromRaw(raw) { /* gauge-specific */ }
 
   function renderCanvas(canvas, props) {
-    // Use GU.* for all shared functions
     // Use IC.drawPointerAtRim for pointer
     // Only gauge-specific sector logic and value formatting remain here
   }
