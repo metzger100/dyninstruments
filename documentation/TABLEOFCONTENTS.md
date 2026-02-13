@@ -32,6 +32,18 @@
 - **Sector logic (warning/alarm placement)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#sector-logic)
 - **Shared drawing functions (InstrumentComponents)** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
 
+## Module Reference (Renderers)
+
+- **How does the numeric text renderer work (caption/value/unit)?** → [modules/three-elements.md](modules/three-elements.md)
+- **What layout modes does ThreeElements support?** → [modules/three-elements.md](modules/three-elements.md#layout-modes)
+- **What props does ThreeElements accept?** → [modules/three-elements.md](modules/three-elements.md#props)
+- **How does the wind dial work (angle+speed dual display)?** → [modules/wind-dial.md](modules/wind-dial.md)
+- **What IC functions does WindDial use?** → [modules/wind-dial.md](modules/wind-dial.md#dial-drawing-via-ic)
+- **What props does WindDial accept?** → [modules/wind-dial.md](modules/wind-dial.md#props)
+- **How does the rotating compass card work?** → [modules/compass-gauge.md](modules/compass-gauge.md)
+- **How does compass rotation with upright labels work?** → [modules/compass-gauge.md](modules/compass-gauge.md#compass-dial-drawing-via-ic)
+- **What props does CompassGauge accept?** → [modules/compass-gauge.md](modules/compass-gauge.md#props)
+
 ## Styling & Theming
 
 - **CSS variables, day/night mode** → [shared/css-theming.md](shared/css-theming.md)
