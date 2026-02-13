@@ -30,7 +30,7 @@
 - **Visual style: proportions, colors, pointer config** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md)
 - **Layout modes (flat/normal/high)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#layout-modes)
 - **Sector logic (warning/alarm placement)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#sector-logic)
-- **Shared drawing functions (GaugeUtils)** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
+- **Shared drawing functions (InstrumentComponents)** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
 
 ## Styling & Theming
 
@@ -40,7 +40,7 @@
 
 ## Refactoring Tasks
 
-- **Phase 1: Extract GaugeUtils (eliminate duplication)** → [guides/add-new-gauge.md](guides/add-new-gauge.md), [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
+- **Phase 1: Refactoring of Gauges and InstrumentComponents (eliminate duplication)** → [guides/add-new-gauge.md](guides/add-new-gauge.md), [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
 - **What functions are duplicated across gauges?** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
 - **How should the refactored gauge structure look?** → [guides/add-new-gauge.md](guides/add-new-gauge.md#refactored-gauge-structure)
 
