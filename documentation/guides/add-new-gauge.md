@@ -38,10 +38,7 @@
       return { num: n, text: n.toFixed(1) };
     }
 
-    // === SHARED FUNCTIONS (currently duplicated, Phase 1 → GaugeUtils) ===
-    // After Phase 1 refactoring, replace these with:
-    //   const GU = Helpers.getModule('GaugeUtils')?.create();
-    // and call GU.setFont(), GU.clamp(), etc.
+    // === SHARED FUNCTIONS (currently duplicated) ===
 
     function setFont(ctx, px, bold, family) { ctx.font = (bold ? '700 ' : '400 ') + px + 'px ' + family; }
     function clamp(n, lo, hi) { n = Number(n); if (!isFinite(n)) return lo; return Math.max(lo, Math.min(hi, n)); }
