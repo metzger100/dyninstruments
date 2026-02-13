@@ -8,11 +8,19 @@ editableParameters define the widget configuration UI in AvNav's Layout Editor. 
 
 ## Parameter Definition
 
-Each parameter is an object with the key being the parameter name (used both as editor label and property name in render functions):
+editableParameters is an object of parameter specs.
+
+- The **object key** is the **property name** that appears in renderHtml/renderCanvas props (e.g. `minValue`, `speedRatioThresholdFlat`).
+- The **editor label** is controlled by the spec field `name` (used widely in plugin.js) or `displayName` (used by dyninstruments helper `makePerKindTextParams`).
+- If neither `name` nor `displayName` is set, AvNav may fall back to showing the key.
 
 ```javascript
 {
-  paramName: { type: "...", default: ..., ... }
+  // key = prop name in render props
+  minValue: { type: "FLOAT", min: 0, max: 200, step: 0.5, default: 0, name: "Min value" },
+
+  // dyninstruments legacy helper uses displayName
+  caption_sog: { type: "STRING", default: "SOG", displayName: "Caption", condition: { kind: "sog" } }
 }
 ```
 
