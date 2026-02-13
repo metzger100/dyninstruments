@@ -1,6 +1,6 @@
 # dyninstruments — Modern Instrument Widgets for AvNav
 
-**Status:** ✅ Functional | Pre-refactoring (Phase 1 pending: GaugeUtils extraction)
+**Status:** ✅ Functional | Pre-refactoring
 
 ## Stack
 
