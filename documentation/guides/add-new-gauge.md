@@ -14,7 +14,6 @@
 ```javascript
 /**
  * Module: NewGauge — Semicircle [description]
- * Documentation: documentation/gauges/semicircle-gauges.md
  * Style Guide: documentation/gauges/gauge-style-guide.md
  * Depends: GaugeUtils, InstrumentComponents (drawPointerAtRim only)
  */
