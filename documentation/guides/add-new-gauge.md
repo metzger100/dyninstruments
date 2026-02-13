@@ -15,7 +15,7 @@
 /**
  * Module: NewGauge — Semicircle [description]
  * Style Guide: documentation/gauges/gauge-style-guide.md
- * Depends: GaugeUtils, InstrumentComponents (drawPointerAtRim only)
+ * Depends: InstrumentComponents (drawPointerAtRim only)
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
