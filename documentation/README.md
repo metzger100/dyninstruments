@@ -30,6 +30,16 @@ modules/
 ├── DepthGauge/                 — Semicircle depth meter
 ├── TemperatureGauge/           — Semicircle thermometer
 └── VoltageGauge/               — Semicircle voltmeter
+
+documentation/
+├── TABLEOFCONTENTS.md
+├── README.md
+├── avnav-api/                  — AvNav plugin API reference
+├── architecture/               — Module system, cluster system
+├── gauges/                     — Gauge style guide, IC API
+├── modules/                    — ThreeElements, WindDial, CompassGauge docs
+├── shared/                     — Helpers, CSS theming
+└── guides/                     — Step-by-step guides
 ```
 
 ## Widget Types
@@ -76,6 +86,8 @@ User selects "kind" in AvNav editor
 **Gauges:** [gauge-style-guide.md](gauges/gauge-style-guide.md), [gauge-shared-api.md](gauges/gauge-shared-api.md)
 
 **Shared:** [helpers.md](shared/helpers.md), [css-theming.md](shared/css-theming.md)
+
+**Modules:** [three-elements.md](modules/three-elements.md), [wind-dial.md](modules/wind-dial.md), [compass-gauge.md](modules/compass-gauge.md)
 
 **Guides:** [add-new-gauge.md](guides/add-new-gauge.md), [add-new-cluster.md](guides/add-new-cluster.md)
 
