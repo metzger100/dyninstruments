@@ -82,8 +82,6 @@ const IC = Helpers.getModule('InstrumentComponents');
 
 **Available module IDs:** `InstrumentComponents`, `ThreeElements`, `WindDial`, `CompassGauge`, `SpeedGauge`, `DepthGauge`, `TemperatureGauge`, `VoltageGauge`, `ClusterHost`
 
-**After Phase 1:** Also `GaugeUtils`
-
 ## Helper Not in Helpers Object
 
 `defaultsFromEditableParams(editableParams)` — builds default values from typed editableParameters. Used internally by plugin.js during registration, not exposed to modules.
