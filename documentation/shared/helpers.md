@@ -88,7 +88,7 @@ const IC = Helpers.getModule('InstrumentComponents');
 
 ## File Location
 
-Defined in `plugin.js`, lines ~56-130.
+Defined in `plugin.js`.
 
 ## Related
 
