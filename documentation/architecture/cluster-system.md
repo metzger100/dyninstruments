@@ -96,6 +96,21 @@ const unit = (k) => p['unit_' + k];
 // Then: out(value, cap(effKind), unit(effKind), formatter, params)
 ```
 
+## Numeric Output Helper
+
+`out(v, cap, unit, formatter, formatterParameters)` builds the props object for ThreeElements:
+
+| Param | Type | Description |
+|---|---|---|
+| `v` | any | Raw store value |
+| `cap` | string | Caption from `p['caption_' + kind]` |
+| `unit` | string | Unit from `p['unit_' + kind]` |
+| `formatter` | string/fn | Formatter name or function |
+| `formatterParameters` | array | Params passed to formatter |
+
+Returns object with only defined fields set (undefined values are omitted).
+Used by all numeric kind dispatch cases.
+
 ## Adding a New Renderer to ClusterHost
 
 To add a new graphic renderer (e.g. BarometerGauge):
@@ -105,6 +120,26 @@ To add a new graphic renderer (e.g. BarometerGauge):
 3. In `translateFunction()`: add dispatch case for the cluster/kind
 4. In `pickRenderer()`: add `if (props.renderer === 'BarometerGauge') return baroSpec;`
 5. Include in `wantsHide` and `finalizeFunction` arrays
+
+### Graphic Kind Props Mapping Example (DepthGauge)
+
+editableParameter names → translateFunction output props:
+
+| editableParameter | Gauge Prop | Notes |
+|---|---|---|
+| `depthMinValue` | `minValue` | `Number(p.depthMinValue)` |
+| `depthMaxValue` | `maxValue` | `Number(p.depthMaxValue)` |
+| `depthTickMajor` | `tickMajor` | |
+| `depthTickMinor` | `tickMinor` | |
+| `depthShowEndLabels` | `showEndLabels` | `!!p.depthShowEndLabels` |
+| `depthWarningFrom` | `warningFrom` | Only if `depthWarningEnabled !== false` |
+| `depthAlarmFrom` | `alarmFrom` | Only if `depthAlarmEnabled !== false` |
+| `depthRatioThresholdNormal` | `depthRatioThresholdNormal` | Passed through 1:1 |
+| `depthRatioThresholdFlat` | `depthRatioThresholdFlat` | Passed through 1:1 |
+| `captionUnitScale` | `captionUnitScale` | Shared across all gauges |
+
+Pattern: Gauge-prefixed editableParameter → generic prop name.
+Enabled/disabled flags gate whether threshold values are passed or `undefined`.
 
 ## File Location
 
