@@ -1,6 +1,6 @@
 # Cluster System
 
-**Status:** ✅ Implemented | ClusterHost.js (412 lines)
+**Status:** ✅ Implemented | ClusterHost.js
 
 ## Overview
 
@@ -109,7 +109,7 @@ To add a new graphic renderer (e.g. BarometerGauge):
 ## File Location
 
 - **ClusterHost:** `modules/ClusterHost/ClusterHost.js`
-- **Cluster definitions:** `plugin.js` (CLUSTERS array, lines ~297-1178)
+- **Cluster definitions:** `plugin.js` (CLUSTERS array)
 
 ## Related
 
