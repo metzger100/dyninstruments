@@ -39,6 +39,10 @@ documentation/
 ├── shared/
 │   ├── helpers.md                  # Helpers object (setupCanvas, resolveTextColor)
 │   └── css-theming.md              # CSS vars, day/night, font stack
+├── modules/
+│   ├── three-elements.md           # ThreeElements numeric renderer
+│   ├── wind-dial.md                # WindDial full-circle wind compass
+│   └── compass-gauge.md            # CompassGauge rotating compass card
 └── guides/
     ├── add-new-gauge.md            # Step-by-step: create a new gauge
     └── add-new-cluster.md          # Step-by-step: create a new cluster widget
