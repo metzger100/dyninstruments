@@ -35,7 +35,7 @@ documentation/
 │   └── cluster-system.md           # ClusterHost, kind→renderer routing
 ├── gauges/
 │   ├── gauge-style-guide.md        # Proportions, colors, pointer, layout modes
-│   └── gauge-shared-api.md         # GaugeUtils.js function reference (Phase 1)
+│   └── gauge-shared-api.md         # InstrumentComponents documentation
 ├── shared/
 │   ├── helpers.md                  # Helpers object (setupCanvas, resolveTextColor)
 │   └── css-theming.md              # CSS vars, day/night, font stack
@@ -73,7 +73,7 @@ Task: Add new BarometerGauge
 ## 3. File Size Limits
 
 - **Max 300 lines per JS file**
-- Shared drawing/layout code → `modules/Shared/GaugeUtils.js`
+- Shared drawing/layout code → `modules/Cores/InstrumentComponents.js`
 - Gauge-specific code only in individual gauge module files
 - Cluster configs → separate files under `config/clusters/` (planned)
 - Target after refactoring. Current files exceed this
@@ -97,7 +97,7 @@ Example:
 /**
  * Module: SpeedGauge — Semicircle speedometer with warning/alarm sectors
  * Style Guide: documentation/gauges/gauge-style-guide.md
- * Depends: GaugeUtils, InstrumentComponents (drawPointerAtRim only)
+ * Depends: InstrumentComponents (drawPointerAtRim only)
  */
 ```
 
@@ -244,7 +244,7 @@ When adding new documentation:
 
 These issues exist in the current codebase and are being resolved incrementally:
 
-- **Massive duplication:** SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge share ~25 identical functions (~350 lines each). Phase 1 extracts these into GaugeUtils.js.
+- **Massive duplication:** SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge share ~25 identical functions (~350 lines each).
 - **Dead fallbacks:** `drawPointerAtRimFallback` exists in all 4 gauge files but never executes (IC is always loaded). Will be removed.
 - **plugin.js monolith:** 1310 lines; ~800 lines are inline editableParameters. Will be split into per-cluster config files.
 - **LEGACY array:** Always empty, `EXPOSE_LEGACY = false`. Will be removed.
