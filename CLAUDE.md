@@ -162,17 +162,6 @@ ratio > thresholdFlat    →  "flat"   (gauge left, text right)
 else                     →  "normal" (text inside semicircle)
 ```
 
-### Other conventions
-
-Dont use optional Chaining (?.). Use &&-Guards instead
-
-Example:
-
-```
-const IC = Helpers.getModule('InstrumentComponents') 
-        && Helpers.getModule('InstrumentComponents').create();
-```
-
 ---
 
 ## 6. Token-Efficient Documentation Format
