@@ -56,7 +56,7 @@
 
 ## Refactoring Tasks
 
-- **Phase 1: Refactoring of Gauges and InstrumentComponents (eliminate duplication)** → [guides/add-new-gauge.md](guides/add-new-gauge.md), [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
+- **Phase 1: Refactoring of Gauges and InstrumentComponents (eliminate duplication)** → [guides/add-new-gauge.md](guides/add-new-gauge.md), [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md), [modules/semicircle-gauges.md](modules/semicircle-gauges.md#duplicated-local-functions)
 - **What functions are duplicated across gauges?** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
 - **How should the refactored gauge structure look?** → [guides/add-new-gauge.md](guides/add-new-gauge.md#refactored-gauge-structure)
 
