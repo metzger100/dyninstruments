@@ -102,7 +102,7 @@ Sectors are colored arc segments painted on the ring. Each gauge type has a diff
 
 ```javascript
 const angles = sectorAngles(fromValue, toValue, minV, maxV, arc);
-// Returns { a0: startAngleRad, a1: endAngleRad }
+// Returns { a0: startAngleRad, a1: endAngleRad } in Degrees
 drawAnnularSector(ctx, cx, cy, rOuter, ringW, angles.a0, angles.a1, "#e7c66a");
 ```
 
