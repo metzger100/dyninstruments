@@ -82,7 +82,7 @@ User selects "kind" in AvNav editor
 ## Refactoring Phases
 
 - ✅ Phase 0: Documentation system (this)
-- ⏳ Phase 1: Extract GaugeUtils.js (eliminate ~1400 lines duplication)
+- ❌ Phase 1: Rework InstrumentComponents and refactor the gauge widgets to reduce the code duplication
 - ❌ Phase 2: Split plugin.js into per-cluster config files
 - ❌ Phase 3: Inline comments + file headers
 - ❌ Phase 4: Remove dead code, naming cleanup
