@@ -10,11 +10,11 @@
 
 ## Phase 1 Dependency
 
-This guide targets ~150–200 line gauges using shared drawing/layout from GaugeUtils (refactored InstrumentComponents). The template will be added here once Phase 1 is complete and the following functions are available in IC/GaugeUtils:
+This guide targets compact gauges using shared drawing/layout from GaugeUtils (refactored InstrumentComponents). The template will be added here once Phase 1 is complete and the following functions are available in IC/GaugeUtils:
 
 | Category | Functions Needed | Current Location |
 |---|---|---|
-| Text layout | `fitTextPx`, `measureValueUnitFit`, `drawValueUnitWithFit`, `drawCaptionMax`, `fitInlineCapValUnit`, `drawThreeRowsBlock` | Duplicated in each gauge (~350 lines per gauge) |
+| Text layout | `fitTextPx`, `measureValueUnitFit`, `drawValueUnitWithFit`, `drawCaptionMax`, `fitInlineCapValUnit`, `drawThreeRowsBlock` | Duplicated in each gauge |
 | Overlay | `drawDisconnectOverlay` | Duplicated in each gauge |
 | Arc drawing | `drawArcRing`, `drawAnnularSector`, `drawTicks`, `drawLabels` | ✅ Already in IC (opts-object API) |
 | Pointer | `drawPointerAtRim` | ✅ Already in IC |
@@ -26,7 +26,7 @@ This guide targets ~150–200 line gauges using shared drawing/layout from Gauge
 
 ### Step 1: Create the Gauge Module
 
-**File:** `modules/NewGauge/NewGauge.js` (target: 150–200 lines)
+**File:** `modules/NewGauge/NewGauge.js` (target: compact module)
 
 Structure:
 1. UMD wrapper (see [module-system.md](../architecture/module-system.md#umd-module-template))

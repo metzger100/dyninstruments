@@ -1,5 +1,7 @@
 # Guide: Create a New Cluster Widget
 
+**Status:** ✅ Reference Guide | Cluster creation workflow for ClusterHost
+
 **Prerequisites:** Read first:
 - [avnav-api/editable-parameters.md](../avnav-api/editable-parameters.md) — Parameter types and conditions
 - [architecture/cluster-system.md](../architecture/cluster-system.md) — ClusterHost dispatch

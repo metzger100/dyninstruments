@@ -1,6 +1,6 @@
 # WindDial Module
 
-**Status:** ✅ Implemented | `modules/WindDial/WindDial.js` (456 lines)
+**Status:** ✅ Implemented | `modules/WindDial/WindDial.js`
 
 ## Overview
 

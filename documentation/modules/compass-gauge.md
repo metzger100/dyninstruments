@@ -1,6 +1,6 @@
 # CompassGauge Module
 
-**Status:** ✅ Implemented | `modules/CompassGauge/CompassGauge.js` (404 lines)
+**Status:** ✅ Implemented | `modules/CompassGauge/CompassGauge.js`
 
 ## Overview
 

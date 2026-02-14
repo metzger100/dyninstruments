@@ -1,19 +1,19 @@
 # Semicircle Gauges (Speed / Depth / Temperature / Voltage)
 
-**Status:** ✅ Implemented | 4 files, ~650–670 lines each (pre-refactoring)
+**Status:** ✅ Implemented | 4 files (pre-refactoring)
 
 ## Overview
 
-Four nearly identical N-shaped semicircle gauge renderers. Share ~25 duplicated local functions (~350 lines each). Only value formatting, sector strategy, default ranges, and prop names differ. All visual style, proportions, layout logic, and drawing code are identical across gauges.
+Four nearly identical N-shaped semicircle gauge renderers. They share many duplicated local functions. Only value formatting, sector strategy, default ranges, and prop names differ. All visual style, proportions, layout logic, and drawing code are identical across gauges.
 
 ## File Locations
 
-| Module | File | Lines | globalKey |
-|---|---|---|---|
-| SpeedGauge | `modules/SpeedGauge/SpeedGauge.js` | 659 | `DyniSpeedGauge` |
-| DepthGauge | `modules/DepthGauge/DepthGauge.js` | 653 | `DyniDepthGauge` |
-| TemperatureGauge | `modules/TemperatureGauge/TemperatureGauge.js` | 668 | `DyniTemperatureGauge` |
-| VoltageGauge | `modules/VoltageGauge/VoltageGauge.js` | 669 | `DyniVoltageGauge` |
+| Module | File | globalKey |
+|---|---|---|
+| SpeedGauge | `modules/SpeedGauge/SpeedGauge.js` | `DyniSpeedGauge` |
+| DepthGauge | `modules/DepthGauge/DepthGauge.js` | `DyniDepthGauge` |
+| TemperatureGauge | `modules/TemperatureGauge/TemperatureGauge.js` | `DyniTemperatureGauge` |
+| VoltageGauge | `modules/VoltageGauge/VoltageGauge.js` | `DyniVoltageGauge` |
 
 No CSS files. All rendering via Canvas 2D.
 
@@ -190,7 +190,7 @@ ClusterHost always sets `value`, so the fallback is effectively dead code.
 
 ## Phase 1 Refactoring Target
 
-The 22 duplicated functions will be consolidated into GaugeUtils (refactored InstrumentComponents). After refactoring, each gauge should be ~150–200 lines containing only:
+The duplicated functions will be consolidated into GaugeUtils (refactored InstrumentComponents). After refactoring, each gauge should be a compact module containing only:
 
 1. `display*FromRaw()` — gauge-specific value formatting
 2. `renderCanvas()` — calling GaugeUtils for all drawing/layout
