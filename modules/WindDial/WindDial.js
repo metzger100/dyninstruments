@@ -29,12 +29,10 @@
       ? gaugeUtilsModule.create(def, Helpers)
       : null;
     const draw = GU && GU.draw;
+    const T = GU && GU.text;
+    const V = GU && GU.value;
 
     // --------- util ----------------------------------------------------------
-    function setFont(ctx, px, bold, family){ ctx.font = (bold ? '700 ' : '400 ') + px + 'px ' + family; }
-    function clamp(n, lo, hi){ n = Number(n); if (!isFinite(n)) return lo; return Math.max(lo, Math.min(hi, n)); }
-    function isFiniteN(n){ return typeof n === 'number' && isFinite(n); }
-
     function formatAngle180(v, leadingZero){
       const n = Number(v); if (!isFinite(n)) return '---';
       let a = ((n + 180) % 360 + 360) % 360 - 180; if (a === 180) a = -180;
@@ -52,98 +50,6 @@
       return n.toFixed(1) + ' ' + (unit || 'kn');
     }
 
-    function fitTextPx(ctx, text, maxW, maxH, family, bold){
-      if (!text) return Math.max(6, Math.floor(maxH));
-      let px = Math.max(6, Math.floor(maxH));
-      setFont(ctx, px, !!bold, family);
-      const w = ctx.measureText(text).width;
-      if (w <= maxW + 0.1) return px;
-      const scale = Math.max(0.1, maxW / Math.max(1, w));
-      px = Math.floor(px * scale);
-      return Math.max(6, Math.min(px, Math.floor(maxH)));
-    }
-
-    // --------- Flat-mode helpers: measure & draw with precedence -------------
-    function measureValueUnitFit(ctx, family, value, unit, w, h, secScale){
-      if (!value) return { vPx: 0, uPx: 0, gap: 0, total: 0 };
-      let lo = 6, hi = Math.max(8, Math.floor(h));
-      let best = { vPx: 6, uPx: 6, gap: 6, total: 0 };
-      function totalWidth(vp){
-        vp = Math.min(vp, h);
-        const up = Math.min(Math.floor(Math.max(6, vp * secScale)), h);
-        setFont(ctx, vp, true, family); const vW = ctx.measureText(value).width;
-        setFont(ctx, up, true, family); const uW = unit ? ctx.measureText(unit).width : 0;
-        const g = unit ? Math.max(6, Math.floor(vp * 0.25)) : 0;
-        return { w: vW + (unit ? (g + uW) : 0), up, gap: g };
-      }
-      for (let i=0;i<18;i++){
-        const mid = (lo + hi) / 2;
-        const test = totalWidth(Math.floor(mid));
-        const okW = test.w <= w + 0.5;
-        if (okW){ best = { vPx: Math.min(Math.floor(mid), h), uPx: test.up, gap: test.gap, total: test.w }; lo = mid; }
-        else hi = mid;
-      }
-      return best;
-    }
-
-    function drawValueUnitWithFit(ctx, family, x, y, w, h, align, value, unit, fit){
-      if (w <= 0 || h <= 0 || !value) return;
-      const vPx = fit.vPx, uPx = fit.uPx, gap = fit.gap;
-      setFont(ctx, vPx, true, family);
-      const vW = ctx.measureText(value).width;
-      setFont(ctx, uPx, true, family);
-      const uW = unit ? ctx.measureText(unit).width : 0;
-      const total = vW + (unit ? (gap + uW) : 0);
-
-      let xStart = (align === 'left') ? x : (x + w - total);
-      const yVal = y + Math.floor((h - vPx) * 0.5);
-
-      ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-      setFont(ctx, vPx, true, family);
-      ctx.fillText(value, xStart, yVal);
-      if (unit){
-        setFont(ctx, uPx, true, family);
-        ctx.fillText(unit, xStart + vW + gap, yVal + Math.max(0, Math.floor(vPx*0.08)));
-      }
-    }
-
-    function drawCaptionMax(ctx, family, x, y, w, h, align, caption, capMaxPx){
-      if (w <= 0 || h <= 0 || !caption) return;
-      let cPx = fitTextPx(ctx, caption, w, h, family, true);
-      if (isFinite(capMaxPx)) cPx = Math.min(cPx, capMaxPx);
-      setFont(ctx, cPx, true, family);
-      ctx.textBaseline = 'top';
-      if (align === 'left'){ ctx.textAlign = 'left'; ctx.fillText(caption, x, y); }
-      else { ctx.textAlign = 'right'; ctx.fillText(caption, x + w, y); }
-    }
-
-    // Draw three stacked rows with shared font sizes (Normal mode helper)
-    function drawThreeRowsBlock(ctx, family, x, y, w, h, align, caption, value, unit, sizes){
-      const { cPx, vPx, uPx, hCap, hVal, hUnit } = sizes;
-      const yCap  = y;
-      const yVal  = y + hCap;
-      const yUnit = y + hCap + hVal;
-
-      if (caption){
-        setFont(ctx, cPx, true, family);
-        ctx.textAlign = align; ctx.textBaseline = 'top';
-        const xCap = (align === 'left') ? x : (align === 'right' ? x + w : x + Math.floor(w/2));
-        ctx.fillText(caption, xCap, yCap);
-      }
-      if (value){
-        setFont(ctx, vPx, true, family);
-        ctx.textAlign = align; ctx.textBaseline = 'top';
-        const xVal = (align === 'left') ? x : (align === 'right' ? x + w : x + Math.floor(w/2));
-        ctx.fillText(value, xVal, yVal);
-      }
-      if (unit){
-        setFont(ctx, uPx, true, family);
-        ctx.textAlign = align; ctx.textBaseline = 'top';
-        const xUnit = (align === 'left') ? x : (align === 'right' ? x + w : x + Math.floor(w/2));
-        ctx.fillText(unit, xUnit, yUnit);
-      }
-    }
-
     function renderCanvas(canvas, props){
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
       if (!W || !H) return;
@@ -152,6 +58,7 @@
       const family = Helpers.resolveFontFamily(canvas);
       const color  = Helpers.resolveTextColor(canvas);
       ctx.fillStyle = color; ctx.strokeStyle = color;
+      if (!T || !V) return;
 
       // Mode thresholds (owned by WindDial)
       const ratio = W / Math.max(1, H);
@@ -209,8 +116,8 @@
 
       // Laylines (symmetric)
       const layEnabled = (props.layEnabled !== false);
-      const layMin = clamp(props.layMin, 0, 180);
-      const layMax = clamp(props.layMax, 0, 180);
+      const layMin = V.clamp(props.layMin, 0, 180);
+      const layMax = V.clamp(props.layMax, 0, 180);
 
       // Dial frame & sectors first
       ctx.save();
@@ -238,7 +145,7 @@
         }
 
         // red wind pointer (tip outward) BEFORE labels so labels stay on top
-        if (isFiniteN(props.angle)) {
+        if (V.isFiniteNumber(props.angle)) {
           draw.drawPointerAtRim(ctx, cx, cy, rOuter, props.angle, {
             depth: needleDepth,
             color: "#ff2b2b",
@@ -278,7 +185,7 @@
 
       ctx.restore();
 
-      const secScale  = clamp(props.captionUnitScale ?? 0.8, 0.3, 3.0);
+      const secScale  = V.clamp(props.captionUnitScale ?? 0.8, 0.3, 3.0);
       const angleUnit = (props.angleUnit || '°').trim();
       const speedUnit = (props.speedUnit || 'kn').trim();
       const angleText = formatAngle180(props.angle, !!props.leadingZero);
@@ -289,14 +196,14 @@
       // -------- FLAT MODE: maximize side boxes with explicit measure/draw ----
       if (mode === 'flat'){
         if (g.leftBottom && g.leftTop){
-          const fitL = measureValueUnitFit(ctx, family, angleText, angleUnit, g.leftBottom.w, g.leftBottom.h, secScale);
-          drawCaptionMax(ctx, family, g.leftTop.x, g.leftTop.y, g.leftTop.w, g.leftTop.h, 'left', angleCap, Math.floor(fitL.vPx * secScale));
-          drawValueUnitWithFit(ctx, family, g.leftBottom.x, g.leftBottom.y, g.leftBottom.w, g.leftBottom.h, 'left', angleText, angleUnit, fitL);
+          const fitL = T.measureValueUnitFit(ctx, family, angleText, angleUnit, g.leftBottom.w, g.leftBottom.h, secScale);
+          T.drawCaptionMax(ctx, family, g.leftTop.x, g.leftTop.y, g.leftTop.w, g.leftTop.h, angleCap, Math.floor(fitL.vPx * secScale), "left");
+          T.drawValueUnitWithFit(ctx, family, g.leftBottom.x, g.leftBottom.y, g.leftBottom.w, g.leftBottom.h, angleText, angleUnit, fitL, "left");
         }
         if (g.rightBottom && g.rightTop){
-          const fitR = measureValueUnitFit(ctx, family, speedText, speedUnit, g.rightBottom.w, g.rightBottom.h, secScale);
-          drawCaptionMax(ctx, family, g.rightTop.x, g.rightTop.y, g.rightTop.w, g.rightTop.h, 'right', speedCap, Math.floor(fitR.vPx * secScale));
-          drawValueUnitWithFit(ctx, family, g.rightBottom.x, g.rightBottom.y, g.rightBottom.w, g.rightBottom.h, 'right', speedText, speedUnit, fitR);
+          const fitR = T.measureValueUnitFit(ctx, family, speedText, speedUnit, g.rightBottom.w, g.rightBottom.h, secScale);
+          T.drawCaptionMax(ctx, family, g.rightTop.x, g.rightTop.y, g.rightTop.w, g.rightTop.h, speedCap, Math.floor(fitR.vPx * secScale), "right");
+          T.drawValueUnitWithFit(ctx, family, g.rightBottom.x, g.rightBottom.y, g.rightBottom.w, g.rightBottom.h, speedText, speedUnit, fitR, "right");
         }
         return;
       }
@@ -306,60 +213,14 @@
         const capTop = angleCap, valTop = angleText, uniTop = angleUnit;
         const capBot = speedCap, valBot = speedText, uniBot = speedUnit;
 
-        function fitInlineCapValUnit(ctx, cap, val, uni, maxW, maxH, secScale, family){
-          if (!val) return { cPx: 0, vPx: 0, uPx: 0, g1: 0, g2: 0 };
-          let lo = 6, hi = Math.max(8, Math.floor(maxH)), best = { cPx: 6, vPx: 6, uPx: 6, g1: 6, g2: 6 };
-          function widthFor(vp){
-            const cp = Math.floor(Math.max(6, vp * secScale));
-            const up = Math.floor(Math.max(6, vp * secScale));
-            const g  = Math.max(6, Math.floor(vp * 0.25));
-            setFont(ctx, cp, true, family); const cW = cap ? ctx.measureText(cap).width : 0;
-            setFont(ctx, vp, true, family); const vW = val ? ctx.measureText(val).width : 0;
-            setFont(ctx, up, true, family); const uW = uni ? ctx.measureText(uni).width : 0;
-            const g1 = cap ? g : 0, g2 = uni ? g : 0;
-            return { cp, vp, up, width: cW + (cap?g1:0) + vW + (uni?g2:0) + (uni?uW:0), g1, g2 };
-          }
-          for (let i=0;i<16;i++){
-            const mid = (lo + hi) / 2;
-            const test = widthFor(Math.floor(mid));
-            const okW = test.width <= maxW + 0.5;
-            const okH = test.vp <= maxH && test.cp <= maxH && test.up <= maxH;
-            if (okW && okH){ best = { cPx: test.cp, vPx: test.vp, uPx: test.up, g1: test.g1, g2: test.g2 }; lo = mid; }
-            else { hi = mid; }
-          }
-          return best;
+        if (g.top) {
+          const fitTop = T.fitInlineCapValUnit(ctx, family, capTop, valTop, uniTop, g.top.w, g.top.h, secScale);
+          T.drawInlineCapValUnit(ctx, family, g.top.x, g.top.y, g.top.w, g.top.h, capTop, valTop, uniTop, fitTop);
         }
-
-        function drawInline(x, y, w, h, cap, val, uni){
-          const fit = fitInlineCapValUnit(ctx, cap, val, uni, w, h, secScale, family);
-          const total = (() => {
-            setFont(ctx, fit.cPx, true, family); const cW = cap ? ctx.measureText(cap).width : 0;
-            setFont(ctx, fit.vPx, true, family); const vW = val ? ctx.measureText(val).width : 0;
-            setFont(ctx, fit.uPx, true, family); const uW = uni ? ctx.measureText(uni).width : 0;
-            return cW + (cap?fit.g1:0) + vW + (uni?fit.g2:0) + (uni?uW:0);
-          })();
-          let xStart = x + Math.floor((w - total)/2);
-          const yMid = y + Math.floor(h/2);
-
-          ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-
-          if (cap){
-            setFont(ctx, fit.cPx, true, family);
-            ctx.fillText(cap, xStart, yMid);
-            xStart += Math.floor(ctx.measureText(cap).width + fit.g1);
-          }
-          setFont(ctx, fit.vPx, true, family);
-          ctx.fillText(val, xStart, yMid);
-          xStart += Math.floor(ctx.measureText(val).width);
-          if (uni){
-            xStart += fit.g2;
-            setFont(ctx, fit.uPx, true, family);
-            ctx.fillText(uni, xStart, yMid);
-          }
+        if (g.bottom) {
+          const fitBottom = T.fitInlineCapValUnit(ctx, family, capBot, valBot, uniBot, g.bottom.w, g.bottom.h, secScale);
+          T.drawInlineCapValUnit(ctx, family, g.bottom.x, g.bottom.y, g.bottom.w, g.bottom.h, capBot, valBot, uniBot, fitBottom);
         }
-
-        if (g.top)    drawInline(g.top.x,    g.top.y,    g.top.w,    g.top.h,    capTop, valTop, uniTop);
-        if (g.bottom) drawInline(g.bottom.x, g.bottom.y, g.bottom.w, g.bottom.h, capBot, valBot, uniBot);
         return;
       }
 
@@ -379,16 +240,16 @@
           const hc     = Math.floor(hv * secScale);
           const hu     = Math.floor(hv * secScale);
 
-          const vPxA = fitTextPx(ctx, angleText, halfW, hv, family, true);
-          const vPxS = fitTextPx(ctx, speedText, halfW, hv, family, true);
+          const vPxA = T.fitTextPx(ctx, angleText, halfW, hv, family, true);
+          const vPxS = T.fitTextPx(ctx, speedText, halfW, hv, family, true);
           const vPx  = Math.min(vPxA, vPxS);
-          const cPx  = Math.min(fitTextPx(ctx, angleCap, halfW, hc, family, true),
-                                fitTextPx(ctx, speedCap, halfW, hc, family, true));
-          const uPx  = Math.min(fitTextPx(ctx, angleUnit, halfW, hu, family, true),
-                                fitTextPx(ctx, speedUnit, halfW, hu, family, true));
+          const cPx  = Math.min(T.fitTextPx(ctx, angleCap, halfW, hc, family, true),
+                                T.fitTextPx(ctx, speedCap, halfW, hc, family, true));
+          const uPx  = Math.min(T.fitTextPx(ctx, angleUnit, halfW, hu, family, true),
+                                T.fitTextPx(ctx, speedUnit, halfW, hu, family, true));
           const sizes = { cPx, vPx, uPx, hCap: hc, hVal: hv, hUnit: hu };
-          drawThreeRowsBlock(ctx, family, xL, yTop, halfW, maxH, 'right', angleCap, angleText, angleUnit, sizes);
-          drawThreeRowsBlock(ctx, family, xR, yTop, halfW, maxH, 'left',  speedCap, speedText, speedUnit, sizes);
+          T.drawThreeRowsBlock(ctx, family, xL, yTop, halfW, maxH, angleCap, angleText, angleUnit, secScale, "right", sizes);
+          T.drawThreeRowsBlock(ctx, family, xR, yTop, halfW, maxH, speedCap, speedText, speedUnit, secScale, "left", sizes);
           return;
         }
 
@@ -407,8 +268,8 @@
           if (halfWMax <= 10) continue;
 
           const hv = Math.max(12, Math.floor(mh / (1 + 2*secScale)));
-          const vPxA = fitTextPx(ctx, angleText, halfWMax, hv, family, true);
-          const vPxS = fitTextPx(ctx, speedText, halfWMax, hv, family, true);
+          const vPxA = T.fitTextPx(ctx, angleText, halfWMax, hv, family, true);
+          const vPxS = T.fitTextPx(ctx, speedText, halfWMax, hv, family, true);
           const vPx  = Math.min(vPxA, vPxS);
 
           const score = vPx * 10000 + halfWMax * 10 + mh;
@@ -423,13 +284,13 @@
         const hc     = Math.floor(hv * secScale);
         const hu     = Math.floor(hv * secScale);
 
-        const cPx  = Math.min(fitTextPx(ctx, angleCap,  halfW, hc, family, true),
-                              fitTextPx(ctx, speedCap,  halfW, hc, family, true));
-        const uPx  = Math.min(fitTextPx(ctx, angleUnit, halfW, hu, family, true),
-                              fitTextPx(ctx, speedUnit, halfW, hu, family, true));
+        const cPx  = Math.min(T.fitTextPx(ctx, angleCap,  halfW, hc, family, true),
+                              T.fitTextPx(ctx, speedCap,  halfW, hc, family, true));
+        const uPx  = Math.min(T.fitTextPx(ctx, angleUnit, halfW, hu, family, true),
+                              T.fitTextPx(ctx, speedUnit, halfW, hu, family, true));
         const vPx  = best ? best.vPx : Math.min(
-          fitTextPx(ctx, angleText, halfW, hv, family, true),
-          fitTextPx(ctx, speedText, halfW, hv, family, true)
+          T.fitTextPx(ctx, angleText, halfW, hv, family, true),
+          T.fitTextPx(ctx, speedText, halfW, hv, family, true)
         );
 
         const sizes = { cPx, vPx, uPx, hCap: hc, hVal: hv, hUnit: hu };
@@ -439,8 +300,8 @@
         const xR     = cx + Math.floor(innerW/2) - halfW;
         const yTop   = cy - Math.floor(maxH/2);
 
-        drawThreeRowsBlock(ctx, family, xL, yTop, halfW, maxH, 'right', angleCap, angleText, angleUnit, sizes);
-        drawThreeRowsBlock(ctx, family, xR, yTop, halfW, maxH, 'left',  speedCap,  speedText,  speedUnit, sizes);
+        T.drawThreeRowsBlock(ctx, family, xL, yTop, halfW, maxH, angleCap, angleText, angleUnit, secScale, "right", sizes);
+        T.drawThreeRowsBlock(ctx, family, xR, yTop, halfW, maxH, speedCap, speedText, speedUnit, secScale, "left", sizes);
       }
     }
 
