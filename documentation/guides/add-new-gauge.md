@@ -1,101 +1,93 @@
 # Guide: Create a New Semicircle Gauge
 
-**Status:** ⛔ Blocked until Phase 1 complete (GaugeUtils refactoring)
+**Status:** ✅ Ready | post-refactoring workflow using shared GaugeUtils API
 
-**Prerequisites:** Read first:
-- [gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md) — Proportions, colors, layout modes
-- [gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md) — InstrumentComponents API
-- [avnav-api/plugin-lifecycle.md](../avnav-api/plugin-lifecycle.md) — Widget registration and render cycle
-- [architecture/cluster-system.md](../architecture/cluster-system.md) — ClusterHost routing
+## Prerequisites
 
-## Phase 1 Dependency
+Read first:
 
-This guide targets compact gauges using shared drawing/layout from GaugeUtils (refactored InstrumentComponents). The template will be added here once Phase 1 is complete and the following functions are available in IC/GaugeUtils:
+- [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md)
+- [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
+- [../architecture/module-system.md](../architecture/module-system.md)
+- [../architecture/cluster-system.md](../architecture/cluster-system.md)
 
-| Category | Functions Needed | Current Location |
-|---|---|---|
-| Text layout | `fitTextPx`, `measureValueUnitFit`, `drawValueUnitWithFit`, `drawCaptionMax`, `fitInlineCapValUnit`, `drawThreeRowsBlock` | Duplicated in each gauge |
-| Overlay | `drawDisconnectOverlay` | Duplicated in each gauge |
-| Arc drawing | `drawArcRing`, `drawAnnularSector`, `drawTicks`, `drawLabels` | ✅ Already in IC (opts-object API) |
-| Pointer | `drawPointerAtRim` | ✅ Already in IC |
-| Math | `valueToAngle`, `angleToValue` | ✅ Already in IC |
+## Overview
 
-**Do not create new gauges until these functions are consolidated.** Copying from existing gauges reintroduces the duplication that Phase 1 eliminates.
+New semicircle gauges should be thin wrappers over `SemicircleGaugeRenderer`. Do not copy helper functions from existing gauges.
 
-## Steps Overview (execute after Phase 1)
+## Step 1: Create Gauge Module
 
-### Step 1: Create the Gauge Module
+Create `modules/NewGauge/NewGauge.js` with:
 
-**File:** `modules/NewGauge/NewGauge.js` (target: compact module)
-
-Structure:
-1. UMD wrapper (see [module-system.md](../architecture/module-system.md#umd-module-template))
-2. `create(def, Helpers)` — get IC via `Helpers.getModule('InstrumentComponents') && Helpers.getModule('InstrumentComponents').create()`
-3. Gauge-specific `displayValueFromRaw(raw)` → `{ num, text }` using avnav formatters
-4. `renderCanvas(canvas, props)` — all drawing via IC/GaugeUtils calls, no local drawing primitives
-5. Export: `{ id, wantsHideNativeHead: true, renderCanvas, translateFunction }`
-
-### Gauge-Specific Code (only these parts vary per gauge)
-
-| Concern | What Varies | Reference |
-|---|---|---|
-| Value formatting | Formatter call + unit conversion | [formatters.md](../avnav-api/formatters.md) |
-| Sector strategy | High-end vs. low-end placement | [gauge-style-guide.md#sector-logic](../gauges/gauge-style-guide.md#sector-logic) |
-| Range defaults | minValue, maxValue, tick intervals | editableParameters in plugin.js |
-| Threshold prop names | `{gauge}RatioThresholdNormal`, `{gauge}RatioThresholdFlat` | [gauge-style-guide.md#layout-modes](../gauges/gauge-style-guide.md#layout-modes) |
-
-### Value-to-Angle Tick Conversion
-
-IC works in degrees. Convert value-based tick intervals:
+1. UMD wrapper
+2. `create(def, Helpers)`
+3. Local gauge-specific functions only:
+- `formatDisplay(raw, props, unit) -> { num, text }`
+- `tickSteps(range) -> { major, minor }`
+- `buildSectors(props, minV, maxV, arc, valueUtils) -> Sector[]`
+4. `renderCanvas` from shared renderer:
 
 ```javascript
-const arcSpan = arc.endDeg - arc.startDeg;  // 180 for standard semicircle
-const range = maxV - minV;
-const stepMajorDeg = (tickMajorValue / range) * arcSpan;
-const stepMinorDeg = (tickMinorValue / range) * arcSpan;
-// Use majorMode: "relative" so ticks align to arc start, not absolute 0°
+const rendererModule = Helpers.getModule("SemicircleGaugeRenderer");
+const renderer = rendererModule && rendererModule.create(def, Helpers);
+
+const renderCanvas = renderer.createRenderer({
+  rawValueKey: "newValueKey",
+  unitDefault: "unit",
+  rangeDefaults: { min: 0, max: 100 },
+  ratioProps: {
+    normal: "newGaugeRatioThresholdNormal",
+    flat: "newGaugeRatioThresholdFlat"
+  },
+  ratioDefaults: { normal: 1.1, flat: 3.5 },
+  tickSteps,
+  formatDisplay,
+  buildSectors
+});
 ```
 
-For labels, use `labelFormatter` with `IC.angleToValue()` to convert tick angles back to display values.
+5. Export:
 
-### Step 2: Register Module in MODULES{}
+```javascript
+return {
+  id: "NewGauge",
+  wantsHideNativeHead: true,
+  renderCanvas,
+  translateFunction
+};
+```
 
-In `plugin.js`, add to the MODULES object:
+## Step 2: Register Module in `plugin.js`
+
+Add to `MODULES`:
 
 ```javascript
 NewGauge: {
   js: BASE + "modules/NewGauge/NewGauge.js",
   css: undefined,
   globalKey: "DyniNewGauge",
-  deps: ["InstrumentComponents"]
-},
+  deps: ["SemicircleGaugeRenderer"]
+}
 ```
 
-Also add `"NewGauge"` to ClusterHost's deps array.
+## Step 3: Add Cluster Kind + Translation
 
-### Step 3: Add Kind to Cluster
+Update `ClusterHost.js`:
 
-See [add-new-cluster.md](add-new-cluster.md) for full cluster creation or to add a kind to an existing cluster.
+1. Add kind dispatch in `translateFunction`
+2. Map editable parameters to generic gauge props (`value`, `minValue`, `maxValue`, `tickMajor`, `tickMinor`, `warningFrom`, `alarmFrom`, thresholds)
+3. Route `pickRenderer` to `NewGauge`
 
-### Step 4: Add ClusterHost Dispatch
+## Step 4: Verify
 
-In `ClusterHost.js` — see [cluster-system.md](../architecture/cluster-system.md#adding-a-new-renderer):
-
-1. Load module + create spec
-2. Add `translateFunction` dispatch case
-3. Add `pickRenderer` case
-4. Include in `wantsHide` and `finalizeFunction`
-
-### Step 5: Verify
-
-- All 3 layout modes (resize widget to trigger flat/normal/high)
+- Resize to trigger `flat`, `normal`, `high`
+- Pointer tracks displayed numeric value
 - Warning/alarm sectors render correctly
-- Pointer tracks value
-- Day/night mode (colors update)
+- Day/night colors update
+- Disconnect overlay works
 
 ## Related
 
-- [add-new-cluster.md](add-new-cluster.md) — Creating a new cluster widget
-- [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md) — Visual specification
-- [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md) — IC function reference
-- [../architecture/module-system.md](../architecture/module-system.md) — MODULES registry
+- [add-new-cluster.md](add-new-cluster.md)
+- [../modules/semicircle-gauges.md](../modules/semicircle-gauges.md)
+- [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)

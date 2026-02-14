@@ -32,7 +32,7 @@
 - **Visual style: proportions, colors, pointer config** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md)
 - **Layout modes (flat/normal/high)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#layout-modes)
 - **Sector logic (warning/alarm placement)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#sector-logic)
-- **Shared drawing functions (InstrumentComponents)** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
+- **Shared gauge APIs (GaugeUtils + InstrumentComponents)** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
 
 ## Module Reference (Renderers)
 
@@ -46,9 +46,8 @@
 - **How does compass rotation with upright labels work?** → [modules/compass-gauge.md](modules/compass-gauge.md#compass-dial-drawing-via-ic)
 - **What props does CompassGauge accept?** → [modules/compass-gauge.md](modules/compass-gauge.md#props)
 - **How do the semicircle gauges work (Speed/Depth/Temp/Voltage)?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md)
-- **What differs between the 4 gauges (sectors, formatting, defaults)?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md#gauge-specific-differences)
-- **What props do the semicircle gauges receive?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md#props)
-- **What is duplicated across gauges (Phase 1 scope)?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md#duplicated-local-functions)
+- **What differs between the 4 gauges (sectors, formatting, defaults)?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md#gauge-specific-responsibilities)
+- **What shared renderer do the semicircle gauges use?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md#shared-render-flow)
 
 ## Styling & Theming
 
@@ -58,8 +57,7 @@
 
 ## Refactoring Tasks
 
-- **Phase 1: Refactoring of Gauges and InstrumentComponents (eliminate duplication)** → [guides/add-new-gauge.md](guides/add-new-gauge.md), [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md), [modules/semicircle-gauges.md](modules/semicircle-gauges.md#duplicated-local-functions)
-- **What functions are duplicated across gauges?** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
+- **Semicircle shared renderer and GaugeUtils API** → [guides/add-new-gauge.md](guides/add-new-gauge.md), [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md), [modules/semicircle-gauges.md](modules/semicircle-gauges.md)
 
 ## Feature-Specific Lookups
 

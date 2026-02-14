@@ -136,6 +136,29 @@
       css: undefined,
       globalKey: "DyniInstrumentComponents"
     },
+    GaugeTextUtils: {
+      js: BASE + "modules/Cores/GaugeTextUtils.js",
+      css: undefined,
+      globalKey: "DyniGaugeTextUtils"
+    },
+    GaugeValueUtils: {
+      js: BASE + "modules/Cores/GaugeValueUtils.js",
+      css: undefined,
+      globalKey: "DyniGaugeValueUtils",
+      deps: ["InstrumentComponents"]
+    },
+    GaugeUtils: {
+      js: BASE + "modules/Cores/GaugeUtils.js",
+      css: undefined,
+      globalKey: "DyniGaugeUtils",
+      deps: ["InstrumentComponents", "GaugeTextUtils", "GaugeValueUtils"]
+    },
+    SemicircleGaugeRenderer: {
+      js: BASE + "modules/Cores/SemicircleGaugeRenderer.js",
+      css: undefined,
+      globalKey: "DyniSemicircleGaugeRenderer",
+      deps: ["GaugeUtils"]
+    },
 
     ThreeElements: { 
       js:  BASE + "modules/ThreeElements/ThreeElements.js",
@@ -159,28 +182,28 @@
     SpeedGauge: {
       js:  BASE + "modules/SpeedGauge/SpeedGauge.js",
       globalKey: "DyniSpeedGauge",
-      deps: ["InstrumentComponents"]
+      deps: ["SemicircleGaugeRenderer"]
     },
 
     DepthGauge: {
       js:  BASE + "modules/DepthGauge/DepthGauge.js",
       css: undefined,
       globalKey: "DyniDepthGauge",
-      deps: ["InstrumentComponents"]
+      deps: ["SemicircleGaugeRenderer"]
     },
 
     TemperatureGauge: {
       js:  BASE + "modules/TemperatureGauge/TemperatureGauge.js",
       css: undefined,
       globalKey: "DyniTemperatureGauge",
-      deps: ["InstrumentComponents"]
+      deps: ["SemicircleGaugeRenderer"]
     },
 
     VoltageGauge: {
       js:  BASE + "modules/VoltageGauge/VoltageGauge.js",
       css: undefined,
       globalKey: "DyniVoltageGauge",
-      deps: ["InstrumentComponents"]
+      deps: ["SemicircleGaugeRenderer"]
     },
 
     ClusterHost: {
