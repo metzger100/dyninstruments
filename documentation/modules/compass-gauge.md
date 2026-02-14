@@ -4,7 +4,7 @@
 
 ## Overview
 
-Full-circle rotating compass card with upright cardinal labels. The disc (ticks + N/NE/E/SE/S/SW/W/NW) rotates by `-heading` while labels stay upright. Optional target marker (BRG/course). Uses IC for all polar drawing.
+Full-circle rotating compass card with upright cardinal labels. The disc (ticks + N/NE/E/SE/S/SW/W/NW) rotates by `-heading` while labels stay upright. Optional target marker (BRG/course). Uses `GaugeUtils.draw` for all polar drawing.
 
 ## Module Registration
 
@@ -14,7 +14,7 @@ CompassGauge: {
   js: BASE + "modules/CompassGauge/CompassGauge.js",
   css: BASE + "modules/CompassGauge/CompassGauge.css",
   globalKey: "DyniCompassGauge",
-  deps: ["InstrumentComponents"]
+  deps: ["GaugeUtils"]
 }
 ```
 
@@ -33,21 +33,21 @@ CompassGauge: {
 | `default` | string | `"---"` | Fallback text when heading invalid |
 | `disconnect` | boolean | `false` | Show "NO DATA" overlay |
 
-## Compass Dial Drawing (via IC)
+## Compass Dial Drawing (via `GaugeUtils.draw`)
 
-All IC calls use `rotationDeg = -heading` so the card rotates while the red lubber pointer stays fixed at 0° (North/top).
+All draw calls use `rotationDeg = -heading` so the card rotates while the red lubber pointer stays fixed at 0° (North/top).
 
-| Element | IC Function | Parameters |
+| Element | Draw Function | Parameters |
 |---|---|---|
-| Ring | `IC.drawRing` | full circle, lineWidth 1 |
-| Ticks | `IC.drawTicks` | `rotationDeg: -heading`, 0→360, major 30°, minor 10° |
-| Lubber pointer | `IC.drawPointerAtRim` | fixed at 0°, variant "long", color "#ff2b2b" |
-| Target marker | `IC.drawRimMarker` | at `(markerCourse - heading)` degrees, only if both values finite |
-| Labels | `IC.drawLabels` | `rotationDeg: -heading`, step 45°, `labelsMap: {0:"N",45:"NE",...}`, `textRotation: "upright"` |
+| Ring | `draw.drawRing` | full circle, lineWidth 1 |
+| Ticks | `draw.drawTicks` | `rotationDeg: -heading`, 0→360, major 30°, minor 10° |
+| Lubber pointer | `draw.drawPointerAtRim` | fixed at 0°, variant "long", color "#ff2b2b" |
+| Target marker | `draw.drawRimMarker` | at `(markerCourse - heading)` degrees, only if both values finite |
+| Labels | `draw.drawLabels` | `rotationDeg: -heading`, step 45°, `labelsMap: {0:"N",45:"NE",...}`, `textRotation: "upright"` |
 
 Label rendering order: ring → ticks → pointer → marker → labels (labels always on top for readability).
 
-If IC is not available: no dial is drawn (graceful degradation).
+If draw primitives are not available: no dial is drawn (graceful degradation).
 
 ## Layout Modes
 
@@ -117,6 +117,6 @@ return {
 
 ## Related
 
-- [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md) — IC function reference (drawRing, drawTicks, drawLabels, drawPointerAtRim, drawRimMarker)
+- [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md) — shared draw API reference
 - [../architecture/cluster-system.md](../architecture/cluster-system.md) — courseHeading cluster dispatch
 - [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md) — Pointer config, colors

@@ -35,7 +35,7 @@ documentation/
 │   └── cluster-system.md           # ClusterHost, kind→renderer routing
 ├── gauges/
 │   ├── gauge-style-guide.md        # Proportions, colors, pointer, layout modes
-│   └── gauge-shared-api.md         # InstrumentComponents documentation
+│   └── gauge-shared-api.md         # Shared GaugeUtils/core API documentation
 ├── shared/
 │   ├── helpers.md                  # Helpers object (setupCanvas, resolveTextColor)
 │   └── css-theming.md              # CSS vars, day/night, font stack
@@ -78,7 +78,7 @@ Task: Add new BarometerGauge
 ## 3. File Size Limits
 
 - **Max 300 lines per JS file**
-- Shared drawing/layout code → `modules/Cores/InstrumentComponents.js`
+- Shared drawing/layout code → split core modules in `modules/Cores/` (`GaugeAngleUtils`, `GaugeTickUtils`, `GaugePrimitiveDrawUtils`, `GaugeDialDrawUtils`)
 - Gauge-specific code only in individual gauge module files
 - Cluster configs → separate files under `config/clusters/` (planned)
 - Target after refactoring. Current files exceed this
@@ -102,7 +102,7 @@ Example:
 /**
  * Module: SpeedGauge — Semicircle speedometer with warning/alarm sectors
  * Style Guide: documentation/gauges/gauge-style-guide.md
- * Depends: InstrumentComponents (drawPointerAtRim only)
+ * Depends: GaugeUtils (draw.drawPointerAtRim)
  */
 ```
 

@@ -157,10 +157,10 @@ Current widgets (depending on your build):
     * **ThreeElements** for numeric text layouts
     * gauge modules (WindDial, CompassGauge, SpeedGauge, DepthGauge, TemperatureGauge) for graphics
 
-* **InstrumentComponents (core)**
+* **Gauge core modules (`GaugeAngleUtils`, `GaugeTickUtils`, `GaugePrimitiveDrawUtils`, `GaugeDialDrawUtils`)**
 
-  * reusable drawing primitives (ticks, rings, pointers, sectors, labels)
-  * shared by the gauge modules
+  * reusable angle/tick/draw primitives
+  * composed by `GaugeUtils` and shared by all gauge modules
 
 ---
 
@@ -176,7 +176,7 @@ There is documentation missing for existing code like the already existing widge
 
 plugin.js is to long. Split the different jobs and configs up in smaller modules.
 
-Refactor the existing gauge elements to use the a new GaugeUtils which shall replace InstrumentComponents. SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge share identical functions.
+Gauge elements now use the split Gauge core modules through `GaugeUtils`. SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge share one renderer flow.
 
 Remove dead Fallbacks.
 

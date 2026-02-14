@@ -4,7 +4,7 @@
 
 ## Overview
 
-Full-circle wind dial renderer showing wind angle (AWA/TWA) and speed (AWS/TWS) simultaneously. Uses IC for all polar drawing (ring, sectors, ticks, labels, pointer). Text layout for angle and speed values is handled internally with dual-column layout.
+Full-circle wind dial renderer showing wind angle (AWA/TWA) and speed (AWS/TWS) simultaneously. Uses `GaugeUtils.draw` for polar drawing (ring, sectors, ticks, labels, pointer). Text layout for angle and speed values is handled internally with dual-column layout.
 
 ## Module Registration
 
@@ -14,7 +14,7 @@ WindDial: {
   js: BASE + "modules/WindDial/WindDial.js",
   css: BASE + "modules/WindDial/WindDial.css",
   globalKey: "DyniWindDial",
-  deps: ["InstrumentComponents"]
+  deps: ["GaugeUtils"]
 }
 ```
 
@@ -37,20 +37,20 @@ WindDial: {
 | `captionUnitScale` | number | `0.8` | Caption/unit size relative to value |
 | `disconnect` | boolean | `false` | Show "NO DATA" overlay |
 
-## Dial Drawing (via IC)
+## Dial Drawing (via `GaugeUtils.draw`)
 
 Angle convention: 0° = North (top), clockwise positive, range ±180.
 
-| Element | IC Function | Parameters |
+| Element | Draw Function | Parameters |
 |---|---|---|
-| Ring | `IC.drawRing` | full circle, lineWidth 1 |
-| Layline starboard | `IC.drawAnnularSector` | `layMin→layMax`, `fillStyle: "#82b683"` |
-| Layline port | `IC.drawAnnularSector` | `-layMax→-layMin`, `fillStyle: "#ff7a76"` |
-| Wind pointer | `IC.drawPointerAtRim` | `angle`, variant "long", sideFactor 0.25, lengthFactor 2, color "#ff2b2b" |
-| Ticks | `IC.drawTicks` | -180→180, major 30°, minor 10°, includeEnd |
-| Labels | `IC.drawLabels` | -180→180, step 30°, endpoints filtered out |
+| Ring | `draw.drawRing` | full circle, lineWidth 1 |
+| Layline starboard | `draw.drawAnnularSector` | `layMin→layMax`, `fillStyle: "#82b683"` |
+| Layline port | `draw.drawAnnularSector` | `-layMax→-layMin`, `fillStyle: "#ff7a76"` |
+| Wind pointer | `draw.drawPointerAtRim` | `angle`, variant "long", sideFactor 0.25, lengthFactor 2, color "#ff2b2b" |
+| Ticks | `draw.drawTicks` | -180→180, major 30°, minor 10°, includeEnd |
+| Labels | `draw.drawLabels` | -180→180, step 30°, endpoints filtered out |
 
-If IC is not available: dial renders empty (graceful fallback, no crash).
+If draw primitives are not available: dial renders empty (graceful fallback, no crash).
 
 ## Layout Modes
 
@@ -123,6 +123,6 @@ return {
 
 ## Related
 
-- [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md) — IC function reference
+- [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md) — shared draw API reference
 - [../architecture/cluster-system.md](../architecture/cluster-system.md) — Wind cluster dispatch
 - [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md) — Layline colors

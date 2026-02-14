@@ -1,28 +1,44 @@
 # Gauge Shared API
 
-**Status:** ✅ Implemented | `InstrumentComponents` + `GaugeUtils` split modules
+**Status:** ✅ Implemented | split Gauge utility modules + `GaugeUtils` facade
 
 ## Overview
 
-Shared gauge logic is now split into focused core modules:
+Shared gauge logic is split into focused core modules:
 
-- `InstrumentComponents` for low-level polar/canvas drawing
+- `GaugeAngleUtils` for angle math and value/angle mapping
+- `GaugeTickUtils` for major/minor tick angle generation
+- `GaugePrimitiveDrawUtils` for low-level canvas primitives
+- `GaugeDialDrawUtils` for radial tick/label/frame drawing
 - `GaugeTextUtils` for text fitting/drawing and disconnect overlay
-- `GaugeValueUtils` for range/angle/ticks/sectors/semicircle geometry
-- `GaugeUtils` as a facade combining the three APIs
+- `GaugeValueUtils` for numeric/range/geometry helpers
+- `GaugeUtils` as the composed facade
 - `SemicircleGaugeRenderer` for the complete shared render flow of Speed/Depth/Temperature/Voltage
-
-This removes the duplicated helper functions from the four semicircle gauges.
 
 ## Module Registration
 
 `plugin.js` registers the shared modules in `MODULES`:
 
 ```javascript
-InstrumentComponents: { js: BASE + "modules/Cores/InstrumentComponents.js", globalKey: "DyniInstrumentComponents" },
+GaugeAngleUtils: { js: BASE + "modules/Cores/GaugeAngleUtils.js", globalKey: "DyniGaugeAngleUtils" },
+GaugeTickUtils: { js: BASE + "modules/Cores/GaugeTickUtils.js", globalKey: "DyniGaugeTickUtils" },
+GaugePrimitiveDrawUtils: {
+  js: BASE + "modules/Cores/GaugePrimitiveDrawUtils.js",
+  globalKey: "DyniGaugePrimitiveDrawUtils",
+  deps: ["GaugeAngleUtils"]
+},
+GaugeDialDrawUtils: {
+  js: BASE + "modules/Cores/GaugeDialDrawUtils.js",
+  globalKey: "DyniGaugeDialDrawUtils",
+  deps: ["GaugeAngleUtils", "GaugeTickUtils", "GaugePrimitiveDrawUtils"]
+},
 GaugeTextUtils: { js: BASE + "modules/Cores/GaugeTextUtils.js", globalKey: "DyniGaugeTextUtils" },
-GaugeValueUtils: { js: BASE + "modules/Cores/GaugeValueUtils.js", globalKey: "DyniGaugeValueUtils", deps: ["InstrumentComponents"] },
-GaugeUtils: { js: BASE + "modules/Cores/GaugeUtils.js", globalKey: "DyniGaugeUtils", deps: ["InstrumentComponents","GaugeTextUtils","GaugeValueUtils"] },
+GaugeValueUtils: { js: BASE + "modules/Cores/GaugeValueUtils.js", globalKey: "DyniGaugeValueUtils", deps: ["GaugeAngleUtils"] },
+GaugeUtils: {
+  js: BASE + "modules/Cores/GaugeUtils.js",
+  globalKey: "DyniGaugeUtils",
+  deps: ["GaugeTextUtils","GaugeValueUtils","GaugeAngleUtils","GaugeTickUtils","GaugePrimitiveDrawUtils","GaugeDialDrawUtils"]
+},
 SemicircleGaugeRenderer: { js: BASE + "modules/Cores/SemicircleGaugeRenderer.js", globalKey: "DyniSemicircleGaugeRenderer", deps: ["GaugeUtils"] }
 ```
 
@@ -42,50 +58,60 @@ const renderer = Helpers.getModule("SemicircleGaugeRenderer") && Helpers.getModu
 | `available` | boolean | `true` when all shared modules are resolved |
 | `text` | object | `GaugeTextUtils` API |
 | `value` | object | `GaugeValueUtils` API |
-| `IC` | object | `InstrumentComponents` API |
+| `angle` | object | `GaugeAngleUtils` API |
+| `tick` | object | `GaugeTickUtils` API |
+| `draw` | object | merged API from `GaugePrimitiveDrawUtils` + `GaugeDialDrawUtils` |
+
+## Draw API (`GaugeUtils.draw`)
+
+| Function | Purpose |
+|---|---|
+| `drawRing` | Draw full circular ring |
+| `drawArcRing` | Draw stroked arc segment |
+| `drawAnnularSector` | Draw filled annular sector |
+| `drawArrow` | Draw line arrow |
+| `drawPointerAtRim` | Draw triangular pointer at rim |
+| `drawRimMarker` | Draw short radial marker at rim |
+| `drawTicksFromAngles` | Draw major/minor ticks from angle lists |
+| `drawTicks` | Build and draw ticks from step config |
+| `drawLabels` | Draw labels on arc/circle |
+| `drawDialFrame` | Convenience ring + ticks + labels |
+
+## Angle API (`GaugeAngleUtils`)
+
+| Function | Purpose |
+|---|---|
+| `degToRad`, `radToDeg` | Degree/radian conversion |
+| `norm360`, `norm180` | Angle normalization |
+| `degToCanvasRad` | Convert logical degree to canvas radians |
+| `valueToAngle`, `angleToValue` | Linear value/angle mapping |
+| `valueRangeToAngleRange` | Convert value range to angle range |
+
+## Tick API (`GaugeTickUtils`)
+
+| Function | Purpose |
+|---|---|
+| `computeSweep` | Sweep direction/intensity for start/end |
+| `buildTickAngles` | Build major/minor angle arrays |
 
 ## GaugeTextUtils API
 
-`GaugeTextUtils.create()` returns these methods:
-
-| Function | Signature | Purpose |
-|---|---|---|
-| `setFont` | `(ctx, px, bold, family)` | Shared font assignment helper |
-| `fitTextPx` | `(ctx, text, maxW, maxH, family, bold)` | Largest font size fitting width/height |
-| `measureValueUnitFit` | `(ctx, family, value, unit, w, h, secScale)` | Fit value+unit on one line |
-| `drawCaptionMax` | `(ctx, family, x, y, w, h, caption, capMaxPx, align)` | Draw caption with optional max size |
-| `drawValueUnitWithFit` | `(ctx, family, x, y, w, h, value, unit, fit, align)` | Render measured value+unit pair |
-| `fitInlineCapValUnit` | `(ctx, family, caption, value, unit, maxW, maxH, secScale)` | Fit inline caption-value-unit row |
-| `drawInlineCapValUnit` | `(ctx, family, x, y, w, h, caption, value, unit, fit)` | Draw inline row centered in box |
-| `drawThreeRowsBlock` | `(ctx, family, x, y, w, h, caption, value, unit, secScale, align, sizes)` | Draw caption/value/unit stacked block |
-| `drawDisconnectOverlay` | `(ctx, W, H, family, color, label)` | Shared “NO DATA” overlay |
+`GaugeTextUtils.create()` returns shared text helpers:
+`setFont`, `fitTextPx`, `measureValueUnitFit`, `drawCaptionMax`, `drawValueUnitWithFit`,
+`fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`, `drawDisconnectOverlay`.
 
 ## GaugeValueUtils API
 
-`GaugeValueUtils.create(def, Helpers)` returns:
-
-| Function | Signature | Purpose |
-|---|---|---|
-| `isFiniteNumber` | `(n)` | Numeric finite check |
-| `clamp` | `(value, lo, hi)` | Clamp helper |
-| `almostInt` | `(value, eps)` | Integer proximity check |
-| `isApprox` | `(a, b, eps)` | Floating-point comparison |
-| `computePad` | `(W, H)` | Shared outer padding (`max(6, min(W,H)*0.04)`) |
-| `computeGap` | `(W, H)` | Shared spacing gap (`max(6, min(W,H)*0.03)`) |
-| `computeMode` | `(ratio, thresholdNormal, thresholdFlat)` | Returns `high`, `normal`, or `flat` |
-| `normalizeRange` | `(minRaw, maxRaw, defaultMin, defaultMax)` | Safe value range normalization |
-| `valueToAngle` | `(value, minV, maxV, arc, doClamp)` | Value→angle mapping (delegates to IC when available) |
-| `angleToValue` | `(angleDeg, minV, maxV, arc, doClamp)` | Angle→value mapping |
-| `buildValueTickAngles` | `(minV, maxV, majorStep, minorStep, arc)` | Build major/minor tick angles |
-| `sectorAngles` | `(from, to, minV, maxV, arc)` | Value range to sector angle pair |
-| `formatMajorLabel` | `(value)` | Tick label formatting |
-| `computeSemicircleGeometry` | `(W, H, pad)` | Radius/center/ring metrics for N-shape gauges |
+`GaugeValueUtils.create(def, Helpers)` returns shared numeric helpers:
+`isFiniteNumber`, `clamp`, `almostInt`, `isApprox`, `computePad`, `computeGap`, `computeMode`,
+`normalizeRange`, `valueToAngle`, `angleToValue`, `buildValueTickAngles`, `sectorAngles`,
+`formatMajorLabel`, `computeSemicircleGeometry`.
 
 ## SemicircleGaugeRenderer API
 
-`SemicircleGaugeRenderer.create(def, Helpers).createRenderer(spec)` returns a `renderCanvas(canvas, props)` function.
+`SemicircleGaugeRenderer.create(def, Helpers).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
 
-### `spec` Fields
+### `spec` fields
 
 | Field | Type | Required | Description |
 |---|---|---|---|
@@ -99,19 +125,11 @@ const renderer = Helpers.getModule("SemicircleGaugeRenderer") && Helpers.getModu
 | `buildSectors` | `(props, minV, maxV, arc, valueUtils) => Sector[]` | yes | Gauge-specific warning/alarm sectors |
 | `arc` | `{startDeg,endDeg}` | no | Optional override (default `270..450`) |
 
-### Sector Shape
+### Sector shape
 
 ```javascript
 { a0: number, a1: number, color: "#rrggbb" }
 ```
-
-## InstrumentComponents
-
-`InstrumentComponents` remains unchanged and is still the shared source for:
-
-- Polar angle math (`valueToAngle`, `angleToValue`, `degToCanvasRad`, ...)
-- Arc/tick/label drawing (`drawArcRing`, `drawAnnularSector`, `drawTicksFromAngles`, `drawLabels`)
-- Pointer and marker primitives (`drawPointerAtRim`, `drawRimMarker`)
 
 ## Related
 

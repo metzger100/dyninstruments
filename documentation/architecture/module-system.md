@@ -1,116 +1,78 @@
 # Module System
 
-**Status:** ✅ Implemented | plugin.js (MODULES registry + loadModule)
+**Status:** ✅ Implemented | plugin.js (`MODULES` registry + `loadModule`)
 
 ## Overview
 
-dyninstruments uses a custom runtime module loader. Modules are UMD-wrapped JS files that register on `window.DyniModules`. plugin.js loads them via `<script>` injection with dependency resolution.
+dyninstruments uses a custom runtime module loader. Modules are UMD-wrapped JS files that register on `window.DyniModules`. `plugin.js` loads them via `<script>` injection with dependency resolution.
 
-## MODULES Registry
+## `MODULES` Registry
 
-Defined in plugin.js. Maps module IDs to file paths, globalKeys, and dependencies:
+Defined in `plugin.js`. It maps module IDs to file paths, global keys, and dependencies.
 
 ```javascript
 const MODULES = {
-  InstrumentComponents: {
-    js: BASE + "modules/Cores/InstrumentComponents.js",
-    css: undefined,
-    globalKey: "DyniInstrumentComponents"
+  GaugeAngleUtils: { js: BASE + "modules/Cores/GaugeAngleUtils.js", globalKey: "DyniGaugeAngleUtils" },
+  GaugeTickUtils: { js: BASE + "modules/Cores/GaugeTickUtils.js", globalKey: "DyniGaugeTickUtils" },
+  GaugePrimitiveDrawUtils: {
+    js: BASE + "modules/Cores/GaugePrimitiveDrawUtils.js",
+    globalKey: "DyniGaugePrimitiveDrawUtils",
+    deps: ["GaugeAngleUtils"]
   },
-  GaugeTextUtils: {
-    js: BASE + "modules/Cores/GaugeTextUtils.js",
-    css: undefined,
-    globalKey: "DyniGaugeTextUtils"
+  GaugeDialDrawUtils: {
+    js: BASE + "modules/Cores/GaugeDialDrawUtils.js",
+    globalKey: "DyniGaugeDialDrawUtils",
+    deps: ["GaugeAngleUtils", "GaugeTickUtils", "GaugePrimitiveDrawUtils"]
   },
+  GaugeTextUtils: { js: BASE + "modules/Cores/GaugeTextUtils.js", globalKey: "DyniGaugeTextUtils" },
   GaugeValueUtils: {
     js: BASE + "modules/Cores/GaugeValueUtils.js",
-    css: undefined,
     globalKey: "DyniGaugeValueUtils",
-    deps: ["InstrumentComponents"]
+    deps: ["GaugeAngleUtils"]
   },
   GaugeUtils: {
     js: BASE + "modules/Cores/GaugeUtils.js",
-    css: undefined,
     globalKey: "DyniGaugeUtils",
-    deps: ["InstrumentComponents","GaugeTextUtils","GaugeValueUtils"]
+    deps: ["GaugeTextUtils","GaugeValueUtils","GaugeAngleUtils","GaugeTickUtils","GaugePrimitiveDrawUtils","GaugeDialDrawUtils"]
   },
   SemicircleGaugeRenderer: {
     js: BASE + "modules/Cores/SemicircleGaugeRenderer.js",
-    css: undefined,
     globalKey: "DyniSemicircleGaugeRenderer",
     deps: ["GaugeUtils"]
   },
-  ThreeElements: {
-    js: BASE + "modules/ThreeElements/ThreeElements.js",
-    css: BASE + "modules/ThreeElements/ThreeElements.css",
-    globalKey: "DyniThreeElements"
-  },
-  WindDial: {
-    js: BASE + "modules/WindDial/WindDial.js",
-    css: BASE + "modules/WindDial/WindDial.css",
-    globalKey: "DyniWindDial",
-    deps: ["InstrumentComponents"]
-  },
-  CompassGauge: {
-    js: BASE + "modules/CompassGauge/CompassGauge.js",
-    css: BASE + "modules/CompassGauge/CompassGauge.css",
-    globalKey: "DyniCompassGauge",
-    deps: ["InstrumentComponents"]
-  },
-  SpeedGauge: {
-    js: BASE + "modules/SpeedGauge/SpeedGauge.js",
-    globalKey: "DyniSpeedGauge",
-    deps: ["SemicircleGaugeRenderer"]
-  },
-  DepthGauge: {
-    js: BASE + "modules/DepthGauge/DepthGauge.js",
-    globalKey: "DyniDepthGauge",
-    deps: ["SemicircleGaugeRenderer"]
-  },
-  TemperatureGauge: {
-    js: BASE + "modules/TemperatureGauge/TemperatureGauge.js",
-    globalKey: "DyniTemperatureGauge",
-    deps: ["SemicircleGaugeRenderer"]
-  },
-  VoltageGauge: {
-    js: BASE + "modules/VoltageGauge/VoltageGauge.js",
-    globalKey: "DyniVoltageGauge",
-    deps: ["SemicircleGaugeRenderer"]
-  },
-  ClusterHost: {
-    js: BASE + "modules/ClusterHost/ClusterHost.js",
-    css: BASE + "modules/ClusterHost/ClusterHost.css",
-    globalKey: "DyniClusterHost",
-    deps: ["ThreeElements","WindDial","CompassGauge","SpeedGauge","DepthGauge","TemperatureGauge","VoltageGauge"]
-  }
+  WindDial: { js: BASE + "modules/WindDial/WindDial.js", globalKey: "DyniWindDial", deps: ["GaugeUtils"] },
+  CompassGauge: { js: BASE + "modules/CompassGauge/CompassGauge.js", globalKey: "DyniCompassGauge", deps: ["GaugeUtils"] },
+  // ... other modules
 };
 ```
 
 ## Dependency Graph
 
-```
+```text
 ClusterHost
 ├── ThreeElements
-├── WindDial ← InstrumentComponents
-├── CompassGauge ← InstrumentComponents
+├── WindDial
+├── CompassGauge
 ├── SpeedGauge
 ├── DepthGauge
 ├── TemperatureGauge
 └── VoltageGauge
 
+WindDial/CompassGauge
+  └── GaugeUtils
+      ├── GaugeAngleUtils
+      ├── GaugeTickUtils
+      ├── GaugePrimitiveDrawUtils
+      ├── GaugeDialDrawUtils
+      ├── GaugeTextUtils
+      └── GaugeValueUtils
+
 SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge
   └── SemicircleGaugeRenderer
       └── GaugeUtils
-          ├── GaugeTextUtils
-          ├── GaugeValueUtils ← InstrumentComponents
-          └── InstrumentComponents
 ```
 
-All gauge/dial modules still share `InstrumentComponents`, with semicircle widgets now going through `GaugeUtils` and `SemicircleGaugeRenderer`.
-
 ## UMD Module Template
-
-Every module follows this pattern:
 
 ```javascript
 (function (root, factory) {
@@ -121,71 +83,43 @@ Every module follows this pattern:
   "use strict";
 
   function create(def, Helpers) {
-    // Get dependencies via Helpers.getModule()
-    const IC = Helpers.getModule('InstrumentComponents')?.create();
-
+    const gaugeUtils = Helpers.getModule("GaugeUtils")?.create(def, Helpers);
     function renderCanvas(canvas, props) { /* ... */ }
     function translateFunction(props) { /* ... */ }
-
-    return {
-      id: "ModuleName",
-      wantsHideNativeHead: true,
-      renderCanvas,
-      translateFunction
-    };
+    return { id: "ModuleName", wantsHideNativeHead: true, renderCanvas, translateFunction };
   }
 
   return { id: "ModuleName", create };
 }));
 ```
 
-**Key points:**
-- `create(def, Helpers)` is called by `registerInstrument()` in plugin.js
-- `def` = the cluster definition object from CLUSTERS[]
-- `Helpers` = shared helper object (see [helpers.md](../shared/helpers.md))
-- Dependencies accessed via `Helpers.getModule('ModuleId')` which returns `window.DyniModules[globalKey]`
+## `loadModule()` Flow
 
-## loadModule() Flow
-
-1. Check cache (dedup)
-2. Recursively load all deps first (`Promise.all(deps.map(loadModule))`)
-3. Load CSS via `loadCssOnce()` (creates `<link>` element)
-4. Load JS via `loadScriptOnce()` (creates `<script>` element)
-5. Verify module registered on `window.DyniModules[globalKey]`
-6. Return module object (has `.create()` method)
+1. Check cache (dedup).
+2. Recursively load all dependencies first (`Promise.all(deps.map(loadModule))`).
+3. Load CSS via `loadCssOnce()` (`<link>`).
+4. Load JS via `loadScriptOnce()` (`<script>`).
+5. Verify module is present on `window.DyniModules[globalKey]`.
+6. Return module object (`{ id, create }`).
 
 ## Registration Flow
 
 ```javascript
-// 1. Collect unique modules needed by all CLUSTERS
 const needed = uniqueModules(INSTRUMENTS);
-
-// 2. Load all modules (with dependency resolution)
 Promise.all(needed.map(loadModule)).then((mods) => {
-  // 3. Register each widget with AvNav
-  INSTRUMENTS.forEach(inst => {
-    registerInstrument(byId[inst.module], inst);
-  });
+  INSTRUMENTS.forEach(inst => registerInstrument(byId[inst.module], inst));
 });
 ```
 
 ## Adding a New Module
 
-1. Create JS file: `modules/NewModule/NewModule.js` with UMD wrapper
-2. Add to MODULES registry in plugin.js:
-   ```javascript
-   NewModule: {
-     js: BASE + "modules/NewModule/NewModule.js",
-     css: undefined,  // or path to CSS
-     globalKey: "DyniNewModule",
-     deps: ["InstrumentComponents"]  // if needed
-   }
-   ```
-3. Add to ClusterHost deps if it's a renderer
-4. Add CSS file if needed (optional)
+1. Create `modules/NewModule/NewModule.js` with UMD wrapper.
+2. Add it to `MODULES` in `plugin.js`.
+3. Declare `deps` using module IDs already in `MODULES`.
+4. Add CSS path if needed.
 
 ## Related
 
-- [cluster-system.md](cluster-system.md) — How ClusterHost uses loaded modules
-- [../shared/helpers.md](../shared/helpers.md) — Helpers object passed to create()
-- [../guides/add-new-gauge.md](../guides/add-new-gauge.md) — Step-by-step guide
+- [cluster-system.md](cluster-system.md) — how ClusterHost uses loaded modules
+- [../shared/helpers.md](../shared/helpers.md) — `Helpers` passed to `create`
+- [../guides/add-new-gauge.md](../guides/add-new-gauge.md) — step-by-step guide

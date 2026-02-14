@@ -1,7 +1,7 @@
 /*!
  * WindDial (UMD) — compact dial for AWA/AWS and TWA/TWS
  *
- * Updated: uses InstrumentComponents instead of PolarCore.
+ * Updated: uses GaugeUtils.draw shared primitives instead of PolarCore.
  *
  * Modes:
  *  - Flat:   Angle caption (left top), value+unit (left bottom), dial centered,
@@ -24,7 +24,11 @@
   "use strict";
 
   function create(def, Helpers) {
-    const IC = Helpers.getModule('InstrumentComponents') && Helpers.getModule('InstrumentComponents').create();
+    const gaugeUtilsModule = Helpers.getModule("GaugeUtils");
+    const GU = gaugeUtilsModule && typeof gaugeUtilsModule.create === "function"
+      ? gaugeUtilsModule.create(def, Helpers)
+      : null;
+    const draw = GU && GU.draw;
 
     // --------- util ----------------------------------------------------------
     function setFont(ctx, px, bold, family){ ctx.font = (bold ? '700 ' : '400 ') + px + 'px ' + family; }
@@ -211,20 +215,20 @@
       // Dial frame & sectors first
       ctx.save();
 
-      if (IC){
+      if (draw){
         // ring
-        IC.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
+        draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
 
         // sectors (annular)
         if (layEnabled && layMax > layMin){
-          IC.drawAnnularSector(ctx, cx, cy, rOuter, {
+          draw.drawAnnularSector(ctx, cx, cy, rOuter, {
             startDeg:  layMin,
             endDeg:    layMax,
             thickness: ringW,
             fillStyle: "#82b683",
             alpha: 1
           });
-          IC.drawAnnularSector(ctx, cx, cy, rOuter, {
+          draw.drawAnnularSector(ctx, cx, cy, rOuter, {
             startDeg: -layMax,
             endDeg:   -layMin,
             thickness: ringW,
@@ -235,7 +239,7 @@
 
         // red wind pointer (tip outward) BEFORE labels so labels stay on top
         if (isFiniteN(props.angle)) {
-          IC.drawPointerAtRim(ctx, cx, cy, rOuter, props.angle, {
+          draw.drawPointerAtRim(ctx, cx, cy, rOuter, props.angle, {
             depth: needleDepth,
             color: "#ff2b2b",
             variant: "long",
@@ -245,7 +249,7 @@
         }
 
         // ticks
-        IC.drawTicks(ctx, cx, cy, tickR, {
+        draw.drawTicks(ctx, cx, cy, tickR, {
           startDeg: -180, endDeg: 180,
           stepMajor: 30, stepMinor: 10,
           includeEnd: true,
@@ -255,7 +259,7 @@
 
         // labels (skip endpoints)
         const labelInsetVal = Math.max(18, Math.floor(ringW * 1.8));
-        IC.drawLabels(ctx, cx, cy, tickR, {
+        draw.drawLabels(ctx, cx, cy, tickR, {
           startDeg: -180, endDeg: 180,
           step: 30,
           includeEnd: true,
@@ -268,7 +272,7 @@
         });
       }
       else {
-        // Fallback: if InstrumentComponents is not available, do nothing (dial stays empty).
+        // Fallback: if draw primitives are not available, do nothing (dial stays empty).
         // This avoids crashes during refactoring.
       }
 

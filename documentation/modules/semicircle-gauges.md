@@ -7,7 +7,7 @@
 The four semicircle gauges now share one renderer implementation:
 
 - Shared rendering and layout in `modules/Cores/SemicircleGaugeRenderer.js`
-- Shared helper APIs via `GaugeUtils` (`GaugeTextUtils`, `GaugeValueUtils`, `InstrumentComponents`)
+- Shared helper APIs via `GaugeUtils` (`GaugeTextUtils`, `GaugeValueUtils`, `GaugeAngleUtils`, `GaugeTickUtils`, draw utils)
 - Gauge modules (`SpeedGauge`, `DepthGauge`, `TemperatureGauge`, `VoltageGauge`) only keep gauge-specific formatting, tick strategy, and sector strategy
 
 All touched JS files are now below the 300-line target.
@@ -35,7 +35,7 @@ Dependency chain:
 SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge
   -> SemicircleGaugeRenderer
   -> GaugeUtils
-  -> GaugeTextUtils + GaugeValueUtils + InstrumentComponents
+  -> GaugeTextUtils + GaugeValueUtils + GaugeAngleUtils + GaugeTickUtils + GaugePrimitiveDrawUtils + GaugeDialDrawUtils
 ```
 
 ## Shared Render Flow

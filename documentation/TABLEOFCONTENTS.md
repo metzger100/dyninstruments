@@ -16,7 +16,7 @@
 ## Architecture
 
 - **How are modules loaded at runtime (UMD)?** → [architecture/module-system.md](architecture/module-system.md)
-- **How does the dependency system work?** → [architecture/module-system.md](architecture/module-system.md#dependencies)
+- **How does the dependency system work?** → [architecture/module-system.md](architecture/module-system.md#dependency-graph)
 - **How does ClusterHost route to renderers?** → [architecture/cluster-system.md](architecture/cluster-system.md)
 - **How does translateFunction dispatch to graphic/numeric?** → [architecture/cluster-system.md](architecture/cluster-system.md#translate-dispatch)
 - **What is the Helpers object?** → [shared/helpers.md](shared/helpers.md)
@@ -32,7 +32,7 @@
 - **Visual style: proportions, colors, pointer config** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md)
 - **Layout modes (flat/normal/high)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#layout-modes)
 - **Sector logic (warning/alarm placement)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#sector-logic)
-- **Shared gauge APIs (GaugeUtils + InstrumentComponents)** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
+- **Shared gauge APIs (GaugeUtils + split core modules)** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
 
 ## Module Reference (Renderers)
 
@@ -40,10 +40,10 @@
 - **What layout modes does ThreeElements support?** → [modules/three-elements.md](modules/three-elements.md#layout-modes)
 - **What props does ThreeElements accept?** → [modules/three-elements.md](modules/three-elements.md#props)
 - **How does the wind dial work (angle+speed dual display)?** → [modules/wind-dial.md](modules/wind-dial.md)
-- **What IC functions does WindDial use?** → [modules/wind-dial.md](modules/wind-dial.md#dial-drawing-via-ic)
+- **What draw functions does WindDial use?** → [modules/wind-dial.md](modules/wind-dial.md#dial-drawing-via-gaugeutilsdraw)
 - **What props does WindDial accept?** → [modules/wind-dial.md](modules/wind-dial.md#props)
 - **How does the rotating compass card work?** → [modules/compass-gauge.md](modules/compass-gauge.md)
-- **How does compass rotation with upright labels work?** → [modules/compass-gauge.md](modules/compass-gauge.md#compass-dial-drawing-via-ic)
+- **How does compass rotation with upright labels work?** → [modules/compass-gauge.md](modules/compass-gauge.md#compass-dial-drawing-via-gaugeutilsdraw)
 - **What props does CompassGauge accept?** → [modules/compass-gauge.md](modules/compass-gauge.md#props)
 - **How do the semicircle gauges work (Speed/Depth/Temp/Voltage)?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md)
 - **What differs between the 4 gauges (sectors, formatting, defaults)?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md#gauge-specific-responsibilities)
