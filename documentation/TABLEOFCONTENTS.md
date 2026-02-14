@@ -18,7 +18,7 @@
 - **How are modules loaded at runtime (UMD)?** → [architecture/module-system.md](architecture/module-system.md)
 - **How does the dependency system work?** → [architecture/module-system.md](architecture/module-system.md#dependency-graph)
 - **How does ClusterHost route to renderers?** → [architecture/cluster-system.md](architecture/cluster-system.md)
-- **How does translateFunction dispatch to graphic/numeric?** → [architecture/cluster-system.md](architecture/cluster-system.md#translate-dispatch)
+- **How does translateFunction dispatch to graphic/numeric?** → [architecture/cluster-system.md](architecture/cluster-system.md#runtime-flow)
 - **What is the Helpers object?** → [shared/helpers.md](shared/helpers.md)
 
 ## Creating New Widgets (Guides)
@@ -55,9 +55,10 @@
 - **Font stack (--dyni-font)** → [shared/css-theming.md](shared/css-theming.md)
 - **Widget border styling** → [shared/css-theming.md](shared/css-theming.md)
 
-## Refactoring Tasks
+## Documentation Maintenance
 
-- **Semicircle shared renderer and GaugeUtils API** → [guides/add-new-gauge.md](guides/add-new-gauge.md), [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md), [modules/semicircle-gauges.md](modules/semicircle-gauges.md)
+- **How do I keep docs aligned after code changes?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md)
+- **How do I run documentation validation checks?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#validation)
 
 ## Feature-Specific Lookups
 
@@ -67,4 +68,4 @@
 **"How does day/night theming work?"** → [shared/css-theming.md](shared/css-theming.md), [shared/helpers.md](shared/helpers.md)
 **"How does HiDPI canvas scaling work?"** → [shared/helpers.md](shared/helpers.md#setupcanvas)
 **"How do I hide the native AvNav widget header?"** → [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md#wantshidenativehead)
-**"How do I add a SignalK KEY selector to the editor?"** → [avnav-api/editable-parameters.md](avnav-api/editable-parameters.md#key-type)
+**"How do I add a SignalK KEY selector to the editor?"** → [avnav-api/editable-parameters.md](avnav-api/editable-parameters.md#key-details)

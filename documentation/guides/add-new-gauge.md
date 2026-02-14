@@ -1,6 +1,6 @@
 # Guide: Create a New Semicircle Gauge
 
-**Status:** ✅ Ready | post-refactoring workflow using shared GaugeUtils API
+**Status:** ✅ Ready | Current workflow with `SemicircleGaugeRenderer` + ClusterHost registries
 
 ## Prerequisites
 
@@ -13,19 +13,19 @@ Read first:
 
 ## Overview
 
-New semicircle gauges should be thin wrappers over `SemicircleGaugeRenderer`. Do not copy helper functions from existing gauges.
+New semicircle gauges should be thin wrappers over `SemicircleGaugeRenderer`. Keep gauge modules focused on formatting, tick strategy, and sector strategy.
 
 ## Step 1: Create Gauge Module
 
-Create `modules/NewGauge/NewGauge.js` with:
+Create `modules/NewGauge/NewGauge.js`:
 
-1. UMD wrapper
-2. `create(def, Helpers)`
-3. Local gauge-specific functions only:
-- `formatDisplay(raw, props, unit) -> { num, text }`
+1. UMD wrapper + `create(def, Helpers)`
+2. Resolve shared renderer: `Helpers.getModule("SemicircleGaugeRenderer").create(def, Helpers)`
+3. Provide gauge-specific functions only:
+- `formatDisplay(raw, props, unit, Helpers) -> { num, text }`
 - `tickSteps(range) -> { major, minor }`
 - `buildSectors(props, minV, maxV, arc, valueUtils) -> Sector[]`
-4. `renderCanvas` from shared renderer:
+4. Build `renderCanvas` with `createRenderer(spec)`
 
 ```javascript
 const rendererModule = Helpers.getModule("SemicircleGaugeRenderer");
@@ -46,7 +46,7 @@ const renderCanvas = renderer.createRenderer({
 });
 ```
 
-5. Export:
+5. Export module spec:
 
 ```javascript
 return {
@@ -57,9 +57,9 @@ return {
 };
 ```
 
-## Step 2: Register Module in `plugin.js`
+## Step 2: Register Module in `config/modules.js`
 
-Add to `MODULES`:
+Add module entry:
 
 ```javascript
 NewGauge: {
@@ -70,21 +70,48 @@ NewGauge: {
 }
 ```
 
-## Step 3: Add Cluster Kind + Translation
+## Step 3: Wire ClusterHost Renderer Registry
 
-Update `ClusterHost.js`:
+If `ClusterHost` should render this gauge, update both declaration and runtime selection:
 
-1. Add kind dispatch in `translateFunction`
-2. Map editable parameters to generic gauge props (`value`, `minValue`, `maxValue`, `tickMajor`, `tickMinor`, `warningFrom`, `alarmFrom`, thresholds)
-3. Route `pickRenderer` to `NewGauge`
+1. `config/modules.js`: add `"NewGauge"` to `ClusterHostRendererRegistry.deps`
+2. `modules/ClusterHost/Core/RendererRegistry.js`:
+- instantiate the new spec in `create()`
+- include it in `subSpecs`
+- route `props.renderer === "NewGauge"` in `pickRenderer()`
 
-## Step 4: Verify
+## Step 4: Route Data via Dispatch Module
+
+Update the relevant cluster dispatch module (`modules/ClusterHost/Dispatch/*.js`) so translation emits:
+
+```javascript
+return {
+  renderer: "NewGauge",
+  value: p.someValue,
+  caption: cap("someGraphicKind"),
+  unit: unit("someGraphicKind"),
+  // gauge props: minValue, maxValue, tickMajor, tickMinor, warningFrom, alarmFrom, ...
+};
+```
+
+Do not edit `ClusterHost.js` for kind-specific translation logic.
+
+## Step 5: Verify
 
 - Resize to trigger `flat`, `normal`, `high`
 - Pointer tracks displayed numeric value
 - Warning/alarm sectors render correctly
 - Day/night colors update
-- Disconnect overlay works
+- Disconnect overlay works (`props.disconnect`)
+
+## Checklist
+
+- [ ] Gauge wrapper created in `modules/NewGauge/NewGauge.js`
+- [ ] Module registered in `config/modules.js`
+- [ ] Added to `ClusterHostRendererRegistry.deps` (if ClusterHost-rendered)
+- [ ] Renderer wired in `modules/ClusterHost/Core/RendererRegistry.js`
+- [ ] Dispatch module emits `renderer: "NewGauge"` and expected props
+- [ ] Visual + resize behavior validated
 
 ## Related
 

@@ -1,96 +1,66 @@
 # Helpers Object
 
-**Status:** ✅ Implemented | Defined in `core/helpers.js`, passed to all module `create()` calls by `core/init.js`
+**Status:** ✅ Implemented | Defined in `core/helpers.js`, passed to module `create()` calls by `core/init.js`
 
 ## Overview
 
-Helpers is a shared utility object passed as second argument to `module.create(def, Helpers)`. Provides canvas setup, theming, formatter application, and module access.
+`Helpers` is passed as second argument to `module.create(def, Helpers)`. It provides canvas setup, theming, formatter application, and module access.
 
 ## API Reference
 
-### setupCanvas(canvas)
+### setupCanvas
 
-Prepares a HiDPI-safe canvas. Maps drawing coordinates to CSS pixels.
+Prepares a HiDPI-safe canvas and returns CSS-pixel drawing dimensions.
 
 ```javascript
 const { ctx, W, H } = Helpers.setupCanvas(canvas);
-// ctx = CanvasRenderingContext2D (scaled for devicePixelRatio)
-// W   = CSS width in pixels (drawing coordinates)
-// H   = CSS height in pixels (drawing coordinates)
 ```
 
-**Implementation:**
-- Reads `canvas.getBoundingClientRect()` for CSS size
-- Sets `canvas.width/height` to CSS size × `devicePixelRatio`
-- Applies `ctx.setTransform(dpr, 0, 0, dpr, 0, 0)` so drawing uses CSS pixels
-- Returns `{ ctx, W, H }` where W/H are CSS pixel dimensions
+Implementation summary:
 
-**Usage:** Call at the start of every `renderCanvas()`. All subsequent drawing uses CSS pixel coordinates (not physical pixels).
+- reads `canvas.getBoundingClientRect()`
+- sets `canvas.width/height` to CSS size × `devicePixelRatio`
+- applies `ctx.setTransform(dpr, 0, 0, dpr, 0, 0)`
+- returns `{ ctx, W, H }` in CSS pixels
 
-### resolveTextColor(canvas)
+### resolveTextColor
 
-Resolves the foreground color for drawing. Reads CSS custom properties in priority order:
+Resolves foreground color with priority:
 
 1. `--dyni-fg`
 2. `--instrument-fg`
 3. `--mainfg`
-4. Fallback: `getComputedStyle(canvas).color` or `"#000"`
+4. `getComputedStyle(canvas).color` or `#000`
 
-```javascript
-const color = Helpers.resolveTextColor(canvas);
-ctx.fillStyle = color;
-ctx.strokeStyle = color;
-```
+### resolveFontFamily
 
-Automatically adapts to AvNav's day/night mode via CSS variables.
+Reads `--dyni-font` and falls back to default stack (`Inter`, system fonts, emoji fonts).
 
-### resolveFontFamily(el)
+### applyFormatter
 
-Resolves the font stack. Reads `--dyni-font` CSS variable, with a comprehensive fallback stack:
+Applies formatter to raw value:
 
-```javascript
-const family = Helpers.resolveFontFamily(canvas);
-ctx.font = '700 14px ' + family;
-```
+1. `props.formatter` function -> call directly
+2. `props.formatter` string -> resolve `avnav.api.formatter[name]`
+3. fallback -> `String(raw)` or `props.default` when null/NaN
 
-Default fallback: `"Inter","SF Pro Text",-apple-system,"Segoe UI",Roboto,"Helvetica Neue",...`
+`formatterParameters` accepts array or comma-separated string.
 
-### applyFormatter(raw, props)
+### getModule
 
-Applies a formatter to a raw SignalK value.
-
-```javascript
-const displayText = Helpers.applyFormatter(rawValue, props);
-```
-
-**Resolution order:**
-1. `props.formatter` is a function → call directly with `(raw, ...formatterParameters)`
-2. `props.formatter` is a string → look up `avnav.api.formatter[name]` and call
-3. Neither → return `String(raw)` or `props.default` if null/NaN
-
-**formatterParameters:** parsed from `props.formatterParameters` (array or comma-separated string).
-
-### getModule(id)
-
-Access other loaded modules by their MODULES registry ID.
+Accesses loaded modules by `config.modules` ID.
 
 ```javascript
 const gaugeUtilsModule = Helpers.getModule("GaugeUtils");
 const gaugeUtils = gaugeUtilsModule && gaugeUtilsModule.create(def, Helpers);
 ```
 
-**Available module IDs:** `GaugeAngleUtils`, `GaugeTickUtils`, `GaugePrimitiveDrawUtils`, `GaugeDialDrawUtils`, `GaugeTextUtils`, `GaugeValueUtils`, `GaugeUtils`, `SemicircleGaugeRenderer`, `ThreeElements`, `WindDial`, `CompassGauge`, `SpeedGauge`, `DepthGauge`, `TemperatureGauge`, `VoltageGauge`, `ClusterHostTranslateUtils`, `ClusterHostRendererRegistry`, `ClusterHostDispatchCourseHeading`, `ClusterHostDispatchSpeed`, `ClusterHostDispatchPosition`, `ClusterHostDispatchDistance`, `ClusterHostDispatchEnvironment`, `ClusterHostDispatchWind`, `ClusterHostDispatchTime`, `ClusterHostDispatchNav`, `ClusterHostDispatchAnchor`, `ClusterHostDispatchVessel`, `ClusterHostDispatchRegistry`, `ClusterHost`
+## Internal Helper Not in `Helpers`
 
-## Helper Not in Helpers Object
-
-`defaultsFromEditableParams(editableParams)` — builds default values from typed editableParameters. Defined in `core/editable-defaults.js`, used by `core/register-instrument.js`, not exposed to modules.
-
-## File Location
-
-Defined in `core/helpers.js`.
+`defaultsFromEditableParams(editableParams)` (from `core/editable-defaults.js`) is used in `core/register-instrument.js` and is not exposed to module code.
 
 ## Related
 
-- [css-theming.md](css-theming.md) — CSS variables read by resolveTextColor/resolveFontFamily
-- [../avnav-api/formatters.md](../avnav-api/formatters.md) — Available formatters
-- [../architecture/module-system.md](../architecture/module-system.md) — How getModule resolves
+- [css-theming.md](css-theming.md)
+- [../avnav-api/formatters.md](../avnav-api/formatters.md)
+- [../architecture/module-system.md](../architecture/module-system.md)

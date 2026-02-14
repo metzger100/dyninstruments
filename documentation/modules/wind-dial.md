@@ -4,12 +4,12 @@
 
 ## Overview
 
-Full-circle wind dial renderer showing wind angle (AWA/TWA) and speed (AWS/TWS) simultaneously. Uses `GaugeUtils.draw` for polar drawing (ring, sectors, ticks, labels, pointer). Text layout for angle and speed values is handled internally with dual-column layout.
+Full-circle wind dial showing angle (AWA/TWA) and speed (AWS/TWS) together. Uses `GaugeUtils.draw` for dial primitives and `GaugeUtils.text/value` for text fitting and value handling.
 
 ## Module Registration
 
 ```javascript
-// In MODULES (plugin.js)
+// In config/modules.js
 WindDial: {
   js: BASE + "modules/WindDial/WindDial.js",
   css: BASE + "modules/WindDial/WindDial.css",
@@ -18,93 +18,58 @@ WindDial: {
 }
 ```
 
-## Props (set by ClusterHost.translateFunction for wind cluster)
+## Props
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `angle` | number | — | Wind angle in degrees (±180 for AWA/TWA) |
-| `speed` | number | — | Wind speed (m/s raw from SignalK) |
-| `angleCaption` | string | `""` | Caption for angle side (e.g. "AWA") |
-| `speedCaption` | string | `""` | Caption for speed side (e.g. "AWS") |
-| `angleUnit` | string | `"°"` | Unit for angle display |
-| `speedUnit` | string | `"kn"` | Unit for speed display |
-| `leadingZero` | boolean | `false` | Pad angle to 3 digits (e.g. "045") |
-| `layEnabled` | boolean | `true` | Show layline sectors |
-| `layMin` | number | `0` | Layline inner angle (degrees, 0–180) |
-| `layMax` | number | `0` | Layline outer angle (degrees, 0–180) |
-| `dialRatioThresholdNormal` | number | `0.7` | Ratio below which → high mode |
-| `dialRatioThresholdFlat` | number | `2.0` | Ratio above which → flat mode |
-| `captionUnitScale` | number | `0.8` | Caption/unit size relative to value |
-| `disconnect` | boolean | `false` | Show "NO DATA" overlay |
+| `angle` | number | — | Wind angle in degrees (±180 display) |
+| `speed` | number | — | Wind speed raw value |
+| `angleCaption` | string | `""` | Angle caption (`AWA`/`TWA`) |
+| `speedCaption` | string | `""` | Speed caption (`AWS`/`TWS`) |
+| `angleUnit` | string | `"°"` | Angle unit |
+| `speedUnit` | string | `"kn"` | Speed unit |
+| `leadingZero` | boolean | `false` | Angle pad to 3 digits |
+| `layEnabled` | boolean | `true` | Enable layline sectors |
+| `layMin` | number | `0` | Layline inner bound (0..180) |
+| `layMax` | number | `0` | Layline outer bound (0..180) |
+| `dialRatioThresholdNormal` | number | `0.7` | Ratio below -> `high` |
+| `dialRatioThresholdFlat` | number | `2.0` | Ratio above -> `flat` |
+| `captionUnitScale` | number | `0.8` | Caption/unit ratio vs value |
+| `disconnect` | boolean | `false` | Draw `NO DATA` overlay |
 
 ## Dial Drawing (via `GaugeUtils.draw`)
 
-Angle convention: 0° = North (top), clockwise positive, range ±180.
-
 | Element | Draw Function | Parameters |
 |---|---|---|
-| Ring | `draw.drawRing` | full circle, lineWidth 1 |
-| Layline starboard | `draw.drawAnnularSector` | `layMin→layMax`, `fillStyle: "#82b683"` |
-| Layline port | `draw.drawAnnularSector` | `-layMax→-layMin`, `fillStyle: "#ff7a76"` |
-| Wind pointer | `draw.drawPointerAtRim` | `angle`, variant "long", sideFactor 0.25, lengthFactor 2, color "#ff2b2b" |
-| Ticks | `draw.drawTicks` | -180→180, major 30°, minor 10°, includeEnd |
-| Labels | `draw.drawLabels` | -180→180, step 30°, endpoints filtered out |
-
-If draw primitives are not available: dial renders empty (graceful fallback, no crash).
+| Ring | `draw.drawRing` | full circle |
+| Layline starboard | `draw.drawAnnularSector` | `layMin..layMax`, green |
+| Layline port | `draw.drawAnnularSector` | `-layMax..-layMin`, red |
+| Wind pointer | `draw.drawPointerAtRim` | red long pointer at `angle` |
+| Ticks | `draw.drawTicks` | `-180..180`, major 30, minor 10 |
+| Labels | `draw.drawLabels` | `-180..180`, step 30, endpoints filtered |
 
 ## Layout Modes
 
-```
+```text
 ratio = W / H
-ratio < dialRatioThresholdNormal (0.7)  →  "high"
-ratio > dialRatioThresholdFlat   (2.0)  →  "flat"
-else                                    →  "normal"
+ratio < dialRatioThresholdNormal -> high
+ratio > dialRatioThresholdFlat -> flat
+otherwise -> normal
 ```
 
 ### Dual-Value Display
 
-WindDial always shows two value groups: **angle** (left side) and **speed** (right side).
+- left side: angle caption/value/unit
+- right side: speed caption/value/unit
 
-**flat** — Side strips next to dial:
-
-```
-[AngleCap]  [         ]  [SpeedCap]
-[AngleVal]  [  DIAL   ]  [SpeedVal]
-[AngleUni]  [         ]  [SpeedUni]
-```
-
-Left strip: angle caption (top), angle value+unit (bottom). Right strip: speed caption (top), speed value+unit (bottom). Value+unit measured first; caption capped at `valuePx × secScale`.
-
-**high** — Inline rows above/below dial:
-
-```
-[AngleCap  AngleVal  AngleUnit]   ← top row
-[          DIAL              ]
-[SpeedCap  SpeedVal  SpeedUnit]   ← bottom row
-```
-
-Binary search fits caption+value+unit inline per row.
-
-**normal** — Three-row blocks inside dial circle:
-
-```
-         [AngleCap | SpeedCap]
-  inside [AngleVal | SpeedVal]
-  circle [AngleUni | SpeedUni]
-```
-
-Two half-width columns (left=right-aligned angle, right=left-aligned speed). Optimal text height found by iterating over possible block heights and maximizing value font size within the safe inscribed rectangle.
+`flat` uses side strips, `normal` uses two inner columns, `high` uses inline top/bottom rows.
 
 ## Internal Value Formatting
 
 | Function | Input | Output |
 |---|---|---|
-| `formatAngle180(v, leadingZero)` | angle (degrees) | String ±180 (e.g. "-045", "135") |
-| `formatSpeed(v, unit)` | speed (m/s) | String via `avnav.api.formatter.formatSpeed` or fallback |
-
-## Shared Internal Functions (duplicated from other modules)
-
-`setFont`, `clamp`, `isFiniteN`, `fitTextPx`, `measureValueUnitFit`, `drawValueUnitWithFit`, `drawCaptionMax`, `drawThreeRowsBlock`, `fitInlineCapValUnit` — identical to CompassGauge versions.
+| `formatAngle180(v, leadingZero)` | angle deg | `-180..180` string |
+| `formatSpeed(v, unit)` | speed value | formatted speed string |
 
 ## Exports
 
@@ -113,16 +78,12 @@ return {
   id: "WindDial",
   wantsHideNativeHead: true,
   renderCanvas,
-  translateFunction      // no-op (returns {}); ClusterHost handles translation
+  translateFunction // no-op, ClusterHost handles translation
 };
 ```
 
-## File Location
-
-`modules/WindDial/WindDial.js`
-
 ## Related
 
-- [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md) — shared draw API reference
-- [../architecture/cluster-system.md](../architecture/cluster-system.md) — Wind cluster dispatch
-- [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md) — Layline colors
+- [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
+- [../architecture/cluster-system.md](../architecture/cluster-system.md)
+- [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md)

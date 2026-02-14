@@ -4,7 +4,7 @@
 
 ## Overview
 
-`ClusterHost` is the meta-module used by all cluster widgets. It now uses a modular internal architecture:
+`ClusterHost` is the meta-module used by all cluster widgets. It uses a modular internal architecture:
 
 - Thin orchestrator: `modules/ClusterHost/ClusterHost.js`
 - Translation toolkit: `modules/ClusterHost/Core/TranslateUtils.js`
@@ -12,22 +12,20 @@
 - Renderer lifecycle/delegation: `modules/ClusterHost/Core/RendererRegistry.js`
 - Per-cluster translators: `modules/ClusterHost/Dispatch/*.js`
 
-This keeps translation logic isolated per cluster while preserving existing behavior.
-
 ## Runtime Flow
 
-1. AvNav calls `ClusterHost.translateFunction(props)`.
-2. `DispatchRegistry` resolves cluster by `props.cluster || def.cluster`.
+1. AvNav calls `ClusterHost.translateFunction(props)`
+2. `DispatchRegistry` resolves cluster by `props.cluster || def.cluster`
 3. `TranslateUtils.createToolkit(props)` provides:
-   - `cap(kind)`
-   - `unit(kind)`
-   - `out(value, caption, unit, formatter, formatterParameters)`
-   - `makeAngleFormatter(isDirection, leadingZero, fallback)`
+- `cap(kind)`
+- `unit(kind)`
+- `out(value, caption, unit, formatter, formatterParameters)`
+- `makeAngleFormatter(isDirection, leadingZero, fallback)`
 4. Matching dispatch module translates to either:
-   - Numeric output for `ThreeElements`
-   - Graphic output with `renderer: "..."`
-5. `ClusterHost.renderCanvas()` delegates to `RendererRegistry`, which picks renderer by `props.renderer`.
-6. `ClusterHost.finalizeFunction()` fans out to all sub-renderers and tolerates renderer-local finalize errors.
+- numeric output for `ThreeElements`
+- graphic output with `renderer: "..."`
+5. `ClusterHost.renderCanvas()` delegates to `RendererRegistry`, which picks renderer by `props.renderer`
+6. `ClusterHost.finalizeFunction()` fans out to all sub-renderers and tolerates renderer-local finalize errors
 
 ## Dispatch Modules
 
@@ -49,7 +47,6 @@ Each module implements:
 ```javascript
 function create(def, Helpers) {
   function translate(props, toolkit) {
-    // cluster-specific mapping
     return {};
   }
   return { cluster: "clusterName", translate };
@@ -70,15 +67,29 @@ function create(def, Helpers) {
 
 `wantsHideNativeHead` is aggregated (`true` if any sub-renderer requests it).
 
-## Adding or Changing a Cluster
+## Registration Rules for New Modules
 
-1. Update cluster config in `config/clusters/*.js` and kind defaults in `config/shared/kind-maps.js`.
-2. Add or update a dispatch module in `modules/ClusterHost/Dispatch/`.
-3. Register the dispatch module in `config/modules.js`.
-4. Add it to `ClusterHostDispatchRegistry.deps` in `config/modules.js`.
-5. If a new graphic renderer is introduced, wire it in:
-   - `config/modules.js`
-   - `modules/ClusterHost/Core/RendererRegistry.js`
+### New Dispatch Module
+
+Must be registered in two places:
+
+1. `config/modules.js`
+- add module entry
+- add dependency in `ClusterHostDispatchRegistry.deps`
+2. `modules/ClusterHost/Core/DispatchRegistry.js`
+- add module ID to `dispatchModuleIds`
+
+### New Renderer Module
+
+Must be registered in two places:
+
+1. `config/modules.js`
+- add renderer module entry
+- add dependency in `ClusterHostRendererRegistry.deps`
+2. `modules/ClusterHost/Core/RendererRegistry.js`
+- instantiate in `create()`
+- include in `subSpecs`
+- add selection branch in `pickRenderer()`
 
 ## Related
 

@@ -4,12 +4,12 @@
 
 ## Overview
 
-Default numeric renderer for all clusters. Draws caption, value, and unit as responsive text on canvas. Uses Helpers (not IC) — no polar drawing. ClusterHost delegates to ThreeElements for every non-graphic kind.
+Default numeric renderer for clusters. Draws caption, value, and unit as responsive canvas text. Cluster-specific translation is handled by `ClusterHost` dispatch modules.
 
 ## Module Registration
 
 ```javascript
-// In MODULES (plugin.js)
+// In config/modules.js
 ThreeElements: {
   js: BASE + "modules/ThreeElements/ThreeElements.js",
   css: BASE + "modules/ThreeElements/ThreeElements.css",
@@ -17,75 +17,63 @@ ThreeElements: {
 }
 ```
 
-No dependencies. Used by ClusterHost as default renderer.
+No dependencies. Used by `ClusterHost` as default renderer.
 
-## Props (set by ClusterHost.translateFunction)
+## Props
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `value` | any | — | Raw store value (formatted via `Helpers.applyFormatter`) |
+| `value` | any | — | Raw value (formatted via `Helpers.applyFormatter`) |
 | `caption` | string | `""` | Caption text |
 | `unit` | string | `""` | Unit text |
-| `formatter` | string/fn | — | Formatter name or function (resolved by Helpers) |
-| `formatterParameters` | array/string | — | Params passed to formatter |
+| `formatter` | string/function | — | Formatter name/function |
+| `formatterParameters` | array/string | — | Formatter parameters |
 | `default` | string | `"---"` | Fallback when value is null/NaN |
-| `ratioThresholdNormal` | number | `1.0` | Aspect ratio below which → high mode |
-| `ratioThresholdFlat` | number | `3.0` | Aspect ratio above which → flat mode |
-| `captionUnitScale` | number | `0.8` | Caption/unit font size relative to value (0.3–3.0) |
-| `disconnect` | boolean | `false` | Show "NO DATA" overlay |
+| `ratioThresholdNormal` | number | `1.0` | Ratio below this -> `high` |
+| `ratioThresholdFlat` | number | `3.0` | Ratio above this -> `flat` |
+| `captionUnitScale` | number | `0.8` | Caption/unit font ratio vs value |
+| `disconnect` | boolean | `false` | Show `NO DATA` overlay |
 
 ## Layout Modes
 
-```
+```text
 ratio = W / H
-ratio < ratioThresholdNormal  →  "high"   (3 rows: caption / value / unit)
-ratio > ratioThresholdFlat    →  "flat"   (1 row: caption value unit inline)
-else                          →  "normal" (2 rows: value+unit top, caption bottom)
+ratio < ratioThresholdNormal -> high
+ratio > ratioThresholdFlat -> flat
+otherwise -> normal
 ```
 
 ### Collapsing Rules
 
-Mode collapses when caption or unit are empty:
-- No caption → always flat (1 row), regardless of ratio
-- No unit + high mode → normal (2 rows)
-- No caption + no unit → flat (1 row)
+- No caption -> force `flat`
+- No unit + `high` -> collapse to `normal`
+- No caption + no unit -> force `flat`
 
 ### Row Layout Per Mode
 
-**high** (3 rows) — weighted by `[secScale, 1, secScale]`:
+**high** (`caption / value / unit`)
 
-| Row | Content | Align | Font weight |
-|---|---|---|---|
-| Top | Caption | left | 700 |
-| Middle | Value | center | 700 |
-| Bottom | Unit | right | 700 |
+- top: caption (left)
+- middle: value (center)
+- bottom: unit (right)
 
-Each row scales independently if it overflows (width or height constrained).
+**normal** (`value+unit / caption`)
 
-**normal** (2 rows) — weighted by `[1, secScale]`:
+- top: value + unit (inline, centered)
+- bottom: caption (left)
 
-| Row | Content | Align | Font weight |
-|---|---|---|---|
-| Top | Value + Unit (inline, centered) | center | 700 |
-| Bottom | Caption | left | 700 |
+**flat** (`caption value unit` inline)
 
-Value+Unit share one row with gap; coupled downscaling preserves ratio.
-
-**flat** (1 row) — binary search for max font size:
-
-```
-[Caption gap Value gap Unit]  centered horizontally, vertically centered
-```
-
-Caption/unit use `secScale × valuePx`. All three shrink together if width overflows.
+- one centered row
+- caption/unit scale from `captionUnitScale`
 
 ## Internal Functions
 
 | Function | Purpose |
 |---|---|
-| `fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, bold)` | Fit single text string to box, returns px |
-| `fitValueUnitRowPx(ctx, valueText, unitText, baseValuePx, secScale, gap, maxW, maxH, family)` | Fit value+unit pair, returns `{ vPx, uPx }` |
-| `drawDisconnectOverlay(ctx, W, H, family, color)` | Semi-transparent "NO DATA" overlay |
+| `fitSingleTextPx(...)` | Fit one string into a box |
+| `fitValueUnitRowPx(...)` | Fit value+unit pair |
+| `drawDisconnectOverlay(...)` | Draw overlay text |
 
 ## Exports
 
@@ -94,16 +82,12 @@ return {
   id: "ThreeElements",
   wantsHideNativeHead: true,
   renderCanvas,
-  translateFunction      // no-op (returns {}); ClusterHost handles translation
+  translateFunction // no-op, ClusterHost handles translation
 };
 ```
 
-## File Location
-
-`modules/ThreeElements/ThreeElements.js`
-
 ## Related
 
-- [../architecture/cluster-system.md](../architecture/cluster-system.md) — ClusterHost routing to ThreeElements
-- [../shared/helpers.md](../shared/helpers.md) — applyFormatter, setupCanvas
-- [../avnav-api/formatters.md](../avnav-api/formatters.md) — Available formatters
+- [../architecture/cluster-system.md](../architecture/cluster-system.md)
+- [../shared/helpers.md](../shared/helpers.md)
+- [../avnav-api/formatters.md](../avnav-api/formatters.md)
