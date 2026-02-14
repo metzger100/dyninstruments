@@ -1,6 +1,6 @@
 # dyninstruments — Modern Instrument Widgets for AvNav
 
-**Status:** ✅ Functional | split Gauge core modules in place
+**Status:** ✅ Functional | split Gauge core modules + modular plugin runtime/config in place
 
 ## Stack
 
@@ -14,11 +14,23 @@
 
 ```
 plugin.js (entry point)
-├── Helpers object (setupCanvas, resolveTextColor, applyFormatter, ...)
-├── MODULES{} registry (module IDs → JS/CSS paths + dependencies)
-├── CLUSTERS[] (widget definitions with editableParameters)
-├── loadModule() — async UMD loader with dependency resolution
-└── registerInstrument() — registers widgets with avnav.api
+├── bootstraps internal plugin scripts in fixed order
+├── sets base URL (`window.DyniPlugin.baseUrl`)
+└── triggers `core.runInit()`
+
+core/
+├── namespace.js                — `window.DyniPlugin` namespace container
+├── helpers.js                  — Helpers factory (setupCanvas/formatter/getModule)
+├── editable-defaults.js        — defaults from editableParameters
+├── module-loader.js            — async UMD loader with dependency resolution
+├── register-instrument.js      — widget definition composition/registration
+└── init.js                     — startup orchestration (`load -> register -> log`)
+
+config/
+├── modules.js                  — module registry (`config.modules`)
+├── instruments.js              — final instrument list (`config.instruments`)
+├── shared/                     — kind maps + helper builders + common editables
+└── clusters/                   — one file per cluster widget definition
 
 modules/
 ├── Cores/GaugeAngleUtils.js       — Angle conversion + value/angle mapping
@@ -103,7 +115,7 @@ User selects "kind" in AvNav editor
 - ✅ Phase 0: Documentation system (this)
 - ✅ Phase 1: Refactor semicircle gauge widgets to reduce duplication
 - ✅ Phase 2: Replace monolithic gauge core with split Gauge utility modules
-- ❌ Phase 2: Split plugin.js into per-cluster config files
+- ✅ Phase 2: Split plugin.js into per-cluster config files
 - ❌ Phase 3: Inline comments + file headers
 - ❌ Phase 4: Remove dead code, naming cleanup
 

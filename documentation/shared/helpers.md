@@ -1,6 +1,6 @@
 # Helpers Object
 
-**Status:** ✅ Implemented | Defined in plugin.js, passed to all module create() calls
+**Status:** ✅ Implemented | Defined in `core/helpers.js`, passed to all module `create()` calls by `core/init.js`
 
 ## Overview
 
@@ -83,11 +83,11 @@ const gaugeUtils = gaugeUtilsModule && gaugeUtilsModule.create(def, Helpers);
 
 ## Helper Not in Helpers Object
 
-`defaultsFromEditableParams(editableParams)` — builds default values from typed editableParameters. Used internally by plugin.js during registration, not exposed to modules.
+`defaultsFromEditableParams(editableParams)` — builds default values from typed editableParameters. Defined in `core/editable-defaults.js`, used by `core/register-instrument.js`, not exposed to modules.
 
 ## File Location
 
-Defined in `plugin.js`.
+Defined in `core/helpers.js`.
 
 ## Related
 
