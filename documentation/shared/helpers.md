@@ -79,7 +79,7 @@ const gaugeUtilsModule = Helpers.getModule("GaugeUtils");
 const gaugeUtils = gaugeUtilsModule && gaugeUtilsModule.create(def, Helpers);
 ```
 
-**Available module IDs:** `GaugeAngleUtils`, `GaugeTickUtils`, `GaugePrimitiveDrawUtils`, `GaugeDialDrawUtils`, `GaugeTextUtils`, `GaugeValueUtils`, `GaugeUtils`, `SemicircleGaugeRenderer`, `ThreeElements`, `WindDial`, `CompassGauge`, `SpeedGauge`, `DepthGauge`, `TemperatureGauge`, `VoltageGauge`, `ClusterHost`
+**Available module IDs:** `GaugeAngleUtils`, `GaugeTickUtils`, `GaugePrimitiveDrawUtils`, `GaugeDialDrawUtils`, `GaugeTextUtils`, `GaugeValueUtils`, `GaugeUtils`, `SemicircleGaugeRenderer`, `ThreeElements`, `WindDial`, `CompassGauge`, `SpeedGauge`, `DepthGauge`, `TemperatureGauge`, `VoltageGauge`, `ClusterHostTranslateUtils`, `ClusterHostRendererRegistry`, `ClusterHostDispatchCourseHeading`, `ClusterHostDispatchSpeed`, `ClusterHostDispatchPosition`, `ClusterHostDispatchDistance`, `ClusterHostDispatchEnvironment`, `ClusterHostDispatchWind`, `ClusterHostDispatchTime`, `ClusterHostDispatchNav`, `ClusterHostDispatchAnchor`, `ClusterHostDispatchVessel`, `ClusterHostDispatchRegistry`, `ClusterHost`
 
 ## Helper Not in Helpers Object
 
