@@ -32,12 +32,10 @@
       ? gaugeUtilsModule.create(def, Helpers)
       : null;
     const draw = GU && GU.draw;
+    const T = GU && GU.text;
+    const V = GU && GU.value;
 
     // ---------- utils --------------------------------------------------------
-    function setFont(ctx, px, bold, family){ ctx.font = (bold ? '700 ' : '400 ') + px + 'px ' + family; }
-    function clamp(n, lo, hi){ n = Number(n); if (!isFinite(n)) return lo; return Math.max(lo, Math.min(hi, n)); }
-    function isFiniteN(n){ return typeof n === 'number' && isFinite(n); }
-
     function formatDirection360(v, leadingZero){
       const n = Number(v); if (!isFinite(n)) return '---';
       let a = n % 360; if (a < 0) a += 360;
@@ -45,122 +43,6 @@
       let s = String(r);
       if (leadingZero) s = s.padStart(3, '0');
       return s;
-    }
-
-    function drawDisconnectOverlay(ctx, W, H, family, color){
-      ctx.save();
-      ctx.globalAlpha = 0.20;
-      ctx.fillStyle = color;
-      ctx.fillRect(0, 0, W, H);
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = color;
-      const px = Math.max(12, Math.floor(Math.min(W, H) * 0.18));
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      setFont(ctx, px, true, family);
-      ctx.fillText('NO DATA', Math.floor(W/2), Math.floor(H/2));
-      ctx.restore();
-    }
-
-    function fitTextPx(ctx, text, maxW, maxH, family, bold){
-      if (!text) return Math.max(6, Math.floor(maxH));
-      let px = Math.max(6, Math.floor(maxH));
-      setFont(ctx, px, !!bold, family);
-      const w = ctx.measureText(text).width;
-      if (w <= maxW + 0.5) return px;
-      const scale = Math.max(0.1, maxW / Math.max(1, w));
-      px = Math.floor(px * scale);
-      return Math.max(6, Math.min(px, Math.floor(maxH)));
-    }
-
-    // --------- Flat-mode helpers (Value/Unit first, Caption capped to relation)
-    function measureValueUnitFit(ctx, family, value, unit, w, h, secScale){
-      if (!value) return { vPx: 0, uPx: 0, gap: 0, total: 0 };
-      let lo = 6, hi = Math.max(8, Math.floor(h));
-      let best = { vPx: 6, uPx: 6, gap: 6, total: 0 };
-      function totalWidth(vp){
-        vp = Math.min(vp, h);
-        const up = Math.min(Math.floor(Math.max(6, vp * secScale)), h);
-        setFont(ctx, vp, true, family); const vW = ctx.measureText(value).width;
-        setFont(ctx, up, true, family); const uW = unit ? ctx.measureText(unit).width : 0;
-        const g = unit ? Math.max(6, Math.floor(vp * 0.25)) : 0;
-        return { w: vW + (unit ? (g + uW) : 0), up, gap: g };
-      }
-      for (let i=0;i<18;i++){
-        const mid = (lo + hi) / 2;
-        const test = totalWidth(Math.floor(mid));
-        const okW = test.w <= w + 0.5;
-        if (okW){ best = { vPx: Math.min(Math.floor(mid), h), uPx: test.up, gap: test.gap, total: test.w }; lo = mid; }
-        else hi = mid;
-      }
-      return best;
-    }
-
-    function drawCaptionMax(ctx, family, x, y, w, h, caption, capMaxPx){
-      if (w <= 0 || h <= 0 || !caption) return;
-      let cPx = fitTextPx(ctx, caption, w, h, family, true);
-      if (isFinite(capMaxPx)) cPx = Math.min(cPx, capMaxPx);
-      setFont(ctx, cPx, true, family);
-      ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-      ctx.fillText(caption, x, y);
-    }
-
-    // --------- One-line inline fitter: Caption • Value • Unit ---------------
-    function fitInlineCapValUnit(ctx, family, caption, value, unit, maxW, maxH, secScale){
-      if (!value) return { cPx: 0, vPx: 0, uPx: 0, g1: 0, g2: 0, total: 0 };
-      let lo = 6, hi = Math.max(8, Math.floor(maxH));
-      let best = { cPx: 6, vPx: 6, uPx: 6, g1: 6, g2: 6, total: 0 };
-      function widthFor(vp){
-        vp = Math.min(vp, maxH);
-        const cp = Math.min(Math.floor(Math.max(6, vp * secScale)), maxH);
-        const up = Math.min(Math.floor(Math.max(6, vp * secScale)), maxH);
-        const gap = Math.max(6, Math.floor(vp * 0.25));
-        setFont(ctx, cp, true, family); const cW = caption ? ctx.measureText(caption).width : 0;
-        setFont(ctx, vp, true, family); const vW = ctx.measureText(value).width;
-        setFont(ctx, up, true, family); const uW = unit ? ctx.measureText(unit).width : 0;
-        const g1 = caption ? gap : 0;
-        const g2 = unit ? gap : 0;
-        return { cp, vp, up, width: cW + g1 + vW + g2 + (unit ? uW : 0), g1, g2 };
-      }
-      for (let i=0;i<18;i++){
-        const mid = (lo + hi) / 2;
-        const t = widthFor(Math.floor(mid));
-        const okW = t.width <= maxW + 0.5;
-        const okH = t.cp <= maxH && t.vp <= maxH && t.up <= maxH;
-        if (okW && okH){
-          best = { cPx: t.cp, vPx: t.vp, uPx: t.up, g1: t.g1, g2: t.g2, total: t.width };
-          lo = mid;
-        }
-        else hi = mid;
-      }
-      return best;
-    }
-
-    // --------- Three-row block helper (center/left/right) -------------------
-    function drawThreeRowsBlock(ctx, family, x, y, w, h, align, caption, value, unit, sizes){
-      const { cPx, vPx, uPx, hCap, hVal, hUnit } = sizes;
-      const yCap  = y;
-      const yVal  = y + hCap;
-      const yUnit = y + hCap + hVal;
-
-      if (caption){
-        setFont(ctx, cPx, true, family);
-        ctx.textAlign = align; ctx.textBaseline = 'top';
-        const xCap = (align === 'left') ? x : (align === 'right' ? x + w : x + Math.floor(w/2));
-        ctx.fillText(caption, xCap, yCap);
-      }
-      if (value){
-        setFont(ctx, vPx, true, family);
-        ctx.textAlign = align; ctx.textBaseline = 'top';
-        const xVal = (align === 'left') ? x : (align === 'right' ? x + w : x + Math.floor(w/2));
-        ctx.fillText(value, xVal, yVal);
-      }
-      if (unit){
-        setFont(ctx, uPx, true, family);
-        ctx.textAlign = align; ctx.textBaseline = 'top';
-        const xUnit = (align === 'left') ? x : (align === 'right' ? x + w : x + Math.floor(w/2));
-        ctx.fillText(unit, xUnit, yUnit);
-      }
     }
 
     function renderCanvas(canvas, props){
@@ -171,6 +53,7 @@
       const family = Helpers.resolveFontFamily(canvas);
       const color  = Helpers.resolveTextColor(canvas);
       ctx.fillStyle = color; ctx.strokeStyle = color;
+      if (!T || !V) return;
 
       const heading = Number(props.heading);
       const marker  = Number(props.markerCourse);
@@ -202,7 +85,7 @@
 
       // ---- Dial: rotated ticks + upright labels layering with pointer -------
       if (draw){
-        const rotationDeg = isFiniteN(heading) ? -heading : 0;
+        const rotationDeg = V.isFiniteNumber(heading) ? -heading : 0;
 
         // Frame (ring + ticks)
         draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
@@ -225,7 +108,7 @@
         });
 
         // Optional target marker (bearing/course) relative to rotating card: (marker - heading)
-        if (isFiniteN(marker) && isFiniteN(heading)){
+        if (V.isFiniteNumber(marker) && V.isFiniteNumber(heading)){
           draw.drawRimMarker(ctx, cx, cy, rOuter, (marker - heading), {
             len: Math.max(12, Math.floor(ringW * 0.9)),
             width: Math.max(3, Math.floor(ringW * 0.40))
@@ -254,8 +137,8 @@
       // ---- Texts -------------------------------------------------------------
       const caption = (props.caption || '').trim();
       const unit    = (props.unit || '°').trim();
-      const value   = isFiniteN(heading) ? formatDirection360(heading, leadingZero) : (props.default || '---');
-      const secScale = clamp(props.captionUnitScale ?? 0.8, 0.3, 3.0);
+      const value   = V.isFiniteNumber(heading) ? formatDirection360(heading, leadingZero) : (props.default || '---');
+      const secScale = V.clamp(props.captionUnitScale ?? 0.8, 0.3, 3.0);
 
       // FLAT: left column next to dial
       if (mode === 'flat'){
@@ -265,23 +148,11 @@
           const topBox    = { x: leftX,  y: cy - R, w: leftStrip,  h: Math.floor(lh/2) };
           const bottomBox = { x: leftX,  y: cy,     w: leftStrip,  h: Math.floor(lh/2) };
 
-          const fit = measureValueUnitFit(ctx, family, value, unit, bottomBox.w, bottomBox.h, secScale);
-          drawCaptionMax(ctx, family, topBox.x, topBox.y, topBox.w, topBox.h, caption, Math.floor(fit.vPx * secScale));
-
-          (function drawValueUnit(){
-            const vPx = fit.vPx, uPx = fit.uPx;
-            setFont(ctx, vPx, true, family); const vW = ctx.measureText(value).width;
-            const xStart = bottomBox.x;
-            const yBase = bottomBox.y + Math.floor((bottomBox.h - vPx)/2);
-            ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-            setFont(ctx, vPx, true, family); ctx.fillText(value, xStart, yBase);
-            if (unit){
-              setFont(ctx, uPx, true, family);
-              ctx.fillText(unit, xStart + vW + fit.gap, yBase + Math.max(0, Math.floor(vPx*0.08)));
-            }
-          })();
+          const fit = T.measureValueUnitFit(ctx, family, value, unit, bottomBox.w, bottomBox.h, secScale);
+          T.drawCaptionMax(ctx, family, topBox.x, topBox.y, topBox.w, topBox.h, caption, Math.floor(fit.vPx * secScale), "left");
+          T.drawValueUnitWithFit(ctx, family, bottomBox.x, bottomBox.y, bottomBox.w, bottomBox.h, value, unit, fit, "left");
         }
-        if (props.disconnect) drawDisconnectOverlay(ctx, W, H, family, color);
+        if (props.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color);
         return;
       }
 
@@ -290,37 +161,10 @@
         const th = Math.max(10, Math.floor((pad + topStrip) * 0.9));
         const band = { x: pad, y: pad, w: W - 2*pad, h: th };
 
-        const fit = fitInlineCapValUnit(ctx, family, caption, value, unit, band.w, band.h, secScale);
+        const fit = T.fitInlineCapValUnit(ctx, family, caption, value, unit, band.w, band.h, secScale);
+        T.drawInlineCapValUnit(ctx, family, band.x, band.y, band.w, band.h, caption, value, unit, fit);
 
-        const total = (function(){
-          setFont(ctx, fit.cPx, true, family); const cW = caption ? ctx.measureText(caption).width : 0;
-          setFont(ctx, fit.vPx, true, family); const vW = ctx.measureText(value).width;
-          setFont(ctx, fit.uPx, true, family); const uW = unit ? ctx.measureText(unit).width : 0;
-          return cW + (caption ? fit.g1 : 0) + vW + (unit ? fit.g2 + uW : 0);
-        })();
-
-        let xStart = band.x + Math.floor((band.w - total) / 2);
-        const yMid = band.y + Math.floor(band.h / 2);
-
-        ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
-
-        if (caption){
-          setFont(ctx, fit.cPx, true, family);
-          ctx.fillText(caption, xStart, yMid);
-          xStart += Math.floor(ctx.measureText(caption).width + fit.g1);
-        }
-
-        setFont(ctx, fit.vPx, true, family);
-        ctx.fillText(value, xStart, yMid);
-        xStart += Math.floor(ctx.measureText(value).width);
-
-        if (unit){
-          xStart += fit.g2;
-          setFont(ctx, fit.uPx, true, family);
-          ctx.fillText(unit, xStart, yMid);
-        }
-
-        if (props.disconnect) drawDisconnectOverlay(ctx, W, H, family, color);
+        if (props.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color);
         return;
       }
 
@@ -332,21 +176,9 @@
 
         if (rSafe < 12) {
           const th = Math.max(10, Math.floor((pad + topStrip) * 0.9));
-          const fit = measureValueUnitFit(ctx, family, value, unit, (W - 2*pad), th, secScale);
-          const total = (function(){
-            setFont(ctx, fit.vPx, true, family); const vW = ctx.measureText(value).width;
-            setFont(ctx, fit.uPx, true, family); const uW = unit ? ctx.measureText(unit).width : 0;
-            return vW + (unit ? fit.gap + uW : 0);
-          })();
-          let xStart = pad + Math.floor(((W - 2*pad) - total)/2);
-          const yBase = pad + Math.floor((th - fit.vPx)/2);
-          ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-          setFont(ctx, fit.vPx, true, family); ctx.fillText(value, xStart, yBase);
-          if (unit){
-            setFont(ctx, fit.uPx, true, family);
-            ctx.fillText(unit, xStart + ctx.measureText(value).width + fit.gap, yBase + Math.max(0, Math.floor(fit.vPx*0.08)));
-          }
-          if (props.disconnect) drawDisconnectOverlay(ctx, W, H, family, color);
+          const fit = T.measureValueUnitFit(ctx, family, value, unit, (W - 2*pad), th, secScale);
+          T.drawValueUnitWithFit(ctx, family, pad, pad, (W - 2*pad), th, value, unit, fit, "center");
+          if (props.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color);
           return;
         }
 
@@ -363,7 +195,7 @@
           if (boxW <= 10) continue;
 
           const hv = Math.max(12, Math.floor(mh / (1 + 2*secScale)));
-          const vPx = fitTextPx(ctx, value, boxW, hv, family, true);
+          const vPx = T.fitTextPx(ctx, value, boxW, hv, family, true);
           const score = vPx * 10000 + boxW * 10 + mh;
           if (!best || score > best.score){
             best = { mh, boxW, hv, vPx, score };
@@ -376,9 +208,9 @@
         const hc   = Math.floor(hv * secScale);
         const hu   = Math.floor(hv * secScale);
 
-        const cPx  = fitTextPx(ctx, caption, boxW, hc, family, true);
-        const uPx  = fitTextPx(ctx, unit,    boxW, hu, family, true);
-        const vPx  = best ? best.vPx : fitTextPx(ctx, value, boxW, hv, family, true);
+        const cPx  = T.fitTextPx(ctx, caption, boxW, hc, family, true);
+        const uPx  = T.fitTextPx(ctx, unit,    boxW, hu, family, true);
+        const vPx  = best ? best.vPx : T.fitTextPx(ctx, value, boxW, hv, family, true);
 
         const sizes = { cPx, vPx, uPx, hCap: hc, hVal: hv, hUnit: hu };
 
@@ -386,9 +218,9 @@
         const yTop  = cy - Math.floor(maxH / 2);
 
         // Center-aligned text in a centered box
-        drawThreeRowsBlock(ctx, family, xBox, yTop, boxW, maxH, 'center', caption, value, unit, sizes);
+        T.drawThreeRowsBlock(ctx, family, xBox, yTop, boxW, maxH, caption, value, unit, secScale, "center", sizes);
 
-        if (props.disconnect) drawDisconnectOverlay(ctx, W, H, family, color);
+        if (props.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color);
       }
     }
 
