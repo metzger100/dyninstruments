@@ -1,0 +1,72 @@
+/**
+ * Module: DyniPlugin Kind Maps - Per-kind caption and unit defaults
+ * Documentation: documentation/guides/add-new-cluster.md
+ * Depends: none
+ */
+(function (root) {
+  "use strict";
+
+  const ns = root.DyniPlugin || {};
+  const config = ns.config || (ns.config = {});
+  const shared = config.shared || (config.shared = {});
+
+  shared.kindMaps = {
+    COURSE_KIND: {
+      cog: { cap: "COG", unit: "\u00b0" },
+      hdt: { cap: "HDT", unit: "\u00b0" },
+      hdm: { cap: "HDM", unit: "\u00b0" },
+      brg: { cap: "BRG", unit: "\u00b0" },
+      hdtGraphic: { cap: "HDT", unit: "\u00b0" },
+      hdmGraphic: { cap: "HDM", unit: "\u00b0" }
+    },
+    SPEED_KIND: {
+      sog: { cap: "SOG", unit: "kn" },
+      stw: { cap: "STW", unit: "kn" },
+      sogGraphic: { cap: "SOG", unit: "kn" },
+      stwGraphic: { cap: "STW", unit: "kn" }
+    },
+    POSITION_KIND: {
+      boat: { cap: "POS", unit: "" },
+      wp: { cap: "WP", unit: "" }
+    },
+    DISTANCE_KIND: {
+      dst: { cap: "DST", unit: "" },
+      route: { cap: "RTE", unit: "" },
+      anchor: { cap: "ANCHOR", unit: "m" },
+      watch: { cap: "AWATCH", unit: "m" }
+    },
+    ENV_KIND: {
+      depth: { cap: "DPT", unit: "m" },
+      depthGraphic: { cap: "DPT", unit: "m" },
+      temp: { cap: "TEMP", unit: "\u00b0C" },
+      tempGraphic: { cap: "TEMP", unit: "\u00b0C" },
+      pressure: { cap: "PRES", unit: "hPa" }
+    },
+    WIND_KIND: {
+      angleTrue: { cap: "TWA", unit: "\u00b0" },
+      angleApparent: { cap: "AWA", unit: "\u00b0" },
+      angleTrueDirection: { cap: "TWD", unit: "\u00b0" },
+      speedTrue: { cap: "TWS", unit: "kn" },
+      speedApparent: { cap: "AWS", unit: "kn" }
+    },
+    NAV_KIND: {
+      eta: { cap: "ETA", unit: "" },
+      rteEta: { cap: "RTE ETA", unit: "" },
+      dst: { cap: "DST", unit: "" },
+      rteDistance: { cap: "RTE", unit: "" },
+      vmg: { cap: "VMG", unit: "kn" },
+      clock: { cap: "TIME", unit: "" },
+      positionBoat: { cap: "POS", unit: "" },
+      positionWp: { cap: "WP", unit: "" }
+    },
+    ANCHOR_KIND: {
+      distance: { cap: "ANCHOR", unit: "m" },
+      watch: { cap: "AWATCH", unit: "m" },
+      bearing: { cap: "ABRG", unit: "\u00b0" }
+    },
+    VESSEL_KIND: {
+      voltage: { cap: "VOLT", unit: "V" },
+      voltageGraphic: { cap: "VOLT", unit: "V" }
+    }
+  };
+}(this));

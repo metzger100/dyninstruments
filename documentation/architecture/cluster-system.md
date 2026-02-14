@@ -144,7 +144,7 @@ Enabled/disabled flags gate whether threshold values are passed or `undefined`.
 ## File Location
 
 - **ClusterHost:** `modules/ClusterHost/ClusterHost.js`
-- **Cluster definitions:** `plugin.js` (CLUSTERS array)
+- **Cluster definitions:** `config/clusters/*.js` (assembled in `config/instruments.js`)
 
 ## Related
 

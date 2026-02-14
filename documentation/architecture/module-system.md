@@ -1,17 +1,17 @@
 # Module System
 
-**Status:** ✅ Implemented | plugin.js (`MODULES` registry + `loadModule`)
+**Status:** ✅ Implemented | `config/modules.js` (`MODULES`) + `core/module-loader.js` (`loadModule`)
 
 ## Overview
 
-dyninstruments uses a custom runtime module loader. Modules are UMD-wrapped JS files that register on `window.DyniModules`. `plugin.js` loads them via `<script>` injection with dependency resolution.
+dyninstruments uses a custom runtime module loader. Modules are UMD-wrapped JS files that register on `window.DyniModules`. `plugin.js` bootstraps internal scripts, and `core/module-loader.js` loads renderer modules via `<script>` injection with dependency resolution.
 
 ## `MODULES` Registry
 
-Defined in `plugin.js`. It maps module IDs to file paths, global keys, and dependencies.
+Defined in `config/modules.js` (`config.modules`). It maps module IDs to file paths, global keys, and dependencies.
 
 ```javascript
-const MODULES = {
+config.modules = {
   GaugeAngleUtils: { js: BASE + "modules/Cores/GaugeAngleUtils.js", globalKey: "DyniGaugeAngleUtils" },
   GaugeTickUtils: { js: BASE + "modules/Cores/GaugeTickUtils.js", globalKey: "DyniGaugeTickUtils" },
   GaugePrimitiveDrawUtils: {
@@ -105,16 +105,16 @@ SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge
 ## Registration Flow
 
 ```javascript
-const needed = uniqueModules(INSTRUMENTS);
-Promise.all(needed.map(loadModule)).then((mods) => {
-  INSTRUMENTS.forEach(inst => registerInstrument(byId[inst.module], inst));
+const needed = loader.uniqueModules(config.instruments);
+Promise.all(needed.map(loader.loadModule)).then((mods) => {
+  config.instruments.forEach(inst => registerInstrument(byId[inst.module], inst, Helpers));
 });
 ```
 
 ## Adding a New Module
 
 1. Create `modules/NewModule/NewModule.js` with UMD wrapper.
-2. Add it to `MODULES` in `plugin.js`.
+2. Add it to `config.modules` in `config/modules.js`.
 3. Declare `deps` using module IDs already in `MODULES`.
 4. Add CSS path if needed.
 
