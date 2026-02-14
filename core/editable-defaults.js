@@ -6,8 +6,8 @@
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin || {};
-  const core = ns.core || (ns.core = {});
+  const ns = root.DyniPlugin;
+  const core = ns.core;
 
   function defaultsFromEditableParams(editableParams) {
     const out = {};

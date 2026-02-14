@@ -11,10 +11,7 @@
   "use strict";
 
   function create(def, Helpers) {
-    const rendererModule = Helpers.getModule("SemicircleGaugeRenderer");
-    const renderer = rendererModule && typeof rendererModule.create === "function"
-      ? rendererModule.create(def, Helpers)
-      : null;
+    const renderer = Helpers.getModule("SemicircleGaugeRenderer").create(def, Helpers);
 
     function extractNumberText(text) {
       const match = String(text).match(/-?\d+(?:\.\d+)?/);
@@ -74,23 +71,21 @@
       return sectors;
     }
 
-    const renderCanvas = (renderer && typeof renderer.createRenderer === "function")
-      ? renderer.createRenderer({
-          rawValueKey: "speed",
-          unitDefault: "kn",
-          rangeDefaults: { min: 0, max: 30 },
-          ratioProps: {
-            normal: "speedRatioThresholdNormal",
-            flat: "speedRatioThresholdFlat"
-          },
-          ratioDefaults: { normal: 1.1, flat: 3.5 },
-          tickSteps: speedTickSteps,
-          formatDisplay: function (raw, props, unit) {
-            return displaySpeedFromRaw(raw, unit);
-          },
-          buildSectors: buildHighEndSectors
-        })
-      : function () {};
+    const renderCanvas = renderer.createRenderer({
+      rawValueKey: "speed",
+      unitDefault: "kn",
+      rangeDefaults: { min: 0, max: 30 },
+      ratioProps: {
+        normal: "speedRatioThresholdNormal",
+        flat: "speedRatioThresholdFlat"
+      },
+      ratioDefaults: { normal: 1.1, flat: 3.5 },
+      tickSteps: speedTickSteps,
+      formatDisplay: function (raw, props, unit) {
+        return displaySpeedFromRaw(raw, unit);
+      },
+      buildSectors: buildHighEndSectors
+    });
 
     function translateFunction() {
       return {};

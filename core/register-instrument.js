@@ -6,8 +6,8 @@
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin || {};
-  const core = ns.core || (ns.core = {});
+  const ns = root.DyniPlugin;
+  const core = ns.core;
 
   function composeUpdates() {
     const fns = Array.prototype.slice.call(arguments).filter(function (fn) {

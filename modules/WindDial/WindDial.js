@@ -24,13 +24,10 @@
   "use strict";
 
   function create(def, Helpers) {
-    const gaugeUtilsModule = Helpers.getModule("GaugeUtils");
-    const GU = gaugeUtilsModule && typeof gaugeUtilsModule.create === "function"
-      ? gaugeUtilsModule.create(def, Helpers)
-      : null;
-    const draw = GU && GU.draw;
-    const T = GU && GU.text;
-    const V = GU && GU.value;
+    const GU = Helpers.getModule("GaugeUtils").create(def, Helpers);
+    const draw = GU.draw;
+    const T = GU.text;
+    const V = GU.value;
 
     // --------- util ----------------------------------------------------------
     function formatAngle180(v, leadingZero){
@@ -58,7 +55,6 @@
       const family = Helpers.resolveFontFamily(canvas);
       const color  = Helpers.resolveTextColor(canvas);
       ctx.fillStyle = color; ctx.strokeStyle = color;
-      if (!T || !V) return;
 
       // Mode thresholds (owned by WindDial)
       const ratio = W / Math.max(1, H);
@@ -121,67 +117,60 @@
 
       // Dial frame & sectors first
       ctx.save();
+      // ring
+      draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
 
-      if (draw){
-        // ring
-        draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
-
-        // sectors (annular)
-        if (layEnabled && layMax > layMin){
-          draw.drawAnnularSector(ctx, cx, cy, rOuter, {
-            startDeg:  layMin,
-            endDeg:    layMax,
-            thickness: ringW,
-            fillStyle: "#82b683",
-            alpha: 1
-          });
-          draw.drawAnnularSector(ctx, cx, cy, rOuter, {
-            startDeg: -layMax,
-            endDeg:   -layMin,
-            thickness: ringW,
-            fillStyle: "#ff7a76",
-            alpha: 1
-          });
-        }
-
-        // red wind pointer (tip outward) BEFORE labels so labels stay on top
-        if (V.isFiniteNumber(props.angle)) {
-          draw.drawPointerAtRim(ctx, cx, cy, rOuter, props.angle, {
-            depth: needleDepth,
-            color: "#ff2b2b",
-            variant: "long",
-            sideFactor: 0.25,
-            lengthFactor: 2
-          });
-        }
-
-        // ticks
-        draw.drawTicks(ctx, cx, cy, tickR, {
-          startDeg: -180, endDeg: 180,
-          stepMajor: 30, stepMinor: 10,
-          includeEnd: true,
-          major: { len: 9, width: 2 },
-          minor: { len: 5, width: 1 }
+      // sectors (annular)
+      if (layEnabled && layMax > layMin){
+        draw.drawAnnularSector(ctx, cx, cy, rOuter, {
+          startDeg:  layMin,
+          endDeg:    layMax,
+          thickness: ringW,
+          fillStyle: "#82b683",
+          alpha: 1
         });
-
-        // labels (skip endpoints)
-        const labelInsetVal = Math.max(18, Math.floor(ringW * 1.8));
-        draw.drawLabels(ctx, cx, cy, tickR, {
-          startDeg: -180, endDeg: 180,
-          step: 30,
-          includeEnd: true,
-          radiusOffset: labelInsetVal,
-          fontPx: Math.max(10, Math.floor(R * 0.14)),
-          bold: true,
-          family,
-          labelFormatter: (deg) => String(deg),
-          labelFilter: (deg) => deg !== -180 && deg !== 180
+        draw.drawAnnularSector(ctx, cx, cy, rOuter, {
+          startDeg: -layMax,
+          endDeg:   -layMin,
+          thickness: ringW,
+          fillStyle: "#ff7a76",
+          alpha: 1
         });
       }
-      else {
-        // Fallback: if draw primitives are not available, do nothing (dial stays empty).
-        // This avoids crashes during refactoring.
+
+      // red wind pointer (tip outward) BEFORE labels so labels stay on top
+      if (V.isFiniteNumber(props.angle)) {
+        draw.drawPointerAtRim(ctx, cx, cy, rOuter, props.angle, {
+          depth: needleDepth,
+          color: "#ff2b2b",
+          variant: "long",
+          sideFactor: 0.25,
+          lengthFactor: 2
+        });
       }
+
+      // ticks
+      draw.drawTicks(ctx, cx, cy, tickR, {
+        startDeg: -180, endDeg: 180,
+        stepMajor: 30, stepMinor: 10,
+        includeEnd: true,
+        major: { len: 9, width: 2 },
+        minor: { len: 5, width: 1 }
+      });
+
+      // labels (skip endpoints)
+      const labelInsetVal = Math.max(18, Math.floor(ringW * 1.8));
+      draw.drawLabels(ctx, cx, cy, tickR, {
+        startDeg: -180, endDeg: 180,
+        step: 30,
+        includeEnd: true,
+        radiusOffset: labelInsetVal,
+        fontPx: Math.max(10, Math.floor(R * 0.14)),
+        bold: true,
+        family,
+        labelFormatter: (deg) => String(deg),
+        labelFilter: (deg) => deg !== -180 && deg !== 180
+      });
 
       ctx.restore();
 

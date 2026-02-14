@@ -6,8 +6,8 @@
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin || {};
-  const config = ns.config || (ns.config = {});
+  const ns = root.DyniPlugin;
+  const config = ns.config;
   const BASE = ns.baseUrl;
 
   if (typeof BASE !== "string" || !BASE) {

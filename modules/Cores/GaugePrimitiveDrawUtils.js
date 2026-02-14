@@ -11,25 +11,8 @@
   "use strict";
 
   function create(def, Helpers) {
-    const angleModule = Helpers && Helpers.getModule && Helpers.getModule("GaugeAngleUtils");
-    const angle = angleModule && typeof angleModule.create === "function" ? angleModule.create(def, Helpers) : null;
-
-    function fallbackDegToCanvasRad(deg, cfg, rotationDeg) {
-      cfg = cfg || {};
-      const zeroDegAt = cfg.zeroDegAt || "north";
-      const clockwise = (cfg.clockwise !== false);
-      let d = Number(deg);
-      if (!isFinite(d)) d = 0;
-      d = d + (Number(rotationDeg) || 0);
-      const shift = (zeroDegAt === "east") ? 0 : -90;
-      const signed = clockwise ? d : -d;
-      const wrapped = ((signed + shift) % 360 + 360) % 360;
-      return (wrapped * Math.PI) / 180;
-    }
-
-    const toCanvas = angle && typeof angle.degToCanvasRad === "function"
-      ? angle.degToCanvasRad
-      : fallbackDegToCanvasRad;
+    const angle = Helpers.getModule("GaugeAngleUtils").create(def, Helpers);
+    const toCanvas = angle.degToCanvasRad;
 
     function withCtx(ctx, fn, style) {
       ctx.save();
@@ -220,7 +203,6 @@
     return {
       id: "GaugePrimitiveDrawUtils",
       version: "0.1.0",
-      available: !!angle,
       withCtx,
       drawRing,
       drawArcRing,

@@ -27,13 +27,10 @@
   "use strict";
 
   function create(def, Helpers) {
-    const gaugeUtilsModule = Helpers.getModule("GaugeUtils");
-    const GU = gaugeUtilsModule && typeof gaugeUtilsModule.create === "function"
-      ? gaugeUtilsModule.create(def, Helpers)
-      : null;
-    const draw = GU && GU.draw;
-    const T = GU && GU.text;
-    const V = GU && GU.value;
+    const GU = Helpers.getModule("GaugeUtils").create(def, Helpers);
+    const draw = GU.draw;
+    const T = GU.text;
+    const V = GU.value;
 
     // ---------- utils --------------------------------------------------------
     function formatDirection360(v, leadingZero){
@@ -53,7 +50,6 @@
       const family = Helpers.resolveFontFamily(canvas);
       const color  = Helpers.resolveTextColor(canvas);
       ctx.fillStyle = color; ctx.strokeStyle = color;
-      if (!T || !V) return;
 
       const heading = Number(props.heading);
       const marker  = Number(props.markerCourse);
@@ -84,55 +80,53 @@
       const topStrip    = Math.max(0, Math.floor((H - 2*pad - 2*R) / 2));
 
       // ---- Dial: rotated ticks + upright labels layering with pointer -------
-      if (draw){
-        const rotationDeg = V.isFiniteNumber(heading) ? -heading : 0;
+      const rotationDeg = V.isFiniteNumber(heading) ? -heading : 0;
 
-        // Frame (ring + ticks)
-        draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
+      // Frame (ring + ticks)
+      draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
 
-        draw.drawTicks(ctx, cx, cy, rOuter, {
-          rotationDeg,
-          startDeg: 0, endDeg: 360,
-          stepMajor: 30, stepMinor: 10,
-          major: { len: 9, width: 2 },
-          minor: { len: 5, width: 1 }
-        });
+      draw.drawTicks(ctx, cx, cy, rOuter, {
+        rotationDeg,
+        startDeg: 0, endDeg: 360,
+        stepMajor: 30, stepMinor: 10,
+        major: { len: 9, width: 2 },
+        minor: { len: 5, width: 1 }
+      });
 
-        // Fixed red lubber pointer at 0° (north), behind labels
-        draw.drawPointerAtRim(ctx, cx, cy, rOuter, 0, {
-          depth: lubber,
-          color: "#ff2b2b",
-          variant: "long",
-          sideFactor: 0.25,
-          lengthFactor: 2
-        });
+      // Fixed red lubber pointer at 0° (north), behind labels
+      draw.drawPointerAtRim(ctx, cx, cy, rOuter, 0, {
+        depth: lubber,
+        color: "#ff2b2b",
+        variant: "long",
+        sideFactor: 0.25,
+        lengthFactor: 2
+      });
 
-        // Optional target marker (bearing/course) relative to rotating card: (marker - heading)
-        if (V.isFiniteNumber(marker) && V.isFiniteNumber(heading)){
-          draw.drawRimMarker(ctx, cx, cy, rOuter, (marker - heading), {
-            len: Math.max(12, Math.floor(ringW * 0.9)),
-            width: Math.max(3, Math.floor(ringW * 0.40))
-          });
-        }
-
-        // Labels last → always readable above pointer/marker.
-        // Because we pass rotationDeg, label positions rotate with the card,
-        // but the text remains upright (default).
-        const labels = { 0:"N",45:"NE",90:"E",135:"SE",180:"S",225:"SW",270:"W",315:"NW" };
-        const labelPx = Math.max(10, Math.floor(R * 0.16));
-        draw.drawLabels(ctx, cx, cy, rOuter, {
-          rotationDeg,
-          startDeg: 0, endDeg: 360,
-          step: 45,
-          radiusOffset: Math.max(16, Math.floor(ringW * 1.6)),
-          fontPx: labelPx,
-          bold: true,
-          family,
-          labelsMap: labels,
-          labelFormatter: (deg) => String(deg),
-          textRotation: "upright"
+      // Optional target marker (bearing/course) relative to rotating card: (marker - heading)
+      if (V.isFiniteNumber(marker) && V.isFiniteNumber(heading)){
+        draw.drawRimMarker(ctx, cx, cy, rOuter, (marker - heading), {
+          len: Math.max(12, Math.floor(ringW * 0.9)),
+          width: Math.max(3, Math.floor(ringW * 0.40))
         });
       }
+
+      // Labels last → always readable above pointer/marker.
+      // Because we pass rotationDeg, label positions rotate with the card,
+      // but the text remains upright (default).
+      const labels = { 0:"N",45:"NE",90:"E",135:"SE",180:"S",225:"SW",270:"W",315:"NW" };
+      const labelPx = Math.max(10, Math.floor(R * 0.16));
+      draw.drawLabels(ctx, cx, cy, rOuter, {
+        rotationDeg,
+        startDeg: 0, endDeg: 360,
+        step: 45,
+        radiusOffset: Math.max(16, Math.floor(ringW * 1.6)),
+        fontPx: labelPx,
+        bold: true,
+        family,
+        labelsMap: labels,
+        labelFormatter: (deg) => String(deg),
+        textRotation: "upright"
+      });
 
       // ---- Texts -------------------------------------------------------------
       const caption = (props.caption || '').trim();

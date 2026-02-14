@@ -6,8 +6,8 @@
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin || {};
-  const core = ns.core || (ns.core = {});
+  const ns = root.DyniPlugin;
+  const core = ns.core;
 
   function loadCssOnce(id, href) {
     if (!href) return Promise.resolve();
@@ -39,7 +39,8 @@
   }
 
   function createModuleLoader(modules) {
-    const registry = modules || {};
+    // Invariant: modules is the fully assembled registry from config/modules.js.
+    const registry = modules;
     const loadCache = new Map();
 
     function loadModule(id) {
@@ -63,8 +64,7 @@
           ]);
         })
         .then(function () {
-          const nsModules = root.DyniModules || {};
-          const mod = nsModules[m.globalKey];
+          const mod = root.DyniModules[m.globalKey];
           if (!mod || typeof mod.create !== "function") {
             throw new Error("Module not found or invalid: " + m.globalKey);
           }
@@ -85,7 +85,7 @@
         deps.forEach(addWithDeps);
       }
 
-      (list || []).forEach(function (i) {
+      list.forEach(function (i) {
         addWithDeps(i.module);
       });
 

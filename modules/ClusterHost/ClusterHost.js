@@ -41,53 +41,21 @@
       };
     }
 
-    const three = Helpers.getModule('ThreeElements');
-    if (!three || typeof three.create !== 'function') {
-      throw new Error('ClusterHost: ThreeElements module not available');
-    }
-    const windDialMod = Helpers.getModule('WindDial');
-    if (!windDialMod || typeof windDialMod.create !== 'function') {
-      throw new Error('ClusterHost: WindDial module not available');
-    }
-    const compassMod = Helpers.getModule('CompassGauge');
-    if (!compassMod || typeof compassMod.create !== 'function') {
-      throw new Error('ClusterHost: CompassGauge module not available');
-    }
+    const threeSpec = Helpers.getModule('ThreeElements').create(def, Helpers);
+    const dialSpec = Helpers.getModule('WindDial').create(def, Helpers);
+    const compassSpec = Helpers.getModule('CompassGauge').create(def, Helpers);
+    const speedGaugeSpec = Helpers.getModule('SpeedGauge').create(def, Helpers);
+    const depthSpec = Helpers.getModule('DepthGauge').create(def, Helpers);
+    const tempSpec = Helpers.getModule('TemperatureGauge').create(def, Helpers);
+    const voltageSpec = Helpers.getModule('VoltageGauge').create(def, Helpers);
 
-    const speedGaugeMod = Helpers.getModule('SpeedGauge');
-    if (!speedGaugeMod || typeof speedGaugeMod.create !== 'function') {
-      throw new Error('ClusterHost: SpeedGauge module not available');
-    }
-
-    const depthMod = Helpers.getModule('DepthGauge');
-    if (!depthMod || typeof depthMod.create !== 'function') {
-      throw new Error('ClusterHost: DepthGauge module not available');
-    }
-
-    const tempMod = Helpers.getModule('TemperatureGauge');
-    if (!tempMod || typeof tempMod.create !== 'function') {
-      throw new Error('ClusterHost: TemperatureGauge module not available');
-    }
-    const voltageMod = Helpers.getModule('VoltageGauge');
-    if (!voltageMod || typeof voltageMod.create !== 'function') {
-      throw new Error('ClusterHost: VoltageGauge module not available');
-    }
-
-    const threeSpec   = three.create(def, Helpers);
-    const dialSpec    = windDialMod.create(def, Helpers);
-    const compassSpec = compassMod.create(def, Helpers);
-    const speedGaugeSpec = speedGaugeMod.create(def, Helpers);
-    const depthSpec   = depthMod.create(def, Helpers);
-    const tempSpec    = tempMod.create(def, Helpers);
-    const voltageSpec = voltageMod.create(def, Helpers);
-
-    const wantsHide = !!(threeSpec && threeSpec.wantsHideNativeHead) ||
-                      !!(dialSpec && dialSpec.wantsHideNativeHead) ||
-                      !!(compassSpec && compassSpec.wantsHideNativeHead) ||
-                      !!(speedGaugeSpec && speedGaugeSpec.wantsHideNativeHead) ||
-                      !!(depthSpec && depthSpec.wantsHideNativeHead) ||
-                      !!(tempSpec && tempSpec.wantsHideNativeHead) ||
-                      !!(voltageSpec && voltageSpec.wantsHideNativeHead);
+    const wantsHide = !!threeSpec.wantsHideNativeHead ||
+                      !!dialSpec.wantsHideNativeHead ||
+                      !!compassSpec.wantsHideNativeHead ||
+                      !!speedGaugeSpec.wantsHideNativeHead ||
+                      !!depthSpec.wantsHideNativeHead ||
+                      !!tempSpec.wantsHideNativeHead ||
+                      !!voltageSpec.wantsHideNativeHead;
 
     function out(v, cap, unit, formatter, formatterParameters){
       const o = {};

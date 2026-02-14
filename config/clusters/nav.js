@@ -6,16 +6,14 @@
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin || {};
-  const config = ns.config || (ns.config = {});
-  const shared = config.shared || (config.shared = {});
+  const ns = root.DyniPlugin;
+  const config = ns.config;
+  const shared = config.shared;
 
   const makePerKindTextParams = shared.makePerKindTextParams;
   const opt = shared.opt;
-  const NAV_KIND = shared.kindMaps && shared.kindMaps.NAV_KIND;
+  const NAV_KIND = shared.kindMaps.NAV_KIND;
   const commonThreeElementsEditables = shared.commonThreeElementsEditables;
-
-  config.clusters = Array.isArray(config.clusters) ? config.clusters : [];
 
   config.clusters.push({
     module: "ClusterHost",
