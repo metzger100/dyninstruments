@@ -107,10 +107,15 @@
       globalKey: "DyniVoltageGauge",
       deps: ["SemicircleGaugeRenderer"]
     },
-    ClusterHost: {
-      js: BASE + "modules/ClusterHost/ClusterHost.js",
-      css: BASE + "modules/ClusterHost/ClusterHost.css",
-      globalKey: "DyniClusterHost",
+    ClusterHostTranslateUtils: {
+      js: BASE + "modules/ClusterHost/Core/TranslateUtils.js",
+      css: undefined,
+      globalKey: "DyniClusterHostTranslateUtils"
+    },
+    ClusterHostRendererRegistry: {
+      js: BASE + "modules/ClusterHost/Core/RendererRegistry.js",
+      css: undefined,
+      globalKey: "DyniClusterHostRendererRegistry",
       deps: [
         "ThreeElements",
         "WindDial",
@@ -119,6 +124,83 @@
         "DepthGauge",
         "TemperatureGauge",
         "VoltageGauge"
+      ]
+    },
+    ClusterHostDispatchCourseHeading: {
+      js: BASE + "modules/ClusterHost/Dispatch/CourseHeading.js",
+      css: undefined,
+      globalKey: "DyniClusterHostDispatchCourseHeading"
+    },
+    ClusterHostDispatchSpeed: {
+      js: BASE + "modules/ClusterHost/Dispatch/Speed.js",
+      css: undefined,
+      globalKey: "DyniClusterHostDispatchSpeed"
+    },
+    ClusterHostDispatchPosition: {
+      js: BASE + "modules/ClusterHost/Dispatch/Position.js",
+      css: undefined,
+      globalKey: "DyniClusterHostDispatchPosition"
+    },
+    ClusterHostDispatchDistance: {
+      js: BASE + "modules/ClusterHost/Dispatch/Distance.js",
+      css: undefined,
+      globalKey: "DyniClusterHostDispatchDistance"
+    },
+    ClusterHostDispatchEnvironment: {
+      js: BASE + "modules/ClusterHost/Dispatch/Environment.js",
+      css: undefined,
+      globalKey: "DyniClusterHostDispatchEnvironment"
+    },
+    ClusterHostDispatchWind: {
+      js: BASE + "modules/ClusterHost/Dispatch/Wind.js",
+      css: undefined,
+      globalKey: "DyniClusterHostDispatchWind"
+    },
+    ClusterHostDispatchTime: {
+      js: BASE + "modules/ClusterHost/Dispatch/Time.js",
+      css: undefined,
+      globalKey: "DyniClusterHostDispatchTime"
+    },
+    ClusterHostDispatchNav: {
+      js: BASE + "modules/ClusterHost/Dispatch/Nav.js",
+      css: undefined,
+      globalKey: "DyniClusterHostDispatchNav"
+    },
+    ClusterHostDispatchAnchor: {
+      js: BASE + "modules/ClusterHost/Dispatch/Anchor.js",
+      css: undefined,
+      globalKey: "DyniClusterHostDispatchAnchor"
+    },
+    ClusterHostDispatchVessel: {
+      js: BASE + "modules/ClusterHost/Dispatch/Vessel.js",
+      css: undefined,
+      globalKey: "DyniClusterHostDispatchVessel"
+    },
+    ClusterHostDispatchRegistry: {
+      js: BASE + "modules/ClusterHost/Core/DispatchRegistry.js",
+      css: undefined,
+      globalKey: "DyniClusterHostDispatchRegistry",
+      deps: [
+        "ClusterHostDispatchCourseHeading",
+        "ClusterHostDispatchSpeed",
+        "ClusterHostDispatchPosition",
+        "ClusterHostDispatchDistance",
+        "ClusterHostDispatchEnvironment",
+        "ClusterHostDispatchWind",
+        "ClusterHostDispatchTime",
+        "ClusterHostDispatchNav",
+        "ClusterHostDispatchAnchor",
+        "ClusterHostDispatchVessel"
+      ]
+    },
+    ClusterHost: {
+      js: BASE + "modules/ClusterHost/ClusterHost.js",
+      css: BASE + "modules/ClusterHost/ClusterHost.css",
+      globalKey: "DyniClusterHost",
+      deps: [
+        "ClusterHostTranslateUtils",
+        "ClusterHostRendererRegistry",
+        "ClusterHostDispatchRegistry"
       ]
     }
   };

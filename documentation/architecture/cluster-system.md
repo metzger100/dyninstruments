@@ -1,152 +1,87 @@
 # Cluster System
 
-**Status:** ✅ Implemented | ClusterHost.js
+**Status:** ✅ Implemented | Modular `ClusterHost` dispatcher architecture
 
 ## Overview
 
-ClusterHost is a meta-module that dispatches rendering to the appropriate sub-renderer based on the user-selected `kind`. Every registered widget uses ClusterHost as its module.
+`ClusterHost` is the meta-module used by all cluster widgets. It now uses a modular internal architecture:
 
-## How It Works
+- Thin orchestrator: `modules/ClusterHost/ClusterHost.js`
+- Translation toolkit: `modules/ClusterHost/Core/TranslateUtils.js`
+- Cluster dispatch map: `modules/ClusterHost/Core/DispatchRegistry.js`
+- Renderer lifecycle/delegation: `modules/ClusterHost/Core/RendererRegistry.js`
+- Per-cluster translators: `modules/ClusterHost/Dispatch/*.js`
 
-1. User selects a `kind` in the AvNav editor (e.g. "sogGraphic")
-2. AvNav calls `translateFunction(props)` on ClusterHost
-3. ClusterHost checks `props.cluster` and `props.kind`
-4. For graphic kinds → sets `{ renderer: "SpeedGauge", ...gaugeProps }`
-5. For numeric kinds → sets `{ value, caption, unit, formatter, formatterParameters }`
-6. `renderCanvas()` calls `pickRenderer(props)` which delegates to the correct sub-renderer
+This keeps translation logic isolated per cluster while preserving existing behavior.
 
-## Translate Dispatch
+## Runtime Flow
 
-ClusterHost's `translateFunction` dispatches by cluster name, then by kind:
+1. AvNav calls `ClusterHost.translateFunction(props)`.
+2. `DispatchRegistry` resolves cluster by `props.cluster || def.cluster`.
+3. `TranslateUtils.createToolkit(props)` provides:
+   - `cap(kind)`
+   - `unit(kind)`
+   - `out(value, caption, unit, formatter, formatterParameters)`
+   - `makeAngleFormatter(isDirection, leadingZero, fallback)`
+4. Matching dispatch module translates to either:
+   - Numeric output for `ThreeElements`
+   - Graphic output with `renderer: "..."`
+5. `ClusterHost.renderCanvas()` delegates to `RendererRegistry`, which picks renderer by `props.renderer`.
+6. `ClusterHost.finalizeFunction()` fans out to all sub-renderers and tolerates renderer-local finalize errors.
 
-### courseHeading Cluster
+## Dispatch Modules
 
-| Kind | Renderer | Formatter | Notes |
-|---|---|---|---|
-| `cog` | ThreeElements | `formatDirection360` | Course over ground |
-| `hdt` | ThreeElements | `formatDirection360` | Heading true |
-| `hdm` | ThreeElements | `formatDirection360` | Heading magnetic |
-| `brg` | ThreeElements | `formatDirection360` | Bearing to WP |
-| `hdtGraphic` | CompassGauge | (internal) | Compass dial |
-| `hdmGraphic` | CompassGauge | (internal) | Compass dial |
+Current dispatch modules:
 
-### speed Cluster
+- `CourseHeading.js` (`courseHeading`)
+- `Speed.js` (`speed`)
+- `Position.js` (`position`)
+- `Distance.js` (`distance`)
+- `Environment.js` (`environment`)
+- `Wind.js` (`wind`)
+- `Time.js` (`time`)
+- `Nav.js` (`nav`)
+- `Anchor.js` (`anchor`)
+- `Vessel.js` (`vessel`)
 
-| Kind | Renderer | Formatter | Notes |
-|---|---|---|---|
-| `sog` | ThreeElements | `formatSpeed` | Speed over ground |
-| `stw` | ThreeElements | `formatSpeed` | Speed through water |
-| `sogGraphic` | SpeedGauge | (internal) | Speed gauge |
-| `stwGraphic` | SpeedGauge | (internal) | Speed gauge |
-
-### environment Cluster
-
-| Kind | Renderer | Formatter | Notes |
-|---|---|---|---|
-| `depth` | ThreeElements | `formatDecimal` [3,1,true] | Depth numeric |
-| `depthGraphic` | DepthGauge | (internal) | Depth gauge |
-| `temp` | ThreeElements | `formatTemperature` ['celsius'] | Temp numeric |
-| `tempGraphic` | TemperatureGauge | (internal) | Temp gauge |
-| `pressure` | ThreeElements | `skPressure` ['hPa'] | Pressure numeric |
-
-### wind Cluster
-
-| Kind | Renderer | Formatter | Notes |
-|---|---|---|---|
-| `angleTrue` | ThreeElements | custom fn (±180) | TWA |
-| `angleApparent` | ThreeElements | custom fn (±180) | AWA |
-| `angleTrueDirection` | ThreeElements | custom fn (0-360) | TWD |
-| `speedTrue` | ThreeElements | `formatSpeed` | TWS |
-| `speedApparent` | ThreeElements | `formatSpeed` | AWS |
-| `angleTrueGraphic` | WindDial | (internal) | Wind dial |
-| `angleApparentGraphic` | WindDial | (internal) | Wind dial |
-
-### Other Clusters (All Numeric/ThreeElements)
-
-| Cluster | Kinds | Formatter |
-|---|---|---|
-| `position` | boat, wp | `formatLonLats` |
-| `distance` | dst, route, anchor, watch | `formatDistance` |
-| `time` | (single) | `formatTime` |
-| `nav` | eta, rteEta, dst, rteDistance, vmg, clock, positionBoat, positionWp | Various |
-| `anchor` | distance, watch, bearing | `formatDistance` / `formatDirection360` |
-| `vessel` | voltage, voltageGraphic | `formatDecimal` / VoltageGauge |
-
-## pickRenderer Function
+Each module implements:
 
 ```javascript
-function pickRenderer(props) {
-  if (props.renderer === 'WindDial')         return dialSpec;
-  if (props.renderer === 'CompassGauge')     return compassSpec;
-  if (props.renderer === 'SpeedGauge')       return speedGaugeSpec;
-  if (props.renderer === 'DepthGauge')       return depthSpec;
-  if (props.renderer === 'TemperatureGauge') return tempSpec;
-  if (props.renderer === 'VoltageGauge')     return voltageSpec;
-  return threeSpec;  // Default: ThreeElements (numeric display)
+function create(def, Helpers) {
+  function translate(props, toolkit) {
+    // cluster-specific mapping
+    return {};
+  }
+  return { cluster: "clusterName", translate };
 }
 ```
 
-## Caption/Unit Resolution
+## Renderer Delegation
 
-Per-kind captions and units are stored as `caption_{kindName}` and `unit_{kindName}` in props. ClusterHost resolves them:
+`RendererRegistry` manages these sub-renderers:
 
-```javascript
-const cap  = (k) => p['caption_' + k];
-const unit = (k) => p['unit_' + k];
-// Then: out(value, cap(effKind), unit(effKind), formatter, params)
-```
+- `ThreeElements` (default fallback)
+- `WindDial`
+- `CompassGauge`
+- `SpeedGauge`
+- `DepthGauge`
+- `TemperatureGauge`
+- `VoltageGauge`
 
-## Numeric Output Helper
+`wantsHideNativeHead` is aggregated (`true` if any sub-renderer requests it).
 
-`out(v, cap, unit, formatter, formatterParameters)` builds the props object for ThreeElements:
+## Adding or Changing a Cluster
 
-| Param | Type | Description |
-|---|---|---|
-| `v` | any | Raw store value |
-| `cap` | string | Caption from `p['caption_' + kind]` |
-| `unit` | string | Unit from `p['unit_' + kind]` |
-| `formatter` | string/fn | Formatter name or function |
-| `formatterParameters` | array | Params passed to formatter |
-
-Returns object with only defined fields set (undefined values are omitted).
-Used by all numeric kind dispatch cases.
-
-## Adding a New Renderer to ClusterHost
-
-To add a new graphic renderer (e.g. BarometerGauge):
-
-1. Load the module in ClusterHost deps: add to `MODULES.ClusterHost.deps`
-2. In `create()`: `const baroMod = Helpers.getModule('BarometerGauge');` + create spec
-3. In `translateFunction()`: add dispatch case for the cluster/kind
-4. In `pickRenderer()`: add `if (props.renderer === 'BarometerGauge') return baroSpec;`
-5. Include in `wantsHide` and `finalizeFunction` arrays
-
-### Graphic Kind Props Mapping Example (DepthGauge)
-
-editableParameter names → translateFunction output props:
-
-| editableParameter | Gauge Prop | Notes |
-|---|---|---|
-| `depthMinValue` | `minValue` | `Number(p.depthMinValue)` |
-| `depthMaxValue` | `maxValue` | `Number(p.depthMaxValue)` |
-| `depthTickMajor` | `tickMajor` | |
-| `depthTickMinor` | `tickMinor` | |
-| `depthShowEndLabels` | `showEndLabels` | `!!p.depthShowEndLabels` |
-| `depthWarningFrom` | `warningFrom` | Only if `depthWarningEnabled !== false` |
-| `depthAlarmFrom` | `alarmFrom` | Only if `depthAlarmEnabled !== false` |
-| `depthRatioThresholdNormal` | `depthRatioThresholdNormal` | Passed through 1:1 |
-| `depthRatioThresholdFlat` | `depthRatioThresholdFlat` | Passed through 1:1 |
-| `captionUnitScale` | `captionUnitScale` | Shared across all gauges |
-
-Pattern: Gauge-prefixed editableParameter → generic prop name.
-Enabled/disabled flags gate whether threshold values are passed or `undefined`.
-
-## File Location
-
-- **ClusterHost:** `modules/ClusterHost/ClusterHost.js`
-- **Cluster definitions:** `config/clusters/*.js` (assembled in `config/instruments.js`)
+1. Update cluster config in `config/clusters/*.js` and kind defaults in `config/shared/kind-maps.js`.
+2. Add or update a dispatch module in `modules/ClusterHost/Dispatch/`.
+3. Register the dispatch module in `config/modules.js`.
+4. Add it to `ClusterHostDispatchRegistry.deps` in `config/modules.js`.
+5. If a new graphic renderer is introduced, wire it in:
+   - `config/modules.js`
+   - `modules/ClusterHost/Core/RendererRegistry.js`
 
 ## Related
 
-- [module-system.md](module-system.md) — How modules and dependencies are loaded
-- [../avnav-api/plugin-lifecycle.md](../avnav-api/plugin-lifecycle.md) — translateFunction in render cycle
+- [module-system.md](module-system.md) — module registry and dependency loading
+- [../avnav-api/plugin-lifecycle.md](../avnav-api/plugin-lifecycle.md) — `translateFunction` lifecycle
+- [../guides/add-new-cluster.md](../guides/add-new-cluster.md) — cluster authoring workflow
