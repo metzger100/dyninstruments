@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin CourseHeading Cluster - Course and heading widget config
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/cluster-utils.js, config/shared/kind-maps.js
+ * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js
  */
 (function (root) {
   "use strict";
@@ -15,7 +15,7 @@
   const COURSE_KIND = shared.kindMaps.COURSE_KIND;
 
   config.clusters.push({
-    module: "ClusterHost",
+    widget: "ClusterWidget",
     def: {
       name: "dyninstruments_CourseHeading",
       description: "Course & headings (COG/HDT/HDM/BRG) incl. Compass gauge",
@@ -48,7 +48,7 @@
           name: "Leading zero (e.g., 005°)"
         },
 
-        // ThreeElements thresholds — only for numeric kinds
+        // ThreeValueTextWidget thresholds — only for numeric kinds
         ratioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
           name: "3-Rows Threshold (numeric)",
@@ -60,7 +60,7 @@
           condition: [{ kind: "cog" }, { kind: "hdt" }, { kind: "hdm" }, { kind: "brg" }]
         },
 
-        // CompassGauge thresholds — only for graphic kinds
+        // CompassGaugeWidget thresholds — only for graphic kinds
         compRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.8,
           name: "Compass 2-Rows Threshold",

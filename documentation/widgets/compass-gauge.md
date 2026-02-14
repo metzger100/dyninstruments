@@ -1,6 +1,6 @@
-# CompassGauge Module
+# CompassGaugeWidget Module
 
-**Status:** ✅ Implemented | `modules/CompassGauge/CompassGauge.js`
+**Status:** ✅ Implemented | `widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js`
 
 ## Overview
 
@@ -9,12 +9,12 @@ Full-circle rotating compass card with upright cardinal labels. The dial rotates
 ## Module Registration
 
 ```javascript
-// In config/modules.js
-CompassGauge: {
-  js: BASE + "modules/CompassGauge/CompassGauge.js",
-  css: BASE + "modules/CompassGauge/CompassGauge.css",
-  globalKey: "DyniCompassGauge",
-  deps: ["GaugeUtils"]
+// In config/components.js
+CompassGaugeWidget: {
+  js: BASE + "widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js",
+  css: BASE + "widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.css",
+  globalKey: "DyniCompassGaugeWidget",
+  deps: ["GaugeToolkit"]
 }
 ```
 
@@ -33,7 +33,7 @@ CompassGauge: {
 | `default` | string | `"---"` | Fallback text for invalid heading |
 | `disconnect` | boolean | `false` | Draw `NO DATA` overlay |
 
-## Compass Dial Drawing (via `GaugeUtils.draw`)
+## Compass Dial Drawing (via `GaugeToolkit.draw`)
 
 All dial calls use `rotationDeg = -heading` so card content rotates while top pointer remains fixed.
 
@@ -74,15 +74,15 @@ otherwise -> normal
 
 ```javascript
 return {
-  id: "CompassGauge",
+  id: "CompassGaugeWidget",
   wantsHideNativeHead: true,
   renderCanvas,
-  translateFunction // no-op, ClusterHost handles translation
+  translateFunction // no-op, ClusterWidget handles translation
 };
 ```
 
 ## Related
 
 - [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
-- [../architecture/cluster-system.md](../architecture/cluster-system.md)
+- [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
 - [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md)

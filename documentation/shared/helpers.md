@@ -1,6 +1,6 @@
 # Helpers Object
 
-**Status:** ✅ Implemented | Defined in `core/helpers.js`, passed to module `create()` calls by `core/init.js`
+**Status:** ✅ Implemented | Defined in `runtime/helpers.js`, passed to module `create()` calls by `runtime/init.js`
 
 ## Overview
 
@@ -48,19 +48,19 @@ Applies formatter to raw value:
 
 ### getModule
 
-Accesses loaded modules by `config.modules` ID.
+Accesses loaded modules by `config.components` ID.
 
 ```javascript
-const gaugeUtilsModule = Helpers.getModule("GaugeUtils");
+const gaugeUtilsModule = Helpers.getModule("GaugeToolkit");
 const gaugeUtils = gaugeUtilsModule && gaugeUtilsModule.create(def, Helpers);
 ```
 
 ## Internal Helper Not in `Helpers`
 
-`defaultsFromEditableParams(editableParams)` (from `core/editable-defaults.js`) is used in `core/register-instrument.js` and is not exposed to module code.
+`defaultsFromEditableParams(editableParams)` (from `runtime/editable-defaults.js`) is used in `runtime/widget-registrar.js` and is not exposed to module code.
 
 ## Related
 
 - [css-theming.md](css-theming.md)
 - [../avnav-api/formatters.md](../avnav-api/formatters.md)
-- [../architecture/module-system.md](../architecture/module-system.md)
+- [../architecture/component-system.md](../architecture/component-system.md)

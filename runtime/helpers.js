@@ -1,13 +1,13 @@
 /**
  * Module: DyniPlugin Helpers - Shared helper functions for modules
  * Documentation: documentation/shared/helpers.md
- * Depends: avnav.api.formatter, window.DyniModules
+ * Depends: avnav.api.formatter, window.DyniComponents
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
-  const core = ns.core;
+  const runtime = ns.runtime;
 
   function applyFormatter(raw, props) {
     const fpRaw = props && props.formatterParameters;
@@ -79,9 +79,9 @@
     };
   }
 
-  core.applyFormatter = applyFormatter;
-  core.setupCanvas = setupCanvas;
-  core.resolveTextColor = resolveTextColor;
-  core.resolveFontFamily = resolveFontFamily;
-  core.createHelpers = createHelpers;
+  runtime.applyFormatter = applyFormatter;
+  runtime.setupCanvas = setupCanvas;
+  runtime.resolveTextColor = resolveTextColor;
+  runtime.resolveFontFamily = resolveFontFamily;
+  runtime.createHelpers = createHelpers;
 }(this));

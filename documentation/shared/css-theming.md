@@ -75,12 +75,12 @@ Canvas fills the full widget area:
 Most modules have minimal or empty CSS files. All visual styling is done in canvas. CSS files exist for:
 
 - **plugin.css** — Plugin-wide styles (font, border, head hiding, canvas sizing)
-- **ClusterHost.css** — Empty (kept for symmetry)
-- **ThreeElements.css** — Empty (reads CSS vars via canvas)
-- **WindDial.css** — Empty (reads CSS vars via canvas)
-- **CompassGauge.css** — Empty (reads CSS vars via canvas)
+- **ClusterWidget.css** — Empty (kept for symmetry)
+- **ThreeValueTextWidget.css** — Empty (reads CSS vars via canvas)
+- **WindDialWidget.css** — Empty (reads CSS vars via canvas)
+- **CompassGaugeWidget.css** — Empty (reads CSS vars via canvas)
 
-SpeedGauge, DepthGauge, TemperatureGauge, VoltageGauge have no CSS files.
+SpeedGaugeWidget, DepthGaugeWidget, TemperatureGaugeWidget, VoltageGaugeWidget have no CSS files.
 
 ## File Location
 

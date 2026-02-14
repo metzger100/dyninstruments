@@ -1,17 +1,17 @@
 /**
- * Module: SemicircleGaugeRenderer - Shared renderer for semicircle gauge widgets
- * Documentation: documentation/modules/semicircle-gauges.md
- * Depends: GaugeUtils
+ * Module: SemicircleGaugeEngine - Shared renderer for semicircle gauge widgets
+ * Documentation: documentation/widgets/semicircle-gauges.md
+ * Depends: GaugeToolkit
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniSemicircleGaugeRenderer = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniSemicircleGaugeEngine = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const GU = Helpers.getModule("GaugeUtils").create(def, Helpers);
+    const GU = Helpers.getModule("GaugeToolkit").create(def, Helpers);
     const T = GU.text;
     const V = GU.value;
     const draw = GU.draw;
@@ -245,11 +245,11 @@
     }
 
     return {
-      id: "SemicircleGaugeRenderer",
+      id: "SemicircleGaugeEngine",
       version: "0.1.0",
       createRenderer
     };
   }
 
-  return { id: "SemicircleGaugeRenderer", create };
+  return { id: "SemicircleGaugeEngine", create };
 }));

@@ -16,32 +16,39 @@
 plugin.js (entry point)
 ├── validates AvNav globals and computes base URL
 ├── bootstraps internal scripts in fixed order
-└── starts core.runInit()
+└── starts runtime.runInit()
 
-core/
+runtime/
 ├── namespace.js          — namespace container
 ├── helpers.js            — Helpers factory
 ├── editable-defaults.js  — defaults from editableParameters
-├── module-loader.js      — module JS/CSS loader + dep resolution
-├── register-instrument.js— widget definition merge + register
-└── init.js               — load modules -> register instruments
+├── component-loader.js   — component JS/CSS loader + dependency resolution
+├── widget-registrar.js   — widget definition merge + register
+└── init.js               — load components -> register widgets
 
 config/
-├── modules.js            — module registry (`config.modules`)
-├── instruments.js        — instrument list (`config.instruments`)
-├── shared/               — kind maps + shared editables/helpers
+├── components.js         — component registry (`config.components`)
+├── widget-definitions.js — widget definition list (`config.widgetDefinitions`)
+├── shared/               — kind defaults + shared editables/helpers
 └── clusters/             — per-cluster widget definitions
 
-modules/
-├── Cores/                — split shared gauge utilities + semicircle renderer
-├── ThreeElements/        — numeric renderer
-├── ClusterHost/          — dispatch + renderer orchestration
-├── WindDial/
-├── CompassGauge/
-├── SpeedGauge/
-├── DepthGauge/
-├── TemperatureGauge/
-└── VoltageGauge/
+cluster/
+├── ClusterWidget.js       — cluster orchestrator
+├── rendering/             — renderer router
+└── mappers/               — per-cluster mapper components
+
+shared/
+└── widget-kits/gauge/     — reusable gauge math/layout/draw engine
+
+widgets/
+├── text/ThreeValueTextWidget/
+└── gauges/
+   ├── WindDialWidget/
+   ├── CompassGaugeWidget/
+   ├── SpeedGaugeWidget/
+   ├── DepthGaugeWidget/
+   ├── TemperatureGaugeWidget/
+   └── VoltageGaugeWidget/
 ```
 
 ## Cluster Widgets (10 total)
@@ -63,13 +70,13 @@ modules/
 
 **AvNav API:** [plugin-lifecycle.md](avnav-api/plugin-lifecycle.md), [editable-parameters.md](avnav-api/editable-parameters.md), [formatters.md](avnav-api/formatters.md)
 
-**Architecture:** [module-system.md](architecture/module-system.md), [cluster-system.md](architecture/cluster-system.md)
+**Architecture:** [component-system.md](architecture/component-system.md), [cluster-widget-system.md](architecture/cluster-widget-system.md)
 
 **Gauges:** [gauge-style-guide.md](gauges/gauge-style-guide.md), [gauge-shared-api.md](gauges/gauge-shared-api.md)
 
 **Shared:** [helpers.md](shared/helpers.md), [css-theming.md](shared/css-theming.md)
 
-**Modules:** [three-elements.md](modules/three-elements.md), [wind-dial.md](modules/wind-dial.md), [compass-gauge.md](modules/compass-gauge.md), [semicircle-gauges.md](modules/semicircle-gauges.md)
+**Widgets:** [three-elements.md](widgets/three-elements.md), [wind-dial.md](widgets/wind-dial.md), [compass-gauge.md](widgets/compass-gauge.md), [semicircle-gauges.md](widgets/semicircle-gauges.md)
 
 **Guides:** [add-new-gauge.md](guides/add-new-gauge.md), [add-new-cluster.md](guides/add-new-cluster.md), [documentation-maintenance.md](guides/documentation-maintenance.md)
 
@@ -86,6 +93,6 @@ The checker validates markdown links/anchors, JS `Documentation:` header targets
 ## Standards
 
 - Keep docs aligned with code changes
-- Keep module registration guidance tied to `config/modules.js`
-- Keep ClusterHost extension guidance tied to runtime registries (`DispatchRegistry.js`, `RendererRegistry.js`)
+- Keep component registration guidance tied to `config/components.js`
+- Keep ClusterWidget extension guidance tied to runtime registries (`ClusterMapperRegistry.js`, `ClusterRendererRouter.js`)
 - Keep JS file headers pointing to correct docs

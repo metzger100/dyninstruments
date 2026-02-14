@@ -15,10 +15,10 @@
 
 ## Architecture
 
-- **How are modules loaded at runtime (UMD)?** → [architecture/module-system.md](architecture/module-system.md)
-- **How does the dependency system work?** → [architecture/module-system.md](architecture/module-system.md#dependency-graph)
-- **How does ClusterHost route to renderers?** → [architecture/cluster-system.md](architecture/cluster-system.md)
-- **How does translateFunction dispatch to graphic/numeric?** → [architecture/cluster-system.md](architecture/cluster-system.md#runtime-flow)
+- **How are modules loaded at runtime (UMD)?** → [architecture/component-system.md](architecture/component-system.md)
+- **How does the dependency system work?** → [architecture/component-system.md](architecture/component-system.md#dependency-graph)
+- **How does ClusterWidget route to renderers?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
+- **How does translateFunction mapper to graphic/numeric?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md#runtime-flow)
 - **What is the Helpers object?** → [shared/helpers.md](shared/helpers.md)
 
 ## Creating New Widgets (Guides)
@@ -32,22 +32,22 @@
 - **Visual style: proportions, colors, pointer config** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md)
 - **Layout modes (flat/normal/high)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#layout-modes)
 - **Sector logic (warning/alarm placement)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#sector-logic)
-- **Shared gauge APIs (GaugeUtils + split core modules)** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
+- **Shared gauge APIs (GaugeToolkit + split core modules)** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
 
 ## Module Reference (Renderers)
 
-- **How does the numeric text renderer work (caption/value/unit)?** → [modules/three-elements.md](modules/three-elements.md)
-- **What layout modes does ThreeElements support?** → [modules/three-elements.md](modules/three-elements.md#layout-modes)
-- **What props does ThreeElements accept?** → [modules/three-elements.md](modules/three-elements.md#props)
-- **How does the wind dial work (angle+speed dual display)?** → [modules/wind-dial.md](modules/wind-dial.md)
-- **What draw functions does WindDial use?** → [modules/wind-dial.md](modules/wind-dial.md#dial-drawing-via-gaugeutilsdraw)
-- **What props does WindDial accept?** → [modules/wind-dial.md](modules/wind-dial.md#props)
-- **How does the rotating compass card work?** → [modules/compass-gauge.md](modules/compass-gauge.md)
-- **How does compass rotation with upright labels work?** → [modules/compass-gauge.md](modules/compass-gauge.md#compass-dial-drawing-via-gaugeutilsdraw)
-- **What props does CompassGauge accept?** → [modules/compass-gauge.md](modules/compass-gauge.md#props)
-- **How do the semicircle gauges work (Speed/Depth/Temp/Voltage)?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md)
-- **What differs between the 4 gauges (sectors, formatting, defaults)?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md#gauge-specific-responsibilities)
-- **What shared renderer do the semicircle gauges use?** → [modules/semicircle-gauges.md](modules/semicircle-gauges.md#shared-render-flow)
+- **How does the numeric text renderer work (caption/value/unit)?** → [widgets/three-elements.md](widgets/three-elements.md)
+- **What layout modes does ThreeValueTextWidget support?** → [widgets/three-elements.md](widgets/three-elements.md#layout-modes)
+- **What props does ThreeValueTextWidget accept?** → [widgets/three-elements.md](widgets/three-elements.md#props)
+- **How does the wind dial work (angle+speed dual display)?** → [widgets/wind-dial.md](widgets/wind-dial.md)
+- **What draw functions does WindDialWidget use?** → [widgets/wind-dial.md](widgets/wind-dial.md#dial-drawing-via-gaugetoolkitdraw)
+- **What props does WindDialWidget accept?** → [widgets/wind-dial.md](widgets/wind-dial.md#props)
+- **How does the rotating compass card work?** → [widgets/compass-gauge.md](widgets/compass-gauge.md)
+- **How does compass rotation with upright labels work?** → [widgets/compass-gauge.md](widgets/compass-gauge.md#compass-dial-drawing-via-gaugetoolkitdraw)
+- **What props does CompassGaugeWidget accept?** → [widgets/compass-gauge.md](widgets/compass-gauge.md#props)
+- **How do the semicircle gauges work (Speed/Depth/Temp/Voltage)?** → [widgets/semicircle-gauges.md](widgets/semicircle-gauges.md)
+- **What differs between the 4 gauges (sectors, formatting, defaults)?** → [widgets/semicircle-gauges.md](widgets/semicircle-gauges.md#gauge-specific-responsibilities)
+- **What shared renderer do the semicircle gauges use?** → [widgets/semicircle-gauges.md](widgets/semicircle-gauges.md#shared-render-flow)
 
 ## Styling & Theming
 

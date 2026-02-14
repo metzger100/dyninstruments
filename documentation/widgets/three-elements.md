@@ -1,23 +1,23 @@
-# ThreeElements Module
+# ThreeValueTextWidget Module
 
-**Status:** ✅ Implemented | `modules/ThreeElements/ThreeElements.js`
+**Status:** ✅ Implemented | `widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js`
 
 ## Overview
 
-Default numeric renderer for clusters. Draws caption, value, and unit as responsive canvas text. Cluster-specific translation is handled by `ClusterHost` dispatch modules.
+Default numeric renderer for clusters. Draws caption, value, and unit as responsive canvas text. Cluster-specific translation is handled by `ClusterWidget` mapper modules.
 
 ## Module Registration
 
 ```javascript
-// In config/modules.js
-ThreeElements: {
-  js: BASE + "modules/ThreeElements/ThreeElements.js",
-  css: BASE + "modules/ThreeElements/ThreeElements.css",
-  globalKey: "DyniThreeElements"
+// In config/components.js
+ThreeValueTextWidget: {
+  js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
+  css: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.css",
+  globalKey: "DyniThreeValueTextWidget"
 }
 ```
 
-No dependencies. Used by `ClusterHost` as default renderer.
+No dependencies. Used by `ClusterWidget` as default renderer.
 
 ## Props
 
@@ -79,15 +79,15 @@ otherwise -> normal
 
 ```javascript
 return {
-  id: "ThreeElements",
+  id: "ThreeValueTextWidget",
   wantsHideNativeHead: true,
   renderCanvas,
-  translateFunction // no-op, ClusterHost handles translation
+  translateFunction // no-op, ClusterWidget handles translation
 };
 ```
 
 ## Related
 
-- [../architecture/cluster-system.md](../architecture/cluster-system.md)
+- [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
 - [../shared/helpers.md](../shared/helpers.md)
 - [../avnav-api/formatters.md](../avnav-api/formatters.md)

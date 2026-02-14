@@ -1,7 +1,7 @@
 /*!
- * WindDial (UMD) — compact dial for AWA/AWS and TWA/TWS
+ * WindDialWidget (UMD) — compact dial for AWA/AWS and TWA/TWS
  *
- * Updated: uses GaugeUtils.draw shared primitives instead of PolarCore.
+ * Updated: uses GaugeToolkit.draw shared primitives instead of PolarCore.
  *
  * Modes:
  *  - Flat:   Angle caption (left top), value+unit (left bottom), dial centered,
@@ -19,12 +19,12 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniWindDial = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniWindDialWidget = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const GU = Helpers.getModule("GaugeUtils").create(def, Helpers);
+    const GU = Helpers.getModule("GaugeToolkit").create(def, Helpers);
     const draw = GU.draw;
     const T = GU.text;
     const V = GU.value;
@@ -56,7 +56,7 @@
       const color  = Helpers.resolveTextColor(canvas);
       ctx.fillStyle = color; ctx.strokeStyle = color;
 
-      // Mode thresholds (owned by WindDial)
+      // Mode thresholds (owned by WindDialWidget)
       const ratio = W / Math.max(1, H);
       const tN = Number(props.dialRatioThresholdNormal ?? 0.7);
       const tF = Number(props.dialRatioThresholdFlat ?? 2.0);
@@ -297,7 +297,7 @@
     function translateFunction(){ return {}; }
 
     return {
-      id: "WindDial",
+      id: "WindDialWidget",
       version: "1.8.0",
       wantsHideNativeHead: true,
       renderCanvas,
@@ -305,5 +305,5 @@
     };
   }
 
-  return { id: "WindDial", create };
+  return { id: "WindDialWidget", create };
 }))

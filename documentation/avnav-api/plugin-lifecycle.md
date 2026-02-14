@@ -80,15 +80,15 @@ Available as `this` in `initFunction`, `finalizeFunction`, `renderHtml`, `render
 updateFunction: function(values) -> object
 ```
 
-Used when editor values change (for example KEY-driven dynamic store key mapping). In dyninstruments, update functions are composed in `core/register-instrument.js` via `composeUpdates(spec.updateFunction, inst.def.updateFunction)`.
+Used when editor values change (for example KEY-driven dynamic store key mapping). In dyninstruments, update functions are composed in `runtime/widget-registrar.js` via `composeUpdates(spec.updateFunction, inst.def.updateFunction)`.
 
 ### cluster
 
-Internal cluster ID (for example `"speed"`, `"wind"`) used by ClusterHost dispatch routing.
+Internal cluster ID (for example `"speed"`, `"wind"`) used by ClusterWidget mapper routing.
 
 ### wantsHideNativeHead
 
-When `true`, render wrapper in `core/register-instrument.js` adds `data-dyni` to widget root. CSS then hides AvNav native `.widgetHead` and `.valueData`.
+When `true`, render wrapper in `runtime/widget-registrar.js` adds `data-dyni` to widget root. CSS then hides AvNav native `.widgetHead` and `.valueData`.
 
 ### Module create() Pattern
 
@@ -105,9 +105,9 @@ function create(def, Helpers) {
 
 ```text
 1. plugin.js bootstraps internal scripts
-2. core/init.js resolves required module IDs from config.instruments
-3. core/module-loader.js loads all required modules (with deps)
-4. core/register-instrument.js merges module spec + cluster definition
+2. runtime/init.js resolves required module IDs from config.widgetDefinitions
+3. runtime/component-loader.js loads all required modules (with deps)
+4. runtime/widget-registrar.js merges module spec + cluster definition
 5. avnav.api.registerWidget(definition, editableParameters)
 ```
 
@@ -116,14 +116,14 @@ function create(def, Helpers) {
 ```text
 1. User changes editable parameter -> updateFunction(values)
 2. AvNav reads store values via storeKeys
-3. ClusterHost.translateFunction(mergedProps)
+3. ClusterWidget.translateFunction(mergedProps)
    -> numeric: { value, caption, unit, formatter, formatterParameters }
-   -> graphic: { renderer: "SpeedGauge", value, caption, unit, ... }
-4. ClusterHost.renderCanvas() delegates via RendererRegistry
+   -> graphic: { renderer: "SpeedGaugeWidget", value, caption, unit, ... }
+4. ClusterWidget.renderCanvas() delegates via ClusterRendererRouter
 ```
 
 ## Related
 
 - [editable-parameters.md](editable-parameters.md) — parameter types and conditions
 - [formatters.md](formatters.md) — formatter registration and built-ins
-- [../architecture/cluster-system.md](../architecture/cluster-system.md) — ClusterHost dispatch
+- [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md) — ClusterWidget mapper

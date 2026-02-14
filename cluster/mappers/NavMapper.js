@@ -1,11 +1,11 @@
 /*!
- * ClusterHost dispatch: nav
+ * ClusterWidget mapper: nav
  */
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniClusterHostDispatchNav = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniNavMapper = factory(); }
 }(this, function () {
   "use strict";
 
@@ -38,5 +38,5 @@
     };
   }
 
-  return { id: "ClusterHostDispatchNav", create: create };
+  return { id: "NavMapper", create: create };
 }));

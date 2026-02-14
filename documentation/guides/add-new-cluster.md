@@ -1,24 +1,24 @@
 # Guide: Create a New Cluster Widget
 
-**Status:** ✅ Reference Guide | Modular ClusterHost workflow
+**Status:** ✅ Reference Guide | Modular ClusterWidget workflow
 
 ## Prerequisites
 
 Read first:
 
 - [../avnav-api/editable-parameters.md](../avnav-api/editable-parameters.md)
-- [../architecture/cluster-system.md](../architecture/cluster-system.md)
-- [../architecture/module-system.md](../architecture/module-system.md)
+- [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
+- [../architecture/component-system.md](../architecture/component-system.md)
 
 ## Overview
 
-A cluster is one AvNav widget with multiple `kind` choices (numeric and optionally graphic). All cluster widgets use `module: "ClusterHost"`.
+A cluster is one AvNav widget with multiple `kind` choices (numeric and optionally graphic). All cluster widgets use `widget: "ClusterWidget"`.
 
-Translation logic lives in one dispatch module per cluster.
+Translation logic lives in one mapper module per cluster.
 
 ## Step 1: Add Kind Defaults
 
-Add entries in `config/shared/kind-maps.js`:
+Add entries in `config/shared/kind-defaults.js`:
 
 ```javascript
 shared.kindMaps.NEW_KIND = {
@@ -34,7 +34,7 @@ Create `config/clusters/new-cluster.js` and push cluster definition:
 
 ```javascript
 config.clusters.push({
-  module: "ClusterHost",
+  widget: "ClusterWidget",
   def: {
     name: "dyninstruments_NewCluster",
     description: "...",
@@ -70,15 +70,15 @@ config.clusters.push({
 
 Then include the config script in `plugin.js` internal load order.
 
-## Step 3: Add Dispatch Module
+## Step 3: Add Mapper Module
 
-Create `modules/ClusterHost/Dispatch/NewCluster.js`:
+Create `cluster/mappers/NewClusterMapper.js`:
 
 ```javascript
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniClusterHostDispatchNewCluster = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniNewClusterMapper = factory(); }
 }(this, function () {
   "use strict";
 
@@ -112,27 +112,27 @@ Create `modules/ClusterHost/Dispatch/NewCluster.js`:
     return { cluster: "newcluster", translate: translate };
   }
 
-  return { id: "ClusterHostDispatchNewCluster", create: create };
+  return { id: "NewClusterMapper", create: create };
 }));
 ```
 
-## Step 4: Register Dispatch Module
+## Step 4: Register Mapper Module
 
-Update both config-time and runtime dispatch lists:
+Update both config-time and runtime mapper lists:
 
-1. `config/modules.js`
-- Add module entry for `ClusterHostDispatchNewCluster`
-- Add to `ClusterHostDispatchRegistry.deps`
-2. `modules/ClusterHost/Core/DispatchRegistry.js`
-- Add `"ClusterHostDispatchNewCluster"` to `dispatchModuleIds`
+1. `config/components.js`
+- Add module entry for `NewClusterMapper`
+- Add to `ClusterMapperRegistry.deps`
+2. `cluster/mappers/ClusterMapperRegistry.js`
+- Add `"NewClusterMapper"` to `mapperIds`
 
 ## Step 5: Optional Graphic Renderer Wiring
 
-If dispatch returns `renderer: "NewGauge"`:
+If mapper returns `renderer: "NewGauge"`:
 
-1. Register `NewGauge` in `config/modules.js`
-2. Add `NewGauge` to `ClusterHostRendererRegistry.deps` in `config/modules.js`
-3. Wire runtime selection in `modules/ClusterHost/Core/RendererRegistry.js`:
+1. Register `NewGauge` in `config/components.js`
+2. Add `NewGauge` to `ClusterRendererRouter.deps` in `config/components.js`
+3. Wire runtime selection in `cluster/rendering/ClusterRendererRouter.js`:
 - instantiate module in `create()`
 - include in `subSpecs`
 - branch in `pickRenderer()`
@@ -141,32 +141,32 @@ If dispatch returns `renderer: "NewGauge"`:
 
 For a new `kind` in an existing cluster:
 
-1. Extend kind defaults in `config/shared/kind-maps.js`
+1. Extend kind defaults in `config/shared/kind-defaults.js`
 2. Extend the cluster `kind` SELECT in `config/clusters/<cluster>.js`
 3. Add any new `storeKeys` / `editableParameters`
-4. Update matching dispatch module in `modules/ClusterHost/Dispatch/<Cluster>.js`
+4. Update matching mapper module in `cluster/mappers/<Cluster>.js`
 5. If the kind is graphic and uses a new renderer, also complete renderer wiring from Step 5
 
 ## Validate
 
 - Ensure each `kind` translates to expected output
-- Ensure numeric kinds route to `ThreeElements`
+- Ensure numeric kinds route to `ThreeValueTextWidget`
 - Ensure graphic kinds set correct `renderer` and props
 - Ensure unknown kinds return `{}`
 - Resize widget and verify layout behavior in AvNav
 
 ## Checklist
 
-- [ ] Kind defaults added in `config/shared/kind-maps.js`
+- [ ] Kind defaults added in `config/shared/kind-defaults.js`
 - [ ] Cluster config created/updated in `config/clusters/`
 - [ ] Cluster script included in `plugin.js` internal load order
-- [ ] Dispatch module added/updated in `modules/ClusterHost/Dispatch/`
-- [ ] Module entry added in `config/modules.js`
-- [ ] Dispatch added in `ClusterHostDispatchRegistry.deps` (`config/modules.js`)
-- [ ] Dispatch added in runtime `dispatchModuleIds` (`modules/ClusterHost/Core/DispatchRegistry.js`)
+- [ ] Mapper module added/updated in `cluster/mappers/`
+- [ ] Module entry added in `config/components.js`
+- [ ] Mapper added in `ClusterMapperRegistry.deps` (`config/components.js`)
+- [ ] Mapper added in runtime `mapperIds` (`cluster/mappers/ClusterMapperRegistry.js`)
 - [ ] Renderer wiring updated (if graphic)
 
 ## Related
 
 - [add-new-gauge.md](add-new-gauge.md)
-- [../architecture/cluster-system.md](../architecture/cluster-system.md)
+- [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)

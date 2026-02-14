@@ -1,17 +1,17 @@
 /**
- * Module: GaugeValueUtils - Shared numeric, range, angle and semicircle geometry helpers
+ * Module: GaugeValueMath - Shared numeric, range, angle and semicircle geometry helpers
  * Documentation: documentation/gauges/gauge-shared-api.md
- * Depends: GaugeAngleUtils
+ * Depends: GaugeAngleMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniGaugeValueUtils = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniGaugeValueMath = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const angle = Helpers.getModule("GaugeAngleUtils").create(def, Helpers);
+    const angle = Helpers.getModule("GaugeAngleMath").create(def, Helpers);
 
     function isFiniteNumber(n) {
       return typeof n === "number" && isFinite(n);
@@ -168,7 +168,7 @@
     }
 
     return {
-      id: "GaugeValueUtils",
+      id: "GaugeValueMath",
       version: "0.1.0",
       isFiniteNumber,
       clamp,
@@ -187,5 +187,5 @@
     };
   }
 
-  return { id: "GaugeValueUtils", create };
+  return { id: "GaugeValueMath", create };
 }));

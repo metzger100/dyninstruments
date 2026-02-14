@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Distance Cluster - Waypoint, route, and anchor distance config
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/cluster-utils.js, config/shared/kind-maps.js, config/shared/common-editables.js
+ * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/common-editables.js
  */
 (function (root) {
   "use strict";
@@ -16,7 +16,7 @@
   const commonThreeElementsEditables = shared.commonThreeElementsEditables;
 
   config.clusters.push({
-    module: "ClusterHost",
+    widget: "ClusterWidget",
     def: {
       name: "dyninstruments_Distance",
       description: "Waypoint distance, route remaining, anchor distances",

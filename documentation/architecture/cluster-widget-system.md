@@ -1,46 +1,46 @@
-# Cluster System
+# Cluster Widget System
 
-**Status:** ✅ Implemented | Modular `ClusterHost` dispatcher architecture
+**Status:** ✅ Implemented | Modular `ClusterWidget` mapper architecture
 
 ## Overview
 
-`ClusterHost` is the meta-module used by all cluster widgets. It uses a modular internal architecture:
+`ClusterWidget` is the meta-module used by all cluster widgets. It uses a modular internal architecture:
 
-- Thin orchestrator: `modules/ClusterHost/ClusterHost.js`
-- Translation toolkit: `modules/ClusterHost/Core/TranslateUtils.js`
-- Cluster dispatch map: `modules/ClusterHost/Core/DispatchRegistry.js`
-- Renderer lifecycle/delegation: `modules/ClusterHost/Core/RendererRegistry.js`
-- Per-cluster translators: `modules/ClusterHost/Dispatch/*.js`
+- Thin orchestrator: `cluster/ClusterWidget.js`
+- Mapping toolkit: `cluster/mappers/ClusterMapperToolkit.js`
+- Cluster mapper map: `cluster/mappers/ClusterMapperRegistry.js`
+- Renderer lifecycle/delegation: `cluster/rendering/ClusterRendererRouter.js`
+- Per-cluster mappers: `cluster/mappers/*.js`
 
 ## Runtime Flow
 
-1. AvNav calls `ClusterHost.translateFunction(props)`
-2. `DispatchRegistry` resolves cluster by `props.cluster || def.cluster`
-3. `TranslateUtils.createToolkit(props)` provides:
+1. AvNav calls `ClusterWidget.translateFunction(props)`
+2. `ClusterMapperRegistry` resolves cluster by `props.cluster || def.cluster`
+3. `ClusterMapperToolkit.createToolkit(props)` provides:
 - `cap(kind)`
 - `unit(kind)`
 - `out(value, caption, unit, formatter, formatterParameters)`
 - `makeAngleFormatter(isDirection, leadingZero, fallback)`
-4. Matching dispatch module translates to either:
-- numeric output for `ThreeElements`
+4. Matching mapper module translates to either:
+- numeric output for `ThreeValueTextWidget`
 - graphic output with `renderer: "..."`
-5. `ClusterHost.renderCanvas()` delegates to `RendererRegistry`, which picks renderer by `props.renderer`
-6. `ClusterHost.finalizeFunction()` fans out to all sub-renderers and tolerates renderer-local finalize errors
+5. `ClusterWidget.renderCanvas()` delegates to `ClusterRendererRouter`, which picks renderer by `props.renderer`
+6. `ClusterWidget.finalizeFunction()` fans out to all sub-renderers and tolerates renderer-local finalize errors
 
-## Dispatch Modules
+## Mapper Modules
 
-Current dispatch modules:
+Current mapper modules:
 
-- `CourseHeading.js` (`courseHeading`)
-- `Speed.js` (`speed`)
-- `Position.js` (`position`)
-- `Distance.js` (`distance`)
-- `Environment.js` (`environment`)
-- `Wind.js` (`wind`)
-- `Time.js` (`time`)
-- `Nav.js` (`nav`)
-- `Anchor.js` (`anchor`)
-- `Vessel.js` (`vessel`)
+- `CourseHeadingMapper.js` (`courseHeading`)
+- `SpeedMapper.js` (`speed`)
+- `PositionMapper.js` (`position`)
+- `DistanceMapper.js` (`distance`)
+- `EnvironmentMapper.js` (`environment`)
+- `WindMapper.js` (`wind`)
+- `TimeMapper.js` (`time`)
+- `NavMapper.js` (`nav`)
+- `AnchorMapper.js` (`anchor`)
+- `VesselMapper.js` (`vessel`)
 
 Each module implements:
 
@@ -55,44 +55,44 @@ function create(def, Helpers) {
 
 ## Renderer Delegation
 
-`RendererRegistry` manages these sub-renderers:
+`ClusterRendererRouter` manages these sub-renderers:
 
-- `ThreeElements` (default fallback)
-- `WindDial`
-- `CompassGauge`
-- `SpeedGauge`
-- `DepthGauge`
-- `TemperatureGauge`
-- `VoltageGauge`
+- `ThreeValueTextWidget` (default fallback)
+- `WindDialWidget`
+- `CompassGaugeWidget`
+- `SpeedGaugeWidget`
+- `DepthGaugeWidget`
+- `TemperatureGaugeWidget`
+- `VoltageGaugeWidget`
 
 `wantsHideNativeHead` is aggregated (`true` if any sub-renderer requests it).
 
-## Registration Rules for New Modules
+## Registration Rules for New Components
 
-### New Dispatch Module
-
-Must be registered in two places:
-
-1. `config/modules.js`
-- add module entry
-- add dependency in `ClusterHostDispatchRegistry.deps`
-2. `modules/ClusterHost/Core/DispatchRegistry.js`
-- add module ID to `dispatchModuleIds`
-
-### New Renderer Module
+### New Mapper Component
 
 Must be registered in two places:
 
-1. `config/modules.js`
-- add renderer module entry
-- add dependency in `ClusterHostRendererRegistry.deps`
-2. `modules/ClusterHost/Core/RendererRegistry.js`
+1. `config/components.js`
+- add component entry
+- add dependency in `ClusterMapperRegistry.deps`
+2. `cluster/mappers/ClusterMapperRegistry.js`
+- add component ID to `mapperIds`
+
+### New Renderer Component
+
+Must be registered in two places:
+
+1. `config/components.js`
+- add renderer component entry
+- add dependency in `ClusterRendererRouter.deps`
+2. `cluster/rendering/ClusterRendererRouter.js`
 - instantiate in `create()`
 - include in `subSpecs`
 - add selection branch in `pickRenderer()`
 
 ## Related
 
-- [module-system.md](module-system.md) — module registry and dependency loading
+- [component-system.md](component-system.md) — component registry and dependency loading
 - [../avnav-api/plugin-lifecycle.md](../avnav-api/plugin-lifecycle.md) — `translateFunction` lifecycle
 - [../guides/add-new-cluster.md](../guides/add-new-cluster.md) — cluster authoring workflow

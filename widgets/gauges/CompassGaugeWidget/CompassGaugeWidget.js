@@ -1,7 +1,7 @@
 /*!
- * CompassGauge (UMD) — rotating compass card with upright cardinal labels
+ * CompassGaugeWidget (UMD) — rotating compass card with upright cardinal labels
  *
- * Updated: uses GaugeUtils.draw shared primitives instead of PolarCore.
+ * Updated: uses GaugeToolkit.draw shared primitives instead of PolarCore.
  *
  * Visual:
  *  - The disc (ticks + cardinal/intercardinal letters) rotates by -heading.
@@ -22,12 +22,12 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniCompassGauge = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniCompassGaugeWidget = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const GU = Helpers.getModule("GaugeUtils").create(def, Helpers);
+    const GU = Helpers.getModule("GaugeToolkit").create(def, Helpers);
     const draw = GU.draw;
     const T = GU.text;
     const V = GU.value;
@@ -221,7 +221,7 @@
     function translateFunction(){ return {}; }
 
     return {
-      id: "CompassGauge",
+      id: "CompassGaugeWidget",
       version: "1.2.0",
       wantsHideNativeHead: true,
       renderCanvas,
@@ -229,5 +229,5 @@
     };
   }
 
-  return { id: "CompassGauge", create };
+  return { id: "CompassGaugeWidget", create };
 }));

@@ -1,6 +1,6 @@
 # dyninstruments – Modern Instrument Widgets for AvNav
 
-`dyninstruments` is an [AvNav](https://github.com/wellenvogel/avnav) plugin that provides a modern, highly legible instrument panel with cluster-based widgets and canvas-based gauges (e.g. WindDial, CompassGauge, SpeedGauge, DepthGauge, TemperatureGauge).
+`dyninstruments` is an [AvNav](https://github.com/wellenvogel/avnav) plugin that provides a modern, highly legible instrument panel with cluster-based widgets and canvas-based gauges (e.g. WindDialWidget, CompassGaugeWidget, SpeedGaugeWidget, DepthGaugeWidget, TemperatureGaugeWidget).
 The goal is **maximum readability at the helm** with **minimal configuration overhead**.
 
 > ⚠️ **Status**: Work in progress / pre-release. APIs, widget names, and editor options may still change.
@@ -24,12 +24,12 @@ The goal is **maximum readability at the helm** with **minimal configuration ove
 
 ### 🎯 Canvas-based gauges (graphics where it matters)
 
-* **WindDial** – compact wind dial for AWA/AWS and TWA/TWS with optional layline sectors.
-* **CompassGauge** – compass gauge for HDT/HDM (graphic kinds).
-* **SpeedGauge** – semicircle speedometer with warning/alarm sectors (fixed arc; “to” values are derived).
-* **DepthGauge** – semicircle depth gauge with shallow-side warning/alarm sectors.
-* **TemperatureGauge** – semicircle temperature gauge with optional high-end warning/alarm sectors.
-* **VoltageGauge** – semicircle voltage gauge with low-end warning/alarm sectors.
+* **WindDialWidget** – compact wind dial for AWA/AWS and TWA/TWS with optional layline sectors.
+* **CompassGaugeWidget** – compass gauge for HDT/HDM (graphic kinds).
+* **SpeedGaugeWidget** – semicircle speedometer with warning/alarm sectors (fixed arc; “to” values are derived).
+* **DepthGaugeWidget** – semicircle depth gauge with shallow-side warning/alarm sectors.
+* **TemperatureGaugeWidget** – semicircle temperature gauge with optional high-end warning/alarm sectors.
+* **VoltageGaugeWidget** – semicircle voltage gauge with low-end warning/alarm sectors.
 
 ### ⚙️ Editor options (sane defaults, per-kind settings)
 
@@ -46,10 +46,10 @@ The goal is **maximum readability at the helm** with **minimal configuration ove
   * range (`minValue`, `maxValue`) and tick steps
   * optional sectors controlled via **enable toggles**
 
-    * **SpeedGauge**: `speedWarningEnabled`, `speedAlarmEnabled` (default enabled)
-    * **DepthGauge**: `depthWarningEnabled`, `depthAlarmEnabled` (default enabled)
-    * **TemperatureGauge**: `tempWarningEnabled`, `tempAlarmEnabled` (default disabled)
-    * **WindDial**: `windLayEnabled` + `layMin`/`layMax` (default enabled)
+    * **SpeedGaugeWidget**: `speedWarningEnabled`, `speedAlarmEnabled` (default enabled)
+    * **DepthGaugeWidget**: `depthWarningEnabled`, `depthAlarmEnabled` (default enabled)
+    * **TemperatureGaugeWidget**: `tempWarningEnabled`, `tempAlarmEnabled` (default disabled)
+    * **WindDialWidget**: `windLayEnabled` + `layMin`/`layMax` (default enabled)
 * **SignalK paths**
 
   * `KEY` fields in the editor allow overriding SignalK sources (e.g., pressure, temperature, voltage)
@@ -82,7 +82,7 @@ The goal is **maximum readability at the helm** with **minimal configuration ove
 
    * `plugin.js`
    * `plugin.css`
-   * `modules/…` (JS modules and assets)
+   * `widgets/…` (JS components and assets)
 
 ### 2) Copy into AvNav plugin directory
 
@@ -146,27 +146,27 @@ Current widgets (depending on your build):
 * **plugin.js**
 
   * validates AvNav globals and computes `baseUrl`
-  * bootstraps internal scripts (`core/*`, `config/*`) in fixed order
-  * starts `core.runInit()`
+  * bootstraps internal scripts (`runtime/*`, `config/*`) in fixed order
+  * starts `runtime.runInit()`
 
-* **core/init.js + core/module-loader.js**
+* **runtime/init.js + runtime/component-loader.js**
 
-  * resolve needed module IDs from `config.instruments`
-  * load JS/CSS modules declared in `config/modules.js` (with dependency resolution)
-  * register widgets via `core/register-instrument.js` -> `avnav.api.registerWidget`
+  * resolve needed component IDs from `config.widgetDefinitions`
+  * load JS/CSS components declared in `config/components.js` (with dependency resolution)
+  * register widgets via `runtime/widget-registrar.js` -> `avnav.api.registerWidget`
 
-* **ClusterHost**
+* **ClusterWidget**
 
   * the central “router” that translates `cluster + kind` into renderer props
   * delegates rendering to:
 
-    * **ThreeElements** for numeric text layouts
-    * gauge modules (WindDial, CompassGauge, SpeedGauge, DepthGauge, TemperatureGauge, VoltageGauge) for graphics
+    * **ThreeValueTextWidget** for numeric text layouts
+    * gauge modules (WindDialWidget, CompassGaugeWidget, SpeedGaugeWidget, DepthGaugeWidget, TemperatureGaugeWidget, VoltageGaugeWidget) for graphics
 
-* **Gauge core modules (`GaugeAngleUtils`, `GaugeTickUtils`, `GaugePrimitiveDrawUtils`, `GaugeDialDrawUtils`)**
+* **Gauge core modules (`GaugeAngleMath`, `GaugeTickMath`, `GaugeCanvasPrimitives`, `GaugeDialRenderer`)**
 
   * reusable angle/tick/draw primitives
-  * composed by `GaugeUtils` and shared by all gauge modules
+  * composed by `GaugeToolkit` and shared by all gauge modules
 
 ---
 
@@ -176,9 +176,9 @@ There are planned structural changes before adding the remaining AvNav widgets. 
 
 ### Completed foundation refactors (historical)
 
-- plugin bootstrap/config split completed (`plugin.js` + `core/*` + `config/*`)
-- gauge core split completed (`GaugeUtils` + shared core modules)
-- semicircle gauges unified on `SemicircleGaugeRenderer`
+- plugin bootstrap/config split completed (`plugin.js` + `runtime/*` + `config/*`)
+- gauge core split completed (`GaugeToolkit` + shared core modules)
+- semicircle gauges unified on `SemicircleGaugeEngine`
 
 ### Cluster refactor (foundation)
 
@@ -205,7 +205,7 @@ After the refactor, the missing core widgets will be integrated as `kinds` into 
 
 ### Implementation order (practical milestones)
 
-1. **Quick wins (text/ThreeElements-based)**: `DateTime`, `TimeStatus`, `signalKPitch`, `signalKRoll`
+1. **Quick wins (text/ThreeValueTextWidget-based)**: `DateTime`, `TimeStatus`, `signalKPitch`, `signalKRoll`
 2. **High-impact canvas visuals**: `XteDisplay`, `ActiveRoute`
 3. **Lists & controls (interaction-heavy)**: `RoutePoints`, `EditRoute`, `Zoom`, `CenterDisplay`
 4. **AIS**: `AisTarget` (requires more data/logic + responsive layout)

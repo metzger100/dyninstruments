@@ -7,7 +7,7 @@
 ## 1. Project Constraints (AvNav Plugin Environment)
 
 - **No npm, no bundler, no build step** — Raw JS loaded via `<script>` tags at runtime
-- **UMD module pattern** — All modules register on `window.DyniModules.{globalKey}`
+- **UMD component pattern** — All components register on `window.DyniComponents.{globalKey}`
 - **avnav.api** — Only external dependency. Plugin API provided by AvNav host app
 - **AVNAV_BASE_URL** — Global string set by AvNav, used to construct module URLs
 - **Canvas 2D only** — All visual rendering via `renderCanvas(canvas, props)`
@@ -31,19 +31,19 @@ documentation/
 │   ├── editable-parameters.md      # Types, conditions, defaults
 │   └── formatters.md               # formatSpeed, formatDistance, etc.
 ├── architecture/
-│   ├── module-system.md            # UMD loader, dependencies, config/modules.js
-│   └── cluster-system.md           # ClusterHost, kind→renderer routing
+│   ├── component-system.md            # UMD loader, dependencies, config/components.js
+│   └── cluster-widget-system.md       # ClusterWidget, kind→renderer routing
 ├── gauges/
 │   ├── gauge-style-guide.md        # Proportions, colors, pointer, layout modes
-│   └── gauge-shared-api.md         # Shared GaugeUtils/core API documentation
+│   └── gauge-shared-api.md         # Shared GaugeToolkit API documentation
 ├── shared/
 │   ├── helpers.md                  # Helpers object (setupCanvas, resolveTextColor)
 │   └── css-theming.md              # CSS vars, day/night, font stack
-├── modules/
+├── widgets/
 │   ├── semicircle-gauges.md        # Speed/Depth/Temperature/Voltage shared 
-│   ├── three-elements.md           # ThreeElements numeric renderer
-│   ├── wind-dial.md                # WindDial full-circle wind compass
-│   └── compass-gauge.md            # CompassGauge rotating compass card
+│   ├── three-elements.md           # ThreeValueTextWidget numeric renderer
+│   ├── wind-dial.md                # WindDialWidget full-circle wind compass
+│   └── compass-gauge.md            # CompassGaugeWidget rotating compass card
 └── guides/
     ├── add-new-gauge.md            # Step-by-step: create a new gauge
     └── add-new-cluster.md          # Step-by-step: create a new cluster widget
@@ -78,8 +78,8 @@ Task: Add new BarometerGauge
 ## 3. File Size Limits
 
 - **Target: <=300 lines per JS file**
-- Shared drawing/layout code → split core modules in `modules/Cores/` (`GaugeAngleUtils`, `GaugeTickUtils`, `GaugePrimitiveDrawUtils`, `GaugeDialDrawUtils`)
-- Gauge-specific code only in individual gauge module files
+- Shared drawing/layout code → split reusable components in `shared/widget-kits/gauge/` (`GaugeAngleMath`, `GaugeTickMath`, `GaugeCanvasPrimitives`, `GaugeDialRenderer`)
+- Gauge-specific code only in individual gauge component files
 - Cluster configs live under `config/clusters/`
 - If a legacy file exceeds 300 lines, keep new logic isolated and avoid increasing size further
 
@@ -87,22 +87,22 @@ Task: Add new BarometerGauge
 
 ## 4. Mandatory File Headers
 
-For **new or modified** JS module files (anything touched in a refactor), add a short header block at the top. Every JS module file MUST have:
+For **new or modified** JS component files (anything touched in a refactor), add a short header block at the top. Every JS component file MUST have:
 
 ```javascript
 /**
  * Module: [Name] — [One-line description]
  * Documentation: documentation/[path].md
- * Depends: [list of module dependencies]
+ * Depends: [list of component dependencies]
  */
 ```
 
 Example:
 ```javascript
 /**
- * Module: SpeedGauge — Semicircle speedometer with warning/alarm sectors
+ * Module: SpeedGaugeWidget — Semicircle speedometer with warning/alarm sectors
  * Style Guide: documentation/gauges/gauge-style-guide.md
- * Depends: GaugeUtils (draw.drawPointerAtRim)
+ * Depends: GaugeToolkit (draw.drawPointerAtRim)
  */
 ```
 
@@ -110,27 +110,27 @@ Example:
 
 ## 5. Coding Conventions
 
-### UMD Module Template
+### UMD Component Template
 
 ```javascript
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniModuleName = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniComponentName = factory(); }
 }(this, function () {
   "use strict";
   function create(def, Helpers) {
-    // Module code here
-    return { id: "ModuleName", /* exports */ };
+    // Component code here
+    return { id: "ComponentName", /* exports */ };
   }
-  return { id: "ModuleName", create };
+  return { id: "ComponentName", create };
 }));
 ```
 
 ### Naming Conventions
 
 - **Widget names:** `dyninstruments_{Cluster}` (e.g., `dyninstruments_Speed`)
-- **Module globalKeys:** `Dyni{ModuleName}` (e.g., `DyniSpeedGauge`)
+- **Component globalKeys:** `Dyni{ComponentName}` (e.g., `DyniSpeedGaugeWidget`)
 - **Gauge threshold props:** `{gauge}RatioThresholdNormal`, `{gauge}RatioThresholdFlat`
 - **Sector props:** `{gauge}WarningFrom`, `{gauge}AlarmFrom`
 - **Per-kind caption/unit:** `caption_{kindName}`, `unit_{kindName}`
@@ -265,4 +265,4 @@ Before completing any task:
 - [ ] Added file headers to new code files
 - [ ] No file exceeds 300 lines
 - [ ] Documentation matches implementation
-- [ ] UMD wrapper pattern used for new modules
+- [ ] UMD wrapper pattern used for new components

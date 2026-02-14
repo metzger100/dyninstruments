@@ -1,11 +1,11 @@
 /*!
- * ClusterHost dispatch: position
+ * ClusterWidget mapper: position
  */
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniClusterHostDispatchPosition = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniPositionMapper = factory(); }
 }(this, function () {
   "use strict";
 
@@ -27,5 +27,5 @@
     };
   }
 
-  return { id: "ClusterHostDispatchPosition", create: create };
+  return { id: "PositionMapper", create: create };
 }));

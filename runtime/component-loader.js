@@ -1,13 +1,13 @@
 /**
- * Module: DyniPlugin Module Loader - Dynamic JS/CSS loading with dependency resolution
- * Documentation: documentation/architecture/module-system.md
- * Depends: window.DyniModules
+ * Module: DyniPlugin Component Loader - Dynamic JS/CSS loading with dependency resolution
+ * Documentation: documentation/architecture/component-system.md
+ * Depends: window.DyniComponents
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
-  const core = ns.core;
+  const runtime = ns.runtime;
 
   function loadCssOnce(id, href) {
     if (!href) return Promise.resolve();
@@ -38,23 +38,23 @@
     });
   }
 
-  function createModuleLoader(modules) {
-    // Invariant: modules is the fully assembled registry from config/modules.js.
-    const registry = modules;
+  function createComponentLoader(components) {
+    // Invariant: components is the fully assembled registry from config/components.js.
+    const registry = components;
     const loadCache = new Map();
 
-    function loadModule(id) {
+    function loadComponent(id) {
       if (loadCache.has(id)) return loadCache.get(id);
 
       const m = registry[id];
       if (!m) {
-        const p = Promise.reject(new Error("Unknown module: " + id));
+        const p = Promise.reject(new Error("Unknown component: " + id));
         loadCache.set(id, p);
         return p;
       }
 
       const deps = Array.isArray(m.deps) ? m.deps : [];
-      const depLoads = Promise.all(deps.map(loadModule));
+      const depLoads = Promise.all(deps.map(loadComponent));
 
       const p = depLoads
         .then(function () {
@@ -64,9 +64,9 @@
           ]);
         })
         .then(function () {
-          const mod = root.DyniModules[m.globalKey];
+          const mod = root.DyniComponents[m.globalKey];
           if (!mod || typeof mod.create !== "function") {
-            throw new Error("Module not found or invalid: " + m.globalKey);
+            throw new Error("Component not found or invalid: " + m.globalKey);
           }
           return mod;
         });
@@ -75,7 +75,7 @@
       return p;
     }
 
-    function uniqueModules(list) {
+    function uniqueComponents(list) {
       const result = new Set();
 
       function addWithDeps(id) {
@@ -86,19 +86,19 @@
       }
 
       list.forEach(function (i) {
-        addWithDeps(i.module);
+        addWithDeps(i.widget);
       });
 
       return Array.from(result);
     }
 
     return {
-      loadModule: loadModule,
-      uniqueModules: uniqueModules
+      loadComponent: loadComponent,
+      uniqueComponents: uniqueComponents
     };
   }
 
-  core.loadCssOnce = loadCssOnce;
-  core.loadScriptOnce = loadScriptOnce;
-  core.createModuleLoader = createModuleLoader;
+  runtime.loadCssOnce = loadCssOnce;
+  runtime.loadScriptOnce = loadScriptOnce;
+  runtime.createComponentLoader = createComponentLoader;
 }(this));

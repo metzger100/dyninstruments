@@ -1,17 +1,17 @@
 /**
- * Module: SpeedGauge - Semicircle speedometer with high-end warning/alarm sectors
- * Documentation: documentation/modules/semicircle-gauges.md
- * Depends: SemicircleGaugeRenderer
+ * Module: SpeedGaugeWidget - Semicircle speedometer with high-end warning/alarm sectors
+ * Documentation: documentation/widgets/semicircle-gauges.md
+ * Depends: SemicircleGaugeEngine
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniSpeedGauge = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniSpeedGaugeWidget = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const renderer = Helpers.getModule("SemicircleGaugeRenderer").create(def, Helpers);
+    const renderer = Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
 
     function extractNumberText(text) {
       const match = String(text).match(/-?\d+(?:\.\d+)?/);
@@ -92,7 +92,7 @@
     }
 
     return {
-      id: "SpeedGauge",
+      id: "SpeedGaugeWidget",
       version: "0.5.0",
       wantsHideNativeHead: true,
       renderCanvas,
@@ -100,5 +100,5 @@
     };
   }
 
-  return { id: "SpeedGauge", create };
+  return { id: "SpeedGaugeWidget", create };
 }));

@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Vessel Cluster - Vessel voltage numeric and gauge config
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/cluster-utils.js, config/shared/kind-maps.js
+ * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js
  */
 (function (root) {
   "use strict";
@@ -15,7 +15,7 @@
   const VESSEL_KIND = shared.kindMaps.VESSEL_KIND;
 
   config.clusters.push({
-    module: "ClusterHost",
+    widget: "ClusterWidget",
     def: {
       name: "dyninstruments_Vessel",
       description: "Vessel system metrics (voltage via SignalK KEY)",
@@ -42,7 +42,7 @@
           condition: [{ kind: "voltage" }, { kind: "voltageGraphic" }]
         },
 
-        // ---------------- VoltageGauge (graphic) settings -------------------
+        // ---------------- VoltageGaugeWidget (graphic) settings -------------------
         voltageMinValue: {
           type: "FLOAT", min: 0, max: 60, step: 0.1, default: 7.0,
           name: "Min voltage",
@@ -83,7 +83,7 @@
           condition: { kind: "voltageGraphic" }
         },
 
-        // low-end sectors (DepthGauge-Regeln)
+        // low-end sectors (DepthGaugeWidget-Regeln)
         voltageAlarmFrom: {
           type: "FLOAT", min: 0, max: 80, step: 0.1, default: 11.6,
           name: "Alarm to (low)",
@@ -97,12 +97,12 @@
 
         voltageRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
-          name: "VoltageGauge: Normal Threshold",
+          name: "VoltageGaugeWidget: Normal Threshold",
           condition: { kind: "voltageGraphic" }
         },
         voltageRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
-          name: "VoltageGauge: Flat Threshold",
+          name: "VoltageGaugeWidget: Flat Threshold",
           condition: { kind: "voltageGraphic" }
         },
 
@@ -120,7 +120,7 @@
 
         ...makePerKindTextParams(VESSEL_KIND),
 
-        // ThreeElements thresholds (numeric only)
+        // ThreeValueTextWidget thresholds (numeric only)
         ratioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
           name: "3-Rows Threshold (numeric)",

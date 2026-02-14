@@ -1,11 +1,11 @@
 /*!
- * ClusterHost dispatch: vessel
+ * ClusterWidget mapper: vessel
  */
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniClusterHostDispatchVessel = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniVesselMapper = factory(); }
 }(this, function () {
   "use strict";
 
@@ -22,7 +22,7 @@
         const warnEnabled = !!p.voltageWarningEnabled;
         const alarmEnabled = !!p.voltageAlarmEnabled;
         return {
-          renderer: "VoltageGauge",
+          renderer: "VoltageGaugeWidget",
           value: (typeof p.value !== "undefined") ? p.value : p.voltage,
           caption: cap("voltageGraphic"),
           unit: unit("voltageGraphic"),
@@ -56,5 +56,5 @@
     };
   }
 
-  return { id: "ClusterHostDispatchVessel", create: create };
+  return { id: "VesselMapper", create: create };
 }));

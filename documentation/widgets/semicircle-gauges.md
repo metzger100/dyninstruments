@@ -6,37 +6,37 @@
 
 The four semicircle gauges share one renderer implementation:
 
-- Shared rendering and layout in `modules/Cores/SemicircleGaugeRenderer.js`
-- Shared helper APIs via `GaugeUtils` (`GaugeTextUtils`, `GaugeValueUtils`, `GaugeAngleUtils`, `GaugeTickUtils`, draw utils)
+- Shared rendering and layout in `shared/widget-kits/gauge/SemicircleGaugeEngine.js`
+- Shared helper APIs via `GaugeToolkit` (`GaugeTextLayout`, `GaugeValueMath`, `GaugeAngleMath`, `GaugeTickMath`, draw utils)
 - Gauge wrappers keep only formatting, tick strategy, and sector strategy
 
 ## File Locations
 
 | Role | File |
 |---|---|
-| Shared facade | `modules/Cores/GaugeUtils.js` |
-| Shared text helpers | `modules/Cores/GaugeTextUtils.js` |
-| Shared numeric/angle helpers | `modules/Cores/GaugeValueUtils.js` |
-| Shared semicircle renderer | `modules/Cores/SemicircleGaugeRenderer.js` |
-| Speed wrapper | `modules/SpeedGauge/SpeedGauge.js` |
-| Depth wrapper | `modules/DepthGauge/DepthGauge.js` |
-| Temperature wrapper | `modules/TemperatureGauge/TemperatureGauge.js` |
-| Voltage wrapper | `modules/VoltageGauge/VoltageGauge.js` |
+| Shared facade | `shared/widget-kits/gauge/GaugeToolkit.js` |
+| Shared text helpers | `shared/widget-kits/gauge/GaugeTextLayout.js` |
+| Shared numeric/angle helpers | `shared/widget-kits/gauge/GaugeValueMath.js` |
+| Shared semicircle renderer | `shared/widget-kits/gauge/SemicircleGaugeEngine.js` |
+| Speed wrapper | `widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js` |
+| Depth wrapper | `widgets/gauges/DepthGaugeWidget/DepthGaugeWidget.js` |
+| Temperature wrapper | `widgets/gauges/TemperatureGaugeWidget/TemperatureGaugeWidget.js` |
+| Voltage wrapper | `widgets/gauges/VoltageGaugeWidget/VoltageGaugeWidget.js` |
 
 ## Module Dependencies
 
-In `config/modules.js`, all four gauges depend on `SemicircleGaugeRenderer`:
+In `config/components.js`, all four gauges depend on `SemicircleGaugeEngine`:
 
 ```text
-SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge
-  -> SemicircleGaugeRenderer
-  -> GaugeUtils
-  -> GaugeTextUtils + GaugeValueUtils + GaugeAngleUtils + GaugeTickUtils + GaugePrimitiveDrawUtils + GaugeDialDrawUtils
+SpeedGaugeWidget/DepthGaugeWidget/TemperatureGaugeWidget/VoltageGaugeWidget
+  -> SemicircleGaugeEngine
+  -> GaugeToolkit
+  -> GaugeTextLayout + GaugeValueMath + GaugeAngleMath + GaugeTickMath + GaugeCanvasPrimitives + GaugeDialRenderer
 ```
 
 ## Shared Render Flow
 
-`SemicircleGaugeRenderer.createRenderer(spec)` handles:
+`SemicircleGaugeEngine.createRenderer(spec)` handles:
 
 1. Canvas setup + mode detection (`flat`, `normal`, `high`)
 2. Gauge geometry and pointer angle mapping
@@ -53,25 +53,25 @@ Each wrapper defines:
 - Sector placement strategy (high-end or low-end)
 - Defaults (range, unit, ratio props)
 
-### SpeedGauge
+### SpeedGaugeWidget
 
 - High-end sectors
 - Formatter path: `formatSpeed`
 - Defaults: range `0..30`, unit `kn`
 
-### DepthGauge
+### DepthGaugeWidget
 
 - Low-end sectors
 - Formatter path: fixed decimal (1)
 - Defaults: range `0..30`, unit `m`
 
-### TemperatureGauge
+### TemperatureGaugeWidget
 
 - High-end sectors
 - Formatter path: `formatTemperature(..., "celsius")` + Kelvin fallback heuristic
 - Defaults: range `0..35`, unit `°C`
 
-### VoltageGauge
+### VoltageGaugeWidget
 
 - Low-end sectors
 - Formatter path: `formatDecimal(..., 3, 1, true)` + numeric fallback

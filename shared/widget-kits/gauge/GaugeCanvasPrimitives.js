@@ -1,17 +1,17 @@
 /**
- * Module: GaugePrimitiveDrawUtils - Shared low-level canvas drawing primitives for gauges
+ * Module: GaugeCanvasPrimitives - Shared low-level canvas drawing primitives for gauges
  * Documentation: documentation/gauges/gauge-shared-api.md
- * Depends: GaugeAngleUtils
+ * Depends: GaugeAngleMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniGaugePrimitiveDrawUtils = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniGaugeCanvasPrimitives = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const angle = Helpers.getModule("GaugeAngleUtils").create(def, Helpers);
+    const angle = Helpers.getModule("GaugeAngleMath").create(def, Helpers);
     const toCanvas = angle.degToCanvasRad;
 
     function withCtx(ctx, fn, style) {
@@ -201,7 +201,7 @@
     }
 
     return {
-      id: "GaugePrimitiveDrawUtils",
+      id: "GaugeCanvasPrimitives",
       version: "0.1.0",
       withCtx,
       drawRing,
@@ -213,5 +213,5 @@
     };
   }
 
-  return { id: "GaugePrimitiveDrawUtils", create };
+  return { id: "GaugeCanvasPrimitives", create };
 }));

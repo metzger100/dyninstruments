@@ -1,76 +1,76 @@
-# Module System
+# Component System
 
-**Status:** ✅ Implemented | `config/modules.js` (`config.modules`) + `core/module-loader.js` (`loadModule`)
+**Status:** ✅ Implemented | `config/components.js` (`config.components`) + `runtime/component-loader.js` (`loadComponent`)
 
 ## Overview
 
-dyninstruments uses a custom runtime module loader. Modules are UMD-wrapped JS files that register on `window.DyniModules`.
+dyninstruments uses a custom runtime component loader. Components are UMD-wrapped JS files that register on `window.DyniComponents`.
 
 Ownership split:
 
-- `plugin.js` bootstraps internal scripts (`core/*`, `config/*`) in fixed order
-- `config/modules.js` defines module registry entries
-- `core/module-loader.js` resolves dependencies and injects module JS/CSS
+- `plugin.js` bootstraps internal scripts (`runtime/*`, `config/*`) in fixed order
+- `config/components.js` defines component registry entries
+- `runtime/component-loader.js` resolves dependencies and injects component JS/CSS
 
-## `config.modules` Registry
+## `config.components` Registry
 
-Defined in `config/modules.js`. It maps module IDs to file paths, global keys, and optional dependencies (`deps`).
+Defined in `config/components.js`. It maps component IDs to file paths, global keys, and optional dependencies (`deps`).
 
-`ClusterHost` depends on modular internals instead of embedding logic in one file:
+`ClusterWidget` depends on modular internals instead of embedding logic in one file:
 
-- `ClusterHostTranslateUtils`
-- `ClusterHostRendererRegistry`
-- `ClusterHostDispatchRegistry`
+- `ClusterMapperToolkit`
+- `ClusterRendererRouter`
+- `ClusterMapperRegistry`
 
-`ClusterHostDispatchRegistry` depends on all per-cluster dispatch modules.
-`ClusterHostRendererRegistry` depends on all renderer modules used at runtime.
+`ClusterMapperRegistry` depends on all per-cluster mapper components.
+`ClusterRendererRouter` depends on all renderer components used at runtime.
 
 ## Dependency Graph
 
 ```text
-ClusterHost
-├── ClusterHostTranslateUtils
-├── ClusterHostDispatchRegistry
-│   ├── ClusterHostDispatchCourseHeading
-│   ├── ClusterHostDispatchSpeed
-│   ├── ClusterHostDispatchPosition
-│   ├── ClusterHostDispatchDistance
-│   ├── ClusterHostDispatchEnvironment
-│   ├── ClusterHostDispatchWind
-│   ├── ClusterHostDispatchTime
-│   ├── ClusterHostDispatchNav
-│   ├── ClusterHostDispatchAnchor
-│   └── ClusterHostDispatchVessel
-└── ClusterHostRendererRegistry
-    ├── ThreeElements
-    ├── WindDial
-    ├── CompassGauge
-    ├── SpeedGauge
-    ├── DepthGauge
-    ├── TemperatureGauge
-    └── VoltageGauge
+ClusterWidget
+├── ClusterMapperToolkit
+├── ClusterMapperRegistry
+│   ├── CourseHeadingMapper
+│   ├── SpeedMapper
+│   ├── PositionMapper
+│   ├── DistanceMapper
+│   ├── EnvironmentMapper
+│   ├── WindMapper
+│   ├── TimeMapper
+│   ├── NavMapper
+│   ├── AnchorMapper
+│   └── VesselMapper
+└── ClusterRendererRouter
+    ├── ThreeValueTextWidget
+    ├── WindDialWidget
+    ├── CompassGaugeWidget
+    ├── SpeedGaugeWidget
+    ├── DepthGaugeWidget
+    ├── TemperatureGaugeWidget
+    └── VoltageGaugeWidget
 
-WindDial/CompassGauge
-  └── GaugeUtils
-      ├── GaugeAngleUtils
-      ├── GaugeTickUtils
-      ├── GaugePrimitiveDrawUtils
-      ├── GaugeDialDrawUtils
-      ├── GaugeTextUtils
-      └── GaugeValueUtils
+WindDialWidget/CompassGaugeWidget
+  └── GaugeToolkit
+      ├── GaugeAngleMath
+      ├── GaugeTickMath
+      ├── GaugeCanvasPrimitives
+      ├── GaugeDialRenderer
+      ├── GaugeTextLayout
+      └── GaugeValueMath
 
-SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge
-  └── SemicircleGaugeRenderer
-      └── GaugeUtils
+SpeedGaugeWidget/DepthGaugeWidget/TemperatureGaugeWidget/VoltageGaugeWidget
+  └── SemicircleGaugeEngine
+      └── GaugeToolkit
 ```
 
-## UMD Module Template
+## UMD Component Template
 
 ```javascript
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniModuleName = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniModuleName = factory(); }
 }(this, function () {
   "use strict";
 
@@ -78,46 +78,46 @@ SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge
     return {};
   }
 
-  return { id: "ModuleName", create };
+  return { id: "ComponentName", create };
 }));
 ```
 
-## `loadModule()` Flow
+## `loadComponent()` Flow
 
 1. Check cache (dedup)
-2. Recursively load dependencies first (`Promise.all(deps.map(loadModule))`)
+2. Recursively load dependencies first (`Promise.all(deps.map(loadComponent))`)
 3. Load CSS via `loadCssOnce()` (`<link>`)
 4. Load JS via `loadScriptOnce()` (`<script>`)
-5. Verify module exists on `window.DyniModules[globalKey]` and has `create`
-6. Return module object (`{ id, create }`)
+5. Verify component exists on `window.DyniComponents[globalKey]` and has `create`
+6. Return component object (`{ id, create }`)
 
 ## Registration Flow
 
-`core/init.js` orchestration:
+`runtime/init.js` orchestration:
 
 ```javascript
-const loader = core.createModuleLoader(config.modules);
-const needed = loader.uniqueModules(config.instruments);
+const loader = runtime.createComponentLoader(config.components);
+const needed = loader.uniqueComponents(config.widgetDefinitions);
 
-Promise.all(needed.map(loader.loadModule)).then(function (mods) {
+Promise.all(needed.map(loader.loadComponent)).then(function (componentsLoaded) {
   const byId = {};
-  mods.forEach(function (m) { byId[m.id] = m; });
+  componentsLoaded.forEach(function (c) { byId[c.id] = c; });
 
-  config.instruments.forEach(function (inst) {
-    core.registerInstrument(byId[inst.module], inst, Helpers);
+  config.widgetDefinitions.forEach(function (widgetDef) {
+    runtime.registerWidget(byId[widgetDef.widget], widgetDef, Helpers);
   });
 });
 ```
 
-## Adding a New Module
+## Adding a New Component
 
-1. Create UMD module file
-2. Add module ID entry in `config/modules.js`
-3. Add `deps` to existing module IDs when needed
+1. Create UMD component file
+2. Add component ID entry in `config/components.js`
+3. Add `deps` to existing component IDs when needed
 4. Add CSS path if required
 
 ## Related
 
-- [cluster-system.md](cluster-system.md) — `ClusterHost` modular dispatch architecture
+- [cluster-widget-system.md](cluster-widget-system.md) — `ClusterWidget` modular mapper architecture
 - [../shared/helpers.md](../shared/helpers.md) — `Helpers` passed to `create`
 - [../guides/add-new-gauge.md](../guides/add-new-gauge.md) — gauge workflow

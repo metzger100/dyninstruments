@@ -1,53 +1,53 @@
 /*!
- * ClusterHost DispatchRegistry (UMD) — cluster-to-dispatch module map
+ * ClusterWidget MapperRegistry (UMD) — cluster-to-mapper module map
  */
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniClusterHostDispatchRegistry = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniClusterMapperRegistry = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const dispatchModuleIds = [
-      "ClusterHostDispatchCourseHeading",
-      "ClusterHostDispatchSpeed",
-      "ClusterHostDispatchPosition",
-      "ClusterHostDispatchDistance",
-      "ClusterHostDispatchEnvironment",
-      "ClusterHostDispatchWind",
-      "ClusterHostDispatchTime",
-      "ClusterHostDispatchNav",
-      "ClusterHostDispatchAnchor",
-      "ClusterHostDispatchVessel"
+    const mapperIds = [
+      "CourseHeadingMapper",
+      "SpeedMapper",
+      "PositionMapper",
+      "DistanceMapper",
+      "EnvironmentMapper",
+      "WindMapper",
+      "TimeMapper",
+      "NavMapper",
+      "AnchorMapper",
+      "VesselMapper"
     ];
 
-    const dispatchers = {};
+    const mappers = {};
 
-    dispatchModuleIds.forEach(function (id) {
+    mapperIds.forEach(function (id) {
       const mod = Helpers.getModule(id);
       if (!mod || typeof mod.create !== "function") return;
       const spec = mod.create(def, Helpers);
       if (!spec || typeof spec.cluster !== "string" || typeof spec.translate !== "function") return;
-      dispatchers[spec.cluster] = spec.translate;
+      mappers[spec.cluster] = spec.translate;
     });
 
-    function translate(props, createToolkit) {
+    function mapCluster(props, createToolkit) {
       const p = props || {};
       const cluster = p.cluster || def.cluster || "";
-      const dispatch = dispatchers[cluster];
-      if (typeof dispatch !== "function") return {};
+      const mapper = mappers[cluster];
+      if (typeof mapper !== "function") return {};
 
       const toolkit = typeof createToolkit === "function" ? createToolkit(p) : {};
-      return dispatch(p, toolkit) || {};
+      return mapper(p, toolkit) || {};
     }
 
     return {
-      translate: translate,
-      dispatchers: dispatchers
+      mapCluster: mapCluster,
+      mappers: mappers
     };
   }
 
-  return { id: "ClusterHostDispatchRegistry", create: create };
+  return { id: "ClusterMapperRegistry", create: create };
 }));

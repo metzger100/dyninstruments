@@ -1,6 +1,6 @@
 /*!
- * ThreeElements (UMD) — responsive caption/value/unit
- * Pure canvas renderer; cluster-specific translation is handled by ClusterHost.
+ * ThreeValueTextWidget (UMD) — responsive caption/value/unit
+ * Pure canvas renderer; cluster-specific translation is handled by ClusterWidget.
  *
  * New behavior (normal & high modes):
  * - "Caption/Unit to Value scale" still defines the initial font sizes across rows.
@@ -19,7 +19,7 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniThreeElements = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniThreeValueTextWidget = factory(); }
 }(this, function () {
   "use strict";
 
@@ -268,19 +268,19 @@
       }
     }
 
-    // No translation here — ClusterHost handles it.
+    // No translation here — ClusterWidget handles it.
     function translateFunction(){ return {}; }
 
     return {
       // Keep the module id stable for the plugin loader.
-      id: "ThreeElements",
+      id: "ThreeValueTextWidget",
       version: "4.3.0",
-      // ThreeElements controls the full look of the widget; hide native head.
+      // ThreeValueTextWidget controls the full look of the widget; hide native head.
       wantsHideNativeHead: true,
       renderCanvas,
       translateFunction
     };
   }
 
-  return { id: "ThreeElements", create };
+  return { id: "ThreeValueTextWidget", create };
 }));

@@ -1,4 +1,4 @@
-/* WindDial — canvas-only renderer; styles can be scoped via widget container.
+/* WindDialWidget — canvas-only renderer; styles can be scoped via widget container.
 
    This file is intentionally minimal. The renderer reads:
    - --dyni-font

@@ -1,6 +1,6 @@
 /**
- * Module: DyniPlugin Module Registry - UMD module registry and dependency map
- * Documentation: documentation/architecture/module-system.md
+ * Module: DyniPlugin Component Registry - UMD component registry and dependency map
+ * Documentation: documentation/architecture/component-system.md
  * Depends: window.DyniPlugin.baseUrl
  */
 (function (root) {
@@ -11,196 +11,197 @@
   const BASE = ns.baseUrl;
 
   if (typeof BASE !== "string" || !BASE) {
-    throw new Error("dyninstruments: baseUrl missing before config/modules.js load");
+    throw new Error("dyninstruments: baseUrl missing before config/components.js load");
   }
 
-  config.modules = {
-    GaugeAngleUtils: {
-      js: BASE + "modules/Cores/GaugeAngleUtils.js",
+  config.components = {
+    GaugeAngleMath: {
+      js: BASE + "shared/widget-kits/gauge/GaugeAngleMath.js",
       css: undefined,
-      globalKey: "DyniGaugeAngleUtils"
+      globalKey: "DyniGaugeAngleMath"
     },
-    GaugeTickUtils: {
-      js: BASE + "modules/Cores/GaugeTickUtils.js",
+    GaugeTickMath: {
+      js: BASE + "shared/widget-kits/gauge/GaugeTickMath.js",
       css: undefined,
-      globalKey: "DyniGaugeTickUtils"
+      globalKey: "DyniGaugeTickMath"
     },
-    GaugePrimitiveDrawUtils: {
-      js: BASE + "modules/Cores/GaugePrimitiveDrawUtils.js",
+    GaugeCanvasPrimitives: {
+      js: BASE + "shared/widget-kits/gauge/GaugeCanvasPrimitives.js",
       css: undefined,
-      globalKey: "DyniGaugePrimitiveDrawUtils",
-      deps: ["GaugeAngleUtils"]
+      globalKey: "DyniGaugeCanvasPrimitives",
+      deps: ["GaugeAngleMath"]
     },
-    GaugeDialDrawUtils: {
-      js: BASE + "modules/Cores/GaugeDialDrawUtils.js",
+    GaugeDialRenderer: {
+      js: BASE + "shared/widget-kits/gauge/GaugeDialRenderer.js",
       css: undefined,
-      globalKey: "DyniGaugeDialDrawUtils",
-      deps: ["GaugeAngleUtils", "GaugeTickUtils", "GaugePrimitiveDrawUtils"]
+      globalKey: "DyniGaugeDialRenderer",
+      deps: ["GaugeAngleMath", "GaugeTickMath", "GaugeCanvasPrimitives"]
     },
-    GaugeTextUtils: {
-      js: BASE + "modules/Cores/GaugeTextUtils.js",
+    GaugeTextLayout: {
+      js: BASE + "shared/widget-kits/gauge/GaugeTextLayout.js",
       css: undefined,
-      globalKey: "DyniGaugeTextUtils"
+      globalKey: "DyniGaugeTextLayout"
     },
-    GaugeValueUtils: {
-      js: BASE + "modules/Cores/GaugeValueUtils.js",
+    GaugeValueMath: {
+      js: BASE + "shared/widget-kits/gauge/GaugeValueMath.js",
       css: undefined,
-      globalKey: "DyniGaugeValueUtils",
-      deps: ["GaugeAngleUtils"]
+      globalKey: "DyniGaugeValueMath",
+      deps: ["GaugeAngleMath"]
     },
-    GaugeUtils: {
-      js: BASE + "modules/Cores/GaugeUtils.js",
+    GaugeToolkit: {
+      js: BASE + "shared/widget-kits/gauge/GaugeToolkit.js",
       css: undefined,
-      globalKey: "DyniGaugeUtils",
+      globalKey: "DyniGaugeToolkit",
       deps: [
-        "GaugeTextUtils",
-        "GaugeValueUtils",
-        "GaugeAngleUtils",
-        "GaugeTickUtils",
-        "GaugePrimitiveDrawUtils",
-        "GaugeDialDrawUtils"
+        "GaugeTextLayout",
+        "GaugeValueMath",
+        "GaugeAngleMath",
+        "GaugeTickMath",
+        "GaugeCanvasPrimitives",
+        "GaugeDialRenderer"
       ]
     },
-    SemicircleGaugeRenderer: {
-      js: BASE + "modules/Cores/SemicircleGaugeRenderer.js",
+    SemicircleGaugeEngine: {
+      js: BASE + "shared/widget-kits/gauge/SemicircleGaugeEngine.js",
       css: undefined,
-      globalKey: "DyniSemicircleGaugeRenderer",
-      deps: ["GaugeUtils"]
+      globalKey: "DyniSemicircleGaugeEngine",
+      deps: ["GaugeToolkit"]
     },
-    ThreeElements: {
-      js: BASE + "modules/ThreeElements/ThreeElements.js",
-      css: BASE + "modules/ThreeElements/ThreeElements.css",
-      globalKey: "DyniThreeElements"
+    ThreeValueTextWidget: {
+      js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
+      css: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.css",
+      globalKey: "DyniThreeValueTextWidget"
     },
-    WindDial: {
-      js: BASE + "modules/WindDial/WindDial.js",
-      css: BASE + "modules/WindDial/WindDial.css",
-      globalKey: "DyniWindDial",
-      deps: ["GaugeUtils"]
+    WindDialWidget: {
+      js: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.js",
+      css: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.css",
+      globalKey: "DyniWindDialWidget",
+      deps: ["GaugeToolkit"]
     },
-    CompassGauge: {
-      js: BASE + "modules/CompassGauge/CompassGauge.js",
-      css: BASE + "modules/CompassGauge/CompassGauge.css",
-      globalKey: "DyniCompassGauge",
-      deps: ["GaugeUtils"]
+    CompassGaugeWidget: {
+      js: BASE + "widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js",
+      css: BASE + "widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.css",
+      globalKey: "DyniCompassGaugeWidget",
+      deps: ["GaugeToolkit"]
     },
-    SpeedGauge: {
-      js: BASE + "modules/SpeedGauge/SpeedGauge.js",
-      globalKey: "DyniSpeedGauge",
-      deps: ["SemicircleGaugeRenderer"]
-    },
-    DepthGauge: {
-      js: BASE + "modules/DepthGauge/DepthGauge.js",
+    SpeedGaugeWidget: {
+      js: BASE + "widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js",
       css: undefined,
-      globalKey: "DyniDepthGauge",
-      deps: ["SemicircleGaugeRenderer"]
+      globalKey: "DyniSpeedGaugeWidget",
+      deps: ["SemicircleGaugeEngine"]
     },
-    TemperatureGauge: {
-      js: BASE + "modules/TemperatureGauge/TemperatureGauge.js",
+    DepthGaugeWidget: {
+      js: BASE + "widgets/gauges/DepthGaugeWidget/DepthGaugeWidget.js",
       css: undefined,
-      globalKey: "DyniTemperatureGauge",
-      deps: ["SemicircleGaugeRenderer"]
+      globalKey: "DyniDepthGaugeWidget",
+      deps: ["SemicircleGaugeEngine"]
     },
-    VoltageGauge: {
-      js: BASE + "modules/VoltageGauge/VoltageGauge.js",
+    TemperatureGaugeWidget: {
+      js: BASE + "widgets/gauges/TemperatureGaugeWidget/TemperatureGaugeWidget.js",
       css: undefined,
-      globalKey: "DyniVoltageGauge",
-      deps: ["SemicircleGaugeRenderer"]
+      globalKey: "DyniTemperatureGaugeWidget",
+      deps: ["SemicircleGaugeEngine"]
     },
-    ClusterHostTranslateUtils: {
-      js: BASE + "modules/ClusterHost/Core/TranslateUtils.js",
+    VoltageGaugeWidget: {
+      js: BASE + "widgets/gauges/VoltageGaugeWidget/VoltageGaugeWidget.js",
       css: undefined,
-      globalKey: "DyniClusterHostTranslateUtils"
+      globalKey: "DyniVoltageGaugeWidget",
+      deps: ["SemicircleGaugeEngine"]
     },
-    ClusterHostRendererRegistry: {
-      js: BASE + "modules/ClusterHost/Core/RendererRegistry.js",
+    ClusterMapperToolkit: {
+      js: BASE + "cluster/mappers/ClusterMapperToolkit.js",
       css: undefined,
-      globalKey: "DyniClusterHostRendererRegistry",
+      globalKey: "DyniClusterMapperToolkit"
+    },
+    ClusterRendererRouter: {
+      js: BASE + "cluster/rendering/ClusterRendererRouter.js",
+      css: undefined,
+      globalKey: "DyniClusterRendererRouter",
       deps: [
-        "ThreeElements",
-        "WindDial",
-        "CompassGauge",
-        "SpeedGauge",
-        "DepthGauge",
-        "TemperatureGauge",
-        "VoltageGauge"
+        "ThreeValueTextWidget",
+        "WindDialWidget",
+        "CompassGaugeWidget",
+        "SpeedGaugeWidget",
+        "DepthGaugeWidget",
+        "TemperatureGaugeWidget",
+        "VoltageGaugeWidget"
       ]
     },
-    ClusterHostDispatchCourseHeading: {
-      js: BASE + "modules/ClusterHost/Dispatch/CourseHeading.js",
+    CourseHeadingMapper: {
+      js: BASE + "cluster/mappers/CourseHeadingMapper.js",
       css: undefined,
-      globalKey: "DyniClusterHostDispatchCourseHeading"
+      globalKey: "DyniCourseHeadingMapper"
     },
-    ClusterHostDispatchSpeed: {
-      js: BASE + "modules/ClusterHost/Dispatch/Speed.js",
+    SpeedMapper: {
+      js: BASE + "cluster/mappers/SpeedMapper.js",
       css: undefined,
-      globalKey: "DyniClusterHostDispatchSpeed"
+      globalKey: "DyniSpeedMapper"
     },
-    ClusterHostDispatchPosition: {
-      js: BASE + "modules/ClusterHost/Dispatch/Position.js",
+    PositionMapper: {
+      js: BASE + "cluster/mappers/PositionMapper.js",
       css: undefined,
-      globalKey: "DyniClusterHostDispatchPosition"
+      globalKey: "DyniPositionMapper"
     },
-    ClusterHostDispatchDistance: {
-      js: BASE + "modules/ClusterHost/Dispatch/Distance.js",
+    DistanceMapper: {
+      js: BASE + "cluster/mappers/DistanceMapper.js",
       css: undefined,
-      globalKey: "DyniClusterHostDispatchDistance"
+      globalKey: "DyniDistanceMapper"
     },
-    ClusterHostDispatchEnvironment: {
-      js: BASE + "modules/ClusterHost/Dispatch/Environment.js",
+    EnvironmentMapper: {
+      js: BASE + "cluster/mappers/EnvironmentMapper.js",
       css: undefined,
-      globalKey: "DyniClusterHostDispatchEnvironment"
+      globalKey: "DyniEnvironmentMapper"
     },
-    ClusterHostDispatchWind: {
-      js: BASE + "modules/ClusterHost/Dispatch/Wind.js",
+    WindMapper: {
+      js: BASE + "cluster/mappers/WindMapper.js",
       css: undefined,
-      globalKey: "DyniClusterHostDispatchWind"
+      globalKey: "DyniWindMapper"
     },
-    ClusterHostDispatchTime: {
-      js: BASE + "modules/ClusterHost/Dispatch/Time.js",
+    TimeMapper: {
+      js: BASE + "cluster/mappers/TimeMapper.js",
       css: undefined,
-      globalKey: "DyniClusterHostDispatchTime"
+      globalKey: "DyniTimeMapper"
     },
-    ClusterHostDispatchNav: {
-      js: BASE + "modules/ClusterHost/Dispatch/Nav.js",
+    NavMapper: {
+      js: BASE + "cluster/mappers/NavMapper.js",
       css: undefined,
-      globalKey: "DyniClusterHostDispatchNav"
+      globalKey: "DyniNavMapper"
     },
-    ClusterHostDispatchAnchor: {
-      js: BASE + "modules/ClusterHost/Dispatch/Anchor.js",
+    AnchorMapper: {
+      js: BASE + "cluster/mappers/AnchorMapper.js",
       css: undefined,
-      globalKey: "DyniClusterHostDispatchAnchor"
+      globalKey: "DyniAnchorMapper"
     },
-    ClusterHostDispatchVessel: {
-      js: BASE + "modules/ClusterHost/Dispatch/Vessel.js",
+    VesselMapper: {
+      js: BASE + "cluster/mappers/VesselMapper.js",
       css: undefined,
-      globalKey: "DyniClusterHostDispatchVessel"
+      globalKey: "DyniVesselMapper"
     },
-    ClusterHostDispatchRegistry: {
-      js: BASE + "modules/ClusterHost/Core/DispatchRegistry.js",
+    ClusterMapperRegistry: {
+      js: BASE + "cluster/mappers/ClusterMapperRegistry.js",
       css: undefined,
-      globalKey: "DyniClusterHostDispatchRegistry",
+      globalKey: "DyniClusterMapperRegistry",
       deps: [
-        "ClusterHostDispatchCourseHeading",
-        "ClusterHostDispatchSpeed",
-        "ClusterHostDispatchPosition",
-        "ClusterHostDispatchDistance",
-        "ClusterHostDispatchEnvironment",
-        "ClusterHostDispatchWind",
-        "ClusterHostDispatchTime",
-        "ClusterHostDispatchNav",
-        "ClusterHostDispatchAnchor",
-        "ClusterHostDispatchVessel"
+        "CourseHeadingMapper",
+        "SpeedMapper",
+        "PositionMapper",
+        "DistanceMapper",
+        "EnvironmentMapper",
+        "WindMapper",
+        "TimeMapper",
+        "NavMapper",
+        "AnchorMapper",
+        "VesselMapper"
       ]
     },
-    ClusterHost: {
-      js: BASE + "modules/ClusterHost/ClusterHost.js",
-      css: BASE + "modules/ClusterHost/ClusterHost.css",
-      globalKey: "DyniClusterHost",
+    ClusterWidget: {
+      js: BASE + "cluster/ClusterWidget.js",
+      css: BASE + "cluster/ClusterWidget.css",
+      globalKey: "DyniClusterWidget",
       deps: [
-        "ClusterHostTranslateUtils",
-        "ClusterHostRendererRegistry",
-        "ClusterHostDispatchRegistry"
+        "ClusterMapperToolkit",
+        "ClusterRendererRouter",
+        "ClusterMapperRegistry"
       ]
     }
   };

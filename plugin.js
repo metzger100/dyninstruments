@@ -1,6 +1,6 @@
 /**
  * Module: plugin.js - DyniPlugin bootstrap entrypoint
- * Documentation: documentation/architecture/module-system.md
+ * Documentation: documentation/architecture/component-system.md
  * Depends: avnav.api, AVNAV_BASE_URL, internal DyniPlugin scripts
  */
 /* global avnav */
@@ -41,14 +41,14 @@
   const ns = window.DyniPlugin = window.DyniPlugin || {};
   ns.baseUrl = BASE;
 
-  // Invariant: this load order is authoritative for all internal namespace/config/core setup.
+  // Invariant: this load order is authoritative for all internal namespace/config/runtime setup.
   const internalScripts = [
-    "core/namespace.js",
-    "core/helpers.js",
-    "core/editable-defaults.js",
-    "config/modules.js",
-    "config/shared/cluster-utils.js",
-    "config/shared/kind-maps.js",
+    "runtime/namespace.js",
+    "runtime/helpers.js",
+    "runtime/editable-defaults.js",
+    "config/components.js",
+    "config/shared/editable-param-utils.js",
+    "config/shared/kind-defaults.js",
     "config/shared/common-editables.js",
     "config/clusters/course-heading.js",
     "config/clusters/speed.js",
@@ -60,10 +60,10 @@
     "config/clusters/nav.js",
     "config/clusters/anchor.js",
     "config/clusters/vessel.js",
-    "config/instruments.js",
-    "core/module-loader.js",
-    "core/register-instrument.js",
-    "core/init.js"
+    "config/widget-definitions.js",
+    "runtime/component-loader.js",
+    "runtime/widget-registrar.js",
+    "runtime/init.js"
   ];
 
   internalScripts
@@ -73,7 +73,7 @@
       });
     }, Promise.resolve())
     .then(function () {
-      return window.DyniPlugin.core.runInit();
+      return window.DyniPlugin.runtime.runInit();
     })
     .catch(function (e) {
       console.error("dyninstruments bootstrap failed:", e);

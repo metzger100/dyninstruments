@@ -1,6 +1,6 @@
 # Guide: Create a New Semicircle Gauge
 
-**Status:** ✅ Ready | Current workflow with `SemicircleGaugeRenderer` + ClusterHost registries
+**Status:** ✅ Ready | Current workflow with `SemicircleGaugeEngine` + ClusterWidget registries
 
 ## Prerequisites
 
@@ -8,19 +8,19 @@ Read first:
 
 - [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md)
 - [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
-- [../architecture/module-system.md](../architecture/module-system.md)
-- [../architecture/cluster-system.md](../architecture/cluster-system.md)
+- [../architecture/component-system.md](../architecture/component-system.md)
+- [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
 
 ## Overview
 
-New semicircle gauges should be thin wrappers over `SemicircleGaugeRenderer`. Keep gauge modules focused on formatting, tick strategy, and sector strategy.
+New semicircle gauges should be thin wrappers over `SemicircleGaugeEngine`. Keep gauge modules focused on formatting, tick strategy, and sector strategy.
 
 ## Step 1: Create Gauge Module
 
-Create `modules/NewGauge/NewGauge.js`:
+Create `widgets/NewGauge/NewGauge.js`:
 
 1. UMD wrapper + `create(def, Helpers)`
-2. Resolve shared renderer: `Helpers.getModule("SemicircleGaugeRenderer").create(def, Helpers)`
+2. Resolve shared renderer: `Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers)`
 3. Provide gauge-specific functions only:
 - `formatDisplay(raw, props, unit, Helpers) -> { num, text }`
 - `tickSteps(range) -> { major, minor }`
@@ -28,7 +28,7 @@ Create `modules/NewGauge/NewGauge.js`:
 4. Build `renderCanvas` with `createRenderer(spec)`
 
 ```javascript
-const rendererModule = Helpers.getModule("SemicircleGaugeRenderer");
+const rendererModule = Helpers.getModule("SemicircleGaugeEngine");
 const renderer = rendererModule && rendererModule.create(def, Helpers);
 
 const renderCanvas = renderer.createRenderer({
@@ -57,32 +57,32 @@ return {
 };
 ```
 
-## Step 2: Register Module in `config/modules.js`
+## Step 2: Register Module in `config/components.js`
 
 Add module entry:
 
 ```javascript
 NewGauge: {
-  js: BASE + "modules/NewGauge/NewGauge.js",
+  js: BASE + "widgets/NewGauge/NewGauge.js",
   css: undefined,
   globalKey: "DyniNewGauge",
-  deps: ["SemicircleGaugeRenderer"]
+  deps: ["SemicircleGaugeEngine"]
 }
 ```
 
-## Step 3: Wire ClusterHost Renderer Registry
+## Step 3: Wire ClusterWidget Renderer Registry
 
-If `ClusterHost` should render this gauge, update both declaration and runtime selection:
+If `ClusterWidget` should render this gauge, update both declaration and runtime selection:
 
-1. `config/modules.js`: add `"NewGauge"` to `ClusterHostRendererRegistry.deps`
-2. `modules/ClusterHost/Core/RendererRegistry.js`:
+1. `config/components.js`: add `"NewGauge"` to `ClusterRendererRouter.deps`
+2. `cluster/rendering/ClusterRendererRouter.js`:
 - instantiate the new spec in `create()`
 - include it in `subSpecs`
 - route `props.renderer === "NewGauge"` in `pickRenderer()`
 
-## Step 4: Route Data via Dispatch Module
+## Step 4: Route Data via Mapper Module
 
-Update the relevant cluster dispatch module (`modules/ClusterHost/Dispatch/*.js`) so translation emits:
+Update the relevant cluster mapper module (`cluster/mappers/*.js`) so translation emits:
 
 ```javascript
 return {
@@ -94,7 +94,7 @@ return {
 };
 ```
 
-Do not edit `ClusterHost.js` for kind-specific translation logic.
+Do not edit `ClusterWidget.js` for kind-specific translation logic.
 
 ## Step 5: Verify
 
@@ -106,15 +106,15 @@ Do not edit `ClusterHost.js` for kind-specific translation logic.
 
 ## Checklist
 
-- [ ] Gauge wrapper created in `modules/NewGauge/NewGauge.js`
-- [ ] Module registered in `config/modules.js`
-- [ ] Added to `ClusterHostRendererRegistry.deps` (if ClusterHost-rendered)
-- [ ] Renderer wired in `modules/ClusterHost/Core/RendererRegistry.js`
-- [ ] Dispatch module emits `renderer: "NewGauge"` and expected props
+- [ ] Gauge wrapper created in `widgets/NewGauge/NewGauge.js`
+- [ ] Module registered in `config/components.js`
+- [ ] Added to `ClusterRendererRouter.deps` (if ClusterWidget-rendered)
+- [ ] Renderer wired in `cluster/rendering/ClusterRendererRouter.js`
+- [ ] Mapper module emits `renderer: "NewGauge"` and expected props
 - [ ] Visual + resize behavior validated
 
 ## Related
 
 - [add-new-cluster.md](add-new-cluster.md)
-- [../modules/semicircle-gauges.md](../modules/semicircle-gauges.md)
+- [../widgets/semicircle-gauges.md](../widgets/semicircle-gauges.md)
 - [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)

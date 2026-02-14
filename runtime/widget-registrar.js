@@ -1,13 +1,13 @@
 /**
- * Module: DyniPlugin Register Instrument - Widget definition composition and registration
+ * Module: DyniPlugin Widget Registrar - Widget definition composition and registration
  * Documentation: documentation/avnav-api/plugin-lifecycle.md
- * Depends: core/editable-defaults.js, avnav.api.registerWidget
+ * Depends: runtime/editable-defaults.js, avnav.api.registerWidget
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
-  const core = ns.core;
+  const runtime = ns.runtime;
 
   function composeUpdates() {
     const fns = Array.prototype.slice.call(arguments).filter(function (fn) {
@@ -25,16 +25,16 @@
     };
   }
 
-  function registerInstrument(mod, inst, Helpers) {
-    const spec = mod.create(inst.def, Helpers) || {};
+  function registerWidget(component, widgetDef, Helpers) {
+    const spec = component.create(widgetDef.def, Helpers) || {};
 
     const defaultClass = "dyniplugin";
-    const mergedClassName = [defaultClass, inst.def.className, spec.className]
+    const mergedClassName = [defaultClass, widgetDef.def.className, spec.className]
       .filter(Boolean)
       .join(" ");
 
-    const storeKeys = spec.storeKeys || inst.def.storeKeys ||
-      (inst.def.storeKey ? { value: inst.def.storeKey } : undefined);
+    const storeKeys = spec.storeKeys || widgetDef.def.storeKeys ||
+      (widgetDef.def.storeKey ? { value: widgetDef.def.storeKey } : undefined);
 
     const renderCanvas = typeof spec.renderCanvas === "function" ? spec.renderCanvas : undefined;
     const renderHtml = typeof spec.renderHtml === "function" ? spec.renderHtml : undefined;
@@ -42,7 +42,7 @@
     const finalizeFunction = typeof spec.finalizeFunction === "function" ? spec.finalizeFunction : undefined;
     const translateFunction = typeof spec.translateFunction === "function" ? spec.translateFunction : undefined;
 
-    const updateFunction = composeUpdates(spec.updateFunction, inst.def.updateFunction);
+    const updateFunction = composeUpdates(spec.updateFunction, widgetDef.def.updateFunction);
 
     const wantsHide = !!spec.wantsHideNativeHead;
 
@@ -58,21 +58,21 @@
       };
     }
 
-    const defaultsFn = core.defaultsFromEditableParams;
+    const defaultsFn = runtime.defaultsFromEditableParams;
     const perInstrumentDefaults = typeof defaultsFn === "function"
-      ? defaultsFn(inst.def.editableParameters)
+      ? defaultsFn(widgetDef.def.editableParameters)
       : {};
 
     const baseDef = {
-      name: inst.def.name,
-      description: inst.def.description || inst.def.name,
-      caption: inst.def.caption || "",
-      unit: inst.def.unit || "",
-      default: inst.def.default || "---",
+      name: widgetDef.def.name,
+      description: widgetDef.def.description || widgetDef.def.name,
+      caption: widgetDef.def.caption || "",
+      unit: widgetDef.def.unit || "",
+      default: widgetDef.def.default || "---",
       storeKeys: storeKeys,
       className: mergedClassName,
 
-      cluster: inst.def.cluster,
+      cluster: widgetDef.def.cluster,
       ...perInstrumentDefaults,
 
       renderCanvas: wrapRenderCanvas(renderCanvas),
@@ -83,9 +83,9 @@
       updateFunction: updateFunction
     };
 
-    const editable = inst.def.editableParameters || {};
+    const editable = widgetDef.def.editableParameters || {};
     root.avnav.api.registerWidget(baseDef, editable);
   }
 
-  core.registerInstrument = registerInstrument;
+  runtime.registerWidget = registerWidget;
 }(this));

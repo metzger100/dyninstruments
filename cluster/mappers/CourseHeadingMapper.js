@@ -1,11 +1,11 @@
 /*!
- * ClusterHost dispatch: courseHeading
+ * ClusterWidget mapper: courseHeading
  */
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniClusterHostDispatchCourseHeading = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniCourseHeadingMapper = factory(); }
 }(this, function () {
   "use strict";
 
@@ -21,7 +21,7 @@
       if (effKind === "hdtGraphic" || effKind === "hdmGraphic") {
         const heading = (effKind === "hdtGraphic") ? p.hdt : p.hdm;
         return {
-          renderer: "CompassGauge",
+          renderer: "CompassGaugeWidget",
           heading: heading,
           markerCourse: p.brg,
           caption: cap(effKind),
@@ -44,5 +44,5 @@
     };
   }
 
-  return { id: "ClusterHostDispatchCourseHeading", create: create };
+  return { id: "CourseHeadingMapper", create: create };
 }));

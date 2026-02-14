@@ -1,11 +1,11 @@
 /*!
- * ClusterHost dispatch: time
+ * ClusterWidget mapper: time
  */
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniClusterHostDispatchTime = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniTimeMapper = factory(); }
 }(this, function () {
   "use strict";
 
@@ -22,5 +22,5 @@
     };
   }
 
-  return { id: "ClusterHostDispatchTime", create: create };
+  return { id: "TimeMapper", create: create };
 }));

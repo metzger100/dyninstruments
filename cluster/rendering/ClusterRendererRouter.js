@@ -1,22 +1,22 @@
 /*!
- * ClusterHost RendererRegistry (UMD) — sub-renderer lifecycle and delegation
+ * ClusterWidget RendererRouter (UMD) — sub-renderer lifecycle and delegation
  */
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniClusterHostRendererRegistry = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniClusterRendererRouter = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const threeSpec = Helpers.getModule("ThreeElements").create(def, Helpers);
-    const dialSpec = Helpers.getModule("WindDial").create(def, Helpers);
-    const compassSpec = Helpers.getModule("CompassGauge").create(def, Helpers);
-    const speedGaugeSpec = Helpers.getModule("SpeedGauge").create(def, Helpers);
-    const depthSpec = Helpers.getModule("DepthGauge").create(def, Helpers);
-    const tempSpec = Helpers.getModule("TemperatureGauge").create(def, Helpers);
-    const voltageSpec = Helpers.getModule("VoltageGauge").create(def, Helpers);
+    const threeSpec = Helpers.getModule("ThreeValueTextWidget").create(def, Helpers);
+    const dialSpec = Helpers.getModule("WindDialWidget").create(def, Helpers);
+    const compassSpec = Helpers.getModule("CompassGaugeWidget").create(def, Helpers);
+    const speedGaugeSpec = Helpers.getModule("SpeedGaugeWidget").create(def, Helpers);
+    const depthSpec = Helpers.getModule("DepthGaugeWidget").create(def, Helpers);
+    const tempSpec = Helpers.getModule("TemperatureGaugeWidget").create(def, Helpers);
+    const voltageSpec = Helpers.getModule("VoltageGaugeWidget").create(def, Helpers);
 
     const subSpecs = [threeSpec, dialSpec, compassSpec, speedGaugeSpec, depthSpec, tempSpec, voltageSpec];
 
@@ -25,12 +25,12 @@
     });
 
     function pickRenderer(props) {
-      if (props && props.renderer === "WindDial") return dialSpec;
-      if (props && props.renderer === "CompassGauge") return compassSpec;
-      if (props && props.renderer === "SpeedGauge") return speedGaugeSpec;
-      if (props && props.renderer === "DepthGauge") return depthSpec;
-      if (props && props.renderer === "TemperatureGauge") return tempSpec;
-      if (props && props.renderer === "VoltageGauge") return voltageSpec;
+      if (props && props.renderer === "WindDialWidget") return dialSpec;
+      if (props && props.renderer === "CompassGaugeWidget") return compassSpec;
+      if (props && props.renderer === "SpeedGaugeWidget") return speedGaugeSpec;
+      if (props && props.renderer === "DepthGaugeWidget") return depthSpec;
+      if (props && props.renderer === "TemperatureGaugeWidget") return tempSpec;
+      if (props && props.renderer === "VoltageGaugeWidget") return voltageSpec;
       return threeSpec;
     }
 
@@ -59,5 +59,5 @@
     };
   }
 
-  return { id: "ClusterHostRendererRegistry", create: create };
+  return { id: "ClusterRendererRouter", create: create };
 }));

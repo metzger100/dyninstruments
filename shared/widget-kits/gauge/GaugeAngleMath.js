@@ -1,12 +1,12 @@
 /**
- * Module: GaugeAngleUtils - Shared angle conversion and value/angle mapping helpers
+ * Module: GaugeAngleMath - Shared angle conversion and value/angle mapping helpers
  * Documentation: documentation/gauges/gauge-shared-api.md
  * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniGaugeAngleUtils = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniGaugeAngleMath = factory(); }
 }(this, function () {
   "use strict";
 
@@ -90,7 +90,7 @@
     }
 
     return {
-      id: "GaugeAngleUtils",
+      id: "GaugeAngleMath",
       version: "0.1.0",
       degToRad,
       radToDeg,
@@ -103,5 +103,5 @@
     };
   }
 
-  return { id: "GaugeAngleUtils", create };
+  return { id: "GaugeAngleMath", create };
 }));

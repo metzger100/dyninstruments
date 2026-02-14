@@ -1,6 +1,6 @@
 /**
- * Module: DyniPlugin Common Editables - Shared ThreeElements layout defaults
- * Documentation: documentation/modules/three-elements.md
+ * Module: DyniPlugin Common Editables - Shared ThreeValueTextWidget layout defaults
+ * Documentation: documentation/widgets/three-elements.md
  * Depends: none
  */
 (function (root) {
