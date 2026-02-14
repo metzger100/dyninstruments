@@ -1,6 +1,6 @@
 # dyninstruments — Modern Instrument Widgets for AvNav
 
-**Status:** ✅ Functional | Pre-refactoring
+**Status:** ✅ Functional | Phase 1 (semicircle refactor) complete
 
 ## Stack
 
@@ -21,7 +21,11 @@ plugin.js (entry point)
 └── registerInstrument() — registers widgets with avnav.api
 
 modules/
-├── Cores/InstrumentComponents.js  — Drawing primitives for full-circle dials
+├── Cores/InstrumentComponents.js  — Polar/canvas primitives
+├── Cores/GaugeTextUtils.js        — Shared text fitting and overlay helpers
+├── Cores/GaugeValueUtils.js       — Shared range/angle/sector helpers
+├── Cores/GaugeUtils.js            — Facade over shared gauge helpers
+├── Cores/SemicircleGaugeRenderer.js — Shared semicircle render flow
 ├── ThreeElements/              — Caption/Value/Unit numeric renderer
 ├── ClusterHost/                — Dispatcher: kind → renderer routing
 ├── WindDial/                   — Full-circle wind compass
@@ -94,7 +98,7 @@ User selects "kind" in AvNav editor
 ## Refactoring Phases
 
 - ✅ Phase 0: Documentation system (this)
-- ❌ Phase 1: Rework InstrumentComponents and refactor the gauge widgets to reduce the code duplication
+- ✅ Phase 1: Rework InstrumentComponents and refactor the semicircle gauge widgets to reduce code duplication
 - ❌ Phase 2: Split plugin.js into per-cluster config files
 - ❌ Phase 3: Inline comments + file headers
 - ❌ Phase 4: Remove dead code, naming cleanup

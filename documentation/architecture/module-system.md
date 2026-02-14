@@ -17,6 +17,29 @@ const MODULES = {
     css: undefined,
     globalKey: "DyniInstrumentComponents"
   },
+  GaugeTextUtils: {
+    js: BASE + "modules/Cores/GaugeTextUtils.js",
+    css: undefined,
+    globalKey: "DyniGaugeTextUtils"
+  },
+  GaugeValueUtils: {
+    js: BASE + "modules/Cores/GaugeValueUtils.js",
+    css: undefined,
+    globalKey: "DyniGaugeValueUtils",
+    deps: ["InstrumentComponents"]
+  },
+  GaugeUtils: {
+    js: BASE + "modules/Cores/GaugeUtils.js",
+    css: undefined,
+    globalKey: "DyniGaugeUtils",
+    deps: ["InstrumentComponents","GaugeTextUtils","GaugeValueUtils"]
+  },
+  SemicircleGaugeRenderer: {
+    js: BASE + "modules/Cores/SemicircleGaugeRenderer.js",
+    css: undefined,
+    globalKey: "DyniSemicircleGaugeRenderer",
+    deps: ["GaugeUtils"]
+  },
   ThreeElements: {
     js: BASE + "modules/ThreeElements/ThreeElements.js",
     css: BASE + "modules/ThreeElements/ThreeElements.css",
@@ -37,22 +60,22 @@ const MODULES = {
   SpeedGauge: {
     js: BASE + "modules/SpeedGauge/SpeedGauge.js",
     globalKey: "DyniSpeedGauge",
-    deps: ["InstrumentComponents"]
+    deps: ["SemicircleGaugeRenderer"]
   },
   DepthGauge: {
     js: BASE + "modules/DepthGauge/DepthGauge.js",
     globalKey: "DyniDepthGauge",
-    deps: ["InstrumentComponents"]
+    deps: ["SemicircleGaugeRenderer"]
   },
   TemperatureGauge: {
     js: BASE + "modules/TemperatureGauge/TemperatureGauge.js",
     globalKey: "DyniTemperatureGauge",
-    deps: ["InstrumentComponents"]
+    deps: ["SemicircleGaugeRenderer"]
   },
   VoltageGauge: {
     js: BASE + "modules/VoltageGauge/VoltageGauge.js",
     globalKey: "DyniVoltageGauge",
-    deps: ["InstrumentComponents"]
+    deps: ["SemicircleGaugeRenderer"]
   },
   ClusterHost: {
     js: BASE + "modules/ClusterHost/ClusterHost.js",
@@ -70,13 +93,20 @@ ClusterHost
 ├── ThreeElements
 ├── WindDial ← InstrumentComponents
 ├── CompassGauge ← InstrumentComponents
-├── SpeedGauge ← InstrumentComponents
-├── DepthGauge ← InstrumentComponents
-├── TemperatureGauge ← InstrumentComponents
-└── VoltageGauge ← InstrumentComponents
+├── SpeedGauge
+├── DepthGauge
+├── TemperatureGauge
+└── VoltageGauge
+
+SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge
+  └── SemicircleGaugeRenderer
+      └── GaugeUtils
+          ├── GaugeTextUtils
+          ├── GaugeValueUtils ← InstrumentComponents
+          └── InstrumentComponents
 ```
 
-All gauge/dial modules depend on InstrumentComponents. ClusterHost depends on all renderers.
+All gauge/dial modules still share `InstrumentComponents`, with semicircle widgets now going through `GaugeUtils` and `SemicircleGaugeRenderer`.
 
 ## UMD Module Template
 
