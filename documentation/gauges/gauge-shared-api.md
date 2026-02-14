@@ -273,7 +273,7 @@ All-in-one: ring + ticks + labels. Sub-options passed via nested objects.
 
 ## Duplicated Functions in Semicircle Gauges
 
-The 4 semicircle gauges (Speed, Depth, Temperature, Voltage) each contain ~25 local functions (~350 lines) that duplicate functionality also available in IC but with **positional parameters instead of opts-objects**. These local copies handle arc drawing, sectors, ticks, labels, and text layout. They do **not** call IC for any of this — only `drawPointerAtRim` is delegated to IC.
+The 4 semicircle gauges (Speed, Depth, Temperature, Voltage) each contain many local functions that duplicate functionality also available in IC but with **positional parameters instead of opts-objects**. These local copies handle arc drawing, sectors, ticks, labels, and text layout. They do **not** call IC for any of this — only `drawPointerAtRim` is delegated to IC.
 
 Affected duplicated functions per gauge: `setFont`, `clamp`, `isFiniteN`, `deg2rad`, `toCanvasAngleRad`, `drawDisconnectOverlay`, `fitTextPx`, `niceTickSteps`, `almostInt`, `extractNumberText`, `drawArcRing`, `drawAnnularSector`, `drawTicksFromAngles`, `drawLabelsForMajorValues`, `buildValueTickAngles`, `sectorAngles`, `measureValueUnitFit`, `drawCaptionMax`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawThreeRowsBlock`, `drawPointerAtRimFallback` (dead code — never executes).
 

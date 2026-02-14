@@ -1,14 +1,16 @@
 # Documentation Table of Contents
 
+**Status:** ✅ Reference | Navigation index for AI-focused docs
+
 **Purpose:** Quick navigation for AI to locate relevant documentation without reading all files.
 
 ## AvNav Plugin API (External)
 
 - **How does widget registration work?** → [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md)
 - **What is the render cycle (translate → render)?** → [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md)
-- **What props does renderCanvas receive?** → [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md#props-in-rendercanvas)
+- **What props does renderCanvas receive?** → [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md#render-cycle-avnav-standard)
 - **What editableParameter types exist?** → [avnav-api/editable-parameters.md](avnav-api/editable-parameters.md)
-- **How do conditions on editableParameters work?** → [avnav-api/editable-parameters.md](avnav-api/editable-parameters.md#conditions)
+- **How do conditions on editableParameters work?** → [avnav-api/editable-parameters.md](avnav-api/editable-parameters.md#condition-undocumented-avnav-feature)
 - **What formatters are available (formatSpeed, formatDistance...)?** → [avnav-api/formatters.md](avnav-api/formatters.md)
 
 ## Architecture
@@ -58,7 +60,6 @@
 
 - **Phase 1: Refactoring of Gauges and InstrumentComponents (eliminate duplication)** → [guides/add-new-gauge.md](guides/add-new-gauge.md), [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md), [modules/semicircle-gauges.md](modules/semicircle-gauges.md#duplicated-local-functions)
 - **What functions are duplicated across gauges?** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
-- **How should the refactored gauge structure look?** → [guides/add-new-gauge.md](guides/add-new-gauge.md#refactored-gauge-structure)
 
 ## Feature-Specific Lookups
 
