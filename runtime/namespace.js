@@ -1,13 +1,13 @@
 /**
  * Module: DyniPlugin Namespace - Internal namespace container
- * Documentation: documentation/architecture/module-system.md
+ * Documentation: documentation/architecture/component-system.md
  * Depends: none
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin = root.DyniPlugin || {};
-  ns.core = ns.core || {};
+  ns.runtime = ns.runtime || {};
   ns.state = ns.state || {};
   ns.config = ns.config || {};
   ns.config.shared = ns.config.shared || {};

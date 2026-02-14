@@ -1,71 +1,71 @@
 # Gauge Shared API
 
-**Status:** ✅ Implemented | split gauge utility modules + `GaugeUtils` facade
+**Status:** ✅ Implemented | split gauge utility modules + `GaugeToolkit` facade
 
 ## Overview
 
 Shared gauge logic is split into focused core modules:
 
-- `GaugeAngleUtils` for angle math and value/angle mapping
-- `GaugeTickUtils` for major/minor tick angle generation
-- `GaugePrimitiveDrawUtils` for low-level canvas primitives
-- `GaugeDialDrawUtils` for radial tick/label/frame drawing
-- `GaugeTextUtils` for text fitting/drawing and disconnect overlay
-- `GaugeValueUtils` for numeric/range/geometry helpers
-- `GaugeUtils` as composed facade
-- `SemicircleGaugeRenderer` as shared render flow for Speed/Depth/Temperature/Voltage
+- `GaugeAngleMath` for angle math and value/angle mapping
+- `GaugeTickMath` for major/minor tick angle generation
+- `GaugeCanvasPrimitives` for low-level canvas primitives
+- `GaugeDialRenderer` for radial tick/label/frame drawing
+- `GaugeTextLayout` for text fitting/drawing and disconnect overlay
+- `GaugeValueMath` for numeric/range/geometry helpers
+- `GaugeToolkit` as composed facade
+- `SemicircleGaugeEngine` as shared render flow for Speed/Depth/Temperature/Voltage
 
 ## Module Registration
 
-`config/modules.js` registers these shared modules:
+`config/components.js` registers these shared modules:
 
 ```javascript
-GaugeAngleUtils: { js: BASE + "modules/Cores/GaugeAngleUtils.js", globalKey: "DyniGaugeAngleUtils" },
-GaugeTickUtils: { js: BASE + "modules/Cores/GaugeTickUtils.js", globalKey: "DyniGaugeTickUtils" },
-GaugePrimitiveDrawUtils: {
-  js: BASE + "modules/Cores/GaugePrimitiveDrawUtils.js",
-  globalKey: "DyniGaugePrimitiveDrawUtils",
-  deps: ["GaugeAngleUtils"]
+GaugeAngleMath: { js: BASE + "shared/widget-kits/gauge/GaugeAngleMath.js", globalKey: "DyniGaugeAngleMath" },
+GaugeTickMath: { js: BASE + "shared/widget-kits/gauge/GaugeTickMath.js", globalKey: "DyniGaugeTickMath" },
+GaugeCanvasPrimitives: {
+  js: BASE + "shared/widget-kits/gauge/GaugeCanvasPrimitives.js",
+  globalKey: "DyniGaugeCanvasPrimitives",
+  deps: ["GaugeAngleMath"]
 },
-GaugeDialDrawUtils: {
-  js: BASE + "modules/Cores/GaugeDialDrawUtils.js",
-  globalKey: "DyniGaugeDialDrawUtils",
-  deps: ["GaugeAngleUtils", "GaugeTickUtils", "GaugePrimitiveDrawUtils"]
+GaugeDialRenderer: {
+  js: BASE + "shared/widget-kits/gauge/GaugeDialRenderer.js",
+  globalKey: "DyniGaugeDialRenderer",
+  deps: ["GaugeAngleMath", "GaugeTickMath", "GaugeCanvasPrimitives"]
 },
-GaugeTextUtils: { js: BASE + "modules/Cores/GaugeTextUtils.js", globalKey: "DyniGaugeTextUtils" },
-GaugeValueUtils: { js: BASE + "modules/Cores/GaugeValueUtils.js", globalKey: "DyniGaugeValueUtils", deps: ["GaugeAngleUtils"] },
-GaugeUtils: {
-  js: BASE + "modules/Cores/GaugeUtils.js",
-  globalKey: "DyniGaugeUtils",
-  deps: ["GaugeTextUtils", "GaugeValueUtils", "GaugeAngleUtils", "GaugeTickUtils", "GaugePrimitiveDrawUtils", "GaugeDialDrawUtils"]
+GaugeTextLayout: { js: BASE + "shared/widget-kits/gauge/GaugeTextLayout.js", globalKey: "DyniGaugeTextLayout" },
+GaugeValueMath: { js: BASE + "shared/widget-kits/gauge/GaugeValueMath.js", globalKey: "DyniGaugeValueMath", deps: ["GaugeAngleMath"] },
+GaugeToolkit: {
+  js: BASE + "shared/widget-kits/gauge/GaugeToolkit.js",
+  globalKey: "DyniGaugeToolkit",
+  deps: ["GaugeTextLayout", "GaugeValueMath", "GaugeAngleMath", "GaugeTickMath", "GaugeCanvasPrimitives", "GaugeDialRenderer"]
 },
-SemicircleGaugeRenderer: {
-  js: BASE + "modules/Cores/SemicircleGaugeRenderer.js",
-  globalKey: "DyniSemicircleGaugeRenderer",
-  deps: ["GaugeUtils"]
+SemicircleGaugeEngine: {
+  js: BASE + "shared/widget-kits/gauge/SemicircleGaugeEngine.js",
+  globalKey: "DyniSemicircleGaugeEngine",
+  deps: ["GaugeToolkit"]
 }
 ```
 
 ## Access Pattern
 
 ```javascript
-const gaugeUtils = Helpers.getModule("GaugeUtils") && Helpers.getModule("GaugeUtils").create(def, Helpers);
-const renderer = Helpers.getModule("SemicircleGaugeRenderer") && Helpers.getModule("SemicircleGaugeRenderer").create(def, Helpers);
+const gaugeUtils = Helpers.getModule("GaugeToolkit") && Helpers.getModule("GaugeToolkit").create(def, Helpers);
+const renderer = Helpers.getModule("SemicircleGaugeEngine") && Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
 ```
 
-## GaugeUtils (Facade)
+## GaugeToolkit (Facade)
 
-`GaugeUtils.create(def, Helpers)` returns:
+`GaugeToolkit.create(def, Helpers)` returns:
 
 | Field | Type | Description |
 |---|---|---|
-| `text` | object | `GaugeTextUtils` API |
-| `value` | object | `GaugeValueUtils` API |
-| `angle` | object | `GaugeAngleUtils` API |
-| `tick` | object | `GaugeTickUtils` API |
-| `draw` | object | merged API from `GaugePrimitiveDrawUtils` + `GaugeDialDrawUtils` |
+| `text` | object | `GaugeTextLayout` API |
+| `value` | object | `GaugeValueMath` API |
+| `angle` | object | `GaugeAngleMath` API |
+| `tick` | object | `GaugeTickMath` API |
+| `draw` | object | merged API from `GaugeCanvasPrimitives` + `GaugeDialRenderer` |
 
-## Draw API (`GaugeUtils.draw`)
+## Draw API (`GaugeToolkit.draw`)
 
 | Function | Purpose |
 |---|---|
@@ -80,7 +80,7 @@ const renderer = Helpers.getModule("SemicircleGaugeRenderer") && Helpers.getModu
 | `drawLabels` | Draw labels on arc/circle |
 | `drawDialFrame` | Convenience ring + ticks + labels |
 
-## Angle API (`GaugeAngleUtils`)
+## Angle API (`GaugeAngleMath`)
 
 | Function | Purpose |
 |---|---|
@@ -90,26 +90,26 @@ const renderer = Helpers.getModule("SemicircleGaugeRenderer") && Helpers.getModu
 | `valueToAngle`, `angleToValue` | Linear value/angle mapping |
 | `valueRangeToAngleRange` | Convert value range to angle range |
 
-## Tick API (`GaugeTickUtils`)
+## Tick API (`GaugeTickMath`)
 
 | Function | Purpose |
 |---|---|
 | `computeSweep` | Sweep direction/intensity for start/end |
 | `buildTickAngles` | Build major/minor angle arrays |
 
-## GaugeTextUtils API
+## GaugeTextLayout API
 
-`GaugeTextUtils.create()` returns shared text helpers:
+`GaugeTextLayout.create()` returns shared text helpers:
 `setFont`, `fitTextPx`, `measureValueUnitFit`, `drawCaptionMax`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`, `drawDisconnectOverlay`.
 
-## GaugeValueUtils API
+## GaugeValueMath API
 
-`GaugeValueUtils.create(def, Helpers)` returns shared numeric helpers:
+`GaugeValueMath.create(def, Helpers)` returns shared numeric helpers:
 `isFiniteNumber`, `clamp`, `almostInt`, `isApprox`, `computePad`, `computeGap`, `computeMode`, `normalizeRange`, `valueToAngle`, `angleToValue`, `buildValueTickAngles`, `sectorAngles`, `formatMajorLabel`, `computeSemicircleGeometry`.
 
-## SemicircleGaugeRenderer API
+## SemicircleGaugeEngine API
 
-`SemicircleGaugeRenderer.create(def, Helpers).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
+`SemicircleGaugeEngine.create(def, Helpers).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
 
 ### `spec` fields
 
@@ -133,6 +133,6 @@ const renderer = Helpers.getModule("SemicircleGaugeRenderer") && Helpers.getModu
 
 ## Related
 
-- [../modules/semicircle-gauges.md](../modules/semicircle-gauges.md)
+- [../widgets/semicircle-gauges.md](../widgets/semicircle-gauges.md)
 - [../guides/add-new-gauge.md](../guides/add-new-gauge.md)
-- [../architecture/module-system.md](../architecture/module-system.md)
+- [../architecture/component-system.md](../architecture/component-system.md)

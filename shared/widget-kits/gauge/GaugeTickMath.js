@@ -1,12 +1,12 @@
 /**
- * Module: GaugeTickUtils - Shared tick sweep and major/minor angle generation
+ * Module: GaugeTickMath - Shared tick sweep and major/minor angle generation
  * Documentation: documentation/gauges/gauge-shared-api.md
  * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniGaugeTickUtils = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniGaugeTickMath = factory(); }
 }(this, function () {
   "use strict";
 
@@ -73,12 +73,12 @@
     }
 
     return {
-      id: "GaugeTickUtils",
+      id: "GaugeTickMath",
       version: "0.1.0",
       computeSweep,
       buildTickAngles
     };
   }
 
-  return { id: "GaugeTickUtils", create };
+  return { id: "GaugeTickMath", create };
 }));

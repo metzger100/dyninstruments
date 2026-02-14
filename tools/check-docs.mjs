@@ -11,10 +11,10 @@ const TARGETS = [
 ].filter((p) => fs.existsSync(p));
 
 const STALE_PHRASES = [
-  "In MODULES (plugin.js)",
-  "composeUpdates() in plugin.js",
-  "plugin.js calls registerInstrument()",
-  "Update `ClusterHost.js`"
+  "In COMPONENTS (plugin.js)",
+  "composeUpdates() in runtime/widget-registrar.js",
+  "runtime/init.js calls runtime.registerWidget()",
+  "Update `ClusterWidget.js`"
 ];
 
 const headingMap = new Map();

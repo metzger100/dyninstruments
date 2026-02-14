@@ -1,19 +1,19 @@
 /**
  * Module: DyniPlugin Init - Runtime initialization and widget registration
- * Documentation: documentation/architecture/module-system.md
- * Depends: core/helpers.js, core/module-loader.js, core/register-instrument.js, config/instruments.js
+ * Documentation: documentation/architecture/component-system.md
+ * Depends: runtime/helpers.js, runtime/component-loader.js, runtime/widget-registrar.js, config/widget-definitions.js
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
-  const core = ns.core;
+  const runtime = ns.runtime;
   const state = ns.state;
 
-  function createGetModule(modules) {
-    return function getModule(id) {
-      const m = modules[id];
-      return root.DyniModules[m.globalKey];
+  function createGetComponent(components) {
+    return function getComponent(id) {
+      const c = components[id];
+      return root.DyniComponents[c.globalKey];
     };
   }
 
@@ -25,30 +25,30 @@
       return Promise.resolve();
     }
 
-    // Invariants: namespace/config/core are bootstrapped in fixed order by plugin.js.
+    // Invariants: namespace/config/runtime are bootstrapped in fixed order by plugin.js.
     const config = ns.config;
-    const modules = config.modules;
-    const instruments = config.instruments;
+    const components = config.components;
+    const widgetDefinitions = config.widgetDefinitions;
 
     state.initStarted = true;
 
-    const Helpers = core.createHelpers(createGetModule(modules));
-    const loader = core.createModuleLoader(modules);
-    const needed = loader.uniqueModules(instruments);
+    const Helpers = runtime.createHelpers(createGetComponent(components));
+    const loader = runtime.createComponentLoader(components);
+    const needed = loader.uniqueComponents(widgetDefinitions);
 
-    state.initPromise = Promise.all(needed.map(loader.loadModule))
-      .then(function (mods) {
+    state.initPromise = Promise.all(needed.map(loader.loadComponent))
+      .then(function (componentsLoaded) {
         const byId = {};
-        mods.forEach(function (m) {
-          byId[m.id] = m;
+        componentsLoaded.forEach(function (component) {
+          byId[component.id] = component;
         });
 
-        instruments.forEach(function (inst) {
-          const mod = byId[inst.module];
-          core.registerInstrument(mod, inst, Helpers);
+        widgetDefinitions.forEach(function (widgetDef) {
+          const component = byId[widgetDef.widget];
+          runtime.registerWidget(component, widgetDef, Helpers);
         });
 
-        root.avnav.api.log("dyninstruments modular init ok (wind/compass clustered): " + instruments.length + " widgets");
+        root.avnav.api.log("dyninstruments component init ok (wind/compass clustered): " + widgetDefinitions.length + " widgets");
       })
       .catch(function (e) {
         state.initStarted = false;
@@ -58,6 +58,6 @@
     return state.initPromise;
   }
 
-  core.runInit = runInit;
+  runtime.runInit = runInit;
   runInit();
 }(this));

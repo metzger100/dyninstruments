@@ -1,6 +1,6 @@
 # Gauge Style Guide
 
-**Status:** ✅ Implemented | SpeedGauge, DepthGauge, TemperatureGauge, VoltageGauge
+**Status:** ✅ Implemented | SpeedGaugeWidget, DepthGaugeWidget, TemperatureGaugeWidget, VoltageGaugeWidget
 
 ## Overview
 
@@ -47,8 +47,8 @@ const cy = gaugeTop + R;
 | Alarm sector | `#ff7a76` | Matte red |
 | Pointer | `#ff2b2b` | Red triangle |
 | Text/ticks/arc stroke | `Helpers.resolveTextColor()` | CSS-resolved foreground |
-| Layline green (WindDial) | `#82b683` | Starboard tack |
-| Layline red (WindDial) | `#ff7a76` | Port tack |
+| Layline green (WindDialWidget) | `#82b683` | Starboard tack |
+| Layline red (WindDialWidget) | `#ff7a76` | Port tack |
 
 ## Pointer Configuration
 
@@ -66,26 +66,26 @@ draw.drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, {
 
 ## Sector Logic
 
-### SpeedGauge (high-end)
+### SpeedGaugeWidget (high-end)
 
 - Warning: `warningFrom..alarmFrom` (or `warningFrom..maxValue`)
 - Alarm: `alarmFrom..maxValue`
 - Default toggles: warning enabled, alarm enabled
 
-### DepthGauge (low-end)
+### DepthGaugeWidget (low-end)
 
 - Alarm: `minValue..alarmFrom`
 - Warning: `alarmFrom..warningFrom`
 - Default toggles: warning enabled, alarm enabled
 
-### VoltageGauge (low-end)
+### VoltageGaugeWidget (low-end)
 
-- Same pattern as DepthGauge
+- Same pattern as DepthGaugeWidget
 - Default toggles: warning enabled, alarm enabled
 
-### TemperatureGauge (high-end)
+### TemperatureGaugeWidget (high-end)
 
-- Same pattern as SpeedGauge
+- Same pattern as SpeedGaugeWidget
 - Default toggles: warning disabled, alarm disabled
 
 ### Sector Drawing
@@ -118,12 +118,12 @@ Aspect ratio `ratio = W / H` determines text layout:
 
 | Gauge | thresholdNormal | thresholdFlat |
 |---|---|---|
-| SpeedGauge | `speedRatioThresholdNormal` (`1.1`) | `speedRatioThresholdFlat` (`3.5`) |
-| DepthGauge | `depthRatioThresholdNormal` (`1.1`) | `depthRatioThresholdFlat` (`3.5`) |
-| TemperatureGauge | `tempRatioThresholdNormal` (`1.1`) | `tempRatioThresholdFlat` (`3.5`) |
-| VoltageGauge | `voltageRatioThresholdNormal` (`1.1`) | `voltageRatioThresholdFlat` (`3.5`) |
-| CompassGauge | `compRatioThresholdNormal` (`0.8`) | `compRatioThresholdFlat` (`2.2`) |
-| WindDial | `dialRatioThresholdNormal` (`0.7`) | `dialRatioThresholdFlat` (`2.0`) |
+| SpeedGaugeWidget | `speedRatioThresholdNormal` (`1.1`) | `speedRatioThresholdFlat` (`3.5`) |
+| DepthGaugeWidget | `depthRatioThresholdNormal` (`1.1`) | `depthRatioThresholdFlat` (`3.5`) |
+| TemperatureGaugeWidget | `tempRatioThresholdNormal` (`1.1`) | `tempRatioThresholdFlat` (`3.5`) |
+| VoltageGaugeWidget | `voltageRatioThresholdNormal` (`1.1`) | `voltageRatioThresholdFlat` (`3.5`) |
+| CompassGaugeWidget | `compRatioThresholdNormal` (`0.8`) | `compRatioThresholdFlat` (`2.2`) |
+| WindDialWidget | `dialRatioThresholdNormal` (`0.7`) | `dialRatioThresholdFlat` (`2.0`) |
 
 ### Text Layout Per Mode
 

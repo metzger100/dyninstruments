@@ -1,11 +1,11 @@
 /*!
- * ClusterHost dispatch: anchor
+ * ClusterWidget mapper: anchor
  */
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniClusterHostDispatchAnchor = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniAnchorMapper = factory(); }
 }(this, function () {
   "use strict";
 
@@ -39,5 +39,5 @@
     };
   }
 
-  return { id: "ClusterHostDispatchAnchor", create: create };
+  return { id: "AnchorMapper", create: create };
 }));

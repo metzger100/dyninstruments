@@ -1,17 +1,17 @@
 /**
- * Module: VoltageGauge - Semicircle voltage gauge with low-end warning/alarm sectors
- * Documentation: documentation/modules/semicircle-gauges.md
- * Depends: SemicircleGaugeRenderer
+ * Module: VoltageGaugeWidget - Semicircle voltage gauge with low-end warning/alarm sectors
+ * Documentation: documentation/widgets/semicircle-gauges.md
+ * Depends: SemicircleGaugeEngine
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniVoltageGauge = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniVoltageGaugeWidget = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const renderer = Helpers.getModule("SemicircleGaugeRenderer").create(def, Helpers);
+    const renderer = Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
 
     function extractNumberText(text) {
       const match = String(text).match(/-?\d+(?:\.\d+)?/);
@@ -102,7 +102,7 @@
     }
 
     return {
-      id: "VoltageGauge",
+      id: "VoltageGaugeWidget",
       version: "0.2.0",
       wantsHideNativeHead: true,
       renderCanvas,
@@ -110,5 +110,5 @@
     };
   }
 
-  return { id: "VoltageGauge", create };
+  return { id: "VoltageGaugeWidget", create };
 }));

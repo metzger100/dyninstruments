@@ -1,17 +1,17 @@
 /**
- * Module: DepthGauge - Semicircle depth gauge with low-end warning/alarm sectors
- * Documentation: documentation/modules/semicircle-gauges.md
- * Depends: SemicircleGaugeRenderer
+ * Module: DepthGaugeWidget - Semicircle depth gauge with low-end warning/alarm sectors
+ * Documentation: documentation/widgets/semicircle-gauges.md
+ * Depends: SemicircleGaugeEngine
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniDepthGauge = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniDepthGaugeWidget = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const renderer = Helpers.getModule("SemicircleGaugeRenderer").create(def, Helpers);
+    const renderer = Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
 
     function formatDepthString(raw, decimals) {
       const n = Number(raw);
@@ -99,7 +99,7 @@
     }
 
     return {
-      id: "DepthGauge",
+      id: "DepthGaugeWidget",
       version: "0.2.0",
       wantsHideNativeHead: true,
       renderCanvas,
@@ -107,5 +107,5 @@
     };
   }
 
-  return { id: "DepthGauge", create };
+  return { id: "DepthGaugeWidget", create };
 }));

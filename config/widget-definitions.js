@@ -1,6 +1,6 @@
 /**
- * Module: DyniPlugin Instruments - Final instrument list assembly
- * Documentation: documentation/architecture/cluster-system.md
+ * Module: DyniPlugin Widget Definitions - Final widget definition assembly
+ * Documentation: documentation/architecture/cluster-widget-system.md
  * Depends: config/clusters/*.js
  */
 (function (root) {
@@ -9,5 +9,5 @@
   const ns = root.DyniPlugin;
   const config = ns.config;
 
-  config.instruments = config.clusters;
+  config.widgetDefinitions = config.clusters;
 }(this));

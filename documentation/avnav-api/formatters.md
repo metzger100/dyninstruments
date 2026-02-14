@@ -67,7 +67,7 @@ Accessed via `avnav.api.formatter.{name}(value, ...params)`:
 
 ### Formatter Resolution in Helpers.applyFormatter (dyninstruments-internal)
 
-Used by ThreeElements for numeric kinds:
+Used by ThreeValueTextWidget for numeric kinds:
 
 1. `props.formatter` is a **function** → `formatter(raw, ...formatterParameters)`
 2. `props.formatter` is a **string** → `avnav.api.formatter[name](raw, ...formatterParameters)`
@@ -75,7 +75,7 @@ Used by ThreeElements for numeric kinds:
 
 ### Custom Angle Formatter (dyninstruments-internal)
 
-ClusterHost creates angle formatters for wind kinds:
+ClusterWidget creates angle formatters for wind kinds:
 
 ```javascript
 function makeAngleFormatter(isDirection, leadingZero, fallback) {
@@ -99,4 +99,4 @@ Graphic gauges bypass the AvNav formatter pipeline. They call `avnav.api.formatt
 
 - [plugin-lifecycle.md](plugin-lifecycle.md) — How translateFunction sets formatters
 - [editable-parameters.md](editable-parameters.md) — formatterParameters in Layout Editor
-- [../architecture/cluster-system.md](../architecture/cluster-system.md) — Which formatter per kind
+- [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md) — Which formatter per kind

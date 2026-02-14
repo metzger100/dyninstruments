@@ -1,11 +1,11 @@
 /*!
- * ClusterHost TranslateUtils (UMD) — shared translation helpers
+ * ClusterWidget MapperToolkit (UMD) — shared mapping helpers
  */
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniClusterHostTranslateUtils = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniClusterMapperToolkit = factory(); }
 }(this, function () {
   "use strict";
 
@@ -76,5 +76,5 @@
     };
   }
 
-  return { id: "ClusterHostTranslateUtils", create: create };
+  return { id: "ClusterMapperToolkit", create: create };
 }));

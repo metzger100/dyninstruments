@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Wind Cluster - Wind numeric and dial widget config
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/cluster-utils.js, config/shared/kind-maps.js
+ * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js
  */
 (function (root) {
   "use strict";
@@ -15,7 +15,7 @@
   const WIND_KIND = shared.kindMaps.WIND_KIND;
 
   config.clusters.push({
-    module: "ClusterHost",
+    widget: "ClusterWidget",
     def: {
       name: "dyninstruments_Wind",
       description: "Wind (angle/speed numbers or dial graphics)",
@@ -75,7 +75,7 @@
           condition: [{ kind: "angleTrueGraphic" }, { kind: "angleApparentGraphic" }]
         },
 
-        // WindDial-only row thresholds
+        // WindDialWidget-only row thresholds
         dialRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.7,
           name: "Dial 3-Rows Threshold",
@@ -87,7 +87,7 @@
           condition: [{ kind: "angleTrueGraphic" }, { kind: "angleApparentGraphic" }]
         },
 
-        // ThreeElements thresholds — only for numeric kinds
+        // ThreeValueTextWidget thresholds — only for numeric kinds
         ratioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
           name: "3-Rows Threshold (numeric)",

@@ -1,11 +1,11 @@
 /*!
- * ClusterHost dispatch: environment
+ * ClusterWidget mapper: environment
  */
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniClusterHostDispatchEnvironment = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniEnvironmentMapper = factory(); }
 }(this, function () {
   "use strict";
 
@@ -23,7 +23,7 @@
         const depthAlarmOn = (p.depthAlarmEnabled !== false);
 
         return {
-          renderer: "DepthGauge",
+          renderer: "DepthGaugeWidget",
           value: p.depth,
           caption: cap("depthGraphic"),
           unit: unit("depthGraphic"),
@@ -47,7 +47,7 @@
         const tempWarnOn = (p.tempWarningEnabled === true);
         const tempAlarmOn = (p.tempAlarmEnabled === true);
         return {
-          renderer: "TemperatureGauge",
+          renderer: "TemperatureGaugeWidget",
           value: p.temp,
 
           caption: cap("tempGraphic"),
@@ -84,5 +84,5 @@
     };
   }
 
-  return { id: "ClusterHostDispatchEnvironment", create: create };
+  return { id: "EnvironmentMapper", create: create };
 }));

@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Environment Cluster - Depth, temperature, and pressure config
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/cluster-utils.js, config/shared/kind-maps.js
+ * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js
  */
 (function (root) {
   "use strict";
@@ -15,7 +15,7 @@
   const ENV_KIND = shared.kindMaps.ENV_KIND;
 
   config.clusters.push({
-    module: "ClusterHost",
+    widget: "ClusterWidget",
     def: {
       name: "dyninstruments_Environment",
       description: "Depth below transducer, temperature, or SignalK pressure",
@@ -55,7 +55,7 @@
           condition: { kind: "pressure" }
         },
 
-        // ---------------- DepthGauge (graphic) settings ------------------------
+        // ---------------- DepthGaugeWidget (graphic) settings ------------------------
         depthMinValue: {
           type: "FLOAT", min: 0, max: 200, step: 0.5, default: 0,
           name: "Min depth",
@@ -109,16 +109,16 @@
 
         depthRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
-          name: "DepthGauge: Normal Threshold",
+          name: "DepthGaugeWidget: Normal Threshold",
           condition: { kind: "depthGraphic" }
         },
         depthRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
-          name: "DepthGauge: Flat Threshold",
+          name: "DepthGaugeWidget: Flat Threshold",
           condition: { kind: "depthGraphic" }
         },
 
-        // -------------- TemperatureGauge (graphic) settings --------------------
+        // -------------- TemperatureGaugeWidget (graphic) settings --------------------
         tempMinValue: {
           type: "FLOAT", min: -50, max: 200, step: 0.5, default: 0,
           name: "Min temp",
@@ -196,7 +196,7 @@
 
         ...makePerKindTextParams(ENV_KIND),
 
-        // ThreeElements thresholds (numeric kinds)
+        // ThreeValueTextWidget thresholds (numeric kinds)
         ratioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
           name: "3-Rows Threshold (numeric)",

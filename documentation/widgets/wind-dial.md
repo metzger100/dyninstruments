@@ -1,20 +1,20 @@
-# WindDial Module
+# WindDialWidget Module
 
-**Status:** ✅ Implemented | `modules/WindDial/WindDial.js`
+**Status:** ✅ Implemented | `widgets/gauges/WindDialWidget/WindDialWidget.js`
 
 ## Overview
 
-Full-circle wind dial showing angle (AWA/TWA) and speed (AWS/TWS) together. Uses `GaugeUtils.draw` for dial primitives and `GaugeUtils.text/value` for text fitting and value handling.
+Full-circle wind dial showing angle (AWA/TWA) and speed (AWS/TWS) together. Uses `GaugeToolkit.draw` for dial primitives and `GaugeToolkit.text/value` for text fitting and value handling.
 
 ## Module Registration
 
 ```javascript
-// In config/modules.js
-WindDial: {
-  js: BASE + "modules/WindDial/WindDial.js",
-  css: BASE + "modules/WindDial/WindDial.css",
-  globalKey: "DyniWindDial",
-  deps: ["GaugeUtils"]
+// In config/components.js
+WindDialWidget: {
+  js: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.js",
+  css: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.css",
+  globalKey: "DyniWindDialWidget",
+  deps: ["GaugeToolkit"]
 }
 ```
 
@@ -37,7 +37,7 @@ WindDial: {
 | `captionUnitScale` | number | `0.8` | Caption/unit ratio vs value |
 | `disconnect` | boolean | `false` | Draw `NO DATA` overlay |
 
-## Dial Drawing (via `GaugeUtils.draw`)
+## Dial Drawing (via `GaugeToolkit.draw`)
 
 | Element | Draw Function | Parameters |
 |---|---|---|
@@ -75,15 +75,15 @@ otherwise -> normal
 
 ```javascript
 return {
-  id: "WindDial",
+  id: "WindDialWidget",
   wantsHideNativeHead: true,
   renderCanvas,
-  translateFunction // no-op, ClusterHost handles translation
+  translateFunction // no-op, ClusterWidget handles translation
 };
 ```
 
 ## Related
 
 - [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
-- [../architecture/cluster-system.md](../architecture/cluster-system.md)
+- [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
 - [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md)

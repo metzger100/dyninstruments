@@ -1,17 +1,17 @@
 /**
- * Module: TemperatureGauge - Semicircle temperature gauge with high-end sectors
- * Documentation: documentation/modules/semicircle-gauges.md
- * Depends: SemicircleGaugeRenderer
+ * Module: TemperatureGaugeWidget - Semicircle temperature gauge with high-end sectors
+ * Documentation: documentation/widgets/semicircle-gauges.md
+ * Depends: SemicircleGaugeEngine
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniTemperatureGauge = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniTemperatureGaugeWidget = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const renderer = Helpers.getModule("SemicircleGaugeRenderer").create(def, Helpers);
+    const renderer = Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
 
     function extractNumberText(text) {
       const match = String(text).match(/-?\d+(?:\.\d+)?/);
@@ -97,7 +97,7 @@
     }
 
     return {
-      id: "TemperatureGauge",
+      id: "TemperatureGaugeWidget",
       version: "0.2.0",
       wantsHideNativeHead: true,
       renderCanvas,
@@ -105,5 +105,5 @@
     };
   }
 
-  return { id: "TemperatureGauge", create };
+  return { id: "TemperatureGaugeWidget", create };
 }));

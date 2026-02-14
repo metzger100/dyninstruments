@@ -1,11 +1,11 @@
 /*!
- * ClusterHost dispatch: speed
+ * ClusterWidget mapper: speed
  */
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniClusterHostDispatchSpeed = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniSpeedMapper = factory(); }
 }(this, function () {
   "use strict";
 
@@ -26,7 +26,7 @@
         const alarmOn = (p.speedAlarmEnabled !== false);
 
         return {
-          renderer: "SpeedGauge",
+          renderer: "SpeedGaugeWidget",
           value: val,
           caption: cap(effKind),
           unit: unit(effKind),
@@ -60,5 +60,5 @@
     };
   }
 
-  return { id: "ClusterHostDispatchSpeed", create: create };
+  return { id: "SpeedMapper", create: create };
 }));

@@ -138,11 +138,11 @@ const SPEED_KIND = { sog: { cap: 'SOG', unit: 'kn' }, stw: { cap: 'STW', unit: '
 // unit_sog:    { type: 'STRING', displayName: 'Unit',    default: 'kn',  condition: { kind: 'sog' } }
 ```
 
-ClusterHost resolves via `p['caption_' + kindName]` and `p['unit_' + kindName]`.
+ClusterWidget resolves via `p['caption_' + kindName]` and `p['unit_' + kindName]`.
 
-### Common ThreeElements Editables (dyninstruments-internal)
+### Common ThreeValueTextWidget Editables (dyninstruments-internal)
 
-Shared layout thresholds for numeric (ThreeElements) kinds:
+Shared layout thresholds for numeric (ThreeValueTextWidget) kinds:
 
 ```javascript
 const commonThreeElementsEditables = {

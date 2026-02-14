@@ -1,11 +1,11 @@
 /*!
- * ClusterHost dispatch: wind
+ * ClusterWidget mapper: wind
  */
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniClusterHostDispatchWind = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniWindMapper = factory(); }
 }(this, function () {
   "use strict";
 
@@ -24,7 +24,7 @@
       if (req === "angleTrueGraphic" || req === "angleApparentGraphic") {
         const isTrue = (req === "angleTrueGraphic");
         return {
-          renderer: "WindDial",
+          renderer: "WindDialWidget",
           angle: isTrue ? p.twa : p.awa,
           speed: isTrue ? p.tws : p.aws,
           angleCaption: isTrue ? p.angleCaption_TWA : p.angleCaption_AWA,
@@ -69,5 +69,5 @@
     };
   }
 
-  return { id: "ClusterHostDispatchWind", create: create };
+  return { id: "WindMapper", create: create };
 }));

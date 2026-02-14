@@ -13,7 +13,7 @@
   const commonThreeElementsEditables = shared.commonThreeElementsEditables;
 
   config.clusters.push({
-    module: "ClusterHost",
+    widget: "ClusterWidget",
     def: {
       name: "dyninstruments_LargeTime",
       description: "Local time (large clock, HH:MM:SS)",

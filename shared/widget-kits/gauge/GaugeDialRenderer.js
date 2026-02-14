@@ -1,19 +1,19 @@
 /**
- * Module: GaugeDialDrawUtils - Shared tick, label and frame drawing helpers for radial dials
+ * Module: GaugeDialRenderer - Shared tick, label and frame drawing helpers for radial dials
  * Documentation: documentation/gauges/gauge-shared-api.md
- * Depends: GaugeAngleUtils, GaugeTickUtils, GaugePrimitiveDrawUtils
+ * Depends: GaugeAngleMath, GaugeTickMath, GaugeCanvasPrimitives
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniModules = root.DyniModules || {}).DyniGaugeDialDrawUtils = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniGaugeDialRenderer = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const angle = Helpers.getModule("GaugeAngleUtils").create(def, Helpers);
-    const tick = Helpers.getModule("GaugeTickUtils").create(def, Helpers);
-    const primitive = Helpers.getModule("GaugePrimitiveDrawUtils").create(def, Helpers);
+    const angle = Helpers.getModule("GaugeAngleMath").create(def, Helpers);
+    const tick = Helpers.getModule("GaugeTickMath").create(def, Helpers);
+    const primitive = Helpers.getModule("GaugeCanvasPrimitives").create(def, Helpers);
 
     const toCanvas = angle.degToCanvasRad;
     const computeSweep = tick.computeSweep;
@@ -192,7 +192,7 @@
     }
 
     return {
-      id: "GaugeDialDrawUtils",
+      id: "GaugeDialRenderer",
       version: "0.1.0",
       drawTicksFromAngles,
       drawTicks,
@@ -201,5 +201,5 @@
     };
   }
 
-  return { id: "GaugeDialDrawUtils", create };
+  return { id: "GaugeDialRenderer", create };
 }));

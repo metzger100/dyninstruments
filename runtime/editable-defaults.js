@@ -7,7 +7,7 @@
   "use strict";
 
   const ns = root.DyniPlugin;
-  const core = ns.core;
+  const runtime = ns.runtime;
 
   function defaultsFromEditableParams(editableParams) {
     const out = {};
@@ -27,5 +27,5 @@
     return out;
   }
 
-  core.defaultsFromEditableParams = defaultsFromEditableParams;
+  runtime.defaultsFromEditableParams = defaultsFromEditableParams;
 }(this));
