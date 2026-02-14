@@ -1,7 +1,7 @@
 /*!
  * CompassGauge (UMD) — rotating compass card with upright cardinal labels
  *
- * Updated: uses InstrumentComponents instead of PolarCore.
+ * Updated: uses GaugeUtils.draw shared primitives instead of PolarCore.
  *
  * Visual:
  *  - The disc (ticks + cardinal/intercardinal letters) rotates by -heading.
@@ -27,7 +27,11 @@
   "use strict";
 
   function create(def, Helpers) {
-    const IC = Helpers.getModule('InstrumentComponents') && Helpers.getModule('InstrumentComponents').create();
+    const gaugeUtilsModule = Helpers.getModule("GaugeUtils");
+    const GU = gaugeUtilsModule && typeof gaugeUtilsModule.create === "function"
+      ? gaugeUtilsModule.create(def, Helpers)
+      : null;
+    const draw = GU && GU.draw;
 
     // ---------- utils --------------------------------------------------------
     function setFont(ctx, px, bold, family){ ctx.font = (bold ? '700 ' : '400 ') + px + 'px ' + family; }
@@ -197,13 +201,13 @@
       const topStrip    = Math.max(0, Math.floor((H - 2*pad - 2*R) / 2));
 
       // ---- Dial: rotated ticks + upright labels layering with pointer -------
-      if (IC){
+      if (draw){
         const rotationDeg = isFiniteN(heading) ? -heading : 0;
 
         // Frame (ring + ticks)
-        IC.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
+        draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
 
-        IC.drawTicks(ctx, cx, cy, rOuter, {
+        draw.drawTicks(ctx, cx, cy, rOuter, {
           rotationDeg,
           startDeg: 0, endDeg: 360,
           stepMajor: 30, stepMinor: 10,
@@ -212,7 +216,7 @@
         });
 
         // Fixed red lubber pointer at 0° (north), behind labels
-        IC.drawPointerAtRim(ctx, cx, cy, rOuter, 0, {
+        draw.drawPointerAtRim(ctx, cx, cy, rOuter, 0, {
           depth: lubber,
           color: "#ff2b2b",
           variant: "long",
@@ -222,7 +226,7 @@
 
         // Optional target marker (bearing/course) relative to rotating card: (marker - heading)
         if (isFiniteN(marker) && isFiniteN(heading)){
-          IC.drawRimMarker(ctx, cx, cy, rOuter, (marker - heading), {
+          draw.drawRimMarker(ctx, cx, cy, rOuter, (marker - heading), {
             len: Math.max(12, Math.floor(ringW * 0.9)),
             width: Math.max(3, Math.floor(ringW * 0.40))
           });
@@ -233,7 +237,7 @@
         // but the text remains upright (default).
         const labels = { 0:"N",45:"NE",90:"E",135:"SE",180:"S",225:"SW",270:"W",315:"NW" };
         const labelPx = Math.max(10, Math.floor(R * 0.16));
-        IC.drawLabels(ctx, cx, cy, rOuter, {
+        draw.drawLabels(ctx, cx, cy, rOuter, {
           rotationDeg,
           startDeg: 0, endDeg: 360,
           step: 45,

@@ -75,12 +75,11 @@ const displayText = Helpers.applyFormatter(rawValue, props);
 Access other loaded modules by their MODULES registry ID.
 
 ```javascript
-const IC = Helpers.getModule('InstrumentComponents');
-// Returns window.DyniModules.DyniInstrumentComponents (the module object)
-// Then call: const ic = IC.create();
+const gaugeUtilsModule = Helpers.getModule("GaugeUtils");
+const gaugeUtils = gaugeUtilsModule && gaugeUtilsModule.create(def, Helpers);
 ```
 
-**Available module IDs:** `InstrumentComponents`, `ThreeElements`, `WindDial`, `CompassGauge`, `SpeedGauge`, `DepthGauge`, `TemperatureGauge`, `VoltageGauge`, `ClusterHost`
+**Available module IDs:** `GaugeAngleUtils`, `GaugeTickUtils`, `GaugePrimitiveDrawUtils`, `GaugeDialDrawUtils`, `GaugeTextUtils`, `GaugeValueUtils`, `GaugeUtils`, `SemicircleGaugeRenderer`, `ThreeElements`, `WindDial`, `CompassGauge`, `SpeedGauge`, `DepthGauge`, `TemperatureGauge`, `VoltageGauge`, `ClusterHost`
 
 ## Helper Not in Helpers Object
 

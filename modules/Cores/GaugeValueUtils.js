@@ -1,7 +1,7 @@
 /**
  * Module: GaugeValueUtils - Shared numeric, range, angle and semicircle geometry helpers
  * Documentation: documentation/gauges/gauge-shared-api.md
- * Depends: InstrumentComponents
+ * Depends: GaugeAngleUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,8 +11,8 @@
   "use strict";
 
   function create(def, Helpers) {
-    const mod = Helpers && Helpers.getModule && Helpers.getModule("InstrumentComponents");
-    const IC = mod && typeof mod.create === "function" ? mod.create() : null;
+    const mod = Helpers && Helpers.getModule && Helpers.getModule("GaugeAngleUtils");
+    const angle = mod && typeof mod.create === "function" ? mod.create(def, Helpers) : null;
 
     function isFiniteNumber(n) {
       return typeof n === "number" && isFinite(n);
@@ -76,8 +76,8 @@
         clamp: doClamp !== false
       };
 
-      if (IC && typeof IC.valueToAngle === "function") {
-        return IC.valueToAngle(value, opts);
+      if (angle && typeof angle.valueToAngle === "function") {
+        return angle.valueToAngle(value, opts);
       }
 
       let v = Number(value);
@@ -96,8 +96,8 @@
         clamp: doClamp !== false
       };
 
-      if (IC && typeof IC.angleToValue === "function") {
-        return IC.angleToValue(angleDeg, opts);
+      if (angle && typeof angle.angleToValue === "function") {
+        return angle.angleToValue(angleDeg, opts);
       }
 
       const a = Number(angleDeg);
@@ -191,7 +191,6 @@
     return {
       id: "GaugeValueUtils",
       version: "0.1.0",
-      IC,
       isFiniteNumber,
       clamp,
       almostInt,

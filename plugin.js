@@ -131,10 +131,27 @@
 
   // ---------- Module registry (UMD namespaces + deps) -----------------------
   const MODULES = {
-    InstrumentComponents: {
-      js:  BASE + "modules/Cores/InstrumentComponents.js",
+    GaugeAngleUtils: {
+      js:  BASE + "modules/Cores/GaugeAngleUtils.js",
       css: undefined,
-      globalKey: "DyniInstrumentComponents"
+      globalKey: "DyniGaugeAngleUtils"
+    },
+    GaugeTickUtils: {
+      js:  BASE + "modules/Cores/GaugeTickUtils.js",
+      css: undefined,
+      globalKey: "DyniGaugeTickUtils"
+    },
+    GaugePrimitiveDrawUtils: {
+      js:  BASE + "modules/Cores/GaugePrimitiveDrawUtils.js",
+      css: undefined,
+      globalKey: "DyniGaugePrimitiveDrawUtils",
+      deps: ["GaugeAngleUtils"]
+    },
+    GaugeDialDrawUtils: {
+      js:  BASE + "modules/Cores/GaugeDialDrawUtils.js",
+      css: undefined,
+      globalKey: "DyniGaugeDialDrawUtils",
+      deps: ["GaugeAngleUtils", "GaugeTickUtils", "GaugePrimitiveDrawUtils"]
     },
     GaugeTextUtils: {
       js: BASE + "modules/Cores/GaugeTextUtils.js",
@@ -145,13 +162,20 @@
       js: BASE + "modules/Cores/GaugeValueUtils.js",
       css: undefined,
       globalKey: "DyniGaugeValueUtils",
-      deps: ["InstrumentComponents"]
+      deps: ["GaugeAngleUtils"]
     },
     GaugeUtils: {
       js: BASE + "modules/Cores/GaugeUtils.js",
       css: undefined,
       globalKey: "DyniGaugeUtils",
-      deps: ["InstrumentComponents", "GaugeTextUtils", "GaugeValueUtils"]
+      deps: [
+        "GaugeTextUtils",
+        "GaugeValueUtils",
+        "GaugeAngleUtils",
+        "GaugeTickUtils",
+        "GaugePrimitiveDrawUtils",
+        "GaugeDialDrawUtils"
+      ]
     },
     SemicircleGaugeRenderer: {
       js: BASE + "modules/Cores/SemicircleGaugeRenderer.js",
@@ -170,13 +194,13 @@
       js:  BASE + "modules/WindDial/WindDial.js",
       css: BASE + "modules/WindDial/WindDial.css",
       globalKey: "DyniWindDial",
-      deps: ["InstrumentComponents"]
+      deps: ["GaugeUtils"]
     },
     CompassGauge: {
       js:  BASE + "modules/CompassGauge/CompassGauge.js",
       css: BASE + "modules/CompassGauge/CompassGauge.css",
       globalKey: "DyniCompassGauge",
-      deps: ["InstrumentComponents"]
+      deps: ["GaugeUtils"]
     },
 
     SpeedGauge: {

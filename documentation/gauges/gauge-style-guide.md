@@ -54,10 +54,10 @@ const cy = gaugeTop  + R;   // center Y
 
 ## Pointer Configuration
 
-All semicircle gauges use identical pointer settings via `InstrumentComponents.drawPointerAtRim()`:
+All semicircle gauges use identical pointer settings via `GaugeUtils.draw.drawPointerAtRim()`:
 
 ```javascript
-IC.drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, {
+draw.drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, {
   depth: needleDepth,     // Penetration depth into ring
   color: "#ff2b2b",       // Red
   variant: "long",        // Extended needle variant
@@ -165,4 +165,4 @@ When `props.disconnect === true` or value is invalid, `drawDisconnectOverlay()` 
 
 ## Related
 
-- [gauge-shared-api.md](gauge-shared-api.md) — InstrumentComponents documentation
+- [gauge-shared-api.md](gauge-shared-api.md) — shared GaugeUtils/core API documentation

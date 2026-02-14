@@ -18,10 +18,10 @@
 
     const T = GU && GU.text;
     const V = GU && GU.value;
-    const IC = GU && GU.IC;
+    const draw = GU && GU.draw;
 
     function drawMajorValueLabels(ctx, family, geom, minV, maxV, majorStep, arc, showEndLabels) {
-      if (!IC) return;
+      if (!draw) return;
       if (!isFinite(minV) || !isFinite(maxV) || maxV <= minV) return;
       const step = Math.abs(Number(majorStep));
       if (!isFinite(step) || step <= 0) return;
@@ -50,7 +50,7 @@
       const labelInset = Math.max(18, Math.floor(geom.ringW * 1.8));
       const labelPx = Math.max(10, Math.floor(geom.R * 0.14));
 
-      IC.drawLabels(ctx, geom.cx, geom.cy, geom.rOuter, {
+      draw.drawLabels(ctx, geom.cx, geom.cy, geom.rOuter, {
         angles: angles,
         radiusOffset: labelInset,
         fontPx: labelPx,
@@ -167,7 +167,7 @@
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
 
-        if (!IC || !V || !T) {
+        if (!draw || !V || !T) {
           if (p.disconnect && T && typeof T.drawDisconnectOverlay === "function") {
             T.drawDisconnectOverlay(ctx, W, H, family, color);
           }
@@ -217,13 +217,13 @@
         const ticks = V.buildValueTickAngles(range.min, range.max, tickMajor, tickMinor, arc);
         const showEndLabels = !!p.showEndLabels;
 
-        IC.drawArcRing(ctx, geom.cx, geom.cy, geom.rOuter, arc.startDeg, arc.endDeg, { lineWidth: 1 });
+        draw.drawArcRing(ctx, geom.cx, geom.cy, geom.rOuter, arc.startDeg, arc.endDeg, { lineWidth: 1 });
 
         for (let i = 0; i < sectorList.length; i++) {
           const s = sectorList[i];
           if (!s) continue;
           if (!V.isFiniteNumber(s.a0) || !V.isFiniteNumber(s.a1)) continue;
-          IC.drawAnnularSector(ctx, geom.cx, geom.cy, geom.rOuter, {
+          draw.drawAnnularSector(ctx, geom.cx, geom.cy, geom.rOuter, {
             startDeg: s.a0,
             endDeg: s.a1,
             thickness: geom.ringW,
@@ -232,7 +232,7 @@
         }
 
         if (V.isFiniteNumber(aNow)) {
-          IC.drawPointerAtRim(ctx, geom.cx, geom.cy, geom.rOuter, aNow, {
+          draw.drawPointerAtRim(ctx, geom.cx, geom.cy, geom.rOuter, aNow, {
             depth: geom.needleDepth,
             color: "#ff2b2b",
             variant: "long",
@@ -241,7 +241,7 @@
           });
         }
 
-        IC.drawTicksFromAngles(ctx, geom.cx, geom.cy, geom.rOuter, ticks, {
+        draw.drawTicksFromAngles(ctx, geom.cx, geom.cy, geom.rOuter, ticks, {
           major: { len: 9, width: 2 },
           minor: { len: 5, width: 1 }
         });

@@ -1,6 +1,6 @@
 # dyninstruments — Modern Instrument Widgets for AvNav
 
-**Status:** ✅ Functional | Phase 1 (semicircle refactor) complete
+**Status:** ✅ Functional | split Gauge core modules in place
 
 ## Stack
 
@@ -21,7 +21,10 @@ plugin.js (entry point)
 └── registerInstrument() — registers widgets with avnav.api
 
 modules/
-├── Cores/InstrumentComponents.js  — Polar/canvas primitives
+├── Cores/GaugeAngleUtils.js       — Angle conversion + value/angle mapping
+├── Cores/GaugeTickUtils.js        — Tick sweep + major/minor angle generation
+├── Cores/GaugePrimitiveDrawUtils.js — Low-level canvas drawing primitives
+├── Cores/GaugeDialDrawUtils.js    — Radial tick/label/frame drawing
 ├── Cores/GaugeTextUtils.js        — Shared text fitting and overlay helpers
 ├── Cores/GaugeValueUtils.js       — Shared range/angle/sector helpers
 ├── Cores/GaugeUtils.js            — Facade over shared gauge helpers
@@ -40,7 +43,7 @@ documentation/
 ├── README.md
 ├── avnav-api/                  — AvNav plugin API reference
 ├── architecture/               — Module system, cluster system
-├── gauges/                     — Gauge style guide, IC API
+├── gauges/                     — Gauge style guide, shared gauge API
 ├── modules/                    — ThreeElements, WindDial, CompassGauge docs
 ├── shared/                     — Helpers, CSS theming
 └── guides/                     — Step-by-step guides
@@ -52,7 +55,7 @@ documentation/
 
 **Semicircle Gauges:** N-shaped arc (270°→450°) with ticks, labels, warning/alarm sectors, pointer. Used by SpeedGauge, DepthGauge, TemperatureGauge, VoltageGauge.
 
-**Full-Circle Dials:** 360° compass/wind dial. Used by WindDial, CompassGauge. Leverages InstrumentComponents for polar drawing.
+**Full-Circle Dials:** 360° compass/wind dial. Used by WindDial, CompassGauge. Leverages `GaugeUtils.draw` for polar drawing.
 
 **ClusterHost:** Meta-module that dispatches to the appropriate renderer based on the selected `kind`. Each registered widget uses ClusterHost.
 
@@ -98,7 +101,8 @@ User selects "kind" in AvNav editor
 ## Refactoring Phases
 
 - ✅ Phase 0: Documentation system (this)
-- ✅ Phase 1: Rework InstrumentComponents and refactor the semicircle gauge widgets to reduce code duplication
+- ✅ Phase 1: Refactor semicircle gauge widgets to reduce duplication
+- ✅ Phase 2: Replace monolithic gauge core with split Gauge utility modules
 - ❌ Phase 2: Split plugin.js into per-cluster config files
 - ❌ Phase 3: Inline comments + file headers
 - ❌ Phase 4: Remove dead code, naming cleanup
