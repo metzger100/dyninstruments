@@ -6,8 +6,8 @@
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin || {};
-  const core = ns.core || (ns.core = {});
+  const ns = root.DyniPlugin;
+  const core = ns.core;
 
   function applyFormatter(raw, props) {
     const fpRaw = props && props.formatterParameters;
@@ -69,11 +69,7 @@
     return '"Inter","SF Pro Text",-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
   }
 
-  function createHelpers(options) {
-    const getModule = options && typeof options.getModule === "function"
-      ? options.getModule
-      : function () { return undefined; };
-
+  function createHelpers(getModule) {
     return {
       applyFormatter: applyFormatter,
       setupCanvas: setupCanvas,

@@ -41,6 +41,7 @@
   const ns = window.DyniPlugin = window.DyniPlugin || {};
   ns.baseUrl = BASE;
 
+  // Invariant: this load order is authoritative for all internal namespace/config/core setup.
   const internalScripts = [
     "core/namespace.js",
     "core/helpers.js",
@@ -72,11 +73,7 @@
       });
     }, Promise.resolve())
     .then(function () {
-      const core = window.DyniPlugin && window.DyniPlugin.core;
-      if (!core || typeof core.runInit !== "function") {
-        throw new Error("dyninstruments: core.runInit missing after bootstrap");
-      }
-      return core.runInit();
+      return window.DyniPlugin.core.runInit();
     })
     .catch(function (e) {
       console.error("dyninstruments bootstrap failed:", e);

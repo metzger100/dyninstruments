@@ -11,10 +11,7 @@
   "use strict";
 
   function create(def, Helpers) {
-    const rendererModule = Helpers.getModule("SemicircleGaugeRenderer");
-    const renderer = rendererModule && typeof rendererModule.create === "function"
-      ? rendererModule.create(def, Helpers)
-      : null;
+    const renderer = Helpers.getModule("SemicircleGaugeRenderer").create(def, Helpers);
 
     function extractNumberText(text) {
       const match = String(text).match(/-?\d+(?:\.\d+)?/);
@@ -79,23 +76,21 @@
       return sectors;
     }
 
-    const renderCanvas = (renderer && typeof renderer.createRenderer === "function")
-      ? renderer.createRenderer({
-          rawValueKey: "temp",
-          unitDefault: "°C",
-          rangeDefaults: { min: 0, max: 35 },
-          ratioProps: {
-            normal: "tempRatioThresholdNormal",
-            flat: "tempRatioThresholdFlat"
-          },
-          ratioDefaults: { normal: 1.1, flat: 3.5 },
-          tickSteps: tempTickSteps,
-          formatDisplay: function (raw) {
-            return displayTempFromRaw(raw, 1);
-          },
-          buildSectors: buildHighEndSectors
-        })
-      : function () {};
+    const renderCanvas = renderer.createRenderer({
+      rawValueKey: "temp",
+      unitDefault: "°C",
+      rangeDefaults: { min: 0, max: 35 },
+      ratioProps: {
+        normal: "tempRatioThresholdNormal",
+        flat: "tempRatioThresholdFlat"
+      },
+      ratioDefaults: { normal: 1.1, flat: 3.5 },
+      tickSteps: tempTickSteps,
+      formatDisplay: function (raw) {
+        return displayTempFromRaw(raw, 1);
+      },
+      buildSectors: buildHighEndSectors
+    });
 
     function translateFunction() {
       return {};

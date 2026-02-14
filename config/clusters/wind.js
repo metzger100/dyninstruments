@@ -6,15 +6,13 @@
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin || {};
-  const config = ns.config || (ns.config = {});
-  const shared = config.shared || (config.shared = {});
+  const ns = root.DyniPlugin;
+  const config = ns.config;
+  const shared = config.shared;
 
   const makePerKindTextParams = shared.makePerKindTextParams;
   const opt = shared.opt;
-  const WIND_KIND = shared.kindMaps && shared.kindMaps.WIND_KIND;
-
-  config.clusters = Array.isArray(config.clusters) ? config.clusters : [];
+  const WIND_KIND = shared.kindMaps.WIND_KIND;
 
   config.clusters.push({
     module: "ClusterHost",

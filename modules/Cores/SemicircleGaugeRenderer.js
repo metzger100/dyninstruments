@@ -11,17 +11,12 @@
   "use strict";
 
   function create(def, Helpers) {
-    const gaugeUtilsModule = Helpers.getModule("GaugeUtils");
-    const GU = gaugeUtilsModule && typeof gaugeUtilsModule.create === "function"
-      ? gaugeUtilsModule.create(def, Helpers)
-      : null;
-
-    const T = GU && GU.text;
-    const V = GU && GU.value;
-    const draw = GU && GU.draw;
+    const GU = Helpers.getModule("GaugeUtils").create(def, Helpers);
+    const T = GU.text;
+    const V = GU.value;
+    const draw = GU.draw;
 
     function drawMajorValueLabels(ctx, family, geom, minV, maxV, majorStep, arc, showEndLabels) {
-      if (!draw) return;
       if (!isFinite(minV) || !isFinite(maxV) || maxV <= minV) return;
       const step = Math.abs(Number(majorStep));
       if (!isFinite(step) || step <= 0) return;
@@ -166,13 +161,6 @@
         const color = Helpers.resolveTextColor(canvas);
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
-
-        if (!draw || !V || !T) {
-          if (p.disconnect && T && typeof T.drawDisconnectOverlay === "function") {
-            T.drawDisconnectOverlay(ctx, W, H, family, color);
-          }
-          return;
-        }
 
         const pad = V.computePad(W, H);
         const gap = V.computeGap(W, H);

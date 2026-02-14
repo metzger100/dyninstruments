@@ -11,8 +11,7 @@
   "use strict";
 
   function create(def, Helpers) {
-    const mod = Helpers && Helpers.getModule && Helpers.getModule("GaugeAngleUtils");
-    const angle = mod && typeof mod.create === "function" ? mod.create(def, Helpers) : null;
+    const angle = Helpers.getModule("GaugeAngleUtils").create(def, Helpers);
 
     function isFiniteNumber(n) {
       return typeof n === "number" && isFinite(n);
@@ -75,16 +74,7 @@
         endDeg: Number(arc.endDeg),
         clamp: doClamp !== false
       };
-
-      if (angle && typeof angle.valueToAngle === "function") {
-        return angle.valueToAngle(value, opts);
-      }
-
-      let v = Number(value);
-      if (!isFinite(v)) return NaN;
-      if (opts.clamp) v = clamp(v, opts.min, opts.max);
-      const t = (opts.max === opts.min) ? 0 : (v - opts.min) / (opts.max - opts.min);
-      return opts.startDeg + (opts.endDeg - opts.startDeg) * t;
+      return angle.valueToAngle(value, opts);
     }
 
     function angleToValue(angleDeg, minV, maxV, arc, doClamp) {
@@ -95,18 +85,7 @@
         endDeg: Number(arc.endDeg),
         clamp: doClamp !== false
       };
-
-      if (angle && typeof angle.angleToValue === "function") {
-        return angle.angleToValue(angleDeg, opts);
-      }
-
-      const a = Number(angleDeg);
-      if (!isFinite(a)) return NaN;
-      const denom = opts.endDeg - opts.startDeg;
-      const t = denom === 0 ? 0 : (a - opts.startDeg) / denom;
-      let value = opts.min + (opts.max - opts.min) * t;
-      if (opts.clamp) value = clamp(value, opts.min, opts.max);
-      return value;
+      return angle.angleToValue(angleDeg, opts);
     }
 
     function buildValueTickAngles(minV, maxV, majorStep, minorStep, arc) {

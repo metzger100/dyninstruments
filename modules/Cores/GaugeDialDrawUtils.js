@@ -11,111 +11,15 @@
   "use strict";
 
   function create(def, Helpers) {
-    const angleModule = Helpers && Helpers.getModule && Helpers.getModule("GaugeAngleUtils");
-    const tickModule = Helpers && Helpers.getModule && Helpers.getModule("GaugeTickUtils");
-    const primitiveModule = Helpers && Helpers.getModule && Helpers.getModule("GaugePrimitiveDrawUtils");
+    const angle = Helpers.getModule("GaugeAngleUtils").create(def, Helpers);
+    const tick = Helpers.getModule("GaugeTickUtils").create(def, Helpers);
+    const primitive = Helpers.getModule("GaugePrimitiveDrawUtils").create(def, Helpers);
 
-    const angle = angleModule && typeof angleModule.create === "function" ? angleModule.create(def, Helpers) : null;
-    const tick = tickModule && typeof tickModule.create === "function" ? tickModule.create(def, Helpers) : null;
-    const primitive = primitiveModule && typeof primitiveModule.create === "function" ? primitiveModule.create(def, Helpers) : null;
-
-    function fallbackDegToCanvasRad(deg, cfg, rotationDeg) {
-      cfg = cfg || {};
-      const zeroDegAt = cfg.zeroDegAt || "north";
-      const clockwise = (cfg.clockwise !== false);
-      let d = Number(deg);
-      if (!isFinite(d)) d = 0;
-      d = d + (Number(rotationDeg) || 0);
-      const shift = (zeroDegAt === "east") ? 0 : -90;
-      const signed = clockwise ? d : -d;
-      const wrapped = ((signed + shift) % 360 + 360) % 360;
-      return (wrapped * Math.PI) / 180;
-    }
-
-    function fallbackComputeSweep(startDeg, endDeg) {
-      let s = Number(startDeg);
-      let e = Number(endDeg);
-      if (!isFinite(s) || !isFinite(e)) return { s: 0, e: 0, sweep: 0, dir: 1 };
-      let sweep = e - s;
-      if (sweep === 0) sweep = 360;
-      const dir = (sweep >= 0) ? 1 : -1;
-      return { s, e, sweep, dir };
-    }
-
-    function fallbackBuildTickAngles(opts) {
-      opts = opts || {};
-      const startDeg = Number(opts.startDeg ?? 0);
-      const endDeg = Number(opts.endDeg ?? 360);
-      const stepMajor = Math.abs(Number(opts.stepMajor ?? 30)) || 30;
-      const stepMinor = Math.abs(Number(opts.stepMinor ?? 10)) || 10;
-      const includeEnd = !!opts.includeEnd;
-      const majorMode = opts.majorMode || "absolute";
-
-      const sweepInfo = fallbackComputeSweep(startDeg, endDeg);
-      const s = sweepInfo.s;
-      const e = sweepInfo.e;
-      const dir = sweepInfo.dir;
-      const majors = [];
-      const minors = [];
-
-      function mod(n, m) { return ((n % m) + m) % m; }
-      function isMajorAngle(a) {
-        if (majorMode === "relative") {
-          return mod(Math.round(a - s), stepMajor) === 0;
-        }
-        return mod(Math.round(a), stepMajor) === 0;
-      }
-
-      const maxSteps = 5000;
-      let count = 0;
-      let a = s;
-
-      function reachedEnd(curr) {
-        if (dir > 0) return includeEnd ? (curr > e) : (curr >= e);
-        return includeEnd ? (curr < e) : (curr <= e);
-      }
-
-      while (!reachedEnd(a) && count++ < maxSteps) {
-        if (isMajorAngle(a)) majors.push(a);
-        else minors.push(a);
-        a += dir * stepMinor;
-      }
-      if (includeEnd) {
-        if (isMajorAngle(e)) majors.push(e);
-        else minors.push(e);
-      }
-      return { majors, minors };
-    }
-
-    function fallbackWithCtx(ctx, fn, style) {
-      ctx.save();
-      if (style) {
-        if (style.alpha != null) ctx.globalAlpha = Number(style.alpha);
-        if (style.strokeStyle != null) ctx.strokeStyle = style.strokeStyle;
-        if (style.fillStyle != null) ctx.fillStyle = style.fillStyle;
-        if (style.lineWidth != null) ctx.lineWidth = style.lineWidth;
-        if (style.lineCap != null) ctx.lineCap = style.lineCap;
-        if (style.lineJoin != null) ctx.lineJoin = style.lineJoin;
-        if (Array.isArray(style.dash)) ctx.setLineDash(style.dash);
-      }
-      try { fn(); } finally { ctx.restore(); }
-    }
-
-    const toCanvas = angle && typeof angle.degToCanvasRad === "function"
-      ? angle.degToCanvasRad
-      : fallbackDegToCanvasRad;
-    const computeSweep = tick && typeof tick.computeSweep === "function"
-      ? tick.computeSweep
-      : fallbackComputeSweep;
-    const buildTickAngles = tick && typeof tick.buildTickAngles === "function"
-      ? tick.buildTickAngles
-      : fallbackBuildTickAngles;
-    const withCtx = primitive && typeof primitive.withCtx === "function"
-      ? primitive.withCtx
-      : fallbackWithCtx;
-    const drawRing = primitive && typeof primitive.drawRing === "function"
-      ? primitive.drawRing
-      : function () {};
+    const toCanvas = angle.degToCanvasRad;
+    const computeSweep = tick.computeSweep;
+    const buildTickAngles = tick.buildTickAngles;
+    const withCtx = primitive.withCtx;
+    const drawRing = primitive.drawRing;
 
     function drawTicks(ctx, cx, cy, rOuter, opts) {
       opts = opts || {};
@@ -290,7 +194,6 @@
     return {
       id: "GaugeDialDrawUtils",
       version: "0.1.0",
-      available: !!(angle && tick && primitive),
       drawTicksFromAngles,
       drawTicks,
       drawLabels,

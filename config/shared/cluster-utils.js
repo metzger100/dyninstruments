@@ -6,9 +6,9 @@
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin || {};
-  const config = ns.config || (ns.config = {});
-  const shared = config.shared || (config.shared = {});
+  const ns = root.DyniPlugin;
+  const config = ns.config;
+  const shared = config.shared;
 
   function makePerKindTextParams(map) {
     const out = {};

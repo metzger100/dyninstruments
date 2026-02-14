@@ -11,69 +11,29 @@
   "use strict";
 
   function create(def, Helpers) {
-    const textModule = Helpers.getModule("GaugeTextUtils");
-    const valueModule = Helpers.getModule("GaugeValueUtils");
-    const angleModule = Helpers.getModule("GaugeAngleUtils");
-    const tickModule = Helpers.getModule("GaugeTickUtils");
-    const primitiveModule = Helpers.getModule("GaugePrimitiveDrawUtils");
-    const dialModule = Helpers.getModule("GaugeDialDrawUtils");
+    const text = Helpers.getModule("GaugeTextUtils").create(def, Helpers);
+    const value = Helpers.getModule("GaugeValueUtils").create(def, Helpers);
+    const angle = Helpers.getModule("GaugeAngleUtils").create(def, Helpers);
+    const tick = Helpers.getModule("GaugeTickUtils").create(def, Helpers);
+    const primitive = Helpers.getModule("GaugePrimitiveDrawUtils").create(def, Helpers);
+    const dial = Helpers.getModule("GaugeDialDrawUtils").create(def, Helpers);
 
-    const text = textModule && typeof textModule.create === "function"
-      ? textModule.create(def, Helpers)
-      : null;
-    const value = valueModule && typeof valueModule.create === "function"
-      ? valueModule.create(def, Helpers)
-      : null;
-    const angle = angleModule && typeof angleModule.create === "function"
-      ? angleModule.create(def, Helpers)
-      : null;
-    const tick = tickModule && typeof tickModule.create === "function"
-      ? tickModule.create(def, Helpers)
-      : null;
-    const primitive = primitiveModule && typeof primitiveModule.create === "function"
-      ? primitiveModule.create(def, Helpers)
-      : null;
-    const dial = dialModule && typeof dialModule.create === "function"
-      ? dialModule.create(def, Helpers)
-      : null;
-
-    const draw = (primitive && dial)
-      ? {
-          drawRing: primitive.drawRing,
-          drawArcRing: primitive.drawArcRing,
-          drawAnnularSector: primitive.drawAnnularSector,
-          drawArrow: primitive.drawArrow,
-          drawPointerAtRim: primitive.drawPointerAtRim,
-          drawRimMarker: primitive.drawRimMarker,
-          drawTicksFromAngles: dial.drawTicksFromAngles,
-          drawTicks: dial.drawTicks,
-          drawLabels: dial.drawLabels,
-          drawDialFrame: dial.drawDialFrame
-        }
-      : null;
-
-    const available = !!(
-      text &&
-      value &&
-      angle &&
-      tick &&
-      primitive &&
-      dial &&
-      draw &&
-      typeof draw.drawRing === "function" &&
-      typeof draw.drawArcRing === "function" &&
-      typeof draw.drawAnnularSector === "function" &&
-      typeof draw.drawTicksFromAngles === "function" &&
-      typeof draw.drawTicks === "function" &&
-      typeof draw.drawLabels === "function" &&
-      typeof draw.drawPointerAtRim === "function" &&
-      typeof draw.drawRimMarker === "function"
-    );
+    const draw = {
+      drawRing: primitive.drawRing,
+      drawArcRing: primitive.drawArcRing,
+      drawAnnularSector: primitive.drawAnnularSector,
+      drawArrow: primitive.drawArrow,
+      drawPointerAtRim: primitive.drawPointerAtRim,
+      drawRimMarker: primitive.drawRimMarker,
+      drawTicksFromAngles: dial.drawTicksFromAngles,
+      drawTicks: dial.drawTicks,
+      drawLabels: dial.drawLabels,
+      drawDialFrame: dial.drawDialFrame
+    };
 
     return {
       id: "GaugeUtils",
       version: "0.2.0",
-      available,
       text,
       value,
       angle,

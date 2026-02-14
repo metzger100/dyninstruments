@@ -11,10 +11,7 @@
   "use strict";
 
   function create(def, Helpers) {
-    const rendererModule = Helpers.getModule("SemicircleGaugeRenderer");
-    const renderer = rendererModule && typeof rendererModule.create === "function"
-      ? rendererModule.create(def, Helpers)
-      : null;
+    const renderer = Helpers.getModule("SemicircleGaugeRenderer").create(def, Helpers);
 
     function extractNumberText(text) {
       const match = String(text).match(/-?\d+(?:\.\d+)?/);
@@ -84,23 +81,21 @@
       return sectors;
     }
 
-    const renderCanvas = (renderer && typeof renderer.createRenderer === "function")
-      ? renderer.createRenderer({
-          rawValueKey: "voltage",
-          unitDefault: "V",
-          rangeDefaults: { min: 10, max: 15 },
-          ratioProps: {
-            normal: "voltageRatioThresholdNormal",
-            flat: "voltageRatioThresholdFlat"
-          },
-          ratioDefaults: { normal: 1.1, flat: 3.5 },
-          tickSteps: voltageTickSteps,
-          formatDisplay: function (raw) {
-            return displayVoltageFromRaw(raw);
-          },
-          buildSectors: buildLowEndSectors
-        })
-      : function () {};
+    const renderCanvas = renderer.createRenderer({
+      rawValueKey: "voltage",
+      unitDefault: "V",
+      rangeDefaults: { min: 10, max: 15 },
+      ratioProps: {
+        normal: "voltageRatioThresholdNormal",
+        flat: "voltageRatioThresholdFlat"
+      },
+      ratioDefaults: { normal: 1.1, flat: 3.5 },
+      tickSteps: voltageTickSteps,
+      formatDisplay: function (raw) {
+        return displayVoltageFromRaw(raw);
+      },
+      buildSectors: buildLowEndSectors
+    });
 
     function translateFunction() {
       return {};
