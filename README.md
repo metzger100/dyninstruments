@@ -29,6 +29,7 @@ The goal is **maximum readability at the helm** with **minimal configuration ove
 * **SpeedGauge** – semicircle speedometer with warning/alarm sectors (fixed arc; “to” values are derived).
 * **DepthGauge** – semicircle depth gauge with shallow-side warning/alarm sectors.
 * **TemperatureGauge** – semicircle temperature gauge with optional high-end warning/alarm sectors.
+* **VoltageGauge** – semicircle voltage gauge with low-end warning/alarm sectors.
 
 ### ⚙️ Editor options (sane defaults, per-kind settings)
 
@@ -140,14 +141,19 @@ Current widgets (depending on your build):
 
 ## Architecture (short overview)
 
-`dyninstruments` is modular and loaded dynamically by `plugin.js` as UMD modules.
+`dyninstruments` is modular and uses a split bootstrap/runtime architecture.
 
 * **plugin.js**
 
-  * loads JS/CSS modules (with dependency resolution)
-  * provides `Helpers` for canvas setup, text color/font resolution, and formatter application
-  * registers widgets via `avnav.api.registerWidget`
-  * builds default values from `editableParameters`
+  * validates AvNav globals and computes `baseUrl`
+  * bootstraps internal scripts (`core/*`, `config/*`) in fixed order
+  * starts `core.runInit()`
+
+* **core/init.js + core/module-loader.js**
+
+  * resolve needed module IDs from `config.instruments`
+  * load JS/CSS modules declared in `config/modules.js` (with dependency resolution)
+  * register widgets via `core/register-instrument.js` -> `avnav.api.registerWidget`
 
 * **ClusterHost**
 
@@ -155,7 +161,7 @@ Current widgets (depending on your build):
   * delegates rendering to:
 
     * **ThreeElements** for numeric text layouts
-    * gauge modules (WindDial, CompassGauge, SpeedGauge, DepthGauge, TemperatureGauge) for graphics
+    * gauge modules (WindDial, CompassGauge, SpeedGauge, DepthGauge, TemperatureGauge, VoltageGauge) for graphics
 
 * **Gauge core modules (`GaugeAngleUtils`, `GaugeTickUtils`, `GaugePrimitiveDrawUtils`, `GaugeDialDrawUtils`)**
 
@@ -168,19 +174,11 @@ Current widgets (depending on your build):
 
 There are planned structural changes before adding the remaining AvNav widgets. Backward compatibility is **not** a goal yet (pre-release).
 
-### Complete the Documentation for AI
+### Completed foundation refactors (historical)
 
-There is documentation missing for existing code like the already existing widgets
-
-### Refactor existing Files to reduce duplications and make it more friendly for AI 
-
-plugin.js is to long. Split the different jobs and configs up in smaller modules.
-
-Gauge elements now use the split Gauge core modules through `GaugeUtils`. SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge share one renderer flow.
-
-Remove dead Fallbacks.
-
-Fixing naming schemes.
+- plugin bootstrap/config split completed (`plugin.js` + `core/*` + `config/*`)
+- gauge core split completed (`GaugeUtils` + shared core modules)
+- semicircle gauges unified on `SemicircleGaugeRenderer`
 
 ### Cluster refactor (foundation)
 

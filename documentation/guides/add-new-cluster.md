@@ -14,11 +14,11 @@ Read first:
 
 A cluster is one AvNav widget with multiple `kind` choices (numeric and optionally graphic). All cluster widgets use `module: "ClusterHost"`.
 
-With the modular refactor, translation logic lives in a dedicated dispatch module per cluster.
+Translation logic lives in one dispatch module per cluster.
 
 ## Step 1: Add Kind Defaults
 
-Add entries to `config/shared/kind-maps.js`:
+Add entries in `config/shared/kind-maps.js`:
 
 ```javascript
 shared.kindMaps.NEW_KIND = {
@@ -30,7 +30,7 @@ shared.kindMaps.NEW_KIND = {
 
 ## Step 2: Add Cluster Definition
 
-Create `config/clusters/new-cluster.js` and push a cluster definition:
+Create `config/clusters/new-cluster.js` and push cluster definition:
 
 ```javascript
 config.clusters.push({
@@ -68,7 +68,7 @@ config.clusters.push({
 });
 ```
 
-Then add this file to `plugin.js` internal load order (next to other cluster config scripts).
+Then include the config script in `plugin.js` internal load order.
 
 ## Step 3: Add Dispatch Module
 
@@ -118,33 +118,52 @@ Create `modules/ClusterHost/Dispatch/NewCluster.js`:
 
 ## Step 4: Register Dispatch Module
 
-In `config/modules.js`:
+Update both config-time and runtime dispatch lists:
 
-1. Add module entry for `ClusterHostDispatchNewCluster`.
-2. Add it to `ClusterHostDispatchRegistry.deps`.
+1. `config/modules.js`
+- Add module entry for `ClusterHostDispatchNewCluster`
+- Add to `ClusterHostDispatchRegistry.deps`
+2. `modules/ClusterHost/Core/DispatchRegistry.js`
+- Add `"ClusterHostDispatchNewCluster"` to `dispatchModuleIds`
 
-If `renderer: "NewGauge"` is used:
+## Step 5: Optional Graphic Renderer Wiring
 
-1. Register `NewGauge` module in `config/modules.js`.
-2. Add `NewGauge` to `ClusterHostRendererRegistry.deps`.
-3. Add renderer selection in `modules/ClusterHost/Core/RendererRegistry.js`.
+If dispatch returns `renderer: "NewGauge"`:
 
-## Step 5: Validate
+1. Register `NewGauge` in `config/modules.js`
+2. Add `NewGauge` to `ClusterHostRendererRegistry.deps` in `config/modules.js`
+3. Wire runtime selection in `modules/ClusterHost/Core/RendererRegistry.js`:
+- instantiate module in `create()`
+- include in `subSpecs`
+- branch in `pickRenderer()`
 
-- Ensure each `kind` translates to expected output.
-- Ensure numeric kinds route to `ThreeElements`.
-- Ensure graphic kinds set correct `renderer` and props.
-- Ensure unknown kinds return `{}`.
-- Resize widget and verify layout behavior in AvNav.
+## Adding a New Kind
+
+For a new `kind` in an existing cluster:
+
+1. Extend kind defaults in `config/shared/kind-maps.js`
+2. Extend the cluster `kind` SELECT in `config/clusters/<cluster>.js`
+3. Add any new `storeKeys` / `editableParameters`
+4. Update matching dispatch module in `modules/ClusterHost/Dispatch/<Cluster>.js`
+5. If the kind is graphic and uses a new renderer, also complete renderer wiring from Step 5
+
+## Validate
+
+- Ensure each `kind` translates to expected output
+- Ensure numeric kinds route to `ThreeElements`
+- Ensure graphic kinds set correct `renderer` and props
+- Ensure unknown kinds return `{}`
+- Resize widget and verify layout behavior in AvNav
 
 ## Checklist
 
 - [ ] Kind defaults added in `config/shared/kind-maps.js`
-- [ ] Cluster config file created in `config/clusters/`
-- [ ] Cluster script included in `plugin.js` load list
-- [ ] Dispatch module added in `modules/ClusterHost/Dispatch/`
+- [ ] Cluster config created/updated in `config/clusters/`
+- [ ] Cluster script included in `plugin.js` internal load order
+- [ ] Dispatch module added/updated in `modules/ClusterHost/Dispatch/`
 - [ ] Module entry added in `config/modules.js`
-- [ ] Dispatch added to `ClusterHostDispatchRegistry.deps`
+- [ ] Dispatch added in `ClusterHostDispatchRegistry.deps` (`config/modules.js`)
+- [ ] Dispatch added in runtime `dispatchModuleIds` (`modules/ClusterHost/Core/DispatchRegistry.js`)
 - [ ] Renderer wiring updated (if graphic)
 
 ## Related

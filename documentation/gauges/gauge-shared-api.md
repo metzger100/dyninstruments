@@ -1,6 +1,6 @@
 # Gauge Shared API
 
-**Status:** ✅ Implemented | split Gauge utility modules + `GaugeUtils` facade
+**Status:** ✅ Implemented | split gauge utility modules + `GaugeUtils` facade
 
 ## Overview
 
@@ -12,12 +12,12 @@ Shared gauge logic is split into focused core modules:
 - `GaugeDialDrawUtils` for radial tick/label/frame drawing
 - `GaugeTextUtils` for text fitting/drawing and disconnect overlay
 - `GaugeValueUtils` for numeric/range/geometry helpers
-- `GaugeUtils` as the composed facade
-- `SemicircleGaugeRenderer` for the complete shared render flow of Speed/Depth/Temperature/Voltage
+- `GaugeUtils` as composed facade
+- `SemicircleGaugeRenderer` as shared render flow for Speed/Depth/Temperature/Voltage
 
 ## Module Registration
 
-`plugin.js` registers the shared modules in `MODULES`:
+`config/modules.js` registers these shared modules:
 
 ```javascript
 GaugeAngleUtils: { js: BASE + "modules/Cores/GaugeAngleUtils.js", globalKey: "DyniGaugeAngleUtils" },
@@ -37,9 +37,13 @@ GaugeValueUtils: { js: BASE + "modules/Cores/GaugeValueUtils.js", globalKey: "Dy
 GaugeUtils: {
   js: BASE + "modules/Cores/GaugeUtils.js",
   globalKey: "DyniGaugeUtils",
-  deps: ["GaugeTextUtils","GaugeValueUtils","GaugeAngleUtils","GaugeTickUtils","GaugePrimitiveDrawUtils","GaugeDialDrawUtils"]
+  deps: ["GaugeTextUtils", "GaugeValueUtils", "GaugeAngleUtils", "GaugeTickUtils", "GaugePrimitiveDrawUtils", "GaugeDialDrawUtils"]
 },
-SemicircleGaugeRenderer: { js: BASE + "modules/Cores/SemicircleGaugeRenderer.js", globalKey: "DyniSemicircleGaugeRenderer", deps: ["GaugeUtils"] }
+SemicircleGaugeRenderer: {
+  js: BASE + "modules/Cores/SemicircleGaugeRenderer.js",
+  globalKey: "DyniSemicircleGaugeRenderer",
+  deps: ["GaugeUtils"]
+}
 ```
 
 ## Access Pattern
@@ -55,7 +59,6 @@ const renderer = Helpers.getModule("SemicircleGaugeRenderer") && Helpers.getModu
 
 | Field | Type | Description |
 |---|---|---|
-| `available` | boolean | `true` when all shared modules are resolved |
 | `text` | object | `GaugeTextUtils` API |
 | `value` | object | `GaugeValueUtils` API |
 | `angle` | object | `GaugeAngleUtils` API |
@@ -97,15 +100,12 @@ const renderer = Helpers.getModule("SemicircleGaugeRenderer") && Helpers.getModu
 ## GaugeTextUtils API
 
 `GaugeTextUtils.create()` returns shared text helpers:
-`setFont`, `fitTextPx`, `measureValueUnitFit`, `drawCaptionMax`, `drawValueUnitWithFit`,
-`fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`, `drawDisconnectOverlay`.
+`setFont`, `fitTextPx`, `measureValueUnitFit`, `drawCaptionMax`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`, `drawDisconnectOverlay`.
 
 ## GaugeValueUtils API
 
 `GaugeValueUtils.create(def, Helpers)` returns shared numeric helpers:
-`isFiniteNumber`, `clamp`, `almostInt`, `isApprox`, `computePad`, `computeGap`, `computeMode`,
-`normalizeRange`, `valueToAngle`, `angleToValue`, `buildValueTickAngles`, `sectorAngles`,
-`formatMajorLabel`, `computeSemicircleGeometry`.
+`isFiniteNumber`, `clamp`, `almostInt`, `isApprox`, `computePad`, `computeGap`, `computeMode`, `normalizeRange`, `valueToAngle`, `angleToValue`, `buildValueTickAngles`, `sectorAngles`, `formatMajorLabel`, `computeSemicircleGeometry`.
 
 ## SemicircleGaugeRenderer API
 
@@ -133,6 +133,6 @@ const renderer = Helpers.getModule("SemicircleGaugeRenderer") && Helpers.getModu
 
 ## Related
 
-- [modules/semicircle-gauges.md](../modules/semicircle-gauges.md)
-- [guides/add-new-gauge.md](../guides/add-new-gauge.md)
-- [architecture/module-system.md](../architecture/module-system.md)
+- [../modules/semicircle-gauges.md](../modules/semicircle-gauges.md)
+- [../guides/add-new-gauge.md](../guides/add-new-gauge.md)
+- [../architecture/module-system.md](../architecture/module-system.md)

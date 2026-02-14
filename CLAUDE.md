@@ -31,7 +31,7 @@ documentation/
 │   ├── editable-parameters.md      # Types, conditions, defaults
 │   └── formatters.md               # formatSpeed, formatDistance, etc.
 ├── architecture/
-│   ├── module-system.md            # UMD loader, dependencies, MODULES{}
+│   ├── module-system.md            # UMD loader, dependencies, config/modules.js
 │   └── cluster-system.md           # ClusterHost, kind→renderer routing
 ├── gauges/
 │   ├── gauge-style-guide.md        # Proportions, colors, pointer, layout modes
@@ -77,11 +77,11 @@ Task: Add new BarometerGauge
 
 ## 3. File Size Limits
 
-- **Max 300 lines per JS file**
+- **Target: <=300 lines per JS file**
 - Shared drawing/layout code → split core modules in `modules/Cores/` (`GaugeAngleUtils`, `GaugeTickUtils`, `GaugePrimitiveDrawUtils`, `GaugeDialDrawUtils`)
 - Gauge-specific code only in individual gauge module files
-- Cluster configs → separate files under `config/clusters/` (planned)
-- Target after refactoring. Current files exceed this
+- Cluster configs live under `config/clusters/`
+- If a legacy file exceeds 300 lines, keep new logic isolated and avoid increasing size further
 
 ---
 
@@ -227,6 +227,7 @@ When adding new documentation:
 - **After code changes:** Update docs immediately
 - Use token-efficient format for all updates
 - Add file headers linking to docs
+- Run `node tools/check-docs.mjs` before completing doc or architecture changes
 
 ---
 
@@ -245,16 +246,10 @@ When adding new documentation:
 
 ---
 
-## 9. Known Code Issues (Pre-Refactoring)
+## 9. Known Code Issues (Current)
 
-These issues exist in the current codebase and are being resolved incrementally:
-
-- **Massive duplication:** SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge share ~25 identical functions (~350 lines each). Also WindDial and CompassDial share 9 identical fucntions.
-- **Dead fallbacks:** `drawPointerAtRimFallback` exists in all 4 gauge files but never executes (IC is always loaded). Will be removed.
-- **plugin.js monolith:** 1310 lines; ~800 lines are inline editableParameters. Will be split into per-cluster config files.
-- **ClusterHost.js monolith:** 412 lines
-- **Not all coding conventions are followed:** in plugin.js ?. is used
-- **LEGACY array:** Always empty, `EXPOSE_LEGACY = false`. Will be removed.
+- A small number of legacy files can still be close to or above the 300-line target; avoid expanding them when possible.
+- Some docs can drift after refactors if registry and runtime touchpoints are not updated together; use `tools/check-docs.mjs`.
 
 ---
 
@@ -266,6 +261,7 @@ Before completing any task:
 - [ ] Read only necessary documentation
 - [ ] Updated documentation in token-efficient format
 - [ ] Updated TABLEOFCONTENTS.md if added new docs
+- [ ] Ran `node tools/check-docs.mjs` and resolved all failures
 - [ ] Added file headers to new code files
 - [ ] No file exceeds 300 lines
 - [ ] Documentation matches implementation

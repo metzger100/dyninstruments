@@ -4,13 +4,11 @@
 
 ## Overview
 
-The four semicircle gauges now share one renderer implementation:
+The four semicircle gauges share one renderer implementation:
 
 - Shared rendering and layout in `modules/Cores/SemicircleGaugeRenderer.js`
 - Shared helper APIs via `GaugeUtils` (`GaugeTextUtils`, `GaugeValueUtils`, `GaugeAngleUtils`, `GaugeTickUtils`, draw utils)
-- Gauge modules (`SpeedGauge`, `DepthGauge`, `TemperatureGauge`, `VoltageGauge`) only keep gauge-specific formatting, tick strategy, and sector strategy
-
-All touched JS files are now below the 300-line target.
+- Gauge wrappers keep only formatting, tick strategy, and sector strategy
 
 ## File Locations
 
@@ -27,11 +25,9 @@ All touched JS files are now below the 300-line target.
 
 ## Module Dependencies
 
-In `plugin.js`, all four gauges now depend on `SemicircleGaugeRenderer` instead of directly depending on duplicated local helpers.
+In `config/modules.js`, all four gauges depend on `SemicircleGaugeRenderer`:
 
-Dependency chain:
-
-```
+```text
 SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge
   -> SemicircleGaugeRenderer
   -> GaugeUtils
@@ -50,46 +46,46 @@ SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge
 
 ## Gauge-Specific Responsibilities
 
-Each gauge wrapper defines only:
+Each wrapper defines:
 
-- Raw value conversion to `{ num, text }`
-- Tick step strategy by value range
-- Sector placement logic (high-end or low-end)
-- Default range, unit, and ratio-threshold prop names
+- Value conversion to `{ num, text }`
+- Tick step strategy
+- Sector placement strategy (high-end or low-end)
+- Defaults (range, unit, ratio props)
 
 ### SpeedGauge
 
-- High-end sectors: `warningFrom..alarmFrom` and `alarmFrom..max`
-- Formatter: `avnav.api.formatter.formatSpeed`
+- High-end sectors
+- Formatter path: `formatSpeed`
 - Defaults: range `0..30`, unit `kn`
 
 ### DepthGauge
 
-- Low-end sectors: `min..alarmFrom` and `alarmFrom..warningFrom` (+ warn-only)
-- Formatter: fixed decimal (`toFixed(1)`)
+- Low-end sectors
+- Formatter path: fixed decimal (1)
 - Defaults: range `0..30`, unit `m`
 
 ### TemperatureGauge
 
-- High-end sectors (same rule as SpeedGauge)
-- Formatter: `formatTemperature(..., "celsius")` with Kelvin fallback heuristic
+- High-end sectors
+- Formatter path: `formatTemperature(..., "celsius")` + Kelvin fallback heuristic
 - Defaults: range `0..35`, unit `°C`
 
 ### VoltageGauge
 
-- Low-end sectors (same rule as DepthGauge)
-- Formatter: `formatDecimal(..., 3, 1, true)` fallback to `toFixed(1)`
+- Low-end sectors
+- Formatter path: `formatDecimal(..., 3, 1, true)` + numeric fallback
 - Defaults: range `10..15`, unit `V`
 
 ## Removed Duplication
 
-The duplicated helper groups were removed from all four gauge files:
+Removed from wrappers:
 
-- Text fit/draw helpers
-- Disconnect overlay helper
-- Tick generation and value-angle mapping helpers
-- Arc sector conversion helpers
-- Semicircle geometry/mode boilerplate
+- text fitting and draw helpers
+- disconnect overlay helpers
+- tick/value-angle helpers
+- sector conversion helpers
+- semicircle geometry/mode boilerplate
 
 ## Related
 

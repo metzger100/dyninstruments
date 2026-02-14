@@ -1,100 +1,63 @@
 # dyninstruments — Modern Instrument Widgets for AvNav
 
-**Status:** ✅ Functional | split Gauge core modules + modular plugin runtime/config in place
+**Status:** ✅ Functional | modular runtime/config and split gauge core in place
 
 ## Stack
 
 - **Runtime:** Browser ES6+ JavaScript, Canvas 2D
-- **Module System:** UMD (no bundler, loaded via `<script>` at runtime)
-- **Host App:** AvNav (marine navigation software)
-- **API:** `avnav.api.registerWidget()` — see [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md)
-- **Styling:** CSS scoped to `.dyniplugin` / `[data-dyni]`, CSS variables for theming
+- **Module System:** UMD, runtime-loaded via `<script>`
+- **Host App:** AvNav
+- **API:** `avnav.api.registerWidget()` — [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md)
+- **Styling:** CSS scoped to `.dyniplugin` / `[data-dyni]`
 
 ## Architecture
 
-```
+```text
 plugin.js (entry point)
-├── bootstraps internal plugin scripts in fixed order
-├── sets base URL (`window.DyniPlugin.baseUrl`)
-└── triggers `core.runInit()`
+├── validates AvNav globals and computes base URL
+├── bootstraps internal scripts in fixed order
+└── starts core.runInit()
 
 core/
-├── namespace.js                — `window.DyniPlugin` namespace container
-├── helpers.js                  — Helpers factory (setupCanvas/formatter/getModule)
-├── editable-defaults.js        — defaults from editableParameters
-├── module-loader.js            — async UMD loader with dependency resolution
-├── register-instrument.js      — widget definition composition/registration
-└── init.js                     — startup orchestration (`load -> register -> log`)
+├── namespace.js          — namespace container
+├── helpers.js            — Helpers factory
+├── editable-defaults.js  — defaults from editableParameters
+├── module-loader.js      — module JS/CSS loader + dep resolution
+├── register-instrument.js— widget definition merge + register
+└── init.js               — load modules -> register instruments
 
 config/
-├── modules.js                  — module registry (`config.modules`)
-├── instruments.js              — final instrument list (`config.instruments`)
-├── shared/                     — kind maps + helper builders + common editables
-└── clusters/                   — one file per cluster widget definition
+├── modules.js            — module registry (`config.modules`)
+├── instruments.js        — instrument list (`config.instruments`)
+├── shared/               — kind maps + shared editables/helpers
+└── clusters/             — per-cluster widget definitions
 
 modules/
-├── Cores/GaugeAngleUtils.js       — Angle conversion + value/angle mapping
-├── Cores/GaugeTickUtils.js        — Tick sweep + major/minor angle generation
-├── Cores/GaugePrimitiveDrawUtils.js — Low-level canvas drawing primitives
-├── Cores/GaugeDialDrawUtils.js    — Radial tick/label/frame drawing
-├── Cores/GaugeTextUtils.js        — Shared text fitting and overlay helpers
-├── Cores/GaugeValueUtils.js       — Shared range/angle/sector helpers
-├── Cores/GaugeUtils.js            — Facade over shared gauge helpers
-├── Cores/SemicircleGaugeRenderer.js — Shared semicircle render flow
-├── ThreeElements/              — Caption/Value/Unit numeric renderer
-├── ClusterHost/                — Dispatcher: kind → renderer routing
-├── WindDial/                   — Full-circle wind compass
-├── CompassGauge/               — Full-circle heading compass
-├── SpeedGauge/                 — Semicircle speedometer
-├── DepthGauge/                 — Semicircle depth meter
-├── TemperatureGauge/           — Semicircle thermometer
-└── VoltageGauge/               — Semicircle voltmeter
-
-documentation/
-├── TABLEOFCONTENTS.md
-├── README.md
-├── avnav-api/                  — AvNav plugin API reference
-├── architecture/               — Module system, cluster system
-├── gauges/                     — Gauge style guide, shared gauge API
-├── modules/                    — ThreeElements, WindDial, CompassGauge docs
-├── shared/                     — Helpers, CSS theming
-└── guides/                     — Step-by-step guides
+├── Cores/                — split shared gauge utilities + semicircle renderer
+├── ThreeElements/        — numeric renderer
+├── ClusterHost/          — dispatch + renderer orchestration
+├── WindDial/
+├── CompassGauge/
+├── SpeedGauge/
+├── DepthGauge/
+├── TemperatureGauge/
+└── VoltageGauge/
 ```
-
-## Widget Types
-
-**Numeric (ThreeElements):** Caption/Value/Unit with responsive 3-row, 2-row, or 1-row layout.
-
-**Semicircle Gauges:** N-shaped arc (270°→450°) with ticks, labels, warning/alarm sectors, pointer. Used by SpeedGauge, DepthGauge, TemperatureGauge, VoltageGauge.
-
-**Full-Circle Dials:** 360° compass/wind dial. Used by WindDial, CompassGauge. Leverages `GaugeUtils.draw` for polar drawing.
-
-**ClusterHost:** Meta-module that dispatches to the appropriate renderer based on the selected `kind`. Each registered widget uses ClusterHost.
 
 ## Cluster Widgets (10 total)
 
-| Widget Name | Cluster | Kinds (selection) |
-|---|---|---|
-| dyninstruments_CourseHeading | courseHeading | cog, hdt, hdm, brg, hdtGraphic, hdmGraphic |
-| dyninstruments_Speed | speed | sog, stw, sogGraphic, stwGraphic |
-| dyninstruments_Position | position | boat, wp |
-| dyninstruments_Distance | distance | dst, route, anchor, watch |
-| dyninstruments_Environment | environment | depth, depthGraphic, temp, tempGraphic, pressure |
-| dyninstruments_Wind | wind | angleTrue, angleApparent, angleTrueDirection, speedTrue, speedApparent, angleTrueGraphic, angleApparentGraphic |
-| dyninstruments_LargeTime | time | (single) |
-| dyninstruments_Nav | nav | eta, rteEta, dst, rteDistance, vmg, clock, positionBoat, positionWp |
-| dyninstruments_Anchor | anchor | distance, watch, bearing |
-| dyninstruments_Vessel | vessel | voltage, voltageGraphic |
-
-## Data Flow
-
-```
-User selects "kind" in AvNav editor
-  → updateFunction() adjusts storeKeys
-  → AvNav reads SignalK values via storeKeys
-  → translateFunction() picks renderer + transforms values
-  → renderCanvas(canvas, props) draws on canvas
-```
+| Widget Name | Cluster |
+|---|---|
+| `dyninstruments_CourseHeading` | `courseHeading` |
+| `dyninstruments_Speed` | `speed` |
+| `dyninstruments_Position` | `position` |
+| `dyninstruments_Distance` | `distance` |
+| `dyninstruments_Environment` | `environment` |
+| `dyninstruments_Wind` | `wind` |
+| `dyninstruments_LargeTime` | `time` |
+| `dyninstruments_Nav` | `nav` |
+| `dyninstruments_Anchor` | `anchor` |
+| `dyninstruments_Vessel` | `vessel` |
 
 ## Documentation Map
 
@@ -106,23 +69,23 @@ User selects "kind" in AvNav editor
 
 **Shared:** [helpers.md](shared/helpers.md), [css-theming.md](shared/css-theming.md)
 
-**Modules:** [three-elements.md](modules/three-elements.md), [wind-dial.md](modules/wind-dial.md), [compass-gauge.md](modules/compass-gauge.md)
+**Modules:** [three-elements.md](modules/three-elements.md), [wind-dial.md](modules/wind-dial.md), [compass-gauge.md](modules/compass-gauge.md), [semicircle-gauges.md](modules/semicircle-gauges.md)
 
-**Guides:** [add-new-gauge.md](guides/add-new-gauge.md), [add-new-cluster.md](guides/add-new-cluster.md)
+**Guides:** [add-new-gauge.md](guides/add-new-gauge.md), [add-new-cluster.md](guides/add-new-cluster.md), [documentation-maintenance.md](guides/documentation-maintenance.md)
 
-## Refactoring Phases
+## Documentation Validation
 
-- ✅ Phase 0: Documentation system (this)
-- ✅ Phase 1: Refactor semicircle gauge widgets to reduce duplication
-- ✅ Phase 2: Replace monolithic gauge core with split Gauge utility modules
-- ✅ Phase 2: Split plugin.js into per-cluster config files
-- ❌ Phase 3: Inline comments + file headers
-- ❌ Phase 4: Remove dead code, naming cleanup
+Run the checker after documentation or architecture changes:
+
+```bash
+node tools/check-docs.mjs
+```
+
+The checker validates markdown links/anchors, JS `Documentation:` header targets, and stale high-risk phrases.
 
 ## Standards
 
-- Files ≤300 lines
-- File headers link to documentation
-- UMD module pattern for all modules
-- Update docs before/after code changes
-- Token-efficient documentation format (see CLAUDE.md)
+- Keep docs aligned with code changes
+- Keep module registration guidance tied to `config/modules.js`
+- Keep ClusterHost extension guidance tied to runtime registries (`DispatchRegistry.js`, `RendererRegistry.js`)
+- Keep JS file headers pointing to correct docs

@@ -4,13 +4,19 @@
 
 ## Overview
 
-dyninstruments uses a custom runtime module loader. Modules are UMD-wrapped JS files that register on `window.DyniModules`. `plugin.js` bootstraps internal scripts, and `core/module-loader.js` loads renderer/config modules via `<script>` injection with dependency resolution.
+dyninstruments uses a custom runtime module loader. Modules are UMD-wrapped JS files that register on `window.DyniModules`.
 
-## `MODULES` Registry
+Ownership split:
 
-Defined in `config/modules.js` (`config.modules`). It maps module IDs to file paths, global keys, and optional dependencies (`deps`).
+- `plugin.js` bootstraps internal scripts (`core/*`, `config/*`) in fixed order
+- `config/modules.js` defines module registry entries
+- `core/module-loader.js` resolves dependencies and injects module JS/CSS
 
-`ClusterHost` now depends on internal modules instead of embedding all logic in one file:
+## `config.modules` Registry
+
+Defined in `config/modules.js`. It maps module IDs to file paths, global keys, and optional dependencies (`deps`).
+
+`ClusterHost` depends on modular internals instead of embedding logic in one file:
 
 - `ClusterHostTranslateUtils`
 - `ClusterHostRendererRegistry`
@@ -78,31 +84,40 @@ SpeedGauge/DepthGauge/TemperatureGauge/VoltageGauge
 
 ## `loadModule()` Flow
 
-1. Check cache (dedup).
-2. Recursively load dependencies first (`Promise.all(deps.map(loadModule))`).
-3. Load CSS via `loadCssOnce()` (`<link>`).
-4. Load JS via `loadScriptOnce()` (`<script>`).
-5. Verify module exists on `window.DyniModules[globalKey]` and has `create`.
-6. Return module object (`{ id, create }`).
+1. Check cache (dedup)
+2. Recursively load dependencies first (`Promise.all(deps.map(loadModule))`)
+3. Load CSS via `loadCssOnce()` (`<link>`)
+4. Load JS via `loadScriptOnce()` (`<script>`)
+5. Verify module exists on `window.DyniModules[globalKey]` and has `create`
+6. Return module object (`{ id, create }`)
 
 ## Registration Flow
 
+`core/init.js` orchestration:
+
 ```javascript
+const loader = core.createModuleLoader(config.modules);
 const needed = loader.uniqueModules(config.instruments);
-Promise.all(needed.map(loader.loadModule)).then((mods) => {
-  config.instruments.forEach(inst => registerInstrument(byId[inst.module], inst, Helpers));
+
+Promise.all(needed.map(loader.loadModule)).then(function (mods) {
+  const byId = {};
+  mods.forEach(function (m) { byId[m.id] = m; });
+
+  config.instruments.forEach(function (inst) {
+    core.registerInstrument(byId[inst.module], inst, Helpers);
+  });
 });
 ```
 
 ## Adding a New Module
 
-1. Create JS module file using the UMD template.
-2. Add module ID entry in `config/modules.js`.
-3. Set `deps` to existing module IDs when needed.
-4. Add CSS path if required.
+1. Create UMD module file
+2. Add module ID entry in `config/modules.js`
+3. Add `deps` to existing module IDs when needed
+4. Add CSS path if required
 
 ## Related
 
 - [cluster-system.md](cluster-system.md) — `ClusterHost` modular dispatch architecture
 - [../shared/helpers.md](../shared/helpers.md) — `Helpers` passed to `create`
-- [../guides/add-new-gauge.md](../guides/add-new-gauge.md) — step-by-step gauge workflow
+- [../guides/add-new-gauge.md](../guides/add-new-gauge.md) — gauge workflow
