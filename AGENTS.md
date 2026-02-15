@@ -1,6 +1,6 @@
-# CLAUDE.md - Project Standards & Workflow
+# AGENTS.md - Project Standards & Workflow
 
-This file is Claude Code-facing guidance for this repository.
+This file is Codex-facing guidance for this repository.
 
 <!-- BEGIN SHARED_INSTRUCTIONS -->
 **Critical:** This document defines AI-optimized documentation standards and development workflow for the dyninstruments AvNav plugin. Read this FIRST before any work.

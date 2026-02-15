@@ -4,6 +4,10 @@
   "private": true,
   "description": "Dev-only tooling for dyninstruments tests",
   "scripts": {
+    "ai:sync:agents": "node tools/sync-ai-instructions.mjs --from=agents",
+    "ai:sync:claude": "node tools/sync-ai-instructions.mjs --from=claude",
+    "ai:check": "node tools/check-ai-instructions.mjs",
+    "docs:check": "node tools/check-docs.mjs && npm run ai:check",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
