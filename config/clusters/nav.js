@@ -47,12 +47,6 @@
           default: "eta",
           name: "Kind"
         },
-        leadingZero: {
-          type: "BOOLEAN",
-          default: true,
-          name: "Leading zero for bearings (ignored unless bearing-like)",
-          condition: []
-        },
         caption: false,
         unit: false,
         formatter: false,
