@@ -19,8 +19,6 @@
 
       const req = p.kind;
 
-      const layEnabled = (p.windLayEnabled !== false);
-
       if (req === "angleTrueGraphic" || req === "angleApparentGraphic") {
         const isTrue = (req === "angleTrueGraphic");
         return {
