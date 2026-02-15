@@ -1,5 +1,7 @@
-/*!
- * ClusterWidget mapper: courseHeading
+/**
+ * Module: CourseHeadingMapper - Cluster translation for COG/HDT/HDM/BRG and compass kinds
+ * Documentation: documentation/architecture/cluster-widget-system.md
+ * Depends: ClusterMapperToolkit
  */
 
 (function (root, factory) {

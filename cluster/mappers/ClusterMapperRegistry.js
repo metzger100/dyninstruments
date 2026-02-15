@@ -1,5 +1,7 @@
-/*!
- * ClusterWidget MapperRegistry (UMD) — cluster-to-mapper module map
+/**
+ * Module: ClusterMapperRegistry - Cluster to mapper module registry and dispatcher
+ * Documentation: documentation/architecture/cluster-widget-system.md
+ * Depends: CourseHeadingMapper, SpeedMapper, EnvironmentMapper, WindMapper, NavMapper, AnchorMapper, VesselMapper
  */
 
 (function (root, factory) {

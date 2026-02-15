@@ -1,5 +1,7 @@
-/*!
- * ClusterWidget MapperToolkit (UMD) — shared mapping helpers
+/**
+ * Module: ClusterMapperToolkit - Shared caption/unit/output helpers for cluster mappers
+ * Documentation: documentation/architecture/cluster-widget-system.md
+ * Depends: none
  */
 
 (function (root, factory) {

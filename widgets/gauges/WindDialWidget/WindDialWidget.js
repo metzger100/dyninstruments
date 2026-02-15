@@ -1,19 +1,7 @@
-/*!
- * WindDialWidget (UMD) — compact dial for AWA/AWS and TWA/TWS
- *
- * Updated: uses GaugeToolkit.draw shared primitives instead of PolarCore.
- *
- * Modes:
- *  - Flat:   Angle caption (left top), value+unit (left bottom), dial centered,
- *            Speed caption (right top), value+unit (right bottom).
- *            The dial stays maximal. In flat mode the side boxes:
- *              1) maximize Value+Unit up to the dial edge (width-constrained),
- *              2) maximize Caption in its own top box (width/height-constrained),
- *                 additionally capped at (ValuePx * captionUnitScale) to keep relation.
- *            Value/Unit never downscale due to dial; only captions adjust if needed.
- *  - Normal: Dial centered; inside the dial each side shows THREE rows:
- *            caption (top), value (middle), unit (bottom).
- *  - High:   One-row blocks at top and bottom (caption + value + unit).
+/**
+ * Module: WindDialWidget - Full-circle wind dial for angle and speed pairs
+ * Documentation: documentation/widgets/wind-dial.md
+ * Depends: GaugeToolkit
  */
 
 (function (root, factory) {

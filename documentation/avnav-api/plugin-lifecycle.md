@@ -80,7 +80,7 @@ Available as `this` in `initFunction`, `finalizeFunction`, `renderHtml`, `render
 updateFunction: function(values) -> object
 ```
 
-Used when editor values change (for example KEY-driven dynamic store key mapping). In dyninstruments, update functions are composed in `runtime/widget-registrar.js` via `composeUpdates(spec.updateFunction, inst.def.updateFunction)`.
+Used when editor values change (for example KEY-driven dynamic store key mapping). In dyninstruments, update functions are composed in `runtime/widget-registrar.js` via `composeUpdates(spec.updateFunction, widgetDef.def.updateFunction)`.
 
 ### cluster
 

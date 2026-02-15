@@ -1,5 +1,7 @@
-/*!
- * ClusterWidget mapper: vessel (voltage + time)
+/**
+ * Module: VesselMapper - Cluster translation for voltage and clock kinds
+ * Documentation: documentation/architecture/cluster-widget-system.md
+ * Depends: ClusterMapperToolkit
  */
 
 (function (root, factory) {

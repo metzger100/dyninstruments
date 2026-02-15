@@ -1,5 +1,7 @@
-/*!
- * ClusterWidget mapper: environment
+/**
+ * Module: EnvironmentMapper - Cluster translation for depth/temperature/pressure kinds
+ * Documentation: documentation/architecture/cluster-widget-system.md
+ * Depends: ClusterMapperToolkit
  */
 
 (function (root, factory) {
