@@ -9,6 +9,7 @@
 - **Host App:** AvNav
 - **API:** `avnav.api.registerWidget()` — [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md)
 - **Styling:** CSS scoped to `.dyniplugin` / `[data-dyni]`
+- **Dev Test Tooling:** Node.js + Vitest (`package.json`, `vitest.config.js`)
 
 ## Architecture
 
@@ -75,7 +76,7 @@ widgets/
 
 **Widgets:** [three-elements.md](widgets/three-elements.md), [wind-dial.md](widgets/wind-dial.md), [compass-gauge.md](widgets/compass-gauge.md), [semicircle-gauges.md](widgets/semicircle-gauges.md)
 
-**Guides:** [add-new-gauge.md](guides/add-new-gauge.md), [add-new-cluster.md](guides/add-new-cluster.md), [documentation-maintenance.md](guides/documentation-maintenance.md)
+**Guides:** [add-new-gauge.md](guides/add-new-gauge.md), [add-new-cluster.md](guides/add-new-cluster.md), [testing-regression.md](guides/testing-regression.md), [documentation-maintenance.md](guides/documentation-maintenance.md)
 
 ## Documentation Validation
 
@@ -86,6 +87,23 @@ node tools/check-docs.mjs
 ```
 
 The checker validates markdown links/anchors, JS `Documentation:` header targets, and stale high-risk phrases.
+
+## Regression Testing
+
+Run from repo root:
+
+```bash
+npm test
+npm run test:coverage
+npm run test:coverage:check
+```
+
+Coverage checks enforce:
+
+- global thresholds from `vitest.config.js`
+- stricter core-module rules from `tools/check-coverage.mjs`
+
+Details: [guides/testing-regression.md](guides/testing-regression.md)
 
 ## Standards
 

@@ -353,6 +353,15 @@ npm run test:coverage
 npm run test:coverage:check
 ```
 
+Current quality gates:
+
+- Global coverage: `lines >= 80`, `functions >= 80`, `statements >= 80`, `branches >= 65`
+- Additional core-module checks via `tools/check-coverage.mjs` for:
+  - `cluster/mappers/*`
+  - `runtime/*`
+  - `shared/widget-kits/gauge/GaugeAngleMath.js`, `GaugeTickMath.js`, `GaugeValueMath.js`
+  - `config/clusters/nav.js`, `config/clusters/environment.js`, `config/clusters/vessel.js`
+
 Scope of the initial suite:
 
 - Mapper logic and cluster/router contracts
