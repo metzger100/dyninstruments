@@ -1,0 +1,41 @@
+const { loadFresh } = require("../../helpers/load-umd");
+
+const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
+  caption_hdtGraphic: "HDT",
+  unit_hdtGraphic: "°",
+  caption_brg: "BRG",
+  unit_brg: "°"
+});
+
+describe("CourseHeadingMapper", function () {
+  it("maps graphic heading kinds to CompassGaugeWidget", function () {
+    const mapper = loadFresh("cluster/mappers/CourseHeadingMapper.js").create();
+    const out = mapper.translate({
+      kind: "hdtGraphic",
+      hdt: 123,
+      brg: 230,
+      leadingZero: true,
+      captionUnitScale: "0.8",
+      compRatioThresholdNormal: "0.8",
+      compRatioThresholdFlat: "2.2"
+    }, toolkit);
+
+    expect(out.renderer).toBe("CompassGaugeWidget");
+    expect(out.heading).toBe(123);
+    expect(out.markerCourse).toBe(230);
+    expect(out.leadingZero).toBe(true);
+  });
+
+  it("maps numeric kinds to formatDirection360", function () {
+    const mapper = loadFresh("cluster/mappers/CourseHeadingMapper.js").create();
+    const out = mapper.translate({ kind: "brg", brg: 12, leadingZero: true }, toolkit);
+
+    expect(out).toEqual({
+      value: 12,
+      caption: "BRG",
+      unit: "°",
+      formatter: "formatDirection360",
+      formatterParameters: [true]
+    });
+  });
+});

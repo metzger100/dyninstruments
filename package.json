@@ -1,0 +1,17 @@
+{
+  "name": "dyninstruments",
+  "version": "0.0.0-test",
+  "private": true,
+  "description": "Dev-only tooling for dyninstruments tests",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:coverage:check": "npm run test:coverage && node tools/check-coverage.mjs"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^2.1.8",
+    "jsdom": "^26.0.0",
+    "vitest": "^2.1.8"
+  }
+}

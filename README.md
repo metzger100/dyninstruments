@@ -323,3 +323,40 @@ Use a launch file like this to start the avnav-server (make sure the paths are r
   ]
 }
 ```
+
+## Testing
+
+The plugin runtime remains raw browser JavaScript. Test tooling is dev-only (`package.json` + Vitest).
+
+1. Install test dependencies:
+```bash
+npm install
+```
+
+2. Run tests once:
+```bash
+npm test
+```
+
+3. Run tests in watch mode:
+```bash
+npm run test:watch
+```
+
+4. Run coverage:
+```bash
+npm run test:coverage
+```
+
+5. Run coverage + stricter core-module checks:
+```bash
+npm run test:coverage:check
+```
+
+Scope of the initial suite:
+
+- Mapper logic and cluster/router contracts
+- Runtime bootstrap/loader/registrar behavior
+- Dynamic cluster `updateFunction` logic
+- Shared gauge math/value/tick modules
+- Gauge wrapper contracts (no image snapshot comparisons in phase 1)
