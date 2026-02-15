@@ -91,12 +91,24 @@
         ratioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
           name: "3-Rows Threshold (numeric)",
-          condition: [{ kind: "angleTrue" }, { kind: "angleApparent" }, { kind: "angleTrueDirection" }]
+          condition: [
+            { kind: "angleTrue" },
+            { kind: "angleApparent" },
+            { kind: "angleTrueDirection" },
+            { kind: "speedTrue" },
+            { kind: "speedApparent" }
+          ]
         },
         ratioThresholdFlat: {
           type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
           name: "1-Row Threshold (numeric)",
-          condition: [{ kind: "angleTrue" }, { kind: "angleApparent" }, { kind: "angleTrueDirection" }]
+          condition: [
+            { kind: "angleTrue" },
+            { kind: "angleApparent" },
+            { kind: "angleTrueDirection" },
+            { kind: "speedTrue" },
+            { kind: "speedApparent" }
+          ]
         },
 
         // Symmetric layline range
