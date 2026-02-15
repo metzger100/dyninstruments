@@ -369,3 +369,18 @@ Scope of the initial suite:
 - Dynamic cluster `updateFunction` logic
 - Shared gauge math/value/tick modules
 - Gauge wrapper contracts (no image snapshot comparisons in phase 1)
+
+## AI Instruction Files (Codex + Claude)
+
+This repository supports both `AGENTS.md` (Codex) and `CLAUDE.md` (Claude Code) as editable sources for shared assistant guidance.
+
+- Both files contain a mirrored shared block between:
+  - `<!-- BEGIN SHARED_INSTRUCTIONS -->`
+  - `<!-- END SHARED_INSTRUCTIONS -->`
+- You can edit either file first, then sync to the other:
+  - `npm run ai:sync:agents` (use `AGENTS.md` as source)
+  - `npm run ai:sync:claude` (use `CLAUDE.md` as source)
+- Validate mirror consistency:
+  - `npm run ai:check`
+- Run full documentation checks:
+  - `npm run docs:check`
