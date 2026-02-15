@@ -6,15 +6,16 @@
 
 ## 1. Project Constraints (AvNav Plugin Environment)
 
-- **No npm, no bundler, no build step** — Raw JS loaded via `<script>` tags at runtime
+- **No bundler, no runtime build step** — Raw JS loaded via `<script>` tags at runtime
+- **Dev-only npm tooling is allowed** — used for tests and quality checks; not part of plugin runtime loading
 - **UMD component pattern** — All components register on `window.DyniComponents.{globalKey}`
 - **avnav.api** — Only external dependency. Plugin API provided by AvNav host app
 - **AVNAV_BASE_URL** — Global string set by AvNav, used to construct module URLs
 - **Canvas 2D only** — All visual rendering via `renderCanvas(canvas, props)`
 - **No ES modules, no import/export** — Must use IIFE or UMD wrappers
 - **HiDPI** — `Helpers.setupCanvas()` handles devicePixelRatio scaling
-- **Browser-only** — No Node.js, no server-side code
-- **No tests** — No test framework
+- **Plugin runtime is browser-only** — No server-side runtime code
+- **Testing stack available** — Vitest + jsdom for regression and coverage checks
 
 ---
 
@@ -46,7 +47,8 @@ documentation/
 │   └── compass-gauge.md            # CompassGaugeWidget rotating compass card
 └── guides/
     ├── add-new-gauge.md            # Step-by-step: create a new gauge
-    └── add-new-cluster.md          # Step-by-step: create a new cluster widget
+    ├── add-new-cluster.md          # Step-by-step: create a new cluster widget
+    └── testing-regression.md       # Test and coverage workflow
 ```
 
 ### RULE: Always Start with TABLEOFCONTENTS.md
@@ -228,6 +230,7 @@ When adding new documentation:
 - Use token-efficient format for all updates
 - Add file headers linking to docs
 - Run `node tools/check-docs.mjs` before completing doc or architecture changes
+- For behavior/runtime changes, run `npm test` and `npm run test:coverage:check`
 
 ---
 
@@ -262,6 +265,8 @@ Before completing any task:
 - [ ] Updated documentation in token-efficient format
 - [ ] Updated TABLEOFCONTENTS.md if added new docs
 - [ ] Ran `node tools/check-docs.mjs` and resolved all failures
+- [ ] For behavior/runtime changes: ran `npm test`
+- [ ] For core logic changes: ran `npm run test:coverage:check`
 - [ ] Added file headers to new code files
 - [ ] No file exceeds 300 lines
 - [ ] Documentation matches implementation

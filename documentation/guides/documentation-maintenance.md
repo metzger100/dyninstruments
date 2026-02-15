@@ -17,7 +17,14 @@ Use this workflow whenever code changes touch architecture, module wiring, or wi
 node tools/check-docs.mjs
 ```
 
-5. Fix all failures before finishing
+5. If behavior/runtime logic changed, run regression checks:
+
+```bash
+npm test
+npm run test:coverage:check
+```
+
+6. Fix all failures before finishing
 
 ## Touchpoint Matrix
 
@@ -29,6 +36,7 @@ node tools/check-docs.mjs
 | Changes in registration/lifecycle flow (`runtime/init.js`, `runtime/widget-registrar.js`) | `documentation/avnav-api/plugin-lifecycle.md`, `documentation/architecture/component-system.md` |
 | Changes in helper API (`runtime/helpers.js`) | `documentation/shared/helpers.md` |
 | CSS/theming changes (`plugin.css`) | `documentation/shared/css-theming.md` |
+| Test setup or coverage rule changes (`package.json`, `vitest.config.js`, `tools/check-coverage.mjs`) | `documentation/guides/testing-regression.md`, `documentation/README.md`, `README.md`, `CLAUDE.md` |
 | New documentation file | `documentation/TABLEOFCONTENTS.md`, `documentation/README.md` |
 
 ## Validation
@@ -44,5 +52,6 @@ Non-zero exit means docs are not consistent.
 ## Related
 
 - [../TABLEOFCONTENTS.md](../TABLEOFCONTENTS.md)
+- [testing-regression.md](testing-regression.md)
 - [../architecture/component-system.md](../architecture/component-system.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
