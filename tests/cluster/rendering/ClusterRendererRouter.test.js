@@ -14,11 +14,13 @@ describe("ClusterRendererRouter", function () {
   it("picks explicit renderer or falls back to ThreeValueTextWidget", function () {
     const three = makeSpec("three", { hide: false });
     const wind = makeSpec("wind", { hide: true });
+    const position = makeSpec("position");
 
     const Helpers = {
       getModule(id) {
         const map = {
           ThreeValueTextWidget: { create: () => three },
+          PositionCoordinateWidget: { create: () => position },
           WindDialWidget: { create: () => wind },
           CompassGaugeWidget: { create: () => makeSpec("compass") },
           SpeedGaugeWidget: { create: () => makeSpec("speed") },
@@ -34,6 +36,7 @@ describe("ClusterRendererRouter", function () {
 
     expect(router.wantsHideNativeHead).toBe(true);
     expect(router.pickRenderer({ renderer: "WindDialWidget" })).toBe(wind);
+    expect(router.pickRenderer({ renderer: "PositionCoordinateWidget" })).toBe(position);
     expect(router.pickRenderer({ renderer: "Unknown" })).toBe(three);
     expect(router.pickRenderer({})).toBe(three);
   });
@@ -47,6 +50,7 @@ describe("ClusterRendererRouter", function () {
       getModule(id) {
         const map = {
           ThreeValueTextWidget: { create: () => three },
+          PositionCoordinateWidget: { create: () => makeSpec("position") },
           WindDialWidget: { create: () => makeSpec("wind") },
           CompassGaugeWidget: { create: () => makeSpec("compass") },
           SpeedGaugeWidget: { create: () => speed },

@@ -72,6 +72,12 @@
       css: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.css",
       globalKey: "DyniThreeValueTextWidget"
     },
+    PositionCoordinateWidget: {
+      js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
+      css: undefined,
+      globalKey: "DyniPositionCoordinateWidget",
+      deps: ["ThreeValueTextWidget"]
+    },
     WindDialWidget: {
       js: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.js",
       css: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.css",
@@ -119,6 +125,7 @@
       globalKey: "DyniClusterRendererRouter",
       deps: [
         "ThreeValueTextWidget",
+        "PositionCoordinateWidget",
         "WindDialWidget",
         "CompassGaugeWidget",
         "SpeedGaugeWidget",

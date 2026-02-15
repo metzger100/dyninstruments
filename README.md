@@ -158,6 +158,7 @@ Current widgets (depending on your build):
   * delegates rendering to:
 
     * **ThreeValueTextWidget** for numeric text layouts
+    * **PositionCoordinateWidget** for stacked nav position layouts (`positionBoat`, `positionWp`)
     * gauge modules (WindDialWidget, CompassGaugeWidget, SpeedGaugeWidget, DepthGaugeWidget, TemperatureGaugeWidget, VoltageGaugeWidget) for graphics
 
 * **Gauge core modules (`GaugeAngleMath`, `GaugeTickMath`, `GaugeCanvasPrimitives`, `GaugeDialRenderer`, `GaugeTextLayout`, `GaugeValueMath`) + `SemicircleGaugeEngine`**

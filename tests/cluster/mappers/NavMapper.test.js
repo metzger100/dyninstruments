@@ -50,5 +50,10 @@ describe("NavMapper", function () {
 
     expect(out.formatter).toBe("formatLonLats");
     expect(out.value).toEqual([1, 2]);
+    expect(out.renderer).toBe("PositionCoordinateWidget");
+
+    const wp = mapper.translate({ kind: "positionWp", positionWp: { lon: 3, lat: 4 } }, toolkit);
+    expect(wp.formatter).toBe("formatLonLats");
+    expect(wp.renderer).toBe("PositionCoordinateWidget");
   });
 });

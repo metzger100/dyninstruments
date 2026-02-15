@@ -40,6 +40,8 @@
 - **How does the numeric text renderer work (caption/value/unit)?** → [widgets/three-elements.md](widgets/three-elements.md)
 - **What layout modes does ThreeValueTextWidget support?** → [widgets/three-elements.md](widgets/three-elements.md#layout-modes)
 - **What props does ThreeValueTextWidget accept?** → [widgets/three-elements.md](widgets/three-elements.md#props)
+- **How do stacked nav positions render (boat/wp)?** → [widgets/position-coordinates.md](widgets/position-coordinates.md)
+- **Which kinds use PositionCoordinateWidget?** → [widgets/position-coordinates.md](widgets/position-coordinates.md#key-details)
 - **How does the wind dial work (angle+speed dual display)?** → [widgets/wind-dial.md](widgets/wind-dial.md)
 - **What draw functions does WindDialWidget use?** → [widgets/wind-dial.md](widgets/wind-dial.md#dial-drawing-via-gaugetoolkitdraw)
 - **What props does WindDialWidget accept?** → [widgets/wind-dial.md](widgets/wind-dial.md#props)
