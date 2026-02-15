@@ -28,8 +28,16 @@
         const u = unit("vmg");
         return out(p.vmg, cap("vmg"), u, "formatSpeed", [u]);
       }
-      if (req === "positionBoat") return out(p.positionBoat, cap("positionBoat"), unit("positionBoat"), "formatLonLats", []);
-      if (req === "positionWp") return out(p.positionWp, cap("positionWp"), unit("positionWp"), "formatLonLats", []);
+      if (req === "positionBoat") {
+        const o = out(p.positionBoat, cap("positionBoat"), unit("positionBoat"), "formatLonLats", []);
+        o.renderer = "PositionCoordinateWidget";
+        return o;
+      }
+      if (req === "positionWp") {
+        const o = out(p.positionWp, cap("positionWp"), unit("positionWp"), "formatLonLats", []);
+        o.renderer = "PositionCoordinateWidget";
+        return o;
+      }
       return {};
     }
 

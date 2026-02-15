@@ -43,6 +43,7 @@ shared/
 
 widgets/
 ├── text/ThreeValueTextWidget/
+├── text/PositionCoordinateWidget/
 └── gauges/
    ├── WindDialWidget/
    ├── CompassGaugeWidget/
@@ -74,7 +75,7 @@ widgets/
 
 **Shared:** [helpers.md](shared/helpers.md), [css-theming.md](shared/css-theming.md)
 
-**Widgets:** [three-elements.md](widgets/three-elements.md), [wind-dial.md](widgets/wind-dial.md), [compass-gauge.md](widgets/compass-gauge.md), [semicircle-gauges.md](widgets/semicircle-gauges.md)
+**Widgets:** [three-elements.md](widgets/three-elements.md), [position-coordinates.md](widgets/position-coordinates.md), [wind-dial.md](widgets/wind-dial.md), [compass-gauge.md](widgets/compass-gauge.md), [semicircle-gauges.md](widgets/semicircle-gauges.md)
 
 **Guides:** [add-new-gauge.md](guides/add-new-gauge.md), [add-new-cluster.md](guides/add-new-cluster.md), [testing-regression.md](guides/testing-regression.md), [documentation-maintenance.md](guides/documentation-maintenance.md)
 

@@ -22,7 +22,8 @@
 - `out(value, caption, unit, formatter, formatterParameters)`
 - `makeAngleFormatter(isDirection, leadingZero, fallback)`
 4. Matching mapper module translates to either:
-- numeric output for `ThreeValueTextWidget`
+- numeric output for `ThreeValueTextWidget` (default text kinds)
+- stacked position output for `PositionCoordinateWidget` (`positionBoat`/`positionWp`)
 - graphic output with `renderer: "..."`
 5. `ClusterWidget.renderCanvas()` delegates to `ClusterRendererRouter`, which picks renderer by `props.renderer`
 6. `ClusterWidget.finalizeFunction()` fans out to all sub-renderers and tolerates renderer-local finalize errors
@@ -55,6 +56,7 @@ function create(def, Helpers) {
 `ClusterRendererRouter` manages these sub-renderers:
 
 - `ThreeValueTextWidget` (default fallback)
+- `PositionCoordinateWidget` (stacked coordinates for nav positions)
 - `WindDialWidget`
 - `CompassGaugeWidget`
 - `SpeedGaugeWidget`

@@ -1,7 +1,7 @@
 /**
  * Module: ClusterRendererRouter - Sub-renderer selection and lifecycle fan-out
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ThreeValueTextWidget, WindDialWidget, CompassGaugeWidget, SpeedGaugeWidget, DepthGaugeWidget, TemperatureGaugeWidget, VoltageGaugeWidget
+ * Depends: ThreeValueTextWidget, PositionCoordinateWidget, WindDialWidget, CompassGaugeWidget, SpeedGaugeWidget, DepthGaugeWidget, TemperatureGaugeWidget, VoltageGaugeWidget
  */
 
 (function (root, factory) {
@@ -14,6 +14,7 @@
   function create(def, Helpers) {
     const threeSpec = Helpers.getModule("ThreeValueTextWidget").create(def, Helpers);
     const rendererSpecs = {
+      PositionCoordinateWidget: Helpers.getModule("PositionCoordinateWidget").create(def, Helpers),
       WindDialWidget: Helpers.getModule("WindDialWidget").create(def, Helpers),
       CompassGaugeWidget: Helpers.getModule("CompassGaugeWidget").create(def, Helpers),
       SpeedGaugeWidget: Helpers.getModule("SpeedGaugeWidget").create(def, Helpers),

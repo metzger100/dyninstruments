@@ -19,6 +19,8 @@ describe("config/components.js", function () {
       "ClusterRendererRouter",
       "ClusterMapperRegistry"
     ]);
+    expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
+    expect(components.ClusterRendererRouter.deps).toContain("PositionCoordinateWidget");
     expect(components.WindMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/WindMapper.js");
   });
 

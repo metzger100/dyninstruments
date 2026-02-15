@@ -40,6 +40,7 @@ ClusterWidget
 │   └── VesselMapper
 └── ClusterRendererRouter
     ├── ThreeValueTextWidget
+    ├── PositionCoordinateWidget
     ├── WindDialWidget
     ├── CompassGaugeWidget
     ├── SpeedGaugeWidget
