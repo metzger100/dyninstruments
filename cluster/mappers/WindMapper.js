@@ -1,5 +1,7 @@
-/*!
- * ClusterWidget mapper: wind
+/**
+ * Module: WindMapper - Cluster translation for numeric and dial wind kinds
+ * Documentation: documentation/architecture/cluster-widget-system.md
+ * Depends: ClusterMapperToolkit
  */
 
 (function (root, factory) {

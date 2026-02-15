@@ -160,7 +160,7 @@ Current widgets (depending on your build):
     * **ThreeValueTextWidget** for numeric text layouts
     * gauge modules (WindDialWidget, CompassGaugeWidget, SpeedGaugeWidget, DepthGaugeWidget, TemperatureGaugeWidget, VoltageGaugeWidget) for graphics
 
-* **Gauge core modules (`GaugeAngleMath`, `GaugeTickMath`, `GaugeCanvasPrimitives`, `GaugeDialRenderer`)**
+* **Gauge core modules (`GaugeAngleMath`, `GaugeTickMath`, `GaugeCanvasPrimitives`, `GaugeDialRenderer`, `GaugeTextLayout`, `GaugeValueMath`) + `SemicircleGaugeEngine`**
 
   * reusable angle/tick/draw primitives
   * composed by `GaugeToolkit` and shared by all gauge modules

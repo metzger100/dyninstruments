@@ -1,5 +1,7 @@
-/*!
- * ClusterWidget mapper: nav (canonical navigation ownership)
+/**
+ * Module: NavMapper - Cluster translation for navigation ETA/distance/position kinds
+ * Documentation: documentation/architecture/cluster-widget-system.md
+ * Depends: ClusterMapperToolkit
  */
 
 (function (root, factory) {

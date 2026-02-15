@@ -1,5 +1,7 @@
-/*!
- * ClusterWidget (UMD) — thin orchestrator over mapper + renderer registries
+/**
+ * Module: ClusterWidget - Thin orchestrator over mapper and renderer registries
+ * Documentation: documentation/architecture/cluster-widget-system.md
+ * Depends: ClusterMapperToolkit, ClusterRendererRouter, ClusterMapperRegistry
  */
 
 (function (root, factory) {

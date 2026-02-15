@@ -35,7 +35,6 @@ WindDialWidget: {
 | `dialRatioThresholdNormal` | number | `0.7` | Ratio below -> `high` |
 | `dialRatioThresholdFlat` | number | `2.0` | Ratio above -> `flat` |
 | `captionUnitScale` | number | `0.8` | Caption/unit ratio vs value |
-| `disconnect` | boolean | `false` | Draw `NO DATA` overlay |
 
 ## Dial Drawing (via `GaugeToolkit.draw`)
 

@@ -1,22 +1,7 @@
-/*!
- * CompassGaugeWidget (UMD) — rotating compass card with upright cardinal labels
- *
- * Updated: uses GaugeToolkit.draw shared primitives instead of PolarCore.
- *
- * Visual:
- *  - The disc (ticks + cardinal/intercardinal letters) rotates by -heading.
- *  - Cardinal letters are always upright.
- *  - Optional target marker (e.g. BRG/route course) at the rim.
- *
- * Modes (own thresholds):
- *  - Flat:   Left column split into top (Caption) and bottom (Value+Unit) boxes.
- *            Value+Unit are maximized to the dial edge; then Caption is maximized
- *            within its box and additionally capped at (ValuePx * captionUnitScale)
- *            to keep the visual relation. Dial stays maximal.
- *  - Normal: Single three-row block (caption/value/unit) centered inside the safe
- *            circle and center-aligned.
- *  - High:   One inline row above the dial: Caption • Value • Unit — centered,
- *            measured with a binary search so all 3 fit height and width.
+/**
+ * Module: CompassGaugeWidget - Full-circle rotating compass with upright labels
+ * Documentation: documentation/widgets/compass-gauge.md
+ * Depends: GaugeToolkit
  */
 
 (function (root, factory) {

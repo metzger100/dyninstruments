@@ -1,19 +1,7 @@
-/*!
- * ThreeValueTextWidget (UMD) — responsive caption/value/unit
- * Pure canvas renderer; cluster-specific translation is handled by ClusterWidget.
- *
- * New behavior (normal & high modes):
- * - "Caption/Unit to Value scale" still defines the initial font sizes across rows.
- * - If a particular row would overflow (by width/height), we downscale that row
- *   independently while preserving the *within-row* scale (e.g. value+unit keep
- *   their relative ratio in the top row). Other rows keep their chosen size.
- *
- * Flat mode (single row) remains coupled: caption/value/unit shrink together.
- *
- * Additional collapsing rules:
- * - If caption is empty: 3-rows and 2-rows collapse to 1-row (flat).
- * - If unit is empty: 3-rows collapses to 2-rows.
- * - If both are empty: 3-rows and 2-rows collapse to 1-row (flat).
+/**
+ * Module: ThreeValueTextWidget - Responsive caption/value/unit numeric canvas renderer
+ * Documentation: documentation/widgets/three-elements.md
+ * Depends: Helpers.applyFormatter
  */
 
 (function (root, factory) {

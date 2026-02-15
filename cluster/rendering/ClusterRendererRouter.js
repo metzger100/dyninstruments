@@ -1,5 +1,7 @@
-/*!
- * ClusterWidget RendererRouter (UMD) — sub-renderer lifecycle and delegation
+/**
+ * Module: ClusterRendererRouter - Sub-renderer selection and lifecycle fan-out
+ * Documentation: documentation/architecture/cluster-widget-system.md
+ * Depends: ThreeValueTextWidget, WindDialWidget, CompassGaugeWidget, SpeedGaugeWidget, DepthGaugeWidget, TemperatureGaugeWidget, VoltageGaugeWidget
  */
 
 (function (root, factory) {

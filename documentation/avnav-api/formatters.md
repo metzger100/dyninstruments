@@ -91,7 +91,7 @@ function makeAngleFormatter(isDirection, leadingZero, fallback) {
 Graphic gauges bypass the AvNav formatter pipeline. They call `avnav.api.formatter` directly and return both display string and numeric value (needed for pointer positioning):
 
 - `displaySpeedFromRaw(raw, unit)` → `{ num, text }` via `formatSpeed`
-- `displayDepthFromRaw(raw, decimals)` → `{ num, text }` via `formatDecimal`
+- `displayDepthFromRaw(raw, decimals)` → `{ num, text }` via local fixed-decimal formatting (`toFixed`)
 - `displayTemperatureFromRaw(raw)` → `{ num, text }` via `formatTemperature`
 - `displayVoltageFromRaw(raw)` → `{ num, text }` via `formatDecimal`
 

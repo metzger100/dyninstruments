@@ -1,5 +1,7 @@
-/*!
- * ClusterWidget mapper: anchor
+/**
+ * Module: AnchorMapper - Cluster translation for anchor distance/watch/bearing kinds
+ * Documentation: documentation/architecture/cluster-widget-system.md
+ * Depends: ClusterMapperToolkit
  */
 
 (function (root, factory) {

@@ -1,5 +1,7 @@
-/*!
- * ClusterWidget mapper: speed
+/**
+ * Module: SpeedMapper - Cluster translation for numeric and semicircle speed gauge kinds
+ * Documentation: documentation/architecture/cluster-widget-system.md
+ * Depends: ClusterMapperToolkit
  */
 
 (function (root, factory) {

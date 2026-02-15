@@ -17,7 +17,7 @@ New semicircle gauges should be thin wrappers over `SemicircleGaugeEngine`. Keep
 
 ## Step 1: Create Gauge Module
 
-Create `widgets/NewGauge/NewGauge.js`:
+Create `widgets/gauges/NewGaugeWidget/NewGaugeWidget.js`:
 
 1. UMD wrapper + `create(def, Helpers)`
 2. Resolve shared renderer: `Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers)`
@@ -50,7 +50,7 @@ const renderCanvas = renderer.createRenderer({
 
 ```javascript
 return {
-  id: "NewGauge",
+  id: "NewGaugeWidget",
   wantsHideNativeHead: true,
   renderCanvas,
   translateFunction
@@ -62,10 +62,10 @@ return {
 Add module entry:
 
 ```javascript
-NewGauge: {
-  js: BASE + "widgets/NewGauge/NewGauge.js",
+NewGaugeWidget: {
+  js: BASE + "widgets/gauges/NewGaugeWidget/NewGaugeWidget.js",
   css: undefined,
-  globalKey: "DyniNewGauge",
+  globalKey: "DyniNewGaugeWidget",
   deps: ["SemicircleGaugeEngine"]
 }
 ```
@@ -74,11 +74,11 @@ NewGauge: {
 
 If `ClusterWidget` should render this gauge, update both declaration and runtime selection:
 
-1. `config/components.js`: add `"NewGauge"` to `ClusterRendererRouter.deps`
+1. `config/components.js`: add `"NewGaugeWidget"` to `ClusterRendererRouter.deps`
 2. `cluster/rendering/ClusterRendererRouter.js`:
 - instantiate the new spec in `create()`
 - include it in `subSpecs`
-- route `props.renderer === "NewGauge"` in `pickRenderer()`
+- route `props.renderer === "NewGaugeWidget"` in `pickRenderer()`
 
 ## Step 4: Route Data via Mapper Module
 
@@ -86,7 +86,7 @@ Update the relevant cluster mapper module (`cluster/mappers/*.js`) so translatio
 
 ```javascript
 return {
-  renderer: "NewGauge",
+  renderer: "NewGaugeWidget",
   value: p.someValue,
   caption: cap("someGraphicKind"),
   unit: unit("someGraphicKind"),
@@ -102,15 +102,15 @@ Do not edit `ClusterWidget.js` for kind-specific translation logic.
 - Pointer tracks displayed numeric value
 - Warning/alarm sectors render correctly
 - Day/night colors update
-- Disconnect overlay works (`props.disconnect`)
+- Disconnect handling works as implemented by the new gauge renderer
 
 ## Checklist
 
-- [ ] Gauge wrapper created in `widgets/NewGauge/NewGauge.js`
+- [ ] Gauge wrapper created in `widgets/gauges/NewGaugeWidget/NewGaugeWidget.js`
 - [ ] Module registered in `config/components.js`
 - [ ] Added to `ClusterRendererRouter.deps` (if ClusterWidget-rendered)
 - [ ] Renderer wired in `cluster/rendering/ClusterRendererRouter.js`
-- [ ] Mapper module emits `renderer: "NewGauge"` and expected props
+- [ ] Mapper module emits `renderer: "NewGaugeWidget"` and expected props
 - [ ] Visual + resize behavior validated
 
 ## Related
