@@ -11,26 +11,25 @@
 
   function create(def, Helpers) {
     const threeSpec = Helpers.getModule("ThreeValueTextWidget").create(def, Helpers);
-    const dialSpec = Helpers.getModule("WindDialWidget").create(def, Helpers);
-    const compassSpec = Helpers.getModule("CompassGaugeWidget").create(def, Helpers);
-    const speedGaugeSpec = Helpers.getModule("SpeedGaugeWidget").create(def, Helpers);
-    const depthSpec = Helpers.getModule("DepthGaugeWidget").create(def, Helpers);
-    const tempSpec = Helpers.getModule("TemperatureGaugeWidget").create(def, Helpers);
-    const voltageSpec = Helpers.getModule("VoltageGaugeWidget").create(def, Helpers);
-
-    const subSpecs = [threeSpec, dialSpec, compassSpec, speedGaugeSpec, depthSpec, tempSpec, voltageSpec];
+    const rendererSpecs = {
+      WindDialWidget: Helpers.getModule("WindDialWidget").create(def, Helpers),
+      CompassGaugeWidget: Helpers.getModule("CompassGaugeWidget").create(def, Helpers),
+      SpeedGaugeWidget: Helpers.getModule("SpeedGaugeWidget").create(def, Helpers),
+      DepthGaugeWidget: Helpers.getModule("DepthGaugeWidget").create(def, Helpers),
+      TemperatureGaugeWidget: Helpers.getModule("TemperatureGaugeWidget").create(def, Helpers),
+      VoltageGaugeWidget: Helpers.getModule("VoltageGaugeWidget").create(def, Helpers)
+    };
+    const subSpecs = [threeSpec].concat(Object.keys(rendererSpecs).map(function (id) {
+      return rendererSpecs[id];
+    }));
 
     const wantsHide = subSpecs.some(function (sub) {
       return !!(sub && sub.wantsHideNativeHead);
     });
 
     function pickRenderer(props) {
-      if (props && props.renderer === "WindDialWidget") return dialSpec;
-      if (props && props.renderer === "CompassGaugeWidget") return compassSpec;
-      if (props && props.renderer === "SpeedGaugeWidget") return speedGaugeSpec;
-      if (props && props.renderer === "DepthGaugeWidget") return depthSpec;
-      if (props && props.renderer === "TemperatureGaugeWidget") return tempSpec;
-      if (props && props.renderer === "VoltageGaugeWidget") return voltageSpec;
+      const rendererId = props && props.renderer;
+      if (rendererId && rendererSpecs[rendererId]) return rendererSpecs[rendererId];
       return threeSpec;
     }
 

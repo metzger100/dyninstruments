@@ -124,7 +124,7 @@ Update both config-time and runtime mapper lists:
 - Add module entry for `NewClusterMapper`
 - Add to `ClusterMapperRegistry.deps`
 2. `cluster/mappers/ClusterMapperRegistry.js`
-- Add `"NewClusterMapper"` to `mapperIds`
+- Add `"newcluster": "NewClusterMapper"` to `MAPPER_MODULE_IDS`
 
 ## Step 5: Optional Graphic Renderer Wiring
 
@@ -133,9 +133,7 @@ If mapper returns `renderer: "NewGauge"`:
 1. Register `NewGauge` in `config/components.js`
 2. Add `NewGauge` to `ClusterRendererRouter.deps` in `config/components.js`
 3. Wire runtime selection in `cluster/rendering/ClusterRendererRouter.js`:
-- instantiate module in `create()`
-- include in `subSpecs`
-- branch in `pickRenderer()`
+- add `NewGauge: Helpers.getModule("NewGauge").create(def, Helpers)` to `rendererSpecs`
 
 ## Adding a New Kind
 
@@ -163,7 +161,7 @@ For a new `kind` in an existing cluster:
 - [ ] Mapper module added/updated in `cluster/mappers/`
 - [ ] Module entry added in `config/components.js`
 - [ ] Mapper added in `ClusterMapperRegistry.deps` (`config/components.js`)
-- [ ] Mapper added in runtime `mapperIds` (`cluster/mappers/ClusterMapperRegistry.js`)
+- [ ] Mapper added in runtime `MAPPER_MODULE_IDS` (`cluster/mappers/ClusterMapperRegistry.js`)
 - [ ] Renderer wiring updated (if graphic)
 
 ## Related

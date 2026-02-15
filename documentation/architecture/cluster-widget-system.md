@@ -33,11 +33,8 @@ Current mapper modules:
 
 - `CourseHeadingMapper.js` (`courseHeading`)
 - `SpeedMapper.js` (`speed`)
-- `PositionMapper.js` (`position`)
-- `DistanceMapper.js` (`distance`)
 - `EnvironmentMapper.js` (`environment`)
 - `WindMapper.js` (`wind`)
-- `TimeMapper.js` (`time`)
 - `NavMapper.js` (`nav`)
 - `AnchorMapper.js` (`anchor`)
 - `VesselMapper.js` (`vessel`)
@@ -77,7 +74,7 @@ Must be registered in two places:
 - add component entry
 - add dependency in `ClusterMapperRegistry.deps`
 2. `cluster/mappers/ClusterMapperRegistry.js`
-- add component ID to `mapperIds`
+- add `cluster: moduleId` entry to `MAPPER_MODULE_IDS`
 
 ### New Renderer Component
 
@@ -87,9 +84,7 @@ Must be registered in two places:
 - add renderer component entry
 - add dependency in `ClusterRendererRouter.deps`
 2. `cluster/rendering/ClusterRendererRouter.js`
-- instantiate in `create()`
-- include in `subSpecs`
-- add selection branch in `pickRenderer()`
+- add `rendererName: rendererSpec` entry in `rendererSpecs` map
 
 ## Related
 

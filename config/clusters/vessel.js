@@ -1,5 +1,5 @@
 /**
- * Module: DyniPlugin Vessel Cluster - Vessel voltage numeric and gauge config
+ * Module: DyniPlugin Vessel Cluster - Vessel metrics widget config (voltage + clock/time)
  * Documentation: documentation/guides/add-new-cluster.md
  * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js
  */
@@ -18,23 +18,26 @@
     widget: "ClusterWidget",
     def: {
       name: "dyninstruments_Vessel",
-      description: "Vessel system metrics (voltage via SignalK KEY)",
+      description: "Vessel system metrics (voltage via SignalK KEY, local clock)",
       caption: "", unit: "", default: "---",
       cluster: "vessel",
-      storeKeys: {},
+      storeKeys: {
+        clock: "nav.gps.rtime"
+      },
 
       editableParameters: {
         kind: {
           type: "SELECT",
           list: [
             opt("Voltage (SignalK)", "voltage"),
-            opt("Voltage gauge (graphic)", "voltageGraphic")
+            opt("Voltage gauge (graphic)", "voltageGraphic"),
+            opt("Clock (local time)", "clock")
           ],
           default: "voltage",
           name: "Kind"
         },
 
-        // Voltage source (SignalK) for BOTH kinds
+        // Voltage source (SignalK) for voltage kinds
         value: {
           type: "KEY",
           default: "",
@@ -124,12 +127,12 @@
         ratioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
           name: "3-Rows Threshold (numeric)",
-          condition: [{ kind: "voltage" }]
+          condition: [{ kind: "voltage" }, { kind: "clock" }]
         },
         ratioThresholdFlat: {
           type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
           name: "1-Row Threshold (numeric)",
-          condition: [{ kind: "voltage" }]
+          condition: [{ kind: "voltage" }, { kind: "clock" }]
         }
       },
 

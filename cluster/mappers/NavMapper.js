@@ -1,5 +1,5 @@
 /*!
- * ClusterWidget mapper: nav
+ * ClusterWidget mapper: nav (canonical navigation ownership)
  */
 
 (function (root, factory) {
@@ -26,7 +26,6 @@
         const u = unit("vmg");
         return out(p.vmg, cap("vmg"), u, "formatSpeed", [u]);
       }
-      if (req === "clock") return out(p.clock, cap("clock"), unit("clock"), "formatTime", []);
       if (req === "positionBoat") return out(p.positionBoat, cap("positionBoat"), unit("positionBoat"), "formatLonLats", []);
       if (req === "positionWp") return out(p.positionWp, cap("positionWp"), unit("positionWp"), "formatLonLats", []);
       return {};

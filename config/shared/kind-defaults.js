@@ -25,16 +25,6 @@
       sogGraphic: { cap: "SOG", unit: "kn" },
       stwGraphic: { cap: "STW", unit: "kn" }
     },
-    POSITION_KIND: {
-      boat: { cap: "POS", unit: "" },
-      wp: { cap: "WP", unit: "" }
-    },
-    DISTANCE_KIND: {
-      dst: { cap: "DST", unit: "" },
-      route: { cap: "RTE", unit: "" },
-      anchor: { cap: "ANCHOR", unit: "m" },
-      watch: { cap: "AWATCH", unit: "m" }
-    },
     ENV_KIND: {
       depth: { cap: "DPT", unit: "m" },
       depthGraphic: { cap: "DPT", unit: "m" },
@@ -55,7 +45,6 @@
       dst: { cap: "DST", unit: "" },
       rteDistance: { cap: "RTE", unit: "" },
       vmg: { cap: "VMG", unit: "kn" },
-      clock: { cap: "TIME", unit: "" },
       positionBoat: { cap: "POS", unit: "" },
       positionWp: { cap: "WP", unit: "" }
     },
@@ -66,7 +55,8 @@
     },
     VESSEL_KIND: {
       voltage: { cap: "VOLT", unit: "V" },
-      voltageGraphic: { cap: "VOLT", unit: "V" }
+      voltageGraphic: { cap: "VOLT", unit: "V" },
+      clock: { cap: "TIME", unit: "" }
     }
   };
 }(this));

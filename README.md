@@ -13,7 +13,7 @@ The goal is **maximum readability at the helm** with **minimal configuration ove
 
 * The plugin groups related values into thematic clusters:
 
-  * `courseHeading`, `speed`, `position`, `distance`, `environment`, `wind`, `time`, `nav`, `anchor`, `vessel`
+  * `courseHeading`, `speed`, `environment`, `wind`, `nav`, `anchor`, `vessel`
 * In the editor you typically select only a `kind` (e.g. `COG`, `HDT`, `SOG`, `STW`, `tempGraphic`) instead of creating separate widgets for every single value.
 
 ### 🔍 Maximum readability (auto layout & scaling)
@@ -122,11 +122,8 @@ Current widgets (depending on your build):
 
 * `dyninstruments_CourseHeading`
 * `dyninstruments_Speed`
-* `dyninstruments_Position`
-* `dyninstruments_Distance`
 * `dyninstruments_Environment`
 * `dyninstruments_Wind`
-* `dyninstruments_LargeTime`
 * `dyninstruments_Nav`
 * `dyninstruments_Anchor`
 * `dyninstruments_Vessel`
@@ -182,17 +179,11 @@ There are planned structural changes before adding the remaining AvNav widgets. 
 
 ### Cluster refactor (foundation)
 
-1. **Move `LargeTime` into an existing cluster (likely `vessel`)**
-   - `dyninstruments_LargeTime` becomes a `kind` (e.g. `clock`) inside `dyninstruments_Vessel`.
+Cluster consolidation is completed:
 
-2. **Merge `distance` into existing clusters**
-   - Waypoint/route distances move into `nav` (`dst`, `rteDistance`).
-   - Anchor distances stay in `anchor` (`distance`, `watch`).
-   - The standalone `distance` cluster/widget will be removed.
-
-3. **Merge `position` into an existing cluster (likely `nav`)**
-   - Boat/WP positions become `kinds` inside `dyninstruments_Nav`.
-   - A “more dynamic” position widget will be built on top of this (switchable sources, consistent formatting).
+- `dyninstruments_Nav` is the canonical owner for `dst`, `rteDistance`, `positionBoat`, `positionWp`.
+- `dyninstruments_Anchor` remains owner for anchor-specific distance/watch/bearing.
+- `dyninstruments_Vessel` owns time/clock (`clock`) and voltage kinds.
 
 ### Assign missing AvNav widgets to target clusters
 
@@ -233,17 +224,17 @@ The actual implementation may differ. Check issues/commits for the current state
 | DateTime                     | —                                                                            | ❌ not covered yet                          |
 | Default                      | —                                                                            | ❌ not covered yet                          |
 | DepthDisplay                 | dyninstruments_Environment → `depth`                                         | ✅ covered                                  |
-| DST                          | dyninstruments_Distance → `dst`                                              | ✅ covered                                  |
+| DST                          | dyninstruments_Nav → `dst`                                                   | ✅ covered                                  |
 | EditRoute                    | —                                                                            | ❌ not covered yet                          |
 | ETA                          | dyninstruments_Nav → `eta`                                                   | ✅ covered                                  |
 | HDM                          | dyninstruments_CourseHeading → `hdm`                                         | ✅ covered                                  |
 | HDT                          | dyninstruments_CourseHeading → `hdt`                                         | ✅ covered                                  |
-| LargeTime                    | dyninstruments_LargeTime                                                     | ✅ covered                                  |
+| LargeTime                    | dyninstruments_Vessel → `clock`                                              | ✅ covered                                  |
 | linGauge_Compass             | —                                                                            | ❌ not covered yet                          |
 | linGauge_Compass180          | —                                                                            | ❌ not covered yet                          |
 | linGauge_Temperature         | —                                                                            | ❌ not covered yet                          |
 | linGauge_Voltage             | —                                                                            | ❌ not covered yet                          |
-| Position                     | dyninstruments_Position → `boat`                                             | ✅ covered                                  |
+| Position                     | dyninstruments_Nav → `positionBoat`                                          | ✅ covered                                  |
 | radGauge_Compass             | dyninstruments_CourseHeading → `hdtGraphic`                                  | ✅ covered                                  |
 | radGauge_Speed               | dyninstruments_Speed → `sogGraphic`/`stwGraphic`                             | ✅ covered                                  |
 | radGauge_Temperature         | dyninstruments_Environment → `tempGraphic`                                   | ✅ covered                                  |
@@ -265,7 +256,7 @@ The actual implementation may differ. Check issues/commits for the current state
 | WindDisplay                  | dyninstruments_Wind → `angleApparentGraphic`                                 | ✅ covered                                  |
 | WindGraphics                 | dyninstruments_Wind → `angleApparentGraphic`/`angleTrueGraphic`              | ✅ covered                                  |
 | WindSpeed                    | dyninstruments_Wind → `speedApparent`                                        | ✅ covered                                  |
-| WpPosition                   | dyninstruments_Position → `wp`                                               | ✅ covered                                  |
+| WpPosition                   | dyninstruments_Nav → `positionWp`                                            | ✅ covered                                  |
 | XteDisplay                   | —                                                                            | ❌ not covered yet                          |
 | Zoom                         | —                                                                            | ❌ not covered yet                          |
 
