@@ -9,28 +9,27 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const mapperIds = [
-      "CourseHeadingMapper",
-      "SpeedMapper",
-      "PositionMapper",
-      "DistanceMapper",
-      "EnvironmentMapper",
-      "WindMapper",
-      "TimeMapper",
-      "NavMapper",
-      "AnchorMapper",
-      "VesselMapper"
-    ];
+  const MAPPER_MODULE_IDS = {
+    courseHeading: "CourseHeadingMapper",
+    speed: "SpeedMapper",
+    environment: "EnvironmentMapper",
+    wind: "WindMapper",
+    nav: "NavMapper",
+    anchor: "AnchorMapper",
+    vessel: "VesselMapper"
+  };
 
+  function create(def, Helpers) {
     const mappers = {};
 
-    mapperIds.forEach(function (id) {
+    Object.keys(MAPPER_MODULE_IDS).forEach(function (clusterId) {
+      const id = MAPPER_MODULE_IDS[clusterId];
       const mod = Helpers.getModule(id);
       if (!mod || typeof mod.create !== "function") return;
       const spec = mod.create(def, Helpers);
-      if (!spec || typeof spec.cluster !== "string" || typeof spec.translate !== "function") return;
-      mappers[spec.cluster] = spec.translate;
+      if (!spec || typeof spec.translate !== "function") return;
+      const mappedCluster = (typeof spec.cluster === "string" && spec.cluster) ? spec.cluster : clusterId;
+      mappers[mappedCluster] = spec.translate;
     });
 
     function mapCluster(props, createToolkit) {

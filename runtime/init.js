@@ -48,7 +48,7 @@
           runtime.registerWidget(component, widgetDef, Helpers);
         });
 
-        root.avnav.api.log("dyninstruments component init ok (wind/compass clustered): " + widgetDefinitions.length + " widgets");
+        root.avnav.api.log("dyninstruments component init ok (clustered): " + widgetDefinitions.length + " widgets");
       })
       .catch(function (e) {
         state.initStarted = false;

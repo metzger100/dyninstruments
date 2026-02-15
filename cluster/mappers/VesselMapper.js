@@ -1,5 +1,5 @@
 /*!
- * ClusterWidget mapper: vessel
+ * ClusterWidget mapper: vessel (voltage + time)
  */
 
 (function (root, factory) {
@@ -45,6 +45,9 @@
       if (req === "voltage") {
         const u = unit("voltage");
         return out(p.value, cap("voltage"), u, "formatDecimal", [3, 1, true]);
+      }
+      if (req === "clock") {
+        return out(p.clock, cap("clock"), unit("clock"), "formatTime", []);
       }
 
       return {};

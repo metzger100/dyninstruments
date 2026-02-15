@@ -51,17 +51,14 @@ widgets/
    └── VoltageGaugeWidget/
 ```
 
-## Cluster Widgets (10 total)
+## Cluster Widgets (7 total)
 
 | Widget Name | Cluster |
 |---|---|
 | `dyninstruments_CourseHeading` | `courseHeading` |
 | `dyninstruments_Speed` | `speed` |
-| `dyninstruments_Position` | `position` |
-| `dyninstruments_Distance` | `distance` |
 | `dyninstruments_Environment` | `environment` |
 | `dyninstruments_Wind` | `wind` |
-| `dyninstruments_LargeTime` | `time` |
 | `dyninstruments_Nav` | `nav` |
 | `dyninstruments_Anchor` | `anchor` |
 | `dyninstruments_Vessel` | `vessel` |

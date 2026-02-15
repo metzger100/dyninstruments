@@ -33,11 +33,8 @@ ClusterWidget
 ├── ClusterMapperRegistry
 │   ├── CourseHeadingMapper
 │   ├── SpeedMapper
-│   ├── PositionMapper
-│   ├── DistanceMapper
 │   ├── EnvironmentMapper
 │   ├── WindMapper
-│   ├── TimeMapper
 │   ├── NavMapper
 │   ├── AnchorMapper
 │   └── VesselMapper

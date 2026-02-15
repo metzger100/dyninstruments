@@ -1,5 +1,5 @@
 /**
- * Module: DyniPlugin Nav Cluster - Navigation metrics widget config
+ * Module: DyniPlugin Nav Cluster - Canonical navigation widget config (ETA, distances, positions)
  * Documentation: documentation/guides/add-new-cluster.md
  * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/common-editables.js
  */
@@ -19,16 +19,16 @@
     widget: "ClusterWidget",
     def: {
       name: "dyninstruments_Nav",
-      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Clock / Positions)",
+      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Positions)",
       caption: "", unit: "", default: "---",
       cluster: "nav",
       storeKeys: {
         eta: "nav.wp.eta",
         rteEta: "nav.route.eta",
         dst: "nav.wp.distance",
+        wpServer: "nav.wp.server",
         rteDistance: "nav.route.remain",
         vmg: "nav.wp.vmg",
-        clock: "nav.gps.rtime",
         positionBoat: "nav.gps.position",
         positionWp: "nav.wp.position"
       },
@@ -41,7 +41,6 @@
             opt("Distance to waypoint (DST)", "dst"),
             opt("Remaining route distance", "rteDistance"),
             opt("VMG to waypoint", "vmg"),
-            opt("Clock (local time)", "clock"),
             opt("Boat position (GPS)", "positionBoat"),
             opt("Active waypoint position", "positionWp")
           ],
@@ -61,6 +60,14 @@
         className: true,
         ...makePerKindTextParams(NAV_KIND),
         ...commonThreeElementsEditables
+      },
+      updateFunction: function (values) {
+        const out = values ? { ...values } : {};
+        const kind = (values && values.kind) || "eta";
+        const needsWp = (kind === "dst" || kind === "positionWp");
+        if (needsWp && values && values.wpServer === false) out.disconnect = true;
+        else if (Object.prototype.hasOwnProperty.call(out, "disconnect")) delete out.disconnect;
+        return out;
       }
     }
   });

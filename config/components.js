@@ -137,16 +137,6 @@
       css: undefined,
       globalKey: "DyniSpeedMapper"
     },
-    PositionMapper: {
-      js: BASE + "cluster/mappers/PositionMapper.js",
-      css: undefined,
-      globalKey: "DyniPositionMapper"
-    },
-    DistanceMapper: {
-      js: BASE + "cluster/mappers/DistanceMapper.js",
-      css: undefined,
-      globalKey: "DyniDistanceMapper"
-    },
     EnvironmentMapper: {
       js: BASE + "cluster/mappers/EnvironmentMapper.js",
       css: undefined,
@@ -156,11 +146,6 @@
       js: BASE + "cluster/mappers/WindMapper.js",
       css: undefined,
       globalKey: "DyniWindMapper"
-    },
-    TimeMapper: {
-      js: BASE + "cluster/mappers/TimeMapper.js",
-      css: undefined,
-      globalKey: "DyniTimeMapper"
     },
     NavMapper: {
       js: BASE + "cluster/mappers/NavMapper.js",
@@ -184,11 +169,8 @@
       deps: [
         "CourseHeadingMapper",
         "SpeedMapper",
-        "PositionMapper",
-        "DistanceMapper",
         "EnvironmentMapper",
         "WindMapper",
-        "TimeMapper",
         "NavMapper",
         "AnchorMapper",
         "VesselMapper"
