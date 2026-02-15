@@ -200,6 +200,7 @@ After the refactor, the missing core widgets will be integrated as `kinds` into 
 1. **Quick wins (text/ThreeValueTextWidget-based)**: `DateTime`, `TimeStatus`, `signalKPitch`, `signalKRoll`
 2. **High-impact canvas visuals**: `XteDisplay`, `ActiveRoute`
 3. **Lists & controls (interaction-heavy)**: `RoutePoints`, `EditRoute`, `Zoom`, `CenterDisplay`
+4. **Linear Gauges**: Alternatives for Graphic-kinds
 4. **AIS**: `AisTarget` (requires more data/logic + responsive layout)
 
 ### Additional non-core widgets (planned)
