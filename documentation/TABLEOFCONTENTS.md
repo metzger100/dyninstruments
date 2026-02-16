@@ -12,6 +12,7 @@
 - **What editableParameter types exist?** → [avnav-api/editable-parameters.md](avnav-api/editable-parameters.md)
 - **How do conditions on editableParameters work?** → [avnav-api/editable-parameters.md](avnav-api/editable-parameters.md#condition-undocumented-avnav-feature)
 - **What formatters are available (formatSpeed, formatDistance...)?** → [avnav-api/formatters.md](avnav-api/formatters.md)
+- **How do I prevent AvNav instrument dashboard (`GpsPage`) widget clicks from navigating back to map?** → [avnav-api/interactive-widgets.md](avnav-api/interactive-widgets.md)
 
 ## Architecture
 
@@ -72,3 +73,4 @@
 **"How does HiDPI canvas scaling work?"** → [shared/helpers.md](shared/helpers.md#setupcanvas)
 **"How do I hide the native AvNav widget header?"** → [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md#wantshidenativehead)
 **"How do I add a SignalK KEY selector to the editor?"** → [avnav-api/editable-parameters.md](avnav-api/editable-parameters.md#key-details)
+**"How do I build interactive buttons/timers/toggles on AvNav instrument dashboard (`GpsPage`)?"** → [avnav-api/interactive-widgets.md](avnav-api/interactive-widgets.md)

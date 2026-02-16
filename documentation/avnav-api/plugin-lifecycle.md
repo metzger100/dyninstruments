@@ -60,6 +60,15 @@ Available as `this` in `initFunction`, `finalizeFunction`, `renderHtml`, `render
 | `getContext()` | map | Canvas context during render |
 | `getDimensions()` | map | Canvas size |
 
+### Interactive Click Handling on `GpsPage` (AvNav Instrument Dashboard)
+
+AvNav's instrument dashboard page (`GpsPage`) uses container-level click handling that can navigate back to map. For interactive controls (buttons, toggles, timers), stop propagation inside widget content.
+
+- `renderHtml` string + `this.eventHandler`: AvNav wraps handlers and applies propagation/default blocking automatically.
+- `renderHtml` returning React/HTM elements: call `ev.stopPropagation()` manually in handlers.
+
+Details and event-chain analysis: [interactive-widgets.md](interactive-widgets.md).
+
 ## Render Cycle (AvNav Standard)
 
 ```text
@@ -126,4 +135,5 @@ function create(def, Helpers) {
 
 - [editable-parameters.md](editable-parameters.md) — parameter types and conditions
 - [formatters.md](formatters.md) — formatter registration and built-ins
+- [interactive-widgets.md](interactive-widgets.md) — preventing instrument-dashboard (`GpsPage`) click-to-navigate for interactive content
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md) — ClusterWidget mapper
