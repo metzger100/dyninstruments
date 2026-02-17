@@ -33,7 +33,8 @@ documentation/
 ├── avnav-api/
 │   ├── plugin-lifecycle.md         # registerWidget, render cycle, props
 │   ├── editable-parameters.md      # Types, conditions, defaults
-│   └── formatters.md               # formatSpeed, formatDistance, etc.
+│   ├── formatters.md               # formatSpeed, formatDistance, etc.
+│   └── interactive-widgets.md      # GpsPage click handling, event propagation
 ├── architecture/
 │   ├── component-system.md            # UMD loader, dependencies, config/components.js
 │   └── cluster-widget-system.md       # ClusterWidget, kind→renderer routing
@@ -44,14 +45,16 @@ documentation/
 │   ├── helpers.md                  # Helpers object (setupCanvas, resolveTextColor)
 │   └── css-theming.md              # CSS vars, day/night, font stack
 ├── widgets/
-│   ├── semicircle-gauges.md        # Speed/Depth/Temperature/Voltage shared 
+│   ├── semicircle-gauges.md        # Speed/Depth/Temperature/Voltage shared
 │   ├── three-elements.md           # ThreeValueTextWidget numeric renderer
+│   ├── position-coordinates.md     # PositionCoordinateWidget stacked nav display
 │   ├── wind-dial.md                # WindDialWidget full-circle wind compass
 │   └── compass-gauge.md            # CompassGaugeWidget rotating compass card
 └── guides/
     ├── add-new-gauge.md            # Step-by-step: create a new gauge
     ├── add-new-cluster.md          # Step-by-step: create a new cluster widget
-    └── testing-regression.md       # Test and coverage workflow
+    ├── testing-regression.md       # Test and coverage workflow
+    └── documentation-maintenance.md # Doc alignment and validation checks
 ```
 
 ### RULE: Always Start with TABLEOFCONTENTS.md
