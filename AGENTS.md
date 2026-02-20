@@ -137,6 +137,5 @@ Task: Add new BarometerGauge
 
 ## 5. Known Issues
 
-See [TECH-DEBT.md](TECH-DEBT.md) for current technical debt and documentation drift notes.
-Keep AGENTS/CLAUDE compact by updating debt items in `TECH-DEBT.md`, not in this routing map.
+Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 <!-- END SHARED_INSTRUCTIONS -->
