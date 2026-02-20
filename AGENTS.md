@@ -112,7 +112,7 @@ Task: Add new BarometerGauge
 - [ ] Implementation complete.
 - [ ] Updated relevant documentation.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.
-- [ ] Ran `npm run check:all` — no blocking failures, and warn-mode findings reviewed.
+- [ ] Ran `npm run check:all` — no failures; strict `check-patterns` passed, and warn-mode findings reviewed.
 - [ ] For behavior changes: ran `npm test`.
 
 ---

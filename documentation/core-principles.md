@@ -1,6 +1,10 @@
 # Core Principles
 **Status:** ✅ Implemented | Non-negotiable architectural boundaries for all changes
 
+## Overview
+
+These rules are mandatory for all contributors and AI agents working in this repository.
+
 Agents and contributors must follow these rules on every task.
 
 1. Rule: Runtime code must be plain JavaScript loaded via `<script>` tags; no bundler and no runtime build step.
@@ -29,3 +33,10 @@ Rationale: Empty catches hide real bugs and train agents into unsafe patterns.
 Rationale: Reliability depends on truthful tests, not altered expectations.
 13. Rule: Rules that matter must be mechanically enforced (lint/check), not only written in prose.
 Rationale: Automated checks persist across sessions when memory and context do not.
+
+## Related
+
+- [TABLEOFCONTENTS.md](TABLEOFCONTENTS.md)
+- [../ARCHITECTURE.md](../ARCHITECTURE.md)
+- [conventions/coding-standards.md](conventions/coding-standards.md)
+- [guides/documentation-maintenance.md](guides/documentation-maintenance.md)
