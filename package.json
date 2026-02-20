@@ -8,6 +8,7 @@
     "ai:sync:claude": "node tools/sync-ai-instructions.mjs --from=claude",
     "ai:check": "node tools/check-ai-instructions.mjs",
     "docs:check": "node tools/check-docs.mjs && npm run ai:check",
+    "check:filesize": "node tools/check-file-size.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
