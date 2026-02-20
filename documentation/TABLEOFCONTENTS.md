@@ -22,6 +22,13 @@
 - **How does translateFunction mapper to graphic/numeric?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md#runtime-flow)
 - **What is the Helpers object?** → [shared/helpers.md](shared/helpers.md)
 
+## Conventions
+
+- **What coding patterns/naming conventions should I follow?** → [conventions/coding-standards.md](conventions/coding-standards.md)
+- **How should I format documentation files?** → [conventions/documentation-format.md](conventions/documentation-format.md)
+- **Which files are the best examples to copy from?** → [conventions/coding-standards.md#reference-implementations](conventions/coding-standards.md#reference-implementations)
+- **What shared utilities exist?** → [conventions/coding-standards.md#shared-utilities](conventions/coding-standards.md#shared-utilities)
+
 ## Creating New Widgets (Guides)
 
 - **How do I create a new semicircle gauge?** → [guides/add-new-gauge.md](guides/add-new-gauge.md)
