@@ -15,18 +15,54 @@ Use this workflow whenever code changes touch architecture, module wiring, or wi
 5. Run validation:
 
 ```bash
-node tools/check-docs.mjs
-node tools/check-doc-reachability.mjs
+npm run check:all
 ```
 
-6. If behavior/runtime logic changed, run regression checks:
+6. If behavior/runtime logic changed, run:
 
 ```bash
 npm test
+```
+
+7. If core logic or test tooling changed, run deeper coverage checks:
+
+```bash
 npm run test:coverage:check
 ```
 
-7. Fix all failures before finishing
+8. Fix all failures and review all warnings before finishing
+
+## Quality and Regression Commands
+
+Run from repository root:
+
+```bash
+npm run check:all
+```
+
+`check:all` runs the full validation chain:
+
+- `node tools/check-docs.mjs`
+- `node tools/check-doc-reachability.mjs`
+- `npm run ai:check`
+- `node tools/check-file-size.mjs`
+- `node tools/check-headers.mjs`
+- `node tools/check-naming.mjs`
+- `node tools/check-patterns.mjs --warn`
+
+Behavior/runtime changes still require:
+
+```bash
+npm test
+```
+
+Use coverage checks when changing core logic or test rules:
+
+```bash
+npm run test:coverage:check
+```
+
+`check-patterns` is intentionally in warn mode inside `check:all` during the current refactor phase. Remove `--warn` from `check:all` after Phase 4 refactoring is complete.
 
 ## Touchpoint Matrix
 
@@ -38,18 +74,20 @@ npm run test:coverage:check
 | Changes in registration/lifecycle flow (`runtime/init.js`, `runtime/widget-registrar.js`) | `documentation/avnav-api/plugin-lifecycle.md`, `documentation/architecture/component-system.md` |
 | Changes in helper API (`runtime/helpers.js`) | `documentation/shared/helpers.md` |
 | CSS/theming changes (`plugin.css`) | `documentation/shared/css-theming.md` |
-| Test setup or quality rule changes (`package.json`, `vitest.config.js`, `tools/check-coverage.mjs`, `tools/check-naming.mjs`, `tools/check-patterns.mjs`) | `documentation/guides/testing-regression.md`, `documentation/README.md`, `README.md`, `CLAUDE.md` |
+| Test setup or quality rule changes (`package.json`, `vitest.config.js`, `tools/check-coverage.mjs`, `tools/check-naming.mjs`, `tools/check-patterns.mjs`) | `documentation/guides/documentation-maintenance.md`, `documentation/README.md`, `README.md`, `AGENTS.md`, `CLAUDE.md` |
 | New documentation file | `documentation/TABLEOFCONTENTS.md`, `documentation/README.md` |
 
 ## Validation
 
-`tools/check-docs.mjs` verifies:
+`npm run check:all` is the default quality gate.
+
+`tools/check-docs.mjs` (inside `check:all`) verifies:
 
 - relative markdown links and anchors
 - JS `Documentation:` header targets
 - stale high-risk architecture phrases
 
-`tools/check-doc-reachability.mjs` verifies:
+`tools/check-doc-reachability.mjs` (inside `check:all`) verifies:
 
 - all in-scope markdown docs are reachable from `AGENTS.md` or `CLAUDE.md`
 - markdown link targets to `.md` files exist on disk
@@ -59,6 +97,5 @@ Non-zero exit means docs are not consistent.
 ## Related
 
 - [../TABLEOFCONTENTS.md](../TABLEOFCONTENTS.md)
-- [testing-regression.md](testing-regression.md)
 - [../architecture/component-system.md](../architecture/component-system.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)

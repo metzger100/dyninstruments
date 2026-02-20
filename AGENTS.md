@@ -52,7 +52,7 @@ documentation/
 └── guides/
     ├── add-new-gauge.md            # Step-by-step: create a new gauge
     ├── add-new-cluster.md          # Step-by-step: create a new cluster widget
-    └── testing-regression.md       # Test and coverage workflow
+    └── documentation-maintenance.md # Docs sync + validation workflow
 ```
 
 ### RULE: Always Start with TABLEOFCONTENTS.md
@@ -74,8 +74,8 @@ Task: Add new BarometerGauge
 3. Read only those docs; do not read all docs sequentially.
 4. Token budget target: 20-30% context gathering, 70-80% implementation.
 5. Keep docs synchronized with code changes in the same task.
-6. For doc or architecture changes, run `node tools/check-docs.mjs`.
-7. For behavior/runtime changes, run `npm test` and `npm run test:coverage:check`.
+6. For doc or architecture changes, run `npm run check:all`.
+7. For behavior/runtime changes, run `npm test`.
 
 Routing flow:
 - `TABLEOFCONTENTS.md` is the lookup index for feature/API questions.
@@ -124,24 +124,14 @@ Task: Add new BarometerGauge
 
 ## 4. Quality Checklist
 
-- [ ] Started with TABLEOFCONTENTS and read only required docs.
-- [ ] Followed `documentation/conventions/coding-standards.md`.
-- [ ] Kept new/modified JS files at or below 300 lines, or isolated new logic from legacy oversized files.
-- [ ] Added/updated JS header blocks with `Documentation:` path.
-- [ ] Reused shared utilities (`shared/widget-kits/`) instead of duplicating widget-local helpers.
-- [ ] Updated docs immediately after behavior or architecture changes.
-- [ ] Updated `documentation/TABLEOFCONTENTS.md` for new or moved docs.
-- [ ] Updated `documentation/README.md` when top-level documentation mapping changed.
-- [ ] Ran `node tools/check-docs.mjs` and resolved failures.
-- [ ] Ran `npm run check:headers` and resolved failures.
-- [ ] Ran `npm run check:filesize` and resolved file size violations.
-- [ ] Ran `npm run check:naming` and resolved naming registration violations.
-- [ ] Ran `npm run check:patterns -- --warn` and reviewed pattern drift findings.
-- [ ] Ran `npm test` for behavior/runtime changes.
-- [ ] Ran `npm run test:coverage:check` for core logic changes.
-- [ ] Verified AGENTS and CLAUDE shared sections are synced (`npm run ai:check`).
-- [ ] Kept gauge formulas/layout guidance only in `documentation/gauges/gauge-style-guide.md`.
-- [ ] Preserved existing information by moving details to mapped docs instead of deleting content.
+- [ ] Read TABLEOFCONTENTS.md to find relevant docs.
+- [ ] Read only necessary documentation.
+- [ ] For non-trivial tasks: create .plan.md or use planning mode first.
+- [ ] Implementation complete.
+- [ ] Updated relevant documentation.
+- [ ] Updated TABLEOFCONTENTS.md if new docs added.
+- [ ] Ran `npm run check:all` — all checks pass, all warnings reviewed.
+- [ ] For behavior changes: ran `npm test`.
 
 ---
 

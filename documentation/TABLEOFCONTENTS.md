@@ -7,6 +7,7 @@
 ## Repository Overview
 
 - **Where is the repository-level project overview?** → [../README.md](../README.md)
+- **Where is the documentation set overview?** → [README.md](README.md)
 
 ## AvNav Plugin API (External)
 
@@ -30,7 +31,7 @@
 ## Conventions
 
 - **What coding patterns/naming conventions should I follow?** → [conventions/coding-standards.md](conventions/coding-standards.md)
-- **How do I run naming registration checks?** → [guides/testing-regression.md](guides/testing-regression.md)
+- **How do I run naming registration checks?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#quality-and-regression-commands)
 - **How should I format documentation files?** → [conventions/documentation-format.md](conventions/documentation-format.md)
 - **Which files are the best examples to copy from?** → [conventions/coding-standards.md#reference-implementations](conventions/coding-standards.md#reference-implementations)
 - **What shared utilities exist?** → [conventions/coding-standards.md#shared-utilities](conventions/coding-standards.md#shared-utilities)
@@ -41,7 +42,7 @@
 - **How do I create a new semicircle gauge?** → [guides/add-new-gauge.md](guides/add-new-gauge.md)
 - **How do I add a new cluster widget?** → [guides/add-new-cluster.md](guides/add-new-cluster.md)
 - **How do I add a new kind to an existing cluster?** → [guides/add-new-cluster.md](guides/add-new-cluster.md#adding-a-new-kind)
-- **How do I run regression tests and coverage checks?** → [guides/testing-regression.md](guides/testing-regression.md)
+- **How do I run regression tests and coverage checks?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#quality-and-regression-commands)
 
 ## Gauge Widgets (Semicircle)
 
