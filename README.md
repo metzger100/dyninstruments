@@ -335,34 +335,29 @@ The plugin runtime remains raw browser JavaScript. Test tooling is dev-only (`pa
 npm install
 ```
 
-2. Run tests once:
+2. Run the unified quality gate:
+```bash
+npm run check:all
+```
+
+3. If behavior/runtime logic changed, run tests once:
 ```bash
 npm test
 ```
 
-3. Run tests in watch mode:
+4. Run tests in watch mode while developing:
 ```bash
 npm run test:watch
 ```
 
-4. Run coverage:
+5. Run coverage:
 ```bash
 npm run test:coverage
 ```
 
-5. Run coverage + stricter core-module checks:
+6. Run coverage + stricter core-module checks (for core logic or tooling changes):
 ```bash
 npm run test:coverage:check
-```
-
-6. Run naming registration checks:
-```bash
-npm run check:naming
-```
-
-7. Run drift-pattern checks:
-```bash
-npm run check:patterns -- --warn
 ```
 
 Current quality gates:
@@ -383,6 +378,7 @@ Current quality gates:
   - empty `catch {}` blocks
   - `console.log/warn/error` usage in non-runtime code
   - ownerless maintenance markers without owner/date annotation
+- `npm run check:all` currently runs `check-patterns` in `--warn` mode; remove `--warn` after Phase 4 refactoring.
 
 Scope of the initial suite:
 

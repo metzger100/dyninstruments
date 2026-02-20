@@ -81,38 +81,46 @@ widgets/
 
 **Widgets:** [three-elements.md](widgets/three-elements.md), [position-coordinates.md](widgets/position-coordinates.md), [wind-dial.md](widgets/wind-dial.md), [compass-gauge.md](widgets/compass-gauge.md), [semicircle-gauges.md](widgets/semicircle-gauges.md)
 
-**Guides:** [add-new-gauge.md](guides/add-new-gauge.md), [add-new-cluster.md](guides/add-new-cluster.md), [testing-regression.md](guides/testing-regression.md), [documentation-maintenance.md](guides/documentation-maintenance.md)
+**Guides:** [add-new-gauge.md](guides/add-new-gauge.md), [add-new-cluster.md](guides/add-new-cluster.md), [documentation-maintenance.md](guides/documentation-maintenance.md)
 
 ## Documentation Validation
 
-Run the checker after documentation or architecture changes:
+Run the unified quality gate after documentation or architecture changes:
 
 ```bash
-node tools/check-docs.mjs
+npm run check:all
 ```
 
-The checker validates markdown links/anchors, JS `Documentation:` header targets, and stale high-risk phrases.
+The quality gate includes doc validation (`check-docs`, reachability), AI file sync validation, and codebase structural checks.
 
-## Regression Testing
+## Quality and Regression Checks
 
 Run from repo root:
 
 ```bash
-npm test
-npm run test:coverage
-npm run test:coverage:check
-npm run check:naming
-npm run check:patterns -- --warn
+npm run check:all
 ```
 
-Coverage checks enforce:
+For behavior/runtime changes, also run:
+
+```bash
+npm test
+```
+
+For core logic or test-tooling changes, also run:
+
+```bash
+npm run test:coverage:check
+```
+
+Coverage and quality checks enforce:
 
 - global thresholds from `vitest.config.js`
 - stricter core-module rules from `tools/check-coverage.mjs`
 - registration naming rules from `tools/check-naming.mjs` (`globalKey`/`id` consistency + cluster widget name pattern)
-- pattern drift rules from `tools/check-patterns.mjs` (duplicate helper detection, forbidden globals, empty catches, non-runtime console logging, owner/date annotation format for maintenance markers)
+- pattern drift rules from `tools/check-patterns.mjs` (duplicate helper detection, forbidden globals, empty catches, non-runtime console logging, owner/date annotation format for maintenance markers), currently run in `--warn` mode via `check:all` until Phase 4 refactoring is complete
 
-Details: [guides/testing-regression.md](guides/testing-regression.md)
+Details: [guides/documentation-maintenance.md](guides/documentation-maintenance.md#quality-and-regression-commands)
 
 ## Standards
 
