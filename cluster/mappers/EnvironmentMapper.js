@@ -54,6 +54,8 @@
 
           caption: cap("tempGraphic"),
           unit: unit("tempGraphic"),
+          formatter: "formatTemperature",
+          formatterParameters: ["celsius"],
 
           minValue: Number(p.tempMinValue),
           maxValue: Number(p.tempMaxValue),

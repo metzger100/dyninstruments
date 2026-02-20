@@ -28,6 +28,8 @@ describe("SpeedMapper", function () {
 
     expect(out.renderer).toBe("SpeedGaugeWidget");
     expect(out.value).toBe(6.4);
+    expect(out.formatter).toBe("formatSpeed");
+    expect(out.formatterParameters).toEqual(["kn"]);
     expect(out.warningFrom).toBe(20);
     expect(out.alarmFrom).toBe(25);
   });

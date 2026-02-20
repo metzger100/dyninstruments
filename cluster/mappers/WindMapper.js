@@ -23,6 +23,7 @@
 
       if (req === "angleTrueGraphic" || req === "angleApparentGraphic") {
         const isTrue = (req === "angleTrueGraphic");
+        const speedUnit = p.speedUnitGraphic;
         return {
           renderer: "WindDialWidget",
           angle: isTrue ? p.twa : p.awa,
@@ -30,7 +31,9 @@
           angleCaption: isTrue ? p.angleCaption_TWA : p.angleCaption_AWA,
           speedCaption: isTrue ? p.speedCaption_TWS : p.speedCaption_AWS,
           angleUnit: p.angleUnitGraphic,
-          speedUnit: p.speedUnitGraphic,
+          speedUnit: speedUnit,
+          formatter: "formatSpeed",
+          formatterParameters: [speedUnit],
           layEnabled: !!p.windLayEnabled,
           layMin: Number(p.layMin),
           layMax: Number(p.layMax),

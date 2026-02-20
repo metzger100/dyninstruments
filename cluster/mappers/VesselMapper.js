@@ -28,6 +28,8 @@
           value: (typeof p.value !== "undefined") ? p.value : p.voltage,
           caption: cap("voltageGraphic"),
           unit: unit("voltageGraphic"),
+          formatter: "formatDecimal",
+          formatterParameters: [3, 1, true],
 
           minValue: Number(p.voltageMinValue),
           maxValue: Number(p.voltageMaxValue),

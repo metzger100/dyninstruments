@@ -54,6 +54,8 @@ describe("EnvironmentMapper", function () {
     }, toolkit);
 
     expect(out.renderer).toBe("TemperatureGaugeWidget");
+    expect(out.formatter).toBe("formatTemperature");
+    expect(out.formatterParameters).toEqual(["celsius"]);
     expect(out.warningFrom).toBeUndefined();
     expect(out.alarmFrom).toBe(32);
   });

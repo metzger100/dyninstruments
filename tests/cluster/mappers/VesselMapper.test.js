@@ -30,6 +30,8 @@ describe("VesselMapper", function () {
 
     expect(out.renderer).toBe("VoltageGaugeWidget");
     expect(out.value).toBe(12.4);
+    expect(out.formatter).toBe("formatDecimal");
+    expect(out.formatterParameters).toEqual([3, 1, true]);
     expect(out.warningFrom).toBeUndefined();
     expect(out.alarmFrom).toBe(11.6);
   });

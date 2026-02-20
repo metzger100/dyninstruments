@@ -31,11 +31,15 @@
       if (req === "positionBoat") {
         const o = out(p.positionBoat, cap("positionBoat"), unit("positionBoat"), "formatLonLats", []);
         o.renderer = "PositionCoordinateWidget";
+        o.coordinateFormatter = "formatLonLatsDecimal";
+        o.coordinateFormatterParameters = [];
         return o;
       }
       if (req === "positionWp") {
         const o = out(p.positionWp, cap("positionWp"), unit("positionWp"), "formatLonLats", []);
         o.renderer = "PositionCoordinateWidget";
+        o.coordinateFormatter = "formatLonLatsDecimal";
+        o.coordinateFormatterParameters = [];
         return o;
       }
       return {};

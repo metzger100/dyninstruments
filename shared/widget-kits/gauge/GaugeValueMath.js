@@ -208,17 +208,6 @@
       return sectors;
     }
 
-    function formatSpeedString(raw, unit) {
-      const n = Number(raw);
-      if (!isFinite(n)) return "---";
-      if (window.avnav && avnav.api && avnav.api.formatter && typeof avnav.api.formatter.formatSpeed === "function") {
-        try {
-          return String(avnav.api.formatter.formatSpeed(n, unit || "kn"));
-        } catch (ignore) { /* intentional: formatter failure falls back to local numeric formatting */ }
-      }
-      return n.toFixed(1) + " " + (unit || "kn");
-    }
-
     function formatAngle180(value, leadingZero) {
       const n = Number(value);
       if (!isFinite(n)) return "---";
@@ -291,7 +280,6 @@
       sectorAngles,
       buildHighEndSectors,
       buildLowEndSectors,
-      formatSpeedString,
       formatAngle180,
       formatDirection360,
       formatMajorLabel,

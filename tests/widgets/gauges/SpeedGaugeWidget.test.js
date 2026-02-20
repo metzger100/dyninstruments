@@ -4,9 +4,13 @@ describe("SpeedGaugeWidget", function () {
   it("passes SemicircleGaugeEngine config with high-end sectors", function () {
     let captured;
     const renderCanvas = vi.fn();
+    const applyFormatter = vi.fn((value, spec) => {
+      return Number(value).toFixed(1) + " " + spec.formatterParameters[0];
+    });
 
     const mod = loadFresh("widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js");
     const spec = mod.create({}, {
+      applyFormatter,
       getModule(id) {
         if (id === "GaugeValueMath") {
           return {
@@ -48,6 +52,11 @@ describe("SpeedGaugeWidget", function () {
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.unitDefault).toBe("kn");
     expect(captured.rangeDefaults).toEqual({ min: 0, max: 30 });
+    expect(captured.formatDisplay(6.44, {
+      formatter: "formatSpeed",
+      formatterParameters: ["kn"]
+    }, "kn")).toEqual({ num: 6.4, text: "6.4" });
+    expect(applyFormatter).toHaveBeenCalled();
 
     const sectors = captured.buildSectors({ warningFrom: 20, alarmFrom: 25 }, 0, 30, {}, {
       sectorAngles(from, to) {

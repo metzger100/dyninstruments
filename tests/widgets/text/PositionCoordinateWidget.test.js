@@ -15,29 +15,31 @@ describe("PositionCoordinateWidget", function () {
   });
 
   function makeHelpers() {
-    return {
-      applyFormatter(raw, props) {
-        const fpRaw = props && props.formatterParameters;
-        const fp = Array.isArray(fpRaw) ? fpRaw : (typeof fpRaw === "string" ? fpRaw.split(",") : []);
-        try {
-          if (props && typeof props.formatter === "function") {
-            return props.formatter.apply(null, [raw].concat(fp));
-          }
-          if (
-            props &&
-            typeof props.formatter === "string" &&
-            globalThis.avnav &&
-            globalThis.avnav.api &&
-            globalThis.avnav.api.formatter &&
-            typeof globalThis.avnav.api.formatter[props.formatter] === "function"
-          ) {
-            return globalThis.avnav.api.formatter[props.formatter].apply(globalThis.avnav.api.formatter, [raw].concat(fp));
-          }
-        } catch (ignore) {}
+    const applyFormatter = vi.fn((raw, props) => {
+      const fpRaw = props && props.formatterParameters;
+      const fp = Array.isArray(fpRaw) ? fpRaw : (typeof fpRaw === "string" ? fpRaw.split(",") : []);
+      try {
+        if (props && typeof props.formatter === "function") {
+          return props.formatter.apply(null, [raw].concat(fp));
+        }
+        if (
+          props &&
+          typeof props.formatter === "string" &&
+          globalThis.avnav &&
+          globalThis.avnav.api &&
+          globalThis.avnav.api.formatter &&
+          typeof globalThis.avnav.api.formatter[props.formatter] === "function"
+        ) {
+          return globalThis.avnav.api.formatter[props.formatter].apply(globalThis.avnav.api.formatter, [raw].concat(fp));
+        }
+      } catch (ignore) {}
 
-        if (raw == null || Number.isNaN(raw)) return (props && props.default) || "---";
-        return String(raw);
-      },
+      if (raw == null || Number.isNaN(raw)) return (props && props.default) || "---";
+      return String(raw);
+    });
+
+    return {
+      applyFormatter,
       setupCanvas(canvas) {
         const ctx = canvas.getContext("2d");
         const rect = canvas.getBoundingClientRect();
@@ -158,9 +160,10 @@ describe("PositionCoordinateWidget", function () {
       return axis === "lat" ? "LAT:" + Number(value).toFixed(2) : "LON:" + Number(value).toFixed(2);
     });
     globalThis.avnav = { api: { formatter: { formatLonLatsDecimal: formatter } } };
+    const helpers = makeHelpers();
 
     const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
-      .create({}, makeHelpers());
+      .create({}, helpers);
 
     [
       { w: 220, h: 140 }, // normal
@@ -187,6 +190,14 @@ describe("PositionCoordinateWidget", function () {
     });
 
     expect(formatter).toHaveBeenCalled();
+    expect(helpers.applyFormatter).toHaveBeenCalledWith(54.1234, expect.objectContaining({
+      formatter: "formatLonLatsDecimal",
+      formatterParameters: ["lat"]
+    }));
+    expect(helpers.applyFormatter).toHaveBeenCalledWith(10.9876, expect.objectContaining({
+      formatter: "formatLonLatsDecimal",
+      formatterParameters: ["lon"]
+    }));
   });
 
   it("uses default text for invalid coordinates", function () {

@@ -14,25 +14,36 @@
     const renderer = Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("GaugeValueMath").create(def, Helpers);
 
-    function toCelsiusNumber(raw) {
+    function toCelsiusNumber(raw, props) {
       const n = Number(raw);
       if (!isFinite(n)) return NaN;
 
-      if (window.avnav && avnav.api && avnav.api.formatter && typeof avnav.api.formatter.formatTemperature === "function") {
-        try {
-          const formatted = String(avnav.api.formatter.formatTemperature(n, "celsius"));
-          const numberText = valueMath.extractNumberText(formatted);
-          const parsed = numberText ? Number(numberText) : NaN;
-          if (isFinite(parsed)) return parsed;
-        } catch (ignore) { /* intentional: formatter failure falls back to Kelvin/Celsius heuristic */ }
+      const p = props || {};
+      const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatTemperature";
+      const formatterParameters = (typeof p.formatterParameters !== "undefined")
+        ? p.formatterParameters
+        : ["celsius"];
+
+      const formatted = String(Helpers.applyFormatter(n, {
+        formatter: formatter,
+        formatterParameters: formatterParameters,
+        default: "---"
+      }));
+      const numberText = valueMath.extractNumberText(formatted);
+      const parsed = numberText ? Number(numberText) : NaN;
+
+      if (isFinite(parsed)) {
+        // Preserve previous Kelvin fallback when formatter path is unavailable.
+        if (n > 200 && formatted.trim() === String(n)) return n - 273.15;
+        return parsed;
       }
 
       if (n > 200) return n - 273.15;
       return n;
     }
 
-    function displayTempFromRaw(raw, decimals) {
-      const celsius = toCelsiusNumber(raw);
+    function displayTempFromRaw(raw, decimals, props) {
+      const celsius = toCelsiusNumber(raw, props);
       if (!isFinite(celsius)) return { num: NaN, text: "---" };
       const d = (typeof decimals === "number" && isFinite(decimals))
         ? Math.max(0, Math.min(6, Math.floor(decimals)))
@@ -60,8 +71,8 @@
       },
       ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: tempTickSteps,
-      formatDisplay: function (raw) {
-        return displayTempFromRaw(raw, 1);
+      formatDisplay: function (raw, props) {
+        return displayTempFromRaw(raw, 1, props);
       },
       buildSectors: function (props, minV, maxV, arc) {
         return valueMath.buildHighEndSectors(props, minV, maxV, arc);

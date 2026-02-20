@@ -28,6 +28,8 @@ WindDialWidget: {
 | `speedCaption` | string | `""` | Speed caption (`AWS`/`TWS`) |
 | `angleUnit` | string | `"°"` | Angle unit |
 | `speedUnit` | string | `"kn"` | Speed unit |
+| `formatter` | string/function | `"formatSpeed"` | Speed formatter passed to `Helpers.applyFormatter` |
+| `formatterParameters` | array/string | `[speedUnit]` | Speed formatter parameters |
 | `leadingZero` | boolean | `false` | Angle pad to 3 digits |
 | `layEnabled` | boolean | `true` | Enable layline sectors |
 | `layMin` | number | `0` | Layline inner bound (0..180) |
@@ -68,7 +70,7 @@ otherwise -> normal
 | Function | Input | Output |
 |---|---|---|
 | `GaugeValueMath.formatAngle180(v, leadingZero)` | angle deg | `-180..180` string |
-| `GaugeValueMath.formatSpeedString(v, unit)` | speed value | formatted speed string |
+| `Helpers.applyFormatter(v, { formatter, formatterParameters })` | speed value | formatted speed string |
 
 ## Exports
 
