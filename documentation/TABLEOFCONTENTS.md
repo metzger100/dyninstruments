@@ -4,6 +4,10 @@
 
 **Purpose:** Quick navigation for AI to locate relevant documentation without reading all files.
 
+## Repository Overview
+
+- **Where is the repository-level project overview?** → [../README.md](../README.md)
+
 ## AvNav Plugin API (External)
 
 - **How does widget registration work?** → [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md)

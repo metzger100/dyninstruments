@@ -11,20 +11,22 @@ Use this workflow whenever code changes touch architecture, module wiring, or wi
 1. Identify touched code areas (`config/`, `runtime/`, `widgets/`, `plugin.js`)
 2. Update the mapped docs in `documentation/`
 3. Update root docs (`README.md`, `CLAUDE.md`) when architecture guidance changes
-4. Run validation:
+4. Every new documentation file must be linked from at least one other doc that is itself reachable from AGENTS.md. The easiest way: add an entry to TABLEOFCONTENTS.md.
+5. Run validation:
 
 ```bash
 node tools/check-docs.mjs
+node tools/check-doc-reachability.mjs
 ```
 
-5. If behavior/runtime logic changed, run regression checks:
+6. If behavior/runtime logic changed, run regression checks:
 
 ```bash
 npm test
 npm run test:coverage:check
 ```
 
-6. Fix all failures before finishing
+7. Fix all failures before finishing
 
 ## Touchpoint Matrix
 
@@ -46,6 +48,11 @@ npm run test:coverage:check
 - relative markdown links and anchors
 - JS `Documentation:` header targets
 - stale high-risk architecture phrases
+
+`tools/check-doc-reachability.mjs` verifies:
+
+- all in-scope markdown docs are reachable from `AGENTS.md` or `CLAUDE.md`
+- markdown link targets to `.md` files exist on disk
 
 Non-zero exit means docs are not consistent.
 
