@@ -2,6 +2,10 @@
 
 **Status:** ✅ Reference | Official AvNav API + dyninstruments internals (marked)
 
+## Overview
+
+Reference for AvNav widget lifecycle APIs and the dyninstruments runtime flow used to register widgets and render values.
+
 ## Global Variables
 
 | Variable | Scope | Description |

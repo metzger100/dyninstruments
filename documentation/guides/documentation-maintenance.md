@@ -51,7 +51,7 @@ npm run check:all
 - `node tools/check-dependencies.mjs`
 - `node tools/check-umd.mjs`
 - `node tools/check-naming.mjs`
-- `node tools/check-patterns.mjs --warn`
+- `node tools/check-patterns.mjs`
 
 Behavior/runtime changes still require:
 
@@ -65,7 +65,7 @@ Use coverage checks when changing core logic or test rules:
 npm run test:coverage:check
 ```
 
-`check-patterns` is intentionally in warn mode inside `check:all` during the current refactor phase. Remove `--warn` from `check:all` after Phase 4 refactoring is complete.
+`check-patterns` is enforced in strict mode inside `check:all`; any finding is a blocking failure.
 
 ## Touchpoint Matrix
 

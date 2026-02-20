@@ -384,7 +384,7 @@ Current quality gates:
   - empty `catch {}` blocks
   - `console.log/warn/error` usage in non-runtime code
   - ownerless maintenance markers without owner/date annotation
-- `npm run check:all` currently runs `check-patterns` in `--warn` mode; remove `--warn` after Phase 4 refactoring.
+- `npm run check:all` runs `check-patterns` in strict mode; any finding fails the command.
 
 Scope of the initial suite:
 
