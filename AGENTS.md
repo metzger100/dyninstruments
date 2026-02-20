@@ -30,6 +30,7 @@ This file is Codex-facing guidance for this repository.
 documentation/
 ├── TABLEOFCONTENTS.md              # Navigation index (read THIS FIRST)
 ├── README.md                       # Project overview
+├── core-principles.md              # Non-negotiable project rules
 ├── avnav-api/
 │   ├── plugin-lifecycle.md         # registerWidget, render cycle, props
 │   ├── editable-parameters.md      # Types, conditions, defaults
@@ -110,6 +111,7 @@ Task: Add new BarometerGauge
 ## 3. File Map
 
 - Feature and API lookups: [documentation/TABLEOFCONTENTS.md](documentation/TABLEOFCONTENTS.md)
+- Non-negotiable project rules: [documentation/core-principles.md](documentation/core-principles.md)
 - Root structural orientation map for AI sessions: [ARCHITECTURE.md](ARCHITECTURE.md)
 - Coding patterns, naming, headers, and canonical examples: [documentation/conventions/coding-standards.md](documentation/conventions/coding-standards.md)
 - Documentation writing format and token budget: [documentation/conventions/documentation-format.md](documentation/conventions/documentation-format.md)
