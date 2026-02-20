@@ -102,6 +102,7 @@ npm test
 npm run test:coverage
 npm run test:coverage:check
 npm run check:naming
+npm run check:patterns -- --warn
 ```
 
 Coverage checks enforce:
@@ -109,6 +110,7 @@ Coverage checks enforce:
 - global thresholds from `vitest.config.js`
 - stricter core-module rules from `tools/check-coverage.mjs`
 - registration naming rules from `tools/check-naming.mjs` (`globalKey`/`id` consistency + cluster widget name pattern)
+- pattern drift rules from `tools/check-patterns.mjs` (duplicate helper detection, forbidden globals, empty catches, non-runtime console logging, owner/date annotation format for maintenance markers)
 
 Details: [guides/testing-regression.md](guides/testing-regression.md)
 

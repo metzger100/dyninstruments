@@ -360,6 +360,11 @@ npm run test:coverage:check
 npm run check:naming
 ```
 
+7. Run drift-pattern checks:
+```bash
+npm run check:patterns -- --warn
+```
+
 Current quality gates:
 
 - Global coverage: `lines >= 80`, `functions >= 80`, `statements >= 80`, `branches >= 65`
@@ -372,6 +377,12 @@ Current quality gates:
   - `config/components.js` component ID ↔ `globalKey` rules
   - `config/clusters/*.js` widget `name` pattern (`dyninstruments_*`)
   - component UMD `window.DyniComponents.*` target and exported `id` consistency
+- Pattern drift checks via `tools/check-patterns.mjs` for:
+  - duplicated helper/function declarations across `widgets/`, `cluster/`, and `shared/`
+  - forbidden direct `window.avnav`/`avnav.api` access outside runtime boundaries
+  - empty `catch {}` blocks
+  - `console.log/warn/error` usage in non-runtime code
+  - ownerless maintenance markers without owner/date annotation
 
 Scope of the initial suite:
 
