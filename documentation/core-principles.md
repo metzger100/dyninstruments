@@ -9,7 +9,7 @@ Rationale: Agents must produce files that run in AvNav without compilation.
 Rationale: A single module boundary keeps agent output predictable and load-safe.
 3. Rule: Visual rendering is Canvas 2D only via `renderCanvas(canvas, props)`.
 Rationale: One rendering API prevents inconsistent UI implementations across sessions.
-4. Rule: Dependency direction is one-way: `widgets/cluster -> shared -> nothing`; `config` is pure data; `runtime` is framework-only.
+4. Rule: Dependency direction is one-way by layer: `widgets -> shared`; `cluster -> cluster/widgets/shared`; `shared -> shared`; `config` is pure data; `runtime` must not depend on `widgets/cluster/shared`.
 Rationale: One-way layering prevents circular dependencies that confuse agents.
 5. Rule: Keep JavaScript files at or below 300 lines; split before crossing the limit.
 Rationale: Focused files improve agent accuracy and reduce regression risk.

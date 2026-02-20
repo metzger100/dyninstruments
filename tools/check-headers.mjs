@@ -38,9 +38,14 @@ for (const file of jsFiles) {
 
   const moduleMatch = header.match(/^\s*\*\s*Module:\s*(.+?)\s*$/m);
   const documentationMatch = header.match(/^\s*\*\s*Documentation:\s*(.+?)\s*$/m);
+  const dependsMatch = header.match(/^\s*\*\s*Depends:\s*(.+?)\s*$/m);
 
-  if (!moduleMatch || !documentationMatch) {
-    failMissingHeader(file.rel);
+  if (!moduleMatch || !documentationMatch || !dependsMatch) {
+    const missing = [];
+    if (!moduleMatch) missing.push("Module");
+    if (!documentationMatch) missing.push("Documentation");
+    if (!dependsMatch) missing.push("Depends");
+    failIncompleteHeader(file.rel, missing);
     continue;
   }
 
@@ -57,6 +62,14 @@ for (const failure of failures) {
   if (failure.type === "missing-header") {
     console.error(
       `[missing-header] ${failure.file}: No module header found. Add at top of file:\n${HEADER_TEMPLATE}`
+    );
+    continue;
+  }
+
+  if (failure.type === "incomplete-header") {
+    console.error(
+      `[missing-header] ${failure.file}: Header is missing required fields: ${failure.missing.join(", ")}.\n` +
+      `Expected fields: Module, Documentation, Depends.`
     );
     continue;
   }
@@ -87,6 +100,11 @@ console.log("SUMMARY_JSON=" + JSON.stringify(summary));
 function failMissingHeader(file) {
   missingHeaders += 1;
   failures.push({ type: "missing-header", file });
+}
+
+function failIncompleteHeader(file, missing) {
+  missingHeaders += 1;
+  failures.push({ type: "incomplete-header", file, missing });
 }
 
 function failBrokenDocLink(file, docPath) {
