@@ -67,7 +67,7 @@ Accessed via `avnav.api.formatter.{name}(value, ...params)`:
 
 ### Formatter Resolution in Helpers.applyFormatter (dyninstruments-internal)
 
-Used by ThreeValueTextWidget for numeric kinds:
+Used by text and graphic widgets:
 
 1. `props.formatter` is a **function** → `formatter(raw, ...formatterParameters)`
 2. `props.formatter` is a **string** → `avnav.api.formatter[name](raw, ...formatterParameters)`
@@ -88,12 +88,13 @@ function makeAngleFormatter(isDirection, leadingZero, fallback) {
 
 ### Gauge-Internal Formatting (dyninstruments-internal)
 
-Graphic gauges bypass the AvNav formatter pipeline. They call `avnav.api.formatter` directly and return both display string and numeric value (needed for pointer positioning):
+Graphic gauges use mapper-provided formatter metadata and resolve formatter calls via `Helpers.applyFormatter(...)`. This keeps formatter guards/try-catch/fallback logic centralized in runtime helpers while still returning numeric + display outputs needed for pointer positioning:
 
-- `displaySpeedFromRaw(raw, unit)` → `{ num, text }` via `formatSpeed`
+- `displaySpeedFromRaw(raw, props, unit)` → `{ num, text }` via `formatSpeed`
 - `displayDepthFromRaw(raw, decimals)` → `{ num, text }` via local fixed-decimal formatting (`toFixed`)
-- `displayTemperatureFromRaw(raw)` → `{ num, text }` via `formatTemperature`
-- `displayVoltageFromRaw(raw)` → `{ num, text }` via `formatDecimal`
+- `displayTemperatureFromRaw(raw, props)` → `{ num, text }` via `formatTemperature`
+- `displayVoltageFromRaw(raw, props)` → `{ num, text }` via `formatDecimal`
+- `PositionCoordinateWidget` stacked mode formats per-line lat/lon via `Helpers.applyFormatter(raw, { formatter: "formatLonLatsDecimal", formatterParameters: [axis] })`
 
 ## Related
 

@@ -14,19 +14,28 @@
     const renderer = Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("GaugeValueMath").create(def, Helpers);
 
-    function formatVoltageString(raw) {
+    function formatVoltageString(raw, props) {
       const n = Number(raw);
       if (!isFinite(n)) return "---";
-      if (window.avnav && avnav.api && avnav.api.formatter && typeof avnav.api.formatter.formatDecimal === "function") {
-        try {
-          return String(avnav.api.formatter.formatDecimal(n, 3, 1, true));
-        } catch (ignore) { /* intentional: formatter failure falls back to fixed-decimal voltage text */ }
-      }
-      return n.toFixed(1);
+
+      const p = props || {};
+      const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatDecimal";
+      const formatterParameters = (typeof p.formatterParameters !== "undefined")
+        ? p.formatterParameters
+        : [3, 1, true];
+      const formatted = String(Helpers.applyFormatter(n, {
+        formatter: formatter,
+        formatterParameters: formatterParameters,
+        default: "---"
+      }));
+
+      // Preserve previous fixed-decimal fallback for missing formatter path.
+      if (formatted.trim() === String(n)) return n.toFixed(1);
+      return formatted;
     }
 
-    function displayVoltageFromRaw(raw) {
-      const formatted = formatVoltageString(raw);
+    function displayVoltageFromRaw(raw, props) {
+      const formatted = formatVoltageString(raw, props);
       const numberText = valueMath.extractNumberText(formatted);
       const num = numberText ? Number(numberText) : NaN;
       if (isFinite(num)) return { num: num, text: numberText };
@@ -56,8 +65,8 @@
       },
       ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: voltageTickSteps,
-      formatDisplay: function (raw) {
-        return displayVoltageFromRaw(raw);
+      formatDisplay: function (raw, props) {
+        return displayVoltageFromRaw(raw, props);
       },
       buildSectors: function (props, minV, maxV, arc) {
         return valueMath.buildLowEndSectors(props, minV, maxV, arc, {

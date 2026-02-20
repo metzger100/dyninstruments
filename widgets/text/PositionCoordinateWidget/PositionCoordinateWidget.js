@@ -28,27 +28,32 @@
     return { lat: lat, lon: lon };
   }
 
-  function getLonLatsDecimalFormatter() {
-    const rootObj = (typeof globalThis !== "undefined")
-      ? globalThis
-      : ((typeof window !== "undefined") ? window : null);
-    const fmt = rootObj && rootObj.avnav && rootObj.avnav.api && rootObj.avnav.api.formatter;
-    if (!fmt || typeof fmt.formatLonLatsDecimal !== "function") return null;
-    return { fn: fmt.formatLonLatsDecimal, ctx: fmt };
-  }
-
-  function formatCoordinate(value, axis, fallbackText, formatterSpec) {
+  function formatCoordinate(value, axis, fallbackText, props, Helpers) {
     const n = Number(value);
     if (!isFinite(n)) return fallbackText;
 
-    if (formatterSpec && typeof formatterSpec.fn === "function") {
-      try {
-        const out = formatterSpec.fn.call(formatterSpec.ctx, n, axis);
-        if (out != null && String(out).trim()) return String(out);
-      } catch (e) { /* intentional: formatter failure falls back to provided default coordinate text */ }
-    }
+    const p = props || {};
+    const formatter = (typeof p.coordinateFormatter !== "undefined")
+      ? p.coordinateFormatter
+      : "formatLonLatsDecimal";
+    const baseParams = Array.isArray(p.coordinateFormatterParameters)
+      ? p.coordinateFormatterParameters.slice()
+      : ((typeof p.coordinateFormatterParameters === "string")
+        ? p.coordinateFormatterParameters.split(",")
+        : []);
+    baseParams.push(axis);
 
-    return fallbackText;
+    const out = String(Helpers.applyFormatter(n, {
+      formatter: formatter,
+      formatterParameters: baseParams,
+      default: fallbackText
+    }));
+    if (!out.trim()) return fallbackText;
+
+    // Preserve prior fallback behavior when formatter is unavailable.
+    if (out.trim() === String(n)) return fallbackText;
+
+    return out;
   }
 
   function create(def, Helpers) {
@@ -148,12 +153,11 @@
       }
 
       const parsed = parseLonLat(p.value);
-      const formatterSpec = getLonLatsDecimalFormatter();
       const latText = parsed
-        ? formatCoordinate(parsed.lat, "lat", fallbackText, formatterSpec)
+        ? formatCoordinate(parsed.lat, "lat", fallbackText, p, Helpers)
         : fallbackText;
       const lonText = parsed
-        ? formatCoordinate(parsed.lon, "lon", fallbackText, formatterSpec)
+        ? formatCoordinate(parsed.lon, "lon", fallbackText, p, Helpers)
         : fallbackText;
 
       const padX = Math.max(6, Math.floor(Math.min(W, H) * 0.04));

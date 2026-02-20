@@ -21,14 +21,11 @@ Rationale: Headers let agents trace dependencies without reading the full regist
 Rationale: Centralized utilities preserve consistent patterns agents can safely copy.
 9. Rule: Widgets and cluster code must not access `window.avnav` directly; use runtime/helpers (`Helpers.applyFormatter()`).
 Rationale: A single host API boundary avoids duplicated guard patterns and formatter drift.
-Known violation (scan 2026-02-20): 5 widget files directly access `window.avnav`/`avnav.api`.
 10. Rule: Validate/default props at translate boundaries; interior code should trust validated inputs.
 Rationale: Boundary validation prevents YOLO probing and guessed data shapes.
 11. Rule: Do not swallow errors silently; handle, rethrow, or comment intentional silence.
 Rationale: Empty catches hide real bugs and train agents into unsafe patterns.
-12. Rule: Plan before implementing non-trivial tasks (`.plan.md` or planning mode) before editing code.
-Rationale: Upfront design improves output quality under limited context windows.
-13. Rule: Never fake green tests; fix root causes instead of weakening assertions/macros.
+12. Rule: Never fake green tests; fix root causes instead of weakening assertions/macros.
 Rationale: Reliability depends on truthful tests, not altered expectations.
-14. Rule: Rules that matter must be mechanically enforced (lint/check), not only written in prose.
+13. Rule: Rules that matter must be mechanically enforced (lint/check), not only written in prose.
 Rationale: Automated checks persist across sessions when memory and context do not.

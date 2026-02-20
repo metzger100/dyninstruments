@@ -34,6 +34,8 @@ describe("WindMapper", function () {
     expect(out.renderer).toBe("WindDialWidget");
     expect(out.angle).toBe(-32);
     expect(out.speed).toBe(6.1);
+    expect(out.formatter).toBe("formatSpeed");
+    expect(out.formatterParameters).toEqual(["kn"]);
     expect(out.layEnabled).toBe(true);
     expect(out.layMin).toBe(20);
     expect(out.layMax).toBe(42);

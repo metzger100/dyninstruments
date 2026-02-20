@@ -4,9 +4,11 @@ describe("VoltageGaugeWidget", function () {
   it("builds low-end sectors with default warning/alarm values", function () {
     let captured;
     const renderCanvas = vi.fn();
+    const applyFormatter = vi.fn((value) => Number(value).toFixed(1));
 
     const mod = loadFresh("widgets/gauges/VoltageGaugeWidget/VoltageGaugeWidget.js");
     const spec = mod.create({}, {
+      applyFormatter,
       getModule(id) {
         if (id === "GaugeValueMath") {
           return {
@@ -55,6 +57,13 @@ describe("VoltageGaugeWidget", function () {
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.rangeDefaults).toEqual({ min: 10, max: 15 });
+    expect(captured.formatDisplay(12.34, {
+      formatter: "formatDecimal",
+      formatterParameters: [3, 1, true]
+    })).toEqual({ num: 12.3, text: "12.3" });
+    expect(applyFormatter).toHaveBeenCalledWith(12.34, expect.objectContaining({
+      formatter: "formatDecimal"
+    }));
 
     const sectors = captured.buildSectors({}, 10, 15, {}, {
       clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, Number(v))); },

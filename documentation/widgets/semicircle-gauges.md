@@ -56,7 +56,7 @@ Each wrapper defines:
 ### SpeedGaugeWidget
 
 - High-end sectors
-- Formatter path: `formatSpeed`
+- Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatSpeed", formatterParameters: [unit] })`
 - Defaults: range `0..30`, unit `kn`
 
 ### DepthGaugeWidget
@@ -68,13 +68,13 @@ Each wrapper defines:
 ### TemperatureGaugeWidget
 
 - High-end sectors
-- Formatter path: `formatTemperature(..., "celsius")` + Kelvin fallback heuristic
+- Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatTemperature", formatterParameters: ["celsius"] })` + Kelvin fallback heuristic
 - Defaults: range `0..35`, unit `°C`
 
 ### VoltageGaugeWidget
 
 - Low-end sectors
-- Formatter path: `formatDecimal(..., 3, 1, true)` + numeric fallback
+- Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatDecimal", formatterParameters: [3, 1, true] })` + numeric fallback
 - Defaults: range `10..15`, unit `V`
 
 ## Removed Duplication
@@ -88,7 +88,7 @@ Removed from wrappers:
 - semicircle geometry/mode boilerplate
 - numeric extraction (`extractNumberText`)
 - high-end/low-end sector builders
-- speed formatting helper (`formatSpeedString`)
+- direct `avnav.api` formatter access and duplicated guard patterns
 
 ## Related
 

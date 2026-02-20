@@ -31,11 +31,13 @@ Specialized nav renderer for `positionBoat` and `positionWp`. It keeps flat layo
 | `ratioThresholdFlat` | number | `3.0` | `ratio > threshold -> flat` |
 | `captionUnitScale` | number | `0.8` | Header scale relative to coordinate lines |
 | `disconnect` | boolean | `false` | Draws `NO DATA` overlay |
+| `coordinateFormatter` | string/function | `"formatLonLatsDecimal"` | Stacked-mode coordinate formatter (`lat`/`lon` axis passed as extra parameter) |
+| `coordinateFormatterParameters` | array/string | `[]` | Base params for stacked-mode formatter before appending axis |
 
 ## Coordinate Formatting
 
 - `flat` mode uses `Helpers.applyFormatter(value, props)` (normally `formatLonLats`)
-- `normal`/`high` modes use `avnav.api.formatter.formatLonLatsDecimal(value, axis)` for per-line lat/lon text
+- `normal`/`high` modes use `Helpers.applyFormatter(value, { formatter: coordinateFormatter, formatterParameters: [...coordinateFormatterParameters, axis] })`
 - If formatter is unavailable/fails, renders `default` fallback text
 - Invalid/missing coordinates render `default` fallback text
 

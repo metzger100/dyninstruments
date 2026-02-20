@@ -17,6 +17,26 @@
     const T = GU.text;
     const V = GU.value;
 
+    function formatSpeedText(raw, props, speedUnit) {
+      const n = Number(raw);
+      if (!isFinite(n)) return "---";
+
+      const p = props || {};
+      const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatSpeed";
+      const formatterParameters = (typeof p.formatterParameters !== "undefined")
+        ? p.formatterParameters
+        : [speedUnit || "kn"];
+      const formatted = String(Helpers.applyFormatter(n, {
+        formatter: formatter,
+        formatterParameters: formatterParameters,
+        default: "---"
+      }));
+
+      // Preserve previous fixed-decimal-with-unit fallback when formatter is unavailable.
+      if (formatted.trim() === String(n)) return n.toFixed(1) + " " + (speedUnit || "kn");
+      return formatted;
+    }
+
     // --------- util ----------------------------------------------------------
     function renderCanvas(canvas, props){
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
@@ -149,7 +169,7 @@
       const angleUnit = (props.angleUnit || '°').trim();
       const speedUnit = (props.speedUnit || 'kn').trim();
       const angleText = V.formatAngle180(props.angle, !!props.leadingZero);
-      const speedText = V.formatSpeedString(props.speed, speedUnit);
+      const speedText = formatSpeedText(props.speed, props, speedUnit);
       const angleCap  = (props.angleCaption || '').trim();
       const speedCap  = (props.speedCaption || '').trim();
 

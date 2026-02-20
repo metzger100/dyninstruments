@@ -23,6 +23,7 @@
       if (effKind === "sogGraphic" || effKind === "stwGraphic") {
         const baseKind = (effKind === "sogGraphic") ? "sog" : "stw";
         const val = p[baseKind];
+        const uni = unit(effKind);
 
         const warnOn = (p.speedWarningEnabled !== false);
         const alarmOn = (p.speedAlarmEnabled !== false);
@@ -31,7 +32,9 @@
           renderer: "SpeedGaugeWidget",
           value: val,
           caption: cap(effKind),
-          unit: unit(effKind),
+          unit: uni,
+          formatter: "formatSpeed",
+          formatterParameters: [uni],
 
           speedRatioThresholdNormal: Number(p.speedRatioThresholdNormal),
           speedRatioThresholdFlat: Number(p.speedRatioThresholdFlat),

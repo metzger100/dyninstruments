@@ -14,8 +14,29 @@
     const renderer = Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("GaugeValueMath").create(def, Helpers);
 
-    function displaySpeedFromRaw(raw, unit) {
-      const formatted = valueMath.formatSpeedString(raw, unit);
+    function formatSpeedString(raw, props, unit) {
+      const n = Number(raw);
+      if (!isFinite(n)) return "---";
+
+      const p = props || {};
+      const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatSpeed";
+      const formatterParameters = (typeof p.formatterParameters !== "undefined")
+        ? p.formatterParameters
+        : [unit || "kn"];
+
+      const formatted = String(Helpers.applyFormatter(n, {
+        formatter: formatter,
+        formatterParameters: formatterParameters,
+        default: "---"
+      }));
+
+      // If formatter resolution falls back to raw passthrough, keep legacy fixed-decimal text.
+      if (formatted.trim() === String(n)) return n.toFixed(1) + " " + (unit || "kn");
+      return formatted;
+    }
+
+    function displaySpeedFromRaw(raw, props, unit) {
+      const formatted = formatSpeedString(raw, props, unit);
       const numberText = valueMath.extractNumberText(formatted);
       const num = numberText ? Number(numberText) : NaN;
       if (isFinite(num)) return { num: num, text: numberText };
@@ -45,7 +66,7 @@
       ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: speedTickSteps,
       formatDisplay: function (raw, props, unit) {
-        return displaySpeedFromRaw(raw, unit);
+        return displaySpeedFromRaw(raw, props, unit);
       },
       buildSectors: function (props, minV, maxV, arc) {
         return valueMath.buildHighEndSectors(props, minV, maxV, arc);

@@ -51,15 +51,6 @@ describe("GaugeValueMath", function () {
     expect(v.formatAngle180(181, true)).toBe("-179");
     expect(v.formatDirection360(-1, true)).toBe("359");
 
-    const prevAvnav = window.avnav;
-    window.avnav = undefined;
-    try {
-      expect(v.formatSpeedString(12.34, "kn")).toBe("12.3 kn");
-      expect(v.formatSpeedString("x", "kn")).toBe("---");
-    } finally {
-      window.avnav = prevAvnav;
-    }
-
     expect(v.buildHighEndSectors({ warningFrom: 20, alarmFrom: 25 }, 0, 30, arc)).toEqual([
       { a0: 390, a1: 420, color: "#e7c66a" },
       { a0: 420, a1: 450, color: "#ff7a76" }
