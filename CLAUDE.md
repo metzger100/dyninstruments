@@ -110,6 +110,7 @@ Task: Add new BarometerGauge
 ## 3. File Map
 
 - Feature and API lookups: [documentation/TABLEOFCONTENTS.md](documentation/TABLEOFCONTENTS.md)
+- Root structural orientation map for AI sessions: [ARCHITECTURE.md](ARCHITECTURE.md)
 - Coding patterns, naming, headers, and canonical examples: [documentation/conventions/coding-standards.md](documentation/conventions/coding-standards.md)
 - Documentation writing format and token budget: [documentation/conventions/documentation-format.md](documentation/conventions/documentation-format.md)
 - Security and safety rules: `documentation/conventions/safety-guidelines.md` (planned, not yet implemented)
