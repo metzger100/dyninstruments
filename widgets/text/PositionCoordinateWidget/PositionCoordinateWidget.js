@@ -45,7 +45,7 @@
       try {
         const out = formatterSpec.fn.call(formatterSpec.ctx, n, axis);
         if (out != null && String(out).trim()) return String(out);
-      } catch (e) {}
+      } catch (e) { /* intentional: formatter failure falls back to provided default coordinate text */ }
     }
 
     return fallbackText;

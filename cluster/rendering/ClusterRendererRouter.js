@@ -48,7 +48,7 @@
       const finalArgs = arguments;
       subSpecs.forEach(function (sub) {
         if (sub && typeof sub.finalizeFunction === "function") {
-          try { sub.finalizeFunction.apply(ctx, finalArgs); } catch (e) {}
+          try { sub.finalizeFunction.apply(ctx, finalArgs); } catch (e) { /* intentional: one sub-finalizer failing must not block other sub-finalizers */ }
         }
       });
     }
