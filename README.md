@@ -355,6 +355,11 @@ npm run test:coverage
 npm run test:coverage:check
 ```
 
+6. Run naming registration checks:
+```bash
+npm run check:naming
+```
+
 Current quality gates:
 
 - Global coverage: `lines >= 80`, `functions >= 80`, `statements >= 80`, `branches >= 65`
@@ -363,6 +368,10 @@ Current quality gates:
   - `runtime/*`
   - `shared/widget-kits/gauge/GaugeAngleMath.js`, `GaugeTickMath.js`, `GaugeValueMath.js`
   - `config/clusters/nav.js`, `config/clusters/environment.js`, `config/clusters/vessel.js`
+- Registration naming checks via `tools/check-naming.mjs` for:
+  - `config/components.js` component ID ↔ `globalKey` rules
+  - `config/clusters/*.js` widget `name` pattern (`dyninstruments_*`)
+  - component UMD `window.DyniComponents.*` target and exported `id` consistency
 
 Scope of the initial suite:
 

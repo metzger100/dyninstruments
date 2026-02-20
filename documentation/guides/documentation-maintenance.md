@@ -36,7 +36,7 @@ npm run test:coverage:check
 | Changes in registration/lifecycle flow (`runtime/init.js`, `runtime/widget-registrar.js`) | `documentation/avnav-api/plugin-lifecycle.md`, `documentation/architecture/component-system.md` |
 | Changes in helper API (`runtime/helpers.js`) | `documentation/shared/helpers.md` |
 | CSS/theming changes (`plugin.css`) | `documentation/shared/css-theming.md` |
-| Test setup or coverage rule changes (`package.json`, `vitest.config.js`, `tools/check-coverage.mjs`) | `documentation/guides/testing-regression.md`, `documentation/README.md`, `README.md`, `CLAUDE.md` |
+| Test setup or quality rule changes (`package.json`, `vitest.config.js`, `tools/check-coverage.mjs`, `tools/check-naming.mjs`) | `documentation/guides/testing-regression.md`, `documentation/README.md`, `README.md`, `CLAUDE.md` |
 | New documentation file | `documentation/TABLEOFCONTENTS.md`, `documentation/README.md` |
 
 ## Validation

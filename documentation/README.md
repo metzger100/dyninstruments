@@ -101,12 +101,14 @@ Run from repo root:
 npm test
 npm run test:coverage
 npm run test:coverage:check
+npm run check:naming
 ```
 
 Coverage checks enforce:
 
 - global thresholds from `vitest.config.js`
 - stricter core-module rules from `tools/check-coverage.mjs`
+- registration naming rules from `tools/check-naming.mjs` (`globalKey`/`id` consistency + cluster widget name pattern)
 
 Details: [guides/testing-regression.md](guides/testing-regression.md)
 

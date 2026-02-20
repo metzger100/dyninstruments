@@ -26,6 +26,7 @@
 ## Conventions
 
 - **What coding patterns/naming conventions should I follow?** → [conventions/coding-standards.md](conventions/coding-standards.md)
+- **How do I run naming registration checks?** → [guides/testing-regression.md](guides/testing-regression.md)
 - **How should I format documentation files?** → [conventions/documentation-format.md](conventions/documentation-format.md)
 - **Which files are the best examples to copy from?** → [conventions/coding-standards.md#reference-implementations](conventions/coding-standards.md#reference-implementations)
 - **What shared utilities exist?** → [conventions/coding-standards.md#shared-utilities](conventions/coding-standards.md#shared-utilities)

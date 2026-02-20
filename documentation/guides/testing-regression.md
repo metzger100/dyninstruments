@@ -14,6 +14,7 @@ Run from repository root:
 npm test
 npm run test:coverage
 npm run test:coverage:check
+npm run check:naming
 ```
 
 ## What Is Covered
@@ -23,13 +24,16 @@ npm run test:coverage:check
 - Runtime bootstrap and registration (`plugin.js`, `runtime/*.js`)
 - Cluster config update functions (`config/clusters/*.js`, focus on dynamic store key behavior)
 - Shared gauge math/value/tick modules (`shared/widget-kits/gauge/GaugeAngleMath.js`, `GaugeTickMath.js`, `GaugeValueMath.js`)
+- Registration naming contracts (`config/components.js`, `config/clusters/*.js`, and component UMD/`id` literals)
 
 ## Coverage Gates
 
 - Global thresholds are configured in `vitest.config.js` (`lines/functions/statements/branches`)
 - Extra strict module-group checks are enforced by `tools/check-coverage.mjs`
+- Registration naming checks are enforced by `tools/check-naming.mjs`
 
-`npm run test:coverage:check` runs both layers.
+`npm run test:coverage:check` runs the coverage layers.
+`npm run check:naming` runs the naming registration linter.
 
 ## Notes
 
