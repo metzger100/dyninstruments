@@ -368,10 +368,16 @@ Current quality gates:
   - `runtime/*`
   - `shared/widget-kits/gauge/GaugeAngleMath.js`, `GaugeTickMath.js`, `GaugeValueMath.js`
   - `config/clusters/nav.js`, `config/clusters/environment.js`, `config/clusters/vessel.js`
+- Dependency direction checks via `tools/check-dependencies.mjs` for:
+  - `config/components.js` `deps` layer rules across `widgets/`, `cluster/`, `shared/`, `config/`, `runtime/`
 - Registration naming checks via `tools/check-naming.mjs` for:
   - `config/components.js` component ID ↔ `globalKey` rules
   - `config/clusters/*.js` widget `name` pattern (`dyninstruments_*`)
   - component UMD `window.DyniComponents.*` target and exported `id` consistency
+- UMD structure checks via `tools/check-umd.mjs` for:
+  - wrapper start at first code token (header-aware)
+  - `root.DyniComponents = root.DyniComponents || {}` registration
+  - `return { id: "...", create }` or `return { id: "...", create: create }` export shape
 - Pattern drift checks via `tools/check-patterns.mjs` for:
   - duplicated helper/function declarations across `widgets/`, `cluster/`, and `shared/`
   - forbidden direct `window.avnav`/`avnav.api` access outside runtime boundaries

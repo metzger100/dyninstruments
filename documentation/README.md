@@ -117,6 +117,8 @@ Coverage and quality checks enforce:
 
 - global thresholds from `vitest.config.js`
 - stricter core-module rules from `tools/check-coverage.mjs`
+- dependency direction rules from `tools/check-dependencies.mjs` (`widgets/`, `cluster/`, `shared/`, `config/`, `runtime/` layer constraints in `config/components.js`)
+- UMD wrapper/component export rules from `tools/check-umd.mjs` (UMD wrapper start, `DyniComponents` registration, and `return { id: "...", create }` export shape)
 - registration naming rules from `tools/check-naming.mjs` (`globalKey`/`id` consistency + cluster widget name pattern)
 - pattern drift rules from `tools/check-patterns.mjs` (duplicate helper detection, forbidden globals, empty catches, non-runtime console logging, owner/date annotation format for maintenance markers), currently run in `--warn` mode via `check:all` until Phase 4 refactoring is complete
 
