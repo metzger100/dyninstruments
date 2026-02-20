@@ -136,6 +136,7 @@ Task: Add new BarometerGauge
 - [ ] Ran `npm run check:headers` and resolved failures.
 - [ ] Ran `npm run check:filesize` and resolved file size violations.
 - [ ] Ran `npm run check:naming` and resolved naming registration violations.
+- [ ] Ran `npm run check:patterns -- --warn` and reviewed pattern drift findings.
 - [ ] Ran `npm test` for behavior/runtime changes.
 - [ ] Ran `npm run test:coverage:check` for core logic changes.
 - [ ] Verified AGENTS and CLAUDE shared sections are synced (`npm run ai:check`).

@@ -11,6 +11,7 @@
     "check:filesize": "node tools/check-file-size.mjs",
     "check:headers": "node tools/check-headers.mjs",
     "check:naming": "node tools/check-naming.mjs",
+    "check:patterns": "node tools/check-patterns.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
