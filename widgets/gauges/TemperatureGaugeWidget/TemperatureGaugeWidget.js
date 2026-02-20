@@ -1,7 +1,7 @@
 /**
  * Module: TemperatureGaugeWidget - Semicircle temperature gauge with high-end sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleGaugeEngine
+ * Depends: SemicircleGaugeEngine, GaugeValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,11 +12,7 @@
 
   function create(def, Helpers) {
     const renderer = Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
-
-    function extractNumberText(text) {
-      const match = String(text).match(/-?\d+(?:\.\d+)?/);
-      return match ? match[0] : "";
-    }
+    const valueMath = Helpers.getModule("GaugeValueMath").create(def, Helpers);
 
     function toCelsiusNumber(raw) {
       const n = Number(raw);
@@ -25,7 +21,7 @@
       if (window.avnav && avnav.api && avnav.api.formatter && typeof avnav.api.formatter.formatTemperature === "function") {
         try {
           const formatted = String(avnav.api.formatter.formatTemperature(n, "celsius"));
-          const numberText = extractNumberText(formatted);
+          const numberText = valueMath.extractNumberText(formatted);
           const parsed = numberText ? Number(numberText) : NaN;
           if (isFinite(parsed)) return parsed;
         } catch (ignore) {}
@@ -54,28 +50,6 @@
       return { major: 50, minor: 10 };
     }
 
-    function buildHighEndSectors(props, minV, maxV, arc, valueUtils) {
-      const warningFrom = Number(props.warningFrom);
-      const alarmFrom = Number(props.alarmFrom);
-
-      const warningTo = (isFinite(alarmFrom) && isFinite(warningFrom) && alarmFrom > warningFrom)
-        ? alarmFrom
-        : maxV;
-
-      const warning = isFinite(warningFrom)
-        ? valueUtils.sectorAngles(warningFrom, warningTo, minV, maxV, arc)
-        : null;
-
-      const alarm = isFinite(alarmFrom)
-        ? valueUtils.sectorAngles(alarmFrom, maxV, minV, maxV, arc)
-        : null;
-
-      const sectors = [];
-      if (warning) sectors.push({ a0: warning.a0, a1: warning.a1, color: "#e7c66a" });
-      if (alarm) sectors.push({ a0: alarm.a0, a1: alarm.a1, color: "#ff7a76" });
-      return sectors;
-    }
-
     const renderCanvas = renderer.createRenderer({
       rawValueKey: "temp",
       unitDefault: "°C",
@@ -89,7 +63,9 @@
       formatDisplay: function (raw) {
         return displayTempFromRaw(raw, 1);
       },
-      buildSectors: buildHighEndSectors
+      buildSectors: function (props, minV, maxV, arc) {
+        return valueMath.buildHighEndSectors(props, minV, maxV, arc);
+      }
     });
 
     function translateFunction() {

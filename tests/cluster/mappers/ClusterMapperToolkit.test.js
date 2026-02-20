@@ -41,4 +41,26 @@ describe("ClusterMapperToolkit", function () {
     expect(toolkit.unit("sog")).toBe("kn");
     expect(toolkit.cap("stw")).toBeUndefined();
   });
+
+  it("uses injected GaugeAngleMath helpers when provided", function () {
+    const mod = loadFresh("cluster/mappers/ClusterMapperToolkit.js");
+    const toolkit = mod.create({}, {
+      getModule(id) {
+        if (id !== "GaugeAngleMath") throw new Error("unexpected module: " + id);
+        return {
+          create() {
+            return {
+              norm360() { return 42; },
+              norm180() { return -7; }
+            };
+          }
+        };
+      }
+    });
+
+    const direction = toolkit.makeAngleFormatter(true, true, "NA");
+    const relative = toolkit.makeAngleFormatter(false, true, "NA");
+    expect(direction(123)).toBe("042");
+    expect(relative(123)).toBe("-007");
+  });
 });

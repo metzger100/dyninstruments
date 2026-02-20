@@ -1,7 +1,7 @@
 /**
  * Module: VoltageGaugeWidget - Semicircle voltage gauge with low-end warning/alarm sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleGaugeEngine
+ * Depends: SemicircleGaugeEngine, GaugeValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,11 +12,7 @@
 
   function create(def, Helpers) {
     const renderer = Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
-
-    function extractNumberText(text) {
-      const match = String(text).match(/-?\d+(?:\.\d+)?/);
-      return match ? match[0] : "";
-    }
+    const valueMath = Helpers.getModule("GaugeValueMath").create(def, Helpers);
 
     function formatVoltageString(raw) {
       const n = Number(raw);
@@ -31,7 +27,7 @@
 
     function displayVoltageFromRaw(raw) {
       const formatted = formatVoltageString(raw);
-      const numberText = extractNumberText(formatted);
+      const numberText = valueMath.extractNumberText(formatted);
       const num = numberText ? Number(numberText) : NaN;
       if (isFinite(num)) return { num: num, text: numberText };
       const fallback = Number(raw);
@@ -50,37 +46,6 @@
       return { major: 50, minor: 10 };
     }
 
-    function buildLowEndSectors(props, minV, maxV, arc, valueUtils) {
-      const warningFrom = Number(props.warningFrom ?? 12.2);
-      const alarmFrom = Number(props.alarmFrom ?? 11.6);
-
-      const alarmTo = isFinite(alarmFrom)
-        ? valueUtils.clamp(alarmFrom, minV, maxV)
-        : NaN;
-
-      const warningTo = isFinite(warningFrom)
-        ? valueUtils.clamp(warningFrom, minV, maxV)
-        : NaN;
-
-      const alarm = (isFinite(alarmTo) && alarmTo > minV)
-        ? valueUtils.sectorAngles(minV, alarmTo, minV, maxV, arc)
-        : null;
-
-      const warning = (isFinite(alarmTo) && isFinite(warningTo) && warningTo > alarmTo)
-        ? valueUtils.sectorAngles(alarmTo, warningTo, minV, maxV, arc)
-        : null;
-
-      const warningOnly = (!alarm && isFinite(warningTo) && warningTo > minV)
-        ? valueUtils.sectorAngles(minV, warningTo, minV, maxV, arc)
-        : null;
-
-      const sectors = [];
-      if (alarm) sectors.push({ a0: alarm.a0, a1: alarm.a1, color: "#ff7a76" });
-      if (warning) sectors.push({ a0: warning.a0, a1: warning.a1, color: "#e7c66a" });
-      if (warningOnly) sectors.push({ a0: warningOnly.a0, a1: warningOnly.a1, color: "#e7c66a" });
-      return sectors;
-    }
-
     const renderCanvas = renderer.createRenderer({
       rawValueKey: "voltage",
       unitDefault: "V",
@@ -94,7 +59,12 @@
       formatDisplay: function (raw) {
         return displayVoltageFromRaw(raw);
       },
-      buildSectors: buildLowEndSectors
+      buildSectors: function (props, minV, maxV, arc) {
+        return valueMath.buildLowEndSectors(props, minV, maxV, arc, {
+          defaultWarningFrom: 12.2,
+          defaultAlarmFrom: 11.6
+        });
+      }
     });
 
     function translateFunction() {

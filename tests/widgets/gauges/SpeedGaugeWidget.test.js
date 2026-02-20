@@ -8,6 +8,29 @@ describe("SpeedGaugeWidget", function () {
     const mod = loadFresh("widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js");
     const spec = mod.create({}, {
       getModule(id) {
+        if (id === "GaugeValueMath") {
+          return {
+            create() {
+              return {
+                extractNumberText(text) {
+                  const match = String(text).match(/-?\d+(?:\.\d+)?/);
+                  return match ? match[0] : "";
+                },
+                buildHighEndSectors(props, minV, maxV) {
+                  const warningFrom = Number(props.warningFrom);
+                  const alarmFrom = Number(props.alarmFrom);
+                  const warningTo = (isFinite(alarmFrom) && isFinite(warningFrom) && alarmFrom > warningFrom)
+                    ? alarmFrom
+                    : maxV;
+                  const sectors = [];
+                  if (isFinite(warningFrom)) sectors.push({ a0: warningFrom, a1: warningTo, color: "#e7c66a" });
+                  if (isFinite(alarmFrom)) sectors.push({ a0: alarmFrom, a1: maxV, color: "#ff7a76" });
+                  return sectors;
+                }
+              };
+            }
+          };
+        }
         if (id !== "SemicircleGaugeEngine") throw new Error("unexpected module: " + id);
         return {
           create() {

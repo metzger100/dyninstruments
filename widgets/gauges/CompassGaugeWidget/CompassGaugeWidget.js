@@ -18,15 +18,6 @@
     const V = GU.value;
 
     // ---------- utils --------------------------------------------------------
-    function formatDirection360(v, leadingZero){
-      const n = Number(v); if (!isFinite(n)) return '---';
-      let a = n % 360; if (a < 0) a += 360;
-      const r = Math.round(a) % 360;
-      let s = String(r);
-      if (leadingZero) s = s.padStart(3, '0');
-      return s;
-    }
-
     function renderCanvas(canvas, props){
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
       if (!W || !H) return;
@@ -116,7 +107,7 @@
       // ---- Texts -------------------------------------------------------------
       const caption = (props.caption || '').trim();
       const unit    = (props.unit || '°').trim();
-      const value   = V.isFiniteNumber(heading) ? formatDirection360(heading, leadingZero) : (props.default || '---');
+      const value   = V.isFiniteNumber(heading) ? V.formatDirection360(heading, leadingZero) : (props.default || '---');
       const secScale = V.clamp(props.captionUnitScale ?? 0.8, 0.3, 3.0);
 
       // FLAT: left column next to dial

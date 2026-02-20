@@ -42,4 +42,35 @@ describe("GaugeValueMath", function () {
     expect(v.sectorAngles("x", 10, 0, 30, arc)).toBeNull();
     expect(v.sectorAngles(5, 5, 0, 30, arc)).toBeNull();
   });
+
+  it("provides shared formatter and sector builder helpers", function () {
+    const v = create();
+    const arc = { startDeg: 270, endDeg: 450 };
+
+    expect(v.extractNumberText("12.3 kn")).toBe("12.3");
+    expect(v.formatAngle180(181, true)).toBe("-179");
+    expect(v.formatDirection360(-1, true)).toBe("359");
+
+    const prevAvnav = window.avnav;
+    window.avnav = undefined;
+    try {
+      expect(v.formatSpeedString(12.34, "kn")).toBe("12.3 kn");
+      expect(v.formatSpeedString("x", "kn")).toBe("---");
+    } finally {
+      window.avnav = prevAvnav;
+    }
+
+    expect(v.buildHighEndSectors({ warningFrom: 20, alarmFrom: 25 }, 0, 30, arc)).toEqual([
+      { a0: 390, a1: 420, color: "#e7c66a" },
+      { a0: 420, a1: 450, color: "#ff7a76" }
+    ]);
+
+    expect(v.buildLowEndSectors({}, 10, 15, arc, {
+      defaultWarningFrom: 12.2,
+      defaultAlarmFrom: 11.6
+    })).toEqual([
+      { a0: 270, a1: 327.6, color: "#ff7a76" },
+      { a0: 327.6, a1: 349.2, color: "#e7c66a" }
+    ]);
+  });
 });

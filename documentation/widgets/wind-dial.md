@@ -67,8 +67,8 @@ otherwise -> normal
 
 | Function | Input | Output |
 |---|---|---|
-| `formatAngle180(v, leadingZero)` | angle deg | `-180..180` string |
-| `formatSpeed(v, unit)` | speed value | formatted speed string |
+| `GaugeValueMath.formatAngle180(v, leadingZero)` | angle deg | `-180..180` string |
+| `GaugeValueMath.formatSpeedString(v, unit)` | speed value | formatted speed string |
 
 ## Exports
 

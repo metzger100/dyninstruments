@@ -21,7 +21,11 @@ Shared gauge logic is split into focused core modules:
 
 ```javascript
 GaugeAngleMath: { js: BASE + "shared/widget-kits/gauge/GaugeAngleMath.js", globalKey: "DyniGaugeAngleMath" },
-GaugeTickMath: { js: BASE + "shared/widget-kits/gauge/GaugeTickMath.js", globalKey: "DyniGaugeTickMath" },
+GaugeTickMath: {
+  js: BASE + "shared/widget-kits/gauge/GaugeTickMath.js",
+  globalKey: "DyniGaugeTickMath",
+  deps: ["GaugeAngleMath"]
+},
 GaugeCanvasPrimitives: {
   js: BASE + "shared/widget-kits/gauge/GaugeCanvasPrimitives.js",
   globalKey: "DyniGaugeCanvasPrimitives",
@@ -84,6 +88,7 @@ const renderer = Helpers.getModule("SemicircleGaugeEngine") && Helpers.getModule
 
 | Function | Purpose |
 |---|---|
+| `mod` | Positive modulo helper used by angle/tick normalization |
 | `degToRad`, `radToDeg` | Degree/radian conversion |
 | `norm360`, `norm180` | Angle normalization |
 | `degToCanvasRad` | Convert logical degree to canvas radians |
@@ -95,17 +100,18 @@ const renderer = Helpers.getModule("SemicircleGaugeEngine") && Helpers.getModule
 | Function | Purpose |
 |---|---|
 | `computeSweep` | Sweep direction/intensity for start/end |
+| `isBeyondEnd` | Shared boundary check for iterative sweep loops |
 | `buildTickAngles` | Build major/minor angle arrays |
 
 ## GaugeTextLayout API
 
 `GaugeTextLayout.create()` returns shared text helpers:
-`setFont`, `fitTextPx`, `measureValueUnitFit`, `drawCaptionMax`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`, `drawDisconnectOverlay`.
+`setFont`, `fitTextPx`, `fitSingleTextPx`, `measureValueUnitFit`, `drawCaptionMax`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`, `drawDisconnectOverlay`.
 
 ## GaugeValueMath API
 
 `GaugeValueMath.create(def, Helpers)` returns shared numeric helpers:
-`isFiniteNumber`, `clamp`, `almostInt`, `isApprox`, `computePad`, `computeGap`, `computeMode`, `normalizeRange`, `valueToAngle`, `angleToValue`, `buildValueTickAngles`, `sectorAngles`, `formatMajorLabel`, `computeSemicircleGeometry`.
+`isFiniteNumber`, `extractNumberText`, `clamp`, `almostInt`, `isApprox`, `computePad`, `computeGap`, `computeMode`, `normalizeRange`, `valueToAngle`, `angleToValue`, `buildValueTickAngles`, `sectorAngles`, `buildHighEndSectors`, `buildLowEndSectors`, `formatSpeedString`, `formatAngle180`, `formatDirection360`, `formatMajorLabel`, `computeSemicircleGeometry`.
 
 ## SemicircleGaugeEngine API
 

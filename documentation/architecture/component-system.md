@@ -30,6 +30,7 @@ Defined in `config/components.js`. It maps component IDs to file paths, global k
 ```text
 ClusterWidget
 ├── ClusterMapperToolkit
+│   └── GaugeAngleMath
 ├── ClusterMapperRegistry
 │   ├── CourseHeadingMapper
 │   ├── SpeedMapper
@@ -40,7 +41,11 @@ ClusterWidget
 │   └── VesselMapper
 └── ClusterRendererRouter
     ├── ThreeValueTextWidget
+    │   ├── GaugeTextLayout
+    │   └── GaugeValueMath
     ├── PositionCoordinateWidget
+    │   ├── GaugeTextLayout
+    │   └── GaugeValueMath
     ├── WindDialWidget
     ├── CompassGaugeWidget
     ├── SpeedGaugeWidget
@@ -58,9 +63,12 @@ WindDialWidget/CompassGaugeWidget
       └── GaugeValueMath
 
 SpeedGaugeWidget/DepthGaugeWidget/TemperatureGaugeWidget/VoltageGaugeWidget
-  └── SemicircleGaugeEngine
-      └── GaugeToolkit
+  ├── SemicircleGaugeEngine
+  │   └── GaugeToolkit
+  └── GaugeValueMath
 ```
+
+`PositionCoordinateWidget` no longer depends on `ThreeValueTextWidget`; widget-to-widget coupling has been removed from the dependency graph.
 
 ## UMD Component Template
 

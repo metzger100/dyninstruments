@@ -29,6 +29,17 @@
       return Math.max(6, Math.min(px, h));
     }
 
+    function fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, bold) {
+      let px = Math.max(1, Math.floor(Math.min(basePx, maxH)));
+      if (!text) return px;
+      setFont(ctx, px, !!bold, family);
+      const w = ctx.measureText(text).width;
+      if (w <= maxW + 0.01) return px;
+      const scale = Math.max(0.1, (maxW / Math.max(1, w)));
+      px = Math.max(1, Math.floor(px * scale));
+      return Math.min(px, Math.floor(maxH));
+    }
+
     function measureValueUnitFit(ctx, family, value, unit, w, h, secScale) {
       if (!value) return { vPx: 0, uPx: 0, gap: 0, total: 0 };
       const maxH = Math.max(8, Math.floor(Number(h) || 0));
@@ -265,6 +276,7 @@
       version: "0.1.0",
       setFont,
       fitTextPx,
+      fitSingleTextPx,
       measureValueUnitFit,
       drawCaptionMax,
       drawValueUnitWithFit,

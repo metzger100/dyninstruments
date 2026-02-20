@@ -1,7 +1,7 @@
 /**
  * Module: PositionCoordinateWidget - Stacked latitude/longitude renderer for nav position kinds
  * Documentation: documentation/widgets/position-coordinates.md
- * Depends: ThreeValueTextWidget, Helpers.setupCanvas, Helpers.resolveTextColor, Helpers.resolveFontFamily
+ * Depends: GaugeTextLayout, GaugeValueMath, Helpers.applyFormatter, Helpers.setupCanvas, Helpers.resolveTextColor, Helpers.resolveFontFamily
  */
 
 (function (root, factory) {
@@ -10,42 +10,6 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniPositionCoordinateWidget = factory(); }
 }(this, function () {
   "use strict";
-
-  function setFont(ctx, px, bold, family) {
-    ctx.font = (bold ? "700 " : "400 ") + px + "px " + family;
-  }
-
-  function clamp(n, lo, hi) {
-    n = Number(n);
-    if (!isFinite(n)) return lo;
-    return Math.max(lo, Math.min(hi, n));
-  }
-
-  function fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, bold) {
-    let px = Math.max(1, Math.floor(Math.min(basePx, maxH)));
-    if (!text) return px;
-    setFont(ctx, px, !!bold, family);
-    const w = ctx.measureText(text).width;
-    if (w <= maxW + 0.01) return px;
-    const scale = Math.max(0.1, (maxW / Math.max(1, w)));
-    px = Math.max(1, Math.floor(px * scale));
-    return Math.min(px, Math.floor(maxH));
-  }
-
-  function drawDisconnectOverlay(ctx, W, H, family, color) {
-    ctx.save();
-    ctx.globalAlpha = 0.20;
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, W, H);
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = color;
-    const px = Math.max(12, Math.floor(Math.min(W, H) * 0.18));
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    setFont(ctx, px, true, family);
-    ctx.fillText("NO DATA", Math.floor(W / 2), Math.floor(H / 2));
-    ctx.restore();
-  }
 
   function parseLonLat(value) {
     if (!value || typeof value !== "object") return null;
@@ -88,29 +52,21 @@
   }
 
   function create(def, Helpers) {
-    const threeSpec = Helpers.getModule("ThreeValueTextWidget").create(def, Helpers);
+    const textLayout = Helpers.getModule("GaugeTextLayout").create(def, Helpers);
+    const valueMath = Helpers.getModule("GaugeValueMath").create(def, Helpers);
 
     function renderCanvas(canvas, props) {
       const p = props || {};
-      const ratio = (canvas && typeof canvas.getBoundingClientRect === "function")
-        ? (canvas.getBoundingClientRect().width / Math.max(1, canvas.getBoundingClientRect().height))
-        : 1;
-
-      const tNormal = Number(p.ratioThresholdNormal ?? 1.0);
-      const tFlat = Number(p.ratioThresholdFlat ?? 3.0);
-      let mode = "normal";
-      if (ratio < tNormal) mode = "high";
-      else if (ratio > tFlat) mode = "flat";
-
-      if (mode === "flat" && threeSpec && typeof threeSpec.renderCanvas === "function") {
-        return threeSpec.renderCanvas.apply(this, [canvas, p]);
-      }
-
       const setup = Helpers.setupCanvas(canvas);
       const ctx = setup && setup.ctx;
       const W = setup && setup.W;
       const H = setup && setup.H;
       if (!ctx || !W || !H) return;
+
+      const tNormal = Number(p.ratioThresholdNormal ?? 1.0);
+      const tFlat = Number(p.ratioThresholdFlat ?? 3.0);
+      const ratio = W / Math.max(1, H);
+      const mode = valueMath.computeMode(ratio, tNormal, tFlat);
 
       ctx.clearRect(0, 0, W, H);
       ctx.textBaseline = "middle";
@@ -121,8 +77,75 @@
 
       const caption = (p.caption || "").trim();
       const unit = (p.unit || "").trim();
-      const secScale = clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
+      const secScale = valueMath.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
       const fallbackText = (p.default == null) ? "---" : String(p.default);
+
+      if (mode === "flat") {
+        const value = Helpers.applyFormatter(p.value, p);
+        const padX = Math.max(6, Math.floor(Math.min(W, H) * 0.04));
+        const innerY = Math.max(3, Math.floor(Math.min(W, H) * 0.035));
+        const gapBase = Math.max(6, Math.floor(Math.min(W, H) * 0.06));
+        const maxH = Math.max(10, H - innerY * 2);
+
+        let lo = 8;
+        let hi = H * 1.6;
+        let best = 10;
+
+        for (let i = 0; i < 14; i++) {
+          const mid = (lo + hi) / 2;
+          const vPx = Math.floor(mid);
+          const sPx = Math.floor(mid * secScale);
+
+          textLayout.setFont(ctx, vPx, true, family);
+          const vW = ctx.measureText(value).width;
+
+          textLayout.setFont(ctx, sPx, true, family);
+          const cW = caption ? ctx.measureText(caption).width : 0;
+          const uW = unit ? ctx.measureText(unit).width : 0;
+
+          const total = (caption ? cW + gapBase : 0) + vW + (unit ? gapBase + uW : 0);
+          const ok = total <= (W - padX * 2) && vPx <= maxH && sPx <= maxH;
+
+          if (ok) {
+            best = mid;
+            lo = mid;
+          } else {
+            hi = mid;
+          }
+        }
+
+        const vPx = Math.floor(best);
+        const sPx = Math.floor(best * secScale);
+
+        textLayout.setFont(ctx, sPx, true, family);
+        const cW = caption ? ctx.measureText(caption).width : 0;
+        textLayout.setFont(ctx, vPx, true, family);
+        const vW = ctx.measureText(value).width;
+        textLayout.setFont(ctx, sPx, true, family);
+        const uW = unit ? ctx.measureText(unit).width : 0;
+
+        const total = (caption ? cW + gapBase : 0) + vW + (unit ? gapBase + uW : 0);
+        let x = Math.floor((W - total) / 2);
+        const y = Math.floor(H / 2);
+        ctx.textAlign = "left";
+
+        if (caption) {
+          textLayout.setFont(ctx, sPx, true, family);
+          ctx.fillText(caption, x, y);
+          x += cW + gapBase;
+        }
+        textLayout.setFont(ctx, vPx, true, family);
+        ctx.fillText(value, x, y);
+        x += vW;
+        if (unit) {
+          x += gapBase;
+          textLayout.setFont(ctx, sPx, true, family);
+          ctx.fillText(unit, x, y);
+        }
+
+        if (p.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color);
+        return;
+      }
 
       const parsed = parseLonLat(p.value);
       const formatterSpec = getLonLatsDecimalFormatter();
@@ -151,8 +174,8 @@
       const maxRowH = Math.max(10, Math.min(row1H, row2H) - innerY * 2);
       const maxRowW = Math.max(10, W - padX * 2);
       const lineBase = Math.floor(maxRowH);
-      const latPx = fitSingleTextPx(ctx, latText, lineBase, maxRowW, maxRowH, family, true);
-      const lonPx = fitSingleTextPx(ctx, lonText, lineBase, maxRowW, maxRowH, family, true);
+      const latPx = textLayout.fitSingleTextPx(ctx, latText, lineBase, maxRowW, maxRowH, family, true);
+      const lonPx = textLayout.fitSingleTextPx(ctx, lonText, lineBase, maxRowW, maxRowH, family, true);
       const linePx = Math.max(1, Math.min(latPx, lonPx));
 
       if (hasHeader) {
@@ -166,21 +189,21 @@
           : Math.max(10, W - padX * 2);
 
         const capPx = caption
-          ? fitSingleTextPx(ctx, caption, headerBase, capMaxW, maxHeaderH, family, true)
+          ? textLayout.fitSingleTextPx(ctx, caption, headerBase, capMaxW, maxHeaderH, family, true)
           : 0;
         const unitPx = unit
-          ? fitSingleTextPx(ctx, unit, Math.floor(headerBase * secScale), unitMaxW, maxHeaderH, family, true)
+          ? textLayout.fitSingleTextPx(ctx, unit, Math.floor(headerBase * secScale), unitMaxW, maxHeaderH, family, true)
           : 0;
         const yHeader = Math.floor(headerH / 2);
 
         if (caption) {
           ctx.textAlign = "left";
-          setFont(ctx, capPx, true, family);
+          textLayout.setFont(ctx, capPx, true, family);
           ctx.fillText(caption, padX, yHeader);
         }
         if (unit) {
           ctx.textAlign = "right";
-          setFont(ctx, unitPx, true, family);
+          textLayout.setFont(ctx, unitPx, true, family);
           ctx.fillText(unit, W - padX, yHeader);
         }
       }
@@ -188,11 +211,11 @@
       const yLat = headerH + Math.floor(row1H / 2);
       const yLon = headerH + row1H + Math.floor(row2H / 2);
       ctx.textAlign = "center";
-      setFont(ctx, linePx, true, family);
+      textLayout.setFont(ctx, linePx, true, family);
       ctx.fillText(latText, Math.floor(W / 2), yLat);
       ctx.fillText(lonText, Math.floor(W / 2), yLon);
 
-      if (p.disconnect) drawDisconnectOverlay(ctx, W, H, family, color);
+      if (p.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color);
     }
 
     function translateFunction() { return {}; }

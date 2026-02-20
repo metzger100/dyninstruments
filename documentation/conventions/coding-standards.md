@@ -87,7 +87,17 @@ Reusable logic MUST go in `shared/widget-kits/`. Never duplicate functions acros
 Current shared utilities include:
 - `GaugeValueMath.clamp()`
 - `GaugeValueMath.isFiniteNumber()`
+- `GaugeValueMath.extractNumberText()`
+- `GaugeValueMath.buildHighEndSectors()`
+- `GaugeValueMath.buildLowEndSectors()`
+- `GaugeValueMath.formatSpeedString()`
+- `GaugeValueMath.formatAngle180()`
+- `GaugeValueMath.formatDirection360()`
+- `GaugeValueMath.computeMode()`
 - `GaugeValueMath.computeSemicircleGeometry()`
+- `GaugeTextLayout.setFont()`
+- `GaugeTextLayout.fitSingleTextPx()`
+- `GaugeTextLayout.drawDisconnectOverlay()`
 - `Helpers.applyFormatter()`
 
 Check these before writing any helper function. For shared gauge utility APIs, see [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md).
