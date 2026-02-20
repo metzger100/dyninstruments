@@ -137,5 +137,5 @@ Task: Add new BarometerGauge
 
 ## 5. Known Issues
 
-Known issues and tech debt: documentation/TECH-DEBT.md
+Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 <!-- END SHARED_INSTRUCTIONS -->
