@@ -13,6 +13,8 @@
 
 ## Architecture
 
+- Root architecture map (AI session orientation): [../ARCHITECTURE.md](../ARCHITECTURE.md)
+
 ```text
 plugin.js (entry point)
 ├── validates AvNav globals and computes base URL

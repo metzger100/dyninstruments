@@ -16,6 +16,7 @@
 
 ## Architecture
 
+- **Where is the root architecture map for AI sessions?** → [../ARCHITECTURE.md](../ARCHITECTURE.md)
 - **How are modules loaded at runtime (UMD)?** → [architecture/component-system.md](architecture/component-system.md)
 - **How does the dependency system work?** → [architecture/component-system.md](architecture/component-system.md#dependency-graph)
 - **How does ClusterWidget route to renderers?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
