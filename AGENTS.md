@@ -133,6 +133,7 @@ Task: Add new BarometerGauge
 - [ ] Updated `documentation/TABLEOFCONTENTS.md` for new or moved docs.
 - [ ] Updated `documentation/README.md` when top-level documentation mapping changed.
 - [ ] Ran `node tools/check-docs.mjs` and resolved failures.
+- [ ] Ran `npm run check:headers` and resolved failures.
 - [ ] Ran `npm run check:filesize` and resolved file size violations.
 - [ ] Ran `npm test` for behavior/runtime changes.
 - [ ] Ran `npm run test:coverage:check` for core logic changes.
