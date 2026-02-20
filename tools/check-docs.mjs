@@ -9,6 +9,8 @@ const TARGETS = [
   path.join(ROOT, "README.md"),
   path.join(ROOT, "CLAUDE.md")
 ].filter((p) => fs.existsSync(p));
+const JS_SCAN_ROOTS = ["plugin.js", "runtime", "cluster", "config", "shared", "widgets"];
+const JS_EXCLUDED_DIRS = new Set([".git", "node_modules", "tests", "tools", "coverage"]);
 
 const STALE_PHRASES = [
   "In COMPONENTS (plugin.js)",
@@ -75,7 +77,7 @@ for (const file of TARGETS) {
   }
 }
 
-const jsFiles = collectFiles(ROOT, (p) => p.endsWith(".js") && !p.includes(`${path.sep}.git${path.sep}`));
+const jsFiles = collectJsFiles();
 for (const jsFile of jsFiles) {
   const content = fs.readFileSync(jsFile, "utf8");
   const match = content.match(/Documentation:\s*([^\n*]+)/);
@@ -135,6 +137,33 @@ function walk(curr, out, predicate) {
   for (const entry of fs.readdirSync(curr, { withFileTypes: true })) {
     if (entry.name === ".git") continue;
     walk(path.join(curr, entry.name), out, predicate);
+  }
+}
+
+function collectJsFiles() {
+  const collected = new Set();
+
+  for (const root of JS_SCAN_ROOTS) {
+    const absolutePath = path.join(ROOT, root);
+    if (!fs.existsSync(absolutePath)) continue;
+    walkJs(absolutePath, collected);
+  }
+
+  return Array.from(collected).sort((a, b) => rel(a).localeCompare(rel(b)));
+}
+
+function walkJs(curr, out) {
+  const stat = fs.statSync(curr);
+  if (stat.isFile()) {
+    if (curr.endsWith(".js")) {
+      out.add(curr);
+    }
+    return;
+  }
+
+  for (const entry of fs.readdirSync(curr, { withFileTypes: true })) {
+    if (entry.isDirectory() && JS_EXCLUDED_DIRS.has(entry.name)) continue;
+    walkJs(path.join(curr, entry.name), out);
   }
 }
 

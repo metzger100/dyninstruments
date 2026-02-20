@@ -22,11 +22,11 @@
 | Layer | Allowed direction |
 |---|---|
 | `widgets/` | `widgets -> shared -> (no imports, UMD globals)` |
-| `cluster/` | `cluster -> shared -> (no imports, UMD globals)` |
+| `cluster/` | `cluster -> cluster/widgets/shared -> (no imports, UMD globals)` |
 | `config/` | `config -> (pure data, no runtime imports)` |
 | `runtime/` | `runtime -> (framework, no widget/cluster imports)` |
 
-Feature code depends on shared code. Shared code depends on nothing. Config is pure data. Runtime is framework-only.
+Widget feature code depends on shared code. Cluster orchestration code may depend on cluster/widgets/shared. Shared code depends only on shared. Config is pure data. Runtime is framework-only.
 
 ## Boundary Rule
 

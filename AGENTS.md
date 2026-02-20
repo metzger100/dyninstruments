@@ -29,7 +29,6 @@ This file is Codex-facing guidance for this repository.
 ```
 documentation/
 ├── TABLEOFCONTENTS.md              # Navigation index (read THIS FIRST)
-├── README.md                       # Project overview
 ├── core-principles.md              # Non-negotiable project rules
 ├── avnav-api/
 │   ├── plugin-lifecycle.md         # registerWidget, render cycle, props
@@ -67,24 +66,7 @@ documentation/
 **Bad (Token wasteful):**
 ```
 Task: Add new BarometerGauge
-❌ Read all documentation files → all gauge source files → ...Navigation Rules
-
-1. Read [documentation/TABLEOFCONTENTS.md](documentation/TABLEOFCONTENTS.md) first.
-2. Identify 1-3 relevant docs before deep code reads.
-3. Read only those docs; do not read all docs sequentially.
-4. Token budget target: 20-30% context gathering, 70-80% implementation.
-5. Keep docs synchronized with code changes in the same task.
-6. For doc or architecture changes, run `npm run check:all`.
-7. For behavior/runtime changes, run `npm test`.
-
-Routing flow:
-- `TABLEOFCONTENTS.md` is the lookup index for feature/API questions.
-- `documentation/conventions/coding-standards.md` is the source of code structure rules.
-- `documentation/conventions/documentation-format.md` is the source of doc writing rules.
-- Gauge proportions/layout formulas stay in `documentation/gauges/gauge-style-guide.md`.
-- For planned-but-missing paths, use plain-text pointers instead of markdown links.
-- Replace planned pointers with links only after the target path exists.
-
+❌ Read all documentation files and large source areas sequentially.
 ```
 
 **Good (Token efficient):**
@@ -108,7 +90,7 @@ Task: Add new BarometerGauge
 
 ---
 
-## 3. File Map
+## 4. File Map
 
 - Feature and API lookups: [documentation/TABLEOFCONTENTS.md](documentation/TABLEOFCONTENTS.md)
 - Non-negotiable project rules: [documentation/core-principles.md](documentation/core-principles.md)
@@ -122,7 +104,7 @@ Task: Add new BarometerGauge
 
 ---
 
-## 4. Quality Checklist
+## 5. Quality Checklist
 
 - [ ] Read TABLEOFCONTENTS.md to find relevant docs.
 - [ ] Read only necessary documentation.
@@ -130,12 +112,12 @@ Task: Add new BarometerGauge
 - [ ] Implementation complete.
 - [ ] Updated relevant documentation.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.
-- [ ] Ran `npm run check:all` — all checks pass, all warnings reviewed.
+- [ ] Ran `npm run check:all` — no blocking failures, and warn-mode findings reviewed.
 - [ ] For behavior changes: ran `npm test`.
 
 ---
 
-## 5. Known Issues
+## 6. Known Issues
 
 Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 <!-- END SHARED_INSTRUCTIONS -->

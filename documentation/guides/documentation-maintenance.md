@@ -43,6 +43,7 @@ npm run check:all
 `check:all` runs the full validation chain:
 
 - `node tools/check-docs.mjs`
+- `node tools/check-doc-format.mjs --warn`
 - `node tools/check-doc-reachability.mjs`
 - `npm run ai:check`
 - `node tools/check-file-size.mjs`
@@ -76,8 +77,8 @@ npm run test:coverage:check
 | Changes in registration/lifecycle flow (`runtime/init.js`, `runtime/widget-registrar.js`) | `documentation/avnav-api/plugin-lifecycle.md`, `documentation/architecture/component-system.md` |
 | Changes in helper API (`runtime/helpers.js`) | `documentation/shared/helpers.md` |
 | CSS/theming changes (`plugin.css`) | `documentation/shared/css-theming.md` |
-| Test setup or quality rule changes (`package.json`, `vitest.config.js`, `tools/check-coverage.mjs`, `tools/check-dependencies.mjs`, `tools/check-umd.mjs`, `tools/check-naming.mjs`, `tools/check-patterns.mjs`) | `documentation/guides/documentation-maintenance.md`, `documentation/README.md`, `README.md`, `AGENTS.md`, `CLAUDE.md` |
-| New documentation file | `documentation/TABLEOFCONTENTS.md`, `documentation/README.md` |
+| Test setup or quality rule changes (`package.json`, `vitest.config.js`, `tools/check-coverage.mjs`, `tools/check-dependencies.mjs`, `tools/check-umd.mjs`, `tools/check-naming.mjs`, `tools/check-patterns.mjs`, `tools/check-doc-format.mjs`) | `documentation/guides/documentation-maintenance.md`, `README.md`, `AGENTS.md`, `CLAUDE.md` |
+| New documentation file | `documentation/TABLEOFCONTENTS.md` |
 
 ## Validation
 
@@ -88,6 +89,11 @@ npm run test:coverage:check
 - relative markdown links and anchors
 - JS `Documentation:` header targets
 - stale high-risk architecture phrases
+
+`tools/check-doc-format.mjs` (inside `check:all`, warn mode) verifies:
+
+- required doc sections (`# Title`, `**Status:**`, and key headings)
+- explicit exceptions for index/tracker docs
 
 `tools/check-doc-reachability.mjs` (inside `check:all`) verifies:
 
