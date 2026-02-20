@@ -99,6 +99,8 @@ editableParameters: {
 }
 ```
 
+`formatterParameters` are positional and formatter-specific. Parameter order and supported values are defined by the selected formatter; see [formatters.md](formatters.md#built-in-formatters-canonical-list).
+
 ---
 
 ## dyninstruments Extensions (Not Part of Official AvNav Docs)
