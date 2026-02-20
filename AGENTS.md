@@ -3,22 +3,22 @@
 This file is Codex-facing guidance for this repository.
 
 <!-- BEGIN SHARED_INSTRUCTIONS -->
-**Critical:** This document defines AI-optimized documentation standards and development workflow for the dyninstruments AvNav plugin. Read this FIRST before any work.
+**Critical:** AGENTS.md is a routing map. Use it to find focused docs, not to store full implementation details.
 
 ---
 
 ## 1. Project Constraints (AvNav Plugin Environment)
 
-- **No bundler, no runtime build step** — Raw JS loaded via `<script>` tags at runtime
-- **Dev-only npm tooling is allowed** — used for tests and quality checks; not part of plugin runtime loading
-- **UMD component pattern** — All components register on `window.DyniComponents.{globalKey}`
-- **avnav.api** — Only external dependency. Plugin API provided by AvNav host app
-- **AVNAV_BASE_URL** — Global string set by AvNav, used to construct module URLs
-- **Canvas 2D only** — All visual rendering via `renderCanvas(canvas, props)`
-- **No ES modules, no import/export** — Must use IIFE or UMD wrappers
-- **HiDPI** — `Helpers.setupCanvas()` handles devicePixelRatio scaling
-- **Plugin runtime is browser-only** — No server-side runtime code
-- **Testing stack available** — Vitest + jsdom for regression and coverage checks
+- **No bundler, no runtime build step** - Raw JS loaded via `<script>` tags at runtime
+- **Dev-only npm tooling is allowed** - used for tests and quality checks; not part of plugin runtime loading
+- **UMD component pattern** - All components register on `window.DyniComponents.{globalKey}`
+- **avnav.api** - Only external dependency. Plugin API provided by AvNav host app
+- **AVNAV_BASE_URL** - Global string set by AvNav, used to construct module URLs
+- **Canvas 2D only** - All visual rendering via `renderCanvas(canvas, props)`
+- **No ES modules, no import/export** - Must use IIFE or UMD wrappers
+- **HiDPI** - `Helpers.setupCanvas()` handles devicePixelRatio scaling
+- **Plugin runtime is browser-only** - No server-side runtime code
+- **Testing stack available** - Vitest + jsdom for regression and coverage checks
 
 ---
 
@@ -33,8 +33,7 @@ documentation/
 ├── avnav-api/
 │   ├── plugin-lifecycle.md         # registerWidget, render cycle, props
 │   ├── editable-parameters.md      # Types, conditions, defaults
-│   ├── formatters.md               # formatSpeed, formatDistance, etc.
-│   └── interactive-widgets.md      # GpsPage click handling, event propagation
+│   └── formatters.md               # formatSpeed, formatDistance, etc.
 ├── architecture/
 │   ├── component-system.md            # UMD loader, dependencies, config/components.js
 │   └── cluster-widget-system.md       # ClusterWidget, kind→renderer routing
@@ -45,16 +44,14 @@ documentation/
 │   ├── helpers.md                  # Helpers object (setupCanvas, resolveTextColor)
 │   └── css-theming.md              # CSS vars, day/night, font stack
 ├── widgets/
-│   ├── semicircle-gauges.md        # Speed/Depth/Temperature/Voltage shared
+│   ├── semicircle-gauges.md        # Speed/Depth/Temperature/Voltage shared 
 │   ├── three-elements.md           # ThreeValueTextWidget numeric renderer
-│   ├── position-coordinates.md     # PositionCoordinateWidget stacked nav display
 │   ├── wind-dial.md                # WindDialWidget full-circle wind compass
 │   └── compass-gauge.md            # CompassGaugeWidget rotating compass card
 └── guides/
     ├── add-new-gauge.md            # Step-by-step: create a new gauge
     ├── add-new-cluster.md          # Step-by-step: create a new cluster widget
-    ├── testing-regression.md       # Test and coverage workflow
-    └── documentation-maintenance.md # Doc alignment and validation checks
+    └── testing-regression.md       # Test and coverage workflow
 ```
 
 ### RULE: Always Start with TABLEOFCONTENTS.md
@@ -69,7 +66,24 @@ documentation/
 **Bad (Token wasteful):**
 ```
 Task: Add new BarometerGauge
-❌ Read all documentation files → all gauge source files → ...
+❌ Read all documentation files → all gauge source files → ...Navigation Rules
+
+1. Read [documentation/TABLEOFCONTENTS.md](documentation/TABLEOFCONTENTS.md) first.
+2. Identify 1-3 relevant docs before deep code reads.
+3. Read only those docs; do not read all docs sequentially.
+4. Token budget target: 20-30% context gathering, 70-80% implementation.
+5. Keep docs synchronized with code changes in the same task.
+6. For doc or architecture changes, run `node tools/check-docs.mjs`.
+7. For behavior/runtime changes, run `npm test` and `npm run test:coverage:check`.
+
+Routing flow:
+- `TABLEOFCONTENTS.md` is the lookup index for feature/API questions.
+- `documentation/conventions/coding-standards.md` is the source of code structure rules.
+- `documentation/conventions/documentation-format.md` is the source of doc writing rules.
+- Gauge proportions/layout formulas stay in `documentation/gauges/gauge-style-guide.md`.
+- For planned-but-missing paths, use plain-text pointers instead of markdown links.
+- Replace planned pointers with links only after the target path exists.
+
 ```
 
 **Good (Token efficient):**
@@ -93,188 +107,39 @@ Task: Add new BarometerGauge
 
 ---
 
-## 4. Mandatory File Headers
+## 3. File Map
 
-For **new or modified** JS component files (anything touched in a refactor), add a short header block at the top. Every JS component file MUST have:
-
-```javascript
-/**
- * Module: [Name] — [One-line description]
- * Documentation: documentation/[path].md
- * Depends: [list of component dependencies]
- */
-```
-
-Example:
-```javascript
-/**
- * Module: SpeedGaugeWidget — Semicircle speedometer with warning/alarm sectors
- * Style Guide: documentation/gauges/gauge-style-guide.md
- * Depends: GaugeToolkit (draw.drawPointerAtRim)
- */
-```
+- Feature and API lookups: [documentation/TABLEOFCONTENTS.md](documentation/TABLEOFCONTENTS.md)
+- Coding patterns, naming, headers, and canonical examples: [documentation/conventions/coding-standards.md](documentation/conventions/coding-standards.md)
+- Documentation writing format and token budget: [documentation/conventions/documentation-format.md](documentation/conventions/documentation-format.md)
+- Security and safety rules: `documentation/conventions/safety-guidelines.md` (planned, not yet implemented)
+- Step-by-step implementation workflows: [documentation/guides/](documentation/guides/)
+- Role definitions and task templates: `documentation/agentprompts/` (planned, not yet implemented)
+- Multi-session active execution plans: `exec-plans/active/` (planned, not yet implemented)
 
 ---
 
-## 5. Coding Conventions
+## 4. Quality Checklist
 
-### UMD Component Template
-
-```javascript
-(function (root, factory) {
-  if (typeof define === "function" && define.amd) define([], factory);
-  else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniComponentName = factory(); }
-}(this, function () {
-  "use strict";
-  function create(def, Helpers) {
-    // Component code here
-    return { id: "ComponentName", /* exports */ };
-  }
-  return { id: "ComponentName", create };
-}));
-```
-
-### Naming Conventions
-
-- **Widget names:** `dyninstruments_{Cluster}` (e.g., `dyninstruments_Speed`)
-- **Component globalKeys:** `Dyni{ComponentName}` (e.g., `DyniSpeedGaugeWidget`)
-- **Gauge threshold props:** `{gauge}RatioThresholdNormal`, `{gauge}RatioThresholdFlat`
-- **Sector props:** `{gauge}WarningFrom`, `{gauge}AlarmFrom`
-- **Per-kind caption/unit:** `caption_{kindName}`, `unit_{kindName}`
-- **editableParameter conditions:** `{ kind: "xxxGraphic" }` or array `[{ kind: "a" }, { kind: "b" }]`
-
-### Gauge Proportions Quick Reference
-
-All semicircle gauges share these proportions (function of R = gauge radius):
-
-| Element | Formula |
-|---|---|
-| R (radius) | `min(availW/2, availH)` |
-| ringW (sector width) | `max(6, floor(R × 0.12))` |
-| needleDepth | `max(8, floor(ringW × 0.9))` |
-| labelInset | `max(18, floor(ringW × 1.8))` |
-| labelFontPx | `max(10, floor(R × 0.14))` |
-| pad | `max(6, floor(min(W,H) × 0.04))` |
-| gap | `max(6, floor(min(W,H) × 0.03))` |
-
-**Colors:** Warning `#e7c66a`, Alarm `#ff7a76`, Pointer `#ff2b2b`
-**Full reference:** `documentation/gauges/gauge-style-guide.md`
-
-### Layout Modes (All Graphic Widgets)
-
-```
-ratio = W / H
-ratio < thresholdNormal  →  "high"   (gauge top, text band below)
-ratio > thresholdFlat    →  "flat"   (gauge left, text right)
-else                     →  "normal" (text inside semicircle)
-```
+- [ ] Started with TABLEOFCONTENTS and read only required docs.
+- [ ] Followed `documentation/conventions/coding-standards.md`.
+- [ ] Kept new/modified JS files at or below 300 lines, or isolated new logic from legacy oversized files.
+- [ ] Added/updated JS header blocks with `Documentation:` path.
+- [ ] Reused shared utilities (`shared/widget-kits/`) instead of duplicating widget-local helpers.
+- [ ] Updated docs immediately after behavior or architecture changes.
+- [ ] Updated `documentation/TABLEOFCONTENTS.md` for new or moved docs.
+- [ ] Updated `documentation/README.md` when top-level documentation mapping changed.
+- [ ] Ran `node tools/check-docs.mjs` and resolved failures.
+- [ ] Ran `npm test` for behavior/runtime changes.
+- [ ] Ran `npm run test:coverage:check` for core logic changes.
+- [ ] Verified AGENTS and CLAUDE shared sections are synced (`npm run ai:check`).
+- [ ] Kept gauge formulas/layout guidance only in `documentation/gauges/gauge-style-guide.md`.
+- [ ] Preserved existing information by moving details to mapped docs instead of deleting content.
 
 ---
 
-## 6. Token-Efficient Documentation Format
+## 5. Known Issues
 
-### Mandatory Format for All Docs
-
-```markdown
-# [Title]
-
-**Status:** [✅ Implemented / ⏳ In Progress / ❌ Not Started] [Brief]
-
-## Overview
-[1-2 sentences max]
-
-## Key Details
-- Compact bullet lists
-- API signatures
-- Data types and values
-- Configuration keys
-
-## API/Interfaces
-[Tables or compact code blocks]
-
-## Fixed Issues (if any)
-[Only important items]
-
-## Related: [links to other docs]
-```
-
-### Forbidden Content (Token Efficiency)
-
-- ❌ Verbose prose explanations
-- ❌ "Why?" sections (keep brief rationale only)
-- ❌ Large ASCII diagrams
-- ❌ Excessive examples (max 1-2)
-- ❌ "Future Enhancements" sections
-- ❌ Empty sections
-- ❌ Decorative formatting
-
-### Required Content (Preserve Completely)
-
-- ✅ API function signatures with parameters
-- ✅ Props/config keys with types and defaults
-- ✅ File paths and code locations
-- ✅ Color values, proportions, constants
-- ✅ Critical implementation details
-- ✅ "Fixed Issues" for troubleshooting context
-
----
-
-## 7. Documentation Maintenance
-
-### RULE: Update TABLEOFCONTENTS.md
-
-When adding new documentation:
-1. Create doc file using token-efficient format
-2. **Update TABLEOFCONTENTS.md** with new mapping
-3. Update documentation/README.md if needed
-
-### RULE: Keep Docs Up-to-Date
-
-- **Before code changes:** Read relevant docs
-- **After code changes:** Update docs immediately
-- Use token-efficient format for all updates
-- Add file headers linking to docs
-- Run `node tools/check-docs.mjs` before completing doc or architecture changes
-- For behavior/runtime changes, run `npm test` and `npm run test:coverage:check`
-
----
-
-## 8. Token Budget Management
-
-**Preserve tokens for implementation, not context gathering.**
-
-| Budget | Allocation |
-|---|---|
-| 20-30% | Reading relevant docs (via TABLEOFCONTENTS.md) |
-| 70-80% | Implementation, problem-solving, code generation |
-
-**Anti-patterns:** ❌ Reading all docs, ❌ Re-reading same docs, ❌ Reading verbose examples
-
-**Best practices:** ✅ TABLEOFCONTENTS.md first, ✅ Read only Key Details sections, ✅ Skip examples unless implementing similar code
-
----
-
-## 9. Known Code Issues (Current)
-
-- A small number of legacy files can still be close to or above the 300-line target; avoid expanding them when possible.
-- Some docs can drift after refactors if registry and runtime touchpoints are not updated together; use `tools/check-docs.mjs`.
-
----
-
-## 10. Quality Checklist
-
-Before completing any task:
-
-- [ ] Used TABLEOFCONTENTS.md to find docs (not read all files)
-- [ ] Read only necessary documentation
-- [ ] Updated documentation in token-efficient format
-- [ ] Updated TABLEOFCONTENTS.md if added new docs
-- [ ] Ran `node tools/check-docs.mjs` and resolved all failures
-- [ ] For behavior/runtime changes: ran `npm test`
-- [ ] For core logic changes: ran `npm run test:coverage:check`
-- [ ] Added file headers to new code files
-- [ ] No file exceeds 300 lines
-- [ ] Documentation matches implementation
-- [ ] UMD wrapper pattern used for new components
+See [TECH-DEBT.md](TECH-DEBT.md) for current technical debt and documentation drift notes.
+Keep AGENTS/CLAUDE compact by updating debt items in `TECH-DEBT.md`, not in this routing map.
 <!-- END SHARED_INSTRUCTIONS -->
