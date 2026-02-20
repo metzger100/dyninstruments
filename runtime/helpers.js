@@ -28,7 +28,7 @@
         return root.avnav.api.formatter[props.formatter].apply(root.avnav.api.formatter, [raw].concat(fp));
       }
     }
-    catch (e) {}
+    catch (e) { /* intentional: formatter failures fall back to default/raw formatting */ }
 
     if (raw == null || Number.isNaN(raw)) return (props && props.default) || "---";
     return String(raw);

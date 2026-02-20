@@ -24,7 +24,7 @@
           const numberText = valueMath.extractNumberText(formatted);
           const parsed = numberText ? Number(numberText) : NaN;
           if (isFinite(parsed)) return parsed;
-        } catch (ignore) {}
+        } catch (ignore) { /* intentional: formatter failure falls back to Kelvin/Celsius heuristic */ }
       }
 
       if (n > 200) return n - 273.15;

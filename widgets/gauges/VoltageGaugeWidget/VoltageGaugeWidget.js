@@ -20,7 +20,7 @@
       if (window.avnav && avnav.api && avnav.api.formatter && typeof avnav.api.formatter.formatDecimal === "function") {
         try {
           return String(avnav.api.formatter.formatDecimal(n, 3, 1, true));
-        } catch (ignore) {}
+        } catch (ignore) { /* intentional: formatter failure falls back to fixed-decimal voltage text */ }
       }
       return n.toFixed(1);
     }

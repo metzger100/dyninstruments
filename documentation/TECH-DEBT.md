@@ -7,7 +7,6 @@
 | ID | Area | Description | Impact | Priority |
 |---|---|---|---|---|
 | TD-008 | widgets | Direct `avnav.api` access in `SpeedGaugeWidget`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `WindDialWidget`, `PositionCoordinateWidget` bypasses runtime formatter boundary | Boundary violation increases guard-pattern duplication and drift | HIGH |
-| TD-009 | cluster + runtime + widgets | Empty catch blocks in `ClusterRendererRouter`, `runtime/helpers`, `SpeedGaugeWidget`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `WindDialWidget`, `PositionCoordinateWidget` | Silent failures hide defects and complicate debugging | MED |
 
 ## Completed Items
 
@@ -20,6 +19,7 @@
 | TD-005 | 2026-02-20 | Unified mode detection in text widgets via `GaugeValueMath.computeMode`; duplicate local ratio mode logic removed there. |
 | TD-006 | 2026-02-20 | Removed local `clamp` copies in text widgets; both now consume `GaugeValueMath.clamp`. |
 | TD-007 | 2026-02-20 | Removed local text helper duplicates by reusing `GaugeTextLayout.setFont`, `GaugeTextLayout.drawDisconnectOverlay`, and `GaugeTextLayout.fitSingleTextPx`. |
+| TD-009 | 2026-02-20 | Annotated intentional fallback catches in `ClusterRendererRouter`, `runtime/helpers`, `GaugeValueMath`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, and `PositionCoordinateWidget`; production empty-catch findings cleared. |
 | TD-010 | 2026-02-20 | Removed widget-to-widget dependency: `PositionCoordinateWidget` no longer depends on `ThreeValueTextWidget`; dependency graph now follows layer rules. |
 
 ## Rules
