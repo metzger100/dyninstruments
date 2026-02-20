@@ -29,6 +29,7 @@
 - **How should I format documentation files?** → [conventions/documentation-format.md](conventions/documentation-format.md)
 - **Which files are the best examples to copy from?** → [conventions/coding-standards.md#reference-implementations](conventions/coding-standards.md#reference-implementations)
 - **What shared utilities exist?** → [conventions/coding-standards.md#shared-utilities](conventions/coding-standards.md#shared-utilities)
+- **What are the non-negotiable project rules?** → [core-principles.md](core-principles.md)
 
 ## Creating New Widgets (Guides)
 

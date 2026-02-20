@@ -69,6 +69,8 @@ widgets/
 
 ## Documentation Map
 
+**Core:** [core-principles.md](core-principles.md)
+
 **AvNav API:** [plugin-lifecycle.md](avnav-api/plugin-lifecycle.md), [editable-parameters.md](avnav-api/editable-parameters.md), [formatters.md](avnav-api/formatters.md), [interactive-widgets.md](avnav-api/interactive-widgets.md)
 
 **Architecture:** [component-system.md](architecture/component-system.md), [cluster-widget-system.md](architecture/cluster-widget-system.md)
