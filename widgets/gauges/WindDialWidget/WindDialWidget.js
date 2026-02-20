@@ -18,23 +18,6 @@
     const V = GU.value;
 
     // --------- util ----------------------------------------------------------
-    function formatAngle180(v, leadingZero){
-      const n = Number(v); if (!isFinite(n)) return '---';
-      let a = ((n + 180) % 360 + 360) % 360 - 180; if (a === 180) a = -180;
-      const r = Math.round(Math.abs(a));
-      let s = String(r); if (leadingZero) s = s.padStart(3, '0');
-      if (a < 0) s = '-' + s;
-      return s;
-    }
-
-    function formatSpeed(v, unit){
-      if (window.avnav && avnav.api && avnav.api.formatter && typeof avnav.api.formatter.formatSpeed === 'function'){
-        try { return avnav.api.formatter.formatSpeed(v, unit || 'kn'); } catch(e){}
-      }
-      const n = Number(v); if (!isFinite(n)) return '---';
-      return n.toFixed(1) + ' ' + (unit || 'kn');
-    }
-
     function renderCanvas(canvas, props){
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
       if (!W || !H) return;
@@ -165,8 +148,8 @@
       const secScale  = V.clamp(props.captionUnitScale ?? 0.8, 0.3, 3.0);
       const angleUnit = (props.angleUnit || '°').trim();
       const speedUnit = (props.speedUnit || 'kn').trim();
-      const angleText = formatAngle180(props.angle, !!props.leadingZero);
-      const speedText = formatSpeed(props.speed, speedUnit);
+      const angleText = V.formatAngle180(props.angle, !!props.leadingZero);
+      const speedText = V.formatSpeedString(props.speed, speedUnit);
       const angleCap  = (props.angleCaption || '').trim();
       const speedCap  = (props.speedCaption || '').trim();
 

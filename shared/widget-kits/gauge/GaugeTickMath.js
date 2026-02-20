@@ -1,7 +1,7 @@
 /**
  * Module: GaugeTickMath - Shared tick sweep and major/minor angle generation
  * Documentation: documentation/gauges/gauge-shared-api.md
- * Depends: none
+ * Depends: GaugeAngleMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,8 +10,13 @@
 }(this, function () {
   "use strict";
 
-  function create() {
-    function mod(n, m) { return ((n % m) + m) % m; }
+  function create(def, Helpers) {
+    const angleMath = (Helpers && typeof Helpers.getModule === "function")
+      ? Helpers.getModule("GaugeAngleMath").create(def, Helpers)
+      : null;
+    const mod = (angleMath && typeof angleMath.mod === "function")
+      ? angleMath.mod
+      : ((n, m) => ((n % m) + m) % m);
 
     function computeSweep(startDeg, endDeg) {
       let s = Number(startDeg);
@@ -23,6 +28,12 @@
       const dir = (sweep >= 0) ? 1 : -1;
 
       return { s, e, sweep, dir };
+    }
+
+    function isBeyondEnd(curr, end, dir, includeEnd) {
+      const direction = Number(dir) >= 0 ? 1 : -1;
+      if (direction > 0) return includeEnd ? (curr > end) : (curr >= end);
+      return includeEnd ? (curr < end) : (curr <= end);
     }
 
     function buildTickAngles(opts) {
@@ -53,12 +64,7 @@
       let count = 0;
       let a = s;
 
-      function reachedEnd(curr) {
-        if (dir > 0) return includeEnd ? (curr > e) : (curr >= e);
-        return includeEnd ? (curr < e) : (curr <= e);
-      }
-
-      while (!reachedEnd(a) && count++ < maxSteps) {
+      while (!isBeyondEnd(a, e, dir, includeEnd) && count++ < maxSteps) {
         if (isMajorAngle(a)) majors.push(a);
         else minors.push(a);
         a += dir * stepMinor;
@@ -76,6 +82,7 @@
       id: "GaugeTickMath",
       version: "0.1.0",
       computeSweep,
+      isBeyondEnd,
       buildTickAngles
     };
   }

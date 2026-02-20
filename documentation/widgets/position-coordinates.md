@@ -9,18 +9,15 @@ Specialized nav renderer for `positionBoat` and `positionWp`. It keeps flat layo
 ## Key Details
 
 - Registered as `PositionCoordinateWidget` in `config/components.js`
-- Routed from `NavMapper` for:
-- `kind: "positionBoat"`
-- `kind: "positionWp"`
-- Flat mode delegates to `ThreeValueTextWidget` (preserves one-line `formatLonLats`)
-- Normal/high modes draw:
+- Routed from `NavMapper` for `kind: "positionBoat"` and `kind: "positionWp"`
+- Depends on shared utilities: `GaugeTextLayout` + `GaugeValueMath`
+- No widget-to-widget dependency on `ThreeValueTextWidget`
+- `flat` mode renders one-line `caption/value/unit` directly in this widget
+- `normal`/`high` modes render stacked coordinates:
 - Header row: caption (left), unit (right)
 - Body row 1: latitude
 - Body row 2: longitude
-- Uses existing text layout editables:
-- `ratioThresholdNormal`
-- `ratioThresholdFlat`
-- `captionUnitScale`
+- Uses layout editables: `ratioThresholdNormal`, `ratioThresholdFlat`, `captionUnitScale`
 
 ## Props
 
@@ -37,9 +34,10 @@ Specialized nav renderer for `positionBoat` and `positionWp`. It keeps flat layo
 
 ## Coordinate Formatting
 
-- Uses `avnav.api.formatter.formatLonLatsDecimal(value, axis)`
-- If formatter is unavailable/fails, renders `default` on both lines
-- Invalid/missing coordinates render `default` on both lines
+- `flat` mode uses `Helpers.applyFormatter(value, props)` (normally `formatLonLats`)
+- `normal`/`high` modes use `avnav.api.formatter.formatLonLatsDecimal(value, axis)` for per-line lat/lon text
+- If formatter is unavailable/fails, renders `default` fallback text
+- Invalid/missing coordinates render `default` fallback text
 
 ## Exports
 

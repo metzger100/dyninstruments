@@ -25,11 +25,11 @@ The four semicircle gauges share one renderer implementation:
 
 ## Module Dependencies
 
-In `config/components.js`, all four gauges depend on `SemicircleGaugeEngine`:
+In `config/components.js`, all four gauges depend on both `SemicircleGaugeEngine` and `GaugeValueMath`:
 
 ```text
 SpeedGaugeWidget/DepthGaugeWidget/TemperatureGaugeWidget/VoltageGaugeWidget
-  -> SemicircleGaugeEngine
+  -> SemicircleGaugeEngine + GaugeValueMath
   -> GaugeToolkit
   -> GaugeTextLayout + GaugeValueMath + GaugeAngleMath + GaugeTickMath + GaugeCanvasPrimitives + GaugeDialRenderer
 ```
@@ -86,6 +86,9 @@ Removed from wrappers:
 - tick/value-angle helpers
 - sector conversion helpers
 - semicircle geometry/mode boilerplate
+- numeric extraction (`extractNumberText`)
+- high-end/low-end sector builders
+- speed formatting helper (`formatSpeedString`)
 
 ## Related
 

@@ -23,7 +23,8 @@
     GaugeTickMath: {
       js: BASE + "shared/widget-kits/gauge/GaugeTickMath.js",
       css: undefined,
-      globalKey: "DyniGaugeTickMath"
+      globalKey: "DyniGaugeTickMath",
+      deps: ["GaugeAngleMath"]
     },
     GaugeCanvasPrimitives: {
       js: BASE + "shared/widget-kits/gauge/GaugeCanvasPrimitives.js",
@@ -70,13 +71,14 @@
     ThreeValueTextWidget: {
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
       css: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.css",
-      globalKey: "DyniThreeValueTextWidget"
+      globalKey: "DyniThreeValueTextWidget",
+      deps: ["GaugeTextLayout", "GaugeValueMath"]
     },
     PositionCoordinateWidget: {
       js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
       css: undefined,
       globalKey: "DyniPositionCoordinateWidget",
-      deps: ["ThreeValueTextWidget"]
+      deps: ["GaugeTextLayout", "GaugeValueMath"]
     },
     WindDialWidget: {
       js: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.js",
@@ -94,30 +96,31 @@
       js: BASE + "widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js",
       css: undefined,
       globalKey: "DyniSpeedGaugeWidget",
-      deps: ["SemicircleGaugeEngine"]
+      deps: ["SemicircleGaugeEngine", "GaugeValueMath"]
     },
     DepthGaugeWidget: {
       js: BASE + "widgets/gauges/DepthGaugeWidget/DepthGaugeWidget.js",
       css: undefined,
       globalKey: "DyniDepthGaugeWidget",
-      deps: ["SemicircleGaugeEngine"]
+      deps: ["SemicircleGaugeEngine", "GaugeValueMath"]
     },
     TemperatureGaugeWidget: {
       js: BASE + "widgets/gauges/TemperatureGaugeWidget/TemperatureGaugeWidget.js",
       css: undefined,
       globalKey: "DyniTemperatureGaugeWidget",
-      deps: ["SemicircleGaugeEngine"]
+      deps: ["SemicircleGaugeEngine", "GaugeValueMath"]
     },
     VoltageGaugeWidget: {
       js: BASE + "widgets/gauges/VoltageGaugeWidget/VoltageGaugeWidget.js",
       css: undefined,
       globalKey: "DyniVoltageGaugeWidget",
-      deps: ["SemicircleGaugeEngine"]
+      deps: ["SemicircleGaugeEngine", "GaugeValueMath"]
     },
     ClusterMapperToolkit: {
       js: BASE + "cluster/mappers/ClusterMapperToolkit.js",
       css: undefined,
-      globalKey: "DyniClusterMapperToolkit"
+      globalKey: "DyniClusterMapperToolkit",
+      deps: ["GaugeAngleMath"]
     },
     ClusterRendererRouter: {
       js: BASE + "cluster/rendering/ClusterRendererRouter.js",

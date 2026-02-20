@@ -68,7 +68,7 @@ otherwise -> normal
 
 | Function | Input | Output |
 |---|---|---|
-| `formatDirection360(v, leadingZero)` | heading deg | `0..359` string |
+| `GaugeValueMath.formatDirection360(v, leadingZero)` | heading deg | `0..359` string |
 
 ## Exports
 

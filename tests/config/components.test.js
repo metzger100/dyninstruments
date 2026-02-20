@@ -19,8 +19,17 @@ describe("config/components.js", function () {
       "ClusterRendererRouter",
       "ClusterMapperRegistry"
     ]);
+    expect(components.GaugeTickMath.deps).toEqual(["GaugeAngleMath"]);
+    expect(components.ClusterMapperToolkit.deps).toEqual(["GaugeAngleMath"]);
+    expect(components.SpeedGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
+    expect(components.DepthGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
+    expect(components.TemperatureGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
+    expect(components.VoltageGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
+    expect(components.ThreeValueTextWidget.deps).toEqual(["GaugeTextLayout", "GaugeValueMath"]);
+    expect(components.PositionCoordinateWidget.deps).toEqual(["GaugeTextLayout", "GaugeValueMath"]);
     expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
     expect(components.ClusterRendererRouter.deps).toContain("PositionCoordinateWidget");
+    expect(components.PositionCoordinateWidget.deps).not.toContain("ThreeValueTextWidget");
     expect(components.WindMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/WindMapper.js");
   });
 

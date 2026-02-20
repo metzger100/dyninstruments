@@ -12,6 +12,21 @@ describe("TemperatureGaugeWidget", function () {
       const mod = loadFresh("widgets/gauges/TemperatureGaugeWidget/TemperatureGaugeWidget.js");
       const spec = mod.create({}, {
         getModule(id) {
+          if (id === "GaugeValueMath") {
+            return {
+              create() {
+                return {
+                  extractNumberText(text) {
+                    const match = String(text).match(/-?\d+(?:\.\d+)?/);
+                    return match ? match[0] : "";
+                  },
+                  buildHighEndSectors() {
+                    return [];
+                  }
+                };
+              }
+            };
+          }
           if (id !== "SemicircleGaugeEngine") throw new Error("unexpected module: " + id);
           return {
             create() {

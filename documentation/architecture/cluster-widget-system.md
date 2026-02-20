@@ -56,7 +56,7 @@ function create(def, Helpers) {
 `ClusterRendererRouter` manages these sub-renderers:
 
 - `ThreeValueTextWidget` (default fallback)
-- `PositionCoordinateWidget` (stacked coordinates for nav positions)
+- `PositionCoordinateWidget` (stacked coordinates for nav positions; now self-contained and no longer delegates flat mode to another widget)
 - `WindDialWidget`
 - `CompassGaugeWidget`
 - `SpeedGaugeWidget`

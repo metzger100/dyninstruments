@@ -17,6 +17,10 @@
 
     const toCanvas = angle.degToCanvasRad;
     const computeSweep = tick.computeSweep;
+    const isBeyondEnd = tick.isBeyondEnd || function (curr, end, dir, includeEnd) {
+      if (Number(dir) >= 0) return includeEnd ? (curr > end) : (curr >= end);
+      return includeEnd ? (curr < end) : (curr <= end);
+    };
     const buildTickAngles = tick.buildTickAngles;
     const withCtx = primitive.withCtx;
     const drawRing = primitive.drawRing;
@@ -113,11 +117,7 @@
         const maxSteps = 5000;
         let count = 0;
         let a = s;
-        function reachedEnd(curr) {
-          if (dir > 0) return includeEnd ? (curr > e) : (curr >= e);
-          return includeEnd ? (curr < e) : (curr <= e);
-        }
-        while (!reachedEnd(a) && count++ < maxSteps) {
+        while (!isBeyondEnd(a, e, dir, includeEnd) && count++ < maxSteps) {
           angles.push(a);
           a += dir * step;
         }

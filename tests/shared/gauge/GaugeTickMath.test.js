@@ -35,4 +35,14 @@ describe("GaugeTickMath", function () {
     expect(relative.majors.slice(0, 4)).toEqual([5, 15, 25, 35]);
     expect(relative.majors.filter((a) => a === 35).length).toBeGreaterThan(0);
   });
+
+  it("detects whether an angle has passed the configured end boundary", function () {
+    expect(mod.isBeyondEnd(10, 10, 1, false)).toBe(true);
+    expect(mod.isBeyondEnd(10, 10, 1, true)).toBe(false);
+    expect(mod.isBeyondEnd(11, 10, 1, true)).toBe(true);
+
+    expect(mod.isBeyondEnd(10, 10, -1, false)).toBe(true);
+    expect(mod.isBeyondEnd(10, 10, -1, true)).toBe(false);
+    expect(mod.isBeyondEnd(9, 10, -1, true)).toBe(true);
+  });
 });

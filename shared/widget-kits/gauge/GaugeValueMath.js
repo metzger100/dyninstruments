@@ -22,6 +22,11 @@
       return isFinite(n) ? n : NaN;
     }
 
+    function extractNumberText(text) {
+      const match = String(text).match(/-?\d+(?:\.\d+)?/);
+      return match ? match[0] : "";
+    }
+
     function clamp(value, lo, hi) {
       const n = Number(value);
       if (!isFinite(n)) return Number(lo);
@@ -66,7 +71,7 @@
       return { min: minV, max: maxV, range: maxV - minV };
     }
 
-    function valueToAngle(value, minV, maxV, arc, doClamp) {
+    const valueToAngle = (value, minV, maxV, arc, doClamp) => {
       const opts = {
         min: Number(minV),
         max: Number(maxV),
@@ -75,9 +80,9 @@
         clamp: doClamp !== false
       };
       return angle.valueToAngle(value, opts);
-    }
+    };
 
-    function angleToValue(angleDeg, minV, maxV, arc, doClamp) {
+    const angleToValue = (angleDeg, minV, maxV, arc, doClamp) => {
       const opts = {
         min: Number(minV),
         max: Number(maxV),
@@ -86,7 +91,7 @@
         clamp: doClamp !== false
       };
       return angle.angleToValue(angleDeg, opts);
-    }
+    };
 
     function buildValueTickAngles(minV, maxV, majorStep, minorStep, arc) {
       const majors = [];
@@ -136,6 +141,107 @@
       return { a0, a1 };
     }
 
+    function buildHighEndSectors(props, minV, maxV, arc, options) {
+      const p = props || {};
+      const opts = options || {};
+      const warningColor = opts.warningColor || "#e7c66a";
+      const alarmColor = opts.alarmColor || "#ff7a76";
+
+      const warningFrom = Number(p.warningFrom);
+      const alarmFrom = Number(p.alarmFrom);
+
+      const warningTo = (isFinite(alarmFrom) && isFinite(warningFrom) && alarmFrom > warningFrom)
+        ? alarmFrom
+        : maxV;
+
+      const warning = isFinite(warningFrom)
+        ? sectorAngles(warningFrom, warningTo, minV, maxV, arc)
+        : null;
+
+      const alarm = isFinite(alarmFrom)
+        ? sectorAngles(alarmFrom, maxV, minV, maxV, arc)
+        : null;
+
+      const sectors = [];
+      if (warning) sectors.push({ a0: warning.a0, a1: warning.a1, color: warningColor });
+      if (alarm) sectors.push({ a0: alarm.a0, a1: alarm.a1, color: alarmColor });
+      return sectors;
+    }
+
+    function buildLowEndSectors(props, minV, maxV, arc, options) {
+      const p = props || {};
+      const opts = options || {};
+      const warningColor = opts.warningColor || "#e7c66a";
+      const alarmColor = opts.alarmColor || "#ff7a76";
+
+      const warningFrom = Number((typeof p.warningFrom !== "undefined")
+        ? p.warningFrom
+        : opts.defaultWarningFrom);
+      const alarmFrom = Number((typeof p.alarmFrom !== "undefined")
+        ? p.alarmFrom
+        : opts.defaultAlarmFrom);
+
+      const alarmTo = isFinite(alarmFrom)
+        ? clamp(alarmFrom, minV, maxV)
+        : NaN;
+
+      const warningTo = isFinite(warningFrom)
+        ? clamp(warningFrom, minV, maxV)
+        : NaN;
+
+      const alarm = (isFinite(alarmTo) && alarmTo > minV)
+        ? sectorAngles(minV, alarmTo, minV, maxV, arc)
+        : null;
+
+      const warning = (isFinite(alarmTo) && isFinite(warningTo) && warningTo > alarmTo)
+        ? sectorAngles(alarmTo, warningTo, minV, maxV, arc)
+        : null;
+
+      const warningOnly = (!alarm && isFinite(warningTo) && warningTo > minV)
+        ? sectorAngles(minV, warningTo, minV, maxV, arc)
+        : null;
+
+      const sectors = [];
+      if (alarm) sectors.push({ a0: alarm.a0, a1: alarm.a1, color: alarmColor });
+      if (warning) sectors.push({ a0: warning.a0, a1: warning.a1, color: warningColor });
+      if (warningOnly) sectors.push({ a0: warningOnly.a0, a1: warningOnly.a1, color: warningColor });
+      return sectors;
+    }
+
+    function formatSpeedString(raw, unit) {
+      const n = Number(raw);
+      if (!isFinite(n)) return "---";
+      if (window.avnav && avnav.api && avnav.api.formatter && typeof avnav.api.formatter.formatSpeed === "function") {
+        try {
+          return String(avnav.api.formatter.formatSpeed(n, unit || "kn"));
+        } catch (ignore) {}
+      }
+      return n.toFixed(1) + " " + (unit || "kn");
+    }
+
+    function formatAngle180(value, leadingZero) {
+      const n = Number(value);
+      if (!isFinite(n)) return "---";
+      let a = ((n + 180) % 360 + 360) % 360 - 180;
+      if (a === 180) a = -180;
+      const rounded = Math.round(Math.abs(a));
+      let out = String(rounded);
+      if (leadingZero) out = out.padStart(3, "0");
+      if (a < 0) out = "-" + out;
+      return out;
+    }
+
+    function formatDirection360(value, leadingZero) {
+      const n = Number(value);
+      if (!isFinite(n)) return "---";
+      let a = n % 360;
+      if (a < 0) a += 360;
+      const rounded = Math.round(a) % 360;
+      let out = String(rounded);
+      if (leadingZero) out = out.padStart(3, "0");
+      return out;
+    }
+
     function formatMajorLabel(value) {
       const n = Number(value);
       if (!isFinite(n)) return "";
@@ -171,6 +277,7 @@
       id: "GaugeValueMath",
       version: "0.1.0",
       isFiniteNumber,
+      extractNumberText,
       clamp,
       almostInt,
       isApprox,
@@ -182,6 +289,11 @@
       angleToValue,
       buildValueTickAngles,
       sectorAngles,
+      buildHighEndSectors,
+      buildLowEndSectors,
+      formatSpeedString,
+      formatAngle180,
+      formatDirection360,
       formatMajorLabel,
       computeSemicircleGeometry
     };

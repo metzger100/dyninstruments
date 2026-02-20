@@ -1,7 +1,7 @@
 /**
  * Module: ThreeValueTextWidget - Responsive caption/value/unit numeric canvas renderer
  * Documentation: documentation/widgets/three-elements.md
- * Depends: Helpers.applyFormatter
+ * Depends: Helpers.applyFormatter, GaugeTextLayout, GaugeValueMath
  */
 
 (function (root, factory) {
@@ -11,46 +11,16 @@
 }(this, function () {
   "use strict";
 
-  function setFont(ctx, px, bold, family){ ctx.font = (bold ? '700 ' : '400 ') + px + 'px ' + family; }
-
-  function drawDisconnectOverlay(ctx, W, H, family, color){
-    ctx.save();
-    ctx.globalAlpha = 0.20;
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, W, H);
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = color;
-    const px = Math.max(12, Math.floor(Math.min(W, H) * 0.18));
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    setFont(ctx, px, true, family);
-    ctx.fillText('NO DATA', Math.floor(W/2), Math.floor(H/2));
-    ctx.restore();
-  }
-
-  function clamp(n, lo, hi){ n = Number(n); if (!isFinite(n)) return lo; return Math.max(lo, Math.min(hi, n)); }
-
   // ---- helpers for sizing ---------------------------------------------------
 
-  function fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, bold){
-    let px = Math.max(1, Math.floor(Math.min(basePx, maxH)));
-    if (!text) return px;
-    setFont(ctx, px, !!bold, family);
-    const w = ctx.measureText(text).width;
-    if (w <= maxW + 0.01) return px;
-    const scale = Math.max(0.1, (maxW / Math.max(1, w)));
-    px = Math.max(1, Math.floor(px * scale));
-    return Math.min(px, Math.floor(maxH));
-  }
-
-  function fitValueUnitRowPx(ctx, valueText, unitText, baseValuePx, secScale, gap, maxW, maxH, family){
+  function fitValueUnitRowPx(ctx, valueText, unitText, baseValuePx, secScale, gap, maxW, maxH, family, setFontFn){
     let vPx = Math.max(1, Math.floor(Math.min(baseValuePx, maxH)));
     let uPx = Math.max(1, Math.floor(Math.min(Math.floor(vPx * secScale), maxH)));
 
-    setFont(ctx, vPx, true, family);
+    setFontFn(ctx, vPx, true, family);
     const vW = valueText ? ctx.measureText(valueText).width : 0;
 
-    setFont(ctx, uPx, true, family);
+    setFontFn(ctx, uPx, true, family);
     const uW = (unitText ? ctx.measureText(unitText).width : 0);
 
     const totalW = vW + (unitText ? (gap + uW) : 0);
@@ -67,6 +37,8 @@
   }
 
   function create(def, Helpers) {
+    const textLayout = Helpers.getModule("GaugeTextLayout").create(def, Helpers);
+    const valueMath = Helpers.getModule("GaugeValueMath").create(def, Helpers);
 
     function renderCanvas(canvas, props){
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
@@ -87,13 +59,10 @@
       const tFlat   = Number(props.ratioThresholdFlat   ?? 3.0);
 
       // Unified scale for caption & unit relative to value font.
-      const secScale = clamp(props.captionUnitScale ?? 0.8, 0.3, 3.0);
+      const secScale = valueMath.clamp(props.captionUnitScale ?? 0.8, 0.3, 3.0);
 
       // Decide base mode from aspect ratio thresholds
-      let baseMode; // 'high' (3 rows), 'normal' (2 rows), 'flat' (1 row)
-      if (ratio < tNormal)      baseMode = 'high';
-      else if (ratio > tFlat)   baseMode = 'flat';
-      else                      baseMode = 'normal';
+      const baseMode = valueMath.computeMode(ratio, tNormal, tFlat);
 
       // Collapse rules driven by caption/unit presence
       const hasCaption = !!caption;
@@ -128,41 +97,41 @@
         const maxWBot = Math.max(10, W - padX*2);
 
         const vBaseH = Math.floor(maxHMid);
-        let vPx = fitSingleTextPx(ctx, value, vBaseH, maxWMid, maxHMid, family, /*bold*/true);
+        let vPx = textLayout.fitSingleTextPx(ctx, value, vBaseH, maxWMid, maxHMid, family, /*bold*/true);
 
         const cBaseH = Math.min(Math.floor(vBaseH * secScale), maxHTop);
         const uBaseH = Math.min(Math.floor(vBaseH * secScale), maxHBot);
 
-        const cPx = caption ? fitSingleTextPx(
+        const cPx = caption ? textLayout.fitSingleTextPx(
           ctx, caption, cBaseH, maxWTop, maxHTop, family, /*bold*/true
         ) : 0;
 
-        const uPx = unit ? fitSingleTextPx(
+        const uPx = unit ? textLayout.fitSingleTextPx(
           ctx, unit,    uBaseH, maxWBot, maxHBot, family, /*bold*/true
         ) : 0;
 
         if (caption){
           const yTop = Math.floor(hTop/2);
-          setFont(ctx, cPx, true, family);
+          textLayout.setFont(ctx, cPx, true, family);
           ctx.textAlign = 'left';
           ctx.fillText(caption, padX, yTop);
         }
 
         {
           const yMid = Math.floor(hTop + hMid/2);
-          setFont(ctx, vPx, true, family);
+          textLayout.setFont(ctx, vPx, true, family);
           ctx.textAlign = 'center';
           ctx.fillText(value, Math.floor(W/2), yMid);
         }
 
         if (unit){
           const yBot = Math.floor(hTop + hMid + hBot/2);
-          setFont(ctx, uPx, true, family);
+          textLayout.setFont(ctx, uPx, true, family);
           ctx.textAlign = 'right';
           ctx.fillText(unit, W - padX, yBot);
         }
 
-        if (props.disconnect) drawDisconnectOverlay(ctx, W, H, family, color);
+        if (props.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color);
         return;
       }
 
@@ -180,36 +149,36 @@
 
         const vBaseH = Math.floor(maxHTop);
         const pair = fitValueUnitRowPx(
-          ctx, value, unit, vBaseH, secScale, /*gap*/gapBase, maxWTop, maxHTop, family
+          ctx, value, unit, vBaseH, secScale, /*gap*/gapBase, maxWTop, maxHTop, family, textLayout.setFont
         );
         let vPx = pair.vPx;
         let uPx = unit ? pair.uPx : 0;
 
         const cBaseH = Math.min(Math.floor(vBaseH * secScale), maxHBot);
-        const cPx = caption ? fitSingleTextPx(
+        const cPx = caption ? textLayout.fitSingleTextPx(
           ctx, caption, cBaseH, maxWBot, maxHBot, family, /*bold*/true
         ) : 0;
 
         {
-          setFont(ctx, vPx, true, family); const vW = ctx.measureText(value).width;
+          textLayout.setFont(ctx, vPx, true, family); const vW = ctx.measureText(value).width;
           let uW = 0;
-          if (unit){ setFont(ctx, uPx, true, family); uW = ctx.measureText(unit).width; }
+          if (unit){ textLayout.setFont(ctx, uPx, true, family); uW = ctx.measureText(unit).width; }
           const total = vW + (unit ? gapBase + uW : 0);
           let x = Math.floor((W - total)/2);
           const y = Math.floor(hTop/2);
           ctx.textAlign = 'left';
-          setFont(ctx, vPx, true, family); ctx.fillText(value, x, y); x += vW;
-          if (unit){ x += gapBase; setFont(ctx, uPx, true, family); ctx.fillText(unit, x, y); }
+          textLayout.setFont(ctx, vPx, true, family); ctx.fillText(value, x, y); x += vW;
+          if (unit){ x += gapBase; textLayout.setFont(ctx, uPx, true, family); ctx.fillText(unit, x, y); }
         }
 
         if (caption){
           const y = Math.floor(hTop + hBot/2);
-          setFont(ctx, cPx, true, family);
+          textLayout.setFont(ctx, cPx, true, family);
           ctx.textAlign = 'left';
           ctx.fillText(caption, padX, y);
         }
 
-        if (props.disconnect) drawDisconnectOverlay(ctx, W, H, family, color);
+        if (props.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color);
         return;
       }
 
@@ -223,10 +192,10 @@
           const vPx = Math.floor(mid);
           const sPx = Math.floor(mid * secScale);
 
-          setFont(ctx, vPx, true, family);
+          textLayout.setFont(ctx, vPx, true, family);
           const vW = ctx.measureText(value).width;
 
-          setFont(ctx, sPx, true, family);
+          textLayout.setFont(ctx, sPx, true, family);
           const cW = caption ? ctx.measureText(caption).width : 0;
           const uW = unit ? ctx.measureText(unit).width : 0;
 
@@ -239,20 +208,20 @@
         const vPx = Math.floor(best);
         const sPx = Math.floor(best * secScale);
 
-        setFont(ctx, sPx, true, family); const cW = caption ? ctx.measureText(caption).width : 0;
-        setFont(ctx, vPx, true, family); const vW = ctx.measureText(value).width;
-        setFont(ctx, sPx, true, family); const uW = unit ? ctx.measureText(unit).width : 0;
+        textLayout.setFont(ctx, sPx, true, family); const cW = caption ? ctx.measureText(caption).width : 0;
+        textLayout.setFont(ctx, vPx, true, family); const vW = ctx.measureText(value).width;
+        textLayout.setFont(ctx, sPx, true, family); const uW = unit ? ctx.measureText(unit).width : 0;
 
         const total = (caption ? cW + gapBase : 0) + vW + (unit ? gapBase + uW : 0);
         let x = Math.floor((W - total)/2);
         const y = Math.floor(H/2);
         ctx.textAlign = 'left';
 
-        if (caption){ setFont(ctx, sPx, true, family); ctx.fillText(caption, x, y); x += cW + gapBase; }
-        setFont(ctx, vPx, true, family); ctx.fillText(value, x, y); x += vW;
-        if (unit){ x += gapBase; setFont(ctx, sPx, true, family); ctx.fillText(unit, x, y); }
+        if (caption){ textLayout.setFont(ctx, sPx, true, family); ctx.fillText(caption, x, y); x += cW + gapBase; }
+        textLayout.setFont(ctx, vPx, true, family); ctx.fillText(value, x, y); x += vW;
+        if (unit){ x += gapBase; textLayout.setFont(ctx, sPx, true, family); ctx.fillText(unit, x, y); }
 
-        if (props.disconnect) drawDisconnectOverlay(ctx, W, H, family, color);
+        if (props.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color);
       }
     }
 

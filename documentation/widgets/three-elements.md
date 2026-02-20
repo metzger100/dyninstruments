@@ -13,11 +13,12 @@ Default numeric renderer for clusters. Draws caption, value, and unit as respons
 ThreeValueTextWidget: {
   js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
   css: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.css",
-  globalKey: "DyniThreeValueTextWidget"
+  globalKey: "DyniThreeValueTextWidget",
+  deps: ["GaugeTextLayout", "GaugeValueMath"]
 }
 ```
 
-No dependencies. Used by `ClusterWidget` as default renderer.
+Used by `ClusterWidget` as default renderer.
 
 ## Props
 
@@ -71,9 +72,10 @@ otherwise -> normal
 
 | Function | Purpose |
 |---|---|
-| `fitSingleTextPx(...)` | Fit one string into a box |
+| `GaugeTextLayout.fitSingleTextPx(...)` | Fit one string into a box |
 | `fitValueUnitRowPx(...)` | Fit value+unit pair |
-| `drawDisconnectOverlay(...)` | Draw overlay text |
+| `GaugeTextLayout.drawDisconnectOverlay(...)` | Draw overlay text |
+| `GaugeValueMath.clamp(...)`, `GaugeValueMath.computeMode(...)` | Shared scale/mode logic |
 
 ## Exports
 
