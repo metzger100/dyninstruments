@@ -78,6 +78,8 @@
 
 - **How do I keep docs aligned after code changes?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md)
 - **How do I run documentation validation checks?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#validation)
+- **How do I keep the codebase clean?** → [guides/garbage-collection.md](guides/garbage-collection.md)
+- **What anti-patterns should I watch for?** → [guides/garbage-collection.md#anti-patterns](guides/garbage-collection.md#anti-patterns)
 - **What areas of the codebase need improvement?** → [QUALITY.md](QUALITY.md)
 - **Where are known issues and tech debt tracked?** → [TECH-DEBT.md](TECH-DEBT.md)
 - **Which AI model should I use for a task?** → [QUALITY.md#model-selection-log](QUALITY.md#model-selection-log)
