@@ -12,35 +12,30 @@ Use this workflow whenever code changes touch architecture, module wiring, or wi
 2. Update the mapped docs in `documentation/`
 3. Update root docs (`README.md`, `AGENTS.md`, `CLAUDE.md`) when architecture guidance changes
 4. Every new documentation file must be linked from at least one other doc that is itself reachable from AGENTS.md. The easiest way: add an entry to TABLEOFCONTENTS.md.
-5. Run validation:
+5. Run strict validation gate:
 
 ```bash
-npm run check:all
+npm run check:strict
 ```
 
-6. If behavior/runtime logic changed, run:
+6. During iteration, optionally run targeted checks (`npm run check:all`, `npm test`) for faster feedback.
 
-```bash
-npm test
-```
-
-7. If core logic or test tooling changed, run deeper coverage checks:
-
-```bash
-npm run test:coverage:check
-```
-
-8. Fix all failures and review all warnings before finishing
+7. Fix all failures and review all warnings before finishing
 
 ## Quality and Regression Commands
 
 Run from repository root:
 
 ```bash
-npm run check:all
+npm run check:strict
 ```
 
-`check:all` runs the full validation chain:
+`check:strict` is the default completion gate and runs:
+
+- `npm run check:all`
+- `npm run test:coverage:check`
+
+`check:all` includes:
 
 - `node tools/check-docs.mjs`
 - `node tools/check-doc-format.mjs --warn`
@@ -53,16 +48,11 @@ npm run check:all
 - `node tools/check-naming.mjs`
 - `node tools/check-patterns.mjs`
 
-Behavior/runtime changes still require:
+`test:coverage:check` includes:
 
 ```bash
-npm test
-```
-
-Use coverage checks when changing core logic or test rules:
-
-```bash
-npm run test:coverage:check
+npm run test:coverage
+node tools/check-coverage.mjs
 ```
 
 `check-patterns` is enforced in strict mode inside `check:all`; any finding is a blocking failure.
@@ -82,7 +72,7 @@ npm run test:coverage:check
 
 ## Validation
 
-`npm run check:all` is the default quality gate.
+`npm run check:strict` is the default quality gate.
 
 `tools/check-docs.mjs` (inside `check:all`) verifies:
 
