@@ -72,6 +72,9 @@
 - **CSS variables, day/night mode** → [shared/css-theming.md](shared/css-theming.md)
 - **Font stack (--dyni-font)** → [shared/css-theming.md](shared/css-theming.md)
 - **Plugin-wide theme token resolver** → [shared/theme-tokens.md](shared/theme-tokens.md)
+- **Theme presets (default/slim/bold/night/highcontrast)** → [shared/theme-tokens.md](shared/theme-tokens.md#preset-definitions)
+- **Runtime preset application flow** → [shared/theme-tokens.md](shared/theme-tokens.md#runtime-integration)
+- **How to test presets via browser console** → [shared/theme-tokens.md](shared/theme-tokens.md#manual-testing-browser-console)
 - **Widget border styling** → [shared/css-theming.md](shared/css-theming.md)
 
 ## Documentation Maintenance
@@ -90,6 +93,7 @@
 **"How do I make a gauge respond to aspect ratio?"** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#layout-modes)
 **"How does the pointer/needle work?"** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#pointer-configuration),
 **"Where are shared theme tokens resolved?"** → [shared/theme-tokens.md](shared/theme-tokens.md)
+**"How do I switch a theme preset at runtime?"** → [shared/theme-tokens.md](shared/theme-tokens.md#runtime-integration)
 **"How does day/night theming work?"** → [shared/css-theming.md](shared/css-theming.md), [shared/helpers.md](shared/helpers.md)
 **"How does HiDPI canvas scaling work?"** → [shared/helpers.md](shared/helpers.md#setupcanvas)
 **"How do I hide the native AvNav widget header?"** → [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md#wantshidenativehead)

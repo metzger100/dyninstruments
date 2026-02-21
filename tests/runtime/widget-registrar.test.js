@@ -3,10 +3,12 @@ const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 describe("runtime/widget-registrar.js", function () {
   function setupContext() {
     const registerWidget = vi.fn();
+    const applyThemePresetToContainer = vi.fn();
 
     const context = createScriptContext({
       DyniPlugin: {
         runtime: {
+          applyThemePresetToContainer,
           defaultsFromEditableParams(editable) {
             const out = {};
             Object.keys(editable || {}).forEach((k) => {
@@ -29,11 +31,11 @@ describe("runtime/widget-registrar.js", function () {
 
     runIifeScript("runtime/widget-registrar.js", context);
 
-    return { context, registerWidget };
+    return { context, registerWidget, applyThemePresetToContainer };
   }
 
   it("merges component/widget def and composes update functions", function () {
-    const { context, registerWidget } = setupContext();
+    const { context, registerWidget, applyThemePresetToContainer } = setupContext();
 
     const component = {
       create() {
@@ -95,6 +97,7 @@ describe("runtime/widget-registrar.js", function () {
     registeredDef.renderCanvas(canvas, {});
     expect(canvas.__dyniMarked).toBe(true);
     expect(rootEl._flag).toBe(true);
+    expect(applyThemePresetToContainer).toHaveBeenCalledWith(rootEl);
     expect(canvas.rendered).toBe(true);
   });
 

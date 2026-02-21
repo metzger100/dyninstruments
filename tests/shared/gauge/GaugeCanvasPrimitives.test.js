@@ -17,7 +17,9 @@ describe("GaugeCanvasPrimitives", function () {
     const ctx = createMockContext2D();
 
     draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {
-      fillStyle: "#123456"
+      fillStyle: "#123456",
+      sideFactor: 0.25,
+      lengthFactor: 2
     });
     expect(ctx.fillStyle).toBe("#123456");
   });
@@ -27,8 +29,33 @@ describe("GaugeCanvasPrimitives", function () {
     const ctx = createMockContext2D();
 
     draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {
-      color: "#abcdef"
+      color: "#abcdef",
+      sideFactor: 0.25,
+      lengthFactor: 2
     });
     expect(ctx.fillStyle).toBe("#abcdef");
+  });
+
+  it("does not alter pointer geometry by variant when factors are fixed", function () {
+    function pointerPath(ctx) {
+      return ctx.calls
+        .filter(function (call) { return call.name === "moveTo" || call.name === "lineTo"; })
+        .map(function (call) { return [call.name].concat(call.args); });
+    }
+
+    const draw = create();
+    const normalCtx = createMockContext2D();
+    const longCtx = createMockContext2D();
+    const pointerOptions = {
+      depth: 10,
+      sideFactor: 0.3,
+      lengthFactor: 1,
+      fillStyle: "#123456"
+    };
+
+    draw.drawPointerAtRim(normalCtx, 100, 100, 50, 0, Object.assign({}, pointerOptions, { variant: "normal" }));
+    draw.drawPointerAtRim(longCtx, 100, 100, 50, 0, Object.assign({}, pointerOptions, { variant: "long" }));
+
+    expect(pointerPath(longCtx)).toEqual(pointerPath(normalCtx));
   });
 });

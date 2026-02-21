@@ -52,6 +52,9 @@
         if (wantsHide && !canvas.__dyniMarked) {
           const rootEl = canvas.closest(".widget, .DirectWidget") || canvas.parentElement;
           if (rootEl && !rootEl.hasAttribute("data-dyni")) rootEl.setAttribute("data-dyni", "");
+          if (rootEl && typeof runtime.applyThemePresetToContainer === "function") {
+            runtime.applyThemePresetToContainer(rootEl);
+          }
           canvas.__dyniMarked = true;
         }
         return fn.apply(this, [canvas, props]);

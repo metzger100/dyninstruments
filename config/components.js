@@ -54,6 +54,12 @@
       css: undefined,
       globalKey: "DyniThemeResolver"
     },
+    ThemePresets: {
+      js: BASE + "shared/theme/ThemePresets.js",
+      css: undefined,
+      globalKey: "DyniThemePresets",
+      deps: ["ThemeResolver"]
+    },
     GaugeToolkit: {
       js: BASE + "shared/widget-kits/gauge/GaugeToolkit.js",
       css: undefined,
