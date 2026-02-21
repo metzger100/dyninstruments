@@ -14,7 +14,7 @@ ThreeValueTextWidget: {
   js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
   css: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.css",
   globalKey: "DyniThreeValueTextWidget",
-  deps: ["GaugeTextLayout", "GaugeValueMath"]
+  deps: ["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]
 }
 ```
 

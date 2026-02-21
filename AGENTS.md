@@ -42,7 +42,8 @@ documentation/
 │   └── gauge-shared-api.md         # Shared GaugeToolkit API documentation
 ├── shared/
 │   ├── helpers.md                  # Helpers object (setupCanvas, resolveTextColor)
-│   └── css-theming.md              # CSS vars, day/night, font stack
+│   ├── css-theming.md              # CSS vars, day/night, font stack
+│   └── theme-tokens.md             # ThemeResolver token schema + cache behavior
 ├── widgets/
 │   ├── semicircle-gauges.md        # Speed/Depth/Temperature/Voltage shared 
 │   ├── three-elements.md           # ThreeValueTextWidget numeric renderer

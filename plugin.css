@@ -7,6 +7,23 @@
   --dyni-font: "Inter", "SF Pro Text", -apple-system, "Segoe UI", Roboto,
                "Helvetica Neue", "Noto Sans", Ubuntu, Cantarell, "Liberation Sans",
                Arial, system-ui, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+  --dyni-pointer: #ff2b2b;
+  --dyni-warning: #e7c66a;
+  --dyni-alarm: #ff7a76;
+  --dyni-layline-stb: #82b683;
+  --dyni-layline-port: #ff7a76;
+  --dyni-tick-major-len: 9;
+  --dyni-tick-major-width: 2;
+  --dyni-tick-minor-len: 5;
+  --dyni-tick-minor-width: 1;
+  --dyni-pointer-side: 0.25;
+  --dyni-pointer-length: 2;
+  --dyni-arc-linewidth: 1;
+  --dyni-ring-width: 0.12;
+  --dyni-label-inset: 1.8;
+  --dyni-label-font: 0.14;
+  --dyni-font-weight: 700;
+  --dyni-label-weight: 700;
   font-family: var(--dyni-font);
 }
 
@@ -27,6 +44,11 @@
 /* Night mode border color. */
 .nightMode .widget.dyniplugin,
 .nightMode .widget[data-dyni] {
+  --dyni-pointer: #ff2b2b;
+  --dyni-warning: #e7c66a;
+  --dyni-alarm: #ff7a76;
+  --dyni-layline-stb: #82b683;
+  --dyni-layline-port: #ff7a76;
   border-color: var(--dyni-border-night, rgba(252, 11, 11, 0.18));
 }
 

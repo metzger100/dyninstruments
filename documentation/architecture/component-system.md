@@ -24,6 +24,7 @@ Defined in `config/components.js`. It maps component IDs to file paths, global k
 
 `ClusterMapperRegistry` depends on all per-cluster mapper components.
 `ClusterRendererRouter` depends on all renderer components used at runtime.
+`ThemeResolver` is a shared plugin-wide token resolver used by both gauge and text rendering paths.
 
 ## Dependency Graph
 
@@ -41,9 +42,11 @@ ClusterWidget
 │   └── VesselMapper
 └── ClusterRendererRouter
     ├── ThreeValueTextWidget
+    │   ├── ThemeResolver
     │   ├── GaugeTextLayout
     │   └── GaugeValueMath
     ├── PositionCoordinateWidget
+    │   ├── ThemeResolver
     │   ├── GaugeTextLayout
     │   └── GaugeValueMath
     ├── WindDialWidget
@@ -55,6 +58,7 @@ ClusterWidget
 
 WindDialWidget/CompassGaugeWidget
   └── GaugeToolkit
+      ├── ThemeResolver
       ├── GaugeAngleMath
       ├── GaugeTickMath
       ├── GaugeCanvasPrimitives

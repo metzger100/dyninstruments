@@ -19,14 +19,17 @@ describe("config/components.js", function () {
       "ClusterRendererRouter",
       "ClusterMapperRegistry"
     ]);
+    expect(components.ThemeResolver.globalKey).toBe("DyniThemeResolver");
+    expect(components.ThemeResolver.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemeResolver.js");
     expect(components.GaugeTickMath.deps).toEqual(["GaugeAngleMath"]);
     expect(components.ClusterMapperToolkit.deps).toEqual(["GaugeAngleMath"]);
     expect(components.SpeedGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
     expect(components.DepthGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
     expect(components.TemperatureGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
     expect(components.VoltageGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
-    expect(components.ThreeValueTextWidget.deps).toEqual(["GaugeTextLayout", "GaugeValueMath"]);
-    expect(components.PositionCoordinateWidget.deps).toEqual(["GaugeTextLayout", "GaugeValueMath"]);
+    expect(components.GaugeToolkit.deps).toContain("ThemeResolver");
+    expect(components.ThreeValueTextWidget.deps).toEqual(["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]);
+    expect(components.PositionCoordinateWidget.deps).toEqual(["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]);
     expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
     expect(components.ClusterRendererRouter.deps).toContain("PositionCoordinateWidget");
     expect(components.PositionCoordinateWidget.deps).not.toContain("ThreeValueTextWidget");

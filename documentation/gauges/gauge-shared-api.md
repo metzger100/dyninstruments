@@ -12,6 +12,7 @@ Shared gauge logic is split into focused core modules:
 - `GaugeDialRenderer` for radial tick/label/frame drawing
 - `GaugeTextLayout` for text fitting/drawing and disconnect overlay
 - `GaugeValueMath` for numeric/range/geometry helpers
+- `ThemeResolver` for plugin-wide CSS theme token resolution
 - `GaugeToolkit` as composed facade
 - `SemicircleGaugeEngine` as shared render flow for Speed/Depth/Temperature/Voltage
 
@@ -38,10 +39,11 @@ GaugeDialRenderer: {
 },
 GaugeTextLayout: { js: BASE + "shared/widget-kits/gauge/GaugeTextLayout.js", globalKey: "DyniGaugeTextLayout" },
 GaugeValueMath: { js: BASE + "shared/widget-kits/gauge/GaugeValueMath.js", globalKey: "DyniGaugeValueMath", deps: ["GaugeAngleMath"] },
+ThemeResolver: { js: BASE + "shared/theme/ThemeResolver.js", globalKey: "DyniThemeResolver" },
 GaugeToolkit: {
   js: BASE + "shared/widget-kits/gauge/GaugeToolkit.js",
   globalKey: "DyniGaugeToolkit",
-  deps: ["GaugeTextLayout", "GaugeValueMath", "GaugeAngleMath", "GaugeTickMath", "GaugeCanvasPrimitives", "GaugeDialRenderer"]
+  deps: ["ThemeResolver", "GaugeTextLayout", "GaugeValueMath", "GaugeAngleMath", "GaugeTickMath", "GaugeCanvasPrimitives", "GaugeDialRenderer"]
 },
 SemicircleGaugeEngine: {
   js: BASE + "shared/widget-kits/gauge/SemicircleGaugeEngine.js",
@@ -63,6 +65,7 @@ const renderer = Helpers.getModule("SemicircleGaugeEngine") && Helpers.getModule
 
 | Field | Type | Description |
 |---|---|---|
+| `theme` | object | `ThemeResolver` API (`resolve(canvas)`) |
 | `text` | object | `GaugeTextLayout` API |
 | `value` | object | `GaugeValueMath` API |
 | `angle` | object | `GaugeAngleMath` API |

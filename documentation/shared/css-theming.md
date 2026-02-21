@@ -35,19 +35,50 @@ If none set: falls back to `getComputedStyle(canvas).color` or `"#000"`.
 | `--dyni-border-day` | Border color in day mode | `rgba(0, 0, 0, 0.30)` |
 | `--dyni-border-night` | Border color in night mode | `rgba(252, 11, 11, 0.18)` |
 
+### Theme Tokens (ThemeResolver)
+
+Read by `ThemeResolver.resolve(canvas)`:
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `--dyni-pointer` | Pointer color | `#ff2b2b` |
+| `--dyni-warning` | Warning sector color | `#e7c66a` |
+| `--dyni-alarm` | Alarm sector color | `#ff7a76` |
+| `--dyni-layline-stb` | Starboard layline color | `#82b683` |
+| `--dyni-layline-port` | Port layline color | `#ff7a76` |
+| `--dyni-tick-major-len` | Major tick length | `9` |
+| `--dyni-tick-major-width` | Major tick stroke width | `2` |
+| `--dyni-tick-minor-len` | Minor tick length | `5` |
+| `--dyni-tick-minor-width` | Minor tick stroke width | `1` |
+| `--dyni-pointer-side` | Pointer side factor | `0.25` |
+| `--dyni-pointer-length` | Pointer length factor | `2` |
+| `--dyni-arc-linewidth` | Arc line width | `1` |
+| `--dyni-ring-width` | Ring width factor | `0.12` |
+| `--dyni-label-inset` | Label inset factor | `1.8` |
+| `--dyni-label-font` | Label font factor | `0.14` |
+| `--dyni-font-weight` | Primary font weight | `700` |
+| `--dyni-label-weight` | Label font weight | `700` |
+
 ## Day/Night Mode
 
-AvNav adds `.nightMode` class to the page root in night mode. CSS handles border adaptation:
+AvNav adds `.nightMode` class to the page root in night mode. CSS handles border and token adaptation:
 
 ```css
 /* Day mode (default) */
 .widget.dyniplugin { border: 1px solid var(--dyni-border-day, rgba(0,0,0,0.30)); }
 
 /* Night mode */
-.nightMode .widget.dyniplugin { border-color: var(--dyni-border-night, rgba(252,11,11,0.18)); }
+.nightMode .widget.dyniplugin {
+  --dyni-pointer: #ff2b2b;
+  --dyni-warning: #e7c66a;
+  --dyni-alarm: #ff7a76;
+  --dyni-layline-stb: #82b683;
+  --dyni-layline-port: #ff7a76;
+  border-color: var(--dyni-border-night, rgba(252,11,11,0.18));
+}
 ```
 
-Canvas colors adapt automatically because `resolveTextColor()` reads live CSS values that AvNav changes on mode switch.
+Color-token night overrides are CSS-only. `ThemeResolver` keeps one JS defaults map and reads live CSS each mode after cache invalidation.
 
 ## Head Hiding
 
@@ -89,4 +120,5 @@ SpeedGaugeWidget, DepthGaugeWidget, TemperatureGaugeWidget, VoltageGaugeWidget h
 ## Related
 
 - [helpers.md](helpers.md) — How resolveTextColor/resolveFontFamily read CSS
+- [theme-tokens.md](theme-tokens.md) — ThemeResolver tokens and cache behavior
 - [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md) — Canvas color palette

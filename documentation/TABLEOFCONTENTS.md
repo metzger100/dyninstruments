@@ -71,6 +71,7 @@
 
 - **CSS variables, day/night mode** → [shared/css-theming.md](shared/css-theming.md)
 - **Font stack (--dyni-font)** → [shared/css-theming.md](shared/css-theming.md)
+- **Plugin-wide theme token resolver** → [shared/theme-tokens.md](shared/theme-tokens.md)
 - **Widget border styling** → [shared/css-theming.md](shared/css-theming.md)
 
 ## Documentation Maintenance
@@ -87,7 +88,8 @@
 
 **"How do I add warning/alarm sectors to a gauge?"** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#sector-logic),
 **"How do I make a gauge respond to aspect ratio?"** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#layout-modes)
-**"How does the pointer/needle work?"** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#pointer-configuration)
+**"How does the pointer/needle work?"** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#pointer-configuration),
+**"Where are shared theme tokens resolved?"** → [shared/theme-tokens.md](shared/theme-tokens.md)
 **"How does day/night theming work?"** → [shared/css-theming.md](shared/css-theming.md), [shared/helpers.md](shared/helpers.md)
 **"How does HiDPI canvas scaling work?"** → [shared/helpers.md](shared/helpers.md#setupcanvas)
 **"How do I hide the native AvNav widget header?"** → [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md#wantshidenativehead)

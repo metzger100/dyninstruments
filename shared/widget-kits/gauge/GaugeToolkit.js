@@ -1,7 +1,7 @@
 /**
  * Module: GaugeToolkit - Facade that composes shared gauge utility modules
  * Documentation: documentation/gauges/gauge-shared-api.md
- * Depends: GaugeTextLayout, GaugeValueMath, GaugeAngleMath, GaugeTickMath, GaugeCanvasPrimitives, GaugeDialRenderer
+ * Depends: ThemeResolver, GaugeTextLayout, GaugeValueMath, GaugeAngleMath, GaugeTickMath, GaugeCanvasPrimitives, GaugeDialRenderer
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,6 +11,7 @@
   "use strict";
 
   function create(def, Helpers) {
+    const theme = Helpers.getModule("ThemeResolver").create(def, Helpers);
     const text = Helpers.getModule("GaugeTextLayout").create(def, Helpers);
     const value = Helpers.getModule("GaugeValueMath").create(def, Helpers);
     const angle = Helpers.getModule("GaugeAngleMath").create(def, Helpers);
@@ -34,6 +35,7 @@
     return {
       id: "GaugeToolkit",
       version: "0.2.0",
+      theme,
       text,
       value,
       angle,
