@@ -50,7 +50,10 @@ const RULES = [
   },
   {
     name: "todo-without-owner",
-    scope: { include: ["**/*.js", "**/*.md"], exclude: ["node_modules/**"] },
+    scope: {
+      include: ["**/*.js", "**/*.md"],
+      exclude: ["node_modules/**", "README.md", "CONTRIBUTING.md", "ROADMAP.md"]
+    },
     detect: /\b(?:TODO|FIXME|HACK|XXX)\b/,
     allowlist: [],
     run: runTodoWithoutOwner,

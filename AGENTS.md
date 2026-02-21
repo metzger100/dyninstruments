@@ -108,7 +108,6 @@ Task: Add new BarometerGauge
 
 - [ ] Read TABLEOFCONTENTS.md to find relevant docs.
 - [ ] Read only necessary documentation.
-- [ ] For non-trivial tasks: create .plan.md or use planning mode first.
 - [ ] Implementation complete.
 - [ ] Updated relevant documentation.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.

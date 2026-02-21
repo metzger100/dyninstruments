@@ -6,7 +6,6 @@
 
 ## Repository Overview
 
-- **Where is the repository-level project overview?** → [../README.md](../README.md)
 - **Where is the documentation navigation index?** → [TABLEOFCONTENTS.md](TABLEOFCONTENTS.md)
 
 ## AvNav Plugin API (External)
