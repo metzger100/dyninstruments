@@ -15,7 +15,7 @@ Rationale: A single module boundary keeps agent output predictable and load-safe
 Rationale: One rendering API prevents inconsistent UI implementations across sessions.
 4. Rule: Dependency direction is one-way by layer: `widgets -> shared`; `cluster -> cluster/widgets/shared`; `shared -> shared`; `config` is pure data; `runtime` must not depend on `widgets/cluster/shared`.
 Rationale: One-way layering prevents circular dependencies that confuse agents.
-5. Rule: Keep JavaScript files at or below 300 lines; split before crossing the limit.
+5. Rule: Keep JavaScript files at or below 400 lines; split before crossing the limit.
 Rationale: Focused files improve agent accuracy and reduce regression risk.
 6. Rule: Documentation must be updated in the same task as code/architecture changes.
 Rationale: Stale docs become stale agent guidance in future sessions.

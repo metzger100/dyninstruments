@@ -16,7 +16,7 @@ Use this document for runtime-safe component structure and naming. It defines fi
 
 ## File Size Limits
 
-- Target: `<=300` lines per JS file.
+- Target: `<=400` lines per JS file.
 - Shared drawing/layout logic must be split into `shared/widget-kits/gauge/` modules:
   - `GaugeAngleMath`
   - `GaugeTickMath`
@@ -24,7 +24,7 @@ Use this document for runtime-safe component structure and naming. It defines fi
   - `GaugeDialRenderer`
 - Gauge-specific behavior stays in individual gauge component files.
 - Cluster configs live under `config/clusters/`.
-- If a legacy file already exceeds 300 lines, isolate new logic and avoid increasing file size further.
+- If a legacy file already exceeds 400 lines, isolate new logic and avoid increasing file size further.
 
 ## Mandatory File Headers
 

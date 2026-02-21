@@ -83,11 +83,11 @@ Task: Add new BarometerGauge
 
 ## 3. File Size Limits
 
-- **Target: <=300 lines per JS file**
+- **Target: <=400 lines per JS file**
 - Shared drawing/layout code → split reusable components in `shared/widget-kits/gauge/` (`GaugeAngleMath`, `GaugeTickMath`, `GaugeCanvasPrimitives`, `GaugeDialRenderer`)
 - Gauge-specific code only in individual gauge component files
 - Cluster configs live under `config/clusters/`
-- If a legacy file exceeds 300 lines, keep new logic isolated and avoid increasing size further
+- If a legacy file exceeds 400 lines, keep new logic isolated and avoid increasing size further
 
 ---
 
