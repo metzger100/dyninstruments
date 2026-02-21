@@ -1,13 +1,13 @@
-# CONTRIBUTING (Human + AI Workflow)
+# CONTRIBUTING (Developer + AI Workflow)
 
-This document is for human contributors using AI coding tools.
-It describes how to prompt, when to use planning mode, what the AI will do, and what the human must verify before merge.
+This document is for contributors using AI coding tools.
+It describes how to prompt, when to use planning mode, what the AI will do, and what the developer must verify before merge.
 
 ## 1) Purpose and Audience
 
-- Audience: human developers using Codex/Claude-style coding agents.
+- Audience: Developers using Codex/Claude-style coding agents.
 - Goal: fast implementation without quality drift.
-- Rule: the human owns final correctness, architecture quality, and documentation quality.
+- Rule: the developer owns final correctness, architecture quality, and documentation quality.
 
 ## 2) How to Prompt AI Effectively
 
@@ -57,9 +57,9 @@ Refactor this area without behavior regression:
 - Report exactly which docs were updated and why
 ```
 
-## 3) Planning Mode Is a Human Decision
+## 3) Planning Mode helps improving the results
 
-The AI does not decide whether planning mode should be enabled. The human must decide before prompting.
+The AI does not decide whether planning mode should be enabled. The Developer must decide before prompting.
 
 | Situation | Planning Mode |
 |---|---|
@@ -84,7 +84,7 @@ This only works if the prompt includes clear scope and required validation.
 
 ## 5) Mandatory Human Review Responsibilities
 
-Before merge, the human must verify:
+Before merge, the developer must verify:
 
 1. Code and documentation match each other.
 2. No AI slop was introduced, including:
@@ -128,7 +128,7 @@ npm run test:coverage:check
 
 Do not merge with failing checks.
 
-## 8) Pre-Merge Human Checklist
+## 8) Pre-Merge Checklist
 
 - [ ] Prompt had explicit scope, constraints, and required checks.
 - [ ] Planning mode was chosen deliberately by the human.
