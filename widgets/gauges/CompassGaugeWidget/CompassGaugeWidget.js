@@ -49,7 +49,7 @@
       const R = Math.max(14, Math.floor(D / 2));
       const cx = Math.floor(W/2);
       const cy = Math.floor(H/2);
-      const ringW = Math.max(6, Math.floor(R * 0.12));
+      const ringW = Math.max(6, Math.floor(R * theme.ring.widthFactor));
       const rOuter = R;
       const lubber = Math.max(10, Math.floor(ringW * 0.9));
 
@@ -143,7 +143,7 @@
 
       // NORMAL: centered three-row block inside the safe circle
       {
-        const labelInsetVal = Math.max(18, Math.floor(ringW * 1.8));
+        const labelInsetVal = Math.max(18, Math.floor(ringW * theme.labels.insetFactor));
         const extra = Math.max(6, Math.floor(R * 0.06));
         const rSafe = Math.max(10, rOuter - (labelInsetVal + extra));
 

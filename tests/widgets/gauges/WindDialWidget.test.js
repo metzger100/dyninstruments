@@ -8,6 +8,7 @@ describe("WindDialWidget", function () {
     const pointerCalls = [];
     const ringCalls = [];
     const tickCalls = [];
+    const labelCalls = [];
     const themeDefaults = {
       colors: {
         pointer: "#ff2b2b",
@@ -25,7 +26,12 @@ describe("WindDialWidget", function () {
         lengthFactor: 1.9
       },
       ring: {
-        arcLineWidth: 2
+        arcLineWidth: 2,
+        widthFactor: 0.35
+      },
+      labels: {
+        insetFactor: 2.1,
+        fontFactor: 0.35
       }
     };
     const applyFormatter = vi.fn((value, spec) => {
@@ -68,7 +74,9 @@ describe("WindDialWidget", function () {
                   drawTicks(ctx, cx, cy, rOuter, opts) {
                     tickCalls.push(opts);
                   },
-                  drawLabels() {}
+                  drawLabels(ctx, cx, cy, rOuter, opts) {
+                    labelCalls.push(opts);
+                  }
                 },
                 theme: {
                   resolve() {
@@ -151,10 +159,13 @@ describe("WindDialWidget", function () {
     expect(valueDrawCalls.some((c) => c.valueText === "spd:5.5:kn" && c.unitText === "kn")).toBe(true);
     expect(laylineCalls[0].fillStyle).toBe(themeDefaults.colors.laylineStb);
     expect(laylineCalls[1].fillStyle).toBe(themeDefaults.colors.laylinePort);
+    expect(laylineCalls[0].thickness).toBe(17);
+    expect(laylineCalls[1].thickness).toBe(17);
     expect(pointerCalls[0].theme).toBe(themeDefaults);
     expect(pointerCalls[0].color).toBeUndefined();
     expect(pointerCalls[0].sideFactor).toBe(themeDefaults.pointer.sideFactor);
     expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.pointer.lengthFactor);
+    expect(pointerCalls[0].depth).toBe(15);
     expect(ringCalls[0].lineWidth).toBe(themeDefaults.ring.arcLineWidth);
     expect(tickCalls[0].major).toEqual({
       len: themeDefaults.ticks.majorLen,
@@ -164,6 +175,8 @@ describe("WindDialWidget", function () {
       len: themeDefaults.ticks.minorLen,
       width: themeDefaults.ticks.minorWidth
     });
+    expect(labelCalls[0].radiusOffset).toBe(35);
+    expect(labelCalls[0].fontPx).toBe(17);
   });
 
   it("throws when required dial theme tokens are missing", function () {

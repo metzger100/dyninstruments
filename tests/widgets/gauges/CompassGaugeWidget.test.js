@@ -4,6 +4,7 @@ const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-ca
 describe("CompassGaugeWidget", function () {
   it("uses theme pointer color for the fixed lubber marker", function () {
     const pointerCalls = [];
+    const rimMarkerCalls = [];
     const ringCalls = [];
     const tickCalls = [];
     const themeDefaults = {
@@ -21,7 +22,12 @@ describe("CompassGaugeWidget", function () {
         lengthFactor: 1.6
       },
       ring: {
-        arcLineWidth: 2.2
+        arcLineWidth: 2.2,
+        widthFactor: 0.35
+      },
+      labels: {
+        insetFactor: 2.1,
+        fontFactor: 0.35
       }
     };
 
@@ -57,7 +63,9 @@ describe("CompassGaugeWidget", function () {
                   drawPointerAtRim(ctx, cx, cy, rOuter, angle, opts) {
                     pointerCalls.push(opts);
                   },
-                  drawRimMarker() {},
+                  drawRimMarker(ctx, cx, cy, rOuter, angle, opts) {
+                    rimMarkerCalls.push(opts);
+                  },
                   drawLabels() {}
                 },
                 theme: {
@@ -123,6 +131,7 @@ describe("CompassGaugeWidget", function () {
 
     spec.renderCanvas(canvas, {
       heading: 12,
+      markerCourse: 30,
       caption: "HDG",
       unit: "°"
     });
@@ -131,6 +140,8 @@ describe("CompassGaugeWidget", function () {
     expect(pointerCalls[0].color).toBeUndefined();
     expect(pointerCalls[0].sideFactor).toBe(themeDefaults.pointer.sideFactor);
     expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.pointer.lengthFactor);
+    expect(pointerCalls[0].depth).toBe(15);
+    expect(rimMarkerCalls[0]).toEqual({ len: 15, width: 6 });
     expect(ringCalls[0].lineWidth).toBe(themeDefaults.ring.arcLineWidth);
     expect(tickCalls[0].major).toEqual({
       len: themeDefaults.ticks.majorLen,

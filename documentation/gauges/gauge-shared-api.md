@@ -123,6 +123,20 @@ Color-token flow:
 `GaugeValueMath.create(def, Helpers)` returns shared numeric helpers:
 `isFiniteNumber`, `extractNumberText`, `clamp`, `almostInt`, `isApprox`, `computePad`, `computeGap`, `computeMode`, `normalizeRange`, `valueToAngle`, `angleToValue`, `buildValueTickAngles`, `sectorAngles`, `buildHighEndSectors`, `buildLowEndSectors`, `formatAngle180`, `formatDirection360`, `formatMajorLabel`, `computeSemicircleGeometry`.
 
+### `computeSemicircleGeometry(W, H, pad, overrides?)`
+
+Computes centered semicircle geometry metrics:
+
+- Returns: `{ availW, availH, R, gaugeLeft, gaugeTop, cx, cy, rOuter, ringW, needleDepth }`
+- Backward compatible: existing 3-argument calls are unchanged
+
+Optional `overrides` fields:
+
+| Field | Type | Default | Behavior |
+|---|---|---|---|
+| `ringWidthFactor` | number | `0.12` | Computes `ringW = max(6, floor(R * ringWidthFactor))` |
+| `needleDepthFactor` | number | derived | If provided: `needleDepth = max(8, floor(ringW * needleDepthFactor))`; if omitted, preserves legacy derived behavior `max(8, floor(ringW * 0.9))` |
+
 ## SemicircleGaugeEngine API
 
 `SemicircleGaugeEngine.create(def, Helpers).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
