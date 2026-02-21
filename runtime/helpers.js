@@ -9,6 +9,9 @@
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
   const hasOwn = Object.prototype.hasOwnProperty;
+  const TEXT_COLOR_VARS = ["--dyni-fg", "--instrument-fg", "--mainfg"];
+  const DEFAULT_FONT_STACK = '"Inter","SF Pro Text",-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
+  const typographyByCanvas = new WeakMap();
 
   function applyFormatter(raw, props) {
     const fpRaw = props && props.formatterParameters;
@@ -56,21 +59,51 @@
     };
   }
 
-  function resolveTextColor(canvas) {
-    const st = getComputedStyle(canvas);
-    const vars = ["--dyni-fg", "--instrument-fg", "--mainfg"];
-    for (const v of vars) {
-      const val = st.getPropertyValue(v).trim();
-      if (val) return val;
-    }
-    return st.color || "#000";
+  function getNightModeState(canvas) {
+    const doc = canvas && canvas.ownerDocument;
+    if (!doc) return false;
+
+    const rootEl = doc.documentElement;
+    if (rootEl && rootEl.classList && rootEl.classList.contains("nightMode")) return true;
+
+    const body = doc.body;
+    return !!(body && body.classList && body.classList.contains("nightMode"));
   }
 
-  function resolveFontFamily(el) {
-    const st = getComputedStyle(el);
-    const varVal = st.getPropertyValue("--dyni-font");
-    if (varVal && varVal.trim()) return varVal.trim();
-    return '"Inter","SF Pro Text",-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
+  function resolveTypography(canvas) {
+    const nightMode = getNightModeState(canvas);
+    const cached = typographyByCanvas.get(canvas);
+    if (cached && cached.nightMode === nightMode) return cached;
+
+    const st = getComputedStyle(canvas);
+
+    let textColor = "";
+    for (const cssVar of TEXT_COLOR_VARS) {
+      const val = st.getPropertyValue(cssVar).trim();
+      if (!val) continue;
+      textColor = val;
+      break;
+    }
+    if (!textColor) textColor = st.color || "#000";
+
+    const fontVar = st.getPropertyValue("--dyni-font");
+    const fontFamily = fontVar && fontVar.trim() ? fontVar.trim() : DEFAULT_FONT_STACK;
+
+    const resolved = {
+      nightMode: nightMode,
+      textColor: textColor,
+      fontFamily: fontFamily
+    };
+    typographyByCanvas.set(canvas, resolved);
+    return resolved;
+  }
+
+  function resolveTextColor(canvas) {
+    return resolveTypography(canvas).textColor;
+  }
+
+  function resolveFontFamily(canvas) {
+    return resolveTypography(canvas).fontFamily;
   }
 
   function createHelpers(getModule) {
