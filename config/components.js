@@ -82,7 +82,7 @@
     },
     ThreeValueTextWidget: {
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
-      css: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.css",
+      css: undefined,
       globalKey: "DyniThreeValueTextWidget",
       deps: ["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]
     },
@@ -94,13 +94,13 @@
     },
     WindDialWidget: {
       js: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.js",
-      css: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.css",
+      css: undefined,
       globalKey: "DyniWindDialWidget",
       deps: ["GaugeToolkit"]
     },
     CompassGaugeWidget: {
       js: BASE + "widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js",
-      css: BASE + "widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.css",
+      css: undefined,
       globalKey: "DyniCompassGaugeWidget",
       deps: ["GaugeToolkit"]
     },
@@ -200,7 +200,7 @@
     },
     ClusterWidget: {
       js: BASE + "cluster/ClusterWidget.js",
-      css: BASE + "cluster/ClusterWidget.css",
+      css: undefined,
       globalKey: "DyniClusterWidget",
       deps: [
         "ClusterMapperToolkit",

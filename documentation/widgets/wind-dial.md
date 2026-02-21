@@ -13,7 +13,7 @@ Theme colors are resolved once per render via `GaugeToolkit.theme.resolve(canvas
 // In config/components.js
 WindDialWidget: {
   js: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.js",
-  css: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.css",
+  css: undefined,
   globalKey: "DyniWindDialWidget",
   deps: ["GaugeToolkit"]
 }
