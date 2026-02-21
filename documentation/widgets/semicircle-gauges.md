@@ -93,6 +93,16 @@ Removed from wrappers:
 - high-end/low-end sector builders
 - direct `avnav.api` formatter access and duplicated guard patterns
 
+## Performance
+
+- Text-fit caching is owned by `SemicircleGaugeEngine.createRenderer(spec)` closure state (`fitCache`), so each gauge renderer instance keeps its own cache.
+- Covered fitting paths: `flat` (compact), `high`, and `normal` layouts.
+- Cache keys include all fitting-relevant inputs:
+  - shared inputs: `W`, `H`, active mode, `caption`, `valueText`, `unit`, effective `secScale` (`captionUnitScale` after clamp), resolved font family, and theme font weights.
+  - geometry/layout inputs: mode-specific box dimensions and geometry values used by fitting (`R`, `ringW`, placement/box metrics, and normal-mode `rSafe` search bounds).
+- Invalidation is automatic by key mismatch when any text, typography, scale, or geometry input changes.
+- Draw calls still execute every frame; only intermediate fitting outputs (chosen sizes/layout fit results) are reused on cache hits.
+
 ## Related
 
 - [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
