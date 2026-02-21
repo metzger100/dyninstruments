@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
-const ROOT = process.cwd();
-const WARN_MODE = process.argv.includes("--warn");
+import { pathToFileURL } from "node:url";
+let ROOT = process.cwd();
+let WARN_MODE = false;
 const SKIP_DIRS = new Set([".git", "node_modules", "coverage"]);
 const fileCache = new Map();
 const scopeCache = new Map();
@@ -58,35 +59,77 @@ const RULES = [
     allowlist: [],
     run: runTodoWithoutOwner,
     message: ({ file, line }) => `[todo-missing-owner] ${file}:${line}\nTODO/FIXME without owner and date. Use format: TODO(name, 2025-06-15): description.\nUndated TODOs become permanent. See conventions/coding-standards.md.`
+  },
+  {
+    name: "unused-fallback",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "config/**/*.js", "plugin.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runUnusedFallbackRule,
+    message: ({ file, line, name }) => `[unused-fallback] ${file}:${line}\nFallback symbol '${name}' is declared but never used. Remove stale fallback leftovers from refactors or wire the fallback into active code paths.`
+  },
+  {
+    name: "dead-code",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "config/**/*.js", "plugin.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runDeadCodeRule,
+    functionAllowlist: ["create", "translateFunction", "translate", "renderCanvas"],
+    message: ({ file, line, detail }) => `[dead-code] ${file}:${line}\n${detail}\nRemove stale refactor leftovers or make branch/function reachable.`
   }
 ];
-const findings = [];
-const checkedFiles = new Set();
-const byRule = {};
-for (const rule of RULES) {
-  const files = filesForScope(rule.scope);
-  for (const file of files) checkedFiles.add(file);
-  const run = rule.run || runRegexRule;
-  const ruleFindings = run(rule, files).sort(compareFindings);
-  byRule[rule.name] = ruleFindings.length;
-  findings.push(...ruleFindings);
+export function runPatternCheck(options = {}) {
+  ROOT = path.resolve(options.root || process.cwd());
+  WARN_MODE = !!options.warnMode;
+  fileCache.clear();
+  scopeCache.clear();
+
+  const findings = [];
+  const checkedFiles = new Set();
+  const byRule = {};
+  for (const rule of RULES) {
+    const files = filesForScope(rule.scope);
+    for (const file of files) checkedFiles.add(file);
+    const run = rule.run || runRegexRule;
+    const ruleFindings = run(rule, files).sort(compareFindings);
+    byRule[rule.name] = ruleFindings.length;
+    findings.push(...ruleFindings);
+  }
+
+  const summary = {
+    ok: findings.length === 0,
+    warnMode: WARN_MODE,
+    checkedFiles: checkedFiles.size,
+    failures: findings.length,
+    byRule
+  };
+
+  if (options.print !== false) {
+    if (findings.length) {
+      const print = WARN_MODE ? console.log : console.error;
+      for (const finding of findings) print(finding.message);
+      print("SUMMARY_JSON=" + JSON.stringify(summary));
+    }
+    else {
+      console.log("Pattern check passed.");
+      console.log("SUMMARY_JSON=" + JSON.stringify(summary));
+    }
+  }
+
+  return { summary, findings };
 }
-const summary = {
-  ok: findings.length === 0,
-  warnMode: WARN_MODE,
-  checkedFiles: checkedFiles.size,
-  failures: findings.length,
-  byRule
-};
-if (findings.length) {
-  const print = WARN_MODE ? console.log : console.error;
-  for (const finding of findings) print(finding.message);
-  print("SUMMARY_JSON=" + JSON.stringify(summary));
-  if (!WARN_MODE) process.exit(1);
+export function runPatternCheckCli(argv = process.argv.slice(2)) {
+  const warnMode = argv.includes("--warn");
+  const { summary, findings } = runPatternCheck({
+    root: process.cwd(),
+    warnMode,
+    print: true
+  });
+  if (findings.length && !summary.warnMode) process.exit(1);
   process.exit(0);
 }
-console.log("Pattern check passed.");
-console.log("SUMMARY_JSON=" + JSON.stringify(summary));
 function runRegexRule(rule, files) {
   const out = [];
   for (const file of files) {
@@ -157,6 +200,109 @@ function runTodoWithoutOwner(rule, files) {
   }
   return out;
 }
+function runUnusedFallbackRule(rule, files) {
+  const out = [];
+  const detect = /\b(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\b/g;
+
+  for (const file of files) {
+    const data = getFileData(file);
+    const seen = new Set();
+    let match;
+
+    while ((match = detect.exec(data.maskedText))) {
+      const name = match[1];
+      if (!/fallback/i.test(name)) continue;
+      const canonical = name.toLowerCase();
+      if (seen.has(canonical)) continue;
+      seen.add(canonical);
+
+      const uses = countIdentifierReferences(data.maskedText, name);
+      if (uses > 1) continue;
+
+      const line = lineAt(match.index, data.lineStarts);
+      out.push({
+        file,
+        line,
+        message: rule.message({ file, line, name })
+      });
+    }
+  }
+
+  return out;
+}
+function runDeadCodeRule(rule, files) {
+  const out = [];
+
+  for (const file of files) {
+    const data = getFileData(file);
+    const seenLines = new Set();
+    const functionDecl = /^\s*function\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(/gm;
+    let match;
+
+    while ((match = functionDecl.exec(data.maskedText))) {
+      const name = match[1];
+      if (rule.functionAllowlist.includes(name)) continue;
+
+      const references = countIdentifierReferences(data.maskedText, name);
+      if (references > 1) continue;
+
+      const line = lineAt(match.index, data.lineStarts);
+      const key = `${file}:${line}`;
+      if (seenLines.has(key)) continue;
+      seenLines.add(key);
+      out.push({
+        file,
+        line,
+        message: rule.message({
+          file,
+          line,
+          detail: `Function '${name}' is declared but never referenced.`
+        })
+      });
+    }
+
+    const directIf = /\bif\s*\(\s*(true|false)\s*\)/g;
+    while ((match = directIf.exec(data.maskedText))) {
+      const literal = match[1];
+      const line = lineAt(match.index, data.lineStarts);
+      const key = `${file}:${line}`;
+      if (seenLines.has(key)) continue;
+      seenLines.add(key);
+      out.push({
+        file,
+        line,
+        message: rule.message({
+          file,
+          line,
+          detail: `Condition 'if (${literal})' is constant; one branch is unreachable.`
+        })
+      });
+    }
+
+    const boolConsts = collectFileScopeConstantBooleans(data.maskedText);
+    for (const entry of boolConsts) {
+      const ifRegex = new RegExp(`\\bif\\s*\\(\\s*(!)?\\s*${escapeRegex(entry.name)}\\s*\\)`, "g");
+      let ifMatch;
+      while ((ifMatch = ifRegex.exec(data.maskedText))) {
+        const negated = !!ifMatch[1];
+        const line = lineAt(ifMatch.index, data.lineStarts);
+        const key = `${file}:${line}`;
+        if (seenLines.has(key)) continue;
+        seenLines.add(key);
+
+        const testExpr = negated ? `!${entry.name}` : entry.name;
+        const detail = `Condition 'if (${testExpr})' is constant because 'const ${entry.name} = ${entry.value}'.`;
+        out.push({
+          file,
+          line,
+          message: rule.message({ file, line, detail })
+        });
+      }
+    }
+  }
+
+  return out;
+}
 function canonicalName(name) {
   if (name === "formatSpeed" || name === "formatSpeedString") return "__formatSpeed";
   if (name === "formatAngle180" || name === "formatDirection360") return "__formatAngleDirection";
@@ -208,7 +354,7 @@ function getFileData(file) {
   for (let i = 0; i < text.length; i += 1) {
     if (text.charCodeAt(i) === 10) lineStarts.push(i + 1);
   }
-  const data = { text, lineStarts };
+  const data = { text, lineStarts, maskedText: maskCommentsAndStrings(text) };
   fileCache.set(file, data);
   return data;
 }
@@ -252,6 +398,107 @@ function asGlobal(re) {
 function compareFindings(a, b) {
   return a.file.localeCompare(b.file) || a.line - b.line;
 }
+function collectFileScopeConstantBooleans(maskedText) {
+  const out = [];
+  const re = /^\s*const\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*(true|false)\s*;/gm;
+  let match;
+  while ((match = re.exec(maskedText))) {
+    out.push({ name: match[1], value: match[2] });
+  }
+  return out;
+}
+function countIdentifierReferences(text, name) {
+  const re = identifierRegExp(name);
+  let count = 0;
+  while (re.exec(text)) count += 1;
+  return count;
+}
+function identifierRegExp(name) {
+  return new RegExp(`(?<![A-Za-z0-9_$])${escapeRegex(name)}(?![A-Za-z0-9_$])`, "g");
+}
+function maskCommentsAndStrings(text) {
+  let out = "";
+  let i = 0;
+  let mode = "code";
+  let quote = "";
+
+  while (i < text.length) {
+    const ch = text[i];
+    const next = text[i + 1];
+
+    if (mode === "code") {
+      if (ch === "/" && next === "/") {
+        out += "  ";
+        i += 2;
+        mode = "line-comment";
+        continue;
+      }
+      if (ch === "/" && next === "*") {
+        out += "  ";
+        i += 2;
+        mode = "block-comment";
+        continue;
+      }
+      if (ch === "'" || ch === "\"" || ch === "`") {
+        out += " ";
+        i += 1;
+        mode = "string";
+        quote = ch;
+        continue;
+      }
+      out += ch;
+      i += 1;
+      continue;
+    }
+
+    if (mode === "line-comment") {
+      if (ch === "\n") {
+        out += "\n";
+        i += 1;
+        mode = "code";
+        continue;
+      }
+      out += " ";
+      i += 1;
+      continue;
+    }
+
+    if (mode === "block-comment") {
+      if (ch === "*" && next === "/") {
+        out += "  ";
+        i += 2;
+        mode = "code";
+        continue;
+      }
+      out += ch === "\n" ? "\n" : " ";
+      i += 1;
+      continue;
+    }
+
+    if (mode === "string") {
+      if (ch === "\\") {
+        out += " ";
+        i += 1;
+        if (i < text.length) {
+          out += text[i] === "\n" ? "\n" : " ";
+          i += 1;
+        }
+        continue;
+      }
+      if (ch === quote) {
+        out += " ";
+        i += 1;
+        mode = "code";
+        quote = "";
+        continue;
+      }
+      out += ch === "\n" ? "\n" : " ";
+      i += 1;
+    }
+  }
+
+  return out;
+}
 function normalizePath(value) {
   return String(value).replace(/\\/g, "/").replace(/^\.\//, "");
 }
@@ -260,4 +507,11 @@ function toRel(absPath) {
 }
 function escapeRegex(text) {
   return text.replace(/[|\\{}()[\]^$+?.]/g, "\\$&");
+}
+function isCliEntrypoint() {
+  if (!process.argv[1]) return false;
+  return pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url;
+}
+if (isCliEntrypoint()) {
+  runPatternCheckCli();
 }

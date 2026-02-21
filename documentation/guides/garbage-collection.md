@@ -6,9 +6,27 @@
 
 Use this guide to remove structural drift, keep documentation synchronized with code, and preserve runtime boundaries. Follow this workflow whenever you perform cleanup or technical-debt reduction.
 
+## Baseline State
+
+Baseline commit (self-updating): `fbbfc8d82f32c7fbf5b7c6cda7000516123d1d51`
+Baseline updated (UTC): `2026-02-21T15:19:06Z`
+
 ## Workflow
 
-1. Run structural checks first.
+1. Read baseline status first.
+
+```bash
+npm run gc:status
+```
+
+- Use the reported `baseline..HEAD` range and candidate file list to scope cleanup.
+- If `gc:status` reports a missing baseline commit, stop and reset explicitly:
+
+```bash
+node tools/gc-baseline.mjs --set <commit>
+```
+
+2. Run structural checks.
 
 ```bash
 node tools/check-file-size.mjs
@@ -18,27 +36,31 @@ node tools/check-patterns.mjs --warn
 ```
 
 Rule references:
-- `check-patterns.mjs`: `duplicate-fn`, `forbidden-global`, `empty-catch`, `todo-missing-owner`
+- `check-patterns.mjs`: `duplicate-fn`, `forbidden-global`, `empty-catch`, `todo-missing-owner`, `unused-fallback`, `dead-code`
 - `check-file-size.mjs`: warning at `>250` non-empty lines, failure at `>300` non-empty lines
 
-2. Verify code-doc co-evolution for changed `.js` files.
-- List changed JS files from git (`git diff --name-only ... -- '*.js'`).
+3. Verify code-doc co-evolution for changed `.js` files.
+- Start from `gc:status` candidate files (baseline range + working-tree drift).
 - For each file, inspect its header `Documentation:` path and confirm the linked `.md` still describes current behavior.
 - Update docs in the same task whenever behavior, props, mapper outputs, or dependencies change.
 
-3. Consolidate duplicate helpers into shared modules.
+4. Consolidate duplicate helpers into shared modules.
 - Move reusable logic to `shared/widget-kits/` (or `shared/widget-kits/gauge/`).
 - Keep widget files focused on widget-specific behavior, not shared math/layout/formatter logic.
 
-4. Enforce the AvNav boundary.
+5. Enforce the AvNav boundary.
 - Only `runtime/` and `plugin.js` should access `window.avnav` / `avnav.api` directly.
 - Widgets/cluster/shared code should call runtime-safe helpers such as `Helpers.applyFormatter()`.
 
-5. Fix catch and maintenance-marker hygiene.
+6. Remove refactor leftovers.
+- Delete fallback declarations that are no longer referenced.
+- Delete dead top-level helper functions and constant-condition branches.
+
+7. Fix catch and maintenance-marker hygiene.
 - Replace empty catches with explicit handling: comment why silence is intentional, log with context, or use centralized handlers.
 - Ensure maintenance markers include owner and date, e.g. `TODO(name, 2026-02-20): ...`.
 
-6. Re-run checks and close the loop.
+8. Re-run checks and close the loop.
 - Run strict checks after fixes:
 
 ```bash
@@ -50,6 +72,11 @@ node tools/check-docs.mjs
 ```
 
 - When cleanup changes debt status, update `documentation/TECH-DEBT.md` and `documentation/QUALITY.md`.
+- Update baseline marker to current `HEAD` before finishing:
+
+```bash
+npm run gc:update-baseline
+```
 
 ## Anti-Patterns
 
@@ -66,6 +93,8 @@ node tools/check-docs.mjs
 | Code↔Doc divergence | Risk pattern: JS behavior changed while linked module docs lag behind | Manual workflow step (code-doc co-evolution check) | Update linked docs in the same task |
 | Magic number spread | Historical repeated padding formula (`Math.max(6, Math.floor(Math.min(W, H) * 0.04))`) appeared across multiple widgets/text renderers before centralization | `check-patterns.mjs` (future rule) + manual review | Centralize constants/calculations in shared helpers |
 | Undated TODOs (`TODO(name, 2026-02-20): ...` required format) | Guardrail: no current violations, rule still enforced repo-wide | `check-patterns.mjs` (`todo-missing-owner`) | Use `TODO(name, YYYY-MM-DD): description` |
+| Unused fallback leftovers | Refactor drift risk: fallback variables remain after formatter-path rewrites and are never read | `check-patterns.mjs` (`unused-fallback`) | Remove stale declarations or wire fallback into reachable formatting flow |
+| Dead refactor code | Refactor drift risk: helper function no longer referenced, or `if (false)` / `if (CONST_FLAG)` constant branches | `check-patterns.mjs` (`dead-code`) | Delete unreachable paths and keep only active logic |
 
 ## Related
 
