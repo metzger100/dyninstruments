@@ -131,4 +131,5 @@ Full roadmap details and the AvNav widget coverage matrix are tracked in [ROADMA
 ## For Developers
 
 Developer setup, AI-assisted workflow rules, quality gates, and pre-PR checklist are documented in [CONTRIBUTING.md](CONTRIBUTING.md).
+Final validation uses the strict gate: `npm run check:strict`.
 Use [documentation/TABLEOFCONTENTS.md](documentation/TABLEOFCONTENTS.md) as the entrypoint for codebase internals.

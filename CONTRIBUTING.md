@@ -64,7 +64,7 @@ Implement this focused change only:
 - Scope: <files/features>
 - Out of scope: <what must not be changed>
 - Constraints: follow AGENTS.md rules and existing architecture boundaries
-- Validation required: npm run check:all
+- Validation required: npm run check:strict
 - Documentation requirement: update linked docs if behavior or configuration changed
 ```
 
@@ -83,8 +83,7 @@ Constraints:
 - follow AGENTS.md/CLAUDE.md
 - keep runtime boundaries intact
 Required validation:
-- npm run check:all
-- npm test
+- npm run check:strict
 Documentation co-evolution:
 - update docs that describe touched behavior in the same change
 ```
@@ -97,7 +96,7 @@ Refactor this area without behavior regression:
 - Keep external behavior stable
 - Remove duplication and keep dependency direction rules
 - Update related docs to match refactor
-- Run npm run check:all and npm test
+- Run npm run check:strict
 - Report exactly which docs were updated and why
 ```
 
@@ -155,19 +154,14 @@ Prefer both when practical.
 Run from repository root after implementation:
 
 ```bash
+npm run check:strict
+```
+
+For faster local iteration before final validation, targeted checks are still useful:
+
+```bash
 npm run check:all
-```
-
-If behavior/runtime logic changed:
-
-```bash
 npm test
-```
-
-If core logic or test tooling changed:
-
-```bash
-npm run test:coverage:check
 ```
 
 Do not merge with failing checks.
@@ -179,6 +173,4 @@ Do not merge with failing checks.
 - [ ] Implementation matches requested intent and scope.
 - [ ] Documentation was updated wherever behavior/config/contracts changed.
 - [ ] AI slop review completed.
-- [ ] `npm run check:all` passed.
-- [ ] `npm test` passed when behavior/runtime changed.
-- [ ] `npm run test:coverage:check` passed when required.
+- [ ] `npm run check:strict` passed.
