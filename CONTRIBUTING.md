@@ -5,11 +5,55 @@ It describes how to prompt, when to use planning mode, what the AI will do, and 
 
 ## 1) Purpose and Audience
 
-- Audience: Developers using Codex/Claude-style coding agents.
+- Audience: Developers using Codex/Claude Code.
 - Goal: fast implementation without quality drift.
 - Rule: the developer owns final correctness, architecture quality, and documentation quality.
 
-## 2) How to Prompt AI Effectively
+## 2) Local Setup (AvNav + Plugin)
+
+### 2.1 Clone AvNav and plugin (remeber to change the paths)
+
+```bash
+git clone https://github.com/wellenvogel/avnav.git ~/avnav-master
+mkdir -p ~/avnav-master/run/avnavdata/plugins
+git clone https://github.com/metzger100/dyninstruments.git ~/avnav-master/run/avnavdata/plugins/dyninstruments
+```
+
+### 2.2 Install plugin dev dependencies
+
+Run inside the plugin folder:
+
+```bash
+cd ~/avnav-master/run/avnavdata/plugins/dyninstruments
+npm ci
+```
+
+### 2.3 Install and watch AvNav viewer
+
+```bash
+cd ~/avnav-master/viewer
+npm install
+npm run watch
+```
+
+### 2.4 Run AvNav server
+
+In another terminal:
+
+```bash
+python3 ~/avnav-master/server/avnav_server.py \
+  -w ~/avnav-master/run/avnavdata \
+  -o 8080 \
+  -u viewer=~/avnav-master/viewer/build/debug,user=~/avnav-master/run/avnavdata/user
+```
+
+### 2.5 Verify plugin load
+
+- Open AvNav in the browser.
+- Enter layout edit mode.
+- Confirm `dyninstruments_*` widgets are visible.
+
+## 3) How to Prompt AI Effectively
 
 Use explicit prompts with scope, constraints, required checks, and documentation requirements.
 
@@ -57,7 +101,7 @@ Refactor this area without behavior regression:
 - Report exactly which docs were updated and why
 ```
 
-## 3) Planning Mode helps improving the results
+## 4) Planning Mode helps improving the results
 
 The AI does not decide whether planning mode should be enabled. The Developer must decide before prompting.
 
@@ -71,7 +115,7 @@ The AI does not decide whether planning mode should be enabled. The Developer mu
 
 If unsure, choose planning mode.
 
-## 4) What the AI Will Do
+## 5) What the AI Will Do
 
 When correctly prompted, the AI will:
 
@@ -82,7 +126,7 @@ When correctly prompted, the AI will:
 
 This only works if the prompt includes clear scope and required validation.
 
-## 5) Mandatory Human Review Responsibilities
+## 6) Mandatory Human Review Responsibilities
 
 Before merge, the developer must verify:
 
@@ -95,7 +139,7 @@ Before merge, the developer must verify:
    - stale docs after behavior/config changes
 3. Validation outputs are real and complete for scope.
 
-## 6) If AI Slop Is Found
+## 7) If AI Slop Is Found
 
 Do not just patch symptoms.
 
@@ -106,7 +150,7 @@ At least one prevention action is required:
 
 Prefer both when practical.
 
-## 7) Execution and Validation Workflow
+## 8) Execution and Validation Workflow
 
 Run from repository root after implementation:
 
@@ -128,7 +172,7 @@ npm run test:coverage:check
 
 Do not merge with failing checks.
 
-## 8) Pre-Merge Checklist
+## 9) Pre-Merge Checklist
 
 - [ ] Prompt had explicit scope, constraints, and required checks.
 - [ ] Planning mode was chosen deliberately by the human.
