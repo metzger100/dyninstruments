@@ -32,6 +32,29 @@
       drawDialFrame: dial.drawDialFrame
     };
 
+    function requireDialThemeTokens(theme, ownerId) {
+      const ticks = theme && theme.ticks;
+      const pointer = theme && theme.pointer;
+      const ring = theme && theme.ring;
+      const metrics = {
+        majorLen: ticks && ticks.majorLen,
+        majorWidth: ticks && ticks.majorWidth,
+        minorLen: ticks && ticks.minorLen,
+        minorWidth: ticks && ticks.minorWidth,
+        sideFactor: pointer && pointer.sideFactor,
+        lengthFactor: pointer && pointer.lengthFactor,
+        arcLineWidth: ring && ring.arcLineWidth
+      };
+      const names = Object.keys(metrics);
+      for (let i = 0; i < names.length; i++) {
+        const name = names[i];
+        if (!Number.isFinite(metrics[name])) {
+          throw new Error(String(ownerId || "GaugeToolkit") + ": missing required theme token " + name);
+        }
+      }
+      return metrics;
+    }
+
     return {
       id: "GaugeToolkit",
       version: "0.2.0",
@@ -40,7 +63,8 @@
       value,
       angle,
       tick,
-      draw
+      draw,
+      requireDialThemeTokens
     };
   }
 

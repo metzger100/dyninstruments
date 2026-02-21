@@ -6,11 +6,26 @@ describe("WindDialWidget", function () {
     const valueDrawCalls = [];
     const laylineCalls = [];
     const pointerCalls = [];
+    const ringCalls = [];
+    const tickCalls = [];
     const themeDefaults = {
       colors: {
         pointer: "#ff2b2b",
         laylineStb: "#82b683",
         laylinePort: "#ff7a76"
+      },
+      ticks: {
+        majorLen: 12,
+        majorWidth: 3,
+        minorLen: 6,
+        minorWidth: 2
+      },
+      pointer: {
+        sideFactor: 0.32,
+        lengthFactor: 1.9
+      },
+      ring: {
+        arcLineWidth: 2
       }
     };
     const applyFormatter = vi.fn((value, spec) => {
@@ -41,20 +56,35 @@ describe("WindDialWidget", function () {
             create() {
               return {
                 draw: {
-                  drawRing() {},
+                  drawRing(ctx, cx, cy, rOuter, opts) {
+                    ringCalls.push(opts);
+                  },
                   drawAnnularSector(ctx, cx, cy, rOuter, opts) {
                     laylineCalls.push(opts);
                   },
                   drawPointerAtRim(ctx, cx, cy, rOuter, angle, opts) {
                     pointerCalls.push(opts);
                   },
-                  drawTicks() {},
+                  drawTicks(ctx, cx, cy, rOuter, opts) {
+                    tickCalls.push(opts);
+                  },
                   drawLabels() {}
                 },
                 theme: {
                   resolve() {
                     return themeDefaults;
                   }
+                },
+                requireDialThemeTokens(theme) {
+                  return {
+                    majorLen: theme.ticks.majorLen,
+                    majorWidth: theme.ticks.majorWidth,
+                    minorLen: theme.ticks.minorLen,
+                    minorWidth: theme.ticks.minorWidth,
+                    sideFactor: theme.pointer.sideFactor,
+                    lengthFactor: theme.pointer.lengthFactor,
+                    arcLineWidth: theme.ring.arcLineWidth
+                  };
                 },
                 text: {
                   measureValueUnitFit() {
@@ -123,5 +153,73 @@ describe("WindDialWidget", function () {
     expect(laylineCalls[1].fillStyle).toBe(themeDefaults.colors.laylinePort);
     expect(pointerCalls[0].theme).toBe(themeDefaults);
     expect(pointerCalls[0].color).toBeUndefined();
+    expect(pointerCalls[0].sideFactor).toBe(themeDefaults.pointer.sideFactor);
+    expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.pointer.lengthFactor);
+    expect(ringCalls[0].lineWidth).toBe(themeDefaults.ring.arcLineWidth);
+    expect(tickCalls[0].major).toEqual({
+      len: themeDefaults.ticks.majorLen,
+      width: themeDefaults.ticks.majorWidth
+    });
+    expect(tickCalls[0].minor).toEqual({
+      len: themeDefaults.ticks.minorLen,
+      width: themeDefaults.ticks.minorWidth
+    });
+  });
+
+  it("throws when required dial theme tokens are missing", function () {
+    const spec = loadFresh("widgets/gauges/WindDialWidget/WindDialWidget.js")
+      .create({}, {
+        setupCanvas() {
+          return {
+            ctx: {},
+            W: 240,
+            H: 180
+          };
+        },
+        getModule(id) {
+          if (id !== "GaugeToolkit") throw new Error("unexpected module: " + id);
+          return {
+            create() {
+              return {
+                draw: {},
+                theme: {
+                  resolve() {
+                    return {
+                      colors: {
+                        pointer: "#ff2b2b",
+                        laylineStb: "#82b683",
+                        laylinePort: "#ff7a76"
+                      }
+                    };
+                  }
+                },
+                requireDialThemeTokens(theme) {
+                  const required = [
+                    theme && theme.ticks && theme.ticks.majorLen,
+                    theme && theme.ticks && theme.ticks.majorWidth,
+                    theme && theme.ticks && theme.ticks.minorLen,
+                    theme && theme.ticks && theme.ticks.minorWidth,
+                    theme && theme.pointer && theme.pointer.sideFactor,
+                    theme && theme.pointer && theme.pointer.lengthFactor,
+                    theme && theme.ring && theme.ring.arcLineWidth
+                  ];
+                  for (let i = 0; i < required.length; i++) {
+                    if (!Number.isFinite(required[i])) {
+                      throw new Error("WindDialWidget: missing required theme token");
+                    }
+                  }
+                  return {};
+                },
+                text: {},
+                value: {}
+              };
+            }
+          };
+        }
+      });
+
+    expect(function () {
+      spec.renderCanvas({}, {});
+    }).toThrow(/missing required theme token/i);
   });
 });

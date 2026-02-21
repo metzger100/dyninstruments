@@ -71,6 +71,7 @@ const renderer = Helpers.getModule("SemicircleGaugeEngine") && Helpers.getModule
 | `angle` | object | `GaugeAngleMath` API |
 | `tick` | object | `GaugeTickMath` API |
 | `draw` | object | merged API from `GaugeCanvasPrimitives` + `GaugeDialRenderer` |
+| `requireDialThemeTokens` | function | Strictly validates and returns generic dial metrics (`ticks`, `pointer`, `ring.arcLineWidth`) |
 
 Color-token flow:
 - Resolve once per render path with `theme.resolve(canvas)`.

@@ -156,6 +156,7 @@
         const H = setup.H;
         if (!W || !H) return;
         const theme = GU.theme.resolve(canvas);
+        const dialTheme = GU.requireDialThemeTokens(theme, "SemicircleGaugeEngine");
 
         ctx.clearRect(0, 0, W, H);
         const family = Helpers.resolveFontFamily(canvas);
@@ -206,7 +207,9 @@
         const ticks = V.buildValueTickAngles(range.min, range.max, tickMajor, tickMinor, arc);
         const showEndLabels = !!p.showEndLabels;
 
-        draw.drawArcRing(ctx, geom.cx, geom.cy, geom.rOuter, arc.startDeg, arc.endDeg, { lineWidth: 1 });
+        draw.drawArcRing(ctx, geom.cx, geom.cy, geom.rOuter, arc.startDeg, arc.endDeg, {
+          lineWidth: dialTheme.arcLineWidth
+        });
 
         for (let i = 0; i < sectorList.length; i++) {
           const s = sectorList[i];
@@ -225,14 +228,14 @@
             depth: geom.needleDepth,
             theme: theme,
             variant: "long",
-            sideFactor: 0.25,
-            lengthFactor: 2
+            sideFactor: dialTheme.sideFactor,
+            lengthFactor: dialTheme.lengthFactor
           });
         }
 
         draw.drawTicksFromAngles(ctx, geom.cx, geom.cy, geom.rOuter, ticks, {
-          major: { len: 9, width: 2 },
-          minor: { len: 5, width: 1 }
+          major: { len: dialTheme.majorLen, width: dialTheme.majorWidth },
+          minor: { len: dialTheme.minorLen, width: dialTheme.minorWidth }
         });
 
         drawMajorValueLabels(ctx, family, geom, range.min, range.max, tickMajor, arc, showEndLabels);
