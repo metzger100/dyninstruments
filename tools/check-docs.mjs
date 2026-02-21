@@ -6,7 +6,6 @@ import path from "node:path";
 const ROOT = process.cwd();
 const TARGETS = [
   ...collectFiles(path.join(ROOT, "documentation"), (p) => p.endsWith(".md")),
-  path.join(ROOT, "README.md"),
   path.join(ROOT, "CLAUDE.md")
 ].filter((p) => fs.existsSync(p));
 const JS_SCAN_ROOTS = ["plugin.js", "runtime", "cluster", "config", "shared", "widgets"];

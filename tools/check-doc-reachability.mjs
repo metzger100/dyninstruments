@@ -5,7 +5,7 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 const ENTRY_FILES = ["AGENTS.md", "CLAUDE.md"].map((p) => path.join(ROOT, p)).filter(fs.existsSync);
-const ROOT_DOCS = ["AGENTS.md", "CLAUDE.md", "ARCHITECTURE.md", "README.md"]
+const ROOT_DOCS = ["AGENTS.md", "CLAUDE.md", "ARCHITECTURE.md"]
   .map((p) => path.join(ROOT, p))
   .filter(fs.existsSync);
 const EXCLUDED = new Set([path.join(ROOT, "documentation/exec-plans/TEMPLATE.md")]);
