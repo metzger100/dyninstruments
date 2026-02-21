@@ -16,7 +16,7 @@
 Notes:
 - `Size OK = check` means no `>300` violations but at least one `>250` warning.
 - Strict grading is applied: unresolved medium/high drift prevents an `A`.
-- Smell prevention gate is fail-closed via `npm run check:smells` (included in `check:all` / `check:strict`).
+- Smell prevention gate is fail-closed via `npm run check:smells` (included in `check:core` / `check:all`).
 
 ## Known Drift Patterns
 

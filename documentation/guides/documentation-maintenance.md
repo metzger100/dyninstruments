@@ -12,14 +12,14 @@ Use this workflow whenever code changes touch architecture, module wiring, or wi
 2. Update the mapped docs in `documentation/`
 3. Update root docs (`README.md`, `AGENTS.md`, `CLAUDE.md`) when architecture guidance changes
 4. Every new documentation file must be linked from at least one other doc that is itself reachable from AGENTS.md. The easiest way: add an entry to TABLEOFCONTENTS.md.
-5. Run strict validation gate:
+5. Run default validation gate:
 
 ```bash
 npm run check:smells
-npm run check:strict
+npm run check:all
 ```
 
-6. During iteration, optionally run targeted checks (`npm run check:all`, `npm test`) for faster feedback.
+6. During iteration, optionally run targeted checks (`npm run check:core`, `npm test`) for faster feedback.
 
 7. Fix all failures and review all warnings before finishing
 
@@ -28,12 +28,12 @@ npm run check:strict
 Run from repository root:
 
 ```bash
-npm run check:strict
+npm run check:all
 ```
 
-`check:strict` is the default completion gate and runs:
+`check:all` is the default completion gate and runs:
 
-- `npm run check:all`
+- `npm run check:core`
 - `npm run test:coverage:check`
 
 `check:smells` runs blocking smell checks:
@@ -41,7 +41,7 @@ npm run check:strict
 - `node tools/check-patterns.mjs`
 - `node tools/check-smell-contracts.mjs`
 
-`check:all` includes:
+`check:core` includes:
 
 - `node tools/check-docs.mjs`
 - `node tools/check-doc-format.mjs --warn`
@@ -61,7 +61,7 @@ npm run test:coverage
 node tools/check-coverage.mjs
 ```
 
-`check-patterns` is enforced in strict mode inside `check:all`; any finding is a blocking failure.
+`check-patterns` is enforced in full mode inside `check:core`; any finding is a blocking failure.
 
 For cleanup sessions tracked by garbage-collection baseline markers:
 
@@ -83,20 +83,20 @@ For cleanup sessions tracked by garbage-collection baseline markers:
 
 ## Validation
 
-`npm run check:strict` is the default quality gate.
+`npm run check:all` is the default quality gate.
 
-`tools/check-docs.mjs` (inside `check:all`) verifies:
+`tools/check-docs.mjs` (inside `check:core`) verifies:
 
 - relative markdown links and anchors
 - JS `Documentation:` header targets
 - stale high-risk architecture phrases
 
-`tools/check-doc-format.mjs` (inside `check:all`, warn mode) verifies:
+`tools/check-doc-format.mjs` (inside `check:core`, warn mode) verifies:
 
 - required doc sections (`# Title`, `**Status:**`, and key headings)
 - explicit exceptions for index/tracker docs
 
-`tools/check-doc-reachability.mjs` (inside `check:all`) verifies:
+`tools/check-doc-reachability.mjs` (inside `check:core`) verifies:
 
 - all in-scope markdown docs are reachable from `AGENTS.md` or `CLAUDE.md`
 - markdown link targets to `.md` files exist on disk
