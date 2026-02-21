@@ -46,22 +46,62 @@ describe("GaugeValueMath", function () {
   it("provides shared formatter and sector builder helpers", function () {
     const v = create();
     const arc = { startDeg: 270, endDeg: 450 };
+    const theme = {
+      colors: {
+        warning: "#aa5500",
+        alarm: "#bb0011"
+      }
+    };
 
     expect(v.extractNumberText("12.3 kn")).toBe("12.3");
     expect(v.formatAngle180(181, true)).toBe("-179");
     expect(v.formatDirection360(-1, true)).toBe("359");
 
-    expect(v.buildHighEndSectors({ warningFrom: 20, alarmFrom: 25 }, 0, 30, arc)).toEqual([
-      { a0: 390, a1: 420, color: "#e7c66a" },
-      { a0: 420, a1: 450, color: "#ff7a76" }
+    expect(v.buildHighEndSectors({ warningFrom: 20, alarmFrom: 25 }, 0, 30, arc, {
+      theme: theme
+    })).toEqual([
+      { a0: 390, a1: 420, color: "#aa5500" },
+      { a0: 420, a1: 450, color: "#bb0011" }
     ]);
 
     expect(v.buildLowEndSectors({}, 10, 15, arc, {
       defaultWarningFrom: 12.2,
-      defaultAlarmFrom: 11.6
+      defaultAlarmFrom: 11.6,
+      theme: theme
     })).toEqual([
-      { a0: 270, a1: 327.6, color: "#ff7a76" },
-      { a0: 327.6, a1: 349.2, color: "#e7c66a" }
+      { a0: 270, a1: 327.6, color: "#bb0011" },
+      { a0: 327.6, a1: 349.2, color: "#aa5500" }
     ]);
+  });
+
+  it("requires theme colors and rejects explicit color overrides", function () {
+    const v = create();
+    const arc = { startDeg: 270, endDeg: 450 };
+
+    expect(function () {
+      v.buildHighEndSectors({ warningFrom: 20, alarmFrom: 25 }, 0, 30, arc);
+    }).toThrow(/missing required options\.theme\.colors\.warning\/alarm/);
+
+    expect(function () {
+      v.buildLowEndSectors({}, 10, 15, arc, {
+        defaultWarningFrom: 12.2,
+        defaultAlarmFrom: 11.6
+      });
+    }).toThrow(/missing required options\.theme\.colors\.warning\/alarm/);
+
+    expect(function () {
+      v.buildHighEndSectors({ warningFrom: 20, alarmFrom: 25 }, 0, 30, arc, {
+        theme: { colors: { warning: "#aa5500" } }
+      });
+    }).toThrow(/missing required options\.theme\.colors\.warning\/alarm/);
+
+    expect(function () {
+      v.buildLowEndSectors({}, 10, 15, arc, {
+        defaultWarningFrom: 12.2,
+        defaultAlarmFrom: 11.6,
+        theme: { colors: { warning: "#aa5500", alarm: "#bb0011" } },
+        warningColor: "#00cc00"
+      });
+    }).toThrow(/no longer supported/);
   });
 });

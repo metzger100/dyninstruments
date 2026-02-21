@@ -68,8 +68,10 @@
       formatDisplay: function (raw, props, unit) {
         return displaySpeedFromRaw(raw, props, unit);
       },
-      buildSectors: function (props, minV, maxV, arc) {
-        return valueMath.buildHighEndSectors(props, minV, maxV, arc);
+      buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
+        return valueMath.buildHighEndSectors(props, minV, maxV, arc, {
+          theme: theme
+        });
       }
     });
 

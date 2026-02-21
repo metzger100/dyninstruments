@@ -72,6 +72,10 @@ const renderer = Helpers.getModule("SemicircleGaugeEngine") && Helpers.getModule
 | `tick` | object | `GaugeTickMath` API |
 | `draw` | object | merged API from `GaugeCanvasPrimitives` + `GaugeDialRenderer` |
 
+Color-token flow:
+- Resolve once per render path with `theme.resolve(canvas)`.
+- Pass resolved token object down to sector builders and draw helpers where needed.
+
 ## Draw API (`GaugeToolkit.draw`)
 
 | Function | Purpose |
@@ -86,6 +90,8 @@ const renderer = Helpers.getModule("SemicircleGaugeEngine") && Helpers.getModule
 | `drawTicks` | Build and draw ticks from step config |
 | `drawLabels` | Draw labels on arc/circle |
 | `drawDialFrame` | Convenience ring + ticks + labels |
+
+`draw.drawPointerAtRim(..., opts)` requires `opts.theme.colors.pointer`. Explicit `opts.color`/`opts.fillStyle` overrides are not supported.
 
 ## Angle API (`GaugeAngleMath`)
 
@@ -131,7 +137,7 @@ const renderer = Helpers.getModule("SemicircleGaugeEngine") && Helpers.getModule
 | `ratioDefaults` | `{normal,flat}` | yes | Default layout thresholds |
 | `tickSteps` | `(range) => {major,minor}` | yes | Gauge-specific tick strategy |
 | `formatDisplay` | `(raw, props, unit, Helpers) => {num,text}` | yes | Gauge-specific value formatter |
-| `buildSectors` | `(props, minV, maxV, arc, valueUtils) => Sector[]` | yes | Gauge-specific warning/alarm sectors |
+| `buildSectors` | `(props, minV, maxV, arc, valueUtils, theme) => Sector[]` | yes | Gauge-specific warning/alarm sectors (must use `theme.colors.warning/alarm`) |
 | `arc` | `{startDeg,endDeg}` | no | Optional override (default `270..450`) |
 
 ### Sector shape
@@ -139,6 +145,8 @@ const renderer = Helpers.getModule("SemicircleGaugeEngine") && Helpers.getModule
 ```javascript
 { a0: number, a1: number, color: "#rrggbb" }
 ```
+
+`color` should come from `theme.colors.warning`/`theme.colors.alarm`. Explicit warning/alarm color overrides are not supported.
 
 ## Related
 

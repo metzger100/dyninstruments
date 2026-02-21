@@ -7,7 +7,7 @@
 The four semicircle gauges share one renderer implementation:
 
 - Shared rendering and layout in `shared/widget-kits/gauge/SemicircleGaugeEngine.js`
-- Shared helper APIs via `GaugeToolkit` (`GaugeTextLayout`, `GaugeValueMath`, `GaugeAngleMath`, `GaugeTickMath`, draw utils)
+- Shared helper APIs via `GaugeToolkit` (`ThemeResolver`, `GaugeTextLayout`, `GaugeValueMath`, `GaugeAngleMath`, `GaugeTickMath`, draw utils)
 - Gauge wrappers keep only formatting, tick strategy, and sector strategy
 
 ## File Locations
@@ -39,10 +39,13 @@ SpeedGaugeWidget/DepthGaugeWidget/TemperatureGaugeWidget/VoltageGaugeWidget
 `SemicircleGaugeEngine.createRenderer(spec)` handles:
 
 1. Canvas setup + mode detection (`flat`, `normal`, `high`)
-2. Gauge geometry and pointer angle mapping
-3. Arc ring + sectors + pointer + ticks + labels
-4. Mode-specific text layout
-5. Disconnect overlay
+2. One-time theme token resolve (`theme = GaugeToolkit.theme.resolve(canvas)`)
+3. Gauge geometry and pointer angle mapping
+4. Arc ring + sectors + pointer + ticks + labels
+5. Mode-specific text layout
+6. Disconnect overlay
+
+Pointer and sector rendering are theme-token only in shared gauge paths (`theme.colors.pointer|warning|alarm` are required).
 
 ## Gauge-Specific Responsibilities
 
@@ -50,7 +53,7 @@ Each wrapper defines:
 
 - Value conversion to `{ num, text }`
 - Tick step strategy
-- Sector placement strategy (high-end or low-end)
+- Sector placement strategy (high-end or low-end), with `theme` forwarded into shared sector builders
 - Defaults (range, unit, ratio props)
 
 ### SpeedGaugeWidget
@@ -95,3 +98,4 @@ Removed from wrappers:
 - [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
 - [../guides/add-new-gauge.md](../guides/add-new-gauge.md)
 - [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md)
+- [../shared/theme-tokens.md](../shared/theme-tokens.md)

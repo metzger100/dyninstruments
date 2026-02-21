@@ -24,7 +24,8 @@ Create `widgets/gauges/NewGaugeWidget/NewGaugeWidget.js`:
 3. Provide gauge-specific functions only:
 - `formatDisplay(raw, props, unit, Helpers) -> { num, text }`
 - `tickSteps(range) -> { major, minor }`
-- `buildSectors(props, minV, maxV, arc, valueUtils) -> Sector[]`
+- `buildSectors(props, minV, maxV, arc, valueUtils, theme) -> Sector[]`
+  `theme.colors.warning` and `theme.colors.alarm` are required in the shared sector-builder path.
 4. Build `renderCanvas` with `createRenderer(spec)`
 
 ```javascript

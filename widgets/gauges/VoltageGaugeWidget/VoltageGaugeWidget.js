@@ -68,10 +68,11 @@
       formatDisplay: function (raw, props) {
         return displayVoltageFromRaw(raw, props);
       },
-      buildSectors: function (props, minV, maxV, arc) {
+      buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
         return valueMath.buildLowEndSectors(props, minV, maxV, arc, {
           defaultWarningFrom: 12.2,
-          defaultAlarmFrom: 11.6
+          defaultAlarmFrom: 11.6,
+          theme: theme
         });
       }
     });

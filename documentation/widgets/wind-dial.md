@@ -5,6 +5,7 @@
 ## Overview
 
 Full-circle wind dial showing angle (AWA/TWA) and speed (AWS/TWS) together. Uses `GaugeToolkit.draw` for dial primitives and `GaugeToolkit.text/value` for text fitting and value handling.
+Theme colors are resolved once per render via `GaugeToolkit.theme.resolve(canvas)`.
 
 ## Module Registration
 
@@ -43,9 +44,9 @@ WindDialWidget: {
 | Element | Draw Function | Parameters |
 |---|---|---|
 | Ring | `draw.drawRing` | full circle |
-| Layline starboard | `draw.drawAnnularSector` | `layMin..layMax`, green |
-| Layline port | `draw.drawAnnularSector` | `-layMax..-layMin`, red |
-| Wind pointer | `draw.drawPointerAtRim` | red long pointer at `angle` |
+| Layline starboard | `draw.drawAnnularSector` | `layMin..layMax`, `theme.colors.laylineStb` (default `#82b683`) |
+| Layline port | `draw.drawAnnularSector` | `-layMax..-layMin`, `theme.colors.laylinePort` (default `#ff7a76`) |
+| Wind pointer | `draw.drawPointerAtRim` | long pointer at `angle`, with `opts.theme.colors.pointer` (default `#ff2b2b`) |
 | Ticks | `draw.drawTicks` | `-180..180`, major 30, minor 10 |
 | Labels | `draw.drawLabels` | `-180..180`, step 30, endpoints filtered |
 
@@ -88,3 +89,4 @@ return {
 - [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
 - [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md)
+- [../shared/theme-tokens.md](../shared/theme-tokens.md)

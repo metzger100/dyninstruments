@@ -141,11 +141,31 @@
       return { a0, a1 };
     }
 
+    function resolveSectorColors(options, sourceName) {
+      const opts = options || {};
+      const src = sourceName || "buildSectors";
+      if (typeof opts.warningColor !== "undefined" || typeof opts.alarmColor !== "undefined") {
+        throw new Error("GaugeValueMath." + src + ": warningColor/alarmColor overrides are no longer supported; use options.theme.colors tokens");
+      }
+
+      const theme = opts.theme;
+      const colors = theme && theme.colors;
+      const warning = colors && colors.warning;
+      const alarm = colors && colors.alarm;
+      if (!warning || !alarm) {
+        throw new Error("GaugeValueMath." + src + ": missing required options.theme.colors.warning/alarm");
+      }
+
+      return {
+        warning: String(warning),
+        alarm: String(alarm)
+      };
+    }
+
     function buildHighEndSectors(props, minV, maxV, arc, options) {
       const p = props || {};
       const opts = options || {};
-      const warningColor = opts.warningColor || "#e7c66a";
-      const alarmColor = opts.alarmColor || "#ff7a76";
+      const sectorColors = resolveSectorColors(opts, "buildHighEndSectors");
 
       const warningFrom = Number(p.warningFrom);
       const alarmFrom = Number(p.alarmFrom);
@@ -163,16 +183,15 @@
         : null;
 
       const sectors = [];
-      if (warning) sectors.push({ a0: warning.a0, a1: warning.a1, color: warningColor });
-      if (alarm) sectors.push({ a0: alarm.a0, a1: alarm.a1, color: alarmColor });
+      if (warning) sectors.push({ a0: warning.a0, a1: warning.a1, color: sectorColors.warning });
+      if (alarm) sectors.push({ a0: alarm.a0, a1: alarm.a1, color: sectorColors.alarm });
       return sectors;
     }
 
     function buildLowEndSectors(props, minV, maxV, arc, options) {
       const p = props || {};
       const opts = options || {};
-      const warningColor = opts.warningColor || "#e7c66a";
-      const alarmColor = opts.alarmColor || "#ff7a76";
+      const sectorColors = resolveSectorColors(opts, "buildLowEndSectors");
 
       const warningFrom = Number((typeof p.warningFrom !== "undefined")
         ? p.warningFrom
@@ -202,9 +221,9 @@
         : null;
 
       const sectors = [];
-      if (alarm) sectors.push({ a0: alarm.a0, a1: alarm.a1, color: alarmColor });
-      if (warning) sectors.push({ a0: warning.a0, a1: warning.a1, color: warningColor });
-      if (warningOnly) sectors.push({ a0: warningOnly.a0, a1: warningOnly.a1, color: warningColor });
+      if (alarm) sectors.push({ a0: alarm.a0, a1: alarm.a1, color: sectorColors.alarm });
+      if (warning) sectors.push({ a0: warning.a0, a1: warning.a1, color: sectorColors.warning });
+      if (warningOnly) sectors.push({ a0: warningOnly.a0, a1: warningOnly.a1, color: sectorColors.warning });
       return sectors;
     }
 

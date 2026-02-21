@@ -74,8 +74,10 @@
       formatDisplay: function (raw, props) {
         return displayTempFromRaw(raw, 1, props);
       },
-      buildSectors: function (props, minV, maxV, arc) {
-        return valueMath.buildHighEndSectors(props, minV, maxV, arc);
+      buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
+        return valueMath.buildHighEndSectors(props, minV, maxV, arc, {
+          theme: theme
+        });
       }
     });
 

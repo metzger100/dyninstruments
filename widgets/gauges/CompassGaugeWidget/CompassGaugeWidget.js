@@ -16,11 +16,13 @@
     const draw = GU.draw;
     const T = GU.text;
     const V = GU.value;
+    const Theme = GU.theme;
 
     // ---------- utils --------------------------------------------------------
     function renderCanvas(canvas, props){
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
       if (!W || !H) return;
+      const theme = Theme.resolve(canvas);
 
       ctx.clearRect(0,0,W,H);
       const family = Helpers.resolveFontFamily(canvas);
@@ -72,7 +74,7 @@
       // Fixed red lubber pointer at 0° (north), behind labels
       draw.drawPointerAtRim(ctx, cx, cy, rOuter, 0, {
         depth: lubber,
-        color: "#ff2b2b",
+        theme: theme,
         variant: "long",
         sideFactor: 0.25,
         lengthFactor: 2

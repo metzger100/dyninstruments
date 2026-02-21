@@ -16,6 +16,7 @@
     const draw = GU.draw;
     const T = GU.text;
     const V = GU.value;
+    const Theme = GU.theme;
 
     function formatSpeedText(raw, props, speedUnit) {
       const n = Number(raw);
@@ -41,6 +42,7 @@
     function renderCanvas(canvas, props){
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
       if (!W || !H) return;
+      const theme = Theme.resolve(canvas);
       ctx.clearRect(0,0,W,H);
 
       const family = Helpers.resolveFontFamily(canvas);
@@ -117,14 +119,14 @@
           startDeg:  layMin,
           endDeg:    layMax,
           thickness: ringW,
-          fillStyle: "#82b683",
+          fillStyle: theme.colors.laylineStb,
           alpha: 1
         });
         draw.drawAnnularSector(ctx, cx, cy, rOuter, {
           startDeg: -layMax,
           endDeg:   -layMin,
           thickness: ringW,
-          fillStyle: "#ff7a76",
+          fillStyle: theme.colors.laylinePort,
           alpha: 1
         });
       }
@@ -133,7 +135,7 @@
       if (V.isFiniteNumber(props.angle)) {
         draw.drawPointerAtRim(ctx, cx, cy, rOuter, props.angle, {
           depth: needleDepth,
-          color: "#ff2b2b",
+          theme: theme,
           variant: "long",
           sideFactor: 0.25,
           lengthFactor: 2

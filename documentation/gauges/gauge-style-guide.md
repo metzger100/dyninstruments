@@ -41,14 +41,16 @@ const cy = gaugeTop + R;
 
 ## Colors
 
-| Element | Hex | Usage |
-|---|---|---|
-| Warning sector | `#e7c66a` | Matte yellow |
-| Alarm sector | `#ff7a76` | Matte red |
-| Pointer | `#ff2b2b` | Red triangle |
-| Text/ticks/arc stroke | `Helpers.resolveTextColor()` | CSS-resolved foreground |
-| Layline green (WindDialWidget) | `#82b683` | Starboard tack |
-| Layline red (WindDialWidget) | `#ff7a76` | Port tack |
+| Element | Theme token | Default | Usage |
+|---|---|---|---|
+| Warning sector | `theme.colors.warning` | `#e7c66a` | Matte yellow |
+| Alarm sector | `theme.colors.alarm` | `#ff7a76` | Matte red |
+| Pointer | `theme.colors.pointer` | `#ff2b2b` | Red triangle |
+| Text/ticks/arc stroke | `Helpers.resolveTextColor()` | CSS-resolved | Foreground |
+| Layline starboard (WindDialWidget) | `theme.colors.laylineStb` | `#82b683` | Starboard tack |
+| Layline port (WindDialWidget) | `theme.colors.laylinePort` | `#ff7a76` | Port tack |
+
+Theme defaults are provided by `ThemeResolver` and can be overridden via CSS variables.
 
 ## Pointer Configuration
 
@@ -57,12 +59,14 @@ All semicircle gauges use the same pointer call:
 ```javascript
 draw.drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, {
   depth: needleDepth,
-  color: "#ff2b2b",
+  theme: theme,
   variant: "long",
   sideFactor: 0.25,
   lengthFactor: 2
 });
 ```
+
+`drawPointerAtRim` requires `theme.colors.pointer`; explicit pointer color overrides are not supported.
 
 ## Sector Logic
 
@@ -99,10 +103,12 @@ if (sector) {
     startDeg: sector.a0,
     endDeg: sector.a1,
     thickness: ringW,
-    fillStyle: "#e7c66a"
+    fillStyle: theme.colors.warning
   });
 }
 ```
+
+Warning/alarm sectors in shared builders require theme tokens (`theme.colors.warning/alarm`).
 
 ## Layout Modes
 
@@ -163,3 +169,4 @@ When `props.disconnect === true`, `drawDisconnectOverlay()` renders a dim overla
 ## Related
 
 - [gauge-shared-api.md](gauge-shared-api.md)
+- [../shared/theme-tokens.md](../shared/theme-tokens.md)
