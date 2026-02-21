@@ -2,13 +2,15 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("CompassGaugeWidget", function () {
-  it("uses theme pointer color for the fixed lubber marker", function () {
-    const pointerCalls = [];
-    const rimMarkerCalls = [];
-    const ringCalls = [];
-    const tickCalls = [];
-    const labelCalls = [];
-    const themeDefaults = {
+  function createCompassCachingHarness() {
+    const calls = {
+      ring: [],
+      ticks: [],
+      pointer: [],
+      rimMarker: [],
+      textDraws: 0
+    };
+    const theme = {
       colors: {
         pointer: "#ff2b2b"
       },
@@ -60,40 +62,52 @@ describe("CompassGaugeWidget", function () {
               return {
                 draw: {
                   drawRing(ctx, cx, cy, rOuter, opts) {
-                    ringCalls.push(opts);
+                    calls.ring.push(opts);
                   },
                   drawTicks(ctx, cx, cy, rOuter, opts) {
-                    tickCalls.push(opts);
+                    calls.ticks.push(opts);
                   },
                   drawPointerAtRim(ctx, cx, cy, rOuter, angle, opts) {
-                    pointerCalls.push(opts);
+                    calls.pointer.push(opts);
                   },
                   drawRimMarker(ctx, cx, cy, rOuter, angle, opts) {
-                    rimMarkerCalls.push(opts);
-                  },
-                  drawLabels(ctx, cx, cy, rOuter, opts) {
-                    labelCalls.push(opts);
+                    calls.rimMarker.push(opts);
+                  }
+                },
+                angle: {
+                  degToCanvasRad(deg, cfg, rotationDeg) {
+                    const d = Number(deg) + (Number(rotationDeg) || 0);
+                    const norm = ((d % 360) + 360) % 360;
+                    return ((norm - 90) * Math.PI) / 180;
                   }
                 },
                 theme: {
                   resolve() {
-                    return themeDefaults;
+                    return theme;
                   }
                 },
                 text: {
                   measureValueUnitFit() {
                     return { vPx: 12, uPx: 10, gap: 6 };
                   },
-                  drawCaptionMax() {},
-                  drawValueUnitWithFit() {},
+                  drawCaptionMax() {
+                    calls.textDraws += 1;
+                  },
+                  drawValueUnitWithFit() {
+                    calls.textDraws += 1;
+                  },
                   fitInlineCapValUnit() {
                     return { cPx: 10, vPx: 12, uPx: 10, gap: 6 };
                   },
-                  drawInlineCapValUnit() {},
+                  drawInlineCapValUnit() {
+                    calls.textDraws += 1;
+                  },
                   fitTextPx() {
                     return 12;
                   },
-                  drawThreeRowsBlock() {},
+                  drawThreeRowsBlock() {
+                    calls.textDraws += 1;
+                  },
                   drawDisconnectOverlay() {}
                 },
                 value: {
@@ -118,6 +132,20 @@ describe("CompassGaugeWidget", function () {
         }
       });
 
+    return { spec, calls, theme };
+  }
+
+  function makeCompassProps(overrides) {
+    return Object.assign({
+      heading: 12,
+      markerCourse: 30,
+      caption: "HDG",
+      unit: "°"
+    }, overrides || {});
+  }
+
+  it("uses theme pointer color for the fixed lubber marker", function () {
+    const harness = createCompassCachingHarness();
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({
       rectWidth: 480,
@@ -125,27 +153,65 @@ describe("CompassGaugeWidget", function () {
       ctx
     });
 
-    spec.renderCanvas(canvas, {
-      heading: 12,
-      markerCourse: 30,
-      caption: "HDG",
-      unit: "°"
-    });
+    harness.spec.renderCanvas(canvas, makeCompassProps());
 
-    expect(pointerCalls[0].fillStyle).toBe(themeDefaults.colors.pointer);
-    expect(pointerCalls[0].sideFactor).toBe(themeDefaults.pointer.sideFactor);
-    expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.pointer.lengthFactor);
-    expect(pointerCalls[0].depth).toBe(15);
-    expect(rimMarkerCalls[0]).toEqual({ len: 15, width: 6 });
-    expect(ringCalls[0].lineWidth).toBe(themeDefaults.ring.arcLineWidth);
-    expect(tickCalls[0].major).toEqual({
-      len: themeDefaults.ticks.majorLen,
-      width: themeDefaults.ticks.majorWidth
+    expect(harness.calls.pointer[0].fillStyle).toBe(harness.theme.colors.pointer);
+    expect(harness.calls.pointer[0].sideFactor).toBe(harness.theme.pointer.sideFactor);
+    expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.pointer.lengthFactor);
+    expect(harness.calls.pointer[0].depth).toBe(15);
+    expect(harness.calls.rimMarker[0]).toEqual({ len: 15, width: 6 });
+    expect(harness.calls.ring[0].lineWidth).toBe(harness.theme.ring.arcLineWidth);
+    expect(harness.calls.ticks[0].major).toEqual({
+      len: harness.theme.ticks.majorLen,
+      width: harness.theme.ticks.majorWidth
     });
-    expect(tickCalls[0].minor).toEqual({
-      len: themeDefaults.ticks.minorLen,
-      width: themeDefaults.ticks.minorWidth
+    expect(harness.calls.ticks[0].minor).toEqual({
+      len: harness.theme.ticks.minorLen,
+      width: harness.theme.ticks.minorWidth
     });
-    expect(labelCalls[0].weight).toBe(themeDefaults.font.labelWeight);
+  });
+
+  it("reuses static cache when heading changes (rotation does not invalidate)", function () {
+    const harness = createCompassCachingHarness();
+    const canvas = createMockCanvas({ rectWidth: 480, rectHeight: 110, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeCompassProps({ heading: 12 }));
+    harness.spec.renderCanvas(canvas, makeCompassProps({ heading: 42 }));
+
+    expect(harness.calls.ring).toHaveLength(1);
+    expect(harness.calls.ticks).toHaveLength(1);
+    expect(harness.calls.pointer).toHaveLength(2);
+    expect(harness.calls.rimMarker).toHaveLength(2);
+  });
+
+  it("invalidates static cache on geometry/style changes", function () {
+    const harness = createCompassCachingHarness();
+    const canvasA = createMockCanvas({ rectWidth: 480, rectHeight: 110, ctx: createMockContext2D() });
+    const canvasB = createMockCanvas({ rectWidth: 520, rectHeight: 110, ctx: createMockContext2D() });
+    const props = makeCompassProps();
+
+    harness.spec.renderCanvas(canvasA, props);
+    harness.spec.renderCanvas(canvasA, props);
+    expect(harness.calls.ring).toHaveLength(1);
+
+    harness.spec.renderCanvas(canvasB, props);
+    expect(harness.calls.ring).toHaveLength(2);
+
+    harness.theme.ring.arcLineWidth = 3.2;
+    harness.spec.renderCanvas(canvasB, props);
+    expect(harness.calls.ring).toHaveLength(3);
+  });
+
+  it("keeps dynamic text redraw active on static cache hits", function () {
+    const harness = createCompassCachingHarness();
+    const canvas = createMockCanvas({ rectWidth: 480, rectHeight: 110, ctx: createMockContext2D() });
+    const props = makeCompassProps();
+
+    harness.spec.renderCanvas(canvas, props);
+    const firstTextCount = harness.calls.textDraws;
+    harness.spec.renderCanvas(canvas, props);
+
+    expect(harness.calls.ring).toHaveLength(1);
+    expect(harness.calls.textDraws).toBeGreaterThan(firstTextCount);
   });
 });

@@ -17,6 +17,7 @@
     const T = GU.text;
     const V = GU.value;
     const Theme = GU.theme;
+    const backgroundCache = { key: null, backCanvas: null, backCtx: null, frontCanvas: null, frontCtx: null };
 
     function formatSpeedText(raw, props, speedUnit) {
       const n = Number(raw);
@@ -24,9 +25,7 @@
 
       const p = props || {};
       const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatSpeed";
-      const formatterParameters = (typeof p.formatterParameters !== "undefined")
-        ? p.formatterParameters
-        : [speedUnit || "kn"];
+      const formatterParameters = (typeof p.formatterParameters !== "undefined") ? p.formatterParameters : [speedUnit || "kn"];
       const formatted = String(Helpers.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
@@ -36,8 +35,69 @@
       return formatted;
     }
 
-    // --------- util ----------------------------------------------------------
+    const buildWindBackgroundKey = (data) => JSON.stringify(data);
+
+    const ensureWindLayer = (canvas, existing, width, height) => {
+      if (existing && existing.width === width && existing.height === height) return existing;
+      const layer = canvas.ownerDocument.createElement("canvas");
+      layer.width = width;
+      layer.height = height;
+      return layer;
+    };
+
+    const rebuildWindBackground = (canvas, state) => {
+      backgroundCache.backCanvas = ensureWindLayer(canvas, backgroundCache.backCanvas, state.bufferW, state.bufferH);
+      backgroundCache.frontCanvas = ensureWindLayer(canvas, backgroundCache.frontCanvas, state.bufferW, state.bufferH);
+      backgroundCache.backCtx = backgroundCache.backCanvas.getContext("2d");
+      backgroundCache.frontCtx = backgroundCache.frontCanvas.getContext("2d");
+      if (!backgroundCache.backCtx || !backgroundCache.frontCtx) return;
+
+      const back = backgroundCache.backCtx;
+      const front = backgroundCache.frontCtx;
+      back.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+      front.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+      back.clearRect(0, 0, state.W, state.H);
+      front.clearRect(0, 0, state.W, state.H);
+      back.fillStyle = back.strokeStyle = state.color;
+      front.fillStyle = front.strokeStyle = state.color;
+
+      draw.drawRing(back, state.cx, state.cy, state.rOuter, { lineWidth: state.theme.ring.arcLineWidth });
+      if (state.layEnabled && state.layMax > state.layMin) {
+        draw.drawAnnularSector(back, state.cx, state.cy, state.rOuter, {
+          startDeg: state.layMin,
+          endDeg: state.layMax,
+          thickness: state.ringW,
+          fillStyle: state.theme.colors.laylineStb,
+          alpha: 1
+        });
+        draw.drawAnnularSector(back, state.cx, state.cy, state.rOuter, {
+          startDeg: -state.layMax,
+          endDeg: -state.layMin,
+          thickness: state.ringW,
+          fillStyle: state.theme.colors.laylinePort,
+          alpha: 1
+        });
+      }
+
+      draw.drawTicks(front, state.cx, state.cy, state.tickR, {
+        startDeg: -180, endDeg: 180, stepMajor: 30, stepMinor: 10, includeEnd: true,
+        major: { len: state.theme.ticks.majorLen, width: state.theme.ticks.majorWidth }, minor: { len: state.theme.ticks.minorLen, width: state.theme.ticks.minorWidth }
+      });
+      draw.drawLabels(front, state.cx, state.cy, state.tickR, {
+        startDeg: -180, endDeg: 180, step: 30, includeEnd: true,
+        radiusOffset: state.labelInsetVal, fontPx: state.labelPx, weight: state.labelWeight, family: state.family,
+        labelFormatter: (deg) => String(deg), labelFilter: (deg) => deg !== -180 && deg !== 180
+      });
+      backgroundCache.key = state.key;
+    };
+
+    const blitWindLayer = (ctx, layer, W, H) => {
+      if (!layer) return;
+      ctx.drawImage(layer, 0, 0, layer.width, layer.height, 0, 0, W, H);
+    };
+
     function renderCanvas(canvas, props){
+      const p = props || {};
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
       if (!W || !H) return;
       const theme = Theme.resolve(canvas);
@@ -49,19 +109,16 @@
       const color  = Helpers.resolveTextColor(canvas);
       ctx.fillStyle = color; ctx.strokeStyle = color;
 
-      // Mode thresholds (owned by WindDialWidget)
       const ratio = W / Math.max(1, H);
-      const tN = V.isFiniteNumber(props.dialRatioThresholdNormal) ? props.dialRatioThresholdNormal : 0.7;
-      const tF = V.isFiniteNumber(props.dialRatioThresholdFlat) ? props.dialRatioThresholdFlat : 2.0;
-      let mode; // 'flat'|'normal'|'high'
+      const tN = V.isFiniteNumber(p.dialRatioThresholdNormal) ? p.dialRatioThresholdNormal : 0.7;
+      const tF = V.isFiniteNumber(p.dialRatioThresholdFlat) ? p.dialRatioThresholdFlat : 2.0;
+      let mode;
       if (ratio < tN) mode = 'high';
       else if (ratio > tF) mode = 'flat';
       else mode = 'normal';
 
       const pad = Math.max(6, Math.floor(Math.min(W,H) * 0.04));
-
-      // Compute maximum dial first; texts must adapt to it.
-      const D = Math.min(W - 2*pad, H - 2*pad); // diameter
+      const D = Math.min(W - 2*pad, H - 2*pad);
       const R = Math.max(14, Math.floor(D / 2));
       const cx = Math.floor(W/2);
       const cy = Math.floor(H/2);
@@ -70,27 +127,20 @@
       const tickR  = rOuter;
       const needleDepth = Math.max(8, Math.floor(ringW * 0.9));
 
-      // Strips for flat mode — fill exactly up to dial edge
-      const leftStrip   = Math.max(0, Math.floor((W - 2*pad - 2*R) / 2));
-      const rightStrip  = leftStrip;
-      const topStrip    = Math.max(0, Math.floor((H - 2*pad - 2*R) / 2));
-      const bottomStrip = topStrip;
-
-      const g = {
-        leftTop: null, leftBottom: null, rightTop: null, rightBottom: null,
-        top: null, bottom: null
-      };
+      const leftStrip = Math.max(0, Math.floor((W - 2*pad - 2*R) / 2)), rightStrip = leftStrip;
+      const topStrip = Math.max(0, Math.floor((H - 2*pad - 2*R) / 2)), bottomStrip = topStrip;
+      const g = { leftTop: null, leftBottom: null, rightTop: null, rightBottom: null, top: null, bottom: null };
 
       if (mode === 'flat'){
         const lh = 2*R;
         const leftX  = pad;
         const rightX = W - pad - rightStrip;
         if (leftStrip > 0){
-          g.leftTop     = { x: leftX,  y: cy - R, w: leftStrip,  h: Math.floor(lh/2) };
-          g.leftBottom  = { x: leftX,  y: cy,     w: leftStrip,  h: Math.floor(lh/2) };
+          g.leftTop = { x: leftX, y: cy - R, w: leftStrip, h: Math.floor(lh/2) };
+          g.leftBottom = { x: leftX, y: cy, w: leftStrip, h: Math.floor(lh/2) };
         }
         if (rightStrip > 0){
-          g.rightTop    = { x: rightX, y: cy - R, w: rightStrip, h: Math.floor(lh/2) };
+          g.rightTop = { x: rightX, y: cy - R, w: rightStrip, h: Math.floor(lh/2) };
           g.rightBottom = { x: rightX, y: cy,     w: rightStrip, h: Math.floor(lh/2) };
         }
       }
@@ -99,41 +149,28 @@
         const availBot = pad + bottomStrip;
         const th = Math.max(10, Math.floor(availTop * 0.85));
         const bh = Math.max(10, Math.floor(availBot * 0.85));
-        g.top    = { x: pad, y: pad,          w: W - 2*pad, h: th };
+        g.top = { x: pad, y: pad, w: W - 2*pad, h: th };
         g.bottom = { x: pad, y: H - pad - bh, w: W - 2*pad, h: bh };
       }
 
-      // Laylines (symmetric)
-      const layEnabled = (props.layEnabled !== false);
-      const layMin = V.clamp(props.layMin, 0, 180);
-      const layMax = V.clamp(props.layMax, 0, 180);
+      const layEnabled = (p.layEnabled !== false);
+      const layMin = V.clamp(p.layMin, 0, 180);
+      const layMax = V.clamp(p.layMax, 0, 180);
+      const labelInsetVal = Math.max(18, Math.floor(ringW * theme.labels.insetFactor));
+      const labelPx = Math.max(10, Math.floor(R * theme.labels.fontFactor));
+      const bufferW = Math.max(1, Math.round(canvas.width || W));
+      const bufferH = Math.max(1, Math.round(canvas.height || H));
+      const dpr = Math.max(1, bufferW / Math.max(1, W));
+      const backgroundKey = buildWindBackgroundKey({ bufferW, bufferH, W, H, dpr, cx, cy, rOuter, tickR, ringW, labelInsetVal, labelPx, layEnabled, layMin, layMax, ringLineWidth: theme.ring.arcLineWidth, ticksMajorLen: theme.ticks.majorLen, ticksMajorWidth: theme.ticks.majorWidth, ticksMinorLen: theme.ticks.minorLen, ticksMinorWidth: theme.ticks.minorWidth, laylineStb: theme.colors.laylineStb, laylinePort: theme.colors.laylinePort, family, labelWeight, color });
 
-      // Dial frame & sectors first
-      ctx.save();
-      // ring
-      draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: theme.ring.arcLineWidth });
-
-      // sectors (annular)
-      if (layEnabled && layMax > layMin){
-        draw.drawAnnularSector(ctx, cx, cy, rOuter, {
-          startDeg:  layMin,
-          endDeg:    layMax,
-          thickness: ringW,
-          fillStyle: theme.colors.laylineStb,
-          alpha: 1
-        });
-        draw.drawAnnularSector(ctx, cx, cy, rOuter, {
-          startDeg: -layMax,
-          endDeg:   -layMin,
-          thickness: ringW,
-          fillStyle: theme.colors.laylinePort,
-          alpha: 1
-        });
+      if (backgroundCache.key !== backgroundKey) {
+        rebuildWindBackground(canvas, { key: backgroundKey, bufferW, bufferH, dpr, W, H, cx, cy, rOuter, tickR, ringW, layEnabled, layMin, layMax, theme, family, labelWeight, color, labelInsetVal, labelPx });
       }
 
-      // red wind pointer (tip outward) BEFORE labels so labels stay on top
-      if (V.isFiniteNumber(props.angle)) {
-        draw.drawPointerAtRim(ctx, cx, cy, rOuter, props.angle, {
+      blitWindLayer(ctx, backgroundCache.backCanvas, W, H);
+
+      if (V.isFiniteNumber(p.angle)) {
+        draw.drawPointerAtRim(ctx, cx, cy, rOuter, p.angle, {
           depth: needleDepth,
           fillStyle: theme.colors.pointer,
           variant: "long",
@@ -141,41 +178,15 @@
           lengthFactor: theme.pointer.lengthFactor
         });
       }
+      blitWindLayer(ctx, backgroundCache.frontCanvas, W, H);
 
-      // ticks
-      draw.drawTicks(ctx, cx, cy, tickR, {
-        startDeg: -180, endDeg: 180,
-        stepMajor: 30, stepMinor: 10,
-        includeEnd: true,
-        major: { len: theme.ticks.majorLen, width: theme.ticks.majorWidth },
-        minor: { len: theme.ticks.minorLen, width: theme.ticks.minorWidth }
-      });
+      const secScale = V.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
+      const angleUnit = (p.angleUnit || '°').trim(), speedUnit = (p.speedUnit || 'kn').trim();
+      const angleText = V.formatAngle180(p.angle, !!p.leadingZero);
+      const speedText = formatSpeedText(p.speed, p, speedUnit);
+      const angleCap = (p.angleCaption || '').trim();
+      const speedCap = (p.speedCaption || '').trim();
 
-      // labels (skip endpoints)
-      const labelInsetVal = Math.max(18, Math.floor(ringW * theme.labels.insetFactor));
-      draw.drawLabels(ctx, cx, cy, tickR, {
-        startDeg: -180, endDeg: 180,
-        step: 30,
-        includeEnd: true,
-        radiusOffset: labelInsetVal,
-        fontPx: Math.max(10, Math.floor(R * theme.labels.fontFactor)),
-        weight: labelWeight,
-        family,
-        labelFormatter: (deg) => String(deg),
-        labelFilter: (deg) => deg !== -180 && deg !== 180
-      });
-
-      ctx.restore();
-
-      const secScale  = V.clamp(props.captionUnitScale ?? 0.8, 0.3, 3.0);
-      const angleUnit = (props.angleUnit || '°').trim();
-      const speedUnit = (props.speedUnit || 'kn').trim();
-      const angleText = V.formatAngle180(props.angle, !!props.leadingZero);
-      const speedText = formatSpeedText(props.speed, props, speedUnit);
-      const angleCap  = (props.angleCaption || '').trim();
-      const speedCap  = (props.speedCaption || '').trim();
-
-      // -------- FLAT MODE: maximize side boxes with explicit measure/draw ----
       if (mode === 'flat'){
         if (g.leftBottom && g.leftTop){
           const fitL = T.measureValueUnitFit(ctx, family, angleText, angleUnit, g.leftBottom.w, g.leftBottom.h, secScale, valueWeight, labelWeight);
@@ -190,7 +201,6 @@
         return;
       }
 
-      // -------- HIGH MODE ----------------------------------------------------
       if (mode === 'high'){
         const capTop = angleCap, valTop = angleText, uniTop = angleUnit;
         const capBot = speedCap, valBot = speedText, uniBot = speedUnit;
@@ -206,7 +216,6 @@
         return;
       }
 
-      // -------- NORMAL MODE --------------------------------------------------
       {
         const extra = Math.max(6, Math.floor(R * 0.06));
         const rSafe = Math.max(10, rOuter - (labelInsetVal + extra));

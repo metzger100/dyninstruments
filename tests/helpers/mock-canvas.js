@@ -33,6 +33,7 @@ function createMockContext2D(options) {
     setLineDash() { rec("setLineDash", arguments); },
     translate() { rec("translate", arguments); },
     rotate() { rec("rotate", arguments); },
+    drawImage() { rec("drawImage", arguments); },
     fillText() { rec("fillText", arguments); },
     measureText(text) {
       rec("measureText", arguments);
@@ -48,13 +49,17 @@ function createMockCanvas(options) {
   const rectW = Number.isFinite(opts.rectWidth) ? opts.rectWidth : 320;
   const rectH = Number.isFinite(opts.rectHeight) ? opts.rectHeight : 180;
   const ctx = opts.ctx || createMockContext2D(opts);
+  const ownerDocument = opts.ownerDocument || createMockOwnerDocument(opts);
 
   return {
     width: 0,
     height: 0,
+    clientWidth: rectW,
+    clientHeight: rectH,
     parentElement: null,
     __ctx: ctx,
     __dyniMarked: false,
+    ownerDocument,
     getContext(type) {
       return type === "2d" ? ctx : null;
     },
@@ -67,7 +72,39 @@ function createMockCanvas(options) {
   };
 }
 
+function createMockOwnerDocument(options) {
+  const opts = options || {};
+  const doc = {};
+  doc.createElement = function (tagName) {
+    if (String(tagName || "").toLowerCase() !== "canvas") {
+      return { tagName: String(tagName || "").toUpperCase() };
+    }
+    const layerCtx = createMockContext2D(opts);
+    return {
+      width: 0,
+      height: 0,
+      parentElement: null,
+      __ctx: layerCtx,
+      __dyniMarked: false,
+      ownerDocument: doc,
+      getContext(type) {
+        return type === "2d" ? layerCtx : null;
+      },
+      getBoundingClientRect() {
+        const width = Number(this.width) || 0;
+        const height = Number(this.height) || 0;
+        return { width, height, top: 0, left: 0, right: width, bottom: height };
+      },
+      closest() {
+        return null;
+      }
+    };
+  };
+  return doc;
+}
+
 module.exports = {
   createMockCanvas,
-  createMockContext2D
+  createMockContext2D,
+  createMockOwnerDocument
 };
