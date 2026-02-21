@@ -44,6 +44,10 @@ describe("SemicircleGaugeEngine", function () {
       labels: {
         insetFactor: 2.2,
         fontFactor: 0.2
+      },
+      font: {
+        weight: 710,
+        labelWeight: 680
       }
     };
     const resolveTheme = vi.fn(function () {
@@ -168,5 +172,6 @@ describe("SemicircleGaugeEngine", function () {
     });
     expect(labelCalls[0].radiusOffset).toBe(37);
     expect(labelCalls[0].fontPx).toBe(19);
+    expect(labelCalls[0].weight).toBe(themeDefaults.font.labelWeight);
   });
 });

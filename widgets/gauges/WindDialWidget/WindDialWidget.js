@@ -41,6 +41,8 @@
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
       if (!W || !H) return;
       const theme = Theme.resolve(canvas);
+      const valueWeight = theme.font.weight;
+      const labelWeight = theme.font.labelWeight;
       ctx.clearRect(0,0,W,H);
 
       const family = Helpers.resolveFontFamily(canvas);
@@ -157,7 +159,7 @@
         includeEnd: true,
         radiusOffset: labelInsetVal,
         fontPx: Math.max(10, Math.floor(R * theme.labels.fontFactor)),
-        bold: true,
+        weight: labelWeight,
         family,
         labelFormatter: (deg) => String(deg),
         labelFilter: (deg) => deg !== -180 && deg !== 180
@@ -176,14 +178,14 @@
       // -------- FLAT MODE: maximize side boxes with explicit measure/draw ----
       if (mode === 'flat'){
         if (g.leftBottom && g.leftTop){
-          const fitL = T.measureValueUnitFit(ctx, family, angleText, angleUnit, g.leftBottom.w, g.leftBottom.h, secScale);
-          T.drawCaptionMax(ctx, family, g.leftTop.x, g.leftTop.y, g.leftTop.w, g.leftTop.h, angleCap, Math.floor(fitL.vPx * secScale), "left");
-          T.drawValueUnitWithFit(ctx, family, g.leftBottom.x, g.leftBottom.y, g.leftBottom.w, g.leftBottom.h, angleText, angleUnit, fitL, "left");
+          const fitL = T.measureValueUnitFit(ctx, family, angleText, angleUnit, g.leftBottom.w, g.leftBottom.h, secScale, valueWeight, labelWeight);
+          T.drawCaptionMax(ctx, family, g.leftTop.x, g.leftTop.y, g.leftTop.w, g.leftTop.h, angleCap, Math.floor(fitL.vPx * secScale), "left", labelWeight);
+          T.drawValueUnitWithFit(ctx, family, g.leftBottom.x, g.leftBottom.y, g.leftBottom.w, g.leftBottom.h, angleText, angleUnit, fitL, "left", valueWeight, labelWeight);
         }
         if (g.rightBottom && g.rightTop){
-          const fitR = T.measureValueUnitFit(ctx, family, speedText, speedUnit, g.rightBottom.w, g.rightBottom.h, secScale);
-          T.drawCaptionMax(ctx, family, g.rightTop.x, g.rightTop.y, g.rightTop.w, g.rightTop.h, speedCap, Math.floor(fitR.vPx * secScale), "right");
-          T.drawValueUnitWithFit(ctx, family, g.rightBottom.x, g.rightBottom.y, g.rightBottom.w, g.rightBottom.h, speedText, speedUnit, fitR, "right");
+          const fitR = T.measureValueUnitFit(ctx, family, speedText, speedUnit, g.rightBottom.w, g.rightBottom.h, secScale, valueWeight, labelWeight);
+          T.drawCaptionMax(ctx, family, g.rightTop.x, g.rightTop.y, g.rightTop.w, g.rightTop.h, speedCap, Math.floor(fitR.vPx * secScale), "right", labelWeight);
+          T.drawValueUnitWithFit(ctx, family, g.rightBottom.x, g.rightBottom.y, g.rightBottom.w, g.rightBottom.h, speedText, speedUnit, fitR, "right", valueWeight, labelWeight);
         }
         return;
       }
@@ -194,12 +196,12 @@
         const capBot = speedCap, valBot = speedText, uniBot = speedUnit;
 
         if (g.top) {
-          const fitTop = T.fitInlineCapValUnit(ctx, family, capTop, valTop, uniTop, g.top.w, g.top.h, secScale);
-          T.drawInlineCapValUnit(ctx, family, g.top.x, g.top.y, g.top.w, g.top.h, capTop, valTop, uniTop, fitTop);
+          const fitTop = T.fitInlineCapValUnit(ctx, family, capTop, valTop, uniTop, g.top.w, g.top.h, secScale, valueWeight, labelWeight);
+          T.drawInlineCapValUnit(ctx, family, g.top.x, g.top.y, g.top.w, g.top.h, capTop, valTop, uniTop, fitTop, valueWeight, labelWeight);
         }
         if (g.bottom) {
-          const fitBottom = T.fitInlineCapValUnit(ctx, family, capBot, valBot, uniBot, g.bottom.w, g.bottom.h, secScale);
-          T.drawInlineCapValUnit(ctx, family, g.bottom.x, g.bottom.y, g.bottom.w, g.bottom.h, capBot, valBot, uniBot, fitBottom);
+          const fitBottom = T.fitInlineCapValUnit(ctx, family, capBot, valBot, uniBot, g.bottom.w, g.bottom.h, secScale, valueWeight, labelWeight);
+          T.drawInlineCapValUnit(ctx, family, g.bottom.x, g.bottom.y, g.bottom.w, g.bottom.h, capBot, valBot, uniBot, fitBottom, valueWeight, labelWeight);
         }
         return;
       }
@@ -220,16 +222,16 @@
           const hc     = Math.floor(hv * secScale);
           const hu     = Math.floor(hv * secScale);
 
-          const vPxA = T.fitTextPx(ctx, angleText, halfW, hv, family, true);
-          const vPxS = T.fitTextPx(ctx, speedText, halfW, hv, family, true);
+          const vPxA = T.fitTextPx(ctx, angleText, halfW, hv, family, valueWeight);
+          const vPxS = T.fitTextPx(ctx, speedText, halfW, hv, family, valueWeight);
           const vPx  = Math.min(vPxA, vPxS);
-          const cPx  = Math.min(T.fitTextPx(ctx, angleCap, halfW, hc, family, true),
-                                T.fitTextPx(ctx, speedCap, halfW, hc, family, true));
-          const uPx  = Math.min(T.fitTextPx(ctx, angleUnit, halfW, hu, family, true),
-                                T.fitTextPx(ctx, speedUnit, halfW, hu, family, true));
+          const cPx  = Math.min(T.fitTextPx(ctx, angleCap, halfW, hc, family, labelWeight),
+                                T.fitTextPx(ctx, speedCap, halfW, hc, family, labelWeight));
+          const uPx  = Math.min(T.fitTextPx(ctx, angleUnit, halfW, hu, family, labelWeight),
+                                T.fitTextPx(ctx, speedUnit, halfW, hu, family, labelWeight));
           const sizes = { cPx, vPx, uPx, hCap: hc, hVal: hv, hUnit: hu };
-          T.drawThreeRowsBlock(ctx, family, xL, yTop, halfW, maxH, angleCap, angleText, angleUnit, secScale, "right", sizes);
-          T.drawThreeRowsBlock(ctx, family, xR, yTop, halfW, maxH, speedCap, speedText, speedUnit, secScale, "left", sizes);
+          T.drawThreeRowsBlock(ctx, family, xL, yTop, halfW, maxH, angleCap, angleText, angleUnit, secScale, "right", sizes, valueWeight, labelWeight);
+          T.drawThreeRowsBlock(ctx, family, xR, yTop, halfW, maxH, speedCap, speedText, speedUnit, secScale, "left", sizes, valueWeight, labelWeight);
           return;
         }
 
@@ -248,8 +250,8 @@
           if (halfWMax <= 10) continue;
 
           const hv = Math.max(12, Math.floor(mh / (1 + 2*secScale)));
-          const vPxA = T.fitTextPx(ctx, angleText, halfWMax, hv, family, true);
-          const vPxS = T.fitTextPx(ctx, speedText, halfWMax, hv, family, true);
+          const vPxA = T.fitTextPx(ctx, angleText, halfWMax, hv, family, valueWeight);
+          const vPxS = T.fitTextPx(ctx, speedText, halfWMax, hv, family, valueWeight);
           const vPx  = Math.min(vPxA, vPxS);
 
           const score = vPx * 10000 + halfWMax * 10 + mh;
@@ -264,13 +266,13 @@
         const hc     = Math.floor(hv * secScale);
         const hu     = Math.floor(hv * secScale);
 
-        const cPx  = Math.min(T.fitTextPx(ctx, angleCap,  halfW, hc, family, true),
-                              T.fitTextPx(ctx, speedCap,  halfW, hc, family, true));
-        const uPx  = Math.min(T.fitTextPx(ctx, angleUnit, halfW, hu, family, true),
-                              T.fitTextPx(ctx, speedUnit, halfW, hu, family, true));
+        const cPx  = Math.min(T.fitTextPx(ctx, angleCap,  halfW, hc, family, labelWeight),
+                              T.fitTextPx(ctx, speedCap,  halfW, hc, family, labelWeight));
+        const uPx  = Math.min(T.fitTextPx(ctx, angleUnit, halfW, hu, family, labelWeight),
+                              T.fitTextPx(ctx, speedUnit, halfW, hu, family, labelWeight));
         const vPx  = best ? best.vPx : Math.min(
-          T.fitTextPx(ctx, angleText, halfW, hv, family, true),
-          T.fitTextPx(ctx, speedText, halfW, hv, family, true)
+          T.fitTextPx(ctx, angleText, halfW, hv, family, valueWeight),
+          T.fitTextPx(ctx, speedText, halfW, hv, family, valueWeight)
         );
 
         const sizes = { cPx, vPx, uPx, hCap: hc, hVal: hv, hUnit: hu };
@@ -280,8 +282,8 @@
         const xR     = cx + Math.floor(innerW/2) - halfW;
         const yTop   = cy - Math.floor(maxH/2);
 
-        T.drawThreeRowsBlock(ctx, family, xL, yTop, halfW, maxH, angleCap, angleText, angleUnit, secScale, "right", sizes);
-        T.drawThreeRowsBlock(ctx, family, xR, yTop, halfW, maxH, speedCap, speedText, speedUnit, secScale, "left", sizes);
+        T.drawThreeRowsBlock(ctx, family, xL, yTop, halfW, maxH, angleCap, angleText, angleUnit, secScale, "right", sizes, valueWeight, labelWeight);
+        T.drawThreeRowsBlock(ctx, family, xR, yTop, halfW, maxH, speedCap, speedText, speedUnit, secScale, "left", sizes, valueWeight, labelWeight);
       }
     }
 

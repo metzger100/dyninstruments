@@ -23,6 +23,8 @@
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
       if (!W || !H) return;
       const theme = Theme.resolve(canvas);
+      const valueWeight = theme.font.weight;
+      const labelWeight = theme.font.labelWeight;
 
       ctx.clearRect(0,0,W,H);
       const family = Helpers.resolveFontFamily(canvas);
@@ -99,7 +101,7 @@
         step: 45,
         radiusOffset: Math.max(16, Math.floor(ringW * 1.6)),
         fontPx: labelPx,
-        bold: true,
+        weight: labelWeight,
         family,
         labelsMap: labels,
         labelFormatter: (deg) => String(deg),
@@ -120,11 +122,11 @@
           const topBox    = { x: leftX,  y: cy - R, w: leftStrip,  h: Math.floor(lh/2) };
           const bottomBox = { x: leftX,  y: cy,     w: leftStrip,  h: Math.floor(lh/2) };
 
-          const fit = T.measureValueUnitFit(ctx, family, value, unit, bottomBox.w, bottomBox.h, secScale);
-          T.drawCaptionMax(ctx, family, topBox.x, topBox.y, topBox.w, topBox.h, caption, Math.floor(fit.vPx * secScale), "left");
-          T.drawValueUnitWithFit(ctx, family, bottomBox.x, bottomBox.y, bottomBox.w, bottomBox.h, value, unit, fit, "left");
+          const fit = T.measureValueUnitFit(ctx, family, value, unit, bottomBox.w, bottomBox.h, secScale, valueWeight, labelWeight);
+          T.drawCaptionMax(ctx, family, topBox.x, topBox.y, topBox.w, topBox.h, caption, Math.floor(fit.vPx * secScale), "left", labelWeight);
+          T.drawValueUnitWithFit(ctx, family, bottomBox.x, bottomBox.y, bottomBox.w, bottomBox.h, value, unit, fit, "left", valueWeight, labelWeight);
         }
-        if (props.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color);
+        if (props.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color, null, labelWeight);
         return;
       }
 
@@ -133,10 +135,10 @@
         const th = Math.max(10, Math.floor((pad + topStrip) * 0.9));
         const band = { x: pad, y: pad, w: W - 2*pad, h: th };
 
-        const fit = T.fitInlineCapValUnit(ctx, family, caption, value, unit, band.w, band.h, secScale);
-        T.drawInlineCapValUnit(ctx, family, band.x, band.y, band.w, band.h, caption, value, unit, fit);
+        const fit = T.fitInlineCapValUnit(ctx, family, caption, value, unit, band.w, band.h, secScale, valueWeight, labelWeight);
+        T.drawInlineCapValUnit(ctx, family, band.x, band.y, band.w, band.h, caption, value, unit, fit, valueWeight, labelWeight);
 
-        if (props.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color);
+        if (props.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color, null, labelWeight);
         return;
       }
 
@@ -148,9 +150,9 @@
 
         if (rSafe < 12) {
           const th = Math.max(10, Math.floor((pad + topStrip) * 0.9));
-          const fit = T.measureValueUnitFit(ctx, family, value, unit, (W - 2*pad), th, secScale);
-          T.drawValueUnitWithFit(ctx, family, pad, pad, (W - 2*pad), th, value, unit, fit, "center");
-          if (props.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color);
+          const fit = T.measureValueUnitFit(ctx, family, value, unit, (W - 2*pad), th, secScale, valueWeight, labelWeight);
+          T.drawValueUnitWithFit(ctx, family, pad, pad, (W - 2*pad), th, value, unit, fit, "center", valueWeight, labelWeight);
+          if (props.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color, null, labelWeight);
           return;
         }
 
@@ -167,7 +169,7 @@
           if (boxW <= 10) continue;
 
           const hv = Math.max(12, Math.floor(mh / (1 + 2*secScale)));
-          const vPx = T.fitTextPx(ctx, value, boxW, hv, family, true);
+          const vPx = T.fitTextPx(ctx, value, boxW, hv, family, valueWeight);
           const score = vPx * 10000 + boxW * 10 + mh;
           if (!best || score > best.score){
             best = { mh, boxW, hv, vPx, score };
@@ -180,9 +182,9 @@
         const hc   = Math.floor(hv * secScale);
         const hu   = Math.floor(hv * secScale);
 
-        const cPx  = T.fitTextPx(ctx, caption, boxW, hc, family, true);
-        const uPx  = T.fitTextPx(ctx, unit,    boxW, hu, family, true);
-        const vPx  = best ? best.vPx : T.fitTextPx(ctx, value, boxW, hv, family, true);
+        const cPx  = T.fitTextPx(ctx, caption, boxW, hc, family, labelWeight);
+        const uPx  = T.fitTextPx(ctx, unit,    boxW, hu, family, labelWeight);
+        const vPx  = best ? best.vPx : T.fitTextPx(ctx, value, boxW, hv, family, valueWeight);
 
         const sizes = { cPx, vPx, uPx, hCap: hc, hVal: hv, hUnit: hu };
 
@@ -190,9 +192,9 @@
         const yTop  = cy - Math.floor(maxH / 2);
 
         // Center-aligned text in a centered box
-        T.drawThreeRowsBlock(ctx, family, xBox, yTop, boxW, maxH, caption, value, unit, secScale, "center", sizes);
+        T.drawThreeRowsBlock(ctx, family, xBox, yTop, boxW, maxH, caption, value, unit, secScale, "center", sizes, valueWeight, labelWeight);
 
-        if (props.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color);
+        if (props.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color, null, labelWeight);
       }
     }
 

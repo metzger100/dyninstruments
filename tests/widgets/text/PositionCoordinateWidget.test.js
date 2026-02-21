@@ -15,6 +15,8 @@ describe("PositionCoordinateWidget", function () {
   });
 
   function makeHelpers() {
+    const themeTokens = { font: { weight: 730, labelWeight: 610 } };
+    const fontWeightCalls = [];
     const applyFormatter = vi.fn((raw, props) => {
       const fpRaw = props && props.formatterParameters;
       const fp = Array.isArray(fpRaw) ? fpRaw : (typeof fpRaw === "string" ? fpRaw.split(",") : []);
@@ -39,6 +41,7 @@ describe("PositionCoordinateWidget", function () {
     });
 
     return {
+      fontWeightCalls,
       applyFormatter,
       setupCanvas(canvas) {
         const ctx = canvas.getContext("2d");
@@ -56,26 +59,41 @@ describe("PositionCoordinateWidget", function () {
         return "#fff";
       },
       getModule(id) {
+        if (id === "ThemeResolver") {
+          return {
+            create() {
+              return {
+                resolve() {
+                  return themeTokens;
+                }
+              };
+            }
+          };
+        }
         if (id === "GaugeTextLayout") {
           return {
             create() {
               return {
-                setFont(ctx, px, bold, family) {
+                setFont(ctx, px, weight, family) {
                   const size = Math.max(1, Math.floor(Number(px) || 0));
-                  ctx.font = (bold ? "700 " : "400 ") + size + "px " + (family || "sans-serif");
+                  const weightNum = Math.floor(Number(weight));
+                  fontWeightCalls.push(weightNum);
+                  ctx.font = String(weightNum) + " " + size + "px " + (family || "sans-serif");
                 },
-                fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, bold) {
+                fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, weight) {
                   let px = Math.max(1, Math.floor(Math.min(basePx, maxH)));
                   if (!text) return px;
                   const size = Math.max(1, Math.floor(Number(px) || 0));
-                  ctx.font = (bold ? "700 " : "400 ") + size + "px " + (family || "sans-serif");
-                  const w = ctx.measureText(String(text)).width;
-                  if (w <= maxW + 0.01) return px;
-                  const scale = Math.max(0.1, (maxW / Math.max(1, w)));
+                  const weightNum = Math.floor(Number(weight));
+                  fontWeightCalls.push(weightNum);
+                  ctx.font = String(weightNum) + " " + size + "px " + (family || "sans-serif");
+                  const width = ctx.measureText(String(text)).width;
+                  if (width <= maxW + 0.01) return px;
+                  const scale = Math.max(0.1, (maxW / Math.max(1, width)));
                   px = Math.max(1, Math.floor(px * scale));
                   return Math.min(px, Math.floor(maxH));
                 },
-                drawDisconnectOverlay(ctx, W, H, family, color) {
+                drawDisconnectOverlay(ctx, W, H, family, color, label, labelWeight) {
                   ctx.save();
                   ctx.globalAlpha = 0.20;
                   ctx.fillStyle = color;
@@ -86,8 +104,10 @@ describe("PositionCoordinateWidget", function () {
                   ctx.textAlign = "center";
                   ctx.textBaseline = "middle";
                   const size = Math.max(1, Math.floor(Number(px) || 0));
-                  ctx.font = "700 " + size + "px " + (family || "sans-serif");
-                  ctx.fillText("NO DATA", Math.floor(W / 2), Math.floor(H / 2));
+                  const overlayWeight = Math.floor(Number(labelWeight));
+                  fontWeightCalls.push(overlayWeight);
+                  ctx.font = String(overlayWeight) + " " + size + "px " + (family || "sans-serif");
+                  ctx.fillText(label || "NO DATA", Math.floor(W / 2), Math.floor(H / 2));
                   ctx.restore();
                 }
               };
@@ -130,8 +150,9 @@ describe("PositionCoordinateWidget", function () {
     });
     globalThis.avnav = { api: { formatter: { formatLonLats: flatFormatter } } };
 
+    const helpers = makeHelpers();
     const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
-      .create({}, makeHelpers());
+      .create({}, helpers);
 
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({
@@ -153,6 +174,8 @@ describe("PositionCoordinateWidget", function () {
     expect(texts).toContain("POS");
     expect(texts).toContain("53.50,8.20");
     expect(flatFormatter).toHaveBeenCalled();
+    expect(helpers.fontWeightCalls).toContain(730);
+    expect(helpers.fontWeightCalls).toContain(610);
   });
 
   it("renders stacked coordinates in normal and high modes", function () {
@@ -245,8 +268,9 @@ describe("PositionCoordinateWidget", function () {
   });
 
   it("draws disconnect overlay text", function () {
+    const helpers = makeHelpers();
     const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
-      .create({}, makeHelpers());
+      .create({}, helpers);
 
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({
@@ -263,5 +287,6 @@ describe("PositionCoordinateWidget", function () {
     });
 
     expect(fillTextValues(ctx)).toContain("NO DATA");
+    expect(helpers.fontWeightCalls).toContain(610);
   });
 });

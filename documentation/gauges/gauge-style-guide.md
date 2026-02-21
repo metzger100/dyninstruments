@@ -160,7 +160,7 @@ Caption  Value  Unit
 
 - Major ticks: `len=theme.ticks.majorLen`, `width=theme.ticks.majorWidth`
 - Minor ticks: `len=theme.ticks.minorLen`, `width=theme.ticks.minorWidth`
-- Labels: bold, font from `resolveFontFamily()`
+- Labels: `weight=theme.font.labelWeight`, font family from `resolveFontFamily()`
 - End labels optional via `showEndLabels`
 
 ## Disconnect Overlay

@@ -1,7 +1,7 @@
 /**
  * Module: PositionCoordinateWidget - Stacked latitude/longitude renderer for nav position kinds
  * Documentation: documentation/widgets/position-coordinates.md
- * Depends: GaugeTextLayout, GaugeValueMath, Helpers.applyFormatter, Helpers.setupCanvas, Helpers.resolveTextColor, Helpers.resolveFontFamily
+ * Depends: ThemeResolver, GaugeTextLayout, GaugeValueMath, Helpers.applyFormatter, Helpers.setupCanvas, Helpers.resolveTextColor, Helpers.resolveFontFamily
  */
 
 (function (root, factory) {
@@ -57,6 +57,7 @@
   }
 
   function create(def, Helpers) {
+    const theme = Helpers.getModule("ThemeResolver").create(def, Helpers);
     const textLayout = Helpers.getModule("GaugeTextLayout").create(def, Helpers);
     const valueMath = Helpers.getModule("GaugeValueMath").create(def, Helpers);
 
@@ -75,6 +76,9 @@
 
       ctx.clearRect(0, 0, W, H);
       ctx.textBaseline = "middle";
+      const tokens = theme.resolve(canvas);
+      const valueWeight = tokens.font.weight;
+      const labelWeight = tokens.font.labelWeight;
 
       const family = Helpers.resolveFontFamily(canvas);
       const color = Helpers.resolveTextColor(canvas);
@@ -101,10 +105,10 @@
           const vPx = Math.floor(mid);
           const sPx = Math.floor(mid * secScale);
 
-          textLayout.setFont(ctx, vPx, true, family);
+          textLayout.setFont(ctx, vPx, valueWeight, family);
           const vW = ctx.measureText(value).width;
 
-          textLayout.setFont(ctx, sPx, true, family);
+          textLayout.setFont(ctx, sPx, labelWeight, family);
           const cW = caption ? ctx.measureText(caption).width : 0;
           const uW = unit ? ctx.measureText(unit).width : 0;
 
@@ -122,11 +126,11 @@
         const vPx = Math.floor(best);
         const sPx = Math.floor(best * secScale);
 
-        textLayout.setFont(ctx, sPx, true, family);
+        textLayout.setFont(ctx, sPx, labelWeight, family);
         const cW = caption ? ctx.measureText(caption).width : 0;
-        textLayout.setFont(ctx, vPx, true, family);
+        textLayout.setFont(ctx, vPx, valueWeight, family);
         const vW = ctx.measureText(value).width;
-        textLayout.setFont(ctx, sPx, true, family);
+        textLayout.setFont(ctx, sPx, labelWeight, family);
         const uW = unit ? ctx.measureText(unit).width : 0;
 
         const total = (caption ? cW + gapBase : 0) + vW + (unit ? gapBase + uW : 0);
@@ -135,20 +139,20 @@
         ctx.textAlign = "left";
 
         if (caption) {
-          textLayout.setFont(ctx, sPx, true, family);
+          textLayout.setFont(ctx, sPx, labelWeight, family);
           ctx.fillText(caption, x, y);
           x += cW + gapBase;
         }
-        textLayout.setFont(ctx, vPx, true, family);
+        textLayout.setFont(ctx, vPx, valueWeight, family);
         ctx.fillText(value, x, y);
         x += vW;
         if (unit) {
           x += gapBase;
-          textLayout.setFont(ctx, sPx, true, family);
+          textLayout.setFont(ctx, sPx, labelWeight, family);
           ctx.fillText(unit, x, y);
         }
 
-        if (p.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color);
+        if (p.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color, null, labelWeight);
         return;
       }
 
@@ -178,8 +182,8 @@
       const maxRowH = Math.max(10, Math.min(row1H, row2H) - innerY * 2);
       const maxRowW = Math.max(10, W - padX * 2);
       const lineBase = Math.floor(maxRowH);
-      const latPx = textLayout.fitSingleTextPx(ctx, latText, lineBase, maxRowW, maxRowH, family, true);
-      const lonPx = textLayout.fitSingleTextPx(ctx, lonText, lineBase, maxRowW, maxRowH, family, true);
+      const latPx = textLayout.fitSingleTextPx(ctx, latText, lineBase, maxRowW, maxRowH, family, valueWeight);
+      const lonPx = textLayout.fitSingleTextPx(ctx, lonText, lineBase, maxRowW, maxRowH, family, valueWeight);
       const linePx = Math.max(1, Math.min(latPx, lonPx));
 
       if (hasHeader) {
@@ -193,21 +197,21 @@
           : Math.max(10, W - padX * 2);
 
         const capPx = caption
-          ? textLayout.fitSingleTextPx(ctx, caption, headerBase, capMaxW, maxHeaderH, family, true)
+          ? textLayout.fitSingleTextPx(ctx, caption, headerBase, capMaxW, maxHeaderH, family, labelWeight)
           : 0;
         const unitPx = unit
-          ? textLayout.fitSingleTextPx(ctx, unit, Math.floor(headerBase * secScale), unitMaxW, maxHeaderH, family, true)
+          ? textLayout.fitSingleTextPx(ctx, unit, Math.floor(headerBase * secScale), unitMaxW, maxHeaderH, family, labelWeight)
           : 0;
         const yHeader = Math.floor(headerH / 2);
 
         if (caption) {
           ctx.textAlign = "left";
-          textLayout.setFont(ctx, capPx, true, family);
+          textLayout.setFont(ctx, capPx, labelWeight, family);
           ctx.fillText(caption, padX, yHeader);
         }
         if (unit) {
           ctx.textAlign = "right";
-          textLayout.setFont(ctx, unitPx, true, family);
+          textLayout.setFont(ctx, unitPx, labelWeight, family);
           ctx.fillText(unit, W - padX, yHeader);
         }
       }
@@ -215,11 +219,11 @@
       const yLat = headerH + Math.floor(row1H / 2);
       const yLon = headerH + row1H + Math.floor(row2H / 2);
       ctx.textAlign = "center";
-      textLayout.setFont(ctx, linePx, true, family);
+      textLayout.setFont(ctx, linePx, valueWeight, family);
       ctx.fillText(latText, Math.floor(W / 2), yLat);
       ctx.fillText(lonText, Math.floor(W / 2), yLon);
 
-      if (p.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color);
+      if (p.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color, null, labelWeight);
     }
 
     function translateFunction() { return {}; }

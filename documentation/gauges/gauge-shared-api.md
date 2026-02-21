@@ -88,10 +88,11 @@ Color-token flow:
 | `drawRimMarker` | Draw short radial marker at rim |
 | `drawTicksFromAngles` | Draw major/minor ticks from angle lists |
 | `drawTicks` | Build and draw ticks from step config |
-| `drawLabels` | Draw labels on arc/circle |
+| `drawLabels` | Draw labels on arc/circle (`opts.weight` numeric font weight) |
 | `drawDialFrame` | Convenience ring + ticks + labels |
 
 `draw.drawPointerAtRim(..., opts)` consumes scalar style inputs (`opts.fillStyle` or `opts.color`) plus shape factors (`opts.sideFactor`, `opts.lengthFactor`).
+`draw.drawLabels(..., opts)` consumes numeric font weight via `opts.weight`.
 
 ## Angle API (`GaugeAngleMath`)
 
@@ -116,6 +117,13 @@ Color-token flow:
 
 `GaugeTextLayout.create()` returns shared text helpers:
 `setFont`, `fitTextPx`, `fitSingleTextPx`, `measureValueUnitFit`, `drawCaptionMax`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`, `drawDisconnectOverlay`.
+
+Key signatures:
+
+- `setFont(ctx, px, weight, family)`
+- `fitTextPx(ctx, text, maxW, maxH, family, weight)`
+- `fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, weight)`
+- Composite helpers (`measureValueUnitFit`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`) accept both `valueWeight` and `labelWeight` numeric arguments.
 
 ## GaugeValueMath API
 

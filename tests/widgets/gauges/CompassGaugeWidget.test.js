@@ -7,6 +7,7 @@ describe("CompassGaugeWidget", function () {
     const rimMarkerCalls = [];
     const ringCalls = [];
     const tickCalls = [];
+    const labelCalls = [];
     const themeDefaults = {
       colors: {
         pointer: "#ff2b2b"
@@ -28,6 +29,10 @@ describe("CompassGaugeWidget", function () {
       labels: {
         insetFactor: 2.1,
         fontFactor: 0.35
+      },
+      font: {
+        weight: 705,
+        labelWeight: 645
       }
     };
 
@@ -66,7 +71,9 @@ describe("CompassGaugeWidget", function () {
                   drawRimMarker(ctx, cx, cy, rOuter, angle, opts) {
                     rimMarkerCalls.push(opts);
                   },
-                  drawLabels() {}
+                  drawLabels(ctx, cx, cy, rOuter, opts) {
+                    labelCalls.push(opts);
+                  }
                 },
                 theme: {
                   resolve() {
@@ -139,5 +146,6 @@ describe("CompassGaugeWidget", function () {
       len: themeDefaults.ticks.minorLen,
       width: themeDefaults.ticks.minorWidth
     });
+    expect(labelCalls[0].weight).toBe(themeDefaults.font.labelWeight);
   });
 });

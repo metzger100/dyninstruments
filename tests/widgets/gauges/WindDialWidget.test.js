@@ -32,6 +32,10 @@ describe("WindDialWidget", function () {
       labels: {
         insetFactor: 2.1,
         fontFactor: 0.35
+      },
+      font: {
+        weight: 720,
+        labelWeight: 660
       }
     };
     const applyFormatter = vi.fn((value, spec) => {
@@ -165,6 +169,7 @@ describe("WindDialWidget", function () {
     });
     expect(labelCalls[0].radiusOffset).toBe(35);
     expect(labelCalls[0].fontPx).toBe(17);
+    expect(labelCalls[0].weight).toBe(themeDefaults.font.labelWeight);
   });
 
   it("does not append unit into value text when formatter returns raw passthrough", function () {
@@ -227,6 +232,10 @@ describe("WindDialWidget", function () {
                       labels: {
                         insetFactor: 2.1,
                         fontFactor: 0.35
+                      },
+                      font: {
+                        weight: 700,
+                        labelWeight: 700
                       }
                     };
                   }

@@ -1,7 +1,7 @@
 /**
  * Module: ThreeValueTextWidget - Responsive caption/value/unit numeric canvas renderer
  * Documentation: documentation/widgets/three-elements.md
- * Depends: Helpers.applyFormatter, GaugeTextLayout, GaugeValueMath
+ * Depends: Helpers.applyFormatter, ThemeResolver, GaugeTextLayout, GaugeValueMath
  */
 
 (function (root, factory) {
@@ -13,14 +13,14 @@
 
   // ---- helpers for sizing ---------------------------------------------------
 
-  function fitValueUnitRowPx(ctx, valueText, unitText, baseValuePx, secScale, gap, maxW, maxH, family, setFontFn){
+  function fitValueUnitRowPx(ctx, valueText, unitText, baseValuePx, secScale, gap, maxW, maxH, family, valueWeight, labelWeight, setFontFn){
     let vPx = Math.max(1, Math.floor(Math.min(baseValuePx, maxH)));
     let uPx = Math.max(1, Math.floor(Math.min(Math.floor(vPx * secScale), maxH)));
 
-    setFontFn(ctx, vPx, true, family);
+    setFontFn(ctx, vPx, valueWeight, family);
     const vW = valueText ? ctx.measureText(valueText).width : 0;
 
-    setFontFn(ctx, uPx, true, family);
+    setFontFn(ctx, uPx, labelWeight, family);
     const uW = (unitText ? ctx.measureText(unitText).width : 0);
 
     const totalW = vW + (unitText ? (gap + uW) : 0);
@@ -37,6 +37,7 @@
   }
 
   function create(def, Helpers) {
+    const theme = Helpers.getModule("ThemeResolver").create(def, Helpers);
     const textLayout = Helpers.getModule("GaugeTextLayout").create(def, Helpers);
     const valueMath = Helpers.getModule("GaugeValueMath").create(def, Helpers);
 
@@ -45,6 +46,9 @@
       if (!W || !H) return;
       ctx.clearRect(0,0,W,H);
       ctx.textBaseline = 'middle';
+      const tokens = theme.resolve(canvas);
+      const valueWeight = tokens.font.weight;
+      const labelWeight = tokens.font.labelWeight;
 
       const family = Helpers.resolveFontFamily(canvas);
       const color  = Helpers.resolveTextColor(canvas);
@@ -97,41 +101,41 @@
         const maxWBot = Math.max(10, W - padX*2);
 
         const vBaseH = Math.floor(maxHMid);
-        let vPx = textLayout.fitSingleTextPx(ctx, value, vBaseH, maxWMid, maxHMid, family, /*bold*/true);
+        let vPx = textLayout.fitSingleTextPx(ctx, value, vBaseH, maxWMid, maxHMid, family, valueWeight);
 
         const cBaseH = Math.min(Math.floor(vBaseH * secScale), maxHTop);
         const uBaseH = Math.min(Math.floor(vBaseH * secScale), maxHBot);
 
         const cPx = caption ? textLayout.fitSingleTextPx(
-          ctx, caption, cBaseH, maxWTop, maxHTop, family, /*bold*/true
+          ctx, caption, cBaseH, maxWTop, maxHTop, family, labelWeight
         ) : 0;
 
         const uPx = unit ? textLayout.fitSingleTextPx(
-          ctx, unit,    uBaseH, maxWBot, maxHBot, family, /*bold*/true
+          ctx, unit,    uBaseH, maxWBot, maxHBot, family, labelWeight
         ) : 0;
 
         if (caption){
           const yTop = Math.floor(hTop/2);
-          textLayout.setFont(ctx, cPx, true, family);
+          textLayout.setFont(ctx, cPx, labelWeight, family);
           ctx.textAlign = 'left';
           ctx.fillText(caption, padX, yTop);
         }
 
         {
           const yMid = Math.floor(hTop + hMid/2);
-          textLayout.setFont(ctx, vPx, true, family);
+          textLayout.setFont(ctx, vPx, valueWeight, family);
           ctx.textAlign = 'center';
           ctx.fillText(value, Math.floor(W/2), yMid);
         }
 
         if (unit){
           const yBot = Math.floor(hTop + hMid + hBot/2);
-          textLayout.setFont(ctx, uPx, true, family);
+          textLayout.setFont(ctx, uPx, labelWeight, family);
           ctx.textAlign = 'right';
           ctx.fillText(unit, W - padX, yBot);
         }
 
-        if (props.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color);
+        if (props.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color, null, labelWeight);
         return;
       }
 
@@ -149,36 +153,36 @@
 
         const vBaseH = Math.floor(maxHTop);
         const pair = fitValueUnitRowPx(
-          ctx, value, unit, vBaseH, secScale, /*gap*/gapBase, maxWTop, maxHTop, family, textLayout.setFont
+          ctx, value, unit, vBaseH, secScale, /*gap*/gapBase, maxWTop, maxHTop, family, valueWeight, labelWeight, textLayout.setFont
         );
         let vPx = pair.vPx;
         let uPx = unit ? pair.uPx : 0;
 
         const cBaseH = Math.min(Math.floor(vBaseH * secScale), maxHBot);
         const cPx = caption ? textLayout.fitSingleTextPx(
-          ctx, caption, cBaseH, maxWBot, maxHBot, family, /*bold*/true
+          ctx, caption, cBaseH, maxWBot, maxHBot, family, labelWeight
         ) : 0;
 
         {
-          textLayout.setFont(ctx, vPx, true, family); const vW = ctx.measureText(value).width;
+          textLayout.setFont(ctx, vPx, valueWeight, family); const vW = ctx.measureText(value).width;
           let uW = 0;
-          if (unit){ textLayout.setFont(ctx, uPx, true, family); uW = ctx.measureText(unit).width; }
+          if (unit){ textLayout.setFont(ctx, uPx, labelWeight, family); uW = ctx.measureText(unit).width; }
           const total = vW + (unit ? gapBase + uW : 0);
           let x = Math.floor((W - total)/2);
           const y = Math.floor(hTop/2);
           ctx.textAlign = 'left';
-          textLayout.setFont(ctx, vPx, true, family); ctx.fillText(value, x, y); x += vW;
-          if (unit){ x += gapBase; textLayout.setFont(ctx, uPx, true, family); ctx.fillText(unit, x, y); }
+          textLayout.setFont(ctx, vPx, valueWeight, family); ctx.fillText(value, x, y); x += vW;
+          if (unit){ x += gapBase; textLayout.setFont(ctx, uPx, labelWeight, family); ctx.fillText(unit, x, y); }
         }
 
         if (caption){
           const y = Math.floor(hTop + hBot/2);
-          textLayout.setFont(ctx, cPx, true, family);
+          textLayout.setFont(ctx, cPx, labelWeight, family);
           ctx.textAlign = 'left';
           ctx.fillText(caption, padX, y);
         }
 
-        if (props.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color);
+        if (props.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color, null, labelWeight);
         return;
       }
 
@@ -192,10 +196,10 @@
           const vPx = Math.floor(mid);
           const sPx = Math.floor(mid * secScale);
 
-          textLayout.setFont(ctx, vPx, true, family);
+          textLayout.setFont(ctx, vPx, valueWeight, family);
           const vW = ctx.measureText(value).width;
 
-          textLayout.setFont(ctx, sPx, true, family);
+          textLayout.setFont(ctx, sPx, labelWeight, family);
           const cW = caption ? ctx.measureText(caption).width : 0;
           const uW = unit ? ctx.measureText(unit).width : 0;
 
@@ -208,20 +212,20 @@
         const vPx = Math.floor(best);
         const sPx = Math.floor(best * secScale);
 
-        textLayout.setFont(ctx, sPx, true, family); const cW = caption ? ctx.measureText(caption).width : 0;
-        textLayout.setFont(ctx, vPx, true, family); const vW = ctx.measureText(value).width;
-        textLayout.setFont(ctx, sPx, true, family); const uW = unit ? ctx.measureText(unit).width : 0;
+        textLayout.setFont(ctx, sPx, labelWeight, family); const cW = caption ? ctx.measureText(caption).width : 0;
+        textLayout.setFont(ctx, vPx, valueWeight, family); const vW = ctx.measureText(value).width;
+        textLayout.setFont(ctx, sPx, labelWeight, family); const uW = unit ? ctx.measureText(unit).width : 0;
 
         const total = (caption ? cW + gapBase : 0) + vW + (unit ? gapBase + uW : 0);
         let x = Math.floor((W - total)/2);
         const y = Math.floor(H/2);
         ctx.textAlign = 'left';
 
-        if (caption){ textLayout.setFont(ctx, sPx, true, family); ctx.fillText(caption, x, y); x += cW + gapBase; }
-        textLayout.setFont(ctx, vPx, true, family); ctx.fillText(value, x, y); x += vW;
-        if (unit){ x += gapBase; textLayout.setFont(ctx, sPx, true, family); ctx.fillText(unit, x, y); }
+        if (caption){ textLayout.setFont(ctx, sPx, labelWeight, family); ctx.fillText(caption, x, y); x += cW + gapBase; }
+        textLayout.setFont(ctx, vPx, valueWeight, family); ctx.fillText(value, x, y); x += vW;
+        if (unit){ x += gapBase; textLayout.setFont(ctx, sPx, labelWeight, family); ctx.fillText(unit, x, y); }
 
-        if (props.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color);
+        if (props.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color, null, labelWeight);
       }
     }
 

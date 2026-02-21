@@ -94,9 +94,9 @@
       const cfg = opts.angleCfg;
 
       const fontPx = Math.max(6, Math.floor(Number(opts.fontPx ?? 11)));
-      const bold = (opts.bold !== false);
+      const weight = Math.floor(Number(opts.weight));
       const family = opts.family || "sans-serif";
-      const font = (bold ? "700 " : "400 ") + fontPx + "px " + family;
+      const font = weight + " " + fontPx + "px " + family;
 
       const radiusOffset = Number(opts.radiusOffset ?? opts.offset ?? 16);
       const rr = rOuter - radiusOffset;
