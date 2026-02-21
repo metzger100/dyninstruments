@@ -84,6 +84,13 @@ otherwise -> normal
 - Caption and unit text uses `theme.font.labelWeight`.
 - Disconnect overlay text uses `theme.font.labelWeight`.
 
+## Performance
+
+- Fitting results are cached per widget instance (closure-local, not global).
+- Cache keys include all fitting-relevant inputs: `W`, `H`, active layout mode, rendered `value` text, `caption`, `unit`, effective `secScale` (`captionUnitScale` after clamp), resolved font family, and theme font weights (`valueWeight`, `labelWeight`).
+- Cache invalidates automatically when any key input changes (for example content, size, mode, scale, or typography changes).
+- Canvas drawing still runs every frame; only fitting/measurement work is reused on cache hits.
+
 ## Exports
 
 ```javascript

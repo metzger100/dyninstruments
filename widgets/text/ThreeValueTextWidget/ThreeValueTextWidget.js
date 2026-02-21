@@ -36,10 +36,30 @@
     return { vPx, uPx };
   }
 
+  function makeFitCacheKey(mode, W, H, valueText, captionText, unitText, secScale, family, valueWeight, labelWeight) {
+    return JSON.stringify({
+      mode,
+      W,
+      H,
+      value: valueText,
+      caption: captionText,
+      unit: unitText,
+      secScale,
+      family,
+      valueWeight,
+      labelWeight
+    });
+  }
+
+  function readFitCache(entry, key) {
+    return entry && entry.key === key ? entry.result : null;
+  }
+
   function create(def, Helpers) {
     const theme = Helpers.getModule("ThemeResolver").create(def, Helpers);
     const textLayout = Helpers.getModule("GaugeTextLayout").create(def, Helpers);
     const valueMath = Helpers.getModule("GaugeValueMath").create(def, Helpers);
+    const fitCache = { high: null, normal: null, flat: null };
 
     function renderCanvas(canvas, props){
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
@@ -56,7 +76,7 @@
 
       const caption = (props.caption || '').trim();
       const unit    = (props.unit || '').trim();
-      const value   = Helpers.applyFormatter(props.value, props);
+      const value   = String(Helpers.applyFormatter(props.value, props));
 
       const ratio   = W / Math.max(1, H);
       const tNormal = valueMath.isFiniteNumber(props.ratioThresholdNormal) ? props.ratioThresholdNormal : 1.0;
@@ -85,34 +105,51 @@
 
       // ---- 3-row layout (Top: Caption, Mid: Value, Bottom: Unit) -----------
       if (mode === 'high'){
-        const wTop = secScale, wMid = 1, wBot = secScale;
-        const wSum = wTop + wMid + wBot;
+        const key = makeFitCacheKey(
+          'high', W, H, value, caption, unit, secScale, family, valueWeight, labelWeight
+        );
+        const cached = readFitCache(fitCache.high, key);
+        let hTop;
+        let hMid;
+        let hBot;
+        let vPx;
+        let cPx;
+        let uPx;
 
-        let hTop = Math.round(H * (wTop / wSum));
-        let hMid = Math.round(H * (wMid / wSum));
-        let hBot = H - hTop - hMid;
+        if (cached) {
+          hTop = cached.hTop;
+          hMid = cached.hMid;
+          hBot = cached.hBot;
+          vPx = cached.vPx;
+          cPx = cached.cPx;
+          uPx = cached.uPx;
+        } else {
+          const wTop = secScale;
+          const wMid = 1;
+          const wBot = secScale;
+          const wSum = wTop + wMid + wBot;
+          hTop = Math.round(H * (wTop / wSum));
+          hMid = Math.round(H * (wMid / wSum));
+          hBot = H - hTop - hMid;
 
-        const maxHTop = Math.max(8,  hTop - innerY*2);
-        const maxHMid = Math.max(10, hMid - innerY*2);
-        const maxHBot = Math.max(8,  hBot -   innerY*2);
+          const maxHTop = Math.max(8, hTop - innerY * 2);
+          const maxHMid = Math.max(10, hMid - innerY * 2);
+          const maxHBot = Math.max(8, hBot - innerY * 2);
+          const maxW = Math.max(10, W - padX * 2);
+          const vBaseH = Math.floor(maxHMid);
+          vPx = textLayout.fitSingleTextPx(ctx, value, vBaseH, maxW, maxHMid, family, valueWeight);
 
-        const maxWTop = Math.max(10, W - padX*2);
-        const maxWMid = Math.max(10, W - padX*2);
-        const maxWBot = Math.max(10, W - padX*2);
+          const cBaseH = Math.min(Math.floor(vBaseH * secScale), maxHTop);
+          const uBaseH = Math.min(Math.floor(vBaseH * secScale), maxHBot);
+          cPx = caption ? textLayout.fitSingleTextPx(
+            ctx, caption, cBaseH, maxW, maxHTop, family, labelWeight
+          ) : 0;
+          uPx = unit ? textLayout.fitSingleTextPx(
+            ctx, unit, uBaseH, maxW, maxHBot, family, labelWeight
+          ) : 0;
 
-        const vBaseH = Math.floor(maxHMid);
-        let vPx = textLayout.fitSingleTextPx(ctx, value, vBaseH, maxWMid, maxHMid, family, valueWeight);
-
-        const cBaseH = Math.min(Math.floor(vBaseH * secScale), maxHTop);
-        const uBaseH = Math.min(Math.floor(vBaseH * secScale), maxHBot);
-
-        const cPx = caption ? textLayout.fitSingleTextPx(
-          ctx, caption, cBaseH, maxWTop, maxHTop, family, labelWeight
-        ) : 0;
-
-        const uPx = unit ? textLayout.fitSingleTextPx(
-          ctx, unit,    uBaseH, maxWBot, maxHBot, family, labelWeight
-        ) : 0;
+          fitCache.high = { key, result: { hTop, hMid, hBot, vPx, cPx, uPx } };
+        }
 
         if (caption){
           const yTop = Math.floor(hTop/2);
@@ -141,38 +178,74 @@
 
       // ---- 2-row layout (Top: Value+Unit, Bottom: Caption) -----------------
       if (mode === 'normal'){
-        const wTop = 1, wBot = secScale, wSum = wTop + wBot;
-        let hTop = Math.round(H * (wTop / wSum));
-        let hBot = H - hTop;
-
-        const maxHTop = Math.max(10, hTop - innerY*2);
-        const maxHBot = Math.max(8,  hBot - innerY*2);
-
-        const maxWTop = Math.max(10, W - padX*2);
-        const maxWBot = Math.max(10, W - padX*2);
-
-        const vBaseH = Math.floor(maxHTop);
-        const pair = fitValueUnitRowPx(
-          ctx, value, unit, vBaseH, secScale, /*gap*/gapBase, maxWTop, maxHTop, family, valueWeight, labelWeight, textLayout.setFont
+        const key = makeFitCacheKey(
+          'normal', W, H, value, caption, unit, secScale, family, valueWeight, labelWeight
         );
-        let vPx = pair.vPx;
-        let uPx = unit ? pair.uPx : 0;
+        const cached = readFitCache(fitCache.normal, key);
+        let hTop;
+        let hBot;
+        let vPx;
+        let uPx;
+        let cPx;
+        let vW;
+        let uW;
+        let total;
 
-        const cBaseH = Math.min(Math.floor(vBaseH * secScale), maxHBot);
-        const cPx = caption ? textLayout.fitSingleTextPx(
-          ctx, caption, cBaseH, maxWBot, maxHBot, family, labelWeight
-        ) : 0;
+        if (cached) {
+          hTop = cached.hTop;
+          hBot = cached.hBot;
+          vPx = cached.vPx;
+          uPx = cached.uPx;
+          cPx = cached.cPx;
+          vW = cached.vW;
+          uW = cached.uW;
+          total = cached.total;
+        } else {
+          const wTop = 1;
+          const wBot = secScale;
+          const wSum = wTop + wBot;
+          hTop = Math.round(H * (wTop / wSum));
+          hBot = H - hTop;
+
+          const maxHTop = Math.max(10, hTop - innerY * 2);
+          const maxHBot = Math.max(8, hBot - innerY * 2);
+          const maxW = Math.max(10, W - padX * 2);
+          const vBaseH = Math.floor(maxHTop);
+          const pair = fitValueUnitRowPx(
+            ctx, value, unit, vBaseH, secScale, gapBase, maxW, maxHTop, family, valueWeight, labelWeight, textLayout.setFont
+          );
+          vPx = pair.vPx;
+          uPx = unit ? pair.uPx : 0;
+
+          const cBaseH = Math.min(Math.floor(vBaseH * secScale), maxHBot);
+          cPx = caption ? textLayout.fitSingleTextPx(
+            ctx, caption, cBaseH, maxW, maxHBot, family, labelWeight
+          ) : 0;
+
+          textLayout.setFont(ctx, vPx, valueWeight, family);
+          vW = ctx.measureText(value).width;
+          uW = 0;
+          if (unit) {
+            textLayout.setFont(ctx, uPx, labelWeight, family);
+            uW = ctx.measureText(unit).width;
+          }
+          total = vW + (unit ? gapBase + uW : 0);
+
+          fitCache.normal = { key, result: { hTop, hBot, vPx, uPx, cPx, vW, uW, total } };
+        }
 
         {
-          textLayout.setFont(ctx, vPx, valueWeight, family); const vW = ctx.measureText(value).width;
-          let uW = 0;
-          if (unit){ textLayout.setFont(ctx, uPx, labelWeight, family); uW = ctx.measureText(unit).width; }
-          const total = vW + (unit ? gapBase + uW : 0);
-          let x = Math.floor((W - total)/2);
-          const y = Math.floor(hTop/2);
+          let x = Math.floor((W - total) / 2);
+          const y = Math.floor(hTop / 2);
           ctx.textAlign = 'left';
-          textLayout.setFont(ctx, vPx, valueWeight, family); ctx.fillText(value, x, y); x += vW;
-          if (unit){ x += gapBase; textLayout.setFont(ctx, uPx, labelWeight, family); ctx.fillText(unit, x, y); }
+          textLayout.setFont(ctx, vPx, valueWeight, family);
+          ctx.fillText(value, x, y);
+          x += vW;
+          if (unit) {
+            x += gapBase;
+            textLayout.setFont(ctx, uPx, labelWeight, family);
+            ctx.fillText(unit, x, y);
+          }
         }
 
         if (caption){
@@ -188,36 +261,64 @@
 
       // ---- 1-row flat layout (Caption, Value, Unit in one line) ------------
       {
-        const maxH = Math.max(10, H - innerY*2);
-        let lo = 8, hi = H*1.6, best = 10;
+        const key = makeFitCacheKey(
+          'flat', W, H, value, caption, unit, secScale, family, valueWeight, labelWeight
+        );
+        const cached = readFitCache(fitCache.flat, key);
+        let vPx;
+        let sPx;
+        let cW;
+        let vW;
+        let uW;
+        let total;
 
-        for (let i=0;i<14;i++){
-          const mid = (lo + hi)/2;
-          const vPx = Math.floor(mid);
-          const sPx = Math.floor(mid * secScale);
+        if (cached) {
+          vPx = cached.vPx;
+          sPx = cached.sPx;
+          cW = cached.cW;
+          vW = cached.vW;
+          uW = cached.uW;
+          total = cached.total;
+        } else {
+          const maxH = Math.max(10, H - innerY * 2);
+          let lo = 8;
+          let hi = H * 1.6;
+          let best = 10;
 
-          textLayout.setFont(ctx, vPx, valueWeight, family);
-          const vW = ctx.measureText(value).width;
+          for (let i = 0; i < 14; i++) {
+            const mid = (lo + hi) / 2;
+            const testVPx = Math.floor(mid);
+            const testSPx = Math.floor(mid * secScale);
+            textLayout.setFont(ctx, testVPx, valueWeight, family);
+            const testVW = ctx.measureText(value).width;
+            textLayout.setFont(ctx, testSPx, labelWeight, family);
+            const testCW = caption ? ctx.measureText(caption).width : 0;
+            const testUW = unit ? ctx.measureText(unit).width : 0;
+            const testTotal = (caption ? testCW + gapBase : 0) + testVW + (unit ? gapBase + testUW : 0);
+            const ok = testTotal <= (W - padX * 2) && testVPx <= maxH && testSPx <= maxH;
 
+            if (ok) {
+              best = mid;
+              lo = mid;
+            } else {
+              hi = mid;
+            }
+          }
+
+          vPx = Math.floor(best);
+          sPx = Math.floor(best * secScale);
           textLayout.setFont(ctx, sPx, labelWeight, family);
-          const cW = caption ? ctx.measureText(caption).width : 0;
-          const uW = unit ? ctx.measureText(unit).width : 0;
+          cW = caption ? ctx.measureText(caption).width : 0;
+          textLayout.setFont(ctx, vPx, valueWeight, family);
+          vW = ctx.measureText(value).width;
+          textLayout.setFont(ctx, sPx, labelWeight, family);
+          uW = unit ? ctx.measureText(unit).width : 0;
+          total = (caption ? cW + gapBase : 0) + vW + (unit ? gapBase + uW : 0);
 
-          const total = (caption ? cW + gapBase : 0) + vW + (unit ? gapBase + uW : 0);
-          const ok = total <= (W - padX*2) && vPx <= maxH && sPx <= maxH;
-
-          if (ok){ best = mid; lo = mid; } else hi = mid;
+          fitCache.flat = { key, result: { vPx, sPx, cW, vW, uW, total } };
         }
 
-        const vPx = Math.floor(best);
-        const sPx = Math.floor(best * secScale);
-
-        textLayout.setFont(ctx, sPx, labelWeight, family); const cW = caption ? ctx.measureText(caption).width : 0;
-        textLayout.setFont(ctx, vPx, valueWeight, family); const vW = ctx.measureText(value).width;
-        textLayout.setFont(ctx, sPx, labelWeight, family); const uW = unit ? ctx.measureText(unit).width : 0;
-
-        const total = (caption ? cW + gapBase : 0) + vW + (unit ? gapBase + uW : 0);
-        let x = Math.floor((W - total)/2);
+        let x = Math.floor((W - total) / 2);
         const y = Math.floor(H/2);
         ctx.textAlign = 'left';
 
