@@ -77,6 +77,13 @@ otherwise -> normal
 | `GaugeTextLayout.drawDisconnectOverlay(...)` | Draw overlay text |
 | `GaugeValueMath.clamp(...)`, `GaugeValueMath.computeMode(...)` | Shared scale/mode logic |
 
+## Themeable Typography
+
+- `ThemeResolver.resolve(canvas)` is called per render.
+- Primary numeric value text uses `theme.font.weight`.
+- Caption and unit text uses `theme.font.labelWeight`.
+- Disconnect overlay text uses `theme.font.labelWeight`.
+
 ## Exports
 
 ```javascript

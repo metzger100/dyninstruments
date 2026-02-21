@@ -17,6 +17,7 @@ Specialized nav renderer for `positionBoat` and `positionWp`. It keeps flat layo
 - Header row: caption (left), unit (right)
 - Body row 1: latitude
 - Body row 2: longitude
+- Typography is theme-driven per render: coordinate/value text uses `theme.font.weight`, header caption/unit and disconnect overlay use `theme.font.labelWeight`
 - Uses layout editables: `ratioThresholdNormal`, `ratioThresholdFlat`, `captionUnitScale`
 
 ## Props

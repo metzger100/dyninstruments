@@ -41,6 +41,11 @@
 | `font.weight` | `--dyni-font-weight` | `700` | number |
 | `font.labelWeight` | `--dyni-label-weight` | `700` | number |
 
+## Font Token Usage
+
+- `font.weight` is used for primary numeric value text in semicircle gauges, WindDialWidget, CompassGaugeWidget, ThreeValueTextWidget, and PositionCoordinateWidget.
+- `font.labelWeight` is used for captions/units, tick labels, dial cardinal labels, and disconnect overlay text.
+
 ## resolve(canvas) Behavior
 
 1. Determine current night-mode root class state (`.nightMode`)

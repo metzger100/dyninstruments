@@ -11,17 +11,18 @@
   "use strict";
 
   function create() {
-    function setFont(ctx, px, bold, family) {
+    function setFont(ctx, px, weight, family) {
       const size = Math.max(1, Math.floor(Number(px) || 0));
-      ctx.font = (bold ? "700 " : "400 ") + size + "px " + (family || "sans-serif");
+      const fontWeight = Math.floor(Number(weight));
+      ctx.font = fontWeight + " " + size + "px " + (family || "sans-serif");
     }
 
-    function fitTextPx(ctx, text, maxW, maxH, family, bold) {
+    function fitTextPx(ctx, text, maxW, maxH, family, weight) {
       const h = Math.max(1, Math.floor(Number(maxH) || 0));
       const wLimit = Math.max(1, Number(maxW) || 0);
       if (!text) return Math.max(6, h);
       let px = Math.max(6, h);
-      setFont(ctx, px, !!bold, family);
+      setFont(ctx, px, weight, family);
       const w = ctx.measureText(String(text)).width;
       if (w <= wLimit + 0.5) return px;
       const scale = Math.max(0.1, wLimit / Math.max(1, w));
@@ -29,10 +30,10 @@
       return Math.max(6, Math.min(px, h));
     }
 
-    function fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, bold) {
+    function fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, weight) {
       let px = Math.max(1, Math.floor(Math.min(basePx, maxH)));
       if (!text) return px;
-      setFont(ctx, px, !!bold, family);
+      setFont(ctx, px, weight, family);
       const w = ctx.measureText(text).width;
       if (w <= maxW + 0.01) return px;
       const scale = Math.max(0.1, (maxW / Math.max(1, w)));
@@ -40,7 +41,7 @@
       return Math.min(px, Math.floor(maxH));
     }
 
-    function measureValueUnitFit(ctx, family, value, unit, w, h, secScale) {
+    function measureValueUnitFit(ctx, family, value, unit, w, h, secScale, valueWeight, labelWeight) {
       if (!value) return { vPx: 0, uPx: 0, gap: 0, total: 0 };
       const maxH = Math.max(8, Math.floor(Number(h) || 0));
       const maxW = Math.max(1, Number(w) || 0);
@@ -54,9 +55,9 @@
       function totalWidth(vp) {
         const safeVp = Math.min(vp, maxH);
         const up = Math.min(Math.floor(Math.max(6, safeVp * scale)), maxH);
-        setFont(ctx, safeVp, true, family);
+        setFont(ctx, safeVp, valueWeight, family);
         const vW = ctx.measureText(String(value)).width;
-        setFont(ctx, up, true, family);
+        setFont(ctx, up, labelWeight, family);
         const uW = unit ? ctx.measureText(String(unit)).width : 0;
         const gap = unit ? Math.max(6, Math.floor(safeVp * 0.25)) : 0;
         return { width: vW + (unit ? (gap + uW) : 0), up, gap };
@@ -80,11 +81,11 @@
       return best;
     }
 
-    function drawCaptionMax(ctx, family, x, y, w, h, caption, capMaxPx, align) {
+    function drawCaptionMax(ctx, family, x, y, w, h, caption, capMaxPx, align, labelWeight) {
       if (w <= 0 || h <= 0 || !caption) return;
-      let cPx = fitTextPx(ctx, caption, w, h, family, true);
+      let cPx = fitTextPx(ctx, caption, w, h, family, labelWeight);
       if (isFinite(Number(capMaxPx))) cPx = Math.min(cPx, Math.floor(Number(capMaxPx)));
-      setFont(ctx, cPx, true, family);
+      setFont(ctx, cPx, labelWeight, family);
       ctx.textBaseline = "top";
       const mode = align || "left";
       if (mode === "right") {
@@ -101,18 +102,18 @@
       ctx.fillText(String(caption), x, y);
     }
 
-    function drawValueUnitWithFit(ctx, family, x, y, w, h, value, unit, fit, align) {
+    function drawValueUnitWithFit(ctx, family, x, y, w, h, value, unit, fit, align, valueWeight, labelWeight) {
       if (w <= 0 || h <= 0 || !value) return;
       const data = fit || { vPx: 6, uPx: 6, gap: 0 };
       const vPx = Math.max(6, Math.floor(Number(data.vPx) || 0));
       const uPx = Math.max(6, Math.floor(Number(data.uPx) || 0));
       const gap = Math.max(0, Math.floor(Number(data.gap) || 0));
 
-      setFont(ctx, vPx, true, family);
+      setFont(ctx, vPx, valueWeight, family);
       const vW = ctx.measureText(String(value)).width;
       let uW = 0;
       if (unit) {
-        setFont(ctx, uPx, true, family);
+        setFont(ctx, uPx, labelWeight, family);
         uW = ctx.measureText(String(unit)).width;
       }
 
@@ -126,16 +127,16 @@
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
 
-      setFont(ctx, vPx, true, family);
+      setFont(ctx, vPx, valueWeight, family);
       ctx.fillText(String(value), xStart, yVal);
 
       if (unit) {
-        setFont(ctx, uPx, true, family);
+        setFont(ctx, uPx, labelWeight, family);
         ctx.fillText(String(unit), xStart + vW + gap, yVal + Math.max(0, Math.floor(vPx * 0.08)));
       }
     }
 
-    function fitInlineCapValUnit(ctx, family, caption, value, unit, maxW, maxH, secScale) {
+    function fitInlineCapValUnit(ctx, family, caption, value, unit, maxW, maxH, secScale, valueWeight, labelWeight) {
       if (!value) return { cPx: 0, vPx: 0, uPx: 0, g1: 0, g2: 0, total: 0 };
       const h = Math.max(8, Math.floor(Number(maxH) || 0));
       const w = Math.max(1, Number(maxW) || 0);
@@ -151,11 +152,11 @@
         const cp = Math.min(Math.floor(Math.max(6, safeVp * scale)), h);
         const up = Math.min(Math.floor(Math.max(6, safeVp * scale)), h);
         const gap = Math.max(6, Math.floor(safeVp * 0.25));
-        setFont(ctx, cp, true, family);
+        setFont(ctx, cp, labelWeight, family);
         const cW = caption ? ctx.measureText(String(caption)).width : 0;
-        setFont(ctx, safeVp, true, family);
+        setFont(ctx, safeVp, valueWeight, family);
         const vW = ctx.measureText(String(value)).width;
-        setFont(ctx, up, true, family);
+        setFont(ctx, up, labelWeight, family);
         const uW = unit ? ctx.measureText(String(unit)).width : 0;
         const g1 = caption ? gap : 0;
         const g2 = unit ? gap : 0;
@@ -177,9 +178,9 @@
       return best;
     }
 
-    function drawInlineCapValUnit(ctx, family, x, y, w, h, caption, value, unit, fit) {
+    function drawInlineCapValUnit(ctx, family, x, y, w, h, caption, value, unit, fit, valueWeight, labelWeight) {
       if (w <= 0 || h <= 0 || !value) return;
-      const data = fit || fitInlineCapValUnit(ctx, family, caption, value, unit, w, h, 0.8);
+      const data = fit || fitInlineCapValUnit(ctx, family, caption, value, unit, w, h, 0.8, valueWeight, labelWeight);
       let xStart = x + Math.floor((w - data.total) / 2);
       const yMid = y + Math.floor(h / 2);
 
@@ -187,23 +188,23 @@
       ctx.textAlign = "left";
 
       if (caption) {
-        setFont(ctx, data.cPx, true, family);
+        setFont(ctx, data.cPx, labelWeight, family);
         ctx.fillText(String(caption), xStart, yMid);
         xStart += Math.floor(ctx.measureText(String(caption)).width + data.g1);
       }
 
-      setFont(ctx, data.vPx, true, family);
+      setFont(ctx, data.vPx, valueWeight, family);
       ctx.fillText(String(value), xStart, yMid);
       xStart += Math.floor(ctx.measureText(String(value)).width);
 
       if (unit) {
         xStart += data.g2;
-        setFont(ctx, data.uPx, true, family);
+        setFont(ctx, data.uPx, labelWeight, family);
         ctx.fillText(String(unit), xStart, yMid);
       }
     }
 
-    function drawThreeRowsBlock(ctx, family, x, y, w, h, caption, value, unit, secScale, align, sizes) {
+    function drawThreeRowsBlock(ctx, family, x, y, w, h, caption, value, unit, secScale, align, sizes, valueWeight, labelWeight) {
       const mode = align || "center";
       let cPx;
       let vPx;
@@ -224,9 +225,9 @@
         hVal = Math.max(10, Math.floor(h / (1 + 2 * scale)));
         hCap = Math.max(8, Math.floor(hVal * scale));
         hUnit = Math.max(8, Math.floor(hVal * scale));
-        cPx = fitTextPx(ctx, caption, w, hCap, family, true);
-        vPx = fitTextPx(ctx, value, w, hVal, family, true);
-        uPx = fitTextPx(ctx, unit, w, hUnit, family, true);
+        cPx = fitTextPx(ctx, caption, w, hCap, family, labelWeight);
+        vPx = fitTextPx(ctx, value, w, hVal, family, valueWeight);
+        uPx = fitTextPx(ctx, unit, w, hUnit, family, labelWeight);
       }
 
       const yCap = y;
@@ -243,20 +244,20 @@
       ctx.textAlign = mode;
 
       if (caption) {
-        setFont(ctx, cPx, true, family);
+        setFont(ctx, cPx, labelWeight, family);
         ctx.fillText(String(caption), xFor(mode), yCap);
       }
       if (value) {
-        setFont(ctx, vPx, true, family);
+        setFont(ctx, vPx, valueWeight, family);
         ctx.fillText(String(value), xFor(mode), yVal);
       }
       if (unit) {
-        setFont(ctx, uPx, true, family);
+        setFont(ctx, uPx, labelWeight, family);
         ctx.fillText(String(unit), xFor(mode), yUni);
       }
     }
 
-    function drawDisconnectOverlay(ctx, W, H, family, color, label) {
+    function drawDisconnectOverlay(ctx, W, H, family, color, label, labelWeight) {
       ctx.save();
       ctx.globalAlpha = 0.20;
       ctx.fillStyle = color;
@@ -266,7 +267,7 @@
       const px = Math.max(12, Math.floor(Math.min(W, H) * 0.18));
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      setFont(ctx, px, true, family);
+      setFont(ctx, px, labelWeight, family);
       ctx.fillText(label || "NO DATA", Math.floor(W / 2), Math.floor(H / 2));
       ctx.restore();
     }

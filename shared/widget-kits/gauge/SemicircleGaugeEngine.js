@@ -16,7 +16,7 @@
     const V = GU.value;
     const draw = GU.draw;
 
-    function drawMajorValueLabels(ctx, family, geom, minV, maxV, majorStep, arc, showEndLabels, labelTheme) {
+    function drawMajorValueLabels(ctx, family, geom, minV, maxV, majorStep, arc, showEndLabels, labelTheme, labelWeight) {
       if (!isFinite(minV) || !isFinite(maxV) || maxV <= minV) return;
       const step = Math.abs(Number(majorStep));
       if (!isFinite(step) || step <= 0) return;
@@ -49,13 +49,13 @@
         angles: angles,
         radiusOffset: labelInset,
         fontPx: labelPx,
-        bold: true,
+        weight: labelWeight,
         family,
         labelsMap: labels
       });
     }
 
-    function drawFlatText(ctx, family, caption, valueText, unit, secScale, geom, pad, gap) {
+    function drawFlatText(ctx, family, caption, valueText, unit, secScale, geom, pad, gap, valueWeight, labelWeight) {
       const rightX = geom.gaugeLeft + 2 * geom.R + gap;
       const rightW = Math.max(0, (pad + geom.availW) - rightX);
       const box = { x: rightX, y: geom.gaugeTop, w: rightW, h: geom.R };
@@ -69,7 +69,7 @@
         h: box.h - Math.floor(box.h / 2)
       };
 
-      const fit = T.measureValueUnitFit(ctx, family, valueText, unit, bottomBox.w, bottomBox.h, secScale);
+      const fit = T.measureValueUnitFit(ctx, family, valueText, unit, bottomBox.w, bottomBox.h, secScale, valueWeight, labelWeight);
       T.drawCaptionMax(
         ctx,
         family,
@@ -79,7 +79,8 @@
         topBox.h,
         caption,
         Math.floor(fit.vPx * secScale),
-        "right"
+        "right",
+        labelWeight
       );
       T.drawValueUnitWithFit(
         ctx,
@@ -91,21 +92,23 @@
         valueText,
         unit,
         fit,
-        "right"
+        "right",
+        valueWeight,
+        labelWeight
       );
     }
 
-    function drawHighText(ctx, family, caption, valueText, unit, secScale, geom, pad, gap, W) {
+    function drawHighText(ctx, family, caption, valueText, unit, secScale, geom, pad, gap, W, valueWeight, labelWeight) {
       const bandY = geom.gaugeTop + geom.R + gap;
       const bandH = Math.max(0, (pad + geom.availH) - bandY);
       if (bandH <= 0) return;
 
       const bandBox = { x: pad, y: bandY, w: W - 2 * pad, h: bandH };
-      const fit = T.fitInlineCapValUnit(ctx, family, caption, valueText, unit, bandBox.w, bandBox.h, secScale);
-      T.drawInlineCapValUnit(ctx, family, bandBox.x, bandBox.y, bandBox.w, bandBox.h, caption, valueText, unit, fit);
+      const fit = T.fitInlineCapValUnit(ctx, family, caption, valueText, unit, bandBox.w, bandBox.h, secScale, valueWeight, labelWeight);
+      T.drawInlineCapValUnit(ctx, family, bandBox.x, bandBox.y, bandBox.w, bandBox.h, caption, valueText, unit, fit, valueWeight, labelWeight);
     }
 
-    function drawNormalText(ctx, family, caption, valueText, unit, secScale, geom, labelTheme) {
+    function drawNormalText(ctx, family, caption, valueText, unit, secScale, geom, labelTheme, valueWeight, labelWeight) {
       const labelInset = Math.max(18, Math.floor(geom.ringW * labelTheme.insetFactor));
       const extra = Math.max(6, Math.floor(geom.R * 0.06));
       const rSafe = Math.max(10, geom.rOuter - (labelInset + extra));
@@ -127,7 +130,7 @@
         if (boxW <= 10) continue;
 
         const hv = Math.max(12, Math.floor(mh / (1 + 2 * secScale)));
-        const vPx = T.fitTextPx(ctx, valueText, boxW, hv, family, true);
+        const vPx = T.fitTextPx(ctx, valueText, boxW, hv, family, valueWeight);
         const score = vPx * 10000 + boxW * 10 + mh;
         if (!best || score > best.score) best = { mh, boxW, score };
       }
@@ -137,7 +140,7 @@
       const xBox = geom.cx - Math.floor(boxW / 2);
       const yBox = yBottom - blockH;
 
-      T.drawThreeRowsBlock(ctx, family, xBox, yBox, boxW, blockH, caption, valueText, unit, secScale, "center");
+      T.drawThreeRowsBlock(ctx, family, xBox, yBox, boxW, blockH, caption, valueText, unit, secScale, "center", null, valueWeight, labelWeight);
     }
 
     function createRenderer(spec) {
@@ -156,6 +159,8 @@
         const H = setup.H;
         if (!W || !H) return;
         const theme = GU.theme.resolve(canvas);
+        const valueWeight = theme.font.weight;
+        const labelWeight = theme.font.labelWeight;
 
         ctx.clearRect(0, 0, W, H);
         const family = Helpers.resolveFontFamily(canvas);
@@ -239,13 +244,13 @@
           minor: { len: theme.ticks.minorLen, width: theme.ticks.minorWidth }
         });
 
-        drawMajorValueLabels(ctx, family, geom, range.min, range.max, tickMajor, arc, showEndLabels, theme.labels);
+        drawMajorValueLabels(ctx, family, geom, range.min, range.max, tickMajor, arc, showEndLabels, theme.labels, labelWeight);
 
-        if (mode === "flat") drawFlatText(ctx, family, caption, valueText, unit, secScale, geom, pad, gap);
-        else if (mode === "high") drawHighText(ctx, family, caption, valueText, unit, secScale, geom, pad, gap, W);
-        else drawNormalText(ctx, family, caption, valueText, unit, secScale, geom, theme.labels);
+        if (mode === "flat") drawFlatText(ctx, family, caption, valueText, unit, secScale, geom, pad, gap, valueWeight, labelWeight);
+        else if (mode === "high") drawHighText(ctx, family, caption, valueText, unit, secScale, geom, pad, gap, W, valueWeight, labelWeight);
+        else drawNormalText(ctx, family, caption, valueText, unit, secScale, geom, theme.labels, valueWeight, labelWeight);
 
-        if (p.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color);
+        if (p.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color, null, labelWeight);
       };
     }
 
