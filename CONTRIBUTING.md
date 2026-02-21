@@ -161,7 +161,6 @@ npm run hooks:doctor
 Run from repository root after implementation:
 
 ```bash
-npm run check:smells
 npm run check:all
 ```
 
@@ -182,5 +181,4 @@ Do not merge with failing checks.
 - [ ] Documentation was updated wherever behavior/config/contracts changed.
 - [ ] AI slop review completed.
 - [ ] `npm run hooks:doctor` passed.
-- [ ] `npm run check:smells` passed.
-- [ ] `npm run check:all` passed.
+- [ ] `npm run check:all` passed (required final gate).

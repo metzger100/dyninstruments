@@ -23,7 +23,7 @@ All blocking smell checks must pass before push (`npm run check:all` via pre-pus
 - Static smell checks: `tools/check-patterns.mjs`
 - Semantic contract checks: `tools/check-smell-contracts.mjs`
 - Aggregated smell gate: `npm run check:smells`
-- Full gate: `npm run check:all`
+- Full gate: `npm run check:all` (includes `npm run check:smells` via `check:core`)
 - Push blocker: `.githooks/pre-push` -> `npm run check:all`
 
 ## Severity Model
