@@ -15,7 +15,6 @@ Use this workflow whenever code changes touch architecture, module wiring, or wi
 5. Run default validation gate:
 
 ```bash
-npm run check:smells
 npm run check:all
 ```
 
@@ -36,11 +35,6 @@ npm run check:all
 - `npm run check:core`
 - `npm run test:coverage:check`
 
-`check:smells` runs blocking smell checks:
-
-- `node tools/check-patterns.mjs`
-- `node tools/check-smell-contracts.mjs`
-
 `check:core` includes:
 
 - `node tools/check-docs.mjs`
@@ -52,7 +46,6 @@ npm run check:all
 - `node tools/check-dependencies.mjs`
 - `node tools/check-umd.mjs`
 - `node tools/check-naming.mjs`
-- `npm run check:smells`
 
 `test:coverage:check` includes:
 
@@ -83,7 +76,7 @@ For cleanup sessions tracked by garbage-collection baseline markers:
 
 ## Validation
 
-`npm run check:all` is the default quality gate.
+`npm run check:all` is the default required quality gate.
 
 `tools/check-docs.mjs` (inside `check:core`) verifies:
 

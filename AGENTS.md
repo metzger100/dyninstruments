@@ -112,8 +112,7 @@ Task: Add new BarometerGauge
 - [ ] Implementation complete.
 - [ ] Updated relevant documentation.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.
-- [ ] Ran `npm run check:smells` — no failures.
-- [ ] Ran `npm run check:all` — no failures; includes `check:core` plus coverage threshold enforcement.
+- [ ] Ran `npm run check:all` — no failures; required final gate (`check:core` plus coverage threshold enforcement).
 - [ ] For cleanup sessions, ran `npm run gc:status` first and `npm run gc:update-baseline` last.
 
 ---
@@ -126,12 +125,8 @@ Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 
 ## 7. Smell Prevention & Fail-Closed Rules
 
-- Run smell gate before full gate:
-  - `npm run check:smells`
-  - `npm run check:all`
-- `check:smells` is blocking and combines:
-  - `tools/check-patterns.mjs` (static smell rules)
-  - `tools/check-smell-contracts.mjs` (semantic smell contracts)
+- Required completion gate is `npm run check:all`.
+- Smell rules and enforcement matrix are documented in [documentation/conventions/smell-prevention.md](documentation/conventions/smell-prevention.md).
 - Defaults must preserve explicit falsy values (`""`, `0`, `false`).
   - Never use truthy fallback for configured defaults (no `x.default || "...")`.
   - Use property-presence/nullish semantics instead.
