@@ -18,9 +18,12 @@ const { ctx, W, H } = Helpers.setupCanvas(canvas);
 
 Implementation summary:
 
-- reads `canvas.getBoundingClientRect()`
-- sets `canvas.width/height` to CSS size × `devicePixelRatio`
-- applies `ctx.setTransform(dpr, 0, 0, dpr, 0, 0)`
+- uses a per-canvas `WeakMap` layout cache (`clientWidth`, `clientHeight`, `cssWidth`, `cssHeight`)
+- compares current `canvas.clientWidth/clientHeight` with cached values
+- cache hit: reuses cached `cssWidth/cssHeight` and skips `getBoundingClientRect()`
+- cache miss: reads `canvas.getBoundingClientRect()`, updates cached layout entry, then continues
+- computes buffer size each call (`canvas.width/height` = CSS size × `devicePixelRatio`) and updates only when changed
+- always applies `ctx.setTransform(dpr, 0, 0, dpr, 0, 0)` on every call
 - returns `{ ctx, W, H }` in CSS pixels
 
 ### resolveTextColor
