@@ -74,17 +74,6 @@ describe("SemicircleGaugeEngine", function () {
             drawDisconnectOverlay() {}
           },
           value: gaugeValueMath,
-          requireDialThemeTokens(theme) {
-            return {
-              majorLen: theme.ticks.majorLen,
-              majorWidth: theme.ticks.majorWidth,
-              minorLen: theme.ticks.minorLen,
-              minorWidth: theme.ticks.minorWidth,
-              sideFactor: theme.pointer.sideFactor,
-              lengthFactor: theme.pointer.lengthFactor,
-              arcLineWidth: theme.ring.arcLineWidth
-            };
-          },
           draw: {
             drawArcRing(ctx, cx, cy, rOuter, startDeg, endDeg, opts) {
               arcRingCalls.push(opts);
@@ -164,8 +153,7 @@ describe("SemicircleGaugeEngine", function () {
     expect(resolveTheme).toHaveBeenCalledTimes(1);
     expect(resolveTheme).toHaveBeenCalledWith(canvas);
     expect(buildSectorsCalls[0].theme).toBe(themeDefaults);
-    expect(pointerCalls[0].theme).toBe(themeDefaults);
-    expect(pointerCalls[0].color).toBeUndefined();
+    expect(pointerCalls[0].fillStyle).toBe(themeDefaults.colors.pointer);
     expect(pointerCalls[0].sideFactor).toBe(themeDefaults.pointer.sideFactor);
     expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.pointer.lengthFactor);
     expect(pointerCalls[0].depth).toBe(15);
@@ -180,61 +168,5 @@ describe("SemicircleGaugeEngine", function () {
     });
     expect(labelCalls[0].radiusOffset).toBe(37);
     expect(labelCalls[0].fontPx).toBe(19);
-  });
-
-  it("throws when required dial theme tokens are missing", function () {
-    const renderer = loadFresh("shared/widget-kits/gauge/SemicircleGaugeEngine.js")
-      .create({}, {
-        setupCanvas() {
-          return {
-            ctx: {},
-            W: 200,
-            H: 120
-          };
-        },
-        getModule(id) {
-          if (id !== "GaugeToolkit") throw new Error("unexpected module: " + id);
-          return {
-            create() {
-              return {
-                theme: {
-                  resolve() {
-                    return {
-                      colors: {
-                        pointer: "#ff2b2b"
-                      }
-                    };
-                  }
-                },
-                text: {},
-                value: {},
-                requireDialThemeTokens(theme) {
-                  const required = [
-                    theme && theme.ticks && theme.ticks.majorLen,
-                    theme && theme.ticks && theme.ticks.majorWidth,
-                    theme && theme.ticks && theme.ticks.minorLen,
-                    theme && theme.ticks && theme.ticks.minorWidth,
-                    theme && theme.pointer && theme.pointer.sideFactor,
-                    theme && theme.pointer && theme.pointer.lengthFactor,
-                    theme && theme.ring && theme.ring.arcLineWidth
-                  ];
-                  for (let i = 0; i < required.length; i++) {
-                    if (!Number.isFinite(required[i])) {
-                      throw new Error("SemicircleGaugeEngine: missing required theme token");
-                    }
-                  }
-                  return {};
-                },
-                draw: {}
-              };
-            }
-          };
-        }
-      })
-      .createRenderer({});
-
-    expect(function () {
-      renderer({}, {});
-    }).toThrow(/missing required theme token/i);
   });
 });

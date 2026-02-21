@@ -58,7 +58,8 @@
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
         return valueMath.buildLowEndSectors(props, minV, maxV, arc, {
-          theme: theme
+          warningColor: theme.colors.warning,
+          alarmColor: theme.colors.alarm
         });
       }
     });

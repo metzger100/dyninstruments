@@ -22,8 +22,8 @@ describe("VoltageGaugeWidget", function () {
                 buildLowEndSectors(props, minV, maxV, arc, options) {
                   receivedOptions = options;
                   return [
-                    { a0: minV, a1: options.defaultAlarmFrom, color: options.theme.colors.alarm },
-                    { a0: options.defaultAlarmFrom, a1: options.defaultWarningFrom, color: options.theme.colors.warning }
+                    { a0: minV, a1: options.defaultAlarmFrom, color: options.alarmColor },
+                    { a0: options.defaultAlarmFrom, a1: options.defaultWarningFrom, color: options.warningColor }
                   ];
                 }
               };
@@ -68,6 +68,48 @@ describe("VoltageGaugeWidget", function () {
     ]);
     expect(receivedOptions.defaultWarningFrom).toBe(12.2);
     expect(receivedOptions.defaultAlarmFrom).toBe(11.6);
-    expect(receivedOptions.theme).toBe(theme);
+    expect(receivedOptions.warningColor).toBe(theme.colors.warning);
+    expect(receivedOptions.alarmColor).toBe(theme.colors.alarm);
+  });
+
+  it("does not force fixed-decimal fallback text on raw formatter passthrough", function () {
+    let captured;
+
+    const mod = loadFresh("widgets/gauges/VoltageGaugeWidget/VoltageGaugeWidget.js");
+    mod.create({}, {
+      applyFormatter(value) {
+        return String(value);
+      },
+      getModule(id) {
+        if (id === "GaugeValueMath") {
+          return {
+            create() {
+              return {
+                extractNumberText(text) {
+                  const match = String(text).match(/-?\d+(?:\.\d+)?/);
+                  return match ? match[0] : "";
+                },
+                buildLowEndSectors() {
+                  return [];
+                }
+              };
+            }
+          };
+        }
+        if (id !== "SemicircleGaugeEngine") throw new Error("unexpected module: " + id);
+        return {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return function () {};
+              }
+            };
+          }
+        };
+      }
+    });
+
+    expect(captured.formatDisplay(12.34, {})).toEqual({ num: 12.34, text: "12.34" });
   });
 });

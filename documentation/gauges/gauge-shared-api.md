@@ -71,7 +71,6 @@ const renderer = Helpers.getModule("SemicircleGaugeEngine") && Helpers.getModule
 | `angle` | object | `GaugeAngleMath` API |
 | `tick` | object | `GaugeTickMath` API |
 | `draw` | object | merged API from `GaugeCanvasPrimitives` + `GaugeDialRenderer` |
-| `requireDialThemeTokens` | function | Strictly validates and returns generic dial metrics (`ticks`, `pointer`, `ring.arcLineWidth`) |
 
 Color-token flow:
 - Resolve once per render path with `theme.resolve(canvas)`.
@@ -92,7 +91,7 @@ Color-token flow:
 | `drawLabels` | Draw labels on arc/circle |
 | `drawDialFrame` | Convenience ring + ticks + labels |
 
-`draw.drawPointerAtRim(..., opts)` requires `opts.theme.colors.pointer`. Explicit `opts.color`/`opts.fillStyle` overrides are not supported.
+`draw.drawPointerAtRim(..., opts)` consumes scalar style inputs (`opts.fillStyle` or `opts.color`) plus shape factors (`opts.sideFactor`, `opts.lengthFactor`).
 
 ## Angle API (`GaugeAngleMath`)
 
@@ -152,7 +151,7 @@ Optional `overrides` fields:
 | `ratioDefaults` | `{normal,flat}` | yes | Default layout thresholds |
 | `tickSteps` | `(range) => {major,minor}` | yes | Gauge-specific tick strategy |
 | `formatDisplay` | `(raw, props, unit, Helpers) => {num,text}` | yes | Gauge-specific value formatter |
-| `buildSectors` | `(props, minV, maxV, arc, valueUtils, theme) => Sector[]` | yes | Gauge-specific warning/alarm sectors (must use `theme.colors.warning/alarm`) |
+| `buildSectors` | `(props, minV, maxV, arc, valueUtils, theme) => Sector[]` | yes | Gauge-specific warning/alarm sectors (wrappers typically pass `theme.colors.warning/alarm` into shared builders) |
 | `arc` | `{startDeg,endDeg}` | no | Optional override (default `270..450`) |
 
 ### Sector shape
@@ -161,7 +160,7 @@ Optional `overrides` fields:
 { a0: number, a1: number, color: "#rrggbb" }
 ```
 
-`color` should come from `theme.colors.warning`/`theme.colors.alarm`. Explicit warning/alarm color overrides are not supported.
+`color` should come from wrapper-selected tokens (typically `theme.colors.warning`/`theme.colors.alarm`).
 
 ## Related
 

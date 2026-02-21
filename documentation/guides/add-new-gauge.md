@@ -25,7 +25,7 @@ Create `widgets/gauges/NewGaugeWidget/NewGaugeWidget.js`:
 - `formatDisplay(raw, props, unit, Helpers) -> { num, text }`
 - `tickSteps(range) -> { major, minor }`
 - `buildSectors(props, minV, maxV, arc, valueUtils, theme) -> Sector[]`
-  `theme.colors.warning` and `theme.colors.alarm` are required in the shared sector-builder path.
+  Pass `warningColor`/`alarmColor` scalars into shared sector builders (typically from `theme.colors.warning`/`theme.colors.alarm`).
 4. Build `renderCanvas` with `createRenderer(spec)`
 
 ```javascript

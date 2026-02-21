@@ -20,8 +20,8 @@ describe("DepthGaugeWidget", function () {
                 buildLowEndSectors(props, minV, maxV, arc, options) {
                   receivedOptions = options;
                   return [
-                    { a0: 0, a1: 2, color: options.theme.colors.alarm },
-                    { a0: 2, a1: 5, color: options.theme.colors.warning }
+                    { a0: 0, a1: 2, color: options.alarmColor },
+                    { a0: 2, a1: 5, color: options.warningColor }
                   ];
                 }
               };
@@ -56,6 +56,7 @@ describe("DepthGaugeWidget", function () {
       { a0: 0, a1: 2, color: "#654321" },
       { a0: 2, a1: 5, color: "#123456" }
     ]);
-    expect(receivedOptions.theme).toBe(theme);
+    expect(receivedOptions.warningColor).toBe(theme.colors.warning);
+    expect(receivedOptions.alarmColor).toBe(theme.colors.alarm);
   });
 });

@@ -83,17 +83,6 @@ describe("WindDialWidget", function () {
                     return themeDefaults;
                   }
                 },
-                requireDialThemeTokens(theme) {
-                  return {
-                    majorLen: theme.ticks.majorLen,
-                    majorWidth: theme.ticks.majorWidth,
-                    minorLen: theme.ticks.minorLen,
-                    minorWidth: theme.ticks.minorWidth,
-                    sideFactor: theme.pointer.sideFactor,
-                    lengthFactor: theme.pointer.lengthFactor,
-                    arcLineWidth: theme.ring.arcLineWidth
-                  };
-                },
                 text: {
                   measureValueUnitFit() {
                     return { vPx: 12, uPx: 10, gap: 6 };
@@ -161,8 +150,7 @@ describe("WindDialWidget", function () {
     expect(laylineCalls[1].fillStyle).toBe(themeDefaults.colors.laylinePort);
     expect(laylineCalls[0].thickness).toBe(17);
     expect(laylineCalls[1].thickness).toBe(17);
-    expect(pointerCalls[0].theme).toBe(themeDefaults);
-    expect(pointerCalls[0].color).toBeUndefined();
+    expect(pointerCalls[0].fillStyle).toBe(themeDefaults.colors.pointer);
     expect(pointerCalls[0].sideFactor).toBe(themeDefaults.pointer.sideFactor);
     expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.pointer.lengthFactor);
     expect(pointerCalls[0].depth).toBe(15);
@@ -179,22 +167,41 @@ describe("WindDialWidget", function () {
     expect(labelCalls[0].fontPx).toBe(17);
   });
 
-  it("throws when required dial theme tokens are missing", function () {
+  it("does not append unit into value text when formatter returns raw passthrough", function () {
+    const valueDrawCalls = [];
+
     const spec = loadFresh("widgets/gauges/WindDialWidget/WindDialWidget.js")
       .create({}, {
-        setupCanvas() {
+        applyFormatter(value) {
+          return String(value);
+        },
+        setupCanvas(canvas) {
+          const ctx = canvas.getContext("2d");
+          const rect = canvas.getBoundingClientRect();
           return {
-            ctx: {},
-            W: 240,
-            H: 180
+            ctx,
+            W: Math.round(rect.width),
+            H: Math.round(rect.height)
           };
+        },
+        resolveFontFamily() {
+          return "sans-serif";
+        },
+        resolveTextColor() {
+          return "#fff";
         },
         getModule(id) {
           if (id !== "GaugeToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
               return {
-                draw: {},
+                draw: {
+                  drawRing() {},
+                  drawAnnularSector() {},
+                  drawPointerAtRim() {},
+                  drawTicks() {},
+                  drawLabels() {}
+                },
                 theme: {
                   resolve() {
                     return {
@@ -202,37 +209,83 @@ describe("WindDialWidget", function () {
                         pointer: "#ff2b2b",
                         laylineStb: "#82b683",
                         laylinePort: "#ff7a76"
+                      },
+                      ticks: {
+                        majorLen: 12,
+                        majorWidth: 3,
+                        minorLen: 6,
+                        minorWidth: 2
+                      },
+                      pointer: {
+                        sideFactor: 0.32,
+                        lengthFactor: 1.9
+                      },
+                      ring: {
+                        arcLineWidth: 2,
+                        widthFactor: 0.35
+                      },
+                      labels: {
+                        insetFactor: 2.1,
+                        fontFactor: 0.35
                       }
                     };
                   }
                 },
-                requireDialThemeTokens(theme) {
-                  const required = [
-                    theme && theme.ticks && theme.ticks.majorLen,
-                    theme && theme.ticks && theme.ticks.majorWidth,
-                    theme && theme.ticks && theme.ticks.minorLen,
-                    theme && theme.ticks && theme.ticks.minorWidth,
-                    theme && theme.pointer && theme.pointer.sideFactor,
-                    theme && theme.pointer && theme.pointer.lengthFactor,
-                    theme && theme.ring && theme.ring.arcLineWidth
-                  ];
-                  for (let i = 0; i < required.length; i++) {
-                    if (!Number.isFinite(required[i])) {
-                      throw new Error("WindDialWidget: missing required theme token");
-                    }
-                  }
-                  return {};
+                text: {
+                  measureValueUnitFit() {
+                    return { vPx: 12, uPx: 10, gap: 6 };
+                  },
+                  drawCaptionMax() {},
+                  drawValueUnitWithFit(ctx, family, x, y, w, h, valueText, unitText) {
+                    valueDrawCalls.push({ valueText: String(valueText), unitText: String(unitText || "") });
+                  },
+                  fitInlineCapValUnit() {
+                    return { cPx: 10, vPx: 12, uPx: 10, gap: 6 };
+                  },
+                  drawInlineCapValUnit() {},
+                  fitTextPx() {
+                    return 12;
+                  },
+                  drawThreeRowsBlock() {}
                 },
-                text: {},
-                value: {}
+                value: {
+                  clamp(value, lo, hi) {
+                    const n = Number(value);
+                    if (!isFinite(n)) return lo;
+                    return Math.max(lo, Math.min(hi, n));
+                  },
+                  isFiniteNumber(value) {
+                    return typeof value === "number" && isFinite(value);
+                  },
+                  formatAngle180(value) {
+                    const n = Number(value);
+                    if (!isFinite(n)) return "---";
+                    return String(Math.round(n));
+                  }
+                }
               };
             }
           };
         }
       });
 
-    expect(function () {
-      spec.renderCanvas({}, {});
-    }).toThrow(/missing required theme token/i);
+    const ctx = createMockContext2D();
+    const canvas = createMockCanvas({
+      rectWidth: 480,
+      rectHeight: 110,
+      ctx
+    });
+
+    spec.renderCanvas(canvas, {
+      angle: 23,
+      speed: 5.5,
+      angleCaption: "AWA",
+      speedCaption: "AWS",
+      angleUnit: "°",
+      speedUnit: "kn"
+    });
+
+    expect(valueDrawCalls.some((c) => c.valueText === "5.5" && c.unitText === "kn")).toBe(true);
+    expect(valueDrawCalls.some((c) => c.valueText === "5.5 kn")).toBe(false);
   });
 });

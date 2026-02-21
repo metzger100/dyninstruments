@@ -12,53 +12,23 @@ describe("GaugeCanvasPrimitives", function () {
     });
   }
 
-  it("uses pointer color from required theme token", function () {
+  it("uses pointer color from fillStyle", function () {
     const draw = create();
     const ctx = createMockContext2D();
 
     draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {
-      theme: {
-        colors: {
-          pointer: "#123456"
-        }
-      }
+      fillStyle: "#123456"
     });
     expect(ctx.fillStyle).toBe("#123456");
   });
 
-  it("throws when required theme pointer token is missing", function () {
+  it("supports color alias for pointer color", function () {
     const draw = create();
     const ctx = createMockContext2D();
 
-    expect(function () {
-      draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {});
-    }).toThrow(/missing required opts\.theme\.colors\.pointer/);
-  });
-
-  it("rejects deprecated explicit pointer color overrides", function () {
-    const draw = create();
-    const ctx = createMockContext2D();
-
-    expect(function () {
-      draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {
-        color: "#abcdef",
-        theme: {
-          colors: {
-            pointer: "#123456"
-          }
-        }
-      });
-    }).toThrow(/overrides are no longer supported/);
-
-    expect(function () {
-      draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {
-        fillStyle: "#abcdef",
-        theme: {
-          colors: {
-            pointer: "#123456"
-          }
-        }
-      });
-    }).toThrow(/overrides are no longer supported/);
+    draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {
+      color: "#abcdef"
+    });
+    expect(ctx.fillStyle).toBe("#abcdef");
   });
 });
