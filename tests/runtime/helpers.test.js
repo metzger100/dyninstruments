@@ -54,6 +54,38 @@ describe("runtime/helpers.js", function () {
     return context.DyniPlugin.runtime;
   }
 
+  function createSizedCanvas(options) {
+    const opts = options || {};
+    const ctx = opts.ctx || createMockContext2D();
+    const calls = { rect: 0 };
+    const rect = {
+      width: Number.isFinite(opts.rectWidth) ? opts.rectWidth : 320,
+      height: Number.isFinite(opts.rectHeight) ? opts.rectHeight : 180
+    };
+    const canvas = {
+      width: 0,
+      height: 0,
+      clientWidth: Number.isFinite(opts.clientWidth) ? opts.clientWidth : rect.width,
+      clientHeight: Number.isFinite(opts.clientHeight) ? opts.clientHeight : rect.height,
+      getContext(type) {
+        return type === "2d" ? ctx : null;
+      },
+      getBoundingClientRect() {
+        calls.rect += 1;
+        return {
+          width: rect.width,
+          height: rect.height,
+          top: 0,
+          left: 0,
+          right: rect.width,
+          bottom: rect.height
+        };
+      }
+    };
+
+    return { canvas, ctx, rect, calls };
+  }
+
   it("applyFormatter handles function, formatter-name and fallback", function () {
     const runtime = loadRuntimeHelpers();
 
@@ -100,6 +132,42 @@ describe("runtime/helpers.js", function () {
     expect(out.W).toBe(300);
     expect(out.H).toBe(120);
     expect(ctx.calls.some((c) => c.name === "setTransform")).toBe(true);
+  });
+
+  it("setupCanvas caches rect-derived layout when client size is unchanged", function () {
+    const runtime = loadRuntimeHelpers();
+    const sized = createSizedCanvas({ clientWidth: 300, clientHeight: 120, rectWidth: 300, rectHeight: 120 });
+
+    const first = runtime.setupCanvas(sized.canvas);
+    const second = runtime.setupCanvas(sized.canvas);
+
+    expect(sized.calls.rect).toBe(1);
+    expect(first.W).toBe(300);
+    expect(first.H).toBe(120);
+    expect(second.W).toBe(300);
+    expect(second.H).toBe(120);
+    expect(sized.canvas.width).toBe(600);
+    expect(sized.canvas.height).toBe(240);
+    expect(sized.ctx.calls.filter((c) => c.name === "setTransform")).toHaveLength(2);
+  });
+
+  it("setupCanvas refreshes cached layout when client size changes", function () {
+    const runtime = loadRuntimeHelpers();
+    const sized = createSizedCanvas({ clientWidth: 300, clientHeight: 120, rectWidth: 300, rectHeight: 120 });
+
+    runtime.setupCanvas(sized.canvas);
+    sized.canvas.clientWidth = 340;
+    sized.canvas.clientHeight = 160;
+    sized.rect.width = 340;
+    sized.rect.height = 160;
+    const second = runtime.setupCanvas(sized.canvas);
+
+    expect(sized.calls.rect).toBe(2);
+    expect(second.W).toBe(340);
+    expect(second.H).toBe(160);
+    expect(sized.canvas.width).toBe(680);
+    expect(sized.canvas.height).toBe(320);
+    expect(sized.ctx.calls.filter((c) => c.name === "setTransform")).toHaveLength(2);
   });
 
   it("resolveTextColor and resolveFontFamily use CSS vars before fallback", function () {

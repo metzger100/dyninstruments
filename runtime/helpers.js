@@ -11,6 +11,7 @@
   const hasOwn = Object.prototype.hasOwnProperty;
   const TEXT_COLOR_VARS = ["--dyni-fg", "--instrument-fg", "--mainfg"];
   const DEFAULT_FONT_STACK = '"Inter","SF Pro Text",-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
+  const layoutByCanvas = new WeakMap();
   const typographyByCanvas = new WeakMap();
 
   function applyFormatter(raw, props) {
@@ -44,9 +45,28 @@
   function setupCanvas(canvas) {
     const ctx = canvas.getContext("2d");
     const dpr = root.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    const w = Math.max(1, Math.round(rect.width * dpr));
-    const h = Math.max(1, Math.round(rect.height * dpr));
+
+    const clientWidth = canvas.clientWidth;
+    const clientHeight = canvas.clientHeight;
+    const cachedLayout = layoutByCanvas.get(canvas);
+    const layout = cachedLayout &&
+      cachedLayout.clientWidth === clientWidth &&
+      cachedLayout.clientHeight === clientHeight
+      ? cachedLayout
+      : (function () {
+        const rect = canvas.getBoundingClientRect();
+        const nextLayout = {
+          clientWidth: clientWidth,
+          clientHeight: clientHeight,
+          cssWidth: rect.width,
+          cssHeight: rect.height
+        };
+        layoutByCanvas.set(canvas, nextLayout);
+        return nextLayout;
+      }());
+
+    const w = Math.max(1, Math.round(layout.cssWidth * dpr));
+    const h = Math.max(1, Math.round(layout.cssHeight * dpr));
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
       canvas.height = h;
@@ -54,8 +74,8 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     return {
       ctx: ctx,
-      W: Math.max(1, Math.round(rect.width)),
-      H: Math.max(1, Math.round(rect.height))
+      W: Math.max(1, Math.round(layout.cssWidth)),
+      H: Math.max(1, Math.round(layout.cssHeight))
     };
   }
 
