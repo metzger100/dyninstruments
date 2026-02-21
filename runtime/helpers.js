@@ -36,7 +36,9 @@
     catch (e) { /* intentional: formatter failures fall back to default/raw formatting */ }
 
     if (raw == null || Number.isNaN(raw)) {
-      if (props && hasOwn.call(props, "default")) return props.default;
+      if (props && hasOwn.call(props, "default")) {
+        return props.default;
+      }
       return "---";
     }
     return String(raw);
@@ -81,10 +83,14 @@
 
   function getNightModeState(canvas) {
     const doc = canvas && canvas.ownerDocument;
-    if (!doc) return false;
+    if (!doc) {
+      return false;
+    }
 
     const rootEl = doc.documentElement;
-    if (rootEl && rootEl.classList && rootEl.classList.contains("nightMode")) return true;
+    if (rootEl && rootEl.classList && rootEl.classList.contains("nightMode")) {
+      return true;
+    }
 
     const body = doc.body;
     return !!(body && body.classList && body.classList.contains("nightMode"));
@@ -93,14 +99,18 @@
   function resolveTypography(canvas) {
     const nightMode = getNightModeState(canvas);
     const cached = typographyByCanvas.get(canvas);
-    if (cached && cached.nightMode === nightMode) return cached;
+    if (cached && cached.nightMode === nightMode) {
+      return cached;
+    }
 
     const st = getComputedStyle(canvas);
 
     let textColor = "";
     for (const cssVar of TEXT_COLOR_VARS) {
       const val = st.getPropertyValue(cssVar).trim();
-      if (!val) continue;
+      if (!val) {
+        continue;
+      }
       textColor = val;
       break;
     }

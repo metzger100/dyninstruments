@@ -71,7 +71,9 @@
   const DEFAULTS = buildDefaults();
 
   function pickTokenValue(style, tokenDef) {
-    if (!style || typeof style.getPropertyValue !== "function") return tokenDef.defaultValue;
+    if (!style || typeof style.getPropertyValue !== "function") {
+      return tokenDef.defaultValue;
+    }
     const raw = style.getPropertyValue(tokenDef.cssVar);
     if (tokenDef.type === "number") {
       const parsed = parseFloat(raw);
@@ -82,12 +84,18 @@
   }
 
   function getNightModeState(canvas) {
-    if (!canvas) return false;
+    if (!canvas) {
+      return false;
+    }
     const doc = canvas.ownerDocument;
-    if (!doc) return false;
+    if (!doc) {
+      return false;
+    }
 
     const rootEl = doc.documentElement;
-    if (rootEl && rootEl.classList && rootEl.classList.contains("nightMode")) return true;
+    if (rootEl && rootEl.classList && rootEl.classList.contains("nightMode")) {
+      return true;
+    }
 
     const body = doc.body;
     return !!(body && body.classList && body.classList.contains("nightMode"));
@@ -105,7 +113,9 @@
   let lastNightModeState = null;
 
   function invalidateCanvas(canvas) {
-    if (!canvas) return;
+    if (!canvas) {
+      return;
+    }
     byCanvas.delete(canvas);
   }
 
@@ -115,7 +125,9 @@
   }
 
   function resolveWithCache(canvas) {
-    if (!canvas) return resolveTokens(null);
+    if (!canvas) {
+      return resolveTokens(null);
+    }
 
     const nightMode = getNightModeState(canvas);
     if (lastNightModeState === null) lastNightModeState = nightMode;
@@ -124,7 +136,9 @@
       lastNightModeState = nightMode;
     }
 
-    if (byCanvas.has(canvas)) return byCanvas.get(canvas);
+    if (byCanvas.has(canvas)) {
+      return byCanvas.get(canvas);
+    }
 
     const style = getComputedStyle(canvas);
     const resolved = resolveTokens(style);

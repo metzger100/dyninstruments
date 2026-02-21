@@ -29,7 +29,9 @@
 
     function clamp(value, lo, hi) {
       const n = Number(value);
-      if (!isFinite(n)) return Number(lo);
+      if (!isFinite(n)) {
+        return Number(lo);
+      }
       return Math.max(Number(lo), Math.min(Number(hi), n));
     }
 
@@ -52,8 +54,12 @@
     }
 
     function computeMode(ratio, thresholdNormal, thresholdFlat) {
-      if (ratio < thresholdNormal) return "high";
-      if (ratio > thresholdFlat) return "flat";
+      if (ratio < thresholdNormal) {
+        return "high";
+      }
+      if (ratio > thresholdFlat) {
+        return "flat";
+      }
       return "normal";
     }
 
@@ -96,7 +102,9 @@
     function buildValueTickAngles(minV, maxV, majorStep, minorStep, arc) {
       const majors = [];
       const minors = [];
-      if (!isFinite(minV) || !isFinite(maxV) || maxV <= minV) return { majors, minors };
+      if (!isFinite(minV) || !isFinite(maxV) || maxV <= minV) {
+        return { majors, minors };
+      }
 
       let minor = Math.abs(Number(minorStep));
       let major = Math.abs(Number(majorStep));
@@ -112,7 +120,9 @@
         const angle = valueToAngle(v, minV, maxV, arc, true);
         (almostInt(rel, 1e-4) ? majors : minors).push(angle);
 
-        if (v === maxV) break;
+        if (v === maxV) {
+          break;
+        }
       }
 
       if (!majors.length || !isApprox(majors[0], arc.startDeg, 1e-6)) majors.unshift(arc.startDeg);
@@ -124,11 +134,15 @@
     function sectorAngles(from, to, minV, maxV, arc) {
       const f = toNumber(from);
       const t = toNumber(to);
-      if (!isFinite(f) || !isFinite(t)) return null;
+      if (!isFinite(f) || !isFinite(t)) {
+        return null;
+      }
 
       const ff = clamp(f, minV, maxV);
       const tt = clamp(t, minV, maxV);
-      if (Math.abs(tt - ff) < 1e-9) return null;
+      if (Math.abs(tt - ff) < 1e-9) {
+        return null;
+      }
 
       let a0 = valueToAngle(ff, minV, maxV, arc, true);
       let a1 = valueToAngle(tt, minV, maxV, arc, true);
@@ -137,7 +151,9 @@
         a0 = a1;
         a1 = tmp;
       }
-      if (Math.abs(a1 - a0) < 1e-6) return null;
+      if (Math.abs(a1 - a0) < 1e-6) {
+        return null;
+      }
       return { a0, a1 };
     }
 
@@ -210,7 +226,9 @@
 
     function formatAngle180(value, leadingZero) {
       const n = Number(value);
-      if (!isFinite(n)) return "---";
+      if (!isFinite(n)) {
+        return "---";
+      }
       let a = ((n + 180) % 360 + 360) % 360 - 180;
       if (a === 180) a = -180;
       const rounded = Math.round(Math.abs(a));
@@ -222,7 +240,9 @@
 
     function formatDirection360(value, leadingZero) {
       const n = Number(value);
-      if (!isFinite(n)) return "---";
+      if (!isFinite(n)) {
+        return "---";
+      }
       let a = n % 360;
       if (a < 0) a += 360;
       const rounded = Math.round(a) % 360;
@@ -233,8 +253,12 @@
 
     function formatMajorLabel(value) {
       const n = Number(value);
-      if (!isFinite(n)) return "";
-      if (almostInt(n, 1e-6)) return String(Math.round(n));
+      if (!isFinite(n)) {
+        return "";
+      }
+      if (almostInt(n, 1e-6)) {
+        return String(Math.round(n));
+      }
       const rounded = Math.round(n * 1000) / 1000;
       return String(rounded);
     }

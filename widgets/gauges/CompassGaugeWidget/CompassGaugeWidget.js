@@ -26,7 +26,9 @@
     const buildCompassBackgroundKey = (data) => JSON.stringify(data);
 
     const ensureCompassLayer = (canvas, existing, width, height) => {
-      if (existing && existing.width === width && existing.height === height) return existing;
+      if (existing && existing.width === width && existing.height === height) {
+        return existing;
+      }
       const layer = canvas.ownerDocument.createElement("canvas");
       layer.width = width;
       layer.height = height;
@@ -41,7 +43,9 @@
         const text = COMPASS_LABELS[angleDeg];
         const sprite = ensureCompassLayer(canvas, null, 1, 1);
         const spriteCtx = sprite.getContext("2d");
-        if (!spriteCtx) continue;
+        if (!spriteCtx) {
+          continue;
+        }
         spriteCtx.setTransform(1, 0, 0, 1, 0, 0);
         spriteCtx.font = font;
         const width = Math.max(1, Math.ceil(spriteCtx.measureText(text).width + 6));
@@ -49,7 +53,9 @@
         sprite.width = width;
         sprite.height = height;
         const drawCtx = sprite.getContext("2d");
-        if (!drawCtx) continue;
+        if (!drawCtx) {
+          continue;
+        }
         drawCtx.setTransform(1, 0, 0, 1, 0, 0);
         drawCtx.clearRect(0, 0, width, height);
         drawCtx.fillStyle = state.color;
@@ -66,7 +72,9 @@
     const rebuildCompassBackground = (canvas, state) => {
       backgroundCache.faceCanvas = ensureCompassLayer(canvas, backgroundCache.faceCanvas, state.bufferW, state.bufferH);
       backgroundCache.faceCtx = backgroundCache.faceCanvas.getContext("2d");
-      if (!backgroundCache.faceCtx) return;
+      if (!backgroundCache.faceCtx) {
+        return;
+      }
       const face = backgroundCache.faceCtx;
       face.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
       face.clearRect(0, 0, state.W, state.H);
@@ -88,7 +96,9 @@
     };
 
     const blitCompassFace = (ctx, face, cx, cy, rotationDeg, W, H) => {
-      if (!face) return;
+      if (!face) {
+        return;
+      }
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate((rotationDeg * Math.PI) / 180);
@@ -98,7 +108,9 @@
     };
 
     const drawCompassCachedLabels = (ctx, cx, cy, labelRadius, rotationDeg) => {
-      if (!backgroundCache.labelSprites || !backgroundCache.labelSprites.length) return;
+      if (!backgroundCache.labelSprites || !backgroundCache.labelSprites.length) {
+        return;
+      }
       for (let i = 0; i < backgroundCache.labelSprites.length; i++) {
         const sprite = backgroundCache.labelSprites[i];
         const t = A.degToCanvasRad(sprite.angleDeg, null, rotationDeg);
@@ -111,7 +123,9 @@
     function renderCanvas(canvas, props){
       const p = props || {};
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
-      if (!W || !H) return;
+      if (!W || !H) {
+        return;
+      }
       const theme = Theme.resolve(canvas);
       const valueWeight = theme.font.weight;
       const labelWeight = theme.font.labelWeight;
@@ -119,7 +133,8 @@
       ctx.clearRect(0,0,W,H);
       const family = Helpers.resolveFontFamily(canvas);
       const color  = Helpers.resolveTextColor(canvas);
-      ctx.fillStyle = color; ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.strokeStyle = color;
 
       const heading = p.heading;
       const marker  = p.markerCourse;
@@ -271,7 +286,9 @@
           const halfDiagY = mh / 2;
           const halfWMax = Math.floor(Math.sqrt(Math.max(0, rEff * rEff - halfDiagY * halfDiagY)));
           const boxW = Math.max(10, 2 * halfWMax);
-          if (boxW <= 10) continue;
+          if (boxW <= 10) {
+            continue;
+          }
 
           const hv = Math.max(12, Math.floor(mh / (1 + 2*secScale)));
           const vPx = T.fitTextPx(ctx, value, boxW, hv, family, valueWeight);

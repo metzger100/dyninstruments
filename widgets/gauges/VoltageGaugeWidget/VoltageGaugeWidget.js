@@ -16,7 +16,9 @@
 
     function formatVoltageString(raw, props) {
       const n = Number(raw);
-      if (!isFinite(n)) return "---";
+      if (!isFinite(n)) {
+        return "---";
+      }
 
       const p = props || {};
       const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatDecimal";
@@ -36,18 +38,34 @@
       const formatted = formatVoltageString(raw, props);
       const numberText = valueMath.extractNumberText(formatted);
       const num = numberText ? Number(numberText) : NaN;
-      if (isFinite(num)) return { num: num, text: numberText };
+      if (isFinite(num)) {
+        return { num: num, text: numberText };
+      }
       return { num: NaN, text: "---" };
     }
 
     function voltageTickSteps(range) {
-      if (!isFinite(range) || range <= 0) return { major: 1, minor: 0.2 };
-      if (range <= 3) return { major: 0.5, minor: 0.1 };
-      if (range <= 6) return { major: 1, minor: 0.2 };
-      if (range <= 12) return { major: 2, minor: 0.5 };
-      if (range <= 30) return { major: 5, minor: 1 };
-      if (range <= 60) return { major: 10, minor: 2 };
-      if (range <= 120) return { major: 20, minor: 5 };
+      if (!isFinite(range) || range <= 0) {
+        return { major: 1, minor: 0.2 };
+      }
+      if (range <= 3) {
+        return { major: 0.5, minor: 0.1 };
+      }
+      if (range <= 6) {
+        return { major: 1, minor: 0.2 };
+      }
+      if (range <= 12) {
+        return { major: 2, minor: 0.5 };
+      }
+      if (range <= 30) {
+        return { major: 5, minor: 1 };
+      }
+      if (range <= 60) {
+        return { major: 10, minor: 2 };
+      }
+      if (range <= 120) {
+        return { major: 20, minor: 5 };
+      }
       return { major: 50, minor: 10 };
     }
 

@@ -32,7 +32,9 @@
 
     function pickRenderer(props) {
       const rendererId = props && props.renderer;
-      if (rendererId && rendererSpecs[rendererId]) return rendererSpecs[rendererId];
+      if (rendererId && rendererSpecs[rendererId]) {
+        return rendererSpecs[rendererId];
+      }
       return threeSpec;
     }
 

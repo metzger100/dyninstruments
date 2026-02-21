@@ -17,12 +17,16 @@
     function mod(n, m) { return ((n % m) + m) % m; }
 
     function norm360(deg) {
-      if (!isFinite(deg)) return deg;
+      if (!isFinite(deg)) {
+        return deg;
+      }
       return mod(deg, 360);
     }
 
     function norm180(deg) {
-      if (!isFinite(deg)) return deg;
+      if (!isFinite(deg)) {
+        return deg;
+      }
       let r = mod(deg + 180, 360) - 180;
       if (r === 180) r = -180;
       return r;
@@ -49,10 +53,14 @@
       const startDeg = Number(opts.startDeg);
       const endDeg = Number(opts.endDeg);
 
-      if (!isFinite(min) || !isFinite(max) || !isFinite(startDeg) || !isFinite(endDeg)) return NaN;
+      if (!isFinite(min) || !isFinite(max) || !isFinite(startDeg) || !isFinite(endDeg)) {
+        return NaN;
+      }
 
       let v = Number(value);
-      if (!isFinite(v)) return NaN;
+      if (!isFinite(v)) {
+        return NaN;
+      }
 
       const clampValue = (opts.clamp !== false);
       if (clampValue) v = Math.max(min, Math.min(max, v));
@@ -68,10 +76,14 @@
       const startDeg = Number(opts.startDeg);
       const endDeg = Number(opts.endDeg);
 
-      if (!isFinite(min) || !isFinite(max) || !isFinite(startDeg) || !isFinite(endDeg)) return NaN;
+      if (!isFinite(min) || !isFinite(max) || !isFinite(startDeg) || !isFinite(endDeg)) {
+        return NaN;
+      }
 
       let a = Number(angleDeg);
-      if (!isFinite(a)) return NaN;
+      if (!isFinite(a)) {
+        return NaN;
+      }
 
       const denom = (endDeg - startDeg);
       const t = (denom === 0) ? 0 : (a - startDeg) / denom;

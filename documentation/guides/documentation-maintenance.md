@@ -41,14 +41,14 @@ npm run check:all
 - `node tools/check-doc-format.mjs --warn`
 - `node tools/check-doc-reachability.mjs`
 - `npm run ai:check`
-- `node tools/check-file-size.mjs` (warns at `>=300`, fails at `>400`, includes oneliner warnings by default: `--oneliner=warn`)
+- `npm run check:filesize` (warns at `>=300`, fails at `>400`, and blocks on dense/packed oneliners via `--oneliner=block`)
 - `node tools/check-headers.mjs`
 - `node tools/check-dependencies.mjs`
 - `node tools/check-umd.mjs`
 - `node tools/check-naming.mjs`
 
-Optional strict variant during cleanup:
-- `npm run check:filesize:strict` (uses `--oneliner=block`)
+Optional exploratory variant during cleanup:
+- `npm run check:filesize:warn` (uses `--oneliner=warn`)
 
 `test:coverage:check` includes:
 

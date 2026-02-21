@@ -20,10 +20,18 @@
 
       const req = p.kind;
 
-      if (req === "eta") return out(p.eta, cap("eta"), unit("eta"), "formatTime", []);
-      if (req === "rteEta") return out(p.rteEta, cap("rteEta"), unit("rteEta"), "formatTime", []);
-      if (req === "dst") return out(p.dst, cap("dst"), unit("dst"), "formatDistance", []);
-      if (req === "rteDistance") return out(p.rteDistance, cap("rteDistance"), unit("rteDistance"), "formatDistance", []);
+      if (req === "eta") {
+        return out(p.eta, cap("eta"), unit("eta"), "formatTime", []);
+      }
+      if (req === "rteEta") {
+        return out(p.rteEta, cap("rteEta"), unit("rteEta"), "formatTime", []);
+      }
+      if (req === "dst") {
+        return out(p.dst, cap("dst"), unit("dst"), "formatDistance", []);
+      }
+      if (req === "rteDistance") {
+        return out(p.rteDistance, cap("rteDistance"), unit("rteDistance"), "formatDistance", []);
+      }
       if (req === "vmg") {
         const u = unit("vmg");
         return out(p.vmg, cap("vmg"), u, "formatSpeed", [u]);

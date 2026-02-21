@@ -21,7 +21,9 @@
 
     function formatSpeedText(raw, props, speedUnit) {
       const n = Number(raw);
-      if (!isFinite(n)) return "---";
+      if (!isFinite(n)) {
+        return "---";
+      }
 
       const p = props || {};
       const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatSpeed";
@@ -38,7 +40,9 @@
     const buildWindBackgroundKey = (data) => JSON.stringify(data);
 
     const ensureWindLayer = (canvas, existing, width, height) => {
-      if (existing && existing.width === width && existing.height === height) return existing;
+      if (existing && existing.width === width && existing.height === height) {
+        return existing;
+      }
       const layer = canvas.ownerDocument.createElement("canvas");
       layer.width = width;
       layer.height = height;
@@ -50,7 +54,9 @@
       backgroundCache.frontCanvas = ensureWindLayer(canvas, backgroundCache.frontCanvas, state.bufferW, state.bufferH);
       backgroundCache.backCtx = backgroundCache.backCanvas.getContext("2d");
       backgroundCache.frontCtx = backgroundCache.frontCanvas.getContext("2d");
-      if (!backgroundCache.backCtx || !backgroundCache.frontCtx) return;
+      if (!backgroundCache.backCtx || !backgroundCache.frontCtx) {
+        return;
+      }
 
       const back = backgroundCache.backCtx;
       const front = backgroundCache.frontCtx;
@@ -92,14 +98,18 @@
     };
 
     const blitWindLayer = (ctx, layer, W, H) => {
-      if (!layer) return;
+      if (!layer) {
+        return;
+      }
       ctx.drawImage(layer, 0, 0, layer.width, layer.height, 0, 0, W, H);
     };
 
     function renderCanvas(canvas, props){
       const p = props || {};
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
-      if (!W || !H) return;
+      if (!W || !H) {
+        return;
+      }
       const theme = Theme.resolve(canvas);
       const valueWeight = theme.font.weight;
       const labelWeight = theme.font.labelWeight;
@@ -107,7 +117,8 @@
 
       const family = Helpers.resolveFontFamily(canvas);
       const color  = Helpers.resolveTextColor(canvas);
-      ctx.fillStyle = color; ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.strokeStyle = color;
 
       const ratio = W / Math.max(1, H);
       const tN = V.isFiniteNumber(p.dialRatioThresholdNormal) ? p.dialRatioThresholdNormal : 0.7;
@@ -127,8 +138,10 @@
       const tickR  = rOuter;
       const needleDepth = Math.max(8, Math.floor(ringW * 0.9));
 
-      const leftStrip = Math.max(0, Math.floor((W - 2*pad - 2*R) / 2)), rightStrip = leftStrip;
-      const topStrip = Math.max(0, Math.floor((H - 2*pad - 2*R) / 2)), bottomStrip = topStrip;
+      const leftStrip = Math.max(0, Math.floor((W - 2*pad - 2*R) / 2));
+      const rightStrip = leftStrip;
+      const topStrip = Math.max(0, Math.floor((H - 2*pad - 2*R) / 2));
+      const bottomStrip = topStrip;
       const g = { leftTop: null, leftBottom: null, rightTop: null, rightBottom: null, top: null, bottom: null };
 
       if (mode === 'flat'){
@@ -161,10 +174,57 @@
       const bufferW = Math.max(1, Math.round(canvas.width || W));
       const bufferH = Math.max(1, Math.round(canvas.height || H));
       const dpr = Math.max(1, bufferW / Math.max(1, W));
-      const backgroundKey = buildWindBackgroundKey({ bufferW, bufferH, W, H, dpr, cx, cy, rOuter, tickR, ringW, labelInsetVal, labelPx, layEnabled, layMin, layMax, ringLineWidth: theme.ring.arcLineWidth, ticksMajorLen: theme.ticks.majorLen, ticksMajorWidth: theme.ticks.majorWidth, ticksMinorLen: theme.ticks.minorLen, ticksMinorWidth: theme.ticks.minorWidth, laylineStb: theme.colors.laylineStb, laylinePort: theme.colors.laylinePort, family, labelWeight, color });
+      const backgroundKey = buildWindBackgroundKey({
+        bufferW: bufferW,
+        bufferH: bufferH,
+        W: W,
+        H: H,
+        dpr: dpr,
+        cx: cx,
+        cy: cy,
+        rOuter: rOuter,
+        tickR: tickR,
+        ringW: ringW,
+        labelInsetVal: labelInsetVal,
+        labelPx: labelPx,
+        layEnabled: layEnabled,
+        layMin: layMin,
+        layMax: layMax,
+        ringLineWidth: theme.ring.arcLineWidth,
+        ticksMajorLen: theme.ticks.majorLen,
+        ticksMajorWidth: theme.ticks.majorWidth,
+        ticksMinorLen: theme.ticks.minorLen,
+        ticksMinorWidth: theme.ticks.minorWidth,
+        laylineStb: theme.colors.laylineStb,
+        laylinePort: theme.colors.laylinePort,
+        family: family,
+        labelWeight: labelWeight,
+        color: color
+      });
 
       if (backgroundCache.key !== backgroundKey) {
-        rebuildWindBackground(canvas, { key: backgroundKey, bufferW, bufferH, dpr, W, H, cx, cy, rOuter, tickR, ringW, layEnabled, layMin, layMax, theme, family, labelWeight, color, labelInsetVal, labelPx });
+        rebuildWindBackground(canvas, {
+          key: backgroundKey,
+          bufferW: bufferW,
+          bufferH: bufferH,
+          dpr: dpr,
+          W: W,
+          H: H,
+          cx: cx,
+          cy: cy,
+          rOuter: rOuter,
+          tickR: tickR,
+          ringW: ringW,
+          layEnabled: layEnabled,
+          layMin: layMin,
+          layMax: layMax,
+          theme: theme,
+          family: family,
+          labelWeight: labelWeight,
+          color: color,
+          labelInsetVal: labelInsetVal,
+          labelPx: labelPx
+        });
       }
 
       blitWindLayer(ctx, backgroundCache.backCanvas, W, H);
@@ -181,7 +241,8 @@
       blitWindLayer(ctx, backgroundCache.frontCanvas, W, H);
 
       const secScale = V.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
-      const angleUnit = (p.angleUnit || '°').trim(), speedUnit = (p.speedUnit || 'kn').trim();
+      const angleUnit = (p.angleUnit || '°').trim();
+      const speedUnit = (p.speedUnit || 'kn').trim();
       const angleText = V.formatAngle180(p.angle, !!p.leadingZero);
       const speedText = formatSpeedText(p.speed, p, speedUnit);
       const angleCap = (p.angleCaption || '').trim();
@@ -191,19 +252,49 @@
         if (g.leftBottom && g.leftTop){
           const fitL = T.measureValueUnitFit(ctx, family, angleText, angleUnit, g.leftBottom.w, g.leftBottom.h, secScale, valueWeight, labelWeight);
           T.drawCaptionMax(ctx, family, g.leftTop.x, g.leftTop.y, g.leftTop.w, g.leftTop.h, angleCap, Math.floor(fitL.vPx * secScale), "left", labelWeight);
-          T.drawValueUnitWithFit(ctx, family, g.leftBottom.x, g.leftBottom.y, g.leftBottom.w, g.leftBottom.h, angleText, angleUnit, fitL, "left", valueWeight, labelWeight);
+          T.drawValueUnitWithFit(
+            ctx,
+            family,
+            g.leftBottom.x,
+            g.leftBottom.y,
+            g.leftBottom.w,
+            g.leftBottom.h,
+            angleText,
+            angleUnit,
+            fitL,
+            "left",
+            valueWeight,
+            labelWeight
+          );
         }
         if (g.rightBottom && g.rightTop){
           const fitR = T.measureValueUnitFit(ctx, family, speedText, speedUnit, g.rightBottom.w, g.rightBottom.h, secScale, valueWeight, labelWeight);
           T.drawCaptionMax(ctx, family, g.rightTop.x, g.rightTop.y, g.rightTop.w, g.rightTop.h, speedCap, Math.floor(fitR.vPx * secScale), "right", labelWeight);
-          T.drawValueUnitWithFit(ctx, family, g.rightBottom.x, g.rightBottom.y, g.rightBottom.w, g.rightBottom.h, speedText, speedUnit, fitR, "right", valueWeight, labelWeight);
+          T.drawValueUnitWithFit(
+            ctx,
+            family,
+            g.rightBottom.x,
+            g.rightBottom.y,
+            g.rightBottom.w,
+            g.rightBottom.h,
+            speedText,
+            speedUnit,
+            fitR,
+            "right",
+            valueWeight,
+            labelWeight
+          );
         }
         return;
       }
 
       if (mode === 'high'){
-        const capTop = angleCap, valTop = angleText, uniTop = angleUnit;
-        const capBot = speedCap, valBot = speedText, uniBot = speedUnit;
+        const capTop = angleCap;
+        const valTop = angleText;
+        const uniTop = angleUnit;
+        const capBot = speedCap;
+        const valBot = speedText;
+        const uniBot = speedUnit;
 
         if (g.top) {
           const fitTop = T.fitInlineCapValUnit(ctx, family, capTop, valTop, uniTop, g.top.w, g.top.h, secScale, valueWeight, labelWeight);
@@ -256,7 +347,9 @@
             Math.sqrt(Math.max(0, (rSafe - innerMar) * (rSafe - innerMar) - halfDiagY * halfDiagY))
             - Math.floor(colGap / 2)
           );
-          if (halfWMax <= 10) continue;
+          if (halfWMax <= 10) {
+            continue;
+          }
 
           const hv = Math.max(12, Math.floor(mh / (1 + 2*secScale)));
           const vPxA = T.fitTextPx(ctx, angleText, halfWMax, hv, family, valueWeight);

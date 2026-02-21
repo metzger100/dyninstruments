@@ -15,7 +15,9 @@
       return typeof fn === "function";
     });
 
-    if (!fns.length) return undefined;
+    if (!fns.length) {
+      return undefined;
+    }
 
     return function (values) {
       const ctx = this;
@@ -48,7 +50,9 @@
     const wantsHide = !!spec.wantsHideNativeHead;
 
     function wrapRenderCanvas(fn) {
-      if (!fn) return undefined;
+      if (!fn) {
+        return undefined;
+      }
       return function (canvas, props) {
         if (wantsHide && !canvas.__dyniMarked) {
           const rootEl = canvas.closest(".widget, .DirectWidget") || canvas.parentElement;

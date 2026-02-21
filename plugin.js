@@ -20,14 +20,18 @@
   }
 
   function loadScriptOnce(id, src) {
-    if (document.getElementById(id)) return Promise.resolve();
+    if (document.getElementById(id)) {
+      return Promise.resolve();
+    }
 
     return new Promise(function (res, rej) {
       const s = document.createElement("script");
       s.id = id;
       s.async = true;
       s.src = src;
-      s.onload = function () { res(); };
+      s.onload = function () {
+        res();
+      };
       s.onerror = rej;
       document.head.appendChild(s);
     });

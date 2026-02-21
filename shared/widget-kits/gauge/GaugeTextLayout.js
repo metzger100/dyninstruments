@@ -20,11 +20,15 @@
     function fitTextPx(ctx, text, maxW, maxH, family, weight) {
       const h = Math.max(1, Math.floor(Number(maxH) || 0));
       const wLimit = Math.max(1, Number(maxW) || 0);
-      if (!text) return Math.max(6, h);
+      if (!text) {
+        return Math.max(6, h);
+      }
       let px = Math.max(6, h);
       setFont(ctx, px, weight, family);
       const w = ctx.measureText(String(text)).width;
-      if (w <= wLimit + 0.5) return px;
+      if (w <= wLimit + 0.5) {
+        return px;
+      }
       const scale = Math.max(0.1, wLimit / Math.max(1, w));
       px = Math.floor(px * scale);
       return Math.max(6, Math.min(px, h));
@@ -32,17 +36,23 @@
 
     function fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, weight) {
       let px = Math.max(1, Math.floor(Math.min(basePx, maxH)));
-      if (!text) return px;
+      if (!text) {
+        return px;
+      }
       setFont(ctx, px, weight, family);
       const w = ctx.measureText(text).width;
-      if (w <= maxW + 0.01) return px;
+      if (w <= maxW + 0.01) {
+        return px;
+      }
       const scale = Math.max(0.1, (maxW / Math.max(1, w)));
       px = Math.max(1, Math.floor(px * scale));
       return Math.min(px, Math.floor(maxH));
     }
 
     function measureValueUnitFit(ctx, family, value, unit, w, h, secScale, valueWeight, labelWeight) {
-      if (!value) return { vPx: 0, uPx: 0, gap: 0, total: 0 };
+      if (!value) {
+        return { vPx: 0, uPx: 0, gap: 0, total: 0 };
+      }
       const maxH = Math.max(8, Math.floor(Number(h) || 0));
       const maxW = Math.max(1, Number(w) || 0);
       const ratio = Number(secScale);
@@ -82,7 +92,9 @@
     }
 
     function drawCaptionMax(ctx, family, x, y, w, h, caption, capMaxPx, align, labelWeight) {
-      if (w <= 0 || h <= 0 || !caption) return;
+      if (w <= 0 || h <= 0 || !caption) {
+        return;
+      }
       let cPx = fitTextPx(ctx, caption, w, h, family, labelWeight);
       if (isFinite(Number(capMaxPx))) cPx = Math.min(cPx, Math.floor(Number(capMaxPx)));
       setFont(ctx, cPx, labelWeight, family);
@@ -103,7 +115,9 @@
     }
 
     function drawValueUnitWithFit(ctx, family, x, y, w, h, value, unit, fit, align, valueWeight, labelWeight) {
-      if (w <= 0 || h <= 0 || !value) return;
+      if (w <= 0 || h <= 0 || !value) {
+        return;
+      }
       const data = fit || { vPx: 6, uPx: 6, gap: 0 };
       const vPx = Math.max(6, Math.floor(Number(data.vPx) || 0));
       const uPx = Math.max(6, Math.floor(Number(data.uPx) || 0));
@@ -137,7 +151,9 @@
     }
 
     function fitInlineCapValUnit(ctx, family, caption, value, unit, maxW, maxH, secScale, valueWeight, labelWeight) {
-      if (!value) return { cPx: 0, vPx: 0, uPx: 0, g1: 0, g2: 0, total: 0 };
+      if (!value) {
+        return { cPx: 0, vPx: 0, uPx: 0, g1: 0, g2: 0, total: 0 };
+      }
       const h = Math.max(8, Math.floor(Number(maxH) || 0));
       const w = Math.max(1, Number(maxW) || 0);
       const ratio = Number(secScale);
@@ -179,7 +195,9 @@
     }
 
     function drawInlineCapValUnit(ctx, family, x, y, w, h, caption, value, unit, fit, valueWeight, labelWeight) {
-      if (w <= 0 || h <= 0 || !value) return;
+      if (w <= 0 || h <= 0 || !value) {
+        return;
+      }
       const data = fit || fitInlineCapValUnit(ctx, family, caption, value, unit, w, h, 0.8, valueWeight, labelWeight);
       let xStart = x + Math.floor((w - data.total) / 2);
       const yMid = y + Math.floor(h / 2);
@@ -235,8 +253,12 @@
       const yUni = y + hCap + hVal;
 
       function xFor(alignment) {
-        if (alignment === "left") return x;
-        if (alignment === "right") return x + w;
+        if (alignment === "left") {
+          return x;
+        }
+        if (alignment === "right") {
+          return x + w;
+        }
         return x + Math.floor(w / 2);
       }
 
