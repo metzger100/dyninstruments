@@ -3,6 +3,7 @@ const { loadFresh } = require("../../helpers/load-umd");
 describe("SpeedGaugeWidget", function () {
   it("passes SemicircleGaugeEngine config with high-end sectors", function () {
     let captured;
+    let receivedOptions;
     const renderCanvas = vi.fn();
     const applyFormatter = vi.fn((value, spec) => {
       return Number(value).toFixed(1) + " " + spec.formatterParameters[0];
@@ -20,16 +21,12 @@ describe("SpeedGaugeWidget", function () {
                   const match = String(text).match(/-?\d+(?:\.\d+)?/);
                   return match ? match[0] : "";
                 },
-                buildHighEndSectors(props, minV, maxV) {
-                  const warningFrom = Number(props.warningFrom);
-                  const alarmFrom = Number(props.alarmFrom);
-                  const warningTo = (isFinite(alarmFrom) && isFinite(warningFrom) && alarmFrom > warningFrom)
-                    ? alarmFrom
-                    : maxV;
-                  const sectors = [];
-                  if (isFinite(warningFrom)) sectors.push({ a0: warningFrom, a1: warningTo, color: "#e7c66a" });
-                  if (isFinite(alarmFrom)) sectors.push({ a0: alarmFrom, a1: maxV, color: "#ff7a76" });
-                  return sectors;
+                buildHighEndSectors(props, minV, maxV, arc, options) {
+                  receivedOptions = options;
+                  return [
+                    { a0: 20, a1: 25, color: options.theme.colors.warning },
+                    { a0: 25, a1: 30, color: options.theme.colors.alarm }
+                  ];
                 }
               };
             }
@@ -58,15 +55,18 @@ describe("SpeedGaugeWidget", function () {
     }, "kn")).toEqual({ num: 6.4, text: "6.4" });
     expect(applyFormatter).toHaveBeenCalled();
 
-    const sectors = captured.buildSectors({ warningFrom: 20, alarmFrom: 25 }, 0, 30, {}, {
-      sectorAngles(from, to) {
-        return { a0: from, a1: to };
+    const theme = {
+      colors: {
+        warning: "#123456",
+        alarm: "#654321"
       }
-    });
+    };
+    const sectors = captured.buildSectors({ warningFrom: 20, alarmFrom: 25 }, 0, 30, {}, {}, theme);
 
     expect(sectors).toEqual([
-      { a0: 20, a1: 25, color: "#e7c66a" },
-      { a0: 25, a1: 30, color: "#ff7a76" }
+      { a0: 20, a1: 25, color: "#123456" },
+      { a0: 25, a1: 30, color: "#654321" }
     ]);
+    expect(receivedOptions.theme).toBe(theme);
   });
 });

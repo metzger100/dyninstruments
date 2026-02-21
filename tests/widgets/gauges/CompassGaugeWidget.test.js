@@ -1,25 +1,17 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
-describe("WindDialWidget", function () {
-  it("formats speed via Helpers.applyFormatter in graphic mode", function () {
-    const valueDrawCalls = [];
-    const laylineCalls = [];
+describe("CompassGaugeWidget", function () {
+  it("uses theme pointer color for the fixed lubber marker", function () {
     const pointerCalls = [];
     const themeDefaults = {
       colors: {
-        pointer: "#ff2b2b",
-        laylineStb: "#82b683",
-        laylinePort: "#ff7a76"
+        pointer: "#ff2b2b"
       }
     };
-    const applyFormatter = vi.fn((value, spec) => {
-      return "spd:" + String(value) + ":" + String(spec.formatterParameters[0]);
-    });
 
-    const spec = loadFresh("widgets/gauges/WindDialWidget/WindDialWidget.js")
+    const spec = loadFresh("widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js")
       .create({}, {
-        applyFormatter,
         setupCanvas(canvas) {
           const ctx = canvas.getContext("2d");
           const rect = canvas.getBoundingClientRect();
@@ -42,13 +34,11 @@ describe("WindDialWidget", function () {
               return {
                 draw: {
                   drawRing() {},
-                  drawAnnularSector(ctx, cx, cy, rOuter, opts) {
-                    laylineCalls.push(opts);
-                  },
+                  drawTicks() {},
                   drawPointerAtRim(ctx, cx, cy, rOuter, angle, opts) {
                     pointerCalls.push(opts);
                   },
-                  drawTicks() {},
+                  drawRimMarker() {},
                   drawLabels() {}
                 },
                 theme: {
@@ -61,9 +51,7 @@ describe("WindDialWidget", function () {
                     return { vPx: 12, uPx: 10, gap: 6 };
                   },
                   drawCaptionMax() {},
-                  drawValueUnitWithFit(ctx, family, x, y, w, h, valueText, unitText) {
-                    valueDrawCalls.push({ valueText: String(valueText), unitText: String(unitText || "") });
-                  },
+                  drawValueUnitWithFit() {},
                   fitInlineCapValUnit() {
                     return { cPx: 10, vPx: 12, uPx: 10, gap: 6 };
                   },
@@ -71,7 +59,8 @@ describe("WindDialWidget", function () {
                   fitTextPx() {
                     return 12;
                   },
-                  drawThreeRowsBlock() {}
+                  drawThreeRowsBlock() {},
+                  drawDisconnectOverlay() {}
                 },
                 value: {
                   clamp(value, lo, hi) {
@@ -82,10 +71,11 @@ describe("WindDialWidget", function () {
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
                   },
-                  formatAngle180(value) {
+                  formatDirection360(value) {
                     const n = Number(value);
                     if (!isFinite(n)) return "---";
-                    return String(Math.round(n));
+                    const norm = ((Math.round(n) % 360) + 360) % 360;
+                    return String(norm).padStart(3, "0");
                   }
                 }
               };
@@ -102,25 +92,11 @@ describe("WindDialWidget", function () {
     });
 
     spec.renderCanvas(canvas, {
-      angle: 23,
-      speed: 5.5,
-      angleCaption: "AWA",
-      speedCaption: "AWS",
-      angleUnit: "°",
-      speedUnit: "kn",
-      layMin: 35,
-      layMax: 45,
-      formatter: "formatSpeed",
-      formatterParameters: ["kn"]
+      heading: 12,
+      caption: "HDG",
+      unit: "°"
     });
 
-    expect(applyFormatter).toHaveBeenCalledWith(5.5, expect.objectContaining({
-      formatter: "formatSpeed",
-      formatterParameters: ["kn"]
-    }));
-    expect(valueDrawCalls.some((c) => c.valueText === "spd:5.5:kn" && c.unitText === "kn")).toBe(true);
-    expect(laylineCalls[0].fillStyle).toBe(themeDefaults.colors.laylineStb);
-    expect(laylineCalls[1].fillStyle).toBe(themeDefaults.colors.laylinePort);
     expect(pointerCalls[0].theme).toBe(themeDefaults);
     expect(pointerCalls[0].color).toBeUndefined();
   });

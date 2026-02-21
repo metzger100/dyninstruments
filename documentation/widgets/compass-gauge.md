@@ -5,6 +5,7 @@
 ## Overview
 
 Full-circle rotating compass card with upright cardinal labels. The dial rotates by `-heading`; the lubber pointer stays fixed at North. Optional target marker (`markerCourse`) is supported.
+Pointer color is resolved once per render via `GaugeToolkit.theme.resolve(canvas)`.
 
 ## Module Registration
 
@@ -41,7 +42,7 @@ All dial calls use `rotationDeg = -heading` so card content rotates while top po
 |---|---|---|
 | Ring | `draw.drawRing` | full circle |
 | Ticks | `draw.drawTicks` | `0..360`, major 30, minor 10, with `rotationDeg` |
-| Lubber pointer | `draw.drawPointerAtRim` | fixed at 0°, red |
+| Lubber pointer | `draw.drawPointerAtRim` | fixed at 0°, with `opts.theme.colors.pointer` (default `#ff2b2b`) |
 | Target marker | `draw.drawRimMarker` | at `(markerCourse - heading)` if both finite |
 | Labels | `draw.drawLabels` | `step=45`, `labelsMap`, `textRotation: "upright"` |
 
@@ -86,3 +87,4 @@ return {
 - [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
 - [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md)
+- [../shared/theme-tokens.md](../shared/theme-tokens.md)

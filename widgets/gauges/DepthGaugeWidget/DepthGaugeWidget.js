@@ -56,8 +56,10 @@
       formatDisplay: function (raw) {
         return displayDepthFromRaw(raw, 1);
       },
-      buildSectors: function (props, minV, maxV, arc) {
-        return valueMath.buildLowEndSectors(props, minV, maxV, arc);
+      buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
+        return valueMath.buildLowEndSectors(props, minV, maxV, arc, {
+          theme: theme
+        });
       }
     });
 

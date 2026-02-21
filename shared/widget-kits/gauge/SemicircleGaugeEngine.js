@@ -155,6 +155,7 @@
         const W = setup.W;
         const H = setup.H;
         if (!W || !H) return;
+        const theme = GU.theme.resolve(canvas);
 
         ctx.clearRect(0, 0, W, H);
         const family = Helpers.resolveFontFamily(canvas);
@@ -199,7 +200,7 @@
           : NaN;
 
         const sectorList = (typeof cfg.buildSectors === "function")
-          ? (cfg.buildSectors(p, range.min, range.max, arc, V) || [])
+          ? (cfg.buildSectors(p, range.min, range.max, arc, V, theme) || [])
           : [];
 
         const ticks = V.buildValueTickAngles(range.min, range.max, tickMajor, tickMinor, arc);
@@ -222,7 +223,7 @@
         if (V.isFiniteNumber(aNow)) {
           draw.drawPointerAtRim(ctx, geom.cx, geom.cy, geom.rOuter, aNow, {
             depth: geom.needleDepth,
-            color: "#ff2b2b",
+            theme: theme,
             variant: "long",
             sideFactor: 0.25,
             lengthFactor: 2
