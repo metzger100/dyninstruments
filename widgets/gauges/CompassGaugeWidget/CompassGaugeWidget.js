@@ -23,6 +23,7 @@
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
       if (!W || !H) return;
       const theme = Theme.resolve(canvas);
+      const dialTheme = GU.requireDialThemeTokens(theme, "CompassGaugeWidget");
 
       ctx.clearRect(0,0,W,H);
       const family = Helpers.resolveFontFamily(canvas);
@@ -61,14 +62,14 @@
       const rotationDeg = V.isFiniteNumber(heading) ? -heading : 0;
 
       // Frame (ring + ticks)
-      draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
+      draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: dialTheme.arcLineWidth });
 
       draw.drawTicks(ctx, cx, cy, rOuter, {
         rotationDeg,
         startDeg: 0, endDeg: 360,
         stepMajor: 30, stepMinor: 10,
-        major: { len: 9, width: 2 },
-        minor: { len: 5, width: 1 }
+        major: { len: dialTheme.majorLen, width: dialTheme.majorWidth },
+        minor: { len: dialTheme.minorLen, width: dialTheme.minorWidth }
       });
 
       // Fixed red lubber pointer at 0° (north), behind labels
@@ -76,8 +77,8 @@
         depth: lubber,
         theme: theme,
         variant: "long",
-        sideFactor: 0.25,
-        lengthFactor: 2
+        sideFactor: dialTheme.sideFactor,
+        lengthFactor: dialTheme.lengthFactor
       });
 
       // Optional target marker (bearing/course) relative to rotating card: (marker - heading)

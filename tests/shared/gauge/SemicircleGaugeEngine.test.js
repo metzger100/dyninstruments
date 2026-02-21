@@ -15,6 +15,8 @@ describe("SemicircleGaugeEngine", function () {
 
   it("resolves theme once and threads it to sectors and pointer color", function () {
     const pointerCalls = [];
+    const tickCalls = [];
+    const arcRingCalls = [];
     const buildSectorsCalls = [];
     const themeDefaults = {
       colors: {
@@ -23,6 +25,19 @@ describe("SemicircleGaugeEngine", function () {
         alarm: "#ff7a76",
         laylineStb: "#82b683",
         laylinePort: "#ff7a76"
+      },
+      ticks: {
+        majorLen: 13,
+        majorWidth: 4,
+        minorLen: 7,
+        minorWidth: 2
+      },
+      pointer: {
+        sideFactor: 0.3,
+        lengthFactor: 1.7
+      },
+      ring: {
+        arcLineWidth: 2.5
       }
     };
     const resolveTheme = vi.fn(function () {
@@ -53,13 +68,28 @@ describe("SemicircleGaugeEngine", function () {
             drawDisconnectOverlay() {}
           },
           value: gaugeValueMath,
+          requireDialThemeTokens(theme) {
+            return {
+              majorLen: theme.ticks.majorLen,
+              majorWidth: theme.ticks.majorWidth,
+              minorLen: theme.ticks.minorLen,
+              minorWidth: theme.ticks.minorWidth,
+              sideFactor: theme.pointer.sideFactor,
+              lengthFactor: theme.pointer.lengthFactor,
+              arcLineWidth: theme.ring.arcLineWidth
+            };
+          },
           draw: {
-            drawArcRing() {},
+            drawArcRing(ctx, cx, cy, rOuter, startDeg, endDeg, opts) {
+              arcRingCalls.push(opts);
+            },
             drawAnnularSector() {},
             drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, opts) {
               pointerCalls.push(opts);
             },
-            drawTicksFromAngles() {},
+            drawTicksFromAngles(ctx, cx, cy, rOuter, ticks, opts) {
+              tickCalls.push(opts);
+            },
             drawLabels() {}
           }
         };
@@ -128,5 +158,72 @@ describe("SemicircleGaugeEngine", function () {
     expect(buildSectorsCalls[0].theme).toBe(themeDefaults);
     expect(pointerCalls[0].theme).toBe(themeDefaults);
     expect(pointerCalls[0].color).toBeUndefined();
+    expect(pointerCalls[0].sideFactor).toBe(themeDefaults.pointer.sideFactor);
+    expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.pointer.lengthFactor);
+    expect(arcRingCalls[0].lineWidth).toBe(themeDefaults.ring.arcLineWidth);
+    expect(tickCalls[0].major).toEqual({
+      len: themeDefaults.ticks.majorLen,
+      width: themeDefaults.ticks.majorWidth
+    });
+    expect(tickCalls[0].minor).toEqual({
+      len: themeDefaults.ticks.minorLen,
+      width: themeDefaults.ticks.minorWidth
+    });
+  });
+
+  it("throws when required dial theme tokens are missing", function () {
+    const renderer = loadFresh("shared/widget-kits/gauge/SemicircleGaugeEngine.js")
+      .create({}, {
+        setupCanvas() {
+          return {
+            ctx: {},
+            W: 200,
+            H: 120
+          };
+        },
+        getModule(id) {
+          if (id !== "GaugeToolkit") throw new Error("unexpected module: " + id);
+          return {
+            create() {
+              return {
+                theme: {
+                  resolve() {
+                    return {
+                      colors: {
+                        pointer: "#ff2b2b"
+                      }
+                    };
+                  }
+                },
+                text: {},
+                value: {},
+                requireDialThemeTokens(theme) {
+                  const required = [
+                    theme && theme.ticks && theme.ticks.majorLen,
+                    theme && theme.ticks && theme.ticks.majorWidth,
+                    theme && theme.ticks && theme.ticks.minorLen,
+                    theme && theme.ticks && theme.ticks.minorWidth,
+                    theme && theme.pointer && theme.pointer.sideFactor,
+                    theme && theme.pointer && theme.pointer.lengthFactor,
+                    theme && theme.ring && theme.ring.arcLineWidth
+                  ];
+                  for (let i = 0; i < required.length; i++) {
+                    if (!Number.isFinite(required[i])) {
+                      throw new Error("SemicircleGaugeEngine: missing required theme token");
+                    }
+                  }
+                  return {};
+                },
+                draw: {}
+              };
+            }
+          };
+        }
+      })
+      .createRenderer({});
+
+    expect(function () {
+      renderer({}, {});
+    }).toThrow(/missing required theme token/i);
   });
 });

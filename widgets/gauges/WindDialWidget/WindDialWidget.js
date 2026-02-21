@@ -43,6 +43,7 @@
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
       if (!W || !H) return;
       const theme = Theme.resolve(canvas);
+      const dialTheme = GU.requireDialThemeTokens(theme, "WindDialWidget");
       ctx.clearRect(0,0,W,H);
 
       const family = Helpers.resolveFontFamily(canvas);
@@ -111,7 +112,7 @@
       // Dial frame & sectors first
       ctx.save();
       // ring
-      draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: 1 });
+      draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: dialTheme.arcLineWidth });
 
       // sectors (annular)
       if (layEnabled && layMax > layMin){
@@ -137,8 +138,8 @@
           depth: needleDepth,
           theme: theme,
           variant: "long",
-          sideFactor: 0.25,
-          lengthFactor: 2
+          sideFactor: dialTheme.sideFactor,
+          lengthFactor: dialTheme.lengthFactor
         });
       }
 
@@ -147,8 +148,8 @@
         startDeg: -180, endDeg: 180,
         stepMajor: 30, stepMinor: 10,
         includeEnd: true,
-        major: { len: 9, width: 2 },
-        minor: { len: 5, width: 1 }
+        major: { len: dialTheme.majorLen, width: dialTheme.majorWidth },
+        minor: { len: dialTheme.minorLen, width: dialTheme.minorWidth }
       });
 
       // labels (skip endpoints)

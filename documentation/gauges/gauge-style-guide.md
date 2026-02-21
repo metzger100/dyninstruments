@@ -11,6 +11,7 @@ Visual specification for semicircle gauge widgets. All four semicircle gauges sh
 - Shape: N-shaped semicircle (opening downward)
 - Default arc: `startDeg = 270`, `endDeg = 450`
 - Angle convention: 0° at North, clockwise positive
+- Generic dial ring/arc stroke width: `theme.ring.arcLineWidth` (default `1`)
 
 Value-to-angle mapping:
 
@@ -61,8 +62,8 @@ draw.drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, {
   depth: needleDepth,
   theme: theme,
   variant: "long",
-  sideFactor: 0.25,
-  lengthFactor: 2
+  sideFactor: theme.pointer.sideFactor,
+  lengthFactor: theme.pointer.lengthFactor
 });
 ```
 
@@ -157,8 +158,8 @@ Caption  Value  Unit
 
 ## Tick Rendering
 
-- Major ticks: `len=9`, `width=2`
-- Minor ticks: `len=5`, `width=1`
+- Major ticks: `len=theme.ticks.majorLen`, `width=theme.ticks.majorWidth`
+- Minor ticks: `len=theme.ticks.minorLen`, `width=theme.ticks.minorWidth`
 - Labels: bold, font from `resolveFontFamily()`
 - End labels optional via `showEndLabels`
 
