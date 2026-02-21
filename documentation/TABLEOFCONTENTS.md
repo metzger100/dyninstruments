@@ -30,6 +30,7 @@
 ## Conventions
 
 - **What coding patterns/naming conventions should I follow?** → [conventions/coding-standards.md](conventions/coding-standards.md)
+- **How are code smells prevented and enforced?** → [conventions/smell-prevention.md](conventions/smell-prevention.md)
 - **How do I run naming registration checks?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#quality-and-regression-commands)
 - **How should I format documentation files?** → [conventions/documentation-format.md](conventions/documentation-format.md)
 - **Which files are the best examples to copy from?** → [conventions/coding-standards.md#reference-implementations](conventions/coding-standards.md#reference-implementations)
@@ -81,6 +82,7 @@
 
 - **How do I keep docs aligned after code changes?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md)
 - **How do I run documentation validation checks?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#validation)
+- **How do I run smell checks before strict gate?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#quality-and-regression-commands)
 - **How do I keep the codebase clean?** → [guides/garbage-collection.md](guides/garbage-collection.md)
 - **What anti-patterns should I watch for?** → [guides/garbage-collection.md#anti-patterns](guides/garbage-collection.md#anti-patterns)
 - **What areas of the codebase need improvement?** → [QUALITY.md](QUALITY.md)

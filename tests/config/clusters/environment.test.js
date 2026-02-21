@@ -30,6 +30,12 @@ describe("config/clusters/environment.js", function () {
     expect(out.storeKeys.value).toBe("sensors.pressure.main");
   });
 
+  it("removes stale pressure value key when pressure key is cleared", function () {
+    const def = loadEnvDef();
+    const out = def.updateFunction({ kind: "pressure", value: "  ", storeKeys: { value: "old.path" } });
+    expect(out.storeKeys.value).toBeUndefined();
+  });
+
   it("removes pressure store key when non-pressure kind is active", function () {
     const def = loadEnvDef();
     const out = def.updateFunction({ kind: "temp", storeKeys: { value: "x", temp: "t" } });

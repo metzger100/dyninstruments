@@ -220,6 +220,11 @@
           if (typeof out.value === "string" && out.value.trim()) {
             out.storeKeys = { ...out.storeKeys, value: out.value.trim() };
           }
+          else if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
+            const sk = { ...out.storeKeys };
+            delete sk.value;
+            out.storeKeys = sk;
+          }
         }
         else {
           if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {

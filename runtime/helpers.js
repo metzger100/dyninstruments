@@ -8,6 +8,7 @@
 
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
+  const hasOwn = Object.prototype.hasOwnProperty;
 
   function applyFormatter(raw, props) {
     const fpRaw = props && props.formatterParameters;
@@ -30,7 +31,10 @@
     }
     catch (e) { /* intentional: formatter failures fall back to default/raw formatting */ }
 
-    if (raw == null || Number.isNaN(raw)) return (props && props.default) || "---";
+    if (raw == null || Number.isNaN(raw)) {
+      if (props && hasOwn.call(props, "default")) return props.default;
+      return "---";
+    }
     return String(raw);
   }
 

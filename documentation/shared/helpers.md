@@ -50,7 +50,9 @@ Applies formatter to raw value:
    - `props.formatter` string -> resolve and call `avnav.api.formatter[name]` when present
 4. Formatter exceptions are intentionally caught; processing continues with fallback
 5. Fallback behavior:
-   - if `raw == null` or `Number.isNaN(raw)` -> `props.default || "---"`
+   - if `raw == null` or `Number.isNaN(raw)`:
+     - return `props.default` when `default` key is explicitly present (including `""`, `0`, `false`)
+     - otherwise return `"---"`
    - otherwise -> `String(raw)`
 
 ### getModule

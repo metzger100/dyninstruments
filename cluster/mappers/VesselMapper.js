@@ -17,6 +17,10 @@
       const cap = toolkit.cap;
       const unit = toolkit.unit;
       const out = toolkit.out;
+      const num = toolkit.num || function (value) {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : undefined;
+      };
 
       const req = p.kind;
 
@@ -31,18 +35,18 @@
           formatter: "formatDecimal",
           formatterParameters: [3, 1, true],
 
-          minValue: Number(p.voltageMinValue),
-          maxValue: Number(p.voltageMaxValue),
-          tickMajor: Number(p.voltageTickMajor),
-          tickMinor: Number(p.voltageTickMinor),
+          minValue: num(p.voltageMinValue),
+          maxValue: num(p.voltageMaxValue),
+          tickMajor: num(p.voltageTickMajor),
+          tickMinor: num(p.voltageTickMinor),
           showEndLabels: !!p.voltageShowEndLabels,
 
-          warningFrom: warnEnabled ? Number(p.voltageWarningFrom) : undefined,
-          alarmFrom: alarmEnabled ? Number(p.voltageAlarmFrom) : undefined,
+          warningFrom: warnEnabled ? num(p.voltageWarningFrom) : undefined,
+          alarmFrom: alarmEnabled ? num(p.voltageAlarmFrom) : undefined,
 
-          voltageRatioThresholdNormal: Number(p.voltageRatioThresholdNormal),
-          voltageRatioThresholdFlat: Number(p.voltageRatioThresholdFlat),
-          captionUnitScale: Number(p.captionUnitScale)
+          voltageRatioThresholdNormal: num(p.voltageRatioThresholdNormal),
+          voltageRatioThresholdFlat: num(p.voltageRatioThresholdFlat),
+          captionUnitScale: num(p.captionUnitScale)
         };
       }
 

@@ -50,9 +50,6 @@
     }));
     if (!out.trim()) return fallbackText;
 
-    // Preserve prior fallback behavior when formatter is unavailable.
-    if (out.trim() === String(n)) return fallbackText;
-
     return out;
   }
 

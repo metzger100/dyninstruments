@@ -33,6 +33,10 @@ Rationale: Empty catches hide real bugs and train agents into unsafe patterns.
 Rationale: Reliability depends on truthful tests, not altered expectations.
 13. Rule: Rules that matter must be mechanically enforced (lint/check), not only written in prose.
 Rationale: Automated checks persist across sessions when memory and context do not.
+14. Rule: Preserve explicit falsy defaults (`""`, `0`, `false`) by using property-presence/nullish semantics; never use truthy fallback for configured defaults.
+Rationale: Truthy fallback (`||`) silently rewrites valid configured values and creates hard-to-debug behavior drift.
+15. Rule: Cache-owning modules must expose explicit invalidation APIs and mutation paths must invoke them whenever cached values become stale.
+Rationale: Mutable runtime state (theme presets, dynamic CSS/token changes) must not rely on implicit refresh assumptions.
 
 ## Related
 

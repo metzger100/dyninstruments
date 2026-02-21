@@ -245,7 +245,7 @@ describe("PositionCoordinateWidget", function () {
     expect(naCount).toBeGreaterThanOrEqual(2);
   });
 
-  it("uses default text when formatter is unavailable", function () {
+  it("falls back to raw numeric string when formatter is unavailable", function () {
     const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
       .create({}, makeHelpers());
 
@@ -263,8 +263,43 @@ describe("PositionCoordinateWidget", function () {
       ratioThresholdFlat: 3.0
     });
 
-    const naCount = fillTextValues(ctx).filter((t) => t === "NA").length;
-    expect(naCount).toBeGreaterThanOrEqual(2);
+    const texts = fillTextValues(ctx);
+    expect(texts).toContain("54.1");
+    expect(texts).toContain("10.9");
+    expect(texts).not.toContain("NA");
+  });
+
+  it("does not infer formatter failure from raw-equality output", function () {
+    globalThis.avnav = {
+      api: {
+        formatter: {
+          formatLonLatsDecimal(value) {
+            return String(Number(value));
+          }
+        }
+      }
+    };
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
+      .create({}, makeHelpers());
+
+    const ctx = createMockContext2D();
+    const canvas = createMockCanvas({
+      rectWidth: 220,
+      rectHeight: 140,
+      ctx
+    });
+
+    spec.renderCanvas(canvas, {
+      value: { lat: 54.1, lon: 10.9 },
+      default: "NA",
+      ratioThresholdNormal: 1.0,
+      ratioThresholdFlat: 3.0
+    });
+
+    const texts = fillTextValues(ctx);
+    expect(texts).toContain("54.1");
+    expect(texts).toContain("10.9");
+    expect(texts).not.toContain("NA");
   });
 
   it("draws disconnect overlay text", function () {

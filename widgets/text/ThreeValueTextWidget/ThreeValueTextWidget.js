@@ -59,8 +59,8 @@
       const value   = Helpers.applyFormatter(props.value, props);
 
       const ratio   = W / Math.max(1, H);
-      const tNormal = Number(props.ratioThresholdNormal ?? 1.0);
-      const tFlat   = Number(props.ratioThresholdFlat   ?? 3.0);
+      const tNormal = valueMath.isFiniteNumber(props.ratioThresholdNormal) ? props.ratioThresholdNormal : 1.0;
+      const tFlat   = valueMath.isFiniteNumber(props.ratioThresholdFlat) ? props.ratioThresholdFlat : 3.0;
 
       // Unified scale for caption & unit relative to value font.
       const secScale = valueMath.clamp(props.captionUnitScale ?? 0.8, 0.3, 3.0);

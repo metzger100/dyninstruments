@@ -151,9 +151,17 @@ Prefer both when practical.
 
 ## 8) Execution and Validation Workflow
 
+Install tracked local hooks once per clone:
+
+```bash
+npm run hooks:install
+npm run hooks:doctor
+```
+
 Run from repository root after implementation:
 
 ```bash
+npm run check:smells
 npm run check:strict
 ```
 
@@ -173,4 +181,6 @@ Do not merge with failing checks.
 - [ ] Implementation matches requested intent and scope.
 - [ ] Documentation was updated wherever behavior/config/contracts changed.
 - [ ] AI slop review completed.
+- [ ] `npm run hooks:doctor` passed.
+- [ ] `npm run check:smells` passed.
 - [ ] `npm run check:strict` passed.

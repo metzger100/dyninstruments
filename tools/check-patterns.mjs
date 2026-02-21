@@ -78,8 +78,39 @@ const RULES = [
     run: runDeadCodeRule,
     functionAllowlist: ["create", "translateFunction", "translate", "renderCanvas"],
     message: ({ file, line, detail }) => `[dead-code] ${file}:${line}\n${detail}\nRemove stale refactor leftovers or make branch/function reachable.`
+  },
+  {
+    name: "default-truthy-fallback",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "config/**/*.js", "plugin.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runDefaultTruthyFallbackRule,
+    message: ({ file, line, expression }) => `[default-truthy-fallback] ${file}:${line}\nTruthy fallback on '.default' detected (${expression}). This clobbers explicit falsy defaults (\"\", 0, false).\nUse property-presence/nullish semantics instead of '||'.`
+  },
+  {
+    name: "formatter-availability-heuristic",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "config/**/*.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runFormatterAvailabilityHeuristicRule,
+    message: ({ file, line }) => `[formatter-availability-heuristic] ${file}:${line}\nFormatter-availability inferred from output equality to String(raw).\nDo not treat formatted output equal to raw text as formatter failure.`
+  },
+  {
+    name: "renderer-numeric-coercion-without-boundary-contract",
+    scope: {
+      include: ["widgets/**/*.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runRendererNumericCoercionRule,
+    message: ({ file, line, propName }) => `[renderer-numeric-coercion-without-boundary-contract] ${file}:${line}\nRenderer coerces mapper-owned prop '${propName}' via Number(props.${propName}).\nNormalize at mapper boundary and pass finite numbers or undefined.`
   }
 ];
+
+const RENDERER_NUMERIC_COERCION_ALLOWLIST = {
+  // "widgets/example.js": new Set(["thresholdProp"])
+};
 export function runPatternCheck(options = {}) {
   ROOT = path.resolve(options.root || process.cwd());
   WARN_MODE = !!options.warnMode;
@@ -298,6 +329,85 @@ function runDeadCodeRule(rule, files) {
           message: rule.message({ file, line, detail })
         });
       }
+    }
+  }
+
+  return out;
+}
+function runDefaultTruthyFallbackRule(rule, files) {
+  const out = [];
+  const detect = /\b([A-Za-z_$][A-Za-z0-9_$.]*\.default)\s*\|\|/g;
+
+  for (const file of files) {
+    const data = getFileData(file);
+    const seenLines = new Set();
+    let match;
+
+    while ((match = detect.exec(data.maskedText))) {
+      const line = lineAt(match.index, data.lineStarts);
+      const key = `${file}:${line}`;
+      if (seenLines.has(key)) continue;
+      seenLines.add(key);
+      out.push({
+        file,
+        line,
+        message: rule.message({
+          file,
+          line,
+          expression: match[1] + " || ..."
+        })
+      });
+    }
+  }
+
+  return out;
+}
+function runFormatterAvailabilityHeuristicRule(rule, files) {
+  const out = [];
+  const detect = /\b[A-Za-z_$][A-Za-z0-9_$]*\.trim\(\)\s*===\s*String\(\s*[A-Za-z_$][A-Za-z0-9_$]*\s*\)/g;
+
+  for (const file of files) {
+    const data = getFileData(file);
+    const seenLines = new Set();
+    let match;
+
+    while ((match = detect.exec(data.maskedText))) {
+      const line = lineAt(match.index, data.lineStarts);
+      const key = `${file}:${line}`;
+      if (seenLines.has(key)) continue;
+      seenLines.add(key);
+      out.push({
+        file,
+        line,
+        message: rule.message({ file, line })
+      });
+    }
+  }
+
+  return out;
+}
+function runRendererNumericCoercionRule(rule, files) {
+  const out = [];
+  const detect = /\bNumber\s*\(\s*props\.([A-Za-z_$][A-Za-z0-9_$]*)\s*(?:\?\?[^)]*)?\)/g;
+
+  for (const file of files) {
+    const allowed = RENDERER_NUMERIC_COERCION_ALLOWLIST[file] || new Set();
+    const data = getFileData(file);
+    const seen = new Set();
+    let match;
+
+    while ((match = detect.exec(data.maskedText))) {
+      const propName = match[1];
+      if (allowed.has(propName)) continue;
+      const line = lineAt(match.index, data.lineStarts);
+      const key = `${file}:${line}:${propName}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({
+        file,
+        line,
+        message: rule.message({ file, line, propName })
+      });
     }
   }
 

@@ -11,6 +11,8 @@ Use this document for runtime-safe component structure and naming. It defines fi
 - Runtime components must follow UMD/IIFE registration under `window.DyniComponents`.
 - No ES module `import`/`export` in plugin runtime files.
 - Reusable logic belongs in shared kits, not in duplicated widget-local helpers.
+- Preserve explicit falsy defaults (`""`, `0`, `false`) via property-presence/nullish checks; never use truthy fallback for configured defaults.
+- Cache-owning modules must expose explicit invalidation APIs and mutation paths must call them.
 
 ## File Size Limits
 

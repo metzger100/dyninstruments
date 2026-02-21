@@ -49,6 +49,9 @@ describe("runtime/helpers.js", function () {
     })).toBe("spd:6:kn");
 
     expect(runtime.applyFormatter(null, { default: "---" })).toBe("---");
+    expect(runtime.applyFormatter(null, { default: "" })).toBe("");
+    expect(runtime.applyFormatter(null, { default: 0 })).toBe(0);
+    expect(runtime.applyFormatter(null, { default: false })).toBe(false);
     expect(runtime.applyFormatter(7, {})).toBe("7");
   });
 

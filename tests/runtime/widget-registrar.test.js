@@ -119,4 +119,24 @@ describe("runtime/widget-registrar.js", function () {
 
     expect(registeredDef.storeKeys).toEqual({ value: "nav.gps.speed" });
   });
+
+  it("preserves explicit falsy default values from widget definitions", function () {
+    const { context, registerWidget } = setupContext();
+
+    const component = { create: () => ({}) };
+
+    context.DyniPlugin.runtime.registerWidget(component, {
+      def: { name: "dyni_DefaultZero", default: 0, editableParameters: {} }
+    }, {});
+    context.DyniPlugin.runtime.registerWidget(component, {
+      def: { name: "dyni_DefaultEmpty", default: "", editableParameters: {} }
+    }, {});
+    context.DyniPlugin.runtime.registerWidget(component, {
+      def: { name: "dyni_DefaultFalse", default: false, editableParameters: {} }
+    }, {});
+
+    expect(registerWidget.mock.calls[0][0].default).toBe(0);
+    expect(registerWidget.mock.calls[1][0].default).toBe("");
+    expect(registerWidget.mock.calls[2][0].default).toBe(false);
+  });
 });

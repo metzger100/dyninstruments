@@ -9,6 +9,7 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniSemicircleGaugeEngine = factory(); }
 }(this, function () {
   "use strict";
+  const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
     const GU = Helpers.getModule("GaugeToolkit").create(def, Helpers);
@@ -172,8 +173,8 @@
         const gap = V.computeGap(W, H);
         const ratio = W / Math.max(1, H);
 
-        const tN = Number(p[ratioProps.normal] ?? modeDefaults.normal);
-        const tF = Number(p[ratioProps.flat] ?? modeDefaults.flat);
+        const tN = V.isFiniteNumber(p[ratioProps.normal]) ? p[ratioProps.normal] : modeDefaults.normal;
+        const tF = V.isFiniteNumber(p[ratioProps.flat]) ? p[ratioProps.flat] : modeDefaults.flat;
         const mode = V.computeMode(ratio, tN, tF);
 
         const caption = String(p.caption || "").trim();
@@ -186,7 +187,7 @@
 
         const valueText = (display.text && String(display.text).trim())
           ? String(display.text).trim()
-          : (p.default || "---");
+          : (hasOwn.call(p, "default") ? p.default : "---");
 
         const valueNum = V.isFiniteNumber(display.num) ? display.num : NaN;
         const range = V.normalizeRange(p.minValue, p.maxValue, rangeDefaults.min, rangeDefaults.max);
@@ -194,8 +195,8 @@
           ? (cfg.tickSteps(range.range) || { major: 10, minor: 2 })
           : { major: 10, minor: 2 };
 
-        const tickMajor = Number(p.tickMajor ?? tickPreset.major);
-        const tickMinor = Number(p.tickMinor ?? tickPreset.minor);
+        const tickMajor = V.isFiniteNumber(p.tickMajor) ? p.tickMajor : tickPreset.major;
+        const tickMinor = V.isFiniteNumber(p.tickMinor) ? p.tickMinor : tickPreset.minor;
         const secScale = V.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
 
         const geom = V.computeSemicircleGeometry(W, H, pad, {
