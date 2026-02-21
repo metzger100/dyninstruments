@@ -119,4 +119,64 @@ describe("tools/check-patterns.mjs", function () {
     expect(result.summary.ok).toBe(true);
     expect(result.findings).toHaveLength(0);
   });
+
+  it("blocks truthy fallback on .default properties", function () {
+    const cwd = createWorkspace({
+      "runtime/example.js": `
+(function () {
+  "use strict";
+  const baseDef = { default: props.default || "---" };
+  return baseDef;
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(out).toContain("[default-truthy-fallback]");
+  });
+
+  it("blocks formatter availability heuristics based on output equality", function () {
+    const cwd = createWorkspace({
+      "widgets/example.js": `
+(function () {
+  "use strict";
+  function normalize(out, n, fallbackText) {
+    if (out.trim() === String(n)) return fallbackText;
+    return out;
+  }
+  normalize("1", 1, "---");
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(out).toContain("[formatter-availability-heuristic]");
+  });
+
+  it("blocks renderer-side Number(props.x) coercion", function () {
+    const cwd = createWorkspace({
+      "widgets/example.js": `
+(function () {
+  "use strict";
+  function renderCanvas(canvas, props) {
+    const threshold = Number(props.ratioThresholdFlat ?? 3.0);
+    return threshold;
+  }
+  renderCanvas({}, {});
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(out).toContain("[renderer-numeric-coercion-without-boundary-contract]");
+  });
 });

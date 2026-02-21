@@ -17,6 +17,10 @@
       const cap = toolkit.cap;
       const unit = toolkit.unit;
       const out = toolkit.out;
+      const num = toolkit.num || function (value) {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : undefined;
+      };
 
       const effKind = p.kind;
 
@@ -29,9 +33,9 @@
           caption: cap(effKind),
           unit: unit(effKind),
           leadingZero: !!p.leadingZero,
-          captionUnitScale: Number(p.captionUnitScale),
-          compRatioThresholdNormal: Number(p.compRatioThresholdNormal),
-          compRatioThresholdFlat: Number(p.compRatioThresholdFlat)
+          captionUnitScale: num(p.captionUnitScale),
+          compRatioThresholdNormal: num(p.compRatioThresholdNormal),
+          compRatioThresholdFlat: num(p.compRatioThresholdFlat)
         };
       }
 

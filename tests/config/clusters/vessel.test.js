@@ -30,6 +30,12 @@ describe("config/clusters/vessel.js", function () {
     expect(out.storeKeys.value).toBe("electrical.battery.house");
   });
 
+  it("removes stale voltage value key when voltage key is cleared", function () {
+    const def = loadVesselDef();
+    const out = def.updateFunction({ kind: "voltageGraphic", value: " ", storeKeys: { value: "old.path" } });
+    expect(out.storeKeys.value).toBeUndefined();
+  });
+
   it("removes dynamic value store key when non-voltage kind is active", function () {
     const def = loadVesselDef();
     const out = def.updateFunction({ kind: "clock", storeKeys: { value: "a", clock: "b" } });

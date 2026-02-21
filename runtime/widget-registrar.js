@@ -8,6 +8,7 @@
 
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
+  const hasOwn = Object.prototype.hasOwnProperty;
 
   function composeUpdates() {
     const fns = Array.prototype.slice.call(arguments).filter(function (fn) {
@@ -68,10 +69,10 @@
 
     const baseDef = {
       name: widgetDef.def.name,
-      description: widgetDef.def.description || widgetDef.def.name,
-      caption: widgetDef.def.caption || "",
-      unit: widgetDef.def.unit || "",
-      default: widgetDef.def.default || "---",
+      description: hasOwn.call(widgetDef.def, "description") ? widgetDef.def.description : widgetDef.def.name,
+      caption: hasOwn.call(widgetDef.def, "caption") ? widgetDef.def.caption : "",
+      unit: hasOwn.call(widgetDef.def, "unit") ? widgetDef.def.unit : "",
+      default: hasOwn.call(widgetDef.def, "default") ? widgetDef.def.default : "---",
       storeKeys: storeKeys,
       className: mergedClassName,
 

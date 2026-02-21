@@ -15,6 +15,7 @@ Use this workflow whenever code changes touch architecture, module wiring, or wi
 5. Run strict validation gate:
 
 ```bash
+npm run check:smells
 npm run check:strict
 ```
 
@@ -35,6 +36,11 @@ npm run check:strict
 - `npm run check:all`
 - `npm run test:coverage:check`
 
+`check:smells` runs blocking smell checks:
+
+- `node tools/check-patterns.mjs`
+- `node tools/check-smell-contracts.mjs`
+
 `check:all` includes:
 
 - `node tools/check-docs.mjs`
@@ -46,7 +52,7 @@ npm run check:strict
 - `node tools/check-dependencies.mjs`
 - `node tools/check-umd.mjs`
 - `node tools/check-naming.mjs`
-- `node tools/check-patterns.mjs`
+- `npm run check:smells`
 
 `test:coverage:check` includes:
 
@@ -72,7 +78,7 @@ For cleanup sessions tracked by garbage-collection baseline markers:
 | Changes in registration/lifecycle flow (`runtime/init.js`, `runtime/widget-registrar.js`) | `documentation/avnav-api/plugin-lifecycle.md`, `documentation/architecture/component-system.md` |
 | Changes in helper API (`runtime/helpers.js`) | `documentation/shared/helpers.md` |
 | CSS/theming changes (`plugin.css`) | `documentation/shared/css-theming.md` |
-| Test setup or quality rule changes (`package.json`, `vitest.config.js`, `tools/check-coverage.mjs`, `tools/check-dependencies.mjs`, `tools/check-umd.mjs`, `tools/check-naming.mjs`, `tools/check-patterns.mjs`, `tools/check-doc-format.mjs`, `tools/gc-baseline.mjs`) | `documentation/guides/documentation-maintenance.md`, `documentation/guides/garbage-collection.md`, `README.md`, `AGENTS.md`, `CLAUDE.md` |
+| Test setup or quality rule changes (`package.json`, `vitest.config.js`, `tools/check-coverage.mjs`, `tools/check-dependencies.mjs`, `tools/check-umd.mjs`, `tools/check-naming.mjs`, `tools/check-patterns.mjs`, `tools/check-smell-contracts.mjs`, `tools/check-doc-format.mjs`, `tools/gc-baseline.mjs`, `tools/install-hooks.mjs`, `tools/check-hooks.mjs`, `.githooks/pre-push`) | `documentation/guides/documentation-maintenance.md`, `documentation/guides/garbage-collection.md`, `README.md`, `AGENTS.md`, `CLAUDE.md` |
 | New documentation file | `documentation/TABLEOFCONTENTS.md` |
 
 ## Validation

@@ -36,7 +36,8 @@ node tools/check-patterns.mjs --warn
 ```
 
 Rule references:
-- `check-patterns.mjs`: `duplicate-fn`, `forbidden-global`, `empty-catch`, `todo-missing-owner`, `unused-fallback`, `dead-code`
+- `check-patterns.mjs`: `duplicate-fn`, `forbidden-global`, `empty-catch`, `todo-missing-owner`, `unused-fallback`, `dead-code`, `default-truthy-fallback`, `formatter-availability-heuristic`, `renderer-numeric-coercion-without-boundary-contract`
+- `check-smell-contracts.mjs`: `theme-cache-invalidation`, `dynamic-storekey-clears-on-empty`, `falsy-default-preservation`, `mapper-output-no-nan`, `text-layout-hotspot-budget`, `coordinate-formatter-no-raw-equality-fallback`
 - `check-file-size.mjs`: warning at `>250` non-empty lines, failure at `>300` non-empty lines
 
 3. Verify code-doc co-evolution for changed `.js` files.
@@ -91,7 +92,11 @@ npm run gc:update-baseline
 | Copy-paste divergence | Historical: `clamp` implemented in multiple files (`GaugeValueMath`, `PositionCoordinateWidget`, `ThreeValueTextWidget`) before TD-006 | `check-patterns.mjs` (`duplicate-fn`) | Use canonical shared implementation (`GaugeValueMath.clamp`) |
 | Test assertion gaming | Guardrail: no confirmed incident in current history, but risk exists when assertions are weakened to force green builds | Human review | Restore strong assertions and fix implementation behavior |
 | Code↔Doc divergence | Risk pattern: JS behavior changed while linked module docs lag behind | Manual workflow step (code-doc co-evolution check) | Update linked docs in the same task |
-| Magic number spread | Historical repeated padding formula (`Math.max(6, Math.floor(Math.min(W, H) * 0.04))`) appeared across multiple widgets/text renderers before centralization | `check-patterns.mjs` (future rule) + manual review | Centralize constants/calculations in shared helpers |
+| Theme cache drift | Runtime preset/style mutation does not invalidate cached token values | `check-smell-contracts.mjs` (`theme-cache-invalidation`) | Expose invalidation API and call it after runtime theme mutation |
+| Stale dynamic store keys | Empty dynamic key input leaves old `storeKeys.value` active | `check-smell-contracts.mjs` (`dynamic-storekey-clears-on-empty`) | Remove stale key from `storeKeys` when input is empty |
+| Falsy default clobbering | `x.default || "---"` overwrites explicit `""`, `0`, or `false` | `check-patterns.mjs` (`default-truthy-fallback`), `check-smell-contracts.mjs` (`falsy-default-preservation`) | Use property-presence/nullish semantics |
+| Renderer coercion drift | Renderer performs `Number(props.x)` for mapper-owned normalized values | `check-patterns.mjs` (`renderer-numeric-coercion-without-boundary-contract`), `check-smell-contracts.mjs` (`mapper-output-no-nan`) | Normalize at mapper boundary, pass finite or `undefined` |
+| Formatter output heuristic | Inferring formatter absence from output equality (`out.trim() === String(raw)`) | `check-patterns.mjs` (`formatter-availability-heuristic`), `check-smell-contracts.mjs` (`coordinate-formatter-no-raw-equality-fallback`) | Remove output-equality heuristics; rely on explicit formatter flow |
 | Undated TODOs (`TODO(name, 2026-02-20): ...` required format) | Guardrail: no current violations, rule still enforced repo-wide | `check-patterns.mjs` (`todo-missing-owner`) | Use `TODO(name, YYYY-MM-DD): description` |
 | Unused fallback leftovers | Refactor drift risk: fallback variables remain after formatter-path rewrites and are never read | `check-patterns.mjs` (`unused-fallback`) | Remove stale declarations or wire fallback into reachable formatting flow |
 | Dead refactor code | Refactor drift risk: helper function no longer referenced, or `if (false)` / `if (CONST_FLAG)` constant branches | `check-patterns.mjs` (`dead-code`) | Delete unreachable paths and keep only active logic |

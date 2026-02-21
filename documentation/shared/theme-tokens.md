@@ -15,6 +15,7 @@
 - File: `shared/theme/ThemeResolver.js`
 - Factory: `create(def, Helpers)`
 - API: `resolve(canvas) -> themeTokens`
+- Invalidation API: `invalidateCanvas(canvas)`, `invalidateAll()`
 - Token metadata API: `TOKEN_DEFS` / `create.TOKEN_DEFS`
 - Caching: `WeakMap` per canvas
 - Invalidation: cache reset when root `.nightMode` class state changes
@@ -70,12 +71,16 @@
 const resolverMod = Helpers.getModule("ThemeResolver");
 const resolver = resolverMod.create(def, Helpers);
 const themeTokens = resolver.resolve(canvas);
+resolver.invalidateCanvas(canvas);
+resolver.invalidateAll();
 
 // Static defaults + token mapping
 resolverMod.DEFAULTS;
 resolverMod.create.DEFAULTS;
 resolverMod.TOKEN_DEFS;
 resolverMod.create.TOKEN_DEFS;
+resolverMod.invalidateCanvas;
+resolverMod.invalidateAll;
 ```
 
 ```javascript
@@ -119,6 +124,8 @@ Only values that differ from theme defaults are included.
 - Discovery pattern: iterate `canvas.widgetData`, resolve root via `canvas.closest(".widget, .DirectWidget") || canvas.parentElement`, apply only for plugin roots (`.dyniplugin` or `[data-dyni]`)
 
 `runtime/widget-registrar.js` also reapplies the active preset when a widget root is first discovered during `renderCanvas`.
+
+After preset application, runtime explicitly invalidates `ThemeResolver` token cache via the module invalidation API so subsequent `resolve(canvas)` reads refreshed values.
 
 ## Manual Testing (Browser Console)
 

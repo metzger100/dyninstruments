@@ -9,17 +9,23 @@
       const mod = factory();
       mod.DEFAULTS = mod.create.DEFAULTS;
       mod.TOKEN_DEFS = mod.create.TOKEN_DEFS;
+      mod.invalidateCanvas = mod.create.invalidateCanvas;
+      mod.invalidateAll = mod.create.invalidateAll;
       return mod;
     });
   } else if (typeof module === "object" && module.exports) {
     const mod = factory();
     mod.DEFAULTS = mod.create.DEFAULTS;
     mod.TOKEN_DEFS = mod.create.TOKEN_DEFS;
+    mod.invalidateCanvas = mod.create.invalidateCanvas;
+    mod.invalidateAll = mod.create.invalidateAll;
     module.exports = mod;
   } else {
     (root.DyniComponents = root.DyniComponents || {}).DyniThemeResolver = factory();
     root.DyniComponents.DyniThemeResolver.DEFAULTS = root.DyniComponents.DyniThemeResolver.create.DEFAULTS;
     root.DyniComponents.DyniThemeResolver.TOKEN_DEFS = root.DyniComponents.DyniThemeResolver.create.TOKEN_DEFS;
+    root.DyniComponents.DyniThemeResolver.invalidateCanvas = root.DyniComponents.DyniThemeResolver.create.invalidateCanvas;
+    root.DyniComponents.DyniThemeResolver.invalidateAll = root.DyniComponents.DyniThemeResolver.create.invalidateAll;
   }
 }(this, function () {
   "use strict";
@@ -95,33 +101,49 @@
     return out;
   }
 
-  function create() {
-    let byCanvas = new WeakMap();
-    let lastNightModeState = null;
+  let byCanvas = new WeakMap();
+  let lastNightModeState = null;
 
-    function resolve(canvas) {
-      if (!canvas) return resolveTokens(null);
+  function invalidateCanvas(canvas) {
+    if (!canvas) return;
+    byCanvas.delete(canvas);
+  }
 
-      const nightMode = getNightModeState(canvas);
-      if (lastNightModeState === null) lastNightModeState = nightMode;
-      else if (nightMode !== lastNightModeState) {
-        byCanvas = new WeakMap();
-        lastNightModeState = nightMode;
-      }
+  function invalidateAll() {
+    byCanvas = new WeakMap();
+    lastNightModeState = null;
+  }
 
-      if (byCanvas.has(canvas)) return byCanvas.get(canvas);
+  function resolveWithCache(canvas) {
+    if (!canvas) return resolveTokens(null);
 
-      const style = getComputedStyle(canvas);
-      const resolved = resolveTokens(style);
-      byCanvas.set(canvas, resolved);
-      return resolved;
+    const nightMode = getNightModeState(canvas);
+    if (lastNightModeState === null) lastNightModeState = nightMode;
+    else if (nightMode !== lastNightModeState) {
+      invalidateAll();
+      lastNightModeState = nightMode;
     }
 
-    return { resolve: resolve };
+    if (byCanvas.has(canvas)) return byCanvas.get(canvas);
+
+    const style = getComputedStyle(canvas);
+    const resolved = resolveTokens(style);
+    byCanvas.set(canvas, resolved);
+    return resolved;
+  }
+
+  function create() {
+    return {
+      resolve: resolveWithCache,
+      invalidateCanvas: invalidateCanvas,
+      invalidateAll: invalidateAll
+    };
   }
 
   create.DEFAULTS = DEFAULTS;
   create.TOKEN_DEFS = TOKEN_DEFS;
+  create.invalidateCanvas = invalidateCanvas;
+  create.invalidateAll = invalidateAll;
 
   return { id: "ThemeResolver", create };
 }));

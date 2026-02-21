@@ -17,6 +17,10 @@
       const cap = toolkit.cap;
       const unit = toolkit.unit;
       const out = toolkit.out;
+      const num = toolkit.num || function (value) {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : undefined;
+      };
 
       const req = p.kind;
 
@@ -30,18 +34,18 @@
           caption: cap("depthGraphic"),
           unit: unit("depthGraphic"),
 
-          minValue: Number(p.depthMinValue),
-          maxValue: Number(p.depthMaxValue),
-          tickMajor: Number(p.depthTickMajor),
-          tickMinor: Number(p.depthTickMinor),
+          minValue: num(p.depthMinValue),
+          maxValue: num(p.depthMaxValue),
+          tickMajor: num(p.depthTickMajor),
+          tickMinor: num(p.depthTickMinor),
           showEndLabels: !!p.depthShowEndLabels,
 
-          alarmFrom: depthAlarmOn ? Number(p.depthAlarmFrom) : undefined,
-          warningFrom: depthWarnOn ? Number(p.depthWarningFrom) : undefined,
+          alarmFrom: depthAlarmOn ? num(p.depthAlarmFrom) : undefined,
+          warningFrom: depthWarnOn ? num(p.depthWarningFrom) : undefined,
 
-          depthRatioThresholdNormal: Number(p.depthRatioThresholdNormal),
-          depthRatioThresholdFlat: Number(p.depthRatioThresholdFlat),
-          captionUnitScale: Number(p.captionUnitScale)
+          depthRatioThresholdNormal: num(p.depthRatioThresholdNormal),
+          depthRatioThresholdFlat: num(p.depthRatioThresholdFlat),
+          captionUnitScale: num(p.captionUnitScale)
         };
       }
 
@@ -57,19 +61,19 @@
           formatter: "formatTemperature",
           formatterParameters: ["celsius"],
 
-          minValue: Number(p.tempMinValue),
-          maxValue: Number(p.tempMaxValue),
-          tickMajor: Number(p.tempTickMajor),
-          tickMinor: Number(p.tempTickMinor),
+          minValue: num(p.tempMinValue),
+          maxValue: num(p.tempMaxValue),
+          tickMajor: num(p.tempTickMajor),
+          tickMinor: num(p.tempTickMinor),
           showEndLabels: !!p.tempShowEndLabels,
 
-          warningFrom: tempWarnOn ? Number(p.tempWarningFrom) : undefined,
-          alarmFrom: tempAlarmOn ? Number(p.tempAlarmFrom) : undefined,
+          warningFrom: tempWarnOn ? num(p.tempWarningFrom) : undefined,
+          alarmFrom: tempAlarmOn ? num(p.tempAlarmFrom) : undefined,
 
-          tempRatioThresholdNormal: Number(p.tempRatioThresholdNormal),
-          tempRatioThresholdFlat: Number(p.tempRatioThresholdFlat),
+          tempRatioThresholdNormal: num(p.tempRatioThresholdNormal),
+          tempRatioThresholdFlat: num(p.tempRatioThresholdFlat),
 
-          captionUnitScale: Number(p.captionUnitScale)
+          captionUnitScale: num(p.captionUnitScale)
         };
       }
 

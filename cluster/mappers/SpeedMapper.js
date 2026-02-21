@@ -17,6 +17,10 @@
       const cap = toolkit.cap;
       const unit = toolkit.unit;
       const out = toolkit.out;
+      const num = toolkit.num || function (value) {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : undefined;
+      };
 
       const effKind = p.kind;
 
@@ -36,21 +40,21 @@
           formatter: "formatSpeed",
           formatterParameters: [uni],
 
-          speedRatioThresholdNormal: Number(p.speedRatioThresholdNormal),
-          speedRatioThresholdFlat: Number(p.speedRatioThresholdFlat),
-          captionUnitScale: Number(p.captionUnitScale),
+          speedRatioThresholdNormal: num(p.speedRatioThresholdNormal),
+          speedRatioThresholdFlat: num(p.speedRatioThresholdFlat),
+          captionUnitScale: num(p.captionUnitScale),
 
-          minValue: Number(p.minValue),
-          maxValue: Number(p.maxValue),
-          startAngleDeg: Number(p.startAngleDeg),
-          endAngleDeg: Number(p.endAngleDeg),
+          minValue: num(p.minValue),
+          maxValue: num(p.maxValue),
+          startAngleDeg: num(p.startAngleDeg),
+          endAngleDeg: num(p.endAngleDeg),
 
-          tickMajor: Number(p.tickMajor),
-          tickMinor: Number(p.tickMinor),
+          tickMajor: num(p.tickMajor),
+          tickMinor: num(p.tickMinor),
           showEndLabels: !!p.showEndLabels,
 
-          warningFrom: warnOn ? Number(p.warningFrom) : undefined,
-          alarmFrom: alarmOn ? Number(p.alarmFrom) : undefined
+          warningFrom: warnOn ? num(p.warningFrom) : undefined,
+          alarmFrom: alarmOn ? num(p.alarmFrom) : undefined
         };
       }
 

@@ -17,6 +17,10 @@
       const cap = toolkit.cap;
       const unit = toolkit.unit;
       const out = toolkit.out;
+      const num = toolkit.num || function (value) {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : undefined;
+      };
       const makeAngleFormatter = toolkit.makeAngleFormatter;
 
       const req = p.kind;
@@ -35,11 +39,11 @@
           formatter: "formatSpeed",
           formatterParameters: [speedUnit],
           layEnabled: !!p.windLayEnabled,
-          layMin: Number(p.layMin),
-          layMax: Number(p.layMax),
-          dialRatioThresholdNormal: Number(p.dialRatioThresholdNormal),
-          dialRatioThresholdFlat: Number(p.dialRatioThresholdFlat),
-          captionUnitScale: Number(p.captionUnitScale),
+          layMin: num(p.layMin),
+          layMax: num(p.layMax),
+          dialRatioThresholdNormal: num(p.dialRatioThresholdNormal),
+          dialRatioThresholdFlat: num(p.dialRatioThresholdFlat),
+          captionUnitScale: num(p.captionUnitScale),
           leadingZero: !!p.leadingZero
         };
       }

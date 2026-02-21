@@ -22,6 +22,7 @@
 | TD-009 | 2026-02-20 | Annotated intentional fallback catches in `ClusterRendererRouter`, `runtime/helpers`, `GaugeValueMath`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, and `PositionCoordinateWidget`; production empty-catch findings cleared. |
 | TD-010 | 2026-02-20 | Removed widget-to-widget dependency: `PositionCoordinateWidget` no longer depends on `ThreeValueTextWidget`; dependency graph now follows layer rules. |
 | TD-008 | 2026-02-20 | Removed direct `avnav.api` access from `SpeedGaugeWidget`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `WindDialWidget`, and `PositionCoordinateWidget`; all formatter access now goes through `Helpers.applyFormatter` with mapper-provided formatter props. |
+| TD-011 | 2026-02-21 | Added fail-closed smell prevention program: `check:smells` (pattern + semantic contracts), falsy-default preservation, theme cache invalidation contract, stale dynamic key cleanup, and pre-push strict hook workflow. |
 
 ## Rules
 

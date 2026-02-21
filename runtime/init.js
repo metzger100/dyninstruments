@@ -70,6 +70,25 @@
     return api;
   }
 
+  function invalidateThemeResolverCache(rootEl) {
+    const resolverMod = state.themeResolverModule;
+    if (!resolverMod) return;
+
+    if (rootEl && typeof resolverMod.invalidateCanvas === "function" && typeof rootEl.querySelectorAll === "function") {
+      const canvases = rootEl.querySelectorAll("canvas.widgetData");
+      if (canvases && canvases.length) {
+        for (let i = 0; i < canvases.length; i++) {
+          resolverMod.invalidateCanvas(canvases[i]);
+        }
+        return;
+      }
+    }
+
+    if (typeof resolverMod.invalidateAll === "function") {
+      resolverMod.invalidateAll();
+    }
+  }
+
   function applyThemePresetToContainer(rootEl, presetName) {
     if (!isPluginContainer(rootEl)) return;
     if (!state.themePresetApi || typeof state.themePresetApi.apply !== "function") return;
@@ -79,6 +98,7 @@
       : (state.themePresetName || resolveThemePresetName());
 
     state.themePresetApi.apply(rootEl, selected);
+    invalidateThemeResolverCache(rootEl);
   }
 
   function applyThemePresetToRegisteredWidgets(presetName) {
@@ -129,6 +149,8 @@
           runtime.registerWidget(component, widgetDef, Helpers);
         });
 
+        state.themeResolverModule = byId.ThemeResolver ||
+          ((Helpers && typeof Helpers.getModule === "function") ? Helpers.getModule("ThemeResolver") : null);
         state.themePresetApi = buildThemePresetApi(byId.ThemePresets, Helpers);
         state.themePresetName = resolveThemePresetName();
         applyThemePresetToRegisteredWidgets(state.themePresetName);
@@ -138,6 +160,7 @@
       .catch(function (e) {
         state.initStarted = false;
         state.themePresetApi = null;
+        state.themeResolverModule = null;
         console.error("dyninstruments init failed:", e);
       });
 

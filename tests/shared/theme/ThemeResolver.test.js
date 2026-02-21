@@ -94,6 +94,36 @@ describe("ThemeResolver", function () {
     expect(calls.value).toBe(1);
   });
 
+  it("refreshes token cache only after explicit invalidation", function () {
+    let pointer = "#111111";
+    globalThis.getComputedStyle = function () {
+      return {
+        getPropertyValue(name) {
+          if (name === "--dyni-pointer") return pointer;
+          return "";
+        }
+      };
+    };
+
+    const mod = loadFresh("shared/theme/ThemeResolver.js");
+    const resolver = mod.create({}, {});
+    const canvas = createCanvas(createDoc({ value: false }));
+
+    const first = resolver.resolve(canvas);
+    pointer = "#222222";
+    const stillCached = resolver.resolve(canvas);
+    expect(stillCached.colors.pointer).toBe("#111111");
+
+    resolver.invalidateCanvas(canvas);
+    const refreshed = resolver.resolve(canvas);
+    expect(refreshed.colors.pointer).toBe("#222222");
+
+    pointer = "#333333";
+    resolver.invalidateAll();
+    const refreshedAll = resolver.resolve(canvas);
+    expect(refreshedAll.colors.pointer).toBe("#333333");
+  });
+
   it("invalidates cache when night mode class state changes", function () {
     const calls = { value: 0 };
     globalThis.getComputedStyle = function () {
@@ -123,6 +153,8 @@ describe("ThemeResolver", function () {
     const mod = loadFresh("shared/theme/ThemeResolver.js");
     expect(mod.DEFAULTS).toBe(mod.create.DEFAULTS);
     expect(mod.TOKEN_DEFS).toBe(mod.create.TOKEN_DEFS);
+    expect(typeof mod.invalidateCanvas).toBe("function");
+    expect(typeof mod.invalidateAll).toBe("function");
     expect(Array.isArray(mod.TOKEN_DEFS)).toBe(true);
     expect(mod.TOKEN_DEFS.some((tokenDef) => tokenDef.path === "pointer.sideFactor" && tokenDef.cssVar === "--dyni-pointer-side")).toBe(true);
     expect(mod.DEFAULTS.pointer.sideFactor).toBe(0.25);

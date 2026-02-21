@@ -31,7 +31,10 @@
 
     return function (raw) {
       const n = Number(raw);
-      if (!isFinite(n)) return fallback || "---";
+      if (!isFinite(n)) {
+        if (typeof fallback !== "undefined") return fallback;
+        return "---";
+      }
       let a = isDirection ? norm360(n) : norm180(n);
       let out;
       if (isDirection) {
@@ -59,6 +62,11 @@
     return o;
   }
 
+  function toFiniteNumber(value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : undefined;
+  }
+
   function createToolkit(props, angleMath) {
     const p = props || {};
     return {
@@ -69,6 +77,7 @@
         return p["unit_" + k];
       },
       out: out,
+      num: toFiniteNumber,
       makeAngleFormatter: function (isDirection, leadingZero, fallback) {
         return makeAngleFormatter(isDirection, leadingZero, fallback, angleMath);
       }
@@ -82,6 +91,7 @@
 
     return {
       out: out,
+      num: toFiniteNumber,
       makeAngleFormatter: function (isDirection, leadingZero, fallback) {
         return makeAngleFormatter(isDirection, leadingZero, fallback, angleMath);
       },

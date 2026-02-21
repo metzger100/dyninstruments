@@ -40,6 +40,8 @@ describe("ClusterMapperToolkit", function () {
     expect(toolkit.cap("sog")).toBe("SOG");
     expect(toolkit.unit("sog")).toBe("kn");
     expect(toolkit.cap("stw")).toBeUndefined();
+    expect(toolkit.num("12.5")).toBe(12.5);
+    expect(toolkit.num("x")).toBeUndefined();
   });
 
   it("uses injected GaugeAngleMath helpers when provided", function () {

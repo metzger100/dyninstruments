@@ -51,8 +51,8 @@
 
       // Mode thresholds (owned by WindDialWidget)
       const ratio = W / Math.max(1, H);
-      const tN = Number(props.dialRatioThresholdNormal ?? 0.7);
-      const tF = Number(props.dialRatioThresholdFlat ?? 2.0);
+      const tN = V.isFiniteNumber(props.dialRatioThresholdNormal) ? props.dialRatioThresholdNormal : 0.7;
+      const tF = V.isFiniteNumber(props.dialRatioThresholdFlat) ? props.dialRatioThresholdFlat : 2.0;
       let mode; // 'flat'|'normal'|'high'
       if (ratio < tN) mode = 'high';
       else if (ratio > tF) mode = 'flat';

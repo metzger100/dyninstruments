@@ -10,6 +10,7 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniCompassGaugeWidget = factory(); }
 }(this, function () {
   "use strict";
+  const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
     const GU = Helpers.getModule("GaugeToolkit").create(def, Helpers);
@@ -31,13 +32,13 @@
       const color  = Helpers.resolveTextColor(canvas);
       ctx.fillStyle = color; ctx.strokeStyle = color;
 
-      const heading = Number(props.heading);
-      const marker  = Number(props.markerCourse);
+      const heading = props.heading;
+      const marker  = props.markerCourse;
       const leadingZero = !!props.leadingZero;
 
       const ratio = W / Math.max(1, H);
-      const tN = Number(props.compRatioThresholdNormal ?? 0.8);
-      const tF = Number(props.compRatioThresholdFlat   ?? 2.2);
+      const tN = V.isFiniteNumber(props.compRatioThresholdNormal) ? props.compRatioThresholdNormal : 0.8;
+      const tF = V.isFiniteNumber(props.compRatioThresholdFlat) ? props.compRatioThresholdFlat : 2.2;
       let mode; // 'flat'|'normal'|'high'
       if (ratio < tN) mode = 'high';
       else if (ratio > tF) mode = 'flat';
@@ -111,7 +112,9 @@
       // ---- Texts -------------------------------------------------------------
       const caption = (props.caption || '').trim();
       const unit    = (props.unit || '°').trim();
-      const value   = V.isFiniteNumber(heading) ? V.formatDirection360(heading, leadingZero) : (props.default || '---');
+      const value   = V.isFiniteNumber(heading)
+        ? V.formatDirection360(heading, leadingZero)
+        : ((props && hasOwn.call(props, "default")) ? props.default : "---");
       const secScale = V.clamp(props.captionUnitScale ?? 0.8, 0.3, 3.0);
 
       // FLAT: left column next to dial
