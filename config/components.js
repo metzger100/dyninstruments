@@ -49,11 +49,17 @@
       globalKey: "DyniGaugeValueMath",
       deps: ["GaugeAngleMath"]
     },
+    ThemeResolver: {
+      js: BASE + "shared/theme/ThemeResolver.js",
+      css: undefined,
+      globalKey: "DyniThemeResolver"
+    },
     GaugeToolkit: {
       js: BASE + "shared/widget-kits/gauge/GaugeToolkit.js",
       css: undefined,
       globalKey: "DyniGaugeToolkit",
       deps: [
+        "ThemeResolver",
         "GaugeTextLayout",
         "GaugeValueMath",
         "GaugeAngleMath",
@@ -72,13 +78,13 @@
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
       css: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.css",
       globalKey: "DyniThreeValueTextWidget",
-      deps: ["GaugeTextLayout", "GaugeValueMath"]
+      deps: ["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]
     },
     PositionCoordinateWidget: {
       js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
       css: undefined,
       globalKey: "DyniPositionCoordinateWidget",
-      deps: ["GaugeTextLayout", "GaugeValueMath"]
+      deps: ["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]
     },
     WindDialWidget: {
       js: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.js",

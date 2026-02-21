@@ -10,7 +10,7 @@ Specialized nav renderer for `positionBoat` and `positionWp`. It keeps flat layo
 
 - Registered as `PositionCoordinateWidget` in `config/components.js`
 - Routed from `NavMapper` for `kind: "positionBoat"` and `kind: "positionWp"`
-- Depends on shared utilities: `GaugeTextLayout` + `GaugeValueMath`
+- Depends on shared utilities: `ThemeResolver` + `GaugeTextLayout` + `GaugeValueMath`
 - No widget-to-widget dependency on `ThreeValueTextWidget`
 - `flat` mode renders one-line `caption/value/unit` directly in this widget
 - `normal`/`high` modes render stacked coordinates:
