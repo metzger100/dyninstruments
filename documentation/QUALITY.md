@@ -10,11 +10,11 @@
 | config/ | 12 | all | all | ✅ (9 tests incl. static cluster coverage) | none | A |
 | cluster/ | 11 | all | all | ✅ (11/11) | none | B |
 | shared/ | 8 | all | all | partial (3/8) | none | B |
-| widgets/gauges/ | 6 | all | check (1 near-limit warn) | partial (5/6) | none | B |
+| widgets/gauges/ | 6 | all | all | partial (5/6) | none | B |
 | widgets/text/ | 2 | all | all | partial (1/2) | none | B |
 
 Notes:
-- `Size OK = check` means no `>300` violations but at least one `>250` warning.
+- `Size OK = check` means no `>400` violations but at least one `>=300` warning.
 - Strict grading is applied: unresolved medium/high drift prevents an `A`.
 - Smell prevention gate is fail-closed (see `documentation/conventions/smell-prevention.md`).
 
@@ -25,7 +25,7 @@ Notes:
 | Duplicate function declarations in widget/shared helpers | HIGH | Previously across `widgets/gauges`, `widgets/text`, `cluster/mappers`, `shared/widget-kits/gauge` | ✅ Fixed (`check-patterns`: `duplicate-functions: 0`) |
 | Direct `avnav.api` access in non-runtime code | HIGH | Previously in `GaugeValueMath`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `PositionCoordinateWidget` | ✅ Fixed (`check-patterns`: `forbidden-globals: 0`) |
 | Empty catch blocks | MED | Previously in `ClusterRendererRouter`, `runtime/helpers`, `GaugeValueMath`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `PositionCoordinateWidget` | ✅ Fixed (`check-patterns`: `empty-catch: 0`) |
-| Oneliner line-limit bypass risk | WARN | Current backlog in runtime/shared/widgets (`check-file-size`: `onelinerDenseWarnings: 12`, `onelinerLongWarnings: 8`) | ⚠️ Warn-only rollout active (TD-012); promote to block after backlog cleanup |
+| Oneliner line-limit bypass risk | WARN | Current backlog in runtime/shared/widgets (`check-file-size`: `onelinerDenseWarnings: 154`, `onelinerLongWarnings: 11`) | ⚠️ Warn-only rollout active in `check:all` (TD-012); strict variant available via `npm run check:filesize:strict` |
 
 ## Model Selection Log
 

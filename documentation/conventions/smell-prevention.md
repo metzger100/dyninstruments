@@ -26,7 +26,7 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 - Aggregated smell gate: `npm run check:smells`
 - Full gate: `npm run check:all` (includes `npm run check:smells` via `check:core`)
 - Push blocker: `.githooks/pre-push` -> `npm run check:all`
-- `check-file-size` defaults to `--oneliner=warn` and supports promotion to `--oneliner=block`
+- `check-file-size` defaults to `--oneliner=warn` in `check:all`; strict variant is available via `npm run check:filesize:strict` (`--oneliner=block`)
 
 ## Severity Model
 
@@ -75,7 +75,7 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 
 1. Reformat dense oneliners into multiline blocks.
 2. Split very long packed lines into multiline object literals/call arguments.
-3. Promote `check-file-size --oneliner=block` after warning backlog reaches zero (tracked by TD-012).
+3. Use `npm run check:filesize:strict` during cleanup, and promote default `check-file-size --oneliner=block` after warning backlog reaches zero (tracked by TD-012).
 
 ## Related
 
