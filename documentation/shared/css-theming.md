@@ -1,10 +1,16 @@
 # CSS Theming
 
-**Status:** ✅ Implemented | plugin.css
+**Status:** ✅ Implemented | plugin.css + runtime preset layer
 
 ## Overview
 
 dyninstruments uses CSS custom properties for theming, scoped to `.dyniplugin` and `[data-dyni]`. All rendering reads colors and fonts from CSS, enabling automatic day/night adaptation.
+
+Theme values are layered:
+
+1. Base defaults from `plugin.css` (`.widget.dyniplugin`, `[data-dyni]`)
+2. Optional runtime preset overrides from `ThemePresets.apply(containerEl, presetName)` (inline style on widget container)
+3. Day/night class-dependent CSS (`.nightMode ...`)
 
 ## CSS Custom Properties
 
@@ -58,6 +64,18 @@ Read by `ThemeResolver.resolve(canvas)`:
 | `--dyni-label-font` | Label font factor | `0.14` |
 | `--dyni-font-weight` | Primary font weight | `700` |
 | `--dyni-label-weight` | Label font weight | `700` |
+
+### Preset Layer (ThemePresets)
+
+`ThemePresets` writes inline CSS vars directly to the widget root container (`.widget` / `.DirectWidget`) using `style.setProperty(...)`.
+
+- `apply(containerEl, presetName)`:
+  - clears all known theme vars on the container first
+  - sets only the selected preset overrides
+- `remove(containerEl)`:
+  - removes all known theme vars from the container
+
+This keeps preset values scoped per widget container and avoids global CSS mutation.
 
 ## Day/Night Mode
 

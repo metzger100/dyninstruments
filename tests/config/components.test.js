@@ -21,6 +21,9 @@ describe("config/components.js", function () {
     ]);
     expect(components.ThemeResolver.globalKey).toBe("DyniThemeResolver");
     expect(components.ThemeResolver.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemeResolver.js");
+    expect(components.ThemePresets.globalKey).toBe("DyniThemePresets");
+    expect(components.ThemePresets.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemePresets.js");
+    expect(components.ThemePresets.deps).toEqual(["ThemeResolver"]);
     expect(components.GaugeTickMath.deps).toEqual(["GaugeAngleMath"]);
     expect(components.ClusterMapperToolkit.deps).toEqual(["GaugeAngleMath"]);
     expect(components.SpeedGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);

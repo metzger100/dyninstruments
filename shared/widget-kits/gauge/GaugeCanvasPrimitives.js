@@ -138,15 +138,12 @@
       const rot = Number(opts.rotationDeg || 0);
       const cfg = opts.angleCfg;
 
-      const variant = opts.variant || "normal";
       let depth = Math.max(2, Math.floor(Number(opts.depth ?? Math.max(8, Math.floor(rOuter * 0.10)))));
-      if (variant === "long") depth = Math.floor(depth * 1.4);
-      if (isFinite(Number(opts.lengthFactor))) depth = Math.floor(depth * Number(opts.lengthFactor));
+      const lengthFactor = Number(opts.lengthFactor);
+      if (isFinite(lengthFactor)) depth = Math.floor(depth * lengthFactor);
 
-      const sideF = (typeof opts.sideFactor === "number")
-        ? Number(opts.sideFactor)
-        : (variant === "long" ? 0.80 : 0.65);
-      const side = Math.max(4, Math.floor(depth * sideF));
+      const sideFactor = Number(opts.sideFactor);
+      const side = Math.max(4, Math.floor(depth * (isFinite(sideFactor) ? sideFactor : 1)));
 
       const rBase = Math.max(1, rOuter - depth);
       const rTip = Math.max(1, rOuter - 2);

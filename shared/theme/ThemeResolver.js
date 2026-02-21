@@ -8,63 +8,71 @@
     define([], function () {
       const mod = factory();
       mod.DEFAULTS = mod.create.DEFAULTS;
+      mod.TOKEN_DEFS = mod.create.TOKEN_DEFS;
       return mod;
     });
   } else if (typeof module === "object" && module.exports) {
     const mod = factory();
     mod.DEFAULTS = mod.create.DEFAULTS;
+    mod.TOKEN_DEFS = mod.create.TOKEN_DEFS;
     module.exports = mod;
   } else {
     (root.DyniComponents = root.DyniComponents || {}).DyniThemeResolver = factory();
     root.DyniComponents.DyniThemeResolver.DEFAULTS = root.DyniComponents.DyniThemeResolver.create.DEFAULTS;
+    root.DyniComponents.DyniThemeResolver.TOKEN_DEFS = root.DyniComponents.DyniThemeResolver.create.TOKEN_DEFS;
   }
 }(this, function () {
   "use strict";
 
-  const DEFAULTS = {
-    colors: {
-      pointer: "#ff2b2b",
-      warning: "#e7c66a",
-      alarm: "#ff7a76",
-      laylineStb: "#82b683",
-      laylinePort: "#ff7a76"
-    },
-    ticks: {
-      majorLen: 9,
-      majorWidth: 2,
-      minorLen: 5,
-      minorWidth: 1
-    },
-    pointer: {
-      sideFactor: 0.25,
-      lengthFactor: 2
-    },
-    ring: {
-      arcLineWidth: 1,
-      widthFactor: 0.12
-    },
-    labels: {
-      insetFactor: 1.8,
-      fontFactor: 0.14
-    },
-    font: {
-      weight: 700,
-      labelWeight: 700
-    }
-  };
+  const TOKEN_DEFS = [
+    { path: "colors.pointer", cssVar: "--dyni-pointer", type: "color", defaultValue: "#ff2b2b" },
+    { path: "colors.warning", cssVar: "--dyni-warning", type: "color", defaultValue: "#e7c66a" },
+    { path: "colors.alarm", cssVar: "--dyni-alarm", type: "color", defaultValue: "#ff7a76" },
+    { path: "colors.laylineStb", cssVar: "--dyni-layline-stb", type: "color", defaultValue: "#82b683" },
+    { path: "colors.laylinePort", cssVar: "--dyni-layline-port", type: "color", defaultValue: "#ff7a76" },
+    { path: "ticks.majorLen", cssVar: "--dyni-tick-major-len", type: "number", defaultValue: 9 },
+    { path: "ticks.majorWidth", cssVar: "--dyni-tick-major-width", type: "number", defaultValue: 2 },
+    { path: "ticks.minorLen", cssVar: "--dyni-tick-minor-len", type: "number", defaultValue: 5 },
+    { path: "ticks.minorWidth", cssVar: "--dyni-tick-minor-width", type: "number", defaultValue: 1 },
+    { path: "pointer.sideFactor", cssVar: "--dyni-pointer-side", type: "number", defaultValue: 0.25 },
+    { path: "pointer.lengthFactor", cssVar: "--dyni-pointer-length", type: "number", defaultValue: 2 },
+    { path: "ring.arcLineWidth", cssVar: "--dyni-arc-linewidth", type: "number", defaultValue: 1 },
+    { path: "ring.widthFactor", cssVar: "--dyni-ring-width", type: "number", defaultValue: 0.12 },
+    { path: "labels.insetFactor", cssVar: "--dyni-label-inset", type: "number", defaultValue: 1.8 },
+    { path: "labels.fontFactor", cssVar: "--dyni-label-font", type: "number", defaultValue: 0.14 },
+    { path: "font.weight", cssVar: "--dyni-font-weight", type: "number", defaultValue: 700 },
+    { path: "font.labelWeight", cssVar: "--dyni-label-weight", type: "number", defaultValue: 700 }
+  ];
 
-  function pickColor(style, varName, fallback) {
-    if (!style || typeof style.getPropertyValue !== "function") return fallback;
-    const raw = style.getPropertyValue(varName);
-    const val = typeof raw === "string" ? raw.trim() : "";
-    return val || fallback;
+  function setByPath(target, pathSegments, value) {
+    let cursor = target;
+    for (let i = 0; i < pathSegments.length - 1; i++) {
+      const segment = pathSegments[i];
+      if (!cursor[segment] || typeof cursor[segment] !== "object") cursor[segment] = {};
+      cursor = cursor[segment];
+    }
+    cursor[pathSegments[pathSegments.length - 1]] = value;
   }
 
-  function pickNumber(style, varName, fallback) {
-    if (!style || typeof style.getPropertyValue !== "function") return fallback;
-    const raw = style.getPropertyValue(varName);
-    const parsed = parseFloat(raw);
-    return Number.isFinite(parsed) ? parsed : fallback;
+  function buildDefaults() {
+    const defaults = {};
+    TOKEN_DEFS.forEach(function (tokenDef) {
+      setByPath(defaults, tokenDef.path.split("."), tokenDef.defaultValue);
+    });
+    return defaults;
+  }
+
+  const DEFAULTS = buildDefaults();
+
+  function pickTokenValue(style, tokenDef) {
+    if (!style || typeof style.getPropertyValue !== "function") return tokenDef.defaultValue;
+    const raw = style.getPropertyValue(tokenDef.cssVar);
+    if (tokenDef.type === "number") {
+      const parsed = parseFloat(raw);
+      return Number.isFinite(parsed) ? parsed : tokenDef.defaultValue;
+    }
+    const val = typeof raw === "string" ? raw.trim() : "";
+    return val || tokenDef.defaultValue;
   }
 
   function getNightModeState(canvas) {
@@ -80,37 +88,11 @@
   }
 
   function resolveTokens(style) {
-    return {
-      colors: {
-        pointer: pickColor(style, "--dyni-pointer", DEFAULTS.colors.pointer),
-        warning: pickColor(style, "--dyni-warning", DEFAULTS.colors.warning),
-        alarm: pickColor(style, "--dyni-alarm", DEFAULTS.colors.alarm),
-        laylineStb: pickColor(style, "--dyni-layline-stb", DEFAULTS.colors.laylineStb),
-        laylinePort: pickColor(style, "--dyni-layline-port", DEFAULTS.colors.laylinePort)
-      },
-      ticks: {
-        majorLen: pickNumber(style, "--dyni-tick-major-len", DEFAULTS.ticks.majorLen),
-        majorWidth: pickNumber(style, "--dyni-tick-major-width", DEFAULTS.ticks.majorWidth),
-        minorLen: pickNumber(style, "--dyni-tick-minor-len", DEFAULTS.ticks.minorLen),
-        minorWidth: pickNumber(style, "--dyni-tick-minor-width", DEFAULTS.ticks.minorWidth)
-      },
-      pointer: {
-        sideFactor: pickNumber(style, "--dyni-pointer-side", DEFAULTS.pointer.sideFactor),
-        lengthFactor: pickNumber(style, "--dyni-pointer-length", DEFAULTS.pointer.lengthFactor)
-      },
-      ring: {
-        arcLineWidth: pickNumber(style, "--dyni-arc-linewidth", DEFAULTS.ring.arcLineWidth),
-        widthFactor: pickNumber(style, "--dyni-ring-width", DEFAULTS.ring.widthFactor)
-      },
-      labels: {
-        insetFactor: pickNumber(style, "--dyni-label-inset", DEFAULTS.labels.insetFactor),
-        fontFactor: pickNumber(style, "--dyni-label-font", DEFAULTS.labels.fontFactor)
-      },
-      font: {
-        weight: pickNumber(style, "--dyni-font-weight", DEFAULTS.font.weight),
-        labelWeight: pickNumber(style, "--dyni-label-weight", DEFAULTS.font.labelWeight)
-      }
-    };
+    const out = {};
+    TOKEN_DEFS.forEach(function (tokenDef) {
+      setByPath(out, tokenDef.path.split("."), pickTokenValue(style, tokenDef));
+    });
+    return out;
   }
 
   function create() {
@@ -139,6 +121,7 @@
   }
 
   create.DEFAULTS = DEFAULTS;
+  create.TOKEN_DEFS = TOKEN_DEFS;
 
   return { id: "ThemeResolver", create };
 }));

@@ -25,6 +25,7 @@ Defined in `config/components.js`. It maps component IDs to file paths, global k
 `ClusterMapperRegistry` depends on all per-cluster mapper components.
 `ClusterRendererRouter` depends on all renderer components used at runtime.
 `ThemeResolver` is a shared plugin-wide token resolver used by both gauge and text rendering paths.
+`ThemePresets` is a shared runtime preset applier that maps preset overrides to container-level CSS vars.
 
 ## Dependency Graph
 
@@ -70,6 +71,10 @@ SpeedGaugeWidget/DepthGaugeWidget/TemperatureGaugeWidget/VoltageGaugeWidget
   ├── SemicircleGaugeEngine
   │   └── GaugeToolkit
   └── GaugeValueMath
+
+runtime/init.js (explicit load)
+  └── ThemePresets
+      └── ThemeResolver
 ```
 
 `PositionCoordinateWidget` no longer depends on `ThreeValueTextWidget`; widget-to-widget coupling has been removed from the dependency graph.
@@ -108,6 +113,7 @@ SpeedGaugeWidget/DepthGaugeWidget/TemperatureGaugeWidget/VoltageGaugeWidget
 ```javascript
 const loader = runtime.createComponentLoader(config.components);
 const needed = loader.uniqueComponents(config.widgetDefinitions);
+if (!needed.includes("ThemePresets")) needed.push("ThemePresets");
 
 Promise.all(needed.map(loader.loadComponent)).then(function (componentsLoaded) {
   const byId = {};
@@ -116,6 +122,8 @@ Promise.all(needed.map(loader.loadComponent)).then(function (componentsLoaded) {
   config.widgetDefinitions.forEach(function (widgetDef) {
     runtime.registerWidget(byId[widgetDef.widget], widgetDef, Helpers);
   });
+
+  runtime.applyThemePresetToRegisteredWidgets();
 });
 ```
 

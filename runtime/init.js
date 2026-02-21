@@ -17,6 +17,86 @@
     };
   }
 
+  // Stub for future AvNav/plugin settings API integration.
+  function readThemePresetFromSettingsApi() {
+    return null;
+  }
+
+  function resolveThemePresetName() {
+    const fromSettingsApi = readThemePresetFromSettingsApi();
+    if (typeof fromSettingsApi === "string" && fromSettingsApi.trim()) return fromSettingsApi.trim();
+    if (typeof ns.theme === "string" && ns.theme.trim()) return ns.theme.trim();
+    return "default";
+  }
+
+  function isPluginContainer(rootEl) {
+    if (!rootEl) return false;
+    if (rootEl.classList && typeof rootEl.classList.contains === "function" && rootEl.classList.contains("dyniplugin")) {
+      return true;
+    }
+    return !!(typeof rootEl.hasAttribute === "function" && rootEl.hasAttribute("data-dyni"));
+  }
+
+  function discoverWidgetRoot(canvas) {
+    if (!canvas) return null;
+    if (typeof canvas.closest === "function") {
+      const found = canvas.closest(".widget, .DirectWidget");
+      if (found) return found;
+    }
+    return canvas.parentElement || null;
+  }
+
+  function listPluginContainers(doc) {
+    if (!doc || typeof doc.querySelectorAll !== "function") return [];
+    const canvases = doc.querySelectorAll("canvas.widgetData");
+    const seen = new Set();
+    const roots = [];
+
+    for (let i = 0; i < canvases.length; i++) {
+      const rootEl = discoverWidgetRoot(canvases[i]);
+      if (!isPluginContainer(rootEl)) continue;
+      if (seen.has(rootEl)) continue;
+      seen.add(rootEl);
+      roots.push(rootEl);
+    }
+
+    return roots;
+  }
+
+  function buildThemePresetApi(component, Helpers) {
+    if (!component || typeof component.create !== "function") return null;
+    const api = component.create({}, Helpers);
+    if (!api || typeof api.apply !== "function" || typeof api.remove !== "function") return null;
+    return api;
+  }
+
+  function applyThemePresetToContainer(rootEl, presetName) {
+    if (!isPluginContainer(rootEl)) return;
+    if (!state.themePresetApi || typeof state.themePresetApi.apply !== "function") return;
+
+    const selected = (typeof presetName === "string" && presetName.trim())
+      ? presetName.trim()
+      : (state.themePresetName || resolveThemePresetName());
+
+    state.themePresetApi.apply(rootEl, selected);
+  }
+
+  function applyThemePresetToRegisteredWidgets(presetName) {
+    const selected = (typeof presetName === "string" && presetName.trim())
+      ? presetName.trim()
+      : resolveThemePresetName();
+
+    state.themePresetName = selected;
+    const roots = listPluginContainers(root.document);
+    roots.forEach(function (rootEl) {
+      applyThemePresetToContainer(rootEl, selected);
+    });
+    return roots.length;
+  }
+
+  runtime.applyThemePresetToContainer = applyThemePresetToContainer;
+  runtime.applyThemePresetToRegisteredWidgets = applyThemePresetToRegisteredWidgets;
+
   function runInit() {
     if (state.initStarted) return state.initPromise;
 
@@ -34,7 +114,8 @@
 
     const Helpers = runtime.createHelpers(createGetComponent(components));
     const loader = runtime.createComponentLoader(components);
-    const needed = loader.uniqueComponents(widgetDefinitions);
+    const needed = loader.uniqueComponents(widgetDefinitions).slice();
+    if (!needed.includes("ThemePresets")) needed.push("ThemePresets");
 
     state.initPromise = Promise.all(needed.map(loader.loadComponent))
       .then(function (componentsLoaded) {
@@ -48,10 +129,15 @@
           runtime.registerWidget(component, widgetDef, Helpers);
         });
 
+        state.themePresetApi = buildThemePresetApi(byId.ThemePresets, Helpers);
+        state.themePresetName = resolveThemePresetName();
+        applyThemePresetToRegisteredWidgets(state.themePresetName);
+
         root.avnav.api.log("dyninstruments component init ok (clustered): " + widgetDefinitions.length + " widgets");
       })
       .catch(function (e) {
         state.initStarted = false;
+        state.themePresetApi = null;
         console.error("dyninstruments init failed:", e);
       });
 

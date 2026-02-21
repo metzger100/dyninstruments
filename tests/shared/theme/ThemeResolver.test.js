@@ -122,6 +122,9 @@ describe("ThemeResolver", function () {
   it("exposes DEFAULTS on module and create function", function () {
     const mod = loadFresh("shared/theme/ThemeResolver.js");
     expect(mod.DEFAULTS).toBe(mod.create.DEFAULTS);
+    expect(mod.TOKEN_DEFS).toBe(mod.create.TOKEN_DEFS);
+    expect(Array.isArray(mod.TOKEN_DEFS)).toBe(true);
+    expect(mod.TOKEN_DEFS.some((tokenDef) => tokenDef.path === "pointer.sideFactor" && tokenDef.cssVar === "--dyni-pointer-side")).toBe(true);
     expect(mod.DEFAULTS.pointer.sideFactor).toBe(0.25);
     expect(mod.DEFAULTS.ring.widthFactor).toBe(0.12);
   });
