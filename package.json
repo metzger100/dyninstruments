@@ -16,6 +16,8 @@
     "check:umd": "node tools/check-umd.mjs",
     "check:naming": "node tools/check-naming.mjs",
     "check:patterns": "node tools/check-patterns.mjs",
+    "gc:status": "node tools/gc-baseline.mjs --status",
+    "gc:update-baseline": "node tools/gc-baseline.mjs --update-head",
     "check:all": "node tools/check-docs.mjs && node tools/check-doc-format.mjs --warn && node tools/check-doc-reachability.mjs && npm run ai:check && node tools/check-file-size.mjs && node tools/check-headers.mjs && node tools/check-dependencies.mjs && node tools/check-umd.mjs && node tools/check-naming.mjs && node tools/check-patterns.mjs",
     "check:strict": "npm run check:all && npm run test:coverage:check",
     "test": "vitest run",

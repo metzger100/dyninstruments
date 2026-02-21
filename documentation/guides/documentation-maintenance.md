@@ -57,6 +57,11 @@ node tools/check-coverage.mjs
 
 `check-patterns` is enforced in strict mode inside `check:all`; any finding is a blocking failure.
 
+For cleanup sessions tracked by garbage-collection baseline markers:
+
+- `npm run gc:status` at the start
+- `npm run gc:update-baseline` at the end
+
 ## Touchpoint Matrix
 
 | Change Type | Minimum Docs to Update |
@@ -67,7 +72,7 @@ node tools/check-coverage.mjs
 | Changes in registration/lifecycle flow (`runtime/init.js`, `runtime/widget-registrar.js`) | `documentation/avnav-api/plugin-lifecycle.md`, `documentation/architecture/component-system.md` |
 | Changes in helper API (`runtime/helpers.js`) | `documentation/shared/helpers.md` |
 | CSS/theming changes (`plugin.css`) | `documentation/shared/css-theming.md` |
-| Test setup or quality rule changes (`package.json`, `vitest.config.js`, `tools/check-coverage.mjs`, `tools/check-dependencies.mjs`, `tools/check-umd.mjs`, `tools/check-naming.mjs`, `tools/check-patterns.mjs`, `tools/check-doc-format.mjs`) | `documentation/guides/documentation-maintenance.md`, `README.md`, `AGENTS.md`, `CLAUDE.md` |
+| Test setup or quality rule changes (`package.json`, `vitest.config.js`, `tools/check-coverage.mjs`, `tools/check-dependencies.mjs`, `tools/check-umd.mjs`, `tools/check-naming.mjs`, `tools/check-patterns.mjs`, `tools/check-doc-format.mjs`, `tools/gc-baseline.mjs`) | `documentation/guides/documentation-maintenance.md`, `documentation/guides/garbage-collection.md`, `README.md`, `AGENTS.md`, `CLAUDE.md` |
 | New documentation file | `documentation/TABLEOFCONTENTS.md` |
 
 ## Validation

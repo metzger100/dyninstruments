@@ -113,6 +113,7 @@ Task: Add new BarometerGauge
 - [ ] Updated relevant documentation.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.
 - [ ] Ran `npm run check:strict` — no failures; includes `check:all` plus coverage threshold enforcement.
+- [ ] For cleanup sessions, ran `npm run gc:status` first and `npm run gc:update-baseline` last.
 
 ---
 
