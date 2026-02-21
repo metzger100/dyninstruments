@@ -21,6 +21,7 @@ Theme values are layered:
 | `--dyni-font` | Font family stack for canvas and HTML | `"Inter","SF Pro Text",-apple-system,"Segoe UI",Roboto,...` |
 
 Set on `.widget.dyniplugin` and `[data-dyni]`. Read by `Helpers.resolveFontFamily()`.
+`Helpers` caches resolved font family per canvas, so repeated renders do not call `getComputedStyle()` again while mode stays unchanged.
 
 ### Colors (Foreground)
 
@@ -33,6 +34,7 @@ Read by `Helpers.resolveTextColor()` in priority order:
 | `--mainfg` | AvNav main foreground | (set by AvNav theme) |
 
 If none set: falls back to `getComputedStyle(canvas).color` or `"#000"`.
+`Helpers.resolveTextColor()` shares a per-canvas typography cache with `resolveFontFamily()`, reducing repeated style reads in steady day or night mode.
 
 ### Border
 
@@ -97,6 +99,7 @@ AvNav adds `.nightMode` class to the page root in night mode. CSS handles border
 ```
 
 Color-token night overrides are CSS-only. `ThemeResolver` keeps one JS defaults map and reads live CSS each mode after cache invalidation.
+`Helpers` typography cache also tracks the current root `.nightMode` state per canvas; when the mode flips, the next `resolveTextColor()` / `resolveFontFamily()` call refreshes cached values from `getComputedStyle()`.
 
 ## Head Hiding
 

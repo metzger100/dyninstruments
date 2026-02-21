@@ -32,9 +32,18 @@ Resolves foreground color with priority:
 3. `--mainfg`
 4. `getComputedStyle(canvas).color` or `#000`
 
+Caching behavior:
+
+- typography values are cached in a per-canvas `WeakMap` entry (`textColor`, `fontFamily`, `nightMode`)
+- each call compares cached `nightMode` to current root `.nightMode` class state
+- unchanged mode returns cached value without a new `getComputedStyle()` call
+- changed mode recomputes from CSS and refreshes cache entry
+
 ### resolveFontFamily
 
 Reads `--dyni-font` and falls back to default stack (`Inter`, system fonts, emoji fonts).
+
+`resolveFontFamily()` shares the same per-canvas typography cache as `resolveTextColor()`, so one style read can serve both values while day/night mode state is unchanged.
 
 ### applyFormatter
 

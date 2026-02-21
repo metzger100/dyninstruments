@@ -2,6 +2,27 @@ const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 const { createMockCanvas, createMockContext2D } = require("../helpers/mock-canvas");
 
 describe("runtime/helpers.js", function () {
+  const DEFAULT_FONT_STACK = '"Inter","SF Pro Text",-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
+
+  function createDoc(nightRef) {
+    return {
+      documentElement: {
+        classList: {
+          contains(name) {
+            return name === "nightMode" && !!nightRef.value;
+          }
+        }
+      },
+      body: {
+        classList: {
+          contains() {
+            return false;
+          }
+        }
+      }
+    };
+  }
+
   function loadRuntimeHelpers(extra) {
     const context = createScriptContext(Object.assign({
       DyniPlugin: {
@@ -82,6 +103,9 @@ describe("runtime/helpers.js", function () {
   });
 
   it("resolveTextColor and resolveFontFamily use CSS vars before fallback", function () {
+    const night = { value: false };
+    const canvas = { ownerDocument: createDoc(night) };
+
     const runtime = loadRuntimeHelpers({
       getComputedStyle() {
         return {
@@ -95,7 +119,81 @@ describe("runtime/helpers.js", function () {
       }
     });
 
-    expect(runtime.resolveTextColor({})).toBe("#abcdef");
-    expect(runtime.resolveFontFamily({})).toBe("\"Fira Sans\"");
+    expect(runtime.resolveTextColor(canvas)).toBe("#abcdef");
+    expect(runtime.resolveFontFamily(canvas)).toBe("\"Fira Sans\"");
+  });
+
+  it("caches typography per canvas while night mode state is unchanged", function () {
+    const calls = { value: 0 };
+    const night = { value: false };
+    const canvas = { ownerDocument: createDoc(night) };
+
+    const runtime = loadRuntimeHelpers({
+      getComputedStyle() {
+        calls.value += 1;
+        return {
+          color: "rgb(1, 2, 3)",
+          getPropertyValue(name) {
+            if (name === "--dyni-fg") return " #abcdef ";
+            if (name === "--dyni-font") return " \"Fira Sans\" ";
+            return "";
+          }
+        };
+      }
+    });
+
+    expect(runtime.resolveTextColor(canvas)).toBe("#abcdef");
+    expect(runtime.resolveFontFamily(canvas)).toBe("\"Fira Sans\"");
+    expect(runtime.resolveTextColor(canvas)).toBe("#abcdef");
+    expect(runtime.resolveFontFamily(canvas)).toBe("\"Fira Sans\"");
+    expect(calls.value).toBe(1);
+  });
+
+  it("refreshes cached typography when night mode class state changes", function () {
+    const calls = { value: 0 };
+    const night = { value: false };
+    const canvas = { ownerDocument: createDoc(night) };
+
+    const runtime = loadRuntimeHelpers({
+      getComputedStyle() {
+        calls.value += 1;
+        return {
+          color: night.value ? "rgb(200, 200, 200)" : "rgb(10, 20, 30)",
+          getPropertyValue(name) {
+            if (name === "--dyni-fg") return night.value ? " #222222 " : " #111111 ";
+            if (name === "--dyni-font") return night.value ? " \"Night Font\" " : " \"Day Font\" ";
+            return "";
+          }
+        };
+      }
+    });
+
+    expect(runtime.resolveTextColor(canvas)).toBe("#111111");
+    expect(runtime.resolveFontFamily(canvas)).toBe("\"Day Font\"");
+    expect(calls.value).toBe(1);
+
+    night.value = true;
+    expect(runtime.resolveTextColor(canvas)).toBe("#222222");
+    expect(runtime.resolveFontFamily(canvas)).toBe("\"Night Font\"");
+    expect(calls.value).toBe(2);
+  });
+
+  it("keeps documented fallback return values when vars are unset", function () {
+    const night = { value: false };
+    const canvas = { ownerDocument: createDoc(night) };
+
+    const runtime = loadRuntimeHelpers({
+      getComputedStyle() {
+        return {
+          color: "rgb(1, 2, 3)",
+          getPropertyValue() {
+            return "";
+          }
+        };
+      }
+    });
+
+    expect(runtime.resolveTextColor(canvas)).toBe("rgb(1, 2, 3)");
+    expect(runtime.resolveFontFamily(canvas)).toBe(DEFAULT_FONT_STACK);
   });
 });
