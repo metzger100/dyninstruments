@@ -1,6 +1,6 @@
 # Quality Scorecard
 
-**Last updated:** 2026-02-20
+**Last updated:** 2026-02-21
 
 ## Layer Health
 
@@ -25,6 +25,7 @@ Notes:
 | Duplicate function declarations in widget/shared helpers | HIGH | Previously across `widgets/gauges`, `widgets/text`, `cluster/mappers`, `shared/widget-kits/gauge` | ✅ Fixed (`check-patterns`: `duplicate-functions: 0`) |
 | Direct `avnav.api` access in non-runtime code | HIGH | Previously in `GaugeValueMath`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `PositionCoordinateWidget` | ✅ Fixed (`check-patterns`: `forbidden-globals: 0`) |
 | Empty catch blocks | MED | Previously in `ClusterRendererRouter`, `runtime/helpers`, `GaugeValueMath`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `PositionCoordinateWidget` | ✅ Fixed (`check-patterns`: `empty-catch: 0`) |
+| Oneliner line-limit bypass risk | WARN | Current backlog in runtime/shared/widgets (`check-file-size`: `onelinerDenseWarnings: 12`, `onelinerLongWarnings: 8`) | ⚠️ Warn-only rollout active (TD-012); promote to block after backlog cleanup |
 
 ## Model Selection Log
 

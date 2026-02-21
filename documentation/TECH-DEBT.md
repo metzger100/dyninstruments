@@ -6,7 +6,7 @@
 
 | ID | Area | Description | Impact | Priority |
 |---|---|---|---|---|
-| — | — | No active high-priority technical debt items currently tracked. | — | — |
+| TD-012 | Tooling / file-size | Warn-first rollout for oneliner enforcement is active: baseline backlog is 12 dense oneliners + 8 very long packed oneliners (`check-file-size` summary: `onelinerWarnings=20`). Promotion target: switch to `--oneliner=block` once backlog reaches zero. | Prevents line-limit bypass drift while preserving CI stability during cleanup window | MED |
 
 ## Completed Items
 
