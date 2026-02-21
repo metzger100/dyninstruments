@@ -26,10 +26,10 @@ angleDeg = startDeg + (endDeg - startDeg) * ((value - min) / (max - min))
 | `R` | `min(floor(availW/2), floor(availH))`, min 14 | 100 |
 | `pad` | `max(6, floor(min(W,H) * 0.04))` | ~6 |
 | `gap` | `max(6, floor(min(W,H) * 0.03))` | ~6 |
-| `ringW` | `max(6, floor(R * 0.12))` | 12 |
+| `ringW` | `max(6, floor(R * theme.ring.widthFactor))` (default `0.12`) | 12 |
 | `needleDepth` | `max(8, floor(ringW * 0.9))` | 10 |
-| `labelInset` | `max(18, floor(ringW * 1.8))` | 21 |
-| `labelFontPx` | `max(10, floor(R * 0.14))` | 14 |
+| `labelInset` | `max(18, floor(ringW * theme.labels.insetFactor))` (default `1.8`) | 21 |
+| `labelFontPx` | `max(10, floor(R * theme.labels.fontFactor))` (default `0.14`) | 14 |
 
 Gauge centering:
 

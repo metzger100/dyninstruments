@@ -13,9 +13,10 @@ describe("SemicircleGaugeEngine", function () {
     });
   }
 
-  it("resolves theme once and threads it to sectors and pointer color", function () {
+  it("resolves theme once and applies tokenized geometry and labels", function () {
     const pointerCalls = [];
     const tickCalls = [];
+    const labelCalls = [];
     const arcRingCalls = [];
     const buildSectorsCalls = [];
     const themeDefaults = {
@@ -37,7 +38,12 @@ describe("SemicircleGaugeEngine", function () {
         lengthFactor: 1.7
       },
       ring: {
-        arcLineWidth: 2.5
+        arcLineWidth: 2.5,
+        widthFactor: 0.18
+      },
+      labels: {
+        insetFactor: 2.2,
+        fontFactor: 0.2
       }
     };
     const resolveTheme = vi.fn(function () {
@@ -90,7 +96,9 @@ describe("SemicircleGaugeEngine", function () {
             drawTicksFromAngles(ctx, cx, cy, rOuter, ticks, opts) {
               tickCalls.push(opts);
             },
-            drawLabels() {}
+            drawLabels(ctx, cx, cy, rOuter, opts) {
+              labelCalls.push(opts);
+            }
           }
         };
       }
@@ -160,6 +168,7 @@ describe("SemicircleGaugeEngine", function () {
     expect(pointerCalls[0].color).toBeUndefined();
     expect(pointerCalls[0].sideFactor).toBe(themeDefaults.pointer.sideFactor);
     expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.pointer.lengthFactor);
+    expect(pointerCalls[0].depth).toBe(15);
     expect(arcRingCalls[0].lineWidth).toBe(themeDefaults.ring.arcLineWidth);
     expect(tickCalls[0].major).toEqual({
       len: themeDefaults.ticks.majorLen,
@@ -169,6 +178,8 @@ describe("SemicircleGaugeEngine", function () {
       len: themeDefaults.ticks.minorLen,
       width: themeDefaults.ticks.minorWidth
     });
+    expect(labelCalls[0].radiusOffset).toBe(37);
+    expect(labelCalls[0].fontPx).toBe(19);
   });
 
   it("throws when required dial theme tokens are missing", function () {

@@ -66,7 +66,7 @@
       const R = Math.max(14, Math.floor(D / 2));
       const cx = Math.floor(W/2);
       const cy = Math.floor(H/2);
-      const ringW = Math.max(6, Math.floor(R * 0.12));
+      const ringW = Math.max(6, Math.floor(R * theme.ring.widthFactor));
       const rOuter = R;
       const tickR  = rOuter;
       const needleDepth = Math.max(8, Math.floor(ringW * 0.9));
@@ -153,13 +153,13 @@
       });
 
       // labels (skip endpoints)
-      const labelInsetVal = Math.max(18, Math.floor(ringW * 1.8));
+      const labelInsetVal = Math.max(18, Math.floor(ringW * theme.labels.insetFactor));
       draw.drawLabels(ctx, cx, cy, tickR, {
         startDeg: -180, endDeg: 180,
         step: 30,
         includeEnd: true,
         radiusOffset: labelInsetVal,
-        fontPx: Math.max(10, Math.floor(R * 0.14)),
+        fontPx: Math.max(10, Math.floor(R * theme.labels.fontFactor)),
         bold: true,
         family,
         labelFormatter: (deg) => String(deg),
@@ -210,7 +210,7 @@
       // -------- NORMAL MODE --------------------------------------------------
       {
         const extra = Math.max(6, Math.floor(R * 0.06));
-        const rSafe = Math.max(10, rOuter - (Math.max(18, Math.floor(ringW * 1.8)) + extra));
+        const rSafe = Math.max(10, rOuter - (labelInsetVal + extra));
         if (rSafe < 12) {
           const innerW = Math.floor(rOuter * 1.00);
           const halfW  = Math.max(10, Math.floor(innerW / 2) - Math.max(4, Math.floor(R * 0.035)));

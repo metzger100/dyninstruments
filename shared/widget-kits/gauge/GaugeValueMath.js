@@ -258,15 +258,22 @@
       return String(rounded);
     }
 
-    function computeSemicircleGeometry(W, H, pad) {
+    function computeSemicircleGeometry(W, H, pad, overrides) {
       const availW = Math.max(1, W - 2 * pad);
       const availH = Math.max(1, H - 2 * pad);
+      const opts = overrides || {};
 
       const R = Math.max(14, Math.min(Math.floor(availW / 2), Math.floor(availH)));
       const gaugeLeft = pad + Math.floor((availW - 2 * R) / 2);
       const gaugeTop = pad + Math.floor((availH - R) / 2);
 
-      const ringW = Math.max(6, Math.floor(R * 0.12));
+      const ringWidthFactor = Number(opts.ringWidthFactor);
+      const ringW = Math.max(6, Math.floor(R * (isFinite(ringWidthFactor) ? ringWidthFactor : 0.12)));
+      const needleDepthFactor = Number(opts.needleDepthFactor);
+      const needleDepth = isFinite(needleDepthFactor)
+        ? Math.max(8, Math.floor(ringW * needleDepthFactor))
+        : Math.max(8, Math.floor(ringW * 0.9));
+
       return {
         availW,
         availH,
@@ -277,7 +284,7 @@
         cy: gaugeTop + R,
         rOuter: R,
         ringW,
-        needleDepth: Math.max(8, Math.floor(ringW * 0.9))
+        needleDepth
       };
     }
 

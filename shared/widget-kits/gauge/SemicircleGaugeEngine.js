@@ -16,7 +16,7 @@
     const V = GU.value;
     const draw = GU.draw;
 
-    function drawMajorValueLabels(ctx, family, geom, minV, maxV, majorStep, arc, showEndLabels) {
+    function drawMajorValueLabels(ctx, family, geom, minV, maxV, majorStep, arc, showEndLabels, labelTheme) {
       if (!isFinite(minV) || !isFinite(maxV) || maxV <= minV) return;
       const step = Math.abs(Number(majorStep));
       if (!isFinite(step) || step <= 0) return;
@@ -42,8 +42,8 @@
       }
 
       if (!angles.length) return;
-      const labelInset = Math.max(18, Math.floor(geom.ringW * 1.8));
-      const labelPx = Math.max(10, Math.floor(geom.R * 0.14));
+      const labelInset = Math.max(18, Math.floor(geom.ringW * labelTheme.insetFactor));
+      const labelPx = Math.max(10, Math.floor(geom.R * labelTheme.fontFactor));
 
       draw.drawLabels(ctx, geom.cx, geom.cy, geom.rOuter, {
         angles: angles,
@@ -105,8 +105,8 @@
       T.drawInlineCapValUnit(ctx, family, bandBox.x, bandBox.y, bandBox.w, bandBox.h, caption, valueText, unit, fit);
     }
 
-    function drawNormalText(ctx, family, caption, valueText, unit, secScale, geom) {
-      const labelInset = Math.max(18, Math.floor(geom.ringW * 1.8));
+    function drawNormalText(ctx, family, caption, valueText, unit, secScale, geom, labelTheme) {
+      const labelInset = Math.max(18, Math.floor(geom.ringW * labelTheme.insetFactor));
       const extra = Math.max(6, Math.floor(geom.R * 0.06));
       const rSafe = Math.max(10, geom.rOuter - (labelInset + extra));
 
@@ -194,7 +194,9 @@
         const tickMinor = Number(p.tickMinor ?? tickPreset.minor);
         const secScale = V.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
 
-        const geom = V.computeSemicircleGeometry(W, H, pad);
+        const geom = V.computeSemicircleGeometry(W, H, pad, {
+          ringWidthFactor: theme.ring.widthFactor
+        });
         const vClamped = V.isFiniteNumber(valueNum) ? V.clamp(valueNum, range.min, range.max) : NaN;
         const aNow = V.isFiniteNumber(vClamped)
           ? V.valueToAngle(vClamped, range.min, range.max, arc, true)
@@ -238,11 +240,11 @@
           minor: { len: dialTheme.minorLen, width: dialTheme.minorWidth }
         });
 
-        drawMajorValueLabels(ctx, family, geom, range.min, range.max, tickMajor, arc, showEndLabels);
+        drawMajorValueLabels(ctx, family, geom, range.min, range.max, tickMajor, arc, showEndLabels, theme.labels);
 
         if (mode === "flat") drawFlatText(ctx, family, caption, valueText, unit, secScale, geom, pad, gap);
         else if (mode === "high") drawHighText(ctx, family, caption, valueText, unit, secScale, geom, pad, gap, W);
-        else drawNormalText(ctx, family, caption, valueText, unit, secScale, geom);
+        else drawNormalText(ctx, family, caption, valueText, unit, secScale, geom, theme.labels);
 
         if (p.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color);
       };
