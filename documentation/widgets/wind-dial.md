@@ -6,6 +6,7 @@
 
 Full-circle wind dial showing angle (AWA/TWA) and speed (AWS/TWS) together. Uses `GaugeToolkit.draw` for dial primitives and `GaugeToolkit.text/value` for text fitting and value handling.
 Theme colors are resolved once per render via `GaugeToolkit.theme.resolve(canvas)`.
+Dial background rendering uses a closure-local two-layer cache (base + overlay) to avoid redrawing static dial elements every frame.
 
 ## Module Registration
 
@@ -49,6 +50,42 @@ WindDialWidget: {
 | Wind pointer | `draw.drawPointerAtRim` | long pointer at `angle`, with `fillStyle: theme.colors.pointer` (default `#ff2b2b`) |
 | Ticks | `draw.drawTicks` | `-180..180`, major 30, minor 10 |
 | Labels | `draw.drawLabels` | `-180..180`, step 30, endpoints filtered |
+
+## Background Cache Behavior
+
+### Cached Static Layers
+
+- Base layer: outer ring + optional layline sectors
+- Overlay layer: tick circle + static degree labels
+
+### Dynamic Per-Frame Layer
+
+- Wind pointer/needle (`angle`)
+- Live value text blocks (flat/high/normal modes)
+- Overlays (`disconnect`)
+
+Pointer draw order is preserved: static base -> pointer -> static tick/label overlay.
+
+### Cache Key Inputs (static-only)
+
+- Pixel buffer dimensions (`canvas.width`, `canvas.height`) and effective DPR mapping
+- Dial geometry inputs (`W`, `H`, `cx`, `cy`, `rOuter`, `ringW`, label inset/font size)
+- Layline config (`layEnabled`, `layMin`, `layMax`)
+- Static style inputs (ring/tick/label geometry styles, layline colors)
+- Resolved typography/style inputs (`family`, `labelWeight`, resolved text color)
+
+### Invalidation Triggers
+
+- Canvas geometry/buffer size changes
+- Dial geometry changes caused by size/theme ring factors
+- Layline config changes
+- Style/token/typography changes that affect static dial rendering
+
+### Non-Triggers
+
+- Live values (`angle`, `speed`)
+- Live text content/captions/units
+- Pointer-only updates
 
 ## Layout Modes
 

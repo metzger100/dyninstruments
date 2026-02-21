@@ -6,6 +6,7 @@
 
 Full-circle rotating compass card with upright cardinal labels. The dial rotates by `-heading`; the lubber pointer stays fixed at North. Optional target marker (`markerCourse`) is supported.
 Pointer color is resolved once per render via `GaugeToolkit.theme.resolve(canvas)`.
+Static dial rendering is cached per widget instance to avoid rebuilding unchanged dial-face layers each frame.
 
 ## Module Registration
 
@@ -36,17 +37,56 @@ CompassGaugeWidget: {
 
 ## Compass Dial Drawing (via `GaugeToolkit.draw`)
 
-All dial calls use `rotationDeg = -heading` so card content rotates while top pointer remains fixed.
+The rotating dial face cache is built from static inputs. At render time, `heading` is applied as a draw transform (`rotationDeg = -heading`) without invalidating static cache state.
 
 | Element | Draw Function | Parameters |
 |---|---|---|
-| Ring | `draw.drawRing` | full circle |
-| Ticks | `draw.drawTicks` | `0..360`, major 30, minor 10, with `rotationDeg` |
+| Ring (cached face) | `draw.drawRing` | full circle |
+| Ticks (cached face) | `draw.drawTicks` | `0..360`, major 30, minor 10 |
 | Lubber pointer | `draw.drawPointerAtRim` | fixed at 0°, with `fillStyle: theme.colors.pointer` (default `#ff2b2b`) |
 | Target marker | `draw.drawRimMarker` | at `(markerCourse - heading)` if both finite |
-| Labels | `draw.drawLabels` | `step=45`, `labelsMap`, `textRotation: "upright"` |
+| Cardinal labels | cached label sprites | existing label set (`N/NE/E/SE/S/SW/W/NW`), rendered upright at heading-rotated positions |
 
 Rendering order keeps labels on top for readability.
+
+## Background Cache Behavior
+
+### Cached Static Assets
+
+- Rotating face bitmap: ring + ticks
+- Cardinal label sprites: prerendered text glyphs reused across frames
+
+### Dynamic Per-Frame Layer
+
+- Heading rotation application for the cached face
+- Fixed lubber pointer
+- Optional target marker
+- Live value text + `disconnect` overlay
+
+### Rotation Model
+
+- `heading` changes only alter draw transforms and label placement math.
+- `heading` is explicitly excluded from the static cache key.
+
+### Cache Key Inputs (static-only)
+
+- Pixel buffer dimensions (`canvas.width`, `canvas.height`) and effective DPR mapping
+- Dial/tick geometry and static style inputs
+- Label geometry inputs (font px, label radius)
+- Resolved typography/style inputs (`family`, `labelWeight`, resolved text color)
+- Label-set signature (current fixed cardinal label map)
+
+### Invalidation Triggers
+
+- Canvas geometry/buffer size changes
+- Dial geometry changes from size/theme style shifts
+- Static style/token/typography changes
+
+### Non-Triggers
+
+- `heading` updates
+- `markerCourse`, live value/caption/unit updates
+- `disconnect` toggle
 
 ## Layout Modes
 
