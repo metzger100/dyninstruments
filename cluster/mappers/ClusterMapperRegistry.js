@@ -27,9 +27,13 @@
     Object.keys(MAPPER_MODULE_IDS).forEach(function (clusterId) {
       const id = MAPPER_MODULE_IDS[clusterId];
       const mod = Helpers.getModule(id);
-      if (!mod || typeof mod.create !== "function") return;
+      if (!mod || typeof mod.create !== "function") {
+        return;
+      }
       const spec = mod.create(def, Helpers);
-      if (!spec || typeof spec.translate !== "function") return;
+      if (!spec || typeof spec.translate !== "function") {
+        return;
+      }
       const mappedCluster = (typeof spec.cluster === "string" && spec.cluster) ? spec.cluster : clusterId;
       mappers[mappedCluster] = spec.translate;
     });
@@ -38,7 +42,9 @@
       const p = props || {};
       const cluster = p.cluster || def.cluster || "";
       const mapper = mappers[cluster];
-      if (typeof mapper !== "function") return {};
+      if (typeof mapper !== "function") {
+        return {};
+      }
 
       const toolkit = typeof createToolkit === "function" ? createToolkit(p) : {};
       return mapper(p, toolkit) || {};

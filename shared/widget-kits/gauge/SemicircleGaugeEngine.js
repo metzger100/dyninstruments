@@ -17,9 +17,16 @@
     const V = GU.value;
     const draw = GU.draw;
 
-    function makeEngineFitCacheKey(data) { return JSON.stringify(data); }
-    function readEngineFitCache(entry, key) { return entry && entry.key === key ? entry.result : null; }
-    function writeEngineFitCache(cache, mode, key, result) { cache[mode] = { key: key, result: result }; return result; }
+    function makeEngineFitCacheKey(data) {
+      return JSON.stringify(data);
+    }
+    function readEngineFitCache(entry, key) {
+      return entry && entry.key === key ? entry.result : null;
+    }
+    function writeEngineFitCache(cache, mode, key, result) {
+      cache[mode] = { key: key, result: result };
+      return result;
+    }
     function computeThreeRowsSizes(ctx, family, caption, valueText, unit, secScale, boxW, blockH, valueWeight, labelWeight) {
       const scale = isFinite(Number(secScale)) ? Number(secScale) : 0.8;
       const hVal = Math.max(10, Math.floor(blockH / (1 + 2 * scale)));
@@ -34,9 +41,13 @@
     }
 
     function drawMajorValueLabels(ctx, family, geom, minV, maxV, majorStep, arc, showEndLabels, labelTheme, labelWeight) {
-      if (!isFinite(minV) || !isFinite(maxV) || maxV <= minV) return;
+      if (!isFinite(minV) || !isFinite(maxV) || maxV <= minV) {
+        return;
+      }
       const step = Math.abs(Number(majorStep));
-      if (!isFinite(step) || step <= 0) return;
+      if (!isFinite(step) || step <= 0) {
+        return;
+      }
 
       const angles = [];
       const labels = {};
@@ -47,7 +58,9 @@
         if (v > maxV) v = maxV;
 
         if (!showEndLabels && (i === 0 || V.isApprox(v, maxV, 1e-6))) {
-          if (V.isApprox(v, maxV, 1e-6)) break;
+          if (V.isApprox(v, maxV, 1e-6)) {
+            break;
+          }
           continue;
         }
 
@@ -55,21 +68,34 @@
         angles.push(angle);
         labels[angle] = V.formatMajorLabel(v);
 
-        if (V.isApprox(v, maxV, 1e-6)) break;
+        if (V.isApprox(v, maxV, 1e-6)) {
+          break;
+        }
       }
 
-      if (!angles.length) return;
+      if (!angles.length) {
+        return;
+      }
       const labelInset = Math.max(18, Math.floor(geom.ringW * labelTheme.insetFactor));
       const labelPx = Math.max(10, Math.floor(geom.R * labelTheme.fontFactor));
 
-      draw.drawLabels(ctx, geom.cx, geom.cy, geom.rOuter, { angles: angles, radiusOffset: labelInset, fontPx: labelPx, weight: labelWeight, family, labelsMap: labels });
+      draw.drawLabels(ctx, geom.cx, geom.cy, geom.rOuter, {
+        angles: angles,
+        radiusOffset: labelInset,
+        fontPx: labelPx,
+        weight: labelWeight,
+        family: family,
+        labelsMap: labels
+      });
     }
 
     function drawFlatText(ctx, family, caption, valueText, unit, secScale, geom, pad, gap, valueWeight, labelWeight, fitCache, commonFitKey) {
       const rightX = geom.gaugeLeft + 2 * geom.R + gap;
       const rightW = Math.max(0, (pad + geom.availW) - rightX);
       const box = { x: rightX, y: geom.gaugeTop, w: rightW, h: geom.R };
-      if (box.w <= 0 || box.h <= 0) return;
+      if (box.w <= 0 || box.h <= 0) {
+        return;
+      }
 
       const topBox = { x: box.x, y: box.y, w: box.w, h: Math.floor(box.h / 2) };
       const bottomBox = {
@@ -79,8 +105,41 @@
         h: box.h - Math.floor(box.h / 2)
       };
 
-      const key = makeEngineFitCacheKey({ ...commonFitKey, mode: "flat", pad: pad, gap: gap, R: geom.R, ringW: geom.ringW, gaugeLeft: geom.gaugeLeft, gaugeTop: geom.gaugeTop, availW: geom.availW, availH: geom.availH, rightX: rightX, rightW: rightW, boxW: box.w, boxH: box.h, topH: topBox.h, bottomW: bottomBox.w, bottomH: bottomBox.h });
-      const fit = readEngineFitCache(fitCache.flat, key) || writeEngineFitCache(fitCache, "flat", key, T.measureValueUnitFit(ctx, family, valueText, unit, bottomBox.w, bottomBox.h, secScale, valueWeight, labelWeight));
+      const key = makeEngineFitCacheKey({
+        ...commonFitKey,
+        mode: "flat",
+        pad: pad,
+        gap: gap,
+        R: geom.R,
+        ringW: geom.ringW,
+        gaugeLeft: geom.gaugeLeft,
+        gaugeTop: geom.gaugeTop,
+        availW: geom.availW,
+        availH: geom.availH,
+        rightX: rightX,
+        rightW: rightW,
+        boxW: box.w,
+        boxH: box.h,
+        topH: topBox.h,
+        bottomW: bottomBox.w,
+        bottomH: bottomBox.h
+      });
+      const fit = readEngineFitCache(fitCache.flat, key) || writeEngineFitCache(
+        fitCache,
+        "flat",
+        key,
+        T.measureValueUnitFit(
+          ctx,
+          family,
+          valueText,
+          unit,
+          bottomBox.w,
+          bottomBox.h,
+          secScale,
+          valueWeight,
+          labelWeight
+        )
+      );
       T.drawCaptionMax(ctx, family, topBox.x, topBox.y, topBox.w, topBox.h, caption, Math.floor(fit.vPx * secScale), "right", labelWeight);
       T.drawValueUnitWithFit(ctx, family, bottomBox.x, bottomBox.y, bottomBox.w, bottomBox.h, valueText, unit, fit, "right", valueWeight, labelWeight);
     }
@@ -88,11 +147,41 @@
     function drawHighText(ctx, family, caption, valueText, unit, secScale, geom, pad, gap, W, valueWeight, labelWeight, fitCache, commonFitKey) {
       const bandY = geom.gaugeTop + geom.R + gap;
       const bandH = Math.max(0, (pad + geom.availH) - bandY);
-      if (bandH <= 0) return;
+      if (bandH <= 0) {
+        return;
+      }
 
       const bandBox = { x: pad, y: bandY, w: W - 2 * pad, h: bandH };
-      const key = makeEngineFitCacheKey({ ...commonFitKey, mode: "high", pad: pad, gap: gap, R: geom.R, ringW: geom.ringW, gaugeTop: geom.gaugeTop, availH: geom.availH, bandY: bandY, bandH: bandH, bandW: bandBox.w });
-      const fit = readEngineFitCache(fitCache.high, key) || writeEngineFitCache(fitCache, "high", key, T.fitInlineCapValUnit(ctx, family, caption, valueText, unit, bandBox.w, bandBox.h, secScale, valueWeight, labelWeight));
+      const key = makeEngineFitCacheKey({
+        ...commonFitKey,
+        mode: "high",
+        pad: pad,
+        gap: gap,
+        R: geom.R,
+        ringW: geom.ringW,
+        gaugeTop: geom.gaugeTop,
+        availH: geom.availH,
+        bandY: bandY,
+        bandH: bandH,
+        bandW: bandBox.w
+      });
+      const fit = readEngineFitCache(fitCache.high, key) || writeEngineFitCache(
+        fitCache,
+        "high",
+        key,
+        T.fitInlineCapValUnit(
+          ctx,
+          family,
+          caption,
+          valueText,
+          unit,
+          bandBox.w,
+          bandBox.h,
+          secScale,
+          valueWeight,
+          labelWeight
+        )
+      );
       T.drawInlineCapValUnit(ctx, family, bandBox.x, bandBox.y, bandBox.w, bandBox.h, caption, valueText, unit, fit, valueWeight, labelWeight);
     }
 
@@ -106,7 +195,22 @@
       const mhMax = Math.floor(rSafe * 0.92);
       const mhMin = Math.floor(rSafe * 0.55);
 
-      const key = makeEngineFitCacheKey({ ...commonFitKey, mode: "normal", R: geom.R, ringW: geom.ringW, rOuter: geom.rOuter, cx: geom.cx, cy: geom.cy, labelInsetFactor: labelTheme.insetFactor, labelInset: labelInset, extra: extra, rSafe: rSafe, yBottom: yBottom, mhMax: mhMax, mhMin: mhMin });
+      const key = makeEngineFitCacheKey({
+        ...commonFitKey,
+        mode: "normal",
+        R: geom.R,
+        ringW: geom.ringW,
+        rOuter: geom.rOuter,
+        cx: geom.cx,
+        cy: geom.cy,
+        labelInsetFactor: labelTheme.insetFactor,
+        labelInset: labelInset,
+        extra: extra,
+        rSafe: rSafe,
+        yBottom: yBottom,
+        mhMax: mhMax,
+        mhMin: mhMin
+      });
 
       let layout = readEngineFitCache(fitCache.normal, key);
       if (!layout) {
@@ -114,11 +218,15 @@
         for (let mh = mhMax; mh >= mhMin; mh--) {
           const yTop = yBottom - mh;
           const yTopRel = yTop - geom.cy;
-          if (Math.abs(yTopRel) >= rSafe) continue;
+          if (Math.abs(yTopRel) >= rSafe) {
+            continue;
+          }
 
           const halfW = Math.floor(Math.sqrt(Math.max(0, rSafe * rSafe - yTopRel * yTopRel)));
           const boxW = Math.max(10, 2 * halfW);
-          if (boxW <= 10) continue;
+          if (boxW <= 10) {
+            continue;
+          }
 
           const hv = Math.max(12, Math.floor(mh / (1 + 2 * secScale)));
           const vPx = T.fitTextPx(ctx, valueText, boxW, hv, family, valueWeight);
@@ -153,7 +261,9 @@
         const ctx = setup.ctx;
         const W = setup.W;
         const H = setup.H;
-        if (!W || !H) return;
+        if (!W || !H) {
+          return;
+        }
         const theme = GU.theme.resolve(canvas);
         const valueWeight = theme.font.weight;
         const labelWeight = theme.font.labelWeight;
@@ -193,7 +303,18 @@
         const tickMajor = V.isFiniteNumber(p.tickMajor) ? p.tickMajor : tickPreset.major;
         const tickMinor = V.isFiniteNumber(p.tickMinor) ? p.tickMinor : tickPreset.minor;
         const secScale = V.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
-        const fitKeyBase = { W: W, H: H, mode: mode, caption: caption, valueText: valueText, unit: unit, secScale: secScale, family: family, valueWeight: valueWeight, labelWeight: labelWeight };
+        const fitKeyBase = {
+          W: W,
+          H: H,
+          mode: mode,
+          caption: caption,
+          valueText: valueText,
+          unit: unit,
+          secScale: secScale,
+          family: family,
+          valueWeight: valueWeight,
+          labelWeight: labelWeight
+        };
 
         const geom = V.computeSemicircleGeometry(W, H, pad, {
           ringWidthFactor: theme.ring.widthFactor
@@ -216,8 +337,12 @@
 
         for (let i = 0; i < sectorList.length; i++) {
           const s = sectorList[i];
-          if (!s) continue;
-          if (!V.isFiniteNumber(s.a0) || !V.isFiniteNumber(s.a1)) continue;
+          if (!s) {
+            continue;
+          }
+          if (!V.isFiniteNumber(s.a0) || !V.isFiniteNumber(s.a1)) {
+            continue;
+          }
           draw.drawAnnularSector(ctx, geom.cx, geom.cy, geom.rOuter, {
             startDeg: s.a0,
             endDeg: s.a1,

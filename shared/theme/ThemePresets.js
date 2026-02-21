@@ -65,14 +65,18 @@
     const knownCssVars = [];
 
     tokenDefs.forEach(function (tokenDef) {
-      if (!tokenDef || typeof tokenDef.path !== "string" || typeof tokenDef.cssVar !== "string") return;
+      if (!tokenDef || typeof tokenDef.path !== "string" || typeof tokenDef.cssVar !== "string") {
+        return;
+      }
       pathToCssVar[tokenDef.path] = tokenDef.cssVar;
       knownCssVars.push(tokenDef.cssVar);
     });
 
     function remove(containerEl) {
       const style = containerEl && containerEl.style;
-      if (!style || typeof style.removeProperty !== "function") return;
+      if (!style || typeof style.removeProperty !== "function") {
+        return;
+      }
       knownCssVars.forEach(function (cssVar) {
         style.removeProperty(cssVar);
       });
@@ -80,7 +84,9 @@
 
     function apply(containerEl, presetName) {
       const style = containerEl && containerEl.style;
-      if (!style || typeof style.setProperty !== "function") return;
+      if (!style || typeof style.setProperty !== "function") {
+        return;
+      }
 
       const name = (typeof presetName === "string" && presetName.trim())
         ? presetName.trim()
@@ -92,7 +98,9 @@
       remove(containerEl);
       Object.keys(flatOverrides).forEach(function (path) {
         const cssVar = pathToCssVar[path];
-        if (!cssVar) return;
+        if (!cssVar) {
+          return;
+        }
         style.setProperty(cssVar, String(flatOverrides[path]));
       });
     }

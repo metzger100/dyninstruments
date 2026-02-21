@@ -24,13 +24,19 @@
 
   function resolveThemePresetName() {
     const fromSettingsApi = readThemePresetFromSettingsApi();
-    if (typeof fromSettingsApi === "string" && fromSettingsApi.trim()) return fromSettingsApi.trim();
-    if (typeof ns.theme === "string" && ns.theme.trim()) return ns.theme.trim();
+    if (typeof fromSettingsApi === "string" && fromSettingsApi.trim()) {
+      return fromSettingsApi.trim();
+    }
+    if (typeof ns.theme === "string" && ns.theme.trim()) {
+      return ns.theme.trim();
+    }
     return "default";
   }
 
   function isPluginContainer(rootEl) {
-    if (!rootEl) return false;
+    if (!rootEl) {
+      return false;
+    }
     if (rootEl.classList && typeof rootEl.classList.contains === "function" && rootEl.classList.contains("dyniplugin")) {
       return true;
     }
@@ -38,24 +44,34 @@
   }
 
   function discoverWidgetRoot(canvas) {
-    if (!canvas) return null;
+    if (!canvas) {
+      return null;
+    }
     if (typeof canvas.closest === "function") {
       const found = canvas.closest(".widget, .DirectWidget");
-      if (found) return found;
+      if (found) {
+        return found;
+      }
     }
     return canvas.parentElement || null;
   }
 
   function listPluginContainers(doc) {
-    if (!doc || typeof doc.querySelectorAll !== "function") return [];
+    if (!doc || typeof doc.querySelectorAll !== "function") {
+      return [];
+    }
     const canvases = doc.querySelectorAll("canvas.widgetData");
     const seen = new Set();
     const roots = [];
 
     for (let i = 0; i < canvases.length; i++) {
       const rootEl = discoverWidgetRoot(canvases[i]);
-      if (!isPluginContainer(rootEl)) continue;
-      if (seen.has(rootEl)) continue;
+      if (!isPluginContainer(rootEl)) {
+        continue;
+      }
+      if (seen.has(rootEl)) {
+        continue;
+      }
       seen.add(rootEl);
       roots.push(rootEl);
     }
@@ -64,15 +80,21 @@
   }
 
   function buildThemePresetApi(component, Helpers) {
-    if (!component || typeof component.create !== "function") return null;
+    if (!component || typeof component.create !== "function") {
+      return null;
+    }
     const api = component.create({}, Helpers);
-    if (!api || typeof api.apply !== "function" || typeof api.remove !== "function") return null;
+    if (!api || typeof api.apply !== "function" || typeof api.remove !== "function") {
+      return null;
+    }
     return api;
   }
 
   function invalidateThemeResolverCache(rootEl) {
     const resolverMod = state.themeResolverModule;
-    if (!resolverMod) return;
+    if (!resolverMod) {
+      return;
+    }
 
     if (rootEl && typeof resolverMod.invalidateCanvas === "function" && typeof rootEl.querySelectorAll === "function") {
       const canvases = rootEl.querySelectorAll("canvas.widgetData");
@@ -90,8 +112,12 @@
   }
 
   function applyThemePresetToContainer(rootEl, presetName) {
-    if (!isPluginContainer(rootEl)) return;
-    if (!state.themePresetApi || typeof state.themePresetApi.apply !== "function") return;
+    if (!isPluginContainer(rootEl)) {
+      return;
+    }
+    if (!state.themePresetApi || typeof state.themePresetApi.apply !== "function") {
+      return;
+    }
 
     const selected = (typeof presetName === "string" && presetName.trim())
       ? presetName.trim()
@@ -118,7 +144,9 @@
   runtime.applyThemePresetToRegisteredWidgets = applyThemePresetToRegisteredWidgets;
 
   function runInit() {
-    if (state.initStarted) return state.initPromise;
+    if (state.initStarted) {
+      return state.initPromise;
+    }
 
     if (!root.avnav || !root.avnav.api) {
       console && console.error && console.error("dyninstruments: avnav.api missing");

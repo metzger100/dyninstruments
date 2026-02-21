@@ -16,7 +16,9 @@
 
     function toCelsiusNumber(raw, props) {
       const n = Number(raw);
-      if (!isFinite(n)) return NaN;
+      if (!isFinite(n)) {
+        return NaN;
+      }
 
       const p = props || {};
       const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatTemperature";
@@ -37,7 +39,9 @@
 
     function displayTempFromRaw(raw, decimals, props) {
       const celsius = toCelsiusNumber(raw, props);
-      if (!isFinite(celsius)) return { num: NaN, text: "---" };
+      if (!isFinite(celsius)) {
+        return { num: NaN, text: "---" };
+      }
       const d = (typeof decimals === "number" && isFinite(decimals))
         ? Math.max(0, Math.min(6, Math.floor(decimals)))
         : 1;
@@ -45,12 +49,24 @@
     }
 
     function tempTickSteps(range) {
-      if (!isFinite(range) || range <= 0) return { major: 10, minor: 2 };
-      if (range <= 8) return { major: 1, minor: 0.5 };
-      if (range <= 20) return { major: 2, minor: 1 };
-      if (range <= 50) return { major: 5, minor: 1 };
-      if (range <= 100) return { major: 10, minor: 2 };
-      if (range <= 200) return { major: 20, minor: 5 };
+      if (!isFinite(range) || range <= 0) {
+        return { major: 10, minor: 2 };
+      }
+      if (range <= 8) {
+        return { major: 1, minor: 0.5 };
+      }
+      if (range <= 20) {
+        return { major: 2, minor: 1 };
+      }
+      if (range <= 50) {
+        return { major: 5, minor: 1 };
+      }
+      if (range <= 100) {
+        return { major: 10, minor: 2 };
+      }
+      if (range <= 200) {
+        return { major: 20, minor: 5 };
+      }
       return { major: 50, minor: 10 };
     }
 

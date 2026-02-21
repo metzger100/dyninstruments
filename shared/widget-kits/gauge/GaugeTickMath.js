@@ -21,7 +21,9 @@
     function computeSweep(startDeg, endDeg) {
       let s = Number(startDeg);
       let e = Number(endDeg);
-      if (!isFinite(s) || !isFinite(e)) return { s: 0, e: 0, sweep: 0, dir: 1 };
+      if (!isFinite(s) || !isFinite(e)) {
+        return { s: 0, e: 0, sweep: 0, dir: 1 };
+      }
 
       let sweep = e - s;
       if (sweep === 0) sweep = 360;
@@ -32,7 +34,9 @@
 
     function isBeyondEnd(curr, end, dir, includeEnd) {
       const direction = Number(dir) >= 0 ? 1 : -1;
-      if (direction > 0) return includeEnd ? (curr > end) : (curr >= end);
+      if (direction > 0) {
+        return includeEnd ? (curr > end) : (curr >= end);
+      }
       return includeEnd ? (curr < end) : (curr <= end);
     }
 

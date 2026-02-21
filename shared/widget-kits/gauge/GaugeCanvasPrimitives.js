@@ -25,7 +25,11 @@
         if (style.lineJoin != null) ctx.lineJoin = style.lineJoin;
         if (Array.isArray(style.dash)) ctx.setLineDash(style.dash);
       }
-      try { fn(); } finally { ctx.restore(); }
+      try {
+        fn();
+      } finally {
+        ctx.restore();
+      }
     }
 
     function drawRing(ctx, cx, cy, r, opts) {
@@ -65,7 +69,9 @@
       const endDeg = Number(opts.endDeg);
       const thickness = Math.max(1, Math.floor(Number(opts.thickness ?? 10)));
 
-      if (!isFinite(startDeg) || !isFinite(endDeg) || !isFinite(rOuter)) return;
+      if (!isFinite(startDeg) || !isFinite(endDeg) || !isFinite(rOuter)) {
+        return;
+      }
 
       const rInner = Math.max(1, rOuter - thickness);
       const rot = Number(opts.rotationDeg || 0);

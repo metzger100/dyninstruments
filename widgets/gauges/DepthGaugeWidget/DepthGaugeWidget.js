@@ -16,7 +16,9 @@
 
     function formatDepthString(raw, decimals) {
       const n = Number(raw);
-      if (!isFinite(n)) return "---";
+      if (!isFinite(n)) {
+        return "---";
+      }
       const d = (typeof decimals === "number" && isFinite(decimals))
         ? Math.max(0, Math.min(6, Math.floor(decimals)))
         : 1;
@@ -27,19 +29,35 @@
       const formatted = formatDepthString(raw, decimals);
       const numberText = valueMath.extractNumberText(formatted);
       const num = numberText ? Number(numberText) : NaN;
-      if (isFinite(num)) return { num: num, text: numberText };
+      if (isFinite(num)) {
+        return { num: num, text: numberText };
+      }
       const fallback = Number(raw);
-      if (isFinite(fallback)) return { num: fallback, text: String(fallback) };
+      if (isFinite(fallback)) {
+        return { num: fallback, text: String(fallback) };
+      }
       return { num: NaN, text: "---" };
     }
 
     function depthTickSteps(range) {
-      if (!isFinite(range) || range <= 0) return { major: 10, minor: 2 };
-      if (range <= 6) return { major: 1, minor: 0.5 };
-      if (range <= 12) return { major: 2, minor: 1 };
-      if (range <= 30) return { major: 5, minor: 1 };
-      if (range <= 60) return { major: 10, minor: 2 };
-      if (range <= 120) return { major: 20, minor: 5 };
+      if (!isFinite(range) || range <= 0) {
+        return { major: 10, minor: 2 };
+      }
+      if (range <= 6) {
+        return { major: 1, minor: 0.5 };
+      }
+      if (range <= 12) {
+        return { major: 2, minor: 1 };
+      }
+      if (range <= 30) {
+        return { major: 5, minor: 1 };
+      }
+      if (range <= 60) {
+        return { major: 10, minor: 2 };
+      }
+      if (range <= 120) {
+        return { major: 20, minor: 5 };
+      }
       return { major: 50, minor: 10 };
     }
 

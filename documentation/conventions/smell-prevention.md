@@ -17,7 +17,7 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 | Renderer coercion drift | Renderer does `Number(props.x)` on mapper-owned normalized props | Normalize at mapper boundary, renderer receives finite number or `undefined` | `check-patterns` (`renderer-numeric-coercion-without-boundary-contract`) + `check-smell-contracts` (`mapper-output-no-nan`) | block |
 | Hotspot growth | Known hotspot files keep growing | Keep hotspot files under stricter local budget, split shared logic early | `check-smell-contracts` (`text-layout-hotspot-budget`) + `check-file-size` | block |
 | Formatter availability heuristic | infer formatter failure from output equality (`out.trim() === String(raw)`) | Use explicit formatter API/fallback behavior, do not infer from output text equality | `check-patterns` (`formatter-availability-heuristic`) + `check-smell-contracts` (`coordinate-formatter-no-raw-equality-fallback`) | block |
-| Oneliner line-limit bypass | File-size limit is bypassed by collapsing multiline blocks into dense/very-long oneliners | Keep multiline formatting; do not compress implementation into dense/packed one-liners | `check-file-size` (`oneliner=dense`, `oneliner=long-packed`) | warn (promotion tracked in `../TECH-DEBT.md` TD-012) |
+| Oneliner line-limit bypass | File-size limit is bypassed by collapsing multiline blocks into dense/very-long oneliners | Keep multiline formatting; do not compress implementation into dense/packed one-liners | `check-file-size` (`oneliner=dense`, `oneliner=long-packed`) | block |
 
 ## Tooling Matrix
 
@@ -26,7 +26,8 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 - Aggregated smell gate: `npm run check:smells`
 - Full gate: `npm run check:all` (includes `npm run check:smells` via `check:core`)
 - Push blocker: `.githooks/pre-push` -> `npm run check:all`
-- `check-file-size` defaults to `--oneliner=warn` in `check:all`; strict variant is available via `npm run check:filesize:strict` (`--oneliner=block`)
+- `check:filesize` runs fail-closed with `--oneliner=block` (used by `check:core`/`check:all`)
+- Optional exploratory variant: `npm run check:filesize:warn`
 
 ## Severity Model
 
@@ -75,7 +76,7 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 
 1. Reformat dense oneliners into multiline blocks.
 2. Split very long packed lines into multiline object literals/call arguments.
-3. Use `npm run check:filesize:strict` during cleanup, and promote default `check-file-size --oneliner=block` after warning backlog reaches zero (tracked by TD-012).
+3. Use `npm run check:filesize` for fail-closed enforcement; use `npm run check:filesize:warn` only for exploratory cleanup passes.
 
 ## Related
 

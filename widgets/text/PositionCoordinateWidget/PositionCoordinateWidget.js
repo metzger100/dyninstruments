@@ -12,25 +12,35 @@
   "use strict";
 
   function parseLonLat(value) {
-    if (!value || typeof value !== "object") return null;
+    if (!value || typeof value !== "object") {
+      return null;
+    }
 
     if (Array.isArray(value)) {
-      if (value.length < 2) return null;
+      if (value.length < 2) {
+        return null;
+      }
       const lon = Number(value[0]);
       const lat = Number(value[1]);
-      if (!isFinite(lat) || !isFinite(lon)) return null;
+      if (!isFinite(lat) || !isFinite(lon)) {
+        return null;
+      }
       return { lat: lat, lon: lon };
     }
 
     const lat = Number(value.lat);
     const lon = Number(value.lon);
-    if (!isFinite(lat) || !isFinite(lon)) return null;
+    if (!isFinite(lat) || !isFinite(lon)) {
+      return null;
+    }
     return { lat: lat, lon: lon };
   }
 
   function formatCoordinate(value, axis, fallbackText, props, Helpers) {
     const n = Number(value);
-    if (!isFinite(n)) return fallbackText;
+    if (!isFinite(n)) {
+      return fallbackText;
+    }
 
     const p = props || {};
     const formatter = (typeof p.coordinateFormatter !== "undefined")
@@ -48,7 +58,9 @@
       formatterParameters: baseParams,
       default: fallbackText
     }));
-    if (!out.trim()) return fallbackText;
+    if (!out.trim()) {
+      return fallbackText;
+    }
 
     return out;
   }
@@ -64,7 +76,9 @@
       const ctx = setup && setup.ctx;
       const W = setup && setup.W;
       const H = setup && setup.H;
-      if (!ctx || !W || !H) return;
+      if (!ctx || !W || !H) {
+        return;
+      }
 
       const tNormal = Number(p.ratioThresholdNormal ?? 1.0);
       const tFlat = Number(p.ratioThresholdFlat ?? 3.0);

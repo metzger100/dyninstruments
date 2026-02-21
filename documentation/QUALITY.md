@@ -25,7 +25,7 @@ Notes:
 | Duplicate function declarations in widget/shared helpers | HIGH | Previously across `widgets/gauges`, `widgets/text`, `cluster/mappers`, `shared/widget-kits/gauge` | ✅ Fixed (`check-patterns`: `duplicate-functions: 0`) |
 | Direct `avnav.api` access in non-runtime code | HIGH | Previously in `GaugeValueMath`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `PositionCoordinateWidget` | ✅ Fixed (`check-patterns`: `forbidden-globals: 0`) |
 | Empty catch blocks | MED | Previously in `ClusterRendererRouter`, `runtime/helpers`, `GaugeValueMath`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `PositionCoordinateWidget` | ✅ Fixed (`check-patterns`: `empty-catch: 0`) |
-| Oneliner line-limit bypass risk | WARN | Current backlog in runtime/shared/widgets (`check-file-size`: `onelinerDenseWarnings: 154`, `onelinerLongWarnings: 11`) | ⚠️ Warn-only rollout active in `check:all` (TD-012); strict variant available via `npm run check:filesize:strict` |
+| Oneliner line-limit bypass risk | HIGH | Previously in runtime/shared/widgets (backlog cleared) | ✅ Fixed (`check:filesize` is fail-closed with `--oneliner=block`; latest summary: `onelinerWarnings: 0`) |
 
 ## Model Selection Log
 

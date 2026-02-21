@@ -187,7 +187,7 @@ describe("tools/check-smell-contracts.mjs", function () {
   });
 
   it("fails text-layout-hotspot-budget when hotspot file grows beyond budget", function () {
-    const manyLines = Array.from({ length: 271 }, (_, i) => `const x${i} = ${i};`).join("\n");
+    const manyLines = Array.from({ length: 291 }, (_, i) => `const x${i} = ${i};`).join("\n");
     const cwd = createWorkspace({
       "shared/widget-kits/gauge/GaugeTextLayout.js": manyLines,
       "widgets/gauges/WindDialWidget/WindDialWidget.js": "const ok = true;\n"

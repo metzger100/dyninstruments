@@ -11,7 +11,9 @@
 
   function defaultsFromEditableParams(editableParams) {
     const out = {};
-    if (!editableParams) return out;
+    if (!editableParams) {
+      return out;
+    }
 
     Object.keys(editableParams).forEach(function (k) {
       const spec = editableParams[k];

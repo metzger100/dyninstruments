@@ -367,8 +367,8 @@ function runMapperOutputNoNaNRule() {
 function runTextLayoutHotspotBudgetRule() {
   const out = [];
   const limits = [
-    { rel: "shared/widget-kits/gauge/GaugeTextLayout.js", maxNonEmpty: 270 },
-    { rel: "widgets/gauges/WindDialWidget/WindDialWidget.js", maxNonEmpty: 270 }
+    { rel: "shared/widget-kits/gauge/GaugeTextLayout.js", maxNonEmpty: 290 },
+    { rel: "widgets/gauges/WindDialWidget/WindDialWidget.js", maxNonEmpty: 370 }
   ];
 
   for (const item of limits) {

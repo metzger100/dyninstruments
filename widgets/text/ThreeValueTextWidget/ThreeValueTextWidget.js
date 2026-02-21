@@ -63,7 +63,9 @@
 
     function renderCanvas(canvas, props){
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
-      if (!W || !H) return;
+      if (!W || !H) {
+        return;
+      }
       ctx.clearRect(0,0,W,H);
       ctx.textBaseline = 'middle';
       const tokens = theme.resolve(canvas);
@@ -322,9 +324,19 @@
         const y = Math.floor(H/2);
         ctx.textAlign = 'left';
 
-        if (caption){ textLayout.setFont(ctx, sPx, labelWeight, family); ctx.fillText(caption, x, y); x += cW + gapBase; }
-        textLayout.setFont(ctx, vPx, valueWeight, family); ctx.fillText(value, x, y); x += vW;
-        if (unit){ x += gapBase; textLayout.setFont(ctx, sPx, labelWeight, family); ctx.fillText(unit, x, y); }
+        if (caption){
+          textLayout.setFont(ctx, sPx, labelWeight, family);
+          ctx.fillText(caption, x, y);
+          x += cW + gapBase;
+        }
+        textLayout.setFont(ctx, vPx, valueWeight, family);
+        ctx.fillText(value, x, y);
+        x += vW;
+        if (unit){
+          x += gapBase;
+          textLayout.setFont(ctx, sPx, labelWeight, family);
+          ctx.fillText(unit, x, y);
+        }
 
         if (props.disconnect) textLayout.drawDisconnectOverlay(ctx, W, H, family, color, null, labelWeight);
       }

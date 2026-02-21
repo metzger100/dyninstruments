@@ -6,7 +6,7 @@
 
 | ID | Area | Description | Impact | Priority |
 |---|---|---|---|---|
-| TD-012 | Tooling / file-size | Warn-first rollout for oneliner enforcement is active: baseline backlog is 154 dense oneliners + 11 very long packed oneliners (`check-file-size` summary: `onelinerWarnings=165`). Strict variant is available via `npm run check:filesize:strict`; promotion target is switching default to `--oneliner=block` once backlog reaches zero. | Prevents line-limit bypass drift while preserving CI stability during cleanup window | MED |
+| — | — | No active debt items. | — | — |
 
 ## Completed Items
 
@@ -23,6 +23,7 @@
 | TD-010 | 2026-02-20 | Removed widget-to-widget dependency: `PositionCoordinateWidget` no longer depends on `ThreeValueTextWidget`; dependency graph now follows layer rules. |
 | TD-008 | 2026-02-20 | Removed direct `avnav.api` access from `SpeedGaugeWidget`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `WindDialWidget`, and `PositionCoordinateWidget`; all formatter access now goes through `Helpers.applyFormatter` with mapper-provided formatter props. |
 | TD-011 | 2026-02-21 | Added fail-closed smell prevention program (pattern + semantic contracts), falsy-default preservation, theme cache invalidation contract, stale dynamic key cleanup, and pre-push full-gate hook workflow. |
+| TD-012 | 2026-02-21 | Cleared oneliner backlog to zero (`onelinerWarnings=0`), promoted `check:filesize` to block mode, and wired `check:core`/`check:all` to fail on dense/packed oneliners. |
 
 ## Rules
 

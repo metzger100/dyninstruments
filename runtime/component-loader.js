@@ -10,29 +10,39 @@
   const runtime = ns.runtime;
 
   function loadCssOnce(id, href) {
-    if (!href) return Promise.resolve();
-    if (document.getElementById(id)) return Promise.resolve();
+    if (!href) {
+      return Promise.resolve();
+    }
+    if (document.getElementById(id)) {
+      return Promise.resolve();
+    }
 
     return new Promise(function (res, rej) {
       const l = document.createElement("link");
       l.id = id;
       l.rel = "stylesheet";
       l.href = href;
-      l.onload = function () { res(); };
+      l.onload = function () {
+        res();
+      };
       l.onerror = rej;
       document.head.appendChild(l);
     });
   }
 
   function loadScriptOnce(id, src) {
-    if (document.getElementById(id)) return Promise.resolve();
+    if (document.getElementById(id)) {
+      return Promise.resolve();
+    }
 
     return new Promise(function (res, rej) {
       const s = document.createElement("script");
       s.id = id;
       s.async = true;
       s.src = src;
-      s.onload = function () { res(); };
+      s.onload = function () {
+        res();
+      };
       s.onerror = rej;
       document.head.appendChild(s);
     });
@@ -44,7 +54,9 @@
     const loadCache = new Map();
 
     function loadComponent(id) {
-      if (loadCache.has(id)) return loadCache.get(id);
+      if (loadCache.has(id)) {
+        return loadCache.get(id);
+      }
 
       const m = registry[id];
       if (!m) {
@@ -79,7 +91,9 @@
       const result = new Set();
 
       function addWithDeps(id) {
-        if (!registry[id] || result.has(id)) return;
+        if (!registry[id] || result.has(id)) {
+          return;
+        }
         result.add(id);
         const deps = registry[id].deps || [];
         deps.forEach(addWithDeps);

@@ -18,7 +18,9 @@
     const toCanvas = angle.degToCanvasRad;
     const computeSweep = tick.computeSweep;
     const isBeyondEnd = tick.isBeyondEnd || function (curr, end, dir, includeEnd) {
-      if (Number(dir) >= 0) return includeEnd ? (curr > end) : (curr >= end);
+      if (Number(dir) >= 0) {
+        return includeEnd ? (curr > end) : (curr >= end);
+      }
       return includeEnd ? (curr < end) : (curr <= end);
     };
     const buildTickAngles = tick.buildTickAngles;
@@ -127,10 +129,14 @@
       const labelsMap = opts.labelsMap || opts.labels || null;
       const labelFormatter = (typeof opts.labelFormatter === "function")
         ? opts.labelFormatter
-        : function (deg) { return String(deg); };
+        : function (deg) {
+          return String(deg);
+        };
       const labelFilter = (typeof opts.labelFilter === "function")
         ? opts.labelFilter
-        : function () { return true; };
+        : function () {
+          return true;
+        };
       const textRotation = opts.textRotation || "upright";
 
       withCtx(ctx, function () {
@@ -140,13 +146,17 @@
 
         for (let i = 0; i < angles.length; i++) {
           const deg = angles[i];
-          if (!labelFilter(deg)) continue;
+          if (!labelFilter(deg)) {
+            continue;
+          }
 
           let text;
           if (labelsMap && labelsMap[deg] != null) text = String(labelsMap[deg]);
           else text = labelFormatter(deg);
 
-          if (!text) continue;
+          if (!text) {
+            continue;
+          }
 
           const t = toCanvas(deg, cfg, rot);
           const x = cx + Math.cos(t) * rr;
