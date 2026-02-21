@@ -21,6 +21,6 @@ npm run hooks:doctor
 
 ## Active Hook
 
-- `pre-push` -> runs `npm run check:strict` (fail-closed)
+- `pre-push` -> runs `npm run check:all` (fail-closed)
 
-Push is blocked when any strict check fails.
+Push is blocked when any full-gate check fails.

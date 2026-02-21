@@ -5,7 +5,7 @@
 ## Overview
 
 This document defines blocking smell rules and where they are enforced in tooling.  
-All blocking smell checks must pass before push (`npm run check:strict` via pre-push hook).
+All blocking smell checks must pass before push (`npm run check:all` via pre-push hook).
 
 ## Smell Catalog
 
@@ -23,8 +23,8 @@ All blocking smell checks must pass before push (`npm run check:strict` via pre-
 - Static smell checks: `tools/check-patterns.mjs`
 - Semantic contract checks: `tools/check-smell-contracts.mjs`
 - Aggregated smell gate: `npm run check:smells`
-- Full gate: `npm run check:strict`
-- Push blocker: `.githooks/pre-push` -> `npm run check:strict`
+- Full gate: `npm run check:all`
+- Push blocker: `.githooks/pre-push` -> `npm run check:all`
 
 ## Severity Model
 

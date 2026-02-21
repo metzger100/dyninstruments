@@ -64,7 +64,7 @@ Implement this focused change only:
 - Scope: <files/features>
 - Out of scope: <what must not be changed>
 - Constraints: follow AGENTS.md rules and existing architecture boundaries
-- Validation required: npm run check:strict
+- Validation required: npm run check:all
 - Documentation requirement: update linked docs if behavior or configuration changed
 ```
 
@@ -83,7 +83,7 @@ Constraints:
 - follow AGENTS.md/CLAUDE.md
 - keep runtime boundaries intact
 Required validation:
-- npm run check:strict
+- npm run check:all
 Documentation co-evolution:
 - update docs that describe touched behavior in the same change
 ```
@@ -96,7 +96,7 @@ Refactor this area without behavior regression:
 - Keep external behavior stable
 - Remove duplication and keep dependency direction rules
 - Update related docs to match refactor
-- Run npm run check:strict
+- Run npm run check:all
 - Report exactly which docs were updated and why
 ```
 
@@ -162,13 +162,13 @@ Run from repository root after implementation:
 
 ```bash
 npm run check:smells
-npm run check:strict
+npm run check:all
 ```
 
 For faster local iteration before final validation, targeted checks are still useful:
 
 ```bash
-npm run check:all
+npm run check:core
 npm test
 ```
 
@@ -183,4 +183,4 @@ Do not merge with failing checks.
 - [ ] AI slop review completed.
 - [ ] `npm run hooks:doctor` passed.
 - [ ] `npm run check:smells` passed.
-- [ ] `npm run check:strict` passed.
+- [ ] `npm run check:all` passed.

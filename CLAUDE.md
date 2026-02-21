@@ -113,7 +113,7 @@ Task: Add new BarometerGauge
 - [ ] Updated relevant documentation.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.
 - [ ] Ran `npm run check:smells` — no failures.
-- [ ] Ran `npm run check:strict` — no failures; includes `check:all` plus coverage threshold enforcement.
+- [ ] Ran `npm run check:all` — no failures; includes `check:core` plus coverage threshold enforcement.
 - [ ] For cleanup sessions, ran `npm run gc:status` first and `npm run gc:update-baseline` last.
 
 ---
@@ -126,9 +126,9 @@ Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 
 ## 7. Smell Prevention & Fail-Closed Rules
 
-- Run smell gate before strict gate:
+- Run smell gate before full gate:
   - `npm run check:smells`
-  - `npm run check:strict`
+  - `npm run check:all`
 - `check:smells` is blocking and combines:
   - `tools/check-patterns.mjs` (static smell rules)
   - `tools/check-smell-contracts.mjs` (semantic smell contracts)
@@ -141,5 +141,5 @@ Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 - Pushes must be fail-closed.
   - Install tracked hooks once: `npm run hooks:install`
   - Verify hook setup: `npm run hooks:doctor`
-  - Pre-push hook runs `npm run check:strict` and blocks push on failures.
+  - Pre-push hook runs `npm run check:all` and blocks push on failures.
 <!-- END SHARED_INSTRUCTIONS -->
