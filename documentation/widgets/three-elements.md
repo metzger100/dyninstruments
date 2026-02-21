@@ -12,7 +12,7 @@ Default numeric renderer for clusters. Draws caption, value, and unit as respons
 // In config/components.js
 ThreeValueTextWidget: {
   js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
-  css: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.css",
+  css: undefined,
   globalKey: "DyniThreeValueTextWidget",
   deps: ["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]
 }

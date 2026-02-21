@@ -13,7 +13,7 @@ Pointer color is resolved once per render via `GaugeToolkit.theme.resolve(canvas
 // In config/components.js
 CompassGaugeWidget: {
   js: BASE + "widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js",
-  css: BASE + "widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.css",
+  css: undefined,
   globalKey: "DyniCompassGaugeWidget",
   deps: ["GaugeToolkit"]
 }
