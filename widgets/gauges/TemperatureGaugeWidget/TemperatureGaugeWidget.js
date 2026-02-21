@@ -32,14 +32,7 @@
       const numberText = valueMath.extractNumberText(formatted);
       const parsed = numberText ? Number(numberText) : NaN;
 
-      if (isFinite(parsed)) {
-        // Preserve previous Kelvin fallback when formatter path is unavailable.
-        if (n > 200 && formatted.trim() === String(n)) return n - 273.15;
-        return parsed;
-      }
-
-      if (n > 200) return n - 273.15;
-      return n;
+      return isFinite(parsed) ? parsed : NaN;
     }
 
     function displayTempFromRaw(raw, decimals, props) {
@@ -76,7 +69,8 @@
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
         return valueMath.buildHighEndSectors(props, minV, maxV, arc, {
-          theme: theme
+          warningColor: theme.colors.warning,
+          alarmColor: theme.colors.alarm
         });
       }
     });

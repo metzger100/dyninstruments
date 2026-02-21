@@ -45,7 +45,7 @@ SpeedGaugeWidget/DepthGaugeWidget/TemperatureGaugeWidget/VoltageGaugeWidget
 5. Mode-specific text layout
 6. Disconnect overlay
 
-Pointer and sector rendering are theme-token only in shared gauge paths (`theme.colors.pointer|warning|alarm` are required).
+Pointer and sector rendering in shared gauge paths use direct scalar token values passed at callsites.
 
 ## Gauge-Specific Responsibilities
 
@@ -53,7 +53,7 @@ Each wrapper defines:
 
 - Value conversion to `{ num, text }`
 - Tick step strategy
-- Sector placement strategy (high-end or low-end), with `theme` forwarded into shared sector builders
+- Sector placement strategy (high-end or low-end), with theme colors forwarded as scalar sector colors
 - Defaults (range, unit, ratio props)
 
 ### SpeedGaugeWidget
@@ -71,13 +71,13 @@ Each wrapper defines:
 ### TemperatureGaugeWidget
 
 - High-end sectors
-- Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatTemperature", formatterParameters: ["celsius"] })` + Kelvin fallback heuristic
+- Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatTemperature", formatterParameters: ["celsius"] })`
 - Defaults: range `0..35`, unit `°C`
 
 ### VoltageGaugeWidget
 
 - Low-end sectors
-- Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatDecimal", formatterParameters: [3, 1, true] })` + numeric fallback
+- Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatDecimal", formatterParameters: [3, 1, true] })`
 - Defaults: range `10..15`, unit `V`
 
 ## Removed Duplication

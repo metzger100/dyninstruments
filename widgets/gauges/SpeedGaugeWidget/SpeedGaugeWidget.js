@@ -30,8 +30,6 @@
         default: "---"
       }));
 
-      // If formatter resolution falls back to raw passthrough, keep legacy fixed-decimal text.
-      if (formatted.trim() === String(n)) return n.toFixed(1) + " " + (unit || "kn");
       return formatted;
     }
 
@@ -40,8 +38,6 @@
       const numberText = valueMath.extractNumberText(formatted);
       const num = numberText ? Number(numberText) : NaN;
       if (isFinite(num)) return { num: num, text: numberText };
-      const fallback = Number(raw);
-      if (isFinite(fallback)) return { num: fallback, text: fallback.toFixed(1) };
       return { num: NaN, text: "---" };
     }
 
@@ -70,7 +66,8 @@
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
         return valueMath.buildHighEndSectors(props, minV, maxV, arc, {
-          theme: theme
+          warningColor: theme.colors.warning,
+          alarmColor: theme.colors.alarm
         });
       }
     });

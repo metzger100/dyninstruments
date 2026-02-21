@@ -33,8 +33,6 @@
         default: "---"
       }));
 
-      // Preserve previous fixed-decimal-with-unit fallback when formatter is unavailable.
-      if (formatted.trim() === String(n)) return n.toFixed(1) + " " + (speedUnit || "kn");
       return formatted;
     }
 
@@ -43,7 +41,6 @@
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
       if (!W || !H) return;
       const theme = Theme.resolve(canvas);
-      const dialTheme = GU.requireDialThemeTokens(theme, "WindDialWidget");
       ctx.clearRect(0,0,W,H);
 
       const family = Helpers.resolveFontFamily(canvas);
@@ -112,7 +109,7 @@
       // Dial frame & sectors first
       ctx.save();
       // ring
-      draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: dialTheme.arcLineWidth });
+      draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: theme.ring.arcLineWidth });
 
       // sectors (annular)
       if (layEnabled && layMax > layMin){
@@ -136,10 +133,10 @@
       if (V.isFiniteNumber(props.angle)) {
         draw.drawPointerAtRim(ctx, cx, cy, rOuter, props.angle, {
           depth: needleDepth,
-          theme: theme,
+          fillStyle: theme.colors.pointer,
           variant: "long",
-          sideFactor: dialTheme.sideFactor,
-          lengthFactor: dialTheme.lengthFactor
+          sideFactor: theme.pointer.sideFactor,
+          lengthFactor: theme.pointer.lengthFactor
         });
       }
 
@@ -148,8 +145,8 @@
         startDeg: -180, endDeg: 180,
         stepMajor: 30, stepMinor: 10,
         includeEnd: true,
-        major: { len: dialTheme.majorLen, width: dialTheme.majorWidth },
-        minor: { len: dialTheme.minorLen, width: dialTheme.minorWidth }
+        major: { len: theme.ticks.majorLen, width: theme.ticks.majorWidth },
+        minor: { len: theme.ticks.minorLen, width: theme.ticks.minorWidth }
       });
 
       // labels (skip endpoints)

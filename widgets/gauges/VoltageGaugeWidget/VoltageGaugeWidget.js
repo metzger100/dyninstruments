@@ -29,8 +29,6 @@
         default: "---"
       }));
 
-      // Preserve previous fixed-decimal fallback for missing formatter path.
-      if (formatted.trim() === String(n)) return n.toFixed(1);
       return formatted;
     }
 
@@ -39,8 +37,6 @@
       const numberText = valueMath.extractNumberText(formatted);
       const num = numberText ? Number(numberText) : NaN;
       if (isFinite(num)) return { num: num, text: numberText };
-      const fallback = Number(raw);
-      if (isFinite(fallback)) return { num: fallback, text: fallback.toFixed(1) };
       return { num: NaN, text: "---" };
     }
 
@@ -72,7 +68,8 @@
         return valueMath.buildLowEndSectors(props, minV, maxV, arc, {
           defaultWarningFrom: 12.2,
           defaultAlarmFrom: 11.6,
-          theme: theme
+          warningColor: theme.colors.warning,
+          alarmColor: theme.colors.alarm
         });
       }
     });

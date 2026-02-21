@@ -137,16 +137,6 @@
       opts = opts || {};
       const rot = Number(opts.rotationDeg || 0);
       const cfg = opts.angleCfg;
-      if (typeof opts.color !== "undefined" || typeof opts.fillStyle !== "undefined") {
-        throw new Error("GaugeCanvasPrimitives.drawPointerAtRim: color/fillStyle overrides are no longer supported; use opts.theme.colors.pointer");
-      }
-
-      const theme = opts.theme;
-      const themeColors = (theme && theme.colors) ? theme.colors : null;
-      const pointerColor = themeColors && themeColors.pointer;
-      if (!pointerColor) {
-        throw new Error("GaugeCanvasPrimitives.drawPointerAtRim: missing required opts.theme.colors.pointer");
-      }
 
       const variant = opts.variant || "normal";
       let depth = Math.max(2, Math.floor(Number(opts.depth ?? Math.max(8, Math.floor(rOuter * 0.10)))));
@@ -179,7 +169,7 @@
         ctx.closePath();
         ctx.fill();
       }, {
-        fillStyle: String(pointerColor),
+        fillStyle: opts.fillStyle || opts.color,
         alpha: (opts.alpha != null) ? opts.alpha : 1
       });
     }

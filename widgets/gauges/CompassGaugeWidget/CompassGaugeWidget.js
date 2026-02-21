@@ -23,7 +23,6 @@
       const { ctx, W, H } = Helpers.setupCanvas(canvas);
       if (!W || !H) return;
       const theme = Theme.resolve(canvas);
-      const dialTheme = GU.requireDialThemeTokens(theme, "CompassGaugeWidget");
 
       ctx.clearRect(0,0,W,H);
       const family = Helpers.resolveFontFamily(canvas);
@@ -62,23 +61,23 @@
       const rotationDeg = V.isFiniteNumber(heading) ? -heading : 0;
 
       // Frame (ring + ticks)
-      draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: dialTheme.arcLineWidth });
+      draw.drawRing(ctx, cx, cy, rOuter, { lineWidth: theme.ring.arcLineWidth });
 
       draw.drawTicks(ctx, cx, cy, rOuter, {
         rotationDeg,
         startDeg: 0, endDeg: 360,
         stepMajor: 30, stepMinor: 10,
-        major: { len: dialTheme.majorLen, width: dialTheme.majorWidth },
-        minor: { len: dialTheme.minorLen, width: dialTheme.minorWidth }
+        major: { len: theme.ticks.majorLen, width: theme.ticks.majorWidth },
+        minor: { len: theme.ticks.minorLen, width: theme.ticks.minorWidth }
       });
 
       // Fixed red lubber pointer at 0° (north), behind labels
       draw.drawPointerAtRim(ctx, cx, cy, rOuter, 0, {
         depth: lubber,
-        theme: theme,
+        fillStyle: theme.colors.pointer,
         variant: "long",
-        sideFactor: dialTheme.sideFactor,
-        lengthFactor: dialTheme.lengthFactor
+        sideFactor: theme.pointer.sideFactor,
+        lengthFactor: theme.pointer.lengthFactor
       });
 
       // Optional target marker (bearing/course) relative to rotating card: (marker - heading)

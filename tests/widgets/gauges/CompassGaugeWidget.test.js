@@ -73,17 +73,6 @@ describe("CompassGaugeWidget", function () {
                     return themeDefaults;
                   }
                 },
-                requireDialThemeTokens(theme) {
-                  return {
-                    majorLen: theme.ticks.majorLen,
-                    majorWidth: theme.ticks.majorWidth,
-                    minorLen: theme.ticks.minorLen,
-                    minorWidth: theme.ticks.minorWidth,
-                    sideFactor: theme.pointer.sideFactor,
-                    lengthFactor: theme.pointer.lengthFactor,
-                    arcLineWidth: theme.ring.arcLineWidth
-                  };
-                },
                 text: {
                   measureValueUnitFit() {
                     return { vPx: 12, uPx: 10, gap: 6 };
@@ -136,8 +125,7 @@ describe("CompassGaugeWidget", function () {
       unit: "°"
     });
 
-    expect(pointerCalls[0].theme).toBe(themeDefaults);
-    expect(pointerCalls[0].color).toBeUndefined();
+    expect(pointerCalls[0].fillStyle).toBe(themeDefaults.colors.pointer);
     expect(pointerCalls[0].sideFactor).toBe(themeDefaults.pointer.sideFactor);
     expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.pointer.lengthFactor);
     expect(pointerCalls[0].depth).toBe(15);
@@ -151,60 +139,5 @@ describe("CompassGaugeWidget", function () {
       len: themeDefaults.ticks.minorLen,
       width: themeDefaults.ticks.minorWidth
     });
-  });
-
-  it("throws when required dial theme tokens are missing", function () {
-    const spec = loadFresh("widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js")
-      .create({}, {
-        setupCanvas() {
-          return {
-            ctx: {},
-            W: 240,
-            H: 180
-          };
-        },
-        getModule(id) {
-          if (id !== "GaugeToolkit") throw new Error("unexpected module: " + id);
-          return {
-            create() {
-              return {
-                draw: {},
-                theme: {
-                  resolve() {
-                    return {
-                      colors: {
-                        pointer: "#ff2b2b"
-                      }
-                    };
-                  }
-                },
-                requireDialThemeTokens(theme) {
-                  const required = [
-                    theme && theme.ticks && theme.ticks.majorLen,
-                    theme && theme.ticks && theme.ticks.majorWidth,
-                    theme && theme.ticks && theme.ticks.minorLen,
-                    theme && theme.ticks && theme.ticks.minorWidth,
-                    theme && theme.pointer && theme.pointer.sideFactor,
-                    theme && theme.pointer && theme.pointer.lengthFactor,
-                    theme && theme.ring && theme.ring.arcLineWidth
-                  ];
-                  for (let i = 0; i < required.length; i++) {
-                    if (!Number.isFinite(required[i])) {
-                      throw new Error("CompassGaugeWidget: missing required theme token");
-                    }
-                  }
-                  return {};
-                },
-                text: {},
-                value: {}
-              };
-            }
-          };
-        }
-      });
-
-    expect(function () {
-      spec.renderCanvas({}, {});
-    }).toThrow(/missing required theme token/i);
   });
 });

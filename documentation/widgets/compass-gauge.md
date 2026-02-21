@@ -42,7 +42,7 @@ All dial calls use `rotationDeg = -heading` so card content rotates while top po
 |---|---|---|
 | Ring | `draw.drawRing` | full circle |
 | Ticks | `draw.drawTicks` | `0..360`, major 30, minor 10, with `rotationDeg` |
-| Lubber pointer | `draw.drawPointerAtRim` | fixed at 0°, with `opts.theme.colors.pointer` (default `#ff2b2b`) |
+| Lubber pointer | `draw.drawPointerAtRim` | fixed at 0°, with `fillStyle: theme.colors.pointer` (default `#ff2b2b`) |
 | Target marker | `draw.drawRimMarker` | at `(markerCourse - heading)` if both finite |
 | Labels | `draw.drawLabels` | `step=45`, `labelsMap`, `textRotation: "upright"` |
 

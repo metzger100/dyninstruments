@@ -24,8 +24,8 @@ describe("SpeedGaugeWidget", function () {
                 buildHighEndSectors(props, minV, maxV, arc, options) {
                   receivedOptions = options;
                   return [
-                    { a0: 20, a1: 25, color: options.theme.colors.warning },
-                    { a0: 25, a1: 30, color: options.theme.colors.alarm }
+                    { a0: 20, a1: 25, color: options.warningColor },
+                    { a0: 25, a1: 30, color: options.alarmColor }
                   ];
                 }
               };
@@ -67,6 +67,47 @@ describe("SpeedGaugeWidget", function () {
       { a0: 20, a1: 25, color: "#123456" },
       { a0: 25, a1: 30, color: "#654321" }
     ]);
-    expect(receivedOptions.theme).toBe(theme);
+    expect(receivedOptions.warningColor).toBe(theme.colors.warning);
+    expect(receivedOptions.alarmColor).toBe(theme.colors.alarm);
+  });
+
+  it("does not fall back to fixed-decimal text when formatter returns raw passthrough", function () {
+    let captured;
+    const mod = loadFresh("widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js");
+    mod.create({}, {
+      applyFormatter(value) {
+        return String(value);
+      },
+      getModule(id) {
+        if (id === "GaugeValueMath") {
+          return {
+            create() {
+              return {
+                extractNumberText(text) {
+                  const match = String(text).match(/-?\d+(?:\.\d+)?/);
+                  return match ? match[0] : "";
+                },
+                buildHighEndSectors() {
+                  return [];
+                }
+              };
+            }
+          };
+        }
+        if (id !== "SemicircleGaugeEngine") throw new Error("unexpected module: " + id);
+        return {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return function () {};
+              }
+            };
+          }
+        };
+      }
+    });
+
+    expect(captured.formatDisplay(6.44, {}, "kn")).toEqual({ num: 6.44, text: "6.44" });
   });
 });

@@ -60,14 +60,14 @@ All semicircle gauges use the same pointer call:
 ```javascript
 draw.drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, {
   depth: needleDepth,
-  theme: theme,
+  fillStyle: theme.colors.pointer,
   variant: "long",
   sideFactor: theme.pointer.sideFactor,
   lengthFactor: theme.pointer.lengthFactor
 });
 ```
 
-`drawPointerAtRim` requires `theme.colors.pointer`; explicit pointer color overrides are not supported.
+Pointer color is passed directly via `fillStyle` from `theme.colors.pointer`.
 
 ## Sector Logic
 
@@ -109,7 +109,7 @@ if (sector) {
 }
 ```
 
-Warning/alarm sectors in shared builders require theme tokens (`theme.colors.warning/alarm`).
+Warning/alarm sectors in shared builders receive scalar color inputs (`warningColor`/`alarmColor`), typically from theme tokens.
 
 ## Layout Modes
 
