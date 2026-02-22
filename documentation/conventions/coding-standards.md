@@ -13,6 +13,7 @@ Use this document for runtime-safe component structure and naming. It defines fi
 - Reusable logic belongs in shared kits, not in duplicated widget-local helpers.
 - Preserve explicit falsy defaults (`""`, `0`, `false`) via property-presence/nullish checks; never use truthy fallback for configured defaults.
 - Cache-owning modules must expose explicit invalidation APIs and mutation paths must call them.
+- Cluster mappers are declarative routing/normalization only; formatter and presentation behavior belongs in renderer modules.
 
 ## File Size Limits
 
@@ -75,6 +76,14 @@ Example:
 - Sector props: `{gauge}WarningFrom`, `{gauge}AlarmFrom`
 - Per-kind caption/unit props: `caption_{kindName}`, `unit_{kindName}`
 - `editableParameter` conditions: `{ kind: "xxxGraphic" }` or `[{ kind: "a" }, { kind: "b" }]`
+- Renderer wrappers under `cluster/rendering/` must use role-based IDs (example: `DateTimeWidget`, `TimeStatusWidget`), not cluster-prefixed IDs.
+
+## Mapper Boundary Rules
+
+- Keep mapper files (`cluster/mappers/*Mapper.js`) limited to `create()` and `translate()` function declarations.
+- Keep mapper output declarative: select `renderer`, map values, normalize numbers, and pass-through formatter keys only.
+- Do not implement formatter logic, status-symbol conversion, or rendering fallbacks inside mappers.
+- Move any non-trivial logic to renderer components (`cluster/rendering/`, `widgets/`) or `ClusterMapperToolkit`.
 
 ## Reference Implementations
 

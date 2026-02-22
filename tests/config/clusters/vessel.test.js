@@ -41,6 +41,31 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.dateTimeRatioThresholdFlat.default).toBe(4.0);
     expect(def.editableParameters.dateTimeRatioThresholdNormal.condition).toEqual({ kind: "dateTime" });
     expect(def.editableParameters.dateTimeRatioThresholdFlat.condition).toEqual({ kind: "dateTime" });
+
+    expect(def.editableParameters.minValue).toBeTruthy();
+    expect(def.editableParameters.maxValue).toBeTruthy();
+    expect(def.editableParameters.tickMajor).toBeTruthy();
+    expect(def.editableParameters.tickMinor).toBeTruthy();
+    expect(def.editableParameters.showEndLabels).toBeTruthy();
+    expect(def.editableParameters.warningFrom).toBeTruthy();
+    expect(def.editableParameters.alarmFrom).toBeTruthy();
+
+    expect(def.editableParameters.warningFrom.condition).toEqual({
+      kind: "voltageGraphic",
+      voltageWarningEnabled: true
+    });
+    expect(def.editableParameters.alarmFrom.condition).toEqual({
+      kind: "voltageGraphic",
+      voltageAlarmEnabled: true
+    });
+
+    expect(def.editableParameters.voltageMinValue).toBeUndefined();
+    expect(def.editableParameters.voltageMaxValue).toBeUndefined();
+    expect(def.editableParameters.voltageTickMajor).toBeUndefined();
+    expect(def.editableParameters.voltageTickMinor).toBeUndefined();
+    expect(def.editableParameters.voltageShowEndLabels).toBeUndefined();
+    expect(def.editableParameters.voltageWarningFrom).toBeUndefined();
+    expect(def.editableParameters.voltageAlarmFrom).toBeUndefined();
   });
 
   it("injects selected voltage path into storeKeys.value for voltage kinds", function () {

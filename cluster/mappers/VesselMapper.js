@@ -11,45 +11,6 @@
 }(this, function () {
   "use strict";
 
-  const DATE_TIME_RATIO_THRESHOLD_NORMAL_DEFAULT = 1.2;
-  const DATE_TIME_RATIO_THRESHOLD_FLAT_DEFAULT = 4.0;
-  const hasOwn = Object.prototype.hasOwnProperty;
-
-  function defaultText(props) {
-    if (props && hasOwn.call(props, "default")) {
-      return props.default;
-    }
-    return "---";
-  }
-
-  function isGpsValid(value) {
-    if (value === true) {
-      return true;
-    }
-    if (value === false || value == null) {
-      return false;
-    }
-    if (typeof value === "number") {
-      return Number.isFinite(value) && value !== 0;
-    }
-    if (typeof value === "string") {
-      const text = value.trim().toLowerCase();
-      if (!text || text === "0" || text === "false" || text === "off" || text === "no") {
-        return false;
-      }
-      return true;
-    }
-    return !!value;
-  }
-
-  function statusCircle(value) {
-    return isGpsValid(value) ? "\ud83d\udfe2" : "\ud83d\udd34";
-  }
-
-  function statusCircleFormatter(raw) {
-    return statusCircle(raw);
-  }
-
   function create() {
     function translate(props, toolkit) {
       const p = props || {};
@@ -60,29 +21,28 @@
         const n = Number(value);
         return Number.isFinite(n) ? n : undefined;
       };
-      const fallback = defaultText(p);
 
       const req = p.kind;
 
       if (req === "voltageGraphic") {
-        const warnEnabled = !!p.voltageWarningEnabled;
-        const alarmEnabled = !!p.voltageAlarmEnabled;
+        const warnEnabled = (p.voltageWarningEnabled !== false);
+        const alarmEnabled = (p.voltageAlarmEnabled !== false);
         return {
           renderer: "VoltageGaugeWidget",
-          value: (typeof p.value !== "undefined") ? p.value : p.voltage,
+          value: p.value,
           caption: cap("voltageGraphic"),
           unit: unit("voltageGraphic"),
           formatter: "formatDecimal",
           formatterParameters: [3, 1, true],
 
-          minValue: num(p.voltageMinValue),
-          maxValue: num(p.voltageMaxValue),
-          tickMajor: num(p.voltageTickMajor),
-          tickMinor: num(p.voltageTickMinor),
-          showEndLabels: !!p.voltageShowEndLabels,
+          minValue: num(p.minValue),
+          maxValue: num(p.maxValue),
+          tickMajor: num(p.tickMajor),
+          tickMinor: num(p.tickMinor),
+          showEndLabels: !!p.showEndLabels,
 
-          warningFrom: warnEnabled ? num(p.voltageWarningFrom) : undefined,
-          alarmFrom: alarmEnabled ? num(p.voltageAlarmFrom) : undefined,
+          warningFrom: warnEnabled ? num(p.warningFrom) : undefined,
+          alarmFrom: alarmEnabled ? num(p.alarmFrom) : undefined,
 
           voltageRatioThresholdNormal: num(p.voltageRatioThresholdNormal),
           voltageRatioThresholdFlat: num(p.voltageRatioThresholdFlat),
@@ -98,39 +58,20 @@
         return out(p.clock, cap("clock"), unit("clock"), "formatTime", []);
       }
       if (req === "dateTime") {
-        const dateTimeRatioNormal = num(p.dateTimeRatioThresholdNormal);
-        const dateTimeRatioFlat = num(p.dateTimeRatioThresholdFlat);
         return {
-          renderer: "PositionCoordinateWidget",
-          value: [p.clock, p.clock],
+          renderer: "DateTimeWidget",
+          clock: p.clock,
           caption: cap("dateTime"),
-          unit: unit("dateTime"),
-          ratioThresholdNormal: (typeof dateTimeRatioNormal === "number")
-            ? dateTimeRatioNormal
-            : DATE_TIME_RATIO_THRESHOLD_NORMAL_DEFAULT,
-          ratioThresholdFlat: (typeof dateTimeRatioFlat === "number")
-            ? dateTimeRatioFlat
-            : DATE_TIME_RATIO_THRESHOLD_FLAT_DEFAULT,
-          formatter: "formatDateTime",
-          formatterParameters: [],
-          coordinateFormatterLat: "formatDate",
-          coordinateFormatterLon: "formatTime",
-          coordinateFlatFromAxes: true,
-          coordinateRawValues: true,
-          default: fallback
+          unit: unit("dateTime")
         };
       }
       if (req === "timeStatus") {
         return {
-          renderer: "PositionCoordinateWidget",
-          value: [p.clock, p.gpsValid],
+          renderer: "TimeStatusWidget",
+          clock: p.clock,
+          gpsValid: p.gpsValid,
           caption: cap("timeStatus"),
-          unit: unit("timeStatus"),
-          coordinateFormatterLat: statusCircleFormatter,
-          coordinateFormatterLon: "formatTime",
-          coordinateFlatFromAxes: true,
-          coordinateRawValues: true,
-          default: fallback
+          unit: unit("timeStatus")
         };
       }
       if (req === "pitch") {

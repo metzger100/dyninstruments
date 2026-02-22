@@ -23,7 +23,8 @@
 - `makeAngleFormatter(isDirection, leadingZero, fallback)`
 4. Matching mapper module translates to either:
 - numeric output for `ThreeValueTextWidget` (default text kinds)
-- stacked pair output for `PositionCoordinateWidget` (`positionBoat`/`positionWp`, plus vessel `dateTime`/`timeStatus`)
+- stacked pair output for `PositionCoordinateWidget` (`positionBoat`/`positionWp`)
+- vessel-specific stacked pair output via `DateTimeWidget` and `TimeStatusWidget` (both delegate rendering to `PositionCoordinateWidget`)
 - graphic output with `renderer: "..."`
 5. `ClusterWidget.renderCanvas()` delegates to `ClusterRendererRouter`, which picks renderer by `props.renderer`
 6. `ClusterWidget.finalizeFunction()` fans out to all sub-renderers and tolerates renderer-local finalize errors
@@ -51,12 +52,19 @@ function create(def, Helpers) {
 }
 ```
 
+Mapper boundary:
+- Keep mapper modules declarative (`create` + `translate` only).
+- Mapper responsibilities: kind routing, output shape mapping, numeric normalization, renderer selection.
+- Renderer responsibilities: formatter/status/display logic and layout behavior.
+
 ## Renderer Delegation
 
 `ClusterRendererRouter` manages these sub-renderers:
 
 - `ThreeValueTextWidget` (default fallback)
-- `PositionCoordinateWidget` (stacked pair renderer for nav positions and vessel date/time status; self-contained and no longer delegates flat mode to another widget)
+- `PositionCoordinateWidget` (stacked pair renderer for nav positions; self-contained and no longer delegates flat mode to another widget)
+- `DateTimeWidget` (vessel date/time wrapper that forwards to `PositionCoordinateWidget`)
+- `TimeStatusWidget` (vessel gps-status/time wrapper that forwards to `PositionCoordinateWidget`)
 - `WindDialWidget`
 - `CompassGaugeWidget`
 - `SpeedGaugeWidget`
@@ -65,6 +73,9 @@ function create(def, Helpers) {
 - `VoltageGaugeWidget`
 
 `wantsHideNativeHead` is aggregated (`true` if any sub-renderer requests it).
+
+Naming boundary:
+- Components under `cluster/rendering/` use role-based IDs, not cluster-prefixed IDs.
 
 ## Registration Rules for New Components
 

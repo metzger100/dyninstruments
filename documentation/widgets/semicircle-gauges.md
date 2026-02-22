@@ -79,6 +79,8 @@ Each wrapper defines:
 - Low-end sectors
 - Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatDecimal", formatterParameters: [3, 1, true] })`
 - Defaults: range `10..15`, unit `V`
+- Toggle behavior: sectors default to enabled when toggle values are unset; explicit `voltageWarningEnabled: false` and/or `voltageAlarmEnabled: false` suppress corresponding sectors
+- Low-end defaults (`warningFrom=12.2`, `alarmFrom=11.6`) are applied only for sectors that remain enabled
 
 ## Removed Duplication
 

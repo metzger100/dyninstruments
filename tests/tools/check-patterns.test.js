@@ -179,4 +179,81 @@ describe("tools/check-patterns.mjs", function () {
     expect(result.summary.ok).toBe(false);
     expect(out).toContain("[renderer-numeric-coercion-without-boundary-contract]");
   });
+
+  it("blocks helper function declarations in cluster mappers", function () {
+    const cwd = createWorkspace({
+      "cluster/mappers/SampleMapper.js": `
+(function () {
+  "use strict";
+  function create() {
+    function decorate(value) {
+      return value;
+    }
+    function translate(props) {
+      return { value: decorate(props.value) };
+    }
+    return { cluster: "sample", translate: translate };
+  }
+  return { id: "SampleMapper", create: create };
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(out).toContain("[mapper-logic-leakage]");
+    expect(out).toContain("decorate");
+  });
+
+  it("blocks helper function bindings in cluster mappers", function () {
+    const cwd = createWorkspace({
+      "cluster/mappers/SampleMapper.js": `
+(function () {
+  "use strict";
+  function create() {
+    function translate(props) {
+      const decorate = (value) => value;
+      return { value: decorate(props.value) };
+    }
+    return { cluster: "sample", translate: translate };
+  }
+  return { id: "SampleMapper", create: create };
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(out).toContain("[mapper-logic-leakage]");
+    expect(out).toContain("decorate");
+  });
+
+  it("blocks cluster-prefixed renderer wrapper ids in cluster/rendering", function () {
+    const cwd = createWorkspace({
+      "config/clusters/vessel.js": "\n",
+      "cluster/rendering/VesselDateTimeWidget.js": "\n"
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(out).toContain("[cluster-renderer-cluster-prefix]");
+    expect(out).toContain("VesselDateTimeWidget");
+  });
+
+  it("allows role-based renderer wrapper ids in cluster/rendering", function () {
+    const cwd = createWorkspace({
+      "config/clusters/vessel.js": "\n",
+      "cluster/rendering/DateTimeWidget.js": "\n"
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    expect(result.summary.ok).toBe(true);
+    expect(result.findings).toHaveLength(0);
+  });
 });
