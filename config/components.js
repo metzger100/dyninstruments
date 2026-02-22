@@ -92,6 +92,18 @@
       globalKey: "DyniPositionCoordinateWidget",
       deps: ["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]
     },
+    DateTimeWidget: {
+      js: BASE + "cluster/rendering/DateTimeWidget.js",
+      css: undefined,
+      globalKey: "DyniDateTimeWidget",
+      deps: ["PositionCoordinateWidget"]
+    },
+    TimeStatusWidget: {
+      js: BASE + "cluster/rendering/TimeStatusWidget.js",
+      css: undefined,
+      globalKey: "DyniTimeStatusWidget",
+      deps: ["PositionCoordinateWidget"]
+    },
     WindDialWidget: {
       js: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.js",
       css: undefined,
@@ -141,6 +153,8 @@
       deps: [
         "ThreeValueTextWidget",
         "PositionCoordinateWidget",
+        "DateTimeWidget",
+        "TimeStatusWidget",
         "WindDialWidget",
         "CompassGaugeWidget",
         "SpeedGaugeWidget",

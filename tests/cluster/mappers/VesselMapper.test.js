@@ -18,19 +18,19 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
 });
 
 describe("VesselMapper", function () {
-  it("maps voltageGraphic and respects sector toggles", function () {
+  it("maps voltageGraphic with generic gauge keys and respects sector toggles", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const out = mapper.translate({
       kind: "voltageGraphic",
       value: 12.4,
       voltageWarningEnabled: false,
       voltageAlarmEnabled: true,
-      voltageWarningFrom: "12.2",
-      voltageAlarmFrom: "11.6",
-      voltageMinValue: "7",
-      voltageMaxValue: "15",
-      voltageTickMajor: "1",
-      voltageTickMinor: "0.2",
+      warningFrom: "12.2",
+      alarmFrom: "11.6",
+      minValue: "7",
+      maxValue: "15",
+      tickMajor: "1",
+      tickMinor: "0.2",
       voltageRatioThresholdNormal: "1.1",
       voltageRatioThresholdFlat: "3.5",
       captionUnitScale: "0.8"
@@ -44,6 +44,29 @@ describe("VesselMapper", function () {
     expect(out.alarmFrom).toBe(11.6);
   });
 
+  it("treats missing voltage sector toggles as enabled by default", function () {
+    const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
+    const out = mapper.translate({
+      kind: "voltageGraphic",
+      value: 12.4,
+      warningFrom: "12.2",
+      alarmFrom: "11.6"
+    }, toolkit);
+
+    expect(out.warningFrom).toBe(12.2);
+    expect(out.alarmFrom).toBe(11.6);
+  });
+
+  it("uses only value for voltageGraphic source and does not fall back to legacy voltage field", function () {
+    const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
+    const out = mapper.translate({
+      kind: "voltageGraphic",
+      voltage: 12.4
+    }, toolkit);
+
+    expect(out.value).toBeUndefined();
+  });
+
   it("maps voltage and clock numeric kinds", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const rawClock = new Date("2026-02-22T14:30:00Z");
@@ -54,46 +77,27 @@ describe("VesselMapper", function () {
     expect(clockOut.value).toBe(rawClock);
   });
 
-  it("maps dateTime to PositionCoordinateWidget with date/time formatters", function () {
+  it("maps dateTime to DateTimeWidget with thin mapper output", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const out = mapper.translate({ kind: "dateTime", clock: rawClock, default: "---" }, toolkit);
-    expect(out.renderer).toBe("PositionCoordinateWidget");
-    expect(out.value).toEqual([rawClock, rawClock]);
-    expect(out.formatter).toBe("formatDateTime");
-    expect(out.coordinateFormatterLat).toBe("formatDate");
-    expect(out.coordinateFormatterLon).toBe("formatTime");
-    expect(out.coordinateFlatFromAxes).toBe(true);
-    expect(out.coordinateRawValues).toBe(true);
-    expect(out.ratioThresholdNormal).toBe(1.2);
-    expect(out.ratioThresholdFlat).toBe(4.0);
+    expect(out.renderer).toBe("DateTimeWidget");
+    expect(out.clock).toBe(rawClock);
+    expect(out.caption).toBe("");
+    expect(out.unit).toBe("");
+    expect(out.value).toBeUndefined();
   });
 
-  it("maps dateTime with explicit dateTime ratio thresholds when configured", function () {
-    const rawClock = new Date("2026-02-22T15:00:00Z");
-    const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
-    const out = mapper.translate({
-      kind: "dateTime",
-      clock: rawClock,
-      dateTimeRatioThresholdNormal: "1.35",
-      dateTimeRatioThresholdFlat: "4.55"
-    }, toolkit);
-    expect(out.ratioThresholdNormal).toBe(1.35);
-    expect(out.ratioThresholdFlat).toBe(4.55);
-  });
-
-  it("maps timeStatus to PositionCoordinateWidget with status circles and time", function () {
+  it("maps timeStatus to TimeStatusWidget with thin mapper output", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const out = mapper.translate({ kind: "timeStatus", clock: rawClock, gpsValid: true, default: "---" }, toolkit);
-    expect(out.renderer).toBe("PositionCoordinateWidget");
-    expect(out.value).toEqual([rawClock, true]);
-    expect(typeof out.coordinateFormatterLat).toBe("function");
-    expect(out.coordinateFormatterLat(true)).toBe("🟢");
-    expect(out.coordinateFormatterLat(false)).toBe("🔴");
-    expect(out.coordinateFormatterLon).toBe("formatTime");
-    expect(out.coordinateFlatFromAxes).toBe(true);
-    expect(out.coordinateRawValues).toBe(true);
+    expect(out.renderer).toBe("TimeStatusWidget");
+    expect(out.clock).toBe(rawClock);
+    expect(out.gpsValid).toBe(true);
+    expect(out.caption).toBe("");
+    expect(out.unit).toBe("");
+    expect(out.value).toBeUndefined();
   });
 
   it("maps pitch and roll to formatDirection in signed-degree mode", function () {
@@ -122,10 +126,10 @@ describe("VesselMapper", function () {
     const out = mapper.translate({
       kind: "voltageGraphic",
       value: 12.4,
-      voltageMinValue: "7",
-      voltageMaxValue: "15",
-      voltageTickMajor: "1",
-      voltageTickMinor: "0.2"
+      minValue: "7",
+      maxValue: "15",
+      tickMajor: "1",
+      tickMinor: "0.2"
     }, toolkitWithoutNum);
 
     expect(out.minValue).toBe(7);

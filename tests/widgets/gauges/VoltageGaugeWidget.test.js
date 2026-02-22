@@ -72,6 +72,67 @@ describe("VoltageGaugeWidget", function () {
     expect(receivedOptions.alarmColor).toBe(theme.colors.alarm);
   });
 
+  it("suppresses disabled sectors by toggle flags before low-end sector building", function () {
+    let captured;
+    const buildLowEndSectors = vi.fn(() => [{ a0: 10, a1: 11.6, color: "#654321" }]);
+
+    const mod = loadFresh("widgets/gauges/VoltageGaugeWidget/VoltageGaugeWidget.js");
+    mod.create({}, {
+      applyFormatter(value) {
+        return String(value);
+      },
+      getModule(id) {
+        if (id === "GaugeValueMath") {
+          return {
+            create() {
+              return {
+                extractNumberText(text) {
+                  const match = String(text).match(/-?\d+(?:\.\d+)?/);
+                  return match ? match[0] : "";
+                },
+                buildLowEndSectors
+              };
+            }
+          };
+        }
+        if (id !== "SemicircleGaugeEngine") throw new Error("unexpected module: " + id);
+        return {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return function () {};
+              }
+            };
+          }
+        };
+      }
+    });
+
+    const theme = { colors: { warning: "#123456", alarm: "#654321" } };
+    expect(captured.buildSectors({
+      voltageWarningEnabled: false,
+      voltageAlarmEnabled: false
+    }, 10, 15, {}, {}, theme)).toEqual([]);
+    expect(buildLowEndSectors).not.toHaveBeenCalled();
+
+    captured.buildSectors({
+      voltageWarningEnabled: false,
+      voltageAlarmEnabled: true
+    }, 10, 15, {}, {}, theme);
+    expect(buildLowEndSectors).toHaveBeenCalledTimes(1);
+    expect(Number.isNaN(buildLowEndSectors.mock.calls[0][0].warningFrom)).toBe(true);
+    expect(buildLowEndSectors.mock.calls[0][0].alarmFrom).toBeUndefined();
+
+    captured.buildSectors({
+      voltageWarningEnabled: true,
+      voltageAlarmEnabled: false
+    }, 10, 15, {}, {}, theme);
+    expect(buildLowEndSectors).toHaveBeenCalledTimes(2);
+    expect(buildLowEndSectors.mock.calls[1][0].warningFrom).toBeUndefined();
+    expect(Number.isNaN(buildLowEndSectors.mock.calls[1][0].alarmFrom)).toBe(true);
+  });
+
   it("does not force fixed-decimal fallback text on raw formatter passthrough", function () {
     let captured;
 

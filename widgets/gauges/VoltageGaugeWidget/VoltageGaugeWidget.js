@@ -83,7 +83,22 @@
         return displayVoltageFromRaw(raw, props);
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
-        return valueMath.buildLowEndSectors(props, minV, maxV, arc, {
+        const p = props || {};
+        const warningEnabled = (p.voltageWarningEnabled !== false);
+        const alarmEnabled = (p.voltageAlarmEnabled !== false);
+        if (!warningEnabled && !alarmEnabled) {
+          return [];
+        }
+
+        const sectorProps = { ...p };
+        if (!warningEnabled) {
+          sectorProps.warningFrom = NaN;
+        }
+        if (!alarmEnabled) {
+          sectorProps.alarmFrom = NaN;
+        }
+
+        return valueMath.buildLowEndSectors(sectorProps, minV, maxV, arc, {
           defaultWarningFrom: 12.2,
           defaultAlarmFrom: 11.6,
           warningColor: theme.colors.warning,

@@ -15,6 +15,8 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 | Dynamic key stale state | `storeKeys.value` remains when dynamic key field is cleared | Clear stale dynamic store keys when key input is empty | `check-smell-contracts` (`dynamic-storekey-clears-on-empty`) | block |
 | Falsy default clobbering | `x.default || "---"` | Preserve explicit falsy defaults using property-presence/nullish semantics | `check-patterns` (`default-truthy-fallback`) + `check-smell-contracts` (`falsy-default-preservation`) | block |
 | Renderer coercion drift | Renderer does `Number(props.x)` on mapper-owned normalized props | Normalize at mapper boundary, renderer receives finite number or `undefined` | `check-patterns` (`renderer-numeric-coercion-without-boundary-contract`) + `check-smell-contracts` (`mapper-output-no-nan`) | block |
+| Mapper logic leakage | Mapper adds helper functions or presentation logic | Keep mappers declarative (`create` + `translate`), move logic to renderer/toolkit modules | `check-patterns` (`mapper-logic-leakage`) | block |
+| Cluster renderer naming drift | `cluster/rendering/` component IDs are cluster-prefixed (e.g. `Vessel*`) | Use role-based renderer IDs in `cluster/rendering/` (e.g. `DateTimeWidget`) | `check-patterns` (`cluster-renderer-cluster-prefix`) + `check-naming` | block |
 | Hotspot growth | Known hotspot files keep growing | Keep hotspot files under stricter local budget, split shared logic early | `check-smell-contracts` (`text-layout-hotspot-budget`) + `check-file-size` | block |
 | Formatter availability heuristic | infer formatter failure from output equality (`out.trim() === String(raw)`) | Use explicit formatter API/fallback behavior, do not infer from output text equality | `check-patterns` (`formatter-availability-heuristic`) + `check-smell-contracts` (`coordinate-formatter-no-raw-equality-fallback`) | block |
 | Oneliner line-limit bypass | File-size limit is bypassed by collapsing multiline blocks into dense/very-long oneliners | Keep multiline formatting; do not compress implementation into dense/packed one-liners | `check-file-size` (`oneliner=dense`, `oneliner=long-packed`) | block |
@@ -23,6 +25,7 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 
 - Static smell checks: `tools/check-patterns.mjs`
 - Semantic contract checks: `tools/check-smell-contracts.mjs`
+- Naming contract checks: `tools/check-naming.mjs`
 - Aggregated smell gate: `npm run check:smells`
 - Full gate: `npm run check:all` (includes `npm run check:smells` via `check:core`)
 - Push blocker: `.githooks/pre-push` -> `npm run check:all`
@@ -59,6 +62,18 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 1. Normalize numeric props in mapper (`finite number` or `undefined`).
 2. Renderer consumes trusted normalized props and applies local defaults only.
 3. Add mapper contract checks for non-finite output.
+
+### Mapper logic leakage
+
+1. Keep mapper logic limited to kind routing, field mapping, and numeric normalization.
+2. Remove mapper-local helper functions (other than `create`/`translate`).
+3. Move formatter/status/display logic to `cluster/rendering/`, `widgets/`, or `ClusterMapperToolkit`.
+
+### Cluster renderer naming drift
+
+1. Rename cluster-rendering components to role-based IDs (remove cluster prefixes).
+2. Keep `componentId`, UMD `globalKey`, returned `id`, and file basename aligned.
+3. Update mapper `renderer` values and `config/components.js` registrations together.
 
 ### Hotspot growth
 

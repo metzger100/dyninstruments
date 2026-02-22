@@ -16,6 +16,10 @@ A cluster is one AvNav widget with multiple `kind` choices (numeric and optional
 
 Translation logic lives in one mapper module per cluster.
 
+Mapper contract:
+- Keep mappers declarative only (`create` + `translate`, kind routing, value normalization).
+- Put formatter/status/display logic in renderer modules or shared toolkit helpers.
+
 ## Step 1: Add Kind Defaults
 
 Add entries in `config/shared/kind-defaults.js`:
@@ -134,6 +138,10 @@ If mapper returns `renderer: "NewGauge"`:
 2. Add `NewGauge` to `ClusterRendererRouter.deps` in `config/components.js`
 3. Wire runtime selection in `cluster/rendering/ClusterRendererRouter.js`:
 - add `NewGauge: Helpers.getModule("NewGauge").create(def, Helpers)` to `rendererSpecs`
+
+Naming rule for `cluster/rendering/` wrappers:
+- Use role-based IDs (example: `DateTimeWidget`, `TimeStatusWidget`), not cluster-prefixed IDs.
+- Keep file basename, component ID, returned `id`, and `globalKey` aligned.
 
 ## Adding a New Kind
 

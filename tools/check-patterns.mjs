@@ -7,6 +7,7 @@ let WARN_MODE = false;
 const SKIP_DIRS = new Set([".git", "node_modules", "coverage"]);
 const fileCache = new Map();
 const scopeCache = new Map();
+let clusterPrefixCache = null;
 const RULES = [
   {
     name: "duplicate-functions",
@@ -105,6 +106,31 @@ const RULES = [
     },
     run: runRendererNumericCoercionRule,
     message: ({ file, line, propName }) => `[renderer-numeric-coercion-without-boundary-contract] ${file}:${line}\nRenderer coerces mapper-owned prop '${propName}' via Number(props.${propName}).\nNormalize at mapper boundary and pass finite numbers or undefined.`
+  },
+  {
+    name: "mapper-logic-leakage",
+    scope: {
+      include: ["cluster/mappers/*Mapper.js"],
+      exclude: [
+        "cluster/mappers/ClusterMapperRegistry.js",
+        "cluster/mappers/ClusterMapperToolkit.js",
+        "tests/**",
+        "tools/**"
+      ]
+    },
+    run: runMapperLogicLeakageRule,
+    functionAllowlist: ["create", "translate"],
+    message: ({ file, line, detail }) => `[mapper-logic-leakage] ${file}:${line}\n${detail}\nMappers must stay declarative. Move presentation/business logic to renderer modules or ClusterMapperToolkit.`
+  },
+  {
+    name: "cluster-renderer-cluster-prefix",
+    scope: {
+      include: ["cluster/rendering/*.js"],
+      exclude: ["cluster/rendering/ClusterRendererRouter.js", "tests/**", "tools/**"]
+    },
+    run: runClusterRendererClusterPrefixRule,
+    allowlist: [],
+    message: ({ file, line, id, prefix }) => `[cluster-renderer-cluster-prefix] ${file}:${line}\nRenderer id '${id}' starts with cluster prefix '${prefix}'.\nUse role-based renderer names in cluster/rendering/ (for example 'DateTimeWidget' instead of '${prefix}${id.slice(prefix.length)}').`
   }
 ];
 
@@ -116,6 +142,7 @@ export function runPatternCheck(options = {}) {
   WARN_MODE = !!options.warnMode;
   fileCache.clear();
   scopeCache.clear();
+  clusterPrefixCache = null;
 
   const findings = [];
   const checkedFiles = new Set();
@@ -412,6 +439,101 @@ function runRendererNumericCoercionRule(rule, files) {
   }
 
   return out;
+}
+function runMapperLogicLeakageRule(rule, files) {
+  const out = [];
+  const namedFunctionDecl = /^\s*function\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(/gm;
+  const helperFunctionBinding = /^\s*(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*(?:function\b|(?:\([^)]*\)|[A-Za-z_$][A-Za-z0-9_$]*)\s*=>)/gm;
+
+  for (const file of files) {
+    const data = getFileData(file);
+    const seen = new Set();
+    let match;
+
+    while ((match = namedFunctionDecl.exec(data.maskedText))) {
+      const name = match[1];
+      if (rule.functionAllowlist.includes(name)) continue;
+      const line = lineAt(match.index, data.lineStarts);
+      const key = `${file}:${line}:${name}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({
+        file,
+        line,
+        message: rule.message({
+          file,
+          line,
+          detail: `Mapper declares helper function '${name}'.`
+        })
+      });
+    }
+
+    while ((match = helperFunctionBinding.exec(data.maskedText))) {
+      const name = match[1];
+      const line = lineAt(match.index, data.lineStarts);
+      const key = `${file}:${line}:${name}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({
+        file,
+        line,
+        message: rule.message({
+          file,
+          line,
+          detail: `Mapper binds helper function '${name}' via variable assignment.`
+        })
+      });
+    }
+  }
+
+  return out;
+}
+function runClusterRendererClusterPrefixRule(rule, files) {
+  const out = [];
+  const prefixes = getClusterPascalPrefixes();
+  if (!prefixes.length) return out;
+
+  for (const file of files) {
+    const id = path.basename(file, ".js");
+    if (rule.allowlist.includes(id)) continue;
+    const prefix = prefixes.find((candidate) => id.startsWith(candidate) && id.length > candidate.length);
+    if (!prefix) continue;
+    out.push({
+      file,
+      line: 1,
+      message: rule.message({ file, line: 1, id, prefix })
+    });
+  }
+
+  return out;
+}
+function getClusterPascalPrefixes() {
+  if (clusterPrefixCache) return clusterPrefixCache;
+
+  const clustersDir = path.join(ROOT, "config/clusters");
+  if (!fs.existsSync(clustersDir)) {
+    clusterPrefixCache = [];
+    return clusterPrefixCache;
+  }
+
+  clusterPrefixCache = fs.readdirSync(clustersDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".js"))
+    .map((entry) => path.basename(entry.name, ".js"))
+    .map(function (name) {
+      return name
+        .split(/[-_]+/)
+        .filter(Boolean)
+        .map(function (segment) {
+          return segment[0].toUpperCase() + segment.slice(1);
+        })
+        .join("");
+    })
+    .filter(Boolean)
+    .sort(function (a, b) {
+      return b.length - a.length || a.localeCompare(b);
+    });
+
+  return clusterPrefixCache;
 }
 function canonicalName(name) {
   if (name === "formatSpeed" || name === "formatSpeedString") return "__formatSpeed";

@@ -67,27 +67,27 @@
         },
 
         // ---------------- VoltageGaugeWidget (graphic) settings -------------------
-        voltageMinValue: {
+        minValue: {
           type: "FLOAT", min: 0, max: 60, step: 0.1, default: 7.0,
           name: "Min voltage",
           condition: { kind: "voltageGraphic" }
         },
-        voltageMaxValue: {
+        maxValue: {
           type: "FLOAT", min: 1, max: 80, step: 0.1, default: 15.0,
           name: "Max voltage",
           condition: { kind: "voltageGraphic" }
         },
-        voltageTickMajor: {
+        tickMajor: {
           type: "FLOAT", min: 0.1, max: 20, step: 0.1, default: 1.0,
           name: "Major tick step",
           condition: { kind: "voltageGraphic" }
         },
-        voltageTickMinor: {
+        tickMinor: {
           type: "FLOAT", min: 0.1, max: 10, step: 0.1, default: 0.2,
           name: "Minor tick step",
           condition: { kind: "voltageGraphic" }
         },
-        voltageShowEndLabels: {
+        showEndLabels: {
           type: "BOOLEAN", default: false,
           name: "Show min/max labels",
           condition: { kind: "voltageGraphic" }
@@ -108,12 +108,12 @@
         },
 
         // low-end sectors (DepthGaugeWidget-Regeln)
-        voltageAlarmFrom: {
+        alarmFrom: {
           type: "FLOAT", min: 0, max: 80, step: 0.1, default: 11.6,
           name: "Alarm to (low)",
           condition: { kind: "voltageGraphic", voltageAlarmEnabled: true }
         },
-        voltageWarningFrom: {
+        warningFrom: {
           type: "FLOAT", min: 0, max: 80, step: 0.1, default: 12.2,
           name: "Warning to (low)",
           condition: { kind: "voltageGraphic", voltageWarningEnabled: true }
