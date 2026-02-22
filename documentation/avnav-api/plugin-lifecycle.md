@@ -48,10 +48,13 @@ storeKeys: {
 }
 ```
 
+For plugin-maintained key/unit contracts (including roll/pitch), see [core-key-catalog.md](core-key-catalog.md).
+
 ### Common Vessel Time/Status Keys
 
 - `nav.gps.rtime` — GPS time value used by vessel `clock`, `dateTime`, and `timeStatus` kinds.
 - `nav.gps.valid` — GPS validity flag used by vessel `timeStatus` kind.
+- Dynamic SignalK passthrough keys (for example `nav.gps.signalk.*`) require explicit formatter/unit tuples; do not assume units without checking [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md).
 
 ## Widget Context
 
@@ -144,5 +147,7 @@ function create(def, Helpers) {
 
 - [editable-parameters.md](editable-parameters.md) — parameter types and conditions
 - [formatters.md](formatters.md) — formatter registration and built-ins
+- [core-key-catalog.md](core-key-catalog.md) — key/unit catalog for core integration
+- [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md) — contract boundaries and tuple policy
 - [interactive-widgets.md](interactive-widgets.md) — preventing instrument-dashboard (`GpsPage`) click-to-navigate for interactive content
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md) — ClusterWidget mapper

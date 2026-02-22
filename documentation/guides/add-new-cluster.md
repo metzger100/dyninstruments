@@ -19,6 +19,10 @@ Translation logic lives in one mapper module per cluster.
 Mapper contract:
 - Keep mappers declarative only (`create` + `translate`, kind routing, value normalization).
 - Put formatter/status/display logic in renderer modules or shared toolkit helpers.
+- For each formatter-bearing kind, define/update a contract tuple in docs:
+  - [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md)
+  - [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md)
+  - [../avnav-api/core-key-catalog.md](../avnav-api/core-key-catalog.md)
 
 ## Step 1: Add Kind Defaults
 
@@ -171,6 +175,7 @@ For a new `kind` in an existing cluster:
 - [ ] Mapper added in `ClusterMapperRegistry.deps` (`config/components.js`)
 - [ ] Mapper added in runtime `MAPPER_MODULE_IDS` (`cluster/mappers/ClusterMapperRegistry.js`)
 - [ ] Renderer wiring updated (if graphic)
+- [ ] Every formatter-bearing kind has documented tuple (`kind -> key -> raw unit/type -> formatter -> formatterParameters`) in core contract docs
 
 ## Related
 

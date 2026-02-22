@@ -16,6 +16,8 @@
 - **What editableParameter types exist?** → [avnav-api/editable-parameters.md](avnav-api/editable-parameters.md)
 - **How do conditions on editableParameters work?** → [avnav-api/editable-parameters.md](avnav-api/editable-parameters.md#condition-undocumented-avnav-feature)
 - **What formatters are available (formatSpeed, formatDistance...)?** → [avnav-api/formatters.md](avnav-api/formatters.md)
+- **What are the canonical formatter signatures and parameter order from AvNav core?** → [avnav-api/core-formatter-catalog.md](avnav-api/core-formatter-catalog.md)
+- **What key/unit contracts are used for core integration (including roll/pitch)?** → [avnav-api/core-key-catalog.md](avnav-api/core-key-catalog.md)
 - **How do I prevent AvNav instrument dashboard (`GpsPage`) widget clicks from navigating back to map?** → [avnav-api/interactive-widgets.md](avnav-api/interactive-widgets.md)
 
 ## Architecture
@@ -25,6 +27,7 @@
 - **How does the dependency system work?** → [architecture/component-system.md](architecture/component-system.md#dependency-graph)
 - **How does ClusterWidget route to renderers?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
 - **How does translateFunction mapper to graphic/numeric?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md#runtime-flow)
+- **Where are plugin↔core contract tuples and roll/pitch contract rules?** → [architecture/plugin-core-contracts.md](architecture/plugin-core-contracts.md)
 - **What is the Helpers object?** → [shared/helpers.md](shared/helpers.md)
 
 ## Conventions
@@ -100,4 +103,5 @@
 **"How does HiDPI canvas scaling work?"** → [shared/helpers.md](shared/helpers.md#setupcanvas)
 **"How do I hide the native AvNav widget header?"** → [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md#wantshidenativehead)
 **"How do I add a SignalK KEY selector to the editor?"** → [avnav-api/editable-parameters.md](avnav-api/editable-parameters.md#key-details)
+**"What is the correct roll/pitch formatter tuple and why?"** → [architecture/plugin-core-contracts.md](architecture/plugin-core-contracts.md), [avnav-api/core-formatter-catalog.md](avnav-api/core-formatter-catalog.md), [avnav-api/core-key-catalog.md](avnav-api/core-key-catalog.md)
 **"How do I build interactive buttons/timers/toggles on AvNav instrument dashboard (`GpsPage`)?"** → [avnav-api/interactive-widgets.md](avnav-api/interactive-widgets.md)
