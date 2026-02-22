@@ -75,22 +75,30 @@
         };
       }
       if (req === "pitch") {
-        return out(
-          p.pitch,
-          cap("pitch"),
-          unit("pitch"),
-          "formatDirection",
-          [false, true, false]
-        );
+        const rawPitch = p.pitch;
+        const pitchValue = (rawPitch == null || (typeof rawPitch === "string" && rawPitch.trim() === ""))
+          ? undefined
+          : rawPitch;
+        return {
+          value: pitchValue,
+          caption: cap("pitch"),
+          unit: unit("pitch"),
+          formatter: "formatDirection",
+          formatterParameters: [true, true, false]
+        };
       }
       if (req === "roll") {
-        return out(
-          p.roll,
-          cap("roll"),
-          unit("roll"),
-          "formatDirection",
-          [false, true, false]
-        );
+        const rawRoll = p.roll;
+        const rollValue = (rawRoll == null || (typeof rawRoll === "string" && rawRoll.trim() === ""))
+          ? undefined
+          : rawRoll;
+        return {
+          value: rollValue,
+          caption: cap("roll"),
+          unit: unit("roll"),
+          formatter: "formatDirection",
+          formatterParameters: [true, true, false]
+        };
       }
 
       return {};

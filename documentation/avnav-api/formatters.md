@@ -101,6 +101,7 @@ Used by text and graphic widgets (`runtime/helpers.js`):
 | Speed/Wind/VMG | `formatSpeed` |
 | Navigation and anchor distances | `formatDistance` |
 | Course/bearing | `formatDirection360` |
+| Vessel roll/pitch | `formatDirection` with `[true, true, false]` (radian input, signed `±180`) |
 | Temperature | `formatTemperature` |
 | Depth/voltage numeric formatting | `formatDecimal` |
 | ETA/clock display | `formatTime` |
