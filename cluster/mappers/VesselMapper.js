@@ -11,7 +11,6 @@
 }(this, function () {
   "use strict";
 
-  const RAD2DEG = 180 / Math.PI;
   const DATE_TIME_RATIO_THRESHOLD_NORMAL_DEFAULT = 1.2;
   const DATE_TIME_RATIO_THRESHOLD_FLAT_DEFAULT = 4.0;
   const hasOwn = Object.prototype.hasOwnProperty;
@@ -51,37 +50,12 @@
     return statusCircle(raw);
   }
 
-  function makeAttitudeFormatter(fallback, makeAngleFormatter) {
-    const angleFormatter = (typeof makeAngleFormatter === "function")
-      ? makeAngleFormatter(false, false, fallback)
-      : function (rawDeg) {
-        const n = Number(rawDeg);
-        if (!isFinite(n)) {
-          return fallback;
-        }
-        const rounded = Math.round(n);
-        if (rounded === 180) {
-          return "-180";
-        }
-        return String(rounded);
-      };
-
-    return function (raw) {
-      const n = Number(raw);
-      if (!Number.isFinite(n)) {
-        return fallback;
-      }
-      return angleFormatter(n * RAD2DEG);
-    };
-  }
-
   function create() {
     function translate(props, toolkit) {
       const p = props || {};
       const cap = toolkit.cap;
       const unit = toolkit.unit;
       const out = toolkit.out;
-      const makeAngleFormatter = toolkit.makeAngleFormatter;
       const num = toolkit.num || function (value) {
         const n = Number(value);
         return Number.isFinite(n) ? n : undefined;
@@ -164,8 +138,8 @@
           p.pitch,
           cap("pitch"),
           unit("pitch"),
-          makeAttitudeFormatter(fallback, makeAngleFormatter),
-          []
+          "formatDirection",
+          [false, true, false]
         );
       }
       if (req === "roll") {
@@ -173,8 +147,8 @@
           p.roll,
           cap("roll"),
           unit("roll"),
-          makeAttitudeFormatter(fallback, makeAngleFormatter),
-          []
+          "formatDirection",
+          [false, true, false]
         );
       }
 

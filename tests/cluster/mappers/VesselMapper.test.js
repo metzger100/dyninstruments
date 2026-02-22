@@ -96,19 +96,18 @@ describe("VesselMapper", function () {
     expect(out.coordinateRawValues).toBe(true);
   });
 
-  it("maps pitch and roll with radians-to-signed-degree formatter functions", function () {
+  it("maps pitch and roll to formatDirection in signed-degree mode", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
 
-    const pitchOut = mapper.translate({ kind: "pitch", pitch: Math.PI / 4, default: "---" }, toolkit);
-    expect(pitchOut.value).toBe(Math.PI / 4);
-    expect(pitchOut.formatter(Math.PI / 4)).toBe("45");
-    expect(pitchOut.formatter(-Math.PI / 6)).toBe("-30");
+    const pitchOut = mapper.translate({ kind: "pitch", pitch: 45, default: "---" }, toolkit);
+    expect(pitchOut.value).toBe(45);
+    expect(pitchOut.formatter).toBe("formatDirection");
+    expect(pitchOut.formatterParameters).toEqual([false, true, false]);
 
-    const rollOut = mapper.translate({ kind: "roll", roll: -Math.PI / 2, default: "---" }, toolkit);
-    expect(rollOut.value).toBe(-Math.PI / 2);
-    expect(rollOut.formatter(-Math.PI / 2)).toBe("-90");
-    expect(rollOut.formatter(Math.PI)).toBe("-180");
-    expect(rollOut.formatter("x")).toBe("---");
+    const rollOut = mapper.translate({ kind: "roll", roll: -90, default: "---" }, toolkit);
+    expect(rollOut.value).toBe(-90);
+    expect(rollOut.formatter).toBe("formatDirection");
+    expect(rollOut.formatterParameters).toEqual([false, true, false]);
   });
 
   it("supports toolkit fallback number conversion and returns empty object for unknown kind", function () {
