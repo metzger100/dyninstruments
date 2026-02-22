@@ -56,7 +56,11 @@
     VESSEL_KIND: {
       voltage: { cap: "VOLT", unit: "V" },
       voltageGraphic: { cap: "VOLT", unit: "V" },
-      clock: { cap: "TIME", unit: "" }
+      clock: { cap: "TIME", unit: "" },
+      dateTime: { cap: "", unit: "" },
+      timeStatus: { cap: "", unit: "" },
+      pitch: { cap: "PITCH", unit: "\u00b0" },
+      roll: { cap: "ROLL", unit: "\u00b0" }
     }
   };
 }(this));

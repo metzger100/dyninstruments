@@ -11,6 +11,10 @@
 }(this, function () {
   "use strict";
 
+  const STATUS_OK = "\ud83d\udfe2";
+  const STATUS_BAD = "\ud83d\udd34";
+  const TIME_STATUS_FALLBACK_SCALE = 0.82;
+
   function parseLonLat(value) {
     if (!value || typeof value !== "object") {
       return null;
@@ -36,25 +40,80 @@
     return { lat: lat, lon: lon };
   }
 
-  function formatCoordinate(value, axis, fallbackText, props, Helpers) {
-    const n = Number(value);
-    if (!isFinite(n)) {
-      return fallbackText;
+  function readLonLatRaw(value) {
+    if (!value || typeof value !== "object") {
+      return null;
     }
 
-    const p = props || {};
-    const formatter = (typeof p.coordinateFormatter !== "undefined")
-      ? p.coordinateFormatter
-      : "formatLonLatsDecimal";
-    const baseParams = Array.isArray(p.coordinateFormatterParameters)
-      ? p.coordinateFormatterParameters.slice()
-      : ((typeof p.coordinateFormatterParameters === "string")
-        ? p.coordinateFormatterParameters.split(",")
-        : []);
-    baseParams.push(axis);
+    if (Array.isArray(value)) {
+      if (value.length < 2) {
+        return null;
+      }
+      return { lon: value[0], lat: value[1] };
+    }
 
-    const out = String(Helpers.applyFormatter(n, {
+    return { lat: value.lat, lon: value.lon };
+  }
+
+  function parseFormatterParams(raw) {
+    if (Array.isArray(raw)) {
+      return raw.slice();
+    }
+    if (typeof raw === "string") {
+      return raw.split(",");
+    }
+    return [];
+  }
+
+  function pickCoordinateFormatter(props, axis) {
+    const p = props || {};
+    const axisSuffix = axis === "lat" ? "Lat" : "Lon";
+    const formatterKey = "coordinateFormatter" + axisSuffix;
+    const paramsKey = "coordinateFormatterParameters" + axisSuffix;
+    const hasAxisOverride = Object.prototype.hasOwnProperty.call(p, formatterKey);
+
+    const formatter = hasAxisOverride
+      ? p[formatterKey]
+      : ((typeof p.coordinateFormatter !== "undefined")
+        ? p.coordinateFormatter
+        : "formatLonLatsDecimal");
+
+    const paramsRaw = (Object.prototype.hasOwnProperty.call(p, paramsKey))
+      ? p[paramsKey]
+      : p.coordinateFormatterParameters;
+
+    return {
       formatter: formatter,
+      params: parseFormatterParams(paramsRaw),
+      appendAxisParam: !hasAxisOverride
+    };
+  }
+
+  function formatCoordinate(value, axis, fallbackText, props, Helpers) {
+    const p = props || {};
+    const rawMode = p.coordinateRawValues === true;
+    let raw = value;
+
+    if (rawMode) {
+      if (raw == null || (typeof raw === "number" && Number.isNaN(raw))) {
+        return fallbackText;
+      }
+    } else {
+      const n = Number(value);
+      if (!isFinite(n)) {
+        return fallbackText;
+      }
+      raw = n;
+    }
+
+    const cfg = pickCoordinateFormatter(p, axis);
+    const baseParams = cfg.params;
+    if (cfg.appendAxisParam) {
+      baseParams.push(axis);
+    }
+
+    const out = String(Helpers.applyFormatter(raw, {
+      formatter: cfg.formatter,
       formatterParameters: baseParams,
       default: fallbackText
     }));
@@ -63,6 +122,50 @@
     }
 
     return out;
+  }
+
+  function isTimeStatusMarker(text) {
+    const raw = (text == null) ? "" : String(text);
+    const marker = raw.trim();
+    return marker === STATUS_OK || marker === STATUS_BAD;
+  }
+
+  function readActualTextHeight(metrics) {
+    if (!metrics || typeof metrics !== "object") {
+      return null;
+    }
+    const ascent = Number(metrics.actualBoundingBoxAscent);
+    const descent = Number(metrics.actualBoundingBoxDescent);
+    if (!Number.isFinite(ascent) || !Number.isFinite(descent)) {
+      return null;
+    }
+    const total = ascent + descent;
+    if (!(total > 0)) {
+      return null;
+    }
+    return total;
+  }
+
+  function buildFlatAxesTextMeta(value, fallbackText, props, Helpers) {
+    const raw = readLonLatRaw(value);
+    if (!raw) {
+      return {
+        topText: fallbackText,
+        bottomText: fallbackText,
+        joinedText: fallbackText,
+        isTimeStatusEmoji: false
+      };
+    }
+
+    const topText = formatCoordinate(raw.lat, "lat", fallbackText, props, Helpers);
+    const bottomText = formatCoordinate(raw.lon, "lon", fallbackText, props, Helpers);
+    const joined = (topText + " " + bottomText).trim();
+    return {
+      topText: topText,
+      bottomText: bottomText,
+      joinedText: joined || fallbackText,
+      isTimeStatusEmoji: isTimeStatusMarker(topText)
+    };
   }
 
   function create(def, Helpers) {
@@ -101,7 +204,13 @@
       const fallbackText = (p.default == null) ? "---" : String(p.default);
 
       if (mode === "flat") {
-        const value = Helpers.applyFormatter(p.value, p);
+        const useAxisFlat = !!p.coordinateFlatFromAxes;
+        const flatMeta = useAxisFlat
+          ? buildFlatAxesTextMeta(p.value, fallbackText, p, Helpers)
+          : null;
+        const value = String(useAxisFlat
+          ? flatMeta.joinedText
+          : Helpers.applyFormatter(p.value, p));
         const padX = Math.max(6, Math.floor(Math.min(W, H) * 0.04));
         const innerY = Math.max(3, Math.floor(Math.min(W, H) * 0.035));
         const gapBase = Math.max(6, Math.floor(Math.min(W, H) * 0.06));
@@ -117,14 +226,23 @@
           const sPx = Math.floor(mid * secScale);
 
           textLayout.setFont(ctx, vPx, valueWeight, family);
-          const vW = ctx.measureText(value).width;
+          const valueMetrics = ctx.measureText(value);
+          const vW = valueMetrics.width;
 
           textLayout.setFont(ctx, sPx, labelWeight, family);
           const cW = caption ? ctx.measureText(caption).width : 0;
           const uW = unit ? ctx.measureText(unit).width : 0;
 
           const total = (caption ? cW + gapBase : 0) + vW + (unit ? gapBase + uW : 0);
-          const ok = total <= (W - padX * 2) && vPx <= maxH && sPx <= maxH;
+          let valueHeightOk = vPx <= maxH;
+          if (flatMeta && flatMeta.isTimeStatusEmoji) {
+            const safeHeight = maxH * TIME_STATUS_FALLBACK_SCALE;
+            const measuredHeight = readActualTextHeight(valueMetrics);
+            valueHeightOk = measuredHeight == null
+              ? vPx <= safeHeight
+              : measuredHeight <= safeHeight;
+          }
+          const ok = total <= (W - padX * 2) && valueHeightOk && sPx <= maxH;
 
           if (ok) {
             best = mid;
@@ -167,7 +285,9 @@
         return;
       }
 
-      const parsed = parseLonLat(p.value);
+      const parsed = (p.coordinateRawValues === true)
+        ? readLonLatRaw(p.value)
+        : parseLonLat(p.value);
       const latText = parsed
         ? formatCoordinate(parsed.lat, "lat", fallbackText, p, Helpers)
         : fallbackText;
@@ -195,7 +315,19 @@
       const lineBase = Math.floor(maxRowH);
       const latPx = textLayout.fitSingleTextPx(ctx, latText, lineBase, maxRowW, maxRowH, family, valueWeight);
       const lonPx = textLayout.fitSingleTextPx(ctx, lonText, lineBase, maxRowW, maxRowH, family, valueWeight);
-      const linePx = Math.max(1, Math.min(latPx, lonPx));
+      let linePx = Math.max(1, Math.min(latPx, lonPx));
+      if (isTimeStatusMarker(latText)) {
+        const safeRowHeight = maxRowH * TIME_STATUS_FALLBACK_SCALE;
+        textLayout.setFont(ctx, linePx, valueWeight, family);
+        const latMetrics = ctx.measureText(latText);
+        const measuredHeight = readActualTextHeight(latMetrics);
+        if (measuredHeight == null) {
+          linePx = Math.max(1, Math.min(linePx, Math.floor(safeRowHeight)));
+        } else if (measuredHeight > safeRowHeight) {
+          const scale = safeRowHeight / measuredHeight;
+          linePx = Math.max(1, Math.floor(linePx * scale));
+        }
+      }
 
       if (hasHeader) {
         const maxHeaderH = Math.max(8, headerH - innerY * 2);

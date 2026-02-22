@@ -68,6 +68,13 @@ Accessed via `avnav.api.formatter.{name}(value, ...params)`:
 
 ---
 
+### Compatibility Note: Date/Time Formatter Inputs
+
+`formatTime`, `formatDate`, and `formatDateTime` should receive the raw store value (Date/time object/value) from AvNav.  
+Do not pre-coerce these inputs with `Number(...)` in mapper/widget boundaries, or formatter behavior can diverge from core AvNav widgets.
+
+---
+
 ## dyninstruments Formatter Usage
 
 ### Formatter Resolution in Helpers.applyFormatter (dyninstruments-internal)

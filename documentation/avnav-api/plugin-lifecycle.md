@@ -48,6 +48,11 @@ storeKeys: {
 }
 ```
 
+### Common Vessel Time/Status Keys
+
+- `nav.gps.rtime` — GPS time value used by vessel `clock`, `dateTime`, and `timeStatus` kinds.
+- `nav.gps.valid` — GPS validity flag used by vessel `timeStatus` kind.
+
 ## Widget Context
 
 Available as `this` in `initFunction`, `finalizeFunction`, `renderHtml`, `renderCanvas`.

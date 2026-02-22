@@ -21,7 +21,26 @@ describe("config/clusters/vessel.js", function () {
     const def = loadVesselDef();
     expect(def.name).toBe("dyninstruments_Vessel");
     expect(def.storeKeys.clock).toBe("nav.gps.rtime");
+    expect(def.storeKeys.gpsValid).toBe("nav.gps.valid");
+    expect(def.storeKeys.pitch).toBe("nav.gps.signalk.navigation.attitude.pitch");
+    expect(def.storeKeys.roll).toBe("nav.gps.signalk.navigation.attitude.roll");
     expect(def.editableParameters.kind.default).toBe("voltage");
+    const kinds = def.editableParameters.kind.list.map((entry) => entry.value);
+    expect(kinds).toEqual(expect.arrayContaining([
+      "voltage",
+      "voltageGraphic",
+      "clock",
+      "dateTime",
+      "timeStatus",
+      "pitch",
+      "roll"
+    ]));
+    expect(def.editableParameters.pitchKey.default).toBe("nav.gps.signalk.navigation.attitude.pitch");
+    expect(def.editableParameters.rollKey.default).toBe("nav.gps.signalk.navigation.attitude.roll");
+    expect(def.editableParameters.dateTimeRatioThresholdNormal.default).toBe(1.2);
+    expect(def.editableParameters.dateTimeRatioThresholdFlat.default).toBe(4.0);
+    expect(def.editableParameters.dateTimeRatioThresholdNormal.condition).toEqual({ kind: "dateTime" });
+    expect(def.editableParameters.dateTimeRatioThresholdFlat.condition).toEqual({ kind: "dateTime" });
   });
 
   it("injects selected voltage path into storeKeys.value for voltage kinds", function () {
@@ -41,5 +60,21 @@ describe("config/clusters/vessel.js", function () {
     const out = def.updateFunction({ kind: "clock", storeKeys: { value: "a", clock: "b" } });
     expect(out.storeKeys.value).toBeUndefined();
     expect(out.storeKeys.clock).toBe("b");
+  });
+
+  it("sets pitch/roll keys from editable KEYs and falls back to defaults when empty", function () {
+    const def = loadVesselDef();
+
+    const pitchExplicit = def.updateFunction({ kind: "pitch", pitchKey: " sensors.attitude.pitch " });
+    expect(pitchExplicit.storeKeys.pitch).toBe("sensors.attitude.pitch");
+
+    const pitchFallback = def.updateFunction({ kind: "pitch", pitchKey: "  " });
+    expect(pitchFallback.storeKeys.pitch).toBe("nav.gps.signalk.navigation.attitude.pitch");
+
+    const rollExplicit = def.updateFunction({ kind: "roll", rollKey: " sensors.attitude.roll " });
+    expect(rollExplicit.storeKeys.roll).toBe("sensors.attitude.roll");
+
+    const rollFallback = def.updateFunction({ kind: "roll", rollKey: "" });
+    expect(rollFallback.storeKeys.roll).toBe("nav.gps.signalk.navigation.attitude.roll");
   });
 });
