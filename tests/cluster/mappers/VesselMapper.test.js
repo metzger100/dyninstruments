@@ -100,18 +100,50 @@ describe("VesselMapper", function () {
     expect(out.value).toBeUndefined();
   });
 
-  it("maps pitch and roll to formatDirection in signed-degree mode", function () {
+  it("maps pitch and roll to formatDirection in signed-degree mode with radian input", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
 
     const pitchOut = mapper.translate({ kind: "pitch", pitch: 45, default: "---" }, toolkit);
     expect(pitchOut.value).toBe(45);
     expect(pitchOut.formatter).toBe("formatDirection");
-    expect(pitchOut.formatterParameters).toEqual([false, true, false]);
+    expect(pitchOut.formatterParameters).toEqual([true, true, false]);
 
     const rollOut = mapper.translate({ kind: "roll", roll: -90, default: "---" }, toolkit);
     expect(rollOut.value).toBe(-90);
     expect(rollOut.formatter).toBe("formatDirection");
-    expect(rollOut.formatterParameters).toEqual([false, true, false]);
+    expect(rollOut.formatterParameters).toEqual([true, true, false]);
+  });
+
+  it("normalizes missing attitude payloads while preserving explicit zero", function () {
+    const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
+
+    const pitchNull = mapper.translate({ kind: "pitch", pitch: null, default: "---" }, toolkit);
+    expect(Object.prototype.hasOwnProperty.call(pitchNull, "value")).toBe(true);
+    expect(pitchNull.value).toBeUndefined();
+    expect(pitchNull.formatterParameters).toEqual([true, true, false]);
+
+    const rollNull = mapper.translate({ kind: "roll", roll: null, default: "---" }, toolkit);
+    expect(Object.prototype.hasOwnProperty.call(rollNull, "value")).toBe(true);
+    expect(rollNull.value).toBeUndefined();
+    expect(rollNull.formatterParameters).toEqual([true, true, false]);
+
+    const pitchBlank = mapper.translate({ kind: "pitch", pitch: "   ", default: "---" }, toolkit);
+    expect(Object.prototype.hasOwnProperty.call(pitchBlank, "value")).toBe(true);
+    expect(pitchBlank.value).toBeUndefined();
+    expect(pitchBlank.formatterParameters).toEqual([true, true, false]);
+
+    const rollBlank = mapper.translate({ kind: "roll", roll: "", default: "---" }, toolkit);
+    expect(Object.prototype.hasOwnProperty.call(rollBlank, "value")).toBe(true);
+    expect(rollBlank.value).toBeUndefined();
+    expect(rollBlank.formatterParameters).toEqual([true, true, false]);
+
+    const pitchZero = mapper.translate({ kind: "pitch", pitch: 0, default: "---" }, toolkit);
+    expect(pitchZero.value).toBe(0);
+    expect(pitchZero.formatterParameters).toEqual([true, true, false]);
+
+    const rollZero = mapper.translate({ kind: "roll", roll: 0, default: "---" }, toolkit);
+    expect(rollZero.value).toBe(0);
+    expect(rollZero.formatterParameters).toEqual([true, true, false]);
   });
 
   it("supports toolkit fallback number conversion and returns empty object for unknown kind", function () {
