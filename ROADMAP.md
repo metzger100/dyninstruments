@@ -25,14 +25,14 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ### Planned integration directions
 
-- `vessel`: `datetime`, `timeStatus`, `signalKPitch`, `signalKRoll`
+- `vessel`: quick-win text kinds completed (`dateTime`, `timeStatus`, `pitch`, `roll`)
 - `nav`: `activeRoute`, `routePoints`, `xteDisplay`, `editRoute`
 - planned new clusters: `ais` (for example `aisTarget`), `map` (for example `zoom`, `centerDisplay`)
 - `default`: likely a dedicated utility/default widget instead of a cluster kind
 
 ### Practical implementation order
 
-1. Quick wins (text/`ThreeValueTextWidget`): `DateTime`, `TimeStatus`, `signalKPitch`, `signalKRoll`
+1. ✅ Quick wins (text): `DateTime`, `TimeStatus`, `signalKPitch`, `signalKRoll`
 2. High-impact canvas visuals: `XteDisplay`, `ActiveRoute`
 3. Lists and controls (interaction-heavy): `RoutePoints`, `EditRoute`, `Zoom`, `CenterDisplay`
 4. Linear gauges: alternatives for graphic kinds
@@ -58,7 +58,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | CenterDisplay                | —                                                                            | ❌ not covered yet                          |
 | COG                          | dyninstruments_CourseHeading → `cog`                                         | ✅ covered                                  |
 | CombinedWidget               | —                                                                            | ❌ not covered yet                          |
-| DateTime                     | —                                                                            | ❌ not covered yet                          |
+| DateTime                     | dyninstruments_Vessel → `dateTime`                                           | ✅ covered                                  |
 | Default                      | —                                                                            | ❌ not covered yet                          |
 | DepthDisplay                 | dyninstruments_Environment → `depth`                                         | ✅ covered                                  |
 | DST                          | dyninstruments_Nav → `dst`                                                   | ✅ covered                                  |
@@ -81,12 +81,12 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | RteDistance                  | dyninstruments_Nav → `rteDistance`                                           | ✅ covered                                  |
 | RteEta                       | dyninstruments_Nav → `rteEta`                                                | ✅ covered                                  |
 | signalKCelsius               | dyninstruments_Environment → `temp`                                          | ✅ covered                                  |
-| signalKPitch                 | —                                                                            | ❌ not covered yet                          |
+| signalKPitch                 | dyninstruments_Vessel → `pitch`                                              | ✅ covered                                  |
 | signalKPressureHpa           | dyninstruments_Environment → `pressure`                                      | ✅ covered                                  |
-| signalKRoll                  | —                                                                            | ❌ not covered yet                          |
+| signalKRoll                  | dyninstruments_Vessel → `roll`                                               | ✅ covered                                  |
 | SOG                          | dyninstruments_Speed → `sog`                                                 | ✅ covered                                  |
 | STW                          | dyninstruments_Speed → `stw`                                                 | ✅ covered                                  |
-| TimeStatus                   | —                                                                            | ❌ not covered yet                          |
+| TimeStatus                   | dyninstruments_Vessel → `timeStatus`                                         | ✅ covered                                  |
 | VMG                          | dyninstruments_Nav → `vmg`                                                   | ✅ covered                                  |
 | WaterTemp                    | dyninstruments_Environment → `temp`                                          | ✅ covered                                  |
 | WindAngle                    | dyninstruments_Wind → `angleApparent`                                        | ✅ covered                                  |
