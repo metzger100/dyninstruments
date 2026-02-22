@@ -5,6 +5,7 @@
 ## Overview
 
 Formatters convert raw store values to display strings. AvNav provides built-in formatters and supports custom registration via `avnav.api.registerFormatter()`.
+Authoritative core formatter signatures and parameter-order details are maintained only in [core-formatter-catalog.md](core-formatter-catalog.md).
 
 ## Registering Custom Formatters (AvNav API)
 
@@ -48,25 +49,19 @@ avnav.api.registerFeatureFormatter('myHtmlInfo', myHtmlInfoFunction);
 
 ## Built-in Formatters (Canonical List)
 
-Accessed via `avnav.api.formatter.{name}(value, ...params)`:
+This file intentionally does not duplicate core formatter signatures.
 
-| Formatter | Parameters (positional) | Input | Output/Behavior |
-|---|---|---|---|
-| `formatDecimal` | `[fix, fract, addSpace, prefixZero]` | Number | Decimal formatting (`fix` = minimum integer digits, `fract` = digits after decimal point, `addSpace` = add a space before positive values, `prefixZero` = zero-prefix integer part) |
-| `formatDecimalOpt` | `[fix, fract, addSpace, prefixZero]` | Number | Like `formatDecimal`, but fractional digits are only shown for non-integer values |
-| `formatDistance` | `[unit]` (`"nm"`, `"m"`, `"km"`) | Distance value | Distance string in selected unit |
-| `formatSpeed` | `[unit]` (`"kn"`, `"ms"`, `"kmh"`) | Speed value | Speed string in selected unit |
-| `formatDirection` | `[inputRadian, range180, leadingZero]` | Direction value | Degree formatting (`inputRadian` = input is radian, `range180` = show +/-180, `leadingZero` = always 3 digits) |
-| `formatDirection360` | `[leadingZero]` | Direction value | Degree formatting in `0..360`, optional 3-digit zero padding |
-| `formatTime` | `[]` | Date/time value | Time string (`HH:MM:SS`) |
-| `formatClock` | `[]` | Date/time value | Time string (`HH:MM`) |
-| `formatDateTime` | `[]` | Date/time value | Date + time string |
-| `formatDate` | `[]` | Date/time value | Date string |
-| `formatString` | `[]` | Any value | Returns input as-is (string formatter) |
-| `formatTemperature` | `[unit]` (`"celsius"`, `"kelvin"`) | Temperature (Kelvin) | Temperature string in selected unit |
-| `formatPressure` | `[unit]` (`"pa"`, `"hpa"`, `"bar"`) | Pressure (Pa) | Pressure string in selected unit |
+Use [core-formatter-catalog.md](core-formatter-catalog.md) for:
+- canonical signature and positional parameter order
+- core alias mapping (`skPressure`, `skTemperature`)
+- normative roll/pitch tuple contract and common failure cases
 
 ---
+
+For strict integration contracts (including roll/pitch tuple requirements), use:
+- [core-formatter-catalog.md](core-formatter-catalog.md)
+- [core-key-catalog.md](core-key-catalog.md)
+- [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md)
 
 ### Compatibility Note: Date/Time Formatter Inputs
 
@@ -91,7 +86,7 @@ Used by text and graphic widgets (`runtime/helpers.js`):
    - `props.formatter` is a string -> `avnav.api.formatter[name]` call when present
 4. Formatter errors are caught intentionally and continue with fallback
 5. Fallback:
-   - `raw == null` or `Number.isNaN(raw)` -> `props.default || "---"`
+   - `raw == null` or `Number.isNaN(raw)` -> `props.default` when explicitly provided, otherwise `"---"`
    - otherwise -> `String(raw)`
 
 ### Formatter Names Currently Used by dyninstruments
@@ -110,7 +105,8 @@ Used by text and graphic widgets (`runtime/helpers.js`):
 
 ### Compatibility Note: Pressure Formatter Name
 
-Canonical formatter documentation uses `formatPressure`. Current dyninstruments runtime mapping still uses `skPressure` in `cluster/mappers/EnvironmentMapper.js`. This file intentionally documents both names until runtime mapping is migrated.
+Current dyninstruments runtime mapping still uses `skPressure` in `cluster/mappers/EnvironmentMapper.js`.  
+See canonical alias mapping in [core-formatter-catalog.md](core-formatter-catalog.md#legacy-aliases-present-in-core).
 
 ### Custom Angle Formatter (dyninstruments-internal)
 
@@ -138,6 +134,9 @@ Graphic gauges use mapper-provided formatter metadata and resolve formatter call
 ## Related
 
 - [plugin-lifecycle.md](plugin-lifecycle.md) — How translateFunction sets formatters
+- [core-formatter-catalog.md](core-formatter-catalog.md) — Authoritative signatures and parameter order
+- [core-key-catalog.md](core-key-catalog.md) — Key/unit contracts used for formatter selection
+- [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md) — Contract tuple schema and roll/pitch incident notes
 - [editable-parameters.md](editable-parameters.md) — formatterParameters in Layout Editor
 - [../shared/helpers.md](../shared/helpers.md) — runtime `Helpers.applyFormatter` behavior
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md) — Which formatter per kind

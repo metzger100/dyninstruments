@@ -57,6 +57,17 @@ Mapper boundary:
 - Mapper responsibilities: kind routing, output shape mapping, numeric normalization, renderer selection.
 - Renderer responsibilities: formatter/status/display logic and layout behavior.
 
+## Vessel Kind Contract Tuples
+
+| kind | renderer path | store field(s) | raw unit/type | formatter contract |
+|---|---|---|---|---|
+| `dateTime` | `DateTimeWidget` -> `PositionCoordinateWidget` | `clock` | Date/time value | `formatDateTime` + axis formatters `formatDate`/`formatTime` |
+| `timeStatus` | `TimeStatusWidget` -> `PositionCoordinateWidget` | `gpsValid`, `clock` | bool-like + Date/time | status-circle formatter + `formatTime` |
+| `pitch` | default `ThreeValueTextWidget` path | `pitch` | radians number or `undefined` | **mandatory:** `formatDirection` + `[true, true, false]` |
+| `roll` | default `ThreeValueTextWidget` path | `roll` | radians number or `undefined` | **mandatory:** `formatDirection` + `[true, true, false]` |
+
+Reference: [plugin-core-contracts.md](plugin-core-contracts.md), [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md), [../avnav-api/core-key-catalog.md](../avnav-api/core-key-catalog.md).
+
 ## Renderer Delegation
 
 `ClusterRendererRouter` manages these sub-renderers:
@@ -103,4 +114,7 @@ Must be registered in two places:
 
 - [component-system.md](component-system.md) — component registry and dependency loading
 - [../avnav-api/plugin-lifecycle.md](../avnav-api/plugin-lifecycle.md) — `translateFunction` lifecycle
+- [plugin-core-contracts.md](plugin-core-contracts.md) — core tuple schema and incident constraints
+- [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md) — canonical formatter signatures
+- [../avnav-api/core-key-catalog.md](../avnav-api/core-key-catalog.md) — key/unit catalog
 - [../guides/add-new-cluster.md](../guides/add-new-cluster.md) — cluster authoring workflow
