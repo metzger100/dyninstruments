@@ -7,6 +7,24 @@ This file is Codex-facing guidance for this repository.
 
 ---
 
+## 0. Mandatory Session Preflight (No Exceptions)
+
+Before planning, coding, review, or documentation edits, always read:
+
+1. `documentation/TABLEOFCONTENTS.md`
+2. `documentation/conventions/coding-standards.md`
+3. `documentation/conventions/smell-prevention.md`
+
+These three reads are mandatory for every task. Start implementation only after this preflight is complete.
+
+If guidance conflicts, precedence is:
+1. `documentation/core-principles.md`
+2. `documentation/conventions/coding-standards.md`
+3. `documentation/conventions/smell-prevention.md`
+4. Task-specific documentation
+
+---
+
 ## 1. Project Constraints (AvNav Plugin Environment)
 
 - **No bundler, no runtime build step** - Raw JS loaded via `<script>` tags at runtime
@@ -58,9 +76,10 @@ documentation/
 ### RULE: Always Start with TABLEOFCONTENTS.md
 
 1. **Read `documentation/TABLEOFCONTENTS.md` FIRST**
-2. Identify 1-3 relevant files for your task
-3. Read ONLY those files
-4. **Never read all files sequentially** (wastes tokens)
+2. **Read `documentation/conventions/coding-standards.md` and `documentation/conventions/smell-prevention.md` for every task**
+3. Identify 1-3 additional relevant files for your task
+4. Read ONLY those additional files
+5. **Never read all files sequentially** (wastes tokens)
 
 ### Example Workflow
 
@@ -74,8 +93,9 @@ Task: Add new BarometerGauge
 ```
 Task: Add new BarometerGauge
 ✅ Read TABLEOFCONTENTS.md
+✅ Read conventions/coding-standards.md and conventions/smell-prevention.md
 ✅ Identify: guides/add-new-gauge.md, gauges/gauge-style-guide.md
-✅ Read only those 2 files
+✅ Read only those 2 additional files
 ✅ Begin implementation
 ```
 
@@ -107,8 +127,8 @@ Task: Add new BarometerGauge
 
 ## 5. Quality Checklist
 
-- [ ] Read TABLEOFCONTENTS.md to find relevant docs.
-- [ ] Read only necessary documentation.
+- [ ] Completed mandatory preflight reads: TABLEOFCONTENTS.md + coding-standards.md + smell-prevention.md.
+- [ ] Read only necessary additional documentation beyond mandatory preflight.
 - [ ] Implementation complete.
 - [ ] Updated relevant documentation.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.
@@ -125,6 +145,7 @@ Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 
 ## 7. Smell Prevention & Fail-Closed Rules
 
+- Mandatory on every task: follow `documentation/conventions/coding-standards.md` and `documentation/conventions/smell-prevention.md` as binding rules, not optional references.
 - Required completion gate is `npm run check:all`.
 - Smell rules and enforcement matrix are documented in [documentation/conventions/smell-prevention.md](documentation/conventions/smell-prevention.md).
 - Defaults must preserve explicit falsy values (`""`, `0`, `false`).
