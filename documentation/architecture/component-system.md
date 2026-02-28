@@ -140,3 +140,4 @@ Promise.all(needed.map(loader.loadComponent)).then(function (componentsLoaded) {
 - [cluster-widget-system.md](cluster-widget-system.md) — `ClusterWidget` modular mapper architecture
 - [../shared/helpers.md](../shared/helpers.md) — `Helpers` passed to `create`
 - [../guides/add-new-gauge.md](../guides/add-new-gauge.md) — gauge workflow
+- [../guides/add-new-full-circle-dial.md](../guides/add-new-full-circle-dial.md) — full-circle dial workflow
