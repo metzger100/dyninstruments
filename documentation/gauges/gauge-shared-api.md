@@ -12,6 +12,9 @@ Shared gauge logic is split into focused core modules:
 - `GaugeDialRenderer` for radial tick/label/frame drawing
 - `GaugeTextLayout` for text fitting/drawing and disconnect overlay
 - `GaugeValueMath` for numeric/range/geometry helpers
+- `TextLayoutPrimitives` for binary-fit and inline draw primitives
+- `TextLayoutComposite` for reusable multi-row text layouts
+- `TextLayoutEngine` as text-layout facade (mode routing + cache + composed helpers)
 - `ThemeResolver` for plugin-wide CSS theme token resolution
 - `GaugeToolkit` as composed facade
 - `SemicircleGaugeEngine` as shared render flow for Speed/Depth/Temperature/Voltage
@@ -41,6 +44,21 @@ GaugeDialRenderer: {
 },
 GaugeTextLayout: { js: BASE + "shared/widget-kits/gauge/GaugeTextLayout.js", globalKey: "DyniGaugeTextLayout" },
 GaugeValueMath: { js: BASE + "shared/widget-kits/gauge/GaugeValueMath.js", globalKey: "DyniGaugeValueMath", deps: ["GaugeAngleMath"] },
+TextLayoutPrimitives: {
+  js: BASE + "shared/widget-kits/gauge/TextLayoutPrimitives.js",
+  globalKey: "DyniTextLayoutPrimitives",
+  deps: ["GaugeTextLayout"]
+},
+TextLayoutComposite: {
+  js: BASE + "shared/widget-kits/gauge/TextLayoutComposite.js",
+  globalKey: "DyniTextLayoutComposite",
+  deps: ["TextLayoutPrimitives"]
+},
+TextLayoutEngine: {
+  js: BASE + "shared/widget-kits/gauge/TextLayoutEngine.js",
+  globalKey: "DyniTextLayoutEngine",
+  deps: ["GaugeValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]
+},
 ThemeResolver: { js: BASE + "shared/theme/ThemeResolver.js", globalKey: "DyniThemeResolver" },
 GaugeToolkit: {
   js: BASE + "shared/widget-kits/gauge/GaugeToolkit.js",
@@ -155,6 +173,14 @@ Optional `overrides` fields:
 |---|---|---|---|
 | `ringWidthFactor` | number | `0.12` | Computes `ringW = max(6, floor(R * ringWidthFactor))` |
 | `needleDepthFactor` | number | derived | If provided: `needleDepth = max(8, floor(ringW * needleDepthFactor))`; if omitted, preserves legacy derived behavior `max(8, floor(ringW * 0.9))` |
+
+## TextLayoutEngine API
+
+`TextLayoutEngine.create(def, Helpers)` returns:
+
+- Cache/mode helpers: `createFitCache`, `clearFitCache`, `makeFitCacheKey`, `readFitCache`, `writeFitCache`, `resolveFitCache`, `computeModeLayout`, `computeInsets`
+- Primitive text helpers: `setFont`, `fitSingleLineBinary`, `fitMultiRowBinary`, `fitValueUnitRow`, `fitInlineTriplet`, `drawInlineTriplet`, `drawDisconnectOverlay`
+- Composite block helpers: `fitThreeRowBlock`, `drawThreeRowBlock`, `fitValueUnitCaptionRows`, `drawValueUnitCaptionRows`, `fitTwoRowsWithHeader`, `drawTwoRowsWithHeader`
 
 ## SemicircleGaugeEngine API
 

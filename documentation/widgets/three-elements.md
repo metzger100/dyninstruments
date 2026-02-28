@@ -14,7 +14,7 @@ ThreeValueTextWidget: {
   js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
   css: undefined,
   globalKey: "DyniThreeValueTextWidget",
-  deps: ["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]
+  deps: ["ThemeResolver", "TextLayoutEngine"]
 }
 ```
 
@@ -72,10 +72,11 @@ otherwise -> normal
 
 | Function | Purpose |
 |---|---|
-| `GaugeTextLayout.fitSingleTextPx(...)` | Fit one string into a box |
-| `fitValueUnitRowPx(...)` | Fit value+unit pair |
-| `GaugeTextLayout.drawDisconnectOverlay(...)` | Draw overlay text |
-| `GaugeValueMath.clamp(...)`, `GaugeValueMath.computeMode(...)` | Shared scale/mode logic |
+| `TextLayoutEngine.computeModeLayout(...)` | Shared ratio mode + collapse handling |
+| `TextLayoutEngine.fitThreeRowBlock(...)` | Fit `high` mode caption/value/unit rows |
+| `TextLayoutEngine.fitValueUnitCaptionRows(...)` | Fit `normal` mode value+unit + caption rows |
+| `TextLayoutEngine.fitInlineTriplet(...)` | Fit `flat` mode inline caption/value/unit row |
+| `TextLayoutEngine.drawDisconnectOverlay(...)` | Draw overlay text |
 
 ## Themeable Typography
 
@@ -86,7 +87,7 @@ otherwise -> normal
 
 ## Performance
 
-- Fitting results are cached per widget instance (closure-local, not global).
+- Fitting results are cached per widget instance (closure-local, not global) via `TextLayoutEngine` cache helpers.
 - Cache keys include all fitting-relevant inputs: `W`, `H`, active layout mode, rendered `value` text, `caption`, `unit`, effective `secScale` (`captionUnitScale` after clamp), resolved font family, and theme font weights (`valueWeight`, `labelWeight`).
 - Cache invalidates automatically when any key input changes (for example content, size, mode, scale, or typography changes).
 - Canvas drawing still runs every frame; only fitting/measurement work is reused on cache hits.

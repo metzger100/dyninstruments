@@ -3,7 +3,6 @@ const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-ca
 
 describe("ThreeValueTextWidget", function () {
   function makeHelpers() {
-    const counters = { fitSingleCalls: 0 };
     const applyFormatter = vi.fn((raw, props) => {
       const fallback = (props && Object.prototype.hasOwnProperty.call(props, "default"))
         ? props.default
@@ -11,9 +10,13 @@ describe("ThreeValueTextWidget", function () {
       if (raw == null || Number.isNaN(raw)) return fallback;
       return String(raw);
     });
+    const modules = {
+      TextLayoutEngine: loadFresh("shared/widget-kits/gauge/TextLayoutEngine.js"),
+      TextLayoutPrimitives: loadFresh("shared/widget-kits/gauge/TextLayoutPrimitives.js"),
+      TextLayoutComposite: loadFresh("shared/widget-kits/gauge/TextLayoutComposite.js")
+    };
 
     return {
-      counters,
       applyFormatter,
       setupCanvas(canvas) {
         const ctx = canvas.getContext("2d");
@@ -51,17 +54,6 @@ describe("ThreeValueTextWidget", function () {
                   const fontWeight = Math.floor(Number(weight));
                   ctx.font = String(fontWeight) + " " + size + "px " + (family || "sans-serif");
                 },
-                fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, weight) {
-                  counters.fitSingleCalls += 1;
-                  let px = Math.max(1, Math.floor(Math.min(basePx, maxH)));
-                  if (!text) return px;
-                  this.setFont(ctx, px, weight, family);
-                  const width = ctx.measureText(String(text)).width;
-                  if (width <= maxW + 0.01) return px;
-                  const scale = Math.max(0.1, (maxW / Math.max(1, width)));
-                  px = Math.max(1, Math.floor(px * scale));
-                  return Math.min(px, Math.floor(maxH));
-                },
                 drawDisconnectOverlay() {}
               };
             }
@@ -88,6 +80,9 @@ describe("ThreeValueTextWidget", function () {
             }
           };
         }
+        if (modules[id]) {
+          return modules[id];
+        }
         throw new Error("unexpected module: " + id);
       }
     };
@@ -97,16 +92,14 @@ describe("ThreeValueTextWidget", function () {
     return calls.filter((entry) => entry.name === name).length;
   }
 
-  function renderFrame(spec, canvas, props, counters) {
+  function renderFrame(spec, canvas, props) {
     const ctx = canvas.__ctx;
     const beforeCallCount = ctx.calls.length;
-    const beforeFit = counters.fitSingleCalls;
     spec.renderCanvas(canvas, props);
     const frameCalls = ctx.calls.slice(beforeCallCount);
     return {
       measureDelta: countByName(frameCalls, "measureText"),
       fillDelta: countByName(frameCalls, "fillText"),
-      fitDelta: counters.fitSingleCalls - beforeFit,
       fillEntries: frameCalls
         .filter((entry) => entry.name === "fillText")
         .map((entry) => ({
@@ -123,22 +116,19 @@ describe("ThreeValueTextWidget", function () {
         name: "high",
         rectWidth: 120,
         rectHeight: 220,
-        props: { value: "12.3", caption: "SPD", unit: "kn" },
-        expectsFitSingle: true
+        props: { value: "12.3", caption: "SPD", unit: "kn" }
       },
       {
         name: "normal",
         rectWidth: 220,
         rectHeight: 140,
-        props: { value: "12.3", caption: "SPD", unit: "kn" },
-        expectsFitSingle: true
+        props: { value: "12.3", caption: "SPD", unit: "kn" }
       },
       {
         name: "flat",
         rectWidth: 420,
         rectHeight: 100,
-        props: { value: "12.3", caption: "SPD", unit: "kn" },
-        expectsFitSingle: false
+        props: { value: "12.3", caption: "SPD", unit: "kn" }
       }
     ];
 
@@ -151,20 +141,12 @@ describe("ThreeValueTextWidget", function () {
         ctx: createMockContext2D()
       });
 
-      const first = renderFrame(spec, canvas, item.props, helpers.counters);
-      const second = renderFrame(spec, canvas, item.props, helpers.counters);
+      const first = renderFrame(spec, canvas, item.props);
+      const second = renderFrame(spec, canvas, item.props);
 
       expect(first.measureDelta).toBeGreaterThan(0);
       expect(second.measureDelta).toBe(0);
       expect(second.fillDelta).toBeGreaterThan(0);
-
-      if (item.expectsFitSingle) {
-        expect(first.fitDelta).toBeGreaterThan(0);
-        expect(second.fitDelta).toBe(0);
-      } else {
-        expect(first.fitDelta).toBe(0);
-        expect(second.fitDelta).toBe(0);
-      }
     });
   });
 
@@ -178,14 +160,13 @@ describe("ThreeValueTextWidget", function () {
     });
 
     const props = { value: "12.3", caption: "SPD", unit: "kn" };
-    const first = renderFrame(spec, canvas, props, helpers.counters);
-    const second = renderFrame(spec, canvas, props, helpers.counters);
-    const third = renderFrame(spec, canvas, { value: "13.1", caption: "SPD", unit: "kn" }, helpers.counters);
+    const first = renderFrame(spec, canvas, props);
+    const second = renderFrame(spec, canvas, props);
+    const third = renderFrame(spec, canvas, { value: "13.1", caption: "SPD", unit: "kn" });
 
     expect(first.measureDelta).toBeGreaterThan(0);
     expect(second.measureDelta).toBe(0);
     expect(third.measureDelta).toBeGreaterThan(0);
-    expect(third.fitDelta).toBeGreaterThan(0);
   });
 
   it("misses cache when dimensions change", function () {
@@ -203,9 +184,9 @@ describe("ThreeValueTextWidget", function () {
       ctx: createMockContext2D()
     });
 
-    const first = renderFrame(spec, canvasWide, props, helpers.counters);
-    const second = renderFrame(spec, canvasWide, props, helpers.counters);
-    const third = renderFrame(spec, canvasWider, props, helpers.counters);
+    const first = renderFrame(spec, canvasWide, props);
+    const second = renderFrame(spec, canvasWide, props);
+    const third = renderFrame(spec, canvasWider, props);
 
     expect(first.measureDelta).toBeGreaterThan(0);
     expect(second.measureDelta).toBe(0);
@@ -222,8 +203,8 @@ describe("ThreeValueTextWidget", function () {
     });
     const props = { value: "12.3", caption: "SPD", unit: "kn" };
 
-    const first = renderFrame(spec, canvas, props, helpers.counters);
-    const second = renderFrame(spec, canvas, props, helpers.counters);
+    const first = renderFrame(spec, canvas, props);
+    const second = renderFrame(spec, canvas, props);
 
     expect(second.fillDelta).toBeGreaterThan(0);
     expect(second.fillEntries).toEqual(first.fillEntries);

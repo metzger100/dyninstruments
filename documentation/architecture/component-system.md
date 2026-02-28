@@ -44,12 +44,10 @@ ClusterWidget
 └── ClusterRendererRouter
     ├── ThreeValueTextWidget
     │   ├── ThemeResolver
-    │   ├── GaugeTextLayout
-    │   └── GaugeValueMath
+    │   └── TextLayoutEngine
     ├── PositionCoordinateWidget
     │   ├── ThemeResolver
-    │   ├── GaugeTextLayout
-    │   └── GaugeValueMath
+    │   └── TextLayoutEngine
     ├── WindDialWidget
     ├── CompassGaugeWidget
     ├── SpeedGaugeWidget
@@ -67,6 +65,13 @@ SpeedGaugeWidget/DepthGaugeWidget/TemperatureGaugeWidget/VoltageGaugeWidget
   ├── SemicircleGaugeEngine
   │   └── GaugeToolkit
   └── GaugeValueMath
+
+TextLayoutEngine
+  ├── GaugeValueMath
+  ├── TextLayoutPrimitives
+  │   └── GaugeTextLayout
+  └── TextLayoutComposite
+      └── TextLayoutPrimitives
 
 runtime/init.js (explicit load)
   └── ThemePresets
