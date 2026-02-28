@@ -64,6 +64,9 @@ Read by `ThemeResolver.resolve(canvas)`:
 | `--dyni-ring-width` | Ring width factor | `0.12` |
 | `--dyni-label-inset` | Label inset factor | `1.8` |
 | `--dyni-label-font` | Label font factor | `0.14` |
+| `--dyni-fullcircle-normal-inner-margin` | Full-circle normal-mode inner margin factor | `0.03` |
+| `--dyni-fullcircle-normal-min-height` | Full-circle normal-mode minimum block height factor | `0.45` |
+| `--dyni-fullcircle-normal-dual-gap` | Full-circle normal-mode dual-column gap factor | `0.05` |
 | `--dyni-font-weight` | Primary font weight | `700` |
 | `--dyni-label-weight` | Label font weight | `700` |
 

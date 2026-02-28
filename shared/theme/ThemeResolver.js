@@ -46,6 +46,9 @@
     { path: "ring.widthFactor", cssVar: "--dyni-ring-width", type: "number", defaultValue: 0.12 },
     { path: "labels.insetFactor", cssVar: "--dyni-label-inset", type: "number", defaultValue: 1.8 },
     { path: "labels.fontFactor", cssVar: "--dyni-label-font", type: "number", defaultValue: 0.14 },
+    { path: "fullCircle.normal.innerMarginFactor", cssVar: "--dyni-fullcircle-normal-inner-margin", type: "number", defaultValue: 0.03 },
+    { path: "fullCircle.normal.minHeightFactor", cssVar: "--dyni-fullcircle-normal-min-height", type: "number", defaultValue: 0.45 },
+    { path: "fullCircle.normal.dualGapFactor", cssVar: "--dyni-fullcircle-normal-dual-gap", type: "number", defaultValue: 0.05 },
     { path: "font.weight", cssVar: "--dyni-font-weight", type: "number", defaultValue: 700 },
     { path: "font.labelWeight", cssVar: "--dyni-label-weight", type: "number", defaultValue: 700 }
   ];

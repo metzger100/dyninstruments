@@ -49,7 +49,7 @@ describe("ThemeResolver", function () {
     const canvas = createCanvas(createDoc({ value: false }));
     const out = resolver.resolve(canvas);
 
-    expect(Object.keys(out).sort()).toEqual(["colors", "font", "labels", "pointer", "ring", "ticks"]);
+    expect(Object.keys(out).sort()).toEqual(["colors", "font", "fullCircle", "labels", "pointer", "ring", "ticks"]);
     expect(out).toEqual(mod.DEFAULTS);
   });
 
@@ -157,7 +157,14 @@ describe("ThemeResolver", function () {
     expect(typeof mod.invalidateAll).toBe("function");
     expect(Array.isArray(mod.TOKEN_DEFS)).toBe(true);
     expect(mod.TOKEN_DEFS.some((tokenDef) => tokenDef.path === "pointer.sideFactor" && tokenDef.cssVar === "--dyni-pointer-side")).toBe(true);
+    expect(mod.TOKEN_DEFS.some((tokenDef) => (
+      tokenDef.path === "fullCircle.normal.innerMarginFactor" &&
+      tokenDef.cssVar === "--dyni-fullcircle-normal-inner-margin"
+    ))).toBe(true);
     expect(mod.DEFAULTS.pointer.sideFactor).toBe(0.25);
     expect(mod.DEFAULTS.ring.widthFactor).toBe(0.12);
+    expect(mod.DEFAULTS.fullCircle.normal.innerMarginFactor).toBe(0.03);
+    expect(mod.DEFAULTS.fullCircle.normal.minHeightFactor).toBe(0.45);
+    expect(mod.DEFAULTS.fullCircle.normal.dualGapFactor).toBe(0.05);
   });
 });

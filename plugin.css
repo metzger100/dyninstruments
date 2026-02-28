@@ -22,6 +22,9 @@
   --dyni-ring-width: 0.12;
   --dyni-label-inset: 1.8;
   --dyni-label-font: 0.14;
+  --dyni-fullcircle-normal-inner-margin: 0.03;
+  --dyni-fullcircle-normal-min-height: 0.45;
+  --dyni-fullcircle-normal-dual-gap: 0.05;
   --dyni-font-weight: 700;
   --dyni-label-weight: 700;
   font-family: var(--dyni-font);

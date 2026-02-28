@@ -16,6 +16,7 @@
 - Companion helper: `FullCircleDialTextLayout` (`shared/widget-kits/gauge/FullCircleDialTextLayout.js`)
 - Cache backend: shared `CanvasLayerCache.createLayerCache({ layers })`
 - Mode selection: `GaugeValueMath.computeMode(ratio, thresholdNormal, thresholdFlat)`
+- Normal-mode text packing is theme-tunable via `fullCircle.normal.*` tokens (`innerMarginFactor`, `minHeightFactor`, `dualGapFactor`)
 
 ## API/Interfaces
 
