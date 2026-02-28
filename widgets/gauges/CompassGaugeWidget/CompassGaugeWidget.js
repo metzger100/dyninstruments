@@ -122,7 +122,8 @@
         if (state.value.isFiniteNumber(display.marker) && state.value.isFiniteNumber(display.heading)) {
           state.draw.drawRimMarker(state.ctx, state.geom.cx, state.geom.cy, state.geom.rOuter, display.marker - display.heading, {
             len: Math.max(12, Math.floor(state.geom.ringW * 0.9)),
-            width: Math.max(3, Math.floor(state.geom.ringW * 0.4))
+            width: Math.max(3, Math.floor(state.geom.ringW * 0.4)),
+            strokeStyle: state.theme.colors.pointer
           });
         }
         drawCompassCachedLabels(state, rotationDeg, api);

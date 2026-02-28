@@ -44,7 +44,7 @@ The rotating dial face cache is built from static inputs. At render time, `headi
 | Ring (cached face) | `draw.drawRing` | full circle |
 | Ticks (cached face) | `draw.drawTicks` | `0..360`, major 30, minor 10 |
 | Lubber pointer | `draw.drawPointerAtRim` | fixed at 0°, with `fillStyle: theme.colors.pointer` (default `#ff2b2b`) |
-| Target marker | `draw.drawRimMarker` | at `(markerCourse - heading)` if both finite |
+| Target marker | `draw.drawRimMarker` | at `(markerCourse - heading)` if both finite, with `strokeStyle: theme.colors.pointer` |
 | Cardinal labels | cached label sprites | existing label set (`N/NE/E/SE/S/SW/W/NW`), rendered upright at heading-rotated positions |
 
 Rendering order keeps labels on top for readability.

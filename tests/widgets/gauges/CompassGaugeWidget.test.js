@@ -176,7 +176,11 @@ describe("CompassGaugeWidget", function () {
     expect(harness.calls.pointer[0].sideFactor).toBe(harness.theme.pointer.sideFactor);
     expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.pointer.lengthFactor);
     expect(harness.calls.pointer[0].depth).toBe(15);
-    expect(harness.calls.rimMarker[0]).toEqual({ len: 15, width: 6 });
+    expect(harness.calls.rimMarker[0]).toEqual({
+      len: 15,
+      width: 6,
+      strokeStyle: harness.theme.colors.pointer
+    });
     expect(harness.calls.ring[0].lineWidth).toBe(harness.theme.ring.arcLineWidth);
     expect(harness.calls.ticks[0].major).toEqual({
       len: harness.theme.ticks.majorLen,
