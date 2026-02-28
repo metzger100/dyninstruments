@@ -1,9 +1,8 @@
 /**
  * Module: WindDialWidget - Full-circle wind dial for angle and speed pairs
  * Documentation: documentation/widgets/wind-dial.md
- * Depends: GaugeToolkit
+ * Depends: FullCircleDialEngine, FullCircleDialTextLayout
  */
-
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
@@ -12,14 +11,10 @@
   "use strict";
 
   function create(def, Helpers) {
-    const GU = Helpers.getModule("GaugeToolkit").create(def, Helpers);
-    const draw = GU.draw;
-    const T = GU.text;
-    const V = GU.value;
-    const Theme = GU.theme;
-    const backgroundCache = { key: null, backCanvas: null, backCtx: null, frontCanvas: null, frontCtx: null };
+    const engine = Helpers.getModule("FullCircleDialEngine").create(def, Helpers);
+    const textLayout = Helpers.getModule("FullCircleDialTextLayout").create(def, Helpers);
 
-    function formatSpeedText(raw, props, speedUnit) {
+    function windFormatSpeedText(raw, props, speedUnit) {
       const n = Number(raw);
       if (!isFinite(n)) {
         return "---";
@@ -27,378 +22,150 @@
 
       const p = props || {};
       const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatSpeed";
-      const formatterParameters = (typeof p.formatterParameters !== "undefined") ? p.formatterParameters : [speedUnit || "kn"];
-      const formatted = String(Helpers.applyFormatter(n, {
+      const formatterParameters = (typeof p.formatterParameters !== "undefined")
+        ? p.formatterParameters
+        : [speedUnit || "kn"];
+
+      return String(Helpers.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
         default: "---"
       }));
-
-      return formatted;
     }
 
-    const buildWindBackgroundKey = (data) => JSON.stringify(data);
-
-    const ensureWindLayer = (canvas, existing, width, height) => {
-      if (existing && existing.width === width && existing.height === height) {
-        return existing;
-      }
-      const layer = canvas.ownerDocument.createElement("canvas");
-      layer.width = width;
-      layer.height = height;
-      return layer;
-    };
-
-    const rebuildWindBackground = (canvas, state) => {
-      backgroundCache.backCanvas = ensureWindLayer(canvas, backgroundCache.backCanvas, state.bufferW, state.bufferH);
-      backgroundCache.frontCanvas = ensureWindLayer(canvas, backgroundCache.frontCanvas, state.bufferW, state.bufferH);
-      backgroundCache.backCtx = backgroundCache.backCanvas.getContext("2d");
-      backgroundCache.frontCtx = backgroundCache.frontCanvas.getContext("2d");
-      if (!backgroundCache.backCtx || !backgroundCache.frontCtx) {
-        return;
-      }
-
-      const back = backgroundCache.backCtx;
-      const front = backgroundCache.frontCtx;
-      back.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
-      front.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
-      back.clearRect(0, 0, state.W, state.H);
-      front.clearRect(0, 0, state.W, state.H);
-      back.fillStyle = back.strokeStyle = state.color;
-      front.fillStyle = front.strokeStyle = state.color;
-
-      draw.drawRing(back, state.cx, state.cy, state.rOuter, { lineWidth: state.theme.ring.arcLineWidth });
-      if (state.layEnabled && state.layMax > state.layMin) {
-        draw.drawAnnularSector(back, state.cx, state.cy, state.rOuter, {
-          startDeg: state.layMin,
-          endDeg: state.layMax,
-          thickness: state.ringW,
-          fillStyle: state.theme.colors.laylineStb,
-          alpha: 1
-        });
-        draw.drawAnnularSector(back, state.cx, state.cy, state.rOuter, {
-          startDeg: -state.layMax,
-          endDeg: -state.layMin,
-          thickness: state.ringW,
-          fillStyle: state.theme.colors.laylinePort,
-          alpha: 1
-        });
-      }
-
-      draw.drawTicks(front, state.cx, state.cy, state.tickR, {
-        startDeg: -180, endDeg: 180, stepMajor: 30, stepMinor: 10, includeEnd: true,
-        major: { len: state.theme.ticks.majorLen, width: state.theme.ticks.majorWidth }, minor: { len: state.theme.ticks.minorLen, width: state.theme.ticks.minorWidth }
-      });
-      draw.drawLabels(front, state.cx, state.cy, state.tickR, {
-        startDeg: -180, endDeg: 180, step: 30, includeEnd: true,
-        radiusOffset: state.labelInsetVal, fontPx: state.labelPx, weight: state.labelWeight, family: state.family,
-        labelFormatter: (deg) => String(deg), labelFilter: (deg) => deg !== -180 && deg !== 180
-      });
-      backgroundCache.key = state.key;
-    };
-
-    const blitWindLayer = (ctx, layer, W, H) => {
-      if (!layer) {
-        return;
-      }
-      ctx.drawImage(layer, 0, 0, layer.width, layer.height, 0, 0, W, H);
-    };
-
-    function renderCanvas(canvas, props){
+    function windDisplay(state, props) {
       const p = props || {};
-      const { ctx, W, H } = Helpers.setupCanvas(canvas);
-      if (!W || !H) {
-        return;
-      }
-      const theme = Theme.resolve(canvas);
-      const valueWeight = theme.font.weight;
-      const labelWeight = theme.font.labelWeight;
-      ctx.clearRect(0,0,W,H);
+      const angleUnit = String(p.angleUnit ?? "°").trim();
+      const speedUnit = String(p.speedUnit ?? "kn").trim();
+      const secScale = state.value.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
 
-      const family = Helpers.resolveFontFamily(canvas);
-      const color  = Helpers.resolveTextColor(canvas);
-      ctx.fillStyle = color;
-      ctx.strokeStyle = color;
-
-      const ratio = W / Math.max(1, H);
-      const tN = V.isFiniteNumber(p.dialRatioThresholdNormal) ? p.dialRatioThresholdNormal : 0.7;
-      const tF = V.isFiniteNumber(p.dialRatioThresholdFlat) ? p.dialRatioThresholdFlat : 2.0;
-      let mode;
-      if (ratio < tN) mode = 'high';
-      else if (ratio > tF) mode = 'flat';
-      else mode = 'normal';
-
-      const pad = Math.max(6, Math.floor(Math.min(W,H) * 0.04));
-      const D = Math.min(W - 2*pad, H - 2*pad);
-      const R = Math.max(14, Math.floor(D / 2));
-      const cx = Math.floor(W/2);
-      const cy = Math.floor(H/2);
-      const ringW = Math.max(6, Math.floor(R * theme.ring.widthFactor));
-      const rOuter = R;
-      const tickR  = rOuter;
-      const needleDepth = Math.max(8, Math.floor(ringW * 0.9));
-
-      const leftStrip = Math.max(0, Math.floor((W - 2*pad - 2*R) / 2));
-      const rightStrip = leftStrip;
-      const topStrip = Math.max(0, Math.floor((H - 2*pad - 2*R) / 2));
-      const bottomStrip = topStrip;
-      const g = { leftTop: null, leftBottom: null, rightTop: null, rightBottom: null, top: null, bottom: null };
-
-      if (mode === 'flat'){
-        const lh = 2*R;
-        const leftX  = pad;
-        const rightX = W - pad - rightStrip;
-        if (leftStrip > 0){
-          g.leftTop = { x: leftX, y: cy - R, w: leftStrip, h: Math.floor(lh/2) };
-          g.leftBottom = { x: leftX, y: cy, w: leftStrip, h: Math.floor(lh/2) };
+      return {
+        angle: p.angle,
+        layEnabled: p.layEnabled !== false,
+        layMin: state.value.clamp(p.layMin, 0, 180),
+        layMax: state.value.clamp(p.layMax, 0, 180),
+        left: {
+          caption: String(p.angleCaption || "").trim(),
+          value: state.value.formatAngle180(p.angle, !!p.leadingZero),
+          unit: angleUnit,
+          secScale: secScale
+        },
+        right: {
+          caption: String(p.speedCaption || "").trim(),
+          value: windFormatSpeedText(p.speed, p, speedUnit),
+          unit: speedUnit,
+          secScale: secScale
         }
-        if (rightStrip > 0){
-          g.rightTop = { x: rightX, y: cy - R, w: rightStrip, h: Math.floor(lh/2) };
-          g.rightBottom = { x: rightX, y: cy,     w: rightStrip, h: Math.floor(lh/2) };
-        }
-      }
-      else if (mode === 'high'){
-        const availTop = pad + topStrip;
-        const availBot = pad + bottomStrip;
-        const th = Math.max(10, Math.floor(availTop * 0.85));
-        const bh = Math.max(10, Math.floor(availBot * 0.85));
-        g.top = { x: pad, y: pad, w: W - 2*pad, h: th };
-        g.bottom = { x: pad, y: H - pad - bh, w: W - 2*pad, h: bh };
-      }
+      };
+    }
 
-      const layEnabled = (p.layEnabled !== false);
-      const layMin = V.clamp(p.layMin, 0, 180);
-      const layMax = V.clamp(p.layMax, 0, 180);
-      const labelInsetVal = Math.max(18, Math.floor(ringW * theme.labels.insetFactor));
-      const labelPx = Math.max(10, Math.floor(R * theme.labels.fontFactor));
-      const bufferW = Math.max(1, Math.round(canvas.width || W));
-      const bufferH = Math.max(1, Math.round(canvas.height || H));
-      const dpr = Math.max(1, bufferW / Math.max(1, W));
-      const backgroundKey = buildWindBackgroundKey({
-        bufferW: bufferW,
-        bufferH: bufferH,
-        W: W,
-        H: H,
-        dpr: dpr,
-        cx: cx,
-        cy: cy,
-        rOuter: rOuter,
-        tickR: tickR,
-        ringW: ringW,
-        labelInsetVal: labelInsetVal,
-        labelPx: labelPx,
-        layEnabled: layEnabled,
-        layMin: layMin,
-        layMax: layMax,
-        ringLineWidth: theme.ring.arcLineWidth,
-        ticksMajorLen: theme.ticks.majorLen,
-        ticksMajorWidth: theme.ticks.majorWidth,
-        ticksMinorLen: theme.ticks.minorLen,
-        ticksMinorWidth: theme.ticks.minorWidth,
-        laylineStb: theme.colors.laylineStb,
-        laylinePort: theme.colors.laylinePort,
-        family: family,
-        labelWeight: labelWeight,
-        color: color
-      });
-
-      if (backgroundCache.key !== backgroundKey) {
-        rebuildWindBackground(canvas, {
-          key: backgroundKey,
-          bufferW: bufferW,
-          bufferH: bufferH,
-          dpr: dpr,
-          W: W,
-          H: H,
-          cx: cx,
-          cy: cy,
-          rOuter: rOuter,
-          tickR: tickR,
-          ringW: ringW,
-          layEnabled: layEnabled,
-          layMin: layMin,
-          layMax: layMax,
-          theme: theme,
-          family: family,
-          labelWeight: labelWeight,
-          color: color,
-          labelInsetVal: labelInsetVal,
-          labelPx: labelPx
-        });
-      }
-
-      blitWindLayer(ctx, backgroundCache.backCanvas, W, H);
-
-      if (V.isFiniteNumber(p.angle)) {
-        draw.drawPointerAtRim(ctx, cx, cy, rOuter, p.angle, {
-          depth: needleDepth,
-          fillStyle: theme.colors.pointer,
-          variant: "long",
-          sideFactor: theme.pointer.sideFactor,
-          lengthFactor: theme.pointer.lengthFactor
-        });
-      }
-      blitWindLayer(ctx, backgroundCache.frontCanvas, W, H);
-
-      const secScale = V.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
-      const angleUnit = (p.angleUnit || '°').trim();
-      const speedUnit = (p.speedUnit || 'kn').trim();
-      const angleText = V.formatAngle180(p.angle, !!p.leadingZero);
-      const speedText = formatSpeedText(p.speed, p, speedUnit);
-      const angleCap = (p.angleCaption || '').trim();
-      const speedCap = (p.speedCaption || '').trim();
-
-      if (mode === 'flat'){
-        if (g.leftBottom && g.leftTop){
-          const fitL = T.measureValueUnitFit(ctx, family, angleText, angleUnit, g.leftBottom.w, g.leftBottom.h, secScale, valueWeight, labelWeight);
-          T.drawCaptionMax(ctx, family, g.leftTop.x, g.leftTop.y, g.leftTop.w, g.leftTop.h, angleCap, Math.floor(fitL.vPx * secScale), "left", labelWeight);
-          T.drawValueUnitWithFit(
-            ctx,
-            family,
-            g.leftBottom.x,
-            g.leftBottom.y,
-            g.leftBottom.w,
-            g.leftBottom.h,
-            angleText,
-            angleUnit,
-            fitL,
-            "left",
-            valueWeight,
-            labelWeight
-          );
-        }
-        if (g.rightBottom && g.rightTop){
-          const fitR = T.measureValueUnitFit(ctx, family, speedText, speedUnit, g.rightBottom.w, g.rightBottom.h, secScale, valueWeight, labelWeight);
-          T.drawCaptionMax(ctx, family, g.rightTop.x, g.rightTop.y, g.rightTop.w, g.rightTop.h, speedCap, Math.floor(fitR.vPx * secScale), "right", labelWeight);
-          T.drawValueUnitWithFit(
-            ctx,
-            family,
-            g.rightBottom.x,
-            g.rightBottom.y,
-            g.rightBottom.w,
-            g.rightBottom.h,
-            speedText,
-            speedUnit,
-            fitR,
-            "right",
-            valueWeight,
-            labelWeight
-          );
-        }
-        return;
-      }
-
-      if (mode === 'high'){
-        const capTop = angleCap;
-        const valTop = angleText;
-        const uniTop = angleUnit;
-        const capBot = speedCap;
-        const valBot = speedText;
-        const uniBot = speedUnit;
-
-        if (g.top) {
-          const fitTop = T.fitInlineCapValUnit(ctx, family, capTop, valTop, uniTop, g.top.w, g.top.h, secScale, valueWeight, labelWeight);
-          T.drawInlineCapValUnit(ctx, family, g.top.x, g.top.y, g.top.w, g.top.h, capTop, valTop, uniTop, fitTop, valueWeight, labelWeight);
-        }
-        if (g.bottom) {
-          const fitBottom = T.fitInlineCapValUnit(ctx, family, capBot, valBot, uniBot, g.bottom.w, g.bottom.h, secScale, valueWeight, labelWeight);
-          T.drawInlineCapValUnit(ctx, family, g.bottom.x, g.bottom.y, g.bottom.w, g.bottom.h, capBot, valBot, uniBot, fitBottom, valueWeight, labelWeight);
-        }
-        return;
-      }
-
-      {
-        const extra = Math.max(6, Math.floor(R * 0.06));
-        const rSafe = Math.max(10, rOuter - (labelInsetVal + extra));
-        if (rSafe < 12) {
-          const innerW = Math.floor(rOuter * 1.00);
-          const halfW  = Math.max(10, Math.floor(innerW / 2) - Math.max(4, Math.floor(R * 0.035)));
-          const maxH   = Math.floor(rOuter * 0.46);
-          const xL     = cx - Math.floor(innerW/2);
-          const xR     = cx + Math.floor(innerW/2) - halfW;
-          const yTop   = cy - Math.floor(maxH/2);
-
-          const hv     = Math.max(12, Math.floor(maxH / (1 + 2*secScale)));
-          const hc     = Math.floor(hv * secScale);
-          const hu     = Math.floor(hv * secScale);
-
-          const vPxA = T.fitTextPx(ctx, angleText, halfW, hv, family, valueWeight);
-          const vPxS = T.fitTextPx(ctx, speedText, halfW, hv, family, valueWeight);
-          const vPx  = Math.min(vPxA, vPxS);
-          const cPx  = Math.min(T.fitTextPx(ctx, angleCap, halfW, hc, family, labelWeight),
-                                T.fitTextPx(ctx, speedCap, halfW, hc, family, labelWeight));
-          const uPx  = Math.min(T.fitTextPx(ctx, angleUnit, halfW, hu, family, labelWeight),
-                                T.fitTextPx(ctx, speedUnit, halfW, hu, family, labelWeight));
-          const sizes = { cPx, vPx, uPx, hCap: hc, hVal: hv, hUnit: hu };
-          T.drawThreeRowsBlock(ctx, family, xL, yTop, halfW, maxH, angleCap, angleText, angleUnit, secScale, "right", sizes, valueWeight, labelWeight);
-          T.drawThreeRowsBlock(ctx, family, xR, yTop, halfW, maxH, speedCap, speedText, speedUnit, secScale, "left", sizes, valueWeight, labelWeight);
+    const renderCanvas = engine.createRenderer({
+      ratioProps: {
+        normal: "dialRatioThresholdNormal",
+        flat: "dialRatioThresholdFlat"
+      },
+      ratioDefaults: { normal: 0.7, flat: 2.0 },
+      cacheLayers: ["back", "front"],
+      buildStaticKey: function (state, props) {
+        const display = windDisplay(state, props);
+        return {
+          layEnabled: display.layEnabled,
+          layMin: display.layMin,
+          layMax: display.layMax,
+          laylineStb: state.theme.colors.laylineStb,
+          laylinePort: state.theme.colors.laylinePort
+        };
+      },
+      rebuildLayer: function (layerCtx, layerName, state, props, api) {
+        const display = windDisplay(state, props);
+        if (layerName === "back") {
+          api.drawFullCircleRing(layerCtx);
+          if (display.layEnabled && display.layMax > display.layMin) {
+            state.draw.drawAnnularSector(layerCtx, state.geom.cx, state.geom.cy, state.geom.rOuter, {
+              startDeg: display.layMin,
+              endDeg: display.layMax,
+              thickness: state.geom.ringW,
+              fillStyle: state.theme.colors.laylineStb,
+              alpha: 1
+            });
+            state.draw.drawAnnularSector(layerCtx, state.geom.cx, state.geom.cy, state.geom.rOuter, {
+              startDeg: -display.layMax,
+              endDeg: -display.layMin,
+              thickness: state.geom.ringW,
+              fillStyle: state.theme.colors.laylinePort,
+              alpha: 1
+            });
+          }
           return;
         }
 
-        const colGap   = Math.max(6, Math.floor(R * 0.05));
-        const innerMar = Math.max(4, Math.floor(R * 0.03));
-
-        let best = null;
-        const mhMax = Math.floor(2 * (rSafe - innerMar));
-        const mhMin = Math.floor(mhMax * 0.45);
-        for (let mh = mhMax; mh >= mhMin; mh -= 1){
-          const halfDiagY = mh / 2;
-          const halfWMax = Math.floor(
-            Math.sqrt(Math.max(0, (rSafe - innerMar) * (rSafe - innerMar) - halfDiagY * halfDiagY))
-            - Math.floor(colGap / 2)
-          );
-          if (halfWMax <= 10) {
-            continue;
-          }
-
-          const hv = Math.max(12, Math.floor(mh / (1 + 2*secScale)));
-          const vPxA = T.fitTextPx(ctx, angleText, halfWMax, hv, family, valueWeight);
-          const vPxS = T.fitTextPx(ctx, speedText, halfWMax, hv, family, valueWeight);
-          const vPx  = Math.min(vPxA, vPxS);
-
-          const score = vPx * 10000 + halfWMax * 10 + mh;
-          if (!best || score > best.score){
-            best = { mh, halfW: halfWMax, hv, vPx, score };
-          }
+        if (layerName === "front") {
+          api.drawFullCircleTicks(layerCtx, {
+            startDeg: -180,
+            endDeg: 180,
+            stepMajor: 30,
+            stepMinor: 10,
+            includeEnd: true
+          });
+          state.draw.drawLabels(layerCtx, state.geom.cx, state.geom.cy, state.geom.rOuter, {
+            startDeg: -180,
+            endDeg: 180,
+            step: 30,
+            includeEnd: true,
+            radiusOffset: state.geom.labelInsetVal,
+            fontPx: state.geom.labelPx,
+            weight: state.labelWeight,
+            family: state.family,
+            labelFormatter: function (deg) {
+              return String(deg);
+            },
+            labelFilter: function (deg) {
+              return deg !== -180 && deg !== 180;
+            }
+          });
         }
-
-        const maxH   = best ? best.mh : Math.floor(rSafe * 0.9);
-        const halfW  = best ? best.halfW : Math.floor(rSafe * 0.6);
-        const hv     = best ? best.hv : Math.max(12, Math.floor(maxH / (1 + 2*secScale)));
-        const hc     = Math.floor(hv * secScale);
-        const hu     = Math.floor(hv * secScale);
-
-        const cPx  = Math.min(T.fitTextPx(ctx, angleCap,  halfW, hc, family, labelWeight),
-                              T.fitTextPx(ctx, speedCap,  halfW, hc, family, labelWeight));
-        const uPx  = Math.min(T.fitTextPx(ctx, angleUnit, halfW, hu, family, labelWeight),
-                              T.fitTextPx(ctx, speedUnit, halfW, hu, family, labelWeight));
-        const vPx  = best ? best.vPx : Math.min(
-          T.fitTextPx(ctx, angleText, halfW, hv, family, valueWeight),
-          T.fitTextPx(ctx, speedText, halfW, hv, family, valueWeight)
-        );
-
-        const sizes = { cPx, vPx, uPx, hCap: hc, hVal: hv, hUnit: hu };
-
-        const innerW = 2 * halfW + colGap;
-        const xL     = cx - Math.floor(innerW/2);
-        const xR     = cx + Math.floor(innerW/2) - halfW;
-        const yTop   = cy - Math.floor(maxH/2);
-
-        T.drawThreeRowsBlock(ctx, family, xL, yTop, halfW, maxH, angleCap, angleText, angleUnit, secScale, "right", sizes, valueWeight, labelWeight);
-        T.drawThreeRowsBlock(ctx, family, xR, yTop, halfW, maxH, speedCap, speedText, speedUnit, secScale, "left", sizes, valueWeight, labelWeight);
+      },
+      drawFrame: function (state, props, api) {
+        const display = windDisplay(state, props);
+        api.drawCachedLayer("back");
+        if (state.value.isFiniteNumber(display.angle)) {
+          api.drawFixedPointer(state.ctx, display.angle, {
+            depth: Math.max(8, Math.floor(state.geom.ringW * 0.9))
+          });
+        }
+        api.drawCachedLayer("front");
+      },
+      drawMode: {
+        flat: function (state, props) {
+          const display = windDisplay(state, props);
+          textLayout.drawDualModeText(state, "flat", display.left, display.right, {
+            leftAlign: "left",
+            rightAlign: "right"
+          });
+        },
+        high: function (state, props) {
+          const display = windDisplay(state, props);
+          textLayout.drawDualModeText(state, "high", display.left, display.right);
+        },
+        normal: function (state, props) {
+          const display = windDisplay(state, props);
+          textLayout.drawDualModeText(state, "normal", display.left, display.right);
+        }
       }
-    }
+    });
 
-    function translateFunction(){ return {}; }
+    function translateFunction() {
+      return {};
+    }
 
     return {
       id: "WindDialWidget",
-      version: "1.8.0",
+      version: "1.9.0",
       wantsHideNativeHead: true,
-      renderCanvas,
-      translateFunction
+      renderCanvas: renderCanvas,
+      translateFunction: translateFunction
     };
   }
 
   return { id: "WindDialWidget", create };
-}))
+}));

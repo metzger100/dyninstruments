@@ -5,8 +5,8 @@
 ## Overview
 
 Full-circle wind dial showing angle (AWA/TWA) and speed (AWS/TWS) together. Uses `GaugeToolkit.draw` for dial primitives and `GaugeToolkit.text/value` for text fitting and value handling.
-Theme colors are resolved once per render via `GaugeToolkit.theme.resolve(canvas)`.
-Dial background rendering uses a closure-local two-layer cache (base + overlay) to avoid redrawing static dial elements every frame.
+Theme colors are resolved once per render via `FullCircleDialEngine`.
+Dial background rendering uses shared `CanvasLayerCache` via `FullCircleDialEngine` (`back` + `front` layers).
 
 ## Module Registration
 
@@ -16,7 +16,7 @@ WindDialWidget: {
   js: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.js",
   css: undefined,
   globalKey: "DyniWindDialWidget",
-  deps: ["GaugeToolkit"]
+  deps: ["FullCircleDialEngine", "FullCircleDialTextLayout"]
 }
 ```
 
@@ -124,6 +124,7 @@ return {
 ## Related
 
 - [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
+- [../gauges/full-circle-dial-engine.md](../gauges/full-circle-dial-engine.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
 - [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md)
 - [../shared/theme-tokens.md](../shared/theme-tokens.md)

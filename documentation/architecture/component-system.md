@@ -58,14 +58,10 @@ ClusterWidget
     └── VoltageGaugeWidget
 
 WindDialWidget/CompassGaugeWidget
-  └── GaugeToolkit
-      ├── ThemeResolver
-      ├── GaugeAngleMath
-      ├── GaugeTickMath
-      ├── GaugeCanvasPrimitives
-      ├── GaugeDialRenderer
-      ├── GaugeTextLayout
-      └── GaugeValueMath
+  ├── FullCircleDialEngine
+  │   ├── GaugeToolkit
+  │   └── CanvasLayerCache
+  └── FullCircleDialTextLayout
 
 SpeedGaugeWidget/DepthGaugeWidget/TemperatureGaugeWidget/VoltageGaugeWidget
   ├── SemicircleGaugeEngine

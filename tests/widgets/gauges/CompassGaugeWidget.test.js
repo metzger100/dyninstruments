@@ -3,6 +3,9 @@ const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-ca
 
 describe("CompassGaugeWidget", function () {
   function createCompassCachingHarness() {
+    const fullCircleEngine = loadFresh("shared/widget-kits/gauge/FullCircleDialEngine.js");
+    const layerCache = loadFresh("shared/widget-kits/gauge/CanvasLayerCache.js");
+    const textLayout = loadFresh("shared/widget-kits/gauge/FullCircleDialTextLayout.js");
     const calls = {
       ring: [],
       ticks: [],
@@ -56,6 +59,9 @@ describe("CompassGaugeWidget", function () {
           return "#fff";
         },
         getModule(id) {
+          if (id === "FullCircleDialEngine") return fullCircleEngine;
+          if (id === "FullCircleDialTextLayout") return textLayout;
+          if (id === "CanvasLayerCache") return layerCache;
           if (id !== "GaugeToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
@@ -118,6 +124,17 @@ describe("CompassGaugeWidget", function () {
                   },
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
+                  },
+                  computePad(W, H) {
+                    return Math.max(6, Math.floor(Math.min(W, H) * 0.04));
+                  },
+                  computeGap(W, H) {
+                    return Math.max(6, Math.floor(Math.min(W, H) * 0.03));
+                  },
+                  computeMode(ratio, thresholdNormal, thresholdFlat) {
+                    if (ratio < thresholdNormal) return "high";
+                    if (ratio > thresholdFlat) return "flat";
+                    return "normal";
                   },
                   formatDirection360(value) {
                     const n = Number(value);

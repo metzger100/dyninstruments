@@ -23,6 +23,11 @@ describe("config/components.js", function () {
     expect(components.ThemeResolver.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemeResolver.js");
     expect(components.CanvasLayerCache.globalKey).toBe("DyniCanvasLayerCache");
     expect(components.CanvasLayerCache.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/CanvasLayerCache.js");
+    expect(components.FullCircleDialEngine.globalKey).toBe("DyniFullCircleDialEngine");
+    expect(components.FullCircleDialEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/FullCircleDialEngine.js");
+    expect(components.FullCircleDialEngine.deps).toEqual(["GaugeToolkit", "CanvasLayerCache"]);
+    expect(components.FullCircleDialTextLayout.globalKey).toBe("DyniFullCircleDialTextLayout");
+    expect(components.FullCircleDialTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/FullCircleDialTextLayout.js");
     expect(components.ThemePresets.globalKey).toBe("DyniThemePresets");
     expect(components.ThemePresets.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemePresets.js");
     expect(components.ThemePresets.deps).toEqual(["ThemeResolver"]);
@@ -32,6 +37,8 @@ describe("config/components.js", function () {
     expect(components.DepthGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
     expect(components.TemperatureGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
     expect(components.VoltageGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
+    expect(components.WindDialWidget.deps).toEqual(["FullCircleDialEngine", "FullCircleDialTextLayout"]);
+    expect(components.CompassGaugeWidget.deps).toEqual(["FullCircleDialEngine", "FullCircleDialTextLayout"]);
     expect(components.GaugeToolkit.deps).toContain("ThemeResolver");
     expect(components.ThreeValueTextWidget.deps).toEqual(["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]);
     expect(components.PositionCoordinateWidget.deps).toEqual(["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]);
