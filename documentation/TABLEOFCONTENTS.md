@@ -96,6 +96,7 @@
 - **Shared text layout/cache facade for text widgets** → [shared/text-layout-engine.md](shared/text-layout-engine.md)
 - **Theme presets (default/slim/bold/night/highcontrast)** → [shared/theme-tokens.md](shared/theme-tokens.md#preset-definitions)
 - **Runtime preset application flow** → [shared/theme-tokens.md](shared/theme-tokens.md#runtime-integration)
+- **How do I select a preset from AvNav user.css?** → [shared/theme-tokens.md](shared/theme-tokens.md#runtime-integration)
 - **How to test presets via browser console** → [shared/theme-tokens.md](shared/theme-tokens.md#manual-testing-browser-console)
 - **Widget border styling** → [shared/css-theming.md](shared/css-theming.md)
 
@@ -121,6 +122,7 @@
 **"How do full-circle layout modes work?"** → [gauges/full-circle-dial-style-guide.md](gauges/full-circle-dial-style-guide.md#layout-modes),
 **"Where are shared theme tokens resolved?"** → [shared/theme-tokens.md](shared/theme-tokens.md)
 **"How do I switch a theme preset at runtime?"** → [shared/theme-tokens.md](shared/theme-tokens.md#runtime-integration)
+**"Can user.css choose the active preset?"** → [shared/theme-tokens.md](shared/theme-tokens.md#runtime-integration)
 **"How does day/night theming work?"** → [shared/css-theming.md](shared/css-theming.md), [shared/helpers.md](shared/helpers.md)
 **"How does HiDPI canvas scaling work?"** → [shared/helpers.md](shared/helpers.md#setupcanvas)
 **"How do I hide the native AvNav widget header?"** → [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md#wantshidenativehead)

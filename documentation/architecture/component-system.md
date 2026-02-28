@@ -25,7 +25,7 @@ Defined in `config/components.js`. It maps component IDs to file paths, global k
 `ClusterMapperRegistry` depends on all per-cluster mapper components.
 `ClusterRendererRouter` depends on all renderer components used at runtime.
 `ThemeResolver` is a shared plugin-wide token resolver used by both gauge and text rendering paths.
-`ThemePresets` is a shared runtime preset applier that maps preset overrides to container-level CSS vars.
+`ThemePresets` is a shared runtime preset applier that sets `data-dyni-theme` on container roots.
 
 ## Dependency Graph
 
@@ -75,7 +75,6 @@ TextLayoutEngine
 
 runtime/init.js (explicit load)
   └── ThemePresets
-      └── ThemeResolver
 ```
 
 `PositionCoordinateWidget` no longer depends on `ThreeValueTextWidget`; widget-to-widget coupling has been removed from the dependency graph.

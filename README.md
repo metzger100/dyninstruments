@@ -104,6 +104,78 @@ Current cluster widgets:
 
 ---
 
+## Customize Instruments
+
+You can customize dyninstruments at two levels:
+
+1. Per-widget behavior in the AvNav widget editor (`kind`, `caption_*`, `unit_*`, ranges, sectors, `KEY` fields)
+2. Global visual style in AvNav `user.css` using dyninstruments CSS variables
+
+### 1) Select a preset from `user.css`
+
+```css
+.widget.dyniplugin,
+[data-dyni] {
+  --dyni-theme-preset: bold;
+}
+```
+
+Available preset names:
+
+- `default`
+- `slim`
+- `bold`
+- `night`
+- `highcontrast`
+
+### 2) Override individual style tokens
+
+```css
+.widget.dyniplugin,
+[data-dyni] {
+  --dyni-pointer: #00aaff;
+  --dyni-warning: #f5c542;
+  --dyni-alarm: #ff5533;
+  --dyni-arc-linewidth: 1.5;
+  --dyni-tick-major-width: 2.5;
+  --dyni-pointer-side: 0.3;
+  --dyni-font-weight: 800;
+}
+```
+
+Common tokens:
+
+- Colors: `--dyni-pointer`, `--dyni-warning`, `--dyni-alarm`, `--dyni-layline-stb`, `--dyni-layline-port`
+- Ring/ticks: `--dyni-arc-linewidth`, `--dyni-ring-width`, `--dyni-tick-major-len`, `--dyni-tick-major-width`, `--dyni-tick-minor-len`, `--dyni-tick-minor-width`
+- Pointer geometry: `--dyni-pointer-side`, `--dyni-pointer-length`
+- Labels/text: `--dyni-label-inset`, `--dyni-label-font`, `--dyni-font-weight`, `--dyni-label-weight`, `--dyni-font`
+
+### 3) Preset precedence
+
+Preset source order:
+
+1. Settings API (future integration)
+2. `window.DyniPlugin.theme`
+3. `--dyni-theme-preset` from `user.css`
+4. `default`
+
+If you want `user.css` to control the preset, make sure `window.DyniPlugin.theme` is not set.
+
+### 4) Apply changes immediately
+
+After editing `user.css`, hard-refresh AvNav.  
+Optional browser-console reapply:
+
+```javascript
+window.DyniPlugin.runtime.applyThemePresetToRegisteredWidgets();
+```
+
+For full theming reference, see:
+- `documentation/shared/css-theming.md`
+- `documentation/shared/theme-tokens.md`
+
+---
+
 ## Architecture (Short Overview)
 
 The plugin uses a split bootstrap/runtime architecture:

@@ -30,6 +30,49 @@
   font-family: var(--dyni-font);
 }
 
+/* 0.1) Preset token overrides (applied via ThemePresets data attribute). */
+.dyniplugin[data-dyni-theme="slim"],
+[data-dyni][data-dyni-theme="slim"] {
+  --dyni-arc-linewidth: 0.5;
+  --dyni-ring-width: 0.09;
+  --dyni-tick-major-width: 1.5;
+  --dyni-tick-minor-width: 0.75;
+  --dyni-pointer-side: 0.18;
+  --dyni-label-weight: 400;
+}
+
+.dyniplugin[data-dyni-theme="bold"],
+[data-dyni][data-dyni-theme="bold"] {
+  --dyni-arc-linewidth: 2;
+  --dyni-ring-width: 0.16;
+  --dyni-tick-major-len: 12;
+  --dyni-tick-major-width: 3;
+  --dyni-tick-minor-len: 7;
+  --dyni-tick-minor-width: 1.5;
+  --dyni-pointer-side: 0.35;
+  --dyni-pointer-length: 2.2;
+}
+
+.dyniplugin[data-dyni-theme="night"],
+[data-dyni][data-dyni-theme="night"] {
+  --dyni-pointer: #cc2222;
+  --dyni-warning: #8b6914;
+  --dyni-alarm: #992222;
+  --dyni-layline-stb: #3d6b3d;
+  --dyni-layline-port: #8b3333;
+}
+
+.dyniplugin[data-dyni-theme="highcontrast"],
+[data-dyni][data-dyni-theme="highcontrast"] {
+  --dyni-pointer: #ff0000;
+  --dyni-warning: #ffcc00;
+  --dyni-alarm: #ff3300;
+  --dyni-arc-linewidth: 2;
+  --dyni-tick-major-width: 3;
+  --dyni-tick-minor-width: 2;
+  --dyni-pointer-side: 0.35;
+}
+
 /* 1) Hide AvNav's native header/value ONLY inside our widgets. */
 [data-dyni] .widgetHead,
 [data-dyni] .valueData {
@@ -47,11 +90,6 @@
 /* Night mode border color. */
 .nightMode .widget.dyniplugin,
 .nightMode .widget[data-dyni] {
-  --dyni-pointer: #ff2b2b;
-  --dyni-warning: #e7c66a;
-  --dyni-alarm: #ff7a76;
-  --dyni-layline-stb: #82b683;
-  --dyni-layline-port: #ff7a76;
   border-color: var(--dyni-border-night, rgba(252, 11, 11, 0.18));
 }
 

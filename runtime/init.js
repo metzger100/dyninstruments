@@ -9,6 +9,7 @@
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
   const state = ns.state;
+  const FALLBACK_PRESET_NAMES = ["default", "slim", "bold", "night", "highcontrast"];
 
   function createGetComponent(components) {
     return function getComponent(id) {
@@ -22,15 +23,26 @@
     return null;
   }
 
-  function resolveThemePresetName() {
-    const fromSettingsApi = readThemePresetFromSettingsApi();
-    if (typeof fromSettingsApi === "string" && fromSettingsApi.trim()) {
-      return fromSettingsApi.trim();
+  function readThemePresetFromCss() {
+    const doc = root.document;
+    if (!doc || typeof root.getComputedStyle !== "function") {
+      return null;
     }
-    if (typeof ns.theme === "string" && ns.theme.trim()) {
-      return ns.theme.trim();
+
+    const roots = listPluginContainers(doc);
+    for (let i = 0; i < roots.length; i++) {
+      const value = readThemePresetCssVarFromElement(roots[i]);
+      if (value) {
+        return value;
+      }
     }
-    return "default";
+
+    const docRootValue = readThemePresetCssVarFromElement(doc.documentElement);
+    if (docRootValue) {
+      return docRootValue;
+    }
+
+    return readThemePresetCssVarFromElement(doc.body);
   }
 
   function isPluginContainer(rootEl) {
@@ -79,6 +91,68 @@
     return roots;
   }
 
+  function readThemePresetCssVarFromElement(el) {
+    if (!el || typeof root.getComputedStyle !== "function") {
+      return null;
+    }
+    const style = root.getComputedStyle(el);
+    if (!style || typeof style.getPropertyValue !== "function") {
+      return null;
+    }
+    const raw = style.getPropertyValue("--dyni-theme-preset");
+    const value = (typeof raw === "string") ? raw.trim() : "";
+    return value || null;
+  }
+
+  function knownPresetNames() {
+    const presets = state.themePresetApi && state.themePresetApi.presets;
+    if (!presets || typeof presets !== "object") {
+      return FALLBACK_PRESET_NAMES.slice();
+    }
+    const names = Object.keys(presets);
+    if (!names.length) {
+      return ["default"];
+    }
+    if (!Object.prototype.hasOwnProperty.call(presets, "default")) {
+      names.push("default");
+    }
+    return names;
+  }
+
+  function normalizePresetName(presetName) {
+    if (typeof presetName !== "string") {
+      return "default";
+    }
+    const normalized = presetName.trim().toLowerCase();
+    if (!normalized) {
+      return "default";
+    }
+    return knownPresetNames().includes(normalized) ? normalized : "default";
+  }
+
+  function resolveThemePresetName() {
+    return resolveThemePresetNameForContainer(null);
+  }
+
+  function resolveThemePresetNameForContainer(rootEl) {
+    const fromSettingsApi = readThemePresetFromSettingsApi();
+    if (typeof fromSettingsApi === "string" && fromSettingsApi.trim()) {
+      return normalizePresetName(fromSettingsApi);
+    }
+    if (typeof ns.theme === "string" && ns.theme.trim()) {
+      return normalizePresetName(ns.theme);
+    }
+    const fromRootCss = readThemePresetCssVarFromElement(rootEl);
+    if (typeof fromRootCss === "string" && fromRootCss.trim()) {
+      return normalizePresetName(fromRootCss);
+    }
+    const fromCss = readThemePresetFromCss();
+    if (typeof fromCss === "string" && fromCss.trim()) {
+      return normalizePresetName(fromCss);
+    }
+    return "default";
+  }
+
   function buildThemePresetApi(component, Helpers) {
     if (!component || typeof component.create !== "function") {
       return null;
@@ -120,8 +194,8 @@
     }
 
     const selected = (typeof presetName === "string" && presetName.trim())
-      ? presetName.trim()
-      : (state.themePresetName || resolveThemePresetName());
+      ? normalizePresetName(presetName)
+      : resolveThemePresetNameForContainer(rootEl);
 
     state.themePresetApi.apply(rootEl, selected);
     invalidateThemeResolverCache(rootEl);
@@ -129,8 +203,8 @@
 
   function applyThemePresetToRegisteredWidgets(presetName) {
     const selected = (typeof presetName === "string" && presetName.trim())
-      ? presetName.trim()
-      : resolveThemePresetName();
+      ? normalizePresetName(presetName)
+      : normalizePresetName(resolveThemePresetName());
 
     state.themePresetName = selected;
     const roots = listPluginContainers(root.document);

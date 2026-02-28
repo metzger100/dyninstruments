@@ -9,8 +9,9 @@ dyninstruments uses CSS custom properties for theming, scoped to `.dyniplugin` a
 Theme values are layered:
 
 1. Base defaults from `plugin.css` (`.widget.dyniplugin`, `[data-dyni]`)
-2. Optional runtime preset overrides from `ThemePresets.apply(containerEl, presetName)` (inline style on widget container)
-3. Day/night class-dependent CSS (`.nightMode ...`)
+2. Optional runtime preset selector from `ThemePresets.apply(containerEl, presetName)` (`data-dyni-theme` on widget container)
+3. Optional user overrides from AvNav `user.css` (per-token and preset variable overrides)
+4. Day/night class-dependent CSS (`.nightMode ...`)
 
 ## CSS Custom Properties
 
@@ -72,15 +73,38 @@ Read by `ThemeResolver.resolve(canvas)`:
 
 ### Preset Layer (ThemePresets)
 
-`ThemePresets` writes inline CSS vars directly to the widget root container (`.widget` / `.DirectWidget`) using `style.setProperty(...)`.
+`ThemePresets` sets a preset selector attribute directly on the widget root container (`.widget` / `.DirectWidget`).
 
 - `apply(containerEl, presetName)`:
-  - clears all known theme vars on the container first
-  - sets only the selected preset overrides
+  - normalizes `presetName`
+  - sets `data-dyni-theme="<preset>"` for non-default presets
+  - removes `data-dyni-theme` when preset is `default`
 - `remove(containerEl)`:
-  - removes all known theme vars from the container
+  - removes `data-dyni-theme` from the container
 
-This keeps preset values scoped per widget container and avoids global CSS mutation.
+`plugin.css` contains the actual preset token overrides via plugin-scoped selectors like `.dyniplugin[data-dyni-theme="slim"]`.
+This keeps preset values scoped per widget container, CSS-inspectable, and compatible with user overrides.
+
+### User CSS Overrides
+
+Preset selection can be provided from AvNav `user.css` via `--dyni-theme-preset`:
+
+```css
+.widget.dyniplugin,
+[data-dyni] {
+  --dyni-theme-preset: slim;
+}
+```
+
+Per-token overrides can be applied in `user.css` and naturally override preset values:
+
+```css
+.widget.dyniplugin,
+[data-dyni] {
+  --dyni-pointer: #00aaff;
+  --dyni-arc-linewidth: 1.5;
+}
+```
 
 ## Day/Night Mode
 
@@ -92,16 +116,11 @@ AvNav adds `.nightMode` class to the page root in night mode. CSS handles border
 
 /* Night mode */
 .nightMode .widget.dyniplugin {
-  --dyni-pointer: #ff2b2b;
-  --dyni-warning: #e7c66a;
-  --dyni-alarm: #ff7a76;
-  --dyni-layline-stb: #82b683;
-  --dyni-layline-port: #ff7a76;
   border-color: var(--dyni-border-night, rgba(252,11,11,0.18));
 }
 ```
 
-Color-token night overrides are CSS-only. `ThemeResolver` keeps one JS defaults map and reads live CSS each mode after cache invalidation.
+Night-mode border adaptation is CSS-only. `ThemeResolver` keeps one JS defaults map and reads live CSS each mode after cache invalidation.
 `Helpers` typography cache also tracks the current root `.nightMode` state per canvas; when the mode flips, the next `resolveTextColor()` / `resolveFontFamily()` call refreshes cached values from `getComputedStyle()`.
 
 ## Head Hiding

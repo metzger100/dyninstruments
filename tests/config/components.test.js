@@ -32,7 +32,7 @@ describe("config/components.js", function () {
     expect(components.FullCircleDialTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/FullCircleDialTextLayout.js");
     expect(components.ThemePresets.globalKey).toBe("DyniThemePresets");
     expect(components.ThemePresets.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemePresets.js");
-    expect(components.ThemePresets.deps).toEqual(["ThemeResolver"]);
+    expect(components.ThemePresets.deps).toBeUndefined();
     expect(components.GaugeTickMath.deps).toEqual(["GaugeAngleMath"]);
     expect(components.ClusterMapperToolkit.deps).toEqual(["GaugeAngleMath"]);
     expect(components.TextLayoutPrimitives.globalKey).toBe("DyniTextLayoutPrimitives");

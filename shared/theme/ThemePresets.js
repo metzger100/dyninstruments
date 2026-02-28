@@ -1,7 +1,7 @@
 /**
- * Module: ThemePresets - Shared theme preset overrides for widget container CSS variables
+ * Module: ThemePresets - Shared theme preset selector API for widget root containers
  * Documentation: documentation/shared/theme-tokens.md
- * Depends: ThemeResolver
+ * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -44,65 +44,36 @@
     }
   };
 
-  function flattenTokenOverrides(source, prefix, out) {
-    Object.keys(source || {}).forEach(function (key) {
-      const value = source[key];
-      const path = prefix ? (prefix + "." + key) : key;
-      if (value && typeof value === "object" && !Array.isArray(value)) {
-        flattenTokenOverrides(value, path, out);
-        return;
-      }
-      out[path] = value;
-    });
+  function normalizePresetName(presetName) {
+    if (typeof presetName !== "string") {
+      return "default";
+    }
+    const normalized = presetName.trim().toLowerCase();
+    if (!normalized || !Object.prototype.hasOwnProperty.call(PRESETS, normalized)) {
+      return "default";
+    }
+    return normalized;
   }
 
-  function create(def, Helpers) {
-    const resolverMod = Helpers.getModule("ThemeResolver");
-    const tokenDefs = Array.isArray(resolverMod && resolverMod.TOKEN_DEFS)
-      ? resolverMod.TOKEN_DEFS
-      : [];
-    const pathToCssVar = {};
-    const knownCssVars = [];
-
-    tokenDefs.forEach(function (tokenDef) {
-      if (!tokenDef || typeof tokenDef.path !== "string" || typeof tokenDef.cssVar !== "string") {
-        return;
-      }
-      pathToCssVar[tokenDef.path] = tokenDef.cssVar;
-      knownCssVars.push(tokenDef.cssVar);
-    });
-
+  function create() {
     function remove(containerEl) {
-      const style = containerEl && containerEl.style;
-      if (!style || typeof style.removeProperty !== "function") {
+      if (!containerEl || typeof containerEl.removeAttribute !== "function") {
         return;
       }
-      knownCssVars.forEach(function (cssVar) {
-        style.removeProperty(cssVar);
-      });
+      containerEl.removeAttribute("data-dyni-theme");
     }
 
     function apply(containerEl, presetName) {
-      const style = containerEl && containerEl.style;
-      if (!style || typeof style.setProperty !== "function") {
+      if (!containerEl || typeof containerEl.setAttribute !== "function") {
         return;
       }
 
-      const name = (typeof presetName === "string" && presetName.trim())
-        ? presetName.trim()
-        : "default";
-      const preset = PRESETS[name] || PRESETS.default;
-      const flatOverrides = {};
-      flattenTokenOverrides(preset, "", flatOverrides);
-
-      remove(containerEl);
-      Object.keys(flatOverrides).forEach(function (path) {
-        const cssVar = pathToCssVar[path];
-        if (!cssVar) {
-          return;
-        }
-        style.setProperty(cssVar, String(flatOverrides[path]));
-      });
+      const name = normalizePresetName(presetName);
+      if (name === "default") {
+        remove(containerEl);
+        return;
+      }
+      containerEl.setAttribute("data-dyni-theme", name);
     }
 
     return {
