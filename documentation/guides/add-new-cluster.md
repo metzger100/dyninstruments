@@ -32,9 +32,18 @@ Add entries in `config/shared/kind-defaults.js`:
 shared.kindMaps.NEW_KIND = {
   value1: { cap: "VAL1", unit: "X" },
   value2: { cap: "VAL2", unit: "Y" },
-  value1Graphic: { cap: "VAL1", unit: "X" }
+  value1Graphic: { cap: "VAL1", unit: "X" },
+  value1GraphicMain: {
+    cap: "VAL1",
+    unit: "X",
+    kind: "value1Graphic",
+    captionName: "Main caption",
+    unitName: "Main unit"
+  }
 };
 ```
+
+Use CamelCase-suffix keys for multi-value graphic fields (`value1GraphicMain`, `xteDisplayBrg`, ...), so generated editable keys stay predictable (`caption_<mapKey>`, `unit_<mapKey>`).
 
 ## Step 2: Add Cluster Definition
 

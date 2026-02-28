@@ -128,8 +128,8 @@ describe("XteDisplayWidget", function () {
                   calls.modeHistory.push(mode);
                   return mode;
                 },
-                computeLayout(W, H, pad, gap, mode) {
-                  const layout = realPrimitives.computeLayout(W, H, pad, gap, mode);
+                computeLayout(W, H, pad, gap, mode, options) {
+                  const layout = realPrimitives.computeLayout(W, H, pad, gap, mode, options);
                   calls.layoutHistory.push(layout);
                   return layout;
                 },
@@ -168,7 +168,9 @@ describe("XteDisplayWidget", function () {
       dtwCaption: "DST",
       btwCaption: "BRG",
       xteUnit: "nm",
+      trackUnit: "°",
       dtwUnit: "nm",
+      btwUnit: "°",
       headingUnit: "°",
       leadingZero: true,
       showWpName: true,
@@ -215,6 +217,63 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.waypointChecks[harness.calls.waypointChecks.length - 1].result).toBe(false);
   });
 
+  it("reuses header space for metric rows in flat mode when waypoint name is disabled", function () {
+    const harness = createHarness();
+    const wideCanvasA = createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() });
+    const wideCanvasB = createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(wideCanvasA, makeProps({ showWpName: true, wpName: "Fairway Buoy" }));
+    harness.spec.renderCanvas(wideCanvasB, makeProps({ showWpName: false, wpName: "Fairway Buoy" }));
+
+    const layoutWithName = harness.calls.layoutHistory[0];
+    const layoutWithoutName = harness.calls.layoutHistory[1];
+
+    expect(layoutWithName.mode).toBe("flat");
+    expect(layoutWithoutName.mode).toBe("flat");
+    expect(layoutWithoutName.metricRects.cog.y).toBeLessThan(layoutWithName.metricRects.cog.y);
+    expect(layoutWithoutName.metricRects.cog.h).toBeGreaterThan(layoutWithName.metricRects.cog.h);
+  });
+
+  it("reduces top highway whitespace in flat/normal/high when waypoint name is disabled", function () {
+    const harness = createHarness();
+
+    harness.spec.renderCanvas(
+      createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() }),
+      makeProps({ showWpName: true, wpName: "Fairway Buoy" })
+    );
+    harness.spec.renderCanvas(
+      createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() }),
+      makeProps({ showWpName: false, wpName: "Fairway Buoy" })
+    );
+    harness.spec.renderCanvas(
+      createMockCanvas({ rectWidth: 220, rectHeight: 220, ctx: createMockContext2D() }),
+      makeProps({ showWpName: true, wpName: "Fairway Buoy" })
+    );
+    harness.spec.renderCanvas(
+      createMockCanvas({ rectWidth: 220, rectHeight: 220, ctx: createMockContext2D() }),
+      makeProps({ showWpName: false, wpName: "Fairway Buoy" })
+    );
+    harness.spec.renderCanvas(
+      createMockCanvas({ rectWidth: 120, rectHeight: 300, ctx: createMockContext2D() }),
+      makeProps({ showWpName: true, wpName: "Fairway Buoy" })
+    );
+    harness.spec.renderCanvas(
+      createMockCanvas({ rectWidth: 120, rectHeight: 300, ctx: createMockContext2D() }),
+      makeProps({ showWpName: false, wpName: "Fairway Buoy" })
+    );
+
+    const flatOn = harness.calls.staticDraws[0].geom;
+    const flatOff = harness.calls.staticDraws[1].geom;
+    const normalOn = harness.calls.staticDraws[2].geom;
+    const normalOff = harness.calls.staticDraws[3].geom;
+    const highOn = harness.calls.staticDraws[4].geom;
+    const highOff = harness.calls.staticDraws[5].geom;
+
+    expect(flatOff.horizonY).toBeLessThan(flatOn.horizonY);
+    expect(normalOff.horizonY).toBeLessThan(normalOn.horizonY);
+    expect(highOff.horizonY).toBeLessThan(highOn.horizonY);
+  });
+
   it("uses fixed +/-1 XTE scale for marker normalization", function () {
     const harness = createHarness();
     const canvas = createMockCanvas({ rectWidth: 300, rectHeight: 180, ctx: createMockContext2D() });
@@ -255,6 +314,42 @@ describe("XteDisplayWidget", function () {
 
     harness.spec.renderCanvas(canvas, makeProps({ disconnect: true }));
     expect(harness.calls.overlays).toBe(2);
+  });
+
+  it("shows DST unit with nm fallback in metric rows", function () {
+    const harness = createHarness();
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeProps({ dtwUnit: undefined }));
+
+    expect(harness.calls.valueRows[2].unit).toBe("nm");
+  });
+
+  it("uses dedicated track and bearing units when provided", function () {
+    const harness = createHarness();
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeProps({
+      trackUnit: "degT",
+      btwUnit: "degM"
+    }));
+
+    expect(harness.calls.valueRows[0].unit).toBe("degT");
+    expect(harness.calls.valueRows[3].unit).toBe("degM");
+  });
+
+  it("falls back to heading unit when dedicated track/bearing units are missing", function () {
+    const harness = createHarness();
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeProps({
+      trackUnit: undefined,
+      btwUnit: undefined,
+      headingUnit: "degH"
+    }));
+
+    expect(harness.calls.valueRows[0].unit).toBe("degH");
+    expect(harness.calls.valueRows[3].unit).toBe("degH");
   });
 
   it("normalizes marker placement using formatted distance magnitude", function () {

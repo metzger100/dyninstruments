@@ -33,6 +33,35 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.xteRatioThresholdNormal.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.xteRatioThresholdFlat.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.showWpNameGraphic.condition).toEqual({ kind: "xteDisplay" });
+    expect(def.editableParameters.showWpNameGraphic.default).toBe(false);
+    expect(def.editableParameters.ratioThresholdNormal.condition).toEqual([
+      { kind: "eta" },
+      { kind: "rteEta" },
+      { kind: "dst" },
+      { kind: "rteDistance" },
+      { kind: "vmg" },
+      { kind: "positionBoat" },
+      { kind: "positionWp" }
+    ]);
+    expect(def.editableParameters.ratioThresholdFlat.condition).toEqual([
+      { kind: "eta" },
+      { kind: "rteEta" },
+      { kind: "dst" },
+      { kind: "rteDistance" },
+      { kind: "vmg" },
+      { kind: "positionBoat" },
+      { kind: "positionWp" }
+    ]);
+    expect(def.editableParameters.caption_xteDisplay).toBeUndefined();
+    expect(def.editableParameters.unit_xteDisplay).toBeUndefined();
+    expect(def.editableParameters.caption_xteDisplayXte.condition).toEqual({ kind: "xteDisplay" });
+    expect(def.editableParameters.unit_xteDisplayXte.condition).toEqual({ kind: "xteDisplay" });
+    expect(def.editableParameters.caption_xteDisplayCog.displayName).toBe("Track caption");
+    expect(def.editableParameters.unit_xteDisplayCog.displayName).toBe("Track unit");
+    expect(def.editableParameters.caption_xteDisplayDst.displayName).toBe("DST caption");
+    expect(def.editableParameters.unit_xteDisplayDst.displayName).toBe("DST unit");
+    expect(def.editableParameters.caption_xteDisplayBrg.displayName).toBe("BRG caption");
+    expect(def.editableParameters.unit_xteDisplayBrg.displayName).toBe("BRG unit");
   });
 
   it("sets disconnect for waypoint-dependent kinds when wpServer is false", function () {

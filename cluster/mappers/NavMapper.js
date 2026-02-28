@@ -55,6 +55,7 @@
         return o;
       }
       if (req === "xteDisplay") {
+        const headingUnit = unit("xteDisplayCog");
         return {
           renderer: "XteDisplayWidget",
           xte: num(p.xte),
@@ -64,15 +65,17 @@
           wpName: typeof p.wpName === "string" ? p.wpName : "",
           disconnect: p.disconnect === true,
           rendererProps: {
-            xteCaption: "XTE",
-            trackCaption: "COG",
-            dtwCaption: "DST",
-            btwCaption: "BRG",
-            xteUnit: "nm",
-            dtwUnit: "nm",
-            headingUnit: "\u00b0",
+            xteCaption: cap("xteDisplayXte"),
+            trackCaption: cap("xteDisplayCog"),
+            dtwCaption: cap("xteDisplayDst"),
+            btwCaption: cap("xteDisplayBrg"),
+            xteUnit: unit("xteDisplayXte"),
+            trackUnit: headingUnit,
+            dtwUnit: unit("xteDisplayDst"),
+            btwUnit: unit("xteDisplayBrg"),
+            headingUnit: headingUnit,
             leadingZero: p.leadingZero !== false,
-            showWpName: p.showWpNameGraphic !== false,
+            showWpName: p.showWpNameGraphic === true,
             xteRatioThresholdNormal: num(p.xteRatioThresholdNormal),
             xteRatioThresholdFlat: num(p.xteRatioThresholdFlat)
           }

@@ -40,10 +40,12 @@ XteDisplayWidget: {
 | `dtwCaption` | string | `"DST"` | Caption for distance field |
 | `btwCaption` | string | `"BRG"` | Caption for bearing field |
 | `xteUnit` | string | `"nm"` | Unit passed to distance formatter |
+| `trackUnit` | string | `"°"` | Unit text for `COG` metric row |
 | `dtwUnit` | string | `"nm"` | Unit passed to distance formatter |
-| `headingUnit` | string | `"°"` | Heading unit text |
+| `btwUnit` | string | `"°"` | Unit text for `BRG` metric row |
+| `headingUnit` | string | `"°"` | Fallback heading unit for `COG/BRG` when dedicated units are unset |
 | `leadingZero` | boolean | `true` | Heading zero-padding (e.g. `093`) |
-| `showWpName` | boolean | `true` | Enable waypoint name if space allows |
+| `showWpName` | boolean | `false` | Enable waypoint name if space allows |
 | `xteRatioThresholdNormal` | number | `0.85` | Ratio below -> `high` |
 | `xteRatioThresholdFlat` | number | `2.3` | Ratio above -> `flat` |
 
@@ -84,10 +86,13 @@ ratio > xteRatioThresholdFlat -> flat
 otherwise -> normal
 ```
 
+When waypoint name display is disabled (or no waypoint name is available), the highway perspective starts higher in all modes to reduce unused whitespace above the road.
+
 ### flat
 
 - Highway uses left `58%` width
 - Right panel contains optional name header + 2x2 metric grid
+- If waypoint name is disabled, the header band is removed and metric rows grow to use the free space
 - Grid order:
   - row 1: `COG`, `BRG`
   - row 2: `XTE`, `DST`
