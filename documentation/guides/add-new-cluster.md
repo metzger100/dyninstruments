@@ -12,7 +12,7 @@ Read first:
 
 ## Overview
 
-A cluster is one AvNav widget with multiple `kind` choices (numeric and optionally graphic). All cluster widgets use `widget: "ClusterWidget"`.
+A cluster is one AvNav widget with multiple `kind` choices (numeric and optionally radial). All cluster widgets use `widget: "ClusterWidget"`.
 
 Translation logic lives in one mapper module per cluster.
 
@@ -32,18 +32,18 @@ Add entries in `config/shared/kind-defaults.js`:
 shared.kindMaps.NEW_KIND = {
   value1: { cap: "VAL1", unit: "X" },
   value2: { cap: "VAL2", unit: "Y" },
-  value1Graphic: { cap: "VAL1", unit: "X" },
-  value1GraphicMain: {
+  value1Radial: { cap: "VAL1", unit: "X" },
+  value1RadialMain: {
     cap: "VAL1",
     unit: "X",
-    kind: "value1Graphic",
+    kind: "value1Radial",
     captionName: "Main caption",
     unitName: "Main unit"
   }
 };
 ```
 
-Use CamelCase-suffix keys for multi-value graphic fields (`value1GraphicMain`, `xteDisplayBrg`, ...), so generated editable keys stay predictable (`caption_<mapKey>`, `unit_<mapKey>`).
+Use CamelCase-suffix keys for multi-value radial fields (`value1RadialMain`, `xteDisplayBrg`, ...), so generated editable keys stay predictable (`caption_<mapKey>`, `unit_<mapKey>`).
 
 ## Step 2: Add Cluster Definition
 
@@ -69,7 +69,7 @@ config.clusters.push({
         list: [
           { name: "Value 1", value: "value1" },
           { name: "Value 2", value: "value2" },
-          { name: "Value 1 [Graphic]", value: "value1Graphic" }
+          { name: "Value 1 [Radial]", value: "value1Radial" }
         ],
         default: "value1",
         name: "Kind"
@@ -106,12 +106,12 @@ Create `cluster/mappers/NewClusterMapper.js`:
       const unit = toolkit.unit;
       const out = toolkit.out;
 
-      if (p.kind === "value1Graphic") {
+      if (p.kind === "value1Radial") {
         return {
           renderer: "NewGauge",
           value: p.value1,
-          caption: cap("value1Graphic"),
-          unit: unit("value1Graphic")
+          caption: cap("value1Radial"),
+          unit: unit("value1Radial")
         };
       }
 
@@ -143,7 +143,7 @@ Update both config-time and runtime mapper lists:
 2. `cluster/mappers/ClusterMapperRegistry.js`
 - Add `"newcluster": "NewClusterMapper"` to `MAPPER_MODULE_IDS`
 
-## Step 5: Optional Graphic Renderer Wiring
+## Step 5: Optional Radial Renderer Wiring
 
 If mapper returns `renderer: "NewGauge"`:
 
@@ -173,13 +173,13 @@ For a new `kind` in an existing cluster:
 2. Extend the cluster `kind` SELECT in `config/clusters/<cluster>.js`
 3. Add any new `storeKeys` / `editableParameters`
 4. Update matching mapper module in `cluster/mappers/<Cluster>.js`
-5. If the kind is graphic and uses a new renderer, also complete renderer wiring from Step 5
+5. If the kind is radial and uses a new renderer, also complete renderer wiring from Step 5
 
 ## Validate
 
 - Ensure each `kind` translates to expected output
 - Ensure numeric kinds route to `ThreeValueTextWidget`
-- Ensure graphic kinds set correct `renderer` and props
+- Ensure radial kinds set correct `renderer` and props
 - Ensure unknown kinds return `{}`
 - Resize widget and verify layout behavior in AvNav
 
@@ -192,7 +192,7 @@ For a new `kind` in an existing cluster:
 - [ ] Module entry added in `config/components.js`
 - [ ] Mapper added in `ClusterMapperRegistry.deps` (`config/components.js`)
 - [ ] Mapper added in runtime `MAPPER_MODULE_IDS` (`cluster/mappers/ClusterMapperRegistry.js`)
-- [ ] Renderer wiring updated (if graphic)
+- [ ] Renderer wiring updated (if radial)
 - [ ] Every formatter-bearing kind has documented tuple (`kind -> key -> raw unit/type -> formatter -> formatterParameters`) in core contract docs
 
 ## Related

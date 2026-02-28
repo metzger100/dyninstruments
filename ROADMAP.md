@@ -35,7 +35,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 1. ✅ Quick wins (text): `DateTime`, `TimeStatus`, `signalKPitch`, `signalKRoll`
 2. High-impact canvas visuals: ✅ `XteDisplay`, `ActiveRoute`
 3. Lists and controls (interaction-heavy): `RoutePoints`, `EditRoute`, `Zoom`, `CenterDisplay`
-4. Linear gauges: alternatives for graphic kinds
+4. Linear gauges: alternatives for radial kinds
 5. AIS: `AisTarget` (requires additional data logic and responsive layout)
 
 ### Additional non-core concepts
@@ -72,10 +72,10 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | linGauge_Temperature         | —                                                                            | ❌ not covered yet                          |
 | linGauge_Voltage             | —                                                                            | ❌ not covered yet                          |
 | Position                     | dyninstruments_Nav → `positionBoat`                                          | ✅ covered                                  |
-| radGauge_Compass             | dyninstruments_CourseHeading → `hdtGraphic`                                  | ✅ covered                                  |
-| radGauge_Speed               | dyninstruments_Speed → `sogGraphic`/`stwGraphic`                             | ✅ covered                                  |
-| radGauge_Temperature         | dyninstruments_Environment → `tempGraphic`                                   | ✅ covered                                  |
-| radGauge_Voltage             | dyninstruments_Vessel → `voltageGraphic`                                     | ✅ covered                                  |
+| radGauge_Compass             | dyninstruments_CourseHeading → `hdtRadial`                                  | ✅ covered                                  |
+| radGauge_Speed               | dyninstruments_Speed → `sogRadial`/`stwRadial`                             | ✅ covered                                  |
+| radGauge_Temperature         | dyninstruments_Environment → `tempRadial`                                   | ✅ covered                                  |
+| radGauge_Voltage             | dyninstruments_Vessel → `voltageRadial`                                     | ✅ covered                                  |
 | RadialGauge                  | —                                                                            | ❌ not covered yet                          |
 | RoutePoints                  | —                                                                            | ❌ not covered yet                          |
 | RteDistance                  | dyninstruments_Nav → `rteDistance`                                           | ✅ covered                                  |
@@ -90,8 +90,8 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | VMG                          | dyninstruments_Nav → `vmg`                                                   | ✅ covered                                  |
 | WaterTemp                    | dyninstruments_Environment → `temp`                                          | ✅ covered                                  |
 | WindAngle                    | dyninstruments_Wind → `angleApparent`                                        | ✅ covered                                  |
-| WindDisplay                  | dyninstruments_Wind → `angleApparentGraphic`                                 | ✅ covered                                  |
-| WindGraphics                 | dyninstruments_Wind → `angleApparentGraphic`/`angleTrueGraphic`              | ✅ covered                                  |
+| WindDisplay                  | dyninstruments_Wind → `angleApparentRadial`                                 | ✅ covered                                  |
+| WindGraphics                 | dyninstruments_Wind → `angleApparentRadial`/`angleTrueRadial`              | ✅ covered                                  |
 | WindSpeed                    | dyninstruments_Wind → `speedApparent`                                        | ✅ covered                                  |
 | WpPosition                   | dyninstruments_Nav → `positionWp`                                            | ✅ covered                                  |
 | XteDisplay                   | dyninstruments_Nav → `xteDisplay`                                            | ✅ covered                                  |

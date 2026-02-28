@@ -12,7 +12,7 @@ The goal is maximum readability at the helm with minimal configuration overhead.
 ### Cluster widgets
 
 - Related values are grouped into thematic clusters: `courseHeading`, `speed`, `environment`, `wind`, `nav`, `anchor`, `vessel`.
-- In the editor you usually select only a `kind` (for example `cog`, `hdt`, `sog`, `stw`, `tempGraphic`) instead of building custom widgets per value.
+- In the editor you usually select only a `kind` (for example `cog`, `hdt`, `sog`, `stw`, `tempRadial`) instead of building custom widgets per value.
 
 ### Readability-first layouts
 
@@ -23,7 +23,7 @@ The goal is maximum readability at the helm with minimal configuration overhead.
 ### Canvas gauges
 
 - `WindDialWidget` for AWA/AWS and TWA/TWS with optional layline sectors.
-- `CompassGaugeWidget` for HDT/HDM graphic kinds.
+- `CompassGaugeWidget` for HDT/HDM radial kinds.
 - Semicircle gauges:
   - `SpeedGaugeWidget`
   - `DepthGaugeWidget`

@@ -1,10 +1,10 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
-  caption_depthGraphic: "DPT",
-  unit_depthGraphic: "m",
-  caption_tempGraphic: "TEMP",
-  unit_tempGraphic: "°C",
+  caption_depthRadial: "DPT",
+  unit_depthRadial: "m",
+  caption_tempRadial: "TEMP",
+  unit_tempRadial: "°C",
   caption_temp: "TEMP",
   unit_temp: "°C",
   caption_pressure: "PRES",
@@ -14,10 +14,10 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
 });
 
 describe("EnvironmentMapper", function () {
-  it("maps depthGraphic with warning/alarm enabled by default", function () {
+  it("maps depthRadial with warning/alarm enabled by default", function () {
     const mapper = loadFresh("cluster/mappers/EnvironmentMapper.js").create();
     const out = mapper.translate({
-      kind: "depthGraphic",
+      kind: "depthRadial",
       depth: 3.2,
       depthMinValue: "0",
       depthMaxValue: "30",
@@ -35,10 +35,10 @@ describe("EnvironmentMapper", function () {
     expect(out.rendererProps.warningFrom).toBe(5);
   });
 
-  it("maps tempGraphic and only enables sectors when toggles are true", function () {
+  it("maps tempRadial and only enables sectors when toggles are true", function () {
     const mapper = loadFresh("cluster/mappers/EnvironmentMapper.js").create();
     const out = mapper.translate({
-      kind: "tempGraphic",
+      kind: "tempRadial",
       temp: 22,
       tempWarningEnabled: false,
       tempAlarmEnabled: true,
@@ -66,5 +66,11 @@ describe("EnvironmentMapper", function () {
     expect(mapper.translate({ kind: "temp", temp: 20 }, toolkit).formatter).toBe("formatTemperature");
     expect(mapper.translate({ kind: "pressure", value: 1013 }, toolkit).formatter).toBe("skPressure");
     expect(mapper.translate({ kind: "depth", depth: 3 }, toolkit).formatter).toBe("formatDecimal");
+  });
+
+  it("rejects legacy graphic kind names", function () {
+    const mapper = loadFresh("cluster/mappers/EnvironmentMapper.js").create();
+    expect(mapper.translate({ kind: "depthGraphic", depth: 3 }, toolkit)).toEqual({});
+    expect(mapper.translate({ kind: "tempGraphic", temp: 20 }, toolkit)).toEqual({});
   });
 });

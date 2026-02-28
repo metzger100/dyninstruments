@@ -35,8 +35,8 @@
             opt("Heading — True (HDT)", "hdt"),
             opt("Heading — Magnetic (HDM)", "hdm"),
             opt("Bearing to waypoint (BRG)", "brg"),
-            opt("Compass — True (HDT) [Graphic]", "hdtGraphic"),
-            opt("Compass — Magnetic (HDM) [Graphic]", "hdmGraphic")
+            opt("Compass — True (HDT) [Radial]", "hdtRadial"),
+            opt("Compass — Magnetic (HDM) [Radial]", "hdmRadial")
           ],
           default: "cog",
           name: "Kind"
@@ -60,19 +60,19 @@
           condition: [{ kind: "cog" }, { kind: "hdt" }, { kind: "hdm" }, { kind: "brg" }]
         },
 
-        // CompassGaugeWidget thresholds — only for graphic kinds
+        // CompassGaugeWidget thresholds — only for radial kinds
         compRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.8,
           name: "Compass 2-Rows Threshold",
-          condition: [{ kind: "hdtGraphic" }, { kind: "hdmGraphic" }]
+          condition: [{ kind: "hdtRadial" }, { kind: "hdmRadial" }]
         },
         compRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.2,
           name: "Compass 1-Row Threshold",
-          condition: [{ kind: "hdtGraphic" }, { kind: "hdmGraphic" }]
+          condition: [{ kind: "hdtRadial" }, { kind: "hdmRadial" }]
         },
 
-        // Shared caption/unit-to-value scale applies to both numeric & graphic
+        // Shared caption/unit-to-value scale applies to both numeric & radial
         captionUnitScale: {
           type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
           name: "Caption/Unit to Value scale"

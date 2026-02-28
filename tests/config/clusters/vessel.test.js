@@ -28,7 +28,7 @@ describe("config/clusters/vessel.js", function () {
     const kinds = def.editableParameters.kind.list.map((entry) => entry.value);
     expect(kinds).toEqual(expect.arrayContaining([
       "voltage",
-      "voltageGraphic",
+      "voltageRadial",
       "clock",
       "dateTime",
       "timeStatus",
@@ -51,11 +51,11 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.alarmFrom).toBeTruthy();
 
     expect(def.editableParameters.warningFrom.condition).toEqual({
-      kind: "voltageGraphic",
+      kind: "voltageRadial",
       voltageWarningEnabled: true
     });
     expect(def.editableParameters.alarmFrom.condition).toEqual({
-      kind: "voltageGraphic",
+      kind: "voltageRadial",
       voltageAlarmEnabled: true
     });
 
@@ -76,7 +76,7 @@ describe("config/clusters/vessel.js", function () {
 
   it("removes stale voltage value key when voltage key is cleared", function () {
     const def = loadVesselDef();
-    const out = def.updateFunction({ kind: "voltageGraphic", value: " ", storeKeys: { value: "old.path" } });
+    const out = def.updateFunction({ kind: "voltageRadial", value: " ", storeKeys: { value: "old.path" } });
     expect(out.storeKeys.value).toBeUndefined();
   });
 

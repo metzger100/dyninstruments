@@ -24,15 +24,15 @@
 
       const req = p.kind;
 
-      if (req === "depthGraphic") {
+      if (req === "depthRadial") {
         const depthWarnOn = (p.depthWarningEnabled !== false);
         const depthAlarmOn = (p.depthAlarmEnabled !== false);
 
         return {
           renderer: "DepthGaugeWidget",
           value: p.depth,
-          caption: cap("depthGraphic"),
-          unit: unit("depthGraphic"),
+          caption: cap("depthRadial"),
+          unit: unit("depthRadial"),
           rendererProps: {
             minValue: num(p.depthMinValue),
             maxValue: num(p.depthMaxValue),
@@ -48,14 +48,14 @@
         };
       }
 
-      if (req === "tempGraphic") {
+      if (req === "tempRadial") {
         const tempWarnOn = (p.tempWarningEnabled === true);
         const tempAlarmOn = (p.tempAlarmEnabled === true);
         return {
           renderer: "TemperatureGaugeWidget",
           value: p.temp,
-          caption: cap("tempGraphic"),
-          unit: unit("tempGraphic"),
+          caption: cap("tempRadial"),
+          unit: unit("tempRadial"),
           formatter: "formatTemperature",
           formatterParameters: ["celsius"],
           rendererProps: {
@@ -79,7 +79,10 @@
       if (req === "pressure") {
         return out(p.value, cap("pressure"), unit("pressure"), "skPressure", ["hPa"]);
       }
-      return out(p.depth, cap("depth"), unit("depth"), "formatDecimal", [3, 1, true]);
+      if (req === "depth") {
+        return out(p.depth, cap("depth"), unit("depth"), "formatDecimal", [3, 1, true]);
+      }
+      return {};
     }
 
     return {

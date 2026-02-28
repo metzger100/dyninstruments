@@ -3,15 +3,15 @@ const { loadFresh } = require("../../helpers/load-umd");
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
   caption_sog: "SOG",
   unit_sog: "kn",
-  caption_sogGraphic: "SOG",
-  unit_sogGraphic: "kn"
+  caption_sogRadial: "SOG",
+  unit_sogRadial: "kn"
 });
 
 describe("SpeedMapper", function () {
-  it("maps graphic kinds to SpeedGaugeWidget and keeps toggles enabled by default", function () {
+  it("maps radial kinds to SpeedGaugeWidget and keeps toggles enabled by default", function () {
     const mapper = loadFresh("cluster/mappers/SpeedMapper.js").create();
     const out = mapper.translate({
-      kind: "sogGraphic",
+      kind: "sogRadial",
       sog: 6.4,
       minValue: "0",
       maxValue: "30",
@@ -37,7 +37,7 @@ describe("SpeedMapper", function () {
   it("disables warning/alarm sectors when toggles are false", function () {
     const mapper = loadFresh("cluster/mappers/SpeedMapper.js").create();
     const out = mapper.translate({
-      kind: "sogGraphic",
+      kind: "sogRadial",
       sog: 6.4,
       speedWarningEnabled: false,
       speedAlarmEnabled: false,
@@ -60,5 +60,10 @@ describe("SpeedMapper", function () {
       formatter: "formatSpeed",
       formatterParameters: ["kn"]
     });
+  });
+
+  it("rejects legacy graphic kind names", function () {
+    const mapper = loadFresh("cluster/mappers/SpeedMapper.js").create();
+    expect(mapper.translate({ kind: "sogGraphic", sog: 5.3 }, toolkit)).toEqual({});
   });
 });

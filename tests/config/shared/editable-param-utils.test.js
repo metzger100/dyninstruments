@@ -26,7 +26,7 @@ describe("config/shared/editable-param-utils.js", function () {
       bothGraphics: {
         cap: "W",
         unit: "u",
-        kind: ["angleTrueGraphic", "angleApparentGraphic"]
+        kind: ["angleTrueRadial", "angleApparentRadial"]
       }
     });
 
@@ -38,12 +38,12 @@ describe("config/shared/editable-param-utils.js", function () {
     expect(params.caption_xteDisplayCog.condition).toEqual({ kind: "xteDisplay" });
     expect(params.unit_xteDisplayCog.condition).toEqual({ kind: "xteDisplay" });
     expect(params.caption_bothGraphics.condition).toEqual([
-      { kind: "angleTrueGraphic" },
-      { kind: "angleApparentGraphic" }
+      { kind: "angleTrueRadial" },
+      { kind: "angleApparentRadial" }
     ]);
     expect(params.unit_bothGraphics.condition).toEqual([
-      { kind: "angleTrueGraphic" },
-      { kind: "angleApparentGraphic" }
+      { kind: "angleTrueRadial" },
+      { kind: "angleApparentRadial" }
     ]);
 
     expect(shared.opt("Label", "value")).toEqual({ name: "Label", value: "value" });

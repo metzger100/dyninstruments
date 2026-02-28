@@ -8,22 +8,22 @@ function makeToolkit() {
     unit_speedTrue: "kn",
     caption_angleApparent: "AWA",
     unit_angleApparent: "°",
-    caption_angleTrueGraphicAngle: "TWA G",
-    unit_angleTrueGraphicAngle: "°T",
-    caption_angleTrueGraphicSpeed: "TWS G",
-    unit_angleTrueGraphicSpeed: "knT",
-    caption_angleApparentGraphicAngle: "AWA G",
-    unit_angleApparentGraphicAngle: "°A",
-    caption_angleApparentGraphicSpeed: "AWS G",
-    unit_angleApparentGraphicSpeed: "knA"
+    caption_angleTrueRadialAngle: "TWA G",
+    unit_angleTrueRadialAngle: "°T",
+    caption_angleTrueRadialSpeed: "TWS G",
+    unit_angleTrueRadialSpeed: "knT",
+    caption_angleApparentRadialAngle: "AWA G",
+    unit_angleApparentRadialAngle: "°A",
+    caption_angleApparentRadialSpeed: "AWS G",
+    unit_angleApparentRadialSpeed: "knA"
   });
 }
 
 describe("WindMapper", function () {
-  it("maps graphic true wind to WindDialWidget props", function () {
+  it("maps radial true wind to WindDialWidget props", function () {
     const mapper = loadFresh("cluster/mappers/WindMapper.js").create();
     const out = mapper.translate({
-      kind: "angleTrueGraphic",
+      kind: "angleTrueRadial",
       twa: -32,
       tws: 6.1,
       windLayEnabled: true,
@@ -65,10 +65,10 @@ describe("WindMapper", function () {
     expect(out.formatter(-181)).toBe("179");
   });
 
-  it("maps graphic apparent wind to apparent composite caption/unit keys", function () {
+  it("maps radial apparent wind to apparent composite caption/unit keys", function () {
     const mapper = loadFresh("cluster/mappers/WindMapper.js").create();
     const out = mapper.translate({
-      kind: "angleApparentGraphic",
+      kind: "angleApparentRadial",
       awa: 18,
       aws: 8.5
     }, makeToolkit());

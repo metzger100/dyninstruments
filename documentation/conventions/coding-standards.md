@@ -75,7 +75,7 @@ Example:
 - Gauge ratio threshold props: `{gauge}RatioThresholdNormal`, `{gauge}RatioThresholdFlat`
 - Sector props: `{gauge}WarningFrom`, `{gauge}AlarmFrom`
 - Per-kind caption/unit props: `caption_{kindName}`, `unit_{kindName}`
-- `editableParameter` conditions: `{ kind: "xxxGraphic" }` or `[{ kind: "a" }, { kind: "b" }]`
+- `editableParameter` conditions: `{ kind: "xxxRadial" }` or `[{ kind: "a" }, { kind: "b" }]`
 - Renderer wrappers under `cluster/rendering/` must use role-based IDs (example: `DateTimeWidget`, `TimeStatusWidget`), not cluster-prefixed IDs.
 
 ## Mapper Boundary Rules

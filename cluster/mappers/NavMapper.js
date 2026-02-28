@@ -75,7 +75,7 @@
             btwUnit: unit("xteDisplayBrg"),
             headingUnit: headingUnit,
             leadingZero: p.leadingZero !== false,
-            showWpName: p.showWpNameGraphic === true,
+            showWpName: p.showWpNameXteDisplay === true,
             xteRatioThresholdNormal: num(p.xteRatioThresholdNormal),
             xteRatioThresholdFlat: num(p.xteRatioThresholdFlat)
           }

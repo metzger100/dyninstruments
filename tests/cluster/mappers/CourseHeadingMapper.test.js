@@ -1,17 +1,17 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
-  caption_hdtGraphic: "HDT",
-  unit_hdtGraphic: "°",
+  caption_hdtRadial: "HDT",
+  unit_hdtRadial: "°",
   caption_brg: "BRG",
   unit_brg: "°"
 });
 
 describe("CourseHeadingMapper", function () {
-  it("maps graphic heading kinds to CompassGaugeWidget", function () {
+  it("maps radial heading kinds to CompassGaugeWidget", function () {
     const mapper = loadFresh("cluster/mappers/CourseHeadingMapper.js").create();
     const out = mapper.translate({
-      kind: "hdtGraphic",
+      kind: "hdtRadial",
       hdt: 123,
       brg: 230,
       leadingZero: true,
@@ -37,5 +37,11 @@ describe("CourseHeadingMapper", function () {
       formatter: "formatDirection360",
       formatterParameters: [true]
     });
+  });
+
+  it("rejects legacy graphic kind names", function () {
+    const mapper = loadFresh("cluster/mappers/CourseHeadingMapper.js").create();
+    expect(mapper.translate({ kind: "hdtGraphic", hdt: 123 }, toolkit)).toEqual({});
+    expect(mapper.translate({ kind: "hdmGraphic", hdm: 123 }, toolkit)).toEqual({});
   });
 });

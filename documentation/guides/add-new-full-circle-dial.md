@@ -128,13 +128,13 @@ const rendererSpecs = {
 Update the relevant mapper (`cluster/mappers/*.js`) to emit declarative dial props:
 
 ```javascript
-if (p.kind === "newDialGraphic") {
+if (p.kind === "newDialRadial") {
   return {
     renderer: "NewDialWidget",
     pointerAngle: toolkit.num(p.someAngle),
     value: toolkit.num(p.someValue),
-    caption: cap("newDialGraphic"),
-    unit: unit("newDialGraphic"),
+    caption: cap("newDialRadial"),
+    unit: unit("newDialRadial"),
     newDialRatioThresholdNormal: toolkit.num(p.newDialRatioThresholdNormal),
     newDialRatioThresholdFlat: toolkit.num(p.newDialRatioThresholdFlat)
   };

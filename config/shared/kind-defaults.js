@@ -16,20 +16,20 @@
       hdt: { cap: "HDT", unit: "\u00b0" },
       hdm: { cap: "HDM", unit: "\u00b0" },
       brg: { cap: "BRG", unit: "\u00b0" },
-      hdtGraphic: { cap: "HDT", unit: "\u00b0" },
-      hdmGraphic: { cap: "HDM", unit: "\u00b0" }
+      hdtRadial: { cap: "HDT", unit: "\u00b0" },
+      hdmRadial: { cap: "HDM", unit: "\u00b0" }
     },
     SPEED_KIND: {
       sog: { cap: "SOG", unit: "kn" },
       stw: { cap: "STW", unit: "kn" },
-      sogGraphic: { cap: "SOG", unit: "kn" },
-      stwGraphic: { cap: "STW", unit: "kn" }
+      sogRadial: { cap: "SOG", unit: "kn" },
+      stwRadial: { cap: "STW", unit: "kn" }
     },
     ENV_KIND: {
       depth: { cap: "DPT", unit: "m" },
-      depthGraphic: { cap: "DPT", unit: "m" },
+      depthRadial: { cap: "DPT", unit: "m" },
       temp: { cap: "TEMP", unit: "\u00b0C" },
-      tempGraphic: { cap: "TEMP", unit: "\u00b0C" },
+      tempRadial: { cap: "TEMP", unit: "\u00b0C" },
       pressure: { cap: "PRES", unit: "hPa" }
     },
     WIND_KIND: {
@@ -38,31 +38,31 @@
       angleTrueDirection: { cap: "TWD", unit: "\u00b0" },
       speedTrue: { cap: "TWS", unit: "kn" },
       speedApparent: { cap: "AWS", unit: "kn" },
-      angleTrueGraphicAngle: {
+      angleTrueRadialAngle: {
         cap: "TWA",
         unit: "\u00b0",
-        kind: "angleTrueGraphic",
+        kind: "angleTrueRadial",
         captionName: "Angle caption",
         unitName: "Angle unit"
       },
-      angleTrueGraphicSpeed: {
+      angleTrueRadialSpeed: {
         cap: "TWS",
         unit: "kn",
-        kind: "angleTrueGraphic",
+        kind: "angleTrueRadial",
         captionName: "Speed caption",
         unitName: "Speed unit"
       },
-      angleApparentGraphicAngle: {
+      angleApparentRadialAngle: {
         cap: "AWA",
         unit: "\u00b0",
-        kind: "angleApparentGraphic",
+        kind: "angleApparentRadial",
         captionName: "Angle caption",
         unitName: "Angle unit"
       },
-      angleApparentGraphicSpeed: {
+      angleApparentRadialSpeed: {
         cap: "AWS",
         unit: "kn",
-        kind: "angleApparentGraphic",
+        kind: "angleApparentRadial",
         captionName: "Speed caption",
         unitName: "Speed unit"
       }
@@ -111,7 +111,7 @@
     },
     VESSEL_KIND: {
       voltage: { cap: "VOLT", unit: "V" },
-      voltageGraphic: { cap: "VOLT", unit: "V" },
+      voltageRadial: { cap: "VOLT", unit: "V" },
       clock: { cap: "TIME", unit: "" },
       dateTime: { cap: "", unit: "" },
       timeStatus: { cap: "", unit: "" },
