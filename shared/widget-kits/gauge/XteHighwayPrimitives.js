@@ -31,19 +31,22 @@
       return "normal";
     }
 
-    function computeLayout(W, H, pad, gap, mode) {
+    function computeLayout(W, H, pad, gap, mode, options) {
       const innerX = pad;
       const innerY = pad;
       const innerW = Math.max(1, W - pad * 2);
       const innerH = Math.max(1, H - pad * 2);
+      const opts = options || {};
+      const reserveNameSpace = opts.reserveNameSpace !== false;
 
       if (mode === "flat") {
         const highwayW = Math.max(40, Math.floor(innerW * 0.58));
         const dataW = Math.max(40, innerW - highwayW - gap);
         const dataX = innerX + highwayW + gap;
-        const headerH = Math.max(16, Math.floor(innerH * 0.22));
-        const gridY = innerY + headerH + gap;
-        const gridH = Math.max(20, innerH - headerH - gap);
+        const headerH = reserveNameSpace ? Math.max(16, Math.floor(innerH * 0.22)) : 0;
+        const reservedNameH = reserveNameSpace ? (headerH + gap) : 0;
+        const gridY = innerY + reservedNameH;
+        const gridH = Math.max(20, innerH - reservedNameH);
         const rowH = Math.max(10, Math.floor((gridH - gap) / 2));
         const colW = Math.max(12, Math.floor((dataW - gap) / 2));
 
@@ -106,9 +109,19 @@
       };
     }
 
-    function highwayGeometry(rect, mode) {
+    function highwayGeometry(rect, mode, options) {
+      const opts = options || {};
       const cx = rect.x + rect.w * 0.5;
-      const topFactor = mode === "high" ? 0.18 : 0.3;
+      let topFactor = mode === "high" ? 0.18 : 0.3;
+      if (opts.compactTop === true) {
+        if (mode === "flat") {
+          topFactor = 0.14;
+        } else if (mode === "high") {
+          topFactor = 0.1;
+        } else {
+          topFactor = 0.16;
+        }
+      }
       const horizonY = rect.y + rect.h * topFactor;
       const baseY = rect.y + rect.h * 0.92;
       const nearHalf = rect.w * 0.43;

@@ -57,24 +57,6 @@
           ]
         },
 
-        // Graphic kind labels/units
-        angleCaption_TWA: { type: "STRING", default: "TWA", name: "Angle caption", condition: { kind: "angleTrueGraphic" } },
-        speedCaption_TWS: { type: "STRING", default: "TWS", name: "Speed caption", condition: { kind: "angleTrueGraphic" } },
-        angleCaption_AWA: { type: "STRING", default: "AWA", name: "Angle caption", condition: { kind: "angleApparentGraphic" } },
-        speedCaption_AWS: { type: "STRING", default: "AWS", name: "Speed caption", condition: { kind: "angleApparentGraphic" } },
-        angleUnitGraphic: {
-          type: "STRING",
-          default: "°",
-          name: "Angle unit",
-          condition: [{ kind: "angleTrueGraphic" }, { kind: "angleApparentGraphic" }]
-        },
-        speedUnitGraphic: {
-          type: "STRING",
-          default: "kn",
-          name: "Speed unit",
-          condition: [{ kind: "angleTrueGraphic" }, { kind: "angleApparentGraphic" }]
-        },
-
         // WindDialWidget-only row thresholds
         dialRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.7,

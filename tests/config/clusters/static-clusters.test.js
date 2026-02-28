@@ -35,5 +35,17 @@ describe("static cluster configs", function () {
     expect(byCluster.speed.editableParameters.kind.default).toBe("sog");
     expect(byCluster.wind.editableParameters.kind.default).toBe("angleTrue");
     expect(byCluster.anchor.editableParameters.kind.default).toBe("distance");
+    expect(byCluster.wind.editableParameters.angleCaption_TWA).toBeUndefined();
+    expect(byCluster.wind.editableParameters.speedCaption_TWS).toBeUndefined();
+    expect(byCluster.wind.editableParameters.angleUnitGraphic).toBeUndefined();
+    expect(byCluster.wind.editableParameters.speedUnitGraphic).toBeUndefined();
+    expect(byCluster.wind.editableParameters.caption_angleTrueGraphicAngle.condition).toEqual({ kind: "angleTrueGraphic" });
+    expect(byCluster.wind.editableParameters.unit_angleTrueGraphicAngle.condition).toEqual({ kind: "angleTrueGraphic" });
+    expect(byCluster.wind.editableParameters.caption_angleTrueGraphicSpeed.condition).toEqual({ kind: "angleTrueGraphic" });
+    expect(byCluster.wind.editableParameters.unit_angleTrueGraphicSpeed.condition).toEqual({ kind: "angleTrueGraphic" });
+    expect(byCluster.wind.editableParameters.caption_angleApparentGraphicAngle.condition).toEqual({ kind: "angleApparentGraphic" });
+    expect(byCluster.wind.editableParameters.unit_angleApparentGraphicAngle.condition).toEqual({ kind: "angleApparentGraphic" });
+    expect(byCluster.wind.editableParameters.caption_angleApparentGraphicSpeed.condition).toEqual({ kind: "angleApparentGraphic" });
+    expect(byCluster.wind.editableParameters.unit_angleApparentGraphicSpeed.condition).toEqual({ kind: "angleApparentGraphic" });
   });
 });

@@ -131,13 +131,37 @@ condition: []   // or omit condition entirely
 
 ### Per-Kind Caption/Unit Pattern (dyninstruments-internal)
 
-Helper `makePerKindTextParams(KIND_MAP)` generates per-kind STRING parameters:
+Helper `makePerKindTextParams(KIND_MAP)` generates per-kind STRING parameters.
+Map entries support this schema:
 
 ```javascript
-const SPEED_KIND = { sog: { cap: 'SOG', unit: 'kn' }, stw: { cap: 'STW', unit: 'kn' } };
+{
+  cap: "Label default",
+  unit: "Unit default",
+  kind: "kindOverride",                 // optional, default: map key
+  captionName: "Caption editor label",  // optional, default: "Caption"
+  unitName: "Unit editor label"         // optional, default: "Unit"
+}
+```
+
+If `kind` is an array, helper output uses OR conditions (`[{ kind: a }, { kind: b }]`).
+
+```javascript
+const WIND_KIND = {
+  angleTrue: { cap: "TWA", unit: "°" },
+  angleTrueGraphicAngle: {
+    cap: "TWA",
+    unit: "°",
+    kind: "angleTrueGraphic",
+    captionName: "Angle caption",
+    unitName: "Angle unit"
+  }
+};
 // Generates:
-// caption_sog: { type: 'STRING', displayName: 'Caption', default: 'SOG', condition: { kind: 'sog' } }
-// unit_sog:    { type: 'STRING', displayName: 'Unit',    default: 'kn',  condition: { kind: 'sog' } }
+// caption_angleTrue: { type: "STRING", displayName: "Caption", default: "TWA", condition: { kind: "angleTrue" } }
+// unit_angleTrue:    { type: "STRING", displayName: "Unit", default: "°", condition: { kind: "angleTrue" } }
+// caption_angleTrueGraphicAngle: { type: "STRING", displayName: "Angle caption", default: "TWA", condition: { kind: "angleTrueGraphic" } }
+// unit_angleTrueGraphicAngle:    { type: "STRING", displayName: "Angle unit", default: "°", condition: { kind: "angleTrueGraphic" } }
 ```
 
 ClusterWidget resolves via `p['caption_' + kindName]` and `p['unit_' + kindName]`.

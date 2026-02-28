@@ -37,17 +37,72 @@
       angleApparent: { cap: "AWA", unit: "\u00b0" },
       angleTrueDirection: { cap: "TWD", unit: "\u00b0" },
       speedTrue: { cap: "TWS", unit: "kn" },
-      speedApparent: { cap: "AWS", unit: "kn" }
+      speedApparent: { cap: "AWS", unit: "kn" },
+      angleTrueGraphicAngle: {
+        cap: "TWA",
+        unit: "\u00b0",
+        kind: "angleTrueGraphic",
+        captionName: "Angle caption",
+        unitName: "Angle unit"
+      },
+      angleTrueGraphicSpeed: {
+        cap: "TWS",
+        unit: "kn",
+        kind: "angleTrueGraphic",
+        captionName: "Speed caption",
+        unitName: "Speed unit"
+      },
+      angleApparentGraphicAngle: {
+        cap: "AWA",
+        unit: "\u00b0",
+        kind: "angleApparentGraphic",
+        captionName: "Angle caption",
+        unitName: "Angle unit"
+      },
+      angleApparentGraphicSpeed: {
+        cap: "AWS",
+        unit: "kn",
+        kind: "angleApparentGraphic",
+        captionName: "Speed caption",
+        unitName: "Speed unit"
+      }
     },
     NAV_KIND: {
       eta: { cap: "ETA", unit: "" },
       rteEta: { cap: "RTE ETA", unit: "" },
-      dst: { cap: "DST", unit: "" },
-      rteDistance: { cap: "RTE", unit: "" },
+      dst: { cap: "DST", unit: "nm" },
+      rteDistance: { cap: "RTE", unit: "nm" },
       vmg: { cap: "VMG", unit: "kn" },
       positionBoat: { cap: "POS", unit: "" },
       positionWp: { cap: "WP", unit: "" },
-      xteDisplay: { cap: "XTE", unit: "nm" }
+      xteDisplayXte: {
+        cap: "XTE",
+        unit: "nm",
+        kind: "xteDisplay",
+        captionName: "XTE caption",
+        unitName: "XTE unit"
+      },
+      xteDisplayCog: {
+        cap: "COG",
+        unit: "\u00b0",
+        kind: "xteDisplay",
+        captionName: "Track caption",
+        unitName: "Track unit"
+      },
+      xteDisplayDst: {
+        cap: "DST",
+        unit: "nm",
+        kind: "xteDisplay",
+        captionName: "DST caption",
+        unitName: "DST unit"
+      },
+      xteDisplayBrg: {
+        cap: "BRG",
+        unit: "\u00b0",
+        kind: "xteDisplay",
+        captionName: "BRG caption",
+        unitName: "BRG unit"
+      }
     },
     ANCHOR_KIND: {
       distance: { cap: "ANCHOR", unit: "m" },

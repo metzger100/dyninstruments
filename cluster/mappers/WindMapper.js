@@ -27,15 +27,17 @@
 
       if (req === "angleTrueGraphic" || req === "angleApparentGraphic") {
         const isTrue = (req === "angleTrueGraphic");
-        const speedUnit = p.speedUnitGraphic;
+        const angleKind = isTrue ? "angleTrueGraphicAngle" : "angleApparentGraphicAngle";
+        const speedKind = isTrue ? "angleTrueGraphicSpeed" : "angleApparentGraphicSpeed";
+        const speedUnit = unit(speedKind);
         return {
           renderer: "WindDialWidget",
           angle: isTrue ? p.twa : p.awa,
           speed: isTrue ? p.tws : p.aws,
           rendererProps: {
-            angleCaption: isTrue ? p.angleCaption_TWA : p.angleCaption_AWA,
-            speedCaption: isTrue ? p.speedCaption_TWS : p.speedCaption_AWS,
-            angleUnit: p.angleUnitGraphic,
+            angleCaption: cap(angleKind),
+            speedCaption: cap(speedKind),
+            angleUnit: unit(angleKind),
             speedUnit: speedUnit,
             formatter: "formatSpeed",
             formatterParameters: [speedUnit],

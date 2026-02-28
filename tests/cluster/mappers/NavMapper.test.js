@@ -8,7 +8,15 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   caption_vmg: "VMG",
   unit_vmg: "kn",
   caption_positionBoat: "POS",
-  unit_positionBoat: ""
+  unit_positionBoat: "",
+  caption_xteDisplayXte: "XTE CAP",
+  unit_xteDisplayXte: "nmX",
+  caption_xteDisplayCog: "COG CAP",
+  unit_xteDisplayCog: "degT",
+  caption_xteDisplayDst: "DST CAP",
+  unit_xteDisplayDst: "nmD",
+  caption_xteDisplayBrg: "BRG CAP",
+  unit_xteDisplayBrg: "degM"
 });
 
 describe("NavMapper", function () {
@@ -85,17 +93,25 @@ describe("NavMapper", function () {
     expect(out.wpName).toBe("Fairway Buoy");
     expect(out.disconnect).toBe(true);
     expect(out.rendererProps).toEqual({
-      xteCaption: "XTE",
-      trackCaption: "COG",
-      dtwCaption: "DST",
-      btwCaption: "BRG",
-      xteUnit: "nm",
-      dtwUnit: "nm",
-      headingUnit: "°",
+      xteCaption: "XTE CAP",
+      trackCaption: "COG CAP",
+      dtwCaption: "DST CAP",
+      btwCaption: "BRG CAP",
+      xteUnit: "nmX",
+      trackUnit: "degT",
+      dtwUnit: "nmD",
+      btwUnit: "degM",
+      headingUnit: "degT",
       leadingZero: false,
       showWpName: false,
       xteRatioThresholdNormal: 0.8,
       xteRatioThresholdFlat: 2.4
     });
+  });
+
+  it("defaults xteDisplay waypoint-name toggle to false when setting is absent", function () {
+    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const out = mapper.translate({ kind: "xteDisplay", xte: 0.2, cog: 90, dtw: 1.1, btw: 95 }, toolkit);
+    expect(out.rendererProps.showWpName).toBe(false);
   });
 });

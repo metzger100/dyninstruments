@@ -161,8 +161,14 @@
       const mode = primitives.computeMode(W, H, normalThreshold, flatThreshold, toolkit.value.computeMode);
       const pad = toolkit.value.computePad(W, H);
       const gap = toolkit.value.computeGap(W, H);
-      const layout = primitives.computeLayout(W, H, pad, gap, mode);
-      const geom = primitives.highwayGeometry(layout.highway, mode);
+      const wpName = trimWaypointName(p.wpName);
+      const reserveNameSpace = (p.showWpName !== false) && !!wpName;
+      const layout = primitives.computeLayout(W, H, pad, gap, mode, {
+        reserveNameSpace: reserveNameSpace
+      });
+      const geom = primitives.highwayGeometry(layout.highway, mode, {
+        compactTop: !reserveNameSpace
+      });
 
       const staticKey = {
         mode: mode,
@@ -224,14 +230,15 @@
         default: "---"
       }), "---");
 
+      const trackUnit = fallbackText(p.trackUnit, headingUnit);
+      const bearingUnit = fallbackText(p.btwUnit, headingUnit);
       const metrics = {
-        cog: { caption: fallbackText(p.trackCaption, "COG"), value: trackValue, unit: headingUnit },
+        cog: { caption: fallbackText(p.trackCaption, "COG"), value: trackValue, unit: trackUnit },
         xte: { caption: fallbackText(p.xteCaption, "XTE"), value: xteDistance + xteSide, unit: "" },
-        dtw: { caption: fallbackText(p.dtwCaption, "DST"), value: dtwDistance, unit: "" },
-        btw: { caption: fallbackText(p.btwCaption, "BRG"), value: bearingValue, unit: headingUnit }
+        dtw: { caption: fallbackText(p.dtwCaption, "DST"), value: dtwDistance, unit: fallbackText(p.dtwUnit, "nm") },
+        btw: { caption: fallbackText(p.btwCaption, "BRG"), value: bearingValue, unit: bearingUnit }
       };
 
-      const wpName = trimWaypointName(p.wpName);
       if (primitives.shouldShowWaypoint(mode, layout.nameRect, p.showWpName !== false, wpName)) {
         drawWaypointName(ctx, toolkit.text, layout.nameRect, wpName, family, labelWeight, textColor);
       }

@@ -14,6 +14,15 @@
   const opt = shared.opt;
   const NAV_KIND = shared.kindMaps.NAV_KIND;
   const commonThreeElementsEditables = shared.commonThreeElementsEditables;
+  const NAV_TEXT_KIND_CONDITION = [
+    { kind: "eta" },
+    { kind: "rteEta" },
+    { kind: "dst" },
+    { kind: "rteDistance" },
+    { kind: "vmg" },
+    { kind: "positionBoat" },
+    { kind: "positionWp" }
+  ];
 
   config.clusters.push({
     widget: "ClusterWidget",
@@ -71,7 +80,7 @@
         },
         showWpNameGraphic: {
           type: "BOOLEAN",
-          default: true,
+          default: false,
           name: "Show waypoint name",
           condition: { kind: "xteDisplay" }
         },
@@ -81,7 +90,18 @@
         formatterParameters: false,
         className: true,
         ...makePerKindTextParams(NAV_KIND),
-        ...commonThreeElementsEditables
+        ratioThresholdNormal: {
+          ...commonThreeElementsEditables.ratioThresholdNormal,
+          condition: NAV_TEXT_KIND_CONDITION
+        },
+        ratioThresholdFlat: {
+          ...commonThreeElementsEditables.ratioThresholdFlat,
+          condition: NAV_TEXT_KIND_CONDITION
+        },
+        captionUnitScale: {
+          ...commonThreeElementsEditables.captionUnitScale,
+          condition: NAV_TEXT_KIND_CONDITION
+        }
       },
       updateFunction: function (values) {
         const out = values ? { ...values } : {};

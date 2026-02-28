@@ -10,21 +10,34 @@
   const config = ns.config;
   const shared = config.shared;
 
+  function makeKindCondition(kind, fallbackKind) {
+    if (Array.isArray(kind)) {
+      return kind.map(function (k) {
+        return { kind: k };
+      });
+    }
+    if (typeof kind === "string" && kind.length) {
+      return { kind: kind };
+    }
+    return { kind: fallbackKind };
+  }
+
   function makePerKindTextParams(map) {
     const out = {};
     Object.keys(map).forEach(function (k) {
       const d = map[k] || {};
+      const condition = makeKindCondition(d.kind, k);
       out["caption_" + k] = {
         type: "STRING",
-        displayName: "Caption",
+        displayName: (typeof d.captionName === "string" && d.captionName.length) ? d.captionName : "Caption",
         default: (typeof d.cap === "string") ? d.cap : "",
-        condition: { kind: k }
+        condition: condition
       };
       out["unit_" + k] = {
         type: "STRING",
-        displayName: "Unit",
+        displayName: (typeof d.unitName === "string" && d.unitName.length) ? d.unitName : "Unit",
         default: (typeof d.unit === "string") ? d.unit : "",
-        condition: { kind: k }
+        condition: condition
       };
     });
     return out;
