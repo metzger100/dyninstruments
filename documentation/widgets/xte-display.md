@@ -108,7 +108,7 @@ When waypoint name display is disabled (or no waypoint name is available), the h
 
 - Top strip (`~14%`): `COG`, `BRG`
 - Middle (`~68%`): deeper-perspective highway
-- Bottom strip (`~18%`): `XTE`, `DST`
+- Bottom strip (`~18%`): `XTE`, `DST` (equal-width two-column layout)
 - Waypoint name remains optional and hides first in constrained sizes
 
 ## Fixed Scale
