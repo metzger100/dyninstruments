@@ -48,6 +48,9 @@
 | `ring.widthFactor` | `--dyni-ring-width` | `0.12` | number |
 | `labels.insetFactor` | `--dyni-label-inset` | `1.8` | number |
 | `labels.fontFactor` | `--dyni-label-font` | `0.14` | number |
+| `fullCircle.normal.innerMarginFactor` | `--dyni-fullcircle-normal-inner-margin` | `0.03` | number |
+| `fullCircle.normal.minHeightFactor` | `--dyni-fullcircle-normal-min-height` | `0.45` | number |
+| `fullCircle.normal.dualGapFactor` | `--dyni-fullcircle-normal-dual-gap` | `0.05` | number |
 | `font.weight` | `--dyni-font-weight` | `700` | number |
 | `font.labelWeight` | `--dyni-label-weight` | `700` | number |
 
