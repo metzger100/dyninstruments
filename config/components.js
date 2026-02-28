@@ -49,6 +49,11 @@
       globalKey: "DyniGaugeValueMath",
       deps: ["GaugeAngleMath"]
     },
+    CanvasLayerCache: {
+      js: BASE + "shared/widget-kits/gauge/CanvasLayerCache.js",
+      css: undefined,
+      globalKey: "DyniCanvasLayerCache"
+    },
     ThemeResolver: {
       js: BASE + "shared/theme/ThemeResolver.js",
       css: undefined,
