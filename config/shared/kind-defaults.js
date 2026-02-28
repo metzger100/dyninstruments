@@ -46,7 +46,8 @@
       rteDistance: { cap: "RTE", unit: "" },
       vmg: { cap: "VMG", unit: "kn" },
       positionBoat: { cap: "POS", unit: "" },
-      positionWp: { cap: "WP", unit: "" }
+      positionWp: { cap: "WP", unit: "" },
+      xteDisplay: { cap: "XTE", unit: "nm" }
     },
     ANCHOR_KIND: {
       distance: { cap: "ANCHOR", unit: "m" },

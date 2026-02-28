@@ -26,14 +26,14 @@ It tracks pre-release priorities and AvNav widget coverage status.
 ### Planned integration directions
 
 - `vessel`: quick-win text kinds completed (`dateTime`, `timeStatus`, `pitch`, `roll`)
-- `nav`: `activeRoute`, `routePoints`, `xteDisplay`, `editRoute`
+- `nav`: `activeRoute`, `routePoints`, `editRoute`
 - planned new clusters: `ais` (for example `aisTarget`), `map` (for example `zoom`, `centerDisplay`)
 - `default`: likely a dedicated utility/default widget instead of a cluster kind
 
 ### Practical implementation order
 
 1. ✅ Quick wins (text): `DateTime`, `TimeStatus`, `signalKPitch`, `signalKRoll`
-2. High-impact canvas visuals: `XteDisplay`, `ActiveRoute`
+2. High-impact canvas visuals: ✅ `XteDisplay`, `ActiveRoute`
 3. Lists and controls (interaction-heavy): `RoutePoints`, `EditRoute`, `Zoom`, `CenterDisplay`
 4. Linear gauges: alternatives for graphic kinds
 5. AIS: `AisTarget` (requires additional data logic and responsive layout)
@@ -94,5 +94,5 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | WindGraphics                 | dyninstruments_Wind → `angleApparentGraphic`/`angleTrueGraphic`              | ✅ covered                                  |
 | WindSpeed                    | dyninstruments_Wind → `speedApparent`                                        | ✅ covered                                  |
 | WpPosition                   | dyninstruments_Nav → `positionWp`                                            | ✅ covered                                  |
-| XteDisplay                   | —                                                                            | ❌ not covered yet                          |
+| XteDisplay                   | dyninstruments_Nav → `xteDisplay`                                            | ✅ covered                                  |
 | Zoom                         | —                                                                            | ❌ not covered yet                          |

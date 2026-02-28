@@ -17,6 +17,10 @@
       const cap = toolkit.cap;
       const unit = toolkit.unit;
       const out = toolkit.out;
+      const num = toolkit.num || function (value) {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : undefined;
+      };
 
       const req = p.kind;
 
@@ -49,6 +53,30 @@
         o.coordinateFormatter = "formatLonLatsDecimal";
         o.coordinateFormatterParameters = [];
         return o;
+      }
+      if (req === "xteDisplay") {
+        return {
+          renderer: "XteDisplayWidget",
+          xte: num(p.xte),
+          cog: num(p.cog),
+          dtw: num(p.dtw),
+          btw: num(p.btw),
+          wpName: typeof p.wpName === "string" ? p.wpName : "",
+          disconnect: p.disconnect === true,
+          rendererProps: {
+            xteCaption: "XTE",
+            trackCaption: "COG",
+            dtwCaption: "DST",
+            btwCaption: "BRG",
+            xteUnit: "nm",
+            dtwUnit: "nm",
+            headingUnit: "\u00b0",
+            leadingZero: p.leadingZero !== false,
+            showWpName: p.showWpNameGraphic !== false,
+            xteRatioThresholdNormal: num(p.xteRatioThresholdNormal),
+            xteRatioThresholdFlat: num(p.xteRatioThresholdFlat)
+          }
+        };
       }
       return {};
     }

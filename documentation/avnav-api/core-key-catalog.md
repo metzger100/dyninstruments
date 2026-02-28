@@ -35,7 +35,12 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `nav` | `eta` | `nav.wp.eta` | `eta` |
 | `nav` | `rteEta` | `nav.route.eta` | `rteEta` |
 | `nav` | `dst` | `nav.wp.distance` | `dst` |
-| `nav` | `wpServer` | `nav.wp.server` | disconnect state for `dst`, `positionWp` |
+| `nav` | `dtw` | `nav.wp.distance` | `xteDisplay` |
+| `nav` | `xte` | `nav.wp.xte` | `xteDisplay` |
+| `nav` | `cog` | `nav.gps.course` | `xteDisplay` |
+| `nav` | `btw` | `nav.wp.course` | `xteDisplay` |
+| `nav` | `wpName` | `nav.wp.name` | `xteDisplay` |
+| `nav` | `wpServer` | `nav.wp.server` | disconnect state for `dst`, `positionWp`, `xteDisplay` |
 | `nav` | `rteDistance` | `nav.route.remain` | `rteDistance` |
 | `nav` | `vmg` | `nav.wp.vmg` | `vmg` |
 | `nav` | `positionBoat` | `nav.gps.position` | `positionBoat` |
@@ -72,6 +77,7 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `cog`, `hdt`, `hdm`, `brg` | `cog`/`hdt`/`hdm`/`brg` | `formatDirection360` + `[leadingZero]` | heading/course/bearing text |
 | `eta`, `rteEta` | `eta` / `rteEta` | `formatTime` + `[]` | Date/time value path |
 | `dst`, `rteDistance` | `dst` / `rteDistance` | `formatDistance` + `[]` | distance text |
+| `xteDisplay` | `xte`, `cog`, `dtw`, `btw`, `wpName` | renderer wrapper (`XteDisplayWidget`) using `formatDistance` (`xte`, `dtw`) + `formatDirection360` (`cog`, `btw`) | fail-closed if required numeric inputs are missing |
 | `vmg` | `vmg` | `formatSpeed` + `[unit]` | speed text |
 | `positionBoat`, `positionWp` | `positionBoat` / `positionWp` | `formatLonLats` + coordinate formatter `formatLonLatsDecimal` | position object expected |
 | `distance`, `watch` | `distance` / `watch` | `formatDistance` + `[unit]` | anchor distances |

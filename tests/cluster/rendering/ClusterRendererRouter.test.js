@@ -20,13 +20,15 @@ describe("ClusterRendererRouter", function () {
     const depth = makeSpec("depth");
     const temp = makeSpec("temp");
     const volt = makeSpec("volt");
+    const xte = makeSpec("xte");
     const targetSpecs = {
       WindDialWidget: wind,
       CompassGaugeWidget: compass,
       SpeedGaugeWidget: speed,
       DepthGaugeWidget: depth,
       TemperatureGaugeWidget: temp,
-      VoltageGaugeWidget: volt
+      VoltageGaugeWidget: volt,
+      XteDisplayWidget: xte
     };
 
     const Helpers = {
@@ -50,6 +52,7 @@ describe("ClusterRendererRouter", function () {
 
     expect(router.wantsHideNativeHead).toBe(true);
     expect(router.pickRenderer({ renderer: "WindDialWidget" })).toBe(wind);
+    expect(router.pickRenderer({ renderer: "XteDisplayWidget" })).toBe(xte);
     expect(router.pickRenderer({ renderer: "PositionCoordinateWidget" })).toBe(position);
     expect(router.pickRenderer({ renderer: "Unknown" })).toBe(three);
     expect(router.pickRenderer({})).toBe(three);
@@ -63,13 +66,15 @@ describe("ClusterRendererRouter", function () {
     const compass = makeSpec("compass");
     const depth = makeSpec("depth");
     const temp = makeSpec("temp");
+    const xte = makeSpec("xte");
     const targetSpecs = {
       WindDialWidget: wind,
       CompassGaugeWidget: compass,
       SpeedGaugeWidget: speed,
       DepthGaugeWidget: depth,
       TemperatureGaugeWidget: temp,
-      VoltageGaugeWidget: voltage
+      VoltageGaugeWidget: voltage,
+      XteDisplayWidget: xte
     };
 
     const Helpers = {
