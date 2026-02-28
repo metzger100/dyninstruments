@@ -132,4 +132,6 @@ Full roadmap details and the AvNav widget coverage matrix are tracked in [ROADMA
 
 Developer setup, AI-assisted workflow rules, quality gates, and pre-PR checklist are documented in [CONTRIBUTING.md](CONTRIBUTING.md).
 
+`tools/check-patterns.mjs` now enforces aggressive cross-file duplication detection (body-level function clones + long cloned blocks), so shared helper extraction is required for repeated logic.
+
 Final validation uses the full gate: `npm run check:all`.

@@ -1,6 +1,6 @@
 # Quality Scorecard
 
-**Last updated:** 2026-02-21
+**Last updated:** 2026-02-28
 
 ## Layer Health
 
@@ -22,7 +22,7 @@ Notes:
 
 | Pattern | Severity | Files | Status |
 |---|---|---|---|
-| Duplicate function declarations in widget/shared helpers | HIGH | Previously across `widgets/gauges`, `widgets/text`, `cluster/mappers`, `shared/widget-kits/gauge` | ✅ Fixed (`check-patterns`: `duplicate-functions: 0`) |
+| Cross-file clone drift (renamed helpers + long copy-paste blocks) | HIGH | Previously under-detected by name-based duplicate rule | ✅ Fixed (`check-patterns`: `duplicate-functions: 0`, `duplicate-block-clones: 0`) |
 | Direct `avnav.api` access in non-runtime code | HIGH | Previously in `GaugeValueMath`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `PositionCoordinateWidget` | ✅ Fixed (`check-patterns`: `forbidden-globals: 0`) |
 | Empty catch blocks | MED | Previously in `ClusterRendererRouter`, `runtime/helpers`, `GaugeValueMath`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `PositionCoordinateWidget` | ✅ Fixed (`check-patterns`: `empty-catch: 0`) |
 | Oneliner line-limit bypass risk | HIGH | Previously in runtime/shared/widgets (backlog cleared) | ✅ Fixed (`check:filesize` is fail-closed with `--oneliner=block`; latest summary: `onelinerWarnings: 0`) |
@@ -34,6 +34,7 @@ Notes:
 | Documentation quality audit/scorecard | GPT-5 Codex | Good | Accurate repo-derived drift extraction from checks + source scan |
 | Cross-layer helper extraction + dependency cleanup | GPT-5 Codex | Good | Cleared all `duplicate-functions` findings and fixed widget dependency direction without render regressions. |
 | Formatter-boundary refactor (`Helpers.applyFormatter`) | GPT-5 Codex | Good | Removed forbidden global access findings and added wind gauge unit tests while preserving formatter output paths. |
+| Aggressive duplication detection hardening | GPT-5 Codex | Good | Replaced name-based duplicate detection with body/clone checks and extracted shared semicircle tick-step resolvers. |
 
 Append new rows when model choice materially affects outcome.
 

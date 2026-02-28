@@ -35,6 +35,228 @@ describe("tools/check-patterns.mjs", function () {
     return findings.map((item) => item.message).join("\n");
   }
 
+  it("blocks renamed but identical function bodies across files", function () {
+    const cwd = createWorkspace({
+      "widgets/a.js": `
+function computeAlpha(value) {
+  let total = 0;
+  const limit = Number(value);
+  for (let i = 0; i < limit; i += 1) {
+    if (i % 2 === 0) {
+      total += i * 3;
+    } else {
+      total -= i;
+    }
+  }
+  if (total > 10) {
+    total = total - 5;
+  } else {
+    total = total + 2;
+  }
+  return total;
+}
+computeAlpha(6);
+`,
+      "widgets/b.js": `
+function computeBeta(value) {
+  let total = 0;
+  const limit = Number(value);
+  for (let i = 0; i < limit; i += 1) {
+    if (i % 2 === 0) {
+      total += i * 3;
+    } else {
+      total -= i;
+    }
+  }
+  if (total > 10) {
+    total = total - 5;
+  } else {
+    total = total + 2;
+  }
+  return total;
+}
+computeBeta(6);
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(out).toContain("[duplicate-fn-body]");
+    expect(result.summary.byRule["duplicate-functions"]).toBeGreaterThan(0);
+  });
+
+  it("blocks duplicate function-expression and arrow-function bodies", function () {
+    const cwd = createWorkspace({
+      "widgets/a.js": `
+const buildMetric = function (list) {
+  let total = 0;
+  for (let i = 0; i < list.length; i += 1) {
+    const item = list[i];
+    if (item > 0) {
+      total += item * 2;
+    } else {
+      total -= item;
+    }
+  }
+  if (total > 100) {
+    total = total - 50;
+  } else {
+    total = total + 10;
+  }
+  return total;
+};
+buildMetric([1, 2, 3, 4]);
+`,
+      "widgets/b.js": `
+const calcMetric = (list) => {
+  let total = 0;
+  for (let i = 0; i < list.length; i += 1) {
+    const item = list[i];
+    if (item > 0) {
+      total += item * 2;
+    } else {
+      total -= item;
+    }
+  }
+  if (total > 100) {
+    total = total - 50;
+  } else {
+    total = total + 10;
+  }
+  return total;
+};
+calcMetric([1, 2, 3, 4]);
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(out).toContain("[duplicate-fn-body]");
+    expect(result.summary.byRule["duplicate-functions"]).toBeGreaterThan(0);
+  });
+
+  it("does not flag same function names when function bodies differ", function () {
+    const cwd = createWorkspace({
+      "widgets/a.js": `
+function computeValue(value) {
+  return value + 1;
+}
+computeValue(3);
+`,
+      "widgets/b.js": `
+function computeValue(value) {
+  return value * 2;
+}
+computeValue(3);
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    expect(result.summary.ok).toBe(true);
+    expect(result.summary.byRule["duplicate-functions"]).toBe(0);
+    expect(result.summary.byRule["duplicate-block-clones"]).toBe(0);
+  });
+
+  it("blocks long duplicated function blocks across files", function () {
+    const sharedBlock = `
+  for (let i = 0; i < rows.length; i += 1) {
+    const item = rows[i];
+    if (!item) {
+      continue;
+    }
+    total += item.speed;
+    total -= item.drag;
+    total += item.wind;
+    total += item.current;
+    total -= item.current;
+    total = total + 1;
+    total = total - 1;
+    if (total > 1000) {
+      total = total / 2;
+    }
+  }
+  for (let j = 0; j < rows.length; j += 1) {
+    const next = rows[j];
+    if (!next) {
+      continue;
+    }
+    total += next.speed;
+    total -= next.drag;
+    total += next.wind;
+    total += next.current;
+    total -= next.current;
+    total = total + 2;
+    total = total - 2;
+    if (total > 1000) {
+      total = total / 2;
+    }
+  }
+`;
+    const cwd = createWorkspace({
+      "widgets/a.js": `
+function aggregateA(rows) {
+  let total = 0;
+  let mode = 1;
+${sharedBlock}
+  if (mode > 0) {
+    total += mode;
+  }
+  return total;
+}
+aggregateA([{ speed: 2, drag: 1, wind: 1, current: 1 }]);
+`,
+      "widgets/b.js": `
+function aggregateB(rows) {
+  let total = 5;
+  let mode = 2;
+${sharedBlock}
+  if (mode > 1) {
+    total -= mode;
+  }
+  return total;
+}
+aggregateB([{ speed: 2, drag: 1, wind: 1, current: 1 }]);
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(out).toContain("[duplicate-block]");
+    expect(result.summary.byRule["duplicate-block-clones"]).toBeGreaterThan(0);
+  });
+
+  it("ignores allowlisted orchestration names and short snippets", function () {
+    const cwd = createWorkspace({
+      "widgets/a.js": `
+function create() { return { ok: true }; }
+function renderCanvas() { return 1; }
+function tiny() { return 1; }
+create();
+renderCanvas();
+tiny();
+`,
+      "widgets/b.js": `
+function create() { return { ok: true }; }
+function renderCanvas() { return 1; }
+function tiny() { return 1; }
+create();
+renderCanvas();
+tiny();
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    expect(result.summary.ok).toBe(true);
+    expect(result.summary.byRule["duplicate-functions"]).toBe(0);
+    expect(result.summary.byRule["duplicate-block-clones"]).toBe(0);
+  });
+
   it("blocks dead unused helper functions", function () {
     const cwd = createWorkspace({
       "widgets/example.js": `

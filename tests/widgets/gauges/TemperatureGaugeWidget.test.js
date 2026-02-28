@@ -5,6 +5,11 @@ describe("TemperatureGaugeWidget", function () {
     let captured;
     const renderCanvas = vi.fn();
     const applyFormatter = vi.fn((value) => String(value));
+    const resolveTemperatureSemicircleTickSteps = vi.fn((range) => {
+      if (range <= 8) return { major: 1, minor: 0.5 };
+      if (range <= 100) return { major: 10, minor: 2 };
+      return { major: 50, minor: 10 };
+    });
 
     const mod = loadFresh("widgets/gauges/TemperatureGaugeWidget/TemperatureGaugeWidget.js");
     const spec = mod.create({}, {
@@ -20,7 +25,8 @@ describe("TemperatureGaugeWidget", function () {
                 },
                 buildHighEndSectors() {
                   return [];
-                }
+                },
+                resolveTemperatureSemicircleTickSteps
               };
             }
           };
@@ -40,6 +46,9 @@ describe("TemperatureGaugeWidget", function () {
     });
 
     expect(spec.renderCanvas).toBe(renderCanvas);
+    expect(captured.tickSteps(8)).toEqual({ major: 1, minor: 0.5 });
+    expect(captured.tickSteps(100)).toEqual({ major: 10, minor: 2 });
+    expect(resolveTemperatureSemicircleTickSteps).toHaveBeenCalledTimes(2);
     const display = captured.formatDisplay(300, {
       formatter: "formatTemperature",
       formatterParameters: ["celsius"]
@@ -70,6 +79,9 @@ describe("TemperatureGaugeWidget", function () {
                 },
                 buildHighEndSectors() {
                   return [];
+                },
+                resolveTemperatureSemicircleTickSteps() {
+                  return { major: 10, minor: 2 };
                 }
               };
             }

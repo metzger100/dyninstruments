@@ -58,6 +58,7 @@ node tools/check-coverage.mjs
 ```
 
 `check-patterns` is enforced in full mode inside `check:core`; any finding is a blocking failure.
+This includes fail-closed cross-file clone detection (`duplicate-functions`, `duplicate-block-clones`).
 
 For cleanup sessions tracked by garbage-collection baseline markers:
 

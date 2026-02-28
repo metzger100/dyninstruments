@@ -45,28 +45,6 @@
       return { num: NaN, text: "---" };
     }
 
-    function speedTickSteps(range) {
-      if (!isFinite(range) || range <= 0) {
-        return { major: 10, minor: 2 };
-      }
-      if (range <= 6) {
-        return { major: 1, minor: 0.5 };
-      }
-      if (range <= 12) {
-        return { major: 2, minor: 1 };
-      }
-      if (range <= 30) {
-        return { major: 5, minor: 1 };
-      }
-      if (range <= 60) {
-        return { major: 10, minor: 2 };
-      }
-      if (range <= 120) {
-        return { major: 20, minor: 5 };
-      }
-      return { major: 50, minor: 10 };
-    }
-
     const renderCanvas = renderer.createRenderer({
       rawValueKey: "speed",
       unitDefault: "kn",
@@ -76,7 +54,7 @@
         flat: "speedRatioThresholdFlat"
       },
       ratioDefaults: { normal: 1.1, flat: 3.5 },
-      tickSteps: speedTickSteps,
+      tickSteps: valueMath.resolveStandardSemicircleTickSteps,
       formatDisplay: function (raw, props, unit) {
         return displaySpeedFromRaw(raw, props, unit);
       },

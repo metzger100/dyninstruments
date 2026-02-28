@@ -6,6 +6,11 @@ describe("VoltageGaugeWidget", function () {
     let receivedOptions;
     const renderCanvas = vi.fn();
     const applyFormatter = vi.fn((value) => Number(value).toFixed(1));
+    const resolveVoltageSemicircleTickSteps = vi.fn((range) => {
+      if (range <= 3) return { major: 0.5, minor: 0.1 };
+      if (range <= 12) return { major: 2, minor: 0.5 };
+      return { major: 50, minor: 10 };
+    });
 
     const mod = loadFresh("widgets/gauges/VoltageGaugeWidget/VoltageGaugeWidget.js");
     const spec = mod.create({}, {
@@ -25,7 +30,8 @@ describe("VoltageGaugeWidget", function () {
                     { a0: minV, a1: options.defaultAlarmFrom, color: options.alarmColor },
                     { a0: options.defaultAlarmFrom, a1: options.defaultWarningFrom, color: options.warningColor }
                   ];
-                }
+                },
+                resolveVoltageSemicircleTickSteps
               };
             }
           };
@@ -46,6 +52,9 @@ describe("VoltageGaugeWidget", function () {
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.rangeDefaults).toEqual({ min: 10, max: 15 });
+    expect(captured.tickSteps(3)).toEqual({ major: 0.5, minor: 0.1 });
+    expect(captured.tickSteps(12)).toEqual({ major: 2, minor: 0.5 });
+    expect(resolveVoltageSemicircleTickSteps).toHaveBeenCalledTimes(2);
     expect(captured.formatDisplay(12.34, {
       formatter: "formatDecimal",
       formatterParameters: [3, 1, true]
@@ -90,7 +99,10 @@ describe("VoltageGaugeWidget", function () {
                   const match = String(text).match(/-?\d+(?:\.\d+)?/);
                   return match ? match[0] : "";
                 },
-                buildLowEndSectors
+                buildLowEndSectors,
+                resolveVoltageSemicircleTickSteps() {
+                  return { major: 1, minor: 0.2 };
+                }
               };
             }
           };
@@ -152,6 +164,9 @@ describe("VoltageGaugeWidget", function () {
                 },
                 buildLowEndSectors() {
                   return [];
+                },
+                resolveVoltageSemicircleTickSteps() {
+                  return { major: 1, minor: 0.2 };
                 }
               };
             }

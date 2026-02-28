@@ -4,6 +4,11 @@ describe("SpeedGaugeWidget", function () {
   it("passes SemicircleGaugeEngine config with high-end sectors", function () {
     let captured;
     let receivedOptions;
+    const resolveStandardSemicircleTickSteps = vi.fn((range) => {
+      if (range <= 6) return { major: 1, minor: 0.5 };
+      if (range <= 30) return { major: 5, minor: 1 };
+      return { major: 50, minor: 10 };
+    });
     const renderCanvas = vi.fn();
     const applyFormatter = vi.fn((value, spec) => {
       return Number(value).toFixed(1) + " " + spec.formatterParameters[0];
@@ -27,7 +32,8 @@ describe("SpeedGaugeWidget", function () {
                     { a0: 20, a1: 25, color: options.warningColor },
                     { a0: 25, a1: 30, color: options.alarmColor }
                   ];
-                }
+                },
+                resolveStandardSemicircleTickSteps
               };
             }
           };
@@ -49,6 +55,9 @@ describe("SpeedGaugeWidget", function () {
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.unitDefault).toBe("kn");
     expect(captured.rangeDefaults).toEqual({ min: 0, max: 30 });
+    expect(captured.tickSteps(6)).toEqual({ major: 1, minor: 0.5 });
+    expect(captured.tickSteps(30)).toEqual({ major: 5, minor: 1 });
+    expect(resolveStandardSemicircleTickSteps).toHaveBeenCalledTimes(2);
     expect(captured.formatDisplay(6.44, {
       formatter: "formatSpeed",
       formatterParameters: ["kn"]

@@ -63,6 +63,70 @@
       return "normal";
     }
 
+    const semicircleTickProfiles = {
+      standard: {
+        default: { major: 10, minor: 2 },
+        ranges: [
+          { max: 6, major: 1, minor: 0.5 },
+          { max: 12, major: 2, minor: 1 },
+          { max: 30, major: 5, minor: 1 },
+          { max: 60, major: 10, minor: 2 },
+          { max: 120, major: 20, minor: 5 }
+        ],
+        fallback: { major: 50, minor: 10 }
+      },
+      temperature: {
+        default: { major: 10, minor: 2 },
+        ranges: [
+          { max: 8, major: 1, minor: 0.5 },
+          { max: 20, major: 2, minor: 1 },
+          { max: 50, major: 5, minor: 1 },
+          { max: 100, major: 10, minor: 2 },
+          { max: 200, major: 20, minor: 5 }
+        ],
+        fallback: { major: 50, minor: 10 }
+      },
+      voltage: {
+        default: { major: 1, minor: 0.2 },
+        ranges: [
+          { max: 3, major: 0.5, minor: 0.1 },
+          { max: 6, major: 1, minor: 0.2 },
+          { max: 12, major: 2, minor: 0.5 },
+          { max: 30, major: 5, minor: 1 },
+          { max: 60, major: 10, minor: 2 },
+          { max: 120, major: 20, minor: 5 }
+        ],
+        fallback: { major: 50, minor: 10 }
+      }
+    };
+
+    function resolveSemicircleTickSteps(range, profileName) {
+      const profile = semicircleTickProfiles[profileName] || semicircleTickProfiles.standard;
+      const n = Number(range);
+      if (!isFinite(n) || n <= 0) {
+        return { major: profile.default.major, minor: profile.default.minor };
+      }
+      for (let i = 0; i < profile.ranges.length; i += 1) {
+        const step = profile.ranges[i];
+        if (n <= step.max) {
+          return { major: step.major, minor: step.minor };
+        }
+      }
+      return { major: profile.fallback.major, minor: profile.fallback.minor };
+    }
+
+    function resolveStandardSemicircleTickSteps(range) {
+      return resolveSemicircleTickSteps(range, "standard");
+    }
+
+    function resolveTemperatureSemicircleTickSteps(range) {
+      return resolveSemicircleTickSteps(range, "temperature");
+    }
+
+    function resolveVoltageSemicircleTickSteps(range) {
+      return resolveSemicircleTickSteps(range, "voltage");
+    }
+
     function normalizeRange(minRaw, maxRaw, defaultMin, defaultMax) {
       let minV = toNumber(minRaw);
       let maxV = toNumber(maxRaw);
@@ -304,6 +368,10 @@
       computePad,
       computeGap,
       computeMode,
+      resolveSemicircleTickSteps,
+      resolveStandardSemicircleTickSteps,
+      resolveTemperatureSemicircleTickSteps,
+      resolveVoltageSemicircleTickSteps,
       normalizeRange,
       valueToAngle,
       angleToValue,

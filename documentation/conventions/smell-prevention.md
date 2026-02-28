@@ -19,6 +19,7 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 | Cluster renderer naming drift | `cluster/rendering/` component IDs are cluster-prefixed (e.g. `Vessel*`) | Use role-based renderer IDs in `cluster/rendering/` (e.g. `DateTimeWidget`) | `check-patterns` (`cluster-renderer-cluster-prefix`) + `check-naming` | block |
 | Hotspot growth | Known hotspot files keep growing | Keep hotspot files under stricter local budget, split shared logic early | `check-smell-contracts` (`text-layout-hotspot-budget`) + `check-file-size` | block |
 | Formatter availability heuristic | infer formatter failure from output equality (`out.trim() === String(raw)`) | Use explicit formatter API/fallback behavior, do not infer from output text equality | `check-patterns` (`formatter-availability-heuristic`) + `check-smell-contracts` (`coordinate-formatter-no-raw-equality-fallback`) | block |
+| Cross-file clone drift | Copy-pasted logic diverges across files (renamed helpers or duplicated long blocks) | Detect body-level function clones and long cloned blocks; extract shared helpers/toolkits | `check-patterns` (`duplicate-functions`, `duplicate-block-clones`) | block |
 | Oneliner line-limit bypass | File-size limit is bypassed by collapsing multiline blocks into dense/very-long oneliners | Keep multiline formatting; do not compress implementation into dense/packed one-liners | `check-file-size` (`oneliner=dense`, `oneliner=long-packed`) | block |
 
 ## Tooling Matrix
@@ -88,6 +89,13 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 1. Remove output-equality checks.
 2. Use explicit formatter dispatch/fallback only.
 3. Add renderer tests to ensure raw-string formatter output is treated as valid.
+
+### Cross-file clone drift
+
+1. Remove widget-local copy-paste blocks and move shared logic into `shared/widget-kits/`.
+2. Prefer shared API calls (`GaugeValueMath.*`, shared renderers) over repeated local helper implementations.
+3. Keep duplicated orchestration stubs (`create`, `translate`, `translateFunction`, `renderCanvas`) minimal; all substantive logic belongs in shared modules.
+4. Add/adjust tests to lock expected shared-helper behavior after extraction.
 
 ### Oneliner line-limit bypass
 
