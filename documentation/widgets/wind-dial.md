@@ -125,6 +125,7 @@ return {
 
 - [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
 - [../gauges/full-circle-dial-engine.md](../gauges/full-circle-dial-engine.md)
+- [../gauges/full-circle-dial-style-guide.md](../gauges/full-circle-dial-style-guide.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
 - [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md)
 - [../shared/theme-tokens.md](../shared/theme-tokens.md)
