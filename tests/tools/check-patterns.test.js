@@ -608,4 +608,129 @@ tiny();
     expect(result.summary.ok).toBe(true);
     expect(result.findings).toHaveLength(0);
   });
+
+  it("blocks guaranteed mapper-contract prop fallbacks in renderer code", function () {
+    const cwd = createWorkspace({
+      "cluster/mappers/SampleMapper.js": `
+(function () {
+  "use strict";
+  function create() {
+    function translate(props, toolkit) {
+      const cap = toolkit.cap;
+      const unit = toolkit.unit;
+      const headingUnit = unit("xteDisplayCog");
+      return {
+        renderer: "SampleWidget",
+        rendererProps: {
+          trackCaption: cap("xteDisplayCog"),
+          trackUnit: headingUnit,
+          unit: unit("xteDisplayCog")
+        }
+      };
+    }
+    return { cluster: "sample", translate: translate };
+  }
+  return { id: "SampleMapper", create: create };
+}());
+`,
+      "widgets/SampleWidget.js": `
+(function () {
+  "use strict";
+  function fallbackText(value, fallback) {
+    return value == null ? fallback : value;
+  }
+  function renderCanvas(canvas, props) {
+    const p = props || {};
+    const a = fallbackText(p.trackCaption, "COG");
+    const b = fallbackText(p.trackUnit, p.unit);
+    const c = String(p.unit ?? "°").trim();
+    return a + b + c + String(canvas);
+  }
+  renderCanvas({}, {});
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(result.summary.byRule).toHaveProperty("redundant-internal-fallback");
+    expect(result.summary.byRuleFailures["redundant-internal-fallback"]).toBeGreaterThan(0);
+    expect(out).toContain("[redundant-internal-fallback]");
+    expect(out).toContain("trackCaption");
+    expect(out).toContain("trackUnit");
+    expect(out).toContain("p.unit ?? \"°\"");
+  });
+
+  it("blocks fallbackText wrappers that duplicate Helpers.applyFormatter defaults", function () {
+    const cwd = createWorkspace({
+      "widgets/SampleWidget.js": `
+(function () {
+  "use strict";
+  function fallbackText(value, fallback) {
+    return value == null ? fallback : value;
+  }
+  function renderCanvas(canvas, props, Helpers) {
+    const p = props || {};
+    const out = fallbackText(Helpers.applyFormatter(p.value, {
+      formatter: "formatDistance",
+      formatterParameters: [p.unit],
+      default: "---"
+    }), "---");
+    return out + String(canvas);
+  }
+  renderCanvas({}, {}, { applyFormatter: function () { return "---"; } });
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(result.summary.byRuleFailures["redundant-internal-fallback"]).toBeGreaterThan(0);
+    expect(out).toContain("[redundant-internal-fallback]");
+    expect(out).toContain("Helpers.applyFormatter");
+  });
+
+  it("allows fallbacks tied to external runtime factors", function () {
+    const cwd = createWorkspace({
+      "runtime/example.js": `
+(function (root) {
+  "use strict";
+  function readValue(props) {
+    if (root.avnav && root.avnav.api) {
+      return props.value;
+    }
+    return props.value || "---";
+  }
+  readValue({});
+}(this));
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    expect(result.summary.ok).toBe(true);
+    expect(result.summary.byRule["redundant-internal-fallback"]).toBe(0);
+  });
+
+  it("allows non-guaranteed fallback props", function () {
+    const cwd = createWorkspace({
+      "widgets/SampleWidget.js": `
+(function () {
+  "use strict";
+  function renderCanvas(canvas, props) {
+    const p = props || {};
+    return String(p.dynamicUnit ?? "kn") + String(canvas);
+  }
+  renderCanvas({}, {});
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    expect(result.summary.ok).toBe(true);
+    expect(result.summary.byRule["redundant-internal-fallback"]).toBe(0);
+  });
 });

@@ -14,6 +14,7 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 | Theme cache drift | Token cache never invalidated after theme preset mutation | Cache-owning modules expose explicit invalidation APIs and callers invoke them on mutation | `check-smell-contracts` (`theme-cache-invalidation`) | block |
 | Dynamic key stale state | `storeKeys.value` remains when dynamic key field is cleared | Clear stale dynamic store keys when key input is empty | `check-smell-contracts` (`dynamic-storekey-clears-on-empty`) | block |
 | Falsy default clobbering | `x.default || "---"` | Preserve explicit falsy defaults using property-presence/nullish semantics | `check-patterns` (`default-truthy-fallback`) + `check-smell-contracts` (`falsy-default-preservation`) | block |
+| Redundant internal fallback | Renderer/local code re-applies fallback for props/defaults already guaranteed by mapper/editable contracts (or wraps `Helpers.applyFormatter` default with the same fallback again) | Trust internal contracts for guaranteed props/defaults; keep fallbacks only for external/runtime uncertainty (AvNav/browser APIs) | `check-patterns` (`redundant-internal-fallback`) | block |
 | Renderer coercion drift | Renderer does `Number(props.x)` on mapper-owned normalized props | Normalize at mapper boundary, renderer receives finite number or `undefined` | `check-patterns` (`renderer-numeric-coercion-without-boundary-contract`) + `check-smell-contracts` (`mapper-output-no-nan`) | block |
 | Mapper logic leakage | Mapper adds helper functions or presentation logic | Keep mappers declarative (`create` + `translate`), move logic to renderer/toolkit modules | `check-patterns` (`mapper-logic-leakage`) | block |
 | Mapper output complexity | Mapper branch returns oversized object literal for one `kind` | If more than 8 mapper props are needed, move renderer-specific config to dedicated wrapper/adapter renderer | `check-patterns` (`mapper-output-complexity`) | warn (`>8`), block (`>12`) |
@@ -58,6 +59,13 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 1. Replace truthy fallback with property-presence/nullish handling.
 2. Keep explicit values (`""`, `0`, `false`) intact end-to-end.
 3. Add runtime helper/registrar tests for explicit falsy defaults.
+
+### Redundant internal fallback
+
+1. Remove fallback wrappers on renderer props that are guaranteed by mapper contracts (`cap/unit` defaults or explicit mapper literals).
+2. Remove outer `fallbackText(...)` wrappers when `Helpers.applyFormatter(..., { default: X })` already uses the same fallback `X`.
+3. Keep defensive fallbacks only where values depend on external runtime uncertainty (for example AvNav/browser APIs).
+4. Add/adjust `check-patterns` tests for both block cases and allowed external-factor cases.
 
 ### Renderer coercion drift
 
