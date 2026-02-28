@@ -6,7 +6,7 @@
 
 | ID | Area | Description | Impact | Priority |
 |---|---|---|---|---|
-| — | — | No active debt items. | — | — |
+| TD-014 | Smell enforcement | `mapper-output-complexity` warning tier (`9..12` props) is advisory; define promotion criteria/date for potential hardening if warning backlog grows. | Medium | Medium |
 
 ## Completed Items
 

@@ -54,11 +54,22 @@ describe("config/components.js", function () {
     expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
     expect(components.DateTimeWidget.deps).toEqual(["PositionCoordinateWidget"]);
     expect(components.TimeStatusWidget.deps).toEqual(["PositionCoordinateWidget"]);
+    expect(components.RendererPropsWidget.deps).toEqual([
+      "WindDialWidget",
+      "CompassGaugeWidget",
+      "SpeedGaugeWidget",
+      "DepthGaugeWidget",
+      "TemperatureGaugeWidget",
+      "VoltageGaugeWidget"
+    ]);
     expect(components.DateTimeWidget.globalKey).toBe("DyniDateTimeWidget");
     expect(components.TimeStatusWidget.globalKey).toBe("DyniTimeStatusWidget");
+    expect(components.RendererPropsWidget.globalKey).toBe("DyniRendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).toContain("PositionCoordinateWidget");
     expect(components.ClusterRendererRouter.deps).toContain("DateTimeWidget");
     expect(components.ClusterRendererRouter.deps).toContain("TimeStatusWidget");
+    expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");
+    expect(components.ClusterRendererRouter.deps).not.toContain("WindDialWidget");
     expect(components.PositionCoordinateWidget.deps).not.toContain("ThreeValueTextWidget");
     expect(components.WindMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/WindMapper.js");
   });

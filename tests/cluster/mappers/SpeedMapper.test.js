@@ -30,8 +30,8 @@ describe("SpeedMapper", function () {
     expect(out.value).toBe(6.4);
     expect(out.formatter).toBe("formatSpeed");
     expect(out.formatterParameters).toEqual(["kn"]);
-    expect(out.warningFrom).toBe(20);
-    expect(out.alarmFrom).toBe(25);
+    expect(out.rendererProps.warningFrom).toBe(20);
+    expect(out.rendererProps.alarmFrom).toBe(25);
   });
 
   it("disables warning/alarm sectors when toggles are false", function () {
@@ -45,8 +45,8 @@ describe("SpeedMapper", function () {
       alarmFrom: "25"
     }, toolkit);
 
-    expect(out.warningFrom).toBeUndefined();
-    expect(out.alarmFrom).toBeUndefined();
+    expect(out.rendererProps.warningFrom).toBeUndefined();
+    expect(out.rendererProps.alarmFrom).toBeUndefined();
   });
 
   it("maps numeric kinds to formatSpeed", function () {

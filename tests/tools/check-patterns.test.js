@@ -34,6 +34,9 @@ describe("tools/check-patterns.mjs", function () {
   function joinMessages(findings) {
     return findings.map((item) => item.message).join("\n");
   }
+  function joinWarningMessages(warnings) {
+    return warnings.map((item) => item.message).join("\n");
+  }
 
   it("blocks renamed but identical function bodies across files", function () {
     const cwd = createWorkspace({
@@ -452,6 +455,133 @@ tiny();
     expect(result.summary.ok).toBe(false);
     expect(out).toContain("[mapper-logic-leakage]");
     expect(out).toContain("decorate");
+  });
+
+  it("warns when mapper translate return object has more than 8 properties", function () {
+    const cwd = createWorkspace({
+      "cluster/mappers/SampleMapper.js": `
+(function () {
+  "use strict";
+  function create() {
+    function translate(props) {
+      const req = props && props.kind;
+      if (req === "speedGraphic") {
+        return {
+          renderer: "SpeedGaugeWidget",
+          value: props.speed,
+          caption: "SPD",
+          unit: "kn",
+          formatter: "formatSpeed",
+          formatterParameters: ["kn"],
+          minValue: 0,
+          maxValue: 30,
+          tickMajor: 5
+        };
+      }
+      return {};
+    }
+    return { cluster: "sample", translate: translate };
+  }
+  return { id: "SampleMapper", create: create };
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const warningOut = joinWarningMessages(result.warnings || []);
+
+    expect(result.summary.ok).toBe(true);
+    expect(result.summary.failures).toBe(0);
+    expect(result.summary.warnings).toBe(1);
+    expect(result.summary.byRuleWarnings["mapper-output-complexity"]).toBe(1);
+    expect(result.summary.byRuleFailures["mapper-output-complexity"]).toBe(0);
+    expect(result.findings).toHaveLength(0);
+    expect(warningOut).toContain("[mapper-output-complexity]");
+    expect(warningOut).toContain("kind 'speedGraphic'");
+  });
+
+  it("blocks when mapper translate return object has more than 12 properties", function () {
+    const cwd = createWorkspace({
+      "cluster/mappers/SampleMapper.js": `
+(function () {
+  "use strict";
+  function create() {
+    function translate(props) {
+      const req = props && props.kind;
+      if (req === "speedGraphic") {
+        return {
+          renderer: "SpeedGaugeWidget",
+          value: props.speed,
+          caption: "SPD",
+          unit: "kn",
+          formatter: "formatSpeed",
+          formatterParameters: ["kn"],
+          minValue: 0,
+          maxValue: 30,
+          tickMajor: 5,
+          tickMinor: 1,
+          warningFrom: 20,
+          alarmFrom: 25,
+          ratioThresholdNormal: 1.2,
+          ratioThresholdFlat: 3.5
+        };
+      }
+      return {};
+    }
+    return { cluster: "sample", translate: translate };
+  }
+  return { id: "SampleMapper", create: create };
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const failureOut = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(result.summary.failures).toBe(1);
+    expect(result.summary.warnings).toBe(0);
+    expect(result.summary.byRuleFailures["mapper-output-complexity"]).toBe(1);
+    expect(result.summary.byRuleWarnings["mapper-output-complexity"]).toBe(0);
+    expect(failureOut).toContain("[mapper-output-complexity]");
+    expect(failureOut).toContain("kind 'speedGraphic'");
+  });
+
+  it("reports multi-kind labels for mapper-output-complexity findings", function () {
+    const cwd = createWorkspace({
+      "cluster/mappers/SampleMapper.js": `
+(function () {
+  "use strict";
+  function create() {
+    function translate(props) {
+      const req = props && props.kind;
+      if (req === "aGraphic" || req === "bGraphic") {
+        return {
+          renderer: "SpeedGaugeWidget",
+          value: props.speed,
+          caption: "SPD",
+          unit: "kn",
+          formatter: "formatSpeed",
+          formatterParameters: ["kn"],
+          minValue: 0,
+          maxValue: 30,
+          tickMajor: 5
+        };
+      }
+      return {};
+    }
+    return { cluster: "sample", translate: translate };
+  }
+  return { id: "SampleMapper", create: create };
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const warningOut = joinWarningMessages(result.warnings || []);
+
+    expect(result.summary.ok).toBe(true);
+    expect(warningOut).toContain("kind 'aGraphic|bGraphic'");
   });
 
   it("blocks cluster-prefixed renderer wrapper ids in cluster/rendering", function () {

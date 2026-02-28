@@ -40,8 +40,8 @@ describe("VesselMapper", function () {
     expect(out.value).toBe(12.4);
     expect(out.formatter).toBe("formatDecimal");
     expect(out.formatterParameters).toEqual([3, 1, true]);
-    expect(out.warningFrom).toBeUndefined();
-    expect(out.alarmFrom).toBe(11.6);
+    expect(out.rendererProps.warningFrom).toBeUndefined();
+    expect(out.rendererProps.alarmFrom).toBe(11.6);
   });
 
   it("treats missing voltage sector toggles as enabled by default", function () {
@@ -53,8 +53,8 @@ describe("VesselMapper", function () {
       alarmFrom: "11.6"
     }, toolkit);
 
-    expect(out.warningFrom).toBe(12.2);
-    expect(out.alarmFrom).toBe(11.6);
+    expect(out.rendererProps.warningFrom).toBe(12.2);
+    expect(out.rendererProps.alarmFrom).toBe(11.6);
   });
 
   it("uses only value for voltageGraphic source and does not fall back to legacy voltage field", function () {
@@ -164,10 +164,10 @@ describe("VesselMapper", function () {
       tickMinor: "0.2"
     }, toolkitWithoutNum);
 
-    expect(out.minValue).toBe(7);
-    expect(out.maxValue).toBe(15);
-    expect(out.tickMajor).toBe(1);
-    expect(out.tickMinor).toBe(0.2);
+    expect(out.rendererProps.minValue).toBe(7);
+    expect(out.rendererProps.maxValue).toBe(15);
+    expect(out.rendererProps.tickMajor).toBe(1);
+    expect(out.rendererProps.tickMinor).toBe(0.2);
     expect(mapper.translate({ kind: "unknownKind" }, toolkitWithoutNum)).toEqual({});
   });
 });

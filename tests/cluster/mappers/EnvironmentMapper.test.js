@@ -31,8 +31,8 @@ describe("EnvironmentMapper", function () {
     }, toolkit);
 
     expect(out.renderer).toBe("DepthGaugeWidget");
-    expect(out.alarmFrom).toBe(2);
-    expect(out.warningFrom).toBe(5);
+    expect(out.rendererProps.alarmFrom).toBe(2);
+    expect(out.rendererProps.warningFrom).toBe(5);
   });
 
   it("maps tempGraphic and only enables sectors when toggles are true", function () {
@@ -56,8 +56,8 @@ describe("EnvironmentMapper", function () {
     expect(out.renderer).toBe("TemperatureGaugeWidget");
     expect(out.formatter).toBe("formatTemperature");
     expect(out.formatterParameters).toEqual(["celsius"]);
-    expect(out.warningFrom).toBeUndefined();
-    expect(out.alarmFrom).toBe(32);
+    expect(out.rendererProps.warningFrom).toBeUndefined();
+    expect(out.rendererProps.alarmFrom).toBe(32);
   });
 
   it("maps numeric kinds with expected formatters", function () {

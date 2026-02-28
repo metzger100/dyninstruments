@@ -16,6 +16,7 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 | Falsy default clobbering | `x.default || "---"` | Preserve explicit falsy defaults using property-presence/nullish semantics | `check-patterns` (`default-truthy-fallback`) + `check-smell-contracts` (`falsy-default-preservation`) | block |
 | Renderer coercion drift | Renderer does `Number(props.x)` on mapper-owned normalized props | Normalize at mapper boundary, renderer receives finite number or `undefined` | `check-patterns` (`renderer-numeric-coercion-without-boundary-contract`) + `check-smell-contracts` (`mapper-output-no-nan`) | block |
 | Mapper logic leakage | Mapper adds helper functions or presentation logic | Keep mappers declarative (`create` + `translate`), move logic to renderer/toolkit modules | `check-patterns` (`mapper-logic-leakage`) | block |
+| Mapper output complexity | Mapper branch returns oversized object literal for one `kind` | If more than 8 mapper props are needed, move renderer-specific config to dedicated wrapper/adapter renderer | `check-patterns` (`mapper-output-complexity`) | warn (`>8`), block (`>12`) |
 | Cluster renderer naming drift | `cluster/rendering/` component IDs are cluster-prefixed (e.g. `Vessel*`) | Use role-based renderer IDs in `cluster/rendering/` (e.g. `DateTimeWidget`) | `check-patterns` (`cluster-renderer-cluster-prefix`) + `check-naming` | block |
 | Hotspot growth | Known hotspot files keep growing | Keep hotspot files under stricter local budget, split shared logic early | `check-smell-contracts` (`text-layout-hotspot-budget`) + `check-file-size` | block |
 | Formatter availability heuristic | infer formatter failure from output equality (`out.trim() === String(raw)`) | Use explicit formatter API/fallback behavior, do not infer from output text equality | `check-patterns` (`formatter-availability-heuristic`) + `check-smell-contracts` (`coordinate-formatter-no-raw-equality-fallback`) | block |
@@ -71,6 +72,14 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 3. Move formatter/status/display logic to `cluster/rendering/`, `widgets/`, or `ClusterMapperToolkit`.
 4. Apply the renderer decision rule before adding renderer-specific prop sets to mapper branches:
    [../guides/add-new-cluster.md#renderer-decision-rule](../guides/add-new-cluster.md#renderer-decision-rule).
+
+### Mapper output complexity
+
+1. Keep each direct `translate()` return object literal under 9 top-level props when feasible.
+2. If one `kind` requires renderer-specific configuration beyond this threshold, move those props into a dedicated renderer wrapper/adapter contract.
+3. Use the renderer decision rule as the default architecture gate:
+   [../guides/add-new-cluster.md#renderer-decision-rule](../guides/add-new-cluster.md#renderer-decision-rule).
+4. Treat `>12` as fail-closed and refactor immediately; treat `9..12` as warning debt and track planned cleanup/promotion in `TECH-DEBT.md`.
 
 ### Cluster renderer naming drift
 

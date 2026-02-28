@@ -23,7 +23,7 @@ describe("CourseHeadingMapper", function () {
     expect(out.renderer).toBe("CompassGaugeWidget");
     expect(out.heading).toBe(123);
     expect(out.markerCourse).toBe(230);
-    expect(out.leadingZero).toBe(true);
+    expect(out.rendererProps.leadingZero).toBe(true);
   });
 
   it("maps numeric kinds to formatDirection360", function () {
