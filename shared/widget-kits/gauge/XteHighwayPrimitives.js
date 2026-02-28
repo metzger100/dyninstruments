@@ -226,6 +226,31 @@
       ctx.restore();
     }
 
+    function drawBoatMarker(ctx, markerX, markerY, markerLength, markerBeam) {
+      const bowY = markerY - markerLength * 0.62;
+      const shoulderY = markerY - markerLength * 0.2;
+      const midY = markerY + markerLength * 0.18;
+      const sternY = markerY + markerLength * 0.56;
+      const shoulderX = markerBeam * 0.48;
+      const midX = markerBeam * 0.56;
+      const sternX = markerBeam * 0.28;
+      const notchX = markerBeam * 0.12;
+      const notchY = sternY - markerLength * 0.08;
+
+      ctx.beginPath();
+      ctx.moveTo(markerX, bowY);
+      ctx.lineTo(markerX + shoulderX, shoulderY);
+      ctx.lineTo(markerX + midX, midY);
+      ctx.lineTo(markerX + sternX, sternY);
+      ctx.lineTo(markerX + notchX, notchY);
+      ctx.lineTo(markerX - notchX, notchY);
+      ctx.lineTo(markerX - sternX, sternY);
+      ctx.lineTo(markerX - midX, midY);
+      ctx.lineTo(markerX - shoulderX, shoulderY);
+      ctx.closePath();
+      ctx.fill();
+    }
+
     function drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow) {
       const cx = geom.cx;
       const horizonY = geom.horizonY;
@@ -234,7 +259,9 @@
       const safeNorm = clamp(xteNormalized, -1.1, 1.1);
       const markerX = cx + safeNorm * nearHalf * 0.82;
       const markerY = baseY - (baseY - horizonY) * 0.12;
-      const markerSize = Math.max(8, nearHalf * 0.08);
+      const laneDepth = Math.max(1, baseY - horizonY);
+      const markerLength = clamp(nearHalf * 0.11, 4, laneDepth * 0.24);
+      const markerBeam = Math.max(3, markerLength * 0.62);
 
       ctx.save();
       ctx.strokeStyle = colors.pointer;
@@ -247,20 +274,15 @@
 
       ctx.globalAlpha = 0.95;
       ctx.fillStyle = colors.pointer;
-      ctx.beginPath();
-      ctx.moveTo(markerX, markerY - markerSize);
-      ctx.lineTo(markerX - markerSize * 0.7, markerY + markerSize * 0.8);
-      ctx.lineTo(markerX + markerSize * 0.7, markerY + markerSize * 0.8);
-      ctx.closePath();
-      ctx.fill();
+      drawBoatMarker(ctx, markerX, markerY, markerLength, markerBeam);
 
       if (overflow) {
         ctx.globalAlpha = 0.95;
         ctx.fillStyle = colors.alarm;
         const edgeX = cx + (safeNorm >= 0 ? 1 : -1) * nearHalf * 0.93;
-        const edgeR = Math.max(3, markerSize * 0.35);
+        const edgeR = Math.max(2.6, markerLength * 0.3);
         ctx.beginPath();
-        ctx.arc(edgeX, markerY - markerSize * 0.2, edgeR, 0, Math.PI * 2);
+        ctx.arc(edgeX, markerY - markerLength * 0.12, edgeR, 0, Math.PI * 2);
         ctx.fill();
       }
 
