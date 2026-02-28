@@ -82,6 +82,7 @@ Reference: [plugin-core-contracts.md](plugin-core-contracts.md), [../avnav-api/c
 - `DepthGaugeWidget`
 - `TemperatureGaugeWidget`
 - `VoltageGaugeWidget`
+- `XteDisplayWidget`
 
 `wantsHideNativeHead` is aggregated (`true` if any sub-renderer requests it).
 

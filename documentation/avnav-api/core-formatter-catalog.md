@@ -50,6 +50,15 @@ Source of truth: AvNav `viewer/util/formatter.js` snapshot verified on 2026-02-2
 | `pitch` | radians | `formatDirection` | `[true, true, false]` |
 | `roll` | radians | `formatDirection` | `[true, true, false]` |
 
+## Normative XteDisplay Renderer Contract
+
+| Field | Formatter | formatterParameters |
+|---|---|---|
+| `xte` | `formatDistance` | `[unit]` |
+| `dtw` | `formatDistance` | `[unit]` |
+| `cog` | `formatDirection360` | `[leadingZero]` |
+| `btw` | `formatDirection360` | `[leadingZero]` |
+
 ## Common Mistakes
 
 | Mistake | Wrong example | Correct contract |

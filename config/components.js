@@ -72,6 +72,11 @@
       css: undefined,
       globalKey: "DyniCanvasLayerCache"
     },
+    XteHighwayPrimitives: {
+      js: BASE + "shared/widget-kits/gauge/XteHighwayPrimitives.js",
+      css: undefined,
+      globalKey: "DyniXteHighwayPrimitives"
+    },
     ThemeResolver: {
       js: BASE + "shared/theme/ThemeResolver.js",
       css: undefined,
@@ -148,7 +153,8 @@
         "SpeedGaugeWidget",
         "DepthGaugeWidget",
         "TemperatureGaugeWidget",
-        "VoltageGaugeWidget"
+        "VoltageGaugeWidget",
+        "XteDisplayWidget"
       ]
     },
     WindDialWidget: {
@@ -186,6 +192,12 @@
       css: undefined,
       globalKey: "DyniVoltageGaugeWidget",
       deps: ["SemicircleGaugeEngine", "GaugeValueMath"]
+    },
+    XteDisplayWidget: {
+      js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
+      css: undefined,
+      globalKey: "DyniXteDisplayWidget",
+      deps: ["GaugeToolkit", "CanvasLayerCache", "XteHighwayPrimitives"]
     },
     ClusterMapperToolkit: {
       js: BASE + "cluster/mappers/ClusterMapperToolkit.js",

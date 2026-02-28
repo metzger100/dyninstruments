@@ -23,6 +23,8 @@ describe("config/components.js", function () {
     expect(components.ThemeResolver.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemeResolver.js");
     expect(components.CanvasLayerCache.globalKey).toBe("DyniCanvasLayerCache");
     expect(components.CanvasLayerCache.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/CanvasLayerCache.js");
+    expect(components.XteHighwayPrimitives.globalKey).toBe("DyniXteHighwayPrimitives");
+    expect(components.XteHighwayPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/XteHighwayPrimitives.js");
     expect(components.FullCircleDialEngine.globalKey).toBe("DyniFullCircleDialEngine");
     expect(components.FullCircleDialEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/FullCircleDialEngine.js");
     expect(components.FullCircleDialEngine.deps).toEqual(["GaugeToolkit", "CanvasLayerCache"]);
@@ -46,6 +48,7 @@ describe("config/components.js", function () {
     expect(components.DepthGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
     expect(components.TemperatureGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
     expect(components.VoltageGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
+    expect(components.XteDisplayWidget.deps).toEqual(["GaugeToolkit", "CanvasLayerCache", "XteHighwayPrimitives"]);
     expect(components.WindDialWidget.deps).toEqual(["FullCircleDialEngine", "FullCircleDialTextLayout"]);
     expect(components.CompassGaugeWidget.deps).toEqual(["FullCircleDialEngine", "FullCircleDialTextLayout"]);
     expect(components.GaugeToolkit.deps).toContain("ThemeResolver");
@@ -60,7 +63,8 @@ describe("config/components.js", function () {
       "SpeedGaugeWidget",
       "DepthGaugeWidget",
       "TemperatureGaugeWidget",
-      "VoltageGaugeWidget"
+      "VoltageGaugeWidget",
+      "XteDisplayWidget"
     ]);
     expect(components.DateTimeWidget.globalKey).toBe("DyniDateTimeWidget");
     expect(components.TimeStatusWidget.globalKey).toBe("DyniTimeStatusWidget");

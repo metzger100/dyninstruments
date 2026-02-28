@@ -60,4 +60,42 @@ describe("NavMapper", function () {
     expect(wp.coordinateFormatter).toBe("formatLonLatsDecimal");
     expect(wp.coordinateFormatterParameters).toEqual([]);
   });
+
+  it("maps xteDisplay to XteDisplayWidget with normalized renderer props", function () {
+    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const out = mapper.translate({
+      kind: "xteDisplay",
+      xte: "0.25",
+      cog: "93",
+      dtw: "1.2",
+      btw: "91",
+      wpName: "Fairway Buoy",
+      disconnect: true,
+      leadingZero: false,
+      showWpNameGraphic: false,
+      xteRatioThresholdNormal: "0.8",
+      xteRatioThresholdFlat: "2.4"
+    }, toolkit);
+
+    expect(out.renderer).toBe("XteDisplayWidget");
+    expect(out.xte).toBe(0.25);
+    expect(out.cog).toBe(93);
+    expect(out.dtw).toBe(1.2);
+    expect(out.btw).toBe(91);
+    expect(out.wpName).toBe("Fairway Buoy");
+    expect(out.disconnect).toBe(true);
+    expect(out.rendererProps).toEqual({
+      xteCaption: "XTE",
+      trackCaption: "COG",
+      dtwCaption: "DST",
+      btwCaption: "BRG",
+      xteUnit: "nm",
+      dtwUnit: "nm",
+      headingUnit: "°",
+      leadingZero: false,
+      showWpName: false,
+      xteRatioThresholdNormal: 0.8,
+      xteRatioThresholdFlat: 2.4
+    });
+  });
 });

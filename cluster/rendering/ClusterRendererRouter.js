@@ -23,7 +23,8 @@
       SpeedGaugeWidget: rendererPropsWidget.create(def, Helpers, "SpeedGaugeWidget"),
       DepthGaugeWidget: rendererPropsWidget.create(def, Helpers, "DepthGaugeWidget"),
       TemperatureGaugeWidget: rendererPropsWidget.create(def, Helpers, "TemperatureGaugeWidget"),
-      VoltageGaugeWidget: rendererPropsWidget.create(def, Helpers, "VoltageGaugeWidget")
+      VoltageGaugeWidget: rendererPropsWidget.create(def, Helpers, "VoltageGaugeWidget"),
+      XteDisplayWidget: rendererPropsWidget.create(def, Helpers, "XteDisplayWidget")
     };
     const subSpecs = [threeSpec].concat(Object.keys(rendererSpecs).map(function (id) {
       return rendererSpecs[id];
