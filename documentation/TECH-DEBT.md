@@ -6,7 +6,8 @@
 
 | ID | Area | Description | Impact | Priority |
 |---|---|---|---|---|
-| TD-014 | Smell enforcement | `mapper-output-complexity` warning tier (`9..12` props) is advisory; define promotion criteria/date for potential hardening if warning backlog grows. | Medium | Medium |
+| TD-014 | Smell enforcement | `mapper-output-complexity` remains mixed-severity (`warn` at `9..12`, `block` at `>12`). Current backlog is `0` warnings (`check-patterns` summary on `2026-02-28`); promotion criteria/date is still pending. | Medium | Medium |
+| TD-015 | Shared gauge engine size hotspots | `check:filesize` reports 4 warning-tier files (`>=300` non-empty lines): `FullCircleDialEngine.js`, `FullCircleDialTextLayout.js`, `GaugeValueMath.js`, `SemicircleGaugeEngine.js`. Further extractions are needed to keep growth below hard limit. | Medium | Medium |
 
 ## Completed Items
 
