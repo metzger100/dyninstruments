@@ -30,21 +30,21 @@
           type: "SELECT",
           list: [
             opt("Depth below transducer", "depth"),
-            opt("Depth gauge (graphic)", "depthGraphic"),
+            opt("Depth gauge (radial)", "depthRadial"),
             opt("Temperature", "temp"),
-            opt("Temperature gauge (graphic)", "tempGraphic"),
+            opt("Temperature gauge (radial)", "tempRadial"),
             opt("Pressure (SignalK)", "pressure")
           ],
           default: "depth",
           name: "Kind"
         },
 
-        // Temperature source (for BOTH numeric + graphic); empty -> default waterTemp
+        // Temperature source (for BOTH numeric + radial); empty -> default waterTemp
         tempKey: {
           type: "KEY",
           default: "",
           name: "SignalK path (temperature)",
-          condition: [{ kind: "temp" }, { kind: "tempGraphic" }]
+          condition: [{ kind: "temp" }, { kind: "tempRadial" }]
         },
 
         // Pressure source (SignalK)
@@ -55,31 +55,31 @@
           condition: { kind: "pressure" }
         },
 
-        // ---------------- DepthGaugeWidget (graphic) settings ------------------------
+        // ---------------- DepthGaugeWidget (radial) settings ------------------------
         depthMinValue: {
           type: "FLOAT", min: 0, max: 200, step: 0.5, default: 0,
           name: "Min depth",
-          condition: { kind: "depthGraphic" }
+          condition: { kind: "depthRadial" }
         },
         depthMaxValue: {
           type: "FLOAT", min: 1, max: 500, step: 0.5, default: 30,
           name: "Max depth",
-          condition: { kind: "depthGraphic" }
+          condition: { kind: "depthRadial" }
         },
         depthTickMajor: {
           type: "FLOAT", min: 0.5, max: 200, step: 0.5, default: 5,
           name: "Major tick step",
-          condition: { kind: "depthGraphic" }
+          condition: { kind: "depthRadial" }
         },
         depthTickMinor: {
           type: "FLOAT", min: 0.1, max: 100, step: 0.1, default: 1,
           name: "Minor tick step",
-          condition: { kind: "depthGraphic" }
+          condition: { kind: "depthRadial" }
         },
         depthShowEndLabels: {
           type: "BOOLEAN", default: false,
           name: "Show min/max labels",
-          condition: { kind: "depthGraphic" }
+          condition: { kind: "depthRadial" }
         },
 
         // --- DepthSectors toggles (default enabled) ----------------------------
@@ -87,62 +87,62 @@
           type: "BOOLEAN",
           default: true,
           name: "Warning sector enabled",
-          condition: { kind: "depthGraphic" }
+          condition: { kind: "depthRadial" }
         },
         depthAlarmEnabled: {
           type: "BOOLEAN",
           default: true,
           name: "Alarm sector enabled",
-          condition: { kind: "depthGraphic" }
+          condition: { kind: "depthRadial" }
         },
 
         depthAlarmFrom: {
           type: "FLOAT", min: 0, max: 500, step: 0.5, default: 2.0,
           name: "Alarm to (shallow)",
-          condition: { kind: "depthGraphic", depthAlarmEnabled: true }
+          condition: { kind: "depthRadial", depthAlarmEnabled: true }
         },
         depthWarningFrom: {
           type: "FLOAT", min: 0, max: 500, step: 0.5, default: 5.0,
           name: "Warning to (shallow)",
-          condition: { kind: "depthGraphic", depthWarningEnabled: true }
+          condition: { kind: "depthRadial", depthWarningEnabled: true }
         },
 
         depthRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
           name: "DepthGaugeWidget: Normal Threshold",
-          condition: { kind: "depthGraphic" }
+          condition: { kind: "depthRadial" }
         },
         depthRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
           name: "DepthGaugeWidget: Flat Threshold",
-          condition: { kind: "depthGraphic" }
+          condition: { kind: "depthRadial" }
         },
 
-        // -------------- TemperatureGaugeWidget (graphic) settings --------------------
+        // -------------- TemperatureGaugeWidget (radial) settings --------------------
         tempMinValue: {
           type: "FLOAT", min: -50, max: 200, step: 0.5, default: 0,
           name: "Min temp",
-          condition: { kind: "tempGraphic" }
+          condition: { kind: "tempRadial" }
         },
         tempMaxValue: {
           type: "FLOAT", min: -40, max: 300, step: 0.5, default: 35,
           name: "Max temp",
-          condition: { kind: "tempGraphic" }
+          condition: { kind: "tempRadial" }
         },
         tempTickMajor: {
           type: "FLOAT", min: 0.5, max: 100, step: 0.5, default: 5,
           name: "Major tick step",
-          condition: { kind: "tempGraphic" }
+          condition: { kind: "tempRadial" }
         },
         tempTickMinor: {
           type: "FLOAT", min: 0.1, max: 50, step: 0.1, default: 1,
           name: "Minor tick step",
-          condition: { kind: "tempGraphic" }
+          condition: { kind: "tempRadial" }
         },
         tempShowEndLabels: {
           type: "BOOLEAN", default: false,
           name: "Show min/max labels",
-          condition: { kind: "tempGraphic" }
+          condition: { kind: "tempRadial" }
         },
 
         // --- TempSectors toggles (default disabled) ----------------------------
@@ -150,39 +150,39 @@
           type: "BOOLEAN",
           default: false,
           name: "Warning sector enabled",
-          condition: { kind: "tempGraphic" }
+          condition: { kind: "tempRadial" }
         },
         tempAlarmEnabled: {
           type: "BOOLEAN",
           default: false,
           name: "Alarm sector enabled",
-          condition: { kind: "tempGraphic" }
+          condition: { kind: "tempRadial" }
         },
 
         // Sensible defaults (but hidden unless enabled)
         tempWarningFrom: {
           type: "FLOAT", min: -50, max: 1000, step: 0.5, default: 28,
           name: "Warning from",
-          condition: { kind: "tempGraphic", tempWarningEnabled: true }
+          condition: { kind: "tempRadial", tempWarningEnabled: true }
         },
         tempAlarmFrom: {
           type: "FLOAT", min: -50, max: 1000, step: 0.5, default: 32,
           name: "Alarm from",
-          condition: { kind: "tempGraphic", tempAlarmEnabled: true }
+          condition: { kind: "tempRadial", tempAlarmEnabled: true }
         },
 
         tempRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
           name: "TempGauge: Normal Threshold",
-          condition: { kind: "tempGraphic" }
+          condition: { kind: "tempRadial" }
         },
         tempRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
           name: "TempGauge: Flat Threshold",
-          condition: { kind: "tempGraphic" }
+          condition: { kind: "tempRadial" }
         },
 
-        // Shared scale (numeric + graphic)
+        // Shared scale (numeric + radial)
         captionUnitScale: {
           type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
           name: "Caption/Unit to Value scale"
@@ -235,7 +235,7 @@
         }
 
         // temperature dynamic key (for selecting different temperature sources)
-        if (kind === "temp" || kind === "tempGraphic") {
+        if (kind === "temp" || kind === "tempRadial") {
           if (typeof out.tempKey === "string" && out.tempKey.trim()) {
             out.storeKeys = { ...out.storeKeys, temp: out.tempKey.trim() };
           }

@@ -49,7 +49,7 @@ kind: {
   type: "SELECT",
   list: [
     { name: "Speed over ground (SOG)", value: "sog" },
-    { name: "Speed gauge [Graphic]", value: "sogGraphic" }
+    { name: "Speed gauge [Radial]", value: "sogRadial" }
   ],
   default: "sog"
 }
@@ -111,7 +111,7 @@ editableParameters: {
 
 **Single condition** — visible when match:
 ```javascript
-condition: { kind: "sogGraphic" }
+condition: { kind: "sogRadial" }
 ```
 
 **OR logic** — array of objects, visible if ANY matches:
@@ -121,7 +121,7 @@ condition: [{ kind: "sog" }, { kind: "stw" }]
 
 **AND logic** — multiple keys in one object, ALL must match:
 ```javascript
-condition: { kind: "depthGraphic", depthAlarmEnabled: true }
+condition: { kind: "depthRadial", depthAlarmEnabled: true }
 ```
 
 **Always visible:**
@@ -149,10 +149,10 @@ If `kind` is an array, helper output uses OR conditions (`[{ kind: a }, { kind: 
 ```javascript
 const WIND_KIND = {
   angleTrue: { cap: "TWA", unit: "°" },
-  angleTrueGraphicAngle: {
+  angleTrueRadialAngle: {
     cap: "TWA",
     unit: "°",
-    kind: "angleTrueGraphic",
+    kind: "angleTrueRadial",
     captionName: "Angle caption",
     unitName: "Angle unit"
   }
@@ -160,8 +160,8 @@ const WIND_KIND = {
 // Generates:
 // caption_angleTrue: { type: "STRING", displayName: "Caption", default: "TWA", condition: { kind: "angleTrue" } }
 // unit_angleTrue:    { type: "STRING", displayName: "Unit", default: "°", condition: { kind: "angleTrue" } }
-// caption_angleTrueGraphicAngle: { type: "STRING", displayName: "Angle caption", default: "TWA", condition: { kind: "angleTrueGraphic" } }
-// unit_angleTrueGraphicAngle:    { type: "STRING", displayName: "Angle unit", default: "°", condition: { kind: "angleTrueGraphic" } }
+// caption_angleTrueRadialAngle: { type: "STRING", displayName: "Angle caption", default: "TWA", condition: { kind: "angleTrueRadial" } }
+// unit_angleTrueRadialAngle:    { type: "STRING", displayName: "Angle unit", default: "°", condition: { kind: "angleTrueRadial" } }
 ```
 
 ClusterWidget resolves via `p['caption_' + kindName]` and `p['unit_' + kindName]`.

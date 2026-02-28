@@ -89,8 +89,8 @@ Update the relevant cluster mapper module (`cluster/mappers/*.js`) so translatio
 return {
   renderer: "NewGaugeWidget",
   value: p.someValue,
-  caption: cap("someGraphicKind"),
-  unit: unit("someGraphicKind"),
+  caption: cap("someRadialKind"),
+  unit: unit("someRadialKind"),
   // gauge props: minValue, maxValue, tickMajor, tickMinor, warningFrom, alarmFrom, ...
 };
 ```

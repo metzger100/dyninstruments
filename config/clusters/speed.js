@@ -18,7 +18,7 @@
     widget: "ClusterWidget",
     def: {
       name: "dyninstruments_Speed",
-      description: "SOG/STW selection (numeric or SpeedGaugeWidget graphic)",
+      description: "SOG/STW selection (numeric or SpeedGaugeWidget radial)",
       caption: "", unit: "", default: "---",
       cluster: "speed",
       storeKeys: { sog: "nav.gps.speed", stw: "nav.gps.waterSpeed" },
@@ -28,8 +28,8 @@
           list: [
             opt("Speed over ground (SOG)", "sog"),
             opt("Speed through water (STW)", "stw"),
-            opt("SpeedGaugeWidget — SOG [Graphic]", "sogGraphic"),
-            opt("SpeedGaugeWidget — STW [Graphic]", "stwGraphic")
+            opt("SpeedGaugeWidget — SOG [Radial]", "sogRadial"),
+            opt("SpeedGaugeWidget — STW [Radial]", "stwRadial")
           ],
           default: "sog",
           name: "Kind"
@@ -47,45 +47,45 @@
           condition: [{ kind: "sog" }, { kind: "stw" }]
         },
 
-        // SpeedGaugeWidget thresholds — only graphic kinds
+        // SpeedGaugeWidget thresholds — only radial kinds
         speedRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
           name: "SpeedGaugeWidget: Normal Threshold",
-          condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }]
+          condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
         speedRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
           name: "SpeedGaugeWidget: Flat Threshold",
-          condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }]
+          condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
 
         // SpeedGaugeWidget range (arc is fixed in SpeedGaugeWidget.js: 270..450)
         minValue: {
           type: "FLOAT", min: 0, max: 200, step: 0.5, default: 0,
           name: "Min speed",
-          condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }]
+          condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
         maxValue: {
           type: "FLOAT", min: 1, max: 200, step: 0.5, default: 30,
           name: "Max speed",
-          condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }]
+          condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
 
         // SpeedGaugeWidget ticks (value-units)
         tickMajor: {
           type: "FLOAT", min: 0.5, max: 100, step: 0.5, default: 5,
           name: "Major tick step",
-          condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }]
+          condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
         tickMinor: {
           type: "FLOAT", min: 0.1, max: 50, step: 0.1, default: 1,
           name: "Minor tick step",
-          condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }]
+          condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
         showEndLabels: {
           type: "BOOLEAN", default: false,
           name: "Show min/max labels",
-          condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }]
+          condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
 
         // --- SpeedSectors toggles (default enabled) ----------------------------
@@ -93,13 +93,13 @@
           type: "BOOLEAN",
           default: true,
           name: "Warning sector enabled",
-          condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }]
+          condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
         speedAlarmEnabled: {
           type: "BOOLEAN",
           default: true,
           name: "Alarm sector enabled",
-          condition: [{ kind: "sogGraphic" }, { kind: "stwGraphic" }]
+          condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
 
         // SpeedGaugeWidget sectors (only show when enabled)
@@ -107,16 +107,16 @@
           type: "FLOAT", min: 0, max: 200, step: 0.5, default: 20,
           name: "Warning from",
           condition: [
-            { kind: "sogGraphic", speedWarningEnabled: true },
-            { kind: "stwGraphic", speedWarningEnabled: true }
+            { kind: "sogRadial", speedWarningEnabled: true },
+            { kind: "stwRadial", speedWarningEnabled: true }
           ]
         },
         alarmFrom: {
           type: "FLOAT", min: 0, max: 200, step: 0.5, default: 25,
           name: "Alarm from",
           condition: [
-            { kind: "sogGraphic", speedAlarmEnabled: true },
-            { kind: "stwGraphic", speedAlarmEnabled: true }
+            { kind: "sogRadial", speedAlarmEnabled: true },
+            { kind: "stwRadial", speedAlarmEnabled: true }
           ]
         },
 

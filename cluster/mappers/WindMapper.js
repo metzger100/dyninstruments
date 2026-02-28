@@ -25,10 +25,10 @@
 
       const req = p.kind;
 
-      if (req === "angleTrueGraphic" || req === "angleApparentGraphic") {
-        const isTrue = (req === "angleTrueGraphic");
-        const angleKind = isTrue ? "angleTrueGraphicAngle" : "angleApparentGraphicAngle";
-        const speedKind = isTrue ? "angleTrueGraphicSpeed" : "angleApparentGraphicSpeed";
+      if (req === "angleTrueRadial" || req === "angleApparentRadial") {
+        const isTrue = (req === "angleTrueRadial");
+        const angleKind = isTrue ? "angleTrueRadialAngle" : "angleApparentRadialAngle";
+        const speedKind = isTrue ? "angleTrueRadialSpeed" : "angleApparentRadialSpeed";
         const speedUnit = unit(speedKind);
         return {
           renderer: "WindDialWidget",

@@ -24,14 +24,14 @@
 
       const req = p.kind;
 
-      if (req === "voltageGraphic") {
+      if (req === "voltageRadial") {
         const warnEnabled = (p.voltageWarningEnabled !== false);
         const alarmEnabled = (p.voltageAlarmEnabled !== false);
         return {
           renderer: "VoltageGaugeWidget",
           value: p.value,
-          caption: cap("voltageGraphic"),
-          unit: unit("voltageGraphic"),
+          caption: cap("voltageRadial"),
+          unit: unit("voltageRadial"),
           formatter: "formatDecimal",
           formatterParameters: [3, 1, true],
           rendererProps: {

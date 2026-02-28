@@ -80,7 +80,7 @@ describe("NavMapper", function () {
       wpName: "Fairway Buoy",
       disconnect: true,
       leadingZero: false,
-      showWpNameGraphic: false,
+      showWpNameXteDisplay: false,
       xteRatioThresholdNormal: "0.8",
       xteRatioThresholdFlat: "2.4"
     }, toolkit);

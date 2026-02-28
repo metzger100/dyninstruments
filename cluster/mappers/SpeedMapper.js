@@ -24,8 +24,8 @@
 
       const effKind = p.kind;
 
-      if (effKind === "sogGraphic" || effKind === "stwGraphic") {
-        const baseKind = (effKind === "sogGraphic") ? "sog" : "stw";
+      if (effKind === "sogRadial" || effKind === "stwRadial") {
+        const baseKind = (effKind === "sogRadial") ? "sog" : "stw";
         const val = p[baseKind];
         const uni = unit(effKind);
 
@@ -56,9 +56,13 @@
         };
       }
 
-      const val = p[effKind];
-      const uni = unit(effKind);
-      return out(val, cap(effKind), uni, "formatSpeed", [uni]);
+      if (effKind === "sog" || effKind === "stw") {
+        const val = p[effKind];
+        const uni = unit(effKind);
+        return out(val, cap(effKind), uni, "formatSpeed", [uni]);
+      }
+
+      return {};
     }
 
     return {

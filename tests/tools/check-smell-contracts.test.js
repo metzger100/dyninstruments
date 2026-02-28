@@ -102,7 +102,7 @@ describe("tools/check-smell-contracts.mjs", function () {
       updateFunction: function (values) {
         const out = values ? { ...values } : {};
         out.storeKeys = out.storeKeys || {};
-        if ((out.kind === "voltage" || out.kind === "voltageGraphic") && typeof out.value === "string" && out.value.trim()) {
+        if ((out.kind === "voltage" || out.kind === "voltageRadial") && typeof out.value === "string" && out.value.trim()) {
           out.storeKeys = { ...out.storeKeys, value: out.value.trim() };
         }
         return out;

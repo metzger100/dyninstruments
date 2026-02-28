@@ -19,19 +19,19 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 
 | Cluster | Store field | Default key path | Used by kind(s) |
 |---|---|---|---|
-| `speed` | `sog` | `nav.gps.speed` | `sog`, `sogGraphic` |
-| `speed` | `stw` | `nav.gps.waterSpeed` | `stw`, `stwGraphic` |
-| `wind` | `awa` | `nav.gps.windAngle` | `angleApparent`, `angleApparentGraphic` |
-| `wind` | `twa` | `nav.gps.trueWindAngle` | `angleTrue`, `angleTrueGraphic` |
+| `speed` | `sog` | `nav.gps.speed` | `sog`, `sogRadial` |
+| `speed` | `stw` | `nav.gps.waterSpeed` | `stw`, `stwRadial` |
+| `wind` | `awa` | `nav.gps.windAngle` | `angleApparent`, `angleApparentRadial` |
+| `wind` | `twa` | `nav.gps.trueWindAngle` | `angleTrue`, `angleTrueRadial` |
 | `wind` | `twd` | `nav.gps.trueWindDirection` | `angleTrueDirection` |
-| `wind` | `aws` | `nav.gps.windSpeed` | `speedApparent`, `angleApparentGraphic` |
-| `wind` | `tws` | `nav.gps.trueWindSpeed` | `speedTrue`, `angleTrueGraphic` |
-| `environment` | `depth` | `nav.gps.depthBelowTransducer` | `depth`, `depthGraphic` |
-| `environment` | `temp` | `nav.gps.waterTemp` | `temp`, `tempGraphic` (if no override) |
+| `wind` | `aws` | `nav.gps.windSpeed` | `speedApparent`, `angleApparentRadial` |
+| `wind` | `tws` | `nav.gps.trueWindSpeed` | `speedTrue`, `angleTrueRadial` |
+| `environment` | `depth` | `nav.gps.depthBelowTransducer` | `depth`, `depthRadial` |
+| `environment` | `temp` | `nav.gps.waterTemp` | `temp`, `tempRadial` (if no override) |
 | `courseHeading` | `cog` | `nav.gps.course` | `cog` |
-| `courseHeading` | `hdt` | `nav.gps.headingTrue` | `hdt`, `hdtGraphic` |
-| `courseHeading` | `hdm` | `nav.gps.headingMag` | `hdm`, `hdmGraphic` |
-| `courseHeading` | `brg` | `nav.wp.course` | `brg`, compass marker in graphic kinds |
+| `courseHeading` | `hdt` | `nav.gps.headingTrue` | `hdt`, `hdtRadial` |
+| `courseHeading` | `hdm` | `nav.gps.headingMag` | `hdm`, `hdmRadial` |
+| `courseHeading` | `brg` | `nav.wp.course` | `brg`, compass marker in radial kinds |
 | `nav` | `eta` | `nav.wp.eta` | `eta` |
 | `nav` | `rteEta` | `nav.route.eta` | `rteEta` |
 | `nav` | `dst` | `nav.wp.distance` | `dst` |
@@ -57,9 +57,9 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 
 | Cluster | Editable key field | Store field affected | Active kind(s) | Behavior |
 |---|---|---|---|---|
-| `environment` | `tempKey` | `temp` | `temp`, `tempGraphic` | non-empty override is used; empty falls back to `nav.gps.waterTemp` |
+| `environment` | `tempKey` | `temp` | `temp`, `tempRadial` | non-empty override is used; empty falls back to `nav.gps.waterTemp` |
 | `environment` | `value` | `value` | `pressure` | non-empty key stored for pressure source; removed when not pressure |
-| `vessel` | `value` | `value` | `voltage`, `voltageGraphic` | non-empty key stored for voltage source; removed for other kinds |
+| `vessel` | `value` | `value` | `voltage`, `voltageRadial` | non-empty key stored for voltage source; removed for other kinds |
 | `vessel` | `pitchKey` | `pitch` | `pitch` | non-empty override is used; empty falls back to default pitch key |
 | `vessel` | `rollKey` | `roll` | `roll` | non-empty override is used; empty falls back to default roll key |
 

@@ -18,7 +18,7 @@
     widget: "ClusterWidget",
     def: {
       name: "dyninstruments_Wind",
-      description: "Wind (angle/speed numbers or dial graphics)",
+      description: "Wind (angle/speed numbers or radial dial renderers)",
       caption: "", unit: "", default: "---",
       cluster: "wind",
       storeKeys: {
@@ -37,8 +37,8 @@
             opt("Angle — True direction (TWD)", "angleTrueDirection"),
             opt("Speed — True (TWS)", "speedTrue"),
             opt("Speed — Apparent (AWS)", "speedApparent"),
-            opt("Dial — True wind (TWA/TWS)", "angleTrueGraphic"),
-            opt("Dial — Apparent wind (AWA/AWS)", "angleApparentGraphic")
+            opt("Dial — True wind (TWA/TWS)", "angleTrueRadial"),
+            opt("Dial — Apparent wind (AWA/AWS)", "angleApparentRadial")
           ],
           default: "angleTrue",
           name: "Kind"
@@ -52,8 +52,8 @@
             { kind: "angleTrue" },
             { kind: "angleApparent" },
             { kind: "angleTrueDirection" },
-            { kind: "angleTrueGraphic" },
-            { kind: "angleApparentGraphic" }
+            { kind: "angleTrueRadial" },
+            { kind: "angleApparentRadial" }
           ]
         },
 
@@ -61,12 +61,12 @@
         dialRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.7,
           name: "Dial 3-Rows Threshold",
-          condition: [{ kind: "angleTrueGraphic" }, { kind: "angleApparentGraphic" }]
+          condition: [{ kind: "angleTrueRadial" }, { kind: "angleApparentRadial" }]
         },
         dialRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.0,
           name: "Dial 1-Row Threshold",
-          condition: [{ kind: "angleTrueGraphic" }, { kind: "angleApparentGraphic" }]
+          condition: [{ kind: "angleTrueRadial" }, { kind: "angleApparentRadial" }]
         },
 
         // ThreeValueTextWidget thresholds — only for numeric kinds
@@ -98,26 +98,26 @@
           type: "BOOLEAN",
           default: true,
           name: "Layline sectors enabled",
-          condition: [{ kind: "angleTrueGraphic" }, { kind: "angleApparentGraphic" }]
+          condition: [{ kind: "angleTrueRadial" }, { kind: "angleApparentRadial" }]
         },
         layMin: {
           type: "FLOAT", min: 0, max: 180, step: 1, default: 25,
           name: "Layline min °",
           condition: [
-            { kind: "angleTrueGraphic", windLayEnabled: true },
-            { kind: "angleApparentGraphic", windLayEnabled: true }
+            { kind: "angleTrueRadial", windLayEnabled: true },
+            { kind: "angleApparentRadial", windLayEnabled: true }
           ]
         },
         layMax: {
           type: "FLOAT", min: 0, max: 180, step: 1, default: 45,
           name: "Layline max °",
           condition: [
-            { kind: "angleTrueGraphic", windLayEnabled: true },
-            { kind: "angleApparentGraphic", windLayEnabled: true }
+            { kind: "angleTrueRadial", windLayEnabled: true },
+            { kind: "angleApparentRadial", windLayEnabled: true }
           ]
         },
 
-        // Shared caption/unit-to-value scale applies to both numeric & graphic
+        // Shared caption/unit-to-value scale applies to both numeric & radial
         captionUnitScale: {
           type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
           name: "Caption/Unit to Value scale"

@@ -24,8 +24,8 @@
 
       const effKind = p.kind;
 
-      if (effKind === "hdtGraphic" || effKind === "hdmGraphic") {
-        const heading = (effKind === "hdtGraphic") ? p.hdt : p.hdm;
+      if (effKind === "hdtRadial" || effKind === "hdmRadial") {
+        const heading = (effKind === "hdtRadial") ? p.hdt : p.hdm;
         return {
           renderer: "CompassGaugeWidget",
           heading: heading,
@@ -41,9 +41,13 @@
         };
       }
 
-      const val = p[effKind];
-      const leadingZero = !!p.leadingZero;
-      return out(val, cap(effKind), unit(effKind), "formatDirection360", [leadingZero]);
+      if (effKind === "cog" || effKind === "hdt" || effKind === "hdm" || effKind === "brg") {
+        const val = p[effKind];
+        const leadingZero = !!p.leadingZero;
+        return out(val, cap(effKind), unit(effKind), "formatDirection360", [leadingZero]);
+      }
+
+      return {};
     }
 
     return {

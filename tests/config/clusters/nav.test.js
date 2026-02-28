@@ -32,8 +32,8 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.leadingZero.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.xteRatioThresholdNormal.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.xteRatioThresholdFlat.condition).toEqual({ kind: "xteDisplay" });
-    expect(def.editableParameters.showWpNameGraphic.condition).toEqual({ kind: "xteDisplay" });
-    expect(def.editableParameters.showWpNameGraphic.default).toBe(false);
+    expect(def.editableParameters.showWpNameXteDisplay.condition).toEqual({ kind: "xteDisplay" });
+    expect(def.editableParameters.showWpNameXteDisplay.default).toBe(false);
     expect(def.editableParameters.ratioThresholdNormal.condition).toEqual([
       { kind: "eta" },
       { kind: "rteEta" },

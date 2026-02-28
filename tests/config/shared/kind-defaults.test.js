@@ -22,10 +22,10 @@ describe("config/shared/kind-defaults.js", function () {
     expect(maps.NAV_KIND.xteDisplayCog.unit).toBe("°");
     expect(maps.NAV_KIND.xteDisplayDst.kind).toBe("xteDisplay");
     expect(maps.NAV_KIND.xteDisplayBrg.captionName).toBe("BRG caption");
-    expect(maps.WIND_KIND.angleTrueGraphicAngle.kind).toBe("angleTrueGraphic");
-    expect(maps.WIND_KIND.angleTrueGraphicSpeed.unitName).toBe("Speed unit");
-    expect(maps.WIND_KIND.angleApparentGraphicAngle.cap).toBe("AWA");
-    expect(maps.WIND_KIND.angleApparentGraphicSpeed.unit).toBe("kn");
+    expect(maps.WIND_KIND.angleTrueRadialAngle.kind).toBe("angleTrueRadial");
+    expect(maps.WIND_KIND.angleTrueRadialSpeed.unitName).toBe("Speed unit");
+    expect(maps.WIND_KIND.angleApparentRadialAngle.cap).toBe("AWA");
+    expect(maps.WIND_KIND.angleApparentRadialSpeed.unit).toBe("kn");
     expect(maps.VESSEL_KIND.clock.cap).toBe("TIME");
     expect(maps.VESSEL_KIND.dateTime.cap).toBe("");
     expect(maps.VESSEL_KIND.timeStatus.unit).toBe("");

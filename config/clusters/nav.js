@@ -28,7 +28,7 @@
     widget: "ClusterWidget",
     def: {
       name: "dyninstruments_Nav",
-      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Positions / XTE graphic)",
+      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Positions / XTE display)",
       caption: "", unit: "", default: "---",
       cluster: "nav",
       storeKeys: {
@@ -57,7 +57,7 @@
             opt("VMG to waypoint", "vmg"),
             opt("Boat position (GPS)", "positionBoat"),
             opt("Active waypoint position", "positionWp"),
-            opt("XTE highway display [Graphic]", "xteDisplay")
+            opt("XTE highway display", "xteDisplay")
           ],
           default: "eta",
           name: "Kind"
@@ -78,7 +78,7 @@
           name: "XTE 1-Row Threshold",
           condition: { kind: "xteDisplay" }
         },
-        showWpNameGraphic: {
+        showWpNameXteDisplay: {
           type: "BOOLEAN",
           default: false,
           name: "Show waypoint name",

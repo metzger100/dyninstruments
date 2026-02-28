@@ -192,7 +192,7 @@ function runDynamicStorekeyClearsRule() {
     out.push(makeFinding("config/clusters/environment.js", 1, "dynamic-storekey-clears-on-empty", "Environment pressure key clearing must remove stale storeKeys.value when value is empty."));
   }
 
-  const vesselOut = vesselDef.def.updateFunction({ kind: "voltageGraphic", value: "  ", storeKeys: { value: "old.path" } });
+  const vesselOut = vesselDef.def.updateFunction({ kind: "voltageRadial", value: "  ", storeKeys: { value: "old.path" } });
   if (vesselOut && vesselOut.storeKeys && Object.prototype.hasOwnProperty.call(vesselOut.storeKeys, "value")) {
     out.push(makeFinding("config/clusters/vessel.js", 1, "dynamic-storekey-clears-on-empty", "Vessel voltage key clearing must remove stale storeKeys.value when value is empty."));
   }
@@ -297,12 +297,12 @@ function runFalsyDefaultPreservationRule() {
 function runMapperOutputNoNaNRule() {
   const out = [];
   const modules = [
-    { rel: "cluster/mappers/SpeedMapper.js", kind: "sogGraphic", props: { kind: "sogGraphic", sog: 5 } },
-    { rel: "cluster/mappers/EnvironmentMapper.js", kind: "depthGraphic", props: { kind: "depthGraphic", depth: 12 } },
-    { rel: "cluster/mappers/EnvironmentMapper.js", kind: "tempGraphic", props: { kind: "tempGraphic", temp: 18 } },
-    { rel: "cluster/mappers/VesselMapper.js", kind: "voltageGraphic", props: { kind: "voltageGraphic", voltage: 12.7 } },
-    { rel: "cluster/mappers/WindMapper.js", kind: "angleTrueGraphic", props: { kind: "angleTrueGraphic", twa: 25, tws: 7 } },
-    { rel: "cluster/mappers/CourseHeadingMapper.js", kind: "hdtGraphic", props: { kind: "hdtGraphic", hdt: 312 } }
+    { rel: "cluster/mappers/SpeedMapper.js", kind: "sogRadial", props: { kind: "sogRadial", sog: 5 } },
+    { rel: "cluster/mappers/EnvironmentMapper.js", kind: "depthRadial", props: { kind: "depthRadial", depth: 12 } },
+    { rel: "cluster/mappers/EnvironmentMapper.js", kind: "tempRadial", props: { kind: "tempRadial", temp: 18 } },
+    { rel: "cluster/mappers/VesselMapper.js", kind: "voltageRadial", props: { kind: "voltageRadial", value: 12.7 } },
+    { rel: "cluster/mappers/WindMapper.js", kind: "angleTrueRadial", props: { kind: "angleTrueRadial", twa: 25, tws: 7 } },
+    { rel: "cluster/mappers/CourseHeadingMapper.js", kind: "hdtRadial", props: { kind: "hdtRadial", hdt: 312 } }
   ];
 
   const toolkit = {

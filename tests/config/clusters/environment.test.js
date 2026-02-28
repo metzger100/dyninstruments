@@ -46,7 +46,7 @@ describe("config/clusters/environment.js", function () {
   it("sets temperature source from tempKey or defaults to waterTemp", function () {
     const def = loadEnvDef();
 
-    const explicit = def.updateFunction({ kind: "tempGraphic", tempKey: "env.temp.engine" });
+    const explicit = def.updateFunction({ kind: "tempRadial", tempKey: "env.temp.engine" });
     expect(explicit.storeKeys.temp).toBe("env.temp.engine");
 
     const fallback = def.updateFunction({ kind: "temp", tempKey: "" });

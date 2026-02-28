@@ -1,8 +1,8 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
-  caption_voltageGraphic: "VOLT",
-  unit_voltageGraphic: "V",
+  caption_voltageRadial: "VOLT",
+  unit_voltageRadial: "V",
   caption_voltage: "VOLT",
   unit_voltage: "V",
   caption_clock: "TIME",
@@ -18,10 +18,10 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
 });
 
 describe("VesselMapper", function () {
-  it("maps voltageGraphic with generic gauge keys and respects sector toggles", function () {
+  it("maps voltageRadial with generic gauge keys and respects sector toggles", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const out = mapper.translate({
-      kind: "voltageGraphic",
+      kind: "voltageRadial",
       value: 12.4,
       voltageWarningEnabled: false,
       voltageAlarmEnabled: true,
@@ -47,7 +47,7 @@ describe("VesselMapper", function () {
   it("treats missing voltage sector toggles as enabled by default", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const out = mapper.translate({
-      kind: "voltageGraphic",
+      kind: "voltageRadial",
       value: 12.4,
       warningFrom: "12.2",
       alarmFrom: "11.6"
@@ -57,10 +57,10 @@ describe("VesselMapper", function () {
     expect(out.rendererProps.alarmFrom).toBe(11.6);
   });
 
-  it("uses only value for voltageGraphic source and does not fall back to legacy voltage field", function () {
+  it("uses only value for voltageRadial source and does not fall back to legacy voltage field", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const out = mapper.translate({
-      kind: "voltageGraphic",
+      kind: "voltageRadial",
       voltage: 12.4
     }, toolkit);
 
@@ -156,7 +156,7 @@ describe("VesselMapper", function () {
     };
 
     const out = mapper.translate({
-      kind: "voltageGraphic",
+      kind: "voltageRadial",
       value: 12.4,
       minValue: "7",
       maxValue: "15",
