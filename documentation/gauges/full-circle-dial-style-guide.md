@@ -120,6 +120,7 @@ Normal-mode layout tokens (`theme.fullCircle.normal.*`):
 ## Background Cache Rules
 
 Static cache key is built in `FullCircleDialEngine` and passed to `CanvasLayerCache.ensureLayer(canvas, key, rebuildFn)`.
+Baseline cache scope/key/invalidation rules are defined in [../conventions/canvas-layer-caching.md](../conventions/canvas-layer-caching.md).
 
 Included in static key:
 - Buffer/draw sizes: `canvas.width`, `canvas.height`, `W`, `H`, `dpr`
@@ -169,6 +170,7 @@ Shared behavior from `GaugeTextLayout.drawDisconnectOverlay()`:
 
 - [full-circle-dial-engine.md](full-circle-dial-engine.md)
 - [gauge-style-guide.md](gauge-style-guide.md)
+- [../conventions/canvas-layer-caching.md](../conventions/canvas-layer-caching.md)
 - [../shared/canvas-layer-cache.md](../shared/canvas-layer-cache.md)
 - [../widgets/compass-gauge.md](../widgets/compass-gauge.md)
 - [../widgets/wind-dial.md](../widgets/wind-dial.md)

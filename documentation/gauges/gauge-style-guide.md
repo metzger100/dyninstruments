@@ -163,6 +163,16 @@ Caption  Value  Unit
 - Labels: `weight=theme.font.labelWeight`, font family from `resolveFontFamily()`
 - End labels optional via `showEndLabels`
 
+## Background Cache Rules
+
+Semicircle gauges follow the shared cache convention through `CanvasLayerCache`.
+
+- Cache static background elements (ring/arc, ticks, static label assets).
+- Keep dynamic elements uncached (live pointer/value text, disconnect overlay).
+- Build keys from geometry + style/theme tokens + typography + label signatures.
+- Exclude live data values and per-frame marker/pointer positions from keys.
+- Full convention: [../conventions/canvas-layer-caching.md](../conventions/canvas-layer-caching.md).
+
 ## Disconnect Overlay
 
 When `props.disconnect === true`, `drawDisconnectOverlay()` renders a dim overlay with centered `NO DATA`.
@@ -170,4 +180,5 @@ When `props.disconnect === true`, `drawDisconnectOverlay()` renders a dim overla
 ## Related
 
 - [gauge-shared-api.md](gauge-shared-api.md)
+- [../conventions/canvas-layer-caching.md](../conventions/canvas-layer-caching.md)
 - [../shared/theme-tokens.md](../shared/theme-tokens.md)

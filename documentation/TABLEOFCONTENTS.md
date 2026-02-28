@@ -34,6 +34,7 @@
 
 - **What coding patterns/naming conventions should I follow?** → [conventions/coding-standards.md](conventions/coding-standards.md)
 - **How are code smells prevented and enforced?** → [conventions/smell-prevention.md](conventions/smell-prevention.md)
+- **What is the standard canvas layer caching convention (scope, keys, invalidation)?** → [conventions/canvas-layer-caching.md](conventions/canvas-layer-caching.md)
 - **How do I reuse offscreen canvas background layer caching across widgets?** → [shared/canvas-layer-cache.md](shared/canvas-layer-cache.md)
 - **How do I run naming registration checks?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#quality-and-regression-commands)
 - **How should I format documentation files?** → [conventions/documentation-format.md](conventions/documentation-format.md)
