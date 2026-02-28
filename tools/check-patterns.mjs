@@ -8,6 +8,56 @@ const SKIP_DIRS = new Set([".git", "node_modules", "coverage"]);
 const fileCache = new Map();
 const scopeCache = new Map();
 let clusterPrefixCache = null;
+const DUPLICATE_FN_MIN_EXACT_TOKENS = 50;
+const DUPLICATE_FN_MIN_SHAPE_TOKENS = 90;
+const DUPLICATE_FN_MIN_SHAPE_CONTROL = 2;
+const DUPLICATE_FN_MIN_SHAPE_STATEMENTS = 6;
+const DUPLICATE_BLOCK_WINDOW = 35;
+const DUPLICATE_BLOCK_MIN_TOKENS = 120;
+const DUPLICATE_BLOCK_MIN_STATEMENTS = 6;
+const ALLOWLISTED_ORCHESTRATION_FUNCTIONS = new Set([
+  "create",
+  "translateFunction",
+  "translate",
+  "renderCanvas"
+]);
+const CONTROL_FLOW_TOKENS = new Set(["if", "for", "while", "switch", "catch"]);
+const KEYWORD_TOKENS = new Set([
+  "break",
+  "case",
+  "catch",
+  "class",
+  "const",
+  "continue",
+  "debugger",
+  "default",
+  "delete",
+  "do",
+  "else",
+  "export",
+  "extends",
+  "finally",
+  "for",
+  "function",
+  "if",
+  "import",
+  "in",
+  "instanceof",
+  "let",
+  "new",
+  "return",
+  "super",
+  "switch",
+  "this",
+  "throw",
+  "try",
+  "typeof",
+  "var",
+  "void",
+  "while",
+  "with",
+  "yield"
+]);
 const RULES = [
   {
     name: "duplicate-functions",
@@ -15,12 +65,24 @@ const RULES = [
       include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js"],
       exclude: ["**/tests/**", "**/tools/**"]
     },
-    detect: /^\s*function\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(/gm,
-    allowlist: ["create", "translateFunction", "translate", "renderCanvas"],
+    allowlist: [...ALLOWLISTED_ORCHESTRATION_FUNCTIONS],
     run: runDuplicateFunctions,
-    message: ({ label, fileCount, locations }) => {
+    message: ({ mode, tokenCount, fileCount, locations }) => {
       const lines = locations.map((loc) => `  - ${loc.file}:${loc.line}`).join("\n");
-      return `[duplicate-fn] Function '${label}' defined in ${fileCount} files:\n${lines}\nExtract to shared/widget-kits/ and import via Helpers.getModule(). See conventions/coding-standards.md#shared-utilities`;
+      return `[duplicate-fn-body] ${mode} function clone across ${fileCount} files (${tokenCount} tokens):\n${lines}\nExtract shared logic to shared/widget-kits/ to prevent copy-paste drift.`;
+    }
+  },
+  {
+    name: "duplicate-block-clones",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js"],
+      exclude: ["**/tests/**", "**/tools/**"]
+    },
+    allowlist: [...ALLOWLISTED_ORCHESTRATION_FUNCTIONS],
+    run: runDuplicateBlockClones,
+    message: ({ tokenCount, statementCount, locations }) => {
+      const lines = locations.map((loc) => `  - ${loc.file}:${loc.line}`).join("\n");
+      return `[duplicate-block] Cross-file cloned function block (${tokenCount} tokens, ${statementCount} statements):\n${lines}\nExtract shared logic to shared/widget-kits/ to keep behavior in one place.`;
     }
   },
   {
@@ -210,40 +272,461 @@ function runRegexRule(rule, files) {
   return out;
 }
 function runDuplicateFunctions(rule, files) {
-  const groups = new Map();
-  for (const file of files) {
-    const data = getFileData(file);
-    const re = asGlobal(rule.detect);
-    let match;
-    while ((match = re.exec(data.text))) {
-      const name = match[1];
-      if (rule.allowlist.includes(name)) continue;
-      const canonical = canonicalName(name);
-      if (!groups.has(canonical)) {
-        groups.set(canonical, { names: new Set(), locations: [] });
+  const groupsExact = new Map();
+  const groupsShape = new Map();
+  const functions = extractFunctionsForDuplication(files, new Set(rule.allowlist || []));
+
+  for (const entry of functions) {
+    if (entry.tokensExact.length >= DUPLICATE_FN_MIN_EXACT_TOKENS) {
+      const key = entry.signatureExact;
+      if (!groupsExact.has(key)) {
+        groupsExact.set(key, {
+          mode: "exact",
+          tokenCount: entry.tokensExact.length,
+          records: []
+        });
       }
-      const group = groups.get(canonical);
-      group.names.add(name);
-      group.locations.push({ file, line: lineAt(match.index, data.lineStarts) });
-      if (match[0].length === 0) re.lastIndex += 1;
+      groupsExact.get(key).records.push(entry);
+    }
+    if (
+      entry.tokensShape.length >= DUPLICATE_FN_MIN_SHAPE_TOKENS
+      && entry.controlCount >= DUPLICATE_FN_MIN_SHAPE_CONTROL
+      && entry.statementCount >= DUPLICATE_FN_MIN_SHAPE_STATEMENTS
+    ) {
+      const key = entry.signatureShape;
+      if (!groupsShape.has(key)) {
+        groupsShape.set(key, {
+          mode: "shape",
+          tokenCount: entry.tokensShape.length,
+          records: []
+        });
+      }
+      groupsShape.get(key).records.push(entry);
     }
   }
+
   const out = [];
-  for (const [canonical, group] of groups.entries()) {
-    const uniqueFiles = new Set(group.locations.map((loc) => loc.file));
+  const exactMarkedSignatures = new Set();
+  const exactGroups = [...groupsExact.values()]
+    .sort(compareDuplicateGroups);
+  for (const group of exactGroups) {
+    const uniqueFiles = new Set(group.records.map((rec) => rec.file));
     if (uniqueFiles.size < 2) continue;
-    const locations = group.locations.sort(compareFindings);
+    const locations = dedupeLocations(group.records.map(function (rec) {
+      return { file: rec.file, line: rec.line };
+    })).sort(compareFindings);
+    for (const rec of group.records) exactMarkedSignatures.add(rec.signatureExact);
     out.push({
       file: locations[0].file,
       line: locations[0].line,
       message: rule.message({
-        label: canonicalLabel(canonical, group.names),
+        mode: group.mode,
+        tokenCount: group.tokenCount,
         fileCount: uniqueFiles.size,
         locations
       })
     });
   }
+
+  const shapeGroups = [...groupsShape.values()]
+    .sort(compareDuplicateGroups);
+  for (const group of shapeGroups) {
+    const uniqueFiles = new Set(group.records.map((rec) => rec.file));
+    if (uniqueFiles.size < 2) continue;
+
+    const exactSignatures = new Set(group.records.map((rec) => rec.signatureExact));
+    if (exactSignatures.size === 1 && exactMarkedSignatures.has([...exactSignatures][0])) continue;
+
+    const locations = dedupeLocations(group.records.map(function (rec) {
+      return { file: rec.file, line: rec.line };
+    })).sort(compareFindings);
+    out.push({
+      file: locations[0].file,
+      line: locations[0].line,
+      message: rule.message({
+        mode: group.mode,
+        tokenCount: group.tokenCount,
+        fileCount: uniqueFiles.size,
+        locations
+      })
+    });
+  }
+
   return out;
+}
+function runDuplicateBlockClones(rule, files) {
+  const out = [];
+  const functions = extractFunctionsForDuplication(files, new Set(rule.allowlist || []));
+  const byId = new Map(functions.map((entry) => [entry.id, entry]));
+  const windowGroups = new Map();
+
+  for (const entry of functions) {
+    if (entry.tokensExact.length < DUPLICATE_BLOCK_WINDOW) continue;
+    for (let i = 0; i <= entry.tokensExact.length - DUPLICATE_BLOCK_WINDOW; i += 1) {
+      const key = entry.tokensExact.slice(i, i + DUPLICATE_BLOCK_WINDOW).join(" ");
+      if (!windowGroups.has(key)) windowGroups.set(key, []);
+      windowGroups.get(key).push({
+        id: entry.id,
+        file: entry.file,
+        start: i,
+        end: i + DUPLICATE_BLOCK_WINDOW
+      });
+    }
+  }
+
+  const pairDeltaGroups = new Map();
+  for (const matches of windowGroups.values()) {
+    if (matches.length < 2) continue;
+    for (let i = 0; i < matches.length; i += 1) {
+      for (let j = i + 1; j < matches.length; j += 1) {
+        const leftRaw = matches[i];
+        const rightRaw = matches[j];
+        if (leftRaw.file === rightRaw.file) continue;
+
+        let left = leftRaw;
+        let right = rightRaw;
+        if (left.id > right.id) {
+          left = rightRaw;
+          right = leftRaw;
+        }
+        const delta = left.start - right.start;
+        const key = `${left.id}:${right.id}:${delta}`;
+        if (!pairDeltaGroups.has(key)) {
+          pairDeltaGroups.set(key, {
+            leftId: left.id,
+            rightId: right.id,
+            segments: []
+          });
+        }
+        pairDeltaGroups.get(key).segments.push({
+          leftStart: left.start,
+          leftEnd: left.end,
+          rightStart: right.start,
+          rightEnd: right.end
+        });
+      }
+    }
+  }
+
+  const seen = new Set();
+  const sortedGroups = [...pairDeltaGroups.values()]
+    .sort(function (a, b) {
+      return a.leftId - b.leftId || a.rightId - b.rightId;
+    });
+  for (const group of sortedGroups) {
+    const leftFn = byId.get(group.leftId);
+    const rightFn = byId.get(group.rightId);
+    if (!leftFn || !rightFn) continue;
+
+    const merged = mergeCloneSegments(group.segments);
+    for (const segment of merged) {
+      const tokenCount = segment.leftEnd - segment.leftStart;
+      if (tokenCount < DUPLICATE_BLOCK_MIN_TOKENS) continue;
+      const statementCount = countStatementMarkers(
+        leftFn.tokensExact.slice(segment.leftStart, segment.leftEnd)
+      );
+      if (statementCount < DUPLICATE_BLOCK_MIN_STATEMENTS) continue;
+
+      const leftLine = tokenLineAt(leftFn, segment.leftStart);
+      const rightLine = tokenLineAt(rightFn, segment.rightStart);
+      const signature = [
+        leftFn.file,
+        leftLine,
+        rightFn.file,
+        rightLine,
+        tokenCount
+      ].join(":");
+      if (seen.has(signature)) continue;
+      seen.add(signature);
+      const locations = [
+        { file: leftFn.file, line: leftLine },
+        { file: rightFn.file, line: rightLine }
+      ].sort(compareFindings);
+      out.push({
+        file: locations[0].file,
+        line: locations[0].line,
+        message: rule.message({
+          tokenCount,
+          statementCount,
+          locations
+        })
+      });
+    }
+  }
+
+  return out;
+}
+function extractFunctionsForDuplication(files, allowlist) {
+  const out = [];
+  const patterns = [
+    /\bfunction\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\([^)]*\)\s*\{/g,
+    /\b(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*function(?:\s+[A-Za-z_$][A-Za-z0-9_$]*)?\s*\([^)]*\)\s*\{/g,
+    /\b(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*(?:\([^)]*\)|[A-Za-z_$][A-Za-z0-9_$]*)\s*=>\s*\{/g
+  ];
+
+  for (const file of files) {
+    const data = getFileData(file);
+    const seen = new Set();
+    for (const pattern of patterns) {
+      const re = asGlobal(pattern);
+      let match;
+      while ((match = re.exec(data.maskedText))) {
+        const name = match[1];
+        if (allowlist.has(name)) continue;
+        const braceIndex = data.maskedText.indexOf("{", match.index + match[0].length - 1);
+        if (braceIndex < 0) continue;
+        const bodyEnd = findMatchingBrace(data.maskedText, braceIndex);
+        if (bodyEnd < 0) continue;
+        const dedupeKey = `${name}:${match.index}:${braceIndex}:${bodyEnd}`;
+        if (seen.has(dedupeKey)) continue;
+        seen.add(dedupeKey);
+
+        const bodyStart = braceIndex + 1;
+        const bodyText = data.text.slice(bodyStart, bodyEnd);
+        const bodyStartLine = lineAt(bodyStart, data.lineStarts);
+        const tokens = tokenizeDuplicationBody(bodyText, bodyStartLine);
+        if (!tokens.length) continue;
+        const tokensExact = tokens.map(function (token) { return token.value; });
+        const tokensShape = tokens.map(toShapeToken);
+        out.push({
+          id: -1,
+          file,
+          name,
+          line: lineAt(match.index, data.lineStarts),
+          tokens,
+          tokensExact,
+          tokensShape,
+          signatureExact: tokensExact.join(" "),
+          signatureShape: tokensShape.join(" "),
+          controlCount: countControlTokens(tokensExact),
+          statementCount: countStatementMarkers(tokensExact)
+        });
+        if (match[0].length === 0) re.lastIndex += 1;
+      }
+    }
+  }
+
+  out.sort(function (a, b) {
+    return compareFindings(a, b) || a.name.localeCompare(b.name);
+  });
+  for (let i = 0; i < out.length; i += 1) out[i].id = i + 1;
+  return out;
+}
+function findMatchingBrace(text, openIndex) {
+  let depth = 0;
+  for (let i = openIndex; i < text.length; i += 1) {
+    const ch = text[i];
+    if (ch === "{") {
+      depth += 1;
+      continue;
+    }
+    if (ch === "}") {
+      depth -= 1;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+function tokenizeDuplicationBody(text, startLine) {
+  const tokens = [];
+  let i = 0;
+  let line = startLine;
+  const operators = [
+    "===",
+    "!==",
+    ">>>",
+    "<<=",
+    ">>=",
+    "**=",
+    "&&=",
+    "||=",
+    "??=",
+    "==",
+    "!=",
+    "<=",
+    ">=",
+    "=>",
+    "++",
+    "--",
+    "&&",
+    "||",
+    "??",
+    "+=",
+    "-=",
+    "*=",
+    "/=",
+    "%=",
+    "&=",
+    "|=",
+    "^=",
+    "<<",
+    ">>",
+    "**",
+    "?."
+  ];
+
+  while (i < text.length) {
+    const ch = text[i];
+    const next = text[i + 1];
+
+    if (ch === " " || ch === "\t" || ch === "\r" || ch === "\f" || ch === "\v") {
+      i += 1;
+      continue;
+    }
+    if (ch === "\n") {
+      line += 1;
+      i += 1;
+      continue;
+    }
+
+    if (ch === "/" && next === "/") {
+      i += 2;
+      while (i < text.length && text[i] !== "\n") i += 1;
+      continue;
+    }
+    if (ch === "/" && next === "*") {
+      i += 2;
+      while (i < text.length) {
+        if (text[i] === "\n") line += 1;
+        if (text[i] === "*" && text[i + 1] === "/") {
+          i += 2;
+          break;
+        }
+        i += 1;
+      }
+      continue;
+    }
+
+    if (ch === "'" || ch === "\"" || ch === "`") {
+      const tokenLine = line;
+      const quote = ch;
+      let raw = ch;
+      i += 1;
+      while (i < text.length) {
+        const cur = text[i];
+        raw += cur;
+        if (cur === "\\") {
+          i += 1;
+          if (i < text.length) {
+            raw += text[i];
+            if (text[i] === "\n") line += 1;
+            i += 1;
+          }
+          continue;
+        }
+        if (cur === "\n") line += 1;
+        i += 1;
+        if (cur === quote) break;
+      }
+      tokens.push({ value: raw, type: "string", line: tokenLine });
+      continue;
+    }
+
+    const numberMatch = text.slice(i).match(/^(?:0[xX][0-9a-fA-F]+|0[bB][01]+|0[oO][0-7]+|(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?)/);
+    if (numberMatch) {
+      tokens.push({ value: numberMatch[0], type: "number", line });
+      i += numberMatch[0].length;
+      continue;
+    }
+
+    const identMatch = text.slice(i).match(/^[A-Za-z_$][A-Za-z0-9_$]*/);
+    if (identMatch) {
+      const value = identMatch[0];
+      tokens.push({
+        value,
+        type: KEYWORD_TOKENS.has(value) ? "keyword" : "identifier",
+        line
+      });
+      i += value.length;
+      continue;
+    }
+
+    let matchedOperator = "";
+    for (const op of operators) {
+      if (text.startsWith(op, i)) {
+        matchedOperator = op;
+        break;
+      }
+    }
+    if (matchedOperator) {
+      tokens.push({ value: matchedOperator, type: "operator", line });
+      i += matchedOperator.length;
+      continue;
+    }
+
+    if ("{}()[];:,.+-*/%<>=!?&|^~".includes(ch)) {
+      tokens.push({ value: ch, type: "punct", line });
+      i += 1;
+      continue;
+    }
+
+    i += 1;
+  }
+
+  return tokens;
+}
+function toShapeToken(token) {
+  if (token.type === "identifier") return "ID";
+  if (token.type === "number") return "NUM";
+  if (token.type === "string") return "STR";
+  return token.value;
+}
+function countControlTokens(tokens) {
+  let count = 0;
+  for (const token of tokens) {
+    if (CONTROL_FLOW_TOKENS.has(token)) count += 1;
+  }
+  return count;
+}
+function countStatementMarkers(tokens) {
+  let count = 0;
+  for (const token of tokens) {
+    if (token === ";") count += 1;
+  }
+  return count;
+}
+function compareDuplicateGroups(a, b) {
+  if (a.records.length !== b.records.length) return b.records.length - a.records.length;
+  if (a.tokenCount !== b.tokenCount) return b.tokenCount - a.tokenCount;
+  const firstA = a.records[0];
+  const firstB = b.records[0];
+  return compareFindings(firstA, firstB);
+}
+function dedupeLocations(locations) {
+  const seen = new Set();
+  const out = [];
+  for (const loc of locations) {
+    const key = `${loc.file}:${loc.line}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(loc);
+  }
+  return out;
+}
+function mergeCloneSegments(segments) {
+  if (!segments.length) return [];
+  const sorted = [...segments].sort(function (a, b) {
+    return a.leftStart - b.leftStart || a.rightStart - b.rightStart;
+  });
+  const out = [];
+  let current = { ...sorted[0] };
+  for (let i = 1; i < sorted.length; i += 1) {
+    const next = sorted[i];
+    if (next.leftStart <= current.leftEnd + 1 && next.rightStart <= current.rightEnd + 1) {
+      current.leftEnd = Math.max(current.leftEnd, next.leftEnd);
+      current.rightEnd = Math.max(current.rightEnd, next.rightEnd);
+      continue;
+    }
+    out.push(current);
+    current = { ...next };
+  }
+  out.push(current);
+  return out;
+}
+function tokenLineAt(entry, tokenIndex) {
+  if (!entry.tokens.length) return entry.line;
+  const idx = Math.max(0, Math.min(entry.tokens.length - 1, tokenIndex));
+  return entry.tokens[idx].line || entry.line;
 }
 function runTodoWithoutOwner(rule, files) {
   const valid = /(?:TODO|FIXME|HACK|XXX)\s*\(\s*\w+.*\d{4}/;
@@ -534,22 +1017,6 @@ function getClusterPascalPrefixes() {
     });
 
   return clusterPrefixCache;
-}
-function canonicalName(name) {
-  if (name === "formatSpeed" || name === "formatSpeedString") return "__formatSpeed";
-  if (name === "formatAngle180" || name === "formatDirection360") return "__formatAngleDirection";
-  const match = name.match(/^(format[A-Z][A-Za-z0-9_$]*)String$/);
-  return match ? match[1] : name;
-}
-function canonicalLabel(canonical, names) {
-  if (canonical === "__formatSpeed") return "formatSpeed/formatSpeedString";
-  if (canonical === "__formatAngleDirection") return "formatAngle180/formatDirection360";
-  if (names.size === 1) return [...names][0];
-  const sorted = [...names].sort((a, b) => a.localeCompare(b));
-  if (names.has(canonical)) {
-    return [canonical, ...sorted.filter((n) => n !== canonical)].join("/");
-  }
-  return sorted.join("/");
 }
 function filesForScope(scope) {
   const key = JSON.stringify(scope);

@@ -36,7 +36,7 @@ node tools/check-patterns.mjs --warn
 ```
 
 Rule references:
-- `check-patterns.mjs`: `duplicate-fn`, `forbidden-global`, `empty-catch`, `todo-missing-owner`, `unused-fallback`, `dead-code`, `default-truthy-fallback`, `formatter-availability-heuristic`, `renderer-numeric-coercion-without-boundary-contract`
+- `check-patterns.mjs`: `duplicate-fn-body` (`duplicate-functions`), `duplicate-block` (`duplicate-block-clones`), `forbidden-global`, `empty-catch`, `todo-missing-owner`, `unused-fallback`, `dead-code`, `default-truthy-fallback`, `formatter-availability-heuristic`, `renderer-numeric-coercion-without-boundary-contract`
 - `check-smell-contracts.mjs`: `theme-cache-invalidation`, `dynamic-storekey-clears-on-empty`, `falsy-default-preservation`, `mapper-output-no-nan`, `text-layout-hotspot-budget`, `coordinate-formatter-no-raw-equality-fallback`
 - `check-file-size.mjs`: warning at `>=300` non-empty lines, failure at `>400` non-empty lines, oneliner detection in block mode via `npm run check:filesize` (optional exploratory warn mode: `npm run check:filesize:warn`)
 
@@ -83,14 +83,14 @@ npm run gc:update-baseline
 
 | Pattern | Example from This Project | Detection | Fix |
 |---|---|---|---|
-| Helper duplication | Historical: `extractNumberText` duplicated in 4 gauge widgets before TD-001 (`DepthGaugeWidget`, `SpeedGaugeWidget`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`) | `check-patterns.mjs` (`duplicate-fn`) | Extract shared helper to `shared/widget-kits/` (done via `GaugeValueMath.extractNumberText`) |
+| Helper duplication | Historical: `extractNumberText` duplicated in 4 gauge widgets before TD-001 (`DepthGaugeWidget`, `SpeedGaugeWidget`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`) | `check-patterns.mjs` (`duplicate-functions` / `[duplicate-fn-body]`) | Extract shared helper to `shared/widget-kits/` (done via `GaugeValueMath.extractNumberText`) |
 | AvNav boundary bypass | Historical: direct `avnav.api` access in `SpeedGaugeWidget`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `WindDialWidget`, `PositionCoordinateWidget` (TD-008) | `check-patterns.mjs` (`forbidden-global`) | Route through `Helpers.applyFormatter()` |
 | Empty catch blocks | Historical: silent `catch(e){}` fallback paths in renderer/helper/widget code before TD-009 | `check-patterns.mjs` (`empty-catch`) | Add explicit comment/logging or use centralized boundary handling |
 | Growing files | Current `>=300` warnings: `widgets/gauges/WindDialWidget/WindDialWidget.js` (363 non-empty lines), `shared/widget-kits/gauge/SemicircleGaugeEngine.js` (341), `widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js` (311) | `check-file-size.mjs` (warning at `>=300`) | Split before exceeding 400 non-empty lines |
 | Oneliner size-limit bypass | Backlog resolved (`onelinerDenseWarnings: 0`, `onelinerLongWarnings: 0`, `onelinerWarnings: 0`) and fail-closed enforcement active (TD-012 completed) | `npm run check:filesize` (`--oneliner=block`) | Keep multiline formatting; use `npm run check:filesize:warn` only for exploratory passes |
 | Stale doc headers | Historical header path drift: `documentation/modules/...` and `documentation/architecture/module-system.md` migrated to current `documentation/widgets/...` and `documentation/architecture/component-system.md` | `check-headers.mjs` (`broken-doc-link`) | Update `Documentation:` header path to the current doc |
 | Naming drift | Historical naming cleanup: `DyniThreeElements` -> `DyniThreeValueTextWidget` and related `globalKey` normalization in `config/components.js` | `check-naming.mjs` | Rename to match conventions (`Dyni{ComponentName}` and matching registered/returned ids) |
-| Copy-paste divergence | Historical: `clamp` implemented in multiple files (`GaugeValueMath`, `PositionCoordinateWidget`, `ThreeValueTextWidget`) before TD-006 | `check-patterns.mjs` (`duplicate-fn`) | Use canonical shared implementation (`GaugeValueMath.clamp`) |
+| Copy-paste divergence | Historical: `clamp` implemented in multiple files (`GaugeValueMath`, `PositionCoordinateWidget`, `ThreeValueTextWidget`) before TD-006 | `check-patterns.mjs` (`duplicate-functions`, `duplicate-block-clones`) | Use canonical shared implementation (`GaugeValueMath.clamp`) |
 | Test assertion gaming | Guardrail: no confirmed incident in current history, but risk exists when assertions are weakened to force green builds | Human review | Restore strong assertions and fix implementation behavior |
 | Code↔Doc divergence | Risk pattern: JS behavior changed while linked module docs lag behind | Manual workflow step (code-doc co-evolution check) | Update linked docs in the same task |
 | Theme cache drift | Runtime preset/style mutation does not invalidate cached token values | `check-smell-contracts.mjs` (`theme-cache-invalidation`) | Expose invalidation API and call it after runtime theme mutation |

@@ -115,4 +115,27 @@ describe("GaugeValueMath", function () {
       { a0: 327.6, a1: 349.2, color: undefined }
     ]);
   });
+
+  it("resolves shared semicircle tick-step presets", function () {
+    const v = create();
+
+    expect(v.resolveStandardSemicircleTickSteps(NaN)).toEqual({ major: 10, minor: 2 });
+    expect(v.resolveStandardSemicircleTickSteps(6)).toEqual({ major: 1, minor: 0.5 });
+    expect(v.resolveStandardSemicircleTickSteps(30)).toEqual({ major: 5, minor: 1 });
+    expect(v.resolveStandardSemicircleTickSteps(250)).toEqual({ major: 50, minor: 10 });
+
+    expect(v.resolveTemperatureSemicircleTickSteps(8)).toEqual({ major: 1, minor: 0.5 });
+    expect(v.resolveTemperatureSemicircleTickSteps(100)).toEqual({ major: 10, minor: 2 });
+    expect(v.resolveTemperatureSemicircleTickSteps(250)).toEqual({ major: 50, minor: 10 });
+
+    expect(v.resolveVoltageSemicircleTickSteps(0)).toEqual({ major: 1, minor: 0.2 });
+    expect(v.resolveVoltageSemicircleTickSteps(3)).toEqual({ major: 0.5, minor: 0.1 });
+    expect(v.resolveVoltageSemicircleTickSteps(12)).toEqual({ major: 2, minor: 0.5 });
+    expect(v.resolveVoltageSemicircleTickSteps(500)).toEqual({ major: 50, minor: 10 });
+
+    expect(v.resolveSemicircleTickSteps(20, "standard")).toEqual({ major: 5, minor: 1 });
+    expect(v.resolveSemicircleTickSteps(20, "temperature")).toEqual({ major: 2, minor: 1 });
+    expect(v.resolveSemicircleTickSteps(20, "voltage")).toEqual({ major: 5, minor: 1 });
+    expect(v.resolveSemicircleTickSteps(20, "unknown")).toEqual({ major: 5, minor: 1 });
+  });
 });

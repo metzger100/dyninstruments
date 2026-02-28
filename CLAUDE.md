@@ -148,6 +148,7 @@ Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 - Mandatory on every task: follow `documentation/conventions/coding-standards.md` and `documentation/conventions/smell-prevention.md` as binding rules, not optional references.
 - Required completion gate is `npm run check:all`.
 - Smell rules and enforcement matrix are documented in [documentation/conventions/smell-prevention.md](documentation/conventions/smell-prevention.md).
+- Duplicate detection is fail-closed via `tools/check-patterns.mjs` rules `duplicate-functions` (body/shape function clones) and `duplicate-block-clones` (long cross-file cloned blocks).
 - Defaults must preserve explicit falsy values (`""`, `0`, `false`).
   - Never use truthy fallback for configured defaults (no `x.default || "...")`.
   - Use property-presence/nullish semantics instead.

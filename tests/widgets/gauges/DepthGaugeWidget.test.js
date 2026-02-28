@@ -4,6 +4,11 @@ describe("DepthGaugeWidget", function () {
   it("builds low-end sectors with alarm and warning order", function () {
     let captured;
     let receivedOptions;
+    const resolveStandardSemicircleTickSteps = vi.fn((range) => {
+      if (range <= 6) return { major: 1, minor: 0.5 };
+      if (range <= 30) return { major: 5, minor: 1 };
+      return { major: 50, minor: 10 };
+    });
     const renderCanvas = vi.fn();
 
     const mod = loadFresh("widgets/gauges/DepthGaugeWidget/DepthGaugeWidget.js");
@@ -23,7 +28,8 @@ describe("DepthGaugeWidget", function () {
                     { a0: 0, a1: 2, color: options.alarmColor },
                     { a0: 2, a1: 5, color: options.warningColor }
                   ];
-                }
+                },
+                resolveStandardSemicircleTickSteps
               };
             }
           };
@@ -43,6 +49,9 @@ describe("DepthGaugeWidget", function () {
     });
 
     expect(spec.renderCanvas).toBe(renderCanvas);
+    expect(captured.tickSteps(6)).toEqual({ major: 1, minor: 0.5 });
+    expect(captured.tickSteps(30)).toEqual({ major: 5, minor: 1 });
+    expect(resolveStandardSemicircleTickSteps).toHaveBeenCalledTimes(2);
 
     const theme = {
       colors: {

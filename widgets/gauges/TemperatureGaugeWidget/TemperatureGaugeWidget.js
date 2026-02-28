@@ -48,28 +48,6 @@
       return { num: celsius, text: celsius.toFixed(d) };
     }
 
-    function tempTickSteps(range) {
-      if (!isFinite(range) || range <= 0) {
-        return { major: 10, minor: 2 };
-      }
-      if (range <= 8) {
-        return { major: 1, minor: 0.5 };
-      }
-      if (range <= 20) {
-        return { major: 2, minor: 1 };
-      }
-      if (range <= 50) {
-        return { major: 5, minor: 1 };
-      }
-      if (range <= 100) {
-        return { major: 10, minor: 2 };
-      }
-      if (range <= 200) {
-        return { major: 20, minor: 5 };
-      }
-      return { major: 50, minor: 10 };
-    }
-
     const renderCanvas = renderer.createRenderer({
       rawValueKey: "temp",
       unitDefault: "°C",
@@ -79,7 +57,7 @@
         flat: "tempRatioThresholdFlat"
       },
       ratioDefaults: { normal: 1.1, flat: 3.5 },
-      tickSteps: tempTickSteps,
+      tickSteps: valueMath.resolveTemperatureSemicircleTickSteps,
       formatDisplay: function (raw, props) {
         return displayTempFromRaw(raw, 1, props);
       },

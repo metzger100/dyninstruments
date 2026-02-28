@@ -246,6 +246,42 @@
       T.drawThreeRowsBlock(ctx, family, xBox, yBox, layout.boxW, layout.blockH, caption, valueText, unit, secScale, "center", layout.sizes, valueWeight, labelWeight);
     }
 
+    function setupRenderSurface(canvas) {
+      const setup = Helpers.setupCanvas(canvas);
+      const W = setup.W;
+      const H = setup.H;
+      if (!W || !H) {
+        return null;
+      }
+      return {
+        ctx: setup.ctx,
+        W: W,
+        H: H
+      };
+    }
+
+    function setupTextPaint(canvas, ctx) {
+      const family = Helpers.resolveFontFamily(canvas);
+      const color = Helpers.resolveTextColor(canvas);
+      ctx.fillStyle = color;
+      ctx.strokeStyle = color;
+      return { family: family, color: color };
+    }
+
+    function resolveModeState(W, H, props, ratioProps, modeDefaults) {
+      const pad = V.computePad(W, H);
+      const gap = V.computeGap(W, H);
+      const ratio = W / Math.max(1, H);
+      const tN = V.isFiniteNumber(props[ratioProps.normal]) ? props[ratioProps.normal] : modeDefaults.normal;
+      const tF = V.isFiniteNumber(props[ratioProps.flat]) ? props[ratioProps.flat] : modeDefaults.flat;
+      return {
+        pad: pad,
+        gap: gap,
+        ratio: ratio,
+        mode: V.computeMode(ratio, tN, tF)
+      };
+    }
+
     function createRenderer(spec) {
       const cfg = spec || {};
       const arc = cfg.arc || { startDeg: 270, endDeg: 450 };
@@ -257,30 +293,26 @@
 
       return function renderCanvas(canvas, props) {
         const p = props || {};
-        const setup = Helpers.setupCanvas(canvas);
-        const ctx = setup.ctx;
-        const W = setup.W;
-        const H = setup.H;
-        if (!W || !H) {
+        const surface = setupRenderSurface(canvas);
+        if (!surface) {
           return;
         }
+        const ctx = surface.ctx;
+        const W = surface.W;
+        const H = surface.H;
         const theme = GU.theme.resolve(canvas);
         const valueWeight = theme.font.weight;
         const labelWeight = theme.font.labelWeight;
 
         ctx.clearRect(0, 0, W, H);
-        const family = Helpers.resolveFontFamily(canvas);
-        const color = Helpers.resolveTextColor(canvas);
-        ctx.fillStyle = color;
-        ctx.strokeStyle = color;
-
-        const pad = V.computePad(W, H);
-        const gap = V.computeGap(W, H);
-        const ratio = W / Math.max(1, H);
-
-        const tN = V.isFiniteNumber(p[ratioProps.normal]) ? p[ratioProps.normal] : modeDefaults.normal;
-        const tF = V.isFiniteNumber(p[ratioProps.flat]) ? p[ratioProps.flat] : modeDefaults.flat;
-        const mode = V.computeMode(ratio, tN, tF);
+        const paint = setupTextPaint(canvas, ctx);
+        const family = paint.family;
+        const color = paint.color;
+        const modeState = resolveModeState(W, H, p, ratioProps, modeDefaults);
+        const pad = modeState.pad;
+        const gap = modeState.gap;
+        const ratio = modeState.ratio;
+        const mode = modeState.mode;
 
         const caption = String(p.caption || "").trim();
         const unit = String(p.unit || unitDefault).trim();

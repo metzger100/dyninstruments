@@ -8,7 +8,7 @@ The four semicircle gauges share one renderer implementation:
 
 - Shared rendering and layout in `shared/widget-kits/gauge/SemicircleGaugeEngine.js`
 - Shared helper APIs via `GaugeToolkit` (`ThemeResolver`, `GaugeTextLayout`, `GaugeValueMath`, `GaugeAngleMath`, `GaugeTickMath`, draw utils)
-- Gauge wrappers keep only formatting, tick strategy, and sector strategy
+- Gauge wrappers keep only formatting, tick-profile selection, and sector strategy
 
 ## File Locations
 
@@ -52,31 +52,35 @@ Pointer and sector rendering in shared gauge paths use direct scalar token value
 Each wrapper defines:
 
 - Value conversion to `{ num, text }`
-- Tick step strategy
+- Tick profile selection via shared `GaugeValueMath` resolver methods
 - Sector placement strategy (high-end or low-end), with theme colors forwarded as scalar sector colors
 - Defaults (range, unit, ratio props)
 
 ### SpeedGaugeWidget
 
 - High-end sectors
+- Tick profile: `resolveStandardSemicircleTickSteps`
 - Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatSpeed", formatterParameters: [unit] })`
 - Defaults: range `0..30`, unit `kn`
 
 ### DepthGaugeWidget
 
 - Low-end sectors
+- Tick profile: `resolveStandardSemicircleTickSteps`
 - Formatter path: fixed decimal (1)
 - Defaults: range `0..30`, unit `m`
 
 ### TemperatureGaugeWidget
 
 - High-end sectors
+- Tick profile: `resolveTemperatureSemicircleTickSteps`
 - Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatTemperature", formatterParameters: ["celsius"] })`
 - Defaults: range `0..35`, unit `°C`
 
 ### VoltageGaugeWidget
 
 - Low-end sectors
+- Tick profile: `resolveVoltageSemicircleTickSteps`
 - Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatDecimal", formatterParameters: [3, 1, true] })`
 - Defaults: range `10..15`, unit `V`
 - Toggle behavior: sectors default to enabled when toggle values are unset; explicit `voltageWarningEnabled: false` and/or `voltageAlarmEnabled: false` suppress corresponding sectors

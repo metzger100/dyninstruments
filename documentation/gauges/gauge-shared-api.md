@@ -158,7 +158,18 @@ Key signatures:
 ## GaugeValueMath API
 
 `GaugeValueMath.create(def, Helpers)` returns shared numeric helpers:
-`isFiniteNumber`, `extractNumberText`, `clamp`, `almostInt`, `isApprox`, `computePad`, `computeGap`, `computeMode`, `normalizeRange`, `valueToAngle`, `angleToValue`, `buildValueTickAngles`, `sectorAngles`, `buildHighEndSectors`, `buildLowEndSectors`, `formatAngle180`, `formatDirection360`, `formatMajorLabel`, `computeSemicircleGeometry`.
+`isFiniteNumber`, `extractNumberText`, `clamp`, `almostInt`, `isApprox`, `computePad`, `computeGap`, `computeMode`, `resolveSemicircleTickSteps`, `resolveStandardSemicircleTickSteps`, `resolveTemperatureSemicircleTickSteps`, `resolveVoltageSemicircleTickSteps`, `normalizeRange`, `valueToAngle`, `angleToValue`, `buildValueTickAngles`, `sectorAngles`, `buildHighEndSectors`, `buildLowEndSectors`, `formatAngle180`, `formatDirection360`, `formatMajorLabel`, `computeSemicircleGeometry`.
+
+### Semicircle Tick-Step Resolvers
+
+`GaugeValueMath` exposes shared preset-driven tick-step helpers used by semicircle wrappers:
+
+- `resolveSemicircleTickSteps(range, profileName)` where `profileName` is one of `standard`, `temperature`, `voltage` (unknown profiles fall back to `standard`)
+- `resolveStandardSemicircleTickSteps(range)`
+- `resolveTemperatureSemicircleTickSteps(range)`
+- `resolveVoltageSemicircleTickSteps(range)`
+
+All resolvers return `{ major, minor }` and preserve explicit profile defaults for invalid/non-positive ranges.
 
 ### `computeSemicircleGeometry(W, H, pad, overrides?)`
 
@@ -195,7 +206,7 @@ Optional `overrides` fields:
 | `rangeDefaults` | `{min,max}` | yes | Default value range |
 | `ratioProps` | `{normal,flat}` | yes | Prop names for layout thresholds |
 | `ratioDefaults` | `{normal,flat}` | yes | Default layout thresholds |
-| `tickSteps` | `(range) => {major,minor}` | yes | Gauge-specific tick strategy |
+| `tickSteps` | `(range) => {major,minor}` | yes | Gauge-specific tick strategy (wrappers should delegate to shared `GaugeValueMath` resolver methods) |
 | `formatDisplay` | `(raw, props, unit, Helpers) => {num,text}` | yes | Gauge-specific value formatter |
 | `buildSectors` | `(props, minV, maxV, arc, valueUtils, theme) => Sector[]` | yes | Gauge-specific warning/alarm sectors (wrappers typically pass `theme.colors.warning/alarm` into shared builders) |
 | `arc` | `{startDeg,endDeg}` | no | Optional override (default `270..450`) |

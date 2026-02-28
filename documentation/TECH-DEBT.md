@@ -24,6 +24,7 @@
 | TD-008 | 2026-02-20 | Removed direct `avnav.api` access from `SpeedGaugeWidget`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `WindDialWidget`, and `PositionCoordinateWidget`; all formatter access now goes through `Helpers.applyFormatter` with mapper-provided formatter props. |
 | TD-011 | 2026-02-21 | Added fail-closed smell prevention program (pattern + semantic contracts), falsy-default preservation, theme cache invalidation contract, stale dynamic key cleanup, and pre-push full-gate hook workflow. |
 | TD-012 | 2026-02-21 | Cleared oneliner backlog to zero (`onelinerWarnings=0`), promoted `check:filesize` to block mode, and wired `check:core`/`check:all` to fail on dense/packed oneliners. |
+| TD-013 | 2026-02-28 | Replaced name-based duplicate detection with body/shape clone checks (`duplicate-functions`, `duplicate-block-clones`) and extracted shared semicircle tick-step resolvers in `GaugeValueMath` for gauge wrappers. |
 
 ## Rules
 
