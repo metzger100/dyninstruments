@@ -24,7 +24,7 @@
 4. Matching mapper module translates to either:
 - numeric output for `ThreeValueTextWidget` (default text kinds)
 - stacked pair output for `PositionCoordinateWidget` (`positionBoat`/`positionWp`)
-- vessel-specific stacked pair output via `DateTimeWidget` and `TimeStatusWidget` (both delegate rendering to `PositionCoordinateWidget`)
+- vessel-specific stacked pair output via `DateTimeRendererWrapper` and `TimeStatusRendererWrapper` (both delegate rendering to `PositionCoordinateWidget`)
 - graphic output with `renderer: "..."`
 5. `ClusterWidget.renderCanvas()` delegates to `ClusterRendererRouter`, which picks renderer by `props.renderer`
 6. `ClusterWidget.finalizeFunction()` fans out to all sub-renderers and tolerates renderer-local finalize errors
@@ -61,8 +61,8 @@ Mapper boundary:
 
 | kind | renderer path | store field(s) | raw unit/type | formatter contract |
 |---|---|---|---|---|
-| `dateTime` | `DateTimeWidget` -> `PositionCoordinateWidget` | `clock` | Date/time value | `formatDateTime` + axis formatters `formatDate`/`formatTime` |
-| `timeStatus` | `TimeStatusWidget` -> `PositionCoordinateWidget` | `gpsValid`, `clock` | bool-like + Date/time | status-circle formatter + `formatTime` |
+| `dateTime` | `DateTimeRendererWrapper` -> `PositionCoordinateWidget` | `clock` | Date/time value | `formatDateTime` + axis formatters `formatDate`/`formatTime` |
+| `timeStatus` | `TimeStatusRendererWrapper` -> `PositionCoordinateWidget` | `gpsValid`, `clock` | bool-like + Date/time | status-circle formatter + `formatTime` |
 | `pitch` | default `ThreeValueTextWidget` path | `pitch` | radians number or `undefined` | **mandatory:** `formatDirection` + `[true, true, false]` |
 | `roll` | default `ThreeValueTextWidget` path | `roll` | radians number or `undefined` | **mandatory:** `formatDirection` + `[true, true, false]` |
 
@@ -74,8 +74,8 @@ Reference: [plugin-core-contracts.md](plugin-core-contracts.md), [../avnav-api/c
 
 - `ThreeValueTextWidget` (default fallback)
 - `PositionCoordinateWidget` (stacked pair renderer for nav positions; self-contained and no longer delegates flat mode to another widget)
-- `DateTimeWidget` (vessel date/time wrapper that forwards to `PositionCoordinateWidget`)
-- `TimeStatusWidget` (vessel gps-status/time wrapper that forwards to `PositionCoordinateWidget`)
+- `DateTimeRendererWrapper` (vessel date/time wrapper that forwards to `PositionCoordinateWidget`)
+- `TimeStatusRendererWrapper` (vessel gps-status/time wrapper that forwards to `PositionCoordinateWidget`)
 - `WindDialWidget`
 - `CompassGaugeWidget`
 - `SpeedGaugeWidget`

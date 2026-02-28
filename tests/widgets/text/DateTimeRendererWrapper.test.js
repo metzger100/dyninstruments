@@ -1,13 +1,13 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
-describe("DateTimeWidget", function () {
+describe("DateTimeRendererWrapper", function () {
   it("delegates to PositionCoordinateWidget with date/time-specific props", function () {
     const delegated = {
       wantsHideNativeHead: true,
       renderCanvas: vi.fn()
     };
 
-    const spec = loadFresh("cluster/rendering/DateTimeWidget.js").create({}, {
+    const spec = loadFresh("cluster/rendering/DateTimeRendererWrapper.js").create({}, {
       getModule(id) {
         if (id === "PositionCoordinateWidget") {
           return {

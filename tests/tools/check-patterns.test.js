@@ -587,7 +587,7 @@ tiny();
   it("blocks cluster-prefixed renderer wrapper ids in cluster/rendering", function () {
     const cwd = createWorkspace({
       "config/clusters/vessel.js": "\n",
-      "cluster/rendering/VesselDateTimeWidget.js": "\n"
+      "cluster/rendering/VesselDateTimeRendererWrapper.js": "\n"
     });
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
@@ -595,13 +595,13 @@ tiny();
 
     expect(result.summary.ok).toBe(false);
     expect(out).toContain("[cluster-renderer-cluster-prefix]");
-    expect(out).toContain("VesselDateTimeWidget");
+    expect(out).toContain("VesselDateTimeRendererWrapper");
   });
 
   it("allows role-based renderer wrapper ids in cluster/rendering", function () {
     const cwd = createWorkspace({
       "config/clusters/vessel.js": "\n",
-      "cluster/rendering/DateTimeWidget.js": "\n"
+      "cluster/rendering/DateTimeRendererWrapper.js": "\n"
     });
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });

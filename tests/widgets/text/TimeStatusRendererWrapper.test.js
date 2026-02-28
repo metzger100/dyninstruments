@@ -1,13 +1,13 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
-describe("TimeStatusWidget", function () {
+describe("TimeStatusRendererWrapper", function () {
   it("delegates to PositionCoordinateWidget with status formatter and time", function () {
     const delegated = {
       wantsHideNativeHead: true,
       renderCanvas: vi.fn()
     };
 
-    const spec = loadFresh("cluster/rendering/TimeStatusWidget.js").create({}, {
+    const spec = loadFresh("cluster/rendering/TimeStatusRendererWrapper.js").create({}, {
       getModule(id) {
         if (id === "PositionCoordinateWidget") {
           return {

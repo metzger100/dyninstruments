@@ -1,5 +1,5 @@
 /**
- * Module: TimeStatusWidget - Vessel GPS status/time renderer wrapper over PositionCoordinateWidget
+ * Module: TimeStatusRendererWrapper - Vessel GPS status/time renderer wrapper over PositionCoordinateWidget
  * Documentation: documentation/widgets/position-coordinates.md
  * Depends: PositionCoordinateWidget
  */
@@ -7,7 +7,7 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniTimeStatusWidget = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniTimeStatusRendererWrapper = factory(); }
 }(this, function () {
   "use strict";
 
@@ -55,12 +55,12 @@
     }
 
     return {
-      id: "TimeStatusWidget",
+      id: "TimeStatusRendererWrapper",
       wantsHideNativeHead: !!(positionSpec && positionSpec.wantsHideNativeHead),
       renderCanvas: renderCanvas,
       translateFunction: translateFunction
     };
   }
 
-  return { id: "TimeStatusWidget", create: create };
+  return { id: "TimeStatusRendererWrapper", create: create };
 }));

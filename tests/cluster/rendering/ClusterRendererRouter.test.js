@@ -36,8 +36,8 @@ describe("ClusterRendererRouter", function () {
         const map = {
           ThreeValueTextWidget: { create: () => three },
           PositionCoordinateWidget: { create: () => position },
-          DateTimeWidget: { create: () => makeSpec("vesselDateTime") },
-          TimeStatusWidget: { create: () => makeSpec("vesselTimeStatus") },
+          DateTimeRendererWrapper: { create: () => makeSpec("vesselDateTime") },
+          TimeStatusRendererWrapper: { create: () => makeSpec("vesselTimeStatus") },
           RendererPropsWidget: {
             create: function (def, helpers, targetRendererId) {
               return targetSpecs[targetRendererId];
@@ -82,8 +82,8 @@ describe("ClusterRendererRouter", function () {
         const map = {
           ThreeValueTextWidget: { create: () => three },
           PositionCoordinateWidget: { create: () => makeSpec("position") },
-          DateTimeWidget: { create: () => makeSpec("vesselDateTime") },
-          TimeStatusWidget: { create: () => makeSpec("vesselTimeStatus") },
+          DateTimeRendererWrapper: { create: () => makeSpec("vesselDateTime") },
+          TimeStatusRendererWrapper: { create: () => makeSpec("vesselTimeStatus") },
           RendererPropsWidget: {
             create: function (def, helpers, targetRendererId) {
               return targetSpecs[targetRendererId];
