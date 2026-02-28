@@ -64,6 +64,7 @@ const renderCanvas = engine.createRenderer(spec);
 ## Related
 
 - [gauge-shared-api.md](gauge-shared-api.md)
+- [full-circle-dial-style-guide.md](full-circle-dial-style-guide.md)
 - [../shared/canvas-layer-cache.md](../shared/canvas-layer-cache.md)
 - [../widgets/compass-gauge.md](../widgets/compass-gauge.md)
 - [../widgets/wind-dial.md](../widgets/wind-dial.md)
