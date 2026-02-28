@@ -55,8 +55,8 @@ describe("config/components.js", function () {
     expect(components.ThreeValueTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
     expect(components.PositionCoordinateWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
     expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
-    expect(components.DateTimeWidget.deps).toEqual(["PositionCoordinateWidget"]);
-    expect(components.TimeStatusWidget.deps).toEqual(["PositionCoordinateWidget"]);
+    expect(components.DateTimeRendererWrapper.deps).toEqual(["PositionCoordinateWidget"]);
+    expect(components.TimeStatusRendererWrapper.deps).toEqual(["PositionCoordinateWidget"]);
     expect(components.RendererPropsWidget.deps).toEqual([
       "WindDialWidget",
       "CompassGaugeWidget",
@@ -66,12 +66,12 @@ describe("config/components.js", function () {
       "VoltageGaugeWidget",
       "XteDisplayWidget"
     ]);
-    expect(components.DateTimeWidget.globalKey).toBe("DyniDateTimeWidget");
-    expect(components.TimeStatusWidget.globalKey).toBe("DyniTimeStatusWidget");
+    expect(components.DateTimeRendererWrapper.globalKey).toBe("DyniDateTimeRendererWrapper");
+    expect(components.TimeStatusRendererWrapper.globalKey).toBe("DyniTimeStatusRendererWrapper");
     expect(components.RendererPropsWidget.globalKey).toBe("DyniRendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).toContain("PositionCoordinateWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("DateTimeWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("TimeStatusWidget");
+    expect(components.ClusterRendererRouter.deps).toContain("DateTimeRendererWrapper");
+    expect(components.ClusterRendererRouter.deps).toContain("TimeStatusRendererWrapper");
     expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).not.toContain("WindDialWidget");
     expect(components.PositionCoordinateWidget.deps).not.toContain("ThreeValueTextWidget");

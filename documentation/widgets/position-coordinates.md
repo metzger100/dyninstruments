@@ -10,7 +10,7 @@ Primary stacked-text renderer used for nav positions and vessel time/date two-li
 
 - Registered as `PositionCoordinateWidget` in `config/components.js`
 - Routed from `NavMapper` for `kind: "positionBoat"` and `kind: "positionWp"`
-- Routed from vessel wrapper renderers `DateTimeWidget` and `TimeStatusWidget` (mapper stays thin while wrappers inject vessel-specific formatter logic)
+- Routed from vessel wrapper renderers `DateTimeRendererWrapper` and `TimeStatusRendererWrapper` (mapper stays thin while wrappers inject vessel-specific formatter logic)
 - Depends on shared utilities: `ThemeResolver` + `TextLayoutEngine`
 - No widget-to-widget dependency on `ThreeValueTextWidget`
 - `flat` mode renders one-line `caption/value/unit` directly in this widget

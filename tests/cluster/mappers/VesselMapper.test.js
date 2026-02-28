@@ -77,22 +77,22 @@ describe("VesselMapper", function () {
     expect(clockOut.value).toBe(rawClock);
   });
 
-  it("maps dateTime to DateTimeWidget with thin mapper output", function () {
+  it("maps dateTime to DateTimeRendererWrapper with thin mapper output", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const out = mapper.translate({ kind: "dateTime", clock: rawClock, default: "---" }, toolkit);
-    expect(out.renderer).toBe("DateTimeWidget");
+    expect(out.renderer).toBe("DateTimeRendererWrapper");
     expect(out.clock).toBe(rawClock);
     expect(out.caption).toBe("");
     expect(out.unit).toBe("");
     expect(out.value).toBeUndefined();
   });
 
-  it("maps timeStatus to TimeStatusWidget with thin mapper output", function () {
+  it("maps timeStatus to TimeStatusRendererWrapper with thin mapper output", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const out = mapper.translate({ kind: "timeStatus", clock: rawClock, gpsValid: true, default: "---" }, toolkit);
-    expect(out.renderer).toBe("TimeStatusWidget");
+    expect(out.renderer).toBe("TimeStatusRendererWrapper");
     expect(out.clock).toBe(rawClock);
     expect(out.gpsValid).toBe(true);
     expect(out.caption).toBe("");

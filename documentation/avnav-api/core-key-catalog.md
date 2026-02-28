@@ -84,8 +84,8 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `bearing` | `bearing` | `formatDirection360` + `[leadingZero]` | anchor bearing |
 | `voltage` | `value` (dynamic) | `formatDecimal` + `[3, 1, true]` | numeric voltage |
 | `clock` | `clock` | `formatTime` + `[]` | Date/time value |
-| `dateTime` | `clock` | renderer wrapper (`DateTimeWidget` -> `PositionCoordinateWidget`) | date/time split formatting |
-| `timeStatus` | `gpsValid`, `clock` | renderer wrapper (`TimeStatusWidget` -> `PositionCoordinateWidget`) | status + time split formatting |
+| `dateTime` | `clock` | renderer wrapper (`DateTimeRendererWrapper` -> `PositionCoordinateWidget`) | date/time split formatting |
+| `timeStatus` | `gpsValid`, `clock` | renderer wrapper (`TimeStatusRendererWrapper` -> `PositionCoordinateWidget`) | status + time split formatting |
 | `pitch` | `pitch` | `formatDirection` + `[true, true, false]` | raw radians required |
 | `roll` | `roll` | `formatDirection` + `[true, true, false]` | raw radians required |
 

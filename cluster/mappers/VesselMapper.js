@@ -58,7 +58,7 @@
       }
       if (req === "dateTime") {
         return {
-          renderer: "DateTimeWidget",
+          renderer: "DateTimeRendererWrapper",
           clock: p.clock,
           caption: cap("dateTime"),
           unit: unit("dateTime")
@@ -66,7 +66,7 @@
       }
       if (req === "timeStatus") {
         return {
-          renderer: "TimeStatusWidget",
+          renderer: "TimeStatusRendererWrapper",
           clock: p.clock,
           gpsValid: p.gpsValid,
           caption: cap("timeStatus"),

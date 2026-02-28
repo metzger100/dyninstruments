@@ -276,7 +276,7 @@ Use this convention for text-heavy roadmap items (ActiveRoute, RoutePoints, AIS 
 
 | Decision signal | Preferred approach |
 | --- | --- |
-| Same layout contract as existing renderer; only field mapping/formatter changes | Extend existing renderer via a thin wrapper (pattern: `DateTimeWidget` / `TimeStatusWidget` over `PositionCoordinateWidget`) |
+| Same layout contract as existing renderer; only field mapping/formatter changes | Extend existing renderer via a thin wrapper (pattern: `DateTimeRendererWrapper` / `TimeStatusRendererWrapper` over `PositionCoordinateWidget`) |
 | Needs different row structure, parser rules, or mode behavior | Create a new renderer module on `TextLayoutEngine` |
 | Requires list/table-like composition or custom per-row formatting contracts | Create a new renderer module |
 | Can be expressed as one/two-row text block with existing draw helpers | Extend existing renderer first |

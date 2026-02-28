@@ -1,5 +1,5 @@
 /**
- * Module: DateTimeWidget - Vessel date/time renderer wrapper over PositionCoordinateWidget
+ * Module: DateTimeRendererWrapper - Vessel date/time renderer wrapper over PositionCoordinateWidget
  * Documentation: documentation/widgets/position-coordinates.md
  * Depends: PositionCoordinateWidget
  */
@@ -7,7 +7,7 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniDateTimeWidget = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniDateTimeRendererWrapper = factory(); }
 }(this, function () {
   "use strict";
 
@@ -35,12 +35,12 @@
     }
 
     return {
-      id: "DateTimeWidget",
+      id: "DateTimeRendererWrapper",
       wantsHideNativeHead: !!(positionSpec && positionSpec.wantsHideNativeHead),
       renderCanvas: renderCanvas,
       translateFunction: translateFunction
     };
   }
 
-  return { id: "DateTimeWidget", create: create };
+  return { id: "DateTimeRendererWrapper", create: create };
 }));

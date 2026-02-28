@@ -76,7 +76,7 @@ Example:
 - Sector props: `{gauge}WarningFrom`, `{gauge}AlarmFrom`
 - Per-kind caption/unit props: `caption_{kindName}`, `unit_{kindName}`
 - `editableParameter` conditions: `{ kind: "xxxRadial" }` or `[{ kind: "a" }, { kind: "b" }]`
-- Renderer wrappers under `cluster/rendering/` must use role-based IDs (example: `DateTimeWidget`, `TimeStatusWidget`), not cluster-prefixed IDs.
+- Renderer wrappers under `cluster/rendering/` must use role-based IDs (example: `DateTimeRendererWrapper`, `TimeStatusRendererWrapper`), not cluster-prefixed IDs.
 
 ## Mapper Boundary Rules
 
@@ -99,7 +99,7 @@ Use this routing table before starting a new widget. Shared engine purposes:
 | Semicircle gauge | `SemicircleGaugeEngine` | [SpeedGaugeWidget](../../widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js) | [add-new-gauge](../guides/add-new-gauge.md) |
 | Full-circle dial | `FullCircleDialEngine` | [CompassGaugeWidget](../../widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js) | [add-new-dial](../guides/add-new-full-circle-dial.md) |
 | Text renderer | `TextLayoutEngine` | [ThreeValueTextWidget](../../widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js) | [add-new-text-renderer](../guides/add-new-text-renderer.md) |
-| Cluster renderer wrapper | `(delegates to above)` | [DateTimeWidget](../../cluster/rendering/DateTimeWidget.js) | [add-new-cluster](../guides/add-new-cluster.md) |
+| Cluster renderer wrapper | `(delegates to above)` | [DateTimeRendererWrapper](../../cluster/rendering/DateTimeRendererWrapper.js) | [add-new-cluster](../guides/add-new-cluster.md) |
 
 Rule: Before creating any new widget, check this table. If your widget matches an archetype, use the corresponding shared engine. If it does not match any archetype, discuss with the team before creating a new engine.
 

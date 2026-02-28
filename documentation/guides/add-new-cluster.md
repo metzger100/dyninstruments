@@ -153,7 +153,7 @@ If mapper returns `renderer: "NewGauge"`:
 - add `NewGauge: Helpers.getModule("NewGauge").create(def, Helpers)` to `rendererSpecs`
 
 Naming rule for `cluster/rendering/` wrappers:
-- Use role-based IDs (example: `DateTimeWidget`, `TimeStatusWidget`), not cluster-prefixed IDs.
+- Use role-based IDs (example: `DateTimeRendererWrapper`, `TimeStatusRendererWrapper`), not cluster-prefixed IDs.
 - Keep file basename, component ID, returned `id`, and `globalKey` aligned.
 
 ## Renderer Decision Rule
@@ -163,7 +163,7 @@ When adding a new cluster `kind`, use this rule to decide between routing to an 
 - If the mapper must set more than 6 renderer-specific props for one `kind`, create a dedicated renderer.
 - If the mapper sets props that change renderer behavior mode (for example `rawMode`, axis formatter overrides, or flatten-from-axes flags), create a dedicated renderer.
 - If the new kind's visual output differs from the existing renderer's primary purpose, create a dedicated renderer.
-- If in doubt, create a thin wrapper renderer that delegates to an existing widget with fixed configuration (pattern: `DateTimeWidget` delegating to `PositionCoordinateWidget`). This keeps mapper output declarative and stabilizes the base renderer contract.
+- If in doubt, create a thin wrapper renderer that delegates to an existing widget with fixed configuration (pattern: `DateTimeRendererWrapper` delegating to `PositionCoordinateWidget`). This keeps mapper output declarative and stabilizes the base renderer contract.
 
 ## Adding a New Kind
 

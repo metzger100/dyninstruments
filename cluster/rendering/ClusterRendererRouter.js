@@ -1,7 +1,7 @@
 /**
  * Module: ClusterRendererRouter - Sub-renderer selection and lifecycle fan-out
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ThreeValueTextWidget, PositionCoordinateWidget, DateTimeWidget, TimeStatusWidget, RendererPropsWidget
+ * Depends: ThreeValueTextWidget, PositionCoordinateWidget, DateTimeRendererWrapper, TimeStatusRendererWrapper, RendererPropsWidget
  */
 
 (function (root, factory) {
@@ -16,8 +16,8 @@
     const rendererPropsWidget = Helpers.getModule("RendererPropsWidget");
     const rendererSpecs = {
       PositionCoordinateWidget: Helpers.getModule("PositionCoordinateWidget").create(def, Helpers),
-      DateTimeWidget: Helpers.getModule("DateTimeWidget").create(def, Helpers),
-      TimeStatusWidget: Helpers.getModule("TimeStatusWidget").create(def, Helpers),
+      DateTimeRendererWrapper: Helpers.getModule("DateTimeRendererWrapper").create(def, Helpers),
+      TimeStatusRendererWrapper: Helpers.getModule("TimeStatusRendererWrapper").create(def, Helpers),
       WindDialWidget: rendererPropsWidget.create(def, Helpers, "WindDialWidget"),
       CompassGaugeWidget: rendererPropsWidget.create(def, Helpers, "CompassGaugeWidget"),
       SpeedGaugeWidget: rendererPropsWidget.create(def, Helpers, "SpeedGaugeWidget"),
