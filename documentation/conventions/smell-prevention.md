@@ -68,6 +68,8 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 1. Keep mapper logic limited to kind routing, field mapping, and numeric normalization.
 2. Remove mapper-local helper functions (other than `create`/`translate`).
 3. Move formatter/status/display logic to `cluster/rendering/`, `widgets/`, or `ClusterMapperToolkit`.
+4. Apply the renderer decision rule before adding renderer-specific prop sets to mapper branches:
+   [../guides/add-new-cluster.md#renderer-decision-rule](../guides/add-new-cluster.md#renderer-decision-rule).
 
 ### Cluster renderer naming drift
 
