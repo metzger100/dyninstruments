@@ -33,6 +33,15 @@ describe("config/components.js", function () {
     expect(components.ThemePresets.deps).toEqual(["ThemeResolver"]);
     expect(components.GaugeTickMath.deps).toEqual(["GaugeAngleMath"]);
     expect(components.ClusterMapperToolkit.deps).toEqual(["GaugeAngleMath"]);
+    expect(components.TextLayoutPrimitives.globalKey).toBe("DyniTextLayoutPrimitives");
+    expect(components.TextLayoutPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/TextLayoutPrimitives.js");
+    expect(components.TextLayoutPrimitives.deps).toEqual(["GaugeTextLayout"]);
+    expect(components.TextLayoutComposite.globalKey).toBe("DyniTextLayoutComposite");
+    expect(components.TextLayoutComposite.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/TextLayoutComposite.js");
+    expect(components.TextLayoutComposite.deps).toEqual(["TextLayoutPrimitives"]);
+    expect(components.TextLayoutEngine.globalKey).toBe("DyniTextLayoutEngine");
+    expect(components.TextLayoutEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/TextLayoutEngine.js");
+    expect(components.TextLayoutEngine.deps).toEqual(["GaugeValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]);
     expect(components.SpeedGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
     expect(components.DepthGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
     expect(components.TemperatureGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
@@ -40,8 +49,8 @@ describe("config/components.js", function () {
     expect(components.WindDialWidget.deps).toEqual(["FullCircleDialEngine", "FullCircleDialTextLayout"]);
     expect(components.CompassGaugeWidget.deps).toEqual(["FullCircleDialEngine", "FullCircleDialTextLayout"]);
     expect(components.GaugeToolkit.deps).toContain("ThemeResolver");
-    expect(components.ThreeValueTextWidget.deps).toEqual(["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]);
-    expect(components.PositionCoordinateWidget.deps).toEqual(["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]);
+    expect(components.ThreeValueTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
+    expect(components.PositionCoordinateWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
     expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
     expect(components.DateTimeWidget.deps).toEqual(["PositionCoordinateWidget"]);
     expect(components.TimeStatusWidget.deps).toEqual(["PositionCoordinateWidget"]);

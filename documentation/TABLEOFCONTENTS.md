@@ -55,6 +55,7 @@
 - **Sector logic (warning/alarm placement)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#sector-logic)
 - **Shared gauge APIs (GaugeToolkit + split core modules)** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
 - **How does the shared full-circle dial engine work?** → [gauges/full-circle-dial-engine.md](gauges/full-circle-dial-engine.md)
+- **How does the shared text layout engine work?** → [shared/text-layout-engine.md](shared/text-layout-engine.md)
 
 ## Module Reference (Renderers)
 
@@ -78,6 +79,7 @@
 - **CSS variables, day/night mode** → [shared/css-theming.md](shared/css-theming.md)
 - **Font stack (--dyni-font)** → [shared/css-theming.md](shared/css-theming.md)
 - **Plugin-wide theme token resolver** → [shared/theme-tokens.md](shared/theme-tokens.md)
+- **Shared text layout/cache facade for text widgets** → [shared/text-layout-engine.md](shared/text-layout-engine.md)
 - **Theme presets (default/slim/bold/night/highcontrast)** → [shared/theme-tokens.md](shared/theme-tokens.md#preset-definitions)
 - **Runtime preset application flow** → [shared/theme-tokens.md](shared/theme-tokens.md#runtime-integration)
 - **How to test presets via browser console** → [shared/theme-tokens.md](shared/theme-tokens.md#manual-testing-browser-console)

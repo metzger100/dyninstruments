@@ -49,6 +49,24 @@
       globalKey: "DyniGaugeValueMath",
       deps: ["GaugeAngleMath"]
     },
+    TextLayoutPrimitives: {
+      js: BASE + "shared/widget-kits/gauge/TextLayoutPrimitives.js",
+      css: undefined,
+      globalKey: "DyniTextLayoutPrimitives",
+      deps: ["GaugeTextLayout"]
+    },
+    TextLayoutComposite: {
+      js: BASE + "shared/widget-kits/gauge/TextLayoutComposite.js",
+      css: undefined,
+      globalKey: "DyniTextLayoutComposite",
+      deps: ["TextLayoutPrimitives"]
+    },
+    TextLayoutEngine: {
+      js: BASE + "shared/widget-kits/gauge/TextLayoutEngine.js",
+      css: undefined,
+      globalKey: "DyniTextLayoutEngine",
+      deps: ["GaugeValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]
+    },
     CanvasLayerCache: {
       js: BASE + "shared/widget-kits/gauge/CanvasLayerCache.js",
       css: undefined,
@@ -100,13 +118,13 @@
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
       css: undefined,
       globalKey: "DyniThreeValueTextWidget",
-      deps: ["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]
+      deps: ["ThemeResolver", "TextLayoutEngine"]
     },
     PositionCoordinateWidget: {
       js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
       css: undefined,
       globalKey: "DyniPositionCoordinateWidget",
-      deps: ["ThemeResolver", "GaugeTextLayout", "GaugeValueMath"]
+      deps: ["ThemeResolver", "TextLayoutEngine"]
     },
     DateTimeWidget: {
       js: BASE + "cluster/rendering/DateTimeWidget.js",

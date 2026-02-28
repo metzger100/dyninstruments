@@ -18,6 +18,11 @@ describe("PositionCoordinateWidget", function () {
     const themeTokens = { font: { weight: 730, labelWeight: 610 } };
     const fontWeightCalls = [];
     const fontCalls = [];
+    const modules = {
+      TextLayoutEngine: loadFresh("shared/widget-kits/gauge/TextLayoutEngine.js"),
+      TextLayoutPrimitives: loadFresh("shared/widget-kits/gauge/TextLayoutPrimitives.js"),
+      TextLayoutComposite: loadFresh("shared/widget-kits/gauge/TextLayoutComposite.js")
+    };
     const applyFormatter = vi.fn((raw, props) => {
       const fpRaw = props && props.formatterParameters;
       const fp = Array.isArray(fpRaw) ? fpRaw : (typeof fpRaw === "string" ? fpRaw.split(",") : []);
@@ -123,6 +128,9 @@ describe("PositionCoordinateWidget", function () {
           return {
             create() {
               return {
+                isFiniteNumber(value) {
+                  return typeof value === "number" && isFinite(value);
+                },
                 clamp(n, lo, hi) {
                   const num = Number(n);
                   if (!isFinite(num)) return lo;
@@ -136,6 +144,9 @@ describe("PositionCoordinateWidget", function () {
               };
             }
           };
+        }
+        if (modules[id]) {
+          return modules[id];
         }
         throw new Error("unexpected module: " + id);
       }
