@@ -70,8 +70,7 @@
         const bottomY = highwayY + highwayH + gap;
         const bottomH = Math.max(18, innerY + innerH - bottomY);
         const topHalfW = Math.max(20, Math.floor((innerW - gap) / 2));
-        const dtwW = Math.max(24, Math.floor(innerW * 0.34));
-        const xteW = Math.max(24, innerW - dtwW - gap);
+        const bottomHalfW = topHalfW;
 
         return {
           mode: mode,
@@ -80,8 +79,8 @@
           metricRects: {
             cog: { x: innerX, y: innerY, w: topHalfW, h: topH },
             btw: { x: innerX + topHalfW + gap, y: innerY, w: topHalfW, h: topH },
-            xte: { x: innerX, y: bottomY, w: xteW, h: bottomH },
-            dtw: { x: innerX + xteW + gap, y: bottomY, w: dtwW, h: bottomH }
+            xte: { x: innerX, y: bottomY, w: bottomHalfW, h: bottomH },
+            dtw: { x: innerX + bottomHalfW + gap, y: bottomY, w: bottomHalfW, h: bottomH }
           }
         };
       }

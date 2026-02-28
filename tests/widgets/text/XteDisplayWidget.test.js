@@ -234,6 +234,21 @@ describe("XteDisplayWidget", function () {
     expect(layoutWithoutName.metricRects.cog.h).toBeGreaterThan(layoutWithName.metricRects.cog.h);
   });
 
+  it("uses equal two-column metric widths in high mode", function () {
+    const harness = createHarness();
+
+    harness.spec.renderCanvas(
+      createMockCanvas({ rectWidth: 120, rectHeight: 300, ctx: createMockContext2D() }),
+      makeProps({ showWpName: true, wpName: "Fairway Buoy" })
+    );
+
+    const layout = harness.calls.layoutHistory[0];
+    expect(layout.mode).toBe("high");
+    expect(layout.metricRects.cog.w).toBe(layout.metricRects.btw.w);
+    expect(layout.metricRects.xte.w).toBe(layout.metricRects.dtw.w);
+    expect(layout.metricRects.xte.w).toBe(layout.metricRects.cog.w);
+  });
+
   it("reduces top highway whitespace in flat/normal/high when waypoint name is disabled", function () {
     const harness = createHarness();
 
