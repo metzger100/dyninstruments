@@ -3,6 +3,9 @@ const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-ca
 
 describe("WindDialWidget", function () {
   function createWindCachingHarness() {
+    const fullCircleEngine = loadFresh("shared/widget-kits/gauge/FullCircleDialEngine.js");
+    const layerCache = loadFresh("shared/widget-kits/gauge/CanvasLayerCache.js");
+    const textLayout = loadFresh("shared/widget-kits/gauge/FullCircleDialTextLayout.js");
     const calls = {
       ring: 0,
       layline: 0,
@@ -62,6 +65,9 @@ describe("WindDialWidget", function () {
           return "#fff";
         },
         getModule(id) {
+          if (id === "FullCircleDialEngine") return fullCircleEngine;
+          if (id === "FullCircleDialTextLayout") return textLayout;
+          if (id === "CanvasLayerCache") return layerCache;
           if (id !== "GaugeToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
@@ -119,12 +125,24 @@ describe("WindDialWidget", function () {
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
                   },
+                  computePad(W, H) {
+                    return Math.max(6, Math.floor(Math.min(W, H) * 0.04));
+                  },
+                  computeGap(W, H) {
+                    return Math.max(6, Math.floor(Math.min(W, H) * 0.03));
+                  },
+                  computeMode(ratio, thresholdNormal, thresholdFlat) {
+                    if (ratio < thresholdNormal) return "high";
+                    if (ratio > thresholdFlat) return "flat";
+                    return "normal";
+                  },
                   formatAngle180(value) {
                     const n = Number(value);
                     if (!isFinite(n)) return "---";
                     return String(Math.round(n));
                   }
-                }
+                },
+                angle: {}
               };
             }
           };
@@ -148,6 +166,9 @@ describe("WindDialWidget", function () {
   }
 
   it("formats speed via Helpers.applyFormatter in graphic mode", function () {
+    const fullCircleEngine = loadFresh("shared/widget-kits/gauge/FullCircleDialEngine.js");
+    const layerCache = loadFresh("shared/widget-kits/gauge/CanvasLayerCache.js");
+    const textLayout = loadFresh("shared/widget-kits/gauge/FullCircleDialTextLayout.js");
     const valueDrawCalls = [];
     const laylineCalls = [];
     const pointerCalls = [];
@@ -206,6 +227,9 @@ describe("WindDialWidget", function () {
           return "#fff";
         },
         getModule(id) {
+          if (id === "FullCircleDialEngine") return fullCircleEngine;
+          if (id === "FullCircleDialTextLayout") return textLayout;
+          if (id === "CanvasLayerCache") return layerCache;
           if (id !== "GaugeToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
@@ -258,25 +282,31 @@ describe("WindDialWidget", function () {
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
                   },
+                  computePad(W, H) {
+                    return Math.max(6, Math.floor(Math.min(W, H) * 0.04));
+                  },
+                  computeGap(W, H) {
+                    return Math.max(6, Math.floor(Math.min(W, H) * 0.03));
+                  },
+                  computeMode(ratio, thresholdNormal, thresholdFlat) {
+                    if (ratio < thresholdNormal) return "high";
+                    if (ratio > thresholdFlat) return "flat";
+                    return "normal";
+                  },
                   formatAngle180(value) {
                     const n = Number(value);
                     if (!isFinite(n)) return "---";
                     return String(Math.round(n));
                   }
-                }
+                },
+                angle: {}
               };
             }
           };
         }
       });
 
-    const ctx = createMockContext2D();
-    const canvas = createMockCanvas({
-      rectWidth: 480,
-      rectHeight: 110,
-      ctx
-    });
-
+    const canvas = createMockCanvas({ rectWidth: 480, rectHeight: 110, ctx: createMockContext2D() });
     spec.renderCanvas(canvas, {
       angle: 23,
       speed: 5.5,
@@ -318,6 +348,9 @@ describe("WindDialWidget", function () {
   });
 
   it("does not append unit into value text when formatter returns raw passthrough", function () {
+    const fullCircleEngine = loadFresh("shared/widget-kits/gauge/FullCircleDialEngine.js");
+    const layerCache = loadFresh("shared/widget-kits/gauge/CanvasLayerCache.js");
+    const textLayout = loadFresh("shared/widget-kits/gauge/FullCircleDialTextLayout.js");
     const valueDrawCalls = [];
 
     const spec = loadFresh("widgets/gauges/WindDialWidget/WindDialWidget.js")
@@ -341,6 +374,9 @@ describe("WindDialWidget", function () {
           return "#fff";
         },
         getModule(id) {
+          if (id === "FullCircleDialEngine") return fullCircleEngine;
+          if (id === "FullCircleDialTextLayout") return textLayout;
+          if (id === "CanvasLayerCache") return layerCache;
           if (id !== "GaugeToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
@@ -411,25 +447,31 @@ describe("WindDialWidget", function () {
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
                   },
+                  computePad(W, H) {
+                    return Math.max(6, Math.floor(Math.min(W, H) * 0.04));
+                  },
+                  computeGap(W, H) {
+                    return Math.max(6, Math.floor(Math.min(W, H) * 0.03));
+                  },
+                  computeMode(ratio, thresholdNormal, thresholdFlat) {
+                    if (ratio < thresholdNormal) return "high";
+                    if (ratio > thresholdFlat) return "flat";
+                    return "normal";
+                  },
                   formatAngle180(value) {
                     const n = Number(value);
                     if (!isFinite(n)) return "---";
                     return String(Math.round(n));
                   }
-                }
+                },
+                angle: {}
               };
             }
           };
         }
       });
 
-    const ctx = createMockContext2D();
-    const canvas = createMockCanvas({
-      rectWidth: 480,
-      rectHeight: 110,
-      ctx
-    });
-
+    const canvas = createMockCanvas({ rectWidth: 480, rectHeight: 110, ctx: createMockContext2D() });
     spec.renderCanvas(canvas, {
       angle: 23,
       speed: 5.5,

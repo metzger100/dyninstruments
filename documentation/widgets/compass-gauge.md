@@ -5,8 +5,8 @@
 ## Overview
 
 Full-circle rotating compass card with upright cardinal labels. The dial rotates by `-heading`; the lubber pointer stays fixed at North. Optional target marker (`markerCourse`) is supported.
-Pointer color is resolved once per render via `GaugeToolkit.theme.resolve(canvas)`.
-Static dial rendering is cached per widget instance to avoid rebuilding unchanged dial-face layers each frame.
+Pointer color is resolved once per render via `FullCircleDialEngine` (`GaugeToolkit.theme.resolve(canvas)` internally).
+Static dial rendering is cached via shared `CanvasLayerCache` managed by `FullCircleDialEngine`.
 
 ## Module Registration
 
@@ -16,7 +16,7 @@ CompassGaugeWidget: {
   js: BASE + "widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js",
   css: undefined,
   globalKey: "DyniCompassGaugeWidget",
-  deps: ["GaugeToolkit"]
+  deps: ["FullCircleDialEngine", "FullCircleDialTextLayout"]
 }
 ```
 
@@ -54,11 +54,11 @@ Rendering order keeps labels on top for readability.
 ### Cached Static Assets
 
 - Rotating face bitmap: ring + ticks
-- Cardinal label sprites: prerendered text glyphs reused across frames
+- Cardinal label sprites: prerendered text glyphs stored in engine cache metadata
 
 ### Dynamic Per-Frame Layer
 
-- Heading rotation application for the cached face
+- Heading rotation application for the cached face (`drawCachedLayer(..., {rotationDeg})`)
 - Fixed lubber pointer
 - Optional target marker
 - Live value text + `disconnect` overlay
@@ -81,6 +81,7 @@ Rendering order keeps labels on top for readability.
 - Canvas geometry/buffer size changes
 - Dial geometry changes from size/theme style shifts
 - Static style/token/typography changes
+- Label sprite geometry/style changes
 
 ### Non-Triggers
 
@@ -125,6 +126,7 @@ return {
 ## Related
 
 - [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
+- [../gauges/full-circle-dial-engine.md](../gauges/full-circle-dial-engine.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
 - [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md)
 - [../shared/theme-tokens.md](../shared/theme-tokens.md)

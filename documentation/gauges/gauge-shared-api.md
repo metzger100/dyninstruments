@@ -15,6 +15,8 @@ Shared gauge logic is split into focused core modules:
 - `ThemeResolver` for plugin-wide CSS theme token resolution
 - `GaugeToolkit` as composed facade
 - `SemicircleGaugeEngine` as shared render flow for Speed/Depth/Temperature/Voltage
+- `FullCircleDialEngine` as shared render flow for Compass/Wind dials
+- `FullCircleDialTextLayout` as shared mode text helper for full-circle wrappers
 
 ## Module Registration
 
@@ -49,6 +51,15 @@ SemicircleGaugeEngine: {
   js: BASE + "shared/widget-kits/gauge/SemicircleGaugeEngine.js",
   globalKey: "DyniSemicircleGaugeEngine",
   deps: ["GaugeToolkit"]
+},
+FullCircleDialEngine: {
+  js: BASE + "shared/widget-kits/gauge/FullCircleDialEngine.js",
+  globalKey: "DyniFullCircleDialEngine",
+  deps: ["GaugeToolkit", "CanvasLayerCache"]
+},
+FullCircleDialTextLayout: {
+  js: BASE + "shared/widget-kits/gauge/FullCircleDialTextLayout.js",
+  globalKey: "DyniFullCircleDialTextLayout"
 }
 ```
 
@@ -57,6 +68,7 @@ SemicircleGaugeEngine: {
 ```javascript
 const gaugeUtils = Helpers.getModule("GaugeToolkit") && Helpers.getModule("GaugeToolkit").create(def, Helpers);
 const renderer = Helpers.getModule("SemicircleGaugeEngine") && Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
+const fullCircle = Helpers.getModule("FullCircleDialEngine") && Helpers.getModule("FullCircleDialEngine").create(def, Helpers);
 ```
 
 ## GaugeToolkit (Facade)
@@ -169,6 +181,39 @@ Optional `overrides` fields:
 ```
 
 `color` should come from wrapper-selected tokens (typically `theme.colors.warning`/`theme.colors.alarm`).
+
+## FullCircleDialEngine API
+
+`FullCircleDialEngine.create(def, Helpers).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
+
+### `spec` fields
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `ratioProps` | `{normal,flat}` | no | Prop names for mode thresholds |
+| `ratioDefaults` | `{normal,flat}` | no | Default mode thresholds |
+| `cacheLayers` | `string[]` | no | Layer names for `CanvasLayerCache` |
+| `layout` | object | no | Shared slot factors (`highTopFactor`, `highBottomFactor`) |
+| `buildStaticKey` | `(state, props) => any` | no | Widget static-key payload |
+| `rebuildLayer` | `(layerCtx, layerName, state, props, api) => void` | no | Static-layer rebuild callback |
+| `drawFrame` | `(state, props, api) => void` | no | Per-frame dynamic draw callback |
+| `drawMode` | `{flat?,high?,normal?}` | no | Mode-specific text/layout callback map |
+| `drawDisconnect` | boolean | no | Set `false` to skip shared disconnect overlay |
+
+### Callback API helpers
+
+- `drawFullCircleRing(targetCtx?, opts?)`
+- `drawFullCircleTicks(targetCtx?, opts?)`
+- `drawFixedPointer(targetCtx?, angleDeg, opts?)`
+- `drawCachedLayer(layerName?, opts?)` (`rotationDeg` supported)
+- `getCacheMeta(key)` / `setCacheMeta(key, value)`
+
+## FullCircleDialTextLayout API
+
+`FullCircleDialTextLayout.create(def, Helpers)` returns:
+
+- `drawSingleModeText(state, mode, display, opts?)`
+- `drawDualModeText(state, mode, left, right, opts?)`
 
 ## Related
 

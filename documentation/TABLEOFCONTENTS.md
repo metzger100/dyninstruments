@@ -54,6 +54,7 @@
 - **Layout modes (flat/normal/high)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#layout-modes)
 - **Sector logic (warning/alarm placement)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#sector-logic)
 - **Shared gauge APIs (GaugeToolkit + split core modules)** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
+- **How does the shared full-circle dial engine work?** → [gauges/full-circle-dial-engine.md](gauges/full-circle-dial-engine.md)
 
 ## Module Reference (Renderers)
 

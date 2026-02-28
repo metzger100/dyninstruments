@@ -85,6 +85,17 @@
       globalKey: "DyniSemicircleGaugeEngine",
       deps: ["GaugeToolkit"]
     },
+    FullCircleDialEngine: {
+      js: BASE + "shared/widget-kits/gauge/FullCircleDialEngine.js",
+      css: undefined,
+      globalKey: "DyniFullCircleDialEngine",
+      deps: ["GaugeToolkit", "CanvasLayerCache"]
+    },
+    FullCircleDialTextLayout: {
+      js: BASE + "shared/widget-kits/gauge/FullCircleDialTextLayout.js",
+      css: undefined,
+      globalKey: "DyniFullCircleDialTextLayout"
+    },
     ThreeValueTextWidget: {
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
       css: undefined,
@@ -113,13 +124,13 @@
       js: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.js",
       css: undefined,
       globalKey: "DyniWindDialWidget",
-      deps: ["GaugeToolkit"]
+      deps: ["FullCircleDialEngine", "FullCircleDialTextLayout"]
     },
     CompassGaugeWidget: {
       js: BASE + "widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js",
       css: undefined,
       globalKey: "DyniCompassGaugeWidget",
-      deps: ["GaugeToolkit"]
+      deps: ["FullCircleDialEngine", "FullCircleDialTextLayout"]
     },
     SpeedGaugeWidget: {
       js: BASE + "widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js",
