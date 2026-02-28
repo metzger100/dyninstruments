@@ -45,6 +45,8 @@
 
 - **How do I create a new semicircle gauge?** → [guides/add-new-gauge.md](guides/add-new-gauge.md)
 - **How do I create a new full-circle dial?** → [guides/add-new-full-circle-dial.md](guides/add-new-full-circle-dial.md)
+- **How do I create a new text-based renderer with TextLayoutEngine?** → [guides/add-new-text-renderer.md](guides/add-new-text-renderer.md)
+- **When should I create a new text renderer vs extending an existing one?** → [guides/add-new-text-renderer.md](guides/add-new-text-renderer.md#b4-decision-guide-new-renderer-vs-extension)
 - **How do I add a new cluster widget?** → [guides/add-new-cluster.md](guides/add-new-cluster.md)
 - **How do I add a new kind to an existing cluster?** → [guides/add-new-cluster.md](guides/add-new-cluster.md#adding-a-new-kind)
 - **How do I add a new kind to an existing dial?** → [guides/add-new-full-circle-dial.md](guides/add-new-full-circle-dial.md#adding-a-new-kind-to-an-existing-dial)
