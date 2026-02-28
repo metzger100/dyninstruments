@@ -85,6 +85,24 @@ Example:
 - Do not implement formatter logic, status-symbol conversion, or rendering fallbacks inside mappers.
 - Move any non-trivial logic to renderer components (`cluster/rendering/`, `widgets/`) or `ClusterMapperToolkit`.
 
+## Widget Archetypes
+
+Use this routing table before starting a new widget. Shared engine purposes:
+
+- `SemicircleGaugeEngine`: shared semicircle gauge rendering flow (geometry, sectors, ticks, pointer, ratio mode).
+- `FullCircleDialEngine`: shared full-circle dial rendering flow (ring/ticks, static layers, pointer and frame orchestration).
+- `TextLayoutEngine`: shared text layout mode routing, fit calculation, and text draw helpers.
+- Cluster renderer wrappers: role-based adapters that delegate to one of the archetypes above.
+
+| Archetype | Shared Engine | Reference Implementation | Guide |
+|---|---|---|---|
+| Semicircle gauge | `SemicircleGaugeEngine` | [SpeedGaugeWidget](../../widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js) | [add-new-gauge](../guides/add-new-gauge.md) |
+| Full-circle dial | `FullCircleDialEngine` | [CompassGaugeWidget](../../widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js) | [add-new-dial](../guides/add-new-full-circle-dial.md) |
+| Text renderer | `TextLayoutEngine` | [ThreeValueTextWidget](../../widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js) | [add-new-text-renderer](../guides/add-new-text-renderer.md) |
+| Cluster renderer wrapper | `(delegates to above)` | [DateTimeWidget](../../cluster/rendering/DateTimeWidget.js) | [add-new-cluster](../guides/add-new-cluster.md) |
+
+Rule: Before creating any new widget, check this table. If your widget matches an archetype, use the corresponding shared engine. If it does not match any archetype, discuss with the team before creating a new engine.
+
 ## Reference Implementations
 
 - For a new semicircle gauge: `widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js` - canonical UMD wrapper, header format, and `SemicircleGaugeEngine` delegation.

@@ -39,6 +39,7 @@
 - **How do I run naming registration checks?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#quality-and-regression-commands)
 - **How should I format documentation files?** → [conventions/documentation-format.md](conventions/documentation-format.md)
 - **Which files are the best examples to copy from?** → [conventions/coding-standards.md#reference-implementations](conventions/coding-standards.md#reference-implementations)
+- **Which shared engine should I use for my widget type?** → [conventions/coding-standards.md#widget-archetypes](conventions/coding-standards.md#widget-archetypes)
 - **What shared utilities exist?** → [conventions/coding-standards.md#shared-utilities](conventions/coding-standards.md#shared-utilities)
 - **What are the non-negotiable project rules?** → [core-principles.md](core-principles.md)
 
