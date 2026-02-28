@@ -118,3 +118,4 @@ Must be registered in two places:
 - [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md) — canonical formatter signatures
 - [../avnav-api/core-key-catalog.md](../avnav-api/core-key-catalog.md) — key/unit catalog
 - [../guides/add-new-cluster.md](../guides/add-new-cluster.md) — cluster authoring workflow
+- [../guides/add-new-full-circle-dial.md](../guides/add-new-full-circle-dial.md) — full-circle dial renderer workflow

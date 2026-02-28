@@ -44,8 +44,10 @@
 ## Creating New Widgets (Guides)
 
 - **How do I create a new semicircle gauge?** → [guides/add-new-gauge.md](guides/add-new-gauge.md)
+- **How do I create a new full-circle dial?** → [guides/add-new-full-circle-dial.md](guides/add-new-full-circle-dial.md)
 - **How do I add a new cluster widget?** → [guides/add-new-cluster.md](guides/add-new-cluster.md)
 - **How do I add a new kind to an existing cluster?** → [guides/add-new-cluster.md](guides/add-new-cluster.md#adding-a-new-kind)
+- **How do I add a new kind to an existing dial?** → [guides/add-new-full-circle-dial.md](guides/add-new-full-circle-dial.md#adding-a-new-kind-to-an-existing-dial)
 - **How do I run regression tests and coverage checks?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#quality-and-regression-commands)
 
 ## Gauge Widgets (Semicircle)
