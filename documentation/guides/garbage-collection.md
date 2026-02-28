@@ -36,7 +36,7 @@ node tools/check-patterns.mjs --warn
 ```
 
 Rule references:
-- `check-patterns.mjs`: `duplicate-fn-body` (`duplicate-functions`), `duplicate-block` (`duplicate-block-clones`), `forbidden-global`, `empty-catch`, `todo-missing-owner`, `unused-fallback`, `dead-code`, `default-truthy-fallback`, `formatter-availability-heuristic`, `renderer-numeric-coercion-without-boundary-contract`
+- `check-patterns.mjs`: `duplicate-fn-body` (`duplicate-functions`), `duplicate-block` (`duplicate-block-clones`), `forbidden-global`, `empty-catch`, `todo-missing-owner`, `unused-fallback`, `dead-code`, `default-truthy-fallback`, `formatter-availability-heuristic`, `renderer-numeric-coercion-without-boundary-contract`, `mapper-output-complexity` (warn at `9..12`, block at `>12`)
 - `check-smell-contracts.mjs`: `theme-cache-invalidation`, `dynamic-storekey-clears-on-empty`, `falsy-default-preservation`, `mapper-output-no-nan`, `text-layout-hotspot-budget`, `coordinate-formatter-no-raw-equality-fallback`
 - `check-file-size.mjs`: warning at `>=300` non-empty lines, failure at `>400` non-empty lines, oneliner detection in block mode via `npm run check:filesize` (optional exploratory warn mode: `npm run check:filesize:warn`)
 
@@ -98,6 +98,7 @@ npm run gc:update-baseline
 | Falsy default clobbering | `x.default || "---"` overwrites explicit `""`, `0`, or `false` | `check-patterns.mjs` (`default-truthy-fallback`), `check-smell-contracts.mjs` (`falsy-default-preservation`) | Use property-presence/nullish semantics |
 | Renderer coercion drift | Renderer performs `Number(props.x)` for mapper-owned normalized values | `check-patterns.mjs` (`renderer-numeric-coercion-without-boundary-contract`), `check-smell-contracts.mjs` (`mapper-output-no-nan`) | Normalize at mapper boundary, pass finite or `undefined` |
 | Formatter output heuristic | Inferring formatter absence from output equality (`out.trim() === String(raw)`) | `check-patterns.mjs` (`formatter-availability-heuristic`), `check-smell-contracts.mjs` (`coordinate-formatter-no-raw-equality-fallback`) | Remove output-equality heuristics; rely on explicit formatter flow |
+| Mapper output complexity | One mapper `kind` branch returns too many top-level props (`return { ... }`) and starts encoding renderer behavior directly | `check-patterns.mjs` (`mapper-output-complexity`) | Keep mapper output thin; move renderer-specific config to a dedicated wrapper/adapter when a branch exceeds 8 props (hard block at `>12`) |
 | Undated TODOs (`TODO(name, 2026-02-20): ...` required format) | Guardrail: no current violations, rule still enforced repo-wide | `check-patterns.mjs` (`todo-missing-owner`) | Use `TODO(name, YYYY-MM-DD): description` |
 | Unused fallback leftovers | Refactor drift risk: fallback variables remain after formatter-path rewrites and are never read | `check-patterns.mjs` (`unused-fallback`) | Remove stale declarations or wire fallback into reachable formatting flow |
 | Dead refactor code | Refactor drift risk: helper function no longer referenced, or `if (false)` / `if (CONST_FLAG)` constant branches | `check-patterns.mjs` (`dead-code`) | Delete unreachable paths and keep only active logic |

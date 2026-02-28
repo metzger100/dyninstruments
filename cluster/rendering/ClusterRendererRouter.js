@@ -1,7 +1,7 @@
 /**
  * Module: ClusterRendererRouter - Sub-renderer selection and lifecycle fan-out
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ThreeValueTextWidget, PositionCoordinateWidget, DateTimeWidget, TimeStatusWidget, WindDialWidget, CompassGaugeWidget, SpeedGaugeWidget, DepthGaugeWidget, TemperatureGaugeWidget, VoltageGaugeWidget
+ * Depends: ThreeValueTextWidget, PositionCoordinateWidget, DateTimeWidget, TimeStatusWidget, RendererPropsWidget
  */
 
 (function (root, factory) {
@@ -13,16 +13,17 @@
 
   function create(def, Helpers) {
     const threeSpec = Helpers.getModule("ThreeValueTextWidget").create(def, Helpers);
+    const rendererPropsWidget = Helpers.getModule("RendererPropsWidget");
     const rendererSpecs = {
       PositionCoordinateWidget: Helpers.getModule("PositionCoordinateWidget").create(def, Helpers),
       DateTimeWidget: Helpers.getModule("DateTimeWidget").create(def, Helpers),
       TimeStatusWidget: Helpers.getModule("TimeStatusWidget").create(def, Helpers),
-      WindDialWidget: Helpers.getModule("WindDialWidget").create(def, Helpers),
-      CompassGaugeWidget: Helpers.getModule("CompassGaugeWidget").create(def, Helpers),
-      SpeedGaugeWidget: Helpers.getModule("SpeedGaugeWidget").create(def, Helpers),
-      DepthGaugeWidget: Helpers.getModule("DepthGaugeWidget").create(def, Helpers),
-      TemperatureGaugeWidget: Helpers.getModule("TemperatureGaugeWidget").create(def, Helpers),
-      VoltageGaugeWidget: Helpers.getModule("VoltageGaugeWidget").create(def, Helpers)
+      WindDialWidget: rendererPropsWidget.create(def, Helpers, "WindDialWidget"),
+      CompassGaugeWidget: rendererPropsWidget.create(def, Helpers, "CompassGaugeWidget"),
+      SpeedGaugeWidget: rendererPropsWidget.create(def, Helpers, "SpeedGaugeWidget"),
+      DepthGaugeWidget: rendererPropsWidget.create(def, Helpers, "DepthGaugeWidget"),
+      TemperatureGaugeWidget: rendererPropsWidget.create(def, Helpers, "TemperatureGaugeWidget"),
+      VoltageGaugeWidget: rendererPropsWidget.create(def, Helpers, "VoltageGaugeWidget")
     };
     const subSpecs = [threeSpec].concat(Object.keys(rendererSpecs).map(function (id) {
       return rendererSpecs[id];

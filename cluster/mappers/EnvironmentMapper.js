@@ -33,19 +33,18 @@
           value: p.depth,
           caption: cap("depthGraphic"),
           unit: unit("depthGraphic"),
-
-          minValue: num(p.depthMinValue),
-          maxValue: num(p.depthMaxValue),
-          tickMajor: num(p.depthTickMajor),
-          tickMinor: num(p.depthTickMinor),
-          showEndLabels: !!p.depthShowEndLabels,
-
-          alarmFrom: depthAlarmOn ? num(p.depthAlarmFrom) : undefined,
-          warningFrom: depthWarnOn ? num(p.depthWarningFrom) : undefined,
-
-          depthRatioThresholdNormal: num(p.depthRatioThresholdNormal),
-          depthRatioThresholdFlat: num(p.depthRatioThresholdFlat),
-          captionUnitScale: num(p.captionUnitScale)
+          rendererProps: {
+            minValue: num(p.depthMinValue),
+            maxValue: num(p.depthMaxValue),
+            tickMajor: num(p.depthTickMajor),
+            tickMinor: num(p.depthTickMinor),
+            showEndLabels: !!p.depthShowEndLabels,
+            alarmFrom: depthAlarmOn ? num(p.depthAlarmFrom) : undefined,
+            warningFrom: depthWarnOn ? num(p.depthWarningFrom) : undefined,
+            depthRatioThresholdNormal: num(p.depthRatioThresholdNormal),
+            depthRatioThresholdFlat: num(p.depthRatioThresholdFlat),
+            captionUnitScale: num(p.captionUnitScale)
+          }
         };
       }
 
@@ -55,25 +54,22 @@
         return {
           renderer: "TemperatureGaugeWidget",
           value: p.temp,
-
           caption: cap("tempGraphic"),
           unit: unit("tempGraphic"),
           formatter: "formatTemperature",
           formatterParameters: ["celsius"],
-
-          minValue: num(p.tempMinValue),
-          maxValue: num(p.tempMaxValue),
-          tickMajor: num(p.tempTickMajor),
-          tickMinor: num(p.tempTickMinor),
-          showEndLabels: !!p.tempShowEndLabels,
-
-          warningFrom: tempWarnOn ? num(p.tempWarningFrom) : undefined,
-          alarmFrom: tempAlarmOn ? num(p.tempAlarmFrom) : undefined,
-
-          tempRatioThresholdNormal: num(p.tempRatioThresholdNormal),
-          tempRatioThresholdFlat: num(p.tempRatioThresholdFlat),
-
-          captionUnitScale: num(p.captionUnitScale)
+          rendererProps: {
+            minValue: num(p.tempMinValue),
+            maxValue: num(p.tempMaxValue),
+            tickMajor: num(p.tempTickMajor),
+            tickMinor: num(p.tempTickMinor),
+            showEndLabels: !!p.tempShowEndLabels,
+            warningFrom: tempWarnOn ? num(p.tempWarningFrom) : undefined,
+            alarmFrom: tempAlarmOn ? num(p.tempAlarmFrom) : undefined,
+            tempRatioThresholdNormal: num(p.tempRatioThresholdNormal),
+            tempRatioThresholdFlat: num(p.tempRatioThresholdFlat),
+            captionUnitScale: num(p.captionUnitScale)
+          }
         };
       }
 

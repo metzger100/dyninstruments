@@ -39,22 +39,20 @@
           unit: uni,
           formatter: "formatSpeed",
           formatterParameters: [uni],
-
-          speedRatioThresholdNormal: num(p.speedRatioThresholdNormal),
-          speedRatioThresholdFlat: num(p.speedRatioThresholdFlat),
-          captionUnitScale: num(p.captionUnitScale),
-
-          minValue: num(p.minValue),
-          maxValue: num(p.maxValue),
-          startAngleDeg: num(p.startAngleDeg),
-          endAngleDeg: num(p.endAngleDeg),
-
-          tickMajor: num(p.tickMajor),
-          tickMinor: num(p.tickMinor),
-          showEndLabels: !!p.showEndLabels,
-
-          warningFrom: warnOn ? num(p.warningFrom) : undefined,
-          alarmFrom: alarmOn ? num(p.alarmFrom) : undefined
+          rendererProps: {
+            speedRatioThresholdNormal: num(p.speedRatioThresholdNormal),
+            speedRatioThresholdFlat: num(p.speedRatioThresholdFlat),
+            captionUnitScale: num(p.captionUnitScale),
+            minValue: num(p.minValue),
+            maxValue: num(p.maxValue),
+            startAngleDeg: num(p.startAngleDeg),
+            endAngleDeg: num(p.endAngleDeg),
+            tickMajor: num(p.tickMajor),
+            tickMinor: num(p.tickMinor),
+            showEndLabels: !!p.showEndLabels,
+            warningFrom: warnOn ? num(p.warningFrom) : undefined,
+            alarmFrom: alarmOn ? num(p.alarmFrom) : undefined
+          }
         };
       }
 

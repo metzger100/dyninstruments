@@ -138,6 +138,19 @@
       globalKey: "DyniTimeStatusWidget",
       deps: ["PositionCoordinateWidget"]
     },
+    RendererPropsWidget: {
+      js: BASE + "cluster/rendering/RendererPropsWidget.js",
+      css: undefined,
+      globalKey: "DyniRendererPropsWidget",
+      deps: [
+        "WindDialWidget",
+        "CompassGaugeWidget",
+        "SpeedGaugeWidget",
+        "DepthGaugeWidget",
+        "TemperatureGaugeWidget",
+        "VoltageGaugeWidget"
+      ]
+    },
     WindDialWidget: {
       js: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.js",
       css: undefined,
@@ -189,12 +202,7 @@
         "PositionCoordinateWidget",
         "DateTimeWidget",
         "TimeStatusWidget",
-        "WindDialWidget",
-        "CompassGaugeWidget",
-        "SpeedGaugeWidget",
-        "DepthGaugeWidget",
-        "TemperatureGaugeWidget",
-        "VoltageGaugeWidget"
+        "RendererPropsWidget"
       ]
     },
     CourseHeadingMapper: {

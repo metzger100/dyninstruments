@@ -32,19 +32,21 @@
           renderer: "WindDialWidget",
           angle: isTrue ? p.twa : p.awa,
           speed: isTrue ? p.tws : p.aws,
-          angleCaption: isTrue ? p.angleCaption_TWA : p.angleCaption_AWA,
-          speedCaption: isTrue ? p.speedCaption_TWS : p.speedCaption_AWS,
-          angleUnit: p.angleUnitGraphic,
-          speedUnit: speedUnit,
-          formatter: "formatSpeed",
-          formatterParameters: [speedUnit],
-          layEnabled: !!p.windLayEnabled,
-          layMin: num(p.layMin),
-          layMax: num(p.layMax),
-          dialRatioThresholdNormal: num(p.dialRatioThresholdNormal),
-          dialRatioThresholdFlat: num(p.dialRatioThresholdFlat),
-          captionUnitScale: num(p.captionUnitScale),
-          leadingZero: !!p.leadingZero
+          rendererProps: {
+            angleCaption: isTrue ? p.angleCaption_TWA : p.angleCaption_AWA,
+            speedCaption: isTrue ? p.speedCaption_TWS : p.speedCaption_AWS,
+            angleUnit: p.angleUnitGraphic,
+            speedUnit: speedUnit,
+            formatter: "formatSpeed",
+            formatterParameters: [speedUnit],
+            layEnabled: !!p.windLayEnabled,
+            layMin: num(p.layMin),
+            layMax: num(p.layMax),
+            dialRatioThresholdNormal: num(p.dialRatioThresholdNormal),
+            dialRatioThresholdFlat: num(p.dialRatioThresholdFlat),
+            captionUnitScale: num(p.captionUnitScale),
+            leadingZero: !!p.leadingZero
+          }
         };
       }
 

@@ -34,12 +34,12 @@ describe("WindMapper", function () {
     expect(out.renderer).toBe("WindDialWidget");
     expect(out.angle).toBe(-32);
     expect(out.speed).toBe(6.1);
-    expect(out.formatter).toBe("formatSpeed");
-    expect(out.formatterParameters).toEqual(["kn"]);
-    expect(out.layEnabled).toBe(true);
-    expect(out.layMin).toBe(20);
-    expect(out.layMax).toBe(42);
-    expect(out.leadingZero).toBe(true);
+    expect(out.rendererProps.formatter).toBe("formatSpeed");
+    expect(out.rendererProps.formatterParameters).toEqual(["kn"]);
+    expect(out.rendererProps.layEnabled).toBe(true);
+    expect(out.rendererProps.layMin).toBe(20);
+    expect(out.rendererProps.layMax).toBe(42);
+    expect(out.rendererProps.leadingZero).toBe(true);
   });
 
   it("maps numeric true angle via angle formatter function", function () {

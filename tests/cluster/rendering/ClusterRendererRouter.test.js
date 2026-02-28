@@ -15,6 +15,19 @@ describe("ClusterRendererRouter", function () {
     const three = makeSpec("three", { hide: false });
     const wind = makeSpec("wind", { hide: true });
     const position = makeSpec("position");
+    const compass = makeSpec("compass");
+    const speed = makeSpec("speed");
+    const depth = makeSpec("depth");
+    const temp = makeSpec("temp");
+    const volt = makeSpec("volt");
+    const targetSpecs = {
+      WindDialWidget: wind,
+      CompassGaugeWidget: compass,
+      SpeedGaugeWidget: speed,
+      DepthGaugeWidget: depth,
+      TemperatureGaugeWidget: temp,
+      VoltageGaugeWidget: volt
+    };
 
     const Helpers = {
       getModule(id) {
@@ -23,12 +36,11 @@ describe("ClusterRendererRouter", function () {
           PositionCoordinateWidget: { create: () => position },
           DateTimeWidget: { create: () => makeSpec("vesselDateTime") },
           TimeStatusWidget: { create: () => makeSpec("vesselTimeStatus") },
-          WindDialWidget: { create: () => wind },
-          CompassGaugeWidget: { create: () => makeSpec("compass") },
-          SpeedGaugeWidget: { create: () => makeSpec("speed") },
-          DepthGaugeWidget: { create: () => makeSpec("depth") },
-          TemperatureGaugeWidget: { create: () => makeSpec("temp") },
-          VoltageGaugeWidget: { create: () => makeSpec("volt") }
+          RendererPropsWidget: {
+            create: function (def, helpers, targetRendererId) {
+              return targetSpecs[targetRendererId];
+            }
+          }
         };
         return map[id];
       }
@@ -47,6 +59,18 @@ describe("ClusterRendererRouter", function () {
     const three = makeSpec("three");
     const speed = makeSpec("speed", { finalizeFunction: vi.fn(() => { throw new Error("ignored"); }) });
     const voltage = makeSpec("voltage");
+    const wind = makeSpec("wind");
+    const compass = makeSpec("compass");
+    const depth = makeSpec("depth");
+    const temp = makeSpec("temp");
+    const targetSpecs = {
+      WindDialWidget: wind,
+      CompassGaugeWidget: compass,
+      SpeedGaugeWidget: speed,
+      DepthGaugeWidget: depth,
+      TemperatureGaugeWidget: temp,
+      VoltageGaugeWidget: voltage
+    };
 
     const Helpers = {
       getModule(id) {
@@ -55,12 +79,11 @@ describe("ClusterRendererRouter", function () {
           PositionCoordinateWidget: { create: () => makeSpec("position") },
           DateTimeWidget: { create: () => makeSpec("vesselDateTime") },
           TimeStatusWidget: { create: () => makeSpec("vesselTimeStatus") },
-          WindDialWidget: { create: () => makeSpec("wind") },
-          CompassGaugeWidget: { create: () => makeSpec("compass") },
-          SpeedGaugeWidget: { create: () => speed },
-          DepthGaugeWidget: { create: () => makeSpec("depth") },
-          TemperatureGaugeWidget: { create: () => makeSpec("temp") },
-          VoltageGaugeWidget: { create: () => voltage }
+          RendererPropsWidget: {
+            create: function (def, helpers, targetRendererId) {
+              return targetSpecs[targetRendererId];
+            }
+          }
         };
         return map[id];
       }

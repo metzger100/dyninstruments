@@ -32,10 +32,12 @@
           markerCourse: p.brg,
           caption: cap(effKind),
           unit: unit(effKind),
-          leadingZero: !!p.leadingZero,
-          captionUnitScale: num(p.captionUnitScale),
-          compRatioThresholdNormal: num(p.compRatioThresholdNormal),
-          compRatioThresholdFlat: num(p.compRatioThresholdFlat)
+          rendererProps: {
+            leadingZero: !!p.leadingZero,
+            captionUnitScale: num(p.captionUnitScale),
+            compRatioThresholdNormal: num(p.compRatioThresholdNormal),
+            compRatioThresholdFlat: num(p.compRatioThresholdFlat)
+          }
         };
       }
 

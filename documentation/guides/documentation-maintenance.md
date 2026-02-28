@@ -57,8 +57,9 @@ npm run test:coverage
 node tools/check-coverage.mjs
 ```
 
-`check-patterns` is enforced in full mode inside `check:core`; any finding is a blocking failure.
-This includes fail-closed cross-file clone detection (`duplicate-functions`, `duplicate-block-clones`).
+`check-patterns` is enforced in full mode inside `check:core`.
+Blocking findings fail the gate; warning findings are non-blocking advisories.
+This includes fail-closed cross-file clone detection (`duplicate-functions`, `duplicate-block-clones`) and mixed-severity mapper complexity checks (`mapper-output-complexity`: warn at `9..12`, block at `>12`).
 
 For cleanup sessions tracked by garbage-collection baseline markers:
 

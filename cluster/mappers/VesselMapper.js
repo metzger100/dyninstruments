@@ -34,19 +34,18 @@
           unit: unit("voltageGraphic"),
           formatter: "formatDecimal",
           formatterParameters: [3, 1, true],
-
-          minValue: num(p.minValue),
-          maxValue: num(p.maxValue),
-          tickMajor: num(p.tickMajor),
-          tickMinor: num(p.tickMinor),
-          showEndLabels: !!p.showEndLabels,
-
-          warningFrom: warnEnabled ? num(p.warningFrom) : undefined,
-          alarmFrom: alarmEnabled ? num(p.alarmFrom) : undefined,
-
-          voltageRatioThresholdNormal: num(p.voltageRatioThresholdNormal),
-          voltageRatioThresholdFlat: num(p.voltageRatioThresholdFlat),
-          captionUnitScale: num(p.captionUnitScale)
+          rendererProps: {
+            minValue: num(p.minValue),
+            maxValue: num(p.maxValue),
+            tickMajor: num(p.tickMajor),
+            tickMinor: num(p.tickMinor),
+            showEndLabels: !!p.showEndLabels,
+            warningFrom: warnEnabled ? num(p.warningFrom) : undefined,
+            alarmFrom: alarmEnabled ? num(p.alarmFrom) : undefined,
+            voltageRatioThresholdNormal: num(p.voltageRatioThresholdNormal),
+            voltageRatioThresholdFlat: num(p.voltageRatioThresholdFlat),
+            captionUnitScale: num(p.captionUnitScale)
+          }
         };
       }
 
