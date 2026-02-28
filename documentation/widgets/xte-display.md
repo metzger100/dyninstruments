@@ -118,6 +118,7 @@ XTE marker placement uses a fixed `1 nm` full-scale range:
 - centerline = `0`
 - left edge = `-1`
 - right edge = `+1`
+- marker uses a boat hull glyph that scales with highway geometry (not fixed pixels)
 
 If `abs(xte) > 1`, marker position is clamped to the edge and overflow alarm cue is rendered.
 
