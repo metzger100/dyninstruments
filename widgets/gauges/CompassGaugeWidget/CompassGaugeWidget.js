@@ -75,8 +75,8 @@
       return {
         heading: heading,
         marker: p.markerCourse,
-        caption: String(p.caption || "").trim(),
-        unit: String(p.unit ?? "°").trim(),
+        caption: String(p.caption).trim(),
+        unit: String(p.unit).trim(),
         value: state.value.isFiniteNumber(heading)
           ? state.value.formatDirection360(heading, !!p.leadingZero)
           : (hasOwn.call(p, "default") ? p.default : "---"),

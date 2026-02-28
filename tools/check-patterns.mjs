@@ -8,6 +8,7 @@ const SKIP_DIRS = new Set([".git", "node_modules", "coverage"]);
 const fileCache = new Map();
 const scopeCache = new Map();
 let clusterPrefixCache = null;
+let rendererContractCache = null;
 const DUPLICATE_FN_MIN_EXACT_TOKENS = 50;
 const DUPLICATE_FN_MIN_SHAPE_TOKENS = 90;
 const DUPLICATE_FN_MIN_SHAPE_CONTROL = 2;
@@ -15,6 +16,15 @@ const DUPLICATE_FN_MIN_SHAPE_STATEMENTS = 6;
 const DUPLICATE_BLOCK_WINDOW = 35;
 const DUPLICATE_BLOCK_MIN_TOKENS = 120;
 const DUPLICATE_BLOCK_MIN_STATEMENTS = 6;
+const RENDER_PROP_OBJECT_NAMES = new Set(["p", "props"]);
+const EXTERNAL_FACTOR_CONTEXT_HINTS = [
+  "root.avnav",
+  "avnav.api",
+  "getComputedStyle",
+  "devicePixelRatio",
+  "ownerDocument",
+  "documentElement"
+];
 const ALLOWLISTED_ORCHESTRATION_FUNCTIONS = new Set([
   "create",
   "translateFunction",
@@ -152,6 +162,20 @@ const RULES = [
     message: ({ file, line, expression }) => `[default-truthy-fallback] ${file}:${line}\nTruthy fallback on '.default' detected (${expression}). This clobbers explicit falsy defaults (\"\", 0, false).\nUse property-presence/nullish semantics instead of '||'.`
   },
   {
+    name: "redundant-internal-fallback",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "config/**/*.js", "plugin.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runRedundantInternalFallbackRule,
+    message: ({ file, line, expression, propName, rendererId, sourceType }) => {
+      if (sourceType === "applyFormatter-default") {
+        return `[redundant-internal-fallback] ${file}:${line}\nRedundant fallback (${expression}). Helpers.applyFormatter() already applies the same default; remove the outer fallback wrapper.`;
+      }
+      return `[redundant-internal-fallback] ${file}:${line}\nRedundant fallback (${expression}) for prop '${propName}'. Renderer '${rendererId}' guarantees this prop via mapper kind-default contracts.`;
+    }
+  },
+  {
     name: "formatter-availability-heuristic",
     scope: {
       include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "config/**/*.js"],
@@ -219,6 +243,7 @@ export function runPatternCheck(options = {}) {
   fileCache.clear();
   scopeCache.clear();
   clusterPrefixCache = null;
+  rendererContractCache = null;
 
   const findings = [];
   const warnings = [];
@@ -557,6 +582,57 @@ function findMatchingBrace(text, openIndex) {
     if (ch === "}") {
       depth -= 1;
       if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+function findMatchingParen(text, openIndex) {
+  let depth = 0;
+  for (let i = openIndex; i < text.length; i += 1) {
+    const ch = text[i];
+    if (ch === "(") {
+      depth += 1;
+      continue;
+    }
+    if (ch === ")") {
+      depth -= 1;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+function findTopLevelComma(maskedText, start, end) {
+  let braceDepth = 0;
+  let parenDepth = 0;
+  let bracketDepth = 0;
+  for (let i = start; i < end; i += 1) {
+    const ch = maskedText[i];
+    if (ch === "{") {
+      braceDepth += 1;
+      continue;
+    }
+    if (ch === "}") {
+      braceDepth -= 1;
+      continue;
+    }
+    if (ch === "(") {
+      parenDepth += 1;
+      continue;
+    }
+    if (ch === ")") {
+      parenDepth -= 1;
+      continue;
+    }
+    if (ch === "[") {
+      bracketDepth += 1;
+      continue;
+    }
+    if (ch === "]") {
+      bracketDepth -= 1;
+      continue;
+    }
+    if (ch === "," && braceDepth === 0 && parenDepth === 0 && bracketDepth === 0) {
+      return i;
     }
   }
   return -1;
@@ -902,6 +978,366 @@ function runDefaultTruthyFallbackRule(rule, files) {
         })
       });
     }
+  }
+
+  return out;
+}
+function runRedundantInternalFallbackRule(rule, files) {
+  const out = [];
+  const contractsByRenderer = getRendererFallbackContracts();
+
+  for (const file of files) {
+    const data = getFileData(file);
+    const rendererId = path.basename(file, ".js");
+    const contract = contractsByRenderer[rendererId] || null;
+    const seen = new Set();
+
+    if (contract) {
+      const detectFallbackTextProp = /\bfallbackText\s*\(\s*([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*,/g;
+      let fallbackMatch;
+
+      while ((fallbackMatch = detectFallbackTextProp.exec(data.maskedText))) {
+        const objectName = fallbackMatch[1];
+        const propName = fallbackMatch[2];
+        if (!RENDER_PROP_OBJECT_NAMES.has(objectName)) {
+          continue;
+        }
+        if (!Object.prototype.hasOwnProperty.call(contract, propName)) {
+          continue;
+        }
+        if (isExternalFactorFallbackContext(data.maskedText, fallbackMatch.index)) {
+          continue;
+        }
+
+        const openParen = data.maskedText.indexOf("(", fallbackMatch.index);
+        const closeParen = openParen >= 0 ? findMatchingParen(data.maskedText, openParen) : -1;
+        const expression = closeParen > openParen
+          ? data.text.slice(fallbackMatch.index, closeParen + 1).trim()
+          : `fallbackText(${objectName}.${propName}, ...)`;
+        const line = lineAt(fallbackMatch.index, data.lineStarts);
+        const key = `${file}:${line}:fallbackText:${propName}`;
+        if (seen.has(key)) {
+          continue;
+        }
+        seen.add(key);
+
+        out.push({
+          file,
+          line,
+          message: rule.message({
+            file,
+            line,
+            expression,
+            propName,
+            rendererId,
+            sourceType: contract[propName]
+          })
+        });
+      }
+
+      const detectLiteralFallback = /\b([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*(\|\||\?\?)/g;
+      let literalMatch;
+      while ((literalMatch = detectLiteralFallback.exec(data.maskedText))) {
+        const objectName = literalMatch[1];
+        const propName = literalMatch[2];
+        const operator = literalMatch[3];
+        if (!RENDER_PROP_OBJECT_NAMES.has(objectName)) {
+          continue;
+        }
+        if (!Object.prototype.hasOwnProperty.call(contract, propName)) {
+          continue;
+        }
+        if (isExternalFactorFallbackContext(data.maskedText, literalMatch.index)) {
+          continue;
+        }
+
+        const literal = readLiteralToken(data.text, literalMatch.index + literalMatch[0].length);
+        if (!literal) {
+          continue;
+        }
+
+        const line = lineAt(literalMatch.index, data.lineStarts);
+        const key = `${file}:${line}:${objectName}.${propName}:${operator}:${literal.token}`;
+        if (seen.has(key)) {
+          continue;
+        }
+        seen.add(key);
+
+        out.push({
+          file,
+          line,
+          message: rule.message({
+            file,
+            line,
+            expression: `${objectName}.${propName} ${operator} ${literal.token}`,
+            propName,
+            rendererId,
+            sourceType: contract[propName]
+          })
+        });
+      }
+    }
+
+    const formatterFallbacks = collectApplyFormatterDefaultFindings(data);
+    for (const finding of formatterFallbacks) {
+      const key = `${file}:${finding.line}:applyFormatter-default`;
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      out.push({
+        file,
+        line: finding.line,
+        message: rule.message({
+          file,
+          line: finding.line,
+          expression: finding.expression,
+          sourceType: "applyFormatter-default"
+        })
+      });
+    }
+  }
+
+  return out;
+}
+function collectApplyFormatterDefaultFindings(data) {
+  const out = [];
+  const detect = /\bfallbackText\s*\(/g;
+  let match;
+
+  while ((match = detect.exec(data.maskedText))) {
+    const openParen = data.maskedText.indexOf("(", match.index);
+    if (openParen < 0) {
+      continue;
+    }
+    const closeParen = findMatchingParen(data.maskedText, openParen);
+    if (closeParen < 0) {
+      continue;
+    }
+    const splitComma = findTopLevelComma(data.maskedText, openParen + 1, closeParen);
+    if (splitComma < 0) {
+      continue;
+    }
+
+    const firstArg = data.text.slice(openParen + 1, splitComma).trim();
+    if (!/^Helpers\.applyFormatter\s*\(/.test(firstArg)) {
+      continue;
+    }
+    const secondArg = data.text.slice(splitComma + 1, closeParen).trim();
+    const defaultExpr = extractApplyFormatterDefaultExpression(firstArg);
+    if (!defaultExpr) {
+      continue;
+    }
+    if (normalizeExpressionForCompare(defaultExpr) !== normalizeExpressionForCompare(secondArg)) {
+      continue;
+    }
+
+    out.push({
+      line: lineAt(match.index, data.lineStarts),
+      expression: data.text.slice(match.index, closeParen + 1).trim()
+    });
+  }
+
+  return out;
+}
+function extractApplyFormatterDefaultExpression(applyFormatterExpr) {
+  const masked = maskCommentsAndStrings(applyFormatterExpr);
+  const openParen = masked.indexOf("(");
+  if (openParen < 0) {
+    return null;
+  }
+  const closeParen = findMatchingParen(masked, openParen);
+  if (closeParen < 0) {
+    return null;
+  }
+  const splitComma = findTopLevelComma(masked, openParen + 1, closeParen);
+  if (splitComma < 0) {
+    return null;
+  }
+
+  const optsExpr = applyFormatterExpr.slice(splitComma + 1, closeParen).trim();
+  if (!optsExpr.startsWith("{")) {
+    return null;
+  }
+  const defaultMatch = /\bdefault\s*:\s*([^,}\n]+)/.exec(optsExpr);
+  if (!defaultMatch) {
+    return null;
+  }
+  return defaultMatch[1].trim();
+}
+function normalizeExpressionForCompare(expression) {
+  return String(expression || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+function readLiteralToken(text, startIndex) {
+  let i = startIndex;
+  while (i < text.length && /\s/.test(text[i])) {
+    i += 1;
+  }
+  if (i >= text.length) {
+    return null;
+  }
+
+  const quote = text[i];
+  if (quote === "\"" || quote === "'" || quote === "`") {
+    let j = i + 1;
+    while (j < text.length) {
+      const ch = text[j];
+      if (ch === "\\") {
+        j += 2;
+        continue;
+      }
+      if (ch === quote) {
+        return { token: text.slice(i, j + 1), end: j + 1 };
+      }
+      j += 1;
+    }
+    return null;
+  }
+
+  const rem = text.slice(i);
+  const keyword = /^(?:true|false|null|undefined)\b/.exec(rem);
+  if (keyword) {
+    return { token: keyword[0], end: i + keyword[0].length };
+  }
+  const numeric = /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:e[+-]?\d+)?/i.exec(rem);
+  if (numeric) {
+    return { token: numeric[0], end: i + numeric[0].length };
+  }
+  return null;
+}
+function isExternalFactorFallbackContext(maskedText, index) {
+  const start = Math.max(0, index - 220);
+  const end = Math.min(maskedText.length, index + 220);
+  const snippet = maskedText.slice(start, end);
+  return EXTERNAL_FACTOR_CONTEXT_HINTS.some((hint) => snippet.includes(hint));
+}
+function getRendererFallbackContracts() {
+  if (rendererContractCache) {
+    return rendererContractCache;
+  }
+
+  const mapperScope = {
+    include: ["cluster/mappers/*Mapper.js"],
+    exclude: [
+      "cluster/mappers/ClusterMapperRegistry.js",
+      "cluster/mappers/ClusterMapperToolkit.js",
+      "tests/**",
+      "tools/**"
+    ]
+  };
+  const mapperFiles = filesForScope(mapperScope);
+  const contracts = {};
+  const detectReturnObject = /\breturn\s*\{/g;
+
+  for (const file of mapperFiles) {
+    const data = getFileData(file);
+    let match;
+    while ((match = detectReturnObject.exec(data.maskedText))) {
+      const openBrace = data.maskedText.indexOf("{", match.index + match[0].length - 1);
+      if (openBrace < 0) {
+        continue;
+      }
+      const closeBrace = findMatchingBrace(data.maskedText, openBrace);
+      if (closeBrace < 0) {
+        continue;
+      }
+      const returnBody = data.text.slice(openBrace + 1, closeBrace);
+      const rendererMatch = /\brenderer\s*:\s*["']([A-Za-z_$][A-Za-z0-9_$]*)["']/.exec(returnBody);
+      if (!rendererMatch) {
+        continue;
+      }
+
+      const rendererId = rendererMatch[1];
+      if (!contracts[rendererId]) {
+        contracts[rendererId] = {};
+      }
+      const aliasKinds = collectMapperAliasKinds(data.text.slice(0, match.index));
+      const foundProps = collectRendererContractProps(returnBody, aliasKinds);
+      for (const [propName, sourceType] of Object.entries(foundProps)) {
+        if (!Object.prototype.hasOwnProperty.call(contracts[rendererId], propName)) {
+          contracts[rendererId][propName] = sourceType;
+        }
+      }
+    }
+  }
+
+  rendererContractCache = contracts;
+  return contracts;
+}
+function collectMapperAliasKinds(prefixText) {
+  const out = {};
+  const declaration = /\b(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*([^;]+);/g;
+  let changed = true;
+
+  while (changed) {
+    changed = false;
+    declaration.lastIndex = 0;
+    let match;
+    while ((match = declaration.exec(prefixText))) {
+      const name = match[1];
+      if (Object.prototype.hasOwnProperty.call(out, name)) {
+        continue;
+      }
+      const expression = match[2].trim();
+      const sourceType = classifyMapperContractExpression(expression, out);
+      if (!sourceType) {
+        continue;
+      }
+      out[name] = sourceType;
+      changed = true;
+    }
+  }
+
+  return out;
+}
+function classifyMapperContractExpression(expression, knownAliases) {
+  const expr = String(expression || "").trim();
+  if (!expr) {
+    return null;
+  }
+  if (/^(?:cap|unit)\s*\(/.test(expr)) {
+    return "mapper-kind-default";
+  }
+  if (/^(["'`])(?:\\[\s\S]|(?!\1)[\s\S])*\1$/.test(expr)) {
+    return "mapper-kind-default";
+  }
+  if (/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(expr) && Object.prototype.hasOwnProperty.call(knownAliases, expr)) {
+    return knownAliases[expr];
+  }
+  return null;
+}
+function collectRendererContractProps(returnBody, aliasKinds) {
+  const out = {};
+  const setProp = function (propName, sourceType) {
+    if (propName === "renderer") {
+      return;
+    }
+    if (!Object.prototype.hasOwnProperty.call(out, propName)) {
+      out[propName] = sourceType;
+    }
+  };
+
+  const capUnitProp = /\b([A-Za-z_$][A-Za-z0-9_$]*)\s*:\s*(cap|unit)\s*\(/g;
+  let match;
+  while ((match = capUnitProp.exec(returnBody))) {
+    setProp(match[1], "mapper-kind-default");
+  }
+
+  const literalProp = /\b([A-Za-z_$][A-Za-z0-9_$]*)\s*:\s*(["'`])(?:\\[\s\S]|(?!\2)[\s\S])*?\2/g;
+  while ((match = literalProp.exec(returnBody))) {
+    setProp(match[1], "mapper-kind-default");
+  }
+
+  const aliasProp = /\b([A-Za-z_$][A-Za-z0-9_$]*)\s*:\s*([A-Za-z_$][A-Za-z0-9_$]*)\b/g;
+  while ((match = aliasProp.exec(returnBody))) {
+    const propName = match[1];
+    const valueName = match[2];
+    if (!Object.prototype.hasOwnProperty.call(aliasKinds, valueName)) {
+      continue;
+    }
+    setProp(propName, aliasKinds[valueName]);
   }
 
   return out;

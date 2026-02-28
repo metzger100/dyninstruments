@@ -195,20 +195,19 @@
       });
       staticLayer.blit(ctx);
 
-      const headingUnit = fallbackText(p.headingUnit, "\u00b0");
       const headingParams = [p.leadingZero !== false];
 
-      const xteDistance = fallbackText(Helpers.applyFormatter(Math.abs(p.xte), {
+      const xteDistance = Helpers.applyFormatter(Math.abs(p.xte), {
         formatter: "formatDistance",
-        formatterParameters: [fallbackText(p.xteUnit, "nm")],
+        formatterParameters: [p.xteUnit],
         default: "---"
-      }), "---");
+      });
 
-      const dtwDistance = fallbackText(Helpers.applyFormatter(p.dtw, {
+      const dtwDistance = Helpers.applyFormatter(p.dtw, {
         formatter: "formatDistance",
-        formatterParameters: [fallbackText(p.dtwUnit, "nm")],
+        formatterParameters: [p.dtwUnit],
         default: "---"
-      }), "---");
+      });
 
       const xteDisplayAbs = parseNumericText(xteDistance, Math.abs(p.xte));
       const signedDisplayXte = p.xte < 0 ? -xteDisplayAbs : xteDisplayAbs;
@@ -218,25 +217,23 @@
 
       primitives.drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow);
 
-      const trackValue = fallbackText(Helpers.applyFormatter(p.cog, {
+      const trackValue = Helpers.applyFormatter(p.cog, {
         formatter: "formatDirection360",
         formatterParameters: headingParams,
         default: "---"
-      }), "---");
+      });
 
-      const bearingValue = fallbackText(Helpers.applyFormatter(p.btw, {
+      const bearingValue = Helpers.applyFormatter(p.btw, {
         formatter: "formatDirection360",
         formatterParameters: headingParams,
         default: "---"
-      }), "---");
+      });
 
-      const trackUnit = fallbackText(p.trackUnit, headingUnit);
-      const bearingUnit = fallbackText(p.btwUnit, headingUnit);
       const metrics = {
-        cog: { caption: fallbackText(p.trackCaption, "COG"), value: trackValue, unit: trackUnit },
-        xte: { caption: fallbackText(p.xteCaption, "XTE"), value: xteDistance + xteSide, unit: "" },
-        dtw: { caption: fallbackText(p.dtwCaption, "DST"), value: dtwDistance, unit: fallbackText(p.dtwUnit, "nm") },
-        btw: { caption: fallbackText(p.btwCaption, "BRG"), value: bearingValue, unit: bearingUnit }
+        cog: { caption: p.trackCaption, value: trackValue, unit: p.trackUnit },
+        xte: { caption: p.xteCaption, value: xteDistance + xteSide, unit: "" },
+        dtw: { caption: p.dtwCaption, value: dtwDistance, unit: p.dtwUnit },
+        btw: { caption: p.btwCaption, value: bearingValue, unit: p.btwUnit }
       };
 
       if (primitives.shouldShowWaypoint(mode, layout.nameRect, p.showWpName !== false, wpName)) {

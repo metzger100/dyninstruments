@@ -331,13 +331,13 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.overlays).toBe(2);
   });
 
-  it("shows DST unit with nm fallback in metric rows", function () {
+  it("uses provided DST unit directly without local fallback", function () {
     const harness = createHarness();
     const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
 
     harness.spec.renderCanvas(canvas, makeProps({ dtwUnit: undefined }));
 
-    expect(harness.calls.valueRows[2].unit).toBe("nm");
+    expect(harness.calls.valueRows[2].unit).toBe("");
   });
 
   it("uses dedicated track and bearing units when provided", function () {
@@ -353,7 +353,7 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.valueRows[3].unit).toBe("degM");
   });
 
-  it("falls back to heading unit when dedicated track/bearing units are missing", function () {
+  it("uses dedicated track/bearing units directly without heading-unit fallback", function () {
     const harness = createHarness();
     const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
 
@@ -363,8 +363,8 @@ describe("XteDisplayWidget", function () {
       headingUnit: "degH"
     }));
 
-    expect(harness.calls.valueRows[0].unit).toBe("degH");
-    expect(harness.calls.valueRows[3].unit).toBe("degH");
+    expect(harness.calls.valueRows[0].unit).toBe("");
+    expect(harness.calls.valueRows[3].unit).toBe("");
   });
 
   it("normalizes marker placement using formatted distance magnitude", function () {

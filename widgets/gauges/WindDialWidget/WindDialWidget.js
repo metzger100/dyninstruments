@@ -21,10 +21,8 @@
       }
 
       const p = props || {};
-      const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatSpeed";
-      const formatterParameters = (typeof p.formatterParameters !== "undefined")
-        ? p.formatterParameters
-        : [speedUnit || "kn"];
+      const formatter = p.formatter;
+      const formatterParameters = p.formatterParameters;
 
       return String(Helpers.applyFormatter(n, {
         formatter: formatter,
@@ -35,8 +33,8 @@
 
     function windDisplay(state, props) {
       const p = props || {};
-      const angleUnit = String(p.angleUnit ?? "°").trim();
-      const speedUnit = String(p.speedUnit ?? "kn").trim();
+      const angleUnit = String(p.angleUnit).trim();
+      const speedUnit = String(p.speedUnit).trim();
       const secScale = state.value.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
 
       return {
@@ -45,13 +43,13 @@
         layMin: state.value.clamp(p.layMin, 0, 180),
         layMax: state.value.clamp(p.layMax, 0, 180),
         left: {
-          caption: String(p.angleCaption || "").trim(),
+          caption: String(p.angleCaption).trim(),
           value: state.value.formatAngle180(p.angle, !!p.leadingZero),
           unit: angleUnit,
           secScale: secScale
         },
         right: {
-          caption: String(p.speedCaption || "").trim(),
+          caption: String(p.speedCaption).trim(),
           value: windFormatSpeedText(p.speed, p, speedUnit),
           unit: speedUnit,
           secScale: secScale
