@@ -128,6 +128,346 @@ describe("runtime/init.js", function () {
     expect(applyPreset).toHaveBeenLastCalledWith(rootEl, "bold");
   });
 
+  it("uses css preset variable when window theme is unset", async function () {
+    const applyPreset = vi.fn();
+    const uniqueComponents = vi.fn(() => ["A"]);
+    const loadComponent = vi.fn((id) => {
+      if (id === "ThemePresets") {
+        return Promise.resolve({
+          id: "ThemePresets",
+          create: () => ({
+            presets: { default: {}, slim: {}, bold: {}, night: {}, highcontrast: {} },
+            apply: applyPreset,
+            remove: vi.fn()
+          })
+        });
+      }
+      return Promise.resolve({ id: "A", create: () => ({}) });
+    });
+
+    const rootEl = {
+      classList: {
+        contains(name) {
+          return name === "dyniplugin";
+        }
+      },
+      hasAttribute() {
+        return false;
+      },
+      style: {
+        setProperty() {},
+        removeProperty() {}
+      }
+    };
+    const canvas = {
+      closest() {
+        return rootEl;
+      },
+      parentElement: rootEl
+    };
+
+    const context = createScriptContext({
+      getComputedStyle(el) {
+        return {
+          getPropertyValue(name) {
+            if (name === "--dyni-theme-preset" && el === rootEl) {
+              return " night ";
+            }
+            return "";
+          }
+        };
+      },
+      document: {
+        querySelectorAll: vi.fn(() => [canvas]),
+        documentElement: {},
+        body: {}
+      },
+      avnav: {
+        api: {
+          registerWidget: vi.fn(),
+          log: vi.fn()
+        }
+      },
+      DyniPlugin: {
+        runtime: {
+          createHelpers: vi.fn(() => ({ helper: true })),
+          createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
+          registerWidget: vi.fn()
+        },
+        state: {},
+        config: {
+          shared: {},
+          clusters: [],
+          components: {
+            A: { globalKey: "DyniA" },
+            ThemePresets: { globalKey: "DyniThemePresets" }
+          },
+          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
+        }
+      }
+    });
+
+    runIifeScript("runtime/init.js", context);
+    await context.DyniPlugin.state.initPromise;
+    await flushPromises();
+
+    expect(applyPreset).toHaveBeenCalledWith(rootEl, "night");
+  });
+
+  it("prefers window theme over css preset fallback", async function () {
+    const applyPreset = vi.fn();
+    const uniqueComponents = vi.fn(() => ["A"]);
+    const loadComponent = vi.fn((id) => {
+      if (id === "ThemePresets") {
+        return Promise.resolve({
+          id: "ThemePresets",
+          create: () => ({
+            presets: { default: {}, slim: {}, bold: {}, night: {}, highcontrast: {} },
+            apply: applyPreset,
+            remove: vi.fn()
+          })
+        });
+      }
+      return Promise.resolve({ id: "A", create: () => ({}) });
+    });
+
+    const rootEl = {
+      classList: {
+        contains(name) {
+          return name === "dyniplugin";
+        }
+      },
+      hasAttribute() {
+        return false;
+      },
+      style: {
+        setProperty() {},
+        removeProperty() {}
+      }
+    };
+    const canvas = {
+      closest() {
+        return rootEl;
+      },
+      parentElement: rootEl
+    };
+
+    const context = createScriptContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue(name) {
+            if (name === "--dyni-theme-preset") {
+              return "night";
+            }
+            return "";
+          }
+        };
+      },
+      document: {
+        querySelectorAll: vi.fn(() => [canvas]),
+        documentElement: {},
+        body: {}
+      },
+      avnav: {
+        api: {
+          registerWidget: vi.fn(),
+          log: vi.fn()
+        }
+      },
+      DyniPlugin: {
+        theme: "slim",
+        runtime: {
+          createHelpers: vi.fn(() => ({ helper: true })),
+          createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
+          registerWidget: vi.fn()
+        },
+        state: {},
+        config: {
+          shared: {},
+          clusters: [],
+          components: {
+            A: { globalKey: "DyniA" },
+            ThemePresets: { globalKey: "DyniThemePresets" }
+          },
+          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
+        }
+      }
+    });
+
+    runIifeScript("runtime/init.js", context);
+    await context.DyniPlugin.state.initPromise;
+    await flushPromises();
+
+    expect(applyPreset).toHaveBeenCalledWith(rootEl, "slim");
+  });
+
+  it("falls back to default when css preset variable is invalid", async function () {
+    const applyPreset = vi.fn();
+    const uniqueComponents = vi.fn(() => ["A"]);
+    const loadComponent = vi.fn((id) => {
+      if (id === "ThemePresets") {
+        return Promise.resolve({
+          id: "ThemePresets",
+          create: () => ({
+            presets: { default: {}, slim: {}, bold: {}, night: {}, highcontrast: {} },
+            apply: applyPreset,
+            remove: vi.fn()
+          })
+        });
+      }
+      return Promise.resolve({ id: "A", create: () => ({}) });
+    });
+
+    const rootEl = {
+      classList: {
+        contains(name) {
+          return name === "dyniplugin";
+        }
+      },
+      hasAttribute() {
+        return false;
+      },
+      style: {
+        setProperty() {},
+        removeProperty() {}
+      }
+    };
+    const canvas = {
+      closest() {
+        return rootEl;
+      },
+      parentElement: rootEl
+    };
+
+    const context = createScriptContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue(name) {
+            if (name === "--dyni-theme-preset") {
+              return "invalidPreset";
+            }
+            return "";
+          }
+        };
+      },
+      document: {
+        querySelectorAll: vi.fn(() => [canvas]),
+        documentElement: {},
+        body: {}
+      },
+      avnav: {
+        api: {
+          registerWidget: vi.fn(),
+          log: vi.fn()
+        }
+      },
+      DyniPlugin: {
+        runtime: {
+          createHelpers: vi.fn(() => ({ helper: true })),
+          createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
+          registerWidget: vi.fn()
+        },
+        state: {},
+        config: {
+          shared: {},
+          clusters: [],
+          components: {
+            A: { globalKey: "DyniA" },
+            ThemePresets: { globalKey: "DyniThemePresets" }
+          },
+          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
+        }
+      }
+    });
+
+    runIifeScript("runtime/init.js", context);
+    await context.DyniPlugin.state.initPromise;
+    await flushPromises();
+
+    expect(applyPreset).toHaveBeenCalledWith(rootEl, "default");
+  });
+
+  it("reads css preset from container when widgets appear after init", async function () {
+    const applyPreset = vi.fn();
+    const uniqueComponents = vi.fn(() => ["A"]);
+    const loadComponent = vi.fn((id) => {
+      if (id === "ThemePresets") {
+        return Promise.resolve({
+          id: "ThemePresets",
+          create: () => ({
+            presets: { default: {}, slim: {}, bold: {}, night: {}, highcontrast: {} },
+            apply: applyPreset,
+            remove: vi.fn()
+          })
+        });
+      }
+      return Promise.resolve({ id: "A", create: () => ({}) });
+    });
+
+    const rootEl = {
+      classList: {
+        contains(name) {
+          return name === "dyniplugin";
+        }
+      },
+      hasAttribute() {
+        return false;
+      },
+      style: {
+        setProperty() {},
+        removeProperty() {}
+      }
+    };
+
+    const context = createScriptContext({
+      getComputedStyle(el) {
+        return {
+          getPropertyValue(name) {
+            if (name === "--dyni-theme-preset" && el === rootEl) {
+              return "bold";
+            }
+            return "";
+          }
+        };
+      },
+      document: {
+        querySelectorAll: vi.fn(() => []),
+        documentElement: {},
+        body: {}
+      },
+      avnav: {
+        api: {
+          registerWidget: vi.fn(),
+          log: vi.fn()
+        }
+      },
+      DyniPlugin: {
+        runtime: {
+          createHelpers: vi.fn(() => ({ helper: true })),
+          createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
+          registerWidget: vi.fn()
+        },
+        state: {},
+        config: {
+          shared: {},
+          clusters: [],
+          components: {
+            A: { globalKey: "DyniA" },
+            ThemePresets: { globalKey: "DyniThemePresets" }
+          },
+          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
+        }
+      }
+    });
+
+    runIifeScript("runtime/init.js", context);
+    await context.DyniPlugin.state.initPromise;
+    await flushPromises();
+
+    context.DyniPlugin.runtime.applyThemePresetToContainer(rootEl);
+    expect(applyPreset).toHaveBeenLastCalledWith(rootEl, "bold");
+  });
+
   it("resets init state and logs when component loading fails", async function () {
     const err = vi.fn();
     const uniqueComponents = vi.fn(() => ["A"]);

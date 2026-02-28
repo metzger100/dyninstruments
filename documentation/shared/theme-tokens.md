@@ -6,7 +6,7 @@
 
 `ThemeResolver` provides plugin-wide token resolution from CSS custom properties. It reads from `getComputedStyle(canvas)`, applies per-token defaults, and caches results per canvas.
 
-`ThemePresets` provides named runtime presets that apply token overrides as inline CSS custom properties on widget root containers.
+`ThemePresets` provides named runtime presets by setting a preset selector attribute (`data-dyni-theme`) on widget root containers.
 
 ## Key Details
 
@@ -27,7 +27,7 @@
 - Global key: `DyniThemePresets`
 - File: `shared/theme/ThemePresets.js`
 - API: `presets`, `apply(containerEl, presetName)`, `remove(containerEl)`
-- Mapping source: reuses `ThemeResolver.TOKEN_DEFS` (`path -> cssVar`)
+- Behavior: manages `data-dyni-theme` attribute on widget roots
 
 ## Token Table
 
@@ -99,12 +99,14 @@ presetsApi.remove(containerEl);
 
 `ThemePresets.apply(containerEl, presetName)`:
 
-1. Removes all known theme CSS variables from the target container
-2. Applies only preset override variables for the selected preset
+1. Normalizes the requested preset name (`trim`, lowercase)
+2. Validates against known presets (`default`, `slim`, `bold`, `night`, `highcontrast`)
+3. Sets `data-dyni-theme="<preset>"` for non-default presets
+4. Removes `data-dyni-theme` for `default`
 
-`ThemePresets.remove(containerEl)` removes every known theme token variable listed in `ThemeResolver.TOKEN_DEFS`.
+`ThemePresets.remove(containerEl)` removes `data-dyni-theme`.
 
-`default` preset is intentionally empty (`{}`), so applying `default` resets container-level token overrides.
+`default` preset is intentionally empty (`{}`), so applying `default` clears preset selector attribute and falls back to base CSS token defaults.
 
 ## Preset Definitions
 
@@ -122,8 +124,12 @@ Only values that differ from theme defaults are included.
 
 `runtime/init.js` loads `ThemePresets` explicitly and applies the selected preset to discovered plugin widget containers after widget registration.
 
-- Current runtime override source: `window.DyniPlugin.theme = "<presetName>"`
-- Default preset when unset: `"default"`
+- Preset source precedence:
+  1. Settings API stub (`readThemePresetFromSettingsApi()`)
+  2. `window.DyniPlugin.theme = "<presetName>"`
+  3. CSS variable `--dyni-theme-preset` (typically from AvNav `user.css`)
+  4. `default`
+- Invalid preset names from any source resolve to `default`.
 - Discovery pattern: iterate `canvas.widgetData`, resolve root via `canvas.closest(".widget, .DirectWidget") || canvas.parentElement`, apply only for plugin roots (`.dyniplugin` or `[data-dyni]`)
 
 `runtime/widget-registrar.js` also reapplies the active preset when a widget root is first discovered during `renderCanvas`.
@@ -142,6 +148,15 @@ To reset:
 ```javascript
 window.DyniPlugin.theme = "default";
 window.DyniPlugin.runtime.applyThemePresetToRegisteredWidgets();
+```
+
+Preset selection from `user.css`:
+
+```css
+.widget.dyniplugin,
+[data-dyni] {
+  --dyni-theme-preset: slim;
+}
 ```
 
 ## Future Settings API Integration

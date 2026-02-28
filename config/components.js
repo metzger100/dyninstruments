@@ -85,8 +85,7 @@
     ThemePresets: {
       js: BASE + "shared/theme/ThemePresets.js",
       css: undefined,
-      globalKey: "DyniThemePresets",
-      deps: ["ThemeResolver"]
+      globalKey: "DyniThemePresets"
     },
     GaugeToolkit: {
       js: BASE + "shared/widget-kits/gauge/GaugeToolkit.js",
