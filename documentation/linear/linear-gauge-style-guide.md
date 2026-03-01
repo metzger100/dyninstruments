@@ -16,11 +16,13 @@ Phase 1 ships `SpeedLinearWidget` for `sogLinear`. The shared engine also reserv
 ## Style and Proportions
 
 - Track is centered in a dedicated scale box.
+- In `high` and `normal`, the scale box gets visual priority over text rows.
 - Track thickness uses `theme.linear.track.widthFactor`.
 - Track stroke uses `theme.linear.track.lineWidth`.
 - Tick lengths/widths use `theme.linear.ticks.*`.
 - Pointer triangle uses `theme.linear.pointer.*` and `theme.colors.pointer`.
 - Tick label spacing/font sizing use `theme.linear.labels.*`.
+- Caption/value row allocation in `high`/`flat` follows `captionUnitScale` so the configured ratio remains visible.
 
 ## Colors
 
@@ -51,8 +53,8 @@ Mode selection uses the same ratio strategy as semicircle gauges:
 
 Mode-specific composition:
 
-- `high`: top linear gauge, middle caption, bottom value+unit
-- `normal`: top linear gauge, bottom one-line `caption value unit`
+- `high`: top linear gauge, then a separated lower text block (`caption` above `value+unit`)
+- `normal`: top linear gauge, bottom one-line `caption value unit` anchored below the scale box
 - `flat`: left linear gauge, right top caption, right bottom value+unit
 
 Tick labels are collision-filtered in narrow layouts and clamped to the gauge area so they do not overlap text rows.

@@ -38,6 +38,15 @@
         mode: value.computeMode(ratio, tNormal, tFlat)
       };
     }
+    function resolveLabelBoost(mode) {
+      if (mode === "high") {
+        return 1.2;
+      }
+      if (mode === "normal") {
+        return 1.12;
+      }
+      return 1.0;
+    }
     function drawTickLabels(layerCtx, state, ticks, showEndLabels) {
       if (!state.labelFontPx || !ticks || !ticks.major || !ticks.major.length) {
         return;
@@ -272,6 +281,7 @@
         const valueNum = value.isFiniteNumber(display.num) ? display.num : NaN;
         const caption = String(p.caption || "").trim();
         const secScale = value.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
+        const rowBoxes = math.splitCaptionValueRows(layout.captionBox, layout.valueBox, secScale);
         const tickPreset = (typeof cfg.tickSteps === "function")
           ? (cfg.tickSteps(axis.max - axis.min) || { major: 10, minor: 2 })
           : { major: 10, minor: 2 };
@@ -286,8 +296,8 @@
         const baseTrack = Math.max(6, Math.floor(layout.trackBox.h * theme.linear.track.widthFactor));
         const maxTrack = Math.max(8, Math.floor(theme.linear.ticks.majorLen * 1.6));
         const trackThickness = math.clamp(baseTrack, 6, maxTrack);
-        const labelInset = Math.max(8, Math.floor(trackThickness * theme.linear.labels.insetFactor));
-        const labelFontPx = Math.max(9, Math.floor(layout.trackBox.h * theme.linear.labels.fontFactor));
+        const labelBoost = resolveLabelBoost(modeState.mode);
+        const labelFontPx = Math.max(10, Math.floor(layout.trackBox.h * theme.linear.labels.fontFactor * labelBoost));
 
         ctx.clearRect(0, 0, W, H);
         ctx.fillStyle = color;
@@ -304,7 +314,6 @@
           labelWeight: theme.font.labelWeight,
           axis: axis,
           trackThickness: trackThickness,
-          labelInset: labelInset,
           labelFontPx: labelFontPx
         };
 
@@ -320,8 +329,8 @@
             scaleX1: layout.scaleX1,
             trackY: layout.trackY,
             trackThickness: trackThickness,
-            labelInset: labelInset,
             labelFontPx: labelFontPx,
+            labelBoost: labelBoost,
             linearTrackWidth: theme.linear.track.widthFactor,
             linearTrackLineWidth: theme.linear.track.lineWidth,
             linearMajorLen: theme.linear.ticks.majorLen,
@@ -372,15 +381,15 @@
         }
 
         if (state.mode === "high") {
-          drawCaptionRow(state, caption, state.layout.captionBox, secScale, "center");
-          drawValueUnitRow(state, valueText, unit, state.layout.valueBox, secScale, "center");
+          drawCaptionRow(state, caption, rowBoxes.captionBox, secScale, "center");
+          drawValueUnitRow(state, valueText, unit, rowBoxes.valueBox, secScale, "center");
         }
         else if (state.mode === "normal") {
           drawInlineRow(state, caption, valueText, unit, state.layout.inlineBox, secScale);
         }
         else {
-          drawCaptionRow(state, caption, state.layout.captionBox, secScale, "right");
-          drawValueUnitRow(state, valueText, unit, state.layout.valueBox, secScale, "right");
+          drawCaptionRow(state, caption, rowBoxes.captionBox, secScale, "right");
+          drawValueUnitRow(state, valueText, unit, rowBoxes.valueBox, secScale, "right");
         }
 
         if (p.disconnect) {

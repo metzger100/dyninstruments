@@ -106,6 +106,42 @@
     return String(Math.round(v * 1000) / 1000);
   }
 
+  function splitCaptionValueRows(captionBox, valueBox, secScale) {
+    if (!captionBox || !valueBox) {
+      return { captionBox: captionBox, valueBox: valueBox };
+    }
+    const totalH = Math.max(0, Number(captionBox.h) + Number(valueBox.h));
+    if (totalH <= 0) {
+      return { captionBox: captionBox, valueBox: valueBox };
+    }
+
+    const ratio = clamp(Number(secScale), 0.3, 3.0);
+    const captionShare = ratio / (1 + ratio);
+    const minCaption = Math.max(10, Math.floor(totalH * 0.2));
+    const minValue = Math.max(14, Math.floor(totalH * 0.25));
+    const capH = clamp(
+      Math.round(totalH * captionShare),
+      minCaption,
+      Math.max(minCaption, totalH - minValue)
+    );
+    const valH = Math.max(0, totalH - capH);
+
+    return {
+      captionBox: {
+        x: captionBox.x,
+        y: captionBox.y,
+        w: captionBox.w,
+        h: capH
+      },
+      valueBox: {
+        x: valueBox.x,
+        y: captionBox.y + capH,
+        w: valueBox.w,
+        h: valH
+      }
+    };
+  }
+
   function computeLayout(mode, W, H, pad, gap) {
     const availW = Math.max(1, W - 2 * pad);
     const availH = Math.max(1, H - 2 * pad);
@@ -126,37 +162,36 @@
       trackBox = { x: scaleX0, y: pad, w: scaleW, h: availH };
       const rightX = scaleX1 + gap;
       const rightW = Math.max(0, W - pad - rightX);
-      const rightH = availH;
-      const captionH = Math.max(14, Math.floor(rightH * 0.42));
-      captionBox = { x: rightX, y: pad, w: rightW, h: captionH };
-      valueBox = { x: rightX, y: pad + captionH, w: rightW, h: Math.max(0, rightH - captionH) };
+      const rightH = clamp(Math.floor(availH * 0.76), 70, availH);
+      const rightY = pad + Math.floor((availH - rightH) / 2);
+      const captionH = Math.max(12, Math.floor(rightH * 0.38));
+      captionBox = { x: rightX, y: rightY, w: rightW, h: captionH };
+      valueBox = { x: rightX, y: rightY + captionH, w: rightW, h: Math.max(0, rightH - captionH) };
     }
     else if (mode === "high") {
-      const scaleH = clamp(Math.floor(availH * 0.34), 64, 140);
+      const scaleH = clamp(Math.floor(availH * 0.44), 84, 220);
       scaleX0 = pad;
       scaleX1 = W - pad;
-      trackY = pad + Math.floor(scaleH * 0.42);
+      trackY = pad + Math.floor(scaleH * 0.35);
       trackBox = { x: scaleX0, y: pad, w: scaleX1 - scaleX0, h: scaleH };
-      const textY = Math.max(
-        trackBox.y + Math.floor(scaleH * 0.72),
-        trackY + Math.max(20, Math.floor(scaleH * 0.2))
-      );
+      const textY = trackBox.y + trackBox.h + Math.max(8, Math.floor(gap * 1.2));
       const textH = Math.max(0, H - pad - textY);
-      const captionH = Math.max(12, Math.floor(textH * 0.36));
+      const captionH = Math.max(10, Math.floor(textH * 0.36));
       captionBox = { x: pad, y: textY, w: availW, h: captionH };
       valueBox = { x: pad, y: textY + captionH, w: availW, h: Math.max(0, textH - captionH) };
     }
     else {
       const inset = Math.max(4, Math.floor(availW * 0.04));
       const topMargin = Math.max(2, Math.floor(availH * 0.05));
-      const scaleH = clamp(Math.floor(availH * 0.42), 56, 110);
+      const scaleH = clamp(Math.floor(availH * 0.50), 64, 144);
       scaleX0 = pad + inset;
       scaleX1 = W - pad - inset;
-      trackY = pad + topMargin + Math.floor(scaleH * 0.36);
+      trackY = pad + topMargin + Math.floor(scaleH * 0.34);
       trackBox = { x: scaleX0, y: pad + topMargin, w: scaleX1 - scaleX0, h: scaleH };
+      const inlineBandH = Math.max(30, Math.floor(availH * 0.32));
       const inlineY = Math.max(
-        trackBox.y + Math.floor(scaleH * 0.72),
-        trackY + Math.max(16, Math.floor(scaleH * 0.2))
+        trackBox.y + trackBox.h + Math.max(6, gap),
+        H - pad - inlineBandH
       );
       inlineBox = {
         x: pad,
@@ -187,7 +222,8 @@
       resolveAxisDomain: resolveAxisDomain,
       buildTicks: buildTicks,
       formatTickLabel: formatTickLabel,
-      computeLayout: computeLayout
+      computeLayout: computeLayout,
+      splitCaptionValueRows: splitCaptionValueRows
     };
   }
 
