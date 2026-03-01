@@ -14,8 +14,10 @@ describe("ClusterRendererRouter", function () {
   it("picks explicit renderer or falls back to ThreeValueTextWidget", function () {
     const three = makeSpec("three", { hide: false });
     const wind = makeSpec("wind", { hide: true });
+    const windLinear = makeSpec("windLinear");
     const position = makeSpec("position");
     const compass = makeSpec("compass");
+    const compassLinear = makeSpec("compassLinear");
     const speed = makeSpec("speed");
     const speedLinear = makeSpec("speedLinear");
     const depth = makeSpec("depth");
@@ -28,6 +30,8 @@ describe("ClusterRendererRouter", function () {
     const targetSpecs = {
       WindRadialWidget: wind,
       CompassRadialWidget: compass,
+      WindLinearWidget: windLinear,
+      CompassLinearWidget: compassLinear,
       SpeedRadialWidget: speed,
       SpeedLinearWidget: speedLinear,
       DepthRadialWidget: depth,
@@ -60,6 +64,8 @@ describe("ClusterRendererRouter", function () {
 
     expect(router.wantsHideNativeHead).toBe(true);
     expect(router.pickRenderer({ renderer: "WindRadialWidget" })).toBe(wind);
+    expect(router.pickRenderer({ renderer: "WindLinearWidget" })).toBe(windLinear);
+    expect(router.pickRenderer({ renderer: "CompassLinearWidget" })).toBe(compassLinear);
     expect(router.pickRenderer({ renderer: "XteDisplayWidget" })).toBe(xte);
     expect(router.pickRenderer({ renderer: "SpeedLinearWidget" })).toBe(speedLinear);
     expect(router.pickRenderer({ renderer: "DepthLinearWidget" })).toBe(depthLinear);
@@ -77,7 +83,9 @@ describe("ClusterRendererRouter", function () {
     const voltage = makeSpec("voltage");
     const voltageLinear = makeSpec("voltageLinear");
     const wind = makeSpec("wind");
+    const windLinear = makeSpec("windLinear");
     const compass = makeSpec("compass");
+    const compassLinear = makeSpec("compassLinear");
     const depth = makeSpec("depth");
     const depthLinear = makeSpec("depthLinear");
     const temp = makeSpec("temp");
@@ -86,6 +94,8 @@ describe("ClusterRendererRouter", function () {
     const targetSpecs = {
       WindRadialWidget: wind,
       CompassRadialWidget: compass,
+      WindLinearWidget: windLinear,
+      CompassLinearWidget: compassLinear,
       SpeedRadialWidget: speed,
       SpeedLinearWidget: speedLinear,
       DepthRadialWidget: depth,

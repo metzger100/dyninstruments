@@ -1,6 +1,6 @@
 # Linear Shared API
 
-**Status:** ✅ Extension-ready | `LinearGaugeEngine` contracts documented for range/centered180/fixed360 wrappers
+**Status:** ✅ Implemented | `LinearGaugeEngine` contracts for range/centered180/fixed360 wrappers, including hook extensions used by Wind/Compass linear widgets
 
 ## Overview
 
@@ -34,7 +34,7 @@ New linear widgets should delegate rendering to `LinearGaugeEngine.createRendere
 ### LinearGaugeTextLayout
 
 - `resolveLabelBoost(mode)`
-- `drawTickLabels(layerCtx, state, ticks, showEndLabels, math)`
+- `drawTickLabels(layerCtx, state, ticks, showEndLabels, math, labelFormatter?)`
 - `drawCaptionRow(state, textApi, caption, box, secScale, align)`
 - `drawValueUnitRow(state, textApi, valueText, unitText, box, secScale, align)`
 - `drawInlineRow(state, textApi, caption, valueText, unitText, box, secScale)`
@@ -61,6 +61,17 @@ Common `spec` fields:
 - `formatDisplay(raw, props, unit, Helpers) -> { num, text }`
 - `buildSectors(props, minV, maxV, axis, valueApi, theme) -> [{ from, to, color }]`
 - `buildStaticKey(state, props)`
+- `resolveAxis(props, range, defaultAxis, api) -> { min, max }` (optional)
+- `buildTicks(axis, tickMajor, tickMinor, props, api) -> { major, minor }` (optional)
+- `formatTickLabel(value, state, props, api) -> string` (optional)
+- `drawFrame(state, props, display, api)` (optional)
+- `drawMode.flat/high/normal(state, props, display, api)` (optional mode-specific text override)
+
+Hook `api` surface:
+
+- `mapValueToX(value, axisOverride?, doClamp?)`
+- `primitives`, `math`, `textLayout`, `text`, `value`, `theme`
+- `drawDefaultPointer(opts)`, `drawPointerAtValue(value, opts)`, `drawMarkerAtValue(value, opts)` (frame hooks)
 
 ### Axis Profile Matrix
 

@@ -26,7 +26,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 ### Planned integration directions
 
 - `vessel`: quick-win text kinds completed (`dateTime`, `timeStatus`, `pitch`, `roll`)
-- linear gauge parity completed for non-compass/non-wind radial ownership (`sogLinear`, `stwLinear`, `depthLinear`, `tempLinear`, `voltageLinear`)
+- linear gauge parity completed for speed/environment/vessel/wind/course-heading ownership (`sogLinear`, `stwLinear`, `depthLinear`, `tempLinear`, `voltageLinear`, `angleTrueLinear`, `angleApparentLinear`, `hdtLinear`, `hdmLinear`)
 - `nav`: `activeRoute`, `routePoints`, `editRoute`
 - planned new clusters: `ais` (for example `aisTarget`), `map` (for example `zoom`, `centerDisplay`)
 - `default`: likely a dedicated utility/default widget instead of a cluster kind
@@ -36,7 +36,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 1. ✅ Quick wins (text): `DateTime`, `TimeStatus`, `signalKPitch`, `signalKRoll`
 2. High-impact canvas visuals: ✅ `XteDisplay`, planned `ActiveRoute`
 3. Lists and controls (interaction-heavy): `RoutePoints`, `EditRoute`, `Zoom`, `CenterDisplay`
-4. ✅ Linear gauges: non-compass/non-wind radial alternatives (`sogLinear`, `stwLinear`, `depthLinear`, `tempLinear`, `voltageLinear`)
+4. ✅ Linear gauges: range + wind + compass alternatives (`sogLinear`, `stwLinear`, `depthLinear`, `tempLinear`, `voltageLinear`, `angleTrueLinear`, `angleApparentLinear`, `hdtLinear`, `hdmLinear`)
 5. AIS: `AisTarget` (requires additional data logic and responsive layout)
 
 ### Additional non-core concepts
@@ -54,8 +54,8 @@ It tracks pre-release priorities and AvNav widget coverage status.
   - `depthRadial` -> `depthLinear`
   - `tempRadial` -> `tempLinear`
   - `voltageRadial` -> `voltageLinear`
-  - `hdtRadial` -> `hdtLinear` (planned)
-  - `angleTrueRadial` -> `angleTrueLinear` (planned)
+  - `hdtRadial` -> `hdtLinear` (implemented)
+  - `angleTrueRadial` -> `angleTrueLinear` (implemented)
 - Axis mode reservation in shared linear engine:
   - `range` for speed/depth/temperature/voltage
   - `centered180` for wind angle kinds with mirrored layline sectors
@@ -84,7 +84,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | HDM                          | dyninstruments_CourseHeading → `hdm`                                         | ✅ covered                                  |
 | HDT                          | dyninstruments_CourseHeading → `hdt`                                         | ✅ covered                                  |
 | LargeTime                    | dyninstruments_Vessel → `clock`                                              | ✅ covered                                  |
-| linGauge_Compass             | —                                                                            | ❌ not covered yet                          |
+| linGauge_Compass             | dyninstruments_CourseHeading → `hdtLinear`/`hdmLinear`                       | ✅ covered                                  |
 | linGauge_Compass180          | —                                                                            | ❌ not covered yet                          |
 | linGauge_Temperature         | dyninstruments_Environment → `tempLinear`                                    | ✅ covered                                  |
 | linGauge_Voltage             | dyninstruments_Vessel → `voltageLinear`                                      | ✅ covered                                  |

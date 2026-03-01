@@ -70,6 +70,8 @@ describe("config/components.js", function () {
     expect(components.XteDisplayWidget.deps).toEqual(["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives"]);
     expect(components.WindRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
     expect(components.CompassRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
+    expect(components.WindLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
+    expect(components.CompassLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.RadialToolkit.deps).toContain("ThemeResolver");
     expect(components.ThreeValueTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
     expect(components.PositionCoordinateWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
@@ -79,6 +81,8 @@ describe("config/components.js", function () {
     expect(components.RendererPropsWidget.deps).toEqual([
       "WindRadialWidget",
       "CompassRadialWidget",
+      "WindLinearWidget",
+      "CompassLinearWidget",
       "SpeedRadialWidget",
       "SpeedLinearWidget",
       "DepthRadialWidget",

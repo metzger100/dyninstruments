@@ -1,6 +1,6 @@
 # Guide: Create a New Linear Gauge
 
-**Status:** ✅ Extension-ready | Profile playbooks for Speed/Depth/Temperature/Voltage/Wind/Compass linear kinds
+**Status:** ✅ Implemented | Profile playbooks for shipped Speed/Depth/Temperature/Voltage/Wind/Compass linear kinds
 
 ## Prerequisites
 
@@ -25,13 +25,18 @@ Select a profile first, then keep the wrapper focused on formatter, ticks, axis 
 | Range low-end | `range` | `depthLinear`, `voltageLinear` | Editable `min/max` | Alarm/Warning near min |
 | Range optional high-end | `range` | `tempLinear` | Editable `min/max` | Optional high-end thresholds |
 | Centered wind-angle | `centered180` | `angleTrueLinear`, `angleApparentLinear` | Fixed `-180..180` | Optional mirrored laylines |
-| Fixed compass | `fixed360` | `hdtLinear`, `hdmLinear`, `cogLinear` | Fixed `0..360` | Usually none |
+| Fixed compass | `fixed360` | `hdtLinear`, `hdmLinear` | Fixed `0..360` | Usually none |
 
 ## Step 1: Create Wrapper Module
 
 Create `widgets/linear/NewLinearWidget/NewLinearWidget.js` with UMD + `create(def, Helpers)`.
 
 Use `SpeedLinearWidget` as reference and delegate to `LinearGaugeEngine`.
+
+Existing advanced references:
+
+- `CompassLinearWidget` (fixed center pointer + moving `0..360` scale + waypoint marker)
+- `WindLinearWidget` (dual angle/speed text + mirrored layline sectors)
 
 ```javascript
 const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);

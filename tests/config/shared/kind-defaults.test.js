@@ -14,6 +14,8 @@ describe("config/shared/kind-defaults.js", function () {
 
     const maps = context.DyniPlugin.config.shared.kindMaps;
     expect(maps.COURSE_KIND.hdt.cap).toBe("HDT");
+    expect(maps.COURSE_KIND.hdtLinear.cap).toBe("HDT");
+    expect(maps.COURSE_KIND.hdmLinear.unit).toBe("°");
     expect(maps.SPEED_KIND.sogLinear.cap).toBe("SOG");
     expect(maps.SPEED_KIND.sogLinear.unit).toBe("kn");
     expect(maps.SPEED_KIND.stwLinear.cap).toBe("STW");
@@ -31,6 +33,10 @@ describe("config/shared/kind-defaults.js", function () {
     expect(maps.WIND_KIND.angleTrueRadialSpeed.unitName).toBe("Speed unit");
     expect(maps.WIND_KIND.angleApparentRadialAngle.cap).toBe("AWA");
     expect(maps.WIND_KIND.angleApparentRadialSpeed.unit).toBe("kn");
+    expect(maps.WIND_KIND.angleTrueLinearAngle.kind).toBe("angleTrueLinear");
+    expect(maps.WIND_KIND.angleTrueLinearSpeed.captionName).toBe("Speed caption");
+    expect(maps.WIND_KIND.angleApparentLinearAngle.cap).toBe("AWA");
+    expect(maps.WIND_KIND.angleApparentLinearSpeed.unit).toBe("kn");
     expect(maps.VESSEL_KIND.clock.cap).toBe("TIME");
     expect(maps.VESSEL_KIND.voltageLinear.unit).toBe("V");
     expect(maps.VESSEL_KIND.dateTime.cap).toBe("");

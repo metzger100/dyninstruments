@@ -20,6 +20,8 @@
       TimeStatusRendererWrapper: Helpers.getModule("TimeStatusRendererWrapper").create(def, Helpers),
       WindRadialWidget: rendererPropsWidget.create(def, Helpers, "WindRadialWidget"),
       CompassRadialWidget: rendererPropsWidget.create(def, Helpers, "CompassRadialWidget"),
+      WindLinearWidget: rendererPropsWidget.create(def, Helpers, "WindLinearWidget"),
+      CompassLinearWidget: rendererPropsWidget.create(def, Helpers, "CompassLinearWidget"),
       SpeedRadialWidget: rendererPropsWidget.create(def, Helpers, "SpeedRadialWidget"),
       SpeedLinearWidget: rendererPropsWidget.create(def, Helpers, "SpeedLinearWidget"),
       DepthRadialWidget: rendererPropsWidget.create(def, Helpers, "DepthRadialWidget"),

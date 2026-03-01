@@ -20,7 +20,7 @@
     return 1.0;
   }
 
-  function drawTickLabels(layerCtx, state, ticks, showEndLabels, math) {
+  function drawTickLabels(layerCtx, state, ticks, showEndLabels, math, labelFormatter) {
     if (!math || !state || !state.labelFontPx || !ticks || !ticks.major || !ticks.major.length) {
       return;
     }
@@ -61,7 +61,13 @@
         continue;
       }
 
-      const label = math.formatTickLabel(tickV);
+      const labelRaw = (typeof labelFormatter === "function")
+        ? labelFormatter(tickV, state)
+        : math.formatTickLabel(tickV);
+      const label = String(labelRaw == null ? "" : labelRaw);
+      if (!label) {
+        continue;
+      }
       const width = layerCtx.measureText(label).width;
       const left = x - width / 2;
       const right = x + width / 2;
