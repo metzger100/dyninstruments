@@ -188,7 +188,7 @@
       scaleX1 = W - pad - inset;
       trackY = pad + topMargin + Math.floor(scaleH * 0.34);
       trackBox = { x: scaleX0, y: pad + topMargin, w: scaleX1 - scaleX0, h: scaleH };
-      const inlineBandH = Math.max(30, Math.floor(availH * 0.32));
+      const inlineBandH = Math.max(36, Math.floor(availH * 0.42));
       const inlineY = Math.max(
         trackBox.y + trackBox.h + Math.max(6, gap),
         H - pad - inlineBandH

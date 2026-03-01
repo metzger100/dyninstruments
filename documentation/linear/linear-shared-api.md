@@ -70,7 +70,7 @@ Supported `spec` fields:
 ## Built-in Mode Layouts
 
 - `high`: top gauge, middle caption, bottom value+unit
-- `normal`: top gauge, bottom inline `caption value unit`
+- `normal`: top gauge, bottom inline `caption value unit` with boosted tick labels and larger inline text band
 - `flat`: left gauge, right caption/value stack
 
 ## Cache Model

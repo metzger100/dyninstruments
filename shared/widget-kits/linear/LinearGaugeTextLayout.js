@@ -15,7 +15,7 @@
       return 1.2;
     }
     if (mode === "normal") {
-      return 1.12;
+      return 1.26;
     }
     return 1.0;
   }

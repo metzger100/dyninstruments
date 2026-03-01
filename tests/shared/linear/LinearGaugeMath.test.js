@@ -19,6 +19,8 @@ describe("LinearGaugeMath", function () {
     expect(layout.inlineBox).toBeTruthy();
     expect(layout.inlineBox.y).toBeGreaterThanOrEqual(layout.trackBox.y + layout.trackBox.h);
     expect(layout.inlineBox.h).toBeGreaterThan(0);
+    expect(layout.inlineBox.y - (layout.trackBox.y + layout.trackBox.h)).toBeLessThanOrEqual(12);
+    expect(layout.inlineBox.h).toBeGreaterThanOrEqual(100);
   });
 
   it("gives flat mode more room to numeric value than caption", function () {
