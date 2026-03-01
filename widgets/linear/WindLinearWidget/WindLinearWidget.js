@@ -51,12 +51,13 @@
       const angleText = isFinite(angle)
         ? valueMath.formatAngle180(angle, !!p.leadingZero)
         : fallback;
+      const angleNum = Number(angleText);
       const angleUnit = String((p.angleUnit == null) ? "°" : p.angleUnit).trim();
       const speedUnit = String((p.speedUnit == null) ? "kn" : p.speedUnit).trim();
       const secScale = valueMath.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
 
       return {
-        num: isFinite(angle) ? angle : NaN,
+        num: isFinite(angleNum) ? angleNum : NaN,
         text: angleText,
         secScale: secScale,
         left: {
