@@ -49,7 +49,7 @@ describe("ThemeResolver", function () {
     const canvas = createCanvas(createDoc({ value: false }));
     const out = resolver.resolve(canvas);
 
-    expect(Object.keys(out).sort()).toEqual(["colors", "font", "fullCircle", "labels", "pointer", "ring", "ticks"]);
+    expect(Object.keys(out).sort()).toEqual(["colors", "font", "fullCircle", "labels", "pointer", "ring", "ticks", "xte"]);
     expect(out).toEqual(mod.DEFAULTS);
   });
 
@@ -58,6 +58,7 @@ describe("ThemeResolver", function () {
       return {
         getPropertyValue(name) {
           if (name === "--dyni-pointer") return "  #123456  ";
+          if (name === "--dyni-xte-line-width-factor") return " 1.5 ";
           return "";
         }
       };
@@ -70,6 +71,7 @@ describe("ThemeResolver", function () {
 
     expect(out.colors.pointer).toBe("#123456");
     expect(out.colors.warning).toBe(mod.DEFAULTS.colors.warning);
+    expect(out.xte.lineWidthFactor).toBe(1.5);
   });
 
   it("returns the same cached object reference for repeated resolve calls", function () {
@@ -161,10 +163,16 @@ describe("ThemeResolver", function () {
       tokenDef.path === "fullCircle.normal.innerMarginFactor" &&
       tokenDef.cssVar === "--dyni-fullcircle-normal-inner-margin"
     ))).toBe(true);
+    expect(mod.TOKEN_DEFS.some((tokenDef) => (
+      tokenDef.path === "xte.lineWidthFactor" &&
+      tokenDef.cssVar === "--dyni-xte-line-width-factor"
+    ))).toBe(true);
     expect(mod.DEFAULTS.pointer.sideFactor).toBe(0.25);
     expect(mod.DEFAULTS.ring.widthFactor).toBe(0.12);
     expect(mod.DEFAULTS.fullCircle.normal.innerMarginFactor).toBe(0.03);
     expect(mod.DEFAULTS.fullCircle.normal.minHeightFactor).toBe(0.45);
     expect(mod.DEFAULTS.fullCircle.normal.dualGapFactor).toBe(0.05);
+    expect(mod.DEFAULTS.xte.lineWidthFactor).toBe(1);
+    expect(Object.keys(mod.DEFAULTS.xte).sort()).toEqual(["lineWidthFactor"]);
   });
 });

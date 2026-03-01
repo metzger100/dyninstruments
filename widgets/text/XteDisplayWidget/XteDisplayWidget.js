@@ -131,17 +131,27 @@
       ctx.clearRect(0, 0, W, H);
       const theme = toolkit.theme.resolve(canvas) || {};
       const themeColors = theme.colors || {};
+      const xteTheme = theme.xte || {};
       const textColor = Helpers.resolveTextColor(canvas);
       const family = Helpers.resolveFontFamily(canvas);
       const valueWeight = theme.font && finiteNumber(theme.font.weight) ? theme.font.weight : 700;
       const labelWeight = theme.font && finiteNumber(theme.font.labelWeight) ? theme.font.labelWeight : 700;
+      const lineWidthFactor = finiteNumber(xteTheme.lineWidthFactor) && xteTheme.lineWidthFactor > 0
+        ? xteTheme.lineWidthFactor
+        : 1;
 
       const colors = {
         pointer: themeColors.pointer || textColor,
         laylineStb: themeColors.laylineStb || textColor,
         laylinePort: themeColors.laylinePort || textColor,
         warning: themeColors.warning || textColor,
-        alarm: themeColors.alarm || textColor
+        alarm: themeColors.alarm || textColor,
+        roadLine: textColor,
+        stripeLine: textColor
+      };
+
+      const xteStyle = {
+        lineWidthFactor: lineWidthFactor
       };
 
       const hasRequiredData =
@@ -176,14 +186,16 @@
         H: H,
         highway: layout.highway,
         geom: geom,
-        textColor: textColor,
         family: family,
         labelWeight: labelWeight,
+        lineWidthFactor: xteStyle.lineWidthFactor,
         pointer: colors.pointer,
         laylineStb: colors.laylineStb,
         laylinePort: colors.laylinePort,
         warning: colors.warning,
-        alarm: colors.alarm
+        alarm: colors.alarm,
+        roadLine: colors.roadLine,
+        stripeLine: colors.stripeLine
       };
 
       staticLayer.ensureLayer(canvas, staticKey, function (layerCtx, layerName, layerCanvas) {
@@ -191,7 +203,7 @@
           return;
         }
         layerCtx.clearRect(0, 0, layerCanvas.width, layerCanvas.height);
-        primitives.drawStaticHighway(layerCtx, geom, colors, textColor, mode);
+        primitives.drawStaticHighway(layerCtx, geom, colors, mode, xteStyle);
       });
       staticLayer.blit(ctx);
 
@@ -215,7 +227,7 @@
       const overflow = Math.abs(xteDisplayAbs) > FIXED_XTE_SCALE;
       const xteSide = p.xte > 0 ? "R" : (p.xte < 0 ? "L" : "");
 
-      primitives.drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow);
+      primitives.drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, xteStyle);
 
       const trackValue = Helpers.applyFormatter(p.cog, {
         formatter: "formatDirection360",

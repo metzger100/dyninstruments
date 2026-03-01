@@ -30,6 +30,23 @@ describe("XteHighwayPrimitives", function () {
     return Math.max.apply(null, values) - Math.min.apply(null, values);
   }
 
+  function createLineWidthTrackerContext() {
+    const ctx = createMockContext2D();
+    const widths = [];
+    let value = ctx.lineWidth;
+    Object.defineProperty(ctx, "lineWidth", {
+      configurable: true,
+      get() {
+        return value;
+      },
+      set(next) {
+        value = next;
+        widths.push(next);
+      }
+    });
+    return { ctx, widths };
+  }
+
   it("draws boat marker as multi-point hull instead of triangle", function () {
     const draw = create();
     const ctx = createMockContext2D();
@@ -77,5 +94,32 @@ describe("XteHighwayPrimitives", function () {
     expect(span(largeBoat, "y")).toBeGreaterThan(span(smallBoat, "y"));
     expect(span(largeBoat, "x")).toBeGreaterThan(span(smallBoat, "x"));
     expect(largeArc.args[2]).toBeGreaterThan(smallArc.args[2]);
+  });
+
+  it("scales static and dynamic line widths with configured lineWidthFactor", function () {
+    const draw = create();
+    const geom = { cx: 150, horizonY: 40, baseY: 170, nearHalf: 120, farHalf: 30 };
+    const colors = {
+      pointer: "#f00",
+      alarm: "#f00",
+      warning: "#f90",
+      laylinePort: "#f66",
+      laylineStb: "#6f6",
+      roadLine: "#fff",
+      stripeLine: "#ccc"
+    };
+
+    const staticBase = createLineWidthTrackerContext();
+    const staticScaled = createLineWidthTrackerContext();
+    draw.drawStaticHighway(staticBase.ctx, geom, colors, "normal", { lineWidthFactor: 1 });
+    draw.drawStaticHighway(staticScaled.ctx, geom, colors, "normal", { lineWidthFactor: 2 });
+
+    const dynamicBase = createLineWidthTrackerContext();
+    const dynamicScaled = createLineWidthTrackerContext();
+    draw.drawDynamicHighway(dynamicBase.ctx, geom, colors, 0.1, false, { lineWidthFactor: 1 });
+    draw.drawDynamicHighway(dynamicScaled.ctx, geom, colors, 0.1, false, { lineWidthFactor: 2 });
+
+    expect(Math.max.apply(null, staticScaled.widths)).toBeGreaterThan(Math.max.apply(null, staticBase.widths));
+    expect(Math.max.apply(null, dynamicScaled.widths)).toBeGreaterThan(Math.max.apply(null, dynamicBase.widths));
   });
 });
