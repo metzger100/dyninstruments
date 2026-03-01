@@ -503,4 +503,99 @@ describe("SemicircleRadialEngine", function () {
       expect(second.drawEntries[item.drawKey]).toEqual(first.drawEntries[item.drawKey]);
     });
   });
+
+  it("preserves explicit empty unit and falsy caption values", function () {
+    let receivedUnit;
+    let receivedCaption;
+    const gaugeValueMath = createValueMath();
+    const gaugeToolkit = {
+      create() {
+        return {
+          theme: {
+            resolve() {
+              return {
+                colors: {
+                  pointer: "#ff2b2b",
+                  warning: "#e7c66a",
+                  alarm: "#ff7a76",
+                  laylineStb: "#82b683",
+                  laylinePort: "#ff7a76"
+                },
+                radial: {
+                  ticks: {
+                    majorLen: 13,
+                    majorWidth: 4,
+                    minorLen: 7,
+                    minorWidth: 2
+                  },
+                  pointer: {
+                    sideFactor: 0.3,
+                    lengthFactor: 1.7
+                  },
+                  ring: {
+                    arcLineWidth: 2.5,
+                    widthFactor: 0.18
+                  },
+                  labels: {
+                    insetFactor: 2.2,
+                    fontFactor: 0.2
+                  }
+                },
+                font: {
+                  weight: 710,
+                  labelWeight: 680
+                }
+              };
+            }
+          },
+          text: {
+            measureValueUnitFit() {
+              return { vPx: 12, uPx: 10, gap: 6 };
+            },
+            drawCaptionMax() {},
+            drawValueUnitWithFit() {},
+            fitInlineCapValUnit() {
+              return { cPx: 10, vPx: 12, uPx: 10, gap: 6 };
+            },
+            drawInlineCapValUnit() {},
+            fitTextPx() {
+              return 12;
+            },
+            drawThreeRowsBlock(ctx, family, x, y, w, h, caption) {
+              receivedCaption = caption;
+            },
+            drawDisconnectOverlay() {}
+          },
+          value: gaugeValueMath,
+          draw: {
+            drawArcRing() {},
+            drawAnnularSector() {},
+            drawPointerAtRim() {},
+            drawTicksFromAngles() {},
+            drawLabels() {}
+          }
+        };
+      }
+    };
+
+    const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
+      .create({}, makeHelpers(gaugeToolkit))
+      .createRenderer({
+        ...makeBaseSpec(),
+        formatDisplay(raw, props, unit) {
+          receivedUnit = unit;
+          const n = Number(raw);
+          return { num: n, text: String(n) };
+        }
+      });
+
+    renderer(createMockCanvas({ rectWidth: 220, rectHeight: 140, ctx: createMockContext2D() }), {
+      value: 12.3,
+      caption: 0,
+      unit: ""
+    });
+
+    expect(receivedUnit).toBe("");
+    expect(receivedCaption).toBe("0");
+  });
 });

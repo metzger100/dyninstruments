@@ -46,6 +46,7 @@
 ## Creating New Widgets (Guides)
 
 - **How do I create a new semicircle gauge?** → [guides/add-new-gauge.md](guides/add-new-gauge.md)
+- **How do I create a new linear gauge?** → [guides/add-new-linear-gauge.md](guides/add-new-linear-gauge.md)
 - **How do I create a new full-circle dial?** → [guides/add-new-full-circle-dial.md](guides/add-new-full-circle-dial.md)
 - **How do I create a new text-based renderer with TextLayoutEngine?** → [guides/add-new-text-renderer.md](guides/add-new-text-renderer.md)
 - **When should I create a new text renderer vs extending an existing one?** → [guides/add-new-text-renderer.md](guides/add-new-text-renderer.md#b4-decision-guide-new-renderer-vs-extension)
@@ -72,6 +73,7 @@
 
 - **Visual style and layout rules for linear instruments** → [linear/linear-gauge-style-guide.md](linear/linear-gauge-style-guide.md)
 - **Shared linear renderer APIs and axis modes** → [linear/linear-shared-api.md](linear/linear-shared-api.md)
+- **How do I add a new linear gauge wrapper?** → [guides/add-new-linear-gauge.md](guides/add-new-linear-gauge.md)
 
 ## Module Reference (Renderers)
 

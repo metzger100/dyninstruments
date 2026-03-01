@@ -316,8 +316,10 @@
         const ratio = modeState.ratio;
         const mode = modeState.mode;
 
-        const caption = String(p.caption || "").trim();
-        const unit = String(p.unit || unitDefault).trim();
+        const captionRaw = hasOwn.call(p, "caption") ? p.caption : "";
+        const caption = String(captionRaw == null ? "" : captionRaw).trim();
+        const unitRaw = hasOwn.call(p, "unit") ? p.unit : unitDefault;
+        const unit = String(unitRaw == null ? unitDefault : unitRaw).trim();
         const raw = (typeof p.value !== "undefined") ? p.value : p[cfg.rawValueKey];
 
         const display = (typeof cfg.formatDisplay === "function")
