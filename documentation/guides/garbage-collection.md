@@ -8,8 +8,8 @@ Use this guide to remove structural drift, keep documentation synchronized with 
 
 ## Baseline State
 
-Baseline commit (self-updating): `0ebc8ecd5ddddc7c52dc4125001a364e32fe186d`
-Baseline updated (UTC): `2026-02-28T14:15:40Z`
+Baseline commit (self-updating): `d95adf1a8f6d339537db490a35901c091062c8b0`
+Baseline updated (UTC): `2026-03-01T00:08:25Z`
 
 ## Workflow
 
