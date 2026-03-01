@@ -26,7 +26,9 @@ npm run gc:status
 node tools/gc-baseline.mjs --set <commit>
 ```
 
-2. Run structural checks.
+2. Run the mandatory manual commit audit (see [Manual Commit Audit (Required)](#manual-commit-audit-required)).
+
+3. Run structural checks.
 
 ```bash
 npm run check:filesize
@@ -40,28 +42,28 @@ Rule references:
 - `check-smell-contracts.mjs`: `theme-cache-invalidation`, `dynamic-storekey-clears-on-empty`, `falsy-default-preservation`, `mapper-output-no-nan`, `text-layout-hotspot-budget`, `coordinate-formatter-no-raw-equality-fallback`
 - `check-file-size.mjs`: warning at `>=300` non-empty lines, failure at `>400` non-empty lines, oneliner detection in block mode via `npm run check:filesize` (optional exploratory warn mode: `npm run check:filesize:warn`)
 
-3. Verify code-doc co-evolution for changed `.js` files.
+4. Verify code-doc co-evolution for changed `.js` files.
 - Start from `gc:status` candidate files (baseline range + working-tree drift).
 - For each file, inspect its header `Documentation:` path and confirm the linked `.md` still describes current behavior.
 - Update docs in the same task whenever behavior, props, mapper outputs, or dependencies change.
 
-4. Consolidate duplicate helpers into shared modules.
+5. Consolidate duplicate helpers into shared modules.
 - Move reusable logic to `shared/widget-kits/` (or `shared/widget-kits/gauge/`).
 - Keep widget files focused on widget-specific behavior, not shared math/layout/formatter logic.
 
-5. Enforce the AvNav boundary.
+6. Enforce the AvNav boundary.
 - Only `runtime/` and `plugin.js` should access `window.avnav` / `avnav.api` directly.
 - Widgets/cluster/shared code should call runtime-safe helpers such as `Helpers.applyFormatter()`.
 
-6. Remove refactor leftovers.
+7. Remove refactor leftovers.
 - Delete fallback declarations that are no longer referenced.
 - Delete dead top-level helper functions and constant-condition branches.
 
-7. Fix catch and maintenance-marker hygiene.
+8. Fix catch and maintenance-marker hygiene.
 - Replace empty catches with explicit handling: comment why silence is intentional, log with context, or use centralized handlers.
 - Ensure maintenance markers include owner and date, e.g. `TODO(name, 2026-02-20): ...`.
 
-8. Re-run checks and close the loop.
+9. Re-run checks and close the loop.
 - Run strict checks after fixes:
 
 ```bash
@@ -73,11 +75,36 @@ node tools/check-docs.mjs
 ```
 
 - When cleanup changes debt status, update `documentation/TECH-DEBT.md` and `documentation/QUALITY.md`.
-- Update baseline marker to current `HEAD` before finishing:
+- Update baseline marker to current `HEAD` only after all completion gates pass:
+- every commit in `RANGE` was manually reviewed (`git rev-list --reverse "$RANGE"`)
+- all findings were fixed or explicitly tracked in docs/debt logs
+- strict checks were re-run and clean (`npm run check:all`)
 
 ```bash
 npm run gc:update-baseline
 ```
+
+## Manual Commit Audit (Required)
+
+- Derive the exact baseline range from `gc:status`.
+- Review every commit in chronological order (`git rev-list --reverse`), including merge commits.
+- Review each commit diff (`git show`) and capture findings before cleanup edits.
+
+```bash
+RANGE="$(npm run -s gc:status | sed -n 's/^Range: //p')"
+git rev-list --count "$RANGE"
+git rev-list --reverse "$RANGE"
+for commit in $(git rev-list --reverse "$RANGE"); do
+  echo "===== $commit ====="
+  git show --stat --patch --find-renames "$commit"
+done
+```
+
+Required per-commit audit checks:
+- code↔doc drift (behavior changed without linked doc updates)
+- smell regressions and boundary violations (`window.avnav` usage outside runtime, mapper leakage, fallback drift)
+- suspicious test weakening or missing coverage updates for behavior changes
+- renamed/moved files with stale docs, stale headers, or naming drift
 
 ## Anti-Patterns
 
@@ -91,6 +118,7 @@ npm run gc:update-baseline
 | Stale doc headers | Historical header path drift: `documentation/modules/...` and `documentation/architecture/module-system.md` migrated to current `documentation/widgets/...` and `documentation/architecture/component-system.md` | `check-headers.mjs` (`broken-doc-link`) | Update `Documentation:` header path to the current doc |
 | Naming drift | Historical naming cleanup: `DyniThreeElements` -> `DyniThreeValueTextWidget` and related `globalKey` normalization in `config/components.js` | `check-naming.mjs` | Rename to match conventions (`Dyni{ComponentName}` and matching registered/returned ids) |
 | Copy-paste divergence | Historical: `clamp` implemented in multiple files (`GaugeValueMath`, `PositionCoordinateWidget`, `ThreeValueTextWidget`) before TD-006 | `check-patterns.mjs` (`duplicate-functions`, `duplicate-block-clones`) | Use canonical shared implementation (`GaugeValueMath.clamp`) |
+| File-list-only review | Reviewing only `gc:status` candidate files while skipping chronological commit audit in `baseline..HEAD` | Manual workflow gate (`Manual Commit Audit (Required)`) | Run full commit-by-commit inspection (`git rev-list --reverse "$RANGE"` + `git show`) before baseline update |
 | Test assertion gaming | Guardrail: no confirmed incident in current history, but risk exists when assertions are weakened to force green builds | Human review | Restore strong assertions and fix implementation behavior |
 | Code↔Doc divergence | Risk pattern: JS behavior changed while linked module docs lag behind | Manual workflow step (code-doc co-evolution check) | Update linked docs in the same task |
 | Theme cache drift | Runtime preset/style mutation does not invalidate cached token values | `check-smell-contracts.mjs` (`theme-cache-invalidation`) | Expose invalidation API and call it after runtime theme mutation |
