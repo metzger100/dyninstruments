@@ -72,8 +72,12 @@
 ## Linear Gauges
 
 - **Visual style and layout rules for linear instruments** → [linear/linear-gauge-style-guide.md](linear/linear-gauge-style-guide.md)
+- **Which linear profile should I use (range/high-end, range/low-end, centered180, fixed360)?** → [linear/linear-gauge-style-guide.md](linear/linear-gauge-style-guide.md#supported-profiles)
+- **What editable parameter key pattern should new linear gauges follow?** → [linear/linear-gauge-style-guide.md](linear/linear-gauge-style-guide.md#editable-parameter-key-pattern)
 - **Shared linear renderer APIs and axis modes** → [linear/linear-shared-api.md](linear/linear-shared-api.md)
+- **What are the `createRenderer(spec)` templates for range, wind-angle, and compass linear wrappers?** → [linear/linear-shared-api.md](linear/linear-shared-api.md#profile-templates)
 - **How do I add a new linear gauge wrapper?** → [guides/add-new-linear-gauge.md](guides/add-new-linear-gauge.md)
+- **What profile playbook should I follow for new linear gauge kinds?** → [guides/add-new-linear-gauge.md](guides/add-new-linear-gauge.md#step-0-choose-profile)
 
 ## Module Reference (Renderers)
 

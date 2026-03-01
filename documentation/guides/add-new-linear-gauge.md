@@ -1,6 +1,6 @@
 # Guide: Create a New Linear Gauge
 
-**Status:** ✅ Ready | Current workflow with `LinearGaugeEngine` + ClusterWidget registries
+**Status:** ✅ Extension-ready | Profile playbooks for Speed/Depth/Temperature/Voltage/Wind/Compass linear kinds
 
 ## Prerequisites
 
@@ -13,32 +13,63 @@ Read first:
 
 ## Overview
 
-New linear gauges should be thin wrappers over `LinearGaugeEngine`. Keep widget modules focused on formatting, axis selection, tick strategy, and sector strategy.
+Linear gauges should be thin wrappers over `LinearGaugeEngine`.
 
-## Step 1: Create Gauge Module
+Select a profile first, then keep the wrapper focused on formatter, ticks, axis mode, and sectors.
 
-Create `widgets/linear/NewLinearWidget/NewLinearWidget.js`:
+## Step 0: Choose Profile
 
-1. UMD wrapper + `create(def, Helpers)`
-2. Resolve shared renderer: `Helpers.getModule("LinearGaugeEngine").create(def, Helpers)`
-3. Provide gauge-specific functions only:
-- `formatDisplay(raw, props, unit, Helpers) -> { num, text }`
-- `tickSteps(range) -> { major, minor }`
-- `buildSectors(props, minV, maxV, axis, valueApi, theme) -> Sector[]`
-4. Build `renderCanvas` with `createRenderer(spec)`
+| Profile | `axisMode` | Typical kinds | Domain | Sector style |
+|---|---|---|---|---|
+| Range high-end | `range` | `sogLinear`, `stwLinear` | Editable `min/max` | Warning/Alarm near max |
+| Range low-end | `range` | `depthLinear`, `voltageLinear` | Editable `min/max` | Alarm/Warning near min |
+| Range optional high-end | `range` | `tempLinear` | Editable `min/max` | Optional high-end thresholds |
+| Centered wind-angle | `centered180` | `angleTrueLinear`, `angleApparentLinear` | Fixed `-180..180` | Optional mirrored laylines |
+| Fixed compass | `fixed360` | `hdtLinear`, `hdmLinear`, `cogLinear` | Fixed `0..360` | Usually none |
+
+## Step 1: Create Wrapper Module
+
+Create `widgets/linear/NewLinearWidget/NewLinearWidget.js` with UMD + `create(def, Helpers)`.
+
+Use `SpeedLinearWidget` as reference and delegate to `LinearGaugeEngine`.
 
 ```javascript
-const rendererModule = Helpers.getModule("LinearGaugeEngine");
-const renderer = rendererModule && rendererModule.create(def, Helpers);
+const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
+const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
 
-const renderCanvas = renderer.createRenderer({
-  rawValueKey: "newValueKey",
-  unitDefault: "unit",
+function formatDisplay(raw, props, unit) {
+  const n = Number(raw);
+  if (!isFinite(n)) return { num: NaN, text: "---" };
+  const out = String(Helpers.applyFormatter(n, {
+    formatter: "formatDecimal",
+    formatterParameters: [3, 1, true],
+    default: "---"
+  }));
+  const text = valueMath.extractNumberText(out);
+  const numeric = Number(text);
+  return isFinite(numeric) ? { num: numeric, text: text } : { num: NaN, text: "---" };
+}
+```
+
+## Step 2: Configure `createRenderer(spec)`
+
+### A) Range profile template
+
+```javascript
+const renderCanvas = engine.createRenderer({
+  rawValueKey: "value",
+  unitDefault: "m",
   axisMode: "range",
-  rangeDefaults: { min: 0, max: 100 },
+  rangeDefaults: { min: 0, max: 30 },
+  rangeProps: { min: "depthLinearMinValue", max: "depthLinearMaxValue" },
+  tickProps: {
+    major: "depthLinearTickMajor",
+    minor: "depthLinearTickMinor",
+    showEndLabels: "depthLinearShowEndLabels"
+  },
   ratioProps: {
-    normal: "newLinearRatioThresholdNormal",
-    flat: "newLinearRatioThresholdFlat"
+    normal: "depthLinearRatioThresholdNormal",
+    flat: "depthLinearRatioThresholdFlat"
   },
   ratioDefaults: { normal: 1.1, flat: 3.5 },
   tickSteps,
@@ -47,80 +78,136 @@ const renderCanvas = renderer.createRenderer({
 });
 ```
 
-5. Export module spec:
+### B) Centered wind-angle template
 
 ```javascript
-return {
-  id: "NewLinearWidget",
-  wantsHideNativeHead: true,
-  renderCanvas,
-  translateFunction
-};
+const renderCanvas = engine.createRenderer({
+  rawValueKey: "angle",
+  unitDefault: "deg",
+  axisMode: "centered180",
+  tickProps: {
+    major: "windAngleLinearTickMajor",
+    minor: "windAngleLinearTickMinor",
+    showEndLabels: "windAngleLinearShowEndLabels"
+  },
+  ratioProps: {
+    normal: "windAngleLinearRatioThresholdNormal",
+    flat: "windAngleLinearRatioThresholdFlat"
+  },
+  ratioDefaults: { normal: 1.1, flat: 3.5 },
+  tickSteps,
+  formatDisplay,
+  buildSectors
+});
 ```
 
-## Step 2: Register Module in `config/components.js`
-
-Add module entry:
+### C) Fixed compass template
 
 ```javascript
-NewLinearWidget: {
-  js: BASE + "widgets/linear/NewLinearWidget/NewLinearWidget.js",
-  css: undefined,
-  globalKey: "DyniNewLinearWidget",
-  deps: ["LinearGaugeEngine", "RadialValueMath"]
+const renderCanvas = engine.createRenderer({
+  rawValueKey: "heading",
+  unitDefault: "deg",
+  axisMode: "fixed360",
+  tickProps: {
+    major: "compassLinearTickMajor",
+    minor: "compassLinearTickMinor",
+    showEndLabels: "compassLinearShowEndLabels"
+  },
+  ratioProps: {
+    normal: "compassLinearRatioThresholdNormal",
+    flat: "compassLinearRatioThresholdFlat"
+  },
+  ratioDefaults: { normal: 1.1, flat: 3.5 },
+  tickSteps,
+  formatDisplay,
+  buildSectors
+});
+```
+
+## Step 3: Add Editable Parameters
+
+Add new kind(s) in `config/shared/kind-defaults.js` and cluster `kind` lists.
+
+Use gauge-prefixed editable keys:
+
+- Ratio thresholds: `{gauge}LinearRatioThresholdNormal`, `{gauge}LinearRatioThresholdFlat`
+- Ticks: `{gauge}LinearTickMajor`, `{gauge}LinearTickMinor`, `{gauge}LinearShowEndLabels`
+- Range domain: `{gauge}LinearMinValue`, `{gauge}LinearMaxValue`
+- High/low-end sectors: `{gauge}LinearWarningEnabled`, `{gauge}LinearAlarmEnabled`, `{gauge}LinearWarningFrom`, `{gauge}LinearAlarmFrom`
+- Wind mirrored sectors: `{gauge}LinearLayEnabled`, `{gauge}LinearLayMin`, `{gauge}LinearLayMax`
+
+Only expose keys relevant for the selected kind via `condition`.
+
+## Step 4: Register Component + Router
+
+1. `config/components.js`
+- Add `NewLinearWidget` entry
+- Add it to `ClusterRendererRouter.deps`
+
+2. `cluster/rendering/ClusterRendererRouter.js`
+- Instantiate renderer spec in `create()`
+- Add to `rendererSpecs`
+- Route `props.renderer === "NewLinearWidget"` in `pickRenderer()`
+
+## Step 5: Mapper Wiring
+
+Keep mapper declarative (`create` + `translate`).
+
+```javascript
+if (p.kind === "depthLinear") {
+  return {
+    renderer: "DepthLinearWidget",
+    value: p.depth,
+    caption: cap("depthLinear"),
+    unit: unit("depthLinear"),
+    formatter: "formatDecimal",
+    formatterParameters: [3, 1, true],
+    rendererProps: {
+      depthLinearRatioThresholdNormal: num(p.depthLinearRatioThresholdNormal),
+      depthLinearRatioThresholdFlat: num(p.depthLinearRatioThresholdFlat),
+      depthLinearMinValue: num(p.depthLinearMinValue),
+      depthLinearMaxValue: num(p.depthLinearMaxValue),
+      depthLinearTickMajor: num(p.depthLinearTickMajor),
+      depthLinearTickMinor: num(p.depthLinearTickMinor),
+      depthLinearShowEndLabels: !!p.depthLinearShowEndLabels,
+      captionUnitScale: num(p.captionUnitScale)
+    }
+  };
 }
 ```
 
-## Step 3: Wire ClusterWidget Renderer Registry
+For `centered180` and `fixed360` kinds, omit `*MinValue` / `*MaxValue` props from mapper output.
 
-If `ClusterWidget` should render this gauge, update both declaration and runtime selection:
+## Step 6: Validate
 
-1. `config/components.js`: add `"NewLinearWidget"` to `ClusterRendererRouter.deps`
-2. `cluster/rendering/ClusterRendererRouter.js`:
-- instantiate the new spec in `create()`
-- include it in `rendererSpecs`
-- route `props.renderer === "NewLinearWidget"` in `pickRenderer()`
+Required checks:
 
-## Step 4: Route Data via Mapper Module
+- Wrapper unit test (`tests/widgets/linear/*LinearWidget.test.js`)
+- Mapper test (`tests/cluster/mappers/*Mapper.test.js`)
+- Cluster static config test updates (`tests/config/clusters/*.test.js`)
+- Full gate: `npm run check:all`
 
-Update the relevant cluster mapper module (`cluster/mappers/*.js`) so translation emits:
+Manual checks:
 
-```javascript
-return {
-  renderer: "NewLinearWidget",
-  value: p.someValue,
-  caption: cap("someLinearKind"),
-  unit: unit("someLinearKind"),
-  formatter: "formatX",
-  formatterParameters: [unit("someLinearKind")],
-  rendererProps: {
-    newLinearMinValue: num(p.newLinearMinValue),
-    newLinearMaxValue: num(p.newLinearMaxValue),
-    newLinearTickMajor: num(p.newLinearTickMajor),
-    newLinearTickMinor: num(p.newLinearTickMinor)
-  }
-};
-```
-
-Mapper rule: keep output declarative. Do not pass dead props that no renderer consumes.
-
-## Step 5: Verify
-
-- Resize to trigger `flat`, `normal`, `high`
-- Pointer tracks displayed numeric value
-- Warning/alarm sectors render correctly
-- Tick labels use expected spacing (`theme.linear.labels.insetFactor`, `fontFactor`)
-- Day/night colors update
-- Disconnect handling works as implemented by the shared engine
+- Resize: `high`, `normal`, `flat`
+- Pointer tracks value and clamps at axis edges
+- Sector behavior matches selected profile
+- Day/night colors and disconnect overlay are correct
 
 ## Checklist
 
-- [ ] Gauge wrapper created in `widgets/linear/NewLinearWidget/NewLinearWidget.js`
-- [ ] Module registered in `config/components.js`
-- [ ] Added to `ClusterRendererRouter.deps` (if ClusterWidget-rendered)
-- [ ] Renderer wired in `cluster/rendering/ClusterRendererRouter.js`
-- [ ] Mapper module emits `renderer: "NewLinearWidget"` and expected props
-- [ ] Visual + resize behavior validated
+- [ ] Kind defaults added in `config/shared/kind-defaults.js`
+- [ ] Cluster `kind` select extended in `config/clusters/<cluster>.js`
+- [ ] Editable parameter conditions added for new linear keys
+- [ ] Wrapper module added in `widgets/linear/`
+- [ ] Component registered in `config/components.js`
+- [ ] Router wiring updated in `cluster/rendering/ClusterRendererRouter.js`
+- [ ] Mapper routes kind to new renderer with normalized props
+- [ ] Formatter tuple docs updated for formatter-bearing kinds:
+  - [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md)
+  - [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md)
+  - [../avnav-api/core-key-catalog.md](../avnav-api/core-key-catalog.md)
+- [ ] `npm run check:all` passes
 
 ## Related
 

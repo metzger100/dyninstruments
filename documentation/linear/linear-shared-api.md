@@ -1,17 +1,17 @@
 # Linear Shared API
 
-**Status:** ✅ Implemented | `LinearGaugeEngine` + `LinearCanvasPrimitives` + `LinearGaugeMath` + `LinearGaugeTextLayout`
+**Status:** ✅ Extension-ready | `LinearGaugeEngine` contracts documented for range/centered180/fixed360 wrappers
 
 ## Overview
 
-Linear instruments use a shared engine pipeline comparable to radial engines:
+Linear instruments use a shared engine pipeline:
 
-- `shared/widget-kits/linear/LinearCanvasPrimitives.js` - low-level drawing helpers
-- `shared/widget-kits/linear/LinearGaugeMath.js` - shared axis/tick/layout helpers
-- `shared/widget-kits/linear/LinearGaugeTextLayout.js` - shared tick-label and text-row helpers
-- `shared/widget-kits/linear/LinearGaugeEngine.js` - cached static layer + dynamic pointer/text orchestration
+- `shared/widget-kits/linear/LinearCanvasPrimitives.js`
+- `shared/widget-kits/linear/LinearGaugeMath.js`
+- `shared/widget-kits/linear/LinearGaugeTextLayout.js`
+- `shared/widget-kits/linear/LinearGaugeEngine.js`
 
-The engine is intentionally generic so future `*Linear` kinds can share layout, scale, sectors, and theming.
+New linear widgets should delegate rendering to `LinearGaugeEngine.createRenderer(spec)`.
 
 ## Components
 
@@ -22,12 +22,6 @@ The engine is intentionally generic so future `*Linear` kinds can share layout, 
 - `drawTick(ctx, x, y, len, opts)`
 - `drawPointer(ctx, x, y, opts)`
 
-### LinearGaugeEngine
-
-- Component ID: `LinearGaugeEngine`
-- Factory: `create(def, Helpers)`
-- Main API: `createRenderer(spec) -> renderCanvas(canvas, props)`
-
 ### LinearGaugeMath
 
 - `keyToText(value)`
@@ -35,6 +29,7 @@ The engine is intentionally generic so future `*Linear` kinds can share layout, 
 - `buildTicks(min, max, majorStep, minorStep)`
 - `resolveAxisDomain(axisMode, range)`
 - `computeLayout(mode, W, H, pad, gap)`
+- `splitCaptionValueRows(captionBox, valueBox, secScale)`
 
 ### LinearGaugeTextLayout
 
@@ -44,40 +39,118 @@ The engine is intentionally generic so future `*Linear` kinds can share layout, 
 - `drawValueUnitRow(state, textApi, valueText, unitText, box, secScale, align)`
 - `drawInlineRow(state, textApi, caption, valueText, unitText, box, secScale)`
 
-## createRenderer(spec)
+### LinearGaugeEngine
 
-Supported `spec` fields:
+- Component ID: `LinearGaugeEngine`
+- Factory: `create(def, Helpers)`
+- Main API: `createRenderer(spec) -> renderCanvas(canvas, props)`
 
-- `rawValueKey`: fallback prop name for raw value
-- `unitDefault`: unit fallback
-- `axisMode`: `"range"` | `"centered180"` | `"fixed360"`
+## `createRenderer(spec)` Contract
+
+Common `spec` fields:
+
+- `rawValueKey`
+- `unitDefault`
+- `axisMode`: `"range" | "centered180" | "fixed360"`
 - `rangeDefaults`: `{ min, max }`
-- `rangeProps`: `{ min, max }` prop names
-- `tickProps`: `{ major, minor, showEndLabels }` prop names
-- `ratioProps`: `{ normal, flat }` prop names
+- `rangeProps`: `{ min, max }`
+- `tickProps`: `{ major, minor, showEndLabels }`
+- `ratioProps`: `{ normal, flat }`
 - `ratioDefaults`: `{ normal, flat }`
-- `tickSteps(range)`: optional shared tick profile selector
-- `formatDisplay(raw, props, unit, Helpers)`: returns `{ num, text }`
-- `buildSectors(props, minV, maxV, axis, valueApi, theme)`: returns `[{ from, to, color }]`
-- `buildStaticKey(state, props)`: optional additional cache key material
+- `tickSteps(range)`
+- `formatDisplay(raw, props, unit, Helpers) -> { num, text }`
+- `buildSectors(props, minV, maxV, axis, valueApi, theme) -> [{ from, to, color }]`
+- `buildStaticKey(state, props)`
 
-## Axis Modes
+### Axis Profile Matrix
 
-- `range`: uses configured `min/max` range (speed/depth/temp/voltage)
-- `centered180`: fixed `-180..180` scale (wind angle planned)
-- `fixed360`: fixed `0..360` scale (compass planned)
+| Field | `range` | `centered180` | `fixed360` |
+|---|---|---|---|
+| `axisMode` | Required | Required | Required |
+| `rangeDefaults` | Used for fallback domain | Ignored by axis resolver | Ignored by axis resolver |
+| `rangeProps` | Used for live domain overrides | Ignored by axis resolver | Ignored by axis resolver |
+| `buildSectors` bounds | Usually `min..max` from config | Fixed `-180..180` | Fixed `0..360` |
+| Typical kinds | Speed/Depth/Temp/Voltage linear | Wind-angle linear | Compass/heading linear |
 
-## Built-in Mode Layouts
+## Profile Templates
 
-- `high`: top gauge, middle caption, bottom value+unit
-- `normal`: top gauge, bottom inline `caption value unit` with boosted tick labels and larger inline text band
-- `flat`: left gauge, right caption/value stack
+### Range Profile (Speed/Depth/Temp/Voltage)
 
-## Cache Model
+```javascript
+const renderCanvas = engine.createRenderer({
+  rawValueKey: "value",
+  unitDefault: "m",
+  axisMode: "range",
+  rangeDefaults: { min: 0, max: 30 },
+  rangeProps: { min: "depthLinearMinValue", max: "depthLinearMaxValue" },
+  tickProps: {
+    major: "depthLinearTickMajor",
+    minor: "depthLinearTickMinor",
+    showEndLabels: "depthLinearShowEndLabels"
+  },
+  ratioProps: {
+    normal: "depthLinearRatioThresholdNormal",
+    flat: "depthLinearRatioThresholdFlat"
+  },
+  ratioDefaults: { normal: 1.1, flat: 3.5 },
+  tickSteps,
+  formatDisplay,
+  buildSectors
+});
+```
 
-- Static cached layer: track, sector bands, ticks, labels
-- Dynamic per-frame layer: pointer, caption/value/unit text, disconnect overlay
-- Cache key excludes live data values and includes geometry/theme/tick/sector signatures
+### Centered Profile (Wind Angle)
+
+```javascript
+const renderCanvas = engine.createRenderer({
+  rawValueKey: "angle",
+  unitDefault: "deg",
+  axisMode: "centered180",
+  tickProps: {
+    major: "windAngleLinearTickMajor",
+    minor: "windAngleLinearTickMinor",
+    showEndLabels: "windAngleLinearShowEndLabels"
+  },
+  ratioProps: {
+    normal: "windAngleLinearRatioThresholdNormal",
+    flat: "windAngleLinearRatioThresholdFlat"
+  },
+  ratioDefaults: { normal: 1.1, flat: 3.5 },
+  tickSteps,
+  formatDisplay,
+  buildSectors
+});
+```
+
+### Fixed Compass Profile
+
+```javascript
+const renderCanvas = engine.createRenderer({
+  rawValueKey: "heading",
+  unitDefault: "deg",
+  axisMode: "fixed360",
+  tickProps: {
+    major: "compassLinearTickMajor",
+    minor: "compassLinearTickMinor",
+    showEndLabels: "compassLinearShowEndLabels"
+  },
+  ratioProps: {
+    normal: "compassLinearRatioThresholdNormal",
+    flat: "compassLinearRatioThresholdFlat"
+  },
+  ratioDefaults: { normal: 1.1, flat: 3.5 },
+  tickSteps,
+  formatDisplay,
+  buildSectors
+});
+```
+
+## Runtime Behavior
+
+- Static cached layer: track, sectors, ticks, labels.
+- Dynamic per frame: pointer, caption/value/unit text, disconnect overlay.
+- Cache key excludes live values and includes geometry/theme/tick/sector signatures.
+- `showEndLabels` defaults to false unless mapper sets it true.
 
 ## Theme Contract
 
@@ -88,10 +161,18 @@ Reads `ThemeResolver` tokens:
 - `theme.linear.ticks.majorLen`, `majorWidth`, `minorLen`, `minorWidth`
 - `theme.linear.pointer.sideFactor`, `lengthFactor`
 - `theme.linear.labels.insetFactor`, `fontFactor`
-- shared color tokens (`theme.colors.pointer`, `warning`, `alarm`)
+- `theme.colors.pointer`, `theme.colors.warning`, `theme.colors.alarm`
+
+## Testing Contract for New Linear Wrappers
+
+- Widget wrapper test validating `createRenderer(spec)` mapping.
+- Mapper test validating renderer name + normalized `rendererProps`.
+- Cluster static-config test for editable conditions on new kinds.
+- Full gate: `npm run check:all`.
 
 ## Related
 
 - [linear-gauge-style-guide.md](linear-gauge-style-guide.md)
-- [../shared/css-theming.md](../shared/css-theming.md)
+- [../guides/add-new-linear-gauge.md](../guides/add-new-linear-gauge.md)
+- [../guides/add-new-cluster.md](../guides/add-new-cluster.md)
 - [../shared/theme-tokens.md](../shared/theme-tokens.md)
