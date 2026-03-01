@@ -117,8 +117,8 @@ describe("WindMapper", function () {
     expect(out.rendererProps.speedUnit).toBe("knLT");
     expect(out.rendererProps.formatter).toBe("formatSpeed");
     expect(out.rendererProps.formatterParameters).toEqual(["knLT"]);
-    expect(out.rendererProps.windLinearRatioThresholdNormal).toBe(1.1);
-    expect(out.rendererProps.windLinearRatioThresholdFlat).toBe(3.5);
+    expect(out.rendererProps.windLinearRatioThresholdNormal).toBe(2);
+    expect(out.rendererProps.windLinearRatioThresholdFlat).toBe(3);
     expect(out.rendererProps.windLinearTickMajor).toBe(30);
     expect(out.rendererProps.windLinearTickMinor).toBe(10);
     expect(out.rendererProps.windLinearShowEndLabels).toBe(false);
