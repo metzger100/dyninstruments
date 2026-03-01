@@ -1,5 +1,5 @@
 /**
- * Module: SpeedMapper - Cluster translation for numeric and semicircle speed gauge kinds
+ * Module: SpeedMapper - Cluster translation for numeric, linear, and semicircle speed gauge kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
  * Depends: ClusterMapperToolkit
  */
@@ -23,6 +23,32 @@
       };
 
       const effKind = p.kind;
+
+      if (effKind === "sogLinear") {
+        const uni = unit(effKind);
+        const warnOn = (p.speedLinearWarningEnabled !== false);
+        const alarmOn = (p.speedLinearAlarmEnabled !== false);
+        return {
+          renderer: "SpeedLinearWidget",
+          value: p.sog,
+          caption: cap(effKind),
+          unit: uni,
+          formatter: "formatSpeed",
+          formatterParameters: [uni],
+          rendererProps: {
+            speedLinearRatioThresholdNormal: num(p.speedLinearRatioThresholdNormal),
+            speedLinearRatioThresholdFlat: num(p.speedLinearRatioThresholdFlat),
+            captionUnitScale: num(p.captionUnitScale),
+            speedLinearMinValue: num(p.speedLinearMinValue),
+            speedLinearMaxValue: num(p.speedLinearMaxValue),
+            speedLinearTickMajor: num(p.speedLinearTickMajor),
+            speedLinearTickMinor: num(p.speedLinearTickMinor),
+            speedLinearShowEndLabels: !!p.speedLinearShowEndLabels,
+            speedLinearWarningFrom: warnOn ? num(p.speedLinearWarningFrom) : undefined,
+            speedLinearAlarmFrom: alarmOn ? num(p.speedLinearAlarmFrom) : undefined
+          }
+        };
+      }
 
       if (effKind === "sogRadial" || effKind === "stwRadial") {
         const baseKind = (effKind === "sogRadial") ? "sog" : "stw";

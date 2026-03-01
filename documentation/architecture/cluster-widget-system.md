@@ -79,6 +79,7 @@ Reference: [plugin-core-contracts.md](plugin-core-contracts.md), [../avnav-api/c
 - `WindRadialWidget`
 - `CompassRadialWidget`
 - `SpeedRadialWidget`
+- `SpeedLinearWidget`
 - `DepthRadialWidget`
 - `TemperatureRadialWidget`
 - `VoltageRadialWidget`

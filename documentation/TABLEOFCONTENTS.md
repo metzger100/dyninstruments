@@ -68,6 +68,11 @@
 - **How do full-circle layout modes (flat/normal/high) work?** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#layout-modes)
 - **How does the shared text layout engine work?** → [shared/text-layout-engine.md](shared/text-layout-engine.md)
 
+## Linear Gauges
+
+- **Visual style and layout rules for linear instruments** → [linear/linear-gauge-style-guide.md](linear/linear-gauge-style-guide.md)
+- **Shared linear renderer APIs and axis modes** → [linear/linear-shared-api.md](linear/linear-shared-api.md)
+
 ## Module Reference (Renderers)
 
 - **How does the numeric text renderer work (caption/value/unit)?** → [widgets/three-elements.md](widgets/three-elements.md)
@@ -87,6 +92,7 @@
 - **How do the semicircle gauges work (Speed/Depth/Temp/Voltage)?** → [widgets/semicircle-gauges.md](widgets/semicircle-gauges.md)
 - **What differs between the 4 gauges (sectors, formatting, defaults)?** → [widgets/semicircle-gauges.md](widgets/semicircle-gauges.md#gauge-specific-responsibilities)
 - **What shared renderer do the semicircle gauges use?** → [widgets/semicircle-gauges.md](widgets/semicircle-gauges.md#shared-render-flow)
+- **How does the first linear gauge (`sogLinear`) work?** → [linear/linear-gauge-style-guide.md](linear/linear-gauge-style-guide.md)
 
 ## Styling & Theming
 

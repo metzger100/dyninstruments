@@ -68,6 +68,16 @@ Read by `ThemeResolver.resolve(canvas)`:
 | `--dyni-radial-fullcircle-normal-inner-margin` | Full-circle normal-mode inner margin factor | `0.03` |
 | `--dyni-radial-fullcircle-normal-min-height` | Full-circle normal-mode minimum block height factor | `0.45` |
 | `--dyni-radial-fullcircle-normal-dual-gap` | Full-circle normal-mode dual-column gap factor | `0.05` |
+| `--dyni-linear-track-width` | Linear track thickness factor | `0.12` |
+| `--dyni-linear-track-linewidth` | Linear track stroke width | `1` |
+| `--dyni-linear-tick-major-len` | Linear major tick length | `9` |
+| `--dyni-linear-tick-major-width` | Linear major tick stroke width | `2` |
+| `--dyni-linear-tick-minor-len` | Linear minor tick length | `5` |
+| `--dyni-linear-tick-minor-width` | Linear minor tick stroke width | `1` |
+| `--dyni-linear-pointer-side` | Linear pointer side factor | `0.25` |
+| `--dyni-linear-pointer-length` | Linear pointer length factor | `2` |
+| `--dyni-linear-label-inset` | Linear label inset factor | `1.8` |
+| `--dyni-linear-label-font` | Linear label font factor | `0.14` |
 | `--dyni-font-weight` | Primary font weight | `700` |
 | `--dyni-label-weight` | Label font weight | `700` |
 | `--dyni-xte-line-width-factor` | XTE highway stroke thickness multiplier | `1` |
@@ -104,6 +114,7 @@ Per-token overrides can be applied in `user.css` and naturally override preset v
 [data-dyni] {
   --dyni-pointer: #00aaff;
   --dyni-radial-arc-linewidth: 1.5;
+  --dyni-linear-track-linewidth: 1.5;
   --dyni-xte-line-width-factor: 1.25;
 }
 ```

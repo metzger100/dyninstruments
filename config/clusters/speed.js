@@ -18,7 +18,7 @@
     widget: "ClusterWidget",
     def: {
       name: "dyninstruments_Speed",
-      description: "SOG/STW selection (numeric or SpeedRadialWidget radial)",
+      description: "SOG/STW selection (numeric, linear, or SpeedRadialWidget radial)",
       caption: "", unit: "", default: "---",
       cluster: "speed",
       storeKeys: { sog: "nav.gps.speed", stw: "nav.gps.waterSpeed" },
@@ -28,6 +28,7 @@
           list: [
             opt("Speed over ground (SOG)", "sog"),
             opt("Speed through water (STW)", "stw"),
+            opt("SpeedLinearWidget — SOG [Linear]", "sogLinear"),
             opt("SpeedRadialWidget — SOG [Radial]", "sogRadial"),
             opt("SpeedRadialWidget — STW [Radial]", "stwRadial")
           ],
@@ -45,6 +46,66 @@
           type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
           name: "1-Row Threshold (numeric)",
           condition: [{ kind: "sog" }, { kind: "stw" }]
+        },
+
+        // SpeedLinearWidget thresholds — only linear kinds
+        speedLinearRatioThresholdNormal: {
+          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          name: "SpeedLinearWidget: Normal Threshold",
+          condition: { kind: "sogLinear" }
+        },
+        speedLinearRatioThresholdFlat: {
+          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          name: "SpeedLinearWidget: Flat Threshold",
+          condition: { kind: "sogLinear" }
+        },
+
+        speedLinearMinValue: {
+          type: "FLOAT", min: 0, max: 200, step: 0.5, default: 0,
+          name: "Min speed (linear)",
+          condition: { kind: "sogLinear" }
+        },
+        speedLinearMaxValue: {
+          type: "FLOAT", min: 1, max: 200, step: 0.5, default: 30,
+          name: "Max speed (linear)",
+          condition: { kind: "sogLinear" }
+        },
+        speedLinearTickMajor: {
+          type: "FLOAT", min: 0.5, max: 100, step: 0.5, default: 5,
+          name: "Major tick step (linear)",
+          condition: { kind: "sogLinear" }
+        },
+        speedLinearTickMinor: {
+          type: "FLOAT", min: 0.1, max: 50, step: 0.1, default: 1,
+          name: "Minor tick step (linear)",
+          condition: { kind: "sogLinear" }
+        },
+        speedLinearShowEndLabels: {
+          type: "BOOLEAN", default: false,
+          name: "Show min/max labels (linear)",
+          condition: { kind: "sogLinear" }
+        },
+        speedLinearWarningEnabled: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Warning sector enabled (linear)",
+          condition: { kind: "sogLinear" }
+        },
+        speedLinearAlarmEnabled: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Alarm sector enabled (linear)",
+          condition: { kind: "sogLinear" }
+        },
+        speedLinearWarningFrom: {
+          type: "FLOAT", min: 0, max: 200, step: 0.5, default: 20,
+          name: "Warning from (linear)",
+          condition: { kind: "sogLinear", speedLinearWarningEnabled: true }
+        },
+        speedLinearAlarmFrom: {
+          type: "FLOAT", min: 0, max: 200, step: 0.5, default: 25,
+          name: "Alarm from (linear)",
+          condition: { kind: "sogLinear", speedLinearAlarmEnabled: true }
         },
 
         // SpeedRadialWidget thresholds — only radial kinds

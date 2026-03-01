@@ -22,6 +22,7 @@
     SPEED_KIND: {
       sog: { cap: "SOG", unit: "kn" },
       stw: { cap: "STW", unit: "kn" },
+      sogLinear: { cap: "SOG", unit: "kn" },
       sogRadial: { cap: "SOG", unit: "kn" },
       stwRadial: { cap: "STW", unit: "kn" }
     },

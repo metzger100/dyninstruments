@@ -17,6 +17,7 @@ describe("ClusterRendererRouter", function () {
     const position = makeSpec("position");
     const compass = makeSpec("compass");
     const speed = makeSpec("speed");
+    const speedLinear = makeSpec("speedLinear");
     const depth = makeSpec("depth");
     const temp = makeSpec("temp");
     const volt = makeSpec("volt");
@@ -25,6 +26,7 @@ describe("ClusterRendererRouter", function () {
       WindRadialWidget: wind,
       CompassRadialWidget: compass,
       SpeedRadialWidget: speed,
+      SpeedLinearWidget: speedLinear,
       DepthRadialWidget: depth,
       TemperatureRadialWidget: temp,
       VoltageRadialWidget: volt,
@@ -53,6 +55,7 @@ describe("ClusterRendererRouter", function () {
     expect(router.wantsHideNativeHead).toBe(true);
     expect(router.pickRenderer({ renderer: "WindRadialWidget" })).toBe(wind);
     expect(router.pickRenderer({ renderer: "XteDisplayWidget" })).toBe(xte);
+    expect(router.pickRenderer({ renderer: "SpeedLinearWidget" })).toBe(speedLinear);
     expect(router.pickRenderer({ renderer: "PositionCoordinateWidget" })).toBe(position);
     expect(router.pickRenderer({ renderer: "Unknown" })).toBe(three);
     expect(router.pickRenderer({})).toBe(three);
@@ -61,6 +64,7 @@ describe("ClusterRendererRouter", function () {
   it("delegates renderCanvas and fans out finalizeFunction safely", function () {
     const three = makeSpec("three");
     const speed = makeSpec("speed", { finalizeFunction: vi.fn(() => { throw new Error("ignored"); }) });
+    const speedLinear = makeSpec("speedLinear");
     const voltage = makeSpec("voltage");
     const wind = makeSpec("wind");
     const compass = makeSpec("compass");
@@ -71,6 +75,7 @@ describe("ClusterRendererRouter", function () {
       WindRadialWidget: wind,
       CompassRadialWidget: compass,
       SpeedRadialWidget: speed,
+      SpeedLinearWidget: speedLinear,
       DepthRadialWidget: depth,
       TemperatureRadialWidget: temp,
       VoltageRadialWidget: voltage,
@@ -109,6 +114,7 @@ describe("ClusterRendererRouter", function () {
 
     expect(three.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
     expect(speed.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
+    expect(speedLinear.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
     expect(voltage.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
   });
 });
