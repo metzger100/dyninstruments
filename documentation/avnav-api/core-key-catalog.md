@@ -19,15 +19,15 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 
 | Cluster | Store field | Default key path | Used by kind(s) |
 |---|---|---|---|
-| `speed` | `sog` | `nav.gps.speed` | `sog`, `sogRadial` |
-| `speed` | `stw` | `nav.gps.waterSpeed` | `stw`, `stwRadial` |
+| `speed` | `sog` | `nav.gps.speed` | `sog`, `sogLinear`, `sogRadial` |
+| `speed` | `stw` | `nav.gps.waterSpeed` | `stw`, `stwLinear`, `stwRadial` |
 | `wind` | `awa` | `nav.gps.windAngle` | `angleApparent`, `angleApparentRadial` |
 | `wind` | `twa` | `nav.gps.trueWindAngle` | `angleTrue`, `angleTrueRadial` |
 | `wind` | `twd` | `nav.gps.trueWindDirection` | `angleTrueDirection` |
 | `wind` | `aws` | `nav.gps.windSpeed` | `speedApparent`, `angleApparentRadial` |
 | `wind` | `tws` | `nav.gps.trueWindSpeed` | `speedTrue`, `angleTrueRadial` |
-| `environment` | `depth` | `nav.gps.depthBelowTransducer` | `depth`, `depthRadial` |
-| `environment` | `temp` | `nav.gps.waterTemp` | `temp`, `tempRadial` (if no override) |
+| `environment` | `depth` | `nav.gps.depthBelowTransducer` | `depth`, `depthLinear`, `depthRadial` |
+| `environment` | `temp` | `nav.gps.waterTemp` | `temp`, `tempLinear`, `tempRadial` (if no override) |
 | `courseHeading` | `cog` | `nav.gps.course` | `cog` |
 | `courseHeading` | `hdt` | `nav.gps.headingTrue` | `hdt`, `hdtRadial` |
 | `courseHeading` | `hdm` | `nav.gps.headingMag` | `hdm`, `hdmRadial` |
@@ -57,9 +57,9 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 
 | Cluster | Editable key field | Store field affected | Active kind(s) | Behavior |
 |---|---|---|---|---|
-| `environment` | `tempKey` | `temp` | `temp`, `tempRadial` | non-empty override is used; empty falls back to `nav.gps.waterTemp` |
+| `environment` | `tempKey` | `temp` | `temp`, `tempLinear`, `tempRadial` | non-empty override is used; empty falls back to `nav.gps.waterTemp` |
 | `environment` | `value` | `value` | `pressure` | non-empty key stored for pressure source; removed when not pressure |
-| `vessel` | `value` | `value` | `voltage`, `voltageRadial` | non-empty key stored for voltage source; removed for other kinds |
+| `vessel` | `value` | `value` | `voltage`, `voltageLinear`, `voltageRadial` | non-empty key stored for voltage source; removed for other kinds |
 | `vessel` | `pitchKey` | `pitch` | `pitch` | non-empty override is used; empty falls back to default pitch key |
 | `vessel` | `rollKey` | `roll` | `roll` | non-empty override is used; empty falls back to default roll key |
 
@@ -68,11 +68,14 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | Kind | Primary store field(s) | Formatter contract | Unit/typing note |
 |---|---|---|---|
 | `sog`, `stw` | `sog` / `stw` | `formatSpeed` + `[unit]` | speed values expected in core speed units |
+| `sogLinear`, `stwLinear` | `sog` / `stw` | `formatSpeed` + `[unit]` | linear speed gauge kinds |
 | `angleTrue`, `angleApparent` | `twa` / `awa` | `makeAngleFormatter(false, leadingZero, default)` | signed angle formatting in mapper toolkit |
 | `angleTrueDirection` | `twd` | `makeAngleFormatter(true, leadingZero, default)` | direction formatting in mapper toolkit |
 | `speedTrue`, `speedApparent` | `tws` / `aws` | `formatSpeed` + `[unit]` | speed values expected in core speed units |
 | `depth` | `depth` | `formatDecimal` + `[3, 1, true]` | numeric depth text |
+| `depthLinear` | `depth` | renderer wrapper (`DepthLinearWidget`) | low-end linear depth sectors |
 | `temp` | `temp` | `formatTemperature` + `["celsius"]` | input source is water temperature key |
+| `tempLinear` | `temp` | `formatTemperature` + `["celsius"]` | linear temperature gauge kind |
 | `pressure` | `value` (dynamic) | `skPressure` + `["hPa"]` | alias of core pressure formatter |
 | `cog`, `hdt`, `hdm`, `brg` | `cog`/`hdt`/`hdm`/`brg` | `formatDirection360` + `[leadingZero]` | heading/course/bearing text |
 | `eta`, `rteEta` | `eta` / `rteEta` | `formatTime` + `[]` | Date/time value path |
@@ -83,6 +86,7 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `distance`, `watch` | `distance` / `watch` | `formatDistance` + `[unit]` | anchor distances |
 | `bearing` | `bearing` | `formatDirection360` + `[leadingZero]` | anchor bearing |
 | `voltage` | `value` (dynamic) | `formatDecimal` + `[3, 1, true]` | numeric voltage |
+| `voltageLinear` | `value` (dynamic) | `formatDecimal` + `[3, 1, true]` | linear voltage gauge kind |
 | `clock` | `clock` | `formatTime` + `[]` | Date/time value |
 | `dateTime` | `clock` | renderer wrapper (`DateTimeRendererWrapper` -> `PositionCoordinateWidget`) | date/time split formatting |
 | `timeStatus` | `gpsValid`, `clock` | renderer wrapper (`TimeStatusRendererWrapper` -> `PositionCoordinateWidget`) | status + time split formatting |

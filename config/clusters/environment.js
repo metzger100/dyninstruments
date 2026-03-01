@@ -30,8 +30,10 @@
           type: "SELECT",
           list: [
             opt("Depth below transducer", "depth"),
+            opt("Depth gauge (linear)", "depthLinear"),
             opt("Depth gauge (radial)", "depthRadial"),
             opt("Temperature", "temp"),
+            opt("Temperature gauge (linear)", "tempLinear"),
             opt("Temperature gauge (radial)", "tempRadial"),
             opt("Pressure (SignalK)", "pressure")
           ],
@@ -44,7 +46,7 @@
           type: "KEY",
           default: "",
           name: "SignalK path (temperature)",
-          condition: [{ kind: "temp" }, { kind: "tempRadial" }]
+          condition: [{ kind: "temp" }, { kind: "tempLinear" }, { kind: "tempRadial" }]
         },
 
         // Pressure source (SignalK)
@@ -53,6 +55,68 @@
           default: "",
           name: "SignalK path (pressure)",
           condition: { kind: "pressure" }
+        },
+
+        // ---------------- DepthLinearWidget (linear) settings ------------------------
+        depthLinearMinValue: {
+          type: "FLOAT", min: 0, max: 200, step: 0.5, default: 0,
+          name: "Min depth (linear)",
+          condition: { kind: "depthLinear" }
+        },
+        depthLinearMaxValue: {
+          type: "FLOAT", min: 1, max: 500, step: 0.5, default: 30,
+          name: "Max depth (linear)",
+          condition: { kind: "depthLinear" }
+        },
+        depthLinearTickMajor: {
+          type: "FLOAT", min: 0.5, max: 200, step: 0.5, default: 5,
+          name: "Major tick step (linear)",
+          condition: { kind: "depthLinear" }
+        },
+        depthLinearTickMinor: {
+          type: "FLOAT", min: 0.1, max: 100, step: 0.1, default: 1,
+          name: "Minor tick step (linear)",
+          condition: { kind: "depthLinear" }
+        },
+        depthLinearShowEndLabels: {
+          type: "BOOLEAN", default: false,
+          name: "Show min/max labels (linear)",
+          condition: { kind: "depthLinear" }
+        },
+
+        depthLinearWarningEnabled: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Warning sector enabled (linear)",
+          condition: { kind: "depthLinear" }
+        },
+        depthLinearAlarmEnabled: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Alarm sector enabled (linear)",
+          condition: { kind: "depthLinear" }
+        },
+
+        depthLinearAlarmFrom: {
+          type: "FLOAT", min: 0, max: 500, step: 0.5, default: 2.0,
+          name: "Alarm to (shallow, linear)",
+          condition: { kind: "depthLinear", depthLinearAlarmEnabled: true }
+        },
+        depthLinearWarningFrom: {
+          type: "FLOAT", min: 0, max: 500, step: 0.5, default: 5.0,
+          name: "Warning to (shallow, linear)",
+          condition: { kind: "depthLinear", depthLinearWarningEnabled: true }
+        },
+
+        depthLinearRatioThresholdNormal: {
+          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          name: "DepthLinearWidget: Normal Threshold",
+          condition: { kind: "depthLinear" }
+        },
+        depthLinearRatioThresholdFlat: {
+          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          name: "DepthLinearWidget: Flat Threshold",
+          condition: { kind: "depthLinear" }
         },
 
         // ---------------- DepthRadialWidget (radial) settings ------------------------
@@ -116,6 +180,68 @@
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
           name: "DepthRadialWidget: Flat Threshold",
           condition: { kind: "depthRadial" }
+        },
+
+        // -------------- TemperatureLinearWidget (linear) settings --------------------
+        tempLinearMinValue: {
+          type: "FLOAT", min: -50, max: 200, step: 0.5, default: 0,
+          name: "Min temp (linear)",
+          condition: { kind: "tempLinear" }
+        },
+        tempLinearMaxValue: {
+          type: "FLOAT", min: -40, max: 300, step: 0.5, default: 35,
+          name: "Max temp (linear)",
+          condition: { kind: "tempLinear" }
+        },
+        tempLinearTickMajor: {
+          type: "FLOAT", min: 0.5, max: 100, step: 0.5, default: 5,
+          name: "Major tick step (linear)",
+          condition: { kind: "tempLinear" }
+        },
+        tempLinearTickMinor: {
+          type: "FLOAT", min: 0.1, max: 50, step: 0.1, default: 1,
+          name: "Minor tick step (linear)",
+          condition: { kind: "tempLinear" }
+        },
+        tempLinearShowEndLabels: {
+          type: "BOOLEAN", default: false,
+          name: "Show min/max labels (linear)",
+          condition: { kind: "tempLinear" }
+        },
+
+        tempLinearWarningEnabled: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Warning sector enabled (linear)",
+          condition: { kind: "tempLinear" }
+        },
+        tempLinearAlarmEnabled: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Alarm sector enabled (linear)",
+          condition: { kind: "tempLinear" }
+        },
+
+        tempLinearWarningFrom: {
+          type: "FLOAT", min: -50, max: 1000, step: 0.5, default: 28,
+          name: "Warning from (linear)",
+          condition: { kind: "tempLinear", tempLinearWarningEnabled: true }
+        },
+        tempLinearAlarmFrom: {
+          type: "FLOAT", min: -50, max: 1000, step: 0.5, default: 32,
+          name: "Alarm from (linear)",
+          condition: { kind: "tempLinear", tempLinearAlarmEnabled: true }
+        },
+
+        tempLinearRatioThresholdNormal: {
+          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          name: "TempLinearWidget: Normal Threshold",
+          condition: { kind: "tempLinear" }
+        },
+        tempLinearRatioThresholdFlat: {
+          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          name: "TempLinearWidget: Flat Threshold",
+          condition: { kind: "tempLinear" }
         },
 
         // -------------- TemperatureRadialWidget (radial) settings --------------------
@@ -235,7 +361,7 @@
         }
 
         // temperature dynamic key (for selecting different temperature sources)
-        if (kind === "temp" || kind === "tempRadial") {
+        if (kind === "temp" || kind === "tempLinear" || kind === "tempRadial") {
           if (typeof out.tempKey === "string" && out.tempKey.trim()) {
             out.storeKeys = { ...out.storeKeys, temp: out.tempKey.trim() };
           }

@@ -81,8 +81,11 @@ Reference: [plugin-core-contracts.md](plugin-core-contracts.md), [../avnav-api/c
 - `SpeedRadialWidget`
 - `SpeedLinearWidget`
 - `DepthRadialWidget`
+- `DepthLinearWidget`
 - `TemperatureRadialWidget`
+- `TemperatureLinearWidget`
 - `VoltageRadialWidget`
+- `VoltageLinearWidget`
 - `XteDisplayWidget`
 
 `wantsHideNativeHead` is aggregated (`true` if any sub-renderer requests it).

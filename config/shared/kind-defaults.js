@@ -23,13 +23,16 @@
       sog: { cap: "SOG", unit: "kn" },
       stw: { cap: "STW", unit: "kn" },
       sogLinear: { cap: "SOG", unit: "kn" },
+      stwLinear: { cap: "STW", unit: "kn" },
       sogRadial: { cap: "SOG", unit: "kn" },
       stwRadial: { cap: "STW", unit: "kn" }
     },
     ENV_KIND: {
       depth: { cap: "DPT", unit: "m" },
+      depthLinear: { cap: "DPT", unit: "m" },
       depthRadial: { cap: "DPT", unit: "m" },
       temp: { cap: "TEMP", unit: "\u00b0C" },
+      tempLinear: { cap: "TEMP", unit: "\u00b0C" },
       tempRadial: { cap: "TEMP", unit: "\u00b0C" },
       pressure: { cap: "PRES", unit: "hPa" }
     },
@@ -112,6 +115,7 @@
     },
     VESSEL_KIND: {
       voltage: { cap: "VOLT", unit: "V" },
+      voltageLinear: { cap: "VOLT", unit: "V" },
       voltageRadial: { cap: "VOLT", unit: "V" },
       clock: { cap: "TIME", unit: "" },
       dateTime: { cap: "", unit: "" },

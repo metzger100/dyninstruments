@@ -98,7 +98,7 @@
 - **How do the semicircle gauges work (Speed/Depth/Temp/Voltage)?** → [widgets/semicircle-gauges.md](widgets/semicircle-gauges.md)
 - **What differs between the 4 gauges (sectors, formatting, defaults)?** → [widgets/semicircle-gauges.md](widgets/semicircle-gauges.md#gauge-specific-responsibilities)
 - **What shared renderer do the semicircle gauges use?** → [widgets/semicircle-gauges.md](widgets/semicircle-gauges.md#shared-render-flow)
-- **How does the first linear gauge (`sogLinear`) work?** → [linear/linear-gauge-style-guide.md](linear/linear-gauge-style-guide.md)
+- **How do shipped linear gauges (speed/depth/temp/voltage) work?** → [linear/linear-gauge-style-guide.md](linear/linear-gauge-style-guide.md)
 
 ## Styling & Theming
 

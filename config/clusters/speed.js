@@ -29,6 +29,7 @@
             opt("Speed over ground (SOG)", "sog"),
             opt("Speed through water (STW)", "stw"),
             opt("SpeedLinearWidget — SOG [Linear]", "sogLinear"),
+            opt("SpeedLinearWidget — STW [Linear]", "stwLinear"),
             opt("SpeedRadialWidget — SOG [Radial]", "sogRadial"),
             opt("SpeedRadialWidget — STW [Radial]", "stwRadial")
           ],
@@ -52,60 +53,66 @@
         speedLinearRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
           name: "SpeedLinearWidget: Normal Threshold",
-          condition: { kind: "sogLinear" }
+          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
           name: "SpeedLinearWidget: Flat Threshold",
-          condition: { kind: "sogLinear" }
+          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
 
         speedLinearMinValue: {
           type: "FLOAT", min: 0, max: 200, step: 0.5, default: 0,
           name: "Min speed (linear)",
-          condition: { kind: "sogLinear" }
+          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearMaxValue: {
           type: "FLOAT", min: 1, max: 200, step: 0.5, default: 30,
           name: "Max speed (linear)",
-          condition: { kind: "sogLinear" }
+          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearTickMajor: {
           type: "FLOAT", min: 0.5, max: 100, step: 0.5, default: 5,
           name: "Major tick step (linear)",
-          condition: { kind: "sogLinear" }
+          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearTickMinor: {
           type: "FLOAT", min: 0.1, max: 50, step: 0.1, default: 1,
           name: "Minor tick step (linear)",
-          condition: { kind: "sogLinear" }
+          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearShowEndLabels: {
           type: "BOOLEAN", default: false,
           name: "Show min/max labels (linear)",
-          condition: { kind: "sogLinear" }
+          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearWarningEnabled: {
           type: "BOOLEAN",
           default: true,
           name: "Warning sector enabled (linear)",
-          condition: { kind: "sogLinear" }
+          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearAlarmEnabled: {
           type: "BOOLEAN",
           default: true,
           name: "Alarm sector enabled (linear)",
-          condition: { kind: "sogLinear" }
+          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearWarningFrom: {
           type: "FLOAT", min: 0, max: 200, step: 0.5, default: 20,
           name: "Warning from (linear)",
-          condition: { kind: "sogLinear", speedLinearWarningEnabled: true }
+          condition: [
+            { kind: "sogLinear", speedLinearWarningEnabled: true },
+            { kind: "stwLinear", speedLinearWarningEnabled: true }
+          ]
         },
         speedLinearAlarmFrom: {
           type: "FLOAT", min: 0, max: 200, step: 0.5, default: 25,
           name: "Alarm from (linear)",
-          condition: { kind: "sogLinear", speedLinearAlarmEnabled: true }
+          condition: [
+            { kind: "sogLinear", speedLinearAlarmEnabled: true },
+            { kind: "stwLinear", speedLinearAlarmEnabled: true }
+          ]
         },
 
         // SpeedRadialWidget thresholds — only radial kinds

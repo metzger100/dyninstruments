@@ -35,6 +35,7 @@
           type: "SELECT",
           list: [
             opt("Voltage (SignalK)", "voltage"),
+            opt("Voltage gauge (linear)", "voltageLinear"),
             opt("Voltage gauge (radial)", "voltageRadial"),
             opt("Clock (local time)", "clock"),
             opt("Date and time", "dateTime"),
@@ -51,7 +52,7 @@
           type: "KEY",
           default: "",
           name: "SignalK path (voltage)",
-          condition: [{ kind: "voltage" }, { kind: "voltageRadial" }]
+          condition: [{ kind: "voltage" }, { kind: "voltageLinear" }, { kind: "voltageRadial" }]
         },
         pitchKey: {
           type: "KEY",
@@ -64,6 +65,68 @@
           default: DEFAULT_ROLL_KEY,
           name: "SignalK path (roll)",
           condition: { kind: "roll" }
+        },
+
+        // ---------------- VoltageLinearWidget (linear) settings -------------------
+        voltageLinearMinValue: {
+          type: "FLOAT", min: 0, max: 60, step: 0.1, default: 7.0,
+          name: "Min voltage (linear)",
+          condition: { kind: "voltageLinear" }
+        },
+        voltageLinearMaxValue: {
+          type: "FLOAT", min: 1, max: 80, step: 0.1, default: 15.0,
+          name: "Max voltage (linear)",
+          condition: { kind: "voltageLinear" }
+        },
+        voltageLinearTickMajor: {
+          type: "FLOAT", min: 0.1, max: 20, step: 0.1, default: 1.0,
+          name: "Major tick step (linear)",
+          condition: { kind: "voltageLinear" }
+        },
+        voltageLinearTickMinor: {
+          type: "FLOAT", min: 0.1, max: 10, step: 0.1, default: 0.2,
+          name: "Minor tick step (linear)",
+          condition: { kind: "voltageLinear" }
+        },
+        voltageLinearShowEndLabels: {
+          type: "BOOLEAN", default: false,
+          name: "Show min/max labels (linear)",
+          condition: { kind: "voltageLinear" }
+        },
+
+        voltageLinearWarningEnabled: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Warning sector enabled (linear)",
+          condition: { kind: "voltageLinear" }
+        },
+        voltageLinearAlarmEnabled: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Alarm sector enabled (linear)",
+          condition: { kind: "voltageLinear" }
+        },
+
+        voltageLinearAlarmFrom: {
+          type: "FLOAT", min: 0, max: 80, step: 0.1, default: 11.6,
+          name: "Alarm to (low, linear)",
+          condition: { kind: "voltageLinear", voltageLinearAlarmEnabled: true }
+        },
+        voltageLinearWarningFrom: {
+          type: "FLOAT", min: 0, max: 80, step: 0.1, default: 12.2,
+          name: "Warning to (low, linear)",
+          condition: { kind: "voltageLinear", voltageLinearWarningEnabled: true }
+        },
+
+        voltageLinearRatioThresholdNormal: {
+          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          name: "VoltageLinearWidget: Normal Threshold",
+          condition: { kind: "voltageLinear" }
+        },
+        voltageLinearRatioThresholdFlat: {
+          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          name: "VoltageLinearWidget: Flat Threshold",
+          condition: { kind: "voltageLinear" }
         },
 
         // ---------------- VoltageRadialWidget (radial) settings -------------------
@@ -194,7 +257,7 @@
         if (!out.storeKeys) out.storeKeys = {};
 
         // attach selected SK path into storeKeys.value (required!)
-        if (kind === "voltage" || kind === "voltageRadial") {
+        if (kind === "voltage" || kind === "voltageLinear" || kind === "voltageRadial") {
           if (typeof out.value === "string" && out.value.trim()) {
             out.storeKeys = { ...out.storeKeys, value: out.value.trim() };
           }

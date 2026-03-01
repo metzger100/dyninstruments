@@ -23,8 +23,11 @@
       SpeedRadialWidget: rendererPropsWidget.create(def, Helpers, "SpeedRadialWidget"),
       SpeedLinearWidget: rendererPropsWidget.create(def, Helpers, "SpeedLinearWidget"),
       DepthRadialWidget: rendererPropsWidget.create(def, Helpers, "DepthRadialWidget"),
+      DepthLinearWidget: rendererPropsWidget.create(def, Helpers, "DepthLinearWidget"),
       TemperatureRadialWidget: rendererPropsWidget.create(def, Helpers, "TemperatureRadialWidget"),
+      TemperatureLinearWidget: rendererPropsWidget.create(def, Helpers, "TemperatureLinearWidget"),
       VoltageRadialWidget: rendererPropsWidget.create(def, Helpers, "VoltageRadialWidget"),
+      VoltageLinearWidget: rendererPropsWidget.create(def, Helpers, "VoltageLinearWidget"),
       XteDisplayWidget: rendererPropsWidget.create(def, Helpers, "XteDisplayWidget")
     };
     const subSpecs = [threeSpec].concat(Object.keys(rendererSpecs).map(function (id) {

@@ -36,17 +36,23 @@ describe("static cluster configs", function () {
     expect(byCluster.wind.editableParameters.kind.default).toBe("angleTrue");
     expect(byCluster.anchor.editableParameters.kind.default).toBe("distance");
     expect(byCluster.speed.editableParameters.kind.list.map((entry) => entry.value))
-      .toEqual(expect.arrayContaining(["sogLinear"]));
-    expect(byCluster.speed.editableParameters.speedLinearRatioThresholdNormal.condition).toEqual({ kind: "sogLinear" });
-    expect(byCluster.speed.editableParameters.speedLinearRatioThresholdFlat.condition).toEqual({ kind: "sogLinear" });
-    expect(byCluster.speed.editableParameters.speedLinearWarningFrom.condition).toEqual({
-      kind: "sogLinear",
-      speedLinearWarningEnabled: true
-    });
-    expect(byCluster.speed.editableParameters.speedLinearAlarmFrom.condition).toEqual({
-      kind: "sogLinear",
-      speedLinearAlarmEnabled: true
-    });
+      .toEqual(expect.arrayContaining(["sogLinear", "stwLinear"]));
+    expect(byCluster.speed.editableParameters.speedLinearRatioThresholdNormal.condition).toEqual([
+      { kind: "sogLinear" },
+      { kind: "stwLinear" }
+    ]);
+    expect(byCluster.speed.editableParameters.speedLinearRatioThresholdFlat.condition).toEqual([
+      { kind: "sogLinear" },
+      { kind: "stwLinear" }
+    ]);
+    expect(byCluster.speed.editableParameters.speedLinearWarningFrom.condition).toEqual([
+      { kind: "sogLinear", speedLinearWarningEnabled: true },
+      { kind: "stwLinear", speedLinearWarningEnabled: true }
+    ]);
+    expect(byCluster.speed.editableParameters.speedLinearAlarmFrom.condition).toEqual([
+      { kind: "sogLinear", speedLinearAlarmEnabled: true },
+      { kind: "stwLinear", speedLinearAlarmEnabled: true }
+    ]);
     expect(byCluster.wind.editableParameters.angleCaption_TWA).toBeUndefined();
     expect(byCluster.wind.editableParameters.speedCaption_TWS).toBeUndefined();
     expect(byCluster.wind.editableParameters.angleUnitGraphic).toBeUndefined();

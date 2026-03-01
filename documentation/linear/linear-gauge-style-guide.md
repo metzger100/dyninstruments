@@ -1,6 +1,6 @@
 # Linear Gauge Style Guide
 
-**Status:** ✅ Extension-ready | `SpeedLinearWidget` shipped, profile contracts documented for range/centered180/fixed360 kinds
+**Status:** ✅ Implemented | Speed/Depth/Temperature/Voltage linear wrappers shipped, profile contracts documented for range/centered180/fixed360 kinds
 
 ## Overview
 

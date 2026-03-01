@@ -19,8 +19,11 @@ describe("ClusterRendererRouter", function () {
     const speed = makeSpec("speed");
     const speedLinear = makeSpec("speedLinear");
     const depth = makeSpec("depth");
+    const depthLinear = makeSpec("depthLinear");
     const temp = makeSpec("temp");
+    const tempLinear = makeSpec("tempLinear");
     const volt = makeSpec("volt");
+    const voltLinear = makeSpec("voltLinear");
     const xte = makeSpec("xte");
     const targetSpecs = {
       WindRadialWidget: wind,
@@ -28,8 +31,11 @@ describe("ClusterRendererRouter", function () {
       SpeedRadialWidget: speed,
       SpeedLinearWidget: speedLinear,
       DepthRadialWidget: depth,
+      DepthLinearWidget: depthLinear,
       TemperatureRadialWidget: temp,
+      TemperatureLinearWidget: tempLinear,
       VoltageRadialWidget: volt,
+      VoltageLinearWidget: voltLinear,
       XteDisplayWidget: xte
     };
 
@@ -56,6 +62,9 @@ describe("ClusterRendererRouter", function () {
     expect(router.pickRenderer({ renderer: "WindRadialWidget" })).toBe(wind);
     expect(router.pickRenderer({ renderer: "XteDisplayWidget" })).toBe(xte);
     expect(router.pickRenderer({ renderer: "SpeedLinearWidget" })).toBe(speedLinear);
+    expect(router.pickRenderer({ renderer: "DepthLinearWidget" })).toBe(depthLinear);
+    expect(router.pickRenderer({ renderer: "TemperatureLinearWidget" })).toBe(tempLinear);
+    expect(router.pickRenderer({ renderer: "VoltageLinearWidget" })).toBe(voltLinear);
     expect(router.pickRenderer({ renderer: "PositionCoordinateWidget" })).toBe(position);
     expect(router.pickRenderer({ renderer: "Unknown" })).toBe(three);
     expect(router.pickRenderer({})).toBe(three);
@@ -66,10 +75,13 @@ describe("ClusterRendererRouter", function () {
     const speed = makeSpec("speed", { finalizeFunction: vi.fn(() => { throw new Error("ignored"); }) });
     const speedLinear = makeSpec("speedLinear");
     const voltage = makeSpec("voltage");
+    const voltageLinear = makeSpec("voltageLinear");
     const wind = makeSpec("wind");
     const compass = makeSpec("compass");
     const depth = makeSpec("depth");
+    const depthLinear = makeSpec("depthLinear");
     const temp = makeSpec("temp");
+    const tempLinear = makeSpec("tempLinear");
     const xte = makeSpec("xte");
     const targetSpecs = {
       WindRadialWidget: wind,
@@ -77,8 +89,11 @@ describe("ClusterRendererRouter", function () {
       SpeedRadialWidget: speed,
       SpeedLinearWidget: speedLinear,
       DepthRadialWidget: depth,
+      DepthLinearWidget: depthLinear,
       TemperatureRadialWidget: temp,
+      TemperatureLinearWidget: tempLinear,
       VoltageRadialWidget: voltage,
+      VoltageLinearWidget: voltageLinear,
       XteDisplayWidget: xte
     };
 
@@ -115,6 +130,9 @@ describe("ClusterRendererRouter", function () {
     expect(three.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
     expect(speed.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
     expect(speedLinear.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
+    expect(depthLinear.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
+    expect(tempLinear.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
     expect(voltage.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
+    expect(voltageLinear.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
   });
 });
