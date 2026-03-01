@@ -1,74 +1,84 @@
 # Linear Gauge Style Guide
 
-**Status:** ✅ Phase 1 implemented | `SpeedLinearWidget` (`sogLinear`)
+**Status:** ✅ Extension-ready | `SpeedLinearWidget` shipped, profile contracts documented for range/centered180/fixed360 kinds
 
 ## Overview
 
-Linear gauges follow radial visual semantics with a horizontal scale:
+Linear gauges are horizontal scale instruments implemented as thin wrappers over `LinearGaugeEngine`.
 
-- same warning/alarm color roles
-- same pointer color token
-- same flat/normal/high responsive mode concept
-- same disconnect overlay behavior
+Use this guide to keep visual behavior and editable parameter contracts consistent when adding new `*Linear` kinds.
 
-Phase 1 ships `SpeedLinearWidget` for `sogLinear`. The shared engine also reserves axis behavior for future wind and compass linear kinds.
+## Key Details
+
+- Track, ticks, pointer, labels, and text rows are rendered by shared linear kits.
+- Layout uses the same responsive modes as radial gauges: `high`, `normal`, `flat`.
+- `normal` mode uses boosted tick labels and a taller inline text band for readability.
+- A linear wrapper should provide only profile-specific formatting, ticks, axis choice, and sectors.
+- Shared theme tokens come from `theme.linear.*` and `theme.colors.*`.
+
+## Supported Profiles
+
+| Profile | Typical kinds | `axisMode` | Domain source | Formatter baseline | Sector model |
+|---|---|---|---|---|---|
+| Speed linear | `sogLinear`, `stwLinear` | `range` | Editable `min/max` | `formatSpeed` | High-end warning/alarm |
+| Depth linear | `depthLinear` | `range` | Editable `min/max` | `formatDecimal` | Low-end warning/alarm |
+| Temperature linear | `tempLinear` | `range` | Editable `min/max` | `formatTemperature` | Optional high-end warning/alarm |
+| Voltage linear | `voltageLinear` | `range` | Editable `min/max` | `formatDecimal` | Low-end warning/alarm |
+| Wind angle linear | `angleTrueLinear`, `angleApparentLinear` | `centered180` | Fixed `-180..180` | Angle formatter contract | Mirrored layline sectors (optional) |
+| Compass linear | `hdtLinear`, `hdmLinear`, `cogLinear` | `fixed360` | Fixed `0..360` | `formatDirection360` | Usually none |
 
 ## Style and Proportions
 
-- Track is centered in a dedicated scale box.
-- In `high` and `normal`, the scale box gets visual priority over text rows.
-- Track thickness uses `theme.linear.track.widthFactor`.
-- Track stroke uses `theme.linear.track.lineWidth`.
+- Track stays centered in a dedicated scale box.
 - Tick lengths/widths use `theme.linear.ticks.*`.
 - Pointer triangle uses `theme.linear.pointer.*` and `theme.colors.pointer`.
-- Tick label spacing/font sizing use `theme.linear.labels.*`.
-- `normal` mode applies a stronger tick-label boost and a taller inline text band to improve caption/value readability.
-- Caption/value row allocation in `high`/`flat` follows `captionUnitScale` so the configured ratio remains visible.
+- Tick labels use `theme.linear.labels.insetFactor` and `theme.linear.labels.fontFactor`.
+- Caption/value rows use `captionUnitScale` in `high` and `flat`.
 
 ## Colors
 
 - Warning sector: `theme.colors.warning`
 - Alarm sector: `theme.colors.alarm`
 - Pointer: `theme.colors.pointer`
-- Tick/labels/track stroke: `Helpers.resolveTextColor()`
+- Track stroke/ticks/labels: `Helpers.resolveTextColor()`
 
 ## Sector Semantics
 
-### SpeedLinearWidget (high-end)
+- High-end sectors: warning `warningFrom..alarmFrom`, alarm `alarmFrom..max`.
+- Low-end sectors: alarm `min..alarmFrom`, warning `alarmFrom..warningFrom`.
+- Mirrored sectors (`centered180`): layline bands on both sides of `0` (for example `[-max,-min]` and `[min,max]`).
+- No sectors: return `[]` from `buildSectors`.
 
-- Warning sector: `speedLinearWarningFrom .. speedLinearAlarmFrom` (or max)
-- Alarm sector: `speedLinearAlarmFrom .. max`
-- Toggle behavior:
-  - `speedLinearWarningEnabled: false` removes warning sector
-  - `speedLinearAlarmEnabled: false` removes alarm sector
+## Editable Parameter Key Pattern
 
-Future low-end and mirrored sector logic should match existing radial conventions per cluster kind.
+Use gauge-prefixed keys to avoid cross-kind collisions.
+
+- Ratio thresholds: `{gauge}LinearRatioThresholdNormal`, `{gauge}LinearRatioThresholdFlat`
+- Ticks: `{gauge}LinearTickMajor`, `{gauge}LinearTickMinor`, `{gauge}LinearShowEndLabels`
+- Range-only domain: `{gauge}LinearMinValue`, `{gauge}LinearMaxValue`
+- High-end sectors: `{gauge}LinearWarningEnabled`, `{gauge}LinearAlarmEnabled`, `{gauge}LinearWarningFrom`, `{gauge}LinearAlarmFrom`
+- Low-end sectors: `{gauge}LinearWarningEnabled`, `{gauge}LinearAlarmEnabled`, `{gauge}LinearWarningFrom`, `{gauge}LinearAlarmFrom`
+- Mirrored sectors: `{gauge}LinearLayEnabled`, `{gauge}LinearLayMin`, `{gauge}LinearLayMax`
 
 ## Layout Modes
 
-Mode selection uses the same ratio strategy as semicircle gauges:
+Mode selection stays ratio-based per gauge kind.
 
-- `high`: `ratio < speedLinearRatioThresholdNormal`
-- `normal`: between thresholds
-- `flat`: `ratio > speedLinearRatioThresholdFlat`
+- `high`: top gauge + lower caption/value block
+- `normal`: top gauge + one inline caption/value/unit row below scale box
+- `flat`: left gauge + right caption/value stack
 
-Mode-specific composition:
+## Extension Readiness Checklist
 
-- `high`: top linear gauge, then a separated lower text block (`caption` above `value+unit`)
-- `normal`: top linear gauge, bottom one-line `caption value unit` with increased text emphasis and reduced empty gap below the scale box
-- `flat`: left linear gauge, right top caption, right bottom value+unit
-
-Tick labels are collision-filtered in narrow layouts and clamped to the gauge area so they do not overlap text rows.
-
-## Axis Reservation for Future Kinds
-
-- `range`: speed/depth/temperature/voltage
-- `centered180`: wind angle kinds with mirrored layline sectors
-- `fixed360`: compass with fixed scale and moving indicator
+- Define kind defaults (`caption_*`, `unit_*`) before mapper wiring.
+- Keep mapper output declarative; numeric normalization stays at mapper boundary.
+- Use `LinearGaugeEngine` axis profile matching the kind semantics.
+- Add widget and mapper tests for new renderer contracts.
+- Update linear docs and run `npm run check:all`.
 
 ## Related
 
 - [../guides/add-new-linear-gauge.md](../guides/add-new-linear-gauge.md)
 - [linear-shared-api.md](linear-shared-api.md)
+- [../guides/add-new-cluster.md](../guides/add-new-cluster.md)
 - [../radial/gauge-style-guide.md](../radial/gauge-style-guide.md)
-- [../shared/css-theming.md](../shared/css-theming.md)
