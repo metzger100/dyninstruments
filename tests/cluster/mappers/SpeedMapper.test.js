@@ -5,6 +5,8 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   unit_sog: "kn",
   caption_sogLinear: "SOG",
   unit_sogLinear: "kn",
+  caption_stwLinear: "STW",
+  unit_stwLinear: "kn",
   caption_sogRadial: "SOG",
   unit_sogRadial: "kn"
 });
@@ -88,6 +90,32 @@ describe("SpeedMapper", function () {
     expect(out.formatterParameters).toEqual(["kn"]);
     expect(out.rendererProps.speedLinearMinValue).toBe(0);
     expect(out.rendererProps.speedLinearMaxValue).toBe(30);
+    expect(out.rendererProps.speedLinearWarningFrom).toBe(20);
+    expect(out.rendererProps.speedLinearAlarmFrom).toBe(25);
+  });
+
+  it("maps stwLinear to SpeedLinearWidget using STW source with shared linear settings", function () {
+    const mapper = loadFresh("cluster/mappers/SpeedMapper.js").create();
+    const out = mapper.translate({
+      kind: "stwLinear",
+      stw: 6.8,
+      speedLinearRatioThresholdNormal: "1.1",
+      speedLinearRatioThresholdFlat: "3.5",
+      speedLinearMinValue: "0",
+      speedLinearMaxValue: "30",
+      speedLinearTickMajor: "5",
+      speedLinearTickMinor: "1",
+      speedLinearShowEndLabels: false,
+      speedLinearWarningFrom: "20",
+      speedLinearAlarmFrom: "25"
+    }, toolkit);
+
+    expect(out.renderer).toBe("SpeedLinearWidget");
+    expect(out.value).toBe(6.8);
+    expect(out.caption).toBe("STW");
+    expect(out.unit).toBe("kn");
+    expect(out.formatter).toBe("formatSpeed");
+    expect(out.formatterParameters).toEqual(["kn"]);
     expect(out.rendererProps.speedLinearWarningFrom).toBe(20);
     expect(out.rendererProps.speedLinearAlarmFrom).toBe(25);
   });

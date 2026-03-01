@@ -1,5 +1,5 @@
 /**
- * Module: SpeedLinearWidget - Linear speed gauge with high-end warning/alarm sectors
+ * Module: SpeedLinearWidget - Linear speed gauge for SOG/STW with high-end warning/alarm sectors
  * Documentation: documentation/linear/linear-gauge-style-guide.md
  * Depends: LinearGaugeEngine, RadialValueMath
  */

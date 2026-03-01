@@ -22,6 +22,8 @@ describe("config/clusters/environment.js", function () {
     expect(def.name).toBe("dyninstruments_Environment");
     expect(def.storeKeys.depth).toBe("nav.gps.depthBelowTransducer");
     expect(def.editableParameters.kind.default).toBe("depth");
+    const kinds = def.editableParameters.kind.list.map((entry) => entry.value);
+    expect(kinds).toEqual(expect.arrayContaining(["depthLinear", "tempLinear"]));
   });
 
   it("injects pressure store key from value when pressure kind is active", function () {
@@ -48,6 +50,9 @@ describe("config/clusters/environment.js", function () {
 
     const explicit = def.updateFunction({ kind: "tempRadial", tempKey: "env.temp.engine" });
     expect(explicit.storeKeys.temp).toBe("env.temp.engine");
+
+    const explicitLinear = def.updateFunction({ kind: "tempLinear", tempKey: "env.temp.linear" });
+    expect(explicitLinear.storeKeys.temp).toBe("env.temp.linear");
 
     const fallback = def.updateFunction({ kind: "temp", tempKey: "" });
     expect(fallback.storeKeys.temp).toBe("nav.gps.waterTemp");

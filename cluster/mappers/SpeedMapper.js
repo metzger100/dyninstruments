@@ -24,13 +24,15 @@
 
       const effKind = p.kind;
 
-      if (effKind === "sogLinear") {
+      if (effKind === "sogLinear" || effKind === "stwLinear") {
+        const baseKind = (effKind === "sogLinear") ? "sog" : "stw";
+        const val = p[baseKind];
         const uni = unit(effKind);
         const warnOn = (p.speedLinearWarningEnabled !== false);
         const alarmOn = (p.speedLinearAlarmEnabled !== false);
         return {
           renderer: "SpeedLinearWidget",
-          value: p.sog,
+          value: val,
           caption: cap(effKind),
           unit: uni,
           formatter: "formatSpeed",

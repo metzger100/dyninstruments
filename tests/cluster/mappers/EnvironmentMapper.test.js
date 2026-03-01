@@ -1,8 +1,12 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
+  caption_depthLinear: "DPT",
+  unit_depthLinear: "m",
   caption_depthRadial: "DPT",
   unit_depthRadial: "m",
+  caption_tempLinear: "TEMP",
+  unit_tempLinear: "°C",
   caption_tempRadial: "TEMP",
   unit_tempRadial: "°C",
   caption_temp: "TEMP",
@@ -14,6 +18,27 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
 });
 
 describe("EnvironmentMapper", function () {
+  it("maps depthLinear with warning/alarm enabled by default", function () {
+    const mapper = loadFresh("cluster/mappers/EnvironmentMapper.js").create();
+    const out = mapper.translate({
+      kind: "depthLinear",
+      depth: 3.2,
+      depthLinearMinValue: "0",
+      depthLinearMaxValue: "30",
+      depthLinearTickMajor: "5",
+      depthLinearTickMinor: "1",
+      depthLinearAlarmFrom: "2",
+      depthLinearWarningFrom: "5",
+      depthLinearRatioThresholdNormal: "1.1",
+      depthLinearRatioThresholdFlat: "3.5",
+      captionUnitScale: "0.8"
+    }, toolkit);
+
+    expect(out.renderer).toBe("DepthLinearWidget");
+    expect(out.rendererProps.depthLinearAlarmFrom).toBe(2);
+    expect(out.rendererProps.depthLinearWarningFrom).toBe(5);
+  });
+
   it("maps depthRadial with warning/alarm enabled by default", function () {
     const mapper = loadFresh("cluster/mappers/EnvironmentMapper.js").create();
     const out = mapper.translate({
@@ -58,6 +83,31 @@ describe("EnvironmentMapper", function () {
     expect(out.formatterParameters).toEqual(["celsius"]);
     expect(out.rendererProps.tempRadialWarningFrom).toBeUndefined();
     expect(out.rendererProps.tempRadialAlarmFrom).toBe(32);
+  });
+
+  it("maps tempLinear and only enables sectors when toggles are true", function () {
+    const mapper = loadFresh("cluster/mappers/EnvironmentMapper.js").create();
+    const out = mapper.translate({
+      kind: "tempLinear",
+      temp: 22,
+      tempLinearWarningEnabled: false,
+      tempLinearAlarmEnabled: true,
+      tempLinearWarningFrom: "28",
+      tempLinearAlarmFrom: "32",
+      tempLinearMinValue: "0",
+      tempLinearMaxValue: "35",
+      tempLinearTickMajor: "5",
+      tempLinearTickMinor: "1",
+      tempLinearRatioThresholdNormal: "1.1",
+      tempLinearRatioThresholdFlat: "3.5",
+      captionUnitScale: "0.8"
+    }, toolkit);
+
+    expect(out.renderer).toBe("TemperatureLinearWidget");
+    expect(out.formatter).toBe("formatTemperature");
+    expect(out.formatterParameters).toEqual(["celsius"]);
+    expect(out.rendererProps.tempLinearWarningFrom).toBeUndefined();
+    expect(out.rendererProps.tempLinearAlarmFrom).toBe(32);
   });
 
   it("maps numeric kinds with expected formatters", function () {

@@ -21,11 +21,12 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 - `dyninstruments_Nav` is canonical owner for `dst`, `rteDistance`, `positionBoat`, `positionWp`
 - `dyninstruments_Anchor` remains owner for anchor distance/watch/bearing
-- `dyninstruments_Vessel` owns time/clock (`clock`) and voltage kinds
+- `dyninstruments_Vessel` owns time/clock (`clock`) and voltage kinds (`voltage`, `voltageRadial`, `voltageLinear`)
 
 ### Planned integration directions
 
 - `vessel`: quick-win text kinds completed (`dateTime`, `timeStatus`, `pitch`, `roll`)
+- linear gauge parity completed for non-compass/non-wind radial ownership (`sogLinear`, `stwLinear`, `depthLinear`, `tempLinear`, `voltageLinear`)
 - `nav`: `activeRoute`, `routePoints`, `editRoute`
 - planned new clusters: `ais` (for example `aisTarget`), `map` (for example `zoom`, `centerDisplay`)
 - `default`: likely a dedicated utility/default widget instead of a cluster kind
@@ -33,9 +34,9 @@ It tracks pre-release priorities and AvNav widget coverage status.
 ### Practical implementation order
 
 1. ✅ Quick wins (text): `DateTime`, `TimeStatus`, `signalKPitch`, `signalKRoll`
-2. High-impact canvas visuals: ✅ `XteDisplay`, `ActiveRoute`
+2. High-impact canvas visuals: ✅ `XteDisplay`, planned `ActiveRoute`
 3. Lists and controls (interaction-heavy): `RoutePoints`, `EditRoute`, `Zoom`, `CenterDisplay`
-4. Linear gauges: alternatives for radial kinds (phase 1: `sogLinear`)
+4. ✅ Linear gauges: non-compass/non-wind radial alternatives (`sogLinear`, `stwLinear`, `depthLinear`, `tempLinear`, `voltageLinear`)
 5. AIS: `AisTarget` (requires additional data logic and responsive layout)
 
 ### Additional non-core concepts
@@ -49,6 +50,10 @@ It tracks pre-release priorities and AvNav widget coverage status.
 - Linear kinds mirror existing radial ownership and naming with `*Linear` suffix.
 - Examples:
   - `sogRadial` -> `sogLinear`
+  - `stwRadial` -> `stwLinear`
+  - `depthRadial` -> `depthLinear`
+  - `tempRadial` -> `tempLinear`
+  - `voltageRadial` -> `voltageLinear`
   - `hdtRadial` -> `hdtLinear` (planned)
   - `angleTrueRadial` -> `angleTrueLinear` (planned)
 - Axis mode reservation in shared linear engine:
@@ -72,7 +77,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | CombinedWidget               | —                                                                            | ❌ not covered yet                          |
 | DateTime                     | dyninstruments_Vessel → `dateTime`                                           | ✅ covered                                  |
 | Default                      | —                                                                            | ❌ not covered yet                          |
-| DepthDisplay                 | dyninstruments_Environment → `depth`                                         | ✅ covered                                  |
+| DepthDisplay                 | dyninstruments_Environment → `depth` / `depthLinear`                         | ✅ covered                                  |
 | DST                          | dyninstruments_Nav → `dst`                                                   | ✅ covered                                  |
 | EditRoute                    | —                                                                            | ❌ not covered yet                          |
 | ETA                          | dyninstruments_Nav → `eta`                                                   | ✅ covered                                  |
@@ -81,8 +86,8 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | LargeTime                    | dyninstruments_Vessel → `clock`                                              | ✅ covered                                  |
 | linGauge_Compass             | —                                                                            | ❌ not covered yet                          |
 | linGauge_Compass180          | —                                                                            | ❌ not covered yet                          |
-| linGauge_Temperature         | —                                                                            | ❌ not covered yet                          |
-| linGauge_Voltage             | —                                                                            | ❌ not covered yet                          |
+| linGauge_Temperature         | dyninstruments_Environment → `tempLinear`                                    | ✅ covered                                  |
+| linGauge_Voltage             | dyninstruments_Vessel → `voltageLinear`                                      | ✅ covered                                  |
 | Position                     | dyninstruments_Nav → `positionBoat`                                          | ✅ covered                                  |
 | radGauge_Compass             | dyninstruments_CourseHeading → `hdtRadial`                                  | ✅ covered                                  |
 | radGauge_Speed               | dyninstruments_Speed → `sogRadial`/`stwRadial`                             | ✅ covered                                  |
@@ -92,12 +97,12 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | RoutePoints                  | —                                                                            | ❌ not covered yet                          |
 | RteDistance                  | dyninstruments_Nav → `rteDistance`                                           | ✅ covered                                  |
 | RteEta                       | dyninstruments_Nav → `rteEta`                                                | ✅ covered                                  |
-| signalKCelsius               | dyninstruments_Environment → `temp`                                          | ✅ covered                                  |
+| signalKCelsius               | dyninstruments_Environment → `temp` / `tempLinear`                           | ✅ covered                                  |
 | signalKPitch                 | dyninstruments_Vessel → `pitch`                                              | ✅ covered                                  |
 | signalKPressureHpa           | dyninstruments_Environment → `pressure`                                      | ✅ covered                                  |
 | signalKRoll                  | dyninstruments_Vessel → `roll`                                               | ✅ covered                                  |
-| SOG                          | dyninstruments_Speed → `sog`                                                 | ✅ covered                                  |
-| STW                          | dyninstruments_Speed → `stw`                                                 | ✅ covered                                  |
+| SOG                          | dyninstruments_Speed → `sog` / `sogLinear`                                   | ✅ covered                                  |
+| STW                          | dyninstruments_Speed → `stw` / `stwLinear`                                   | ✅ covered                                  |
 | TimeStatus                   | dyninstruments_Vessel → `timeStatus`                                         | ✅ covered                                  |
 | VMG                          | dyninstruments_Nav → `vmg`                                                   | ✅ covered                                  |
 | WaterTemp                    | dyninstruments_Environment → `temp`                                          | ✅ covered                                  |

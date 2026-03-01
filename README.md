@@ -12,7 +12,7 @@ The goal is maximum readability at the helm with minimal configuration overhead.
 ### Cluster widgets
 
 - Related values are grouped into thematic clusters: `courseHeading`, `speed`, `environment`, `wind`, `nav`, `anchor`, `vessel`.
-- In the editor you usually select only a `kind` (for example `cog`, `hdt`, `sog`, `stw`, `tempRadial`) instead of building custom widgets per value.
+- In the editor you usually select only a `kind` (for example `cog`, `hdt`, `sog`, `stwLinear`, `tempLinear`, `tempRadial`) instead of building custom widgets per value.
 
 ### Readability-first layouts
 
@@ -29,6 +29,11 @@ The goal is maximum readability at the helm with minimal configuration overhead.
   - `DepthRadialWidget`
   - `TemperatureRadialWidget`
   - `VoltageRadialWidget`
+- Linear gauges:
+  - `SpeedLinearWidget` (`sogLinear`, `stwLinear`)
+  - `DepthLinearWidget`
+  - `TemperatureLinearWidget`
+  - `VoltageLinearWidget`
 
 ### Editor options
 
@@ -192,6 +197,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full layer map and dependency rul
 ## Roadmap (Short)
 
 - Foundation refactors are complete (bootstrap split, shared gauge core, semicircle engine unification).
+- Linear parity for non-compass/non-wind radial kinds is complete (`sogLinear`, `stwLinear`, `depthLinear`, `tempLinear`, `voltageLinear`).
 - Next focus is coverage expansion for remaining AvNav widget categories.
 - Cluster-first integration remains the primary strategy.
 - Backward compatibility is not guaranteed during pre-release.

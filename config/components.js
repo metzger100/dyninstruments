@@ -173,8 +173,11 @@
         "SpeedRadialWidget",
         "SpeedLinearWidget",
         "DepthRadialWidget",
+        "DepthLinearWidget",
         "TemperatureRadialWidget",
+        "TemperatureLinearWidget",
         "VoltageRadialWidget",
+        "VoltageLinearWidget",
         "XteDisplayWidget"
       ]
     },
@@ -202,17 +205,35 @@
       globalKey: "DyniSpeedLinearWidget",
       deps: ["LinearGaugeEngine", "RadialValueMath"]
     },
+    DepthLinearWidget: {
+      js: BASE + "widgets/linear/DepthLinearWidget/DepthLinearWidget.js",
+      css: undefined,
+      globalKey: "DyniDepthLinearWidget",
+      deps: ["LinearGaugeEngine", "RadialValueMath"]
+    },
     DepthRadialWidget: {
       js: BASE + "widgets/radial/DepthRadialWidget/DepthRadialWidget.js",
       css: undefined,
       globalKey: "DyniDepthRadialWidget",
       deps: ["SemicircleRadialEngine", "RadialValueMath"]
     },
+    TemperatureLinearWidget: {
+      js: BASE + "widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js",
+      css: undefined,
+      globalKey: "DyniTemperatureLinearWidget",
+      deps: ["LinearGaugeEngine", "RadialValueMath"]
+    },
     TemperatureRadialWidget: {
       js: BASE + "widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js",
       css: undefined,
       globalKey: "DyniTemperatureRadialWidget",
       deps: ["SemicircleRadialEngine", "RadialValueMath"]
+    },
+    VoltageLinearWidget: {
+      js: BASE + "widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js",
+      css: undefined,
+      globalKey: "DyniVoltageLinearWidget",
+      deps: ["LinearGaugeEngine", "RadialValueMath"]
     },
     VoltageRadialWidget: {
       js: BASE + "widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js",

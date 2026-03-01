@@ -24,6 +24,30 @@
 
       const req = p.kind;
 
+      if (req === "depthLinear") {
+        const depthWarnOn = (p.depthLinearWarningEnabled !== false);
+        const depthAlarmOn = (p.depthLinearAlarmEnabled !== false);
+
+        return {
+          renderer: "DepthLinearWidget",
+          value: p.depth,
+          caption: cap("depthLinear"),
+          unit: unit("depthLinear"),
+          rendererProps: {
+            depthLinearMinValue: num(p.depthLinearMinValue),
+            depthLinearMaxValue: num(p.depthLinearMaxValue),
+            depthLinearTickMajor: num(p.depthLinearTickMajor),
+            depthLinearTickMinor: num(p.depthLinearTickMinor),
+            depthLinearShowEndLabels: !!p.depthLinearShowEndLabels,
+            depthLinearAlarmFrom: depthAlarmOn ? num(p.depthLinearAlarmFrom) : undefined,
+            depthLinearWarningFrom: depthWarnOn ? num(p.depthLinearWarningFrom) : undefined,
+            depthLinearRatioThresholdNormal: num(p.depthLinearRatioThresholdNormal),
+            depthLinearRatioThresholdFlat: num(p.depthLinearRatioThresholdFlat),
+            captionUnitScale: num(p.captionUnitScale)
+          }
+        };
+      }
+
       if (req === "depthRadial") {
         const depthWarnOn = (p.depthRadialWarningEnabled !== false);
         const depthAlarmOn = (p.depthRadialAlarmEnabled !== false);
@@ -68,6 +92,31 @@
             tempRadialAlarmFrom: tempAlarmOn ? num(p.tempRadialAlarmFrom) : undefined,
             tempRadialRatioThresholdNormal: num(p.tempRadialRatioThresholdNormal),
             tempRadialRatioThresholdFlat: num(p.tempRadialRatioThresholdFlat),
+            captionUnitScale: num(p.captionUnitScale)
+          }
+        };
+      }
+
+      if (req === "tempLinear") {
+        const tempWarnOn = (p.tempLinearWarningEnabled === true);
+        const tempAlarmOn = (p.tempLinearAlarmEnabled === true);
+        return {
+          renderer: "TemperatureLinearWidget",
+          value: p.temp,
+          caption: cap("tempLinear"),
+          unit: unit("tempLinear"),
+          formatter: "formatTemperature",
+          formatterParameters: ["celsius"],
+          rendererProps: {
+            tempLinearMinValue: num(p.tempLinearMinValue),
+            tempLinearMaxValue: num(p.tempLinearMaxValue),
+            tempLinearTickMajor: num(p.tempLinearTickMajor),
+            tempLinearTickMinor: num(p.tempLinearTickMinor),
+            tempLinearShowEndLabels: !!p.tempLinearShowEndLabels,
+            tempLinearWarningFrom: tempWarnOn ? num(p.tempLinearWarningFrom) : undefined,
+            tempLinearAlarmFrom: tempAlarmOn ? num(p.tempLinearAlarmFrom) : undefined,
+            tempLinearRatioThresholdNormal: num(p.tempLinearRatioThresholdNormal),
+            tempLinearRatioThresholdFlat: num(p.tempLinearRatioThresholdFlat),
             captionUnitScale: num(p.captionUnitScale)
           }
         };

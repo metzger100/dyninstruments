@@ -28,6 +28,7 @@ describe("config/clusters/vessel.js", function () {
     const kinds = def.editableParameters.kind.list.map((entry) => entry.value);
     expect(kinds).toEqual(expect.arrayContaining([
       "voltage",
+      "voltageLinear",
       "voltageRadial",
       "clock",
       "dateTime",
@@ -49,6 +50,13 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.voltageRadialShowEndLabels).toBeTruthy();
     expect(def.editableParameters.voltageRadialWarningFrom).toBeTruthy();
     expect(def.editableParameters.voltageRadialAlarmFrom).toBeTruthy();
+    expect(def.editableParameters.voltageLinearMinValue).toBeTruthy();
+    expect(def.editableParameters.voltageLinearMaxValue).toBeTruthy();
+    expect(def.editableParameters.voltageLinearTickMajor).toBeTruthy();
+    expect(def.editableParameters.voltageLinearTickMinor).toBeTruthy();
+    expect(def.editableParameters.voltageLinearShowEndLabels).toBeTruthy();
+    expect(def.editableParameters.voltageLinearWarningFrom).toBeTruthy();
+    expect(def.editableParameters.voltageLinearAlarmFrom).toBeTruthy();
 
     expect(def.editableParameters.voltageRadialWarningFrom.condition).toEqual({
       kind: "voltageRadial",
@@ -57,6 +65,14 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.voltageRadialAlarmFrom.condition).toEqual({
       kind: "voltageRadial",
       voltageRadialAlarmEnabled: true
+    });
+    expect(def.editableParameters.voltageLinearWarningFrom.condition).toEqual({
+      kind: "voltageLinear",
+      voltageLinearWarningEnabled: true
+    });
+    expect(def.editableParameters.voltageLinearAlarmFrom.condition).toEqual({
+      kind: "voltageLinear",
+      voltageLinearAlarmEnabled: true
     });
   });
 
@@ -68,7 +84,7 @@ describe("config/clusters/vessel.js", function () {
 
   it("removes stale voltage value key when voltage key is cleared", function () {
     const def = loadVesselDef();
-    const out = def.updateFunction({ kind: "voltageRadial", value: " ", storeKeys: { value: "old.path" } });
+    const out = def.updateFunction({ kind: "voltageLinear", value: " ", storeKeys: { value: "old.path" } });
     expect(out.storeKeys.value).toBeUndefined();
   });
 

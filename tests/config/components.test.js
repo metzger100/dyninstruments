@@ -61,8 +61,11 @@ describe("config/components.js", function () {
     expect(components.TextLayoutEngine.deps).toEqual(["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]);
     expect(components.SpeedRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
     expect(components.SpeedLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
+    expect(components.DepthLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.DepthRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
+    expect(components.TemperatureLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.TemperatureRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
+    expect(components.VoltageLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.VoltageRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
     expect(components.XteDisplayWidget.deps).toEqual(["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives"]);
     expect(components.WindRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
@@ -79,8 +82,11 @@ describe("config/components.js", function () {
       "SpeedRadialWidget",
       "SpeedLinearWidget",
       "DepthRadialWidget",
+      "DepthLinearWidget",
       "TemperatureRadialWidget",
+      "TemperatureLinearWidget",
       "VoltageRadialWidget",
+      "VoltageLinearWidget",
       "XteDisplayWidget"
     ]);
     expect(components.DateTimeRendererWrapper.globalKey).toBe("DyniDateTimeRendererWrapper");

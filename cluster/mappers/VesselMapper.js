@@ -24,6 +24,31 @@
 
       const req = p.kind;
 
+      if (req === "voltageLinear") {
+        const warnEnabled = (p.voltageLinearWarningEnabled !== false);
+        const alarmEnabled = (p.voltageLinearAlarmEnabled !== false);
+        return {
+          renderer: "VoltageLinearWidget",
+          value: p.value,
+          caption: cap("voltageLinear"),
+          unit: unit("voltageLinear"),
+          formatter: "formatDecimal",
+          formatterParameters: [3, 1, true],
+          rendererProps: {
+            voltageLinearMinValue: num(p.voltageLinearMinValue),
+            voltageLinearMaxValue: num(p.voltageLinearMaxValue),
+            voltageLinearTickMajor: num(p.voltageLinearTickMajor),
+            voltageLinearTickMinor: num(p.voltageLinearTickMinor),
+            voltageLinearShowEndLabels: !!p.voltageLinearShowEndLabels,
+            voltageLinearWarningFrom: warnEnabled ? num(p.voltageLinearWarningFrom) : undefined,
+            voltageLinearAlarmFrom: alarmEnabled ? num(p.voltageLinearAlarmFrom) : undefined,
+            voltageLinearRatioThresholdNormal: num(p.voltageLinearRatioThresholdNormal),
+            voltageLinearRatioThresholdFlat: num(p.voltageLinearRatioThresholdFlat),
+            captionUnitScale: num(p.captionUnitScale)
+          }
+        };
+      }
+
       if (req === "voltageRadial") {
         const warnEnabled = (p.voltageRadialWarningEnabled !== false);
         const alarmEnabled = (p.voltageRadialAlarmEnabled !== false);

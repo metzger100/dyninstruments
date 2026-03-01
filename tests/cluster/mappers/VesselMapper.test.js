@@ -1,6 +1,8 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
+  caption_voltageLinear: "VOLT",
+  unit_voltageLinear: "V",
   caption_voltageRadial: "VOLT",
   unit_voltageRadial: "V",
   caption_voltage: "VOLT",
@@ -18,6 +20,45 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
 });
 
 describe("VesselMapper", function () {
+  it("maps voltageLinear with explicit linear keys and respects sector toggles", function () {
+    const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
+    const out = mapper.translate({
+      kind: "voltageLinear",
+      value: 12.4,
+      voltageLinearWarningEnabled: false,
+      voltageLinearAlarmEnabled: true,
+      voltageLinearWarningFrom: "12.2",
+      voltageLinearAlarmFrom: "11.6",
+      voltageLinearMinValue: "7",
+      voltageLinearMaxValue: "15",
+      voltageLinearTickMajor: "1",
+      voltageLinearTickMinor: "0.2",
+      voltageLinearRatioThresholdNormal: "1.1",
+      voltageLinearRatioThresholdFlat: "3.5",
+      captionUnitScale: "0.8"
+    }, toolkit);
+
+    expect(out.renderer).toBe("VoltageLinearWidget");
+    expect(out.value).toBe(12.4);
+    expect(out.formatter).toBe("formatDecimal");
+    expect(out.formatterParameters).toEqual([3, 1, true]);
+    expect(out.rendererProps.voltageLinearWarningFrom).toBeUndefined();
+    expect(out.rendererProps.voltageLinearAlarmFrom).toBe(11.6);
+  });
+
+  it("treats missing voltageLinear sector toggles as enabled by default", function () {
+    const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
+    const out = mapper.translate({
+      kind: "voltageLinear",
+      value: 12.4,
+      voltageLinearWarningFrom: "12.2",
+      voltageLinearAlarmFrom: "11.6"
+    }, toolkit);
+
+    expect(out.rendererProps.voltageLinearWarningFrom).toBe(12.2);
+    expect(out.rendererProps.voltageLinearAlarmFrom).toBe(11.6);
+  });
+
   it("maps voltageRadial with explicit radial keys and respects sector toggles", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const out = mapper.translate({
@@ -61,6 +102,16 @@ describe("VesselMapper", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const out = mapper.translate({
       kind: "voltageRadial",
+      voltage: 12.4
+    }, toolkit);
+
+    expect(out.value).toBeUndefined();
+  });
+
+  it("uses only value for voltageLinear source and does not fall back to legacy voltage field", function () {
+    const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
+    const out = mapper.translate({
+      kind: "voltageLinear",
       voltage: 12.4
     }, toolkit);
 
