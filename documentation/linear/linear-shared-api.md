@@ -1,6 +1,6 @@
 # Linear Shared API
 
-**Status:** ✅ Implemented | `LinearGaugeEngine` + `LinearCanvasPrimitives` + `LinearGaugeMath`
+**Status:** ✅ Implemented | `LinearGaugeEngine` + `LinearCanvasPrimitives` + `LinearGaugeMath` + `LinearGaugeTextLayout`
 
 ## Overview
 
@@ -8,6 +8,7 @@ Linear instruments use a shared engine pipeline comparable to radial engines:
 
 - `shared/widget-kits/linear/LinearCanvasPrimitives.js` - low-level drawing helpers
 - `shared/widget-kits/linear/LinearGaugeMath.js` - shared axis/tick/layout helpers
+- `shared/widget-kits/linear/LinearGaugeTextLayout.js` - shared tick-label and text-row helpers
 - `shared/widget-kits/linear/LinearGaugeEngine.js` - cached static layer + dynamic pointer/text orchestration
 
 The engine is intentionally generic so future `*Linear` kinds can share layout, scale, sectors, and theming.
@@ -34,6 +35,14 @@ The engine is intentionally generic so future `*Linear` kinds can share layout, 
 - `buildTicks(min, max, majorStep, minorStep)`
 - `resolveAxisDomain(axisMode, range)`
 - `computeLayout(mode, W, H, pad, gap)`
+
+### LinearGaugeTextLayout
+
+- `resolveLabelBoost(mode)`
+- `drawTickLabels(layerCtx, state, ticks, showEndLabels, math)`
+- `drawCaptionRow(state, textApi, caption, box, secScale, align)`
+- `drawValueUnitRow(state, textApi, valueText, unitText, box, secScale, align)`
+- `drawInlineRow(state, textApi, caption, valueText, unitText, box, secScale)`
 
 ## createRenderer(spec)
 

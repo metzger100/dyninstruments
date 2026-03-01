@@ -70,17 +70,23 @@ describe("ThemePresets", function () {
 
     expect(api.presets.slim.radial.ring.arcLineWidth).toBe(0.5);
     expect(api.presets.slim.radial.pointer.sideFactor).toBe(0.18);
+    expect(api.presets.slim.linear.track.widthFactor).toBe(0.09);
+    expect(api.presets.slim.linear.ticks.minorWidth).toBe(0.75);
     expect(api.presets.slim.xte.lineWidthFactor).toBe(0.85);
 
     expect(api.presets.bold.radial.ring.widthFactor).toBe(0.16);
     expect(api.presets.bold.radial.pointer.lengthFactor).toBe(2.2);
-    expect(api.presets.bold.xte.lineWidthFactor).toBe(1.2);
+    expect(api.presets.bold.linear.track.widthFactor).toBe(0.16);
+    expect(api.presets.bold.linear.pointer.lengthFactor).toBe(2.2);
+    expect(api.presets.bold.xte.lineWidthFactor).toBe(1.5);
 
     expect(api.presets.night.colors.pointer).toBe("#cc2222");
     expect(api.presets.night.colors.laylinePort).toBe("#8b3333");
 
     expect(api.presets.highcontrast.colors.warning).toBe("#ffcc00");
     expect(api.presets.highcontrast.radial.ticks.minorWidth).toBe(2);
+    expect(api.presets.highcontrast.linear.track.lineWidth).toBe(2);
+    expect(api.presets.highcontrast.linear.pointer.sideFactor).toBe(0.35);
     expect(api.presets.highcontrast.xte.lineWidthFactor).toBe(1.3);
   });
 });

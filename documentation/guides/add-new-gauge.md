@@ -15,6 +15,8 @@ Read first:
 
 New semicircle gauges should be thin wrappers over `SemicircleRadialEngine`. Keep gauge modules focused on formatting, tick strategy, and sector strategy.
 
+For linear instruments, use [add-new-linear-gauge.md](add-new-linear-gauge.md) and `LinearGaugeEngine`.
+
 ## Step 1: Create Gauge Module
 
 Create `widgets/radial/NewGaugeWidget/NewGaugeWidget.js`:

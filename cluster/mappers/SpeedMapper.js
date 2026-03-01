@@ -71,8 +71,6 @@
             captionUnitScale: num(p.captionUnitScale),
             speedRadialMinValue: num(p.speedRadialMinValue),
             speedRadialMaxValue: num(p.speedRadialMaxValue),
-            startAngleDeg: num(p.startAngleDeg),
-            endAngleDeg: num(p.endAngleDeg),
             speedRadialTickMajor: num(p.speedRadialTickMajor),
             speedRadialTickMinor: num(p.speedRadialTickMinor),
             speedRadialShowEndLabels: !!p.speedRadialShowEndLabels,

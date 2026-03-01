@@ -34,6 +34,8 @@ describe("SpeedMapper", function () {
     expect(out.formatterParameters).toEqual(["kn"]);
     expect(out.rendererProps.speedRadialWarningFrom).toBe(20);
     expect(out.rendererProps.speedRadialAlarmFrom).toBe(25);
+    expect(out.rendererProps.startAngleDeg).toBeUndefined();
+    expect(out.rendererProps.endAngleDeg).toBeUndefined();
   });
 
   it("disables warning/alarm sectors when toggles are false", function () {

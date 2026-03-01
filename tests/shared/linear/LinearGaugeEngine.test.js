@@ -12,6 +12,7 @@ describe("LinearGaugeEngine", function () {
       pointer: [],
       measureValueUnitFitScales: [],
       fitInlineCapValUnitScales: [],
+      fitInlineCaptions: [],
       captionRowHeights: [],
       valueRowHeights: [],
       drawCaptionMax: 0,
@@ -81,6 +82,7 @@ describe("LinearGaugeEngine", function () {
 
     const engineMod = loadFresh("shared/widget-kits/linear/LinearGaugeEngine.js");
     const mathMod = loadFresh("shared/widget-kits/linear/LinearGaugeMath.js");
+    const textLayoutMod = loadFresh("shared/widget-kits/linear/LinearGaugeTextLayout.js");
     const engine = engineMod.create({}, {
       setupCanvas(canvas) {
         const ctx = canvas.getContext("2d");
@@ -101,6 +103,7 @@ describe("LinearGaugeEngine", function () {
         if (id === "CanvasLayerCache") return cacheMod;
         if (id === "LinearCanvasPrimitives") return primitivesModule;
         if (id === "LinearGaugeMath") return mathMod;
+        if (id === "LinearGaugeTextLayout") return textLayoutMod;
         if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
         return {
           create() {
@@ -146,6 +149,7 @@ describe("LinearGaugeEngine", function () {
                 },
                 fitInlineCapValUnit(ctx, family, caption, valueText, unitText, maxW, maxH, secScale) {
                   calls.fitInlineCapValUnitScales.push(secScale);
+                  calls.fitInlineCaptions.push(caption);
                   return { cPx: 12, vPx: 20, uPx: 14, g1: 6, g2: 6, total: 120 };
                 },
                 drawCaptionMax(ctx, family, x, y, w, h) {
@@ -336,5 +340,105 @@ describe("LinearGaugeEngine", function () {
     const highRatio = highScale.captionRowHeights[0] / (highScale.captionRowHeights[0] + highScale.valueRowHeights[0]);
 
     expect(lowRatio).toBeLessThan(highRatio);
+  });
+
+  it("preserves explicit empty unit and falsy caption values", function () {
+    const harness = createHarness();
+    let receivedUnit;
+    const renderer = harness.engine.createRenderer({
+      rawValueKey: "value",
+      unitDefault: "kn",
+      ratioProps: { normal: "n", flat: "f" },
+      ratioDefaults: { normal: 1.1, flat: 3.5 },
+      rangeDefaults: { min: 0, max: 30 },
+      rangeProps: { min: "min", max: "max" },
+      tickProps: { major: "major", minor: "minor", showEndLabels: "showEndLabels" },
+      formatDisplay(raw, props, unit) {
+        receivedUnit = unit;
+        const n = Number(raw);
+        return { num: n, text: String(n) };
+      }
+    });
+
+    renderer(createMockCanvas({ rectWidth: 280, rectHeight: 220, ctx: createMockContext2D() }), {
+      value: 10,
+      min: 0,
+      max: 30,
+      major: 10,
+      minor: 5,
+      n: 1.1,
+      f: 3.5,
+      caption: 0,
+      unit: ""
+    });
+
+    expect(receivedUnit).toBe("");
+    expect(harness.calls.fitInlineCaptions).toEqual(["0"]);
+  });
+
+  it("uses linear.labels.insetFactor to position tick labels", function () {
+    function renderLabelY(insetFactor) {
+      const harness = createHarness();
+      harness.theme.linear.labels.insetFactor = insetFactor;
+      const renderer = harness.engine.createRenderer({
+        rawValueKey: "value",
+        rangeDefaults: { min: 0, max: 30 },
+        rangeProps: { min: "min", max: "max" },
+        tickProps: { major: "major", minor: "minor", showEndLabels: "showEndLabels" }
+      });
+
+      const layerContexts = [];
+      const ownerDocument = {
+        createElement(tagName) {
+          if (String(tagName || "").toLowerCase() !== "canvas") {
+            return { tagName: String(tagName || "").toUpperCase() };
+          }
+          const layerCtx = createMockContext2D();
+          layerContexts.push(layerCtx);
+          return {
+            width: 0,
+            height: 0,
+            parentElement: null,
+            __ctx: layerCtx,
+            ownerDocument: ownerDocument,
+            getContext(type) {
+              return type === "2d" ? layerCtx : null;
+            },
+            getBoundingClientRect() {
+              const width = Number(this.width) || 0;
+              const height = Number(this.height) || 0;
+              return { width, height, top: 0, left: 0, right: width, bottom: height };
+            },
+            closest() {
+              return null;
+            }
+          };
+        }
+      };
+
+      renderer(createMockCanvas({
+        rectWidth: 480,
+        rectHeight: 120,
+        ctx: createMockContext2D(),
+        ownerDocument: ownerDocument
+      }), {
+        value: 12,
+        min: 0,
+        max: 30,
+        major: 10,
+        minor: 5,
+        showEndLabels: true
+      });
+
+      const fillTextCalls = (layerContexts[0] && layerContexts[0].calls || [])
+        .filter((entry) => entry.name === "fillText");
+      const ys = fillTextCalls.map((entry) => entry.args[2]);
+      expect(ys.length).toBeGreaterThan(0);
+      return Math.min.apply(null, ys);
+    }
+
+    const yLowInset = renderLabelY(0.5);
+    const yHighInset = renderLabelY(3.0);
+    expect(yHighInset).toBeGreaterThan(yLowInset);
   });
 });

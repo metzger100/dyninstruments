@@ -67,6 +67,7 @@ Tick labels are collision-filtered in narrow layouts and clamped to the gauge ar
 
 ## Related
 
+- [../guides/add-new-linear-gauge.md](../guides/add-new-linear-gauge.md)
 - [linear-shared-api.md](linear-shared-api.md)
 - [../radial/gauge-style-guide.md](../radial/gauge-style-guide.md)
 - [../shared/css-theming.md](../shared/css-theming.md)

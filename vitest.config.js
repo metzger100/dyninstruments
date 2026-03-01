@@ -18,6 +18,8 @@ module.exports = {
         "runtime/**/*.js",
         "config/shared/*.js",
         "config/clusters/*.js",
+        "shared/widget-kits/linear/*.js",
+        "widgets/linear/**/*.js",
         "shared/widget-kits/radial/RadialAngleMath.js",
         "shared/widget-kits/radial/RadialTickMath.js",
         "shared/widget-kits/radial/RadialValueMath.js"

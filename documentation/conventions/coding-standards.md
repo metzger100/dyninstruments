@@ -90,6 +90,7 @@ Example:
 Use this routing table before starting a new widget. Shared engine purposes:
 
 - `SemicircleRadialEngine`: shared semicircle gauge rendering flow (geometry, sectors, ticks, pointer, ratio mode).
+- `LinearGaugeEngine`: shared horizontal gauge rendering flow (axis modes, sectors, ticks, pointer, ratio mode).
 - `FullCircleRadialEngine`: shared full-circle dial rendering flow (ring/ticks, static layers, pointer and frame orchestration).
 - `TextLayoutEngine`: shared text layout mode routing, fit calculation, and text draw helpers.
 - Cluster renderer wrappers: role-based adapters that delegate to one of the archetypes above.
@@ -97,6 +98,7 @@ Use this routing table before starting a new widget. Shared engine purposes:
 | Archetype | Shared Engine | Reference Implementation | Guide |
 |---|---|---|---|
 | Semicircle gauge | `SemicircleRadialEngine` | [SpeedRadialWidget](../../widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js) | [add-new-gauge](../guides/add-new-gauge.md) |
+| Linear gauge | `LinearGaugeEngine` | [SpeedLinearWidget](../../widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js) | [add-new-linear-gauge](../guides/add-new-linear-gauge.md) |
 | Full-circle dial | `FullCircleRadialEngine` | [CompassRadialWidget](../../widgets/radial/CompassRadialWidget/CompassRadialWidget.js) | [add-new-dial](../guides/add-new-full-circle-dial.md) |
 | Text renderer | `TextLayoutEngine` | [ThreeValueTextWidget](../../widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js) | [add-new-text-renderer](../guides/add-new-text-renderer.md) |
 | Cluster renderer wrapper | `(delegates to above)` | [DateTimeRendererWrapper](../../cluster/rendering/DateTimeRendererWrapper.js) | [add-new-cluster](../guides/add-new-cluster.md) |
@@ -106,6 +108,7 @@ Rule: Before creating any new widget, check this table. If your widget matches a
 ## Reference Implementations
 
 - For a new semicircle gauge: `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js` - canonical UMD wrapper, header format, and `SemicircleRadialEngine` delegation.
+- For a new linear gauge: `widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js` - canonical UMD wrapper and `LinearGaugeEngine` delegation.
 - For a new shared utility facade: `shared/widget-kits/radial/RadialToolkit.js` - facade pattern and dependency composition across shared gauge modules.
 - For a new cluster mapper: `cluster/mappers/SpeedMapper.js` - `translate(props, toolkit)` mapping pattern and renderer routing output shape.
 
@@ -134,5 +137,6 @@ Check these before writing any helper function. For shared gauge utility APIs, s
 ## Related
 
 - [../guides/add-new-gauge.md](../guides/add-new-gauge.md)
+- [../guides/add-new-linear-gauge.md](../guides/add-new-linear-gauge.md)
 - [../guides/add-new-cluster.md](../guides/add-new-cluster.md)
 - [../architecture/component-system.md](../architecture/component-system.md)

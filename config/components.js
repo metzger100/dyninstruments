@@ -87,6 +87,11 @@
       css: undefined,
       globalKey: "DyniLinearGaugeMath"
     },
+    LinearGaugeTextLayout: {
+      js: BASE + "shared/widget-kits/linear/LinearGaugeTextLayout.js",
+      css: undefined,
+      globalKey: "DyniLinearGaugeTextLayout"
+    },
     ThemeResolver: {
       js: BASE + "shared/theme/ThemeResolver.js",
       css: undefined,
@@ -132,7 +137,7 @@
       js: BASE + "shared/widget-kits/linear/LinearGaugeEngine.js",
       css: undefined,
       globalKey: "DyniLinearGaugeEngine",
-      deps: ["RadialToolkit", "CanvasLayerCache", "LinearCanvasPrimitives", "LinearGaugeMath"]
+      deps: ["RadialToolkit", "CanvasLayerCache", "LinearCanvasPrimitives", "LinearGaugeMath", "LinearGaugeTextLayout"]
     },
     ThreeValueTextWidget: {
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",

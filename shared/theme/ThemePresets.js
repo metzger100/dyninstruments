@@ -18,6 +18,11 @@
         ticks: { majorWidth: 1.5, minorWidth: 0.75 },
         pointer: { sideFactor: 0.18 }
       },
+      linear: {
+        track: { widthFactor: 0.09, lineWidth: 0.75 },
+        ticks: { majorWidth: 1.5, minorWidth: 0.75 },
+        pointer: { sideFactor: 0.18 }
+      },
       font: { labelWeight: 400 },
       xte: { lineWidthFactor: 0.85 }
     },
@@ -27,7 +32,12 @@
         ticks: { majorLen: 12, majorWidth: 3, minorLen: 7, minorWidth: 1.5 },
         pointer: { sideFactor: 0.35, lengthFactor: 2.2 }
       },
-      xte: { lineWidthFactor: 1.2 }
+      linear: {
+        track: { widthFactor: 0.16, lineWidth: 2 },
+        ticks: { majorLen: 12, majorWidth: 3, minorLen: 7, minorWidth: 1.5 },
+        pointer: { sideFactor: 0.35, lengthFactor: 2.2 }
+      },
+      xte: { lineWidthFactor: 1.5 }
     },
     night: {
       colors: {
@@ -46,6 +56,11 @@
       },
       radial: {
         ring: { arcLineWidth: 2 },
+        ticks: { majorWidth: 3, minorWidth: 2 },
+        pointer: { sideFactor: 0.35 }
+      },
+      linear: {
+        track: { lineWidth: 2 },
         ticks: { majorWidth: 3, minorWidth: 2 },
         pointer: { sideFactor: 0.35 }
       },
