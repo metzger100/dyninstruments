@@ -70,6 +70,7 @@ Read by `ThemeResolver.resolve(canvas)`:
 | `--dyni-fullcircle-normal-dual-gap` | Full-circle normal-mode dual-column gap factor | `0.05` |
 | `--dyni-font-weight` | Primary font weight | `700` |
 | `--dyni-label-weight` | Label font weight | `700` |
+| `--dyni-xte-line-width-factor` | XTE highway stroke thickness multiplier | `1` |
 
 ### Preset Layer (ThemePresets)
 
@@ -103,6 +104,7 @@ Per-token overrides can be applied in `user.css` and naturally override preset v
 [data-dyni] {
   --dyni-pointer: #00aaff;
   --dyni-arc-linewidth: 1.5;
+  --dyni-xte-line-width-factor: 1.25;
 }
 ```
 

@@ -134,12 +134,18 @@
       };
     }
 
-    function drawStaticHighway(ctx, geom, colors, textColor, mode) {
+    function resolveLineWidthFactor(style) {
+      const factor = style && Number.isFinite(style.lineWidthFactor) ? style.lineWidthFactor : 1;
+      return factor > 0 ? factor : 1;
+    }
+
+    function drawStaticHighway(ctx, geom, colors, mode, style) {
       const cx = geom.cx;
       const horizonY = geom.horizonY;
       const baseY = geom.baseY;
       const nearHalf = geom.nearHalf;
       const farHalf = geom.farHalf;
+      const lineWidthFactor = resolveLineWidthFactor(style);
 
       ctx.save();
       ctx.lineCap = "round";
@@ -183,8 +189,8 @@
       ctx.fill();
 
       ctx.globalAlpha = 0.75;
-      ctx.strokeStyle = textColor;
-      ctx.lineWidth = Math.max(1.2, nearHalf * 0.01);
+      ctx.strokeStyle = colors.roadLine;
+      ctx.lineWidth = Math.max(1.2, nearHalf * 0.01) * lineWidthFactor;
       ctx.beginPath();
       ctx.moveTo(cx - farHalf, horizonY);
       ctx.lineTo(cx - nearHalf, baseY);
@@ -193,6 +199,7 @@
       ctx.stroke();
 
       const stripeCount = mode === "high" ? 12 : 10;
+      ctx.strokeStyle = colors.stripeLine;
       for (let i = 0; i <= stripeCount; i += 1) {
         const t = i / stripeCount;
         const p = t * t;
@@ -200,7 +207,7 @@
         const half = farHalf + (nearHalf - farHalf) * p;
 
         ctx.globalAlpha = 0.35 + p * 0.35;
-        ctx.lineWidth = Math.max(1, 0.8 + p * 1.8);
+        ctx.lineWidth = Math.max(1, 0.8 + p * 1.8) * lineWidthFactor;
         ctx.beginPath();
         ctx.moveTo(cx - half, y);
         ctx.lineTo(cx + half, y);
@@ -217,7 +224,8 @@
       }
 
       ctx.globalAlpha = 0.8;
-      ctx.lineWidth = Math.max(1.2, nearHalf * 0.013);
+      ctx.strokeStyle = colors.roadLine;
+      ctx.lineWidth = Math.max(1.2, nearHalf * 0.013) * lineWidthFactor;
       ctx.beginPath();
       ctx.moveTo(cx - farHalf, horizonY);
       ctx.lineTo(cx + farHalf, horizonY);
@@ -250,11 +258,12 @@
       ctx.fill();
     }
 
-    function drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow) {
+    function drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, style) {
       const cx = geom.cx;
       const horizonY = geom.horizonY;
       const baseY = geom.baseY;
       const nearHalf = geom.nearHalf;
+      const lineWidthFactor = resolveLineWidthFactor(style);
       const safeNorm = clamp(xteNormalized, -1.1, 1.1);
       const markerX = cx + safeNorm * nearHalf * 0.82;
       const markerY = baseY - (baseY - horizonY) * 0.12;
@@ -264,7 +273,7 @@
 
       ctx.save();
       ctx.strokeStyle = colors.pointer;
-      ctx.lineWidth = Math.max(1.4, nearHalf * 0.018);
+      ctx.lineWidth = Math.max(1.4, nearHalf * 0.018) * lineWidthFactor;
       ctx.globalAlpha = 0.9;
       ctx.beginPath();
       ctx.moveTo(cx, horizonY);

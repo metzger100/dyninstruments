@@ -16,12 +16,14 @@
       ring: { arcLineWidth: 0.5, widthFactor: 0.09 },
       ticks: { majorWidth: 1.5, minorWidth: 0.75 },
       pointer: { sideFactor: 0.18 },
-      font: { labelWeight: 400 }
+      font: { labelWeight: 400 },
+      xte: { lineWidthFactor: 0.85 }
     },
     bold: {
       ring: { arcLineWidth: 2, widthFactor: 0.16 },
       ticks: { majorLen: 12, majorWidth: 3, minorLen: 7, minorWidth: 1.5 },
-      pointer: { sideFactor: 0.35, lengthFactor: 2.2 }
+      pointer: { sideFactor: 0.35, lengthFactor: 2.2 },
+      xte: { lineWidthFactor: 1.2 }
     },
     night: {
       colors: {
@@ -40,7 +42,8 @@
       },
       ring: { arcLineWidth: 2 },
       ticks: { majorWidth: 3, minorWidth: 2 },
-      pointer: { sideFactor: 0.35 }
+      pointer: { sideFactor: 0.35 },
+      xte: { lineWidthFactor: 1.3 }
     }
   };
 

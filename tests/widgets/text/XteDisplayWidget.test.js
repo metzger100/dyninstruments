@@ -16,7 +16,7 @@ describe("XteDisplayWidget", function () {
       waypointChecks: []
     };
 
-    const theme = {
+    const defaultTheme = {
       colors: {
         pointer: "#aa0011",
         laylineStb: "#00aa66",
@@ -29,6 +29,14 @@ describe("XteDisplayWidget", function () {
         labelWeight: 640
       }
     };
+    const themeOverrides = opts.theme || {};
+    const theme = {
+      colors: Object.assign({}, defaultTheme.colors, themeOverrides.colors || {}),
+      font: Object.assign({}, defaultTheme.font, themeOverrides.font || {})
+    };
+    if (themeOverrides.xte) {
+      theme.xte = Object.assign({}, themeOverrides.xte);
+    }
 
     const layerCache = loadFresh("shared/widget-kits/gauge/CanvasLayerCache.js");
     const realPrimitives = loadFresh("shared/widget-kits/gauge/XteHighwayPrimitives.js").create();
@@ -134,11 +142,11 @@ describe("XteDisplayWidget", function () {
                   return layout;
                 },
                 highwayGeometry: realPrimitives.highwayGeometry,
-                drawStaticHighway(ctx, geom, colors, textColor, mode) {
-                  calls.staticDraws.push({ colors, textColor, mode, geom });
+                drawStaticHighway(ctx, geom, colors, mode, style) {
+                  calls.staticDraws.push({ colors, mode, geom, style });
                 },
-                drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow) {
-                  calls.dynamicDraws.push({ colors, xteNormalized, overflow, geom });
+                drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, style) {
+                  calls.dynamicDraws.push({ colors, xteNormalized, overflow, geom, style });
                 },
                 shouldShowWaypoint(mode, rect, showWpName, name) {
                   const result = realPrimitives.shouldShowWaypoint(mode, rect, showWpName, name);
@@ -200,8 +208,48 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.staticDraws[0].colors.pointer).toBe(harness.theme.colors.pointer);
     expect(harness.calls.staticDraws[0].colors.warning).toBe(harness.theme.colors.warning);
     expect(harness.calls.staticDraws[0].colors.alarm).toBe(harness.theme.colors.alarm);
+    expect(harness.calls.staticDraws[0].colors.roadLine).toBe("#ffffff");
+    expect(harness.calls.staticDraws[0].colors.stripeLine).toBe("#ffffff");
+    expect(harness.calls.staticDraws[0].style.lineWidthFactor).toBe(1);
     expect(harness.calls.dynamicDraws[0].colors.laylineStb).toBe(harness.theme.colors.laylineStb);
     expect(harness.calls.dynamicDraws[0].colors.laylinePort).toBe(harness.theme.colors.laylinePort);
+    expect(harness.calls.dynamicDraws[0].style.lineWidthFactor).toBe(1);
+  });
+
+  it("applies xte line-width override while keeping shared theme colors", function () {
+    const harness = createHarness({
+      theme: {
+        xte: {
+          lineWidthFactor: 1.7
+        }
+      }
+    });
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeProps());
+
+    expect(harness.calls.staticDraws[0].colors.pointer).toBe(harness.theme.colors.pointer);
+    expect(harness.calls.staticDraws[0].colors.roadLine).toBe("#ffffff");
+    expect(harness.calls.staticDraws[0].colors.stripeLine).toBe("#ffffff");
+    expect(harness.calls.dynamicDraws[0].style.lineWidthFactor).toBe(1.7);
+  });
+
+  it("falls back to default lineWidthFactor when xte value is invalid", function () {
+    const harness = createHarness({
+      theme: {
+        xte: {
+          lineWidthFactor: 0
+        }
+      }
+    });
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeProps());
+
+    expect(harness.calls.staticDraws[0].colors.pointer).toBe(harness.theme.colors.pointer);
+    expect(harness.calls.staticDraws[0].colors.roadLine).toBe("#ffffff");
+    expect(harness.calls.staticDraws[0].colors.stripeLine).toBe("#ffffff");
+    expect(harness.calls.dynamicDraws[0].style.lineWidthFactor).toBe(1);
   });
 
   it("hides waypoint name before core metrics in constrained layouts", function () {
@@ -316,6 +364,24 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.staticDraws).toHaveLength(1);
 
     harness.spec.renderCanvas(canvasB, makeProps());
+    expect(harness.calls.staticDraws).toHaveLength(2);
+  });
+
+  it("invalidates static cache when xte style tokens change", function () {
+    const harness = createHarness({
+      theme: {
+        xte: {
+          lineWidthFactor: 1
+        }
+      }
+    });
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeProps());
+    expect(harness.calls.staticDraws).toHaveLength(1);
+
+    harness.theme.xte.lineWidthFactor = 1.8;
+    harness.spec.renderCanvas(canvas, makeProps());
     expect(harness.calls.staticDraws).toHaveLength(2);
   });
 

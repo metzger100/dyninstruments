@@ -27,6 +27,7 @@
   --dyni-fullcircle-normal-dual-gap: 0.05;
   --dyni-font-weight: 700;
   --dyni-label-weight: 700;
+  --dyni-xte-line-width-factor: 1;
   font-family: var(--dyni-font);
 }
 
@@ -39,6 +40,7 @@
   --dyni-tick-minor-width: 0.75;
   --dyni-pointer-side: 0.18;
   --dyni-label-weight: 400;
+  --dyni-xte-line-width-factor: 0.85;
 }
 
 .dyniplugin[data-dyni-theme="bold"],
@@ -51,6 +53,7 @@
   --dyni-tick-minor-width: 1.5;
   --dyni-pointer-side: 0.35;
   --dyni-pointer-length: 2.2;
+  --dyni-xte-line-width-factor: 1.5;
 }
 
 .dyniplugin[data-dyni-theme="night"],
@@ -71,6 +74,7 @@
   --dyni-tick-major-width: 3;
   --dyni-tick-minor-width: 2;
   --dyni-pointer-side: 0.35;
+  --dyni-xte-line-width-factor: 1.3;
 }
 
 /* 1) Hide AvNav's native header/value ONLY inside our widgets. */

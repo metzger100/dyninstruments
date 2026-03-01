@@ -72,7 +72,9 @@ Theme is resolved once per frame via `GaugeToolkit.theme.resolve(canvas)`.
 | Port cue/highlight | `theme.colors.laylinePort` |
 | Lane edge tint | `theme.colors.warning` |
 | Out-of-scale clamp marker | `theme.colors.alarm` |
-| Base text/line color | `Helpers.resolveTextColor(canvas)` |
+| Road edge + horizon strokes | `Helpers.resolveTextColor(canvas)` |
+| Lane stripe strokes | `Helpers.resolveTextColor(canvas)` |
+| Highway stroke thickness | `theme.xte.lineWidthFactor` (fallback `1` when invalid or `<=0`) |
 | Value text weight | `theme.font.weight` |
 | Label text weight | `theme.font.labelWeight` |
 
@@ -134,7 +136,7 @@ Static key includes:
 - mode and canvas geometry
 - highway geometry
 - resolved theme token colors used in static draw
-- typography/style inputs affecting static layer (`family`, `labelWeight`, text color)
+- style inputs affecting static layer (`family`, `labelWeight`, `xte.lineWidthFactor`)
 
 Dynamic elements are never cached:
 

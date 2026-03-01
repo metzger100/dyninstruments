@@ -50,7 +50,8 @@
     { path: "fullCircle.normal.minHeightFactor", cssVar: "--dyni-fullcircle-normal-min-height", type: "number", defaultValue: 0.45 },
     { path: "fullCircle.normal.dualGapFactor", cssVar: "--dyni-fullcircle-normal-dual-gap", type: "number", defaultValue: 0.05 },
     { path: "font.weight", cssVar: "--dyni-font-weight", type: "number", defaultValue: 700 },
-    { path: "font.labelWeight", cssVar: "--dyni-label-weight", type: "number", defaultValue: 700 }
+    { path: "font.labelWeight", cssVar: "--dyni-label-weight", type: "number", defaultValue: 700 },
+    { path: "xte.lineWidthFactor", cssVar: "--dyni-xte-line-width-factor", type: "number", defaultValue: 1 }
   ];
 
   function setByPath(target, pathSegments, value) {
