@@ -21,9 +21,11 @@ describe("WindLinearWidget", function () {
                 formatAngle180(value, leadingZero) {
                   const n = Number(value);
                   if (!isFinite(n)) return "---";
-                  const abs = Math.abs(Math.round(n));
+                  let wrapped = ((n + 180) % 360 + 360) % 360 - 180;
+                  if (wrapped === 180) wrapped = -180;
+                  const abs = Math.abs(Math.round(wrapped));
                   const base = leadingZero ? String(abs).padStart(3, "0") : String(abs);
-                  return n < 0 ? "-" + base : base;
+                  return wrapped < 0 ? "-" + base : base;
                 }
               };
             }
@@ -69,6 +71,20 @@ describe("WindLinearWidget", function () {
       formatter: "formatSpeed",
       formatterParameters: ["kn"]
     }));
+
+    const wrapped = captured.formatDisplay(337, {
+      speed: 6.1,
+      angleCaption: "AWA",
+      speedCaption: "AWS",
+      angleUnit: "°",
+      speedUnit: "kn",
+      formatter: "formatSpeed",
+      formatterParameters: ["kn"],
+      leadingZero: true,
+      captionUnitScale: 0.8
+    });
+    expect(wrapped.text).toBe("-023");
+    expect(wrapped.num).toBe(-23);
 
     const sectors = captured.buildSectors({
       windLinearLayEnabled: true,
