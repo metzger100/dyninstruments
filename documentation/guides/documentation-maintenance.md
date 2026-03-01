@@ -64,7 +64,8 @@ This includes fail-closed cross-file clone detection (`duplicate-functions`, `du
 For cleanup sessions tracked by garbage-collection baseline markers:
 
 - `npm run gc:status` at the start
-- `npm run gc:update-baseline` at the end
+- complete mandatory commit-by-commit review in [garbage-collection.md#manual-commit-audit-required](garbage-collection.md#manual-commit-audit-required)
+- `npm run gc:update-baseline` at the end, only after audit + cleanup loop + strict checks are complete
 
 ## Touchpoint Matrix
 
