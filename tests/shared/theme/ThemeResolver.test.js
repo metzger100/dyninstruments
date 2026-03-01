@@ -49,7 +49,7 @@ describe("ThemeResolver", function () {
     const canvas = createCanvas(createDoc({ value: false }));
     const out = resolver.resolve(canvas);
 
-    expect(Object.keys(out).sort()).toEqual(["colors", "font", "fullCircle", "labels", "pointer", "ring", "ticks", "xte"]);
+    expect(Object.keys(out).sort()).toEqual(["colors", "font", "radial", "xte"]);
     expect(out).toEqual(mod.DEFAULTS);
   });
 
@@ -158,20 +158,20 @@ describe("ThemeResolver", function () {
     expect(typeof mod.invalidateCanvas).toBe("function");
     expect(typeof mod.invalidateAll).toBe("function");
     expect(Array.isArray(mod.TOKEN_DEFS)).toBe(true);
-    expect(mod.TOKEN_DEFS.some((tokenDef) => tokenDef.path === "pointer.sideFactor" && tokenDef.cssVar === "--dyni-pointer-side")).toBe(true);
+    expect(mod.TOKEN_DEFS.some((tokenDef) => tokenDef.path === "radial.pointer.sideFactor" && tokenDef.cssVar === "--dyni-radial-pointer-side")).toBe(true);
     expect(mod.TOKEN_DEFS.some((tokenDef) => (
-      tokenDef.path === "fullCircle.normal.innerMarginFactor" &&
-      tokenDef.cssVar === "--dyni-fullcircle-normal-inner-margin"
+      tokenDef.path === "radial.fullCircle.normal.innerMarginFactor" &&
+      tokenDef.cssVar === "--dyni-radial-fullcircle-normal-inner-margin"
     ))).toBe(true);
     expect(mod.TOKEN_DEFS.some((tokenDef) => (
       tokenDef.path === "xte.lineWidthFactor" &&
       tokenDef.cssVar === "--dyni-xte-line-width-factor"
     ))).toBe(true);
-    expect(mod.DEFAULTS.pointer.sideFactor).toBe(0.25);
-    expect(mod.DEFAULTS.ring.widthFactor).toBe(0.12);
-    expect(mod.DEFAULTS.fullCircle.normal.innerMarginFactor).toBe(0.03);
-    expect(mod.DEFAULTS.fullCircle.normal.minHeightFactor).toBe(0.45);
-    expect(mod.DEFAULTS.fullCircle.normal.dualGapFactor).toBe(0.05);
+    expect(mod.DEFAULTS.radial.pointer.sideFactor).toBe(0.25);
+    expect(mod.DEFAULTS.radial.ring.widthFactor).toBe(0.12);
+    expect(mod.DEFAULTS.radial.fullCircle.normal.innerMarginFactor).toBe(0.03);
+    expect(mod.DEFAULTS.radial.fullCircle.normal.minHeightFactor).toBe(0.45);
+    expect(mod.DEFAULTS.radial.fullCircle.normal.dualGapFactor).toBe(0.05);
     expect(mod.DEFAULTS.xte.lineWidthFactor).toBe(1);
     expect(Object.keys(mod.DEFAULTS.xte).sort()).toEqual(["lineWidthFactor"]);
   });

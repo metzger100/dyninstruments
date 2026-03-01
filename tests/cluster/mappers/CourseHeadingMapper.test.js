@@ -8,7 +8,7 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
 });
 
 describe("CourseHeadingMapper", function () {
-  it("maps radial heading kinds to CompassGaugeWidget", function () {
+  it("maps radial heading kinds to CompassRadialWidget", function () {
     const mapper = loadFresh("cluster/mappers/CourseHeadingMapper.js").create();
     const out = mapper.translate({
       kind: "hdtRadial",
@@ -16,11 +16,11 @@ describe("CourseHeadingMapper", function () {
       brg: 230,
       leadingZero: true,
       captionUnitScale: "0.8",
-      compRatioThresholdNormal: "0.8",
-      compRatioThresholdFlat: "2.2"
+      compassRadialRatioThresholdNormal: "0.8",
+      compassRadialRatioThresholdFlat: "2.2"
     }, toolkit);
 
-    expect(out.renderer).toBe("CompassGaugeWidget");
+    expect(out.renderer).toBe("CompassRadialWidget");
     expect(out.heading).toBe(123);
     expect(out.markerCourse).toBe(230);
     expect(out.rendererProps.leadingZero).toBe(true);

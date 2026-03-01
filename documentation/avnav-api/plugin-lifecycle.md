@@ -139,7 +139,7 @@ function create(def, Helpers) {
 2. AvNav reads store values via storeKeys
 3. ClusterWidget.translateFunction(mergedProps)
    -> numeric: { value, caption, unit, formatter, formatterParameters }
-   -> graphic: { renderer: "SpeedGaugeWidget", value, caption, unit, ... }
+   -> graphic: { renderer: "SpeedRadialWidget", value, caption, unit, ... }
 4. ClusterWidget.renderCanvas() delegates via ClusterRendererRouter
 ```
 

@@ -48,7 +48,7 @@ Rule references:
 - Update docs in the same task whenever behavior, props, mapper outputs, or dependencies change.
 
 5. Consolidate duplicate helpers into shared modules.
-- Move reusable logic to `shared/widget-kits/` (or `shared/widget-kits/gauge/`).
+- Move reusable logic to `shared/widget-kits/` (or `shared/widget-kits/radial/`).
 - Keep widget files focused on widget-specific behavior, not shared math/layout/formatter logic.
 
 6. Enforce the AvNav boundary.
@@ -110,14 +110,14 @@ Required per-commit audit checks:
 
 | Pattern | Example from This Project | Detection | Fix |
 |---|---|---|---|
-| Helper duplication | Historical: `extractNumberText` duplicated in 4 gauge widgets before TD-001 (`DepthGaugeWidget`, `SpeedGaugeWidget`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`) | `check-patterns.mjs` (`duplicate-functions` / `[duplicate-fn-body]`) | Extract shared helper to `shared/widget-kits/` (done via `GaugeValueMath.extractNumberText`) |
-| AvNav boundary bypass | Historical: direct `avnav.api` access in `SpeedGaugeWidget`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `WindDialWidget`, `PositionCoordinateWidget` (TD-008) | `check-patterns.mjs` (`forbidden-global`) | Route through `Helpers.applyFormatter()` |
+| Helper duplication | Historical: `extractNumberText` duplicated in 4 gauge widgets before TD-001 (`DepthRadialWidget`, `SpeedRadialWidget`, `TemperatureRadialWidget`, `VoltageRadialWidget`) | `check-patterns.mjs` (`duplicate-functions` / `[duplicate-fn-body]`) | Extract shared helper to `shared/widget-kits/` (done via `RadialValueMath.extractNumberText`) |
+| AvNav boundary bypass | Historical: direct `avnav.api` access in `SpeedRadialWidget`, `TemperatureRadialWidget`, `VoltageRadialWidget`, `WindRadialWidget`, `PositionCoordinateWidget` (TD-008) | `check-patterns.mjs` (`forbidden-global`) | Route through `Helpers.applyFormatter()` |
 | Empty catch blocks | Historical: silent `catch(e){}` fallback paths in renderer/helper/widget code before TD-009 | `check-patterns.mjs` (`empty-catch`) | Add explicit comment/logging or use centralized boundary handling |
-| Growing files | Current `>=300` warnings: `widgets/gauges/WindDialWidget/WindDialWidget.js` (363 non-empty lines), `shared/widget-kits/gauge/SemicircleGaugeEngine.js` (341), `widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js` (311) | `check-file-size.mjs` (warning at `>=300`) | Split before exceeding 400 non-empty lines |
+| Growing files | Current `>=300` warnings: `widgets/radial/WindRadialWidget/WindRadialWidget.js` (363 non-empty lines), `shared/widget-kits/radial/SemicircleRadialEngine.js` (341), `widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js` (311) | `check-file-size.mjs` (warning at `>=300`) | Split before exceeding 400 non-empty lines |
 | Oneliner size-limit bypass | Backlog resolved (`onelinerDenseWarnings: 0`, `onelinerLongWarnings: 0`, `onelinerWarnings: 0`) and fail-closed enforcement active (TD-012 completed) | `npm run check:filesize` (`--oneliner=block`) | Keep multiline formatting; use `npm run check:filesize:warn` only for exploratory passes |
 | Stale doc headers | Historical header path drift: `documentation/modules/...` and `documentation/architecture/module-system.md` migrated to current `documentation/widgets/...` and `documentation/architecture/component-system.md` | `check-headers.mjs` (`broken-doc-link`) | Update `Documentation:` header path to the current doc |
 | Naming drift | Historical naming cleanup: `DyniThreeElements` -> `DyniThreeValueTextWidget` and related `globalKey` normalization in `config/components.js` | `check-naming.mjs` | Rename to match conventions (`Dyni{ComponentName}` and matching registered/returned ids) |
-| Copy-paste divergence | Historical: `clamp` implemented in multiple files (`GaugeValueMath`, `PositionCoordinateWidget`, `ThreeValueTextWidget`) before TD-006 | `check-patterns.mjs` (`duplicate-functions`, `duplicate-block-clones`) | Use canonical shared implementation (`GaugeValueMath.clamp`) |
+| Copy-paste divergence | Historical: `clamp` implemented in multiple files (`RadialValueMath`, `PositionCoordinateWidget`, `ThreeValueTextWidget`) before TD-006 | `check-patterns.mjs` (`duplicate-functions`, `duplicate-block-clones`) | Use canonical shared implementation (`RadialValueMath.clamp`) |
 | File-list-only review | Reviewing only `gc:status` candidate files while skipping chronological commit audit in `baseline..HEAD` | Manual workflow gate (`Manual Commit Audit (Required)`) | Run full commit-by-commit inspection (`git rev-list --reverse "$RANGE"` + `git show`) before baseline update |
 | Test assertion gaming | Guardrail: no confirmed incident in current history, but risk exists when assertions are weakened to force green builds | Human review | Restore strong assertions and fix implementation behavior |
 | Code↔Doc divergence | Risk pattern: JS behavior changed while linked module docs lag behind | Manual workflow step (code-doc co-evolution check) | Update linked docs in the same task |

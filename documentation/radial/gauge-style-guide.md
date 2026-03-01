@@ -1,6 +1,6 @@
 # Gauge Style Guide
 
-**Status:** ✅ Implemented | SpeedGaugeWidget, DepthGaugeWidget, TemperatureGaugeWidget, VoltageGaugeWidget
+**Status:** ✅ Implemented | SpeedRadialWidget, DepthRadialWidget, TemperatureRadialWidget, VoltageRadialWidget
 
 ## Overview
 
@@ -11,7 +11,7 @@ Visual specification for semicircle gauge widgets. All four semicircle gauges sh
 - Shape: N-shaped semicircle (opening downward)
 - Default arc: `startDeg = 270`, `endDeg = 450`
 - Angle convention: 0° at North, clockwise positive
-- Generic dial ring/arc stroke width: `theme.ring.arcLineWidth` (default `1`)
+- Generic dial ring/arc stroke width: `theme.radial.ring.arcLineWidth` (default `1`)
 
 Value-to-angle mapping:
 
@@ -26,10 +26,10 @@ angleDeg = startDeg + (endDeg - startDeg) * ((value - min) / (max - min))
 | `R` | `min(floor(availW/2), floor(availH))`, min 14 | 100 |
 | `pad` | `max(6, floor(min(W,H) * 0.04))` | ~6 |
 | `gap` | `max(6, floor(min(W,H) * 0.03))` | ~6 |
-| `ringW` | `max(6, floor(R * theme.ring.widthFactor))` (default `0.12`) | 12 |
+| `ringW` | `max(6, floor(R * theme.radial.ring.widthFactor))` (default `0.12`) | 12 |
 | `needleDepth` | `max(8, floor(ringW * 0.9))` | 10 |
-| `labelInset` | `max(18, floor(ringW * theme.labels.insetFactor))` (default `1.8`) | 21 |
-| `labelFontPx` | `max(10, floor(R * theme.labels.fontFactor))` (default `0.14`) | 14 |
+| `labelInset` | `max(18, floor(ringW * theme.radial.labels.insetFactor))` (default `1.8`) | 21 |
+| `labelFontPx` | `max(10, floor(R * theme.radial.labels.fontFactor))` (default `0.14`) | 14 |
 
 Gauge centering:
 
@@ -48,8 +48,8 @@ const cy = gaugeTop + R;
 | Alarm sector | `theme.colors.alarm` | `#ff7a76` | Matte red |
 | Pointer | `theme.colors.pointer` | `#ff2b2b` | Red triangle |
 | Text/ticks/arc stroke | `Helpers.resolveTextColor()` | CSS-resolved | Foreground |
-| Layline starboard (WindDialWidget) | `theme.colors.laylineStb` | `#82b683` | Starboard tack |
-| Layline port (WindDialWidget) | `theme.colors.laylinePort` | `#ff7a76` | Port tack |
+| Layline starboard (WindRadialWidget) | `theme.colors.laylineStb` | `#82b683` | Starboard tack |
+| Layline port (WindRadialWidget) | `theme.colors.laylinePort` | `#ff7a76` | Port tack |
 
 Theme defaults are provided by `ThemeResolver` and can be overridden via CSS variables.
 
@@ -62,8 +62,8 @@ draw.drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, {
   depth: needleDepth,
   fillStyle: theme.colors.pointer,
   variant: "long",
-  sideFactor: theme.pointer.sideFactor,
-  lengthFactor: theme.pointer.lengthFactor
+  sideFactor: theme.radial.pointer.sideFactor,
+  lengthFactor: theme.radial.pointer.lengthFactor
 });
 ```
 
@@ -71,26 +71,26 @@ Pointer color is passed directly via `fillStyle` from `theme.colors.pointer`.
 
 ## Sector Logic
 
-### SpeedGaugeWidget (high-end)
+### SpeedRadialWidget (high-end)
 
 - Warning: `warningFrom..alarmFrom` (or `warningFrom..maxValue`)
 - Alarm: `alarmFrom..maxValue`
 - Default toggles: warning enabled, alarm enabled
 
-### DepthGaugeWidget (low-end)
+### DepthRadialWidget (low-end)
 
 - Alarm: `minValue..alarmFrom`
 - Warning: `alarmFrom..warningFrom`
 - Default toggles: warning enabled, alarm enabled
 
-### VoltageGaugeWidget (low-end)
+### VoltageRadialWidget (low-end)
 
-- Same pattern as DepthGaugeWidget
+- Same pattern as DepthRadialWidget
 - Default toggles: warning enabled, alarm enabled
 
-### TemperatureGaugeWidget (high-end)
+### TemperatureRadialWidget (high-end)
 
-- Same pattern as SpeedGaugeWidget
+- Same pattern as SpeedRadialWidget
 - Default toggles: warning disabled, alarm disabled
 
 ### Sector Drawing
@@ -125,12 +125,12 @@ Aspect ratio `ratio = W / H` determines text layout:
 
 | Gauge | thresholdNormal | thresholdFlat |
 |---|---|---|
-| SpeedGaugeWidget | `speedRatioThresholdNormal` (`1.1`) | `speedRatioThresholdFlat` (`3.5`) |
-| DepthGaugeWidget | `depthRatioThresholdNormal` (`1.1`) | `depthRatioThresholdFlat` (`3.5`) |
-| TemperatureGaugeWidget | `tempRatioThresholdNormal` (`1.1`) | `tempRatioThresholdFlat` (`3.5`) |
-| VoltageGaugeWidget | `voltageRatioThresholdNormal` (`1.1`) | `voltageRatioThresholdFlat` (`3.5`) |
-| CompassGaugeWidget | `compRatioThresholdNormal` (`0.8`) | `compRatioThresholdFlat` (`2.2`) |
-| WindDialWidget | `dialRatioThresholdNormal` (`0.7`) | `dialRatioThresholdFlat` (`2.0`) |
+| SpeedRadialWidget | `speedRadialRatioThresholdNormal` (`1.1`) | `speedRadialRatioThresholdFlat` (`3.5`) |
+| DepthRadialWidget | `depthRadialRatioThresholdNormal` (`1.1`) | `depthRadialRatioThresholdFlat` (`3.5`) |
+| TemperatureRadialWidget | `tempRadialRatioThresholdNormal` (`1.1`) | `tempRadialRatioThresholdFlat` (`3.5`) |
+| VoltageRadialWidget | `voltageRadialRatioThresholdNormal` (`1.1`) | `voltageRadialRatioThresholdFlat` (`3.5`) |
+| CompassRadialWidget | `compassRadialRatioThresholdNormal` (`0.8`) | `compassRadialRatioThresholdFlat` (`2.2`) |
+| WindRadialWidget | `windRadialRatioThresholdNormal` (`0.7`) | `windRadialRatioThresholdFlat` (`2.0`) |
 
 ### Text Layout Per Mode
 
@@ -158,8 +158,8 @@ Caption  Value  Unit
 
 ## Tick Rendering
 
-- Major ticks: `len=theme.ticks.majorLen`, `width=theme.ticks.majorWidth`
-- Minor ticks: `len=theme.ticks.minorLen`, `width=theme.ticks.minorWidth`
+- Major ticks: `len=theme.radial.ticks.majorLen`, `width=theme.radial.ticks.majorWidth`
+- Minor ticks: `len=theme.radial.ticks.minorLen`, `width=theme.radial.ticks.minorWidth`
 - Labels: `weight=theme.font.labelWeight`, font family from `resolveFontFamily()`
 - End labels optional via `showEndLabels`
 

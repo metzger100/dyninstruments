@@ -32,7 +32,7 @@ Defined in `config/components.js`. It maps component IDs to file paths, global k
 ```text
 ClusterWidget
 ├── ClusterMapperToolkit
-│   └── GaugeAngleMath
+│   └── RadialAngleMath
 ├── ClusterMapperRegistry
 │   ├── CourseHeadingMapper
 │   ├── SpeedMapper
@@ -48,28 +48,28 @@ ClusterWidget
     ├── PositionCoordinateWidget
     │   ├── ThemeResolver
     │   └── TextLayoutEngine
-    ├── WindDialWidget
-    ├── CompassGaugeWidget
-    ├── SpeedGaugeWidget
-    ├── DepthGaugeWidget
-    ├── TemperatureGaugeWidget
-    └── VoltageGaugeWidget
+    ├── WindRadialWidget
+    ├── CompassRadialWidget
+    ├── SpeedRadialWidget
+    ├── DepthRadialWidget
+    ├── TemperatureRadialWidget
+    └── VoltageRadialWidget
 
-WindDialWidget/CompassGaugeWidget
-  ├── FullCircleDialEngine
-  │   ├── GaugeToolkit
+WindRadialWidget/CompassRadialWidget
+  ├── FullCircleRadialEngine
+  │   ├── RadialToolkit
   │   └── CanvasLayerCache
-  └── FullCircleDialTextLayout
+  └── FullCircleRadialTextLayout
 
-SpeedGaugeWidget/DepthGaugeWidget/TemperatureGaugeWidget/VoltageGaugeWidget
-  ├── SemicircleGaugeEngine
-  │   └── GaugeToolkit
-  └── GaugeValueMath
+SpeedRadialWidget/DepthRadialWidget/TemperatureRadialWidget/VoltageRadialWidget
+  ├── SemicircleRadialEngine
+  │   └── RadialToolkit
+  └── RadialValueMath
 
 TextLayoutEngine
-  ├── GaugeValueMath
+  ├── RadialValueMath
   ├── TextLayoutPrimitives
-  │   └── GaugeTextLayout
+  │   └── RadialTextLayout
   └── TextLayoutComposite
       └── TextLayoutPrimitives
 

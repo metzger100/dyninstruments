@@ -15,65 +15,65 @@
   }
 
   config.components = {
-    GaugeAngleMath: {
-      js: BASE + "shared/widget-kits/gauge/GaugeAngleMath.js",
+    RadialAngleMath: {
+      js: BASE + "shared/widget-kits/radial/RadialAngleMath.js",
       css: undefined,
-      globalKey: "DyniGaugeAngleMath"
+      globalKey: "DyniRadialAngleMath"
     },
-    GaugeTickMath: {
-      js: BASE + "shared/widget-kits/gauge/GaugeTickMath.js",
+    RadialTickMath: {
+      js: BASE + "shared/widget-kits/radial/RadialTickMath.js",
       css: undefined,
-      globalKey: "DyniGaugeTickMath",
-      deps: ["GaugeAngleMath"]
+      globalKey: "DyniRadialTickMath",
+      deps: ["RadialAngleMath"]
     },
-    GaugeCanvasPrimitives: {
-      js: BASE + "shared/widget-kits/gauge/GaugeCanvasPrimitives.js",
+    RadialCanvasPrimitives: {
+      js: BASE + "shared/widget-kits/radial/RadialCanvasPrimitives.js",
       css: undefined,
-      globalKey: "DyniGaugeCanvasPrimitives",
-      deps: ["GaugeAngleMath"]
+      globalKey: "DyniRadialCanvasPrimitives",
+      deps: ["RadialAngleMath"]
     },
-    GaugeDialRenderer: {
-      js: BASE + "shared/widget-kits/gauge/GaugeDialRenderer.js",
+    RadialFrameRenderer: {
+      js: BASE + "shared/widget-kits/radial/RadialFrameRenderer.js",
       css: undefined,
-      globalKey: "DyniGaugeDialRenderer",
-      deps: ["GaugeAngleMath", "GaugeTickMath", "GaugeCanvasPrimitives"]
+      globalKey: "DyniRadialFrameRenderer",
+      deps: ["RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives"]
     },
-    GaugeTextLayout: {
-      js: BASE + "shared/widget-kits/gauge/GaugeTextLayout.js",
+    RadialTextLayout: {
+      js: BASE + "shared/widget-kits/radial/RadialTextLayout.js",
       css: undefined,
-      globalKey: "DyniGaugeTextLayout"
+      globalKey: "DyniRadialTextLayout"
     },
-    GaugeValueMath: {
-      js: BASE + "shared/widget-kits/gauge/GaugeValueMath.js",
+    RadialValueMath: {
+      js: BASE + "shared/widget-kits/radial/RadialValueMath.js",
       css: undefined,
-      globalKey: "DyniGaugeValueMath",
-      deps: ["GaugeAngleMath"]
+      globalKey: "DyniRadialValueMath",
+      deps: ["RadialAngleMath"]
     },
     TextLayoutPrimitives: {
-      js: BASE + "shared/widget-kits/gauge/TextLayoutPrimitives.js",
+      js: BASE + "shared/widget-kits/text/TextLayoutPrimitives.js",
       css: undefined,
       globalKey: "DyniTextLayoutPrimitives",
-      deps: ["GaugeTextLayout"]
+      deps: ["RadialTextLayout"]
     },
     TextLayoutComposite: {
-      js: BASE + "shared/widget-kits/gauge/TextLayoutComposite.js",
+      js: BASE + "shared/widget-kits/text/TextLayoutComposite.js",
       css: undefined,
       globalKey: "DyniTextLayoutComposite",
       deps: ["TextLayoutPrimitives"]
     },
     TextLayoutEngine: {
-      js: BASE + "shared/widget-kits/gauge/TextLayoutEngine.js",
+      js: BASE + "shared/widget-kits/text/TextLayoutEngine.js",
       css: undefined,
       globalKey: "DyniTextLayoutEngine",
-      deps: ["GaugeValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]
+      deps: ["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]
     },
     CanvasLayerCache: {
-      js: BASE + "shared/widget-kits/gauge/CanvasLayerCache.js",
+      js: BASE + "shared/widget-kits/canvas/CanvasLayerCache.js",
       css: undefined,
       globalKey: "DyniCanvasLayerCache"
     },
     XteHighwayPrimitives: {
-      js: BASE + "shared/widget-kits/gauge/XteHighwayPrimitives.js",
+      js: BASE + "shared/widget-kits/xte/XteHighwayPrimitives.js",
       css: undefined,
       globalKey: "DyniXteHighwayPrimitives"
     },
@@ -87,36 +87,36 @@
       css: undefined,
       globalKey: "DyniThemePresets"
     },
-    GaugeToolkit: {
-      js: BASE + "shared/widget-kits/gauge/GaugeToolkit.js",
+    RadialToolkit: {
+      js: BASE + "shared/widget-kits/radial/RadialToolkit.js",
       css: undefined,
-      globalKey: "DyniGaugeToolkit",
+      globalKey: "DyniRadialToolkit",
       deps: [
         "ThemeResolver",
-        "GaugeTextLayout",
-        "GaugeValueMath",
-        "GaugeAngleMath",
-        "GaugeTickMath",
-        "GaugeCanvasPrimitives",
-        "GaugeDialRenderer"
+        "RadialTextLayout",
+        "RadialValueMath",
+        "RadialAngleMath",
+        "RadialTickMath",
+        "RadialCanvasPrimitives",
+        "RadialFrameRenderer"
       ]
     },
-    SemicircleGaugeEngine: {
-      js: BASE + "shared/widget-kits/gauge/SemicircleGaugeEngine.js",
+    SemicircleRadialEngine: {
+      js: BASE + "shared/widget-kits/radial/SemicircleRadialEngine.js",
       css: undefined,
-      globalKey: "DyniSemicircleGaugeEngine",
-      deps: ["GaugeToolkit"]
+      globalKey: "DyniSemicircleRadialEngine",
+      deps: ["RadialToolkit"]
     },
-    FullCircleDialEngine: {
-      js: BASE + "shared/widget-kits/gauge/FullCircleDialEngine.js",
+    FullCircleRadialEngine: {
+      js: BASE + "shared/widget-kits/radial/FullCircleRadialEngine.js",
       css: undefined,
-      globalKey: "DyniFullCircleDialEngine",
-      deps: ["GaugeToolkit", "CanvasLayerCache"]
+      globalKey: "DyniFullCircleRadialEngine",
+      deps: ["RadialToolkit", "CanvasLayerCache"]
     },
-    FullCircleDialTextLayout: {
-      js: BASE + "shared/widget-kits/gauge/FullCircleDialTextLayout.js",
+    FullCircleRadialTextLayout: {
+      js: BASE + "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
       css: undefined,
-      globalKey: "DyniFullCircleDialTextLayout"
+      globalKey: "DyniFullCircleRadialTextLayout"
     },
     ThreeValueTextWidget: {
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
@@ -147,62 +147,62 @@
       css: undefined,
       globalKey: "DyniRendererPropsWidget",
       deps: [
-        "WindDialWidget",
-        "CompassGaugeWidget",
-        "SpeedGaugeWidget",
-        "DepthGaugeWidget",
-        "TemperatureGaugeWidget",
-        "VoltageGaugeWidget",
+        "WindRadialWidget",
+        "CompassRadialWidget",
+        "SpeedRadialWidget",
+        "DepthRadialWidget",
+        "TemperatureRadialWidget",
+        "VoltageRadialWidget",
         "XteDisplayWidget"
       ]
     },
-    WindDialWidget: {
-      js: BASE + "widgets/gauges/WindDialWidget/WindDialWidget.js",
+    WindRadialWidget: {
+      js: BASE + "widgets/radial/WindRadialWidget/WindRadialWidget.js",
       css: undefined,
-      globalKey: "DyniWindDialWidget",
-      deps: ["FullCircleDialEngine", "FullCircleDialTextLayout"]
+      globalKey: "DyniWindRadialWidget",
+      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]
     },
-    CompassGaugeWidget: {
-      js: BASE + "widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js",
+    CompassRadialWidget: {
+      js: BASE + "widgets/radial/CompassRadialWidget/CompassRadialWidget.js",
       css: undefined,
-      globalKey: "DyniCompassGaugeWidget",
-      deps: ["FullCircleDialEngine", "FullCircleDialTextLayout"]
+      globalKey: "DyniCompassRadialWidget",
+      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]
     },
-    SpeedGaugeWidget: {
-      js: BASE + "widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js",
+    SpeedRadialWidget: {
+      js: BASE + "widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js",
       css: undefined,
-      globalKey: "DyniSpeedGaugeWidget",
-      deps: ["SemicircleGaugeEngine", "GaugeValueMath"]
+      globalKey: "DyniSpeedRadialWidget",
+      deps: ["SemicircleRadialEngine", "RadialValueMath"]
     },
-    DepthGaugeWidget: {
-      js: BASE + "widgets/gauges/DepthGaugeWidget/DepthGaugeWidget.js",
+    DepthRadialWidget: {
+      js: BASE + "widgets/radial/DepthRadialWidget/DepthRadialWidget.js",
       css: undefined,
-      globalKey: "DyniDepthGaugeWidget",
-      deps: ["SemicircleGaugeEngine", "GaugeValueMath"]
+      globalKey: "DyniDepthRadialWidget",
+      deps: ["SemicircleRadialEngine", "RadialValueMath"]
     },
-    TemperatureGaugeWidget: {
-      js: BASE + "widgets/gauges/TemperatureGaugeWidget/TemperatureGaugeWidget.js",
+    TemperatureRadialWidget: {
+      js: BASE + "widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js",
       css: undefined,
-      globalKey: "DyniTemperatureGaugeWidget",
-      deps: ["SemicircleGaugeEngine", "GaugeValueMath"]
+      globalKey: "DyniTemperatureRadialWidget",
+      deps: ["SemicircleRadialEngine", "RadialValueMath"]
     },
-    VoltageGaugeWidget: {
-      js: BASE + "widgets/gauges/VoltageGaugeWidget/VoltageGaugeWidget.js",
+    VoltageRadialWidget: {
+      js: BASE + "widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js",
       css: undefined,
-      globalKey: "DyniVoltageGaugeWidget",
-      deps: ["SemicircleGaugeEngine", "GaugeValueMath"]
+      globalKey: "DyniVoltageRadialWidget",
+      deps: ["SemicircleRadialEngine", "RadialValueMath"]
     },
     XteDisplayWidget: {
       js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
       css: undefined,
       globalKey: "DyniXteDisplayWidget",
-      deps: ["GaugeToolkit", "CanvasLayerCache", "XteHighwayPrimitives"]
+      deps: ["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives"]
     },
     ClusterMapperToolkit: {
       js: BASE + "cluster/mappers/ClusterMapperToolkit.js",
       css: undefined,
       globalKey: "DyniClusterMapperToolkit",
-      deps: ["GaugeAngleMath"]
+      deps: ["RadialAngleMath"]
     },
     ClusterRendererRouter: {
       js: BASE + "cluster/rendering/ClusterRendererRouter.js",

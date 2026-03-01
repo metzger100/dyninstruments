@@ -1,11 +1,11 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
-describe("WindDialWidget", function () {
+describe("WindRadialWidget", function () {
   function createWindCachingHarness() {
-    const fullCircleEngine = loadFresh("shared/widget-kits/gauge/FullCircleDialEngine.js");
-    const layerCache = loadFresh("shared/widget-kits/gauge/CanvasLayerCache.js");
-    const textLayout = loadFresh("shared/widget-kits/gauge/FullCircleDialTextLayout.js");
+    const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
+    const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
+    const textLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js");
     const calls = {
       ring: 0,
       layline: 0,
@@ -20,23 +20,25 @@ describe("WindDialWidget", function () {
         laylineStb: "#82b683",
         laylinePort: "#ff7a76"
       },
-      ticks: {
-        majorLen: 12,
-        majorWidth: 3,
-        minorLen: 6,
-        minorWidth: 2
-      },
-      pointer: {
-        sideFactor: 0.32,
-        lengthFactor: 1.9
-      },
-      ring: {
-        arcLineWidth: 2,
-        widthFactor: 0.35
-      },
-      labels: {
-        insetFactor: 2.1,
-        fontFactor: 0.35
+      radial: {
+        ticks: {
+          majorLen: 12,
+          majorWidth: 3,
+          minorLen: 6,
+          minorWidth: 2
+        },
+        pointer: {
+          sideFactor: 0.32,
+          lengthFactor: 1.9
+        },
+        ring: {
+          arcLineWidth: 2,
+          widthFactor: 0.35
+        },
+        labels: {
+          insetFactor: 2.1,
+          fontFactor: 0.35
+        }
       },
       font: {
         weight: 700,
@@ -44,7 +46,7 @@ describe("WindDialWidget", function () {
       }
     };
 
-    const spec = loadFresh("widgets/gauges/WindDialWidget/WindDialWidget.js")
+    const spec = loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js")
       .create({}, {
         applyFormatter(value) {
           return String(value);
@@ -65,10 +67,10 @@ describe("WindDialWidget", function () {
           return "#fff";
         },
         getModule(id) {
-          if (id === "FullCircleDialEngine") return fullCircleEngine;
-          if (id === "FullCircleDialTextLayout") return textLayout;
+          if (id === "FullCircleRadialEngine") return fullCircleEngine;
+          if (id === "FullCircleRadialTextLayout") return textLayout;
           if (id === "CanvasLayerCache") return layerCache;
-          if (id !== "GaugeToolkit") throw new Error("unexpected module: " + id);
+          if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
               return {
@@ -160,15 +162,15 @@ describe("WindDialWidget", function () {
       speedCaption: "AWS",
       angleUnit: "°",
       speedUnit: "kn",
-      layMin: 35,
-      layMax: 45
+      windRadialLayMin: 35,
+      windRadialLayMax: 45
     }, overrides || {});
   }
 
   it("formats speed via Helpers.applyFormatter in graphic mode", function () {
-    const fullCircleEngine = loadFresh("shared/widget-kits/gauge/FullCircleDialEngine.js");
-    const layerCache = loadFresh("shared/widget-kits/gauge/CanvasLayerCache.js");
-    const textLayout = loadFresh("shared/widget-kits/gauge/FullCircleDialTextLayout.js");
+    const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
+    const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
+    const textLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js");
     const valueDrawCalls = [];
     const laylineCalls = [];
     const pointerCalls = [];
@@ -181,23 +183,25 @@ describe("WindDialWidget", function () {
         laylineStb: "#82b683",
         laylinePort: "#ff7a76"
       },
-      ticks: {
-        majorLen: 12,
-        majorWidth: 3,
-        minorLen: 6,
-        minorWidth: 2
-      },
-      pointer: {
-        sideFactor: 0.32,
-        lengthFactor: 1.9
-      },
-      ring: {
-        arcLineWidth: 2,
-        widthFactor: 0.35
-      },
-      labels: {
-        insetFactor: 2.1,
-        fontFactor: 0.35
+      radial: {
+        ticks: {
+          majorLen: 12,
+          majorWidth: 3,
+          minorLen: 6,
+          minorWidth: 2
+        },
+        pointer: {
+          sideFactor: 0.32,
+          lengthFactor: 1.9
+        },
+        ring: {
+          arcLineWidth: 2,
+          widthFactor: 0.35
+        },
+        labels: {
+          insetFactor: 2.1,
+          fontFactor: 0.35
+        }
       },
       font: {
         weight: 720,
@@ -208,7 +212,7 @@ describe("WindDialWidget", function () {
       return "spd:" + String(value) + ":" + String(spec.formatterParameters[0]);
     });
 
-    const spec = loadFresh("widgets/gauges/WindDialWidget/WindDialWidget.js")
+    const spec = loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js")
       .create({}, {
         applyFormatter,
         setupCanvas(canvas) {
@@ -227,10 +231,10 @@ describe("WindDialWidget", function () {
           return "#fff";
         },
         getModule(id) {
-          if (id === "FullCircleDialEngine") return fullCircleEngine;
-          if (id === "FullCircleDialTextLayout") return textLayout;
+          if (id === "FullCircleRadialEngine") return fullCircleEngine;
+          if (id === "FullCircleRadialTextLayout") return textLayout;
           if (id === "CanvasLayerCache") return layerCache;
-          if (id !== "GaugeToolkit") throw new Error("unexpected module: " + id);
+          if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
               return {
@@ -314,8 +318,8 @@ describe("WindDialWidget", function () {
       speedCaption: "AWS",
       angleUnit: "°",
       speedUnit: "kn",
-      layMin: 35,
-      layMax: 45,
+      windRadialLayMin: 35,
+      windRadialLayMax: 45,
       formatter: "formatSpeed",
       formatterParameters: ["kn"]
     });
@@ -330,17 +334,17 @@ describe("WindDialWidget", function () {
     expect(laylineCalls[0].thickness).toBe(17);
     expect(laylineCalls[1].thickness).toBe(17);
     expect(pointerCalls[0].fillStyle).toBe(themeDefaults.colors.pointer);
-    expect(pointerCalls[0].sideFactor).toBe(themeDefaults.pointer.sideFactor);
-    expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.pointer.lengthFactor);
+    expect(pointerCalls[0].sideFactor).toBe(themeDefaults.radial.pointer.sideFactor);
+    expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.radial.pointer.lengthFactor);
     expect(pointerCalls[0].depth).toBe(15);
-    expect(ringCalls[0].lineWidth).toBe(themeDefaults.ring.arcLineWidth);
+    expect(ringCalls[0].lineWidth).toBe(themeDefaults.radial.ring.arcLineWidth);
     expect(tickCalls[0].major).toEqual({
-      len: themeDefaults.ticks.majorLen,
-      width: themeDefaults.ticks.majorWidth
+      len: themeDefaults.radial.ticks.majorLen,
+      width: themeDefaults.radial.ticks.majorWidth
     });
     expect(tickCalls[0].minor).toEqual({
-      len: themeDefaults.ticks.minorLen,
-      width: themeDefaults.ticks.minorWidth
+      len: themeDefaults.radial.ticks.minorLen,
+      width: themeDefaults.radial.ticks.minorWidth
     });
     expect(labelCalls[0].radiusOffset).toBe(35);
     expect(labelCalls[0].fontPx).toBe(17);
@@ -348,12 +352,12 @@ describe("WindDialWidget", function () {
   });
 
   it("does not append unit into value text when formatter returns raw passthrough", function () {
-    const fullCircleEngine = loadFresh("shared/widget-kits/gauge/FullCircleDialEngine.js");
-    const layerCache = loadFresh("shared/widget-kits/gauge/CanvasLayerCache.js");
-    const textLayout = loadFresh("shared/widget-kits/gauge/FullCircleDialTextLayout.js");
+    const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
+    const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
+    const textLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js");
     const valueDrawCalls = [];
 
-    const spec = loadFresh("widgets/gauges/WindDialWidget/WindDialWidget.js")
+    const spec = loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js")
       .create({}, {
         applyFormatter(value) {
           return String(value);
@@ -374,10 +378,10 @@ describe("WindDialWidget", function () {
           return "#fff";
         },
         getModule(id) {
-          if (id === "FullCircleDialEngine") return fullCircleEngine;
-          if (id === "FullCircleDialTextLayout") return textLayout;
+          if (id === "FullCircleRadialEngine") return fullCircleEngine;
+          if (id === "FullCircleRadialTextLayout") return textLayout;
           if (id === "CanvasLayerCache") return layerCache;
-          if (id !== "GaugeToolkit") throw new Error("unexpected module: " + id);
+          if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
               return {
@@ -396,23 +400,25 @@ describe("WindDialWidget", function () {
                         laylineStb: "#82b683",
                         laylinePort: "#ff7a76"
                       },
-                      ticks: {
-                        majorLen: 12,
-                        majorWidth: 3,
-                        minorLen: 6,
-                        minorWidth: 2
-                      },
-                      pointer: {
-                        sideFactor: 0.32,
-                        lengthFactor: 1.9
-                      },
-                      ring: {
-                        arcLineWidth: 2,
-                        widthFactor: 0.35
-                      },
-                      labels: {
-                        insetFactor: 2.1,
-                        fontFactor: 0.35
+                      radial: {
+                        ticks: {
+                          majorLen: 12,
+                          majorWidth: 3,
+                          minorLen: 6,
+                          minorWidth: 2
+                        },
+                        pointer: {
+                          sideFactor: 0.32,
+                          lengthFactor: 1.9
+                        },
+                        ring: {
+                          arcLineWidth: 2,
+                          widthFactor: 0.35
+                        },
+                        labels: {
+                          insetFactor: 2.1,
+                          fontFactor: 0.35
+                        }
                       },
                       font: {
                         weight: 700,
@@ -526,11 +532,11 @@ describe("WindDialWidget", function () {
     harness.spec.renderCanvas(canvas, makeWindProps());
     expect(harness.calls.ring).toBe(1);
 
-    harness.theme.ring.arcLineWidth = 3;
+    harness.theme.radial.ring.arcLineWidth = 3;
     harness.spec.renderCanvas(canvas, makeWindProps());
     expect(harness.calls.ring).toBe(2);
 
-    harness.spec.renderCanvas(canvas, makeWindProps({ layMax: 55 }));
+    harness.spec.renderCanvas(canvas, makeWindProps({ windRadialLayMax: 55 }));
     expect(harness.calls.ring).toBe(3);
   });
 });

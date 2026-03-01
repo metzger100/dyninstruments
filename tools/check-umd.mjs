@@ -7,7 +7,7 @@ const ROOT = process.cwd();
 const SCAN_ROOTS = ["cluster", "shared", "widgets"];
 const EXCLUDED_DIRS = new Set([".git", "node_modules", "coverage", "tests", "tools"]);
 const STANDARDS_REF = "conventions/coding-standards.md";
-const REFERENCE_IMPL = "widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js";
+const REFERENCE_IMPL = "widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js";
 
 const UMD_WRAPPER_RE = /^\(function\s*\(\s*root\s*,\s*factory\s*\)\s*\{/;
 const DYNI_COMPONENTS_RE = /root\.DyniComponents\s*=\s*root\.DyniComponents\s*\|\|\s*{}/;

@@ -68,19 +68,19 @@ describe("ThemePresets", function () {
   it("contains expected spot overrides per preset", function () {
     const { api } = createApi();
 
-    expect(api.presets.slim.ring.arcLineWidth).toBe(0.5);
-    expect(api.presets.slim.pointer.sideFactor).toBe(0.18);
+    expect(api.presets.slim.radial.ring.arcLineWidth).toBe(0.5);
+    expect(api.presets.slim.radial.pointer.sideFactor).toBe(0.18);
     expect(api.presets.slim.xte.lineWidthFactor).toBe(0.85);
 
-    expect(api.presets.bold.ring.widthFactor).toBe(0.16);
-    expect(api.presets.bold.pointer.lengthFactor).toBe(2.2);
+    expect(api.presets.bold.radial.ring.widthFactor).toBe(0.16);
+    expect(api.presets.bold.radial.pointer.lengthFactor).toBe(2.2);
     expect(api.presets.bold.xte.lineWidthFactor).toBe(1.2);
 
     expect(api.presets.night.colors.pointer).toBe("#cc2222");
     expect(api.presets.night.colors.laylinePort).toBe("#8b3333");
 
     expect(api.presets.highcontrast.colors.warning).toBe("#ffcc00");
-    expect(api.presets.highcontrast.ticks.minorWidth).toBe(2);
+    expect(api.presets.highcontrast.radial.ticks.minorWidth).toBe(2);
     expect(api.presets.highcontrast.xte.lineWidthFactor).toBe(1.3);
   });
 });

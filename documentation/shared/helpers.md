@@ -72,7 +72,7 @@ Applies formatter to raw value:
 Accesses loaded modules by `config.components` ID.
 
 ```javascript
-const gaugeUtilsModule = Helpers.getModule("GaugeToolkit");
+const gaugeUtilsModule = Helpers.getModule("RadialToolkit");
 const gaugeUtils = gaugeUtilsModule && gaugeUtilsModule.create(def, Helpers);
 ```
 

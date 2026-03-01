@@ -1,18 +1,18 @@
 /**
- * Module: DepthGaugeWidget - Semicircle depth gauge with low-end warning/alarm sectors
+ * Module: DepthRadialWidget - Semicircle depth gauge with low-end warning/alarm sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleGaugeEngine, GaugeValueMath
+ * Depends: SemicircleRadialEngine, RadialValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniDepthGaugeWidget = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniDepthRadialWidget = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const renderer = Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
-    const valueMath = Helpers.getModule("GaugeValueMath").create(def, Helpers);
+    const renderer = Helpers.getModule("SemicircleRadialEngine").create(def, Helpers);
+    const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
 
     function formatDepthString(raw, decimals) {
       const n = Number(raw);
@@ -43,9 +43,18 @@
       rawValueKey: "depth",
       unitDefault: "m",
       rangeDefaults: { min: 0, max: 30 },
+      rangeProps: {
+        min: "depthRadialMinValue",
+        max: "depthRadialMaxValue"
+      },
+      tickProps: {
+        major: "depthRadialTickMajor",
+        minor: "depthRadialTickMinor",
+        showEndLabels: "depthRadialShowEndLabels"
+      },
       ratioProps: {
-        normal: "depthRatioThresholdNormal",
-        flat: "depthRatioThresholdFlat"
+        normal: "depthRadialRatioThresholdNormal",
+        flat: "depthRadialRatioThresholdFlat"
       },
       ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
@@ -53,7 +62,11 @@
         return displayDepthFromRaw(raw, 1);
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
-        return valueMath.buildLowEndSectors(props, minV, maxV, arc, {
+        const radialProps = {
+          warningFrom: props && props.depthRadialWarningFrom,
+          alarmFrom: props && props.depthRadialAlarmFrom
+        };
+        return valueMath.buildLowEndSectors(radialProps, minV, maxV, arc, {
           warningColor: theme.colors.warning,
           alarmColor: theme.colors.alarm
         });
@@ -65,7 +78,7 @@
     }
 
     return {
-      id: "DepthGaugeWidget",
+      id: "DepthRadialWidget",
       version: "0.2.0",
       wantsHideNativeHead: true,
       renderCanvas,
@@ -73,5 +86,5 @@
     };
   }
 
-  return { id: "DepthGaugeWidget", create };
+  return { id: "DepthRadialWidget", create };
 }));

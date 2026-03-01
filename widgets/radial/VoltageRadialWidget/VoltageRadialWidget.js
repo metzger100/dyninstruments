@@ -1,18 +1,18 @@
 /**
- * Module: VoltageGaugeWidget - Semicircle voltage gauge with low-end warning/alarm sectors
+ * Module: VoltageRadialWidget - Semicircle voltage gauge with low-end warning/alarm sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleGaugeEngine, GaugeValueMath
+ * Depends: SemicircleRadialEngine, RadialValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniVoltageGaugeWidget = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniVoltageRadialWidget = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const renderer = Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
-    const valueMath = Helpers.getModule("GaugeValueMath").create(def, Helpers);
+    const renderer = Helpers.getModule("SemicircleRadialEngine").create(def, Helpers);
+    const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
 
     function formatVoltageString(raw, props) {
       const n = Number(raw);
@@ -48,9 +48,18 @@
       rawValueKey: "voltage",
       unitDefault: "V",
       rangeDefaults: { min: 10, max: 15 },
+      rangeProps: {
+        min: "voltageRadialMinValue",
+        max: "voltageRadialMaxValue"
+      },
+      tickProps: {
+        major: "voltageRadialTickMajor",
+        minor: "voltageRadialTickMinor",
+        showEndLabels: "voltageRadialShowEndLabels"
+      },
       ratioProps: {
-        normal: "voltageRatioThresholdNormal",
-        flat: "voltageRatioThresholdFlat"
+        normal: "voltageRadialRatioThresholdNormal",
+        flat: "voltageRadialRatioThresholdFlat"
       },
       ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: valueMath.resolveVoltageSemicircleTickSteps,
@@ -59,13 +68,16 @@
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
         const p = props || {};
-        const warningEnabled = (p.voltageWarningEnabled !== false);
-        const alarmEnabled = (p.voltageAlarmEnabled !== false);
+        const warningEnabled = (p.voltageRadialWarningEnabled !== false);
+        const alarmEnabled = (p.voltageRadialAlarmEnabled !== false);
         if (!warningEnabled && !alarmEnabled) {
           return [];
         }
 
-        const sectorProps = { ...p };
+        const sectorProps = {
+          warningFrom: p.voltageRadialWarningFrom,
+          alarmFrom: p.voltageRadialAlarmFrom
+        };
         if (!warningEnabled) {
           sectorProps.warningFrom = NaN;
         }
@@ -87,7 +99,7 @@
     }
 
     return {
-      id: "VoltageGaugeWidget",
+      id: "VoltageRadialWidget",
       version: "0.2.0",
       wantsHideNativeHead: true,
       renderCanvas,
@@ -95,5 +107,5 @@
     };
   }
 
-  return { id: "VoltageGaugeWidget", create };
+  return { id: "VoltageRadialWidget", create };
 }));

@@ -25,25 +25,25 @@
       const req = p.kind;
 
       if (req === "voltageRadial") {
-        const warnEnabled = (p.voltageWarningEnabled !== false);
-        const alarmEnabled = (p.voltageAlarmEnabled !== false);
+        const warnEnabled = (p.voltageRadialWarningEnabled !== false);
+        const alarmEnabled = (p.voltageRadialAlarmEnabled !== false);
         return {
-          renderer: "VoltageGaugeWidget",
+          renderer: "VoltageRadialWidget",
           value: p.value,
           caption: cap("voltageRadial"),
           unit: unit("voltageRadial"),
           formatter: "formatDecimal",
           formatterParameters: [3, 1, true],
           rendererProps: {
-            minValue: num(p.minValue),
-            maxValue: num(p.maxValue),
-            tickMajor: num(p.tickMajor),
-            tickMinor: num(p.tickMinor),
-            showEndLabels: !!p.showEndLabels,
-            warningFrom: warnEnabled ? num(p.warningFrom) : undefined,
-            alarmFrom: alarmEnabled ? num(p.alarmFrom) : undefined,
-            voltageRatioThresholdNormal: num(p.voltageRatioThresholdNormal),
-            voltageRatioThresholdFlat: num(p.voltageRatioThresholdFlat),
+            voltageRadialMinValue: num(p.voltageRadialMinValue),
+            voltageRadialMaxValue: num(p.voltageRadialMaxValue),
+            voltageRadialTickMajor: num(p.voltageRadialTickMajor),
+            voltageRadialTickMinor: num(p.voltageRadialTickMinor),
+            voltageRadialShowEndLabels: !!p.voltageRadialShowEndLabels,
+            voltageRadialWarningFrom: warnEnabled ? num(p.voltageRadialWarningFrom) : undefined,
+            voltageRadialAlarmFrom: alarmEnabled ? num(p.voltageRadialAlarmFrom) : undefined,
+            voltageRadialRatioThresholdNormal: num(p.voltageRadialRatioThresholdNormal),
+            voltageRadialRatioThresholdFlat: num(p.voltageRadialRatioThresholdFlat),
             captionUnitScale: num(p.captionUnitScale)
           }
         };

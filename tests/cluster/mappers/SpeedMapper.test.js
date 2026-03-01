@@ -8,30 +8,30 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
 });
 
 describe("SpeedMapper", function () {
-  it("maps radial kinds to SpeedGaugeWidget and keeps toggles enabled by default", function () {
+  it("maps radial kinds to SpeedRadialWidget and keeps toggles enabled by default", function () {
     const mapper = loadFresh("cluster/mappers/SpeedMapper.js").create();
     const out = mapper.translate({
       kind: "sogRadial",
       sog: 6.4,
-      minValue: "0",
-      maxValue: "30",
+      speedRadialMinValue: "0",
+      speedRadialMaxValue: "30",
       startAngleDeg: "270",
       endAngleDeg: "450",
-      tickMajor: "5",
-      tickMinor: "1",
-      warningFrom: "20",
-      alarmFrom: "25",
+      speedRadialTickMajor: "5",
+      speedRadialTickMinor: "1",
+      speedRadialWarningFrom: "20",
+      speedRadialAlarmFrom: "25",
       captionUnitScale: "0.8",
-      speedRatioThresholdNormal: "1.1",
-      speedRatioThresholdFlat: "3.5"
+      speedRadialRatioThresholdNormal: "1.1",
+      speedRadialRatioThresholdFlat: "3.5"
     }, toolkit);
 
-    expect(out.renderer).toBe("SpeedGaugeWidget");
+    expect(out.renderer).toBe("SpeedRadialWidget");
     expect(out.value).toBe(6.4);
     expect(out.formatter).toBe("formatSpeed");
     expect(out.formatterParameters).toEqual(["kn"]);
-    expect(out.rendererProps.warningFrom).toBe(20);
-    expect(out.rendererProps.alarmFrom).toBe(25);
+    expect(out.rendererProps.speedRadialWarningFrom).toBe(20);
+    expect(out.rendererProps.speedRadialAlarmFrom).toBe(25);
   });
 
   it("disables warning/alarm sectors when toggles are false", function () {
@@ -39,14 +39,14 @@ describe("SpeedMapper", function () {
     const out = mapper.translate({
       kind: "sogRadial",
       sog: 6.4,
-      speedWarningEnabled: false,
-      speedAlarmEnabled: false,
-      warningFrom: "20",
-      alarmFrom: "25"
+      speedRadialWarningEnabled: false,
+      speedRadialAlarmEnabled: false,
+      speedRadialWarningFrom: "20",
+      speedRadialAlarmFrom: "25"
     }, toolkit);
 
-    expect(out.rendererProps.warningFrom).toBeUndefined();
-    expect(out.rendererProps.alarmFrom).toBeUndefined();
+    expect(out.rendererProps.speedRadialWarningFrom).toBeUndefined();
+    expect(out.rendererProps.speedRadialAlarmFrom).toBeUndefined();
   });
 
   it("maps numeric kinds to formatSpeed", function () {

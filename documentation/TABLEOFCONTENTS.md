@@ -57,15 +57,15 @@
 
 ## Gauge Widgets (Semicircle)
 
-- **Visual style: proportions, colors, pointer config** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md)
-- **Layout modes (flat/normal/high)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#layout-modes)
-- **Sector logic (warning/alarm placement)** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#sector-logic)
-- **Shared gauge APIs (GaugeToolkit + split core modules)** → [gauges/gauge-shared-api.md](gauges/gauge-shared-api.md)
-- **How does the shared full-circle dial engine work?** → [gauges/full-circle-dial-engine.md](gauges/full-circle-dial-engine.md)
-- **What are the full-circle dial proportions (R, ring, label inset)?** → [gauges/full-circle-dial-style-guide.md](gauges/full-circle-dial-style-guide.md#proportions-function-of-r)
-- **How are full-circle pointers configured (lubber vs value pointer)?** → [gauges/full-circle-dial-style-guide.md](gauges/full-circle-dial-style-guide.md#pointer-variants)
-- **How are full-circle ticks and labels rendered?** → [gauges/full-circle-dial-style-guide.md](gauges/full-circle-dial-style-guide.md#tick-rendering)
-- **How do full-circle layout modes (flat/normal/high) work?** → [gauges/full-circle-dial-style-guide.md](gauges/full-circle-dial-style-guide.md#layout-modes)
+- **Visual style: proportions, colors, pointer config** → [radial/gauge-style-guide.md](radial/gauge-style-guide.md)
+- **Layout modes (flat/normal/high)** → [radial/gauge-style-guide.md](radial/gauge-style-guide.md#layout-modes)
+- **Sector logic (warning/alarm placement)** → [radial/gauge-style-guide.md](radial/gauge-style-guide.md#sector-logic)
+- **Shared gauge APIs (RadialToolkit + split core modules)** → [radial/gauge-shared-api.md](radial/gauge-shared-api.md)
+- **How does the shared full-circle dial engine work?** → [radial/full-circle-dial-engine.md](radial/full-circle-dial-engine.md)
+- **What are the full-circle dial proportions (R, ring, label inset)?** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#proportions-function-of-r)
+- **How are full-circle pointers configured (lubber vs value pointer)?** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#pointer-variants)
+- **How are full-circle ticks and labels rendered?** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#tick-rendering)
+- **How do full-circle layout modes (flat/normal/high) work?** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#layout-modes)
 - **How does the shared text layout engine work?** → [shared/text-layout-engine.md](shared/text-layout-engine.md)
 
 ## Module Reference (Renderers)
@@ -76,11 +76,11 @@
 - **How do stacked nav positions render (boat/wp)?** → [widgets/position-coordinates.md](widgets/position-coordinates.md)
 - **Which kinds use PositionCoordinateWidget?** → [widgets/position-coordinates.md](widgets/position-coordinates.md#key-details)
 - **How does the wind dial work (angle+speed dual display)?** → [widgets/wind-dial.md](widgets/wind-dial.md)
-- **What draw functions does WindDialWidget use?** → [widgets/wind-dial.md](widgets/wind-dial.md#dial-drawing-via-gaugetoolkitdraw)
-- **What props does WindDialWidget accept?** → [widgets/wind-dial.md](widgets/wind-dial.md#props)
+- **What draw functions does WindRadialWidget use?** → [widgets/wind-dial.md](widgets/wind-dial.md#dial-drawing-via-radialtoolkitdraw)
+- **What props does WindRadialWidget accept?** → [widgets/wind-dial.md](widgets/wind-dial.md#props)
 - **How does the rotating compass card work?** → [widgets/compass-gauge.md](widgets/compass-gauge.md)
-- **How does compass rotation with upright labels work?** → [widgets/compass-gauge.md](widgets/compass-gauge.md#compass-dial-drawing-via-gaugetoolkitdraw)
-- **What props does CompassGaugeWidget accept?** → [widgets/compass-gauge.md](widgets/compass-gauge.md#props)
+- **How does compass rotation with upright labels work?** → [widgets/compass-gauge.md](widgets/compass-gauge.md#compass-dial-drawing-via-radialtoolkitdraw)
+- **What props does CompassRadialWidget accept?** → [widgets/compass-gauge.md](widgets/compass-gauge.md#props)
 - **How does the XTE highway widget work?** → [widgets/xte-display.md](widgets/xte-display.md)
 - **What layout modes does XteDisplayWidget use?** → [widgets/xte-display.md](widgets/xte-display.md#layout-modes)
 - **What XTE scale does XteDisplayWidget use?** → [widgets/xte-display.md](widgets/xte-display.md)
@@ -113,13 +113,13 @@
 
 ## Feature-Specific Lookups
 
-**"How do I add warning/alarm sectors to a gauge?"** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#sector-logic),
-**"How do I make a gauge respond to aspect ratio?"** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#layout-modes)
-**"How does the pointer/needle work?"** → [gauges/gauge-style-guide.md](gauges/gauge-style-guide.md#pointer-configuration),
-**"What are the full-circle dial proportions?"** → [gauges/full-circle-dial-style-guide.md](gauges/full-circle-dial-style-guide.md#proportions-function-of-r)
-**"How are full-circle pointers configured?"** → [gauges/full-circle-dial-style-guide.md](gauges/full-circle-dial-style-guide.md#pointer-variants),
-**"How does full-circle tick rendering work?"** → [gauges/full-circle-dial-style-guide.md](gauges/full-circle-dial-style-guide.md#tick-rendering)
-**"How do full-circle layout modes work?"** → [gauges/full-circle-dial-style-guide.md](gauges/full-circle-dial-style-guide.md#layout-modes),
+**"How do I add warning/alarm sectors to a gauge?"** → [radial/gauge-style-guide.md](radial/gauge-style-guide.md#sector-logic),
+**"How do I make a gauge respond to aspect ratio?"** → [radial/gauge-style-guide.md](radial/gauge-style-guide.md#layout-modes)
+**"How does the pointer/needle work?"** → [radial/gauge-style-guide.md](radial/gauge-style-guide.md#pointer-configuration),
+**"What are the full-circle dial proportions?"** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#proportions-function-of-r)
+**"How are full-circle pointers configured?"** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#pointer-variants),
+**"How does full-circle tick rendering work?"** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#tick-rendering)
+**"How do full-circle layout modes work?"** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#layout-modes),
 **"Where are shared theme tokens resolved?"** → [shared/theme-tokens.md](shared/theme-tokens.md)
 **"How do I switch a theme preset at runtime?"** → [shared/theme-tokens.md](shared/theme-tokens.md#runtime-integration)
 **"Can user.css choose the active preset?"** → [shared/theme-tokens.md](shared/theme-tokens.md#runtime-integration)

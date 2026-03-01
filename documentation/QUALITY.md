@@ -10,7 +10,7 @@
 | config/ | 12 | all | all | ✅ (9 tests incl. static cluster coverage) | none | A |
 | cluster/ | 14 | all | all | ✅ (14/14) | none | A |
 | shared/ | 16 | all | check (4 warns, 0 violations) | partial (11/16) | none | B |
-| widgets/gauges/ | 6 | all | all | ✅ (6/6) | none | A |
+| widgets/radial/ | 6 | all | all | ✅ (6/6) | none | A |
 | widgets/text/ | 2 | all | all | ✅ (2/2) | none | A |
 
 Notes:
@@ -27,11 +27,11 @@ Notes:
 | Pattern | Severity | Files | Status |
 |---|---|---|---|
 | Cross-file clone drift (renamed helpers + long copy-paste blocks) | HIGH | Previously under-detected by name-based duplicate rule | ✅ Fixed (`check-patterns`: `duplicate-functions: 0`, `duplicate-block-clones: 0`) |
-| Canvas layer caching duplication (offscreen cache lifecycle/key/blit logic duplicated in dial renderers) | HIGH | Previously spread across full-circle dial implementations | ✅ Fixed (shared `CanvasLayerCache` + `FullCircleDialEngine`; `check-patterns`: `duplicate-block-clones: 0`) |
-| Direct `avnav.api` access in non-runtime code | HIGH | Previously in `GaugeValueMath`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `PositionCoordinateWidget` | ✅ Fixed (`check-patterns`: `forbidden-globals: 0`) |
-| Empty catch blocks | MED | Previously in `ClusterRendererRouter`, `runtime/helpers`, `GaugeValueMath`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `PositionCoordinateWidget` | ✅ Fixed (`check-patterns`: `empty-catch: 0`) |
+| Canvas layer caching duplication (offscreen cache lifecycle/key/blit logic duplicated in dial renderers) | HIGH | Previously spread across full-circle dial implementations | ✅ Fixed (shared `CanvasLayerCache` + `FullCircleRadialEngine`; `check-patterns`: `duplicate-block-clones: 0`) |
+| Direct `avnav.api` access in non-runtime code | HIGH | Previously in `RadialValueMath`, `TemperatureRadialWidget`, `VoltageRadialWidget`, `PositionCoordinateWidget` | ✅ Fixed (`check-patterns`: `forbidden-globals: 0`) |
+| Empty catch blocks | MED | Previously in `ClusterRendererRouter`, `runtime/helpers`, `RadialValueMath`, `TemperatureRadialWidget`, `VoltageRadialWidget`, `PositionCoordinateWidget` | ✅ Fixed (`check-patterns`: `empty-catch: 0`) |
 | Oneliner line-limit bypass risk | HIGH | Previously in runtime/shared/widgets (backlog cleared) | ✅ Fixed (`check:filesize` is fail-closed with `--oneliner=block`; latest summary: `onelinerWarnings: 0`) |
-| Shared engine hotspot growth near size threshold | MED | `shared/widget-kits/gauge/FullCircleDialEngine.js`, `shared/widget-kits/gauge/FullCircleDialTextLayout.js`, `shared/widget-kits/gauge/GaugeValueMath.js`, `shared/widget-kits/gauge/SemicircleGaugeEngine.js` | ⚠ Active (`check:filesize` warnings: 4, violations: 0) |
+| Shared engine hotspot growth near size threshold | MED | `shared/widget-kits/radial/FullCircleRadialEngine.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialEngine.js` | ⚠ Active (`check:filesize` warnings: 4, violations: 0) |
 
 ## Model Selection Log
 

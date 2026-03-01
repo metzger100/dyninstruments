@@ -87,6 +87,6 @@ cache.blit(targetCtx);
 ## Related
 
 - [../shared/canvas-layer-cache.md](../shared/canvas-layer-cache.md)
-- [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md)
-- [../gauges/full-circle-dial-style-guide.md](../gauges/full-circle-dial-style-guide.md)
+- [../radial/gauge-style-guide.md](../radial/gauge-style-guide.md)
+- [../radial/full-circle-dial-style-guide.md](../radial/full-circle-dial-style-guide.md)
 - [../widgets/compass-gauge.md](../widgets/compass-gauge.md)

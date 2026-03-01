@@ -22,48 +22,48 @@ describe("config/components.js", function () {
     expect(components.ThemeResolver.globalKey).toBe("DyniThemeResolver");
     expect(components.ThemeResolver.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemeResolver.js");
     expect(components.CanvasLayerCache.globalKey).toBe("DyniCanvasLayerCache");
-    expect(components.CanvasLayerCache.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/CanvasLayerCache.js");
+    expect(components.CanvasLayerCache.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/canvas/CanvasLayerCache.js");
     expect(components.XteHighwayPrimitives.globalKey).toBe("DyniXteHighwayPrimitives");
-    expect(components.XteHighwayPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/XteHighwayPrimitives.js");
-    expect(components.FullCircleDialEngine.globalKey).toBe("DyniFullCircleDialEngine");
-    expect(components.FullCircleDialEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/FullCircleDialEngine.js");
-    expect(components.FullCircleDialEngine.deps).toEqual(["GaugeToolkit", "CanvasLayerCache"]);
-    expect(components.FullCircleDialTextLayout.globalKey).toBe("DyniFullCircleDialTextLayout");
-    expect(components.FullCircleDialTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/FullCircleDialTextLayout.js");
+    expect(components.XteHighwayPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/xte/XteHighwayPrimitives.js");
+    expect(components.FullCircleRadialEngine.globalKey).toBe("DyniFullCircleRadialEngine");
+    expect(components.FullCircleRadialEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialEngine.js");
+    expect(components.FullCircleRadialEngine.deps).toEqual(["RadialToolkit", "CanvasLayerCache"]);
+    expect(components.FullCircleRadialTextLayout.globalKey).toBe("DyniFullCircleRadialTextLayout");
+    expect(components.FullCircleRadialTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialTextLayout.js");
     expect(components.ThemePresets.globalKey).toBe("DyniThemePresets");
     expect(components.ThemePresets.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemePresets.js");
     expect(components.ThemePresets.deps).toBeUndefined();
-    expect(components.GaugeTickMath.deps).toEqual(["GaugeAngleMath"]);
-    expect(components.ClusterMapperToolkit.deps).toEqual(["GaugeAngleMath"]);
+    expect(components.RadialTickMath.deps).toEqual(["RadialAngleMath"]);
+    expect(components.ClusterMapperToolkit.deps).toEqual(["RadialAngleMath"]);
     expect(components.TextLayoutPrimitives.globalKey).toBe("DyniTextLayoutPrimitives");
-    expect(components.TextLayoutPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/TextLayoutPrimitives.js");
-    expect(components.TextLayoutPrimitives.deps).toEqual(["GaugeTextLayout"]);
+    expect(components.TextLayoutPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextLayoutPrimitives.js");
+    expect(components.TextLayoutPrimitives.deps).toEqual(["RadialTextLayout"]);
     expect(components.TextLayoutComposite.globalKey).toBe("DyniTextLayoutComposite");
-    expect(components.TextLayoutComposite.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/TextLayoutComposite.js");
+    expect(components.TextLayoutComposite.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextLayoutComposite.js");
     expect(components.TextLayoutComposite.deps).toEqual(["TextLayoutPrimitives"]);
     expect(components.TextLayoutEngine.globalKey).toBe("DyniTextLayoutEngine");
-    expect(components.TextLayoutEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/gauge/TextLayoutEngine.js");
-    expect(components.TextLayoutEngine.deps).toEqual(["GaugeValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]);
-    expect(components.SpeedGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
-    expect(components.DepthGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
-    expect(components.TemperatureGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
-    expect(components.VoltageGaugeWidget.deps).toEqual(["SemicircleGaugeEngine", "GaugeValueMath"]);
-    expect(components.XteDisplayWidget.deps).toEqual(["GaugeToolkit", "CanvasLayerCache", "XteHighwayPrimitives"]);
-    expect(components.WindDialWidget.deps).toEqual(["FullCircleDialEngine", "FullCircleDialTextLayout"]);
-    expect(components.CompassGaugeWidget.deps).toEqual(["FullCircleDialEngine", "FullCircleDialTextLayout"]);
-    expect(components.GaugeToolkit.deps).toContain("ThemeResolver");
+    expect(components.TextLayoutEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextLayoutEngine.js");
+    expect(components.TextLayoutEngine.deps).toEqual(["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]);
+    expect(components.SpeedRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
+    expect(components.DepthRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
+    expect(components.TemperatureRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
+    expect(components.VoltageRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
+    expect(components.XteDisplayWidget.deps).toEqual(["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives"]);
+    expect(components.WindRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
+    expect(components.CompassRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
+    expect(components.RadialToolkit.deps).toContain("ThemeResolver");
     expect(components.ThreeValueTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
     expect(components.PositionCoordinateWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
     expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
     expect(components.DateTimeRendererWrapper.deps).toEqual(["PositionCoordinateWidget"]);
     expect(components.TimeStatusRendererWrapper.deps).toEqual(["PositionCoordinateWidget"]);
     expect(components.RendererPropsWidget.deps).toEqual([
-      "WindDialWidget",
-      "CompassGaugeWidget",
-      "SpeedGaugeWidget",
-      "DepthGaugeWidget",
-      "TemperatureGaugeWidget",
-      "VoltageGaugeWidget",
+      "WindRadialWidget",
+      "CompassRadialWidget",
+      "SpeedRadialWidget",
+      "DepthRadialWidget",
+      "TemperatureRadialWidget",
+      "VoltageRadialWidget",
       "XteDisplayWidget"
     ]);
     expect(components.DateTimeRendererWrapper.globalKey).toBe("DyniDateTimeRendererWrapper");
@@ -73,7 +73,7 @@ describe("config/components.js", function () {
     expect(components.ClusterRendererRouter.deps).toContain("DateTimeRendererWrapper");
     expect(components.ClusterRendererRouter.deps).toContain("TimeStatusRendererWrapper");
     expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");
-    expect(components.ClusterRendererRouter.deps).not.toContain("WindDialWidget");
+    expect(components.ClusterRendererRouter.deps).not.toContain("WindRadialWidget");
     expect(components.PositionCoordinateWidget.deps).not.toContain("ThreeValueTextWidget");
     expect(components.WindMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/WindMapper.js");
   });

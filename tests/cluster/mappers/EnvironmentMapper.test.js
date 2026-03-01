@@ -19,20 +19,20 @@ describe("EnvironmentMapper", function () {
     const out = mapper.translate({
       kind: "depthRadial",
       depth: 3.2,
-      depthMinValue: "0",
-      depthMaxValue: "30",
-      depthTickMajor: "5",
-      depthTickMinor: "1",
-      depthAlarmFrom: "2",
-      depthWarningFrom: "5",
-      depthRatioThresholdNormal: "1.1",
-      depthRatioThresholdFlat: "3.5",
+      depthRadialMinValue: "0",
+      depthRadialMaxValue: "30",
+      depthRadialTickMajor: "5",
+      depthRadialTickMinor: "1",
+      depthRadialAlarmFrom: "2",
+      depthRadialWarningFrom: "5",
+      depthRadialRatioThresholdNormal: "1.1",
+      depthRadialRatioThresholdFlat: "3.5",
       captionUnitScale: "0.8"
     }, toolkit);
 
-    expect(out.renderer).toBe("DepthGaugeWidget");
-    expect(out.rendererProps.alarmFrom).toBe(2);
-    expect(out.rendererProps.warningFrom).toBe(5);
+    expect(out.renderer).toBe("DepthRadialWidget");
+    expect(out.rendererProps.depthRadialAlarmFrom).toBe(2);
+    expect(out.rendererProps.depthRadialWarningFrom).toBe(5);
   });
 
   it("maps tempRadial and only enables sectors when toggles are true", function () {
@@ -40,24 +40,24 @@ describe("EnvironmentMapper", function () {
     const out = mapper.translate({
       kind: "tempRadial",
       temp: 22,
-      tempWarningEnabled: false,
-      tempAlarmEnabled: true,
-      tempWarningFrom: "28",
-      tempAlarmFrom: "32",
-      tempMinValue: "0",
-      tempMaxValue: "35",
-      tempTickMajor: "5",
-      tempTickMinor: "1",
-      tempRatioThresholdNormal: "1.1",
-      tempRatioThresholdFlat: "3.5",
+      tempRadialWarningEnabled: false,
+      tempRadialAlarmEnabled: true,
+      tempRadialWarningFrom: "28",
+      tempRadialAlarmFrom: "32",
+      tempRadialMinValue: "0",
+      tempRadialMaxValue: "35",
+      tempRadialTickMajor: "5",
+      tempRadialTickMinor: "1",
+      tempRadialRatioThresholdNormal: "1.1",
+      tempRadialRatioThresholdFlat: "3.5",
       captionUnitScale: "0.8"
     }, toolkit);
 
-    expect(out.renderer).toBe("TemperatureGaugeWidget");
+    expect(out.renderer).toBe("TemperatureRadialWidget");
     expect(out.formatter).toBe("formatTemperature");
     expect(out.formatterParameters).toEqual(["celsius"]);
-    expect(out.rendererProps.warningFrom).toBeUndefined();
-    expect(out.rendererProps.alarmFrom).toBe(32);
+    expect(out.rendererProps.tempRadialWarningFrom).toBeUndefined();
+    expect(out.rendererProps.tempRadialAlarmFrom).toBe(32);
   });
 
   it("maps numeric kinds with expected formatters", function () {

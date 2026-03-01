@@ -7,25 +7,25 @@
 | ID | Area | Description | Impact | Priority |
 |---|---|---|---|---|
 | TD-014 | Smell enforcement | `mapper-output-complexity` remains mixed-severity (`warn` at `9..12`, `block` at `>12`). Current backlog is `0` warnings (`check-patterns` summary on `2026-02-28`); promotion criteria/date is still pending. | Medium | Medium |
-| TD-015 | Shared gauge engine size hotspots | `check:filesize` reports 4 warning-tier files (`>=300` non-empty lines): `FullCircleDialEngine.js`, `FullCircleDialTextLayout.js`, `GaugeValueMath.js`, `SemicircleGaugeEngine.js`. Further extractions are needed to keep growth below hard limit. | Medium | Medium |
+| TD-015 | Shared gauge engine size hotspots | `check:filesize` reports 4 warning-tier files (`>=300` non-empty lines): `FullCircleRadialEngine.js`, `FullCircleRadialTextLayout.js`, `RadialValueMath.js`, `SemicircleRadialEngine.js`. Further extractions are needed to keep growth below hard limit. | Medium | Medium |
 
 ## Completed Items
 
 | ID | Date | Resolution |
 |---|---|---|
-| TD-001 | 2026-02-20 | Moved `extractNumberText` to `GaugeValueMath.extractNumberText`; all semicircle wrappers consume shared helper. |
-| TD-002 | 2026-02-20 | Moved high-end sector construction to `GaugeValueMath.buildHighEndSectors`; speed and temperature wrappers now delegate to shared utility. |
-| TD-003 | 2026-02-20 | Moved low-end sector construction to `GaugeValueMath.buildLowEndSectors` with optional defaults; depth and voltage behavior preserved via shared options. |
+| TD-001 | 2026-02-20 | Moved `extractNumberText` to `RadialValueMath.extractNumberText`; all semicircle wrappers consume shared helper. |
+| TD-002 | 2026-02-20 | Moved high-end sector construction to `RadialValueMath.buildHighEndSectors`; speed and temperature wrappers now delegate to shared utility. |
+| TD-003 | 2026-02-20 | Moved low-end sector construction to `RadialValueMath.buildLowEndSectors` with optional defaults; depth and voltage behavior preserved via shared options. |
 | TD-004 | 2026-02-20 | Unified speed formatting behavior and removed duplicate widget-local logic; graphic speed rendering now routes through shared formatter boundary. |
-| TD-005 | 2026-02-20 | Unified mode detection in text widgets via `GaugeValueMath.computeMode`; duplicate local ratio mode logic removed there. |
-| TD-006 | 2026-02-20 | Removed local `clamp` copies in text widgets; both now consume `GaugeValueMath.clamp`. |
-| TD-007 | 2026-02-20 | Removed local text helper duplicates by reusing `GaugeTextLayout.setFont`, `GaugeTextLayout.drawDisconnectOverlay`, and `GaugeTextLayout.fitSingleTextPx`. |
-| TD-009 | 2026-02-20 | Annotated intentional fallback catches in `ClusterRendererRouter`, `runtime/helpers`, `GaugeValueMath`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, and `PositionCoordinateWidget`; production empty-catch findings cleared. |
+| TD-005 | 2026-02-20 | Unified mode detection in text widgets via `RadialValueMath.computeMode`; duplicate local ratio mode logic removed there. |
+| TD-006 | 2026-02-20 | Removed local `clamp` copies in text widgets; both now consume `RadialValueMath.clamp`. |
+| TD-007 | 2026-02-20 | Removed local text helper duplicates by reusing `RadialTextLayout.setFont`, `RadialTextLayout.drawDisconnectOverlay`, and `RadialTextLayout.fitSingleTextPx`. |
+| TD-009 | 2026-02-20 | Annotated intentional fallback catches in `ClusterRendererRouter`, `runtime/helpers`, `RadialValueMath`, `TemperatureRadialWidget`, `VoltageRadialWidget`, and `PositionCoordinateWidget`; production empty-catch findings cleared. |
 | TD-010 | 2026-02-20 | Removed widget-to-widget dependency: `PositionCoordinateWidget` no longer depends on `ThreeValueTextWidget`; dependency graph now follows layer rules. |
-| TD-008 | 2026-02-20 | Removed direct `avnav.api` access from `SpeedGaugeWidget`, `TemperatureGaugeWidget`, `VoltageGaugeWidget`, `WindDialWidget`, and `PositionCoordinateWidget`; all formatter access now goes through `Helpers.applyFormatter` with mapper-provided formatter props. |
+| TD-008 | 2026-02-20 | Removed direct `avnav.api` access from `SpeedRadialWidget`, `TemperatureRadialWidget`, `VoltageRadialWidget`, `WindRadialWidget`, and `PositionCoordinateWidget`; all formatter access now goes through `Helpers.applyFormatter` with mapper-provided formatter props. |
 | TD-011 | 2026-02-21 | Added fail-closed smell prevention program (pattern + semantic contracts), falsy-default preservation, theme cache invalidation contract, stale dynamic key cleanup, and pre-push full-gate hook workflow. |
 | TD-012 | 2026-02-21 | Cleared oneliner backlog to zero (`onelinerWarnings=0`), promoted `check:filesize` to block mode, and wired `check:core`/`check:all` to fail on dense/packed oneliners. |
-| TD-013 | 2026-02-28 | Replaced name-based duplicate detection with body/shape clone checks (`duplicate-functions`, `duplicate-block-clones`) and extracted shared semicircle tick-step resolvers in `GaugeValueMath` for gauge wrappers. |
+| TD-013 | 2026-02-28 | Replaced name-based duplicate detection with body/shape clone checks (`duplicate-functions`, `duplicate-block-clones`) and extracted shared semicircle tick-step resolvers in `RadialValueMath` for gauge wrappers. |
 
 ## Rules
 

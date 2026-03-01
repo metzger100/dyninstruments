@@ -9,7 +9,7 @@ describe("RendererPropsWidget", function () {
 
     const spec = loadFresh("cluster/rendering/RendererPropsWidget.js").create({}, {
       getModule(id) {
-        if (id === "SpeedGaugeWidget") {
+        if (id === "SpeedRadialWidget") {
           return {
             create() {
               return delegated;
@@ -18,11 +18,11 @@ describe("RendererPropsWidget", function () {
         }
         throw new Error("unexpected module: " + id);
       }
-    }, "SpeedGaugeWidget");
+    }, "SpeedRadialWidget");
 
     const canvas = { id: "c" };
     spec.renderCanvas(canvas, {
-      renderer: "SpeedGaugeWidget",
+      renderer: "SpeedRadialWidget",
       value: 1,
       unit: "kn",
       rendererProps: {
@@ -35,7 +35,7 @@ describe("RendererPropsWidget", function () {
     expect(spec.wantsHideNativeHead).toBe(true);
     expect(delegated.renderCanvas).toHaveBeenCalledTimes(1);
     expect(delegated.renderCanvas).toHaveBeenCalledWith(canvas, expect.objectContaining({
-      renderer: "SpeedGaugeWidget",
+      renderer: "SpeedRadialWidget",
       value: 2,
       unit: "kn",
       minValue: 0,
@@ -51,7 +51,7 @@ describe("RendererPropsWidget", function () {
 
     const spec = loadFresh("cluster/rendering/RendererPropsWidget.js").create({}, {
       getModule(id) {
-        if (id === "SpeedGaugeWidget") {
+        if (id === "SpeedRadialWidget") {
           return {
             create() {
               return delegated;
@@ -60,7 +60,7 @@ describe("RendererPropsWidget", function () {
         }
         throw new Error("unexpected module: " + id);
       }
-    }, "SpeedGaugeWidget");
+    }, "SpeedRadialWidget");
 
     spec.finalizeFunction(1, 2, 3);
     expect(delegated.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);

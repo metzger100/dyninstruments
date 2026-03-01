@@ -66,67 +66,67 @@
           condition: { kind: "roll" }
         },
 
-        // ---------------- VoltageGaugeWidget (radial) settings -------------------
-        minValue: {
+        // ---------------- VoltageRadialWidget (radial) settings -------------------
+        voltageRadialMinValue: {
           type: "FLOAT", min: 0, max: 60, step: 0.1, default: 7.0,
           name: "Min voltage",
           condition: { kind: "voltageRadial" }
         },
-        maxValue: {
+        voltageRadialMaxValue: {
           type: "FLOAT", min: 1, max: 80, step: 0.1, default: 15.0,
           name: "Max voltage",
           condition: { kind: "voltageRadial" }
         },
-        tickMajor: {
+        voltageRadialTickMajor: {
           type: "FLOAT", min: 0.1, max: 20, step: 0.1, default: 1.0,
           name: "Major tick step",
           condition: { kind: "voltageRadial" }
         },
-        tickMinor: {
+        voltageRadialTickMinor: {
           type: "FLOAT", min: 0.1, max: 10, step: 0.1, default: 0.2,
           name: "Minor tick step",
           condition: { kind: "voltageRadial" }
         },
-        showEndLabels: {
+        voltageRadialShowEndLabels: {
           type: "BOOLEAN", default: false,
           name: "Show min/max labels",
           condition: { kind: "voltageRadial" }
         },
 
         // --- VoltageSectors toggles (default enabled) -----------------------
-        voltageWarningEnabled: {
+        voltageRadialWarningEnabled: {
           type: "BOOLEAN",
           default: true,
           name: "Warning sector enabled",
           condition: { kind: "voltageRadial" }
         },
-        voltageAlarmEnabled: {
+        voltageRadialAlarmEnabled: {
           type: "BOOLEAN",
           default: true,
           name: "Alarm sector enabled",
           condition: { kind: "voltageRadial" }
         },
 
-        // low-end sectors (DepthGaugeWidget-Regeln)
-        alarmFrom: {
+        // low-end sectors (DepthRadialWidget-Regeln)
+        voltageRadialAlarmFrom: {
           type: "FLOAT", min: 0, max: 80, step: 0.1, default: 11.6,
           name: "Alarm to (low)",
-          condition: { kind: "voltageRadial", voltageAlarmEnabled: true }
+          condition: { kind: "voltageRadial", voltageRadialAlarmEnabled: true }
         },
-        warningFrom: {
+        voltageRadialWarningFrom: {
           type: "FLOAT", min: 0, max: 80, step: 0.1, default: 12.2,
           name: "Warning to (low)",
-          condition: { kind: "voltageRadial", voltageWarningEnabled: true }
+          condition: { kind: "voltageRadial", voltageRadialWarningEnabled: true }
         },
 
-        voltageRatioThresholdNormal: {
+        voltageRadialRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
-          name: "VoltageGaugeWidget: Normal Threshold",
+          name: "VoltageRadialWidget: Normal Threshold",
           condition: { kind: "voltageRadial" }
         },
-        voltageRatioThresholdFlat: {
+        voltageRadialRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
-          name: "VoltageGaugeWidget: Flat Threshold",
+          name: "VoltageRadialWidget: Flat Threshold",
           condition: { kind: "voltageRadial" }
         },
 

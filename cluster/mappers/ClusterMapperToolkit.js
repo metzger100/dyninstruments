@@ -1,7 +1,7 @@
 /**
  * Module: ClusterMapperToolkit - Shared caption/unit/output helpers for cluster mappers
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: GaugeAngleMath
+ * Depends: RadialAngleMath
  */
 
 (function (root, factory) {
@@ -92,7 +92,7 @@
 
   function create(def, Helpers) {
     const angleMath = (Helpers && typeof Helpers.getModule === "function")
-      ? Helpers.getModule("GaugeAngleMath").create(def, Helpers)
+      ? Helpers.getModule("RadialAngleMath").create(def, Helpers)
       : null;
 
     return {

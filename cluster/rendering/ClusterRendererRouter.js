@@ -18,12 +18,12 @@
       PositionCoordinateWidget: Helpers.getModule("PositionCoordinateWidget").create(def, Helpers),
       DateTimeRendererWrapper: Helpers.getModule("DateTimeRendererWrapper").create(def, Helpers),
       TimeStatusRendererWrapper: Helpers.getModule("TimeStatusRendererWrapper").create(def, Helpers),
-      WindDialWidget: rendererPropsWidget.create(def, Helpers, "WindDialWidget"),
-      CompassGaugeWidget: rendererPropsWidget.create(def, Helpers, "CompassGaugeWidget"),
-      SpeedGaugeWidget: rendererPropsWidget.create(def, Helpers, "SpeedGaugeWidget"),
-      DepthGaugeWidget: rendererPropsWidget.create(def, Helpers, "DepthGaugeWidget"),
-      TemperatureGaugeWidget: rendererPropsWidget.create(def, Helpers, "TemperatureGaugeWidget"),
-      VoltageGaugeWidget: rendererPropsWidget.create(def, Helpers, "VoltageGaugeWidget"),
+      WindRadialWidget: rendererPropsWidget.create(def, Helpers, "WindRadialWidget"),
+      CompassRadialWidget: rendererPropsWidget.create(def, Helpers, "CompassRadialWidget"),
+      SpeedRadialWidget: rendererPropsWidget.create(def, Helpers, "SpeedRadialWidget"),
+      DepthRadialWidget: rendererPropsWidget.create(def, Helpers, "DepthRadialWidget"),
+      TemperatureRadialWidget: rendererPropsWidget.create(def, Helpers, "TemperatureRadialWidget"),
+      VoltageRadialWidget: rendererPropsWidget.create(def, Helpers, "VoltageRadialWidget"),
       XteDisplayWidget: rendererPropsWidget.create(def, Helpers, "XteDisplayWidget")
     };
     const subSpecs = [threeSpec].concat(Object.keys(rendererSpecs).map(function (id) {

@@ -42,30 +42,22 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.dateTimeRatioThresholdNormal.condition).toEqual({ kind: "dateTime" });
     expect(def.editableParameters.dateTimeRatioThresholdFlat.condition).toEqual({ kind: "dateTime" });
 
-    expect(def.editableParameters.minValue).toBeTruthy();
-    expect(def.editableParameters.maxValue).toBeTruthy();
-    expect(def.editableParameters.tickMajor).toBeTruthy();
-    expect(def.editableParameters.tickMinor).toBeTruthy();
-    expect(def.editableParameters.showEndLabels).toBeTruthy();
-    expect(def.editableParameters.warningFrom).toBeTruthy();
-    expect(def.editableParameters.alarmFrom).toBeTruthy();
+    expect(def.editableParameters.voltageRadialMinValue).toBeTruthy();
+    expect(def.editableParameters.voltageRadialMaxValue).toBeTruthy();
+    expect(def.editableParameters.voltageRadialTickMajor).toBeTruthy();
+    expect(def.editableParameters.voltageRadialTickMinor).toBeTruthy();
+    expect(def.editableParameters.voltageRadialShowEndLabels).toBeTruthy();
+    expect(def.editableParameters.voltageRadialWarningFrom).toBeTruthy();
+    expect(def.editableParameters.voltageRadialAlarmFrom).toBeTruthy();
 
-    expect(def.editableParameters.warningFrom.condition).toEqual({
+    expect(def.editableParameters.voltageRadialWarningFrom.condition).toEqual({
       kind: "voltageRadial",
-      voltageWarningEnabled: true
+      voltageRadialWarningEnabled: true
     });
-    expect(def.editableParameters.alarmFrom.condition).toEqual({
+    expect(def.editableParameters.voltageRadialAlarmFrom.condition).toEqual({
       kind: "voltageRadial",
-      voltageAlarmEnabled: true
+      voltageRadialAlarmEnabled: true
     });
-
-    expect(def.editableParameters.voltageMinValue).toBeUndefined();
-    expect(def.editableParameters.voltageMaxValue).toBeUndefined();
-    expect(def.editableParameters.voltageTickMajor).toBeUndefined();
-    expect(def.editableParameters.voltageTickMinor).toBeUndefined();
-    expect(def.editableParameters.voltageShowEndLabels).toBeUndefined();
-    expect(def.editableParameters.voltageWarningFrom).toBeUndefined();
-    expect(def.editableParameters.voltageAlarmFrom).toBeUndefined();
   });
 
   it("injects selected voltage path into storeKeys.value for voltage kinds", function () {

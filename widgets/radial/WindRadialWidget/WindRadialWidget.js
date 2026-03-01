@@ -1,18 +1,18 @@
 /**
- * Module: WindDialWidget - Full-circle wind dial for angle and speed pairs
+ * Module: WindRadialWidget - Full-circle wind dial for angle and speed pairs
  * Documentation: documentation/widgets/wind-dial.md
- * Depends: FullCircleDialEngine, FullCircleDialTextLayout
+ * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniWindDialWidget = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniWindRadialWidget = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const engine = Helpers.getModule("FullCircleDialEngine").create(def, Helpers);
-    const textLayout = Helpers.getModule("FullCircleDialTextLayout").create(def, Helpers);
+    const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers);
+    const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers);
 
     function windFormatSpeedText(raw, props, speedUnit) {
       const n = Number(raw);
@@ -40,8 +40,8 @@
       return {
         angle: p.angle,
         layEnabled: p.layEnabled !== false,
-        layMin: state.value.clamp(p.layMin, 0, 180),
-        layMax: state.value.clamp(p.layMax, 0, 180),
+        windRadialLayMin: state.value.clamp(p.windRadialLayMin, 0, 180),
+        windRadialLayMax: state.value.clamp(p.windRadialLayMax, 0, 180),
         left: {
           caption: String(p.angleCaption).trim(),
           value: state.value.formatAngle180(p.angle, !!p.leadingZero),
@@ -59,8 +59,8 @@
 
     const renderCanvas = engine.createRenderer({
       ratioProps: {
-        normal: "dialRatioThresholdNormal",
-        flat: "dialRatioThresholdFlat"
+        normal: "windRadialRatioThresholdNormal",
+        flat: "windRadialRatioThresholdFlat"
       },
       ratioDefaults: { normal: 0.7, flat: 2.0 },
       cacheLayers: ["back", "front"],
@@ -68,8 +68,8 @@
         const display = windDisplay(state, props);
         return {
           layEnabled: display.layEnabled,
-          layMin: display.layMin,
-          layMax: display.layMax,
+          windRadialLayMin: display.windRadialLayMin,
+          windRadialLayMax: display.windRadialLayMax,
           laylineStb: state.theme.colors.laylineStb,
           laylinePort: state.theme.colors.laylinePort
         };
@@ -78,17 +78,17 @@
         const display = windDisplay(state, props);
         if (layerName === "back") {
           api.drawFullCircleRing(layerCtx);
-          if (display.layEnabled && display.layMax > display.layMin) {
+          if (display.layEnabled && display.windRadialLayMax > display.windRadialLayMin) {
             state.draw.drawAnnularSector(layerCtx, state.geom.cx, state.geom.cy, state.geom.rOuter, {
-              startDeg: display.layMin,
-              endDeg: display.layMax,
+              startDeg: display.windRadialLayMin,
+              endDeg: display.windRadialLayMax,
               thickness: state.geom.ringW,
               fillStyle: state.theme.colors.laylineStb,
               alpha: 1
             });
             state.draw.drawAnnularSector(layerCtx, state.geom.cx, state.geom.cy, state.geom.rOuter, {
-              startDeg: -display.layMax,
-              endDeg: -display.layMin,
+              startDeg: -display.windRadialLayMax,
+              endDeg: -display.windRadialLayMin,
               thickness: state.geom.ringW,
               fillStyle: state.theme.colors.laylinePort,
               alpha: 1
@@ -157,7 +157,7 @@
     }
 
     return {
-      id: "WindDialWidget",
+      id: "WindRadialWidget",
       version: "1.9.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
@@ -165,5 +165,5 @@
     };
   }
 
-  return { id: "WindDialWidget", create };
+  return { id: "WindRadialWidget", create };
 }));

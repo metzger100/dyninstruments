@@ -1,13 +1,13 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockContext2D } = require("../../helpers/mock-canvas");
 
-describe("GaugeCanvasPrimitives", function () {
+describe("RadialCanvasPrimitives", function () {
   function create() {
-    const mod = loadFresh("shared/widget-kits/gauge/GaugeCanvasPrimitives.js");
+    const mod = loadFresh("shared/widget-kits/radial/RadialCanvasPrimitives.js");
     return mod.create({}, {
       getModule(id) {
-        if (id !== "GaugeAngleMath") throw new Error("unexpected module: " + id);
-        return loadFresh("shared/widget-kits/gauge/GaugeAngleMath.js");
+        if (id !== "RadialAngleMath") throw new Error("unexpected module: " + id);
+        return loadFresh("shared/widget-kits/radial/RadialAngleMath.js");
       }
     });
   }

@@ -38,26 +38,26 @@
 | `colors.alarm` | `--dyni-alarm` | `#ff7a76` | string |
 | `colors.laylineStb` | `--dyni-layline-stb` | `#82b683` | string |
 | `colors.laylinePort` | `--dyni-layline-port` | `#ff7a76` | string |
-| `ticks.majorLen` | `--dyni-tick-major-len` | `9` | number |
-| `ticks.majorWidth` | `--dyni-tick-major-width` | `2` | number |
-| `ticks.minorLen` | `--dyni-tick-minor-len` | `5` | number |
-| `ticks.minorWidth` | `--dyni-tick-minor-width` | `1` | number |
-| `pointer.sideFactor` | `--dyni-pointer-side` | `0.25` | number |
-| `pointer.lengthFactor` | `--dyni-pointer-length` | `2` | number |
-| `ring.arcLineWidth` | `--dyni-arc-linewidth` | `1` | number |
-| `ring.widthFactor` | `--dyni-ring-width` | `0.12` | number |
-| `labels.insetFactor` | `--dyni-label-inset` | `1.8` | number |
-| `labels.fontFactor` | `--dyni-label-font` | `0.14` | number |
-| `fullCircle.normal.innerMarginFactor` | `--dyni-fullcircle-normal-inner-margin` | `0.03` | number |
-| `fullCircle.normal.minHeightFactor` | `--dyni-fullcircle-normal-min-height` | `0.45` | number |
-| `fullCircle.normal.dualGapFactor` | `--dyni-fullcircle-normal-dual-gap` | `0.05` | number |
+| `ticks.majorLen` | `--dyni-radial-tick-major-len` | `9` | number |
+| `ticks.majorWidth` | `--dyni-radial-tick-major-width` | `2` | number |
+| `ticks.minorLen` | `--dyni-radial-tick-minor-len` | `5` | number |
+| `ticks.minorWidth` | `--dyni-radial-tick-minor-width` | `1` | number |
+| `pointer.sideFactor` | `--dyni-radial-pointer-side` | `0.25` | number |
+| `pointer.lengthFactor` | `--dyni-radial-pointer-length` | `2` | number |
+| `ring.arcLineWidth` | `--dyni-radial-arc-linewidth` | `1` | number |
+| `ring.widthFactor` | `--dyni-radial-ring-width` | `0.12` | number |
+| `labels.insetFactor` | `--dyni-radial-label-inset` | `1.8` | number |
+| `labels.fontFactor` | `--dyni-radial-label-font` | `0.14` | number |
+| `fullCircle.normal.innerMarginFactor` | `--dyni-radial-fullcircle-normal-inner-margin` | `0.03` | number |
+| `fullCircle.normal.minHeightFactor` | `--dyni-radial-fullcircle-normal-min-height` | `0.45` | number |
+| `fullCircle.normal.dualGapFactor` | `--dyni-radial-fullcircle-normal-dual-gap` | `0.05` | number |
 | `font.weight` | `--dyni-font-weight` | `700` | number |
 | `font.labelWeight` | `--dyni-label-weight` | `700` | number |
 | `xte.lineWidthFactor` | `--dyni-xte-line-width-factor` | `1` | number |
 
 ## Font Token Usage
 
-- `font.weight` is used for primary numeric value text in semicircle gauges, WindDialWidget, CompassGaugeWidget, ThreeValueTextWidget, and PositionCoordinateWidget.
+- `font.weight` is used for primary numeric value text in semicircle gauges, WindRadialWidget, CompassRadialWidget, ThreeValueTextWidget, and PositionCoordinateWidget.
 - `font.labelWeight` is used for captions/units, tick labels, dial cardinal labels, and disconnect overlay text.
 
 ## resolve(canvas) Behavior
@@ -170,4 +170,4 @@ Preset selection from `user.css`:
 
 - [css-theming.md](css-theming.md)
 - [../architecture/component-system.md](../architecture/component-system.md)
-- [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
+- [../radial/gauge-shared-api.md](../radial/gauge-shared-api.md)

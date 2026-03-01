@@ -1,10 +1,10 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
-describe("FullCircleDialEngine", function () {
+describe("FullCircleRadialEngine", function () {
   function createHarness() {
-    const engineMod = loadFresh("shared/widget-kits/gauge/FullCircleDialEngine.js");
-    const cacheMod = loadFresh("shared/widget-kits/gauge/CanvasLayerCache.js");
+    const engineMod = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
+    const cacheMod = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
     const calls = {
       ring: [],
       ticks: [],
@@ -19,23 +19,25 @@ describe("FullCircleDialEngine", function () {
         laylineStb: "#82b683",
         laylinePort: "#ff7a76"
       },
-      ticks: {
-        majorLen: 12,
-        majorWidth: 3,
-        minorLen: 5,
-        minorWidth: 1.5
-      },
-      pointer: {
-        sideFactor: 0.32,
-        lengthFactor: 1.9
-      },
-      ring: {
-        arcLineWidth: 2.4,
-        widthFactor: 0.35
-      },
-      labels: {
-        insetFactor: 2.1,
-        fontFactor: 0.35
+      radial: {
+        ticks: {
+          majorLen: 12,
+          majorWidth: 3,
+          minorLen: 5,
+          minorWidth: 1.5
+        },
+        pointer: {
+          sideFactor: 0.32,
+          lengthFactor: 1.9
+        },
+        ring: {
+          arcLineWidth: 2.4,
+          widthFactor: 0.35
+        },
+        labels: {
+          insetFactor: 2.1,
+          fontFactor: 0.35
+        }
       },
       font: {
         weight: 700,
@@ -63,7 +65,7 @@ describe("FullCircleDialEngine", function () {
         if (id === "CanvasLayerCache") {
           return cacheMod;
         }
-        if (id !== "GaugeToolkit") {
+        if (id !== "RadialToolkit") {
           throw new Error("unexpected module: " + id);
         }
         return {
@@ -148,18 +150,18 @@ describe("FullCircleDialEngine", function () {
     const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 160, ctx: createMockContext2D() });
     renderer(canvas, {});
 
-    expect(harness.calls.ring[0].lineWidth).toBe(harness.theme.ring.arcLineWidth);
+    expect(harness.calls.ring[0].lineWidth).toBe(harness.theme.radial.ring.arcLineWidth);
     expect(harness.calls.ticks[0].major).toEqual({
-      len: harness.theme.ticks.majorLen,
-      width: harness.theme.ticks.majorWidth
+      len: harness.theme.radial.ticks.majorLen,
+      width: harness.theme.radial.ticks.majorWidth
     });
     expect(harness.calls.ticks[0].minor).toEqual({
-      len: harness.theme.ticks.minorLen,
-      width: harness.theme.ticks.minorWidth
+      len: harness.theme.radial.ticks.minorLen,
+      width: harness.theme.radial.ticks.minorWidth
     });
     expect(harness.calls.pointer[0].fillStyle).toBe(harness.theme.colors.pointer);
-    expect(harness.calls.pointer[0].sideFactor).toBe(harness.theme.pointer.sideFactor);
-    expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.pointer.lengthFactor);
+    expect(harness.calls.pointer[0].sideFactor).toBe(harness.theme.radial.pointer.sideFactor);
+    expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.radial.pointer.lengthFactor);
   });
 
   it("routes layout mode using ratio thresholds", function () {

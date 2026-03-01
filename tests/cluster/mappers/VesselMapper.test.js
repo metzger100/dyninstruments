@@ -18,30 +18,30 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
 });
 
 describe("VesselMapper", function () {
-  it("maps voltageRadial with generic gauge keys and respects sector toggles", function () {
+  it("maps voltageRadial with explicit radial keys and respects sector toggles", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const out = mapper.translate({
       kind: "voltageRadial",
       value: 12.4,
-      voltageWarningEnabled: false,
-      voltageAlarmEnabled: true,
-      warningFrom: "12.2",
-      alarmFrom: "11.6",
-      minValue: "7",
-      maxValue: "15",
-      tickMajor: "1",
-      tickMinor: "0.2",
-      voltageRatioThresholdNormal: "1.1",
-      voltageRatioThresholdFlat: "3.5",
+      voltageRadialWarningEnabled: false,
+      voltageRadialAlarmEnabled: true,
+      voltageRadialWarningFrom: "12.2",
+      voltageRadialAlarmFrom: "11.6",
+      voltageRadialMinValue: "7",
+      voltageRadialMaxValue: "15",
+      voltageRadialTickMajor: "1",
+      voltageRadialTickMinor: "0.2",
+      voltageRadialRatioThresholdNormal: "1.1",
+      voltageRadialRatioThresholdFlat: "3.5",
       captionUnitScale: "0.8"
     }, toolkit);
 
-    expect(out.renderer).toBe("VoltageGaugeWidget");
+    expect(out.renderer).toBe("VoltageRadialWidget");
     expect(out.value).toBe(12.4);
     expect(out.formatter).toBe("formatDecimal");
     expect(out.formatterParameters).toEqual([3, 1, true]);
-    expect(out.rendererProps.warningFrom).toBeUndefined();
-    expect(out.rendererProps.alarmFrom).toBe(11.6);
+    expect(out.rendererProps.voltageRadialWarningFrom).toBeUndefined();
+    expect(out.rendererProps.voltageRadialAlarmFrom).toBe(11.6);
   });
 
   it("treats missing voltage sector toggles as enabled by default", function () {
@@ -49,12 +49,12 @@ describe("VesselMapper", function () {
     const out = mapper.translate({
       kind: "voltageRadial",
       value: 12.4,
-      warningFrom: "12.2",
-      alarmFrom: "11.6"
+      voltageRadialWarningFrom: "12.2",
+      voltageRadialAlarmFrom: "11.6"
     }, toolkit);
 
-    expect(out.rendererProps.warningFrom).toBe(12.2);
-    expect(out.rendererProps.alarmFrom).toBe(11.6);
+    expect(out.rendererProps.voltageRadialWarningFrom).toBe(12.2);
+    expect(out.rendererProps.voltageRadialAlarmFrom).toBe(11.6);
   });
 
   it("uses only value for voltageRadial source and does not fall back to legacy voltage field", function () {
@@ -158,16 +158,16 @@ describe("VesselMapper", function () {
     const out = mapper.translate({
       kind: "voltageRadial",
       value: 12.4,
-      minValue: "7",
-      maxValue: "15",
-      tickMajor: "1",
-      tickMinor: "0.2"
+      voltageRadialMinValue: "7",
+      voltageRadialMaxValue: "15",
+      voltageRadialTickMajor: "1",
+      voltageRadialTickMinor: "0.2"
     }, toolkitWithoutNum);
 
-    expect(out.rendererProps.minValue).toBe(7);
-    expect(out.rendererProps.maxValue).toBe(15);
-    expect(out.rendererProps.tickMajor).toBe(1);
-    expect(out.rendererProps.tickMinor).toBe(0.2);
+    expect(out.rendererProps.voltageRadialMinValue).toBe(7);
+    expect(out.rendererProps.voltageRadialMaxValue).toBe(15);
+    expect(out.rendererProps.voltageRadialTickMajor).toBe(1);
+    expect(out.rendererProps.voltageRadialTickMinor).toBe(0.2);
     expect(mapper.translate({ kind: "unknownKind" }, toolkitWithoutNum)).toEqual({});
   });
 });

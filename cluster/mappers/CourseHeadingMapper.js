@@ -27,7 +27,7 @@
       if (effKind === "hdtRadial" || effKind === "hdmRadial") {
         const heading = (effKind === "hdtRadial") ? p.hdt : p.hdm;
         return {
-          renderer: "CompassGaugeWidget",
+          renderer: "CompassRadialWidget",
           heading: heading,
           markerCourse: p.brg,
           caption: cap(effKind),
@@ -35,8 +35,8 @@
           rendererProps: {
             leadingZero: !!p.leadingZero,
             captionUnitScale: num(p.captionUnitScale),
-            compRatioThresholdNormal: num(p.compRatioThresholdNormal),
-            compRatioThresholdFlat: num(p.compRatioThresholdFlat)
+            compassRadialRatioThresholdNormal: num(p.compassRadialRatioThresholdNormal),
+            compassRadialRatioThresholdFlat: num(p.compassRadialRatioThresholdFlat)
           }
         };
       }

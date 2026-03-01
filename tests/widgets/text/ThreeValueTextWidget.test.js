@@ -11,9 +11,9 @@ describe("ThreeValueTextWidget", function () {
       return String(raw);
     });
     const modules = {
-      TextLayoutEngine: loadFresh("shared/widget-kits/gauge/TextLayoutEngine.js"),
-      TextLayoutPrimitives: loadFresh("shared/widget-kits/gauge/TextLayoutPrimitives.js"),
-      TextLayoutComposite: loadFresh("shared/widget-kits/gauge/TextLayoutComposite.js")
+      TextLayoutEngine: loadFresh("shared/widget-kits/text/TextLayoutEngine.js"),
+      TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
+      TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js")
     };
 
     return {
@@ -45,7 +45,7 @@ describe("ThreeValueTextWidget", function () {
             }
           };
         }
-        if (id === "GaugeTextLayout") {
+        if (id === "RadialTextLayout") {
           return {
             create() {
               return {
@@ -59,7 +59,7 @@ describe("ThreeValueTextWidget", function () {
             }
           };
         }
-        if (id === "GaugeValueMath") {
+        if (id === "RadialValueMath") {
           return {
             create() {
               return {

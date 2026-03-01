@@ -60,13 +60,13 @@
           condition: [{ kind: "cog" }, { kind: "hdt" }, { kind: "hdm" }, { kind: "brg" }]
         },
 
-        // CompassGaugeWidget thresholds — only for radial kinds
-        compRatioThresholdNormal: {
+        // CompassRadialWidget thresholds — only for radial kinds
+        compassRadialRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.8,
           name: "Compass 2-Rows Threshold",
           condition: [{ kind: "hdtRadial" }, { kind: "hdmRadial" }]
         },
-        compRatioThresholdFlat: {
+        compassRadialRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.2,
           name: "Compass 1-Row Threshold",
           condition: [{ kind: "hdtRadial" }, { kind: "hdmRadial" }]
