@@ -1,6 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
-describe("VoltageGaugeWidget", function () {
+describe("VoltageRadialWidget", function () {
   it("builds low-end sectors with default warning/alarm values", function () {
     let captured;
     let receivedOptions;
@@ -12,11 +12,11 @@ describe("VoltageGaugeWidget", function () {
       return { major: 50, minor: 10 };
     });
 
-    const mod = loadFresh("widgets/gauges/VoltageGaugeWidget/VoltageGaugeWidget.js");
+    const mod = loadFresh("widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js");
     const spec = mod.create({}, {
       applyFormatter,
       getModule(id) {
-        if (id === "GaugeValueMath") {
+        if (id === "RadialValueMath") {
           return {
             create() {
               return {
@@ -36,7 +36,7 @@ describe("VoltageGaugeWidget", function () {
             }
           };
         }
-        if (id !== "SemicircleGaugeEngine") throw new Error("unexpected module: " + id);
+        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
         return {
           create() {
             return {
@@ -85,13 +85,13 @@ describe("VoltageGaugeWidget", function () {
     let captured;
     const buildLowEndSectors = vi.fn(() => [{ a0: 10, a1: 11.6, color: "#654321" }]);
 
-    const mod = loadFresh("widgets/gauges/VoltageGaugeWidget/VoltageGaugeWidget.js");
+    const mod = loadFresh("widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js");
     mod.create({}, {
       applyFormatter(value) {
         return String(value);
       },
       getModule(id) {
-        if (id === "GaugeValueMath") {
+        if (id === "RadialValueMath") {
           return {
             create() {
               return {
@@ -107,7 +107,7 @@ describe("VoltageGaugeWidget", function () {
             }
           };
         }
-        if (id !== "SemicircleGaugeEngine") throw new Error("unexpected module: " + id);
+        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
         return {
           create() {
             return {
@@ -123,22 +123,22 @@ describe("VoltageGaugeWidget", function () {
 
     const theme = { colors: { warning: "#123456", alarm: "#654321" } };
     expect(captured.buildSectors({
-      voltageWarningEnabled: false,
-      voltageAlarmEnabled: false
+      voltageRadialWarningEnabled: false,
+      voltageRadialAlarmEnabled: false
     }, 10, 15, {}, {}, theme)).toEqual([]);
     expect(buildLowEndSectors).not.toHaveBeenCalled();
 
     captured.buildSectors({
-      voltageWarningEnabled: false,
-      voltageAlarmEnabled: true
+      voltageRadialWarningEnabled: false,
+      voltageRadialAlarmEnabled: true
     }, 10, 15, {}, {}, theme);
     expect(buildLowEndSectors).toHaveBeenCalledTimes(1);
     expect(Number.isNaN(buildLowEndSectors.mock.calls[0][0].warningFrom)).toBe(true);
     expect(buildLowEndSectors.mock.calls[0][0].alarmFrom).toBeUndefined();
 
     captured.buildSectors({
-      voltageWarningEnabled: true,
-      voltageAlarmEnabled: false
+      voltageRadialWarningEnabled: true,
+      voltageRadialAlarmEnabled: false
     }, 10, 15, {}, {}, theme);
     expect(buildLowEndSectors).toHaveBeenCalledTimes(2);
     expect(buildLowEndSectors.mock.calls[1][0].warningFrom).toBeUndefined();
@@ -148,13 +148,13 @@ describe("VoltageGaugeWidget", function () {
   it("does not force fixed-decimal fallback text on raw formatter passthrough", function () {
     let captured;
 
-    const mod = loadFresh("widgets/gauges/VoltageGaugeWidget/VoltageGaugeWidget.js");
+    const mod = loadFresh("widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js");
     mod.create({}, {
       applyFormatter(value) {
         return String(value);
       },
       getModule(id) {
-        if (id === "GaugeValueMath") {
+        if (id === "RadialValueMath") {
           return {
             create() {
               return {
@@ -172,7 +172,7 @@ describe("VoltageGaugeWidget", function () {
             }
           };
         }
-        if (id !== "SemicircleGaugeEngine") throw new Error("unexpected module: " + id);
+        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
         return {
           create() {
             return {

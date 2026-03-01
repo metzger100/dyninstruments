@@ -1,12 +1,12 @@
 /**
- * Module: FullCircleDialEngine - Shared renderer pipeline for full-circle dial widgets
- * Documentation: documentation/gauges/full-circle-dial-engine.md
- * Depends: GaugeToolkit, CanvasLayerCache
+ * Module: FullCircleRadialEngine - Shared renderer pipeline for full-circle dial widgets
+ * Documentation: documentation/radial/full-circle-dial-engine.md
+ * Depends: RadialToolkit, CanvasLayerCache
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniFullCircleDialEngine = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniFullCircleRadialEngine = factory(); }
 }(this, function () {
   "use strict";
   function fullCircleKeyToText(value) {
@@ -46,7 +46,7 @@
     const R = Math.max(14, Math.floor(D / 2));
     const cx = Math.floor(W / 2);
     const cy = Math.floor(H / 2);
-    const ringW = Math.max(6, Math.floor(R * theme.ring.widthFactor));
+    const ringW = Math.max(6, Math.floor(R * theme.radial.ring.widthFactor));
     const leftStrip = Math.max(0, Math.floor((W - 2 * pad - 2 * R) / 2));
     const topStrip = Math.max(0, Math.floor((H - 2 * pad - 2 * R) / 2));
     return {
@@ -61,8 +61,8 @@
       rightStrip: leftStrip,
       topStrip: topStrip,
       bottomStrip: topStrip,
-      labelInsetVal: Math.max(18, Math.floor(ringW * theme.labels.insetFactor)),
-      labelPx: Math.max(10, Math.floor(R * theme.labels.fontFactor))
+      labelInsetVal: Math.max(18, Math.floor(ringW * theme.radial.labels.insetFactor)),
+      labelPx: Math.max(10, Math.floor(R * theme.radial.labels.fontFactor))
     };
   }
 
@@ -136,7 +136,7 @@
   }
 
   function create(def, Helpers) {
-    const GU = Helpers.getModule("GaugeToolkit").create(def, Helpers);
+    const GU = Helpers.getModule("RadialToolkit").create(def, Helpers);
     const layerCacheApi = Helpers.getModule("CanvasLayerCache").create(def, Helpers);
     const draw = GU.draw;
     const text = GU.text;
@@ -224,13 +224,13 @@
             ringW: geom.ringW,
             labelInsetVal: geom.labelInsetVal,
             labelPx: geom.labelPx,
-            ringLineWidth: theme.ring.arcLineWidth,
-            ticksMajorLen: theme.ticks.majorLen,
-            ticksMajorWidth: theme.ticks.majorWidth,
-            ticksMinorLen: theme.ticks.minorLen,
-            ticksMinorWidth: theme.ticks.minorWidth,
-            pointerSide: theme.pointer.sideFactor,
-            pointerLength: theme.pointer.lengthFactor,
+            ringLineWidth: theme.radial.ring.arcLineWidth,
+            ticksMajorLen: theme.radial.ticks.majorLen,
+            ticksMajorWidth: theme.radial.ticks.majorWidth,
+            ticksMinorLen: theme.radial.ticks.minorLen,
+            ticksMinorWidth: theme.radial.ticks.minorWidth,
+            pointerSide: theme.radial.pointer.sideFactor,
+            pointerLength: theme.radial.pointer.lengthFactor,
             family: family,
             labelWeight: labelWeight,
             color: color
@@ -246,7 +246,7 @@
             draw.drawRing(target, state.geom.cx, state.geom.cy, state.geom.rOuter, {
               lineWidth: value.isFiniteNumber(options.lineWidth)
                 ? options.lineWidth
-                : state.theme.ring.arcLineWidth
+                : state.theme.radial.ring.arcLineWidth
             });
           },
           drawFullCircleTicks(targetCtx, opts) {
@@ -260,12 +260,12 @@
               stepMinor: pickFinite(options.stepMinor, 10),
               includeEnd: !!options.includeEnd,
               major: {
-                len: value.isFiniteNumber(options.majorLen) ? options.majorLen : state.theme.ticks.majorLen,
-                width: value.isFiniteNumber(options.majorWidth) ? options.majorWidth : state.theme.ticks.majorWidth
+                len: value.isFiniteNumber(options.majorLen) ? options.majorLen : state.theme.radial.ticks.majorLen,
+                width: value.isFiniteNumber(options.majorWidth) ? options.majorWidth : state.theme.radial.ticks.majorWidth
               },
               minor: {
-                len: value.isFiniteNumber(options.minorLen) ? options.minorLen : state.theme.ticks.minorLen,
-                width: value.isFiniteNumber(options.minorWidth) ? options.minorWidth : state.theme.ticks.minorWidth
+                len: value.isFiniteNumber(options.minorLen) ? options.minorLen : state.theme.radial.ticks.minorLen,
+                width: value.isFiniteNumber(options.minorWidth) ? options.minorWidth : state.theme.radial.ticks.minorWidth
               }
             });
           },
@@ -276,8 +276,8 @@
               depth: value.isFiniteNumber(options.depth) ? options.depth : state.geom.needleDepth,
               fillStyle: options.fillStyle || state.theme.colors.pointer,
               variant: options.variant || "long",
-              sideFactor: value.isFiniteNumber(options.sideFactor) ? options.sideFactor : state.theme.pointer.sideFactor,
-              lengthFactor: value.isFiniteNumber(options.lengthFactor) ? options.lengthFactor : state.theme.pointer.lengthFactor
+              sideFactor: value.isFiniteNumber(options.sideFactor) ? options.sideFactor : state.theme.radial.pointer.sideFactor,
+              lengthFactor: value.isFiniteNumber(options.lengthFactor) ? options.lengthFactor : state.theme.radial.pointer.lengthFactor
             });
           },
           drawCachedLayer(layerName, opts) {
@@ -340,11 +340,11 @@
     };
 
     return {
-      id: "FullCircleDialEngine",
+      id: "FullCircleRadialEngine",
       version: "0.1.0",
       createRenderer: fullCircleCreateRenderer
     };
   }
 
-  return { id: "FullCircleDialEngine", create: create };
+  return { id: "FullCircleRadialEngine", create: create };
 }));

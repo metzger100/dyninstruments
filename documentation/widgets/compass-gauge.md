@@ -1,22 +1,22 @@
-# CompassGaugeWidget Module
+# CompassRadialWidget Module
 
-**Status:** ✅ Implemented | `widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js`
+**Status:** ✅ Implemented | `widgets/radial/CompassRadialWidget/CompassRadialWidget.js`
 
 ## Overview
 
 Full-circle rotating compass card with upright cardinal labels. The dial rotates by `-heading`; the lubber pointer stays fixed at North. Optional target marker (`markerCourse`) is supported.
-Pointer color is resolved once per render via `FullCircleDialEngine` (`GaugeToolkit.theme.resolve(canvas)` internally).
-Static dial rendering is cached via shared `CanvasLayerCache` managed by `FullCircleDialEngine`.
+Pointer color is resolved once per render via `FullCircleRadialEngine` (`RadialToolkit.theme.resolve(canvas)` internally).
+Static dial rendering is cached via shared `CanvasLayerCache` managed by `FullCircleRadialEngine`.
 
 ## Module Registration
 
 ```javascript
 // In config/components.js
-CompassGaugeWidget: {
-  js: BASE + "widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js",
+CompassRadialWidget: {
+  js: BASE + "widgets/radial/CompassRadialWidget/CompassRadialWidget.js",
   css: undefined,
-  globalKey: "DyniCompassGaugeWidget",
-  deps: ["FullCircleDialEngine", "FullCircleDialTextLayout"]
+  globalKey: "DyniCompassRadialWidget",
+  deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]
 }
 ```
 
@@ -29,13 +29,13 @@ CompassGaugeWidget: {
 | `caption` | string | `""` | Caption text |
 | `unit` | string | `"°"` | Unit text |
 | `leadingZero` | boolean | `true` | Zero-pad heading |
-| `compRatioThresholdNormal` | number | `0.8` | Ratio below -> `high` |
-| `compRatioThresholdFlat` | number | `2.2` | Ratio above -> `flat` |
+| `compassRadialRatioThresholdNormal` | number | `0.8` | Ratio below -> `high` |
+| `compassRadialRatioThresholdFlat` | number | `2.2` | Ratio above -> `flat` |
 | `captionUnitScale` | number | `0.8` | Caption/unit ratio vs value |
 | `default` | string | `"---"` | Fallback text for invalid heading |
 | `disconnect` | boolean | `false` | Draw `NO DATA` overlay |
 
-## Compass Dial Drawing (via `GaugeToolkit.draw`)
+## Compass Dial Drawing (via `RadialToolkit.draw`)
 
 The rotating dial face cache is built from static inputs. At render time, `heading` is applied as a draw transform (`rotationDeg = -heading`) without invalidating static cache state.
 
@@ -93,8 +93,8 @@ Rendering order keeps labels on top for readability.
 
 ```text
 ratio = W / H
-ratio < compRatioThresholdNormal -> high
-ratio > compRatioThresholdFlat -> flat
+ratio < compassRadialRatioThresholdNormal -> high
+ratio > compassRadialRatioThresholdFlat -> flat
 otherwise -> normal
 ```
 
@@ -110,13 +110,13 @@ otherwise -> normal
 
 | Function | Input | Output |
 |---|---|---|
-| `GaugeValueMath.formatDirection360(v, leadingZero)` | heading deg | `0..359` string |
+| `RadialValueMath.formatDirection360(v, leadingZero)` | heading deg | `0..359` string |
 
 ## Exports
 
 ```javascript
 return {
-  id: "CompassGaugeWidget",
+  id: "CompassRadialWidget",
   wantsHideNativeHead: true,
   renderCanvas,
   translateFunction // no-op, ClusterWidget handles translation
@@ -125,9 +125,9 @@ return {
 
 ## Related
 
-- [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
-- [../gauges/full-circle-dial-engine.md](../gauges/full-circle-dial-engine.md)
-- [../gauges/full-circle-dial-style-guide.md](../gauges/full-circle-dial-style-guide.md)
+- [../radial/gauge-shared-api.md](../radial/gauge-shared-api.md)
+- [../radial/full-circle-dial-engine.md](../radial/full-circle-dial-engine.md)
+- [../radial/full-circle-dial-style-guide.md](../radial/full-circle-dial-style-guide.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
-- [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md)
+- [../radial/gauge-style-guide.md](../radial/gauge-style-guide.md)
 - [../shared/theme-tokens.md](../shared/theme-tokens.md)

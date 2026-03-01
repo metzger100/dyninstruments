@@ -1,13 +1,13 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
-describe("SemicircleGaugeEngine", function () {
+describe("SemicircleRadialEngine", function () {
   function createValueMath() {
-    const valueMod = loadFresh("shared/widget-kits/gauge/GaugeValueMath.js");
-    const angleMod = loadFresh("shared/widget-kits/gauge/GaugeAngleMath.js");
+    const valueMod = loadFresh("shared/widget-kits/radial/RadialValueMath.js");
+    const angleMod = loadFresh("shared/widget-kits/radial/RadialAngleMath.js");
     return valueMod.create({}, {
       getModule(id) {
-        if (id !== "GaugeAngleMath") throw new Error("unexpected module: " + id);
+        if (id !== "RadialAngleMath") throw new Error("unexpected module: " + id);
         return angleMod;
       }
     });
@@ -19,8 +19,8 @@ describe("SemicircleGaugeEngine", function () {
       unitDefault: "kn",
       rangeDefaults: { min: 0, max: 30 },
       ratioProps: {
-        normal: "speedRatioThresholdNormal",
-        flat: "speedRatioThresholdFlat"
+        normal: "speedRadialRatioThresholdNormal",
+        flat: "speedRadialRatioThresholdFlat"
       },
       ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps() {
@@ -54,7 +54,7 @@ describe("SemicircleGaugeEngine", function () {
         return "#fff";
       },
       getModule(id) {
-        if (id !== "GaugeToolkit") throw new Error("unexpected module: " + id);
+        if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
         return gaugeToolkit;
       }
     };
@@ -84,23 +84,25 @@ describe("SemicircleGaugeEngine", function () {
         laylineStb: "#82b683",
         laylinePort: "#ff7a76"
       },
-      ticks: {
-        majorLen: 13,
-        majorWidth: 4,
-        minorLen: 7,
-        minorWidth: 2
-      },
-      pointer: {
-        sideFactor: 0.3,
-        lengthFactor: 1.7
-      },
-      ring: {
-        arcLineWidth: 2.5,
-        widthFactor: 0.18
-      },
-      labels: {
-        insetFactor: 2.2,
-        fontFactor: 0.2
+      radial: {
+        ticks: {
+          majorLen: 13,
+          majorWidth: 4,
+          minorLen: 7,
+          minorWidth: 2
+        },
+        pointer: {
+          sideFactor: 0.3,
+          lengthFactor: 1.7
+        },
+        ring: {
+          arcLineWidth: 2.5,
+          widthFactor: 0.18
+        },
+        labels: {
+          insetFactor: 2.2,
+          fontFactor: 0.2
+        }
       },
       font: {
         weight: 710,
@@ -172,7 +174,7 @@ describe("SemicircleGaugeEngine", function () {
       }
     };
 
-    const renderer = loadFresh("shared/widget-kits/gauge/SemicircleGaugeEngine.js")
+    const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
       .create({}, makeHelpers(gaugeToolkit))
       .createRenderer(makeBaseSpec());
 
@@ -238,23 +240,25 @@ describe("SemicircleGaugeEngine", function () {
         laylineStb: "#82b683",
         laylinePort: "#ff7a76"
       },
-      ticks: {
-        majorLen: 13,
-        majorWidth: 4,
-        minorLen: 7,
-        minorWidth: 2
-      },
-      pointer: {
-        sideFactor: 0.3,
-        lengthFactor: 1.7
-      },
-      ring: {
-        arcLineWidth: 2.5,
-        widthFactor: 0.18
-      },
-      labels: {
-        insetFactor: 2.2,
-        fontFactor: 0.2
+      radial: {
+        ticks: {
+          majorLen: 13,
+          majorWidth: 4,
+          minorLen: 7,
+          minorWidth: 2
+        },
+        pointer: {
+          sideFactor: 0.3,
+          lengthFactor: 1.7
+        },
+        ring: {
+          arcLineWidth: 2.5,
+          widthFactor: 0.18
+        },
+        labels: {
+          insetFactor: 2.2,
+          fontFactor: 0.2
+        }
       },
       font: {
         weight: 710,
@@ -308,7 +312,7 @@ describe("SemicircleGaugeEngine", function () {
       }
     };
 
-    const renderer = loadFresh("shared/widget-kits/gauge/SemicircleGaugeEngine.js")
+    const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
       .create({}, makeHelpers(gaugeToolkit))
       .createRenderer({
         ...makeBaseSpec(),
@@ -335,17 +339,17 @@ describe("SemicircleGaugeEngine", function () {
     expect(resolveTheme).toHaveBeenCalledWith(canvas);
     expect(buildSectorsCalls[0].theme).toBe(themeDefaults);
     expect(pointerCalls[0].fillStyle).toBe(themeDefaults.colors.pointer);
-    expect(pointerCalls[0].sideFactor).toBe(themeDefaults.pointer.sideFactor);
-    expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.pointer.lengthFactor);
+    expect(pointerCalls[0].sideFactor).toBe(themeDefaults.radial.pointer.sideFactor);
+    expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.radial.pointer.lengthFactor);
     expect(pointerCalls[0].depth).toBe(15);
-    expect(arcRingCalls[0].lineWidth).toBe(themeDefaults.ring.arcLineWidth);
+    expect(arcRingCalls[0].lineWidth).toBe(themeDefaults.radial.ring.arcLineWidth);
     expect(tickCalls[0].major).toEqual({
-      len: themeDefaults.ticks.majorLen,
-      width: themeDefaults.ticks.majorWidth
+      len: themeDefaults.radial.ticks.majorLen,
+      width: themeDefaults.radial.ticks.majorWidth
     });
     expect(tickCalls[0].minor).toEqual({
-      len: themeDefaults.ticks.minorLen,
-      width: themeDefaults.ticks.minorWidth
+      len: themeDefaults.radial.ticks.minorLen,
+      width: themeDefaults.radial.ticks.minorWidth
     });
     expect(labelCalls[0].radiusOffset).toBe(37);
     expect(labelCalls[0].fontPx).toBe(19);

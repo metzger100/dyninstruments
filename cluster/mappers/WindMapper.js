@@ -31,7 +31,7 @@
         const speedKind = isTrue ? "angleTrueRadialSpeed" : "angleApparentRadialSpeed";
         const speedUnit = unit(speedKind);
         return {
-          renderer: "WindDialWidget",
+          renderer: "WindRadialWidget",
           angle: isTrue ? p.twa : p.awa,
           speed: isTrue ? p.tws : p.aws,
           rendererProps: {
@@ -41,11 +41,11 @@
             speedUnit: speedUnit,
             formatter: "formatSpeed",
             formatterParameters: [speedUnit],
-            layEnabled: !!p.windLayEnabled,
-            layMin: num(p.layMin),
-            layMax: num(p.layMax),
-            dialRatioThresholdNormal: num(p.dialRatioThresholdNormal),
-            dialRatioThresholdFlat: num(p.dialRatioThresholdFlat),
+            layEnabled: !!p.windRadialLayEnabled,
+            windRadialLayMin: num(p.windRadialLayMin),
+            windRadialLayMax: num(p.windRadialLayMax),
+            windRadialRatioThresholdNormal: num(p.windRadialRatioThresholdNormal),
+            windRadialRatioThresholdFlat: num(p.windRadialRatioThresholdFlat),
             captionUnitScale: num(p.captionUnitScale),
             leadingZero: !!p.leadingZero
           }

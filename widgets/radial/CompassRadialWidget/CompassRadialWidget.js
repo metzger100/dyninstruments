@@ -1,12 +1,12 @@
 /**
- * Module: CompassGaugeWidget - Full-circle rotating compass with upright labels
+ * Module: CompassRadialWidget - Full-circle rotating compass with upright labels
  * Documentation: documentation/widgets/compass-gauge.md
- * Depends: FullCircleDialEngine, FullCircleDialTextLayout
+ * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniCompassGaugeWidget = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniCompassRadialWidget = factory(); }
 }(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
@@ -14,8 +14,8 @@
   const COMPASS_LABEL_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
   function create(def, Helpers) {
-    const engine = Helpers.getModule("FullCircleDialEngine").create(def, Helpers);
-    const textLayout = Helpers.getModule("FullCircleDialTextLayout").create(def, Helpers);
+    const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers);
+    const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers);
 
     function buildCompassLabelSprites(canvas, state) {
       const sprites = [];
@@ -86,8 +86,8 @@
 
     const renderCanvas = engine.createRenderer({
       ratioProps: {
-        normal: "compRatioThresholdNormal",
-        flat: "compRatioThresholdFlat"
+        normal: "compassRadialRatioThresholdNormal",
+        flat: "compassRadialRatioThresholdFlat"
       },
       ratioDefaults: { normal: 0.8, flat: 2.2 },
       cacheLayers: ["face"],
@@ -146,7 +146,7 @@
     }
 
     return {
-      id: "CompassGaugeWidget",
+      id: "CompassRadialWidget",
       version: "1.3.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
@@ -154,5 +154,5 @@
     };
   }
 
-  return { id: "CompassGaugeWidget", create };
+  return { id: "CompassRadialWidget", create };
 }));

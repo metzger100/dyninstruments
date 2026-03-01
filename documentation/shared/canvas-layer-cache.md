@@ -10,7 +10,7 @@
 
 - Component ID: `CanvasLayerCache`
 - Global key: `DyniCanvasLayerCache`
-- File: `shared/widget-kits/gauge/CanvasLayerCache.js`
+- File: `shared/widget-kits/canvas/CanvasLayerCache.js`
 - Factory: `create(def, Helpers)`
 - Main API: `createLayerCache(spec)`
 - Layer config: `spec.layers` array (default: `["layer"]`)

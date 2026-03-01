@@ -25,49 +25,49 @@
       const req = p.kind;
 
       if (req === "depthRadial") {
-        const depthWarnOn = (p.depthWarningEnabled !== false);
-        const depthAlarmOn = (p.depthAlarmEnabled !== false);
+        const depthWarnOn = (p.depthRadialWarningEnabled !== false);
+        const depthAlarmOn = (p.depthRadialAlarmEnabled !== false);
 
         return {
-          renderer: "DepthGaugeWidget",
+          renderer: "DepthRadialWidget",
           value: p.depth,
           caption: cap("depthRadial"),
           unit: unit("depthRadial"),
           rendererProps: {
-            minValue: num(p.depthMinValue),
-            maxValue: num(p.depthMaxValue),
-            tickMajor: num(p.depthTickMajor),
-            tickMinor: num(p.depthTickMinor),
-            showEndLabels: !!p.depthShowEndLabels,
-            alarmFrom: depthAlarmOn ? num(p.depthAlarmFrom) : undefined,
-            warningFrom: depthWarnOn ? num(p.depthWarningFrom) : undefined,
-            depthRatioThresholdNormal: num(p.depthRatioThresholdNormal),
-            depthRatioThresholdFlat: num(p.depthRatioThresholdFlat),
+            depthRadialMinValue: num(p.depthRadialMinValue),
+            depthRadialMaxValue: num(p.depthRadialMaxValue),
+            depthRadialTickMajor: num(p.depthRadialTickMajor),
+            depthRadialTickMinor: num(p.depthRadialTickMinor),
+            depthRadialShowEndLabels: !!p.depthRadialShowEndLabels,
+            depthRadialAlarmFrom: depthAlarmOn ? num(p.depthRadialAlarmFrom) : undefined,
+            depthRadialWarningFrom: depthWarnOn ? num(p.depthRadialWarningFrom) : undefined,
+            depthRadialRatioThresholdNormal: num(p.depthRadialRatioThresholdNormal),
+            depthRadialRatioThresholdFlat: num(p.depthRadialRatioThresholdFlat),
             captionUnitScale: num(p.captionUnitScale)
           }
         };
       }
 
       if (req === "tempRadial") {
-        const tempWarnOn = (p.tempWarningEnabled === true);
-        const tempAlarmOn = (p.tempAlarmEnabled === true);
+        const tempWarnOn = (p.tempRadialWarningEnabled === true);
+        const tempAlarmOn = (p.tempRadialAlarmEnabled === true);
         return {
-          renderer: "TemperatureGaugeWidget",
+          renderer: "TemperatureRadialWidget",
           value: p.temp,
           caption: cap("tempRadial"),
           unit: unit("tempRadial"),
           formatter: "formatTemperature",
           formatterParameters: ["celsius"],
           rendererProps: {
-            minValue: num(p.tempMinValue),
-            maxValue: num(p.tempMaxValue),
-            tickMajor: num(p.tempTickMajor),
-            tickMinor: num(p.tempTickMinor),
-            showEndLabels: !!p.tempShowEndLabels,
-            warningFrom: tempWarnOn ? num(p.tempWarningFrom) : undefined,
-            alarmFrom: tempAlarmOn ? num(p.tempAlarmFrom) : undefined,
-            tempRatioThresholdNormal: num(p.tempRatioThresholdNormal),
-            tempRatioThresholdFlat: num(p.tempRatioThresholdFlat),
+            tempRadialMinValue: num(p.tempRadialMinValue),
+            tempRadialMaxValue: num(p.tempRadialMaxValue),
+            tempRadialTickMajor: num(p.tempRadialTickMajor),
+            tempRadialTickMinor: num(p.tempRadialTickMinor),
+            tempRadialShowEndLabels: !!p.tempRadialShowEndLabels,
+            tempRadialWarningFrom: tempWarnOn ? num(p.tempRadialWarningFrom) : undefined,
+            tempRadialAlarmFrom: tempAlarmOn ? num(p.tempRadialAlarmFrom) : undefined,
+            tempRadialRatioThresholdNormal: num(p.tempRadialRatioThresholdNormal),
+            tempRadialRatioThresholdFlat: num(p.tempRadialRatioThresholdFlat),
             captionUnitScale: num(p.captionUnitScale)
           }
         };

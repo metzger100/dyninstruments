@@ -22,13 +22,13 @@ The goal is maximum readability at the helm with minimal configuration overhead.
 
 ### Canvas gauges
 
-- `WindDialWidget` for AWA/AWS and TWA/TWS with optional layline sectors.
-- `CompassGaugeWidget` for HDT/HDM radial kinds.
+- `WindRadialWidget` for AWA/AWS and TWA/TWS with optional layline sectors.
+- `CompassRadialWidget` for HDT/HDM radial kinds.
 - Semicircle gauges:
-  - `SpeedGaugeWidget`
-  - `DepthGaugeWidget`
-  - `TemperatureGaugeWidget`
-  - `VoltageGaugeWidget`
+  - `SpeedRadialWidget`
+  - `DepthRadialWidget`
+  - `TemperatureRadialWidget`
+  - `VoltageRadialWidget`
 
 ### Editor options
 
@@ -136,9 +136,9 @@ Available preset names:
   --dyni-pointer: #00aaff;
   --dyni-warning: #f5c542;
   --dyni-alarm: #ff5533;
-  --dyni-arc-linewidth: 1.5;
-  --dyni-tick-major-width: 2.5;
-  --dyni-pointer-side: 0.3;
+  --dyni-radial-arc-linewidth: 1.5;
+  --dyni-radial-tick-major-width: 2.5;
+  --dyni-radial-pointer-side: 0.3;
   --dyni-font-weight: 800;
 }
 ```
@@ -146,9 +146,9 @@ Available preset names:
 Common tokens:
 
 - Colors: `--dyni-pointer`, `--dyni-warning`, `--dyni-alarm`, `--dyni-layline-stb`, `--dyni-layline-port`
-- Ring/ticks: `--dyni-arc-linewidth`, `--dyni-ring-width`, `--dyni-tick-major-len`, `--dyni-tick-major-width`, `--dyni-tick-minor-len`, `--dyni-tick-minor-width`
-- Pointer geometry: `--dyni-pointer-side`, `--dyni-pointer-length`
-- Labels/text: `--dyni-label-inset`, `--dyni-label-font`, `--dyni-font-weight`, `--dyni-label-weight`, `--dyni-font`
+- Ring/ticks: `--dyni-radial-arc-linewidth`, `--dyni-radial-ring-width`, `--dyni-radial-tick-major-len`, `--dyni-radial-tick-major-width`, `--dyni-radial-tick-minor-len`, `--dyni-radial-tick-minor-width`
+- Pointer geometry: `--dyni-radial-pointer-side`, `--dyni-radial-pointer-length`
+- Labels/text: `--dyni-radial-label-inset`, `--dyni-radial-label-font`, `--dyni-font-weight`, `--dyni-label-weight`, `--dyni-font`
 
 ### 3) Preset precedence
 

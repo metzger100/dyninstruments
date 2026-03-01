@@ -1,7 +1,7 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
-describe("GaugeTickMath", function () {
-  const mod = loadFresh("shared/widget-kits/gauge/GaugeTickMath.js").create();
+describe("RadialTickMath", function () {
+  const mod = loadFresh("shared/widget-kits/radial/RadialTickMath.js").create();
 
   it("computes sweep direction and handles zero sweep as full circle", function () {
     expect(mod.computeSweep(10, 40)).toEqual({ s: 10, e: 40, sweep: 30, dir: 1 });

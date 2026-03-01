@@ -38,8 +38,8 @@ describe("XteDisplayWidget", function () {
       theme.xte = Object.assign({}, themeOverrides.xte);
     }
 
-    const layerCache = loadFresh("shared/widget-kits/gauge/CanvasLayerCache.js");
-    const realPrimitives = loadFresh("shared/widget-kits/gauge/XteHighwayPrimitives.js").create();
+    const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
+    const realPrimitives = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js").create();
 
     const spec = loadFresh("widgets/text/XteDisplayWidget/XteDisplayWidget.js").create({}, {
       applyFormatter(value, opts) {
@@ -78,7 +78,7 @@ describe("XteDisplayWidget", function () {
         if (id === "CanvasLayerCache") {
           return layerCache;
         }
-        if (id === "GaugeToolkit") {
+        if (id === "RadialToolkit") {
           return {
             create() {
               return {

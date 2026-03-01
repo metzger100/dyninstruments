@@ -1,12 +1,12 @@
 /**
- * Module: FullCircleDialTextLayout - Shared text layout helpers for full-circle dial widgets
- * Documentation: documentation/gauges/full-circle-dial-engine.md
- * Depends: GaugeTextLayout state API from FullCircleDialEngine callbacks
+ * Module: FullCircleRadialTextLayout - Shared text layout helpers for full-circle dial widgets
+ * Documentation: documentation/radial/full-circle-dial-engine.md
+ * Depends: RadialTextLayout state API from FullCircleRadialEngine callbacks
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniFullCircleDialTextLayout = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniFullCircleRadialTextLayout = factory(); }
 }(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
@@ -25,7 +25,7 @@
     return fullCircleClamp(raw, minValue, maxValue);
   }
   function fullCircleNormalConfig(state) {
-    const normal = state && state.theme && state.theme.fullCircle && state.theme.fullCircle.normal;
+    const normal = state && state.theme && state.theme.radial && state.theme.radial.fullCircle && state.theme.radial.fullCircle.normal;
     return {
       innerMarginFactor: fullCircleThemeNumber(normal, "innerMarginFactor", FULL_CIRCLE_NORMAL_DEFAULTS.innerMarginFactor, 0, 0.25),
       minHeightFactor: fullCircleThemeNumber(normal, "minHeightFactor", FULL_CIRCLE_NORMAL_DEFAULTS.minHeightFactor, 0.25, 0.95),
@@ -388,10 +388,10 @@
       fullCircleDualNormal(state, left, right);
     }
     return {
-      id: "FullCircleDialTextLayout",
+      id: "FullCircleRadialTextLayout",
       drawSingleModeText: drawSingleModeText,
       drawDualModeText: drawDualModeText
     };
   }
-  return { id: "FullCircleDialTextLayout", create: create };
+  return { id: "FullCircleRadialTextLayout", create: create };
 }));

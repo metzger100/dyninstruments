@@ -29,29 +29,29 @@
         const val = p[baseKind];
         const uni = unit(effKind);
 
-        const warnOn = (p.speedWarningEnabled !== false);
-        const alarmOn = (p.speedAlarmEnabled !== false);
+        const warnOn = (p.speedRadialWarningEnabled !== false);
+        const alarmOn = (p.speedRadialAlarmEnabled !== false);
 
         return {
-          renderer: "SpeedGaugeWidget",
+          renderer: "SpeedRadialWidget",
           value: val,
           caption: cap(effKind),
           unit: uni,
           formatter: "formatSpeed",
           formatterParameters: [uni],
           rendererProps: {
-            speedRatioThresholdNormal: num(p.speedRatioThresholdNormal),
-            speedRatioThresholdFlat: num(p.speedRatioThresholdFlat),
+            speedRadialRatioThresholdNormal: num(p.speedRadialRatioThresholdNormal),
+            speedRadialRatioThresholdFlat: num(p.speedRadialRatioThresholdFlat),
             captionUnitScale: num(p.captionUnitScale),
-            minValue: num(p.minValue),
-            maxValue: num(p.maxValue),
+            speedRadialMinValue: num(p.speedRadialMinValue),
+            speedRadialMaxValue: num(p.speedRadialMaxValue),
             startAngleDeg: num(p.startAngleDeg),
             endAngleDeg: num(p.endAngleDeg),
-            tickMajor: num(p.tickMajor),
-            tickMinor: num(p.tickMinor),
-            showEndLabels: !!p.showEndLabels,
-            warningFrom: warnOn ? num(p.warningFrom) : undefined,
-            alarmFrom: alarmOn ? num(p.alarmFrom) : undefined
+            speedRadialTickMajor: num(p.speedRadialTickMajor),
+            speedRadialTickMinor: num(p.speedRadialTickMinor),
+            speedRadialShowEndLabels: !!p.speedRadialShowEndLabels,
+            speedRadialWarningFrom: warnOn ? num(p.speedRadialWarningFrom) : undefined,
+            speedRadialAlarmFrom: alarmOn ? num(p.speedRadialAlarmFrom) : undefined
           }
         };
       }

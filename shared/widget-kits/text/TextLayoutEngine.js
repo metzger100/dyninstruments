@@ -1,7 +1,7 @@
 /**
  * Module: TextLayoutEngine - Shared mode routing, fit-cache helpers, and composed text layout API
  * Documentation: documentation/shared/text-layout-engine.md
- * Depends: GaugeValueMath, TextLayoutPrimitives, TextLayoutComposite
+ * Depends: RadialValueMath, TextLayoutPrimitives, TextLayoutComposite
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,7 +11,7 @@
   "use strict";
 
   function create(def, Helpers) {
-    const value = Helpers.getModule("GaugeValueMath").create(def, Helpers);
+    const value = Helpers.getModule("RadialValueMath").create(def, Helpers);
     const primitive = Helpers.getModule("TextLayoutPrimitives").create(def, Helpers);
     const composite = Helpers.getModule("TextLayoutComposite").create(def, Helpers);
 

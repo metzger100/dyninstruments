@@ -10,10 +10,10 @@ The engine is split into small shared modules to stay under hotspot/file-size li
 
 ## Key Details
 
-- Runtime module path: `shared/widget-kits/gauge/TextLayoutEngine.js`
+- Runtime module path: `shared/widget-kits/text/TextLayoutEngine.js`
 - Internal split modules:
-- `shared/widget-kits/gauge/TextLayoutPrimitives.js`
-- `shared/widget-kits/gauge/TextLayoutComposite.js`
+- `shared/widget-kits/text/TextLayoutPrimitives.js`
+- `shared/widget-kits/text/TextLayoutComposite.js`
 - Registered component IDs:
 - `TextLayoutPrimitives`
 - `TextLayoutComposite`
@@ -50,5 +50,5 @@ const modeData = textEngine.computeModeLayout({
 
 - [../widgets/three-elements.md](../widgets/three-elements.md)
 - [../widgets/position-coordinates.md](../widgets/position-coordinates.md)
-- [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
+- [../radial/gauge-shared-api.md](../radial/gauge-shared-api.md)
 - [../architecture/component-system.md](../architecture/component-system.md)

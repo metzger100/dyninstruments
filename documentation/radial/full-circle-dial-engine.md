@@ -1,21 +1,21 @@
-# FullCircleDialEngine
+# FullCircleRadialEngine
 
 **Status:** ✅ Implemented | shared full-circle dial renderer pipeline for Compass/Wind widgets
 
 ## Overview
 
-`FullCircleDialEngine` centralizes shared full-circle dial rendering concerns: mode routing, geometry, static-layer caching, and tokenized dial helper drawing.
-`CompassGaugeWidget` and `WindDialWidget` now provide only widget-specific callbacks.
+`FullCircleRadialEngine` centralizes shared full-circle dial rendering concerns: mode routing, geometry, static-layer caching, and tokenized dial helper drawing.
+`CompassRadialWidget` and `WindRadialWidget` now provide only widget-specific callbacks.
 
 ## Key Details
 
-- Component ID: `FullCircleDialEngine`
-- Global key: `DyniFullCircleDialEngine`
-- File: `shared/widget-kits/gauge/FullCircleDialEngine.js`
-- Depends: `GaugeToolkit`, `CanvasLayerCache`
-- Companion helper: `FullCircleDialTextLayout` (`shared/widget-kits/gauge/FullCircleDialTextLayout.js`)
+- Component ID: `FullCircleRadialEngine`
+- Global key: `DyniFullCircleRadialEngine`
+- File: `shared/widget-kits/radial/FullCircleRadialEngine.js`
+- Depends: `RadialToolkit`, `CanvasLayerCache`
+- Companion helper: `FullCircleRadialTextLayout` (`shared/widget-kits/radial/FullCircleRadialTextLayout.js`)
 - Cache backend: shared `CanvasLayerCache.createLayerCache({ layers })`
-- Mode selection: `GaugeValueMath.computeMode(ratio, thresholdNormal, thresholdFlat)`
+- Mode selection: `RadialValueMath.computeMode(ratio, thresholdNormal, thresholdFlat)`
 - Normal-mode text packing is theme-tunable via `fullCircle.normal.*` tokens (`innerMarginFactor`, `minHeightFactor`, `dualGapFactor`)
 
 ## API/Interfaces
@@ -23,7 +23,7 @@
 ### Factory
 
 ```javascript
-const engine = Helpers.getModule("FullCircleDialEngine").create(def, Helpers);
+const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers);
 const renderCanvas = engine.createRenderer(spec);
 ```
 

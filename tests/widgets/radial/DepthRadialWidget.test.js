@@ -1,6 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
-describe("DepthGaugeWidget", function () {
+describe("DepthRadialWidget", function () {
   it("builds low-end sectors with alarm and warning order", function () {
     let captured;
     let receivedOptions;
@@ -11,10 +11,10 @@ describe("DepthGaugeWidget", function () {
     });
     const renderCanvas = vi.fn();
 
-    const mod = loadFresh("widgets/gauges/DepthGaugeWidget/DepthGaugeWidget.js");
+    const mod = loadFresh("widgets/radial/DepthRadialWidget/DepthRadialWidget.js");
     const spec = mod.create({}, {
       getModule(id) {
-        if (id === "GaugeValueMath") {
+        if (id === "RadialValueMath") {
           return {
             create() {
               return {
@@ -34,7 +34,7 @@ describe("DepthGaugeWidget", function () {
             }
           };
         }
-        if (id !== "SemicircleGaugeEngine") throw new Error("unexpected module: " + id);
+        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
         return {
           create() {
             return {

@@ -22,12 +22,12 @@ describe("ClusterRendererRouter", function () {
     const volt = makeSpec("volt");
     const xte = makeSpec("xte");
     const targetSpecs = {
-      WindDialWidget: wind,
-      CompassGaugeWidget: compass,
-      SpeedGaugeWidget: speed,
-      DepthGaugeWidget: depth,
-      TemperatureGaugeWidget: temp,
-      VoltageGaugeWidget: volt,
+      WindRadialWidget: wind,
+      CompassRadialWidget: compass,
+      SpeedRadialWidget: speed,
+      DepthRadialWidget: depth,
+      TemperatureRadialWidget: temp,
+      VoltageRadialWidget: volt,
       XteDisplayWidget: xte
     };
 
@@ -51,7 +51,7 @@ describe("ClusterRendererRouter", function () {
     const router = loadFresh("cluster/rendering/ClusterRendererRouter.js").create({}, Helpers);
 
     expect(router.wantsHideNativeHead).toBe(true);
-    expect(router.pickRenderer({ renderer: "WindDialWidget" })).toBe(wind);
+    expect(router.pickRenderer({ renderer: "WindRadialWidget" })).toBe(wind);
     expect(router.pickRenderer({ renderer: "XteDisplayWidget" })).toBe(xte);
     expect(router.pickRenderer({ renderer: "PositionCoordinateWidget" })).toBe(position);
     expect(router.pickRenderer({ renderer: "Unknown" })).toBe(three);
@@ -68,12 +68,12 @@ describe("ClusterRendererRouter", function () {
     const temp = makeSpec("temp");
     const xte = makeSpec("xte");
     const targetSpecs = {
-      WindDialWidget: wind,
-      CompassGaugeWidget: compass,
-      SpeedGaugeWidget: speed,
-      DepthGaugeWidget: depth,
-      TemperatureGaugeWidget: temp,
-      VoltageGaugeWidget: voltage,
+      WindRadialWidget: wind,
+      CompassRadialWidget: compass,
+      SpeedRadialWidget: speed,
+      DepthRadialWidget: depth,
+      TemperatureRadialWidget: temp,
+      VoltageRadialWidget: voltage,
       XteDisplayWidget: xte
     };
 
@@ -98,7 +98,7 @@ describe("ClusterRendererRouter", function () {
 
     const ctx = { marker: 1 };
     const canvas = { id: "canvas" };
-    const props = { renderer: "VoltageGaugeWidget" };
+    const props = { renderer: "VoltageRadialWidget" };
 
     router.renderCanvas.call(ctx, canvas, props);
     expect(voltage.renderCanvas).toHaveBeenCalledWith(canvas, props);

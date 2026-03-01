@@ -14,8 +14,8 @@ It tracks pre-release priorities and AvNav widget coverage status.
 ### Completed foundation refactors
 
 - Plugin bootstrap/config split completed (`plugin.js` + `runtime/*` + `config/*`)
-- Gauge core split completed (`GaugeToolkit` + shared core modules)
-- Semicircle gauges unified on `SemicircleGaugeEngine`
+- Gauge core split completed (`RadialToolkit` + shared core modules)
+- Semicircle gauges unified on `SemicircleRadialEngine`
 
 ### Cluster refactor baseline
 

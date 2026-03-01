@@ -1,6 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
-describe("FullCircleDialTextLayout", function () {
+describe("FullCircleRadialTextLayout", function () {
   function createHarness(overrides) {
     const cfg = overrides || {};
     const calls = {
@@ -75,7 +75,7 @@ describe("FullCircleDialTextLayout", function () {
   }
 
   it("packs single normal text using diameter-aware fit and center alignment", function () {
-    const layout = loadFresh("shared/widget-kits/gauge/FullCircleDialTextLayout.js").create({}, {});
+    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, {});
     const harness = createHarness();
 
     layout.drawSingleModeText(harness.state, "normal", makeSingleDisplay());
@@ -96,7 +96,7 @@ describe("FullCircleDialTextLayout", function () {
   });
 
   it("packs dual normal text with tokenized default column gap and wider columns", function () {
-    const layout = loadFresh("shared/widget-kits/gauge/FullCircleDialTextLayout.js").create({}, {});
+    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, {});
     const harness = createHarness();
     const display = makeDualDisplay();
 
@@ -120,15 +120,17 @@ describe("FullCircleDialTextLayout", function () {
   });
 
   it("applies full-circle normal layout token overrides deterministically", function () {
-    const layout = loadFresh("shared/widget-kits/gauge/FullCircleDialTextLayout.js").create({}, {});
+    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, {});
     const defaultHarness = createHarness();
     const overrideHarness = createHarness({
       theme: {
-        fullCircle: {
-          normal: {
-            innerMarginFactor: 0.10,
-            minHeightFactor: 0.60,
-            dualGapFactor: 0.12
+        radial: {
+          fullCircle: {
+            normal: {
+              innerMarginFactor: 0.10,
+              minHeightFactor: 0.60,
+              dualGapFactor: 0.12
+            }
           }
         }
       }
@@ -153,9 +155,11 @@ describe("FullCircleDialTextLayout", function () {
     const singleDefault = createHarness();
     const singleOverride = createHarness({
       theme: {
-        fullCircle: {
-          normal: {
-            innerMarginFactor: 0.20
+        radial: {
+          fullCircle: {
+            normal: {
+              innerMarginFactor: 0.20
+            }
           }
         }
       }

@@ -1,7 +1,7 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
-describe("GaugeAngleMath", function () {
-  const mod = loadFresh("shared/widget-kits/gauge/GaugeAngleMath.js").create();
+describe("RadialAngleMath", function () {
+  const mod = loadFresh("shared/widget-kits/radial/RadialAngleMath.js").create();
 
   it("normalizes angles to 360 and 180 ranges", function () {
     expect(mod.norm360(361)).toBe(1);

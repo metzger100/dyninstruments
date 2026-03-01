@@ -1,12 +1,12 @@
 /**
- * Module: GaugeTextLayout - Shared text fitting and overlay helpers for gauge widgets
- * Documentation: documentation/gauges/gauge-shared-api.md
+ * Module: RadialTextLayout - Shared text fitting and overlay helpers for gauge widgets
+ * Documentation: documentation/radial/gauge-shared-api.md
  * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniGaugeTextLayout = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniRadialTextLayout = factory(); }
 }(this, function () {
   "use strict";
 
@@ -295,7 +295,7 @@
     }
 
     return {
-      id: "GaugeTextLayout",
+      id: "RadialTextLayout",
       version: "0.1.0",
       setFont,
       fitTextPx,
@@ -310,5 +310,5 @@
     };
   }
 
-  return { id: "GaugeTextLayout", create };
+  return { id: "RadialTextLayout", create };
 }));

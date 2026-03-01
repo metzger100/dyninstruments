@@ -76,12 +76,12 @@ Reference: [plugin-core-contracts.md](plugin-core-contracts.md), [../avnav-api/c
 - `PositionCoordinateWidget` (stacked pair renderer for nav positions; self-contained and no longer delegates flat mode to another widget)
 - `DateTimeRendererWrapper` (vessel date/time wrapper that forwards to `PositionCoordinateWidget`)
 - `TimeStatusRendererWrapper` (vessel gps-status/time wrapper that forwards to `PositionCoordinateWidget`)
-- `WindDialWidget`
-- `CompassGaugeWidget`
-- `SpeedGaugeWidget`
-- `DepthGaugeWidget`
-- `TemperatureGaugeWidget`
-- `VoltageGaugeWidget`
+- `WindRadialWidget`
+- `CompassRadialWidget`
+- `SpeedRadialWidget`
+- `DepthRadialWidget`
+- `TemperatureRadialWidget`
+- `VoltageRadialWidget`
 - `XteDisplayWidget`
 
 `wantsHideNativeHead` is aggregated (`true` if any sub-renderer requests it).

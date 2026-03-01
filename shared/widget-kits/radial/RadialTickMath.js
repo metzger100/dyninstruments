@@ -1,18 +1,18 @@
 /**
- * Module: GaugeTickMath - Shared tick sweep and major/minor angle generation
- * Documentation: documentation/gauges/gauge-shared-api.md
- * Depends: GaugeAngleMath
+ * Module: RadialTickMath - Shared tick sweep and major/minor angle generation
+ * Documentation: documentation/radial/gauge-shared-api.md
+ * Depends: RadialAngleMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniGaugeTickMath = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniRadialTickMath = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
     const angleMath = (Helpers && typeof Helpers.getModule === "function")
-      ? Helpers.getModule("GaugeAngleMath").create(def, Helpers)
+      ? Helpers.getModule("RadialAngleMath").create(def, Helpers)
       : null;
     const mod = (angleMath && typeof angleMath.mod === "function")
       ? angleMath.mod
@@ -83,7 +83,7 @@
     }
 
     return {
-      id: "GaugeTickMath",
+      id: "RadialTickMath",
       version: "0.1.0",
       computeSweep,
       isBeyondEnd,
@@ -91,5 +91,5 @@
     };
   }
 
-  return { id: "GaugeTickMath", create };
+  return { id: "RadialTickMath", create };
 }));

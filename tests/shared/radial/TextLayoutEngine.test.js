@@ -18,10 +18,10 @@ describe("TextLayoutEngine", function () {
   }
 
   function createEngine() {
-    const engineModule = loadFresh("shared/widget-kits/gauge/TextLayoutEngine.js");
-    const primitiveModule = loadFresh("shared/widget-kits/gauge/TextLayoutPrimitives.js");
-    const compositeModule = loadFresh("shared/widget-kits/gauge/TextLayoutComposite.js");
-    const textLayoutModule = loadFresh("shared/widget-kits/gauge/GaugeTextLayout.js");
+    const engineModule = loadFresh("shared/widget-kits/text/TextLayoutEngine.js");
+    const primitiveModule = loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js");
+    const compositeModule = loadFresh("shared/widget-kits/text/TextLayoutComposite.js");
+    const textLayoutModule = loadFresh("shared/widget-kits/radial/RadialTextLayout.js");
     const valueMathModule = {
       create() {
         return {
@@ -44,8 +44,8 @@ describe("TextLayoutEngine", function () {
 
     return engineModule.create({}, {
       getModule(id) {
-        if (id === "GaugeValueMath") return valueMathModule;
-        if (id === "GaugeTextLayout") return textLayoutModule;
+        if (id === "RadialValueMath") return valueMathModule;
+        if (id === "RadialTextLayout") return textLayoutModule;
         if (id === "TextLayoutPrimitives") return primitiveModule;
         if (id === "TextLayoutComposite") return compositeModule;
         throw new Error("unexpected module: " + id);

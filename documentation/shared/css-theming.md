@@ -55,19 +55,19 @@ Read by `ThemeResolver.resolve(canvas)`:
 | `--dyni-alarm` | Alarm sector color | `#ff7a76` |
 | `--dyni-layline-stb` | Starboard layline color | `#82b683` |
 | `--dyni-layline-port` | Port layline color | `#ff7a76` |
-| `--dyni-tick-major-len` | Major tick length | `9` |
-| `--dyni-tick-major-width` | Major tick stroke width | `2` |
-| `--dyni-tick-minor-len` | Minor tick length | `5` |
-| `--dyni-tick-minor-width` | Minor tick stroke width | `1` |
-| `--dyni-pointer-side` | Pointer side factor | `0.25` |
-| `--dyni-pointer-length` | Pointer length factor | `2` |
-| `--dyni-arc-linewidth` | Arc line width | `1` |
-| `--dyni-ring-width` | Ring width factor | `0.12` |
-| `--dyni-label-inset` | Label inset factor | `1.8` |
-| `--dyni-label-font` | Label font factor | `0.14` |
-| `--dyni-fullcircle-normal-inner-margin` | Full-circle normal-mode inner margin factor | `0.03` |
-| `--dyni-fullcircle-normal-min-height` | Full-circle normal-mode minimum block height factor | `0.45` |
-| `--dyni-fullcircle-normal-dual-gap` | Full-circle normal-mode dual-column gap factor | `0.05` |
+| `--dyni-radial-tick-major-len` | Major tick length | `9` |
+| `--dyni-radial-tick-major-width` | Major tick stroke width | `2` |
+| `--dyni-radial-tick-minor-len` | Minor tick length | `5` |
+| `--dyni-radial-tick-minor-width` | Minor tick stroke width | `1` |
+| `--dyni-radial-pointer-side` | Pointer side factor | `0.25` |
+| `--dyni-radial-pointer-length` | Pointer length factor | `2` |
+| `--dyni-radial-arc-linewidth` | Arc line width | `1` |
+| `--dyni-radial-ring-width` | Ring width factor | `0.12` |
+| `--dyni-radial-label-inset` | Label inset factor | `1.8` |
+| `--dyni-radial-label-font` | Label font factor | `0.14` |
+| `--dyni-radial-fullcircle-normal-inner-margin` | Full-circle normal-mode inner margin factor | `0.03` |
+| `--dyni-radial-fullcircle-normal-min-height` | Full-circle normal-mode minimum block height factor | `0.45` |
+| `--dyni-radial-fullcircle-normal-dual-gap` | Full-circle normal-mode dual-column gap factor | `0.05` |
 | `--dyni-font-weight` | Primary font weight | `700` |
 | `--dyni-label-weight` | Label font weight | `700` |
 | `--dyni-xte-line-width-factor` | XTE highway stroke thickness multiplier | `1` |
@@ -103,7 +103,7 @@ Per-token overrides can be applied in `user.css` and naturally override preset v
 .widget.dyniplugin,
 [data-dyni] {
   --dyni-pointer: #00aaff;
-  --dyni-arc-linewidth: 1.5;
+  --dyni-radial-arc-linewidth: 1.5;
   --dyni-xte-line-width-factor: 1.25;
 }
 ```
@@ -160,4 +160,4 @@ All component-level widget CSS files were removed. Visual styling remains canvas
 
 - [helpers.md](helpers.md) — How resolveTextColor/resolveFontFamily read CSS
 - [theme-tokens.md](theme-tokens.md) — ThemeResolver tokens and cache behavior
-- [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md) — Canvas color palette
+- [../radial/gauge-style-guide.md](../radial/gauge-style-guide.md) — Canvas color palette

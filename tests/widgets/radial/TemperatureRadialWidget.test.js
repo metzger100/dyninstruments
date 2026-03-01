@@ -1,6 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
-describe("TemperatureGaugeWidget", function () {
+describe("TemperatureRadialWidget", function () {
   it("does not apply Kelvin fallback on raw formatter passthrough", function () {
     let captured;
     const renderCanvas = vi.fn();
@@ -11,11 +11,11 @@ describe("TemperatureGaugeWidget", function () {
       return { major: 50, minor: 10 };
     });
 
-    const mod = loadFresh("widgets/gauges/TemperatureGaugeWidget/TemperatureGaugeWidget.js");
+    const mod = loadFresh("widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js");
     const spec = mod.create({}, {
       applyFormatter,
       getModule(id) {
-        if (id === "GaugeValueMath") {
+        if (id === "RadialValueMath") {
           return {
             create() {
               return {
@@ -31,7 +31,7 @@ describe("TemperatureGaugeWidget", function () {
             }
           };
         }
-        if (id !== "SemicircleGaugeEngine") throw new Error("unexpected module: " + id);
+        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
         return {
           create() {
             return {
@@ -63,13 +63,13 @@ describe("TemperatureGaugeWidget", function () {
     let captured;
     const renderCanvas = vi.fn();
 
-    const mod = loadFresh("widgets/gauges/TemperatureGaugeWidget/TemperatureGaugeWidget.js");
+    const mod = loadFresh("widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js");
     mod.create({}, {
       applyFormatter() {
         return "not-a-number";
       },
       getModule(id) {
-        if (id === "GaugeValueMath") {
+        if (id === "RadialValueMath") {
           return {
             create() {
               return {
@@ -87,7 +87,7 @@ describe("TemperatureGaugeWidget", function () {
             }
           };
         }
-        if (id !== "SemicircleGaugeEngine") throw new Error("unexpected module: " + id);
+        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
         return {
           create() {
             return {

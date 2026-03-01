@@ -3,7 +3,7 @@ const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("XteHighwayPrimitives", function () {
   function create() {
-    const mod = loadFresh("shared/widget-kits/gauge/XteHighwayPrimitives.js");
+    const mod = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js");
     return mod.create();
   }
 

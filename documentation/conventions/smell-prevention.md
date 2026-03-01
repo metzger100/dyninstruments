@@ -110,7 +110,7 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 ### Cross-file clone drift
 
 1. Remove widget-local copy-paste blocks and move shared logic into `shared/widget-kits/`.
-2. Prefer shared API calls (`GaugeValueMath.*`, shared renderers) over repeated local helper implementations.
+2. Prefer shared API calls (`RadialValueMath.*`, shared renderers) over repeated local helper implementations.
 3. Keep duplicated orchestration stubs (`create`, `translate`, `translateFunction`, `renderCanvas`) minimal; all substantive logic belongs in shared modules.
 4. Add/adjust tests to lock expected shared-helper behavior after extraction.
 

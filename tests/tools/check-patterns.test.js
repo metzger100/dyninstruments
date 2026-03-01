@@ -467,7 +467,7 @@ tiny();
       const req = props && props.kind;
       if (req === "speedGraphic") {
         return {
-          renderer: "SpeedGaugeWidget",
+          renderer: "SpeedRadialWidget",
           value: props.speed,
           caption: "SPD",
           unit: "kn",
@@ -510,7 +510,7 @@ tiny();
       const req = props && props.kind;
       if (req === "speedGraphic") {
         return {
-          renderer: "SpeedGaugeWidget",
+          renderer: "SpeedRadialWidget",
           value: props.speed,
           caption: "SPD",
           unit: "kn",
@@ -557,7 +557,7 @@ tiny();
       const req = props && props.kind;
       if (req === "aGraphic" || req === "bGraphic") {
         return {
-          renderer: "SpeedGaugeWidget",
+          renderer: "SpeedRadialWidget",
           value: props.speed,
           caption: "SPD",
           unit: "kn",

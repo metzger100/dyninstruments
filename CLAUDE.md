@@ -55,9 +55,9 @@ documentation/
 ├── architecture/
 │   ├── component-system.md            # UMD loader, dependencies, config/components.js
 │   └── cluster-widget-system.md       # ClusterWidget, kind→renderer routing
-├── gauges/
+├── radial/
 │   ├── gauge-style-guide.md        # Proportions, colors, pointer, layout modes
-│   └── gauge-shared-api.md         # Shared GaugeToolkit API documentation
+│   └── gauge-shared-api.md         # Shared RadialToolkit API documentation
 ├── shared/
 │   ├── helpers.md                  # Helpers object (setupCanvas, resolveTextColor)
 │   ├── css-theming.md              # CSS vars, day/night, font stack
@@ -65,8 +65,8 @@ documentation/
 ├── widgets/
 │   ├── semicircle-gauges.md        # Speed/Depth/Temperature/Voltage shared 
 │   ├── three-elements.md           # ThreeValueTextWidget numeric renderer
-│   ├── wind-dial.md                # WindDialWidget full-circle wind compass
-│   └── compass-gauge.md            # CompassGaugeWidget rotating compass card
+│   ├── wind-dial.md                # WindRadialWidget full-circle wind compass
+│   └── compass-gauge.md            # CompassRadialWidget rotating compass card
 └── guides/
     ├── add-new-gauge.md            # Step-by-step: create a new gauge
     ├── add-new-cluster.md          # Step-by-step: create a new cluster widget
@@ -94,7 +94,7 @@ Task: Add new BarometerGauge
 Task: Add new BarometerGauge
 ✅ Read TABLEOFCONTENTS.md
 ✅ Read conventions/coding-standards.md and conventions/smell-prevention.md
-✅ Identify: guides/add-new-gauge.md, gauges/gauge-style-guide.md
+✅ Identify: guides/add-new-gauge.md, radial/gauge-style-guide.md
 ✅ Read only those 2 additional files
 ✅ Begin implementation
 ```
@@ -104,7 +104,7 @@ Task: Add new BarometerGauge
 ## 3. File Size Limits
 
 - **Target: <=400 lines per JS file**
-- Shared drawing/layout code → split reusable components in `shared/widget-kits/gauge/` (`GaugeAngleMath`, `GaugeTickMath`, `GaugeCanvasPrimitives`, `GaugeDialRenderer`)
+- Shared drawing/layout code → split reusable components in `shared/widget-kits/radial/` (`RadialAngleMath`, `RadialTickMath`, `RadialCanvasPrimitives`, `RadialFrameRenderer`)
 - Gauge-specific code only in individual gauge component files
 - Cluster configs live under `config/clusters/`
 - If a legacy file exceeds 400 lines, keep new logic isolated and avoid increasing size further

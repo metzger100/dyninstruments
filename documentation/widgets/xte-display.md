@@ -21,7 +21,7 @@ XteDisplayWidget: {
   js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
   css: undefined,
   globalKey: "DyniXteDisplayWidget",
-  deps: ["GaugeToolkit", "CanvasLayerCache", "XteHighwayPrimitives"]
+  deps: ["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives"]
 }
 ```
 
@@ -63,7 +63,7 @@ Otherwise `drawDisconnectOverlay(..., "NO DATA", ...)` is used.
 
 ## Theme Token Usage
 
-Theme is resolved once per frame via `GaugeToolkit.theme.resolve(canvas)`.
+Theme is resolved once per frame via `RadialToolkit.theme.resolve(canvas)`.
 
 | Visual element | Token |
 |---|---|

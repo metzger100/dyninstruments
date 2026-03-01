@@ -1,11 +1,11 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
-describe("CompassGaugeWidget", function () {
+describe("CompassRadialWidget", function () {
   function createCompassCachingHarness() {
-    const fullCircleEngine = loadFresh("shared/widget-kits/gauge/FullCircleDialEngine.js");
-    const layerCache = loadFresh("shared/widget-kits/gauge/CanvasLayerCache.js");
-    const textLayout = loadFresh("shared/widget-kits/gauge/FullCircleDialTextLayout.js");
+    const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
+    const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
+    const textLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js");
     const calls = {
       ring: [],
       ticks: [],
@@ -17,23 +17,25 @@ describe("CompassGaugeWidget", function () {
       colors: {
         pointer: "#ff2b2b"
       },
-      ticks: {
-        majorLen: 11,
-        majorWidth: 3,
-        minorLen: 4,
-        minorWidth: 1.5
-      },
-      pointer: {
-        sideFactor: 0.28,
-        lengthFactor: 1.6
-      },
-      ring: {
-        arcLineWidth: 2.2,
-        widthFactor: 0.35
-      },
-      labels: {
-        insetFactor: 2.1,
-        fontFactor: 0.35
+      radial: {
+        ticks: {
+          majorLen: 11,
+          majorWidth: 3,
+          minorLen: 4,
+          minorWidth: 1.5
+        },
+        pointer: {
+          sideFactor: 0.28,
+          lengthFactor: 1.6
+        },
+        ring: {
+          arcLineWidth: 2.2,
+          widthFactor: 0.35
+        },
+        labels: {
+          insetFactor: 2.1,
+          fontFactor: 0.35
+        }
       },
       font: {
         weight: 705,
@@ -41,7 +43,7 @@ describe("CompassGaugeWidget", function () {
       }
     };
 
-    const spec = loadFresh("widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js")
+    const spec = loadFresh("widgets/radial/CompassRadialWidget/CompassRadialWidget.js")
       .create({}, {
         setupCanvas(canvas) {
           const ctx = canvas.getContext("2d");
@@ -59,10 +61,10 @@ describe("CompassGaugeWidget", function () {
           return "#fff";
         },
         getModule(id) {
-          if (id === "FullCircleDialEngine") return fullCircleEngine;
-          if (id === "FullCircleDialTextLayout") return textLayout;
+          if (id === "FullCircleRadialEngine") return fullCircleEngine;
+          if (id === "FullCircleRadialTextLayout") return textLayout;
           if (id === "CanvasLayerCache") return layerCache;
-          if (id !== "GaugeToolkit") throw new Error("unexpected module: " + id);
+          if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
               return {
@@ -173,22 +175,22 @@ describe("CompassGaugeWidget", function () {
     harness.spec.renderCanvas(canvas, makeCompassProps());
 
     expect(harness.calls.pointer[0].fillStyle).toBe(harness.theme.colors.pointer);
-    expect(harness.calls.pointer[0].sideFactor).toBe(harness.theme.pointer.sideFactor);
-    expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.pointer.lengthFactor);
+    expect(harness.calls.pointer[0].sideFactor).toBe(harness.theme.radial.pointer.sideFactor);
+    expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.radial.pointer.lengthFactor);
     expect(harness.calls.pointer[0].depth).toBe(15);
     expect(harness.calls.rimMarker[0]).toEqual({
       len: 15,
       width: 6,
       strokeStyle: harness.theme.colors.pointer
     });
-    expect(harness.calls.ring[0].lineWidth).toBe(harness.theme.ring.arcLineWidth);
+    expect(harness.calls.ring[0].lineWidth).toBe(harness.theme.radial.ring.arcLineWidth);
     expect(harness.calls.ticks[0].major).toEqual({
-      len: harness.theme.ticks.majorLen,
-      width: harness.theme.ticks.majorWidth
+      len: harness.theme.radial.ticks.majorLen,
+      width: harness.theme.radial.ticks.majorWidth
     });
     expect(harness.calls.ticks[0].minor).toEqual({
-      len: harness.theme.ticks.minorLen,
-      width: harness.theme.ticks.minorWidth
+      len: harness.theme.radial.ticks.minorLen,
+      width: harness.theme.radial.ticks.minorWidth
     });
   });
 
@@ -218,7 +220,7 @@ describe("CompassGaugeWidget", function () {
     harness.spec.renderCanvas(canvasB, props);
     expect(harness.calls.ring).toHaveLength(2);
 
-    harness.theme.ring.arcLineWidth = 3.2;
+    harness.theme.radial.ring.arcLineWidth = 3.2;
     harness.spec.renderCanvas(canvasB, props);
     expect(harness.calls.ring).toHaveLength(3);
   });

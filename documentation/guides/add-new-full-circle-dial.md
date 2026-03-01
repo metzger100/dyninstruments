@@ -1,28 +1,28 @@
 # Guide: Create a New Full-Circle Dial
 
-**Status:** ✅ Ready | Current workflow with `FullCircleDialEngine` + ClusterWidget registries
+**Status:** ✅ Ready | Current workflow with `FullCircleRadialEngine` + ClusterWidget registries
 
 ## Overview
 
-New full-circle dials should be thin wrappers over `FullCircleDialEngine`. Keep widget modules focused on display strategy, static-layer callbacks, and pointer behavior.
+New full-circle dials should be thin wrappers over `FullCircleRadialEngine`. Keep widget modules focused on display strategy, static-layer callbacks, and pointer behavior.
 
 ## Prerequisites
 
 Read first:
 
-- [../gauges/full-circle-dial-style-guide.md](../gauges/full-circle-dial-style-guide.md)
-- [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
+- [../radial/full-circle-dial-style-guide.md](../radial/full-circle-dial-style-guide.md)
+- [../radial/gauge-shared-api.md](../radial/gauge-shared-api.md)
 - [../architecture/component-system.md](../architecture/component-system.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
 
 ## Step 1: Create Dial Wrapper Module
 
-Create `widgets/gauges/NewDialWidget/NewDialWidget.js`:
+Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
 
 1. Use UMD wrapper + `create(def, Helpers)`.
 2. Resolve shared modules:
-   - `const engine = Helpers.getModule("FullCircleDialEngine").create(def, Helpers)`
-   - `const textLayout = Helpers.getModule("FullCircleDialTextLayout").create(def, Helpers)`
+   - `const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers)`
+   - `const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers)`
 3. Add widget-specific display strategy only:
    - single-value display object (compass-style), or
    - dual-value display object (wind-style)
@@ -41,8 +41,8 @@ Create `widgets/gauges/NewDialWidget/NewDialWidget.js`:
   "use strict";
 
   function create(def, Helpers) {
-    const engine = Helpers.getModule("FullCircleDialEngine").create(def, Helpers);
-    const textLayout = Helpers.getModule("FullCircleDialTextLayout").create(def, Helpers);
+    const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers);
+    const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers);
 
     function buildDisplay(state, props) {
       // Widget-specific captions/units/value strategy only.
@@ -67,8 +67,8 @@ Create `widgets/gauges/NewDialWidget/NewDialWidget.js`:
           depth: Math.max(8, Math.floor(state.geom.ringW * 0.9)),
           variant: "long",
           fillStyle: state.theme.colors.pointer,
-          sideFactor: state.theme.pointer.sideFactor,
-          lengthFactor: state.theme.pointer.lengthFactor
+          sideFactor: state.theme.radial.pointer.sideFactor,
+          lengthFactor: state.theme.radial.pointer.lengthFactor
         });
         api.drawCachedLayer("front");
       },
@@ -102,10 +102,10 @@ Add module entry:
 
 ```javascript
 NewDialWidget: {
-  js: BASE + "widgets/gauges/NewDialWidget/NewDialWidget.js",
+  js: BASE + "widgets/radial/NewDialWidget/NewDialWidget.js",
   css: undefined,
   globalKey: "DyniNewDialWidget",
-  deps: ["FullCircleDialEngine", "FullCircleDialTextLayout"]
+  deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]
 }
 ```
 
@@ -161,8 +161,8 @@ Decision guide:
 
 ## Checklist
 
-- [ ] Dial wrapper created in `widgets/gauges/NewDialWidget/NewDialWidget.js`
-- [ ] Module registered in `config/components.js` with `deps: ["FullCircleDialEngine", "FullCircleDialTextLayout"]`
+- [ ] Dial wrapper created in `widgets/radial/NewDialWidget/NewDialWidget.js`
+- [ ] Module registered in `config/components.js` with `deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]`
 - [ ] Added to `ClusterRendererRouter.deps` (if ClusterWidget-rendered)
 - [ ] Renderer wired in `cluster/rendering/ClusterRendererRouter.js` (if ClusterWidget-rendered)
 - [ ] Mapper returns `renderer: "NewDialWidget"` with declarative, normalized props
@@ -173,6 +173,6 @@ Decision guide:
 
 - [add-new-gauge.md](add-new-gauge.md)
 - [add-new-cluster.md](add-new-cluster.md)
-- [../gauges/full-circle-dial-engine.md](../gauges/full-circle-dial-engine.md)
+- [../radial/full-circle-dial-engine.md](../radial/full-circle-dial-engine.md)
 - [../widgets/compass-gauge.md](../widgets/compass-gauge.md)
 - [../widgets/wind-dial.md](../widgets/wind-dial.md)

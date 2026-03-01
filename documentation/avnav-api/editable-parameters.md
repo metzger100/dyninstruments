@@ -10,7 +10,7 @@ editableParameters define the widget configuration UI in AvNav's Layout Editor. 
 
 editableParameters is an object of parameter specs.
 
-- The **object key** is the **property name** that appears in renderHtml/renderCanvas props (e.g. `minValue`, `speedRatioThresholdFlat`).
+- The **object key** is the **property name** that appears in renderHtml/renderCanvas props (e.g. `minValue`, `speedRadialRatioThresholdFlat`).
 - The **editor label** is controlled by the spec field `name` (used across cluster config files in config/clusters/*) or `displayName` (used by dyninstruments helper `makePerKindTextParams`).
 - If neither `name` nor `displayName` is set, AvNav may fall back to showing the key.
 
@@ -121,7 +121,7 @@ condition: [{ kind: "sog" }, { kind: "stw" }]
 
 **AND logic** — multiple keys in one object, ALL must match:
 ```javascript
-condition: { kind: "depthRadial", depthAlarmEnabled: true }
+condition: { kind: "depthRadial", depthRadialAlarmEnabled: true }
 ```
 
 **Always visible:**

@@ -19,9 +19,9 @@ describe("PositionCoordinateWidget", function () {
     const fontWeightCalls = [];
     const fontCalls = [];
     const modules = {
-      TextLayoutEngine: loadFresh("shared/widget-kits/gauge/TextLayoutEngine.js"),
-      TextLayoutPrimitives: loadFresh("shared/widget-kits/gauge/TextLayoutPrimitives.js"),
-      TextLayoutComposite: loadFresh("shared/widget-kits/gauge/TextLayoutComposite.js")
+      TextLayoutEngine: loadFresh("shared/widget-kits/text/TextLayoutEngine.js"),
+      TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
+      TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js")
     };
     const applyFormatter = vi.fn((raw, props) => {
       const fpRaw = props && props.formatterParameters;
@@ -77,7 +77,7 @@ describe("PositionCoordinateWidget", function () {
             }
           };
         }
-        if (id === "GaugeTextLayout") {
+        if (id === "RadialTextLayout") {
           return {
             create() {
               return {
@@ -124,7 +124,7 @@ describe("PositionCoordinateWidget", function () {
             }
           };
         }
-        if (id === "GaugeValueMath") {
+        if (id === "RadialValueMath") {
           return {
             create() {
               return {

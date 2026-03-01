@@ -44,11 +44,11 @@ describe("ClusterMapperToolkit", function () {
     expect(toolkit.num("x")).toBeUndefined();
   });
 
-  it("uses injected GaugeAngleMath helpers when provided", function () {
+  it("uses injected RadialAngleMath helpers when provided", function () {
     const mod = loadFresh("cluster/mappers/ClusterMapperToolkit.js");
     const toolkit = mod.create({}, {
       getModule(id) {
-        if (id !== "GaugeAngleMath") throw new Error("unexpected module: " + id);
+        if (id !== "RadialAngleMath") throw new Error("unexpected module: " + id);
         return {
           create() {
             return {

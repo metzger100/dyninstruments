@@ -1,112 +1,112 @@
 # Gauge Shared API
 
-**Status:** ✅ Implemented | split gauge utility modules + `GaugeToolkit` facade
+**Status:** ✅ Implemented | split gauge utility modules + `RadialToolkit` facade
 
 ## Overview
 
 Shared gauge logic is split into focused core modules:
 
-- `GaugeAngleMath` for angle math and value/angle mapping
-- `GaugeTickMath` for major/minor tick angle generation
-- `GaugeCanvasPrimitives` for low-level canvas primitives
-- `GaugeDialRenderer` for radial tick/label/frame drawing
-- `GaugeTextLayout` for text fitting/drawing and disconnect overlay
-- `GaugeValueMath` for numeric/range/geometry helpers
+- `RadialAngleMath` for angle math and value/angle mapping
+- `RadialTickMath` for major/minor tick angle generation
+- `RadialCanvasPrimitives` for low-level canvas primitives
+- `RadialFrameRenderer` for radial tick/label/frame drawing
+- `RadialTextLayout` for text fitting/drawing and disconnect overlay
+- `RadialValueMath` for numeric/range/geometry helpers
 - `TextLayoutPrimitives` for binary-fit and inline draw primitives
 - `TextLayoutComposite` for reusable multi-row text layouts
 - `TextLayoutEngine` as text-layout facade (mode routing + cache + composed helpers)
 - `ThemeResolver` for plugin-wide CSS theme token resolution
-- `GaugeToolkit` as composed facade
-- `SemicircleGaugeEngine` as shared render flow for Speed/Depth/Temperature/Voltage
-- `FullCircleDialEngine` as shared render flow for Compass/Wind dials
-- `FullCircleDialTextLayout` as shared mode text helper for full-circle wrappers
+- `RadialToolkit` as composed facade
+- `SemicircleRadialEngine` as shared render flow for Speed/Depth/Temperature/Voltage
+- `FullCircleRadialEngine` as shared render flow for Compass/Wind dials
+- `FullCircleRadialTextLayout` as shared mode text helper for full-circle wrappers
 
 ## Module Registration
 
 `config/components.js` registers these shared modules:
 
 ```javascript
-GaugeAngleMath: { js: BASE + "shared/widget-kits/gauge/GaugeAngleMath.js", globalKey: "DyniGaugeAngleMath" },
-GaugeTickMath: {
-  js: BASE + "shared/widget-kits/gauge/GaugeTickMath.js",
-  globalKey: "DyniGaugeTickMath",
-  deps: ["GaugeAngleMath"]
+RadialAngleMath: { js: BASE + "shared/widget-kits/radial/RadialAngleMath.js", globalKey: "DyniRadialAngleMath" },
+RadialTickMath: {
+  js: BASE + "shared/widget-kits/radial/RadialTickMath.js",
+  globalKey: "DyniRadialTickMath",
+  deps: ["RadialAngleMath"]
 },
-GaugeCanvasPrimitives: {
-  js: BASE + "shared/widget-kits/gauge/GaugeCanvasPrimitives.js",
-  globalKey: "DyniGaugeCanvasPrimitives",
-  deps: ["GaugeAngleMath"]
+RadialCanvasPrimitives: {
+  js: BASE + "shared/widget-kits/radial/RadialCanvasPrimitives.js",
+  globalKey: "DyniRadialCanvasPrimitives",
+  deps: ["RadialAngleMath"]
 },
-GaugeDialRenderer: {
-  js: BASE + "shared/widget-kits/gauge/GaugeDialRenderer.js",
-  globalKey: "DyniGaugeDialRenderer",
-  deps: ["GaugeAngleMath", "GaugeTickMath", "GaugeCanvasPrimitives"]
+RadialFrameRenderer: {
+  js: BASE + "shared/widget-kits/radial/RadialFrameRenderer.js",
+  globalKey: "DyniRadialFrameRenderer",
+  deps: ["RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives"]
 },
-GaugeTextLayout: { js: BASE + "shared/widget-kits/gauge/GaugeTextLayout.js", globalKey: "DyniGaugeTextLayout" },
-GaugeValueMath: { js: BASE + "shared/widget-kits/gauge/GaugeValueMath.js", globalKey: "DyniGaugeValueMath", deps: ["GaugeAngleMath"] },
+RadialTextLayout: { js: BASE + "shared/widget-kits/radial/RadialTextLayout.js", globalKey: "DyniRadialTextLayout" },
+RadialValueMath: { js: BASE + "shared/widget-kits/radial/RadialValueMath.js", globalKey: "DyniRadialValueMath", deps: ["RadialAngleMath"] },
 TextLayoutPrimitives: {
-  js: BASE + "shared/widget-kits/gauge/TextLayoutPrimitives.js",
+  js: BASE + "shared/widget-kits/text/TextLayoutPrimitives.js",
   globalKey: "DyniTextLayoutPrimitives",
-  deps: ["GaugeTextLayout"]
+  deps: ["RadialTextLayout"]
 },
 TextLayoutComposite: {
-  js: BASE + "shared/widget-kits/gauge/TextLayoutComposite.js",
+  js: BASE + "shared/widget-kits/text/TextLayoutComposite.js",
   globalKey: "DyniTextLayoutComposite",
   deps: ["TextLayoutPrimitives"]
 },
 TextLayoutEngine: {
-  js: BASE + "shared/widget-kits/gauge/TextLayoutEngine.js",
+  js: BASE + "shared/widget-kits/text/TextLayoutEngine.js",
   globalKey: "DyniTextLayoutEngine",
-  deps: ["GaugeValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]
+  deps: ["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]
 },
 ThemeResolver: { js: BASE + "shared/theme/ThemeResolver.js", globalKey: "DyniThemeResolver" },
-GaugeToolkit: {
-  js: BASE + "shared/widget-kits/gauge/GaugeToolkit.js",
-  globalKey: "DyniGaugeToolkit",
-  deps: ["ThemeResolver", "GaugeTextLayout", "GaugeValueMath", "GaugeAngleMath", "GaugeTickMath", "GaugeCanvasPrimitives", "GaugeDialRenderer"]
+RadialToolkit: {
+  js: BASE + "shared/widget-kits/radial/RadialToolkit.js",
+  globalKey: "DyniRadialToolkit",
+  deps: ["ThemeResolver", "RadialTextLayout", "RadialValueMath", "RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives", "RadialFrameRenderer"]
 },
-SemicircleGaugeEngine: {
-  js: BASE + "shared/widget-kits/gauge/SemicircleGaugeEngine.js",
-  globalKey: "DyniSemicircleGaugeEngine",
-  deps: ["GaugeToolkit"]
+SemicircleRadialEngine: {
+  js: BASE + "shared/widget-kits/radial/SemicircleRadialEngine.js",
+  globalKey: "DyniSemicircleRadialEngine",
+  deps: ["RadialToolkit"]
 },
-FullCircleDialEngine: {
-  js: BASE + "shared/widget-kits/gauge/FullCircleDialEngine.js",
-  globalKey: "DyniFullCircleDialEngine",
-  deps: ["GaugeToolkit", "CanvasLayerCache"]
+FullCircleRadialEngine: {
+  js: BASE + "shared/widget-kits/radial/FullCircleRadialEngine.js",
+  globalKey: "DyniFullCircleRadialEngine",
+  deps: ["RadialToolkit", "CanvasLayerCache"]
 },
-FullCircleDialTextLayout: {
-  js: BASE + "shared/widget-kits/gauge/FullCircleDialTextLayout.js",
-  globalKey: "DyniFullCircleDialTextLayout"
+FullCircleRadialTextLayout: {
+  js: BASE + "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+  globalKey: "DyniFullCircleRadialTextLayout"
 }
 ```
 
 ## Access Pattern
 
 ```javascript
-const gaugeUtils = Helpers.getModule("GaugeToolkit") && Helpers.getModule("GaugeToolkit").create(def, Helpers);
-const renderer = Helpers.getModule("SemicircleGaugeEngine") && Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
-const fullCircle = Helpers.getModule("FullCircleDialEngine") && Helpers.getModule("FullCircleDialEngine").create(def, Helpers);
+const gaugeUtils = Helpers.getModule("RadialToolkit") && Helpers.getModule("RadialToolkit").create(def, Helpers);
+const renderer = Helpers.getModule("SemicircleRadialEngine") && Helpers.getModule("SemicircleRadialEngine").create(def, Helpers);
+const fullCircle = Helpers.getModule("FullCircleRadialEngine") && Helpers.getModule("FullCircleRadialEngine").create(def, Helpers);
 ```
 
-## GaugeToolkit (Facade)
+## RadialToolkit (Facade)
 
-`GaugeToolkit.create(def, Helpers)` returns:
+`RadialToolkit.create(def, Helpers)` returns:
 
 | Field | Type | Description |
 |---|---|---|
 | `theme` | object | `ThemeResolver` API (`resolve(canvas)`) |
-| `text` | object | `GaugeTextLayout` API |
-| `value` | object | `GaugeValueMath` API |
-| `angle` | object | `GaugeAngleMath` API |
-| `tick` | object | `GaugeTickMath` API |
-| `draw` | object | merged API from `GaugeCanvasPrimitives` + `GaugeDialRenderer` |
+| `text` | object | `RadialTextLayout` API |
+| `value` | object | `RadialValueMath` API |
+| `angle` | object | `RadialAngleMath` API |
+| `tick` | object | `RadialTickMath` API |
+| `draw` | object | merged API from `RadialCanvasPrimitives` + `RadialFrameRenderer` |
 
 Color-token flow:
 - Resolve once per render path with `theme.resolve(canvas)`.
 - Pass resolved token object down to sector builders and draw helpers where needed.
 
-## Draw API (`GaugeToolkit.draw`)
+## Draw API (`RadialToolkit.draw`)
 
 | Function | Purpose |
 |---|---|
@@ -124,7 +124,7 @@ Color-token flow:
 `draw.drawPointerAtRim(..., opts)` consumes scalar style inputs (`opts.fillStyle` or `opts.color`) plus shape factors (`opts.sideFactor`, `opts.lengthFactor`).
 `draw.drawLabels(..., opts)` consumes numeric font weight via `opts.weight`.
 
-## Angle API (`GaugeAngleMath`)
+## Angle API (`RadialAngleMath`)
 
 | Function | Purpose |
 |---|---|
@@ -135,7 +135,7 @@ Color-token flow:
 | `valueToAngle`, `angleToValue` | Linear value/angle mapping |
 | `valueRangeToAngleRange` | Convert value range to angle range |
 
-## Tick API (`GaugeTickMath`)
+## Tick API (`RadialTickMath`)
 
 | Function | Purpose |
 |---|---|
@@ -143,9 +143,9 @@ Color-token flow:
 | `isBeyondEnd` | Shared boundary check for iterative sweep loops |
 | `buildTickAngles` | Build major/minor angle arrays |
 
-## GaugeTextLayout API
+## RadialTextLayout API
 
-`GaugeTextLayout.create()` returns shared text helpers:
+`RadialTextLayout.create()` returns shared text helpers:
 `setFont`, `fitTextPx`, `fitSingleTextPx`, `measureValueUnitFit`, `drawCaptionMax`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`, `drawDisconnectOverlay`.
 
 Key signatures:
@@ -155,14 +155,14 @@ Key signatures:
 - `fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, weight)`
 - Composite helpers (`measureValueUnitFit`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`) accept both `valueWeight` and `labelWeight` numeric arguments.
 
-## GaugeValueMath API
+## RadialValueMath API
 
-`GaugeValueMath.create(def, Helpers)` returns shared numeric helpers:
+`RadialValueMath.create(def, Helpers)` returns shared numeric helpers:
 `isFiniteNumber`, `extractNumberText`, `clamp`, `almostInt`, `isApprox`, `computePad`, `computeGap`, `computeMode`, `resolveSemicircleTickSteps`, `resolveStandardSemicircleTickSteps`, `resolveTemperatureSemicircleTickSteps`, `resolveVoltageSemicircleTickSteps`, `normalizeRange`, `valueToAngle`, `angleToValue`, `buildValueTickAngles`, `sectorAngles`, `buildHighEndSectors`, `buildLowEndSectors`, `formatAngle180`, `formatDirection360`, `formatMajorLabel`, `computeSemicircleGeometry`.
 
 ### Semicircle Tick-Step Resolvers
 
-`GaugeValueMath` exposes shared preset-driven tick-step helpers used by semicircle wrappers:
+`RadialValueMath` exposes shared preset-driven tick-step helpers used by semicircle wrappers:
 
 - `resolveSemicircleTickSteps(range, profileName)` where `profileName` is one of `standard`, `temperature`, `voltage` (unknown profiles fall back to `standard`)
 - `resolveStandardSemicircleTickSteps(range)`
@@ -193,9 +193,9 @@ Optional `overrides` fields:
 - Primitive text helpers: `setFont`, `fitSingleLineBinary`, `fitMultiRowBinary`, `fitValueUnitRow`, `fitInlineTriplet`, `drawInlineTriplet`, `drawDisconnectOverlay`
 - Composite block helpers: `fitThreeRowBlock`, `drawThreeRowBlock`, `fitValueUnitCaptionRows`, `drawValueUnitCaptionRows`, `fitTwoRowsWithHeader`, `drawTwoRowsWithHeader`
 
-## SemicircleGaugeEngine API
+## SemicircleRadialEngine API
 
-`SemicircleGaugeEngine.create(def, Helpers).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
+`SemicircleRadialEngine.create(def, Helpers).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
 
 ### `spec` fields
 
@@ -206,7 +206,7 @@ Optional `overrides` fields:
 | `rangeDefaults` | `{min,max}` | yes | Default value range |
 | `ratioProps` | `{normal,flat}` | yes | Prop names for layout thresholds |
 | `ratioDefaults` | `{normal,flat}` | yes | Default layout thresholds |
-| `tickSteps` | `(range) => {major,minor}` | yes | Gauge-specific tick strategy (wrappers should delegate to shared `GaugeValueMath` resolver methods) |
+| `tickSteps` | `(range) => {major,minor}` | yes | Gauge-specific tick strategy (wrappers should delegate to shared `RadialValueMath` resolver methods) |
 | `formatDisplay` | `(raw, props, unit, Helpers) => {num,text}` | yes | Gauge-specific value formatter |
 | `buildSectors` | `(props, minV, maxV, arc, valueUtils, theme) => Sector[]` | yes | Gauge-specific warning/alarm sectors (wrappers typically pass `theme.colors.warning/alarm` into shared builders) |
 | `arc` | `{startDeg,endDeg}` | no | Optional override (default `270..450`) |
@@ -219,9 +219,9 @@ Optional `overrides` fields:
 
 `color` should come from wrapper-selected tokens (typically `theme.colors.warning`/`theme.colors.alarm`).
 
-## FullCircleDialEngine API
+## FullCircleRadialEngine API
 
-`FullCircleDialEngine.create(def, Helpers).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
+`FullCircleRadialEngine.create(def, Helpers).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
 
 ### `spec` fields
 
@@ -245,9 +245,9 @@ Optional `overrides` fields:
 - `drawCachedLayer(layerName?, opts?)` (`rotationDeg` supported)
 - `getCacheMeta(key)` / `setCacheMeta(key, value)`
 
-## FullCircleDialTextLayout API
+## FullCircleRadialTextLayout API
 
-`FullCircleDialTextLayout.create(def, Helpers)` returns:
+`FullCircleRadialTextLayout.create(def, Helpers)` returns:
 
 - `drawSingleModeText(state, mode, display, opts?)`
 - `drawDualModeText(state, mode, left, right, opts?)`

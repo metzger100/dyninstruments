@@ -1,7 +1,7 @@
 /**
  * Module: TextLayoutPrimitives - Low-level text fit and inline draw helpers
  * Documentation: documentation/shared/text-layout-engine.md
- * Depends: GaugeTextLayout
+ * Depends: RadialTextLayout
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,7 +11,7 @@
   "use strict";
 
   function create(def, Helpers) {
-    const text = Helpers.getModule("GaugeTextLayout").create(def, Helpers);
+    const text = Helpers.getModule("RadialTextLayout").create(def, Helpers);
 
     function primitiveSetFont(ctx, px, weight, family) {
       text.setFont(ctx, px, weight, family);

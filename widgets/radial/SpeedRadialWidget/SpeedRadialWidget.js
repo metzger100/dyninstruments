@@ -1,18 +1,18 @@
 /**
- * Module: SpeedGaugeWidget - Semicircle speedometer with high-end warning/alarm sectors
+ * Module: SpeedRadialWidget - Semicircle speedometer with high-end warning/alarm sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleGaugeEngine, GaugeValueMath
+ * Depends: SemicircleRadialEngine, RadialValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniSpeedGaugeWidget = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniSpeedRadialWidget = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const renderer = Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
-    const valueMath = Helpers.getModule("GaugeValueMath").create(def, Helpers);
+    const renderer = Helpers.getModule("SemicircleRadialEngine").create(def, Helpers);
+    const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
 
     function formatSpeedString(raw, props, unit) {
       const n = Number(raw);
@@ -49,9 +49,18 @@
       rawValueKey: "speed",
       unitDefault: "kn",
       rangeDefaults: { min: 0, max: 30 },
+      rangeProps: {
+        min: "speedRadialMinValue",
+        max: "speedRadialMaxValue"
+      },
+      tickProps: {
+        major: "speedRadialTickMajor",
+        minor: "speedRadialTickMinor",
+        showEndLabels: "speedRadialShowEndLabels"
+      },
       ratioProps: {
-        normal: "speedRatioThresholdNormal",
-        flat: "speedRatioThresholdFlat"
+        normal: "speedRadialRatioThresholdNormal",
+        flat: "speedRadialRatioThresholdFlat"
       },
       ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
@@ -59,7 +68,11 @@
         return displaySpeedFromRaw(raw, props, unit);
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
-        return valueMath.buildHighEndSectors(props, minV, maxV, arc, {
+        const radialProps = {
+          warningFrom: props && props.speedRadialWarningFrom,
+          alarmFrom: props && props.speedRadialAlarmFrom
+        };
+        return valueMath.buildHighEndSectors(radialProps, minV, maxV, arc, {
           warningColor: theme.colors.warning,
           alarmColor: theme.colors.alarm
         });
@@ -71,7 +84,7 @@
     }
 
     return {
-      id: "SpeedGaugeWidget",
+      id: "SpeedRadialWidget",
       version: "0.5.0",
       wantsHideNativeHead: true,
       renderCanvas,
@@ -79,5 +92,5 @@
     };
   }
 
-  return { id: "SpeedGaugeWidget", create };
+  return { id: "SpeedRadialWidget", create };
 }));

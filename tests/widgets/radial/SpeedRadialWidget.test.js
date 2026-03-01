@@ -1,7 +1,7 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
-describe("SpeedGaugeWidget", function () {
-  it("passes SemicircleGaugeEngine config with high-end sectors", function () {
+describe("SpeedRadialWidget", function () {
+  it("passes SemicircleRadialEngine config with high-end sectors", function () {
     let captured;
     let receivedOptions;
     const resolveStandardSemicircleTickSteps = vi.fn((range) => {
@@ -14,11 +14,11 @@ describe("SpeedGaugeWidget", function () {
       return Number(value).toFixed(1) + " " + spec.formatterParameters[0];
     });
 
-    const mod = loadFresh("widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js");
+    const mod = loadFresh("widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js");
     const spec = mod.create({}, {
       applyFormatter,
       getModule(id) {
-        if (id === "GaugeValueMath") {
+        if (id === "RadialValueMath") {
           return {
             create() {
               return {
@@ -38,7 +38,7 @@ describe("SpeedGaugeWidget", function () {
             }
           };
         }
-        if (id !== "SemicircleGaugeEngine") throw new Error("unexpected module: " + id);
+        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
         return {
           create() {
             return {
@@ -82,13 +82,13 @@ describe("SpeedGaugeWidget", function () {
 
   it("does not fall back to fixed-decimal text when formatter returns raw passthrough", function () {
     let captured;
-    const mod = loadFresh("widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js");
+    const mod = loadFresh("widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js");
     mod.create({}, {
       applyFormatter(value) {
         return String(value);
       },
       getModule(id) {
-        if (id === "GaugeValueMath") {
+        if (id === "RadialValueMath") {
           return {
             create() {
               return {
@@ -103,7 +103,7 @@ describe("SpeedGaugeWidget", function () {
             }
           };
         }
-        if (id !== "SemicircleGaugeEngine") throw new Error("unexpected module: " + id);
+        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
         return {
           create() {
             return {

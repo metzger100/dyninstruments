@@ -18,9 +18,9 @@ module.exports = {
         "runtime/**/*.js",
         "config/shared/*.js",
         "config/clusters/*.js",
-        "shared/widget-kits/gauge/GaugeAngleMath.js",
-        "shared/widget-kits/gauge/GaugeTickMath.js",
-        "shared/widget-kits/gauge/GaugeValueMath.js"
+        "shared/widget-kits/radial/RadialAngleMath.js",
+        "shared/widget-kits/radial/RadialTickMath.js",
+        "shared/widget-kits/radial/RadialValueMath.js"
       ],
       exclude: [
         "tests/**",

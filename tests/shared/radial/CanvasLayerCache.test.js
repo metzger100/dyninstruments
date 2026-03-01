@@ -3,7 +3,7 @@ const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-ca
 
 describe("CanvasLayerCache", function () {
   function createCache(spec) {
-    const mod = loadFresh("shared/widget-kits/gauge/CanvasLayerCache.js");
+    const mod = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
     return mod.create({}, {}).createLayerCache(spec);
   }
 

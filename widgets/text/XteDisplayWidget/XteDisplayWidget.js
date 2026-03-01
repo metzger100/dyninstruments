@@ -1,7 +1,7 @@
 /**
  * Module: XteDisplayWidget - Responsive XTE highway renderer with integrated nav metrics
  * Documentation: documentation/widgets/xte-display.md
- * Depends: GaugeToolkit, CanvasLayerCache, XteHighwayPrimitives
+ * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,7 +13,7 @@
   const FIXED_XTE_SCALE = 1;
 
   function create(def, Helpers) {
-    const toolkit = Helpers.getModule("GaugeToolkit").create(def, Helpers);
+    const toolkit = Helpers.getModule("RadialToolkit").create(def, Helpers);
     const cacheFactory = Helpers.getModule("CanvasLayerCache").create(def, Helpers);
     const primitives = Helpers.getModule("XteHighwayPrimitives").create(def, Helpers);
     const staticLayer = cacheFactory.createLayerCache({ layers: ["back"] });

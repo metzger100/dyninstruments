@@ -20,22 +20,22 @@ function makeToolkit() {
 }
 
 describe("WindMapper", function () {
-  it("maps radial true wind to WindDialWidget props", function () {
+  it("maps radial true wind to WindRadialWidget props", function () {
     const mapper = loadFresh("cluster/mappers/WindMapper.js").create();
     const out = mapper.translate({
       kind: "angleTrueRadial",
       twa: -32,
       tws: 6.1,
-      windLayEnabled: true,
-      layMin: "20",
-      layMax: "42",
-      dialRatioThresholdNormal: "0.7",
-      dialRatioThresholdFlat: "2.1",
+      windRadialLayEnabled: true,
+      windRadialLayMin: "20",
+      windRadialLayMax: "42",
+      windRadialRatioThresholdNormal: "0.7",
+      windRadialRatioThresholdFlat: "2.1",
       captionUnitScale: "0.8",
       leadingZero: true
     }, makeToolkit());
 
-    expect(out.renderer).toBe("WindDialWidget");
+    expect(out.renderer).toBe("WindRadialWidget");
     expect(out.angle).toBe(-32);
     expect(out.speed).toBe(6.1);
     expect(out.rendererProps.angleCaption).toBe("TWA G");
@@ -45,8 +45,8 @@ describe("WindMapper", function () {
     expect(out.rendererProps.formatter).toBe("formatSpeed");
     expect(out.rendererProps.formatterParameters).toEqual(["knT"]);
     expect(out.rendererProps.layEnabled).toBe(true);
-    expect(out.rendererProps.layMin).toBe(20);
-    expect(out.rendererProps.layMax).toBe(42);
+    expect(out.rendererProps.windRadialLayMin).toBe(20);
+    expect(out.rendererProps.windRadialLayMax).toBe(42);
     expect(out.rendererProps.leadingZero).toBe(true);
   });
 

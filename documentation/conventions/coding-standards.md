@@ -18,11 +18,11 @@ Use this document for runtime-safe component structure and naming. It defines fi
 ## File Size Limits
 
 - Target: `<=400` lines per JS file.
-- Shared drawing/layout logic must be split into `shared/widget-kits/gauge/` modules:
-  - `GaugeAngleMath`
-  - `GaugeTickMath`
-  - `GaugeCanvasPrimitives`
-  - `GaugeDialRenderer`
+- Shared drawing/layout logic must be split into `shared/widget-kits/radial/` modules:
+  - `RadialAngleMath`
+  - `RadialTickMath`
+  - `RadialCanvasPrimitives`
+  - `RadialFrameRenderer`
 - Gauge-specific behavior stays in individual gauge component files.
 - Cluster configs live under `config/clusters/`.
 - If a legacy file already exceeds 400 lines, isolate new logic and avoid increasing file size further.
@@ -43,9 +43,9 @@ Example:
 
 ```javascript
 /**
- * Module: SpeedGaugeWidget - Semicircle speedometer with warning/alarm sectors
+ * Module: SpeedRadialWidget - Semicircle speedometer with warning/alarm sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleGaugeEngine
+ * Depends: SemicircleRadialEngine
  */
 ```
 
@@ -71,7 +71,7 @@ Example:
 ## Naming Conventions
 
 - Widget names: `dyninstruments_{Cluster}` (example: `dyninstruments_Speed`)
-- Component `globalKey` values: `Dyni{ComponentName}` (example: `DyniSpeedGaugeWidget`)
+- Component `globalKey` values: `Dyni{ComponentName}` (example: `DyniSpeedRadialWidget`)
 - Gauge ratio threshold props: `{gauge}RatioThresholdNormal`, `{gauge}RatioThresholdFlat`
 - Sector props: `{gauge}WarningFrom`, `{gauge}AlarmFrom`
 - Per-kind caption/unit props: `caption_{kindName}`, `unit_{kindName}`
@@ -89,15 +89,15 @@ Example:
 
 Use this routing table before starting a new widget. Shared engine purposes:
 
-- `SemicircleGaugeEngine`: shared semicircle gauge rendering flow (geometry, sectors, ticks, pointer, ratio mode).
-- `FullCircleDialEngine`: shared full-circle dial rendering flow (ring/ticks, static layers, pointer and frame orchestration).
+- `SemicircleRadialEngine`: shared semicircle gauge rendering flow (geometry, sectors, ticks, pointer, ratio mode).
+- `FullCircleRadialEngine`: shared full-circle dial rendering flow (ring/ticks, static layers, pointer and frame orchestration).
 - `TextLayoutEngine`: shared text layout mode routing, fit calculation, and text draw helpers.
 - Cluster renderer wrappers: role-based adapters that delegate to one of the archetypes above.
 
 | Archetype | Shared Engine | Reference Implementation | Guide |
 |---|---|---|---|
-| Semicircle gauge | `SemicircleGaugeEngine` | [SpeedGaugeWidget](../../widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js) | [add-new-gauge](../guides/add-new-gauge.md) |
-| Full-circle dial | `FullCircleDialEngine` | [CompassGaugeWidget](../../widgets/gauges/CompassGaugeWidget/CompassGaugeWidget.js) | [add-new-dial](../guides/add-new-full-circle-dial.md) |
+| Semicircle gauge | `SemicircleRadialEngine` | [SpeedRadialWidget](../../widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js) | [add-new-gauge](../guides/add-new-gauge.md) |
+| Full-circle dial | `FullCircleRadialEngine` | [CompassRadialWidget](../../widgets/radial/CompassRadialWidget/CompassRadialWidget.js) | [add-new-dial](../guides/add-new-full-circle-dial.md) |
 | Text renderer | `TextLayoutEngine` | [ThreeValueTextWidget](../../widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js) | [add-new-text-renderer](../guides/add-new-text-renderer.md) |
 | Cluster renderer wrapper | `(delegates to above)` | [DateTimeRendererWrapper](../../cluster/rendering/DateTimeRendererWrapper.js) | [add-new-cluster](../guides/add-new-cluster.md) |
 
@@ -105,8 +105,8 @@ Rule: Before creating any new widget, check this table. If your widget matches a
 
 ## Reference Implementations
 
-- For a new semicircle gauge: `widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js` - canonical UMD wrapper, header format, and `SemicircleGaugeEngine` delegation.
-- For a new shared utility facade: `shared/widget-kits/gauge/GaugeToolkit.js` - facade pattern and dependency composition across shared gauge modules.
+- For a new semicircle gauge: `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js` - canonical UMD wrapper, header format, and `SemicircleRadialEngine` delegation.
+- For a new shared utility facade: `shared/widget-kits/radial/RadialToolkit.js` - facade pattern and dependency composition across shared gauge modules.
 - For a new cluster mapper: `cluster/mappers/SpeedMapper.js` - `translate(props, toolkit)` mapping pattern and renderer routing output shape.
 
 ## Shared Utilities
@@ -114,22 +114,22 @@ Rule: Before creating any new widget, check this table. If your widget matches a
 Reusable logic MUST go in `shared/widget-kits/`. Never duplicate functions across widgets.
 
 Current shared utilities include:
-- `GaugeValueMath.clamp()`
-- `GaugeValueMath.isFiniteNumber()`
-- `GaugeValueMath.extractNumberText()`
-- `GaugeValueMath.buildHighEndSectors()`
-- `GaugeValueMath.buildLowEndSectors()`
-- `GaugeValueMath.formatSpeedString()`
-- `GaugeValueMath.formatAngle180()`
-- `GaugeValueMath.formatDirection360()`
-- `GaugeValueMath.computeMode()`
-- `GaugeValueMath.computeSemicircleGeometry()`
-- `GaugeTextLayout.setFont()`
-- `GaugeTextLayout.fitSingleTextPx()`
-- `GaugeTextLayout.drawDisconnectOverlay()`
+- `RadialValueMath.clamp()`
+- `RadialValueMath.isFiniteNumber()`
+- `RadialValueMath.extractNumberText()`
+- `RadialValueMath.buildHighEndSectors()`
+- `RadialValueMath.buildLowEndSectors()`
+- `RadialValueMath.formatSpeedString()`
+- `RadialValueMath.formatAngle180()`
+- `RadialValueMath.formatDirection360()`
+- `RadialValueMath.computeMode()`
+- `RadialValueMath.computeSemicircleGeometry()`
+- `RadialTextLayout.setFont()`
+- `RadialTextLayout.fitSingleTextPx()`
+- `RadialTextLayout.drawDisconnectOverlay()`
 - `Helpers.applyFormatter()`
 
-Check these before writing any helper function. For shared gauge utility APIs, see [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md).
+Check these before writing any helper function. For shared gauge utility APIs, see [../radial/gauge-shared-api.md](../radial/gauge-shared-api.md).
 
 ## Related
 

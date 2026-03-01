@@ -6,40 +6,40 @@
 
 The four semicircle gauges share one renderer implementation:
 
-- Shared rendering and layout in `shared/widget-kits/gauge/SemicircleGaugeEngine.js`
-- Shared helper APIs via `GaugeToolkit` (`ThemeResolver`, `GaugeTextLayout`, `GaugeValueMath`, `GaugeAngleMath`, `GaugeTickMath`, draw utils)
+- Shared rendering and layout in `shared/widget-kits/radial/SemicircleRadialEngine.js`
+- Shared helper APIs via `RadialToolkit` (`ThemeResolver`, `RadialTextLayout`, `RadialValueMath`, `RadialAngleMath`, `RadialTickMath`, draw utils)
 - Gauge wrappers keep only formatting, tick-profile selection, and sector strategy
 
 ## File Locations
 
 | Role | File |
 |---|---|
-| Shared facade | `shared/widget-kits/gauge/GaugeToolkit.js` |
-| Shared text helpers | `shared/widget-kits/gauge/GaugeTextLayout.js` |
-| Shared numeric/angle helpers | `shared/widget-kits/gauge/GaugeValueMath.js` |
-| Shared semicircle renderer | `shared/widget-kits/gauge/SemicircleGaugeEngine.js` |
-| Speed wrapper | `widgets/gauges/SpeedGaugeWidget/SpeedGaugeWidget.js` |
-| Depth wrapper | `widgets/gauges/DepthGaugeWidget/DepthGaugeWidget.js` |
-| Temperature wrapper | `widgets/gauges/TemperatureGaugeWidget/TemperatureGaugeWidget.js` |
-| Voltage wrapper | `widgets/gauges/VoltageGaugeWidget/VoltageGaugeWidget.js` |
+| Shared facade | `shared/widget-kits/radial/RadialToolkit.js` |
+| Shared text helpers | `shared/widget-kits/radial/RadialTextLayout.js` |
+| Shared numeric/angle helpers | `shared/widget-kits/radial/RadialValueMath.js` |
+| Shared semicircle renderer | `shared/widget-kits/radial/SemicircleRadialEngine.js` |
+| Speed wrapper | `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js` |
+| Depth wrapper | `widgets/radial/DepthRadialWidget/DepthRadialWidget.js` |
+| Temperature wrapper | `widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js` |
+| Voltage wrapper | `widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js` |
 
 ## Module Dependencies
 
-In `config/components.js`, all four gauges depend on both `SemicircleGaugeEngine` and `GaugeValueMath`:
+In `config/components.js`, all four gauges depend on both `SemicircleRadialEngine` and `RadialValueMath`:
 
 ```text
-SpeedGaugeWidget/DepthGaugeWidget/TemperatureGaugeWidget/VoltageGaugeWidget
-  -> SemicircleGaugeEngine + GaugeValueMath
-  -> GaugeToolkit
-  -> GaugeTextLayout + GaugeValueMath + GaugeAngleMath + GaugeTickMath + GaugeCanvasPrimitives + GaugeDialRenderer
+SpeedRadialWidget/DepthRadialWidget/TemperatureRadialWidget/VoltageRadialWidget
+  -> SemicircleRadialEngine + RadialValueMath
+  -> RadialToolkit
+  -> RadialTextLayout + RadialValueMath + RadialAngleMath + RadialTickMath + RadialCanvasPrimitives + RadialFrameRenderer
 ```
 
 ## Shared Render Flow
 
-`SemicircleGaugeEngine.createRenderer(spec)` handles:
+`SemicircleRadialEngine.createRenderer(spec)` handles:
 
 1. Canvas setup + mode detection (`flat`, `normal`, `high`)
-2. One-time theme token resolve (`theme = GaugeToolkit.theme.resolve(canvas)`)
+2. One-time theme token resolve (`theme = RadialToolkit.theme.resolve(canvas)`)
 3. Gauge geometry and pointer angle mapping
 4. Arc ring + sectors + pointer + ticks + labels
 5. Mode-specific text layout
@@ -52,38 +52,38 @@ Pointer and sector rendering in shared gauge paths use direct scalar token value
 Each wrapper defines:
 
 - Value conversion to `{ num, text }`
-- Tick profile selection via shared `GaugeValueMath` resolver methods
+- Tick profile selection via shared `RadialValueMath` resolver methods
 - Sector placement strategy (high-end or low-end), with theme colors forwarded as scalar sector colors
 - Defaults (range, unit, ratio props)
 
-### SpeedGaugeWidget
+### SpeedRadialWidget
 
 - High-end sectors
 - Tick profile: `resolveStandardSemicircleTickSteps`
 - Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatSpeed", formatterParameters: [unit] })`
 - Defaults: range `0..30`, unit `kn`
 
-### DepthGaugeWidget
+### DepthRadialWidget
 
 - Low-end sectors
 - Tick profile: `resolveStandardSemicircleTickSteps`
 - Formatter path: fixed decimal (1)
 - Defaults: range `0..30`, unit `m`
 
-### TemperatureGaugeWidget
+### TemperatureRadialWidget
 
 - High-end sectors
 - Tick profile: `resolveTemperatureSemicircleTickSteps`
 - Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatTemperature", formatterParameters: ["celsius"] })`
 - Defaults: range `0..35`, unit `°C`
 
-### VoltageGaugeWidget
+### VoltageRadialWidget
 
 - Low-end sectors
 - Tick profile: `resolveVoltageSemicircleTickSteps`
 - Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatDecimal", formatterParameters: [3, 1, true] })`
 - Defaults: range `10..15`, unit `V`
-- Toggle behavior: sectors default to enabled when toggle values are unset; explicit `voltageWarningEnabled: false` and/or `voltageAlarmEnabled: false` suppress corresponding sectors
+- Toggle behavior: sectors default to enabled when toggle values are unset; explicit `voltageRadialWarningEnabled: false` and/or `voltageRadialAlarmEnabled: false` suppress corresponding sectors
 - Low-end defaults (`warningFrom=12.2`, `alarmFrom=11.6`) are applied only for sectors that remain enabled
 
 ## Removed Duplication
@@ -101,7 +101,7 @@ Removed from wrappers:
 
 ## Performance
 
-- Text-fit caching is owned by `SemicircleGaugeEngine.createRenderer(spec)` closure state (`fitCache`), so each gauge renderer instance keeps its own cache.
+- Text-fit caching is owned by `SemicircleRadialEngine.createRenderer(spec)` closure state (`fitCache`), so each gauge renderer instance keeps its own cache.
 - Covered fitting paths: `flat` (compact), `high`, and `normal` layouts.
 - Cache keys include all fitting-relevant inputs:
   - shared inputs: `W`, `H`, active mode, `caption`, `valueText`, `unit`, effective `secScale` (`captionUnitScale` after clamp), resolved font family, and theme font weights.
@@ -111,7 +111,7 @@ Removed from wrappers:
 
 ## Related
 
-- [../gauges/gauge-shared-api.md](../gauges/gauge-shared-api.md)
+- [../radial/gauge-shared-api.md](../radial/gauge-shared-api.md)
 - [../guides/add-new-gauge.md](../guides/add-new-gauge.md)
-- [../gauges/gauge-style-guide.md](../gauges/gauge-style-guide.md)
+- [../radial/gauge-style-guide.md](../radial/gauge-style-guide.md)
 - [../shared/theme-tokens.md](../shared/theme-tokens.md)

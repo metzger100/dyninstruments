@@ -1,18 +1,18 @@
 /**
- * Module: TemperatureGaugeWidget - Semicircle temperature gauge with high-end sectors
+ * Module: TemperatureRadialWidget - Semicircle temperature gauge with high-end sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleGaugeEngine, GaugeValueMath
+ * Depends: SemicircleRadialEngine, RadialValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniTemperatureGaugeWidget = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniTemperatureRadialWidget = factory(); }
 }(this, function () {
   "use strict";
 
   function create(def, Helpers) {
-    const renderer = Helpers.getModule("SemicircleGaugeEngine").create(def, Helpers);
-    const valueMath = Helpers.getModule("GaugeValueMath").create(def, Helpers);
+    const renderer = Helpers.getModule("SemicircleRadialEngine").create(def, Helpers);
+    const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
 
     function toCelsiusNumber(raw, props) {
       const n = Number(raw);
@@ -52,9 +52,18 @@
       rawValueKey: "temp",
       unitDefault: "°C",
       rangeDefaults: { min: 0, max: 35 },
+      rangeProps: {
+        min: "tempRadialMinValue",
+        max: "tempRadialMaxValue"
+      },
+      tickProps: {
+        major: "tempRadialTickMajor",
+        minor: "tempRadialTickMinor",
+        showEndLabels: "tempRadialShowEndLabels"
+      },
       ratioProps: {
-        normal: "tempRatioThresholdNormal",
-        flat: "tempRatioThresholdFlat"
+        normal: "tempRadialRatioThresholdNormal",
+        flat: "tempRadialRatioThresholdFlat"
       },
       ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: valueMath.resolveTemperatureSemicircleTickSteps,
@@ -62,7 +71,11 @@
         return displayTempFromRaw(raw, 1, props);
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
-        return valueMath.buildHighEndSectors(props, minV, maxV, arc, {
+        const radialProps = {
+          warningFrom: props && props.tempRadialWarningFrom,
+          alarmFrom: props && props.tempRadialAlarmFrom
+        };
+        return valueMath.buildHighEndSectors(radialProps, minV, maxV, arc, {
           warningColor: theme.colors.warning,
           alarmColor: theme.colors.alarm
         });
@@ -74,7 +87,7 @@
     }
 
     return {
-      id: "TemperatureGaugeWidget",
+      id: "TemperatureRadialWidget",
       version: "0.2.0",
       wantsHideNativeHead: true,
       renderCanvas,
@@ -82,5 +95,5 @@
     };
   }
 
-  return { id: "TemperatureGaugeWidget", create };
+  return { id: "TemperatureRadialWidget", create };
 }));

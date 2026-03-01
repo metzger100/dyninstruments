@@ -57,13 +57,13 @@
           ]
         },
 
-        // WindDialWidget-only row thresholds
-        dialRatioThresholdNormal: {
+        // WindRadialWidget-only row thresholds
+        windRadialRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.7,
           name: "Dial 3-Rows Threshold",
           condition: [{ kind: "angleTrueRadial" }, { kind: "angleApparentRadial" }]
         },
-        dialRatioThresholdFlat: {
+        windRadialRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.0,
           name: "Dial 1-Row Threshold",
           condition: [{ kind: "angleTrueRadial" }, { kind: "angleApparentRadial" }]
@@ -94,26 +94,26 @@
         },
 
         // Symmetric layline range
-        windLayEnabled: {
+        windRadialLayEnabled: {
           type: "BOOLEAN",
           default: true,
           name: "Layline sectors enabled",
           condition: [{ kind: "angleTrueRadial" }, { kind: "angleApparentRadial" }]
         },
-        layMin: {
+        windRadialLayMin: {
           type: "FLOAT", min: 0, max: 180, step: 1, default: 25,
           name: "Layline min °",
           condition: [
-            { kind: "angleTrueRadial", windLayEnabled: true },
-            { kind: "angleApparentRadial", windLayEnabled: true }
+            { kind: "angleTrueRadial", windRadialLayEnabled: true },
+            { kind: "angleApparentRadial", windRadialLayEnabled: true }
           ]
         },
-        layMax: {
+        windRadialLayMax: {
           type: "FLOAT", min: 0, max: 180, step: 1, default: 45,
           name: "Layline max °",
           condition: [
-            { kind: "angleTrueRadial", windLayEnabled: true },
-            { kind: "angleApparentRadial", windLayEnabled: true }
+            { kind: "angleTrueRadial", windRadialLayEnabled: true },
+            { kind: "angleApparentRadial", windRadialLayEnabled: true }
           ]
         },
 

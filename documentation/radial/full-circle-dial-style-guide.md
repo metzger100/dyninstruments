@@ -1,17 +1,17 @@
 # Full-Circle Dial Style Guide
 
-**Status:** ✅ Implemented | CompassGaugeWidget + WindDialWidget
+**Status:** ✅ Implemented | CompassRadialWidget + WindRadialWidget
 
 ## Overview
 
-Visual specification for full-circle dial widgets. Constants and formulas are implementation-derived from `FullCircleDialEngine`, `FullCircleDialTextLayout`, widget modules, and shared `CanvasLayerCache`.
+Visual specification for full-circle dial widgets. Constants and formulas are implementation-derived from `FullCircleRadialEngine`, `FullCircleRadialTextLayout`, widget modules, and shared `CanvasLayerCache`.
 
 ## Key Details
 
-- Shared renderer/caching backbone: `FullCircleDialEngine.createRenderer(spec)` + `CanvasLayerCache.createLayerCache({ layers })`.
-- Angle conversion uses `GaugeAngleMath.degToCanvasRad()` defaults: `zeroDegAt="north"`, clockwise positive.
+- Shared renderer/caching backbone: `FullCircleRadialEngine.createRenderer(spec)` + `CanvasLayerCache.createLayerCache({ layers })`.
+- Angle conversion uses `RadialAngleMath.degToCanvasRad()` defaults: `zeroDegAt="north"`, clockwise positive.
 - Geometry and mode slots are computed once per frame in engine state and reused by widget callbacks.
-- Theme/token sources come from `ThemeResolver` via `GaugeToolkit.theme.resolve(canvas)`.
+- Theme/token sources come from `ThemeResolver` via `RadialToolkit.theme.resolve(canvas)`.
 
 ## Arc Configuration
 
@@ -26,24 +26,24 @@ Visual specification for full-circle dial widgets. Constants and formulas are im
 
 | Element | Formula | Source |
 |---|---|---|
-| `pad` | `max(6, floor(min(W, H) * 0.04))` | `GaugeValueMath.computePad()` |
-| `gap` | `max(6, floor(min(W, H) * 0.03))` | `GaugeValueMath.computeGap()` |
+| `pad` | `max(6, floor(min(W, H) * 0.04))` | `RadialValueMath.computePad()` |
+| `gap` | `max(6, floor(min(W, H) * 0.03))` | `RadialValueMath.computeGap()` |
 | `D` | `min(W - 2*pad, H - 2*pad)` | `computeGeometry()` |
 | `R` | `max(14, floor(D / 2))` | `computeGeometry()` |
 | `cx` | `floor(W / 2)` | `computeGeometry()` |
 | `cy` | `floor(H / 2)` | `computeGeometry()` |
-| `ringW` | `max(6, floor(R * theme.ring.widthFactor))` | `computeGeometry()` |
+| `ringW` | `max(6, floor(R * theme.radial.ring.widthFactor))` | `computeGeometry()` |
 | `needleDepth` | `max(8, floor(ringW * 0.9))` | `computeGeometry()` |
-| `labelInsetVal` | `max(18, floor(ringW * theme.labels.insetFactor))` | `computeGeometry()` |
-| `labelPx` | `max(10, floor(R * theme.labels.fontFactor))` | `computeGeometry()` |
+| `labelInsetVal` | `max(18, floor(ringW * theme.radial.labels.insetFactor))` | `computeGeometry()` |
+| `labelPx` | `max(10, floor(R * theme.radial.labels.fontFactor))` | `computeGeometry()` |
 | `leftStrip` | `max(0, floor((W - 2*pad - 2*R) / 2))` | `computeGeometry()` |
 | `rightStrip` | `leftStrip` | `computeGeometry()` |
 | `topStrip` | `max(0, floor((H - 2*pad - 2*R) / 2))` | `computeGeometry()` |
 | `bottomStrip` | `topStrip` | `computeGeometry()` |
 
 Tick lengths are token-defined pixel values (not `R`-scaled):
-- Major: `theme.ticks.majorLen` (default `9`)
-- Minor: `theme.ticks.minorLen` (default `5`)
+- Major: `theme.radial.ticks.majorLen` (default `9`)
+- Minor: `theme.radial.ticks.minorLen` (default `5`)
 
 ## Colors
 
@@ -56,18 +56,18 @@ Tick lengths are token-defined pixel values (not `R`-scaled):
 | Tick stroke | resolved text color | `Helpers.resolveTextColor(canvas)` | runtime CSS-derived |
 | Label text | resolved text color | `Helpers.resolveTextColor(canvas)` | runtime CSS-derived |
 
-Ring stroke width: `theme.ring.arcLineWidth` (default `1`).
+Ring stroke width: `theme.radial.ring.arcLineWidth` (default `1`).
 
 ## Pointer Variants
 
 | Variant | Widget | Angle input | Depth | Common options |
 |---|---|---|---|---|
-| Lubber pointer (fixed) | `CompassGaugeWidget` | fixed `0°` | `max(10, floor(ringW * 0.9))` | `variant="long"`, `fillStyle=theme.colors.pointer` |
-| Value pointer (dynamic) | `WindDialWidget` | `display.angle` | `max(8, floor(ringW * 0.9))` | `variant="long"`, `fillStyle=theme.colors.pointer` |
+| Lubber pointer (fixed) | `CompassRadialWidget` | fixed `0°` | `max(10, floor(ringW * 0.9))` | `variant="long"`, `fillStyle=theme.colors.pointer` |
+| Value pointer (dynamic) | `WindRadialWidget` | `display.angle` | `max(8, floor(ringW * 0.9))` | `variant="long"`, `fillStyle=theme.colors.pointer` |
 
 Shared pointer shape controls:
-- `theme.pointer.sideFactor` (`--dyni-pointer-side`, default `0.25`)
-- `theme.pointer.lengthFactor` (`--dyni-pointer-length`, default `2`)
+- `theme.radial.pointer.sideFactor` (`--dyni-radial-pointer-side`, default `0.25`)
+- `theme.radial.pointer.lengthFactor` (`--dyni-radial-pointer-length`, default `2`)
 
 ## Tick Rendering
 
@@ -79,7 +79,7 @@ Shared pointer shape controls:
 Label typography:
 - Weight: `theme.font.labelWeight`
 - Family: `Helpers.resolveFontFamily(canvas)`
-- Font size: `labelPx = max(10, floor(R * theme.labels.fontFactor))`
+- Font size: `labelPx = max(10, floor(R * theme.radial.labels.fontFactor))`
 
 ## Layout Modes
 
@@ -94,8 +94,8 @@ Threshold props/defaults:
 
 | Widget | thresholdNormal | thresholdFlat |
 |---|---|---|
-| Compass | `compRatioThresholdNormal` (`0.8`) | `compRatioThresholdFlat` (`2.2`) |
-| Wind | `dialRatioThresholdNormal` (`0.7`) | `dialRatioThresholdFlat` (`2.0`) |
+| Compass | `compassRadialRatioThresholdNormal` (`0.8`) | `compassRadialRatioThresholdFlat` (`2.2`) |
+| Wind | `windRadialRatioThresholdNormal` (`0.7`) | `windRadialRatioThresholdFlat` (`2.0`) |
 
 Mode text layout:
 
@@ -109,7 +109,7 @@ High-mode slot factors (`computeSlots`):
 - Engine defaults: `highTopFactor=0.85`, `highBottomFactor=0.85`
 - Compass override: `highTopFactor=0.9`, `highBottomFactor=0.9`
 
-Normal-mode layout tokens (`theme.fullCircle.normal.*`):
+Normal-mode layout tokens (`theme.radial.fullCircle.normal.*`):
 
 | Token | Default | Clamp range |
 |---|---|---|
@@ -119,7 +119,7 @@ Normal-mode layout tokens (`theme.fullCircle.normal.*`):
 
 ## Background Cache Rules
 
-Static cache key is built in `FullCircleDialEngine` and passed to `CanvasLayerCache.ensureLayer(canvas, key, rebuildFn)`.
+Static cache key is built in `FullCircleRadialEngine` and passed to `CanvasLayerCache.ensureLayer(canvas, key, rebuildFn)`.
 Baseline cache scope/key/invalidation rules are defined in [../conventions/canvas-layer-caching.md](../conventions/canvas-layer-caching.md).
 
 Included in static key:
@@ -131,7 +131,7 @@ Included in static key:
 
 Widget payloads:
 - Compass payload: `labelPx`, `labelRadius`, fixed label signature (`N|NE|E|SE|S|SW|W|NW`)
-- Wind payload: `layEnabled`, `layMin`, `layMax`, `laylineStb`, `laylinePort`
+- Wind payload: `layEnabled`, `windRadialLayMin`, `windRadialLayMax`, `laylineStb`, `laylinePort`
 
 Explicit non-key inputs:
 - Compass: `heading` (draw transform `rotationDeg=-heading`), `markerCourse`, live caption/value/unit text, `disconnect`
@@ -145,13 +145,13 @@ Rebuild triggers (`CanvasLayerCache`):
 
 ## Layline And Marker Conventions
 
-Wind laylines (`WindDialWidget`, back layer):
-- Draw only when `layEnabled !== false` and `layMax > layMin`
-- Starboard sector: `startDeg=layMin`, `endDeg=layMax`, `fillStyle=theme.colors.laylineStb`
-- Port sector: `startDeg=-layMax`, `endDeg=-layMin`, `fillStyle=theme.colors.laylinePort`
+Wind laylines (`WindRadialWidget`, back layer):
+- Draw only when `layEnabled !== false` and `windRadialLayMax > windRadialLayMin`
+- Starboard sector: `startDeg=windRadialLayMin`, `endDeg=windRadialLayMax`, `fillStyle=theme.colors.laylineStb`
+- Port sector: `startDeg=-windRadialLayMax`, `endDeg=-windRadialLayMin`, `fillStyle=theme.colors.laylinePort`
 - Sector thickness: `ringW`
 
-Compass target marker (`CompassGaugeWidget`, per-frame):
+Compass target marker (`CompassRadialWidget`, per-frame):
 - Marker is compass-only (`markerCourse`); no wind marker primitive exists
 - Draw when both `markerCourse` and `heading` are finite
 - Marker angle relative to rotated card: `markerCourse - heading`
@@ -159,7 +159,7 @@ Compass target marker (`CompassGaugeWidget`, per-frame):
 
 ## Disconnect Overlay
 
-Shared behavior from `GaugeTextLayout.drawDisconnectOverlay()`:
+Shared behavior from `RadialTextLayout.drawDisconnectOverlay()`:
 - Trigger: `props.disconnect === true` and `drawDisconnect !== false`
 - Overlay: fill full canvas with `globalAlpha=0.20` and resolved text color
 - Label: centered `NO DATA`

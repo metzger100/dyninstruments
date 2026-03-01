@@ -1,12 +1,12 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
-describe("GaugeValueMath", function () {
+describe("RadialValueMath", function () {
   function create() {
-    const mod = loadFresh("shared/widget-kits/gauge/GaugeValueMath.js");
+    const mod = loadFresh("shared/widget-kits/radial/RadialValueMath.js");
     return mod.create({}, {
       getModule(id) {
-        if (id !== "GaugeAngleMath") throw new Error("unexpected module: " + id);
-        return loadFresh("shared/widget-kits/gauge/GaugeAngleMath.js");
+        if (id !== "RadialAngleMath") throw new Error("unexpected module: " + id);
+        return loadFresh("shared/widget-kits/radial/RadialAngleMath.js");
       }
     });
   }

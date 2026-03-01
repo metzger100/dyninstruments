@@ -1,18 +1,18 @@
 /**
- * Module: SemicircleGaugeEngine - Shared renderer for semicircle gauge widgets
+ * Module: SemicircleRadialEngine - Shared renderer for semicircle gauge widgets
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: GaugeToolkit
+ * Depends: RadialToolkit
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniSemicircleGaugeEngine = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniSemicircleRadialEngine = factory(); }
 }(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
-    const GU = Helpers.getModule("GaugeToolkit").create(def, Helpers);
+    const GU = Helpers.getModule("RadialToolkit").create(def, Helpers);
     const T = GU.text;
     const V = GU.value;
     const draw = GU.draw;
@@ -287,6 +287,8 @@
       const arc = cfg.arc || { startDeg: 270, endDeg: 450 };
       const modeDefaults = cfg.ratioDefaults || { normal: 1.1, flat: 3.5 };
       const rangeDefaults = cfg.rangeDefaults || { min: 0, max: 30 };
+      const rangeProps = cfg.rangeProps || { min: "minValue", max: "maxValue" };
+      const tickProps = cfg.tickProps || { major: "tickMajor", minor: "tickMinor", showEndLabels: "showEndLabels" };
       const ratioProps = cfg.ratioProps || { normal: "ratioThresholdNormal", flat: "ratioThresholdFlat" };
       const unitDefault = cfg.unitDefault || "";
       const fitCache = { flat: null, high: null, normal: null };
@@ -327,13 +329,13 @@
           : (hasOwn.call(p, "default") ? p.default : "---");
 
         const valueNum = V.isFiniteNumber(display.num) ? display.num : NaN;
-        const range = V.normalizeRange(p.minValue, p.maxValue, rangeDefaults.min, rangeDefaults.max);
+        const range = V.normalizeRange(p[rangeProps.min], p[rangeProps.max], rangeDefaults.min, rangeDefaults.max);
         const tickPreset = (typeof cfg.tickSteps === "function")
           ? (cfg.tickSteps(range.range) || { major: 10, minor: 2 })
           : { major: 10, minor: 2 };
 
-        const tickMajor = V.isFiniteNumber(p.tickMajor) ? p.tickMajor : tickPreset.major;
-        const tickMinor = V.isFiniteNumber(p.tickMinor) ? p.tickMinor : tickPreset.minor;
+        const tickMajor = V.isFiniteNumber(p[tickProps.major]) ? p[tickProps.major] : tickPreset.major;
+        const tickMinor = V.isFiniteNumber(p[tickProps.minor]) ? p[tickProps.minor] : tickPreset.minor;
         const secScale = V.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
         const fitKeyBase = {
           W: W,
@@ -349,7 +351,7 @@
         };
 
         const geom = V.computeSemicircleGeometry(W, H, pad, {
-          ringWidthFactor: theme.ring.widthFactor
+          ringWidthFactor: theme.radial.ring.widthFactor
         });
         const vClamped = V.isFiniteNumber(valueNum) ? V.clamp(valueNum, range.min, range.max) : NaN;
         const aNow = V.isFiniteNumber(vClamped)
@@ -361,10 +363,10 @@
           : [];
 
         const ticks = V.buildValueTickAngles(range.min, range.max, tickMajor, tickMinor, arc);
-        const showEndLabels = !!p.showEndLabels;
+        const showEndLabels = !!p[tickProps.showEndLabels];
 
         draw.drawArcRing(ctx, geom.cx, geom.cy, geom.rOuter, arc.startDeg, arc.endDeg, {
-          lineWidth: theme.ring.arcLineWidth
+          lineWidth: theme.radial.ring.arcLineWidth
         });
 
         for (let i = 0; i < sectorList.length; i++) {
@@ -388,32 +390,32 @@
             depth: geom.needleDepth,
             fillStyle: theme.colors.pointer,
             variant: "long",
-            sideFactor: theme.pointer.sideFactor,
-            lengthFactor: theme.pointer.lengthFactor
+            sideFactor: theme.radial.pointer.sideFactor,
+            lengthFactor: theme.radial.pointer.lengthFactor
           });
         }
 
         draw.drawTicksFromAngles(ctx, geom.cx, geom.cy, geom.rOuter, ticks, {
-          major: { len: theme.ticks.majorLen, width: theme.ticks.majorWidth },
-          minor: { len: theme.ticks.minorLen, width: theme.ticks.minorWidth }
+          major: { len: theme.radial.ticks.majorLen, width: theme.radial.ticks.majorWidth },
+          minor: { len: theme.radial.ticks.minorLen, width: theme.radial.ticks.minorWidth }
         });
 
-        drawMajorValueLabels(ctx, family, geom, range.min, range.max, tickMajor, arc, showEndLabels, theme.labels, labelWeight);
+        drawMajorValueLabels(ctx, family, geom, range.min, range.max, tickMajor, arc, showEndLabels, theme.radial.labels, labelWeight);
 
         if (mode === "flat") drawFlatText(ctx, family, caption, valueText, unit, secScale, geom, pad, gap, valueWeight, labelWeight, fitCache, fitKeyBase);
         else if (mode === "high") drawHighText(ctx, family, caption, valueText, unit, secScale, geom, pad, gap, W, valueWeight, labelWeight, fitCache, fitKeyBase);
-        else drawNormalText(ctx, family, caption, valueText, unit, secScale, geom, theme.labels, valueWeight, labelWeight, fitCache, fitKeyBase);
+        else drawNormalText(ctx, family, caption, valueText, unit, secScale, geom, theme.radial.labels, valueWeight, labelWeight, fitCache, fitKeyBase);
 
         if (p.disconnect) T.drawDisconnectOverlay(ctx, W, H, family, color, null, labelWeight);
       };
     }
 
     return {
-      id: "SemicircleGaugeEngine",
+      id: "SemicircleRadialEngine",
       version: "0.1.0",
       createRenderer
     };
   }
 
-  return { id: "SemicircleGaugeEngine", create };
+  return { id: "SemicircleRadialEngine", create };
 }));

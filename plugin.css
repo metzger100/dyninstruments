@@ -12,19 +12,19 @@
   --dyni-alarm: #ff7a76;
   --dyni-layline-stb: #82b683;
   --dyni-layline-port: #ff7a76;
-  --dyni-tick-major-len: 9;
-  --dyni-tick-major-width: 2;
-  --dyni-tick-minor-len: 5;
-  --dyni-tick-minor-width: 1;
-  --dyni-pointer-side: 0.25;
-  --dyni-pointer-length: 2;
-  --dyni-arc-linewidth: 1;
-  --dyni-ring-width: 0.12;
-  --dyni-label-inset: 1.8;
-  --dyni-label-font: 0.14;
-  --dyni-fullcircle-normal-inner-margin: 0.03;
-  --dyni-fullcircle-normal-min-height: 0.45;
-  --dyni-fullcircle-normal-dual-gap: 0.05;
+  --dyni-radial-tick-major-len: 9;
+  --dyni-radial-tick-major-width: 2;
+  --dyni-radial-tick-minor-len: 5;
+  --dyni-radial-tick-minor-width: 1;
+  --dyni-radial-pointer-side: 0.25;
+  --dyni-radial-pointer-length: 2;
+  --dyni-radial-arc-linewidth: 1;
+  --dyni-radial-ring-width: 0.12;
+  --dyni-radial-label-inset: 1.8;
+  --dyni-radial-label-font: 0.14;
+  --dyni-radial-fullcircle-normal-inner-margin: 0.03;
+  --dyni-radial-fullcircle-normal-min-height: 0.45;
+  --dyni-radial-fullcircle-normal-dual-gap: 0.05;
   --dyni-font-weight: 700;
   --dyni-label-weight: 700;
   --dyni-xte-line-width-factor: 1;
@@ -34,25 +34,25 @@
 /* 0.1) Preset token overrides (applied via ThemePresets data attribute). */
 .dyniplugin[data-dyni-theme="slim"],
 [data-dyni][data-dyni-theme="slim"] {
-  --dyni-arc-linewidth: 0.5;
-  --dyni-ring-width: 0.09;
-  --dyni-tick-major-width: 1.5;
-  --dyni-tick-minor-width: 0.75;
-  --dyni-pointer-side: 0.18;
+  --dyni-radial-arc-linewidth: 0.5;
+  --dyni-radial-ring-width: 0.09;
+  --dyni-radial-tick-major-width: 1.5;
+  --dyni-radial-tick-minor-width: 0.75;
+  --dyni-radial-pointer-side: 0.18;
   --dyni-label-weight: 400;
   --dyni-xte-line-width-factor: 0.85;
 }
 
 .dyniplugin[data-dyni-theme="bold"],
 [data-dyni][data-dyni-theme="bold"] {
-  --dyni-arc-linewidth: 2;
-  --dyni-ring-width: 0.16;
-  --dyni-tick-major-len: 12;
-  --dyni-tick-major-width: 3;
-  --dyni-tick-minor-len: 7;
-  --dyni-tick-minor-width: 1.5;
-  --dyni-pointer-side: 0.35;
-  --dyni-pointer-length: 2.2;
+  --dyni-radial-arc-linewidth: 2;
+  --dyni-radial-ring-width: 0.16;
+  --dyni-radial-tick-major-len: 12;
+  --dyni-radial-tick-major-width: 3;
+  --dyni-radial-tick-minor-len: 7;
+  --dyni-radial-tick-minor-width: 1.5;
+  --dyni-radial-pointer-side: 0.35;
+  --dyni-radial-pointer-length: 2.2;
   --dyni-xte-line-width-factor: 1.5;
 }
 
@@ -70,10 +70,10 @@
   --dyni-pointer: #ff0000;
   --dyni-warning: #ffcc00;
   --dyni-alarm: #ff3300;
-  --dyni-arc-linewidth: 2;
-  --dyni-tick-major-width: 3;
-  --dyni-tick-minor-width: 2;
-  --dyni-pointer-side: 0.35;
+  --dyni-radial-arc-linewidth: 2;
+  --dyni-radial-tick-major-width: 3;
+  --dyni-radial-tick-minor-width: 2;
+  --dyni-radial-pointer-side: 0.35;
   --dyni-xte-line-width-factor: 1.3;
 }
 
