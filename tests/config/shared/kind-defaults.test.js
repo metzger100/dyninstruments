@@ -14,6 +14,8 @@ describe("config/shared/kind-defaults.js", function () {
 
     const maps = context.DyniPlugin.config.shared.kindMaps;
     expect(maps.COURSE_KIND.hdt.cap).toBe("HDT");
+    expect(maps.SPEED_KIND.sogLinear.cap).toBe("SOG");
+    expect(maps.SPEED_KIND.sogLinear.unit).toBe("kn");
     expect(maps.WIND_KIND.speedTrue.unit).toBe("kn");
     expect(maps.NAV_KIND.dst.unit).toBe("nm");
     expect(maps.NAV_KIND.rteDistance.unit).toBe("nm");

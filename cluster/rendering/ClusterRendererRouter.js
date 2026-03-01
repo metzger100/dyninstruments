@@ -21,6 +21,7 @@
       WindRadialWidget: rendererPropsWidget.create(def, Helpers, "WindRadialWidget"),
       CompassRadialWidget: rendererPropsWidget.create(def, Helpers, "CompassRadialWidget"),
       SpeedRadialWidget: rendererPropsWidget.create(def, Helpers, "SpeedRadialWidget"),
+      SpeedLinearWidget: rendererPropsWidget.create(def, Helpers, "SpeedLinearWidget"),
       DepthRadialWidget: rendererPropsWidget.create(def, Helpers, "DepthRadialWidget"),
       TemperatureRadialWidget: rendererPropsWidget.create(def, Helpers, "TemperatureRadialWidget"),
       VoltageRadialWidget: rendererPropsWidget.create(def, Helpers, "VoltageRadialWidget"),

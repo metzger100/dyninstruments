@@ -35,7 +35,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 1. ✅ Quick wins (text): `DateTime`, `TimeStatus`, `signalKPitch`, `signalKRoll`
 2. High-impact canvas visuals: ✅ `XteDisplay`, `ActiveRoute`
 3. Lists and controls (interaction-heavy): `RoutePoints`, `EditRoute`, `Zoom`, `CenterDisplay`
-4. Linear gauges: alternatives for radial kinds
+4. Linear gauges: alternatives for radial kinds (phase 1: `sogLinear`)
 5. AIS: `AisTarget` (requires additional data logic and responsive layout)
 
 ### Additional non-core concepts
@@ -43,6 +43,18 @@ It tracks pre-release priorities and AvNav widget coverage status.
 - OBP60-style instruments: graphical Roll/Pitch, Clock, Rudder, Keel
 - C-net 2000 style multi instruments: history graphs, interactive regatta clock, anchor nav plot
 - Wind four-corner graphic for `TWA`/`TWS`/`AWA`/`AWS`
+
+## Linear Naming Convention
+
+- Linear kinds mirror existing radial ownership and naming with `*Linear` suffix.
+- Examples:
+  - `sogRadial` -> `sogLinear`
+  - `hdtRadial` -> `hdtLinear` (planned)
+  - `angleTrueRadial` -> `angleTrueLinear` (planned)
+- Axis mode reservation in shared linear engine:
+  - `range` for speed/depth/temperature/voltage
+  - `centered180` for wind angle kinds with mirrored layline sectors
+  - `fixed360` for compass with fixed scale and moving indicator
 
 ## AvNav Widget Coverage Matrix
 

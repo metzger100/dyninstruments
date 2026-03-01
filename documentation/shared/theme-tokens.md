@@ -51,6 +51,16 @@
 | `fullCircle.normal.innerMarginFactor` | `--dyni-radial-fullcircle-normal-inner-margin` | `0.03` | number |
 | `fullCircle.normal.minHeightFactor` | `--dyni-radial-fullcircle-normal-min-height` | `0.45` | number |
 | `fullCircle.normal.dualGapFactor` | `--dyni-radial-fullcircle-normal-dual-gap` | `0.05` | number |
+| `linear.track.widthFactor` | `--dyni-linear-track-width` | `0.12` | number |
+| `linear.track.lineWidth` | `--dyni-linear-track-linewidth` | `1` | number |
+| `linear.ticks.majorLen` | `--dyni-linear-tick-major-len` | `9` | number |
+| `linear.ticks.majorWidth` | `--dyni-linear-tick-major-width` | `2` | number |
+| `linear.ticks.minorLen` | `--dyni-linear-tick-minor-len` | `5` | number |
+| `linear.ticks.minorWidth` | `--dyni-linear-tick-minor-width` | `1` | number |
+| `linear.pointer.sideFactor` | `--dyni-linear-pointer-side` | `0.25` | number |
+| `linear.pointer.lengthFactor` | `--dyni-linear-pointer-length` | `2` | number |
+| `linear.labels.insetFactor` | `--dyni-linear-label-inset` | `1.8` | number |
+| `linear.labels.fontFactor` | `--dyni-linear-label-font` | `0.14` | number |
 | `font.weight` | `--dyni-font-weight` | `700` | number |
 | `font.labelWeight` | `--dyni-label-weight` | `700` | number |
 | `xte.lineWidthFactor` | `--dyni-xte-line-width-factor` | `1` | number |
@@ -116,10 +126,10 @@ Only values that differ from theme defaults are included.
 | Preset | Overrides |
 |---|---|
 | `default` | none |
-| `slim` | `ring.arcLineWidth=0.5`, `ring.widthFactor=0.09`, `ticks.majorWidth=1.5`, `ticks.minorWidth=0.75`, `pointer.sideFactor=0.18`, `font.labelWeight=400`, `xte.lineWidthFactor=0.85` |
-| `bold` | `ring.arcLineWidth=2`, `ring.widthFactor=0.16`, `ticks.majorLen=12`, `ticks.majorWidth=3`, `ticks.minorLen=7`, `ticks.minorWidth=1.5`, `pointer.sideFactor=0.35`, `pointer.lengthFactor=2.2`, `xte.lineWidthFactor=1.2` |
+| `slim` | `ring.arcLineWidth=0.5`, `ring.widthFactor=0.09`, `ticks.majorWidth=1.5`, `ticks.minorWidth=0.75`, `pointer.sideFactor=0.18`, `linear.track.widthFactor=0.09`, `linear.track.lineWidth=0.75`, `linear.ticks.majorWidth=1.5`, `linear.ticks.minorWidth=0.75`, `linear.pointer.sideFactor=0.18`, `font.labelWeight=400`, `xte.lineWidthFactor=0.85` |
+| `bold` | `ring.arcLineWidth=2`, `ring.widthFactor=0.16`, `ticks.majorLen=12`, `ticks.majorWidth=3`, `ticks.minorLen=7`, `ticks.minorWidth=1.5`, `pointer.sideFactor=0.35`, `pointer.lengthFactor=2.2`, `linear.track.widthFactor=0.16`, `linear.track.lineWidth=2`, `linear.ticks.majorLen=12`, `linear.ticks.majorWidth=3`, `linear.ticks.minorLen=7`, `linear.ticks.minorWidth=1.5`, `linear.pointer.sideFactor=0.35`, `linear.pointer.lengthFactor=2.2`, `xte.lineWidthFactor=1.5` |
 | `night` | `colors.pointer=#cc2222`, `colors.warning=#8b6914`, `colors.alarm=#992222`, `colors.laylineStb=#3d6b3d`, `colors.laylinePort=#8b3333` |
-| `highcontrast` | `colors.pointer=#ff0000`, `colors.warning=#ffcc00`, `colors.alarm=#ff3300`, `ring.arcLineWidth=2`, `ticks.majorWidth=3`, `ticks.minorWidth=2`, `pointer.sideFactor=0.35`, `xte.lineWidthFactor=1.3` |
+| `highcontrast` | `colors.pointer=#ff0000`, `colors.warning=#ffcc00`, `colors.alarm=#ff3300`, `ring.arcLineWidth=2`, `ticks.majorWidth=3`, `ticks.minorWidth=2`, `pointer.sideFactor=0.35`, `linear.track.lineWidth=2`, `linear.ticks.majorWidth=3`, `linear.ticks.minorWidth=2`, `linear.pointer.sideFactor=0.35`, `xte.lineWidthFactor=1.3` |
 
 ## Runtime Integration
 

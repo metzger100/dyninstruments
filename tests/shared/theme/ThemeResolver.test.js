@@ -49,7 +49,7 @@ describe("ThemeResolver", function () {
     const canvas = createCanvas(createDoc({ value: false }));
     const out = resolver.resolve(canvas);
 
-    expect(Object.keys(out).sort()).toEqual(["colors", "font", "radial", "xte"]);
+    expect(Object.keys(out).sort()).toEqual(["colors", "font", "linear", "radial", "xte"]);
     expect(out).toEqual(mod.DEFAULTS);
   });
 
@@ -58,6 +58,7 @@ describe("ThemeResolver", function () {
       return {
         getPropertyValue(name) {
           if (name === "--dyni-pointer") return "  #123456  ";
+          if (name === "--dyni-linear-track-width") return " 0.2 ";
           if (name === "--dyni-xte-line-width-factor") return " 1.5 ";
           return "";
         }
@@ -71,6 +72,7 @@ describe("ThemeResolver", function () {
 
     expect(out.colors.pointer).toBe("#123456");
     expect(out.colors.warning).toBe(mod.DEFAULTS.colors.warning);
+    expect(out.linear.track.widthFactor).toBe(0.2);
     expect(out.xte.lineWidthFactor).toBe(1.5);
   });
 
@@ -167,11 +169,22 @@ describe("ThemeResolver", function () {
       tokenDef.path === "xte.lineWidthFactor" &&
       tokenDef.cssVar === "--dyni-xte-line-width-factor"
     ))).toBe(true);
+    expect(mod.TOKEN_DEFS.some((tokenDef) => (
+      tokenDef.path === "linear.track.widthFactor" &&
+      tokenDef.cssVar === "--dyni-linear-track-width"
+    ))).toBe(true);
+    expect(mod.TOKEN_DEFS.some((tokenDef) => (
+      tokenDef.path === "linear.pointer.lengthFactor" &&
+      tokenDef.cssVar === "--dyni-linear-pointer-length"
+    ))).toBe(true);
     expect(mod.DEFAULTS.radial.pointer.sideFactor).toBe(0.25);
     expect(mod.DEFAULTS.radial.ring.widthFactor).toBe(0.12);
     expect(mod.DEFAULTS.radial.fullCircle.normal.innerMarginFactor).toBe(0.03);
     expect(mod.DEFAULTS.radial.fullCircle.normal.minHeightFactor).toBe(0.45);
     expect(mod.DEFAULTS.radial.fullCircle.normal.dualGapFactor).toBe(0.05);
+    expect(mod.DEFAULTS.linear.track.widthFactor).toBe(0.12);
+    expect(mod.DEFAULTS.linear.pointer.lengthFactor).toBe(2);
+    expect(mod.DEFAULTS.linear.labels.insetFactor).toBe(1.8);
     expect(mod.DEFAULTS.xte.lineWidthFactor).toBe(1);
     expect(Object.keys(mod.DEFAULTS.xte).sort()).toEqual(["lineWidthFactor"]);
   });

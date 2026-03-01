@@ -25,11 +25,18 @@ describe("config/components.js", function () {
     expect(components.CanvasLayerCache.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/canvas/CanvasLayerCache.js");
     expect(components.XteHighwayPrimitives.globalKey).toBe("DyniXteHighwayPrimitives");
     expect(components.XteHighwayPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/xte/XteHighwayPrimitives.js");
+    expect(components.LinearCanvasPrimitives.globalKey).toBe("DyniLinearCanvasPrimitives");
+    expect(components.LinearCanvasPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearCanvasPrimitives.js");
+    expect(components.LinearGaugeMath.globalKey).toBe("DyniLinearGaugeMath");
+    expect(components.LinearGaugeMath.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeMath.js");
     expect(components.FullCircleRadialEngine.globalKey).toBe("DyniFullCircleRadialEngine");
     expect(components.FullCircleRadialEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialEngine.js");
     expect(components.FullCircleRadialEngine.deps).toEqual(["RadialToolkit", "CanvasLayerCache"]);
     expect(components.FullCircleRadialTextLayout.globalKey).toBe("DyniFullCircleRadialTextLayout");
     expect(components.FullCircleRadialTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialTextLayout.js");
+    expect(components.LinearGaugeEngine.globalKey).toBe("DyniLinearGaugeEngine");
+    expect(components.LinearGaugeEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeEngine.js");
+    expect(components.LinearGaugeEngine.deps).toEqual(["RadialToolkit", "CanvasLayerCache", "LinearCanvasPrimitives", "LinearGaugeMath"]);
     expect(components.ThemePresets.globalKey).toBe("DyniThemePresets");
     expect(components.ThemePresets.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemePresets.js");
     expect(components.ThemePresets.deps).toBeUndefined();
@@ -45,6 +52,7 @@ describe("config/components.js", function () {
     expect(components.TextLayoutEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextLayoutEngine.js");
     expect(components.TextLayoutEngine.deps).toEqual(["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]);
     expect(components.SpeedRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
+    expect(components.SpeedLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.DepthRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
     expect(components.TemperatureRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
     expect(components.VoltageRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
@@ -61,6 +69,7 @@ describe("config/components.js", function () {
       "WindRadialWidget",
       "CompassRadialWidget",
       "SpeedRadialWidget",
+      "SpeedLinearWidget",
       "DepthRadialWidget",
       "TemperatureRadialWidget",
       "VoltageRadialWidget",

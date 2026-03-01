@@ -35,6 +35,18 @@ describe("static cluster configs", function () {
     expect(byCluster.speed.editableParameters.kind.default).toBe("sog");
     expect(byCluster.wind.editableParameters.kind.default).toBe("angleTrue");
     expect(byCluster.anchor.editableParameters.kind.default).toBe("distance");
+    expect(byCluster.speed.editableParameters.kind.list.map((entry) => entry.value))
+      .toEqual(expect.arrayContaining(["sogLinear"]));
+    expect(byCluster.speed.editableParameters.speedLinearRatioThresholdNormal.condition).toEqual({ kind: "sogLinear" });
+    expect(byCluster.speed.editableParameters.speedLinearRatioThresholdFlat.condition).toEqual({ kind: "sogLinear" });
+    expect(byCluster.speed.editableParameters.speedLinearWarningFrom.condition).toEqual({
+      kind: "sogLinear",
+      speedLinearWarningEnabled: true
+    });
+    expect(byCluster.speed.editableParameters.speedLinearAlarmFrom.condition).toEqual({
+      kind: "sogLinear",
+      speedLinearAlarmEnabled: true
+    });
     expect(byCluster.wind.editableParameters.angleCaption_TWA).toBeUndefined();
     expect(byCluster.wind.editableParameters.speedCaption_TWS).toBeUndefined();
     expect(byCluster.wind.editableParameters.angleUnitGraphic).toBeUndefined();

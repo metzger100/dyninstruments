@@ -77,6 +77,16 @@
       css: undefined,
       globalKey: "DyniXteHighwayPrimitives"
     },
+    LinearCanvasPrimitives: {
+      js: BASE + "shared/widget-kits/linear/LinearCanvasPrimitives.js",
+      css: undefined,
+      globalKey: "DyniLinearCanvasPrimitives"
+    },
+    LinearGaugeMath: {
+      js: BASE + "shared/widget-kits/linear/LinearGaugeMath.js",
+      css: undefined,
+      globalKey: "DyniLinearGaugeMath"
+    },
     ThemeResolver: {
       js: BASE + "shared/theme/ThemeResolver.js",
       css: undefined,
@@ -118,6 +128,12 @@
       css: undefined,
       globalKey: "DyniFullCircleRadialTextLayout"
     },
+    LinearGaugeEngine: {
+      js: BASE + "shared/widget-kits/linear/LinearGaugeEngine.js",
+      css: undefined,
+      globalKey: "DyniLinearGaugeEngine",
+      deps: ["RadialToolkit", "CanvasLayerCache", "LinearCanvasPrimitives", "LinearGaugeMath"]
+    },
     ThreeValueTextWidget: {
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
       css: undefined,
@@ -150,6 +166,7 @@
         "WindRadialWidget",
         "CompassRadialWidget",
         "SpeedRadialWidget",
+        "SpeedLinearWidget",
         "DepthRadialWidget",
         "TemperatureRadialWidget",
         "VoltageRadialWidget",
@@ -173,6 +190,12 @@
       css: undefined,
       globalKey: "DyniSpeedRadialWidget",
       deps: ["SemicircleRadialEngine", "RadialValueMath"]
+    },
+    SpeedLinearWidget: {
+      js: BASE + "widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js",
+      css: undefined,
+      globalKey: "DyniSpeedLinearWidget",
+      deps: ["LinearGaugeEngine", "RadialValueMath"]
     },
     DepthRadialWidget: {
       js: BASE + "widgets/radial/DepthRadialWidget/DepthRadialWidget.js",
