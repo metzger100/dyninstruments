@@ -41,6 +41,26 @@
         };
       }
 
+      if (effKind === "hdtLinear" || effKind === "hdmLinear") {
+        const heading = (effKind === "hdtLinear") ? p.hdt : p.hdm;
+        return {
+          renderer: "CompassLinearWidget",
+          heading: heading,
+          markerCourse: p.brg,
+          caption: cap(effKind),
+          unit: unit(effKind),
+          rendererProps: {
+            leadingZero: !!p.leadingZero,
+            captionUnitScale: num(p.captionUnitScale),
+            compassLinearRatioThresholdNormal: num(p.compassLinearRatioThresholdNormal),
+            compassLinearRatioThresholdFlat: num(p.compassLinearRatioThresholdFlat),
+            compassLinearTickMajor: num(p.compassLinearTickMajor),
+            compassLinearTickMinor: num(p.compassLinearTickMinor),
+            compassLinearShowEndLabels: !!p.compassLinearShowEndLabels
+          }
+        };
+      }
+
       if (effKind === "cog" || effKind === "hdt" || effKind === "hdm" || effKind === "brg") {
         const val = p[effKind];
         const leadingZero = !!p.leadingZero;

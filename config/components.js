@@ -170,6 +170,8 @@
       deps: [
         "WindRadialWidget",
         "CompassRadialWidget",
+        "WindLinearWidget",
+        "CompassLinearWidget",
         "SpeedRadialWidget",
         "SpeedLinearWidget",
         "DepthRadialWidget",
@@ -192,6 +194,18 @@
       css: undefined,
       globalKey: "DyniCompassRadialWidget",
       deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]
+    },
+    WindLinearWidget: {
+      js: BASE + "widgets/linear/WindLinearWidget/WindLinearWidget.js",
+      css: undefined,
+      globalKey: "DyniWindLinearWidget",
+      deps: ["LinearGaugeEngine", "RadialValueMath"]
+    },
+    CompassLinearWidget: {
+      js: BASE + "widgets/linear/CompassLinearWidget/CompassLinearWidget.js",
+      css: undefined,
+      globalKey: "DyniCompassLinearWidget",
+      deps: ["LinearGaugeEngine", "RadialValueMath"]
     },
     SpeedRadialWidget: {
       js: BASE + "widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js",

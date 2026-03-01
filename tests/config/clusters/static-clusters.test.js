@@ -37,6 +37,10 @@ describe("static cluster configs", function () {
     expect(byCluster.anchor.editableParameters.kind.default).toBe("distance");
     expect(byCluster.speed.editableParameters.kind.list.map((entry) => entry.value))
       .toEqual(expect.arrayContaining(["sogLinear", "stwLinear"]));
+    expect(byCluster.courseHeading.editableParameters.kind.list.map((entry) => entry.value))
+      .toEqual(expect.arrayContaining(["hdtLinear", "hdmLinear"]));
+    expect(byCluster.wind.editableParameters.kind.list.map((entry) => entry.value))
+      .toEqual(expect.arrayContaining(["angleTrueLinear", "angleApparentLinear"]));
     expect(byCluster.speed.editableParameters.speedLinearRatioThresholdNormal.condition).toEqual([
       { kind: "sogLinear" },
       { kind: "stwLinear" }
@@ -65,5 +69,21 @@ describe("static cluster configs", function () {
     expect(byCluster.wind.editableParameters.unit_angleApparentRadialAngle.condition).toEqual({ kind: "angleApparentRadial" });
     expect(byCluster.wind.editableParameters.caption_angleApparentRadialSpeed.condition).toEqual({ kind: "angleApparentRadial" });
     expect(byCluster.wind.editableParameters.unit_angleApparentRadialSpeed.condition).toEqual({ kind: "angleApparentRadial" });
+    expect(byCluster.wind.editableParameters.caption_angleTrueLinearAngle.condition).toEqual({ kind: "angleTrueLinear" });
+    expect(byCluster.wind.editableParameters.unit_angleTrueLinearAngle.condition).toEqual({ kind: "angleTrueLinear" });
+    expect(byCluster.wind.editableParameters.caption_angleTrueLinearSpeed.condition).toEqual({ kind: "angleTrueLinear" });
+    expect(byCluster.wind.editableParameters.unit_angleTrueLinearSpeed.condition).toEqual({ kind: "angleTrueLinear" });
+    expect(byCluster.wind.editableParameters.caption_angleApparentLinearAngle.condition).toEqual({ kind: "angleApparentLinear" });
+    expect(byCluster.wind.editableParameters.unit_angleApparentLinearAngle.condition).toEqual({ kind: "angleApparentLinear" });
+    expect(byCluster.wind.editableParameters.caption_angleApparentLinearSpeed.condition).toEqual({ kind: "angleApparentLinear" });
+    expect(byCluster.wind.editableParameters.unit_angleApparentLinearSpeed.condition).toEqual({ kind: "angleApparentLinear" });
+    expect(byCluster.courseHeading.editableParameters.compassLinearRatioThresholdNormal.condition).toEqual([
+      { kind: "hdtLinear" },
+      { kind: "hdmLinear" }
+    ]);
+    expect(byCluster.wind.editableParameters.windLinearRatioThresholdNormal.condition).toEqual([
+      { kind: "angleTrueLinear" },
+      { kind: "angleApparentLinear" }
+    ]);
   });
 });

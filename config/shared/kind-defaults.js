@@ -17,7 +17,9 @@
       hdm: { cap: "HDM", unit: "\u00b0" },
       brg: { cap: "BRG", unit: "\u00b0" },
       hdtRadial: { cap: "HDT", unit: "\u00b0" },
-      hdmRadial: { cap: "HDM", unit: "\u00b0" }
+      hdmRadial: { cap: "HDM", unit: "\u00b0" },
+      hdtLinear: { cap: "HDT", unit: "\u00b0" },
+      hdmLinear: { cap: "HDM", unit: "\u00b0" }
     },
     SPEED_KIND: {
       sog: { cap: "SOG", unit: "kn" },
@@ -67,6 +69,34 @@
         cap: "AWS",
         unit: "kn",
         kind: "angleApparentRadial",
+        captionName: "Speed caption",
+        unitName: "Speed unit"
+      },
+      angleTrueLinearAngle: {
+        cap: "TWA",
+        unit: "\u00b0",
+        kind: "angleTrueLinear",
+        captionName: "Angle caption",
+        unitName: "Angle unit"
+      },
+      angleTrueLinearSpeed: {
+        cap: "TWS",
+        unit: "kn",
+        kind: "angleTrueLinear",
+        captionName: "Speed caption",
+        unitName: "Speed unit"
+      },
+      angleApparentLinearAngle: {
+        cap: "AWA",
+        unit: "\u00b0",
+        kind: "angleApparentLinear",
+        captionName: "Angle caption",
+        unitName: "Angle unit"
+      },
+      angleApparentLinearSpeed: {
+        cap: "AWS",
+        unit: "kn",
+        kind: "angleApparentLinear",
         captionName: "Speed caption",
         unitName: "Speed unit"
       }

@@ -1,6 +1,6 @@
 # Linear Gauge Style Guide
 
-**Status:** ✅ Implemented | Speed/Depth/Temperature/Voltage linear wrappers shipped, profile contracts documented for range/centered180/fixed360 kinds
+**Status:** ✅ Implemented | Speed/Depth/Temperature/Voltage/Wind/Compass linear wrappers shipped, profile contracts documented for range/centered180/fixed360 kinds
 
 ## Overview
 
@@ -15,6 +15,9 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 - `normal` mode uses boosted tick labels and a taller inline text band for readability.
 - A linear wrapper should provide only profile-specific formatting, ticks, axis choice, and sectors.
 - Shared theme tokens come from `theme.linear.*` and `theme.colors.*`.
+- Compass linear (`hdtLinear`, `hdmLinear`) keeps the pointer fixed at center and scrolls the `0..360` scale under it.
+- Compass linear supports waypoint marker display (`markerCourse`) relative to current heading.
+- Wind linear (`angleTrueLinear`, `angleApparentLinear`) renders angle+speed together and supports mirrored layline sectors.
 
 ## Supported Profiles
 

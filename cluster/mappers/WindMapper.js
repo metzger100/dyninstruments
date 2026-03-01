@@ -1,5 +1,5 @@
 /**
- * Module: WindMapper - Cluster translation for numeric and dial wind kinds
+ * Module: WindMapper - Cluster translation for numeric, radial dial, and linear wind kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
  * Depends: ClusterMapperToolkit
  */
@@ -46,6 +46,36 @@
             windRadialLayMax: num(p.windRadialLayMax),
             windRadialRatioThresholdNormal: num(p.windRadialRatioThresholdNormal),
             windRadialRatioThresholdFlat: num(p.windRadialRatioThresholdFlat),
+            captionUnitScale: num(p.captionUnitScale),
+            leadingZero: !!p.leadingZero
+          }
+        };
+      }
+
+      if (req === "angleTrueLinear" || req === "angleApparentLinear") {
+        const isTrue = (req === "angleTrueLinear");
+        const angleKind = isTrue ? "angleTrueLinearAngle" : "angleApparentLinearAngle";
+        const speedKind = isTrue ? "angleTrueLinearSpeed" : "angleApparentLinearSpeed";
+        const speedUnit = unit(speedKind);
+        return {
+          renderer: "WindLinearWidget",
+          angle: isTrue ? p.twa : p.awa,
+          speed: isTrue ? p.tws : p.aws,
+          rendererProps: {
+            angleCaption: cap(angleKind),
+            speedCaption: cap(speedKind),
+            angleUnit: unit(angleKind),
+            speedUnit: speedUnit,
+            formatter: "formatSpeed",
+            formatterParameters: [speedUnit],
+            windLinearRatioThresholdNormal: num(p.windLinearRatioThresholdNormal),
+            windLinearRatioThresholdFlat: num(p.windLinearRatioThresholdFlat),
+            windLinearTickMajor: num(p.windLinearTickMajor),
+            windLinearTickMinor: num(p.windLinearTickMinor),
+            windLinearShowEndLabels: !!p.windLinearShowEndLabels,
+            windLinearLayEnabled: p.windLinearLayEnabled !== false,
+            windLinearLayMin: num(p.windLinearLayMin),
+            windLinearLayMax: num(p.windLinearLayMax),
             captionUnitScale: num(p.captionUnitScale),
             leadingZero: !!p.leadingZero
           }
