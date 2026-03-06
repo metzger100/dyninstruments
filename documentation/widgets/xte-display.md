@@ -12,6 +12,8 @@ Graphic navigation widget with a 2.5D highway view for cross-track guidance and 
 - `BRG` (bearing to waypoint)
 - waypoint name (optional, hidden first when space is constrained)
 
+The highway frame follows the same solid-line visual language as the radial and linear instruments: foreground road rails, horizon line, clean perspective bars, and a pointer-colored live guidance overlay without translucent lane-surface shading.
+
 Renderer keeps the highway frame visible when data is missing. Missing/disconnected metrics render with the configured placeholder (default `---`), and the moving XTE indicator is suppressed until the full guidance set is valid again.
 
 ## Module Registration
@@ -70,12 +72,9 @@ Theme is resolved once per frame via `RadialToolkit.theme.resolve(canvas)`.
 | Visual element | Token |
 |---|---|
 | Boat marker + active centerline | `theme.colors.pointer` |
-| Starboard cue/highlight | `theme.colors.laylineStb` |
-| Port cue/highlight | `theme.colors.laylinePort` |
-| Lane edge tint | `theme.colors.warning` |
 | Out-of-scale clamp marker | `theme.colors.alarm` |
 | Road edge + horizon strokes | `Helpers.resolveTextColor(canvas)` |
-| Lane stripe strokes | `Helpers.resolveTextColor(canvas)` |
+| Perspective bars + center seam markers | `Helpers.resolveTextColor(canvas)` |
 | Highway stroke thickness | `theme.xte.lineWidthFactor` (fallback `1` when invalid or `<=0`) |
 | Value text weight | `theme.font.weight` |
 | Label text weight | `theme.font.labelWeight` |
@@ -135,10 +134,10 @@ Uses `CanvasLayerCache` (`back` layer) for static highway drawing.
 
 Static key includes:
 
-- mode and canvas geometry
+- mode
 - highway geometry
-- resolved theme token colors used in static draw
-- style inputs affecting static layer (`family`, `labelWeight`, `xte.lineWidthFactor`)
+- resolved foreground colors used in static draw
+- style inputs affecting static layer (`xte.lineWidthFactor`)
 
 Dynamic elements are never cached:
 

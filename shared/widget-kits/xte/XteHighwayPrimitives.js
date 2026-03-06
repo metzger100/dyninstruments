@@ -16,6 +16,15 @@
       return Math.max(lo, Math.min(hi, value));
     }
 
+    function lerp(from, to, t) {
+      return from + (to - from) * t;
+    }
+
+    function snapCoord(value, lineWidth) {
+      const width = Math.max(1, Math.round(Number.isFinite(lineWidth) ? lineWidth : 1));
+      return Math.round(value) + (width % 2 ? 0.5 : 0);
+    }
+
     function computeMode(W, H, thresholdNormal, thresholdFlat, modeFn) {
       const ratio = W / Math.max(1, H);
       const normal = Number.isFinite(thresholdNormal) ? thresholdNormal : 0.85;
@@ -141,97 +150,56 @@
       return factor > 0 ? factor : 1;
     }
 
+    function strokeSegment(ctx, x1, y1, x2, y2, lineWidth) {
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      ctx.moveTo(snapCoord(x1, lineWidth), snapCoord(y1, lineWidth));
+      ctx.lineTo(snapCoord(x2, lineWidth), snapCoord(y2, lineWidth));
+      ctx.stroke();
+    }
+
+    function strokeCrossbar(ctx, cx, y, half, lineWidth) {
+      strokeSegment(ctx, cx - half, y, cx + half, y, lineWidth);
+    }
+
     function drawStaticHighway(ctx, geom, colors, mode, style) {
       const cx = geom.cx;
       const horizonY = geom.horizonY;
       const baseY = geom.baseY;
       const nearHalf = geom.nearHalf;
       const farHalf = geom.farHalf;
+      const laneDepth = Math.max(1, baseY - horizonY);
       const lineWidthFactor = resolveLineWidthFactor(style);
+      const railWidth = Math.max(1.2, nearHalf * 0.012) * lineWidthFactor;
+      const crossbarWidth = Math.max(1, nearHalf * 0.009) * lineWidthFactor;
+      const seamWidth = Math.max(1, crossbarWidth * 0.7);
+      const horizonWidth = Math.max(1, railWidth * 0.9);
+      const stripeCount = mode === "high" ? 8 : (mode === "flat" ? 6 : 7);
 
       ctx.save();
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-
-      ctx.fillStyle = colors.warning;
-      ctx.globalAlpha = 0.07;
-      ctx.beginPath();
-      ctx.moveTo(cx - farHalf, horizonY);
-      ctx.lineTo(cx - nearHalf, baseY);
-      ctx.lineTo(cx - nearHalf * 0.86, baseY);
-      ctx.lineTo(cx - farHalf * 0.7, horizonY);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.moveTo(cx + farHalf, horizonY);
-      ctx.lineTo(cx + nearHalf, baseY);
-      ctx.lineTo(cx + nearHalf * 0.86, baseY);
-      ctx.lineTo(cx + farHalf * 0.7, horizonY);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.globalAlpha = 0.08;
-      ctx.fillStyle = colors.laylinePort;
-      ctx.beginPath();
-      ctx.moveTo(cx - farHalf, horizonY);
-      ctx.lineTo(cx, horizonY);
-      ctx.lineTo(cx, baseY);
-      ctx.lineTo(cx - nearHalf, baseY);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = colors.laylineStb;
-      ctx.beginPath();
-      ctx.moveTo(cx + farHalf, horizonY);
-      ctx.lineTo(cx, horizonY);
-      ctx.lineTo(cx, baseY);
-      ctx.lineTo(cx + nearHalf, baseY);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.globalAlpha = 0.75;
+      ctx.lineCap = "butt";
+      ctx.lineJoin = "miter";
       ctx.strokeStyle = colors.roadLine;
-      ctx.lineWidth = Math.max(1.2, nearHalf * 0.01) * lineWidthFactor;
-      ctx.beginPath();
-      ctx.moveTo(cx - farHalf, horizonY);
-      ctx.lineTo(cx - nearHalf, baseY);
-      ctx.moveTo(cx + farHalf, horizonY);
-      ctx.lineTo(cx + nearHalf, baseY);
-      ctx.stroke();
+      strokeSegment(ctx, cx - farHalf, horizonY, cx - nearHalf, baseY, railWidth);
+      strokeSegment(ctx, cx + farHalf, horizonY, cx + nearHalf, baseY, railWidth);
+      strokeCrossbar(ctx, cx, horizonY, farHalf, horizonWidth);
 
-      const stripeCount = mode === "high" ? 12 : 10;
       ctx.strokeStyle = colors.stripeLine;
-      for (let i = 0; i <= stripeCount; i += 1) {
-        const t = i / stripeCount;
-        const p = t * t;
-        const y = horizonY + (baseY - horizonY) * p;
-        const half = farHalf + (nearHalf - farHalf) * p;
+      for (let i = 1; i <= stripeCount; i += 1) {
+        const p = Math.pow(i / (stripeCount + 1), 1.65);
+        const y = lerp(horizonY, baseY, p);
+        const half = lerp(farHalf, nearHalf, p);
+        const crossbarHalf = Math.max(half * 0.72, half - railWidth * 0.45);
 
-        ctx.globalAlpha = 0.35 + p * 0.35;
-        ctx.lineWidth = Math.max(1, 0.8 + p * 1.8) * lineWidthFactor;
-        ctx.beginPath();
-        ctx.moveTo(cx - half, y);
-        ctx.lineTo(cx + half, y);
-        ctx.stroke();
-
-        const laneHalf = half * 0.42;
-        ctx.globalAlpha = 0.28;
-        ctx.beginPath();
-        ctx.moveTo(cx - laneHalf, y);
-        ctx.lineTo(cx - laneHalf * 0.9, y + 0.01);
-        ctx.moveTo(cx + laneHalf, y);
-        ctx.lineTo(cx + laneHalf * 0.9, y + 0.01);
-        ctx.stroke();
+        strokeCrossbar(ctx, cx, y, crossbarHalf, crossbarWidth);
+        if (i < stripeCount) {
+          const nextP = Math.pow((i + 1) / (stripeCount + 1), 1.65);
+          const nextY = lerp(horizonY, baseY, nextP);
+          const gapMid = (y + nextY) * 0.5;
+          const seamLen = clamp((nextY - y) * 0.42, 3, laneDepth * 0.08);
+          strokeSegment(ctx, cx, gapMid - seamLen * 0.5, cx, gapMid + seamLen * 0.5, seamWidth);
+        }
       }
-
-      ctx.globalAlpha = 0.8;
-      ctx.strokeStyle = colors.roadLine;
-      ctx.lineWidth = Math.max(1.2, nearHalf * 0.013) * lineWidthFactor;
-      ctx.beginPath();
-      ctx.moveTo(cx - farHalf, horizonY);
-      ctx.lineTo(cx + farHalf, horizonY);
-      ctx.stroke();
       ctx.restore();
     }
 
@@ -272,22 +240,18 @@
       const laneDepth = Math.max(1, baseY - horizonY);
       const markerLength = clamp(nearHalf * 0.11, 4, laneDepth * 0.24);
       const markerBeam = Math.max(3, markerLength * 0.62);
+      const centerlineWidth = Math.max(1.4, nearHalf * 0.016) * lineWidthFactor;
 
       ctx.save();
+      ctx.lineCap = "butt";
+      ctx.lineJoin = "miter";
       ctx.strokeStyle = colors.pointer;
-      ctx.lineWidth = Math.max(1.4, nearHalf * 0.018) * lineWidthFactor;
-      ctx.globalAlpha = 0.9;
-      ctx.beginPath();
-      ctx.moveTo(cx, horizonY);
-      ctx.lineTo(cx, baseY);
-      ctx.stroke();
+      strokeSegment(ctx, cx, horizonY, cx, baseY, centerlineWidth);
 
-      ctx.globalAlpha = 0.95;
       ctx.fillStyle = colors.pointer;
       drawBoatMarker(ctx, markerX, markerY, markerLength, markerBeam);
 
       if (overflow) {
-        ctx.globalAlpha = 0.95;
         ctx.fillStyle = colors.alarm;
         const edgeX = cx + (safeNorm >= 0 ? 1 : -1) * nearHalf * 0.93;
         const edgeR = Math.max(2.6, markerLength * 0.3);
