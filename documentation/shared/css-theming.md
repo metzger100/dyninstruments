@@ -1,17 +1,17 @@
 # CSS Theming
 
-**Status:** ✅ Implemented | plugin.css + runtime preset layer
+**Status:** ✅ Implemented | plugin.css + runtime token resolver
 
 ## Overview
 
-dyninstruments uses CSS custom properties for theming, scoped to `.dyniplugin` and `[data-dyni]`. All rendering reads colors and fonts from CSS, enabling automatic day/night adaptation.
+dyninstruments uses CSS custom properties for theming, scoped to `.dyniplugin` and `[data-dyni]`. Structural styles stay in `plugin.css`, while `ThemeResolver` merges explicit CSS token overrides with runtime preset/default values.
 
 Theme values are layered:
 
-1. Base defaults from `plugin.css` (`.widget.dyniplugin`, `[data-dyni]`)
-2. Optional runtime preset selector from `ThemePresets.apply(containerEl, presetName)` (`data-dyni-theme` on widget container)
-3. Optional user overrides from AvNav `user.css` (per-token and preset variable overrides)
-4. Day/night class-dependent CSS (`.nightMode ...`)
+1. Explicit CSS token overrides on the widget/canvas inheritance chain (typically AvNav `user.css`)
+2. Optional runtime preset selected via `ThemePresets.apply(containerEl, presetName)` (`data-dyni-theme` on widget container)
+3. Built-in `ThemeResolver` token defaults
+4. Day/night class-dependent CSS for structural styling (`.nightMode ...`)
 
 ## CSS Custom Properties
 
@@ -81,6 +81,7 @@ Read by `ThemeResolver.resolve(canvas)`:
 | `--dyni-font-weight` | Primary font weight | `700` |
 | `--dyni-label-weight` | Label font weight | `700` |
 | `--dyni-xte-line-width-factor` | XTE highway stroke thickness multiplier | `1.5` |
+| `--dyni-xte-boat-size-factor` | XTE boat indicator size multiplier | `1` |
 
 Pointer sizing semantics:
 - full rendered width: `max(8, floor(basePointerSize * widthFactor))`
@@ -99,8 +100,7 @@ Pointer sizing semantics:
 - `remove(containerEl)`:
   - removes `data-dyni-theme` from the container
 
-`plugin.css` contains the actual preset token overrides via plugin-scoped selectors like `.dyniplugin[data-dyni-theme="slim"]`.
-This keeps preset values scoped per widget container, CSS-inspectable, and compatible with user overrides.
+`ThemeResolver` reads `data-dyni-theme`, resolves the matching entry from `ThemePresets.PRESETS`, and uses that preset as the fallback layer before built-in token defaults.
 
 ### User CSS Overrides
 
@@ -113,7 +113,7 @@ Preset selection can be provided from AvNav `user.css` via `--dyni-theme-preset`
 }
 ```
 
-Per-token overrides can be applied in `user.css` and naturally override preset values:
+Per-token overrides can be applied in `user.css` and override preset values directly:
 
 ```css
 .widget.dyniplugin,
@@ -124,6 +124,7 @@ Per-token overrides can be applied in `user.css` and naturally override preset v
   --dyni-radial-arc-linewidth: 1.5;
   --dyni-linear-track-linewidth: 1.5;
   --dyni-xte-line-width-factor: 1.25;
+  --dyni-xte-boat-size-factor: 1.2;
 }
 ```
 
@@ -141,7 +142,7 @@ AvNav adds `.nightMode` class to the page root in night mode. CSS handles border
 }
 ```
 
-Night-mode border adaptation is CSS-only. `ThemeResolver` keeps one JS defaults map and reads live CSS each mode after cache invalidation.
+ Night-mode border adaptation is CSS-only. `ThemeResolver` keeps the token defaults/preset map in JS and re-reads explicit CSS overrides after cache invalidation.
 `Helpers` typography cache also tracks the current root `.nightMode` state per canvas; when the mode flips, the next `resolveTextColor()` / `resolveFontFamily()` call refreshes cached values from `getComputedStyle()`.
 
 ## Head Hiding
@@ -169,7 +170,7 @@ Canvas fills the full widget area:
 
 All component-level widget CSS files were removed. Visual styling remains canvas-driven, and shared theme/style rules are provided only via:
 
-- **plugin.css** — Plugin-wide styles (font, border, head hiding, canvas sizing)
+- **plugin.css** — Plugin-wide structural styles (font, border, head hiding, canvas sizing)
 
 ## File Location
 

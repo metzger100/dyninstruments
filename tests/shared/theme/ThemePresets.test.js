@@ -22,12 +22,14 @@ describe("ThemePresets", function () {
   function createApi() {
     const presetsMod = loadFresh("shared/theme/ThemePresets.js");
     return {
+      mod: presetsMod,
       api: presetsMod.create()
     };
   }
 
   it("exposes all expected preset names and empty default preset", function () {
-    const { api } = createApi();
+    const { mod, api } = createApi();
+    expect(mod.PRESETS).toBe(mod.create.PRESETS);
     expect(Object.keys(api.presets).sort()).toEqual(["bold", "default", "highcontrast", "night", "slim"]);
     expect(api.presets.default).toEqual({});
   });

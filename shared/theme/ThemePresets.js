@@ -5,9 +5,20 @@
  * Thickness hierarchy: slim < default < bold; only stroke-related tokens shift.
  */
 (function (root, factory) {
-  if (typeof define === "function" && define.amd) define([], factory);
-  else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniThemePresets = factory(); }
+  if (typeof define === "function" && define.amd) {
+    define([], function () {
+      const mod = factory();
+      mod.PRESETS = mod.create.PRESETS;
+      return mod;
+    });
+  } else if (typeof module === "object" && module.exports) {
+    const mod = factory();
+    mod.PRESETS = mod.create.PRESETS;
+    module.exports = mod;
+  } else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniThemePresets = factory();
+    root.DyniComponents.DyniThemePresets.PRESETS = root.DyniComponents.DyniThemePresets.create.PRESETS;
+  }
 }(this, function () {
   "use strict";
 
@@ -108,6 +119,8 @@
       remove: remove
     };
   }
+
+  create.PRESETS = PRESETS;
 
   return { id: "ThemePresets", create };
 }));

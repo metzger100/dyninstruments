@@ -96,6 +96,28 @@ describe("XteHighwayPrimitives", function () {
     expect(largeArc.args[2]).toBeGreaterThan(smallArc.args[2]);
   });
 
+  it("scales the boat marker with configured boatSizeFactor", function () {
+    const draw = create();
+    const colors = { pointer: "#f00", alarm: "#f00" };
+    const baseCtx = createMockContext2D();
+    const scaledCtx = createMockContext2D();
+    const geom = {
+      cx: 150,
+      horizonY: 40,
+      baseY: 170,
+      nearHalf: 120
+    };
+
+    draw.drawDynamicHighway(baseCtx, geom, colors, 0.2, false, { boatSizeFactor: 1 });
+    draw.drawDynamicHighway(scaledCtx, geom, colors, 0.2, false, { boatSizeFactor: 1.5 });
+
+    const baseBoat = extractBoatPoints(baseCtx);
+    const scaledBoat = extractBoatPoints(scaledCtx);
+
+    expect(span(scaledBoat, "y")).toBeGreaterThan(span(baseBoat, "y"));
+    expect(span(scaledBoat, "x")).toBeGreaterThan(span(baseBoat, "x"));
+  });
+
   it("draws the static highway as stroke-only geometry with crisp line caps", function () {
     const draw = create();
     const ctx = createMockContext2D();

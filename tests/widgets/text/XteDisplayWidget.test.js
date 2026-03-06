@@ -213,13 +213,15 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.dynamicDraws[0].colors.pointer).toBe(harness.theme.colors.pointer);
     expect(harness.calls.dynamicDraws[0].colors.alarm).toBe(harness.theme.colors.alarm);
     expect(harness.calls.dynamicDraws[0].style.lineWidthFactor).toBe(1);
+    expect(harness.calls.dynamicDraws[0].style.boatSizeFactor).toBe(1);
   });
 
   it("applies xte line-width override while keeping shared theme colors", function () {
     const harness = createHarness({
       theme: {
         xte: {
-          lineWidthFactor: 1.7
+          lineWidthFactor: 1.7,
+          boatSizeFactor: 1.35
         }
       }
     });
@@ -231,13 +233,15 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.staticDraws[0].colors.roadLine).toBe("#ffffff");
     expect(harness.calls.staticDraws[0].colors.stripeLine).toBe("#ffffff");
     expect(harness.calls.dynamicDraws[0].style.lineWidthFactor).toBe(1.7);
+    expect(harness.calls.dynamicDraws[0].style.boatSizeFactor).toBe(1.35);
   });
 
-  it("falls back to default lineWidthFactor when xte value is invalid", function () {
+  it("falls back to default xte style factors when xte theme values are invalid", function () {
     const harness = createHarness({
       theme: {
         xte: {
-          lineWidthFactor: 0
+          lineWidthFactor: 0,
+          boatSizeFactor: -2
         }
       }
     });
@@ -249,6 +253,7 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.staticDraws[0].colors.roadLine).toBe("#ffffff");
     expect(harness.calls.staticDraws[0].colors.stripeLine).toBe("#ffffff");
     expect(harness.calls.dynamicDraws[0].style.lineWidthFactor).toBe(1);
+    expect(harness.calls.dynamicDraws[0].style.boatSizeFactor).toBe(1);
   });
 
   it("hides waypoint name before core metrics in constrained layouts", function () {
@@ -382,6 +387,28 @@ describe("XteDisplayWidget", function () {
     harness.theme.xte.lineWidthFactor = 1.8;
     harness.spec.renderCanvas(canvas, makeProps());
     expect(harness.calls.staticDraws).toHaveLength(2);
+  });
+
+  it("keeps the static cache when only xte boat size changes", function () {
+    const harness = createHarness({
+      theme: {
+        xte: {
+          boatSizeFactor: 1
+        }
+      }
+    });
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeProps());
+    expect(harness.calls.staticDraws).toHaveLength(1);
+    expect(harness.calls.dynamicDraws[0].style.boatSizeFactor).toBe(1);
+
+    harness.theme.xte.boatSizeFactor = 1.6;
+    harness.spec.renderCanvas(canvas, makeProps());
+
+    expect(harness.calls.staticDraws).toHaveLength(1);
+    expect(harness.calls.dynamicDraws).toHaveLength(2);
+    expect(harness.calls.dynamicDraws[1].style.boatSizeFactor).toBe(1.6);
   });
 
   it("keeps the static cache when only dynamic pointer/alarm colors change", function () {
