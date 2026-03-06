@@ -36,6 +36,7 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 - Sector bands render above the scale line so the track stroke remains visible.
 - Tick lengths/widths use `theme.linear.ticks.*`.
 - Pointer triangle uses `theme.linear.pointer.*` and `theme.colors.pointer`.
+- Waypoint/course markers scale from the rendered track thickness, end at the scale line, and render as flat rectangular bars instead of rounded caps.
 - Tick labels use `theme.linear.labels.insetFactor` and `theme.linear.labels.fontFactor`.
 - Caption/value rows use `captionUnitScale` in `high` and `flat`.
 
