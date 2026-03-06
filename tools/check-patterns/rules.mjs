@@ -9,6 +9,15 @@ import {
 } from "./rules-core.mjs";
 import { runDuplicateBlockClones, runDuplicateFunctions } from "./rules-duplicates.mjs";
 import {
+  runCatchFallbackWithoutSuppressionRule,
+  runCssJsDefaultDuplicationRule,
+  runHardcodedRuntimeDefaultRule,
+  runInternalHookFallbackRule,
+  runInvalidLintSuppressionRule,
+  runPrematureLegacySupportRule,
+  runRedundantNullTypeGuardRule
+} from "./rules-failfast.mjs";
+import {
   runClusterRendererClusterPrefixRule,
   runMapperLogicLeakageRule,
   runMapperOutputComplexityRule
@@ -23,6 +32,15 @@ const ALLOWLISTED_ORCHESTRATION_FUNCTIONS = new Set([
 ]);
 
 export const RULES = [
+  {
+    name: "invalid-lint-suppression",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runInvalidLintSuppressionRule,
+    message: ({ file, line, detail }) => `[invalid-lint-suppression] ${file}:${line}\n${detail}`
+  },
   {
     name: "duplicate-functions",
     scope: {
@@ -65,6 +83,16 @@ export const RULES = [
     detect: /catch\s*\([^)]*\)\s*\{\s*\}/g,
     allowlist: [],
     message: ({ file, line }) => `[empty-catch] ${file}:${line}\nEmpty catch block swallows errors silently. Either:\n1. Add a comment explaining why: catch(e) { /* intentional: avnav may be absent */ }\n2. Log the error: catch(e) { console.warn('...', e); }\n3. Use Helpers.applyFormatter() which handles this centrally.\nSee core-principles.md #11.`
+  },
+  {
+    name: "catch-fallback-without-suppression",
+    severity: "warn",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runCatchFallbackWithoutSuppressionRule,
+    message: ({ file, line, expression }) => `[catch-fallback-without-suppression] ${file}:${line}\nNon-rethrow catch detected (${expression}). Fail-fast policy requires an inline rule-specific suppression comment for intentional fallback catches.`
   },
   {
     name: "console-in-widgets",
@@ -128,6 +156,56 @@ export const RULES = [
       }
       return `[redundant-internal-fallback] ${file}:${line}\nRedundant fallback (${expression}) for prop '${propName}'. Renderer '${rendererId}' guarantees this prop via mapper kind-default contracts.`;
     }
+  },
+  {
+    name: "internal-hook-fallback",
+    severity: "warn",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runInternalHookFallbackRule,
+    message: ({ file, line, expression }) => `[internal-hook-fallback] ${file}:${line}\nInternal hook/spec fallback detected (${expression}). Keep defaults at the boundary and avoid re-sanitizing internal hook results.`
+  },
+  {
+    name: "redundant-null-type-guard",
+    severity: "warn",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runRedundantNullTypeGuardRule,
+    message: ({ file, line, expression }) => `[redundant-null-type-guard] ${file}:${line}\nRedundant internal null/type guard (${expression}). Trust validated internal contracts instead of silently sanitizing again.`
+  },
+  {
+    name: "hardcoded-runtime-default",
+    severity: "warn",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runHardcodedRuntimeDefaultRule,
+    message: ({ file, line, expression }) => `[hardcoded-runtime-default] ${file}:${line}\nHardcoded runtime fallback/default detected (${expression}). Prefer declarative config or boundary-owned defaults over inline literals.`
+  },
+  {
+    name: "css-js-default-duplication",
+    severity: "warn",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runCssJsDefaultDuplicationRule,
+    message: ({ file, line, expression }) => `[css-js-default-duplication] ${file}:${line}\nJS duplicates CSS/theme defaults (${expression}). Keep theme/token defaults in the CSS or theme boundary layer only.`
+  },
+  {
+    name: "premature-legacy-support",
+    severity: "warn",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runPrematureLegacySupportRule,
+    message: ({ file, line, expression }) => `[premature-legacy-support] ${file}:${line}\nPremature legacy/compatibility support detected (${expression}). Remove speculative fallback/compat paths unless an active boundary contract requires them.`
   },
   {
     name: "formatter-availability-heuristic",
