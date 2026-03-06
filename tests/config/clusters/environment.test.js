@@ -22,11 +22,21 @@ describe("config/clusters/environment.js", function () {
     expect(def.name).toBe("dyninstruments_Environment");
     expect(def.storeKeys.depth).toBe("nav.gps.depthBelowTransducer");
     expect(def.editableParameters.kind.default).toBe("depth");
+    expect(def.editableParameters.kind.name).toBe("Instrument");
     const kinds = def.editableParameters.kind.list.map((entry) => entry.value);
     expect(kinds).toEqual(expect.arrayContaining(["depthLinear", "tempLinear"]));
     expect(def.editableParameters.depthLinearRatioThresholdNormal.internal).toBe(true);
     expect(def.editableParameters.tempRadialRatioThresholdFlat.internal).toBe(true);
     expect(def.editableParameters.captionUnitScale.internal).not.toBe(true);
+    expect(def.editableParameters.tempKey.name).toBe("Temperature store path");
+    expect(def.editableParameters.value.name).toBe("Pressure store path");
+    expect(def.editableParameters.depthLinearTickMajor.name).toBe("Major tick step");
+    expect(def.editableParameters.depthLinearShowEndLabels.name).toBe("Show min/max labels");
+    expect(def.editableParameters.depthRadialWarningEnabled.name).toBe("Show warning sector");
+    expect(def.editableParameters.depthLinearAlarmFrom.name).toBe("Alarm at or below");
+    expect(def.editableParameters.tempLinearWarningFrom.name).toBe("Warning at or above");
+    expect(def.editableParameters.tempRadialAlarmFrom.name).toBe("Alarm at or above");
+    expect(def.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
   });
 
   it("injects pressure store key from value when pressure kind is active", function () {

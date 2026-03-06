@@ -43,7 +43,7 @@
             opt("Linear — Apparent wind (AWA/AWS)", "angleApparentLinear")
           ],
           default: "angleTrue",
-          name: "Kind"
+          name: "Instrument"
         },
 
         leadingZero: {
@@ -90,17 +90,17 @@
         },
         windLinearTickMajor: {
           type: "FLOAT", min: 1, max: 180, step: 1, default: 30,
-          name: "Major tick step (linear)",
+          name: "Major tick step",
           condition: [{ kind: "angleTrueLinear" }, { kind: "angleApparentLinear" }]
         },
         windLinearTickMinor: {
           type: "FLOAT", min: 1, max: 90, step: 1, default: 10,
-          name: "Minor tick step (linear)",
+          name: "Minor tick step",
           condition: [{ kind: "angleTrueLinear" }, { kind: "angleApparentLinear" }]
         },
         windLinearShowEndLabels: {
           type: "BOOLEAN", default: false,
-          name: "Show min/max labels (linear)",
+          name: "Show min/max labels",
           condition: [{ kind: "angleTrueLinear" }, { kind: "angleApparentLinear" }]
         },
 
@@ -139,7 +139,7 @@
         },
         windRadialLayMin: {
           type: "FLOAT", min: 0, max: 180, step: 1, default: 25,
-          name: "Layline min °",
+          name: "Min layline angle",
           condition: [
             { kind: "angleTrueRadial", windRadialLayEnabled: true },
             { kind: "angleApparentRadial", windRadialLayEnabled: true }
@@ -147,7 +147,7 @@
         },
         windRadialLayMax: {
           type: "FLOAT", min: 0, max: 180, step: 1, default: 45,
-          name: "Layline max °",
+          name: "Max layline angle",
           condition: [
             { kind: "angleTrueRadial", windRadialLayEnabled: true },
             { kind: "angleApparentRadial", windRadialLayEnabled: true }
@@ -156,12 +156,12 @@
         windLinearLayEnabled: {
           type: "BOOLEAN",
           default: true,
-          name: "Layline sectors enabled (linear)",
+          name: "Layline sectors enabled",
           condition: [{ kind: "angleTrueLinear" }, { kind: "angleApparentLinear" }]
         },
         windLinearLayMin: {
           type: "FLOAT", min: 0, max: 180, step: 1, default: 25,
-          name: "Layline min ° (linear)",
+          name: "Min layline angle",
           condition: [
             { kind: "angleTrueLinear", windLinearLayEnabled: true },
             { kind: "angleApparentLinear", windLinearLayEnabled: true }
@@ -169,7 +169,7 @@
         },
         windLinearLayMax: {
           type: "FLOAT", min: 0, max: 180, step: 1, default: 45,
-          name: "Layline max ° (linear)",
+          name: "Max layline angle",
           condition: [
             { kind: "angleTrueLinear", windLinearLayEnabled: true },
             { kind: "angleApparentLinear", windLinearLayEnabled: true }
@@ -179,7 +179,7 @@
         // Shared caption/unit-to-value scale applies to numeric, radial, and linear
         captionUnitScale: {
           type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
-          name: "Caption/Unit to Value scale"
+          name: "Caption/Unit size"
         },
 
         caption: false,

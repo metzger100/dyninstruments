@@ -25,6 +25,7 @@ describe("config/clusters/vessel.js", function () {
     expect(def.storeKeys.pitch).toBe("nav.gps.signalk.navigation.attitude.pitch");
     expect(def.storeKeys.roll).toBe("nav.gps.signalk.navigation.attitude.roll");
     expect(def.editableParameters.kind.default).toBe("voltage");
+    expect(def.editableParameters.kind.name).toBe("Instrument");
     const kinds = def.editableParameters.kind.list.map((entry) => entry.value);
     expect(kinds).toEqual(expect.arrayContaining([
       "voltage",
@@ -38,6 +39,9 @@ describe("config/clusters/vessel.js", function () {
     ]));
     expect(def.editableParameters.pitchKey.default).toBe("nav.gps.signalk.navigation.attitude.pitch");
     expect(def.editableParameters.rollKey.default).toBe("nav.gps.signalk.navigation.attitude.roll");
+    expect(def.editableParameters.value.name).toBe("Voltage store path");
+    expect(def.editableParameters.pitchKey.name).toBe("Pitch store path");
+    expect(def.editableParameters.rollKey.name).toBe("Roll store path");
     expect(def.editableParameters.dateTimeRatioThresholdNormal.default).toBe(1.2);
     expect(def.editableParameters.dateTimeRatioThresholdFlat.default).toBe(4.0);
     expect(def.editableParameters.dateTimeRatioThresholdNormal.condition).toEqual({ kind: "dateTime" });
@@ -45,6 +49,7 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.dateTimeRatioThresholdNormal.internal).toBe(true);
     expect(def.editableParameters.dateTimeRatioThresholdFlat.internal).toBe(true);
     expect(def.editableParameters.captionUnitScale.internal).not.toBe(true);
+    expect(def.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
 
     expect(def.editableParameters.voltageRadialMinValue).toBeTruthy();
     expect(def.editableParameters.voltageRadialMaxValue).toBeTruthy();
@@ -79,6 +84,11 @@ describe("config/clusters/vessel.js", function () {
     });
     expect(def.editableParameters.voltageLinearRatioThresholdNormal.internal).toBe(true);
     expect(def.editableParameters.voltageRadialRatioThresholdFlat.internal).toBe(true);
+    expect(def.editableParameters.voltageLinearTickMajor.name).toBe("Major tick step");
+    expect(def.editableParameters.voltageLinearShowEndLabels.name).toBe("Show min/max labels");
+    expect(def.editableParameters.voltageRadialWarningEnabled.name).toBe("Show warning sector");
+    expect(def.editableParameters.voltageLinearAlarmFrom.name).toBe("Alarm at or below");
+    expect(def.editableParameters.voltageRadialWarningFrom.name).toBe("Warning at or below");
   });
 
   it("injects selected voltage path into storeKeys.value for voltage kinds", function () {

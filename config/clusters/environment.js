@@ -38,14 +38,14 @@
             opt("Pressure (SignalK)", "pressure")
           ],
           default: "depth",
-          name: "Kind"
+          name: "Instrument"
         },
 
         // Temperature source (for BOTH numeric + radial); empty -> default waterTemp
         tempKey: {
           type: "KEY",
           default: "",
-          name: "SignalK path (temperature)",
+          name: "Temperature store path",
           condition: [{ kind: "temp" }, { kind: "tempLinear" }, { kind: "tempRadial" }]
         },
 
@@ -53,58 +53,58 @@
         value: {
           type: "KEY",
           default: "",
-          name: "SignalK path (pressure)",
+          name: "Pressure store path",
           condition: { kind: "pressure" }
         },
 
         // ---------------- DepthLinearWidget (linear) settings ------------------------
         depthLinearMinValue: {
           type: "FLOAT", min: 0, max: 200, step: 0.5, default: 0,
-          name: "Min depth (linear)",
+          name: "Min depth",
           condition: { kind: "depthLinear" }
         },
         depthLinearMaxValue: {
           type: "FLOAT", min: 1, max: 500, step: 0.5, default: 30,
-          name: "Max depth (linear)",
+          name: "Max depth",
           condition: { kind: "depthLinear" }
         },
         depthLinearTickMajor: {
           type: "FLOAT", min: 0.5, max: 200, step: 0.5, default: 5,
-          name: "Major tick step (linear)",
+          name: "Major tick step",
           condition: { kind: "depthLinear" }
         },
         depthLinearTickMinor: {
           type: "FLOAT", min: 0.1, max: 100, step: 0.1, default: 1,
-          name: "Minor tick step (linear)",
+          name: "Minor tick step",
           condition: { kind: "depthLinear" }
         },
         depthLinearShowEndLabels: {
           type: "BOOLEAN", default: false,
-          name: "Show min/max labels (linear)",
+          name: "Show min/max labels",
           condition: { kind: "depthLinear" }
         },
 
         depthLinearWarningEnabled: {
           type: "BOOLEAN",
           default: true,
-          name: "Warning sector enabled (linear)",
+          name: "Show warning sector",
           condition: { kind: "depthLinear" }
         },
         depthLinearAlarmEnabled: {
           type: "BOOLEAN",
           default: true,
-          name: "Alarm sector enabled (linear)",
+          name: "Show alarm sector",
           condition: { kind: "depthLinear" }
         },
 
         depthLinearAlarmFrom: {
           type: "FLOAT", min: 0, max: 500, step: 0.5, default: 2.0,
-          name: "Alarm to (shallow, linear)",
+          name: "Alarm at or below",
           condition: { kind: "depthLinear", depthLinearAlarmEnabled: true }
         },
         depthLinearWarningFrom: {
           type: "FLOAT", min: 0, max: 500, step: 0.5, default: 5.0,
-          name: "Warning to (shallow, linear)",
+          name: "Warning at or below",
           condition: { kind: "depthLinear", depthLinearWarningEnabled: true }
         },
 
@@ -152,24 +152,24 @@
         depthRadialWarningEnabled: {
           type: "BOOLEAN",
           default: true,
-          name: "Warning sector enabled",
+          name: "Show warning sector",
           condition: { kind: "depthRadial" }
         },
         depthRadialAlarmEnabled: {
           type: "BOOLEAN",
           default: true,
-          name: "Alarm sector enabled",
+          name: "Show alarm sector",
           condition: { kind: "depthRadial" }
         },
 
         depthRadialAlarmFrom: {
           type: "FLOAT", min: 0, max: 500, step: 0.5, default: 2.0,
-          name: "Alarm to (shallow)",
+          name: "Alarm at or below",
           condition: { kind: "depthRadial", depthRadialAlarmEnabled: true }
         },
         depthRadialWarningFrom: {
           type: "FLOAT", min: 0, max: 500, step: 0.5, default: 5.0,
-          name: "Warning to (shallow)",
+          name: "Warning at or below",
           condition: { kind: "depthRadial", depthRadialWarningEnabled: true }
         },
 
@@ -189,51 +189,51 @@
         // -------------- TemperatureLinearWidget (linear) settings --------------------
         tempLinearMinValue: {
           type: "FLOAT", min: -50, max: 200, step: 0.5, default: 0,
-          name: "Min temp (linear)",
+          name: "Min temp",
           condition: { kind: "tempLinear" }
         },
         tempLinearMaxValue: {
           type: "FLOAT", min: -40, max: 300, step: 0.5, default: 35,
-          name: "Max temp (linear)",
+          name: "Max temp",
           condition: { kind: "tempLinear" }
         },
         tempLinearTickMajor: {
           type: "FLOAT", min: 0.5, max: 100, step: 0.5, default: 5,
-          name: "Major tick step (linear)",
+          name: "Major tick step",
           condition: { kind: "tempLinear" }
         },
         tempLinearTickMinor: {
           type: "FLOAT", min: 0.1, max: 50, step: 0.1, default: 1,
-          name: "Minor tick step (linear)",
+          name: "Minor tick step",
           condition: { kind: "tempLinear" }
         },
         tempLinearShowEndLabels: {
           type: "BOOLEAN", default: false,
-          name: "Show min/max labels (linear)",
+          name: "Show min/max labels",
           condition: { kind: "tempLinear" }
         },
 
         tempLinearWarningEnabled: {
           type: "BOOLEAN",
           default: false,
-          name: "Warning sector enabled (linear)",
+          name: "Show warning sector",
           condition: { kind: "tempLinear" }
         },
         tempLinearAlarmEnabled: {
           type: "BOOLEAN",
           default: false,
-          name: "Alarm sector enabled (linear)",
+          name: "Show alarm sector",
           condition: { kind: "tempLinear" }
         },
 
         tempLinearWarningFrom: {
           type: "FLOAT", min: -50, max: 1000, step: 0.5, default: 28,
-          name: "Warning from (linear)",
+          name: "Warning at or above",
           condition: { kind: "tempLinear", tempLinearWarningEnabled: true }
         },
         tempLinearAlarmFrom: {
           type: "FLOAT", min: -50, max: 1000, step: 0.5, default: 32,
-          name: "Alarm from (linear)",
+          name: "Alarm at or above",
           condition: { kind: "tempLinear", tempLinearAlarmEnabled: true }
         },
 
@@ -281,25 +281,25 @@
         tempRadialWarningEnabled: {
           type: "BOOLEAN",
           default: false,
-          name: "Warning sector enabled",
+          name: "Show warning sector",
           condition: { kind: "tempRadial" }
         },
         tempRadialAlarmEnabled: {
           type: "BOOLEAN",
           default: false,
-          name: "Alarm sector enabled",
+          name: "Show alarm sector",
           condition: { kind: "tempRadial" }
         },
 
         // Sensible defaults (but hidden unless enabled)
         tempRadialWarningFrom: {
           type: "FLOAT", min: -50, max: 1000, step: 0.5, default: 28,
-          name: "Warning from",
+          name: "Warning at or above",
           condition: { kind: "tempRadial", tempRadialWarningEnabled: true }
         },
         tempRadialAlarmFrom: {
           type: "FLOAT", min: -50, max: 1000, step: 0.5, default: 32,
-          name: "Alarm from",
+          name: "Alarm at or above",
           condition: { kind: "tempRadial", tempRadialAlarmEnabled: true }
         },
 
@@ -319,7 +319,7 @@
         // Shared scale (numeric + radial)
         captionUnitScale: {
           type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
-          name: "Caption/Unit to Value scale"
+          name: "Caption/Unit size"
         },
 
         caption: false,

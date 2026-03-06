@@ -28,6 +28,7 @@ describe("config/clusters/nav.js", function () {
     expect(def.storeKeys.dtw).toBe("nav.wp.distance");
     expect(def.storeKeys.wpName).toBe("nav.wp.name");
     expect(def.editableParameters.kind.default).toBe("eta");
+    expect(def.editableParameters.kind.name).toBe("Instrument");
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "xteDisplay")).toBe(true);
     expect(def.editableParameters.leadingZero.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.xteRatioThresholdNormal.condition).toEqual({ kind: "xteDisplay" });
@@ -57,6 +58,7 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.ratioThresholdNormal.internal).toBe(true);
     expect(def.editableParameters.ratioThresholdFlat.internal).toBe(true);
     expect(def.editableParameters.captionUnitScale.internal).not.toBe(true);
+    expect(def.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
     expect(def.editableParameters.caption_xteDisplay).toBeUndefined();
     expect(def.editableParameters.unit_xteDisplay).toBeUndefined();
     expect(def.editableParameters.caption_xteDisplayXte.condition).toEqual({ kind: "xteDisplay" });

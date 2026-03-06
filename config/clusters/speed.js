@@ -34,7 +34,7 @@
             opt("SpeedRadialWidget — STW [Radial]", "stwRadial")
           ],
           default: "sog",
-          name: "Kind"
+          name: "Instrument"
         },
 
         // ThreeValueTextWidget thresholds — only numeric kinds
@@ -67,44 +67,44 @@
 
         speedLinearMinValue: {
           type: "FLOAT", min: 0, max: 200, step: 0.5, default: 0,
-          name: "Min speed (linear)",
+          name: "Min speed",
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearMaxValue: {
           type: "FLOAT", min: 1, max: 200, step: 0.5, default: 30,
-          name: "Max speed (linear)",
+          name: "Max speed",
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearTickMajor: {
           type: "FLOAT", min: 0.5, max: 100, step: 0.5, default: 5,
-          name: "Major tick step (linear)",
+          name: "Major tick step",
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearTickMinor: {
           type: "FLOAT", min: 0.1, max: 50, step: 0.1, default: 1,
-          name: "Minor tick step (linear)",
+          name: "Minor tick step",
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearShowEndLabels: {
           type: "BOOLEAN", default: false,
-          name: "Show min/max labels (linear)",
+          name: "Show min/max labels",
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearWarningEnabled: {
           type: "BOOLEAN",
           default: true,
-          name: "Warning sector enabled (linear)",
+          name: "Show warning sector",
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearAlarmEnabled: {
           type: "BOOLEAN",
           default: true,
-          name: "Alarm sector enabled (linear)",
+          name: "Show alarm sector",
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearWarningFrom: {
           type: "FLOAT", min: 0, max: 200, step: 0.5, default: 20,
-          name: "Warning from (linear)",
+          name: "Warning at or above",
           condition: [
             { kind: "sogLinear", speedLinearWarningEnabled: true },
             { kind: "stwLinear", speedLinearWarningEnabled: true }
@@ -112,7 +112,7 @@
         },
         speedLinearAlarmFrom: {
           type: "FLOAT", min: 0, max: 200, step: 0.5, default: 25,
-          name: "Alarm from (linear)",
+          name: "Alarm at or above",
           condition: [
             { kind: "sogLinear", speedLinearAlarmEnabled: true },
             { kind: "stwLinear", speedLinearAlarmEnabled: true }
@@ -166,20 +166,20 @@
         speedRadialWarningEnabled: {
           type: "BOOLEAN",
           default: true,
-          name: "Warning sector enabled",
+          name: "Show warning sector",
           condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
         speedRadialAlarmEnabled: {
           type: "BOOLEAN",
           default: true,
-          name: "Alarm sector enabled",
+          name: "Show alarm sector",
           condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
 
         // SpeedRadialWidget sectors (only show when enabled)
         speedRadialWarningFrom: {
           type: "FLOAT", min: 0, max: 200, step: 0.5, default: 20,
-          name: "Warning from",
+          name: "Warning at or above",
           condition: [
             { kind: "sogRadial", speedRadialWarningEnabled: true },
             { kind: "stwRadial", speedRadialWarningEnabled: true }
@@ -187,7 +187,7 @@
         },
         speedRadialAlarmFrom: {
           type: "FLOAT", min: 0, max: 200, step: 0.5, default: 25,
-          name: "Alarm from",
+          name: "Alarm at or above",
           condition: [
             { kind: "sogRadial", speedRadialAlarmEnabled: true },
             { kind: "stwRadial", speedRadialAlarmEnabled: true }
@@ -197,7 +197,7 @@
         // Shared caption/unit-to-value scale (used by SpeedRadialWidget + also fine for numeric)
         captionUnitScale: {
           type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
-          name: "Caption/Unit to Value scale"
+          name: "Caption/Unit size"
         },
 
         caption: false,

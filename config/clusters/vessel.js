@@ -44,77 +44,77 @@
             opt("SignalK roll", "roll")
           ],
           default: "voltage",
-          name: "Kind"
+          name: "Instrument"
         },
 
         // Voltage source (SignalK) for voltage kinds
         value: {
           type: "KEY",
           default: "",
-          name: "SignalK path (voltage)",
+          name: "Voltage store path",
           condition: [{ kind: "voltage" }, { kind: "voltageLinear" }, { kind: "voltageRadial" }]
         },
         pitchKey: {
           type: "KEY",
           default: DEFAULT_PITCH_KEY,
-          name: "SignalK path (pitch)",
+          name: "Pitch store path",
           condition: { kind: "pitch" }
         },
         rollKey: {
           type: "KEY",
           default: DEFAULT_ROLL_KEY,
-          name: "SignalK path (roll)",
+          name: "Roll store path",
           condition: { kind: "roll" }
         },
 
         // ---------------- VoltageLinearWidget (linear) settings -------------------
         voltageLinearMinValue: {
           type: "FLOAT", min: 0, max: 60, step: 0.1, default: 7.0,
-          name: "Min voltage (linear)",
+          name: "Min voltage",
           condition: { kind: "voltageLinear" }
         },
         voltageLinearMaxValue: {
           type: "FLOAT", min: 1, max: 80, step: 0.1, default: 15.0,
-          name: "Max voltage (linear)",
+          name: "Max voltage",
           condition: { kind: "voltageLinear" }
         },
         voltageLinearTickMajor: {
           type: "FLOAT", min: 0.1, max: 20, step: 0.1, default: 1.0,
-          name: "Major tick step (linear)",
+          name: "Major tick step",
           condition: { kind: "voltageLinear" }
         },
         voltageLinearTickMinor: {
           type: "FLOAT", min: 0.1, max: 10, step: 0.1, default: 0.2,
-          name: "Minor tick step (linear)",
+          name: "Minor tick step",
           condition: { kind: "voltageLinear" }
         },
         voltageLinearShowEndLabels: {
           type: "BOOLEAN", default: false,
-          name: "Show min/max labels (linear)",
+          name: "Show min/max labels",
           condition: { kind: "voltageLinear" }
         },
 
         voltageLinearWarningEnabled: {
           type: "BOOLEAN",
           default: true,
-          name: "Warning sector enabled (linear)",
+          name: "Show warning sector",
           condition: { kind: "voltageLinear" }
         },
         voltageLinearAlarmEnabled: {
           type: "BOOLEAN",
           default: true,
-          name: "Alarm sector enabled (linear)",
+          name: "Show alarm sector",
           condition: { kind: "voltageLinear" }
         },
 
         voltageLinearAlarmFrom: {
           type: "FLOAT", min: 0, max: 80, step: 0.1, default: 11.6,
-          name: "Alarm to (low, linear)",
+          name: "Alarm at or below",
           condition: { kind: "voltageLinear", voltageLinearAlarmEnabled: true }
         },
         voltageLinearWarningFrom: {
           type: "FLOAT", min: 0, max: 80, step: 0.1, default: 12.2,
-          name: "Warning to (low, linear)",
+          name: "Warning at or below",
           condition: { kind: "voltageLinear", voltageLinearWarningEnabled: true }
         },
 
@@ -162,25 +162,25 @@
         voltageRadialWarningEnabled: {
           type: "BOOLEAN",
           default: true,
-          name: "Warning sector enabled",
+          name: "Show warning sector",
           condition: { kind: "voltageRadial" }
         },
         voltageRadialAlarmEnabled: {
           type: "BOOLEAN",
           default: true,
-          name: "Alarm sector enabled",
+          name: "Show alarm sector",
           condition: { kind: "voltageRadial" }
         },
 
         // low-end sectors (DepthRadialWidget-Regeln)
         voltageRadialAlarmFrom: {
           type: "FLOAT", min: 0, max: 80, step: 0.1, default: 11.6,
-          name: "Alarm to (low)",
+          name: "Alarm at or below",
           condition: { kind: "voltageRadial", voltageRadialAlarmEnabled: true }
         },
         voltageRadialWarningFrom: {
           type: "FLOAT", min: 0, max: 80, step: 0.1, default: 12.2,
-          name: "Warning to (low)",
+          name: "Warning at or below",
           condition: { kind: "voltageRadial", voltageRadialWarningEnabled: true }
         },
 
@@ -200,7 +200,7 @@
         // Shared scale
         captionUnitScale: {
           type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
-          name: "Caption/Unit to Value scale"
+          name: "Caption/Unit size"
         },
 
         caption: false,
