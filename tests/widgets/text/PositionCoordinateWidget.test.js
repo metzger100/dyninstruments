@@ -238,6 +238,47 @@ describe("PositionCoordinateWidget", function () {
     }));
   });
 
+  it("supports the dateTime display variant without wrapper props", function () {
+    const rawClock = new Date("2026-02-22T15:00:00Z");
+    globalThis.avnav = {
+      api: {
+        formatter: {
+          formatDate(value) { return value === rawClock ? "DATE" : "DATE_BAD"; },
+          formatTime(value) { return value === rawClock ? "TIME" : "TIME_BAD"; }
+        }
+      }
+    };
+
+    const helpers = makeHelpers();
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
+      .create({}, helpers);
+
+    const ctx = createMockContext2D();
+    const canvas = createMockCanvas({
+      rectWidth: 420,
+      rectHeight: 100,
+      ctx
+    });
+
+    spec.renderCanvas(canvas, {
+      value: [rawClock, rawClock],
+      displayVariant: "dateTime",
+      ratioThresholdNormal: 1.35,
+      ratioThresholdFlat: 3.0,
+      default: "NA"
+    });
+
+    expect(fillTextValues(ctx)).toContain("DATE TIME");
+    expect(helpers.applyFormatter).toHaveBeenCalledWith(rawClock, expect.objectContaining({
+      formatter: "formatDate",
+      formatterParameters: []
+    }));
+    expect(helpers.applyFormatter).toHaveBeenCalledWith(rawClock, expect.objectContaining({
+      formatter: "formatTime",
+      formatterParameters: []
+    }));
+  });
+
   it("renders status circle on top line and formatted time on bottom in flat axis mode", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
     const statusFormatter = vi.fn((raw) => {
@@ -271,6 +312,42 @@ describe("PositionCoordinateWidget", function () {
     expect(fillTextValues(ctx)).toContain("🟢 TIME_OBJ");
     expect(statusFormatter).toHaveBeenCalledWith(true);
     expect(timeFormatter).toHaveBeenCalledWith(rawClock);
+  });
+
+  it("supports the timeStatus display variant without wrapper props", function () {
+    const rawClock = new Date("2026-02-22T15:00:00Z");
+    globalThis.avnav = {
+      api: {
+        formatter: {
+          formatTime(value) { return value === rawClock ? "TIME_OBJ" : "TIME_BAD"; }
+        }
+      }
+    };
+
+    const helpers = makeHelpers();
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
+      .create({}, helpers);
+
+    const ctx = createMockContext2D();
+    const canvas = createMockCanvas({
+      rectWidth: 420,
+      rectHeight: 100,
+      ctx
+    });
+
+    spec.renderCanvas(canvas, {
+      value: [rawClock, true],
+      displayVariant: "timeStatus",
+      ratioThresholdNormal: 1.0,
+      ratioThresholdFlat: 3.0,
+      default: "NA"
+    });
+
+    expect(fillTextValues(ctx)).toContain("🟢 TIME_OBJ");
+    expect(helpers.applyFormatter).toHaveBeenCalledWith(rawClock, expect.objectContaining({
+      formatter: "formatTime",
+      formatterParameters: []
+    }));
   });
 
   it("downscales timeStatus emoji lines in flat mode to avoid clipping", function () {

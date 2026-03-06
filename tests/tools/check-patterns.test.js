@@ -598,10 +598,10 @@ tiny();
     expect(out).toContain("VesselDateTimeRendererWrapper");
   });
 
-  it("allows role-based renderer wrapper ids in cluster/rendering", function () {
+  it("allows role-based ids in cluster/rendering", function () {
     const cwd = createWorkspace({
       "config/clusters/vessel.js": "\n",
-      "cluster/rendering/DateTimeRendererWrapper.js": "\n"
+      "cluster/rendering/RendererPropsWidget.js": "\n"
     });
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });

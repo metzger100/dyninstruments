@@ -128,27 +128,34 @@ describe("VesselMapper", function () {
     expect(clockOut.value).toBe(rawClock);
   });
 
-  it("maps dateTime to DateTimeRendererWrapper with thin mapper output", function () {
+  it("maps dateTime to PositionCoordinateWidget with direct variant props", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
-    const out = mapper.translate({ kind: "dateTime", clock: rawClock, default: "---" }, toolkit);
-    expect(out.renderer).toBe("DateTimeRendererWrapper");
-    expect(out.clock).toBe(rawClock);
+    const out = mapper.translate({
+      kind: "dateTime",
+      clock: rawClock,
+      dateTimeRatioThresholdNormal: "1.35",
+      dateTimeRatioThresholdFlat: "4.55",
+      default: "---"
+    }, toolkit);
+    expect(out.renderer).toBe("PositionCoordinateWidget");
+    expect(out.displayVariant).toBe("dateTime");
+    expect(out.value).toEqual([rawClock, rawClock]);
     expect(out.caption).toBe("");
     expect(out.unit).toBe("");
-    expect(out.value).toBeUndefined();
+    expect(out.ratioThresholdNormal).toBe(1.35);
+    expect(out.ratioThresholdFlat).toBe(4.55);
   });
 
-  it("maps timeStatus to TimeStatusRendererWrapper with thin mapper output", function () {
+  it("maps timeStatus to PositionCoordinateWidget with direct variant props", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const out = mapper.translate({ kind: "timeStatus", clock: rawClock, gpsValid: true, default: "---" }, toolkit);
-    expect(out.renderer).toBe("TimeStatusRendererWrapper");
-    expect(out.clock).toBe(rawClock);
-    expect(out.gpsValid).toBe(true);
+    expect(out.renderer).toBe("PositionCoordinateWidget");
+    expect(out.displayVariant).toBe("timeStatus");
+    expect(out.value).toEqual([rawClock, true]);
     expect(out.caption).toBe("");
     expect(out.unit).toBe("");
-    expect(out.value).toBeUndefined();
   });
 
   it("maps pitch and roll to formatDirection in signed-degree mode with radian input", function () {

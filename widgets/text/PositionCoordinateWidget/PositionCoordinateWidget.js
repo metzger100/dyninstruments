@@ -10,9 +10,20 @@
 }(this, function () {
   "use strict";
 
+  const DISPLAY_VARIANT_POSITION = "position";
+  const DISPLAY_VARIANT_DATE_TIME = "dateTime";
+  const DISPLAY_VARIANT_TIME_STATUS = "timeStatus";
   const STATUS_OK = "\ud83d\udfe2";
   const STATUS_BAD = "\ud83d\udd34";
   const TIME_STATUS_SCALE_LIMIT = 0.82;
+
+  function normalizeDisplayVariant(value) {
+    if (value === DISPLAY_VARIANT_DATE_TIME || value === DISPLAY_VARIANT_TIME_STATUS) {
+      return value;
+    }
+    return DISPLAY_VARIANT_POSITION;
+  }
+
   function readCoordinatePair(value, rawMode) {
     if (!value || typeof value !== "object") {
       return null;
@@ -29,6 +40,60 @@
     const lon = Number(lonRaw);
     return isFinite(lat) && isFinite(lon) ? { lat: lat, lon: lon } : null;
   }
+
+  function isGpsValid(value) {
+    if (value === true) {
+      return true;
+    }
+    if (value === false || value == null) {
+      return false;
+    }
+    if (typeof value === "number") {
+      return Number.isFinite(value) && value !== 0;
+    }
+    if (typeof value === "string") {
+      const text = value.trim().toLowerCase();
+      if (!text || text === "0" || text === "false" || text === "off" || text === "no") {
+        return false;
+      }
+      return true;
+    }
+    return !!value;
+  }
+
+  function statusCircleFormatter(raw) {
+    return isGpsValid(raw) ? STATUS_OK : STATUS_BAD;
+  }
+
+  function resolveVariantProps(props) {
+    const p = props || {};
+    const displayVariant = normalizeDisplayVariant(p.displayVariant);
+
+    if (displayVariant === DISPLAY_VARIANT_DATE_TIME) {
+      return {
+        ...p,
+        displayVariant: displayVariant,
+        coordinateFormatterLat: "formatDate",
+        coordinateFormatterLon: "formatTime",
+        coordinateFlatFromAxes: true,
+        coordinateRawValues: true
+      };
+    }
+
+    if (displayVariant === DISPLAY_VARIANT_TIME_STATUS) {
+      return {
+        ...p,
+        displayVariant: displayVariant,
+        coordinateFormatterLat: statusCircleFormatter,
+        coordinateFormatterLon: "formatTime",
+        coordinateFlatFromAxes: true,
+        coordinateRawValues: true
+      };
+    }
+
+    return p;
+  }
+
   function pickAxisFormatter(props, axis) {
     const p = props || {};
     const suffix = axis === "lat" ? "Lat" : "Lon";
@@ -84,7 +149,7 @@
     const text = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
     const fitCache = text.createFitCache(["flat", "stacked"]);
     function renderCanvas(canvas, props) {
-      const p = props || {};
+      const p = resolveVariantProps(props);
       const setup = Helpers.setupCanvas(canvas);
       const ctx = setup && setup.ctx;
       const W = setup && setup.W;

@@ -83,17 +83,20 @@
       }
       if (req === "dateTime") {
         return {
-          renderer: "DateTimeRendererWrapper",
-          clock: p.clock,
+          renderer: "PositionCoordinateWidget",
+          displayVariant: "dateTime",
+          value: [p.clock, p.clock],
           caption: cap("dateTime"),
-          unit: unit("dateTime")
+          unit: unit("dateTime"),
+          ratioThresholdNormal: num(p.dateTimeRatioThresholdNormal),
+          ratioThresholdFlat: num(p.dateTimeRatioThresholdFlat)
         };
       }
       if (req === "timeStatus") {
         return {
-          renderer: "TimeStatusRendererWrapper",
-          clock: p.clock,
-          gpsValid: p.gpsValid,
+          renderer: "PositionCoordinateWidget",
+          displayVariant: "timeStatus",
+          value: [p.clock, p.gpsValid],
           caption: cap("timeStatus"),
           unit: unit("timeStatus")
         };

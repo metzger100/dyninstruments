@@ -23,8 +23,7 @@
 - `makeAngleFormatter(isDirection, leadingZero, fallback)`
 4. Matching mapper module translates to either:
 - numeric output for `ThreeValueTextWidget` (default text kinds)
-- stacked pair output for `PositionCoordinateWidget` (`positionBoat`/`positionWp`)
-- vessel-specific stacked pair output via `DateTimeRendererWrapper` and `TimeStatusRendererWrapper` (both delegate rendering to `PositionCoordinateWidget`)
+- stacked pair or variant output for `PositionCoordinateWidget` (`positionBoat`/`positionWp`, vessel `dateTime`, vessel `timeStatus`)
 - graphic output with `renderer: "..."`
 5. `ClusterWidget.renderCanvas()` delegates to `ClusterRendererRouter`, which picks renderer by `props.renderer`
 6. `ClusterWidget.finalizeFunction()` fans out to all sub-renderers and tolerates renderer-local finalize errors
@@ -61,8 +60,8 @@ Mapper boundary:
 
 | kind | renderer path | store field(s) | raw unit/type | formatter contract |
 |---|---|---|---|---|
-| `dateTime` | `DateTimeRendererWrapper` -> `PositionCoordinateWidget` | `clock` | Date/time value | `formatDateTime` + axis formatters `formatDate`/`formatTime` |
-| `timeStatus` | `TimeStatusRendererWrapper` -> `PositionCoordinateWidget` | `gpsValid`, `clock` | bool-like + Date/time | status-circle formatter + `formatTime` |
+| `dateTime` | `PositionCoordinateWidget` (`displayVariant: "dateTime"`) | `clock` | Date/time value | axis formatters `formatDate`/`formatTime` |
+| `timeStatus` | `PositionCoordinateWidget` (`displayVariant: "timeStatus"`) | `gpsValid`, `clock` | bool-like + Date/time | status-circle formatter + `formatTime` |
 | `pitch` | default `ThreeValueTextWidget` path | `pitch` | radians number or `undefined` | **mandatory:** `formatDirection` + `[true, true, false]` |
 | `roll` | default `ThreeValueTextWidget` path | `roll` | radians number or `undefined` | **mandatory:** `formatDirection` + `[true, true, false]` |
 
@@ -73,9 +72,7 @@ Reference: [plugin-core-contracts.md](plugin-core-contracts.md), [../avnav-api/c
 `ClusterRendererRouter` manages these sub-renderers:
 
 - `ThreeValueTextWidget` (default fallback)
-- `PositionCoordinateWidget` (stacked pair renderer for nav positions; self-contained and no longer delegates flat mode to another widget)
-- `DateTimeRendererWrapper` (vessel date/time wrapper that forwards to `PositionCoordinateWidget`)
-- `TimeStatusRendererWrapper` (vessel gps-status/time wrapper that forwards to `PositionCoordinateWidget`)
+- `PositionCoordinateWidget` (stacked pair text renderer for nav positions plus vessel `dateTime` / `timeStatus` variants)
 - `WindRadialWidget`
 - `CompassRadialWidget`
 - `SpeedRadialWidget`
@@ -92,6 +89,23 @@ Reference: [plugin-core-contracts.md](plugin-core-contracts.md), [../avnav-api/c
 
 Naming boundary:
 - Components under `cluster/rendering/` use role-based IDs, not cluster-prefixed IDs.
+
+## `cluster/rendering/` Boundary
+
+What belongs in `cluster/rendering/`:
+
+- the router (`ClusterRendererRouter`)
+- router-owned generic infrastructure (`RendererPropsWidget`)
+- true sub-renderers whose primary responsibility is cluster-side rendering orchestration
+
+What does not belong in `cluster/rendering/`:
+
+- per-kind mapper-to-widget shim files that only forward props to a widget in `widgets/`
+- translation-only logic that belongs in mappers
+- adaptation logic that can live inside the target renderer as a renderer-owned variant contract
+
+Rule:
+- If multiple kinds share the same visual/layout contract, extend the existing renderer with a variant prop (for example `PositionCoordinateWidget` `displayVariant`) instead of adding a new cluster-side forwarding shim.
 
 ## Registration Rules for New Components
 

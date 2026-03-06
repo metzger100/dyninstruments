@@ -248,7 +248,7 @@ export const RULES = [
     },
     run: runClusterRendererClusterPrefixRule,
     allowlist: [],
-    message: ({ file, line, id, prefix }) => `[cluster-renderer-cluster-prefix] ${file}:${line}\nRenderer id '${id}' starts with cluster prefix '${prefix}'.\nUse role-based renderer names in cluster/rendering/ (for example 'DateTimeRendererWrapper' instead of '${prefix}${id.slice(prefix.length)}').`
+    message: ({ file, line, id, prefix }) => `[cluster-renderer-cluster-prefix] ${file}:${line}\nRenderer id '${id}' starts with cluster prefix '${prefix}'.\nUse role-based renderer names in cluster/rendering/ (for example 'RendererPropsWidget' instead of '${prefix}${id.slice(prefix.length)}').`
   },
   {
     name: "mapper-output-complexity",
