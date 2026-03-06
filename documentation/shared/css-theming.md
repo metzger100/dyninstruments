@@ -59,7 +59,7 @@ Read by `ThemeResolver.resolve(canvas)`:
 | `--dyni-radial-tick-major-width` | Major tick stroke width | `3` |
 | `--dyni-radial-tick-minor-len` | Minor tick length | `7` |
 | `--dyni-radial-tick-minor-width` | Minor tick stroke width | `1.5` |
-| `--dyni-radial-pointer-side` | Pointer side factor | `0.25` |
+| `--dyni-radial-pointer-width` | Pointer full-width factor | `1` |
 | `--dyni-radial-pointer-length` | Pointer length factor | `2` |
 | `--dyni-radial-arc-linewidth` | Arc line width | `2` |
 | `--dyni-radial-ring-width` | Ring width factor | `0.16` |
@@ -74,13 +74,19 @@ Read by `ThemeResolver.resolve(canvas)`:
 | `--dyni-linear-tick-major-width` | Linear major tick stroke width | `3` |
 | `--dyni-linear-tick-minor-len` | Linear minor tick length | `7` |
 | `--dyni-linear-tick-minor-width` | Linear minor tick stroke width | `1.5` |
-| `--dyni-linear-pointer-side` | Linear pointer side factor | `0.25` |
+| `--dyni-linear-pointer-width` | Linear pointer full-width factor | `1` |
 | `--dyni-linear-pointer-length` | Linear pointer length factor | `2` |
 | `--dyni-linear-label-inset` | Linear label inset factor | `1.8` |
 | `--dyni-linear-label-font` | Linear label font factor | `0.14` |
 | `--dyni-font-weight` | Primary font weight | `700` |
 | `--dyni-label-weight` | Label font weight | `700` |
 | `--dyni-xte-line-width-factor` | XTE highway stroke thickness multiplier | `1.5` |
+
+Pointer sizing semantics:
+- full rendered width: `max(8, floor(basePointerSize * widthFactor))`
+- rendered length: `max(8, floor(basePointerSize * lengthFactor))`
+- radial base size: unscaled `needleDepth`
+- linear base size: unscaled `pointerDepthBase` unless an explicit pixel `depth` override is supplied
 
 ### Preset Layer (ThemePresets)
 
@@ -113,6 +119,8 @@ Per-token overrides can be applied in `user.css` and naturally override preset v
 .widget.dyniplugin,
 [data-dyni] {
   --dyni-pointer: #00aaff;
+  --dyni-radial-pointer-width: 1.2;
+  --dyni-linear-pointer-width: 1.2;
   --dyni-radial-arc-linewidth: 1.5;
   --dyni-linear-track-linewidth: 1.5;
   --dyni-xte-line-width-factor: 1.25;

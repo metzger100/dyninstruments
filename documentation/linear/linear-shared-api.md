@@ -171,9 +171,13 @@ Reads `ThemeResolver` tokens:
 - `theme.linear.track.widthFactor`
 - `theme.linear.track.lineWidth`
 - `theme.linear.ticks.majorLen`, `majorWidth`, `minorLen`, `minorWidth`
-- `theme.linear.pointer.sideFactor`, `lengthFactor`
+- `theme.linear.pointer.widthFactor`, `lengthFactor`
 - `theme.linear.labels.insetFactor`, `fontFactor`
 - `theme.colors.pointer`, `theme.colors.warning`, `theme.colors.alarm`
+
+Default linear pointer sizing uses the same unscaled `pointerDepthBase` for both factors:
+- rendered length: `max(8, floor(pointerDepthBase * theme.linear.pointer.lengthFactor))`
+- full rendered width: `max(8, floor(pointerDepthBase * theme.linear.pointer.widthFactor))`
 
 ## Testing Contract for New Linear Wrappers
 

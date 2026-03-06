@@ -26,7 +26,7 @@ angleDeg = startDeg + (endDeg - startDeg) * ((value - min) / (max - min))
 | `R` | `min(floor(availW/2), floor(availH))`, min 14 | 100 |
 | `pad` | `max(6, floor(min(W,H) * 0.04))` | ~6 |
 | `gap` | `max(6, floor(min(W,H) * 0.03))` | ~6 |
-| `ringW` | `max(6, floor(R * theme.radial.ring.widthFactor))` (default `0.12`) | 12 |
+| `ringW` | `max(6, floor(R * theme.radial.ring.widthFactor))` (default `0.16`) | 12 |
 | `needleDepth` | `max(8, floor(R * 0.11))` | 10 |
 | `labelInset` | `max(18, floor(ringW * theme.radial.labels.insetFactor))` (default `1.8`) | 21 |
 | `labelFontPx` | `max(10, floor(R * theme.radial.labels.fontFactor))` (default `0.14`) | 14 |
@@ -62,12 +62,18 @@ draw.drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, {
   depth: needleDepth,
   fillStyle: theme.colors.pointer,
   variant: "long",
-  sideFactor: theme.radial.pointer.sideFactor,
+  widthFactor: theme.radial.pointer.widthFactor,
   lengthFactor: theme.radial.pointer.lengthFactor
 });
 ```
 
 Pointer color is passed directly via `fillStyle` from `theme.colors.pointer`.
+Pointer length and full rendered width both scale from the same base `needleDepth`:
+
+```text
+pointerLengthPx = max(8, floor(needleDepth * theme.radial.pointer.lengthFactor))
+pointerWidthPx = max(8, floor(needleDepth * theme.radial.pointer.widthFactor))
+```
 
 ## Sector Logic
 

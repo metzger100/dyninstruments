@@ -66,8 +66,9 @@ Ring stroke width: `theme.radial.ring.arcLineWidth` (default `1`).
 | Value pointer (dynamic) | `WindRadialWidget` | `display.angle` | `needleDepth` | `variant="long"`, `fillStyle=theme.colors.pointer` |
 
 Shared pointer shape controls:
-- `theme.radial.pointer.sideFactor` (`--dyni-radial-pointer-side`, default `0.25`)
+- `theme.radial.pointer.widthFactor` (`--dyni-radial-pointer-width`, default `1`)
 - `theme.radial.pointer.lengthFactor` (`--dyni-radial-pointer-length`, default `2`)
+- Both factors scale from the same unscaled `needleDepth`; width is the full rendered pointer width.
 
 ## Tick Rendering
 
@@ -125,7 +126,7 @@ Baseline cache scope/key/invalidation rules are defined in [../conventions/canva
 Included in static key:
 - Buffer/draw sizes: `canvas.width`, `canvas.height`, `W`, `H`, `dpr`
 - Geometry: `cx`, `cy`, `rOuter`, `ringW`, `labelInsetVal`, `labelPx`
-- Static style factors: ring/tick widths and lengths, pointer side/length factors, ring line width
+- Static style factors: ring/tick widths and lengths, pointer width/length factors, ring line width
 - Typography/style: `family`, `labelWeight`, resolved text color
 - Widget static payload from `buildStaticKey(state, props)`
 

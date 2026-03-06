@@ -28,7 +28,7 @@ describe("WindRadialWidget", function () {
           minorWidth: 2
         },
         pointer: {
-          sideFactor: 0.32,
+          widthFactor: 1.216,
           lengthFactor: 1.9
         },
         ring: {
@@ -191,7 +191,7 @@ describe("WindRadialWidget", function () {
           minorWidth: 2
         },
         pointer: {
-          sideFactor: 0.32,
+          widthFactor: 1.216,
           lengthFactor: 1.9
         },
         ring: {
@@ -334,7 +334,7 @@ describe("WindRadialWidget", function () {
     expect(laylineCalls[0].thickness).toBe(17);
     expect(laylineCalls[1].thickness).toBe(17);
     expect(pointerCalls[0].fillStyle).toBe(themeDefaults.colors.pointer);
-    expect(pointerCalls[0].sideFactor).toBe(themeDefaults.radial.pointer.sideFactor);
+    expect(pointerCalls[0].widthFactor).toBe(themeDefaults.radial.pointer.widthFactor);
     expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.radial.pointer.lengthFactor);
     expect(pointerCalls[0].depth).toBe(8);
     expect(ringCalls[0].lineWidth).toBe(themeDefaults.radial.ring.arcLineWidth);
@@ -408,7 +408,7 @@ describe("WindRadialWidget", function () {
                           minorWidth: 2
                         },
                         pointer: {
-                          sideFactor: 0.32,
+                          widthFactor: 1.216,
                           lengthFactor: 1.9
                         },
                         ring: {

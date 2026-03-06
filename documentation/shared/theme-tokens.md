@@ -42,7 +42,7 @@
 | `ticks.majorWidth` | `--dyni-radial-tick-major-width` | `3` | number |
 | `ticks.minorLen` | `--dyni-radial-tick-minor-len` | `7` | number |
 | `ticks.minorWidth` | `--dyni-radial-tick-minor-width` | `1.5` | number |
-| `pointer.sideFactor` | `--dyni-radial-pointer-side` | `0.25` | number |
+| `pointer.widthFactor` | `--dyni-radial-pointer-width` | `1` | number |
 | `pointer.lengthFactor` | `--dyni-radial-pointer-length` | `2` | number |
 | `ring.arcLineWidth` | `--dyni-radial-arc-linewidth` | `2` | number |
 | `ring.widthFactor` | `--dyni-radial-ring-width` | `0.16` | number |
@@ -57,7 +57,7 @@
 | `linear.ticks.majorWidth` | `--dyni-linear-tick-major-width` | `3` | number |
 | `linear.ticks.minorLen` | `--dyni-linear-tick-minor-len` | `7` | number |
 | `linear.ticks.minorWidth` | `--dyni-linear-tick-minor-width` | `1.5` | number |
-| `linear.pointer.sideFactor` | `--dyni-linear-pointer-side` | `0.25` | number |
+| `linear.pointer.widthFactor` | `--dyni-linear-pointer-width` | `1` | number |
 | `linear.pointer.lengthFactor` | `--dyni-linear-pointer-length` | `2` | number |
 | `linear.labels.insetFactor` | `--dyni-linear-label-inset` | `1.8` | number |
 | `linear.labels.fontFactor` | `--dyni-linear-label-font` | `0.14` | number |
@@ -69,6 +69,25 @@
 
 - `font.weight` is used for primary numeric value text in semicircle gauges, WindRadialWidget, CompassRadialWidget, ThreeValueTextWidget, and PositionCoordinateWidget.
 - `font.labelWeight` is used for captions/units, tick labels, dial cardinal labels, and disconnect overlay text.
+
+## Pointer Factor Semantics
+
+- `widthFactor` controls full rendered pointer width.
+- `lengthFactor` controls rendered pointer length.
+- Both factors scale from the same unscaled base pointer size; width no longer derives from length-scaled depth.
+
+Formulas:
+
+```text
+pointerLengthPx = max(8, floor(basePointerSize * lengthFactor))
+pointerWidthPx = max(8, floor(basePointerSize * widthFactor))
+pointerHalfWidthPx = max(4, floor(pointerWidthPx / 2))
+```
+
+Base pointer size by renderer:
+
+- Radial gauges and full-circle dials: unscaled `needleDepth` / explicit `depth`
+- Linear gauges: unscaled `pointerDepthBase`, unless an explicit pixel `depth` override is supplied
 
 ## resolve(canvas) Behavior
 
@@ -126,10 +145,10 @@ Only values that differ from theme defaults are included.
 | Preset | Overrides |
 |---|---|
 | `default` | none |
-| `slim` | `ring.arcLineWidth=1`, `ring.widthFactor=0.12`, `ticks.majorLen=9`, `ticks.majorWidth=2`, `ticks.minorLen=5`, `ticks.minorWidth=1`, `pointer.sideFactor=0.18`, `linear.track.widthFactor=0.12`, `linear.track.lineWidth=1`, `linear.ticks.majorLen=9`, `linear.ticks.majorWidth=2`, `linear.ticks.minorLen=5`, `linear.ticks.minorWidth=1`, `linear.pointer.sideFactor=0.18`, `font.labelWeight=400`, `xte.lineWidthFactor=1` |
-| `bold` | `ring.arcLineWidth=2.5`, `ring.widthFactor=0.2`, `ticks.majorLen=16`, `ticks.majorWidth=4`, `ticks.minorLen=9`, `ticks.minorWidth=2`, `pointer.sideFactor=0.35`, `pointer.lengthFactor=2.2`, `linear.track.widthFactor=0.2`, `linear.track.lineWidth=2.5`, `linear.ticks.majorLen=16`, `linear.ticks.majorWidth=4`, `linear.ticks.minorLen=9`, `linear.ticks.minorWidth=2`, `linear.pointer.sideFactor=0.35`, `linear.pointer.lengthFactor=2.2`, `xte.lineWidthFactor=2` |
+| `slim` | `ring.arcLineWidth=1`, `ring.widthFactor=0.12`, `ticks.majorLen=9`, `ticks.majorWidth=2`, `ticks.minorLen=5`, `ticks.minorWidth=1`, `pointer.widthFactor=0.72`, `linear.track.widthFactor=0.12`, `linear.track.lineWidth=1`, `linear.ticks.majorLen=9`, `linear.ticks.majorWidth=2`, `linear.ticks.minorLen=5`, `linear.ticks.minorWidth=1`, `linear.pointer.widthFactor=0.72`, `font.labelWeight=400`, `xte.lineWidthFactor=1` |
+| `bold` | `ring.arcLineWidth=2.5`, `ring.widthFactor=0.2`, `ticks.majorLen=16`, `ticks.majorWidth=4`, `ticks.minorLen=9`, `ticks.minorWidth=2`, `pointer.widthFactor=1.54`, `pointer.lengthFactor=2.2`, `linear.track.widthFactor=0.2`, `linear.track.lineWidth=2.5`, `linear.ticks.majorLen=16`, `linear.ticks.majorWidth=4`, `linear.ticks.minorLen=9`, `linear.ticks.minorWidth=2`, `linear.pointer.widthFactor=1.54`, `linear.pointer.lengthFactor=2.2`, `xte.lineWidthFactor=2` |
 | `night` | `colors.pointer=#cc2222`, `colors.warning=#8b6914`, `colors.alarm=#992222`, `colors.laylineStb=#3d6b3d`, `colors.laylinePort=#8b3333` |
-| `highcontrast` | `colors.pointer=#ff0000`, `colors.warning=#ffcc00`, `colors.alarm=#ff3300`, `ring.arcLineWidth=2`, `ticks.majorWidth=3`, `ticks.minorWidth=2`, `pointer.sideFactor=0.35`, `linear.track.lineWidth=2`, `linear.ticks.majorWidth=3`, `linear.ticks.minorWidth=2`, `linear.pointer.sideFactor=0.35`, `xte.lineWidthFactor=1.3` |
+| `highcontrast` | `colors.pointer=#ff0000`, `colors.warning=#ffcc00`, `colors.alarm=#ff3300`, `ring.arcLineWidth=2`, `ticks.majorWidth=3`, `ticks.minorWidth=2`, `pointer.widthFactor=1.4`, `linear.track.lineWidth=2`, `linear.ticks.majorWidth=3`, `linear.ticks.minorWidth=2`, `linear.pointer.widthFactor=1.4`, `xte.lineWidthFactor=1.3` |
 
 ## Runtime Integration
 

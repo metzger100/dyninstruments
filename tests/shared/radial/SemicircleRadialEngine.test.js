@@ -92,7 +92,7 @@ describe("SemicircleRadialEngine", function () {
           minorWidth: 2
         },
         pointer: {
-          sideFactor: 0.3,
+          widthFactor: 1.02,
           lengthFactor: 1.7
         },
         ring: {
@@ -248,7 +248,7 @@ describe("SemicircleRadialEngine", function () {
           minorWidth: 2
         },
         pointer: {
-          sideFactor: 0.3,
+          widthFactor: 1.02,
           lengthFactor: 1.7
         },
         ring: {
@@ -339,7 +339,7 @@ describe("SemicircleRadialEngine", function () {
     expect(resolveTheme).toHaveBeenCalledWith(canvas);
     expect(buildSectorsCalls[0].theme).toBe(themeDefaults);
     expect(pointerCalls[0].fillStyle).toBe(themeDefaults.colors.pointer);
-    expect(pointerCalls[0].sideFactor).toBe(themeDefaults.radial.pointer.sideFactor);
+    expect(pointerCalls[0].widthFactor).toBe(themeDefaults.radial.pointer.widthFactor);
     expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.radial.pointer.lengthFactor);
     expect(pointerCalls[0].depth).toBe(10);
     expect(arcRingCalls[0].lineWidth).toBe(themeDefaults.radial.ring.arcLineWidth);
@@ -354,6 +354,103 @@ describe("SemicircleRadialEngine", function () {
     expect(labelCalls[0].radiusOffset).toBe(37);
     expect(labelCalls[0].fontPx).toBe(19);
     expect(labelCalls[0].weight).toBe(themeDefaults.font.labelWeight);
+  });
+
+  it("keeps default radial pointer sizing independent from ring width changes", function () {
+    function renderPointer(ringWidthFactor) {
+      const pointerCalls = [];
+      const gaugeValueMath = createValueMath();
+      const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
+        .create({}, makeHelpers({
+          create() {
+            return {
+              theme: {
+                resolve() {
+                  return {
+                    colors: {
+                      pointer: "#ff2b2b",
+                      warning: "#e7c66a",
+                      alarm: "#ff7a76",
+                      laylineStb: "#82b683",
+                      laylinePort: "#ff7a76"
+                    },
+                    radial: {
+                      ticks: {
+                        majorLen: 13,
+                        majorWidth: 4,
+                        minorLen: 7,
+                        minorWidth: 2
+                      },
+                      pointer: {
+                        widthFactor: 1.02,
+                        lengthFactor: 1.7
+                      },
+                      ring: {
+                        arcLineWidth: 2.5,
+                        widthFactor: ringWidthFactor
+                      },
+                      labels: {
+                        insetFactor: 2.2,
+                        fontFactor: 0.2
+                      }
+                    },
+                    font: {
+                      weight: 710,
+                      labelWeight: 680
+                    }
+                  };
+                }
+              },
+              text: {
+                measureValueUnitFit() {
+                  return { vPx: 12, uPx: 10, gap: 6 };
+                },
+                drawCaptionMax() {},
+                drawValueUnitWithFit() {},
+                fitInlineCapValUnit() {
+                  return { cPx: 10, vPx: 12, uPx: 10, gap: 6 };
+                },
+                drawInlineCapValUnit() {},
+                fitTextPx() {
+                  return 12;
+                },
+                drawThreeRowsBlock() {},
+                drawDisconnectOverlay() {}
+              },
+              value: gaugeValueMath,
+              draw: {
+                drawArcRing() {},
+                drawAnnularSector() {},
+                drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, opts) {
+                  pointerCalls.push(opts);
+                },
+                drawTicksFromAngles() {},
+                drawLabels() {}
+              }
+            };
+          }
+        }))
+        .createRenderer(makeBaseSpec());
+
+      renderer(createMockCanvas({
+        rectWidth: 480,
+        rectHeight: 110,
+        ctx: createMockContext2D()
+      }), {
+        value: 12.3,
+        caption: "SPD",
+        unit: "kn"
+      });
+
+      return pointerCalls[0];
+    }
+
+    const thinPointer = renderPointer(0.1);
+    const thickPointer = renderPointer(0.24);
+
+    expect(thinPointer.depth).toBe(thickPointer.depth);
+    expect(thinPointer.widthFactor).toBe(thickPointer.widthFactor);
+    expect(thinPointer.lengthFactor).toBe(thickPointer.lengthFactor);
   });
 
   it("reuses cached fitting for unchanged keys in flat/high/normal modes while still drawing each frame", function () {
@@ -529,7 +626,7 @@ describe("SemicircleRadialEngine", function () {
                     minorWidth: 2
                   },
                   pointer: {
-                    sideFactor: 0.3,
+                    widthFactor: 1.02,
                     lengthFactor: 1.7
                   },
                   ring: {

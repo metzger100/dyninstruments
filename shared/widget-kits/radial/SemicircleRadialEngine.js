@@ -405,7 +405,7 @@
             depth: geom.needleDepth,
             fillStyle: theme.colors.pointer,
             variant: "long",
-            sideFactor: theme.radial.pointer.sideFactor,
+            widthFactor: theme.radial.pointer.widthFactor,
             lengthFactor: theme.radial.pointer.lengthFactor
           });
         }
