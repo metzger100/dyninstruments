@@ -309,12 +309,16 @@
             const opts = markerOpts || {};
             const depthValue = Number(opts.depth);
             const sideValue = Number(opts.side);
-            const depth = Number.isFinite(depthValue)
+            const basePointerSize = Number.isFinite(depthValue)
               ? Math.max(8, Math.floor(depthValue))
+              : pointerDepthBase;
+            const depth = Number.isFinite(depthValue)
+              ? basePointerSize
               : Math.max(8, Math.floor(pointerDepthBase * theme.linear.pointer.lengthFactor));
+            const pointerWidth = Math.max(8, Math.floor(basePointerSize * theme.linear.pointer.widthFactor));
             const side = Number.isFinite(sideValue)
               ? Math.max(4, Math.floor(sideValue))
-              : Math.max(4, Math.floor(depth * theme.linear.pointer.sideFactor));
+              : Math.max(4, Math.floor(pointerWidth / 2));
             primitives.drawPointer(targetCtx || ctx, Math.round(pointerX), pointerTipY, {
               depth: depth,
               side: side,

@@ -17,12 +17,12 @@
       radial: {
         ring: { arcLineWidth: 1, widthFactor: 0.12 },
         ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
-        pointer: { sideFactor: 0.18 }
+        pointer: { widthFactor: 0.72 }
       },
       linear: {
         track: { widthFactor: 0.12, lineWidth: 1 },
         ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
-        pointer: { sideFactor: 0.18 }
+        pointer: { widthFactor: 0.72 }
       },
       font: { labelWeight: 400 },
       xte: { lineWidthFactor: 1 }
@@ -31,12 +31,12 @@
       radial: {
         ring: { arcLineWidth: 2.5, widthFactor: 0.2 },
         ticks: { majorLen: 16, majorWidth: 4, minorLen: 9, minorWidth: 2 },
-        pointer: { sideFactor: 0.35, lengthFactor: 2.2 }
+        pointer: { widthFactor: 1.54, lengthFactor: 2.2 }
       },
       linear: {
         track: { widthFactor: 0.2, lineWidth: 2.5 },
         ticks: { majorLen: 16, majorWidth: 4, minorLen: 9, minorWidth: 2 },
-        pointer: { sideFactor: 0.35, lengthFactor: 2.2 }
+        pointer: { widthFactor: 1.54, lengthFactor: 2.2 }
       },
       xte: { lineWidthFactor: 2 }
     },
@@ -58,12 +58,12 @@
       radial: {
         ring: { arcLineWidth: 2 },
         ticks: { majorWidth: 3, minorWidth: 2 },
-        pointer: { sideFactor: 0.35 }
+        pointer: { widthFactor: 1.4 }
       },
       linear: {
         track: { lineWidth: 2 },
         ticks: { majorWidth: 3, minorWidth: 2 },
-        pointer: { sideFactor: 0.35 }
+        pointer: { widthFactor: 1.4 }
       },
       xte: { lineWidthFactor: 1.3 }
     }

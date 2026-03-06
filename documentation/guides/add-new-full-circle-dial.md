@@ -67,7 +67,7 @@ Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
           depth: state.geom.needleDepth,
           variant: "long",
           fillStyle: state.theme.colors.pointer,
-          sideFactor: state.theme.radial.pointer.sideFactor,
+          widthFactor: state.theme.radial.pointer.widthFactor,
           lengthFactor: state.theme.radial.pointer.lengthFactor
         });
         api.drawCachedLayer("front");

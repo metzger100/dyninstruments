@@ -232,7 +232,7 @@
             ticksMajorWidth: theme.radial.ticks.majorWidth,
             ticksMinorLen: theme.radial.ticks.minorLen,
             ticksMinorWidth: theme.radial.ticks.minorWidth,
-            pointerSide: theme.radial.pointer.sideFactor,
+            pointerWidth: theme.radial.pointer.widthFactor,
             pointerLength: theme.radial.pointer.lengthFactor,
             family: family,
             labelWeight: labelWeight,
@@ -279,7 +279,7 @@
               depth: value.isFiniteNumber(options.depth) ? options.depth : state.geom.needleDepth,
               fillStyle: options.fillStyle || state.theme.colors.pointer,
               variant: options.variant || "long",
-              sideFactor: value.isFiniteNumber(options.sideFactor) ? options.sideFactor : state.theme.radial.pointer.sideFactor,
+              widthFactor: value.isFiniteNumber(options.widthFactor) ? options.widthFactor : state.theme.radial.pointer.widthFactor,
               lengthFactor: value.isFiniteNumber(options.lengthFactor) ? options.lengthFactor : state.theme.radial.pointer.lengthFactor
             });
           },

@@ -25,7 +25,7 @@ describe("CompassRadialWidget", function () {
           minorWidth: 1.5
         },
         pointer: {
-          sideFactor: 0.28,
+          widthFactor: 0.896,
           lengthFactor: 1.6
         },
         ring: {
@@ -175,7 +175,7 @@ describe("CompassRadialWidget", function () {
     harness.spec.renderCanvas(canvas, makeCompassProps());
 
     expect(harness.calls.pointer[0].fillStyle).toBe(harness.theme.colors.pointer);
-    expect(harness.calls.pointer[0].sideFactor).toBe(harness.theme.radial.pointer.sideFactor);
+    expect(harness.calls.pointer[0].widthFactor).toBe(harness.theme.radial.pointer.widthFactor);
     expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.radial.pointer.lengthFactor);
     expect(harness.calls.pointer[0].depth).toBe(10);
     expect(harness.calls.rimMarker[0]).toEqual({

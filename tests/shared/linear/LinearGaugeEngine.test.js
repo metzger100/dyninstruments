@@ -34,7 +34,7 @@ describe("LinearGaugeEngine", function () {
           minorWidth: 1
         },
         pointer: {
-          sideFactor: 0.25,
+          widthFactor: 1,
           lengthFactor: 2
         },
         ring: {
@@ -49,7 +49,7 @@ describe("LinearGaugeEngine", function () {
       linear: {
         track: { widthFactor: 0.2, lineWidth: 2.5 },
         ticks: { majorLen: 12, majorWidth: 3, minorLen: 6, minorWidth: 2 },
-        pointer: { sideFactor: 0.3, lengthFactor: 1.5 },
+        pointer: { widthFactor: 0.9, lengthFactor: 1.5 },
         labels: { insetFactor: 1.2, fontFactor: 0.2 }
       },
       font: {
@@ -581,6 +581,9 @@ describe("LinearGaugeEngine", function () {
     expect(harness.calls.pointer[0] && harness.calls.pointer[0].opts && harness.calls.pointer[0].opts.depth).toBe(
       Math.max(8, Math.floor(Math.max(8, Math.min(14, Math.floor(markerTrackBoxHeight * 0.12))) * harness.theme.linear.pointer.lengthFactor))
     );
+    expect(harness.calls.pointer[0] && harness.calls.pointer[0].opts && harness.calls.pointer[0].opts.side).toBe(
+      Math.max(4, Math.floor((Math.max(8, Math.min(14, Math.floor(markerTrackBoxHeight * 0.12))) * harness.theme.linear.pointer.widthFactor) / 2))
+    );
     expect(defaultMarker && defaultMarker.len).toBe(Math.max(6, Math.floor(Math.max(6, Math.min(14, Math.floor(markerTrackBoxHeight * 0.12))) * 0.9)));
     expect(defaultMarker && defaultMarker.opts && defaultMarker.opts.lineWidth).toBe(Math.max(3, Math.floor(Math.max(6, Math.min(14, Math.floor(markerTrackBoxHeight * 0.12))) * 0.4)));
     expect(defaultMarker && (defaultMarker.y - defaultMarker.len)).toBe(markerTrackY);
@@ -602,14 +605,14 @@ describe("LinearGaugeEngine", function () {
         colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#ff7a76" },
         radial: {
           ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
-          pointer: { sideFactor: 0.25, lengthFactor: 2 },
+          pointer: { widthFactor: 1, lengthFactor: 2 },
           ring: { arcLineWidth: 1, widthFactor: 0.12 },
           labels: { insetFactor: 1.8, fontFactor: 0.14 }
         },
         linear: {
           track: { widthFactor: 0.08, lineWidth: 1 },
           ticks: { majorLen: 12, majorWidth: 3, minorLen: 6, minorWidth: 2 },
-          pointer: { sideFactor: 0.3, lengthFactor: 1.5 },
+          pointer: { widthFactor: 0.9, lengthFactor: 1.5 },
           labels: { insetFactor: 1.2, fontFactor: 0.2 }
         },
         font: { weight: 700, labelWeight: 650 },
@@ -621,14 +624,14 @@ describe("LinearGaugeEngine", function () {
         colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#ff7a76" },
         radial: {
           ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
-          pointer: { sideFactor: 0.25, lengthFactor: 2 },
+          pointer: { widthFactor: 1, lengthFactor: 2 },
           ring: { arcLineWidth: 1, widthFactor: 0.12 },
           labels: { insetFactor: 1.8, fontFactor: 0.14 }
         },
         linear: {
           track: { widthFactor: 0.3, lineWidth: 4 },
           ticks: { majorLen: 12, majorWidth: 3, minorLen: 6, minorWidth: 2 },
-          pointer: { sideFactor: 0.3, lengthFactor: 1.5 },
+          pointer: { widthFactor: 0.9, lengthFactor: 1.5 },
           labels: { insetFactor: 1.2, fontFactor: 0.2 }
         },
         font: { weight: 700, labelWeight: 650 },
@@ -656,9 +659,64 @@ describe("LinearGaugeEngine", function () {
 
     expect(thinTrackThickness).not.toBe(thickTrackThickness);
     expect(thinHarness.calls.pointer[0].opts.depth).toBe(thickHarness.calls.pointer[0].opts.depth);
+    expect(thinHarness.calls.pointer[0].opts.side).toBe(thickHarness.calls.pointer[0].opts.side);
     const thinMarker = thinHarness.calls.ticks[thinHarness.calls.ticks.length - 1];
     const thickMarker = thickHarness.calls.ticks[thickHarness.calls.ticks.length - 1];
     expect(thinMarker.len).toBe(thickMarker.len);
     expect(thinMarker.opts.lineWidth).toBe(thickMarker.opts.lineWidth);
+  });
+
+  it("keeps default pointer width independent from linear pointer lengthFactor", function () {
+    const shortHarness = createHarness({
+      theme: {
+        colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#ff7a76" },
+        radial: {
+          ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
+          pointer: { widthFactor: 1, lengthFactor: 2 },
+          ring: { arcLineWidth: 1, widthFactor: 0.12 },
+          labels: { insetFactor: 1.8, fontFactor: 0.14 }
+        },
+        linear: {
+          track: { widthFactor: 0.2, lineWidth: 2 },
+          ticks: { majorLen: 12, majorWidth: 3, minorLen: 6, minorWidth: 2 },
+          pointer: { widthFactor: 0.9, lengthFactor: 1.1 },
+          labels: { insetFactor: 1.2, fontFactor: 0.2 }
+        },
+        font: { weight: 700, labelWeight: 650 },
+        xte: { lineWidthFactor: 1 }
+      }
+    });
+    const longHarness = createHarness({
+      theme: {
+        colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#ff7a76" },
+        radial: {
+          ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
+          pointer: { widthFactor: 1, lengthFactor: 2 },
+          ring: { arcLineWidth: 1, widthFactor: 0.12 },
+          labels: { insetFactor: 1.8, fontFactor: 0.14 }
+        },
+        linear: {
+          track: { widthFactor: 0.2, lineWidth: 2 },
+          ticks: { majorLen: 12, majorWidth: 3, minorLen: 6, minorWidth: 2 },
+          pointer: { widthFactor: 0.9, lengthFactor: 2.4 },
+          labels: { insetFactor: 1.2, fontFactor: 0.2 }
+        },
+        font: { weight: 700, labelWeight: 650 },
+        xte: { lineWidthFactor: 1 }
+      }
+    });
+    const spec = {
+      rawValueKey: "value",
+      rangeDefaults: { min: 0, max: 100 },
+      rangeProps: { min: "min", max: "max" },
+      tickProps: { major: "major", minor: "minor", showEndLabels: "showEndLabels" }
+    };
+    const props = { value: 40, min: 0, max: 100, major: 20, minor: 10 };
+
+    shortHarness.engine.createRenderer(spec)(createMockCanvas({ rectWidth: 280, rectHeight: 220, ctx: createMockContext2D() }), props);
+    longHarness.engine.createRenderer(spec)(createMockCanvas({ rectWidth: 280, rectHeight: 220, ctx: createMockContext2D() }), props);
+
+    expect(shortHarness.calls.pointer[0].opts.depth).not.toBe(longHarness.calls.pointer[0].opts.depth);
+    expect(shortHarness.calls.pointer[0].opts.side).toBe(longHarness.calls.pointer[0].opts.side);
   });
 });

@@ -70,7 +70,7 @@ describe("ThemePresets", function () {
 
     expect(api.presets.slim.radial.ring.arcLineWidth).toBe(1);
     expect(api.presets.slim.radial.ticks.majorLen).toBe(9);
-    expect(api.presets.slim.radial.pointer.sideFactor).toBe(0.18);
+    expect(api.presets.slim.radial.pointer.widthFactor).toBe(0.72);
     expect(api.presets.slim.linear.track.widthFactor).toBe(0.12);
     expect(api.presets.slim.linear.ticks.minorWidth).toBe(1);
     expect(api.presets.slim.linear.ticks.minorLen).toBe(5);
@@ -78,9 +78,11 @@ describe("ThemePresets", function () {
 
     expect(api.presets.bold.radial.ring.widthFactor).toBe(0.2);
     expect(api.presets.bold.radial.ticks.majorWidth).toBe(4);
+    expect(api.presets.bold.radial.pointer.widthFactor).toBe(1.54);
     expect(api.presets.bold.radial.pointer.lengthFactor).toBe(2.2);
     expect(api.presets.bold.linear.track.widthFactor).toBe(0.2);
     expect(api.presets.bold.linear.track.lineWidth).toBe(2.5);
+    expect(api.presets.bold.linear.pointer.widthFactor).toBe(1.54);
     expect(api.presets.bold.linear.pointer.lengthFactor).toBe(2.2);
     expect(api.presets.bold.xte.lineWidthFactor).toBe(2);
 
@@ -90,7 +92,8 @@ describe("ThemePresets", function () {
     expect(api.presets.highcontrast.colors.warning).toBe("#ffcc00");
     expect(api.presets.highcontrast.radial.ticks.minorWidth).toBe(2);
     expect(api.presets.highcontrast.linear.track.lineWidth).toBe(2);
-    expect(api.presets.highcontrast.linear.pointer.sideFactor).toBe(0.35);
+    expect(api.presets.highcontrast.radial.pointer.widthFactor).toBe(1.4);
+    expect(api.presets.highcontrast.linear.pointer.widthFactor).toBe(1.4);
     expect(api.presets.highcontrast.xte.lineWidthFactor).toBe(1.3);
   });
 });

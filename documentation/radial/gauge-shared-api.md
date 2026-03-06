@@ -121,7 +121,7 @@ Color-token flow:
 | `drawLabels` | Draw labels on arc/circle (`opts.weight` numeric font weight) |
 | `drawDialFrame` | Convenience ring + ticks + labels |
 
-`draw.drawPointerAtRim(..., opts)` consumes scalar style inputs (`opts.fillStyle` or `opts.color`) plus shape factors (`opts.sideFactor`, `opts.lengthFactor`).
+`draw.drawPointerAtRim(..., opts)` consumes scalar style inputs (`opts.fillStyle` or `opts.color`) plus shape factors (`opts.widthFactor`, `opts.lengthFactor`).
 `draw.drawLabels(..., opts)` consumes numeric font weight via `opts.weight`.
 
 ## Angle API (`RadialAngleMath`)

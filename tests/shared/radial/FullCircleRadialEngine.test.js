@@ -27,7 +27,7 @@ describe("FullCircleRadialEngine", function () {
           minorWidth: 1.5
         },
         pointer: {
-          sideFactor: 0.32,
+          widthFactor: 1.216,
           lengthFactor: 1.9
         },
         ring: {
@@ -161,7 +161,7 @@ describe("FullCircleRadialEngine", function () {
     });
     expect(harness.calls.pointer[0].fillStyle).toBe(harness.theme.colors.pointer);
     expect(harness.calls.pointer[0].depth).toBe(8);
-    expect(harness.calls.pointer[0].sideFactor).toBe(harness.theme.radial.pointer.sideFactor);
+    expect(harness.calls.pointer[0].widthFactor).toBe(harness.theme.radial.pointer.widthFactor);
     expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.radial.pointer.lengthFactor);
   });
 

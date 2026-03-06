@@ -146,15 +146,17 @@
       const rot = hasOwn.call(opts, "rotationDeg") ? Number(opts.rotationDeg) : 0;
       const cfg = opts.angleCfg;
 
-      let depth = Math.max(
+      const baseDepth = Math.max(
         2,
         Math.floor(Number(hasOwn.call(opts, "depth") ? opts.depth : Math.max(8, Math.floor(rOuter * 0.10))))
       );
+      let depth = baseDepth;
       const lengthFactor = Number(opts.lengthFactor);
       if (isFinite(lengthFactor)) depth = Math.floor(depth * lengthFactor);
 
-      const sideFactor = Number(opts.sideFactor);
-      const side = Math.max(4, Math.floor(depth * (isFinite(sideFactor) ? sideFactor : 1)));
+      const widthFactor = Number(opts.widthFactor);
+      const pointerWidth = Math.max(8, Math.floor(baseDepth * (isFinite(widthFactor) ? widthFactor : 1)));
+      const halfWidth = Math.max(4, Math.floor(pointerWidth / 2));
 
       const rBase = Math.max(1, rOuter - depth);
       const rTip = Math.max(1, rOuter - 2);
@@ -172,8 +174,8 @@
       withCtx(ctx, function () {
         ctx.beginPath();
         ctx.moveTo(tipX, tipY);
-        ctx.lineTo(baseX + Math.cos(l) * side, baseY + Math.sin(l) * side);
-        ctx.lineTo(baseX + Math.cos(r) * side, baseY + Math.sin(r) * side);
+        ctx.lineTo(baseX + Math.cos(l) * halfWidth, baseY + Math.sin(l) * halfWidth);
+        ctx.lineTo(baseX + Math.cos(r) * halfWidth, baseY + Math.sin(r) * halfWidth);
         ctx.closePath();
         ctx.fill();
       }, {

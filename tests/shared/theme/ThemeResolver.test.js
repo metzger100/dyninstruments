@@ -59,6 +59,7 @@ describe("ThemeResolver", function () {
         getPropertyValue(name) {
           if (name === "--dyni-pointer") return "  #123456  ";
           if (name === "--dyni-linear-track-width") return " 0.2 ";
+          if (name === "--dyni-linear-pointer-width") return " 0.9 ";
           if (name === "--dyni-xte-line-width-factor") return " 1.5 ";
           return "";
         }
@@ -73,6 +74,7 @@ describe("ThemeResolver", function () {
     expect(out.colors.pointer).toBe("#123456");
     expect(out.colors.warning).toBe(mod.DEFAULTS.colors.warning);
     expect(out.linear.track.widthFactor).toBe(0.2);
+    expect(out.linear.pointer.widthFactor).toBe(0.9);
     expect(out.xte.lineWidthFactor).toBe(1.5);
   });
 
@@ -160,7 +162,7 @@ describe("ThemeResolver", function () {
     expect(typeof mod.invalidateCanvas).toBe("function");
     expect(typeof mod.invalidateAll).toBe("function");
     expect(Array.isArray(mod.TOKEN_DEFS)).toBe(true);
-    expect(mod.TOKEN_DEFS.some((tokenDef) => tokenDef.path === "radial.pointer.sideFactor" && tokenDef.cssVar === "--dyni-radial-pointer-side")).toBe(true);
+    expect(mod.TOKEN_DEFS.some((tokenDef) => tokenDef.path === "radial.pointer.widthFactor" && tokenDef.cssVar === "--dyni-radial-pointer-width")).toBe(true);
     expect(mod.TOKEN_DEFS.some((tokenDef) => (
       tokenDef.path === "radial.fullCircle.normal.innerMarginFactor" &&
       tokenDef.cssVar === "--dyni-radial-fullcircle-normal-inner-margin"
@@ -177,7 +179,11 @@ describe("ThemeResolver", function () {
       tokenDef.path === "linear.pointer.lengthFactor" &&
       tokenDef.cssVar === "--dyni-linear-pointer-length"
     ))).toBe(true);
-    expect(mod.DEFAULTS.radial.pointer.sideFactor).toBe(0.25);
+    expect(mod.TOKEN_DEFS.some((tokenDef) => (
+      tokenDef.path === "linear.pointer.widthFactor" &&
+      tokenDef.cssVar === "--dyni-linear-pointer-width"
+    ))).toBe(true);
+    expect(mod.DEFAULTS.radial.pointer.widthFactor).toBe(1);
     expect(mod.DEFAULTS.radial.ring.arcLineWidth).toBe(2);
     expect(mod.DEFAULTS.radial.ring.widthFactor).toBe(0.16);
     expect(mod.DEFAULTS.radial.ticks.majorLen).toBe(12);
@@ -189,9 +195,12 @@ describe("ThemeResolver", function () {
     expect(mod.DEFAULTS.linear.track.lineWidth).toBe(2);
     expect(mod.DEFAULTS.linear.ticks.majorWidth).toBe(3);
     expect(mod.DEFAULTS.linear.ticks.minorLen).toBe(7);
+    expect(mod.DEFAULTS.linear.pointer.widthFactor).toBe(1);
     expect(mod.DEFAULTS.linear.pointer.lengthFactor).toBe(2);
     expect(mod.DEFAULTS.linear.labels.insetFactor).toBe(1.8);
     expect(mod.DEFAULTS.xte.lineWidthFactor).toBe(1.5);
+    expect(Object.prototype.hasOwnProperty.call(mod.DEFAULTS.radial.pointer, "sideFactor")).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(mod.DEFAULTS.linear.pointer, "sideFactor")).toBe(false);
     expect(Object.keys(mod.DEFAULTS.xte).sort()).toEqual(["lineWidthFactor"]);
   });
 });
