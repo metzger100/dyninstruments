@@ -11,55 +11,22 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ## Roadmap
 
-### Completed foundation refactors
-
-- Plugin bootstrap/config split completed (`plugin.js` + `runtime/*` + `config/*`)
-- Gauge core split completed (`RadialToolkit` + shared core modules)
-- Semicircle gauges unified on `SemicircleRadialEngine`
-
-### Cluster refactor baseline
-
-- `dyni_Nav_Instruments` is canonical owner for `dst`, `rteDistance`, `positionBoat`, `positionWp`
-- `dyni_Anchor_Instruments` remains owner for anchor distance/watch/bearing
-- `dyni_Vessel_Instruments` owns time/clock (`clock`) and voltage kinds (`voltage`, `voltageRadial`, `voltageLinear`)
-
 ### Planned integration directions
 
-- `vessel`: quick-win text kinds completed (`dateTime`, `timeStatus`, `pitch`, `roll`)
-- linear gauge parity completed for speed/environment/vessel/wind/course-heading ownership (`sogLinear`, `stwLinear`, `depthLinear`, `tempLinear`, `voltageLinear`, `angleTrueLinear`, `angleApparentLinear`, `hdtLinear`, `hdmLinear`)
-- `nav`: `activeRoute` completed, `routePoints`, `editRoute`
+- `nav`: `routePoints`, `editRoute`
 - planned new clusters: `ais` (for example `aisTarget`), `map` (for example `zoom`, `centerDisplay`)
 - `default`: likely a dedicated utility/default widget instead of a cluster kind
 
 ### Practical implementation order
 
-1. ✅ Quick wins (text): `DateTime`, `TimeStatus`, `signalKPitch`, `signalKRoll`
-2. High-impact canvas visuals: ✅ `XteDisplay`, ✅ `ActiveRoute`
-3. Lists and controls (interaction-heavy): `RoutePoints`, `EditRoute`, `Zoom`, `CenterDisplay`
-4. ✅ Linear gauges: range + wind + compass alternatives (`sogLinear`, `stwLinear`, `depthLinear`, `tempLinear`, `voltageLinear`, `angleTrueLinear`, `angleApparentLinear`, `hdtLinear`, `hdmLinear`)
-5. AIS: `AisTarget` (requires additional data logic and responsive layout)
+1. Lists and controls (interaction-heavy): `RoutePoints`, `EditRoute`, `Zoom`, `CenterDisplay`
+2. AIS: `AisTarget` (requires additional data logic and responsive layout)
 
 ### Additional non-core concepts
 
 - OBP60-style instruments: graphical Roll/Pitch, Clock, Rudder, Keel
 - C-net 2000 style multi instruments: history graphs, interactive regatta clock, anchor nav plot
 - Wind four-corner graphic for `TWA`/`TWS`/`AWA`/`AWS`
-
-## Linear Naming Convention
-
-- Linear kinds mirror existing radial ownership and naming with `*Linear` suffix.
-- Examples:
-  - `sogRadial` -> `sogLinear`
-  - `stwRadial` -> `stwLinear`
-  - `depthRadial` -> `depthLinear`
-  - `tempRadial` -> `tempLinear`
-  - `voltageRadial` -> `voltageLinear`
-  - `hdtRadial` -> `hdtLinear` (implemented)
-  - `angleTrueRadial` -> `angleTrueLinear` (implemented)
-- Axis mode reservation in shared linear engine:
-  - `range` for speed/depth/temperature/voltage
-  - `centered180` for wind angle kinds with mirrored layline sectors
-  - `fixed360` for compass with fixed scale and moving indicator
 
 ## AvNav Widget Coverage Matrix
 
