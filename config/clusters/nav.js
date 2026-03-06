@@ -28,7 +28,7 @@
     widget: "ClusterWidget",
     def: {
       name: "dyni_Nav_Instruments",
-      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Positions / XTE display)",
+      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Active route / Positions / XTE display)",
       caption: "", unit: "", default: "---",
       cluster: "nav",
       storeKeys: {
@@ -41,6 +41,11 @@
         btw: "nav.wp.course",
         wpName: "nav.wp.name",
         wpServer: "nav.wp.server",
+        activeRouteName: "nav.route.name",
+        activeRouteRemain: "nav.route.remain",
+        activeRouteEta: "nav.route.eta",
+        activeRouteNextCourse: "nav.route.nextCourse",
+        activeRouteApproaching: "nav.route.isApproaching",
         rteDistance: "nav.route.remain",
         vmg: "nav.wp.vmg",
         positionBoat: "nav.gps.position",
@@ -55,6 +60,7 @@
             opt("Distance to waypoint (DST)", "dst"),
             opt("Remaining route distance", "rteDistance"),
             opt("VMG to waypoint", "vmg"),
+            opt("Active route", "activeRoute"),
             opt("Boat position (GPS)", "positionBoat"),
             opt("Active waypoint position", "positionWp"),
             opt("XTE highway display", "xteDisplay")
@@ -79,6 +85,18 @@
           internal: true,
           name: "XTE 1-Row Threshold",
           condition: { kind: "xteDisplay" }
+        },
+        activeRouteRatioThresholdNormal: {
+          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.2,
+          internal: true,
+          name: "ActiveRoute: 3-Rows Threshold",
+          condition: { kind: "activeRoute" }
+        },
+        activeRouteRatioThresholdFlat: {
+          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.8,
+          internal: true,
+          name: "ActiveRoute: 1-Row Threshold",
+          condition: { kind: "activeRoute" }
         },
         showWpNameXteDisplay: {
           type: "BOOLEAN",
@@ -110,8 +128,12 @@
       updateFunction: function (values) {
         const out = values ? { ...values } : {};
         const kind = (values && values.kind) || "eta";
+        const routeName = (values && typeof values.activeRouteName === "string")
+          ? values.activeRouteName.trim()
+          : "";
         const needsWp = (kind === "dst" || kind === "positionWp" || kind === "xteDisplay");
-        if (needsWp && values && values.wpServer === false) out.disconnect = true;
+        const routeDisconnect = (kind === "activeRoute") && ((values && values.wpServer === false) || !routeName);
+        if ((needsWp && values && values.wpServer === false) || routeDisconnect) out.disconnect = true;
         else if (Object.prototype.hasOwnProperty.call(out, "disconnect")) delete out.disconnect;
         return out;
       }

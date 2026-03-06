@@ -27,14 +27,14 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 - `vessel`: quick-win text kinds completed (`dateTime`, `timeStatus`, `pitch`, `roll`)
 - linear gauge parity completed for speed/environment/vessel/wind/course-heading ownership (`sogLinear`, `stwLinear`, `depthLinear`, `tempLinear`, `voltageLinear`, `angleTrueLinear`, `angleApparentLinear`, `hdtLinear`, `hdmLinear`)
-- `nav`: `activeRoute`, `routePoints`, `editRoute`
+- `nav`: `activeRoute` completed, `routePoints`, `editRoute`
 - planned new clusters: `ais` (for example `aisTarget`), `map` (for example `zoom`, `centerDisplay`)
 - `default`: likely a dedicated utility/default widget instead of a cluster kind
 
 ### Practical implementation order
 
 1. ✅ Quick wins (text): `DateTime`, `TimeStatus`, `signalKPitch`, `signalKRoll`
-2. High-impact canvas visuals: ✅ `XteDisplay`, planned `ActiveRoute`
+2. High-impact canvas visuals: ✅ `XteDisplay`, ✅ `ActiveRoute`
 3. Lists and controls (interaction-heavy): `RoutePoints`, `EditRoute`, `Zoom`, `CenterDisplay`
 4. ✅ Linear gauges: range + wind + compass alternatives (`sogLinear`, `stwLinear`, `depthLinear`, `tempLinear`, `voltageLinear`, `angleTrueLinear`, `angleApparentLinear`, `hdtLinear`, `hdmLinear`)
 5. AIS: `AisTarget` (requires additional data logic and responsive layout)
@@ -65,7 +65,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 | AvNav Widget                 | dyninstruments                                                               | Coverage                                    |
 | ---------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------- |
-| ActiveRoute                  | —                                                                            | ❌ not covered yet                          |
+| ActiveRoute                  | dyni_Nav_Instruments → `activeRoute`                                         | ✅ covered                                  |
 | AisTarget                    | —                                                                            | ❌ not covered yet                          |
 | Alarm                        | —                                                                            | ❌ not covered yet                          |
 | AnchorBearing                | dyni_Anchor_Instruments → `bearing`                                          | ✅ covered                                  |

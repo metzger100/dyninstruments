@@ -23,7 +23,7 @@ XteDisplayWidget: {
   js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
   css: undefined,
   globalKey: "DyniXteDisplayWidget",
-  deps: ["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives"]
+  deps: ["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives", "TextTileLayout"]
 }
 ```
 

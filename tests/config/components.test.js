@@ -59,6 +59,9 @@ describe("config/components.js", function () {
     expect(components.TextLayoutEngine.globalKey).toBe("DyniTextLayoutEngine");
     expect(components.TextLayoutEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextLayoutEngine.js");
     expect(components.TextLayoutEngine.deps).toEqual(["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]);
+    expect(components.TextTileLayout.globalKey).toBe("DyniTextTileLayout");
+    expect(components.TextTileLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextTileLayout.js");
+    expect(components.TextTileLayout.deps).toBeUndefined();
     expect(components.SpeedRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
     expect(components.SpeedLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.DepthLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
@@ -67,7 +70,7 @@ describe("config/components.js", function () {
     expect(components.TemperatureRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
     expect(components.VoltageLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.VoltageRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
-    expect(components.XteDisplayWidget.deps).toEqual(["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives"]);
+    expect(components.XteDisplayWidget.deps).toEqual(["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives", "TextTileLayout"]);
     expect(components.WindRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
     expect(components.CompassRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
     expect(components.WindLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
@@ -76,6 +79,9 @@ describe("config/components.js", function () {
     expect(components.ThreeValueTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
     expect(components.PositionCoordinateWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
     expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
+    expect(components.ActiveRouteTextWidget.globalKey).toBe("DyniActiveRouteTextWidget");
+    expect(components.ActiveRouteTextWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js");
+    expect(components.ActiveRouteTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine", "RadialTextLayout", "TextTileLayout"]);
     expect(components.RendererPropsWidget.deps).toEqual([
       "WindRadialWidget",
       "CompassRadialWidget",
@@ -93,6 +99,7 @@ describe("config/components.js", function () {
     ]);
     expect(components.RendererPropsWidget.globalKey).toBe("DyniRendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).toContain("PositionCoordinateWidget");
+    expect(components.ClusterRendererRouter.deps).toContain("ActiveRouteTextWidget");
     expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).not.toContain("WindRadialWidget");
     expect(components.PositionCoordinateWidget.deps).not.toContain("ThreeValueTextWidget");

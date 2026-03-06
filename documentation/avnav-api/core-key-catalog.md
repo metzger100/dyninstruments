@@ -40,7 +40,12 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `nav` | `cog` | `nav.gps.course` | `xteDisplay` |
 | `nav` | `btw` | `nav.wp.course` | `xteDisplay` |
 | `nav` | `wpName` | `nav.wp.name` | `xteDisplay` |
-| `nav` | `wpServer` | `nav.wp.server` | disconnect state for `dst`, `positionWp`, `xteDisplay` |
+| `nav` | `wpServer` | `nav.wp.server` | disconnect state for `dst`, `positionWp`, `xteDisplay`, `activeRoute` |
+| `nav` | `activeRouteName` | `nav.route.name` | `activeRoute` |
+| `nav` | `activeRouteRemain` | `nav.route.remain` | `activeRoute` |
+| `nav` | `activeRouteEta` | `nav.route.eta` | `activeRoute` |
+| `nav` | `activeRouteNextCourse` | `nav.route.nextCourse` | `activeRoute` |
+| `nav` | `activeRouteApproaching` | `nav.route.isApproaching` | `activeRoute` |
 | `nav` | `rteDistance` | `nav.route.remain` | `rteDistance` |
 | `nav` | `vmg` | `nav.wp.vmg` | `vmg` |
 | `nav` | `positionBoat` | `nav.gps.position` | `positionBoat` |
@@ -80,6 +85,7 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `cog`, `hdt`, `hdm`, `brg` | `cog`/`hdt`/`hdm`/`brg` | `formatDirection360` + `[leadingZero]` | heading/course/bearing text |
 | `eta`, `rteEta` | `eta` / `rteEta` | `formatTime` + `[]` | Date/time value path |
 | `dst`, `rteDistance` | `dst` / `rteDistance` | `formatDistance` + `[]` | distance text |
+| `activeRoute` | `activeRouteName`, `activeRouteRemain`, `activeRouteEta`, `activeRouteNextCourse`, `activeRouteApproaching` | renderer wrapper (`ActiveRouteTextWidget`) using `formatDistance` (`activeRouteRemain`) + `[remainUnit]`, `formatTime` (`activeRouteEta`) + `[]`, `formatDirection` (`activeRouteNextCourse`) + `[]` | next course is degree-based; `NEXT` tile only renders while approaching |
 | `xteDisplay` | `xte`, `cog`, `dtw`, `btw`, `wpName` | renderer wrapper (`XteDisplayWidget`) using `formatDistance` (`xte`, `dtw`) + `formatDirection360` (`cog`, `btw`) | fail-closed if required numeric inputs are missing |
 | `vmg` | `vmg` | `formatSpeed` + `[unit]` | speed text |
 | `positionBoat`, `positionWp` | `positionBoat` / `positionWp` | `formatLonLats` + coordinate formatter `formatLonLatsDecimal` | position object expected |

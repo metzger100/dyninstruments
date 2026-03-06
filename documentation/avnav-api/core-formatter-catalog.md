@@ -59,6 +59,14 @@ Source of truth: AvNav `viewer/util/formatter.js` snapshot verified on 2026-02-2
 | `cog` | `formatDirection360` | `[leadingZero]` |
 | `btw` | `formatDirection360` | `[leadingZero]` |
 
+## Normative ActiveRoute Renderer Contract
+
+| Field | Formatter | formatterParameters |
+|---|---|---|
+| `remain` | `formatDistance` | `[remainUnit]` |
+| `eta` | `formatTime` | `[]` |
+| `nextCourse` | `formatDirection` | `[]` |
+
 ## Common Mistakes
 
 | Mistake | Wrong example | Correct contract |

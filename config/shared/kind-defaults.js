@@ -109,6 +109,27 @@
       vmg: { cap: "VMG", unit: "kn" },
       positionBoat: { cap: "POS", unit: "" },
       positionWp: { cap: "WP", unit: "" },
+      activeRouteRemain: {
+        cap: "RTE",
+        unit: "nm",
+        kind: "activeRoute",
+        captionName: "Route distance caption",
+        unitName: "Route distance unit"
+      },
+      activeRouteEta: {
+        cap: "ETA",
+        unit: "",
+        kind: "activeRoute",
+        captionName: "ETA caption",
+        unitName: "ETA unit"
+      },
+      activeRouteNextCourse: {
+        cap: "NEXT",
+        unit: "\u00b0",
+        kind: "activeRoute",
+        captionName: "Next course caption",
+        unitName: "Next course unit"
+      },
       xteDisplayXte: {
         cap: "XTE",
         unit: "nm",

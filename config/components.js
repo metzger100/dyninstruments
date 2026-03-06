@@ -67,6 +67,11 @@
       globalKey: "DyniTextLayoutEngine",
       deps: ["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]
     },
+    TextTileLayout: {
+      js: BASE + "shared/widget-kits/text/TextTileLayout.js",
+      css: undefined,
+      globalKey: "DyniTextTileLayout"
+    },
     CanvasLayerCache: {
       js: BASE + "shared/widget-kits/canvas/CanvasLayerCache.js",
       css: undefined,
@@ -150,6 +155,12 @@
       css: undefined,
       globalKey: "DyniPositionCoordinateWidget",
       deps: ["ThemeResolver", "TextLayoutEngine"]
+    },
+    ActiveRouteTextWidget: {
+      js: BASE + "widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js",
+      css: undefined,
+      globalKey: "DyniActiveRouteTextWidget",
+      deps: ["ThemeResolver", "TextLayoutEngine", "RadialTextLayout", "TextTileLayout"]
     },
     RendererPropsWidget: {
       js: BASE + "cluster/rendering/RendererPropsWidget.js",
@@ -247,7 +258,7 @@
       js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
       css: undefined,
       globalKey: "DyniXteDisplayWidget",
-      deps: ["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives"]
+      deps: ["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives", "TextTileLayout"]
     },
     ClusterMapperToolkit: {
       js: BASE + "cluster/mappers/ClusterMapperToolkit.js",
@@ -262,6 +273,7 @@
       deps: [
         "ThreeValueTextWidget",
         "PositionCoordinateWidget",
+        "ActiveRouteTextWidget",
         "RendererPropsWidget"
       ]
     },

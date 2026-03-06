@@ -24,6 +24,7 @@
 4. Matching mapper module translates to either:
 - numeric output for `ThreeValueTextWidget` (default text kinds)
 - stacked pair or variant output for `PositionCoordinateWidget` (`positionBoat`/`positionWp`, vessel `dateTime`, vessel `timeStatus`)
+- dedicated text-renderer output for `ActiveRouteTextWidget` (`nav` `activeRoute`)
 - graphic output with `renderer: "..."`
 5. `ClusterWidget.renderCanvas()` delegates to `ClusterRendererRouter`, which picks renderer by `props.renderer`
 6. `ClusterWidget.finalizeFunction()` fans out to all sub-renderers and tolerates renderer-local finalize errors
@@ -73,6 +74,7 @@ Reference: [plugin-core-contracts.md](plugin-core-contracts.md), [../avnav-api/c
 
 - `ThreeValueTextWidget` (default fallback)
 - `PositionCoordinateWidget` (stacked pair text renderer for nav positions plus vessel `dateTime` / `timeStatus` variants)
+- `ActiveRouteTextWidget`
 - `WindRadialWidget`
 - `CompassRadialWidget`
 - `SpeedRadialWidget`
