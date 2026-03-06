@@ -385,16 +385,24 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.staticDraws).toHaveLength(2);
   });
 
-  it("fails closed with NO DATA overlay when required values are missing", function () {
+  it("keeps the highway frame visible and suppresses the indicator when required values are missing", function () {
     const harness = createHarness();
     const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
 
     harness.spec.renderCanvas(canvas, makeProps({ xte: undefined }));
-    expect(harness.calls.overlays).toBe(1);
+    expect(harness.calls.staticDraws).toHaveLength(1);
     expect(harness.calls.dynamicDraws).toHaveLength(0);
+    expect(harness.calls.valueRows[1].value).toBe("---");
+    expect(harness.calls.valueRows[2].value).toBe("0.72");
 
     harness.spec.renderCanvas(canvas, makeProps({ disconnect: true }));
-    expect(harness.calls.overlays).toBe(2);
+    expect(harness.calls.overlays).toBe(0);
+    expect(harness.calls.staticDraws).toHaveLength(2);
+    expect(harness.calls.dynamicDraws).toHaveLength(0);
+    expect(harness.calls.valueRows[4].value).toBe("---");
+    expect(harness.calls.valueRows[5].value).toBe("---");
+    expect(harness.calls.valueRows[6].value).toBe("---");
+    expect(harness.calls.valueRows[7].value).toBe("---");
   });
 
   it("uses provided DST unit directly without local fallback", function () {

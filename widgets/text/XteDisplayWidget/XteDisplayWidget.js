@@ -152,24 +152,20 @@
         lineWidthFactor: lineWidthFactor
       };
 
-      const hasRequiredData =
-        p.disconnect !== true &&
+      const disconnected = p.disconnect === true;
+      const guidanceAvailable =
+        !disconnected &&
         finiteNumber(p.xte) &&
         finiteNumber(p.cog) &&
         finiteNumber(p.dtw) &&
         finiteNumber(p.btw);
-
-      if (!hasRequiredData) {
-        toolkit.text.drawDisconnectOverlay(ctx, W, H, family, textColor, null, labelWeight);
-        return;
-      }
 
       const normalThreshold = p.xteRatioThresholdNormal;
       const flatThreshold = p.xteRatioThresholdFlat;
       const mode = primitives.computeMode(W, H, normalThreshold, flatThreshold, toolkit.value.computeMode);
       const pad = toolkit.value.computePad(W, H);
       const gap = toolkit.value.computeGap(W, H);
-      const wpName = trimWaypointName(p.wpName);
+      const wpName = disconnected ? "" : trimWaypointName(p.wpName);
       const reserveNameSpace = (p.showWpName !== false) && !!wpName;
       const layout = primitives.computeLayout(W, H, pad, gap, mode, {
         reserveNameSpace: reserveNameSpace
@@ -205,35 +201,43 @@
       });
       staticLayer.blit(ctx);
 
+      const xteRaw = disconnected ? undefined : p.xte;
+      const cogRaw = disconnected ? undefined : p.cog;
+      const dtwRaw = disconnected ? undefined : p.dtw;
+      const btwRaw = disconnected ? undefined : p.btw;
       const headingParams = [p.leadingZero !== false];
 
-      const xteDistance = Helpers.applyFormatter(Math.abs(p.xte), {
+      const xteDistance = Helpers.applyFormatter(
+        finiteNumber(xteRaw) ? Math.abs(xteRaw) : undefined,
+        {
         formatter: "formatDistance",
         formatterParameters: [p.xteUnit],
         default: p.default
-      });
+        }
+      );
 
-      const dtwDistance = Helpers.applyFormatter(p.dtw, {
+      const dtwDistance = Helpers.applyFormatter(dtwRaw, {
         formatter: "formatDistance",
         formatterParameters: [p.dtwUnit],
         default: p.default
       });
 
-      const xteDisplayAbs = parseNumericText(xteDistance, Math.abs(p.xte));
-      const signedDisplayXte = p.xte < 0 ? -xteDisplayAbs : xteDisplayAbs;
-      const xteNormalized = signedDisplayXte / FIXED_XTE_SCALE;
-      const overflow = Math.abs(xteDisplayAbs) > FIXED_XTE_SCALE;
-      const xteSide = p.xte > 0 ? "R" : (p.xte < 0 ? "L" : "");
+      const xteSide = finiteNumber(xteRaw) ? (xteRaw > 0 ? "R" : (xteRaw < 0 ? "L" : "")) : "";
+      if (guidanceAvailable) {
+        const xteDisplayAbs = parseNumericText(xteDistance, Math.abs(xteRaw));
+        const signedDisplayXte = xteRaw < 0 ? -xteDisplayAbs : xteDisplayAbs;
+        const xteNormalized = signedDisplayXte / FIXED_XTE_SCALE;
+        const overflow = Math.abs(xteDisplayAbs) > FIXED_XTE_SCALE;
+        primitives.drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, xteStyle);
+      }
 
-      primitives.drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, xteStyle);
-
-      const trackValue = Helpers.applyFormatter(p.cog, {
+      const trackValue = Helpers.applyFormatter(cogRaw, {
         formatter: "formatDirection360",
         formatterParameters: headingParams,
         default: p.default
       });
 
-      const bearingValue = Helpers.applyFormatter(p.btw, {
+      const bearingValue = Helpers.applyFormatter(btwRaw, {
         formatter: "formatDirection360",
         formatterParameters: headingParams,
         default: p.default

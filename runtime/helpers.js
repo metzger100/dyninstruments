@@ -16,34 +16,35 @@
   const typographyByCanvas = new WeakMap();
 
   function applyFormatter(raw, props) {
-    const fpRaw = props && props.formatterParameters;
+    const p = props || {};
+    if (raw == null || Number.isNaN(raw)) {
+      if (hasOwn.call(p, "default")) {
+        return p.default;
+      }
+      // dyni-lint-disable-next-line hardcoded-runtime-default -- Helpers.applyFormatter is the documented runtime owner of the generic missing-value placeholder.
+      return "---";
+    }
+
+    const fpRaw = p.formatterParameters;
     const fp = Array.isArray(fpRaw) ? fpRaw
       : (typeof fpRaw === "string" ? fpRaw.split(",") : []);
     try {
-      if (props && typeof props.formatter === "function") {
-        return props.formatter.apply(null, [raw].concat(fp));
+      if (typeof p.formatter === "function") {
+        return p.formatter.apply(null, [raw].concat(fp));
       }
       if (
-        props &&
-        typeof props.formatter === "string" &&
+        typeof p.formatter === "string" &&
         root.avnav &&
         root.avnav.api &&
         root.avnav.api.formatter &&
-        typeof root.avnav.api.formatter[props.formatter] === "function"
+        typeof root.avnav.api.formatter[p.formatter] === "function"
       ) {
-        return root.avnav.api.formatter[props.formatter].apply(root.avnav.api.formatter, [raw].concat(fp));
+        return root.avnav.api.formatter[p.formatter].apply(root.avnav.api.formatter, [raw].concat(fp));
       }
     }
     // dyni-lint-disable-next-line catch-fallback-without-suppression -- Formatter dispatch is an external AvNav/custom boundary; documented fallback behavior must remain centralized here.
     catch (e) { /* intentional: formatter failures fall back to default/raw formatting */ }
 
-    if (raw == null || Number.isNaN(raw)) {
-      if (props && hasOwn.call(props, "default")) {
-        return props.default;
-      }
-      // dyni-lint-disable-next-line hardcoded-runtime-default -- Helpers.applyFormatter is the documented runtime owner of the generic missing-value placeholder.
-      return "---";
-    }
     return String(raw);
   }
 

@@ -108,6 +108,35 @@ describe("runtime/helpers.js", function () {
     expect(runtime.applyFormatter(7, {})).toBe("7");
   });
 
+  it("returns the configured default before calling formatters for nullish or NaN raw values", function () {
+    const fnFormatter = vi.fn(function () {
+      return "-";
+    });
+    const namedFormatter = vi.fn(function () {
+      return "-";
+    });
+    const runtime = loadRuntimeHelpers({
+      avnav: {
+        api: {
+          formatter: {
+            formatSpeed: namedFormatter
+          }
+        }
+      }
+    });
+
+    expect(runtime.applyFormatter(null, {
+      default: "---",
+      formatter: fnFormatter
+    })).toBe("---");
+    expect(runtime.applyFormatter(NaN, {
+      default: "---",
+      formatter: "formatSpeed"
+    })).toBe("---");
+    expect(fnFormatter).not.toHaveBeenCalled();
+    expect(namedFormatter).not.toHaveBeenCalled();
+  });
+
   it("falls back to default string when formatter throws", function () {
     const runtime = loadRuntimeHelpers();
     const out = runtime.applyFormatter(5, {
