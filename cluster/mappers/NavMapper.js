@@ -40,6 +40,31 @@
         const u = unit("vmg");
         return out(p.vmg, cap("vmg"), u, "formatSpeed", [u]);
       }
+      if (req === "activeRoute") {
+        return {
+          renderer: "ActiveRouteTextWidget",
+          routeName: typeof p.activeRouteName === "string" ? p.activeRouteName.trim() : "",
+          disconnect: p.disconnect === true,
+          display: {
+            remain: num(p.activeRouteRemain),
+            eta: p.activeRouteEta,
+            nextCourse: num(p.activeRouteNextCourse),
+            isApproaching: p.activeRouteApproaching === true
+          },
+          captions: {
+            remain: cap("activeRouteRemain"),
+            eta: cap("activeRouteEta"),
+            nextCourse: cap("activeRouteNextCourse")
+          },
+          units: {
+            remain: unit("activeRouteRemain"),
+            eta: unit("activeRouteEta"),
+            nextCourse: unit("activeRouteNextCourse")
+          },
+          ratioThresholdNormal: num(p.activeRouteRatioThresholdNormal),
+          ratioThresholdFlat: num(p.activeRouteRatioThresholdFlat)
+        };
+      }
       if (req === "positionBoat") {
         const o = out(p.positionBoat, cap("positionBoat"), unit("positionBoat"), "formatLonLats", []);
         o.renderer = "PositionCoordinateWidget";

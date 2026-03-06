@@ -78,6 +78,9 @@ describe("XteDisplayWidget", function () {
         if (id === "CanvasLayerCache") {
           return layerCache;
         }
+        if (id === "TextTileLayout") {
+          return loadFresh("shared/widget-kits/text/TextTileLayout.js");
+        }
         if (id === "RadialToolkit") {
           return {
             create() {

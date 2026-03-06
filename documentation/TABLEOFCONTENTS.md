@@ -84,6 +84,7 @@
 - **How does the numeric text renderer work (caption/value/unit)?** → [widgets/three-elements.md](widgets/three-elements.md)
 - **What layout modes does ThreeValueTextWidget support?** → [widgets/three-elements.md](widgets/three-elements.md#layout-modes)
 - **What props does ThreeValueTextWidget accept?** → [widgets/three-elements.md](widgets/three-elements.md#props)
+- **How does the ActiveRoute widget work (route name, RTE, ETA, NEXT)?** → [widgets/active-route.md](widgets/active-route.md)
 - **How do stacked nav positions render (boat/wp)?** → [widgets/position-coordinates.md](widgets/position-coordinates.md)
 - **Which kinds use PositionCoordinateWidget?** → [widgets/position-coordinates.md](widgets/position-coordinates.md#key-details)
 - **How does the wind dial work (angle+speed dual display)?** → [widgets/wind-dial.md](widgets/wind-dial.md)
@@ -127,6 +128,7 @@
 
 **"How do I add warning/alarm sectors to a gauge?"** → [radial/gauge-style-guide.md](radial/gauge-style-guide.md#sector-logic),
 **"How do I make a gauge respond to aspect ratio?"** → [radial/gauge-style-guide.md](radial/gauge-style-guide.md#layout-modes)
+**"How does the active-route layout react to aspect ratio?"** → [widgets/active-route.md](widgets/active-route.md#layout-modes)
 **"How does the pointer/needle work?"** → [radial/gauge-style-guide.md](radial/gauge-style-guide.md#pointer-configuration),
 **"What are the full-circle dial proportions?"** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#proportions-function-of-r)
 **"How are full-circle pointers configured?"** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#pointer-variants),

@@ -24,6 +24,11 @@ describe("config/shared/kind-defaults.js", function () {
     expect(maps.WIND_KIND.speedTrue.unit).toBe("kn");
     expect(maps.NAV_KIND.dst.unit).toBe("nm");
     expect(maps.NAV_KIND.rteDistance.unit).toBe("nm");
+    expect(maps.NAV_KIND.activeRouteRemain.kind).toBe("activeRoute");
+    expect(maps.NAV_KIND.activeRouteRemain.cap).toBe("RTE");
+    expect(maps.NAV_KIND.activeRouteEta.unit).toBe("");
+    expect(maps.NAV_KIND.activeRouteNextCourse.unit).toBe("°");
+    expect(maps.NAV_KIND.activeRouteNextCourse.captionName).toBe("Next course caption");
     expect(maps.NAV_KIND.xteDisplay).toBeUndefined();
     expect(maps.NAV_KIND.xteDisplayXte.cap).toBe("XTE");
     expect(maps.NAV_KIND.xteDisplayCog.unit).toBe("°");

@@ -7,6 +7,12 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   unit_rteDistance: "nm",
   caption_vmg: "VMG",
   unit_vmg: "kn",
+  caption_activeRouteRemain: "RTE CAP",
+  unit_activeRouteRemain: "nmA",
+  caption_activeRouteEta: "ETA CAP",
+  unit_activeRouteEta: "",
+  caption_activeRouteNextCourse: "NEXT CAP",
+  unit_activeRouteNextCourse: "degN",
   caption_positionBoat: "POS",
   unit_positionBoat: "",
   caption_xteDisplayXte: "XTE CAP",
@@ -50,6 +56,64 @@ describe("NavMapper", function () {
       formatter: "formatSpeed",
       formatterParameters: ["kn"]
     });
+  });
+
+  it("maps activeRoute to ActiveRouteTextWidget with renderer-owned field props", function () {
+    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const rawEta = new Date("2026-03-06T11:45:00Z");
+    const out = mapper.translate({
+      kind: "activeRoute",
+      activeRouteName: "  Harbor Run  ",
+      activeRouteRemain: "18.2",
+      activeRouteEta: rawEta,
+      activeRouteNextCourse: "93",
+      activeRouteApproaching: true,
+      activeRouteRatioThresholdNormal: "1.25",
+      activeRouteRatioThresholdFlat: "4.4",
+      disconnect: true
+    }, toolkit);
+
+    expect(out).toEqual({
+      renderer: "ActiveRouteTextWidget",
+      routeName: "Harbor Run",
+      disconnect: true,
+      display: {
+        remain: 18.2,
+        eta: rawEta,
+        nextCourse: 93,
+        isApproaching: true
+      },
+      captions: {
+        remain: "RTE CAP",
+        eta: "ETA CAP",
+        nextCourse: "NEXT CAP"
+      },
+      units: {
+        remain: "nmA",
+        eta: "",
+        nextCourse: "degN"
+      },
+      ratioThresholdNormal: 1.25,
+      ratioThresholdFlat: 4.4
+    });
+  });
+
+  it("keeps next-course props available even when approach state is false", function () {
+    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const out = mapper.translate({
+      kind: "activeRoute",
+      activeRouteName: "Harbor Run",
+      activeRouteRemain: 12,
+      activeRouteEta: new Date("2026-03-06T11:45:00Z"),
+      activeRouteNextCourse: 91,
+      activeRouteApproaching: false
+    }, toolkit);
+
+    expect(out.renderer).toBe("ActiveRouteTextWidget");
+    expect(out.display.isApproaching).toBe(false);
+    expect(out.display.nextCourse).toBe(91);
+    expect(out.captions.nextCourse).toBe("NEXT CAP");
+    expect(out.units.nextCourse).toBe("degN");
   });
 
   it("maps positions with lon/lat formatter", function () {

@@ -1,7 +1,7 @@
 /**
  * Module: XteDisplayWidget - Responsive XTE highway renderer with integrated nav metrics
  * Documentation: documentation/widgets/xte-display.md
- * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives
+ * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives, TextTileLayout
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -17,6 +17,7 @@
     const toolkit = Helpers.getModule("RadialToolkit").create(def, Helpers);
     const cacheFactory = Helpers.getModule("CanvasLayerCache").create(def, Helpers);
     const primitives = Helpers.getModule("XteHighwayPrimitives").create(def, Helpers);
+    const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
     const staticLayer = cacheFactory.createLayerCache({ layers: ["back"] });
 
     function finiteNumber(value) {
@@ -54,68 +55,6 @@
         return "";
       }
       return raw.trim();
-    }
-
-    function drawWaypointName(ctx, textApi, rect, name, family, labelWeight, textColor) {
-      if (!name || rect.w <= 0 || rect.h <= 0) {
-        return;
-      }
-
-      let label = name;
-      const maxPx = Math.max(10, Math.floor(rect.h * 0.72));
-      let px = textApi.fitSingleTextPx(ctx, label, maxPx, rect.w, rect.h, family, labelWeight);
-      textApi.setFont(ctx, px, labelWeight, family);
-      while (label.length > 2 && ctx.measureText(label).width > rect.w) {
-        label = label.slice(0, -1);
-      }
-
-      px = textApi.fitSingleTextPx(ctx, label, maxPx, rect.w, rect.h, family, labelWeight);
-      textApi.setFont(ctx, px, labelWeight, family);
-      ctx.fillStyle = textColor;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(label, rect.x + rect.w * 0.5, rect.y + rect.h * 0.5);
-    }
-
-    function drawMetricStack(ctx, textApi, metric, rect, family, textColor, valueWeight, labelWeight, secScale) {
-      if (!metric || rect.w <= 0 || rect.h <= 0) {
-        return;
-      }
-
-      const caption = metric.caption;
-      const value = metric.value;
-      const unit = metric.unit;
-      const capH = Math.max(9, Math.floor(rect.h * 0.34));
-      const valueY = rect.y + capH;
-      const valueH = Math.max(8, rect.h - capH);
-
-      ctx.fillStyle = textColor;
-      textApi.drawCaptionMax(ctx, family, rect.x, rect.y, rect.w, capH, caption, capH, "center", labelWeight);
-      const fit = textApi.measureValueUnitFit(
-        ctx,
-        family,
-        value,
-        unit,
-        rect.w,
-        valueH,
-        secScale,
-        valueWeight,
-        labelWeight
-      );
-      textApi.drawValueUnitWithFit(
-        ctx,
-        family,
-        rect.x,
-        valueY,
-        rect.w,
-        valueH,
-        value,
-        unit,
-        fit,
-        "center",
-        valueWeight,
-        labelWeight
-      );
     }
 
     function renderCanvas(canvas, props) {
@@ -243,13 +182,63 @@
       };
 
       if (primitives.shouldShowWaypoint(mode, layout.nameRect, p.showWpName !== false, wpName)) {
-        drawWaypointName(ctx, toolkit.text, layout.nameRect, wpName, family, labelWeight, textColor);
+        tileLayout.drawFittedLine({
+          textApi: toolkit.text,
+          ctx: ctx,
+          text: wpName,
+          rect: layout.nameRect,
+          align: "center",
+          family: family,
+          weight: labelWeight,
+          maxPx: Math.max(10, Math.floor(layout.nameRect.h * 0.72)),
+          color: textColor
+        });
       }
 
-      drawMetricStack(ctx, toolkit.text, metrics.cog, layout.metricRects.cog, family, textColor, valueWeight, labelWeight, 0.75);
-      drawMetricStack(ctx, toolkit.text, metrics.xte, layout.metricRects.xte, family, textColor, valueWeight, labelWeight, 0.7);
-      drawMetricStack(ctx, toolkit.text, metrics.dtw, layout.metricRects.dtw, family, textColor, valueWeight, labelWeight, 0.7);
-      drawMetricStack(ctx, toolkit.text, metrics.btw, layout.metricRects.btw, family, textColor, valueWeight, labelWeight, 0.75);
+      tileLayout.drawMetricTile({
+        textApi: toolkit.text,
+        ctx: ctx,
+        metric: metrics.cog,
+        rect: layout.metricRects.cog,
+        family: family,
+        color: textColor,
+        valueWeight: valueWeight,
+        labelWeight: labelWeight,
+        secScale: 0.75
+      });
+      tileLayout.drawMetricTile({
+        textApi: toolkit.text,
+        ctx: ctx,
+        metric: metrics.xte,
+        rect: layout.metricRects.xte,
+        family: family,
+        color: textColor,
+        valueWeight: valueWeight,
+        labelWeight: labelWeight,
+        secScale: 0.7
+      });
+      tileLayout.drawMetricTile({
+        textApi: toolkit.text,
+        ctx: ctx,
+        metric: metrics.dtw,
+        rect: layout.metricRects.dtw,
+        family: family,
+        color: textColor,
+        valueWeight: valueWeight,
+        labelWeight: labelWeight,
+        secScale: 0.7
+      });
+      tileLayout.drawMetricTile({
+        textApi: toolkit.text,
+        ctx: ctx,
+        metric: metrics.btw,
+        rect: layout.metricRects.btw,
+        family: family,
+        color: textColor,
+        valueWeight: valueWeight,
+        labelWeight: labelWeight,
+        secScale: 0.75
+      });
     }
 
     function translateFunction() {

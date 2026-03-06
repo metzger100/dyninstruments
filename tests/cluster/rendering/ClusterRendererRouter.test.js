@@ -16,6 +16,7 @@ describe("ClusterRendererRouter", function () {
     const wind = makeSpec("wind", { hide: true });
     const windLinear = makeSpec("windLinear");
     const position = makeSpec("position");
+    const activeRoute = makeSpec("activeRoute");
     const compass = makeSpec("compass");
     const compassLinear = makeSpec("compassLinear");
     const speed = makeSpec("speed");
@@ -48,6 +49,7 @@ describe("ClusterRendererRouter", function () {
         const map = {
           ThreeValueTextWidget: { create: () => three },
           PositionCoordinateWidget: { create: () => position },
+          ActiveRouteTextWidget: { create: () => activeRoute },
           RendererPropsWidget: {
             create: function (def, helpers, targetRendererId) {
               return targetSpecs[targetRendererId];
@@ -70,12 +72,14 @@ describe("ClusterRendererRouter", function () {
     expect(router.pickRenderer({ renderer: "TemperatureLinearWidget" })).toBe(tempLinear);
     expect(router.pickRenderer({ renderer: "VoltageLinearWidget" })).toBe(voltLinear);
     expect(router.pickRenderer({ renderer: "PositionCoordinateWidget" })).toBe(position);
+    expect(router.pickRenderer({ renderer: "ActiveRouteTextWidget" })).toBe(activeRoute);
     expect(router.pickRenderer({ renderer: "Unknown" })).toBe(three);
     expect(router.pickRenderer({})).toBe(three);
   });
 
   it("delegates renderCanvas and fans out finalizeFunction safely", function () {
     const three = makeSpec("three");
+    const activeRoute = makeSpec("activeRoute");
     const speed = makeSpec("speed", { finalizeFunction: vi.fn(() => { throw new Error("ignored"); }) });
     const speedLinear = makeSpec("speedLinear");
     const voltage = makeSpec("voltage");
@@ -110,6 +114,7 @@ describe("ClusterRendererRouter", function () {
         const map = {
           ThreeValueTextWidget: { create: () => three },
           PositionCoordinateWidget: { create: () => makeSpec("position") },
+          ActiveRouteTextWidget: { create: () => activeRoute },
           RendererPropsWidget: {
             create: function (def, helpers, targetRendererId) {
               return targetSpecs[targetRendererId];
@@ -134,6 +139,7 @@ describe("ClusterRendererRouter", function () {
     }).not.toThrow();
 
     expect(three.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
+    expect(activeRoute.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
     expect(speed.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
     expect(speedLinear.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
     expect(depthLinear.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);

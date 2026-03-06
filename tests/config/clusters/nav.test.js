@@ -27,14 +27,26 @@ describe("config/clusters/nav.js", function () {
     expect(def.storeKeys.btw).toBe("nav.wp.course");
     expect(def.storeKeys.dtw).toBe("nav.wp.distance");
     expect(def.storeKeys.wpName).toBe("nav.wp.name");
+    expect(def.storeKeys.activeRouteName).toBe("nav.route.name");
+    expect(def.storeKeys.activeRouteRemain).toBe("nav.route.remain");
+    expect(def.storeKeys.activeRouteEta).toBe("nav.route.eta");
+    expect(def.storeKeys.activeRouteNextCourse).toBe("nav.route.nextCourse");
+    expect(def.storeKeys.activeRouteApproaching).toBe("nav.route.isApproaching");
     expect(def.editableParameters.kind.default).toBe("eta");
     expect(def.editableParameters.kind.name).toBe("Instrument");
+    expect(def.editableParameters.kind.list.some((entry) => entry.value === "activeRoute")).toBe(true);
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "xteDisplay")).toBe(true);
     expect(def.editableParameters.leadingZero.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.xteRatioThresholdNormal.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.xteRatioThresholdFlat.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.xteRatioThresholdNormal.internal).toBe(true);
     expect(def.editableParameters.xteRatioThresholdFlat.internal).toBe(true);
+    expect(def.editableParameters.activeRouteRatioThresholdNormal.condition).toEqual({ kind: "activeRoute" });
+    expect(def.editableParameters.activeRouteRatioThresholdFlat.condition).toEqual({ kind: "activeRoute" });
+    expect(def.editableParameters.activeRouteRatioThresholdNormal.internal).toBe(true);
+    expect(def.editableParameters.activeRouteRatioThresholdFlat.internal).toBe(true);
+    expect(def.editableParameters.activeRouteRatioThresholdNormal.default).toBe(1.2);
+    expect(def.editableParameters.activeRouteRatioThresholdFlat.default).toBe(3.8);
     expect(def.editableParameters.showWpNameXteDisplay.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.showWpNameXteDisplay.default).toBe(false);
     expect(def.editableParameters.ratioThresholdNormal.condition).toEqual([
@@ -61,8 +73,22 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
     expect(def.editableParameters.caption_xteDisplay).toBeUndefined();
     expect(def.editableParameters.unit_xteDisplay).toBeUndefined();
+    expect(def.editableParameters.caption_activeRoute).toBeUndefined();
+    expect(def.editableParameters.unit_activeRoute).toBeUndefined();
+    expect(def.editableParameters.caption_activeRouteRemain.condition).toEqual({ kind: "activeRoute" });
+    expect(def.editableParameters.unit_activeRouteRemain.condition).toEqual({ kind: "activeRoute" });
+    expect(def.editableParameters.caption_activeRouteEta.condition).toEqual({ kind: "activeRoute" });
+    expect(def.editableParameters.unit_activeRouteEta.condition).toEqual({ kind: "activeRoute" });
+    expect(def.editableParameters.caption_activeRouteNextCourse.condition).toEqual({ kind: "activeRoute" });
+    expect(def.editableParameters.unit_activeRouteNextCourse.condition).toEqual({ kind: "activeRoute" });
     expect(def.editableParameters.caption_xteDisplayXte.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.unit_xteDisplayXte.condition).toEqual({ kind: "xteDisplay" });
+    expect(def.editableParameters.caption_activeRouteRemain.displayName).toBe("Route distance caption");
+    expect(def.editableParameters.unit_activeRouteRemain.displayName).toBe("Route distance unit");
+    expect(def.editableParameters.caption_activeRouteEta.displayName).toBe("ETA caption");
+    expect(def.editableParameters.unit_activeRouteEta.displayName).toBe("ETA unit");
+    expect(def.editableParameters.caption_activeRouteNextCourse.displayName).toBe("Next course caption");
+    expect(def.editableParameters.unit_activeRouteNextCourse.displayName).toBe("Next course unit");
     expect(def.editableParameters.caption_xteDisplayCog.displayName).toBe("Track caption");
     expect(def.editableParameters.unit_xteDisplayCog.displayName).toBe("Track unit");
     expect(def.editableParameters.caption_xteDisplayDst.displayName).toBe("DST caption");
@@ -85,5 +111,31 @@ describe("config/clusters/nav.js", function () {
 
     const c = def.updateFunction({ kind: "eta", wpServer: false, disconnect: true });
     expect(c.disconnect).toBeUndefined();
+  });
+
+  it("sets disconnect for activeRoute when waypoint data is disconnected or route name is missing", function () {
+    const def = loadNavDef();
+
+    const serverDown = def.updateFunction({
+      kind: "activeRoute",
+      wpServer: false,
+      activeRouteName: "Harbor Run"
+    });
+    expect(serverDown.disconnect).toBe(true);
+
+    const emptyName = def.updateFunction({
+      kind: "activeRoute",
+      wpServer: true,
+      activeRouteName: "   "
+    });
+    expect(emptyName.disconnect).toBe(true);
+
+    const healthy = def.updateFunction({
+      kind: "activeRoute",
+      wpServer: true,
+      activeRouteName: "Harbor Run",
+      disconnect: true
+    });
+    expect(healthy.disconnect).toBeUndefined();
   });
 });
