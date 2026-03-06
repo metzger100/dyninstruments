@@ -26,10 +26,10 @@ describe("static cluster configs", function () {
     const defs = loadClusters();
     const byCluster = Object.fromEntries(defs.map((d) => [d.cluster, d]));
 
-    expect(byCluster.courseHeading.name).toBe("dyninstruments_CourseHeading");
-    expect(byCluster.speed.name).toBe("dyninstruments_Speed");
-    expect(byCluster.wind.name).toBe("dyninstruments_Wind");
-    expect(byCluster.anchor.name).toBe("dyninstruments_Anchor");
+    expect(byCluster.courseHeading.name).toBe("dyni_CourseHeading_Instruments");
+    expect(byCluster.speed.name).toBe("dyni_Speed_Instruments");
+    expect(byCluster.wind.name).toBe("dyni_Wind_Instruments");
+    expect(byCluster.anchor.name).toBe("dyni_Anchor_Instruments");
 
     expect(byCluster.courseHeading.editableParameters.kind.default).toBe("cog");
     expect(byCluster.speed.editableParameters.kind.default).toBe("sog");

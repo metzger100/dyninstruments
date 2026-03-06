@@ -129,10 +129,10 @@ function validateClusterWidgetNames(clusterFiles) {
     }
 
     const widgetName = widgetNameMatch[2];
-    if (!/^dyninstruments_.+/.test(widgetName)) {
+    if (!/^dyni_.+_Instruments$/.test(widgetName)) {
       addViolation(
         "cluster-widget-name-pattern",
-        `[naming] ${file}: widget name '${widgetName}' does not match 'dyninstruments_*'. Expected: '${expectedName}'. See ${CONVENTIONS_PATH}`
+        `[naming] ${file}: widget name '${widgetName}' does not match 'dyni_*_Instruments'. Expected: '${expectedName}'. See ${CONVENTIONS_PATH}`
       );
     }
   }
@@ -231,7 +231,7 @@ function buildExpectedClusterName(clusterFile) {
   const name = path.basename(clusterFile, ".js");
   const words = name.split(/[-_]+/).filter(Boolean);
   const pascal = words.map(capitalize).join("");
-  return `dyninstruments_${pascal || "Cluster"}`;
+  return `dyni_${pascal || "Cluster"}_Instruments`;
 }
 
 function capitalize(text) {

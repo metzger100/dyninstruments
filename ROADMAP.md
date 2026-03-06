@@ -19,9 +19,9 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ### Cluster refactor baseline
 
-- `dyninstruments_Nav` is canonical owner for `dst`, `rteDistance`, `positionBoat`, `positionWp`
-- `dyninstruments_Anchor` remains owner for anchor distance/watch/bearing
-- `dyninstruments_Vessel` owns time/clock (`clock`) and voltage kinds (`voltage`, `voltageRadial`, `voltageLinear`)
+- `dyni_Nav_Instruments` is canonical owner for `dst`, `rteDistance`, `positionBoat`, `positionWp`
+- `dyni_Anchor_Instruments` remains owner for anchor distance/watch/bearing
+- `dyni_Vessel_Instruments` owns time/clock (`clock`) and voltage kinds (`voltage`, `voltageRadial`, `voltageLinear`)
 
 ### Planned integration directions
 
@@ -68,48 +68,48 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | ActiveRoute                  | —                                                                            | ❌ not covered yet                          |
 | AisTarget                    | —                                                                            | ❌ not covered yet                          |
 | Alarm                        | —                                                                            | ❌ not covered yet                          |
-| AnchorBearing                | dyninstruments_Anchor → `bearing`                                            | ✅ covered                                  |
-| AnchorDistance               | dyninstruments_Anchor → `distance`                                           | ✅ covered                                  |
-| AnchorWatchDistance          | dyninstruments_Anchor → `watch`                                              | ✅ covered                                  |
-| BRG                          | dyninstruments_CourseHeading → `brg`                                         | ✅ covered                                  |
+| AnchorBearing                | dyni_Anchor_Instruments → `bearing`                                          | ✅ covered                                  |
+| AnchorDistance               | dyni_Anchor_Instruments → `distance`                                         | ✅ covered                                  |
+| AnchorWatchDistance          | dyni_Anchor_Instruments → `watch`                                            | ✅ covered                                  |
+| BRG                          | dyni_CourseHeading_Instruments → `brg`                                       | ✅ covered                                  |
 | CenterDisplay                | —                                                                            | ❌ not covered yet                          |
-| COG                          | dyninstruments_CourseHeading → `cog`                                         | ✅ covered                                  |
+| COG                          | dyni_CourseHeading_Instruments → `cog`                                       | ✅ covered                                  |
 | CombinedWidget               | —                                                                            | ❌ not covered yet                          |
-| DateTime                     | dyninstruments_Vessel → `dateTime`                                           | ✅ covered                                  |
+| DateTime                     | dyni_Vessel_Instruments → `dateTime`                                         | ✅ covered                                  |
 | Default                      | —                                                                            | ❌ not covered yet                          |
-| DepthDisplay                 | dyninstruments_Environment → `depth` / `depthLinear`                         | ✅ covered                                  |
-| DST                          | dyninstruments_Nav → `dst`                                                   | ✅ covered                                  |
+| DepthDisplay                 | dyni_Environment_Instruments → `depth` / `depthLinear`                       | ✅ covered                                  |
+| DST                          | dyni_Nav_Instruments → `dst`                                                 | ✅ covered                                  |
 | EditRoute                    | —                                                                            | ❌ not covered yet                          |
-| ETA                          | dyninstruments_Nav → `eta`                                                   | ✅ covered                                  |
-| HDM                          | dyninstruments_CourseHeading → `hdm`                                         | ✅ covered                                  |
-| HDT                          | dyninstruments_CourseHeading → `hdt`                                         | ✅ covered                                  |
-| LargeTime                    | dyninstruments_Vessel → `clock`                                              | ✅ covered                                  |
-| linGauge_Compass             | dyninstruments_CourseHeading → `hdtLinear`/`hdmLinear`                       | ✅ covered                                  |
+| ETA                          | dyni_Nav_Instruments → `eta`                                                 | ✅ covered                                  |
+| HDM                          | dyni_CourseHeading_Instruments → `hdm`                                       | ✅ covered                                  |
+| HDT                          | dyni_CourseHeading_Instruments → `hdt`                                       | ✅ covered                                  |
+| LargeTime                    | dyni_Vessel_Instruments → `clock`                                            | ✅ covered                                  |
+| linGauge_Compass             | dyni_CourseHeading_Instruments → `hdtLinear`/`hdmLinear`                     | ✅ covered                                  |
 | linGauge_Compass180          | —                                                                            | ❌ not covered yet                          |
-| linGauge_Temperature         | dyninstruments_Environment → `tempLinear`                                    | ✅ covered                                  |
-| linGauge_Voltage             | dyninstruments_Vessel → `voltageLinear`                                      | ✅ covered                                  |
-| Position                     | dyninstruments_Nav → `positionBoat`                                          | ✅ covered                                  |
-| radGauge_Compass             | dyninstruments_CourseHeading → `hdtRadial`                                  | ✅ covered                                  |
-| radGauge_Speed               | dyninstruments_Speed → `sogRadial`/`stwRadial`                             | ✅ covered                                  |
-| radGauge_Temperature         | dyninstruments_Environment → `tempRadial`                                   | ✅ covered                                  |
-| radGauge_Voltage             | dyninstruments_Vessel → `voltageRadial`                                     | ✅ covered                                  |
+| linGauge_Temperature         | dyni_Environment_Instruments → `tempLinear`                                  | ✅ covered                                  |
+| linGauge_Voltage             | dyni_Vessel_Instruments → `voltageLinear`                                    | ✅ covered                                  |
+| Position                     | dyni_Nav_Instruments → `positionBoat`                                        | ✅ covered                                  |
+| radGauge_Compass             | dyni_CourseHeading_Instruments → `hdtRadial`                                 | ✅ covered                                  |
+| radGauge_Speed               | dyni_Speed_Instruments → `sogRadial`/`stwRadial`                             | ✅ covered                                  |
+| radGauge_Temperature         | dyni_Environment_Instruments → `tempRadial`                                  | ✅ covered                                  |
+| radGauge_Voltage             | dyni_Vessel_Instruments → `voltageRadial`                                    | ✅ covered                                  |
 | RadialGauge                  | —                                                                            | ❌ not covered yet                          |
 | RoutePoints                  | —                                                                            | ❌ not covered yet                          |
-| RteDistance                  | dyninstruments_Nav → `rteDistance`                                           | ✅ covered                                  |
-| RteEta                       | dyninstruments_Nav → `rteEta`                                                | ✅ covered                                  |
-| signalKCelsius               | dyninstruments_Environment → `temp` / `tempLinear`                           | ✅ covered                                  |
-| signalKPitch                 | dyninstruments_Vessel → `pitch`                                              | ✅ covered                                  |
-| signalKPressureHpa           | dyninstruments_Environment → `pressure`                                      | ✅ covered                                  |
-| signalKRoll                  | dyninstruments_Vessel → `roll`                                               | ✅ covered                                  |
-| SOG                          | dyninstruments_Speed → `sog` / `sogLinear`                                   | ✅ covered                                  |
-| STW                          | dyninstruments_Speed → `stw` / `stwLinear`                                   | ✅ covered                                  |
-| TimeStatus                   | dyninstruments_Vessel → `timeStatus`                                         | ✅ covered                                  |
-| VMG                          | dyninstruments_Nav → `vmg`                                                   | ✅ covered                                  |
-| WaterTemp                    | dyninstruments_Environment → `temp`                                          | ✅ covered                                  |
-| WindAngle                    | dyninstruments_Wind → `angleApparent`                                        | ✅ covered                                  |
-| WindDisplay                  | dyninstruments_Wind → `angleApparentRadial`                                 | ✅ covered                                  |
-| WindGraphics                 | dyninstruments_Wind → `angleApparentRadial`/`angleTrueRadial`              | ✅ covered                                  |
-| WindSpeed                    | dyninstruments_Wind → `speedApparent`                                        | ✅ covered                                  |
-| WpPosition                   | dyninstruments_Nav → `positionWp`                                            | ✅ covered                                  |
-| XteDisplay                   | dyninstruments_Nav → `xteDisplay`                                            | ✅ covered                                  |
+| RteDistance                  | dyni_Nav_Instruments → `rteDistance`                                         | ✅ covered                                  |
+| RteEta                       | dyni_Nav_Instruments → `rteEta`                                              | ✅ covered                                  |
+| signalKCelsius               | dyni_Environment_Instruments → `temp` / `tempLinear`                         | ✅ covered                                  |
+| signalKPitch                 | dyni_Vessel_Instruments → `pitch`                                            | ✅ covered                                  |
+| signalKPressureHpa           | dyni_Environment_Instruments → `pressure`                                    | ✅ covered                                  |
+| signalKRoll                  | dyni_Vessel_Instruments → `roll`                                             | ✅ covered                                  |
+| SOG                          | dyni_Speed_Instruments → `sog` / `sogLinear`                                 | ✅ covered                                  |
+| STW                          | dyni_Speed_Instruments → `stw` / `stwLinear`                                 | ✅ covered                                  |
+| TimeStatus                   | dyni_Vessel_Instruments → `timeStatus`                                       | ✅ covered                                  |
+| VMG                          | dyni_Nav_Instruments → `vmg`                                                 | ✅ covered                                  |
+| WaterTemp                    | dyni_Environment_Instruments → `temp`                                        | ✅ covered                                  |
+| WindAngle                    | dyni_Wind_Instruments → `angleApparent`                                      | ✅ covered                                  |
+| WindDisplay                  | dyni_Wind_Instruments → `angleApparentRadial`                                | ✅ covered                                  |
+| WindGraphics                 | dyni_Wind_Instruments → `angleApparentRadial`/`angleTrueRadial`              | ✅ covered                                  |
+| WindSpeed                    | dyni_Wind_Instruments → `speedApparent`                                      | ✅ covered                                  |
+| WpPosition                   | dyni_Nav_Instruments → `positionWp`                                          | ✅ covered                                  |
+| XteDisplay                   | dyni_Nav_Instruments → `xteDisplay`                                          | ✅ covered                                  |
 | Zoom                         | —                                                                            | ❌ not covered yet                          |

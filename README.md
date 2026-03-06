@@ -93,19 +93,19 @@ Restart the AvNav server after installation.
 
 1. Open AvNav in your browser.
 2. Enter edit mode for your instrument layout.
-3. Add widgets prefixed with `dyninstruments_`.
+3. Add cluster widgets named `dyni_*_Instruments`.
 4. Pick a `kind` in the widget editor.
 5. Optionally adjust captions, units, and gauge sector toggles.
 
 Current cluster widgets:
 
-- `dyninstruments_CourseHeading`
-- `dyninstruments_Speed`
-- `dyninstruments_Environment`
-- `dyninstruments_Wind`
-- `dyninstruments_Nav`
-- `dyninstruments_Anchor`
-- `dyninstruments_Vessel`
+- `dyni_CourseHeading_Instruments`
+- `dyni_Speed_Instruments`
+- `dyni_Environment_Instruments`
+- `dyni_Wind_Instruments`
+- `dyni_Nav_Instruments`
+- `dyni_Anchor_Instruments`
+- `dyni_Vessel_Instruments`
 
 ---
 

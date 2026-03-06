@@ -18,7 +18,7 @@
   config.clusters.push({
     widget: "ClusterWidget",
     def: {
-      name: "dyninstruments_Anchor",
+      name: "dyni_Anchor_Instruments",
       description: "Anchor metrics (distance, watch radius, bearing)",
       caption: "", unit: "", default: "---",
       cluster: "anchor",
