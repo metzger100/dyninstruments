@@ -70,11 +70,13 @@
         },
         xteRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.85,
+          internal: true,
           name: "XTE 3-Rows Threshold",
           condition: { kind: "xteDisplay" }
         },
         xteRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.3,
+          internal: true,
           name: "XTE 1-Row Threshold",
           condition: { kind: "xteDisplay" }
         },
@@ -92,10 +94,12 @@
         ...makePerKindTextParams(NAV_KIND),
         ratioThresholdNormal: {
           ...commonThreeElementsEditables.ratioThresholdNormal,
+          internal: true,
           condition: NAV_TEXT_KIND_CONDITION
         },
         ratioThresholdFlat: {
           ...commonThreeElementsEditables.ratioThresholdFlat,
+          internal: true,
           condition: NAV_TEXT_KIND_CONDITION
         },
         captionUnitScale: {

@@ -40,11 +40,13 @@
         // ThreeValueTextWidget thresholds — only numeric kinds
         ratioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+          internal: true,
           name: "3-Rows Threshold (numeric)",
           condition: [{ kind: "sog" }, { kind: "stw" }]
         },
         ratioThresholdFlat: {
           type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
+          internal: true,
           name: "1-Row Threshold (numeric)",
           condition: [{ kind: "sog" }, { kind: "stw" }]
         },
@@ -52,11 +54,13 @@
         // SpeedLinearWidget thresholds — only linear kinds
         speedLinearRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          internal: true,
           name: "SpeedLinearWidget: Normal Threshold",
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          internal: true,
           name: "SpeedLinearWidget: Flat Threshold",
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
@@ -118,11 +122,13 @@
         // SpeedRadialWidget thresholds — only radial kinds
         speedRadialRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          internal: true,
           name: "SpeedRadialWidget: Normal Threshold",
           condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
         speedRadialRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          internal: true,
           name: "SpeedRadialWidget: Flat Threshold",
           condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },

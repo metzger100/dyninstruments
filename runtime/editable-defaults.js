@@ -29,5 +29,27 @@
     return out;
   }
 
+  function editableParamsForRegistration(editableParams) {
+    const out = {};
+    if (!editableParams) {
+      return out;
+    }
+
+    Object.keys(editableParams).forEach(function (k) {
+      const spec = editableParams[k];
+      if (
+        spec &&
+        typeof spec === "object" &&
+        spec.internal === true
+      ) {
+        return;
+      }
+      out[k] = spec;
+    });
+
+    return out;
+  }
+
   runtime.defaultsFromEditableParams = defaultsFromEditableParams;
+  runtime.editableParamsForRegistration = editableParamsForRegistration;
 }(this));

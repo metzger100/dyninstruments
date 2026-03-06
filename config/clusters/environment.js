@@ -110,11 +110,13 @@
 
         depthLinearRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          internal: true,
           name: "DepthLinearWidget: Normal Threshold",
           condition: { kind: "depthLinear" }
         },
         depthLinearRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          internal: true,
           name: "DepthLinearWidget: Flat Threshold",
           condition: { kind: "depthLinear" }
         },
@@ -173,11 +175,13 @@
 
         depthRadialRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          internal: true,
           name: "DepthRadialWidget: Normal Threshold",
           condition: { kind: "depthRadial" }
         },
         depthRadialRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          internal: true,
           name: "DepthRadialWidget: Flat Threshold",
           condition: { kind: "depthRadial" }
         },
@@ -235,11 +239,13 @@
 
         tempLinearRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          internal: true,
           name: "TempLinearWidget: Normal Threshold",
           condition: { kind: "tempLinear" }
         },
         tempLinearRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          internal: true,
           name: "TempLinearWidget: Flat Threshold",
           condition: { kind: "tempLinear" }
         },
@@ -299,11 +305,13 @@
 
         tempRadialRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          internal: true,
           name: "TempGauge: Normal Threshold",
           condition: { kind: "tempRadial" }
         },
         tempRadialRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          internal: true,
           name: "TempGauge: Flat Threshold",
           condition: { kind: "tempRadial" }
         },
@@ -325,11 +333,13 @@
         // ThreeValueTextWidget thresholds (numeric kinds)
         ratioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+          internal: true,
           name: "3-Rows Threshold (numeric)",
           condition: [{ kind: "depth" }, { kind: "temp" }, { kind: "pressure" }]
         },
         ratioThresholdFlat: {
           type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
+          internal: true,
           name: "1-Row Threshold (numeric)",
           condition: [{ kind: "depth" }, { kind: "temp" }, { kind: "pressure" }]
         }

@@ -120,11 +120,13 @@
 
         voltageLinearRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          internal: true,
           name: "VoltageLinearWidget: Normal Threshold",
           condition: { kind: "voltageLinear" }
         },
         voltageLinearRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          internal: true,
           name: "VoltageLinearWidget: Flat Threshold",
           condition: { kind: "voltageLinear" }
         },
@@ -184,11 +186,13 @@
 
         voltageRadialRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          internal: true,
           name: "VoltageRadialWidget: Normal Threshold",
           condition: { kind: "voltageRadial" }
         },
         voltageRadialRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          internal: true,
           name: "VoltageRadialWidget: Flat Threshold",
           condition: { kind: "voltageRadial" }
         },
@@ -210,6 +214,7 @@
         // ThreeValueTextWidget thresholds (numeric only)
         ratioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+          internal: true,
           name: "3-Rows Threshold (numeric)",
           condition: [
             { kind: "voltage" },
@@ -221,6 +226,7 @@
         },
         ratioThresholdFlat: {
           type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
+          internal: true,
           name: "1-Row Threshold (numeric)",
           condition: [
             { kind: "voltage" },
@@ -236,6 +242,7 @@
           max: 2.0,
           step: 0.05,
           default: 1.2,
+          internal: true,
           name: "DateTime: 3-Rows Threshold",
           condition: { kind: "dateTime" }
         },
@@ -245,6 +252,7 @@
           max: 6.0,
           step: 0.05,
           default: 4,
+          internal: true,
           name: "DateTime: 1-Row Threshold",
           condition: { kind: "dateTime" }
         }
