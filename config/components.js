@@ -151,18 +151,6 @@
       globalKey: "DyniPositionCoordinateWidget",
       deps: ["ThemeResolver", "TextLayoutEngine"]
     },
-    DateTimeRendererWrapper: {
-      js: BASE + "cluster/rendering/DateTimeRendererWrapper.js",
-      css: undefined,
-      globalKey: "DyniDateTimeRendererWrapper",
-      deps: ["PositionCoordinateWidget"]
-    },
-    TimeStatusRendererWrapper: {
-      js: BASE + "cluster/rendering/TimeStatusRendererWrapper.js",
-      css: undefined,
-      globalKey: "DyniTimeStatusRendererWrapper",
-      deps: ["PositionCoordinateWidget"]
-    },
     RendererPropsWidget: {
       js: BASE + "cluster/rendering/RendererPropsWidget.js",
       css: undefined,
@@ -274,8 +262,6 @@
       deps: [
         "ThreeValueTextWidget",
         "PositionCoordinateWidget",
-        "DateTimeRendererWrapper",
-        "TimeStatusRendererWrapper",
         "RendererPropsWidget"
       ]
     },

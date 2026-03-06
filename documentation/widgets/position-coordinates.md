@@ -4,13 +4,13 @@
 
 ## Overview
 
-Primary stacked-text renderer used for nav positions and vessel time/date two-line variants. It keeps flat layouts in single-line format and renders two stacked lines in normal/high layouts.
+Primary stacked-text renderer used for nav positions and vessel time/date variants. It keeps flat layouts in single-line format and renders two stacked lines in normal/high layouts.
 
 ## Key Details
 
 - Registered as `PositionCoordinateWidget` in `config/components.js`
 - Routed from `NavMapper` for `kind: "positionBoat"` and `kind: "positionWp"`
-- Routed from vessel wrapper renderers `DateTimeRendererWrapper` and `TimeStatusRendererWrapper` (mapper stays thin while wrappers inject vessel-specific formatter logic)
+- Routed directly from `VesselMapper` for `kind: "dateTime"` and `kind: "timeStatus"` via `displayVariant`
 - Depends on shared utilities: `ThemeResolver` + `TextLayoutEngine`
 - No widget-to-widget dependency on `ThreeValueTextWidget`
 - `flat` mode renders one-line `caption/value/unit` directly in this widget
@@ -33,6 +33,7 @@ Primary stacked-text renderer used for nav positions and vessel time/date two-li
 | `ratioThresholdFlat` | number | `3.0` | `ratio > threshold -> flat` |
 | `captionUnitScale` | number | `0.8` | Header scale relative to coordinate lines |
 | `disconnect` | boolean | `false` | Draws `NO DATA` overlay |
+| `displayVariant` | string | `"position"` | Renderer-owned variant contract: `"position"`, `"dateTime"`, or `"timeStatus"` |
 | `coordinateFormatter` | string/function | `"formatLonLatsDecimal"` | Stacked-mode coordinate formatter (`lat`/`lon` axis passed as extra parameter) |
 | `coordinateFormatterParameters` | array/string | `[]` | Base params for stacked-mode formatter before appending axis |
 | `coordinateFormatterLat` | string/function | — | Optional axis override for top line formatter |
@@ -45,6 +46,8 @@ Primary stacked-text renderer used for nav positions and vessel time/date two-li
 
 - `flat` mode uses `Helpers.applyFormatter(value, props)` (normally `formatLonLats`)
 - When `coordinateFlatFromAxes` is true, flat mode formats both axes (`lat` + `lon`) and joins them into one line
+- `displayVariant: "dateTime"` enables renderer-owned raw-value formatting with `formatDate` (top) and `formatTime` (bottom), and joins both outputs in flat mode
+- `displayVariant: "timeStatus"` enables renderer-owned status-circle formatting (top) plus `formatTime` (bottom), and joins both outputs in flat mode
 - For vessel `timeStatus`, emoji status markers (`🟢`/`🔴`) use an extra vertical fit guard in flat and stacked layouts to prevent border clipping
 - `normal`/`high` modes use `Helpers.applyFormatter(value, { formatter: coordinateFormatter, formatterParameters: [...coordinateFormatterParameters, axis] })`
 - Axis mapping is fixed: `lat` -> first (top) line, `lon` -> second (bottom) line

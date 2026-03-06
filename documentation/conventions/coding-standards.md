@@ -78,7 +78,7 @@ Example:
 - Sector props: `{gauge}WarningFrom`, `{gauge}AlarmFrom`
 - Per-kind caption/unit props: `caption_{kindName}`, `unit_{kindName}`
 - `editableParameter` conditions: `{ kind: "xxxRadial" }` or `[{ kind: "a" }, { kind: "b" }]`
-- Renderer wrappers under `cluster/rendering/` must use role-based IDs (example: `DateTimeRendererWrapper`, `TimeStatusRendererWrapper`), not cluster-prefixed IDs.
+- Components under `cluster/rendering/` must use role-based IDs, not cluster-prefixed IDs, and must not be per-kind mapper-to-widget forwarding shims.
 
 ## Mapper Boundary Rules
 
@@ -105,7 +105,7 @@ Use this routing table before starting a new widget. Shared engine purposes:
 - `LinearGaugeEngine`: shared horizontal gauge rendering flow (axis modes, sectors, ticks, pointer, ratio mode).
 - `FullCircleRadialEngine`: shared full-circle dial rendering flow (ring/ticks, static layers, pointer and frame orchestration).
 - `TextLayoutEngine`: shared text layout mode routing, fit calculation, and text draw helpers.
-- Cluster renderer wrappers: role-based adapters that delegate to one of the archetypes above.
+- Renderer variants: extend an existing renderer when the visual contract stays the same and only kind-specific formatting or field mapping changes.
 
 | Archetype | Shared Engine | Reference Implementation | Guide |
 |---|---|---|---|
@@ -113,7 +113,7 @@ Use this routing table before starting a new widget. Shared engine purposes:
 | Linear gauge | `LinearGaugeEngine` | [SpeedLinearWidget](../../widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js) | [add-new-linear-gauge](../guides/add-new-linear-gauge.md) |
 | Full-circle dial | `FullCircleRadialEngine` | [CompassRadialWidget](../../widgets/radial/CompassRadialWidget/CompassRadialWidget.js) | [add-new-dial](../guides/add-new-full-circle-dial.md) |
 | Text renderer | `TextLayoutEngine` | [ThreeValueTextWidget](../../widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js) | [add-new-text-renderer](../guides/add-new-text-renderer.md) |
-| Cluster renderer wrapper | `(delegates to above)` | [DateTimeRendererWrapper](../../cluster/rendering/DateTimeRendererWrapper.js) | [add-new-cluster](../guides/add-new-cluster.md) |
+| Text renderer variant | `TextLayoutEngine` | [PositionCoordinateWidget](../../widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js) | [add-new-text-renderer](../guides/add-new-text-renderer.md) |
 
 Rule: Before creating any new widget, check this table. If your widget matches an archetype, use the corresponding shared engine. If it does not match any archetype, discuss with the team before creating a new engine.
 

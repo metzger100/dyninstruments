@@ -76,8 +76,6 @@ describe("config/components.js", function () {
     expect(components.ThreeValueTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
     expect(components.PositionCoordinateWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
     expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
-    expect(components.DateTimeRendererWrapper.deps).toEqual(["PositionCoordinateWidget"]);
-    expect(components.TimeStatusRendererWrapper.deps).toEqual(["PositionCoordinateWidget"]);
     expect(components.RendererPropsWidget.deps).toEqual([
       "WindRadialWidget",
       "CompassRadialWidget",
@@ -93,12 +91,8 @@ describe("config/components.js", function () {
       "VoltageLinearWidget",
       "XteDisplayWidget"
     ]);
-    expect(components.DateTimeRendererWrapper.globalKey).toBe("DyniDateTimeRendererWrapper");
-    expect(components.TimeStatusRendererWrapper.globalKey).toBe("DyniTimeStatusRendererWrapper");
     expect(components.RendererPropsWidget.globalKey).toBe("DyniRendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).toContain("PositionCoordinateWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("DateTimeRendererWrapper");
-    expect(components.ClusterRendererRouter.deps).toContain("TimeStatusRendererWrapper");
     expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).not.toContain("WindRadialWidget");
     expect(components.PositionCoordinateWidget.deps).not.toContain("ThreeValueTextWidget");

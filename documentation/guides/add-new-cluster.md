@@ -152,9 +152,10 @@ If mapper returns `renderer: "NewGauge"`:
 3. Wire runtime selection in `cluster/rendering/ClusterRendererRouter.js`:
 - add `NewGauge: Helpers.getModule("NewGauge").create(def, Helpers)` to `rendererSpecs`
 
-Naming rule for `cluster/rendering/` wrappers:
-- Use role-based IDs (example: `DateTimeRendererWrapper`, `TimeStatusRendererWrapper`), not cluster-prefixed IDs.
+Naming rule for `cluster/rendering/` components:
+- Use role-based IDs (example: `ClusterRendererRouter`, `RendererPropsWidget`), not cluster-prefixed IDs.
 - Keep file basename, component ID, returned `id`, and `globalKey` aligned.
+- Do not add per-kind mapper-to-widget forwarding shims there.
 
 ## Renderer Decision Rule
 
@@ -163,7 +164,7 @@ When adding a new cluster `kind`, use this rule to decide between routing to an 
 - If the mapper must set more than 6 renderer-specific props for one `kind`, create a dedicated renderer.
 - If the mapper sets props that change renderer behavior mode (for example `rawMode`, axis formatter overrides, or flatten-from-axes flags), create a dedicated renderer.
 - If the new kind's visual output differs from the existing renderer's primary purpose, create a dedicated renderer.
-- If in doubt, create a thin wrapper renderer that delegates to an existing widget with fixed configuration (pattern: `DateTimeRendererWrapper` delegating to `PositionCoordinateWidget`). This keeps mapper output declarative and stabilizes the base renderer contract.
+- If the visual layout stays the same, prefer extending the existing renderer with a renderer-owned variant contract (pattern: `PositionCoordinateWidget` `displayVariant`) instead of adding a cluster-side forwarding shim.
 
 ## Adding a New Kind
 
