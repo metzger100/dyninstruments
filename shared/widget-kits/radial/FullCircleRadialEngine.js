@@ -9,19 +9,20 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniFullCircleRadialEngine = factory(); }
 }(this, function () {
   "use strict";
+  const hasOwn = Object.prototype.hasOwnProperty;
+  const DEFAULT_RATIO_PROPS = { normal: "ratioThresholdNormal", flat: "ratioThresholdFlat" };
+  const DEFAULT_RATIO_DEFAULTS = { normal: 0.8, flat: 2.2 };
+  const DEFAULT_LAYOUT = {};
+
   function fullCircleKeyToText(value) {
     if (typeof value === "string") {
       return value;
     }
-    try {
-      return JSON.stringify(value);
-    } catch (e) {
-      return String(value);
-    }
+    return JSON.stringify(value);
   }
-  function pickFinite(value, fallback) {
+  function pickFinite(value, defaultValue) {
     const n = Number(value);
-    return isFinite(n) ? n : fallback;
+    return isFinite(n) ? n : defaultValue;
   }
   function fullCircleNormalizeLayers(raw) {
     const source = Array.isArray(raw) ? raw : null;
@@ -145,13 +146,13 @@
 
     const fullCircleCreateRenderer = function (spec) {
       const cfg = spec || {};
-      const ratioProps = cfg.ratioProps || { normal: "ratioThresholdNormal", flat: "ratioThresholdFlat" };
-      const ratioDefaults = cfg.ratioDefaults || { normal: 0.8, flat: 2.2 };
+      const ratioProps = hasOwn.call(cfg, "ratioProps") ? cfg.ratioProps : DEFAULT_RATIO_PROPS;
+      const ratioDefaults = hasOwn.call(cfg, "ratioDefaults") ? cfg.ratioDefaults : DEFAULT_RATIO_DEFAULTS;
       const layers = fullCircleNormalizeLayers(cfg.cacheLayers);
       const layerCache = layerCacheApi.createLayerCache({ layers: layers });
       const layerCanvases = Object.create(null);
       const cacheMeta = Object.create(null);
-      const layoutCfg = cfg.layout || {};
+      const layoutCfg = hasOwn.call(cfg, "layout") ? cfg.layout : DEFAULT_LAYOUT;
 
       return function renderCanvas(canvas, props) {
         const p = props || {};
@@ -327,8 +328,8 @@
           api.drawCachedLayer(layers[0]);
         }
 
-        const drawMode = cfg.drawMode || {};
-        const modeRenderer = drawMode[state.mode];
+        const drawMode = hasOwn.call(cfg, "drawMode") ? cfg.drawMode : null;
+        const modeRenderer = drawMode && drawMode[state.mode];
         if (typeof modeRenderer === "function") {
           modeRenderer(state, p, api);
         }

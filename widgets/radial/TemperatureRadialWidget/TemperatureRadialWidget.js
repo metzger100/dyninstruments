@@ -9,18 +9,26 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniTemperatureRadialWidget = factory(); }
 }(this, function () {
   "use strict";
+  const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
     const renderer = Helpers.getModule("SemicircleRadialEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
+    function resolveDefaultText(props) {
+      if (props && hasOwn.call(props, "default")) {
+        return props.default;
+      }
+      // dyni-lint-disable-next-line hardcoded-runtime-default -- Standalone formatter helpers still need the shared missing-value placeholder when no default prop is supplied.
+      return "---";
+    }
 
     function toCelsiusNumber(raw, props) {
+      const p = props || {};
       const n = Number(raw);
       if (!isFinite(n)) {
         return NaN;
       }
 
-      const p = props || {};
       const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatTemperature";
       const formatterParameters = (typeof p.formatterParameters !== "undefined")
         ? p.formatterParameters
@@ -29,7 +37,7 @@
       const formatted = String(Helpers.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
-        default: "---"
+        default: p.default
       }));
       const numberText = valueMath.extractNumberText(formatted);
       const parsed = numberText ? Number(numberText) : NaN;
@@ -38,9 +46,10 @@
     }
 
     function displayTempFromRaw(raw, decimals, props) {
+      const defaultText = resolveDefaultText(props);
       const celsius = toCelsiusNumber(raw, props);
       if (!isFinite(celsius)) {
-        return { num: NaN, text: "---" };
+        return { num: NaN, text: defaultText };
       }
       const d = (typeof decimals === "number" && isFinite(decimals))
         ? Math.max(0, Math.min(6, Math.floor(decimals)))

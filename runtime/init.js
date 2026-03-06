@@ -9,7 +9,7 @@
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
   const state = ns.state;
-  const FALLBACK_PRESET_NAMES = ["default", "slim", "bold", "night", "highcontrast"];
+  const DEFAULT_PRESET_NAMES = ["default", "slim", "bold", "night", "highcontrast"];
 
   function createGetComponent(components) {
     return function getComponent(id) {
@@ -99,6 +99,7 @@
     if (!style || typeof style.getPropertyValue !== "function") {
       return null;
     }
+    // dyni-lint-disable-next-line css-js-default-duplication -- Theme preset selection is intentionally read from the documented CSS boundary.
     const raw = style.getPropertyValue("--dyni-theme-preset");
     const value = (typeof raw === "string") ? raw.trim() : "";
     return value || null;
@@ -107,7 +108,7 @@
   function knownPresetNames() {
     const presets = state.themePresetApi && state.themePresetApi.presets;
     if (!presets || typeof presets !== "object") {
-      return FALLBACK_PRESET_NAMES.slice();
+      return DEFAULT_PRESET_NAMES.slice();
     }
     const names = Object.keys(presets);
     if (!names.length) {
@@ -264,6 +265,7 @@
         state.themePresetApi = null;
         state.themeResolverModule = null;
         console.error("dyninstruments init failed:", e);
+        throw e;
       });
 
     return state.initPromise;

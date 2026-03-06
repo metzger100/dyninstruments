@@ -14,13 +14,13 @@
   function fullCircleClamp(value, minValue, maxValue) {
     return Math.max(minValue, Math.min(maxValue, value));
   }
-  function fullCircleThemeNumber(source, key, fallback, minValue, maxValue) {
+  function fullCircleThemeNumber(source, key, defaultValue, minValue, maxValue) {
     if (!source || !hasOwn.call(source, key)) {
-      return fallback;
+      return defaultValue;
     }
     const raw = Number(source[key]);
     if (!isFinite(raw)) {
-      return fallback;
+      return defaultValue;
     }
     return fullCircleClamp(raw, minValue, maxValue);
   }
@@ -201,11 +201,11 @@
     const cfg = opts || {};
     fullCircleSingleFlat(state, left, {
       side: "left",
-      align: cfg.leftAlign || "left"
+      align: hasOwn.call(cfg, "leftAlign") ? cfg.leftAlign : "left"
     });
     fullCircleSingleFlat(state, right, {
       side: "right",
-      align: cfg.rightAlign || "right"
+      align: hasOwn.call(cfg, "rightAlign") ? cfg.rightAlign : "right"
     });
   }
   function fullCircleDualHigh(state, left, right) {

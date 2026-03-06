@@ -9,18 +9,27 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniTemperatureLinearWidget = factory(); }
 }(this, function () {
   "use strict";
+  const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
     const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
+    function resolveDefaultText(props) {
+      if (props && hasOwn.call(props, "default")) {
+        return props.default;
+      }
+      // dyni-lint-disable-next-line hardcoded-runtime-default -- Standalone formatter helpers still need the shared missing-value placeholder when no default prop is supplied.
+      return "---";
+    }
 
     function formatDisplay(raw, props) {
+      const p = props || {};
+      const defaultText = resolveDefaultText(p);
       const n = Number(raw);
       if (!isFinite(n)) {
-        return { num: NaN, text: "---" };
+        return { num: NaN, text: defaultText };
       }
 
-      const p = props || {};
       const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatTemperature";
       const formatterParameters = (typeof p.formatterParameters !== "undefined")
         ? p.formatterParameters
@@ -29,13 +38,13 @@
       const formatted = String(Helpers.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
-        default: "---"
+        default: defaultText
       }));
       const numberText = valueMath.extractNumberText(formatted);
       const parsed = numberText ? Number(numberText) : NaN;
 
       if (!isFinite(parsed)) {
-        return { num: NaN, text: "---" };
+        return { num: NaN, text: defaultText };
       }
       return { num: parsed, text: parsed.toFixed(1) };
     }

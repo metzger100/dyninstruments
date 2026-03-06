@@ -79,8 +79,8 @@
         unit: String(p.unit).trim(),
         value: state.value.isFiniteNumber(heading)
           ? state.value.formatDirection360(heading, !!p.leadingZero)
-          : (hasOwn.call(p, "default") ? p.default : "---"),
-        secScale: state.value.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0)
+          : p.default,
+        secScale: state.value.clamp(p.captionUnitScale, 0.3, 3.0)
       };
     }
 
@@ -114,12 +114,15 @@
       },
       drawFrame: function (state, props, api) {
         const display = compassDisplay(state, props);
-        const rotationDeg = state.value.isFiniteNumber(display.heading) ? -display.heading : 0;
+        let rotationDeg = 0;
+        if (Number.isFinite(display.heading)) {
+          rotationDeg = -display.heading;
+        }
 
         api.drawCachedLayer("face", { rotationDeg: rotationDeg });
         api.drawFixedPointer(state.ctx, 0, { depth: Math.max(10, Math.floor(state.geom.ringW * 0.9)) });
 
-        if (state.value.isFiniteNumber(display.marker) && state.value.isFiniteNumber(display.heading)) {
+        if (Number.isFinite(display.marker) && Number.isFinite(display.heading)) {
           state.draw.drawRimMarker(state.ctx, state.geom.cx, state.geom.cy, state.geom.rOuter, display.marker - display.heading, {
             len: Math.max(12, Math.floor(state.geom.ringW * 0.9)),
             width: Math.max(3, Math.floor(state.geom.ringW * 0.4)),

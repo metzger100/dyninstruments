@@ -11,7 +11,7 @@
 }(this, function () {
   "use strict";
 
-  function makeAngleFormatter(isDirection, leadingZero, fallback, angleMath) {
+  function makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath) {
     const norm360 = (angleMath && typeof angleMath.norm360 === "function")
       ? angleMath.norm360
       : ((deg) => {
@@ -36,10 +36,7 @@
     return function (raw) {
       const n = Number(raw);
       if (!isFinite(n)) {
-        if (typeof fallback !== "undefined") {
-          return fallback;
-        }
-        return "---";
+        return defaultText;
       }
       let a = isDirection ? norm360(n) : norm180(n);
       let out;
@@ -84,8 +81,8 @@
       },
       out: out,
       num: toFiniteNumber,
-      makeAngleFormatter: function (isDirection, leadingZero, fallback) {
-        return makeAngleFormatter(isDirection, leadingZero, fallback, angleMath);
+      makeAngleFormatter: function (isDirection, leadingZero, defaultText) {
+        return makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath);
       }
     };
   }
@@ -98,8 +95,8 @@
     return {
       out: out,
       num: toFiniteNumber,
-      makeAngleFormatter: function (isDirection, leadingZero, fallback) {
-        return makeAngleFormatter(isDirection, leadingZero, fallback, angleMath);
+      makeAngleFormatter: function (isDirection, leadingZero, defaultText) {
+        return makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath);
       },
       createToolkit: function (props) {
         return createToolkit(props, angleMath);

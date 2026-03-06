@@ -20,7 +20,7 @@
     function fitSingleLineBinary(args) {
       const cfg = args || {};
       const ctx = cfg.ctx;
-      const textValue = String(cfg.text || "");
+      const textValue = String(cfg.text);
       const maxW = Math.max(1, Number(cfg.maxW) || 0);
       const maxH = Math.max(1, Number(cfg.maxH) || 0);
       const family = cfg.family;
@@ -70,7 +70,7 @@
 
     function fitMultiRowBinary(args) {
       const cfg = args || {};
-      const rows = Array.isArray(cfg.rows) ? cfg.rows : [];
+      const rows = cfg.rows;
       const ctx = cfg.ctx;
       const maxW = Math.max(1, Number(cfg.maxW) || 0);
       const maxH = Math.max(1, Number(cfg.maxH) || 0);
@@ -129,8 +129,8 @@
     function fitValueUnitRow(args) {
       const cfg = args || {};
       const ctx = cfg.ctx;
-      const valueText = String(cfg.valueText || "");
-      const unitText = String(cfg.unitText || "");
+      const valueText = String(cfg.valueText);
+      const unitText = String(cfg.unitText);
       const maxW = Math.max(1, Number(cfg.maxW) || 0);
       const maxH = Math.max(1, Number(cfg.maxH) || 0);
       const baseValuePx = Math.max(1, Math.floor(Number(cfg.baseValuePx) || maxH));
@@ -166,9 +166,9 @@
     function fitInlineTriplet(args) {
       const cfg = args || {};
       const ctx = cfg.ctx;
-      const captionText = String(cfg.captionText || "");
-      const valueText = String(cfg.valueText || "");
-      const unitText = String(cfg.unitText || "");
+      const captionText = String(cfg.captionText);
+      const valueText = String(cfg.valueText);
+      const unitText = String(cfg.unitText);
       const maxW = Math.max(1, Number(cfg.maxW) || 0);
       const maxH = Math.max(1, Number(cfg.maxH) || 0);
       const family = cfg.family;
@@ -218,17 +218,17 @@
         return best;
       }
       primitiveSetFont(ctx, minPx, valueWeight, family);
-      const fallbackVW = ctx.measureText(valueText).width;
+      const baseValueWidth = ctx.measureText(valueText).width;
       primitiveSetFont(ctx, minPx, labelWeight, family);
-      const fallbackCW = captionText ? ctx.measureText(captionText).width : 0;
-      const fallbackUW = unitText ? ctx.measureText(unitText).width : 0;
+      const baseCaptionWidth = captionText ? ctx.measureText(captionText).width : 0;
+      const baseUnitWidth = unitText ? ctx.measureText(unitText).width : 0;
       return {
         vPx: minPx,
         sPx: minPx,
-        cW: fallbackCW,
-        vW: fallbackVW,
-        uW: fallbackUW,
-        total: (captionText ? fallbackCW + gap : 0) + fallbackVW + (unitText ? gap + fallbackUW : 0),
+        cW: baseCaptionWidth,
+        vW: baseValueWidth,
+        uW: baseUnitWidth,
+        total: (captionText ? baseCaptionWidth + gap : 0) + baseValueWidth + (unitText ? gap + baseUnitWidth : 0),
         gap: gap
       };
     }
@@ -236,10 +236,10 @@
     function drawInlineTriplet(args) {
       const cfg = args || {};
       const ctx = cfg.ctx;
-      const fit = cfg.fit || {};
-      const captionText = String(cfg.captionText || "");
-      const valueText = String(cfg.valueText || "");
-      const unitText = String(cfg.unitText || "");
+      const fit = cfg.fit;
+      const captionText = String(cfg.captionText);
+      const valueText = String(cfg.valueText);
+      const unitText = String(cfg.unitText);
       const x = Math.floor(Number(cfg.x) || 0);
       const y = Math.floor(Number(cfg.y) || 0);
       const W = Math.max(1, Math.floor(Number(cfg.W) || 0));

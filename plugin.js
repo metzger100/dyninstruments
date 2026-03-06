@@ -76,6 +76,7 @@
     .then(function () {
       return window.DyniPlugin.runtime.runInit();
     })
+    // dyni-lint-disable-next-line catch-fallback-without-suppression -- Top-level bootstrap should log startup failures without turning them into unhandled browser promise rejections.
     .catch(function (e) {
       console.error("dyninstruments bootstrap failed:", e);
     });

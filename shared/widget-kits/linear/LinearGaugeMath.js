@@ -14,11 +14,7 @@
     if (typeof value === "string") {
       return value;
     }
-    try {
-      return JSON.stringify(value);
-    } catch (e) {
-      return String(value);
-    }
+    return JSON.stringify(value);
   }
 
   function clamp(value, lo, hi) {

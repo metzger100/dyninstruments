@@ -12,7 +12,7 @@
 
   const STATUS_OK = "\ud83d\udfe2";
   const STATUS_BAD = "\ud83d\udd34";
-  const TIME_STATUS_FALLBACK_SCALE = 0.82;
+  const TIME_STATUS_SCALE_LIMIT = 0.82;
   function readCoordinatePair(value, rawMode) {
     if (!value || typeof value !== "object") {
       return null;
@@ -44,16 +44,16 @@
       appendAxisParam: !hasOverride
     };
   }
-  function formatAxisValue(rawValue, axis, fallbackText, props, Helpers) {
+  function formatAxisValue(rawValue, axis, defaultText, props, Helpers) {
     const rawMode = props && props.coordinateRawValues === true;
     if (rawMode) {
       if (rawValue == null || (typeof rawValue === "number" && Number.isNaN(rawValue))) {
-        return fallbackText;
+        return defaultText;
       }
     } else {
       const n = Number(rawValue);
       if (!isFinite(n)) {
-        return fallbackText;
+        return defaultText;
       }
       rawValue = n;
     }
@@ -62,13 +62,13 @@
     const out = String(Helpers.applyFormatter(rawValue, {
       formatter: cfg.formatter,
       formatterParameters: cfg.params,
-      default: fallbackText
+      default: defaultText
     }));
-    return out.trim() ? out : fallbackText;
+    return out.trim() ? out : defaultText;
   }
   function isTimeStatusMarker(text) {
-    return String(text == null ? "" : text).trim() === STATUS_OK ||
-      String(text == null ? "" : text).trim() === STATUS_BAD;
+    const normalized = String(text).trim();
+    return normalized === STATUS_OK || normalized === STATUS_BAD;
   }
   function readActualTextHeight(metrics) {
     const ascent = Number(metrics && metrics.actualBoundingBoxAscent);
@@ -109,18 +109,18 @@
         unitText: p.unit
       });
       const insets = text.computeInsets(W, H);
-      const fallbackText = (p.default == null) ? "---" : String(p.default);
+      const defaultText = String(p.default);
       if (modeData.mode === "flat") {
         const pairRaw = readCoordinatePair(p.value, true);
         const useAxisFlat = !!p.coordinateFlatFromAxes;
         const topText = useAxisFlat
-          ? formatAxisValue(pairRaw ? pairRaw.lat : null, "lat", fallbackText, p, Helpers)
+          ? formatAxisValue(pairRaw ? pairRaw.lat : null, "lat", defaultText, p, Helpers)
           : "";
         const bottomText = useAxisFlat
-          ? formatAxisValue(pairRaw ? pairRaw.lon : null, "lon", fallbackText, p, Helpers)
+          ? formatAxisValue(pairRaw ? pairRaw.lon : null, "lon", defaultText, p, Helpers)
           : "";
         const valueText = String(useAxisFlat
-          ? ((topText + " " + bottomText).trim() || fallbackText)
+          ? ((topText + " " + bottomText).trim() || defaultText)
           : Helpers.applyFormatter(p.value, p));
         const statusEmoji = useAxisFlat && isTimeStatusMarker(topText);
         const key = text.makeFitCacheKey({
@@ -150,7 +150,7 @@
               if (!statusEmoji) {
                 return true;
               }
-              const safeHeight = meta.maxH * TIME_STATUS_FALLBACK_SCALE;
+              const safeHeight = meta.maxH * TIME_STATUS_SCALE_LIMIT;
               const h = readActualTextHeight(meta.valueMetrics);
               return h == null ? meta.valuePx <= safeHeight : h <= safeHeight;
             }
@@ -171,11 +171,11 @@
       } else {
         const parsed = readCoordinatePair(p.value, p.coordinateRawValues === true);
         const latText = parsed
-          ? formatAxisValue(parsed.lat, "lat", fallbackText, p, Helpers)
-          : fallbackText;
+          ? formatAxisValue(parsed.lat, "lat", defaultText, p, Helpers)
+          : defaultText;
         const lonText = parsed
-          ? formatAxisValue(parsed.lon, "lon", fallbackText, p, Helpers)
-          : fallbackText;
+          ? formatAxisValue(parsed.lon, "lon", defaultText, p, Helpers)
+          : defaultText;
         const topStatusEmoji = isTimeStatusMarker(latText);
         const key = text.makeFitCacheKey({
           mode: modeData.mode,
@@ -206,7 +206,7 @@
               if (!topStatusEmoji) {
                 return true;
               }
-              const safeHeight = meta.maxH * TIME_STATUS_FALLBACK_SCALE;
+              const safeHeight = meta.maxH * TIME_STATUS_SCALE_LIMIT;
               const h = readActualTextHeight(meta.metrics);
               return h == null ? meta.px <= safeHeight : h <= safeHeight;
             }

@@ -57,7 +57,7 @@
       const p = props || {};
       const heading = Number(raw);
       if (!isFinite(heading)) {
-        return { num: NaN, text: hasOwn.call(p, "default") ? p.default : "---" };
+        return { num: NaN, text: p.default };
       }
       return {
         num: heading,

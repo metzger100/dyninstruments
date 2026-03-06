@@ -15,27 +15,32 @@
     const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers);
 
     function windFormatSpeedText(raw, props, speedUnit) {
+      const p = props || {};
       const n = Number(raw);
       if (!isFinite(n)) {
-        return "---";
+        return p.default;
       }
 
-      const p = props || {};
       const formatter = p.formatter;
       const formatterParameters = p.formatterParameters;
 
       return String(Helpers.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
-        default: "---"
+        default: p.default
       }));
     }
 
     function windDisplay(state, props) {
       const p = props || {};
+      const defaultText = p.default;
       const angleUnit = String(p.angleUnit).trim();
       const speedUnit = String(p.speedUnit).trim();
-      const secScale = state.value.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
+      const secScale = state.value.clamp(p.captionUnitScale, 0.3, 3.0);
+      let angleText = defaultText;
+      if (Number.isFinite(p.angle)) {
+        angleText = state.value.formatAngle180(p.angle, !!p.leadingZero);
+      }
 
       return {
         angle: p.angle,
@@ -44,7 +49,7 @@
         windRadialLayMax: state.value.clamp(p.windRadialLayMax, 0, 180),
         left: {
           caption: String(p.angleCaption).trim(),
-          value: state.value.formatAngle180(p.angle, !!p.leadingZero),
+          value: angleText,
           unit: angleUnit,
           secScale: secScale
         },

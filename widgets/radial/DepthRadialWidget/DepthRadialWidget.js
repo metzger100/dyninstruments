@@ -14,10 +14,10 @@
     const renderer = Helpers.getModule("SemicircleRadialEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
 
-    function formatDepthString(raw, decimals) {
+    function formatDepthString(raw, decimals, defaultText) {
       const n = Number(raw);
       if (!isFinite(n)) {
-        return "---";
+        return defaultText;
       }
       const d = (typeof decimals === "number" && isFinite(decimals))
         ? Math.max(0, Math.min(6, Math.floor(decimals)))
@@ -25,18 +25,18 @@
       return n.toFixed(d);
     }
 
-    function displayDepthFromRaw(raw, decimals) {
-      const formatted = formatDepthString(raw, decimals);
+    function displayDepthFromRaw(raw, decimals, defaultText) {
+      const formatted = formatDepthString(raw, decimals, defaultText);
       const numberText = valueMath.extractNumberText(formatted);
       const num = numberText ? Number(numberText) : NaN;
       if (isFinite(num)) {
         return { num: num, text: numberText };
       }
-      const fallback = Number(raw);
-      if (isFinite(fallback)) {
-        return { num: fallback, text: String(fallback) };
+      const rawNumber = Number(raw);
+      if (isFinite(rawNumber)) {
+        return { num: rawNumber, text: String(rawNumber) };
       }
-      return { num: NaN, text: "---" };
+      return { num: NaN, text: defaultText };
     }
 
     const renderCanvas = renderer.createRenderer({
@@ -58,8 +58,8 @@
       },
       ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
-      formatDisplay: function (raw) {
-        return displayDepthFromRaw(raw, 1);
+      formatDisplay: function (raw, props) {
+        return displayDepthFromRaw(raw, 1, props.default);
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
         const radialProps = {

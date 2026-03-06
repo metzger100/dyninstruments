@@ -65,7 +65,7 @@
         return p;
       }
 
-      const deps = Array.isArray(m.deps) ? m.deps : [];
+      const deps = m.deps || [];
       const depLoads = Promise.all(deps.map(loadComponent));
 
       const p = depLoads

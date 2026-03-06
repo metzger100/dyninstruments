@@ -9,6 +9,7 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniXteHighwayPrimitives = factory(); }
 }(this, function () {
   "use strict";
+  const DEFAULT_STYLE = { lineWidthFactor: 1 };
 
   function create() {
     function clamp(value, lo, hi) {
@@ -135,7 +136,8 @@
     }
 
     function resolveLineWidthFactor(style) {
-      const factor = style && Number.isFinite(style.lineWidthFactor) ? style.lineWidthFactor : 1;
+      const source = style || DEFAULT_STYLE;
+      const factor = source.lineWidthFactor;
       return factor > 0 ? factor : 1;
     }
 
