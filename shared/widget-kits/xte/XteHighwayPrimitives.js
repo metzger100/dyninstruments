@@ -9,7 +9,7 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniXteHighwayPrimitives = factory(); }
 }(this, function () {
   "use strict";
-  const DEFAULT_STYLE = { lineWidthFactor: 1 };
+  const DEFAULT_STYLE = { lineWidthFactor: 1, boatSizeFactor: 1 };
 
   function create() {
     function clamp(value, lo, hi) {
@@ -150,6 +150,12 @@
       return factor > 0 ? factor : 1;
     }
 
+    function resolveBoatSizeFactor(style) {
+      const source = style || DEFAULT_STYLE;
+      const factor = source.boatSizeFactor;
+      return factor > 0 ? factor : 1;
+    }
+
     function strokeSegment(ctx, x1, y1, x2, y2, lineWidth) {
       ctx.lineWidth = lineWidth;
       ctx.beginPath();
@@ -234,11 +240,13 @@
       const baseY = geom.baseY;
       const nearHalf = geom.nearHalf;
       const lineWidthFactor = resolveLineWidthFactor(style);
+      const boatSizeFactor = resolveBoatSizeFactor(style);
       const safeNorm = clamp(xteNormalized, -1.1, 1.1);
       const markerX = cx + safeNorm * nearHalf * 0.82;
       const markerY = baseY - (baseY - horizonY) * 0.12;
       const laneDepth = Math.max(1, baseY - horizonY);
-      const markerLength = clamp(nearHalf * 0.11, 4, laneDepth * 0.24);
+      const markerBaseLength = clamp(nearHalf * 0.11, 4, laneDepth * 0.24);
+      const markerLength = Math.max(4, markerBaseLength * boatSizeFactor);
       const markerBeam = Math.max(3, markerLength * 0.62);
       const centerlineWidth = Math.max(1.4, nearHalf * 0.016) * lineWidthFactor;
 

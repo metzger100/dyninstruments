@@ -11,7 +11,7 @@
   "use strict";
 
   const FIXED_XTE_SCALE = 1;
-  const DEFAULT_XTE_THEME = { lineWidthFactor: 1 };
+  const DEFAULT_XTE_THEME = { lineWidthFactor: 1, boatSizeFactor: 1 };
 
   function create(def, Helpers) {
     const toolkit = Helpers.getModule("RadialToolkit").create(def, Helpers);
@@ -137,6 +137,7 @@
       const valueWeight = theme.font.weight;
       const labelWeight = theme.font.labelWeight;
       const lineWidthFactor = xteTheme.lineWidthFactor > 0 ? xteTheme.lineWidthFactor : 1;
+      const boatSizeFactor = xteTheme.boatSizeFactor > 0 ? xteTheme.boatSizeFactor : 1;
 
       const colors = {
         pointer: theme.colors.pointer,
@@ -145,8 +146,12 @@
         stripeLine: textColor
       };
 
-      const xteStyle = {
+      const xteStaticStyle = {
         lineWidthFactor: lineWidthFactor
+      };
+      const xteDynamicStyle = {
+        lineWidthFactor: lineWidthFactor,
+        boatSizeFactor: boatSizeFactor
       };
 
       const disconnected = p.disconnect === true;
@@ -174,7 +179,7 @@
       const staticKey = {
         mode: mode,
         geom: geom,
-        lineWidthFactor: xteStyle.lineWidthFactor,
+        lineWidthFactor: xteStaticStyle.lineWidthFactor,
         roadLine: colors.roadLine,
         stripeLine: colors.stripeLine
       };
@@ -184,7 +189,7 @@
           return;
         }
         layerCtx.clearRect(0, 0, layerCanvas.width, layerCanvas.height);
-        primitives.drawStaticHighway(layerCtx, geom, colors, mode, xteStyle);
+        primitives.drawStaticHighway(layerCtx, geom, colors, mode, xteStaticStyle);
       });
       staticLayer.blit(ctx);
 
@@ -215,7 +220,7 @@
         const signedDisplayXte = xteRaw < 0 ? -xteDisplayAbs : xteDisplayAbs;
         const xteNormalized = signedDisplayXte / FIXED_XTE_SCALE;
         const overflow = Math.abs(xteDisplayAbs) > FIXED_XTE_SCALE;
-        primitives.drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, xteStyle);
+        primitives.drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, xteDynamicStyle);
       }
 
       const trackValue = Helpers.applyFormatter(cogRaw, {

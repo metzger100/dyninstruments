@@ -30,6 +30,8 @@
 }(this, function () {
   "use strict";
 
+  const EMPTY_PRESET = {};
+
   // dyni-lint-disable-next-line css-js-default-duplication -- ThemeResolver is the documented theme-token boundary and owns per-token defaults.
   function defineToken(path, cssVar, type, defaultValue) {
     return { path: path, cssVar: cssVar, type: type, defaultValue: defaultValue }; /* dyni-lint-disable-line css-js-default-duplication -- ThemeResolver is the documented theme-token boundary and owns per-token defaults. */
@@ -66,7 +68,8 @@
     defineToken("linear.labels.fontFactor", "--dyni-linear-label-font", "number", 0.14),
     defineToken("font.weight", "--dyni-font-weight", "number", 700),
     defineToken("font.labelWeight", "--dyni-label-weight", "number", 700),
-    defineToken("xte.lineWidthFactor", "--dyni-xte-line-width-factor", "number", 1.5)
+    defineToken("xte.lineWidthFactor", "--dyni-xte-line-width-factor", "number", 1.5),
+    defineToken("xte.boatSizeFactor", "--dyni-xte-boat-size-factor", "number", 1)
   ];
 
   function setByPath(target, pathSegments, value) {
@@ -89,17 +92,85 @@
 
   const DEFAULTS = buildDefaults();
 
-  function pickTokenValue(style, tokenDef) {
+  function getByPath(source, pathSegments) {
+    let cursor = source;
+    for (let i = 0; i < pathSegments.length; i++) {
+      if (!cursor || typeof cursor !== "object" || !Object.prototype.hasOwnProperty.call(cursor, pathSegments[i])) {
+        return undefined;
+      }
+      cursor = cursor[pathSegments[i]];
+    }
+    return cursor;
+  }
+
+  function readTokenOverride(style, tokenDef) {
     if (!style || typeof style.getPropertyValue !== "function") {
-      return tokenDef.defaultValue;
+      return { hasValue: false, value: tokenDef.defaultValue };
     }
     const raw = style.getPropertyValue(tokenDef.cssVar);
     if (tokenDef.type === "number") {
       const parsed = parseFloat(raw);
-      return Number.isFinite(parsed) ? parsed : tokenDef.defaultValue;
+      return Number.isFinite(parsed)
+        ? { hasValue: true, value: parsed }
+        : { hasValue: false, value: tokenDef.defaultValue };
     }
     const val = typeof raw === "string" ? raw.trim() : "";
-    return val || tokenDef.defaultValue;
+    return val
+      ? { hasValue: true, value: val }
+      : { hasValue: false, value: tokenDef.defaultValue };
+  }
+
+  function resolvePresetDefs(Helpers) {
+    const presetsMod = Helpers && typeof Helpers.getModule === "function"
+      ? Helpers.getModule("ThemePresets")
+      : null;
+
+    if (presetsMod && presetsMod.PRESETS && typeof presetsMod.PRESETS === "object") {
+      return presetsMod.PRESETS;
+    }
+    if (presetsMod && presetsMod.create && presetsMod.create.PRESETS && typeof presetsMod.create.PRESETS === "object") {
+      return presetsMod.create.PRESETS;
+    }
+    return { default: EMPTY_PRESET };
+  }
+
+  function normalizePresetName(presetName, presetDefs) {
+    if (typeof presetName !== "string") {
+      return "default";
+    }
+    const normalized = presetName.trim().toLowerCase();
+    if (!normalized || !Object.prototype.hasOwnProperty.call(presetDefs, normalized)) {
+      return "default";
+    }
+    return normalized;
+  }
+
+  function discoverWidgetRoot(canvas) {
+    if (!canvas) {
+      return null;
+    }
+    if (typeof canvas.closest === "function") {
+      const found = canvas.closest(".widget, .DirectWidget");
+      if (found) {
+        return found;
+      }
+    }
+    return canvas.parentElement || null;
+  }
+
+  function getActivePresetName(rootEl, presetDefs) {
+    if (!rootEl || typeof rootEl.getAttribute !== "function") {
+      return "default";
+    }
+    return normalizePresetName(rootEl.getAttribute("data-dyni-theme"), presetDefs);
+  }
+
+  function getComputedStyleSafe(el) {
+    if (!el || typeof getComputedStyle !== "function") {
+      return null;
+    }
+    const style = getComputedStyle(el);
+    return style && typeof style.getPropertyValue === "function" ? style : null;
   }
 
   function getNightModeState(canvas) {
@@ -120,10 +191,24 @@
     return !!(body && body.classList && body.classList.contains("nightMode"));
   }
 
-  function resolveTokens(style) {
+  function resolveTokens(styles, presetValues) {
     const out = {};
     TOKEN_DEFS.forEach(function (tokenDef) {
-      setByPath(out, tokenDef.path.split("."), pickTokenValue(style, tokenDef));
+      const pathSegments = tokenDef.path.split(".");
+      let value = getByPath(presetValues, pathSegments);
+      if (typeof value === "undefined") {
+        value = tokenDef.defaultValue;
+      }
+
+      for (let i = 0; i < styles.length; i++) {
+        const override = readTokenOverride(styles[i], tokenDef);
+        if (override.hasValue) {
+          value = override.value;
+          break;
+        }
+      }
+
+      setByPath(out, pathSegments, value);
     });
     return out;
   }
@@ -143,29 +228,41 @@
     lastNightModeState = null;
   }
 
-  function resolveWithCache(canvas) {
-    if (!canvas) {
-      return resolveTokens(null);
+  function create(def, Helpers) {
+    const presetDefs = resolvePresetDefs(Helpers);
+
+    function resolveWithCache(canvas) {
+      if (!canvas) {
+        return resolveTokens([], EMPTY_PRESET);
+      }
+
+      const nightMode = getNightModeState(canvas);
+      if (lastNightModeState === null) lastNightModeState = nightMode;
+      else if (nightMode !== lastNightModeState) {
+        invalidateAll();
+        lastNightModeState = nightMode;
+      }
+
+      if (byCanvas.has(canvas)) {
+        return byCanvas.get(canvas);
+      }
+
+      const rootEl = discoverWidgetRoot(canvas);
+      const styles = [getComputedStyleSafe(canvas)];
+      if (rootEl && rootEl !== canvas) {
+        styles.push(getComputedStyleSafe(rootEl));
+      }
+
+      const presetName = getActivePresetName(rootEl, presetDefs);
+      const presetValues = Object.prototype.hasOwnProperty.call(presetDefs, presetName)
+        ? presetDefs[presetName]
+        : EMPTY_PRESET;
+
+      const resolved = resolveTokens(styles, presetValues);
+      byCanvas.set(canvas, resolved);
+      return resolved;
     }
 
-    const nightMode = getNightModeState(canvas);
-    if (lastNightModeState === null) lastNightModeState = nightMode;
-    else if (nightMode !== lastNightModeState) {
-      invalidateAll();
-      lastNightModeState = nightMode;
-    }
-
-    if (byCanvas.has(canvas)) {
-      return byCanvas.get(canvas);
-    }
-
-    const style = getComputedStyle(canvas);
-    const resolved = resolveTokens(style);
-    byCanvas.set(canvas, resolved);
-    return resolved;
-  }
-
-  function create() {
     return {
       resolve: resolveWithCache,
       invalidateCanvas: invalidateCanvas,

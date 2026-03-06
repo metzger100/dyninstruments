@@ -76,6 +76,7 @@ Theme is resolved once per frame via `RadialToolkit.theme.resolve(canvas)`.
 | Road edge + horizon strokes | `Helpers.resolveTextColor(canvas)` |
 | Perspective bars + center seam markers | `Helpers.resolveTextColor(canvas)` |
 | Highway stroke thickness | `theme.xte.lineWidthFactor` (fallback `1` when invalid or `<=0`) |
+| Boat indicator size | `theme.xte.boatSizeFactor` (fallback `1` when invalid or `<=0`) |
 | Value text weight | `theme.font.weight` |
 | Label text weight | `theme.font.labelWeight` |
 

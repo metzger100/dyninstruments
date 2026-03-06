@@ -143,19 +143,81 @@ Available preset names:
   --dyni-alarm: #ff5533;
   --dyni-radial-arc-linewidth: 1.5;
   --dyni-radial-tick-major-width: 2.5;
-  --dyni-radial-pointer-side: 0.3;
+  --dyni-radial-pointer-width: 1.2;
+  --dyni-xte-boat-size-factor: 1.2;
   --dyni-font-weight: 800;
 }
 ```
 
-Common tokens:
+Direct token overrides beat the active preset. They are resolved by `ThemeResolver`, so they no longer depend on `plugin.css` load order.
 
-- Colors: `--dyni-pointer`, `--dyni-warning`, `--dyni-alarm`, `--dyni-layline-stb`, `--dyni-layline-port`
-- Ring/ticks: `--dyni-radial-arc-linewidth`, `--dyni-radial-ring-width`, `--dyni-radial-tick-major-len`, `--dyni-radial-tick-major-width`, `--dyni-radial-tick-minor-len`, `--dyni-radial-tick-minor-width`
-- Pointer geometry: `--dyni-radial-pointer-side`, `--dyni-radial-pointer-length`
-- Labels/text: `--dyni-radial-label-inset`, `--dyni-radial-label-font`, `--dyni-font-weight`, `--dyni-label-weight`, `--dyni-font`
+### 3) Full CSS token reference
 
-### 3) Preset precedence
+Values below are valid `user.css` examples. For `ThemeResolver` tokens, the example matches the shipped default unless noted otherwise.
+
+#### Preset and structural tokens
+
+| Token | Example value | Description |
+|---|---|---|
+| `--dyni-theme-preset` | `bold` | Selects the active runtime preset (`default`, `slim`, `bold`, `night`, `highcontrast`). |
+| `--dyni-font` | `"Inter", "SF Pro Text", -apple-system, "Segoe UI", Roboto, sans-serif` | Font stack used by dyninstruments canvas and HTML rendering. |
+| `--dyni-fg` | `#dfe6ee` | Plugin-specific foreground color override used by text/ticks before AvNav fallback colors. |
+| `--dyni-border-day` | `rgba(0, 0, 0, 0.30)` | Widget border color in day mode. |
+| `--dyni-border-night` | `rgba(252, 11, 11, 0.18)` | Widget border color in night mode. |
+
+#### Theme colors
+
+| Token | Example value | Description |
+|---|---|---|
+| `--dyni-pointer` | `#ff2b2b` | Main pointer/needle color for gauges and dials. |
+| `--dyni-warning` | `#e7c66a` | Warning sector color. |
+| `--dyni-alarm` | `#ff7a76` | Alarm sector color. |
+| `--dyni-layline-stb` | `#82b683` | Starboard layline color. |
+| `--dyni-layline-port` | `#ff7a76` | Port layline color. |
+
+#### Radial tokens
+
+| Token | Example value | Description |
+|---|---|---|
+| `--dyni-radial-tick-major-len` | `12` | Major radial tick length in px-style factor units. |
+| `--dyni-radial-tick-major-width` | `3` | Major radial tick stroke width. |
+| `--dyni-radial-tick-minor-len` | `7` | Minor radial tick length. |
+| `--dyni-radial-tick-minor-width` | `1.5` | Minor radial tick stroke width. |
+| `--dyni-radial-pointer-width` | `1` | Full-width factor for radial pointers. |
+| `--dyni-radial-pointer-length` | `2` | Length factor for radial pointers. |
+| `--dyni-radial-arc-linewidth` | `2` | Arc stroke width. |
+| `--dyni-radial-ring-width` | `0.16` | Ring thickness factor. |
+| `--dyni-radial-label-inset` | `1.8` | Label inset factor from the ring edge. |
+| `--dyni-radial-label-font` | `0.14` | Radial label font-size factor. |
+| `--dyni-radial-fullcircle-normal-inner-margin` | `0.03` | Inner margin factor for normal-mode full-circle dials. |
+| `--dyni-radial-fullcircle-normal-min-height` | `0.45` | Minimum text block height factor for normal-mode full-circle dials. |
+| `--dyni-radial-fullcircle-normal-dual-gap` | `0.05` | Gap factor between dual columns in normal-mode full-circle dials. |
+
+#### Linear tokens
+
+| Token | Example value | Description |
+|---|---|---|
+| `--dyni-linear-track-width` | `0.16` | Linear track thickness factor. |
+| `--dyni-linear-track-linewidth` | `2` | Linear track stroke width. |
+| `--dyni-linear-tick-major-len` | `12` | Major linear tick length. |
+| `--dyni-linear-tick-major-width` | `3` | Major linear tick stroke width. |
+| `--dyni-linear-tick-minor-len` | `7` | Minor linear tick length. |
+| `--dyni-linear-tick-minor-width` | `1.5` | Minor linear tick stroke width. |
+| `--dyni-linear-pointer-width` | `1` | Full-width factor for linear pointers. |
+| `--dyni-linear-pointer-length` | `2` | Length factor for linear pointers. |
+| `--dyni-linear-label-inset` | `1.8` | Label inset factor for linear gauges. |
+| `--dyni-linear-label-font` | `0.14` | Linear label font-size factor. |
+
+#### Text and XTE tokens
+
+| Token | Example value | Description |
+|---|---|---|
+| `--dyni-font-weight` | `700` | Primary numeric/value text weight. |
+| `--dyni-label-weight` | `700` | Caption/unit/tick-label text weight. |
+| `--dyni-xte-line-width-factor` | `1.5` | Stroke width multiplier for the XTE highway renderer. |
+| `--dyni-xte-boat-size-factor` | `1` | Size multiplier for the XTE boat indicator glyph. |
+
+### 4) Preset precedence
 
 Preset source order:
 
@@ -166,7 +228,7 @@ Preset source order:
 
 If you want `user.css` to control the preset, make sure `window.DyniPlugin.theme` is not set.
 
-### 4) Apply changes immediately
+### 5) Apply changes immediately
 
 After editing `user.css`, hard-refresh AvNav.  
 Optional browser-console reapply:

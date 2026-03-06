@@ -468,6 +468,107 @@ describe("runtime/init.js", function () {
     expect(applyPreset).toHaveBeenLastCalledWith(rootEl, "bold");
   });
 
+  it("invalidates ThemeResolver cache for container canvases after preset application", async function () {
+    const applyPreset = vi.fn();
+    const invalidateCanvas = vi.fn();
+    const invalidateAll = vi.fn();
+    const uniqueComponents = vi.fn(() => ["A", "ThemeResolver"]);
+    const loadComponent = vi.fn((id) => {
+      if (id === "ThemePresets") {
+        return Promise.resolve({
+          id: "ThemePresets",
+          PRESETS: { default: {}, bold: {} },
+          create: () => ({
+            presets: { default: {}, bold: {} },
+            apply: applyPreset,
+            remove: vi.fn()
+          })
+        });
+      }
+      if (id === "ThemeResolver") {
+        return Promise.resolve({
+          id: "ThemeResolver",
+          create: () => ({
+            resolve: vi.fn(),
+            invalidateCanvas,
+            invalidateAll
+          }),
+          invalidateCanvas,
+          invalidateAll
+        });
+      }
+      return Promise.resolve({ id: "A", create: () => ({}) });
+    });
+
+    const rootEl = {
+      classList: {
+        contains(name) {
+          return name === "dyniplugin";
+        }
+      },
+      hasAttribute() {
+        return false;
+      },
+      querySelectorAll() {
+        return [canvas];
+      },
+      style: {
+        setProperty() {},
+        removeProperty() {}
+      }
+    };
+    const canvas = {
+      closest() {
+        return rootEl;
+      },
+      parentElement: rootEl
+    };
+
+    const context = createScriptContext({
+      document: {
+        querySelectorAll: vi.fn(() => [canvas])
+      },
+      avnav: {
+        api: {
+          registerWidget: vi.fn(),
+          log: vi.fn()
+        }
+      },
+      DyniPlugin: {
+        runtime: {
+          createHelpers: vi.fn(() => ({ helper: true })),
+          createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
+          registerWidget: vi.fn()
+        },
+        state: {},
+        config: {
+          shared: {},
+          clusters: [],
+          components: {
+            A: { globalKey: "DyniA" },
+            ThemeResolver: { globalKey: "DyniThemeResolver" },
+            ThemePresets: { globalKey: "DyniThemePresets" }
+          },
+          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
+        }
+      }
+    });
+
+    runIifeScript("runtime/init.js", context);
+    await context.DyniPlugin.state.initPromise;
+    await flushPromises();
+
+    applyPreset.mockClear();
+    invalidateCanvas.mockClear();
+    invalidateAll.mockClear();
+
+    context.DyniPlugin.runtime.applyThemePresetToContainer(rootEl, "bold");
+
+    expect(applyPreset).toHaveBeenCalledWith(rootEl, "bold");
+    expect(invalidateCanvas).toHaveBeenCalledWith(canvas);
+    expect(invalidateAll).not.toHaveBeenCalled();
+  });
+
   it("resets init state and logs when component loading fails", async function () {
     const err = vi.fn();
     const uniqueComponents = vi.fn(() => ["A"]);

@@ -4,7 +4,7 @@
 
 ## Overview
 
-`ThemeResolver` provides plugin-wide token resolution from CSS custom properties. It reads from `getComputedStyle(canvas)`, applies per-token defaults, and caches results per canvas.
+`ThemeResolver` provides plugin-wide token resolution from CSS custom properties. It discovers the widget root from the canvas, applies the selected preset from `data-dyni-theme`, prefers explicit CSS custom-property overrides, and caches the merged result per canvas.
 
 `ThemePresets` provides named runtime presets by setting a preset selector attribute (`data-dyni-theme`) on widget root containers.
 
@@ -17,16 +17,18 @@
 - API: `resolve(canvas) -> themeTokens`
 - Invalidation API: `invalidateCanvas(canvas)`, `invalidateAll()`
 - Token metadata API: `TOKEN_DEFS` / `create.TOKEN_DEFS`
+- Preset metadata API: reads `ThemePresets.PRESETS` / `ThemePresets.create.PRESETS`
 - Caching: `WeakMap` per canvas
 - Invalidation: cache reset when root `.nightMode` class state changes
 - Numeric parsing: `parseFloat`, fallback on `NaN`
 - Color parsing: `trim`, fallback on empty string
-- No JS night defaults; night behavior is CSS-driven
+- Default token values are JS-owned in `ThemeResolver`
 
 - Component ID: `ThemePresets`
 - Global key: `DyniThemePresets`
 - File: `shared/theme/ThemePresets.js`
 - API: `presets`, `apply(containerEl, presetName)`, `remove(containerEl)`
+- Static metadata: `PRESETS` / `create.PRESETS`
 - Behavior: manages `data-dyni-theme` attribute on widget roots
 
 ## Token Table
@@ -64,6 +66,7 @@
 | `font.weight` | `--dyni-font-weight` | `700` | number |
 | `font.labelWeight` | `--dyni-label-weight` | `700` | number |
 | `xte.lineWidthFactor` | `--dyni-xte-line-width-factor` | `1.5` | number |
+| `xte.boatSizeFactor` | `--dyni-xte-boat-size-factor` | `1` | number |
 
 ## Font Token Usage
 
@@ -94,9 +97,11 @@ Base pointer size by renderer:
 1. Determine current night-mode root class state (`.nightMode`)
 2. If state changed since last call, clear canvas cache
 3. Return cached tokens for canvas when present
-4. Otherwise read CSS variables via `getComputedStyle(canvas)`
-5. Parse and normalize all tokens
-6. Store in cache and return token object
+4. Discover the widget root (`canvas.closest(".widget, .DirectWidget") || canvas.parentElement`)
+5. Resolve the active preset from `data-dyni-theme`
+6. Read explicit CSS token overrides from canvas/root computed style
+7. Merge in order: CSS override -> preset value -> built-in default
+8. Store in cache and return token object
 
 ## API/Interfaces
 
@@ -121,6 +126,8 @@ const presetsMod = Helpers.getModule("ThemePresets");
 const presetsApi = presetsMod.create(def, Helpers);
 
 presetsApi.presets; // { default, slim, bold, night, highcontrast }
+presetsMod.PRESETS;
+presetsMod.create.PRESETS;
 presetsApi.apply(containerEl, "slim");
 presetsApi.remove(containerEl);
 ```
@@ -136,7 +143,7 @@ presetsApi.remove(containerEl);
 
 `ThemePresets.remove(containerEl)` removes `data-dyni-theme`.
 
-`default` preset is intentionally empty (`{}`), so applying `default` clears preset selector attribute and falls back to base CSS token defaults.
+`default` preset is intentionally empty (`{}`), so applying `default` clears the preset selector attribute and falls back to `ThemeResolver` built-in defaults.
 
 ## Preset Definitions
 
