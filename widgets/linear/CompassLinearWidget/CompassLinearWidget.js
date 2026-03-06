@@ -87,8 +87,6 @@
       }
       const markerWrapped = heading + norm180(marker - heading);
       api.drawMarkerAtValue(markerWrapped, {
-        len: Math.max(8, Math.floor(state.trackThickness * 1.3)),
-        lineWidth: Math.max(2, Math.floor(state.theme.linear.ticks.majorWidth)),
         strokeStyle: state.theme.colors.pointer
       });
     }

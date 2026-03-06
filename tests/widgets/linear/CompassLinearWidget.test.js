@@ -74,19 +74,21 @@ describe("CompassLinearWidget", function () {
       drawMarkerAtValue: vi.fn()
     };
     const state = {
-      trackThickness: 10,
       theme: {
-        linear: { ticks: { majorWidth: 2 } },
         colors: { pointer: "#ff2b2b" }
       }
     };
 
     captured.drawFrame(state, { markerCourse: 10 }, { num: 350 }, api);
     expect(api.drawDefaultPointer).toHaveBeenCalledTimes(1);
-    expect(api.drawMarkerAtValue).toHaveBeenCalledWith(370, expect.any(Object));
+    expect(api.drawMarkerAtValue).toHaveBeenNthCalledWith(1, 370, {
+      strokeStyle: "#ff2b2b"
+    });
 
     captured.drawFrame(state, { markerCourse: 300 }, { num: 350 }, api);
-    expect(api.drawMarkerAtValue).toHaveBeenCalledWith(300, expect.any(Object));
+    expect(api.drawMarkerAtValue).toHaveBeenNthCalledWith(2, 300, {
+      strokeStyle: "#ff2b2b"
+    });
   });
 
   it("returns fallback text for invalid heading values", function () {

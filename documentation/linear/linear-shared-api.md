@@ -72,6 +72,7 @@ Hook `api` surface:
 - `mapValueToX(value, axisOverride?, doClamp?)`
 - `primitives`, `math`, `textLayout`, `text`, `value`, `theme`
 - `drawDefaultPointer(opts)`, `drawPointerAtValue(value, opts)`, `drawMarkerAtValue(value, opts)` (frame hooks)
+- `drawMarkerAtValue(value, opts)` uses track-thickness-based defaults when `opts.len`/`opts.lineWidth` are omitted, keeps the marker at or below the scale line, and renders it with flat rectangular ends.
 
 ### Axis Profile Matrix
 

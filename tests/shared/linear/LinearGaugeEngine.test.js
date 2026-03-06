@@ -471,6 +471,8 @@ describe("LinearGaugeEngine", function () {
     let buildTicksCalls = 0;
     let drawFrameCalls = 0;
     let drawModeCalls = 0;
+    let markerTrackThickness = NaN;
+    let markerTrackY = NaN;
 
     const layerContexts = [];
     const ownerDocument = {
@@ -523,8 +525,11 @@ describe("LinearGaugeEngine", function () {
       },
       drawFrame(state, props, display, api) {
         drawFrameCalls += 1;
+        markerTrackThickness = state.trackThickness;
+        markerTrackY = state.layout.trackY;
         api.drawDefaultPointer();
         api.drawMarkerAtValue(45, { lineWidth: 7, len: 9, strokeStyle: "#00ff00" });
+        api.drawMarkerAtValue(75, { strokeStyle: "#ff2b2b" });
       },
       drawMode: {
         normal(state, props, display, api) {
@@ -552,7 +557,28 @@ describe("LinearGaugeEngine", function () {
     expect(drawFrameCalls).toBe(1);
     expect(drawModeCalls).toBe(1);
     expect(harness.calls.pointer).toHaveLength(1);
-    expect(harness.calls.ticks.some((entry) => entry.opts && entry.opts.lineWidth === 7)).toBe(true);
+    const explicitMarker = harness.calls.ticks.find(function (entry) {
+      return entry.opts && entry.opts.strokeStyle === "#00ff00";
+    });
+    const defaultMarker = harness.calls.ticks.find(function (entry) {
+      return entry.opts && entry.opts.strokeStyle === "#ff2b2b";
+    });
+    expect(explicitMarker).toEqual(expect.objectContaining({
+      len: 9,
+      opts: expect.objectContaining({
+        lineWidth: 7,
+        strokeStyle: "#00ff00"
+      })
+    }));
+    expect(defaultMarker).toEqual(expect.objectContaining({
+      opts: expect.objectContaining({
+        lineCap: "butt",
+        strokeStyle: "#ff2b2b"
+      })
+    }));
+    expect(defaultMarker && defaultMarker.len).toBe(Math.max(6, Math.floor(markerTrackThickness * 0.9)));
+    expect(defaultMarker && defaultMarker.opts && defaultMarker.opts.lineWidth).toBe(Math.max(3, Math.floor(markerTrackThickness * 0.4)));
+    expect(defaultMarker && (defaultMarker.y - defaultMarker.len)).toBe(markerTrackY);
     expect(harness.calls.drawCaptionMax).toBe(0);
     expect(harness.calls.drawValueUnitWithFit).toBe(0);
     expect(harness.calls.drawInlineCapValUnit).toBe(0);

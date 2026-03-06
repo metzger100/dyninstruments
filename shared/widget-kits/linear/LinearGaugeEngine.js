@@ -338,16 +338,17 @@
           const opts = markerOpts || {};
           const lenValue = Number(opts.len);
           const widthValue = Number(opts.lineWidth);
+          // Waypoint/course markers scale from trackThickness and start exactly at the scale line.
           const len = Number.isFinite(lenValue)
             ? Math.max(4, lenValue)
-            : Math.max(10, Math.floor(theme.linear.ticks.majorLen * 1.6));
+            : Math.max(6, Math.floor(trackThickness * 0.9));
           const width = Number.isFinite(widthValue)
             ? Math.max(1, widthValue)
-            : Math.max(1, Math.floor(theme.linear.ticks.majorWidth));
-          const y = layout.trackY + Math.floor(trackThickness / 2) + Math.max(2, Math.floor(len * 0.4));
+            : Math.max(3, Math.floor(trackThickness * 0.4));
+          const y = layout.trackY + len;
           primitives.drawTick(targetCtx || ctx, Math.round(markerX), y, len, {
             lineWidth: width,
-            lineCap: "round",
+            lineCap: "butt",
             strokeStyle: hasOwn.call(opts, "strokeStyle") ? opts.strokeStyle : theme.colors.pointer
           });
         }
