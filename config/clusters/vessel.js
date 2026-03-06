@@ -19,7 +19,7 @@
   config.clusters.push({
     widget: "ClusterWidget",
     def: {
-      name: "dyninstruments_Vessel",
+      name: "dyni_Vessel_Instruments",
       description: "Vessel metrics (voltage, time/date, GPS status, SignalK attitude)",
       caption: "", unit: "", default: "---",
       cluster: "vessel",

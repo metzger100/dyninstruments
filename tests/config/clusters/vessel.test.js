@@ -19,7 +19,7 @@ describe("config/clusters/vessel.js", function () {
 
   it("registers vessel cluster definition", function () {
     const def = loadVesselDef();
-    expect(def.name).toBe("dyninstruments_Vessel");
+    expect(def.name).toBe("dyni_Vessel_Instruments");
     expect(def.storeKeys.clock).toBe("nav.gps.rtime");
     expect(def.storeKeys.gpsValid).toBe("nav.gps.valid");
     expect(def.storeKeys.pitch).toBe("nav.gps.signalk.navigation.attitude.pitch");

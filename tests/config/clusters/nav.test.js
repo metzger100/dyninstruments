@@ -20,7 +20,7 @@ describe("config/clusters/nav.js", function () {
 
   it("registers nav cluster definition", function () {
     const def = loadNavDef();
-    expect(def.name).toBe("dyninstruments_Nav");
+    expect(def.name).toBe("dyni_Nav_Instruments");
     expect(def.storeKeys.eta).toBe("nav.wp.eta");
     expect(def.storeKeys.xte).toBe("nav.wp.xte");
     expect(def.storeKeys.cog).toBe("nav.gps.course");

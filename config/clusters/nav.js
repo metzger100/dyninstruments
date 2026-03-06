@@ -27,7 +27,7 @@
   config.clusters.push({
     widget: "ClusterWidget",
     def: {
-      name: "dyninstruments_Nav",
+      name: "dyni_Nav_Instruments",
       description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Positions / XTE display)",
       caption: "", unit: "", default: "---",
       cluster: "nav",

@@ -19,7 +19,7 @@ describe("config/clusters/environment.js", function () {
 
   it("registers environment cluster with expected keys", function () {
     const def = loadEnvDef();
-    expect(def.name).toBe("dyninstruments_Environment");
+    expect(def.name).toBe("dyni_Environment_Instruments");
     expect(def.storeKeys.depth).toBe("nav.gps.depthBelowTransducer");
     expect(def.editableParameters.kind.default).toBe("depth");
     expect(def.editableParameters.kind.name).toBe("Instrument");

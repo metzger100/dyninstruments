@@ -53,7 +53,7 @@ Create `config/clusters/new-cluster.js` and push cluster definition:
 config.clusters.push({
   widget: "ClusterWidget",
   def: {
-    name: "dyninstruments_NewCluster",
+    name: "dyni_NewCluster_Instruments",
     description: "...",
     caption: "",
     unit: "",

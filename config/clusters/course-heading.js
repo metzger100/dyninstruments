@@ -17,7 +17,7 @@
   config.clusters.push({
     widget: "ClusterWidget",
     def: {
-      name: "dyninstruments_CourseHeading",
+      name: "dyni_CourseHeading_Instruments",
       description: "Course & headings (COG/HDT/HDM/BRG) incl. radial and linear compass gauges",
       caption: "", unit: "", default: "---",
       cluster: "courseHeading",

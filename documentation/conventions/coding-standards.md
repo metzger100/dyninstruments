@@ -72,7 +72,7 @@ Example:
 
 ## Naming Conventions
 
-- Widget names: `dyninstruments_{Cluster}` (example: `dyninstruments_Speed`)
+- Cluster widget names: `dyni_{Cluster}_Instruments` (example: `dyni_Speed_Instruments`)
 - Component `globalKey` values: `Dyni{ComponentName}` (example: `DyniSpeedRadialWidget`)
 - Gauge ratio threshold props: `{gauge}RatioThresholdNormal`, `{gauge}RatioThresholdFlat`
 - Sector props: `{gauge}WarningFrom`, `{gauge}AlarmFrom`

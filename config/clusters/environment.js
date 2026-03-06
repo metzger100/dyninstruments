@@ -17,7 +17,7 @@
   config.clusters.push({
     widget: "ClusterWidget",
     def: {
-      name: "dyninstruments_Environment",
+      name: "dyni_Environment_Instruments",
       description: "Depth below transducer, temperature, or SignalK pressure",
       caption: "", unit: "", default: "---",
       cluster: "environment",

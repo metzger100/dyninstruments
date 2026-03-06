@@ -17,7 +17,7 @@
   config.clusters.push({
     widget: "ClusterWidget",
     def: {
-      name: "dyninstruments_Speed",
+      name: "dyni_Speed_Instruments",
       description: "SOG/STW selection (numeric, linear, or SpeedRadialWidget radial)",
       caption: "", unit: "", default: "---",
       cluster: "speed",

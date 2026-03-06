@@ -17,7 +17,7 @@
   config.clusters.push({
     widget: "ClusterWidget",
     def: {
-      name: "dyninstruments_Wind",
+      name: "dyni_Wind_Instruments",
       description: "Wind (angle/speed numbers, radial dials, or linear dual gauges)",
       caption: "", unit: "", default: "---",
       cluster: "wind",
