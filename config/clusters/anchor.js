@@ -36,7 +36,7 @@
             opt("Bearing from anchor", "bearing")
           ],
           default: "distance",
-          name: "Kind"
+          name: "Instrument"
         },
         leadingZero: {
           type: "BOOLEAN",

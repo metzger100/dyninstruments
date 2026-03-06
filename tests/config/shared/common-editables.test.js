@@ -19,5 +19,6 @@ describe("config/shared/common-editables.js", function () {
     expect(editables.ratioThresholdFlat.internal).toBe(true);
     expect(editables.captionUnitScale.internal).not.toBe(true);
     expect(editables.captionUnitScale.default).toBe(0.8);
+    expect(editables.captionUnitScale.name).toBe("Caption/Unit size");
   });
 });

@@ -72,7 +72,7 @@ config.clusters.push({
           { name: "Value 1 [Radial]", value: "value1Radial" }
         ],
         default: "value1",
-        name: "Kind"
+        name: "Instrument"
       },
       caption: false,
       unit: false,

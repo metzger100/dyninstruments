@@ -23,7 +23,7 @@
     },
     captionUnitScale: {
       type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
-      name: "Caption/Unit to Value scale"
+      name: "Caption/Unit size"
     }
   };
 }(this));

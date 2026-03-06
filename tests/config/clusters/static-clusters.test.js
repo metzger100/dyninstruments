@@ -35,6 +35,10 @@ describe("static cluster configs", function () {
     expect(byCluster.speed.editableParameters.kind.default).toBe("sog");
     expect(byCluster.wind.editableParameters.kind.default).toBe("angleTrue");
     expect(byCluster.anchor.editableParameters.kind.default).toBe("distance");
+    expect(byCluster.courseHeading.editableParameters.kind.name).toBe("Instrument");
+    expect(byCluster.speed.editableParameters.kind.name).toBe("Instrument");
+    expect(byCluster.wind.editableParameters.kind.name).toBe("Instrument");
+    expect(byCluster.anchor.editableParameters.kind.name).toBe("Instrument");
     expect(byCluster.speed.editableParameters.kind.list.map((entry) => entry.value))
       .toEqual(expect.arrayContaining(["sogLinear", "stwLinear"]));
     expect(byCluster.courseHeading.editableParameters.kind.list.map((entry) => entry.value))
@@ -50,6 +54,13 @@ describe("static cluster configs", function () {
       { kind: "sogLinear" },
       { kind: "stwLinear" }
     ]);
+    expect(byCluster.speed.editableParameters.speedLinearTickMajor.name).toBe("Major tick step");
+    expect(byCluster.speed.editableParameters.speedLinearTickMinor.name).toBe("Minor tick step");
+    expect(byCluster.speed.editableParameters.speedLinearShowEndLabels.name).toBe("Show min/max labels");
+    expect(byCluster.speed.editableParameters.speedLinearWarningEnabled.name).toBe("Show warning sector");
+    expect(byCluster.speed.editableParameters.speedRadialAlarmEnabled.name).toBe("Show alarm sector");
+    expect(byCluster.speed.editableParameters.speedLinearWarningFrom.name).toBe("Warning at or above");
+    expect(byCluster.speed.editableParameters.speedRadialAlarmFrom.name).toBe("Alarm at or above");
     expect(byCluster.speed.editableParameters.speedLinearWarningFrom.condition).toEqual([
       { kind: "sogLinear", speedLinearWarningEnabled: true },
       { kind: "stwLinear", speedLinearWarningEnabled: true }
@@ -89,5 +100,11 @@ describe("static cluster configs", function () {
     ]);
     expect(byCluster.wind.editableParameters.windLinearRatioThresholdNormal.internal).toBe(true);
     expect(byCluster.wind.editableParameters.captionUnitScale.internal).not.toBe(true);
+    expect(byCluster.wind.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
+    expect(byCluster.wind.editableParameters.windLinearTickMajor.name).toBe("Major tick step");
+    expect(byCluster.wind.editableParameters.windLinearTickMinor.name).toBe("Minor tick step");
+    expect(byCluster.wind.editableParameters.windLinearShowEndLabels.name).toBe("Show min/max labels");
+    expect(byCluster.wind.editableParameters.windRadialLayMin.name).toBe("Min layline angle");
+    expect(byCluster.wind.editableParameters.windLinearLayMax.name).toBe("Max layline angle");
   });
 });

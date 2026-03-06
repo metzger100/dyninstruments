@@ -41,7 +41,7 @@
             opt("Compass — Magnetic (HDM) [Linear]", "hdmLinear")
           ],
           default: "cog",
-          name: "Kind"
+          name: "Instrument"
         },
 
         leadingZero: {
@@ -93,24 +93,24 @@
         },
         compassLinearTickMajor: {
           type: "FLOAT", min: 1, max: 180, step: 1, default: 30,
-          name: "Major tick step (linear)",
+          name: "Major tick step",
           condition: [{ kind: "hdtLinear" }, { kind: "hdmLinear" }]
         },
         compassLinearTickMinor: {
           type: "FLOAT", min: 1, max: 180, step: 1, default: 10,
-          name: "Minor tick step (linear)",
+          name: "Minor tick step",
           condition: [{ kind: "hdtLinear" }, { kind: "hdmLinear" }]
         },
         compassLinearShowEndLabels: {
           type: "BOOLEAN", default: false,
-          name: "Show min/max labels (linear)",
+          name: "Show min/max labels",
           condition: [{ kind: "hdtLinear" }, { kind: "hdmLinear" }]
         },
 
         // Shared caption/unit-to-value scale applies to both numeric & radial
         captionUnitScale: {
           type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
-          name: "Caption/Unit to Value scale"
+          name: "Caption/Unit size"
         },
 
         // hide low-levels

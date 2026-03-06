@@ -60,7 +60,7 @@
             opt("XTE highway display", "xteDisplay")
           ],
           default: "eta",
-          name: "Kind"
+          name: "Instrument"
         },
         leadingZero: {
           type: "BOOLEAN",

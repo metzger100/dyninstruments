@@ -13,6 +13,7 @@ editableParameters is an object of parameter specs.
 - The **object key** is the **property name** that appears in renderHtml/renderCanvas props (e.g. `minValue`, `speedRadialRatioThresholdFlat`).
 - The **editor label** is controlled by the spec field `name` (used across cluster config files in config/clusters/*) or `displayName` (used by dyninstruments helper `makePerKindTextParams`).
 - If neither `name` nor `displayName` is set, AvNav may fall back to showing the key.
+- dyninstruments editor labels should stay short. Remove mode hints already implied by `condition`, prefer `Instrument` for the top-level selector label, use `store path` wording for `KEY` selectors, keep common abbreviations such as `min/max`, and add directional wording only when it changes the meaning (for example `Warning at or above` vs `Warning at or below`).
 
 ```javascript
 {
@@ -51,7 +52,8 @@ kind: {
     { name: "Speed over ground (SOG)", value: "sog" },
     { name: "Speed gauge [Radial]", value: "sogRadial" }
   ],
-  default: "sog"
+  default: "sog",
+  name: "Instrument"
 }
 ```
 
@@ -68,6 +70,8 @@ Shows a browser for currently available AvNav store keys. The render function re
 ```javascript
 value: { type: "KEY", default: "" }
 ```
+
+Recommended editor captions for `KEY` parameters should describe the AvNav store-path override directly, for example `Temperature store path` or `Voltage store path`.
 
 ### COLOR Details
 
