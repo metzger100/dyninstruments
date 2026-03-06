@@ -39,6 +39,8 @@ node tools/check-patterns.mjs --warn
 
 Rule references:
 - `check-patterns.mjs`: `duplicate-fn-body` (`duplicate-functions`), `duplicate-block` (`duplicate-block-clones`), `forbidden-global`, `empty-catch`, `todo-missing-owner`, `unused-fallback`, `dead-code`, `default-truthy-fallback`, `formatter-availability-heuristic`, `renderer-numeric-coercion-without-boundary-contract`, `mapper-output-complexity` (warn at `9..12`, block at `>12`)
+- `check-patterns.mjs` warn-only fail-fast rollout: `catch-fallback-without-suppression`, `internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `css-js-default-duplication`, `premature-legacy-support`
+- `check-patterns.mjs` blocking suppression guard: `invalid-lint-suppression`
 - `check-smell-contracts.mjs`: `theme-cache-invalidation`, `dynamic-storekey-clears-on-empty`, `falsy-default-preservation`, `mapper-output-no-nan`, `text-layout-hotspot-budget`, `coordinate-formatter-no-raw-equality-fallback`
 - `check-file-size.mjs`: warning at `>=300` non-empty lines, failure at `>400` non-empty lines, oneliner detection in block mode via `npm run check:filesize` (optional exploratory warn mode: `npm run check:filesize:warn`)
 
@@ -61,6 +63,9 @@ Rule references:
 
 8. Fix catch and maintenance-marker hygiene.
 - Replace empty catches with explicit handling: comment why silence is intentional, log with context, or use centralized handlers.
+- For intentional warn-only fallback exceptions, use rule-specific suppression syntax with a reason:
+  - `// dyni-lint-disable-next-line <rule-name> -- <reason>`
+  - `/* dyni-lint-disable-line <rule-name> -- <reason> */`
 - Ensure maintenance markers include owner and date, e.g. `TODO(name, 2026-02-20): ...`.
 
 9. Re-run checks and close the loop.
@@ -124,6 +129,13 @@ Required per-commit audit checks:
 | Theme cache drift | Runtime preset/style mutation does not invalidate cached token values | `check-smell-contracts.mjs` (`theme-cache-invalidation`) | Expose invalidation API and call it after runtime theme mutation |
 | Stale dynamic store keys | Empty dynamic key input leaves old `storeKeys.value` active | `check-smell-contracts.mjs` (`dynamic-storekey-clears-on-empty`) | Remove stale key from `storeKeys` when input is empty |
 | Falsy default clobbering | `x.default || "---"` overwrites explicit `""`, `0`, or `false` | `check-patterns.mjs` (`default-truthy-fallback`), `check-smell-contracts.mjs` (`falsy-default-preservation`) | Use property-presence/nullish semantics |
+| Invalid suppression directive | `dyni-lint-disable-*` comment is malformed or references unknown rule | `check-patterns.mjs` (`invalid-lint-suppression`) | Fix the directive syntax and keep the reason explicit |
+| Catch fallback without suppression | Non-rethrow `catch` path remains without explicit exception | `check-patterns.mjs` (`catch-fallback-without-suppression`) | Re-throw by default or add narrow suppression with reason while the external boundary still requires fallback |
+| Internal hook fallback | Shared/widget code wraps hook/spec output in `normalize*` or `cfg.*(...) || ...` fallback logic | `check-patterns.mjs` (`internal-hook-fallback`) | Move defaults to the owning boundary and trust internal hook contracts |
+| Redundant null/type guard | Internal code repeatedly sanitizes already-normalized values | `check-patterns.mjs` (`redundant-null-type-guard`) | Remove downstream guards and tighten upstream contracts |
+| Hardcoded runtime default | Inline placeholder/object/number defaults drift from config/theme ownership | `check-patterns.mjs` (`hardcoded-runtime-default`) | Move defaults to declarative config/theme/helper boundaries |
+| CSS/JS default duplication | JS repeats CSS/theme defaults around `getComputedStyle`, `defaultValue`, or `--dyni-*` | `check-patterns.mjs` (`css-js-default-duplication`) | Keep visual defaults in CSS/theme boundary only |
+| Premature legacy support | Speculative `fallback*`/`legacy*`/`compat*` paths linger in code | `check-patterns.mjs` (`premature-legacy-support`) | Remove compat paths until a live contract requires them |
 | Renderer coercion drift | Renderer performs `Number(props.x)` for mapper-owned normalized values | `check-patterns.mjs` (`renderer-numeric-coercion-without-boundary-contract`), `check-smell-contracts.mjs` (`mapper-output-no-nan`) | Normalize at mapper boundary, pass finite or `undefined` |
 | Formatter output heuristic | Inferring formatter absence from output equality (`out.trim() === String(raw)`) | `check-patterns.mjs` (`formatter-availability-heuristic`), `check-smell-contracts.mjs` (`coordinate-formatter-no-raw-equality-fallback`) | Remove output-equality heuristics; rely on explicit formatter flow |
 | Mapper output complexity | One mapper `kind` branch returns too many top-level props (`return { ... }`) and starts encoding renderer behavior directly | `check-patterns.mjs` (`mapper-output-complexity`) | Keep mapper output thin; move renderer-specific config to a dedicated wrapper/adapter when a branch exceeds 8 props (hard block at `>12`) |

@@ -733,4 +733,367 @@ tiny();
     expect(result.summary.ok).toBe(true);
     expect(result.summary.byRule["redundant-internal-fallback"]).toBe(0);
   });
+
+  const failFastRuleCases = [
+    {
+      rule: "catch-fallback-without-suppression",
+      rel: "runtime/example.js",
+      positive: `
+(function () {
+  "use strict";
+  function runTask() {
+    try {
+      work();
+    } catch (e) {
+      return "fallback";
+    }
+  }
+  runTask();
+}());
+`,
+      clean: `
+(function () {
+  "use strict";
+  function runTask() {
+    try {
+      work();
+    } catch (e) {
+      throw e;
+    }
+  }
+  runTask();
+}());
+`,
+      disableNextLine: `
+(function () {
+  "use strict";
+  function runTask() {
+    try {
+      work();
+    }
+    // dyni-lint-disable-next-line catch-fallback-without-suppression -- external formatter boundary still degrades to fallback text
+    catch (e) {
+      return "fallback";
+    }
+  }
+  runTask();
+}());
+`,
+      disableLine: `
+(function () {
+  "use strict";
+  function runTask() {
+    try {
+      work();
+    } catch (e) { return "fallback"; } /* dyni-lint-disable-line catch-fallback-without-suppression -- external formatter boundary still degrades to fallback text */
+  }
+  runTask();
+}());
+`
+    },
+    {
+      rule: "internal-hook-fallback",
+      rel: "shared/example.js",
+      positive: `
+(function () {
+  "use strict";
+  function normalizeAxis(candidate, fallbackAxis) {
+    return candidate;
+  }
+  normalizeAxis({}, {});
+}());
+`,
+      clean: `
+(function () {
+  "use strict";
+  function resolveAxis(axis) {
+    return axis;
+  }
+  resolveAxis({});
+}());
+`,
+      disableNextLine: `
+(function () {
+  "use strict";
+  // dyni-lint-disable-next-line internal-hook-fallback -- temporary bridge until hook contract is tightened
+  function normalizeAxis(candidate, fallbackAxis) {
+    return candidate;
+  }
+  normalizeAxis({}, {});
+}());
+`,
+      disableLine: `
+(function () {
+  "use strict";
+  function normalizeAxis(candidate, fallbackAxis) { return candidate; } /* dyni-lint-disable-line internal-hook-fallback -- temporary bridge until hook contract is tightened */
+  normalizeAxis({}, {});
+}());
+`
+    },
+    {
+      rule: "redundant-null-type-guard",
+      rel: "widgets/example.js",
+      positive: `
+(function () {
+  "use strict";
+  function renderCanvas() {
+    const label = String(labelRaw == null ? "" : labelRaw);
+    return label;
+  }
+  renderCanvas();
+}());
+`,
+      clean: `
+(function () {
+  "use strict";
+  function renderCanvas() {
+    const label = String(labelRaw);
+    return label;
+  }
+  renderCanvas();
+}());
+`,
+      disableNextLine: `
+(function () {
+  "use strict";
+  function renderCanvas() {
+    // dyni-lint-disable-next-line redundant-null-type-guard -- caller contract is still being migrated
+    const label = String(labelRaw == null ? "" : labelRaw);
+    return label;
+  }
+  renderCanvas();
+}());
+`,
+      disableLine: `
+(function () {
+  "use strict";
+  function renderCanvas() {
+    const label = String(labelRaw == null ? "" : labelRaw); /* dyni-lint-disable-line redundant-null-type-guard -- caller contract is still being migrated */
+    return label;
+  }
+  renderCanvas();
+}());
+`
+    },
+    {
+      rule: "hardcoded-runtime-default",
+      rel: "widgets/example.js",
+      positive: `
+(function () {
+  "use strict";
+  function renderCanvas() {
+    const row = parsed.left || { caption: "", value: "---", unit: "" };
+    return row;
+  }
+  renderCanvas();
+}());
+`,
+      clean: `
+(function () {
+  "use strict";
+  function renderCanvas() {
+    return parsed.left;
+  }
+  renderCanvas();
+}());
+`,
+      disableNextLine: `
+(function () {
+  "use strict";
+  function renderCanvas() {
+    // dyni-lint-disable-next-line hardcoded-runtime-default -- placeholder survives only until mapper owns this row state
+    const row = parsed.left || { caption: "", value: "---", unit: "" };
+    return row;
+  }
+  renderCanvas();
+}());
+`,
+      disableLine: `
+(function () {
+  "use strict";
+  function renderCanvas() {
+    const row = parsed.left || { caption: "", value: "---", unit: "" }; /* dyni-lint-disable-line hardcoded-runtime-default -- placeholder survives only until mapper owns this row state */
+    return row;
+  }
+  renderCanvas();
+}());
+`
+    },
+    {
+      rule: "css-js-default-duplication",
+      rel: "runtime/example.js",
+      positive: `
+(function () {
+  "use strict";
+  function renderCanvas() {
+    const fontFamily = fontVar && fontVar.trim() ? fontVar.trim() : DEFAULT_FONT_STACK;
+    return fontFamily;
+  }
+  renderCanvas();
+}());
+`,
+      clean: `
+(function () {
+  "use strict";
+  function renderCanvas() {
+    return fontVar.trim();
+  }
+  renderCanvas();
+}());
+`,
+      disableNextLine: `
+(function () {
+  "use strict";
+  function renderCanvas() {
+    // dyni-lint-disable-next-line css-js-default-duplication -- typography defaults still live in JS until theme boundary is flattened
+    const fontFamily = fontVar && fontVar.trim() ? fontVar.trim() : DEFAULT_FONT_STACK;
+    return fontFamily;
+  }
+  renderCanvas();
+}());
+`,
+      disableLine: `
+(function () {
+  "use strict";
+  function renderCanvas() {
+    const fontFamily = fontVar && fontVar.trim() ? fontVar.trim() : DEFAULT_FONT_STACK; /* dyni-lint-disable-line css-js-default-duplication -- typography defaults still live in JS until theme boundary is flattened */
+    return fontFamily;
+  }
+  renderCanvas();
+}());
+`
+    },
+    {
+      rule: "premature-legacy-support",
+      rel: "shared/example.js",
+      positive: `
+(function () {
+  "use strict";
+  function copy(axis) {
+    const fallbackAxis = axis;
+    return fallbackAxis;
+  }
+  copy({});
+}());
+`,
+      clean: `
+(function () {
+  "use strict";
+  function copy(axis) {
+    const axisCopy = axis;
+    return axisCopy;
+  }
+  copy({});
+}());
+`,
+      disableNextLine: `
+(function () {
+  "use strict";
+  function copy(axis) {
+    // dyni-lint-disable-next-line premature-legacy-support -- active migration still references legacy naming in one bridge point
+    const fallbackAxis = axis;
+    return fallbackAxis;
+  }
+  copy({});
+}());
+`,
+      disableLine: `
+(function () {
+  "use strict";
+  function copy(axis) {
+    const fallbackAxis = axis; /* dyni-lint-disable-line premature-legacy-support -- active migration still references legacy naming in one bridge point */
+    return fallbackAxis;
+  }
+  copy({});
+}());
+`
+    }
+  ];
+
+  failFastRuleCases.forEach(function (testCase) {
+    it(`warns for ${testCase.rule}`, function () {
+      const cwd = createWorkspace({ [testCase.rel]: testCase.positive });
+      const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+      const out = joinWarningMessages(result.warnings || []);
+
+      expect(result.summary.byRuleWarnings[testCase.rule]).toBeGreaterThan(0);
+      expect(out).toContain(`[${testCase.rule}]`);
+    });
+
+    it(`does not warn for clean ${testCase.rule} sample`, function () {
+      const cwd = createWorkspace({ [testCase.rel]: testCase.clean });
+      const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+
+      expect(result.summary.byRuleWarnings[testCase.rule]).toBe(0);
+    });
+
+    it(`supports disable-next-line for ${testCase.rule}`, function () {
+      const cwd = createWorkspace({ [testCase.rel]: testCase.disableNextLine });
+      const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+      const out = joinMessages(result.findings);
+
+      expect(result.summary.byRuleWarnings[testCase.rule]).toBe(0);
+      expect(out).not.toContain("[invalid-lint-suppression]");
+    });
+
+    it(`supports disable-line for ${testCase.rule}`, function () {
+      const cwd = createWorkspace({ [testCase.rel]: testCase.disableLine });
+      const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+      const out = joinMessages(result.findings);
+
+      expect(result.summary.byRuleWarnings[testCase.rule]).toBe(0);
+      expect(out).not.toContain("[invalid-lint-suppression]");
+    });
+  });
+
+  it("blocks malformed lint suppression directives", function () {
+    const cwd = createWorkspace({
+      "runtime/example.js": `
+(function () {
+  "use strict";
+  function runTask() {
+    try {
+      work();
+    }
+    // dyni-lint-disable-next-line catch-fallback-without-suppression
+    catch (e) {
+      return "fallback";
+    }
+  }
+  runTask();
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBeGreaterThan(0);
+    expect(out).toContain("[invalid-lint-suppression]");
+  });
+
+  it("blocks unknown lint suppression rule names", function () {
+    const cwd = createWorkspace({
+      "runtime/example.js": `
+(function () {
+  "use strict";
+  function runTask() {
+    try {
+      work();
+    } catch (e) { return "fallback"; } /* dyni-lint-disable-line not-a-real-rule -- bogus rule name */
+  }
+  runTask();
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBeGreaterThan(0);
+    expect(out).toContain("[invalid-lint-suppression]");
+    expect(out).toContain("not-a-real-rule");
+  });
 });

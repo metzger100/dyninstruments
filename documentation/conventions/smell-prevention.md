@@ -6,6 +6,7 @@
 
 This document defines smell rules and where they are enforced in tooling.  
 Blocking checks must pass before push (`npm run check:all` via pre-push hook).
+Warn-only rollout rules are tracked debt until they are promoted to `block`.
 
 ## Smell Catalog
 
@@ -15,6 +16,13 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 | Dynamic key stale state | `storeKeys.value` remains when dynamic key field is cleared | Clear stale dynamic store keys when key input is empty | `check-smell-contracts` (`dynamic-storekey-clears-on-empty`) | block |
 | Falsy default clobbering | `x.default || "---"` | Preserve explicit falsy defaults using property-presence/nullish semantics | `check-patterns` (`default-truthy-fallback`) + `check-smell-contracts` (`falsy-default-preservation`) | block |
 | Redundant internal fallback | Renderer/local code re-applies fallback for props/defaults already guaranteed by mapper/editable contracts (or wraps `Helpers.applyFormatter` default with the same fallback again) | Trust internal contracts for guaranteed props/defaults; keep fallbacks only for external/runtime uncertainty (AvNav/browser APIs) | `check-patterns` (`redundant-internal-fallback`) | block |
+| Invalid lint suppression | Inline `dyni-lint-disable-*` directive is malformed or references unknown rule | Suppress only the named rule and always include a short reason | `check-patterns` (`invalid-lint-suppression`) | block |
+| Catch fallback without suppression | Non-rethrow `catch` silently degrades behavior without explicit exception | Re-throw by default; keep intentional fallback catches only with rule-specific suppression | `check-patterns` (`catch-fallback-without-suppression`) | warn |
+| Internal hook fallback | Shared/widget code normalizes or fallbacks internal hook/spec results (`normalize*`, `cfg.*(...) || ...`) | Keep defaults at the boundary and trust internal hook contracts | `check-patterns` (`internal-hook-fallback`) | warn |
+| Redundant null/type guard | Internal code repeatedly sanitizes already-normalized values (`String(x == null ? "" : x)`, `Array.isArray(x) ? x : []`, `isFiniteNumber(x) ? ... : ...`) | Remove redundant guards and trust mapper/runtime/theme contracts | `check-patterns` (`redundant-null-type-guard`) | warn |
+| Hardcoded runtime default | Runtime/widget/shared code embeds fallback literals or object defaults already owned elsewhere | Use declarative config/theme defaults or boundary-owned placeholders | `check-patterns` (`hardcoded-runtime-default`) | warn |
+| CSS/JS default duplication | JS repeats CSS/theme token defaults (`getComputedStyle`, `defaultValue`, `--dyni-*`) | Keep visual/token defaults in CSS or theme resolver boundary only | `check-patterns` (`css-js-default-duplication`) | warn |
+| Premature legacy support | Code adds speculative compat/legacy/fallback naming or multi-source compatibility branches | Remove speculative compatibility paths until a live boundary requires them | `check-patterns` (`premature-legacy-support`) | warn |
 | Renderer coercion drift | Renderer does `Number(props.x)` on mapper-owned normalized props | Normalize at mapper boundary, renderer receives finite number or `undefined` | `check-patterns` (`renderer-numeric-coercion-without-boundary-contract`) + `check-smell-contracts` (`mapper-output-no-nan`) | block |
 | Mapper logic leakage | Mapper adds helper functions or presentation logic | Keep mappers declarative (`create` + `translate`), move logic to renderer/toolkit modules | `check-patterns` (`mapper-logic-leakage`) | block |
 | Mapper output complexity | Mapper branch returns oversized object literal for one `kind` | If more than 8 mapper props are needed, move renderer-specific config to dedicated wrapper/adapter renderer | `check-patterns` (`mapper-output-complexity`) | warn (`>8`), block (`>12`) |
@@ -35,10 +43,24 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 - `check:filesize` runs fail-closed with `--oneliner=block` (used by `check:core`/`check:all`)
 - Optional exploratory variant: `npm run check:filesize:warn`
 
+## Suppression Syntax
+
+Allowed inline exceptions:
+
+```javascript
+// dyni-lint-disable-next-line <rule-name> -- <reason>
+/* dyni-lint-disable-line <rule-name> -- <reason> */
+```
+
+- Suppress only one named rule.
+- Always include a short reason after `--`.
+- Malformed directives or unknown rule names fail via `invalid-lint-suppression`.
+
 ## Severity Model
 
 - `block`: must pass locally before push.
-- `warn`: allowed only for exploratory rules not yet promoted; promotion target and rationale must be tracked in `documentation/TECH-DEBT.md`.
+- `warn`: allowed only for exploratory or rollout rules not yet promoted; promotion target and rationale must be tracked in `documentation/TECH-DEBT.md`.
+- Promotion rule for warn-only fallback checks: each rule moves to `block` only after its repo warning count reaches zero and the zero-warning state is recorded in `TECH-DEBT.md`.
 
 ## Fix Playbooks
 
@@ -66,6 +88,42 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook).
 2. Remove outer `fallbackText(...)` wrappers when `Helpers.applyFormatter(..., { default: X })` already uses the same fallback `X`.
 3. Keep defensive fallbacks only where values depend on external runtime uncertainty (for example AvNav/browser APIs).
 4. Add/adjust `check-patterns` tests for both block cases and allowed external-factor cases.
+
+### Catch fallback without suppression
+
+1. Re-throw errors by default.
+2. If the fallback is still required by an external boundary, add a rule-specific suppression with a reason.
+3. Remove the suppression once the boundary contract is tightened.
+
+### Internal hook fallback
+
+1. Remove `normalize*` helpers that re-sanitize internal hook outputs.
+2. Remove `cfg.*(...) || ...` hook-result fallbacks where the hook contract can guarantee shape.
+3. Push required defaults into the boundary that owns the hook/spec result.
+
+### Redundant null/type guard
+
+1. Remove repeated `String(... == null ? ... : ...)`, `Array.isArray(...) ? ... : []`, and `isFiniteNumber(...) ? ... : ...` patterns on internal values.
+2. Tighten the upstream contract instead of silently normalizing downstream.
+3. Add suppression only for temporary migrations that still bridge an external boundary.
+
+### Hardcoded runtime default
+
+1. Move placeholder/default literals to declarative config, mapper defaults, runtime helpers, or CSS/theme token boundaries.
+2. Remove inline object/array fallback stubs in widget/shared code where the shape is already contract-owned.
+3. Keep warn-mode findings tracked until each rule reaches zero backlog.
+
+### CSS/JS default duplication
+
+1. Keep style/token defaults in `plugin.css` or `ThemeResolver`.
+2. Remove duplicated JS defaults around `getComputedStyle`, `defaultValue`, and `--dyni-*` lookups when a single boundary can own them.
+3. Suppress only temporary boundary bridges and document why the duplication still exists.
+
+### Premature legacy support
+
+1. Remove speculative `fallback*`, `legacy*`, `compat*`, or `deprecated*` code names when no live contract requires them.
+2. Collapse multi-source compatibility branches down to the single supported input path.
+3. Reintroduce compatibility only when there is a documented boundary contract and coverage for it.
 
 ### Renderer coercion drift
 

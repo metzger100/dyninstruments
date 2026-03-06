@@ -8,6 +8,7 @@
 |---|---|---|---|---|
 | TD-014 | Smell enforcement | `mapper-output-complexity` remains mixed-severity (`warn` at `9..12`, `block` at `>12`). Current backlog is `0` warnings (`check-patterns` summary on `2026-02-28`); promotion criteria/date is still pending. | Medium | Medium |
 | TD-015 | Shared gauge engine size hotspots | `check:filesize` reports 4 warning-tier files (`>=300` non-empty lines): `FullCircleRadialEngine.js`, `FullCircleRadialTextLayout.js`, `RadialValueMath.js`, `SemicircleRadialEngine.js`. Further extractions are needed to keep growth below hard limit. | Medium | Medium |
+| TD-016 | Fail-fast fallback rollout | Warn-only fallback/legacy backlog introduced on `2026-03-06`: `233` total warnings from `node tools/check-patterns.mjs --warn` (`catch-fallback-without-suppression=8`, `internal-hook-fallback=8`, `redundant-null-type-guard=24`, `hardcoded-runtime-default=137`, `css-js-default-duplication=36`, `premature-legacy-support=20`). Promotion rule: each warn-only rule moves to `block` only after its repo warning count reaches `0` and that zero-warning state is recorded here. | High | High |
 
 ## Completed Items
 

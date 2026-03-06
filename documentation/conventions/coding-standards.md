@@ -14,6 +14,8 @@ Use this document for runtime-safe component structure and naming. It defines fi
 - Preserve explicit falsy defaults (`""`, `0`, `false`) via property-presence/nullish checks; never use truthy fallback for configured defaults.
 - Cache-owning modules must expose explicit invalidation APIs and mutation paths must call them.
 - Cluster mappers are declarative routing/normalization only; formatter and presentation behavior belongs in renderer modules.
+- Fail-fast / keep-it-simple: validate and default at boundaries, then trust the resulting internal contract.
+- Do not add speculative legacy/compat/fallback helpers or duplicate CSS/config defaults in runtime code.
 
 ## File Size Limits
 
@@ -84,6 +86,16 @@ Example:
 - Keep mapper output declarative: select `renderer`, map values, normalize numbers, and pass-through formatter keys only.
 - Do not implement formatter logic, status-symbol conversion, or rendering fallbacks inside mappers.
 - Move any non-trivial logic to renderer components (`cluster/rendering/`, `widgets/`) or `ClusterMapperToolkit`.
+
+## Fail-Fast / Keep It Simple
+
+- Apply defaults and validation once at the boundary (config, mapper, runtime helper, or theme resolver).
+- After that boundary, trust internal `props/state/theme/display/cfg` contracts instead of re-sanitizing them.
+- Do not create `normalize*` helpers or fallback wrappers for internal hook/spec results unless an external boundary contract requires them.
+- Do not mirror `plugin.css`, theme token, or editable-parameter defaults in widget/shared runtime code.
+- If an exception must keep a fallback path, annotate it with a rule-specific suppression:
+  - `// dyni-lint-disable-next-line <rule-name> -- <reason>`
+  - `/* dyni-lint-disable-line <rule-name> -- <reason> */`
 
 ## Widget Archetypes
 

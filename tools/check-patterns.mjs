@@ -6,7 +6,9 @@ import {
   compareFindings,
   filesForScope,
   getWarnMode,
-  resetContext
+  isLintSuppressed,
+  resetContext,
+  setKnownRuleNames
 } from "./check-patterns/shared.mjs";
 
 export function runPatternCheck(options = {}) {
@@ -14,6 +16,7 @@ export function runPatternCheck(options = {}) {
     root: path.resolve(options.root || process.cwd()),
     warnMode: !!options.warnMode
   });
+  setKnownRuleNames(RULES.map((rule) => rule.name));
 
   const findings = [];
   const warnings = [];
@@ -32,6 +35,12 @@ export function runPatternCheck(options = {}) {
           ...finding,
           severity
         };
+      })
+      .filter(function (finding) {
+        if (rule.name === "invalid-lint-suppression") {
+          return true;
+        }
+        return !isLintSuppressed(finding.file, finding.line, rule.name);
       })
       .sort(compareFindings);
     byRule[rule.name] = ruleFindings.length;

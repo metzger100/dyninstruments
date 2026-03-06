@@ -149,12 +149,19 @@ Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 - Required completion gate is `npm run check:all`.
 - Smell rules and enforcement matrix are documented in [documentation/conventions/smell-prevention.md](documentation/conventions/smell-prevention.md).
 - Duplicate detection is fail-closed via `tools/check-patterns.mjs` rules `duplicate-functions` (body/shape function clones) and `duplicate-block-clones` (long cross-file cloned blocks).
+- Fail-fast / keep-it-simple is mandatory.
+  - Defaults and validation belong at boundaries; internal code should trust normalized contracts.
+  - Do not add speculative legacy/compat/fallback support or duplicate CSS/config defaults in runtime code.
 - Defaults must preserve explicit falsy values (`""`, `0`, `false`).
   - Never use truthy fallback for configured defaults (no `x.default || "...")`.
   - Use property-presence/nullish semantics instead.
+- Intentional fallback exceptions must use rule-specific suppression comments with a reason.
+  - `// dyni-lint-disable-next-line <rule-name> -- <reason>`
+  - `/* dyni-lint-disable-line <rule-name> -- <reason> */`
 - Cache-owning modules must expose invalidation API.
   - Required contract: expose invalidation methods and call them whenever state mutation changes cached values.
   - Theme token cache must be invalidated after runtime preset application.
+- Warn-only fallback/legacy lint rules must still be reviewed and tracked in `documentation/TECH-DEBT.md` until promoted to block mode.
 - Pushes must be fail-closed.
   - Install tracked hooks once: `npm run hooks:install`
   - Verify hook setup: `npm run hooks:doctor`

@@ -37,6 +37,14 @@ Rationale: Automated checks persist across sessions when memory and context do n
 Rationale: Truthy fallback (`||`) silently rewrites valid configured values and creates hard-to-debug behavior drift.
 15. Rule: Cache-owning modules must expose explicit invalidation APIs and mutation paths must invoke them whenever cached values become stale.
 Rationale: Mutable runtime state (theme presets, dynamic CSS/token changes) must not rely on implicit refresh assumptions.
+16. Rule: Defaults and validation belong at boundaries; internal code should trust normalized contracts and fail fast.
+Rationale: Re-validating or silently sanitizing already-normalized data hides contract drift and multiplies fallback behavior.
+17. Rule: Do not add speculative legacy, compatibility, or fallback support unless an active external boundary contract requires it.
+Rationale: Premature compatibility paths become permanent debt and obscure the real data flow.
+18. Rule: Do not duplicate CSS, theme-token, or declarative config defaults inside runtime/widget logic.
+Rationale: Duplicated defaults drift from the real source of truth and make behavior hard to reason about.
+19. Rule: Intentional fallback exceptions must use a rule-specific `dyni-lint-disable-*` suppression with a short reason.
+Rationale: Explicit, narrow suppressions keep exceptional fallback behavior reviewable and mechanically enforceable.
 
 ## Related
 

@@ -17,6 +17,8 @@ const fileCache = new Map();
 const scopeCache = new Map();
 let clusterPrefixCache = null;
 let rendererContractCache = null;
+let lintDirectiveCache = new Map();
+let knownRuleNames = [];
 
 export const RENDER_PROP_OBJECT_NAMES = new Set(["p", "props"]);
 
@@ -27,6 +29,8 @@ export function resetContext(options = {}) {
   scopeCache.clear();
   clusterPrefixCache = null;
   rendererContractCache = null;
+  lintDirectiveCache = new Map();
+  knownRuleNames = [];
 }
 
 export function getWarnMode() {
@@ -43,6 +47,21 @@ export function getRendererContractCache() {
 
 export function setRendererContractCache(value) {
   rendererContractCache = value;
+}
+
+export function setKnownRuleNames(names) {
+  knownRuleNames = Array.isArray(names) ? names.slice() : [];
+  lintDirectiveCache = new Map();
+}
+
+export function isLintSuppressed(file, line, ruleName) {
+  const info = getLintDirectiveInfo(file);
+  const suppressedRules = info.suppressionsByLine.get(line);
+  return !!(suppressedRules && suppressedRules.has(ruleName));
+}
+
+export function getInvalidLintSuppressions(file) {
+  return getLintDirectiveInfo(file).invalids.slice();
 }
 
 export function filesForScope(scope) {
@@ -72,6 +91,74 @@ export function getFileData(file) {
   const data = { text, lineStarts, maskedText: maskCommentsAndStrings(text) };
   fileCache.set(file, data);
   return data;
+}
+
+function getLintDirectiveInfo(file) {
+  if (lintDirectiveCache.has(file)) {
+    return lintDirectiveCache.get(file);
+  }
+
+  const data = getFileData(file);
+  const info = parseLintDirectives(data.text, data.lineStarts);
+  lintDirectiveCache.set(file, info);
+  return info;
+}
+
+function parseLintDirectives(text, lineStarts) {
+  const suppressionsByLine = new Map();
+  const invalids = [];
+  const knownRules = new Set(knownRuleNames);
+  const commentRe = /\/\/[^\n]*|\/\*[\s\S]*?\*\//g;
+  let match;
+
+  while ((match = commentRe.exec(text))) {
+    const raw = match[0];
+    if (!raw.includes("dyni-lint-disable-")) {
+      continue;
+    }
+
+    const line = lineAt(match.index, lineStarts);
+    const body = raw.startsWith("//")
+      ? raw.slice(2).trim()
+      : raw.slice(2, -2).trim();
+    const parsed = /^dyni-lint-disable-(next-line|line)\s+([a-z0-9-]+)\s+--\s+(.+)$/s.exec(body);
+    if (!parsed) {
+      invalids.push({
+        line,
+        detail: `Malformed suppression directive '${body}'. Expected 'dyni-lint-disable-next-line <rule-name> -- <reason>' or 'dyni-lint-disable-line <rule-name> -- <reason>'.`
+      });
+      continue;
+    }
+
+    const mode = parsed[1];
+    const ruleName = parsed[2];
+    const reason = parsed[3].trim();
+    if (!reason) {
+      invalids.push({
+        line,
+        detail: `Suppression for rule '${ruleName}' is missing a reason.`
+      });
+      continue;
+    }
+    if (!knownRules.has(ruleName)) {
+      invalids.push({
+        line,
+        detail: `Suppression references unknown rule '${ruleName}'.`
+      });
+      continue;
+    }
+
+    const targetLine = mode === "next-line" ? line + 1 : line;
+    if (!suppressionsByLine.has(targetLine)) {
+      suppressionsByLine.set(targetLine, new Set());
+    }
+    suppressionsByLine.get(targetLine).add(ruleName);
+  }
+
+  return {
+    suppressionsByLine,
+    invalids
+  };
 }
 
 export function getClusterPascalPrefixes() {

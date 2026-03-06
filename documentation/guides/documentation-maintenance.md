@@ -21,6 +21,7 @@ npm run check:all
 6. During iteration, optionally run targeted checks (`npm run check:core`, `npm test`) for faster feedback.
 
 7. Fix all failures and review all warnings before finishing
+8. For warn-only smell rollouts, record the warning backlog and promotion criteria in `documentation/TECH-DEBT.md`
 
 ## Quality and Regression Commands
 
@@ -60,6 +61,7 @@ node tools/check-coverage.mjs
 `check-patterns` is enforced in full mode inside `check:core`.
 Blocking findings fail the gate; warning findings are non-blocking advisories.
 This includes fail-closed cross-file clone detection (`duplicate-functions`, `duplicate-block-clones`) and mixed-severity mapper complexity checks (`mapper-output-complexity`: warn at `9..12`, block at `>12`).
+It also includes warn-only fail-fast fallback/legacy rules (`catch-fallback-without-suppression`, `internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `css-js-default-duplication`, `premature-legacy-support`) plus blocking suppression validation (`invalid-lint-suppression`).
 
 For cleanup sessions tracked by garbage-collection baseline markers:
 
