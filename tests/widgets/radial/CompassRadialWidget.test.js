@@ -177,10 +177,10 @@ describe("CompassRadialWidget", function () {
     expect(harness.calls.pointer[0].fillStyle).toBe(harness.theme.colors.pointer);
     expect(harness.calls.pointer[0].sideFactor).toBe(harness.theme.radial.pointer.sideFactor);
     expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.radial.pointer.lengthFactor);
-    expect(harness.calls.pointer[0].depth).toBe(15);
+    expect(harness.calls.pointer[0].depth).toBe(10);
     expect(harness.calls.rimMarker[0]).toEqual({
-      len: 15,
-      width: 6,
+      len: 12,
+      width: 3,
       strokeStyle: harness.theme.colors.pointer
     });
     expect(harness.calls.ring[0].lineWidth).toBe(harness.theme.radial.ring.arcLineWidth);

@@ -473,6 +473,7 @@ describe("LinearGaugeEngine", function () {
     let drawModeCalls = 0;
     let markerTrackThickness = NaN;
     let markerTrackY = NaN;
+    let markerTrackBoxHeight = NaN;
 
     const layerContexts = [];
     const ownerDocument = {
@@ -527,6 +528,7 @@ describe("LinearGaugeEngine", function () {
         drawFrameCalls += 1;
         markerTrackThickness = state.trackThickness;
         markerTrackY = state.layout.trackY;
+        markerTrackBoxHeight = state.layout.trackBox.h;
         api.drawDefaultPointer();
         api.drawMarkerAtValue(45, { lineWidth: 7, len: 9, strokeStyle: "#00ff00" });
         api.drawMarkerAtValue(75, { strokeStyle: "#ff2b2b" });
@@ -576,8 +578,11 @@ describe("LinearGaugeEngine", function () {
         strokeStyle: "#ff2b2b"
       })
     }));
-    expect(defaultMarker && defaultMarker.len).toBe(Math.max(6, Math.floor(markerTrackThickness * 0.9)));
-    expect(defaultMarker && defaultMarker.opts && defaultMarker.opts.lineWidth).toBe(Math.max(3, Math.floor(markerTrackThickness * 0.4)));
+    expect(harness.calls.pointer[0] && harness.calls.pointer[0].opts && harness.calls.pointer[0].opts.depth).toBe(
+      Math.max(8, Math.floor(Math.max(8, Math.min(14, Math.floor(markerTrackBoxHeight * 0.12))) * harness.theme.linear.pointer.lengthFactor))
+    );
+    expect(defaultMarker && defaultMarker.len).toBe(Math.max(6, Math.floor(Math.max(6, Math.min(14, Math.floor(markerTrackBoxHeight * 0.12))) * 0.9)));
+    expect(defaultMarker && defaultMarker.opts && defaultMarker.opts.lineWidth).toBe(Math.max(3, Math.floor(Math.max(6, Math.min(14, Math.floor(markerTrackBoxHeight * 0.12))) * 0.4)));
     expect(defaultMarker && (defaultMarker.y - defaultMarker.len)).toBe(markerTrackY);
     expect(harness.calls.drawCaptionMax).toBe(0);
     expect(harness.calls.drawValueUnitWithFit).toBe(0);
@@ -587,5 +592,73 @@ describe("LinearGaugeEngine", function () {
       .filter((entry) => entry.name === "fillText");
     const labels = fillTextCalls.map((entry) => entry.args[0]);
     expect(labels).toContain("L0");
+  });
+
+  it("keeps default pointer and marker sizing independent from track thickness theme tokens", function () {
+    let thinTrackThickness = NaN;
+    let thickTrackThickness = NaN;
+    const thinHarness = createHarness({
+      theme: {
+        colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#ff7a76" },
+        radial: {
+          ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
+          pointer: { sideFactor: 0.25, lengthFactor: 2 },
+          ring: { arcLineWidth: 1, widthFactor: 0.12 },
+          labels: { insetFactor: 1.8, fontFactor: 0.14 }
+        },
+        linear: {
+          track: { widthFactor: 0.08, lineWidth: 1 },
+          ticks: { majorLen: 12, majorWidth: 3, minorLen: 6, minorWidth: 2 },
+          pointer: { sideFactor: 0.3, lengthFactor: 1.5 },
+          labels: { insetFactor: 1.2, fontFactor: 0.2 }
+        },
+        font: { weight: 700, labelWeight: 650 },
+        xte: { lineWidthFactor: 1 }
+      }
+    });
+    const thickHarness = createHarness({
+      theme: {
+        colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#ff7a76" },
+        radial: {
+          ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
+          pointer: { sideFactor: 0.25, lengthFactor: 2 },
+          ring: { arcLineWidth: 1, widthFactor: 0.12 },
+          labels: { insetFactor: 1.8, fontFactor: 0.14 }
+        },
+        linear: {
+          track: { widthFactor: 0.3, lineWidth: 4 },
+          ticks: { majorLen: 12, majorWidth: 3, minorLen: 6, minorWidth: 2 },
+          pointer: { sideFactor: 0.3, lengthFactor: 1.5 },
+          labels: { insetFactor: 1.2, fontFactor: 0.2 }
+        },
+        font: { weight: 700, labelWeight: 650 },
+        xte: { lineWidthFactor: 1 }
+      }
+    });
+    const spec = {
+      rawValueKey: "value",
+      rangeDefaults: { min: 0, max: 100 },
+      rangeProps: { min: "min", max: "max" },
+      tickProps: { major: "major", minor: "minor", showEndLabels: "showEndLabels" },
+      drawFrame(state, props, display, api) {
+        if (!isFinite(thinTrackThickness)) thinTrackThickness = state.trackThickness;
+        else thickTrackThickness = state.trackThickness;
+        api.drawDefaultPointer();
+        api.drawMarkerAtValue(60, { strokeStyle: "#ff2b2b" });
+      }
+    };
+    const thinRenderer = thinHarness.engine.createRenderer(spec);
+    const thickRenderer = thickHarness.engine.createRenderer(spec);
+    const props = { value: 40, min: 0, max: 100, major: 20, minor: 10 };
+
+    thinRenderer(createMockCanvas({ rectWidth: 280, rectHeight: 220, ctx: createMockContext2D() }), props);
+    thickRenderer(createMockCanvas({ rectWidth: 280, rectHeight: 220, ctx: createMockContext2D() }), props);
+
+    expect(thinTrackThickness).not.toBe(thickTrackThickness);
+    expect(thinHarness.calls.pointer[0].opts.depth).toBe(thickHarness.calls.pointer[0].opts.depth);
+    const thinMarker = thinHarness.calls.ticks[thinHarness.calls.ticks.length - 1];
+    const thickMarker = thickHarness.calls.ticks[thickHarness.calls.ticks.length - 1];
+    expect(thinMarker.len).toBe(thickMarker.len);
+    expect(thinMarker.opts.lineWidth).toBe(thickMarker.opts.lineWidth);
   });
 });

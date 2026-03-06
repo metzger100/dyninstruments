@@ -183,7 +183,7 @@ Optional `overrides` fields:
 | Field | Type | Default | Behavior |
 |---|---|---|---|
 | `ringWidthFactor` | number | `0.12` | Computes `ringW = max(6, floor(R * ringWidthFactor))` |
-| `needleDepthFactor` | number | derived | If provided: `needleDepth = max(8, floor(ringW * needleDepthFactor))`; if omitted, preserves legacy derived behavior `max(8, floor(ringW * 0.9))` |
+| `needleDepthFactor` | number | derived | If provided: `needleDepth = max(8, floor(ringW * needleDepthFactor))`; if omitted, default pointer depth is decoupled from ring thickness via `max(8, floor(R * 0.11))` |
 
 ## TextLayoutEngine API
 

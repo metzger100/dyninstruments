@@ -120,12 +120,12 @@
         }
 
         api.drawCachedLayer("face", { rotationDeg: rotationDeg });
-        api.drawFixedPointer(state.ctx, 0, { depth: Math.max(10, Math.floor(state.geom.ringW * 0.9)) });
+        api.drawFixedPointer(state.ctx, 0, { depth: Math.max(10, state.geom.needleDepth) });
 
         if (Number.isFinite(display.marker) && Number.isFinite(display.heading)) {
           state.draw.drawRimMarker(state.ctx, state.geom.cx, state.geom.cy, state.geom.rOuter, display.marker - display.heading, {
-            len: Math.max(12, Math.floor(state.geom.ringW * 0.9)),
-            width: Math.max(3, Math.floor(state.geom.ringW * 0.4)),
+            len: state.geom.markerLen,
+            width: state.geom.markerWidth,
             strokeStyle: state.theme.colors.pointer
           });
         }

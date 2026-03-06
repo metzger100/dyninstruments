@@ -133,7 +133,7 @@
         api.drawCachedLayer("back");
         if (state.value.isFiniteNumber(display.angle)) {
           api.drawFixedPointer(state.ctx, display.angle, {
-            depth: Math.max(8, Math.floor(state.geom.ringW * 0.9))
+            depth: state.geom.needleDepth
           });
         }
         api.drawCachedLayer("front");

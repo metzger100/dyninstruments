@@ -27,7 +27,7 @@ angleDeg = startDeg + (endDeg - startDeg) * ((value - min) / (max - min))
 | `pad` | `max(6, floor(min(W,H) * 0.04))` | ~6 |
 | `gap` | `max(6, floor(min(W,H) * 0.03))` | ~6 |
 | `ringW` | `max(6, floor(R * theme.radial.ring.widthFactor))` (default `0.12`) | 12 |
-| `needleDepth` | `max(8, floor(ringW * 0.9))` | 10 |
+| `needleDepth` | `max(8, floor(R * 0.11))` | 10 |
 | `labelInset` | `max(18, floor(ringW * theme.radial.labels.insetFactor))` (default `1.8`) | 21 |
 | `labelFontPx` | `max(10, floor(R * theme.radial.labels.fontFactor))` (default `0.14`) | 14 |
 
