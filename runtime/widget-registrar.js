@@ -70,6 +70,7 @@
     const perInstrumentDefaults = typeof defaultsFn === "function"
       ? defaultsFn(widgetDef.def.editableParameters)
       : {};
+    const editableFn = runtime.editableParamsForRegistration;
 
     const baseDef = {
       name: widgetDef.def.name,
@@ -91,7 +92,9 @@
       updateFunction: updateFunction
     };
 
-    const editable = widgetDef.def.editableParameters || {};
+    const editable = typeof editableFn === "function"
+      ? editableFn(widgetDef.def.editableParameters)
+      : (widgetDef.def.editableParameters || {});
     root.avnav.api.registerWidget(baseDef, editable);
   }
 

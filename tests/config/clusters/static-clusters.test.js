@@ -45,6 +45,7 @@ describe("static cluster configs", function () {
       { kind: "sogLinear" },
       { kind: "stwLinear" }
     ]);
+    expect(byCluster.speed.editableParameters.speedLinearRatioThresholdNormal.internal).toBe(true);
     expect(byCluster.speed.editableParameters.speedLinearRatioThresholdFlat.condition).toEqual([
       { kind: "sogLinear" },
       { kind: "stwLinear" }
@@ -81,9 +82,12 @@ describe("static cluster configs", function () {
       { kind: "hdtLinear" },
       { kind: "hdmLinear" }
     ]);
+    expect(byCluster.courseHeading.editableParameters.compassLinearRatioThresholdNormal.internal).toBe(true);
     expect(byCluster.wind.editableParameters.windLinearRatioThresholdNormal.condition).toEqual([
       { kind: "angleTrueLinear" },
       { kind: "angleApparentLinear" }
     ]);
+    expect(byCluster.wind.editableParameters.windLinearRatioThresholdNormal.internal).toBe(true);
+    expect(byCluster.wind.editableParameters.captionUnitScale.internal).not.toBe(true);
   });
 });

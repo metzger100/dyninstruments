@@ -17,6 +17,17 @@ describe("runtime/widget-registrar.js", function () {
               }
             });
             return out;
+          },
+          editableParamsForRegistration(editable) {
+            const out = {};
+            Object.keys(editable || {}).forEach((k) => {
+              const spec = editable[k];
+              if (spec && typeof spec === "object" && spec.internal === true) {
+                return;
+              }
+              out[k] = spec;
+            });
+            return out;
           }
         },
         state: {},
@@ -63,7 +74,8 @@ describe("runtime/widget-registrar.js", function () {
         className: "widgetClass",
         cluster: "speed",
         editableParameters: {
-          kind: { type: "SELECT", default: "sog" }
+          kind: { type: "SELECT", default: "sog" },
+          ratioThresholdNormal: { type: "FLOAT", default: 1.1, internal: true }
         },
         updateFunction(values) {
           return Object.assign({}, values, { fromDef: true });
@@ -74,12 +86,15 @@ describe("runtime/widget-registrar.js", function () {
     context.DyniPlugin.runtime.registerWidget(component, widgetDef, {});
     expect(registerWidget).toHaveBeenCalledOnce();
 
-    const [registeredDef] = registerWidget.mock.calls[0];
+    const [registeredDef, registeredEditable] = registerWidget.mock.calls[0];
     expect(registeredDef.className).toContain("dyniplugin");
     expect(registeredDef.className).toContain("widgetClass");
     expect(registeredDef.className).toContain("componentClass");
     expect(registeredDef.kind).toBe("sog");
+    expect(registeredDef.ratioThresholdNormal).toBe(1.1);
     expect(registeredDef.storeKeys).toEqual({ x: "nav.x" });
+    expect(registeredEditable.kind).toEqual({ type: "SELECT", default: "sog" });
+    expect(registeredEditable.ratioThresholdNormal).toBeUndefined();
 
     const updated = registeredDef.updateFunction({ a: 1 });
     expect(updated).toEqual({ a: 1, fromSpec: true, fromDef: true });

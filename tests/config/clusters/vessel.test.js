@@ -42,6 +42,9 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.dateTimeRatioThresholdFlat.default).toBe(4.0);
     expect(def.editableParameters.dateTimeRatioThresholdNormal.condition).toEqual({ kind: "dateTime" });
     expect(def.editableParameters.dateTimeRatioThresholdFlat.condition).toEqual({ kind: "dateTime" });
+    expect(def.editableParameters.dateTimeRatioThresholdNormal.internal).toBe(true);
+    expect(def.editableParameters.dateTimeRatioThresholdFlat.internal).toBe(true);
+    expect(def.editableParameters.captionUnitScale.internal).not.toBe(true);
 
     expect(def.editableParameters.voltageRadialMinValue).toBeTruthy();
     expect(def.editableParameters.voltageRadialMaxValue).toBeTruthy();
@@ -74,6 +77,8 @@ describe("config/clusters/vessel.js", function () {
       kind: "voltageLinear",
       voltageLinearAlarmEnabled: true
     });
+    expect(def.editableParameters.voltageLinearRatioThresholdNormal.internal).toBe(true);
+    expect(def.editableParameters.voltageRadialRatioThresholdFlat.internal).toBe(true);
   });
 
   it("injects selected voltage path into storeKeys.value for voltage kinds", function () {

@@ -25,6 +25,30 @@ describe("runtime/editable-defaults.js", function () {
     });
   });
 
+  it("filters internal editable parameters from host registration", function () {
+    const context = createScriptContext({
+      DyniPlugin: {
+        runtime: {},
+        state: {},
+        config: { shared: {}, clusters: [] }
+      }
+    });
+
+    runIifeScript("runtime/editable-defaults.js", context);
+
+    const fn = context.DyniPlugin.runtime.editableParamsForRegistration;
+    const filtered = fn({
+      kind: { type: "SELECT", default: "sog" },
+      caption: false,
+      ratioThresholdNormal: { type: "FLOAT", default: 1.0, internal: true }
+    });
+
+    expect(filtered).toEqual({
+      kind: { type: "SELECT", default: "sog" },
+      caption: false
+    });
+  });
+
   it("returns empty object for missing editable params", function () {
     const context = createScriptContext({
       DyniPlugin: {

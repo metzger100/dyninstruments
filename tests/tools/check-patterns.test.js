@@ -1007,6 +1007,63 @@ tiny();
   copy({});
 }());
 `
+    },
+    {
+      rule: "editable-threshold-missing-internal",
+      rel: "config/clusters/example.js",
+      positive: `
+(function (root) {
+  "use strict";
+  root.DyniPlugin.config.clusters.push({
+    def: {
+      editableParameters: {
+        speedLinearRatioThresholdNormal: { type: "FLOAT", default: 1.1 },
+        captionUnitScale: { type: "FLOAT", default: 0.8 }
+      }
+    }
+  });
+}(this));
+`,
+      clean: `
+(function (root) {
+  "use strict";
+  root.DyniPlugin.config.clusters.push({
+    def: {
+      editableParameters: {
+        speedLinearRatioThresholdNormal: { type: "FLOAT", default: 1.1, internal: true },
+        captionUnitScale: { type: "FLOAT", default: 0.8 }
+      }
+    }
+  });
+}(this));
+`,
+      disableNextLine: `
+(function (root) {
+  "use strict";
+  root.DyniPlugin.config.clusters.push({
+    def: {
+      editableParameters: {
+        // dyni-lint-disable-next-line editable-threshold-missing-internal -- migration keeps this threshold temporarily user-visible
+        speedLinearRatioThresholdNormal: { type: "FLOAT", default: 1.1 },
+        captionUnitScale: { type: "FLOAT", default: 0.8 }
+      }
+    }
+  });
+}(this));
+`,
+      disableLine: `
+(function (root) {
+  "use strict";
+  root.DyniPlugin.config.clusters.push({
+    def: {
+      editableParameters: {
+        speedLinearRatioThresholdNormal: { type: "FLOAT", default: 1.1 }, /* dyni-lint-disable-line editable-threshold-missing-internal -- migration keeps this threshold temporarily user-visible */
+        captionUnitScale: { type: "FLOAT", default: 0.8 }
+      }
+    }
+  });
+}(this));
+`
     }
   ];
 

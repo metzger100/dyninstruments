@@ -379,3 +379,53 @@ export function runPrematureLegacySupportRule(rule, files) {
 
   return out;
 }
+
+export function runEditableThresholdInternalRule(rule, files) {
+  const out = [];
+  const propertyDecl = /^[ \t]*([A-Za-z_$][A-Za-z0-9_$]*)\s*:\s*\{/gm;
+
+  for (const file of files) {
+    const data = getFileData(file);
+    const seen = new Set();
+    let match;
+
+    while ((match = propertyDecl.exec(data.maskedText))) {
+      const keyName = match[1];
+      if (!/(Ratio|Threshold)/.test(keyName)) {
+        continue;
+      }
+
+      const openBrace = data.maskedText.indexOf("{", match.index + match[0].length - 1);
+      if (openBrace < 0) {
+        continue;
+      }
+      const closeBrace = findMatchingBrace(data.maskedText, openBrace);
+      if (closeBrace < 0) {
+        continue;
+      }
+
+      const body = data.maskedText.slice(openBrace + 1, closeBrace);
+      if (/\binternal\s*:\s*true\b/.test(body)) {
+        continue;
+      }
+
+      const line = lineAt(match.index, data.lineStarts);
+      const dedupeKey = `${file}:${line}:${keyName}`;
+      if (seen.has(dedupeKey)) {
+        continue;
+      }
+      seen.add(dedupeKey);
+      out.push({
+        file,
+        line,
+        message: rule.message({
+          file,
+          line,
+          keyName
+        })
+      });
+    }
+  }
+
+  return out;
+}

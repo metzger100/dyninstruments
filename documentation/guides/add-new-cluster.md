@@ -87,6 +87,10 @@ config.clusters.push({
 
 Then include the config script in `plugin.js` internal load order.
 
+Internal-only responsive layout knobs must be marked `internal: true` on the editable spec.
+Examples: `ratioThresholdNormal`, `ratioThresholdFlat`, and widget-specific `*RatioThreshold*` values.
+This keeps their runtime defaults active while hiding them from the AvNav editor.
+
 ## Step 3: Add Mapper Module
 
 Create `cluster/mappers/NewClusterMapper.js`:
@@ -173,6 +177,7 @@ For a new `kind` in an existing cluster:
 1. Extend kind defaults in `config/shared/kind-defaults.js`
 2. Extend the cluster `kind` SELECT in `config/clusters/<cluster>.js`
 3. Add any new `storeKeys` / `editableParameters`
+   Mark runtime-only threshold/ratio editables with `internal: true`; keep real user controls visible.
 4. Update matching mapper module in `cluster/mappers/<Cluster>.js`
 5. If the kind is radial and uses a new renderer, also complete renderer wiring from Step 5
 

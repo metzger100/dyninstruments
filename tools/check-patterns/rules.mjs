@@ -11,6 +11,7 @@ import { runDuplicateBlockClones, runDuplicateFunctions } from "./rules-duplicat
 import {
   runCatchFallbackWithoutSuppressionRule,
   runCssJsDefaultDuplicationRule,
+  runEditableThresholdInternalRule,
   runHardcodedRuntimeDefaultRule,
   runInternalHookFallbackRule,
   runInvalidLintSuppressionRule,
@@ -206,6 +207,16 @@ export const RULES = [
     },
     run: runPrematureLegacySupportRule,
     message: ({ file, line, expression }) => `[premature-legacy-support] ${file}:${line}\nPremature legacy/compatibility support detected (${expression}). Remove speculative fallback/compat paths unless an active boundary contract requires them.`
+  },
+  {
+    name: "editable-threshold-missing-internal",
+    severity: "warn",
+    scope: {
+      include: ["config/clusters/*.js", "config/shared/*.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runEditableThresholdInternalRule,
+    message: ({ file, line, keyName }) => `[editable-threshold-missing-internal] ${file}:${line}\nEditable parameter '${keyName}' looks like an internal ratio/threshold layout knob but is missing 'internal: true'. Mark runtime-only threshold specs internal so defaults still apply without exposing them in the host editor.`
   },
   {
     name: "formatter-availability-heuristic",

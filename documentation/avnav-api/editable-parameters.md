@@ -129,6 +129,17 @@ condition: { kind: "depthRadial", depthRadialAlarmEnabled: true }
 condition: []   // or omit condition entirely
 ```
 
+### internal (dyninstruments-internal)
+
+`internal: true` marks a dyninstruments editable spec as runtime-owned but editor-hidden.
+
+- The spec stays in the cluster/shared config object.
+- `runtime/editable-defaults.js` still extracts its `default` value into the registered widget definition.
+- `runtime/widget-registrar.js` strips it from the `editableParameters` object passed to `avnav.api.registerWidget(...)`, so AvNav does not show it in the config editor.
+- This is a dyninstruments convention, not part of the documented AvNav API.
+
+Use it for implementation-detail layout tuning knobs such as responsive ratio thresholds. Do not use it for meaningful end-user controls such as range, ticks, captions, units, or feature toggles.
+
 ### Per-Kind Caption/Unit Pattern (dyninstruments-internal)
 
 Helper `makePerKindTextParams(KIND_MAP)` generates per-kind STRING parameters.
@@ -172,8 +183,8 @@ Shared layout thresholds for numeric (ThreeValueTextWidget) kinds:
 
 ```javascript
 const commonThreeElementsEditables = {
-  ratioThresholdNormal: { type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0 },
-  ratioThresholdFlat:   { type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0 },
+  ratioThresholdNormal: { type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0, internal: true },
+  ratioThresholdFlat:   { type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0, internal: true },
   captionUnitScale:     { type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8 }
 };
 ```
