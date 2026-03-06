@@ -31,11 +31,11 @@ describe("RadialValueMath", function () {
     });
   });
 
-  it("applies ringWidthFactor override and keeps derived needle depth behavior", function () {
+  it("applies ringWidthFactor override without changing default pointer depth", function () {
     const v = create();
     expect(v.computeSemicircleGeometry(320, 180, 8, { ringWidthFactor: 0.2 })).toMatchObject({
       ringW: 30,
-      needleDepth: 27
+      needleDepth: 16
     });
   });
 

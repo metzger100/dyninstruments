@@ -341,7 +341,7 @@
       const needleDepthFactor = Number(opts.needleDepthFactor);
       const needleDepth = isFinite(needleDepthFactor)
         ? Math.max(8, Math.floor(ringW * needleDepthFactor))
-        : Math.max(8, Math.floor(ringW * 0.9));
+        : Math.max(8, Math.floor(R * 0.11));
 
       return {
         availW,

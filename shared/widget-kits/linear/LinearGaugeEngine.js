@@ -174,10 +174,11 @@
           ? buildTicksFn(axis, tickMajor, tickMinor, p, hookApiBase)
           : defaultTicks;
         const sectors = buildSectorsFn(p, range.min, range.max, axis, value, theme);
-
         const baseTrack = Math.max(6, Math.floor(layout.trackBox.h * theme.linear.track.widthFactor));
         const maxTrack = Math.max(8, Math.floor(theme.linear.ticks.majorLen * 1.6));
         const trackThickness = math.clamp(baseTrack, 6, maxTrack);
+        const pointerDepthBase = math.clamp(Math.floor(layout.trackBox.h * 0.12), 8, 14);
+        const markerSizeBase = math.clamp(Math.floor(layout.trackBox.h * 0.12), 6, 14);
         const sectorClearance = Math.max(1, Math.ceil(theme.linear.track.lineWidth / 2));
         const sectorBandY = layout.trackY - (trackThickness / 2) - sectorClearance;
         const labelBoost = textLayout.resolveLabelBoost(modeState.mode);
@@ -186,11 +187,9 @@
           2,
           Math.floor(labelFontPx * theme.linear.labels.insetFactor * 0.2)
         );
-
         ctx.clearRect(0, 0, W, H);
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
-
         const state = {
           ctx: ctx,
           mode: modeState.mode,
@@ -250,7 +249,6 @@
             return cfg.formatTickLabel(tickValue, tickState || state, p, hookApi);
           }
           : null;
-
         const staticKey = math.keyToText({
           engine: {
             W: W,
@@ -300,7 +298,6 @@
           drawStaticLayer(layerCtx, state, ticks, showEndLabels, sectors, tickLabelFormatter);
         });
         layerCache.blit(ctx);
-
         function drawPointerAtValue(targetCtx, markerValue, markerOpts) {
           const pointerValue = Number(markerValue);
           if (!isFinite(pointerValue)) {
@@ -309,13 +306,12 @@
           const pointerX = state.mapValueToX(pointerValue, true);
           const pointerTipY = layout.trackY - Math.floor(trackThickness / 2) - 1;
           if (isFinite(pointerX)) {
-            const depthBase = Math.max(8, trackThickness);
             const opts = markerOpts || {};
             const depthValue = Number(opts.depth);
             const sideValue = Number(opts.side);
             const depth = Number.isFinite(depthValue)
               ? Math.max(8, Math.floor(depthValue))
-              : Math.max(8, Math.floor(depthBase * theme.linear.pointer.lengthFactor));
+              : Math.max(8, Math.floor(pointerDepthBase * theme.linear.pointer.lengthFactor));
             const side = Number.isFinite(sideValue)
               ? Math.max(4, Math.floor(sideValue))
               : Math.max(4, Math.floor(depth * theme.linear.pointer.sideFactor));
@@ -338,13 +334,12 @@
           const opts = markerOpts || {};
           const lenValue = Number(opts.len);
           const widthValue = Number(opts.lineWidth);
-          // Waypoint/course markers scale from trackThickness and start exactly at the scale line.
           const len = Number.isFinite(lenValue)
             ? Math.max(4, lenValue)
-            : Math.max(6, Math.floor(trackThickness * 0.9));
+            : Math.max(6, Math.floor(markerSizeBase * 0.9));
           const width = Number.isFinite(widthValue)
             ? Math.max(1, widthValue)
-            : Math.max(3, Math.floor(trackThickness * 0.4));
+            : Math.max(3, Math.floor(markerSizeBase * 0.4));
           const y = layout.trackY + len;
           primitives.drawTick(targetCtx || ctx, Math.round(markerX), y, len, {
             lineWidth: width,
@@ -363,7 +358,6 @@
             drawMarkerAtValue(ctx, valueNum, opts);
           }
         };
-
         if (typeof cfg.drawFrame === "function") {
           cfg.drawFrame(state, p, displayState, Object.assign({}, hookApi, drawApi));
         }

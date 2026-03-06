@@ -55,32 +55,32 @@ Read by `ThemeResolver.resolve(canvas)`:
 | `--dyni-alarm` | Alarm sector color | `#ff7a76` |
 | `--dyni-layline-stb` | Starboard layline color | `#82b683` |
 | `--dyni-layline-port` | Port layline color | `#ff7a76` |
-| `--dyni-radial-tick-major-len` | Major tick length | `9` |
-| `--dyni-radial-tick-major-width` | Major tick stroke width | `2` |
-| `--dyni-radial-tick-minor-len` | Minor tick length | `5` |
-| `--dyni-radial-tick-minor-width` | Minor tick stroke width | `1` |
+| `--dyni-radial-tick-major-len` | Major tick length | `12` |
+| `--dyni-radial-tick-major-width` | Major tick stroke width | `3` |
+| `--dyni-radial-tick-minor-len` | Minor tick length | `7` |
+| `--dyni-radial-tick-minor-width` | Minor tick stroke width | `1.5` |
 | `--dyni-radial-pointer-side` | Pointer side factor | `0.25` |
 | `--dyni-radial-pointer-length` | Pointer length factor | `2` |
-| `--dyni-radial-arc-linewidth` | Arc line width | `1` |
-| `--dyni-radial-ring-width` | Ring width factor | `0.12` |
+| `--dyni-radial-arc-linewidth` | Arc line width | `2` |
+| `--dyni-radial-ring-width` | Ring width factor | `0.16` |
 | `--dyni-radial-label-inset` | Label inset factor | `1.8` |
 | `--dyni-radial-label-font` | Label font factor | `0.14` |
 | `--dyni-radial-fullcircle-normal-inner-margin` | Full-circle normal-mode inner margin factor | `0.03` |
 | `--dyni-radial-fullcircle-normal-min-height` | Full-circle normal-mode minimum block height factor | `0.45` |
 | `--dyni-radial-fullcircle-normal-dual-gap` | Full-circle normal-mode dual-column gap factor | `0.05` |
-| `--dyni-linear-track-width` | Linear track thickness factor | `0.12` |
-| `--dyni-linear-track-linewidth` | Linear track stroke width | `1` |
-| `--dyni-linear-tick-major-len` | Linear major tick length | `9` |
-| `--dyni-linear-tick-major-width` | Linear major tick stroke width | `2` |
-| `--dyni-linear-tick-minor-len` | Linear minor tick length | `5` |
-| `--dyni-linear-tick-minor-width` | Linear minor tick stroke width | `1` |
+| `--dyni-linear-track-width` | Linear track thickness factor | `0.16` |
+| `--dyni-linear-track-linewidth` | Linear track stroke width | `2` |
+| `--dyni-linear-tick-major-len` | Linear major tick length | `12` |
+| `--dyni-linear-tick-major-width` | Linear major tick stroke width | `3` |
+| `--dyni-linear-tick-minor-len` | Linear minor tick length | `7` |
+| `--dyni-linear-tick-minor-width` | Linear minor tick stroke width | `1.5` |
 | `--dyni-linear-pointer-side` | Linear pointer side factor | `0.25` |
 | `--dyni-linear-pointer-length` | Linear pointer length factor | `2` |
 | `--dyni-linear-label-inset` | Linear label inset factor | `1.8` |
 | `--dyni-linear-label-font` | Linear label font factor | `0.14` |
 | `--dyni-font-weight` | Primary font weight | `700` |
 | `--dyni-label-weight` | Label font weight | `700` |
-| `--dyni-xte-line-width-factor` | XTE highway stroke thickness multiplier | `1` |
+| `--dyni-xte-line-width-factor` | XTE highway stroke thickness multiplier | `1.5` |
 
 ### Preset Layer (ThemePresets)
 

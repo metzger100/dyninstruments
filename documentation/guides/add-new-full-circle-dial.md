@@ -64,7 +64,7 @@ Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
         const display = buildDisplay(state, props);
         api.drawCachedLayer("back");
         api.drawFixedPointer(state.ctx, Number(props.pointerAngle) || 0, {
-          depth: Math.max(8, Math.floor(state.geom.ringW * 0.9)),
+          depth: state.geom.needleDepth,
           variant: "long",
           fillStyle: state.theme.colors.pointer,
           sideFactor: state.theme.radial.pointer.sideFactor,

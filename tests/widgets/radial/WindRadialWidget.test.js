@@ -336,7 +336,7 @@ describe("WindRadialWidget", function () {
     expect(pointerCalls[0].fillStyle).toBe(themeDefaults.colors.pointer);
     expect(pointerCalls[0].sideFactor).toBe(themeDefaults.radial.pointer.sideFactor);
     expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.radial.pointer.lengthFactor);
-    expect(pointerCalls[0].depth).toBe(15);
+    expect(pointerCalls[0].depth).toBe(8);
     expect(ringCalls[0].lineWidth).toBe(themeDefaults.radial.ring.arcLineWidth);
     expect(tickCalls[0].major).toEqual({
       len: themeDefaults.radial.ticks.majorLen,

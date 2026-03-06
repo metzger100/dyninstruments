@@ -178,14 +178,20 @@ describe("ThemeResolver", function () {
       tokenDef.cssVar === "--dyni-linear-pointer-length"
     ))).toBe(true);
     expect(mod.DEFAULTS.radial.pointer.sideFactor).toBe(0.25);
-    expect(mod.DEFAULTS.radial.ring.widthFactor).toBe(0.12);
+    expect(mod.DEFAULTS.radial.ring.arcLineWidth).toBe(2);
+    expect(mod.DEFAULTS.radial.ring.widthFactor).toBe(0.16);
+    expect(mod.DEFAULTS.radial.ticks.majorLen).toBe(12);
+    expect(mod.DEFAULTS.radial.ticks.minorWidth).toBe(1.5);
     expect(mod.DEFAULTS.radial.fullCircle.normal.innerMarginFactor).toBe(0.03);
     expect(mod.DEFAULTS.radial.fullCircle.normal.minHeightFactor).toBe(0.45);
     expect(mod.DEFAULTS.radial.fullCircle.normal.dualGapFactor).toBe(0.05);
-    expect(mod.DEFAULTS.linear.track.widthFactor).toBe(0.12);
+    expect(mod.DEFAULTS.linear.track.widthFactor).toBe(0.16);
+    expect(mod.DEFAULTS.linear.track.lineWidth).toBe(2);
+    expect(mod.DEFAULTS.linear.ticks.majorWidth).toBe(3);
+    expect(mod.DEFAULTS.linear.ticks.minorLen).toBe(7);
     expect(mod.DEFAULTS.linear.pointer.lengthFactor).toBe(2);
     expect(mod.DEFAULTS.linear.labels.insetFactor).toBe(1.8);
-    expect(mod.DEFAULTS.xte.lineWidthFactor).toBe(1);
+    expect(mod.DEFAULTS.xte.lineWidthFactor).toBe(1.5);
     expect(Object.keys(mod.DEFAULTS.xte).sort()).toEqual(["lineWidthFactor"]);
   });
 });

@@ -160,6 +160,7 @@ describe("FullCircleRadialEngine", function () {
       width: harness.theme.radial.ticks.minorWidth
     });
     expect(harness.calls.pointer[0].fillStyle).toBe(harness.theme.colors.pointer);
+    expect(harness.calls.pointer[0].depth).toBe(8);
     expect(harness.calls.pointer[0].sideFactor).toBe(harness.theme.radial.pointer.sideFactor);
     expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.radial.pointer.lengthFactor);
   });

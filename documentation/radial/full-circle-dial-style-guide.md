@@ -33,7 +33,7 @@ Visual specification for full-circle dial widgets. Constants and formulas are im
 | `cx` | `floor(W / 2)` | `computeGeometry()` |
 | `cy` | `floor(H / 2)` | `computeGeometry()` |
 | `ringW` | `max(6, floor(R * theme.radial.ring.widthFactor))` | `computeGeometry()` |
-| `needleDepth` | `max(8, floor(ringW * 0.9))` | `computeGeometry()` |
+| `needleDepth` | `max(8, floor(R * 0.11))` | `computeGeometry()` |
 | `labelInsetVal` | `max(18, floor(ringW * theme.radial.labels.insetFactor))` | `computeGeometry()` |
 | `labelPx` | `max(10, floor(R * theme.radial.labels.fontFactor))` | `computeGeometry()` |
 | `leftStrip` | `max(0, floor((W - 2*pad - 2*R) / 2))` | `computeGeometry()` |
@@ -62,8 +62,8 @@ Ring stroke width: `theme.radial.ring.arcLineWidth` (default `1`).
 
 | Variant | Widget | Angle input | Depth | Common options |
 |---|---|---|---|---|
-| Lubber pointer (fixed) | `CompassRadialWidget` | fixed `0°` | `max(10, floor(ringW * 0.9))` | `variant="long"`, `fillStyle=theme.colors.pointer` |
-| Value pointer (dynamic) | `WindRadialWidget` | `display.angle` | `max(8, floor(ringW * 0.9))` | `variant="long"`, `fillStyle=theme.colors.pointer` |
+| Lubber pointer (fixed) | `CompassRadialWidget` | fixed `0°` | `max(10, needleDepth)` | `variant="long"`, `fillStyle=theme.colors.pointer` |
+| Value pointer (dynamic) | `WindRadialWidget` | `display.angle` | `needleDepth` | `variant="long"`, `fillStyle=theme.colors.pointer` |
 
 Shared pointer shape controls:
 - `theme.radial.pointer.sideFactor` (`--dyni-radial-pointer-side`, default `0.25`)
@@ -155,7 +155,7 @@ Compass target marker (`CompassRadialWidget`, per-frame):
 - Marker is compass-only (`markerCourse`); no wind marker primitive exists
 - Draw when both `markerCourse` and `heading` are finite
 - Marker angle relative to rotated card: `markerCourse - heading`
-- Marker dimensions: `len=max(12, floor(ringW * 0.9))`, `width=max(3, floor(ringW * 0.4))`
+- Marker dimensions: `len=max(12, floor(R * 0.11))`, `width=max(3, floor(R * 0.05))`
 
 ## Disconnect Overlay
 
