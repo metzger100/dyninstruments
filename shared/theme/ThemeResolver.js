@@ -30,38 +30,43 @@
 }(this, function () {
   "use strict";
 
+  // dyni-lint-disable-next-line css-js-default-duplication -- ThemeResolver is the documented theme-token boundary and owns per-token defaults.
+  function defineToken(path, cssVar, type, defaultValue) {
+    return { path: path, cssVar: cssVar, type: type, defaultValue: defaultValue }; /* dyni-lint-disable-line css-js-default-duplication -- ThemeResolver is the documented theme-token boundary and owns per-token defaults. */
+  }
+
   const TOKEN_DEFS = [
-    { path: "colors.pointer", cssVar: "--dyni-pointer", type: "color", defaultValue: "#ff2b2b" },
-    { path: "colors.warning", cssVar: "--dyni-warning", type: "color", defaultValue: "#e7c66a" },
-    { path: "colors.alarm", cssVar: "--dyni-alarm", type: "color", defaultValue: "#ff7a76" },
-    { path: "colors.laylineStb", cssVar: "--dyni-layline-stb", type: "color", defaultValue: "#82b683" },
-    { path: "colors.laylinePort", cssVar: "--dyni-layline-port", type: "color", defaultValue: "#ff7a76" },
-    { path: "radial.ticks.majorLen", cssVar: "--dyni-radial-tick-major-len", type: "number", defaultValue: 9 },
-    { path: "radial.ticks.majorWidth", cssVar: "--dyni-radial-tick-major-width", type: "number", defaultValue: 2 },
-    { path: "radial.ticks.minorLen", cssVar: "--dyni-radial-tick-minor-len", type: "number", defaultValue: 5 },
-    { path: "radial.ticks.minorWidth", cssVar: "--dyni-radial-tick-minor-width", type: "number", defaultValue: 1 },
-    { path: "radial.pointer.sideFactor", cssVar: "--dyni-radial-pointer-side", type: "number", defaultValue: 0.25 },
-    { path: "radial.pointer.lengthFactor", cssVar: "--dyni-radial-pointer-length", type: "number", defaultValue: 2 },
-    { path: "radial.ring.arcLineWidth", cssVar: "--dyni-radial-arc-linewidth", type: "number", defaultValue: 1 },
-    { path: "radial.ring.widthFactor", cssVar: "--dyni-radial-ring-width", type: "number", defaultValue: 0.12 },
-    { path: "radial.labels.insetFactor", cssVar: "--dyni-radial-label-inset", type: "number", defaultValue: 1.8 },
-    { path: "radial.labels.fontFactor", cssVar: "--dyni-radial-label-font", type: "number", defaultValue: 0.14 },
-    { path: "radial.fullCircle.normal.innerMarginFactor", cssVar: "--dyni-radial-fullcircle-normal-inner-margin", type: "number", defaultValue: 0.03 },
-    { path: "radial.fullCircle.normal.minHeightFactor", cssVar: "--dyni-radial-fullcircle-normal-min-height", type: "number", defaultValue: 0.45 },
-    { path: "radial.fullCircle.normal.dualGapFactor", cssVar: "--dyni-radial-fullcircle-normal-dual-gap", type: "number", defaultValue: 0.05 },
-    { path: "linear.track.widthFactor", cssVar: "--dyni-linear-track-width", type: "number", defaultValue: 0.12 },
-    { path: "linear.track.lineWidth", cssVar: "--dyni-linear-track-linewidth", type: "number", defaultValue: 1 },
-    { path: "linear.ticks.majorLen", cssVar: "--dyni-linear-tick-major-len", type: "number", defaultValue: 9 },
-    { path: "linear.ticks.majorWidth", cssVar: "--dyni-linear-tick-major-width", type: "number", defaultValue: 2 },
-    { path: "linear.ticks.minorLen", cssVar: "--dyni-linear-tick-minor-len", type: "number", defaultValue: 5 },
-    { path: "linear.ticks.minorWidth", cssVar: "--dyni-linear-tick-minor-width", type: "number", defaultValue: 1 },
-    { path: "linear.pointer.sideFactor", cssVar: "--dyni-linear-pointer-side", type: "number", defaultValue: 0.25 },
-    { path: "linear.pointer.lengthFactor", cssVar: "--dyni-linear-pointer-length", type: "number", defaultValue: 2 },
-    { path: "linear.labels.insetFactor", cssVar: "--dyni-linear-label-inset", type: "number", defaultValue: 1.8 },
-    { path: "linear.labels.fontFactor", cssVar: "--dyni-linear-label-font", type: "number", defaultValue: 0.14 },
-    { path: "font.weight", cssVar: "--dyni-font-weight", type: "number", defaultValue: 700 },
-    { path: "font.labelWeight", cssVar: "--dyni-label-weight", type: "number", defaultValue: 700 },
-    { path: "xte.lineWidthFactor", cssVar: "--dyni-xte-line-width-factor", type: "number", defaultValue: 1 }
+    defineToken("colors.pointer", "--dyni-pointer", "color", "#ff2b2b"),
+    defineToken("colors.warning", "--dyni-warning", "color", "#e7c66a"),
+    defineToken("colors.alarm", "--dyni-alarm", "color", "#ff7a76"),
+    defineToken("colors.laylineStb", "--dyni-layline-stb", "color", "#82b683"),
+    defineToken("colors.laylinePort", "--dyni-layline-port", "color", "#ff7a76"),
+    defineToken("radial.ticks.majorLen", "--dyni-radial-tick-major-len", "number", 9),
+    defineToken("radial.ticks.majorWidth", "--dyni-radial-tick-major-width", "number", 2),
+    defineToken("radial.ticks.minorLen", "--dyni-radial-tick-minor-len", "number", 5),
+    defineToken("radial.ticks.minorWidth", "--dyni-radial-tick-minor-width", "number", 1),
+    defineToken("radial.pointer.sideFactor", "--dyni-radial-pointer-side", "number", 0.25),
+    defineToken("radial.pointer.lengthFactor", "--dyni-radial-pointer-length", "number", 2),
+    defineToken("radial.ring.arcLineWidth", "--dyni-radial-arc-linewidth", "number", 1),
+    defineToken("radial.ring.widthFactor", "--dyni-radial-ring-width", "number", 0.12),
+    defineToken("radial.labels.insetFactor", "--dyni-radial-label-inset", "number", 1.8),
+    defineToken("radial.labels.fontFactor", "--dyni-radial-label-font", "number", 0.14),
+    defineToken("radial.fullCircle.normal.innerMarginFactor", "--dyni-radial-fullcircle-normal-inner-margin", "number", 0.03),
+    defineToken("radial.fullCircle.normal.minHeightFactor", "--dyni-radial-fullcircle-normal-min-height", "number", 0.45),
+    defineToken("radial.fullCircle.normal.dualGapFactor", "--dyni-radial-fullcircle-normal-dual-gap", "number", 0.05),
+    defineToken("linear.track.widthFactor", "--dyni-linear-track-width", "number", 0.12),
+    defineToken("linear.track.lineWidth", "--dyni-linear-track-linewidth", "number", 1),
+    defineToken("linear.ticks.majorLen", "--dyni-linear-tick-major-len", "number", 9),
+    defineToken("linear.ticks.majorWidth", "--dyni-linear-tick-major-width", "number", 2),
+    defineToken("linear.ticks.minorLen", "--dyni-linear-tick-minor-len", "number", 5),
+    defineToken("linear.ticks.minorWidth", "--dyni-linear-tick-minor-width", "number", 1),
+    defineToken("linear.pointer.sideFactor", "--dyni-linear-pointer-side", "number", 0.25),
+    defineToken("linear.pointer.lengthFactor", "--dyni-linear-pointer-length", "number", 2),
+    defineToken("linear.labels.insetFactor", "--dyni-linear-label-inset", "number", 1.8),
+    defineToken("linear.labels.fontFactor", "--dyni-linear-label-font", "number", 0.14),
+    defineToken("font.weight", "--dyni-font-weight", "number", 700),
+    defineToken("font.labelWeight", "--dyni-label-weight", "number", 700),
+    defineToken("xte.lineWidthFactor", "--dyni-xte-line-width-factor", "number", 1)
   ];
 
   function setByPath(target, pathSegments, value) {

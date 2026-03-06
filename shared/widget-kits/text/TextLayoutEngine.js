@@ -9,6 +9,10 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniTextLayoutEngine = factory(); }
 }(this, function () {
   "use strict";
+  const hasOwn = Object.prototype.hasOwnProperty;
+  const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.0;
+  const DEFAULT_RATIO_THRESHOLD_FLAT = 3.0;
+  const DEFAULT_CAPTION_UNIT_SCALE = 0.8;
 
   function create(def, Helpers) {
     const value = Helpers.getModule("RadialValueMath").create(def, Helpers);
@@ -37,11 +41,7 @@
     }
 
     function makeFitCacheKey(parts) {
-      try {
-        return JSON.stringify(parts || {});
-      } catch (e) {
-        return String(parts);
-      }
+      return JSON.stringify(parts || {});
     }
 
     function readFitCache(cache, mode, key) {
@@ -75,11 +75,19 @@
       const W = Number(cfg.W) || 0;
       const H = Number(cfg.H) || 0;
       const ratio = W / Math.max(1, H);
-      const tNormal = value.isFiniteNumber(cfg.ratioThresholdNormal) ? cfg.ratioThresholdNormal : 1.0;
-      const tFlat = value.isFiniteNumber(cfg.ratioThresholdFlat) ? cfg.ratioThresholdFlat : 3.0;
-      const secScale = value.clamp(cfg.captionUnitScale ?? 0.8, 0.3, 3.0);
-      const caption = String(cfg.captionText || "").trim();
-      const unit = String(cfg.unitText || "").trim();
+      const tNormal = hasOwn.call(cfg, "ratioThresholdNormal")
+        ? cfg.ratioThresholdNormal
+        : DEFAULT_RATIO_THRESHOLD_NORMAL;
+      const tFlat = hasOwn.call(cfg, "ratioThresholdFlat")
+        ? cfg.ratioThresholdFlat
+        : DEFAULT_RATIO_THRESHOLD_FLAT;
+      const secScale = value.clamp(
+        hasOwn.call(cfg, "captionUnitScale") ? cfg.captionUnitScale : DEFAULT_CAPTION_UNIT_SCALE,
+        0.3,
+        3.0
+      );
+      const caption = String(hasOwn.call(cfg, "captionText") ? cfg.captionText : "").trim();
+      const unit = String(hasOwn.call(cfg, "unitText") ? cfg.unitText : "").trim();
       const hasCaption = !!caption;
       const hasUnit = !!unit;
       const baseMode = value.computeMode(ratio, tNormal, tFlat);

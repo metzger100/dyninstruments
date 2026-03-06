@@ -9,6 +9,7 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniRadialAngleMath = factory(); }
 }(this, function () {
   "use strict";
+  const hasOwn = Object.prototype.hasOwnProperty;
 
   function create() {
     function degToRad(deg) { return (deg * Math.PI) / 180; }
@@ -34,7 +35,7 @@
 
     function degToCanvasRad(deg, cfg, rotationDeg) {
       cfg = cfg || {};
-      const zeroDegAt = cfg.zeroDegAt || "north";
+      const zeroDegAt = hasOwn.call(cfg, "zeroDegAt") ? cfg.zeroDegAt : "north";
       const clockwise = (cfg.clockwise !== false);
 
       let d = Number(deg);

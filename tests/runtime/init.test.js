@@ -502,7 +502,7 @@ describe("runtime/init.js", function () {
     });
 
     runIifeScript("runtime/init.js", context);
-    await context.DyniPlugin.state.initPromise;
+    await expect(context.DyniPlugin.state.initPromise).rejects.toThrow("load failed");
     await flushPromises();
 
     expect(context.DyniPlugin.state.initStarted).toBe(false);

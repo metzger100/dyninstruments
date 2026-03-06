@@ -64,7 +64,7 @@
       const labelRaw = (typeof labelFormatter === "function")
         ? labelFormatter(tickV, state)
         : math.formatTickLabel(tickV);
-      const label = String(labelRaw == null ? "" : labelRaw);
+      const label = String(labelRaw);
       if (!label) {
         continue;
       }

@@ -291,7 +291,7 @@
     function formatAngle180(value, leadingZero) {
       const n = Number(value);
       if (!isFinite(n)) {
-        return "---";
+        return "";
       }
       let a = ((n + 180) % 360 + 360) % 360 - 180;
       if (a === 180) a = -180;
@@ -305,7 +305,7 @@
     function formatDirection360(value, leadingZero) {
       const n = Number(value);
       if (!isFinite(n)) {
-        return "---";
+        return "";
       }
       let a = n % 360;
       if (a < 0) a += 360;

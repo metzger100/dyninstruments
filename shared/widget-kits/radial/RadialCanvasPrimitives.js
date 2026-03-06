@@ -9,6 +9,7 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniRadialCanvasPrimitives = factory(); }
 }(this, function () {
   "use strict";
+  const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
     const angle = Helpers.getModule("RadialAngleMath").create(def, Helpers);
@@ -48,8 +49,9 @@
 
     function drawArcRing(ctx, cx, cy, r, startDeg, endDeg, opts) {
       opts = opts || {};
-      const a0 = toCanvas(startDeg, opts.angleCfg, opts.rotationDeg || 0);
-      const a1 = toCanvas(endDeg, opts.angleCfg, opts.rotationDeg || 0);
+      const rotationDeg = hasOwn.call(opts, "rotationDeg") ? Number(opts.rotationDeg) : 0;
+      const a0 = toCanvas(startDeg, opts.angleCfg, rotationDeg);
+      const a1 = toCanvas(endDeg, opts.angleCfg, rotationDeg);
 
       withCtx(ctx, function () {
         ctx.beginPath();
@@ -67,14 +69,14 @@
       opts = opts || {};
       const startDeg = Number(opts.startDeg);
       const endDeg = Number(opts.endDeg);
-      const thickness = Math.max(1, Math.floor(Number(opts.thickness ?? 10)));
+      const thickness = Math.max(1, Math.floor(Number(hasOwn.call(opts, "thickness") ? opts.thickness : 10)));
 
       if (!isFinite(startDeg) || !isFinite(endDeg) || !isFinite(rOuter)) {
         return;
       }
 
       const rInner = Math.max(1, rOuter - thickness);
-      const rot = Number(opts.rotationDeg || 0);
+      const rot = hasOwn.call(opts, "rotationDeg") ? Number(opts.rotationDeg) : 0;
       const cfg = opts.angleCfg;
 
       const a0 = toCanvas(startDeg, cfg, rot);
@@ -87,7 +89,7 @@
         ctx.closePath();
         ctx.fill();
 
-        const lw = Number(opts.lineWidth || 0);
+        const lw = hasOwn.call(opts, "lineWidth") ? Number(opts.lineWidth) : 0;
         if (lw > 0) {
           ctx.lineWidth = lw;
           ctx.stroke();
@@ -101,12 +103,12 @@
 
     function drawArrow(ctx, cx, cy, r, angleDeg, opts) {
       opts = opts || {};
-      const rot = Number(opts.rotationDeg || 0);
+      const rot = hasOwn.call(opts, "rotationDeg") ? Number(opts.rotationDeg) : 0;
       const cfg = opts.angleCfg;
 
-      const tail = Math.max(0, Number(opts.tail ?? 12));
-      const head = Math.max(2, Number(opts.head ?? 8));
-      const width = Math.max(1, Number(opts.width ?? 2));
+      const tail = Math.max(0, Number(hasOwn.call(opts, "tail") ? opts.tail : 12));
+      const head = Math.max(2, Number(hasOwn.call(opts, "head") ? opts.head : 8));
+      const width = Math.max(1, Number(hasOwn.call(opts, "width") ? opts.width : 2));
 
       const t = toCanvas(angleDeg, cfg, rot);
       const x2 = cx + Math.cos(t) * Math.max(0, r - 2);
@@ -141,10 +143,13 @@
 
     function drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, opts) {
       opts = opts || {};
-      const rot = Number(opts.rotationDeg || 0);
+      const rot = hasOwn.call(opts, "rotationDeg") ? Number(opts.rotationDeg) : 0;
       const cfg = opts.angleCfg;
 
-      let depth = Math.max(2, Math.floor(Number(opts.depth ?? Math.max(8, Math.floor(rOuter * 0.10)))));
+      let depth = Math.max(
+        2,
+        Math.floor(Number(hasOwn.call(opts, "depth") ? opts.depth : Math.max(8, Math.floor(rOuter * 0.10))))
+      );
       const lengthFactor = Number(opts.lengthFactor);
       if (isFinite(lengthFactor)) depth = Math.floor(depth * lengthFactor);
 
@@ -179,11 +184,11 @@
 
     function drawRimMarker(ctx, cx, cy, rOuter, angleDeg, opts) {
       opts = opts || {};
-      const rot = Number(opts.rotationDeg || 0);
+      const rot = hasOwn.call(opts, "rotationDeg") ? Number(opts.rotationDeg) : 0;
       const cfg = opts.angleCfg;
 
-      const len = Math.max(1, Number(opts.len ?? 12));
-      const width = Math.max(1, Number(opts.width ?? 3));
+      const len = Math.max(1, Number(hasOwn.call(opts, "len") ? opts.len : 12));
+      const width = Math.max(1, Number(hasOwn.call(opts, "width") ? opts.width : 3));
 
       const t = toCanvas(angleDeg, cfg, rot);
       const x1 = cx + Math.cos(t) * (rOuter - len);

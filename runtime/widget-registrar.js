@@ -76,7 +76,7 @@
       description: hasOwn.call(widgetDef.def, "description") ? widgetDef.def.description : widgetDef.def.name,
       caption: hasOwn.call(widgetDef.def, "caption") ? widgetDef.def.caption : "",
       unit: hasOwn.call(widgetDef.def, "unit") ? widgetDef.def.unit : "",
-      default: hasOwn.call(widgetDef.def, "default") ? widgetDef.def.default : "---",
+      default: widgetDef.def.default,
       storeKeys: storeKeys,
       className: mergedClassName,
 

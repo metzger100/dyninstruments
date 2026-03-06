@@ -16,12 +16,13 @@
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
 
     function formatDisplay(raw, props, unit) {
+      const p = props || {};
+      const defaultText = p.default;
       const n = Number(raw);
       if (!isFinite(n)) {
-        return { num: NaN, text: "---" };
+        return { num: NaN, text: defaultText };
       }
 
-      const p = props || {};
       const formatter = hasOwn.call(p, "formatter") ? p.formatter : "formatSpeed";
       const formatterParameters = hasOwn.call(p, "formatterParameters")
         ? p.formatterParameters
@@ -30,13 +31,13 @@
       const out = String(Helpers.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
-        default: "---"
+        default: defaultText
       }));
       const numberText = valueMath.extractNumberText(out);
       const numeric = Number(numberText);
 
       if (!isFinite(numeric)) {
-        return { num: NaN, text: "---" };
+        return { num: NaN, text: defaultText };
       }
       return { num: numeric, text: numberText };
     }

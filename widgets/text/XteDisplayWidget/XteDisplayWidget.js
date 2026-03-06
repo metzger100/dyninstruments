@@ -11,6 +11,7 @@
   "use strict";
 
   const FIXED_XTE_SCALE = 1;
+  const DEFAULT_XTE_THEME = { lineWidthFactor: 1 };
 
   function create(def, Helpers) {
     const toolkit = Helpers.getModule("RadialToolkit").create(def, Helpers);
@@ -26,26 +27,26 @@
       return typeof value === "number" && isFinite(value);
     }
 
-    function fallbackText(value, fallback) {
+    function textOrDefault(value, defaultText) {
       if (typeof value === "string") {
         return value;
       }
       if (value == null) {
-        return fallback;
+        return defaultText;
       }
       return String(value);
     }
 
-    function parseNumericText(text, fallbackNumber) {
-      const raw = fallbackText(text, "");
+    function parseNumericText(text, defaultNumber) {
+      const raw = textOrDefault(text, "");
       const extract = toolkit.value && toolkit.value.extractNumberText;
       const token = typeof extract === "function" ? extract(raw) : String(raw).match(/-?\d+(?:\.\d+)?/)?.[0];
       if (!token) {
-        return fallbackNumber;
+        return defaultNumber;
       }
       const normalized = String(token).replace(",", ".");
       const parsed = Number(normalized);
-      return Number.isFinite(parsed) ? parsed : fallbackNumber;
+      return Number.isFinite(parsed) ? parsed : defaultNumber;
     }
 
     function trimWaypointName(raw) {
@@ -81,9 +82,9 @@
         return;
       }
 
-      const caption = fallbackText(metric.caption, "");
-      const value = fallbackText(metric.value, "---");
-      const unit = fallbackText(metric.unit, "");
+      const caption = metric.caption;
+      const value = metric.value;
+      const unit = metric.unit;
       const capH = Math.max(9, Math.floor(rect.h * 0.34));
       const valueY = rect.y + capH;
       const valueH = Math.max(8, rect.h - capH);
@@ -129,23 +130,20 @@
       }
 
       ctx.clearRect(0, 0, W, H);
-      const theme = toolkit.theme.resolve(canvas) || {};
-      const themeColors = theme.colors || {};
-      const xteTheme = theme.xte || {};
+      const theme = toolkit.theme.resolve(canvas);
+      const xteTheme = theme.xte || DEFAULT_XTE_THEME;
       const textColor = Helpers.resolveTextColor(canvas);
       const family = Helpers.resolveFontFamily(canvas);
-      const valueWeight = theme.font && finiteNumber(theme.font.weight) ? theme.font.weight : 700;
-      const labelWeight = theme.font && finiteNumber(theme.font.labelWeight) ? theme.font.labelWeight : 700;
-      const lineWidthFactor = finiteNumber(xteTheme.lineWidthFactor) && xteTheme.lineWidthFactor > 0
-        ? xteTheme.lineWidthFactor
-        : 1;
+      const valueWeight = theme.font.weight;
+      const labelWeight = theme.font.labelWeight;
+      const lineWidthFactor = xteTheme.lineWidthFactor > 0 ? xteTheme.lineWidthFactor : 1;
 
       const colors = {
-        pointer: themeColors.pointer || textColor,
-        laylineStb: themeColors.laylineStb || textColor,
-        laylinePort: themeColors.laylinePort || textColor,
-        warning: themeColors.warning || textColor,
-        alarm: themeColors.alarm || textColor,
+        pointer: theme.colors.pointer,
+        laylineStb: theme.colors.laylineStb,
+        laylinePort: theme.colors.laylinePort,
+        warning: theme.colors.warning,
+        alarm: theme.colors.alarm,
         roadLine: textColor,
         stripeLine: textColor
       };
@@ -162,12 +160,12 @@
         finiteNumber(p.btw);
 
       if (!hasRequiredData) {
-        toolkit.text.drawDisconnectOverlay(ctx, W, H, family, textColor, "NO DATA", labelWeight);
+        toolkit.text.drawDisconnectOverlay(ctx, W, H, family, textColor, null, labelWeight);
         return;
       }
 
-      const normalThreshold = finiteNumber(p.xteRatioThresholdNormal) ? p.xteRatioThresholdNormal : 0.85;
-      const flatThreshold = finiteNumber(p.xteRatioThresholdFlat) ? p.xteRatioThresholdFlat : 2.3;
+      const normalThreshold = p.xteRatioThresholdNormal;
+      const flatThreshold = p.xteRatioThresholdFlat;
       const mode = primitives.computeMode(W, H, normalThreshold, flatThreshold, toolkit.value.computeMode);
       const pad = toolkit.value.computePad(W, H);
       const gap = toolkit.value.computeGap(W, H);
@@ -212,13 +210,13 @@
       const xteDistance = Helpers.applyFormatter(Math.abs(p.xte), {
         formatter: "formatDistance",
         formatterParameters: [p.xteUnit],
-        default: "---"
+        default: p.default
       });
 
       const dtwDistance = Helpers.applyFormatter(p.dtw, {
         formatter: "formatDistance",
         formatterParameters: [p.dtwUnit],
-        default: "---"
+        default: p.default
       });
 
       const xteDisplayAbs = parseNumericText(xteDistance, Math.abs(p.xte));
@@ -232,13 +230,13 @@
       const trackValue = Helpers.applyFormatter(p.cog, {
         formatter: "formatDirection360",
         formatterParameters: headingParams,
-        default: "---"
+        default: p.default
       });
 
       const bearingValue = Helpers.applyFormatter(p.btw, {
         formatter: "formatDirection360",
         formatterParameters: headingParams,
-        default: "---"
+        default: p.default
       });
 
       const metrics = {

@@ -10,6 +10,7 @@
   const runtime = ns.runtime;
   const hasOwn = Object.prototype.hasOwnProperty;
   const TEXT_COLOR_VARS = ["--dyni-fg", "--instrument-fg", "--mainfg"];
+  // dyni-lint-disable-next-line css-js-default-duplication -- Typography defaults are owned at the helper/CSS boundary and documented in shared/helpers.md.
   const DEFAULT_FONT_STACK = '"Inter","SF Pro Text",-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
   const layoutByCanvas = new WeakMap();
   const typographyByCanvas = new WeakMap();
@@ -33,12 +34,14 @@
         return root.avnav.api.formatter[props.formatter].apply(root.avnav.api.formatter, [raw].concat(fp));
       }
     }
+    // dyni-lint-disable-next-line catch-fallback-without-suppression -- Formatter dispatch is an external AvNav/custom boundary; documented fallback behavior must remain centralized here.
     catch (e) { /* intentional: formatter failures fall back to default/raw formatting */ }
 
     if (raw == null || Number.isNaN(raw)) {
       if (props && hasOwn.call(props, "default")) {
         return props.default;
       }
+      // dyni-lint-disable-next-line hardcoded-runtime-default -- Helpers.applyFormatter is the documented runtime owner of the generic missing-value placeholder.
       return "---";
     }
     return String(raw);
@@ -114,9 +117,11 @@
       textColor = val;
       break;
     }
-    if (!textColor) textColor = st.color || "#000";
+    if (!textColor) textColor = st.color || "#000"; /* dyni-lint-disable-line hardcoded-runtime-default -- Typography resolution owns the browser-level foreground fallback when dyni CSS vars are absent. */ /* dyni-lint-disable-line css-js-default-duplication -- Typography resolution is the CSS boundary for foreground color fallback; see documentation/shared/helpers.md. */
 
+    // dyni-lint-disable-next-line css-js-default-duplication -- Typography resolution is the CSS boundary for the dyni font variable lookup.
     const fontVar = st.getPropertyValue("--dyni-font");
+    // dyni-lint-disable-next-line css-js-default-duplication -- Typography resolution owns the documented default font stack when the CSS token is unset.
     const fontFamily = fontVar && fontVar.trim() ? fontVar.trim() : DEFAULT_FONT_STACK;
 
     const resolved = {

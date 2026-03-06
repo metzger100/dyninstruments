@@ -25,10 +25,10 @@
       return { left: left, right: right };
     }
 
-    function resolveSpeedText(rawSpeed, props, speedUnit, fallbackText) {
+    function resolveSpeedText(rawSpeed, props, speedUnit, defaultText) {
       const n = Number(rawSpeed);
       if (!isFinite(n)) {
-        return fallbackText;
+        return defaultText;
       }
       const p = props || {};
       const formatter = hasOwn.call(p, "formatter") ? p.formatter : "formatSpeed";
@@ -38,36 +38,36 @@
       const out = String(Helpers.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
-        default: fallbackText
+        default: defaultText
       }));
       const trimmed = out.trim();
-      return trimmed || fallbackText;
+      return trimmed || defaultText;
     }
 
     function windDisplay(rawAngle, props) {
       const p = props || {};
-      const fallback = hasOwn.call(p, "default") ? p.default : "---";
+      const defaultText = p.default;
       const angle = Number(rawAngle);
       const angleText = isFinite(angle)
         ? valueMath.formatAngle180(angle, !!p.leadingZero)
-        : fallback;
+        : defaultText;
       const angleNum = Number(angleText);
-      const angleUnit = String((p.angleUnit == null) ? "°" : p.angleUnit).trim();
-      const speedUnit = String((p.speedUnit == null) ? "kn" : p.speedUnit).trim();
-      const secScale = valueMath.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
+      const angleUnit = String(p.angleUnit).trim();
+      const speedUnit = String(p.speedUnit).trim();
+      const secScale = valueMath.clamp(p.captionUnitScale, 0.3, 3.0);
 
       return {
         num: isFinite(angleNum) ? angleNum : NaN,
         text: angleText,
         secScale: secScale,
         left: {
-          caption: String((p.angleCaption == null) ? "" : p.angleCaption).trim(),
+          caption: String(p.angleCaption).trim(),
           value: angleText,
           unit: angleUnit
         },
         right: {
-          caption: String((p.speedCaption == null) ? "" : p.speedCaption).trim(),
-          value: resolveSpeedText(p.speed, p, speedUnit, fallback),
+          caption: String(p.speedCaption).trim(),
+          value: resolveSpeedText(p.speed, p, speedUnit, defaultText),
           unit: speedUnit
         }
       };
@@ -142,13 +142,13 @@
       buildSectors: buildSectors,
       drawMode: {
         flat: function (state, props, display, api) {
-          const parsed = (display && display.parsed) || {};
+          const parsed = display.parsed;
           drawDualRows(
             state,
             api.text,
             api.textLayout,
-            parsed.left || { caption: "", value: "---", unit: "" },
-            parsed.right || { caption: "", value: "---", unit: "" },
+            parsed.left,
+            parsed.right,
             display.rowBoxes && display.rowBoxes.captionBox,
             display.rowBoxes && display.rowBoxes.valueBox,
             display.secScale,
@@ -157,25 +157,25 @@
           );
         },
         normal: function (state, props, display, api) {
-          const parsed = (display && display.parsed) || {};
+          const parsed = display.parsed;
           drawDualInline(
             state,
             api.text,
             api.textLayout,
-            parsed.left || { caption: "", value: "---", unit: "" },
-            parsed.right || { caption: "", value: "---", unit: "" },
+            parsed.left,
+            parsed.right,
             state.layout && state.layout.inlineBox,
             display.secScale
           );
         },
         high: function (state, props, display, api) {
-          const parsed = (display && display.parsed) || {};
+          const parsed = display.parsed;
           drawDualRows(
             state,
             api.text,
             api.textLayout,
-            parsed.left || { caption: "", value: "---", unit: "" },
-            parsed.right || { caption: "", value: "---", unit: "" },
+            parsed.left,
+            parsed.right,
             display.rowBoxes && display.rowBoxes.captionBox,
             display.rowBoxes && display.rowBoxes.valueBox,
             display.secScale,

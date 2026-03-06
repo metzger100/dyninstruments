@@ -9,15 +9,24 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniDepthLinearWidget = factory(); }
 }(this, function () {
   "use strict";
+  const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
     const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
+    function resolveDefaultText(props) {
+      if (props && hasOwn.call(props, "default")) {
+        return props.default;
+      }
+      // dyni-lint-disable-next-line hardcoded-runtime-default -- Standalone formatter helpers still need the shared missing-value placeholder when no default prop is supplied.
+      return "---";
+    }
 
-    function formatDisplay(raw) {
+    function formatDisplay(raw, props) {
+      const defaultText = resolveDefaultText(props);
       const n = Number(raw);
       if (!isFinite(n)) {
-        return { num: NaN, text: "---" };
+        return { num: NaN, text: defaultText };
       }
       return { num: n, text: n.toFixed(1) };
     }

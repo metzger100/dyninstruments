@@ -12,6 +12,13 @@
   const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
+    const DEFAULT_ARC = { startDeg: 270, endDeg: 450 };
+    const DEFAULT_RATIO_DEFAULTS = { normal: 1.1, flat: 3.5 };
+    const DEFAULT_RANGE_DEFAULTS = { min: 0, max: 30 };
+    const DEFAULT_RANGE_PROPS = { min: "minValue", max: "maxValue" };
+    const DEFAULT_TICK_PROPS = { major: "tickMajor", minor: "tickMinor", showEndLabels: "showEndLabels" };
+    const DEFAULT_RATIO_PROPS = { normal: "ratioThresholdNormal", flat: "ratioThresholdFlat" };
+    const DEFAULT_TICK_PRESET = { major: 10, minor: 2 };
     const GU = Helpers.getModule("RadialToolkit").create(def, Helpers);
     const T = GU.text;
     const V = GU.value;
@@ -284,13 +291,30 @@
 
     function createRenderer(spec) {
       const cfg = spec || {};
-      const arc = cfg.arc || { startDeg: 270, endDeg: 450 };
-      const modeDefaults = cfg.ratioDefaults || { normal: 1.1, flat: 3.5 };
-      const rangeDefaults = cfg.rangeDefaults || { min: 0, max: 30 };
-      const rangeProps = cfg.rangeProps || { min: "minValue", max: "maxValue" };
-      const tickProps = cfg.tickProps || { major: "tickMajor", minor: "tickMinor", showEndLabels: "showEndLabels" };
-      const ratioProps = cfg.ratioProps || { normal: "ratioThresholdNormal", flat: "ratioThresholdFlat" };
-      const unitDefault = cfg.unitDefault || "";
+      const arc = hasOwn.call(cfg, "arc") ? cfg.arc : DEFAULT_ARC;
+      const modeDefaults = hasOwn.call(cfg, "ratioDefaults") ? cfg.ratioDefaults : DEFAULT_RATIO_DEFAULTS;
+      const rangeDefaults = hasOwn.call(cfg, "rangeDefaults") ? cfg.rangeDefaults : DEFAULT_RANGE_DEFAULTS;
+      const rangeProps = hasOwn.call(cfg, "rangeProps") ? cfg.rangeProps : DEFAULT_RANGE_PROPS;
+      const tickProps = hasOwn.call(cfg, "tickProps") ? cfg.tickProps : DEFAULT_TICK_PROPS;
+      const ratioProps = hasOwn.call(cfg, "ratioProps") ? cfg.ratioProps : DEFAULT_RATIO_PROPS;
+      const unitDefault = hasOwn.call(cfg, "unitDefault") ? cfg.unitDefault : "";
+      const formatDisplay = typeof cfg.formatDisplay === "function"
+        ? function (rawValue, props, unitText) {
+          return cfg.formatDisplay(rawValue, props, unitText, Helpers);
+        }
+        : function (rawValue) {
+          return { num: Number(rawValue), text: String(rawValue) };
+        };
+      const tickSteps = typeof cfg.tickSteps === "function"
+        ? cfg.tickSteps
+        : function () {
+          return DEFAULT_TICK_PRESET;
+        };
+      const buildSectors = typeof cfg.buildSectors === "function"
+        ? cfg.buildSectors
+        : function () {
+          return [];
+        };
       const fitCache = { flat: null, high: null, normal: null };
 
       return function renderCanvas(canvas, props) {
@@ -316,29 +340,20 @@
         const ratio = modeState.ratio;
         const mode = modeState.mode;
 
-        const captionRaw = hasOwn.call(p, "caption") ? p.caption : "";
-        const caption = String(captionRaw == null ? "" : captionRaw).trim();
-        const unitRaw = hasOwn.call(p, "unit") ? p.unit : unitDefault;
-        const unit = String(unitRaw == null ? unitDefault : unitRaw).trim();
+        const caption = String(p.caption).trim();
+        const unit = String(hasOwn.call(p, "unit") ? p.unit : unitDefault).trim();
         const raw = (typeof p.value !== "undefined") ? p.value : p[cfg.rawValueKey];
 
-        const display = (typeof cfg.formatDisplay === "function")
-          ? (cfg.formatDisplay(raw, p, unit, Helpers) || {})
-          : { num: Number(raw), text: String(raw) };
-
-        const valueText = (display.text && String(display.text).trim())
-          ? String(display.text).trim()
-          : (hasOwn.call(p, "default") ? p.default : "---");
-
-        const valueNum = V.isFiniteNumber(display.num) ? display.num : NaN;
+        const display = formatDisplay(raw, p, unit);
+        const trimmedValueText = display.text.trim();
+        const valueText = trimmedValueText || p.default;
+        const valueNum = display.num;
         const range = V.normalizeRange(p[rangeProps.min], p[rangeProps.max], rangeDefaults.min, rangeDefaults.max);
-        const tickPreset = (typeof cfg.tickSteps === "function")
-          ? (cfg.tickSteps(range.range) || { major: 10, minor: 2 })
-          : { major: 10, minor: 2 };
+        const tickPreset = tickSteps(range.range);
 
         const tickMajor = V.isFiniteNumber(p[tickProps.major]) ? p[tickProps.major] : tickPreset.major;
         const tickMinor = V.isFiniteNumber(p[tickProps.minor]) ? p[tickProps.minor] : tickPreset.minor;
-        const secScale = V.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
+        const secScale = V.clamp(p.captionUnitScale, 0.3, 3.0);
         const fitKeyBase = {
           W: W,
           H: H,
@@ -360,9 +375,7 @@
           ? V.valueToAngle(vClamped, range.min, range.max, arc, true)
           : NaN;
 
-        const sectorList = (typeof cfg.buildSectors === "function")
-          ? (cfg.buildSectors(p, range.min, range.max, arc, V, theme) || [])
-          : [];
+        const sectorList = buildSectors(p, range.min, range.max, arc, V, theme);
 
         const ticks = V.buildValueTickAngles(range.min, range.max, tickMajor, tickMinor, arc);
         const showEndLabels = !!p[tickProps.showEndLabels];

@@ -290,6 +290,7 @@
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       setFont(ctx, px, labelWeight, family);
+      // dyni-lint-disable-next-line hardcoded-runtime-default -- Disconnect overlay owns the documented default label when callers do not supply one.
       ctx.fillText(label || "NO DATA", Math.floor(W / 2), Math.floor(H / 2));
       ctx.restore();
     }

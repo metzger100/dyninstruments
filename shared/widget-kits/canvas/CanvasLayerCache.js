@@ -33,11 +33,7 @@
       if (typeof key === "string") {
         return key;
       }
-      try {
-        return JSON.stringify(key);
-      } catch (e) {
-        return String(key);
-      }
+      return JSON.stringify(key);
     }
 
     function createLayer(canvas, width, height) {
@@ -54,7 +50,7 @@
       return { canvas: layerCanvas, ctx: layerCtx };
     }
 
-    function resolveDrawSize(canvas, fallbackW, fallbackH) {
+    function resolveDrawSize(canvas, defaultWidth, defaultHeight) {
       let W = Number(canvas && canvas.clientWidth);
       let H = Number(canvas && canvas.clientHeight);
       if ((!isFinite(W) || W <= 0 || !isFinite(H) || H <= 0) && canvas && typeof canvas.getBoundingClientRect === "function") {
@@ -63,10 +59,10 @@
         H = Number(rect && rect.height);
       }
       if (!isFinite(W) || W <= 0) {
-        W = fallbackW;
+        W = defaultWidth;
       }
       if (!isFinite(H) || H <= 0) {
-        H = fallbackH;
+        H = defaultHeight;
       }
       return { W: Math.max(1, Math.round(W)), H: Math.max(1, Math.round(H)) };
     }

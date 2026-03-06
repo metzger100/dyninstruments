@@ -15,12 +15,13 @@
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
 
     function formatVoltageString(raw, props) {
+      const p = props || {};
+      const defaultText = p.default;
       const n = Number(raw);
       if (!isFinite(n)) {
-        return "---";
+        return defaultText;
       }
 
-      const p = props || {};
       const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatDecimal";
       const formatterParameters = (typeof p.formatterParameters !== "undefined")
         ? p.formatterParameters
@@ -28,20 +29,21 @@
       const formatted = String(Helpers.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
-        default: "---"
+        default: defaultText
       }));
 
       return formatted;
     }
 
     function displayVoltageFromRaw(raw, props) {
+      const defaultText = props.default;
       const formatted = formatVoltageString(raw, props);
       const numberText = valueMath.extractNumberText(formatted);
       const num = numberText ? Number(numberText) : NaN;
       if (isFinite(num)) {
         return { num: num, text: numberText };
       }
-      return { num: NaN, text: "---" };
+      return { num: NaN, text: defaultText };
     }
 
     const renderCanvas = renderer.createRenderer({

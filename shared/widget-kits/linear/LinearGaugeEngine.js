@@ -12,6 +12,13 @@
   const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
+    const DEFAULT_AXIS_MODE = "range";
+    const DEFAULT_RATIO_PROPS = { normal: "ratioThresholdNormal", flat: "ratioThresholdFlat" };
+    const DEFAULT_RATIO_DEFAULTS = { normal: 1.1, flat: 3.5 };
+    const DEFAULT_RANGE_DEFAULTS = { min: 0, max: 30 };
+    const DEFAULT_RANGE_PROPS = { min: "minValue", max: "maxValue" };
+    const DEFAULT_TICK_PROPS = { major: "tickMajor", minor: "tickMinor", showEndLabels: "showEndLabels" };
+    const DEFAULT_TICK_PRESET = { major: 10, minor: 2 };
     const GU = Helpers.getModule("RadialToolkit").create(def, Helpers);
     const layerCacheApi = Helpers.getModule("CanvasLayerCache").create(def, Helpers);
     const primitives = Helpers.getModule("LinearCanvasPrimitives").create(def, Helpers);
@@ -38,37 +45,6 @@
         ratio: ratio,
         mode: value.computeMode(ratio, tNormal, tFlat)
       };
-    }
-    function normalizeAxis(candidate, fallbackAxis) {
-      const source = candidate || fallbackAxis;
-      const min = Number(source && source.min);
-      const max = Number(source && source.max);
-      if (!isFinite(min) || !isFinite(max) || max <= min) {
-        return { min: Number(fallbackAxis.min), max: Number(fallbackAxis.max) };
-      }
-      return { min: min, max: max };
-    }
-
-    function normalizeTicks(candidate, fallbackTicks) {
-      function normalizeArray(values) {
-        if (!Array.isArray(values)) {
-          return [];
-        }
-        const out = [];
-        for (let i = 0; i < values.length; i++) {
-          const n = Number(values[i]);
-          if (isFinite(n)) {
-            out.push(n);
-          }
-        }
-        return out;
-      }
-      const major = normalizeArray(candidate && candidate.major);
-      const minor = normalizeArray(candidate && candidate.minor);
-      if (!major.length && !minor.length) {
-        return { major: normalizeArray(fallbackTicks && fallbackTicks.major), minor: normalizeArray(fallbackTicks && fallbackTicks.minor) };
-      }
-      return { major: major, minor: minor };
     }
 
     function drawStaticLayer(layerCtx, state, ticks, showEndLabels, sectors, labelFormatter) {
@@ -126,13 +102,32 @@
 
     function createRenderer(spec) {
       const cfg = spec || {};
-      const axisMode = cfg.axisMode || "range";
-      const ratioProps = cfg.ratioProps || { normal: "ratioThresholdNormal", flat: "ratioThresholdFlat" };
-      const ratioDefaults = cfg.ratioDefaults || { normal: 1.1, flat: 3.5 };
-      const rangeDefaults = cfg.rangeDefaults || { min: 0, max: 30 };
-      const rangeProps = cfg.rangeProps || { min: "minValue", max: "maxValue" };
-      const tickProps = cfg.tickProps || { major: "tickMajor", minor: "tickMinor", showEndLabels: "showEndLabels" };
-      const unitDefault = cfg.unitDefault || "";
+      const axisMode = hasOwn.call(cfg, "axisMode") ? cfg.axisMode : DEFAULT_AXIS_MODE;
+      const ratioProps = hasOwn.call(cfg, "ratioProps") ? cfg.ratioProps : DEFAULT_RATIO_PROPS;
+      const ratioDefaults = hasOwn.call(cfg, "ratioDefaults") ? cfg.ratioDefaults : DEFAULT_RATIO_DEFAULTS;
+      const rangeDefaults = hasOwn.call(cfg, "rangeDefaults") ? cfg.rangeDefaults : DEFAULT_RANGE_DEFAULTS;
+      const rangeProps = hasOwn.call(cfg, "rangeProps") ? cfg.rangeProps : DEFAULT_RANGE_PROPS;
+      const tickProps = hasOwn.call(cfg, "tickProps") ? cfg.tickProps : DEFAULT_TICK_PROPS;
+      const unitDefault = hasOwn.call(cfg, "unitDefault") ? cfg.unitDefault : "";
+      const resolveAxisFn = typeof cfg.resolveAxis === "function" ? cfg.resolveAxis : null;
+      const formatDisplay = typeof cfg.formatDisplay === "function"
+        ? function (rawValue, props, unitText) {
+          return cfg.formatDisplay(rawValue, props, unitText, Helpers);
+        }
+        : function (rawValue) {
+          return { num: Number(rawValue), text: String(rawValue) };
+        };
+      const tickSteps = typeof cfg.tickSteps === "function"
+        ? cfg.tickSteps
+        : function () {
+          return DEFAULT_TICK_PRESET;
+        };
+      const buildTicksFn = typeof cfg.buildTicks === "function" ? cfg.buildTicks : null;
+      const buildSectorsFn = typeof cfg.buildSectors === "function"
+        ? cfg.buildSectors
+        : function () {
+          return [];
+        };
       const layerCache = layerCacheApi.createLayerCache({ layers: ["base"] });
 
       return function renderCanvas(canvas, props) {
@@ -160,53 +155,34 @@
           theme: theme
         };
         const defaultAxis = math.resolveAxisDomain(axisMode, range);
-        const axis = normalizeAxis(
-          (typeof cfg.resolveAxis === "function")
-            ? cfg.resolveAxis(p, range, defaultAxis, hookApiBase)
-            : defaultAxis,
-          defaultAxis
-        );
+        const axis = resolveAxisFn ? resolveAxisFn(p, range, defaultAxis, hookApiBase) : defaultAxis;
         const raw = (typeof p.value !== "undefined") ? p.value : p[cfg.rawValueKey];
-        const unitRaw = hasOwn.call(p, "unit") ? p.unit : unitDefault;
-        const unit = String(unitRaw == null ? unitDefault : unitRaw).trim();
-        const display = (typeof cfg.formatDisplay === "function")
-          ? (cfg.formatDisplay(raw, p, unit, Helpers) || {})
-          : { num: Number(raw), text: String(raw) };
-
-        const valueText = (display.text && String(display.text).trim())
-          ? String(display.text).trim()
-          : (hasOwn.call(p, "default") ? p.default : "---");
-        const valueNum = value.isFiniteNumber(display.num) ? display.num : NaN;
-        const captionRaw = hasOwn.call(p, "caption") ? p.caption : "";
-        const caption = String(captionRaw == null ? "" : captionRaw).trim();
-        const secScale = value.clamp(p.captionUnitScale ?? 0.8, 0.3, 3.0);
+        const unit = String(hasOwn.call(p, "unit") ? p.unit : unitDefault).trim();
+        const display = formatDisplay(raw, p, unit);
+        const trimmedValueText = display.text.trim();
+        const valueText = trimmedValueText || p.default;
+        const valueNum = display.num;
+        const caption = String(p.caption).trim();
+        const secScale = value.clamp(p.captionUnitScale, 0.3, 3.0);
         const rowBoxes = math.splitCaptionValueRows(layout.captionBox, layout.valueBox, secScale);
-        const tickPreset = (typeof cfg.tickSteps === "function")
-          ? (cfg.tickSteps(axis.max - axis.min) || { major: 10, minor: 2 })
-          : { major: 10, minor: 2 };
+        const tickPreset = tickSteps(axis.max - axis.min);
         const tickMajor = value.isFiniteNumber(p[tickProps.major]) ? p[tickProps.major] : tickPreset.major;
         const tickMinor = value.isFiniteNumber(p[tickProps.minor]) ? p[tickProps.minor] : tickPreset.minor;
         const showEndLabels = !!p[tickProps.showEndLabels];
         const defaultTicks = math.buildTicks(axis.min, axis.max, tickMajor, tickMinor);
-        const ticks = normalizeTicks(
-          (typeof cfg.buildTicks === "function")
-            ? cfg.buildTicks(axis, tickMajor, tickMinor, p, hookApiBase)
-            : defaultTicks,
-          defaultTicks
-        );
-        const sectors = (typeof cfg.buildSectors === "function")
-          ? (cfg.buildSectors(p, range.min, range.max, axis, value, theme) || [])
-          : [];
+        const ticks = buildTicksFn
+          ? buildTicksFn(axis, tickMajor, tickMinor, p, hookApiBase)
+          : defaultTicks;
+        const sectors = buildSectorsFn(p, range.min, range.max, axis, value, theme);
 
         const baseTrack = Math.max(6, Math.floor(layout.trackBox.h * theme.linear.track.widthFactor));
         const maxTrack = Math.max(8, Math.floor(theme.linear.ticks.majorLen * 1.6));
         const trackThickness = math.clamp(baseTrack, 6, maxTrack);
         const labelBoost = textLayout.resolveLabelBoost(modeState.mode);
         const labelFontPx = Math.max(10, Math.floor(layout.trackBox.h * theme.linear.labels.fontFactor * labelBoost));
-        const labelInsetFactor = Number(theme.linear.labels.insetFactor);
         const labelInsetPx = Math.max(
           2,
-          Math.floor(labelFontPx * (isFinite(labelInsetFactor) ? labelInsetFactor : 1.8) * 0.2)
+          Math.floor(labelFontPx * theme.linear.labels.insetFactor * 0.2)
         );
 
         ctx.clearRect(0, 0, W, H);
@@ -332,16 +308,18 @@
           if (isFinite(pointerX)) {
             const depthBase = Math.max(8, trackThickness);
             const opts = markerOpts || {};
-            const depth = value.isFiniteNumber(opts.depth)
-              ? Math.max(8, Math.floor(opts.depth))
+            const depthValue = Number(opts.depth);
+            const sideValue = Number(opts.side);
+            const depth = Number.isFinite(depthValue)
+              ? Math.max(8, Math.floor(depthValue))
               : Math.max(8, Math.floor(depthBase * theme.linear.pointer.lengthFactor));
-            const side = value.isFiniteNumber(opts.side)
-              ? Math.max(4, Math.floor(opts.side))
+            const side = Number.isFinite(sideValue)
+              ? Math.max(4, Math.floor(sideValue))
               : Math.max(4, Math.floor(depth * theme.linear.pointer.sideFactor));
             primitives.drawPointer(targetCtx || ctx, Math.round(pointerX), pointerTipY, {
               depth: depth,
               side: side,
-              fillStyle: opts.fillStyle || theme.colors.pointer
+              fillStyle: hasOwn.call(opts, "fillStyle") ? opts.fillStyle : theme.colors.pointer
             });
           }
         }
@@ -355,17 +333,19 @@
             return;
           }
           const opts = markerOpts || {};
-          const len = value.isFiniteNumber(opts.len)
-            ? Math.max(4, Number(opts.len))
+          const lenValue = Number(opts.len);
+          const widthValue = Number(opts.lineWidth);
+          const len = Number.isFinite(lenValue)
+            ? Math.max(4, lenValue)
             : Math.max(10, Math.floor(theme.linear.ticks.majorLen * 1.6));
-          const width = value.isFiniteNumber(opts.lineWidth)
-            ? Math.max(1, Number(opts.lineWidth))
+          const width = Number.isFinite(widthValue)
+            ? Math.max(1, widthValue)
             : Math.max(1, Math.floor(theme.linear.ticks.majorWidth));
           const y = layout.trackY + Math.floor(trackThickness / 2) + Math.max(2, Math.floor(len * 0.4));
           primitives.drawTick(targetCtx || ctx, Math.round(markerX), y, len, {
             lineWidth: width,
             lineCap: "round",
-            strokeStyle: opts.strokeStyle || theme.colors.pointer
+            strokeStyle: hasOwn.call(opts, "strokeStyle") ? opts.strokeStyle : theme.colors.pointer
           });
         }
         const drawApi = {

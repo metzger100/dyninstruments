@@ -9,6 +9,7 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniRadialFrameRenderer = factory(); }
 }(this, function () {
   "use strict";
+  const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
     const angle = Helpers.getModule("RadialAngleMath").create(def, Helpers);
@@ -26,16 +27,19 @@
     const buildTickAngles = tick.buildTickAngles;
     const withCtx = primitive.withCtx;
     const drawRing = primitive.drawRing;
+    function readOptionNumber(opts, key, defaultValue) {
+      return Number(hasOwn.call(opts, key) ? opts[key] : defaultValue);
+    }
 
     function drawTicks(ctx, cx, cy, rOuter, opts) {
       opts = opts || {};
       const ticksToDraw = buildTickAngles({
-        startDeg: opts.startDeg ?? 0,
-        endDeg: opts.endDeg ?? 360,
-        stepMajor: opts.stepMajor ?? 30,
-        stepMinor: opts.stepMinor ?? 10,
+        startDeg: readOptionNumber(opts, "startDeg", 0),
+        endDeg: readOptionNumber(opts, "endDeg", 360),
+        stepMajor: readOptionNumber(opts, "stepMajor", 30),
+        stepMinor: readOptionNumber(opts, "stepMinor", 10),
         includeEnd: !!opts.includeEnd,
-        majorMode: opts.majorMode || "absolute"
+        majorMode: hasOwn.call(opts, "majorMode") ? opts.majorMode : "absolute"
       });
       drawTicksFromAngles(ctx, cx, cy, rOuter, ticksToDraw, opts);
     }
@@ -44,14 +48,16 @@
       opts = opts || {};
       angles = angles || { majors: [], minors: [] };
 
-      const rot = Number(opts.rotationDeg || 0);
+      const rot = readOptionNumber(opts, "rotationDeg", 0);
       const cfg = opts.angleCfg;
 
-      const major = Object.assign({ len: 8, width: 2 }, opts.major || {});
-      const minor = Object.assign({ len: 5, width: 1 }, opts.minor || {});
+      const majorSource = hasOwn.call(opts, "major") ? opts.major : null;
+      const minorSource = hasOwn.call(opts, "minor") ? opts.minor : null;
+      const major = Object.assign({ len: 8, width: 2 }, majorSource || {});
+      const minor = Object.assign({ len: 5, width: 1 }, minorSource || {});
 
       withCtx(ctx, function () {
-        ctx.lineCap = opts.lineCap || "butt";
+        ctx.lineCap = hasOwn.call(opts, "lineCap") ? opts.lineCap : "butt";
 
         if (angles.minors && angles.minors.length) {
           ctx.beginPath();
@@ -92,24 +98,26 @@
 
     function drawLabels(ctx, cx, cy, rOuter, opts) {
       opts = opts || {};
-      const rot = Number(opts.rotationDeg || 0);
+      const rot = readOptionNumber(opts, "rotationDeg", 0);
       const cfg = opts.angleCfg;
 
-      const fontPx = Math.max(6, Math.floor(Number(opts.fontPx ?? 11)));
+      const fontPx = Math.max(6, Math.floor(readOptionNumber(opts, "fontPx", 11)));
       const weight = Math.floor(Number(opts.weight));
-      const family = opts.family || "sans-serif";
+      const family = hasOwn.call(opts, "family") ? opts.family : "sans-serif";
       const font = weight + " " + fontPx + "px " + family;
 
-      const radiusOffset = Number(opts.radiusOffset ?? opts.offset ?? 16);
+      const radiusOffset = hasOwn.call(opts, "radiusOffset")
+        ? Number(opts.radiusOffset)
+        : readOptionNumber(opts, "offset", 16);
       const rr = rOuter - radiusOffset;
 
       let angles = [];
       if (Array.isArray(opts.angles)) {
         angles = opts.angles.slice();
       } else {
-        const startDeg = Number(opts.startDeg ?? 0);
-        const endDeg = Number(opts.endDeg ?? 360);
-        const step = Math.abs(Number(opts.step ?? 30)) || 30;
+        const startDeg = readOptionNumber(opts, "startDeg", 0);
+        const endDeg = readOptionNumber(opts, "endDeg", 360);
+        const step = Math.abs(readOptionNumber(opts, "step", 30)) || 30;
         const includeEnd = !!opts.includeEnd;
         const sweepInfo = computeSweep(startDeg, endDeg);
         const s = sweepInfo.s;
@@ -126,7 +134,7 @@
         if (includeEnd) angles.push(e);
       }
 
-      const labelsMap = opts.labelsMap || opts.labels || null;
+      const labelsMap = hasOwn.call(opts, "labelsMap") ? opts.labelsMap : (opts.labels || null);
       const labelFormatter = (typeof opts.labelFormatter === "function")
         ? opts.labelFormatter
         : function (deg) {
@@ -137,7 +145,7 @@
         : function () {
           return true;
         };
-      const textRotation = opts.textRotation || "upright";
+      const textRotation = hasOwn.call(opts, "textRotation") ? opts.textRotation : "upright";
 
       withCtx(ctx, function () {
         ctx.font = font;
@@ -181,10 +189,11 @@
 
     function drawDialFrame(ctx, cx, cy, rOuter, opts) {
       opts = opts || {};
-      const rot = Number(opts.rotationDeg || 0);
+      const rot = readOptionNumber(opts, "rotationDeg", 0);
 
       if (opts.ring !== false) {
-        const ringOpts = Object.assign({}, opts.ring || {});
+        const ringSource = hasOwn.call(opts, "ring") ? opts.ring : null;
+        const ringOpts = Object.assign({}, ringSource || {});
         drawRing(ctx, cx, cy, rOuter, ringOpts);
       }
 

@@ -67,7 +67,7 @@
 
     function drawThreeRowBlock(args) {
       const cfg = args || {};
-      const fit = cfg.fit || {};
+      const fit = cfg.fit;
       const hTop = Math.max(1, Math.floor(Number(fit.hTop) || 1));
       const hMid = Math.max(1, Math.floor(Number(fit.hMid) || 1));
       const hBot = Math.max(1, Math.floor(Number(fit.hBot) || 1));
@@ -142,7 +142,7 @@
 
     function drawValueUnitCaptionRows(args) {
       const cfg = args || {};
-      const fit = cfg.fit || {};
+      const fit = cfg.fit;
       primitive.drawInlineTriplet({
         ctx: cfg.ctx,
         fit: {
@@ -260,7 +260,7 @@
 
     function drawTwoRowsWithHeader(args) {
       const cfg = args || {};
-      const fit = cfg.fit || {};
+      const fit = cfg.fit;
       const W = Math.max(1, Number(cfg.W) || 0);
       const ctx = cfg.ctx;
       if (fit.hasHeader) {

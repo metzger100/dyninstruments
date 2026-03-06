@@ -9,6 +9,7 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniRadialTickMath = factory(); }
 }(this, function () {
   "use strict";
+  const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
     const angleMath = (Helpers && typeof Helpers.getModule === "function")
@@ -42,12 +43,12 @@
 
     function buildTickAngles(opts) {
       opts = opts || {};
-      const startDeg = Number(opts.startDeg ?? 0);
-      const endDeg = Number(opts.endDeg ?? 360);
-      const stepMajor = Math.abs(Number(opts.stepMajor ?? 30)) || 30;
-      const stepMinor = Math.abs(Number(opts.stepMinor ?? 10)) || 10;
+      const startDeg = Number(hasOwn.call(opts, "startDeg") ? opts.startDeg : 0);
+      const endDeg = Number(hasOwn.call(opts, "endDeg") ? opts.endDeg : 360);
+      const stepMajor = Math.abs(Number(hasOwn.call(opts, "stepMajor") ? opts.stepMajor : 30)) || 30;
+      const stepMinor = Math.abs(Number(hasOwn.call(opts, "stepMinor") ? opts.stepMinor : 10)) || 10;
       const includeEnd = !!opts.includeEnd;
-      const majorMode = opts.majorMode || "absolute";
+      const majorMode = hasOwn.call(opts, "majorMode") ? opts.majorMode : "absolute";
 
       const sweepInfo = computeSweep(startDeg, endDeg);
       const s = sweepInfo.s;
