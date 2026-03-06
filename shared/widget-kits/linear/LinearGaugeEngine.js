@@ -68,7 +68,7 @@
         if (!isFinite(x0) || !isFinite(x1) || Math.abs(x1 - x0) <= 1) {
           continue;
         }
-        primitives.drawBand(layerCtx, x0, x1, state.layout.trackY, state.trackThickness, {
+        primitives.drawBand(layerCtx, x0, x1, state.sectorBandY, state.trackThickness, {
           fillStyle: sector.color
         });
       }
@@ -178,6 +178,8 @@
         const baseTrack = Math.max(6, Math.floor(layout.trackBox.h * theme.linear.track.widthFactor));
         const maxTrack = Math.max(8, Math.floor(theme.linear.ticks.majorLen * 1.6));
         const trackThickness = math.clamp(baseTrack, 6, maxTrack);
+        const sectorClearance = Math.max(1, Math.ceil(theme.linear.track.lineWidth / 2));
+        const sectorBandY = layout.trackY - (trackThickness / 2) - sectorClearance;
         const labelBoost = textLayout.resolveLabelBoost(modeState.mode);
         const labelFontPx = Math.max(10, Math.floor(layout.trackBox.h * theme.linear.labels.fontFactor * labelBoost));
         const labelInsetPx = Math.max(
@@ -200,6 +202,7 @@
           labelWeight: theme.font.labelWeight,
           axis: axis,
           trackThickness: trackThickness,
+          sectorBandY: sectorBandY,
           labelFontPx: labelFontPx,
           labelInsetPx: labelInsetPx,
           mapValueToX: function (valueNum, doClamp) {

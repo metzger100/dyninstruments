@@ -33,6 +33,7 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 ## Style and Proportions
 
 - Track stays centered in a dedicated scale box.
+- Sector bands render above the scale line so the track stroke remains visible.
 - Tick lengths/widths use `theme.linear.ticks.*`.
 - Pointer triangle uses `theme.linear.pointer.*` and `theme.colors.pointer`.
 - Tick labels use `theme.linear.labels.insetFactor` and `theme.linear.labels.fontFactor`.
