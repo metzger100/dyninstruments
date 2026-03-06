@@ -12,7 +12,7 @@ Graphic navigation widget with a 2.5D highway view for cross-track guidance and 
 - `BRG` (bearing to waypoint)
 - waypoint name (optional, hidden first when space is constrained)
 
-Renderer is fail-closed: if required data is missing or disconnected, it draws `NO DATA`.
+Renderer keeps the highway frame visible when data is missing. Missing/disconnected metrics render with the configured placeholder (default `---`), and the moving XTE indicator is suppressed until the full guidance set is valid again.
 
 ## Module Registration
 
@@ -34,7 +34,7 @@ XteDisplayWidget: {
 | `dtw` | number | — | Distance to waypoint |
 | `btw` | number | — | Bearing to waypoint |
 | `wpName` | string | `""` | Waypoint name |
-| `disconnect` | boolean | `false` | Draw fail-closed overlay |
+| `disconnect` | boolean | `false` | Suppress live guidance and force placeholder metric values |
 | `xteCaption` | string | `"XTE"` | Caption for XTE field |
 | `trackCaption` | string | `"COG"` | Caption for track field |
 | `dtwCaption` | string | `"DST"` | Caption for distance field |
@@ -49,9 +49,11 @@ XteDisplayWidget: {
 | `xteRatioThresholdNormal` | number | `0.85` | Ratio below -> `high` |
 | `xteRatioThresholdFlat` | number | `2.3` | Ratio above -> `flat` |
 
-## Required Data Contract
+## Guidance Data Contract
 
-Widget renders the highway only if all are valid:
+Widget always renders the static highway frame.
+
+The moving XTE indicator renders only if all are valid:
 
 - finite `xte`
 - finite `cog`
@@ -59,7 +61,7 @@ Widget renders the highway only if all are valid:
 - finite `btw`
 - `disconnect !== true`
 
-Otherwise `drawDisconnectOverlay(..., "NO DATA", ...)` is used.
+Otherwise the widget shows placeholder text for missing/disconnected values and skips the dynamic highway indicator.
 
 ## Theme Token Usage
 

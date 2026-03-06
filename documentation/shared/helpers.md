@@ -53,19 +53,18 @@ Reads `--dyni-font` and falls back to default stack (`Inter`, system fonts, emoj
 Applies formatter to raw value:
 
 1. Reads `props.formatterParameters`
-2. Normalizes parameters:
+2. If `raw == null` or `Number.isNaN(raw)`:
+   - return `props.default` when `default` key is explicitly present (including `""`, `0`, `false`)
+   - otherwise return `"---"`
+3. Normalizes parameters:
    - array -> used as-is
    - string -> split by comma
    - otherwise -> `[]`
-3. Dispatch order:
+4. Dispatch order:
    - `props.formatter` function -> call directly
    - `props.formatter` string -> resolve and call `avnav.api.formatter[name]` when present
-4. Formatter exceptions are intentionally caught; processing continues with fallback
-5. Fallback behavior:
-   - if `raw == null` or `Number.isNaN(raw)`:
-     - return `props.default` when `default` key is explicitly present (including `""`, `0`, `false`)
-     - otherwise return `"---"`
-   - otherwise -> `String(raw)`
+5. Formatter exceptions are intentionally caught; processing continues with raw-string fallback
+6. If no formatter is available, or formatter dispatch fails, return `String(raw)`
 
 ### getModule
 

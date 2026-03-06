@@ -77,17 +77,18 @@ Do not pre-coerce these inputs with `Number(...)` in mapper/widget boundaries, o
 Used by text and graphic widgets (`runtime/helpers.js`):
 
 1. Reads `props.formatterParameters`
-2. Normalizes parameters:
+2. If `raw == null` or `Number.isNaN(raw)`:
+   - return `props.default` when explicitly provided
+   - otherwise return `"---"`
+3. Normalizes parameters:
    - array -> used as-is
    - string -> split by comma
    - otherwise -> `[]`
-3. Dispatch order:
+4. Dispatch order:
    - `props.formatter` is a function -> direct call
    - `props.formatter` is a string -> `avnav.api.formatter[name]` call when present
-4. Formatter errors are caught intentionally and continue with fallback
-5. Fallback:
-   - `raw == null` or `Number.isNaN(raw)` -> `props.default` when explicitly provided, otherwise `"---"`
-   - otherwise -> `String(raw)`
+5. Formatter errors are caught intentionally and continue with raw-string fallback
+6. If no formatter is available, or formatter dispatch fails, return `String(raw)`
 
 ### Formatter Names Currently Used by dyninstruments
 
