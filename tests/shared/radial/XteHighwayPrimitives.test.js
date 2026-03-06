@@ -96,15 +96,36 @@ describe("XteHighwayPrimitives", function () {
     expect(largeArc.args[2]).toBeGreaterThan(smallArc.args[2]);
   });
 
+  it("draws the static highway as stroke-only geometry with crisp line caps", function () {
+    const draw = create();
+    const ctx = createMockContext2D();
+
+    draw.drawStaticHighway(ctx, {
+      cx: 150,
+      horizonY: 40,
+      baseY: 170,
+      nearHalf: 120,
+      farHalf: 30
+    }, {
+      roadLine: "#fff",
+      stripeLine: "#ccc"
+    }, "normal", { lineWidthFactor: 1 });
+
+    const fillCalls = ctx.calls.filter(function (call) { return call.name === "fill"; });
+    const strokeCalls = ctx.calls.filter(function (call) { return call.name === "stroke"; });
+
+    expect(fillCalls).toHaveLength(0);
+    expect(strokeCalls.length).toBeGreaterThan(5);
+    expect(ctx.lineCap).toBe("butt");
+    expect(ctx.lineJoin).toBe("miter");
+  });
+
   it("scales static and dynamic line widths with configured lineWidthFactor", function () {
     const draw = create();
     const geom = { cx: 150, horizonY: 40, baseY: 170, nearHalf: 120, farHalf: 30 };
     const colors = {
       pointer: "#f00",
       alarm: "#f00",
-      warning: "#f90",
-      laylinePort: "#f66",
-      laylineStb: "#6f6",
       roadLine: "#fff",
       stripeLine: "#ccc"
     };

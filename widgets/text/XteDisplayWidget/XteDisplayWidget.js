@@ -140,9 +140,6 @@
 
       const colors = {
         pointer: theme.colors.pointer,
-        laylineStb: theme.colors.laylineStb,
-        laylinePort: theme.colors.laylinePort,
-        warning: theme.colors.warning,
         alarm: theme.colors.alarm,
         roadLine: textColor,
         stripeLine: textColor
@@ -176,18 +173,8 @@
 
       const staticKey = {
         mode: mode,
-        W: W,
-        H: H,
-        highway: layout.highway,
         geom: geom,
-        family: family,
-        labelWeight: labelWeight,
         lineWidthFactor: xteStyle.lineWidthFactor,
-        pointer: colors.pointer,
-        laylineStb: colors.laylineStb,
-        laylinePort: colors.laylinePort,
-        warning: colors.warning,
-        alarm: colors.alarm,
         roadLine: colors.roadLine,
         stripeLine: colors.stripeLine
       };

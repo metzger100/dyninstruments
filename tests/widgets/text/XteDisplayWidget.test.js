@@ -206,13 +206,12 @@ describe("XteDisplayWidget", function () {
     harness.spec.renderCanvas(canvas, makeProps());
 
     expect(harness.calls.staticDraws[0].colors.pointer).toBe(harness.theme.colors.pointer);
-    expect(harness.calls.staticDraws[0].colors.warning).toBe(harness.theme.colors.warning);
     expect(harness.calls.staticDraws[0].colors.alarm).toBe(harness.theme.colors.alarm);
     expect(harness.calls.staticDraws[0].colors.roadLine).toBe("#ffffff");
     expect(harness.calls.staticDraws[0].colors.stripeLine).toBe("#ffffff");
     expect(harness.calls.staticDraws[0].style.lineWidthFactor).toBe(1);
-    expect(harness.calls.dynamicDraws[0].colors.laylineStb).toBe(harness.theme.colors.laylineStb);
-    expect(harness.calls.dynamicDraws[0].colors.laylinePort).toBe(harness.theme.colors.laylinePort);
+    expect(harness.calls.dynamicDraws[0].colors.pointer).toBe(harness.theme.colors.pointer);
+    expect(harness.calls.dynamicDraws[0].colors.alarm).toBe(harness.theme.colors.alarm);
     expect(harness.calls.dynamicDraws[0].style.lineWidthFactor).toBe(1);
   });
 
@@ -383,6 +382,24 @@ describe("XteDisplayWidget", function () {
     harness.theme.xte.lineWidthFactor = 1.8;
     harness.spec.renderCanvas(canvas, makeProps());
     expect(harness.calls.staticDraws).toHaveLength(2);
+  });
+
+  it("keeps the static cache when only dynamic pointer/alarm colors change", function () {
+    const harness = createHarness();
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeProps());
+    expect(harness.calls.staticDraws).toHaveLength(1);
+    expect(harness.calls.dynamicDraws).toHaveLength(1);
+
+    harness.theme.colors.pointer = "#00ccee";
+    harness.theme.colors.alarm = "#ff1100";
+    harness.spec.renderCanvas(canvas, makeProps());
+
+    expect(harness.calls.staticDraws).toHaveLength(1);
+    expect(harness.calls.dynamicDraws).toHaveLength(2);
+    expect(harness.calls.dynamicDraws[1].colors.pointer).toBe("#00ccee");
+    expect(harness.calls.dynamicDraws[1].colors.alarm).toBe("#ff1100");
   });
 
   it("keeps the highway frame visible and suppresses the indicator when required values are missing", function () {
