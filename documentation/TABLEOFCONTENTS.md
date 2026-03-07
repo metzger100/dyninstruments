@@ -118,6 +118,7 @@
 - **How do I keep docs aligned after code changes?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md)
 - **How do I run documentation validation checks?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#validation)
 - **How do I run smell checks before strict gate?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#quality-and-regression-commands)
+- **Where is the multi-session implementation plan template?** → [PLAN.md](PLAN.md)
 - **How do I keep the codebase clean?** → [guides/garbage-collection.md](guides/garbage-collection.md)
 - **What anti-patterns should I watch for?** → [guides/garbage-collection.md#anti-patterns](guides/garbage-collection.md#anti-patterns)
 - **What areas of the codebase need improvement?** → [QUALITY.md](QUALITY.md)
