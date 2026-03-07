@@ -4,7 +4,7 @@
 
 ## Overview
 
-This plan covers feature-parity support for the core "active" widgets inside the existing cluster system:
+This plan covers feature-parity support for the core route/AIS workflow widgets inside the existing cluster system:
 
 - `ActiveRoute`
 - `EditRoute`
@@ -21,7 +21,7 @@ The chosen direction for dyninstruments is:
 The two hard problems are now:
 
 1. extending the cluster runtime to support HTML/interactivity cleanly
-2. getting plugin-safe host APIs for the route-editor and AIS workflows that the core widgets trigger today
+2. getting plugin-safe host APIs for the route-editor and AIS workflows that the core implementation currently splits across widget renderers, page click handlers, and page-shell code
 
 ## Core Behavior Summary
 
@@ -35,6 +35,20 @@ The two hard problems are now:
 Observed source detail that still needs validation against live behavior:
 
 - `viewer/components/ActiveRouteWidget.jsx` uses both `isApproaching` and `isAproaching`. Parity tests must follow actual runtime behavior, not the typo in isolation.
+
+## Confirmed Interaction Ownership Split
+
+The core widgets do not all own their workflows the same way. This matters for plugin parity because cluster kinds inside `dyni_Nav_Instruments` cannot rely on built-in widget names being special-cased by core pages.
+
+| Widget | Ownership pattern in core | Confirmed source behavior | Scope for this plan |
+|---|---|---|---|
+| `CenterDisplay` | passive renderer | no widget-specific click handling; `MapPage` only gates visibility when center lock is active | out of scope here; roadmap item |
+| `Zoom` | page-routed click on passive renderer | `ZoomWidget` is passive; `NavPage` intercepts widget click and runs `MapHolder.checkAutoZoom(true)` | out of scope here, but useful evidence for Phase 0 issue framing |
+| `Alarm` | page-shell widget with widget-owned click trap | `AlarmWidget` stops propagation, but `PageLeft` injects the actual "stop running alarms" callback | out of scope here, but useful evidence for Phase 0 issue framing |
+| `ActiveRoute` | page-routed click on passive renderer | `ActiveRouteWidget` renders only; `NavPage` opens edit-route flow; `GpsPage` has no special-case and falls back to page pop | in scope |
+| `EditRoute` | page-routed click on passive renderer | `EditRouteWidget` renders only; `EditRoutePage` opens `EditRouteDialog` on widget click | in scope |
+| `RoutePoints` | widget-owned row clicks + page/API workflow | `RoutePointsWidget` emits clicked row data; pages register `avnav.api.routePoints.activate(index)` handlers | in scope |
+| `AisTarget` | widget-owned click + page-owned dialog workflow | `AisTargetWidget` forwards `mmsi`; `NavPage` and `GpsPage` open `AisInfoWithFunctions` | in scope |
 
 ## Current Dyninstruments Gaps
 
@@ -54,6 +68,10 @@ Observed source detail that still needs validation against live behavior:
   - syncing active route state into edit-route state
   - opening AIS info/list workflows
   - performing AIS target actions (`nearest`, `locate`, `hide`, `track`) from plugins
+- Adjacent core widgets confirm the same architectural split:
+  - `Zoom` uses page-routed click behavior on top of a passive widget renderer
+  - `Alarm` is mounted by page shell code rather than panel-layout widget routing
+  - `CenterDisplay` is a passive map widget with no widget-owned interaction at all
 
 ## Final Implementation Goal
 
@@ -111,11 +129,24 @@ Observed source detail that still needs validation against live behavior:
    - plugin-safe "open edit route dialog/page" action for `EditRoute`
    - documented support for `avnav.api.routePoints.activate(index)` or a replacement route-point activation API
    - explicit answer whether plugin code may rely on `nav.routeHandler.editingRoute/currentLeg` object methods such as `computeLength()` and `getRoutePoints()`
+   - include in the issue body that core route widgets are mixed today:
+     - `ActiveRoute` is page-routed from `NavPage`
+     - `EditRoute` is page-routed from `EditRoutePage`
+     - `RoutePoints` owns row clicks but delegates centering/dialog behavior through page-registered handlers
+   - make explicit that plugin cluster widgets cannot reuse built-in widget-name special cases, so parity requires a host API rather than copied page logic
 2. Open a core-project issue for AIS workflow APIs. Minimum requested surface:
    - show AIS info dialog from a plugin widget
    - open AIS list page from a plugin widget
    - plugin-safe actions for `nearest`, `locate`, `hide`, and `track`
+   - include in the issue body that `AisTarget` is also mixed today:
+     - the widget owns the click target and forwards `mmsi`
+     - `NavPage` / `GpsPage` own the actual dialog composition and page navigation
+   - make explicit that plugin code needs a stable dialog/action API instead of embedding page-local `AisInfoWithFunctions` wiring
 3. Treat these issues as hard blockers for feature parity. Internal cluster refactoring can proceed, but do not add private-core shims, adapters, or temporary compatibility layers to bridge the missing APIs.
+4. Reference adjacent non-blocker examples in the issue discussion so core sees the broader pattern:
+   - `Zoom` is page-routed on a passive widget
+   - `Alarm` is page-shell-owned rather than layout-widget-owned
+   - `CenterDisplay` is passive and does not need workflow APIs, which helps separate read-only parity from action parity
 
 ### Phase 1 - Extend the cluster runtime to support HTML sub-renderers
 
@@ -230,6 +261,21 @@ Requested outcome:
   - active route summary
   - route-point list items
 
+Context to include in the issue body:
+
+- core route-widget behavior is split today:
+  - `ActiveRoute` is rendered by a passive widget, but `NavPage` owns the click workflow
+  - `EditRoute` is rendered by a passive widget, but `EditRoutePage` owns the click workflow
+  - `RoutePoints` owns row clicks, but the page/API layer owns activation and re-click dialog semantics
+- `GpsPage` has different fallback behavior from `NavPage`, so plugin parity cannot be achieved safely by globally swallowing clicks
+- dyninstruments cluster kinds cannot reuse built-in widget-name special cases, so copied page logic would create private-core coupling
+
+Requested clarification from core:
+
+- which parts are intended to stay page-owned
+- which parts should be promoted to plugin-safe host APIs
+- whether the route-object read model is intentionally public or should be replaced by plain data APIs
+
 Preferred shape if core wants high-level APIs instead of raw store contracts:
 
 - `avnav.api.routeEditor.openActiveRoute()`
@@ -246,6 +292,22 @@ Requested outcome:
   - nearest
   - locate/track
   - hide/unhide
+
+Context to include in the issue body:
+
+- `AisTarget` already mixes ownership:
+  - the widget owns the clickable target area and forwards `mmsi`
+  - `NavPage` / `GpsPage` own dialog construction via `AisInfoWithFunctions`
+  - dialog buttons own follow-up page navigation and actions
+- dyninstruments can reproduce the visual widget, but should not copy page-local React dialog wiring just to get parity
+- `Zoom` and `Alarm` are useful comparison points when discussing ownership boundaries:
+  - `Zoom` is page-routed on a passive renderer
+  - `Alarm` is page-shell-owned rather than panel-widget-owned
+
+Requested clarification from core:
+
+- whether plugins should get one high-level AIS dialog API or several smaller workflow/action APIs
+- whether "show info", "open list", "track", and "hide" are all considered stable plugin-level operations
 
 Preferred shape if core chooses high-level APIs:
 
@@ -300,6 +362,10 @@ Preferred shape if core chooses high-level APIs:
    - `viewer/nav/routeeditor.js`
    - `viewer/util/api.js`
 7. Confirmed that current public API support is sufficient only for route-point activation, not for full route-editor or AIS widget parity.
+8. Confirmed the broader ownership split around adjacent widgets:
+   - `CenterDisplay` is passive
+   - `Zoom` is page-routed
+   - `Alarm` is page-shell-owned
 
 ## Open Questions / Validation Points
 
@@ -314,6 +380,11 @@ Preferred shape if core chooses high-level APIs:
 
 - The current plugin already supports `renderHtml` and `this.eventHandler` at the registered-widget boundary. The missing piece is carrying that capability through the cluster pipeline.
 - Because these features stay inside `dyni_Nav_Instruments`, page-specific core click handlers keyed by built-in widget names cannot be reused directly.
+- Core interaction ownership is mixed even among nearby widgets:
+  - passive renderer + page click routing (`Zoom`, `ActiveRoute`, `EditRoute`)
+  - widget-owned click target + page/API workflow (`RoutePoints`, `AisTarget`)
+  - page-shell widget ownership (`Alarm`)
+  - fully passive display (`CenterDisplay`)
 - The plan intentionally removes backward-compatibility strategies because the plugin is not released yet. The temporary summary-style `activeRoute` path should be replaced directly instead of carried forward.
 - The safest implementation order is:
   1. settle the core API blocker
