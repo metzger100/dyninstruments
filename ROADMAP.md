@@ -13,14 +13,26 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ### Planned integration directions
 
+- `map`: `centerDisplay`, `zoom`
 - `nav`: `routePoints`, `editRoute`
-- planned new clusters: `ais` (for example `aisTarget`), `map` (for example `zoom`, `centerDisplay`)
+- planned new clusters: `ais` (for example `aisTarget`)
+- page/header utility parity: `alarm`
 - `default`: likely a dedicated utility/default widget instead of a cluster kind
 
 ### Practical implementation order
 
-1. Lists and controls (interaction-heavy): `RoutePoints`, `EditRoute`, `Zoom`, `CenterDisplay`
-2. AIS: `AisTarget` (requires additional data logic and responsive layout)
+1. Passive map widget first: `CenterDisplay`
+2. Page-routed map action after that: `Zoom`
+3. Route workflow widgets: `RoutePoints`, `EditRoute`
+4. AIS workflow widget: `AisTarget`
+5. Page/header utility parity: `Alarm`
+
+### Core interaction notes
+
+- Passive widget: `CenterDisplay`
+- Page-routed click on passive renderer: `Zoom`, `ActiveRoute`, `EditRoute`
+- Widget-owned click target with page/API workflow: `RoutePoints`, `AisTarget`
+- Page-shell-owned widget: `Alarm`
 
 ### Additional non-core concepts
 
