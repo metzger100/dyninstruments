@@ -14,6 +14,7 @@ Use this document for runtime-safe component structure and naming. It defines fi
 - Preserve explicit falsy defaults (`""`, `0`, `false`) via property-presence/nullish checks; never use truthy fallback for configured defaults.
 - Cache-owning modules must expose explicit invalidation APIs and mutation paths must call them.
 - Cluster mappers are declarative routing/normalization only; formatter and presentation behavior belongs in renderer modules.
+- User-visible responsive floors must come from the shared responsive-profile contract; widget-local floors are allowed only for technical safety bounds.
 - Fail-fast / keep-it-simple: validate and default at boundaries, then trust the resulting internal contract.
 - Do not add speculative legacy/compat/fallback helpers or duplicate CSS/config defaults in runtime code.
 
@@ -96,6 +97,13 @@ Example:
 - If an exception must keep a fallback path, annotate it with a rule-specific suppression:
   - `// dyni-lint-disable-next-line <rule-name> -- <reason>`
   - `/* dyni-lint-disable-line <rule-name> -- <reason> */`
+
+## Responsive Layout Ownership
+
+- Shared responsive compaction policy belongs to one shared owner; Phase 0 locks that contract in [../shared/responsive-scale-profile.md](../shared/responsive-scale-profile.md) and Phase 1 extracts the runtime module under `shared/widget-kits/layout/ResponsiveScaleProfile.js`.
+- Layout-owner modules may map shared profile outputs into family-specific geometry, spacing, and text ceilings, but they must not invent a second compact curve or copy the baseline constants locally.
+- Cluster mappers, renderer props, theme tokens, `plugin.css`, and editable parameters are not owners of responsive compaction policy.
+- Local literals are acceptable only for technical safety bounds (`0`, `1`, `2`, or equivalent non-visual guards). User-visible responsive floors such as text/layout minima must come from the shared profile contract.
 
 ## Widget Archetypes
 

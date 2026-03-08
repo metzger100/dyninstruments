@@ -118,8 +118,8 @@ Scope:
    - small safety floors for canvas validity are allowed
    - larger user-visible layout/text floors must come from the shared profile, not widget-local literals
 3. Decide the shared home for the new contract:
-   - preferred: new shared module such as `shared/widget-kits/layout/ResponsiveScaleProfile.js`
-   - acceptable fallback: extend an existing shared facade only if it does not create a hotspot
+   - chosen owner: new shared module `shared/widget-kits/layout/ResponsiveScaleProfile.js`
+   - do not extend `TextLayoutEngine` or `RadialValueMath` with compaction ownership; keep those as consumers/facades
 4. Keep the contract fail-fast:
    - no per-widget fallback compat layers
    - no second compact algorithm per widget family
@@ -313,13 +313,14 @@ Scope:
    - `tests/tools/check-patterns.test.js`
    - `tests/tools/check-smell-contracts.test.js`
 
-## Open Questions / Validation Points
+## Phase 0 Decisions
 
-- Should the shared responsive contract live in a new cross-family layout module, or is extending `TextLayoutEngine` / `RadialValueMath` acceptable without creating a new hotspot?
-- Which absolute floors remain acceptable as technical safety bounds, and where should the lint allowlist draw that line?
-- Should compact-profile parameters remain internal constants, or become theme-owned/runtime-owned later?
-- Is one shared `textFillScale` curve enough for text, linear, semicircle, full-circle, and XTE layouts, or do those families need separate curve specs on top of the same base helper?
-- Does the team want compact-vs-large regression tests to assert geometry ratios, text max-px ceilings, or both?
+- Shared owner: use a new cross-family layout module `shared/widget-kits/layout/ResponsiveScaleProfile.js`.
+- Ownership boundary: `TextLayoutEngine`, radial/linear engines, and dedicated widgets consume the shared profile; they do not own the compaction curve.
+- Safety floors: local literals are acceptable only for technical safety bounds (`0`, `1`, `2`, or equivalent non-visual guards). User-visible floors remain shared-profile-owned.
+- Constant ownership: compact-profile constants stay JS-owned in runtime/shared code for now; they do not move to theme tokens, `plugin.css`, or editable parameters in this rollout phase.
+- Base curve policy: one shared `minDim -> t` curve is the contract for all families. Family-specific named scales may layer on top of that base profile, but they must not replace it.
+- Regression strategy: Phase 0 locks exact/tight-tolerance shared-profile outputs in `CenterDisplayLayout` tests and keeps renderer-level compact-fill behavior covered in `CenterDisplayTextWidget` tests.
 
 ## Relevant Information
 
@@ -353,6 +354,7 @@ Scope:
 
 - [TABLEOFCONTENTS.md](TABLEOFCONTENTS.md)
 - [PLAN.md](PLAN.md)
+- [shared/responsive-scale-profile.md](shared/responsive-scale-profile.md)
 - [widgets/center-display.md](widgets/center-display.md)
 - [conventions/coding-standards.md](conventions/coding-standards.md)
 - [conventions/smell-prevention.md](conventions/smell-prevention.md)
