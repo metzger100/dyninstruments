@@ -15,14 +15,12 @@
   function trimString(value) {
     return value == null ? "" : String(value).trim();
   }
-
   function appendUnit(text, unit, defaultText) {
     if (!unit || text === defaultText) {
       return text;
     }
     return text + unit;
   }
-
   function formatCoordinate(point, axis, defaultText, Helpers) {
     const raw = point && axis === "lat" ? point.lat : point && point.lon;
     const out = String(Helpers.applyFormatter(raw, {
@@ -32,7 +30,6 @@
     }));
     return out.trim() ? out : defaultText;
   }
-
   function formatCourse(value, defaultText, Helpers) {
     const out = String(Helpers.applyFormatter(value, {
       formatter: "formatDirection",
@@ -41,7 +38,6 @@
     }));
     return out.trim() ? out : defaultText;
   }
-
   function formatDistance(value, unit, defaultText, Helpers) {
     const out = String(Helpers.applyFormatter(value, {
       formatter: "formatDistance",
@@ -50,7 +46,6 @@
     }));
     return out.trim() ? out : defaultText;
   }
-
   function buildDisplayState(props, math, defaultText, Helpers) {
     const p = props || {};
     const display = (p.display && typeof p.display === "object") ? p.display : {};
@@ -104,20 +99,28 @@
       })
     };
   }
-
   function measureTextWidth(ctx, textApi, text, family, weight, px) {
     textApi.setFont(ctx, Math.max(1, Math.floor(Number(px) || 0)), weight, family);
     return ctx.measureText(String(text || "")).width;
   }
-
   function computeLineMaxPx(rect, ratio) {
     return Math.max(1, Math.floor(rect.h * ratio));
   }
-
   function computeTextPad(rect) {
     return Math.ceil(Math.max(0, Math.min(rect.w, rect.h)) * 0.04);
   }
-
+  function computeRelationValueMaxPx(layout) {
+    const rowRects = layout.rowRects;
+    let maxPx = 0;
+    for (let i = 0; i < rowRects.length; i++) {
+      const rect = rowRects[i];
+      if (!rect || !(rect.h > 0)) {
+        continue;
+      }
+      maxPx = Math.max(maxPx, computeLineMaxPx(rect, 0.66));
+    }
+    return maxPx;
+  }
   function clampShare(value, minShare, maxShare) {
     const n = Number(value);
     if (!Number.isFinite(n)) {
@@ -182,6 +185,7 @@
   }
 
   function drawCenterPanel(layout, state, displayState, family, valueWeight, labelWeight, color) {
+    const relationValueMaxPx = computeRelationValueMaxPx(layout);
     state.ctx.fillStyle = color;
     state.tileLayout.drawFittedLine({
       textApi: state.radialText,
@@ -203,7 +207,7 @@
       align: layout.center.coordAlign,
       family: family,
       weight: valueWeight,
-      maxPx: computeLineMaxPx(layout.center.latRect, 0.74),
+      maxPx: relationValueMaxPx,
       padX: computeTextPad(layout.center.latRect),
       color: color
     });
@@ -215,7 +219,7 @@
       align: layout.center.coordAlign,
       family: family,
       weight: valueWeight,
-      maxPx: computeLineMaxPx(layout.center.lonRect, 0.74),
+      maxPx: relationValueMaxPx,
       padX: computeTextPad(layout.center.lonRect),
       color: color
     });
@@ -371,25 +375,14 @@
         highCaptionRatio: hints.highCaptionRatio,
         flatCaptionRatio: hints.flatCaptionRatio
       });
-      const renderState = {
-        ctx: ctx,
-        radialText: radialText,
-        tileLayout: tileLayout
-      };
+      const renderState = { ctx: ctx, radialText: radialText, tileLayout: tileLayout };
 
       drawCenterPanel(layout, renderState, displayState, family, valueWeight, labelWeight, color);
       drawRelationRows(layout, displayState.rows, renderState, family, valueWeight, labelWeight, color);
     }
 
     function translateFunction() { return {}; }
-
-    return {
-      id: "CenterDisplayTextWidget",
-      wantsHideNativeHead: true,
-      renderCanvas: renderCanvas,
-      translateFunction: translateFunction
-    };
+    return { id: "CenterDisplayTextWidget", wantsHideNativeHead: true, renderCanvas: renderCanvas, translateFunction: translateFunction };
   }
-
   return { id: "CenterDisplayTextWidget", create: create };
 }));
