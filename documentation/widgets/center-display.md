@@ -18,6 +18,41 @@ It keeps core data parity with AvNav `CenterDisplay` while using a readability-f
 
 This is a dedicated renderer, not a `PositionCoordinateWidget` variant, because it owns a different top-panel + relation-row contract across aspect ratios.
 
+## Key Details
+
+- `CenterDisplayLayout` is the current canonical responsive baseline for the repo-wide compact-profile rollout.
+- The current compaction curve is JS-owned in runtime code; Phase 0 documents it and tests it without extracting a new shared module yet.
+- `CenterDisplayLayout` currently owns geometry plus a temporary private `computeResponsiveProfile(...)`; Phase 1 will move that profile ownership to `shared/widget-kits/layout/ResponsiveScaleProfile.js` while keeping `CenterDisplayLayout` as a nav-owned consumer.
+
+## Responsive Baseline Contract
+
+Current baseline formulas from `shared/widget-kits/nav/CenterDisplayLayout.js`:
+
+```text
+minDim = max(1, min(W, H))
+t = clamp((minDim - 80) / 100, 0, 1)
+textFillScale = lerp(1.18, 1, t)
+normalCaptionShareScale = lerp(0.78, 1, t)
+flatCenterShareScale = lerp(0.84, 1, t)
+stackedCaptionScale = lerp(0.76, 1, t)
+highCenterWeightScale = lerp(0.88, 1, t)
+```
+
+Local geometry inputs remain ratio-derived and stay nav-owned:
+
+```text
+padX = max(1, floor(minDim * 0.03))
+innerY = max(1, floor(minDim * 0.02))
+gap = max(1, floor(minDim * 0.03))
+```
+
+Contract notes:
+
+- compact widgets use the same base `minDim -> t` curve as larger widgets; only the named scale outputs change
+- smaller tiles reduce panel shares/caption bands while increasing fitted text fill
+- the ratio-mode thresholds still choose `high` / `normal` / `flat`; the compact profile only adjusts layout density within the chosen mode
+- mappers, renderer props, theme tokens, and `plugin.css` do not own this compaction policy
+
 ## Module Registration
 
 ```javascript
@@ -114,4 +149,5 @@ Measure row behavior:
 
 - [active-route.md](active-route.md)
 - [position-coordinates.md](position-coordinates.md)
+- [../shared/responsive-scale-profile.md](../shared/responsive-scale-profile.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
