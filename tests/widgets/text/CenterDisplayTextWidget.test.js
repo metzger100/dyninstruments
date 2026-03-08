@@ -17,6 +17,7 @@ describe("CenterDisplayTextWidget", function () {
       TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
       TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
       TextTileLayout: loadFresh("shared/widget-kits/text/TextTileLayout.js"),
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
       CenterDisplayLayout: loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js"),
       CenterDisplayMath: loadFresh("shared/widget-kits/nav/CenterDisplayMath.js")
     };
@@ -150,7 +151,7 @@ describe("CenterDisplayTextWidget", function () {
   }
 
   function computeLayoutSnapshot(width, height, mode, relationCount) {
-    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
+    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create({}, makeHelpers());
     const insets = layout.computeInsets(width, height);
     const contentRect = layout.createContentRect(width, height, insets);
     return layout.computeLayout({

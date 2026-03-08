@@ -62,6 +62,12 @@ describe("config/components.js", function () {
     expect(components.TextTileLayout.globalKey).toBe("DyniTextTileLayout");
     expect(components.TextTileLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextTileLayout.js");
     expect(components.TextTileLayout.deps).toBeUndefined();
+    expect(components.ResponsiveScaleProfile.globalKey).toBe("DyniResponsiveScaleProfile");
+    expect(components.ResponsiveScaleProfile.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    expect(components.ResponsiveScaleProfile.deps).toBeUndefined();
+    expect(components.CenterDisplayLayout.globalKey).toBe("DyniCenterDisplayLayout");
+    expect(components.CenterDisplayLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/CenterDisplayLayout.js");
+    expect(components.CenterDisplayLayout.deps).toEqual(["ResponsiveScaleProfile"]);
     expect(components.SpeedRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
     expect(components.SpeedLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.DepthLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);

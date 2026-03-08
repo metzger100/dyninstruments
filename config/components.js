@@ -72,6 +72,11 @@
       css: undefined,
       globalKey: "DyniTextTileLayout"
     },
+    ResponsiveScaleProfile: {
+      js: BASE + "shared/widget-kits/layout/ResponsiveScaleProfile.js",
+      css: undefined,
+      globalKey: "DyniResponsiveScaleProfile"
+    },
     CanvasLayerCache: {
       js: BASE + "shared/widget-kits/canvas/CanvasLayerCache.js",
       css: undefined,
@@ -100,7 +105,8 @@
     CenterDisplayLayout: {
       js: BASE + "shared/widget-kits/nav/CenterDisplayLayout.js",
       css: undefined,
-      globalKey: "DyniCenterDisplayLayout"
+      globalKey: "DyniCenterDisplayLayout",
+      deps: ["ResponsiveScaleProfile"]
     },
     CenterDisplayMath: {
       js: BASE + "shared/widget-kits/nav/CenterDisplayMath.js",

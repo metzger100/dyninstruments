@@ -1,14 +1,16 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("CenterDisplayLayout", function () {
-  function expectResponsiveProfile(profile, expected) {
-    expect(profile.minDim).toBe(expected.minDim);
-    expect(profile.t).toBeCloseTo(expected.t, 6);
-    expect(profile.textFillScale).toBeCloseTo(expected.textFillScale, 6);
-    expect(profile.normalCaptionShareScale).toBeCloseTo(expected.normalCaptionShareScale, 6);
-    expect(profile.flatCenterShareScale).toBeCloseTo(expected.flatCenterShareScale, 6);
-    expect(profile.stackedCaptionScale).toBeCloseTo(expected.stackedCaptionScale, 6);
-    expect(profile.highCenterWeightScale).toBeCloseTo(expected.highCenterWeightScale, 6);
+  function createLayout() {
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    return loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create({}, {
+      getModule(id) {
+        if (id === "ResponsiveScaleProfile") {
+          return responsiveScaleProfile;
+        }
+        throw new Error("unexpected module: " + id);
+      }
+    });
   }
 
   function expectRectInside(inner, outer) {
@@ -39,84 +41,8 @@ describe("CenterDisplayLayout", function () {
     };
   }
 
-  it("locks the baseline responsive profile curve at boundary sizes", function () {
-    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
-    const cases = [
-      {
-        width: 60,
-        height: 120,
-        expected: {
-          minDim: 60,
-          t: 0,
-          textFillScale: 1.18,
-          normalCaptionShareScale: 0.78,
-          flatCenterShareScale: 0.84,
-          stackedCaptionScale: 0.76,
-          highCenterWeightScale: 0.88
-        }
-      },
-      {
-        width: 80,
-        height: 160,
-        expected: {
-          minDim: 80,
-          t: 0,
-          textFillScale: 1.18,
-          normalCaptionShareScale: 0.78,
-          flatCenterShareScale: 0.84,
-          stackedCaptionScale: 0.76,
-          highCenterWeightScale: 0.88
-        }
-      },
-      {
-        width: 130,
-        height: 220,
-        expected: {
-          minDim: 130,
-          t: 0.5,
-          textFillScale: 1.09,
-          normalCaptionShareScale: 0.89,
-          flatCenterShareScale: 0.92,
-          stackedCaptionScale: 0.88,
-          highCenterWeightScale: 0.94
-        }
-      },
-      {
-        width: 180,
-        height: 260,
-        expected: {
-          minDim: 180,
-          t: 1,
-          textFillScale: 1,
-          normalCaptionShareScale: 1,
-          flatCenterShareScale: 1,
-          stackedCaptionScale: 1,
-          highCenterWeightScale: 1
-        }
-      },
-      {
-        width: 240,
-        height: 400,
-        expected: {
-          minDim: 240,
-          t: 1,
-          textFillScale: 1,
-          normalCaptionShareScale: 1,
-          flatCenterShareScale: 1,
-          stackedCaptionScale: 1,
-          highCenterWeightScale: 1
-        }
-      }
-    ];
-
-    cases.forEach((testCase) => {
-      const insets = layout.computeInsets(testCase.width, testCase.height);
-      expectResponsiveProfile(insets.responsive, testCase.expected);
-    });
-  });
-
   it("derives center-display insets from minDim ratios with 1px safety floors", function () {
-    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
+    const layout = createLayout();
     const compactInsets = layout.computeInsets(20, 50);
     const mediumInsets = layout.computeInsets(140, 220);
 
@@ -130,7 +56,7 @@ describe("CenterDisplayLayout", function () {
   });
 
   it("keeps compact normal-mode panels and rows inside the content rect", function () {
-    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
+    const layout = createLayout();
     const cases = [
       { width: 120, height: 60, relationCount: 2 },
       { width: 120, height: 80, relationCount: 3 },
@@ -157,7 +83,7 @@ describe("CenterDisplayLayout", function () {
   });
 
   it("scales compact row heights with available space and row count", function () {
-    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
+    const layout = createLayout();
     const compactThreeRows = buildSnapshot(layout, 120, 60, "normal", 3).out;
     const tallerThreeRows = buildSnapshot(layout, 120, 80, "normal", 3).out;
     const tallerTwoRows = buildSnapshot(layout, 120, 80, "normal", 2).out;
@@ -167,7 +93,7 @@ describe("CenterDisplayLayout", function () {
   });
 
   it("applies linear caption-share and text-fill compaction on compact normal tiles", function () {
-    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
+    const layout = createLayout();
     const compact = buildSnapshot(layout, 120, 80, "normal", 2);
     const medium = buildSnapshot(layout, 140, 90, "normal", 2);
     const large = buildSnapshot(layout, 260, 180, "normal", 2);
@@ -188,7 +114,7 @@ describe("CenterDisplayLayout", function () {
   });
 
   it("balances the first coordinate row and last relation row against the outer edges in normal mode", function () {
-    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
+    const layout = createLayout();
     const cases = [
       { width: 260, height: 180, relationCount: 2 },
       { width: 260, height: 180, relationCount: 3 }
@@ -209,7 +135,7 @@ describe("CenterDisplayLayout", function () {
   });
 
   it("compacts flat mode center share and caption band on smaller wide tiles", function () {
-    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
+    const layout = createLayout();
     const compact = buildSnapshot(layout, 220, 80, "flat", 2);
     const large = buildSnapshot(layout, 520, 180, "flat", 2);
 
@@ -222,7 +148,7 @@ describe("CenterDisplayLayout", function () {
   });
 
   it("compacts high mode caption band and center weight on smaller tall tiles", function () {
-    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
+    const layout = createLayout();
     const compact = buildSnapshot(layout, 120, 140, "high", 2);
     const large = buildSnapshot(layout, 180, 260, "high", 2);
 
