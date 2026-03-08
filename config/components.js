@@ -65,7 +65,7 @@
       js: BASE + "shared/widget-kits/text/TextLayoutEngine.js",
       css: undefined,
       globalKey: "DyniTextLayoutEngine",
-      deps: ["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]
+      deps: ["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite", "ResponsiveScaleProfile"]
     },
     TextTileLayout: {
       js: BASE + "shared/widget-kits/text/TextTileLayout.js",

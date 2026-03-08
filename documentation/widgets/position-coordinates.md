@@ -6,6 +6,12 @@
 
 Primary stacked-text renderer used for nav positions and vessel time/date variants. It keeps flat layouts in single-line format and renders two stacked lines in normal/high layouts.
 
+Phase 2 adopts the shared text compaction contract from `TextLayoutEngine.computeResponsiveInsets()`:
+
+- stacked `normal` / `high` layouts consume shared compact insets and `textFillScale`
+- flat mode keeps the same formatter behavior but benefits from compact insets and the lowered inline minimum fit floor
+- emoji-specific time-status guards remain renderer-owned and continue to run on top of the shared compact layout
+
 ## Key Details
 
 - Registered as `PositionCoordinateWidget` in `config/components.js`
@@ -55,6 +61,7 @@ Primary stacked-text renderer used for nav positions and vessel time/date varian
 - If formatter is unavailable/fails, renders `default` fallback text
 - Invalid/missing coordinates render `default` fallback text
 - Fit/layout caching is widget-local and keyed by text, dimensions, mode, typography, and layout scale via `TextLayoutEngine`.
+- Shared responsive compaction does not add extra cache inputs; it is derived from `W` / `H`.
 
 ## Exports
 

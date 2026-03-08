@@ -58,7 +58,7 @@ describe("config/components.js", function () {
     expect(components.TextLayoutComposite.deps).toEqual(["TextLayoutPrimitives"]);
     expect(components.TextLayoutEngine.globalKey).toBe("DyniTextLayoutEngine");
     expect(components.TextLayoutEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextLayoutEngine.js");
-    expect(components.TextLayoutEngine.deps).toEqual(["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]);
+    expect(components.TextLayoutEngine.deps).toEqual(["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite", "ResponsiveScaleProfile"]);
     expect(components.TextTileLayout.globalKey).toBe("DyniTextTileLayout");
     expect(components.TextTileLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextTileLayout.js");
     expect(components.TextTileLayout.deps).toBeUndefined();

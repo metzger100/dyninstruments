@@ -178,7 +178,7 @@
       const secScale = Number(cfg.secScale);
       const scale = isFinite(secScale) ? secScale : 0.8;
       const steps = Math.max(1, Math.floor(Number(cfg.steps) || 14));
-      const minPx = Math.max(1, Math.floor(Number(cfg.minPx) || 8));
+      const minPx = Math.max(1, Math.floor(Number(cfg.minPx) || 1));
       const maxPx = Math.max(minPx, Math.floor(Number(cfg.maxPx) || (maxH * 1.6)));
       const extraValueCheck = typeof cfg.extraValueCheck === "function"
         ? cfg.extraValueCheck

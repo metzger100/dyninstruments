@@ -10,6 +10,21 @@
 }(this, function () {
   "use strict";
 
+  function clampTextFillScale(value) {
+    const n = Number(value);
+    return Number.isFinite(n) && n > 0 ? n : 1;
+  }
+
+  function scaleTextCeiling(basePx, maxPx, textFillScale) {
+    const safeMax = Math.max(1, Math.floor(Number(maxPx) || 0));
+    const safeBase = Math.max(1, Math.floor(Number(basePx) || 0));
+    const compactBoost = Math.max(0, clampTextFillScale(textFillScale) - 1);
+    return Math.min(
+      safeMax,
+      Math.max(1, Math.floor(safeBase + ((safeMax - safeBase) * compactBoost)))
+    );
+  }
+
   function create(def, Helpers) {
     const primitive = Helpers.getModule("TextLayoutPrimitives").create(def, Helpers);
 
@@ -17,6 +32,7 @@
       const cfg = args || {};
       const secScale = Number(cfg.secScale);
       const scale = isFinite(secScale) ? secScale : 0.8;
+      const textFillScale = clampTextFillScale(cfg.textFillScale);
       const W = Math.max(1, Number(cfg.W) || 0);
       const H = Math.max(1, Number(cfg.H) || 0);
       const padX = Math.max(0, Number(cfg.padX) || 0);
@@ -24,10 +40,12 @@
       const hTop = Math.round(H * (scale / (1 + scale + scale)));
       const hMid = Math.round(H * (1 / (1 + scale + scale)));
       const hBot = H - hTop - hMid;
-      const maxW = Math.max(10, W - padX * 2);
-      const maxHTop = Math.max(8, hTop - innerY * 2);
-      const maxHMid = Math.max(10, hMid - innerY * 2);
-      const maxHBot = Math.max(8, hBot - innerY * 2);
+      const maxW = Math.max(1, W - padX * 2);
+      const maxHTop = Math.max(1, hTop - innerY * 2);
+      const maxHMid = Math.max(1, hMid - innerY * 2);
+      const maxHBot = Math.max(1, hBot - innerY * 2);
+      const capMaxPx = scaleTextCeiling(Math.min(Math.floor(maxHMid * scale), maxHTop), maxHTop, textFillScale);
+      const unitMaxPx = scaleTextCeiling(Math.min(Math.floor(maxHMid * scale), maxHBot), maxHBot, textFillScale);
       const vFit = primitive.fitSingleLineBinary({
         ctx: cfg.ctx,
         text: cfg.valueText,
@@ -43,7 +61,7 @@
           ctx: cfg.ctx,
           text: cfg.captionText,
           minPx: 1,
-          maxPx: Math.min(Math.floor(maxHMid * scale), maxHTop),
+          maxPx: capMaxPx,
           maxW: maxW,
           maxH: maxHTop,
           family: cfg.family,
@@ -55,7 +73,7 @@
           ctx: cfg.ctx,
           text: cfg.unitText,
           minPx: 1,
-          maxPx: Math.min(Math.floor(maxHMid * scale), maxHBot),
+          maxPx: unitMaxPx,
           maxW: maxW,
           maxH: maxHBot,
           family: cfg.family,
@@ -93,15 +111,17 @@
       const cfg = args || {};
       const secScale = Number(cfg.secScale);
       const scale = isFinite(secScale) ? secScale : 0.8;
+      const textFillScale = clampTextFillScale(cfg.textFillScale);
       const W = Math.max(1, Number(cfg.W) || 0);
       const H = Math.max(1, Number(cfg.H) || 0);
       const padX = Math.max(0, Number(cfg.padX) || 0);
       const innerY = Math.max(0, Number(cfg.innerY) || 0);
       const hTop = Math.round(H * (1 / (1 + scale)));
       const hBot = H - hTop;
-      const maxW = Math.max(10, W - padX * 2);
-      const maxHTop = Math.max(10, hTop - innerY * 2);
-      const maxHBot = Math.max(8, hBot - innerY * 2);
+      const maxW = Math.max(1, W - padX * 2);
+      const maxHTop = Math.max(1, hTop - innerY * 2);
+      const maxHBot = Math.max(1, hBot - innerY * 2);
+      const capMaxPx = scaleTextCeiling(Math.min(Math.floor(maxHTop * scale), maxHBot), maxHBot, textFillScale);
       const pair = primitive.fitValueUnitRow({
         ctx: cfg.ctx,
         valueText: cfg.valueText,
@@ -120,7 +140,7 @@
           ctx: cfg.ctx,
           text: cfg.captionText,
           minPx: 1,
-          maxPx: Math.min(Math.floor(maxHTop * scale), maxHBot),
+          maxPx: capMaxPx,
           maxW: maxW,
           maxH: maxHBot,
           family: cfg.family,
@@ -182,20 +202,21 @@
       const innerY = Math.max(0, Number(cfg.innerY) || 0);
       const secScale = Number(cfg.secScale);
       const scale = isFinite(secScale) ? secScale : 0.8;
+      const textFillScale = clampTextFillScale(cfg.textFillScale);
       const topRowExtraCheck = typeof cfg.topRowExtraCheck === "function"
         ? cfg.topRowExtraCheck
         : null;
       let headerH = 0;
       if (hasHeader) {
         const headerWeight = cfg.mode === "high" ? 0.24 : 0.30;
-        headerH = Math.max(14, Math.floor(H * headerWeight));
+        headerH = Math.max(1, Math.floor(H * headerWeight));
         headerH = Math.min(headerH, Math.floor(H * 0.45));
       }
       const bodyH = Math.max(1, H - headerH);
       const row1H = Math.max(1, Math.floor(bodyH / 2));
       const row2H = Math.max(1, bodyH - row1H);
-      const maxRowH = Math.max(10, Math.min(row1H, row2H) - innerY * 2);
-      const maxRowW = Math.max(10, W - padX * 2);
+      const maxRowH = Math.max(1, Math.min(row1H, row2H) - innerY * 2);
+      const maxRowW = Math.max(1, W - padX * 2);
       const rowFit = primitive.fitMultiRowBinary({
         ctx: cfg.ctx,
         rows: [cfg.topText, cfg.bottomText],
@@ -213,14 +234,18 @@
       let capPx = 0;
       let unitPx = 0;
       if (hasHeader) {
-        const maxHeaderH = Math.max(8, headerH - innerY * 2);
-        const headerBase = Math.min(maxHeaderH, Math.floor(rowFit.px * scale));
+        const maxHeaderH = Math.max(1, headerH - innerY * 2);
+        const headerBase = scaleTextCeiling(
+          Math.min(maxHeaderH, Math.floor(rowFit.px * scale)),
+          maxHeaderH,
+          textFillScale
+        );
         const capMaxW = cfg.captionText && cfg.unitText
-          ? Math.max(10, Math.floor((W - padX * 2) * 0.62))
-          : Math.max(10, W - padX * 2);
+          ? Math.max(1, Math.floor((W - padX * 2) * 0.62))
+          : Math.max(1, W - padX * 2);
         const unitMaxW = cfg.captionText && cfg.unitText
-          ? Math.max(10, Math.floor((W - padX * 2) * 0.32))
-          : Math.max(10, W - padX * 2);
+          ? Math.max(1, Math.floor((W - padX * 2) * 0.32))
+          : Math.max(1, W - padX * 2);
         capPx = cfg.captionText
           ? primitive.fitSingleLineBinary({
             ctx: cfg.ctx,
