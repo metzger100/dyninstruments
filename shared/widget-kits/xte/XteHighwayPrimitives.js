@@ -25,99 +25,6 @@
       return Math.round(value) + (width % 2 ? 0.5 : 0);
     }
 
-    function computeMode(W, H, thresholdNormal, thresholdFlat, modeFn) {
-      const ratio = W / Math.max(1, H);
-      const normal = Number.isFinite(thresholdNormal) ? thresholdNormal : 0.85;
-      const flat = Number.isFinite(thresholdFlat) ? thresholdFlat : 2.3;
-      if (typeof modeFn === "function") {
-        return modeFn(ratio, normal, flat);
-      }
-      if (ratio < normal) {
-        return "high";
-      }
-      if (ratio > flat) {
-        return "flat";
-      }
-      return "normal";
-    }
-
-    function computeLayout(W, H, pad, gap, mode, options) {
-      const innerX = pad;
-      const innerY = pad;
-      const innerW = Math.max(1, W - pad * 2);
-      const innerH = Math.max(1, H - pad * 2);
-      const opts = options || {};
-      const reserveNameSpace = opts.reserveNameSpace !== false;
-
-      if (mode === "flat") {
-        const highwayW = Math.max(40, Math.floor(innerW * 0.58));
-        const dataW = Math.max(40, innerW - highwayW - gap);
-        const dataX = innerX + highwayW + gap;
-        const headerH = reserveNameSpace ? Math.max(16, Math.floor(innerH * 0.22)) : 0;
-        const reservedNameH = reserveNameSpace ? (headerH + gap) : 0;
-        const gridY = innerY + reservedNameH;
-        const gridH = Math.max(20, innerH - reservedNameH);
-        const rowH = Math.max(10, Math.floor((gridH - gap) / 2));
-        const colW = Math.max(12, Math.floor((dataW - gap) / 2));
-
-        return {
-          mode: mode,
-          highway: { x: innerX, y: innerY, w: highwayW, h: innerH },
-          nameRect: { x: dataX, y: innerY, w: dataW, h: headerH },
-          metricRects: {
-            cog: { x: dataX, y: gridY, w: colW, h: rowH },
-            btw: { x: dataX + colW + gap, y: gridY, w: colW, h: rowH },
-            xte: { x: dataX, y: gridY + rowH + gap, w: colW, h: rowH },
-            dtw: { x: dataX + colW + gap, y: gridY + rowH + gap, w: colW, h: rowH }
-          }
-        };
-      }
-
-      if (mode === "high") {
-        const topH = Math.max(16, Math.floor(innerH * 0.14));
-        const highwayY = innerY + topH + gap;
-        const highwayH = Math.max(24, Math.floor(innerH * 0.68));
-        const bottomY = highwayY + highwayH + gap;
-        const bottomH = Math.max(18, innerY + innerH - bottomY);
-        const topHalfW = Math.max(20, Math.floor((innerW - gap) / 2));
-        const bottomHalfW = topHalfW;
-
-        return {
-          mode: mode,
-          highway: { x: innerX, y: highwayY, w: innerW, h: highwayH },
-          nameRect: { x: innerX + Math.floor(innerW * 0.18), y: innerY, w: Math.floor(innerW * 0.64), h: topH },
-          metricRects: {
-            cog: { x: innerX, y: innerY, w: topHalfW, h: topH },
-            btw: { x: innerX + topHalfW + gap, y: innerY, w: topHalfW, h: topH },
-            xte: { x: innerX, y: bottomY, w: bottomHalfW, h: bottomH },
-            dtw: { x: innerX + bottomHalfW + gap, y: bottomY, w: bottomHalfW, h: bottomH }
-          }
-        };
-      }
-
-      const highwayH = Math.max(24, Math.floor(innerH * 0.64));
-      const bandY = innerY + highwayH + gap;
-      const bandH = Math.max(20, innerH - highwayH - gap);
-      const colW = Math.max(12, Math.floor((innerW - gap * 3) / 4));
-
-      return {
-        mode: mode,
-        highway: { x: innerX, y: innerY, w: innerW, h: highwayH },
-        nameRect: {
-          x: innerX + Math.floor(innerW * 0.1),
-          y: innerY + Math.max(2, Math.floor(highwayH * 0.04)),
-          w: Math.floor(innerW * 0.8),
-          h: Math.max(16, Math.floor(highwayH * 0.14))
-        },
-        metricRects: {
-          cog: { x: innerX, y: bandY, w: colW, h: bandH },
-          xte: { x: innerX + (colW + gap), y: bandY, w: colW, h: bandH },
-          dtw: { x: innerX + (colW + gap) * 2, y: bandY, w: colW, h: bandH },
-          btw: { x: innerX + (colW + gap) * 3, y: bandY, w: colW, h: bandH }
-        }
-      };
-    }
-
     function highwayGeometry(rect, mode, options) {
       const opts = options || {};
       const cx = rect.x + rect.w * 0.5;
@@ -271,23 +178,33 @@
       ctx.restore();
     }
 
-    function shouldShowWaypoint(mode, rect, showWpName, name) {
-      if (!showWpName || !name) {
+    function shouldShowWaypoint(mode, layout, showWpName, name, fit) {
+      const rect = layout && layout.nameRect;
+      const responsive = layout && layout.responsive;
+      if (!showWpName || !name || !rect || !fit) {
         return false;
       }
+      const fittedText = typeof fit.text === "string"
+        ? fit.text.trim()
+        : (fit.text == null ? "" : String(fit.text).trim());
+      if (!fittedText) {
+        return false;
+      }
+      const fullText = String(name).trim();
+      const coverage = fullText ? fittedText.length / fullText.length : 0;
+      const textFill = fit.px / Math.max(1, rect.h);
+      const compactness = responsive && Number.isFinite(responsive.t) ? responsive.t : 0;
       if (mode === "flat") {
-        return rect.w >= 110 && rect.h >= 16;
+        return compactness >= 0.22 && coverage >= 0.45 && textFill >= 0.45;
       }
       if (mode === "high") {
-        return rect.w >= 100 && rect.h >= 14;
+        return compactness >= 0.35 && coverage >= 0.5 && textFill >= 0.5;
       }
-      return rect.w >= 120 && rect.h >= 16;
+      return compactness >= 0.18 && coverage >= 0.45 && textFill >= 0.45;
     }
 
     return {
       clamp: clamp,
-      computeMode: computeMode,
-      computeLayout: computeLayout,
       highwayGeometry: highwayGeometry,
       drawStaticHighway: drawStaticHighway,
       drawDynamicHighway: drawDynamicHighway,

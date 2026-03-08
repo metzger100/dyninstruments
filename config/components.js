@@ -72,10 +72,21 @@
       css: undefined,
       globalKey: "DyniTextTileLayout"
     },
+    LayoutRectMath: {
+      js: BASE + "shared/widget-kits/layout/LayoutRectMath.js",
+      css: undefined,
+      globalKey: "DyniLayoutRectMath"
+    },
     ResponsiveScaleProfile: {
       js: BASE + "shared/widget-kits/layout/ResponsiveScaleProfile.js",
       css: undefined,
       globalKey: "DyniResponsiveScaleProfile"
+    },
+    ActiveRouteLayout: {
+      js: BASE + "shared/widget-kits/nav/ActiveRouteLayout.js",
+      css: undefined,
+      globalKey: "DyniActiveRouteLayout",
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
     },
     CanvasLayerCache: {
       js: BASE + "shared/widget-kits/canvas/CanvasLayerCache.js",
@@ -86,6 +97,12 @@
       js: BASE + "shared/widget-kits/xte/XteHighwayPrimitives.js",
       css: undefined,
       globalKey: "DyniXteHighwayPrimitives"
+    },
+    XteHighwayLayout: {
+      js: BASE + "shared/widget-kits/xte/XteHighwayLayout.js",
+      css: undefined,
+      globalKey: "DyniXteHighwayLayout",
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
     },
     LinearCanvasPrimitives: {
       js: BASE + "shared/widget-kits/linear/LinearCanvasPrimitives.js",
@@ -106,7 +123,7 @@
       js: BASE + "shared/widget-kits/nav/CenterDisplayLayout.js",
       css: undefined,
       globalKey: "DyniCenterDisplayLayout",
-      deps: ["ResponsiveScaleProfile"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
     },
     CenterDisplayMath: {
       js: BASE + "shared/widget-kits/nav/CenterDisplayMath.js",
@@ -176,7 +193,7 @@
       js: BASE + "widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js",
       css: undefined,
       globalKey: "DyniActiveRouteTextWidget",
-      deps: ["ThemeResolver", "TextLayoutEngine", "RadialTextLayout", "TextTileLayout"]
+      deps: ["ThemeResolver", "TextLayoutEngine", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout"]
     },
     CenterDisplayTextWidget: {
       js: BASE + "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
@@ -287,7 +304,7 @@
       js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
       css: undefined,
       globalKey: "DyniXteDisplayWidget",
-      deps: ["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives", "TextTileLayout"]
+      deps: ["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives", "XteHighwayLayout", "TextTileLayout"]
     },
     ClusterMapperToolkit: {
       js: BASE + "cluster/mappers/ClusterMapperToolkit.js",

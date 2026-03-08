@@ -1,7 +1,7 @@
 /**
  * Module: CenterDisplayLayout - Responsive layout rectangles for the CenterDisplay renderer
  * Documentation: documentation/widgets/center-display.md
- * Depends: ResponsiveScaleProfile
+ * Depends: ResponsiveScaleProfile, LayoutRectMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -24,6 +24,7 @@
   const NORMAL_COORD_MIN_RATIO = 0.44;
   const FLAT_CENTER_MIN_RATIO = 0.28;
   const FLAT_CENTER_MAX_RATIO = 0.56;
+  let makeRect = null;
   const RESPONSIVE_SCALES = {
     textFillScale: 1.18,
     normalCaptionShareScale: 0.78,
@@ -40,17 +41,10 @@
     return Math.max(minValue, Math.min(maxValue, n));
   }
 
-  function makeRect(x, y, w, h) {
-    return {
-      x: Math.round(x),
-      y: Math.round(y),
-      w: Math.max(0, Math.round(w)),
-      h: Math.max(0, Math.round(h))
-    };
-  }
-
   function create(def, Helpers) {
     const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
+    const rectApi = Helpers.getModule("LayoutRectMath").create(def, Helpers);
+    makeRect = rectApi.makeRect;
 
     function computeInsets(W, H) {
       const responsive = profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });

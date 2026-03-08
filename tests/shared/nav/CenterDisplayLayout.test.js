@@ -8,6 +8,9 @@ describe("CenterDisplayLayout", function () {
         if (id === "ResponsiveScaleProfile") {
           return responsiveScaleProfile;
         }
+        if (id === "LayoutRectMath") {
+          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+        }
         throw new Error("unexpected module: " + id);
       }
     });

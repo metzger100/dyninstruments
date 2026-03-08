@@ -1,7 +1,7 @@
 /**
  * Module: XteDisplayWidget - Responsive XTE highway renderer with integrated nav metrics
  * Documentation: documentation/widgets/xte-display.md
- * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives, TextTileLayout
+ * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives, XteHighwayLayout, TextTileLayout
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -17,6 +17,7 @@
     const toolkit = Helpers.getModule("RadialToolkit").create(def, Helpers);
     const cacheFactory = Helpers.getModule("CanvasLayerCache").create(def, Helpers);
     const primitives = Helpers.getModule("XteHighwayPrimitives").create(def, Helpers);
+    const layoutApi = Helpers.getModule("XteHighwayLayout").create(def, Helpers);
     const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
     const staticLayer = cacheFactory.createLayerCache({ layers: ["back"] });
 
@@ -103,12 +104,16 @@
 
       const normalThreshold = p.xteRatioThresholdNormal;
       const flatThreshold = p.xteRatioThresholdFlat;
-      const mode = primitives.computeMode(W, H, normalThreshold, flatThreshold, toolkit.value.computeMode);
-      const pad = toolkit.value.computePad(W, H);
-      const gap = toolkit.value.computeGap(W, H);
+      const mode = layoutApi.computeMode(W, H, normalThreshold, flatThreshold);
+      const insets = layoutApi.computeInsets(W, H);
+      const contentRect = layoutApi.createContentRect(W, H, insets);
       const wpName = disconnected ? "" : trimWaypointName(p.wpName);
       const reserveNameSpace = (p.showWpName !== false) && !!wpName;
-      const layout = primitives.computeLayout(W, H, pad, gap, mode, {
+      const layout = layoutApi.computeLayout({
+        contentRect: contentRect,
+        gap: insets.gap,
+        mode: mode,
+        responsive: insets.responsive,
         reserveNameSpace: reserveNameSpace
       });
       const geom = primitives.highwayGeometry(layout.highway, mode, {
@@ -181,16 +186,29 @@
         btw: { caption: p.btwCaption, value: bearingValue, unit: p.btwUnit }
       };
 
-      if (primitives.shouldShowWaypoint(mode, layout.nameRect, p.showWpName !== false, wpName)) {
+      const waypointFit = reserveNameSpace ? tileLayout.measureFittedLine({
+        textApi: toolkit.text,
+        ctx: ctx,
+        text: wpName,
+        maxW: layout.nameRect.w,
+        maxH: layout.nameRect.h,
+        maxPx: Math.max(1, Math.floor(layout.nameRect.h * 0.72)),
+        textFillScale: layout.responsive.textFillScale,
+        family: family,
+        weight: labelWeight
+      }) : null;
+
+      if (primitives.shouldShowWaypoint(mode, layout, p.showWpName !== false, wpName, waypointFit)) {
         tileLayout.drawFittedLine({
           textApi: toolkit.text,
           ctx: ctx,
+          fit: waypointFit,
           text: wpName,
           rect: layout.nameRect,
           align: "center",
           family: family,
           weight: labelWeight,
-          maxPx: Math.max(10, Math.floor(layout.nameRect.h * 0.72)),
+          maxPx: Math.max(1, Math.floor(layout.nameRect.h * 0.72)),
           color: textColor
         });
       }
@@ -204,7 +222,8 @@
         color: textColor,
         valueWeight: valueWeight,
         labelWeight: labelWeight,
-        secScale: 0.75
+        secScale: 0.75,
+        textFillScale: layout.responsive.textFillScale
       });
       tileLayout.drawMetricTile({
         textApi: toolkit.text,
@@ -215,7 +234,8 @@
         color: textColor,
         valueWeight: valueWeight,
         labelWeight: labelWeight,
-        secScale: 0.7
+        secScale: 0.7,
+        textFillScale: layout.responsive.textFillScale
       });
       tileLayout.drawMetricTile({
         textApi: toolkit.text,
@@ -226,7 +246,8 @@
         color: textColor,
         valueWeight: valueWeight,
         labelWeight: labelWeight,
-        secScale: 0.7
+        secScale: 0.7,
+        textFillScale: layout.responsive.textFillScale
       });
       tileLayout.drawMetricTile({
         textApi: toolkit.text,
@@ -237,7 +258,8 @@
         color: textColor,
         valueWeight: valueWeight,
         labelWeight: labelWeight,
-        secScale: 0.75
+        secScale: 0.75,
+        textFillScale: layout.responsive.textFillScale
       });
     }
 

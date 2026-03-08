@@ -15,6 +15,12 @@ It renders:
 
 This is a dedicated renderer, not a `PositionCoordinateWidget` variant, because it owns a different row/grid contract across aspect ratios.
 
+Layout ownership:
+
+- `shared/widget-kits/nav/ActiveRouteLayout.js` owns responsive insets, content rects, and mode-specific rectangle splitting
+- `shared/widget-kits/layout/ResponsiveScaleProfile.js` owns the shared `minDim -> t` compact curve consumed by `ActiveRouteLayout`
+- `ActiveRouteTextWidget` keeps parsing, formatting, fit-cache keys, accent fill, and draw orchestration only
+
 ## Module Registration
 
 ```javascript
@@ -22,7 +28,7 @@ ActiveRouteTextWidget: {
   js: BASE + "widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js",
   css: undefined,
   globalKey: "DyniActiveRouteTextWidget",
-  deps: ["ThemeResolver", "TextLayoutEngine", "RadialTextLayout", "TextTileLayout"]
+  deps: ["ThemeResolver", "TextLayoutEngine", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout"]
 }
 ```
 
@@ -33,17 +39,17 @@ Used by `ClusterWidget` via `NavMapper` for `kind: "activeRoute"`.
 | Prop | Type | Default | Description |
 |---|---|---|---|
 | `routeName` | string | `""` | Active route name, rendered without caption/unit |
-| `remain` | number | — | Remaining route distance |
-| `eta` | Date-like | — | Route ETA |
-| `nextCourse` | number | — | Next route course, shown only while approaching |
-| `isApproaching` | boolean | `false` | Enables approach accent + `NEXT` tile |
+| `display.remain` | number | — | Remaining route distance |
+| `display.eta` | Date-like | — | Route ETA |
+| `display.nextCourse` | number | — | Next route course, shown only while approaching |
+| `display.isApproaching` | boolean | `false` | Enables approach accent + `NEXT` tile |
 | `disconnect` | boolean | `false` | Forces placeholder metric values and `NO DATA` overlay |
-| `remainCaption` | string | `"RTE"` | Caption for remaining-distance tile |
-| `remainUnit` | string | `"nm"` | Unit for remaining-distance tile and formatter input |
-| `etaCaption` | string | `"ETA"` | Caption for ETA tile |
-| `etaUnit` | string | `""` | ETA unit text (normally empty) |
-| `nextCourseCaption` | string | `"NEXT"` | Caption for next-course tile |
-| `nextCourseUnit` | string | `"°"` | Unit text for next-course tile |
+| `captions.remain` | string | `"RTE"` | Caption for remaining-distance tile |
+| `units.remain` | string | `"nm"` | Unit for remaining-distance tile and formatter input |
+| `captions.eta` | string | `"ETA"` | Caption for ETA tile |
+| `units.eta` | string | `""` | ETA unit text (normally empty) |
+| `captions.nextCourse` | string | `"NEXT"` | Caption for next-course tile |
+| `units.nextCourse` | string | `"°"` | Unit text for next-course tile |
 | `ratioThresholdNormal` | number | `1.2` | Ratio below this -> `high` |
 | `ratioThresholdFlat` | number | `3.8` | Ratio above this -> `flat` |
 | `default` | string | `"---"` | Placeholder for missing values |
@@ -76,6 +82,7 @@ otherwise -> normal
 - right metric panel
 - non-approach: `RTE | ETA`
 - approach: `RTE | ETA | NEXT`
+- compact wide tiles reduce the route-name share via `ActiveRouteLayout` while increasing text fill through the shared profile
 
 ## Formatting Contract
 
@@ -97,6 +104,7 @@ When `disconnect` is true:
 - captions/units use `theme.font.labelWeight`
 - route name uses `theme.font.weight` in `normal` mode and `theme.font.labelWeight` in `high`/`flat`
 - approach state adds a low-alpha fill using `theme.colors.warning`
+- compact tiles increase fitted route-name and metric text fill via `ActiveRouteLayout.responsive.textFillScale`
 - no new CSS defaults or theme tokens are introduced
 
 ## Related
