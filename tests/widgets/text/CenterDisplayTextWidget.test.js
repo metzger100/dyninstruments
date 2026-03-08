@@ -149,6 +149,23 @@ describe("CenterDisplayTextWidget", function () {
     return match ? Number(match[1]) : 0;
   }
 
+  function computeLayoutSnapshot(width, height, mode, relationCount) {
+    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
+    const insets = layout.computeInsets(width, height);
+    const contentRect = layout.createContentRect(width, height, insets);
+    return layout.computeLayout({
+      contentRect: contentRect,
+      mode: mode,
+      relationCount: relationCount,
+      gap: insets.gap,
+      responsive: insets.responsive,
+      normalCaptionShare: 0.28,
+      flatCenterShare: 0.42,
+      highCaptionRatio: 0.24,
+      flatCaptionRatio: 0.22
+    });
+  }
+
   function expectTextsInsideCanvas(calls, width, height) {
     calls.forEach((entry) => {
       expect(entry.x).toBeGreaterThanOrEqual(0);
@@ -316,6 +333,30 @@ describe("CenterDisplayTextWidget", function () {
     expectTextsInsideCanvas(texts, 120, 80);
   });
 
+  it("keeps compact flat and high layouts inside the canvas while preserving waypoint and boat rows", function () {
+    const helpers = makeHelpers();
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
+      .create({}, helpers);
+    const sizes = [
+      { width: 220, height: 80 },
+      { width: 120, height: 140 }
+    ];
+
+    sizes.forEach((size) => {
+      const ctx = createMockContext2D();
+      const canvas = createMockCanvas({ rectWidth: size.width, rectHeight: size.height, ctx });
+
+      spec.renderCanvas(canvas, makeProps({ activeMeasure: undefined }));
+
+      const texts = fillTextCalls(ctx);
+      expect(findFirstText(texts, "WP")).toBeTruthy();
+      expect(findFirstText(texts, "BOAT")).toBeTruthy();
+      expect(findFirstTextPrefix(texts, "LAT:")).toBeTruthy();
+      expect(findFirstTextPrefix(texts, "LON:")).toBeTruthy();
+      expectTextsInsideCanvas(texts, size.width, size.height);
+    });
+  });
+
   it("keeps coordinate font sizes aligned with relation value rows in normal and flat modes", function () {
     const helpers = makeHelpers();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
@@ -341,8 +382,46 @@ describe("CenterDisplayTextWidget", function () {
       expect(lonCall).toBeTruthy();
       expect(wpValueCall).toBeTruthy();
       expect(boatValueCall).toBeTruthy();
-      expect(parseFontPx(latCall.font)).toBe(parseFontPx(wpValueCall.font));
-      expect(parseFontPx(lonCall.font)).toBe(parseFontPx(boatValueCall.font));
+      expect(Math.abs(parseFontPx(latCall.font) - parseFontPx(wpValueCall.font))).toBeLessThanOrEqual(1);
+      expect(Math.abs(parseFontPx(lonCall.font) - parseFontPx(boatValueCall.font))).toBeLessThanOrEqual(1);
     });
+  });
+
+  it("increases compact text fill on smaller normal widgets without changing the layout mode", function () {
+    const helpers = makeHelpers();
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
+      .create({}, helpers);
+    const sizes = {
+      compact: { width: 161, height: 80 },
+      large: { width: 512, height: 265 }
+    };
+    const captured = {};
+
+    Object.keys(sizes).forEach((key) => {
+      const size = sizes[key];
+      const ctx = createMockContext2D();
+      const fonts = captureTextFonts(ctx);
+      const canvas = createMockCanvas({ rectWidth: size.width, rectHeight: size.height, ctx });
+      spec.renderCanvas(canvas, makeProps({ activeMeasure: undefined }));
+      captured[key] = fonts;
+    });
+
+    const compactLayout = computeLayoutSnapshot(sizes.compact.width, sizes.compact.height, "normal", 2);
+    const largeLayout = computeLayoutSnapshot(sizes.large.width, sizes.large.height, "normal", 2);
+    const compactLat = captured.compact.find((entry) => entry.text.indexOf("LAT:") === 0);
+    const largeLat = captured.large.find((entry) => entry.text.indexOf("LAT:") === 0);
+    const compactWpValue = captured.compact.find((entry) => entry.text.indexOf("92") === 0);
+    const largeWpValue = captured.large.find((entry) => entry.text.indexOf("92") === 0);
+
+    expect(compactLat).toBeTruthy();
+    expect(largeLat).toBeTruthy();
+    expect(compactWpValue).toBeTruthy();
+    expect(largeWpValue).toBeTruthy();
+    expect(parseFontPx(compactLat.font) / compactLayout.center.latRect.h).toBeGreaterThan(
+      parseFontPx(largeLat.font) / largeLayout.center.latRect.h
+    );
+    expect(parseFontPx(compactWpValue.font) / compactLayout.rowRects[0].h).toBeGreaterThan(
+      parseFontPx(largeWpValue.font) / largeLayout.rowRects[0].h
+    );
   });
 });

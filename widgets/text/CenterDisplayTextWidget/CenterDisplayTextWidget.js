@@ -106,10 +106,13 @@
   function computeLineMaxPx(rect, ratio) {
     return Math.max(1, Math.floor(rect.h * ratio));
   }
+  function computeResponsiveLineMaxPx(rect, ratio, fillScale) {
+    return computeLineMaxPx(rect, ratio * fillScale);
+  }
   function computeTextPad(rect) {
     return Math.ceil(Math.max(0, Math.min(rect.w, rect.h)) * 0.04);
   }
-  function computeRelationValueMaxPx(layout) {
+  function computeRelationValueMaxPx(layout, textFillScale) {
     const rowRects = layout.rowRects;
     let maxPx = 0;
     for (let i = 0; i < rowRects.length; i++) {
@@ -117,7 +120,7 @@
       if (!rect || !(rect.h > 0)) {
         continue;
       }
-      maxPx = Math.max(maxPx, computeLineMaxPx(rect, 0.66));
+      maxPx = Math.max(maxPx, computeResponsiveLineMaxPx(rect, 0.66, textFillScale));
     }
     return maxPx;
   }
@@ -185,7 +188,8 @@
   }
 
   function drawCenterPanel(layout, state, displayState, family, valueWeight, labelWeight, color) {
-    const relationValueMaxPx = computeRelationValueMaxPx(layout);
+    const textFillScale = layout.responsive.textFillScale;
+    const relationValueMaxPx = computeRelationValueMaxPx(layout, textFillScale);
     state.ctx.fillStyle = color;
     state.tileLayout.drawFittedLine({
       textApi: state.radialText,
@@ -195,7 +199,7 @@
       align: layout.center.captionAlign,
       family: family,
       weight: labelWeight,
-      maxPx: computeLineMaxPx(layout.center.captionRect, 0.76),
+      maxPx: computeResponsiveLineMaxPx(layout.center.captionRect, 0.76, textFillScale),
       padX: computeTextPad(layout.center.captionRect),
       color: color
     });
@@ -227,8 +231,9 @@
 
   function computeRowLayout(row, rect, state, family, valueWeight, labelWeight) {
     const gap = Math.max(1, Math.floor(Math.min(rect.w, rect.h) * 0.08));
-    const labelMaxPx = computeLineMaxPx(rect, 0.58);
-    const valueMaxPx = computeLineMaxPx(rect, 0.66);
+    const textFillScale = state.textFillScale;
+    const labelMaxPx = computeResponsiveLineMaxPx(rect, 0.58, textFillScale);
+    const valueMaxPx = computeResponsiveLineMaxPx(rect, 0.66, textFillScale);
     const desiredLabelWidth = row.caption
       ? measureTextWidth(state.ctx, state.radialText, row.caption, family, labelWeight, labelMaxPx)
       : 0;
@@ -370,12 +375,18 @@
         mode: modeData.mode,
         relationCount: displayState.rows.length,
         gap: insets.gap,
+        responsive: insets.responsive,
         normalCaptionShare: hints.normalCaptionShare,
         flatCenterShare: hints.flatCenterShare,
         highCaptionRatio: hints.highCaptionRatio,
         flatCaptionRatio: hints.flatCaptionRatio
       });
-      const renderState = { ctx: ctx, radialText: radialText, tileLayout: tileLayout };
+      const renderState = {
+        ctx: ctx,
+        radialText: radialText,
+        tileLayout: tileLayout,
+        textFillScale: layout.responsive.textFillScale
+      };
 
       drawCenterPanel(layout, renderState, displayState, family, valueWeight, labelWeight, color);
       drawRelationRows(layout, displayState.rows, renderState, family, valueWeight, labelWeight, color);

@@ -12,6 +12,12 @@
 
   const HIGH_CENTER_WEIGHT = 2.4;
   const NORMAL_COORD_LINE_COUNT = 2;
+  const RESPONSIVE_MIN_DIM = 80;
+  const RESPONSIVE_DIM_RANGE = 100;
+  const PAD_X_RATIO = 0.03;
+  const INNER_Y_RATIO = 0.02;
+  const GAP_RATIO = 0.03;
+  const TEXT_FILL_SCALE_MIN = 1.18;
   const FLAT_CENTER_RATIO = 0.42;
   const HIGH_STACKED_CAPTION_RATIO = 0.24;
   const FLAT_STACKED_CAPTION_RATIO = 0.22;
@@ -21,7 +27,6 @@
   const NORMAL_COORD_MIN_RATIO = 0.44;
   const FLAT_CENTER_MIN_RATIO = 0.28;
   const FLAT_CENTER_MAX_RATIO = 0.56;
-  const COMPACT_SCALE_MIN = 0.62;
 
   function clampNumber(value, minValue, maxValue, defaultValue) {
     const n = Number(value);
@@ -40,12 +45,32 @@
     };
   }
 
-  function computeInsets(W, H) {
+  function lerp(from, to, t) {
+    return from + ((to - from) * t);
+  }
+
+  function computeResponsiveProfile(W, H) {
     const minDim = Math.max(1, Math.min(Number(W) || 0, Number(H) || 0));
+    const t = clampNumber((minDim - RESPONSIVE_MIN_DIM) / RESPONSIVE_DIM_RANGE, 0, 1, 0);
     return {
-      padX: Math.floor(minDim * 0.03),
-      innerY: Math.floor(minDim * 0.02),
-      gap: Math.max(1, Math.floor(minDim * 0.03))
+      minDim: minDim,
+      t: t,
+      textFillScale: lerp(TEXT_FILL_SCALE_MIN, 1, t),
+      normalCaptionShareScale: lerp(0.78, 1, t),
+      flatCenterShareScale: lerp(0.84, 1, t),
+      stackedCaptionScale: lerp(0.76, 1, t),
+      highCenterWeightScale: lerp(0.88, 1, t)
+    };
+  }
+
+  function computeInsets(W, H) {
+    const responsive = computeResponsiveProfile(W, H);
+    const minDim = responsive.minDim;
+    return {
+      padX: Math.max(1, Math.floor(minDim * PAD_X_RATIO)),
+      innerY: Math.max(1, Math.floor(minDim * INNER_Y_RATIO)),
+      gap: Math.max(1, Math.floor(minDim * GAP_RATIO)),
+      responsive: responsive
     };
   }
 
@@ -131,11 +156,13 @@
     const safeGap = Math.max(0, Math.floor(gap));
     const rowGapTotal = safeGap * Math.max(0, relationCount - 1);
     const totalRhythmHeight = Math.max(1, contentRect.h - safeGap - rowGapTotal);
-    const rhythmRowHeight = Math.max(
+    const centerHeight = Math.max(
       1,
-      Math.floor(totalRhythmHeight / Math.max(1, relationCount + NORMAL_COORD_LINE_COUNT))
+      Math.floor(
+        totalRhythmHeight * NORMAL_COORD_LINE_COUNT /
+        Math.max(1, relationCount + NORMAL_COORD_LINE_COUNT)
+      )
     );
-    const centerHeight = Math.max(1, rhythmRowHeight * NORMAL_COORD_LINE_COUNT);
     return {
       centerRect: makeRect(contentRect.x, contentRect.y, contentRect.w, centerHeight),
       rowsRect: makeRect(
@@ -147,28 +174,16 @@
     };
   }
 
-  function computeCompactScale(contentRect, relationCount, mode) {
-    const aspect = contentRect.h / Math.max(1, contentRect.w);
-    const rowPenalty = Math.max(0, relationCount - (mode === "flat" ? 1 : 2)) * 0.05;
-    return clampNumber((aspect * 0.75) + 0.3 - rowPenalty, COMPACT_SCALE_MIN, 1, 1);
-  }
-
   function computeLayout(args) {
     const cfg = args || {};
     const contentRect = cfg.contentRect || makeRect(0, 0, 0, 0);
-    const defaultGap = Math.max(1, Math.floor(Math.min(contentRect.w, contentRect.h) * 0.03));
+    const responsive = cfg.responsive || computeResponsiveProfile(contentRect.w, contentRect.h);
+    const defaultGap = Math.max(1, Math.floor(responsive.minDim * GAP_RATIO));
     const mode = cfg.mode === "high" || cfg.mode === "flat" ? cfg.mode : "normal";
     const relationCount = Math.max(1, Math.floor(Number(cfg.relationCount) || 0));
-    const compactScale = computeCompactScale(contentRect, relationCount, mode);
-    const gap = Math.max(
-      0,
-      Math.floor(
-        clampNumber(cfg.gap, 0, Math.max(contentRect.w, contentRect.h), defaultGap) *
-        (0.45 + compactScale * 0.55)
-      )
-    );
+    const gap = Math.max(0, Math.floor(clampNumber(cfg.gap, 0, Math.max(contentRect.w, contentRect.h), defaultGap)));
     const normalCaptionShare = clampNumber(
-      Number(cfg.normalCaptionShare) * (0.78 + compactScale * 0.22),
+      Number(cfg.normalCaptionShare) * responsive.normalCaptionShareScale,
       NORMAL_CAPTION_MIN_RATIO,
       Math.min(NORMAL_CAPTION_MAX_RATIO, 1 - NORMAL_COORD_MIN_RATIO),
       NORMAL_CAPTION_COL_RATIO
@@ -176,7 +191,7 @@
 
     if (mode === "flat") {
       const centerShare = clampNumber(
-        Number(cfg.flatCenterShare) * (0.82 + compactScale * 0.18),
+        Number(cfg.flatCenterShare) * responsive.flatCenterShareScale,
         FLAT_CENTER_MIN_RATIO,
         FLAT_CENTER_MAX_RATIO,
         FLAT_CENTER_RATIO
@@ -192,22 +207,24 @@
       );
       return {
         mode: mode,
-        center: splitStackedPanel(centerRect, Number(cfg.flatCaptionRatio) * (0.72 + compactScale * 0.28)),
-        rowRects: splitRows(rowsRect, relationCount, gap)
+        center: splitStackedPanel(centerRect, Number(cfg.flatCaptionRatio) * responsive.stackedCaptionScale),
+        rowRects: splitRows(rowsRect, relationCount, gap),
+        responsive: responsive
       };
     }
 
     const vertical = mode === "high"
-      ? computeVerticalRects(contentRect, relationCount, gap, HIGH_CENTER_WEIGHT * compactScale)
+      ? computeVerticalRects(contentRect, relationCount, gap, HIGH_CENTER_WEIGHT * responsive.highCenterWeightScale)
       : computeNormalVerticalRects(contentRect, relationCount, gap);
 
     return {
       mode: mode,
       gap: gap,
       center: mode === "high"
-        ? splitStackedPanel(vertical.centerRect, Number(cfg.highCaptionRatio) * (0.72 + compactScale * 0.28))
+        ? splitStackedPanel(vertical.centerRect, Number(cfg.highCaptionRatio) * responsive.stackedCaptionScale)
         : splitNormalPanel(vertical.centerRect, gap, normalCaptionShare),
-      rowRects: splitRows(vertical.rowsRect, relationCount, gap)
+      rowRects: splitRows(vertical.rowsRect, relationCount, gap),
+      responsive: responsive
     };
   }
 
