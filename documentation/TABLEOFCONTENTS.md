@@ -85,6 +85,7 @@
 - **What layout modes does ThreeValueTextWidget support?** → [widgets/three-elements.md](widgets/three-elements.md#layout-modes)
 - **What props does ThreeValueTextWidget accept?** → [widgets/three-elements.md](widgets/three-elements.md#props)
 - **How does the ActiveRoute widget work (route name, RTE, ETA, NEXT)?** → [widgets/active-route.md](widgets/active-route.md)
+- **How does the CenterDisplay widget work (center position + waypoint/boat/measure rows)?** → [widgets/center-display.md](widgets/center-display.md)
 - **How do stacked nav positions render (boat/wp)?** → [widgets/position-coordinates.md](widgets/position-coordinates.md)
 - **Which kinds use PositionCoordinateWidget?** → [widgets/position-coordinates.md](widgets/position-coordinates.md#key-details)
 - **How does the wind dial work (angle+speed dual display)?** → [widgets/wind-dial.md](widgets/wind-dial.md)

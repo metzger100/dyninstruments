@@ -17,6 +17,7 @@ describe("ClusterRendererRouter", function () {
     const windLinear = makeSpec("windLinear");
     const position = makeSpec("position");
     const activeRoute = makeSpec("activeRoute");
+    const centerDisplay = makeSpec("centerDisplay");
     const compass = makeSpec("compass");
     const compassLinear = makeSpec("compassLinear");
     const speed = makeSpec("speed");
@@ -50,6 +51,7 @@ describe("ClusterRendererRouter", function () {
           ThreeValueTextWidget: { create: () => three },
           PositionCoordinateWidget: { create: () => position },
           ActiveRouteTextWidget: { create: () => activeRoute },
+          CenterDisplayTextWidget: { create: () => centerDisplay },
           RendererPropsWidget: {
             create: function (def, helpers, targetRendererId) {
               return targetSpecs[targetRendererId];
@@ -73,6 +75,7 @@ describe("ClusterRendererRouter", function () {
     expect(router.pickRenderer({ renderer: "VoltageLinearWidget" })).toBe(voltLinear);
     expect(router.pickRenderer({ renderer: "PositionCoordinateWidget" })).toBe(position);
     expect(router.pickRenderer({ renderer: "ActiveRouteTextWidget" })).toBe(activeRoute);
+    expect(router.pickRenderer({ renderer: "CenterDisplayTextWidget" })).toBe(centerDisplay);
     expect(router.pickRenderer({ renderer: "Unknown" })).toBe(three);
     expect(router.pickRenderer({})).toBe(three);
   });
@@ -80,6 +83,7 @@ describe("ClusterRendererRouter", function () {
   it("delegates renderCanvas and fans out finalizeFunction safely", function () {
     const three = makeSpec("three");
     const activeRoute = makeSpec("activeRoute");
+    const centerDisplay = makeSpec("centerDisplay");
     const speed = makeSpec("speed", { finalizeFunction: vi.fn(() => { throw new Error("ignored"); }) });
     const speedLinear = makeSpec("speedLinear");
     const voltage = makeSpec("voltage");
@@ -115,6 +119,7 @@ describe("ClusterRendererRouter", function () {
           ThreeValueTextWidget: { create: () => three },
           PositionCoordinateWidget: { create: () => makeSpec("position") },
           ActiveRouteTextWidget: { create: () => activeRoute },
+          CenterDisplayTextWidget: { create: () => centerDisplay },
           RendererPropsWidget: {
             create: function (def, helpers, targetRendererId) {
               return targetSpecs[targetRendererId];
@@ -140,6 +145,7 @@ describe("ClusterRendererRouter", function () {
 
     expect(three.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
     expect(activeRoute.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
+    expect(centerDisplay.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
     expect(speed.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
     expect(speedLinear.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
     expect(depthLinear.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);

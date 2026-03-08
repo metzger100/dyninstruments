@@ -48,6 +48,14 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `nav` | `activeRouteApproaching` | `nav.route.isApproaching` | `activeRoute` |
 | `nav` | `rteDistance` | `nav.route.remain` | `rteDistance` |
 | `nav` | `vmg` | `nav.wp.vmg` | `vmg` |
+| `nav` | `centerCourse` | `nav.center.course` | `centerDisplay` |
+| `nav` | `centerDistance` | `nav.center.distance` | `centerDisplay` |
+| `nav` | `centerMarkerCourse` | `nav.center.markerCourse` | `centerDisplay` |
+| `nav` | `centerMarkerDistance` | `nav.center.markerDistance` | `centerDisplay` |
+| `nav` | `centerPosition` | `map.centerPosition` | `centerDisplay` |
+| `nav` | `activeMeasure` | `map.activeMeasure` | `centerDisplay` |
+| `nav` | `measureRhumbLine` | `properties.measureRhumbLine` | `centerDisplay` |
+| `nav` | `lockPosition` | `map.lockPosition` | `centerDisplay` visibility |
 | `nav` | `positionBoat` | `nav.gps.position` | `positionBoat` |
 | `nav` | `positionWp` | `nav.wp.position` | `positionWp` |
 | `anchor` | `distance` | `nav.anchor.distance` | `distance` |
@@ -86,6 +94,7 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `eta`, `rteEta` | `eta` / `rteEta` | `formatTime` + `[]` | Date/time value path |
 | `dst`, `rteDistance` | `dst` / `rteDistance` | `formatDistance` + `[]` | distance text |
 | `activeRoute` | `activeRouteName`, `activeRouteRemain`, `activeRouteEta`, `activeRouteNextCourse`, `activeRouteApproaching` | renderer wrapper (`ActiveRouteTextWidget`) using `formatDistance` (`activeRouteRemain`) + `[remainUnit]`, `formatTime` (`activeRouteEta`) + `[]`, `formatDirection` (`activeRouteNextCourse`) + `[]` | next course is degree-based; `NEXT` tile only renders while approaching |
+| `centerDisplay` | `centerPosition`, `centerMarkerCourse`, `centerMarkerDistance`, `centerCourse`, `centerDistance`, `activeMeasure`, `measureRhumbLine`, `lockPosition` | renderer wrapper (`CenterDisplayTextWidget`) using `formatLonLatsDecimal` (center coordinates) + `formatDirection` (relation courses) + `formatDistance` (relation distances) | measure row is computed client-side from `activeMeasure.getPointAtIndex(0)` and omitted when unavailable; widget visibility follows `!lockPosition \|\| editing` |
 | `xteDisplay` | `xte`, `cog`, `dtw`, `btw`, `wpName` | renderer wrapper (`XteDisplayWidget`) using `formatDistance` (`xte`, `dtw`) + `formatDirection360` (`cog`, `btw`) | fail-closed if required numeric inputs are missing |
 | `vmg` | `vmg` | `formatSpeed` + `[unit]` | speed text |
 | `positionBoat`, `positionWp` | `positionBoat` / `positionWp` | `formatLonLats` + coordinate formatter `formatLonLatsDecimal` | position object expected |
@@ -105,6 +114,10 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 |---|---|---|---|
 | `nav.gps.rtime` | Date/time value for `formatTime`/`formatDate`/`formatDateTime` family | high | `viewer/util/keys.jsx`, mapper usage |
 | `nav.gps.valid` | GPS validity bool-like flag | high | `viewer/util/keys.jsx`, vessel mapper usage |
+| `map.centerPosition` | Current map center position object | high | `viewer/util/keys.jsx`, `viewer/components/CenterDisplayWidget.jsx` (2026-03-08) |
+| `map.activeMeasure` | Current measure object passed through live store state | medium | `viewer/util/keys.jsx`, `viewer/components/CenterDisplayWidget.jsx` (2026-03-08) |
+| `properties.measureRhumbLine` | Measure mode toggle for rhumb-line vs great-circle calculations | high | `viewer/util/keys.jsx`, `viewer/components/CenterDisplayWidget.jsx` (2026-03-08) |
+| `map.lockPosition` | Map lock state used to hide/show `CenterDisplay` | high | `viewer/components/MapPage.jsx` (2026-03-08) |
 | `nav.gps.signalk.navigation.attitude.pitch` | SignalK pitch (radians) | medium | `config/clusters/vessel.js`, `server/handler/signalkhandler.py`, vessel mapper |
 | `nav.gps.signalk.navigation.attitude.roll` | SignalK roll (radians) | medium | `config/clusters/vessel.js`, `server/handler/signalkhandler.py`, vessel mapper |
 

@@ -13,7 +13,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ### Planned integration directions
 
-- `map`: `centerDisplay`, `zoom`
+- `map`: `zoom`
 - `nav`: `routePoints`, `editRoute`
 - planned new clusters: `ais` (for example `aisTarget`)
 - page/header utility parity: `alarm`
@@ -21,11 +21,10 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ### Practical implementation order
 
-1. Passive map widget first: `CenterDisplay`
-2. Page-routed map action after that: `Zoom`
-3. Route workflow widgets: `RoutePoints`, `EditRoute`
-4. AIS workflow widget: `AisTarget`
-5. Page/header utility parity: `Alarm`
+1. Page-routed map action: `Zoom`
+2. Route workflow widgets: `RoutePoints`, `EditRoute`
+3. AIS workflow widget: `AisTarget`
+4. Page/header utility parity: `Alarm`
 
 ### Core interaction notes
 
@@ -51,7 +50,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | AnchorDistance               | dyni_Anchor_Instruments → `distance`                                         | ✅ covered                                  |
 | AnchorWatchDistance          | dyni_Anchor_Instruments → `watch`                                            | ✅ covered                                  |
 | BRG                          | dyni_CourseHeading_Instruments → `brg`                                       | ✅ covered                                  |
-| CenterDisplay                | —                                                                            | ❌ not covered yet                          |
+| CenterDisplay                | dyni_Nav_Instruments → `centerDisplay`                                       | ✅ covered                                  |
 | COG                          | dyni_CourseHeading_Instruments → `cog`                                       | ✅ covered                                  |
 | CombinedWidget               | —                                                                            | ❌ not covered yet                          |
 | DateTime                     | dyni_Vessel_Instruments → `dateTime`                                         | ✅ covered                                  |
