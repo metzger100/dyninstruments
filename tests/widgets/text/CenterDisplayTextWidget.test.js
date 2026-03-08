@@ -131,6 +131,24 @@ describe("CenterDisplayTextWidget", function () {
     return calls.find((entry) => entry.text.indexOf(prefix) === 0);
   }
 
+  function captureTextFonts(ctx) {
+    const captured = [];
+    const originalFillText = ctx.fillText;
+    ctx.fillText = function () {
+      captured.push({
+        text: String(arguments[0]),
+        font: ctx.font
+      });
+      return originalFillText.apply(this, arguments);
+    };
+    return captured;
+  }
+
+  function parseFontPx(font) {
+    const match = /(\d+)px/.exec(String(font || ""));
+    return match ? Number(match[1]) : 0;
+  }
+
   function expectTextsInsideCanvas(calls, width, height) {
     calls.forEach((entry) => {
       expect(entry.x).toBeGreaterThanOrEqual(0);
@@ -296,5 +314,35 @@ describe("CenterDisplayTextWidget", function () {
     expect(findFirstText(texts, "WP")).toBeTruthy();
     expect(findFirstText(texts, "BOAT")).toBeTruthy();
     expectTextsInsideCanvas(texts, 120, 80);
+  });
+
+  it("keeps coordinate font sizes aligned with relation value rows in normal and flat modes", function () {
+    const helpers = makeHelpers();
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
+      .create({}, helpers);
+    const sizes = [
+      { width: 260, height: 180 },
+      { width: 520, height: 100 }
+    ];
+
+    sizes.forEach((size) => {
+      const ctx = createMockContext2D();
+      const fonts = captureTextFonts(ctx);
+      const canvas = createMockCanvas({ rectWidth: size.width, rectHeight: size.height, ctx });
+
+      spec.renderCanvas(canvas, makeProps({ activeMeasure: undefined }));
+
+      const latCall = fonts.find((entry) => entry.text === "LAT:54.123");
+      const lonCall = fonts.find((entry) => entry.text === "LON:10.456");
+      const wpValueCall = fonts.find((entry) => entry.text === "92\u00b0 / 12.3nm");
+      const boatValueCall = fonts.find((entry) => entry.text === "184\u00b0 / 3.4nm");
+
+      expect(latCall).toBeTruthy();
+      expect(lonCall).toBeTruthy();
+      expect(wpValueCall).toBeTruthy();
+      expect(boatValueCall).toBeTruthy();
+      expect(parseFontPx(latCall.font)).toBe(parseFontPx(wpValueCall.font));
+      expect(parseFontPx(lonCall.font)).toBe(parseFontPx(boatValueCall.font));
+    });
   });
 });

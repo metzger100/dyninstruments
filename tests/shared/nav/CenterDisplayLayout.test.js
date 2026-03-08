@@ -97,6 +97,32 @@ describe("CenterDisplayLayout", function () {
     const largeTopGap = large.rowRects[0].y - (large.center.rect.y + large.center.rect.h);
 
     expect(compactTopGap).toBeLessThan(largeTopGap);
-    expect(compact.center.rect.h / compactContent.h).toBeLessThan(large.center.rect.h / largeContent.h);
+  });
+
+  it("balances the first coordinate row and last relation row against the outer edges in normal mode", function () {
+    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
+    const cases = [
+      { width: 260, height: 180, relationCount: 2 },
+      { width: 260, height: 180, relationCount: 3 }
+    ];
+
+    cases.forEach((testCase) => {
+      const insets = layout.computeInsets(testCase.width, testCase.height);
+      const contentRect = layout.createContentRect(testCase.width, testCase.height, insets);
+      const out = layout.computeLayout({
+        contentRect: contentRect,
+        mode: "normal",
+        relationCount: testCase.relationCount,
+        gap: insets.gap,
+        normalCaptionShare: 0.28
+      });
+      const firstCoordCenter = out.center.latRect.y + Math.floor(out.center.latRect.h / 2);
+      const lastRow = out.rowRects[out.rowRects.length - 1];
+      const lastRowCenter = lastRow.y + Math.floor(lastRow.h / 2);
+      const topMargin = firstCoordCenter - contentRect.y;
+      const bottomMargin = (contentRect.y + contentRect.h) - lastRowCenter;
+
+      expect(Math.abs(topMargin - bottomMargin)).toBeLessThanOrEqual(1);
+    });
   });
 });

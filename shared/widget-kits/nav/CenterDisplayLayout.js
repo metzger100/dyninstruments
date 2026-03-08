@@ -11,7 +11,7 @@
   "use strict";
 
   const HIGH_CENTER_WEIGHT = 2.4;
-  const NORMAL_CENTER_WEIGHT = 1.9;
+  const NORMAL_COORD_LINE_COUNT = 2;
   const FLAT_CENTER_RATIO = 0.42;
   const HIGH_STACKED_CAPTION_RATIO = 0.24;
   const FLAT_STACKED_CAPTION_RATIO = 0.22;
@@ -127,6 +127,26 @@
     };
   }
 
+  function computeNormalVerticalRects(contentRect, relationCount, gap) {
+    const safeGap = Math.max(0, Math.floor(gap));
+    const rowGapTotal = safeGap * Math.max(0, relationCount - 1);
+    const totalRhythmHeight = Math.max(1, contentRect.h - safeGap - rowGapTotal);
+    const rhythmRowHeight = Math.max(
+      1,
+      Math.floor(totalRhythmHeight / Math.max(1, relationCount + NORMAL_COORD_LINE_COUNT))
+    );
+    const centerHeight = Math.max(1, rhythmRowHeight * NORMAL_COORD_LINE_COUNT);
+    return {
+      centerRect: makeRect(contentRect.x, contentRect.y, contentRect.w, centerHeight),
+      rowsRect: makeRect(
+        contentRect.x,
+        contentRect.y + centerHeight + safeGap,
+        contentRect.w,
+        Math.max(1, contentRect.h - centerHeight - safeGap)
+      )
+    };
+  }
+
   function computeCompactScale(contentRect, relationCount, mode) {
     const aspect = contentRect.h / Math.max(1, contentRect.w);
     const rowPenalty = Math.max(0, relationCount - (mode === "flat" ? 1 : 2)) * 0.05;
@@ -177,12 +197,9 @@
       };
     }
 
-    const vertical = computeVerticalRects(
-      contentRect,
-      relationCount,
-      gap,
-      (mode === "high" ? HIGH_CENTER_WEIGHT : NORMAL_CENTER_WEIGHT) * compactScale
-    );
+    const vertical = mode === "high"
+      ? computeVerticalRects(contentRect, relationCount, gap, HIGH_CENTER_WEIGHT * compactScale)
+      : computeNormalVerticalRects(contentRect, relationCount, gap);
 
     return {
       mode: mode,
