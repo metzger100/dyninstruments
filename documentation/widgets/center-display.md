@@ -20,13 +20,13 @@ This is a dedicated renderer, not a `PositionCoordinateWidget` variant, because 
 
 ## Key Details
 
-- `CenterDisplayLayout` is the current canonical responsive baseline for the repo-wide compact-profile rollout.
-- The current compaction curve is JS-owned in runtime code; Phase 0 documents it and tests it without extracting a new shared module yet.
-- `CenterDisplayLayout` currently owns geometry plus a temporary private `computeResponsiveProfile(...)`; Phase 1 will move that profile ownership to `shared/widget-kits/layout/ResponsiveScaleProfile.js` while keeping `CenterDisplayLayout` as a nav-owned consumer.
+- `CenterDisplayLayout` is the current canonical responsive baseline and the Phase 1 reference consumer of `ResponsiveScaleProfile`.
+- `shared/widget-kits/layout/ResponsiveScaleProfile.js` owns the shared `minDim -> t` compaction curve plus named scale outputs.
+- `CenterDisplayLayout` keeps nav-owned geometry, panel bounds, and row splitting; it no longer owns a private responsive-profile implementation.
 
 ## Responsive Baseline Contract
 
-Current baseline formulas from `shared/widget-kits/nav/CenterDisplayLayout.js`:
+Shared baseline formulas from `shared/widget-kits/layout/ResponsiveScaleProfile.js`, consumed by `CenterDisplayLayout`:
 
 ```text
 minDim = max(1, min(W, H))

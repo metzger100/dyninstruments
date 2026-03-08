@@ -1,6 +1,6 @@
 # Implementation Plan
 
-**Status:** ⏳ Investigated | Plugin-wide responsive scaling and compact rendering rollout
+**Status:** ⏳ In Progress | Phase 1 extracted; later responsive rollout phases pending
 
 ## Overview
 
@@ -55,7 +55,7 @@ Scope:
 
 ## Current Dyninstruments Gaps
 
-- The new compact behavior lives inside `CenterDisplayLayout` / `CenterDisplayTextWidget` only; there is no shared responsive profile module yet.
+- `ResponsiveScaleProfile` now owns the shared base compaction curve, but only `CenterDisplayLayout` consumes it so far.
 - Shared text helpers (`TextLayoutEngine`, `TextLayoutComposite`, `TextTileLayout`) still contain layout-driving fixed floors, so numeric and coordinate widgets do not inherit the new compact fill behavior.
 - `ActiveRouteTextWidget`, `XteHighwayPrimitives`, `LinearGaugeMath`, `SemicircleRadialEngine`, `FullCircleRadialEngine`, and `FullCircleRadialTextLayout` each own local size floors and spacing rules.
 - The current custom lint/smell system does not yet block new hardcoded responsive-layout floors or missing adoption of a shared compact profile.
@@ -79,9 +79,10 @@ Scope:
 | File | Description | Planned/Actual Change |
 |---|---|---|
 | `documentation/PLAN2.md` | This rollout plan | Actual change in this session |
-| `documentation/TABLEOFCONTENTS.md` | Documentation index | Actual change in this session |
-| `shared/widget-kits/nav/CenterDisplayLayout.js` | Current compact reference profile | Planned refactor target: extract reusable responsive-profile logic |
-| `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js` | Current compact reference widget | Planned refactor target: consume shared profile after extraction |
+| `documentation/TABLEOFCONTENTS.md` | Documentation index | No change required in this session |
+| `shared/widget-kits/layout/ResponsiveScaleProfile.js` | Shared runtime owner for the base compact curve | Actual change in this session |
+| `shared/widget-kits/nav/CenterDisplayLayout.js` | Current compact reference profile | Actual change in this session: now consumes `ResponsiveScaleProfile` |
+| `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js` | Current compact reference widget | No runtime change in this session; behavior preserved through `CenterDisplayLayout` |
 | `shared/widget-kits/text/TextLayoutEngine.js` | Shared text layout facade | Planned change: expose shared responsive profile / compact inset helpers |
 | `shared/widget-kits/text/TextLayoutComposite.js` | Shared text row/block layout | Planned change: remove layout-driving fixed floors and adopt profile scaling |
 | `shared/widget-kits/text/TextTileLayout.js` | Shared metric/fitted line helper | Planned change: support compact text-fill scaling |
@@ -125,6 +126,8 @@ Scope:
    - no second compact algorithm per widget family
 
 ### Phase 1 - Extract shared responsive profile infrastructure
+
+Status: implemented. `ResponsiveScaleProfile` now exists as the shared runtime owner, `CenterDisplayLayout` consumes it, and exact profile outputs are locked in dedicated shared-module tests.
 
 1. Extract the reusable `CenterDisplay` compaction primitives into one shared module:
    - `computeProfile(W, H, spec)`
