@@ -8,6 +8,27 @@ describe("CenterDisplayLayout", function () {
     expect(inner.y + inner.h).toBeLessThanOrEqual(outer.y + outer.h);
   }
 
+  function buildSnapshot(layout, width, height, mode, relationCount) {
+    const insets = layout.computeInsets(width, height);
+    const contentRect = layout.createContentRect(width, height, insets);
+    const out = layout.computeLayout({
+      contentRect: contentRect,
+      mode: mode,
+      relationCount: relationCount,
+      gap: insets.gap,
+      responsive: insets.responsive,
+      normalCaptionShare: 0.28,
+      flatCenterShare: 0.42,
+      highCaptionRatio: 0.24,
+      flatCaptionRatio: 0.22
+    });
+    return {
+      insets: insets,
+      contentRect: contentRect,
+      out: out
+    };
+  }
+
   it("keeps compact normal-mode panels and rows inside the content rect", function () {
     const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
     const cases = [
@@ -17,15 +38,9 @@ describe("CenterDisplayLayout", function () {
     ];
 
     cases.forEach((testCase) => {
-      const insets = layout.computeInsets(testCase.width, testCase.height);
-      const contentRect = layout.createContentRect(testCase.width, testCase.height, insets);
-      const out = layout.computeLayout({
-        contentRect: contentRect,
-        mode: "normal",
-        relationCount: testCase.relationCount,
-        gap: insets.gap,
-        normalCaptionShare: 0.28
-      });
+      const snapshot = buildSnapshot(layout, testCase.width, testCase.height, "normal", testCase.relationCount);
+      const contentRect = snapshot.contentRect;
+      const out = snapshot.out;
 
       expectRectInside(out.center.rect, contentRect);
       expectRectInside(out.center.captionRect, out.center.rect);
@@ -43,60 +58,25 @@ describe("CenterDisplayLayout", function () {
 
   it("scales compact row heights with available space and row count", function () {
     const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
-    const smallInsets = layout.computeInsets(120, 60);
-    const tallInsets = layout.computeInsets(120, 80);
-    const smallContent = layout.createContentRect(120, 60, smallInsets);
-    const tallContent = layout.createContentRect(120, 80, tallInsets);
-    const compactThreeRows = layout.computeLayout({
-      contentRect: smallContent,
-      mode: "normal",
-      relationCount: 3,
-      gap: smallInsets.gap,
-      normalCaptionShare: 0.28
-    });
-    const tallerThreeRows = layout.computeLayout({
-      contentRect: tallContent,
-      mode: "normal",
-      relationCount: 3,
-      gap: tallInsets.gap,
-      normalCaptionShare: 0.28
-    });
-    const tallerTwoRows = layout.computeLayout({
-      contentRect: tallContent,
-      mode: "normal",
-      relationCount: 2,
-      gap: tallInsets.gap,
-      normalCaptionShare: 0.28
-    });
+    const compactThreeRows = buildSnapshot(layout, 120, 60, "normal", 3).out;
+    const tallerThreeRows = buildSnapshot(layout, 120, 80, "normal", 3).out;
+    const tallerTwoRows = buildSnapshot(layout, 120, 80, "normal", 2).out;
 
     expect(tallerThreeRows.rowRects[0].h).toBeGreaterThan(compactThreeRows.rowRects[0].h);
     expect(tallerTwoRows.rowRects[0].h).toBeGreaterThan(tallerThreeRows.rowRects[0].h);
   });
 
-  it("compresses top-band spacing more aggressively on compact normal tiles", function () {
+  it("applies linear caption-share and text-fill compaction on compact normal tiles", function () {
     const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
-    const compactInsets = layout.computeInsets(120, 60);
-    const largeInsets = layout.computeInsets(260, 180);
-    const compactContent = layout.createContentRect(120, 60, compactInsets);
-    const largeContent = layout.createContentRect(260, 180, largeInsets);
-    const compact = layout.computeLayout({
-      contentRect: compactContent,
-      mode: "normal",
-      relationCount: 2,
-      gap: compactInsets.gap,
-      normalCaptionShare: 0.28
-    });
-    const large = layout.computeLayout({
-      contentRect: largeContent,
-      mode: "normal",
-      relationCount: 2,
-      gap: largeInsets.gap,
-      normalCaptionShare: 0.28
-    });
-    const compactTopGap = compact.rowRects[0].y - (compact.center.rect.y + compact.center.rect.h);
-    const largeTopGap = large.rowRects[0].y - (large.center.rect.y + large.center.rect.h);
+    const compact = buildSnapshot(layout, 120, 80, "normal", 2);
+    const medium = buildSnapshot(layout, 140, 90, "normal", 2);
+    const large = buildSnapshot(layout, 260, 180, "normal", 2);
 
-    expect(compactTopGap).toBeLessThan(largeTopGap);
+    expect(compact.out.center.captionRect.w / compact.out.center.rect.w).toBeLessThan(
+      large.out.center.captionRect.w / large.out.center.rect.w
+    );
+    expect(compact.out.responsive.textFillScale).toBeGreaterThan(medium.out.responsive.textFillScale);
+    expect(medium.out.responsive.textFillScale).toBeGreaterThan(large.out.responsive.textFillScale);
   });
 
   it("balances the first coordinate row and last relation row against the outer edges in normal mode", function () {
@@ -107,15 +87,9 @@ describe("CenterDisplayLayout", function () {
     ];
 
     cases.forEach((testCase) => {
-      const insets = layout.computeInsets(testCase.width, testCase.height);
-      const contentRect = layout.createContentRect(testCase.width, testCase.height, insets);
-      const out = layout.computeLayout({
-        contentRect: contentRect,
-        mode: "normal",
-        relationCount: testCase.relationCount,
-        gap: insets.gap,
-        normalCaptionShare: 0.28
-      });
+      const snapshot = buildSnapshot(layout, testCase.width, testCase.height, "normal", testCase.relationCount);
+      const contentRect = snapshot.contentRect;
+      const out = snapshot.out;
       const firstCoordCenter = out.center.latRect.y + Math.floor(out.center.latRect.h / 2);
       const lastRow = out.rowRects[out.rowRects.length - 1];
       const lastRowCenter = lastRow.y + Math.floor(lastRow.h / 2);
@@ -124,5 +98,31 @@ describe("CenterDisplayLayout", function () {
 
       expect(Math.abs(topMargin - bottomMargin)).toBeLessThanOrEqual(1);
     });
+  });
+
+  it("compacts flat mode center share and caption band on smaller wide tiles", function () {
+    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
+    const compact = buildSnapshot(layout, 220, 80, "flat", 2);
+    const large = buildSnapshot(layout, 520, 180, "flat", 2);
+
+    expectRectInside(compact.out.center.rect, compact.contentRect);
+    compact.out.rowRects.forEach((rect) => expectRectInside(rect, compact.contentRect));
+    expect(compact.out.center.rect.w / compact.contentRect.w).toBeLessThan(large.out.center.rect.w / large.contentRect.w);
+    expect(compact.out.center.captionRect.h / compact.out.center.rect.h).toBeLessThan(
+      large.out.center.captionRect.h / large.out.center.rect.h
+    );
+  });
+
+  it("compacts high mode caption band and center weight on smaller tall tiles", function () {
+    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create();
+    const compact = buildSnapshot(layout, 120, 140, "high", 2);
+    const large = buildSnapshot(layout, 180, 260, "high", 2);
+
+    expectRectInside(compact.out.center.rect, compact.contentRect);
+    compact.out.rowRects.forEach((rect) => expectRectInside(rect, compact.contentRect));
+    expect(compact.out.center.rect.h / compact.contentRect.h).toBeLessThan(large.out.center.rect.h / large.contentRect.h);
+    expect(compact.out.center.captionRect.h / compact.out.center.rect.h).toBeLessThan(
+      large.out.center.captionRect.h / large.out.center.rect.h
+    );
   });
 });

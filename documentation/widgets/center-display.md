@@ -12,7 +12,8 @@ It keeps core data parity with AvNav `CenterDisplay` while using a readability-f
 - waypoint and boat relation rows always present
 - optional measure row when a first measure point is available
 - adaptive geometry derived from measured text and available canvas space; no fixed pixel layout floors
-- compact tiles compress top-band and row spacing more aggressively than larger layouts
+- compact tiles linearly tighten mode-specific panel shares and increase fitted text fill from `minDim <= 80` to `minDim >= 180`
+- compact tiles also increase fitted text fill linearly so captions, coordinates, and relation values occupy more of each row without changing the normal-mode panel split
 - core visibility semantics handled in nav-cluster `updateFunction`: visible only when `!lockPosition || editing`
 
 This is a dedicated renderer, not a `PositionCoordinateWidget` variant, because it owns a different top-panel + relation-row contract across aspect ratios.
@@ -72,6 +73,7 @@ otherwise -> normal
 - full-width center panel at the top
 - center caption above the two stacked coordinate lines
 - relation rows stacked below using full widget width
+- smaller tiles linearly shrink caption band and center weighting while large tiles keep the current spacing
 
 ### normal
 
@@ -79,11 +81,13 @@ otherwise -> normal
 - center caption in a measured left column
 - two coordinate lines stacked in a right column
 - relation rows stacked below using full widget width
+- the balanced two-coordinate-row rhythm is preserved while smaller tiles linearly reduce caption-column share
 
 ### flat
 
 - left center-position panel sized from measured coordinate demand
 - right panel with vertically stacked relation rows
+- smaller wide tiles linearly reduce center-panel share and stacked caption height so coordinates and relation values can grow
 
 ## Formatting Contract
 
@@ -103,6 +107,7 @@ Measure row behavior:
 - text color comes from `Helpers.resolveTextColor(canvas)`
 - coordinate/value groups use `theme.font.weight`
 - captions/row labels use `theme.font.labelWeight`
+- compact layouts also raise fitted line-height ceilings linearly, making smaller widgets read denser while larger widgets retain the existing text rhythm
 - no icon sprites, no new theme tokens, no CSS defaults beyond normal dyninstruments widget styling
 
 ## Related
