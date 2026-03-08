@@ -13,6 +13,14 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   unit_activeRouteEta: "",
   caption_activeRouteNextCourse: "NEXT CAP",
   unit_activeRouteNextCourse: "degN",
+  caption_centerDisplayPosition: "CENTER CAP",
+  unit_centerDisplayPosition: "",
+  caption_centerDisplayMarker: "WP CAP",
+  unit_centerDisplayMarker: "nmC",
+  caption_centerDisplayBoat: "BOAT CAP",
+  unit_centerDisplayBoat: "nmB",
+  caption_centerDisplayMeasure: "MEAS CAP",
+  unit_centerDisplayMeasure: "nmM",
   caption_positionBoat: "POS",
   unit_positionBoat: "",
   caption_xteDisplayXte: "XTE CAP",
@@ -133,6 +141,46 @@ describe("NavMapper", function () {
     expect(wp.coordinateFormatterParameters).toEqual([]);
   });
 
+  it("maps centerDisplay to CenterDisplayTextWidget with nested renderer props", function () {
+    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const activeMeasure = { getPointAtIndex: vi.fn(() => ({ lat: 54.1, lon: 10.2 })) };
+    const out = mapper.translate({
+      kind: "centerDisplay",
+      centerPosition: { lat: 54.2, lon: 10.3 },
+      centerMarkerCourse: "91",
+      centerMarkerDistance: "1852",
+      centerCourse: "182",
+      centerDistance: "926",
+      activeMeasure: activeMeasure,
+      measureRhumbLine: true,
+      centerDisplayRatioThresholdNormal: "1.1",
+      centerDisplayRatioThresholdFlat: "2.4"
+    }, toolkit);
+
+    expect(out).toEqual({
+      renderer: "CenterDisplayTextWidget",
+      display: {
+        position: { lat: 54.2, lon: 10.3 },
+        marker: { course: 91, distance: 1852 },
+        boat: { course: 182, distance: 926 },
+        measure: { activeMeasure: activeMeasure, useRhumbLine: true }
+      },
+      captions: {
+        position: "CENTER CAP",
+        marker: "WP CAP",
+        boat: "BOAT CAP",
+        measure: "MEAS CAP"
+      },
+      units: {
+        marker: "nmC",
+        boat: "nmB",
+        measure: "nmM"
+      },
+      ratioThresholdNormal: 1.1,
+      ratioThresholdFlat: 2.4
+    });
+  });
+
   it("maps xteDisplay to XteDisplayWidget with normalized renderer props", function () {
     const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
     const out = mapper.translate({
@@ -177,5 +225,11 @@ describe("NavMapper", function () {
     const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
     const out = mapper.translate({ kind: "xteDisplay", xte: 0.2, cog: 90, dtw: 1.1, btw: 95 }, toolkit);
     expect(out.rendererProps.showWpName).toBe(false);
+  });
+
+  it("keeps centerDisplay measure toggle false unless explicitly enabled", function () {
+    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const out = mapper.translate({ kind: "centerDisplay" }, toolkit);
+    expect(out.display.measure.useRhumbLine).toBe(false);
   });
 });

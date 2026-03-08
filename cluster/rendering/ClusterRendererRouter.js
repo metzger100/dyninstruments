@@ -1,7 +1,7 @@
 /**
  * Module: ClusterRendererRouter - Sub-renderer selection and lifecycle fan-out
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ThreeValueTextWidget, PositionCoordinateWidget, ActiveRouteTextWidget, RendererPropsWidget
+ * Depends: ThreeValueTextWidget, PositionCoordinateWidget, ActiveRouteTextWidget, CenterDisplayTextWidget, RendererPropsWidget
  */
 
 (function (root, factory) {
@@ -17,6 +17,7 @@
     const rendererSpecs = {
       PositionCoordinateWidget: Helpers.getModule("PositionCoordinateWidget").create(def, Helpers),
       ActiveRouteTextWidget: Helpers.getModule("ActiveRouteTextWidget").create(def, Helpers),
+      CenterDisplayTextWidget: Helpers.getModule("CenterDisplayTextWidget").create(def, Helpers),
       WindRadialWidget: rendererPropsWidget.create(def, Helpers, "WindRadialWidget"),
       CompassRadialWidget: rendererPropsWidget.create(def, Helpers, "CompassRadialWidget"),
       WindLinearWidget: rendererPropsWidget.create(def, Helpers, "WindLinearWidget"),

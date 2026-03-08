@@ -97,6 +97,16 @@
       css: undefined,
       globalKey: "DyniLinearGaugeTextLayout"
     },
+    CenterDisplayLayout: {
+      js: BASE + "shared/widget-kits/nav/CenterDisplayLayout.js",
+      css: undefined,
+      globalKey: "DyniCenterDisplayLayout"
+    },
+    CenterDisplayMath: {
+      js: BASE + "shared/widget-kits/nav/CenterDisplayMath.js",
+      css: undefined,
+      globalKey: "DyniCenterDisplayMath"
+    },
     ThemeResolver: {
       js: BASE + "shared/theme/ThemeResolver.js",
       css: undefined,
@@ -161,6 +171,19 @@
       css: undefined,
       globalKey: "DyniActiveRouteTextWidget",
       deps: ["ThemeResolver", "TextLayoutEngine", "RadialTextLayout", "TextTileLayout"]
+    },
+    CenterDisplayTextWidget: {
+      js: BASE + "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
+      css: undefined,
+      globalKey: "DyniCenterDisplayTextWidget",
+      deps: [
+        "ThemeResolver",
+        "TextLayoutEngine",
+        "RadialTextLayout",
+        "TextTileLayout",
+        "CenterDisplayLayout",
+        "CenterDisplayMath"
+      ]
     },
     RendererPropsWidget: {
       js: BASE + "cluster/rendering/RendererPropsWidget.js",
@@ -274,6 +297,7 @@
         "ThreeValueTextWidget",
         "PositionCoordinateWidget",
         "ActiveRouteTextWidget",
+        "CenterDisplayTextWidget",
         "RendererPropsWidget"
       ]
     },

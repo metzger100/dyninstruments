@@ -67,6 +67,19 @@ Source of truth: AvNav `viewer/util/formatter.js` snapshot verified on 2026-02-2
 | `eta` | `formatTime` | `[]` |
 | `nextCourse` | `formatDirection` | `[]` |
 
+## Normative CenterDisplay Renderer Contract
+
+| Field | Formatter | formatterParameters |
+|---|---|---|
+| `position.lat` | `formatLonLatsDecimal` | `["lat"]` |
+| `position.lon` | `formatLonLatsDecimal` | `["lon"]` |
+| `marker.course` | `formatDirection` | `[]` |
+| `marker.distance` | `formatDistance` | `[markerUnit]` |
+| `boat.course` | `formatDirection` | `[]` |
+| `boat.distance` | `formatDistance` | `[boatUnit]` |
+| `measure.course` | `formatDirection` | `[]` |
+| `measure.distance` | `formatDistance` | `[measureUnit]` |
+
 ## Common Mistakes
 
 | Mistake | Wrong example | Correct contract |
