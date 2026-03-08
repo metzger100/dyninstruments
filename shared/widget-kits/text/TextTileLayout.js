@@ -15,6 +15,13 @@
     return Number.isFinite(n) ? n : defaultValue;
   }
 
+  function resolveScaledMaxPx(basePx, maxPx, textFillScale) {
+    const safeBase = Math.max(1, Math.floor(clampNumber(basePx, 1)));
+    const safeMax = Math.max(1, Math.floor(clampNumber(maxPx, safeBase)));
+    const scale = Math.max(0.1, clampNumber(textFillScale, 1));
+    return Math.min(safeMax, Math.max(1, Math.floor(safeBase * scale)));
+  }
+
   function trimToWidth(ctx, textApi, text, px, maxW, family, weight) {
     let out = typeof text === "string" ? text : String(text);
     if (!out) {
@@ -34,27 +41,32 @@
       const metric = cfg.metric;
       const rect = cfg.rect;
       const captionHeightRatio = clampNumber(cfg.captionHeightRatio, 0.34);
+      const textFillScale = clampNumber(cfg.textFillScale, 1);
       if (!metric || !rect) {
         return null;
       }
       const capH = Math.max(9, Math.floor((Number(rect.h) || 0) * captionHeightRatio));
       const valueY = (Number(rect.y) || 0) + capH;
       const valueH = Math.max(8, (Number(rect.h) || 0) - capH);
+      const capMaxPx = resolveScaledMaxPx(clampNumber(cfg.captionMaxPx, capH), capH, textFillScale);
+      const valueMaxPx = resolveScaledMaxPx(clampNumber(cfg.valueMaxPx, valueH), valueH, textFillScale);
       const fit = textApi.measureValueUnitFit(
         cfg.ctx,
         cfg.family,
         metric.value,
         metric.unit,
         rect.w,
-        valueH,
+        valueMaxPx,
         cfg.secScale,
         cfg.valueWeight,
         cfg.labelWeight
       );
       return {
         capH: capH,
+        capMaxPx: capMaxPx,
         valueY: valueY,
         valueH: valueH,
+        valueMaxPx: valueMaxPx,
         fit: fit
       };
     }
@@ -80,7 +92,7 @@
         rect.w,
         measurement.capH,
         metric.caption,
-        measurement.capH,
+        measurement.capMaxPx,
         cfg.align,
         cfg.labelWeight
       );
@@ -106,7 +118,7 @@
       const textApi = cfg.textApi;
       const maxW = Math.max(1, clampNumber(cfg.maxW, 0));
       const maxH = Math.max(1, clampNumber(cfg.maxH, 0));
-      const basePx = Math.max(1, Math.floor(Math.min(clampNumber(cfg.maxPx, maxH), maxH)));
+      const basePx = resolveScaledMaxPx(clampNumber(cfg.maxPx, maxH), maxH, cfg.textFillScale);
       const source = String(cfg.text);
       const px = textApi.fitSingleTextPx(
         cfg.ctx,
@@ -138,6 +150,7 @@
         maxW: rect.w,
         maxH: rect.h,
         maxPx: cfg.maxPx,
+        textFillScale: cfg.textFillScale,
         family: cfg.family,
         weight: cfg.weight
       });

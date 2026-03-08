@@ -1,7 +1,7 @@
 /**
  * Module: TextLayoutEngine - Shared mode routing, fit-cache helpers, and composed text layout API
  * Documentation: documentation/shared/text-layout-engine.md
- * Depends: RadialValueMath, TextLayoutPrimitives, TextLayoutComposite
+ * Depends: RadialValueMath, TextLayoutPrimitives, TextLayoutComposite, ResponsiveScaleProfile
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,11 +13,18 @@
   const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.0;
   const DEFAULT_RATIO_THRESHOLD_FLAT = 3.0;
   const DEFAULT_CAPTION_UNIT_SCALE = 0.8;
+  const RESPONSIVE_INSET_PAD_X_RATIO = 0.04;
+  const RESPONSIVE_INSET_INNER_Y_RATIO = 0.035;
+  const RESPONSIVE_INSET_GAP_RATIO = 0.06;
+  const RESPONSIVE_TEXT_SCALES = {
+    textFillScale: 1.18
+  };
 
   function create(def, Helpers) {
     const value = Helpers.getModule("RadialValueMath").create(def, Helpers);
     const primitive = Helpers.getModule("TextLayoutPrimitives").create(def, Helpers);
     const composite = Helpers.getModule("TextLayoutComposite").create(def, Helpers);
+    const responsiveProfile = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
 
     function createFitCache(modeList) {
       const modes = Array.isArray(modeList) && modeList.length
@@ -70,6 +77,20 @@
       };
     }
 
+    function computeResponsiveInsets(W, H) {
+      const responsive = responsiveProfile.computeProfile(W, H, { scales: RESPONSIVE_TEXT_SCALES });
+      return {
+        padX: responsiveProfile.computeInsetPx(responsive, RESPONSIVE_INSET_PAD_X_RATIO, 1),
+        innerY: responsiveProfile.computeInsetPx(responsive, RESPONSIVE_INSET_INNER_Y_RATIO, 1),
+        gapBase: responsiveProfile.computeInsetPx(responsive, RESPONSIVE_INSET_GAP_RATIO, 1),
+        responsive: responsive
+      };
+    }
+
+    function scaleMaxTextPx(basePx, textFillScale) {
+      return responsiveProfile.scaleMaxTextPx(basePx, textFillScale);
+    }
+
     function computeModeLayout(args) {
       const cfg = args || {};
       const W = Number(cfg.W) || 0;
@@ -119,6 +140,8 @@
       writeFitCache: writeFitCache,
       resolveFitCache: resolveFitCache,
       computeInsets: computeInsets,
+      computeResponsiveInsets: computeResponsiveInsets,
+      scaleMaxTextPx: scaleMaxTextPx,
       computeModeLayout: computeModeLayout,
       fitSingleLineBinary: primitive.fitSingleLineBinary,
       fitMultiRowBinary: primitive.fitMultiRowBinary,

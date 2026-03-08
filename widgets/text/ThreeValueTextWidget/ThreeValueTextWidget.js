@@ -45,7 +45,8 @@
         collapseNoCaptionToFlat: true,
         collapseHighWithoutUnitToNormal: true
       });
-      const insets = text.computeInsets(W, H);
+      const insets = text.computeResponsiveInsets(W, H);
+      const textFillScale = insets.responsive.textFillScale;
       const keyBase = {
         W: W,
         H: H,
@@ -67,6 +68,7 @@
             H: H,
             padX: insets.padX,
             innerY: insets.innerY,
+            textFillScale: textFillScale,
             secScale: modeData.secScale,
             captionText: modeData.caption,
             valueText: valueText,
@@ -98,6 +100,7 @@
             padX: insets.padX,
             innerY: insets.innerY,
             gapBase: insets.gapBase,
+            textFillScale: textFillScale,
             secScale: modeData.secScale,
             captionText: modeData.caption,
             valueText: valueText,
@@ -130,7 +133,7 @@
             secScale: modeData.secScale,
             gap: insets.gapBase,
             maxW: W - insets.padX * 2,
-            maxH: Math.max(10, H - insets.innerY * 2),
+            maxH: Math.max(1, H - insets.innerY * 2),
             family: family,
             valueWeight: valueWeight,
             labelWeight: labelWeight

@@ -22,6 +22,7 @@ describe("TextLayoutEngine", function () {
     const primitiveModule = loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js");
     const compositeModule = loadFresh("shared/widget-kits/text/TextLayoutComposite.js");
     const textLayoutModule = loadFresh("shared/widget-kits/radial/RadialTextLayout.js");
+    const responsiveProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const valueMathModule = {
       create() {
         return {
@@ -48,6 +49,7 @@ describe("TextLayoutEngine", function () {
         if (id === "RadialTextLayout") return textLayoutModule;
         if (id === "TextLayoutPrimitives") return primitiveModule;
         if (id === "TextLayoutComposite") return compositeModule;
+        if (id === "ResponsiveScaleProfile") return responsiveProfileModule;
         throw new Error("unexpected module: " + id);
       }
     });
@@ -116,6 +118,22 @@ describe("TextLayoutEngine", function () {
     expect(engine.readFitCache(cache, "flat", key)).toBe(null);
     engine.clearFitCache(cache);
     expect(engine.readFitCache(cache, "normal", "n")).toBe(null);
+  });
+
+  it("computes responsive insets with compact fill scaling from the shared profile", function () {
+    const engine = createEngine();
+    const compact = engine.computeResponsiveInsets(120, 80);
+    const medium = engine.computeResponsiveInsets(160, 120);
+    const large = engine.computeResponsiveInsets(260, 180);
+    const legacy = engine.computeInsets(120, 80);
+
+    expect(compact.padX).toBeLessThan(legacy.padX);
+    expect(compact.innerY).toBeLessThan(legacy.innerY);
+    expect(compact.gapBase).toBeLessThan(legacy.gapBase);
+    expect(compact.responsive.textFillScale).toBeGreaterThan(medium.responsive.textFillScale);
+    expect(medium.responsive.textFillScale).toBeGreaterThan(large.responsive.textFillScale);
+    expect(large.responsive.textFillScale).toBe(1);
+    expect(engine.scaleMaxTextPx(20, compact.responsive.textFillScale)).toBeGreaterThan(20);
   });
 
   it("fits single-line and multi-row text with binary search", function () {
@@ -188,6 +206,90 @@ describe("TextLayoutEngine", function () {
     expect(inline.total).toBeLessThanOrEqual(130.01);
     expect(inline.vPx).toBeGreaterThan(0);
     expect(inline.sPx).toBeGreaterThan(0);
+  });
+
+  it("keeps shared composite fit paths usable on very small tiles", function () {
+    const engine = createEngine();
+    const ctx = createSizingContext();
+
+    const highFit = engine.fitThreeRowBlock({
+      ctx: ctx,
+      W: 24,
+      H: 28,
+      padX: 1,
+      innerY: 1,
+      secScale: 0.8,
+      textFillScale: 1.18,
+      captionText: "SPD",
+      valueText: "7",
+      unitText: "k",
+      family: "sans-serif",
+      valueWeight: 730,
+      labelWeight: 610
+    });
+    const normalFit = engine.fitValueUnitCaptionRows({
+      ctx: ctx,
+      W: 28,
+      H: 22,
+      padX: 1,
+      innerY: 1,
+      gapBase: 1,
+      secScale: 0.8,
+      textFillScale: 1.18,
+      captionText: "SPD",
+      valueText: "7",
+      unitText: "k",
+      family: "sans-serif",
+      valueWeight: 730,
+      labelWeight: 610
+    });
+    const stackedFit = engine.fitTwoRowsWithHeader({
+      ctx: ctx,
+      mode: "normal",
+      W: 26,
+      H: 18,
+      padX: 1,
+      innerY: 1,
+      secScale: 0.8,
+      textFillScale: 1.18,
+      captionText: "POS",
+      unitText: "nm",
+      topText: "LAT",
+      bottomText: "LON",
+      family: "sans-serif",
+      valueWeight: 730,
+      labelWeight: 610
+    });
+
+    expect(highFit.cPx).toBeGreaterThan(0);
+    expect(highFit.vPx).toBeGreaterThan(0);
+    expect(highFit.uPx).toBeGreaterThan(0);
+    expect(normalFit.vPx).toBeGreaterThan(0);
+    expect(normalFit.cPx).toBeGreaterThan(0);
+    expect(stackedFit.linePx).toBeGreaterThan(0);
+    expect(stackedFit.capPx).toBeGreaterThan(0);
+  });
+
+  it("allows inline triplet fits below the old 8px minimum on tiny tiles", function () {
+    const engine = createEngine();
+    const ctx = createSizingContext();
+    const inline = engine.fitInlineTriplet({
+      ctx: ctx,
+      captionText: "S",
+      valueText: "7",
+      unitText: "",
+      secScale: 0.8,
+      gap: 1,
+      maxW: 8,
+      maxH: 5,
+      family: "sans-serif",
+      valueWeight: 730,
+      labelWeight: 610
+    });
+
+    expect(inline.vPx).toBeGreaterThan(0);
+    expect(inline.vPx).toBeLessThan(8);
+    expect(inline.vPx).toBeLessThanOrEqual(5);
   });
 
   it("draws inline and block layouts with expected text output", function () {

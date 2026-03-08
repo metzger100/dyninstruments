@@ -1,6 +1,6 @@
 # Implementation Plan
 
-**Status:** ⏳ In Progress | Phase 1 extracted; later responsive rollout phases pending
+**Status:** ⏳ In Progress | Phases 1-2 implemented; later responsive rollout phases pending
 
 ## Overview
 
@@ -17,8 +17,8 @@ Scope:
 | Area | Current state | Rollout implication |
 |---|---|---|
 | `CenterDisplayTextWidget` + `CenterDisplayLayout` | Already uses a measured layout plus `minDim`-driven linear compaction (`textFillScale`, caption-share scaling, stacked-caption scaling, center-weight scaling). | Treat as the reference behavior and extract the reusable parts into shared infrastructure. |
-| `ThreeValueTextWidget` | Responsive by ratio mode only. Relies on `TextLayoutEngine` / `TextLayoutComposite`, but no small-tile compaction profile is applied. | Upgrade shared text engine first; this unlocks numeric kinds across `anchor`, `speed`, `environment`, `vessel`, `wind`, `courseHeading`, and `nav`. |
-| `PositionCoordinateWidget` | Uses shared text engine and stacked/flat routing, but compact behavior still depends on engine floors rather than a shared compaction profile. | Migrate after the shared text engine so `positionBoat`, `positionWp`, `dateTime`, and `timeStatus` inherit the same compact behavior. |
+| `ThreeValueTextWidget` | Uses shared text compaction via `TextLayoutEngine.computeResponsiveInsets()` plus composite `textFillScale` consumption in `high` / `normal` modes. Flat mode now benefits from compact insets and the lowered inline minimum fit floor. | Phase 2 is implemented for numeric kinds across `anchor`, `speed`, `environment`, `vessel`, `wind`, `courseHeading`, and `nav`. |
+| `PositionCoordinateWidget` | Uses shared text compaction via `TextLayoutEngine.computeResponsiveInsets()` for stacked and flat layouts while preserving renderer-owned axis-formatting and emoji guard behavior. | Phase 2 is implemented for `positionBoat`, `positionWp`, `dateTime`, and `timeStatus`. |
 | `ActiveRouteTextWidget` | Has ratio modes, but layout uses local hard floors like `40`, `16`, `12`, `6`, `4` and no linear fill boost. | Needs dedicated layout refactor on top of the shared profile. |
 | `XteDisplayWidget` + `XteHighwayPrimitives` | Ratio modes exist, but layout reserves large fixed floors (`40`, `24`, `20`, `16`, `12`, `10`) for highway/text panels. | Needs both geometry compaction and text-fill compaction. |
 | `LinearGaugeEngine` + `LinearGaugeMath` + `LinearGaugeTextLayout` | Shared engine covers many widgets, but layout and text still clamp to fixed floors (`90`, `80`, `84`, `64`, `36`, `10`, `8`, `6`). | High-leverage migration point for all linear gauges. |
@@ -55,11 +55,10 @@ Scope:
 
 ## Current Dyninstruments Gaps
 
-- `ResponsiveScaleProfile` now owns the shared base compaction curve, but only `CenterDisplayLayout` consumes it so far.
-- Shared text helpers (`TextLayoutEngine`, `TextLayoutComposite`, `TextTileLayout`) still contain layout-driving fixed floors, so numeric and coordinate widgets do not inherit the new compact fill behavior.
-- `ActiveRouteTextWidget`, `XteHighwayPrimitives`, `LinearGaugeMath`, `SemicircleRadialEngine`, `FullCircleRadialEngine`, and `FullCircleRadialTextLayout` each own local size floors and spacing rules.
+- `ResponsiveScaleProfile` now owns the shared base compaction curve, and both `CenterDisplayLayout` and the shared text pipeline consume it.
+- Phase 2 closes the numeric/coordinate text gap, but `ActiveRouteTextWidget`, `XteHighwayPrimitives`, `LinearGaugeMath`, `SemicircleRadialEngine`, `FullCircleRadialEngine`, and `FullCircleRadialTextLayout` still own local responsive floors or spacing rules.
 - The current custom lint/smell system does not yet block new hardcoded responsive-layout floors or missing adoption of a shared compact profile.
-- Current tests validate some responsive behavior, but only `CenterDisplay` explicitly checks compact-vs-large linear compaction.
+- Current tests now validate compact-vs-large text compaction for `CenterDisplay`, `ThreeValueTextWidget`, `PositionCoordinateWidget`, and the shared text engine.
 
 ## Final Implementation Goal
 
@@ -83,11 +82,11 @@ Scope:
 | `shared/widget-kits/layout/ResponsiveScaleProfile.js` | Shared runtime owner for the base compact curve | Actual change in this session |
 | `shared/widget-kits/nav/CenterDisplayLayout.js` | Current compact reference profile | Actual change in this session: now consumes `ResponsiveScaleProfile` |
 | `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js` | Current compact reference widget | No runtime change in this session; behavior preserved through `CenterDisplayLayout` |
-| `shared/widget-kits/text/TextLayoutEngine.js` | Shared text layout facade | Planned change: expose shared responsive profile / compact inset helpers |
-| `shared/widget-kits/text/TextLayoutComposite.js` | Shared text row/block layout | Planned change: remove layout-driving fixed floors and adopt profile scaling |
-| `shared/widget-kits/text/TextTileLayout.js` | Shared metric/fitted line helper | Planned change: support compact text-fill scaling |
-| `widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js` | Numeric text renderer used across many clusters | Planned change |
-| `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js` | Stacked coordinate/date/time renderer | Planned change |
+| `shared/widget-kits/text/TextLayoutEngine.js` | Shared text layout facade | Actual change in this session: now consumes `ResponsiveScaleProfile`, exposes `computeResponsiveInsets()`, and wraps `scaleMaxTextPx()` |
+| `shared/widget-kits/text/TextLayoutComposite.js` | Shared text row/block layout | Actual change in this session: removed user-visible fit floors and added compact `textFillScale` consumption for shared stacked layouts |
+| `shared/widget-kits/text/TextTileLayout.js` | Shared metric/fitted line helper | Actual change in this session: additive compact text args added for later Phase 3 adoption without changing current consumers |
+| `widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js` | Numeric text renderer used across many clusters | Actual change in this session: now uses shared responsive insets and compact text-fill scaling |
+| `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js` | Stacked coordinate/date/time renderer | Actual change in this session: now uses shared responsive insets and compact text-fill scaling |
 | `widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js` | Dedicated active-route renderer | Planned change |
 | `shared/widget-kits/xte/XteHighwayPrimitives.js` | XTE layout geometry owner | Planned change |
 | `widgets/text/XteDisplayWidget/XteDisplayWidget.js` | XTE renderer | Planned change |
@@ -146,6 +145,8 @@ Status: implemented. `ResponsiveScaleProfile` now exists as the shared runtime o
    - share scaling stays within expected min/max bounds
 
 ### Phase 2 - Upgrade the shared text pipeline first
+
+Status: implemented. `TextLayoutEngine` now consumes `ResponsiveScaleProfile`, shared stacked text fits accept compact `textFillScale`, `ThreeValueTextWidget` and `PositionCoordinateWidget` use the shared compact insets, and targeted shared/widget tests lock the compact-vs-large behavior.
 
 1. Extend `TextLayoutEngine`, `TextLayoutComposite`, and `TextTileLayout` so compact text-fill scaling is available to all text widgets.
 2. Replace layout-driving fixed floors in the shared text path with responsive-profile-derived values where appropriate.

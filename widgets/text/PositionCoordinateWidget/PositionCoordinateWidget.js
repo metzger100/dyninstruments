@@ -173,7 +173,8 @@
         captionText: p.caption,
         unitText: p.unit
       });
-      const insets = text.computeInsets(W, H);
+      const insets = text.computeResponsiveInsets(W, H);
+      const textFillScale = insets.responsive.textFillScale;
       const defaultText = String(p.default);
       if (modeData.mode === "flat") {
         const pairRaw = readCoordinatePair(p.value, true);
@@ -207,7 +208,7 @@
             secScale: modeData.secScale,
             gap: insets.gapBase,
             maxW: W - insets.padX * 2,
-            maxH: Math.max(10, H - insets.innerY * 2),
+            maxH: Math.max(1, H - insets.innerY * 2),
             family: family,
             valueWeight: valueWeight,
             labelWeight: labelWeight,
@@ -259,6 +260,7 @@
             H: H,
             padX: insets.padX,
             innerY: insets.innerY,
+            textFillScale: textFillScale,
             secScale: modeData.secScale,
             captionText: modeData.caption,
             unitText: modeData.unit,

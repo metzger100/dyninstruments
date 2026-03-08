@@ -21,7 +21,8 @@ describe("PositionCoordinateWidget", function () {
     const modules = {
       TextLayoutEngine: loadFresh("shared/widget-kits/text/TextLayoutEngine.js"),
       TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
-      TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js")
+      TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js")
     };
     const applyFormatter = vi.fn((raw, props) => {
       const fpRaw = props && props.formatterParameters;
@@ -157,6 +158,30 @@ describe("PositionCoordinateWidget", function () {
     return ctx.calls
       .filter((c) => c.name === "fillText")
       .map((c) => String(c.args[0]));
+  }
+
+  function captureTextCalls(ctx) {
+    const captured = [];
+    const originalFillText = ctx.fillText;
+    ctx.fillText = function () {
+      captured.push({
+        text: String(arguments[0]),
+        x: arguments[1],
+        y: arguments[2],
+        font: ctx.font
+      });
+      return originalFillText.apply(this, arguments);
+    };
+    return captured;
+  }
+
+  function parseFontPx(font) {
+    const match = /(\d+)px/.exec(String(font || ""));
+    return match ? Number(match[1]) : 0;
+  }
+
+  function findTextCall(calls, text) {
+    return calls.find((entry) => entry.text === text);
   }
 
   it("renders flat mode in one line using formatter output", function () {
@@ -356,6 +381,7 @@ describe("PositionCoordinateWidget", function () {
       const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
         .create({}, helpers);
       const ctx = createMockContext2D();
+      const captured = captureTextCalls(ctx);
       const canvas = createMockCanvas({
         rectWidth: 420,
         rectHeight: 100,
@@ -371,12 +397,9 @@ describe("PositionCoordinateWidget", function () {
         ratioThresholdFlat: 3.0,
         default: "NA"
       });
-      const valuePx = helpers.fontCalls
-        .filter((entry) => entry.weight === 730)
-        .map((entry) => entry.px);
       return {
         texts: fillTextValues(ctx),
-        maxValuePx: valuePx.length ? Math.max.apply(null, valuePx) : 0
+        finalValuePx: parseFontPx(findTextCall(captured, statusText + " 15:49:45").font)
       };
     }
 
@@ -385,9 +408,9 @@ describe("PositionCoordinateWidget", function () {
 
     expect(emojiCase.texts).toContain("🟢 15:49:45");
     expect(textCase.texts).toContain("OK 15:49:45");
-    expect(emojiCase.maxValuePx).toBeGreaterThan(0);
-    expect(textCase.maxValuePx).toBeGreaterThan(0);
-    expect(emojiCase.maxValuePx).toBeLessThan(textCase.maxValuePx);
+    expect(emojiCase.finalValuePx).toBeGreaterThan(0);
+    expect(textCase.finalValuePx).toBeGreaterThan(0);
+    expect(emojiCase.finalValuePx).toBeLessThan(textCase.finalValuePx);
   });
 
   it("downscales timeStatus emoji in high mode to avoid top-line clipping", function () {
@@ -512,6 +535,107 @@ describe("PositionCoordinateWidget", function () {
       formatter: "formatLonLatsDecimal",
       formatterParameters: ["lon"]
     }));
+  });
+
+  it("increases compact text fill ratios in stacked and flat-axis modes", function () {
+    const cases = [
+      {
+        name: "stacked",
+        compact: { width: 160, height: 120 },
+        large: { width: 320, height: 220 },
+        targetText: "POS",
+        props: {
+          value: { lat: 54.1234, lon: 10.9876 },
+          caption: "POS",
+          unit: "nm",
+          ratioThresholdNormal: 1.0,
+          ratioThresholdFlat: 3.0
+        },
+        usableHeight(H, insets) {
+          const headerH = Math.min(Math.max(1, Math.floor(H * 0.30)), Math.floor(H * 0.45));
+          return Math.max(1, headerH - insets.innerY * 2);
+        }
+      },
+      {
+        name: "flat-axis",
+        compact: { width: 220, height: 40 },
+        large: { width: 520, height: 140 },
+        targetText: "DATE TIME",
+        props: {
+          value: [new Date("2026-02-22T15:00:00Z"), new Date("2026-02-22T15:00:00Z")],
+          caption: "POS",
+          coordinateFlatFromAxes: true,
+          coordinateRawValues: true,
+          coordinateFormatterLat() { return "DATE"; },
+          coordinateFormatterLon() { return "TIME"; },
+          ratioThresholdNormal: 1.0,
+          ratioThresholdFlat: 3.0,
+          default: "NA"
+        },
+        usableHeight(H) {
+          return H;
+        }
+      }
+    ];
+
+    cases.forEach(function (item) {
+      const compactHelpers = makeHelpers();
+      const compactEngine = compactHelpers.getModule("TextLayoutEngine").create({}, compactHelpers);
+      const compactCtx = createMockContext2D();
+      const compactCaptured = captureTextCalls(compactCtx);
+      const compactCanvas = createMockCanvas({
+        rectWidth: item.compact.width,
+        rectHeight: item.compact.height,
+        ctx: compactCtx
+      });
+      const compactSpec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
+        .create({}, compactHelpers);
+      const compactMode = compactEngine.computeModeLayout({
+        W: item.compact.width,
+        H: item.compact.height,
+        captionText: item.props.caption,
+        unitText: item.props.unit
+      });
+      const compactInsets = compactEngine.computeResponsiveInsets(item.compact.width, item.compact.height);
+      compactSpec.renderCanvas(compactCanvas, item.props);
+      const compactTarget = findTextCall(compactCaptured, item.targetText);
+
+      const largeHelpers = makeHelpers();
+      const largeEngine = largeHelpers.getModule("TextLayoutEngine").create({}, largeHelpers);
+      const largeCtx = createMockContext2D();
+      const largeCaptured = captureTextCalls(largeCtx);
+      const largeCanvas = createMockCanvas({
+        rectWidth: item.large.width,
+        rectHeight: item.large.height,
+        ctx: largeCtx
+      });
+      const largeSpec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
+        .create({}, largeHelpers);
+      const largeMode = largeEngine.computeModeLayout({
+        W: item.large.width,
+        H: item.large.height,
+        captionText: item.props.caption,
+        unitText: item.props.unit
+      });
+      const largeInsets = largeEngine.computeResponsiveInsets(item.large.width, item.large.height);
+      largeSpec.renderCanvas(largeCanvas, item.props);
+      const largeTarget = findTextCall(largeCaptured, item.targetText);
+
+      expect(compactTarget).toBeTruthy();
+      expect(largeTarget).toBeTruthy();
+      if (item.name === "stacked") {
+        expect(compactMode.mode).toBe("normal");
+        expect(largeMode.mode).toBe("normal");
+      } else {
+        expect(compactMode.mode).toBe("flat");
+        expect(largeMode.mode).toBe("flat");
+      }
+      expect(
+        parseFontPx(compactTarget.font) / item.usableHeight(item.compact.height, compactInsets)
+      ).toBeGreaterThan(
+        parseFontPx(largeTarget.font) / item.usableHeight(item.large.height, largeInsets)
+      );
+    });
   });
 
   it("uses default text for invalid coordinates", function () {

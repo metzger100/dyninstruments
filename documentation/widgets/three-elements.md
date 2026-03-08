@@ -6,6 +6,12 @@
 
 Default numeric renderer for clusters. Draws caption, value, and unit as responsive canvas text. Cluster-specific translation is handled by `ClusterWidget` mapper modules.
 
+Phase 2 adopts the shared text compaction contract from `TextLayoutEngine.computeResponsiveInsets()`:
+
+- compact tiles use shared profile-owned insets and gap compaction
+- `high` / `normal` composite fits consume shared `textFillScale` for stronger compact caption/unit fill
+- `flat` mode keeps the same render contract, but now benefits from compact insets and the lowered inline minimum fit floor
+
 ## Module Registration
 
 ```javascript
@@ -73,6 +79,7 @@ otherwise -> normal
 | Function | Purpose |
 |---|---|
 | `TextLayoutEngine.computeModeLayout(...)` | Shared ratio mode + collapse handling |
+| `TextLayoutEngine.computeResponsiveInsets(...)` | Shared Phase 2 compact insets + `textFillScale` |
 | `TextLayoutEngine.fitThreeRowBlock(...)` | Fit `high` mode caption/value/unit rows |
 | `TextLayoutEngine.fitValueUnitCaptionRows(...)` | Fit `normal` mode value+unit + caption rows |
 | `TextLayoutEngine.fitInlineTriplet(...)` | Fit `flat` mode inline caption/value/unit row |
@@ -90,6 +97,7 @@ otherwise -> normal
 - Fitting results are cached per widget instance (closure-local, not global) via `TextLayoutEngine` cache helpers.
 - Cache keys include all fitting-relevant inputs: `W`, `H`, active layout mode, rendered `value` text, `caption`, `unit`, effective `secScale` (`captionUnitScale` after clamp), resolved font family, and theme font weights (`valueWeight`, `labelWeight`).
 - Cache invalidates automatically when any key input changes (for example content, size, mode, scale, or typography changes).
+- Shared responsive compaction does not add extra cache inputs; it is derived from `W` / `H`.
 - Canvas drawing still runs every frame; only fitting/measurement work is reused on cache hits.
 
 ## Exports
