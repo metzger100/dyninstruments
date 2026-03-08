@@ -16,6 +16,12 @@ The highway frame follows the same solid-line visual language as the radial and 
 
 Renderer keeps the highway frame visible when data is missing. Missing/disconnected metrics render with the configured placeholder (default `---`), and the moving XTE indicator is suppressed until the full guidance set is valid again.
 
+Layout ownership:
+
+- `shared/widget-kits/xte/XteHighwayLayout.js` owns responsive insets, mode selection, and highway/name/metric rectangles
+- `shared/widget-kits/xte/XteHighwayPrimitives.js` owns highway geometry drawing, dynamic marker drawing, and waypoint visibility heuristics
+- `shared/widget-kits/layout/ResponsiveScaleProfile.js` owns the shared compact curve consumed by `XteHighwayLayout`
+
 ## Module Registration
 
 ```javascript
@@ -23,7 +29,7 @@ XteDisplayWidget: {
   js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
   css: undefined,
   globalKey: "DyniXteDisplayWidget",
-  deps: ["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives", "TextTileLayout"]
+  deps: ["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives", "XteHighwayLayout", "TextTileLayout"]
 }
 ```
 
@@ -45,7 +51,7 @@ XteDisplayWidget: {
 | `trackUnit` | string | `"°"` | Unit text for `COG` metric row |
 | `dtwUnit` | string | `"nm"` | Unit passed to distance formatter |
 | `btwUnit` | string | `"°"` | Unit text for `BRG` metric row |
-| `headingUnit` | string | `"°"` | Fallback heading unit for `COG/BRG` when dedicated units are unset |
+| `headingUnit` | string | `"°"` | Compatibility prop retained in mapper output; renderer uses `trackUnit` and `btwUnit` directly |
 | `leadingZero` | boolean | `true` | Heading zero-padding (e.g. `093`) |
 | `showWpName` | boolean | `false` | Enable waypoint name if space allows |
 | `xteRatioThresholdNormal` | number | `0.85` | Ratio below -> `high` |
@@ -91,6 +97,7 @@ otherwise -> normal
 ```
 
 When waypoint name display is disabled (or no waypoint name is available), the highway perspective starts higher in all modes to reduce unused whitespace above the road.
+Compact widgets also reduce waypoint/header shares and increase text fill through `XteHighwayLayout`.
 
 ### flat
 
@@ -107,6 +114,7 @@ When waypoint name display is disabled (or no waypoint name is available), the h
 - Bottom band (`~36%`) with 4 equal columns
 - Column order: `COG | XTE | DST | BRG`
 - Waypoint name appears near horizon if space allows
+- visibility now uses responsive adequacy heuristics rather than fixed pixel thresholds
 
 ### high
 
@@ -114,6 +122,7 @@ When waypoint name display is disabled (or no waypoint name is available), the h
 - Middle (`~68%`): deeper-perspective highway
 - Bottom strip (`~18%`): `XTE`, `DST` (equal-width two-column layout)
 - Waypoint name remains optional and hides first in constrained sizes
+- top strip and name area compact on smaller tall widgets through `XteHighwayLayout`
 
 ## Fixed Scale
 

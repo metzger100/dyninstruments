@@ -62,12 +62,21 @@ describe("config/components.js", function () {
     expect(components.TextTileLayout.globalKey).toBe("DyniTextTileLayout");
     expect(components.TextTileLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextTileLayout.js");
     expect(components.TextTileLayout.deps).toBeUndefined();
+    expect(components.LayoutRectMath.globalKey).toBe("DyniLayoutRectMath");
+    expect(components.LayoutRectMath.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/layout/LayoutRectMath.js");
+    expect(components.LayoutRectMath.deps).toBeUndefined();
     expect(components.ResponsiveScaleProfile.globalKey).toBe("DyniResponsiveScaleProfile");
     expect(components.ResponsiveScaleProfile.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/layout/ResponsiveScaleProfile.js");
     expect(components.ResponsiveScaleProfile.deps).toBeUndefined();
+    expect(components.ActiveRouteLayout.globalKey).toBe("DyniActiveRouteLayout");
+    expect(components.ActiveRouteLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/ActiveRouteLayout.js");
+    expect(components.ActiveRouteLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
     expect(components.CenterDisplayLayout.globalKey).toBe("DyniCenterDisplayLayout");
     expect(components.CenterDisplayLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/CenterDisplayLayout.js");
-    expect(components.CenterDisplayLayout.deps).toEqual(["ResponsiveScaleProfile"]);
+    expect(components.CenterDisplayLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
+    expect(components.XteHighwayLayout.globalKey).toBe("DyniXteHighwayLayout");
+    expect(components.XteHighwayLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/xte/XteHighwayLayout.js");
+    expect(components.XteHighwayLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
     expect(components.SpeedRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
     expect(components.SpeedLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.DepthLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
@@ -76,7 +85,7 @@ describe("config/components.js", function () {
     expect(components.TemperatureRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
     expect(components.VoltageLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.VoltageRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
-    expect(components.XteDisplayWidget.deps).toEqual(["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives", "TextTileLayout"]);
+    expect(components.XteDisplayWidget.deps).toEqual(["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives", "XteHighwayLayout", "TextTileLayout"]);
     expect(components.WindRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
     expect(components.CompassRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
     expect(components.WindLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
@@ -87,7 +96,7 @@ describe("config/components.js", function () {
     expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
     expect(components.ActiveRouteTextWidget.globalKey).toBe("DyniActiveRouteTextWidget");
     expect(components.ActiveRouteTextWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js");
-    expect(components.ActiveRouteTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine", "RadialTextLayout", "TextTileLayout"]);
+    expect(components.ActiveRouteTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout"]);
     expect(components.RendererPropsWidget.deps).toEqual([
       "WindRadialWidget",
       "CompassRadialWidget",

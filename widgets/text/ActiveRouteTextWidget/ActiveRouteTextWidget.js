@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteTextWidget - Responsive active-route summary with conditional next-course tile
  * Documentation: documentation/widgets/active-route.md
- * Depends: ThemeResolver, TextLayoutEngine, RadialTextLayout, TextTileLayout
+ * Depends: ThemeResolver, TextLayoutEngine, RadialTextLayout, TextTileLayout, ActiveRouteLayout
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,9 +11,6 @@
   "use strict";
 
   const hasOwn = Object.prototype.hasOwnProperty;
-  const NAME_PANEL_RATIO_FLAT = 0.38;
-  const NAME_BAND_RATIO_HIGH = 0.22;
-  const NAME_BAND_RATIO_NORMAL = 0.34;
   const APPROACH_ALPHA = 0.14;
   const ROUTE_NAME_ALPHA = 0.78;
   const ROUTE_NAME_ALPHA_NORMAL = 0.92;
@@ -60,15 +57,6 @@
     return out.trim() ? out : defaultText;
   }
 
-  function createContentRect(W, H, insets) {
-    return {
-      x: insets.padX,
-      y: insets.innerY,
-      w: Math.max(1, W - insets.padX * 2),
-      h: Math.max(1, H - insets.innerY * 2)
-    };
-  }
-
   function buildMetricSpecs(parsed, remainText, etaText, nextCourseText) {
     const metrics = [
       {
@@ -95,64 +83,6 @@
     return metrics;
   }
 
-  function computeLayout(contentRect, gap, mode, isApproaching) {
-    const x = contentRect.x;
-    const y = contentRect.y;
-    const w = contentRect.w;
-    const h = contentRect.h;
-    const layout = {
-      nameRect: null,
-      metricRects: Object.create(null)
-    };
-
-    if (mode === "flat") {
-      const nameW = Math.max(40, Math.floor(w * NAME_PANEL_RATIO_FLAT));
-      const metricsX = x + nameW + gap;
-      const metricsW = Math.max(1, w - nameW - gap);
-      const columns = isApproaching ? 3 : 2;
-      const cellW = Math.max(1, Math.floor((metricsW - gap * (columns - 1)) / columns));
-      layout.nameRect = { x: x, y: y, w: nameW, h: h };
-      layout.metricRects.remain = { x: metricsX, y: y, w: cellW, h: h };
-      layout.metricRects.eta = { x: metricsX + cellW + gap, y: y, w: cellW, h: h };
-      if (isApproaching) {
-        layout.metricRects.next = { x: metricsX + (cellW + gap) * 2, y: y, w: cellW, h: h };
-      }
-      return layout;
-    }
-
-    const nameRatio = mode === "high" ? NAME_BAND_RATIO_HIGH : NAME_BAND_RATIO_NORMAL;
-    const nameH = Math.max(16, Math.floor(h * nameRatio));
-    const metricsY = y + nameH + gap;
-    const metricsH = Math.max(1, h - nameH - gap);
-    layout.nameRect = { x: x, y: y, w: w, h: nameH };
-
-    if (mode === "high") {
-      const rows = isApproaching ? 3 : 2;
-      const cellH = Math.max(1, Math.floor((metricsH - gap * (rows - 1)) / rows));
-      layout.metricRects.remain = { x: x, y: metricsY, w: w, h: cellH };
-      layout.metricRects.eta = { x: x, y: metricsY + cellH + gap, w: w, h: cellH };
-      if (isApproaching) {
-        layout.metricRects.next = { x: x, y: metricsY + (cellH + gap) * 2, w: w, h: cellH };
-      }
-      return layout;
-    }
-
-    if (!isApproaching) {
-      const cellW = Math.max(1, Math.floor((w - gap) / 2));
-      layout.metricRects.remain = { x: x, y: metricsY, w: cellW, h: metricsH };
-      layout.metricRects.eta = { x: x + cellW + gap, y: metricsY, w: cellW, h: metricsH };
-      return layout;
-    }
-
-    const topH = Math.max(1, Math.floor((metricsH - gap) * 0.52));
-    const bottomH = Math.max(1, metricsH - topH - gap);
-    const cellW = Math.max(1, Math.floor((w - gap) / 2));
-    layout.metricRects.remain = { x: x, y: metricsY, w: cellW, h: topH };
-    layout.metricRects.eta = { x: x + cellW + gap, y: metricsY, w: cellW, h: topH };
-    layout.metricRects.next = { x: x, y: metricsY + topH + gap, w: w, h: bottomH };
-    return layout;
-  }
-
   function buildModeArgs(W, H, props) {
     const args = {
       W: W,
@@ -172,14 +102,14 @@
   }
 
   function measureRenderData(args) {
-    const layout = computeLayout(args.contentRect, args.gap, args.mode, args.parsed.isApproaching);
     const nameFit = args.tileLayout.measureFittedLine({
       textApi: args.radialText,
       ctx: args.ctx,
       text: args.routeNameText,
-      maxW: layout.nameRect.w - args.namePadX * 2,
-      maxH: layout.nameRect.h,
-      maxPx: Math.max(12, Math.floor(layout.nameRect.h * args.nameMaxPxRatio)),
+      maxW: Math.max(1, args.layout.nameRect.w - args.layout.namePadX * 2),
+      maxH: args.layout.nameRect.h,
+      maxPx: Math.max(1, Math.floor(args.layout.nameRect.h * args.nameMaxPxRatio)),
+      textFillScale: args.textFillScale,
       family: args.family,
       weight: args.nameWeight
     });
@@ -190,7 +120,8 @@
         textApi: args.radialText,
         ctx: args.ctx,
         metric: metric,
-        rect: layout.metricRects[metric.id],
+        rect: args.layout.metricRects[metric.id],
+        textFillScale: args.textFillScale,
         family: args.family,
         valueWeight: args.valueWeight,
         labelWeight: args.labelWeight,
@@ -198,7 +129,7 @@
       });
     }
     return {
-      layout: layout,
+      layout: args.layout,
       nameFit: nameFit,
       metricFits: metricFits
     };
@@ -220,6 +151,7 @@
     const text = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
     const radialText = Helpers.getModule("RadialTextLayout").create(def, Helpers);
     const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
+    const layoutApi = Helpers.getModule("ActiveRouteLayout").create(def, Helpers);
     const fitCache = text.createFitCache(["high", "normal", "flat"]);
 
     function renderCanvas(canvas, props) {
@@ -258,9 +190,16 @@
       const nameMaxPxRatio = modeData.mode === "flat"
         ? ROUTE_NAME_MAX_PX_RATIO_FLAT
         : (modeData.mode === "normal" ? ROUTE_NAME_MAX_PX_RATIO_NORMAL : ROUTE_NAME_MAX_PX_RATIO_HIGH);
-      const insets = text.computeInsets(W, H);
-      const contentRect = createContentRect(W, H, insets);
-      const gap = Math.max(6, Math.floor(Math.min(contentRect.w, contentRect.h) * 0.04));
+      const insets = layoutApi.computeInsets(W, H);
+      const contentRect = layoutApi.createContentRect(W, H, insets);
+      const layout = layoutApi.computeLayout({
+        contentRect: contentRect,
+        gap: insets.gap,
+        namePadX: insets.namePadX,
+        mode: modeData.mode,
+        isApproaching: parsed.isApproaching,
+        responsive: insets.responsive
+      });
 
       if (parsed.isApproaching) {
         applyApproachAccent(ctx, contentRect, tokens.colors.warning);
@@ -289,13 +228,10 @@
       const renderData = text.resolveFitCache(fitCache, modeData.mode, key, function () {
         return measureRenderData({
           ctx: ctx,
-          mode: modeData.mode,
-          contentRect: contentRect,
-          gap: gap,
-          parsed: parsed,
+          layout: layout,
           metrics: metrics,
           routeNameText: routeNameText,
-          namePadX: Math.max(4, Math.floor(contentRect.w * 0.01)),
+          textFillScale: layout.responsive.textFillScale,
           nameWeight: nameWeight,
           nameMaxPxRatio: nameMaxPxRatio,
           family: family,
@@ -312,7 +248,7 @@
         fit: renderData.nameFit,
         rect: renderData.layout.nameRect,
         align: "left",
-        padX: Math.max(4, Math.floor(contentRect.w * 0.01)),
+        padX: renderData.layout.namePadX,
         family: family,
         weight: nameWeight,
         color: color,

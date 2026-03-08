@@ -2,7 +2,9 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("ActiveRouteTextWidget", function () {
-  function makeHelpers() {
+  function makeHelpers(recorder) {
+    const calls = recorder || { lineTextFillScales: [], metricTextFillScales: [] };
+    const tileLayoutApi = loadFresh("shared/widget-kits/text/TextTileLayout.js").create();
     const themeTokens = {
       colors: {
         warning: "#f0c24b"
@@ -19,7 +21,8 @@ describe("ActiveRouteTextWidget", function () {
       TextLayoutEngine: loadFresh("shared/widget-kits/text/TextLayoutEngine.js"),
       TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
       TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
-      TextTileLayout: loadFresh("shared/widget-kits/text/TextTileLayout.js"),
+      ActiveRouteLayout: loadFresh("shared/widget-kits/nav/ActiveRouteLayout.js"),
+      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
       ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js")
     };
 
@@ -67,6 +70,29 @@ describe("ActiveRouteTextWidget", function () {
               return {
                 resolve() {
                   return themeTokens;
+                }
+              };
+            }
+          };
+        }
+        if (id === "TextTileLayout") {
+          return {
+            create() {
+              return {
+                id: "TextTileLayout",
+                measureMetricTile(args) {
+                  calls.metricTextFillScales.push(args.textFillScale);
+                  return tileLayoutApi.measureMetricTile(args);
+                },
+                drawMetricTile(args) {
+                  return tileLayoutApi.drawMetricTile(args);
+                },
+                measureFittedLine(args) {
+                  calls.lineTextFillScales.push(args.textFillScale);
+                  return tileLayoutApi.measureFittedLine(args);
+                },
+                drawFittedLine(args) {
+                  return tileLayoutApi.drawFittedLine(args);
                 }
               };
             }
@@ -136,6 +162,36 @@ describe("ActiveRouteTextWidget", function () {
       return originalFillText.apply(this, arguments);
     };
     return captured;
+  }
+
+  function parseFontPx(font) {
+    const match = /(\d+)px/.exec(String(font || ""));
+    return match ? Number(match[1]) : 0;
+  }
+
+  function computeLayoutSnapshot(width, height, isApproaching) {
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutApi = loadFresh("shared/widget-kits/nav/ActiveRouteLayout.js").create({}, {
+      getModule(id) {
+        if (id === "ResponsiveScaleProfile") {
+          return responsiveScaleProfile;
+        }
+        if (id === "LayoutRectMath") {
+          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+        }
+        throw new Error("unexpected module: " + id);
+      }
+    });
+    const insets = layoutApi.computeInsets(width, height);
+    const contentRect = layoutApi.createContentRect(width, height, insets);
+    return layoutApi.computeLayout({
+      contentRect: contentRect,
+      gap: insets.gap,
+      namePadX: insets.namePadX,
+      mode: "normal",
+      isApproaching: isApproaching,
+      responsive: insets.responsive
+    });
   }
 
   it("renders non-approach normal mode as a two-column metric layout", function () {
@@ -338,5 +394,38 @@ describe("ActiveRouteTextWidget", function () {
     expect(texts).toContain("---");
     expect(texts).toContain("NEXT");
     expect(texts).toContain("NO DATA");
+  });
+
+  it("increases compact text occupancy in normal mode via the shared responsive layout profile", function () {
+    const compactRecorder = { lineTextFillScales: [], metricTextFillScales: [] };
+    const largeRecorder = { lineTextFillScales: [], metricTextFillScales: [] };
+    const compactCtx = createMockContext2D();
+    const largeCtx = createMockContext2D();
+    const compactFonts = captureTextFonts(compactCtx);
+    const largeFonts = captureTextFonts(largeCtx);
+    const compactSpec = loadFresh("widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js")
+      .create({}, makeHelpers(compactRecorder));
+    const largeSpec = loadFresh("widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js")
+      .create({}, makeHelpers(largeRecorder));
+    const compactCanvas = createMockCanvas({ rectWidth: 161, rectHeight: 80, ctx: compactCtx });
+    const largeCanvas = createMockCanvas({ rectWidth: 800, rectHeight: 400, ctx: largeCtx });
+
+    compactSpec.renderCanvas(compactCanvas, makeProps());
+    largeSpec.renderCanvas(largeCanvas, makeProps());
+
+    const compactLayout = computeLayoutSnapshot(161, 80, false);
+    const largeLayout = computeLayoutSnapshot(800, 400, false);
+    const compactName = compactFonts.find((entry) => entry.text === "Harbor Run");
+    const largeName = largeFonts.find((entry) => entry.text === "Harbor Run");
+    const compactRemainValue = compactFonts.find((entry) => entry.text === "12.3");
+    const largeRemainValue = largeFonts.find((entry) => entry.text === "12.3");
+
+    expect(compactRecorder.lineTextFillScales[0]).toBeGreaterThan(largeRecorder.lineTextFillScales[0]);
+    expect(compactRecorder.metricTextFillScales[0]).toBeGreaterThan(largeRecorder.metricTextFillScales[0]);
+    expect(parseFontPx(compactName.font) / compactLayout.nameRect.h).toBeGreaterThan(
+      parseFontPx(largeName.font) / largeLayout.nameRect.h
+    );
+    expect(compactRemainValue).toBeTruthy();
+    expect(largeRemainValue).toBeTruthy();
   });
 });

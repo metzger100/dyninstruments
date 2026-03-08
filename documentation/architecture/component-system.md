@@ -26,6 +26,7 @@ Defined in `config/components.js`. It maps component IDs to file paths, global k
 `ClusterRendererRouter` depends on all renderer components used at runtime.
 `ThemeResolver` is a shared plugin-wide token resolver used by both gauge and text rendering paths.
 `ThemePresets` is a shared runtime preset applier that sets `data-dyni-theme` on container roots.
+Dedicated nav renderers may also depend on shared layout-owner modules that consume `ResponsiveScaleProfile`.
 
 ## Dependency Graph
 
@@ -48,6 +49,21 @@ ClusterWidget
     ├── PositionCoordinateWidget
     │   ├── ThemeResolver
     │   └── TextLayoutEngine
+    ├── ActiveRouteTextWidget
+    │   ├── ThemeResolver
+    │   ├── TextLayoutEngine
+    │   ├── RadialTextLayout
+    │   ├── TextTileLayout
+    │   └── ActiveRouteLayout
+    │       └── ResponsiveScaleProfile
+    ├── RendererPropsWidget
+    │   └── XteDisplayWidget
+    │       ├── RadialToolkit
+    │       ├── CanvasLayerCache
+    │       ├── XteHighwayPrimitives
+    │       ├── XteHighwayLayout
+    │       │   └── ResponsiveScaleProfile
+    │       └── TextTileLayout
     ├── WindRadialWidget
     ├── CompassRadialWidget
     ├── SpeedRadialWidget

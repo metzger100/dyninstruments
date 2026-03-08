@@ -17,6 +17,7 @@ describe("CenterDisplayTextWidget", function () {
       TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
       TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
       TextTileLayout: loadFresh("shared/widget-kits/text/TextTileLayout.js"),
+      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
       ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
       CenterDisplayLayout: loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js"),
       CenterDisplayMath: loadFresh("shared/widget-kits/nav/CenterDisplayMath.js")

@@ -13,7 +13,9 @@ describe("XteDisplayWidget", function () {
       overlays: 0,
       valueRows: [],
       captionRows: [],
-      waypointChecks: []
+      waypointChecks: [],
+      waypointTextFillScales: [],
+      metricTextFillScales: []
     };
 
     const defaultTheme = {
@@ -39,7 +41,20 @@ describe("XteDisplayWidget", function () {
     }
 
     const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const realPrimitives = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js").create();
+    const realLayout = loadFresh("shared/widget-kits/xte/XteHighwayLayout.js").create({}, {
+      getModule(id) {
+        if (id === "ResponsiveScaleProfile") {
+          return responsiveScaleProfile;
+        }
+        if (id === "LayoutRectMath") {
+          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+        }
+        throw new Error("Unexpected layout dependency: " + id);
+      }
+    });
+    const realTileLayout = loadFresh("shared/widget-kits/text/TextTileLayout.js").create();
 
     const spec = loadFresh("widgets/text/XteDisplayWidget/XteDisplayWidget.js").create({}, {
       applyFormatter(value, opts) {
@@ -77,9 +92,6 @@ describe("XteDisplayWidget", function () {
       getModule(id) {
         if (id === "CanvasLayerCache") {
           return layerCache;
-        }
-        if (id === "TextTileLayout") {
-          return loadFresh("shared/widget-kits/text/TextTileLayout.js");
         }
         if (id === "RadialToolkit") {
           return {
@@ -134,16 +146,6 @@ describe("XteDisplayWidget", function () {
           return {
             create() {
               return {
-                computeMode(W, H, thresholdNormal, thresholdFlat, modeFn) {
-                  const mode = realPrimitives.computeMode(W, H, thresholdNormal, thresholdFlat, modeFn);
-                  calls.modeHistory.push(mode);
-                  return mode;
-                },
-                computeLayout(W, H, pad, gap, mode, options) {
-                  const layout = realPrimitives.computeLayout(W, H, pad, gap, mode, options);
-                  calls.layoutHistory.push(layout);
-                  return layout;
-                },
                 highwayGeometry: realPrimitives.highwayGeometry,
                 drawStaticHighway(ctx, geom, colors, mode, style) {
                   calls.staticDraws.push({ colors, mode, geom, style });
@@ -151,10 +153,55 @@ describe("XteDisplayWidget", function () {
                 drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, style) {
                   calls.dynamicDraws.push({ colors, xteNormalized, overflow, geom, style });
                 },
-                shouldShowWaypoint(mode, rect, showWpName, name) {
-                  const result = realPrimitives.shouldShowWaypoint(mode, rect, showWpName, name);
-                  calls.waypointChecks.push({ mode, showWpName, name, result, rect });
+                shouldShowWaypoint(mode, layout, showWpName, name, fit) {
+                  const result = realPrimitives.shouldShowWaypoint(mode, layout, showWpName, name, fit);
+                  calls.waypointChecks.push({ mode, showWpName, name, result, rect: layout && layout.nameRect, fit });
                   return result;
+                }
+              };
+            }
+          };
+        }
+        if (id === "XteHighwayLayout") {
+          return {
+            create() {
+              return {
+                id: "XteHighwayLayout",
+                computeMode(W, H, thresholdNormal, thresholdFlat) {
+                  const mode = realLayout.computeMode(W, H, thresholdNormal, thresholdFlat);
+                  calls.modeHistory.push(mode);
+                  return mode;
+                },
+                computeInsets: realLayout.computeInsets,
+                createContentRect: realLayout.createContentRect,
+                computeLayout(args) {
+                  const layout = realLayout.computeLayout(args);
+                  calls.layoutHistory.push(layout);
+                  return layout;
+                }
+              };
+            }
+          };
+        }
+        if (id === "TextTileLayout") {
+          return {
+            create() {
+              return {
+                id: "TextTileLayout",
+                measureMetricTile(args) {
+                  calls.metricTextFillScales.push(args.textFillScale);
+                  return realTileLayout.measureMetricTile(args);
+                },
+                drawMetricTile(args) {
+                  calls.metricTextFillScales.push(args.textFillScale);
+                  return realTileLayout.drawMetricTile(args);
+                },
+                measureFittedLine(args) {
+                  calls.waypointTextFillScales.push(args.textFillScale);
+                  return realTileLayout.measureFittedLine(args);
+                },
+                drawFittedLine(args) {
+                  return realTileLayout.drawFittedLine(args);
                 }
               };
             }
@@ -497,5 +544,24 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.dynamicDraws).toHaveLength(1);
     expect(harness.calls.dynamicDraws[0].overflow).toBe(false);
     expect(harness.calls.dynamicDraws[0].xteNormalized).toBeCloseTo(1.0, 6);
+  });
+
+  it("passes stronger compact text-fill scaling to waypoint and metric tiles", function () {
+    const compactHarness = createHarness();
+    const largeHarness = createHarness();
+
+    compactHarness.spec.renderCanvas(
+      createMockCanvas({ rectWidth: 161, rectHeight: 80, ctx: createMockContext2D() }),
+      makeProps({ showWpName: true, wpName: "Fairway Buoy" })
+    );
+    largeHarness.spec.renderCanvas(
+      createMockCanvas({ rectWidth: 520, rectHeight: 260, ctx: createMockContext2D() }),
+      makeProps({ showWpName: true, wpName: "Fairway Buoy" })
+    );
+
+    expect(compactHarness.calls.modeHistory[0]).toBe("normal");
+    expect(largeHarness.calls.modeHistory[0]).toBe("normal");
+    expect(compactHarness.calls.waypointTextFillScales[0]).toBeGreaterThan(largeHarness.calls.waypointTextFillScales[0]);
+    expect(compactHarness.calls.metricTextFillScales[0]).toBeGreaterThan(largeHarness.calls.metricTextFillScales[0]);
   });
 });
