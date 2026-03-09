@@ -1,6 +1,6 @@
 # Implementation Plan
 
-**Status:** ⏳ In Progress | Phases 1-2 implemented; later responsive rollout phases pending
+**Status:** ⏳ In Progress | Phases 1-4 implemented; later responsive rollout phases pending
 
 ## Overview
 
@@ -21,8 +21,8 @@ Scope:
 | `PositionCoordinateWidget` | Uses shared text compaction via `TextLayoutEngine.computeResponsiveInsets()` for stacked and flat layouts while preserving renderer-owned axis-formatting and emoji guard behavior. | Phase 2 is implemented for `positionBoat`, `positionWp`, `dateTime`, and `timeStatus`. |
 | `ActiveRouteTextWidget` | Has ratio modes, but layout uses local hard floors like `40`, `16`, `12`, `6`, `4` and no linear fill boost. | Needs dedicated layout refactor on top of the shared profile. |
 | `XteDisplayWidget` + `XteHighwayPrimitives` | Ratio modes exist, but layout reserves large fixed floors (`40`, `24`, `20`, `16`, `12`, `10`) for highway/text panels. | Needs both geometry compaction and text-fill compaction. |
-| `LinearGaugeEngine` + `LinearGaugeMath` + `LinearGaugeTextLayout` | Shared engine covers many widgets, but layout and text still clamp to fixed floors (`90`, `80`, `84`, `64`, `36`, `10`, `8`, `6`). | High-leverage migration point for all linear gauges. |
-| `WindLinearWidget` | Dual-value text layout is custom and adds more fixed gap floors on top of `LinearGaugeEngine`. | Needs a widget-specific follow-up after linear-engine migration. |
+| `LinearGaugeLayout` + `LinearGaugeEngine` + `LinearGaugeMath` + `LinearGaugeTextLayout` | Linear-family layout ownership now lives in `LinearGaugeLayout`, the engine consumes shared responsive insets/geometry, and text rows use compact fill scaling without widget-local hard layout floors. | Phase 4 is implemented for the shared linear pipeline. |
+| `WindLinearWidget` | Dual-value text layout now keeps its widget-specific orchestration but uses ratio-based split gaps with `1px` safety floors on top of the shared linear pipeline. | Phase 4 is implemented for the wind-specific follow-up. |
 | `SemicircleRadialEngine` | Geometry is mostly proportional, but radial text blocks and label insets still depend on fixed floors (`18`, `10`, `8`, `6`, `4`). | Add shared compact profile for semicircle text and label geometry. |
 | `FullCircleRadialEngine` + `FullCircleRadialTextLayout` | Full-circle geometry/text still uses fixed floors (`14`, `12`, `10`, `8`, `6`, `18`, `16`). | Add shared compact profile for dial ring, labels, and text slots. |
 
@@ -56,7 +56,7 @@ Scope:
 ## Current Dyninstruments Gaps
 
 - `ResponsiveScaleProfile` now owns the shared base compaction curve, and both `CenterDisplayLayout` and the shared text pipeline consume it.
-- Phase 2 closes the numeric/coordinate text gap, but `ActiveRouteTextWidget`, `XteHighwayPrimitives`, `LinearGaugeMath`, `SemicircleRadialEngine`, `FullCircleRadialEngine`, and `FullCircleRadialTextLayout` still own local responsive floors or spacing rules.
+- Phase 2 closes the numeric/coordinate text gap, and Phase 4 closes the shared linear gap, but `ActiveRouteTextWidget`, `XteHighwayPrimitives`, `SemicircleRadialEngine`, `FullCircleRadialEngine`, and `FullCircleRadialTextLayout` still own local responsive floors or spacing rules.
 - The current custom lint/smell system does not yet block new hardcoded responsive-layout floors or missing adoption of a shared compact profile.
 - Current tests now validate compact-vs-large text compaction for `CenterDisplay`, `ThreeValueTextWidget`, `PositionCoordinateWidget`, and the shared text engine.
 
@@ -90,15 +90,16 @@ Scope:
 | `widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js` | Dedicated active-route renderer | Planned change |
 | `shared/widget-kits/xte/XteHighwayPrimitives.js` | XTE layout geometry owner | Planned change |
 | `widgets/text/XteDisplayWidget/XteDisplayWidget.js` | XTE renderer | Planned change |
-| `shared/widget-kits/linear/LinearGaugeMath.js` | Linear layout owner | Planned change |
-| `shared/widget-kits/linear/LinearGaugeEngine.js` | Linear gauge rendering pipeline | Planned change |
-| `shared/widget-kits/linear/LinearGaugeTextLayout.js` | Linear text/tick-label helper | Planned change |
-| `widgets/linear/WindLinearWidget/WindLinearWidget.js` | Dual-value linear layout | Planned change |
+| `shared/widget-kits/linear/LinearGaugeLayout.js` | Linear-family responsive layout owner | Actual change in this session |
+| `shared/widget-kits/linear/LinearGaugeMath.js` | Linear axis/tick/value helper | Actual change in this session: layout ownership removed |
+| `shared/widget-kits/linear/LinearGaugeEngine.js` | Linear gauge rendering pipeline | Actual change in this session: now consumes `LinearGaugeLayout` and exposes responsive state |
+| `shared/widget-kits/linear/LinearGaugeTextLayout.js` | Linear text/tick-label helper | Actual change in this session: compact fill scaling applied to caption/value/inline fits |
+| `widgets/linear/WindLinearWidget/WindLinearWidget.js` | Dual-value linear layout | Actual change in this session: local split gaps now use ratio-based `1px` safety floors |
 | `shared/widget-kits/radial/SemicircleRadialEngine.js` | Shared semicircle gauge pipeline | Planned change |
 | `shared/widget-kits/radial/FullCircleRadialEngine.js` | Shared full-circle dial pipeline | Planned change |
 | `shared/widget-kits/radial/FullCircleRadialTextLayout.js` | Full-circle text layout helper | Planned change |
 | `widgets/radial/CompassRadialWidget/CompassRadialWidget.js` | Full-circle label sprite owner | Planned change |
-| `config/components.js` | Component registry | Planned change: register new shared responsive module if extracted |
+| `config/components.js` | Component registry | Actual change in this session: registered `LinearGaugeLayout` and updated `LinearGaugeEngine` deps |
 | `tools/check-patterns/rules.mjs` | Pattern-rule registry | Planned change: add responsive-layout anti-regression rules |
 | `tools/check-smell-contracts.mjs` | Semantic contract checks | Planned change: add responsive adoption / coverage contract |
 | `tests/tools/check-patterns.test.js` | Pattern-rule coverage | Planned change |
@@ -175,7 +176,9 @@ Status: implemented. `TextLayoutEngine` now consumes `ResponsiveScaleProfile`, s
 
 ### Phase 4 - Roll the profile into all linear gauges
 
-1. Refactor `LinearGaugeMath.computeLayout()` so layout-driving widths/heights no longer depend on hardcoded display floors like `90`, `80`, `84`, `64`, `36`.
+Status: implemented. `LinearGaugeLayout` now owns linear-family responsive layout, `LinearGaugeMath` is reduced to pure axis/tick/value helpers, `LinearGaugeEngine` consumes layout-owned responsive geometry and exposes `state.responsive` / `state.textFillScale`, `LinearGaugeTextLayout` scales caption/value/inline fits via the shared compact profile, and `WindLinearWidget` keeps only ratio-based dual-gap orchestration on top of the shared pipeline.
+
+1. Extract linear-family responsive layout ownership into `LinearGaugeLayout` so layout-driving widths/heights no longer depend on hardcoded display floors like `90`, `80`, `84`, `64`, `36`.
 2. Refactor `LinearGaugeEngine` so:
    - track thickness
    - label font size

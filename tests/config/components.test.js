@@ -31,6 +31,9 @@ describe("config/components.js", function () {
     expect(components.LinearGaugeMath.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeMath.js");
     expect(components.LinearGaugeTextLayout.globalKey).toBe("DyniLinearGaugeTextLayout");
     expect(components.LinearGaugeTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeTextLayout.js");
+    expect(components.LinearGaugeLayout.globalKey).toBe("DyniLinearGaugeLayout");
+    expect(components.LinearGaugeLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeLayout.js");
+    expect(components.LinearGaugeLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
     expect(components.FullCircleRadialEngine.globalKey).toBe("DyniFullCircleRadialEngine");
     expect(components.FullCircleRadialEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialEngine.js");
     expect(components.FullCircleRadialEngine.deps).toEqual(["RadialToolkit", "CanvasLayerCache"]);
@@ -43,6 +46,7 @@ describe("config/components.js", function () {
       "CanvasLayerCache",
       "LinearCanvasPrimitives",
       "LinearGaugeMath",
+      "LinearGaugeLayout",
       "LinearGaugeTextLayout"
     ]);
     expect(components.ThemePresets.globalKey).toBe("DyniThemePresets");

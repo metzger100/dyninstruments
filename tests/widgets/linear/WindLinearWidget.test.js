@@ -204,4 +204,90 @@ describe("WindLinearWidget", function () {
     expect(calls.value).toBe(4);
     expect(calls.inline).toBe(2);
   });
+
+  it("uses ratio-based dual gaps with a 1px safety floor and forwards shared compaction state", function () {
+    let captured;
+    loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create({}, {
+      applyFormatter(value) {
+        return String(value);
+      },
+      getModule(id) {
+        if (id === "RadialValueMath") {
+          return {
+            create() {
+              return {
+                clamp(value, lo, hi) {
+                  const n = Number(value);
+                  if (!isFinite(n)) return lo;
+                  return Math.max(lo, Math.min(hi, n));
+                },
+                formatAngle180(value) {
+                  const n = Number(value);
+                  return isFinite(n) ? String(Math.round(n)) : "---";
+                }
+              };
+            }
+          };
+        }
+        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
+        return {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return function () {};
+              }
+            };
+          }
+        };
+      }
+    });
+
+    const calls = [];
+    const api = {
+      text: {},
+      textLayout: {
+        drawCaptionRow(state, textApi, caption, box) {
+          calls.push({ type: "caption", textFillScale: state.textFillScale, caption, box });
+        },
+        drawValueUnitRow(state, textApi, value, unit, box) {
+          calls.push({ type: "value", textFillScale: state.textFillScale, value, unit, box });
+        },
+        drawInlineRow(state, textApi, caption, value, unit, box) {
+          calls.push({ type: "inline", textFillScale: state.textFillScale, caption, value, unit, box });
+        }
+      }
+    };
+    const state = {
+      textFillScale: 1.18,
+      layout: {
+        inlineBox: { x: 0, y: 0, w: 20, h: 18 }
+      }
+    };
+    const display = {
+      secScale: 0.8,
+      parsed: {
+        left: { caption: "AWA", value: "23", unit: "°" },
+        right: { caption: "AWS", value: "5.5", unit: "kn" }
+      },
+      rowBoxes: {
+        captionBox: { x: 0, y: 0, w: 20, h: 8 },
+        valueBox: { x: 0, y: 8, w: 20, h: 10 }
+      }
+    };
+
+    captured.drawMode.flat(state, {}, display, api);
+    captured.drawMode.normal(state, {}, display, api);
+
+    const flatLeftCaption = calls.find((entry) => entry.type === "caption" && entry.caption === "AWA");
+    const flatRightCaption = calls.find((entry) => entry.type === "caption" && entry.caption === "AWS");
+    const inlineLeft = calls.find((entry) => entry.type === "inline" && entry.caption === "AWA");
+    const inlineRight = calls.find((entry) => entry.type === "inline" && entry.caption === "AWS");
+
+    expect(flatLeftCaption.box.w).toBe(9);
+    expect(flatRightCaption.box.x - (flatLeftCaption.box.x + flatLeftCaption.box.w)).toBe(1);
+    expect(inlineRight.box.x - (inlineLeft.box.x + inlineLeft.box.w)).toBe(1);
+    expect(flatLeftCaption.textFillScale).toBe(1.18);
+    expect(inlineLeft.textFillScale).toBe(1.18);
+  });
 });

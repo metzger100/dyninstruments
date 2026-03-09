@@ -119,6 +119,12 @@
       css: undefined,
       globalKey: "DyniLinearGaugeTextLayout"
     },
+    LinearGaugeLayout: {
+      js: BASE + "shared/widget-kits/linear/LinearGaugeLayout.js",
+      css: undefined,
+      globalKey: "DyniLinearGaugeLayout",
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+    },
     CenterDisplayLayout: {
       js: BASE + "shared/widget-kits/nav/CenterDisplayLayout.js",
       css: undefined,
@@ -175,7 +181,7 @@
       js: BASE + "shared/widget-kits/linear/LinearGaugeEngine.js",
       css: undefined,
       globalKey: "DyniLinearGaugeEngine",
-      deps: ["RadialToolkit", "CanvasLayerCache", "LinearCanvasPrimitives", "LinearGaugeMath", "LinearGaugeTextLayout"]
+      deps: ["RadialToolkit", "CanvasLayerCache", "LinearCanvasPrimitives", "LinearGaugeMath", "LinearGaugeLayout", "LinearGaugeTextLayout"]
     },
     ThreeValueTextWidget: {
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",

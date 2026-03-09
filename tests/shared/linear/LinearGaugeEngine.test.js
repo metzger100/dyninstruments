@@ -10,6 +10,9 @@ describe("LinearGaugeEngine", function () {
       bands: [],
       ticks: [],
       pointer: [],
+      captionMaxPx: [],
+      valueFits: [],
+      inlineFits: [],
       measureValueUnitFitScales: [],
       fitInlineCapValUnitScales: [],
       fitInlineCaptions: [],
@@ -81,6 +84,9 @@ describe("LinearGaugeEngine", function () {
     };
 
     const engineMod = loadFresh("shared/widget-kits/linear/LinearGaugeEngine.js");
+    const responsiveScaleProfileMod = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMathMod = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const layoutMod = loadFresh("shared/widget-kits/linear/LinearGaugeLayout.js");
     const mathMod = loadFresh("shared/widget-kits/linear/LinearGaugeMath.js");
     const textLayoutMod = loadFresh("shared/widget-kits/linear/LinearGaugeTextLayout.js");
     const engine = engineMod.create({}, {
@@ -102,7 +108,10 @@ describe("LinearGaugeEngine", function () {
       getModule(id) {
         if (id === "CanvasLayerCache") return cacheMod;
         if (id === "LinearCanvasPrimitives") return primitivesModule;
+        if (id === "ResponsiveScaleProfile") return responsiveScaleProfileMod;
+        if (id === "LayoutRectMath") return layoutRectMathMod;
         if (id === "LinearGaugeMath") return mathMod;
+        if (id === "LinearGaugeLayout") return layoutMod;
         if (id === "LinearGaugeTextLayout") return textLayoutMod;
         if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
         return {
@@ -125,17 +134,6 @@ describe("LinearGaugeEngine", function () {
                   const safeMax = rMax > rMin ? rMax : rMin + 1;
                   return { min: rMin, max: safeMax, range: safeMax - rMin };
                 },
-                computePad(W, H) {
-                  return Math.max(6, Math.floor(Math.min(W, H) * 0.04));
-                },
-                computeGap(W, H) {
-                  return Math.max(6, Math.floor(Math.min(W, H) * 0.03));
-                },
-                computeMode(ratio, tNormal, tFlat) {
-                  if (ratio < tNormal) return "high";
-                  if (ratio > tFlat) return "flat";
-                  return "normal";
-                },
                 clamp(v, lo, hi) {
                   const n = Number(v);
                   if (!isFinite(n)) return lo;
@@ -152,15 +150,18 @@ describe("LinearGaugeEngine", function () {
                   calls.fitInlineCaptions.push(caption);
                   return { cPx: 12, vPx: 20, uPx: 14, g1: 6, g2: 6, total: 120 };
                 },
-                drawCaptionMax(ctx, family, x, y, w, h) {
+                drawCaptionMax(ctx, family, x, y, w, h, caption, capMaxPx) {
                   calls.captionRowHeights.push(h);
+                  calls.captionMaxPx.push(capMaxPx);
                   calls.drawCaptionMax += 1;
                 },
-                drawValueUnitWithFit(ctx, family, x, y, w, h) {
+                drawValueUnitWithFit(ctx, family, x, y, w, h, valueText, unitText, fit) {
                   calls.valueRowHeights.push(h);
+                  calls.valueFits.push(fit);
                   calls.drawValueUnitWithFit += 1;
                 },
-                drawInlineCapValUnit() {
+                drawInlineCapValUnit(ctx, family, x, y, w, h, caption, valueText, unitText, fit) {
+                  calls.inlineFits.push(fit);
                   calls.drawInlineCapValUnit += 1;
                 },
                 drawDisconnectOverlay() {}
@@ -313,6 +314,44 @@ describe("LinearGaugeEngine", function () {
     });
     expect(harness.calls.drawCaptionMax).toBe(2);
     expect(harness.calls.drawValueUnitWithFit).toBe(2);
+  });
+
+  it("boosts compact text ceilings while large layouts settle back to scale 1", function () {
+    const stackedHarness = createHarness();
+    const stackedRenderer = stackedHarness.engine.createRenderer({
+      rawValueKey: "value",
+      ratioProps: { normal: "n", flat: "f" },
+      ratioDefaults: { normal: 1.1, flat: 3.5 },
+      rangeDefaults: { min: 0, max: 30 },
+      rangeProps: { min: "min", max: "max" },
+      tickProps: { major: "major", minor: "minor", showEndLabels: "showEndLabels" }
+    });
+    const inlineHarness = createHarness();
+    const inlineRenderer = inlineHarness.engine.createRenderer({
+      rawValueKey: "value",
+      ratioProps: { normal: "n", flat: "f" },
+      ratioDefaults: { normal: 1.1, flat: 3.5 },
+      rangeDefaults: { min: 0, max: 30 },
+      rangeProps: { min: "min", max: "max" },
+      tickProps: { major: "major", minor: "minor", showEndLabels: "showEndLabels" }
+    });
+
+    stackedRenderer(createMockCanvas({ rectWidth: 120, rectHeight: 220, ctx: createMockContext2D() }), {
+      value: 10, min: 0, max: 30, major: 10, minor: 5, n: 1.1, f: 3.5, caption: "SOG"
+    });
+    stackedRenderer(createMockCanvas({ rectWidth: 180, rectHeight: 260, ctx: createMockContext2D() }), {
+      value: 10, min: 0, max: 30, major: 10, minor: 5, n: 1.1, f: 3.5, caption: "SOG"
+    });
+    inlineRenderer(createMockCanvas({ rectWidth: 220, rectHeight: 160, ctx: createMockContext2D() }), {
+      value: 10, min: 0, max: 30, major: 10, minor: 5, n: 1.1, f: 3.5, caption: "SOG"
+    });
+    inlineRenderer(createMockCanvas({ rectWidth: 360, rectHeight: 220, ctx: createMockContext2D() }), {
+      value: 10, min: 0, max: 30, major: 10, minor: 5, n: 1.1, f: 3.5, caption: "SOG"
+    });
+
+    expect(stackedHarness.calls.captionMaxPx[0]).toBeGreaterThan(stackedHarness.calls.captionMaxPx[1]);
+    expect(stackedHarness.calls.valueFits[0].vPx).toBeGreaterThan(stackedHarness.calls.valueFits[1].vPx);
+    expect(inlineHarness.calls.inlineFits[0].vPx).toBeGreaterThan(inlineHarness.calls.inlineFits[1].vPx);
   });
 
   it("honors captionUnitScale directly across all modes", function () {
@@ -578,14 +617,15 @@ describe("LinearGaugeEngine", function () {
         strokeStyle: "#ff2b2b"
       })
     }));
+    const pointerDepthBase = Math.max(1, Math.floor(markerTrackBoxHeight * 0.12));
     expect(harness.calls.pointer[0] && harness.calls.pointer[0].opts && harness.calls.pointer[0].opts.depth).toBe(
-      Math.max(8, Math.floor(Math.max(8, Math.min(14, Math.floor(markerTrackBoxHeight * 0.12))) * harness.theme.linear.pointer.lengthFactor))
+      Math.max(1, Math.floor(pointerDepthBase * harness.theme.linear.pointer.lengthFactor))
     );
     expect(harness.calls.pointer[0] && harness.calls.pointer[0].opts && harness.calls.pointer[0].opts.side).toBe(
-      Math.max(4, Math.floor((Math.max(8, Math.min(14, Math.floor(markerTrackBoxHeight * 0.12))) * harness.theme.linear.pointer.widthFactor) / 2))
+      Math.max(1, Math.floor(Math.max(1, Math.floor(pointerDepthBase * harness.theme.linear.pointer.widthFactor)) / 2))
     );
-    expect(defaultMarker && defaultMarker.len).toBe(Math.max(6, Math.floor(Math.max(6, Math.min(14, Math.floor(markerTrackBoxHeight * 0.12))) * 0.9)));
-    expect(defaultMarker && defaultMarker.opts && defaultMarker.opts.lineWidth).toBe(Math.max(3, Math.floor(Math.max(6, Math.min(14, Math.floor(markerTrackBoxHeight * 0.12))) * 0.4)));
+    expect(defaultMarker && defaultMarker.len).toBe(Math.max(1, Math.floor(pointerDepthBase * 0.9)));
+    expect(defaultMarker && defaultMarker.opts && defaultMarker.opts.lineWidth).toBe(Math.max(1, Math.floor(pointerDepthBase * 0.4)));
     expect(defaultMarker && (defaultMarker.y - defaultMarker.len)).toBe(markerTrackY);
     expect(harness.calls.drawCaptionMax).toBe(0);
     expect(harness.calls.drawValueUnitWithFit).toBe(0);

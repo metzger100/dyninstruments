@@ -7,6 +7,7 @@
 Linear instruments use a shared engine pipeline:
 
 - `shared/widget-kits/linear/LinearCanvasPrimitives.js`
+- `shared/widget-kits/linear/LinearGaugeLayout.js`
 - `shared/widget-kits/linear/LinearGaugeMath.js`
 - `shared/widget-kits/linear/LinearGaugeTextLayout.js`
 - `shared/widget-kits/linear/LinearGaugeEngine.js`
@@ -28,8 +29,21 @@ New linear widgets should delegate rendering to `LinearGaugeEngine.createRendere
 - `mapValueToX(value, min, max, x0, x1, clamp?)`
 - `buildTicks(min, max, majorStep, minorStep)`
 - `resolveAxisDomain(axisMode, range)`
-- `computeLayout(mode, W, H, pad, gap)`
+- `formatTickLabel(value)`
+
+### LinearGaugeLayout
+
+- `computeMode(W, H, thresholdNormal, thresholdFlat)`
+- `computeInsets(W, H)`
+- `createContentRect(W, H, insets)`
+- `computeLayout({ W, H, mode, theme, contentRect?, responsive? })`
 - `splitCaptionValueRows(captionBox, valueBox, secScale)`
+
+Ownership:
+
+- `ResponsiveScaleProfile` owns the shared `minDim -> textFillScale` curve.
+- `LinearGaugeLayout` owns linear-family ratio mode selection, insets/gaps, track/text rectangles, and row splitting.
+- `LinearGaugeEngine` and `LinearGaugeTextLayout` are consumers of that layout state; they do not own a second compact curve.
 
 ### LinearGaugeTextLayout
 
@@ -73,6 +87,12 @@ Hook `api` surface:
 - `primitives`, `math`, `textLayout`, `text`, `value`, `theme`
 - `drawDefaultPointer(opts)`, `drawPointerAtValue(value, opts)`, `drawMarkerAtValue(value, opts)` (frame hooks)
 - `drawMarkerAtValue(value, opts)` uses layout-based defaults when `opts.len`/`opts.lineWidth` are omitted, keeps the marker at or below the scale line, and renders it with flat rectangular ends.
+
+Hook `state` additions:
+
+- `state.responsive`
+- `state.textFillScale`
+- `state.layout.responsive`
 
 ### Axis Profile Matrix
 
@@ -163,6 +183,7 @@ const renderCanvas = engine.createRenderer({
 - Dynamic per frame: pointer, caption/value/unit text, disconnect overlay.
 - Cache key excludes live values and includes geometry/theme/tick/sector signatures.
 - `showEndLabels` defaults to false unless mapper sets it true.
+- Compact tiles now get smaller insets/gaps from `LinearGaugeLayout`, slimmer default track/pointer/marker geometry, and larger fitted text ceilings via `state.textFillScale`.
 
 ## Theme Contract
 
@@ -175,9 +196,11 @@ Reads `ThemeResolver` tokens:
 - `theme.linear.labels.insetFactor`, `fontFactor`
 - `theme.colors.pointer`, `theme.colors.warning`, `theme.colors.alarm`
 
-Default linear pointer sizing uses the same unscaled `pointerDepthBase` for both factors:
-- rendered length: `max(8, floor(pointerDepthBase * theme.linear.pointer.lengthFactor))`
-- full rendered width: `max(8, floor(pointerDepthBase * theme.linear.pointer.widthFactor))`
+Default linear pointer and marker sizing stays geometry-driven:
+- base pointer/marker size is derived from `layout.trackBox.h`
+- pointer length uses `theme.linear.pointer.lengthFactor`
+- pointer width uses `theme.linear.pointer.widthFactor`
+- compact tiles reduce those defaults via the shared compact profile instead of fixed pixel floors
 
 ## Testing Contract for New Linear Wrappers
 
