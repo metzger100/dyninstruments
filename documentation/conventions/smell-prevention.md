@@ -21,6 +21,8 @@ Warn-only rollout rules are tracked debt until they are promoted to `block`.
 | Internal hook fallback | Shared/widget code normalizes or fallbacks internal hook/spec results (`normalize*`, `cfg.*(...) || ...`) | Keep defaults at the boundary and trust internal hook contracts | `check-patterns` (`internal-hook-fallback`) | warn |
 | Redundant null/type guard | Internal code repeatedly sanitizes already-normalized values (`String(x == null ? "" : x)`, `Array.isArray(x) ? x : []`, `isFiniteNumber(x) ? ... : ...`) | Remove redundant guards and trust mapper/runtime/theme contracts | `check-patterns` (`redundant-null-type-guard`) | warn |
 | Hardcoded runtime default | Runtime/widget/shared code embeds fallback literals or object defaults already owned elsewhere | Use declarative config/theme defaults or boundary-owned placeholders | `check-patterns` (`hardcoded-runtime-default`) | warn |
+| Responsive layout hard floor | Responsive layout/text owner keeps user-visible hard floors such as `Math.max(9, ...)` or `clamp(..., 10, ...)` instead of deriving them from the shared compact profile | Use `ResponsiveScaleProfile`-derived geometry/text ceilings; keep only technical canvas-safety guards with explicit suppression comments | `check-patterns` (`responsive-layout-hard-floor`) | warn |
+| Responsive profile ownership drift | Layout owner stops resolving `ResponsiveScaleProfile`, or a consumer module imports it directly instead of using layout-owned `responsive` / `textFillScale` state | Keep compaction ownership in `ResponsiveScaleProfile` + layout-owner modules only; consumers must read layout-owned state | `check-patterns` (`responsive-profile-ownership`) | block |
 | CSS/JS default duplication | JS repeats CSS/theme token defaults (`getComputedStyle`, `defaultValue`, `--dyni-*`) | Keep visual/token defaults in CSS or theme resolver boundary only | `check-patterns` (`css-js-default-duplication`) | warn |
 | Premature legacy support | Code adds speculative compat/legacy/fallback naming or multi-source compatibility branches | Remove speculative compatibility paths until a live boundary requires them | `check-patterns` (`premature-legacy-support`) | warn |
 | Renderer coercion drift | Renderer does `Number(props.x)` on mapper-owned normalized props | Normalize at mapper boundary, renderer receives finite number or `undefined` | `check-patterns` (`renderer-numeric-coercion-without-boundary-contract`) + `check-smell-contracts` (`mapper-output-no-nan`) | block |
@@ -60,7 +62,7 @@ Allowed inline exceptions:
 
 - `block`: must pass locally before push.
 - `warn`: allowed only for exploratory or rollout rules not yet promoted; promotion target and rationale must be tracked in `documentation/TECH-DEBT.md`.
-- Promotion rule for warn-only fallback checks: each rule moves to `block` only after its repo warning count reaches zero and the zero-warning state is recorded in `TECH-DEBT.md`.
+- Promotion rule for warn-only rollout checks: each rule moves to `block` only after its repo warning count reaches zero and the zero-warning state is recorded in `TECH-DEBT.md`.
 
 ## Fix Playbooks
 
@@ -112,6 +114,18 @@ Allowed inline exceptions:
 1. Move placeholder/default literals to declarative config, mapper defaults, runtime helpers, or CSS/theme token boundaries.
 2. Remove inline object/array fallback stubs in widget/shared code where the shape is already contract-owned.
 3. Keep warn-mode findings tracked until each rule reaches zero backlog.
+
+### Responsive layout hard floor
+
+1. Replace user-visible `Math.max(N>=3, ...)` / `clamp(..., N>=3, ...)` layout floors with `ResponsiveScaleProfile`-derived geometry or text ceilings.
+2. Keep only true technical canvas-viability guards above `2`, and annotate those lines with a rule-specific suppression comment plus reason.
+3. Track remaining warning counts in `TECH-DEBT.md` until the backlog reaches zero and the rule can be promoted.
+
+### Responsive profile ownership drift
+
+1. Resolve `ResponsiveScaleProfile` only in layout-owner modules (`TextLayoutEngine`, layout owners for nav/xte/linear/radial families).
+2. Keep consumer modules on layout-owned state (`responsive`, `textFillScale`, `computeResponsiveInsets`) instead of importing the profile directly.
+3. Add or adjust tool tests when ownership boundaries move so the manifest stays aligned with the repo architecture.
 
 ### CSS/JS default duplication
 
