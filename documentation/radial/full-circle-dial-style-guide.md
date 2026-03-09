@@ -4,11 +4,12 @@
 
 ## Overview
 
-Visual specification for full-circle dial widgets. Constants and formulas are implementation-derived from `FullCircleRadialEngine`, `FullCircleRadialTextLayout`, widget modules, and shared `CanvasLayerCache`.
+Visual specification for full-circle dial widgets. Constants and formulas are implementation-derived from `FullCircleRadialLayout`, `FullCircleRadialEngine`, `FullCircleRadialTextLayout`, widget modules, and shared `CanvasLayerCache`.
 
 ## Key Details
 
 - Shared renderer/caching backbone: `FullCircleRadialEngine.createRenderer(spec)` + `CanvasLayerCache.createLayerCache({ layers })`.
+- Shared responsive owner: `FullCircleRadialLayout.computeMode()` / `computeInsets()` / `computeLayout()`.
 - Angle conversion uses `RadialAngleMath.degToCanvasRad()` defaults: `zeroDegAt="north"`, clockwise positive.
 - Geometry and mode slots are computed once per frame in engine state and reused by widget callbacks.
 - Theme/token sources come from `ThemeResolver` via `RadialToolkit.theme.resolve(canvas)`.
@@ -26,19 +27,25 @@ Visual specification for full-circle dial widgets. Constants and formulas are im
 
 | Element | Formula | Source |
 |---|---|---|
-| `pad` | `max(6, floor(min(W, H) * 0.04))` | `RadialValueMath.computePad()` |
-| `gap` | `max(6, floor(min(W, H) * 0.03))` | `RadialValueMath.computeGap()` |
-| `D` | `min(W - 2*pad, H - 2*pad)` | `computeGeometry()` |
-| `R` | `max(14, floor(D / 2))` | `computeGeometry()` |
-| `cx` | `floor(W / 2)` | `computeGeometry()` |
-| `cy` | `floor(H / 2)` | `computeGeometry()` |
-| `ringW` | `max(6, floor(R * theme.radial.ring.widthFactor))` | `computeGeometry()` |
-| `needleDepth` | `max(8, floor(R * 0.11))` | `computeGeometry()` |
-| `labelInsetVal` | `max(18, floor(ringW * theme.radial.labels.insetFactor))` | `computeGeometry()` |
-| `labelPx` | `max(10, floor(R * theme.radial.labels.fontFactor))` | `computeGeometry()` |
-| `leftStrip` | `max(0, floor((W - 2*pad - 2*R) / 2))` | `computeGeometry()` |
+| `pad` | `ResponsiveScaleProfile.computeInsetPx(responsive, 0.04, 1)` | `FullCircleRadialLayout.computeInsets()` |
+| `gap` | `ResponsiveScaleProfile.computeInsetPx(responsive, 0.03, 1)` | `FullCircleRadialLayout.computeInsets()` |
+| `textFillScale` | `lerp(1.18, 1, t)` | `ResponsiveScaleProfile.computeProfile()` |
+| `compactGeometryScale` | `max(0.5, 1 - max(0, textFillScale - 1))` | `FullCircleRadialLayout.computeLayout()` |
+| `D` | `2 * R`, centered inside padded content rect | `FullCircleRadialLayout.computeLayout()` |
+| `R` | `max(1, floor(min(contentRect.w, contentRect.h) / 2))` | `FullCircleRadialLayout.computeLayout()` |
+| `cx` | `contentRect.x + floor(contentRect.w / 2)` | `FullCircleRadialLayout.computeLayout()` |
+| `cy` | `contentRect.y + floor(contentRect.h / 2)` | `FullCircleRadialLayout.computeLayout()` |
+| `ringW` | `max(1, floor(R * theme.radial.ring.widthFactor * compactGeometryScale))` | `FullCircleRadialLayout.computeLayout()` |
+| `needleDepth` | `max(1, floor(R * 0.11 * compactGeometryScale))` | `FullCircleRadialLayout.computeLayout()` |
+| `fixedPointerDepth` | `max(needleDepth, floor(ringW * 0.6))` | `FullCircleRadialLayout.computeLayout()` |
+| `markerLen` | `max(1, floor(ringW * 0.75))` | `FullCircleRadialLayout.computeLayout()` |
+| `markerWidth` | `max(1, floor(ringW * 0.20))` | `FullCircleRadialLayout.computeLayout()` |
+| `labelInsetVal` | `max(1, floor(ringW * theme.radial.labels.insetFactor))` | `FullCircleRadialLayout.computeLayout()` |
+| `labelPx` | `max(1, floor(R * theme.radial.labels.fontFactor * compactGeometryScale))` | `FullCircleRadialLayout.computeLayout()` |
+| `labelRadius` | `max(0, R - max(1, floor(ringW * 1.6)))` | `FullCircleRadialLayout.computeLayout()` |
+| `leftStrip` | `max(0, floor((contentRect.w - 2*R) / 2))` | `FullCircleRadialLayout.computeLayout()` |
 | `rightStrip` | `leftStrip` | `computeGeometry()` |
-| `topStrip` | `max(0, floor((H - 2*pad - 2*R) / 2))` | `computeGeometry()` |
+| `topStrip` | `max(0, floor((contentRect.h - 2*R) / 2))` | `FullCircleRadialLayout.computeLayout()` |
 | `bottomStrip` | `topStrip` | `computeGeometry()` |
 
 Tick lengths are token-defined pixel values (not `R`-scaled):
@@ -62,7 +69,7 @@ Ring stroke width: `theme.radial.ring.arcLineWidth` (default `1`).
 
 | Variant | Widget | Angle input | Depth | Common options |
 |---|---|---|---|---|
-| Lubber pointer (fixed) | `CompassRadialWidget` | fixed `0°` | `max(10, needleDepth)` | `variant="long"`, `fillStyle=theme.colors.pointer` |
+| Lubber pointer (fixed) | `CompassRadialWidget` | fixed `0°` | `fixedPointerDepth` | `variant="long"`, `fillStyle=theme.colors.pointer` |
 | Value pointer (dynamic) | `WindRadialWidget` | `display.angle` | `needleDepth` | `variant="long"`, `fillStyle=theme.colors.pointer` |
 
 Shared pointer shape controls:
@@ -80,7 +87,7 @@ Shared pointer shape controls:
 Label typography:
 - Weight: `theme.font.labelWeight`
 - Family: `Helpers.resolveFontFamily(canvas)`
-- Font size: `labelPx = max(10, floor(R * theme.radial.labels.fontFactor))`
+- Font size: `labelPx = max(1, floor(R * theme.radial.labels.fontFactor * compactGeometryScale))`
 
 ## Layout Modes
 
@@ -106,7 +113,7 @@ Mode text layout:
 | `normal` | centered 3-row block inside dial | two centered inner columns (left/right) |
 | `high` | inline row in top slot | top row for left value, bottom row for right value |
 
-High-mode slot factors (`computeSlots`):
+High-mode slot factors (`FullCircleRadialLayout.computeLayout()`):
 - Engine defaults: `highTopFactor=0.85`, `highBottomFactor=0.85`
 - Compass override: `highTopFactor=0.9`, `highBottomFactor=0.9`
 
@@ -117,6 +124,8 @@ Normal-mode layout tokens (`theme.radial.fullCircle.normal.*`):
 | `innerMarginFactor` | `0.03` | `0..0.25` |
 | `minHeightFactor` | `0.45` | `0.25..0.95` |
 | `dualGapFactor` | `0.05` | `0..0.25` |
+
+Normal-mode fit search is bounded by `layout.normal.safeRadius`; token overrides only reshape the search within those layout-owned bounds.
 
 ## Background Cache Rules
 
@@ -156,7 +165,7 @@ Compass target marker (`CompassRadialWidget`, per-frame):
 - Marker is compass-only (`markerCourse`); no wind marker primitive exists
 - Draw when both `markerCourse` and `heading` are finite
 - Marker angle relative to rotated card: `markerCourse - heading`
-- Marker dimensions: `len=max(12, floor(R * 0.11))`, `width=max(3, floor(R * 0.05))`
+- Marker dimensions: `len=markerLen`, `width=markerWidth`
 
 ## Disconnect Overlay
 

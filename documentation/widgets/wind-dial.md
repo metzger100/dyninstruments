@@ -7,6 +7,7 @@
 Full-circle wind dial showing angle (AWA/TWA) and speed (AWS/TWS) together. Uses `RadialToolkit.draw` for dial primitives and `RadialToolkit.text/value` for text fitting and value handling.
 Theme colors are resolved once per render via `FullCircleRadialEngine`.
 Dial background rendering uses shared `CanvasLayerCache` via `FullCircleRadialEngine` (`back` + `front` layers).
+Responsive ring, label, and pointer geometry come from `FullCircleRadialLayout` through the shared engine state.
 
 ## Module Registration
 
@@ -47,9 +48,9 @@ WindRadialWidget: {
 | Ring | `draw.drawRing` | full circle |
 | Layline starboard | `draw.drawAnnularSector` | `windRadialLayMin..windRadialLayMax`, `theme.colors.laylineStb` (default `#82b683`) |
 | Layline port | `draw.drawAnnularSector` | `-windRadialLayMax..-windRadialLayMin`, `theme.colors.laylinePort` (default `#ff7a76`) |
-| Wind pointer | `draw.drawPointerAtRim` | long pointer at `angle`, with `fillStyle: theme.colors.pointer` (default `#ff2b2b`) |
+| Wind pointer | `draw.drawPointerAtRim` | long pointer at `angle`, with layout-owned `needleDepth` and `fillStyle: theme.colors.pointer` (default `#ff2b2b`) |
 | Ticks | `draw.drawTicks` | `-180..180`, major 30, minor 10 |
-| Labels | `draw.drawLabels` | `-180..180`, step 30, endpoints filtered |
+| Labels | `draw.drawLabels` | `-180..180`, step 30, endpoints filtered, with layout-owned `radiusOffset` / `fontPx` |
 
 ## Background Cache Behavior
 
@@ -102,6 +103,11 @@ otherwise -> normal
 - right side: speed caption/value/unit
 
 `flat` uses side strips, `normal` uses two inner columns, `high` uses inline top/bottom rows.
+
+Responsive ownership:
+- `FullCircleRadialLayout` owns mode routing, compact insets, dial geometry, label metrics, and slot bounds.
+- `FullCircleRadialEngine` owns cache lifecycle and shared callback state.
+- `WindRadialWidget` only owns wind-specific layline, pointer, and formatter behavior.
 
 ## Internal Value Formatting
 

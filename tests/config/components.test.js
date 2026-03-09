@@ -34,9 +34,12 @@ describe("config/components.js", function () {
     expect(components.LinearGaugeLayout.globalKey).toBe("DyniLinearGaugeLayout");
     expect(components.LinearGaugeLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeLayout.js");
     expect(components.LinearGaugeLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
+    expect(components.FullCircleRadialLayout.globalKey).toBe("DyniFullCircleRadialLayout");
+    expect(components.FullCircleRadialLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialLayout.js");
+    expect(components.FullCircleRadialLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
     expect(components.FullCircleRadialEngine.globalKey).toBe("DyniFullCircleRadialEngine");
     expect(components.FullCircleRadialEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialEngine.js");
-    expect(components.FullCircleRadialEngine.deps).toEqual(["RadialToolkit", "CanvasLayerCache"]);
+    expect(components.FullCircleRadialEngine.deps).toEqual(["RadialToolkit", "CanvasLayerCache", "FullCircleRadialLayout"]);
     expect(components.FullCircleRadialTextLayout.globalKey).toBe("DyniFullCircleRadialTextLayout");
     expect(components.FullCircleRadialTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialTextLayout.js");
     expect(components.SemicircleRadialLayout.globalKey).toBe("DyniSemicircleRadialLayout");

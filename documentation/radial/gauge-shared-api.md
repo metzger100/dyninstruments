@@ -20,6 +20,7 @@ Shared gauge logic is split into focused core modules:
 - `SemicircleRadialLayout` as shared responsive layout owner for Speed/Depth/Temperature/Voltage
 - `SemicircleRadialTextLayout` as shared mode text helper for Speed/Depth/Temperature/Voltage
 - `SemicircleRadialEngine` as shared render flow for Speed/Depth/Temperature/Voltage
+- `FullCircleRadialLayout` as shared responsive layout owner for Compass/Wind dials
 - `FullCircleRadialEngine` as shared render flow for Compass/Wind dials
 - `FullCircleRadialTextLayout` as shared mode text helper for full-circle wrappers
 
@@ -81,10 +82,15 @@ SemicircleRadialEngine: {
   globalKey: "DyniSemicircleRadialEngine",
   deps: ["RadialToolkit", "SemicircleRadialLayout", "SemicircleRadialTextLayout"]
 },
+FullCircleRadialLayout: {
+  js: BASE + "shared/widget-kits/radial/FullCircleRadialLayout.js",
+  globalKey: "DyniFullCircleRadialLayout",
+  deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+},
 FullCircleRadialEngine: {
   js: BASE + "shared/widget-kits/radial/FullCircleRadialEngine.js",
   globalKey: "DyniFullCircleRadialEngine",
-  deps: ["RadialToolkit", "CanvasLayerCache"]
+  deps: ["RadialToolkit", "CanvasLayerCache", "FullCircleRadialLayout"]
 },
 FullCircleRadialTextLayout: {
   js: BASE + "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
@@ -265,6 +271,28 @@ Responsive ownership for the semicircle family:
 ## FullCircleRadialEngine API
 
 `FullCircleRadialEngine.create(def, Helpers).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
+
+Responsive ownership for the full-circle family:
+
+- `FullCircleRadialLayout` owns mode selection, compact insets, dial geometry, label metrics, slot bounds, and normal-mode safe-radius limits.
+- `FullCircleRadialTextLayout` consumes layout-owned state plus `textFillScale` for mode-routed text drawing.
+- `FullCircleRadialEngine` orchestrates theme resolve, static-layer caching, shared draw helpers, and delegated widget callbacks.
+
+## FullCircleRadialLayout API
+
+`FullCircleRadialLayout.create(def, Helpers)` returns:
+
+- `computeMode(W, H, thresholdNormal, thresholdFlat)`
+- `computeInsets(W, H)` -> `{ pad, gap, responsive }`
+- `computeLayout({ W, H, theme, mode, insets, responsive, layoutConfig? })`
+
+`computeLayout(...)` returns layout-owned state:
+
+- `geom` (`R`, `cx`, `cy`, `rOuter`, `ringW`, `needleDepth`, `fixedPointerDepth`, `markerLen`, `markerWidth`, strips)
+- `labels` (`radiusOffset`, `fontPx`, `spriteRadius`)
+- `slots` (`leftTop`, `leftBottom`, `rightTop`, `rightBottom`, `top`, `bottom`)
+- `normal` (`safeRadius`, `compactCenterHeight`, `dualCompactWidth`, `dualCompactInset`, `dualCompactHeight`)
+- `responsive`, `textFillScale`, `compactGeometryScale`
 
 ### `spec` fields
 

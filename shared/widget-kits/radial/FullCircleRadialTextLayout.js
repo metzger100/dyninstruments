@@ -9,39 +9,205 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniFullCircleRadialTextLayout = factory(); }
 }(this, function () {
   "use strict";
+
   const hasOwn = Object.prototype.hasOwnProperty;
-  const FULL_CIRCLE_NORMAL_DEFAULTS = { innerMarginFactor: 0.03, minHeightFactor: 0.45, dualGapFactor: 0.05 };
-  function fullCircleClamp(value, minValue, maxValue) {
-    return Math.max(minValue, Math.min(maxValue, value));
+  const NORMAL_DEFAULTS = { innerMarginFactor: 0.03, minHeightFactor: 0.45, dualGapFactor: 0.05 };
+
+  function clampNumber(value, minValue, maxValue, defaultValue) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) {
+      return defaultValue;
+    }
+    return Math.max(minValue, Math.min(maxValue, n));
   }
-  function fullCircleThemeNumber(source, key, defaultValue, minValue, maxValue) {
+
+  function resolveSecondaryScale(value) {
+    return clampNumber(value, 0.3, 3.0, 0.8);
+  }
+
+  function resolveTextFillScale(state) {
+    return clampNumber(state && state.textFillScale, 0.1, 10, 1);
+  }
+
+  function growSize(currentSize, ceilingSize, textFillScale) {
+    const current = Math.max(1, Math.floor(Number(currentSize) || 0));
+    const ceiling = Math.max(1, Math.floor(Number(ceilingSize) || 0));
+    if (current >= ceiling) {
+      return ceiling;
+    }
+    const fillGain = Math.max(0, clampNumber(textFillScale, 0.1, 10, 1) - 1);
+    return Math.max(1, Math.min(ceiling, current + Math.floor((ceiling - current) * fillGain)));
+  }
+
+  function themeNumber(source, key, defaultValue, minValue, maxValue) {
     if (!source || !hasOwn.call(source, key)) {
       return defaultValue;
     }
-    const raw = Number(source[key]);
-    if (!isFinite(raw)) {
-      return defaultValue;
-    }
-    return fullCircleClamp(raw, minValue, maxValue);
+    return clampNumber(source[key], minValue, maxValue, defaultValue);
   }
-  function fullCircleNormalConfig(state) {
-    const normal = state && state.theme && state.theme.radial && state.theme.radial.fullCircle && state.theme.radial.fullCircle.normal;
+
+  function normalConfig(state) {
+    const source = state && state.theme && state.theme.radial && state.theme.radial.fullCircle && state.theme.radial.fullCircle.normal;
     return {
-      innerMarginFactor: fullCircleThemeNumber(normal, "innerMarginFactor", FULL_CIRCLE_NORMAL_DEFAULTS.innerMarginFactor, 0, 0.25),
-      minHeightFactor: fullCircleThemeNumber(normal, "minHeightFactor", FULL_CIRCLE_NORMAL_DEFAULTS.minHeightFactor, 0.25, 0.95),
-      dualGapFactor: fullCircleThemeNumber(normal, "dualGapFactor", FULL_CIRCLE_NORMAL_DEFAULTS.dualGapFactor, 0, 0.25)
+      innerMarginFactor: themeNumber(source, "innerMarginFactor", NORMAL_DEFAULTS.innerMarginFactor, 0, 0.25),
+      minHeightFactor: themeNumber(source, "minHeightFactor", NORMAL_DEFAULTS.minHeightFactor, 0.25, 0.95),
+      dualGapFactor: themeNumber(source, "dualGapFactor", NORMAL_DEFAULTS.dualGapFactor, 0, 0.25)
     };
   }
-  function fullCircleSingleFlat(state, display, opts) {
-    const cfg = opts || {};
-    const side = cfg.side === "right" ? "right" : "left";
-    const align = cfg.align || side;
+
+  function boostValueUnitFit(state, fit, unitText, boxHeight) {
+    if (!fit) {
+      return fit;
+    }
+    const textFillScale = resolveTextFillScale(state);
+    const ceiling = Math.max(1, Math.floor(Number(boxHeight) || 0));
+    const gapCeiling = Math.max(1, Math.floor(ceiling * 0.5));
+    return {
+      vPx: growSize(fit.vPx, ceiling, textFillScale),
+      uPx: unitText ? growSize(fit.uPx, ceiling, textFillScale) : 0,
+      gap: unitText ? growSize(fit.gap, gapCeiling, textFillScale) : 0
+    };
+  }
+
+  function boostInlineFit(state, fit, caption, unitText, boxHeight) {
+    if (!fit) {
+      return fit;
+    }
+    const textFillScale = resolveTextFillScale(state);
+    const ceiling = Math.max(1, Math.floor(Number(boxHeight) || 0));
+    const gapCeiling = Math.max(1, Math.floor(ceiling * 0.5));
+    return {
+      cPx: caption ? growSize(fit.cPx, ceiling, textFillScale) : 0,
+      vPx: growSize(fit.vPx, ceiling, textFillScale),
+      uPx: unitText ? growSize(fit.uPx, ceiling, textFillScale) : 0,
+      g1: caption ? growSize(fit.g1, gapCeiling, textFillScale) : 0,
+      g2: unitText ? growSize(fit.g2, gapCeiling, textFillScale) : 0,
+      total: fit.total
+    };
+  }
+
+  function measureBlockSizes(state, display, boxWidth, blockHeight) {
+    const secScale = resolveSecondaryScale(display.secScale);
+    const ceiling = Math.max(1, Math.floor(Number(blockHeight) || 0));
+    const valueHeight = Math.max(1, Math.floor(ceiling / (1 + 2 * secScale)));
+    const captionHeight = Math.max(1, Math.floor(valueHeight * secScale));
+    const unitHeight = Math.max(1, Math.floor(valueHeight * secScale));
+    const textFillScale = resolveTextFillScale(state);
+    return {
+      cPx: growSize(
+        state.text.fitTextPx(state.ctx, display.caption, boxWidth, captionHeight, state.family, state.labelWeight),
+        captionHeight,
+        textFillScale
+      ),
+      vPx: growSize(
+        state.text.fitTextPx(state.ctx, display.value, boxWidth, valueHeight, state.family, state.valueWeight),
+        valueHeight,
+        textFillScale
+      ),
+      uPx: growSize(
+        state.text.fitTextPx(state.ctx, display.unit, boxWidth, unitHeight, state.family, state.labelWeight),
+        unitHeight,
+        textFillScale
+      ),
+      hCap: captionHeight,
+      hVal: valueHeight,
+      hUnit: unitHeight
+    };
+  }
+
+  function mergeBlockSizes(leftSizes, rightSizes) {
+    return {
+      cPx: Math.min(leftSizes.cPx, rightSizes.cPx),
+      vPx: Math.min(leftSizes.vPx, rightSizes.vPx),
+      uPx: Math.min(leftSizes.uPx, rightSizes.uPx),
+      hCap: leftSizes.hCap,
+      hVal: leftSizes.hVal,
+      hUnit: leftSizes.hUnit
+    };
+  }
+
+  function drawBlock(state, x, y, width, height, display, align, sizes) {
+    state.text.drawThreeRowsBlock(
+      state.ctx,
+      state.family,
+      x,
+      y,
+      width,
+      height,
+      display.caption,
+      display.value,
+      display.unit,
+      display.secScale,
+      align,
+      sizes,
+      state.valueWeight,
+      state.labelWeight
+    );
+  }
+
+  function drawSingleCompactCenterRow(state, display) {
+    const normal = state.layout && state.layout.normal;
+    const box = normal && normal.compactCenterHeight
+      ? { x: state.layout.contentRect.x, y: state.layout.contentRect.y, w: state.layout.contentRect.w, h: normal.compactCenterHeight }
+      : null;
+    if (!box || box.w <= 0 || box.h <= 0) {
+      return;
+    }
+    const fit = boostValueUnitFit(state, state.text.measureValueUnitFit(
+      state.ctx,
+      state.family,
+      display.value,
+      display.unit,
+      box.w,
+      box.h,
+      display.secScale,
+      state.valueWeight,
+      state.labelWeight
+    ), display.unit, box.h);
+    state.text.drawValueUnitWithFit(
+      state.ctx,
+      state.family,
+      box.x,
+      box.y,
+      box.w,
+      box.h,
+      display.value,
+      display.unit,
+      fit,
+      "center",
+      state.valueWeight,
+      state.labelWeight
+    );
+  }
+
+  function drawDualCompactRows(state, left, right) {
+    const normal = state.layout && state.layout.normal;
+    if (!normal) {
+      return;
+    }
+    const innerWidth = Math.max(1, normal.dualCompactWidth);
+    const halfWidth = Math.max(1, Math.floor(innerWidth / 2) - normal.dualCompactInset);
+    const blockHeight = Math.max(1, normal.dualCompactHeight);
+    const xLeft = state.geom.cx - Math.floor(innerWidth / 2);
+    const xRight = state.geom.cx + Math.floor(innerWidth / 2) - halfWidth;
+    const yTop = state.geom.cy - Math.floor(blockHeight / 2);
+    const leftSizes = measureBlockSizes(state, left, halfWidth, blockHeight);
+    const rightSizes = measureBlockSizes(state, right, halfWidth, blockHeight);
+    const sizes = mergeBlockSizes(leftSizes, rightSizes);
+
+    drawBlock(state, xLeft, yTop, halfWidth, blockHeight, left, "right", sizes);
+    drawBlock(state, xRight, yTop, halfWidth, blockHeight, right, "left", sizes);
+  }
+
+  function drawSingleFlat(state, display, opts) {
+    const side = opts && opts.side === "right" ? "right" : "left";
+    const align = opts && opts.align ? opts.align : side;
     const top = side === "right" ? state.slots.rightTop : state.slots.leftTop;
     const bottom = side === "right" ? state.slots.rightBottom : state.slots.leftBottom;
     if (!top || !bottom) {
       return;
     }
-    const fit = state.text.measureValueUnitFit(
+    const fit = boostValueUnitFit(state, state.text.measureValueUnitFit(
       state.ctx,
       state.family,
       display.value,
@@ -51,7 +217,7 @@
       display.secScale,
       state.valueWeight,
       state.labelWeight
-    );
+    ), display.unit, bottom.h);
     state.text.drawCaptionMax(
       state.ctx,
       state.family,
@@ -60,7 +226,7 @@
       top.w,
       top.h,
       display.caption,
-      Math.floor(fit.vPx * display.secScale),
+      growSize(Math.floor(fit.vPx * resolveSecondaryScale(display.secScale)), top.h, state.textFillScale),
       align,
       state.labelWeight
     );
@@ -79,14 +245,13 @@
       state.labelWeight
     );
   }
-  function fullCircleSingleHigh(state, display, opts) {
-    const cfg = opts || {};
-    const slotName = cfg.slot === "bottom" ? "bottom" : "top";
-    const slot = state.slots[slotName];
+
+  function drawSingleHigh(state, display, opts) {
+    const slot = opts && opts.slot === "bottom" ? state.slots.bottom : state.slots.top;
     if (!slot) {
       return;
     }
-    const fit = state.text.fitInlineCapValUnit(
+    const fit = boostInlineFit(state, state.text.fitInlineCapValUnit(
       state.ctx,
       state.family,
       display.caption,
@@ -97,7 +262,7 @@
       display.secScale,
       state.valueWeight,
       state.labelWeight
-    );
+    ), display.caption, display.unit, slot.h);
     state.text.drawInlineCapValUnit(
       state.ctx,
       state.family,
@@ -113,285 +278,116 @@
       state.labelWeight
     );
   }
-  function fullCircleSingleNormal(state, display) {
-    const T = state.text;
-    const R = state.geom.R;
-    const cfg = fullCircleNormalConfig(state);
-    const secScale = state.value.clamp(display.secScale, 0.3, 3.0);
-    const rSafe = Math.max(10, state.geom.rOuter - (state.geom.labelInsetVal + Math.max(6, Math.floor(R * 0.06))));
-    if (rSafe < 12) {
-      const th = Math.max(10, Math.floor((state.pad + state.geom.topStrip) * 0.9));
-      const fit = T.measureValueUnitFit(
-        state.ctx,
-        state.family,
-        display.value,
-        display.unit,
-        state.W - 2 * state.pad,
-        th,
-        secScale,
-        state.valueWeight,
-        state.labelWeight
-      );
-      T.drawValueUnitWithFit(
-        state.ctx,
-        state.family,
-        state.pad,
-        state.pad,
-        state.W - 2 * state.pad,
-        th,
-        display.value,
-        display.unit,
-        fit,
-        "center",
-        state.valueWeight,
-        state.labelWeight
-      );
-      return;
-    }
-    const innerMargin = Math.max(4, Math.floor(R * cfg.innerMarginFactor));
-    const rEff = Math.max(10, rSafe - innerMargin);
-    let best = null;
-    const mhMax = Math.floor(2 * rEff);
-    const mhMin = Math.max(10, Math.floor(mhMax * cfg.minHeightFactor));
-    for (let mh = mhMax; mh >= mhMin; mh -= 1) {
-      const halfDiagY = mh / 2;
-      const halfWMax = Math.floor(Math.sqrt(Math.max(0, rEff * rEff - halfDiagY * halfDiagY)));
-      const boxW = Math.max(10, 2 * halfWMax);
-      if (boxW <= 10) {
-        continue;
-      }
-      const hVal = Math.max(12, Math.floor(mh / (1 + 2 * secScale)));
-      const vPx = T.fitTextPx(state.ctx, display.value, boxW, hVal, state.family, state.valueWeight);
-      const score = vPx * 10000 + boxW * 10 + mh;
-      if (!best || score > best.score) {
-        best = { maxH: mh, boxW: boxW, hVal: hVal, vPx: vPx, score: score };
-      }
-    }
-    const maxH = best ? best.maxH : Math.floor(rEff * 0.9);
-    const boxW = best ? best.boxW : Math.floor(rEff * 1.6);
-    const hVal = best ? best.hVal : Math.max(12, Math.floor(maxH / (1 + 2 * secScale)));
-    const hCap = Math.floor(hVal * display.secScale);
-    const hUnit = Math.floor(hVal * display.secScale);
-    const sizes = {
-      cPx: T.fitTextPx(state.ctx, display.caption, boxW, hCap, state.family, state.labelWeight),
-      vPx: best ? best.vPx : T.fitTextPx(state.ctx, display.value, boxW, hVal, state.family, state.valueWeight),
-      uPx: T.fitTextPx(state.ctx, display.unit, boxW, hUnit, state.family, state.labelWeight),
-      hCap: hCap,
-      hVal: hVal,
-      hUnit: hUnit
-    };
-    T.drawThreeRowsBlock(
-      state.ctx,
-      state.family,
-      state.geom.cx - Math.floor(boxW / 2),
-      state.geom.cy - Math.floor(maxH / 2),
-      boxW,
-      maxH,
-      display.caption,
-      display.value,
-      display.unit,
-      secScale,
-      "center",
-      sizes,
-      state.valueWeight,
-      state.labelWeight
-    );
-  }
-  function fullCircleDualFlat(state, left, right, opts) {
-    const cfg = opts || {};
-    fullCircleSingleFlat(state, left, {
-      side: "left",
-      align: hasOwn.call(cfg, "leftAlign") ? cfg.leftAlign : "left"
-    });
-    fullCircleSingleFlat(state, right, {
-      side: "right",
-      align: hasOwn.call(cfg, "rightAlign") ? cfg.rightAlign : "right"
-    });
-  }
-  function fullCircleDualHigh(state, left, right) {
-    fullCircleSingleHigh(state, left, { slot: "top" });
-    fullCircleSingleHigh(state, right, { slot: "bottom" });
-  }
-  function fullCircleDualNormal(state, left, right) {
-    const T = state.text;
-    const R = state.geom.R;
-    const cfg = fullCircleNormalConfig(state);
-    const secScale = state.value.clamp((left.secScale + right.secScale) / 2, 0.3, 3.0);
-    const extra = Math.max(6, Math.floor(R * 0.06));
-    const rSafe = Math.max(10, state.geom.rOuter - (state.geom.labelInsetVal + extra));
-    if (rSafe < 12) {
-      const innerW = Math.floor(state.geom.rOuter * 1.0);
-      const halfW = Math.max(10, Math.floor(innerW / 2) - Math.max(4, Math.floor(R * 0.035)));
-      const maxH = Math.floor(state.geom.rOuter * 0.46);
-      const xLeft = state.geom.cx - Math.floor(innerW / 2);
-      const xRight = state.geom.cx + Math.floor(innerW / 2) - halfW;
-      const yTop = state.geom.cy - Math.floor(maxH / 2);
-      const hv = Math.max(12, Math.floor(maxH / (1 + 2 * secScale)));
-      const hc = Math.floor(hv * secScale);
-      const hu = Math.floor(hv * secScale);
-      const sizesTiny = {
-        cPx: Math.min(
-          T.fitTextPx(state.ctx, left.caption, halfW, hc, state.family, state.labelWeight),
-          T.fitTextPx(state.ctx, right.caption, halfW, hc, state.family, state.labelWeight)
-        ),
-        vPx: Math.min(
-          T.fitTextPx(state.ctx, left.value, halfW, hv, state.family, state.valueWeight),
-          T.fitTextPx(state.ctx, right.value, halfW, hv, state.family, state.valueWeight)
-        ),
-        uPx: Math.min(
-          T.fitTextPx(state.ctx, left.unit, halfW, hu, state.family, state.labelWeight),
-          T.fitTextPx(state.ctx, right.unit, halfW, hu, state.family, state.labelWeight)
-        ),
-        hCap: hc,
-        hVal: hv,
-        hUnit: hu
-      };
-      T.drawThreeRowsBlock(
-        state.ctx,
-        state.family,
-        xLeft,
-        yTop,
-        halfW,
-        maxH,
-        left.caption,
-        left.value,
-        left.unit,
-        secScale,
-        "right",
-        sizesTiny,
-        state.valueWeight,
-        state.labelWeight
-      );
-      T.drawThreeRowsBlock(
-        state.ctx,
-        state.family,
-        xRight,
-        yTop,
-        halfW,
-        maxH,
-        right.caption,
-        right.value,
-        right.unit,
-        secScale,
-        "left",
-        sizesTiny,
-        state.valueWeight,
-        state.labelWeight
-      );
-      return;
-    }
-    const colGap = Math.max(6, Math.floor(R * cfg.dualGapFactor));
-    const innerMargin = Math.max(4, Math.floor(R * cfg.innerMarginFactor));
-    const rEff = Math.max(10, rSafe - innerMargin);
-    let best = null;
-    const mhMax = Math.floor(2 * rEff);
-    const mhMin = Math.max(10, Math.floor(mhMax * cfg.minHeightFactor));
-    for (let mh = mhMax; mh >= mhMin; mh -= 1) {
-      const halfDiagY = mh / 2;
-      const halfWMax = Math.floor(
-        Math.sqrt(Math.max(0, rEff * rEff - halfDiagY * halfDiagY)) - Math.floor(colGap / 2)
-      );
-      if (halfWMax <= 10) {
-        continue;
-      }
-      const hv = Math.max(12, Math.floor(mh / (1 + 2 * secScale)));
-      const vPx = Math.min(
-        T.fitTextPx(state.ctx, left.value, halfWMax, hv, state.family, state.valueWeight),
-        T.fitTextPx(state.ctx, right.value, halfWMax, hv, state.family, state.valueWeight)
-      );
-      const score = vPx * 10000 + halfWMax * 10 + mh;
-      if (!best || score > best.score) {
-        best = { maxH: mh, halfW: halfWMax, hv: hv, vPx: vPx, score: score };
-      }
-    }
-    const maxH = best ? best.maxH : Math.floor(rSafe * 0.9);
-    const halfW = best ? best.halfW : Math.floor(rSafe * 0.6);
-    const hv = best ? best.hv : Math.max(12, Math.floor(maxH / (1 + 2 * secScale)));
-    const hc = Math.floor(hv * secScale);
-    const hu = Math.floor(hv * secScale);
-    const sizes = {
-      cPx: Math.min(
-        T.fitTextPx(state.ctx, left.caption, halfW, hc, state.family, state.labelWeight),
-        T.fitTextPx(state.ctx, right.caption, halfW, hc, state.family, state.labelWeight)
-      ),
-      vPx: best ? best.vPx : Math.min(
-        T.fitTextPx(state.ctx, left.value, halfW, hv, state.family, state.valueWeight),
-        T.fitTextPx(state.ctx, right.value, halfW, hv, state.family, state.valueWeight)
-      ),
-      uPx: Math.min(
-        T.fitTextPx(state.ctx, left.unit, halfW, hu, state.family, state.labelWeight),
-        T.fitTextPx(state.ctx, right.unit, halfW, hu, state.family, state.labelWeight)
-      ),
-      hCap: hc,
-      hVal: hv,
-      hUnit: hu
-    };
-    const innerW = 2 * halfW + colGap;
-    const xLeft = state.geom.cx - Math.floor(innerW / 2);
-    const xRight = xLeft + halfW + colGap;
-    const yTop = state.geom.cy - Math.floor(maxH / 2);
 
-    T.drawThreeRowsBlock(
-      state.ctx,
-      state.family,
-      xLeft,
-      yTop,
-      halfW,
-      maxH,
-      left.caption,
-      left.value,
-      left.unit,
-      secScale,
-      "right",
-      sizes,
-      state.valueWeight,
-      state.labelWeight
-    );
-    T.drawThreeRowsBlock(
-      state.ctx,
-      state.family,
-      xRight,
-      yTop,
-      halfW,
-      maxH,
-      right.caption,
-      right.value,
-      right.unit,
-      secScale,
-      "left",
-      sizes,
-      state.valueWeight,
-      state.labelWeight
-    );
+  function drawSingleNormal(state, display) {
+    const cfg = normalConfig(state);
+    const safeRadius = Math.max(1, state.layout && state.layout.normal ? state.layout.normal.safeRadius : 0);
+    if (safeRadius <= 1) {
+      drawSingleCompactCenterRow(state, display);
+      return;
+    }
+    const secScale = resolveSecondaryScale(display.secScale);
+    const innerMargin = Math.max(1, Math.floor(state.geom.R * cfg.innerMarginFactor));
+    const effectiveRadius = Math.max(1, safeRadius - innerMargin);
+    let best = null;
+    const heightMax = Math.max(1, Math.floor(effectiveRadius * 2));
+    const heightMin = Math.max(1, Math.floor(heightMax * cfg.minHeightFactor));
+
+    for (let blockHeight = heightMax; blockHeight >= heightMin; blockHeight -= 1) {
+      const halfHeight = blockHeight / 2;
+      const halfWidth = Math.floor(Math.sqrt(Math.max(0, effectiveRadius * effectiveRadius - halfHeight * halfHeight)));
+      const boxWidth = Math.max(1, halfWidth * 2);
+      const valueHeight = Math.max(1, Math.floor(blockHeight / (1 + 2 * secScale)));
+      const valuePx = state.text.fitTextPx(state.ctx, display.value, boxWidth, valueHeight, state.family, state.valueWeight);
+      const score = (valuePx * 10000) + (boxWidth * 10) + blockHeight;
+      if (!best || score > best.score) {
+        best = { blockHeight: blockHeight, boxWidth: boxWidth, score: score };
+      }
+    }
+
+    const blockHeight = best ? best.blockHeight : Math.max(1, Math.floor(effectiveRadius * 0.9));
+    const boxWidth = best ? best.boxWidth : Math.max(1, Math.floor(effectiveRadius * 1.6));
+    const sizes = measureBlockSizes(state, display, boxWidth, blockHeight);
+    drawBlock(state, state.geom.cx - Math.floor(boxWidth / 2), state.geom.cy - Math.floor(blockHeight / 2), boxWidth, blockHeight, display, "center", sizes);
   }
-  function create(def, Helpers) {
+
+  function drawDualNormal(state, left, right) {
+    const cfg = normalConfig(state);
+    const safeRadius = Math.max(1, state.layout && state.layout.normal ? state.layout.normal.safeRadius : 0);
+    if (safeRadius <= 1) {
+      drawDualCompactRows(state, left, right);
+      return;
+    }
+    const dualScale = resolveSecondaryScale((left.secScale + right.secScale) / 2);
+    const innerMargin = Math.max(1, Math.floor(state.geom.R * cfg.innerMarginFactor));
+    const columnGap = Math.max(1, Math.floor(state.geom.R * cfg.dualGapFactor));
+    const effectiveRadius = Math.max(1, safeRadius - innerMargin);
+    let best = null;
+    const heightMax = Math.max(1, Math.floor(effectiveRadius * 2));
+    const heightMin = Math.max(1, Math.floor(heightMax * cfg.minHeightFactor));
+
+    for (let blockHeight = heightMax; blockHeight >= heightMin; blockHeight -= 1) {
+      const halfHeight = blockHeight / 2;
+      const halfWidth = Math.floor(
+        Math.sqrt(Math.max(0, effectiveRadius * effectiveRadius - halfHeight * halfHeight)) - Math.floor(columnGap / 2)
+      );
+      if (halfWidth <= 0) {
+        continue;
+      }
+      const valueHeight = Math.max(1, Math.floor(blockHeight / (1 + 2 * dualScale)));
+      const valuePx = Math.min(
+        state.text.fitTextPx(state.ctx, left.value, halfWidth, valueHeight, state.family, state.valueWeight),
+        state.text.fitTextPx(state.ctx, right.value, halfWidth, valueHeight, state.family, state.valueWeight)
+      );
+      const score = (valuePx * 10000) + (halfWidth * 10) + blockHeight;
+      if (!best || score > best.score) {
+        best = { blockHeight: blockHeight, halfWidth: halfWidth, score: score };
+      }
+    }
+
+    const blockHeight = best ? best.blockHeight : Math.max(1, Math.floor(safeRadius * 0.9));
+    const halfWidth = best ? best.halfWidth : Math.max(1, Math.floor(safeRadius * 0.6));
+    const leftSizes = measureBlockSizes(state, left, halfWidth, blockHeight);
+    const rightSizes = measureBlockSizes(state, right, halfWidth, blockHeight);
+    const sizes = mergeBlockSizes(leftSizes, rightSizes);
+    const totalWidth = (halfWidth * 2) + columnGap;
+    const xLeft = state.geom.cx - Math.floor(totalWidth / 2);
+    const xRight = xLeft + halfWidth + columnGap;
+    const yTop = state.geom.cy - Math.floor(blockHeight / 2);
+
+    drawBlock(state, xLeft, yTop, halfWidth, blockHeight, left, "right", sizes);
+    drawBlock(state, xRight, yTop, halfWidth, blockHeight, right, "left", sizes);
+  }
+
+  function create() {
     function drawSingleModeText(state, mode, display, opts) {
       if (mode === "flat") {
-        fullCircleSingleFlat(state, display, opts);
+        drawSingleFlat(state, display, opts);
         return;
       }
       if (mode === "high") {
-        fullCircleSingleHigh(state, display, opts);
+        drawSingleHigh(state, display, opts);
         return;
       }
-      fullCircleSingleNormal(state, display);
+      drawSingleNormal(state, display);
     }
+
     function drawDualModeText(state, mode, left, right, opts) {
       if (mode === "flat") {
-        fullCircleDualFlat(state, left, right, opts);
+        drawSingleFlat(state, left, { side: "left", align: opts && hasOwn.call(opts, "leftAlign") ? opts.leftAlign : "left" });
+        drawSingleFlat(state, right, { side: "right", align: opts && hasOwn.call(opts, "rightAlign") ? opts.rightAlign : "right" });
         return;
       }
       if (mode === "high") {
-        fullCircleDualHigh(state, left, right);
+        drawSingleHigh(state, left, { slot: "top" });
+        drawSingleHigh(state, right, { slot: "bottom" });
         return;
       }
-      fullCircleDualNormal(state, left, right);
+      drawDualNormal(state, left, right);
     }
-    return {
-      id: "FullCircleRadialTextLayout",
-      drawSingleModeText: drawSingleModeText,
-      drawDualModeText: drawDualModeText
-    };
+
+    return { id: "FullCircleRadialTextLayout", drawSingleModeText: drawSingleModeText, drawDualModeText: drawDualModeText };
   }
+
   return { id: "FullCircleRadialTextLayout", create: create };
 }));

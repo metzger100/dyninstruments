@@ -4,8 +4,11 @@ const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-ca
 describe("CompassRadialWidget", function () {
   function createCompassCachingHarness() {
     const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
+    const fullCircleLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
     const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
     const textLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js");
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
     const calls = {
       ring: [],
       ticks: [],
@@ -62,8 +65,11 @@ describe("CompassRadialWidget", function () {
         },
         getModule(id) {
           if (id === "FullCircleRadialEngine") return fullCircleEngine;
+          if (id === "FullCircleRadialLayout") return fullCircleLayout;
           if (id === "FullCircleRadialTextLayout") return textLayout;
           if (id === "CanvasLayerCache") return layerCache;
+          if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
+          if (id === "LayoutRectMath") return layoutRectMath;
           if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
@@ -127,17 +133,6 @@ describe("CompassRadialWidget", function () {
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
                   },
-                  computePad(W, H) {
-                    return Math.max(6, Math.floor(Math.min(W, H) * 0.04));
-                  },
-                  computeGap(W, H) {
-                    return Math.max(6, Math.floor(Math.min(W, H) * 0.03));
-                  },
-                  computeMode(ratio, thresholdNormal, thresholdFlat) {
-                    if (ratio < thresholdNormal) return "high";
-                    if (ratio > thresholdFlat) return "flat";
-                    return "normal";
-                  },
                   formatDirection360(value) {
                     const n = Number(value);
                     if (!isFinite(n)) return "---";
@@ -151,7 +146,31 @@ describe("CompassRadialWidget", function () {
         }
       });
 
-    return { spec, calls, theme };
+    return {
+      spec,
+      calls,
+      theme,
+      computeLayout(width, height) {
+        const api = fullCircleLayout.create({}, {
+          getModule(id) {
+            if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
+            if (id === "LayoutRectMath") return layoutRectMath;
+            throw new Error("unexpected layout module: " + id);
+          }
+        });
+        const mode = api.computeMode(width, height, 0.8, 2.2);
+        const insets = api.computeInsets(width, height);
+        return api.computeLayout({
+          W: width,
+          H: height,
+          mode: mode,
+          theme: theme,
+          insets: insets,
+          responsive: insets.responsive,
+          layoutConfig: { highTopFactor: 0.9, highBottomFactor: 0.9 }
+        });
+      }
+    };
   }
 
   function makeCompassProps(overrides) {
@@ -173,14 +192,15 @@ describe("CompassRadialWidget", function () {
     });
 
     harness.spec.renderCanvas(canvas, makeCompassProps());
+    const layout = harness.computeLayout(480, 110);
 
     expect(harness.calls.pointer[0].fillStyle).toBe(harness.theme.colors.pointer);
     expect(harness.calls.pointer[0].widthFactor).toBe(harness.theme.radial.pointer.widthFactor);
     expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.radial.pointer.lengthFactor);
-    expect(harness.calls.pointer[0].depth).toBe(10);
+    expect(harness.calls.pointer[0].depth).toBe(layout.geom.fixedPointerDepth);
     expect(harness.calls.rimMarker[0]).toEqual({
-      len: 12,
-      width: 3,
+      len: layout.geom.markerLen,
+      width: layout.geom.markerWidth,
       strokeStyle: harness.theme.colors.pointer
     });
     expect(harness.calls.ring[0].lineWidth).toBe(harness.theme.radial.ring.arcLineWidth);
