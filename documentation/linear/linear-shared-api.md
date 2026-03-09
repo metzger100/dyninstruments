@@ -36,13 +36,14 @@ New linear widgets should delegate rendering to `LinearGaugeEngine.createRendere
 - `computeMode(W, H, thresholdNormal, thresholdFlat)`
 - `computeInsets(W, H)`
 - `createContentRect(W, H, insets)`
-- `computeLayout({ W, H, mode, theme, contentRect?, responsive? })`
+- `computeLayout({ W, H, mode, theme, contentRect?, responsive?, layoutConfig? })`
 - `splitCaptionValueRows(captionBox, valueBox, secScale)`
 
 Ownership:
 
 - `ResponsiveScaleProfile` owns the shared `minDim -> textFillScale` curve.
 - `LinearGaugeLayout` owns linear-family ratio mode selection, insets/gaps, track/text rectangles, and row splitting.
+- Optional `layoutConfig` lets wrappers remap `normal` / `high` geometry without reimplementing the shared gauge pipeline.
 - `LinearGaugeEngine` and `LinearGaugeTextLayout` are consumers of that layout state; they do not own a second compact curve.
 
 ## Responsive Ownership Contract
@@ -87,6 +88,7 @@ Common `spec` fields:
 - `formatTickLabel(value, state, props, api) -> string` (optional)
 - `drawFrame(state, props, display, api)` (optional)
 - `drawMode.flat/high/normal(state, props, display, api)` (optional mode-specific text override)
+- `layout` (optional) -> `{ normalVariant?: "stacked", highVariant?: "split" }`
 
 Hook `api` surface:
 
@@ -102,7 +104,7 @@ Hook `state` additions:
 - `state.layout.responsive`
 
 Wrappers should consume these layout-owned state fields instead of recomputing compact geometry locally.
-`WindLinearWidget` now reads `state.layout.dualRowGap` / `state.layout.inlineDualGap`, and `LinearGaugeTextLayout` trusts the layout-owned `labelFontPx` without adding a second readable-floor policy.
+`WindLinearWidget` now reads `state.layout.dualRowGap`, uses `spec.layout` to remap `normal` / `high`, and consumes split-high `state.layout.textTopBox` / `state.layout.textBottomBox` for inline top and bottom metric rows while `LinearGaugeTextLayout` trusts the layout-owned `labelFontPx` without adding a second readable-floor policy.
 
 ### Axis Profile Matrix
 
@@ -194,6 +196,8 @@ const renderCanvas = engine.createRenderer({
 - Cache key excludes live values and includes geometry/theme/tick/sector signatures.
 - `showEndLabels` defaults to false unless mapper sets it true.
 - Compact tiles now get smaller insets/gaps from `LinearGaugeLayout`, slimmer default track/pointer/marker geometry, and larger fitted text ceilings via `state.textFillScale`.
+- Default row rendering still uses `display.rowBoxes.captionBox` / `valueBox` for stacked layouts and `state.layout.inlineBox` for inline layouts.
+- Split-high layouts expose `display.rowBoxes.top` and `display.rowBoxes.bottom`, each pre-split into caption/value boxes using the shared `captionUnitScale` logic.
 
 ## Theme Contract
 

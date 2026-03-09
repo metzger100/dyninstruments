@@ -160,6 +160,11 @@ describe("WindLinearWidget", function () {
       }
     });
 
+    expect(captured.layout).toEqual({
+      normalVariant: "stacked",
+      highVariant: "split"
+    });
+
     const calls = {
       caption: 0,
       value: 0,
@@ -181,9 +186,9 @@ describe("WindLinearWidget", function () {
     };
     const state = {
       layout: {
-        inlineBox: { x: 0, y: 0, w: 280, h: 60 },
         dualRowGap: 8,
-        inlineDualGap: 10
+        textTopBox: { x: 0, y: 0, w: 280, h: 60 },
+        textBottomBox: { x: 0, y: 160, w: 280, h: 66 }
       }
     };
     const display = {
@@ -194,7 +199,9 @@ describe("WindLinearWidget", function () {
       },
       rowBoxes: {
         captionBox: { x: 0, y: 0, w: 280, h: 30 },
-        valueBox: { x: 0, y: 30, w: 280, h: 40 }
+        valueBox: { x: 0, y: 30, w: 280, h: 40 },
+        top: null,
+        bottom: null
       }
     };
 
@@ -207,7 +214,7 @@ describe("WindLinearWidget", function () {
     expect(calls.inline).toBe(2);
   });
 
-  it("uses layout-owned dual gaps with a 1px safety floor and forwards shared compaction state", function () {
+  it("uses layout-owned dual gaps for flat/normal and full-width rows for split high", function () {
     let captured;
     loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create({}, {
       applyFormatter(value) {
@@ -245,27 +252,12 @@ describe("WindLinearWidget", function () {
       }
     });
 
-    const calls = [];
-    const api = {
-      text: {},
-      textLayout: {
-        drawCaptionRow(state, textApi, caption, box) {
-          calls.push({ type: "caption", textFillScale: state.textFillScale, caption, box });
-        },
-        drawValueUnitRow(state, textApi, value, unit, box) {
-          calls.push({ type: "value", textFillScale: state.textFillScale, value, unit, box });
-        },
-        drawInlineRow(state, textApi, caption, value, unit, box) {
-          calls.push({ type: "inline", textFillScale: state.textFillScale, caption, value, unit, box });
-        }
-      }
-    };
     const state = {
       textFillScale: 1.18,
       layout: {
-        inlineBox: { x: 0, y: 0, w: 20, h: 18 },
         dualRowGap: 1,
-        inlineDualGap: 1
+        textTopBox: { x: 0, y: 0, w: 20, h: 18 },
+        textBottomBox: { x: 0, y: 28, w: 20, h: 18 }
       }
     };
     const display = {
@@ -276,22 +268,52 @@ describe("WindLinearWidget", function () {
       },
       rowBoxes: {
         captionBox: { x: 0, y: 0, w: 20, h: 8 },
-        valueBox: { x: 0, y: 8, w: 20, h: 10 }
+        valueBox: { x: 0, y: 8, w: 20, h: 10 },
+        top: null,
+        bottom: null
       }
     };
 
-    captured.drawMode.flat(state, {}, display, api);
-    captured.drawMode.normal(state, {}, display, api);
+    function renderMode(modeName) {
+      const calls = [];
+      const api = {
+        text: {},
+        textLayout: {
+          drawCaptionRow(innerState, textApi, caption, box, secScale, align) {
+            calls.push({ type: "caption", textFillScale: innerState.textFillScale, caption, box, align });
+          },
+          drawValueUnitRow(innerState, textApi, value, unit, box, secScale, align) {
+            calls.push({ type: "value", textFillScale: innerState.textFillScale, value, unit, box, align });
+          },
+          drawInlineRow(innerState, textApi, caption, value, unit, box) {
+            calls.push({ type: "inline", textFillScale: innerState.textFillScale, caption, value, unit, box });
+          }
+        }
+      };
+      captured.drawMode[modeName](state, {}, display, api);
+      return calls;
+    }
 
-    const flatLeftCaption = calls.find((entry) => entry.type === "caption" && entry.caption === "AWA");
-    const flatRightCaption = calls.find((entry) => entry.type === "caption" && entry.caption === "AWS");
-    const inlineLeft = calls.find((entry) => entry.type === "inline" && entry.caption === "AWA");
-    const inlineRight = calls.find((entry) => entry.type === "inline" && entry.caption === "AWS");
+    const flatCalls = renderMode("flat");
+    const normalCalls = renderMode("normal");
+    const highCalls = renderMode("high");
+    const flatLeftCaption = flatCalls.find((entry) => entry.type === "caption" && entry.caption === "AWA");
+    const flatRightCaption = flatCalls.find((entry) => entry.type === "caption" && entry.caption === "AWS");
+    const normalLeftCaption = normalCalls.find((entry) => entry.type === "caption" && entry.caption === "AWA");
+    const normalRightCaption = normalCalls.find((entry) => entry.type === "caption" && entry.caption === "AWS");
+    const highTopInline = highCalls.find((entry) => entry.type === "inline" && entry.caption === "AWA");
+    const highBottomInline = highCalls.find((entry) => entry.type === "inline" && entry.caption === "AWS");
 
     expect(flatLeftCaption.box.w).toBe(9);
     expect(flatRightCaption.box.x - (flatLeftCaption.box.x + flatLeftCaption.box.w)).toBe(1);
-    expect(inlineRight.box.x - (inlineLeft.box.x + inlineLeft.box.w)).toBe(1);
+    expect(normalRightCaption.box.x - (normalLeftCaption.box.x + normalLeftCaption.box.w)).toBe(1);
+    expect(highTopInline.box).toEqual(state.layout.textTopBox);
+    expect(highBottomInline.box).toEqual(state.layout.textBottomBox);
     expect(flatLeftCaption.textFillScale).toBe(1.18);
-    expect(inlineLeft.textFillScale).toBe(1.18);
+    expect(normalLeftCaption.textFillScale).toBe(1.18);
+    expect(highTopInline.textFillScale).toBe(1.18);
+    expect(flatCalls.some((entry) => entry.type === "inline")).toBe(false);
+    expect(normalCalls.some((entry) => entry.type === "inline")).toBe(false);
+    expect(highCalls.filter((entry) => entry.type === "inline")).toHaveLength(2);
   });
 });

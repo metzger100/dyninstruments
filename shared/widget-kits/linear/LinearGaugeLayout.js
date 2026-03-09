@@ -24,6 +24,7 @@
   const HIGH_TRACK_Y_RATIO = 0.35;
   const HIGH_TEXT_GAP_FACTOR = 1.2;
   const HIGH_CAPTION_SHARE_RATIO = 0.36;
+  const HIGH_SPLIT_TEXT_SHARE_RATIO = 0.24;
   const NORMAL_INSET_RATIO = 0.04;
   const NORMAL_TOP_MARGIN_RATIO = 0.05;
   const NORMAL_SCALE_HEIGHT_RATIO = 0.50;
@@ -48,6 +49,119 @@
     }
     const insets = cfg && cfg.insets ? cfg.insets : computeInsets(cfg && cfg.W, cfg && cfg.H);
     return createContentRect(cfg && cfg.W, cfg && cfg.H, insets);
+  }
+
+  function resolveNormalVariant(layoutConfig) {
+    return layoutConfig && layoutConfig.normalVariant === "stacked" ? "stacked" : "inline";
+  }
+
+  function resolveHighVariant(layoutConfig) {
+    return layoutConfig && layoutConfig.highVariant === "split" ? "split" : "stacked";
+  }
+
+  function computeFlatLayout(contentRect, right, gap, responsive, profileApi) {
+    const usableWidth = Math.max(1, contentRect.w - gap);
+    const textW = Math.max(1, Math.floor(usableWidth * FLAT_TEXT_SHARE_RATIO));
+    const scaleW = Math.max(1, contentRect.w - textW - gap);
+    const textH = Math.max(1, Math.floor(contentRect.h * FLAT_TEXT_HEIGHT_RATIO));
+    const rightX = contentRect.x + scaleW + gap;
+    const rightW = Math.max(1, right - rightX);
+    const rightY = contentRect.y + Math.floor((contentRect.h - textH) / 2);
+    const captionH = Math.max(1, Math.floor(textH * FLAT_CAPTION_SHARE_RATIO));
+    const scaleX0 = contentRect.x;
+    const scaleX1 = contentRect.x + scaleW;
+    const captionBox = makeRect(rightX, rightY, rightW, captionH);
+    return {
+      scaleX0: scaleX0,
+      scaleX1: scaleX1,
+      trackY: contentRect.y + Math.floor(contentRect.h * FLAT_TRACK_Y_RATIO),
+      trackBox: makeRect(scaleX0, contentRect.y, scaleW, contentRect.h),
+      captionBox: captionBox,
+      valueBox: makeRect(rightX, rightY + captionH, rightW, Math.max(1, textH - captionH)),
+      inlineBox: null,
+      dualRowGap: profileApi.computeIntrinsicSpacePx(responsive, captionBox.w, DUAL_ROW_GAP_RATIO, 2, 1),
+      inlineDualGap: 0,
+      textTopBox: null,
+      textBottomBox: null
+    };
+  }
+
+  function computeStackedLayout(contentRect, bottom, gap, responsive, profileApi) {
+    const textGap = Math.max(1, Math.floor(gap * HIGH_TEXT_GAP_FACTOR));
+    const availableHeight = Math.max(1, contentRect.h - textGap);
+    const scaleH = Math.max(1, Math.floor(availableHeight * HIGH_SCALE_HEIGHT_RATIO));
+    const textY = Math.min(bottom - 1, contentRect.y + scaleH + textGap);
+    const textH = Math.max(1, bottom - textY);
+    const captionH = Math.max(1, Math.floor(textH * HIGH_CAPTION_SHARE_RATIO));
+    const captionBox = makeRect(contentRect.x, textY, contentRect.w, captionH);
+    return {
+      scaleX0: contentRect.x,
+      scaleX1: contentRect.x + contentRect.w,
+      trackY: contentRect.y + Math.floor(scaleH * HIGH_TRACK_Y_RATIO),
+      trackBox: makeRect(contentRect.x, contentRect.y, contentRect.w, scaleH),
+      captionBox: captionBox,
+      valueBox: makeRect(contentRect.x, textY + captionH, contentRect.w, Math.max(1, textH - captionH)),
+      inlineBox: null,
+      dualRowGap: profileApi.computeIntrinsicSpacePx(responsive, captionBox.w, DUAL_ROW_GAP_RATIO, 2, 1),
+      inlineDualGap: 0,
+      textTopBox: null,
+      textBottomBox: null
+    };
+  }
+
+  function computeSplitHighLayout(contentRect, gap) {
+    const textGap = Math.max(1, gap);
+    const availableHeight = Math.max(1, contentRect.h - textGap * 2);
+    const topTextH = Math.max(1, Math.floor(availableHeight * HIGH_SPLIT_TEXT_SHARE_RATIO));
+    const bottomTextH = Math.max(1, Math.floor(availableHeight * HIGH_SPLIT_TEXT_SHARE_RATIO));
+    const scaleH = Math.max(1, availableHeight - topTextH - bottomTextH);
+    const middleY = contentRect.y + topTextH + textGap;
+    const bottomY = middleY + scaleH + textGap;
+    return {
+      scaleX0: contentRect.x,
+      scaleX1: contentRect.x + contentRect.w,
+      trackY: middleY + Math.floor(scaleH * HIGH_TRACK_Y_RATIO),
+      trackBox: makeRect(contentRect.x, middleY, contentRect.w, scaleH),
+      captionBox: null,
+      valueBox: null,
+      inlineBox: null,
+      dualRowGap: 0,
+      inlineDualGap: 0,
+      textTopBox: makeRect(contentRect.x, contentRect.y, contentRect.w, topTextH),
+      textBottomBox: makeRect(contentRect.x, bottomY, contentRect.w, Math.max(1, contentRect.y + contentRect.h - bottomY))
+    };
+  }
+
+  function computeInlineLayout(contentRect, right, bottom, gap, responsive, profileApi) {
+    const inset = Math.max(1, Math.floor(contentRect.w * NORMAL_INSET_RATIO));
+    const topMargin = Math.max(1, Math.floor(contentRect.h * NORMAL_TOP_MARGIN_RATIO));
+    const trackGap = Math.max(1, gap);
+    const availableHeight = Math.max(1, contentRect.h - topMargin - trackGap);
+    const scaleH = Math.max(1, Math.floor(availableHeight * NORMAL_SCALE_HEIGHT_RATIO));
+    const inlineBandH = Math.max(1, Math.floor(contentRect.h * NORMAL_INLINE_HEIGHT_RATIO));
+    const inlineY = Math.min(
+      bottom - 1,
+      Math.max(
+        contentRect.y + topMargin + scaleH + trackGap,
+        bottom - inlineBandH
+      )
+    );
+    const scaleX0 = contentRect.x + inset;
+    const scaleX1 = Math.max(scaleX0 + 1, right - inset);
+    const inlineBox = makeRect(contentRect.x, inlineY, contentRect.w, Math.max(1, bottom - inlineY));
+    return {
+      scaleX0: scaleX0,
+      scaleX1: scaleX1,
+      trackY: contentRect.y + topMargin + Math.floor(scaleH * NORMAL_TRACK_Y_RATIO),
+      trackBox: makeRect(scaleX0, contentRect.y + topMargin, Math.max(1, scaleX1 - scaleX0), scaleH),
+      captionBox: null,
+      valueBox: null,
+      inlineBox: inlineBox,
+      dualRowGap: 0,
+      inlineDualGap: profileApi.computeIntrinsicSpacePx(responsive, inlineBox.w, DUAL_INLINE_GAP_RATIO, 2, 1),
+      textTopBox: null,
+      textBottomBox: null
+    };
   }
 
   function create(def, Helpers) {
@@ -142,84 +256,36 @@
       const right = contentRect.x + contentRect.w;
       const bottom = contentRect.y + contentRect.h;
       const mode = cfg.mode === "flat" || cfg.mode === "high" ? cfg.mode : "normal";
-      let scaleX0 = contentRect.x;
-      let scaleX1 = right;
-      let trackY = contentRect.y;
-      let trackBox = null;
-      let captionBox = null;
-      let valueBox = null;
-      let inlineBox = null;
-      let dualRowGap = 0;
-      let inlineDualGap = 0;
-
-      if (mode === "flat") {
-        const usableWidth = Math.max(1, contentRect.w - gap);
-        const textW = Math.max(1, Math.floor(usableWidth * FLAT_TEXT_SHARE_RATIO));
-        const scaleW = Math.max(1, contentRect.w - textW - gap);
-        const textH = Math.max(1, Math.floor(contentRect.h * FLAT_TEXT_HEIGHT_RATIO));
-        const rightX = contentRect.x + scaleW + gap;
-        const rightW = Math.max(1, right - rightX);
-        const rightY = contentRect.y + Math.floor((contentRect.h - textH) / 2);
-        const captionH = Math.max(1, Math.floor(textH * FLAT_CAPTION_SHARE_RATIO));
-        scaleX0 = contentRect.x;
-        scaleX1 = contentRect.x + scaleW;
-        trackY = contentRect.y + Math.floor(contentRect.h * FLAT_TRACK_Y_RATIO);
-        trackBox = makeRect(scaleX0, contentRect.y, scaleW, contentRect.h);
-        captionBox = makeRect(rightX, rightY, rightW, captionH);
-        valueBox = makeRect(rightX, rightY + captionH, rightW, Math.max(1, textH - captionH));
-        dualRowGap = profileApi.computeIntrinsicSpacePx(responsive, captionBox.w, DUAL_ROW_GAP_RATIO, 2, 1);
-      }
-      else if (mode === "high") {
-        const textGap = Math.max(1, Math.floor(gap * HIGH_TEXT_GAP_FACTOR));
-        const availableHeight = Math.max(1, contentRect.h - textGap);
-        const scaleH = Math.max(1, Math.floor(availableHeight * HIGH_SCALE_HEIGHT_RATIO));
-        const textY = Math.min(bottom - 1, contentRect.y + scaleH + textGap);
-        const textH = Math.max(1, bottom - textY);
-        const captionH = Math.max(1, Math.floor(textH * HIGH_CAPTION_SHARE_RATIO));
-        scaleX0 = contentRect.x;
-        scaleX1 = right;
-        trackY = contentRect.y + Math.floor(scaleH * HIGH_TRACK_Y_RATIO);
-        trackBox = makeRect(scaleX0, contentRect.y, contentRect.w, scaleH);
-        captionBox = makeRect(contentRect.x, textY, contentRect.w, captionH);
-        valueBox = makeRect(contentRect.x, textY + captionH, contentRect.w, Math.max(1, textH - captionH));
-        dualRowGap = profileApi.computeIntrinsicSpacePx(responsive, captionBox.w, DUAL_ROW_GAP_RATIO, 2, 1);
-      }
-      else {
-        const inset = Math.max(1, Math.floor(contentRect.w * NORMAL_INSET_RATIO));
-        const topMargin = Math.max(1, Math.floor(contentRect.h * NORMAL_TOP_MARGIN_RATIO));
-        const trackGap = Math.max(1, gap);
-        const availableHeight = Math.max(1, contentRect.h - topMargin - trackGap);
-        const scaleH = Math.max(1, Math.floor(availableHeight * NORMAL_SCALE_HEIGHT_RATIO));
-        const inlineBandH = Math.max(1, Math.floor(contentRect.h * NORMAL_INLINE_HEIGHT_RATIO));
-        const inlineY = Math.min(
-          bottom - 1,
-          Math.max(
-            contentRect.y + topMargin + scaleH + trackGap,
-            bottom - inlineBandH
-          )
-        );
-        scaleX0 = contentRect.x + inset;
-        scaleX1 = Math.max(scaleX0 + 1, right - inset);
-        trackY = contentRect.y + topMargin + Math.floor(scaleH * NORMAL_TRACK_Y_RATIO);
-        trackBox = makeRect(scaleX0, contentRect.y + topMargin, Math.max(1, scaleX1 - scaleX0), scaleH);
-        inlineBox = makeRect(contentRect.x, inlineY, contentRect.w, Math.max(1, bottom - inlineY));
-        inlineDualGap = profileApi.computeIntrinsicSpacePx(responsive, inlineBox.w, DUAL_INLINE_GAP_RATIO, 2, 1);
-      }
+      const normalVariant = resolveNormalVariant(cfg.layoutConfig);
+      const highVariant = resolveHighVariant(cfg.layoutConfig);
+      const modeLayout = mode === "flat"
+        ? computeFlatLayout(contentRect, right, gap, responsive, profileApi)
+        : (mode === "high"
+          ? (highVariant === "split"
+            ? computeSplitHighLayout(contentRect, gap)
+            : computeStackedLayout(contentRect, bottom, gap, responsive, profileApi))
+          : (normalVariant === "stacked"
+            ? computeStackedLayout(contentRect, bottom, gap, responsive, profileApi)
+            : computeInlineLayout(contentRect, right, bottom, gap, responsive, profileApi)));
 
       return {
         mode: mode,
         gap: gap,
         responsive: responsive,
         contentRect: contentRect,
-        scaleX0: scaleX0,
-        scaleX1: scaleX1,
-        trackY: trackY,
-        trackBox: trackBox,
-        captionBox: captionBox,
-        valueBox: valueBox,
-        inlineBox: inlineBox,
-        dualRowGap: dualRowGap,
-        inlineDualGap: inlineDualGap
+        normalVariant: normalVariant,
+        highVariant: highVariant,
+        scaleX0: modeLayout.scaleX0,
+        scaleX1: modeLayout.scaleX1,
+        trackY: modeLayout.trackY,
+        trackBox: modeLayout.trackBox,
+        captionBox: modeLayout.captionBox,
+        valueBox: modeLayout.valueBox,
+        inlineBox: modeLayout.inlineBox,
+        dualRowGap: modeLayout.dualRowGap,
+        inlineDualGap: modeLayout.inlineDualGap,
+        textTopBox: modeLayout.textTopBox,
+        textBottomBox: modeLayout.textBottomBox
       };
     }
 
