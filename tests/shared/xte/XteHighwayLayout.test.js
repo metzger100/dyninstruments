@@ -76,20 +76,33 @@ describe("XteHighwayLayout", function () {
     expect(withoutName.metricRects.cog.h).toBeGreaterThan(withName.metricRects.cog.h);
   });
 
-  it("compacts flat highway share and normal name height on smaller widgets", function () {
+  it("compacts flat highway share and normal name height monotonically across compact, medium, and large widgets", function () {
     const layout = createLayout();
     const compactFlat = buildSnapshot(layout, 220, 80, "flat", true);
+    const mediumFlat = buildSnapshot(layout, 320, 120, "flat", true);
     const largeFlat = buildSnapshot(layout, 520, 180, "flat", true);
     const compactNormal = buildSnapshot(layout, 161, 80, "normal", true);
-    const largeNormal = buildSnapshot(layout, 520, 260, "normal", true);
+    const mediumNormal = buildSnapshot(layout, 220, 120, "normal", true);
+    const largeNormal = buildSnapshot(layout, 800, 400, "normal", true);
 
     expect(compactFlat.out.highway.w / compactFlat.contentRect.w).toBeLessThan(
+      mediumFlat.out.highway.w / mediumFlat.contentRect.w
+    );
+    expect(mediumFlat.out.highway.w / mediumFlat.contentRect.w).toBeLessThan(
       largeFlat.out.highway.w / largeFlat.contentRect.w
     );
     expect(compactNormal.out.nameRect.h / compactNormal.out.highway.h).toBeLessThan(
+      mediumNormal.out.nameRect.h / mediumNormal.out.highway.h
+    );
+    expect(mediumNormal.out.nameRect.h / mediumNormal.out.highway.h).toBeLessThan(
       largeNormal.out.nameRect.h / largeNormal.out.highway.h
     );
-    expect(compactNormal.out.responsive.textFillScale).toBeGreaterThan(largeNormal.out.responsive.textFillScale);
+    expect(compactNormal.out.responsive.textFillScale).toBeGreaterThan(
+      mediumNormal.out.responsive.textFillScale
+    );
+    expect(mediumNormal.out.responsive.textFillScale).toBeGreaterThan(
+      largeNormal.out.responsive.textFillScale
+    );
   });
 
   it("keeps high-mode metric columns balanced", function () {
