@@ -34,6 +34,39 @@
     return out;
   }
 
+  function resolveMetricTextRect(rect, padX) {
+    const safeRect = rect || {};
+    const safePad = Math.max(0, Math.floor(clampNumber(padX, 0)));
+    const width = Math.max(1, (Number(safeRect.w) || 0) - safePad * 2);
+    return {
+      x: (Number(safeRect.x) || 0) + safePad,
+      y: Number(safeRect.y) || 0,
+      w: width,
+      h: Math.max(1, Number(safeRect.h) || 0)
+    };
+  }
+
+  function resolveMetricHeights(totalHeight, captionHeightRatio, captionHeightPx) {
+    const safeHeight = Math.max(1, Math.floor(Number(totalHeight) || 0));
+    const defaultCaptionHeight = Math.max(1, Math.floor(safeHeight * captionHeightRatio));
+    const requestedCaptionHeight = Number.isFinite(Number(captionHeightPx))
+      ? Math.floor(Number(captionHeightPx))
+      : defaultCaptionHeight;
+
+    if (safeHeight <= 2) {
+      return {
+        capH: 1,
+        valueH: Math.max(1, safeHeight - 1)
+      };
+    }
+
+    const capH = Math.max(1, Math.min(safeHeight - 2, requestedCaptionHeight));
+    return {
+      capH: capH,
+      valueH: Math.max(2, safeHeight - capH)
+    };
+  }
+
   function create() {
     function measureMetricTile(args) {
       const cfg = args || {};
@@ -45,9 +78,11 @@
       if (!metric || !rect) {
         return null;
       }
-      const capH = Math.max(9, Math.floor((Number(rect.h) || 0) * captionHeightRatio));
-      const valueY = (Number(rect.y) || 0) + capH;
-      const valueH = Math.max(8, (Number(rect.h) || 0) - capH);
+      const textRect = resolveMetricTextRect(rect, cfg.padX);
+      const heights = resolveMetricHeights(rect.h, captionHeightRatio, cfg.captionHeightPx);
+      const capH = heights.capH;
+      const valueY = textRect.y + capH;
+      const valueH = heights.valueH;
       const capMaxPx = resolveScaledMaxPx(clampNumber(cfg.captionMaxPx, capH), capH, textFillScale);
       const valueMaxPx = resolveScaledMaxPx(clampNumber(cfg.valueMaxPx, valueH), valueH, textFillScale);
       const fit = textApi.measureValueUnitFit(
@@ -55,7 +90,7 @@
         cfg.family,
         metric.value,
         metric.unit,
-        rect.w,
+        textRect.w,
         valueMaxPx,
         cfg.secScale,
         cfg.valueWeight,
@@ -67,6 +102,8 @@
         valueY: valueY,
         valueH: valueH,
         valueMaxPx: valueMaxPx,
+        textX: textRect.x,
+        textW: textRect.w,
         fit: fit
       };
     }
@@ -87,9 +124,9 @@
       textApi.drawCaptionMax(
         cfg.ctx,
         cfg.family,
-        rect.x,
+        measurement.textX,
         rect.y,
-        rect.w,
+        measurement.textW,
         measurement.capH,
         metric.caption,
         measurement.capMaxPx,
@@ -99,9 +136,9 @@
       textApi.drawValueUnitWithFit(
         cfg.ctx,
         cfg.family,
-        rect.x,
+        measurement.textX,
         measurement.valueY,
-        rect.w,
+        measurement.textW,
         measurement.valueH,
         metric.value,
         metric.unit,

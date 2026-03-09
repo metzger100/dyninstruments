@@ -150,6 +150,20 @@ describe("CenterDisplayLayout", function () {
     );
   });
 
+  it("derives center text padding and relation gaps from the shared intrinsic spacing contract", function () {
+    const layout = createLayout();
+    const compact = buildSnapshot(layout, 120, 80, "normal", 3);
+    const large = buildSnapshot(layout, 260, 180, "normal", 2);
+    const sampleRect = { x: 0, y: 0, w: 120, h: 80 };
+
+    expect(layout.computeTextPadPx(sampleRect, compact.out.responsive)).toBeLessThan(
+      layout.computeTextPadPx(sampleRect, large.out.responsive)
+    );
+    expect(layout.computeRowValueGapPx(compact.out.rowRects[0], compact.out.responsive)).toBeLessThan(
+      layout.computeRowValueGapPx(large.out.rowRects[0], large.out.responsive)
+    );
+  });
+
   it("compacts high mode caption band and center weight on smaller tall tiles", function () {
     const layout = createLayout();
     const compact = buildSnapshot(layout, 120, 140, "high", 2);

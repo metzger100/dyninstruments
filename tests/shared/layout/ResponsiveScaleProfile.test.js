@@ -142,4 +142,36 @@ describe("ResponsiveScaleProfile", function () {
     expect(profileApi.scaleMaxTextPx(20, 1)).toBe(20);
     expect(profileApi.scaleMaxTextPx(1, 0.5)).toBe(1);
   });
+
+  it("computes intrinsic inner spacing from span, fill scale, and item count", function () {
+    const profileApi = createProfileApi();
+    const compact = profileApi.computeProfile(120, 80, { scales: CENTER_DISPLAY_SCALES });
+    const medium = profileApi.computeProfile(160, 120, { scales: CENTER_DISPLAY_SCALES });
+    const large = profileApi.computeProfile(260, 180, { scales: CENTER_DISPLAY_SCALES });
+    const spanPx = 240;
+
+    expect(profileApi.computeIntrinsicSpacePx(compact, spanPx, 0.08, 2, 1)).toBeLessThan(
+      profileApi.computeIntrinsicSpacePx(medium, spanPx, 0.08, 2, 1)
+    );
+    expect(profileApi.computeIntrinsicSpacePx(medium, spanPx, 0.08, 2, 1)).toBeLessThan(
+      profileApi.computeIntrinsicSpacePx(large, spanPx, 0.08, 2, 1)
+    );
+    expect(profileApi.computeIntrinsicSpacePx(compact, spanPx, 0.08, 4, 1)).toBeLessThan(
+      profileApi.computeIntrinsicSpacePx(compact, spanPx, 0.08, 2, 1)
+    );
+    expect(profileApi.computeIntrinsicSpacePx(compact, 1, 0.08, 4, 1)).toBe(1);
+    expect(profileApi.computeIntrinsicSpacePx(compact, 2, 0.08, 4, 2)).toBe(2);
+  });
+
+  it("builds metric-tile spacing from the shared intrinsic helper", function () {
+    const profileApi = createProfileApi();
+    const compact = profileApi.computeProfile(120, 80, { scales: CENTER_DISPLAY_SCALES });
+    const large = profileApi.computeProfile(260, 180, { scales: CENTER_DISPLAY_SCALES });
+
+    const compactSpacing = profileApi.computeIntrinsicTileSpacing(compact, { w: 160, h: 80 }, 0.04, 0.34);
+    const largeSpacing = profileApi.computeIntrinsicTileSpacing(large, { w: 160, h: 80 }, 0.04, 0.34);
+
+    expect(compactSpacing.padX).toBeLessThan(largeSpacing.padX);
+    expect(compactSpacing.captionHeightPx).toBeLessThan(largeSpacing.captionHeightPx);
+  });
 });

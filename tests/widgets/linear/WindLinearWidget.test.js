@@ -181,7 +181,9 @@ describe("WindLinearWidget", function () {
     };
     const state = {
       layout: {
-        inlineBox: { x: 0, y: 0, w: 280, h: 60 }
+        inlineBox: { x: 0, y: 0, w: 280, h: 60 },
+        dualRowGap: 8,
+        inlineDualGap: 10
       }
     };
     const display = {
@@ -205,7 +207,7 @@ describe("WindLinearWidget", function () {
     expect(calls.inline).toBe(2);
   });
 
-  it("uses ratio-based dual gaps with a 1px safety floor and forwards shared compaction state", function () {
+  it("uses layout-owned dual gaps with a 1px safety floor and forwards shared compaction state", function () {
     let captured;
     loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create({}, {
       applyFormatter(value) {
@@ -261,7 +263,9 @@ describe("WindLinearWidget", function () {
     const state = {
       textFillScale: 1.18,
       layout: {
-        inlineBox: { x: 0, y: 0, w: 20, h: 18 }
+        inlineBox: { x: 0, y: 0, w: 20, h: 18 },
+        dualRowGap: 1,
+        inlineDualGap: 1
       }
     };
     const display = {

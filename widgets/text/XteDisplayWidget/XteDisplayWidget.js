@@ -185,6 +185,12 @@
         dtw: { caption: p.dtwCaption, value: dtwDistance, unit: p.dtwUnit },
         btw: { caption: p.btwCaption, value: bearingValue, unit: p.btwUnit }
       };
+      const metricSpacing = {
+        cog: layoutApi.computeMetricTileSpacing(layout.metricRects.cog, layout.responsive),
+        xte: layoutApi.computeMetricTileSpacing(layout.metricRects.xte, layout.responsive),
+        dtw: layoutApi.computeMetricTileSpacing(layout.metricRects.dtw, layout.responsive),
+        btw: layoutApi.computeMetricTileSpacing(layout.metricRects.btw, layout.responsive)
+      };
 
       const waypointFit = reserveNameSpace ? tileLayout.measureFittedLine({
         textApi: toolkit.text,
@@ -223,7 +229,9 @@
         valueWeight: valueWeight,
         labelWeight: labelWeight,
         secScale: 0.75,
-        textFillScale: layout.responsive.textFillScale
+        textFillScale: layout.responsive.textFillScale,
+        padX: metricSpacing.cog.padX,
+        captionHeightPx: metricSpacing.cog.captionHeightPx
       });
       tileLayout.drawMetricTile({
         textApi: toolkit.text,
@@ -235,7 +243,9 @@
         valueWeight: valueWeight,
         labelWeight: labelWeight,
         secScale: 0.7,
-        textFillScale: layout.responsive.textFillScale
+        textFillScale: layout.responsive.textFillScale,
+        padX: metricSpacing.xte.padX,
+        captionHeightPx: metricSpacing.xte.captionHeightPx
       });
       tileLayout.drawMetricTile({
         textApi: toolkit.text,
@@ -247,7 +257,9 @@
         valueWeight: valueWeight,
         labelWeight: labelWeight,
         secScale: 0.7,
-        textFillScale: layout.responsive.textFillScale
+        textFillScale: layout.responsive.textFillScale,
+        padX: metricSpacing.dtw.padX,
+        captionHeightPx: metricSpacing.dtw.captionHeightPx
       });
       tileLayout.drawMetricTile({
         textApi: toolkit.text,
@@ -259,7 +271,9 @@
         valueWeight: valueWeight,
         labelWeight: labelWeight,
         secScale: 0.75,
-        textFillScale: layout.responsive.textFillScale
+        textFillScale: layout.responsive.textFillScale,
+        padX: metricSpacing.btw.padX,
+        captionHeightPx: metricSpacing.btw.captionHeightPx
       });
     }
 

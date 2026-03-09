@@ -114,4 +114,37 @@ describe("LinearGaugeTextLayout", function () {
 
     expect(calls.map((entry) => entry.text)).toEqual(["C0", "C50", "C100"]);
   });
+
+  it("uses layout-owned label font sizes without a local readable-floor override", function () {
+    const textLayout = loadFresh("shared/widget-kits/linear/LinearGaugeTextLayout.js").create();
+    const fonts = [];
+    const layerCtx = {
+      font: "",
+      textAlign: "",
+      textBaseline: "",
+      measureText(text) {
+        return { width: String(text || "").length * 6 };
+      },
+      fillText() {
+        fonts.push(layerCtx.font);
+      }
+    };
+
+    textLayout.drawTickLabels(
+      layerCtx,
+      Object.assign(createState(1), { labelFontPx: 4, labelInsetPx: 2 }),
+      { major: [0], minor: [] },
+      true,
+      {
+        mapValueToX() {
+          return 10;
+        },
+        formatTickLabel() {
+          return "0";
+        }
+      }
+    );
+
+    expect(fonts[0]).toContain("4px");
+  });
 });

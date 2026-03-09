@@ -96,4 +96,17 @@ describe("LinearGaugeLayout", function () {
     expect(highScale.captionBox.h).toBeGreaterThan(lowScale.captionBox.h);
     expect(lowScale.valueBox.y).toBe(lowScale.captionBox.y + lowScale.captionBox.h);
   });
+
+  it("derives wind dual gaps from layout-owned compact spacing", function () {
+    const layout = createLayout();
+    const compactFlat = buildSnapshot(layout, 120, 80, "flat").out;
+    const largeFlat = buildSnapshot(layout, 520, 140, "flat").out;
+    const compactNormal = buildSnapshot(layout, 160, 120, "normal").out;
+    const largeNormal = buildSnapshot(layout, 320, 180, "normal").out;
+
+    expect(compactFlat.dualRowGap).toBeLessThan(largeFlat.dualRowGap);
+    expect(compactNormal.inlineDualGap).toBeLessThan(largeNormal.inlineDualGap);
+    expect(compactFlat.dualRowGap).toBeGreaterThanOrEqual(1);
+    expect(compactNormal.inlineDualGap).toBeGreaterThanOrEqual(1);
+  });
 });

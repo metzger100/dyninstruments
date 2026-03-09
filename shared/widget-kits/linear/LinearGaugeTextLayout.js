@@ -114,7 +114,7 @@
     if (!math || !state || !state.labelFontPx || !ticks || !ticks.major || !ticks.major.length) {
       return;
     }
-    const fontPx = Math.max(9, Math.floor(state.labelFontPx));
+    const fontPx = Math.max(1, Math.floor(state.labelFontPx));
     layerCtx.font = state.labelWeight + " " + fontPx + "px " + state.family;
     layerCtx.textAlign = "center";
     layerCtx.textBaseline = "top";

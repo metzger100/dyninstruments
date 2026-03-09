@@ -242,7 +242,7 @@ export const RULES = [
   },
   {
     name: "responsive-layout-hard-floor",
-    severity: "warn",
+    severity: "block",
     scope: {
       include: [
         "shared/widget-kits/text/TextLayoutEngine.js",

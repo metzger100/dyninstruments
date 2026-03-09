@@ -15,6 +15,8 @@
   const PAD_X_RATIO = 0.03;
   const INNER_Y_RATIO = 0.02;
   const GAP_RATIO = 0.03;
+  const TEXT_PAD_RATIO = 0.04;
+  const ROW_VALUE_GAP_RATIO = 0.08;
   const FLAT_CENTER_RATIO = 0.42;
   const HIGH_STACKED_CAPTION_RATIO = 0.24;
   const FLAT_STACKED_CAPTION_RATIO = 0.22;
@@ -139,11 +141,23 @@
       };
     }
 
+    function computeTextPadPx(rect, responsive) {
+      const span = Math.min(Math.max(0, Number(rect && rect.w) || 0), Math.max(0, Number(rect && rect.h) || 0));
+      return profileApi.computeIntrinsicSpacePx(responsive, span, TEXT_PAD_RATIO, 1, 1);
+    }
+
+    function computeRowValueGapPx(rect, responsive) {
+      const span = Math.min(Math.max(0, Number(rect && rect.w) || 0), Math.max(0, Number(rect && rect.h) || 0));
+      return profileApi.computeIntrinsicSpacePx(responsive, span, ROW_VALUE_GAP_RATIO, 2, 1);
+    }
+
     return {
       id: "CenterDisplayLayout",
       computeInsets: computeInsets,
       createContentRect: createContentRect,
-      computeLayout: computeLayout
+      computeLayout: computeLayout,
+      computeTextPadPx: computeTextPadPx,
+      computeRowValueGapPx: computeRowValueGapPx
     };
   }
 

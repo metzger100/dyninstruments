@@ -21,7 +21,7 @@ Warn-only rollout rules are tracked debt until they are promoted to `block`.
 | Internal hook fallback | Shared/widget code normalizes or fallbacks internal hook/spec results (`normalize*`, `cfg.*(...) || ...`) | Keep defaults at the boundary and trust internal hook contracts | `check-patterns` (`internal-hook-fallback`) | warn |
 | Redundant null/type guard | Internal code repeatedly sanitizes already-normalized values (`String(x == null ? "" : x)`, `Array.isArray(x) ? x : []`, `isFiniteNumber(x) ? ... : ...`) | Remove redundant guards and trust mapper/runtime/theme contracts | `check-patterns` (`redundant-null-type-guard`) | warn |
 | Hardcoded runtime default | Runtime/widget/shared code embeds fallback literals or object defaults already owned elsewhere | Use declarative config/theme defaults or boundary-owned placeholders | `check-patterns` (`hardcoded-runtime-default`) | warn |
-| Responsive layout hard floor | Responsive layout/text owner keeps user-visible hard floors such as `Math.max(9, ...)` or `clamp(..., 10, ...)` instead of deriving them from the shared compact profile | Use `ResponsiveScaleProfile`-derived geometry/text ceilings; keep only technical canvas-safety guards with explicit suppression comments | `check-patterns` (`responsive-layout-hard-floor`) | warn |
+| Responsive layout hard floor | Responsive layout/text owner keeps user-visible hard floors such as `Math.max(9, ...)` or `clamp(..., 10, ...)` instead of deriving them from the shared compact profile | Use `ResponsiveScaleProfile`-derived geometry/text ceilings; keep only technical canvas-safety guards with explicit suppression comments | `check-patterns` (`responsive-layout-hard-floor`) | block |
 | Responsive profile ownership drift | Layout owner stops resolving `ResponsiveScaleProfile`, or a consumer module imports it directly instead of using layout-owned `responsive` / `textFillScale` state | Keep compaction ownership in `ResponsiveScaleProfile` + layout-owner modules only; consumers must read layout-owned state | `check-patterns` (`responsive-profile-ownership`) | block |
 | CSS/JS default duplication | JS repeats CSS/theme token defaults (`getComputedStyle`, `defaultValue`, `--dyni-*`) | Keep visual/token defaults in CSS or theme resolver boundary only | `check-patterns` (`css-js-default-duplication`) | warn |
 | Premature legacy support | Code adds speculative compat/legacy/fallback naming or multi-source compatibility branches | Remove speculative compatibility paths until a live boundary requires them | `check-patterns` (`premature-legacy-support`) | warn |
@@ -119,7 +119,7 @@ Allowed inline exceptions:
 
 1. Replace user-visible `Math.max(N>=3, ...)` / `clamp(..., N>=3, ...)` layout floors with `ResponsiveScaleProfile`-derived geometry or text ceilings.
 2. Keep only true technical canvas-viability guards above `2`, and annotate those lines with a rule-specific suppression comment plus reason.
-3. Track remaining warning counts in `TECH-DEBT.md` until the backlog reaches zero and the rule can be promoted.
+3. Treat any new finding as fail-closed; the rollout backlog was cleared and the rule is now `block`.
 
 ### Responsive profile ownership drift
 

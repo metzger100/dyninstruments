@@ -27,8 +27,8 @@ This is a dedicated renderer, not a `PositionCoordinateWidget` variant, because 
 ## Ownership Contract
 
 - `ResponsiveScaleProfile` owns the base compact curve plus the named scale outputs used by `CenterDisplayLayout`.
-- `CenterDisplayLayout` maps that shared curve into nav-specific insets, caption bands, panel shares, and row rectangles.
-- `CenterDisplayTextWidget` consumes layout-owned rectangles and `layout.responsive` outputs during fit/draw orchestration; it does not define a second compact curve.
+- `CenterDisplayLayout` maps that shared curve into nav-specific insets, caption bands, panel shares, row rectangles, and the inner text padding/row-gap helpers consumed by the widget.
+- `CenterDisplayTextWidget` consumes layout-owned rectangles and `layout.responsive` outputs during fit/draw orchestration; it does not define a second compact curve or local compact spacing formulas.
 - Forbidden pattern: direct `ResponsiveScaleProfile` imports or widget-local responsive hard floors inside `CenterDisplayTextWidget`.
 
 ## Responsive Baseline Contract
@@ -51,6 +51,13 @@ Local geometry inputs remain ratio-derived and stay nav-owned:
 padX = max(1, floor(minDim * 0.03))
 innerY = max(1, floor(minDim * 0.02))
 gap = max(1, floor(minDim * 0.03))
+```
+
+Shared inner spacing is also layout-owned:
+
+```text
+textPadPx = computeIntrinsicSpacePx(responsive, min(rect.w, rect.h), 0.04, 1, 1)
+rowValueGapPx = computeIntrinsicSpacePx(responsive, min(rect.w, rect.h), 0.08, 2, 1)
 ```
 
 Contract notes:

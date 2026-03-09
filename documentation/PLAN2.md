@@ -1,6 +1,6 @@
 # Implementation Plan
 
-**Status:** ✅ Implemented | Phases 1-9 implemented; rollout closed with `TD-018` still tracked as warn-only debt
+**Status:** ✅ Implemented | Phases 1-9 implemented; rollout fully closed on `2026-03-09`
 
 ## Overview
 
@@ -22,7 +22,7 @@ Scope:
 | `ActiveRouteTextWidget` | Has ratio modes, but layout uses local hard floors like `40`, `16`, `12`, `6`, `4` and no linear fill boost. | Needs dedicated layout refactor on top of the shared profile. |
 | `XteDisplayWidget` + `XteHighwayPrimitives` | Ratio modes exist, but layout reserves large fixed floors (`40`, `24`, `20`, `16`, `12`, `10`) for highway/text panels. | Needs both geometry compaction and text-fill compaction. |
 | `LinearGaugeLayout` + `LinearGaugeEngine` + `LinearGaugeMath` + `LinearGaugeTextLayout` | Linear-family layout ownership now lives in `LinearGaugeLayout`, the engine consumes shared responsive insets/geometry, and text rows use compact fill scaling without widget-local hard layout floors. | Phase 4 is implemented for the shared linear pipeline. |
-| `WindLinearWidget` | Dual-value text layout now keeps its widget-specific orchestration but uses ratio-based split gaps with `1px` safety floors on top of the shared linear pipeline. | Phase 4 is implemented for the wind-specific follow-up. |
+| `WindLinearWidget` | Dual-value text layout now keeps its widget-specific orchestration while consuming layout-owned compact dual gaps from `LinearGaugeLayout`. | Phase 4 is implemented for the wind-specific follow-up. |
 | `SemicircleRadialLayout` + `SemicircleRadialTextLayout` + `SemicircleRadialEngine` | Semicircle-family responsive layout ownership now lives in `SemicircleRadialLayout`, mode-routed fitting/draw is delegated to `SemicircleRadialTextLayout`, and the engine consumes shared compact geometry/text state without widget-local hard layout floors. | Phase 5 is implemented for the shared semicircle pipeline. |
 | `FullCircleRadialLayout` + `FullCircleRadialEngine` + `FullCircleRadialTextLayout` | Full-circle-family responsive layout ownership now lives in `FullCircleRadialLayout`, the engine consumes layout-owned compact geometry/state, and full-circle text slots use compact fill scaling without widget-local hard layout floors. | Phase 6 is implemented for the shared full-circle pipeline. |
 
@@ -56,8 +56,8 @@ Scope:
 ## Current Dyninstruments Gaps
 
 - `ResponsiveScaleProfile` now owns the shared base compaction curve, and both `CenterDisplayLayout` and the shared text pipeline consume it.
-- Dedicated nav/text ownership is now routed through `ActiveRouteLayout` and `XteHighwayLayout`, but `TextTileLayout` and `LinearGaugeTextLayout` still keep a few warn-only local hard floors.
-- Phase 7 adds fail-closed ownership enforcement plus a warn-only hard-floor rollout rule, so new responsive-profile ownership drift now blocks while the remaining hard-floor backlog stays tracked in `TECH-DEBT.md`.
+- Dedicated nav/text ownership is now routed through `ActiveRouteLayout` and `XteHighwayLayout`, and `TextTileLayout` / `LinearGaugeTextLayout` now consume layout-owned spacing without residual responsive-floor backlog.
+- Phase 7 enforcement is now fully fail-closed: both responsive ownership and responsive hard-floor drift block once introduced.
 - Current tests now validate compact-vs-large text compaction for `CenterDisplay`, `ThreeValueTextWidget`, `PositionCoordinateWidget`, and the shared text engine.
 
 ## Final Implementation Goal
@@ -84,17 +84,17 @@ Scope:
 | `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js` | Current compact reference widget | No runtime change in this session; behavior preserved through `CenterDisplayLayout` |
 | `shared/widget-kits/text/TextLayoutEngine.js` | Shared text layout facade | Actual change in this session: now consumes `ResponsiveScaleProfile`, exposes `computeResponsiveInsets()`, and wraps `scaleMaxTextPx()` |
 | `shared/widget-kits/text/TextLayoutComposite.js` | Shared text row/block layout | Actual change in this session: removed user-visible fit floors and added compact `textFillScale` consumption for shared stacked layouts |
-| `shared/widget-kits/text/TextTileLayout.js` | Shared metric/fitted line helper | Actual change in this session: additive compact text args added for later Phase 3 adoption without changing current consumers |
+| `shared/widget-kits/text/TextTileLayout.js` | Shared metric/fitted line helper | Actual change in this session: consumes layout-owned metric padding/caption-band spacing and keeps only technical `1/2px` guards |
 | `widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js` | Numeric text renderer used across many clusters | Actual change in this session: now uses shared responsive insets and compact text-fill scaling |
 | `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js` | Stacked coordinate/date/time renderer | Actual change in this session: now uses shared responsive insets and compact text-fill scaling |
-| `widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js` | Dedicated active-route renderer | Planned change |
+| `widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js` | Dedicated active-route renderer | Actual change in this session: passes layout-owned metric tile spacing into `TextTileLayout` |
 | `shared/widget-kits/xte/XteHighwayPrimitives.js` | XTE layout geometry owner | Planned change |
-| `widgets/text/XteDisplayWidget/XteDisplayWidget.js` | XTE renderer | Planned change |
+| `widgets/text/XteDisplayWidget/XteDisplayWidget.js` | XTE renderer | Actual change in this session: passes layout-owned metric tile spacing into `TextTileLayout` |
 | `shared/widget-kits/linear/LinearGaugeLayout.js` | Linear-family responsive layout owner | Actual change in this session |
 | `shared/widget-kits/linear/LinearGaugeMath.js` | Linear axis/tick/value helper | Actual change in this session: layout ownership removed |
 | `shared/widget-kits/linear/LinearGaugeEngine.js` | Linear gauge rendering pipeline | Actual change in this session: now consumes `LinearGaugeLayout` and exposes responsive state |
 | `shared/widget-kits/linear/LinearGaugeTextLayout.js` | Linear text/tick-label helper | Actual change in this session: compact fill scaling applied to caption/value/inline fits |
-| `widgets/linear/WindLinearWidget/WindLinearWidget.js` | Dual-value linear layout | Actual change in this session: local split gaps now use ratio-based `1px` safety floors |
+| `widgets/linear/WindLinearWidget/WindLinearWidget.js` | Dual-value linear layout | Actual change in this session: consumes layout-owned dual-column gaps from `LinearGaugeLayout` |
 | `shared/widget-kits/radial/SemicircleRadialLayout.js` | Semicircle-family responsive layout owner | Actual change in this session |
 | `shared/widget-kits/radial/SemicircleRadialTextLayout.js` | Shared semicircle text/caching helper | Actual change in this session |
 | `shared/widget-kits/radial/SemicircleRadialEngine.js` | Shared semicircle gauge pipeline | Actual change in this session: now consumes `SemicircleRadialLayout` and `SemicircleRadialTextLayout` |
@@ -231,7 +231,7 @@ Status: implemented. `FullCircleRadialLayout` now owns full-circle responsive ge
 
 ### Phase 7 - Add fail-closed enforcement via linters and smell contracts
 
-Status: implemented. Phase 7 now adds `responsive-layout-hard-floor` as a warn-only rollout rule, promotes `responsive-profile-ownership` to `block` after a zero-warning repo run, adds dedicated tool coverage, and tracks the remaining `responsive-layout-hard-floor=3` warnings in `TECH-DEBT.md` as of `2026-03-09`.
+Status: implemented. Phase 7 now runs fully fail-closed on `2026-03-09`: `responsive-profile-ownership` and `responsive-layout-hard-floor` both sit at `0` findings, both rules are `block`, and dedicated tool coverage locks the ownership/hard-floor contract.
 
 1. Add a new `check-patterns` rollout rule for layout-driving hard floors in widget/shared layout code.
    - target: user-visible layout/text minima such as `Math.max(16, ...)`, `Math.max(40, ...)`, `clamp(..., 10, ...)`
@@ -260,7 +260,7 @@ Status: implemented. Phase 8 aligned the shared docs, authoring guides, and main
 
 ### Phase 9 - Verification and release gate
 
-Status: implemented. Phase 9 adds owner-level compact/medium/large progression assertions for `ActiveRouteLayout` and `XteHighwayLayout`, reruns the targeted owner suites, and revalidates the full repo gate on `2026-03-09`. `npm run check:all` passed (`74/74` test files, `414/414` tests, lines/statements `93.68%`, functions `90.09%`, branches `69.91%`), and `npm run check:patterns` still reports only the tracked warn-only responsive backlog (`responsive-layout-hard-floor=3`, `responsive-profile-ownership=0`). Representative compact/medium/large layout snapshots were reviewed through the existing owner/widget test harnesses for `CenterDisplay`, shared text renderers, `ActiveRoute`, `XTE`, linear gauges, semicircle gauges, and full-circle dials; the rollout closes without promoting `responsive-layout-hard-floor` beyond warn mode.
+Status: implemented. Phase 9 adds owner-level compact/medium/large progression assertions for `ActiveRouteLayout` and `XteHighwayLayout`, reruns the targeted owner suites, and revalidates the full repo gate on `2026-03-09`. `npm run check:all` passed, `node tools/check-patterns.mjs` reports `responsive-layout-hard-floor=0` and `responsive-profile-ownership=0`, and representative compact/medium/large layout snapshots were reviewed through the existing owner/widget test harnesses for `CenterDisplay`, shared text renderers, `ActiveRoute`, `XTE`, linear gauges, semicircle gauges, and full-circle dials. The rollout closes with no remaining responsive enforcement debt.
 
 1. Add compact-size regression coverage to each affected family.
 2. Run targeted widget and shared-engine tests while migrating each phase.

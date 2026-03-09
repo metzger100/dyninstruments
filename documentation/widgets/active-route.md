@@ -19,6 +19,7 @@ Layout ownership:
 
 - `shared/widget-kits/nav/ActiveRouteLayout.js` owns responsive insets, content rects, and mode-specific rectangle splitting
 - `shared/widget-kits/layout/ResponsiveScaleProfile.js` owns the shared `minDim -> t` compact curve consumed by `ActiveRouteLayout`
+- `ActiveRouteLayout.computeMetricTileSpacing(rect, responsive)` owns metric-tile padding and caption-band compaction for `TextTileLayout`
 - `ActiveRouteTextWidget` keeps parsing, formatting, fit-cache keys, accent fill, and draw orchestration only
 
 ## Module Registration
@@ -83,6 +84,7 @@ otherwise -> normal
 - non-approach: `RTE | ETA`
 - approach: `RTE | ETA | NEXT`
 - compact wide tiles reduce the route-name share via `ActiveRouteLayout` while increasing text fill through the shared profile
+- compact metric tiles also consume layout-owned `padX` / `captionHeightPx` values instead of widget-local spacing floors
 
 ## Formatting Contract
 
