@@ -77,6 +77,18 @@
       textLayout.drawTickLabels(layerCtx, state, ticks, showEndLabels, math, labelFormatter);
     }
 
+    function splitTextBoxRows(box, secScale) {
+      if (!box) {
+        return null;
+      }
+      const captionSeedHeight = Math.max(1, Math.floor(Number(box.h) / 2));
+      return layoutApi.splitCaptionValueRows(
+        { x: box.x, y: box.y, w: box.w, h: captionSeedHeight },
+        { x: box.x, y: box.y + captionSeedHeight, w: box.w, h: Math.max(1, box.h - captionSeedHeight) },
+        secScale
+      );
+    }
+
     function createRenderer(spec) {
       const cfg = spec || {};
       const axisMode = hasOwn.call(cfg, "axisMode") ? cfg.axisMode : DEFAULT_AXIS_MODE;
@@ -86,6 +98,7 @@
       const rangeProps = hasOwn.call(cfg, "rangeProps") ? cfg.rangeProps : DEFAULT_RANGE_PROPS;
       const tickProps = hasOwn.call(cfg, "tickProps") ? cfg.tickProps : DEFAULT_TICK_PROPS;
       const unitDefault = hasOwn.call(cfg, "unitDefault") ? cfg.unitDefault : "";
+      const layoutCfg = hasOwn.call(cfg, "layout") ? cfg.layout : null;
       const resolveAxisFn = typeof cfg.resolveAxis === "function" ? cfg.resolveAxis : null;
       const buildTicksFn = typeof cfg.buildTicks === "function" ? cfg.buildTicks : null;
       const buildSectorsFn = typeof cfg.buildSectors === "function"
@@ -134,7 +147,8 @@
           mode: mode,
           gap: insets.gap,
           contentRect: layoutApi.createContentRect(W, H, insets),
-          responsive: insets.responsive
+          responsive: insets.responsive,
+          layoutConfig: layoutCfg
         });
         const textFillScale = resolveTextFillScale(layout.responsive);
         const compactGeometryScale = resolveCompactGeometryScale(textFillScale);
@@ -147,7 +161,23 @@
         const display = formatDisplay(raw, p, unit);
         const valueText = display.text.trim() || p.default;
         const secScale = value.clamp(p.captionUnitScale, 0.3, 3.0);
-        const rowBoxes = layoutApi.splitCaptionValueRows(layout.captionBox, layout.valueBox, secScale);
+        const rowBoxes = {
+          captionBox: null,
+          valueBox: null,
+          top: null,
+          bottom: null
+        };
+        if (layout.captionBox && layout.valueBox) {
+          const primaryRows = layoutApi.splitCaptionValueRows(layout.captionBox, layout.valueBox, secScale);
+          rowBoxes.captionBox = primaryRows.captionBox;
+          rowBoxes.valueBox = primaryRows.valueBox;
+        }
+        if (layout.textTopBox) {
+          rowBoxes.top = splitTextBoxRows(layout.textTopBox, secScale);
+        }
+        if (layout.textBottomBox) {
+          rowBoxes.bottom = splitTextBoxRows(layout.textBottomBox, secScale);
+        }
         const tickPreset = tickSteps(axis.max - axis.min);
         const tickMajor = value.isFiniteNumber(p[tickProps.major]) ? p[tickProps.major] : tickPreset.major;
         const tickMinor = value.isFiniteNumber(p[tickProps.minor]) ? p[tickProps.minor] : tickPreset.minor;

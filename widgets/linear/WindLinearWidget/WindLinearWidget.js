@@ -86,13 +86,11 @@
       textLayoutApi.drawValueUnitRow(state, textApi, right.value, right.unit, valueCols.right, secScale, rightAlign);
     }
 
-    function drawDualInline(state, textApi, textLayoutApi, left, right, inlineBox, secScale) {
-      if (!inlineBox || inlineBox.w <= 0 || inlineBox.h <= 0) {
+    function drawMetricInline(state, textApi, textLayoutApi, metric, box, secScale) {
+      if (!metric || !box) {
         return;
       }
-      const cols = splitHorizontal(inlineBox, Math.max(0, Math.floor(Number(state.layout && state.layout.inlineDualGap) || 0)));
-      textLayoutApi.drawInlineRow(state, textApi, left.caption, left.value, left.unit, cols.left, secScale);
-      textLayoutApi.drawInlineRow(state, textApi, right.caption, right.value, right.unit, cols.right, secScale);
+      textLayoutApi.drawInlineRow(state, textApi, metric.caption, metric.value, metric.unit, box, secScale);
     }
 
     function buildSectors(props, minV, maxV, axis, valueApi, theme) {
@@ -125,6 +123,10 @@
       rawValueKey: "angle",
       unitDefault: "°",
       axisMode: "centered180",
+      layout: {
+        normalVariant: "stacked",
+        highVariant: "split"
+      },
       tickProps: {
         major: "windLinearTickMajor",
         minor: "windLinearTickMinor",
@@ -134,7 +136,7 @@
         normal: "windLinearRatioThresholdNormal",
         flat: "windLinearRatioThresholdFlat"
       },
-      ratioDefaults: { normal: 2, flat: 3 },
+      ratioDefaults: { normal: 0.9, flat: 3 },
       tickSteps: function () {
         return { major: 30, minor: 10 };
       },
@@ -158,18 +160,6 @@
         },
         normal: function (state, props, display, api) {
           const parsed = display.parsed;
-          drawDualInline(
-            state,
-            api.text,
-            api.textLayout,
-            parsed.left,
-            parsed.right,
-            state.layout && state.layout.inlineBox,
-            display.secScale
-          );
-        },
-        high: function (state, props, display, api) {
-          const parsed = display.parsed;
           drawDualRows(
             state,
             api.text,
@@ -181,6 +171,25 @@
             display.secScale,
             "left",
             "right"
+          );
+        },
+        high: function (state, props, display, api) {
+          const parsed = display.parsed;
+          drawMetricInline(
+            state,
+            api.text,
+            api.textLayout,
+            parsed.left,
+            state.layout && state.layout.textTopBox,
+            display.secScale
+          );
+          drawMetricInline(
+            state,
+            api.text,
+            api.textLayout,
+            parsed.right,
+            state.layout && state.layout.textBottomBox,
+            display.secScale
           );
         }
       }

@@ -23,7 +23,7 @@ describe("LinearGaugeLayout", function () {
     expect(inner.y + inner.h).toBeLessThanOrEqual(outer.y + outer.h);
   }
 
-  function buildSnapshot(layout, width, height, mode) {
+  function buildSnapshot(layout, width, height, mode, layoutConfig) {
     const insets = layout.computeInsets(width, height);
     const contentRect = layout.createContentRect(width, height, insets);
     return {
@@ -35,7 +35,8 @@ describe("LinearGaugeLayout", function () {
         mode: mode,
         gap: insets.gap,
         contentRect: contentRect,
-        responsive: insets.responsive
+        responsive: insets.responsive,
+        layoutConfig: layoutConfig
       })
     };
   }
@@ -63,6 +64,54 @@ describe("LinearGaugeLayout", function () {
       if (snapshot.out.valueBox) expectRectInside(snapshot.out.valueBox, snapshot.contentRect);
       if (testCase.expectInline) expectRectInside(snapshot.out.inlineBox, snapshot.contentRect);
     });
+  });
+
+  it("keeps the default normal/high layout contracts intact", function () {
+    const layout = createLayout();
+    const normal = buildSnapshot(layout, 280, 220, "normal").out;
+    const high = buildSnapshot(layout, 120, 320, "high").out;
+
+    expect(normal.inlineBox).toBeTruthy();
+    expect(normal.captionBox).toBeNull();
+    expect(normal.valueBox).toBeNull();
+    expect(normal.textTopBox).toBeNull();
+    expect(normal.textBottomBox).toBeNull();
+    expect(high.inlineBox).toBeNull();
+    expect(high.captionBox).toBeTruthy();
+    expect(high.valueBox).toBeTruthy();
+    expect(high.textTopBox).toBeNull();
+    expect(high.textBottomBox).toBeNull();
+  });
+
+  it("supports a stacked normal variant without an inline row", function () {
+    const layout = createLayout();
+    const snapshot = buildSnapshot(layout, 280, 220, "normal", {
+      normalVariant: "stacked"
+    });
+
+    expectRectInside(snapshot.out.trackBox, snapshot.contentRect);
+    expectRectInside(snapshot.out.captionBox, snapshot.contentRect);
+    expectRectInside(snapshot.out.valueBox, snapshot.contentRect);
+    expect(snapshot.out.inlineBox).toBeNull();
+    expect(snapshot.out.normalVariant).toBe("stacked");
+    expect(snapshot.out.dualRowGap).toBeGreaterThanOrEqual(1);
+  });
+
+  it("supports a split high variant with ordered top and bottom text bands", function () {
+    const layout = createLayout();
+    const snapshot = buildSnapshot(layout, 120, 320, "high", {
+      highVariant: "split"
+    });
+
+    expectRectInside(snapshot.out.textTopBox, snapshot.contentRect);
+    expectRectInside(snapshot.out.trackBox, snapshot.contentRect);
+    expectRectInside(snapshot.out.textBottomBox, snapshot.contentRect);
+    expect(snapshot.out.captionBox).toBeNull();
+    expect(snapshot.out.valueBox).toBeNull();
+    expect(snapshot.out.inlineBox).toBeNull();
+    expect(snapshot.out.highVariant).toBe("split");
+    expect(snapshot.out.textTopBox.y + snapshot.out.textTopBox.h).toBeLessThanOrEqual(snapshot.out.trackBox.y);
+    expect(snapshot.out.trackBox.y + snapshot.out.trackBox.h).toBeLessThanOrEqual(snapshot.out.textBottomBox.y);
   });
 
   it("compacts insets and text fill for smaller widgets", function () {

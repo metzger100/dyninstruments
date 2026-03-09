@@ -18,6 +18,7 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 - Compass linear (`hdtLinear`, `hdmLinear`) keeps the pointer fixed at center and scrolls the `0..360` scale under it.
 - Compass linear supports waypoint marker display (`markerCourse`) relative to current heading.
 - Wind linear (`angleTrueLinear`, `angleApparentLinear`) renders angle+speed together and supports mirrored layline sectors.
+- Wind linear overrides the generic `normal` / `high` text geometry: `normal` uses the stacked dual block below the gauge, and `high` uses inline top metric + middle gauge + inline bottom metric.
 
 ## Supported Profiles
 
@@ -72,6 +73,12 @@ Mode selection stays ratio-based per gauge kind.
 - `high`: top gauge + lower caption/value block
 - `normal`: top gauge + one inline caption/value/unit row below scale box
 - `flat`: left gauge + right caption/value stack
+
+Wind linear override:
+
+- `high`: top inline angle metric, middle gauge, bottom inline speed metric
+- `normal`: top gauge + stacked dual angle/speed block below
+- `flat`: unchanged from the generic flat layout
 
 ## Extension Readiness Checklist
 

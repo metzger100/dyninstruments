@@ -77,15 +77,15 @@
 
         // WindLinearWidget-only row thresholds
         windLinearRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 2,
+          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.9,
           internal: true,
-          name: "Linear 3-Rows Threshold",
+          name: "Linear split threshold",
           condition: [{ kind: "angleTrueLinear" }, { kind: "angleApparentLinear" }]
         },
         windLinearRatioThresholdFlat: {
           type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3,
           internal: true,
-          name: "Linear 1-Row Threshold",
+          name: "Linear flat threshold",
           condition: [{ kind: "angleTrueLinear" }, { kind: "angleApparentLinear" }]
         },
         windLinearTickMajor: {
