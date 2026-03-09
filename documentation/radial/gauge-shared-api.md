@@ -24,6 +24,13 @@ Shared gauge logic is split into focused core modules:
 - `FullCircleRadialEngine` as shared render flow for Compass/Wind dials
 - `FullCircleRadialTextLayout` as shared mode text helper for full-circle wrappers
 
+## Responsive Ownership Contract
+
+- `ResponsiveScaleProfile` owns the shared `minDim -> t -> textFillScale` compaction curve.
+- `SemicircleRadialLayout` and `FullCircleRadialLayout` map that curve into family-specific insets, geometry, label metrics, slot bounds, and geometry scales.
+- `SemicircleRadialEngine`, `SemicircleRadialTextLayout`, `FullCircleRadialEngine`, `FullCircleRadialTextLayout`, and wrapper callbacks consume layout-owned `responsive`, `textFillScale`, and `compactGeometryScale`.
+- Wrapper widgets must not import `ResponsiveScaleProfile` or add widget-local user-visible responsive floors; compact policy stays in the layout owners.
+
 ## Module Registration
 
 `config/components.js` registers these shared modules:

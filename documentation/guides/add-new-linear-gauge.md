@@ -17,6 +17,12 @@ Linear gauges should be thin wrappers over `LinearGaugeEngine`.
 
 Select a profile first, then keep the wrapper focused on formatter, ticks, axis mode, and sectors.
 
+Responsive ownership:
+
+- `ResponsiveScaleProfile` is consumed by `LinearGaugeLayout`, not by wrapper widgets.
+- `LinearGaugeEngine` exposes layout-owned `state.responsive`, `state.textFillScale`, and `state.compactGeometryScale` to hooks and shared text helpers.
+- Do not add wrapper-local user-visible responsive `Math.max(...)` / `clamp(...)` floors or import `ResponsiveScaleProfile` directly in linear wrappers.
+
 ## Step 0: Choose Profile
 
 | Profile | `axisMode` | Typical kinds | Domain | Sector style |
@@ -37,6 +43,11 @@ Existing advanced references:
 
 - `CompassLinearWidget` (fixed center pointer + moving `0..360` scale + waypoint marker)
 - `WindLinearWidget` (dual angle/speed text + mirrored layline sectors)
+
+Responsive ownership rule:
+
+- Let `LinearGaugeLayout` own insets, track/text rectangles, and compact sizing.
+- Keep wrapper hooks on display formatting, tick policy, sector policy, and any truly widget-specific draw callbacks.
 
 ```javascript
 const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);

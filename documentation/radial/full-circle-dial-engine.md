@@ -20,6 +20,13 @@
 - Mode selection/insets/geometry: `FullCircleRadialLayout.computeMode()` + `computeInsets()` + `computeLayout()`
 - Normal-mode text packing is theme-tunable via `fullCircle.normal.*` tokens (`innerMarginFactor`, `minHeightFactor`, `dualGapFactor`)
 
+## Ownership Contract
+
+- `ResponsiveScaleProfile` owns the base compact curve.
+- `FullCircleRadialLayout` maps that curve into full-circle insets, dial geometry, slot bounds, and compact geometry scales.
+- `FullCircleRadialEngine`, `FullCircleRadialTextLayout`, and wrapper `drawFrame` / `drawMode` callbacks consume `state.layout`, `state.responsive`, `state.textFillScale`, and `state.compactGeometryScale`.
+- Wrapper widgets must not import `ResponsiveScaleProfile` directly or add a second compact curve via widget-local responsive hard floors.
+
 ## API/Interfaces
 
 ### Factory

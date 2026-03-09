@@ -1,6 +1,6 @@
 # Implementation Plan
 
-**Status:** ⏳ In Progress | Phases 1-7 implemented; later responsive rollout phases pending
+**Status:** ⏳ In Progress | Phases 1-8 implemented; Phase 9 verification gate pending
 
 ## Overview
 
@@ -245,6 +245,8 @@ Status: implemented. Phase 7 now adds `responsive-layout-hard-floor` as a warn-o
 5. Promote the new rules to `block` only after warning backlog reaches zero, following the repo’s existing smell-prevention policy.
 
 ### Phase 8 - Documentation and guidance updates
+
+Status: implemented. Phase 8 aligned the shared docs, authoring guides, and maintenance notes with the responsive ownership contract. The remaining work was guidance-layer cleanup only; no additional runtime/API changes were needed.
 
 1. Update widget docs so the new compact-rendering contract is documented where the shared engines live:
    - `documentation/widgets/center-display.md`

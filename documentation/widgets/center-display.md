@@ -24,6 +24,13 @@ This is a dedicated renderer, not a `PositionCoordinateWidget` variant, because 
 - `shared/widget-kits/layout/ResponsiveScaleProfile.js` owns the shared `minDim -> t` compaction curve plus named scale outputs.
 - `CenterDisplayLayout` keeps nav-owned geometry, panel bounds, and row splitting; it no longer owns a private responsive-profile implementation.
 
+## Ownership Contract
+
+- `ResponsiveScaleProfile` owns the base compact curve plus the named scale outputs used by `CenterDisplayLayout`.
+- `CenterDisplayLayout` maps that shared curve into nav-specific insets, caption bands, panel shares, and row rectangles.
+- `CenterDisplayTextWidget` consumes layout-owned rectangles and `layout.responsive` outputs during fit/draw orchestration; it does not define a second compact curve.
+- Forbidden pattern: direct `ResponsiveScaleProfile` imports or widget-local responsive hard floors inside `CenterDisplayTextWidget`.
+
 ## Responsive Baseline Contract
 
 Shared baseline formulas from `shared/widget-kits/layout/ResponsiveScaleProfile.js`, consumed by `CenterDisplayLayout`:
