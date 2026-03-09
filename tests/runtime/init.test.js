@@ -2,10 +2,24 @@ const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 const { flushPromises } = require("../helpers/async");
 
 describe("runtime/init.js", function () {
+  function createBridgeRuntimeMock() {
+    const hostActions = { getCapabilities: vi.fn(), routePoints: {}, routeEditor: {}, ais: {} };
+    const bridge = {
+      getHostActions: vi.fn(() => hostActions),
+      destroy: vi.fn()
+    };
+    return {
+      hostActions,
+      bridge,
+      createTemporaryHostActionBridge: vi.fn(() => bridge)
+    };
+  }
+
   it("loads needed components and registers widgets", async function () {
     const registerWidget = vi.fn();
     const uniqueComponents = vi.fn(() => ["A"]);
     const loadComponent = vi.fn((id) => Promise.resolve({ id, create: () => ({}) }));
+    const { bridge, createTemporaryHostActionBridge } = createBridgeRuntimeMock();
 
     const context = createScriptContext({
       DyniComponents: {
@@ -20,6 +34,7 @@ describe("runtime/init.js", function () {
       },
       DyniPlugin: {
         runtime: {
+          createTemporaryHostActionBridge,
           createHelpers: vi.fn((getComponent) => {
             getComponent("A");
             return { helper: true };
@@ -48,6 +63,10 @@ describe("runtime/init.js", function () {
     expect(uniqueComponents).toHaveBeenCalledWith([{ widget: "A", def: { name: "dyni_test" } }]);
     expect(loadComponent.mock.calls.map((call) => call[0]).sort()).toEqual(["A", "ThemePresets"]);
     expect(context.DyniPlugin.runtime.registerWidget).toHaveBeenCalledTimes(1);
+    expect(context.DyniPlugin.state.hostActionBridge).toBe(bridge);
+    expect(createTemporaryHostActionBridge.mock.invocationCallOrder[0]).toBeLessThan(
+      context.DyniPlugin.runtime.registerWidget.mock.invocationCallOrder[0]
+    );
     expect(context.avnav.api.log).toHaveBeenCalled();
   });
 
@@ -55,6 +74,7 @@ describe("runtime/init.js", function () {
     const applyPreset = vi.fn();
     const registerWidget = vi.fn();
     const uniqueComponents = vi.fn(() => ["A"]);
+    const { createTemporaryHostActionBridge } = createBridgeRuntimeMock();
     const loadComponent = vi.fn((id) => {
       if (id === "ThemePresets") {
         return Promise.resolve({
@@ -100,6 +120,7 @@ describe("runtime/init.js", function () {
       DyniPlugin: {
         theme: "slim",
         runtime: {
+          createTemporaryHostActionBridge,
           createHelpers: vi.fn(() => ({ helper: true })),
           createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
           registerWidget: vi.fn()
@@ -131,6 +152,7 @@ describe("runtime/init.js", function () {
   it("uses css preset variable when window theme is unset", async function () {
     const applyPreset = vi.fn();
     const uniqueComponents = vi.fn(() => ["A"]);
+    const { createTemporaryHostActionBridge } = createBridgeRuntimeMock();
     const loadComponent = vi.fn((id) => {
       if (id === "ThemePresets") {
         return Promise.resolve({
@@ -190,6 +212,7 @@ describe("runtime/init.js", function () {
       },
       DyniPlugin: {
         runtime: {
+          createTemporaryHostActionBridge,
           createHelpers: vi.fn(() => ({ helper: true })),
           createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
           registerWidget: vi.fn()
@@ -217,6 +240,7 @@ describe("runtime/init.js", function () {
   it("prefers window theme over css preset fallback", async function () {
     const applyPreset = vi.fn();
     const uniqueComponents = vi.fn(() => ["A"]);
+    const { createTemporaryHostActionBridge } = createBridgeRuntimeMock();
     const loadComponent = vi.fn((id) => {
       if (id === "ThemePresets") {
         return Promise.resolve({
@@ -277,6 +301,7 @@ describe("runtime/init.js", function () {
       DyniPlugin: {
         theme: "slim",
         runtime: {
+          createTemporaryHostActionBridge,
           createHelpers: vi.fn(() => ({ helper: true })),
           createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
           registerWidget: vi.fn()
@@ -304,6 +329,7 @@ describe("runtime/init.js", function () {
   it("falls back to default when css preset variable is invalid", async function () {
     const applyPreset = vi.fn();
     const uniqueComponents = vi.fn(() => ["A"]);
+    const { createTemporaryHostActionBridge } = createBridgeRuntimeMock();
     const loadComponent = vi.fn((id) => {
       if (id === "ThemePresets") {
         return Promise.resolve({
@@ -363,6 +389,7 @@ describe("runtime/init.js", function () {
       },
       DyniPlugin: {
         runtime: {
+          createTemporaryHostActionBridge,
           createHelpers: vi.fn(() => ({ helper: true })),
           createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
           registerWidget: vi.fn()
@@ -390,6 +417,7 @@ describe("runtime/init.js", function () {
   it("reads css preset from container when widgets appear after init", async function () {
     const applyPreset = vi.fn();
     const uniqueComponents = vi.fn(() => ["A"]);
+    const { createTemporaryHostActionBridge } = createBridgeRuntimeMock();
     const loadComponent = vi.fn((id) => {
       if (id === "ThemePresets") {
         return Promise.resolve({
@@ -443,6 +471,7 @@ describe("runtime/init.js", function () {
       },
       DyniPlugin: {
         runtime: {
+          createTemporaryHostActionBridge,
           createHelpers: vi.fn(() => ({ helper: true })),
           createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
           registerWidget: vi.fn()
@@ -473,6 +502,7 @@ describe("runtime/init.js", function () {
     const invalidateCanvas = vi.fn();
     const invalidateAll = vi.fn();
     const uniqueComponents = vi.fn(() => ["A", "ThemeResolver"]);
+    const { createTemporaryHostActionBridge } = createBridgeRuntimeMock();
     const loadComponent = vi.fn((id) => {
       if (id === "ThemePresets") {
         return Promise.resolve({
@@ -536,6 +566,7 @@ describe("runtime/init.js", function () {
       },
       DyniPlugin: {
         runtime: {
+          createTemporaryHostActionBridge,
           createHelpers: vi.fn(() => ({ helper: true })),
           createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
           registerWidget: vi.fn()
@@ -573,6 +604,7 @@ describe("runtime/init.js", function () {
     const err = vi.fn();
     const uniqueComponents = vi.fn(() => ["A"]);
     const loadComponent = vi.fn(() => Promise.reject(new Error("load failed")));
+    const { bridge, createTemporaryHostActionBridge } = createBridgeRuntimeMock();
     const context = createScriptContext({
       console: { error: err },
       avnav: {
@@ -583,6 +615,7 @@ describe("runtime/init.js", function () {
       },
       DyniPlugin: {
         runtime: {
+          createTemporaryHostActionBridge,
           createHelpers: vi.fn(() => ({ helper: true })),
           createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
           registerWidget: vi.fn()
@@ -608,6 +641,8 @@ describe("runtime/init.js", function () {
 
     expect(context.DyniPlugin.state.initStarted).toBe(false);
     expect(context.DyniPlugin.state.themePresetApi).toBeNull();
+    expect(bridge.destroy).toHaveBeenCalledTimes(1);
+    expect(context.DyniPlugin.state.hostActionBridge).toBeNull();
     expect(err).toHaveBeenCalled();
   });
 

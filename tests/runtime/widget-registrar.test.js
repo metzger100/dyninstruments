@@ -4,11 +4,15 @@ describe("runtime/widget-registrar.js", function () {
   function setupContext() {
     const registerWidget = vi.fn();
     const applyThemePresetToContainer = vi.fn();
+    const hostActions = { getCapabilities: vi.fn(), routePoints: {}, routeEditor: {}, ais: {} };
 
     const context = createScriptContext({
       DyniPlugin: {
         runtime: {
           applyThemePresetToContainer,
+          getHostActions() {
+            return hostActions;
+          },
           defaultsFromEditableParams(editable) {
             const out = {};
             Object.keys(editable || {}).forEach((k) => {
@@ -42,11 +46,11 @@ describe("runtime/widget-registrar.js", function () {
 
     runIifeScript("runtime/widget-registrar.js", context);
 
-    return { context, registerWidget, applyThemePresetToContainer };
+    return { context, registerWidget, applyThemePresetToContainer, hostActions };
   }
 
   it("merges component/widget def and composes update functions", function () {
-    const { context, registerWidget, applyThemePresetToContainer } = setupContext();
+    const { context, registerWidget, applyThemePresetToContainer, hostActions } = setupContext();
 
     const component = {
       create() {
@@ -83,7 +87,11 @@ describe("runtime/widget-registrar.js", function () {
       }
     };
 
-    context.DyniPlugin.runtime.registerWidget(component, widgetDef, {});
+    context.DyniPlugin.runtime.registerWidget(component, widgetDef, {
+      getHostActions() {
+        return hostActions;
+      }
+    });
     expect(registerWidget).toHaveBeenCalledOnce();
 
     const [registeredDef, registeredEditable] = registerWidget.mock.calls[0];
@@ -117,7 +125,7 @@ describe("runtime/widget-registrar.js", function () {
   });
 
   it("falls back to storeKey when storeKeys absent", function () {
-    const { context, registerWidget } = setupContext();
+    const { context, registerWidget, hostActions } = setupContext();
 
     const component = { create: () => ({}) };
     const widgetDef = {
@@ -129,29 +137,99 @@ describe("runtime/widget-registrar.js", function () {
       }
     };
 
-    context.DyniPlugin.runtime.registerWidget(component, widgetDef, {});
+    context.DyniPlugin.runtime.registerWidget(component, widgetDef, {
+      getHostActions() {
+        return hostActions;
+      }
+    });
     const [registeredDef] = registerWidget.mock.calls[0];
 
     expect(registeredDef.storeKeys).toEqual({ value: "nav.gps.speed" });
   });
 
   it("preserves explicit falsy default values from widget definitions", function () {
-    const { context, registerWidget } = setupContext();
+    const { context, registerWidget, hostActions } = setupContext();
 
     const component = { create: () => ({}) };
 
     context.DyniPlugin.runtime.registerWidget(component, {
       def: { name: "dyni_DefaultZero", default: 0, editableParameters: {} }
-    }, {});
+    }, {
+      getHostActions() {
+        return hostActions;
+      }
+    });
     context.DyniPlugin.runtime.registerWidget(component, {
       def: { name: "dyni_DefaultEmpty", default: "", editableParameters: {} }
-    }, {});
+    }, {
+      getHostActions() {
+        return hostActions;
+      }
+    });
     context.DyniPlugin.runtime.registerWidget(component, {
       def: { name: "dyni_DefaultFalse", default: false, editableParameters: {} }
-    }, {});
+    }, {
+      getHostActions() {
+        return hostActions;
+      }
+    });
 
     expect(registerWidget.mock.calls[0][0].default).toBe(0);
     expect(registerWidget.mock.calls[1][0].default).toBe("");
     expect(registerWidget.mock.calls[2][0].default).toBe(false);
+  });
+
+  it("injects hostActions into init, html, canvas, and finalize widget contexts", function () {
+    const { context, registerWidget, hostActions } = setupContext();
+    const seen = {
+      init: [],
+      html: [],
+      canvas: [],
+      finalize: []
+    };
+    const component = {
+      create() {
+        return {
+          initFunction() {
+            seen.init.push(this.hostActions);
+          },
+          renderHtml() {
+            seen.html.push(this.hostActions);
+            return "<div>ok</div>";
+          },
+          renderCanvas() {
+            seen.canvas.push(this.hostActions);
+          },
+          finalizeFunction() {
+            seen.finalize.push(this.hostActions);
+          }
+        };
+      }
+    };
+
+    context.DyniPlugin.runtime.registerWidget(component, {
+      def: {
+        name: "dyni_HostActions",
+        editableParameters: {}
+      }
+    }, {
+      getHostActions() {
+        return hostActions;
+      }
+    });
+
+    const [registeredDef] = registerWidget.mock.calls[0];
+    const widgetContext = {};
+
+    registeredDef.initFunction.call(widgetContext, {});
+    registeredDef.renderHtml.call(widgetContext, {});
+    registeredDef.renderCanvas.call(widgetContext, { __dyniMarked: true, closest() { return null; }, parentElement: null }, {});
+    registeredDef.finalizeFunction.call(widgetContext, {});
+
+    expect(seen.init).toEqual([hostActions]);
+    expect(seen.html).toEqual([hostActions]);
+    expect(seen.canvas).toEqual([hostActions]);
+    expect(seen.finalize).toEqual([hostActions]);
+    expect(widgetContext.hostActions).toBe(hostActions);
   });
 });

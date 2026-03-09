@@ -1,6 +1,6 @@
 # Implementation Plan
 
-**Status:** ⏳ In Progress | Temporary host bridge plus cluster/runtime parity work pending
+**Status:** ⏳ In Progress | Phase 0 temporary host bridge is implemented; later cluster/runtime parity work remains
 
 ## Overview
 
@@ -31,6 +31,15 @@ Phase 0 is now the temporary-bridge phase:
 - exact workflow parity for `ActiveRoute`, `EditRoute`, and `AisTarget` still requires host-side bridging because the workflows are page-owned
 - the accepted near-term path is a temporary runtime bridge that hides DOM/event-layer manipulation behind a widget-facing avnav-api-like interface
 - generalized host-action API work is deferred until core defines a broader concept for exposing such actions to plugins
+
+Phase 0 implementation status (`2026-03-09`):
+
+- `runtime/TemporaryHostActionBridge.js` now exists as the runtime-only host workflow facade
+- `plugin.js` bootstraps the bridge before `runtime/init.js`
+- `runtime/init.js` creates and owns the singleton bridge lifecycle
+- `runtime/helpers.js` exposes `Helpers.getHostActions()`
+- `runtime/widget-registrar.js` injects `this.hostActions` before lifecycle/render callbacks
+- runtime tests now lock the bridge capability/dispatch/error contract
 
 ## Core Behavior Summary
 
@@ -92,6 +101,13 @@ Widget/rendering code must depend on the bridge facade only, never on DOM select
 ### Widget-Side Interface
 
 The bridge must expose a widget-facing avnav-api-like namespace through runtime helpers and widget context (`Helpers.getHostActions()` and `this.hostActions`).
+
+Implemented Phase 0 dispatch path:
+
+- page detection resolves `#navpage`, `#gpspage`, `#editroutepage`, then falls back to `other`
+- `routePoints.activate(index)` uses `window.avnav.api.routePoints.activate(index)`
+- `routeEditor.openActiveRoute()`, `routeEditor.openEditRoute()`, and `ais.showInfo(mmsi)` dispatch through the current page's existing React `onItemClick` path
+- the bridge resolves that page callback from the mounted page root / widget-container React fiber props; widgets never touch this DOM/runtime detail directly
 
 All action methods must return `true` only when the bridge definitively dispatched the native-equivalent workflow. They may return `false` only for capability modes that the widget must treat as passive or unsupported before it traps the click. Once a widget binds a bridge-owned interactive handler for a supported dispatch path, missing host affordances are contract violations and must throw explicit bridge errors.
 
@@ -156,22 +172,23 @@ The bridge must not:
 | File | Description | Planned/Actual Change |
 |---|---|---|
 | `documentation/PLAN.md` | This implementation handoff document | Actual change in this session |
-| `runtime/TemporaryHostActionBridge.js` | Temporary runtime bridge for plugin-only host workflow parity | Planned change: centralize DOM/event-layer host-action bridging behind stable widget-side interface |
+| `runtime/TemporaryHostActionBridge.js` | Temporary runtime bridge for plugin-only host workflow parity | Actual change in this session: centralizes DOM/event-layer host-action bridging behind stable widget-side interface |
 | `cluster/ClusterWidget.js` | Cluster orchestrator | Planned change: expose HTML delegation and lifecycle hooks in addition to canvas |
 | `cluster/rendering/ClusterRendererRouter.js` | Cluster sub-renderer routing | Planned change: support `renderHtml`, renderer lifecycle fan-out, and HTML capability selection |
 | `cluster/mappers/NavMapper.js` | `nav` cluster kind translation | Planned change: add active-workflow kinds and keep mapper output declarative |
 | `config/clusters/nav.js` | `dyni_Nav_Instruments` config | Planned change: add new kinds, editables, and kind-specific defaults/conditions |
 | `config/components.js` | Component registry | Planned change: register new HTML renderers and any shared helper modules |
-| `runtime/helpers.js` | Shared widget/runtime helper factory | Planned change: expose bridge facade to widgets via helper/runtime contract |
-| `runtime/widget-registrar.js` | Widget registration composition | Planned change: support HTML hide-native-head/theme-root contracts for cluster widgets |
-| `runtime/init.js` | Init, component loading, theme preset application | Planned change: initialize temporary host bridge, install/remove plugin-specific runtime hooks, and keep theme behavior aligned for HTML widgets |
+| `runtime/helpers.js` | Shared widget/runtime helper factory | Actual change in this session: exposes bridge facade to widgets via helper/runtime contract |
+| `runtime/widget-registrar.js` | Widget registration composition | Actual change in this session: injects `this.hostActions` before lifecycle/render callbacks while keeping existing canvas marking |
+| `runtime/init.js` | Init, component loading, theme preset application | Actual change in this session: initializes and owns the temporary host bridge lifecycle |
 | `plugin.css` | Plugin-wide styling and hide-native-head rules | Planned change: support HTML cluster kinds without affecting existing canvas kinds |
 | `tests/cluster/ClusterWidget.test.js` | Cluster orchestration coverage | Planned change |
 | `tests/cluster/rendering/ClusterRendererRouter.test.js` | Router/capability coverage | Planned change |
 | `tests/cluster/mappers/NavMapper.test.js` | `nav` mapper coverage | Planned change |
 | `tests/config/clusters/nav.test.js` | `nav` cluster config coverage | Planned change |
-| `tests/runtime/widget-registrar.test.js` | HTML hide-native-head registration coverage | Planned change |
-| `tests/runtime/init.test.js` | Theme preset/init coverage | Planned change |
+| `tests/runtime/TemporaryHostActionBridge.test.js` | Temporary bridge capability/dispatch coverage | Actual change in this session |
+| `tests/runtime/widget-registrar.test.js` | Widget registration coverage | Actual change in this session: `hostActions` injection coverage |
+| `tests/runtime/init.test.js` | Theme preset/init coverage | Actual change in this session: bridge bootstrap/cleanup coverage |
 | `/path/to/avnav/viewer/components/ActiveRouteWidget.jsx` | Core behavior reference | Reference only |
 | `/path/to/avnav/viewer/components/EditRouteWidget.jsx` | Core behavior reference | Reference only |
 | `/path/to/avnav/viewer/components/RoutePointsWidget.jsx` | Core behavior reference | Reference only |
@@ -189,6 +206,8 @@ The bridge must not:
 ## Todo Steps
 
 ### Phase 0 - Introduce `TemporaryHostActionBridge` for temporary workflow parity
+
+Status: implemented on `2026-03-09`.
 
 1. Add `runtime/TemporaryHostActionBridge.js` and keep the class/module name explicitly temporary.
 2. Centralize all temporary host DOM/event-layer logic in this bridge. No widget, mapper, or renderer may query host DOM directly for workflow parity.

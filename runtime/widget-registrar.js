@@ -49,11 +49,16 @@
 
     const wantsHide = !!spec.wantsHideNativeHead;
 
+    function attachHostActions(ctx) {
+      ctx.hostActions = Helpers.getHostActions();
+    }
+
     function wrapRenderCanvas(fn) {
       if (!fn) {
         return undefined;
       }
       return function (canvas, props) {
+        attachHostActions(this);
         if (wantsHide && !canvas.__dyniMarked) {
           const rootEl = canvas.closest(".widget, .DirectWidget") || canvas.parentElement;
           if (rootEl && !rootEl.hasAttribute("data-dyni")) rootEl.setAttribute("data-dyni", "");
@@ -63,6 +68,16 @@
           canvas.__dyniMarked = true;
         }
         return fn.apply(this, [canvas, props]);
+      };
+    }
+
+    function wrapWidgetContext(fn) {
+      if (!fn) {
+        return undefined;
+      }
+      return function () {
+        attachHostActions(this);
+        return fn.apply(this, arguments);
       };
     }
 
@@ -85,9 +100,9 @@
       ...perInstrumentDefaults,
 
       renderCanvas: wrapRenderCanvas(renderCanvas),
-      renderHtml: renderHtml,
-      initFunction: initFunction,
-      finalizeFunction: finalizeFunction,
+      renderHtml: wrapWidgetContext(renderHtml),
+      initFunction: wrapWidgetContext(initFunction),
+      finalizeFunction: wrapWidgetContext(finalizeFunction),
       translateFunction: translateFunction,
       updateFunction: updateFunction
     };

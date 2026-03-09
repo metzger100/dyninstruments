@@ -293,4 +293,30 @@ describe("runtime/helpers.js", function () {
     expect(runtime.resolveTextColor(canvas)).toBe("rgb(1, 2, 3)");
     expect(runtime.resolveFontFamily(canvas)).toBe(DEFAULT_FONT_STACK);
   });
+
+  it("exposes the singleton hostActions facade through runtime and Helpers", function () {
+    const hostActions = { routePoints: {}, routeEditor: {}, ais: {}, getCapabilities: vi.fn() };
+    const runtime = loadRuntimeHelpers({
+      DyniPlugin: {
+        runtime: {},
+        state: {
+          hostActionBridge: {
+            getHostActions: vi.fn(() => hostActions)
+          }
+        },
+        config: { shared: {}, clusters: [] }
+      }
+    });
+
+    expect(runtime.getHostActions()).toBe(hostActions);
+    expect(runtime.createHelpers(function () {}).getHostActions()).toBe(hostActions);
+  });
+
+  it("fails fast when hostActions are requested before bridge initialization", function () {
+    const runtime = loadRuntimeHelpers();
+
+    expect(function () {
+      runtime.getHostActions();
+    }).toThrow();
+  });
 });

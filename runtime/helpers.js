@@ -142,12 +142,17 @@
     return resolveTypography(canvas).fontFamily;
   }
 
+  function getHostActions() {
+    return ns.state.hostActionBridge.getHostActions();
+  }
+
   function createHelpers(getModule) {
     return {
       applyFormatter: applyFormatter,
       setupCanvas: setupCanvas,
       resolveTextColor: resolveTextColor,
       resolveFontFamily: resolveFontFamily,
+      getHostActions: getHostActions,
       getModule: getModule
     };
   }
@@ -156,5 +161,6 @@
   runtime.setupCanvas = setupCanvas;
   runtime.resolveTextColor = resolveTextColor;
   runtime.resolveFontFamily = resolveFontFamily;
+  runtime.getHostActions = getHostActions;
   runtime.createHelpers = createHelpers;
 }(this));

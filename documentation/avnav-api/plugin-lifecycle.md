@@ -63,6 +63,7 @@ Available as `this` in `initFunction`, `finalizeFunction`, `renderHtml`, `render
 | Property/Method | Widget Type | Description |
 |---|---|---|
 | `eventHandler` | userWidget | Register HTML event handlers |
+| `hostActions` | dyninstruments userWidget | Phase 0 runtime facade for temporary route/AIS host workflows |
 | `triggerRedraw()` | userWidget | Force re-render |
 | `triggerRender()` | map | Force map render |
 | `lonLatToPixel(lon, lat)` | map | Coordinates → canvas pixels |
@@ -119,6 +120,20 @@ Internal cluster ID (for example `"speed"`, `"wind"`) used by ClusterWidget mapp
 
 When `true`, render wrapper in `runtime/widget-registrar.js` adds `data-dyni` to widget root. CSS then hides AvNav native `.widgetHead` and `.valueData`.
 
+### hostActions
+
+`runtime/widget-registrar.js` injects `this.hostActions` before `initFunction`, `renderHtml`, `renderCanvas`, and `finalizeFunction`.
+
+Current Phase 0 facade:
+
+- `this.hostActions.getCapabilities()`
+- `this.hostActions.routePoints.activate(index)`
+- `this.hostActions.routeEditor.openActiveRoute()`
+- `this.hostActions.routeEditor.openEditRoute()`
+- `this.hostActions.ais.showInfo(mmsi)`
+
+This is dyninstruments-only runtime behavior, not official AvNav API.
+
 ### Module create() Pattern
 
 dyninstruments modules expose `create(def, Helpers)`:
@@ -134,9 +149,9 @@ function create(def, Helpers) {
 
 ```text
 1. plugin.js bootstraps internal scripts
-2. runtime/init.js resolves required module IDs from config.widgetDefinitions
-3. runtime/component-loader.js loads all required modules (with deps)
-4. runtime/widget-registrar.js merges module spec + cluster definition
+2. runtime/init.js creates `TemporaryHostActionBridge`
+3. runtime/component-loader.js loads required modules from config.widgetDefinitions
+4. runtime/widget-registrar.js merges module spec + cluster definition and injects `hostActions`
 5. avnav.api.registerWidget(definition, editableParameters)
 ```
 
