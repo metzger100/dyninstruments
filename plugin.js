@@ -64,6 +64,7 @@
     "config/widget-definitions.js",
     "runtime/component-loader.js",
     "runtime/widget-registrar.js",
+    "runtime/TemporaryHostActionBridge.js",
     "runtime/init.js"
   ];
 

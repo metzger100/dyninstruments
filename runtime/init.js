@@ -228,6 +228,8 @@
       return Promise.resolve();
     }
 
+    state.hostActionBridge = runtime.createTemporaryHostActionBridge();
+
     // Invariants: namespace/config/runtime are bootstrapped in fixed order by plugin.js.
     const config = ns.config;
     const components = config.components;
@@ -264,6 +266,8 @@
         state.initStarted = false;
         state.themePresetApi = null;
         state.themeResolverModule = null;
+        state.hostActionBridge.destroy();
+        state.hostActionBridge = null;
         console.error("dyninstruments init failed:", e);
         throw e;
       });

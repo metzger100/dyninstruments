@@ -4,7 +4,7 @@
 
 ## Overview
 
-`Helpers` is passed as second argument to `module.create(def, Helpers)`. It provides canvas setup, theming, formatter application, and module access.
+`Helpers` is passed as second argument to `module.create(def, Helpers)`. It provides canvas setup, theming, formatter application, host-action access, and module access.
 
 ## API Reference
 
@@ -65,6 +65,28 @@ Applies formatter to raw value:
    - `props.formatter` string -> resolve and call `avnav.api.formatter[name]` when present
 5. Formatter exceptions are intentionally caught; processing continues with raw-string fallback
 6. If no formatter is available, or formatter dispatch fails, return `String(raw)`
+
+### getHostActions
+
+Returns the singleton Phase 0 host-action facade owned by `runtime/TemporaryHostActionBridge.js`.
+
+```javascript
+const hostActions = Helpers.getHostActions();
+const capabilities = hostActions.getCapabilities();
+```
+
+Contract summary:
+
+- intended for interactive route/AIS parity work only
+- mirrors the widget-facing namespace shape:
+  - `hostActions.getCapabilities()`
+  - `hostActions.routePoints.activate(index)`
+  - `hostActions.routeEditor.openActiveRoute()`
+  - `hostActions.routeEditor.openEditRoute()`
+  - `hostActions.ais.showInfo(mmsi)`
+- `runtime/init.js` owns bridge creation before widget registration; helper/runtime code treats that as an internal contract
+- widgets may also read the same facade from `this.hostActions` because `runtime/widget-registrar.js` injects it before lifecycle/render callbacks
+- all host DOM / `window.avnav` coupling stays inside the runtime bridge; widget and cluster code must not reach around this helper
 
 ### getModule
 
