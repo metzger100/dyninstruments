@@ -1,6 +1,6 @@
 # Implementation Plan
 
-**Status:** ⏳ In Progress | Phase 0 resolved; cluster/runtime parity work still pending
+**Status:** ⏳ In Progress | Temporary host bridge plus cluster/runtime parity work pending
 
 ## Overview
 
@@ -14,27 +14,32 @@ This plan covers feature-parity support for the core route/AIS workflow widgets 
 The chosen direction for dyninstruments is:
 
 - keep these widgets inside `dyni_Nav_Instruments` for now
+- add a temporary runtime `TemporaryHostActionBridge` that centralizes all plugin-side DOM/workflow bridging behind an avnav-api-like facade
 - extend the cluster runtime so cluster sub-renderers can use `renderHtml` in addition to `renderCanvas`
 - defer any `nav` cluster split until later if the mapper/config grows into a hotspot
 - replace the temporary summary-style `activeRoute` cluster kind with the core-parity implementation instead of preserving a compatibility path
 
-The remaining hard problem is extending the cluster runtime to support HTML/interactivity cleanly.
+The remaining hard problems are:
 
-Phase 0 is considered resolved for now:
+- extending the cluster runtime to support HTML/interactivity cleanly
+- providing temporary workflow parity for host-owned dialogs/overlays without spreading DOM manipulation across widgets
+
+Phase 0 is now the temporary-bridge phase:
 
 - current viewer source still exposes `window.avnav.api.routePoints`, and core pages use it
 - maintainer feedback does not treat this area as a documented/stable public plugin-action contract
-- the accepted near-term path is plugin-owned `renderHtml` / React click handling, with AvNav actions treated only as optional fallback behavior
+- exact workflow parity for `ActiveRoute`, `EditRoute`, and `AisTarget` still requires host-side bridging because the workflows are page-owned
+- the accepted near-term path is a temporary runtime bridge that hides DOM/event-layer manipulation behind a widget-facing avnav-api-like interface
 - generalized host-action API work is deferred until core defines a broader concept for exposing such actions to plugins
 
 ## Core Behavior Summary
 
 | Widget | Core data inputs | Visible behavior | Core click/workflow behavior | Parity risk |
 |---|---|---|---|---|
-| `ActiveRoute` | `nav.route.name`, `nav.route.remain`, `nav.route.eta`, `nav.route.nextCourse`, `nav.route.isApproaching`, `gui.global.layoutEditing`, `nav.wp.server` | Shows route name, remaining distance, ETA, and `NEXT` only while approaching. Hidden when there is no route unless layout editing is active. Uses approach background state. | In `NavPage`, click runs `activeRoute.setIndexToTarget()`, `activeRoute.syncTo(RouteEdit.MODES.EDIT)`, then `history.push("editroutepage")`. In `GpsPage` it is not special-cased and falls back to page pop behavior. | No documented host action API today. Use plugin-owned click handling and defer generalized route-editor API work. |
-| `EditRoute` | `RouteEdit.MODES.EDIT` store keys plus `nav.route.remain`, `nav.route.eta`, `nav.route.isApproaching`, `nav.routeHandler.useRhumbLine` | Shows route name, point count, route length, and in non-horizontal mode also RTG and ETA. Uses different border colors for editable vs active route. Shows `No Route` fallback. | In `EditRoutePage`, click opens `EditRouteDialog`. | No documented host action API today. Keep parity work on the plugin side and revisit host APIs later. |
-| `RoutePoints` | `RouteEdit.MODES.EDIT` store keys plus `properties.routeShowLL`, `gui.global.layoutEditing`, `nav.routeHandler.useRhumbLine` | Shows waypoint list, selected-row highlight, and auto-scrolls the selected row into view. Hidden in horizontal mode unless layout editing is active. | Row click activates the current route point. Re-clicking the already centered point opens the waypoint dialog. Page code also exposes `avnav.api.routePoints.activate(index)` via registered handlers. | Current viewer source exposes `routePoints`, but maintainer feedback does not bless it as stable public plugin API. Any use must stay isolated and tagged as workaround code. |
-| `AisTarget` | `nav.ais.nearest`, `gui.global.layoutEditing`, `nav.ais.trackedMmsi` and AIS color properties | Shows nearest AIS target, uses compact horizontal layout on dashboard-like panels, and colors background by warning/nearest/tracked state. | In `NavPage` and `GpsPage`, click opens `AisInfoWithFunctions`; dialog buttons trigger nearest/locate/hide/list actions. | No documented AIS plugin-action API today. Prefer plugin-owned interaction and defer generalized host-action API work. |
+| `ActiveRoute` | `nav.route.name`, `nav.route.remain`, `nav.route.eta`, `nav.route.nextCourse`, `nav.route.isApproaching`, `gui.global.layoutEditing`, `nav.wp.server` | Shows route name, remaining distance, ETA, and `NEXT` only while approaching. Hidden when there is no route unless layout editing is active. Uses approach background state. | In `NavPage`, click runs `activeRoute.setIndexToTarget()`, `activeRoute.syncTo(RouteEdit.MODES.EDIT)`, then `history.push("editroutepage")`. In `GpsPage` it is not special-cased and falls back to page pop behavior. | No documented host action API today. Phase 0 must bridge this through `TemporaryHostActionBridge` without changing native widget behavior. |
+| `EditRoute` | `RouteEdit.MODES.EDIT` store keys plus `nav.route.remain`, `nav.route.eta`, `nav.route.isApproaching`, `nav.routeHandler.useRhumbLine` | Shows route name, point count, route length, and in non-horizontal mode also RTG and ETA. Uses different border colors for editable vs active route. Shows `No Route` fallback. | In `EditRoutePage`, click opens `EditRouteDialog`. | No documented host action API today. Phase 0 must provide a temporary host-workflow bridge for dialog opening. |
+| `RoutePoints` | `RouteEdit.MODES.EDIT` store keys plus `properties.routeShowLL`, `gui.global.layoutEditing`, `nav.routeHandler.useRhumbLine` | Shows waypoint list, selected-row highlight, and auto-scrolls the selected row into view. Hidden in horizontal mode unless layout editing is active. | Row click activates the current route point. Re-clicking the already centered point opens the waypoint dialog. Page code also exposes `avnav.api.routePoints.activate(index)` via registered handlers. | Current viewer source exposes `routePoints`, but maintainer feedback does not bless it as stable public plugin API. Any use must stay isolated behind the temporary bridge and tagged as workaround code. |
+| `AisTarget` | `nav.ais.nearest`, `gui.global.layoutEditing`, `nav.ais.trackedMmsi` and AIS color properties | Shows nearest AIS target, uses compact horizontal layout on dashboard-like panels, and colors background by warning/nearest/tracked state. | In `NavPage` and `GpsPage`, click opens `AisInfoWithFunctions`; dialog buttons trigger nearest/locate/hide/list actions. | No documented AIS plugin-action API today. Phase 0 must bridge the native host dialog workflow through a temporary runtime facade. |
 
 Observed source detail that still needs validation against live behavior:
 
@@ -65,6 +70,7 @@ The core widgets do not all own their workflows the same way. This matters for p
   - per-sub-renderer `wantsHideNativeHead` behavior beyond canvas-based marking
 - `runtime/widget-registrar.js` only marks hide-native-head/theme roots from the `renderCanvas` path. Pure HTML cluster kinds cannot currently mark the widget root.
 - `runtime/init.js` discovers plugin containers via `canvas.widgetData`, so pure HTML cluster kinds are invisible to theme-preset discovery.
+- No runtime bridge exists that can expose temporary host-workflow methods to widgets while keeping DOM manipulation isolated in one removable module.
 - `config/clusters/nav.js` and `cluster/mappers/NavMapper.js` currently model only the existing summary-style nav kinds. They do not yet carry the active-workflow kinds.
 - The current `nav` cluster already has an `activeRoute` kind for the newly added summary widget. Under a fail-fast approach, that kind should be replaced directly by the core-parity implementation instead of carrying both variants.
 - The current viewer source attaches `routePoints.activate/registerHandler` to `window.avnav.api`, but maintainer feedback indicates there is no generalized documented plugin-action concept for this area. There is still no corresponding documented/stable API for:
@@ -77,9 +83,59 @@ The core widgets do not all own their workflows the same way. This matters for p
   - `Alarm` is mounted by page shell code rather than panel-layout widget routing
   - `CenterDisplay` is a passive map widget with no widget-owned interaction at all
 
+## TemporaryHostActionBridge Contract
+
+`TemporaryHostActionBridge` is the only module allowed to manipulate host DOM, install plugin-specific workflow aliases, or automate host-owned dialogs/pages for this plan.
+
+Widget/rendering code must depend on the bridge facade only, never on DOM selectors or page internals directly.
+
+### Widget-Side Interface
+
+The bridge must expose a widget-facing avnav-api-like namespace through runtime helpers and widget context (`Helpers.getHostActions()` and `this.hostActions`).
+
+All action methods must return `true` only when the bridge definitively dispatched the native-equivalent workflow. They must return `false` when the bridge could not or should not handle the action, so the widget can preserve native fallback behavior when required.
+
+| Namespace | Method | Required behavior |
+|---|---|---|
+| `routePoints` | `activate(index)` | Use the current runtime-exposed route-point activation path when available and preserve native selected-row / re-click waypoint-dialog behavior. |
+| `routeEditor` | `openActiveRoute()` | Reproduce native `ActiveRoute` click workflow on pages where the host special-case exists. On pages where native behavior is default fallback (for example `GpsPage`), return `false` so widget-side handling can preserve that default. |
+| `routeEditor` | `openEditRoute()` | Reproduce native `EditRoute` click workflow, opening the host `EditRouteDialog` rather than rebuilding it in the plugin. |
+| `ais` | `showInfo(mmsi)` | Reproduce native `AisTarget` click workflow by opening the host AIS info dialog/overlay for the supplied target. |
+| root | `getCapabilities()` | Return capability flags for the currently installed host bridge so widgets can gate optional UI and tests can assert supported paths. |
+
+### Required Capabilities
+
+- Mark the implementation explicitly temporary:
+  - file/class name must stay `TemporaryHostActionBridge`
+  - implementation blocks must carry `// dyni-workaround(avnav-plugin-actions) -- ...`
+- Keep all DOM/event-layer host coupling centralized in this module.
+- Add plugin-specific workflow handling only for dyninstruments widgets; never alter native-widget behavior or native-widget names.
+- Support page-aware parity:
+  - `ActiveRoute` must match `NavPage` route-editor opening behavior
+  - `ActiveRoute` on `GpsPage` must preserve native fallback behavior rather than forcing a non-native interaction path
+  - `EditRoute` must open the host dialog on `EditRoutePage`
+  - `RoutePoints` must continue to use the native route-point workflow when available
+  - `AisTarget` must open the native AIS info workflow on `NavPage`/`GpsPage`
+- Support capability detection and guarded failure. Missing selectors, pages, or host affordances must return `false`, not throw or break page behavior.
+- Support lifecycle cleanup for any listeners, observers, or temporary DOM hooks installed by the bridge.
+- Keep future removal cheap:
+  - widgets call the bridge facade only
+  - when a documented host API exists, replace bridge internals with thin adapters or delete the DOM path without changing widget contracts
+
+### Native No-Regression Rule
+
+The bridge must not:
+
+- override existing native widget branches
+- rename or shadow native widgets
+- mutate native workflow ordering
+- require changes to AvNav core source
+- spread selector-based host logic into widget renderers, mappers, or configs
+
 ## Final Implementation Goal
 
 - Extend `dyni_Nav_Instruments` so cluster sub-renderers can support both `renderCanvas` and `renderHtml`.
+- Add `TemporaryHostActionBridge` to runtime so widgets can call a stable host-action facade while Phase 0 still depends on DOM/event-layer bridging.
 - Add the core-style active-workflow kinds to `nav` for now:
   - `activeRoute`
   - `editRoute`
@@ -87,8 +143,8 @@ The core widgets do not all own their workflows the same way. This matters for p
   - `aisTarget`
 - Use `renderHtml` string mode plus `this.eventHandler` for interactive cluster kinds.
 - Support plugin theming and hide-native-header behavior for HTML cluster kinds, not only canvas kinds.
-- Match core visibility rules and layout variants, and keep interaction ownership on the plugin side where no stable host API exists yet.
-- Avoid private-core coupling: do not ship parity that depends on private `RouteEdit`, `NavData`, `MapHolder`, or page-local `history` objects.
+- Match core visibility rules and layout variants, and keep widget code on a stable bridge facade even while host workflows are temporarily driven by DOM/event-layer bridging.
+- Avoid private-core JS-object coupling in widget code: do not ship parity that depends on direct use of private `RouteEdit`, `NavData`, `MapHolder`, or page-local `history` objects outside the bridge.
 - Keep any temporary dependency on runtime-exposed but undocumented actions narrow, optional, and explicitly marked as workaround code.
 - Accept that `nav` may become a temporary hotspot and may need to split later once the feature set stabilizes.
 
@@ -97,13 +153,15 @@ The core widgets do not all own their workflows the same way. This matters for p
 | File | Description | Planned/Actual Change |
 |---|---|---|
 | `documentation/PLAN.md` | This implementation handoff document | Actual change in this session |
+| `runtime/TemporaryHostActionBridge.js` | Temporary runtime bridge for plugin-only host workflow parity | Planned change: centralize DOM/event-layer host-action bridging behind stable widget-side interface |
 | `cluster/ClusterWidget.js` | Cluster orchestrator | Planned change: expose HTML delegation and lifecycle hooks in addition to canvas |
 | `cluster/rendering/ClusterRendererRouter.js` | Cluster sub-renderer routing | Planned change: support `renderHtml`, renderer lifecycle fan-out, and HTML capability selection |
 | `cluster/mappers/NavMapper.js` | `nav` cluster kind translation | Planned change: add active-workflow kinds and keep mapper output declarative |
 | `config/clusters/nav.js` | `dyni_Nav_Instruments` config | Planned change: add new kinds, editables, and kind-specific defaults/conditions |
 | `config/components.js` | Component registry | Planned change: register new HTML renderers and any shared helper modules |
+| `runtime/helpers.js` | Shared widget/runtime helper factory | Planned change: expose bridge facade to widgets via helper/runtime contract |
 | `runtime/widget-registrar.js` | Widget registration composition | Planned change: support HTML hide-native-head/theme-root contracts for cluster widgets |
-| `runtime/init.js` | Init, component loading, theme preset application | Planned change: discover/apply presets for HTML cluster widgets too |
+| `runtime/init.js` | Init, component loading, theme preset application | Planned change: initialize temporary host bridge, install/remove plugin-specific runtime hooks, and keep theme behavior aligned for HTML widgets |
 | `plugin.css` | Plugin-wide styling and hide-native-head rules | Planned change: support HTML cluster kinds without affecting existing canvas kinds |
 | `tests/cluster/ClusterWidget.test.js` | Cluster orchestration coverage | Planned change |
 | `tests/cluster/rendering/ClusterRendererRouter.test.js` | Router/capability coverage | Planned change |
@@ -127,19 +185,31 @@ The core widgets do not all own their workflows the same way. This matters for p
 
 ## Todo Steps
 
-### Phase 0 - Resolved for now: use plugin-owned handlers and defer host API enhancement
+### Phase 0 - Introduce `TemporaryHostActionBridge` for temporary workflow parity
 
-1. Record the current core clarification:
-   - there is no generalized concept yet for exposing host actions to plugins
-   - current viewer source still exposes `window.avnav.api.routePoints`, and core pages register handlers on it
-   - this source/runtime exposure must not be treated as a documented/stable plugin contract
-2. Do not block dyninstruments parity work on new core APIs.
-3. Use plugin-owned `renderHtml` / React click handlers as the accepted near-term workaround.
-4. Treat AvNav-side action behavior only as fallback where it is actually available at runtime; do not assume built-in widget-name special-cases can be reused by plugin widgets.
-5. Do not add private-core shims for `RouteEdit`, `NavData`, `AisInfoWithFunctions`, or page-local `history` objects.
-6. When workaround code is added for this gap, mark it with the inline comment:
+1. Add `runtime/TemporaryHostActionBridge.js` and keep the class/module name explicitly temporary.
+2. Centralize all temporary host DOM/event-layer logic in this bridge. No widget, mapper, or renderer may query host DOM directly for workflow parity.
+3. Expose a stable widget-side interface that mirrors the preferred future API shape:
+   - `hostActions.routePoints.activate(index)`
+   - `hostActions.routeEditor.openActiveRoute()`
+   - `hostActions.routeEditor.openEditRoute()`
+   - `hostActions.ais.showInfo(mmsi)`
+   - `hostActions.getCapabilities()`
+4. Make every bridge action return `true` only when the host-equivalent workflow was actually dispatched, else `false`.
+5. Implement the bridge so it can insert plugin-specific workflow handling without changing native-widget behavior.
+   - The bridge may add plugin-only delegated listeners, alias checks, or other DOM/runtime hooks.
+   - Native widget branches and outcomes must remain untouched.
+6. Prefer existing host affordances first:
+   - `routePoints.activate(index)` should use the runtime-exposed host relay when available
+   - other actions may use temporary DOM/event-layer bridging only inside this bridge
+7. Preserve core page differences:
+   - `ActiveRoute` on `NavPage` opens the route editor workflow
+   - `ActiveRoute` on `GpsPage` preserves native fallback behavior if the bridge cannot or should not handle it directly
+   - `EditRoute` opens the native edit-route dialog on `EditRoutePage`
+   - `AisTarget` opens native AIS info workflow on `NavPage` / `GpsPage`
+8. Mark all temporary bridging code with:
    - `// dyni-workaround(avnav-plugin-actions) -- <reason>`
-7. Keep future route-editor / AIS API enhancement as deferred follow-up, not as a blocker for the cluster/runtime work.
+9. Keep future host API extension as a bridge-internal replacement, not a widget-contract rewrite.
 
 ### Phase 1 - Extend the cluster runtime to support HTML sub-renderers
 
@@ -201,48 +271,65 @@ The core widgets do not all own their workflows the same way. This matters for p
 3. Implement the `routePoints` renderer as an HTML sub-renderer.
    - Match the core list shape, `showLatLon` switch, and selected-row behavior.
    - Hide it in horizontal mode unless layout editing is active.
-   - If parity needs `avnav.api.routePoints.activate(index)`, treat it as a runtime-exposed workaround only: isolate usage, guard it, and tag the block with `// dyni-workaround(avnav-plugin-actions) -- ...`.
+   - If parity needs `avnav.api.routePoints.activate(index)`, keep that usage inside `TemporaryHostActionBridge` only; renderer code must stay on `hostActions.routePoints.activate(index)`.
    - Add selected-row auto-scroll after render.
 4. Implement the `aisTarget` renderer as an HTML sub-renderer.
    - Match the core compact-vs-full layout behavior.
    - Match background-state coloring for warning, nearest, tracked, and normal target states.
    - Keep rendering logic separate from the eventual click/dialog workflow wiring.
 
-### Phase 5 - Wire interactions through plugin-owned handlers first
+### Phase 5 - Wire widget interactions through the bridge facade
 
-1. Because these features live inside `dyni_Nav_Instruments`, core page-level widget-name special cases will not help. The HTML renderers must own their own click behavior through `this.eventHandler`.
+1. Because these features live inside `dyni_Nav_Instruments`, core page-level widget-name special cases will not help directly. HTML renderers must capture clicks through `this.eventHandler` and delegate host-equivalent workflows to `this.hostActions`.
 2. `activeRoute` parity kind:
-   - keep interaction on the plugin side for now
-   - keep the `GpsPage` behavior aligned with core instead of making it globally interactive by accident
+   - call `hostActions.routeEditor.openActiveRoute()`
+   - if the bridge returns `false` on pages where native behavior is default fallback, preserve that fallback instead of forcing a plugin-owned alternative
 3. `editRoute` kind:
-   - implement the plugin-side behavior that is possible without private-core page wiring
+   - call `hostActions.routeEditor.openEditRoute()`
+   - do not rebuild the native dialog when bridge-backed parity is the accepted temporary path
 4. `routePoints` kind:
-   - row click may use `avnav.api.routePoints.activate(index)` only as a guarded workaround if parity requires it
-   - re-click behavior should not duplicate private core dialog logic inside the plugin
+   - row click calls `hostActions.routePoints.activate(index)`
+   - keep any direct use of `avnav.api.routePoints` inside the bridge only
 5. `aisTarget` kind:
-   - keep the click behavior plugin-owned until a documented AIS host API exists
-   - do not copy private dialog logic or page-local action wiring
+   - click calls `hostActions.ais.showInfo(mmsi)`
+   - keep host dialog/action automation inside the bridge, not in renderer code
 
 ### Phase 6 - Tests and verification
 
 1. Add unit tests for HTML cluster rendering and event-handler wiring.
-2. Add behavior tests for:
+2. Add unit tests for `TemporaryHostActionBridge`:
+   - capability reporting
+   - plugin-only hook installation
+   - native no-regression for non-plugin widgets
+   - guarded `false` return on unsupported pages/selectors
+3. Add behavior tests for bridge-backed workflow parity:
+   - `activeRoute` dispatch on `NavPage`
+   - `activeRoute` fallback preservation on `GpsPage`
+   - `editRoute` dialog opening on `EditRoutePage`
+   - `routePoints.activate(index)` integration
+   - `aisTarget` info workflow dispatch
+4. Add behavior tests for:
    - active-route parity visibility and approach state
    - `editRoute` horizontal-vs-normal layout
    - `routePoints` row activation and selected-row rendering
    - `aisTarget` compact layout and state-based color choice
-3. Add runtime tests covering theme preset application and hide-native-head behavior for HTML cluster kinds.
-4. Add `nav` cluster config and mapper tests for the new kinds and for the direct replacement of the temporary `activeRoute` summary path.
-5. Manually compare dyninstruments behavior against core on:
+5. Add runtime tests covering theme preset application and hide-native-head behavior for HTML cluster kinds.
+6. Add `nav` cluster config and mapper tests for the new kinds and for the direct replacement of the temporary `activeRoute` summary path.
+7. Manually compare dyninstruments behavior against core on:
    - `NavPage`
    - `GpsPage`
    - `EditRoutePage`
    - `AisPage` / AIS info workflow
-6. Run the final gate: `npm run check:all`.
+8. Run the final gate: `npm run check:all`.
 
 ## Deferred Future Core Follow-Up
 
 Generalized plugin-action APIs for route-editor and AIS workflows are deferred until core defines a broader concept for exposing host actions to plugins.
+
+When that API exists, `TemporaryHostActionBridge` should become either:
+
+- a thin adapter over the documented host API, or
+- a deleted module whose public widget-side facade is provided directly by runtime helpers
 
 If this is revisited later, preferred high-level shapes remain:
 
@@ -256,13 +343,17 @@ If this is revisited later, preferred high-level shapes remain:
 
 ## Acceptance Criteria
 
+- `TemporaryHostActionBridge` exists in runtime, is explicitly marked temporary, and is the only module that performs host DOM/event-layer workflow bridging for plugin parity.
+- Widgets call a stable bridge facade (`hostActions.*`) rather than host DOM or private host JS objects directly.
+- Plugin-specific bridge hooks do not change native widget behavior or native widget names.
 - `dyni_Nav_Instruments` supports both canvas and HTML sub-renderers through the cluster pipeline.
 - `kind: "activeRoute"` is the core-parity implementation, not a temporary summary variant.
 - The `nav` cluster includes the active-workflow kinds for now, without compatibility aliases or duplicate fallback kinds.
 - HTML cluster kinds receive dyninstruments theming and hide-native-head behavior without depending on canvas presence.
-- Route and AIS interactions avoid private core modules and page-local wiring.
+- Route and AIS interactions avoid private core modules and page-local wiring outside the bridge.
 - Any temporary use of runtime-exposed but undocumented actions is isolated, guarded, and tagged with `// dyni-workaround(avnav-plugin-actions) -- ...`.
 - Visual and workflow behavior matches the current core widgets closely enough to swap layouts without user-visible regression.
+- Temporary bridge-backed interactions can dispatch native-equivalent workflows for `activeRoute`, `editRoute`, `routePoints`, and `aisTarget`, or return `false` without breaking native fallback behavior where parity requires it.
 - `npm run check:all` passes.
 
 ## Completed Investigation
@@ -301,8 +392,8 @@ If this is revisited later, preferred high-level shapes remain:
    - `viewer/util/api.js`
 7. Confirmed that current viewer source exposes `window.avnav.api.routePoints`, but maintainer feedback does not treat this area as a documented/stable plugin-action contract.
 8. Confirmed the accepted near-term workaround:
-   - use plugin-owned `renderHtml` / React handlers
-   - treat AvNav-side actions only as optional fallback behavior
+   - add a temporary runtime `TemporaryHostActionBridge`
+   - keep DOM/event-layer host coupling isolated behind widget-facing `hostActions.*`
    - defer generalized API enhancement until later
 9. Confirmed the broader ownership split around adjacent widgets:
    - `CenterDisplay` is passive
@@ -324,6 +415,7 @@ If this is revisited later, preferred high-level shapes remain:
 - Because these features stay inside `dyni_Nav_Instruments`, page-specific core click handlers keyed by built-in widget names cannot be reused directly.
 - Current viewer source exposes `window.avnav.api.routePoints`, but maintainer guidance says there is no general plugin-action concept here yet. Treat it as runtime-exposed workaround surface, not stable plugin API.
 - Workaround code for this gap must be tagged with `// dyni-workaround(avnav-plugin-actions) -- <reason>` so it can be found and retired later.
+- The temporary bridge must be the only place that performs host DOM/event-layer workflow automation. Widgets stay on a stable avnav-api-like facade (`hostActions.*`).
 - Core interaction ownership is mixed even among nearby widgets:
   - passive renderer + page click routing (`Zoom`, `ActiveRoute`, `EditRoute`)
   - widget-owned click target + page/API workflow (`RoutePoints`, `AisTarget`)
@@ -331,10 +423,10 @@ If this is revisited later, preferred high-level shapes remain:
   - fully passive display (`CenterDisplay`)
 - The plan intentionally removes backward-compatibility strategies because the plugin is not released yet. The temporary summary-style `activeRoute` path should be replaced directly instead of carried forward.
 - The safest implementation order is:
-  1. extend cluster HTML support and HTML theming infrastructure
-  2. expand the `nav` cluster contract
-  3. implement the HTML sub-renderers
-  4. wire workflows through plugin-owned handlers first
+  1. add `TemporaryHostActionBridge` and expose `hostActions.*`
+  2. extend cluster HTML support and HTML theming infrastructure
+  3. expand the `nav` cluster contract
+  4. implement the HTML sub-renderers against the bridge facade
   5. verify parity and run `npm run check:all`
 
 ## Related
