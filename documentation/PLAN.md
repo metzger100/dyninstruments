@@ -93,15 +93,15 @@ Widget/rendering code must depend on the bridge facade only, never on DOM select
 
 The bridge must expose a widget-facing avnav-api-like namespace through runtime helpers and widget context (`Helpers.getHostActions()` and `this.hostActions`).
 
-All action methods must return `true` only when the bridge definitively dispatched the native-equivalent workflow. They must return `false` when the bridge could not or should not handle the action, so the widget can preserve native fallback behavior when required.
+All action methods must return `true` only when the bridge definitively dispatched the native-equivalent workflow. They may return `false` only for capability modes that the widget must treat as passive or unsupported before it traps the click. Once a widget binds a bridge-owned interactive handler for a supported dispatch path, missing host affordances are contract violations and must throw explicit bridge errors.
 
 | Namespace | Method | Required behavior |
 |---|---|---|
-| `routePoints` | `activate(index)` | Use the current runtime-exposed route-point activation path when available and preserve native selected-row / re-click waypoint-dialog behavior. |
-| `routeEditor` | `openActiveRoute()` | Reproduce native `ActiveRoute` click workflow on pages where the host special-case exists. On pages where native behavior is default fallback (for example `GpsPage`), return `false` so widget-side handling can preserve that default. |
+| `routePoints` | `activate(index)` | Use the current runtime-exposed route-point activation path when available and preserve native selected-row / re-click waypoint-dialog behavior. If the page lacks a route-point activation affordance, expose that through capabilities so the widget can stay non-interactive there. |
+| `routeEditor` | `openActiveRoute()` | Reproduce native `ActiveRoute` click workflow on pages where the plugin must dispatch it. On pages where native behavior is the page default fallback (for example `GpsPage`), `getCapabilities()` must report passive mode so the renderer does not install a plugin click trap. |
 | `routeEditor` | `openEditRoute()` | Reproduce native `EditRoute` click workflow, opening the host `EditRouteDialog` rather than rebuilding it in the plugin. |
 | `ais` | `showInfo(mmsi)` | Reproduce native `AisTarget` click workflow by opening the host AIS info dialog/overlay for the supplied target. |
-| root | `getCapabilities()` | Return capability flags for the currently installed host bridge so widgets can gate optional UI and tests can assert supported paths. |
+| root | `getCapabilities()` | Return page-aware capability modes for the current host bridge so widgets can decide whether to dispatch through the bridge, stay passive and allow native page handling, or hide unsupported affordances. |
 
 ### Required Capabilities
 
@@ -112,11 +112,14 @@ All action methods must return `true` only when the bridge definitively dispatch
 - Add plugin-specific workflow handling only for dyninstruments widgets; never alter native-widget behavior or native-widget names.
 - Support page-aware parity:
   - `ActiveRoute` must match `NavPage` route-editor opening behavior
-  - `ActiveRoute` on `GpsPage` must preserve native fallback behavior rather than forcing a non-native interaction path
+  - `ActiveRoute` on `GpsPage` must stay passive so page-level `history.pop()` remains reachable; do not bind plugin click trapping there
   - `EditRoute` must open the host dialog on `EditRoutePage`
   - `RoutePoints` must continue to use the native route-point workflow when available
   - `AisTarget` must open the native AIS info workflow on `NavPage`/`GpsPage`
-- Support capability detection and guarded failure. Missing selectors, pages, or host affordances must return `false`, not throw or break page behavior.
+- Support capability detection at the renderer boundary:
+  - widgets must consult `getCapabilities()` before binding bridge-owned click handlers
+  - `false` returns are allowed only for passive/unsupported modes that were already detected before click trapping
+  - if a dispatch-capable path is selected and selectors, pages, or host affordances are missing, throw an explicit bridge error instead of degrading silently
 - Support lifecycle cleanup for any listeners, observers, or temporary DOM hooks installed by the bridge.
 - Keep future removal cheap:
   - widgets call the bridge facade only
@@ -195,7 +198,9 @@ The bridge must not:
    - `hostActions.routeEditor.openEditRoute()`
    - `hostActions.ais.showInfo(mmsi)`
    - `hostActions.getCapabilities()`
-4. Make every bridge action return `true` only when the host-equivalent workflow was actually dispatched, else `false`.
+4. Make every bridge action return `true` only when the host-equivalent workflow was actually dispatched.
+   - Return `false` only for passive/unsupported modes that callers checked before binding click handlers.
+   - If a dispatch-capable path breaks at runtime, throw an explicit bridge error.
 5. Implement the bridge so it can insert plugin-specific workflow handling without changing native-widget behavior.
    - The bridge may add plugin-only delegated listeners, alias checks, or other DOM/runtime hooks.
    - Native widget branches and outcomes must remain untouched.
@@ -204,7 +209,7 @@ The bridge must not:
    - other actions may use temporary DOM/event-layer bridging only inside this bridge
 7. Preserve core page differences:
    - `ActiveRoute` on `NavPage` opens the route editor workflow
-   - `ActiveRoute` on `GpsPage` preserves native fallback behavior if the bridge cannot or should not handle it directly
+   - `ActiveRoute` on `GpsPage` stays passive so native `history.pop()` fallback remains reachable; do not rely on a post-click `false` return once `renderHtml` has trapped the event
    - `EditRoute` opens the native edit-route dialog on `EditRoutePage`
    - `AisTarget` opens native AIS info workflow on `NavPage` / `GpsPage`
 8. Mark all temporary bridging code with:
@@ -264,7 +269,7 @@ The bridge must not:
    - Use `renderHtml` string mode and `this.eventHandler`.
    - Preserve the core visibility rule: hide when there is no route unless layout editing is active.
    - Match the approach-state visual treatment and field set from the core widget.
-   - Preserve context-sensitive click behavior. In particular, do not accidentally suppress `GpsPage` fallback navigation if parity requires the core default there.
+   - Preserve context-sensitive click behavior. In particular, on `GpsPage` render it without a plugin click handler so the native fallback navigation still receives the click.
 2. Implement the `editRoute` renderer as an HTML sub-renderer.
    - Match the core border state, horizontal layout reduction, and `No Route` fallback.
    - Do not add adapters or compatibility wrappers around private route-object contracts. If the required route data is not available through a stable contract, stop and raise the core API blocker.
@@ -280,10 +285,12 @@ The bridge must not:
 
 ### Phase 5 - Wire widget interactions through the bridge facade
 
-1. Because these features live inside `dyni_Nav_Instruments`, core page-level widget-name special cases will not help directly. HTML renderers must capture clicks through `this.eventHandler` and delegate host-equivalent workflows to `this.hostActions`.
+1. Because these features live inside `dyni_Nav_Instruments`, core page-level widget-name special cases will not help directly. HTML renderers that own the interaction must capture clicks through `this.eventHandler` and delegate host-equivalent workflows to `this.hostActions`.
 2. `activeRoute` parity kind:
-   - call `hostActions.routeEditor.openActiveRoute()`
-   - if the bridge returns `false` on pages where native behavior is default fallback, preserve that fallback instead of forcing a plugin-owned alternative
+   - consult `hostActions.getCapabilities()` before binding the click handler
+   - when capability mode is `dispatch`, bind the handler and call `hostActions.routeEditor.openActiveRoute()`
+   - when capability mode is `passive` on `GpsPage`, do not bind a plugin click handler and let the native page fallback own the click
+   - if a dispatch-capable path breaks at runtime, surface the bridge error instead of silently degrading
 3. `editRoute` kind:
    - call `hostActions.routeEditor.openEditRoute()`
    - do not rebuild the native dialog when bridge-backed parity is the accepted temporary path
@@ -301,10 +308,11 @@ The bridge must not:
    - capability reporting
    - plugin-only hook installation
    - native no-regression for non-plugin widgets
-   - guarded `false` return on unsupported pages/selectors
+   - `false` return only for pre-declared passive/unsupported capability modes
+   - explicit thrown error when a dispatch-capable path loses required host affordances
 3. Add behavior tests for bridge-backed workflow parity:
    - `activeRoute` dispatch on `NavPage`
-   - `activeRoute` fallback preservation on `GpsPage`
+   - `activeRoute` passive rendering on `GpsPage` so native fallback remains reachable
    - `editRoute` dialog opening on `EditRoutePage`
    - `routePoints.activate(index)` integration
    - `aisTarget` info workflow dispatch
@@ -353,7 +361,7 @@ If this is revisited later, preferred high-level shapes remain:
 - Route and AIS interactions avoid private core modules and page-local wiring outside the bridge.
 - Any temporary use of runtime-exposed but undocumented actions is isolated, guarded, and tagged with `// dyni-workaround(avnav-plugin-actions) -- ...`.
 - Visual and workflow behavior matches the current core widgets closely enough to swap layouts without user-visible regression.
-- Temporary bridge-backed interactions can dispatch native-equivalent workflows for `activeRoute`, `editRoute`, `routePoints`, and `aisTarget`, or return `false` without breaking native fallback behavior where parity requires it.
+- Temporary bridge-backed interactions can dispatch native-equivalent workflows for `activeRoute`, `editRoute`, `routePoints`, and `aisTarget`; pages that must retain native fallback stay passive before click trapping; broken dispatch paths throw explicit bridge errors instead of degrading silently.
 - `npm run check:all` passes.
 
 ## Completed Investigation
