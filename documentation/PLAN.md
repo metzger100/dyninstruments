@@ -1,6 +1,6 @@
 # Implementation Plan
 
-**Status:** ⏳ In Progress | Phase 0 temporary host bridge is implemented; later cluster/runtime parity work remains
+**Status:** ⏳ In Progress | Phase 0 temporary host bridge and Phase 1 cluster HTML sub-renderer support are implemented; later parity work remains
 
 ## Overview
 
@@ -41,6 +41,14 @@ Phase 0 implementation status (`2026-03-09`):
 - `runtime/widget-registrar.js` injects `this.hostActions` before lifecycle/render callbacks
 - runtime tests now lock the bridge capability/dispatch/error contract
 
+Phase 1 implementation status (`2026-03-09`):
+
+- `cluster/ClusterWidget.js` now exposes `renderHtml` and `initFunction` alongside the existing cluster translation/canvas/finalize contract
+- `cluster/rendering/ClusterRendererRouter.js` now supports pure-canvas, pure-HTML, and mixed sub-renderers through one picked-renderer dispatch path
+- cluster init now targets only the active renderer selected by init-call props; finalize still fans out defensively across instantiated sub-renderers
+- `cluster/rendering/RendererPropsWidget.js` now merges mapper-owned `rendererProps` into delegated HTML render and init paths in addition to canvas render
+- cluster tests now cover HTML delegation, active-only init delegation, and merged `rendererProps` behavior across non-canvas paths
+
 ## Core Behavior Summary
 
 | Widget | Core data inputs | Visible behavior | Core click/workflow behavior | Parity risk |
@@ -71,12 +79,8 @@ The core widgets do not all own their workflows the same way. This matters for p
 ## Current Dyninstruments Gaps
 
 - `config/widget-definitions.js` already matches the desired registration model because the plan stays cluster-based.
-- `ClusterWidget` currently exposes `translateFunction`, `renderCanvas`, and `finalizeFunction`, but not `renderHtml` or lifecycle delegation needed for HTML sub-renderers.
-- `ClusterRendererRouter` currently fans out only `renderCanvas` and `finalizeFunction`. It has no contract for:
-  - HTML sub-rendering
-  - HTML event-handler wiring
-  - per-sub-renderer `initFunction`
-  - per-sub-renderer `wantsHideNativeHead` behavior beyond canvas-based marking
+- Phase 1 is complete: `ClusterWidget` now exposes `renderHtml`, `renderCanvas`, `initFunction`, `finalizeFunction`, and aggregated `wantsHideNativeHead`.
+- Phase 1 is complete: `ClusterRendererRouter` now delegates pure-canvas, pure-HTML, and mixed renderers, and `RendererPropsWidget` now carries `rendererProps` through canvas, HTML, and init paths.
 - `runtime/widget-registrar.js` only marks hide-native-head/theme roots from the `renderCanvas` path. Pure HTML cluster kinds cannot currently mark the widget root.
 - `runtime/init.js` discovers plugin containers via `canvas.widgetData`, so pure HTML cluster kinds are invisible to theme-preset discovery.
 - No runtime bridge exists that can expose temporary host-workflow methods to widgets while keeping DOM manipulation isolated in one removable module.
@@ -236,6 +240,8 @@ Status: implemented on `2026-03-09`.
 9. Keep future host API extension as a bridge-internal replacement, not a widget-contract rewrite.
 
 ### Phase 1 - Extend the cluster runtime to support HTML sub-renderers
+
+Status: implemented on `2026-03-09`.
 
 1. Extend `ClusterWidget` so the cluster registration contract can expose:
    - `renderCanvas`

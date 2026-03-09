@@ -27,8 +27,9 @@
 - dedicated text-renderer output for `ActiveRouteTextWidget` (`nav` `activeRoute`)
 - dedicated text-renderer output for `CenterDisplayTextWidget` (`nav` `centerDisplay`)
 - graphic output with `renderer: "..."`
-5. `ClusterWidget.renderCanvas()` delegates to `ClusterRendererRouter`, which picks renderer by `props.renderer`
-6. `ClusterWidget.finalizeFunction()` fans out to all sub-renderers and tolerates renderer-local finalize errors
+5. `ClusterWidget.initFunction()` delegates one-time initialization to the active renderer selected by the init-call props
+6. `ClusterWidget.renderCanvas()` / `ClusterWidget.renderHtml()` delegate to `ClusterRendererRouter`, which picks renderer by `props.renderer`
+7. `ClusterWidget.finalizeFunction()` fans out to all sub-renderers and tolerates renderer-local finalize errors
 
 ## Mapper Modules
 
@@ -90,6 +91,14 @@ Reference: [plugin-core-contracts.md](plugin-core-contracts.md), [../avnav-api/c
 - `XteDisplayWidget`
 
 `wantsHideNativeHead` is aggregated (`true` if any sub-renderer requests it).
+
+Sub-renderer capability contract:
+
+- pure canvas renderer: implements `renderCanvas(canvas, props)`
+- pure HTML renderer: implements `renderHtml(props)`
+- mixed renderer: may implement both render paths
+- optional lifecycle hooks: `initFunction(...)` for active-renderer setup, `finalizeFunction(...)` for defensive cleanup fan-out
+- `RendererPropsWidget` applies mapper-owned `rendererProps` merges consistently across delegated canvas render, HTML render, and init calls
 
 Naming boundary:
 - Components under `cluster/rendering/` use role-based IDs, not cluster-prefixed IDs.

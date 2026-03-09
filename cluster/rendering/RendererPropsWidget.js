@@ -14,12 +14,35 @@
   function create(def, Helpers, targetRendererId) {
     const targetSpec = Helpers.getModule(targetRendererId).create(def, Helpers);
 
-    function renderCanvas(canvas, props) {
+    function mergeRendererProps(props) {
       const p = props || {};
       const hasRendererProps = p.rendererProps && typeof p.rendererProps === "object" && !Array.isArray(p.rendererProps);
-      const mergedProps = hasRendererProps ? { ...p, ...p.rendererProps } : { ...p };
+      return hasRendererProps ? { ...p, ...p.rendererProps } : { ...p };
+    }
+
+    function renderCanvas(canvas, props) {
+      const mergedProps = mergeRendererProps(props);
       if (targetSpec && typeof targetSpec.renderCanvas === "function") {
         return targetSpec.renderCanvas.call(this, canvas, mergedProps);
+      }
+      return undefined;
+    }
+
+    function renderHtml(props) {
+      const mergedProps = mergeRendererProps(props);
+      if (targetSpec && typeof targetSpec.renderHtml === "function") {
+        return targetSpec.renderHtml.call(this, mergedProps);
+      }
+      return undefined;
+    }
+
+    function initFunction() {
+      const initArgs = Array.prototype.slice.call(arguments);
+      if (initArgs.length) {
+        initArgs[initArgs.length - 1] = mergeRendererProps(initArgs[initArgs.length - 1]);
+      }
+      if (targetSpec && typeof targetSpec.initFunction === "function") {
+        return targetSpec.initFunction.apply(this, initArgs);
       }
       return undefined;
     }
@@ -38,7 +61,9 @@
     return {
       id: "RendererPropsWidget",
       wantsHideNativeHead: !!(targetSpec && targetSpec.wantsHideNativeHead),
+      renderHtml: renderHtml,
       renderCanvas: renderCanvas,
+      initFunction: initFunction,
       translateFunction: translateFunction,
       finalizeFunction: finalizeFunction
     };
