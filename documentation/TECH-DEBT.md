@@ -8,8 +8,6 @@
 |---|---|---|---|---|
 | TD-014 | Smell enforcement | `mapper-output-complexity` remains mixed-severity (`warn` at `9..12`, `block` at `>12`). Current backlog is `0` warnings (`check-patterns` summary on `2026-02-28`); promotion criteria/date is still pending. | Medium | Medium |
 | TD-015 | Shared gauge engine size hotspots | `check:filesize` reports 4 warning-tier files (`>=300` non-empty lines): `FullCircleRadialEngine.js`, `FullCircleRadialTextLayout.js`, `RadialValueMath.js`, `SemicircleRadialEngine.js`. Further extractions are needed to keep growth below hard limit. | Medium | Medium |
-| TD-017 | Plugin-wide compact spacing system | Multiple widgets still size row gaps, panel gaps, and padding with helpers or local formulas that stay too large on small dashboard tiles. Extract a shared intrinsic spacing contract so compact widgets derive spacing from available canvas size and row count, with gaps that shrink on small tiles and expand on large tiles. Apply that contract across text and gauge layout helpers instead of fixing each widget ad hoc. | High | High |
-| TD-018 | Responsive enforcement rollout | `responsive-layout-hard-floor` remains warn-only after Phase 7 calibration on `2026-03-09`: `3` warnings from `node tools/check-patterns.mjs` (`TextTileLayout=2`, `LinearGaugeTextLayout=1`). `responsive-profile-ownership` reached `0` warnings and was promoted to `block` the same day. Promote `responsive-layout-hard-floor` only after the remaining warning count reaches `0` and that zero-warning state is recorded here. | High | High |
 
 ## Completed Items
 
@@ -29,6 +27,8 @@
 | TD-012 | 2026-02-21 | Cleared oneliner backlog to zero (`onelinerWarnings=0`), promoted `check:filesize` to block mode, and wired `check:core`/`check:all` to fail on dense/packed oneliners. |
 | TD-013 | 2026-02-28 | Replaced name-based duplicate detection with body/shape clone checks (`duplicate-functions`, `duplicate-block-clones`) and extracted shared semicircle tick-step resolvers in `RadialValueMath` for gauge wrappers. |
 | TD-016 | 2026-03-09 | Cleared the earlier warn-only fallback/legacy backlog to zero; `node tools/check-patterns.mjs` on March 9, 2026 reported `0` warnings for `catch-fallback-without-suppression`, `internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `css-js-default-duplication`, and `premature-legacy-support`. |
+| TD-017 | 2026-03-09 | Added shared intrinsic spacing helpers in `ResponsiveScaleProfile`, routed `CenterDisplay`, `ActiveRoute`, `XTE`, and `WindLinear` spacing through layout-owned APIs/state, and removed the remaining widget-local compact gap/padding formulas on the PLAN2 surface. |
+| TD-018 | 2026-03-09 | Cleared `responsive-layout-hard-floor` to `0` findings, promoted the rule to `block`, updated responsive rule coverage to fail-closed, and revalidated the zero-backlog state with `node tools/check-patterns.mjs`. |
 
 ## Rules
 

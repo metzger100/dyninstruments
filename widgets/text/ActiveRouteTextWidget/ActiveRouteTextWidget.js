@@ -116,16 +116,20 @@
     const metricFits = Object.create(null);
     for (let i = 0; i < args.metrics.length; i++) {
       const metric = args.metrics[i];
+      const metricRect = args.layout.metricRects[metric.id];
+      const spacing = args.layoutApi.computeMetricTileSpacing(metricRect, args.layout.responsive);
       metricFits[metric.id] = args.tileLayout.measureMetricTile({
         textApi: args.radialText,
         ctx: args.ctx,
         metric: metric,
-        rect: args.layout.metricRects[metric.id],
+        rect: metricRect,
         textFillScale: args.textFillScale,
         family: args.family,
         valueWeight: args.valueWeight,
         labelWeight: args.labelWeight,
-        secScale: METRIC_SEC_SCALE
+        secScale: METRIC_SEC_SCALE,
+        padX: spacing.padX,
+        captionHeightPx: spacing.captionHeightPx
       });
     }
     return {
@@ -238,6 +242,7 @@
           valueWeight: valueWeight,
           labelWeight: labelWeight,
           radialText: radialText,
+          layoutApi: layoutApi,
           tileLayout: tileLayout
         });
       });

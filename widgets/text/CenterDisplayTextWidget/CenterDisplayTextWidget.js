@@ -109,9 +109,6 @@
   function computeResponsiveLineMaxPx(rect, ratio, fillScale) {
     return computeLineMaxPx(rect, ratio * fillScale);
   }
-  function computeTextPad(rect) {
-    return Math.ceil(Math.max(0, Math.min(rect.w, rect.h)) * 0.04);
-  }
   function computeRelationValueMaxPx(layout, textFillScale) {
     const rowRects = layout.rowRects;
     let maxPx = 0;
@@ -200,7 +197,7 @@
       family: family,
       weight: labelWeight,
       maxPx: computeResponsiveLineMaxPx(layout.center.captionRect, 0.76, textFillScale),
-      padX: computeTextPad(layout.center.captionRect),
+      padX: state.layoutApi.computeTextPadPx(layout.center.captionRect, layout.responsive),
       color: color
     });
     state.tileLayout.drawFittedLine({
@@ -212,7 +209,7 @@
       family: family,
       weight: valueWeight,
       maxPx: relationValueMaxPx,
-      padX: computeTextPad(layout.center.latRect),
+      padX: state.layoutApi.computeTextPadPx(layout.center.latRect, layout.responsive),
       color: color
     });
     state.tileLayout.drawFittedLine({
@@ -224,13 +221,13 @@
       family: family,
       weight: valueWeight,
       maxPx: relationValueMaxPx,
-      padX: computeTextPad(layout.center.lonRect),
+      padX: state.layoutApi.computeTextPadPx(layout.center.lonRect, layout.responsive),
       color: color
     });
   }
 
   function computeRowLayout(row, rect, state, family, valueWeight, labelWeight) {
-    const gap = Math.max(1, Math.floor(Math.min(rect.w, rect.h) * 0.08));
+    const gap = state.layoutApi.computeRowValueGapPx(rect, state.responsive);
     const textFillScale = state.textFillScale;
     const labelMaxPx = computeResponsiveLineMaxPx(rect, 0.58, textFillScale);
     const valueMaxPx = computeResponsiveLineMaxPx(rect, 0.66, textFillScale);
@@ -300,7 +297,7 @@
           family: family,
           weight: labelWeight,
           maxPx: rowLayout.labelMaxPx,
-          padX: computeTextPad(rowLayout.labelRect),
+          padX: state.layoutApi.computeTextPadPx(rowLayout.labelRect, layout.responsive),
           color: color
         });
       }
@@ -313,7 +310,7 @@
         family: family,
         weight: valueWeight,
         maxPx: rowLayout.valueMaxPx,
-        padX: computeTextPad(rowLayout.valueRect),
+        padX: state.layoutApi.computeTextPadPx(rowLayout.valueRect, layout.responsive),
         color: color
       });
     }
@@ -385,7 +382,9 @@
         ctx: ctx,
         radialText: radialText,
         tileLayout: tileLayout,
-        textFillScale: layout.responsive.textFillScale
+        textFillScale: layout.responsive.textFillScale,
+        layoutApi: layoutApi,
+        responsive: layout.responsive
       };
 
       drawCenterPanel(layout, renderState, displayState, family, valueWeight, labelWeight, color);

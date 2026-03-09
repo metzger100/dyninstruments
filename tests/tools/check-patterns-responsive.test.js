@@ -31,15 +31,11 @@ describe("tools/check-patterns responsive rules", function () {
     return dir;
   }
 
-  function warningMessages(result) {
-    return result.warnings.map((item) => item.message).join("\n");
-  }
-
   function findingMessages(result) {
     return result.findings.map((item) => item.message).join("\n");
   }
 
-  it("warns on Math.max hard floors in scoped responsive layout files", function () {
+  it("fails on Math.max hard floors in scoped responsive layout files", function () {
     const cwd = createWorkspace({
       "shared/widget-kits/text/TextTileLayout.js": `
 function measureMetricTile(rect) {
@@ -51,12 +47,12 @@ measureMetricTile({ h: 20 });
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.ok).toBe(true);
-    expect(result.summary.byRuleWarnings["responsive-layout-hard-floor"]).toBe(1);
-    expect(warningMessages(result)).toContain("[responsive-layout-hard-floor]");
+    expect(result.summary.ok).toBe(false);
+    expect(result.summary.byRuleFailures["responsive-layout-hard-floor"]).toBe(1);
+    expect(findingMessages(result)).toContain("[responsive-layout-hard-floor]");
   });
 
-  it("warns on clamp-style hard floors in scoped responsive layout files", function () {
+  it("fails on clamp-style hard floors in scoped responsive layout files", function () {
     const cwd = createWorkspace({
       "shared/widget-kits/text/TextTileLayout.js": `
 function compute(rect) {
@@ -68,9 +64,9 @@ compute({ h: 20 });
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.ok).toBe(true);
-    expect(result.summary.byRuleWarnings["responsive-layout-hard-floor"]).toBe(1);
-    expect(warningMessages(result)).toContain("clampNumber(rect.h, 10, 50)");
+    expect(result.summary.ok).toBe(false);
+    expect(result.summary.byRuleFailures["responsive-layout-hard-floor"]).toBe(1);
+    expect(findingMessages(result)).toContain("clampNumber(rect.h, 10, 50)");
   });
 
   it("ignores excluded primitive files for the hard-floor rule", function () {
@@ -85,7 +81,7 @@ drawPointer(20);
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleWarnings["responsive-layout-hard-floor"]).toBe(0);
+    expect(result.summary.byRuleFailures["responsive-layout-hard-floor"]).toBe(0);
   });
 
   it("ignores 0/1/2 technical safety floors", function () {
@@ -100,7 +96,7 @@ measureMetricTile({ h: 20 });
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleWarnings["responsive-layout-hard-floor"]).toBe(0);
+    expect(result.summary.byRuleFailures["responsive-layout-hard-floor"]).toBe(0);
   });
 
   it("ignores valid suppressions for intentional technical floors", function () {
@@ -116,7 +112,7 @@ measureMetricTile({ h: 20 });
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleWarnings["responsive-layout-hard-floor"]).toBe(0);
+    expect(result.summary.byRuleFailures["responsive-layout-hard-floor"]).toBe(0);
   });
 
   it("fails when an owner stops resolving ResponsiveScaleProfile", function () {

@@ -178,7 +178,8 @@ describe("XteDisplayWidget", function () {
                   const layout = realLayout.computeLayout(args);
                   calls.layoutHistory.push(layout);
                   return layout;
-                }
+                },
+                computeMetricTileSpacing: realLayout.computeMetricTileSpacing
               };
             }
           };

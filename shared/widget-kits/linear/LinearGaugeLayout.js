@@ -14,6 +14,8 @@
   const DEFAULT_RATIO_THRESHOLD_FLAT = 3.5;
   const PAD_RATIO = 0.04;
   const GAP_RATIO = 0.03;
+  const DUAL_ROW_GAP_RATIO = 0.04;
+  const DUAL_INLINE_GAP_RATIO = 0.05;
   const FLAT_TEXT_SHARE_RATIO = 0.34;
   const FLAT_TEXT_HEIGHT_RATIO = 0.76;
   const FLAT_CAPTION_SHARE_RATIO = 0.38;
@@ -147,6 +149,8 @@
       let captionBox = null;
       let valueBox = null;
       let inlineBox = null;
+      let dualRowGap = 0;
+      let inlineDualGap = 0;
 
       if (mode === "flat") {
         const usableWidth = Math.max(1, contentRect.w - gap);
@@ -163,6 +167,7 @@
         trackBox = makeRect(scaleX0, contentRect.y, scaleW, contentRect.h);
         captionBox = makeRect(rightX, rightY, rightW, captionH);
         valueBox = makeRect(rightX, rightY + captionH, rightW, Math.max(1, textH - captionH));
+        dualRowGap = profileApi.computeIntrinsicSpacePx(responsive, captionBox.w, DUAL_ROW_GAP_RATIO, 2, 1);
       }
       else if (mode === "high") {
         const textGap = Math.max(1, Math.floor(gap * HIGH_TEXT_GAP_FACTOR));
@@ -177,6 +182,7 @@
         trackBox = makeRect(scaleX0, contentRect.y, contentRect.w, scaleH);
         captionBox = makeRect(contentRect.x, textY, contentRect.w, captionH);
         valueBox = makeRect(contentRect.x, textY + captionH, contentRect.w, Math.max(1, textH - captionH));
+        dualRowGap = profileApi.computeIntrinsicSpacePx(responsive, captionBox.w, DUAL_ROW_GAP_RATIO, 2, 1);
       }
       else {
         const inset = Math.max(1, Math.floor(contentRect.w * NORMAL_INSET_RATIO));
@@ -197,6 +203,7 @@
         trackY = contentRect.y + topMargin + Math.floor(scaleH * NORMAL_TRACK_Y_RATIO);
         trackBox = makeRect(scaleX0, contentRect.y + topMargin, Math.max(1, scaleX1 - scaleX0), scaleH);
         inlineBox = makeRect(contentRect.x, inlineY, contentRect.w, Math.max(1, bottom - inlineY));
+        inlineDualGap = profileApi.computeIntrinsicSpacePx(responsive, inlineBox.w, DUAL_INLINE_GAP_RATIO, 2, 1);
       }
 
       return {
@@ -210,7 +217,9 @@
         trackBox: trackBox,
         captionBox: captionBox,
         valueBox: valueBox,
-        inlineBox: inlineBox
+        inlineBox: inlineBox,
+        dualRowGap: dualRowGap,
+        inlineDualGap: inlineDualGap
       };
     }
 

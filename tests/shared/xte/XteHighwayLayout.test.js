@@ -113,4 +113,15 @@ describe("XteHighwayLayout", function () {
     expect(snapshot.metricRects.xte.w).toBe(snapshot.metricRects.dtw.w);
     expect(snapshot.metricRects.cog.h).toBe(snapshot.nameRect.h);
   });
+
+  it("derives metric-tile spacing from compact layout-owned responsive state", function () {
+    const layout = createLayout();
+    const compact = buildSnapshot(layout, 161, 80, "normal", true).out;
+    const large = buildSnapshot(layout, 520, 180, "flat", true).out;
+    const compactSpacing = layout.computeMetricTileSpacing(compact.metricRects.cog, compact.responsive);
+    const largeSpacing = layout.computeMetricTileSpacing(large.metricRects.cog, large.responsive);
+
+    expect(compactSpacing.padX).toBeLessThan(largeSpacing.padX);
+    expect(compactSpacing.captionHeightPx).toBeLessThan(largeSpacing.captionHeightPx);
+  });
 });

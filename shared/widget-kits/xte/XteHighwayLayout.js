@@ -12,6 +12,8 @@
 
   const PAD_RATIO = 0.04;
   const GAP_RATIO = 0.03;
+  const METRIC_TILE_PAD_RATIO = 0.04;
+  const METRIC_TILE_CAPTION_RATIO = 0.34;
   const FLAT_HIGHWAY_RATIO = 0.58;
   const FLAT_HEADER_RATIO = 0.22;
   const NORMAL_HIGHWAY_RATIO = 0.64;
@@ -99,6 +101,15 @@
         insets.pad,
         Math.max(1, W - insets.pad * 2),
         Math.max(1, H - insets.pad * 2)
+      );
+    }
+
+    function computeMetricTileSpacing(rect, responsive) {
+      return profileApi.computeIntrinsicTileSpacing(
+        responsive,
+        rect,
+        METRIC_TILE_PAD_RATIO,
+        METRIC_TILE_CAPTION_RATIO
       );
     }
 
@@ -268,7 +279,8 @@
       computeMode: computeMode,
       computeInsets: computeInsets,
       createContentRect: createContentRect,
-      computeLayout: computeLayout
+      computeLayout: computeLayout,
+      computeMetricTileSpacing: computeMetricTileSpacing
     };
   }
 

@@ -109,4 +109,15 @@ describe("ActiveRouteLayout", function () {
       largeNormal.out.responsive.textFillScale
     );
   });
+
+  it("derives metric-tile spacing from compact layout-owned responsive state", function () {
+    const layout = createLayout();
+    const compact = buildSnapshot(layout, 161, 80, "normal", true).out;
+    const large = buildSnapshot(layout, 520, 180, "flat", true).out;
+    const compactSpacing = layout.computeMetricTileSpacing(compact.metricRects.remain, compact.responsive);
+    const largeSpacing = layout.computeMetricTileSpacing(large.metricRects.remain, large.responsive);
+
+    expect(compactSpacing.padX).toBeLessThan(largeSpacing.padX);
+    expect(compactSpacing.captionHeightPx).toBeLessThan(largeSpacing.captionHeightPx);
+  });
 });

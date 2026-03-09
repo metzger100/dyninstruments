@@ -61,6 +61,25 @@
       return Math.max(safeFloor, Math.floor(minDim * safeRatio));
     }
 
+    function computeIntrinsicSpacePx(profile, spanPx, ratio, count, floor) {
+      const safeSpan = Math.max(0, Math.floor(clampNumber(spanPx, 0, Number.MAX_SAFE_INTEGER, 0)));
+      const safeRatio = clampNumber(ratio, 0, 10, 0);
+      const safeCount = clampNumber(count, 1, Number.MAX_SAFE_INTEGER, 1);
+      const safeFloor = Math.max(0, Math.floor(clampNumber(floor, 0, Number.MAX_SAFE_INTEGER, 0)));
+      const textFillScale = clampNumber(profile && profile.textFillScale, 1, 10, 1);
+      const scaled = Math.floor((safeSpan * safeRatio) / (Math.sqrt(safeCount) * textFillScale));
+      return Math.max(safeFloor, scaled);
+    }
+
+    function computeIntrinsicTileSpacing(profile, rect, padRatio, captionRatio) {
+      const safeRect = rect || {};
+      const span = Math.min(Math.max(0, Number(safeRect.w) || 0), Math.max(0, Number(safeRect.h) || 0));
+      return {
+        padX: computeIntrinsicSpacePx(profile, span, padRatio, 1, 1),
+        captionHeightPx: computeIntrinsicSpacePx(profile, Math.max(0, Number(safeRect.h) || 0), captionRatio, 1, 1)
+      };
+    }
+
     function scaleShare(base, scale, minValue, maxValue) {
       const safeBase = clampNumber(base, minValue, maxValue, minValue);
       const safeScale = clampNumber(scale, 0, 10, 1);
@@ -77,6 +96,8 @@
       id: "ResponsiveScaleProfile",
       computeProfile: computeProfile,
       computeInsetPx: computeInsetPx,
+      computeIntrinsicSpacePx: computeIntrinsicSpacePx,
+      computeIntrinsicTileSpacing: computeIntrinsicTileSpacing,
       scaleShare: scaleShare,
       scaleMaxTextPx: scaleMaxTextPx
     };

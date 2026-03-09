@@ -19,6 +19,7 @@ Renderer keeps the highway frame visible when data is missing. Missing/disconnec
 Layout ownership:
 
 - `shared/widget-kits/xte/XteHighwayLayout.js` owns responsive insets, mode selection, and highway/name/metric rectangles
+- `shared/widget-kits/xte/XteHighwayLayout.js` also owns metric-tile padding and caption-band compaction for `TextTileLayout`
 - `shared/widget-kits/xte/XteHighwayPrimitives.js` owns highway geometry drawing, dynamic marker drawing, and waypoint visibility heuristics
 - `shared/widget-kits/layout/ResponsiveScaleProfile.js` owns the shared compact curve consumed by `XteHighwayLayout`
 
@@ -97,7 +98,7 @@ otherwise -> normal
 ```
 
 When waypoint name display is disabled (or no waypoint name is available), the highway perspective starts higher in all modes to reduce unused whitespace above the road.
-Compact widgets also reduce waypoint/header shares and increase text fill through `XteHighwayLayout`.
+Compact widgets also reduce waypoint/header shares, increase text fill, and tighten metric-tile inner spacing through `XteHighwayLayout`.
 
 ### flat
 

@@ -48,8 +48,8 @@ Ownership:
 ## Responsive Ownership Contract
 
 - `ResponsiveScaleProfile` owns the shared `minDim -> t -> textFillScale` compaction contract.
-- `LinearGaugeLayout` maps that contract into linear-family insets, track/text rectangles, marker sizing inputs, and geometry scalars.
-- `LinearGaugeEngine`, `LinearGaugeTextLayout`, and wrapper hooks consume layout-owned `responsive`, `textFillScale`, and `compactGeometryScale`.
+- `LinearGaugeLayout` maps that contract into linear-family insets, track/text rectangles, marker sizing inputs, geometry scalars, and the dual-column gap values consumed by `WindLinearWidget`.
+- `LinearGaugeEngine`, `LinearGaugeTextLayout`, and wrapper hooks consume layout-owned `responsive`, `textFillScale`, `compactGeometryScale`, and `layout` spacing state.
 - Wrapper modules stay thin: do not import `ResponsiveScaleProfile` directly and do not add user-visible responsive `Math.max(...)` / `clamp(...)` floors in wrapper code.
 
 ### LinearGaugeTextLayout
@@ -102,6 +102,7 @@ Hook `state` additions:
 - `state.layout.responsive`
 
 Wrappers should consume these layout-owned state fields instead of recomputing compact geometry locally.
+`WindLinearWidget` now reads `state.layout.dualRowGap` / `state.layout.inlineDualGap`, and `LinearGaugeTextLayout` trusts the layout-owned `labelFontPx` without adding a second readable-floor policy.
 
 ### Axis Profile Matrix
 

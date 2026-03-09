@@ -14,6 +14,8 @@
   const INNER_Y_RATIO = 0.035;
   const GAP_RATIO = 0.04;
   const NAME_PAD_X_RATIO = 0.025;
+  const METRIC_TILE_PAD_RATIO = 0.04;
+  const METRIC_TILE_CAPTION_RATIO = 0.34;
   const NAME_PANEL_RATIO_FLAT = 0.38;
   const NAME_BAND_RATIO_HIGH = 0.22;
   const NAME_BAND_RATIO_NORMAL = 0.34;
@@ -88,6 +90,15 @@
         insets.innerY,
         Math.max(1, W - insets.padX * 2),
         Math.max(1, H - insets.innerY * 2)
+      );
+    }
+
+    function computeMetricTileSpacing(rect, responsive) {
+      return profileApi.computeIntrinsicTileSpacing(
+        responsive,
+        rect,
+        METRIC_TILE_PAD_RATIO,
+        METRIC_TILE_CAPTION_RATIO
       );
     }
 
@@ -201,7 +212,8 @@
       id: "ActiveRouteLayout",
       computeInsets: computeInsets,
       createContentRect: createContentRect,
-      computeLayout: computeLayout
+      computeLayout: computeLayout,
+      computeMetricTileSpacing: computeMetricTileSpacing
     };
   }
 
