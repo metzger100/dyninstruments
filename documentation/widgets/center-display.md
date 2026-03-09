@@ -98,7 +98,7 @@ CenterDisplayTextWidget: {
 | `display.measure.useRhumbLine` | boolean | `false` | Selects rhumb-line vs great-circle measure math |
 | `captions.position` | string | `"CENTER"` | Center-panel caption |
 | `captions.marker` | string | `"WP"` | Waypoint row label |
-| `captions.boat` | string | `"BOAT"` | Boat row label |
+| `captions.boat` | string | `"POS"` | Boat row label |
 | `captions.measure` | string | `"MEAS"` | Measure row label |
 | `units.marker` | string | `"nm"` | Waypoint distance unit for `formatDistance` |
 | `units.boat` | string | `"nm"` | Boat distance unit for `formatDistance` |

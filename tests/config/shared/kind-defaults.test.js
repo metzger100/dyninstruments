@@ -27,6 +27,7 @@ describe("config/shared/kind-defaults.js", function () {
     expect(maps.NAV_KIND.centerDisplayPosition.kind).toBe("centerDisplay");
     expect(maps.NAV_KIND.centerDisplayPosition.cap).toBe("CENTER");
     expect(maps.NAV_KIND.centerDisplayMarker.unit).toBe("nm");
+    expect(maps.NAV_KIND.centerDisplayBoat.cap).toBe("POS");
     expect(maps.NAV_KIND.centerDisplayBoat.captionName).toBe("Boat caption");
     expect(maps.NAV_KIND.centerDisplayMeasure.unitName).toBe("Measure distance unit");
     expect(maps.NAV_KIND.activeRouteRemain.kind).toBe("activeRoute");

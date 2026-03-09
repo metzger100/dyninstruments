@@ -97,7 +97,7 @@ describe("CenterDisplayTextWidget", function () {
       captions: {
         position: "CENTER",
         marker: "WP",
-        boat: "BOAT",
+        boat: "POS",
         measure: "MEAS"
       },
       units: {
@@ -201,7 +201,7 @@ describe("CenterDisplayTextWidget", function () {
     const lon = findFirstText(texts, "LON:10.456");
     const meas = findFirstText(texts, "MEAS");
     const wp = findFirstText(texts, "WP");
-    const boat = findFirstText(texts, "BOAT");
+    const boat = findFirstText(texts, "POS");
 
     expect(center).toBeTruthy();
     expect(lat).toBeTruthy();
@@ -254,7 +254,7 @@ describe("CenterDisplayTextWidget", function () {
     const center = findFirstText(texts, "CENTER");
     const lat = findFirstText(texts, "LAT:54.123");
     const wp = findFirstText(texts, "WP");
-    const boat = findFirstText(texts, "BOAT");
+    const boat = findFirstText(texts, "POS");
 
     expect(center.x).toBeLessThan(wp.x);
     expect(lat.x).toBeLessThan(wp.x);
@@ -273,7 +273,7 @@ describe("CenterDisplayTextWidget", function () {
     const texts = fillTextCalls(ctx);
     expect(findFirstText(texts, "MEAS")).toBeUndefined();
     expect(findFirstText(texts, "WP")).toBeTruthy();
-    expect(findFirstText(texts, "BOAT")).toBeTruthy();
+    expect(findFirstText(texts, "POS")).toBeTruthy();
   });
 
   it("renders placeholders for missing coordinates and relation values", function () {
@@ -314,7 +314,7 @@ describe("CenterDisplayTextWidget", function () {
       const texts = fillTextCalls(ctx);
       expect(findFirstTextPrefix(texts, "C")).toBeTruthy();
       expect(findFirstText(texts, "WP")).toBeTruthy();
-      expect(findFirstText(texts, "BOAT")).toBeTruthy();
+      expect(findFirstText(texts, "POS")).toBeTruthy();
       expectTextsInsideCanvas(texts, size.width, size.height);
     });
   });
@@ -331,7 +331,7 @@ describe("CenterDisplayTextWidget", function () {
     const texts = fillTextCalls(ctx);
     expect(findFirstText(texts, "MEAS")).toBeTruthy();
     expect(findFirstText(texts, "WP")).toBeTruthy();
-    expect(findFirstText(texts, "BOAT")).toBeTruthy();
+    expect(findFirstText(texts, "POS")).toBeTruthy();
     expectTextsInsideCanvas(texts, 120, 80);
   });
 
@@ -352,7 +352,7 @@ describe("CenterDisplayTextWidget", function () {
 
       const texts = fillTextCalls(ctx);
       expect(findFirstText(texts, "WP")).toBeTruthy();
-      expect(findFirstText(texts, "BOAT")).toBeTruthy();
+      expect(findFirstText(texts, "POS")).toBeTruthy();
       expect(findFirstTextPrefix(texts, "LAT:")).toBeTruthy();
       expect(findFirstTextPrefix(texts, "LON:")).toBeTruthy();
       expectTextsInsideCanvas(texts, size.width, size.height);

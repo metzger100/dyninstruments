@@ -124,7 +124,7 @@
         unitName: "Waypoint distance unit"
       },
       centerDisplayBoat: {
-        cap: "BOAT",
+        cap: "POS",
         unit: "nm",
         kind: "centerDisplay",
         captionName: "Boat caption",
