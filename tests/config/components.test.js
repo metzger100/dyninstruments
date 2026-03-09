@@ -39,6 +39,12 @@ describe("config/components.js", function () {
     expect(components.FullCircleRadialEngine.deps).toEqual(["RadialToolkit", "CanvasLayerCache"]);
     expect(components.FullCircleRadialTextLayout.globalKey).toBe("DyniFullCircleRadialTextLayout");
     expect(components.FullCircleRadialTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialTextLayout.js");
+    expect(components.SemicircleRadialLayout.globalKey).toBe("DyniSemicircleRadialLayout");
+    expect(components.SemicircleRadialLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/SemicircleRadialLayout.js");
+    expect(components.SemicircleRadialLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
+    expect(components.SemicircleRadialTextLayout.globalKey).toBe("DyniSemicircleRadialTextLayout");
+    expect(components.SemicircleRadialTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/SemicircleRadialTextLayout.js");
+    expect(components.SemicircleRadialTextLayout.deps).toBeUndefined();
     expect(components.LinearGaugeEngine.globalKey).toBe("DyniLinearGaugeEngine");
     expect(components.LinearGaugeEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeEngine.js");
     expect(components.LinearGaugeEngine.deps).toEqual([
@@ -81,6 +87,7 @@ describe("config/components.js", function () {
     expect(components.XteHighwayLayout.globalKey).toBe("DyniXteHighwayLayout");
     expect(components.XteHighwayLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/xte/XteHighwayLayout.js");
     expect(components.XteHighwayLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
+    expect(components.SemicircleRadialEngine.deps).toEqual(["RadialToolkit", "SemicircleRadialLayout", "SemicircleRadialTextLayout"]);
     expect(components.SpeedRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
     expect(components.SpeedLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.DepthLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);

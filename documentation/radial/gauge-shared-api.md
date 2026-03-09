@@ -17,6 +17,8 @@ Shared gauge logic is split into focused core modules:
 - `TextLayoutEngine` as text-layout facade (mode routing + cache + composed helpers)
 - `ThemeResolver` for plugin-wide CSS theme token resolution
 - `RadialToolkit` as composed facade
+- `SemicircleRadialLayout` as shared responsive layout owner for Speed/Depth/Temperature/Voltage
+- `SemicircleRadialTextLayout` as shared mode text helper for Speed/Depth/Temperature/Voltage
 - `SemicircleRadialEngine` as shared render flow for Speed/Depth/Temperature/Voltage
 - `FullCircleRadialEngine` as shared render flow for Compass/Wind dials
 - `FullCircleRadialTextLayout` as shared mode text helper for full-circle wrappers
@@ -57,7 +59,7 @@ TextLayoutComposite: {
 TextLayoutEngine: {
   js: BASE + "shared/widget-kits/text/TextLayoutEngine.js",
   globalKey: "DyniTextLayoutEngine",
-  deps: ["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite"]
+  deps: ["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite", "ResponsiveScaleProfile"]
 },
 ThemeResolver: { js: BASE + "shared/theme/ThemeResolver.js", globalKey: "DyniThemeResolver" },
 RadialToolkit: {
@@ -65,10 +67,19 @@ RadialToolkit: {
   globalKey: "DyniRadialToolkit",
   deps: ["ThemeResolver", "RadialTextLayout", "RadialValueMath", "RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives", "RadialFrameRenderer"]
 },
+SemicircleRadialLayout: {
+  js: BASE + "shared/widget-kits/radial/SemicircleRadialLayout.js",
+  globalKey: "DyniSemicircleRadialLayout",
+  deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+},
+SemicircleRadialTextLayout: {
+  js: BASE + "shared/widget-kits/radial/SemicircleRadialTextLayout.js",
+  globalKey: "DyniSemicircleRadialTextLayout"
+},
 SemicircleRadialEngine: {
   js: BASE + "shared/widget-kits/radial/SemicircleRadialEngine.js",
   globalKey: "DyniSemicircleRadialEngine",
-  deps: ["RadialToolkit"]
+  deps: ["RadialToolkit", "SemicircleRadialLayout", "SemicircleRadialTextLayout"]
 },
 FullCircleRadialEngine: {
   js: BASE + "shared/widget-kits/radial/FullCircleRadialEngine.js",
@@ -196,6 +207,38 @@ Optional `overrides` fields:
 ## SemicircleRadialEngine API
 
 `SemicircleRadialEngine.create(def, Helpers).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
+
+Responsive ownership for the semicircle family:
+
+- `SemicircleRadialLayout` owns mode selection, compact insets, gauge geometry, label metrics, and mode boxes
+- `SemicircleRadialTextLayout` owns fit caching and mode-routed text draw for `flat` / `high` / `normal`
+- `SemicircleRadialEngine` orchestrates theme resolve, sectors, pointer, ticks, labels, and delegated text draw
+
+## SemicircleRadialLayout API
+
+`SemicircleRadialLayout.create(def, Helpers)` returns:
+
+- `computeMode(W, H, thresholdNormal, thresholdFlat)`
+- `computeInsets(W, H)` -> `{ pad, gap, responsive }`
+- `computeLayout({ W, H, theme, mode, insets, responsive })`
+
+`computeLayout(...)` returns layout-owned geometry:
+
+- `geom` (`R`, `cx`, `cy`, `rOuter`, `ringW`, `needleDepth`, placement)
+- `labels` (`radiusOffset`, `fontPx`)
+- `flat` boxes (`box`, `topBox`, `bottomBox`)
+- `high.bandBox`
+- `normal` bounds (`rSafe`, `yBottom`, `mhMax`, `mhMin`)
+- `responsive`, `textFillScale`, `compactGeometryScale`
+
+## SemicircleRadialTextLayout API
+
+`SemicircleRadialTextLayout.create(def, Helpers)` returns:
+
+- `createFitCache()`
+- `drawModeText(state, display, fitCache)`
+
+`drawModeText(...)` expects layout-owned state from `SemicircleRadialEngine` and routes to the correct flat/high/normal text path while reusing per-mode fit-cache entries.
 
 ### `spec` fields
 

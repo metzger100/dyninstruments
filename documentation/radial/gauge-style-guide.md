@@ -24,12 +24,12 @@ angleDeg = startDeg + (endDeg - startDeg) * ((value - min) / (max - min))
 | Element | Formula | Example R=100 |
 |---|---|---|
 | `R` | `min(floor(availW/2), floor(availH))`, min 14 | 100 |
-| `pad` | `max(6, floor(min(W,H) * 0.04))` | ~6 |
-| `gap` | `max(6, floor(min(W,H) * 0.03))` | ~6 |
+| `pad` | `ResponsiveScaleProfile.computeInsetPx(responsive, 0.04, 1)` | ~4 |
+| `gap` | `ResponsiveScaleProfile.computeInsetPx(responsive, 0.03, 1)` | ~3 |
 | `ringW` | `max(6, floor(R * theme.radial.ring.widthFactor))` (default `0.16`) | 12 |
 | `needleDepth` | `max(8, floor(R * 0.11))` | 10 |
-| `labelInset` | `max(18, floor(ringW * theme.radial.labels.insetFactor))` (default `1.8`) | 21 |
-| `labelFontPx` | `max(10, floor(R * theme.radial.labels.fontFactor))` (default `0.14`) | 14 |
+| `labelInset` | `max(1, floor(ringW * theme.radial.labels.insetFactor * compactGeometryScale))` | ~17 |
+| `labelFontPx` | `max(1, floor(R * theme.radial.labels.fontFactor * compactGeometryScale))` | ~16 |
 
 Gauge centering:
 
@@ -39,6 +39,19 @@ const gaugeTop = pad + Math.floor((availH - R) / 2);
 const cx = gaugeLeft + R;
 const cy = gaugeTop + R;
 ```
+
+Shared compact math:
+
+```text
+textFillScale = lerp(1.18, 1, t)
+compactGeometryScale = max(0.5, 1 - max(0, textFillScale - 1))
+```
+
+Ownership:
+
+- `ResponsiveScaleProfile` owns `minDim -> t -> textFillScale`
+- `SemicircleRadialLayout` owns semicircle-family geometry, label metrics, and mode boxes
+- `SemicircleRadialTextLayout` owns fit caching and mode-routed text consumption
 
 ## Colors
 
@@ -161,6 +174,8 @@ Row 3: Unit
 [Gauge at top]
 Caption  Value  Unit
 ```
+
+All three layouts now consume `SemicircleRadialLayout` boxes plus `SemicircleRadialTextLayout` ceiling scaling; they no longer rely on fixed user-visible minima like `18`, `10`, `8`, `6`, or `4`.
 
 ## Tick Rendering
 
