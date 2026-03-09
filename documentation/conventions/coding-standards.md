@@ -98,6 +98,14 @@ Example:
   - `// dyni-lint-disable-next-line <rule-name> -- <reason>`
   - `/* dyni-lint-disable-line <rule-name> -- <reason> */`
 
+## Temporary Workaround Marker
+
+- If code intentionally bridges a missing/undocumented AvNav host-action contract, mark the block with:
+  - `// dyni-workaround(avnav-plugin-actions) -- <reason>`
+- Use this marker only for temporary plugin-side workflow bridges such as route-editor, route-point, AIS, or page-click ownership gaps.
+- Keep the reason short and name the missing contract if known (`routePoints`, `routeEditor`, `ais`, `GpsPage` click fallback).
+- This marker is for future cleanup/searchability; it is not a lint-suppression directive.
+
 ## Responsive Layout Ownership
 
 - Shared responsive compaction policy belongs to one shared owner; Phase 0 locks that contract in [../shared/responsive-scale-profile.md](../shared/responsive-scale-profile.md) and Phase 1 extracts the runtime module under `shared/widget-kits/layout/ResponsiveScaleProfile.js`.

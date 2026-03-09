@@ -1,6 +1,6 @@
 # Implementation Plan
 
-**Status:** ⏳ Investigated | Cluster-based plan for active-widget feature parity
+**Status:** ⏳ In Progress | Phase 0 resolved; cluster/runtime parity work still pending
 
 ## Overview
 
@@ -18,19 +18,23 @@ The chosen direction for dyninstruments is:
 - defer any `nav` cluster split until later if the mapper/config grows into a hotspot
 - replace the temporary summary-style `activeRoute` cluster kind with the core-parity implementation instead of preserving a compatibility path
 
-The two hard problems are now:
+The remaining hard problem is extending the cluster runtime to support HTML/interactivity cleanly.
 
-1. extending the cluster runtime to support HTML/interactivity cleanly
-2. getting plugin-safe host APIs for the route-editor and AIS workflows that the core implementation currently splits across widget renderers, page click handlers, and page-shell code
+Phase 0 is considered resolved for now:
+
+- current viewer source still exposes `window.avnav.api.routePoints`, and core pages use it
+- maintainer feedback does not treat this area as a documented/stable public plugin-action contract
+- the accepted near-term path is plugin-owned `renderHtml` / React click handling, with AvNav actions treated only as optional fallback behavior
+- generalized host-action API work is deferred until core defines a broader concept for exposing such actions to plugins
 
 ## Core Behavior Summary
 
 | Widget | Core data inputs | Visible behavior | Core click/workflow behavior | Parity risk |
 |---|---|---|---|---|
-| `ActiveRoute` | `nav.route.name`, `nav.route.remain`, `nav.route.eta`, `nav.route.nextCourse`, `nav.route.isApproaching`, `gui.global.layoutEditing`, `nav.wp.server` | Shows route name, remaining distance, ETA, and `NEXT` only while approaching. Hidden when there is no route unless layout editing is active. Uses approach background state. | In `NavPage`, click runs `activeRoute.setIndexToTarget()`, `activeRoute.syncTo(RouteEdit.MODES.EDIT)`, then `history.push("editroutepage")`. In `GpsPage` it is not special-cased and falls back to page pop behavior. | Needs plugin-safe route-editor open/select API if parity is to be achieved without private core modules. |
-| `EditRoute` | `RouteEdit.MODES.EDIT` store keys plus `nav.route.remain`, `nav.route.eta`, `nav.route.isApproaching`, `nav.routeHandler.useRhumbLine` | Shows route name, point count, route length, and in non-horizontal mode also RTG and ETA. Uses different border colors for editable vs active route. Shows `No Route` fallback. | In `EditRoutePage`, click opens `EditRouteDialog`. | Depends on route-editor read/write contracts that are not currently exposed as plugin-safe APIs. |
-| `RoutePoints` | `RouteEdit.MODES.EDIT` store keys plus `properties.routeShowLL`, `gui.global.layoutEditing`, `nav.routeHandler.useRhumbLine` | Shows waypoint list, selected-row highlight, and auto-scrolls the selected row into view. Hidden in horizontal mode unless layout editing is active. | Row click activates the current route point. Re-clicking the already centered point opens the waypoint dialog. Page code also exposes `avnav.api.routePoints.activate(index)` via registered handlers. | Rendering depends on route-object list helpers today. Interaction may be able to reuse `routePoints.activate` if core documents it as stable plugin API. |
-| `AisTarget` | `nav.ais.nearest`, `gui.global.layoutEditing`, `nav.ais.trackedMmsi` and AIS color properties | Shows nearest AIS target, uses compact horizontal layout on dashboard-like panels, and colors background by warning/nearest/tracked state. | In `NavPage` and `GpsPage`, click opens `AisInfoWithFunctions`; dialog buttons trigger nearest/locate/hide/list actions. | Needs plugin-safe AIS dialog/action API because the current flow is private React/page code. |
+| `ActiveRoute` | `nav.route.name`, `nav.route.remain`, `nav.route.eta`, `nav.route.nextCourse`, `nav.route.isApproaching`, `gui.global.layoutEditing`, `nav.wp.server` | Shows route name, remaining distance, ETA, and `NEXT` only while approaching. Hidden when there is no route unless layout editing is active. Uses approach background state. | In `NavPage`, click runs `activeRoute.setIndexToTarget()`, `activeRoute.syncTo(RouteEdit.MODES.EDIT)`, then `history.push("editroutepage")`. In `GpsPage` it is not special-cased and falls back to page pop behavior. | No documented host action API today. Use plugin-owned click handling and defer generalized route-editor API work. |
+| `EditRoute` | `RouteEdit.MODES.EDIT` store keys plus `nav.route.remain`, `nav.route.eta`, `nav.route.isApproaching`, `nav.routeHandler.useRhumbLine` | Shows route name, point count, route length, and in non-horizontal mode also RTG and ETA. Uses different border colors for editable vs active route. Shows `No Route` fallback. | In `EditRoutePage`, click opens `EditRouteDialog`. | No documented host action API today. Keep parity work on the plugin side and revisit host APIs later. |
+| `RoutePoints` | `RouteEdit.MODES.EDIT` store keys plus `properties.routeShowLL`, `gui.global.layoutEditing`, `nav.routeHandler.useRhumbLine` | Shows waypoint list, selected-row highlight, and auto-scrolls the selected row into view. Hidden in horizontal mode unless layout editing is active. | Row click activates the current route point. Re-clicking the already centered point opens the waypoint dialog. Page code also exposes `avnav.api.routePoints.activate(index)` via registered handlers. | Current viewer source exposes `routePoints`, but maintainer feedback does not bless it as stable public plugin API. Any use must stay isolated and tagged as workaround code. |
+| `AisTarget` | `nav.ais.nearest`, `gui.global.layoutEditing`, `nav.ais.trackedMmsi` and AIS color properties | Shows nearest AIS target, uses compact horizontal layout on dashboard-like panels, and colors background by warning/nearest/tracked state. | In `NavPage` and `GpsPage`, click opens `AisInfoWithFunctions`; dialog buttons trigger nearest/locate/hide/list actions. | No documented AIS plugin-action API today. Prefer plugin-owned interaction and defer generalized host-action API work. |
 
 Observed source detail that still needs validation against live behavior:
 
@@ -63,7 +67,7 @@ The core widgets do not all own their workflows the same way. This matters for p
 - `runtime/init.js` discovers plugin containers via `canvas.widgetData`, so pure HTML cluster kinds are invisible to theme-preset discovery.
 - `config/clusters/nav.js` and `cluster/mappers/NavMapper.js` currently model only the existing summary-style nav kinds. They do not yet carry the active-workflow kinds.
 - The current `nav` cluster already has an `activeRoute` kind for the newly added summary widget. Under a fail-fast approach, that kind should be replaced directly by the core-parity implementation instead of carrying both variants.
-- The public plugin API in `viewer/util/api.js` currently exposes `routePoints.activate/registerHandler`, but there is no corresponding public API for:
+- The current viewer source attaches `routePoints.activate/registerHandler` to `window.avnav.api`, but maintainer feedback indicates there is no generalized documented plugin-action concept for this area. There is still no corresponding documented/stable API for:
   - opening the route editor page/dialog
   - syncing active route state into edit-route state
   - opening AIS info/list workflows
@@ -83,8 +87,9 @@ The core widgets do not all own their workflows the same way. This matters for p
   - `aisTarget`
 - Use `renderHtml` string mode plus `this.eventHandler` for interactive cluster kinds.
 - Support plugin theming and hide-native-header behavior for HTML cluster kinds, not only canvas kinds.
-- Match core visibility rules, layout variants, and page-specific interaction flows where the host exposes a stable API.
-- Fail closed on missing host API: do not ship fake parity that depends on private `RouteEdit`, `NavData`, `MapHolder`, or page-local `history` objects.
+- Match core visibility rules and layout variants, and keep interaction ownership on the plugin side where no stable host API exists yet.
+- Avoid private-core coupling: do not ship parity that depends on private `RouteEdit`, `NavData`, `MapHolder`, or page-local `history` objects.
+- Keep any temporary dependency on runtime-exposed but undocumented actions narrow, optional, and explicitly marked as workaround code.
 - Accept that `nav` may become a temporary hotspot and may need to split later once the feature set stabilizes.
 
 ## Related Files
@@ -122,31 +127,19 @@ The core widgets do not all own their workflows the same way. This matters for p
 
 ## Todo Steps
 
-### Phase 0 - Lock the host contract first
+### Phase 0 - Resolved for now: use plugin-owned handlers and defer host API enhancement
 
-1. Open a core-project issue for route-editor workflow APIs. Minimum requested surface:
-   - plugin-safe "open active route editor" action equivalent to `setIndexToTarget + syncTo(EDIT) + history.push("editroutepage")`
-   - plugin-safe "open edit route dialog/page" action for `EditRoute`
-   - documented support for `avnav.api.routePoints.activate(index)` or a replacement route-point activation API
-   - explicit answer whether plugin code may rely on `nav.routeHandler.editingRoute/currentLeg` object methods such as `computeLength()` and `getRoutePoints()`
-   - include in the issue body that core route widgets are mixed today:
-     - `ActiveRoute` is page-routed from `NavPage`
-     - `EditRoute` is page-routed from `EditRoutePage`
-     - `RoutePoints` owns row clicks but delegates centering/dialog behavior through page-registered handlers
-   - make explicit that plugin cluster widgets cannot reuse built-in widget-name special cases, so parity requires a host API rather than copied page logic
-2. Open a core-project issue for AIS workflow APIs. Minimum requested surface:
-   - show AIS info dialog from a plugin widget
-   - open AIS list page from a plugin widget
-   - plugin-safe actions for `nearest`, `locate`, `hide`, and `track`
-   - include in the issue body that `AisTarget` is also mixed today:
-     - the widget owns the click target and forwards `mmsi`
-     - `NavPage` / `GpsPage` own the actual dialog composition and page navigation
-   - make explicit that plugin code needs a stable dialog/action API instead of embedding page-local `AisInfoWithFunctions` wiring
-3. Treat these issues as hard blockers for feature parity. Internal cluster refactoring can proceed, but do not add private-core shims, adapters, or temporary compatibility layers to bridge the missing APIs.
-4. Reference adjacent non-blocker examples in the issue discussion so core sees the broader pattern:
-   - `Zoom` is page-routed on a passive widget
-   - `Alarm` is page-shell-owned rather than layout-widget-owned
-   - `CenterDisplay` is passive and does not need workflow APIs, which helps separate read-only parity from action parity
+1. Record the current core clarification:
+   - there is no generalized concept yet for exposing host actions to plugins
+   - current viewer source still exposes `window.avnav.api.routePoints`, and core pages register handlers on it
+   - this source/runtime exposure must not be treated as a documented/stable plugin contract
+2. Do not block dyninstruments parity work on new core APIs.
+3. Use plugin-owned `renderHtml` / React click handlers as the accepted near-term workaround.
+4. Treat AvNav-side action behavior only as fallback where it is actually available at runtime; do not assume built-in widget-name special-cases can be reused by plugin widgets.
+5. Do not add private-core shims for `RouteEdit`, `NavData`, `AisInfoWithFunctions`, or page-local `history` objects.
+6. When workaround code is added for this gap, mark it with the inline comment:
+   - `// dyni-workaround(avnav-plugin-actions) -- <reason>`
+7. Keep future route-editor / AIS API enhancement as deferred follow-up, not as a blocker for the cluster/runtime work.
 
 ### Phase 1 - Extend the cluster runtime to support HTML sub-renderers
 
@@ -208,27 +201,27 @@ The core widgets do not all own their workflows the same way. This matters for p
 3. Implement the `routePoints` renderer as an HTML sub-renderer.
    - Match the core list shape, `showLatLon` switch, and selected-row behavior.
    - Hide it in horizontal mode unless layout editing is active.
-   - Use `avnav.api.routePoints.activate(index)` only if that API is confirmed/documented. Otherwise stop and raise the blocker instead of adding a private workaround.
+   - If parity needs `avnav.api.routePoints.activate(index)`, treat it as a runtime-exposed workaround only: isolate usage, guard it, and tag the block with `// dyni-workaround(avnav-plugin-actions) -- ...`.
    - Add selected-row auto-scroll after render.
 4. Implement the `aisTarget` renderer as an HTML sub-renderer.
    - Match the core compact-vs-full layout behavior.
    - Match background-state coloring for warning, nearest, tracked, and normal target states.
    - Keep rendering logic separate from the eventual click/dialog workflow wiring.
 
-### Phase 5 - Wire interactions through public APIs only
+### Phase 5 - Wire interactions through plugin-owned handlers first
 
 1. Because these features live inside `dyni_Nav_Instruments`, core page-level widget-name special cases will not help. The HTML renderers must own their own click behavior through `this.eventHandler`.
 2. `activeRoute` parity kind:
-   - on supported page contexts, call the new route-editor API and transition into the edit-route workflow
+   - keep interaction on the plugin side for now
    - keep the `GpsPage` behavior aligned with core instead of making it globally interactive by accident
 3. `editRoute` kind:
-   - click should open the edit-route dialog/page via the new host API
+   - implement the plugin-side behavior that is possible without private-core page wiring
 4. `routePoints` kind:
-   - row click should activate/center the selected route point through `avnav.api.routePoints.activate(index)` or its approved replacement
-   - re-click behavior should follow the page-registered handler semantics instead of duplicating core dialog logic inside the plugin
+   - row click may use `avnav.api.routePoints.activate(index)` only as a guarded workaround if parity requires it
+   - re-click behavior should not duplicate private core dialog logic inside the plugin
 5. `aisTarget` kind:
-   - click should open the same AIS info/list workflow exposed by the new host API
-   - AIS actions should run through host APIs, not through copied private dialog logic
+   - keep the click behavior plugin-owned until a documented AIS host API exists
+   - do not copy private dialog logic or page-local action wiring
 
 ### Phase 6 - Tests and verification
 
@@ -247,70 +240,15 @@ The core widgets do not all own their workflows the same way. This matters for p
    - `AisPage` / AIS info workflow
 6. Run the final gate: `npm run check:all`.
 
-## Core Issue Draft
+## Deferred Future Core Follow-Up
 
-### Core issue 1: plugin-safe route-editor workflow API
+Generalized plugin-action APIs for route-editor and AIS workflows are deferred until core defines a broader concept for exposing host actions to plugins.
 
-Requested outcome:
-
-- expose a public API for "open active route editor"
-- expose a public API for "open edit-route dialog/page"
-- either document `avnav.api.routePoints.activate(index)` as supported plugin API or replace it with a route-editor namespace API
-- document whether plugins may rely on the current route-object store values and methods, or expose a plain read-model for:
-  - editing route summary
-  - active route summary
-  - route-point list items
-
-Context to include in the issue body:
-
-- core route-widget behavior is split today:
-  - `ActiveRoute` is rendered by a passive widget, but `NavPage` owns the click workflow
-  - `EditRoute` is rendered by a passive widget, but `EditRoutePage` owns the click workflow
-  - `RoutePoints` owns row clicks, but the page/API layer owns activation and re-click dialog semantics
-- `GpsPage` has different fallback behavior from `NavPage`, so plugin parity cannot be achieved safely by globally swallowing clicks
-- dyninstruments cluster kinds cannot reuse built-in widget-name special cases, so copied page logic would create private-core coupling
-
-Requested clarification from core:
-
-- which parts are intended to stay page-owned
-- which parts should be promoted to plugin-safe host APIs
-- whether the route-object read model is intentionally public or should be replaced by plain data APIs
-
-Preferred shape if core wants high-level APIs instead of raw store contracts:
+If this is revisited later, preferred high-level shapes remain:
 
 - `avnav.api.routeEditor.openActiveRoute()`
 - `avnav.api.routeEditor.openEditRoute()`
 - `avnav.api.routePoints.activate(index)` or `avnav.api.routeEditor.activatePoint(index)`
-
-### Core issue 2: plugin-safe AIS widget workflow API
-
-Requested outcome:
-
-- expose a public API to show AIS info for an MMSI from a plugin widget
-- expose a public API to open AIS list view from a plugin widget
-- expose stable target actions for:
-  - nearest
-  - locate/track
-  - hide/unhide
-
-Context to include in the issue body:
-
-- `AisTarget` already mixes ownership:
-  - the widget owns the clickable target area and forwards `mmsi`
-  - `NavPage` / `GpsPage` own dialog construction via `AisInfoWithFunctions`
-  - dialog buttons own follow-up page navigation and actions
-- dyninstruments can reproduce the visual widget, but should not copy page-local React dialog wiring just to get parity
-- `Zoom` and `Alarm` are useful comparison points when discussing ownership boundaries:
-  - `Zoom` is page-routed on a passive renderer
-  - `Alarm` is page-shell-owned rather than panel-widget-owned
-
-Requested clarification from core:
-
-- whether plugins should get one high-level AIS dialog API or several smaller workflow/action APIs
-- whether "show info", "open list", "track", and "hide" are all considered stable plugin-level operations
-
-Preferred shape if core chooses high-level APIs:
-
 - `avnav.api.ais.showInfo(mmsi)`
 - `avnav.api.ais.openList(mmsi)`
 - `avnav.api.ais.setTrackedTarget(mmsiOrZero)`
@@ -322,8 +260,8 @@ Preferred shape if core chooses high-level APIs:
 - `kind: "activeRoute"` is the core-parity implementation, not a temporary summary variant.
 - The `nav` cluster includes the active-workflow kinds for now, without compatibility aliases or duplicate fallback kinds.
 - HTML cluster kinds receive dyninstruments theming and hide-native-head behavior without depending on canvas presence.
-- Route and AIS interactions use documented/public host APIs only.
-- `routePoints` row activation works through the supported host contract.
+- Route and AIS interactions avoid private core modules and page-local wiring.
+- Any temporary use of runtime-exposed but undocumented actions is isolated, guarded, and tagged with `// dyni-workaround(avnav-plugin-actions) -- ...`.
 - Visual and workflow behavior matches the current core widgets closely enough to swap layouts without user-visible regression.
 - `npm run check:all` passes.
 
@@ -361,17 +299,21 @@ Preferred shape if core chooses high-level APIs:
    - `viewer/components/AisInfoDisplay.jsx`
    - `viewer/nav/routeeditor.js`
    - `viewer/util/api.js`
-7. Confirmed that current public API support is sufficient only for route-point activation, not for full route-editor or AIS widget parity.
-8. Confirmed the broader ownership split around adjacent widgets:
+7. Confirmed that current viewer source exposes `window.avnav.api.routePoints`, but maintainer feedback does not treat this area as a documented/stable plugin-action contract.
+8. Confirmed the accepted near-term workaround:
+   - use plugin-owned `renderHtml` / React handlers
+   - treat AvNav-side actions only as optional fallback behavior
+   - defer generalized API enhancement until later
+9. Confirmed the broader ownership split around adjacent widgets:
    - `CenterDisplay` is passive
    - `Zoom` is page-routed
    - `Alarm` is page-shell-owned
 
 ## Open Questions / Validation Points
 
-- Does core want to bless the current route-object store contract for plugin use, or should dyninstruments wait for a plain read-model API?
-- Should `avnav.api.routePoints.activate(index)` be documented as stable plugin API, or replaced before dyninstruments depends on it?
-- What is the preferred host API shape for AIS workflows: one high-level dialog API or several smaller actions?
+- Does core want to bless the current route-object store contract for plugin use, or should dyninstruments eventually move to a plain read-model API?
+- If route/AIS host APIs are revisited later, should `avnav.api.routePoints.activate(index)` be documented as stable plugin API or replaced?
+- What is the preferred host API shape for future AIS workflows: one high-level dialog API or several smaller actions?
 - For late-mounted HTML cluster widgets, should dyninstruments use a rescan-based theme application or a DOM observer?
 - Does the `ActiveRouteWidget.jsx` `isAproaching` typo affect live behavior, or is it dead code in practice?
 - At what point should `nav` be split once active-workflow kinds are added?
@@ -380,6 +322,8 @@ Preferred shape if core chooses high-level APIs:
 
 - The current plugin already supports `renderHtml` and `this.eventHandler` at the registered-widget boundary. The missing piece is carrying that capability through the cluster pipeline.
 - Because these features stay inside `dyni_Nav_Instruments`, page-specific core click handlers keyed by built-in widget names cannot be reused directly.
+- Current viewer source exposes `window.avnav.api.routePoints`, but maintainer guidance says there is no general plugin-action concept here yet. Treat it as runtime-exposed workaround surface, not stable plugin API.
+- Workaround code for this gap must be tagged with `// dyni-workaround(avnav-plugin-actions) -- <reason>` so it can be found and retired later.
 - Core interaction ownership is mixed even among nearby widgets:
   - passive renderer + page click routing (`Zoom`, `ActiveRoute`, `EditRoute`)
   - widget-owned click target + page/API workflow (`RoutePoints`, `AisTarget`)
@@ -387,12 +331,11 @@ Preferred shape if core chooses high-level APIs:
   - fully passive display (`CenterDisplay`)
 - The plan intentionally removes backward-compatibility strategies because the plugin is not released yet. The temporary summary-style `activeRoute` path should be replaced directly instead of carried forward.
 - The safest implementation order is:
-  1. settle the core API blocker
-  2. extend cluster HTML support and HTML theming infrastructure
-  3. expand the `nav` cluster contract
-  4. implement the HTML sub-renderers
-  5. wire workflows only through public APIs
-  6. verify parity and run `npm run check:all`
+  1. extend cluster HTML support and HTML theming infrastructure
+  2. expand the `nav` cluster contract
+  3. implement the HTML sub-renderers
+  4. wire workflows through plugin-owned handlers first
+  5. verify parity and run `npm run check:all`
 
 ## Related
 
