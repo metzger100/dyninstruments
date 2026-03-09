@@ -7,6 +7,7 @@
 Full-circle rotating compass card with upright cardinal labels. The dial rotates by `-heading`; the lubber pointer stays fixed at North. Optional target marker (`markerCourse`) is supported.
 Pointer color is resolved once per render via `FullCircleRadialEngine` (`RadialToolkit.theme.resolve(canvas)` internally).
 Static dial rendering is cached via shared `CanvasLayerCache` managed by `FullCircleRadialEngine`.
+Responsive ring, label, marker, and pointer geometry come from `FullCircleRadialLayout` through the shared engine state.
 
 ## Module Registration
 
@@ -43,8 +44,8 @@ The rotating dial face cache is built from static inputs. At render time, `headi
 |---|---|---|
 | Ring (cached face) | `draw.drawRing` | full circle |
 | Ticks (cached face) | `draw.drawTicks` | `0..360`, major 30, minor 10 |
-| Lubber pointer | `draw.drawPointerAtRim` | fixed at 0°, with `fillStyle: theme.colors.pointer` (default `#ff2b2b`) |
-| Target marker | `draw.drawRimMarker` | at `(markerCourse - heading)` if both finite, with `strokeStyle: theme.colors.pointer` |
+| Lubber pointer | `draw.drawPointerAtRim` | fixed at 0°, with `fillStyle: theme.colors.pointer` and layout-owned `fixedPointerDepth` |
+| Target marker | `draw.drawRimMarker` | at `(markerCourse - heading)` if both finite, with layout-owned `markerLen` / `markerWidth` |
 | Cardinal labels | cached label sprites | existing label set (`N/NE/E/SE/S/SW/W/NW`), rendered upright at heading-rotated positions |
 
 Rendering order keeps labels on top for readability.
@@ -105,6 +106,11 @@ otherwise -> normal
 `normal`: centered 3-row block inside dial
 
 `high`: one inline row above dial
+
+Responsive ownership:
+- `FullCircleRadialLayout` owns mode routing, compact insets, dial geometry, label metrics, and slot bounds.
+- `FullCircleRadialEngine` owns cache lifecycle and shared callback state.
+- `CompassRadialWidget` only owns compass-specific static face and marker behavior.
 
 ## Internal Value Formatting
 

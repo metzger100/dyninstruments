@@ -5,6 +5,9 @@ describe("FullCircleRadialEngine", function () {
   function createHarness() {
     const engineMod = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
     const cacheMod = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
+    const fullCircleLayoutMod = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
+    const responsiveScaleProfileMod = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMathMod = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
     const calls = {
       ring: [],
       ticks: [],
@@ -44,6 +47,13 @@ describe("FullCircleRadialEngine", function () {
         labelWeight: 650
       }
     };
+    const layoutApi = fullCircleLayoutMod.create({}, {
+      getModule(id) {
+        if (id === "ResponsiveScaleProfile") return responsiveScaleProfileMod;
+        if (id === "LayoutRectMath") return layoutRectMathMod;
+        throw new Error("unexpected layout module: " + id);
+      }
+    });
 
     const engine = engineMod.create({}, {
       setupCanvas(canvas) {
@@ -64,6 +74,15 @@ describe("FullCircleRadialEngine", function () {
       getModule(id) {
         if (id === "CanvasLayerCache") {
           return cacheMod;
+        }
+        if (id === "FullCircleRadialLayout") {
+          return fullCircleLayoutMod;
+        }
+        if (id === "ResponsiveScaleProfile") {
+          return responsiveScaleProfileMod;
+        }
+        if (id === "LayoutRectMath") {
+          return layoutRectMathMod;
         }
         if (id !== "RadialToolkit") {
           throw new Error("unexpected module: " + id);
@@ -89,17 +108,6 @@ describe("FullCircleRadialEngine", function () {
                 drawDisconnectOverlay() {}
               },
               value: {
-                computePad(W, H) {
-                  return Math.max(6, Math.floor(Math.min(W, H) * 0.04));
-                },
-                computeGap(W, H) {
-                  return Math.max(6, Math.floor(Math.min(W, H) * 0.03));
-                },
-                computeMode(ratio, thresholdNormal, thresholdFlat) {
-                  if (ratio < thresholdNormal) return "high";
-                  if (ratio > thresholdFlat) return "flat";
-                  return "normal";
-                },
                 isFiniteNumber(n) {
                   return typeof n === "number" && isFinite(n);
                 }
@@ -122,7 +130,7 @@ describe("FullCircleRadialEngine", function () {
       }
     });
 
-    return { engine, calls, theme };
+    return { engine, calls, theme, layoutApi };
   }
 
   it("applies theme defaults to ring/ticks/fixed pointer helpers", function () {
@@ -149,6 +157,16 @@ describe("FullCircleRadialEngine", function () {
 
     const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 160, ctx: createMockContext2D() });
     renderer(canvas, {});
+    const mode = harness.layoutApi.computeMode(320, 160, 0.8, 2.2);
+    const insets = harness.layoutApi.computeInsets(320, 160);
+    const layout = harness.layoutApi.computeLayout({
+      W: 320,
+      H: 160,
+      mode: mode,
+      theme: harness.theme,
+      insets: insets,
+      responsive: insets.responsive
+    });
 
     expect(harness.calls.ring[0].lineWidth).toBe(harness.theme.radial.ring.arcLineWidth);
     expect(harness.calls.ticks[0].major).toEqual({
@@ -160,7 +178,7 @@ describe("FullCircleRadialEngine", function () {
       width: harness.theme.radial.ticks.minorWidth
     });
     expect(harness.calls.pointer[0].fillStyle).toBe(harness.theme.colors.pointer);
-    expect(harness.calls.pointer[0].depth).toBe(8);
+    expect(harness.calls.pointer[0].depth).toBe(layout.geom.needleDepth);
     expect(harness.calls.pointer[0].widthFactor).toBe(harness.theme.radial.pointer.widthFactor);
     expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.radial.pointer.lengthFactor);
   });
@@ -182,6 +200,41 @@ describe("FullCircleRadialEngine", function () {
     renderer(createMockCanvas({ rectWidth: 500, rectHeight: 120, ctx: createMockContext2D() }), {});
 
     expect(harness.calls.mode).toEqual(["high", "normal", "flat"]);
+  });
+
+  it("exposes layout-owned responsive state and cache geometry to callbacks", function () {
+    const harness = createHarness();
+    const states = [];
+    const renderer = harness.engine.createRenderer({
+      cacheLayers: ["face"],
+      buildStaticKey(state) {
+        return { mode: state.mode };
+      },
+      rebuildLayer(layerCtx, layerName, state) {
+        states.push({
+          mode: state.mode,
+          hasLayout: !!state.layout,
+          hasResponsive: !!state.responsive,
+          textFillScale: state.textFillScale,
+          compactGeometryScale: state.compactGeometryScale,
+          labelRadiusOffset: state.labels.radiusOffset,
+          labelFontPx: state.labels.fontPx,
+          fixedPointerDepth: state.geom.fixedPointerDepth,
+          staticKey: JSON.parse(state.staticKey)
+        });
+      }
+    });
+
+    renderer(createMockCanvas({ rectWidth: 120, rectHeight: 80, ctx: createMockContext2D() }), {});
+
+    expect(states).toHaveLength(1);
+    expect(states[0].hasLayout).toBe(true);
+    expect(states[0].hasResponsive).toBe(true);
+    expect(states[0].textFillScale).toBeGreaterThan(1);
+    expect(states[0].compactGeometryScale).toBeLessThan(1);
+    expect(states[0].labelRadiusOffset).toBe(states[0].staticKey.engine.labelInsetVal);
+    expect(states[0].labelFontPx).toBe(states[0].staticKey.engine.labelPx);
+    expect(states[0].fixedPointerDepth).toBeGreaterThan(0);
   });
 
   it("rebuilds static layers only when keys or geometry change and preserves layer order", function () {

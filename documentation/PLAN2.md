@@ -1,6 +1,6 @@
 # Implementation Plan
 
-**Status:** ⏳ In Progress | Phases 1-5 implemented; later responsive rollout phases pending
+**Status:** ⏳ In Progress | Phases 1-6 implemented; later responsive rollout phases pending
 
 ## Overview
 
@@ -24,7 +24,7 @@ Scope:
 | `LinearGaugeLayout` + `LinearGaugeEngine` + `LinearGaugeMath` + `LinearGaugeTextLayout` | Linear-family layout ownership now lives in `LinearGaugeLayout`, the engine consumes shared responsive insets/geometry, and text rows use compact fill scaling without widget-local hard layout floors. | Phase 4 is implemented for the shared linear pipeline. |
 | `WindLinearWidget` | Dual-value text layout now keeps its widget-specific orchestration but uses ratio-based split gaps with `1px` safety floors on top of the shared linear pipeline. | Phase 4 is implemented for the wind-specific follow-up. |
 | `SemicircleRadialLayout` + `SemicircleRadialTextLayout` + `SemicircleRadialEngine` | Semicircle-family responsive layout ownership now lives in `SemicircleRadialLayout`, mode-routed fitting/draw is delegated to `SemicircleRadialTextLayout`, and the engine consumes shared compact geometry/text state without widget-local hard layout floors. | Phase 5 is implemented for the shared semicircle pipeline. |
-| `FullCircleRadialEngine` + `FullCircleRadialTextLayout` | Full-circle geometry/text still uses fixed floors (`14`, `12`, `10`, `8`, `6`, `18`, `16`). | Add shared compact profile for dial ring, labels, and text slots. |
+| `FullCircleRadialLayout` + `FullCircleRadialEngine` + `FullCircleRadialTextLayout` | Full-circle-family responsive layout ownership now lives in `FullCircleRadialLayout`, the engine consumes layout-owned compact geometry/state, and full-circle text slots use compact fill scaling without widget-local hard layout floors. | Phase 6 is implemented for the shared full-circle pipeline. |
 
 ## Affected Instrument Map
 
@@ -56,7 +56,7 @@ Scope:
 ## Current Dyninstruments Gaps
 
 - `ResponsiveScaleProfile` now owns the shared base compaction curve, and both `CenterDisplayLayout` and the shared text pipeline consume it.
-- Phase 2 closes the numeric/coordinate text gap, Phase 4 closes the shared linear gap, and Phase 5 closes the shared semicircle gap, but `ActiveRouteTextWidget`, `XteHighwayPrimitives`, `FullCircleRadialEngine`, and `FullCircleRadialTextLayout` still own local responsive floors or spacing rules.
+- Phase 2 closes the numeric/coordinate text gap, Phase 4 closes the shared linear gap, Phase 5 closes the shared semicircle gap, and Phase 6 closes the shared full-circle gap, but `ActiveRouteTextWidget` and `XteHighwayPrimitives` still own local responsive floors or spacing rules.
 - The current custom lint/smell system does not yet block new hardcoded responsive-layout floors or missing adoption of a shared compact profile.
 - Current tests now validate compact-vs-large text compaction for `CenterDisplay`, `ThreeValueTextWidget`, `PositionCoordinateWidget`, and the shared text engine.
 
@@ -98,9 +98,10 @@ Scope:
 | `shared/widget-kits/radial/SemicircleRadialLayout.js` | Semicircle-family responsive layout owner | Actual change in this session |
 | `shared/widget-kits/radial/SemicircleRadialTextLayout.js` | Shared semicircle text/caching helper | Actual change in this session |
 | `shared/widget-kits/radial/SemicircleRadialEngine.js` | Shared semicircle gauge pipeline | Actual change in this session: now consumes `SemicircleRadialLayout` and `SemicircleRadialTextLayout` |
-| `shared/widget-kits/radial/FullCircleRadialEngine.js` | Shared full-circle dial pipeline | Planned change |
-| `shared/widget-kits/radial/FullCircleRadialTextLayout.js` | Full-circle text layout helper | Planned change |
-| `widgets/radial/CompassRadialWidget/CompassRadialWidget.js` | Full-circle label sprite owner | Planned change |
+| `shared/widget-kits/radial/FullCircleRadialLayout.js` | Full-circle-family responsive layout owner | Actual change in this session |
+| `shared/widget-kits/radial/FullCircleRadialEngine.js` | Shared full-circle dial pipeline | Actual change in this session: now consumes `FullCircleRadialLayout` and exposes layout-owned responsive state |
+| `shared/widget-kits/radial/FullCircleRadialTextLayout.js` | Full-circle text layout helper | Actual change in this session: now consumes layout-owned safe bounds plus compact text-fill scaling |
+| `widgets/radial/CompassRadialWidget/CompassRadialWidget.js` | Full-circle label sprite owner | Actual change in this session: now consumes layout-owned label/pointer/marker geometry |
 | `config/components.js` | Component registry | Actual change in this session: registered `LinearGaugeLayout` and updated `LinearGaugeEngine` deps |
 | `tools/check-patterns/rules.mjs` | Pattern-rule registry | Planned change: add responsive-layout anti-regression rules |
 | `tools/check-smell-contracts.mjs` | Semantic contract checks | Planned change: add responsive adoption / coverage contract |
@@ -215,6 +216,8 @@ Status: implemented. `SemicircleRadialLayout` now owns semicircle-family respons
    - `VoltageRadialWidget`
 
 ### Phase 6 - Roll the profile into full-circle dials
+
+Status: implemented. `FullCircleRadialLayout` now owns full-circle responsive geometry and label metrics, `FullCircleRadialEngine` is reduced to shared orchestration over layout-owned state, `FullCircleRadialTextLayout` consumes shared compact text fill plus layout-owned safe bounds, and both `CompassRadialWidget` and `WindRadialWidget` consume the new compact geometry contract.
 
 1. Refactor `FullCircleRadialEngine.computeGeometry()` so ring, label inset, marker, and strip geometry honor the shared compact profile.
 2. Refactor `FullCircleRadialTextLayout` so normal/high/flat text slots use compact fill scaling rather than fixed floors.

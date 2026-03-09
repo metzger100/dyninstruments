@@ -2,10 +2,40 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("WindRadialWidget", function () {
+  function createFullCircleLayoutApi() {
+    const fullCircleLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    return fullCircleLayout.create({}, {
+      getModule(id) {
+        if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
+        if (id === "LayoutRectMath") return layoutRectMath;
+        throw new Error("unexpected layout module: " + id);
+      }
+    });
+  }
+
+  function computeWindLayout(theme, width, height) {
+    const api = createFullCircleLayoutApi();
+    const mode = api.computeMode(width, height, 0.7, 2.0);
+    const insets = api.computeInsets(width, height);
+    return api.computeLayout({
+      W: width,
+      H: height,
+      mode: mode,
+      theme: theme,
+      insets: insets,
+      responsive: insets.responsive
+    });
+  }
+
   function createWindCachingHarness() {
     const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
+    const fullCircleLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
     const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
     const textLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js");
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
     const calls = {
       ring: 0,
       layline: 0,
@@ -68,8 +98,11 @@ describe("WindRadialWidget", function () {
         },
         getModule(id) {
           if (id === "FullCircleRadialEngine") return fullCircleEngine;
+          if (id === "FullCircleRadialLayout") return fullCircleLayout;
           if (id === "FullCircleRadialTextLayout") return textLayout;
           if (id === "CanvasLayerCache") return layerCache;
+          if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
+          if (id === "LayoutRectMath") return layoutRectMath;
           if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
@@ -127,17 +160,6 @@ describe("WindRadialWidget", function () {
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
                   },
-                  computePad(W, H) {
-                    return Math.max(6, Math.floor(Math.min(W, H) * 0.04));
-                  },
-                  computeGap(W, H) {
-                    return Math.max(6, Math.floor(Math.min(W, H) * 0.03));
-                  },
-                  computeMode(ratio, thresholdNormal, thresholdFlat) {
-                    if (ratio < thresholdNormal) return "high";
-                    if (ratio > thresholdFlat) return "flat";
-                    return "normal";
-                  },
                   formatAngle180(value) {
                     const n = Number(value);
                     if (!isFinite(n)) return "---";
@@ -169,8 +191,11 @@ describe("WindRadialWidget", function () {
 
   it("formats speed via Helpers.applyFormatter in graphic mode", function () {
     const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
+    const fullCircleLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
     const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
     const textLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js");
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
     const valueDrawCalls = [];
     const laylineCalls = [];
     const pointerCalls = [];
@@ -232,8 +257,11 @@ describe("WindRadialWidget", function () {
         },
         getModule(id) {
           if (id === "FullCircleRadialEngine") return fullCircleEngine;
+          if (id === "FullCircleRadialLayout") return fullCircleLayout;
           if (id === "FullCircleRadialTextLayout") return textLayout;
           if (id === "CanvasLayerCache") return layerCache;
+          if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
+          if (id === "LayoutRectMath") return layoutRectMath;
           if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
@@ -286,17 +314,6 @@ describe("WindRadialWidget", function () {
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
                   },
-                  computePad(W, H) {
-                    return Math.max(6, Math.floor(Math.min(W, H) * 0.04));
-                  },
-                  computeGap(W, H) {
-                    return Math.max(6, Math.floor(Math.min(W, H) * 0.03));
-                  },
-                  computeMode(ratio, thresholdNormal, thresholdFlat) {
-                    if (ratio < thresholdNormal) return "high";
-                    if (ratio > thresholdFlat) return "flat";
-                    return "normal";
-                  },
                   formatAngle180(value) {
                     const n = Number(value);
                     if (!isFinite(n)) return "---";
@@ -323,6 +340,7 @@ describe("WindRadialWidget", function () {
       formatter: "formatSpeed",
       formatterParameters: ["kn"]
     });
+    const layout = computeWindLayout(themeDefaults, 480, 110);
 
     expect(applyFormatter).toHaveBeenCalledWith(5.5, expect.objectContaining({
       formatter: "formatSpeed",
@@ -331,12 +349,12 @@ describe("WindRadialWidget", function () {
     expect(valueDrawCalls.some((c) => c.valueText === "spd:5.5:kn" && c.unitText === "kn")).toBe(true);
     expect(laylineCalls[0].fillStyle).toBe(themeDefaults.colors.laylineStb);
     expect(laylineCalls[1].fillStyle).toBe(themeDefaults.colors.laylinePort);
-    expect(laylineCalls[0].thickness).toBe(17);
-    expect(laylineCalls[1].thickness).toBe(17);
+    expect(laylineCalls[0].thickness).toBe(layout.geom.ringW);
+    expect(laylineCalls[1].thickness).toBe(layout.geom.ringW);
     expect(pointerCalls[0].fillStyle).toBe(themeDefaults.colors.pointer);
     expect(pointerCalls[0].widthFactor).toBe(themeDefaults.radial.pointer.widthFactor);
     expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.radial.pointer.lengthFactor);
-    expect(pointerCalls[0].depth).toBe(8);
+    expect(pointerCalls[0].depth).toBe(layout.geom.needleDepth);
     expect(ringCalls[0].lineWidth).toBe(themeDefaults.radial.ring.arcLineWidth);
     expect(tickCalls[0].major).toEqual({
       len: themeDefaults.radial.ticks.majorLen,
@@ -346,15 +364,18 @@ describe("WindRadialWidget", function () {
       len: themeDefaults.radial.ticks.minorLen,
       width: themeDefaults.radial.ticks.minorWidth
     });
-    expect(labelCalls[0].radiusOffset).toBe(35);
-    expect(labelCalls[0].fontPx).toBe(17);
+    expect(labelCalls[0].radiusOffset).toBe(layout.labels.radiusOffset);
+    expect(labelCalls[0].fontPx).toBe(layout.labels.fontPx);
     expect(labelCalls[0].weight).toBe(themeDefaults.font.labelWeight);
   });
 
   it("does not append unit into value text when formatter returns raw passthrough", function () {
     const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
+    const fullCircleLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
     const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
     const textLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js");
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
     const valueDrawCalls = [];
 
     const spec = loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js")
@@ -379,8 +400,11 @@ describe("WindRadialWidget", function () {
         },
         getModule(id) {
           if (id === "FullCircleRadialEngine") return fullCircleEngine;
+          if (id === "FullCircleRadialLayout") return fullCircleLayout;
           if (id === "FullCircleRadialTextLayout") return textLayout;
           if (id === "CanvasLayerCache") return layerCache;
+          if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
+          if (id === "LayoutRectMath") return layoutRectMath;
           if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
@@ -452,17 +476,6 @@ describe("WindRadialWidget", function () {
                   },
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
-                  },
-                  computePad(W, H) {
-                    return Math.max(6, Math.floor(Math.min(W, H) * 0.04));
-                  },
-                  computeGap(W, H) {
-                    return Math.max(6, Math.floor(Math.min(W, H) * 0.03));
-                  },
-                  computeMode(ratio, thresholdNormal, thresholdFlat) {
-                    if (ratio < thresholdNormal) return "high";
-                    if (ratio > thresholdFlat) return "flat";
-                    return "normal";
                   },
                   formatAngle180(value) {
                     const n = Number(value);

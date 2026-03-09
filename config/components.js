@@ -173,7 +173,13 @@
       js: BASE + "shared/widget-kits/radial/FullCircleRadialEngine.js",
       css: undefined,
       globalKey: "DyniFullCircleRadialEngine",
-      deps: ["RadialToolkit", "CanvasLayerCache"]
+      deps: ["RadialToolkit", "CanvasLayerCache", "FullCircleRadialLayout"]
+    },
+    FullCircleRadialLayout: {
+      js: BASE + "shared/widget-kits/radial/FullCircleRadialLayout.js",
+      css: undefined,
+      globalKey: "DyniFullCircleRadialLayout",
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
     },
     FullCircleRadialTextLayout: {
       js: BASE + "shared/widget-kits/radial/FullCircleRadialTextLayout.js",

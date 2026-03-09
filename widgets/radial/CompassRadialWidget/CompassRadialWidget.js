@@ -19,8 +19,8 @@
 
     function buildCompassLabelSprites(canvas, state) {
       const sprites = [];
-      const labelRadius = state.geom.rOuter - Math.max(16, Math.floor(state.geom.ringW * 1.6));
-      const font = state.labelWeight + " " + state.geom.labelPx + "px " + state.family;
+      const labelRadius = state.labels.spriteRadius;
+      const font = state.labelWeight + " " + state.labels.fontPx + "px " + state.family;
 
       for (let i = 0; i < COMPASS_LABEL_ANGLES.length; i++) {
         const angleDeg = COMPASS_LABEL_ANGLES[i];
@@ -33,7 +33,7 @@
 
         spriteCtx.font = font;
         const width = Math.max(1, Math.ceil(spriteCtx.measureText(text).width + 6));
-        const height = Math.max(1, Math.ceil(state.geom.labelPx * 1.6));
+        const height = Math.max(1, Math.ceil(state.labels.fontPx * 1.6));
         sprite.width = width;
         sprite.height = height;
 
@@ -94,8 +94,8 @@
       layout: { highTopFactor: 0.9, highBottomFactor: 0.9 },
       buildStaticKey: function (state) {
         return {
-          labelPx: state.geom.labelPx,
-          labelRadius: state.geom.rOuter - Math.max(16, Math.floor(state.geom.ringW * 1.6)),
+          labelPx: state.labels.fontPx,
+          labelRadius: state.labels.spriteRadius,
           labelsSig: "N|NE|E|SE|S|SW|W|NW"
         };
       },
@@ -120,7 +120,7 @@
         }
 
         api.drawCachedLayer("face", { rotationDeg: rotationDeg });
-        api.drawFixedPointer(state.ctx, 0, { depth: Math.max(10, state.geom.needleDepth) });
+        api.drawFixedPointer(state.ctx, 0, { depth: state.geom.fixedPointerDepth });
 
         if (Number.isFinite(display.marker) && Number.isFinite(display.heading)) {
           state.draw.drawRimMarker(state.ctx, state.geom.cx, state.geom.cy, state.geom.rOuter, display.marker - display.heading, {

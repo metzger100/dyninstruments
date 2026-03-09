@@ -1,7 +1,7 @@
 /**
  * Module: FullCircleRadialEngine - Shared renderer pipeline for full-circle dial widgets
  * Documentation: documentation/radial/full-circle-dial-engine.md
- * Depends: RadialToolkit, CanvasLayerCache
+ * Depends: RadialToolkit, CanvasLayerCache, FullCircleRadialLayout
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -42,105 +42,10 @@
     return out.length ? out : ["layer"];
   }
 
-  function computeGeometry(W, H, pad, theme) {
-    const D = Math.min(W - 2 * pad, H - 2 * pad);
-    const R = Math.max(14, Math.floor(D / 2));
-    const cx = Math.floor(W / 2);
-    const cy = Math.floor(H / 2);
-    const ringW = Math.max(6, Math.floor(R * theme.radial.ring.widthFactor));
-    const leftStrip = Math.max(0, Math.floor((W - 2 * pad - 2 * R) / 2));
-    const topStrip = Math.max(0, Math.floor((H - 2 * pad - 2 * R) / 2));
-    return {
-      D: D,
-      R: R,
-      cx: cx,
-      cy: cy,
-      rOuter: R,
-      ringW: ringW,
-      needleDepth: Math.max(8, Math.floor(R * 0.11)),
-      markerLen: Math.max(12, Math.floor(R * 0.11)),
-      markerWidth: Math.max(3, Math.floor(R * 0.05)),
-      leftStrip: leftStrip,
-      rightStrip: leftStrip,
-      topStrip: topStrip,
-      bottomStrip: topStrip,
-      labelInsetVal: Math.max(18, Math.floor(ringW * theme.radial.labels.insetFactor)),
-      labelPx: Math.max(10, Math.floor(R * theme.radial.labels.fontFactor))
-    };
-  }
-
-  function computeSlots(mode, W, H, pad, geom, layoutCfg) {
-    const cfg = layoutCfg || {};
-    const slots = {
-      leftTop: null,
-      leftBottom: null,
-      rightTop: null,
-      rightBottom: null,
-      top: null,
-      bottom: null
-    };
-    if (mode === "flat") {
-      const lh = 2 * geom.R;
-      if (geom.leftStrip > 0) {
-        slots.leftTop = {
-          x: pad,
-          y: geom.cy - geom.R,
-          w: geom.leftStrip,
-          h: Math.floor(lh / 2)
-        };
-        slots.leftBottom = {
-          x: pad,
-          y: geom.cy,
-          w: geom.leftStrip,
-          h: Math.floor(lh / 2)
-        };
-      }
-      if (geom.rightStrip > 0) {
-        const rightX = W - pad - geom.rightStrip;
-        slots.rightTop = {
-          x: rightX,
-          y: geom.cy - geom.R,
-          w: geom.rightStrip,
-          h: Math.floor(lh / 2)
-        };
-        slots.rightBottom = {
-          x: rightX,
-          y: geom.cy,
-          w: geom.rightStrip,
-          h: Math.floor(lh / 2)
-        };
-      }
-      return slots;
-    }
-
-    if (mode === "high") {
-      const topFactor = pickFinite(cfg.highTopFactor, 0.85);
-      const bottomFactor = pickFinite(cfg.highBottomFactor, 0.85);
-      const availTop = pad + geom.topStrip;
-      const availBottom = pad + geom.bottomStrip;
-      const topHeight = Math.max(10, Math.floor(availTop * topFactor));
-      const bottomHeight = Math.max(10, Math.floor(availBottom * bottomFactor));
-
-      slots.top = {
-        x: pad,
-        y: pad,
-        w: W - 2 * pad,
-        h: topHeight
-      };
-      slots.bottom = {
-        x: pad,
-        y: H - pad - bottomHeight,
-        w: W - 2 * pad,
-        h: bottomHeight
-      };
-    }
-
-    return slots;
-  }
-
   function create(def, Helpers) {
     const GU = Helpers.getModule("RadialToolkit").create(def, Helpers);
     const layerCacheApi = Helpers.getModule("CanvasLayerCache").create(def, Helpers);
+    const layoutApi = Helpers.getModule("FullCircleRadialLayout").create(def, Helpers);
     const draw = GU.draw;
     const text = GU.text;
     const value = GU.value;
@@ -176,15 +81,22 @@
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
 
-        const pad = value.computePad(W, H);
-        const gap = value.computeGap(W, H);
         const ratio = W / Math.max(1, H);
         const tNormal = value.isFiniteNumber(p[ratioProps.normal]) ? p[ratioProps.normal] : ratioDefaults.normal;
         const tFlat = value.isFiniteNumber(p[ratioProps.flat]) ? p[ratioProps.flat] : ratioDefaults.flat;
-        const mode = value.computeMode(ratio, tNormal, tFlat);
-
-        const geom = computeGeometry(W, H, pad, theme);
-        const slots = computeSlots(mode, W, H, pad, geom, layoutCfg);
+        const mode = layoutApi.computeMode(W, H, tNormal, tFlat);
+        const insets = layoutApi.computeInsets(W, H);
+        const layout = layoutApi.computeLayout({
+          W: W,
+          H: H,
+          mode: mode,
+          theme: theme,
+          insets: insets,
+          responsive: insets.responsive,
+          layoutConfig: layoutCfg
+        });
+        const geom = layout.geom;
+        const slots = layout.slots;
         const bufferW = Math.max(1, Math.round(canvas.width || W));
         const bufferH = Math.max(1, Math.round(canvas.height || H));
         const dpr = Math.max(1, bufferW / Math.max(1, W));
@@ -200,10 +112,15 @@
           color: color,
           valueWeight: valueWeight,
           labelWeight: labelWeight,
-          pad: pad,
-          gap: gap,
+          pad: layout.pad,
+          gap: layout.gap,
           ratio: ratio,
+          layout: layout,
+          responsive: layout.responsive,
+          textFillScale: layout.textFillScale,
+          compactGeometryScale: layout.compactGeometryScale,
           geom: geom,
+          labels: layout.labels,
           slots: slots,
           bufferW: bufferW,
           bufferH: bufferH,
@@ -225,8 +142,8 @@
             cy: geom.cy,
             rOuter: geom.rOuter,
             ringW: geom.ringW,
-            labelInsetVal: geom.labelInsetVal,
-            labelPx: geom.labelPx,
+            labelInsetVal: layout.labels.radiusOffset,
+            labelPx: layout.labels.fontPx,
             ringLineWidth: theme.radial.ring.arcLineWidth,
             ticksMajorLen: theme.radial.ticks.majorLen,
             ticksMajorWidth: theme.radial.ticks.majorWidth,

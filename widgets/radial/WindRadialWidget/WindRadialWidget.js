@@ -115,8 +115,8 @@
             endDeg: 180,
             step: 30,
             includeEnd: true,
-            radiusOffset: state.geom.labelInsetVal,
-            fontPx: state.geom.labelPx,
+            radiusOffset: state.labels.radiusOffset,
+            fontPx: state.labels.fontPx,
             weight: state.labelWeight,
             family: state.family,
             labelFormatter: function (deg) {
