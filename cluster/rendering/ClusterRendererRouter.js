@@ -48,11 +48,26 @@
       return threeSpec;
     }
 
-    function renderCanvas(canvas, props) {
+    function delegateActiveMethod(methodName, args, props) {
       const sub = pickRenderer(props);
-      if (sub && typeof sub.renderCanvas === "function") {
-        return sub.renderCanvas.apply(this, [canvas, props]);
+      if (sub && typeof sub[methodName] === "function") {
+        return sub[methodName].apply(this, args);
       }
+      return undefined;
+    }
+
+    function renderHtml(props) {
+      return delegateActiveMethod.call(this, "renderHtml", [props], props);
+    }
+
+    function renderCanvas(canvas, props) {
+      return delegateActiveMethod.call(this, "renderCanvas", [canvas, props], props);
+    }
+
+    function initFunction() {
+      const initArgs = Array.prototype.slice.call(arguments);
+      const props = initArgs.length ? initArgs[initArgs.length - 1] : undefined;
+      return delegateActiveMethod.call(this, "initFunction", initArgs, props);
     }
 
     function finalizeFunction() {
@@ -69,7 +84,9 @@
     return {
       wantsHideNativeHead: wantsHide,
       pickRenderer: pickRenderer,
+      renderHtml: renderHtml,
       renderCanvas: renderCanvas,
+      initFunction: initFunction,
       finalizeFunction: finalizeFunction
     };
   }

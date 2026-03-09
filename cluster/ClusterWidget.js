@@ -25,7 +25,9 @@
       version: "1.15.0",
       wantsHideNativeHead: !!rendererRouter.wantsHideNativeHead,
       translateFunction: translateFunction,
+      renderHtml: rendererRouter.renderHtml,
       renderCanvas: rendererRouter.renderCanvas,
+      initFunction: rendererRouter.initFunction,
       finalizeFunction: rendererRouter.finalizeFunction
     };
   }
