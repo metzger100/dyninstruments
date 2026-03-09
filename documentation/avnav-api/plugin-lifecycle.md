@@ -81,6 +81,14 @@ AvNav's instrument dashboard page (`GpsPage`) uses container-level click handlin
 
 Details and event-chain analysis: [interactive-widgets.md](interactive-widgets.md).
 
+### Runtime-Exposed Action Caveat
+
+- Current core source attaches `routePoints` to `window.avnav.api` in `viewer/util/api.js`, and core pages use it as a handler registry/action relay from `viewer/gui/GpsPage.jsx` and `viewer/gui/EditRoutePage.jsx`.
+- Maintainer guidance for Phase 0 is still: there is no generalized concept yet for exposing host actions to plugins.
+- Treat `routePoints` as runtime-exposed implementation detail unless core later documents it as stable plugin API.
+- Preferred near-term approach for route/AIS/editor workflows: own the interaction inside plugin `renderHtml` / React code and use AvNav-side actions only as optional fallback.
+- Tag temporary code for this gap with `// dyni-workaround(avnav-plugin-actions) -- <reason>`.
+
 ## Render Cycle (AvNav Standard)
 
 ```text

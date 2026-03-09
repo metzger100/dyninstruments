@@ -13,6 +13,9 @@ On AvNav's instrument dashboard page (`GpsPage`), widget clicks normally navigat
 - `WidgetFrame` binds click handling at the outer widget container level; any bubbled click can trigger navigation.
 - For interactive content, block propagation inside the plugin-rendered area.
 - Native `WidgetHead` (caption/unit bar) sits outside plugin content; clicks there still navigate unless hidden (`wantsHideNativeHead: true`).
+- Current viewer source exposes `window.avnav.api.routePoints`, and core pages register handlers on it, but maintainer guidance does not treat this as a documented/stable general plugin-action API.
+- For missing route/AIS/editor workflow APIs, the accepted near-term path is plugin-owned `renderHtml` / React handlers first; treat AvNav-side actions only as optional fallback behavior.
+- Mark any such workaround code with `// dyni-workaround(avnav-plugin-actions) -- <reason>` so it can be found and retired later.
 
 ## API/Interfaces
 
@@ -67,6 +70,12 @@ return HTM`
 - In layout edit mode, clicks that reach `WidgetFrame` open widget editing; clicks blocked inside interactive content do not.
 - Touch interactions are usually covered by click propagation control; if raw touch handlers are used, apply propagation control there as well.
 - `renderCanvas`-only widgets cannot attach inner DOM handlers; pair with `renderHtml` controls when interaction is needed.
+
+## Host Workflow Caveat
+
+- Do not treat source-visible page helpers or dialog wiring as plugin-safe API just because they are reachable in the current core tree.
+- Avoid private-core coupling to `RouteEdit`, `NavData`, page-local `history`, or `AisInfoWithFunctions`.
+- If parity needs a runtime-exposed helper such as `avnav.api.routePoints.activate(index)`, keep the usage narrow, guard it, and tag the block with the workaround marker.
 
 ## Recommendation for dyninstruments
 
