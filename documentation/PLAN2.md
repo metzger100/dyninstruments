@@ -1,6 +1,6 @@
 # Implementation Plan
 
-**Status:** ⏳ In Progress | Phases 1-8 implemented; Phase 9 verification gate pending
+**Status:** ✅ Implemented | Phases 1-9 implemented; rollout closed with `TD-018` still tracked as warn-only debt
 
 ## Overview
 
@@ -259,6 +259,8 @@ Status: implemented. Phase 8 aligned the shared docs, authoring guides, and main
 4. Update the relevant “add new widget” guides so new instruments inherit the contract by default.
 
 ### Phase 9 - Verification and release gate
+
+Status: implemented. Phase 9 adds owner-level compact/medium/large progression assertions for `ActiveRouteLayout` and `XteHighwayLayout`, reruns the targeted owner suites, and revalidates the full repo gate on `2026-03-09`. `npm run check:all` passed (`74/74` test files, `414/414` tests, lines/statements `93.68%`, functions `90.09%`, branches `69.91%`), and `npm run check:patterns` still reports only the tracked warn-only responsive backlog (`responsive-layout-hard-floor=3`, `responsive-profile-ownership=0`). Representative compact/medium/large layout snapshots were reviewed through the existing owner/widget test harnesses for `CenterDisplay`, shared text renderers, `ActiveRoute`, `XTE`, linear gauges, semicircle gauges, and full-circle dials; the rollout closes without promoting `responsive-layout-hard-floor` beyond warn mode.
 
 1. Add compact-size regression coverage to each affected family.
 2. Run targeted widget and shared-engine tests while migrating each phase.

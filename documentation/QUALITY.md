@@ -1,37 +1,34 @@
 # Quality Scorecard
 
-**Last updated:** 2026-02-28
+**Last updated:** 2026-03-09
 
 ## Layer Health
 
 | Layer | Files | Headers | Size OK | Tests | Duplicates | Grade |
 |---|---:|---|---|---|---|---|
 | runtime/ | 6 | all | all | ✅ (6/6) | none | A |
-| config/ | 12 | all | all | ✅ (9 tests incl. static cluster coverage) | none | A |
-| cluster/ | 14 | all | all | ✅ (14/14) | none | A |
-| shared/ | 16 | all | check (4 warns, 0 violations) | partial (11/16) | none | B |
+| config/ | 12 | all | check (2 warns, 0 violations) | ✅ (9 suites incl. static cluster coverage) | none | B |
+| cluster/ | 12 | all | all | ✅ (12/12) | none | A |
+| shared/ | 32 | all | check (5 warns, 0 violations) | broad (24 suites) | none | B |
 | widgets/radial/ | 6 | all | all | ✅ (6/6) | none | A |
-| widgets/text/ | 2 | all | all | ✅ (2/2) | none | A |
+| widgets/text/ | 5 | all | check (2 warns, 0 violations) | ✅ (5/5) | none | B |
+| widgets/linear/ | 6 | all | all | ✅ (6/6) | none | A |
 
 Notes:
 - `Size OK = check` means no `>400` violations but at least one `>=300` warning.
 - Strict grading is applied: unresolved medium/high drift prevents an `A`.
 - Smell prevention gate is fail-closed (see `documentation/conventions/smell-prevention.md`).
-- Validation run (`2026-02-28`): `npm run check:all` passed.
-- `check:filesize` summary: `warnings=4`, `violations=0`, `onelinerWarnings=0`.
-- Coverage summary (`coverage/coverage-summary.json`): lines/statements `95.60%` (3244/3393), functions `91.47%` (118/129), branches `70.28%` (485/690).
-- Coverage gate groups: Cluster mappers lines `94.52%`, branches `68.22%`; Runtime core lines `92.73%`, branches `79.88%`; Gauge math core lines `92.07%`, branches `59.06%`; Dynamic cluster update functions lines `100.00%`, branches `83.78%`.
+- Validation run (`2026-03-09`): `npm run check:all` passed with `74/74` test files and `414/414` tests green.
+- `check:patterns` summary (`2026-03-09`): `warnings=3`, all from `responsive-layout-hard-floor`; `responsive-profile-ownership=0`.
+- `check:filesize` summary (`2026-03-09`): `warnings=9`, `violations=0`, `onelinerWarnings=0`.
+- Coverage summary (`coverage/coverage-summary.json`, `2026-03-09`): lines/statements `93.68%`, functions `90.09%`, branches `69.91%`.
 
 ## Known Drift Patterns
 
 | Pattern | Severity | Files | Status |
 |---|---|---|---|
-| Cross-file clone drift (renamed helpers + long copy-paste blocks) | HIGH | Previously under-detected by name-based duplicate rule | ✅ Fixed (`check-patterns`: `duplicate-functions: 0`, `duplicate-block-clones: 0`) |
-| Canvas layer caching duplication (offscreen cache lifecycle/key/blit logic duplicated in dial renderers) | HIGH | Previously spread across full-circle dial implementations | ✅ Fixed (shared `CanvasLayerCache` + `FullCircleRadialEngine`; `check-patterns`: `duplicate-block-clones: 0`) |
-| Direct `avnav.api` access in non-runtime code | HIGH | Previously in `RadialValueMath`, `TemperatureRadialWidget`, `VoltageRadialWidget`, `PositionCoordinateWidget` | ✅ Fixed (`check-patterns`: `forbidden-globals: 0`) |
-| Empty catch blocks | MED | Previously in `ClusterRendererRouter`, `runtime/helpers`, `RadialValueMath`, `TemperatureRadialWidget`, `VoltageRadialWidget`, `PositionCoordinateWidget` | ✅ Fixed (`check-patterns`: `empty-catch: 0`) |
-| Oneliner line-limit bypass risk | HIGH | Previously in runtime/shared/widgets (backlog cleared) | ✅ Fixed (`check:filesize` is fail-closed with `--oneliner=block`; latest summary: `onelinerWarnings: 0`) |
-| Shared engine hotspot growth near size threshold | MED | `shared/widget-kits/radial/FullCircleRadialEngine.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialEngine.js` | ⚠ Active (`check:filesize` warnings: 4, violations: 0) |
+| Responsive hard-floor rollout backlog | HIGH | `shared/widget-kits/text/TextTileLayout.js`, `shared/widget-kits/linear/LinearGaugeTextLayout.js` | ⚠ Active (`check:patterns`: `responsive-layout-hard-floor=3`; tracked in `TD-018`) |
+| File-size hotspot growth near threshold | MED | `config/clusters/environment.js`, `config/components.js`, `shared/widget-kits/linear/LinearGaugeEngine.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialTextLayout.js`, `shared/widget-kits/text/TextLayoutComposite.js`, `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js`, `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js` | ⚠ Active (`check:filesize` warnings: 9, violations: 0) |
 
 ## Model Selection Log
 
@@ -42,6 +39,7 @@ Notes:
 | Formatter-boundary refactor (`Helpers.applyFormatter`) | GPT-5 Codex | Good | Removed forbidden global access findings and added wind gauge unit tests while preserving formatter output paths. |
 | Aggressive duplication detection hardening | GPT-5 Codex | Good | Replaced name-based duplicate detection with body/clone checks and extracted shared semicircle tick-step resolvers. |
 | Post-Phase A/Phase C documentation resync (`QUALITY.md` + `TECH-DEBT.md`) | GPT-5 Codex | Good | Recomputed scorecard from live repo gates (`check:all` pass, updated layer counts/tests, warn-tier debt reconciled). |
+| Phase 9 responsive verification closeout | GPT-5 Codex | Good | Added owner-level monotonic regression coverage for `ActiveRouteLayout` and `XteHighwayLayout`, reran `check:all`, and refreshed rollout status to the March 9, 2026 gate state. |
 
 Append new rows when model choice materially affects outcome.
 

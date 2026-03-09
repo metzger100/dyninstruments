@@ -81,19 +81,32 @@ describe("ActiveRouteLayout", function () {
     expect(snapshot.metricRects.next.w).toBeGreaterThan(snapshot.metricRects.remain.w);
   });
 
-  it("compacts flat and normal name shares on smaller widgets", function () {
+  it("compacts flat and normal name shares monotonically across compact, medium, and large widgets", function () {
     const layout = createLayout();
     const compactFlat = buildSnapshot(layout, 220, 80, "flat", false);
+    const mediumFlat = buildSnapshot(layout, 320, 100, "flat", false);
     const largeFlat = buildSnapshot(layout, 560, 160, "flat", false);
     const compactNormal = buildSnapshot(layout, 161, 80, "normal", false);
-    const largeNormal = buildSnapshot(layout, 520, 260, "normal", false);
+    const mediumNormal = buildSnapshot(layout, 220, 120, "normal", false);
+    const largeNormal = buildSnapshot(layout, 800, 400, "normal", false);
 
     expect(compactFlat.out.nameRect.w / compactFlat.contentRect.w).toBeLessThan(
+      mediumFlat.out.nameRect.w / mediumFlat.contentRect.w
+    );
+    expect(mediumFlat.out.nameRect.w / mediumFlat.contentRect.w).toBeLessThan(
       largeFlat.out.nameRect.w / largeFlat.contentRect.w
     );
     expect(compactNormal.out.nameRect.h / compactNormal.contentRect.h).toBeLessThan(
+      mediumNormal.out.nameRect.h / mediumNormal.contentRect.h
+    );
+    expect(mediumNormal.out.nameRect.h / mediumNormal.contentRect.h).toBeLessThan(
       largeNormal.out.nameRect.h / largeNormal.contentRect.h
     );
-    expect(compactNormal.out.responsive.textFillScale).toBeGreaterThan(largeNormal.out.responsive.textFillScale);
+    expect(compactNormal.out.responsive.textFillScale).toBeGreaterThan(
+      mediumNormal.out.responsive.textFillScale
+    );
+    expect(mediumNormal.out.responsive.textFillScale).toBeGreaterThan(
+      largeNormal.out.responsive.textFillScale
+    );
   });
 });
