@@ -23,10 +23,14 @@ Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
 2. Resolve shared modules:
    - `const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers)`
    - `const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers)`
-3. Add widget-specific display strategy only:
+3. Respect responsive ownership:
+   - `FullCircleRadialLayout` already consumes `ResponsiveScaleProfile` and owns compact insets, dial geometry, slot bounds, and compact geometry scales.
+   - Wrapper callbacks consume `state.layout`, `state.responsive`, `state.textFillScale`, and `state.compactGeometryScale`.
+   - Do not import `ResponsiveScaleProfile` directly and do not add widget-local user-visible responsive `Math.max(...)` / `clamp(...)` floors.
+4. Add widget-specific display strategy only:
    - single-value display object (compass-style), or
    - dual-value display object (wind-style)
-4. Build `renderCanvas` with `engine.createRenderer({ ... })` and keep callbacks scoped:
+5. Build `renderCanvas` with `engine.createRenderer({ ... })` and keep callbacks scoped:
    - `buildStaticKey(state, props)` for cache key payload
    - `rebuildLayer(layerCtx, layerName, state, props, api)` for static layers
    - `drawFrame(state, props, api)` for per-frame dynamic drawing (pointer, dynamic marker)

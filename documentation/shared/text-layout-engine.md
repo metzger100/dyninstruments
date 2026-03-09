@@ -13,19 +13,23 @@ The engine is split into small shared modules to stay under hotspot/file-size li
 - Runtime module path: `shared/widget-kits/text/TextLayoutEngine.js`
 - Shared responsive dependency: `shared/widget-kits/layout/ResponsiveScaleProfile.js`
 - Internal split modules:
-- `shared/widget-kits/text/TextLayoutPrimitives.js`
-- `shared/widget-kits/text/TextLayoutComposite.js`
+  - `shared/widget-kits/text/TextLayoutPrimitives.js`
+  - `shared/widget-kits/text/TextLayoutComposite.js`
 - Registered component IDs:
-- `TextLayoutPrimitives`
-- `TextLayoutComposite`
-- `TextLayoutEngine`
+  - `TextLayoutPrimitives`
+  - `TextLayoutComposite`
+  - `TextLayoutEngine`
 - Widgets pass preformatted strings; engine does not parse coordinates or select formatters.
 - Fit cache is widget-instance local (`createFitCache()` in widget `create()` scope).
 - Layout mode routing supports `flat` / `normal` / `high`.
-- Phase 2 responsive ownership:
-  - `ResponsiveScaleProfile` owns the shared `minDim -> t` compaction curve.
-  - `TextLayoutEngine` consumes that profile for text-family insets and max-text scaling.
-  - Dedicated Phase 3 widgets may keep using legacy `computeInsets()` until migrated.
+
+## Ownership Contract
+
+- `ResponsiveScaleProfile` owns the shared `minDim -> t` compaction curve.
+- `TextLayoutEngine` is the shared text-family layout owner for reusable numeric and coordinate renderers.
+- New shared text renderers should use `computeResponsiveInsets(W, H)` and consume `insets.responsive.textFillScale` for compact text-ceiling boosts.
+- Widgets with distinct geometry contracts should create a dedicated shared layout-owner module such as `ActiveRouteLayout` or `XteHighwayLayout` instead of embedding responsive floors in renderer code.
+- Consumer renderers read layout-owned `responsive` / `textFillScale`; they do not import `ResponsiveScaleProfile` directly.
 
 ## API/Interfaces
 
@@ -44,7 +48,9 @@ const insets = textEngine.computeResponsiveInsets(W, H);
 // -> { padX, innerY, gapBase, responsive: { minDim, t, textFillScale } }
 ```
 
-Phase 2 composite fit calls accept optional `textFillScale` and use it only as a consumer-side ceiling boost for compact caption/unit/header text. The shared profile still owns the compact curve itself.
+New shared text renderers should treat `computeResponsiveInsets(...)` as the stable responsive contract. `computeInsets(...)` remains a low-level helper, not the cross-widget ownership boundary.
+
+Composite fit calls accept optional `textFillScale` and use it only as a consumer-side ceiling boost for compact caption/unit/header text. The shared profile still owns the compact curve itself.
 
 Mode routing shape:
 

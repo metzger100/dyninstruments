@@ -45,6 +45,13 @@ Ownership:
 - `LinearGaugeLayout` owns linear-family ratio mode selection, insets/gaps, track/text rectangles, and row splitting.
 - `LinearGaugeEngine` and `LinearGaugeTextLayout` are consumers of that layout state; they do not own a second compact curve.
 
+## Responsive Ownership Contract
+
+- `ResponsiveScaleProfile` owns the shared `minDim -> t -> textFillScale` compaction contract.
+- `LinearGaugeLayout` maps that contract into linear-family insets, track/text rectangles, marker sizing inputs, and geometry scalars.
+- `LinearGaugeEngine`, `LinearGaugeTextLayout`, and wrapper hooks consume layout-owned `responsive`, `textFillScale`, and `compactGeometryScale`.
+- Wrapper modules stay thin: do not import `ResponsiveScaleProfile` directly and do not add user-visible responsive `Math.max(...)` / `clamp(...)` floors in wrapper code.
+
 ### LinearGaugeTextLayout
 
 - `resolveLabelBoost(mode)`
@@ -93,6 +100,8 @@ Hook `state` additions:
 - `state.responsive`
 - `state.textFillScale`
 - `state.layout.responsive`
+
+Wrappers should consume these layout-owned state fields instead of recomputing compact geometry locally.
 
 ### Axis Profile Matrix
 

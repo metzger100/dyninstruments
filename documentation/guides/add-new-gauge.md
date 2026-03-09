@@ -23,12 +23,15 @@ Create `widgets/radial/NewGaugeWidget/NewGaugeWidget.js`:
 
 1. UMD wrapper + `create(def, Helpers)`
 2. Resolve shared renderer: `Helpers.getModule("SemicircleRadialEngine").create(def, Helpers)`
-3. Provide gauge-specific functions only:
-- `formatDisplay(raw, props, unit, Helpers) -> { num, text }`
-- `tickSteps(range) -> { major, minor }`
-- `buildSectors(props, minV, maxV, arc, valueUtils, theme) -> Sector[]`
-  Pass `warningColor`/`alarmColor` scalars into shared sector builders (typically from `theme.colors.warning`/`theme.colors.alarm`).
-4. Build `renderCanvas` with `createRenderer(spec)`
+3. Respect responsive ownership:
+   - `SemicircleRadialLayout` already consumes `ResponsiveScaleProfile` and owns compact geometry/text boxes for the family.
+   - Keep wrapper code thin; do not import `ResponsiveScaleProfile` and do not add user-visible responsive `Math.max(...)` / `clamp(...)` floors in wrapper code.
+4. Provide gauge-specific functions only:
+   - `formatDisplay(raw, props, unit, Helpers) -> { num, text }`
+   - `tickSteps(range) -> { major, minor }`
+   - `buildSectors(props, minV, maxV, arc, valueUtils, theme) -> Sector[]`
+     Pass `warningColor`/`alarmColor` scalars into shared sector builders (typically from `theme.colors.warning`/`theme.colors.alarm`).
+5. Build `renderCanvas` with `createRenderer(spec)`
 
 ```javascript
 const rendererModule = Helpers.getModule("SemicircleRadialEngine");
@@ -49,7 +52,7 @@ const renderCanvas = renderer.createRenderer({
 });
 ```
 
-5. Export module spec:
+6. Export module spec:
 
 ```javascript
 return {
@@ -98,6 +101,7 @@ return {
 ```
 
 Do not edit `ClusterWidget.js` for kind-specific translation logic.
+Do not move layout, compact-geometry, or responsive-floor logic into mapper files.
 
 ## Step 5: Verify
 

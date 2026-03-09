@@ -62,6 +62,7 @@ node tools/check-coverage.mjs
 Blocking findings fail the gate; warning findings are non-blocking advisories.
 This includes fail-closed cross-file clone detection (`duplicate-functions`, `duplicate-block-clones`) and mixed-severity mapper complexity checks (`mapper-output-complexity`: warn at `9..12`, block at `>12`).
 It also includes warn-only fail-fast fallback/legacy rules (`catch-fallback-without-suppression`, `internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `css-js-default-duplication`, `premature-legacy-support`) plus blocking suppression validation (`invalid-lint-suppression`).
+Responsive ownership checks are part of the same gate: `responsive-profile-ownership` blocks new ownership drift, and `responsive-layout-hard-floor` tracks remaining warn-only hard-floor backlog until it reaches zero.
 
 For cleanup sessions tracked by garbage-collection baseline markers:
 

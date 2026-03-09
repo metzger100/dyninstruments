@@ -19,22 +19,28 @@ Phase A3 extracted `TextLayoutEngine` so new text widgets can stay thin:
 - `TextLayoutEngine` owns layout mode routing, fit calculation, and shared draw helpers.
 - Cluster mappers stay declarative (routing and normalized props only).
 
+## Responsive Ownership Decision
+
+- Use `TextLayoutEngine.computeResponsiveInsets(W, H)` when the renderer can be expressed with shared text rows and shared fit helpers.
+- If the widget needs dedicated rectangles or geometry ownership, create a shared layout-owner module under `shared/widget-kits/` that consumes `ResponsiveScaleProfile` and return layout-owned boxes to the renderer.
+- Do not import `ResponsiveScaleProfile` directly into text renderer modules and do not add user-visible responsive `Math.max(...)` / `clamp(...)` floors in widget code.
+
 ## Step 1: Create the Text Renderer Module
 
 Create a UMD component under `widgets/text/<WidgetName>/<WidgetName>.js`.
 
-Template example (`ActiveRouteTextWidget` style):
+Template example (shared text-family renderer style):
 
 ```javascript
 /**
- * Module: ActiveRouteTextWidget - Route name + leg distance + ETA text renderer
+ * Module: RouteSummaryTextWidget - Route name + leg distance + ETA text renderer
  * Documentation: documentation/guides/add-new-text-renderer.md
  * Depends: ThemeResolver, TextLayoutEngine, Helpers.applyFormatter
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniActiveRouteTextWidget = factory(); }
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniRouteSummaryTextWidget = factory(); }
 }(this, function () {
   "use strict";
 
@@ -123,7 +129,7 @@ Template example (`ActiveRouteTextWidget` style):
         captionText: parsed.routeName || parsed.caption,
         unitText: parsed.unit
       });
-      const insets = text.computeInsets(W, H);
+      const insets = text.computeResponsiveInsets(W, H);
       const key = text.makeFitCacheKey({
         mode: modeData.mode,
         W: W,
@@ -146,6 +152,7 @@ Template example (`ActiveRouteTextWidget` style):
           H: H,
           padX: insets.padX,
           innerY: insets.innerY,
+          textFillScale: insets.responsive.textFillScale,
           secScale: modeData.secScale,
           captionText: modeData.caption,
           unitText: modeData.unit,
@@ -186,28 +193,28 @@ Template example (`ActiveRouteTextWidget` style):
     function translateFunction() { return {}; }
 
     return {
-      id: "ActiveRouteTextWidget",
+      id: "RouteSummaryTextWidget",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
       translateFunction: translateFunction
     };
   }
 
-  return { id: "ActiveRouteTextWidget", create: create };
+  return { id: "RouteSummaryTextWidget", create: create };
 }));
 ```
 
-Key rule: parse and format widget data inside the renderer; do not move layout internals into mapper files.
+Key rule: parse and format widget data inside the renderer; do not move layout internals into mapper files. If the widget grows beyond shared text rows, stop and extract a layout-owner module instead of adding widget-local responsive logic.
 
 ## Step 2: Register in Component Registry
 
 Add the new component in `config/components.js`:
 
 ```javascript
-ActiveRouteTextWidget: {
-  js: BASE + "widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js",
+RouteSummaryTextWidget: {
+  js: BASE + "widgets/text/RouteSummaryTextWidget/RouteSummaryTextWidget.js",
   css: undefined,
-  globalKey: "DyniActiveRouteTextWidget",
+  globalKey: "DyniRouteSummaryTextWidget",
   deps: ["ThemeResolver", "TextLayoutEngine"]
 }
 ```
@@ -224,7 +231,7 @@ Example:
 ```javascript
 const rendererSpecs = {
   PositionCoordinateWidget: Helpers.getModule("PositionCoordinateWidget").create(def, Helpers),
-  ActiveRouteTextWidget: Helpers.getModule("ActiveRouteTextWidget").create(def, Helpers)
+  RouteSummaryTextWidget: Helpers.getModule("RouteSummaryTextWidget").create(def, Helpers)
 };
 ```
 
@@ -237,24 +244,26 @@ Update mapper translation to route kinds without embedding formatting logic.
 Example mapper branch:
 
 ```javascript
-if (req === "activeRoute") {
+if (req === "routeSummary") {
   return {
-    renderer: "ActiveRouteTextWidget",
-    routeName: p.activeRouteName,
-    legDistance: toolkit.num(p.activeRouteDistance),
-    eta: p.activeRouteEta,
+    renderer: "RouteSummaryTextWidget",
+    routeName: p.routeSummaryName,
+    legDistance: toolkit.num(p.routeSummaryDistance),
+    eta: p.routeSummaryEta,
     distanceFormatter: "formatDistance",
     distanceFormatterParameters: [],
     etaFormatter: "formatTime",
     etaFormatterParameters: [],
-    caption: cap("activeRoute"),
-    unit: unit("activeRoute")
+    caption: cap("routeSummary"),
+    unit: unit("routeSummary")
   };
 }
 ```
 
 Formatter names and parameter signatures must match the catalog:
 [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md).
+
+If the renderer needs custom geometry ownership like `ActiveRouteTextWidget` or `XteDisplayWidget`, keep the mapper contract equally declarative but route into a renderer that consumes its own shared layout-owner module.
 
 ## Step 5: Verify
 
