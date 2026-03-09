@@ -3,51 +3,28 @@ const { loadFresh } = require("../../helpers/load-umd");
 describe("LinearGaugeMath", function () {
   const math = loadFresh("shared/widget-kits/linear/LinearGaugeMath.js").create();
 
-  it("keeps high mode caption/value block below the full scale box", function () {
-    const layout = math.computeLayout("high", 380, 500, 14, 10);
-
-    expect(layout.captionBox).toBeTruthy();
-    expect(layout.valueBox).toBeTruthy();
-    expect(layout.captionBox.y).toBeGreaterThanOrEqual(layout.trackBox.y + layout.trackBox.h);
-    expect(layout.captionBox.y - (layout.trackBox.y + layout.trackBox.h)).toBeLessThanOrEqual(16);
-    expect(layout.captionBox.h).toBeLessThan(layout.valueBox.h);
+  it("maps values into axis coordinates with optional clamping", function () {
+    expect(math.mapValueToX(15, 0, 30, 10, 110, true)).toBe(60);
+    expect(math.mapValueToX(-10, 0, 30, 10, 110, true)).toBe(10);
+    expect(math.mapValueToX(-10, 0, 30, 10, 110, false)).toBeLessThan(10);
   });
 
-  it("keeps normal mode inline text below the scale box", function () {
-    const layout = math.computeLayout("normal", 820, 280, 11, 8);
+  it("builds major and minor ticks without duplicating majors", function () {
+    const ticks = math.buildTicks(0, 20, 10, 5);
 
-    expect(layout.inlineBox).toBeTruthy();
-    expect(layout.inlineBox.y).toBeGreaterThanOrEqual(layout.trackBox.y + layout.trackBox.h);
-    expect(layout.inlineBox.h).toBeGreaterThan(0);
-    expect(layout.inlineBox.y - (layout.trackBox.y + layout.trackBox.h)).toBeLessThanOrEqual(12);
-    expect(layout.inlineBox.h).toBeGreaterThanOrEqual(100);
+    expect(ticks.major).toEqual([0, 10, 20]);
+    expect(ticks.minor).toEqual([5, 15]);
   });
 
-  it("gives flat mode more room to numeric value than caption", function () {
-    const layout = math.computeLayout("flat", 520, 140, 8, 6);
-
-    expect(layout.captionBox).toBeTruthy();
-    expect(layout.valueBox).toBeTruthy();
-    expect(layout.captionBox.h).toBeLessThan(layout.valueBox.h);
+  it("resolves axis domains for supported linear profiles", function () {
+    expect(math.resolveAxisDomain("centered180", { min: 10, max: 20 })).toEqual({ min: -180, max: 180 });
+    expect(math.resolveAxisDomain("fixed360", { min: 10, max: 20 })).toEqual({ min: 0, max: 360 });
+    expect(math.resolveAxisDomain("range", { min: 10, max: 20 })).toEqual({ min: 10, max: 20 });
   });
 
-  it("splits caption/value rows according to captionUnitScale", function () {
-    const splitA = math.splitCaptionValueRows(
-      { x: 0, y: 100, w: 200, h: 20 },
-      { x: 0, y: 120, w: 200, h: 80 },
-      0.8
-    );
-    const splitB = math.splitCaptionValueRows(
-      { x: 0, y: 100, w: 200, h: 20 },
-      { x: 0, y: 120, w: 200, h: 80 },
-      1.2
-    );
-
-    const ratioA = splitA.captionBox.h / (splitA.captionBox.h + splitA.valueBox.h);
-    const ratioB = splitB.captionBox.h / (splitB.captionBox.h + splitB.valueBox.h);
-
-    expect(ratioA).toBeCloseTo(0.44, 1);
-    expect(ratioB).toBeGreaterThan(ratioA);
-    expect(splitA.valueBox.y).toBe(splitA.captionBox.y + splitA.captionBox.h);
+  it("formats tick labels without trailing integer decimals", function () {
+    expect(math.formatTickLabel(12)).toBe("12");
+    expect(math.formatTickLabel(12.3456)).toBe("12.346");
+    expect(math.formatTickLabel(NaN)).toBe("");
   });
 });

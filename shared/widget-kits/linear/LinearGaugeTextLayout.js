@@ -10,6 +10,96 @@
 }(this, function () {
   "use strict";
 
+  function clampTextFillScale(value) {
+    const n = Number(value);
+    return Number.isFinite(n) && n > 0 ? n : 1;
+  }
+
+  function scaleTextCeiling(basePx, maxPx, textFillScale) {
+    const safeMax = Math.max(1, Math.floor(Number(maxPx) || 0));
+    const safeBase = Math.max(1, Math.floor(Number(basePx) || 0));
+    const fillDelta = Math.max(0, clampTextFillScale(textFillScale) - 1);
+    const remaining = Math.max(0, safeMax - safeBase);
+    return Math.max(1, Math.min(safeMax, safeBase + Math.floor(remaining * fillDelta)));
+  }
+
+  function setCanvasFont(ctx, px, weight, family) {
+    ctx.font = Math.floor(Number(weight) || 0) + " " + Math.max(1, Math.floor(Number(px) || 0)) + "px " + (family || "sans-serif");
+  }
+
+  function measureFitTotal(ctx, family, valueText, unitText, fit, valueWeight, labelWeight) {
+    setCanvasFont(ctx, fit.vPx, valueWeight, family);
+    const valueWidth = ctx.measureText(String(valueText || "")).width;
+    if (!unitText) {
+      return valueWidth;
+    }
+    setCanvasFont(ctx, fit.uPx, labelWeight, family);
+    return valueWidth + fit.gap + ctx.measureText(String(unitText)).width;
+  }
+
+  function measureInlineTotal(ctx, family, caption, valueText, unitText, fit, valueWeight, labelWeight) {
+    let total = 0;
+    if (caption) {
+      setCanvasFont(ctx, fit.cPx, labelWeight, family);
+      total += ctx.measureText(String(caption)).width + fit.g1;
+    }
+    setCanvasFont(ctx, fit.vPx, valueWeight, family);
+    total += ctx.measureText(String(valueText || "")).width;
+    if (unitText) {
+      setCanvasFont(ctx, fit.uPx, labelWeight, family);
+      total += fit.g2 + ctx.measureText(String(unitText)).width;
+    }
+    return total;
+  }
+
+  function scaleValueUnitFit(state, valueText, unitText, fit, boxHeight) {
+    if (!fit) {
+      return fit;
+    }
+    const maxPx = Math.max(1, Math.floor(Number(boxHeight) || 0));
+    const scaledFit = {
+      vPx: scaleTextCeiling(fit.vPx, maxPx, state.textFillScale),
+      uPx: unitText ? scaleTextCeiling(fit.uPx, maxPx, state.textFillScale) : 0,
+      gap: unitText ? scaleTextCeiling(fit.gap, Math.max(1, Math.floor(maxPx * 0.5)), state.textFillScale) : 0
+    };
+    scaledFit.total = measureFitTotal(
+      state.ctx,
+      state.family,
+      valueText,
+      unitText,
+      scaledFit,
+      state.valueWeight,
+      state.labelWeight
+    );
+    return scaledFit;
+  }
+
+  function scaleInlineFit(state, caption, valueText, unitText, fit, boxHeight) {
+    if (!fit) {
+      return fit;
+    }
+    const maxPx = Math.max(1, Math.floor(Number(boxHeight) || 0));
+    const gapMaxPx = Math.max(1, Math.floor(maxPx * 0.5));
+    const scaledFit = {
+      cPx: caption ? scaleTextCeiling(fit.cPx, maxPx, state.textFillScale) : 0,
+      vPx: scaleTextCeiling(fit.vPx, maxPx, state.textFillScale),
+      uPx: unitText ? scaleTextCeiling(fit.uPx, maxPx, state.textFillScale) : 0,
+      g1: caption ? scaleTextCeiling(fit.g1, gapMaxPx, state.textFillScale) : 0,
+      g2: unitText ? scaleTextCeiling(fit.g2, gapMaxPx, state.textFillScale) : 0
+    };
+    scaledFit.total = measureInlineTotal(
+      state.ctx,
+      state.family,
+      caption,
+      valueText,
+      unitText,
+      scaledFit,
+      state.valueWeight,
+      state.labelWeight
+    );
+    return scaledFit;
+  }
+
   function resolveLabelBoost(mode) {
     if (mode === "high") {
       return 1.2;
@@ -94,7 +184,8 @@
       state.valueWeight,
       state.labelWeight
     );
-    const captionMax = Math.max(8, Math.floor(fit.vPx * secScale));
+    const captionBasePx = Math.max(1, Math.floor(fit.vPx * secScale));
+    const captionMax = scaleTextCeiling(captionBasePx, box.h, state.textFillScale);
     textApi.drawCaptionMax(
       state.ctx,
       state.family,
@@ -124,6 +215,7 @@
       state.valueWeight,
       state.labelWeight
     );
+    const scaledFit = scaleValueUnitFit(state, valueText, unitText, fit, box.h);
     textApi.drawValueUnitWithFit(
       state.ctx,
       state.family,
@@ -133,7 +225,7 @@
       box.h,
       valueText,
       unitText,
-      fit,
+      scaledFit,
       align,
       state.valueWeight,
       state.labelWeight
@@ -156,6 +248,7 @@
       state.valueWeight,
       state.labelWeight
     );
+    const scaledFit = scaleInlineFit(state, caption, valueText, unitText, fit, box.h);
     textApi.drawInlineCapValUnit(
       state.ctx,
       state.family,
@@ -166,7 +259,7 @@
       caption,
       valueText,
       unitText,
-      fit,
+      scaledFit,
       state.valueWeight,
       state.labelWeight
     );
@@ -175,7 +268,7 @@
   function create() {
     return {
       id: "LinearGaugeTextLayout",
-      version: "0.1.0",
+      version: "0.2.0",
       resolveLabelBoost: resolveLabelBoost,
       drawTickLabels: drawTickLabels,
       drawCaptionRow: drawCaptionRow,

@@ -25,6 +25,10 @@
       return { left: left, right: right };
     }
 
+    function resolveGapPx(width, ratio) {
+      return Math.max(1, Math.floor(Math.max(0, Number(width) || 0) * ratio));
+    }
+
     function resolveSpeedText(rawSpeed, props, speedUnit, defaultText) {
       const n = Number(rawSpeed);
       if (!isFinite(n)) {
@@ -77,7 +81,7 @@
       if (!captionBox || !valueBox) {
         return;
       }
-      const gap = Math.max(6, Math.floor(captionBox.w * 0.04));
+      const gap = resolveGapPx(captionBox.w, 0.04);
       const captionCols = splitHorizontal(captionBox, gap);
       const valueCols = splitHorizontal(valueBox, gap);
       textLayoutApi.drawCaptionRow(state, textApi, left.caption, captionCols.left, secScale, leftAlign);
@@ -90,7 +94,7 @@
       if (!inlineBox || inlineBox.w <= 0 || inlineBox.h <= 0) {
         return;
       }
-      const cols = splitHorizontal(inlineBox, Math.max(8, Math.floor(inlineBox.w * 0.05)));
+      const cols = splitHorizontal(inlineBox, resolveGapPx(inlineBox.w, 0.05));
       textLayoutApi.drawInlineRow(state, textApi, left.caption, left.value, left.unit, cols.left, secScale);
       textLayoutApi.drawInlineRow(state, textApi, right.caption, right.value, right.unit, cols.right, secScale);
     }
