@@ -71,8 +71,11 @@
 
     function computeInsets(W, H) {
       return {
+        // dyni-lint-disable-next-line responsive-layout-hard-floor -- legacy non-responsive API kept for comparison coverage; responsive callers use computeResponsiveInsets
         padX: Math.max(6, Math.floor(Math.min(W, H) * 0.04)),
+        // dyni-lint-disable-next-line responsive-layout-hard-floor -- legacy non-responsive API kept for comparison coverage; responsive callers use computeResponsiveInsets
         innerY: Math.max(3, Math.floor(Math.min(W, H) * 0.035)),
+        // dyni-lint-disable-next-line responsive-layout-hard-floor -- legacy non-responsive API kept for comparison coverage; responsive callers use computeResponsiveInsets
         gapBase: Math.max(6, Math.floor(Math.min(W, H) * 0.06))
       };
     }

@@ -43,11 +43,14 @@
   function computeGeometry(width, height, pad, ringWidthFactor) {
     const availableWidth = Math.max(1, width - pad * 2);
     const availableHeight = Math.max(1, height - pad * 2);
+    // dyni-lint-disable-next-line responsive-layout-hard-floor -- minimum semicircle radius keeps geometry drawable on extremely small canvases
     const radius = Math.max(14, Math.min(Math.floor(availableWidth * 0.5), Math.floor(availableHeight)));
     const gaugeLeft = pad + Math.floor((availableWidth - radius * 2) * 0.5);
     const gaugeTop = pad + Math.floor((availableHeight - radius) * 0.5);
     const ringFactor = Number.isFinite(ringWidthFactor) ? ringWidthFactor : 0.12;
+    // dyni-lint-disable-next-line responsive-layout-hard-floor -- ring width needs a minimum stroke to remain drawable once radius collapses
     const ringW = Math.max(6, Math.floor(radius * ringFactor));
+    // dyni-lint-disable-next-line responsive-layout-hard-floor -- pointer base depth needs a minimum shape for canvas viability
     const needleDepth = Math.max(8, Math.floor(radius * 0.11));
 
     return {

@@ -1,6 +1,6 @@
 # Implementation Plan
 
-**Status:** ⏳ In Progress | Phases 1-6 implemented; later responsive rollout phases pending
+**Status:** ⏳ In Progress | Phases 1-7 implemented; later responsive rollout phases pending
 
 ## Overview
 
@@ -56,8 +56,8 @@ Scope:
 ## Current Dyninstruments Gaps
 
 - `ResponsiveScaleProfile` now owns the shared base compaction curve, and both `CenterDisplayLayout` and the shared text pipeline consume it.
-- Phase 2 closes the numeric/coordinate text gap, Phase 4 closes the shared linear gap, Phase 5 closes the shared semicircle gap, and Phase 6 closes the shared full-circle gap, but `ActiveRouteTextWidget` and `XteHighwayPrimitives` still own local responsive floors or spacing rules.
-- The current custom lint/smell system does not yet block new hardcoded responsive-layout floors or missing adoption of a shared compact profile.
+- Dedicated nav/text ownership is now routed through `ActiveRouteLayout` and `XteHighwayLayout`, but `TextTileLayout` and `LinearGaugeTextLayout` still keep a few warn-only local hard floors.
+- Phase 7 adds fail-closed ownership enforcement plus a warn-only hard-floor rollout rule, so new responsive-profile ownership drift now blocks while the remaining hard-floor backlog stays tracked in `TECH-DEBT.md`.
 - Current tests now validate compact-vs-large text compaction for `CenterDisplay`, `ThreeValueTextWidget`, `PositionCoordinateWidget`, and the shared text engine.
 
 ## Final Implementation Goal
@@ -103,10 +103,9 @@ Scope:
 | `shared/widget-kits/radial/FullCircleRadialTextLayout.js` | Full-circle text layout helper | Actual change in this session: now consumes layout-owned safe bounds plus compact text-fill scaling |
 | `widgets/radial/CompassRadialWidget/CompassRadialWidget.js` | Full-circle label sprite owner | Actual change in this session: now consumes layout-owned label/pointer/marker geometry |
 | `config/components.js` | Component registry | Actual change in this session: registered `LinearGaugeLayout` and updated `LinearGaugeEngine` deps |
-| `tools/check-patterns/rules.mjs` | Pattern-rule registry | Planned change: add responsive-layout anti-regression rules |
-| `tools/check-smell-contracts.mjs` | Semantic contract checks | Planned change: add responsive adoption / coverage contract |
-| `tests/tools/check-patterns.test.js` | Pattern-rule coverage | Planned change |
-| `tests/tools/check-smell-contracts.test.js` | Contract-rule coverage | Planned change |
+| `tools/check-patterns/rules.mjs` | Pattern-rule registry | Actual change in this session: registered responsive rollout + ownership enforcement rules |
+| `tools/check-patterns/rules-responsive.mjs` | Responsive rule runners | Actual change in this session: new hard-floor and ownership checks |
+| `tests/tools/check-patterns-responsive.test.js` | Responsive pattern-rule coverage | Actual change in this session |
 
 ## Todo Steps
 
@@ -232,13 +231,15 @@ Status: implemented. `FullCircleRadialLayout` now owns full-circle responsive ge
 
 ### Phase 7 - Add fail-closed enforcement via linters and smell contracts
 
+Status: implemented. Phase 7 now adds `responsive-layout-hard-floor` as a warn-only rollout rule, promotes `responsive-profile-ownership` to `block` after a zero-warning repo run, adds dedicated tool coverage, and tracks the remaining `responsive-layout-hard-floor=3` warnings in `TECH-DEBT.md` as of `2026-03-09`.
+
 1. Add a new `check-patterns` rollout rule for layout-driving hard floors in widget/shared layout code.
    - target: user-visible layout/text minima such as `Math.max(16, ...)`, `Math.max(40, ...)`, `clamp(..., 10, ...)`
    - exclude: low-level canvas primitives, buffer sizing, and explicit safety guards
    - start as `warn`
 2. Add a second `check-patterns` or `check-smell-contracts` rule that enforces adoption of the shared responsive profile in layout-owner modules.
-   - target owners: shared text helpers, `ActiveRoute`, `XTE`, linear layout owner, semicircle engine, full-circle engine/text layout, `CenterDisplayLayout`
-   - choose the semantic contract tool if file-text regex would be too brittle
+   - target owners: `TextLayoutEngine`, `CenterDisplayLayout`, `ActiveRouteLayout`, `XteHighwayLayout`, `LinearGaugeLayout`, `SemicircleRadialLayout`, `FullCircleRadialLayout`
+   - forbid direct `ResponsiveScaleProfile` imports in consumer modules that should read layout-owned state instead
 3. Add tool tests covering both new rules.
 4. Record any warn-only backlog in `documentation/TECH-DEBT.md`.
 5. Promote the new rules to `block` only after warning backlog reaches zero, following the repo’s existing smell-prevention policy.
