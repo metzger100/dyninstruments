@@ -150,21 +150,24 @@
       js: BASE + "shared/widget-kits/radial/RadialToolkit.js",
       css: undefined,
       globalKey: "DyniRadialToolkit",
-      deps: [
-        "ThemeResolver",
-        "RadialTextLayout",
-        "RadialValueMath",
-        "RadialAngleMath",
-        "RadialTickMath",
-        "RadialCanvasPrimitives",
-        "RadialFrameRenderer"
-      ]
+      deps: ["ThemeResolver", "RadialTextLayout", "RadialValueMath", "RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives", "RadialFrameRenderer"]
+    },
+    SemicircleRadialLayout: {
+      js: BASE + "shared/widget-kits/radial/SemicircleRadialLayout.js",
+      css: undefined,
+      globalKey: "DyniSemicircleRadialLayout",
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+    },
+    SemicircleRadialTextLayout: {
+      js: BASE + "shared/widget-kits/radial/SemicircleRadialTextLayout.js",
+      css: undefined,
+      globalKey: "DyniSemicircleRadialTextLayout"
     },
     SemicircleRadialEngine: {
       js: BASE + "shared/widget-kits/radial/SemicircleRadialEngine.js",
       css: undefined,
       globalKey: "DyniSemicircleRadialEngine",
-      deps: ["RadialToolkit"]
+      deps: ["RadialToolkit", "SemicircleRadialLayout", "SemicircleRadialTextLayout"]
     },
     FullCircleRadialEngine: {
       js: BASE + "shared/widget-kits/radial/FullCircleRadialEngine.js",

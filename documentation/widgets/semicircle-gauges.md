@@ -6,7 +6,9 @@
 
 The four semicircle gauges share one renderer implementation:
 
-- Shared rendering and layout in `shared/widget-kits/radial/SemicircleRadialEngine.js`
+- Shared responsive layout ownership in `shared/widget-kits/radial/SemicircleRadialLayout.js`
+- Shared mode-routed text fitting/draw in `shared/widget-kits/radial/SemicircleRadialTextLayout.js`
+- Shared rendering orchestration in `shared/widget-kits/radial/SemicircleRadialEngine.js`
 - Shared helper APIs via `RadialToolkit` (`ThemeResolver`, `RadialTextLayout`, `RadialValueMath`, `RadialAngleMath`, `RadialTickMath`, draw utils)
 - Gauge wrappers keep only formatting, tick-profile selection, and sector strategy
 
@@ -17,6 +19,8 @@ The four semicircle gauges share one renderer implementation:
 | Shared facade | `shared/widget-kits/radial/RadialToolkit.js` |
 | Shared text helpers | `shared/widget-kits/radial/RadialTextLayout.js` |
 | Shared numeric/angle helpers | `shared/widget-kits/radial/RadialValueMath.js` |
+| Responsive layout owner | `shared/widget-kits/radial/SemicircleRadialLayout.js` |
+| Mode text helper | `shared/widget-kits/radial/SemicircleRadialTextLayout.js` |
 | Shared semicircle renderer | `shared/widget-kits/radial/SemicircleRadialEngine.js` |
 | Speed wrapper | `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js` |
 | Depth wrapper | `widgets/radial/DepthRadialWidget/DepthRadialWidget.js` |
@@ -30,22 +34,29 @@ In `config/components.js`, all four gauges depend on both `SemicircleRadialEngin
 ```text
 SpeedRadialWidget/DepthRadialWidget/TemperatureRadialWidget/VoltageRadialWidget
   -> SemicircleRadialEngine + RadialValueMath
-  -> RadialToolkit
+  -> RadialToolkit + SemicircleRadialLayout + SemicircleRadialTextLayout
   -> RadialTextLayout + RadialValueMath + RadialAngleMath + RadialTickMath + RadialCanvasPrimitives + RadialFrameRenderer
+  -> ResponsiveScaleProfile + LayoutRectMath
 ```
 
 ## Shared Render Flow
 
 `SemicircleRadialEngine.createRenderer(spec)` handles:
 
-1. Canvas setup + mode detection (`flat`, `normal`, `high`)
+1. Canvas setup + theme resolve + responsive mode detection (`flat`, `normal`, `high`)
 2. One-time theme token resolve (`theme = RadialToolkit.theme.resolve(canvas)`)
-3. Gauge geometry and pointer angle mapping
+3. `SemicircleRadialLayout.computeInsets()` / `computeLayout()` for shared responsive geometry, label metrics, and mode boxes
 4. Arc ring + sectors + pointer + ticks + labels
-5. Mode-specific text layout
+5. `SemicircleRadialTextLayout.drawModeText()` for flat/high/normal caption-value-unit layout
 6. Disconnect overlay
 
 Pointer and sector rendering in shared gauge paths use direct scalar token values passed at callsites.
+
+Responsive ownership:
+
+- `ResponsiveScaleProfile` owns the compact curve (`textFillScale`)
+- `SemicircleRadialLayout` maps that curve into semicircle-family spacing, label metrics, and text boxes
+- `SemicircleRadialTextLayout` consumes layout-owned boxes and `textFillScale`; it does not create a second compaction curve
 
 ## Gauge-Specific Responsibilities
 
@@ -101,11 +112,11 @@ Removed from wrappers:
 
 ## Performance
 
-- Text-fit caching is owned by `SemicircleRadialEngine.createRenderer(spec)` closure state (`fitCache`), so each gauge renderer instance keeps its own cache.
+- Text-fit caching is still owned by the `SemicircleRadialEngine.createRenderer(spec)` closure state (`fitCache`), but the per-mode cache entries are consumed by `SemicircleRadialTextLayout`.
 - Covered fitting paths: `flat` (compact), `high`, and `normal` layouts.
 - Cache keys include all fitting-relevant inputs:
   - shared inputs: `W`, `H`, active mode, `caption`, `valueText`, `unit`, effective `secScale` (`captionUnitScale` after clamp), resolved font family, and theme font weights.
-  - geometry/layout inputs: mode-specific box dimensions and geometry values used by fitting (`R`, `ringW`, placement/box metrics, and normal-mode `rSafe` search bounds).
+  - geometry/layout inputs: mode-specific box dimensions and layout-owned geometry values (`R`, `ringW`, label metrics, placement boxes, and normal-mode `rSafe` / search bounds).
 - Invalidation is automatic by key mismatch when any text, typography, scale, or geometry input changes.
 - Draw calls still execute every frame; only intermediate fitting outputs (chosen sizes/layout fit results) are reused on cache hits.
 

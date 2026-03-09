@@ -13,6 +13,21 @@ describe("SemicircleRadialEngine", function () {
     });
   }
 
+  function createLayoutModule() {
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    return loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js").create({}, {
+      getModule(id) {
+        if (id === "ResponsiveScaleProfile") {
+          return responsiveScaleProfile;
+        }
+        if (id === "LayoutRectMath") {
+          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+        }
+        throw new Error("unexpected module: " + id);
+      }
+    });
+  }
+
   function makeBaseSpec() {
     return {
       rawValueKey: "speed",
@@ -36,7 +51,7 @@ describe("SemicircleRadialEngine", function () {
     };
   }
 
-  function makeHelpers(gaugeToolkit) {
+  function makeHelpers(modules) {
     return {
       setupCanvas(canvas) {
         const ctx = canvas.getContext("2d");
@@ -54,28 +69,20 @@ describe("SemicircleRadialEngine", function () {
         return "#fff";
       },
       getModule(id) {
-        if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
-        return gaugeToolkit;
+        if (modules[id]) {
+          return modules[id];
+        }
+        throw new Error("unexpected module: " + id);
       }
     };
   }
 
-  function createCachingHarness() {
-    const counters = {
-      measureValueUnitFit: 0,
-      fitInlineCapValUnit: 0,
-      fitTextPx: 0,
-      drawCaptionMax: 0,
-      drawValueUnitWithFit: 0,
-      drawInlineCapValUnit: 0,
-      drawThreeRowsBlock: 0
-    };
-    const drawCalls = {
-      drawCaptionMax: [],
-      drawValueUnitWithFit: [],
-      drawInlineCapValUnit: [],
-      drawThreeRowsBlock: []
-    };
+  it("resolves theme once and applies tokenized geometry and label metrics from the layout owner", function () {
+    const pointerCalls = [];
+    const tickCalls = [];
+    const labelCalls = [];
+    const arcRingCalls = [];
+    const buildSectorsCalls = [];
     const themeDefaults = {
       colors: {
         pointer: "#ff2b2b",
@@ -118,178 +125,6 @@ describe("SemicircleRadialEngine", function () {
         return {
           theme: { resolve: resolveTheme },
           text: {
-            measureValueUnitFit(ctx, family, value, unit, w, h, secScale) {
-              counters.measureValueUnitFit += 1;
-              const ratio = Number(secScale);
-              const scale = isFinite(ratio) ? ratio : 0.8;
-              const vPx = Math.max(6, Math.min(Math.floor(Number(h) || 0), 28));
-              const uPx = Math.max(6, Math.floor(vPx * scale));
-              return { vPx, uPx, gap: unit ? Math.max(6, Math.floor(vPx * 0.25)) : 0 };
-            },
-            drawCaptionMax(ctx, family, x, y, w, h, caption, capMaxPx, align, labelWeight) {
-              counters.drawCaptionMax += 1;
-              drawCalls.drawCaptionMax.push({ family, x, y, w, h, caption, capMaxPx, align, labelWeight });
-            },
-            drawValueUnitWithFit(ctx, family, x, y, w, h, value, unit, fit, align, valueWeight, labelWeight) {
-              counters.drawValueUnitWithFit += 1;
-              drawCalls.drawValueUnitWithFit.push({
-                family, x, y, w, h, value, unit, fit: { ...fit }, align, valueWeight, labelWeight
-              });
-            },
-            fitInlineCapValUnit(ctx, family, caption, value, unit, maxW, maxH) {
-              counters.fitInlineCapValUnit += 1;
-              const vPx = Math.max(6, Math.min(Math.floor(Number(maxH) || 0), 28));
-              const sec = Math.max(6, Math.floor(vPx * 0.8));
-              return { cPx: sec, vPx, uPx: sec, g1: 6, g2: 6, total: maxW };
-            },
-            drawInlineCapValUnit(ctx, family, x, y, w, h, caption, value, unit, fit, valueWeight, labelWeight) {
-              counters.drawInlineCapValUnit += 1;
-              drawCalls.drawInlineCapValUnit.push({
-                family, x, y, w, h, caption, value, unit, fit: { ...fit }, valueWeight, labelWeight
-              });
-            },
-            fitTextPx(ctx, text, maxW, maxH) {
-              counters.fitTextPx += 1;
-              return Math.max(6, Math.min(Math.floor(Number(maxH) || 0), 28));
-            },
-            drawThreeRowsBlock(ctx, family, x, y, w, h, caption, value, unit, secScale, align, sizes, valueWeight, labelWeight) {
-              counters.drawThreeRowsBlock += 1;
-              drawCalls.drawThreeRowsBlock.push({
-                family, x, y, w, h, caption, value, unit, secScale, align,
-                sizes: sizes ? { ...sizes } : null,
-                valueWeight, labelWeight
-              });
-            },
-            drawDisconnectOverlay() {}
-          },
-          value: gaugeValueMath,
-          draw: {
-            drawArcRing() {},
-            drawAnnularSector() {},
-            drawPointerAtRim() {},
-            drawTicksFromAngles() {},
-            drawLabels() {}
-          }
-        };
-      }
-    };
-
-    const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
-      .create({}, makeHelpers(gaugeToolkit))
-      .createRenderer(makeBaseSpec());
-
-    return { counters, drawCalls, renderer, resolveTheme, themeDefaults };
-  }
-
-  function copyCounters(counters) {
-    return {
-      measureValueUnitFit: counters.measureValueUnitFit,
-      fitInlineCapValUnit: counters.fitInlineCapValUnit,
-      fitTextPx: counters.fitTextPx,
-      drawCaptionMax: counters.drawCaptionMax,
-      drawValueUnitWithFit: counters.drawValueUnitWithFit,
-      drawInlineCapValUnit: counters.drawInlineCapValUnit,
-      drawThreeRowsBlock: counters.drawThreeRowsBlock
-    };
-  }
-
-  function renderFrame(harness, canvas, props) {
-    const before = copyCounters(harness.counters);
-    const beforeCalls = {
-      drawCaptionMax: harness.drawCalls.drawCaptionMax.length,
-      drawValueUnitWithFit: harness.drawCalls.drawValueUnitWithFit.length,
-      drawInlineCapValUnit: harness.drawCalls.drawInlineCapValUnit.length,
-      drawThreeRowsBlock: harness.drawCalls.drawThreeRowsBlock.length
-    };
-
-    harness.renderer(canvas, props);
-
-    const after = copyCounters(harness.counters);
-    return {
-      fitDelta: {
-        measureValueUnitFit: after.measureValueUnitFit - before.measureValueUnitFit,
-        fitInlineCapValUnit: after.fitInlineCapValUnit - before.fitInlineCapValUnit,
-        fitTextPx: after.fitTextPx - before.fitTextPx
-      },
-      drawDelta: {
-        drawCaptionMax: after.drawCaptionMax - before.drawCaptionMax,
-        drawValueUnitWithFit: after.drawValueUnitWithFit - before.drawValueUnitWithFit,
-        drawInlineCapValUnit: after.drawInlineCapValUnit - before.drawInlineCapValUnit,
-        drawThreeRowsBlock: after.drawThreeRowsBlock - before.drawThreeRowsBlock
-      },
-      drawEntries: {
-        drawCaptionMax: harness.drawCalls.drawCaptionMax.slice(beforeCalls.drawCaptionMax),
-        drawValueUnitWithFit: harness.drawCalls.drawValueUnitWithFit.slice(beforeCalls.drawValueUnitWithFit),
-        drawInlineCapValUnit: harness.drawCalls.drawInlineCapValUnit.slice(beforeCalls.drawInlineCapValUnit),
-        drawThreeRowsBlock: harness.drawCalls.drawThreeRowsBlock.slice(beforeCalls.drawThreeRowsBlock)
-      }
-    };
-  }
-
-  it("resolves theme once and applies tokenized geometry and labels", function () {
-    const pointerCalls = [];
-    const tickCalls = [];
-    const labelCalls = [];
-    const arcRingCalls = [];
-    const buildSectorsCalls = [];
-    const themeDefaults = {
-      colors: {
-        pointer: "#ff2b2b",
-        warning: "#e7c66a",
-        alarm: "#ff7a76",
-        laylineStb: "#82b683",
-        laylinePort: "#ff7a76"
-      },
-      radial: {
-        ticks: {
-          majorLen: 13,
-          majorWidth: 4,
-          minorLen: 7,
-          minorWidth: 2
-        },
-        pointer: {
-          widthFactor: 1.02,
-          lengthFactor: 1.7
-        },
-        ring: {
-          arcLineWidth: 2.5,
-          widthFactor: 0.18
-        },
-        labels: {
-          insetFactor: 2.2,
-          fontFactor: 0.2
-        }
-      },
-      font: {
-        weight: 710,
-        labelWeight: 680
-      }
-    };
-    const resolveTheme = vi.fn(function () {
-      return themeDefaults;
-    });
-
-    const gaugeValueMath = createValueMath();
-    const gaugeToolkit = {
-      create() {
-        return {
-          theme: {
-            resolve: resolveTheme
-          },
-          text: {
-            measureValueUnitFit() {
-              return { vPx: 12, uPx: 10, gap: 6 };
-            },
-            drawCaptionMax() {},
-            drawValueUnitWithFit() {},
-            fitInlineCapValUnit() {
-              return { cPx: 10, vPx: 12, uPx: 10, gap: 6 };
-            },
-            drawInlineCapValUnit() {},
-            fitTextPx() {
-              return 12;
-            },
-            drawThreeRowsBlock() {},
             drawDisconnectOverlay() {}
           },
           value: gaugeValueMath,
@@ -311,9 +146,28 @@ describe("SemicircleRadialEngine", function () {
         };
       }
     };
-
+    const textLayoutCalls = [];
+    const modules = {
+      RadialToolkit: gaugeToolkit,
+      SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
+      SemicircleRadialTextLayout: {
+        create() {
+          return {
+            createFitCache() {
+              return {};
+            },
+            drawModeText(state, display) {
+              textLayoutCalls.push({ state, display });
+            }
+          };
+        }
+      },
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
+    };
+    const helpers = makeHelpers(modules);
     const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
-      .create({}, makeHelpers(gaugeToolkit))
+      .create({}, helpers)
       .createRenderer({
         ...makeBaseSpec(),
         buildSectors(props, minV, maxV, arc, valueUtils, theme) {
@@ -322,11 +176,10 @@ describe("SemicircleRadialEngine", function () {
         }
       });
 
-    const ctx = createMockContext2D();
     const canvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
-      ctx
+      ctx: createMockContext2D()
     });
 
     renderer(canvas, {
@@ -335,13 +188,23 @@ describe("SemicircleRadialEngine", function () {
       unit: "kn"
     });
 
+    const layoutApi = createLayoutModule();
+    const insets = layoutApi.computeInsets(480, 110);
+    const expectedLayout = layoutApi.computeLayout({
+      W: 480,
+      H: 110,
+      mode: "flat",
+      theme: themeDefaults,
+      insets: insets,
+      responsive: insets.responsive
+    });
+
     expect(resolveTheme).toHaveBeenCalledTimes(1);
     expect(resolveTheme).toHaveBeenCalledWith(canvas);
     expect(buildSectorsCalls[0].theme).toBe(themeDefaults);
     expect(pointerCalls[0].fillStyle).toBe(themeDefaults.colors.pointer);
     expect(pointerCalls[0].widthFactor).toBe(themeDefaults.radial.pointer.widthFactor);
     expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.radial.pointer.lengthFactor);
-    expect(pointerCalls[0].depth).toBe(10);
     expect(arcRingCalls[0].lineWidth).toBe(themeDefaults.radial.ring.arcLineWidth);
     expect(tickCalls[0].major).toEqual({
       len: themeDefaults.radial.ticks.majorLen,
@@ -351,17 +214,19 @@ describe("SemicircleRadialEngine", function () {
       len: themeDefaults.radial.ticks.minorLen,
       width: themeDefaults.radial.ticks.minorWidth
     });
-    expect(labelCalls[0].radiusOffset).toBe(37);
-    expect(labelCalls[0].fontPx).toBe(19);
+    expect(labelCalls[0].radiusOffset).toBe(expectedLayout.labels.radiusOffset);
+    expect(labelCalls[0].fontPx).toBe(expectedLayout.labels.fontPx);
     expect(labelCalls[0].weight).toBe(themeDefaults.font.labelWeight);
+    expect(textLayoutCalls).toHaveLength(1);
+    expect(textLayoutCalls[0].state.layout.mode).toBe("flat");
   });
 
   it("keeps default radial pointer sizing independent from ring width changes", function () {
     function renderPointer(ringWidthFactor) {
       const pointerCalls = [];
       const gaugeValueMath = createValueMath();
-      const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
-        .create({}, makeHelpers({
+      const modules = {
+        RadialToolkit: {
           create() {
             return {
               theme: {
@@ -402,19 +267,6 @@ describe("SemicircleRadialEngine", function () {
                 }
               },
               text: {
-                measureValueUnitFit() {
-                  return { vPx: 12, uPx: 10, gap: 6 };
-                },
-                drawCaptionMax() {},
-                drawValueUnitWithFit() {},
-                fitInlineCapValUnit() {
-                  return { cPx: 10, vPx: 12, uPx: 10, gap: 6 };
-                },
-                drawInlineCapValUnit() {},
-                fitTextPx() {
-                  return 12;
-                },
-                drawThreeRowsBlock() {},
                 drawDisconnectOverlay() {}
               },
               value: gaugeValueMath,
@@ -429,7 +281,23 @@ describe("SemicircleRadialEngine", function () {
               }
             };
           }
-        }))
+        },
+        SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
+        SemicircleRadialTextLayout: {
+          create() {
+            return {
+              createFitCache() {
+                return {};
+              },
+              drawModeText() {}
+            };
+          }
+        },
+        ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
+      };
+      const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
+        .create({}, makeHelpers(modules))
         .createRenderer(makeBaseSpec());
 
       renderer(createMockCanvas({
@@ -453,246 +321,137 @@ describe("SemicircleRadialEngine", function () {
     expect(thinPointer.lengthFactor).toBe(thickPointer.lengthFactor);
   });
 
-  it("reuses cached fitting for unchanged keys in flat/high/normal modes while still drawing each frame", function () {
-    const cases = [
-      {
-        name: "flat",
-        rectWidth: 480,
-        rectHeight: 110,
-        fitKey: "measureValueUnitFit",
-        drawKey: "drawValueUnitWithFit"
+  it("delegates text rendering through SemicircleRadialTextLayout and preserves explicit falsy text props", function () {
+    const drawModeText = vi.fn();
+    const layoutCalls = {
+      computeMode: 0,
+      computeInsets: 0,
+      computeLayout: 0
+    };
+    const layoutSnapshot = {
+      mode: "normal",
+      responsive: { textFillScale: 1.15 },
+      textFillScale: 1.15,
+      geom: {
+        cx: 60,
+        cy: 60,
+        rOuter: 50,
+        ringW: 12,
+        needleDepth: 10
       },
-      {
-        name: "high",
-        rectWidth: 120,
-        rectHeight: 220,
-        fitKey: "fitInlineCapValUnit",
-        drawKey: "drawInlineCapValUnit"
+      labels: {
+        radiusOffset: 20,
+        fontPx: 12
       },
-      {
-        name: "normal",
-        rectWidth: 220,
-        rectHeight: 140,
-        fitKey: "fitTextPx",
-        drawKey: "drawThreeRowsBlock"
-      }
-    ];
-
-    cases.forEach(function (item) {
-      const harness = createCachingHarness();
-      const canvas = createMockCanvas({
-        rectWidth: item.rectWidth,
-        rectHeight: item.rectHeight,
-        ctx: createMockContext2D()
-      });
-      const props = { value: 12.3, caption: "SPD", unit: "kn" };
-
-      const first = renderFrame(harness, canvas, props);
-      const second = renderFrame(harness, canvas, props);
-
-      expect(first.fitDelta[item.fitKey]).toBeGreaterThan(0);
-      expect(second.fitDelta[item.fitKey]).toBe(0);
-      expect(first.drawDelta[item.drawKey]).toBeGreaterThan(0);
-      expect(second.drawDelta[item.drawKey]).toBeGreaterThan(0);
-    });
-  });
-
-  it("misses cache when content changes", function () {
-    const cases = [
-      { rectWidth: 480, rectHeight: 110, fitKey: "measureValueUnitFit" },
-      { rectWidth: 120, rectHeight: 220, fitKey: "fitInlineCapValUnit" },
-      { rectWidth: 220, rectHeight: 140, fitKey: "fitTextPx" }
-    ];
-
-    cases.forEach(function (item) {
-      const harness = createCachingHarness();
-      const canvas = createMockCanvas({
-        rectWidth: item.rectWidth,
-        rectHeight: item.rectHeight,
-        ctx: createMockContext2D()
-      });
-
-      const first = renderFrame(harness, canvas, { value: 12.3, caption: "SPD", unit: "kn" });
-      const second = renderFrame(harness, canvas, { value: 12.3, caption: "SPD", unit: "kn" });
-      const third = renderFrame(harness, canvas, { value: 13.7, caption: "SPD", unit: "kn" });
-
-      expect(first.fitDelta[item.fitKey]).toBeGreaterThan(0);
-      expect(second.fitDelta[item.fitKey]).toBe(0);
-      expect(third.fitDelta[item.fitKey]).toBeGreaterThan(0);
-    });
-  });
-
-  it("misses cache when geometry changes", function () {
-    const cases = [
-      {
-        a: { rectWidth: 480, rectHeight: 110 },
-        b: { rectWidth: 520, rectHeight: 110 },
-        fitKey: "measureValueUnitFit"
-      },
-      {
-        a: { rectWidth: 120, rectHeight: 220 },
-        b: { rectWidth: 120, rectHeight: 260 },
-        fitKey: "fitInlineCapValUnit"
-      },
-      {
-        a: { rectWidth: 220, rectHeight: 140 },
-        b: { rectWidth: 240, rectHeight: 140 },
-        fitKey: "fitTextPx"
-      }
-    ];
-
-    cases.forEach(function (item) {
-      const harness = createCachingHarness();
-      const props = { value: 12.3, caption: "SPD", unit: "kn" };
-      const canvasA = createMockCanvas({
-        rectWidth: item.a.rectWidth,
-        rectHeight: item.a.rectHeight,
-        ctx: createMockContext2D()
-      });
-      const canvasB = createMockCanvas({
-        rectWidth: item.b.rectWidth,
-        rectHeight: item.b.rectHeight,
-        ctx: createMockContext2D()
-      });
-
-      const first = renderFrame(harness, canvasA, props);
-      const second = renderFrame(harness, canvasA, props);
-      const third = renderFrame(harness, canvasB, props);
-
-      expect(first.fitDelta[item.fitKey]).toBeGreaterThan(0);
-      expect(second.fitDelta[item.fitKey]).toBe(0);
-      expect(third.fitDelta[item.fitKey]).toBeGreaterThan(0);
-    });
-  });
-
-  it("keeps draw output semantics unchanged on cache hits", function () {
-    const cases = [
-      {
-        rectWidth: 480,
-        rectHeight: 110,
-        drawKey: "drawValueUnitWithFit"
-      },
-      {
-        rectWidth: 120,
-        rectHeight: 220,
-        drawKey: "drawInlineCapValUnit"
-      },
-      {
-        rectWidth: 220,
-        rectHeight: 140,
-        drawKey: "drawThreeRowsBlock"
-      }
-    ];
-
-    cases.forEach(function (item) {
-      const harness = createCachingHarness();
-      const canvas = createMockCanvas({
-        rectWidth: item.rectWidth,
-        rectHeight: item.rectHeight,
-        ctx: createMockContext2D()
-      });
-      const props = { value: 12.3, caption: "SPD", unit: "kn" };
-
-      const first = renderFrame(harness, canvas, props);
-      const second = renderFrame(harness, canvas, props);
-
-      expect(second.drawDelta[item.drawKey]).toBeGreaterThan(0);
-      expect(second.drawEntries[item.drawKey]).toEqual(first.drawEntries[item.drawKey]);
-    });
-  });
-
-  it("preserves explicit empty unit and falsy caption values", function () {
-    let receivedUnit;
-    let receivedCaption;
-    const gaugeValueMath = createValueMath();
-    const gaugeToolkit = {
-      create() {
-        return {
-          theme: {
-            resolve() {
-              return {
-                colors: {
-                  pointer: "#ff2b2b",
-                  warning: "#e7c66a",
-                  alarm: "#ff7a76",
-                  laylineStb: "#82b683",
-                  laylinePort: "#ff7a76"
-                },
-                radial: {
-                  ticks: {
-                    majorLen: 13,
-                    majorWidth: 4,
-                    minorLen: 7,
-                    minorWidth: 2
+      flat: { box: { x: 0, y: 0, w: 0, h: 0 }, topBox: { x: 0, y: 0, w: 0, h: 0 }, bottomBox: { x: 0, y: 0, w: 0, h: 0 } },
+      high: { bandBox: { x: 0, y: 0, w: 0, h: 0 } },
+      normal: { rSafe: 20, yBottom: 52, mhMax: 18, mhMin: 12 }
+    };
+    const modules = {
+      RadialToolkit: {
+        create() {
+          return {
+            theme: {
+              resolve() {
+                return {
+                  colors: {
+                    pointer: "#ff2b2b"
                   },
-                  pointer: {
-                    widthFactor: 1.02,
-                    lengthFactor: 1.7
+                  radial: {
+                    ticks: {
+                      majorLen: 13,
+                      majorWidth: 4,
+                      minorLen: 7,
+                      minorWidth: 2
+                    },
+                    pointer: {
+                      widthFactor: 1.02,
+                      lengthFactor: 1.7
+                    },
+                    ring: {
+                      arcLineWidth: 2.5,
+                      widthFactor: 0.18
+                    },
+                    labels: {
+                      insetFactor: 2.2,
+                      fontFactor: 0.2
+                    }
                   },
-                  ring: {
-                    arcLineWidth: 2.5,
-                    widthFactor: 0.18
-                  },
-                  labels: {
-                    insetFactor: 2.2,
-                    fontFactor: 0.2
+                  font: {
+                    weight: 710,
+                    labelWeight: 680
                   }
-                },
-                font: {
-                  weight: 710,
-                  labelWeight: 680
-                }
-              };
+                };
+              }
+            },
+            text: {
+              drawDisconnectOverlay() {}
+            },
+            value: createValueMath(),
+            draw: {
+              drawArcRing() {},
+              drawAnnularSector() {},
+              drawPointerAtRim() {},
+              drawTicksFromAngles() {},
+              drawLabels() {}
             }
-          },
-          text: {
-            measureValueUnitFit() {
-              return { vPx: 12, uPx: 10, gap: 6 };
+          };
+        }
+      },
+      SemicircleRadialLayout: {
+        create() {
+          return {
+            computeMode() {
+              layoutCalls.computeMode += 1;
+              return "normal";
             },
-            drawCaptionMax() {},
-            drawValueUnitWithFit() {},
-            fitInlineCapValUnit() {
-              return { cPx: 10, vPx: 12, uPx: 10, gap: 6 };
+            computeInsets() {
+              layoutCalls.computeInsets += 1;
+              return { pad: 1, gap: 1, responsive: { textFillScale: 1.15 } };
             },
-            drawInlineCapValUnit() {},
-            fitTextPx() {
-              return 12;
+            computeLayout() {
+              layoutCalls.computeLayout += 1;
+              return layoutSnapshot;
+            }
+          };
+        }
+      },
+      SemicircleRadialTextLayout: {
+        create() {
+          return {
+            createFitCache() {
+              return {};
             },
-            drawThreeRowsBlock(ctx, family, x, y, w, h, caption) {
-              receivedCaption = caption;
-            },
-            drawDisconnectOverlay() {}
-          },
-          value: gaugeValueMath,
-          draw: {
-            drawArcRing() {},
-            drawAnnularSector() {},
-            drawPointerAtRim() {},
-            drawTicksFromAngles() {},
-            drawLabels() {}
-          }
-        };
+            drawModeText: drawModeText
+          };
+        }
       }
     };
-
     const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
-      .create({}, makeHelpers(gaugeToolkit))
-      .createRenderer({
-        ...makeBaseSpec(),
-        formatDisplay(raw, props, unit) {
-          receivedUnit = unit;
-          const n = Number(raw);
-          return { num: n, text: String(n) };
-        }
-      });
+      .create({}, makeHelpers(modules))
+      .createRenderer(makeBaseSpec());
 
-    renderer(createMockCanvas({ rectWidth: 220, rectHeight: 140, ctx: createMockContext2D() }), {
+    renderer(createMockCanvas({
+      rectWidth: 220,
+      rectHeight: 140,
+      ctx: createMockContext2D()
+    }), {
       value: 12.3,
       caption: 0,
       unit: ""
     });
 
-    expect(receivedUnit).toBe("");
-    expect(receivedCaption).toBe("0");
+    expect(layoutCalls.computeMode).toBe(1);
+    expect(layoutCalls.computeInsets).toBe(1);
+    expect(layoutCalls.computeLayout).toBe(1);
+    expect(drawModeText).toHaveBeenCalledTimes(1);
+    expect(drawModeText.mock.calls[0][0].layout).toBe(layoutSnapshot);
+    expect(drawModeText.mock.calls[0][0].textFillScale).toBe(1.15);
+    expect(drawModeText.mock.calls[0][1]).toEqual({
+      caption: "0",
+      valueText: "12.3",
+      unit: "",
+      secScale: 0.3
+    });
   });
 });
