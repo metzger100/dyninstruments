@@ -18,16 +18,15 @@ Notes:
 - `Size OK = check` means no `>400` violations but at least one `>=300` warning.
 - Strict grading is applied: unresolved medium/high drift prevents an `A`.
 - Smell prevention gate is fail-closed (see `documentation/conventions/smell-prevention.md`).
-- Validation run (`2026-03-09`): `npm run check:all` passed with `74/74` test files and `414/414` tests green.
-- `check:patterns` summary (`2026-03-09`): `warnings=3`, all from `responsive-layout-hard-floor`; `responsive-profile-ownership=0`.
+- Validation run (`2026-03-09`): `npm run check:all` passed with `75/75` test files and `427/427` tests green.
+- `check:patterns` summary (`2026-03-09`): `warnings=0`; `responsive-layout-hard-floor=0`; `responsive-profile-ownership=0`.
 - `check:filesize` summary (`2026-03-09`): `warnings=9`, `violations=0`, `onelinerWarnings=0`.
-- Coverage summary (`coverage/coverage-summary.json`, `2026-03-09`): lines/statements `93.68%`, functions `90.09%`, branches `69.91%`.
+- Coverage summary (`coverage/coverage-summary.json`, `2026-03-09`): lines/statements `93.73%`, functions `90.35%`, branches `70.22%`.
 
 ## Known Drift Patterns
 
 | Pattern | Severity | Files | Status |
 |---|---|---|---|
-| Responsive hard-floor rollout backlog | HIGH | `shared/widget-kits/text/TextTileLayout.js`, `shared/widget-kits/linear/LinearGaugeTextLayout.js` | ⚠ Active (`check:patterns`: `responsive-layout-hard-floor=3`; tracked in `TD-018`) |
 | File-size hotspot growth near threshold | MED | `config/clusters/environment.js`, `config/components.js`, `shared/widget-kits/linear/LinearGaugeEngine.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialTextLayout.js`, `shared/widget-kits/text/TextLayoutComposite.js`, `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js`, `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js` | ⚠ Active (`check:filesize` warnings: 9, violations: 0) |
 
 ## Model Selection Log
@@ -40,6 +39,7 @@ Notes:
 | Aggressive duplication detection hardening | GPT-5 Codex | Good | Replaced name-based duplicate detection with body/clone checks and extracted shared semicircle tick-step resolvers. |
 | Post-Phase A/Phase C documentation resync (`QUALITY.md` + `TECH-DEBT.md`) | GPT-5 Codex | Good | Recomputed scorecard from live repo gates (`check:all` pass, updated layer counts/tests, warn-tier debt reconciled). |
 | Phase 9 responsive verification closeout | GPT-5 Codex | Good | Added owner-level monotonic regression coverage for `ActiveRouteLayout` and `XteHighwayLayout`, reran `check:all`, and refreshed rollout status to the March 9, 2026 gate state. |
+| Garbage-collection audit + scorecard resync | GPT-5 Codex | Good | Manual baseline..HEAD audit found doc-state drift rather than runtime regressions; resynced `QUALITY.md` and `TECH-DEBT.md` to the live March 9, 2026 gate outputs before advancing the GC baseline. |
 
 Append new rows when model choice materially affects outcome.
 

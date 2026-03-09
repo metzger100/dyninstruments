@@ -7,7 +7,7 @@
 | ID | Area | Description | Impact | Priority |
 |---|---|---|---|---|
 | TD-014 | Smell enforcement | `mapper-output-complexity` remains mixed-severity (`warn` at `9..12`, `block` at `>12`). Current backlog is `0` warnings (`check-patterns` summary on `2026-02-28`); promotion criteria/date is still pending. | Medium | Medium |
-| TD-015 | Shared gauge engine size hotspots | `check:filesize` reports 4 warning-tier files (`>=300` non-empty lines): `FullCircleRadialEngine.js`, `FullCircleRadialTextLayout.js`, `RadialValueMath.js`, `SemicircleRadialEngine.js`. Further extractions are needed to keep growth below hard limit. | Medium | Medium |
+| TD-015 | File-size hotspot backlog | `check:filesize` reports 9 warning-tier files (`>=300` non-empty lines): `config/clusters/environment.js`, `config/components.js`, `shared/widget-kits/linear/LinearGaugeEngine.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialTextLayout.js`, `shared/widget-kits/text/TextLayoutComposite.js`, `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js`, and `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js`. Further extractions are needed to keep growth below the hard limit. | Medium | Medium |
 
 ## Completed Items
 
