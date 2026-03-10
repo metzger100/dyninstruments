@@ -11,6 +11,7 @@
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
   const DEFAULT_RATIO_PROPS = { normal: "ratioThresholdNormal", flat: "ratioThresholdFlat" };
+  // Engine-owned last-resort fallback for callers that omit threshold props.
   const DEFAULT_RATIO_DEFAULTS = { normal: 0.8, flat: 2.2 };
   const DEFAULT_LAYOUT = {};
 

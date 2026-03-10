@@ -10,8 +10,8 @@
 }(this, function () {
   "use strict";
 
-  const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.1;
-  const DEFAULT_RATIO_THRESHOLD_FLAT = 3.5;
+  const STRUCTURAL_RATIO_THRESHOLD_NORMAL = 1.0;
+  const STRUCTURAL_RATIO_THRESHOLD_FLAT = 3.0;
   const PAD_RATIO = 0.04;
   const GAP_RATIO = 0.03;
   const DUAL_ROW_GAP_RATIO = 0.04;
@@ -175,13 +175,13 @@
         thresholdNormal,
         0.1,
         Number.MAX_SAFE_INTEGER,
-        DEFAULT_RATIO_THRESHOLD_NORMAL
+        STRUCTURAL_RATIO_THRESHOLD_NORMAL
       );
       const flat = clampNumber(
         thresholdFlat,
         normal,
         Number.MAX_SAFE_INTEGER,
-        DEFAULT_RATIO_THRESHOLD_FLAT
+        STRUCTURAL_RATIO_THRESHOLD_FLAT
       );
       if (ratio < normal) {
         return "high";
