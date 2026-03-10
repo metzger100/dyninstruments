@@ -71,6 +71,8 @@ function formatDisplay(raw, props, unit) {
 
 ### A) Range profile template
 
+For config-backed plugin wrappers, pass `ratioProps` only. `ratioDefaults` stays available for non-config consumers, but plugin wrappers should trust the editable/default pipeline instead of duplicating those literals.
+
 ```javascript
 const renderCanvas = engine.createRenderer({
   rawValueKey: "value",
@@ -87,7 +89,6 @@ const renderCanvas = engine.createRenderer({
     normal: "depthLinearRatioThresholdNormal",
     flat: "depthLinearRatioThresholdFlat"
   },
-  ratioDefaults: { normal: 1.1, flat: 3.5 },
   tickSteps,
   formatDisplay,
   buildSectors
@@ -110,7 +111,6 @@ const renderCanvas = engine.createRenderer({
     normal: "windAngleLinearRatioThresholdNormal",
     flat: "windAngleLinearRatioThresholdFlat"
   },
-  ratioDefaults: { normal: 1.1, flat: 3.5 },
   tickSteps,
   formatDisplay,
   buildSectors
@@ -133,7 +133,6 @@ const renderCanvas = engine.createRenderer({
     normal: "compassLinearRatioThresholdNormal",
     flat: "compassLinearRatioThresholdFlat"
   },
-  ratioDefaults: { normal: 1.1, flat: 3.5 },
   tickSteps,
   formatDisplay,
   buildSectors

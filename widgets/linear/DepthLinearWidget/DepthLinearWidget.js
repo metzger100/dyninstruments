@@ -68,7 +68,6 @@
         normal: "depthLinearRatioThresholdNormal",
         flat: "depthLinearRatioThresholdFlat"
       },
-      ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
       formatDisplay: formatDisplay,
       buildSectors: function (props, minV, maxV, axis, valueApi, theme) {

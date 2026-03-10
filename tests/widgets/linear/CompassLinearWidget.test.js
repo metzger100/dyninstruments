@@ -48,6 +48,7 @@ describe("CompassLinearWidget", function () {
       normal: "compassLinearRatioThresholdNormal",
       flat: "compassLinearRatioThresholdFlat"
     });
+    expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps()).toEqual({ major: 30, minor: 10 });
 
     const axisA = captured.resolveAxis({ heading: 10 }, {}, { min: 0, max: 360 });

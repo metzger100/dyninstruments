@@ -46,6 +46,11 @@ describe("WindLinearWidget", function () {
     });
 
     expect(captured.axisMode).toBe("centered180");
+    expect(captured.ratioProps).toEqual({
+      normal: "windLinearRatioThresholdNormal",
+      flat: "windLinearRatioThresholdFlat"
+    });
+    expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps()).toEqual({ major: 30, minor: 10 });
 
     const display = captured.formatDisplay(-32, {

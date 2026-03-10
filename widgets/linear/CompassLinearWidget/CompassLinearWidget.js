@@ -104,7 +104,6 @@
         normal: "compassLinearRatioThresholdNormal",
         flat: "compassLinearRatioThresholdFlat"
       },
-      ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: function () {
         return { major: 30, minor: 10 };
       },

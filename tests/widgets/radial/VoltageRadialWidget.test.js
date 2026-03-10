@@ -52,6 +52,11 @@ describe("VoltageRadialWidget", function () {
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.rangeDefaults).toEqual({ min: 10, max: 15 });
+    expect(captured.ratioProps).toEqual({
+      normal: "voltageRadialRatioThresholdNormal",
+      flat: "voltageRadialRatioThresholdFlat"
+    });
+    expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(3)).toEqual({ major: 0.5, minor: 0.1 });
     expect(captured.tickSteps(12)).toEqual({ major: 2, minor: 0.5 });
     expect(resolveVoltageSemicircleTickSteps).toHaveBeenCalledTimes(2);

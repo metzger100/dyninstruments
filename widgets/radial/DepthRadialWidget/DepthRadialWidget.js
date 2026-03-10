@@ -56,7 +56,6 @@
         normal: "depthRadialRatioThresholdNormal",
         flat: "depthRadialRatioThresholdFlat"
       },
-      ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
       formatDisplay: function (raw, props) {
         return displayDepthFromRaw(raw, 1, props.default);

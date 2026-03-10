@@ -45,12 +45,13 @@ const renderCanvas = renderer.createRenderer({
     normal: "newGaugeRatioThresholdNormal",
     flat: "newGaugeRatioThresholdFlat"
   },
-  ratioDefaults: { normal: 1.1, flat: 3.5 },
   tickSteps,
   formatDisplay,
   buildSectors
 });
 ```
+
+For config-backed plugin wrappers, do not add `ratioDefaults` here. The shared engine already owns the last-resort fallback, and normal plugin runtime should receive threshold props from the editable/default config boundary.
 
 6. Export module spec:
 

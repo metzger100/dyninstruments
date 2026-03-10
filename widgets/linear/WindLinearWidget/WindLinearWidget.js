@@ -136,7 +136,6 @@
         normal: "windLinearRatioThresholdNormal",
         flat: "windLinearRatioThresholdFlat"
       },
-      ratioDefaults: { normal: 0.9, flat: 3 },
       tickSteps: function () {
         return { major: 30, minor: 10 };
       },

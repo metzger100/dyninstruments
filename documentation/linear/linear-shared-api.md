@@ -77,8 +77,8 @@ Common `spec` fields:
 - `rangeDefaults`: `{ min, max }`
 - `rangeProps`: `{ min, max }`
 - `tickProps`: `{ major, minor, showEndLabels }`
-- `ratioProps`: `{ normal, flat }`
-- `ratioDefaults`: `{ normal, flat }`
+- `ratioProps`: `{ normal, flat }` for config-owned editable threshold bindings
+- `ratioDefaults`: optional `{ normal, flat }` engine-level safety fallback; config-backed plugin wrappers should omit it
 - `tickSteps(range)`
 - `formatDisplay(raw, props, unit, Helpers) -> { num, text }`
 - `buildSectors(props, minV, maxV, axis, valueApi, theme) -> [{ from, to, color }]`
@@ -120,6 +120,8 @@ Wrappers should consume these layout-owned state fields instead of recomputing c
 
 ### Range Profile (Speed/Depth/Temp/Voltage)
 
+Config-backed wrappers should pass `ratioProps` only and rely on the editable/default pipeline to populate those props. `ratioDefaults` remains available only as the engine's last-resort fallback for non-config consumers.
+
 ```javascript
 const renderCanvas = engine.createRenderer({
   rawValueKey: "value",
@@ -136,7 +138,6 @@ const renderCanvas = engine.createRenderer({
     normal: "depthLinearRatioThresholdNormal",
     flat: "depthLinearRatioThresholdFlat"
   },
-  ratioDefaults: { normal: 1.1, flat: 3.5 },
   tickSteps,
   formatDisplay,
   buildSectors
@@ -159,7 +160,6 @@ const renderCanvas = engine.createRenderer({
     normal: "windAngleLinearRatioThresholdNormal",
     flat: "windAngleLinearRatioThresholdFlat"
   },
-  ratioDefaults: { normal: 1.1, flat: 3.5 },
   tickSteps,
   formatDisplay,
   buildSectors
@@ -182,7 +182,6 @@ const renderCanvas = engine.createRenderer({
     normal: "compassLinearRatioThresholdNormal",
     flat: "compassLinearRatioThresholdFlat"
   },
-  ratioDefaults: { normal: 1.1, flat: 3.5 },
   tickSteps,
   formatDisplay,
   buildSectors

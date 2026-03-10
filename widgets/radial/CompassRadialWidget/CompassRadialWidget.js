@@ -89,7 +89,6 @@
         normal: "compassRadialRatioThresholdNormal",
         flat: "compassRadialRatioThresholdFlat"
       },
-      ratioDefaults: { normal: 0.8, flat: 2.2 },
       cacheLayers: ["face"],
       layout: { highTopFactor: 0.9, highBottomFactor: 0.9 },
       buildStaticKey: function (state) {

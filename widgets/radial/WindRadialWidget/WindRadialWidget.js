@@ -67,7 +67,6 @@
         normal: "windRadialRatioThresholdNormal",
         flat: "windRadialRatioThresholdFlat"
       },
-      ratioDefaults: { normal: 0.7, flat: 2.0 },
       cacheLayers: ["back", "front"],
       buildStaticKey: function (state, props) {
         const display = windDisplay(state, props);

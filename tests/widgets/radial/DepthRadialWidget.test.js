@@ -49,6 +49,11 @@ describe("DepthRadialWidget", function () {
     });
 
     expect(spec.renderCanvas).toBe(renderCanvas);
+    expect(captured.ratioProps).toEqual({
+      normal: "depthRadialRatioThresholdNormal",
+      flat: "depthRadialRatioThresholdFlat"
+    });
+    expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(6)).toEqual({ major: 1, minor: 0.5 });
     expect(captured.tickSteps(30)).toEqual({ major: 5, minor: 1 });
     expect(resolveStandardSemicircleTickSteps).toHaveBeenCalledTimes(2);
