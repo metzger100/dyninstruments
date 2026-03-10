@@ -272,7 +272,7 @@ Full roadmap details and the AvNav widget coverage matrix are tracked in [ROADMA
 
 Developer setup, AI-assisted workflow rules, quality gates, and pre-PR checklist are documented in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-`tools/check-patterns.mjs` now enforces aggressive cross-file duplication detection (body-level function clones + long cloned blocks) and emits warn-only fail-fast fallback/legacy findings. Shared helper extraction is required for repeated logic, and intentional exceptions must use:
+`tools/check-patterns.mjs` now enforces aggressive cross-file duplication detection (body-level function clones + long cloned blocks) and emits warn-only fallback/legacy plus atomicity findings. The warn-only atomicity rollout covers duplicated widget defaults, engine/layout default drift, redundant Canvas or `Helpers` `typeof` guards, try/finally canvas restore wrappers, and inline editable-default duplication. Shared helper extraction is required for repeated logic, and intentional exceptions must use:
 
 ```javascript
 // dyni-lint-disable-next-line <rule-name> -- <reason>

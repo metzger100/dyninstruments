@@ -17,6 +17,7 @@ const fileCache = new Map();
 const scopeCache = new Map();
 let clusterPrefixCache = null;
 let rendererContractCache = null;
+let atomicityContractCache = null;
 let lintDirectiveCache = new Map();
 let knownRuleNames = [];
 
@@ -29,6 +30,7 @@ export function resetContext(options = {}) {
   scopeCache.clear();
   clusterPrefixCache = null;
   rendererContractCache = null;
+  atomicityContractCache = null;
   lintDirectiveCache = new Map();
   knownRuleNames = [];
 }
@@ -47,6 +49,14 @@ export function getRendererContractCache() {
 
 export function setRendererContractCache(value) {
   rendererContractCache = value;
+}
+
+export function getAtomicityContractCache() {
+  return atomicityContractCache;
+}
+
+export function setAtomicityContractCache(value) {
+  atomicityContractCache = value;
 }
 
 export function setKnownRuleNames(names) {
