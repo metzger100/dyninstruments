@@ -700,12 +700,13 @@ tiny();
 (function (root) {
   "use strict";
   function readValue(props) {
+    const unavailableText = props.unavailableText;
     if (root.avnav && root.avnav.api) {
       return props.value;
     }
-    return props.value || "---";
+    return props.value || unavailableText;
   }
-  readValue({});
+  readValue({ unavailableText: "missing" });
 }(this));
 `
     });
@@ -721,10 +722,9 @@ tiny();
 (function () {
   "use strict";
   function renderCanvas(canvas, props) {
-    const p = props || {};
-    return String(p.dynamicUnit ?? "kn") + String(canvas);
+    return String(props.dynamicUnit ?? props.fallbackUnit) + String(canvas);
   }
-  renderCanvas({}, {});
+  renderCanvas({}, { fallbackUnit: "kn" });
 }());
 `
     });
@@ -737,6 +737,7 @@ tiny();
   const failFastRuleCases = [
     {
       rule: "catch-fallback-without-suppression",
+      severity: "warn",
       rel: "runtime/example.js",
       positive: `
 (function () {
@@ -793,6 +794,7 @@ tiny();
     },
     {
       rule: "internal-hook-fallback",
+      severity: "block",
       rel: "shared/example.js",
       positive: `
 (function () {
@@ -832,6 +834,7 @@ tiny();
     },
     {
       rule: "redundant-null-type-guard",
+      severity: "block",
       rel: "widgets/example.js",
       positive: `
 (function () {
@@ -877,6 +880,7 @@ tiny();
     },
     {
       rule: "hardcoded-runtime-default",
+      severity: "block",
       rel: "widgets/example.js",
       positive: `
 (function () {
@@ -921,6 +925,7 @@ tiny();
     },
     {
       rule: "css-js-default-duplication",
+      severity: "warn",
       rel: "runtime/example.js",
       positive: `
 (function () {
@@ -965,6 +970,7 @@ tiny();
     },
     {
       rule: "premature-legacy-support",
+      severity: "warn",
       rel: "shared/example.js",
       positive: `
 (function () {
@@ -1010,6 +1016,7 @@ tiny();
     },
     {
       rule: "editable-threshold-missing-internal",
+      severity: "warn",
       rel: "config/clusters/example.js",
       positive: `
 (function (root) {
@@ -1067,21 +1074,35 @@ tiny();
     }
   ];
 
+  function reportMessages(result, severity) {
+    return severity === "block"
+      ? joinMessages(result.findings || [])
+      : joinWarningMessages(result.warnings || []);
+  }
+
   failFastRuleCases.forEach(function (testCase) {
-    it(`warns for ${testCase.rule}`, function () {
+    it(`${testCase.severity === "block" ? "blocks" : "warns"} for ${testCase.rule}`, function () {
       const cwd = createWorkspace({ [testCase.rel]: testCase.positive });
       const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
-      const out = joinWarningMessages(result.warnings || []);
+      const out = reportMessages(result, testCase.severity);
 
-      expect(result.summary.byRuleWarnings[testCase.rule]).toBeGreaterThan(0);
+      expect(result.summary.ok).toBe(testCase.severity !== "block");
+      if (testCase.severity === "block") {
+        expect(result.summary.byRuleFailures[testCase.rule]).toBeGreaterThan(0);
+        expect(result.summary.byRuleWarnings[testCase.rule]).toBe(0);
+      } else {
+        expect(result.summary.byRuleWarnings[testCase.rule]).toBeGreaterThan(0);
+        expect(result.summary.byRuleFailures[testCase.rule]).toBe(0);
+      }
       expect(out).toContain(`[${testCase.rule}]`);
     });
 
-    it(`does not warn for clean ${testCase.rule} sample`, function () {
+    it(`does not report for clean ${testCase.rule} sample`, function () {
       const cwd = createWorkspace({ [testCase.rel]: testCase.clean });
       const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
       expect(result.summary.byRuleWarnings[testCase.rule]).toBe(0);
+      expect(result.summary.byRuleFailures[testCase.rule]).toBe(0);
     });
 
     it(`supports disable-next-line for ${testCase.rule}`, function () {
@@ -1090,6 +1111,7 @@ tiny();
       const out = joinMessages(result.findings);
 
       expect(result.summary.byRuleWarnings[testCase.rule]).toBe(0);
+      expect(result.summary.byRuleFailures[testCase.rule]).toBe(0);
       expect(out).not.toContain("[invalid-lint-suppression]");
     });
 
@@ -1099,6 +1121,7 @@ tiny();
       const out = joinMessages(result.findings);
 
       expect(result.summary.byRuleWarnings[testCase.rule]).toBe(0);
+      expect(result.summary.byRuleFailures[testCase.rule]).toBe(0);
       expect(out).not.toContain("[invalid-lint-suppression]");
     });
   });

@@ -60,9 +60,8 @@ node tools/check-coverage.mjs
 
 `check-patterns` is enforced in full mode inside `check:core`.
 Blocking findings fail the gate; warning findings are non-blocking advisories.
-This includes fail-closed cross-file clone detection (`duplicate-functions`, `duplicate-block-clones`) and mixed-severity mapper complexity checks (`mapper-output-complexity`: warn at `9..12`, block at `>12`).
-It also includes warn-only fail-fast fallback/legacy rules (`catch-fallback-without-suppression`, `internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `css-js-default-duplication`, `premature-legacy-support`), warn-only atomicity rollout rules (`widget-renderer-default-duplication`, `engine-layout-default-drift`, `canvas-api-typeof-guard`, `try-finally-canvas-drawing`, `framework-method-typeof-guard`, `inline-config-default-duplication`), plus blocking suppression validation (`invalid-lint-suppression`).
-Responsive ownership checks are part of the same gate: `responsive-profile-ownership` blocks new ownership drift, and `responsive-layout-hard-floor` tracks remaining warn-only hard-floor backlog until it reaches zero.
+This includes fail-closed cross-file clone detection (`duplicate-functions`, `duplicate-block-clones`), block-mode atomicity/fail-fast rules (`internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `widget-renderer-default-duplication`, `engine-layout-default-drift`, `canvas-api-typeof-guard`, `try-finally-canvas-drawing`, `framework-method-typeof-guard`, `inline-config-default-duplication`), mixed-severity mapper complexity checks (`mapper-output-complexity`: warn at `9..12`, block at `>12`), remaining warn-only rollout rules (`catch-fallback-without-suppression`, `css-js-default-duplication`, `premature-legacy-support`, `editable-threshold-missing-internal`), plus blocking suppression validation (`invalid-lint-suppression`).
+Responsive ownership checks are part of the same gate: `responsive-profile-ownership` and `responsive-layout-hard-floor` both block new drift.
 
 For cleanup sessions tracked by garbage-collection baseline markers:
 

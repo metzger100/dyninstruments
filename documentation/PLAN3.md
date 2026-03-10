@@ -1,6 +1,6 @@
 # Implementation Plan — Atomicity Linter & Redundant Verbosity Cleanup
 
-**Status:** ⏳ Planned | Linter rules and codebase fixes for contract-trusting atomicity enforcement
+**Status:** ✅ Implemented | Linter rules and codebase fixes for contract-trusting atomicity enforcement
 
 ## Overview
 
@@ -108,7 +108,7 @@ Every widget that calls `engine.createRenderer(spec)` hardcodes the string names
 
 ### Rule 1: `widget-renderer-default-duplication`
 
-**Severity:** starts as `warn`, promoted to `block` in Phase 8.
+**Severity:** `block` (added in warn mode during Phase 0, promoted in Phase 8 on `2026-03-10`).
 
 **Scope:** `widgets/**/*.js`
 
@@ -118,7 +118,7 @@ Every widget that calls `engine.createRenderer(spec)` hardcodes the string names
 
 ### Rule 2: `engine-layout-default-drift`
 
-**Severity:** starts as `warn`, promoted to `block` in Phase 8.
+**Severity:** `block` (added in warn mode during Phase 0, promoted in Phase 8 on `2026-03-10`).
 
 **Scope:** `shared/widget-kits/linear/*.js`, `shared/widget-kits/radial/*.js`
 
@@ -128,7 +128,7 @@ Every widget that calls `engine.createRenderer(spec)` hardcodes the string names
 
 ### Rule 3: `canvas-api-typeof-guard`
 
-**Severity:** starts as `warn`, promoted to `block` in Phase 8.
+**Severity:** `block` (added in warn mode during Phase 0, promoted in Phase 8 on `2026-03-10`).
 
 **Scope:** `shared/**/*.js`, `widgets/**/*.js`
 
@@ -138,7 +138,7 @@ Every widget that calls `engine.createRenderer(spec)` hardcodes the string names
 
 ### Rule 4: `try-finally-canvas-drawing`
 
-**Severity:** starts as `warn`, promoted to `block` in Phase 8.
+**Severity:** `block` (added in warn mode during Phase 0, promoted in Phase 8 on `2026-03-10`).
 
 **Scope:** `shared/**/*.js`
 
@@ -148,7 +148,7 @@ Every widget that calls `engine.createRenderer(spec)` hardcodes the string names
 
 ### Rule 5: `framework-method-typeof-guard`
 
-**Severity:** starts as `warn`, promoted to `block` in Phase 8.
+**Severity:** `block` (added in warn mode during Phase 0, promoted in Phase 8 on `2026-03-10`).
 
 **Scope:** `shared/**/*.js`, `widgets/**/*.js`
 
@@ -158,7 +158,7 @@ Every widget that calls `engine.createRenderer(spec)` hardcodes the string names
 
 ### Rule 6: `inline-config-default-duplication`
 
-**Severity:** starts as `warn`, promoted to `block` in Phase 8.
+**Severity:** `block` (added in warn mode during Phase 0, promoted in Phase 8 on `2026-03-10`).
 
 **Scope:** `widgets/**/*.js`, `shared/**/*.js`
 
@@ -168,11 +168,11 @@ Every widget that calls `engine.createRenderer(spec)` hardcodes the string names
 
 ### Existing Rules to Promote
 
-| Rule | Current severity | Proposed severity | When |
+| Rule | Previous severity | Current severity | Promoted |
 |---|---|---|---|
-| `redundant-null-type-guard` | warn | block | Phase 8, after backlog reaches zero |
-| `internal-hook-fallback` | warn | block | Phase 8, after backlog reaches zero |
-| `hardcoded-runtime-default` | warn | block | Phase 8, after backlog reaches zero |
+| `redundant-null-type-guard` | warn | block | Phase 8 on `2026-03-10` |
+| `internal-hook-fallback` | warn | block | Phase 8 on `2026-03-10` |
+| `hardcoded-runtime-default` | warn | block | Phase 8 on `2026-03-10` |
 
 ## Todo Steps
 
@@ -247,20 +247,11 @@ Status: implemented on `2026-03-10`. Phase 7 followed the live-warning cleanup s
 
 ### Phase 8 — Promote all new rules to block and promote existing warn rules
 
-1. In `tools/check-patterns/rules.mjs`, change severity from `"warn"` to `"block"` for all six new rules.
-2. Promote existing warn rules to block:
-   - `redundant-null-type-guard`
-   - `internal-hook-fallback`
-   - `hardcoded-runtime-default`
-3. Run the full linter suite and confirm zero violations.
-4. Update this document's status to `✅ Implemented`.
+Status: implemented on `2026-03-10`. Promoted the six atomicity rules plus `redundant-null-type-guard`, `internal-hook-fallback`, and `hardcoded-runtime-default` to `block` in `tools/check-patterns/rules.mjs`. Updated the severity-sensitive checker fixtures so promoted rules now fail closed while the remaining warn-only rollout rules stay non-blocking where intended. Revalidated with `npx vitest run tests/tools/check-patterns-atomicity.test.js tests/tools/check-patterns.test.js`, `node tools/check-patterns.mjs`, and `npm run check:all`; `node tools/check-patterns.mjs` reports `0` failures and `0` warnings, and `npm run check:all` passed on March 10, 2026 with `78/78` test files and `475/475` tests green.
 
 ### Phase 9 — Documentation and guidance updates
 
-1. Update `documentation/TECH-DEBT.md` to remove the warn-backlog entries from Phase 0.
-2. Update `documentation/conventions/coding-standards.md` with the new atomicity rules and their rationale.
-3. Update `CONTRIBUTING.md` so contributors and agents know to avoid re-introducing the patterns these rules catch.
-4. Update `AGENTS.md` and `CLAUDE.md` with explicit guidance for AI agents to trust internal contracts rather than adding defensive guards.
+Status: closed on `2026-03-10`. The Phase 8 truth-sync updated the enforcement-owner docs (`documentation/conventions/smell-prevention.md`, `documentation/guides/documentation-maintenance.md`, `documentation/guides/garbage-collection.md`, `documentation/QUALITY.md`, `documentation/TECH-DEBT.md`, and this plan). `documentation/conventions/coding-standards.md`, `CONTRIBUTING.md`, `AGENTS.md`, and `CLAUDE.md` required no rollout-specific edits because they contained no stale atomicity severity or backlog guidance.
 
 ## Affected File Map
 
@@ -297,7 +288,11 @@ Status: implemented on `2026-03-10`. Phase 7 followed the live-warning cleanup s
 | `shared/widget-kits/radial/RadialTickMath.js` | Radial tick math helper | Modified in Phase 6 |
 | `shared/widget-kits/canvas/CanvasLayerCache.js` | Canvas layer caching | Reviewed in Phase 7; no code change because its DOM-boundary guards are not part of the live warning surface |
 | `shared/theme/ThemeResolver.js` | Theme resolution | Modified in Phase 7 with the one production bootstrap-boundary suppression |
-| `documentation/TECH-DEBT.md` | Tech debt tracking | Modified in Phase 0 and Phase 9 |
+| `documentation/conventions/smell-prevention.md` | Smell severity catalog | Modified in Phase 8 to promote atomicity + fail-fast severities to block |
+| `documentation/guides/documentation-maintenance.md` | Quality-gate workflow guide | Modified in Phase 8 to reflect the promoted checker severities |
+| `documentation/guides/garbage-collection.md` | Cleanup workflow guide | Modified in Phase 8 to reflect current rule severities and live hotspot examples |
+| `documentation/QUALITY.md` | Quality scorecard | Modified in Phase 8 to resync the live March 10, 2026 gate state |
+| `documentation/TECH-DEBT.md` | Tech debt tracking | Modified in Phase 0 and Phase 8 |
 | `documentation/conventions/coding-standards.md` | Coding standards | Modified in Phase 9 |
 | `CONTRIBUTING.md` | Contributor workflow | Modified in Phase 9 |
 | `AGENTS.md` | AI agent instructions | Modified in Phase 9 |
