@@ -21,6 +21,12 @@ Warn-only rollout rules are tracked debt until they are promoted to `block`.
 | Internal hook fallback | Shared/widget code normalizes or fallbacks internal hook/spec results (`normalize*`, `cfg.*(...) || ...`) | Keep defaults at the boundary and trust internal hook contracts | `check-patterns` (`internal-hook-fallback`) | warn |
 | Redundant null/type guard | Internal code repeatedly sanitizes already-normalized values (`String(x == null ? "" : x)`, `Array.isArray(x) ? x : []`, `isFiniteNumber(x) ? ... : ...`) | Remove redundant guards and trust mapper/runtime/theme contracts | `check-patterns` (`redundant-null-type-guard`) | warn |
 | Hardcoded runtime default | Runtime/widget/shared code embeds fallback literals or object defaults already owned elsewhere | Use declarative config/theme defaults or boundary-owned placeholders | `check-patterns` (`hardcoded-runtime-default`) | warn |
+| Widget renderer default duplication | Widget `createRenderer(...)` spec repeats editable-parameter defaults in `ratioDefaults` / `rangeDefaults` | Keep editable defaults in config and use engine fallback only as the unreachable last resort | `check-patterns` (`widget-renderer-default-duplication`) | warn |
+| Engine/layout default drift | Layout owner re-declares semantic ratio defaults already owned by the engine family | Keep semantic defaults in one owner only; layout keeps structural safety bounds only | `check-patterns` (`engine-layout-default-drift`) | warn |
+| Canvas API typeof guard | Internal drawing code checks standard Canvas 2D methods with `typeof ctx.* === "function"` | Trust the validated Canvas 2D context; keep capability checks only at real DOM/canvas boundaries | `check-patterns` (`canvas-api-typeof-guard`) | warn |
+| Try/finally canvas drawing | Internal draw path wraps `ctx.save()` / `ctx.restore()` in `try/finally` without an external throwing boundary | Use direct save/draw/restore pairing; reserve `try/finally` for real boundary cleanup | `check-patterns` (`try-finally-canvas-drawing`) | warn |
+| Framework method typeof guard | Internal code checks `Helpers` or module methods with `typeof ... === "function"` after module resolution | Trust module-loader/helper contracts once inside the internal boundary | `check-patterns` (`framework-method-typeof-guard`) | warn |
+| Inline config default duplication | Widget/shared code re-declares editable defaults inline (`typeof p.foo !== "undefined" ? ... : 12.2`) | Trust the editable-default contract instead of duplicating literals downstream | `check-patterns` (`inline-config-default-duplication`) | warn |
 | Responsive layout hard floor | Responsive layout/text owner keeps user-visible hard floors such as `Math.max(9, ...)` or `clamp(..., 10, ...)` instead of deriving them from the shared compact profile | Use `ResponsiveScaleProfile`-derived geometry/text ceilings; keep only technical canvas-safety guards with explicit suppression comments | `check-patterns` (`responsive-layout-hard-floor`) | block |
 | Responsive profile ownership drift | Layout owner stops resolving `ResponsiveScaleProfile`, or a consumer module imports it directly instead of using layout-owned `responsive` / `textFillScale` state | Keep compaction ownership in `ResponsiveScaleProfile` + layout-owner modules only; consumers must read layout-owned state | `check-patterns` (`responsive-profile-ownership`) | block |
 | CSS/JS default duplication | JS repeats CSS/theme token defaults (`getComputedStyle`, `defaultValue`, `--dyni-*`) | Keep visual/token defaults in CSS or theme resolver boundary only | `check-patterns` (`css-js-default-duplication`) | warn |
@@ -114,6 +120,42 @@ Allowed inline exceptions:
 1. Move placeholder/default literals to declarative config, mapper defaults, runtime helpers, or CSS/theme token boundaries.
 2. Remove inline object/array fallback stubs in widget/shared code where the shape is already contract-owned.
 3. Keep warn-mode findings tracked until each rule reaches zero backlog.
+
+### Widget renderer default duplication
+
+1. Remove widget-local `ratioDefaults` / `rangeDefaults` that exactly mirror config-owned editable defaults.
+2. Keep engine defaults as the single runtime fallback owner for unreachable missing-config scenarios.
+3. Add or adjust checker coverage when a new renderer family adds default-bearing spec groups.
+
+### Engine/layout default drift
+
+1. Keep semantic ratio defaults in the engine owner (`DEFAULT_RATIO_DEFAULTS`) and remove copied layout constants.
+2. If a layout still needs a fallback, use structural safety bounds rather than re-declaring semantic defaults.
+3. Add or adjust family-manifest tests whenever a new engine/layout pair is introduced.
+
+### Canvas API typeof guard
+
+1. Remove `typeof ctx.* === "function"` guards for standard Canvas 2D methods on internal drawing paths.
+2. Keep capability checks only at genuine DOM/canvas boundaries and annotate intentional exceptions with rule-specific suppressions.
+3. Add or adjust checker tests for any newly allowlisted Canvas methods.
+
+### Try/finally canvas drawing
+
+1. Replace internal `ctx.save(); try { ... } finally { ctx.restore(); }` blocks with direct save/draw/restore pairing.
+2. Keep `try/finally` only when cleanup crosses a real external boundary or callback-owned throw path.
+3. Suppress narrow boundary exceptions explicitly until the contract is tightened.
+
+### Framework method typeof guard
+
+1. Remove `typeof Helpers.* === "function"` and module-alias method guards after internal resolution.
+2. Keep bootstrap- or DOM-boundary exceptions explicit with rule-specific suppressions.
+3. Extend alias detection coverage when a new internal resolver pattern is introduced.
+
+### Inline config default duplication
+
+1. Remove inline fallback literals when the editable-parameter boundary already guarantees the prop default.
+2. Keep downstream code on the normalized prop contract and centralize real defaults in config/runtime boundaries.
+3. Add checker coverage for new editable-backed fallback patterns before promoting the rule.
 
 ### Responsive layout hard floor
 

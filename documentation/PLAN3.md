@@ -178,6 +178,8 @@ Every widget that calls `engine.createRenderer(spec)` hardcodes the string names
 
 ### Phase 0 — Implement new linter rules in warn mode
 
+Status: implemented on `2026-03-10`. Added the six warn-only atomicity rules, dedicated checker coverage in `tests/tools/check-patterns-atomicity.test.js`, shared atomicity contract caching, and the March 10, 2026 backlog snapshot. `node tools/check-patterns.mjs` now reports `33` warnings for the Phase 0 rollout surface: `widget-renderer-default-duplication=18`, `engine-layout-default-drift=6`, `canvas-api-typeof-guard=2`, `try-finally-canvas-drawing=2`, `framework-method-typeof-guard=3`, and `inline-config-default-duplication=2`.
+
 1. Create `tools/check-patterns/rules-atomicity.mjs` with implementations for the six rules described above.
 2. Register all six rules in `tools/check-patterns/rules.mjs` with `severity: "warn"`.
 3. Add shared utilities to `tools/check-patterns/shared.mjs` if needed — the config cross-referencing helpers that parse `config/clusters/*.js` editable parameter `default:` values and map them to widget renderer spec properties via `ratioProps`/`rangeProps` bindings.
@@ -259,6 +261,8 @@ Some `typeof` checks are legitimate because they operate at genuine external bou
 | File | Description | Planned change |
 |---|---|---|
 | `tools/check-patterns/rules-atomicity.mjs` | New rule implementations | Created in Phase 0 |
+| `tools/check-patterns/atomicity-contracts.mjs` | Atomicity config/widget contract index | Created in Phase 0 |
+| `tools/check-patterns/atomicity-parser.mjs` | Atomicity literal/object parser helpers | Created in Phase 0 |
 | `tools/check-patterns/rules.mjs` | Pattern-rule registry | Modified in Phase 0 to register new rules, modified in Phase 8 to promote severity |
 | `tools/check-patterns/shared.mjs` | Shared linter utilities | Modified in Phase 0 if config cross-referencing helpers are needed |
 | `tests/tools/check-patterns-atomicity.test.js` | New rule test coverage | Created in Phase 0 |

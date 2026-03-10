@@ -1,6 +1,6 @@
 # Quality Scorecard
 
-**Last updated:** 2026-03-09
+**Last updated:** 2026-03-10
 
 ## Layer Health
 
@@ -18,16 +18,17 @@ Notes:
 - `Size OK = check` means no `>400` violations but at least one `>=300` warning.
 - Strict grading is applied: unresolved medium/high drift prevents an `A`.
 - Smell prevention gate is fail-closed (see `documentation/conventions/smell-prevention.md`).
-- Validation run (`2026-03-09`): `npm run check:all` passed with `75/75` test files and `427/427` tests green.
-- `check:patterns` summary (`2026-03-09`): `warnings=0`; `responsive-layout-hard-floor=0`; `responsive-profile-ownership=0`.
-- `check:filesize` summary (`2026-03-09`): `warnings=9`, `violations=0`, `onelinerWarnings=0`.
-- Coverage summary (`coverage/coverage-summary.json`, `2026-03-09`): lines/statements `93.73%`, functions `90.35%`, branches `70.22%`.
+- Validation run (`2026-03-10`): `npm run check:all` passed with `77/77` test files and `453/453` tests green.
+- `check:patterns` summary (`2026-03-10`): `warnings=33`; `widget-renderer-default-duplication=18`; `engine-layout-default-drift=6`; `canvas-api-typeof-guard=2`; `try-finally-canvas-drawing=2`; `framework-method-typeof-guard=3`; `inline-config-default-duplication=2`; `responsive-layout-hard-floor=0`; `responsive-profile-ownership=0`.
+- `check:filesize` summary (`2026-03-10`): `warnings=9`, `violations=0`, `onelinerWarnings=0`.
+- Coverage summary (`coverage/coverage-summary.json`, `2026-03-10`): lines/statements `93.84%`, functions `91.32%`, branches `71.34%`.
 
 ## Known Drift Patterns
 
 | Pattern | Severity | Files | Status |
 |---|---|---|---|
 | File-size hotspot growth near threshold | MED | `config/clusters/environment.js`, `config/components.js`, `shared/widget-kits/linear/LinearGaugeEngine.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialTextLayout.js`, `shared/widget-kits/text/TextLayoutComposite.js`, `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js`, `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js` | ⚠ Active (`check:filesize` warnings: 9, violations: 0) |
+| Atomicity warn backlog | MED | Widget `createRenderer` defaults, layout ratio constants, internal Canvas/helper guards, inline editable-default fallbacks | ⚠ Active (`check:patterns` warnings on `2026-03-10`: `33`; see `TD-019`) |
 
 ## Model Selection Log
 
@@ -40,6 +41,7 @@ Notes:
 | Post-Phase A/Phase C documentation resync (`QUALITY.md` + `TECH-DEBT.md`) | GPT-5 Codex | Good | Recomputed scorecard from live repo gates (`check:all` pass, updated layer counts/tests, warn-tier debt reconciled). |
 | Phase 9 responsive verification closeout | GPT-5 Codex | Good | Added owner-level monotonic regression coverage for `ActiveRouteLayout` and `XteHighwayLayout`, reran `check:all`, and refreshed rollout status to the March 9, 2026 gate state. |
 | Garbage-collection audit + scorecard resync | GPT-5 Codex | Good | Manual baseline..HEAD audit found doc-state drift rather than runtime regressions; resynced `QUALITY.md` and `TECH-DEBT.md` to the live March 9, 2026 gate outputs before advancing the GC baseline. |
+| Phase 0 atomicity warn-only rollout | GPT-5 Codex | Good | Added six warn-only `check-patterns` rules, dedicated tool coverage, and the March 10, 2026 backlog snapshot while keeping `check:all` green. |
 
 Append new rows when model choice materially affects outcome.
 
