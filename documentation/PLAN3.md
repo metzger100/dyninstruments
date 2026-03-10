@@ -188,6 +188,8 @@ Status: implemented on `2026-03-10`. Added the six warn-only atomicity rules, de
 
 ### Phase 1 — Remove widget-level `ratioDefaults` duplication
 
+Status: implemented on `2026-03-10`. Removed wrapper-owned `ratioDefaults` from the 12 config-backed linear/radial wrappers, updated wrapper and shared-engine coverage for config-backed threshold ownership vs engine fallback behavior, and tightened the shared API / authoring docs so plugin wrappers treat `ratioDefaults` as an engine-level safety fallback only. `node tools/check-patterns.mjs` should now report `widget-renderer-default-duplication=6`, leaving only the Phase 2 `rangeDefaults` backlog for that rule.
+
 1. For each linear and radial widget that passes `ratioDefaults` to `createRenderer()`, remove the `ratioDefaults` property from the spec object.
 2. The engines (`LinearGaugeEngine`, `SemicircleRadialEngine`, `FullCircleRadialEngine`) already carry `DEFAULT_RATIO_DEFAULTS` as last-resort fallbacks — verify those constants still exist and are documented as the single source of truth.
 3. Run all existing widget render tests to confirm no behavior change.

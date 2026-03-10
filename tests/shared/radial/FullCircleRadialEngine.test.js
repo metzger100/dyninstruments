@@ -183,6 +183,36 @@ describe("FullCircleRadialEngine", function () {
     expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.radial.pointer.lengthFactor);
   });
 
+  it("matches callback-visible layout state with or without wrapper-owned ratioDefaults when config thresholds are present", function () {
+    function captureState(specOverrides) {
+      const harness = createHarness();
+      let snapshot = null;
+      const renderer = harness.engine.createRenderer(Object.assign({
+        ratioProps: { normal: "n", flat: "f" },
+        drawFrame(state) {
+          snapshot = {
+            mode: state.mode,
+            labelFontPx: state.labels.fontPx,
+            fixedPointerDepth: state.geom.fixedPointerDepth,
+            textFillScale: state.textFillScale,
+            compactGeometryScale: state.compactGeometryScale
+          };
+        }
+      }, specOverrides || {}));
+
+      renderer(createMockCanvas({ rectWidth: 225, rectHeight: 300, ctx: createMockContext2D() }), {
+        n: 0.8,
+        f: 2.2
+      });
+
+      return snapshot;
+    }
+
+    expect(captureState({
+      ratioDefaults: { normal: 0.8, flat: 2.2 }
+    })).toEqual(captureState());
+  });
+
   it("routes layout mode using ratio thresholds", function () {
     const harness = createHarness();
     const renderer = harness.engine.createRenderer({
@@ -200,6 +230,25 @@ describe("FullCircleRadialEngine", function () {
     renderer(createMockCanvas({ rectWidth: 500, rectHeight: 120, ctx: createMockContext2D() }), {});
 
     expect(harness.calls.mode).toEqual(["high", "normal", "flat"]);
+  });
+
+  it("falls back to engine-owned ratio defaults when wind threshold props are absent", function () {
+    function captureMode(props) {
+      const harness = createHarness();
+      let mode = null;
+      const renderer = harness.engine.createRenderer({
+        ratioProps: { normal: "windNormal", flat: "windFlat" },
+        drawFrame(state) {
+          mode = state.mode;
+        }
+      });
+
+      renderer(createMockCanvas({ rectWidth: 225, rectHeight: 300, ctx: createMockContext2D() }), props || {});
+      return mode;
+    }
+
+    expect(captureMode()).toBe("high");
+    expect(captureMode({ windNormal: 0.7, windFlat: 2.0 })).toBe("normal");
   });
 
   it("exposes layout-owned responsive state and cache geometry to callbacks", function () {

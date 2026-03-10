@@ -96,7 +96,6 @@
         normal: "tempLinearRatioThresholdNormal",
         flat: "tempLinearRatioThresholdFlat"
       },
-      ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: valueMath.resolveTemperatureSemicircleTickSteps,
       formatDisplay: formatDisplay,
       buildSectors: function (props, minV, maxV, axis, valueApi, theme) {

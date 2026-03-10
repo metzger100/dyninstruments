@@ -47,6 +47,11 @@ describe("TemperatureLinearWidget", function () {
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.unitDefault).toBe("°C");
+    expect(captured.ratioProps).toEqual({
+      normal: "tempLinearRatioThresholdNormal",
+      flat: "tempLinearRatioThresholdFlat"
+    });
+    expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(8)).toEqual({ major: 1, minor: 0.5 });
     expect(captured.tickSteps(100)).toEqual({ major: 10, minor: 2 });
     expect(resolveTemperatureSemicircleTickSteps).toHaveBeenCalledTimes(2);

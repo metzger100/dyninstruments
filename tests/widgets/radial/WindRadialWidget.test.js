@@ -2,6 +2,44 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("WindRadialWidget", function () {
+  it("passes full-circle ratio props without wrapper-owned ratioDefaults", function () {
+    let captured;
+    const renderCanvas = vi.fn();
+
+    const spec = loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js").create({}, {
+      applyFormatter(value) {
+        return String(value);
+      },
+      getModule(id) {
+        if (id === "FullCircleRadialTextLayout") {
+          return {
+            create() {
+              return {};
+            }
+          };
+        }
+        if (id !== "FullCircleRadialEngine") throw new Error("unexpected module: " + id);
+        return {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return renderCanvas;
+              }
+            };
+          }
+        };
+      }
+    });
+
+    expect(spec.renderCanvas).toBe(renderCanvas);
+    expect(captured.ratioProps).toEqual({
+      normal: "windRadialRatioThresholdNormal",
+      flat: "windRadialRatioThresholdFlat"
+    });
+    expect(captured).not.toHaveProperty("ratioDefaults");
+  });
+
   function createFullCircleLayoutApi() {
     const fullCircleLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");

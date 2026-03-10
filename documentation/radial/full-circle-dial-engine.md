@@ -41,7 +41,7 @@ const renderCanvas = engine.createRenderer(spec);
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `ratioProps` | `{normal,flat}` | no | Prop names for mode thresholds |
-| `ratioDefaults` | `{normal,flat}` | no | Default mode thresholds |
+| `ratioDefaults` | `{normal,flat}` | no | Engine-level safety fallback for missing threshold props; config-backed wrappers should omit it |
 | `cacheLayers` | `string[]` | no | Layer names passed to `CanvasLayerCache` |
 | `layout` | object | no | Shared slot shaping (`highTopFactor`, `highBottomFactor`) |
 | `buildStaticKey` | `(state, props) => any` | no | Widget static cache-key payload |

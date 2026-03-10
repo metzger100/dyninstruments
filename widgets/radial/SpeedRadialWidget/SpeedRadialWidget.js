@@ -64,7 +64,6 @@
         normal: "speedRadialRatioThresholdNormal",
         flat: "speedRadialRatioThresholdFlat"
       },
-      ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
       formatDisplay: function (raw, props, unit) {
         return displaySpeedFromRaw(raw, props, unit);

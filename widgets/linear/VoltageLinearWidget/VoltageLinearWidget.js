@@ -104,7 +104,6 @@
         normal: "voltageLinearRatioThresholdNormal",
         flat: "voltageLinearRatioThresholdFlat"
       },
-      ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: valueMath.resolveVoltageSemicircleTickSteps,
       formatDisplay: formatDisplay,
       buildSectors: function (props, minV, maxV, axis, valueApi, theme) {

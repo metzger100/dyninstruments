@@ -74,7 +74,6 @@
         normal: "tempRadialRatioThresholdNormal",
         flat: "tempRadialRatioThresholdFlat"
       },
-      ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: valueMath.resolveTemperatureSemicircleTickSteps,
       formatDisplay: function (raw, props) {
         return displayTempFromRaw(raw, 1, props);

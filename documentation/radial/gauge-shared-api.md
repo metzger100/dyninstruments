@@ -261,7 +261,7 @@ Responsive ownership for the semicircle family:
 | `unitDefault` | string | yes | Default unit text |
 | `rangeDefaults` | `{min,max}` | yes | Default value range |
 | `ratioProps` | `{normal,flat}` | yes | Prop names for layout thresholds |
-| `ratioDefaults` | `{normal,flat}` | yes | Default layout thresholds |
+| `ratioDefaults` | `{normal,flat}` | no | Engine-level safety fallback for missing threshold props; config-backed wrappers should omit it |
 | `tickSteps` | `(range) => {major,minor}` | yes | Gauge-specific tick strategy (wrappers should delegate to shared `RadialValueMath` resolver methods) |
 | `formatDisplay` | `(raw, props, unit, Helpers) => {num,text}` | yes | Gauge-specific value formatter |
 | `buildSectors` | `(props, minV, maxV, arc, valueUtils, theme) => Sector[]` | yes | Gauge-specific warning/alarm sectors (wrappers typically pass `theme.colors.warning/alarm` into shared builders) |
@@ -306,7 +306,7 @@ Responsive ownership for the full-circle family:
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `ratioProps` | `{normal,flat}` | no | Prop names for mode thresholds |
-| `ratioDefaults` | `{normal,flat}` | no | Default mode thresholds |
+| `ratioDefaults` | `{normal,flat}` | no | Engine-level safety fallback for missing threshold props; config-backed wrappers should omit it |
 | `cacheLayers` | `string[]` | no | Layer names for `CanvasLayerCache` |
 | `layout` | object | no | Shared slot factors (`highTopFactor`, `highBottomFactor`) |
 | `buildStaticKey` | `(state, props) => any` | no | Widget static-key payload |

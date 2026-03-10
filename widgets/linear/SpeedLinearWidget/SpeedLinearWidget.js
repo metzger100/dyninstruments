@@ -88,7 +88,6 @@
         normal: "speedLinearRatioThresholdNormal",
         flat: "speedLinearRatioThresholdFlat"
       },
-      ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
       formatDisplay: formatDisplay,
       buildSectors: buildSectors

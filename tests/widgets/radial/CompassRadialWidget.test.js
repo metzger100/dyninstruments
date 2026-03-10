@@ -2,6 +2,41 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("CompassRadialWidget", function () {
+  it("passes full-circle ratio props without wrapper-owned ratioDefaults", function () {
+    let captured;
+    const renderCanvas = vi.fn();
+
+    const spec = loadFresh("widgets/radial/CompassRadialWidget/CompassRadialWidget.js").create({}, {
+      getModule(id) {
+        if (id === "FullCircleRadialTextLayout") {
+          return {
+            create() {
+              return {};
+            }
+          };
+        }
+        if (id !== "FullCircleRadialEngine") throw new Error("unexpected module: " + id);
+        return {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return renderCanvas;
+              }
+            };
+          }
+        };
+      }
+    });
+
+    expect(spec.renderCanvas).toBe(renderCanvas);
+    expect(captured.ratioProps).toEqual({
+      normal: "compassRadialRatioThresholdNormal",
+      flat: "compassRadialRatioThresholdFlat"
+    });
+    expect(captured).not.toHaveProperty("ratioDefaults");
+  });
+
   function createCompassCachingHarness() {
     const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
     const fullCircleLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");

@@ -47,6 +47,11 @@ describe("SpeedLinearWidget", function () {
     expect(captured.axisMode).toBe("range");
     expect(captured.unitDefault).toBe("kn");
     expect(captured.rangeDefaults).toEqual({ min: 0, max: 30 });
+    expect(captured.ratioProps).toEqual({
+      normal: "speedLinearRatioThresholdNormal",
+      flat: "speedLinearRatioThresholdFlat"
+    });
+    expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(6)).toEqual({ major: 1, minor: 0.5 });
     expect(captured.tickSteps(30)).toEqual({ major: 5, minor: 1 });
     expect(resolveStandardSemicircleTickSteps).toHaveBeenCalledTimes(2);

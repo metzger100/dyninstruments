@@ -63,7 +63,6 @@
         normal: "voltageRadialRatioThresholdNormal",
         flat: "voltageRadialRatioThresholdFlat"
       },
-      ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps: valueMath.resolveVoltageSemicircleTickSteps,
       formatDisplay: function (raw, props) {
         return displayVoltageFromRaw(raw, props);

@@ -55,7 +55,6 @@ Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
 
     const renderCanvas = engine.createRenderer({
       ratioProps: { normal: "newDialRatioThresholdNormal", flat: "newDialRatioThresholdFlat" },
-      ratioDefaults: { normal: 0.8, flat: 2.2 },
       cacheLayers: ["back", "front"],
       buildStaticKey: function (state, props) {
         return { customStatic: true };
@@ -88,6 +87,9 @@ Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
         }
       }
     });
+
+    // Config-backed plugin wrappers should omit ratioDefaults and trust the
+    // editable/default config boundary to populate the threshold props.
 
     function translateFunction() {
       return {};
