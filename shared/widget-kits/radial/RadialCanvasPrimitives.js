@@ -26,11 +26,8 @@
         if (style.lineJoin != null) ctx.lineJoin = style.lineJoin;
         if (Array.isArray(style.dash)) ctx.setLineDash(style.dash);
       }
-      try {
-        fn();
-      } finally {
-        ctx.restore();
-      }
+      fn();
+      ctx.restore();
     }
 
     function drawRing(ctx, cx, cy, r, opts) {
