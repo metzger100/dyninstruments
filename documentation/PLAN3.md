@@ -239,17 +239,11 @@ Status: implemented on `2026-03-10`. Removed the two internal framework-method g
 
 ### Phase 7 — Add lint suppressions for legitimate boundary exceptions
 
-Some `typeof` checks are legitimate because they operate at genuine external boundaries, not internal contracts:
+Status: implemented on `2026-03-10`. Phase 7 followed the live-warning cleanup scope instead of the earlier broader candidate list: added one production `framework-method-typeof-guard` suppression in `ThemeResolver` for the runtime-bootstrap `Helpers.getModule("ThemePresets")` boundary, extended atomicity-rule coverage with a matching suppression regression, and revalidated the repo so `node tools/check-patterns.mjs` now reports `0` warnings across the atomicity rollout surface. `CanvasLayerCache` was intentionally not changed in this phase because its DOM-boundary guards are not part of the current live warning surface. `npm run check:all` passed on March 10, 2026 with `78/78` test files and `475/475` tests green.
 
-| File | Pattern | Reason for suppression |
-|---|---|---|
-| `CanvasLayerCache.js` | `typeof canvas.ownerDocument.createElement === "function"` | DOM boundary — canvas element may come from different document contexts |
-| `CanvasLayerCache.js` | `typeof canvas.getBoundingClientRect === "function"` | DOM boundary — canvas element capability check |
-| `ThemeResolver.js` | `typeof Helpers.getModule === "function"` | Runtime bootstrap order — ThemeResolver may be created before all modules are registered |
-| `ThemeResolver.js` | `typeof canvas.closest === "function"` | DOM boundary — older canvas polyfills |
-
-1. Add `dyni-lint-disable-next-line` comments with the specific rule name and a short justification for each legitimate exception.
-2. Run the full linter suite and verify the backlog is now zero for all new rules.
+1. In `ThemeResolver.js`, keep the existing bootstrap fallback behavior and annotate the one legitimate module-loader boundary with a rule-specific suppression comment.
+2. Extend `tests/tools/check-patterns-atomicity.test.js` with a focused `framework-method-typeof-guard` suppression case that mirrors the `ThemeResolver` ternary shape and verifies `invalid-lint-suppression=0`.
+3. Revalidate with `node tools/check-patterns.mjs`, `npx vitest run tests/tools/check-patterns-atomicity.test.js tests/shared/theme/ThemeResolver.test.js`, and `npm run check:all`.
 
 ### Phase 8 — Promote all new rules to block and promote existing warn rules
 
@@ -301,8 +295,8 @@ Some `typeof` checks are legitimate because they operate at genuine external bou
 | `shared/widget-kits/linear/LinearCanvasPrimitives.js` | Linear canvas drawing primitives | Modified in Phase 4 and Phase 5 |
 | `shared/widget-kits/radial/RadialCanvasPrimitives.js` | Radial canvas drawing primitives | Modified in Phase 5 |
 | `shared/widget-kits/radial/RadialTickMath.js` | Radial tick math helper | Modified in Phase 6 |
-| `shared/widget-kits/canvas/CanvasLayerCache.js` | Canvas layer caching | Modified in Phase 7 (suppression only) |
-| `shared/theme/ThemeResolver.js` | Theme resolution | Modified in Phase 7 (suppression only) |
+| `shared/widget-kits/canvas/CanvasLayerCache.js` | Canvas layer caching | Reviewed in Phase 7; no code change because its DOM-boundary guards are not part of the live warning surface |
+| `shared/theme/ThemeResolver.js` | Theme resolution | Modified in Phase 7 with the one production bootstrap-boundary suppression |
 | `documentation/TECH-DEBT.md` | Tech debt tracking | Modified in Phase 0 and Phase 9 |
 | `documentation/conventions/coding-standards.md` | Coding standards | Modified in Phase 9 |
 | `CONTRIBUTING.md` | Contributor workflow | Modified in Phase 9 |
