@@ -39,8 +39,8 @@ node tools/check-patterns.mjs --warn
 
 Rule references:
 - `check-patterns.mjs`: `duplicate-fn-body` (`duplicate-functions`), `duplicate-block` (`duplicate-block-clones`), `forbidden-global`, `empty-catch`, `todo-missing-owner`, `unused-fallback`, `dead-code`, `default-truthy-fallback`, `formatter-availability-heuristic`, `renderer-numeric-coercion-without-boundary-contract`, `mapper-output-complexity` (warn at `9..12`, block at `>12`)
-- `check-patterns.mjs` warn-only fail-fast rollout: `catch-fallback-without-suppression`, `internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `css-js-default-duplication`, `premature-legacy-support`
-- `check-patterns.mjs` warn-only atomicity rollout: `widget-renderer-default-duplication`, `engine-layout-default-drift`, `canvas-api-typeof-guard`, `try-finally-canvas-drawing`, `framework-method-typeof-guard`, `inline-config-default-duplication`
+- `check-patterns.mjs` block-mode fail-fast + atomicity rules: `internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `widget-renderer-default-duplication`, `engine-layout-default-drift`, `canvas-api-typeof-guard`, `try-finally-canvas-drawing`, `framework-method-typeof-guard`, `inline-config-default-duplication`
+- `check-patterns.mjs` remaining warn-only rollout rules: `catch-fallback-without-suppression`, `css-js-default-duplication`, `premature-legacy-support`, `editable-threshold-missing-internal`
 - `check-patterns.mjs` blocking suppression guard: `invalid-lint-suppression`
 - `check-smell-contracts.mjs`: `theme-cache-invalidation`, `dynamic-storekey-clears-on-empty`, `falsy-default-preservation`, `mapper-output-no-nan`, `text-layout-hotspot-budget`, `coordinate-formatter-no-raw-equality-fallback`
 - `check-file-size.mjs`: warning at `>=300` non-empty lines, failure at `>400` non-empty lines, oneliner detection in block mode via `npm run check:filesize` (optional exploratory warn mode: `npm run check:filesize:warn`)
@@ -64,7 +64,7 @@ Rule references:
 
 8. Fix catch and maintenance-marker hygiene.
 - Replace empty catches with explicit handling: comment why silence is intentional, log with context, or use centralized handlers.
-- For intentional warn-only fallback exceptions, use rule-specific suppression syntax with a reason:
+- For intentional rule exceptions, use rule-specific suppression syntax with a reason:
   - `// dyni-lint-disable-next-line <rule-name> -- <reason>`
   - `/* dyni-lint-disable-line <rule-name> -- <reason> */`
 - Ensure maintenance markers include owner and date, e.g. `TODO(name, 2026-02-20): ...`.
@@ -119,7 +119,7 @@ Required per-commit audit checks:
 | Helper duplication | Historical: `extractNumberText` duplicated in 4 gauge widgets before TD-001 (`DepthRadialWidget`, `SpeedRadialWidget`, `TemperatureRadialWidget`, `VoltageRadialWidget`) | `check-patterns.mjs` (`duplicate-functions` / `[duplicate-fn-body]`) | Extract shared helper to `shared/widget-kits/` (done via `RadialValueMath.extractNumberText`) |
 | AvNav boundary bypass | Historical: direct `avnav.api` access in `SpeedRadialWidget`, `TemperatureRadialWidget`, `VoltageRadialWidget`, `WindRadialWidget`, `PositionCoordinateWidget` (TD-008) | `check-patterns.mjs` (`forbidden-global`) | Route through `Helpers.applyFormatter()` |
 | Empty catch blocks | Historical: silent `catch(e){}` fallback paths in renderer/helper/widget code before TD-009 | `check-patterns.mjs` (`empty-catch`) | Add explicit comment/logging or use centralized boundary handling |
-| Growing files | Current `>=300` warnings: `widgets/radial/WindRadialWidget/WindRadialWidget.js` (363 non-empty lines), `shared/widget-kits/radial/SemicircleRadialEngine.js` (341), `widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js` (311) | `check-file-size.mjs` (warning at `>=300`) | Split before exceeding 400 non-empty lines |
+| Growing files | Current `>=300` warnings: `config/clusters/environment.js`, `config/components.js`, `shared/widget-kits/linear/LinearGaugeEngine.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialTextLayout.js`, `shared/widget-kits/text/TextLayoutComposite.js`, `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js`, `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js` | `check-file-size.mjs` (warning at `>=300`) | Split before exceeding 400 non-empty lines |
 | Oneliner size-limit bypass | Backlog resolved (`onelinerDenseWarnings: 0`, `onelinerLongWarnings: 0`, `onelinerWarnings: 0`) and fail-closed enforcement active (TD-012 completed) | `npm run check:filesize` (`--oneliner=block`) | Keep multiline formatting; use `npm run check:filesize:warn` only for exploratory passes |
 | Stale doc headers | Historical header path drift: `documentation/modules/...` and `documentation/architecture/module-system.md` migrated to current `documentation/widgets/...` and `documentation/architecture/component-system.md` | `check-headers.mjs` (`broken-doc-link`) | Update `Documentation:` header path to the current doc |
 | Naming drift | Historical naming cleanup: `DyniThreeElements` -> `DyniThreeValueTextWidget` and related `globalKey` normalization in `config/components.js` | `check-naming.mjs` | Rename to match conventions (`Dyni{ComponentName}` and matching registered/returned ids) |

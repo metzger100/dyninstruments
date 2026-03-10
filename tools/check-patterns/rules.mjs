@@ -172,7 +172,7 @@ export const RULES = [
   },
   {
     name: "internal-hook-fallback",
-    severity: "warn",
+    severity: "block",
     scope: {
       include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
       exclude: ["tests/**", "tools/**"]
@@ -182,7 +182,7 @@ export const RULES = [
   },
   {
     name: "redundant-null-type-guard",
-    severity: "warn",
+    severity: "block",
     scope: {
       include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
       exclude: ["tests/**", "tools/**"]
@@ -192,7 +192,7 @@ export const RULES = [
   },
   {
     name: "hardcoded-runtime-default",
-    severity: "warn",
+    severity: "block",
     scope: {
       include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
       exclude: ["tests/**", "tools/**"]
@@ -202,7 +202,7 @@ export const RULES = [
   },
   {
     name: "widget-renderer-default-duplication",
-    severity: "warn",
+    severity: "block",
     scope: {
       include: ["widgets/**/*.js"],
       exclude: ["tests/**", "tools/**"]
@@ -212,7 +212,7 @@ export const RULES = [
   },
   {
     name: "engine-layout-default-drift",
-    severity: "warn",
+    severity: "block",
     scope: {
       include: ["shared/widget-kits/linear/*.js", "shared/widget-kits/radial/*.js"],
       exclude: ["tests/**", "tools/**"]
@@ -222,7 +222,7 @@ export const RULES = [
   },
   {
     name: "canvas-api-typeof-guard",
-    severity: "warn",
+    severity: "block",
     scope: {
       include: ["shared/**/*.js", "widgets/**/*.js"],
       exclude: ["tests/**", "tools/**"]
@@ -232,7 +232,7 @@ export const RULES = [
   },
   {
     name: "try-finally-canvas-drawing",
-    severity: "warn",
+    severity: "block",
     scope: {
       include: ["shared/**/*.js"],
       exclude: ["tests/**", "tools/**"]
@@ -242,7 +242,7 @@ export const RULES = [
   },
   {
     name: "framework-method-typeof-guard",
-    severity: "warn",
+    severity: "block",
     scope: {
       include: ["shared/**/*.js", "widgets/**/*.js"],
       exclude: ["tests/**", "tools/**"]
@@ -252,7 +252,7 @@ export const RULES = [
   },
   {
     name: "inline-config-default-duplication",
-    severity: "warn",
+    severity: "block",
     scope: {
       include: ["widgets/**/*.js", "shared/**/*.js"],
       exclude: ["tests/**", "tools/**"]
