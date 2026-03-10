@@ -1,8 +1,9 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("VoltageRadialWidget", function () {
-  it("builds low-end sectors with default warning/alarm values", function () {
+  it("builds low-end sectors from config-backed warning/alarm values", function () {
     let captured;
+    let receivedProps;
     let receivedOptions;
     const renderCanvas = vi.fn();
     const applyFormatter = vi.fn((value) => Number(value).toFixed(1));
@@ -25,10 +26,11 @@ describe("VoltageRadialWidget", function () {
                   return match ? match[0] : "";
                 },
                 buildLowEndSectors(props, minV, maxV, arc, options) {
+                  receivedProps = props;
                   receivedOptions = options;
                   return [
-                    { a0: minV, a1: options.defaultAlarmFrom, color: options.alarmColor },
-                    { a0: options.defaultAlarmFrom, a1: options.defaultWarningFrom, color: options.warningColor }
+                    { a0: minV, a1: props.alarmFrom, color: options.alarmColor },
+                    { a0: props.alarmFrom, a1: props.warningFrom, color: options.warningColor }
                   ];
                 },
                 resolveVoltageSemicircleTickSteps
@@ -51,7 +53,7 @@ describe("VoltageRadialWidget", function () {
     });
 
     expect(spec.renderCanvas).toBe(renderCanvas);
-    expect(captured.rangeDefaults).toEqual({ min: 10, max: 15 });
+    expect(captured).not.toHaveProperty("rangeDefaults");
     expect(captured.ratioProps).toEqual({
       normal: "voltageRadialRatioThresholdNormal",
       flat: "voltageRadialRatioThresholdFlat"
@@ -74,14 +76,21 @@ describe("VoltageRadialWidget", function () {
         alarm: "#654321"
       }
     };
-    const sectors = captured.buildSectors({}, 10, 15, {}, {}, theme);
+    const sectors = captured.buildSectors({
+      voltageRadialWarningFrom: 12.2,
+      voltageRadialAlarmFrom: 11.6
+    }, 10, 15, {}, {}, theme);
 
     expect(sectors).toEqual([
       { a0: 10, a1: 11.6, color: "#654321" },
       { a0: 11.6, a1: 12.2, color: "#123456" }
     ]);
-    expect(receivedOptions.defaultWarningFrom).toBe(12.2);
-    expect(receivedOptions.defaultAlarmFrom).toBe(11.6);
+    expect(receivedProps).toEqual({
+      warningFrom: 12.2,
+      alarmFrom: 11.6
+    });
+    expect(receivedOptions).not.toHaveProperty("defaultWarningFrom");
+    expect(receivedOptions).not.toHaveProperty("defaultAlarmFrom");
     expect(receivedOptions.warningColor).toBe(theme.colors.warning);
     expect(receivedOptions.alarmColor).toBe(theme.colors.alarm);
   });
@@ -135,18 +144,20 @@ describe("VoltageRadialWidget", function () {
 
     captured.buildSectors({
       voltageRadialWarningEnabled: false,
-      voltageRadialAlarmEnabled: true
+      voltageRadialAlarmEnabled: true,
+      voltageRadialAlarmFrom: 11.6
     }, 10, 15, {}, {}, theme);
     expect(buildLowEndSectors).toHaveBeenCalledTimes(1);
     expect(Number.isNaN(buildLowEndSectors.mock.calls[0][0].warningFrom)).toBe(true);
-    expect(buildLowEndSectors.mock.calls[0][0].alarmFrom).toBeUndefined();
+    expect(buildLowEndSectors.mock.calls[0][0].alarmFrom).toBe(11.6);
 
     captured.buildSectors({
       voltageRadialWarningEnabled: true,
-      voltageRadialAlarmEnabled: false
+      voltageRadialAlarmEnabled: false,
+      voltageRadialWarningFrom: 12.2
     }, 10, 15, {}, {}, theme);
     expect(buildLowEndSectors).toHaveBeenCalledTimes(2);
-    expect(buildLowEndSectors.mock.calls[1][0].warningFrom).toBeUndefined();
+    expect(buildLowEndSectors.mock.calls[1][0].warningFrom).toBe(12.2);
     expect(Number.isNaN(buildLowEndSectors.mock.calls[1][0].alarmFrom)).toBe(true);
   });
 

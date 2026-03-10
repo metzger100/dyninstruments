@@ -68,7 +68,7 @@ The same pattern exists for `rangeDefaults` — widgets hardcode `{ min: X, max:
 | `TemperatureLinearWidget` | `{ min: 0, max: 35 }` | `environment.js` | ✅ exact duplicate |
 | `TemperatureRadialWidget` | `{ min: 0, max: 35 }` | `environment.js` | ✅ exact duplicate |
 
-`VoltageLinearWidget` and `VoltageRadialWidget` are not part of the live Phase 2 warning surface on March 10, 2026. Their wrapper-owned `rangeDefaults` no longer match the config-owned editable defaults in `config/clusters/vessel.js`, so their range ownership mismatch remains separate cleanup work rather than `widget-renderer-default-duplication`.
+`VoltageLinearWidget` and `VoltageRadialWidget` were not part of the live Phase 2 warning surface on March 10, 2026 because their wrapper-owned `rangeDefaults` no longer exactly matched the config-owned editable defaults in `config/clusters/vessel.js`. A follow-up cleanup on March 10, 2026 removed those remaining wrapper-owned range defaults so all config-backed gauge wrappers now omit `rangeDefaults`.
 
 ### Problem 2: Engine/Layout Modules Duplicate Each Other's Defaults
 
@@ -197,7 +197,7 @@ Status: implemented on `2026-03-10`. Removed wrapper-owned `ratioDefaults` from 
 
 ### Phase 2 — Remove widget-level `rangeDefaults` duplication
 
-Status: implemented on `2026-03-10`. Removed wrapper-owned `rangeDefaults` from the six config-backed wrappers still flagged by `widget-renderer-default-duplication` (`Speed/Depth/Temperature` in both linear and semicircle families), updated wrapper and shared-engine coverage for config-owned range bounds vs engine fallback behavior, and tightened the shared API / authoring docs so config-backed wrappers omit `rangeDefaults`. `node tools/check-patterns.mjs` should now report `widget-renderer-default-duplication=0`; the remaining atomicity backlog is `15` warnings across the other five warn-mode rules. Voltage range ownership remains out of scope for this phase because those wrappers no longer match config-owned min/max defaults.
+Status: implemented on `2026-03-10`. Removed wrapper-owned `rangeDefaults` from the six config-backed wrappers still flagged by `widget-renderer-default-duplication` (`Speed/Depth/Temperature` in both linear and semicircle families), updated wrapper and shared-engine coverage for config-owned range bounds vs engine fallback behavior, and tightened the shared API / authoring docs so config-backed wrappers omit `rangeDefaults`. `node tools/check-patterns.mjs` should now report `widget-renderer-default-duplication=0`; the remaining atomicity backlog is `15` warnings across the other five warn-mode rules. A same-day follow-up then removed the last voltage wrapper-owned `rangeDefaults` as well, so all config-backed range wrappers now follow the documented contract.
 
 1. Remove `rangeDefaults` from the six duplicate wrappers only: `SpeedLinearWidget`, `DepthLinearWidget`, `TemperatureLinearWidget`, `SpeedRadialWidget`, `DepthRadialWidget`, and `TemperatureRadialWidget`.
 2. Keep `LinearGaugeEngine.DEFAULT_RANGE_DEFAULTS` and `SemicircleRadialEngine.DEFAULT_RANGE_DEFAULTS` unchanged as the single runtime fallback owners.
@@ -251,7 +251,7 @@ Status: implemented on `2026-03-10`. Promoted the six atomicity rules plus `redu
 
 ### Phase 9 — Documentation and guidance updates
 
-Status: closed on `2026-03-10`. The Phase 8 truth-sync updated the enforcement-owner docs (`documentation/conventions/smell-prevention.md`, `documentation/guides/documentation-maintenance.md`, `documentation/guides/garbage-collection.md`, `documentation/QUALITY.md`, `documentation/TECH-DEBT.md`, and this plan). `documentation/conventions/coding-standards.md`, `CONTRIBUTING.md`, `AGENTS.md`, and `CLAUDE.md` required no rollout-specific edits because they contained no stale atomicity severity or backlog guidance.
+Status: closed on `2026-03-10`. The Phase 8 truth-sync updated the enforcement-owner docs (`documentation/conventions/smell-prevention.md`, `documentation/guides/documentation-maintenance.md`, `documentation/guides/garbage-collection.md`, `documentation/QUALITY.md`, `documentation/TECH-DEBT.md`, and this plan). `documentation/conventions/coding-standards.md`, `CONTRIBUTING.md`, `AGENTS.md`, and `CLAUDE.md` were reviewed during Phase 9 and required no rollout-specific edits because they contained no stale atomicity severity or backlog guidance.
 
 ## Affected File Map
 
@@ -268,13 +268,13 @@ Status: closed on `2026-03-10`. The Phase 8 truth-sync updated the enforcement-o
 | `widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js` | Linear speed gauge | Modified in Phase 1 and Phase 2 |
 | `widgets/linear/DepthLinearWidget/DepthLinearWidget.js` | Linear depth gauge | Modified in Phase 1 and Phase 2 |
 | `widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js` | Linear temperature gauge | Modified in Phase 1 and Phase 2 |
-| `widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js` | Linear voltage gauge | Modified in Phase 1 and Phase 6; Phase 2 range ownership cleanup deferred |
+| `widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js` | Linear voltage gauge | Modified in Phase 1 and Phase 6; same-day follow-up removed the last wrapper-owned `rangeDefaults` |
 | `widgets/linear/CompassLinearWidget/CompassLinearWidget.js` | Linear compass gauge | Modified in Phase 1 |
 | `widgets/linear/WindLinearWidget/WindLinearWidget.js` | Linear wind gauge | Modified in Phase 1 |
 | `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js` | Semicircle speedometer | Modified in Phase 1 and Phase 2 |
 | `widgets/radial/DepthRadialWidget/DepthRadialWidget.js` | Semicircle depth gauge | Modified in Phase 1 and Phase 2 |
 | `widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js` | Semicircle temperature gauge | Modified in Phase 1 and Phase 2 |
-| `widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js` | Semicircle voltage gauge | Modified in Phase 1; Phase 2 range ownership cleanup deferred |
+| `widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js` | Semicircle voltage gauge | Modified in Phase 1; same-day follow-up removed the last wrapper-owned `rangeDefaults` and redundant sector fallback literals |
 | `widgets/radial/CompassRadialWidget/CompassRadialWidget.js` | Full-circle compass dial | Modified in Phase 1 |
 | `widgets/radial/WindRadialWidget/WindRadialWidget.js` | Full-circle wind dial | Modified in Phase 1 |
 | `shared/widget-kits/linear/LinearGaugeLayout.js` | Linear-family responsive layout owner | Modified in Phase 3 |
@@ -293,10 +293,10 @@ Status: closed on `2026-03-10`. The Phase 8 truth-sync updated the enforcement-o
 | `documentation/guides/garbage-collection.md` | Cleanup workflow guide | Modified in Phase 8 to reflect current rule severities and live hotspot examples |
 | `documentation/QUALITY.md` | Quality scorecard | Modified in Phase 8 to resync the live March 10, 2026 gate state |
 | `documentation/TECH-DEBT.md` | Tech debt tracking | Modified in Phase 0 and Phase 8 |
-| `documentation/conventions/coding-standards.md` | Coding standards | Modified in Phase 9 |
-| `CONTRIBUTING.md` | Contributor workflow | Modified in Phase 9 |
-| `AGENTS.md` | AI agent instructions | Modified in Phase 9 |
-| `CLAUDE.md` | Claude-specific instructions | Modified in Phase 9 |
+| `documentation/conventions/coding-standards.md` | Coding standards | Reviewed in Phase 9; no rollout-specific edit required |
+| `CONTRIBUTING.md` | Contributor workflow | Reviewed in Phase 9; no rollout-specific edit required |
+| `AGENTS.md` | AI agent instructions | Reviewed in Phase 9; no rollout-specific edit required |
+| `CLAUDE.md` | Claude-specific instructions | Reviewed in Phase 9; no rollout-specific edit required |
 
 ## Related
 

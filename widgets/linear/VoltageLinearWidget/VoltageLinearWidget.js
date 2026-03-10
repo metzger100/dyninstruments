@@ -90,7 +90,6 @@
       rawValueKey: "voltage",
       unitDefault: "V",
       axisMode: "range",
-      rangeDefaults: { min: 10, max: 15 },
       rangeProps: {
         min: "voltageLinearMinValue",
         max: "voltageLinearMaxValue"

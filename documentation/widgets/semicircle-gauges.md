@@ -96,10 +96,10 @@ Each wrapper defines:
 - Low-end sectors
 - Tick profile: `resolveVoltageSemicircleTickSteps`
 - Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatDecimal", formatterParameters: [3, 1, true] })`
-- Wrapper-local fallback range: `10..15` (does not currently match config-owned voltage min/max defaults and remains separate cleanup debt)
+- Config-backed range defaults: `7..15`
 - Wrapper defaults/bindings: unit `V`, voltage ratio props
 - Toggle behavior: sectors default to enabled when toggle values are unset; explicit `voltageRadialWarningEnabled: false` and/or `voltageRadialAlarmEnabled: false` suppress corresponding sectors
-- Low-end defaults (`warningFrom=12.2`, `alarmFrom=11.6`) are applied only for sectors that remain enabled
+- Low-end defaults (`warningFrom=12.2`, `alarmFrom=11.6`) come from the editable/default config boundary; the wrapper forwards only enabled sector props plus theme colors
 
 ## Removed Duplication
 
