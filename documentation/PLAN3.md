@@ -223,9 +223,11 @@ Status: implemented on `2026-03-10`. Removed the two internal Canvas 2D method g
 
 ### Phase 5 — Simplify try/finally canvas drawing blocks
 
-1. In `LinearCanvasPrimitives.js`, replace all `try { draw(); } finally { ctx.restore(); }` patterns with `draw(); ctx.restore();` in `drawTrack`, `drawBand`, `drawTick`, and `drawPointer`.
-2. In `RadialCanvasPrimitives.js`, replace the same pattern in the `withSave` helper.
-3. Run existing canvas rendering tests to confirm no behavior change.
+Status: implemented on `2026-03-10`. Removed the remaining internal `try { ... } finally { ctx.restore(); }` wrappers from the shared linear and radial primitive owners, expanded direct primitive regressions to assert balanced `save`/`restore` usage across the touched public draw paths, and revalidated the Phase 5 surface with `node tools/check-patterns.mjs` plus the full `npm run check:all` gate. `node tools/check-patterns.mjs` now reports `try-finally-canvas-drawing=0`, reducing the remaining atomicity backlog to `5` warnings across the later-phase rules (`framework-method-typeof-guard=3`, `inline-config-default-duplication=2`). `npm run check:all` passed after the cleanup with `78/78` test files and `474/474` tests green.
+
+1. In `LinearCanvasPrimitives.js`, replaced all `try { draw(); } finally { ctx.restore(); }` patterns with direct `draw(); ctx.restore();` sequencing in `drawTrack`, `drawBand`, `drawTick`, and `drawPointer` while keeping the existing semantic gates unchanged.
+2. In `RadialCanvasPrimitives.js`, replaced the same pattern in the shared `withCtx` helper so `RadialCanvasPrimitives` and `RadialFrameRenderer` continue to consume one context-owner API with direct save/draw/restore sequencing.
+3. Expanded direct primitive coverage in `tests/shared/linear/LinearCanvasPrimitives.test.js` and `tests/shared/radial/RadialCanvasPrimitives.test.js` to assert balanced `save`/`restore` calls plus unchanged dash, fill/stroke, tick, pointer, ring, and annular-sector behavior.
 
 ### Phase 6 — Remove framework method `typeof` guards and inline config default duplication
 

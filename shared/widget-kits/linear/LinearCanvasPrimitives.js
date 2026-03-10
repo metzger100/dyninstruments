@@ -46,14 +46,11 @@
       alpha: (p.alpha != null) ? p.alpha : 1,
       dash: p.dash
     });
-    try {
-      ctx.beginPath();
-      ctx.moveTo(x0, y);
-      ctx.lineTo(x1, y);
-      ctx.stroke();
-    } finally {
-      ctx.restore();
-    }
+    ctx.beginPath();
+    ctx.moveTo(x0, y);
+    ctx.lineTo(x1, y);
+    ctx.stroke();
+    ctx.restore();
   }
 
   function drawBand(ctx, x0, x1, y, thickness, opts) {
@@ -72,16 +69,13 @@
       strokeStyle: p.strokeStyle,
       alpha: (p.alpha != null) ? p.alpha : 1
     });
-    try {
-      ctx.fillRect(left, top, width, t);
-      const lineWidth = hasOwn.call(p, "lineWidth") ? Number(p.lineWidth) : 0;
-      if (lineWidth > 0) {
-        ctx.lineWidth = lineWidth;
-        ctx.strokeRect(left, top, width, t);
-      }
-    } finally {
-      ctx.restore();
+    ctx.fillRect(left, top, width, t);
+    const lineWidth = hasOwn.call(p, "lineWidth") ? Number(p.lineWidth) : 0;
+    if (lineWidth > 0) {
+      ctx.lineWidth = lineWidth;
+      ctx.strokeRect(left, top, width, t);
     }
+    ctx.restore();
   }
 
   function drawTick(ctx, x, y, len, opts) {
@@ -94,14 +88,11 @@
       lineCap: hasOwn.call(p, "lineCap") ? p.lineCap : "butt",
       alpha: (p.alpha != null) ? p.alpha : 1
     });
-    try {
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x, y - length);
-      ctx.stroke();
-    } finally {
-      ctx.restore();
-    }
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y - length);
+    ctx.stroke();
+    ctx.restore();
   }
 
   function drawPointer(ctx, x, y, opts) {
@@ -113,16 +104,13 @@
       fillStyle: p.fillStyle || p.color,
       alpha: (p.alpha != null) ? p.alpha : 1
     });
-    try {
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x - side, y - depth);
-      ctx.lineTo(x + side, y - depth);
-      ctx.closePath();
-      ctx.fill();
-    } finally {
-      ctx.restore();
-    }
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - side, y - depth);
+    ctx.lineTo(x + side, y - depth);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
   }
 
   function create() {

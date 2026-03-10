@@ -12,6 +12,15 @@ describe("RadialCanvasPrimitives", function () {
     });
   }
 
+  function callsNamed(ctx, name) {
+    return ctx.calls.filter(function (call) { return call.name === name; });
+  }
+
+  function expectBalancedSaveRestore(ctx) {
+    expect(callsNamed(ctx, "save")).toHaveLength(1);
+    expect(callsNamed(ctx, "restore")).toHaveLength(1);
+  }
+
   function pointDistance(a, b) {
     const dx = a.x - b.x;
     const dy = a.y - b.y;
@@ -37,6 +46,43 @@ describe("RadialCanvasPrimitives", function () {
     };
   }
 
+  it("applies stroke styles through drawRing and balances save/restore", function () {
+    const draw = create();
+    const ctx = createMockContext2D();
+
+    draw.drawRing(ctx, 100, 100, 50, {
+      strokeStyle: "#224466",
+      lineWidth: 3,
+      dash: [4, 2]
+    });
+
+    expect(ctx.strokeStyle).toBe("#224466");
+    expect(callsNamed(ctx, "setLineDash")).toHaveLength(1);
+    expect(callsNamed(ctx, "setLineDash")[0].args[0]).toEqual([4, 2]);
+    expect(callsNamed(ctx, "arc")).toHaveLength(1);
+    expect(callsNamed(ctx, "stroke")).toHaveLength(1);
+    expectBalancedSaveRestore(ctx);
+  });
+
+  it("fills annular sectors with balanced save/restore semantics", function () {
+    const draw = create();
+    const ctx = createMockContext2D();
+
+    draw.drawAnnularSector(ctx, 100, 100, 50, {
+      startDeg: 0,
+      endDeg: 90,
+      thickness: 8,
+      fillStyle: "#123456",
+      strokeStyle: "#abcdef",
+      lineWidth: 2
+    });
+
+    expect(ctx.fillStyle).toBe("#123456");
+    expect(callsNamed(ctx, "fill")).toHaveLength(1);
+    expect(callsNamed(ctx, "stroke")).toHaveLength(1);
+    expectBalancedSaveRestore(ctx);
+  });
+
   it("uses pointer color from fillStyle", function () {
     const draw = create();
     const ctx = createMockContext2D();
@@ -47,6 +93,7 @@ describe("RadialCanvasPrimitives", function () {
       lengthFactor: 2
     });
     expect(ctx.fillStyle).toBe("#123456");
+    expectBalancedSaveRestore(ctx);
   });
 
   it("supports color alias for pointer color", function () {
@@ -59,6 +106,7 @@ describe("RadialCanvasPrimitives", function () {
       lengthFactor: 2
     });
     expect(ctx.fillStyle).toBe("#abcdef");
+    expectBalancedSaveRestore(ctx);
   });
 
   it("does not alter pointer geometry by variant when factors are fixed", function () {
