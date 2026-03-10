@@ -285,4 +285,23 @@ draw({ strokeRect() {} });
     expect(warningCount(result, "canvas-api-typeof-guard")).toBe(0);
     expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(0);
   });
+
+  it("respects framework-method suppressions for ThemeResolver bootstrap boundaries", function () {
+    const result = run({
+      "shared/theme/ThemeResolver.js": `
+function resolvePresetDefs(Helpers) {
+  // dyni-lint-disable-next-line framework-method-typeof-guard -- ThemeResolver may resolve before ThemePresets is registered during runtime bootstrap
+  const presetsMod = Helpers && typeof Helpers.getModule === "function"
+    ? Helpers.getModule("ThemePresets")
+    : null;
+  return presetsMod;
+}
+resolvePresetDefs({ getModule() { return null; } });
+`
+    });
+
+    expect(result.summary.ok).toBe(true);
+    expect(warningCount(result, "framework-method-typeof-guard")).toBe(0);
+    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(0);
+  });
 });

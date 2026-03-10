@@ -121,6 +121,7 @@
   }
 
   function resolvePresetDefs(Helpers) {
+    // dyni-lint-disable-next-line framework-method-typeof-guard -- ThemeResolver may resolve before ThemePresets is registered during runtime bootstrap.
     const presetsMod = Helpers && typeof Helpers.getModule === "function"
       ? Helpers.getModule("ThemePresets")
       : null;
