@@ -12,12 +12,8 @@
   const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
-    const angleMath = (Helpers && typeof Helpers.getModule === "function")
-      ? Helpers.getModule("RadialAngleMath").create(def, Helpers)
-      : null;
-    const mod = (angleMath && typeof angleMath.mod === "function")
-      ? angleMath.mod
-      : ((n, m) => ((n % m) + m) % m);
+    const angleMath = Helpers.getModule("RadialAngleMath").create(def, Helpers);
+    const mod = angleMath.mod;
 
     function computeSweep(startDeg, endDeg) {
       let s = Number(startDeg);

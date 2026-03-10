@@ -1,15 +1,24 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("RadialTickMath", function () {
-  const mod = loadFresh("shared/widget-kits/radial/RadialTickMath.js").create();
+  function create() {
+    return loadFresh("shared/widget-kits/radial/RadialTickMath.js").create({}, {
+      getModule(id) {
+        if (id !== "RadialAngleMath") throw new Error("unexpected module: " + id);
+        return loadFresh("shared/widget-kits/radial/RadialAngleMath.js");
+      }
+    });
+  }
 
   it("computes sweep direction and handles zero sweep as full circle", function () {
+    const mod = create();
     expect(mod.computeSweep(10, 40)).toEqual({ s: 10, e: 40, sweep: 30, dir: 1 });
     expect(mod.computeSweep(40, 10)).toEqual({ s: 40, e: 10, sweep: -30, dir: -1 });
     expect(mod.computeSweep(10, 10)).toEqual({ s: 10, e: 10, sweep: 360, dir: 1 });
   });
 
   it("builds major/minor tick sets for absolute and relative major modes", function () {
+    const mod = create();
     const absolute = mod.buildTickAngles({
       startDeg: 0,
       endDeg: 90,
@@ -37,6 +46,7 @@ describe("RadialTickMath", function () {
   });
 
   it("detects whether an angle has passed the configured end boundary", function () {
+    const mod = create();
     expect(mod.isBeyondEnd(10, 10, 1, false)).toBe(true);
     expect(mod.isBeyondEnd(10, 10, 1, true)).toBe(false);
     expect(mod.isBeyondEnd(11, 10, 1, true)).toBe(true);

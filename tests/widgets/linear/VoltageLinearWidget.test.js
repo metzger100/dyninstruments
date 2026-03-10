@@ -63,7 +63,10 @@ describe("VoltageLinearWidget", function () {
       formatter: "formatDecimal"
     }));
 
-    const sectors = captured.buildSectors({}, 10, 15, { min: 10, max: 15 }, {}, {
+    const sectors = captured.buildSectors({
+      voltageLinearWarningFrom: 12.2,
+      voltageLinearAlarmFrom: 11.6
+    }, 10, 15, { min: 10, max: 15 }, {}, {
       colors: { warning: "#123456", alarm: "#654321" }
     });
 
