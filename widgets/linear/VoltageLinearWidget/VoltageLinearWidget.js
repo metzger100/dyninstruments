@@ -49,10 +49,10 @@
       }
 
       const warningFrom = warningEnabled
-        ? Number((typeof p.voltageLinearWarningFrom !== "undefined") ? p.voltageLinearWarningFrom : 12.2)
+        ? Number(p.voltageLinearWarningFrom)
         : NaN;
       const alarmFrom = alarmEnabled
-        ? Number((typeof p.voltageLinearAlarmFrom !== "undefined") ? p.voltageLinearAlarmFrom : 11.6)
+        ? Number(p.voltageLinearAlarmFrom)
         : NaN;
       const alarmTo = isFinite(alarmFrom) ? valueMath.clamp(alarmFrom, axis.min, axis.max) : NaN;
       const warningTo = isFinite(warningFrom) ? valueMath.clamp(warningFrom, axis.min, axis.max) : NaN;

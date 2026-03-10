@@ -231,9 +231,11 @@ Status: implemented on `2026-03-10`. Removed the remaining internal `try { ... }
 
 ### Phase 6 — Remove framework method `typeof` guards and inline config default duplication
 
-1. In `RadialTickMath.js`, remove the `Helpers && typeof Helpers.getModule === "function"` guard and the `angleMath && typeof angleMath.mod === "function"` fallback. Replace with direct calls.
-2. In `VoltageLinearWidget.js`, remove the `typeof p.voltageLinearWarningFrom !== "undefined"` / `typeof p.voltageLinearAlarmFrom !== "undefined"` checks and their inline numeric fallbacks (`12.2`, `11.6`). The editable-defaults system guarantees these properties are populated from `config/clusters/vessel.js`.
-3. Run existing tests to confirm no behavior change.
+Status: implemented on `2026-03-10`. Removed the two internal framework-method guards from `RadialTickMath`, removed the config-duplicating voltage threshold fallbacks from `VoltageLinearWidget`, updated the focused shared/widget regressions to use the runtime module-loader and editable-default contracts, and revalidated the Phase 6 surface with targeted Vitest coverage plus the full `npm run check:all` gate. `node tools/check-patterns.mjs` now reports `1` remaining warning across the later-phase rules (`framework-method-typeof-guard=1`, `inline-config-default-duplication=0`); the remaining `ThemeResolver` warning is intentional Phase 7 suppression work. `npm run check:all` passed after the cleanup with `78/78` test files and `474/474` tests green.
+
+1. In `RadialTickMath.js`, replaced the `Helpers && typeof Helpers.getModule === "function"` guard and the `angleMath && typeof angleMath.mod === "function"` fallback with direct internal-contract calls.
+2. In `VoltageLinearWidget.js`, removed the inline `12.2` / `11.6` threshold fallbacks so the low-end sector builder now trusts the config-owned editable defaults from `config/clusters/vessel.js`.
+3. Updated `tests/shared/radial/RadialTickMath.test.js` and `tests/widgets/linear/VoltageLinearWidget.test.js` so the focused coverage matches the owned runtime contracts, then revalidated with `npx vitest run tests/shared/radial/RadialTickMath.test.js tests/widgets/linear/VoltageLinearWidget.test.js tests/tools/check-patterns-atomicity.test.js`, `node tools/check-patterns.mjs`, and `npm run check:all`.
 
 ### Phase 7 — Add lint suppressions for legitimate boundary exceptions
 
