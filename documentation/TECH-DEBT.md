@@ -30,6 +30,7 @@
 | TD-017 | 2026-03-09 | Added shared intrinsic spacing helpers in `ResponsiveScaleProfile`, routed `CenterDisplay`, `ActiveRoute`, `XTE`, and `WindLinear` spacing through layout-owned APIs/state, and removed the remaining widget-local compact gap/padding formulas on the PLAN2 surface. |
 | TD-018 | 2026-03-09 | Cleared `responsive-layout-hard-floor` to `0` findings, promoted the rule to `block`, updated responsive rule coverage to fail-closed, and revalidated the zero-backlog state with `node tools/check-patterns.mjs`. |
 | TD-019 | 2026-03-10 | Promoted `internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `widget-renderer-default-duplication`, `engine-layout-default-drift`, `canvas-api-typeof-guard`, `try-finally-canvas-drawing`, `framework-method-typeof-guard`, and `inline-config-default-duplication` to `block`. Updated severity-sensitive checker coverage, resynced the enforcement-owner docs, and revalidated the repo with `node tools/check-patterns.mjs` (`failures=0`, `warnings=0`) plus `npm run check:all` passing with `78/78` test files and `475/475` tests green on March 10, 2026. |
+| TD-020 | 2026-03-10 | Removed the last voltage wrapper-owned `rangeDefaults` and the redundant `VoltageRadialWidget` sector fallback literals so all config-backed gauge wrappers now trust the editable/default boundary for min/max and threshold values. Resynced `PLAN3.md` and widget docs to the live March 10, 2026 state. |
 
 ## Rules
 

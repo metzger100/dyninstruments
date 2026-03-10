@@ -49,7 +49,6 @@
     const renderCanvas = renderer.createRenderer({
       rawValueKey: "voltage",
       unitDefault: "V",
-      rangeDefaults: { min: 10, max: 15 },
       rangeProps: {
         min: "voltageRadialMinValue",
         max: "voltageRadialMaxValue"
@@ -87,8 +86,6 @@
         }
 
         return valueMath.buildLowEndSectors(sectorProps, minV, maxV, arc, {
-          defaultWarningFrom: 12.2,
-          defaultAlarmFrom: 11.6,
           warningColor: theme.colors.warning,
           alarmColor: theme.colors.alarm
         });
