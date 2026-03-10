@@ -49,6 +49,15 @@ describe("LinearGaugeLayout", function () {
     expect(layout.computeMode(120, 320, 1.1, 3.5)).toBe("high");
   });
 
+  it("uses structural fallback thresholds only when explicit thresholds are absent", function () {
+    const layout = createLayout();
+
+    expect(layout.computeMode(260, 220, 1.2, 2.8)).toBe("high");
+    expect(layout.computeMode(260, 220, undefined, undefined)).toBe("normal");
+    expect(layout.computeMode(520, 160, undefined, undefined)).toBe("flat");
+    expect(layout.computeMode(120, 320, undefined, undefined)).toBe("high");
+  });
+
   it("keeps flat, normal, and high geometry inside the content rect", function () {
     const layout = createLayout();
     const cases = [

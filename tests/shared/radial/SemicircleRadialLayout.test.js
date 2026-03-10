@@ -57,6 +57,15 @@ describe("SemicircleRadialLayout", function () {
     expect(layout.computeMode(120, 240, 1.1, 3.5)).toBe("high");
   });
 
+  it("uses structural fallback thresholds only when explicit thresholds are absent", function () {
+    const layout = createLayout();
+
+    expect(layout.computeMode(260, 220, 1.2, 2.8)).toBe("high");
+    expect(layout.computeMode(260, 220, undefined, undefined)).toBe("normal");
+    expect(layout.computeMode(520, 160, undefined, undefined)).toBe("flat");
+    expect(layout.computeMode(120, 320, undefined, undefined)).toBe("high");
+  });
+
   it("derives compact insets and text fill from the shared responsive profile", function () {
     const layout = createLayout();
     const compact = buildSnapshot(layout, 120, 80, "flat");

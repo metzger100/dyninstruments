@@ -13,6 +13,7 @@
 
   function create(def, Helpers) {
     const DEFAULT_ARC = { startDeg: 270, endDeg: 450 };
+    // Engine-owned last-resort fallback for callers that omit threshold props.
     const DEFAULT_RATIO_DEFAULTS = { normal: 1.1, flat: 3.5 };
     const DEFAULT_RANGE_DEFAULTS = { min: 0, max: 30 };
     const DEFAULT_RANGE_PROPS = { min: "minValue", max: "maxValue" };

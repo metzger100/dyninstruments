@@ -206,10 +206,12 @@ Status: implemented on `2026-03-10`. Removed wrapper-owned `rangeDefaults` from 
 
 ### Phase 3 — Consolidate engine/layout default constants
 
-1. Remove the `DEFAULT_RATIO_THRESHOLD_NORMAL` and `DEFAULT_RATIO_THRESHOLD_FLAT` constants from `LinearGaugeLayout.js`.
-2. Update `computeMode()` so its `clampNumber` calls use a structural safety value (e.g. `1.0` / `3.0`) rather than duplicating the engine's semantic defaults — the actual threshold values are always passed in as parameters from the engine.
-3. Verify `SemicircleRadialEngine` and `FullCircleRadialEngine` each carry a single authoritative `DEFAULT_RATIO_DEFAULTS` and document it in a header comment.
-4. Add a targeted test to `LinearGaugeLayout` that calls `computeMode()` with explicit threshold values and verifies the mode selection, then calls it with `undefined` thresholds and verifies the structural fallback produces a reasonable mode.
+Status: implemented on `2026-03-10`. Cleared the full live `engine-layout-default-drift` backlog across the linear, semicircle, and full-circle gauge families. `LinearGaugeLayout`, `SemicircleRadialLayout`, and `FullCircleRadialLayout` now use layout-owned structural fallback thresholds only (`1.0/3.0` for linear + semicircle, `1.0/2.0` for full-circle), while `LinearGaugeEngine`, `SemicircleRadialEngine`, and `FullCircleRadialEngine` remain the sole semantic owners of `DEFAULT_RATIO_DEFAULTS`. Added focused layout regressions for explicit-threshold behavior plus omitted-threshold structural fallback behavior. `node tools/check-patterns.mjs` should now report `engine-layout-default-drift=0`, reducing the remaining atomicity backlog to `9` warnings across the four later-phase rules.
+
+1. Remove semantic `DEFAULT_RATIO_THRESHOLD_*` constants from all three layout owners and replace them with layout-owned structural fallback thresholds in `computeMode()`.
+2. Keep the existing clamp/order behavior in all three layout owners (`thresholdNormal >= 0.1`, `thresholdFlat >= thresholdNormal`) so direct callers still get a safe mode when thresholds are omitted.
+3. Keep engine `DEFAULT_RATIO_DEFAULTS` unchanged and annotate each engine as the last-resort runtime owner for missing threshold props.
+4. Add targeted layout tests for all three families that prove explicit thresholds still drive mode selection and omitted thresholds use the new structural fallback pair.
 
 ### Phase 4 — Remove canvas API `typeof` guards
 
@@ -283,9 +285,11 @@ Some `typeof` checks are legitimate because they operate at genuine external bou
 | `widgets/radial/CompassRadialWidget/CompassRadialWidget.js` | Full-circle compass dial | Modified in Phase 1 |
 | `widgets/radial/WindRadialWidget/WindRadialWidget.js` | Full-circle wind dial | Modified in Phase 1 |
 | `shared/widget-kits/linear/LinearGaugeLayout.js` | Linear-family responsive layout owner | Modified in Phase 3 |
-| `shared/widget-kits/linear/LinearGaugeEngine.js` | Linear gauge rendering pipeline | Verified in Phase 3 |
-| `shared/widget-kits/radial/SemicircleRadialEngine.js` | Semicircle gauge pipeline | Verified in Phase 3 |
-| `shared/widget-kits/radial/FullCircleRadialEngine.js` | Full-circle dial pipeline | Verified in Phase 3 |
+| `shared/widget-kits/radial/SemicircleRadialLayout.js` | Semicircle-family responsive layout owner | Modified in Phase 3 |
+| `shared/widget-kits/radial/FullCircleRadialLayout.js` | Full-circle-family responsive layout owner | Modified in Phase 3 |
+| `shared/widget-kits/linear/LinearGaugeEngine.js` | Linear gauge rendering pipeline | Modified in Phase 3 to document engine-owned ratio fallback ownership |
+| `shared/widget-kits/radial/SemicircleRadialEngine.js` | Semicircle gauge pipeline | Modified in Phase 3 to document engine-owned ratio fallback ownership |
+| `shared/widget-kits/radial/FullCircleRadialEngine.js` | Full-circle dial pipeline | Modified in Phase 3 to document engine-owned ratio fallback ownership |
 | `shared/widget-kits/linear/LinearCanvasPrimitives.js` | Linear canvas drawing primitives | Modified in Phase 4 and Phase 5 |
 | `shared/widget-kits/radial/RadialCanvasPrimitives.js` | Radial canvas drawing primitives | Modified in Phase 5 |
 | `shared/widget-kits/radial/RadialTickMath.js` | Radial tick math helper | Modified in Phase 6 |
