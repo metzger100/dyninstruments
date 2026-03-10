@@ -29,6 +29,7 @@ function createMockContext2D(options) {
     lineTo() { rec("lineTo", arguments); },
     clearRect() { rec("clearRect", arguments); },
     fillRect() { rec("fillRect", arguments); },
+    strokeRect() { rec("strokeRect", arguments); },
     setTransform() { rec("setTransform", arguments); },
     setLineDash() { rec("setLineDash", arguments); },
     translate() { rec("translate", arguments); },

@@ -31,7 +31,7 @@
     if (typeof s.lineJoin !== "undefined") {
       ctx.lineJoin = s.lineJoin;
     }
-    if (Array.isArray(s.dash) && typeof ctx.setLineDash === "function") {
+    if (Array.isArray(s.dash)) {
       ctx.setLineDash(s.dash);
     }
   }
@@ -43,7 +43,8 @@
       strokeStyle: p.strokeStyle,
       lineWidth: (p.lineWidth != null) ? p.lineWidth : 1,
       lineCap: hasOwn.call(p, "lineCap") ? p.lineCap : "round",
-      alpha: (p.alpha != null) ? p.alpha : 1
+      alpha: (p.alpha != null) ? p.alpha : 1,
+      dash: p.dash
     });
     try {
       ctx.beginPath();
@@ -74,7 +75,7 @@
     try {
       ctx.fillRect(left, top, width, t);
       const lineWidth = hasOwn.call(p, "lineWidth") ? Number(p.lineWidth) : 0;
-      if (lineWidth > 0 && typeof ctx.strokeRect === "function") {
+      if (lineWidth > 0) {
         ctx.lineWidth = lineWidth;
         ctx.strokeRect(left, top, width, t);
       }

@@ -215,9 +215,11 @@ Status: implemented on `2026-03-10`. Cleared the full live `engine-layout-defaul
 
 ### Phase 4 — Remove canvas API `typeof` guards
 
-1. In `LinearCanvasPrimitives.js`, remove the `typeof ctx.strokeRect === "function"` guard — keep only the meaningful condition (`lineWidth > 0`).
-2. In `LinearCanvasPrimitives.js`, remove the `typeof ctx.setLineDash === "function"` guard — keep only the meaningful condition (`Array.isArray(s.dash)`).
-3. Run existing canvas rendering tests to confirm no behavior change.
+Status: implemented on `2026-03-10`. Removed the two internal Canvas 2D method guards from `LinearCanvasPrimitives`, added direct shared-primitive coverage for dashed track rendering plus fill-only vs stroked band behavior, and extended `createMockContext2D()` so the shared test harness models `strokeRect()` as part of the owned Canvas 2D contract. `node tools/check-patterns.mjs` now reports `canvas-api-typeof-guard=0`, reducing the remaining atomicity backlog to `7` warnings across the later-phase rules (`try-finally-canvas-drawing=2`, `framework-method-typeof-guard=3`, `inline-config-default-duplication=2`). `npm run check:all` passed after the cleanup with `78/78` test files and `470/470` tests green.
+
+1. In `LinearCanvasPrimitives.js`, removed the `typeof ctx.strokeRect === "function"` and `typeof ctx.setLineDash === "function"` guards while keeping the real semantic gates (`lineWidth > 0`, `Array.isArray(s.dash)`).
+2. Added direct regression coverage in `tests/shared/linear/LinearCanvasPrimitives.test.js` and updated `tests/helpers/mock-canvas.js` so the shared mock matches the owned Canvas 2D contract.
+3. Revalidated the Phase 4 surface with the targeted primitive suite, `node tools/check-patterns.mjs`, and the required `npm run check:all` gate.
 
 ### Phase 5 — Simplify try/finally canvas drawing blocks
 
@@ -272,6 +274,8 @@ Some `typeof` checks are legitimate because they operate at genuine external bou
 | `tools/check-patterns/rules.mjs` | Pattern-rule registry | Modified in Phase 0 to register new rules, modified in Phase 8 to promote severity |
 | `tools/check-patterns/shared.mjs` | Shared linter utilities | Modified in Phase 0 if config cross-referencing helpers are needed |
 | `tests/tools/check-patterns-atomicity.test.js` | New rule test coverage | Created in Phase 0 |
+| `tests/helpers/mock-canvas.js` | Shared canvas test harness | Modified in Phase 4 to model `strokeRect()` on the owned Canvas 2D contract |
+| `tests/shared/linear/LinearCanvasPrimitives.test.js` | Direct linear primitive regression coverage | Created in Phase 4 |
 | `widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js` | Linear speed gauge | Modified in Phase 1 and Phase 2 |
 | `widgets/linear/DepthLinearWidget/DepthLinearWidget.js` | Linear depth gauge | Modified in Phase 1 and Phase 2 |
 | `widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js` | Linear temperature gauge | Modified in Phase 1 and Phase 2 |
