@@ -50,7 +50,6 @@
     const renderCanvas = renderer.createRenderer({
       rawValueKey: "speed",
       unitDefault: "kn",
-      rangeDefaults: { min: 0, max: 30 },
       rangeProps: {
         min: "speedRadialMinValue",
         max: "speedRadialMaxValue"

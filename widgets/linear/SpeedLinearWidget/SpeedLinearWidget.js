@@ -74,7 +74,6 @@
       rawValueKey: "speed",
       unitDefault: "kn",
       axisMode: "range",
-      rangeDefaults: { min: 0, max: 30 },
       rangeProps: {
         min: "speedLinearMinValue",
         max: "speedLinearMaxValue"

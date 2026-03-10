@@ -82,7 +82,6 @@
       rawValueKey: "temp",
       unitDefault: "°C",
       axisMode: "range",
-      rangeDefaults: { min: 0, max: 35 },
       rangeProps: {
         min: "tempLinearMinValue",
         max: "tempLinearMaxValue"

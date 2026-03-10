@@ -42,7 +42,6 @@
     const renderCanvas = renderer.createRenderer({
       rawValueKey: "depth",
       unitDefault: "m",
-      rangeDefaults: { min: 0, max: 30 },
       rangeProps: {
         min: "depthRadialMinValue",
         max: "depthRadialMaxValue"

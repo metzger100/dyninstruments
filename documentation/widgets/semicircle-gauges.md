@@ -65,35 +65,39 @@ Each wrapper defines:
 - Value conversion to `{ num, text }`
 - Tick profile selection via shared `RadialValueMath` resolver methods
 - Sector placement strategy (high-end or low-end), with theme colors forwarded as scalar sector colors
-- Defaults (range, unit, ratio props)
+- Wrapper-owned unit/ratio bindings plus config-backed range ownership
 
 ### SpeedRadialWidget
 
 - High-end sectors
 - Tick profile: `resolveStandardSemicircleTickSteps`
 - Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatSpeed", formatterParameters: [unit] })`
-- Defaults: range `0..30`, unit `kn`
+- Config-backed range defaults: `0..30`
+- Wrapper defaults/bindings: unit `kn`, speed ratio props
 
 ### DepthRadialWidget
 
 - Low-end sectors
 - Tick profile: `resolveStandardSemicircleTickSteps`
 - Formatter path: fixed decimal (1)
-- Defaults: range `0..30`, unit `m`
+- Config-backed range defaults: `0..30`
+- Wrapper defaults/bindings: unit `m`, depth ratio props
 
 ### TemperatureRadialWidget
 
 - High-end sectors
 - Tick profile: `resolveTemperatureSemicircleTickSteps`
 - Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatTemperature", formatterParameters: ["celsius"] })`
-- Defaults: range `0..35`, unit `°C`
+- Config-backed range defaults: `0..35`
+- Wrapper defaults/bindings: unit `°C`, temperature ratio props
 
 ### VoltageRadialWidget
 
 - Low-end sectors
 - Tick profile: `resolveVoltageSemicircleTickSteps`
 - Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatDecimal", formatterParameters: [3, 1, true] })`
-- Defaults: range `10..15`, unit `V`
+- Wrapper-local fallback range: `10..15` (does not currently match config-owned voltage min/max defaults and remains separate cleanup debt)
+- Wrapper defaults/bindings: unit `V`, voltage ratio props
 - Toggle behavior: sectors default to enabled when toggle values are unset; explicit `voltageRadialWarningEnabled: false` and/or `voltageRadialAlarmEnabled: false` suppress corresponding sectors
 - Low-end defaults (`warningFrom=12.2`, `alarmFrom=11.6`) are applied only for sectors that remain enabled
 

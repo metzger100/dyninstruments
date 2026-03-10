@@ -40,7 +40,6 @@ const renderer = rendererModule && rendererModule.create(def, Helpers);
 const renderCanvas = renderer.createRenderer({
   rawValueKey: "newValueKey",
   unitDefault: "unit",
-  rangeDefaults: { min: 0, max: 100 },
   ratioProps: {
     normal: "newGaugeRatioThresholdNormal",
     flat: "newGaugeRatioThresholdFlat"
@@ -51,7 +50,7 @@ const renderCanvas = renderer.createRenderer({
 });
 ```
 
-For config-backed plugin wrappers, do not add `ratioDefaults` here. The shared engine already owns the last-resort fallback, and normal plugin runtime should receive threshold props from the editable/default config boundary.
+For config-backed plugin wrappers, do not add `rangeDefaults` or `ratioDefaults` here. The shared engine already owns the last-resort fallback, and normal plugin runtime should receive min/max and threshold props from the editable/default config boundary.
 
 6. Export module spec:
 

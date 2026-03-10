@@ -71,14 +71,13 @@ function formatDisplay(raw, props, unit) {
 
 ### A) Range profile template
 
-For config-backed plugin wrappers, pass `ratioProps` only. `ratioDefaults` stays available for non-config consumers, but plugin wrappers should trust the editable/default pipeline instead of duplicating those literals.
+For config-backed plugin wrappers, pass `rangeProps` and `ratioProps` only. `rangeDefaults` and `ratioDefaults` stay available for non-config consumers, but plugin wrappers should trust the editable/default pipeline instead of duplicating those literals.
 
 ```javascript
 const renderCanvas = engine.createRenderer({
   rawValueKey: "value",
   unitDefault: "m",
   axisMode: "range",
-  rangeDefaults: { min: 0, max: 30 },
   rangeProps: { min: "depthLinearMinValue", max: "depthLinearMaxValue" },
   tickProps: {
     major: "depthLinearTickMajor",
