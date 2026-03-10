@@ -122,6 +122,7 @@
 - **How do I run smell checks before strict gate?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#quality-and-regression-commands)
 - **Where is the multi-session implementation plan template?** → [PLAN.md](PLAN.md)
 - **Where is the plugin-wide responsive scaling rollout plan?** → [PLAN2.md](PLAN2.md)
+- **Where is the implementation plan for the atomic linter implementation?** → [PLAN3.md](PLAN3.md)
 - **How do I keep the codebase clean?** → [guides/garbage-collection.md](guides/garbage-collection.md)
 - **What anti-patterns should I watch for?** → [guides/garbage-collection.md#anti-patterns](guides/garbage-collection.md#anti-patterns)
 - **What areas of the codebase need improvement?** → [QUALITY.md](QUALITY.md)
