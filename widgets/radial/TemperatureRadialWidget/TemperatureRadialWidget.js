@@ -60,7 +60,6 @@
     const renderCanvas = renderer.createRenderer({
       rawValueKey: "temp",
       unitDefault: "°C",
-      rangeDefaults: { min: 0, max: 35 },
       rangeProps: {
         min: "tempRadialMinValue",
         max: "tempRadialMaxValue"

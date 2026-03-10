@@ -326,6 +326,219 @@ describe("SemicircleRadialEngine", function () {
     })).toEqual(captureState());
   });
 
+  it("matches callback-visible range and layout state with or without wrapper-owned rangeDefaults when config bounds are present", function () {
+    function captureState(includeRangeDefaults) {
+      let capturedState = null;
+      let capturedRange = null;
+      const themeDefaults = {
+        colors: {
+          pointer: "#ff2b2b",
+          warning: "#e7c66a",
+          alarm: "#ff7a76",
+          laylineStb: "#82b683",
+          laylinePort: "#ff7a76"
+        },
+        radial: {
+          ticks: {
+            majorLen: 13,
+            majorWidth: 4,
+            minorLen: 7,
+            minorWidth: 2
+          },
+          pointer: {
+            widthFactor: 1.02,
+            lengthFactor: 1.7
+          },
+          ring: {
+            arcLineWidth: 2.5,
+            widthFactor: 0.18
+          },
+          labels: {
+            insetFactor: 2.2,
+            fontFactor: 0.2
+          }
+        },
+        font: {
+          weight: 710,
+          labelWeight: 680
+        }
+      };
+      const modules = {
+        RadialToolkit: {
+          create() {
+            return {
+              theme: {
+                resolve() {
+                  return themeDefaults;
+                }
+              },
+              text: {
+                drawDisconnectOverlay() {}
+              },
+              value: createValueMath(),
+              draw: {
+                drawArcRing() {},
+                drawAnnularSector() {},
+                drawPointerAtRim() {},
+                drawTicksFromAngles() {},
+                drawLabels() {}
+              }
+            };
+          }
+        },
+        SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
+        SemicircleRadialTextLayout: {
+          create() {
+            return {
+              createFitCache() {
+                return {};
+              },
+              drawModeText(state) {
+                capturedState = {
+                  mode: state.layout.mode,
+                  labelFontPx: state.layout.labels.fontPx,
+                  ringW: state.geom.ringW,
+                  needleDepth: state.geom.needleDepth,
+                  textFillScale: state.textFillScale
+                };
+              }
+            };
+          }
+        },
+        ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
+      };
+      const spec = makeBaseSpec();
+      if (!includeRangeDefaults) {
+        delete spec.rangeDefaults;
+      }
+      spec.buildSectors = function (props, minV, maxV) {
+        capturedRange = { min: minV, max: maxV };
+        return [];
+      };
+      const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
+        .create({}, makeHelpers(modules))
+        .createRenderer(spec);
+
+      renderer(createMockCanvas({
+        rectWidth: 300,
+        rectHeight: 300,
+        ctx: createMockContext2D()
+      }), {
+        value: 12.3,
+        caption: "SPD",
+        unit: "kn",
+        minValue: 4,
+        maxValue: 44,
+        speedRadialRatioThresholdNormal: 1.1,
+        speedRadialRatioThresholdFlat: 3.5
+      });
+
+      return {
+        state: capturedState,
+        range: capturedRange
+      };
+    }
+
+    expect(captureState(true)).toEqual(captureState(false));
+  });
+
+  it("falls back to engine-owned range defaults when range props are absent", function () {
+    let capturedRange = null;
+    const modules = {
+      RadialToolkit: {
+        create() {
+          return {
+            theme: {
+              resolve() {
+                return {
+                  colors: {
+                    pointer: "#ff2b2b",
+                    warning: "#e7c66a",
+                    alarm: "#ff7a76",
+                    laylineStb: "#82b683",
+                    laylinePort: "#ff7a76"
+                  },
+                  radial: {
+                    ticks: {
+                      majorLen: 13,
+                      majorWidth: 4,
+                      minorLen: 7,
+                      minorWidth: 2
+                    },
+                    pointer: {
+                      widthFactor: 1.02,
+                      lengthFactor: 1.7
+                    },
+                    ring: {
+                      arcLineWidth: 2.5,
+                      widthFactor: 0.18
+                    },
+                    labels: {
+                      insetFactor: 2.2,
+                      fontFactor: 0.2
+                    }
+                  },
+                  font: {
+                    weight: 710,
+                    labelWeight: 680
+                  }
+                };
+              }
+            },
+            text: {
+              drawDisconnectOverlay() {}
+            },
+            value: createValueMath(),
+            draw: {
+              drawArcRing() {},
+              drawAnnularSector() {},
+              drawPointerAtRim() {},
+              drawTicksFromAngles() {},
+              drawLabels() {}
+            }
+          };
+        }
+      },
+      SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
+      SemicircleRadialTextLayout: {
+        create() {
+          return {
+            createFitCache() {
+              return {};
+            },
+            drawModeText() {}
+          };
+        }
+      },
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
+    };
+    const spec = makeBaseSpec();
+    delete spec.rangeDefaults;
+    spec.buildSectors = function (props, minV, maxV) {
+      capturedRange = { min: minV, max: maxV };
+      return [];
+    };
+    const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
+      .create({}, makeHelpers(modules))
+      .createRenderer(spec);
+
+    renderer(createMockCanvas({
+      rectWidth: 300,
+      rectHeight: 300,
+      ctx: createMockContext2D()
+    }), {
+      value: 12.3,
+      caption: "SPD",
+      unit: "kn",
+      speedRadialRatioThresholdNormal: 1.1,
+      speedRadialRatioThresholdFlat: 3.5
+    });
+
+    expect(capturedRange).toEqual({ min: 0, max: 30 });
+  });
+
   it("keeps default radial pointer sizing independent from ring width changes", function () {
     function renderPointer(ringWidthFactor) {
       const pointerCalls = [];

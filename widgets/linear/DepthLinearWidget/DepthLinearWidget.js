@@ -54,7 +54,6 @@
       rawValueKey: "depth",
       unitDefault: "m",
       axisMode: "range",
-      rangeDefaults: { min: 0, max: 30 },
       rangeProps: {
         min: "depthLinearMinValue",
         max: "depthLinearMaxValue"

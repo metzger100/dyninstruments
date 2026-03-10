@@ -259,13 +259,15 @@ Responsive ownership for the semicircle family:
 |---|---|---|---|
 | `rawValueKey` | string | yes | Fallback key when `props.value` is undefined |
 | `unitDefault` | string | yes | Default unit text |
-| `rangeDefaults` | `{min,max}` | yes | Default value range |
+| `rangeDefaults` | `{min,max}` | no | Engine-level safety fallback for missing range props; config-backed wrappers should omit it |
 | `ratioProps` | `{normal,flat}` | yes | Prop names for layout thresholds |
 | `ratioDefaults` | `{normal,flat}` | no | Engine-level safety fallback for missing threshold props; config-backed wrappers should omit it |
 | `tickSteps` | `(range) => {major,minor}` | yes | Gauge-specific tick strategy (wrappers should delegate to shared `RadialValueMath` resolver methods) |
 | `formatDisplay` | `(raw, props, unit, Helpers) => {num,text}` | yes | Gauge-specific value formatter |
 | `buildSectors` | `(props, minV, maxV, arc, valueUtils, theme) => Sector[]` | yes | Gauge-specific warning/alarm sectors (wrappers typically pass `theme.colors.warning/alarm` into shared builders) |
 | `arc` | `{startDeg,endDeg}` | no | Optional override (default `270..450`) |
+
+Config-backed plugin wrappers should pass `rangeProps` / `ratioProps` and trust the editable/default pipeline to populate live min/max and threshold values. `rangeDefaults` and `ratioDefaults` remain available only for non-config consumers.
 
 ### Sector shape
 

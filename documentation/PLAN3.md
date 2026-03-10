@@ -67,8 +67,8 @@ The same pattern exists for `rangeDefaults` — widgets hardcode `{ min: X, max:
 | `DepthRadialWidget` | `{ min: 0, max: 30 }` | `environment.js` | ✅ exact duplicate |
 | `TemperatureLinearWidget` | `{ min: 0, max: 35 }` | `environment.js` | ✅ exact duplicate |
 | `TemperatureRadialWidget` | `{ min: 0, max: 35 }` | `environment.js` | ✅ exact duplicate |
-| `VoltageLinearWidget` | `{ min: 10, max: 15 }` | `vessel.js` | ✅ exact duplicate |
-| `VoltageRadialWidget` | `{ min: 10, max: 15 }` | `vessel.js` | ✅ exact duplicate |
+
+`VoltageLinearWidget` and `VoltageRadialWidget` are not part of the live Phase 2 warning surface on March 10, 2026. Their wrapper-owned `rangeDefaults` no longer match the config-owned editable defaults in `config/clusters/vessel.js`, so their range ownership mismatch remains separate cleanup work rather than `widget-renderer-default-duplication`.
 
 ### Problem 2: Engine/Layout Modules Duplicate Each Other's Defaults
 
@@ -197,10 +197,12 @@ Status: implemented on `2026-03-10`. Removed wrapper-owned `ratioDefaults` from 
 
 ### Phase 2 — Remove widget-level `rangeDefaults` duplication
 
-1. For each linear and radial widget that passes `rangeDefaults` to `createRenderer()`, remove the `rangeDefaults` property from the spec object.
-2. The engines already carry `DEFAULT_RANGE_DEFAULTS` — verify and document as single source of truth.
-3. Run all existing widget render tests to confirm no behavior change.
-4. Add engine-level tests covering absent `rangeDefaults` behavior.
+Status: implemented on `2026-03-10`. Removed wrapper-owned `rangeDefaults` from the six config-backed wrappers still flagged by `widget-renderer-default-duplication` (`Speed/Depth/Temperature` in both linear and semicircle families), updated wrapper and shared-engine coverage for config-owned range bounds vs engine fallback behavior, and tightened the shared API / authoring docs so config-backed wrappers omit `rangeDefaults`. `node tools/check-patterns.mjs` should now report `widget-renderer-default-duplication=0`; the remaining atomicity backlog is `15` warnings across the other five warn-mode rules. Voltage range ownership remains out of scope for this phase because those wrappers no longer match config-owned min/max defaults.
+
+1. Remove `rangeDefaults` from the six duplicate wrappers only: `SpeedLinearWidget`, `DepthLinearWidget`, `TemperatureLinearWidget`, `SpeedRadialWidget`, `DepthRadialWidget`, and `TemperatureRadialWidget`.
+2. Keep `LinearGaugeEngine.DEFAULT_RANGE_DEFAULTS` and `SemicircleRadialEngine.DEFAULT_RANGE_DEFAULTS` unchanged as the single runtime fallback owners.
+3. Update wrapper tests to assert thin wrapper specs omit `rangeDefaults`.
+4. Add engine-level regressions for config-bound equivalence and omitted-range fallback behavior.
 
 ### Phase 3 — Consolidate engine/layout default constants
 
@@ -271,13 +273,13 @@ Some `typeof` checks are legitimate because they operate at genuine external bou
 | `widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js` | Linear speed gauge | Modified in Phase 1 and Phase 2 |
 | `widgets/linear/DepthLinearWidget/DepthLinearWidget.js` | Linear depth gauge | Modified in Phase 1 and Phase 2 |
 | `widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js` | Linear temperature gauge | Modified in Phase 1 and Phase 2 |
-| `widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js` | Linear voltage gauge | Modified in Phase 1, Phase 2, and Phase 6 |
+| `widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js` | Linear voltage gauge | Modified in Phase 1 and Phase 6; Phase 2 range ownership cleanup deferred |
 | `widgets/linear/CompassLinearWidget/CompassLinearWidget.js` | Linear compass gauge | Modified in Phase 1 |
 | `widgets/linear/WindLinearWidget/WindLinearWidget.js` | Linear wind gauge | Modified in Phase 1 |
 | `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js` | Semicircle speedometer | Modified in Phase 1 and Phase 2 |
 | `widgets/radial/DepthRadialWidget/DepthRadialWidget.js` | Semicircle depth gauge | Modified in Phase 1 and Phase 2 |
 | `widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js` | Semicircle temperature gauge | Modified in Phase 1 and Phase 2 |
-| `widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js` | Semicircle voltage gauge | Modified in Phase 1 and Phase 2 |
+| `widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js` | Semicircle voltage gauge | Modified in Phase 1; Phase 2 range ownership cleanup deferred |
 | `widgets/radial/CompassRadialWidget/CompassRadialWidget.js` | Full-circle compass dial | Modified in Phase 1 |
 | `widgets/radial/WindRadialWidget/WindRadialWidget.js` | Full-circle wind dial | Modified in Phase 1 |
 | `shared/widget-kits/linear/LinearGaugeLayout.js` | Linear-family responsive layout owner | Modified in Phase 3 |

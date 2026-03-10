@@ -54,7 +54,7 @@ describe("SpeedRadialWidget", function () {
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.unitDefault).toBe("kn");
-    expect(captured.rangeDefaults).toEqual({ min: 0, max: 30 });
+    expect(captured).not.toHaveProperty("rangeDefaults");
     expect(captured.ratioProps).toEqual({
       normal: "speedRadialRatioThresholdNormal",
       flat: "speedRadialRatioThresholdFlat"

@@ -74,8 +74,8 @@ Common `spec` fields:
 - `rawValueKey`
 - `unitDefault`
 - `axisMode`: `"range" | "centered180" | "fixed360"`
-- `rangeDefaults`: `{ min, max }`
 - `rangeProps`: `{ min, max }`
+- `rangeDefaults`: optional `{ min, max }` engine-level safety fallback; config-backed plugin wrappers should omit it
 - `tickProps`: `{ major, minor, showEndLabels }`
 - `ratioProps`: `{ normal, flat }` for config-owned editable threshold bindings
 - `ratioDefaults`: optional `{ normal, flat }` engine-level safety fallback; config-backed plugin wrappers should omit it
@@ -111,7 +111,7 @@ Wrappers should consume these layout-owned state fields instead of recomputing c
 | Field | `range` | `centered180` | `fixed360` |
 |---|---|---|---|
 | `axisMode` | Required | Required | Required |
-| `rangeDefaults` | Used for fallback domain | Ignored by axis resolver | Ignored by axis resolver |
+| `rangeDefaults` | Optional fallback domain when live bounds are absent | Ignored by axis resolver | Ignored by axis resolver |
 | `rangeProps` | Used for live domain overrides | Ignored by axis resolver | Ignored by axis resolver |
 | `buildSectors` bounds | Usually `min..max` from config | Fixed `-180..180` | Fixed `0..360` |
 | Typical kinds | Speed/Depth/Temp/Voltage linear | Wind-angle linear | Compass/heading linear |
@@ -120,14 +120,13 @@ Wrappers should consume these layout-owned state fields instead of recomputing c
 
 ### Range Profile (Speed/Depth/Temp/Voltage)
 
-Config-backed wrappers should pass `ratioProps` only and rely on the editable/default pipeline to populate those props. `ratioDefaults` remains available only as the engine's last-resort fallback for non-config consumers.
+Config-backed wrappers should pass `rangeProps` and `ratioProps` only and rely on the editable/default pipeline to populate those props. `rangeDefaults` and `ratioDefaults` remain available only as the engine's last-resort fallbacks for non-config consumers.
 
 ```javascript
 const renderCanvas = engine.createRenderer({
   rawValueKey: "value",
   unitDefault: "m",
   axisMode: "range",
-  rangeDefaults: { min: 0, max: 30 },
   rangeProps: { min: "depthLinearMinValue", max: "depthLinearMaxValue" },
   tickProps: {
     major: "depthLinearTickMajor",
