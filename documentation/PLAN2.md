@@ -292,7 +292,7 @@ Status: implemented. Phase 9 adds owner-level compact/medium/large progression a
 2. Read the documentation relevant to this task:
    - `documentation/widgets/center-display.md`
    - `documentation/conventions/documentation-format.md`
-   - `documentation/PLAN.md`
+   - `documentation/PLAN1.md`
    - `ARCHITECTURE.md`
 3. Inspected the current compact reference implementation:
    - `shared/widget-kits/nav/CenterDisplayLayout.js`
@@ -372,7 +372,7 @@ Status: implemented. Phase 9 adds owner-level compact/medium/large progression a
 ## Related
 
 - [TABLEOFCONTENTS.md](TABLEOFCONTENTS.md)
-- [PLAN.md](PLAN.md)
+- [PLAN1.md](PLAN1.md)
 - [shared/responsive-scale-profile.md](shared/responsive-scale-profile.md)
 - [widgets/center-display.md](widgets/center-display.md)
 - [conventions/coding-standards.md](conventions/coding-standards.md)
