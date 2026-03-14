@@ -120,7 +120,7 @@
 - **How do I keep docs aligned after code changes?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md)
 - **How do I run documentation validation checks?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#validation)
 - **How do I run smell checks before strict gate?** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md#quality-and-regression-commands)
-- **Where is the multi-session implementation plan template?** → [PLAN.md](PLAN.md)
+- **Where is the multi-session implementation plan template?** → [PLAN1.md](PLAN1.md)
 - **Where is the plugin-wide responsive scaling rollout plan?** → [PLAN2.md](PLAN2.md)
 - **Where is the implementation plan for the atomic linter implementation?** → [PLAN3.md](PLAN3.md)
 - **How do I keep the codebase clean?** → [guides/garbage-collection.md](guides/garbage-collection.md)
