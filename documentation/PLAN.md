@@ -1,471 +1,355 @@
-# Implementation Plan
+# Implementation Plan — HTML Renderer Support and ActiveRoute Hybrid Migration
 
-**Status:** ⏳ In Progress | Phase 0 temporary host bridge and Phase 1 cluster HTML sub-renderer support are implemented; later parity work remains
+**Status:** ⏳ In Progress | Session-safe roadmap for future pure `renderHtml` widgets and the ActiveRoute hybrid shell
 
 ## Overview
 
-This plan covers feature-parity support for the core route/AIS workflow widgets inside the existing cluster system:
+This plan prepares dyninstruments for two HTML-backed widget shapes: pure `renderHtml` widgets with DOM-owned controls and hybrid widgets that use an HTML shell plus nested Canvas 2D visuals. `ActiveRouteTextWidget` is the first planned hybrid consumer, not the definition of all future HTML rendering.
 
-- `ActiveRoute`
-- `EditRoute`
-- `RoutePoints`
-- `AisTarget`
+## Key Details
 
-The chosen direction for dyninstruments is:
+- Rule 3 remains unchanged:
+  - passive visual widget -> `renderCanvas(canvas, props)`
+  - interaction-heavy widget with dedicated DOM controls -> `renderHtml(props)` only
+  - graphics-heavy interactive widget without button-like DOM controls -> `renderHtml(props)` + child `<canvas>`
+- Pure `renderHtml` widgets are already a first-class path. They keep the current `renderHtml` + `this.eventHandler` + deferred root-sync behavior.
+- The only new runtime contract in this plan is an optional hybrid hook:
+  - `afterHtmlRender(mountEl, props)`
+- Hybrid-only mount state must stay registrar-owned:
+  - stable per-widget mount id
+  - monotonic per-render sequence number
+  - queued post-sync callback bound to the specific render result
+- `runtime/widget-registrar.js` remains the single owner of:
+  - `hostActions` injection
+  - HTML sync scheduling
+  - hybrid mount-id generation
+  - hybrid render-sequence tracking
+  - hybrid mounted-shell lookup
+- `runtime/init.js` remains the owner of runtime root sync, theme application, cache invalidation, and queued post-sync task flush.
+- `ClusterWidget`, `ClusterRendererRouter`, and `RendererPropsWidget` must forward optional HTML lifecycle hooks the same way they already forward render/init/finalize behavior.
+- No widget-local polling, retry timers, or query-by-global-selector shell lookup is allowed.
+- ActiveRoute visuals stay canvas-owned through a shared nav renderer; future pure HTML widgets stay DOM-owned.
+- Each numbered step below is one session bundle and must end with `npm run check:all`.
 
-- keep these widgets inside `dyni_Nav_Instruments` for now
-- add a temporary runtime `TemporaryHostActionBridge` that centralizes all plugin-side DOM/workflow bridging behind an avnav-api-like facade
-- extend the cluster runtime so cluster sub-renderers can use `renderHtml` in addition to `renderCanvas`
-- defer any `nav` cluster split until later if the mapper/config grows into a hotspot
-- replace the temporary summary-style `activeRoute` cluster kind with the core-parity implementation instead of preserving a compatibility path
+## Scope
 
-The remaining hard problems are:
+**In scope:**
 
-- extending the cluster runtime to support HTML/interactivity cleanly
-- providing temporary workflow parity for host-owned dialogs/overlays without spreading DOM manipulation across widgets
+- preserve and document the pure `renderHtml` widget path
+- add a reusable hybrid-shell contract for graphics-heavy interactive widgets
+- migrate `ActiveRouteTextWidget` to that hybrid contract
+- extract ActiveRoute canvas visuals into a shared nav renderer
+- update runtime, router, tests, and docs in lockstep
 
-Phase 0 is now the temporary-bridge phase:
+**Out of scope:**
 
-- current viewer source still exposes `window.avnav.api.routePoints`, and core pages use it
-- maintainer feedback does not treat this area as a documented/stable public plugin-action contract
-- exact workflow parity for `ActiveRoute`, `EditRoute`, and `AisTarget` still requires host-side bridging because the workflows are page-owned
-- the accepted near-term path is a temporary runtime bridge that hides DOM/event-layer manipulation behind a widget-facing avnav-api-like interface
-- generalized host-action API work is deferred until core defines a broader concept for exposing such actions to plugins
+- forcing pure `renderHtml` widgets into the hybrid shell pattern
+- rewriting passive visuals into HTML/CSS
+- new host-action APIs beyond the current bridge facade
+- speculative migration of unrelated widgets before a concrete use case exists
 
-Phase 0 implementation status (`2026-03-09`):
+## API/Interfaces
 
-- `runtime/TemporaryHostActionBridge.js` now exists as the runtime-only host workflow facade
-- `plugin.js` bootstraps the bridge before `runtime/init.js`
-- `runtime/init.js` creates and owns the singleton bridge lifecycle
-- `runtime/helpers.js` exposes `Helpers.getHostActions()`
-- `runtime/widget-registrar.js` injects `this.hostActions` before lifecycle/render callbacks
-- runtime tests now lock the bridge capability/dispatch/error contract
+### Renderer Choice Guide
 
-Phase 1 implementation status (`2026-03-09`):
-
-- `cluster/ClusterWidget.js` now exposes `renderHtml` and `initFunction` alongside the existing cluster translation/canvas/finalize contract
-- `cluster/rendering/ClusterRendererRouter.js` now supports pure-canvas, pure-HTML, and mixed sub-renderers through one picked-renderer dispatch path
-- cluster init now targets only the active renderer selected by init-call props; finalize still fans out defensively across instantiated sub-renderers
-- `cluster/rendering/RendererPropsWidget.js` now merges mapper-owned `rendererProps` into delegated HTML render and init paths in addition to canvas render
-- cluster tests now cover HTML delegation, active-only init delegation, and merged `rendererProps` behavior across non-canvas paths
-
-## Core Behavior Summary
-
-| Widget | Core data inputs | Visible behavior | Core click/workflow behavior | Parity risk |
-|---|---|---|---|---|
-| `ActiveRoute` | `nav.route.name`, `nav.route.remain`, `nav.route.eta`, `nav.route.nextCourse`, `nav.route.isApproaching`, `gui.global.layoutEditing`, `nav.wp.server` | Shows route name, remaining distance, ETA, and `NEXT` only while approaching. Hidden when there is no route unless layout editing is active. Uses approach background state. | In `NavPage`, click runs `activeRoute.setIndexToTarget()`, `activeRoute.syncTo(RouteEdit.MODES.EDIT)`, then `history.push("editroutepage")`. In `GpsPage` it is not special-cased and falls back to page pop behavior. | No documented host action API today. Phase 0 must bridge this through `TemporaryHostActionBridge` without changing native widget behavior. |
-| `EditRoute` | `RouteEdit.MODES.EDIT` store keys plus `nav.route.remain`, `nav.route.eta`, `nav.route.isApproaching`, `nav.routeHandler.useRhumbLine` | Shows route name, point count, route length, and in non-horizontal mode also RTG and ETA. Uses different border colors for editable vs active route. Shows `No Route` fallback. | In `EditRoutePage`, click opens `EditRouteDialog`. | No documented host action API today. Phase 0 must provide a temporary host-workflow bridge for dialog opening. |
-| `RoutePoints` | `RouteEdit.MODES.EDIT` store keys plus `properties.routeShowLL`, `gui.global.layoutEditing`, `nav.routeHandler.useRhumbLine` | Shows waypoint list, selected-row highlight, and auto-scrolls the selected row into view. Hidden in horizontal mode unless layout editing is active. | Row click activates the current route point. Re-clicking the already centered point opens the waypoint dialog. Page code also exposes `avnav.api.routePoints.activate(index)` via registered handlers. | Current viewer source exposes `routePoints`, but maintainer feedback does not bless it as stable public plugin API. Any use must stay isolated behind the temporary bridge and tagged as workaround code. |
-| `AisTarget` | `nav.ais.nearest`, `gui.global.layoutEditing`, `nav.ais.trackedMmsi` and AIS color properties | Shows nearest AIS target, uses compact horizontal layout on dashboard-like panels, and colors background by warning/nearest/tracked state. | In `NavPage` and `GpsPage`, click opens `AisInfoWithFunctions`; dialog buttons trigger nearest/locate/hide/list actions. | No documented AIS plugin-action API today. Phase 0 must bridge the native host dialog workflow through a temporary runtime facade. |
-
-Observed source detail that still needs validation against live behavior:
-
-- `viewer/components/ActiveRouteWidget.jsx` uses both `isApproaching` and `isAproaching`. Parity tests must follow actual runtime behavior, not the typo in isolation.
-
-## Confirmed Interaction Ownership Split
-
-The core widgets do not all own their workflows the same way. This matters for plugin parity because cluster kinds inside `dyni_Nav_Instruments` cannot rely on built-in widget names being special-cased by core pages.
-
-| Widget | Ownership pattern in core | Confirmed source behavior | Scope for this plan |
-|---|---|---|---|
-| `CenterDisplay` | passive renderer | no widget-specific click handling; `MapPage` only gates visibility when center lock is active | out of scope here; roadmap item |
-| `Zoom` | page-routed click on passive renderer | `ZoomWidget` is passive; `NavPage` intercepts widget click and runs `MapHolder.checkAutoZoom(true)` | out of scope here, but useful evidence for Phase 0 issue framing |
-| `Alarm` | page-shell widget with widget-owned click trap | `AlarmWidget` stops propagation, but `PageLeft` injects the actual "stop running alarms" callback | out of scope here, but useful evidence for Phase 0 issue framing |
-| `ActiveRoute` | page-routed click on passive renderer | `ActiveRouteWidget` renders only; `NavPage` opens edit-route flow; `GpsPage` has no special-case and falls back to page pop | in scope |
-| `EditRoute` | page-routed click on passive renderer | `EditRouteWidget` renders only; `EditRoutePage` opens `EditRouteDialog` on widget click | in scope |
-| `RoutePoints` | widget-owned row clicks + page/API workflow | `RoutePointsWidget` emits clicked row data; pages register `avnav.api.routePoints.activate(index)` handlers | in scope |
-| `AisTarget` | widget-owned click + page-owned dialog workflow | `AisTargetWidget` forwards `mmsi`; `NavPage` and `GpsPage` open `AisInfoWithFunctions` | in scope |
-
-## Current Dyninstruments Gaps
-
-- `config/widget-definitions.js` already matches the desired registration model because the plan stays cluster-based.
-- Phase 1 is complete: `ClusterWidget` now exposes `renderHtml`, `renderCanvas`, `initFunction`, `finalizeFunction`, and aggregated `wantsHideNativeHead`.
-- Phase 1 is complete: `ClusterRendererRouter` now delegates pure-canvas, pure-HTML, and mixed renderers, and `RendererPropsWidget` now carries `rendererProps` through canvas, HTML, and init paths.
-- `runtime/widget-registrar.js` only marks hide-native-head/theme roots from the `renderCanvas` path. Pure HTML cluster kinds cannot currently mark the widget root.
-- `runtime/init.js` discovers plugin containers via `canvas.widgetData`, so pure HTML cluster kinds are invisible to theme-preset discovery.
-- No runtime bridge exists that can expose temporary host-workflow methods to widgets while keeping DOM manipulation isolated in one removable module.
-- `config/clusters/nav.js` and `cluster/mappers/NavMapper.js` currently model only the existing summary-style nav kinds. They do not yet carry the active-workflow kinds.
-- The current `nav` cluster already has an `activeRoute` kind for the newly added summary widget. Under a fail-fast approach, that kind should be replaced directly by the core-parity implementation instead of carrying both variants.
-- The current viewer source attaches `routePoints.activate/registerHandler` to `window.avnav.api`, but maintainer feedback indicates there is no generalized documented plugin-action concept for this area. There is still no corresponding documented/stable API for:
-  - opening the route editor page/dialog
-  - syncing active route state into edit-route state
-  - opening AIS info/list workflows
-  - performing AIS target actions (`nearest`, `locate`, `hide`, `track`) from plugins
-- Adjacent core widgets confirm the same architectural split:
-  - `Zoom` uses page-routed click behavior on top of a passive widget renderer
-  - `Alarm` is mounted by page shell code rather than panel-layout widget routing
-  - `CenterDisplay` is a passive map widget with no widget-owned interaction at all
-
-## TemporaryHostActionBridge Contract
-
-`TemporaryHostActionBridge` is the only module allowed to manipulate host DOM, install plugin-specific workflow aliases, or automate host-owned dialogs/pages for this plan.
-
-Widget/rendering code must depend on the bridge facade only, never on DOM selectors or page internals directly.
-
-### Widget-Side Interface
-
-The bridge must expose a widget-facing avnav-api-like namespace through runtime helpers and widget context (`Helpers.getHostActions()` and `this.hostActions`).
-
-Implemented Phase 0 dispatch path:
-
-- page detection resolves `#navpage`, `#gpspage`, `#editroutepage`, then falls back to `other`
-- `routePoints.activate(index)` uses `window.avnav.api.routePoints.activate(index)`
-- `routeEditor.openActiveRoute()`, `routeEditor.openEditRoute()`, and `ais.showInfo(mmsi)` dispatch through the current page's existing React `onItemClick` path
-- the bridge resolves that page callback from the mounted page root / widget-container React fiber props; widgets never touch this DOM/runtime detail directly
-
-All action methods must return `true` only when the bridge definitively dispatched the native-equivalent workflow. They may return `false` only for capability modes that the widget must treat as passive or unsupported before it traps the click. Once a widget binds a bridge-owned interactive handler for a supported dispatch path, missing host affordances are contract violations and must throw explicit bridge errors.
-
-| Namespace | Method | Required behavior |
+| Widget shape | Required path | Notes |
 |---|---|---|
-| `routePoints` | `activate(index)` | Use the current runtime-exposed route-point activation path when available and preserve native selected-row / re-click waypoint-dialog behavior. If the page lacks a route-point activation affordance, expose that through capabilities so the widget can stay non-interactive there. |
-| `routeEditor` | `openActiveRoute()` | Reproduce native `ActiveRoute` click workflow on pages where the plugin must dispatch it. On pages where native behavior is the page default fallback (for example `GpsPage`), `getCapabilities()` must report passive mode so the renderer does not install a plugin click trap. |
-| `routeEditor` | `openEditRoute()` | Reproduce native `EditRoute` click workflow, opening the host `EditRouteDialog` rather than rebuilding it in the plugin. |
-| `ais` | `showInfo(mmsi)` | Reproduce native `AisTarget` click workflow by opening the host AIS info dialog/overlay for the supplied target. |
-| root | `getCapabilities()` | Return page-aware capability modes for the current host bridge so widgets can decide whether to dispatch through the bridge, stay passive and allow native page handling, or hide unsupported affordances. |
+| Passive visual display | `renderCanvas(canvas, props)` | Default dyninstruments path |
+| Interaction-heavy widget with dedicated DOM controls | `renderHtml(props)` | Use DOM-native layout and `this.eventHandler`; no nested canvas |
+| Graphics-heavy interactive widget without button-like DOM controls | `renderHtml(props)` + `afterHtmlRender(mountEl, props)` | Hybrid shell owns interaction; child canvas owns visuals |
 
-### Required Capabilities
+### Pure `renderHtml` Contract
 
-- Mark the implementation explicitly temporary:
-  - file/class name must stay `TemporaryHostActionBridge`
-  - implementation blocks must carry `// dyni-workaround(avnav-plugin-actions) -- ...`
-- Keep all DOM/event-layer host coupling centralized in this module.
-- Add plugin-specific workflow handling only for dyninstruments widgets; never alter native-widget behavior or native-widget names.
-- Support page-aware parity:
-  - `ActiveRoute` must match `NavPage` route-editor opening behavior
-  - `ActiveRoute` on `GpsPage` must stay passive so page-level `history.pop()` remains reachable; do not bind plugin click trapping there
-  - `EditRoute` must open the host dialog on `EditRoutePage`
-  - `RoutePoints` must continue to use the native route-point workflow when available
-  - `AisTarget` must open the native AIS info workflow on `NavPage`/`GpsPage`
-- Support capability detection at the renderer boundary:
-  - widgets must consult `getCapabilities()` before binding bridge-owned click handlers
-  - `false` returns are allowed only for passive/unsupported modes that were already detected before click trapping
-  - if a dispatch-capable path is selected and selectors, pages, or host affordances are missing, throw an explicit bridge error instead of degrading silently
-- Support lifecycle cleanup for any listeners, observers, or temporary DOM hooks installed by the bridge.
-- Keep future removal cheap:
-  - widgets call the bridge facade only
-  - when a documented host API exists, replace bridge internals with thin adapters or delete the DOM path without changing widget contracts
-
-### Native No-Regression Rule
-
-The bridge must not:
-
-- override existing native widget branches
-- rename or shadow native widgets
-- mutate native workflow ordering
-- require changes to AvNav core source
-- spread selector-based host logic into widget renderers, mappers, or configs
-
-## Final Implementation Goal
-
-- Extend `dyni_Nav_Instruments` so cluster sub-renderers can support both `renderCanvas` and `renderHtml`.
-- Add `TemporaryHostActionBridge` to runtime so widgets can call a stable host-action facade while Phase 0 still depends on DOM/event-layer bridging.
-- Add the core-style active-workflow kinds to `nav` for now:
-  - `activeRoute`
-  - `editRoute`
-  - `routePoints`
-  - `aisTarget`
-- Use `renderHtml` string mode plus `this.eventHandler` for interactive cluster kinds.
-- Support plugin theming and hide-native-header behavior for HTML cluster kinds, not only canvas kinds.
-- Match core visibility rules and layout variants, and keep widget code on a stable bridge facade even while host workflows are temporarily driven by DOM/event-layer bridging.
-- Avoid private-core JS-object coupling in widget code: do not ship parity that depends on direct use of private `RouteEdit`, `NavData`, `MapHolder`, or page-local `history` objects outside the bridge.
-- Keep any temporary dependency on runtime-exposed but undocumented actions narrow, optional, and explicitly marked as workaround code.
-- Accept that `nav` may become a temporary hotspot and may need to split later once the feature set stabilizes.
-
-## Related Files
-
-| File | Description | Planned/Actual Change |
+| Interface | Owner | Purpose |
 |---|---|---|
-| `documentation/PLAN.md` | This implementation handoff document | Actual change in this session |
-| `runtime/TemporaryHostActionBridge.js` | Temporary runtime bridge for plugin-only host workflow parity | Actual change in this session: centralizes DOM/event-layer host-action bridging behind stable widget-side interface |
-| `cluster/ClusterWidget.js` | Cluster orchestrator | Planned change: expose HTML delegation and lifecycle hooks in addition to canvas |
-| `cluster/rendering/ClusterRendererRouter.js` | Cluster sub-renderer routing | Planned change: support `renderHtml`, renderer lifecycle fan-out, and HTML capability selection |
-| `cluster/mappers/NavMapper.js` | `nav` cluster kind translation | Planned change: add active-workflow kinds and keep mapper output declarative |
-| `config/clusters/nav.js` | `dyni_Nav_Instruments` config | Planned change: add new kinds, editables, and kind-specific defaults/conditions |
-| `config/components.js` | Component registry | Planned change: register new HTML renderers and any shared helper modules |
-| `runtime/helpers.js` | Shared widget/runtime helper factory | Actual change in this session: exposes bridge facade to widgets via helper/runtime contract |
-| `runtime/widget-registrar.js` | Widget registration composition | Actual change in this session: injects `this.hostActions` before lifecycle/render callbacks while keeping existing canvas marking |
-| `runtime/init.js` | Init, component loading, theme preset application | Actual change in this session: initializes and owns the temporary host bridge lifecycle |
-| `plugin.css` | Plugin-wide styling and hide-native-head rules | Planned change: support HTML cluster kinds without affecting existing canvas kinds |
-| `tests/cluster/ClusterWidget.test.js` | Cluster orchestration coverage | Planned change |
-| `tests/cluster/rendering/ClusterRendererRouter.test.js` | Router/capability coverage | Planned change |
-| `tests/cluster/mappers/NavMapper.test.js` | `nav` mapper coverage | Planned change |
-| `tests/config/clusters/nav.test.js` | `nav` cluster config coverage | Planned change |
-| `tests/runtime/TemporaryHostActionBridge.test.js` | Temporary bridge capability/dispatch coverage | Actual change in this session |
-| `tests/runtime/widget-registrar.test.js` | Widget registration coverage | Actual change in this session: `hostActions` injection coverage |
-| `tests/runtime/init.test.js` | Theme preset/init coverage | Actual change in this session: bridge bootstrap/cleanup coverage |
-| `/home/leobareth/Dokumente/Programmieren/avnav/viewer/components/ActiveRouteWidget.jsx` | Core behavior reference | Reference only |
-| `/home/leobareth/Dokumente/Programmieren/avnav/viewer/components/EditRouteWidget.jsx` | Core behavior reference | Reference only |
-| `/home/leobareth/Dokumente/Programmieren/avnav/viewer/components/RoutePointsWidget.jsx` | Core behavior reference | Reference only |
-| `/home/leobareth/Dokumente/Programmieren/avnav/viewer/components/AisTargetWidget.jsx` | Core behavior reference | Reference only |
-| `/home/leobareth/Dokumente/Programmieren/avnav/viewer/gui/NavPage.jsx` | Core widget-click routing | Reference only |
-| `/home/leobareth/Dokumente/Programmieren/avnav/viewer/gui/GpsPage.jsx` | Core dashboard click behavior | Reference only |
-| `/home/leobareth/Dokumente/Programmieren/avnav/viewer/gui/EditRoutePage.jsx` | Core route-edit workflow | Reference only |
-| `/home/leobareth/Dokumente/Programmieren/avnav/viewer/components/AisInfoDisplay.jsx` | Core AIS dialog/actions | Reference only |
-| `/home/leobareth/Dokumente/Programmieren/avnav/viewer/util/api.js` | Public plugin API surface | Reference only |
-| `widgets/html/ActiveRouteWidget/ActiveRouteWidget.js` | New HTML sub-renderer for `nav` cluster | Likely new file |
-| `widgets/html/EditRouteWidget/EditRouteWidget.js` | New HTML sub-renderer for `nav` cluster | Likely new file |
-| `widgets/html/RoutePointsWidget/RoutePointsWidget.js` | New HTML sub-renderer for `nav` cluster | Likely new file |
-| `widgets/html/AisTargetWidget/AisTargetWidget.js` | New HTML sub-renderer for `nav` cluster | Likely new file |
+| `renderHtml(props)` | pure HTML renderer | Returns inner markup only |
+| `initFunction(...)` | optional renderer hook | Setup timers/listeners/state |
+| `finalizeFunction(...)` | optional renderer hook | Cleanup timers/listeners/state |
 
-## Todo Steps
+Rules:
 
-### Phase 0 - Introduce `TemporaryHostActionBridge` for temporary workflow parity
+- use `this.eventHandler` for string-mode event handlers or manual propagation blocking for React/HTM output
+- runtime continues to call `schedulePluginContainerSync()` after `renderHtml(...)` returns
+- no mount id, no render sequence, and no `afterHtmlRender(...)` are required
+- do not assume `[data-dyni]` or preset-applied root styling already exists during the first `renderHtml(...)` call
 
-Status: implemented on `2026-03-09`.
+### Hybrid Contract
 
-1. Add `runtime/TemporaryHostActionBridge.js` and keep the class/module name explicitly temporary.
-2. Centralize all temporary host DOM/event-layer logic in this bridge. No widget, mapper, or renderer may query host DOM directly for workflow parity.
-3. Expose a stable widget-side interface that mirrors the preferred future API shape:
-   - `hostActions.routePoints.activate(index)`
-   - `hostActions.routeEditor.openActiveRoute()`
-   - `hostActions.routeEditor.openEditRoute()`
-   - `hostActions.ais.showInfo(mmsi)`
-   - `hostActions.getCapabilities()`
-4. Make every bridge action return `true` only when the host-equivalent workflow was actually dispatched.
-   - Return `false` only for passive/unsupported modes that callers checked before binding click handlers.
-   - If a dispatch-capable path breaks at runtime, throw an explicit bridge error.
-5. Implement the bridge so it can insert plugin-specific workflow handling without changing native-widget behavior.
-   - The bridge may add plugin-only delegated listeners, alias checks, or other DOM/runtime hooks.
-   - Native widget branches and outcomes must remain untouched.
-6. Prefer existing host affordances first:
-   - `routePoints.activate(index)` should use the runtime-exposed host relay when available
-   - other actions may use temporary DOM/event-layer bridging only inside this bridge
-7. Preserve core page differences:
-   - `ActiveRoute` on `NavPage` opens the route editor workflow
-   - `ActiveRoute` on `GpsPage` stays passive so native `history.pop()` fallback remains reachable; do not rely on a post-click `false` return once `renderHtml` has trapped the event
-   - `EditRoute` opens the native edit-route dialog on `EditRoutePage`
-   - `AisTarget` opens native AIS info workflow on `NavPage` / `GpsPage`
-8. Mark all temporary bridging code with:
-   - `// dyni-workaround(avnav-plugin-actions) -- <reason>`
-9. Keep future host API extension as a bridge-internal replacement, not a widget-contract rewrite.
+| Interface | Owner | Purpose |
+|---|---|---|
+| `renderHtml(props)` | hybrid renderer | Returns shell markup plus nested `<canvas>` |
+| `afterHtmlRender(mountEl, props)` | hybrid renderer | Resolves nested canvas from `mountEl` and paints after root sync/theme application |
+| `finalizeFunction(...)` | hybrid renderer | Clears DOM refs and invalidates pending hybrid state if needed |
+| extracted canvas renderer API | shared module | Reuses canvas visuals without a second implementation |
 
-### Phase 1 - Extend the cluster runtime to support HTML sub-renderers
+Rules:
 
-Status: implemented on `2026-03-09`.
+- `afterHtmlRender(...)` is optional and hybrid-only
+- if a renderer does not expose `afterHtmlRender(...)`, runtime behavior stays on the pure HTML path
+- if `renderCanvas(...)` remains exported during migration, it must be a thin delegation to the same shared visual renderer
 
-1. Extend `ClusterWidget` so the cluster registration contract can expose:
-   - `renderCanvas`
-   - `renderHtml`
-   - `initFunction`
-   - `finalizeFunction`
-   - aggregated `wantsHideNativeHead`
-2. Extend `ClusterRendererRouter` so a picked renderer may implement either or both:
-   - `renderCanvas(canvas, props)`
-   - `renderHtml(props)`
-3. Add lifecycle fan-out rules for cluster sub-renderers:
-   - `initFunction` should initialize only the active renderer contract or an explicit router-owned shared contract
-   - `finalizeFunction` should still fan out defensively where shared cleanup is required
-4. Define the renderer capability contract clearly:
-   - pure canvas renderer
-   - pure HTML renderer
-   - mixed renderer if ever needed
-5. Keep mappers declarative. Renderer selection and mode switching belong in the mapper output and router, not inside `NavMapper` helper logic.
-6. Add tests proving that `ClusterWidget` and `ClusterRendererRouter` correctly delegate HTML and canvas renderers without breaking existing canvas-only kinds.
+### Runtime Contract Additions
 
-### Phase 2 - Make HTML cluster kinds first-class dyninstruments widgets
+| API / state | File | Purpose |
+|---|---|---|
+| `schedulePluginContainerSync(task?)` | `runtime/init.js` | Existing HTML sync API; optional post-sync task is used only by hybrid renderers |
+| `state.pluginContainerSyncTasks` | `runtime/init.js` | Pending post-sync hybrid callbacks |
+| `ctx.htmlMount = { mountId, renderSeq }` | widget context | Hybrid-only widget-facing mount state that may be serialized into shell markup |
+| `ctx.__dyniHtmlMountId` / `ctx.__dyniHtmlRenderSeq` | widget context | Internal registrar-owned hybrid state |
 
-1. Stop relying on the canvas-only `data-dyni` marker as the only hide-native-head contract.
-2. Add a class-based or equivalent registrar-owned contract for widgets that want to hide AvNav's native header/value area, for example a marker class applied when `wantsHideNativeHead === true`.
-3. Update `plugin.css` to scope hide-native-head behavior to that explicit contract instead of requiring canvas-root discovery.
-4. Expand theme-preset discovery/application in `runtime/init.js` so it finds pure HTML cluster widgets as well, not only `canvas.widgetData`.
-5. Ensure theme preset application still works for late-mounted HTML widgets. The mechanism can be a class-based rescan, a DOM observer, or another runtime-safe approach, but it must not remain canvas-only.
-6. Add tests for:
-   - HTML cluster widgets receiving hide-native-head styling
-   - HTML cluster widgets being included in theme-preset application
-   - existing canvas cluster widgets keeping their current behavior
+### Hybrid Shell Markup Contract
 
-### Phase 3 - Expand the `nav` cluster contract
+Hybrid `renderHtml(props)` must emit shell markup like:
 
-1. Extend `config/clusters/nav.js` so `dyni_Nav_Instruments` offers the active-workflow kinds.
-2. Replace the current summary implementation behind `kind: "activeRoute"` with the core-parity implementation. Do not keep a second summary-only variant for compatibility.
-3. Add `editRoute`, `routePoints`, and `aisTarget` kinds to the `nav` selector list.
-4. Remove any config or mapper paths that only exist to support the temporary summary behavior once the parity implementation is in place.
-5. Add only the editable parameters that the `nav` cluster can actually honor. Avoid speculative editables that depend on unresolved host APIs.
-6. Keep `NavMapper` output declarative:
-   - route to renderer ID
-   - normalize numbers and booleans
-   - pass renderer-owned props only
-   - do not embed layout or HTML assembly in the mapper
-7. Track `nav` cluster growth as an explicit follow-up risk. If config or mapper complexity becomes a hotspot, split into a dedicated cluster later rather than overloading it indefinitely.
+```html
+<div
+  class="dyni-active-route-shell"
+  data-dyni-html-mount="..."
+  data-dyni-html-render="...">
+  <canvas class="dyni-active-route-canvas"></canvas>
+</div>
+```
 
-### Phase 4 - Implement the new HTML sub-renderers
+Rules:
 
-1. Implement the `activeRoute` renderer as the core-parity HTML sub-renderer used by the `nav` cluster.
-   - Use `renderHtml` string mode and `this.eventHandler`.
-   - Preserve the core visibility rule: hide when there is no route unless layout editing is active.
-   - Match the approach-state visual treatment and field set from the core widget.
-   - Preserve context-sensitive click behavior. In particular, on `GpsPage` render it without a plugin click handler so the native fallback navigation still receives the click.
-2. Implement the `editRoute` renderer as an HTML sub-renderer.
-   - Match the core border state, horizontal layout reduction, and `No Route` fallback.
-   - Do not add adapters or compatibility wrappers around private route-object contracts. If the required route data is not available through a stable contract, stop and raise the core API blocker.
-3. Implement the `routePoints` renderer as an HTML sub-renderer.
-   - Match the core list shape, `showLatLon` switch, and selected-row behavior.
-   - Hide it in horizontal mode unless layout editing is active.
-   - If parity needs `avnav.api.routePoints.activate(index)`, keep that usage inside `TemporaryHostActionBridge` only; renderer code must stay on `hostActions.routePoints.activate(index)`.
-   - Add selected-row auto-scroll after render.
-4. Implement the `aisTarget` renderer as an HTML sub-renderer.
-   - Match the core compact-vs-full layout behavior.
-   - Match background-state coloring for warning, nearest, tracked, and normal target states.
-   - Keep rendering logic separate from the eventual click/dialog workflow wiring.
+- `data-dyni-html-mount` must match `this.htmlMount.mountId`
+- `data-dyni-html-render` must match `this.htmlMount.renderSeq`
+- the nested canvas is the only visual drawing surface
+- interaction handlers live on the shell, not on a fake HTML recreation of the visual layout
 
-### Phase 5 - Wire widget interactions through the bridge facade
+### Fail-Closed Rules
 
-1. Because these features live inside `dyni_Nav_Instruments`, core page-level widget-name special cases will not help directly. HTML renderers that own the interaction must capture clicks through `this.eventHandler` and delegate host-equivalent workflows to `this.hostActions`.
-2. `activeRoute` parity kind:
-   - consult `hostActions.getCapabilities()` before binding the click handler
-   - when capability mode is `dispatch`, bind the handler and call `hostActions.routeEditor.openActiveRoute()`
-   - when capability mode is `passive` on `GpsPage`, do not bind a plugin click handler and let the native page fallback own the click
-   - if a dispatch-capable path breaks at runtime, surface the bridge error instead of silently degrading
-3. `editRoute` kind:
-   - call `hostActions.routeEditor.openEditRoute()`
-   - do not rebuild the native dialog when bridge-backed parity is the accepted temporary path
-4. `routePoints` kind:
-   - row click calls `hostActions.routePoints.activate(index)`
-   - keep any direct use of `avnav.api.routePoints` inside the bridge only
-5. `aisTarget` kind:
-   - click calls `hostActions.ais.showInfo(mmsi)`
-   - keep host dialog/action automation inside the bridge, not in renderer code
+- root sync and theme application always run before any queued post-sync task
+- `runtime/init.js` must copy the queued task list and clear the queue before invoking tasks
+- each queued task must be isolated so one thrown error does not block later tasks
+- missing mount, stale render sequence, or missing nested canvas is a no-op, not a retry loop
+- task isolation must still surface failure context through logging or another explicit diagnostic path
+- plain HTML widgets must remain functional when no post-sync task is provided
 
-### Phase 6 - Tests and verification
+## Detailed Runtime Sequences
 
-1. Add unit tests for HTML cluster rendering and event-handler wiring.
-2. Add unit tests for `TemporaryHostActionBridge`:
-   - capability reporting
-   - plugin-only hook installation
-   - native no-regression for non-plugin widgets
-   - `false` return only for pre-declared passive/unsupported capability modes
-   - explicit thrown error when a dispatch-capable path loses required host affordances
-3. Add behavior tests for bridge-backed workflow parity:
-   - `activeRoute` dispatch on `NavPage`
-   - `activeRoute` passive rendering on `GpsPage` so native fallback remains reachable
-   - `editRoute` dialog opening on `EditRoutePage`
-   - `routePoints.activate(index)` integration
-   - `aisTarget` info workflow dispatch
-4. Add behavior tests for:
-   - active-route parity visibility and approach state
-   - `editRoute` horizontal-vs-normal layout
-   - `routePoints` row activation and selected-row rendering
-   - `aisTarget` compact layout and state-based color choice
-5. Add runtime tests covering theme preset application and hide-native-head behavior for HTML cluster kinds.
-6. Add `nav` cluster config and mapper tests for the new kinds and for the direct replacement of the temporary `activeRoute` summary path.
-7. Manually compare dyninstruments behavior against core on:
-   - `NavPage`
-   - `GpsPage`
-   - `EditRoutePage`
-   - `AisPage` / AIS info workflow
-8. Run the final gate: `npm run check:all`.
+### Pure HTML-Only Sequence
 
-## Deferred Future Core Follow-Up
+1. `runtime/widget-registrar.js` wraps `renderHtml(...)`.
+2. The wrapper injects `this.hostActions`.
+3. The renderer returns inner HTML markup.
+4. The registrar calls `runtime.schedulePluginContainerSync()` with no task.
+5. `runtime/init.js` rescans plugin roots, applies `[data-dyni]`, applies the theme preset, and invalidates theme-resolver caches as needed.
+6. No hybrid mount state and no post-sync paint callback are involved.
 
-Generalized plugin-action APIs for route-editor and AIS workflows are deferred until core defines a broader concept for exposing host actions to plugins.
+### Hybrid Sequence
 
-When that API exists, `TemporaryHostActionBridge` should become either:
+1. `runtime/widget-registrar.js` wraps `renderHtml(...)`.
+2. Before calling the renderer, the wrapper:
+   - injects `this.hostActions`
+   - assigns hybrid mount state if absent
+   - increments the hybrid render sequence
+   - exposes `this.htmlMount = { mountId, renderSeq }`
+3. The hybrid renderer returns shell markup containing the mount attributes and nested canvas.
+4. The registrar schedules `runtime.schedulePluginContainerSync(task)` with a post-sync callback captured for that widget instance and render sequence.
+5. `runtime/init.js` rescans plugin roots, applies `[data-dyni]`, applies theme preset, invalidates caches, and only then flushes queued post-sync tasks.
+6. The callback verifies that `ctx.__dyniHtmlRenderSeq` still matches the captured sequence.
+7. The callback resolves `mountEl` via registrar-owned shell lookup and then resolves the nested canvas from that mount only.
+8. If the sequence is stale or the shell is gone, the callback exits without drawing.
+9. If the mount matches, `afterHtmlRender(mountEl, props)` paints via the shared canvas renderer.
 
-- a thin adapter over the documented host API, or
-- a deleted module whose public widget-side facade is provided directly by runtime helpers
+## Implementation Steps
 
-If this is revisited later, preferred high-level shapes remain:
+### Session Rule
 
-- `avnav.api.routeEditor.openActiveRoute()`
-- `avnav.api.routeEditor.openEditRoute()`
-- `avnav.api.routePoints.activate(index)` or `avnav.api.routeEditor.activatePoint(index)`
-- `avnav.api.ais.showInfo(mmsi)`
-- `avnav.api.ais.openList(mmsi)`
-- `avnav.api.ais.setTrackedTarget(mmsiOrZero)`
-- `avnav.api.ais.setHidden(mmsi, hidden)`
+- each numbered step below is one session-safe bundle
+- do not start the next step until the current step ends with `npm run check:all`
+- every step must leave the repo green and mergeable
+- if a step changes runtime or widget behavior, update the relevant docs in that same step
 
-## Acceptance Criteria
+### Step 1 — Pure HTML Baseline Lock Bundle
 
-- `TemporaryHostActionBridge` exists in runtime, is explicitly marked temporary, and is the only module that performs host DOM/event-layer workflow bridging for plugin parity.
-- Widgets call a stable bridge facade (`hostActions.*`) rather than host DOM or private host JS objects directly.
-- Plugin-specific bridge hooks do not change native widget behavior or native widget names.
-- `dyni_Nav_Instruments` supports both canvas and HTML sub-renderers through the cluster pipeline.
-- `kind: "activeRoute"` is the core-parity implementation, not a temporary summary variant.
-- The `nav` cluster includes the active-workflow kinds for now, without compatibility aliases or duplicate fallback kinds.
-- HTML cluster kinds receive dyninstruments theming and hide-native-head behavior without depending on canvas presence.
-- Route and AIS interactions avoid private core modules and page-local wiring outside the bridge.
-- Any temporary use of runtime-exposed but undocumented actions is isolated, guarded, and tagged with `// dyni-workaround(avnav-plugin-actions) -- ...`.
-- Visual and workflow behavior matches the current core widgets closely enough to swap layouts without user-visible regression.
-- Temporary bridge-backed interactions can dispatch native-equivalent workflows for `activeRoute`, `editRoute`, `routePoints`, and `aisTarget`; pages that must retain native fallback stay passive before click trapping; broken dispatch paths throw explicit bridge errors instead of degrading silently.
-- `npm run check:all` passes.
+**Files:**
 
-## Completed Investigation
+- `documentation/avnav-api/plugin-lifecycle.md`
+- `documentation/avnav-api/interactive-widgets.md`
+- `documentation/architecture/cluster-widget-system.md`
+- `tests/runtime/widget-registrar.test.js`
+- `tests/runtime/init-root-ownership.test.js`
 
-1. Read the mandatory preflight docs:
-   - `documentation/TABLEOFCONTENTS.md`
-   - `documentation/conventions/coding-standards.md`
-   - `documentation/conventions/smell-prevention.md`
-2. Read the plugin docs relevant to this task:
-   - `documentation/avnav-api/plugin-lifecycle.md`
-   - `documentation/avnav-api/interactive-widgets.md`
-   - `documentation/widgets/active-route.md`
-   - `documentation/architecture/cluster-widget-system.md`
-   - `ARCHITECTURE.md`
-3. Inspected the current dyninstruments runtime and cluster path:
-   - `cluster/ClusterWidget.js`
-   - `cluster/rendering/ClusterRendererRouter.js`
-   - `runtime/widget-registrar.js`
-   - `runtime/init.js`
-   - `config/components.js`
-4. Inspected the current `nav` cluster implementation:
-   - `cluster/mappers/NavMapper.js`
-   - `config/clusters/nav.js`
-5. Inspected the core widget implementations:
-   - `viewer/components/ActiveRouteWidget.jsx`
-   - `viewer/components/EditRouteWidget.jsx`
-   - `viewer/components/RoutePointsWidget.jsx`
-   - `viewer/components/AisTargetWidget.jsx`
-6. Inspected the surrounding core workflow code:
-   - `viewer/gui/NavPage.jsx`
-   - `viewer/gui/GpsPage.jsx`
-   - `viewer/gui/EditRoutePage.jsx`
-   - `viewer/gui/AisPage.jsx`
-   - `viewer/components/AisInfoDisplay.jsx`
-   - `viewer/nav/routeeditor.js`
-   - `viewer/util/api.js`
-7. Confirmed that current viewer source exposes `window.avnav.api.routePoints`, but maintainer feedback does not treat this area as a documented/stable plugin-action contract.
-8. Confirmed the accepted near-term workaround:
-   - add a temporary runtime `TemporaryHostActionBridge`
-   - keep DOM/event-layer host coupling isolated behind widget-facing `hostActions.*`
-   - defer generalized API enhancement until later
-9. Confirmed the broader ownership split around adjacent widgets:
-   - `CenterDisplay` is passive
-   - `Zoom` is page-routed
-   - `Alarm` is page-shell-owned
+Changes:
 
-## Open Questions / Validation Points
+- lock the current pure `renderHtml` contract as first-class behavior
+- make the docs explicitly state that pure HTML renderers remain supported and do not need hybrid mount state
+- add non-regression tests for:
+  - `hostActions` injection on HTML renderers
+  - deferred root sync after `renderHtml(...)`
+  - plain HTML behavior when no hybrid post-sync task exists
 
-- Does core want to bless the current route-object store contract for plugin use, or should dyninstruments eventually move to a plain read-model API?
-- If route/AIS host APIs are revisited later, should `avnav.api.routePoints.activate(index)` be documented as stable plugin API or replaced?
-- What is the preferred host API shape for future AIS workflows: one high-level dialog API or several smaller actions?
-- For late-mounted HTML cluster widgets, should dyninstruments use a rescan-based theme application or a DOM observer?
-- Does the `ActiveRouteWidget.jsx` `isAproaching` typo affect live behavior, or is it dead code in practice?
-- At what point should `nav` be split once active-workflow kinds are added?
+Completion criteria:
 
-## Relevant Information
+- no runtime behavior changes yet
+- pure HTML docs and tests are explicit enough to protect future refactors
+- `npm run check:all`
 
-- The current plugin already supports `renderHtml` and `this.eventHandler` at the registered-widget boundary. The missing piece is carrying that capability through the cluster pipeline.
-- Because these features stay inside `dyni_Nav_Instruments`, page-specific core click handlers keyed by built-in widget names cannot be reused directly.
-- Current viewer source exposes `window.avnav.api.routePoints`, but maintainer guidance says there is no general plugin-action concept here yet. Treat it as runtime-exposed workaround surface, not stable plugin API.
-- Workaround code for this gap must be tagged with `// dyni-workaround(avnav-plugin-actions) -- <reason>` so it can be found and retired later.
-- The temporary bridge must be the only place that performs host DOM/event-layer workflow automation. Widgets stay on a stable avnav-api-like facade (`hostActions.*`).
-- Core interaction ownership is mixed even among nearby widgets:
-  - passive renderer + page click routing (`Zoom`, `ActiveRoute`, `EditRoute`)
-  - widget-owned click target + page/API workflow (`RoutePoints`, `AisTarget`)
-  - page-shell widget ownership (`Alarm`)
-  - fully passive display (`CenterDisplay`)
-- The plan intentionally removes backward-compatibility strategies because the plugin is not released yet. The temporary summary-style `activeRoute` path should be replaced directly instead of carried forward.
-- The safest implementation order is:
-  1. add `TemporaryHostActionBridge` and expose `hostActions.*`
-  2. extend cluster HTML support and HTML theming infrastructure
-  3. expand the `nav` cluster contract
-  4. implement the HTML sub-renderers against the bridge facade
-  5. verify parity and run `npm run check:all`
+### Step 2 — HTML Sync Queue Bundle
+
+**Files:**
+
+- `runtime/init.js`
+- `documentation/avnav-api/plugin-lifecycle.md`
+- `tests/runtime/init-root-ownership.test.js`
+
+Changes:
+
+- extend `schedulePluginContainerSync(task?)` to queue optional post-sync callbacks
+- keep the no-argument pure HTML call path unchanged
+- copy the queued callback list and clear the queue before invoking tasks
+- keep root marking, theme application, and cache invalidation ahead of task execution
+- isolate each queued task so one thrown error does not block later tasks
+
+Completion criteria:
+
+- pure HTML behavior is unchanged
+- runtime exposes a usable post-sync queue for hybrid renderers
+- `npm run check:all`
+
+### Step 3 — Hybrid Registrar and Router Contract Bundle
+
+**Files:**
+
+- `runtime/widget-registrar.js`
+- `cluster/ClusterWidget.js`
+- `cluster/rendering/ClusterRendererRouter.js`
+- `cluster/rendering/RendererPropsWidget.js`
+- `documentation/avnav-api/plugin-lifecycle.md`
+- `documentation/architecture/cluster-widget-system.md`
+- `tests/runtime/widget-registrar.test.js`
+- `tests/cluster/ClusterWidget.test.js`
+- `tests/cluster/rendering/ClusterRendererRouter.test.js`
+- `tests/cluster/rendering/RendererPropsWidget.test.js`
+
+Changes:
+
+- make `runtime/widget-registrar.js` the only owner of hybrid mount-id generation, render-sequence tracking, widget-facing `this.htmlMount`, and mounted-shell lookup
+- expose hybrid mount state only when a renderer implements `afterHtmlRender(...)`
+- schedule hybrid post-sync callbacks through `schedulePluginContainerSync(task?)`
+- delegate optional `afterHtmlRender(...)` through `ClusterWidget`, `ClusterRendererRouter`, and `RendererPropsWidget`
+- keep pure HTML renderers without `afterHtmlRender(...)` on the unchanged baseline path
+
+Completion criteria:
+
+- no shipped widget uses `afterHtmlRender(...)` yet
+- hybrid contract plumbing is live without changing pure HTML behavior
+- `npm run check:all`
+
+### Step 4 — Shared ActiveRoute Canvas Extraction Bundle
+
+**Files:**
+
+- `shared/widget-kits/nav/ActiveRouteCanvasRenderer.js` (new)
+- `config/components.js`
+- `documentation/widgets/active-route.md`
+- `tests/config/components.test.js`
+- `tests/shared/nav/ActiveRouteCanvasRenderer.test.js` (new)
+- `widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js`
+- `tests/widgets/text/ActiveRouteTextWidget.test.js`
+
+Changes:
+
+- move the current `ActiveRouteTextWidget.renderCanvas(...)` visual logic into `ActiveRouteCanvasRenderer`
+- keep current visual owners unchanged:
+  - `ThemeResolver`
+  - `TextLayoutEngine`
+  - `RadialTextLayout`
+  - `TextTileLayout`
+  - `ActiveRouteLayout`
+- keep `ActiveRouteTextWidget` behavior unchanged by delegating its existing canvas path to the new shared renderer
+- move canvas-visual assertions into the shared renderer tests
+
+Completion criteria:
+
+- ActiveRoute still renders exactly through the current canvas path
+- the shared canvas renderer is ready for hybrid reuse
+- `npm run check:all`
+
+### Step 5 — Hybrid ActiveRoute Bundle
+
+**Files:**
+
+- `widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js`
+- `plugin.css`
+- `documentation/avnav-api/interactive-widgets.md`
+- `documentation/widgets/active-route.md`
+- `tests/widgets/text/ActiveRouteTextWidget.test.js`
+
+Changes:
+
+- add hybrid `renderHtml(props)` that returns shell markup and nested canvas only
+- serialize only `this.htmlMount.mountId` and `this.htmlMount.renderSeq` into shell markup
+- add `afterHtmlRender(mountEl, props)` that:
+  - accepts `mountEl` from the runtime contract
+  - resolves the nested canvas from that mount only
+  - calls `ActiveRouteCanvasRenderer`
+- register `this.eventHandler.openActiveRoute` only for supported dispatch capability and `editing !== true`
+- omit click handlers for passive, unsupported, and edit mode
+- keep all layout, fit, accent, and disconnect visuals in the shared canvas renderer
+
+Rules:
+
+- no widget-local mount-id generation
+- no widget-local shell selector construction
+- no widget-local retry timers
+- no second visual implementation beside the shared canvas renderer
+
+Completion criteria:
+
+- hybrid ActiveRoute behavior is live
+- shell markup, click ownership, and post-sync canvas repaint tests pass
+- `npm run check:all`
+
+### Step 6 — Final Audit Bundle
+
+**Files:**
+
+- `documentation/avnav-api/plugin-lifecycle.md`
+- `documentation/avnav-api/interactive-widgets.md`
+- `documentation/architecture/cluster-widget-system.md`
+- `documentation/widgets/active-route.md`
+- `documentation/core-principles.md` (only if wording still drifts)
+
+Updates:
+
+- verify the per-step doc updates stayed aligned
+- verify docs still describe pure HTML widgets as first-class and the hybrid shell as an optional exception
+- document any remaining wording drift or follow-up debt
+
+Completion criteria:
+
+- documentation matches shipped runtime and widget behavior
+- the repo guidance is safe for future pure HTML and hybrid widget work
+- `npm run check:all`
+
+## Files Expected To Change
+
+| File | Planned change |
+|---|---|
+| `runtime/init.js` | optional post-sync task queue for hybrid HTML renders |
+| `runtime/widget-registrar.js` | hybrid mount-id/render-sequence assignment and `afterHtmlRender(...)` scheduling |
+| `cluster/ClusterWidget.js` | re-export optional `afterHtmlRender(...)` |
+| `cluster/rendering/ClusterRendererRouter.js` | delegate optional `afterHtmlRender(...)` |
+| `cluster/rendering/RendererPropsWidget.js` | forward merged-prop `afterHtmlRender(...)` |
+| `config/components.js` | register `ActiveRouteCanvasRenderer` dependency |
+| `shared/widget-kits/nav/ActiveRouteCanvasRenderer.js` | new extracted canvas visual renderer |
+| `widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js` | shared-canvas delegation, then hybrid shell/orchestrator rewrite |
+| `plugin.css` | hybrid-shell classes only |
+
+## Validation
+
+- run `npm run check:all`
+- keep all existing pure HTML, `nav` cluster, and host-action bridge tests green
+- add explicit hybrid non-regression coverage before shipping Step 5
+- verify no new documentation reachability or format errors
 
 ## Related
 
-- [TABLEOFCONTENTS.md](TABLEOFCONTENTS.md)
 - [avnav-api/plugin-lifecycle.md](avnav-api/plugin-lifecycle.md)
 - [avnav-api/interactive-widgets.md](avnav-api/interactive-widgets.md)
 - [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
 - [widgets/active-route.md](widgets/active-route.md)
+- [core-principles.md](core-principles.md)
