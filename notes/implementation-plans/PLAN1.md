@@ -280,7 +280,7 @@ Goal: make sure that code works like intended for renderHtml based widget. And a
 }
 ```
 - Make sure that it is clear that visuals follow the ThemeResolver while the components own css only is there for the layout and composition.
-- Rework this plan to not replace the existing activeRoute but first building a parallel activeRouteInteractive before removing the old canvas widget and refactor the new one.
+- Rewrite this plan to not replace the existing activeRoute but first building a parallel activeRouteInteractive before removing the old canvas widget and refactor the new one.
 
 It is very important that we keep the code clean. 
 
