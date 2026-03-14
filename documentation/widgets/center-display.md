@@ -20,7 +20,7 @@ This is a dedicated renderer, not a `PositionCoordinateWidget` variant, because 
 
 ## Key Details
 
-- `CenterDisplayLayout` is the current canonical responsive baseline and the Phase 1 reference consumer of `ResponsiveScaleProfile`.
+- `CenterDisplayLayout` is the current canonical responsive baseline and a primary reference consumer of `ResponsiveScaleProfile`.
 - `shared/widget-kits/layout/ResponsiveScaleProfile.js` owns the shared `minDim -> t` compaction curve plus named scale outputs.
 - `CenterDisplayLayout` keeps nav-owned geometry, panel bounds, and row splitting; it no longer owns a private responsive-profile implementation.
 

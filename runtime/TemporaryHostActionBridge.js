@@ -1,6 +1,6 @@
 /**
  * Module: DyniPlugin TemporaryHostActionBridge - Temporary runtime facade for host-owned workflow dispatch
- * Documentation: documentation/PLAN1.md
+ * Documentation: documentation/avnav-api/plugin-lifecycle.md
  * Depends: avnav.api, DOM page roots
  */
 (function (root) {

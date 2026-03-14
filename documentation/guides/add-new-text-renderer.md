@@ -13,7 +13,7 @@ Read first:
 
 ## Overview
 
-Phase A3 extracted `TextLayoutEngine` so new text widgets can stay thin:
+`TextLayoutEngine` keeps new text widgets thin:
 
 - Renderer module owns data parsing, formatter selection, and `renderCanvas`.
 - `TextLayoutEngine` owns layout mode routing, fit calculation, and shared draw helpers.

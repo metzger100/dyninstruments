@@ -63,7 +63,7 @@ Available as `this` in `initFunction`, `finalizeFunction`, `renderHtml`, `render
 | Property/Method | Widget Type | Description |
 |---|---|---|
 | `eventHandler` | userWidget | Register HTML event handlers |
-| `hostActions` | dyninstruments userWidget | Phase 0 runtime facade for temporary route/AIS host workflows |
+| `hostActions` | dyninstruments userWidget | Temporary runtime facade for route/AIS host workflows |
 | `triggerRedraw()` | userWidget | Force re-render |
 | `triggerRender()` | map | Force map render |
 | `lonLatToPixel(lon, lat)` | map | Coordinates → canvas pixels |
@@ -85,7 +85,7 @@ Details and event-chain analysis: [interactive-widgets.md](interactive-widgets.m
 ### Runtime-Exposed Action Caveat
 
 - Current core source attaches `routePoints` to `window.avnav.api` in `viewer/util/api.js`, and core pages use it as a handler registry/action relay from `viewer/gui/GpsPage.jsx` and `viewer/gui/EditRoutePage.jsx`.
-- Maintainer guidance for Phase 0 is still: there is no generalized concept yet for exposing host actions to plugins.
+- Maintainer guidance remains: there is no generalized concept yet for exposing host actions to plugins.
 - Treat `routePoints` as runtime-exposed implementation detail unless core later documents it as stable plugin API.
 - Preferred near-term approach for route/AIS/editor workflows: own the interaction inside plugin `renderHtml` / React code and use AvNav-side actions only as optional fallback.
 - Tag temporary code for this gap with `// dyni-workaround(avnav-plugin-actions) -- <reason>`.
@@ -124,7 +124,7 @@ When `true`, render wrapper in `runtime/widget-registrar.js` adds `data-dyni` to
 
 `runtime/widget-registrar.js` injects `this.hostActions` before `initFunction`, `renderHtml`, `renderCanvas`, and `finalizeFunction`.
 
-Current Phase 0 facade:
+Current dyninstruments facade:
 
 - `this.hostActions.getCapabilities()`
 - `this.hostActions.routePoints.activate(index)`

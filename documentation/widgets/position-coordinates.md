@@ -6,7 +6,7 @@
 
 Primary stacked-text renderer used for nav positions and vessel time/date variants. It keeps flat layouts in single-line format and renders two stacked lines in normal/high layouts.
 
-Phase 2 adopts the shared text compaction contract from `TextLayoutEngine.computeResponsiveInsets()`:
+This renderer uses the shared text compaction contract from `TextLayoutEngine.computeResponsiveInsets()`:
 
 - stacked `normal` / `high` layouts consume shared compact insets and `textFillScale`
 - flat mode keeps the same formatter behavior but benefits from compact insets and the lowered inline minimum fit floor
