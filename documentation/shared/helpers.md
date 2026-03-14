@@ -68,7 +68,7 @@ Applies formatter to raw value:
 
 ### getHostActions
 
-Returns the singleton Phase 0 host-action facade owned by `runtime/TemporaryHostActionBridge.js`.
+Returns the singleton host-action facade owned by `runtime/TemporaryHostActionBridge.js`.
 
 ```javascript
 const hostActions = Helpers.getHostActions();

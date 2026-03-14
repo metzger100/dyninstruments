@@ -108,7 +108,7 @@ Example:
 
 ## Responsive Layout Ownership
 
-- Shared responsive compaction policy belongs to one shared owner; Phase 0 locks that contract in [../shared/responsive-scale-profile.md](../shared/responsive-scale-profile.md) and Phase 1 extracts the runtime module under `shared/widget-kits/layout/ResponsiveScaleProfile.js`.
+- Shared responsive compaction policy belongs to one shared owner; [../shared/responsive-scale-profile.md](../shared/responsive-scale-profile.md) documents that contract and the runtime module lives under `shared/widget-kits/layout/ResponsiveScaleProfile.js`.
 - Layout-owner modules may map shared profile outputs into family-specific geometry, spacing, and text ceilings, but they must not invent a second compact curve or copy the baseline constants locally.
 - Cluster mappers, renderer props, theme tokens, `plugin.css`, and editable parameters are not owners of responsive compaction policy.
 - Local literals are acceptable only for technical safety bounds (`0`, `1`, `2`, or equivalent non-visual guards). User-visible responsive floors such as text/layout minima must come from the shared profile contract.

@@ -6,7 +6,7 @@
 
 Default numeric renderer for clusters. Draws caption, value, and unit as responsive canvas text. Cluster-specific translation is handled by `ClusterWidget` mapper modules.
 
-Phase 2 adopts the shared text compaction contract from `TextLayoutEngine.computeResponsiveInsets()`:
+This renderer uses the shared text compaction contract from `TextLayoutEngine.computeResponsiveInsets()`:
 
 - compact tiles use shared profile-owned insets and gap compaction
 - `high` / `normal` composite fits consume shared `textFillScale` for stronger compact caption/unit fill
@@ -79,7 +79,7 @@ otherwise -> normal
 | Function | Purpose |
 |---|---|
 | `TextLayoutEngine.computeModeLayout(...)` | Shared ratio mode + collapse handling |
-| `TextLayoutEngine.computeResponsiveInsets(...)` | Shared Phase 2 compact insets + `textFillScale` |
+| `TextLayoutEngine.computeResponsiveInsets(...)` | Shared compact insets + `textFillScale` |
 | `TextLayoutEngine.fitThreeRowBlock(...)` | Fit `high` mode caption/value/unit rows |
 | `TextLayoutEngine.fitValueUnitCaptionRows(...)` | Fit `normal` mode value+unit + caption rows |
 | `TextLayoutEngine.fitInlineTriplet(...)` | Fit `flat` mode inline caption/value/unit row |

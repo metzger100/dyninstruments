@@ -13,7 +13,7 @@ It also exposes the shared intrinsic-spacing helpers used by layout owners to de
 - Shared owner responsibility: base `minDim -> t` compaction math, named scale outputs, and intrinsic-spacing helpers used by multiple widget families
 - Layout-owner responsibility: map shared scale outputs into family-specific geometry, spacing, share, and text-ceiling rules
 - Non-owners: cluster mappers, renderer props, theme tokens, `plugin.css`, and editable parameters
-- Base compaction constants stay JS-owned for now; they are not promoted to CSS/theme/runtime config in Phase 1
+- Base compaction constants stay JS-owned for now; they are not promoted to CSS/theme/runtime config
 - One repo-wide base curve is the contract; family-specific outputs may layer on top of it, but they must not replace it with independent widget-local curves
 - Local hard floors are allowed only for technical safety bounds (`0`, `1`, `2`, or equivalent non-visual guards)
 
@@ -39,7 +39,7 @@ minDim = max(1, min(W, H))
 t = clamp((minDim - 80) / 100, 0, 1)
 ```
 
-`CenterDisplayLayout` Phase 1 scale minima:
+`CenterDisplayLayout` scale minima:
 
 ```text
 textFillScale = lerp(1.18, 1, t)
@@ -65,10 +65,9 @@ spacePx = max(floor, floor((spanPx * ratio) / (sqrt(count) * textFillScale)))
 
 - Shared profile owns compaction math, interpolation, and named scale outputs.
 - Family layout owners consume those outputs and convert them into rectangles, shares, inner spacing, and max-text ceilings.
-- `CenterDisplayLayout`, `ActiveRouteLayout`, `XteHighwayLayout`, and `LinearGaugeLayout` are the primary intrinsic-spacing consumers on the PLAN2 surface.
+- `CenterDisplayLayout`, `ActiveRouteLayout`, `XteHighwayLayout`, and `LinearGaugeLayout` are the primary intrinsic-spacing consumers in the current responsive contract.
 
 ## Related
 
 - [../widgets/center-display.md](../widgets/center-display.md)
 - [../conventions/coding-standards.md](../conventions/coding-standards.md)
-- [../PLAN2.md](../PLAN2.md)
