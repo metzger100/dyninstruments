@@ -254,7 +254,35 @@ Behavior:
 
 ## Todo Steps
 
-### Step 0 — Establish `renderHtml` concepts, rules, and documentation boundary
+### Step 0 — Make sure that the already layed foundation is stable
+
+Relevant commits:
+- 43b373bd04480601bbfe3028fa2d2af4346de6fc
+- ce0c7b7d1542661e67986f4c742cc044b9af2120
+- 6c90688c597a9d6dc2f65e37e02bdc582b7537a1
+- f50738a3de5e1bf24fb7466c6c56325973536e33
+- 3ce68adbc9ba715b8234ffb51affc830b0c8df99
+
+Goal: make sure that code works like intended for renderHtml based widget. And also update the following Steps to don't run into common errors when interacting with the core project. e.g.:
+
+- either trigger renderCanvas or trigger renderHtml because ExternalWidget als supports both and generates an empty canvas plus the html
+- the hiding of the avnav header must work with this concept:
+  - [data-dyni] = “this is the actual plugin-owned DOM root”
+  - .dyni-hide-native-head = “hide AvNav’s native header on that root”
+  - the runtime applies both markers to the real root, not just to the registered className. For canvas widgets that means rediscovering the root from canvas.closest(".widget, .DirectWidget") as before; for HTML widgets, from the .dyni-htmlWidget wrapper. That keeps the new HTML-ready model, but removes the broken assumption that dyniplugin/dyni-hide-native-head already land on the actual AvNav root.
+
+```css
+[data-dyni].dyni-hide-native-head .widgetHead,
+[data-dyni].dyni-hide-native-head .valueData {
+  display: none !important;
+}
+```
+- Make sure that it is clear that visuals follow the ThemeResolver while the components own css only is there for the layout and composition.
+- Rework this plan to not replace the existing activeRoute but first building a parallel activeRouteInteractive before removing the old canvas widget and refactor the new one.
+
+It is very important that we keep the code clean. 
+
+### Step 1 — Establish `renderHtml` concepts, rules, and documentation boundary
 
 Goal: make the HTML-widget contract explicit before any runtime or renderer migration starts.
 
@@ -290,7 +318,7 @@ Exit criteria:
 - future `renderHtml` sessions have a written architectural contract before copying the ActiveRoute pilot
 - rule/enforcement gaps are explicit instead of being left implicit in one widget implementation
 
-### Step 1 — Formalize HTML-widget runtime foundation
+### Step 2 — Formalize HTML-widget runtime foundation
 
 Goal: make `renderHtml` widgets first-class in runtime and docs before touching ActiveRoute markup.
 
@@ -307,7 +335,7 @@ Exit criteria:
 - an HTML-only widget can be discovered, themed, and styled without a backing canvas
 - runtime behavior matches the Step 0 contract
 
-### Step 2 — Extract shared HTML/view-model primitives
+### Step 3 — Extract shared HTML/view-model primitives
 
 Goal: move ActiveRoute-specific semantics out of the current canvas renderer so the HTML migration is mostly a presenter swap.
 
@@ -324,7 +352,7 @@ Exit criteria:
 - ActiveRoute semantic output is testable without canvas drawing
 - HTML string rendering has a safe shared escape boundary
 
-### Step 3 — Convert ActiveRoute to `renderHtml` with visual parity
+### Step 4 — Convert ActiveRoute to `renderHtml` with visual parity
 
 Goal: replace the canvas drawing path with DOM markup that reproduces the current widget contract.
 
@@ -341,7 +369,7 @@ Exit criteria:
 - ActiveRoute no longer depends on canvas rendering
 - HTML output matches the current widget’s structure and visible states across compact, normal, and wide sizes
 
-### Step 4 — Add route-editor feature parity and close the pilot
+### Step 5 — Add route-editor feature parity and close the pilot
 
 Goal: make the HTML widget behave like core ActiveRoute where the bridge supports it, then lock the pattern for later interactive widgets.
 
