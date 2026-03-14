@@ -256,6 +256,8 @@ Behavior:
 
 ### Step 0 — Make sure that the already layed foundation is stable
 
+I want to analyze all those commits step by step and search for regressions or wrong implementations.
+
 Relevant commits:
 - 43b373bd04480601bbfe3028fa2d2af4346de6fc
 - ce0c7b7d1542661e67986f4c742cc044b9af2120
