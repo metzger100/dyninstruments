@@ -1,745 +1,853 @@
-# Implementation Plan — `renderHtml` Active Widgets / ActiveRoute Pilot
+# Implementation Plan — `renderHtml` Active Widgets / ActiveRoute Pilot / NavPage Sizing
 
-**Status:** ❌ Not Started | `renderHtml` foundation, ActiveRoute pilot, host-action parity, NavPage widget sizing
+**Status:** Reworked against the current dyninstruments and AvNav codebases. Implementation gate remains **RED** until shell discovery, semantic head hiding, preset propagation, HTML root measurement, semantic re-layout, and ActiveRoute parity are hardened.
 
-## Overview
+## Scope
 
-This plan introduces a narrow `renderHtml` path for active widgets, starting with `dyni_Nav_Instruments` `kind: "activeRoute"`.
-The pilot must preserve the current ActiveRoute visual contract while adding the core-style route-editor action via `TemporaryHostActionBridge`, without turning HTML into the default renderer path for passive widgets.
+This plan defines the first safe `renderHtml` path for dyninstruments, using ActiveRoute as the pilot widget. It also closes the missing NavPage shell-sizing contract for both `renderHtml` widgets and selected `renderCanvas` widgets.
 
-The pilot widget is built as a **parallel `activeRouteInteractive`** kind (registered in `config/clusters/nav.js` alongside the existing `activeRoute` canvas widget) routed to a new `ActiveRouteTextHtmlWidget` renderer. The old canvas `ActiveRouteTextWidget` stays untouched until the new HTML renderer reaches full parity, at which point the old kind and canvas renderer are removed in a single cleanup commit.
+This is **not** a blanket migration to HTML. Canvas remains the default renderer path for passive instruments until HTML parity is proven.
 
-## Current Codebase Findings
+No AvNav core change is required for the pilot.
 
-- `ClusterWidget`, `ClusterRendererRouter`, and `RendererPropsWidget` already pass through `renderHtml(props)`.
-- `runtime/widget-registrar.js` already injects `this.hostActions` into `renderHtml`, `initFunction`, and `finalizeFunction`.
-- `TemporaryHostActionBridge` already exposes page-aware capability for this widget:
-  - `routeEditor.openActiveRoute` = `dispatch` on `navpage`
-  - `routeEditor.openActiveRoute` = `passive` on `gpspage`
-  - `routeEditor.openActiveRoute` = `unsupported` elsewhere
-- `ActiveRouteTextWidget` is still canvas-only and owns the current visual contract:
-  - `high` / `normal` / `flat` layout modes
-  - approach accent
-  - route-name truncation
-  - placeholder handling
-  - disconnect overlay
-- `ActiveRouteLayout` is currently a canvas-layout owner; the HTML path has no documented size/layout contract yet.
-- Several runtime/style utilities still assume widgets are canvas-backed:
-  - `runtime/init.js` discovers plugin containers via `canvas.widgetData`
-  - `runtime/widget-registrar.js` only marks roots and reapplies theme presets in `renderCanvas`
-  - `plugin.css` hides AvNav native head only under `[data-dyni]`
-- No shared HTML-string escaping utility exists yet for `renderHtml` string renderers.
+---
 
-## AvNav Widget Sizing on NavPage — Critical Analysis
+## Verified Facts From The Current Codebase
 
-This section documents how AvNav sizes widgets on the NavPage (and MapPage in general), what assumptions exist, and what the plugin must do to make `renderHtml` widgets display correctly. This is also partially relevant for `renderCanvas` widgets that may need non-default height in the vertical panel.
+1. **AvNav already supports HTML-only widgets.**
+   `ExternalWidget` renders `UserHtml` whenever `renderHtml` returns content and creates a canvas only when `renderCanvas` exists. `initFunction` and `finalizeFunction` still run.
 
-### How AvNav Renders External Widgets
+2. **The current dyninstruments blocker is runtime discovery, not host HTML support.**
+   `runtime/init.js` still enumerates plugin containers from `canvas.widgetData`, so HTML-only roots are invisible to preset re-apply scans.
 
-`ExternalWidget.jsx` is the React component that renders plugin-registered widgets. It wraps everything in a `WidgetFrame` which produces this DOM structure:
+3. **The shell class stack is preserved today.**
+   `ExternalWidget` passes translated props through `WidgetFrame`, and `WidgetFrame` merges `props.className` and `props.addClass`. Registered dyni shell classes survive even if translated output adds classes.
 
-```text
-<div class="widget externalWidget dyniplugin {additionalClasses}" style="...">  ← WidgetFrame
-  <div class="widgetHead">...</div>                                              ← WidgetHead (hidden by plugin CSS)
-  <div class="noresize">                                                         ← when mode !== 'gps'
-    <canvas class="widgetData" />                                                ← if renderCanvas
-    <UserHtml />                                                                 ← if renderHtml (parsed HTML string)
-  </div>
-</div>
-```
+4. **The current native-head hiding path is still canvas-marked and is not sufficient for an HTML ActiveRoute pilot.**
+   `plugin.css` hides AvNav header/value through `[data-dyni]`, and `runtime/widget-registrar.js` sets that marker only from the wrapped `renderCanvas` path when `wantsHideNativeHead` is true.
 
-Key: when `mode === 'gps'` (GpsPage), a `<div class="resize">` with automatic font-sizing via `resizeElementFont` is used instead of `<div class="noresize">`. On NavPage, `mode` is `"vertical"` or `"horizontal"`, so `noresize` is always used — **no automatic font scaling happens**.
+5. **ActiveRoute can still trigger a native AvNav header even when `caption` and `unit` are empty.**
+   In AvNav, `WidgetHead` renders when `caption`, `unit`, or `infoMiddle` exist. `infoMiddle` is populated from `disconnect`. In dyninstruments, `config/clusters/nav.js` sets `disconnect` for `kind: "activeRoute"` when `wpServer === false` or no route name exists.
 
-### Panel Layout on NavPage
+6. **The current theme model is not CSS-only.**
+   `ThemePresets.apply()` updates `data-dyni-theme` on the shell. `ThemeResolver` still resolves canvas tokens from this precedence:
+   - computed style on the canvas element
+   - computed style on the widget root
+   - `ThemePresets.PRESETS`
+   - resolver defaults
 
-NavPage uses `MapPage.jsx` which creates four widget panels:
+7. **The current string-mode `renderHtml` path has no DOM root ref.**
+   `renderHtml`, `initFunction`, and `finalizeFunction` do not receive the mounted HTML element. Any `ResizeObserver` plan therefore needs an explicit post-mount root-locator contract.
 
-| Panel | CSS class | `mode` prop | Layout direction | Key sizing rules |
-|---|---|---|---|---|
-| `left` | `.widgetContainer.vertical.left` | `"vertical"` | Column (bottom-aligned) | `width: var(--avnav-left-widgets-width)` = 8.8em, `max-height: 100%`, widgets share height via `flex-grow: 1` |
-| `top` | `.widgetContainer.horizontal.top` | `"horizontal"` | Row (wrapping) | `max-height: calc(4em + 0.2em)`, widgets get `height: 4em` fixed |
-| `bottomLeft` | `.widgetContainer.horizontal.bottomLeft` | `"horizontal"` | Row (reverse) | Same horizontal rules as top |
-| `bottomRight` | `.widgetContainer.horizontal.bottomRight` | `"horizontal"` | Row | Same horizontal rules as top |
+8. **A new `activeRouteInteractive` kind needs more than router wiring.**
+   In addition to mapper/router/component registration, `config/shared/kind-defaults.js` and `config/clusters/nav.js` must be updated because ActiveRoute captions, units, editables, and disconnect logic are keyed to `kind: "activeRoute"` today.
 
-### Vertical Panel (Left) — Height Distribution
+9. **`config/components.js` is part of the runtime gate, not just bookkeeping.**
+   Any new `ActiveRouteTextHtmlWidget` must be registered there and loaded as a dependency for `ClusterRendererRouter`, otherwise `Helpers.getModule("ActiveRouteTextHtmlWidget")` cannot resolve at runtime.
 
-```css
-.widgetContainer.vertical {
-  overflow: hidden;
-  flex-direction: column;
-  justify-content: flex-end;    /* widgets anchor to bottom, overflow clips from top */
-  align-items: stretch;
-}
-.widgetContainer.vertical .widget {
-  flex-grow: 1;     /* from base .widget rule */
-  flex-shrink: 0;   /* widgets do NOT shrink below intrinsic size */
-  width: calc(100% - 0.2em);
-}
-```
+10. **NavPage shell sizing is host-defined and mode-specific.**
+    - left panel: `mode="vertical"`
+    - top/bottom panels: `mode="horizontal"`
+    - GPS/dashboard pages: `mode="gps"`
+    AvNav `.widget` defaults still include `flex-grow: 1`. In horizontal containers, editor mode additionally applies `flex-shrink: 1` to widgets.
 
-All widgets in the vertical panel get **equal height** via `flex-grow: 1` distributed among siblings. The total available height is the map area height. If there are 7 widgets (default NavPage left panel), each gets ~1/7 of the vertical space.
+---
 
-For **canvas widgets** this works because:
-- `plugin.css` sets `[data-dyni] canvas.widgetData { width: 100% !important; height: 100% !important; }`
-- The canvas element fills whatever space flex allocates
-- The canvas renderer draws into actual pixel dimensions via `Helpers.setupCanvas(canvas)`
+## Phase 0 — Re-Verified Assessment
 
-For **HTML widgets** this is problematic because:
-- HTML content has **intrinsic size** — it pushes the widget height based on content
-- The `.noresize` wrapper is `flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0`
-- If the HTML content is smaller than the flex-allocated space, it won't fill the widget
-- If the HTML content is taller, it may cause unexpected overflow or widget expansion
+### 0a — AvNav `ExternalWidget` HTML-only path
 
-### Horizontal Panels (Top, Bottom) — Fixed Height and Width
+**Verdict:** PASS
 
-```css
-.widgetContainer.horizontal .widget {
-  height: var(--avnav-horizontal-widgets-height);   /* = 4em, fixed */
-}
-```
+Confirmed:
 
-Height is fixed at 4em. Width comes from **widget-specific CSS rules** in AvNav's `widgets.less`:
-
-```css
-/* Example: AvNav built-in ActiveRouteWidget */
-.widget.activeRouteWidget { width: 7em; }   /* via .smallWidget(@size1) */
-
-/* Example: AvNav built-in SOG widget */
-.widget.SOG { width: 11em; }                /* via .bigWidget(@size2) */
-```
-
-Plugin widgets have CSS class `dyniplugin` and `externalWidget`, **not** any of AvNav's built-in widget classes. Without explicit width rules, the plugin widget will have **no defined width** in horizontal panels — it will either collapse to content width or stretch unpredictably depending on `flex-grow`.
-
-### GpsPage — Automatic Font Scaling (Not NavPage)
-
-On GpsPage (`mode === 'gps'`), `WidgetFrame` uses `ResizeFrame` which calls `resizeElementFont(el)`. This function iterates on `el.style.fontSize` (as a percentage) to find the largest font-size where `scrollHeight <= clientHeight && scrollWidth <= clientWidth`. This is what makes GpsPage widgets auto-scale their text to fill available space.
-
-**This does not apply on NavPage** because `mode` is `"vertical"` or `"horizontal"`, not `"gps"`.
-
-### The `mode` Prop Is Passed to Plugin Renderers
-
-The `mode` string (`"vertical"`, `"horizontal"`, `"gps"`) flows from the `WidgetContainer` through `WidgetFactory.createWidget` → `DynamicWidget` → `ExternalWidget` → `getProps()` → `renderHtml(props)` / `renderCanvas(canvas, props)`. The plugin can read `props.mode` and adapt its rendering accordingly.
-
-Additionally, `WidgetFrame` adds the CSS class `"horizontal"` to the widget div when `mode === 'horizontal'`, which means `.widget.horizontal` selectors apply.
-
-### What the Plugin Must Do for renderHtml on NavPage
-
-1. **Explicit widget width in horizontal panels**: Add CSS rules in `plugin.css` or component CSS that set width for plugin widgets in horizontal containers:
-   ```css
-   .widgetContainer.horizontal .widget.dyniplugin { width: 7em; }
-   /* or per-kind overrides via additional class names */
-   ```
-
-2. **HTML wrapper must fill allocated flex space**: The outermost HTML element returned by `renderHtml` must be styled to fill its parent flex container:
-   ```css
-   .dyni-htmlWidget {
-     display: flex;
-     flex-direction: column;
-     width: 100%;
-     height: 100%;
-     min-height: 0;
-     overflow: hidden;
-   }
-   ```
-
-3. **Use `mode` prop for layout switching**: Instead of canvas-based W/H ratio detection, the HTML renderer can use `props.mode` to select a compact (horizontal/4em-constrained) vs. expanded (vertical/flex-shared) layout. CSS classes or data attributes can be set from the `mode` prop.
-
-4. **Font sizing strategy**: Since `resizeElementFont` does not run on NavPage, the HTML renderer must either:
-   - Use fixed `em`-based sizing that works within the known panel dimensions (8.8em wide vertical panel, 4em tall horizontal panel at the base `widgetFontSize`)
-   - Use CSS `clamp()` / viewport-relative units for responsive text
-   - Accept that text will not auto-scale like on GpsPage
-
-5. **Canvas widgets that need more height**: For canvas-based widgets that need disproportionate space in the vertical panel (e.g., radial gauges), the same flex distribution applies — every widget gets equal `flex-grow: 1`. To request more space, a widget would need CSS overrides for `flex-grow` or explicit `min-height`. This is an AvNav layout constraint, not something the plugin can fully control without user CSS overrides.
-
-### Summary of Sizing Dimensions
-
-| Context | Width | Height | Font scaling |
-|---|---|---|---|
-| NavPage vertical (left) | ~8.8em (container-set) | Equal share via flex-grow | None (noresize) |
-| NavPage horizontal (top/bottom) | **Must be set by plugin CSS** | 4em (fixed) | None (noresize) |
-| GpsPage | Grid-cell allocated | Grid-cell allocated | `resizeElementFont` auto-scales |
-
-## New `renderHtml` Concepts
-
-- `renderHtml` stays an exception for active widgets only. Canvas remains the default for passive display widgets.
-- Use AvNav string-mode HTML rendering plus `this.eventHandler`. Do not introduce React/HTM or inline JS.
-- Treat host actions as capability-driven state, not as unconditional APIs. Renderers must branch on `dispatch`, `passive`, and `unsupported`.
-- Passive HTML widgets must rely on the host/page click path instead of intercepting clicks themselves.
-- Make widget-root discovery independent of `canvas.widgetData` so HTML-only widgets can still receive theme presets, native-head hiding, and future runtime hooks.
-- Separate semantic state from presentation:
-  - JS owns parsing, formatting, disconnect/action state, and host-action wiring.
-  - `ThemeResolver` owns visual tokens and their defaults.
-  - component CSS owns layout/composition, truncation, and semantic-class arrangement for `renderHtml` widgets only.
-- Add a shared HTML escaping helper before any store-driven string is interpolated into `renderHtml`.
-- Close the missing HTML size/layout contract before converting ActiveRoute:
-  - component CSS is the layout owner for `renderHtml` widgets
-  - the plugin must explicitly handle NavPage panel sizing (horizontal width, vertical flex-fill)
-  - if a runtime size bridge is still needed, it may expose generic size attributes/classes, but it must not become the layout owner
-
-## Proposed Working Model
-
-### Render Path Contract
-
-```text
-storeKeys
--> mapper translate()
--> renderer props (includes props.mode from AvNav)
--> renderer builds HTML view model
--> renderer registers this.eventHandler callbacks
--> renderer returns escaped HTML string
--> component CSS owns layout/composition
--> ThemeResolver supplies visual tokens consumed by CSS
-```
-
-Rules:
-
-- mappers stay declarative and do not know about DOM, click handlers, or host-action capability lookup
-- renderer modules own parsing, formatting, placeholder rules, capability mapping, and markup selection
-- event handlers are registered only in `renderHtml` through `this.eventHandler`
-- `initFunction` / `finalizeFunction` are reserved for shared runtime hooks such as future resize observers, not for business logic
-- `props.mode` is the primary signal for layout adaptation on NavPage (`"vertical"` / `"horizontal"`) vs GpsPage (`"gps"`)
-
-### HTML Root Contract
-
-Suggested root contract for all future active widgets:
-
-- runtime marks widget roots independently of canvas presence
-- widget root carries plugin identity and renderer identity:
-  - `[data-dyni]`
-  - `[data-dyni-render="html"]`
-- HTML renderer returns one full-size wrapper element
-- click ownership is mode-dependent:
-  - `dispatch` -> renderer may attach a handler
-  - `passive` / `unsupported` -> renderer returns passive markup and lets the host own click semantics
-
-```html
-<div class="dyni-htmlWidget dyni-activeRoute" data-dyni-mode="vertical">...</div>
-```
-
-- renderer wrapper fills the usable widget area and becomes the only click boundary for widget-owned interactions
-- `wantsHideNativeHead: true` remains the way to reclaim full widget space for HTML widgets too
-- the wrapper element must be styled to fill its flex parent (`width: 100%; height: 100%; display: flex; overflow: hidden`)
-- `data-dyni-mode` mirrors `props.mode` so CSS can target layout variants without JS layout switching
-
-### Theme / CSS Contract
-
-Ownership decision:
-
-- `ThemeResolver` is the single owner of visual-token defaults and preset resolution
-- `plugin.css` remains the shared shell layer only
-- component CSS files are a narrow exception for `renderHtml` widgets and own only widget composition/layout, truncation, and DOM arrangement
-
-Contract:
-
-- `plugin.css` keeps only plugin-wide shell rules such as font inheritance, root attributes, border behavior, native-head hiding, shared HTML-widget base selectors, **and NavPage panel sizing rules for plugin widgets** (horizontal width defaults)
-- widget-specific CSS files own renderer-internal composition/layout rules such as tile grids, truncation, layout rearrangement, semantic state selectors, and widget-only responsive rules
-- HTML widgets consume resolved visual values through CSS custom properties on the widget root
-- those custom properties are populated from the ThemeResolver-owned token set; component CSS consumes them but never defines fallback token defaults or preset values
-- fonts, font weights, colors, and any future stroke/line-thickness style tokens remain ThemeResolver-owned even when HTML widgets use them in CSS
-
-Minimum token set for the pilot:
-
-- foreground text color
-- warning/accent color
-- primary font weight
-- label font weight
-- border/head-hiding state already provided by plugin root styling
+- `ExternalWidget` renders `UserHtml` if `renderHtml` returns non-null content.
+- Canvas creation is conditional on `props.renderCanvas`.
+- `UserHtml` translates string-mode event handlers and suppresses propagation/default before invoking dyninstruments handlers.
+- `initFunction` and `finalizeFunction` run even when no canvas exists.
 
 Consequence:
 
-- HTML widgets do not need a canvas just to access theme tokens
-- no widget-local duplication of preset defaults
-- `plugin.css` does not become a dumping ground for widget-local DOM layout
-- `ActiveRouteTextHtmlWidget` should ship with its own component CSS file registered through `config/components.js`
-- this component-CSS exception applies only to `renderHtml` widgets, not to canvas widgets
-- component CSS arranges markup; ThemeResolver remains the source of truth for how that markup looks
+- No AvNav-side blocker exists for an HTML-only dyninstruments widget.
+- No host-side code change is required for the pilot.
 
-### Responsive Layout Contract
+### 0b — Runtime root discovery for HTML-only widgets
 
-Ownership decision:
+**Verdict:** FAIL
 
-- component CSS owns layout/composition for HTML widgets
-- `high` / `normal` / `flat` remain documentation labels for the three compositions, but they are not renderer-owned mode props
-- `ThemeResolver` does not encode layout breakpoints or composition switching
-- `props.mode` (`"vertical"` / `"horizontal"` / `"gps"`) is the primary layout signal from AvNav
+Current gap:
 
-Implementation rule:
+- `runtime/init.js` still discovers plugin roots through `canvas.widgetData` enumeration.
+- `isPluginContainer()` already accepts `.dyniplugin` and `[data-dyni]`, but `listPluginContainers()` never scans shell roots directly.
+- HTML-only widgets without a canvas are therefore invisible to preset re-apply scans.
 
-- `activeRouteRatioThresholdNormal` / `activeRouteRatioThresholdFlat` are retired for the HTML renderer because layout breakpoints become CSS-owned
-- the HTML renderer uses `props.mode` to set a `data-dyni-mode` attribute on the wrapper; CSS targets this attribute for layout switching
-- in horizontal mode (`4em` height), CSS selects a compact single-row composition
-- in vertical mode (flex-shared height), CSS selects a stacked multi-row composition
-- in gps mode (auto-scaled), CSS selects the full expanded composition
-- if the target browser still needs a runtime size assist (e.g., container queries are unavailable), that assist may expose a generic size bucket on the root, but layout rules still live in component CSS
-- renderer/view-model code must not decide between `high` / `normal` / `flat`
-- renderer/view-model code must not carry theme, typography, or layout-selection defaults
+Required correction:
 
-### ActiveRoute View-Model Contract
+- make shell scanning primary
+- discover plugin roots directly by shell selector:
+  - `.widget.dyniplugin`
+- keep `[data-dyni]` only as a temporary fallback while CSS migration is in flight
 
-The HTML renderer should not directly format from raw props into string concatenation. It should first build a small semantic model:
+### 0c — Native head hiding
 
-| Field | Meaning |
-|---|---|
-| `routeNameText` | trimmed route name or placeholder |
-| `metrics` | ordered tile array for `RTE`, `ETA`, optional `NEXT` |
-| `isApproaching` | enables accent state and `NEXT` tile visibility |
-| `disconnect` | enables placeholder values and disconnect overlay |
-| `actionMode` | `dispatch`, `passive`, or `unsupported` |
-| `isActionable` | convenience boolean for markup/CSS |
-| `mode` | AvNav panel mode: `"vertical"`, `"horizontal"`, or `"gps"` |
+**Verdict:** FAIL / PILOT BLOCKER
 
-Rendering rules:
+Current state:
 
-- `NEXT` tile exists whenever `isApproaching === true`, even if the course value is missing
-- disconnect keeps the same tile structure; only values switch to placeholders
-- `high` / `normal` / `flat` composition is selected by component CSS (via `data-dyni-mode` and container dimensions), not by the view model
-- route-name truncation is CSS-owned (`overflow`, `text-overflow`) rather than manual canvas fitting
-- all user/store-derived strings are escaped once at the render boundary
-- the view model carries semantic state only; it does not expose visual-token or layout-mode fields
+- `plugin.css` still hides native AvNav elements through `[data-dyni]`
+- current runtime marking happens only in the wrapped canvas path
+- ActiveRoute disconnect state can still cause AvNav `WidgetHead` to render because `disconnect` feeds the `infoMiddle` slot even when `caption` and `unit` are empty
 
-### Host-Action Behavior Matrix
+Important clarification:
 
-| Capability | Widget behavior | Markup/handler rule |
-|---|---|---|
-| `dispatch` | widget owns the click and opens the route editor | register root click handler via `this.eventHandler`; render clickable affordance |
-| `passive` | widget stays visually passive and relies on host/page click semantics | do not register root handler; do not install `catchAll`; let the host own click flow |
-| `unsupported` | widget renders data only | no action handler; no clickable affordance |
+- this is a real blocker for an HTML ActiveRoute pilot
+- the failure mode is not theoretical: `config/clusters/nav.js` sets `disconnect` for `kind: "activeRoute"` when `wpServer === false` or the route name is missing
+- therefore native-head suppression must be shell-semantic and available without canvas markup side effects
 
-Implications:
+Required correction:
 
-- host-action lookups happen inside the renderer, never in config or mapper code
-- workaround paths are narrow and explicitly marked
-- ActiveRoute should be the reference for later `EditRoute`, `RoutePoints`, and `AisTarget` capability gating
-- passive markup may expose semantic classes/attributes for styling and tests, but it must stay handler-free so the host keeps click ownership
+- introduce a semantic shell class:
+  - `.dyni-hide-native-head`
+- append it directly to the registered widget shell class list when `wantsHideNativeHead === true`
+- switch head-hiding CSS to that class
+- keep `[data-dyni]` selectors only as a temporary migration fallback
 
-### ActiveRoute DOM Shape
+Required CSS target:
 
-Target DOM structure for the pilot in `dispatch` mode:
+```css
+.widget.dyniplugin.dyni-hide-native-head > .widgetHead {
+  display: none !important;
+}
+
+/* legacy fallback only; keep temporarily if older paths still emit valueData */
+.widget.dyniplugin.dyni-hide-native-head .valueData {
+  display: none !important;
+}
+```
+
+### 0d — NavPage sizing
+
+**Verdict:** FAIL / PARTIAL
+
+What AvNav actually does:
+
+- left NavPage panel uses `mode="vertical"`
+- top and bottom NavPage panels use `mode="horizontal"`
+- `gps` is the only mode that gets automatic resize behavior in `WidgetFrame`
+- NavPage widgets render inside `.noresize`
+
+Core sizing facts:
+
+#### Left NavPage panel (`vertical`)
+
+- width is host-defined
+- height is distributed across widgets by flex
+- plugin content must fill the assigned shell height
+- taller widgets can bias their share only through shell-level `flexGrow` and optional `minHeight`
+
+#### Top and bottom NavPage panels (`horizontal`)
+
+- height is host-fixed
+- width is the main plugin-controlled dimension
+- default `.widget` CSS still includes `flex-grow: 1`
+- in editing mode, `.widgetContainer.horizontal .widget` additionally gets `flex-shrink: 1`
+- `style.width` alone is therefore not deterministic
+
+#### GpsPage (`gps`)
+
+- host grid allocation and resize behavior remain host-controlled
+- plugin should avoid forcing shell size here
+
+Required correction:
+
+- define an explicit shell sizing contract
+- solve width on horizontal NavPage panels with `style.width + style.flexGrow = 0`
+- set `style.flexShrink = 0` when deterministic width must also hold in editor mode
+- solve fill behavior for HTML wrappers
+- document that vertical-panel height bias is possible, horizontal-panel height growth is not
+
+### 0e — Theme propagation without canvas
+
+**Verdict:** FAIL
+
+Current gap:
+
+- `ThemePresets.apply()` only updates `data-dyni-theme`
+- runtime root discovery still depends on canvases
+- HTML-only widgets therefore do not reliably receive preset state after mount
+- `plugin.css` does not yet define preset-driven public tokens for HTML widgets
+
+Important clarification:
+
+- the current canvas theme path is still owned by `ThemeResolver`
+- the current runtime is **not** a CSS-only theme system
+- switching `data-dyni-theme` alone is not enough for HTML unless the required public CSS tokens also exist on the shell
+
+Required baseline:
+
+- theme preset application must no longer depend on the canvas path
+- HTML-only widgets must receive the correct `data-dyni-theme` on the shell after mount
+- Phase 1 must preserve the existing canvas precedence contract:
+  - canvas CSS vars
+  - root CSS vars
+  - `ThemePresets.PRESETS`
+  - resolver defaults
+- HTML widgets need a shell-level public CSS token layer for the subset of tokens they consume
+
+Phase 1 decision:
+
+- keep `ThemeResolver` unchanged for canvas widgets unless an explicit later theme-unification step is approved
+- add shell-level public CSS tokens for HTML widgets in `plugin.css`
+- keep `data-dyni-theme` in sync on `.widget.dyniplugin`
+- do **not** describe Phase 1 as a full removal of the JS preset layer
+
+---
+
+## Final Technical Contract
+
+### 1. Separate outer shell and inner renderer
+
+There are two distinct layers.
+
+#### Outer shell
+
+The AvNav widget root:
+
+- `.widget.dyniplugin`
+
+Optional shell state:
+
+- `.dyni-hide-native-head`
+- `data-dyni-theme="night|slim|bold|highcontrast"`
+- no `data-dyni-theme` attribute for `default`
+
+This layer controls:
+
+- width in horizontal NavPage panels
+- flex height share in the vertical NavPage panel
+- native-head visibility
+- preset name visibility
+- shell-level public tokens for HTML widgets
+
+#### Inner renderer
+
+The dyninstruments-owned content inside `.noresize` or `.resize`:
+
+- canvas
+- HTML wrapper returned by `renderHtml`
+
+This layer controls:
+
+- composition
+- truncation
+- tile layout
+- click handling
+- visual presentation
+
+**Rule:** solve shell sizing first, then solve fill and layout inside the renderer.
+
+### 2. Shell identity and discovery
+
+The first-class plugin shell contract is:
+
+- `.widget.dyniplugin`
+- optional `.dyni-hide-native-head`
+- optional `data-dyni-theme`
+
+Required rule:
+
+- runtime discovers plugin shells by shell selector, not by canvases
+- runtime behavior must not depend on per-instance root IDs or DOM-order coupling
+- `[data-dyni]` remains transition-only until CSS migration is complete
+
+### 3. `className` merge policy
+
+The current AvNav path already preserves base shell classes.
+
+The correct policy is:
+
+- registration-time classes remain authoritative for semantic shell behavior
+- translated classes may add shell classes, but must not be required for root identity or head hiding
+- HeadHide must be added directly to the registration-time class list
+
+Required registration pattern:
+
+```js
+const wantsHide = !!spec.wantsHideNativeHead;
+const mergedClassName = [
+  "dyniplugin",
+  wantsHide ? "dyni-hide-native-head" : "",
+  widgetDef.def.className,
+  spec.className
+].filter(Boolean).join(" ");
+```
+
+### 4. Theme propagation policy
+
+Phase 1 must reflect the code that exists today.
+
+#### Canvas widgets
+
+Canvas widgets continue to resolve tokens through `ThemeResolver`.
+
+Required preserved precedence:
+
+- canvas CSS vars
+- root CSS vars
+- `ThemePresets.PRESETS`
+- `ThemeResolver` defaults
+
+Do not describe Phase 1 as a CSS-only canvas theme system.
+
+#### HTML widgets
+
+HTML widgets do not use `ThemeResolver` today.
+
+Required HTML contract:
+
+- preset name remains visible as `data-dyni-theme` on the shell
+- `plugin.css` defines default public tokens on `.widget.dyniplugin`
+- `plugin.css` defines preset overrides for those same public tokens on selectors such as:
+  - `.widget.dyniplugin[data-dyni-theme="night"]`
+- HTML widgets consume those shell-level public tokens through normal CSS cascade
+
+This keeps the HTML path explicit without pretending that canvas has already moved to the same mechanism.
+
+#### Runtime preset application
+
+Because `renderHtml` and any HTML-side root lookup depend on mounted DOM, the runtime helper must support a **post-commit** path.
+
+Important clarification:
+
+- `renderCanvas` in AvNav `ExternalWidget` already runs from a mounted lifecycle path
+- the queued helper is therefore required primarily for HTML-only widgets, late-mounted roots, and canvas-independent convergence to the active preset state
+- the helper must not be justified by the claim that `renderCanvas` itself is pre-commit
+- preset propagation and layout synchronization are separate concerns; the preset queue does not replace normal widget-state-to-DOM synchronization
+
+Required helper shape:
+
+```js
+runtime.queueApplyThemePresetToRegisteredWidgets()
+```
+
+Required behavior:
+
+- debounce/throttle repeated requests
+- schedule work asynchronously after mount
+- scan `.widget.dyniplugin`
+- resolve the active preset in a canvas-independent way
+- update or clear `data-dyni-theme`
+- invalidate canvas token caches after preset changes
+
+Canvas may keep an immediate fast-path when a concrete root is already known. That path is lifecycle-correct and may remain. The queued shell-scan path is required so HTML-only and late-mounted roots also converge to the active preset state.
+
+### 5. Native-head hiding policy
+
+Head hiding must be semantic and shell-based.
+
+- registration adds `.dyni-hide-native-head` to the shell class list when requested
+- CSS hides `.widgetHead` through that class
+- HTML widgets must not depend on `[data-dyni]` for native-head suppression
+- `[data-dyni]` may remain only as a temporary migration fallback
+- `.valueData` hiding should be treated as a legacy-compatibility fallback, not as the primary contract for new `ExternalWidget`-based HTML widgets
+
+### 6. NavPage sizing policy
+
+Per-widget shell sizing flows through translated `style` on the AvNav shell.
+
+Allowed shell sizing controls:
+
+- `mode === "horizontal"`
+  - explicit `style.width`
+  - `style.flexGrow = 0`
+  - `style.flexShrink = 0` when deterministic width must also hold in layout-editor mode
+- `mode === "vertical"`
+  - `style.flexGrow`
+  - optional `style.minHeight`
+- `mode === "gps"`
+  - no shell forcing; let host layout and resize behavior work normally
+
+### 7. Base HTML wrapper contract
+
+Every `renderHtml` widget must return a single outer wrapper that fills the shell.
+
+Example shape:
 
 ```html
-<div
-  class="dyni-htmlWidget dyni-activeRoute dyni-state-approach dyni-state-actionable"
-  data-dyni-action-mode="dispatch"
-  data-dyni-mode="vertical"
-  onclick="openActiveRoute"
->
-  <div class="dyni-activeRoute__name">Harbor Run</div>
-  <div class="dyni-activeRoute__metrics">
-    <div class="dyni-activeRoute__tile dyni-activeRoute__tile--remain">...</div>
-    <div class="dyni-activeRoute__tile dyni-activeRoute__tile--eta">...</div>
-    <div class="dyni-activeRoute__tile dyni-activeRoute__tile--next">...</div>
-  </div>
-  <div class="dyni-activeRoute__overlay">NO DATA</div>
+<div class="dyni-htmlWidget" data-dyni-instance="...">
+  ...
 </div>
 ```
 
-Behavior:
-
-- root state classes own semantic state (`approach`, `disconnect`, `actionable`), not layout mode
-- `data-dyni-mode` carries the AvNav panel mode for CSS layout switching
-- tile order remains semantic and stable; CSS rearranges layout, not JS
-- overlay is present only in disconnect mode
-- `passive` and `unsupported` markup reuses the same structure but omits `onclick` and the actionable affordance so the host keeps click ownership
-- `data-dyni-action-mode` is optional but useful for test assertions and capability-specific styling hooks
-
-## Parity Target
-
-### Visual parity
-
-- Preserve the same data hierarchy: route name + `RTE`, `ETA`, conditional `NEXT`.
-- Preserve current mode semantics: tall stacked layout (vertical panel), compact single-row layout (horizontal panels), auto-scaled layout (GpsPage).
-- Keep route-name truncation, approach accent, placeholder semantics, and disconnect overlay.
-- Keep theme and preset behavior aligned with existing CSS token names.
-
-### Feature parity
-
-- On `navpage`, clicking the widget opens the route editor via `this.hostActions.routeEditor.openActiveRoute()`.
-- On `gpspage` (`passive`) and unsupported pages, the widget must not fake a dispatch path.
-- HTML-owned click handling must not reintroduce the `GpsPage` bubbling problem documented in `interactive-widgets.md`.
-
-## Decision Gate Before Widget Migration
-
-- Step 0 must explicitly close the repo-wide contract for future HTML widgets:
-  - when `renderHtml` is allowed
-  - how HTML widgets receive theme/root/native-head behavior
-  - how host-action capability gating is documented
-  - what must be shared vs widget-local
-  - that ThemeResolver owns look tokens while component CSS owns layout/composition
-  - that component CSS is a `renderHtml`-only exception, not a rollback of the canvas-first styling model
-  - how NavPage widget sizing works and what the plugin must provide
-- Step 1 runtime work must explicitly close how HTML widgets get:
-  - root detection (without `canvas.widgetData` dependency)
-  - preset application
-  - native-head hiding
-  - root-level theme token exposure for HTML CSS consumption
-  - correct sizing behavior in all NavPage panel modes
-- Retire hidden canvas-only ratio editables for ActiveRoute when the HTML renderer lands.
-
-## Likely Touch Points
-
-- `runtime/init.js`
-- `runtime/widget-registrar.js`
-- `plugin.css`
-- `config/components.js`
-- `config/clusters/nav.js`
-- `cluster/mappers/NavMapper.js`
-- `cluster/rendering/ClusterRendererRouter.js`
-- `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js` (new)
-- `widgets/text/ActiveRouteTextHtmlWidget/active-route-html.css` (new)
-- `runtime/TemporaryHostActionBridge.js`
-- `documentation/core-principles.md`
-- `documentation/conventions/coding-standards.md`
-- `documentation/conventions/smell-prevention.md`
-- `documentation/avnav-api/plugin-lifecycle.md`
-- `documentation/avnav-api/interactive-widgets.md`
-- `documentation/architecture/component-system.md`
-- `documentation/shared/css-theming.md`
-- `documentation/widgets/active-route.md`
-- `documentation/guides/add-new-text-renderer.md`
-- `documentation/TECH-DEBT.md`
-- `documentation/TABLEOFCONTENTS.md`
-
-## Todo Steps
-
-### Step 0 — Verify the existing foundation is stable
-
-Analyze the commits that laid the `renderHtml` foundation and search for regressions or wrong implementations.
-
-Relevant commits:
-- 43b373bd04480601bbfe3028fa2d2af4346de6fc
-- ce0c7b7d1542661e67986f4c742cc044b9af2120
-- 6c90688c597a9d6dc2f65e37e02bdc582b7537a1
-- f50738a3de5e1bf24fb7466c6c56325973536e33
-- 3ce68adbc9ba715b8234ffb51affc830b0c8df99
-
-Goal: verify that the existing code works as intended for `renderHtml`-based widgets and update subsequent steps to avoid common pitfalls when interacting with AvNav core.
-
-Specific verification areas:
-
-**0a — ExternalWidget rendering path**
-
-Verify that `ExternalWidget.jsx` correctly handles the case where **only** `renderHtml` is provided (no `renderCanvas`). The current code:
-- Creates a `<canvas>` element only when `props.renderCanvas` is truthy (line 71): `{props.renderCanvas ? <canvas className='widgetData' ref={canvasRef}></canvas> : null}`
-- Renders `UserHtml` when `renderHtml` returns a non-null string (line 72)
-- The `useEffect` that calls `renderCanvas` still runs every render cycle even when `renderCanvas` is undefined — verify this causes no side effects
-
-Confirm that the `ClusterRendererRouter` correctly delegates: when the active sub-renderer has only `renderHtml` (no `renderCanvas`), the router must return `undefined` from `renderCanvas` so that `ExternalWidget` does not create a canvas element.
-
-**0b — Widget root marking for HTML-only widgets**
-
-The current `wrapRenderCanvas` in `widget-registrar.js` marks the root element with `[data-dyni]` and applies theme presets. But this only runs inside `wrapRenderCanvas` — it does **not** run for `renderHtml`-only widgets because `wrapWidgetContext` (used for `renderHtml`) does not include root marking.
-
-This means an HTML-only widget will:
-- ✗ Not have `[data-dyni]` on its AvNav widget root
-- ✗ Not get theme presets applied to its container
-- ✗ Not get the native head hidden via `[data-dyni] .widgetHead { display: none !important; }`
-
-Verify this gap and document the fix needed in Step 2.
-
-**0c — Native head hiding**
-
-The current `plugin.css` rule is:
 ```css
-[data-dyni] .widgetHead,
-[data-dyni] .valueData {
-  display: none !important;
-}
-```
-
-This depends on `[data-dyni]` being present on the widget root. As noted in 0b, HTML-only widgets won't have this attribute unless root marking is fixed. Verify:
-- that the `wantsHideNativeHead` flag flows correctly through `ClusterWidget` → `ClusterRendererRouter` → `widget-registrar.js`
-- that the head hiding works for the case where both `renderCanvas` and `renderHtml` are present (current state) but would break for `renderHtml`-only
-
-The correct model is:
-- `[data-dyni]` = "this is the actual plugin-owned DOM root"
-- `.dyni-hide-native-head` = "hide AvNav's native header on that root" (optional additional marker)
-- the runtime applies both markers to the real AvNav root (`.widget` or `.DirectWidget`), not just to the registered className
-- for canvas widgets: discover root from `canvas.closest(".widget, .DirectWidget")`
-- for HTML widgets: discover root from the `.dyni-htmlWidget` wrapper's `closest(".widget, .DirectWidget")`
-
-Updated CSS (target for Step 2):
-```css
-[data-dyni].dyni-hide-native-head .widgetHead,
-[data-dyni].dyni-hide-native-head .valueData {
-  display: none !important;
-}
-```
-
-**0d — NavPage widget sizing for the plugin**
-
-Verify that current canvas-based dyninstruments widgets size correctly on NavPage:
-- In the vertical left panel: canvas fills the flex-allocated space via `[data-dyni] canvas.widgetData { width: 100% !important; height: 100% !important }`
-- In horizontal panels: plugin widgets need an explicit `width` rule — check whether current widgets have one or rely on AvNav defaults
-- Confirm that `props.mode` is accessible inside `renderCanvas` / `renderHtml` and carries the correct value (`"vertical"`, `"horizontal"`, `"gps"`)
-
-Document what sizing rules are missing for the HTML path and must be added in Step 2.
-
-**0e — Event handler wiring via UserHtml**
-
-Verify that `UserHtml.tsx` correctly translates `onclick="handlerName"` attributes in the HTML string to React synthetic events that call `this.eventHandler["handlerName"]`. Specifically:
-- the HTML string contains lowercase `onclick="openActiveRoute"`
-- `UserHtml`'s `transform` function matches `node.attribs[k].match(/^on../)` and looks up `context.eventHandler[evstring]`
-- the handler is called with `ev.stopPropagation()` and `ev.preventDefault()` — confirm this prevents event bubbling to the AvNav `onItemClick` handler on NavPage (which would cause a double-dispatch or navigation to GpsPage)
-
-**0f — ThemeResolver access without canvas**
-
-The current `ThemeResolver.resolve(canvas)` takes a canvas element and reads computed styles from the canvas ancestor chain. For HTML-only widgets, there is no canvas. Verify:
-- whether `ThemeResolver` can accept a non-canvas element (e.g., the HTML wrapper element)
-- if not, what adapter is needed in the `initFunction` or `renderHtml` path to provide tokens
-- whether tokens can alternatively be exposed as CSS custom properties on the root element (avoiding the need for JS token resolution in the HTML renderer)
-
-Exit criteria for Step 0:
-- Each verification area (0a–0f) is documented with pass/fail and any fixes needed
-- Subsequent steps are updated to account for discovered issues
-- No code changes — this step is analysis only
-
-### Step 1 — Establish `renderHtml` concepts, rules, and documentation boundary
-
-Goal: make the HTML-widget contract explicit before any runtime or renderer migration starts.
-
-Main changes:
-
-- update repo-level rules so future sessions do not treat `renderHtml` as an ad hoc exception:
-  - `documentation/core-principles.md`
-  - `documentation/conventions/coding-standards.md`
-  - `documentation/conventions/smell-prevention.md`
-- document the new active-widget architecture:
-  - `renderHtml` is for active widgets only
-  - string-mode HTML + `this.eventHandler` is the default path
-  - store-driven strings must be escaped before interpolation
-  - host actions must be capability-gated and marked with `dyni-workaround(avnav-plugin-actions)` where applicable
-  - HTML widgets still need a documented root/theme/head-hiding contract
-  - `ThemeResolver` owns all look-related tokens and defaults
-  - widget-specific CSS is a narrow `renderHtml`-only exception and owns layout/composition only
-  - `plugin.css` vs widget-specific CSS ownership must be explicit
-  - passive widgets rely on host click semantics; only `dispatch` widgets attach root handlers
-- document the NavPage widget sizing contract:
-  - `props.mode` is the primary layout signal
-  - horizontal panels require explicit width from the plugin
-  - vertical panels require HTML content to fill flex-allocated space
-  - the HTML wrapper element sizing contract
-  - what `resizeElementFont` does and does not do per mode
-- add or update discoverable authoring docs:
-  - `documentation/avnav-api/plugin-lifecycle.md`
-  - `documentation/avnav-api/interactive-widgets.md`
-  - `documentation/architecture/component-system.md`
-  - `documentation/shared/css-theming.md`
-  - `documentation/guides/add-new-text-renderer.md` or a dedicated `add-new-html-widget.md`
-  - `documentation/TABLEOFCONTENTS.md`
-- define the enforcement plan for future follow-up:
-  - if new `check-patterns` rules are added in the same session, wire them here
-  - if enforcement is deferred, record the backlog explicitly in `documentation/TECH-DEBT.md`
-
-Exit criteria:
-
-- future `renderHtml` sessions have a written architectural contract before copying the ActiveRoute pilot
-- NavPage sizing constraints are documented so renderers don't have to rediscover them
-- rule/enforcement gaps are explicit instead of being left implicit in one widget implementation
-
-### Step 2 — Formalize HTML-widget runtime foundation
-
-Goal: make `renderHtml` widgets first-class in runtime and docs before touching ActiveRoute markup.
-
-Main changes:
-
-**2a — Canvas-independent root discovery and marking**
-
-- update `listPluginContainers` in `runtime/init.js` to also discover HTML-only widget roots:
-  - currently queries `canvas.widgetData` elements and walks up to `.widget, .DirectWidget`
-  - must additionally query `[data-dyni-render="html"]` or `.dyni-htmlWidget` elements
-  - or: switch to querying `[data-dyni]` directly if root marking happens before discovery
-- update `wrapRenderCanvas` / `wrapWidgetContext` in `runtime/widget-registrar.js`:
-  - `renderHtml` wrapper must also mark the AvNav root with `[data-dyni]` and apply theme presets
-  - the HTML wrapper element is not available at render time (it's a string); root marking must happen via `initFunction` or a post-render hook
-  - alternative: root marking via `renderCanvas` when both render methods are present (current canvas+HTML hybrid), and a new `initFunction`-based path for HTML-only
-
-**2b — Theme token exposure via CSS custom properties**
-
-- expose ThemeResolver-owned visual tokens as CSS custom properties on the widget root element:
-  ```css
-  [data-dyni] {
-    --dyni-fg-color: <resolved text color>;
-    --dyni-warning-color: <resolved warning/accent>;
-    --dyni-font-weight: <resolved primary weight>;
-    --dyni-label-weight: <resolved label weight>;
-  }
-  ```
-- these must be set from JS (via the ThemeResolver resolution) onto the actual DOM element
-- component CSS consumes these variables; it never defines fallback token defaults
-- this replaces the need for `ThemeResolver.resolve(canvas)` inside HTML renderers
-
-**2c — Native head hiding for HTML-only widgets**
-
-- ensure `[data-dyni]` is present on the AvNav root for HTML-only widgets
-- update `plugin.css` to use the compound selector model:
-  ```css
-  [data-dyni].dyni-hide-native-head .widgetHead,
-  [data-dyni].dyni-hide-native-head .valueData {
-    display: none !important;
-  }
-  ```
-- the runtime must add `.dyni-hide-native-head` when `wantsHideNativeHead` is true
-
-**2d — NavPage panel sizing foundation in plugin.css**
-
-Add base sizing rules for plugin widgets on NavPage:
-
-```css
-/* Horizontal panel width default for plugin widgets */
-.widgetContainer.horizontal .widget.dyniplugin {
-  width: 7em;  /* match AvNav .smallWidget default; override per-widget in component CSS if needed */
-}
-
-/* HTML widget wrapper must fill available flex space */
 .dyni-htmlWidget {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
+  min-width: 0;
   min-height: 0;
   overflow: hidden;
   box-sizing: border-box;
 }
 ```
 
-These rules go in `plugin.css` because they are plugin-wide concerns, not widget-specific layout.
+### 8. HTML root-locator and layout-mode policy
 
-**2e — Tests**
+`props.mode` is only the shell-context signal:
 
-- add failing tests first for HTML-only root discovery, preset application, and head hiding
-- add tests for the sizing rules: verify that `.dyni-htmlWidget` in a flex container fills available space
-- verify that `props.mode` is correctly passed through the render chain
+- `horizontal` = top/bottom NavPage shell context
+- `vertical` = left NavPage shell context
+- `gps` = dashboard shell context
 
-Exit criteria:
+It is **not** sufficient for ActiveRoute sub-layout selection.
 
-- an HTML-only widget can be discovered, themed, and styled without a backing canvas
-- the widget sizes correctly in all NavPage panel modes (vertical, horizontal) and on GpsPage
-- runtime behavior matches the Step 0/1 contract
+ActiveRoute currently chooses `flat`, `normal`, and `high` from the actual rendered aspect ratio through `TextLayoutEngine.computeModeLayout(W, H, ...)`.
 
-### Step 3 — Extract shared HTML/view-model primitives
+The current string-mode `renderHtml` API has no direct DOM ref.
 
-Goal: move ActiveRoute-specific semantics out of the current canvas renderer so the HTML migration is mostly a presenter swap.
+Required HTML rule:
 
-Main changes:
+- the HTML renderer must measure actual DOM size
+- layout kind must be derived from measured `W/H`, not just from `props.mode`
+- the renderer must update layout state whenever shell size changes
+- the renderer must also recompute layout when semantic inputs change at constant size, including at minimum:
+  - route name text
+  - `disconnect`
+  - `isApproaching`
+  - metric captions/units/values
+  - ratio-threshold parameters
 
-- extract ActiveRoute parsing, formatter selection, placeholder handling, and action-capability resolution into a renderer-local helper/view-model first; promote to shared only if later widgets actually reuse the same contract
-- add a shared HTML escaping utility for string renderers:
-  ```js
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
+Required implementation shape:
+
+- allocate a stable per-instance ID on widget context
+- stamp that ID into the single HTML root, for example `data-dyni-instance="..."`
+- after mount, resolve the root element by that selector
+- attach `ResizeObserver` to that root
+- compute:
+  - actual `W`
+  - actual `H`
+  - layout kind from `TextLayoutEngine.computeModeLayout`
+  - fitted text and pixel geometry from the shared ActiveRoute helpers
+- write the resolved layout into attributes/classes and CSS vars, for example:
+  - `data-dyni-layout="flat|normal|high"`
+  - `data-dyni-approach="true|false"`
+  - `data-dyni-disconnect="true|false"`
+  - pixel CSS custom properties in `px`
+- rerun the same computation from normal widget update/render paths when relevant semantic data changes even if `ResizeObserver` does not fire
+- disconnect observers deterministically in `finalizeFunction`
+
+### 9. ActiveRoute HTML visual-fidelity contract
+
+The HTML ActiveRoute renderer must reproduce the current canvas semantics, not just its high-level structure.
+
+The contract has four layers:
+
+1. semantic data contract
+2. geometric layout contract
+3. typography and fitting contract
+4. overlay/state contract
+
+#### 9.1 Canonical layout constants from `ActiveRouteLayout`
+
+These values are canonical and must stay shared between canvas and HTML:
+
+- `PAD_X_RATIO = 0.04`
+- `INNER_Y_RATIO = 0.035`
+- `GAP_RATIO = 0.04`
+- `NAME_PAD_X_RATIO = 0.025`
+- `METRIC_TILE_PAD_RATIO = 0.04`
+- `METRIC_TILE_CAPTION_RATIO = 0.34`
+- `NAME_PANEL_RATIO_FLAT = 0.38`
+- `NAME_BAND_RATIO_HIGH = 0.22`
+- `NAME_BAND_RATIO_NORMAL = 0.34`
+- `NORMAL_APPROACH_TOP_RATIO = 0.52`
+- flat/high/normal name min/max clamp ratios exactly as defined in `ActiveRouteLayout.js`
+
+These values are part of the renderer contract.
+
+#### 9.2 Responsive scaling and pixel rounding contract
+
+The current canvas renderer does not use pure percentages. It computes responsive insets and applies `Math.floor` at multiple steps.
+
+Required rule:
+
+- JS computes final pixel layout values from measured DOM size using the shared layout helpers
+- JS writes final values as CSS custom properties in `px`
+- CSS consumes those pixel variables
+
+This avoids subpixel drift and preserves parity with canvas rounding behavior.
+
+#### 9.3 Exact outer templates by resolved layout kind
+
+**Flat**
+
+- name panel on the left
+- metrics area on the right
+- metrics columns:
+  - non-approach: `remain | eta`
+  - approach: `remain | eta | next`
+
+**High**
+
+- name band on top
+- metrics stack below
+- metrics rows:
+  - non-approach: `remain / eta`
+  - approach: `remain / eta / next`
+
+**Normal, non-approach**
+
+- name band on top
+- metrics row below
+- metrics columns: `remain | eta`
+
+**Normal, approach**
+
+- name band on top
+- nested metrics block below:
+  - top block = `remain | eta`
+  - bottom block = `next`
+  - top height share uses the existing `0.52` ratio after gap handling
+
+#### 9.4 Route name rendering contract
+
+Canvas behavior today:
+
+- route name is a single line
+- no wrapping
+- text is font-fitted to available width/height
+- overflow is handled by trimming characters until the measured text fits
+- canvas does **not** append ellipsis
+
+Required HTML behavior:
+
+- keep route name single-line
+- do not introduce ellipsis unless canvas changes too
+- preserve current semantics as closely as possible
+
+Mode-specific constants:
+
+- `flat` and `high`: use `labelWeight`
+- `normal`: use `valueWeight`
+- alpha:
+  - `flat` / `high`: `0.78`
+  - `normal`: `0.92`
+- max font-size ceiling by mode:
+  - `flat`: `0.46 * nameRect.h`
+  - `high`: `0.54 * nameRect.h`
+  - `normal`: `0.66 * nameRect.h`
+
+#### 9.5 Metric tile contract
+
+Each metric tile keeps this structure:
+
+- caption
+- value
+- unit
+
+Canvas behavior today:
+
+- caption height comes from `computeIntrinsicTileSpacing(...)`
+- value and unit line uses shared fitting logic
+- secondary caption/unit scale is `0.72`
+
+Required HTML behavior:
+
+- metric tiles receive pixel-level spacing values from the shared layout/model layer
+- do not approximate tile spacing with CSS-only percentages
+- value and unit remain on one line
+- caption remains a distinct upper region
+
+#### 9.6 Overlay and state contract
+
+Canvas behavior today:
+
+- approach accent is a translucent overlay over the **content rect**, not the entire widget
+- approach overlay alpha is `0.14`
+- disconnect is a full-widget overlay
+- disconnect overlay keeps current canvas semantics from `TextLayoutEngine.drawDisconnectOverlay(...)`
+- disconnect state does not change structural layout selection
+
+Required HTML behavior:
+
+- preserve the same overlay scopes
+- preserve the same layout selection under disconnect
+
+#### 9.7 Theme/token contract for HTML ActiveRoute
+
+At minimum the HTML path must receive shell-level public tokens for:
+
+- foreground/text color
+- warning color
+- font weight
+- label weight
+- font family
+
+These must be defined on the shell CSS layer that HTML consumes directly.
+
+#### 9.8 Event behavior contract
+
+For the pilot widget:
+
+- string-mode `renderHtml` remains the default path
+- root click is installed only when the action mode is `dispatch`
+- `dispatch` must call:
+  - `this.hostActions.routeEditor.openActiveRoute()`
+- `passive` and `unsupported` install no root click handler
+- event handling must remain compatible with AvNav `UserHtml` propagation suppression
+
+#### 9.9 Acceptance matrix for visual parity
+
+Parity must be verified for all combinations below:
+
+- `flat`, `high`, `normal`
+- approach `true` / `false`
+- disconnect `true` / `false`
+- long route names requiring trimming
+- preset variants `default`, `slim`, `bold`, `night`, `highcontrast`
+- shell contexts `vertical`, `horizontal`, `gps`
+
+---
+
+## Implementation Phases
+
+## Phase 1 — Runtime and shell hardening
+
+Goal: make HTML-only widgets first-class before introducing any real HTML widget.
+
+### 1.1 Root discovery
+
+Change runtime discovery to scan plugin shells directly:
+
+- `.widget.dyniplugin`
+
+Do not use `canvas.widgetData` as the primary discovery mechanism anymore.
+
+### 1.2 Registration-time shell identity
+
+Move shell identity to registration, not to canvas render side effects.
+
+Responsibilities:
+
+- always register widgets with `dyniplugin`
+- append `.dyni-hide-native-head` at registration time when `wantsHideNativeHead === true`
+- preserve any existing widget-specific classes
+- allow translated classes to add non-semantic shell classes only
+
+**Exit condition:** ActiveRoute disconnect state cannot reveal native `WidgetHead` on HTML-only widgets.
+
+### 1.3 Preset application for HTML and canvas widgets
+
+Add a throttled helper such as:
+
+```js
+runtime.queueApplyThemePresetToRegisteredWidgets()
+```
+
+Important requirement:
+
+- this helper must schedule **post-commit** work for HTML-only widgets and late-mounted roots
+- a direct synchronous call from the wrapped `renderHtml` path is not sufficient because `renderHtml` runs before mount
+- this helper is not justified by `renderCanvas`; the AvNav `ExternalWidget` canvas path already runs after mount
+
+Use the helper from wrapped `renderHtml`, from any lifecycle entry that may create or reveal HTML-only roots, and from preset-switch paths that need a shell scan.
+
+Runtime requirements:
+
+- resolve the active preset in a canvas-independent way
+- keep `data-dyni-theme` in sync with the active preset name
+- remove the attribute entirely for `default`
+- invalidate canvas theme caches after preset changes
+- keep the existing canvas `ThemeResolver` precedence intact
+
+Canvas may keep its immediate per-root apply fast-path when a concrete shell is already known. That fast-path is valid, but it must no longer be the only mechanism.
+
+### 1.4 Shell CSS hardening in `plugin.css`
+
+Update plugin-wide shell CSS to cover:
+
+- shell selectors based on `.widget.dyniplugin`
+- head-hiding semantics through `.dyni-hide-native-head`
+- canvas fill rules based on the shell contract
+- base HTML wrapper fill rules
+- base font-family inheritance on dyni roots
+- default public tokens for HTML widgets
+- preset-specific public token overrides for HTML widgets
+
+Migration note:
+
+- `[data-dyni]` selectors may remain temporarily while the old head-hide/canvas-fill path is being retired
+- do not remove the legacy selectors until the replacement shell selectors are live and tested
+
+### 1.5 Shell sizing helper
+
+Add a shared helper owned by translation logic, for example:
+
+```js
+function resolveWidgetShellStyle(opts) {
+  const mode = opts.mode;
+  if (mode === "horizontal") {
+    if (!opts.horizontalWidth) return undefined;
+    return {
+      width: opts.horizontalWidth,
+      flexGrow: 0,
+      flexShrink: opts.lockWidthInEditor ? 0 : undefined
+    };
   }
-  ```
-- keep `plugin.css` limited to shared shell behavior and add renderHtml-only component CSS for ActiveRouteTextHtmlWidget through `config/components.js`
-- remove renderer-owned layout-mode decisions from the ActiveRoute view model
-- add `mode` from `props.mode` to the view model so it can be set as `data-dyni-mode` on the wrapper
-- keep mapper output stable unless Step 1 already removed obsolete hidden ratio editables
-
-Exit criteria:
-
-- ActiveRoute semantic output is testable without canvas drawing
-- HTML string rendering has a safe shared escape boundary
-- the view model includes `mode` for CSS-based layout switching
-
-### Step 4 — Build `activeRouteInteractive` as parallel HTML renderer
-
-Goal: build the new HTML-based ActiveRoute as a parallel kind alongside the existing canvas widget, without replacing it.
-
-Main changes:
-
-- create `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js`:
-  - implements `renderHtml(props)` returning an escaped HTML string
-  - builds the semantic view model from Step 3
-  - sets `data-dyni-mode` from `props.mode`
-  - registers `this.eventHandler["openActiveRoute"]` when `actionMode === "dispatch"`
-  - does **not** implement `renderCanvas`
-- create `widgets/text/ActiveRouteTextHtmlWidget/active-route-html.css`:
-  - owns layout/composition for the three mode targets:
-    - `[data-dyni-mode="horizontal"]` → compact single-row (fits 4em height)
-    - `[data-dyni-mode="vertical"]` → stacked multi-row (fills flex-allocated height in 8.8em wide container)
-    - `[data-dyni-mode="gps"]` → full expanded layout
-  - uses CSS custom properties from ThemeResolver for colors, fonts, weights
-  - handles route-name truncation via `overflow: hidden; text-overflow: ellipsis; white-space: nowrap`
-  - handles approach accent via `background-color` with alpha on `.dyni-state-approach`
-  - handles disconnect overlay positioning
-- register in `config/components.js` with CSS dependency:
-  ```js
-  ActiveRouteTextHtmlWidget: {
-    js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
-    css: BASE + "widgets/text/ActiveRouteTextHtmlWidget/active-route-html.css",
-    globalKey: "DyniActiveRouteTextHtmlWidget",
-    deps: ["ThemeResolver", "TextTileLayout"]
+  if (mode === "vertical") {
+    const out = {};
+    if (opts.verticalFlexGrow != null) out.flexGrow = opts.verticalFlexGrow;
+    if (opts.verticalMinHeight) out.minHeight = opts.verticalMinHeight;
+    return Object.keys(out).length ? out : undefined;
   }
-  ```
-- register `activeRouteInteractive` kind in `config/clusters/nav.js`:
-  ```js
-  opt("Active route (interactive)", "activeRouteInteractive"),
-  ```
-- add routing in `ClusterRendererRouter` and `NavMapper` to direct `activeRouteInteractive` to the new HTML renderer
-- **do not touch** the existing `activeRoute` kind or `ActiveRouteTextWidget` canvas renderer
+  return undefined;
+}
+```
 
-Exit criteria:
+Do not describe width-only sizing as deterministic for horizontal widgets unless the editor-mode shrink behavior is explicitly handled or explicitly declared out of scope.
 
-- `activeRouteInteractive` is selectable in the AvNav layout editor as a separate instrument kind
-- the HTML widget renders correctly in all NavPage panels (vertical left, horizontal top/bottom)
-- the HTML widget renders correctly on GpsPage
-- visual output matches the existing canvas widget's structure and visible states
-- the existing `activeRoute` canvas widget is unchanged and still works
+### 1.6 Tests
 
-### Step 5 — Add route-editor feature parity and close the pilot
+Required tests:
 
-Goal: make the HTML widget behave like core ActiveRoute where the bridge supports it, then lock the pattern for later interactive widgets.
+- HTML-only roots are discovered without canvases
+- late-mounted HTML-only roots receive preset state through the queued helper
+- default preset clears `data-dyni-theme`
+- preset switching invalidates canvas caches deterministically
+- head hiding works through `.dyni-hide-native-head`
+- ActiveRoute disconnect state does not reveal native AvNav header UI
+- canvas widgets still keep correct preset behavior
+- translated `style.width`, `style.flexGrow`, and where required `style.flexShrink` reach `WidgetFrame`
+- translated class output can add classes without breaking the registered shell class stack
 
-Main changes:
+**Exit gate:** no real HTML widget work starts until Phase 1 is green.
 
-- register a root click handler through `this.eventHandler` only when `actionMode === "dispatch"`
-- on `dispatch`, call `this.hostActions.routeEditor.openActiveRoute()`
-- on `passive`, do not register a handler, do not install `catchAll`, and rely on host/page click behavior
-- on `unsupported`, render passive non-clickable markup
-- verify that `UserHtml`'s event handling correctly stops propagation to prevent the NavPage `widgetClick` handler from also firing (which would try to match `item.name === "ActiveRoute"` and fail, then navigate to GpsPage)
-- add tests for handler registration, capability gating, and host-action calls
-- manually verify `navpage` click behavior in AvNav:
-  - clicking `activeRouteInteractive` widget opens route editor
-  - clicking the widget on `gpspage` does NOT trigger any action
-  - clicking the widget on other pages does nothing
-- run the full gate: `npm run check:all`
+## Phase 2 — Shared ActiveRoute semantic and layout extraction
 
-Exit criteria:
+Goal: isolate the ActiveRoute view model and exact layout contract from renderer technology.
 
-- the interactive HTML widget has full route-editor parity on NavPage
-- event bubbling does not cause unintended navigation
-- `npm run check:all` passes
+Main work:
 
-### Step 6 — Replace canvas `activeRoute` and clean up
+- extract shared ActiveRoute semantic helpers from the current canvas widget
+- keep `ActiveRouteLayout` as the canonical geometry source
+- extract visual constants from the canvas widget into shared constants:
+  - approach alpha
+  - route-name alpha by mode
+  - metric secondary scale
+  - route-name font-size ceilings by mode
+- add a shared HTML escaping helper before any store-driven string is interpolated into `renderHtml`
+- define pilot view-model fields such as:
+  - route name text
+  - metrics
+  - approach state
+  - disconnect state
+  - action mode
+  - shell mode
+  - measured width/height
+  - resolved layout kind (`flat`, `high`, `normal`)
+  - resolved pixel geometry for name and metric tiles
+  - resolved fitted typography values needed by the HTML renderer
 
-Goal: promote the HTML renderer to be the default `activeRoute` and remove the parallel path.
+Rule:
 
-Main changes:
+- JS owns semantic state, measured geometry, and fitted typography
+- CSS owns final DOM composition and paint semantics
 
-- update `config/clusters/nav.js`: change `activeRoute` kind to route to `ActiveRouteTextHtmlWidget` instead of `ActiveRouteTextWidget`
-- remove the `activeRouteInteractive` kind option (it becomes the new `activeRoute`)
-- remove or deprecate `ActiveRouteTextWidget` canvas renderer and `ActiveRouteLayout` canvas layout module (if no longer used by other widgets)
-- retire `activeRouteRatioThresholdNormal` / `activeRouteRatioThresholdFlat` editable parameters from the `activeRoute` kind
-- remove dead canvas code and unused dependencies
-- refresh roadmap/docs so HTML active widgets are a documented extension path
-- add or update a dedicated HTML-widget authoring guide and link it from `TABLEOFCONTENTS.md`
-- run the full gate: `npm run check:all`
+## Phase 3 — Parallel HTML ActiveRoute pilot
 
-Exit criteria:
+Goal: build a real HTML widget without replacing the existing canvas ActiveRoute path yet.
 
-- repo docs contain a stable HTML-widget pattern
-- ActiveRoute is the reference implementation for future interactive parity widgets
-- `npm run check:all` passes
-- no orphaned canvas-only code remains for ActiveRoute
+Main work:
 
-## Related
+- add `ActiveRouteTextHtmlWidget`
+- add dedicated component CSS
+- register the new component in `config/components.js`
+- add `ActiveRouteTextHtmlWidget` as a dependency wherever `ClusterRendererRouter` must resolve it
+- introduce a parallel kind such as `activeRouteInteractive`
+- route only that new kind to the HTML renderer
+- keep current `activeRoute` canvas rendering unchanged
 
-- `ROADMAP.md`
-- `documentation/avnav-api/plugin-lifecycle.md`
-- `documentation/avnav-api/interactive-widgets.md`
-- `documentation/widgets/active-route.md`
-- `runtime/TemporaryHostActionBridge.js`
+Renderer rules:
+
+- string-mode `renderHtml`
+- single outer `.dyni-htmlWidget` wrapper
+- stable per-instance root attribute for DOM lookup
+- semantic state classes and `data-dyni-*` attributes for layout and state
+- post-mount DOM resolution plus `ResizeObserver`
+- JS-computed pixel variables for layout rectangles and spacing
+- deterministic observer cleanup
+- no `renderCanvas`
+
+Cluster/config rules:
+
+- `NavMapper.js` must emit the new renderer id for the new kind
+- `ClusterRendererRouter.js` must resolve and delegate to the new HTML widget
+- `config/clusters/nav.js` must add the new kind and duplicate ActiveRoute-specific editables/conditions where required
+- `config/shared/kind-defaults.js` must cover the new kind for captions/units if the HTML pilot uses the same semantic fields
+
+## Phase 4 — Visual parity and route-editor behavior
+
+Goal: make the pilot visually and behaviorally equivalent where host capabilities allow it.
+
+Main work:
+
+- implement route-name fit/trimming behavior without introducing ellipsis
+- implement metric tile spacing and caption/value/unit hierarchy from shared fitted values
+- implement approach overlay with the existing content-rect semantics
+- implement disconnect overlay with the existing full-widget semantics
+- install a recompute path that runs on:
+  - real DOM resize
+  - route-name changes
+  - approach-state changes
+  - disconnect changes
+  - metric/caption/unit changes
+  - ratio-threshold changes
+- `dispatch` mode installs the root click handler
+- `passive` mode installs no root click handler
+- `unsupported` mode installs no root click handler
+- `dispatch` calls `this.hostActions.routeEditor.openActiveRoute()`
+- validate that HTML click handling does not bubble into host click behavior
+
+## Phase 5 — Promote and clean up
+
+Goal: replace the canvas ActiveRoute widget only after the HTML pilot has parity.
+
+Main work:
+
+- point `activeRoute` to the HTML renderer
+- remove the parallel pilot kind
+- retire obsolete canvas-only ActiveRoute code only after parity is verified
+- remove legacy `[data-dyni]` selectors only after the new shell contract is proven green
+
+---
+
+## Files to Touch
+
+### dyninstruments
+
+- `runtime/init.js`
+- `runtime/widget-registrar.js`
+- `runtime/helpers.js` if shared HTML token helpers are added there
+- `plugin.css`
+- `shared/theme/ThemePresets.js` only if preset-to-public-token export/helpers are introduced
+- `shared/widget-kits/nav/ActiveRouteLayout.js`
+- `widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js`
+- `cluster/mappers/NavMapper.js`
+- `cluster/rendering/ClusterRendererRouter.js`
+- `config/clusters/nav.js`
+- `config/shared/kind-defaults.js`
+- `config/components.js`
+- `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js` (new)
+- `widgets/text/ActiveRouteTextHtmlWidget/active-route-html.css` (new)
+- runtime and widget tests covering root discovery, preset application, shell sizing, semantic re-layout, visual parity, and event behavior
+
+### AvNav reference points this plan depends on
+
+No AvNav changes are required for the pilot, but these host files define the constraints the plugin must obey:
+
+- `viewer/components/ExternalWidget.jsx`
+- `viewer/components/UserHtml.tsx`
+- `viewer/components/WidgetBase.jsx`
+- `viewer/components/MapPage.jsx`
+- `viewer/style/widgets.less`
