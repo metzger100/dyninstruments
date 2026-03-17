@@ -301,23 +301,27 @@ No generic global observer system. Local mechanism per instance.
 
 ## Theme and Root Model
 
-### 1. Root Classes
+### 1. Static Root Contract
 
-Target state: `.widget.dyniplugin` plus **static** host classes such as `dyni-host-html`, optionally `dyni-hide-native-head`. The first plugin-owned HTML wrapper remains `.widgetData.dyni-shell`. Renderer and `kind` states only on that shell or below it. These classes are provided through the registered widget definition or `WidgetFrame`, not rewritten dynamically during commit.
+The widget root is always `.widget.dyniplugin`. Host-related classes such as `dyni-host-html` and, if enabled, `dyni-hide-native-head` are established statically through the registered widget definition or `WidgetFrame` classes. The first plugin-owned node returned by `renderHtml` remains `.widgetData.dyni-shell` and carries only instance-, surface-, and kind-local state such as `data-dyni-instance`, `data-dyni-surface`, and `dyni-kind-*`.
 
-### 2. ThemeResolver Becomes Root-First
+Root identity is therefore a registration concern, not a renderer concern and not a commit-time mutation concern. Renderers do not write host markers onto the root. The local commit step only resolves `rootEl` and `shellEl`, verifies the static host contract, and binds the active surface session to that root/shell pair.
 
-Target API: `resolveForRoot(rootEl)`, with `resolveForCanvas(canvas)` only as an adapter path. Final tokens as CSS custom properties on root/shell. HTML and canvas consume the same token reality.
+### 2. Theme Is Root-First
 
-This also includes the helper layer: `runtime/helpers.js` (`resolveTextColor`, `resolveFontFamily`) must not remain separately canvas-first, but must be switched to the same root/token contract or cleanly adapted to it.
+Theme resolution, preset application, and token materialization are anchored at the widget root. `ThemeResolver` therefore exposes a root-first path (`resolveForRoot(rootEl)`) as the primary API. Any canvas-based entry point remains only an adapter path that resolves its owning root and then uses the same token contract.
 
-### 3. Theme Preset Application and Root Discovery
+This rule applies to the entire style system, not only to high-level theme selection. `runtime/helpers.js`, including typography and color helpers such as `resolveTextColor` and `resolveFontFamily`, must participate in the same shared root/token contract. HTML and `canvas-dom` surfaces must consume one style reality, not separate HTML and canvas style paths.
 
-`runtime/init.js` discovers plugin roots through `.widget.dyniplugin`, no longer through `canvas.widgetData`. Theme presets also work for HTML-only widgets.
+### 3. Root Discovery and Preset Application
 
-### 4. Head Hiding Remains Global
+`runtime/init.js` discovers plugin instances through `.widget.dyniplugin`, not through `canvas.widgetData`. Theme preset lookup, invalidation, and application also begin at the root, so HTML-only widgets participate in the same preset flow as canvas-backed surfaces.
 
-Head hiding via a global root class. Theme via root tokens. No mixing.
+Any remaining runtime path that still starts from `canvas.widgetData`, `[data-dyni]`, or another legacy canvas-origin marker is replaced by root-first or shell-first discovery. `[data-dyni]` may remain temporarily as a compatibility trace, but no runtime-critical behavior depends on it.
+
+### 4. Global Head-Hiding Policy
+
+Head hiding remains a global host-level policy and is expressed through a static root class such as `dyni-hide-native-head`. It is not mixed into renderer state, shell state, or theme logic. Theme is carried by root tokens; head hiding is carried by a root class. These concerns stay separate.
 
 ---
 
