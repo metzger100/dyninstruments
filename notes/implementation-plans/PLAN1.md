@@ -86,7 +86,7 @@ Consequence:
 
 - AvNav's `ResizeFrame` also affects the plugin’s HTML shell — through cascading font-size scaling. The `canvas-dom` adapter and its shell containers must isolate themselves from this: the canvas surface wrapper must set `font-size: initial` so that the percentage scaling from `ResizeFrame` does not affect canvas sizing or layout calculations.
 
-- The `canvas-dom` adapter must still implement its own sizing logic (`ResizeObserver`), because `ResizeFrame` only performs font scaling, not canvas buffer sizing.
+- The `canvas-dom` adapter must still implement its own sizing logic (`ResizeObserver` or size signature check), because `ResizeFrame` only performs font scaling, not canvas buffer sizing.
 
 ### Current Dyni Plugin
 
