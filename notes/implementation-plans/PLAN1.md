@@ -369,37 +369,603 @@ Remains a temporary facade. Capabilities as dispatch information, not as bubble 
 
 ---
 
-## Rollout Order
+## ## Implementation Phases
 
-### Phase 1 — Runtime Foundation for HTML Host
+### Overview
 
-Goal: decouple root discovery, theme presets, registrar, and CSS/root markers from canvas. Introduce local root commit per instance (`requestAnimationFrame`-based with `MutationObserver` fallback), without dynamically rewriting root classes. Replace every runtime-critical dependency on `canvas.widgetData` discovery and `[data-dyni]`-based behavior with root-first or shell-first paths in the same phase.
+Phases 1–4 form the runtime foundation. Phases 5–9 are the atomic cluster conversion
+(all must land together for deployment, but are implemented and tested individually).
+Phases 10–12 deliver the first native HTML kind.
 
-Result: HTML-only widgets work cleanly at the infrastructure level, including theme/preset application, head-hiding markers, and CSS/root discovery without any residual dependency on host canvas markers.
+Each phase lists:
 
-### Phase 2+3 — Convert Cluster to HTML Host + Canvas DOM Adapter (ATOMIC)
+- **Goal** — what this phase achieves in isolation.
+- **Input files** — load these into context (plan + these files).
+- **Touch / Create** — files to edit or create.
+- **Test exit** — how to verify before moving on.
+- **Scope boundary** — what NOT to change yet.
 
-**Phase 2 and Phase 3 are implemented as one atomic delivery unit.** Reason: between removing `renderCanvas` (Phase 2) and providing the canvas DOM adapter (Phase 3), all existing canvas widgets would fail. For a live navigation plugin, that is not acceptable.
+Always load PLAN1.md (architecture sections, principles, constraints) as context
+alongside the input files.
 
-Goal of Phase 2: `dyni_Nav_Instruments` becomes `renderHtml`-only on the host side. Internal surface router and `SurfaceSessionController` are introduced.
+---
 
-Goal of Phase 3: continue running existing canvas kinds inside the HTML host. Minimal bind / draw / cleanup lifecycle for internal canvas: prop comparison in `renderHtml` as redraw trigger, own `ResizeObserver` for buffer sizing, `font-size: initial` for isolation from `ResizeFrame`, clear fill contract of the canvas surface wrapper, explicit theme invalidation for repaint.
+### Phase 1 — ThemeResolver: Root-First API
 
-Result: the visible cluster remains unchanged. Host canvas disappears completely. The canvas DOM adapter locally replaces the missing host canvas lifecycle. Surface switches inside the same instance are lifecycle-safe.
+**Goal:** `ThemeResolver` gains a `resolveForRoot(rootEl)` entry point that resolves
+tokens from a widget root element instead of requiring a canvas. The existing
+`resolve(canvas)` path becomes a thin adapter that finds its owning root and
+delegates to `resolveForRoot`. Cache is keyed by root element, not by canvas.
 
-### Phase 4 — `activeRouteInteractive` as the First Native HTML Kind
+**Input files:** `shared/theme/ThemeResolver.js`, `tests/shared/theme/ThemeResolver.test.js`
 
-New independent `kind`, shared `ActiveRouteViewModel`, own HTML renderer. AvNav-compliant interaction contract through string-based `renderHtml`, registered `catchAll` `eventHandler`, and named control handlers. For layout-relevant content changes, the HTML path uses `resizeSignature(props)` and `triggerResize()`. Optional host actions through runtime facade.
+**Touch:** `shared/theme/ThemeResolver.js`
+**Test exit:** All existing `ThemeResolver` tests pass. New tests verify that
+`resolveForRoot(rootEl)` returns correct tokens when CSS custom properties are set
+on the root, and that `resolve(canvas)` still works as before by delegating through
+the root path.
 
-Result: first real HTML path in the Nav cluster. Interactive area works on `GpsPage` without triggering the host click path.
+**Scope boundary:** Do not change `helpers.js`, `init.js`, `widget-registrar.js`,
+or `plugin.css`.
 
-### Phase 5 — Gradually Migrate Additional Kinds
+---
 
-As needed, migrate further `canvas-dom` kinds to native HTML renderers.
+### Phase 2 — Canvas Typography Helpers: Shared Root/Token Contract
 
-### Phase 6 — Refactor `activeRouteInteractive` → `activeRoute`
+**Goal:** `resolveTextColor`, `resolveFontFamily`, and `resolveTypography` in
+`helpers.js` switch to the same root-first token contract introduced in Phase 1.
+They accept either a canvas or a root element. When given a canvas, they resolve
+the owning root and use the shared path. No parallel second style resolution path
+for canvas only.
 
-Once the HTML path is stable, `activeRoute` is converted to HTML and `activeRouteInteractive` is refactored into `activeRoute`.
+**Input files:** `runtime/helpers.js`, `tests/runtime/helpers.test.js`,
+`shared/theme/ThemeResolver.js` (as reference for the new API)
+
+**Touch:** `runtime/helpers.js`
+**Test exit:** All existing `helpers` tests pass. New tests verify that
+`resolveTextColor` and `resolveFontFamily` return correct values when called with
+a root element (no canvas), and still work when called with a canvas.
+
+**Scope boundary:** Do not change `init.js`, `widget-registrar.js`, `plugin.css`,
+or any cluster files.
+
+---
+
+### Phase 3 — Root Discovery: `init.js` Decoupled from Canvas
+
+**Goal:** `listPluginContainers` discovers widget instances through
+`.widget.dyniplugin` instead of `canvas.widgetData`. Theme preset lookup,
+invalidation, and application begin at the root. `invalidateThemeResolverCache`
+uses the root-first `ThemeResolver` API. HTML-only widgets (no canvas child)
+participate in the same preset/invalidation flow as canvas-backed widgets.
+
+**Input files:** `runtime/init.js`, `tests/runtime/init.test.js`,
+`shared/theme/ThemeResolver.js` (as reference)
+
+**Touch:** `runtime/init.js`
+**Test exit:** All existing `init` tests pass. New tests verify that
+`listPluginContainers` finds a `.widget.dyniplugin` root that contains no
+`canvas.widgetData`, and that `applyThemePresetToContainer` works on such a root.
+
+**Scope boundary:** Do not change `widget-registrar.js`, `plugin.css`, or any
+cluster files. `[data-dyni]` may remain as a secondary selector in
+`isPluginContainer` for backward compatibility, but must no longer be the primary
+discovery path.
+
+---
+
+### Phase 4 — Widget Registrar: Static Host Marking + CSS Migration
+
+**Goal:** `widget-registrar.js` applies host-level markers (`dyni-host-html`,
+`dyni-hide-native-head`) as static classes on the widget/frame definition, not by
+mutating the DOM in `wrapRenderCanvas`. Theme preset application is no longer
+gated behind `canvas.__dyniMarked`. `plugin.css` moves runtime-critical rules from
+`[data-dyni]` selectors to `.widget.dyniplugin` and `.widgetData.dyni-shell` (or
+equivalent static selectors). `[data-dyni]` selectors may remain as a temporary
+compatibility trail but no runtime-critical behavior depends on them.
+
+**Input files:** `runtime/widget-registrar.js`, `tests/runtime/widget-registrar.test.js`,
+`plugin.css`, `runtime/init.js` (as reference for the new root contract)
+
+**Touch:** `runtime/widget-registrar.js`, `plugin.css`
+**Test exit:** All existing `widget-registrar` tests pass. New tests verify that a
+widget registered without `renderCanvas` still gets head-hiding and theme preset
+applied through the static class path. CSS visually hides `.widgetHead` inside
+`.widget.dyniplugin` without requiring `[data-dyni]`.
+
+**Scope boundary:** Do not change cluster files. The widget is still registered
+with `renderCanvas` at this point — the registrar must handle both paths. The
+actual removal of `renderCanvas` from the registration happens in Phase 9.
+
+---
+
+### Phase 5 — HostCommitController (Standalone Module)
+
+**Goal:** Create `runtime/HostCommitController.js` as a self-contained module.
+Implements the deferred commit lifecycle described in the plan (Section G.1):
+instance state creation in init, revision tracking, rAF-based commit scheduling
+with MutationObserver fallback, root/shell resolution, cleanup. Exposes a clear
+factory function. Does not wire into ClusterWidget yet.
+
+**Input files:** PLAN1.md Section G.1 (HostCommitController), `runtime/helpers.js`
+(as reference for module patterns/UMD shape),
+`viewer/components/ExternalWidget.jsx` (as reference for the host lifecycle)
+
+**Create:** `runtime/HostCommitController.js`, `tests/runtime/HostCommitController.test.js`
+**Test exit:** Unit tests cover: init creates instance state without DOM access;
+`scheduleCommit` resolves shell via `data-dyni-instance` after rAF; stale commits
+(wrong revision) are discarded; cleanup cancels pending rAF/MutationObserver/timers;
+double-schedule is deduplicated.
+
+**Scope boundary:** Do not modify any existing files. This is a new module only.
+
+---
+
+### Phase 6 — SurfaceSessionController (Standalone Module)
+
+**Goal:** Create `runtime/SurfaceSessionController.js` as a self-contained state
+machine. Implements the switching logic described in the plan (Section G.2):
+tracks `desiredSurface` / `mountedSurface` / `surfaceRevision` / `activeController`,
+dispatches `attach` / `update` / `detach("remount")` / `detach("surface-switch")` /
+`destroy` on surface controllers. Surface controllers are injected as a factory —
+the actual html and canvas-dom controllers are not created here.
+
+**Input files:** PLAN1.md Section G.2 (SurfaceSessionController)
+
+**Create:** `runtime/SurfaceSessionController.js`, `tests/runtime/SurfaceSessionController.test.js`
+**Test exit:** Unit tests with mock surface controllers cover: same surface + same
+shell → `update`; same surface + new shell → `detach("remount")` then `attach`;
+different surface → `detach("surface-switch")` on old, `attach` on new; `destroy`
+calls through; stale async work (wrong revision) is rejected.
+
+**Scope boundary:** Do not modify any existing files. This is a new module only.
+
+---
+
+### Phase 7 — CanvasDomSurfaceAdapter (Standalone Module)
+
+**Goal:** Create `cluster/rendering/CanvasDomSurfaceAdapter.js`. Implements the
+`canvas-dom` surface controller described in the plan (Section G.3 / F.2):
+stable shell markup generation, internal canvas management, prop comparison as
+redraw trigger, own ResizeObserver for buffer sizing, `font-size: initial`
+isolation, fill contract, DPI/size logic via `Helpers.setupCanvas` or equivalent,
+dirty/bind flags, theme invalidation, cleanup. Conforms to the surface controller
+interface from Phase 6 (`attach` / `update` / `detach` / `destroy`).
+
+**Input files:** PLAN1.md Sections F.2, G.3, `runtime/helpers.js` (for
+`setupCanvas`), one existing canvas renderer as reference (e.g.
+`widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js`),
+`viewer/components/ExternalWidget.jsx` + `viewer/hoc/Resizable.jsx` (for
+understanding the host render/resize contract)
+
+**Create:** `cluster/rendering/CanvasDomSurfaceAdapter.js`,
+`tests/cluster/rendering/CanvasDomSurfaceAdapter.test.js`
+**Test exit:** Unit tests cover: `attach` creates internal canvas and binds
+ResizeObserver; `update` with changed props schedules repaint; `update` with
+identical props does not repaint; theme invalidation forces repaint even without
+prop change; `detach` disconnects ResizeObserver and clears canvas refs; shell
+markup is structurally stable across `update` calls (Principle 8a).
+
+**Scope boundary:** Do not modify existing renderer files. Do not rewrite
+ClusterRendererRouter yet. This module wraps existing renderers but does not
+change them.
+
+---
+
+### Phase 8 — Kind Catalog + Surface Router (ClusterRendererRouter Rewrite)
+
+**Goal:** Create the Kind Catalog as a central spec (Section D) with `kind`,
+`viewModelId`, `rendererId`, `surface` per entry. Rewrite `ClusterRendererRouter.js`
+from a simple renderer delegator into a surface-aware router: determine surface
+per kind from the catalog, select renderer or canvas-dom adapter, generate the
+HTML shell markup (Section C), coordinate surface controller lifecycle via the
+SurfaceSessionController interface. The router no longer exposes `renderCanvas`.
+
+**Input files:** `cluster/rendering/ClusterRendererRouter.js`,
+`tests/cluster/rendering/` (existing router tests), `cluster/rendering/CanvasDomSurfaceAdapter.js`
+(Phase 7), `runtime/SurfaceSessionController.js` (Phase 6), PLAN1.md Sections C, D, F
+
+**Touch:** `cluster/rendering/ClusterRendererRouter.js`
+**Create:** Kind Catalog (may be a new file or a section within the router — either
+is acceptable). Possibly `cluster/rendering/HtmlSurfaceController.js` as a minimal
+stub that satisfies the surface controller interface for `html` kinds (no real HTML
+kinds exist yet, but the router needs both branches to be complete).
+**Test exit:** Existing router tests are adapted. New tests verify: correct surface
+selection per catalog entry; shell markup includes `data-dyni-instance`,
+`data-dyni-surface`, and surface-specific classes; `canvas-dom` entries route
+through `CanvasDomSurfaceAdapter`; `html` entries route through the stub html
+controller; `renderCanvas` is no longer exposed.
+
+**Scope boundary:** Do not modify `ClusterWidget.js` yet. Do not modify
+`widget-registrar.js` yet. The router is tested in isolation from the host wiring.
+
+---
+
+### Phase 9 — Wire Everything: ClusterWidget + Registrar Flip
+
+**Goal:** Rewrite `ClusterWidget.js` to use `HostCommitController` and
+`SurfaceSessionController` (via the rewritten router). `initFunction` creates
+instance state and registers the global `catchAll` eventHandler.
+`renderHtml` returns the shell, stores props, increments revision, and triggers
+the deferred commit. `finalizeFunction` cleans up. Remove `renderCanvas` from the
+returned spec. Update `widget-registrar.js` to no longer wrap or pass
+`renderCanvas`. Update `plugin.css` with surface-specific shell classes
+(`.dyni-surface-canvas`, `.dyni-surface-html`, `font-size: initial` isolation).
+
+**Input files:** `cluster/ClusterWidget.js`, `tests/cluster/ClusterWidget.test.js`,
+`runtime/widget-registrar.js`, `tests/runtime/widget-registrar.test.js`,
+`plugin.css`, all modules from Phases 5–8
+
+**Touch:** `cluster/ClusterWidget.js`, `runtime/widget-registrar.js`, `plugin.css`
+**Test exit:** All existing cluster and registrar tests adapted and passing. New
+integration tests verify: widget registered without `renderCanvas`; `renderHtml`
+returns valid shell markup; deferred commit finds root and binds surface
+controller; canvas kinds still render through the canvas-dom adapter; surface
+switch (simulated kind change) cleans up old controller and attaches new one;
+`finalizeFunction` leaves no dangling observers or timers.
+
+**Deployment note:** Phases 5–9 are deployed together. No subset is safe to ship.
+But each phase is implemented and tested individually, and each leaves the existing
+code functional until Phase 9 flips the switch.
+
+---
+
+### Phase 10 — ActiveRouteViewModel Extraction
+
+**Goal:** Extract the `activeRoute` domain logic currently inline in
+`NavMapper.js` into a shared `cluster/viewmodels/ActiveRouteViewModel.js`.
+Normalize data, derive disconnect state, prepare route/distance/ETA/course/states,
+deliver caption and unit contracts. No HTML markup, no canvas drawing. Update
+`NavMapper.js` to use the extracted view model for the existing `activeRoute` kind.
+
+**Input files:** `cluster/mappers/NavMapper.js`,
+`tests/cluster/mappers/NavMapper.test.js`
+
+**Create:** `cluster/viewmodels/ActiveRouteViewModel.js`,
+`tests/cluster/viewmodels/ActiveRouteViewModel.test.js`
+**Touch:** `cluster/mappers/NavMapper.js`
+**Test exit:** All existing NavMapper tests pass unchanged (the output for
+`kind: "activeRoute"` is identical). New ViewModel unit tests cover: field
+normalization, disconnect derivation, missing/null value handling.
+
+**Scope boundary:** Do not add `activeRouteInteractive` yet. This phase only
+extracts — it does not introduce new kinds.
+
+---
+
+### Phase 11 — `activeRouteInteractive`: Config, Mapper, HTML Renderer
+
+**Goal:** Add `activeRouteInteractive` as a new independent `kind`. Register it
+in the Kind Catalog with `surface: "html"`. Add it to `nav.js` config as a
+selectable kind. Add the mapper case in `NavMapper.js` using the shared
+`ActiveRouteViewModel`. Create the HTML renderer
+(`cluster/rendering/ActiveRouteTextHtmlWidget.js`) that produces string-based
+HTML for the surface wrapper and content area.
+
+**Input files:** `config/clusters/nav.js`, `cluster/mappers/NavMapper.js`,
+Kind Catalog (from Phase 8), `cluster/viewmodels/ActiveRouteViewModel.js`
+(Phase 10), PLAN1.md Sections D, E, F.1
+
+**Create:** `cluster/rendering/ActiveRouteTextHtmlWidget.js`,
+`tests/cluster/rendering/ActiveRouteTextHtmlWidget.test.js`
+**Touch:** `config/clusters/nav.js`, `cluster/mappers/NavMapper.js`, Kind Catalog
+**Test exit:** NavMapper tests verify `kind: "activeRouteInteractive"` produces
+correct view model output. Renderer tests verify HTML output includes expected
+structure, captions, values. Config tests verify the new kind appears in the
+selectable list and that editables and disconnect logic apply to both active route
+kinds.
+
+**Scope boundary:** Do not implement eventHandler wiring or interaction behavior
+yet. The renderer produces static HTML only at this point.
+
+---
+
+### Phase 12 — EventHandler Wiring for HTML Surface Controller
+
+**Goal:** Complete the `html` surface controller (stub from Phase 8) with real
+lifecycle management of named `eventHandler` registrations. On `attach`, bind
+only the handlers needed by the active HTML kind. On `detach` / `destroy`, remove
+them. Implement `resizeSignature(props)` + `triggerResize()` for layout-relevant
+content changes. Wire `ActiveRouteTextHtmlWidget` to use named control handlers
+for interactive elements. Ensure `catchAll` (registered globally in
+`ClusterWidget.initFunction`) covers empty-space clicks on the interactive wrapper.
+Add interaction-related CSS for `activeRouteInteractive` to `plugin.css`.
+
+**Input files:** `cluster/rendering/HtmlSurfaceController.js` (stub from Phase 8),
+`cluster/rendering/ActiveRouteTextHtmlWidget.js` (Phase 11),
+`cluster/ClusterWidget.js` (Phase 9, for catchAll reference),
+`viewer/components/UserHtml.tsx` (for understanding the eventHandler contract),
+`plugin.css`, PLAN1.md Sections F.1, G.3 (html controller), Principle 10
+
+**Touch:** `cluster/rendering/HtmlSurfaceController.js`,
+`cluster/rendering/ActiveRouteTextHtmlWidget.js`, `plugin.css`
+**Test exit:** Tests verify: named handlers are registered on `attach` and removed
+on `detach`; `resizeSignature` change triggers `triggerResize()` exactly once;
+surface switch removes all named handlers; `catchAll` is present on the outermost
+interactive wrapper; interactive area markup passes through `UserHtml` event
+interception correctly (click events get `stopPropagation` + `preventDefault`).
+
+**Scope boundary:** Host action dispatch via `TemporaryHostActionBridge` is
+optional and can be wired separately. The widget must be safe and usable without it.
+
+---
+
+### Phase 13 — Compatibility Trail Cleanup
+
+**Goal:** Remove every temporary compatibility path, dead code path, and
+deferred deprecation that accumulated during Phases 1–12. After this phase,
+no legacy marker, selector, adapter shim, or unreachable code path remains
+in the codebase.
+
+**Input files:** All files touched or created in Phases 1–12, plus
+`shared/theme/ThemePresets.js`, `config/components.js`. Use `grep` to
+verify zero remaining occurrences of each item before marking it done.
+
+**Items to clean up (comprehensive — verify each):**
+
+**A. `[data-dyni]` attribute — full removal**
+
+Phase 4 left `[data-dyni]` CSS selectors as a "temporary compatibility trail".
+Phase 3 left `data-dyni` as a secondary fallback in `isPluginContainer`.
+Phase 9 removed `wrapRenderCanvas`, which was the only runtime code that
+set `data-dyni` on roots. No runtime path depends on it any more.
+
+- `runtime/init.js`: remove the `data-dyni` fallback branch from
+  `isPluginContainer`. Discovery is `.widget.dyniplugin` only.
+- `plugin.css`: remove all `[data-dyni]` selectors. Every rule that was
+  duplicated onto `.widget.dyniplugin` (Phase 4) now stands alone.
+- Verify: `grep -rn "data-dyni" --include="*.js" --include="*.css"` in
+  non-test source returns zero hits (excluding `data-dyni-instance`,
+  `data-dyni-surface`, `data-dyni-theme` which are current architecture).
+
+**B. `canvas.widgetData` queries — full removal**
+
+Phase 3 replaced the primary discovery path. Verify no residual
+`querySelectorAll("canvas.widgetData")` remains in `runtime/init.js` or
+anywhere else in non-test source. The CSS rule
+`[data-dyni] canvas.widgetData` is removed with item A.
+
+**C. `wrapRenderCanvas` and `__dyniMarked` — dead code removal**
+
+Phase 9 stopped registering `renderCanvas`. If `wrapRenderCanvas` or
+`canvas.__dyniMarked` still exist in `runtime/widget-registrar.js` as
+unreachable code, remove them.
+
+**D. ThemeResolver canvas-keyed WeakMap**
+
+Phase 1 introduced root-keyed resolution. If the old `byCanvas` WeakMap
+or `invalidateCanvas(canvas)` API still exist as adapter shims, simplify:
+remove canvas-keyed cache, keep only root-keyed cache. The public
+`resolve(canvas)` adapter method may remain (it finds the root and
+delegates), but should not maintain its own cache layer. Update
+`invalidateCanvas` to resolve root and call `invalidateRoot`, or remove
+it in favor of `invalidateRoot` / `invalidateAll` only.
+
+**E. `helpers.js` canvas-keyed WeakMaps**
+
+Phase 2 switched typography helpers to the root/token contract. If
+`typographyByCanvas` or `layoutByCanvas` WeakMaps still exist as adapter
+caches for the `resolveTypography(canvas)` path, simplify to root-keyed
+only. The canvas-accepting function signatures may remain as convenience
+adapters (find root, delegate), but should not keep a separate cache.
+
+**F. Old `renderCanvas` export from ClusterRendererRouter**
+
+Phase 8 rewrote the router to no longer expose `renderCanvas`. Verify the
+function and its delegation path are fully removed, not just unused.
+
+**G. Old `renderCanvas` delegation in ClusterWidget**
+
+Phase 9 rewrote `ClusterWidget.js`. Verify the returned spec no longer
+contains a `renderCanvas` property at all, and that no internal function
+references the removed host canvas lifecycle.
+
+**H. Stale lint suppression comments**
+
+Some `dyni-lint-disable` comments reference documentation or boundaries
+that have changed. Review all suppression comments in files touched during
+Phases 1–12 and update the justification text where the referenced
+documentation path or boundary contract has moved. Remove any suppression
+that is no longer needed because the underlying code was restructured.
+
+**I. Test cleanup**
+
+Review test files for `widget-registrar`, `init`, `helpers`, `ThemeResolver`,
+`ClusterWidget`, and `ClusterRendererRouter`. Remove or update test cases
+that exercise removed code paths (e.g., tests that assert `data-dyni` is
+set, tests that call `wrapRenderCanvas`, tests that pass a canvas to
+`listPluginContainers`). Ensure no test depends on a compatibility trail
+that this phase removes.
+
+**J. TECH-DEBT.md update**
+
+Add a completed entry documenting the removal of all `[data-dyni]` legacy
+selectors, `canvas.widgetData` discovery, and canvas-keyed cache shims.
+Reference this phase.
+
+**Touch:** `runtime/init.js`, `runtime/widget-registrar.js`, `runtime/helpers.js`,
+`shared/theme/ThemeResolver.js`, `cluster/ClusterWidget.js`,
+`cluster/rendering/ClusterRendererRouter.js`, `plugin.css`,
+`documentation/TECH-DEBT.md`, affected test files.
+
+**Test exit:** `npm run check:all` passes. `grep -rn` for each removed
+pattern confirms zero non-test source hits. All existing tests pass
+(adapted where necessary). No new warnings from `check:patterns` or
+`check:filesize`.
+
+**Scope boundary:** Do not change widget renderers, shared widget-kits,
+mappers, or config files. This phase is purely removal and simplification
+of infrastructure code. Do not update documentation prose beyond
+TECH-DEBT.md — that belongs to Phase 14.
+
+---
+
+### Phase 14 — Documentation Sweep
+
+**Goal:** Bring all project documentation in line with the post-Phase-12
+architecture. Individual phases may have updated docs for the files they
+touched, but those updates lack the big picture of the completed
+architecture. This phase performs a systematic sweep across every
+documentation file and AI instruction file to ensure consistency,
+remove outdated references, add missing coverage for new modules, and
+update guides to reflect the dual-surface (html / canvas-dom) world.
+
+**Input files:** All files under `documentation/`, all top-level `.md` files
+(`ARCHITECTURE.md`, `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`,
+`ROADMAP.md`), `documentation/TABLEOFCONTENTS.md`, all new modules created
+in Phases 5–12.
+
+**Items to update (comprehensive — verify each):**
+
+**A. Top-level AI instruction files**
+
+- `AGENTS.md` and `CLAUDE.md`: Section 1 ("Project Constraints") states
+  "Canvas 2D only — All visual rendering via `renderCanvas(canvas, props)`".
+  Update to reflect the dual-surface model: canvas-dom for existing gauges,
+  native HTML for interactive widgets, `renderHtml` as the sole host path.
+- `AGENTS.md` and `CLAUDE.md`: Section 4 ("File Map") — add entries for
+  new modules (`runtime/HostCommitController.js`,
+  `runtime/SurfaceSessionController.js`,
+  `cluster/rendering/CanvasDomSurfaceAdapter.js`,
+  `cluster/rendering/HtmlSurfaceController.js`,
+  `cluster/viewmodels/ActiveRouteViewModel.js`,
+  `cluster/rendering/ActiveRouteTextHtmlWidget.js`,
+  Kind Catalog location).
+- `ARCHITECTURE.md`: Layer Map and Component Registration Flow must reflect
+  the new `renderHtml`-only registration, the surface layer, and the
+  HostCommitController/SurfaceSessionController runtime modules. Add
+  `cluster/viewmodels/` to the layer map.
+
+**B. Architecture documentation**
+
+- `documentation/architecture/cluster-widget-system.md`: Rewrite to
+  reflect the surface router model. The old flow
+  "ClusterWidget.renderCanvas() delegates via ClusterRendererRouter" is
+  replaced by the shell/surface/commit architecture. Document the Kind
+  Catalog as the routing spec. Document surface lifecycle
+  (attach/update/detach/destroy).
+- `documentation/architecture/component-system.md`: Update the
+  registration flow to show `renderHtml`-only registration. Remove or
+  mark as historical any `renderCanvas` registration path.
+- `documentation/architecture/plugin-core-contracts.md`: Review and
+  update any contract descriptions that assume canvas-only rendering.
+
+**C. AvNav API documentation**
+
+- `documentation/avnav-api/plugin-lifecycle.md`: Major update needed.
+  The lifecycle table lists `renderCanvas` as an optional hook — update
+  to document that the Nav cluster no longer uses it. Update the
+  `wantsHideNativeHead` section: head hiding is now via static root class,
+  not `data-dyni` attribute. Update the `hostActions` injection section
+  to reflect that injection no longer happens through `wrapRenderCanvas`.
+  Update the render cycle diagram to show `renderHtml` → deferred commit →
+  surface controller lifecycle.
+- `documentation/avnav-api/interactive-widgets.md`: Update the recommended
+  pattern. The current doc shows `catchAll` registered inside `renderHtml`.
+  The new architecture registers `catchAll` once in `initFunction` (global)
+  and named control handlers are managed by the html surface controller on
+  attach/detach. Update code examples accordingly. Document the
+  `resizeSignature` + `triggerResize` pattern for layout-relevant HTML.
+- `documentation/avnav-api/editable-parameters.md`: Add
+  `activeRouteInteractive` to any relevant examples.
+
+**D. Shared / theme documentation**
+
+- `documentation/shared/theme-tokens.md`: Update to document the
+  root-first resolution path (`resolveForRoot`). Note that the
+  canvas-accepting `resolve(canvas)` is now an adapter. Remove any
+  language suggesting the cache is canvas-scoped.
+- `documentation/shared/css-theming.md`: Update selectors from
+  `[data-dyni]` to `.widget.dyniplugin`. Document new surface-specific
+  classes (`.dyni-surface-html`, `.dyni-surface-canvas`), shell classes
+  (`.widgetData.dyni-shell`), and kind classes (`.dyni-kind-*`).
+  Document `font-size: initial` isolation on `.dyni-surface-canvas`.
+- `documentation/shared/helpers.md`: Update `resolveTextColor` and
+  `resolveFontFamily` documentation to reflect the root-first API.
+  Note that canvas-accepting signatures remain as convenience adapters.
+
+**E. Core principles**
+
+- `documentation/core-principles.md`: Rule 3 states "Passive visual
+  rendering stays on Canvas 2D via `renderCanvas(canvas, props)`;
+  `renderHtml(props)` is allowed only for active widgets that need
+  DOM-owned interaction." Update to reflect the new reality: all
+  rendering goes through `renderHtml` on the host side; canvas
+  rendering happens inside the canvas-dom adapter for existing gauges;
+  native HTML is used for interactive kinds and will gradually replace
+  canvas for non-interactive kinds too.
+
+**F. Guides**
+
+- `documentation/guides/add-new-text-renderer.md`: Update to document
+  both paths — canvas renderer (wrapped by CanvasDomSurfaceAdapter)
+  and native HTML renderer. Update the step-by-step to include Kind
+  Catalog registration with `surface` field.
+- `documentation/guides/add-new-gauge.md`: Update to note that new
+  gauges are wrapped by the canvas-dom adapter and registered with
+  `surface: "canvas-dom"` in the Kind Catalog. The renderer itself
+  is unchanged, but the host path is different.
+- `documentation/guides/add-new-linear-gauge.md`: Same as above.
+- `documentation/guides/add-new-full-circle-dial.md`: Same as above.
+- `documentation/guides/add-new-cluster.md`: Update to document the
+  Kind Catalog, surface selection, and the distinction between html
+  and canvas-dom kinds.
+- Consider adding: `documentation/guides/add-new-html-kind.md` — a
+  new guide for creating native HTML kinds (ViewModel extraction,
+  HTML renderer, Kind Catalog entry, eventHandler wiring, surface
+  controller lifecycle).
+
+**G. Widget documentation**
+
+- `documentation/widgets/active-route.md`: Add `activeRouteInteractive`
+  as a documented kind. Document the shared `ActiveRouteViewModel`,
+  the HTML renderer, the interaction contract, and the relationship
+  to `activeRoute`.
+
+**H. Conventions**
+
+- `documentation/conventions/smell-prevention.md`: Update the reference
+  to `renderCanvas` in the orchestration stub rule to include
+  `renderHtml` and surface controller delegation.
+- `documentation/conventions/coding-standards.md`: Review for any
+  examples or rules that assume canvas-only rendering.
+
+**I. Structural documentation**
+
+- `documentation/TABLEOFCONTENTS.md`: Add entries for all new
+  documentation pages and all new modules. Verify all existing links
+  still resolve.
+- `documentation/TECH-DEBT.md`: Review for any items that should be
+  added or resolved as a result of the full implementation.
+- `ROADMAP.md`: Update to reflect completed phases and adjust future
+  milestones (Phase 15/16: gradual migration, activeRoute refactor).
+- `README.md`: Update if it describes the rendering architecture or
+  widget capabilities.
+- `CONTRIBUTING.md`: Update if it references the old rendering pipeline
+  or registration flow.
+
+**Touch:** All files listed above.
+
+**Test exit:** `npm run check:all` passes (including `check:docs` and
+`check:doc-reachability` if they exist). All internal documentation
+cross-references resolve. `grep -rn` for `renderCanvas` across
+`documentation/` returns only clearly marked historical/compatibility
+context, not active guidance. The TABLEOFCONTENTS.md index covers every
+module and documentation page.
+
+**Scope boundary:** Do not change any source code. This phase is
+documentation only. If you discover a source code inconsistency while
+reviewing docs, note it as a TECH-DEBT item rather than fixing it here.
+
+---
+
+## Deployment Boundaries
+
+| Deployable unit              | Phases | Rationale                                                                                                                                                                                     |
+| ---------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Runtime foundation           | 1–4    | Each phase is independently safe. Existing canvas widgets continue working. Can be shipped incrementally.                                                                                     |
+| Cluster HTML host conversion | 5–9    | Must ship together. Between removing `renderCanvas` (Phase 9) and having the canvas-dom adapter (Phase 7), canvas widgets would break. But each phase is implemented and tested individually. |
+| First native HTML kind       | 10–12  | Can ship incrementally. Phase 10–11 add a new read-only kind. Phase 12 adds interactivity.                                                                                                    |
 
 ---
 
