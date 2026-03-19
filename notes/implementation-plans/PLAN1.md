@@ -513,6 +513,8 @@ double-schedule is deduplicated.
 
 ### Phase 6 — SurfaceSessionController (Standalone Module)
 
+**Status:** implemented (`2026-03-19`)
+
 **Goal:** Create `runtime/SurfaceSessionController.js` as a self-contained state
 machine. Implements the switching logic described in the plan (Section G.2):
 tracks `desiredSurface` / `mountedSurface` / `surfaceRevision` / `activeController`,
@@ -536,6 +538,8 @@ runtime lifecycle module (`SurfaceSessionController`) and keep
 ---
 
 ### Phase 7 — CanvasDomSurfaceAdapter (Standalone Module)
+
+**Status:** implemented (`2026-03-19`)
 
 **Goal:** Create `cluster/rendering/CanvasDomSurfaceAdapter.js`. Implements the
 `canvas-dom` surface controller described in the plan (Section G.3 / F.2):

@@ -228,20 +228,15 @@
       css: undefined,
       globalKey: "DyniRendererPropsWidget",
       deps: [
-        "WindRadialWidget",
-        "CompassRadialWidget",
-        "WindLinearWidget",
-        "CompassLinearWidget",
-        "SpeedRadialWidget",
-        "SpeedLinearWidget",
-        "DepthRadialWidget",
-        "DepthLinearWidget",
-        "TemperatureRadialWidget",
-        "TemperatureLinearWidget",
-        "VoltageRadialWidget",
-        "VoltageLinearWidget",
+        "WindRadialWidget", "CompassRadialWidget", "WindLinearWidget", "CompassLinearWidget",
+        "SpeedRadialWidget", "SpeedLinearWidget", "DepthRadialWidget", "DepthLinearWidget",
+        "TemperatureRadialWidget", "TemperatureLinearWidget", "VoltageRadialWidget", "VoltageLinearWidget",
         "XteDisplayWidget"
       ]
+    },
+    CanvasDomSurfaceAdapter: {
+      js: BASE + "cluster/rendering/CanvasDomSurfaceAdapter.js", css: undefined,
+      globalKey: "DyniCanvasDomSurfaceAdapter", deps: ["ThemeResolver"]
     },
     WindRadialWidget: {
       js: BASE + "widgets/radial/WindRadialWidget/WindRadialWidget.js",
