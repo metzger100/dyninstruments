@@ -32,9 +32,14 @@
     const spec = component.create(widgetDef.def, Helpers) || {};
 
     const defaultClass = "dyniplugin";
-    const mergedClassName = [defaultClass, widgetDef.def.className, spec.className]
-      .filter(Boolean)
-      .join(" ");
+    const wantsHide = !!spec.wantsHideNativeHead;
+    const mergedClassName = Array.from(new Set([
+      defaultClass,
+      "dyni-host-html",
+      widgetDef.def.className,
+      spec.className,
+      wantsHide ? "dyni-hide-native-head" : null
+    ].filter(Boolean))).join(" ");
 
     const storeKeys = spec.storeKeys || widgetDef.def.storeKeys ||
       (widgetDef.def.storeKey ? { value: widgetDef.def.storeKey } : undefined);
@@ -47,8 +52,6 @@
 
     const updateFunction = composeUpdates(spec.updateFunction, widgetDef.def.updateFunction);
 
-    const wantsHide = !!spec.wantsHideNativeHead;
-
     function attachHostActions(ctx) {
       ctx.hostActions = Helpers.getHostActions();
     }
@@ -59,14 +62,6 @@
       }
       return function (canvas, props) {
         attachHostActions(this);
-        if (wantsHide && !canvas.__dyniMarked) {
-          const rootEl = canvas.closest(".widget, .DirectWidget") || canvas.parentElement;
-          if (rootEl && !rootEl.hasAttribute("data-dyni")) rootEl.setAttribute("data-dyni", "");
-          if (rootEl && typeof runtime.applyThemePresetToContainer === "function") {
-            runtime.applyThemePresetToContainer(rootEl);
-          }
-          canvas.__dyniMarked = true;
-        }
         return fn.apply(this, [canvas, props]);
       };
     }

@@ -96,6 +96,8 @@ describe("runtime/widget-registrar.js", function () {
 
     const [registeredDef, registeredEditable] = registerWidget.mock.calls[0];
     expect(registeredDef.className).toContain("dyniplugin");
+    expect(registeredDef.className).toContain("dyni-host-html");
+    expect(registeredDef.className).toContain("dyni-hide-native-head");
     expect(registeredDef.className).toContain("widgetClass");
     expect(registeredDef.className).toContain("componentClass");
     expect(registeredDef.kind).toBe("sog");
@@ -113,14 +115,13 @@ describe("runtime/widget-registrar.js", function () {
       setAttribute() { this._flag = true; }
     };
     const canvas = {
-      __dyniMarked: false,
       closest() { return rootEl; }
     };
 
     registeredDef.renderCanvas(canvas, {});
-    expect(canvas.__dyniMarked).toBe(true);
-    expect(rootEl._flag).toBe(true);
-    expect(applyThemePresetToContainer).toHaveBeenCalledWith(rootEl);
+    expect(canvas.__dyniMarked).toBeUndefined();
+    expect(rootEl._flag).toBe(false);
+    expect(applyThemePresetToContainer).not.toHaveBeenCalled();
     expect(canvas.rendered).toBe(true);
   });
 
@@ -177,6 +178,44 @@ describe("runtime/widget-registrar.js", function () {
     expect(registerWidget.mock.calls[0][0].default).toBe(0);
     expect(registerWidget.mock.calls[1][0].default).toBe("");
     expect(registerWidget.mock.calls[2][0].default).toBe(false);
+  });
+
+  it("applies static host classes even when the component has no renderCanvas", function () {
+    const { context, registerWidget, hostActions } = setupContext();
+    const seen = [];
+    const component = {
+      create() {
+        return {
+          wantsHideNativeHead: true,
+          renderHtml() {
+            seen.push(this.hostActions);
+            return "<div>ok</div>";
+          }
+        };
+      }
+    };
+
+    context.DyniPlugin.runtime.registerWidget(component, {
+      def: {
+        name: "dyni_HtmlOnly",
+        className: "customClass",
+        editableParameters: {}
+      }
+    }, {
+      getHostActions() {
+        return hostActions;
+      }
+    });
+
+    const [registeredDef] = registerWidget.mock.calls[0];
+    expect(registeredDef.className).toContain("dyniplugin");
+    expect(registeredDef.className).toContain("dyni-host-html");
+    expect(registeredDef.className).toContain("dyni-hide-native-head");
+    expect(registeredDef.className).toContain("customClass");
+    expect(registeredDef.renderCanvas).toBeUndefined();
+
+    registeredDef.renderHtml.call({}, {});
+    expect(seen).toEqual([hostActions]);
   });
 
   it("injects hostActions into init, html, canvas, and finalize widget contexts", function () {

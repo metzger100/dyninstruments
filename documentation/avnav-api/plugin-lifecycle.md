@@ -118,7 +118,7 @@ Internal cluster ID (for example `"speed"`, `"wind"`) used by ClusterWidget mapp
 
 ### wantsHideNativeHead
 
-When `true`, render wrapper in `runtime/widget-registrar.js` adds `data-dyni` to widget root. CSS then hides AvNav native `.widgetHead` and `.valueData`.
+When `true`, `runtime/widget-registrar.js` adds the static `dyni-hide-native-head` class to the registered widget root. CSS then hides AvNav native `.widgetHead` and `.valueData` through `.widget.dyniplugin.dyni-hide-native-head`.
 
 ### hostActions
 

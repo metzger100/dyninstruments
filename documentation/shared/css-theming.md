@@ -4,7 +4,7 @@
 
 ## Overview
 
-dyninstruments uses CSS custom properties for theming, scoped to `.widget.dyniplugin` roots. Structural styles stay in `plugin.css`, while `ThemeResolver` merges explicit CSS token overrides with runtime preset/default values. The preset bootstrap path is root-only; `[data-dyni]` remains a separate head-hiding marker and is not part of discovery. Typography helpers resolve from the owning widget root, so canvas remains the geometry/drawing owner.
+dyninstruments uses CSS custom properties for theming, scoped to `.widget.dyniplugin` roots. Structural styles stay in `plugin.css`, while `ThemeResolver` merges explicit CSS token overrides with runtime preset/default values. The preset bootstrap path is root-only; head hiding is expressed through the static `dyni-hide-native-head` class on the registered widget root. Typography helpers resolve from the owning widget root, so canvas remains the geometry/drawing owner.
 
 Theme values are layered:
 
@@ -145,11 +145,11 @@ Night-mode border adaptation is CSS-only. `ThemeResolver` keeps the token defaul
 
 ## Head Hiding
 
-When a module sets `wantsHideNativeHead: true`, the registration wrapper adds `data-dyni` attribute to the widget root. CSS then hides AvNav's native header:
+When a module sets `wantsHideNativeHead: true`, the registration wrapper adds the static `dyni-hide-native-head` class to the widget root. CSS then hides AvNav's native header:
 
 ```css
-[data-dyni] .widgetHead,
-[data-dyni] .valueData {
+.widget.dyniplugin.dyni-hide-native-head .widgetHead,
+.widget.dyniplugin.dyni-hide-native-head .valueData {
   display: none !important;
 }
 ```
@@ -157,7 +157,7 @@ When a module sets `wantsHideNativeHead: true`, the registration wrapper adds `d
 Canvas fills the full widget area:
 
 ```css
-[data-dyni] canvas.widgetData {
+.widget.dyniplugin canvas.widgetData {
   width: 100% !important;
   height: 100% !important;
   display: block;

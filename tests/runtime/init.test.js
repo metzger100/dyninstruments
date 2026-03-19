@@ -42,23 +42,6 @@ describe("runtime/init.js", function () {
     };
   }
 
-  function createLegacyOnlyRoot() {
-    return {
-      classList: {
-        contains() {
-          return false;
-        }
-      },
-      hasAttribute(name) {
-        return name === "data-dyni";
-      },
-      style: {
-        setProperty() {},
-        removeProperty() {}
-      }
-    };
-  }
-
   it("loads needed components and registers widgets", async function () {
     const registerWidget = vi.fn();
     const uniqueComponents = vi.fn(() => ["A"]);
@@ -466,66 +449,6 @@ describe("runtime/init.js", function () {
 
     context.DyniPlugin.runtime.applyThemePresetToContainer(rootEl);
     expect(applyPreset).toHaveBeenLastCalledWith(rootEl, "bold");
-  });
-
-  it("ignores data-dyni-only containers when discovering plugin roots", async function () {
-    const applyPreset = vi.fn();
-    const uniqueComponents = vi.fn(() => ["A"]);
-    const { createTemporaryHostActionBridge } = createBridgeRuntimeMock();
-    const loadComponent = vi.fn((id) => {
-      if (id === "ThemePresets") {
-        return Promise.resolve({
-          id: "ThemePresets",
-          create: () => ({
-            presets: { default: {}, bold: {} },
-            apply: applyPreset,
-            remove: vi.fn()
-          })
-        });
-      }
-      return Promise.resolve({ id: "A", create: () => ({}) });
-    });
-
-    const legacyRoot = createLegacyOnlyRoot();
-
-    const context = createScriptContext({
-      document: {
-        querySelectorAll: vi.fn(() => [legacyRoot]),
-        documentElement: {},
-        body: {}
-      },
-      avnav: {
-        api: {
-          registerWidget: vi.fn(),
-          log: vi.fn()
-        }
-      },
-      DyniPlugin: {
-        runtime: {
-          createTemporaryHostActionBridge,
-          createHelpers: vi.fn(() => ({ helper: true })),
-          createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
-          registerWidget: vi.fn()
-        },
-        state: {},
-        config: {
-          shared: {},
-          clusters: [],
-          components: {
-            A: { globalKey: "DyniA" },
-            ThemePresets: { globalKey: "DyniThemePresets" }
-          },
-          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
-        }
-      }
-    });
-
-    runIifeScript("runtime/init.js", context);
-    await context.DyniPlugin.state.initPromise;
-    await flushPromises();
-
-    expect(context.document.querySelectorAll).toHaveBeenCalledWith(".widget.dyniplugin");
-    expect(applyPreset).not.toHaveBeenCalled();
   });
 
   it("invalidates ThemeResolver cache for the root after preset application", async function () {
