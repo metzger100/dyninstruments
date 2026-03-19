@@ -4,7 +4,7 @@
 
 ## Overview
 
-`ThemeResolver` provides plugin-wide token resolution from CSS custom properties. It discovers the widget root from the canvas, applies the selected preset from `data-dyni-theme`, prefers explicit CSS custom-property overrides, and caches the merged result per canvas.
+`ThemeResolver` provides plugin-wide token resolution from CSS custom properties. The canonical API is root-first: `resolveForRoot(rootEl)` reads the widget root directly, applies the selected preset from `data-dyni-theme`, prefers explicit CSS custom-property overrides, and caches the merged result per root. `resolve(canvas)` remains as a thin adapter that resolves the owning root and delegates to the root-first path.
 
 `ThemePresets` provides named runtime presets by setting a preset selector attribute (`data-dyni-theme`) on widget root containers.
 
@@ -14,11 +14,12 @@
 - Global key: `DyniThemeResolver`
 - File: `shared/theme/ThemeResolver.js`
 - Factory: `create(def, Helpers)`
-- API: `resolve(canvas) -> themeTokens`
-- Invalidation API: `invalidateCanvas(canvas)`, `invalidateAll()`
+- API: `resolveForRoot(rootEl) -> themeTokens`
+- Adapter API: `resolve(canvas) -> themeTokens`
+- Invalidation API: `invalidateCanvas(canvasOrRoot)`, `invalidateAll()`
 - Token metadata API: `TOKEN_DEFS` / `create.TOKEN_DEFS`
 - Preset metadata API: reads `ThemePresets.PRESETS` / `ThemePresets.create.PRESETS`
-- Caching: `WeakMap` per canvas
+- Caching: `WeakMap` per root element
 - Invalidation: cache reset when root `.nightMode` class state changes
 - Numeric parsing: `parseFloat`, fallback on `NaN`
 - Color parsing: `trim`, fallback on empty string
@@ -92,23 +93,23 @@ Base pointer size by renderer:
 - Radial gauges and full-circle dials: unscaled `needleDepth` / explicit `depth`
 - Linear gauges: unscaled `pointerDepthBase`, unless an explicit pixel `depth` override is supplied
 
-## resolve(canvas) Behavior
+## resolveForRoot(rootEl) Behavior
 
 1. Determine current night-mode root class state (`.nightMode`)
-2. If state changed since last call, clear canvas cache
-3. Return cached tokens for canvas when present
-4. Discover the widget root (`canvas.closest(".widget, .DirectWidget") || canvas.parentElement`)
-5. Resolve the active preset from `data-dyni-theme`
-6. Read explicit CSS token overrides from canvas/root computed style
-7. Merge in order: CSS override -> preset value -> built-in default
-8. Store in cache and return token object
+2. If state changed since last call, clear cached tokens
+3. Return cached tokens for root when present
+4. Resolve the active preset from `data-dyni-theme`
+5. Read explicit CSS token overrides from the root computed style
+6. Merge in order: CSS override -> preset value -> built-in default
+7. Store in cache and return token object
 
 ## API/Interfaces
 
 ```javascript
 const resolverMod = Helpers.getModule("ThemeResolver");
 const resolver = resolverMod.create(def, Helpers);
-const themeTokens = resolver.resolve(canvas);
+const themeTokens = resolver.resolveForRoot(rootEl);
+const sameTokens = resolver.resolve(canvas); // adapter path for existing callers
 resolver.invalidateCanvas(canvas);
 resolver.invalidateAll();
 
