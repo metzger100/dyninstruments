@@ -10,6 +10,7 @@
 - Mapping toolkit: `cluster/mappers/ClusterMapperToolkit.js`
 - Cluster mapper map: `cluster/mappers/ClusterMapperRegistry.js`
 - Renderer lifecycle/delegation: `cluster/rendering/ClusterRendererRouter.js`
+- Standalone canvas-dom surface adapter foundation (Phase 7): `cluster/rendering/CanvasDomSurfaceAdapter.js`
 - Per-cluster mappers: `cluster/mappers/*.js`
 
 ## Runtime Flow
@@ -91,6 +92,10 @@ Reference: [plugin-core-contracts.md](plugin-core-contracts.md), [../avnav-api/c
 - `XteDisplayWidget`
 
 `wantsHideNativeHead` is aggregated (`true` if any sub-renderer requests it).
+
+Phase 7 status note:
+- `CanvasDomSurfaceAdapter` is implemented as a standalone module and tested in isolation.
+- Router/Cluster wiring to this adapter is intentionally deferred to later PLAN1 phases.
 
 Sub-renderer capability contract:
 
