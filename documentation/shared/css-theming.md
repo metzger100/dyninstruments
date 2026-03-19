@@ -4,7 +4,7 @@
 
 ## Overview
 
-dyninstruments uses CSS custom properties for theming, scoped to `.dyniplugin` and `[data-dyni]`. Structural styles stay in `plugin.css`, while `ThemeResolver` merges explicit CSS token overrides with runtime preset/default values.
+dyninstruments uses CSS custom properties for theming, scoped to `.dyniplugin` and `[data-dyni]`. Structural styles stay in `plugin.css`, while `ThemeResolver` merges explicit CSS token overrides with runtime preset/default values. Typography helpers resolve from the owning widget root, so canvas remains the geometry/drawing owner.
 
 Theme values are layered:
 
@@ -21,12 +21,12 @@ Theme values are layered:
 |---|---|---|
 | `--dyni-font` | Font family stack for canvas and HTML | `"Inter","SF Pro Text",-apple-system,"Segoe UI",Roboto,...` |
 
-Set on `.widget.dyniplugin` and `[data-dyni]`. Read by `Helpers.resolveFontFamily()`.
-`Helpers` caches resolved font family per canvas, so repeated renders do not call `getComputedStyle()` again while mode stays unchanged.
+Set on `.widget.dyniplugin` and inherited through the widget subtree. Read by `Helpers.resolveFontFamily(rootOrCanvas)`.
+`Helpers` caches resolved font family per widget root, so repeated renders do not call `getComputedStyle()` again while mode stays unchanged.
 
 ### Colors (Foreground)
 
-Read by `Helpers.resolveTextColor()` in priority order:
+Read by `Helpers.resolveTextColor(rootOrCanvas)` in priority order:
 
 | Variable | Purpose | Fallback |
 |---|---|---|
@@ -34,8 +34,8 @@ Read by `Helpers.resolveTextColor()` in priority order:
 | `--instrument-fg` | AvNav instrument foreground | (set by AvNav theme) |
 | `--mainfg` | AvNav main foreground | (set by AvNav theme) |
 
-If none set: falls back to `getComputedStyle(canvas).color` or `"#000"`.
-`Helpers.resolveTextColor()` shares a per-canvas typography cache with `resolveFontFamily()`, reducing repeated style reads in steady day or night mode.
+If none set: falls back to `getComputedStyle(rootOrCanvas).color` or `"#000"`.
+`Helpers.resolveTextColor()` shares a per-root typography cache with `resolveFontFamily()`, reducing repeated style reads in steady day or night mode.
 
 ### Border
 
@@ -142,8 +142,8 @@ AvNav adds `.nightMode` class to the page root in night mode. CSS handles border
 }
 ```
 
- Night-mode border adaptation is CSS-only. `ThemeResolver` keeps the token defaults/preset map in JS and re-reads explicit CSS overrides after cache invalidation.
-`Helpers` typography cache also tracks the current root `.nightMode` state per canvas; when the mode flips, the next `resolveTextColor()` / `resolveFontFamily()` call refreshes cached values from `getComputedStyle()`.
+Night-mode border adaptation is CSS-only. `ThemeResolver` keeps the token defaults/preset map in JS and re-reads explicit CSS overrides after cache invalidation.
+`Helpers` typography cache also tracks the current root `.nightMode` state per widget root; when the mode flips, the next `resolveTextColor()` / `resolveFontFamily()` call refreshes cached values from `getComputedStyle()`.
 
 ## Head Hiding
 

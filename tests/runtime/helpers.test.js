@@ -23,6 +23,54 @@ describe("runtime/helpers.js", function () {
     };
   }
 
+  function createRoot(doc) {
+    const attrs = Object.create(null);
+    const root = {
+      ownerDocument: doc,
+      parentElement: null,
+      getAttribute(name) {
+        return Object.prototype.hasOwnProperty.call(attrs, name) ? attrs[name] : null;
+      },
+      setAttribute(name, value) {
+        attrs[String(name)] = String(value);
+      },
+      removeAttribute(name) {
+        delete attrs[String(name)];
+      },
+      closest(selector) {
+        return selector === ".widget, .DirectWidget" ? root : null;
+      }
+    };
+    return root;
+  }
+
+  function createCanvas(doc, rootEl) {
+    return {
+      ownerDocument: doc,
+      parentElement: rootEl || null,
+      closest(selector) {
+        return selector === ".widget, .DirectWidget" ? rootEl || null : null;
+      }
+    };
+  }
+
+  function createComputedStyle(styleByEl, calls) {
+    return function (el) {
+      if (calls) {
+        calls.push(el);
+      }
+      const values = typeof styleByEl === "function"
+        ? styleByEl(el)
+        : (styleByEl && styleByEl.has(el) ? styleByEl.get(el) : {});
+      return {
+        color: Object.prototype.hasOwnProperty.call(values, "color") ? values.color : "rgb(1, 2, 3)",
+        getPropertyValue(name) {
+          return Object.prototype.hasOwnProperty.call(values, name) ? values[name] : "";
+        }
+      };
+    };
+  }
+
   function loadRuntimeHelpers(extra) {
     const context = createScriptContext(Object.assign({
       DyniPlugin: {
@@ -199,80 +247,85 @@ describe("runtime/helpers.js", function () {
     expect(sized.ctx.calls.filter((c) => c.name === "setTransform")).toHaveLength(2);
   });
 
-  it("resolveTextColor and resolveFontFamily use CSS vars before fallback", function () {
+  it("resolveTextColor and resolveFontFamily read from a root element directly", function () {
     const night = { value: false };
-    const canvas = { ownerDocument: createDoc(night) };
+    const doc = createDoc(night);
+    const rootEl = createRoot(doc);
+    const calls = [];
 
     const runtime = loadRuntimeHelpers({
-      getComputedStyle() {
-        return {
-          color: "rgb(1, 2, 3)",
-          getPropertyValue(name) {
-            if (name === "--dyni-fg") return " #abcdef ";
-            if (name === "--dyni-font") return " \"Fira Sans\" ";
-            return "";
-          }
-        };
-      }
+      getComputedStyle: createComputedStyle(new Map([
+        [rootEl, {
+          "--dyni-fg": " #abcdef ",
+          "--dyni-font": " \"Fira Sans\" "
+        }]
+      ]), calls)
     });
 
-    expect(runtime.resolveTextColor(canvas)).toBe("#abcdef");
-    expect(runtime.resolveFontFamily(canvas)).toBe("\"Fira Sans\"");
+    expect(runtime.resolveTextColor(rootEl)).toBe("#abcdef");
+    expect(runtime.resolveFontFamily(rootEl)).toBe("\"Fira Sans\"");
+    expect(calls).toEqual([rootEl]);
   });
 
-  it("caches typography per canvas while night mode state is unchanged", function () {
-    const calls = { value: 0 };
+  it("adapts canvas inputs through the owning root", function () {
     const night = { value: false };
-    const canvas = { ownerDocument: createDoc(night) };
+    const doc = createDoc(night);
+    const rootEl = createRoot(doc);
+    const canvas = createCanvas(doc, rootEl);
+    const calls = [];
 
     const runtime = loadRuntimeHelpers({
-      getComputedStyle() {
-        calls.value += 1;
-        return {
-          color: "rgb(1, 2, 3)",
-          getPropertyValue(name) {
-            if (name === "--dyni-fg") return " #abcdef ";
-            if (name === "--dyni-font") return " \"Fira Sans\" ";
-            return "";
-          }
-        };
-      }
+      getComputedStyle: createComputedStyle(new Map([
+        [rootEl, {
+          "--dyni-fg": " #abcdef ",
+          "--dyni-font": " \"Fira Sans\" "
+        }],
+        [canvas, {
+          "--dyni-fg": " #ff00ff ",
+          "--dyni-font": " \"Wrong Font\" "
+        }]
+      ]), calls)
     });
 
     expect(runtime.resolveTextColor(canvas)).toBe("#abcdef");
     expect(runtime.resolveFontFamily(canvas)).toBe("\"Fira Sans\"");
-    expect(runtime.resolveTextColor(canvas)).toBe("#abcdef");
-    expect(runtime.resolveFontFamily(canvas)).toBe("\"Fira Sans\"");
-    expect(calls.value).toBe(1);
+    expect(calls).toEqual([rootEl]);
   });
 
-  it("refreshes cached typography when night mode class state changes", function () {
-    const calls = { value: 0 };
+  it("shares one root-owned typography cache across root and canvas calls and refreshes on night mode changes", function () {
+    const calls = [];
     const night = { value: false };
-    const canvas = { ownerDocument: createDoc(night) };
+    const doc = createDoc(night);
+    const rootEl = createRoot(doc);
+    const canvas = createCanvas(doc, rootEl);
 
     const runtime = loadRuntimeHelpers({
-      getComputedStyle() {
-        calls.value += 1;
+      getComputedStyle: createComputedStyle(function (el) {
+        if (el === rootEl) {
+          return {
+            color: night.value ? "rgb(200, 200, 200)" : "rgb(10, 20, 30)",
+            "--dyni-fg": night.value ? " #222222 " : " #111111 ",
+            "--dyni-font": night.value ? " \"Night Font\" " : " \"Day Font\" "
+          };
+        }
         return {
-          color: night.value ? "rgb(200, 200, 200)" : "rgb(10, 20, 30)",
-          getPropertyValue(name) {
-            if (name === "--dyni-fg") return night.value ? " #222222 " : " #111111 ";
-            if (name === "--dyni-font") return night.value ? " \"Night Font\" " : " \"Day Font\" ";
-            return "";
-          }
+          color: "rgb(9, 9, 9)",
+          "--dyni-fg": " #999999 ",
+          "--dyni-font": " \"Canvas Font\" "
         };
-      }
+      }, calls)
     });
 
-    expect(runtime.resolveTextColor(canvas)).toBe("#111111");
+    expect(runtime.resolveTextColor(rootEl)).toBe("#111111");
     expect(runtime.resolveFontFamily(canvas)).toBe("\"Day Font\"");
-    expect(calls.value).toBe(1);
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toBe(rootEl);
 
     night.value = true;
     expect(runtime.resolveTextColor(canvas)).toBe("#222222");
-    expect(runtime.resolveFontFamily(canvas)).toBe("\"Night Font\"");
-    expect(calls.value).toBe(2);
+    expect(runtime.resolveFontFamily(rootEl)).toBe("\"Night Font\"");
+    expect(calls).toHaveLength(2);
+    expect(calls[1]).toBe(rootEl);
   });
 
   it("keeps documented fallback return values when vars are unset", function () {
