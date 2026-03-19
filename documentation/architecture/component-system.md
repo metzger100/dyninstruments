@@ -11,6 +11,7 @@ Ownership split:
 - `plugin.js` bootstraps internal scripts (`runtime/*`, `config/*`) in fixed order
 - `config/components.js` defines component registry entries
 - `runtime/component-loader.js` resolves dependencies and injects component JS/CSS
+- `runtime/HostCommitController.js` provides standalone deferred commit scheduling for HTML-shell mounting (Phase 5 foundation, not yet wired into `ClusterWidget`)
 
 ## `config.components` Registry
 
@@ -155,6 +156,7 @@ In the current init flow, theme presets are applied to discovered `.widget.dynip
 ## Related
 
 - [cluster-widget-system.md](cluster-widget-system.md) — `ClusterWidget` modular mapper architecture
+- [host-commit-controller.md](host-commit-controller.md) — standalone deferred commit controller API
 - [../shared/helpers.md](../shared/helpers.md) — `Helpers` passed to `create`
 - [../guides/add-new-gauge.md](../guides/add-new-gauge.md) — gauge workflow
 - [../guides/add-new-full-circle-dial.md](../guides/add-new-full-circle-dial.md) — full-circle dial workflow

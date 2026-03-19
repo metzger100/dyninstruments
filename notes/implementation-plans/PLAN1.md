@@ -392,6 +392,8 @@ alongside the input files.
 
 ### Phase 1 — ThemeResolver: Root-First API
 
+**Status:** implemented (`2026-03-19`)
+
 **Goal:** `ThemeResolver` gains a `resolveForRoot(rootEl)` entry point that resolves
 tokens from a widget root element instead of requiring a canvas. The existing
 `resolve(canvas)` path becomes a thin adapter that finds its owning root and
@@ -411,6 +413,8 @@ or `plugin.css`.
 ---
 
 ### Phase 2 — Canvas Typography Helpers: Shared Root/Token Contract
+
+**Status:** implemented (`2026-03-19`)
 
 **Goal:** `resolveTextColor`, `resolveFontFamily`, and `resolveTypography` in
 `helpers.js` switch to the same root-first token contract introduced in Phase 1.
@@ -432,6 +436,8 @@ or any cluster files.
 ---
 
 ### Phase 3 — Root Discovery: `init.js` Decoupled from Canvas
+
+**Status:** implemented (`2026-03-19`)
 
 **Goal:** `listPluginContainers` discovers widget instances through
 `.widget.dyniplugin` instead of `canvas.widgetData`. Theme preset lookup,
@@ -455,6 +461,8 @@ discovery path.
 ---
 
 ### Phase 4 — Widget Registrar: Static Host Marking + CSS Migration
+
+**Status:** implemented (`2026-03-19`)
 
 **Goal:** `widget-registrar.js` applies host-level markers (`dyni-host-html`,
 `dyni-hide-native-head`) as static classes on the widget/frame definition, not by
@@ -480,6 +488,8 @@ actual removal of `renderCanvas` from the registration happens in Phase 9.
 ---
 
 ### Phase 5 — HostCommitController (Standalone Module)
+
+**Status:** implemented (`2026-03-19`)
 
 **Goal:** Create `runtime/HostCommitController.js` as a self-contained module.
 Implements the deferred commit lifecycle described in the plan (Section G.1):
@@ -517,6 +527,9 @@ the actual html and canvas-dom controllers are not created here.
 shell → `update`; same surface + new shell → `detach("remount")` then `attach`;
 different surface → `detach("surface-switch")` on old, `attach` on new; `destroy`
 calls through; stale async work (wrong revision) is rejected.
+**Documentation update:** Add or update architecture documentation for the new
+runtime lifecycle module (`SurfaceSessionController`) and keep
+`documentation/TABLEOFCONTENTS.md` in sync with any new documentation page.
 
 **Scope boundary:** Do not modify any existing files. This is a new module only.
 
@@ -545,6 +558,10 @@ ResizeObserver; `update` with changed props schedules repaint; `update` with
 identical props does not repaint; theme invalidation forces repaint even without
 prop change; `detach` disconnects ResizeObserver and clears canvas refs; shell
 markup is structurally stable across `update` calls (Principle 8a).
+**Documentation update:** Update architecture/rendering docs to document the
+`canvas-dom` adapter contract (`attach`/`update`/`detach`/`destroy`), the
+`font-size: initial` isolation rule, and `ResizeObserver` ownership. Update
+`documentation/TABLEOFCONTENTS.md` if a new doc page is added.
 
 **Scope boundary:** Do not modify existing renderer files. Do not rewrite
 ClusterRendererRouter yet. This module wraps existing renderers but does not
@@ -575,6 +592,10 @@ selection per catalog entry; shell markup includes `data-dyni-instance`,
 `data-dyni-surface`, and surface-specific classes; `canvas-dom` entries route
 through `CanvasDomSurfaceAdapter`; `html` entries route through the stub html
 controller; `renderCanvas` is no longer exposed.
+**Documentation update:** Update architecture docs for the new Kind Catalog and
+surface-aware router flow (`renderHtml` shell path, surface selection, and
+controller lifecycle). Update `documentation/TABLEOFCONTENTS.md` navigation for
+new/renamed references.
 
 **Scope boundary:** Do not modify `ClusterWidget.js` yet. Do not modify
 `widget-registrar.js` yet. The router is tested in isolation from the host wiring.
@@ -603,6 +624,10 @@ returns valid shell markup; deferred commit finds root and binds surface
 controller; canvas kinds still render through the canvas-dom adapter; surface
 switch (simulated kind change) cleans up old controller and attaches new one;
 `finalizeFunction` leaves no dangling observers or timers.
+**Documentation update:** Update lifecycle/architecture/theme docs for the host
+flip to `renderHtml`-only registration, `ClusterWidget` lifecycle ownership,
+static host-class policy, and surface shell CSS contract. Keep
+`documentation/TABLEOFCONTENTS.md` aligned with the updated pages.
 
 **Deployment note:** Phases 5–9 are deployed together. No subset is safe to ship.
 But each phase is implemented and tested individually, and each leaves the existing
@@ -627,6 +652,9 @@ deliver caption and unit contracts. No HTML markup, no canvas drawing. Update
 **Test exit:** All existing NavMapper tests pass unchanged (the output for
 `kind: "activeRoute"` is identical). New ViewModel unit tests cover: field
 normalization, disconnect derivation, missing/null value handling.
+**Documentation update:** Update active-route and architecture docs to document
+`ActiveRouteViewModel` as the shared domain contract and list the new file in
+`documentation/TABLEOFCONTENTS.md` if a dedicated doc page is added.
 
 **Scope boundary:** Do not add `activeRouteInteractive` yet. This phase only
 extracts — it does not introduce new kinds.
@@ -654,6 +682,9 @@ correct view model output. Renderer tests verify HTML output includes expected
 structure, captions, values. Config tests verify the new kind appears in the
 selectable list and that editables and disconnect logic apply to both active route
 kinds.
+**Documentation update:** Update widget + cluster docs for the new
+`activeRouteInteractive` kind, Kind Catalog entry (`surface: "html"`), and
+HTML renderer contract. Update `documentation/TABLEOFCONTENTS.md` for added docs.
 
 **Scope boundary:** Do not implement eventHandler wiring or interaction behavior
 yet. The renderer produces static HTML only at this point.
@@ -684,6 +715,10 @@ on `detach`; `resizeSignature` change triggers `triggerResize()` exactly once;
 surface switch removes all named handlers; `catchAll` is present on the outermost
 interactive wrapper; interactive area markup passes through `UserHtml` event
 interception correctly (click events get `stopPropagation` + `preventDefault`).
+**Documentation update:** Update interactive-widget and lifecycle docs for
+`catchAll` registration ownership (`initFunction` global + surface-owned named
+handlers), `resizeSignature` behavior, and HTML-surface detach cleanup rules.
+Update `documentation/TABLEOFCONTENTS.md` links as needed.
 
 **Scope boundary:** Host action dispatch via `TemporaryHostActionBridge` is
 optional and can be wired separately. The widget must be safe and usable without it.
@@ -787,6 +822,10 @@ Reference this phase.
 `shared/theme/ThemeResolver.js`, `cluster/ClusterWidget.js`,
 `cluster/rendering/ClusterRendererRouter.js`, `plugin.css`,
 `documentation/TECH-DEBT.md`, affected test files.
+**Documentation update:** In this cleanup phase, update all docs that still
+describe removed compatibility paths (legacy selectors/markers/canvas-origin
+discovery) and keep `documentation/TABLEOFCONTENTS.md` accurate. Keep
+`documentation/TECH-DEBT.md` synchronized with what was removed/resolved.
 
 **Test exit:** `npm run check:all` passes. `grep -rn` for each removed
 pattern confirms zero non-test source hits. All existing tests pass
@@ -795,8 +834,8 @@ pattern confirms zero non-test source hits. All existing tests pass
 
 **Scope boundary:** Do not change widget renderers, shared widget-kits,
 mappers, or config files. This phase is purely removal and simplification
-of infrastructure code. Do not update documentation prose beyond
-TECH-DEBT.md — that belongs to Phase 14.
+of infrastructure code. Keep behavior changes scoped to removal/simplification
+work; broad architecture narrative alignment still happens in Phase 14.
 
 ---
 
