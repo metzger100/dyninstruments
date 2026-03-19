@@ -4,7 +4,7 @@
 
 ## Overview
 
-dyninstruments uses CSS custom properties for theming, scoped to `.dyniplugin` and `[data-dyni]`. Structural styles stay in `plugin.css`, while `ThemeResolver` merges explicit CSS token overrides with runtime preset/default values. Typography helpers resolve from the owning widget root, so canvas remains the geometry/drawing owner.
+dyninstruments uses CSS custom properties for theming, scoped to `.widget.dyniplugin` roots. Structural styles stay in `plugin.css`, while `ThemeResolver` merges explicit CSS token overrides with runtime preset/default values. The preset bootstrap path is root-only; `[data-dyni]` remains a separate head-hiding marker and is not part of discovery. Typography helpers resolve from the owning widget root, so canvas remains the geometry/drawing owner.
 
 Theme values are layered:
 
@@ -107,8 +107,7 @@ Pointer sizing semantics:
 Preset selection can be provided from AvNav `user.css` via `--dyni-theme-preset`:
 
 ```css
-.widget.dyniplugin,
-[data-dyni] {
+.widget.dyniplugin {
   --dyni-theme-preset: slim;
 }
 ```
@@ -116,8 +115,7 @@ Preset selection can be provided from AvNav `user.css` via `--dyni-theme-preset`
 Per-token overrides can be applied in `user.css` and override preset values directly:
 
 ```css
-.widget.dyniplugin,
-[data-dyni] {
+.widget.dyniplugin {
   --dyni-pointer: #00aaff;
   --dyni-radial-pointer-width: 1.2;
   --dyni-linear-pointer-width: 1.2;

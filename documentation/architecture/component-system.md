@@ -143,6 +143,8 @@ Promise.all(needed.map(loader.loadComponent)).then(function (componentsLoaded) {
 });
 ```
 
+In the current init flow, theme presets are applied to discovered `.widget.dyniplugin` roots directly after widget registration.
+
 ## Adding a New Component
 
 1. Create UMD component file
