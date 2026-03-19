@@ -575,6 +575,8 @@ change them.
 
 ### Phase 8 — Kind Catalog + Surface Router (ClusterRendererRouter Rewrite)
 
+**Status:** implemented (`2026-03-19`)
+
 **Goal:** Create the Kind Catalog as a central spec (Section D) with `kind`,
 `viewModelId`, `rendererId`, `surface` per entry. Rewrite `ClusterRendererRouter.js`
 from a simple renderer delegator into a surface-aware router: determine surface

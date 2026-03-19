@@ -238,6 +238,8 @@
       js: BASE + "cluster/rendering/CanvasDomSurfaceAdapter.js", css: undefined,
       globalKey: "DyniCanvasDomSurfaceAdapter", deps: ["ThemeResolver"]
     },
+    ClusterKindCatalog: { js: BASE + "cluster/rendering/ClusterKindCatalog.js", css: undefined, globalKey: "DyniClusterKindCatalog" },
+    HtmlSurfaceController: { js: BASE + "cluster/rendering/HtmlSurfaceController.js", css: undefined, globalKey: "DyniHtmlSurfaceController" },
     WindRadialWidget: {
       js: BASE + "widgets/radial/WindRadialWidget/WindRadialWidget.js",
       css: undefined,
@@ -327,10 +329,8 @@
       css: undefined,
       globalKey: "DyniClusterRendererRouter",
       deps: [
-        "ThreeValueTextWidget",
-        "PositionCoordinateWidget",
-        "ActiveRouteTextWidget",
-        "CenterDisplayTextWidget",
+        "ClusterKindCatalog", "CanvasDomSurfaceAdapter", "HtmlSurfaceController",
+        "ThreeValueTextWidget", "PositionCoordinateWidget", "ActiveRouteTextWidget", "CenterDisplayTextWidget",
         "RendererPropsWidget"
       ]
     },
