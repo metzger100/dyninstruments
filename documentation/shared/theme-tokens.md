@@ -4,7 +4,7 @@
 
 ## Overview
 
-`ThemeResolver` provides plugin-wide token resolution from CSS custom properties. The canonical API is root-first: `resolveForRoot(rootEl)` reads the widget root directly, applies the selected preset from `data-dyni-theme`, prefers explicit CSS custom-property overrides, and caches the merged result per root. `resolve(canvas)` remains as a thin adapter that resolves the owning root and delegates to the root-first path.
+`ThemeResolver` provides plugin-wide token resolution from CSS custom properties. The canonical API is root-first: `resolveForRoot(rootEl)` reads the widget root directly, applies the selected preset from `data-dyni-theme`, prefers explicit CSS custom-property overrides, and caches the merged result per root. `runtime/init.js` discovers `.widget.dyniplugin` roots directly when applying presets, and `resolve(canvas)` remains as a thin adapter that resolves the owning root and delegates to the root-first path.
 
 `ThemePresets` provides named runtime presets by setting a preset selector attribute (`data-dyni-theme`) on widget root containers.
 
@@ -160,7 +160,7 @@ Only values that differ from theme defaults are included.
 
 ## Runtime Integration
 
-`runtime/init.js` loads `ThemePresets` explicitly and applies the selected preset to discovered plugin widget containers after widget registration.
+`runtime/init.js` loads `ThemePresets` explicitly and applies the selected preset to discovered `.widget.dyniplugin` roots after widget registration.
 
 - Preset source precedence:
   1. Settings API stub (`readThemePresetFromSettingsApi()`)
@@ -168,7 +168,7 @@ Only values that differ from theme defaults are included.
   3. CSS variable `--dyni-theme-preset` (typically from AvNav `user.css`)
   4. `default`
 - Invalid preset names from any source resolve to `default`.
-- Discovery pattern: iterate `canvas.widgetData`, resolve root via `canvas.closest(".widget, .DirectWidget") || canvas.parentElement`, apply only for plugin roots (`.dyniplugin` or `[data-dyni]`)
+- Discovery pattern: iterate `.widget.dyniplugin` roots directly and apply the preset to those roots. When no widget root is mounted yet, the document-level CSS fallback remains the last resort.
 
 `runtime/widget-registrar.js` also reapplies the active preset when a widget root is first discovered during `renderCanvas`.
 
@@ -191,8 +191,7 @@ window.DyniPlugin.runtime.applyThemePresetToRegisteredWidgets();
 Preset selection from `user.css`:
 
 ```css
-.widget.dyniplugin,
-[data-dyni] {
+.widget.dyniplugin {
   --dyni-theme-preset: slim;
 }
 ```

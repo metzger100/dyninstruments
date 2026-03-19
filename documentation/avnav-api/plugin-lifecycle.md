@@ -155,6 +155,8 @@ function create(def, Helpers) {
 5. avnav.api.registerWidget(definition, editableParameters)
 ```
 
+After registration, `runtime/init.js` applies theme presets by discovering `.widget.dyniplugin` roots directly.
+
 ### dyninstruments Render Flow
 
 ```text

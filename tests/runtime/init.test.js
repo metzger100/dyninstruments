@@ -15,6 +15,50 @@ describe("runtime/init.js", function () {
     };
   }
 
+  function createPluginRoot() {
+    const attrs = Object.create(null);
+    return {
+      classList: {
+        contains(name) {
+          return name === "dyniplugin";
+        }
+      },
+      hasAttribute(name) {
+        return Object.prototype.hasOwnProperty.call(attrs, name);
+      },
+      getAttribute(name) {
+        return Object.prototype.hasOwnProperty.call(attrs, name) ? attrs[name] : null;
+      },
+      setAttribute(name, value) {
+        attrs[String(name)] = String(value);
+      },
+      removeAttribute(name) {
+        delete attrs[String(name)];
+      },
+      style: {
+        setProperty() {},
+        removeProperty() {}
+      }
+    };
+  }
+
+  function createLegacyOnlyRoot() {
+    return {
+      classList: {
+        contains() {
+          return false;
+        }
+      },
+      hasAttribute(name) {
+        return name === "data-dyni";
+      },
+      style: {
+        setProperty() {},
+        removeProperty() {}
+      }
+    };
+  }
+
   it("loads needed components and registers widgets", async function () {
     const registerWidget = vi.fn();
     const uniqueComponents = vi.fn(() => ["A"]);
@@ -85,31 +129,11 @@ describe("runtime/init.js", function () {
       return Promise.resolve({ id: "A", create: () => ({}) });
     });
 
-    const rootEl = {
-      classList: {
-        contains(name) {
-          return name === "dyniplugin";
-        }
-      },
-      hasAttribute() {
-        return false;
-      },
-      style: {
-        setProperty() {},
-        removeProperty() {}
-      }
-    };
-
-    const canvas = {
-      closest() {
-        return rootEl;
-      },
-      parentElement: rootEl
-    };
+    const rootEl = createPluginRoot();
 
     const context = createScriptContext({
       document: {
-        querySelectorAll: vi.fn(() => [canvas])
+        querySelectorAll: vi.fn(() => [rootEl])
       },
       avnav: {
         api: {
@@ -143,6 +167,7 @@ describe("runtime/init.js", function () {
     await context.DyniPlugin.state.initPromise;
     await flushPromises();
 
+    expect(context.document.querySelectorAll).toHaveBeenCalledWith(".widget.dyniplugin");
     expect(applyPreset).toHaveBeenCalledWith(rootEl, "slim");
     expect(typeof context.DyniPlugin.runtime.applyThemePresetToRegisteredWidgets).toBe("function");
     context.DyniPlugin.runtime.applyThemePresetToRegisteredWidgets("bold");
@@ -167,26 +192,7 @@ describe("runtime/init.js", function () {
       return Promise.resolve({ id: "A", create: () => ({}) });
     });
 
-    const rootEl = {
-      classList: {
-        contains(name) {
-          return name === "dyniplugin";
-        }
-      },
-      hasAttribute() {
-        return false;
-      },
-      style: {
-        setProperty() {},
-        removeProperty() {}
-      }
-    };
-    const canvas = {
-      closest() {
-        return rootEl;
-      },
-      parentElement: rootEl
-    };
+    const rootEl = createPluginRoot();
 
     const context = createScriptContext({
       getComputedStyle(el) {
@@ -200,7 +206,7 @@ describe("runtime/init.js", function () {
         };
       },
       document: {
-        querySelectorAll: vi.fn(() => [canvas]),
+        querySelectorAll: vi.fn(() => [rootEl]),
         documentElement: {},
         body: {}
       },
@@ -234,6 +240,7 @@ describe("runtime/init.js", function () {
     await context.DyniPlugin.state.initPromise;
     await flushPromises();
 
+    expect(context.document.querySelectorAll).toHaveBeenCalledWith(".widget.dyniplugin");
     expect(applyPreset).toHaveBeenCalledWith(rootEl, "night");
   });
 
@@ -255,26 +262,7 @@ describe("runtime/init.js", function () {
       return Promise.resolve({ id: "A", create: () => ({}) });
     });
 
-    const rootEl = {
-      classList: {
-        contains(name) {
-          return name === "dyniplugin";
-        }
-      },
-      hasAttribute() {
-        return false;
-      },
-      style: {
-        setProperty() {},
-        removeProperty() {}
-      }
-    };
-    const canvas = {
-      closest() {
-        return rootEl;
-      },
-      parentElement: rootEl
-    };
+    const rootEl = createPluginRoot();
 
     const context = createScriptContext({
       getComputedStyle() {
@@ -288,7 +276,7 @@ describe("runtime/init.js", function () {
         };
       },
       document: {
-        querySelectorAll: vi.fn(() => [canvas]),
+        querySelectorAll: vi.fn(() => [rootEl]),
         documentElement: {},
         body: {}
       },
@@ -323,6 +311,7 @@ describe("runtime/init.js", function () {
     await context.DyniPlugin.state.initPromise;
     await flushPromises();
 
+    expect(context.document.querySelectorAll).toHaveBeenCalledWith(".widget.dyniplugin");
     expect(applyPreset).toHaveBeenCalledWith(rootEl, "slim");
   });
 
@@ -344,26 +333,7 @@ describe("runtime/init.js", function () {
       return Promise.resolve({ id: "A", create: () => ({}) });
     });
 
-    const rootEl = {
-      classList: {
-        contains(name) {
-          return name === "dyniplugin";
-        }
-      },
-      hasAttribute() {
-        return false;
-      },
-      style: {
-        setProperty() {},
-        removeProperty() {}
-      }
-    };
-    const canvas = {
-      closest() {
-        return rootEl;
-      },
-      parentElement: rootEl
-    };
+    const rootEl = createPluginRoot();
 
     const context = createScriptContext({
       getComputedStyle() {
@@ -377,7 +347,7 @@ describe("runtime/init.js", function () {
         };
       },
       document: {
-        querySelectorAll: vi.fn(() => [canvas]),
+        querySelectorAll: vi.fn(() => [rootEl]),
         documentElement: {},
         body: {}
       },
@@ -411,6 +381,7 @@ describe("runtime/init.js", function () {
     await context.DyniPlugin.state.initPromise;
     await flushPromises();
 
+    expect(context.document.querySelectorAll).toHaveBeenCalledWith(".widget.dyniplugin");
     expect(applyPreset).toHaveBeenCalledWith(rootEl, "default");
   });
 
@@ -497,7 +468,67 @@ describe("runtime/init.js", function () {
     expect(applyPreset).toHaveBeenLastCalledWith(rootEl, "bold");
   });
 
-  it("invalidates ThemeResolver cache for container canvases after preset application", async function () {
+  it("ignores data-dyni-only containers when discovering plugin roots", async function () {
+    const applyPreset = vi.fn();
+    const uniqueComponents = vi.fn(() => ["A"]);
+    const { createTemporaryHostActionBridge } = createBridgeRuntimeMock();
+    const loadComponent = vi.fn((id) => {
+      if (id === "ThemePresets") {
+        return Promise.resolve({
+          id: "ThemePresets",
+          create: () => ({
+            presets: { default: {}, bold: {} },
+            apply: applyPreset,
+            remove: vi.fn()
+          })
+        });
+      }
+      return Promise.resolve({ id: "A", create: () => ({}) });
+    });
+
+    const legacyRoot = createLegacyOnlyRoot();
+
+    const context = createScriptContext({
+      document: {
+        querySelectorAll: vi.fn(() => [legacyRoot]),
+        documentElement: {},
+        body: {}
+      },
+      avnav: {
+        api: {
+          registerWidget: vi.fn(),
+          log: vi.fn()
+        }
+      },
+      DyniPlugin: {
+        runtime: {
+          createTemporaryHostActionBridge,
+          createHelpers: vi.fn(() => ({ helper: true })),
+          createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
+          registerWidget: vi.fn()
+        },
+        state: {},
+        config: {
+          shared: {},
+          clusters: [],
+          components: {
+            A: { globalKey: "DyniA" },
+            ThemePresets: { globalKey: "DyniThemePresets" }
+          },
+          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
+        }
+      }
+    });
+
+    runIifeScript("runtime/init.js", context);
+    await context.DyniPlugin.state.initPromise;
+    await flushPromises();
+
+    expect(context.document.querySelectorAll).toHaveBeenCalledWith(".widget.dyniplugin");
+    expect(applyPreset).not.toHaveBeenCalled();
+  });
+
+  it("invalidates ThemeResolver cache for the root after preset application", async function () {
     const applyPreset = vi.fn();
     const invalidateCanvas = vi.fn();
     const invalidateAll = vi.fn();
@@ -530,33 +561,11 @@ describe("runtime/init.js", function () {
       return Promise.resolve({ id: "A", create: () => ({}) });
     });
 
-    const rootEl = {
-      classList: {
-        contains(name) {
-          return name === "dyniplugin";
-        }
-      },
-      hasAttribute() {
-        return false;
-      },
-      querySelectorAll() {
-        return [canvas];
-      },
-      style: {
-        setProperty() {},
-        removeProperty() {}
-      }
-    };
-    const canvas = {
-      closest() {
-        return rootEl;
-      },
-      parentElement: rootEl
-    };
+    const rootEl = createPluginRoot();
 
     const context = createScriptContext({
       document: {
-        querySelectorAll: vi.fn(() => [canvas])
+        querySelectorAll: vi.fn(() => [rootEl])
       },
       avnav: {
         api: {
@@ -596,7 +605,7 @@ describe("runtime/init.js", function () {
     context.DyniPlugin.runtime.applyThemePresetToContainer(rootEl, "bold");
 
     expect(applyPreset).toHaveBeenCalledWith(rootEl, "bold");
-    expect(invalidateCanvas).toHaveBeenCalledWith(canvas);
+    expect(invalidateCanvas).toHaveBeenCalledWith(rootEl);
     expect(invalidateAll).not.toHaveBeenCalled();
   });
 

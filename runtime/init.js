@@ -46,49 +46,17 @@
   }
 
   function isPluginContainer(rootEl) {
-    if (!rootEl) {
-      return false;
-    }
-    if (rootEl.classList && typeof rootEl.classList.contains === "function" && rootEl.classList.contains("dyniplugin")) {
-      return true;
-    }
-    return !!(typeof rootEl.hasAttribute === "function" && rootEl.hasAttribute("data-dyni"));
-  }
-
-  function discoverWidgetRoot(canvas) {
-    if (!canvas) {
-      return null;
-    }
-    if (typeof canvas.closest === "function") {
-      const found = canvas.closest(".widget, .DirectWidget");
-      if (found) {
-        return found;
-      }
-    }
-    return canvas.parentElement || null;
+    return !!(rootEl &&
+      rootEl.classList &&
+      typeof rootEl.classList.contains === "function" &&
+      rootEl.classList.contains("dyniplugin"));
   }
 
   function listPluginContainers(doc) {
     if (!doc || typeof doc.querySelectorAll !== "function") {
       return [];
     }
-    const canvases = doc.querySelectorAll("canvas.widgetData");
-    const seen = new Set();
-    const roots = [];
-
-    for (let i = 0; i < canvases.length; i++) {
-      const rootEl = discoverWidgetRoot(canvases[i]);
-      if (!isPluginContainer(rootEl)) {
-        continue;
-      }
-      if (seen.has(rootEl)) {
-        continue;
-      }
-      seen.add(rootEl);
-      roots.push(rootEl);
-    }
-
-    return roots;
+    return Array.prototype.slice.call(doc.querySelectorAll(".widget.dyniplugin"));
   }
 
   function readThemePresetCssVarFromElement(el) {
@@ -171,14 +139,9 @@
       return;
     }
 
-    if (rootEl && typeof resolverMod.invalidateCanvas === "function" && typeof rootEl.querySelectorAll === "function") {
-      const canvases = rootEl.querySelectorAll("canvas.widgetData");
-      if (canvases && canvases.length) {
-        for (let i = 0; i < canvases.length; i++) {
-          resolverMod.invalidateCanvas(canvases[i]);
-        }
-        return;
-      }
+    if (typeof resolverMod.invalidateCanvas === "function") {
+      resolverMod.invalidateCanvas(rootEl);
+      return;
     }
 
     if (typeof resolverMod.invalidateAll === "function") {
