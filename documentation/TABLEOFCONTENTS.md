@@ -27,6 +27,7 @@
 - **How does the dependency system work?** → [architecture/component-system.md](architecture/component-system.md#dependency-graph)
 - **How does ClusterWidget route to renderers?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
 - **How does translateFunction mapper to graphic/numeric?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md#runtime-flow)
+- **How does deferred host commit scheduling work for `renderHtml` shells?** → [architecture/host-commit-controller.md](architecture/host-commit-controller.md)
 - **Where are plugin↔core contract tuples and roll/pitch contract rules?** → [architecture/plugin-core-contracts.md](architecture/plugin-core-contracts.md)
 - **What is the Helpers object?** → [shared/helpers.md](shared/helpers.md)
 
