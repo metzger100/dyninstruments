@@ -31,9 +31,10 @@ describe("ThemeResolver", function () {
     };
   }
 
-  function createRoot() {
+  function createRoot(doc) {
     const attrs = Object.create(null);
-    return {
+    const root = {
+      ownerDocument: doc,
       getAttribute(name) {
         return Object.prototype.hasOwnProperty.call(attrs, name) ? attrs[name] : null;
       },
@@ -42,8 +43,12 @@ describe("ThemeResolver", function () {
       },
       removeAttribute(name) {
         delete attrs[String(name)];
+      },
+      closest(selector) {
+        return selector === ".widget, .DirectWidget" ? root : null;
       }
     };
+    return root;
   }
 
   function createCanvas(doc, rootEl) {
@@ -79,24 +84,26 @@ describe("ThemeResolver", function () {
     };
   }
 
-  it("resolve returns full defaults when CSS variables are not set", function () {
+  it("resolveForRoot returns full defaults when CSS variables are not set", function () {
     installComputedStyle(new Map());
 
     const mod = loadFresh("shared/theme/ThemeResolver.js");
+    const doc = createDoc({ value: false });
+    const rootEl = createRoot(doc);
     const resolver = mod.create({}, createHelpers());
-    const canvas = createCanvas(createDoc({ value: false }), createRoot());
-    const out = resolver.resolve(canvas);
+    const out = resolver.resolveForRoot(rootEl);
 
     expect(Object.keys(out).sort()).toEqual(["colors", "font", "linear", "radial", "xte"]);
     expect(out).toEqual(mod.DEFAULTS);
   });
 
-  it("respects CSS variable overrides", function () {
+  it("resolveForRoot respects CSS variable overrides and preset values on the root", function () {
     const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const rootEl = createRoot();
-    const canvas = createCanvas(createDoc({ value: false }), rootEl);
+    const doc = createDoc({ value: false });
+    const rootEl = createRoot(doc);
+    rootEl.setAttribute("data-dyni-theme", "bold");
     installComputedStyle(new Map([
-      [canvas, {
+      [rootEl, {
         "--dyni-pointer": "  #123456  ",
         "--dyni-linear-track-width": " 0.2 ",
         "--dyni-linear-pointer-width": " 0.9 ",
@@ -105,43 +112,31 @@ describe("ThemeResolver", function () {
     ]));
 
     const resolver = mod.create({}, createHelpers());
-    const out = resolver.resolve(canvas);
+    const out = resolver.resolveForRoot(rootEl);
 
     expect(out.colors.pointer).toBe("#123456");
     expect(out.colors.warning).toBe(mod.DEFAULTS.colors.warning);
     expect(out.linear.track.widthFactor).toBe(0.2);
     expect(out.linear.pointer.widthFactor).toBe(0.9);
-    expect(out.xte.lineWidthFactor).toBe(1.5);
-    expect(out.xte.boatSizeFactor).toBe(1);
-  });
-
-  it("applies active preset values from the widget root", function () {
-    installComputedStyle(new Map());
-
-    const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const rootEl = createRoot();
-    rootEl.setAttribute("data-dyni-theme", "bold");
-    const resolver = mod.create({}, createHelpers());
-    const canvas = createCanvas(createDoc({ value: false }), rootEl);
-    const out = resolver.resolve(canvas);
-
     expect(out.radial.ring.arcLineWidth).toBe(2.5);
     expect(out.radial.pointer.widthFactor).toBe(1.54);
     expect(out.linear.pointer.lengthFactor).toBe(2.2);
-    expect(out.xte.lineWidthFactor).toBe(2);
+    expect(out.xte.lineWidthFactor).toBe(1.5);
     expect(out.xte.boatSizeFactor).toBe(mod.DEFAULTS.xte.boatSizeFactor);
   });
 
-  it("prefers explicit root CSS overrides over active preset values", function () {
+  it("resolve(canvas) delegates through the widget root", function () {
     const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const rootEl = createRoot();
+    const doc = createDoc({ value: false });
+    const rootEl = createRoot(doc);
     rootEl.setAttribute("data-dyni-theme", "night");
-    const canvas = createCanvas(createDoc({ value: false }), rootEl);
+    const canvas = createCanvas(doc, rootEl);
     installComputedStyle(new Map([
+      [canvas, {
+        "--dyni-pointer": " #00ff00 "
+      }],
       [rootEl, {
-        "--dyni-pointer": " #00aaff ",
-        "--dyni-linear-track-linewidth": " 1.25 ",
-        "--dyni-xte-boat-size-factor": " 1.4 "
+        "--dyni-pointer": " #00aaff "
       }]
     ]));
 
@@ -150,34 +145,37 @@ describe("ThemeResolver", function () {
 
     expect(out.colors.pointer).toBe("#00aaff");
     expect(out.colors.warning).toBe("#8b6914");
-    expect(out.linear.track.lineWidth).toBe(1.25);
-    expect(out.xte.boatSizeFactor).toBe(1.4);
-    expect(out.xte.lineWidthFactor).toBe(mod.DEFAULTS.xte.lineWidthFactor);
+    expect(resolver.resolveForRoot(rootEl)).toBe(out);
   });
 
-  it("returns the same cached object reference for repeated resolve calls", function () {
+  it("reuses the cache by root identity instead of canvas identity", function () {
     const calls = { value: 0 };
     installComputedStyle(new Map(), calls);
 
     const mod = loadFresh("shared/theme/ThemeResolver.js");
+    const doc = createDoc({ value: false });
+    const rootEl = createRoot(doc);
+    const canvasA = createCanvas(doc, rootEl);
+    const canvasB = createCanvas(doc, rootEl);
     const resolver = mod.create({}, createHelpers());
-    const canvas = createCanvas(createDoc({ value: false }), createRoot());
 
-    const first = resolver.resolve(canvas);
-    const second = resolver.resolve(canvas);
+    const first = resolver.resolve(canvasA);
+    const second = resolver.resolve(canvasB);
 
     expect(first).toBe(second);
-    expect(calls.value).toBe(2);
+    expect(calls.value).toBe(1);
   });
 
   it("refreshes token cache only after explicit invalidation", function () {
     const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const rootEl = createRoot();
-    const resolver = mod.create({}, createHelpers());
-    const canvas = createCanvas(createDoc({ value: false }), rootEl);
+    const doc = createDoc({ value: false });
+    const rootEl = createRoot(doc);
+    const canvas = createCanvas(doc, rootEl);
     installComputedStyle(new Map());
 
+    const resolver = mod.create({}, createHelpers());
     const first = resolver.resolve(canvas);
+
     rootEl.setAttribute("data-dyni-theme", "bold");
     const stillCached = resolver.resolve(canvas);
     expect(stillCached.radial.pointer.widthFactor).toBe(first.radial.pointer.widthFactor);
@@ -197,17 +195,27 @@ describe("ThemeResolver", function () {
     installComputedStyle(new Map(), calls);
 
     const mod = loadFresh("shared/theme/ThemeResolver.js");
+    const night = { value: false };
+    const doc = createDoc(night);
+    const rootEl = createRoot(doc);
     const resolver = mod.create({}, createHelpers());
 
-    const night = { value: false };
-    const canvas = createCanvas(createDoc(night), createRoot());
-
-    const dayTokens = resolver.resolve(canvas);
+    const dayTokens = resolver.resolveForRoot(rootEl);
     night.value = true;
-    const nightTokens = resolver.resolve(canvas);
+    const nightTokens = resolver.resolveForRoot(rootEl);
 
     expect(dayTokens).not.toBe(nightTokens);
-    expect(calls.value).toBe(4);
+    expect(calls.value).toBe(2);
+  });
+
+  it("exposes the root-first API on the resolver instance", function () {
+    const mod = loadFresh("shared/theme/ThemeResolver.js");
+    const resolver = mod.create({}, createHelpers());
+
+    expect(typeof resolver.resolve).toBe("function");
+    expect(typeof resolver.resolveForRoot).toBe("function");
+    expect(typeof resolver.invalidateCanvas).toBe("function");
+    expect(typeof resolver.invalidateAll).toBe("function");
   });
 
   it("exposes DEFAULTS on module and create function", function () {

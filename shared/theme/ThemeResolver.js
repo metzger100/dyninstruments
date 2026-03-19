@@ -1,5 +1,5 @@
 /**
- * Module: ThemeResolver - Plugin-wide CSS token resolver with canvas-scoped cache
+ * Module: ThemeResolver - Plugin-wide CSS token resolver with root-scoped cache
  * Documentation: documentation/shared/theme-tokens.md
  * Depends: CSS custom properties, document root night mode class
  */
@@ -214,44 +214,39 @@
     return out;
   }
 
-  let byCanvas = new WeakMap();
+  let byRoot = new WeakMap();
   let lastNightModeState = null;
 
-  function invalidateCanvas(canvas) {
-    if (!canvas) {
+  function invalidateCanvas(rootEl) {
+    const resolvedRoot = discoverWidgetRoot(rootEl) || rootEl;
+    if (!resolvedRoot) {
       return;
     }
-    byCanvas.delete(canvas);
+    byRoot.delete(resolvedRoot);
   }
 
   function invalidateAll() {
-    byCanvas = new WeakMap();
+    byRoot = new WeakMap();
     lastNightModeState = null;
   }
 
   function create(def, Helpers) {
     const presetDefs = resolvePresetDefs(Helpers);
 
-    function resolveWithCache(canvas) {
-      if (!canvas) {
+    function resolveForRoot(rootEl) {
+      if (!rootEl) {
         return resolveTokens([], EMPTY_PRESET);
       }
 
-      const nightMode = getNightModeState(canvas);
+      const nightMode = getNightModeState(rootEl);
       if (lastNightModeState === null) lastNightModeState = nightMode;
       else if (nightMode !== lastNightModeState) {
         invalidateAll();
         lastNightModeState = nightMode;
       }
 
-      if (byCanvas.has(canvas)) {
-        return byCanvas.get(canvas);
-      }
-
-      const rootEl = discoverWidgetRoot(canvas);
-      const styles = [getComputedStyleSafe(canvas)];
-      if (rootEl && rootEl !== canvas) {
-        styles.push(getComputedStyleSafe(rootEl));
+      if (byRoot.has(rootEl)) {
+        return byRoot.get(rootEl);
       }
 
       const presetName = getActivePresetName(rootEl, presetDefs);
@@ -259,13 +254,18 @@
         ? presetDefs[presetName]
         : EMPTY_PRESET;
 
-      const resolved = resolveTokens(styles, presetValues);
-      byCanvas.set(canvas, resolved);
+      const resolved = resolveTokens([getComputedStyleSafe(rootEl)], presetValues);
+      byRoot.set(rootEl, resolved);
       return resolved;
     }
 
+    function resolve(canvas) {
+      return resolveForRoot(discoverWidgetRoot(canvas) || canvas);
+    }
+
     return {
-      resolve: resolveWithCache,
+      resolve: resolve,
+      resolveForRoot: resolveForRoot,
       invalidateCanvas: invalidateCanvas,
       invalidateAll: invalidateAll
     };
