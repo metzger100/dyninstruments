@@ -1,11 +1,11 @@
 # Surface Session Controller
 
-**Status:** ✅ Implemented | Standalone runtime state machine for `html` / `canvas-dom` session ownership
+**Status:** ✅ Implemented | Runtime state machine for `html` / `canvas-dom` session ownership, wired in `ClusterWidget` (Phase 9)
 
 ## Overview
 
 `runtime/SurfaceSessionController.js` coordinates per-instance surface lifecycle transitions after host commit resolution.
-It is a standalone runtime module introduced in Phase 6 and is not wired into `ClusterWidget` yet.
+It was introduced as a standalone runtime module in Phase 6 and is now consumed by `cluster/ClusterWidget.js` for live surface attach/update/detach transitions.
 
 ## Key Details
 

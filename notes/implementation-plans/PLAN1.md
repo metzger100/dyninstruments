@@ -610,6 +610,8 @@ new/renamed references.
 
 ### Phase 9 — Wire Everything: ClusterWidget + Registrar Flip
 
+**Status:** implemented (`2026-03-19`)
+
 **Goal:** Rewrite `ClusterWidget.js` to use `HostCommitController` and
 `SurfaceSessionController` (via the rewritten router). `initFunction` creates
 instance state and registers the global `catchAll` eventHandler.

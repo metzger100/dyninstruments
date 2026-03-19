@@ -1,6 +1,6 @@
 # Cluster Widget System
 
-**Status:** ✅ Implemented | Strict kind-catalog + surface-aware router architecture (Phase 8)
+**Status:** ✅ Implemented | Strict kind-catalog + surface-aware router + host commit/session wiring (Phase 9)
 
 ## Overview
 
@@ -12,7 +12,7 @@
 - Kind/surface routing spec: `cluster/rendering/ClusterKindCatalog.js`
 - Surface-aware router + shell owner: `cluster/rendering/ClusterRendererRouter.js`
 - Canvas surface owner: `cluster/rendering/CanvasDomSurfaceAdapter.js`
-- HTML surface owner (minimal lifecycle contract in Phase 8): `cluster/rendering/HtmlSurfaceController.js`
+- HTML surface owner: `cluster/rendering/HtmlSurfaceController.js`
 - Per-cluster mappers: `cluster/mappers/*.js`
 
 ## Runtime Flow
@@ -30,19 +30,23 @@
 - dedicated text-renderer output for `ActiveRouteTextWidget` (`nav` `activeRoute`)
 - dedicated text-renderer output for `CenterDisplayTextWidget` (`nav` `centerDisplay`)
 - graphic output with `renderer: "..."`
-5. `ClusterWidget.renderHtml(props)` delegates shell rendering to `ClusterRendererRouter`
-6. `ClusterRendererRouter` resolves route strictly by `props.cluster + props.kind` via `ClusterKindCatalog` (fail-closed; no unknown-kind fallback)
-7. Router renders shell-first markup: `.widgetData.dyni-shell` with `data-dyni-instance`, `data-dyni-surface`, and `.dyni-kind-*`
-8. Surface shell owner by route surface:
+5. `ClusterWidget.initFunction(props)` creates per-instance runtime state:
+- `HostCommitController` for deferred host commit
+- `SurfaceSessionController` for active surface lifecycle ownership
+- global `eventHandler.catchAll` registration
+6. `ClusterWidget.renderHtml(props)` records revision via host-commit state, delegates shell rendering to `ClusterRendererRouter`, then schedules deferred commit
+7. `ClusterRendererRouter` resolves route strictly by `props.cluster + props.kind` via `ClusterKindCatalog` (fail-closed; no unknown-kind fallback)
+8. Router renders shell-first markup: `.widgetData.dyni-shell` with `data-dyni-instance`, `data-dyni-surface`, and `.dyni-kind-*`
+9. Surface shell owner by route surface:
 - `canvas-dom` -> `CanvasDomSurfaceAdapter.renderSurfaceShell()` (stable mount subtree)
 - `html` -> `HtmlSurfaceController.renderSurfaceShell(...)`
-9. Router exposes helper APIs for Phase 9 host/session wiring:
-- `createSurfaceControllerFactory(hostContext)` for `SurfaceSessionController`
-- `createSessionPayload(commitPayload)` to normalize `surface/rootEl/shellEl/props/revision`
+10. On deferred commit callback, `ClusterWidget` builds session payload via `router.createSessionPayload(...)` and reconciles via `SurfaceSessionController.reconcileSession(...)`
+11. `ClusterWidget.finalizeFunction()` cleans up host-commit handles and destroys the active surface session
 
-Phase 8 contract note:
-- Router no longer exposes `renderCanvas`.
-- Router no longer performs passive fallback routing (`unknown -> ThreeValueTextWidget`).
+Phase 9 contract note:
+- Router does not expose host `renderCanvas`.
+- `ClusterWidget` is registered renderHtml-only on the host path.
+- Existing canvas renderers run only through the internal `canvas-dom` adapter.
 
 ## Mapper Modules
 
@@ -102,7 +106,7 @@ Strict routing rules:
 - Unknown `rendererId` values throw during router initialization.
 - Mapper-provided `props.renderer` must match the catalog `rendererId` for the same tuple; mismatch throws.
 
-In Phase 8, all shipped tuples use `surface: "canvas-dom"`. The `html` branch is fully wired and validated, but reserved for later phases.
+In Phase 9, shipped tuples still use `surface: "canvas-dom"`; the `html` branch remains fully wired for upcoming native HTML kinds.
 
 ## Surface-Aware Router
 
@@ -131,7 +135,10 @@ In Phase 8, all shipped tuples use `surface: "canvas-dom"`. The `html` branch is
 Surface owner contract:
 
 - `CanvasDomSurfaceAdapter.createSurfaceController(...)` -> `attach/update/detach/destroy` + optional `invalidateTheme`
-- `HtmlSurfaceController.createSurfaceController(...)` -> strict `attach/update/detach/destroy` (minimal in Phase 8)
+- `HtmlSurfaceController.createSurfaceController(...)` -> strict `attach/update/detach/destroy`
+- Router helper APIs consumed by `ClusterWidget`:
+- `createSurfaceControllerFactory(hostContext)`
+- `createSessionPayload(commitPayload)`
 
 Naming boundary:
 - Components under `cluster/rendering/` use role-based IDs, not cluster-prefixed IDs.

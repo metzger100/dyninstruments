@@ -11,7 +11,8 @@ Ownership split:
 - `plugin.js` bootstraps internal scripts (`runtime/*`, `config/*`) in fixed order
 - `config/components.js` defines component registry entries
 - `runtime/component-loader.js` resolves dependencies and injects component JS/CSS
-- `runtime/HostCommitController.js` provides standalone deferred commit scheduling for HTML-shell mounting (Phase 5 foundation, not yet wired into `ClusterWidget`)
+- `runtime/HostCommitController.js` provides deferred commit scheduling for HTML-shell mounting (wired by `ClusterWidget` in Phase 9)
+- `runtime/SurfaceSessionController.js` owns per-instance `html`/`canvas-dom` lifecycle state (wired by `ClusterWidget` in Phase 9)
 
 ## `config.components` Registry
 
