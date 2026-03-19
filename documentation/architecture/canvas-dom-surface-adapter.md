@@ -1,15 +1,20 @@
 # Canvas DOM Surface Adapter
 
-**Status:** ✅ Implemented | Standalone `canvas-dom` surface controller module (Phase 7)
+**Status:** ✅ Implemented | `canvas-dom` surface owner used by `ClusterRendererRouter` (Phase 8)
 
 ## Overview
 
-`cluster/rendering/CanvasDomSurfaceAdapter.js` provides a standalone adapter for internal canvas lifecycle on the HTML host path. It is implemented in Phase 7 and is not wired into `ClusterRendererRouter`/`ClusterWidget` yet.
+`cluster/rendering/CanvasDomSurfaceAdapter.js` provides the canvas-surface owner for internal canvas lifecycle on the HTML host path.
+In Phase 8 it is used by `ClusterRendererRouter` for:
+
+- stable canvas-shell markup generation (`renderSurfaceShell`)
+- `canvas-dom` controller creation (`createSurfaceController`) for surface-session lifecycle hooks
 
 ## Key Details
 
 - File: `cluster/rendering/CanvasDomSurfaceAdapter.js`
 - Component ID: `CanvasDomSurfaceAdapter`
+- Router integration owner: `cluster/rendering/ClusterRendererRouter.js` (`canvas-dom` branch)
 - Strict non-compat contract:
   - throws when `rendererSpec.renderCanvas` is missing
   - throws when `ResizeObserver` is unavailable

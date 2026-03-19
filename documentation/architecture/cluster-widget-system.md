@@ -1,6 +1,6 @@
 # Cluster Widget System
 
-**Status:** ✅ Implemented | Modular `ClusterWidget` mapper architecture
+**Status:** ✅ Implemented | Strict kind-catalog + surface-aware router architecture (Phase 8)
 
 ## Overview
 
@@ -9,8 +9,10 @@
 - Thin orchestrator: `cluster/ClusterWidget.js`
 - Mapping toolkit: `cluster/mappers/ClusterMapperToolkit.js`
 - Cluster mapper map: `cluster/mappers/ClusterMapperRegistry.js`
-- Renderer lifecycle/delegation: `cluster/rendering/ClusterRendererRouter.js`
-- Standalone canvas-dom surface adapter foundation (Phase 7): `cluster/rendering/CanvasDomSurfaceAdapter.js`
+- Kind/surface routing spec: `cluster/rendering/ClusterKindCatalog.js`
+- Surface-aware router + shell owner: `cluster/rendering/ClusterRendererRouter.js`
+- Canvas surface owner: `cluster/rendering/CanvasDomSurfaceAdapter.js`
+- HTML surface owner (minimal lifecycle contract in Phase 8): `cluster/rendering/HtmlSurfaceController.js`
 - Per-cluster mappers: `cluster/mappers/*.js`
 
 ## Runtime Flow
@@ -28,9 +30,19 @@
 - dedicated text-renderer output for `ActiveRouteTextWidget` (`nav` `activeRoute`)
 - dedicated text-renderer output for `CenterDisplayTextWidget` (`nav` `centerDisplay`)
 - graphic output with `renderer: "..."`
-5. `ClusterWidget.initFunction()` delegates one-time initialization to the active renderer selected by the init-call props
-6. `ClusterWidget.renderCanvas()` / `ClusterWidget.renderHtml()` delegate to `ClusterRendererRouter`, which picks renderer by `props.renderer`
-7. `ClusterWidget.finalizeFunction()` fans out to all sub-renderers and tolerates renderer-local finalize errors
+5. `ClusterWidget.renderHtml(props)` delegates shell rendering to `ClusterRendererRouter`
+6. `ClusterRendererRouter` resolves route strictly by `props.cluster + props.kind` via `ClusterKindCatalog` (fail-closed; no unknown-kind fallback)
+7. Router renders shell-first markup: `.widgetData.dyni-shell` with `data-dyni-instance`, `data-dyni-surface`, and `.dyni-kind-*`
+8. Surface shell owner by route surface:
+- `canvas-dom` -> `CanvasDomSurfaceAdapter.renderSurfaceShell()` (stable mount subtree)
+- `html` -> `HtmlSurfaceController.renderSurfaceShell(...)`
+9. Router exposes helper APIs for Phase 9 host/session wiring:
+- `createSurfaceControllerFactory(hostContext)` for `SurfaceSessionController`
+- `createSessionPayload(commitPayload)` to normalize `surface/rootEl/shellEl/props/revision`
+
+Phase 8 contract note:
+- Router no longer exposes `renderCanvas`.
+- Router no longer performs passive fallback routing (`unknown -> ThreeValueTextWidget`).
 
 ## Mapper Modules
 
@@ -71,11 +83,32 @@ Mapper boundary:
 
 Reference: [plugin-core-contracts.md](plugin-core-contracts.md), [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md), [../avnav-api/core-key-catalog.md](../avnav-api/core-key-catalog.md).
 
-## Renderer Delegation
+## Kind Catalog & Surface Routing
 
-`ClusterRendererRouter` manages these sub-renderers:
+`ClusterKindCatalog` is the single source of truth for route selection.
+Each entry contains:
 
-- `ThreeValueTextWidget` (default fallback)
+- `cluster`
+- `kind`
+- `viewModelId`
+- `rendererId`
+- `surface` (`html` or `canvas-dom`)
+
+Strict routing rules:
+
+- Missing `cluster + kind` tuple throws.
+- Duplicate tuples throw at catalog build time.
+- Unsupported `surface` values throw.
+- Unknown `rendererId` values throw during router initialization.
+- Mapper-provided `props.renderer` must match the catalog `rendererId` for the same tuple; mismatch throws.
+
+In Phase 8, all shipped tuples use `surface: "canvas-dom"`. The `html` branch is fully wired and validated, but reserved for later phases.
+
+## Surface-Aware Router
+
+`ClusterRendererRouter` owns renderer inventory and surface shell routing for:
+
+- `ThreeValueTextWidget`
 - `PositionCoordinateWidget` (stacked pair text renderer for nav positions plus vessel `dateTime` / `timeStatus` variants)
 - `ActiveRouteTextWidget`
 - `CenterDisplayTextWidget`
@@ -91,19 +124,14 @@ Reference: [plugin-core-contracts.md](plugin-core-contracts.md), [../avnav-api/c
 - `VoltageLinearWidget`
 - `XteDisplayWidget`
 
-`wantsHideNativeHead` is aggregated (`true` if any sub-renderer requests it).
+`wantsHideNativeHead` remains aggregated (`true` if any referenced renderer requests it).
 
-Phase 7 status note:
-- `CanvasDomSurfaceAdapter` is implemented as a standalone module and tested in isolation.
-- Router/Cluster wiring to this adapter is intentionally deferred to later PLAN1 phases.
+`RendererPropsWidget` still applies mapper-owned `rendererProps` merges for delegated gauge renderers.
 
-Sub-renderer capability contract:
+Surface owner contract:
 
-- pure canvas renderer: implements `renderCanvas(canvas, props)`
-- pure HTML renderer: implements `renderHtml(props)`
-- mixed renderer: may implement both render paths
-- optional lifecycle hooks: `initFunction(...)` for active-renderer setup, `finalizeFunction(...)` for defensive cleanup fan-out
-- `RendererPropsWidget` applies mapper-owned `rendererProps` merges consistently across delegated canvas render, HTML render, and init calls
+- `CanvasDomSurfaceAdapter.createSurfaceController(...)` -> `attach/update/detach/destroy` + optional `invalidateTheme`
+- `HtmlSurfaceController.createSurfaceController(...)` -> strict `attach/update/detach/destroy` (minimal in Phase 8)
 
 Naming boundary:
 - Components under `cluster/rendering/` use role-based IDs, not cluster-prefixed IDs.
@@ -137,15 +165,28 @@ Must be registered in two places:
 2. `cluster/mappers/ClusterMapperRegistry.js`
 - add `cluster: moduleId` entry to `MAPPER_MODULE_IDS`
 
-### New Renderer Component
+### New Kind Route (Cluster + Kind)
 
-Must be registered in two places:
+Must be updated in three places:
+
+1. cluster config (`config/clusters/*.js`)
+- add kind option/editables/store keys
+2. mapper (`cluster/mappers/*Mapper.js`)
+- map kind output shape and normalized props
+3. kind catalog (`cluster/rendering/ClusterKindCatalog.js`)
+- add strict tuple with `viewModelId`, `rendererId`, and `surface`
+
+### New Renderer Component / Route Target
+
+Must be registered in runtime dependency + router inventory:
 
 1. `config/components.js`
 - add renderer component entry
 - add dependency in `ClusterRendererRouter.deps`
 2. `cluster/rendering/ClusterRendererRouter.js`
-- add `rendererName: rendererSpec` entry in `rendererSpecs` map
+- add `rendererName: rendererSpec` in router inventory
+- if mapper uses `rendererProps`, route through `RendererPropsWidget`
+- ensure catalog tuples point to the new `rendererId`
 
 ## Related
 

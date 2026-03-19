@@ -111,6 +111,15 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteTextWidget.globalKey).toBe("DyniActiveRouteTextWidget");
     expect(components.ActiveRouteTextWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js");
     expect(components.ActiveRouteTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout"]);
+    expect(components.CanvasDomSurfaceAdapter.globalKey).toBe("DyniCanvasDomSurfaceAdapter");
+    expect(components.CanvasDomSurfaceAdapter.js).toBe("http://host/plugins/dyninstruments/cluster/rendering/CanvasDomSurfaceAdapter.js");
+    expect(components.CanvasDomSurfaceAdapter.deps).toEqual(["ThemeResolver"]);
+    expect(components.ClusterKindCatalog.globalKey).toBe("DyniClusterKindCatalog");
+    expect(components.ClusterKindCatalog.js).toBe("http://host/plugins/dyninstruments/cluster/rendering/ClusterKindCatalog.js");
+    expect(components.ClusterKindCatalog.deps).toBeUndefined();
+    expect(components.HtmlSurfaceController.globalKey).toBe("DyniHtmlSurfaceController");
+    expect(components.HtmlSurfaceController.js).toBe("http://host/plugins/dyninstruments/cluster/rendering/HtmlSurfaceController.js");
+    expect(components.HtmlSurfaceController.deps).toBeUndefined();
     expect(components.RendererPropsWidget.deps).toEqual([
       "WindRadialWidget",
       "CompassRadialWidget",
@@ -127,6 +136,9 @@ describe("config/components.js", function () {
       "XteDisplayWidget"
     ]);
     expect(components.RendererPropsWidget.globalKey).toBe("DyniRendererPropsWidget");
+    expect(components.ClusterRendererRouter.deps).toContain("ClusterKindCatalog");
+    expect(components.ClusterRendererRouter.deps).toContain("CanvasDomSurfaceAdapter");
+    expect(components.ClusterRendererRouter.deps).toContain("HtmlSurfaceController");
     expect(components.ClusterRendererRouter.deps).toContain("PositionCoordinateWidget");
     expect(components.ClusterRendererRouter.deps).toContain("ActiveRouteTextWidget");
     expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");

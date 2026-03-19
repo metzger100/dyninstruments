@@ -27,9 +27,11 @@
 - **How does the dependency system work?** → [architecture/component-system.md](architecture/component-system.md#dependency-graph)
 - **How does ClusterWidget route to renderers?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
 - **How does translateFunction mapper to graphic/numeric?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md#runtime-flow)
+- **Where is strict `cluster + kind -> surface + renderer` routing defined?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
+- **How does the surface-aware router build shell markup and session payloads?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
 - **How does deferred host commit scheduling work for `renderHtml` shells?** → [architecture/host-commit-controller.md](architecture/host-commit-controller.md)
 - **How does per-instance surface session switching (`attach`/`update`/`detach`/`destroy`) work?** → [architecture/surface-session-controller.md](architecture/surface-session-controller.md)
-- **How does the standalone `canvas-dom` surface adapter work (`renderSurfaceShell`, `createSurfaceController`, strict contracts)?** → [architecture/canvas-dom-surface-adapter.md](architecture/canvas-dom-surface-adapter.md)
+- **How does the `canvas-dom` surface adapter integrate with the router (`renderSurfaceShell`, `createSurfaceController`, strict contracts)?** → [architecture/canvas-dom-surface-adapter.md](architecture/canvas-dom-surface-adapter.md)
 - **Where are plugin↔core contract tuples and roll/pitch contract rules?** → [architecture/plugin-core-contracts.md](architecture/plugin-core-contracts.md)
 - **What is the Helpers object?** → [shared/helpers.md](shared/helpers.md)
 

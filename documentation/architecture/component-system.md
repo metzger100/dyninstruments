@@ -24,7 +24,7 @@ Defined in `config/components.js`. It maps component IDs to file paths, global k
 - `ClusterMapperRegistry`
 
 `ClusterMapperRegistry` depends on all per-cluster mapper components.
-`ClusterRendererRouter` depends on all renderer components used at runtime.
+`ClusterRendererRouter` depends on kind/surface routing owners plus renderer components used at runtime.
 `ThemeResolver` is a shared plugin-wide token resolver used by both gauge and text rendering paths.
 `ThemePresets` is a shared runtime preset applier that sets `data-dyni-theme` on container roots.
 Dedicated nav renderers may also depend on shared layout-owner modules that consume `ResponsiveScaleProfile`.
@@ -44,6 +44,9 @@ ClusterWidget
 │   ├── AnchorMapper
 │   └── VesselMapper
 └── ClusterRendererRouter
+    ├── ClusterKindCatalog
+    ├── CanvasDomSurfaceAdapter
+    ├── HtmlSurfaceController
     ├── ThreeValueTextWidget
     │   ├── ThemeResolver
     │   └── TextLayoutEngine
@@ -58,6 +61,18 @@ ClusterWidget
     │   └── ActiveRouteLayout
     │       └── ResponsiveScaleProfile
     ├── RendererPropsWidget
+    │   ├── WindRadialWidget
+    │   ├── CompassRadialWidget
+    │   ├── WindLinearWidget
+    │   ├── CompassLinearWidget
+    │   ├── SpeedRadialWidget
+    │   ├── SpeedLinearWidget
+    │   ├── DepthRadialWidget
+    │   ├── DepthLinearWidget
+    │   ├── TemperatureRadialWidget
+    │   ├── TemperatureLinearWidget
+    │   ├── VoltageRadialWidget
+    │   ├── VoltageLinearWidget
     │   └── XteDisplayWidget
     │       ├── RadialToolkit
     │       ├── CanvasLayerCache
@@ -65,12 +80,6 @@ ClusterWidget
     │       ├── XteHighwayLayout
     │       │   └── ResponsiveScaleProfile
     │       └── TextTileLayout
-    ├── WindRadialWidget
-    ├── CompassRadialWidget
-    ├── SpeedRadialWidget
-    ├── DepthRadialWidget
-    ├── TemperatureRadialWidget
-    └── VoltageRadialWidget
 
 WindRadialWidget/CompassRadialWidget
   ├── FullCircleRadialEngine
@@ -95,6 +104,9 @@ runtime/init.js (explicit load)
 ```
 
 `PositionCoordinateWidget` no longer depends on `ThreeValueTextWidget`; widget-to-widget coupling has been removed from the dependency graph.
+
+Phase 8 note:
+- `ClusterRendererRouter` switched to strict kind-catalog routing and no longer exports a host `renderCanvas` delegation path.
 
 ## UMD Component Template
 

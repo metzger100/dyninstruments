@@ -1,7 +1,11 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("ClusterRendererRouter", function () {
-  const TARGET_RENDERER_IDS = [
+  const ALL_RENDERER_IDS = [
+    "ThreeValueTextWidget",
+    "PositionCoordinateWidget",
+    "ActiveRouteTextWidget",
+    "CenterDisplayTextWidget",
     "WindRadialWidget",
     "CompassRadialWidget",
     "WindLinearWidget",
@@ -17,215 +21,281 @@ describe("ClusterRendererRouter", function () {
     "XteDisplayWidget"
   ];
 
-  function makeSpec(name, opts) {
-    const o = opts || {};
+  function makeRendererSpec(id, opts) {
+    const options = opts || {};
     const spec = {
-      id: name,
-      wantsHideNativeHead: !!o.hide
+      id: id,
+      wantsHideNativeHead: !!options.hide,
+      renderCanvas: options.renderCanvas === false ? undefined : vi.fn()
     };
 
-    if (o.renderCanvas !== false) {
-      spec.renderCanvas = typeof o.renderCanvas === "function" ? o.renderCanvas : vi.fn();
-    }
-    if (typeof o.renderHtml === "function") {
-      spec.renderHtml = o.renderHtml;
-    }
-    if (typeof o.initFunction === "function") {
-      spec.initFunction = o.initFunction;
-    }
-    if (o.finalizeFunction !== false) {
-      spec.finalizeFunction = typeof o.finalizeFunction === "function" ? o.finalizeFunction : vi.fn();
+    if (typeof options.renderHtml === "function") {
+      spec.renderHtml = options.renderHtml;
     }
 
     return spec;
   }
 
-  function createHelpers(overrides) {
-    const specs = Object.assign({
-      ThreeValueTextWidget: makeSpec("three"),
-      PositionCoordinateWidget: makeSpec("position"),
-      ActiveRouteTextWidget: makeSpec("activeRoute"),
-      CenterDisplayTextWidget: makeSpec("centerDisplay")
-    }, overrides || {});
+  function makeControllerMock(id) {
+    return {
+      id: id,
+      attach: vi.fn(),
+      update: vi.fn(() => ({ updated: true, changed: true })),
+      detach: vi.fn(),
+      destroy: vi.fn(),
+      invalidateTheme: vi.fn(() => true)
+    };
+  }
 
-    TARGET_RENDERER_IDS.forEach(function (id) {
-      if (!Object.prototype.hasOwnProperty.call(specs, id)) {
-        specs[id] = makeSpec(id);
-      }
+  function makeCustomCatalog(entries) {
+    const routeEntries = entries.map(function (entry) {
+      return Object.freeze({
+        cluster: entry.cluster,
+        kind: entry.kind,
+        viewModelId: entry.viewModelId,
+        rendererId: entry.rendererId,
+        surface: entry.surface
+      });
     });
 
     return {
-      getModule(id) {
-        const map = {
-          ThreeValueTextWidget: { create: () => specs.ThreeValueTextWidget },
-          PositionCoordinateWidget: { create: () => specs.PositionCoordinateWidget },
-          ActiveRouteTextWidget: { create: () => specs.ActiveRouteTextWidget },
-          CenterDisplayTextWidget: { create: () => specs.CenterDisplayTextWidget },
-          RendererPropsWidget: {
-            create: function (def, helpers, targetRendererId) {
-              return specs[targetRendererId];
-            }
+      create: function () {
+        return {
+          createDefaultCatalog: function () {
+            return {
+              resolveRoute: function (cluster, kind) {
+                const found = routeEntries.find(function (item) {
+                  return item.cluster === cluster && item.kind === kind;
+                });
+                if (!found) {
+                  throw new Error("ClusterKindCatalog: missing catalog entry for cluster '" + cluster + "' kind '" + kind + "'");
+                }
+                return found;
+              },
+              listRoutes: function () {
+                return routeEntries.slice();
+              }
+            };
           }
         };
-        return map[id];
       }
     };
   }
 
-  it("picks explicit renderer or falls back to ThreeValueTextWidget", function () {
-    const three = makeSpec("three", { hide: false });
-    const wind = makeSpec("wind", { hide: true });
-    const windLinear = makeSpec("windLinear");
-    const position = makeSpec("position");
-    const activeRoute = makeSpec("activeRoute");
-    const centerDisplay = makeSpec("centerDisplay");
-    const compass = makeSpec("compass");
-    const compassLinear = makeSpec("compassLinear");
-    const speed = makeSpec("speed");
-    const speedLinear = makeSpec("speedLinear");
-    const depth = makeSpec("depth");
-    const depthLinear = makeSpec("depthLinear");
-    const temp = makeSpec("temp");
-    const tempLinear = makeSpec("tempLinear");
-    const volt = makeSpec("volt");
-    const voltLinear = makeSpec("voltLinear");
-    const xte = makeSpec("xte");
+  function createHarness(options) {
+    const opts = options || {};
+    const handles = {
+      canvasControllers: [],
+      htmlControllers: []
+    };
 
-    const Helpers = createHelpers({
-      ThreeValueTextWidget: three,
-      PositionCoordinateWidget: position,
-      ActiveRouteTextWidget: activeRoute,
-      CenterDisplayTextWidget: centerDisplay,
-      WindRadialWidget: wind,
-      CompassRadialWidget: compass,
-      WindLinearWidget: windLinear,
-      CompassLinearWidget: compassLinear,
-      SpeedRadialWidget: speed,
-      SpeedLinearWidget: speedLinear,
-      DepthRadialWidget: depth,
-      DepthLinearWidget: depthLinear,
-      TemperatureRadialWidget: temp,
-      TemperatureLinearWidget: tempLinear,
-      VoltageRadialWidget: volt,
-      VoltageLinearWidget: voltLinear,
-      XteDisplayWidget: xte
+    const rendererSpecs = {};
+    ALL_RENDERER_IDS.forEach(function (id) {
+      rendererSpecs[id] = makeRendererSpec(id);
     });
+    Object.assign(rendererSpecs, opts.rendererSpecs || {});
+
+    const canvasAdapter = {
+      renderSurfaceShell: vi.fn(() => '<div class="dyni-surface-canvas"><div class="dyni-surface-canvas-mount"></div></div>'),
+      createSurfaceController: vi.fn(function () {
+        const next = makeControllerMock("canvas-" + handles.canvasControllers.length);
+        handles.canvasControllers.push(next);
+        return next;
+      })
+    };
+
+    const htmlOwner = {
+      renderSurfaceShell: vi.fn(function (params) {
+        const rendererSpec = params.rendererSpec;
+        const props = params.props;
+        const hostContext = params.hostContext;
+        let inner = "";
+        if (rendererSpec && typeof rendererSpec.renderHtml === "function") {
+          inner = hostContext
+            ? rendererSpec.renderHtml.call(hostContext, props)
+            : rendererSpec.renderHtml(props);
+        }
+        return '<div class="dyni-surface-html">' + inner + "</div>";
+      }),
+      createSurfaceController: vi.fn(function () {
+        const next = makeControllerMock("html-" + handles.htmlControllers.length);
+        handles.htmlControllers.push(next);
+        return next;
+      })
+    };
+
+    handles.canvasAdapter = canvasAdapter;
+    handles.htmlOwner = htmlOwner;
+
+    const modules = {
+      ClusterKindCatalog: opts.catalogModule || loadFresh("cluster/rendering/ClusterKindCatalog.js"),
+      CanvasDomSurfaceAdapter: { create: () => canvasAdapter },
+      HtmlSurfaceController: { create: () => htmlOwner },
+      ThreeValueTextWidget: { create: () => rendererSpecs.ThreeValueTextWidget },
+      PositionCoordinateWidget: { create: () => rendererSpecs.PositionCoordinateWidget },
+      ActiveRouteTextWidget: { create: () => rendererSpecs.ActiveRouteTextWidget },
+      CenterDisplayTextWidget: { create: () => rendererSpecs.CenterDisplayTextWidget },
+      RendererPropsWidget: {
+        create: function (def, Helpers, targetRendererId) {
+          return rendererSpecs[targetRendererId];
+        }
+      }
+    };
+
+    const Helpers = {
+      getModule(id) {
+        const mod = modules[id];
+        if (!mod) {
+          throw new Error("unexpected module: " + id);
+        }
+        return mod;
+      }
+    };
 
     const router = loadFresh("cluster/rendering/ClusterRendererRouter.js").create({}, Helpers);
 
-    expect(router.wantsHideNativeHead).toBe(true);
-    expect(router.pickRenderer({ renderer: "WindRadialWidget" })).toBe(wind);
-    expect(router.pickRenderer({ renderer: "WindLinearWidget" })).toBe(windLinear);
-    expect(router.pickRenderer({ renderer: "CompassLinearWidget" })).toBe(compassLinear);
-    expect(router.pickRenderer({ renderer: "XteDisplayWidget" })).toBe(xte);
-    expect(router.pickRenderer({ renderer: "SpeedLinearWidget" })).toBe(speedLinear);
-    expect(router.pickRenderer({ renderer: "DepthLinearWidget" })).toBe(depthLinear);
-    expect(router.pickRenderer({ renderer: "TemperatureLinearWidget" })).toBe(tempLinear);
-    expect(router.pickRenderer({ renderer: "VoltageLinearWidget" })).toBe(voltLinear);
-    expect(router.pickRenderer({ renderer: "PositionCoordinateWidget" })).toBe(position);
-    expect(router.pickRenderer({ renderer: "ActiveRouteTextWidget" })).toBe(activeRoute);
-    expect(router.pickRenderer({ renderer: "CenterDisplayTextWidget" })).toBe(centerDisplay);
-    expect(router.pickRenderer({ renderer: "Unknown" })).toBe(three);
-    expect(router.pickRenderer({})).toBe(three);
+    return {
+      router,
+      handles
+    };
+  }
+
+  it("resolves every shipped cluster/kind from the strict catalog", function () {
+    const h = createHarness();
+    const routes = h.router.listRoutes();
+
+    expect(routes).toHaveLength(51);
+    routes.forEach(function (route) {
+      const resolved = h.router.resolveRouteSpec({
+        cluster: route.cluster,
+        kind: route.kind
+      });
+      expect(resolved).toEqual(route);
+      expect(resolved.surface).toBe("canvas-dom");
+    });
+
+    const activeRoute = h.router.resolveRouteSpec({ cluster: "nav", kind: "activeRoute" });
+    expect(activeRoute.viewModelId).toBe("ActiveRouteViewModel");
   });
 
-  it("delegates explicit html renderers and mixed renderers through the picked renderer", function () {
-    const activeRoute = makeSpec("activeRoute", {
-      hide: true,
+  it("renders shell-first HTML with instance/surface markers and canvas-dom shell content", function () {
+    const h = createHarness();
+    const ctx = {
+      __dyniHostCommitState: { instanceId: "dyni-host-42" }
+    };
+
+    const out = h.router.renderHtml.call(ctx, {
+      cluster: "speed",
+      kind: "sog",
+      value: 5.1
+    });
+
+    expect(h.handles.canvasAdapter.renderSurfaceShell).toHaveBeenCalledTimes(1);
+    expect(out).toContain('class="widgetData dyni-shell dyni-surface-canvas dyni-kind-sog"');
+    expect(out).toContain('data-dyni-instance="dyni-host-42"');
+    expect(out).toContain('data-dyni-surface="canvas-dom"');
+    expect(out).toContain("dyni-surface-canvas-mount");
+    expect(h.router.renderCanvas).toBeUndefined();
+  });
+
+  it("routes html surfaces through HtmlSurfaceController shell owner", function () {
+    const htmlCatalog = makeCustomCatalog([
+      {
+        cluster: "nav",
+        kind: "activeRouteInteractive",
+        viewModelId: "ActiveRouteViewModel",
+        rendererId: "ActiveRouteTextWidget",
+        surface: "html"
+      }
+    ]);
+
+    const htmlRenderer = makeRendererSpec("ActiveRouteTextWidget", {
       renderCanvas: false,
-      renderHtml: vi.fn(() => "<div>route</div>")
-    });
-    const centerDisplay = makeSpec("centerDisplay", {
-      renderCanvas: vi.fn(),
-      renderHtml: vi.fn(() => "<div>center</div>")
+      renderHtml: vi.fn(() => "<button>route</button>")
     });
 
-    const router = loadFresh("cluster/rendering/ClusterRendererRouter.js").create({}, createHelpers({
-      ActiveRouteTextWidget: activeRoute,
-      CenterDisplayTextWidget: centerDisplay
-    }));
+    const h = createHarness({
+      catalogModule: htmlCatalog,
+      rendererSpecs: {
+        ActiveRouteTextWidget: htmlRenderer
+      }
+    });
 
-    const activeProps = { renderer: "ActiveRouteTextWidget", routeName: "Leg 1" };
-    const mixedProps = { renderer: "CenterDisplayTextWidget", value: 3 };
-    const canvas = { id: "canvas" };
+    const out = h.router.renderHtml({
+      cluster: "nav",
+      kind: "activeRouteInteractive"
+    });
 
-    expect(router.renderHtml(activeProps)).toBe("<div>route</div>");
-    router.renderCanvas(canvas, mixedProps);
-    expect(router.renderHtml(mixedProps)).toBe("<div>center</div>");
-
-    expect(activeRoute.renderHtml).toHaveBeenCalledWith(activeProps);
-    expect(centerDisplay.renderCanvas).toHaveBeenCalledWith(canvas, mixedProps);
-    expect(centerDisplay.renderHtml).toHaveBeenCalledWith(mixedProps);
+    expect(h.handles.htmlOwner.renderSurfaceShell).toHaveBeenCalledTimes(1);
+    expect(out).toContain('data-dyni-surface="html"');
+    expect(out).toContain("dyni-surface-html");
+    expect(out).toContain("<button>route</button>");
   });
 
-  it("delegates initFunction only to the active renderer selected by init props", function () {
-    const three = makeSpec("three", { initFunction: vi.fn() });
-    const speed = makeSpec("speed", { initFunction: vi.fn() });
-    const voltage = makeSpec("voltage", { initFunction: vi.fn() });
-
-    const router = loadFresh("cluster/rendering/ClusterRendererRouter.js").create({}, createHelpers({
-      ThreeValueTextWidget: three,
-      SpeedRadialWidget: speed,
-      VoltageRadialWidget: voltage
-    }));
-
-    const ctx = { marker: 1 };
-    const initCtx = { eventHandler: {} };
-    const voltageProps = { renderer: "VoltageRadialWidget", value: 12 };
-    const fallbackProps = {};
-
-    router.initFunction.call(ctx, initCtx, voltageProps);
-    router.initFunction.call(ctx, initCtx, fallbackProps);
-
-    expect(voltage.initFunction).toHaveBeenCalledWith(initCtx, voltageProps);
-    expect(three.initFunction).toHaveBeenCalledWith(initCtx, fallbackProps);
-    expect(speed.initFunction).not.toHaveBeenCalled();
-  });
-
-  it("delegates renderCanvas and fans out finalizeFunction safely", function () {
-    const three = makeSpec("three");
-    const activeRoute = makeSpec("activeRoute");
-    const centerDisplay = makeSpec("centerDisplay");
-    const speed = makeSpec("speed", { finalizeFunction: vi.fn(() => { throw new Error("ignored"); }) });
-    const speedLinear = makeSpec("speedLinear");
-    const voltage = makeSpec("voltage");
-    const voltageLinear = makeSpec("voltageLinear");
-    const depthLinear = makeSpec("depthLinear");
-    const tempLinear = makeSpec("tempLinear");
-
-    const Helpers = createHelpers({
-      ThreeValueTextWidget: three,
-      ActiveRouteTextWidget: activeRoute,
-      CenterDisplayTextWidget: centerDisplay,
-      SpeedRadialWidget: speed,
-      SpeedLinearWidget: speedLinear,
-      VoltageRadialWidget: voltage,
-      VoltageLinearWidget: voltageLinear,
-      DepthLinearWidget: depthLinear,
-      TemperatureLinearWidget: tempLinear
-    });
-
-    const router = loadFresh("cluster/rendering/ClusterRendererRouter.js").create({}, Helpers);
-
-    const ctx = { marker: 1 };
-    const canvas = { id: "canvas" };
-    const props = { renderer: "VoltageRadialWidget" };
-
-    router.renderCanvas.call(ctx, canvas, props);
-    expect(voltage.renderCanvas).toHaveBeenCalledWith(canvas, props);
+  it("throws for missing tuples and mapper renderer mismatches", function () {
+    const h = createHarness();
 
     expect(function () {
-      router.finalizeFunction.call(ctx, 1, 2, 3);
-    }).not.toThrow();
+      h.router.resolveRouteSpec({ cluster: "nav", kind: "missing" });
+    }).toThrow("missing catalog entry");
 
-    expect(three.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
-    expect(activeRoute.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
-    expect(centerDisplay.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
-    expect(speed.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
-    expect(speedLinear.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
-    expect(depthLinear.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
-    expect(tempLinear.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
-    expect(voltage.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
-    expect(voltageLinear.finalizeFunction).toHaveBeenCalledWith(1, 2, 3);
+    expect(function () {
+      h.router.resolveRouteSpec({
+        cluster: "speed",
+        kind: "sog",
+        renderer: "SpeedRadialWidget"
+      });
+    }).toThrow("mapper renderer mismatch");
+  });
+
+  it("provides surface controller factory and recreates controller on same-surface renderer switches", function () {
+    const h = createHarness();
+    const createSurfaceController = h.router.createSurfaceControllerFactory({ marker: 1 });
+    const controller = createSurfaceController("canvas-dom");
+
+    const basePayload = {
+      rootEl: { id: "root" },
+      shellEl: { id: "shell" },
+      revision: 1
+    };
+
+    controller.attach(Object.assign({}, basePayload, {
+      props: { cluster: "speed", kind: "sog", value: 5 }
+    }));
+
+    expect(h.handles.canvasAdapter.createSurfaceController).toHaveBeenCalledTimes(1);
+    expect(h.handles.canvasControllers[0].attach).toHaveBeenCalledTimes(1);
+
+    const updateResult = controller.update(Object.assign({}, basePayload, {
+      revision: 2,
+      props: { cluster: "speed", kind: "sogRadial", value: 6, renderer: "SpeedRadialWidget" }
+    }));
+
+    expect(updateResult.remounted).toBe(true);
+    expect(h.handles.canvasAdapter.createSurfaceController).toHaveBeenCalledTimes(2);
+    expect(h.handles.canvasControllers[0].detach).toHaveBeenCalledWith("renderer-switch");
+    expect(h.handles.canvasControllers[0].destroy).toHaveBeenCalledTimes(1);
+    expect(h.handles.canvasControllers[1].attach).toHaveBeenCalledTimes(1);
+  });
+
+  it("creates SurfaceSessionController payload with resolved surface and route metadata", function () {
+    const h = createHarness();
+
+    const payload = h.router.createSessionPayload({
+      rootEl: { id: "root" },
+      shellEl: { id: "shell" },
+      revision: 7,
+      props: { cluster: "nav", kind: "activeRoute" }
+    });
+
+    expect(payload).toMatchObject({
+      surface: "canvas-dom",
+      revision: 7,
+      route: {
+        cluster: "nav",
+        kind: "activeRoute",
+        rendererId: "ActiveRouteTextWidget"
+      }
+    });
   });
 });
