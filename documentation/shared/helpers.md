@@ -4,7 +4,7 @@
 
 ## Overview
 
-`Helpers` is passed as second argument to `module.create(def, Helpers)`. It provides canvas setup, theming, formatter application, host-action access, and module access.
+`Helpers` is passed as second argument to `module.create(def, Helpers)`. It provides canvas-only setup, root-scoped typography/theming, formatter application, host-action access, and module access.
 
 ## API Reference
 
@@ -28,25 +28,26 @@ Implementation summary:
 
 ### resolveTextColor
 
-Resolves foreground color with priority:
+Resolves foreground color from the owning widget root with priority:
 
 1. `--dyni-fg`
 2. `--instrument-fg`
 3. `--mainfg`
-4. `getComputedStyle(canvas).color` or `#000`
+4. `getComputedStyle(rootOrCanvas).color` or `#000`
 
 Caching behavior:
 
-- typography values are cached in a per-canvas `WeakMap` entry (`textColor`, `fontFamily`, `nightMode`)
+- typography values are cached in a per-root `WeakMap` entry (`textColor`, `fontFamily`, `nightMode`)
+- canvas inputs are adapted to their owning widget root before cache lookup
 - each call compares cached `nightMode` to current root `.nightMode` class state
 - unchanged mode returns cached value without a new `getComputedStyle()` call
 - changed mode recomputes from CSS and refreshes cache entry
 
 ### resolveFontFamily
 
-Reads `--dyni-font` and falls back to default stack (`Inter`, system fonts, emoji fonts).
+Reads `--dyni-font` from the owning widget root and falls back to default stack (`Inter`, system fonts, emoji fonts).
 
-`resolveFontFamily()` shares the same per-canvas typography cache as `resolveTextColor()`, so one style read can serve both values while day/night mode state is unchanged.
+`resolveFontFamily()` shares the same per-root typography cache as `resolveTextColor()`, so one style read can serve both values while day/night mode state is unchanged.
 
 ### applyFormatter
 

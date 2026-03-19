@@ -13,7 +13,7 @@
   // dyni-lint-disable-next-line css-js-default-duplication -- Typography defaults are owned at the helper/CSS boundary and documented in shared/helpers.md.
   const DEFAULT_FONT_STACK = '"Inter","SF Pro Text",-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
   const layoutByCanvas = new WeakMap();
-  const typographyByCanvas = new WeakMap();
+  const typographyByRoot = new WeakMap();
 
   function applyFormatter(raw, props) {
     const p = props || {};
@@ -85,6 +85,19 @@
     };
   }
 
+  function discoverWidgetRoot(target) {
+    if (!target) {
+      return null;
+    }
+    if (typeof target.closest === "function") {
+      const found = target.closest(".widget, .DirectWidget");
+      if (found) {
+        return found;
+      }
+    }
+    return target.parentElement || null;
+  }
+
   function getNightModeState(canvas) {
     const doc = canvas && canvas.ownerDocument;
     if (!doc) {
@@ -100,14 +113,19 @@
     return !!(body && body.classList && body.classList.contains("nightMode"));
   }
 
-  function resolveTypography(canvas) {
-    const nightMode = getNightModeState(canvas);
-    const cached = typographyByCanvas.get(canvas);
+  function resolveTypography(target) {
+    const rootEl = discoverWidgetRoot(target) || target;
+    const nightMode = getNightModeState(rootEl);
+    const cached = typographyByRoot.get(rootEl);
     if (cached && cached.nightMode === nightMode) {
       return cached;
     }
 
-    const st = getComputedStyle(canvas);
+    if (cached) {
+      typographyByRoot.delete(rootEl);
+    }
+
+    const st = getComputedStyle(rootEl);
 
     let textColor = "";
     for (const cssVar of TEXT_COLOR_VARS) {
@@ -130,7 +148,7 @@
       textColor: textColor,
       fontFamily: fontFamily
     };
-    typographyByCanvas.set(canvas, resolved);
+    typographyByRoot.set(rootEl, resolved);
     return resolved;
   }
 
