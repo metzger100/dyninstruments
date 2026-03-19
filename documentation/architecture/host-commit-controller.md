@@ -1,11 +1,11 @@
 # Host Commit Controller
 
-**Status:** ✅ Implemented | Standalone deferred commit scheduler for HTML host mounting
+**Status:** ✅ Implemented | Deferred commit scheduler for HTML host mounting, wired in `ClusterWidget` (Phase 9)
 
 ## Overview
 
 `runtime/HostCommitController.js` provides a runtime-owned controller for deferred DOM commit after `renderHtml`.
-It is implemented as a standalone module in Phase 5 and is intentionally not wired into `ClusterWidget` yet.
+It was introduced as a standalone module in Phase 5 and is now consumed by `cluster/ClusterWidget.js` as part of the Phase 9 host flip.
 
 ## Key Details
 

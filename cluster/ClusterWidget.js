@@ -1,7 +1,7 @@
 /**
- * Module: ClusterWidget - Thin orchestrator over mapper and renderer registries
+ * Module: ClusterWidget - Cluster lifecycle orchestrator with deferred host commit and surface sessions
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ClusterMapperToolkit, ClusterRendererRouter, ClusterMapperRegistry
+ * Depends: ClusterMapperToolkit, ClusterRendererRouter, ClusterMapperRegistry, HostCommitController, SurfaceSessionController
  */
 
 (function (root, factory) {
@@ -11,24 +11,122 @@
 }(this, function () {
   "use strict";
 
+  const GLOBAL_ROOT = (typeof globalThis !== "undefined")
+    ? globalThis
+    : (typeof self !== "undefined" ? self : {});
+
+  function resolveRuntimeApi() {
+    const ns = GLOBAL_ROOT.DyniPlugin;
+    return ns && ns.runtime ? ns.runtime : null;
+  }
+
+  function ensureFactory(runtimeApi, name) {
+    if (!runtimeApi || typeof runtimeApi[name] !== "function") {
+      throw new Error("ClusterWidget: runtime." + name + " must be available");
+    }
+  }
+
   function create(def, Helpers) {
+    const runtimeApi = resolveRuntimeApi();
+    ensureFactory(runtimeApi, "createHostCommitController");
+    ensureFactory(runtimeApi, "createSurfaceSessionController");
+
     const mapperToolkit = Helpers.getModule("ClusterMapperToolkit").create(def, Helpers);
     const rendererRouter = Helpers.getModule("ClusterRendererRouter").create(def, Helpers);
     const mapperRegistry = Helpers.getModule("ClusterMapperRegistry").create(def, Helpers);
+
+    function registerCatchAllHandler(ctx) {
+      if (!ctx || typeof ctx !== "object") {
+        return;
+      }
+      const handlers = (ctx.eventHandler && typeof ctx.eventHandler === "object")
+        ? ctx.eventHandler
+        : (ctx.eventHandler = []);
+      handlers.catchAll = function catchAll() {};
+    }
+
+    function initRuntimeState(ctx) {
+      const previous = ctx.__dyniClusterState;
+      if (previous) {
+        previous.hostCommitController.cleanup();
+        previous.surfaceSessionController.destroy();
+      }
+
+      const hostCommitController = runtimeApi.createHostCommitController();
+      const surfaceSessionController = runtimeApi.createSurfaceSessionController({
+        createSurfaceController: rendererRouter.createSurfaceControllerFactory(ctx)
+      });
+
+      const state = {
+        hostCommitController: hostCommitController,
+        surfaceSessionController: surfaceSessionController
+      };
+
+      ctx.__dyniHostCommitState = hostCommitController.initState();
+      surfaceSessionController.initState();
+      ctx.__dyniClusterState = state;
+
+      registerCatchAllHandler(ctx);
+      return state;
+    }
+
+    function resolveRuntimeState(ctx) {
+      if (!ctx || typeof ctx !== "object") {
+        throw new Error("ClusterWidget: widget context must be an object");
+      }
+      return ctx.__dyniClusterState || initRuntimeState(ctx);
+    }
 
     function translateFunction(props) {
       return mapperRegistry.mapCluster(props || {}, mapperToolkit.createToolkit);
     }
 
+    function initFunction() {
+      initRuntimeState(this || {});
+    }
+
+    function renderHtml(props) {
+      const ctx = this || {};
+      const routeProps = props || {};
+      const state = resolveRuntimeState(ctx);
+
+      state.hostCommitController.recordRender(routeProps);
+      ctx.__dyniHostCommitState = state.hostCommitController.getState();
+
+      const html = rendererRouter.renderHtml.call(ctx, routeProps);
+
+      state.hostCommitController.scheduleCommit({
+        onCommit: function (commitPayload) {
+          const sessionPayload = rendererRouter.createSessionPayload(commitPayload);
+          state.surfaceSessionController.reconcileSession(sessionPayload);
+        }
+      });
+
+      return html;
+    }
+
+    function finalizeFunction() {
+      const ctx = this || {};
+      const state = ctx.__dyniClusterState;
+      if (!state) {
+        return;
+      }
+
+      state.hostCommitController.cleanup();
+      state.surfaceSessionController.destroy();
+      ctx.__dyniClusterState = null;
+      ctx.__dyniHostCommitState = null;
+      ctx.__dyniRouterInstanceId = null;
+    }
+
     return {
       id: "ClusterWidget",
-      version: "1.15.0",
+      version: "1.16.0",
       wantsHideNativeHead: !!rendererRouter.wantsHideNativeHead,
       translateFunction: translateFunction,
-      renderHtml: rendererRouter.renderHtml,
-      renderCanvas: rendererRouter.renderCanvas,
-      initFunction: rendererRouter.initFunction,
-      finalizeFunction: rendererRouter.finalizeFunction
+      initFunction: initFunction,
+      renderHtml: renderHtml,
+      finalizeFunction: finalizeFunction
     };
   }
 

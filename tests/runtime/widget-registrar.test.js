@@ -50,7 +50,7 @@ describe("runtime/widget-registrar.js", function () {
   }
 
   it("merges component/widget def and composes update functions", function () {
-    const { context, registerWidget, applyThemePresetToContainer, hostActions } = setupContext();
+    const { context, registerWidget, hostActions } = setupContext();
 
     const component = {
       create() {
@@ -58,9 +58,7 @@ describe("runtime/widget-registrar.js", function () {
           className: "componentClass",
           storeKeys: { x: "nav.x" },
           wantsHideNativeHead: true,
-          renderCanvas(canvas) {
-            canvas.rendered = true;
-          },
+          renderCanvas: vi.fn(),
           updateFunction(values) {
             return Object.assign({}, values, { fromSpec: true });
           }
@@ -108,21 +106,7 @@ describe("runtime/widget-registrar.js", function () {
 
     const updated = registeredDef.updateFunction({ a: 1 });
     expect(updated).toEqual({ a: 1, fromSpec: true, fromDef: true });
-
-    const rootEl = {
-      _flag: false,
-      hasAttribute() { return this._flag; },
-      setAttribute() { this._flag = true; }
-    };
-    const canvas = {
-      closest() { return rootEl; }
-    };
-
-    registeredDef.renderCanvas(canvas, {});
-    expect(canvas.__dyniMarked).toBeUndefined();
-    expect(rootEl._flag).toBe(false);
-    expect(applyThemePresetToContainer).not.toHaveBeenCalled();
-    expect(canvas.rendered).toBe(true);
+    expect(registeredDef.renderCanvas).toBeUndefined();
   });
 
   it("falls back to storeKey when storeKeys absent", function () {
@@ -218,12 +202,11 @@ describe("runtime/widget-registrar.js", function () {
     expect(seen).toEqual([hostActions]);
   });
 
-  it("injects hostActions into init, html, canvas, and finalize widget contexts", function () {
+  it("injects hostActions into init, html, and finalize widget contexts", function () {
     const { context, registerWidget, hostActions } = setupContext();
     const seen = {
       init: [],
       html: [],
-      canvas: [],
       finalize: []
     };
     const component = {
@@ -235,9 +218,6 @@ describe("runtime/widget-registrar.js", function () {
           renderHtml() {
             seen.html.push(this.hostActions);
             return "<div>ok</div>";
-          },
-          renderCanvas() {
-            seen.canvas.push(this.hostActions);
           },
           finalizeFunction() {
             seen.finalize.push(this.hostActions);
@@ -262,13 +242,12 @@ describe("runtime/widget-registrar.js", function () {
 
     registeredDef.initFunction.call(widgetContext, {});
     registeredDef.renderHtml.call(widgetContext, {});
-    registeredDef.renderCanvas.call(widgetContext, { __dyniMarked: true, closest() { return null; }, parentElement: null }, {});
     registeredDef.finalizeFunction.call(widgetContext, {});
 
     expect(seen.init).toEqual([hostActions]);
     expect(seen.html).toEqual([hostActions]);
-    expect(seen.canvas).toEqual([hostActions]);
     expect(seen.finalize).toEqual([hostActions]);
+    expect(registeredDef.renderCanvas).toBeUndefined();
     expect(widgetContext.hostActions).toBe(hostActions);
   });
 });

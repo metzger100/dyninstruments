@@ -24,6 +24,15 @@ describe("plugin.js bootstrap", function () {
 
     expect(dom.appendedScripts.length).toBeGreaterThan(10);
     expect(dom.appendedScripts[0].src).toBe("http://host/plugins/dyninstruments/runtime/namespace.js");
+    const loadedScriptSrc = dom.appendedScripts.map((item) => item.src);
+    const hostCommitIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/HostCommitController.js");
+    const surfaceSessionIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/SurfaceSessionController.js");
+    const initIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/init.js");
+
+    expect(hostCommitIndex).toBeGreaterThan(-1);
+    expect(surfaceSessionIndex).toBeGreaterThan(-1);
+    expect(hostCommitIndex).toBeLessThan(initIndex);
+    expect(surfaceSessionIndex).toBeLessThan(initIndex);
     expect(dom.appendedScripts[dom.appendedScripts.length - 1].src)
       .toBe("http://host/plugins/dyninstruments/runtime/init.js");
     expect(runInit).toHaveBeenCalledOnce();

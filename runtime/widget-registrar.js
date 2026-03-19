@@ -44,7 +44,6 @@
     const storeKeys = spec.storeKeys || widgetDef.def.storeKeys ||
       (widgetDef.def.storeKey ? { value: widgetDef.def.storeKey } : undefined);
 
-    const renderCanvas = typeof spec.renderCanvas === "function" ? spec.renderCanvas : undefined;
     const renderHtml = typeof spec.renderHtml === "function" ? spec.renderHtml : undefined;
     const initFunction = typeof spec.initFunction === "function" ? spec.initFunction : undefined;
     const finalizeFunction = typeof spec.finalizeFunction === "function" ? spec.finalizeFunction : undefined;
@@ -54,16 +53,6 @@
 
     function attachHostActions(ctx) {
       ctx.hostActions = Helpers.getHostActions();
-    }
-
-    function wrapRenderCanvas(fn) {
-      if (!fn) {
-        return undefined;
-      }
-      return function (canvas, props) {
-        attachHostActions(this);
-        return fn.apply(this, [canvas, props]);
-      };
     }
 
     function wrapWidgetContext(fn) {
@@ -94,7 +83,6 @@
       cluster: widgetDef.def.cluster,
       ...perInstrumentDefaults,
 
-      renderCanvas: wrapRenderCanvas(renderCanvas),
       renderHtml: wrapWidgetContext(renderHtml),
       initFunction: wrapWidgetContext(initFunction),
       finalizeFunction: wrapWidgetContext(finalizeFunction),

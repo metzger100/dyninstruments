@@ -29,14 +29,17 @@
   border-color: var(--dyni-border-night, rgba(252, 11, 11, 0.18));
 }
 
-/* Ensure the canvas uses the full widget area. */
-.widget.dyniplugin canvas.widgetData,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas {
+/* Host shell and surfaces fill the widget area on the renderHtml host path. */
+.widget.dyniplugin .widgetData.dyni-shell,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-html,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas-mount,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas-node {
   width: 100% !important;
   height: 100% !important;
   display: block;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell {
+.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas {
   font-size: initial;
 }

@@ -154,13 +154,19 @@ When a module sets `wantsHideNativeHead: true`, the registration wrapper adds th
 }
 ```
 
-Canvas fills the full widget area:
+Surface shell and internal canvas fill the full widget area:
 
 ```css
-.widget.dyniplugin canvas.widgetData {
+.widget.dyniplugin .widgetData.dyni-shell,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas-mount,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas-node {
   width: 100% !important;
   height: 100% !important;
   display: block;
+}
+.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas {
+  font-size: initial;
 }
 ```
 

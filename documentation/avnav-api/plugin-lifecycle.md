@@ -122,7 +122,8 @@ When `true`, `runtime/widget-registrar.js` adds the static `dyni-hide-native-hea
 
 ### hostActions
 
-`runtime/widget-registrar.js` injects `this.hostActions` before `initFunction`, `renderHtml`, `renderCanvas`, and `finalizeFunction`.
+`runtime/widget-registrar.js` injects `this.hostActions` before `initFunction`, `renderHtml`, and `finalizeFunction`.
+`ClusterWidget` is now registered renderHtml-only on the host path (no host `renderCanvas` registration).
 
 Current dyninstruments facade:
 
@@ -140,8 +141,10 @@ dyninstruments modules expose `create(def, Helpers)`:
 
 ```javascript
 function create(def, Helpers) {
-  function renderCanvas(canvas, props) { /* ... */ }
-  return { id: "ModuleName", wantsHideNativeHead: true, renderCanvas };
+  function renderHtml(props) { /* ... */ }
+  function initFunction(props) { /* ... */ }
+  function finalizeFunction() { /* ... */ }
+  return { id: "ModuleName", wantsHideNativeHead: true, renderHtml, initFunction, finalizeFunction };
 }
 ```
 
@@ -165,7 +168,10 @@ After registration, `runtime/init.js` applies theme presets by discovering `.wid
 3. ClusterWidget.translateFunction(mergedProps)
    -> numeric: { value, caption, unit, formatter, formatterParameters }
    -> graphic: { renderer: "SpeedRadialWidget", value, caption, unit, ... }
-4. ClusterWidget.renderCanvas() delegates via ClusterRendererRouter
+4. ClusterWidget.renderHtml() returns shell markup via ClusterRendererRouter
+5. HostCommitController deferred commit resolves root/shell by data-dyni-instance
+6. SurfaceSessionController reconciles attach/update/remount/surface-switch lifecycle
+7. canvas kinds repaint through CanvasDomSurfaceAdapter internal canvas lifecycle
 ```
 
 ## Related
