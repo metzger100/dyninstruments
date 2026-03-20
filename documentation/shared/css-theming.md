@@ -165,6 +165,12 @@ Surface shell and internal canvas fill the full widget area:
   height: 100% !important;
   display: block;
 }
+.widget.dyniplugin .widgetData.dyni-shell {
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  align-self: stretch;
+}
 .widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas {
   font-size: initial;
 }
