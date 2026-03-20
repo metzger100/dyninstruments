@@ -453,7 +453,7 @@ describe("runtime/init.js", function () {
 
   it("invalidates ThemeResolver cache for the root after preset application", async function () {
     const applyPreset = vi.fn();
-    const invalidateCanvas = vi.fn();
+    const invalidateRoot = vi.fn();
     const invalidateAll = vi.fn();
     const uniqueComponents = vi.fn(() => ["A", "ThemeResolver"]);
     const { createTemporaryHostActionBridge } = createBridgeRuntimeMock();
@@ -473,11 +473,11 @@ describe("runtime/init.js", function () {
         return Promise.resolve({
           id: "ThemeResolver",
           create: () => ({
-            resolve: vi.fn(),
-            invalidateCanvas,
+            resolveForRoot: vi.fn(),
+            invalidateRoot,
             invalidateAll
           }),
-          invalidateCanvas,
+          invalidateRoot,
           invalidateAll
         });
       }
@@ -522,13 +522,13 @@ describe("runtime/init.js", function () {
     await flushPromises();
 
     applyPreset.mockClear();
-    invalidateCanvas.mockClear();
+    invalidateRoot.mockClear();
     invalidateAll.mockClear();
 
     context.DyniPlugin.runtime.applyThemePresetToContainer(rootEl, "bold");
 
     expect(applyPreset).toHaveBeenCalledWith(rootEl, "bold");
-    expect(invalidateCanvas).toHaveBeenCalledWith(rootEl);
+    expect(invalidateRoot).toHaveBeenCalledWith(rootEl);
     expect(invalidateAll).not.toHaveBeenCalled();
   });
 

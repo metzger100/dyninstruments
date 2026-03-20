@@ -94,7 +94,10 @@ function runThemeCacheInvalidationRule() {
     };
   };
 
-  const canvas = {
+  const rootEl = {
+    getAttribute() {
+      return null;
+    },
     ownerDocument: {
       documentElement: { classList: { contains() { return false; } } },
       body: { classList: { contains() { return false; } } }
@@ -102,36 +105,36 @@ function runThemeCacheInvalidationRule() {
   };
 
   const resolver = mod.create({}, {});
-  if (!resolver || typeof resolver.resolve !== "function") {
-    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "ThemeResolver.create() must return resolve(canvas)."));
+  if (!resolver || typeof resolver.resolveForRoot !== "function") {
+    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "ThemeResolver.create() must return resolveForRoot(rootEl)."));
     return out;
   }
-  if (typeof resolver.invalidateCanvas !== "function" || typeof resolver.invalidateAll !== "function") {
-    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "ThemeResolver.create() must return invalidateCanvas() and invalidateAll()."));
+  if (typeof resolver.invalidateRoot !== "function" || typeof resolver.invalidateAll !== "function") {
+    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "ThemeResolver.create() must return invalidateRoot() and invalidateAll()."));
     return out;
   }
-  if (typeof mod.invalidateCanvas !== "function" || typeof mod.invalidateAll !== "function") {
-    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "ThemeResolver module must expose invalidateCanvas() and invalidateAll()."));
+  if (typeof mod.invalidateRoot !== "function" || typeof mod.invalidateAll !== "function") {
+    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "ThemeResolver module must expose invalidateRoot() and invalidateAll()."));
     return out;
   }
 
-  const first = resolver.resolve(canvas);
+  const first = resolver.resolveForRoot(rootEl);
   pointer = "#222222";
-  resolver.invalidateCanvas(canvas);
-  const second = resolver.resolve(canvas);
+  resolver.invalidateRoot(rootEl);
+  const second = resolver.resolveForRoot(rootEl);
   if (!second || !second.colors || second.colors.pointer !== "#222222") {
-    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "invalidateCanvas(canvas) must refresh cached tokens for that canvas."));
+    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "invalidateRoot(rootEl) must refresh cached tokens for that root."));
   }
 
   pointer = "#333333";
   resolver.invalidateAll();
-  const third = resolver.resolve(canvas);
+  const third = resolver.resolveForRoot(rootEl);
   if (!third || !third.colors || third.colors.pointer !== "#333333") {
     out.push(makeFinding(rel, 1, "theme-cache-invalidation", "invalidateAll() must refresh cached tokens."));
   }
 
   if (!first || !first.colors || first.colors.pointer !== "#111111") {
-    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "resolve(canvas) should return initial pointer token value."));
+    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "resolveForRoot(rootEl) should return initial pointer token value."));
   }
 
   const initRel = "runtime/init.js";

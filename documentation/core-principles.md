@@ -11,8 +11,8 @@ Agents and contributors must follow these rules on every task.
 Rationale: Agents must produce files that run in AvNav without compilation.
 2. Rule: Every component must use the UMD/IIFE wrapper and register on `window.DyniComponents.{globalKey}`.
 Rationale: A single module boundary keeps agent output predictable and load-safe.
-3. Rule: Passive visual rendering stays on Canvas 2D via `renderCanvas(canvas, props)`; `renderHtml(props)` is allowed only for active widgets that need DOM-owned interaction.
-Rationale: Canvas remains the default display path, while the HTML exception stays narrow and tied to real interaction requirements instead of becoming a second passive rendering system.
+3. Rule: Cluster widgets register `renderHtml(props)` on the AvNav host path; surface rendering is selected internally via strict kind-catalog routing (`surface: "html"` or `surface: "canvas-dom"`).
+Rationale: Host lifecycle ownership is centralized in one render path, while internal surface routing stays explicit and fail-closed.
 4. Rule: Dependency direction is one-way by layer: `widgets -> shared`; `cluster -> cluster/widgets/shared`; `shared -> shared`; `config` is pure data; `runtime` must not depend on `widgets/cluster/shared`.
 Rationale: One-way layering prevents circular dependencies that confuse agents.
 5. Rule: Keep JavaScript files at or below 400 lines; split before crossing the limit.

@@ -74,7 +74,7 @@ Otherwise the widget shows placeholder text for missing/disconnected values and 
 
 ## Theme Token Usage
 
-Theme is resolved once per frame via `RadialToolkit.theme.resolve(canvas)`.
+Theme is resolved once per frame via `RadialToolkit.theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas)`.
 
 | Visual element | Token |
 |---|---|

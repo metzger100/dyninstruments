@@ -43,6 +43,7 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.kind.default).toBe("eta");
     expect(def.editableParameters.kind.name).toBe("Instrument");
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "activeRoute")).toBe(true);
+    expect(def.editableParameters.kind.list.some((entry) => entry.value === "activeRouteInteractive")).toBe(true);
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "centerDisplay")).toBe(true);
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "xteDisplay")).toBe(true);
     expect(def.editableParameters.centerDisplayRatioThresholdNormal.condition).toEqual({ kind: "centerDisplay" });
@@ -56,8 +57,14 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.xteRatioThresholdFlat.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.xteRatioThresholdNormal.internal).toBe(true);
     expect(def.editableParameters.xteRatioThresholdFlat.internal).toBe(true);
-    expect(def.editableParameters.activeRouteRatioThresholdNormal.condition).toEqual({ kind: "activeRoute" });
-    expect(def.editableParameters.activeRouteRatioThresholdFlat.condition).toEqual({ kind: "activeRoute" });
+    expect(def.editableParameters.activeRouteRatioThresholdNormal.condition).toEqual([
+      { kind: "activeRoute" },
+      { kind: "activeRouteInteractive" }
+    ]);
+    expect(def.editableParameters.activeRouteRatioThresholdFlat.condition).toEqual([
+      { kind: "activeRoute" },
+      { kind: "activeRouteInteractive" }
+    ]);
     expect(def.editableParameters.activeRouteRatioThresholdNormal.internal).toBe(true);
     expect(def.editableParameters.activeRouteRatioThresholdFlat.internal).toBe(true);
     expect(def.editableParameters.activeRouteRatioThresholdNormal.default).toBe(1.2);
@@ -98,12 +105,12 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.unit_centerDisplayBoat.displayName).toBe("Boat distance unit");
     expect(def.editableParameters.caption_centerDisplayMeasure.displayName).toBe("Measure caption");
     expect(def.editableParameters.unit_centerDisplayMeasure.displayName).toBe("Measure distance unit");
-    expect(def.editableParameters.caption_activeRouteRemain.condition).toEqual({ kind: "activeRoute" });
-    expect(def.editableParameters.unit_activeRouteRemain.condition).toEqual({ kind: "activeRoute" });
-    expect(def.editableParameters.caption_activeRouteEta.condition).toEqual({ kind: "activeRoute" });
-    expect(def.editableParameters.unit_activeRouteEta.condition).toEqual({ kind: "activeRoute" });
-    expect(def.editableParameters.caption_activeRouteNextCourse.condition).toEqual({ kind: "activeRoute" });
-    expect(def.editableParameters.unit_activeRouteNextCourse.condition).toEqual({ kind: "activeRoute" });
+    expect(def.editableParameters.caption_activeRouteRemain.condition).toEqual([{ kind: "activeRoute" }, { kind: "activeRouteInteractive" }]);
+    expect(def.editableParameters.unit_activeRouteRemain.condition).toEqual([{ kind: "activeRoute" }, { kind: "activeRouteInteractive" }]);
+    expect(def.editableParameters.caption_activeRouteEta.condition).toEqual([{ kind: "activeRoute" }, { kind: "activeRouteInteractive" }]);
+    expect(def.editableParameters.unit_activeRouteEta.condition).toEqual([{ kind: "activeRoute" }, { kind: "activeRouteInteractive" }]);
+    expect(def.editableParameters.caption_activeRouteNextCourse.condition).toEqual([{ kind: "activeRoute" }, { kind: "activeRouteInteractive" }]);
+    expect(def.editableParameters.unit_activeRouteNextCourse.condition).toEqual([{ kind: "activeRoute" }, { kind: "activeRouteInteractive" }]);
     expect(def.editableParameters.caption_xteDisplayXte.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.unit_xteDisplayXte.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.caption_activeRouteRemain.displayName).toBe("Route distance caption");
@@ -136,7 +143,7 @@ describe("config/clusters/nav.js", function () {
     expect(c.disconnect).toBeUndefined();
   });
 
-  it("sets disconnect for activeRoute when waypoint data is disconnected or route name is missing", function () {
+  it("does not derive disconnect for activeRoute kinds in updateFunction", function () {
     const def = loadNavDef();
 
     const serverDown = def.updateFunction({
@@ -144,22 +151,30 @@ describe("config/clusters/nav.js", function () {
       wpServer: false,
       activeRouteName: "Harbor Run"
     });
-    expect(serverDown.disconnect).toBe(true);
+    expect(serverDown.disconnect).toBeUndefined();
 
     const emptyName = def.updateFunction({
       kind: "activeRoute",
       wpServer: true,
       activeRouteName: "   "
     });
-    expect(emptyName.disconnect).toBe(true);
+    expect(emptyName.disconnect).toBeUndefined();
 
-    const healthy = def.updateFunction({
+    const staleDisconnect = def.updateFunction({
       kind: "activeRoute",
       wpServer: true,
       activeRouteName: "Harbor Run",
       disconnect: true
     });
-    expect(healthy.disconnect).toBeUndefined();
+    expect(staleDisconnect.disconnect).toBeUndefined();
+
+    const interactiveStaleDisconnect = def.updateFunction({
+      kind: "activeRouteInteractive",
+      wpServer: true,
+      activeRouteName: "Harbor Run",
+      disconnect: true
+    });
+    expect(interactiveStaleDisconnect.disconnect).toBeUndefined();
   });
 
   it("applies core visibility semantics for centerDisplay and clears stale visible on other kinds", function () {

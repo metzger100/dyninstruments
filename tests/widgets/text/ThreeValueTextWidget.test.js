@@ -34,12 +34,15 @@ describe("ThreeValueTextWidget", function () {
       resolveTextColor() {
         return "#fff";
       },
+      resolveWidgetRoot(target) {
+        return target;
+      },
       getModule(id) {
         if (id === "ThemeResolver") {
           return {
             create() {
               return {
-                resolve() {
+                resolveForRoot() {
                   return { font: { weight: 730, labelWeight: 610 } };
                 }
               };

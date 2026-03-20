@@ -85,7 +85,7 @@
     };
   }
 
-  function discoverWidgetRoot(target) {
+  function resolveWidgetRoot(target) {
     if (!target) {
       return null;
     }
@@ -98,14 +98,14 @@
     return target.parentElement || null;
   }
 
-  function getNightModeState(canvas) {
-    const doc = canvas && canvas.ownerDocument;
+  function getNightModeState(rootEl) {
+    const doc = rootEl && rootEl.ownerDocument;
     if (!doc) {
       return false;
     }
 
-    const rootEl = doc.documentElement;
-    if (rootEl && rootEl.classList && rootEl.classList.contains("nightMode")) {
+    const docRootEl = doc.documentElement;
+    if (docRootEl && docRootEl.classList && docRootEl.classList.contains("nightMode")) {
       return true;
     }
 
@@ -114,7 +114,7 @@
   }
 
   function resolveTypography(target) {
-    const rootEl = discoverWidgetRoot(target) || target;
+    const rootEl = resolveWidgetRoot(target) || target;
     const nightMode = getNightModeState(rootEl);
     const cached = typographyByRoot.get(rootEl);
     if (cached && cached.nightMode === nightMode) {
@@ -170,6 +170,7 @@
       setupCanvas: setupCanvas,
       resolveTextColor: resolveTextColor,
       resolveFontFamily: resolveFontFamily,
+      resolveWidgetRoot: resolveWidgetRoot,
       getHostActions: getHostActions,
       getModule: getModule
     };
@@ -179,6 +180,7 @@
   runtime.setupCanvas = setupCanvas;
   runtime.resolveTextColor = resolveTextColor;
   runtime.resolveFontFamily = resolveFontFamily;
+  runtime.resolveWidgetRoot = resolveWidgetRoot;
   runtime.getHostActions = getHostActions;
   runtime.createHelpers = createHelpers;
 }(this));

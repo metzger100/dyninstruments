@@ -14,6 +14,7 @@ Read first:
 ## Overview
 
 Linear gauges should be thin wrappers over `LinearGaugeEngine`.
+Cluster host registration remains `renderHtml`; linear canvas wrappers run on internal `surface: "canvas-dom"` routes.
 
 Select a profile first, then keep the wrapper focused on formatter, ticks, axis mode, and sectors.
 
@@ -161,7 +162,8 @@ Only expose keys relevant for the selected kind via `condition`.
 2. `cluster/rendering/ClusterRendererRouter.js`
 - Instantiate renderer spec in `create()`
 - Add to `rendererSpecs`
-- Route `props.renderer === "NewLinearWidget"` in `pickRenderer()`
+3. `cluster/rendering/ClusterKindCatalog.js`
+- Add strict tuple with `rendererId: "NewLinearWidget"` and `surface: "canvas-dom"`
 
 ## Step 5: Mapper Wiring
 
@@ -216,6 +218,7 @@ Manual checks:
 - [ ] Wrapper module added in `widgets/linear/`
 - [ ] Component registered in `config/components.js`
 - [ ] Router wiring updated in `cluster/rendering/ClusterRendererRouter.js`
+- [ ] Kind catalog tuple added in `cluster/rendering/ClusterKindCatalog.js` with `surface: "canvas-dom"`
 - [ ] Mapper routes kind to new renderer with normalized props
 - [ ] Formatter tuple docs updated for formatter-bearing kinds:
   - [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md)

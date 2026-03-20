@@ -105,6 +105,9 @@ describe("LinearGaugeEngine", function () {
       resolveTextColor() {
         return "#fff";
       },
+      resolveWidgetRoot(target) {
+        return target;
+      },
       getModule(id) {
         if (id === "CanvasLayerCache") return cacheMod;
         if (id === "LinearCanvasPrimitives") return primitivesModule;
@@ -118,7 +121,7 @@ describe("LinearGaugeEngine", function () {
           create() {
             return {
               theme: {
-                resolve() {
+                resolveForRoot() {
                   return theme;
                 }
               },

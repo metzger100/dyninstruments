@@ -68,6 +68,9 @@ describe("SemicircleRadialEngine", function () {
       resolveTextColor() {
         return "#fff";
       },
+      resolveWidgetRoot(target) {
+        return target;
+      },
       getModule(id) {
         if (modules[id]) {
           return modules[id];
@@ -123,7 +126,7 @@ describe("SemicircleRadialEngine", function () {
     const gaugeToolkit = {
       create() {
         return {
-          theme: { resolve: resolveTheme },
+          theme: { resolveForRoot: resolveTheme },
           text: {
             drawDisconnectOverlay() {}
           },
@@ -262,7 +265,7 @@ describe("SemicircleRadialEngine", function () {
           create() {
             return {
               theme: {
-                resolve() {
+                resolveForRoot() {
                   return themeDefaults;
                 }
               },
@@ -368,7 +371,7 @@ describe("SemicircleRadialEngine", function () {
           create() {
             return {
               theme: {
-                resolve() {
+                resolveForRoot() {
                   return themeDefaults;
                 }
               },
@@ -450,7 +453,7 @@ describe("SemicircleRadialEngine", function () {
         create() {
           return {
             theme: {
-              resolve() {
+              resolveForRoot() {
                 return {
                   colors: {
                     pointer: "#ff2b2b",
@@ -548,7 +551,7 @@ describe("SemicircleRadialEngine", function () {
           create() {
             return {
               theme: {
-                resolve() {
+                resolveForRoot() {
                   return {
                     colors: {
                       pointer: "#ff2b2b",
@@ -670,7 +673,7 @@ describe("SemicircleRadialEngine", function () {
         create() {
           return {
             theme: {
-              resolve() {
+              resolveForRoot() {
                 return {
                   colors: {
                     pointer: "#ff2b2b"

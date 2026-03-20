@@ -5,7 +5,7 @@
 ## Overview
 
 Full-circle rotating compass card with upright cardinal labels. The dial rotates by `-heading`; the lubber pointer stays fixed at North. Optional target marker (`markerCourse`) is supported.
-Pointer color is resolved once per render via `FullCircleRadialEngine` (`RadialToolkit.theme.resolve(canvas)` internally).
+Pointer color is resolved once per render via `FullCircleRadialEngine` (`RadialToolkit.theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas)` internally).
 Static dial rendering is cached via shared `CanvasLayerCache` managed by `FullCircleRadialEngine`.
 Responsive ring, label, marker, and pointer geometry come from `FullCircleRadialLayout` through the shared engine state.
 

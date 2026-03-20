@@ -14,6 +14,7 @@ Read first:
 ## Overview
 
 New semicircle gauges should be thin wrappers over `SemicircleRadialEngine`. Keep gauge modules focused on formatting, tick strategy, and sector strategy.
+Cluster host registration stays `renderHtml`; canvas gauge wrappers are mounted through the internal `canvas-dom` surface.
 
 For linear instruments, use [add-new-linear-gauge.md](add-new-linear-gauge.md) and `LinearGaugeEngine`.
 
@@ -82,9 +83,9 @@ If `ClusterWidget` should render this gauge, update both declaration and runtime
 
 1. `config/components.js`: add `"NewGaugeWidget"` to `ClusterRendererRouter.deps`
 2. `cluster/rendering/ClusterRendererRouter.js`:
-- instantiate the new spec in `create()`
-- include it in `subSpecs`
-- route `props.renderer === "NewGaugeWidget"` in `pickRenderer()`
+- instantiate the new renderer spec in `rendererSpecs`
+3. `cluster/rendering/ClusterKindCatalog.js`:
+- add strict tuple with `rendererId: "NewGaugeWidget"` and `surface: "canvas-dom"`
 
 ## Step 4: Route Data via Mapper Module
 
@@ -117,6 +118,7 @@ Do not move layout, compact-geometry, or responsive-floor logic into mapper file
 - [ ] Module registered in `config/components.js`
 - [ ] Added to `ClusterRendererRouter.deps` (if ClusterWidget-rendered)
 - [ ] Renderer wired in `cluster/rendering/ClusterRendererRouter.js`
+- [ ] Kind catalog tuple added with `surface: "canvas-dom"` in `cluster/rendering/ClusterKindCatalog.js`
 - [ ] Mapper module emits `renderer: "NewGaugeWidget"` and expected props
 - [ ] Visual + resize behavior validated
 

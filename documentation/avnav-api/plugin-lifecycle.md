@@ -58,7 +58,7 @@ For plugin-maintained key/unit contracts (including roll/pitch), see [core-key-c
 
 ## Widget Context
 
-Available as `this` in `initFunction`, `finalizeFunction`, `renderHtml`, `renderCanvas`.
+Available as `this` in `initFunction`, `finalizeFunction`, `renderHtml`, and (for widgets that register it) `renderCanvas`.
 
 | Property/Method | Widget Type | Description |
 |---|---|---|
@@ -100,6 +100,15 @@ Details and event-chain analysis: [interactive-widgets.md](interactive-widgets.m
 
 `mergedProps` includes editable parameter values, store values, and translate output.
 
+## dyninstruments Host Contract (Current)
+
+- Cluster widgets are registered on the host path with `renderHtml` (no host `renderCanvas` registration).
+- Existing canvas renderers stay valid as internal renderer contracts and are mounted through `CanvasDomSurfaceAdapter`.
+- Runtime commit/surface ownership is explicit:
+  - `HostCommitController`: deferred shell/root commit
+  - `SurfaceSessionController`: per-instance `attach/update/detach/destroy` lifecycle
+  - `HtmlSurfaceController`: named HTML handler ownership per active HTML surface session
+
 ---
 
 ## dyninstruments Internals (Not Official AvNav API)
@@ -134,6 +143,21 @@ Current dyninstruments facade:
 - `this.hostActions.ais.showInfo(mmsi)`
 
 This is dyninstruments-only runtime behavior, not official AvNav API.
+
+### eventHandler Ownership
+
+- `ClusterWidget.initFunction` registers `eventHandler.catchAll` once as global wrapper handler.
+- `HtmlSurfaceController` owns named control handlers for the active HTML surface session:
+  - bind on `attach`
+  - refresh on `update`
+  - remove on `detach` and `destroy`
+- `catchAll` is not surface-owned; it remains global to consume empty-space clicks on interactive wrappers.
+
+### HTML Resize Contract
+
+- HTML renderers provide `resizeSignature(props)` through the HTML surface contract.
+- On signature change, `HtmlSurfaceController` calls `triggerResize()` exactly once for that update pass.
+- This keeps layout-sensitive HTML kinds responsive without global observers.
 
 ### Module create() Pattern
 

@@ -645,6 +645,8 @@ code functional until Phase 9 flips the switch.
 
 ### Phase 10 — ActiveRouteViewModel Extraction
 
+**Status:** implemented (`2026-03-20`)
+
 **Goal:** Extract the `activeRoute` domain logic currently inline in
 `NavMapper.js` into a shared `cluster/viewmodels/ActiveRouteViewModel.js`.
 Normalize data, derive disconnect state, prepare route/distance/ETA/course/states,
@@ -670,6 +672,8 @@ extracts — it does not introduce new kinds.
 ---
 
 ### Phase 11 — `activeRouteInteractive`: Config, Mapper, HTML Renderer
+
+**Status:** implemented (`2026-03-20`)
 
 **Goal:** Add `activeRouteInteractive` as a new independent `kind`. Register it
 in the Kind Catalog with `surface: "html"`. Add it to `nav.js` config as a
@@ -700,6 +704,8 @@ yet. The renderer produces static HTML only at this point.
 ---
 
 ### Phase 12 — EventHandler Wiring for HTML Surface Controller
+
+**Status:** implemented (`2026-03-20`)
 
 **Goal:** Complete the `html` surface controller (stub from Phase 8) with real
 lifecycle management of named `eventHandler` registrations. On `attach`, bind
@@ -734,6 +740,8 @@ optional and can be wired separately. The widget must be safe and usable without
 ---
 
 ### Phase 13 — Compatibility Trail Cleanup
+
+**Status:** implemented (`2026-03-20`)
 
 **Goal:** Remove every temporary compatibility path, dead code path, and
 deferred deprecation that accumulated during Phases 1–12. After this phase,
@@ -848,6 +856,8 @@ work; broad architecture narrative alignment still happens in Phase 14.
 ---
 
 ### Phase 14 — Documentation Sweep
+
+**Status:** implemented (`2026-03-20`)
 
 **Goal:** Bring all project documentation in line with the post-Phase-12
 architecture. Individual phases may have updated docs for the files they
@@ -990,6 +1000,10 @@ in Phases 5–12.
   widget capabilities.
 - `CONTRIBUTING.md`: Update if it references the old rendering pipeline
   or registration flow.
+
+**J. Phase related Documentation**
+
+- In all documentation Files it might also be possible that the docs are talking about Phases or Steps. Remove those references to the implementation plans and extend the docs to be standalone without the references to the plans.
 
 **Touch:** All files listed above.
 

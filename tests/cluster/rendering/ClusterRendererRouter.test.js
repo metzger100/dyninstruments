@@ -5,6 +5,7 @@ describe("ClusterRendererRouter", function () {
     "ThreeValueTextWidget",
     "PositionCoordinateWidget",
     "ActiveRouteTextWidget",
+    "ActiveRouteTextHtmlWidget",
     "CenterDisplayTextWidget",
     "WindRadialWidget",
     "CompassRadialWidget",
@@ -93,6 +94,10 @@ describe("ClusterRendererRouter", function () {
     ALL_RENDERER_IDS.forEach(function (id) {
       rendererSpecs[id] = makeRendererSpec(id);
     });
+    rendererSpecs.ActiveRouteTextHtmlWidget = makeRendererSpec("ActiveRouteTextHtmlWidget", {
+      renderCanvas: false,
+      renderHtml: vi.fn(() => "<div>interactive-route</div>")
+    });
     Object.assign(rendererSpecs, opts.rendererSpecs || {});
 
     const canvasAdapter = {
@@ -134,6 +139,7 @@ describe("ClusterRendererRouter", function () {
       ThreeValueTextWidget: { create: () => rendererSpecs.ThreeValueTextWidget },
       PositionCoordinateWidget: { create: () => rendererSpecs.PositionCoordinateWidget },
       ActiveRouteTextWidget: { create: () => rendererSpecs.ActiveRouteTextWidget },
+      ActiveRouteTextHtmlWidget: { create: () => rendererSpecs.ActiveRouteTextHtmlWidget },
       CenterDisplayTextWidget: { create: () => rendererSpecs.CenterDisplayTextWidget },
       RendererPropsWidget: {
         create: function (def, Helpers, targetRendererId) {
@@ -164,14 +170,14 @@ describe("ClusterRendererRouter", function () {
     const h = createHarness();
     const routes = h.router.listRoutes();
 
-    expect(routes).toHaveLength(51);
+    expect(routes).toHaveLength(52);
     routes.forEach(function (route) {
       const resolved = h.router.resolveRouteSpec({
         cluster: route.cluster,
         kind: route.kind
       });
       expect(resolved).toEqual(route);
-      expect(resolved.surface).toBe("canvas-dom");
+      expect(resolved.surface).toBe(route.surface);
     });
 
     const activeRoute = h.router.resolveRouteSpec({ cluster: "nav", kind: "activeRoute" });
@@ -204,12 +210,12 @@ describe("ClusterRendererRouter", function () {
         cluster: "nav",
         kind: "activeRouteInteractive",
         viewModelId: "ActiveRouteViewModel",
-        rendererId: "ActiveRouteTextWidget",
+        rendererId: "ActiveRouteTextHtmlWidget",
         surface: "html"
       }
     ]);
 
-    const htmlRenderer = makeRendererSpec("ActiveRouteTextWidget", {
+    const htmlRenderer = makeRendererSpec("ActiveRouteTextHtmlWidget", {
       renderCanvas: false,
       renderHtml: vi.fn(() => "<button>route</button>")
     });
@@ -217,7 +223,7 @@ describe("ClusterRendererRouter", function () {
     const h = createHarness({
       catalogModule: htmlCatalog,
       rendererSpecs: {
-        ActiveRouteTextWidget: htmlRenderer
+        ActiveRouteTextHtmlWidget: htmlRenderer
       }
     });
 

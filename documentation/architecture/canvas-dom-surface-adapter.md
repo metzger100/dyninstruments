@@ -1,13 +1,13 @@
 # Canvas DOM Surface Adapter
 
-**Status:** ✅ Implemented | `canvas-dom` surface owner used by `ClusterRendererRouter` (Phase 8)
+**Status:** ✅ Implemented | `canvas-dom` surface owner used by `ClusterRendererRouter`
 
 ## Overview
 
-`cluster/rendering/CanvasDomSurfaceAdapter.js` provides the canvas-surface owner for internal canvas lifecycle on the HTML host path.
-In Phase 8 it is used by `ClusterRendererRouter` for:
+`cluster/rendering/CanvasDomSurfaceAdapter.js` owns the internal canvas lifecycle on the HTML host path.
+`ClusterRendererRouter` uses it for:
 
-- stable canvas-shell markup generation (`renderSurfaceShell`)
+- stable canvas-surface shell generation (`renderSurfaceShell`)
 - `canvas-dom` controller creation (`createSurfaceController`) for surface-session lifecycle hooks
 
 ## Key Details
@@ -15,7 +15,7 @@ In Phase 8 it is used by `ClusterRendererRouter` for:
 - File: `cluster/rendering/CanvasDomSurfaceAdapter.js`
 - Component ID: `CanvasDomSurfaceAdapter`
 - Router integration owner: `cluster/rendering/ClusterRendererRouter.js` (`canvas-dom` branch)
-- Strict non-compat contract:
+- Strict contract:
   - throws when `rendererSpec.renderCanvas` is missing
   - throws when `ResizeObserver` is unavailable
   - throws when shell mount target `.dyni-surface-canvas-mount` is missing
@@ -64,4 +64,4 @@ controller.invalidateTheme(reason);
 
 - [cluster-widget-system.md](cluster-widget-system.md)
 - [surface-session-controller.md](surface-session-controller.md)
-- [../../notes/implementation-plans/PLAN1.md](../../notes/implementation-plans/PLAN1.md)
+- [host-commit-controller.md](host-commit-controller.md)

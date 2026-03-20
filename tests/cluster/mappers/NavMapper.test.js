@@ -33,15 +33,27 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   unit_xteDisplayBrg: "degM"
 });
 
+function createMapper() {
+  const Helpers = {
+    getModule(id) {
+      if (id === "ActiveRouteViewModel") {
+        return loadFresh("cluster/viewmodels/ActiveRouteViewModel.js");
+      }
+      throw new Error("unexpected module: " + id);
+    }
+  };
+  return loadFresh("cluster/mappers/NavMapper.js").create({}, Helpers);
+}
+
 describe("NavMapper", function () {
   it("maps ETA kinds with formatTime", function () {
-    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const mapper = createMapper();
     expect(mapper.translate({ kind: "eta", eta: 1700000000 }, toolkit).formatter).toBe("formatTime");
     expect(mapper.translate({ kind: "rteEta", rteEta: 1700000100 }, toolkit).formatter).toBe("formatTime");
   });
 
   it("maps distance kinds with formatDistance", function () {
-    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const mapper = createMapper();
     const out = mapper.translate({ kind: "rteDistance", rteDistance: 12.3 }, toolkit);
 
     expect(out).toEqual({
@@ -54,7 +66,7 @@ describe("NavMapper", function () {
   });
 
   it("maps VMG using speed formatter and unit parameter", function () {
-    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const mapper = createMapper();
     const out = mapper.translate({ kind: "vmg", vmg: 4.2 }, toolkit);
 
     expect(out).toEqual({
@@ -67,7 +79,7 @@ describe("NavMapper", function () {
   });
 
   it("maps activeRoute to ActiveRouteTextWidget with renderer-owned field props", function () {
-    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const mapper = createMapper();
     const rawEta = new Date("2026-03-06T11:45:00Z");
     const out = mapper.translate({
       kind: "activeRoute",
@@ -78,6 +90,7 @@ describe("NavMapper", function () {
       activeRouteApproaching: true,
       activeRouteRatioThresholdNormal: "1.25",
       activeRouteRatioThresholdFlat: "4.4",
+      wpServer: true,
       disconnect: true
     }, toolkit);
 
@@ -106,8 +119,49 @@ describe("NavMapper", function () {
     });
   });
 
+  it("maps activeRouteInteractive to ActiveRouteTextHtmlWidget with shared domain payload", function () {
+    const mapper = createMapper();
+    const rawEta = new Date("2026-03-06T11:45:00Z");
+    const out = mapper.translate({
+      kind: "activeRouteInteractive",
+      activeRouteName: "  Harbor Run  ",
+      activeRouteRemain: "18.2",
+      activeRouteEta: rawEta,
+      activeRouteNextCourse: "93",
+      activeRouteApproaching: true,
+      activeRouteRatioThresholdNormal: "1.25",
+      activeRouteRatioThresholdFlat: "4.4",
+      wpServer: true,
+      disconnect: true
+    }, toolkit);
+
+    expect(out).toEqual({
+      renderer: "ActiveRouteTextHtmlWidget",
+      routeName: "Harbor Run",
+      disconnect: true,
+      display: {
+        remain: 18.2,
+        eta: rawEta,
+        nextCourse: 93,
+        isApproaching: true
+      },
+      captions: {
+        remain: "RTE CAP",
+        eta: "ETA CAP",
+        nextCourse: "NEXT CAP"
+      },
+      units: {
+        remain: "nmA",
+        eta: "",
+        nextCourse: "degN"
+      },
+      ratioThresholdNormal: 1.25,
+      ratioThresholdFlat: 4.4
+    });
+  });
+
   it("keeps next-course props available even when approach state is false", function () {
-    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const mapper = createMapper();
     const out = mapper.translate({
       kind: "activeRoute",
       activeRouteName: "Harbor Run",
@@ -124,8 +178,26 @@ describe("NavMapper", function () {
     expect(out.units.nextCourse).toBe("degN");
   });
 
+  it("derives activeRoute disconnect from wpServer or empty route-name state", function () {
+    const mapper = createMapper();
+
+    const wpServerDown = mapper.translate({
+      kind: "activeRoute",
+      activeRouteName: "Harbor Run",
+      wpServer: false
+    }, toolkit);
+    expect(wpServerDown.disconnect).toBe(true);
+
+    const emptyName = mapper.translate({
+      kind: "activeRoute",
+      activeRouteName: "   ",
+      wpServer: true
+    }, toolkit);
+    expect(emptyName.disconnect).toBe(true);
+  });
+
   it("maps positions with lon/lat formatter", function () {
-    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const mapper = createMapper();
     const out = mapper.translate({ kind: "positionBoat", positionBoat: [1, 2] }, toolkit);
 
     expect(out.formatter).toBe("formatLonLats");
@@ -142,7 +214,7 @@ describe("NavMapper", function () {
   });
 
   it("maps centerDisplay to CenterDisplayTextWidget with nested renderer props", function () {
-    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const mapper = createMapper();
     const activeMeasure = { getPointAtIndex: vi.fn(() => ({ lat: 54.1, lon: 10.2 })) };
     const out = mapper.translate({
       kind: "centerDisplay",
@@ -182,7 +254,7 @@ describe("NavMapper", function () {
   });
 
   it("maps xteDisplay to XteDisplayWidget with normalized renderer props", function () {
-    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const mapper = createMapper();
     const out = mapper.translate({
       kind: "xteDisplay",
       xte: "0.25",
@@ -222,13 +294,13 @@ describe("NavMapper", function () {
   });
 
   it("defaults xteDisplay waypoint-name toggle to false when setting is absent", function () {
-    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const mapper = createMapper();
     const out = mapper.translate({ kind: "xteDisplay", xte: 0.2, cog: 90, dtw: 1.1, btw: 95 }, toolkit);
     expect(out.rendererProps.showWpName).toBe(false);
   });
 
   it("keeps centerDisplay measure toggle false unless explicitly enabled", function () {
-    const mapper = loadFresh("cluster/mappers/NavMapper.js").create();
+    const mapper = createMapper();
     const out = mapper.translate({ kind: "centerDisplay" }, toolkit);
     expect(out.display.measure.useRhumbLine).toBe(false);
   });

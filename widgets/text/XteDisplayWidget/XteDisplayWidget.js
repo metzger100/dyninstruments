@@ -70,7 +70,7 @@
       }
 
       ctx.clearRect(0, 0, W, H);
-      const theme = toolkit.theme.resolve(canvas);
+      const theme = toolkit.theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas);
       const xteTheme = theme.xte || DEFAULT_XTE_THEME;
       const textColor = Helpers.resolveTextColor(canvas);
       const family = Helpers.resolveFontFamily(canvas);

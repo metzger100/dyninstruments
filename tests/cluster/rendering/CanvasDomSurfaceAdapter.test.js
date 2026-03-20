@@ -124,7 +124,7 @@ describe("CanvasDomSurfaceAdapter", function () {
       renderCanvas: vi.fn()
     };
     const themeModule = opts.themeModule || {
-      invalidateCanvas: vi.fn(),
+      invalidateRoot: vi.fn(),
       invalidateAll: vi.fn()
     };
     const helpers = {
@@ -206,7 +206,7 @@ describe("CanvasDomSurfaceAdapter", function () {
   it("renders a structurally stable shell markup", function () {
     const adapter = loadFresh("cluster/rendering/CanvasDomSurfaceAdapter.js").create({}, {
       getModule() {
-        return { invalidateCanvas: vi.fn(), invalidateAll: vi.fn() };
+        return { invalidateRoot: vi.fn(), invalidateAll: vi.fn() };
       }
     });
 
@@ -274,7 +274,7 @@ describe("CanvasDomSurfaceAdapter", function () {
     h.rendererSpec.renderCanvas.mockClear();
 
     expect(h.controller.invalidateTheme("theme-change")).toBe(true);
-    expect(h.themeModule.invalidateCanvas).toHaveBeenCalledWith(h.rootEl);
+    expect(h.themeModule.invalidateRoot).toHaveBeenCalledWith(h.rootEl);
     expect(h.frameQueue).toHaveLength(1);
 
     h.runNextFrame();
@@ -300,7 +300,7 @@ describe("CanvasDomSurfaceAdapter", function () {
   it("throws for strict non-compat contracts", function () {
     const adapter = loadFresh("cluster/rendering/CanvasDomSurfaceAdapter.js").create({}, {
       getModule() {
-        return { invalidateCanvas: vi.fn(), invalidateAll: vi.fn() };
+        return { invalidateRoot: vi.fn(), invalidateAll: vi.fn() };
       }
     });
 

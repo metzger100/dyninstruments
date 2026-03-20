@@ -177,7 +177,7 @@
       return true;
     }
 
-    function installFallbackObservers(targetRevision, callbacks) {
+    function installDeferredObservers(targetRevision, callbacks) {
       if (!MutationObserverCtor || typeof MutationObserverCtor !== "function") {
         state.timeoutHandle = setTimer(function () {
           commitIfReady(targetRevision, callbacks);
@@ -214,7 +214,7 @@
           return;
         }
 
-        installFallbackObservers(targetRevision, callbacks);
+        installDeferredObservers(targetRevision, callbacks);
       });
     }
 

@@ -51,16 +51,6 @@ describe("ThemeResolver", function () {
     return root;
   }
 
-  function createCanvas(doc, rootEl) {
-    return {
-      ownerDocument: doc,
-      parentElement: rootEl || null,
-      closest() {
-        return rootEl || null;
-      }
-    };
-  }
-
   function createHelpers() {
     const presetsMod = loadFresh("shared/theme/ThemePresets.js");
     return {
@@ -125,42 +115,36 @@ describe("ThemeResolver", function () {
     expect(out.xte.boatSizeFactor).toBe(mod.DEFAULTS.xte.boatSizeFactor);
   });
 
-  it("resolve(canvas) delegates through the widget root", function () {
+  it("resolveForRoot resolves tokens for the supplied widget root", function () {
     const mod = loadFresh("shared/theme/ThemeResolver.js");
     const doc = createDoc({ value: false });
     const rootEl = createRoot(doc);
     rootEl.setAttribute("data-dyni-theme", "night");
-    const canvas = createCanvas(doc, rootEl);
     installComputedStyle(new Map([
-      [canvas, {
-        "--dyni-pointer": " #00ff00 "
-      }],
       [rootEl, {
         "--dyni-pointer": " #00aaff "
       }]
     ]));
 
     const resolver = mod.create({}, createHelpers());
-    const out = resolver.resolve(canvas);
+    const out = resolver.resolveForRoot(rootEl);
 
     expect(out.colors.pointer).toBe("#00aaff");
     expect(out.colors.warning).toBe("#8b6914");
     expect(resolver.resolveForRoot(rootEl)).toBe(out);
   });
 
-  it("reuses the cache by root identity instead of canvas identity", function () {
+  it("reuses the cache by root identity", function () {
     const calls = { value: 0 };
     installComputedStyle(new Map(), calls);
 
     const mod = loadFresh("shared/theme/ThemeResolver.js");
     const doc = createDoc({ value: false });
     const rootEl = createRoot(doc);
-    const canvasA = createCanvas(doc, rootEl);
-    const canvasB = createCanvas(doc, rootEl);
     const resolver = mod.create({}, createHelpers());
 
-    const first = resolver.resolve(canvasA);
-    const second = resolver.resolve(canvasB);
+    const first = resolver.resolveForRoot(rootEl);
+    const second = resolver.resolveForRoot(rootEl);
 
     expect(first).toBe(second);
     expect(calls.value).toBe(1);
@@ -170,23 +154,22 @@ describe("ThemeResolver", function () {
     const mod = loadFresh("shared/theme/ThemeResolver.js");
     const doc = createDoc({ value: false });
     const rootEl = createRoot(doc);
-    const canvas = createCanvas(doc, rootEl);
     installComputedStyle(new Map());
 
     const resolver = mod.create({}, createHelpers());
-    const first = resolver.resolve(canvas);
+    const first = resolver.resolveForRoot(rootEl);
 
     rootEl.setAttribute("data-dyni-theme", "bold");
-    const stillCached = resolver.resolve(canvas);
+    const stillCached = resolver.resolveForRoot(rootEl);
     expect(stillCached.radial.pointer.widthFactor).toBe(first.radial.pointer.widthFactor);
 
-    resolver.invalidateCanvas(canvas);
-    const refreshed = resolver.resolve(canvas);
+    resolver.invalidateRoot(rootEl);
+    const refreshed = resolver.resolveForRoot(rootEl);
     expect(refreshed.radial.pointer.widthFactor).toBe(1.54);
 
     rootEl.removeAttribute("data-dyni-theme");
     resolver.invalidateAll();
-    const refreshedAll = resolver.resolve(canvas);
+    const refreshedAll = resolver.resolveForRoot(rootEl);
     expect(refreshedAll.radial.pointer.widthFactor).toBe(mod.DEFAULTS.radial.pointer.widthFactor);
   });
 
@@ -212,9 +195,8 @@ describe("ThemeResolver", function () {
     const mod = loadFresh("shared/theme/ThemeResolver.js");
     const resolver = mod.create({}, createHelpers());
 
-    expect(typeof resolver.resolve).toBe("function");
     expect(typeof resolver.resolveForRoot).toBe("function");
-    expect(typeof resolver.invalidateCanvas).toBe("function");
+    expect(typeof resolver.invalidateRoot).toBe("function");
     expect(typeof resolver.invalidateAll).toBe("function");
   });
 
@@ -222,7 +204,7 @@ describe("ThemeResolver", function () {
     const mod = loadFresh("shared/theme/ThemeResolver.js");
     expect(mod.DEFAULTS).toBe(mod.create.DEFAULTS);
     expect(mod.TOKEN_DEFS).toBe(mod.create.TOKEN_DEFS);
-    expect(typeof mod.invalidateCanvas).toBe("function");
+    expect(typeof mod.invalidateRoot).toBe("function");
     expect(typeof mod.invalidateAll).toBe("function");
     expect(Array.isArray(mod.TOKEN_DEFS)).toBe(true);
     expect(mod.TOKEN_DEFS.some((tokenDef) => tokenDef.path === "radial.pointer.widthFactor" && tokenDef.cssVar === "--dyni-radial-pointer-width")).toBe(true);
