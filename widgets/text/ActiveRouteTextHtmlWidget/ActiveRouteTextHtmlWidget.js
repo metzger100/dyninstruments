@@ -12,9 +12,16 @@
   "use strict";
 
   const OPEN_HANDLER_NAME = "activeRouteOpen";
+  const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.2;
+  const DEFAULT_RATIO_THRESHOLD_FLAT = 3.8;
 
   const trimText = function (value) {
     return (value == null) ? "" : String(value).trim();
+  };
+
+  const toFiniteNumber = function (value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : undefined;
   };
 
   const escapeHtmlText = function (value) {
@@ -39,10 +46,58 @@
     return ""
       + '<div class="dyni-active-route-metric dyni-active-route-metric-' + metricId + '">'
       + '<div class="dyni-active-route-metric-caption">' + escapeHtmlText(caption) + "</div>"
-      + '<div class="dyni-active-route-metric-value">' + escapeHtmlText(value) + "</div>"
-      + '<div class="dyni-active-route-metric-unit">' + escapeHtmlText(unit) + "</div>"
+      + '<div class="dyni-active-route-metric-value-row">'
+      + '<span class="dyni-active-route-metric-value">' + escapeHtmlText(value) + "</span>"
+      + '<span class="dyni-active-route-metric-unit">' + escapeHtmlText(unit) + "</span>"
+      + "</div>"
       + "</div>";
   };
+
+  function resolveShellRect(hostContext) {
+    const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
+    const commitState = ctx && ctx.__dyniHostCommitState ? ctx.__dyniHostCommitState : null;
+    const shellEl = commitState && commitState.shellEl ? commitState.shellEl : null;
+    const rootEl = commitState && commitState.rootEl ? commitState.rootEl : null;
+    const targetEl = shellEl || rootEl;
+    if (!targetEl || typeof targetEl.getBoundingClientRect !== "function") {
+      return null;
+    }
+    const rect = targetEl.getBoundingClientRect();
+    const width = toFiniteNumber(rect && rect.width);
+    const height = toFiniteNumber(rect && rect.height);
+    if (!(width > 0) || !(height > 0)) {
+      return null;
+    }
+    return { width: width, height: height };
+  }
+
+  function resolveMode(props, hostContext) {
+    const p = props || {};
+    const isVerticalPanel = p.mode === "vertical";
+    const normalThresholdRaw = toFiniteNumber(p.ratioThresholdNormal);
+    const flatThresholdRaw = toFiniteNumber(p.ratioThresholdFlat);
+    const normalThreshold = typeof normalThresholdRaw === "number"
+      ? normalThresholdRaw
+      : DEFAULT_RATIO_THRESHOLD_NORMAL;
+    const flatThreshold = typeof flatThresholdRaw === "number"
+      ? flatThresholdRaw
+      : DEFAULT_RATIO_THRESHOLD_FLAT;
+    const rect = resolveShellRect(hostContext);
+    if (!rect) {
+      return "normal";
+    }
+    const ratio = rect.width / rect.height;
+    if (ratio < normalThreshold) {
+      return "high";
+    }
+    if (ratio > flatThreshold) {
+      if (isVerticalPanel) {
+        return "normal";
+      }
+      return "flat";
+    }
+    return "normal";
+  }
 
   function ensureDisplayProps(props) {
     const p = props || {};
@@ -125,9 +180,11 @@
         Helpers
       )
       : "";
+    const mode = resolveMode(p, hostContext);
 
     return {
       routeNameText: routeNameText,
+      mode: mode,
       isApproaching: isApproaching,
       disconnect: disconnect,
       remainCaption: remainCaption,
@@ -163,6 +220,7 @@
         wrapperClasses.push("dyni-active-route-disconnect");
       }
       wrapperClasses.push(model.canOpenRoute ? "dyni-active-route-open-dispatch" : "dyni-active-route-open-passive");
+      wrapperClasses.push("dyni-active-route-mode-" + model.mode);
 
       let metricsHtml = "";
       metricsHtml += renderMetricTile("remain", model.remainCaption, model.remainText, model.remainUnit, escapeHtmlText);
@@ -191,9 +249,16 @@
         model.remainText.length,
         model.etaText.length,
         model.isApproaching ? model.nextCourseText.length : 0,
+        model.mode,
         model.isApproaching ? 1 : 0,
         model.disconnect ? 1 : 0
       ].join("|");
+    };
+
+    const initFunction = function () {
+      if (this && typeof this.triggerResize === "function") {
+        this.triggerResize();
+      }
     };
 
     const translateFunction = function () {
@@ -206,6 +271,7 @@
       renderHtml: renderHtml,
       namedHandlers: namedHandlers,
       resizeSignature: resizeSignature,
+      initFunction: initFunction,
       translateFunction: translateFunction
     };
   }
