@@ -40,6 +40,18 @@
   display: block;
 }
 
+/* Override generic AvNav .widgetData text-field layout defaults for shell hosts. */
+.widget.dyniplugin .widgetData.dyni-shell {
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  text-align: initial;
+  align-self: stretch;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
 .widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas {
   font-size: initial;
 }

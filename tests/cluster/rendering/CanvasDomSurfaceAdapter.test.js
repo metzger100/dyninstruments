@@ -116,6 +116,9 @@ describe("CanvasDomSurfaceAdapter", function () {
   function createHarness(options) {
     const opts = options || {};
     const dom = createDomShell(opts.includeMount);
+    if (opts.shellHasSurfaceClass) {
+      dom.shellEl.classList.add("dyni-surface-canvas");
+    }
     const rootEl = createElement(dom.doc, "div", "widget dyniplugin dyni-host-html");
     const rendererSpec = {
       renderCanvas: vi.fn()
@@ -234,6 +237,16 @@ describe("CanvasDomSurfaceAdapter", function () {
 
     expect(h.rendererSpec.renderCanvas).toHaveBeenCalledTimes(1);
     expect(h.rendererSpec.renderCanvas).toHaveBeenCalledWith(h.dom.createdCanvases[0], { value: 12 });
+  });
+
+  it("prefers nested .dyni-surface-canvas over shell-level class collisions", function () {
+    const h = createHarness({ shellHasSurfaceClass: true });
+
+    h.controller.attach(h.payload({ value: 5 }, 1));
+
+    expect(h.dom.shellEl.style.fontSize || "").toBe("");
+    expect(h.dom.surfaceEl.style.fontSize).toBe("initial");
+    expect(h.observerInstances[0].observe).toHaveBeenCalledWith(h.dom.surfaceEl);
   });
 
   it("update repaints on changed props and skips repaint for shallow-identical props", function () {

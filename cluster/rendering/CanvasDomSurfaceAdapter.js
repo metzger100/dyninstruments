@@ -28,6 +28,23 @@
       el.classList.contains(className));
   }
 
+  function findDescendantByClass(rootEl, className) {
+    if (!rootEl || !rootEl.children || !rootEl.children.length) {
+      return null;
+    }
+    for (let i = 0; i < rootEl.children.length; i += 1) {
+      const child = rootEl.children[i];
+      if (hasClass(child, className)) {
+        return child;
+      }
+      const nested = findDescendantByClass(child, className);
+      if (nested) {
+        return nested;
+      }
+    }
+    return null;
+  }
+
   function ensurePayload(methodName, payload) {
     if (!payload || typeof payload !== "object") {
       throw new Error("CanvasDomSurfaceAdapter: " + methodName + "() requires a payload object");
@@ -195,13 +212,23 @@
       }
 
       function findSurfaceElement(hostShellEl) {
+        if (!hostShellEl) {
+          return null;
+        }
+        const nestedFromChildren = findDescendantByClass(hostShellEl, "dyni-surface-canvas");
+        if (nestedFromChildren) {
+          return nestedFromChildren;
+        }
+        if (typeof hostShellEl.querySelector === "function") {
+          const nestedSurfaceEl = hostShellEl.querySelector(SURFACE_SELECTOR);
+          if (nestedSurfaceEl) {
+            return nestedSurfaceEl;
+          }
+        }
         if (hasClass(hostShellEl, "dyni-surface-canvas")) {
           return hostShellEl;
         }
-        if (typeof hostShellEl.querySelector !== "function") {
-          return null;
-        }
-        return hostShellEl.querySelector(SURFACE_SELECTOR);
+        return null;
       }
 
       function findMountElement(hostSurfaceEl) {
