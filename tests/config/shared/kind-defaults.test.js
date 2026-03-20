@@ -30,9 +30,11 @@ describe("config/shared/kind-defaults.js", function () {
     expect(maps.NAV_KIND.centerDisplayBoat.cap).toBe("POS");
     expect(maps.NAV_KIND.centerDisplayBoat.captionName).toBe("Boat caption");
     expect(maps.NAV_KIND.centerDisplayMeasure.unitName).toBe("Measure distance unit");
-    expect(maps.NAV_KIND.activeRouteRemain.kind).toBe("activeRoute");
+    expect(maps.NAV_KIND.activeRouteRemain.kind).toEqual(["activeRoute", "activeRouteInteractive"]);
     expect(maps.NAV_KIND.activeRouteRemain.cap).toBe("RTE");
+    expect(maps.NAV_KIND.activeRouteEta.kind).toEqual(["activeRoute", "activeRouteInteractive"]);
     expect(maps.NAV_KIND.activeRouteEta.unit).toBe("");
+    expect(maps.NAV_KIND.activeRouteNextCourse.kind).toEqual(["activeRoute", "activeRouteInteractive"]);
     expect(maps.NAV_KIND.activeRouteNextCourse.unit).toBe("°");
     expect(maps.NAV_KIND.activeRouteNextCourse.captionName).toBe("Next course caption");
     expect(maps.NAV_KIND.xteDisplay).toBeUndefined();

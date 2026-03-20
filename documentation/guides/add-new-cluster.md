@@ -13,6 +13,7 @@ Read first:
 ## Overview
 
 A cluster is one AvNav widget with multiple `kind` choices (numeric and optionally radial). All cluster widgets use `widget: "ClusterWidget"`.
+Cluster host registration is `renderHtml`; per-kind render behavior is selected by strict kind-catalog tuples with explicit `surface` (`canvas-dom` or `html`).
 
 Translation logic lives in one mapper module per cluster.
 
@@ -155,6 +156,9 @@ If mapper returns `renderer: "NewGauge"`:
 2. Add `NewGauge` to `ClusterRendererRouter.deps` in `config/components.js`
 3. Wire runtime selection in `cluster/rendering/ClusterRendererRouter.js`:
 - add `NewGauge: Helpers.getModule("NewGauge").create(def, Helpers)` to `rendererSpecs`
+4. Add or update the route tuple in `cluster/rendering/ClusterKindCatalog.js` with explicit `surface`:
+- `surface: "canvas-dom"` for canvas wrappers
+- `surface: "html"` for native HTML renderers
 
 Naming rule for `cluster/rendering/` components:
 - Use role-based IDs (example: `ClusterRendererRouter`, `RendererPropsWidget`), not cluster-prefixed IDs.
@@ -180,6 +184,7 @@ For a new `kind` in an existing cluster:
    Mark runtime-only threshold/ratio editables with `internal: true`; keep real user controls visible.
 4. Update matching mapper module in `cluster/mappers/<Cluster>.js`
 5. If the kind is radial and uses a new renderer, also complete renderer wiring from Step 5
+6. Add or update the strict kind-catalog tuple (`cluster`, `kind`, `viewModelId`, `rendererId`, `surface`)
 
 ## Validate
 
@@ -199,6 +204,7 @@ For a new `kind` in an existing cluster:
 - [ ] Mapper added in `ClusterMapperRegistry.deps` (`config/components.js`)
 - [ ] Mapper added in runtime `MAPPER_MODULE_IDS` (`cluster/mappers/ClusterMapperRegistry.js`)
 - [ ] Renderer wiring updated (if radial)
+- [ ] Kind catalog tuple added/updated with explicit `surface`
 - [ ] Every formatter-bearing kind has documented tuple (`kind -> key -> raw unit/type -> formatter -> formatterParameters`) in core contract docs
 
 ## Related

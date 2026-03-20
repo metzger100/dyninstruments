@@ -33,8 +33,10 @@ On AvNav's instrument dashboard page (`GpsPage`), widget clicks normally navigat
 `ExternalWidget` wraps `this.eventHandler` callbacks and calls `ev.stopPropagation()` and `ev.preventDefault()` before invoking the handler.
 
 ```javascript
-renderHtml: function(props) {
+initFunction: function() {
   this.eventHandler.catchAll = function() {};
+},
+renderHtml: function(props) {
   this.eventHandler.startTimer = function() { startCountdown(); };
   this.eventHandler.stopTimer = function() { stopCountdown(); };
 
@@ -48,6 +50,8 @@ renderHtml: function(props) {
 ```
 
 Use a wrapper `onclick="catchAll"` so empty-space taps inside the widget also stop bubbling.
+
+For dyninstruments cluster HTML kinds, only `catchAll` is global. Named handlers are session-owned by `HtmlSurfaceController` and are attached/removed via `attach`/`detach`/`destroy`.
 
 ### Approach B: `renderHtml` Returning React/HTM Elements
 
@@ -81,11 +85,12 @@ return HTM`
 
 For a Regatta Timer or similar control-heavy widget:
 
-1. Use `renderHtml` string mode with `this.eventHandler`.
-2. Add a wrapper-level no-op catch-all click handler.
-3. Register all control handlers in `this.eventHandler`.
-4. Prefer `wantsHideNativeHead: true` to maximize safe interactive area.
-5. Manage lifecycle with `initFunction` / `finalizeFunction`, and refresh UI via `triggerRedraw()`.
+1. Register `catchAll` once in `initFunction`.
+2. Render an interactive wrapper with `onclick="catchAll"`.
+3. Attach named control handlers only for the active HTML surface session.
+4. Remove named handlers on remount/surface switch/destroy.
+5. Implement `resizeSignature(props)` and trigger `triggerResize()` on layout-relevant changes.
+6. Prefer `wantsHideNativeHead: true` to maximize safe interactive area.
 
 ## Related
 

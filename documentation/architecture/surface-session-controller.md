@@ -1,11 +1,10 @@
 # Surface Session Controller
 
-**Status:** ✅ Implemented | Runtime state machine for `html` / `canvas-dom` session ownership, wired in `ClusterWidget` (Phase 9)
+**Status:** ✅ Implemented | Runtime state machine for `html` / `canvas-dom` session ownership
 
 ## Overview
 
-`runtime/SurfaceSessionController.js` coordinates per-instance surface lifecycle transitions after host commit resolution.
-It was introduced as a standalone runtime module in Phase 6 and is now consumed by `cluster/ClusterWidget.js` for live surface attach/update/detach transitions.
+`runtime/SurfaceSessionController.js` coordinates per-instance surface lifecycle transitions after host commit resolution. `cluster/ClusterWidget.js` uses it to reconcile attach/update/remount/surface-switch transitions against the mounted shell.
 
 ## Key Details
 
@@ -14,7 +13,7 @@ It was introduced as a standalone runtime module in Phase 6 and is now consumed 
 - Strict supported surfaces:
   - `html`
   - `canvas-dom`
-- Strict non-compat behavior:
+- Strict behavior:
   - throws for unsupported surface IDs
   - throws when `createSurfaceController` is missing
   - throws when returned controllers do not implement `attach`/`update`/`detach`/`destroy`
@@ -62,4 +61,3 @@ session.getState();
 - [host-commit-controller.md](host-commit-controller.md)
 - [cluster-widget-system.md](cluster-widget-system.md)
 - [component-system.md](component-system.md)
-- [../../notes/implementation-plans/PLAN1.md](../../notes/implementation-plans/PLAN1.md)

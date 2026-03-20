@@ -6,15 +6,23 @@
 
 ```text
 .
-├── plugin.js                 # entry point + bootstrap
-├── runtime/                  # loader, registrar, helpers — framework layer
-├── config/                   # component registry, widget definitions, cluster configs — declaration layer
-├── cluster/                  # ClusterWidget orchestrator, mappers, renderer router — routing layer
-├── shared/widget-kits/       # reusable gauge math/draw engine — shared library layer
-├── widgets/                  # individual widget renderers — feature layer
-├── tests/                    # mirrors source structure
-├── tools/                    # validation scripts
-└── documentation/            # AI-optimized reference docs
+├── plugin.js                    # entry point + bootstrap
+├── runtime/                     # bootstrap/runtime framework layer
+│   ├── init.js                  # registration + theme-preset application
+│   ├── widget-registrar.js      # host widget definition composition
+│   ├── HostCommitController.js  # deferred renderHtml host commit
+│   └── SurfaceSessionController.js # per-instance surface lifecycle state
+├── config/                      # declarations: components, widget defs, cluster configs
+├── cluster/                     # cluster routing and ownership boundaries
+│   ├── ClusterWidget.js         # host renderHtml lifecycle orchestrator
+│   ├── mappers/                 # declarative cluster translation
+│   ├── rendering/               # kind catalog + surface router + surface owners
+│   └── viewmodels/              # shared domain normalization contracts
+├── shared/widget-kits/          # reusable rendering/layout engines
+├── widgets/                     # renderer implementations (canvas + html)
+├── tests/                       # mirrors source structure
+├── tools/                       # validation scripts
+└── documentation/               # AI-optimized reference docs
 ```
 
 ## Dependency Direction Rule
@@ -31,17 +39,21 @@ Widget feature code depends on shared code. Cluster orchestration code may depen
 ## Boundary Rule
 
 1. Only `runtime/` may access `window.avnav` directly.
-2. Widgets and cluster code must use `Helpers.applyFormatter()` for all formatting.
-3. This is the single API boundary to the host application.
+2. Widgets and cluster code must use `Helpers.applyFormatter()` for formatter dispatch/fallback behavior.
+3. Cluster host registration is `renderHtml` on AvNav host; internal visual surface selection is owned by kind catalog + surface router.
+4. Canvas rendering remains valid as an internal renderer contract via `CanvasDomSurfaceAdapter` (`renderCanvas(canvas, props)` callbacks).
 
 ## Component Registration Flow
 
 1. `plugin.js` bootstraps internal scripts and starts `runtime.runInit()`.
 2. `runtime/component-loader.js` loads required components declared in `config/components.js`.
-3. `runtime/widget-registrar.js` registers widget definitions via `avnav.api.registerWidget()`; details: [documentation/architecture/component-system.md](documentation/architecture/component-system.md).
+3. `runtime/widget-registrar.js` composes widget definitions and registers via `avnav.api.registerWidget()`.
+4. `ClusterWidget` drives host `renderHtml` lifecycle; deferred commit/surface switching is owned by `HostCommitController` + `SurfaceSessionController`.
 
 ## Cross-References
 
 - [documentation/TABLEOFCONTENTS.md](documentation/TABLEOFCONTENTS.md)
 - [documentation/architecture/component-system.md](documentation/architecture/component-system.md)
 - [documentation/architecture/cluster-widget-system.md](documentation/architecture/cluster-widget-system.md)
+- [documentation/architecture/host-commit-controller.md](documentation/architecture/host-commit-controller.md)
+- [documentation/architecture/surface-session-controller.md](documentation/architecture/surface-session-controller.md)

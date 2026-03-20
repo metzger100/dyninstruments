@@ -1,0 +1,52 @@
+/* ActiveRoute interactive html surface */
+.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.18em;
+  padding: 0.2em 0.26em;
+  box-sizing: border-box;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-route-name {
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-open-action.is-dispatch {
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.08em;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-open-action.is-passive {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.15em 0.25em;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-approaching .dyni-active-route-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metric {
+  min-width: 0;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metric-caption,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metric-unit {
+  opacity: 0.78;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metric-value {
+  font-weight: 600;
+}

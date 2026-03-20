@@ -1,6 +1,6 @@
 # Cluster Widget System
 
-**Status:** ✅ Implemented | Strict kind-catalog + surface-aware router + host commit/session wiring (Phase 9)
+**Status:** ✅ Implemented | Strict kind-catalog + surface-aware router + host commit/session wiring
 
 ## Overview
 
@@ -13,6 +13,7 @@
 - Surface-aware router + shell owner: `cluster/rendering/ClusterRendererRouter.js`
 - Canvas surface owner: `cluster/rendering/CanvasDomSurfaceAdapter.js`
 - HTML surface owner: `cluster/rendering/HtmlSurfaceController.js`
+- Shared domain viewmodels: `cluster/viewmodels/*.js` (current: `ActiveRouteViewModel.js`)
 - Per-cluster mappers: `cluster/mappers/*.js`
 
 ## Runtime Flow
@@ -28,8 +29,10 @@
 - numeric output for `ThreeValueTextWidget` (default text kinds)
 - stacked pair or variant output for `PositionCoordinateWidget` (`positionBoat`/`positionWp`, vessel `dateTime`, vessel `timeStatus`)
 - dedicated text-renderer output for `ActiveRouteTextWidget` (`nav` `activeRoute`)
+- dedicated html-renderer output for `ActiveRouteTextHtmlWidget` (`nav` `activeRouteInteractive`)
 - dedicated text-renderer output for `CenterDisplayTextWidget` (`nav` `centerDisplay`)
 - graphic output with `renderer: "..."`
+`NavMapper` delegates active-route domain normalization (`routeName`, `disconnect`, `display`, captions/units) to `ActiveRouteViewModel`.
 5. `ClusterWidget.initFunction(props)` creates per-instance runtime state:
 - `HostCommitController` for deferred host commit
 - `SurfaceSessionController` for active surface lifecycle ownership
@@ -43,10 +46,11 @@
 10. On deferred commit callback, `ClusterWidget` builds session payload via `router.createSessionPayload(...)` and reconciles via `SurfaceSessionController.reconcileSession(...)`
 11. `ClusterWidget.finalizeFunction()` cleans up host-commit handles and destroys the active surface session
 
-Phase 9 contract note:
+Contract note:
 - Router does not expose host `renderCanvas`.
 - `ClusterWidget` is registered renderHtml-only on the host path.
 - Existing canvas renderers run only through the internal `canvas-dom` adapter.
+- Native HTML kinds run through `HtmlSurfaceController` (current shipped tuple: `nav/activeRouteInteractive`).
 
 ## Mapper Modules
 
@@ -75,6 +79,11 @@ Mapper boundary:
 - Keep mapper modules declarative (`create` + `translate` only).
 - Mapper responsibilities: kind routing, output shape mapping, numeric normalization, renderer selection.
 - Renderer responsibilities: formatter/status/display logic and layout behavior.
+
+## ViewModel Modules
+
+- `cluster/viewmodels/ActiveRouteViewModel.js`: shared active-route domain contract owner for `nav/activeRoute` and `nav/activeRouteInteractive` payload normalization and disconnect derivation.
+- Viewmodels are mapper-owned domain helpers; they do not render HTML/canvas and do not own surface lifecycle.
 
 ## Vessel Kind Contract Tuples
 
@@ -106,7 +115,10 @@ Strict routing rules:
 - Unknown `rendererId` values throw during router initialization.
 - Mapper-provided `props.renderer` must match the catalog `rendererId` for the same tuple; mismatch throws.
 
-In Phase 9, shipped tuples still use `surface: "canvas-dom"`; the `html` branch remains fully wired for upcoming native HTML kinds.
+Shipped tuples include both surfaces:
+
+- `surface: "canvas-dom"` for existing canvas-backed kinds
+- `surface: "html"` for native HTML kinds (`nav/activeRouteInteractive`)
 
 ## Surface-Aware Router
 
@@ -115,6 +127,7 @@ In Phase 9, shipped tuples still use `surface: "canvas-dom"`; the `html` branch 
 - `ThreeValueTextWidget`
 - `PositionCoordinateWidget` (stacked pair text renderer for nav positions plus vessel `dateTime` / `timeStatus` variants)
 - `ActiveRouteTextWidget`
+- `ActiveRouteTextHtmlWidget`
 - `CenterDisplayTextWidget`
 - `WindRadialWidget`
 - `CompassRadialWidget`

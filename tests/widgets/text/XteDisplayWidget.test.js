@@ -89,6 +89,9 @@ describe("XteDisplayWidget", function () {
       resolveFontFamily() {
         return "sans-serif";
       },
+      resolveWidgetRoot(target) {
+        return target;
+      },
       getModule(id) {
         if (id === "CanvasLayerCache") {
           return layerCache;
@@ -98,7 +101,7 @@ describe("XteDisplayWidget", function () {
             create() {
               return {
                 theme: {
-                  resolve() {
+                  resolveForRoot() {
                     return theme;
                   }
                 },

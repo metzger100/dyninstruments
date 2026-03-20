@@ -44,7 +44,7 @@ SpeedRadialWidget/DepthRadialWidget/TemperatureRadialWidget/VoltageRadialWidget
 `SemicircleRadialEngine.createRenderer(spec)` handles:
 
 1. Canvas setup + theme resolve + responsive mode detection (`flat`, `normal`, `high`)
-2. One-time theme token resolve (`theme = RadialToolkit.theme.resolve(canvas)`)
+2. One-time theme token resolve (`theme = RadialToolkit.theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas)`)
 3. `SemicircleRadialLayout.computeInsets()` / `computeLayout()` for shared responsive geometry, label metrics, and mode boxes
 4. Arc ring + sectors + pointer + ticks + labels
 5. `SemicircleRadialTextLayout.drawModeText()` for flat/high/normal caption-value-unit layout

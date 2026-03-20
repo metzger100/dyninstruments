@@ -11,8 +11,8 @@ Ownership split:
 - `plugin.js` bootstraps internal scripts (`runtime/*`, `config/*`) in fixed order
 - `config/components.js` defines component registry entries
 - `runtime/component-loader.js` resolves dependencies and injects component JS/CSS
-- `runtime/HostCommitController.js` provides deferred commit scheduling for HTML-shell mounting (wired by `ClusterWidget` in Phase 9)
-- `runtime/SurfaceSessionController.js` owns per-instance `html`/`canvas-dom` lifecycle state (wired by `ClusterWidget` in Phase 9)
+- `runtime/HostCommitController.js` provides deferred commit scheduling for HTML-shell mounting
+- `runtime/SurfaceSessionController.js` owns per-instance `html`/`canvas-dom` lifecycle state
 
 ## `config.components` Registry
 
@@ -61,6 +61,7 @@ ClusterWidget
     │   ├── TextTileLayout
     │   └── ActiveRouteLayout
     │       └── ResponsiveScaleProfile
+    ├── ActiveRouteTextHtmlWidget
     ├── RendererPropsWidget
     │   ├── WindRadialWidget
     │   ├── CompassRadialWidget
@@ -105,9 +106,7 @@ runtime/init.js (explicit load)
 ```
 
 `PositionCoordinateWidget` no longer depends on `ThreeValueTextWidget`; widget-to-widget coupling has been removed from the dependency graph.
-
-Phase 8 note:
-- `ClusterRendererRouter` switched to strict kind-catalog routing and no longer exports a host `renderCanvas` delegation path.
+`ClusterRendererRouter` uses strict kind-catalog routing and does not expose a host `renderCanvas` delegation path.
 
 ## UMD Component Template
 

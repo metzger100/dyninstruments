@@ -1,10 +1,18 @@
-# ActiveRouteTextWidget Module
+# Active Route Renderers
 
-**Status:** ✅ Implemented | `widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js`
+**Status:** ✅ Implemented | `widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js` + `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js`
 
 ## Overview
 
-Responsive text renderer for AvNav active-route summary data.
+Shared active-route domain with two renderer surfaces:
+
+- `activeRoute` -> canvas renderer (`ActiveRouteTextWidget`, `surface: "canvas-dom"`)
+- `activeRouteInteractive` -> interactive HTML renderer (`ActiveRouteTextHtmlWidget`, `surface: "html"`)
+
+Domain ownership:
+
+- `cluster/viewmodels/ActiveRouteViewModel.js` owns active-route data normalization (`routeName`, `disconnect`, `display`, `captions`, `units`) for both kinds.
+- Renderers are output-only and consume the normalized domain payload.
 
 It renders:
 
@@ -33,9 +41,20 @@ ActiveRouteTextWidget: {
 }
 ```
 
-Used by `ClusterWidget` via `NavMapper` for `kind: "activeRoute"`.
+```javascript
+ActiveRouteTextHtmlWidget: {
+  js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+  css: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css",
+  globalKey: "DyniActiveRouteTextHtmlWidget"
+}
+```
 
-## Props
+Used by `ClusterWidget` via `NavMapper` with shared viewmodel payload:
+
+- `kind: "activeRoute"` -> `renderer: "ActiveRouteTextWidget"`
+- `kind: "activeRouteInteractive"` -> `renderer: "ActiveRouteTextHtmlWidget"`
+
+## Shared Props
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
@@ -54,6 +73,11 @@ Used by `ClusterWidget` via `NavMapper` for `kind: "activeRoute"`.
 | `ratioThresholdNormal` | number | `1.2` | Ratio below this -> `high` |
 | `ratioThresholdFlat` | number | `3.8` | Ratio above this -> `flat` |
 | `default` | string | `"---"` | Placeholder for missing values |
+
+Notes:
+
+- `ActiveRouteTextWidget` consumes all fields above for canvas layout and rendering.
+- `ActiveRouteTextHtmlWidget` consumes the same domain/label/unit/default payload and renders interactive HTML with named handler wiring through the html surface controller.
 
 ## Layout Modes
 
@@ -98,6 +122,17 @@ When `disconnect` is true:
 - metric values render with `default`
 - approach layout still keeps the `NEXT` tile when `isApproaching === true`
 - `TextLayoutEngine.drawDisconnectOverlay(...)` draws the shared `NO DATA` overlay
+
+`ActiveRouteTextHtmlWidget` uses the same formatter mapping via `Helpers.applyFormatter(...)`, emits escaped text into HTML markup, and provides named interaction handlers.
+
+## HTML Renderer Contract (`activeRouteInteractive`)
+
+- Output is string-based `renderHtml(props)` with explicit `onclick` handler names for AvNav `eventHandler` wiring.
+- Markup includes route-name block plus metric tiles for `RTE`, `ETA`, and conditional `NEXT` while approaching.
+- Disconnect state is exposed via wrapper class/marker for html-surface lifecycle wiring.
+- Wrapper includes `onclick="catchAll"` for empty-space click consumption.
+- Route-name action target uses named handler wiring (`activeRouteOpen`) owned by `HtmlSurfaceController` lifecycle attach/update/detach.
+- `resizeSignature(props)` drives layout-relevant `triggerResize()` calls through `HtmlSurfaceController`.
 
 ## Visual State
 

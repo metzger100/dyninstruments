@@ -1,7 +1,7 @@
 /**
  * Module: NavMapper - Cluster translation for navigation ETA/distance/position kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ClusterMapperToolkit
+ * Depends: ClusterMapperToolkit, ActiveRouteViewModel
  */
 
 (function (root, factory) {
@@ -11,7 +11,9 @@
 }(this, function () {
   "use strict";
 
-  function create() {
+  function create(def, Helpers) {
+    const activeRouteViewModel = Helpers.getModule("ActiveRouteViewModel").create(def, Helpers);
+
     function translate(props, toolkit) {
       const p = props || {};
       const cap = toolkit.cap;
@@ -40,27 +42,15 @@
         const u = unit("vmg");
         return out(p.vmg, cap("vmg"), u, "formatSpeed", [u]);
       }
-      if (req === "activeRoute") {
+      if (req === "activeRoute" || req === "activeRouteInteractive") {
+        const activeRouteDomain = activeRouteViewModel.build(p, toolkit);
         return {
-          renderer: "ActiveRouteTextWidget",
-          routeName: typeof p.activeRouteName === "string" ? p.activeRouteName.trim() : "",
-          disconnect: p.disconnect === true,
-          display: {
-            remain: num(p.activeRouteRemain),
-            eta: p.activeRouteEta,
-            nextCourse: num(p.activeRouteNextCourse),
-            isApproaching: p.activeRouteApproaching === true
-          },
-          captions: {
-            remain: cap("activeRouteRemain"),
-            eta: cap("activeRouteEta"),
-            nextCourse: cap("activeRouteNextCourse")
-          },
-          units: {
-            remain: unit("activeRouteRemain"),
-            eta: unit("activeRouteEta"),
-            nextCourse: unit("activeRouteNextCourse")
-          },
+          renderer: req === "activeRouteInteractive" ? "ActiveRouteTextHtmlWidget" : "ActiveRouteTextWidget",
+          routeName: activeRouteDomain.routeName,
+          disconnect: activeRouteDomain.disconnect,
+          display: activeRouteDomain.display,
+          captions: activeRouteDomain.captions,
+          units: activeRouteDomain.units,
           ratioThresholdNormal: num(p.activeRouteRatioThresholdNormal),
           ratioThresholdFlat: num(p.activeRouteRatioThresholdFlat)
         };

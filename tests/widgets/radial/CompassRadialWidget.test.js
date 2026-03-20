@@ -98,6 +98,9 @@ describe("CompassRadialWidget", function () {
         resolveTextColor() {
           return "#fff";
         },
+        resolveWidgetRoot(target) {
+          return target;
+        },
         getModule(id) {
           if (id === "FullCircleRadialEngine") return fullCircleEngine;
           if (id === "FullCircleRadialLayout") return fullCircleLayout;
@@ -131,7 +134,7 @@ describe("CompassRadialWidget", function () {
                   }
                 },
                 theme: {
-                  resolve() {
+                  resolveForRoot() {
                     return theme;
                   }
                 },

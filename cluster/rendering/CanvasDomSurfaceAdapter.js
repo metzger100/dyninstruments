@@ -144,28 +144,12 @@
           return;
         }
 
-        if (typeof themeResolver.invalidateCanvas === "function") {
-          themeResolver.invalidateCanvas(targetRootEl);
-          return;
-        }
-        if (
-          themeResolver.create &&
-          typeof themeResolver.create === "function" &&
-          typeof themeResolver.create.invalidateCanvas === "function"
-        ) {
-          themeResolver.create.invalidateCanvas(targetRootEl);
+        if (typeof themeResolver.invalidateRoot === "function") {
+          themeResolver.invalidateRoot(targetRootEl);
           return;
         }
         if (typeof themeResolver.invalidateAll === "function") {
           themeResolver.invalidateAll();
-          return;
-        }
-        if (
-          themeResolver.create &&
-          typeof themeResolver.create === "function" &&
-          typeof themeResolver.create.invalidateAll === "function"
-        ) {
-          themeResolver.create.invalidateAll();
         }
       }
 

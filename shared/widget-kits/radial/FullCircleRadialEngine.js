@@ -72,7 +72,7 @@
           return;
         }
 
-        const theme = GU.theme.resolve(canvas);
+        const theme = GU.theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas);
         const valueWeight = theme.font.weight;
         const labelWeight = theme.font.labelWeight;
 

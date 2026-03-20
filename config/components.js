@@ -5,15 +5,12 @@
  */
 (function (root) {
   "use strict";
-
   const ns = root.DyniPlugin;
   const config = ns.config;
   const BASE = ns.baseUrl;
-
   if (typeof BASE !== "string" || !BASE) {
     throw new Error("dyninstruments: baseUrl missing before config/components.js load");
   }
-
   config.components = {
     RadialAngleMath: {
       js: BASE + "shared/widget-kits/radial/RadialAngleMath.js",
@@ -210,6 +207,10 @@
       globalKey: "DyniActiveRouteTextWidget",
       deps: ["ThemeResolver", "TextLayoutEngine", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout"]
     },
+    ActiveRouteTextHtmlWidget: {
+      js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+      css: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css", globalKey: "DyniActiveRouteTextHtmlWidget"
+    },
     CenterDisplayTextWidget: {
       js: BASE + "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
       css: undefined,
@@ -324,13 +325,14 @@
       globalKey: "DyniClusterMapperToolkit",
       deps: ["RadialAngleMath"]
     },
+    ActiveRouteViewModel: { js: BASE + "cluster/viewmodels/ActiveRouteViewModel.js", css: undefined, globalKey: "DyniActiveRouteViewModel" },
     ClusterRendererRouter: {
       js: BASE + "cluster/rendering/ClusterRendererRouter.js",
       css: undefined,
       globalKey: "DyniClusterRendererRouter",
       deps: [
         "ClusterKindCatalog", "CanvasDomSurfaceAdapter", "HtmlSurfaceController",
-        "ThreeValueTextWidget", "PositionCoordinateWidget", "ActiveRouteTextWidget", "CenterDisplayTextWidget",
+        "ThreeValueTextWidget", "PositionCoordinateWidget", "ActiveRouteTextWidget", "ActiveRouteTextHtmlWidget", "CenterDisplayTextWidget",
         "RendererPropsWidget"
       ]
     },
@@ -357,7 +359,8 @@
     NavMapper: {
       js: BASE + "cluster/mappers/NavMapper.js",
       css: undefined,
-      globalKey: "DyniNavMapper"
+      globalKey: "DyniNavMapper",
+      deps: ["ActiveRouteViewModel"]
     },
     AnchorMapper: {
       js: BASE + "cluster/mappers/AnchorMapper.js",

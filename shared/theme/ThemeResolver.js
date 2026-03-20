@@ -9,7 +9,7 @@
       const mod = factory();
       mod.DEFAULTS = mod.create.DEFAULTS;
       mod.TOKEN_DEFS = mod.create.TOKEN_DEFS;
-      mod.invalidateCanvas = mod.create.invalidateCanvas;
+      mod.invalidateRoot = mod.create.invalidateRoot;
       mod.invalidateAll = mod.create.invalidateAll;
       return mod;
     });
@@ -17,14 +17,14 @@
     const mod = factory();
     mod.DEFAULTS = mod.create.DEFAULTS;
     mod.TOKEN_DEFS = mod.create.TOKEN_DEFS;
-    mod.invalidateCanvas = mod.create.invalidateCanvas;
+    mod.invalidateRoot = mod.create.invalidateRoot;
     mod.invalidateAll = mod.create.invalidateAll;
     module.exports = mod;
   } else {
     (root.DyniComponents = root.DyniComponents || {}).DyniThemeResolver = factory();
     root.DyniComponents.DyniThemeResolver.DEFAULTS = root.DyniComponents.DyniThemeResolver.create.DEFAULTS;
     root.DyniComponents.DyniThemeResolver.TOKEN_DEFS = root.DyniComponents.DyniThemeResolver.create.TOKEN_DEFS;
-    root.DyniComponents.DyniThemeResolver.invalidateCanvas = root.DyniComponents.DyniThemeResolver.create.invalidateCanvas;
+    root.DyniComponents.DyniThemeResolver.invalidateRoot = root.DyniComponents.DyniThemeResolver.create.invalidateRoot;
     root.DyniComponents.DyniThemeResolver.invalidateAll = root.DyniComponents.DyniThemeResolver.create.invalidateAll;
   }
 }(this, function () {
@@ -146,19 +146,6 @@
     return normalized;
   }
 
-  function discoverWidgetRoot(canvas) {
-    if (!canvas) {
-      return null;
-    }
-    if (typeof canvas.closest === "function") {
-      const found = canvas.closest(".widget, .DirectWidget");
-      if (found) {
-        return found;
-      }
-    }
-    return canvas.parentElement || null;
-  }
-
   function getActivePresetName(rootEl, presetDefs) {
     if (!rootEl || typeof rootEl.getAttribute !== "function") {
       return "default";
@@ -174,17 +161,17 @@
     return style && typeof style.getPropertyValue === "function" ? style : null;
   }
 
-  function getNightModeState(canvas) {
-    if (!canvas) {
+  function getNightModeState(rootEl) {
+    if (!rootEl) {
       return false;
     }
-    const doc = canvas.ownerDocument;
+    const doc = rootEl.ownerDocument;
     if (!doc) {
       return false;
     }
 
-    const rootEl = doc.documentElement;
-    if (rootEl && rootEl.classList && rootEl.classList.contains("nightMode")) {
+    const docRootEl = doc.documentElement;
+    if (docRootEl && docRootEl.classList && docRootEl.classList.contains("nightMode")) {
       return true;
     }
 
@@ -217,12 +204,11 @@
   let byRoot = new WeakMap();
   let lastNightModeState = null;
 
-  function invalidateCanvas(rootEl) {
-    const resolvedRoot = discoverWidgetRoot(rootEl) || rootEl;
-    if (!resolvedRoot) {
+  function invalidateRoot(rootEl) {
+    if (!rootEl) {
       return;
     }
-    byRoot.delete(resolvedRoot);
+    byRoot.delete(rootEl);
   }
 
   function invalidateAll() {
@@ -259,21 +245,16 @@
       return resolved;
     }
 
-    function resolve(canvas) {
-      return resolveForRoot(discoverWidgetRoot(canvas) || canvas);
-    }
-
     return {
-      resolve: resolve,
       resolveForRoot: resolveForRoot,
-      invalidateCanvas: invalidateCanvas,
+      invalidateRoot: invalidateRoot,
       invalidateAll: invalidateAll
     };
   }
 
   create.DEFAULTS = DEFAULTS;
   create.TOKEN_DEFS = TOKEN_DEFS;
-  create.invalidateCanvas = invalidateCanvas;
+  create.invalidateRoot = invalidateRoot;
   create.invalidateAll = invalidateAll;
 
   return { id: "ThemeResolver", create };

@@ -63,12 +63,15 @@ describe("ActiveRouteTextWidget", function () {
       resolveTextColor() {
         return "#ffffff";
       },
+      resolveWidgetRoot(target) {
+        return target;
+      },
       getModule(id) {
         if (id === "ThemeResolver") {
           return {
             create() {
               return {
-                resolve() {
+                resolveForRoot() {
                   return themeTokens;
                 }
               };

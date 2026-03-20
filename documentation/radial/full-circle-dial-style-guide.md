@@ -12,7 +12,7 @@ Visual specification for full-circle dial widgets. Constants and formulas are im
 - Shared responsive owner: `FullCircleRadialLayout.computeMode()` / `computeInsets()` / `computeLayout()`.
 - Angle conversion uses `RadialAngleMath.degToCanvasRad()` defaults: `zeroDegAt="north"`, clockwise positive.
 - Geometry and mode slots are computed once per frame in engine state and reused by widget callbacks.
-- Theme/token sources come from `ThemeResolver` via `RadialToolkit.theme.resolve(canvas)`.
+- Theme/token sources come from `ThemeResolver` via `RadialToolkit.theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas)`.
 
 ## Arc Configuration
 

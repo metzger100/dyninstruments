@@ -74,7 +74,7 @@ Allowed inline exceptions:
 
 ### Theme cache drift
 
-1. Add/verify `invalidateCanvas` and `invalidateAll` on cache-owning module API.
+1. Add/verify `invalidateRoot` and `invalidateAll` on cache-owning module API.
 2. Call invalidation from every runtime mutation path.
 3. Add/adjust tests for mutation -> invalidation -> refreshed resolve.
 
@@ -225,7 +225,7 @@ Allowed inline exceptions:
 
 1. Remove widget-local copy-paste blocks and move shared logic into `shared/widget-kits/`.
 2. Prefer shared API calls (`RadialValueMath.*`, shared renderers) over repeated local helper implementations.
-3. Keep duplicated orchestration stubs (`create`, `translate`, `translateFunction`, `renderCanvas`) minimal; all substantive logic belongs in shared modules.
+3. Keep duplicated orchestration stubs (`create`, `translate`, `translateFunction`, `renderHtml`, `renderCanvas`) minimal; all substantive logic belongs in shared modules or surface owners.
 4. Add/adjust tests to lock expected shared-helper behavior after extraction.
 
 ### Oneliner line-limit bypass

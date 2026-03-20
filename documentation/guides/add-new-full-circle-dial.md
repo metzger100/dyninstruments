@@ -5,6 +5,7 @@
 ## Overview
 
 New full-circle dials should be thin wrappers over `FullCircleRadialEngine`. Keep widget modules focused on display strategy, static-layer callbacks, and pointer behavior.
+Cluster host registration remains `renderHtml`; full-circle canvas wrappers run through internal `surface: "canvas-dom"` routes.
 
 ## Prerequisites
 
@@ -128,6 +129,7 @@ const rendererSpecs = {
   NewDialWidget: Helpers.getModule("NewDialWidget").create(def, Helpers)
 };
 ```
+3. In `cluster/rendering/ClusterKindCatalog.js`, add strict tuple with `rendererId: "NewDialWidget"` and `surface: "canvas-dom"`.
 
 ## Step 4: Route Data via Mapper Module
 
@@ -171,6 +173,7 @@ Decision guide:
 - [ ] Module registered in `config/components.js` with `deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]`
 - [ ] Added to `ClusterRendererRouter.deps` (if ClusterWidget-rendered)
 - [ ] Renderer wired in `cluster/rendering/ClusterRendererRouter.js` (if ClusterWidget-rendered)
+- [ ] Kind catalog tuple added in `cluster/rendering/ClusterKindCatalog.js` with `surface: "canvas-dom"`
 - [ ] Mapper returns `renderer: "NewDialWidget"` with declarative, normalized props
 - [ ] Layout behavior verified in `flat`, `normal`, `high`
 - [ ] Pointer tracking, theme colors, and disconnect overlay verified

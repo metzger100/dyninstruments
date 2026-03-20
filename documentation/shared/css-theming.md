@@ -46,7 +46,7 @@ If none set: falls back to `getComputedStyle(rootOrCanvas).color` or `"#000"`.
 
 ### Theme Tokens (ThemeResolver)
 
-Read by `ThemeResolver.resolve(canvas)`:
+Read by `ThemeResolver.resolveForRoot(rootEl)` (canvas renderers resolve `rootEl` via `Helpers.resolveWidgetRoot(canvas)`):
 
 | Variable | Purpose | Default |
 |---|---|---|
@@ -159,6 +159,7 @@ Surface shell and internal canvas fill the full widget area:
 ```css
 .widget.dyniplugin .widgetData.dyni-shell,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-html,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas-mount,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas-node {
   width: 100% !important;
@@ -178,9 +179,10 @@ Surface shell and internal canvas fill the full widget area:
 
 ## Module CSS Files
 
-All component-level widget CSS files were removed. Visual styling remains canvas-driven, and shared theme/style rules are provided only via:
+Most visual/style contracts are centralized in `plugin.css`. Native HTML kinds may ship component-local CSS for inner content styling (example: `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css`), but root/shell/surface ownership stays in shared host CSS.
 
-- **plugin.css** — Plugin-wide structural styles (font, border, head hiding, canvas sizing)
+- **plugin.css** — plugin-wide root, shell, head-hiding, and surface fill contracts
+- **Widget-local CSS (optional)** — renderer-local markup styling for native HTML kinds
 
 ## File Location
 

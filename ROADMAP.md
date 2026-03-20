@@ -6,7 +6,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 ## Status and Scope
 
 - Project stage: pre-release
-- Backward compatibility is not guaranteed in this phase
+- Backward compatibility is not guaranteed during pre-release evolution
 - Scope: planned integration order and current coverage map
 
 ## Roadmap

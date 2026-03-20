@@ -139,8 +139,8 @@
       return;
     }
 
-    if (typeof resolverMod.invalidateCanvas === "function") {
-      resolverMod.invalidateCanvas(rootEl);
+    if (typeof resolverMod.invalidateRoot === "function") {
+      resolverMod.invalidateRoot(rootEl);
       return;
     }
 

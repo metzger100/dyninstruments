@@ -32,7 +32,9 @@ If guidance conflicts, precedence is:
 - **UMD component pattern** - All components register on `window.DyniComponents.{globalKey}`
 - **avnav.api** - Only external dependency. Plugin API provided by AvNav host app
 - **AVNAV_BASE_URL** - Global string set by AvNav, used to construct module URLs
-- **Canvas 2D only** - All visual rendering via `renderCanvas(canvas, props)`
+- **Host path is renderHtml-only** - Cluster widgets register `renderHtml` on AvNav host
+- **Internal dual-surface model** - `surface: "html"` for native HTML kinds, `surface: "canvas-dom"` for internal canvas kinds
+- **Canvas 2D remains internal** - Existing gauges/text canvas renderers run through `CanvasDomSurfaceAdapter` and `renderCanvas(canvas, props)` callbacks
 - **No ES modules, no import/export** - Must use IIFE or UMD wrappers
 - **HiDPI** - `Helpers.setupCanvas()` handles devicePixelRatio scaling
 - **Plugin runtime is browser-only** - No server-side runtime code
@@ -118,6 +120,13 @@ Task: Add new BarometerGauge
 - Root structural orientation map for AI sessions: [ARCHITECTURE.md](ARCHITECTURE.md)
 - Coding patterns, naming, headers, and canonical examples: [documentation/conventions/coding-standards.md](documentation/conventions/coding-standards.md)
 - Documentation writing format and token budget: [documentation/conventions/documentation-format.md](documentation/conventions/documentation-format.md)
+- Host deferred-commit ownership: [documentation/architecture/host-commit-controller.md](documentation/architecture/host-commit-controller.md)
+- Surface session lifecycle ownership: [documentation/architecture/surface-session-controller.md](documentation/architecture/surface-session-controller.md)
+- Canvas surface adapter ownership: [documentation/architecture/canvas-dom-surface-adapter.md](documentation/architecture/canvas-dom-surface-adapter.md)
+- Kind catalog ownership: [cluster/rendering/ClusterKindCatalog.js](cluster/rendering/ClusterKindCatalog.js)
+- HTML surface lifecycle owner: [cluster/rendering/HtmlSurfaceController.js](cluster/rendering/HtmlSurfaceController.js)
+- Shared active-route domain owner: [cluster/viewmodels/ActiveRouteViewModel.js](cluster/viewmodels/ActiveRouteViewModel.js)
+- Native HTML renderer entrypoint: [widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js](widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js)
 - Security and safety rules: `documentation/conventions/safety-guidelines.md` (planned, not yet implemented)
 - Step-by-step implementation workflows: [documentation/guides/](documentation/guides/)
 - Role definitions and task templates: `documentation/agentprompts/` (planned, not yet implemented)

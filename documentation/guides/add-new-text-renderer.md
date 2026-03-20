@@ -13,6 +13,9 @@ Read first:
 
 ## Overview
 
+This guide covers canvas-backed text renderers on the internal `canvas-dom` surface.
+For native HTML kinds (`surface: "html"`), use [add-new-html-kind.md](add-new-html-kind.md).
+
 `TextLayoutEngine` keeps new text widgets thin:
 
 - Renderer module owns data parsing, formatter selection, and `renderCanvas`.
@@ -98,7 +101,7 @@ Template example (shared text-family renderer style):
       ctx.clearRect(0, 0, W, H);
       ctx.textBaseline = "middle";
 
-      const tokens = theme.resolve(canvas);
+      const tokens = theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas);
       const family = Helpers.resolveFontFamily(canvas);
       const color = Helpers.resolveTextColor(canvas);
       const valueWeight = tokens.font.weight;
@@ -237,6 +240,19 @@ const rendererSpecs = {
 
 Use role-based renderer IDs (for example `ActiveRouteTextWidget`), not cluster-prefixed names.
 
+## Step 3b: Add Kind Catalog Route
+
+Add or update the strict route tuple in `cluster/rendering/ClusterKindCatalog.js`:
+
+```javascript
+{ cluster: "nav", kind: "routeSummary", viewModelId: "MapperOutputViewModel", rendererId: "RouteSummaryTextWidget", surface: "canvas-dom" }
+```
+
+Rules:
+- `surface` must be explicit (`canvas-dom` here).
+- `rendererId` must match mapper output `renderer`.
+- Unsupported surfaces or mismatched renderer IDs fail closed at runtime.
+
 ## Step 4: Mapper Routing (Declarative Only)
 
 Update mapper translation to route kinds without embedding formatting logic.
@@ -306,6 +322,7 @@ Rule of thumb: default to extension; create a new renderer only when the view co
 ## Related
 
 - [add-new-cluster.md](add-new-cluster.md)
+- [add-new-html-kind.md](add-new-html-kind.md)
 - [../widgets/three-elements.md](../widgets/three-elements.md)
 - [../widgets/position-coordinates.md](../widgets/position-coordinates.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)

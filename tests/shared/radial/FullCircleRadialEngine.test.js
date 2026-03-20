@@ -71,6 +71,9 @@ describe("FullCircleRadialEngine", function () {
       resolveTextColor() {
         return "#fff";
       },
+      resolveWidgetRoot(target) {
+        return target;
+      },
       getModule(id) {
         if (id === "CanvasLayerCache") {
           return cacheMod;
@@ -120,7 +123,7 @@ describe("FullCircleRadialEngine", function () {
                 }
               },
               theme: {
-                resolve() {
+                resolveForRoot() {
                   return theme;
                 }
               }

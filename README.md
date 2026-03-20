@@ -1,6 +1,6 @@
 # dyninstruments - Modern Instrument Widgets for AvNav
 
-`dyninstruments` is an [AvNav](https://github.com/wellenvogel/avnav) plugin that provides a modern, highly legible instrument panel with cluster-based widgets and canvas-based gauges.
+`dyninstruments` is an [AvNav](https://github.com/wellenvogel/avnav) plugin that provides a modern, highly legible instrument panel with cluster-based widgets, native HTML interaction surfaces, and internal canvas-backed gauges.
 The goal is maximum readability at the helm with minimal configuration overhead.
 
 > ⚠️ **Status:** Pre-release. APIs, widget names, and editor options may still change.
@@ -19,6 +19,13 @@ The goal is maximum readability at the helm with minimal configuration overhead.
 - Caption, value, and unit are auto-scaled for available space.
 - Layout adapts to aspect ratio (flat / normal / high).
 - Numeric values stay visually dominant.
+
+### Surface model
+
+- Host registration path is `renderHtml`.
+- Internal kind routes use strict `surface` tuples:
+  - `surface: "canvas-dom"` for existing canvas renderers
+  - `surface: "html"` for native HTML kinds (for example interactive active route)
 
 ### Canvas gauges
 
@@ -119,8 +126,7 @@ You can customize dyninstruments at two levels:
 ### 1) Select a preset from `user.css`
 
 ```css
-.widget.dyniplugin,
-[data-dyni] {
+.widget.dyniplugin {
   --dyni-theme-preset: bold;
 }
 ```
@@ -136,8 +142,7 @@ Available preset names:
 ### 2) Override individual style tokens
 
 ```css
-.widget.dyniplugin,
-[data-dyni] {
+.widget.dyniplugin {
   --dyni-pointer: #00aaff;
   --dyni-warning: #f5c542;
   --dyni-alarm: #ff5533;

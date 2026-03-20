@@ -66,12 +66,15 @@ describe("PositionCoordinateWidget", function () {
       resolveTextColor() {
         return "#fff";
       },
+      resolveWidgetRoot(target) {
+        return target;
+      },
       getModule(id) {
         if (id === "ThemeResolver") {
           return {
             create() {
               return {
-                resolve() {
+                resolveForRoot() {
                   return themeTokens;
                 }
               };

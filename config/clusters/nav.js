@@ -29,7 +29,7 @@
     widget: "ClusterWidget",
     def: {
       name: "dyni_Nav_Instruments",
-      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Active route / Positions / Center display / XTE display)",
+      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Active route / Active route interactive / Positions / Center display / XTE display)",
       caption: "", unit: "", default: "---",
       cluster: "nav",
       storeKeys: {
@@ -70,6 +70,7 @@
             opt("Remaining route distance", "rteDistance"),
             opt("VMG to waypoint", "vmg"),
             opt("Active route", "activeRoute"),
+            opt("Active route (interactive)", "activeRouteInteractive"),
             opt("Boat position (GPS)", "positionBoat"),
             opt("Active waypoint position", "positionWp"),
             opt("Center display", "centerDisplay"),
@@ -112,13 +113,13 @@
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.2,
           internal: true,
           name: "ActiveRoute: 3-Rows Threshold",
-          condition: { kind: "activeRoute" }
+          condition: [{ kind: "activeRoute" }, { kind: "activeRouteInteractive" }]
         },
         activeRouteRatioThresholdFlat: {
           type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.8,
           internal: true,
           name: "ActiveRoute: 1-Row Threshold",
-          condition: { kind: "activeRoute" }
+          condition: [{ kind: "activeRoute" }, { kind: "activeRouteInteractive" }]
         },
         showWpNameXteDisplay: {
           type: "BOOLEAN",
@@ -150,12 +151,8 @@
       updateFunction: function (values) {
         const out = values ? { ...values } : {};
         const kind = (values && values.kind) || "eta";
-        const routeName = (values && typeof values.activeRouteName === "string")
-          ? values.activeRouteName.trim()
-          : "";
         const needsWp = (kind === "dst" || kind === "positionWp" || kind === "xteDisplay");
-        const routeDisconnect = (kind === "activeRoute") && ((values && values.wpServer === false) || !routeName);
-        if ((needsWp && values && values.wpServer === false) || routeDisconnect) out.disconnect = true;
+        if (needsWp && values && values.wpServer === false) out.disconnect = true;
         else if (Object.prototype.hasOwnProperty.call(out, "disconnect")) delete out.disconnect;
         if (kind === "centerDisplay") {
           out.visible = !(values && values.lockPosition) || !!(values && values.editing);

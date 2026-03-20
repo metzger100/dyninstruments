@@ -4,7 +4,7 @@
 
 ## Overview
 
-`Helpers` is passed as second argument to `module.create(def, Helpers)`. It provides canvas-only setup, root-scoped typography/theming, formatter application, host-action access, and module access.
+`Helpers` is passed as second argument to `module.create(def, Helpers)`. It provides canvas setup utilities, root-scoped typography/theming, formatter application, host-action access, and module access.
 
 ## API Reference
 
@@ -48,6 +48,19 @@ Caching behavior:
 Reads `--dyni-font` from the owning widget root and falls back to default stack (`Inter`, system fonts, emoji fonts).
 
 `resolveFontFamily()` shares the same per-root typography cache as `resolveTextColor()`, so one style read can serve both values while day/night mode state is unchanged.
+
+### resolveWidgetRoot
+
+Resolves the owning widget root (`.widget` or `.DirectWidget`) for a DOM target.
+
+```javascript
+const rootEl = Helpers.resolveWidgetRoot(canvasOrElement);
+```
+
+Usage contract:
+
+- Theme callers that start from canvas inputs must resolve root first and call `ThemeResolver.resolveForRoot(rootEl)`.
+- This keeps root discovery logic in one runtime owner instead of duplicating `.closest(...)` logic across renderers.
 
 ### applyFormatter
 

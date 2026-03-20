@@ -134,6 +134,9 @@ describe("WindRadialWidget", function () {
         resolveTextColor() {
           return "#fff";
         },
+        resolveWidgetRoot(target) {
+          return target;
+        },
         getModule(id) {
           if (id === "FullCircleRadialEngine") return fullCircleEngine;
           if (id === "FullCircleRadialLayout") return fullCircleLayout;
@@ -163,7 +166,7 @@ describe("WindRadialWidget", function () {
                   }
                 },
                 theme: {
-                  resolve() {
+                  resolveForRoot() {
                     return theme;
                   }
                 },
@@ -293,6 +296,9 @@ describe("WindRadialWidget", function () {
         resolveTextColor() {
           return "#fff";
         },
+        resolveWidgetRoot(target) {
+          return target;
+        },
         getModule(id) {
           if (id === "FullCircleRadialEngine") return fullCircleEngine;
           if (id === "FullCircleRadialLayout") return fullCircleLayout;
@@ -322,7 +328,7 @@ describe("WindRadialWidget", function () {
                   }
                 },
                 theme: {
-                  resolve() {
+                  resolveForRoot() {
                     return themeDefaults;
                   }
                 },
@@ -436,6 +442,9 @@ describe("WindRadialWidget", function () {
         resolveTextColor() {
           return "#fff";
         },
+        resolveWidgetRoot(target) {
+          return target;
+        },
         getModule(id) {
           if (id === "FullCircleRadialEngine") return fullCircleEngine;
           if (id === "FullCircleRadialLayout") return fullCircleLayout;
@@ -455,7 +464,7 @@ describe("WindRadialWidget", function () {
                   drawLabels() {}
                 },
                 theme: {
-                  resolve() {
+                  resolveForRoot() {
                     return {
                       colors: {
                         pointer: "#ff2b2b",

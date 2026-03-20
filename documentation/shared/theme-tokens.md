@@ -4,7 +4,7 @@
 
 ## Overview
 
-`ThemeResolver` provides plugin-wide token resolution from CSS custom properties. The canonical API is root-first: `resolveForRoot(rootEl)` reads the widget root directly, applies the selected preset from `data-dyni-theme`, prefers explicit CSS custom-property overrides, and caches the merged result per root. `runtime/init.js` discovers `.widget.dyniplugin` roots directly when applying presets, and `resolve(canvas)` remains as a thin adapter that resolves the owning root and delegates to the root-first path.
+`ThemeResolver` provides plugin-wide token resolution from CSS custom properties. The API is strictly root-first: `resolveForRoot(rootEl)` reads the widget root directly, applies the selected preset from `data-dyni-theme`, prefers explicit CSS custom-property overrides, and caches the merged result per root. `runtime/init.js` discovers `.widget.dyniplugin` roots directly when applying presets.
 
 `ThemePresets` provides named runtime presets by setting a preset selector attribute (`data-dyni-theme`) on widget root containers.
 
@@ -15,11 +15,11 @@
 - File: `shared/theme/ThemeResolver.js`
 - Factory: `create(def, Helpers)`
 - API: `resolveForRoot(rootEl) -> themeTokens`
-- Adapter API: `resolve(canvas) -> themeTokens`
-- Invalidation API: `invalidateCanvas(canvasOrRoot)`, `invalidateAll()`
+- Invalidation API: `invalidateRoot(rootEl)`, `invalidateAll()`
 - Token metadata API: `TOKEN_DEFS` / `create.TOKEN_DEFS`
 - Preset metadata API: reads `ThemePresets.PRESETS` / `ThemePresets.create.PRESETS`
 - Caching: `WeakMap` per root element
+- Canvas renderer call pattern: `const rootEl = Helpers.resolveWidgetRoot(canvas) || canvas; resolver.resolveForRoot(rootEl)`
 - Invalidation: cache reset when root `.nightMode` class state changes
 - Numeric parsing: `parseFloat`, fallback on `NaN`
 - Color parsing: `trim`, fallback on empty string
@@ -109,8 +109,7 @@ Base pointer size by renderer:
 const resolverMod = Helpers.getModule("ThemeResolver");
 const resolver = resolverMod.create(def, Helpers);
 const themeTokens = resolver.resolveForRoot(rootEl);
-const sameTokens = resolver.resolve(canvas); // adapter path for existing callers
-resolver.invalidateCanvas(canvas);
+resolver.invalidateRoot(rootEl);
 resolver.invalidateAll();
 
 // Static defaults + token mapping
@@ -118,7 +117,7 @@ resolverMod.DEFAULTS;
 resolverMod.create.DEFAULTS;
 resolverMod.TOKEN_DEFS;
 resolverMod.create.TOKEN_DEFS;
-resolverMod.invalidateCanvas;
+resolverMod.invalidateRoot;
 resolverMod.invalidateAll;
 ```
 
@@ -170,9 +169,7 @@ Only values that differ from theme defaults are included.
 - Invalid preset names from any source resolve to `default`.
 - Discovery pattern: iterate `.widget.dyniplugin` roots directly and apply the preset to those roots. When no widget root is mounted yet, the document-level CSS fallback remains the last resort.
 
-`runtime/widget-registrar.js` also reapplies the active preset when a widget root is first discovered during `renderCanvas`.
-
-After preset application, runtime explicitly invalidates `ThemeResolver` token cache via the module invalidation API so subsequent `resolve(canvas)` reads refreshed values.
+After preset application, runtime explicitly invalidates `ThemeResolver` token cache via `invalidateRoot(rootEl)` so subsequent `resolveForRoot(rootEl)` reads refreshed values.
 
 ## Manual Testing (Browser Console)
 

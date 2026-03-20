@@ -126,7 +126,7 @@
         const ctx = surface.ctx;
         const W = surface.W;
         const H = surface.H;
-        const theme = GU.theme.resolve(canvas);
+        const theme = GU.theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas);
         const paint = setupTextPaint(canvas, ctx);
         const mode = layoutApi.computeMode(
           W,
