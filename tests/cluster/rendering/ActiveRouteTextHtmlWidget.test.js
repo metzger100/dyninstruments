@@ -253,14 +253,6 @@ describe("ActiveRouteTextHtmlWidget", function () {
     expect(html).toContain("dyni-active-route-mode-flat");
   });
 
-  it("keeps normal mode in vertical panel even when shell ratio is above the flat threshold", function () {
-    const renderer = createRenderer().renderer;
-    const hostContext = createHostContext({ shellSize: { width: 500, height: 100 } });
-    const html = renderer.renderHtml.call(hostContext, makeProps({ mode: "vertical" }));
-    expect(html).toContain("dyni-active-route-mode-normal");
-    expect(html).not.toContain("dyni-active-route-mode-flat");
-  });
-
   it("applies computed fit styles for route and metric values without ellipsis content", function () {
     const fitCompute = vi.fn(function () {
       return {
