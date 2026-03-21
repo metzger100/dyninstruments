@@ -54,14 +54,13 @@ ClusterWidget
     ├── PositionCoordinateWidget
     │   ├── ThemeResolver
     │   └── TextLayoutEngine
-    ├── ActiveRouteTextWidget
-    │   ├── ThemeResolver
-    │   ├── TextLayoutEngine
-    │   ├── RadialTextLayout
-    │   ├── TextTileLayout
-    │   └── ActiveRouteLayout
-    │       └── ResponsiveScaleProfile
     ├── ActiveRouteTextHtmlWidget
+    │   └── ActiveRouteHtmlFit
+    │       ├── ThemeResolver
+    │       ├── RadialTextLayout
+    │       ├── TextTileLayout
+    │       └── ActiveRouteLayout
+    │           └── ResponsiveScaleProfile
     ├── RendererPropsWidget
     │   ├── WindRadialWidget
     │   ├── CompassRadialWidget

@@ -14,7 +14,7 @@ editableParameters is an object of parameter specs.
 - The **editor label** is controlled by the spec field `name` (used across cluster config files in config/clusters/*) or `displayName` (used by dyninstruments helper `makePerKindTextParams`).
 - If neither `name` nor `displayName` is set, AvNav may fall back to showing the key.
 - dyninstruments editor labels should stay short. Remove mode hints already implied by `condition`, prefer `Instrument` for the top-level selector label, use `store path` wording for `KEY` selectors, keep common abbreviations such as `min/max`, and add directional wording only when it changes the meaning (for example `Warning at or above` vs `Warning at or below`).
-- In the nav cluster, active-route editables use shared conditions for both `activeRoute` and `activeRouteInteractive` kinds.
+- In the nav cluster, active-route editables are scoped to `activeRoute`.
 
 ```javascript
 {
@@ -50,8 +50,7 @@ editableParameters is an object of parameter specs.
 kind: {
   type: "SELECT",
   list: [
-    { name: "Active route", value: "activeRoute" },
-    { name: "Active route (interactive)", value: "activeRouteInteractive" }
+    { name: "Active route", value: "activeRoute" }
   ],
   default: "activeRoute",
   name: "Instrument"

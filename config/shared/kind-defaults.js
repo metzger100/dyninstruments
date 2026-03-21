@@ -140,21 +140,21 @@
       activeRouteRemain: {
         cap: "RTE",
         unit: "nm",
-        kind: ["activeRoute", "activeRouteInteractive"],
+        kind: "activeRoute",
         captionName: "Route distance caption",
         unitName: "Route distance unit"
       },
       activeRouteEta: {
         cap: "ETA",
         unit: "",
-        kind: ["activeRoute", "activeRouteInteractive"],
+        kind: "activeRoute",
         captionName: "ETA caption",
         unitName: "ETA unit"
       },
       activeRouteNextCourse: {
         cap: "NEXT",
         unit: "\u00b0",
-        kind: ["activeRoute", "activeRouteInteractive"],
+        kind: "activeRoute",
         captionName: "Next course caption",
         unitName: "Next course unit"
       },

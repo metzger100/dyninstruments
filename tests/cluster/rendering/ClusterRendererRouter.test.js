@@ -4,7 +4,6 @@ describe("ClusterRendererRouter", function () {
   const ALL_RENDERER_IDS = [
     "ThreeValueTextWidget",
     "PositionCoordinateWidget",
-    "ActiveRouteTextWidget",
     "ActiveRouteTextHtmlWidget",
     "CenterDisplayTextWidget",
     "WindRadialWidget",
@@ -138,7 +137,6 @@ describe("ClusterRendererRouter", function () {
       HtmlSurfaceController: { create: () => htmlOwner },
       ThreeValueTextWidget: { create: () => rendererSpecs.ThreeValueTextWidget },
       PositionCoordinateWidget: { create: () => rendererSpecs.PositionCoordinateWidget },
-      ActiveRouteTextWidget: { create: () => rendererSpecs.ActiveRouteTextWidget },
       ActiveRouteTextHtmlWidget: { create: () => rendererSpecs.ActiveRouteTextHtmlWidget },
       CenterDisplayTextWidget: { create: () => rendererSpecs.CenterDisplayTextWidget },
       RendererPropsWidget: {
@@ -170,7 +168,7 @@ describe("ClusterRendererRouter", function () {
     const h = createHarness();
     const routes = h.router.listRoutes();
 
-    expect(routes).toHaveLength(52);
+    expect(routes).toHaveLength(51);
     routes.forEach(function (route) {
       const resolved = h.router.resolveRouteSpec({
         cluster: route.cluster,
@@ -182,6 +180,8 @@ describe("ClusterRendererRouter", function () {
 
     const activeRoute = h.router.resolveRouteSpec({ cluster: "nav", kind: "activeRoute" });
     expect(activeRoute.viewModelId).toBe("ActiveRouteViewModel");
+    expect(activeRoute.rendererId).toBe("ActiveRouteTextHtmlWidget");
+    expect(activeRoute.surface).toBe("html");
   });
 
   it("renders shell-first HTML with instance/surface markers and canvas-dom shell content", function () {
@@ -208,7 +208,7 @@ describe("ClusterRendererRouter", function () {
     const htmlCatalog = makeCustomCatalog([
       {
         cluster: "nav",
-        kind: "activeRouteInteractive",
+        kind: "activeRoute",
         viewModelId: "ActiveRouteViewModel",
         rendererId: "ActiveRouteTextHtmlWidget",
         surface: "html"
@@ -229,7 +229,7 @@ describe("ClusterRendererRouter", function () {
 
     const out = h.router.renderHtml({
       cluster: "nav",
-      kind: "activeRouteInteractive"
+      kind: "activeRoute"
     });
 
     expect(h.handles.htmlOwner.renderSurfaceShell).toHaveBeenCalledTimes(1);
@@ -295,12 +295,12 @@ describe("ClusterRendererRouter", function () {
     });
 
     expect(payload).toMatchObject({
-      surface: "canvas-dom",
+      surface: "html",
       revision: 7,
       route: {
         cluster: "nav",
         kind: "activeRoute",
-        rendererId: "ActiveRouteTextWidget"
+        rendererId: "ActiveRouteTextHtmlWidget"
       }
     });
   });

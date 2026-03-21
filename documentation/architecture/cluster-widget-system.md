@@ -28,8 +28,7 @@
 4. Matching mapper module translates to either:
 - numeric output for `ThreeValueTextWidget` (default text kinds)
 - stacked pair or variant output for `PositionCoordinateWidget` (`positionBoat`/`positionWp`, vessel `dateTime`, vessel `timeStatus`)
-- dedicated text-renderer output for `ActiveRouteTextWidget` (`nav` `activeRoute`)
-- dedicated html-renderer output for `ActiveRouteTextHtmlWidget` (`nav` `activeRouteInteractive`)
+- dedicated html-renderer output for `ActiveRouteTextHtmlWidget` (`nav` `activeRoute`)
 - dedicated text-renderer output for `CenterDisplayTextWidget` (`nav` `centerDisplay`)
 - graphic output with `renderer: "..."`
 `NavMapper` delegates active-route domain normalization (`routeName`, `disconnect`, `display`, captions/units) to `ActiveRouteViewModel`.
@@ -50,7 +49,7 @@ Contract note:
 - Router does not expose host `renderCanvas`.
 - `ClusterWidget` is registered renderHtml-only on the host path.
 - Existing canvas renderers run only through the internal `canvas-dom` adapter.
-- Native HTML kinds run through `HtmlSurfaceController` (current shipped tuple: `nav/activeRouteInteractive`).
+- Native HTML kinds run through `HtmlSurfaceController` (current shipped tuple: `nav/activeRoute`).
 
 ## Mapper Modules
 
@@ -82,7 +81,7 @@ Mapper boundary:
 
 ## ViewModel Modules
 
-- `cluster/viewmodels/ActiveRouteViewModel.js`: shared active-route domain contract owner for `nav/activeRoute` and `nav/activeRouteInteractive` payload normalization and disconnect derivation.
+- `cluster/viewmodels/ActiveRouteViewModel.js`: shared active-route domain contract owner for `nav/activeRoute` payload normalization and disconnect derivation.
 - Viewmodels are mapper-owned domain helpers; they do not render HTML/canvas and do not own surface lifecycle.
 
 ## Vessel Kind Contract Tuples
@@ -118,7 +117,7 @@ Strict routing rules:
 Shipped tuples include both surfaces:
 
 - `surface: "canvas-dom"` for existing canvas-backed kinds
-- `surface: "html"` for native HTML kinds (`nav/activeRouteInteractive`)
+- `surface: "html"` for native HTML kinds (`nav/activeRoute`)
 
 ## Surface-Aware Router
 
@@ -126,7 +125,6 @@ Shipped tuples include both surfaces:
 
 - `ThreeValueTextWidget`
 - `PositionCoordinateWidget` (stacked pair text renderer for nav positions plus vessel `dateTime` / `timeStatus` variants)
-- `ActiveRouteTextWidget`
 - `ActiveRouteTextHtmlWidget`
 - `CenterDisplayTextWidget`
 - `WindRadialWidget`
