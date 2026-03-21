@@ -135,6 +135,10 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js");
     expect(components.ActiveRouteTextHtmlWidget.css).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css");
     expect(components.ActiveRouteTextHtmlWidget.deps).toEqual(["ActiveRouteHtmlFit"]);
+    expect(components.MapZoomTextHtmlWidget.globalKey).toBe("DyniMapZoomTextHtmlWidget");
+    expect(components.MapZoomTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js");
+    expect(components.MapZoomTextHtmlWidget.css).toBe("http://host/plugins/dyninstruments/widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css");
+    expect(components.MapZoomTextHtmlWidget.deps).toEqual(["MapZoomHtmlFit"]);
     expect(components.CanvasDomSurfaceAdapter.globalKey).toBe("DyniCanvasDomSurfaceAdapter");
     expect(components.CanvasDomSurfaceAdapter.js).toBe("http://host/plugins/dyninstruments/cluster/rendering/CanvasDomSurfaceAdapter.js");
     expect(components.CanvasDomSurfaceAdapter.deps).toEqual(["ThemeResolver"]);
@@ -165,12 +169,15 @@ describe("config/components.js", function () {
     expect(components.ClusterRendererRouter.deps).toContain("HtmlSurfaceController");
     expect(components.ClusterRendererRouter.deps).toContain("PositionCoordinateWidget");
     expect(components.ClusterRendererRouter.deps).toContain("ActiveRouteTextHtmlWidget");
+    expect(components.ClusterRendererRouter.deps).toContain("MapZoomTextHtmlWidget");
     expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).not.toContain("WindRadialWidget");
     expect(components.PositionCoordinateWidget.deps).not.toContain("ThreeValueTextWidget");
     expect(components.NavMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/NavMapper.js");
     expect(components.NavMapper.deps).toEqual(["ActiveRouteViewModel"]);
+    expect(components.MapMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/MapMapper.js");
     expect(components.ClusterMapperRegistry.deps).toContain("NavMapper");
+    expect(components.ClusterMapperRegistry.deps).toContain("MapMapper");
     expect(components.WindMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/WindMapper.js");
   });
 

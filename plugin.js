@@ -63,6 +63,7 @@
     "config/clusters/environment.js",
     "config/clusters/wind.js",
     "config/clusters/nav.js",
+    "config/clusters/map.js",
     "config/clusters/anchor.js",
     "config/clusters/vessel.js",
     "config/widget-definitions.js",

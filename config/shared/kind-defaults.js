@@ -109,34 +109,6 @@
       vmg: { cap: "VMG", unit: "kn" },
       positionBoat: { cap: "POS", unit: "" },
       positionWp: { cap: "WP", unit: "" },
-      centerDisplayPosition: {
-        cap: "CENTER",
-        unit: "",
-        kind: "centerDisplay",
-        captionName: "Center caption",
-        unitName: "Center unit"
-      },
-      centerDisplayMarker: {
-        cap: "WP",
-        unit: "nm",
-        kind: "centerDisplay",
-        captionName: "Waypoint caption",
-        unitName: "Waypoint distance unit"
-      },
-      centerDisplayBoat: {
-        cap: "POS",
-        unit: "nm",
-        kind: "centerDisplay",
-        captionName: "Boat caption",
-        unitName: "Boat distance unit"
-      },
-      centerDisplayMeasure: {
-        cap: "MEAS",
-        unit: "nm",
-        kind: "centerDisplay",
-        captionName: "Measure caption",
-        unitName: "Measure distance unit"
-      },
       activeRouteRemain: {
         cap: "RTE",
         unit: "nm",
@@ -185,6 +157,37 @@
         kind: "xteDisplay",
         captionName: "BRG caption",
         unitName: "BRG unit"
+      }
+    },
+    MAP_KIND: {
+      zoom: { cap: "ZOOM", unit: "" },
+      centerDisplayPosition: {
+        cap: "CENTER",
+        unit: "",
+        kind: "centerDisplay",
+        captionName: "Center caption",
+        unitName: "Center unit"
+      },
+      centerDisplayMarker: {
+        cap: "WP",
+        unit: "nm",
+        kind: "centerDisplay",
+        captionName: "Waypoint caption",
+        unitName: "Waypoint distance unit"
+      },
+      centerDisplayBoat: {
+        cap: "POS",
+        unit: "nm",
+        kind: "centerDisplay",
+        captionName: "Boat caption",
+        unitName: "Boat distance unit"
+      },
+      centerDisplayMeasure: {
+        cap: "MEAS",
+        unit: "nm",
+        kind: "centerDisplay",
+        captionName: "Measure caption",
+        unitName: "Measure distance unit"
       }
     },
     ANCHOR_KIND: {

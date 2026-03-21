@@ -48,16 +48,18 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `nav` | `activeRouteApproaching` | `nav.route.isApproaching` | `activeRoute` |
 | `nav` | `rteDistance` | `nav.route.remain` | `rteDistance` |
 | `nav` | `vmg` | `nav.wp.vmg` | `vmg` |
-| `nav` | `centerCourse` | `nav.center.course` | `centerDisplay` |
-| `nav` | `centerDistance` | `nav.center.distance` | `centerDisplay` |
-| `nav` | `centerMarkerCourse` | `nav.center.markerCourse` | `centerDisplay` |
-| `nav` | `centerMarkerDistance` | `nav.center.markerDistance` | `centerDisplay` |
-| `nav` | `centerPosition` | `map.centerPosition` | `centerDisplay` |
-| `nav` | `activeMeasure` | `map.activeMeasure` | `centerDisplay` |
-| `nav` | `measureRhumbLine` | `properties.measureRhumbLine` | `centerDisplay` |
-| `nav` | `lockPosition` | `map.lockPosition` | `centerDisplay` visibility |
 | `nav` | `positionBoat` | `nav.gps.position` | `positionBoat` |
 | `nav` | `positionWp` | `nav.wp.position` | `positionWp` |
+| `map` | `zoom` | `map.currentZoom` | `zoom` |
+| `map` | `requiredZoom` | `map.requiredZoom` | `zoom` |
+| `map` | `centerCourse` | `nav.center.course` | `centerDisplay` |
+| `map` | `centerDistance` | `nav.center.distance` | `centerDisplay` |
+| `map` | `centerMarkerCourse` | `nav.center.markerCourse` | `centerDisplay` |
+| `map` | `centerMarkerDistance` | `nav.center.markerDistance` | `centerDisplay` |
+| `map` | `centerPosition` | `map.centerPosition` | `centerDisplay` |
+| `map` | `activeMeasure` | `map.activeMeasure` | `centerDisplay` |
+| `map` | `measureRhumbLine` | `properties.measureRhumbLine` | `centerDisplay` |
+| `map` | `lockPosition` | `map.lockPosition` | `centerDisplay` visibility |
 | `anchor` | `distance` | `nav.anchor.distance` | `distance` |
 | `anchor` | `watch` | `nav.anchor.watchDistance` | `watch` |
 | `anchor` | `bearing` | `nav.anchor.direction` | `bearing` |
@@ -94,7 +96,8 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `eta`, `rteEta` | `eta` / `rteEta` | `formatTime` + `[]` | Date/time value path |
 | `dst`, `rteDistance` | `dst` / `rteDistance` | `formatDistance` + `[]` | distance text |
 | `activeRoute` | `activeRouteName`, `activeRouteRemain`, `activeRouteEta`, `activeRouteNextCourse`, `activeRouteApproaching` | renderer wrapper (`ActiveRouteTextHtmlWidget`, html surface) using `formatDistance` (`activeRouteRemain`) + `[remainUnit]`, `formatTime` (`activeRouteEta`) + `[]`, `formatDirection` (`activeRouteNextCourse`) + `[]` | next course is degree-based; `NEXT` tile only renders while approaching |
-| `centerDisplay` | `centerPosition`, `centerMarkerCourse`, `centerMarkerDistance`, `centerCourse`, `centerDistance`, `activeMeasure`, `measureRhumbLine`, `lockPosition` | renderer wrapper (`CenterDisplayTextWidget`) using `formatLonLatsDecimal` (center coordinates) + `formatDirection` (relation courses) + `formatDistance` (relation distances) | measure row is computed client-side from `activeMeasure.getPointAtIndex(0)` and omitted when unavailable; widget visibility follows `!lockPosition \|\| editing` |
+| `zoom` | `zoom`, `requiredZoom` | renderer wrapper (`MapZoomTextHtmlWidget`, html surface) using `formatDecimalOpt` (`zoom`, `requiredZoom`) + `[2, 1]` | `requiredZoom` is shown as parenthesized secondary text only when different from `zoom` |
+| `centerDisplay` | `centerPosition`, `centerMarkerCourse`, `centerMarkerDistance`, `centerCourse`, `centerDistance`, `activeMeasure`, `measureRhumbLine`, `lockPosition` | renderer wrapper (`CenterDisplayTextWidget`) using `formatLonLatsDecimal` (center coordinates) + `formatDirection` (relation courses) + `formatDistance` (relation distances) | map-cluster kind; measure row is computed client-side from `activeMeasure.getPointAtIndex(0)` and omitted when unavailable; widget visibility follows `!lockPosition \|\| editing` |
 | `xteDisplay` | `xte`, `cog`, `dtw`, `btw`, `wpName` | renderer wrapper (`XteDisplayWidget`) using `formatDistance` (`xte`, `dtw`) + `formatDirection360` (`cog`, `btw`) | fail-closed if required numeric inputs are missing |
 | `vmg` | `vmg` | `formatSpeed` + `[unit]` | speed text |
 | `positionBoat`, `positionWp` | `positionBoat` / `positionWp` | `formatLonLats` + coordinate formatter `formatLonLatsDecimal` | position object expected |
@@ -114,6 +117,8 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 |---|---|---|---|
 | `nav.gps.rtime` | Date/time value for `formatTime`/`formatDate`/`formatDateTime` family | high | `viewer/util/keys.jsx`, mapper usage |
 | `nav.gps.valid` | GPS validity bool-like flag | high | `viewer/util/keys.jsx`, vessel mapper usage |
+| `map.currentZoom` | Current map zoom level value | high | `viewer/util/keys.jsx`, `viewer/nav/navpage.jsx` (2026-03-08) |
+| `map.requiredZoom` | Target zoom value used by auto-zoom parity checks | medium | `viewer/util/keys.jsx`, map zoom item behavior in `viewer/nav/navpage.jsx` (2026-03-08) |
 | `map.centerPosition` | Current map center position object | high | `viewer/util/keys.jsx`, `viewer/components/CenterDisplayWidget.jsx` (2026-03-08) |
 | `map.activeMeasure` | Current measure object passed through live store state | medium | `viewer/util/keys.jsx`, `viewer/components/CenterDisplayWidget.jsx` (2026-03-08) |
 | `properties.measureRhumbLine` | Measure mode toggle for rhumb-line vs great-circle calculations | high | `viewer/util/keys.jsx`, `viewer/components/CenterDisplayWidget.jsx` (2026-03-08) |

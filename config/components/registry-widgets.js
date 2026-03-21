@@ -24,6 +24,12 @@
       globalKey: "DyniActiveRouteTextHtmlWidget",
       deps: ["ActiveRouteHtmlFit"]
     },
+    MapZoomTextHtmlWidget: {
+      js: BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
+      css: BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css",
+      globalKey: "DyniMapZoomTextHtmlWidget",
+      deps: ["MapZoomHtmlFit"]
+    },
     CenterDisplayTextWidget: {
       js: BASE + "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
       css: undefined,

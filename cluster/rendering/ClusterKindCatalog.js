@@ -66,8 +66,11 @@
     { cluster: "nav", kind: "activeRoute", viewModelId: "ActiveRouteViewModel", rendererId: "ActiveRouteTextHtmlWidget", surface: "html" },
     { cluster: "nav", kind: "positionBoat", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "PositionCoordinateWidget", surface: "canvas-dom" },
     { cluster: "nav", kind: "positionWp", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "PositionCoordinateWidget", surface: "canvas-dom" },
-    { cluster: "nav", kind: "centerDisplay", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "CenterDisplayTextWidget", surface: "canvas-dom" },
     { cluster: "nav", kind: "xteDisplay", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "XteDisplayWidget", surface: "canvas-dom" },
+
+    // map
+    { cluster: "map", kind: "centerDisplay", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "CenterDisplayTextWidget", surface: "canvas-dom" },
+    { cluster: "map", kind: "zoom", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "MapZoomTextHtmlWidget", surface: "html" },
 
     // anchor
     { cluster: "anchor", kind: "distance", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },

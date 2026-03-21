@@ -55,39 +55,6 @@
           ratioThresholdFlat: num(p.activeRouteRatioThresholdFlat)
         };
       }
-      if (req === "centerDisplay") {
-        return {
-          renderer: "CenterDisplayTextWidget",
-          display: {
-            position: p.centerPosition,
-            marker: {
-              course: num(p.centerMarkerCourse),
-              distance: num(p.centerMarkerDistance)
-            },
-            boat: {
-              course: num(p.centerCourse),
-              distance: num(p.centerDistance)
-            },
-            measure: {
-              activeMeasure: p.activeMeasure,
-              useRhumbLine: p.measureRhumbLine === true
-            }
-          },
-          captions: {
-            position: cap("centerDisplayPosition"),
-            marker: cap("centerDisplayMarker"),
-            boat: cap("centerDisplayBoat"),
-            measure: cap("centerDisplayMeasure")
-          },
-          units: {
-            marker: unit("centerDisplayMarker"),
-            boat: unit("centerDisplayBoat"),
-            measure: unit("centerDisplayMeasure")
-          },
-          ratioThresholdNormal: num(p.centerDisplayRatioThresholdNormal),
-          ratioThresholdFlat: num(p.centerDisplayRatioThresholdFlat)
-        };
-      }
       if (req === "positionBoat") {
         const o = out(p.positionBoat, cap("positionBoat"), unit("positionBoat"), "formatLonLats", []);
         o.renderer = "PositionCoordinateWidget";

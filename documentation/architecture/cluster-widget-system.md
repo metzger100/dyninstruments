@@ -29,7 +29,8 @@
 - numeric output for `ThreeValueTextWidget` (default text kinds)
 - stacked pair or variant output for `PositionCoordinateWidget` (`positionBoat`/`positionWp`, vessel `dateTime`, vessel `timeStatus`)
 - dedicated html-renderer output for `ActiveRouteTextHtmlWidget` (`nav` `activeRoute`)
-- dedicated text-renderer output for `CenterDisplayTextWidget` (`nav` `centerDisplay`)
+- dedicated html-renderer output for `MapZoomTextHtmlWidget` (`map` `zoom`)
+- dedicated text-renderer output for `CenterDisplayTextWidget` (`map` `centerDisplay`)
 - graphic output with `renderer: "..."`
 `NavMapper` delegates active-route domain normalization (`routeName`, `disconnect`, `display`, captions/units) to `ActiveRouteViewModel`.
 5. `ClusterWidget.initFunction(props)` creates per-instance runtime state:
@@ -49,7 +50,7 @@ Contract note:
 - Router does not expose host `renderCanvas`.
 - `ClusterWidget` is registered renderHtml-only on the host path.
 - Existing canvas renderers run only through the internal `canvas-dom` adapter.
-- Native HTML kinds run through `HtmlSurfaceController` (current shipped tuple: `nav/activeRoute`).
+- Native HTML kinds run through `HtmlSurfaceController` (current shipped tuples: `nav/activeRoute`, `map/zoom`).
 
 ## Mapper Modules
 
@@ -60,6 +61,7 @@ Current mapper modules:
 - `EnvironmentMapper.js` (`environment`)
 - `WindMapper.js` (`wind`)
 - `NavMapper.js` (`nav`)
+- `MapMapper.js` (`map`)
 - `AnchorMapper.js` (`anchor`)
 - `VesselMapper.js` (`vessel`)
 
@@ -117,7 +119,7 @@ Strict routing rules:
 Shipped tuples include both surfaces:
 
 - `surface: "canvas-dom"` for existing canvas-backed kinds
-- `surface: "html"` for native HTML kinds (`nav/activeRoute`)
+- `surface: "html"` for native HTML kinds (`nav/activeRoute`, `map/zoom`)
 
 ## Surface-Aware Router
 
@@ -126,6 +128,7 @@ Shipped tuples include both surfaces:
 - `ThreeValueTextWidget`
 - `PositionCoordinateWidget` (stacked pair text renderer for nav positions plus vessel `dateTime` / `timeStatus` variants)
 - `ActiveRouteTextHtmlWidget`
+- `MapZoomTextHtmlWidget`
 - `CenterDisplayTextWidget`
 - `WindRadialWidget`
 - `CompassRadialWidget`

@@ -30,6 +30,11 @@
       globalKey: "DyniActiveRouteLayout",
       deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
     },
+    MapZoomHtmlFit: {
+      js: BASE + "shared/widget-kits/nav/MapZoomHtmlFit.js",
+      css: undefined,
+      globalKey: "DyniMapZoomHtmlFit"
+    },
     CanvasLayerCache: {
       js: BASE + "shared/widget-kits/canvas/CanvasLayerCache.js",
       css: undefined,

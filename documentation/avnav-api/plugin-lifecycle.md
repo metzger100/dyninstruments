@@ -138,6 +138,7 @@ Current dyninstruments facade:
 
 - `this.hostActions.getCapabilities()`
 - `this.hostActions.routePoints.activate(index)`
+- `this.hostActions.map.checkAutoZoom()`
 - `this.hostActions.routeEditor.openActiveRoute()`
 - `this.hostActions.routeEditor.openEditRoute()`
 - `this.hostActions.ais.showInfo(mmsi)`

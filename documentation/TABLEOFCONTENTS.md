@@ -96,6 +96,8 @@
 - **How does the ActiveRoute HTML renderer work (`activeRoute` -> html)?** → [widgets/active-route.md](widgets/active-route.md)
 - **What is the ActiveRoute CSS/state visual contract?** → [widgets/active-route.md](widgets/active-route.md#visual-contract)
 - **What are ActiveRoute layout and fit constants?** → [widgets/active-route.md](widgets/active-route.md#layout-constants-owner-activeroutelayout)
+- **How does the map zoom HTML renderer work (`map/zoom` -> html)?** → [widgets/map-zoom.md](widgets/map-zoom.md)
+- **What is the map zoom click/hotspot ownership contract?** → [widgets/map-zoom.md](widgets/map-zoom.md#layering-and-click-ownership)
 - **How does the CenterDisplay widget work (center position + waypoint/boat/measure rows)?** → [widgets/center-display.md](widgets/center-display.md)
 - **How do stacked nav positions render (boat/wp)?** → [widgets/position-coordinates.md](widgets/position-coordinates.md)
 - **Which kinds use PositionCoordinateWidget?** → [widgets/position-coordinates.md](widgets/position-coordinates.md#key-details)

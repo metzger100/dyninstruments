@@ -14,7 +14,6 @@
   const opt = shared.opt;
   const NAV_KIND = shared.kindMaps.NAV_KIND;
   const commonThreeElementsEditables = shared.commonThreeElementsEditables;
-  const CENTER_DISPLAY_CONDITION = { kind: "centerDisplay" };
   const NAV_TEXT_KIND_CONDITION = [
     { kind: "eta" },
     { kind: "rteEta" },
@@ -29,7 +28,7 @@
     widget: "ClusterWidget",
     def: {
       name: "dyni_Nav_Instruments",
-      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Active route / Positions / Center display / XTE display)",
+      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Active route / Positions / XTE display)",
       caption: "", unit: "", default: "---",
       cluster: "nav",
       storeKeys: {
@@ -49,14 +48,6 @@
         activeRouteApproaching: "nav.route.isApproaching",
         rteDistance: "nav.route.remain",
         vmg: "nav.wp.vmg",
-        centerCourse: "nav.center.course",
-        centerDistance: "nav.center.distance",
-        centerMarkerCourse: "nav.center.markerCourse",
-        centerMarkerDistance: "nav.center.markerDistance",
-        centerPosition: "map.centerPosition",
-        activeMeasure: "map.activeMeasure",
-        measureRhumbLine: "properties.measureRhumbLine",
-        lockPosition: "map.lockPosition",
         positionBoat: "nav.gps.position",
         positionWp: "nav.wp.position"
       },
@@ -72,23 +63,10 @@
             opt("Active route", "activeRoute"),
             opt("Boat position (GPS)", "positionBoat"),
             opt("Active waypoint position", "positionWp"),
-            opt("Center display", "centerDisplay"),
             opt("XTE highway display", "xteDisplay")
           ],
           default: "eta",
           name: "Instrument"
-        },
-        centerDisplayRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
-          internal: true,
-          name: "CenterDisplay: 3-Rows Threshold",
-          condition: CENTER_DISPLAY_CONDITION
-        },
-        centerDisplayRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.4,
-          internal: true,
-          name: "CenterDisplay: 1-Row Threshold",
-          condition: CENTER_DISPLAY_CONDITION
         },
         leadingZero: {
           type: "BOOLEAN",
@@ -153,9 +131,7 @@
         const needsWp = (kind === "dst" || kind === "positionWp" || kind === "xteDisplay");
         if (needsWp && values && values.wpServer === false) out.disconnect = true;
         else if (Object.prototype.hasOwnProperty.call(out, "disconnect")) delete out.disconnect;
-        if (kind === "centerDisplay") {
-          out.visible = !(values && values.lockPosition) || !!(values && values.editing);
-        } else if (Object.prototype.hasOwnProperty.call(out, "visible")) {
+        if (Object.prototype.hasOwnProperty.call(out, "visible")) {
           delete out.visible;
         }
         return out;

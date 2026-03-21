@@ -1,7 +1,7 @@
 /**
  * Module: ClusterRendererRouter - Strict kind/surface router with shell rendering and surface-controller helpers
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ClusterKindCatalog, CanvasDomSurfaceAdapter, HtmlSurfaceController, RendererPropsWidget, ActiveRouteTextHtmlWidget
+ * Depends: ClusterKindCatalog, CanvasDomSurfaceAdapter, HtmlSurfaceController, RendererPropsWidget, ActiveRouteTextHtmlWidget, MapZoomTextHtmlWidget
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -36,6 +36,7 @@
       ThreeValueTextWidget: threeSpec,
       PositionCoordinateWidget: Helpers.getModule("PositionCoordinateWidget").create(def, Helpers),
       ActiveRouteTextHtmlWidget: Helpers.getModule("ActiveRouteTextHtmlWidget").create(def, Helpers),
+      MapZoomTextHtmlWidget: Helpers.getModule("MapZoomTextHtmlWidget").create(def, Helpers),
       CenterDisplayTextWidget: Helpers.getModule("CenterDisplayTextWidget").create(def, Helpers),
       WindRadialWidget: rendererPropsWidget.create(def, Helpers, "WindRadialWidget"),
       CompassRadialWidget: rendererPropsWidget.create(def, Helpers, "CompassRadialWidget"),
