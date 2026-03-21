@@ -3,8 +3,21 @@ const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("MapZoomTextHtmlWidget", function () {
+  const MODULE_PATH_BY_ID = {
+    MapZoomHtmlFit: "shared/widget-kits/nav/MapZoomHtmlFit.js",
+    TextLayoutEngine: "shared/widget-kits/text/TextLayoutEngine.js",
+    RadialValueMath: "shared/widget-kits/radial/RadialValueMath.js",
+    RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
+    TextLayoutPrimitives: "shared/widget-kits/text/TextLayoutPrimitives.js",
+    TextLayoutComposite: "shared/widget-kits/text/TextLayoutComposite.js",
+    ResponsiveScaleProfile: "shared/widget-kits/layout/ResponsiveScaleProfile.js",
+    RadialTextLayout: "shared/widget-kits/radial/RadialTextLayout.js",
+    RadialTextFitting: "shared/widget-kits/radial/RadialTextFitting.js"
+  };
+
   function createRenderer(options) {
     const opts = options || {};
+    const moduleCache = Object.create(null);
     const Helpers = {
       applyFormatter: opts.applyFormatter || function (value, formatterOptions) {
         const cfg = formatterOptions || {};
@@ -20,10 +33,14 @@ describe("MapZoomTextHtmlWidget", function () {
         return "sans-serif";
       },
       getModule: opts.getModule || function (id) {
-        if (id === "MapZoomHtmlFit") {
-          return loadFresh("shared/widget-kits/nav/MapZoomHtmlFit.js");
+        const relPath = MODULE_PATH_BY_ID[id];
+        if (!relPath) {
+          throw new Error("unexpected module lookup: " + id);
         }
-        throw new Error("unexpected module lookup: " + id);
+        if (!moduleCache[id]) {
+          moduleCache[id] = loadFresh(relPath);
+        }
+        return moduleCache[id];
       }
     };
     return loadFresh("widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js").create({}, Helpers);
@@ -67,13 +84,16 @@ describe("MapZoomTextHtmlWidget", function () {
   }
 
   function pickPx(html, className) {
-    const marker = 'class="' + className + '"';
-    const index = html.indexOf(marker);
-    if (index < 0) {
+    const classPattern = className.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const tagMatch = html.match(new RegExp("<[^>]*class=\"" + classPattern + "\"[^>]*>"));
+    if (!tagMatch) {
       return 0;
     }
-    const snippet = html.slice(index, index + 220);
-    const match = snippet.match(/font-size:(\d+)px;/);
+    const styleMatch = tagMatch[0].match(/style="([^"]*)"/);
+    if (!styleMatch) {
+      return 0;
+    }
+    const match = styleMatch[1].match(/font-size:(\d+)px;/);
     return match ? Number(match[1]) : 0;
   }
 
@@ -307,7 +327,8 @@ describe("MapZoomTextHtmlWidget", function () {
       makeProps({
         unit: "x",
         caption: "ZOOM CAPTION VERY LONG",
-        zoom: 123456.789
+        zoom: 123456.789,
+        requiredZoom: 123456.789
       })
     );
     const smallHtml = renderer.renderHtml.call(
@@ -315,7 +336,8 @@ describe("MapZoomTextHtmlWidget", function () {
       makeProps({
         unit: "x",
         caption: "ZOOM CAPTION VERY LONG",
-        zoom: 123456.789
+        zoom: 123456.789,
+        requiredZoom: 123456.789
       })
     );
 
@@ -333,40 +355,89 @@ describe("MapZoomTextHtmlWidget", function () {
     expect(smallCaptionPx).not.toBe(smallValuePx);
   });
 
-  it("caps caption and unit fit against captionUnitScale while keeping adaptive downscaling", function () {
+  it("keeps long flat-mode captions readable in wide shells", function () {
     const renderer = createRenderer();
-    const shell = createHostContext({ shellSize: { width: 320, height: 120 } });
+    const html = renderer.renderHtml.call(
+      createHostContext({ shellSize: { width: 940, height: 170 } }),
+      makeProps({
+        caption: "Map Zoom Level",
+        unit: "kn",
+        zoom: 13,
+        requiredZoom: 13
+      })
+    );
+    const captionPx = pickPx(html, "dyni-map-zoom-caption");
+    const valuePx = pickPx(html, "dyni-map-zoom-value");
 
-    const defaultScaleHtml = renderer.renderHtml.call(shell, makeProps({
-      unit: "units",
-      caption: "ZOOM CAPTION VERY LONG",
-      zoom: 123456.789
+    expect(html).toContain("dyni-map-zoom-mode-flat");
+    expect(captionPx).toBeGreaterThan(0);
+    expect(valuePx).toBeGreaterThan(0);
+    expect(captionPx / valuePx).toBeGreaterThan(0.74);
+  });
+
+  it("uses scale-coupled caption and unit sizing in flat mode", function () {
+    const renderer = createRenderer();
+    const html = renderer.renderHtml.call(
+      createHostContext({ shellSize: { width: 940, height: 170 } }),
+      makeProps({
+        caption: "Map Zoom Level",
+        unit: "kn",
+        zoom: 13,
+        requiredZoom: 13,
+        captionUnitScale: 0.8
+      })
+    );
+    const captionPx = pickPx(html, "dyni-map-zoom-caption");
+    const valuePx = pickPx(html, "dyni-map-zoom-value");
+    const unitPx = pickPx(html, "dyni-map-zoom-unit");
+
+    expect(captionPx).toBeGreaterThan(0);
+    expect(valuePx).toBeGreaterThan(0);
+    expect(unitPx).toBeGreaterThan(0);
+    expect(Math.abs((captionPx / valuePx) - 0.8)).toBeLessThanOrEqual(0.02);
+    expect(Math.abs((unitPx / valuePx) - 0.8)).toBeLessThanOrEqual(0.02);
+  });
+
+  it("increases secondary text and downscales value as captionUnitScale rises", function () {
+    const renderer = createRenderer();
+    const shell = createHostContext({ shellSize: { width: 940, height: 170 } });
+
+    const lowScaleHtml = renderer.renderHtml.call(shell, makeProps({
+      caption: "Map Zoom Level",
+      unit: "kn",
+      zoom: 13,
+      requiredZoom: 13,
+      captionUnitScale: 0.6
     }));
-    const customScaleHtml = renderer.renderHtml.call(shell, makeProps({
-      unit: "units",
-      caption: "ZOOM CAPTION VERY LONG",
-      zoom: 123456.789,
+    const highScaleHtml = renderer.renderHtml.call(shell, makeProps({
+      caption: "Map Zoom Level",
+      unit: "kn",
+      zoom: 13,
+      requiredZoom: 13,
       captionUnitScale: 1.1
     }));
 
-    const valuePxDefault = pickPx(defaultScaleHtml, "dyni-map-zoom-value");
-    const captionPxDefault = pickPx(defaultScaleHtml, "dyni-map-zoom-caption");
-    const unitPxDefault = pickPx(defaultScaleHtml, "dyni-map-zoom-unit");
-    const valuePxCustom = pickPx(customScaleHtml, "dyni-map-zoom-value");
-    const captionPxCustom = pickPx(customScaleHtml, "dyni-map-zoom-caption");
-    const unitPxCustom = pickPx(customScaleHtml, "dyni-map-zoom-unit");
+    const valuePxLow = pickPx(lowScaleHtml, "dyni-map-zoom-value");
+    const captionPxLow = pickPx(lowScaleHtml, "dyni-map-zoom-caption");
+    const unitPxLow = pickPx(lowScaleHtml, "dyni-map-zoom-unit");
+    const valuePxHigh = pickPx(highScaleHtml, "dyni-map-zoom-value");
+    const captionPxHigh = pickPx(highScaleHtml, "dyni-map-zoom-caption");
+    const unitPxHigh = pickPx(highScaleHtml, "dyni-map-zoom-unit");
 
-    expect(valuePxDefault).toBeGreaterThan(0);
-    expect(captionPxDefault).toBeGreaterThan(0);
-    expect(unitPxDefault).toBeGreaterThan(0);
-    expect(valuePxCustom).toBeGreaterThan(0);
-    expect(captionPxCustom).toBeGreaterThan(0);
-    expect(unitPxCustom).toBeGreaterThan(0);
+    expect(valuePxLow).toBeGreaterThan(0);
+    expect(captionPxLow).toBeGreaterThan(0);
+    expect(unitPxLow).toBeGreaterThan(0);
+    expect(valuePxHigh).toBeGreaterThan(0);
+    expect(captionPxHigh).toBeGreaterThan(0);
+    expect(unitPxHigh).toBeGreaterThan(0);
 
-    expect(captionPxDefault).toBeLessThanOrEqual(Math.floor(valuePxDefault * 0.8));
-    expect(unitPxDefault).toBeLessThanOrEqual(Math.floor(valuePxDefault * 0.8));
-    expect(captionPxCustom).toBeLessThanOrEqual(Math.floor(valuePxCustom * 1.1));
-    expect(unitPxCustom).toBeLessThanOrEqual(Math.floor(valuePxCustom * 1.1));
+    expect(captionPxHigh).toBeGreaterThan(captionPxLow);
+    expect(unitPxHigh).toBeGreaterThan(unitPxLow);
+    expect(valuePxHigh).toBeLessThan(valuePxLow);
+    expect(Math.abs((captionPxLow / valuePxLow) - 0.6)).toBeLessThanOrEqual(0.02);
+    expect(Math.abs((unitPxLow / valuePxLow) - 0.6)).toBeLessThanOrEqual(0.02);
+    expect(Math.abs((captionPxHigh / valuePxHigh) - 1.1)).toBeLessThanOrEqual(0.03);
+    expect(Math.abs((unitPxHigh / valuePxHigh) - 1.1)).toBeLessThanOrEqual(0.03);
   });
 
   it("keeps navpage sizing guard and caption full-foreground css contract", function () {
