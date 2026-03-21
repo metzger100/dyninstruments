@@ -151,7 +151,11 @@
     );
   }
 
-  function openActiveRoute(hostContext) {
+  function openActiveRoute(hostContext, props) {
+    const p = props && typeof props === "object" ? props : null;
+    if (p && p.editing === true) {
+      return false;
+    }
     if (!canDispatchOpenRoute(hostContext)) {
       return false;
     }
@@ -199,10 +203,15 @@
       )
       : "";
     const mode = resolveMode(p, hostContext);
+    const isEditing = p.editing === true;
+    const dispatchOpenRoute = canDispatchOpenRoute(hostContext);
+    const canOpenRoute = !isEditing && dispatchOpenRoute;
+    const captureClicks = canOpenRoute;
 
     return {
       routeNameText: routeNameText,
       mode: mode,
+      isEditing: isEditing,
       isApproaching: isApproaching,
       disconnect: disconnect,
       remainCaption: remainCaption,
@@ -214,7 +223,8 @@
       remainText: remainText,
       etaText: etaText,
       nextCourseText: nextCourseText,
-      canOpenRoute: canDispatchOpenRoute(hostContext)
+      canOpenRoute: canOpenRoute,
+      captureClicks: captureClicks
     };
   }
 
@@ -224,7 +234,7 @@
     const namedHandlers = function (props, hostContext) {
       return {
         activeRouteOpen: function activeRouteOpenHandler() {
-          return openActiveRoute(hostContext);
+          return openActiveRoute(hostContext, props);
         }
       };
     };
@@ -283,10 +293,11 @@
       const openHotspotHtml = model.canOpenRoute
         ? ('<div class="dyni-active-route-open-hotspot" onclick="' + OPEN_HANDLER_NAME + '"></div>')
         : "";
+      const wrapperOnClickAttr = model.captureClicks ? ' onclick="catchAll"' : "";
 
       return ""
         + '<div class="' + wrapperClasses.join(" ") + '"'
-        + ' onclick="catchAll"'
+        + wrapperOnClickAttr
         + ">"
         + openHotspotHtml
         + '<div class="dyni-active-route-route-name"' + toStyleAttr(routeNameStyle) + ">"

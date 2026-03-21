@@ -131,8 +131,9 @@ When `disconnect` is true:
 - Output is string-based `renderHtml(props)` with explicit `onclick` handler names for AvNav `eventHandler` wiring.
 - Markup includes route-name block plus metric tiles for `RTE`, `ETA`, and conditional `NEXT` while approaching.
 - Disconnect state is exposed via wrapper class/marker for html-surface lifecycle wiring.
-- Wrapper includes `onclick="catchAll"` for empty-space click consumption.
-- Dispatch-capable state renders a full-widget transparent hotspot with named handler wiring (`activeRouteOpen`) so any click inside the widget opens route editor.
+- In non-editing dispatch mode, wrapper includes `onclick="catchAll"` for empty-space click consumption.
+- In non-editing dispatch mode, renderer adds a full-widget transparent hotspot with named handler wiring (`activeRouteOpen`) so any click inside the widget opens route editor.
+- In editing mode or passive/unsupported capability mode, renderer does not capture clicks, allowing host click handling to continue.
 - Clickability indicator is cursor-only (`pointer`) in dispatch mode; no additional badge/underline marker is rendered.
 - `resizeSignature(props)` drives layout-relevant `triggerResize()` calls through `HtmlSurfaceController`.
 
