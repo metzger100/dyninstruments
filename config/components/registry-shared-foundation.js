@@ -94,10 +94,16 @@
       globalKey: "DyniRadialFrameRenderer",
       deps: ["RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives"]
     },
+    RadialTextFitting: {
+      js: BASE + "shared/widget-kits/radial/RadialTextFitting.js",
+      css: undefined,
+      globalKey: "DyniRadialTextFitting"
+    },
     RadialTextLayout: {
       js: BASE + "shared/widget-kits/radial/RadialTextLayout.js",
       css: undefined,
-      globalKey: "DyniRadialTextLayout"
+      globalKey: "DyniRadialTextLayout",
+      deps: ["RadialTextFitting"]
     },
     RadialTickMath: {
       js: BASE + "shared/widget-kits/radial/RadialTickMath.js",

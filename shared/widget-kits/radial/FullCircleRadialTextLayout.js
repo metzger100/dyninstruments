@@ -126,6 +126,32 @@
     };
   }
 
+  function scoreDisplaySizes(display, sizes) {
+    const valuePx = Math.max(0, Number(sizes && sizes.vPx) || 0);
+    const captionPx = display && display.caption
+      ? Math.max(0, Number(sizes && sizes.cPx) || 0)
+      : valuePx;
+    const unitPx = display && display.unit
+      ? Math.max(0, Number(sizes && sizes.uPx) || 0)
+      : valuePx;
+    const minLegibility = Math.min(captionPx, valuePx, unitPx);
+    const avgLegibility = (captionPx + valuePx + unitPx) / 3;
+    return { minLegibility: minLegibility, avgLegibility: avgLegibility };
+  }
+
+  function scoreSingleCandidate(display, sizes, boxWidth, blockHeight) {
+    const score = scoreDisplaySizes(display, sizes);
+    return (score.minLegibility * 1000000) + (score.avgLegibility * 10000) + (boxWidth * 10) + blockHeight;
+  }
+
+  function scoreDualCandidate(leftDisplay, rightDisplay, leftSizes, rightSizes, halfWidth, blockHeight) {
+    const leftScore = scoreDisplaySizes(leftDisplay, leftSizes);
+    const rightScore = scoreDisplaySizes(rightDisplay, rightSizes);
+    const minLegibility = Math.min(leftScore.minLegibility, rightScore.minLegibility);
+    const avgLegibility = (leftScore.avgLegibility + rightScore.avgLegibility) * 0.5;
+    return (minLegibility * 1000000) + (avgLegibility * 10000) + (halfWidth * 10) + blockHeight;
+  }
+
   function drawBlock(state, x, y, width, height, display, align, sizes) {
     state.text.drawThreeRowsBlock(
       state.ctx,
@@ -298,16 +324,19 @@
       const halfWidth = Math.floor(Math.sqrt(Math.max(0, effectiveRadius * effectiveRadius - halfHeight * halfHeight)));
       const boxWidth = Math.max(1, halfWidth * 2);
       const valueHeight = Math.max(1, Math.floor(blockHeight / (1 + 2 * secScale)));
-      const valuePx = state.text.fitTextPx(state.ctx, display.value, boxWidth, valueHeight, state.family, state.valueWeight);
-      const score = (valuePx * 10000) + (boxWidth * 10) + blockHeight;
+      if (valueHeight <= 0) {
+        continue;
+      }
+      const sizes = measureBlockSizes(state, display, boxWidth, blockHeight);
+      const score = scoreSingleCandidate(display, sizes, boxWidth, blockHeight);
       if (!best || score > best.score) {
-        best = { blockHeight: blockHeight, boxWidth: boxWidth, score: score };
+        best = { blockHeight: blockHeight, boxWidth: boxWidth, score: score, sizes: sizes };
       }
     }
 
     const blockHeight = best ? best.blockHeight : Math.max(1, Math.floor(effectiveRadius * 0.9));
     const boxWidth = best ? best.boxWidth : Math.max(1, Math.floor(effectiveRadius * 1.6));
-    const sizes = measureBlockSizes(state, display, boxWidth, blockHeight);
+    const sizes = best && best.sizes ? best.sizes : measureBlockSizes(state, display, boxWidth, blockHeight);
     drawBlock(state, state.geom.cx - Math.floor(boxWidth / 2), state.geom.cy - Math.floor(blockHeight / 2), boxWidth, blockHeight, display, "center", sizes);
   }
 
@@ -335,20 +364,21 @@
         continue;
       }
       const valueHeight = Math.max(1, Math.floor(blockHeight / (1 + 2 * dualScale)));
-      const valuePx = Math.min(
-        state.text.fitTextPx(state.ctx, left.value, halfWidth, valueHeight, state.family, state.valueWeight),
-        state.text.fitTextPx(state.ctx, right.value, halfWidth, valueHeight, state.family, state.valueWeight)
-      );
-      const score = (valuePx * 10000) + (halfWidth * 10) + blockHeight;
+      if (valueHeight <= 0) {
+        continue;
+      }
+      const leftSizes = measureBlockSizes(state, left, halfWidth, blockHeight);
+      const rightSizes = measureBlockSizes(state, right, halfWidth, blockHeight);
+      const score = scoreDualCandidate(left, right, leftSizes, rightSizes, halfWidth, blockHeight);
       if (!best || score > best.score) {
-        best = { blockHeight: blockHeight, halfWidth: halfWidth, score: score };
+        best = { blockHeight: blockHeight, halfWidth: halfWidth, score: score, leftSizes: leftSizes, rightSizes: rightSizes };
       }
     }
 
     const blockHeight = best ? best.blockHeight : Math.max(1, Math.floor(safeRadius * 0.9));
     const halfWidth = best ? best.halfWidth : Math.max(1, Math.floor(safeRadius * 0.6));
-    const leftSizes = measureBlockSizes(state, left, halfWidth, blockHeight);
-    const rightSizes = measureBlockSizes(state, right, halfWidth, blockHeight);
+    const leftSizes = best && best.leftSizes ? best.leftSizes : measureBlockSizes(state, left, halfWidth, blockHeight);
+    const rightSizes = best && best.rightSizes ? best.rightSizes : measureBlockSizes(state, right, halfWidth, blockHeight);
     const sizes = mergeBlockSizes(leftSizes, rightSizes);
     const totalWidth = (halfWidth * 2) + columnGap;
     const xLeft = state.geom.cx - Math.floor(totalWidth / 2);

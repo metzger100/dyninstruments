@@ -31,6 +31,18 @@ describe("SemicircleRadialTextLayout", function () {
     });
   }
 
+  function createRadialTextApi() {
+    const fitting = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
+    return loadFresh("shared/widget-kits/radial/RadialTextLayout.js").create({}, {
+      getModule(id) {
+        if (id === "RadialTextFitting") {
+          return fitting;
+        }
+        throw new Error("unexpected module: " + id);
+      }
+    });
+  }
+
   function createHarness(mode, width, height) {
     const layoutApi = createLayoutApi();
     const insets = layoutApi.computeInsets(width, height);
@@ -88,6 +100,73 @@ describe("SemicircleRadialTextLayout", function () {
         valueWeight: themeDefaults.font.weight,
         labelWeight: themeDefaults.font.labelWeight,
         text: textApi,
+        layout: layout,
+        geom: layout.geom,
+        responsive: layout.responsive,
+        textFillScale: layout.textFillScale
+      }
+    };
+  }
+
+  function createRealTextHarness(mode, width, height) {
+    const layoutApi = createLayoutApi();
+    const insets = layoutApi.computeInsets(width, height);
+    const layout = layoutApi.computeLayout({
+      W: width,
+      H: height,
+      mode: mode,
+      theme: themeDefaults,
+      insets: insets,
+      responsive: insets.responsive
+    });
+    const realText = createRadialTextApi();
+    const captures = {
+      valueUnit: [],
+      threeRows: []
+    };
+    const ctx = createMockContext2D({ charWidth: 1 });
+    ctx.measureText = function (text) {
+      const match = String(ctx.font || "").match(/([0-9]+(?:\.[0-9]+)?)px/);
+      const px = match ? Number(match[1]) : 10;
+      return { width: String(text || "").length * px * 0.62 };
+    };
+    const textProxy = {
+      setFont: realText.setFont,
+      fitTextPx: realText.fitTextPx,
+      fitSingleTextPx: realText.fitSingleTextPx,
+      measureValueUnitFit: realText.measureValueUnitFit,
+      fitInlineCapValUnit: realText.fitInlineCapValUnit,
+      drawCaptionMax: realText.drawCaptionMax,
+      drawInlineCapValUnit: realText.drawInlineCapValUnit,
+      drawDisconnectOverlay: realText.drawDisconnectOverlay,
+      drawValueUnitWithFit(ctxArg, family, x, y, w, h, valueText, unitText, fit, align, valueWeight, labelWeight) {
+        const start = ctxArg.calls.length;
+        realText.drawValueUnitWithFit(ctxArg, family, x, y, w, h, valueText, unitText, fit, align, valueWeight, labelWeight);
+        const scaled = ctxArg.calls
+          .slice(start)
+          .some((entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
+        captures.valueUnit.push({ w, valueText, unitText, fit, scaled });
+      },
+      drawThreeRowsBlock(ctxArg, family, x, y, w, h, caption, valueText, unitText, secScale, align, sizes, valueWeight, labelWeight) {
+        const start = ctxArg.calls.length;
+        realText.drawThreeRowsBlock(ctxArg, family, x, y, w, h, caption, valueText, unitText, secScale, align, sizes, valueWeight, labelWeight);
+        const scaled = ctxArg.calls
+          .slice(start)
+          .some((entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
+        captures.threeRows.push({ w, caption, valueText, unitText, sizes, scaled });
+      }
+    };
+    return {
+      captures: captures,
+      realText: realText,
+      state: {
+        ctx: ctx,
+        W: width,
+        H: height,
+        family: "sans-serif",
+        valueWeight: themeDefaults.font.weight,
+        labelWeight: themeDefaults.font.labelWeight,
+        text: textProxy,
         layout: layout,
         geom: layout.geom,
         responsive: layout.responsive,
@@ -206,5 +285,54 @@ describe("SemicircleRadialTextLayout", function () {
 
       expect(item.harness.calls[item.drawKey][1]).toEqual(item.harness.calls[item.drawKey][0]);
     });
+  });
+
+  it("applies flat-mode draw-time clamp for long caption/value/unit strings", function () {
+    const textLayout = loadFresh("shared/widget-kits/radial/SemicircleRadialTextLayout.js").create();
+    const harness = createRealTextHarness("flat", 260, 90);
+    const cache = textLayout.createFitCache();
+
+    textLayout.drawModeText(harness.state, {
+      caption: "True Wind Speed - Radial",
+      valueText: "123.45",
+      unit: "Degree Celsius",
+      secScale: 0.8
+    }, cache);
+
+    expect(harness.captures.valueUnit.length).toBe(1);
+    const row = harness.captures.valueUnit[0];
+    harness.realText.setFont(harness.state.ctx, row.fit.vPx, harness.state.valueWeight, harness.state.family);
+    const valueWidth = harness.state.ctx.measureText(String(row.valueText)).width;
+    let totalWidth = valueWidth;
+    if (row.unitText) {
+      harness.realText.setFont(harness.state.ctx, row.fit.uPx, harness.state.labelWeight, harness.state.family);
+      totalWidth += row.fit.gap + harness.state.ctx.measureText(String(row.unitText)).width;
+    }
+    expect(totalWidth <= row.w + 0.01 || row.scaled).toBe(true);
+  });
+
+  it("applies normal-mode draw-time clamp for long caption/unit strings", function () {
+    const textLayout = loadFresh("shared/widget-kits/radial/SemicircleRadialTextLayout.js").create();
+    const harness = createRealTextHarness("normal", 220, 120);
+    const cache = textLayout.createFitCache();
+
+    textLayout.drawModeText(harness.state, {
+      caption: "Water Temperature - Radial",
+      valueText: "17.3",
+      unit: "Degree Celsius",
+      secScale: 0.8
+    }, cache);
+
+    expect(harness.captures.threeRows.length).toBe(1);
+    const block = harness.captures.threeRows[0];
+    harness.realText.setFont(harness.state.ctx, block.sizes.cPx, harness.state.labelWeight, harness.state.family);
+    const captionWidth = harness.state.ctx.measureText(String(block.caption)).width;
+    harness.realText.setFont(harness.state.ctx, block.sizes.vPx, harness.state.valueWeight, harness.state.family);
+    const valueWidth = harness.state.ctx.measureText(String(block.valueText)).width;
+    harness.realText.setFont(harness.state.ctx, block.sizes.uPx, harness.state.labelWeight, harness.state.family);
+    const unitWidth = harness.state.ctx.measureText(String(block.unitText)).width;
+
+    const overflows = captionWidth > block.w + 0.01 || valueWidth > block.w + 0.01 || unitWidth > block.w + 0.01;
+    expect(overflows ? block.scaled : true).toBe(true);
   });
 });

@@ -1,6 +1,18 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("FullCircleRadialTextLayout", function () {
+  function createRadialTextApi() {
+    const fitting = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
+    return loadFresh("shared/widget-kits/radial/RadialTextLayout.js").create({}, {
+      getModule(id) {
+        if (id === "RadialTextFitting") {
+          return fitting;
+        }
+        throw new Error("unexpected module: " + id);
+      }
+    });
+  }
+
   function createHarness(overrides) {
     const cfg = overrides || {};
     const calls = {
@@ -89,6 +101,62 @@ describe("FullCircleRadialTextLayout", function () {
     };
   }
 
+  function createRealTextHarness(overrides) {
+    const text = createRadialTextApi();
+    const captures = {
+      valueUnit: [],
+      threeRows: []
+    };
+    const ctx = {
+      calls: [],
+      textAlign: "left",
+      textBaseline: "alphabetic",
+      font: "10px sans-serif",
+      save() { this.calls.push({ name: "save", args: [] }); },
+      restore() { this.calls.push({ name: "restore", args: [] }); },
+      translate() { this.calls.push({ name: "translate", args: Array.from(arguments) }); },
+      scale() { this.calls.push({ name: "scale", args: Array.from(arguments) }); },
+      fillText() { this.calls.push({ name: "fillText", args: Array.from(arguments) }); },
+      measureText(label) {
+        this.calls.push({ name: "measureText", args: Array.from(arguments) });
+        const match = String(this.font || "").match(/([0-9]+(?:\.[0-9]+)?)px/);
+        const px = match ? Number(match[1]) : 10;
+        return { width: String(label || "").length * px * 0.62 };
+      }
+    };
+    const harness = createHarness(overrides);
+    harness.state.ctx = ctx;
+    harness.state.text = {
+      setFont: text.setFont,
+      fitTextPx: text.fitTextPx,
+      fitSingleTextPx: text.fitSingleTextPx,
+      measureValueUnitFit: text.measureValueUnitFit,
+      fitInlineCapValUnit: text.fitInlineCapValUnit,
+      drawCaptionMax: text.drawCaptionMax,
+      drawInlineCapValUnit: text.drawInlineCapValUnit,
+      drawDisconnectOverlay: text.drawDisconnectOverlay,
+      drawValueUnitWithFit(ctxArg, family, x, y, w, h, valueText, unitText, fit, align, valueWeight, labelWeight) {
+        const start = ctxArg.calls.length;
+        text.drawValueUnitWithFit(ctxArg, family, x, y, w, h, valueText, unitText, fit, align, valueWeight, labelWeight);
+        const scaled = ctxArg.calls
+          .slice(start)
+          .some((entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
+        captures.valueUnit.push({ w, valueText, unitText, fit, scaled });
+      },
+      drawThreeRowsBlock(ctxArg, family, x, y, w, h, caption, valueText, unitText, secScale, align, sizes, valueWeight, labelWeight) {
+        const start = ctxArg.calls.length;
+        text.drawThreeRowsBlock(ctxArg, family, x, y, w, h, caption, valueText, unitText, secScale, align, sizes, valueWeight, labelWeight);
+        const scaled = ctxArg.calls
+          .slice(start)
+          .some((entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
+        captures.threeRows.push({ w, caption, valueText, unitText, sizes, scaled });
+      }
+    };
+    harness.captures = captures;
+    harness.realText = text;
+    return harness;
+  }
+
   it("packs single normal text inside the layout-owned safe radius and centers the block", function () {
     const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, {});
     const harness = createHarness();
@@ -165,5 +233,52 @@ describe("FullCircleRadialTextLayout", function () {
     expect(overrideRight.x - (overrideLeft.x + overrideLeft.w)).toBeGreaterThan(baseRight.x - (baseLeft.x + baseLeft.w));
     expect(overrideLeft.w).toBeLessThan(baseLeft.w);
     expect(overrideLeft.h).toBeGreaterThan(baseLeft.h);
+  });
+
+  it("applies flat-mode clamp for long dual labels so side-slot rows do not overflow", function () {
+    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, {});
+    const harness = createRealTextHarness();
+    const display = {
+      left: { caption: "True Wind Angle - Radial", value: "-101", unit: "Degree Celsius", secScale: 0.8 },
+      right: { caption: "True Wind Speed - Radial", value: "9.0", unit: "Knots per Hour", secScale: 0.8 }
+    };
+
+    layout.drawDualModeText(harness.state, "flat", display.left, display.right);
+
+    expect(harness.captures.valueUnit.length).toBe(2);
+    harness.captures.valueUnit.forEach(function (row) {
+      harness.realText.setFont(harness.state.ctx, row.fit.vPx, harness.state.valueWeight, harness.state.family);
+      const valueWidth = harness.state.ctx.measureText(String(row.valueText)).width;
+      let totalWidth = valueWidth;
+      if (row.unitText) {
+        harness.realText.setFont(harness.state.ctx, row.fit.uPx, harness.state.labelWeight, harness.state.family);
+        totalWidth += row.fit.gap + harness.state.ctx.measureText(String(row.unitText)).width;
+      }
+      expect(totalWidth <= row.w + 0.01 || row.scaled).toBe(true);
+    });
+  });
+
+  it("applies normal-mode clamp for long dual labels while keeping mirrored placement", function () {
+    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, {});
+    const harness = createRealTextHarness();
+    const display = {
+      left: { caption: "True Wind Angle - Radial", value: "-101", unit: "Degree Celsius", secScale: 0.8 },
+      right: { caption: "True Wind Speed - Radial", value: "9.0", unit: "Knots per Hour", secScale: 0.8 }
+    };
+
+    layout.drawDualModeText(harness.state, "normal", display.left, display.right);
+
+    expect(harness.captures.threeRows.length).toBe(2);
+    harness.captures.threeRows.forEach(function (block) {
+      harness.realText.setFont(harness.state.ctx, block.sizes.cPx, harness.state.labelWeight, harness.state.family);
+      const captionWidth = harness.state.ctx.measureText(String(block.caption)).width;
+      harness.realText.setFont(harness.state.ctx, block.sizes.vPx, harness.state.valueWeight, harness.state.family);
+      const valueWidth = harness.state.ctx.measureText(String(block.valueText)).width;
+      harness.realText.setFont(harness.state.ctx, block.sizes.uPx, harness.state.labelWeight, harness.state.family);
+      const unitWidth = harness.state.ctx.measureText(String(block.unitText)).width;
+
+      const overflows = captionWidth > block.w + 0.01 || valueWidth > block.w + 0.01 || unitWidth > block.w + 0.01;
+      expect(overflows ? block.scaled : true).toBe(true);
+    });
   });
 });

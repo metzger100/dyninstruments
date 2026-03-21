@@ -12,6 +12,7 @@ describe("CenterDisplayTextWidget", function () {
     const modules = {
       RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js"),
       RadialValueMath: loadFresh("shared/widget-kits/radial/RadialValueMath.js"),
+      RadialTextFitting: loadFresh("shared/widget-kits/radial/RadialTextFitting.js"),
       RadialTextLayout: loadFresh("shared/widget-kits/radial/RadialTextLayout.js"),
       TextLayoutEngine: loadFresh("shared/widget-kits/text/TextLayoutEngine.js"),
       TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),

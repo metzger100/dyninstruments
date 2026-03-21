@@ -33,6 +33,7 @@ function createMockContext2D(options) {
     setTransform() { rec("setTransform", arguments); },
     setLineDash() { rec("setLineDash", arguments); },
     translate() { rec("translate", arguments); },
+    scale() { rec("scale", arguments); },
     rotate() { rec("rotate", arguments); },
     drawImage() { rec("drawImage", arguments); },
     fillText() { rec("fillText", arguments); },

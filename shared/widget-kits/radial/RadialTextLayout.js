@@ -1,7 +1,7 @@
 /**
  * Module: RadialTextLayout - Shared text fitting and overlay helpers for gauge widgets
  * Documentation: documentation/radial/gauge-shared-api.md
- * Depends: none
+ * Depends: RadialTextFitting
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,216 +10,144 @@
 }(this, function () {
   "use strict";
 
-  function create() {
-    function setFont(ctx, px, weight, family) {
-      const size = Math.max(1, Math.floor(Number(px) || 0));
-      const fontWeight = Math.floor(Number(weight));
-      ctx.font = fontWeight + " " + size + "px " + (family || "sans-serif");
+  function lineAnchor(x, w, align) {
+    if (align === "right") {
+      return x + w;
     }
-
-    function fitTextPx(ctx, text, maxW, maxH, family, weight) {
-      const h = Math.max(1, Math.floor(Number(maxH) || 0));
-      const wLimit = Math.max(1, Number(maxW) || 0);
-      if (!text) {
-        return Math.max(6, h);
-      }
-      let px = Math.max(6, h);
-      setFont(ctx, px, weight, family);
-      const w = ctx.measureText(String(text)).width;
-      if (w <= wLimit + 0.5) {
-        return px;
-      }
-      const scale = Math.max(0.1, wLimit / Math.max(1, w));
-      px = Math.floor(px * scale);
-      return Math.max(6, Math.min(px, h));
+    if (align === "center") {
+      return x + (w * 0.5);
     }
+    return x;
+  }
 
-    function fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, weight) {
-      let px = Math.max(1, Math.floor(Math.min(basePx, maxH)));
-      if (!text) {
-        return px;
-      }
-      setFont(ctx, px, weight, family);
-      const w = ctx.measureText(text).width;
-      if (w <= maxW + 0.01) {
-        return px;
-      }
-      const scale = Math.max(0.1, (maxW / Math.max(1, w)));
-      px = Math.max(1, Math.floor(px * scale));
-      return Math.min(px, Math.floor(maxH));
-    }
+  function create(def, Helpers) {
+    const fitting = Helpers.getModule("RadialTextFitting").create(def, Helpers);
+    const MIN_FONT_PX = fitting.MIN_FONT_PX;
+    const WIDTH_EPSILON = fitting.WIDTH_EPSILON;
+    const clampPositive = fitting.clampPositive;
+    const setFont = fitting.setFont;
+    const fitTextPx = fitting.fitTextPx;
+    const fitSingleTextPx = fitting.fitSingleTextPx;
+    const measureValueUnitFit = fitting.measureValueUnitFit;
+    const fitInlineCapValUnit = fitting.fitInlineCapValUnit;
 
-    function measureValueUnitFit(ctx, family, value, unit, w, h, secScale, valueWeight, labelWeight) {
-      if (!value) {
-        return { vPx: 0, uPx: 0, gap: 0, total: 0 };
-      }
-      const maxH = Math.max(8, Math.floor(Number(h) || 0));
-      const maxW = Math.max(1, Number(w) || 0);
-      const ratio = Number(secScale);
-      const scale = isFinite(ratio) ? ratio : 0.8;
-
-      let lo = 6;
-      let hi = maxH;
-      let best = { vPx: 6, uPx: 6, gap: 6, total: 0 };
-
-      function totalWidth(vp) {
-        const safeVp = Math.min(vp, maxH);
-        const up = Math.min(Math.floor(Math.max(6, safeVp * scale)), maxH);
-        setFont(ctx, safeVp, valueWeight, family);
-        const vW = ctx.measureText(String(value)).width;
-        setFont(ctx, up, labelWeight, family);
-        const uW = unit ? ctx.measureText(String(unit)).width : 0;
-        const gap = unit ? Math.max(6, Math.floor(safeVp * 0.25)) : 0;
-        return { width: vW + (unit ? (gap + uW) : 0), up, gap };
+    function drawClampedLine(ctx, text, anchorX, y, maxW, align) {
+      const content = String(text || "");
+      const widthLimit = Math.max(0, Number(maxW) || 0);
+      if (!content || widthLimit <= 0) {
+        return;
       }
 
-      for (let i = 0; i < 18; i++) {
-        const mid = (lo + hi) / 2;
-        const test = totalWidth(Math.floor(mid));
-        if (test.width <= maxW + 0.5) {
-          best = {
-            vPx: Math.min(Math.floor(mid), maxH),
-            uPx: test.up,
-            gap: test.gap,
-            total: test.width
-          };
-          lo = mid;
-        } else {
-          hi = mid;
-        }
+      const mode = align || "left";
+      ctx.textAlign = mode;
+      const measured = ctx.measureText(content).width;
+      if (measured <= widthLimit + WIDTH_EPSILON) {
+        ctx.fillText(content, anchorX, y);
+        return;
       }
-      return best;
+
+      const scaleX = Math.max(0.01, widthLimit / Math.max(WIDTH_EPSILON, measured));
+      ctx.save();
+      ctx.translate(anchorX, 0);
+      ctx.scale(scaleX, 1);
+      ctx.fillText(content, 0, y);
+      ctx.restore();
     }
 
     function drawCaptionMax(ctx, family, x, y, w, h, caption, capMaxPx, align, labelWeight) {
       if (w <= 0 || h <= 0 || !caption) {
         return;
       }
+
       let cPx = fitTextPx(ctx, caption, w, h, family, labelWeight);
-      if (isFinite(Number(capMaxPx))) cPx = Math.min(cPx, Math.floor(Number(capMaxPx)));
+      if (isFinite(Number(capMaxPx))) {
+        cPx = Math.min(cPx, clampPositive(capMaxPx, MIN_FONT_PX));
+      }
+
       setFont(ctx, cPx, labelWeight, family);
       ctx.textBaseline = "top";
       const mode = align || "left";
-      if (mode === "right") {
-        ctx.textAlign = "right";
-        ctx.fillText(String(caption), x + w, y);
-        return;
-      }
-      if (mode === "center") {
-        ctx.textAlign = "center";
-        ctx.fillText(String(caption), x + Math.floor(w / 2), y);
-        return;
-      }
-      ctx.textAlign = "left";
-      ctx.fillText(String(caption), x, y);
+      drawClampedLine(ctx, caption, lineAnchor(x, w, mode), y, w, mode);
     }
 
     function drawValueUnitWithFit(ctx, family, x, y, w, h, value, unit, fit, align, valueWeight, labelWeight) {
       if (w <= 0 || h <= 0 || !value) {
         return;
       }
-      const data = fit || { vPx: 6, uPx: 6, gap: 0 };
-      const vPx = Math.max(6, Math.floor(Number(data.vPx) || 0));
-      const uPx = Math.max(6, Math.floor(Number(data.uPx) || 0));
-      const gap = Math.max(0, Math.floor(Number(data.gap) || 0));
 
+      const data = fit || { vPx: MIN_FONT_PX, uPx: MIN_FONT_PX, gap: 0 };
+      const vPx = Math.max(MIN_FONT_PX, Number(data.vPx) || 0);
+      const uPx = Math.max(MIN_FONT_PX, Number(data.uPx) || 0);
+      const gap = Math.max(0, Math.floor(Number(data.gap) || 0));
       setFont(ctx, vPx, valueWeight, family);
-      const vW = ctx.measureText(String(value)).width;
-      let uW = 0;
+      const valueW = ctx.measureText(String(value)).width;
+
+      let unitW = 0;
       if (unit) {
         setFont(ctx, uPx, labelWeight, family);
-        uW = ctx.measureText(String(unit)).width;
+        unitW = ctx.measureText(String(unit)).width;
       }
 
-      const total = vW + (unit ? (gap + uW) : 0);
+      const total = valueW + (unit ? (gap + unitW) : 0);
+      const widthLimit = Math.max(0, Number(w) || 0);
       const mode = align || "left";
-      const xStart = (mode === "right")
-        ? (x + w - total)
-        : (mode === "center" ? (x + Math.floor((w - total) / 2)) : x);
+      const rowScale = total > widthLimit + WIDTH_EPSILON
+        ? Math.max(0.01, widthLimit / Math.max(WIDTH_EPSILON, total))
+        : 1;
+      const anchorX = lineAnchor(x, w, mode);
+      const xStart = mode === "right" ? -total : (mode === "center" ? -(total * 0.5) : 0);
       const yVal = y + Math.floor((h - vPx) * 0.5);
 
+      ctx.save();
+      ctx.translate(anchorX, 0);
+      ctx.scale(rowScale, 1);
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
-
       setFont(ctx, vPx, valueWeight, family);
       ctx.fillText(String(value), xStart, yVal);
-
       if (unit) {
         setFont(ctx, uPx, labelWeight, family);
-        ctx.fillText(String(unit), xStart + vW + gap, yVal + Math.max(0, Math.floor(vPx * 0.08)));
+        ctx.fillText(String(unit), xStart + valueW + gap, yVal + Math.max(0, Math.floor(vPx * 0.08)));
       }
-    }
-
-    function fitInlineCapValUnit(ctx, family, caption, value, unit, maxW, maxH, secScale, valueWeight, labelWeight) {
-      if (!value) {
-        return { cPx: 0, vPx: 0, uPx: 0, g1: 0, g2: 0, total: 0 };
-      }
-      const h = Math.max(8, Math.floor(Number(maxH) || 0));
-      const w = Math.max(1, Number(maxW) || 0);
-      const ratio = Number(secScale);
-      const scale = isFinite(ratio) ? ratio : 0.8;
-
-      let lo = 6;
-      let hi = h;
-      let best = { cPx: 6, vPx: 6, uPx: 6, g1: 6, g2: 6, total: 0 };
-
-      function widthFor(vp) {
-        const safeVp = Math.min(vp, h);
-        const cp = Math.min(Math.floor(Math.max(6, safeVp * scale)), h);
-        const up = Math.min(Math.floor(Math.max(6, safeVp * scale)), h);
-        const gap = Math.max(6, Math.floor(safeVp * 0.25));
-        setFont(ctx, cp, labelWeight, family);
-        const cW = caption ? ctx.measureText(String(caption)).width : 0;
-        setFont(ctx, safeVp, valueWeight, family);
-        const vW = ctx.measureText(String(value)).width;
-        setFont(ctx, up, labelWeight, family);
-        const uW = unit ? ctx.measureText(String(unit)).width : 0;
-        const g1 = caption ? gap : 0;
-        const g2 = unit ? gap : 0;
-        return { cp, vp: safeVp, up, width: cW + g1 + vW + g2 + (unit ? uW : 0), g1, g2 };
-      }
-
-      for (let i = 0; i < 18; i++) {
-        const mid = (lo + hi) / 2;
-        const test = widthFor(Math.floor(mid));
-        const okW = test.width <= w + 0.5;
-        const okH = test.cp <= h && test.vp <= h && test.up <= h;
-        if (okW && okH) {
-          best = { cPx: test.cp, vPx: test.vp, uPx: test.up, g1: test.g1, g2: test.g2, total: test.width };
-          lo = mid;
-        } else {
-          hi = mid;
-        }
-      }
-      return best;
+      ctx.restore();
     }
 
     function drawInlineCapValUnit(ctx, family, x, y, w, h, caption, value, unit, fit, valueWeight, labelWeight) {
       if (w <= 0 || h <= 0 || !value) {
         return;
       }
+
       const data = fit || fitInlineCapValUnit(ctx, family, caption, value, unit, w, h, 0.8, valueWeight, labelWeight);
-      let xStart = x + Math.floor((w - data.total) / 2);
+      const widthLimit = Math.max(0, Number(w) || 0);
+      const rowScale = data.total > widthLimit + WIDTH_EPSILON
+        ? Math.max(0.01, widthLimit / Math.max(WIDTH_EPSILON, data.total))
+        : 1;
+      let xStart = -(data.total * 0.5);
       const yMid = y + Math.floor(h / 2);
 
+      ctx.save();
+      ctx.translate(x + (w * 0.5), 0);
+      ctx.scale(rowScale, 1);
       ctx.textBaseline = "middle";
       ctx.textAlign = "left";
 
       if (caption) {
         setFont(ctx, data.cPx, labelWeight, family);
         ctx.fillText(String(caption), xStart, yMid);
-        xStart += Math.floor(ctx.measureText(String(caption)).width + data.g1);
+        xStart += ctx.measureText(String(caption)).width + data.g1;
       }
 
       setFont(ctx, data.vPx, valueWeight, family);
       ctx.fillText(String(value), xStart, yMid);
-      xStart += Math.floor(ctx.measureText(String(value)).width);
+      xStart += ctx.measureText(String(value)).width;
 
       if (unit) {
         xStart += data.g2;
         setFont(ctx, data.uPx, labelWeight, family);
         ctx.fillText(String(unit), xStart, yMid);
       }
+
+      ctx.restore();
     }
 
     function drawThreeRowsBlock(ctx, family, x, y, w, h, caption, value, unit, secScale, align, sizes, valueWeight, labelWeight) {
@@ -229,7 +157,6 @@
       let uPx;
       let hCap;
       let hVal;
-      let hUnit;
 
       if (sizes) {
         cPx = sizes.cPx;
@@ -237,12 +164,12 @@
         uPx = sizes.uPx;
         hCap = sizes.hCap;
         hVal = sizes.hVal;
-        hUnit = sizes.hUnit;
       } else {
-        const scale = isFinite(Number(secScale)) ? Number(secScale) : 0.8;
-        hVal = Math.max(10, Math.floor(h / (1 + 2 * scale)));
-        hCap = Math.max(8, Math.floor(hVal * scale));
-        hUnit = Math.max(8, Math.floor(hVal * scale));
+        const ratio = Number(secScale);
+        const scale = isFinite(ratio) ? ratio : 0.8;
+        hVal = Math.max(MIN_FONT_PX, h / (1 + 2 * scale));
+        hCap = Math.max(MIN_FONT_PX, hVal * scale);
+        const hUnit = Math.max(MIN_FONT_PX, hVal * scale);
         cPx = fitTextPx(ctx, caption, w, hCap, family, labelWeight);
         vPx = fitTextPx(ctx, value, w, hVal, family, valueWeight);
         uPx = fitTextPx(ctx, unit, w, hUnit, family, labelWeight);
@@ -251,31 +178,20 @@
       const yCap = y;
       const yVal = y + hCap;
       const yUni = y + hCap + hVal;
-
-      function xFor(alignment) {
-        if (alignment === "left") {
-          return x;
-        }
-        if (alignment === "right") {
-          return x + w;
-        }
-        return x + Math.floor(w / 2);
-      }
-
+      const anchor = lineAnchor(x, w, mode);
       ctx.textBaseline = "top";
-      ctx.textAlign = mode;
 
       if (caption) {
         setFont(ctx, cPx, labelWeight, family);
-        ctx.fillText(String(caption), xFor(mode), yCap);
+        drawClampedLine(ctx, caption, anchor, yCap, w, mode);
       }
       if (value) {
         setFont(ctx, vPx, valueWeight, family);
-        ctx.fillText(String(value), xFor(mode), yVal);
+        drawClampedLine(ctx, value, anchor, yVal, w, mode);
       }
       if (unit) {
         setFont(ctx, uPx, labelWeight, family);
-        ctx.fillText(String(unit), xFor(mode), yUni);
+        drawClampedLine(ctx, unit, anchor, yUni, w, mode);
       }
     }
 
@@ -298,18 +214,18 @@
     return {
       id: "RadialTextLayout",
       version: "0.1.0",
-      setFont,
-      fitTextPx,
-      fitSingleTextPx,
-      measureValueUnitFit,
-      drawCaptionMax,
-      drawValueUnitWithFit,
-      fitInlineCapValUnit,
-      drawInlineCapValUnit,
-      drawThreeRowsBlock,
-      drawDisconnectOverlay
+      setFont: setFont,
+      fitTextPx: fitTextPx,
+      fitSingleTextPx: fitSingleTextPx,
+      measureValueUnitFit: measureValueUnitFit,
+      drawCaptionMax: drawCaptionMax,
+      drawValueUnitWithFit: drawValueUnitWithFit,
+      fitInlineCapValUnit: fitInlineCapValUnit,
+      drawInlineCapValUnit: drawInlineCapValUnit,
+      drawThreeRowsBlock: drawThreeRowsBlock,
+      drawDisconnectOverlay: drawDisconnectOverlay
     };
   }
 
-  return { id: "RadialTextLayout", create };
+  return { id: "RadialTextLayout", create: create };
 }));

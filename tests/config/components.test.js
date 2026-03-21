@@ -79,6 +79,10 @@ describe("config/components.js", function () {
     expect(components.ThemePresets.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemePresets.js");
     expect(components.ThemePresets.deps).toBeUndefined();
     expect(components.RadialTickMath.deps).toEqual(["RadialAngleMath"]);
+    expect(components.RadialTextFitting.globalKey).toBe("DyniRadialTextFitting");
+    expect(components.RadialTextFitting.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/RadialTextFitting.js");
+    expect(components.RadialTextFitting.deps).toBeUndefined();
+    expect(components.RadialTextLayout.deps).toEqual(["RadialTextFitting"]);
     expect(components.ClusterMapperToolkit.deps).toEqual(["RadialAngleMath"]);
     expect(components.ActiveRouteViewModel.globalKey).toBe("DyniActiveRouteViewModel");
     expect(components.ActiveRouteViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/ActiveRouteViewModel.js");
