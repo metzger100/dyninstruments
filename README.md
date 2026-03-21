@@ -285,3 +285,8 @@ Developer setup, AI-assisted workflow rules, quality gates, and pre-PR checklist
 ```
 
 Final validation uses the full gate: `npm run check:all`.
+
+Performance tooling:
+- `npm run perf:run` writes `artifacts/perf/perf-report.json` and `artifacts/perf/perf-report.md`.
+- `npm run perf:check` compares current run metrics against `perf/baselines/core-lab-v1.json` and fails closed on threshold violations.
+- Perf gate details and lifecycle span ownership are documented in `documentation/guides/performance-gate.md`.

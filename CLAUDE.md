@@ -141,7 +141,7 @@ Task: Add new BarometerGauge
 - [ ] Implementation complete.
 - [ ] Updated relevant documentation.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.
-- [ ] Ran `npm run check:all` — no failures; required final gate (`check:core` plus coverage threshold enforcement).
+- [ ] Ran `npm run check:all` — no failures; required final gate (`check:core` plus coverage threshold enforcement plus `perf:check`).
 - [ ] For cleanup sessions, ran `npm run gc:status` first and `npm run gc:update-baseline` last.
 
 ---
@@ -155,7 +155,7 @@ Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 ## 7. Smell Prevention & Fail-Closed Rules
 
 - Mandatory on every task: follow `documentation/conventions/coding-standards.md` and `documentation/conventions/smell-prevention.md` as binding rules, not optional references.
-- Required completion gate is `npm run check:all`.
+- Required completion gate is `npm run check:all` (`check:core` + `test:coverage:check` + `perf:check`).
 - Smell rules and enforcement matrix are documented in [documentation/conventions/smell-prevention.md](documentation/conventions/smell-prevention.md).
 - Duplicate detection is fail-closed via `tools/check-patterns.mjs` rules `duplicate-functions` (body/shape function clones) and `duplicate-block-clones` (long cross-file cloned blocks).
 - Fail-fast / keep-it-simple is mandatory.

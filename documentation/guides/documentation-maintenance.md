@@ -19,6 +19,7 @@ npm run check:all
 ```
 
 6. During iteration, optionally run targeted checks (`npm run check:core`, `npm test`) for faster feedback.
+   For perf-gate changes, include `npm run perf:run` and `npm run perf:check`.
 
 7. Fix all failures and review all warnings before finishing
 8. For warn-only smell rollouts, record the warning backlog and promotion criteria in `documentation/TECH-DEBT.md`
@@ -35,6 +36,7 @@ npm run check:all
 
 - `npm run check:core`
 - `npm run test:coverage:check`
+- `npm run perf:check`
 
 `check:core` includes:
 
@@ -58,6 +60,22 @@ npm run test:coverage
 node tools/check-coverage.mjs
 ```
 
+`perf:run` includes:
+
+```bash
+node tools/perf-run.mjs
+```
+
+It writes machine-readable and markdown artifacts to `artifacts/perf/`.
+
+`perf:check` includes:
+
+```bash
+node tools/perf-check.mjs
+```
+
+It compares current metrics against committed baselines in `perf/baselines/` and fails closed on threshold violations.
+
 `check-patterns` is enforced in full mode inside `check:core`.
 Blocking findings fail the gate; warning findings are non-blocking advisories.
 This includes fail-closed cross-file clone detection (`duplicate-functions`, `duplicate-block-clones`), block-mode atomicity/fail-fast rules (`internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `widget-renderer-default-duplication`, `engine-layout-default-drift`, `canvas-api-typeof-guard`, `try-finally-canvas-drawing`, `framework-method-typeof-guard`, `inline-config-default-duplication`), mixed-severity mapper complexity checks (`mapper-output-complexity`: warn at `9..12`, block at `>12`), remaining warn-only rollout rules (`catch-fallback-without-suppression`, `css-js-default-duplication`, `premature-legacy-support`, `editable-threshold-missing-internal`), plus blocking suppression validation (`invalid-lint-suppression`).
@@ -79,7 +97,7 @@ For cleanup sessions tracked by garbage-collection baseline markers:
 | Changes in registration/lifecycle flow (`runtime/init.js`, `runtime/widget-registrar.js`) | `documentation/avnav-api/plugin-lifecycle.md`, `documentation/architecture/component-system.md` |
 | Changes in helper API (`runtime/helpers.js`) | `documentation/shared/helpers.md` |
 | CSS/theming changes (`plugin.css`) | `documentation/shared/css-theming.md` |
-| Test setup or quality rule changes (`package.json`, `vitest.config.js`, `tools/check-file-size.mjs`, `tools/check-coverage.mjs`, `tools/check-dependencies.mjs`, `tools/check-umd.mjs`, `tools/check-naming.mjs`, `tools/check-patterns.mjs`, `tools/check-smell-contracts.mjs`, `tools/check-doc-format.mjs`, `tools/gc-baseline.mjs`, `tools/install-hooks.mjs`, `tools/check-hooks.mjs`, `.githooks/pre-push`) | `documentation/guides/documentation-maintenance.md`, `documentation/guides/garbage-collection.md`, `README.md`, `AGENTS.md`, `CLAUDE.md` |
+| Test setup or quality rule changes (`package.json`, `vitest.config.js`, `tools/check-file-size.mjs`, `tools/check-coverage.mjs`, `tools/check-dependencies.mjs`, `tools/check-umd.mjs`, `tools/check-naming.mjs`, `tools/check-patterns.mjs`, `tools/check-smell-contracts.mjs`, `tools/check-doc-format.mjs`, `tools/perf-run.mjs`, `tools/perf-check.mjs`, `tools/perf/*.mjs`, `tools/gc-baseline.mjs`, `tools/install-hooks.mjs`, `tools/check-hooks.mjs`, `.githooks/pre-push`) | `documentation/guides/documentation-maintenance.md`, `documentation/guides/garbage-collection.md`, `documentation/guides/performance-gate.md`, `README.md`, `AGENTS.md`, `CLAUDE.md` |
 | New documentation file | `documentation/TABLEOFCONTENTS.md` |
 
 ## Validation

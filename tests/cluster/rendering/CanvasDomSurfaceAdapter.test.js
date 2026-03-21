@@ -283,6 +283,37 @@ describe("CanvasDomSurfaceAdapter", function () {
     expect(h.rendererSpec.renderCanvas).toHaveBeenCalledWith(h.dom.createdCanvases[0], { value: 3 });
   });
 
+  it("emits schedulePaint and renderer spans when perf hooks are active", function () {
+    const spans = [];
+    const previousHooks = globalThis.__DYNI_PERF_HOOKS__;
+    globalThis.__DYNI_PERF_HOOKS__ = {
+      startSpan(name, tags) {
+        return { name, tags: tags || null };
+      },
+      endSpan(token, tags) {
+        spans.push({
+          name: token && token.name,
+          tags: {
+            ...(token && token.tags ? token.tags : {}),
+            ...(tags && typeof tags === "object" ? tags : {})
+          }
+        });
+      }
+    };
+
+    try {
+      const h = createHarness();
+      h.controller.attach(h.payload({ value: 5, cluster: "speed", kind: "sogRadial" }, 1));
+      h.runNextFrame();
+
+      expect(spans.some((entry) => entry.name === "CanvasDomSurfaceAdapter.schedulePaint->paintNow")).toBe(true);
+      expect(spans.some((entry) => entry.name === "Renderer.renderCanvas")).toBe(true);
+    }
+    finally {
+      globalThis.__DYNI_PERF_HOOKS__ = previousHooks;
+    }
+  });
+
   it("detach disconnects observer, cancels pending frames, and clears canvas refs from mount", function () {
     const h = createHarness();
     h.controller.attach(h.payload({ value: 1 }, 1));

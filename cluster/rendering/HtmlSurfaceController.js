@@ -11,10 +11,32 @@
 }(this, function () {
   "use strict";
 
+  const GLOBAL_ROOT = (typeof globalThis !== "undefined")
+    ? globalThis
+    : (typeof self !== "undefined" ? self : {});
   const SURFACE_ID = "html";
   const SURFACE_CLASS = "dyni-surface-html";
   const PREBOUND_HANDLER_NAMES = "__dyniHtmlSurfacePreboundHandlers";
   const FORBIDDEN_HANDLER_NAME = "catchAll";
+  const PERF_HOOK_KEY = "__DYNI_PERF_HOOKS__";
+
+  function startPerfSpan(name, tags) {
+    const hooks = GLOBAL_ROOT[PERF_HOOK_KEY];
+    if (!hooks || typeof hooks.startSpan !== "function") {
+      return null;
+    }
+    return {
+      hooks: hooks,
+      token: hooks.startSpan(name, tags || null)
+    };
+  }
+
+  function endPerfSpan(span, tags) {
+    if (!span || !span.hooks || typeof span.hooks.endSpan !== "function") {
+      return;
+    }
+    span.hooks.endSpan(span.token, tags || null);
+  }
 
   function ensurePayload(methodName, payload) {
     if (!payload || typeof payload !== "object") {
@@ -161,7 +183,22 @@
       ensureHostContext("renderSurfaceShell", hostContext);
       bindPreRenderHandlers(rendererSpec, props, hostContext);
 
-      const rendered = rendererSpec.renderHtml.call(hostContext, props);
+      const renderSpan = startPerfSpan("Renderer.renderHtml", {
+        rendererId: rendererSpec.id || "unknown",
+        cluster: props && props.cluster,
+        kind: props && props.kind
+      });
+      let rendered;
+      try {
+        rendered = rendererSpec.renderHtml.call(hostContext, props);
+      }
+      finally {
+        endPerfSpan(renderSpan, {
+          rendererId: rendererSpec.id || "unknown",
+          cluster: props && props.cluster,
+          kind: props && props.kind
+        });
+      }
       if (typeof rendered !== "string") {
         throw new Error("HtmlSurfaceController: renderSurfaceShell() requires rendererSpec.renderHtml() to return string");
       }
@@ -204,28 +241,44 @@
       }
 
       function attach(payload) {
+        const span = startPerfSpan("HtmlSurfaceController.attach", {
+          rendererId: rendererSpec.id || "unknown",
+          revision: payload && payload.revision
+        });
         if (destroyed) {
           throw new Error("HtmlSurfaceController: attach() after destroy()");
         }
         ensurePayload("attach", payload);
-        rootEl = payload.rootEl;
-        shellEl = payload.shellEl;
-        props = payload.props;
-        revision = payload.revision;
-        bindOwnedHandlers(props, "attach");
-        resizeSignature = resolveResizeSignature(rendererSpec, props, hostContext, "attach");
-        attached = true;
+        try {
+          rootEl = payload.rootEl;
+          shellEl = payload.shellEl;
+          props = payload.props;
+          revision = payload.revision;
+          bindOwnedHandlers(props, "attach");
+          resizeSignature = resolveResizeSignature(rendererSpec, props, hostContext, "attach");
+          attached = true;
 
-        if (typeof rendererSpec.initFunction === "function") {
-          if (hostContext) {
-            rendererSpec.initFunction.call(hostContext, props);
-          } else {
-            rendererSpec.initFunction(props);
+          if (typeof rendererSpec.initFunction === "function") {
+            if (hostContext) {
+              rendererSpec.initFunction.call(hostContext, props);
+            } else {
+              rendererSpec.initFunction(props);
+            }
           }
+        }
+        finally {
+          endPerfSpan(span, {
+            rendererId: rendererSpec.id || "unknown",
+            revision: payload && payload.revision
+          });
         }
       }
 
       function update(payload) {
+        const span = startPerfSpan("HtmlSurfaceController.update", {
+          rendererId: rendererSpec.id || "unknown",
+          revision: payload && payload.revision
+        });
         ensurePayload("update", payload);
         if (!attached) {
           throw new Error("HtmlSurfaceController: update() requires an attached surface");
@@ -233,19 +286,26 @@
         if (payload.shellEl !== shellEl) {
           throw new Error("HtmlSurfaceController: update() received a different shellEl; remount required");
         }
+        try {
+          const changed = props !== payload.props;
+          bindOwnedHandlers(payload.props, "update");
+          const resized = refreshResizeSignature(payload.props, "update");
+          rootEl = payload.rootEl;
+          shellEl = payload.shellEl;
+          props = payload.props;
+          revision = payload.revision;
 
-        const changed = props !== payload.props;
-        bindOwnedHandlers(payload.props, "update");
-        const resized = refreshResizeSignature(payload.props, "update");
-        rootEl = payload.rootEl;
-        shellEl = payload.shellEl;
-        props = payload.props;
-        revision = payload.revision;
-
-        return {
-          updated: changed || resized,
-          changed: changed
-        };
+          return {
+            updated: changed || resized,
+            changed: changed
+          };
+        }
+        finally {
+          endPerfSpan(span, {
+            rendererId: rendererSpec.id || "unknown",
+            revision: payload && payload.revision
+          });
+        }
       }
 
       function detach(reason) {

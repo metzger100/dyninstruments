@@ -9,6 +9,7 @@
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
   const hasOwn = Object.prototype.hasOwnProperty;
+  const PERF_HOOK_KEY = "__DYNI_PERF_HOOKS__";
 
   let instanceCounter = 0;
 
@@ -64,6 +65,15 @@
       : root.MutationObserver;
 
     let state = createState(nextInstanceId(instancePrefix));
+    let pendingWaitSpanToken = null;
+
+    function resolvePerfHooks() {
+      const hooks = root[PERF_HOOK_KEY];
+      if (!hooks || typeof hooks.startSpan !== "function" || typeof hooks.endSpan !== "function") {
+        return null;
+      }
+      return hooks;
+    }
 
     function getState() {
       return {
@@ -111,7 +121,12 @@
       clearTimeoutHandle();
     }
 
-    function clearPendingState() {
+    function clearPendingState(tags) {
+      const hooks = resolvePerfHooks();
+      if (hooks && pendingWaitSpanToken) {
+        hooks.endSpan(pendingWaitSpanToken, tags || null);
+      }
+      pendingWaitSpanToken = null;
       state.commitPending = false;
       state.scheduledRevision = null;
     }
@@ -141,10 +156,15 @@
       return rootEl;
     }
 
-    function commitIfReady(targetRevision, callbacks) {
+    function commitIfReady(targetRevision, callbacks, waitStage) {
       if (targetRevision !== state.renderRevision) {
         clearAsyncHandles();
-        clearPendingState();
+        clearPendingState({
+          status: "stale",
+          waitStage: waitStage || "stale",
+          revision: targetRevision,
+          instanceId: state.instanceId
+        });
         return true;
       }
 
@@ -162,7 +182,12 @@
       state.shellEl = shellEl;
       state.rootEl = rootEl;
       state.mountedRevision = targetRevision;
-      clearPendingState();
+      clearPendingState({
+        status: "committed",
+        waitStage: waitStage || "unknown",
+        revision: targetRevision,
+        instanceId: state.instanceId
+      });
 
       if (callbacks && typeof callbacks.onCommit === "function") {
         callbacks.onCommit({
@@ -179,15 +204,15 @@
 
     function installDeferredObservers(targetRevision, callbacks) {
       if (!MutationObserverCtor || typeof MutationObserverCtor !== "function") {
-        state.timeoutHandle = setTimer(function () {
-          commitIfReady(targetRevision, callbacks);
-        }, 0);
-        return;
-      }
+          state.timeoutHandle = setTimer(function () {
+            commitIfReady(targetRevision, callbacks, "timeout");
+          }, 0);
+          return;
+        }
 
       if (!state.observer) {
         state.observer = new MutationObserverCtor(function () {
-          commitIfReady(targetRevision, callbacks);
+          commitIfReady(targetRevision, callbacks, "mutation-observer");
         });
         if (doc && doc.body) {
           state.observer.observe(doc.body, { childList: true, subtree: true });
@@ -196,7 +221,7 @@
 
       if (state.timeoutHandle == null) {
         state.timeoutHandle = setTimer(function () {
-          commitIfReady(targetRevision, callbacks);
+          commitIfReady(targetRevision, callbacks, "timeout");
         }, 0);
       }
     }
@@ -205,7 +230,7 @@
       state.rafHandle = requestFrame(function () {
         state.rafHandle = null;
 
-        if (commitIfReady(targetRevision, callbacks)) {
+        if (commitIfReady(targetRevision, callbacks, attempt === 1 ? "raf-1" : "raf-2")) {
           return;
         }
 
@@ -220,6 +245,7 @@
 
     function initState() {
       clearAsyncHandles();
+      clearPendingState({ status: "reset", waitStage: "reset", revision: state.renderRevision, instanceId: state.instanceId });
       state = createState(nextInstanceId(instancePrefix));
       return getState();
     }
@@ -232,6 +258,7 @@
 
     function scheduleCommit(callbacks) {
       const targetRevision = state.renderRevision;
+      const hooks = resolvePerfHooks();
 
       if (state.commitPending && state.scheduledRevision === targetRevision) {
         return false;
@@ -244,13 +271,24 @@
 
       state.commitPending = true;
       state.scheduledRevision = targetRevision;
+      pendingWaitSpanToken = hooks
+        ? hooks.startSpan("HostCommitController.scheduleCommit->onCommit", {
+          instanceId: state.instanceId,
+          revision: targetRevision
+        })
+        : null;
       scheduleRafAttempt(targetRevision, callbacks || {}, 1);
       return true;
     }
 
     function cleanup() {
       clearAsyncHandles();
-      clearPendingState();
+      clearPendingState({
+        status: "cleanup",
+        waitStage: "cleanup",
+        revision: state.renderRevision,
+        instanceId: state.instanceId
+      });
       state.rootEl = null;
       state.shellEl = null;
     }

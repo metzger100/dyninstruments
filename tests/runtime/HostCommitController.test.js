@@ -21,6 +21,7 @@ describe("runtime/HostCommitController.js", function () {
 
   function createHarness() {
     let shell = null;
+    const spans = [];
 
     const rafQueue = [];
     const canceledRafs = [];
@@ -88,6 +89,20 @@ describe("runtime/HostCommitController.js", function () {
       setTimeout: setTimeoutStub,
       clearTimeout: clearTimeoutStub,
       MutationObserver: MutationObserverStub,
+      __DYNI_PERF_HOOKS__: {
+        startSpan(name, tags) {
+          return { name, tags: tags || null };
+        },
+        endSpan(token, tags) {
+          spans.push({
+            name: token && token.name,
+            tags: {
+              ...(token && token.tags ? token.tags : {}),
+              ...(tags && typeof tags === "object" ? tags : {})
+            }
+          });
+        }
+      },
       DyniPlugin: {
         runtime: {},
         state: {},
@@ -135,6 +150,7 @@ describe("runtime/HostCommitController.js", function () {
       timeoutQueue,
       clearedTimeouts,
       observerInstances,
+      spans,
       runNextRaf,
       runNextTimeout,
       triggerObserver
@@ -305,5 +321,52 @@ describe("runtime/HostCommitController.js", function () {
 
     expect(onCommit).toHaveBeenCalledTimes(1);
     expect(onCommit.mock.calls[0][0].rootEl).toBe(rootEl);
+  });
+
+  it("records wait-stage classification for each host-commit completion path", function () {
+    const rafOneHarness = createHarness();
+    const rafOneController = rafOneHarness.createController();
+    const rafOneRoot = createHostRoot();
+    const rafOneShell = createShell(rafOneRoot);
+    rafOneHarness.setShell(rafOneShell);
+    rafOneController.recordRender({ kind: "activeRoute" });
+    rafOneController.scheduleCommit({ onCommit: vi.fn() });
+    rafOneHarness.runNextRaf();
+    expect(rafOneHarness.spans.some((entry) => entry.tags.waitStage === "raf-1")).toBe(true);
+
+    const rafTwoHarness = createHarness();
+    const rafTwoController = rafTwoHarness.createController();
+    const rafTwoRoot = createHostRoot();
+    const rafTwoShell = createShell(rafTwoRoot);
+    rafTwoController.recordRender({ value: 2 });
+    rafTwoController.scheduleCommit({ onCommit: vi.fn() });
+    rafTwoHarness.runNextRaf();
+    rafTwoHarness.setShell(rafTwoShell);
+    rafTwoHarness.runNextRaf();
+    expect(rafTwoHarness.spans.some((entry) => entry.tags.waitStage === "raf-2")).toBe(true);
+
+    const observerHarness = createHarness();
+    const observerController = observerHarness.createController();
+    const observerRoot = createHostRoot();
+    const observerShell = createShell(observerRoot);
+    observerController.recordRender({ value: 3 });
+    observerController.scheduleCommit({ onCommit: vi.fn() });
+    observerHarness.runNextRaf();
+    observerHarness.runNextRaf();
+    observerHarness.setShell(observerShell);
+    observerHarness.triggerObserver(0);
+    expect(observerHarness.spans.some((entry) => entry.tags.waitStage === "mutation-observer")).toBe(true);
+
+    const timeoutHarness = createHarness();
+    const timeoutController = timeoutHarness.createController({ MutationObserver: null });
+    const timeoutRoot = createHostRoot();
+    const timeoutShell = createShell(timeoutRoot);
+    timeoutController.recordRender({ value: 4 });
+    timeoutController.scheduleCommit({ onCommit: vi.fn() });
+    timeoutHarness.runNextRaf();
+    timeoutHarness.runNextRaf();
+    timeoutHarness.setShell(timeoutShell);
+    timeoutHarness.runNextTimeout();
+    expect(timeoutHarness.spans.some((entry) => entry.tags.waitStage === "timeout")).toBe(true);
   });
 });
