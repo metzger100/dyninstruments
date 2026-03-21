@@ -57,6 +57,7 @@
 - **How do I create a new full-circle dial?** → [guides/add-new-full-circle-dial.md](guides/add-new-full-circle-dial.md)
 - **How do I create a new text-based renderer with TextLayoutEngine?** → [guides/add-new-text-renderer.md](guides/add-new-text-renderer.md)
 - **How do I create a new native HTML kind?** → [guides/add-new-html-kind.md](guides/add-new-html-kind.md)
+- **How do I define the visual contract for a new native HTML kind?** → [guides/add-new-html-kind.md](guides/add-new-html-kind.md#step-3-define-visual-contract-before-wiring)
 - **When should I create a new text renderer vs extending an existing one?** → [guides/add-new-text-renderer.md](guides/add-new-text-renderer.md#b4-decision-guide-new-renderer-vs-extension)
 - **How do I add a new cluster widget?** → [guides/add-new-cluster.md](guides/add-new-cluster.md)
 - **How do I add a new kind to an existing cluster?** → [guides/add-new-cluster.md](guides/add-new-cluster.md#adding-a-new-kind)
@@ -93,6 +94,8 @@
 - **What layout modes does ThreeValueTextWidget support?** → [widgets/three-elements.md](widgets/three-elements.md#layout-modes)
 - **What props does ThreeValueTextWidget accept?** → [widgets/three-elements.md](widgets/three-elements.md#props)
 - **How does the ActiveRoute HTML renderer work (`activeRoute` -> html)?** → [widgets/active-route.md](widgets/active-route.md)
+- **What is the ActiveRoute CSS/state visual contract?** → [widgets/active-route.md](widgets/active-route.md#visual-contract)
+- **What are ActiveRoute layout and fit constants?** → [widgets/active-route.md](widgets/active-route.md#layout-constants-owner-activeroutelayout)
 - **How does the CenterDisplay widget work (center position + waypoint/boat/measure rows)?** → [widgets/center-display.md](widgets/center-display.md)
 - **How do stacked nav positions render (boat/wp)?** → [widgets/position-coordinates.md](widgets/position-coordinates.md)
 - **Which kinds use PositionCoordinateWidget?** → [widgets/position-coordinates.md](widgets/position-coordinates.md#key-details)
@@ -114,6 +117,7 @@
 
 - **CSS variables, day/night mode** → [shared/css-theming.md](shared/css-theming.md)
 - **Font stack (--dyni-font)** → [shared/css-theming.md](shared/css-theming.md)
+- **What is the shared visual style contract for HTML-only widgets?** → [shared/html-widget-visual-style-guide.md](shared/html-widget-visual-style-guide.md)
 - **Plugin-wide theme token resolver** → [shared/theme-tokens.md](shared/theme-tokens.md)
 - **Shared text layout/cache facade for text widgets** → [shared/text-layout-engine.md](shared/text-layout-engine.md)
 - **Theme presets (default/slim/bold/night/highcontrast)** → [shared/theme-tokens.md](shared/theme-tokens.md#preset-definitions)
@@ -138,6 +142,8 @@
 **"How do I add warning/alarm sectors to a gauge?"** → [radial/gauge-style-guide.md](radial/gauge-style-guide.md#sector-logic),
 **"How do I make a gauge respond to aspect ratio?"** → [radial/gauge-style-guide.md](radial/gauge-style-guide.md#layout-modes)
 **"How does the active-route layout react to aspect ratio?"** → [widgets/active-route.md](widgets/active-route.md#layout-modes)
+**"What classes and states must an HTML widget document?"** → [shared/html-widget-visual-style-guide.md](shared/html-widget-visual-style-guide.md#css-class-and-state-contract)
+**"What tests are required for a new HTML kind?"** → [guides/add-new-html-kind.md](guides/add-new-html-kind.md#step-7-required-html-kind-test-matrix)
 **"How does the pointer/needle work?"** → [radial/gauge-style-guide.md](radial/gauge-style-guide.md#pointer-configuration),
 **"What are the full-circle dial proportions?"** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#proportions-function-of-r)
 **"How are full-circle pointers configured?"** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#pointer-variants),
