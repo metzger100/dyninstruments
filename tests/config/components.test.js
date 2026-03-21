@@ -114,9 +114,6 @@ describe("config/components.js", function () {
     expect(components.ThreeValueTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
     expect(components.PositionCoordinateWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
     expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
-    expect(components.ActiveRouteTextWidget.globalKey).toBe("DyniActiveRouteTextWidget");
-    expect(components.ActiveRouteTextWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js");
-    expect(components.ActiveRouteTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout"]);
     expect(components.ActiveRouteTextHtmlWidget.globalKey).toBe("DyniActiveRouteTextHtmlWidget");
     expect(components.ActiveRouteTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js");
     expect(components.ActiveRouteTextHtmlWidget.css).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css");
@@ -150,7 +147,6 @@ describe("config/components.js", function () {
     expect(components.ClusterRendererRouter.deps).toContain("CanvasDomSurfaceAdapter");
     expect(components.ClusterRendererRouter.deps).toContain("HtmlSurfaceController");
     expect(components.ClusterRendererRouter.deps).toContain("PositionCoordinateWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("ActiveRouteTextWidget");
     expect(components.ClusterRendererRouter.deps).toContain("ActiveRouteTextHtmlWidget");
     expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).not.toContain("WindRadialWidget");

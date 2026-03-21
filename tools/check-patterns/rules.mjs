@@ -325,7 +325,6 @@ export const RULES = [
         "shared/widget-kits/radial/SemicircleRadialTextLayout.js",
         "shared/widget-kits/radial/FullCircleRadialLayout.js",
         "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
-        "widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js",
         "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
         "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
         "widgets/linear/WindLinearWidget/WindLinearWidget.js",
@@ -359,7 +358,6 @@ export const RULES = [
         "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
         "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
         "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-        "widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js",
         "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
         "widgets/text/XteDisplayWidget/XteDisplayWidget.js"
       ],

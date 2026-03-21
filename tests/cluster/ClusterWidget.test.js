@@ -216,7 +216,7 @@ describe("ClusterWidget", function () {
     const renderHtml = vi.fn(() => "<div>surface</div>");
     const createSessionPayload = vi.fn(function (payload) {
       const kind = payload && payload.props ? payload.props.kind : "";
-      const surface = kind === "activeRouteInteractive" ? "html" : "canvas-dom";
+      const surface = kind === "activeRoute" ? "html" : "canvas-dom";
       return Object.assign({ surface: surface }, payload);
     });
 
@@ -242,12 +242,12 @@ describe("ClusterWidget", function () {
     const widgetContext = { eventHandler: [] };
 
     widget.initFunction.call(widgetContext);
-    widget.renderHtml.call(widgetContext, { cluster: "nav", kind: "activeRoute" });
+    widget.renderHtml.call(widgetContext, { cluster: "nav", kind: "eta" });
     expect(surfaceFactory).toHaveBeenCalledWith("canvas-dom");
     expect(canvasController.attach).toHaveBeenCalledTimes(1);
     expect(htmlController.attach).toHaveBeenCalledTimes(0);
 
-    widget.renderHtml.call(widgetContext, { cluster: "nav", kind: "activeRouteInteractive" });
+    widget.renderHtml.call(widgetContext, { cluster: "nav", kind: "activeRoute" });
     expect(canvasController.detach).toHaveBeenCalledWith("surface-switch");
     expect(canvasController.destroy).toHaveBeenCalledTimes(1);
     expect(surfaceFactory).toHaveBeenCalledWith("html");

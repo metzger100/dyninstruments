@@ -200,11 +200,6 @@
       globalKey: "DyniPositionCoordinateWidget",
       deps: ["ThemeResolver", "TextLayoutEngine"]
     },
-    ActiveRouteTextWidget: {
-      js: BASE + "widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js",
-      css: undefined, globalKey: "DyniActiveRouteTextWidget",
-      deps: ["ThemeResolver", "TextLayoutEngine", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout"]
-    },
     ActiveRouteTextHtmlWidget: {
       js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
       css: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css",
@@ -332,7 +327,7 @@
       globalKey: "DyniClusterRendererRouter",
       deps: [
         "ClusterKindCatalog", "CanvasDomSurfaceAdapter", "HtmlSurfaceController",
-        "ThreeValueTextWidget", "PositionCoordinateWidget", "ActiveRouteTextWidget", "ActiveRouteTextHtmlWidget", "CenterDisplayTextWidget",
+        "ThreeValueTextWidget", "PositionCoordinateWidget", "ActiveRouteTextHtmlWidget", "CenterDisplayTextWidget",
         "RendererPropsWidget"
       ]
     },

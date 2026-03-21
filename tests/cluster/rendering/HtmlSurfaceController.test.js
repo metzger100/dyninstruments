@@ -27,12 +27,12 @@ describe("HtmlSurfaceController", function () {
 
     const html = module.renderSurfaceShell({
       rendererSpec: rendererSpec,
-      props: { kind: "activeRouteInteractive" },
+      props: { kind: "activeRoute" },
       hostContext: hostContext
     });
 
-    expect(rendererSpec.namedHandlers).toHaveBeenCalledWith({ kind: "activeRouteInteractive" }, hostContext);
-    expect(rendererSpec.renderHtml).toHaveBeenCalledWith({ kind: "activeRouteInteractive" });
+    expect(rendererSpec.namedHandlers).toHaveBeenCalledWith({ kind: "activeRoute" }, hostContext);
+    expect(rendererSpec.renderHtml).toHaveBeenCalledWith({ kind: "activeRoute" });
     expect(hostContext.eventHandler.activeRouteOpen).toBe(activeRouteOpen);
     expect(html).toBe('<div class="dyni-surface-html"><button onclick="activeRouteOpen">ok</button></div>');
   });

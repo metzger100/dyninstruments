@@ -78,52 +78,11 @@ describe("NavMapper", function () {
     });
   });
 
-  it("maps activeRoute to ActiveRouteTextWidget with renderer-owned field props", function () {
+  it("maps activeRoute to ActiveRouteTextHtmlWidget with renderer-owned field props", function () {
     const mapper = createMapper();
     const rawEta = new Date("2026-03-06T11:45:00Z");
     const out = mapper.translate({
       kind: "activeRoute",
-      activeRouteName: "  Harbor Run  ",
-      activeRouteRemain: "18.2",
-      activeRouteEta: rawEta,
-      activeRouteNextCourse: "93",
-      activeRouteApproaching: true,
-      activeRouteRatioThresholdNormal: "1.25",
-      activeRouteRatioThresholdFlat: "4.4",
-      wpServer: true,
-      disconnect: true
-    }, toolkit);
-
-    expect(out).toEqual({
-      renderer: "ActiveRouteTextWidget",
-      routeName: "Harbor Run",
-      disconnect: true,
-      display: {
-        remain: 18.2,
-        eta: rawEta,
-        nextCourse: 93,
-        isApproaching: true
-      },
-      captions: {
-        remain: "RTE CAP",
-        eta: "ETA CAP",
-        nextCourse: "NEXT CAP"
-      },
-      units: {
-        remain: "nmA",
-        eta: "",
-        nextCourse: "degN"
-      },
-      ratioThresholdNormal: 1.25,
-      ratioThresholdFlat: 4.4
-    });
-  });
-
-  it("maps activeRouteInteractive to ActiveRouteTextHtmlWidget with shared domain payload", function () {
-    const mapper = createMapper();
-    const rawEta = new Date("2026-03-06T11:45:00Z");
-    const out = mapper.translate({
-      kind: "activeRouteInteractive",
       activeRouteName: "  Harbor Run  ",
       activeRouteRemain: "18.2",
       activeRouteEta: rawEta,
@@ -171,7 +130,7 @@ describe("NavMapper", function () {
       activeRouteApproaching: false
     }, toolkit);
 
-    expect(out.renderer).toBe("ActiveRouteTextWidget");
+    expect(out.renderer).toBe("ActiveRouteTextHtmlWidget");
     expect(out.display.isApproaching).toBe(false);
     expect(out.display.nextCourse).toBe(91);
     expect(out.captions.nextCourse).toBe("NEXT CAP");

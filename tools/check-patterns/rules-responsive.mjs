@@ -60,7 +60,6 @@ const RESPONSIVE_CONSUMER_FILES = new Set([
   "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
   "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
   "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-  "widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js",
   "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
   "widgets/text/XteDisplayWidget/XteDisplayWidget.js"
 ]);

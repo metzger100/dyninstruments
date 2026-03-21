@@ -42,10 +42,10 @@
         const u = unit("vmg");
         return out(p.vmg, cap("vmg"), u, "formatSpeed", [u]);
       }
-      if (req === "activeRoute" || req === "activeRouteInteractive") {
+      if (req === "activeRoute") {
         const activeRouteDomain = activeRouteViewModel.build(p, toolkit);
         return {
-          renderer: req === "activeRouteInteractive" ? "ActiveRouteTextHtmlWidget" : "ActiveRouteTextWidget",
+          renderer: "ActiveRouteTextHtmlWidget",
           routeName: activeRouteDomain.routeName,
           disconnect: activeRouteDomain.disconnect,
           display: activeRouteDomain.display,

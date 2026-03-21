@@ -238,7 +238,7 @@ const rendererSpecs = {
 };
 ```
 
-Use role-based renderer IDs (for example `ActiveRouteTextWidget`), not cluster-prefixed names.
+Use role-based renderer IDs (for example `CenterDisplayTextWidget`), not cluster-prefixed names.
 
 ## Step 3b: Add Kind Catalog Route
 
@@ -279,7 +279,7 @@ if (req === "routeSummary") {
 Formatter names and parameter signatures must match the catalog:
 [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md).
 
-If the renderer needs custom geometry ownership like `ActiveRouteTextWidget` or `XteDisplayWidget`, keep the mapper contract equally declarative but route into a renderer that consumes its own shared layout-owner module.
+If the renderer needs custom geometry ownership like `CenterDisplayTextWidget` or `XteDisplayWidget`, keep the mapper contract equally declarative but route into a renderer that consumes its own shared layout-owner module.
 
 ## Step 5: Verify
 

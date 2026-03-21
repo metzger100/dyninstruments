@@ -10,21 +10,12 @@ describe("ClusterKindCatalog", function () {
     const catalog = catalogFactory.createDefaultCatalog();
 
     const routes = catalog.listRoutes();
-    expect(routes).toHaveLength(52);
+    expect(routes).toHaveLength(51);
 
     const activeRoute = catalog.resolveRoute("nav", "activeRoute");
     expect(activeRoute).toEqual({
       cluster: "nav",
       kind: "activeRoute",
-      viewModelId: "ActiveRouteViewModel",
-      rendererId: "ActiveRouteTextWidget",
-      surface: "canvas-dom"
-    });
-
-    const activeRouteInteractive = catalog.resolveRoute("nav", "activeRouteInteractive");
-    expect(activeRouteInteractive).toEqual({
-      cluster: "nav",
-      kind: "activeRouteInteractive",
       viewModelId: "ActiveRouteViewModel",
       rendererId: "ActiveRouteTextHtmlWidget",
       surface: "html"
@@ -37,6 +28,10 @@ describe("ClusterKindCatalog", function () {
 
     expect(function () {
       catalog.resolveRoute("nav", "missing");
+    }).toThrow("missing catalog entry");
+
+    expect(function () {
+      catalog.resolveRoute("nav", "activeRouteInteractive");
     }).toThrow("missing catalog entry");
   });
 

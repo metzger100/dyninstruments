@@ -35,7 +35,6 @@
     const rendererSpecs = {
       ThreeValueTextWidget: threeSpec,
       PositionCoordinateWidget: Helpers.getModule("PositionCoordinateWidget").create(def, Helpers),
-      ActiveRouteTextWidget: Helpers.getModule("ActiveRouteTextWidget").create(def, Helpers),
       ActiveRouteTextHtmlWidget: Helpers.getModule("ActiveRouteTextHtmlWidget").create(def, Helpers),
       CenterDisplayTextWidget: Helpers.getModule("CenterDisplayTextWidget").create(def, Helpers),
       WindRadialWidget: rendererPropsWidget.create(def, Helpers, "WindRadialWidget"),
