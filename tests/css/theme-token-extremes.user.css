@@ -1,0 +1,50 @@
+/* Copy this whole block into AvNav user.css for manual testing.
+   Fixture only, not production styling. */
+
+.widget.dyniplugin {
+  --dyni-theme-preset: default;
+
+  /* Colors */
+  --dyni-pointer: #00f5ff;
+  --dyni-warning: #ff00e6;
+  --dyni-alarm: #18ff52;
+  --dyni-layline-stb: #006dff;
+  --dyni-layline-port: #ff2a00;
+
+  /* Radial */
+  --dyni-radial-tick-major-len: 22;
+  --dyni-radial-tick-major-width: 6;
+  --dyni-radial-tick-minor-len: 3;
+  --dyni-radial-tick-minor-width: 0.8;
+  --dyni-radial-pointer-width: 1.9;
+  --dyni-radial-pointer-length: 0.95;
+  --dyni-radial-arc-linewidth: 4.5;
+  --dyni-radial-ring-width: 0.28;
+  --dyni-radial-label-inset: 1.1;
+  --dyni-radial-label-font: 0.2;
+
+  /* Full-circle (normal mode) */
+  --dyni-radial-fullcircle-normal-inner-margin: 0.12;
+  --dyni-radial-fullcircle-normal-min-height: 0.62;
+  --dyni-radial-fullcircle-normal-dual-gap: 0.12;
+
+  /* Linear */
+  --dyni-linear-track-width: 0.28;
+  --dyni-linear-track-linewidth: 4;
+  --dyni-linear-tick-major-len: 20;
+  --dyni-linear-tick-major-width: 5;
+  --dyni-linear-tick-minor-len: 4;
+  --dyni-linear-tick-minor-width: 0.9;
+  --dyni-linear-pointer-width: 1.9;
+  --dyni-linear-pointer-length: 0.95;
+  --dyni-linear-label-inset: 1.1;
+  --dyni-linear-label-font: 0.2;
+
+  /* Font */
+  --dyni-font-weight: 900;
+  --dyni-label-weight: 300;
+
+  /* XTE */
+  --dyni-xte-line-width-factor: 2.8;
+  --dyni-xte-boat-size-factor: 1.8;
+}
