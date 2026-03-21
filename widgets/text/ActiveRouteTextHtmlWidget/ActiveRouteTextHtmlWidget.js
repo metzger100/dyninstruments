@@ -91,7 +91,6 @@
 
   function resolveMode(props, hostContext) {
     const p = props || {};
-    const isVerticalPanel = p.mode === "vertical";
     const normalThresholdRaw = toFiniteNumber(p.ratioThresholdNormal);
     const flatThresholdRaw = toFiniteNumber(p.ratioThresholdFlat);
     const normalThreshold = typeof normalThresholdRaw === "number"
@@ -109,9 +108,6 @@
       return "high";
     }
     if (ratio > flatThreshold) {
-      if (isVerticalPanel) {
-        return "normal";
-      }
       return "flat";
     }
     return "normal";
