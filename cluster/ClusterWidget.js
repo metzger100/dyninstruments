@@ -14,6 +14,25 @@
   const GLOBAL_ROOT = (typeof globalThis !== "undefined")
     ? globalThis
     : (typeof self !== "undefined" ? self : {});
+  const PERF_HOOK_KEY = "__DYNI_PERF_HOOKS__";
+
+  function startPerfSpan(name, tags) {
+    const hooks = GLOBAL_ROOT[PERF_HOOK_KEY];
+    if (!hooks || typeof hooks.startSpan !== "function") {
+      return null;
+    }
+    return {
+      hooks: hooks,
+      token: hooks.startSpan(name, tags || null)
+    };
+  }
+
+  function endPerfSpan(span, tags) {
+    if (!span || !span.hooks || typeof span.hooks.endSpan !== "function") {
+      return;
+    }
+    span.hooks.endSpan(span.token, tags || null);
+  }
 
   function resolveRuntimeApi() {
     const ns = GLOBAL_ROOT.DyniPlugin;
@@ -78,7 +97,20 @@
     }
 
     function translateFunction(props) {
-      return mapperRegistry.mapCluster(props || {}, mapperToolkit.createToolkit);
+      const routeProps = props || {};
+      const span = startPerfSpan("ClusterWidget.translateFunction", {
+        cluster: routeProps.cluster,
+        kind: routeProps.kind
+      });
+      try {
+        return mapperRegistry.mapCluster(routeProps, mapperToolkit.createToolkit);
+      }
+      finally {
+        endPerfSpan(span, {
+          cluster: routeProps.cluster,
+          kind: routeProps.kind
+        });
+      }
     }
 
     function initFunction() {
@@ -88,21 +120,32 @@
     function renderHtml(props) {
       const ctx = this || {};
       const routeProps = props || {};
-      const state = resolveRuntimeState(ctx);
-
-      state.hostCommitController.recordRender(routeProps);
-      ctx.__dyniHostCommitState = state.hostCommitController.getState();
-
-      const html = rendererRouter.renderHtml.call(ctx, routeProps);
-
-      state.hostCommitController.scheduleCommit({
-        onCommit: function (commitPayload) {
-          const sessionPayload = rendererRouter.createSessionPayload(commitPayload);
-          state.surfaceSessionController.reconcileSession(sessionPayload);
-        }
+      const span = startPerfSpan("ClusterWidget.renderHtml", {
+        cluster: routeProps.cluster,
+        kind: routeProps.kind
       });
+      const state = resolveRuntimeState(ctx);
+      try {
+        state.hostCommitController.recordRender(routeProps);
+        ctx.__dyniHostCommitState = state.hostCommitController.getState();
 
-      return html;
+        const html = rendererRouter.renderHtml.call(ctx, routeProps);
+
+        state.hostCommitController.scheduleCommit({
+          onCommit: function (commitPayload) {
+            const sessionPayload = rendererRouter.createSessionPayload(commitPayload);
+            state.surfaceSessionController.reconcileSession(sessionPayload);
+          }
+        });
+
+        return html;
+      }
+      finally {
+        endPerfSpan(span, {
+          cluster: routeProps.cluster,
+          kind: routeProps.kind
+        });
+      }
     }
 
     function finalizeFunction() {

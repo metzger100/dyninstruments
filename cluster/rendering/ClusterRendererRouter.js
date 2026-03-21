@@ -10,6 +10,29 @@
 }(this, function () {
   "use strict";
 
+  const GLOBAL_ROOT = (typeof globalThis !== "undefined")
+    ? globalThis
+    : (typeof self !== "undefined" ? self : {});
+  const PERF_HOOK_KEY = "__DYNI_PERF_HOOKS__";
+
+  function startPerfSpan(name, tags) {
+    const hooks = GLOBAL_ROOT[PERF_HOOK_KEY];
+    if (!hooks || typeof hooks.startSpan !== "function") {
+      return null;
+    }
+    return {
+      hooks: hooks,
+      token: hooks.startSpan(name, tags || null)
+    };
+  }
+
+  function endPerfSpan(span, tags) {
+    if (!span || !span.hooks || typeof span.hooks.endSpan !== "function") {
+      return;
+    }
+    span.hooks.endSpan(span.token, tags || null);
+  }
+
   function toClassToken(value) {
     return String(value || "")
       .replace(/[^a-zA-Z0-9_-]/g, "-")
@@ -300,8 +323,21 @@
         '>' + shellInner + "</div>";
     }
     function renderHtml(props) {
-      const routeState = resolveRouteState(props);
-      return buildShellHtml(routeState, this);
+      const routeProps = props || {};
+      const span = startPerfSpan("ClusterRendererRouter.renderHtml", {
+        cluster: routeProps.cluster,
+        kind: routeProps.kind
+      });
+      try {
+        const routeState = resolveRouteState(routeProps);
+        return buildShellHtml(routeState, this);
+      }
+      finally {
+        endPerfSpan(span, {
+          cluster: routeProps.cluster,
+          kind: routeProps.kind
+        });
+      }
     }
     function resolveRouteSpec(props) {
       return resolveRouteState(props).route;

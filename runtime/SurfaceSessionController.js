@@ -8,6 +8,7 @@
 
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
+  const PERF_HOOK_KEY = "__DYNI_PERF_HOOKS__";
   const SUPPORTED_SURFACES = {
     html: true,
     "canvas-dom": true
@@ -74,6 +75,14 @@
 
     let state = createInitialState();
 
+    function resolvePerfHooks() {
+      const hooks = root[PERF_HOOK_KEY];
+      if (!hooks || typeof hooks.startSpan !== "function" || typeof hooks.endSpan !== "function") {
+        return null;
+      }
+      return hooks;
+    }
+
     function getState() {
       return {
         desiredSurface: state.desiredSurface,
@@ -113,47 +122,63 @@
     }
 
     function reconcileSession(payload) {
+      const hooks = resolvePerfHooks();
+      const spanToken = hooks
+        ? hooks.startSpan("SurfaceSessionController.reconcileSession", {
+          surface: payload && payload.surface,
+          revision: payload && payload.revision
+        })
+        : null;
       ensurePayload(payload);
       ensureSurface(payload.surface);
+      try {
+        if (payload.revision < state.mountedRevision) {
+          return false;
+        }
 
-      if (payload.revision < state.mountedRevision) {
-        return false;
-      }
+        const mountedSurface = state.mountedSurface;
+        const mountedController = state.activeController;
+        const sameSurface = mountedSurface === payload.surface && !!mountedController;
+        const sameShell = sameSurface && state.shellEl === payload.shellEl;
 
-      const mountedSurface = state.mountedSurface;
-      const mountedController = state.activeController;
-      const sameSurface = mountedSurface === payload.surface && !!mountedController;
-      const sameShell = sameSurface && state.shellEl === payload.shellEl;
+        if (!mountedController) {
+          const firstController = createControllerForSurface(payload.surface);
+          firstController.attach(payload);
+          state.activeController = firstController;
+          applyMountedState(payload);
+          return true;
+        }
 
-      if (!mountedController) {
-        const firstController = createControllerForSurface(payload.surface);
-        firstController.attach(payload);
-        state.activeController = firstController;
+        if (sameSurface && sameShell) {
+          mountedController.update(payload);
+          applyMountedState(payload);
+          return true;
+        }
+
+        if (sameSurface) {
+          mountedController.detach("remount");
+          mountedController.attach(payload);
+          applyMountedState(payload);
+          return true;
+        }
+
+        mountedController.detach("surface-switch");
+        mountedController.destroy();
+
+        const nextController = createControllerForSurface(payload.surface);
+        nextController.attach(payload);
+        state.activeController = nextController;
         applyMountedState(payload);
         return true;
       }
-
-      if (sameSurface && sameShell) {
-        mountedController.update(payload);
-        applyMountedState(payload);
-        return true;
+      finally {
+        if (hooks && spanToken) {
+          hooks.endSpan(spanToken, {
+            surface: payload && payload.surface,
+            revision: payload && payload.revision
+          });
+        }
       }
-
-      if (sameSurface) {
-        mountedController.detach("remount");
-        mountedController.attach(payload);
-        applyMountedState(payload);
-        return true;
-      }
-
-      mountedController.detach("surface-switch");
-      mountedController.destroy();
-
-      const nextController = createControllerForSurface(payload.surface);
-      nextController.attach(payload);
-      state.activeController = nextController;
-      applyMountedState(payload);
-      return true;
     }
 
     function destroy() {

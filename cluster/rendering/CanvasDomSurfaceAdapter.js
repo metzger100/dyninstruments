@@ -17,9 +17,14 @@
   const MOUNT_SELECTOR = ".dyni-surface-canvas-mount";
   const CANVAS_CLASS = "dyni-surface-canvas-node";
   const RENDER_NOT_READY = { updated: false, changed: false };
-  const GLOBAL_ROOT = (typeof globalThis !== "undefined")
-    ? globalThis
-    : (typeof self !== "undefined" ? self : {});
+  const GLOBAL_ROOT = (typeof globalThis !== "undefined") ? globalThis : (typeof self !== "undefined" ? self : {});
+  function startPerfSpan(name, tags) {
+    const hooks = GLOBAL_ROOT.__DYNI_PERF_HOOKS__;
+    return (hooks && typeof hooks.startSpan === "function") ? { hooks: hooks, token: hooks.startSpan(name, tags || null) } : null;
+  }
+  function endPerfSpan(span, tags) {
+    if (span && span.hooks && typeof span.hooks.endSpan === "function") span.hooks.endSpan(span.token, tags || null);
+  }
 
   function hasClass(el, className) {
     return !!(el &&
@@ -138,6 +143,7 @@
       let paintDirty = false;
       let sizeDirty = false;
       let themeDirty = false;
+      let pendingPaintWaitSpan = null;
 
       function callThemeInvalidation(targetRootEl) {
         if (!themeResolver || typeof themeResolver !== "object") {
@@ -159,6 +165,11 @@
         }
         cancelFrame(rafHandle);
         rafHandle = null;
+        endPerfSpan(pendingPaintWaitSpan, {
+          rendererId: rendererSpec.id || "unknown",
+          status: "canceled"
+        });
+        pendingPaintWaitSpan = null;
       }
 
       function disconnectObserver() {
@@ -265,11 +276,31 @@
           return;
         }
 
-        if (hostContext) {
-          rendererSpec.renderCanvas.call(hostContext, canvasEl, props);
-        } else {
-          rendererSpec.renderCanvas(canvasEl, props);
+        const renderSpan = startPerfSpan("Renderer.renderCanvas", {
+          rendererId: rendererSpec.id || "unknown",
+          cluster: props && props.cluster,
+          kind: props && props.kind
+        });
+        try {
+          if (hostContext) {
+            rendererSpec.renderCanvas.call(hostContext, canvasEl, props);
+          } else {
+            rendererSpec.renderCanvas(canvasEl, props);
+          }
         }
+        finally {
+          endPerfSpan(renderSpan, {
+            rendererId: rendererSpec.id || "unknown",
+            cluster: props && props.cluster,
+            kind: props && props.kind
+          });
+        }
+        endPerfSpan(pendingPaintWaitSpan, {
+          rendererId: rendererSpec.id || "unknown",
+          revision: revision,
+          status: "painted"
+        });
+        pendingPaintWaitSpan = null;
         clearRenderFlags();
       }
 
@@ -283,6 +314,11 @@
           return false;
         }
 
+        pendingPaintWaitSpan = startPerfSpan("CanvasDomSurfaceAdapter.schedulePaint->paintNow", {
+          rendererId: rendererSpec.id || "unknown",
+          reason: reason || "update",
+          revision: revision
+        });
         rafHandle = requestFrame(function () {
           rafHandle = null;
           paintNow();
@@ -362,6 +398,11 @@
         cancelPendingFrame();
         disconnectObserver();
         removeCanvasNode();
+        endPerfSpan(pendingPaintWaitSpan, {
+          rendererId: rendererSpec.id || "unknown",
+          status: "detached"
+        });
+        pendingPaintWaitSpan = null;
         clearRenderFlags();
         clearDomRefs();
         props = undefined;

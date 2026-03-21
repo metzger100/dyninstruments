@@ -1,0 +1,2426 @@
+{
+  "baseline_schema_version": 1,
+  "baseline_id": "core-lab-v1",
+  "baseline_generated_at": "2026-03-21T14:08:09.751Z",
+  "source": "committed-ci-baseline",
+  "schema_version": 1,
+  "suite_id": "dyninstruments-perf-core-v1",
+  "generated_at": "2026-03-21T14:07:49.539Z",
+  "environment": {
+    "runner": "node-jsdom",
+    "browser_lab_mode": "simulated-chromium-headless",
+    "cpu_slowdown_factor": 6,
+    "warmup_iterations": 5,
+    "measured_iterations": 200,
+    "deterministic_seed": 1337,
+    "node_version": "v25.7.0",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "scenario_order": [
+    "speed_radial",
+    "wind_radial",
+    "xte_text",
+    "active_route_html",
+    "map_zoom_html",
+    "center_display_text",
+    "gpspage_all_widgets"
+  ],
+  "scenarios": {
+    "speed_radial": {
+      "sample_count": 200,
+      "compute_ms": {
+        "count": 200,
+        "min": 0.386,
+        "max": 5.394,
+        "mean": 0.618,
+        "p50": 0.511,
+        "p95": 0.981,
+        "p99": 2.008
+      },
+      "wait_ms": {
+        "count": 200,
+        "min": 0.754,
+        "max": 6.162,
+        "mean": 1.23,
+        "p50": 1.104,
+        "p95": 2.078,
+        "p99": 3.029
+      },
+      "total_ms": {
+        "count": 200,
+        "min": 1.002,
+        "max": 6.539,
+        "mean": 1.572,
+        "p50": 1.409,
+        "p95": 2.571,
+        "p99": 3.885
+      },
+      "wait_ratio": {
+        "count": 200,
+        "min": 0.488,
+        "max": 0.777,
+        "mean": 0.672,
+        "p50": 0.67,
+        "p95": 0.719,
+        "p99": 0.75
+      },
+      "wait_breakdown_ms": {
+        "host_commit_wait_ms": {
+          "count": 200,
+          "min": 0.243,
+          "max": 1.397,
+          "mean": 0.441,
+          "p50": 0.408,
+          "p95": 0.732,
+          "p99": 1.175
+        },
+        "surface_reconcile_wait_ms": {
+          "count": 200,
+          "min": 0.124,
+          "max": 0.587,
+          "mean": 0.207,
+          "p50": 0.184,
+          "p95": 0.379,
+          "p99": 0.567
+        },
+        "canvas_paint_queue_wait_ms": {
+          "count": 200,
+          "min": 0.367,
+          "max": 5.346,
+          "mean": 0.582,
+          "p50": 0.483,
+          "p95": 0.926,
+          "p99": 1.981
+        }
+      },
+      "long_tasks": {
+        "count_50ms": 0,
+        "max_ms": 0
+      },
+      "hotspots": {
+        "top_by_self": [
+          {
+            "function_name": "fitTextPx",
+            "file": "shared/widget-kits/radial/RadialTextFitting.js",
+            "self_ms": 3.234,
+            "total_ms": 29.06,
+            "self_share_pct": 6.813,
+            "total_share_pct": 2.607
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "cluster/rendering/RendererPropsWidget.js",
+            "self_ms": 3.233,
+            "total_ms": 109.772,
+            "self_share_pct": 6.811,
+            "total_share_pct": 9.848
+          },
+          {
+            "function_name": "computeProfile",
+            "file": "shared/widget-kits/layout/ResponsiveScaleProfile.js",
+            "self_ms": 2.463,
+            "total_ms": 2.463,
+            "self_share_pct": 5.189,
+            "total_share_pct": 0.221
+          },
+          {
+            "function_name": "getNightModeState",
+            "file": "shared/theme/ThemeResolver.js",
+            "self_ms": 2.348,
+            "total_ms": 2.348,
+            "self_share_pct": 4.946,
+            "total_share_pct": 0.211
+          },
+          {
+            "function_name": "withCtx.fillStyle",
+            "file": "shared/widget-kits/radial/RadialFrameRenderer.js",
+            "self_ms": 2.168,
+            "total_ms": 2.168,
+            "self_share_pct": 4.567,
+            "total_share_pct": 0.195
+          },
+          {
+            "function_name": "valueToAngle",
+            "file": "shared/widget-kits/radial/RadialValueMath.js",
+            "self_ms": 2.161,
+            "total_ms": 3.225,
+            "self_share_pct": 4.552,
+            "total_share_pct": 0.289
+          },
+          {
+            "function_name": "reconcileSession",
+            "file": "runtime/SurfaceSessionController.js",
+            "self_ms": 2.159,
+            "total_ms": 42.113,
+            "self_share_pct": 4.548,
+            "total_share_pct": 3.778
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "shared/widget-kits/radial/SemicircleRadialEngine.js",
+            "self_ms": 2.152,
+            "total_ms": 106.539,
+            "self_share_pct": 4.533,
+            "total_share_pct": 9.558
+          },
+          {
+            "function_name": "degToCanvasRad",
+            "file": "shared/widget-kits/radial/RadialAngleMath.js",
+            "self_ms": 2.146,
+            "total_ms": 2.146,
+            "self_share_pct": 4.521,
+            "total_share_pct": 0.193
+          },
+          {
+            "function_name": "drawModeText",
+            "file": "shared/widget-kits/radial/SemicircleRadialTextLayout.js",
+            "self_ms": 2.138,
+            "total_ms": 36.192,
+            "self_share_pct": 4.504,
+            "total_share_pct": 3.247
+          },
+          {
+            "function_name": "withCtx.strokeStyle",
+            "file": "shared/widget-kits/radial/RadialFrameRenderer.js",
+            "self_ms": 2.111,
+            "total_ms": 23.529,
+            "self_share_pct": 4.447,
+            "total_share_pct": 2.111
+          },
+          {
+            "function_name": "drawNormalText",
+            "file": "shared/widget-kits/radial/SemicircleRadialTextLayout.js",
+            "self_ms": 1.786,
+            "total_ms": 34.054,
+            "self_share_pct": 3.762,
+            "total_share_pct": 3.055
+          },
+          {
+            "function_name": "getNightModeState",
+            "file": "runtime/helpers.js",
+            "self_ms": 1.105,
+            "total_ms": 3.258,
+            "self_share_pct": 2.328,
+            "total_share_pct": 0.292
+          },
+          {
+            "function_name": "resolveRouteState",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 1.092,
+            "total_ms": 1.092,
+            "self_share_pct": 2.3,
+            "total_share_pct": 0.098
+          },
+          {
+            "function_name": "resolveRootElement",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 1.086,
+            "total_ms": 5.377,
+            "self_share_pct": 2.288,
+            "total_share_pct": 0.482
+          }
+        ],
+        "top_by_total": [
+          {
+            "function_name": "paintNow",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 0,
+            "total_ms": 114.081,
+            "self_share_pct": 0,
+            "total_share_pct": 10.235
+          },
+          {
+            "function_name": "(anonymous)",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 0,
+            "total_ms": 114.081,
+            "self_share_pct": 0,
+            "total_share_pct": 10.235
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "cluster/rendering/RendererPropsWidget.js",
+            "self_ms": 3.233,
+            "total_ms": 109.772,
+            "self_share_pct": 6.811,
+            "total_share_pct": 9.848
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "shared/widget-kits/radial/SemicircleRadialEngine.js",
+            "self_ms": 2.152,
+            "total_ms": 106.539,
+            "self_share_pct": 4.533,
+            "total_share_pct": 9.558
+          },
+          {
+            "function_name": "commitIfReady",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 57.244,
+            "self_share_pct": 0,
+            "total_share_pct": 5.136
+          },
+          {
+            "function_name": "(anonymous)",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 57.244,
+            "self_share_pct": 0,
+            "total_share_pct": 5.136
+          },
+          {
+            "function_name": "reconcileSession",
+            "file": "runtime/SurfaceSessionController.js",
+            "self_ms": 2.159,
+            "total_ms": 42.113,
+            "self_share_pct": 4.548,
+            "total_share_pct": 3.778
+          },
+          {
+            "function_name": "onCommit",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 0,
+            "total_ms": 42.113,
+            "self_share_pct": 0,
+            "total_share_pct": 3.778
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 0,
+            "total_ms": 36.69,
+            "self_share_pct": 0,
+            "total_share_pct": 3.292
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 0,
+            "total_ms": 36.69,
+            "self_share_pct": 0,
+            "total_share_pct": 3.292
+          },
+          {
+            "function_name": "drawModeText",
+            "file": "shared/widget-kits/radial/SemicircleRadialTextLayout.js",
+            "self_ms": 2.138,
+            "total_ms": 36.192,
+            "self_share_pct": 4.504,
+            "total_share_pct": 3.247
+          },
+          {
+            "function_name": "drawNormalText",
+            "file": "shared/widget-kits/radial/SemicircleRadialTextLayout.js",
+            "self_ms": 1.786,
+            "total_ms": 34.054,
+            "self_share_pct": 3.762,
+            "total_share_pct": 3.055
+          },
+          {
+            "function_name": "withCtx",
+            "file": "shared/widget-kits/radial/RadialCanvasPrimitives.js",
+            "self_ms": 0,
+            "total_ms": 31.016,
+            "self_share_pct": 0,
+            "total_share_pct": 2.783
+          },
+          {
+            "function_name": "fitTextPx",
+            "file": "shared/widget-kits/radial/RadialTextFitting.js",
+            "self_ms": 3.234,
+            "total_ms": 29.06,
+            "self_share_pct": 6.813,
+            "total_share_pct": 2.607
+          },
+          {
+            "function_name": "computeThreeRowsSizes",
+            "file": "shared/widget-kits/radial/SemicircleRadialTextLayout.js",
+            "self_ms": 0,
+            "total_ms": 29.06,
+            "self_share_pct": 0,
+            "total_share_pct": 2.607
+          }
+        ],
+        "hottest_self_share_pct": 6.813,
+        "top5_self_share_pct": 28.326,
+        "total_profiled_ms": 1114.645,
+        "source": "cpu-profile"
+      }
+    },
+    "wind_radial": {
+      "sample_count": 200,
+      "compute_ms": {
+        "count": 200,
+        "min": 0.482,
+        "max": 4.08,
+        "mean": 0.632,
+        "p50": 0.57,
+        "p95": 0.827,
+        "p99": 1.198
+      },
+      "wait_ms": {
+        "count": 200,
+        "min": 0.819,
+        "max": 7.518,
+        "mean": 1.098,
+        "p50": 0.985,
+        "p95": 1.465,
+        "p99": 4.313
+      },
+      "total_ms": {
+        "count": 200,
+        "min": 1.079,
+        "max": 7.773,
+        "mean": 1.374,
+        "p50": 1.259,
+        "p95": 1.787,
+        "p99": 4.594
+      },
+      "wait_ratio": {
+        "count": 200,
+        "min": 0.522,
+        "max": 0.917,
+        "mean": 0.633,
+        "p50": 0.63,
+        "p95": 0.66,
+        "p99": 0.694
+      },
+      "wait_breakdown_ms": {
+        "host_commit_wait_ms": {
+          "count": 200,
+          "min": 0.227,
+          "max": 0.915,
+          "mean": 0.312,
+          "p50": 0.282,
+          "p95": 0.458,
+          "p99": 0.562
+        },
+        "surface_reconcile_wait_ms": {
+          "count": 200,
+          "min": 0.119,
+          "max": 6.59,
+          "mean": 0.178,
+          "p50": 0.14,
+          "p95": 0.19,
+          "p99": 0.242
+        },
+        "canvas_paint_queue_wait_ms": {
+          "count": 200,
+          "min": 0.465,
+          "max": 4.065,
+          "mean": 0.608,
+          "p50": 0.544,
+          "p95": 0.802,
+          "p99": 1.176
+        }
+      },
+      "long_tasks": {
+        "count_50ms": 0,
+        "max_ms": 0
+      },
+      "hotspots": {
+        "top_by_self": [
+          {
+            "function_name": "measureBlockSizes",
+            "file": "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+            "self_ms": 8.639,
+            "total_ms": 61.949,
+            "self_share_pct": 16.833,
+            "total_share_pct": 5.758
+          },
+          {
+            "function_name": "fitTextPx",
+            "file": "shared/widget-kits/radial/RadialTextFitting.js",
+            "self_ms": 5.351,
+            "total_ms": 49.023,
+            "self_share_pct": 10.426,
+            "total_share_pct": 4.557
+          },
+          {
+            "function_name": "resolveRoute",
+            "file": "cluster/rendering/ClusterKindCatalog.js",
+            "self_ms": 3.734,
+            "total_ms": 3.734,
+            "self_share_pct": 7.275,
+            "total_share_pct": 0.347
+          },
+          {
+            "function_name": "applySurfaceContractStyles",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 3.454,
+            "total_ms": 15.434,
+            "self_share_pct": 6.73,
+            "total_share_pct": 1.435
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 2.203,
+            "total_ms": 31.265,
+            "self_share_pct": 4.292,
+            "total_share_pct": 2.906
+          },
+          {
+            "function_name": "scoreDisplaySizes",
+            "file": "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+            "self_ms": 2.157,
+            "total_ms": 2.157,
+            "self_share_pct": 4.203,
+            "total_share_pct": 0.2
+          },
+          {
+            "function_name": "clampNumber",
+            "file": "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+            "self_ms": 2.151,
+            "total_ms": 2.151,
+            "self_share_pct": 4.191,
+            "total_share_pct": 0.2
+          },
+          {
+            "function_name": "commitIfReady",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 2.149,
+            "total_ms": 42.444,
+            "self_share_pct": 4.187,
+            "total_share_pct": 3.945
+          },
+          {
+            "function_name": "applyFormatter",
+            "file": "runtime/helpers.js",
+            "self_ms": 2.149,
+            "total_ms": 3.219,
+            "self_share_pct": 4.187,
+            "total_share_pct": 0.299
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "shared/widget-kits/radial/FullCircleRadialEngine.js",
+            "self_ms": 2.147,
+            "total_ms": 102.001,
+            "self_share_pct": 4.183,
+            "total_share_pct": 9.481
+          },
+          {
+            "function_name": "growSize",
+            "file": "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+            "self_ms": 2.136,
+            "total_ms": 2.136,
+            "self_share_pct": 4.162,
+            "total_share_pct": 0.199
+          },
+          {
+            "function_name": "fullCircleKeyToText",
+            "file": "shared/widget-kits/radial/FullCircleRadialEngine.js",
+            "self_ms": 2.056,
+            "total_ms": 2.056,
+            "self_share_pct": 4.006,
+            "total_share_pct": 0.191
+          },
+          {
+            "function_name": "drawFrame",
+            "file": "widgets/radial/WindRadialWidget/WindRadialWidget.js",
+            "self_ms": 1.157,
+            "total_ms": 3.287,
+            "self_share_pct": 2.254,
+            "total_share_pct": 0.306
+          },
+          {
+            "function_name": "windDisplay",
+            "file": "widgets/radial/WindRadialWidget/WindRadialWidget.js",
+            "self_ms": 1.095,
+            "total_ms": 4.314,
+            "self_share_pct": 2.134,
+            "total_share_pct": 0.401
+          },
+          {
+            "function_name": "drawBlock",
+            "file": "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+            "self_ms": 1.094,
+            "total_ms": 4.374,
+            "self_share_pct": 2.132,
+            "total_share_pct": 0.407
+          }
+        ],
+        "top_by_total": [
+          {
+            "function_name": "(anonymous)",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 1.078,
+            "total_ms": 104.165,
+            "self_share_pct": 2.1,
+            "total_share_pct": 9.682
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "cluster/rendering/RendererPropsWidget.js",
+            "self_ms": 0,
+            "total_ms": 103.087,
+            "self_share_pct": 0,
+            "total_share_pct": 9.582
+          },
+          {
+            "function_name": "paintNow",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 0,
+            "total_ms": 103.087,
+            "self_share_pct": 0,
+            "total_share_pct": 9.582
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "shared/widget-kits/radial/FullCircleRadialEngine.js",
+            "self_ms": 2.147,
+            "total_ms": 102.001,
+            "self_share_pct": 4.183,
+            "total_share_pct": 9.481
+          },
+          {
+            "function_name": "drawDualNormal",
+            "file": "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+            "self_ms": 1.072,
+            "total_ms": 69.552,
+            "self_share_pct": 2.089,
+            "total_share_pct": 6.465
+          },
+          {
+            "function_name": "drawDualModeText",
+            "file": "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+            "self_ms": 0,
+            "total_ms": 69.552,
+            "self_share_pct": 0,
+            "total_share_pct": 6.465
+          },
+          {
+            "function_name": "normal",
+            "file": "widgets/radial/WindRadialWidget/WindRadialWidget.js",
+            "self_ms": 0,
+            "total_ms": 69.552,
+            "self_share_pct": 0,
+            "total_share_pct": 6.465
+          },
+          {
+            "function_name": "measureBlockSizes",
+            "file": "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+            "self_ms": 8.639,
+            "total_ms": 61.949,
+            "self_share_pct": 16.833,
+            "total_share_pct": 5.758
+          },
+          {
+            "function_name": "fitTextPx",
+            "file": "shared/widget-kits/radial/RadialTextFitting.js",
+            "self_ms": 5.351,
+            "total_ms": 49.023,
+            "self_share_pct": 10.426,
+            "total_share_pct": 4.557
+          },
+          {
+            "function_name": "commitIfReady",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 2.149,
+            "total_ms": 42.444,
+            "self_share_pct": 4.187,
+            "total_share_pct": 3.945
+          },
+          {
+            "function_name": "(anonymous)",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 42.444,
+            "self_share_pct": 0,
+            "total_share_pct": 3.945
+          },
+          {
+            "function_name": "onCommit",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 0,
+            "total_ms": 32.358,
+            "self_share_pct": 0,
+            "total_share_pct": 3.008
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 2.203,
+            "total_ms": 31.265,
+            "self_share_pct": 4.292,
+            "total_share_pct": 2.906
+          },
+          {
+            "function_name": "reconcileSession",
+            "file": "runtime/SurfaceSessionController.js",
+            "self_ms": 0,
+            "total_ms": 31.265,
+            "self_share_pct": 0,
+            "total_share_pct": 2.906
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 0,
+            "total_ms": 27.992,
+            "self_share_pct": 0,
+            "total_share_pct": 2.602
+          }
+        ],
+        "hottest_self_share_pct": 16.833,
+        "top5_self_share_pct": 45.556,
+        "total_profiled_ms": 1075.837,
+        "source": "cpu-profile"
+      }
+    },
+    "xte_text": {
+      "sample_count": 200,
+      "compute_ms": {
+        "count": 200,
+        "min": 0.212,
+        "max": 1.166,
+        "mean": 0.288,
+        "p50": 0.266,
+        "p95": 0.427,
+        "p99": 0.775
+      },
+      "wait_ms": {
+        "count": 200,
+        "min": 0.505,
+        "max": 5.82,
+        "mean": 0.736,
+        "p50": 0.63,
+        "p95": 1.124,
+        "p99": 2.477
+      },
+      "total_ms": {
+        "count": 200,
+        "min": 0.783,
+        "max": 6.142,
+        "mean": 1.053,
+        "p50": 0.941,
+        "p95": 1.479,
+        "p99": 2.786
+      },
+      "wait_ratio": {
+        "count": 200,
+        "min": 0.559,
+        "max": 0.937,
+        "mean": 0.707,
+        "p50": 0.705,
+        "p95": 0.754,
+        "p99": 0.881
+      },
+      "wait_breakdown_ms": {
+        "host_commit_wait_ms": {
+          "count": 200,
+          "min": 0.193,
+          "max": 3.967,
+          "mean": 0.297,
+          "p50": 0.248,
+          "p95": 0.457,
+          "p99": 0.796
+        },
+        "surface_reconcile_wait_ms": {
+          "count": 200,
+          "min": 0.103,
+          "max": 4.984,
+          "mean": 0.176,
+          "p50": 0.126,
+          "p95": 0.194,
+          "p99": 1.096
+        },
+        "canvas_paint_queue_wait_ms": {
+          "count": 200,
+          "min": 0.201,
+          "max": 0.828,
+          "mean": 0.264,
+          "p50": 0.244,
+          "p95": 0.384,
+          "p99": 0.692
+        }
+      },
+      "long_tasks": {
+        "count_50ms": 0,
+        "max_ms": 0
+      },
+      "hotspots": {
+        "top_by_self": [
+          {
+            "function_name": "renderCanvas",
+            "file": "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
+            "self_ms": 17.44,
+            "total_ms": 54.753,
+            "self_share_pct": 40.926,
+            "total_share_pct": 10.112
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "cluster/rendering/RendererPropsWidget.js",
+            "self_ms": 2.24,
+            "total_ms": 56.993,
+            "self_share_pct": 5.257,
+            "total_share_pct": 10.525
+          },
+          {
+            "function_name": "hasClass",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 2.233,
+            "total_ms": 4.424,
+            "self_share_pct": 5.24,
+            "total_share_pct": 0.817
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 2.196,
+            "total_ms": 24.658,
+            "self_share_pct": 5.153,
+            "total_share_pct": 4.554
+          },
+          {
+            "function_name": "createCanvasNode",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 2.165,
+            "total_ms": 5.379,
+            "self_share_pct": 5.081,
+            "total_share_pct": 0.993
+          },
+          {
+            "function_name": "drawValueUnitWithFit",
+            "file": "shared/widget-kits/radial/RadialTextLayout.js",
+            "self_ms": 2.163,
+            "total_ms": 3.227,
+            "self_share_pct": 5.076,
+            "total_share_pct": 0.596
+          },
+          {
+            "function_name": "splitColumns",
+            "file": "shared/widget-kits/xte/XteHighwayLayout.js",
+            "self_ms": 2.163,
+            "total_ms": 2.163,
+            "self_share_pct": 5.076,
+            "total_share_pct": 0.399
+          },
+          {
+            "function_name": "translate",
+            "file": "cluster/mappers/NavMapper.js",
+            "self_ms": 2.146,
+            "total_ms": 2.146,
+            "self_share_pct": 5.036,
+            "total_share_pct": 0.396
+          },
+          {
+            "function_name": "buildShellHtml",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 1.302,
+            "total_ms": 1.302,
+            "self_share_pct": 3.055,
+            "total_share_pct": 0.24
+          },
+          {
+            "function_name": "setupCanvas",
+            "file": "runtime/helpers.js",
+            "self_ms": 1.088,
+            "total_ms": 4.301,
+            "self_share_pct": 2.553,
+            "total_share_pct": 0.794
+          },
+          {
+            "function_name": "applySurfaceContractStyles",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 1.072,
+            "total_ms": 8.706,
+            "self_share_pct": 2.516,
+            "total_share_pct": 1.608
+          },
+          {
+            "function_name": "computeLayout",
+            "file": "shared/widget-kits/xte/XteHighwayLayout.js",
+            "self_ms": 1.071,
+            "total_ms": 3.234,
+            "self_share_pct": 2.513,
+            "total_share_pct": 0.597
+          },
+          {
+            "function_name": "measureValueUnitFit",
+            "file": "shared/widget-kits/radial/RadialTextFitting.js",
+            "self_ms": 1.071,
+            "total_ms": 2.142,
+            "self_share_pct": 2.513,
+            "total_share_pct": 0.396
+          },
+          {
+            "function_name": "measureMetricTile",
+            "file": "shared/widget-kits/text/TextTileLayout.js",
+            "self_ms": 1.07,
+            "total_ms": 3.212,
+            "self_share_pct": 2.511,
+            "total_share_pct": 0.593
+          },
+          {
+            "function_name": "renderHtml",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 1.066,
+            "total_ms": 6.685,
+            "self_share_pct": 2.502,
+            "total_share_pct": 1.235
+          }
+        ],
+        "top_by_total": [
+          {
+            "function_name": "renderCanvas",
+            "file": "cluster/rendering/RendererPropsWidget.js",
+            "self_ms": 2.24,
+            "total_ms": 56.993,
+            "self_share_pct": 5.257,
+            "total_share_pct": 10.525
+          },
+          {
+            "function_name": "paintNow",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 0,
+            "total_ms": 56.993,
+            "self_share_pct": 0,
+            "total_share_pct": 10.525
+          },
+          {
+            "function_name": "(anonymous)",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 0,
+            "total_ms": 56.993,
+            "self_share_pct": 0,
+            "total_share_pct": 10.525
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
+            "self_ms": 17.44,
+            "total_ms": 54.753,
+            "self_share_pct": 40.926,
+            "total_share_pct": 10.112
+          },
+          {
+            "function_name": "commitIfReady",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 38.871,
+            "self_share_pct": 0,
+            "total_share_pct": 7.179
+          },
+          {
+            "function_name": "(anonymous)",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 38.871,
+            "self_share_pct": 0,
+            "total_share_pct": 7.179
+          },
+          {
+            "function_name": "reconcileSession",
+            "file": "runtime/SurfaceSessionController.js",
+            "self_ms": 0,
+            "total_ms": 27.9,
+            "self_share_pct": 0,
+            "total_share_pct": 5.152
+          },
+          {
+            "function_name": "onCommit",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 0,
+            "total_ms": 27.9,
+            "self_share_pct": 0,
+            "total_share_pct": 5.152
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 2.196,
+            "total_ms": 24.658,
+            "self_share_pct": 5.153,
+            "total_share_pct": 4.554
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 0,
+            "total_ms": 22.462,
+            "self_share_pct": 0,
+            "total_share_pct": 4.148
+          },
+          {
+            "function_name": "resolveWidgetRoot",
+            "file": "runtime/helpers.js",
+            "self_ms": 0,
+            "total_ms": 10.876,
+            "self_share_pct": 0,
+            "total_share_pct": 2.009
+          },
+          {
+            "function_name": "drawMetricTile",
+            "file": "shared/widget-kits/text/TextTileLayout.js",
+            "self_ms": 0,
+            "total_ms": 9.675,
+            "self_share_pct": 0,
+            "total_share_pct": 1.787
+          },
+          {
+            "function_name": "applySurfaceContractStyles",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 1.072,
+            "total_ms": 8.706,
+            "self_share_pct": 2.516,
+            "total_share_pct": 1.608
+          },
+          {
+            "function_name": "findMountElement",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 0,
+            "total_ms": 8.377,
+            "self_share_pct": 0,
+            "total_share_pct": 1.547
+          },
+          {
+            "function_name": "renderHtml",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 1.066,
+            "total_ms": 6.685,
+            "self_share_pct": 2.502,
+            "total_share_pct": 1.235
+          }
+        ],
+        "hottest_self_share_pct": 40.926,
+        "top5_self_share_pct": 61.657,
+        "total_profiled_ms": 541.485,
+        "source": "cpu-profile"
+      }
+    },
+    "active_route_html": {
+      "sample_count": 200,
+      "compute_ms": {
+        "count": 200,
+        "min": 0.268,
+        "max": 1.079,
+        "mean": 0.392,
+        "p50": 0.356,
+        "p95": 0.592,
+        "p99": 0.958
+      },
+      "wait_ms": {
+        "count": 200,
+        "min": 0.491,
+        "max": 3.607,
+        "mean": 0.718,
+        "p50": 0.655,
+        "p95": 1.12,
+        "p99": 1.626
+      },
+      "total_ms": {
+        "count": 200,
+        "min": 0.8,
+        "max": 4.002,
+        "mean": 1.096,
+        "p50": 1.017,
+        "p95": 1.624,
+        "p99": 1.979
+      },
+      "wait_ratio": {
+        "count": 200,
+        "min": 0.403,
+        "max": 0.886,
+        "mean": 0.642,
+        "p50": 0.646,
+        "p95": 0.73,
+        "p99": 0.839
+      },
+      "wait_breakdown_ms": {
+        "host_commit_wait_ms": {
+          "count": 200,
+          "min": 0.465,
+          "max": 3.535,
+          "mean": 0.676,
+          "p50": 0.615,
+          "p95": 1.078,
+          "p99": 1.574
+        },
+        "surface_reconcile_wait_ms": {
+          "count": 200,
+          "min": 0.025,
+          "max": 0.102,
+          "mean": 0.042,
+          "p50": 0.039,
+          "p95": 0.071,
+          "p99": 0.089
+        },
+        "canvas_paint_queue_wait_ms": {
+          "count": 200,
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "p50": 0,
+          "p95": 0,
+          "p99": 0
+        }
+      },
+      "long_tasks": {
+        "count_50ms": 0,
+        "max_ms": 0
+      },
+      "hotspots": {
+        "top_by_self": [
+          {
+            "function_name": "renderMetricTile",
+            "file": "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+            "self_ms": 2.889,
+            "total_ms": 3.986,
+            "self_share_pct": 15.993,
+            "total_share_pct": 1.634
+          },
+          {
+            "function_name": "compute",
+            "file": "shared/widget-kits/nav/ActiveRouteHtmlFit.js",
+            "self_ms": 2.214,
+            "total_ms": 8.698,
+            "self_share_pct": 12.256,
+            "total_share_pct": 3.566
+          },
+          {
+            "function_name": "detach",
+            "file": "cluster/rendering/HtmlSurfaceController.js",
+            "self_ms": 2.129,
+            "total_ms": 2.129,
+            "self_share_pct": 11.786,
+            "total_share_pct": 0.873
+          },
+          {
+            "function_name": "renderHtml",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 1.1,
+            "total_ms": 19.197,
+            "self_share_pct": 6.089,
+            "total_share_pct": 7.87
+          },
+          {
+            "function_name": "trimText",
+            "file": "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+            "self_ms": 1.097,
+            "total_ms": 1.097,
+            "self_share_pct": 6.073,
+            "total_share_pct": 0.45
+          },
+          {
+            "function_name": "getNightModeState",
+            "file": "shared/theme/ThemeResolver.js",
+            "self_ms": 1.095,
+            "total_ms": 4.328,
+            "self_share_pct": 6.062,
+            "total_share_pct": 1.774
+          },
+          {
+            "function_name": "resolveRootElement",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 1.093,
+            "total_ms": 3.231,
+            "self_share_pct": 6.051,
+            "total_share_pct": 1.325
+          },
+          {
+            "function_name": "renderSurfaceShell",
+            "file": "cluster/rendering/HtmlSurfaceController.js",
+            "self_ms": 1.091,
+            "total_ms": 15.923,
+            "self_share_pct": 6.04,
+            "total_share_pct": 6.527
+          },
+          {
+            "function_name": "renderHtml",
+            "file": "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+            "self_ms": 1.076,
+            "total_ms": 14.832,
+            "self_share_pct": 5.957,
+            "total_share_pct": 6.08
+          },
+          {
+            "function_name": "toFiniteNumber",
+            "file": "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+            "self_ms": 1.072,
+            "total_ms": 1.072,
+            "self_share_pct": 5.934,
+            "total_share_pct": 0.439
+          },
+          {
+            "function_name": "applyFormatter",
+            "file": "runtime/helpers.js",
+            "self_ms": 1.071,
+            "total_ms": 3.228,
+            "self_share_pct": 5.929,
+            "total_share_pct": 1.323
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 1.069,
+            "total_ms": 6.46,
+            "self_share_pct": 5.918,
+            "total_share_pct": 2.648
+          },
+          {
+            "function_name": "resizeSignature",
+            "file": "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+            "self_ms": 1.068,
+            "total_ms": 4.296,
+            "self_share_pct": 5.912,
+            "total_share_pct": 1.761
+          },
+          {
+            "function_name": "commitIfReady",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 20.459,
+            "self_share_pct": 0,
+            "total_share_pct": 8.387
+          },
+          {
+            "function_name": "(anonymous)",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 20.459,
+            "self_share_pct": 0,
+            "total_share_pct": 8.387
+          }
+        ],
+        "top_by_total": [
+          {
+            "function_name": "commitIfReady",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 20.459,
+            "self_share_pct": 0,
+            "total_share_pct": 8.387
+          },
+          {
+            "function_name": "(anonymous)",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 20.459,
+            "self_share_pct": 0,
+            "total_share_pct": 8.387
+          },
+          {
+            "function_name": "renderHtml",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 1.1,
+            "total_ms": 19.197,
+            "self_share_pct": 6.089,
+            "total_share_pct": 7.87
+          },
+          {
+            "function_name": "renderHtml",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 0,
+            "total_ms": 16.989,
+            "self_share_pct": 0,
+            "total_share_pct": 6.964
+          },
+          {
+            "function_name": "renderSurfaceShell",
+            "file": "cluster/rendering/HtmlSurfaceController.js",
+            "self_ms": 1.091,
+            "total_ms": 15.923,
+            "self_share_pct": 6.04,
+            "total_share_pct": 6.527
+          },
+          {
+            "function_name": "renderSurfaceShell",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 0,
+            "total_ms": 15.923,
+            "self_share_pct": 0,
+            "total_share_pct": 6.527
+          },
+          {
+            "function_name": "buildShellHtml",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 0,
+            "total_ms": 15.923,
+            "self_share_pct": 0,
+            "total_share_pct": 6.527
+          },
+          {
+            "function_name": "renderHtml",
+            "file": "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+            "self_ms": 1.076,
+            "total_ms": 14.832,
+            "self_share_pct": 5.957,
+            "total_share_pct": 6.08
+          },
+          {
+            "function_name": "reconcileSession",
+            "file": "runtime/SurfaceSessionController.js",
+            "self_ms": 0,
+            "total_ms": 10.761,
+            "self_share_pct": 0,
+            "total_share_pct": 4.411
+          },
+          {
+            "function_name": "onCommit",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 0,
+            "total_ms": 10.761,
+            "self_share_pct": 0,
+            "total_share_pct": 4.411
+          },
+          {
+            "function_name": "compute",
+            "file": "shared/widget-kits/nav/ActiveRouteHtmlFit.js",
+            "self_ms": 2.214,
+            "total_ms": 8.698,
+            "self_share_pct": 12.256,
+            "total_share_pct": 3.566
+          },
+          {
+            "function_name": "resolveShellElement",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 6.467,
+            "self_share_pct": 0,
+            "total_share_pct": 2.651
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 1.069,
+            "total_ms": 6.46,
+            "self_share_pct": 5.918,
+            "total_share_pct": 2.648
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/HtmlSurfaceController.js",
+            "self_ms": 0,
+            "total_ms": 5.391,
+            "self_share_pct": 0,
+            "total_share_pct": 2.21
+          },
+          {
+            "function_name": "getNightModeState",
+            "file": "shared/theme/ThemeResolver.js",
+            "self_ms": 1.095,
+            "total_ms": 4.328,
+            "self_share_pct": 6.062,
+            "total_share_pct": 1.774
+          }
+        ],
+        "hottest_self_share_pct": 15.993,
+        "top5_self_share_pct": 52.197,
+        "total_profiled_ms": 243.941,
+        "source": "cpu-profile"
+      }
+    },
+    "map_zoom_html": {
+      "sample_count": 200,
+      "compute_ms": {
+        "count": 200,
+        "min": 0.168,
+        "max": 4.44,
+        "mean": 0.315,
+        "p50": 0.277,
+        "p95": 0.449,
+        "p99": 0.68
+      },
+      "wait_ms": {
+        "count": 200,
+        "min": 0.414,
+        "max": 1.87,
+        "mean": 0.615,
+        "p50": 0.592,
+        "p95": 0.886,
+        "p99": 1.138
+      },
+      "total_ms": {
+        "count": 200,
+        "min": 0.688,
+        "max": 2.675,
+        "mean": 0.988,
+        "p50": 0.96,
+        "p95": 1.333,
+        "p99": 1.659
+      },
+      "wait_ratio": {
+        "count": 200,
+        "min": 0.173,
+        "max": 0.886,
+        "mean": 0.675,
+        "p50": 0.689,
+        "p95": 0.733,
+        "p99": 0.764
+      },
+      "wait_breakdown_ms": {
+        "host_commit_wait_ms": {
+          "count": 200,
+          "min": 0.391,
+          "max": 1.817,
+          "mean": 0.573,
+          "p50": 0.545,
+          "p95": 0.843,
+          "p99": 1.092
+        },
+        "surface_reconcile_wait_ms": {
+          "count": 200,
+          "min": 0.021,
+          "max": 0.161,
+          "mean": 0.043,
+          "p50": 0.039,
+          "p95": 0.072,
+          "p99": 0.1
+        },
+        "canvas_paint_queue_wait_ms": {
+          "count": 200,
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "p50": 0,
+          "p95": 0,
+          "p99": 0
+        }
+      },
+      "long_tasks": {
+        "count_50ms": 0,
+        "max_ms": 0
+      },
+      "hotspots": {
+        "top_by_self": [
+          {
+            "function_name": "measureText",
+            "file": "shared/widget-kits/nav/MapZoomHtmlFit.js",
+            "self_ms": 4.321,
+            "total_ms": 4.321,
+            "self_share_pct": 17.184,
+            "total_share_pct": 1.194
+          },
+          {
+            "function_name": "resizeSignature",
+            "file": "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
+            "self_ms": 2.328,
+            "total_ms": 5.648,
+            "self_share_pct": 9.258,
+            "total_share_pct": 1.56
+          },
+          {
+            "function_name": "translateFunction",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 2.139,
+            "total_ms": 3.212,
+            "self_share_pct": 8.506,
+            "total_share_pct": 0.887
+          },
+          {
+            "function_name": "toFiniteNumber",
+            "file": "shared/widget-kits/nav/MapZoomHtmlFit.js",
+            "self_ms": 1.16,
+            "total_ms": 1.16,
+            "self_share_pct": 4.613,
+            "total_share_pct": 0.32
+          },
+          {
+            "function_name": "formatZoom",
+            "file": "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
+            "self_ms": 1.116,
+            "total_ms": 3.32,
+            "self_share_pct": 4.438,
+            "total_share_pct": 0.917
+          },
+          {
+            "function_name": "fitTextPx",
+            "file": "shared/widget-kits/nav/MapZoomHtmlFit.js",
+            "self_ms": 1.105,
+            "total_ms": 4.33,
+            "self_share_pct": 4.394,
+            "total_share_pct": 1.196
+          },
+          {
+            "function_name": "renderHtml",
+            "file": "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
+            "self_ms": 1.104,
+            "total_ms": 20.614,
+            "self_share_pct": 4.39,
+            "total_share_pct": 5.694
+          },
+          {
+            "function_name": "applyFormatter",
+            "file": "runtime/helpers.js",
+            "self_ms": 1.099,
+            "total_ms": 2.204,
+            "self_share_pct": 4.37,
+            "total_share_pct": 0.609
+          },
+          {
+            "function_name": "createSurfaceController",
+            "file": "cluster/rendering/HtmlSurfaceController.js",
+            "self_ms": 1.092,
+            "total_ms": 1.092,
+            "self_share_pct": 4.343,
+            "total_share_pct": 0.302
+          },
+          {
+            "function_name": "resolveTypography",
+            "file": "runtime/helpers.js",
+            "self_ms": 1.09,
+            "total_ms": 7.563,
+            "self_share_pct": 4.335,
+            "total_share_pct": 2.089
+          },
+          {
+            "function_name": "namedHandlers",
+            "file": "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
+            "self_ms": 1.088,
+            "total_ms": 1.088,
+            "self_share_pct": 4.327,
+            "total_share_pct": 0.301
+          },
+          {
+            "function_name": "detach",
+            "file": "cluster/rendering/HtmlSurfaceController.js",
+            "self_ms": 1.082,
+            "total_ms": 1.082,
+            "self_share_pct": 4.303,
+            "total_share_pct": 0.299
+          },
+          {
+            "function_name": "resolveFontFamily",
+            "file": "runtime/helpers.js",
+            "self_ms": 1.079,
+            "total_ms": 8.642,
+            "self_share_pct": 4.291,
+            "total_share_pct": 2.387
+          },
+          {
+            "function_name": "resolveMeasureContext",
+            "file": "shared/widget-kits/nav/MapZoomHtmlFit.js",
+            "self_ms": 1.075,
+            "total_ms": 1.075,
+            "self_share_pct": 4.275,
+            "total_share_pct": 0.297
+          },
+          {
+            "function_name": "createInnerController",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 1.072,
+            "total_ms": 2.164,
+            "self_share_pct": 4.263,
+            "total_share_pct": 0.598
+          }
+        ],
+        "top_by_total": [
+          {
+            "function_name": "commitIfReady",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 30.631,
+            "self_share_pct": 0,
+            "total_share_pct": 8.461
+          },
+          {
+            "function_name": "(anonymous)",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 30.631,
+            "self_share_pct": 0,
+            "total_share_pct": 8.461
+          },
+          {
+            "function_name": "buildModel",
+            "file": "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
+            "self_ms": 1.069,
+            "total_ms": 21.765,
+            "self_share_pct": 4.251,
+            "total_share_pct": 6.012
+          },
+          {
+            "function_name": "buildShellHtml",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 0,
+            "total_ms": 21.676,
+            "self_share_pct": 0,
+            "total_share_pct": 5.987
+          },
+          {
+            "function_name": "renderHtml",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 0,
+            "total_ms": 21.676,
+            "self_share_pct": 0,
+            "total_share_pct": 5.987
+          },
+          {
+            "function_name": "renderHtml",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 0,
+            "total_ms": 21.676,
+            "self_share_pct": 0,
+            "total_share_pct": 5.987
+          },
+          {
+            "function_name": "renderHtml",
+            "file": "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
+            "self_ms": 1.104,
+            "total_ms": 20.614,
+            "self_share_pct": 4.39,
+            "total_share_pct": 5.694
+          },
+          {
+            "function_name": "renderSurfaceShell",
+            "file": "cluster/rendering/HtmlSurfaceController.js",
+            "self_ms": 0,
+            "total_ms": 20.614,
+            "self_share_pct": 0,
+            "total_share_pct": 5.694
+          },
+          {
+            "function_name": "renderSurfaceShell",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 0,
+            "total_ms": 20.614,
+            "self_share_pct": 0,
+            "total_share_pct": 5.694
+          },
+          {
+            "function_name": "compute",
+            "file": "shared/widget-kits/nav/MapZoomHtmlFit.js",
+            "self_ms": 0,
+            "total_ms": 16.303,
+            "self_share_pct": 0,
+            "total_share_pct": 4.503
+          },
+          {
+            "function_name": "reconcileSession",
+            "file": "runtime/SurfaceSessionController.js",
+            "self_ms": 0,
+            "total_ms": 11.062,
+            "self_share_pct": 0,
+            "total_share_pct": 3.056
+          },
+          {
+            "function_name": "onCommit",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 0,
+            "total_ms": 11.062,
+            "self_share_pct": 0,
+            "total_share_pct": 3.056
+          },
+          {
+            "function_name": "resolveShellElement",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 9.699,
+            "self_share_pct": 0,
+            "total_share_pct": 2.679
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 0,
+            "total_ms": 8.9,
+            "self_share_pct": 0,
+            "total_share_pct": 2.458
+          },
+          {
+            "function_name": "resolveFontFamily",
+            "file": "runtime/helpers.js",
+            "self_ms": 1.079,
+            "total_ms": 8.642,
+            "self_share_pct": 4.291,
+            "total_share_pct": 2.387
+          }
+        ],
+        "hottest_self_share_pct": 17.184,
+        "top5_self_share_pct": 43.999,
+        "total_profiled_ms": 362.031,
+        "source": "cpu-profile"
+      }
+    },
+    "center_display_text": {
+      "sample_count": 200,
+      "compute_ms": {
+        "count": 200,
+        "min": 0.188,
+        "max": 1.097,
+        "mean": 0.292,
+        "p50": 0.261,
+        "p95": 0.452,
+        "p99": 0.695
+      },
+      "wait_ms": {
+        "count": 200,
+        "min": 0.463,
+        "max": 2.675,
+        "mean": 0.708,
+        "p50": 0.652,
+        "p95": 1.116,
+        "p99": 1.515
+      },
+      "total_ms": {
+        "count": 200,
+        "min": 0.708,
+        "max": 3.564,
+        "mean": 1.033,
+        "p50": 0.963,
+        "p95": 1.557,
+        "p99": 1.936
+      },
+      "wait_ratio": {
+        "count": 200,
+        "min": 0.429,
+        "max": 0.87,
+        "mean": 0.707,
+        "p50": 0.707,
+        "p95": 0.745,
+        "p99": 0.784
+      },
+      "wait_breakdown_ms": {
+        "host_commit_wait_ms": {
+          "count": 200,
+          "min": 0.175,
+          "max": 0.918,
+          "mean": 0.296,
+          "p50": 0.282,
+          "p95": 0.452,
+          "p99": 0.69
+        },
+        "surface_reconcile_wait_ms": {
+          "count": 200,
+          "min": 0.098,
+          "max": 1.857,
+          "mean": 0.15,
+          "p50": 0.129,
+          "p95": 0.225,
+          "p99": 0.455
+        },
+        "canvas_paint_queue_wait_ms": {
+          "count": 200,
+          "min": 0.175,
+          "max": 0.925,
+          "mean": 0.263,
+          "p50": 0.238,
+          "p95": 0.403,
+          "p99": 0.559
+        }
+      },
+      "long_tasks": {
+        "count_50ms": 0,
+        "max_ms": 0
+      },
+      "hotspots": {
+        "top_by_self": [
+          {
+            "function_name": "setFont",
+            "file": "shared/widget-kits/radial/RadialTextFitting.js",
+            "self_ms": 3.27,
+            "total_ms": 3.27,
+            "self_share_pct": 10.288,
+            "total_share_pct": 0.527
+          },
+          {
+            "function_name": "drawRelationRows",
+            "file": "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
+            "self_ms": 3.254,
+            "total_ms": 17.204,
+            "self_share_pct": 10.237,
+            "total_share_pct": 2.77
+          },
+          {
+            "function_name": "computeModeLayout",
+            "file": "shared/widget-kits/text/TextLayoutEngine.js",
+            "self_ms": 3.219,
+            "total_ms": 3.219,
+            "self_share_pct": 10.127,
+            "total_share_pct": 0.518
+          },
+          {
+            "function_name": "drawFittedLine",
+            "file": "shared/widget-kits/text/TextTileLayout.js",
+            "self_ms": 2.144,
+            "total_ms": 12.865,
+            "self_share_pct": 6.745,
+            "total_share_pct": 2.072
+          },
+          {
+            "function_name": "measureTextWidth",
+            "file": "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
+            "self_ms": 2.126,
+            "total_ms": 8.58,
+            "self_share_pct": 6.688,
+            "total_share_pct": 1.382
+          },
+          {
+            "function_name": "formatCourse",
+            "file": "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
+            "self_ms": 1.401,
+            "total_ms": 1.401,
+            "self_share_pct": 4.408,
+            "total_share_pct": 0.226
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
+            "self_ms": 1.188,
+            "total_ms": 49.911,
+            "self_share_pct": 3.737,
+            "total_share_pct": 8.037
+          },
+          {
+            "function_name": "toClassToken",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 1.152,
+            "total_ms": 1.152,
+            "self_share_pct": 3.624,
+            "total_share_pct": 0.186
+          },
+          {
+            "function_name": "applySurfaceContractStyles",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 1.137,
+            "total_ms": 18.573,
+            "self_share_pct": 3.577,
+            "total_share_pct": 2.991
+          },
+          {
+            "function_name": "makeRect",
+            "file": "shared/widget-kits/layout/LayoutRectMath.js",
+            "self_ms": 1.105,
+            "total_ms": 1.105,
+            "self_share_pct": 3.476,
+            "total_share_pct": 0.178
+          },
+          {
+            "function_name": "computeGreatCircle",
+            "file": "shared/widget-kits/nav/CenterDisplayMath.js",
+            "self_ms": 1.094,
+            "total_ms": 1.094,
+            "self_share_pct": 3.442,
+            "total_share_pct": 0.176
+          },
+          {
+            "function_name": "onCommit",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 1.091,
+            "total_ms": 37.315,
+            "self_share_pct": 3.432,
+            "total_share_pct": 6.009
+          },
+          {
+            "function_name": "clampNumber",
+            "file": "shared/widget-kits/layout/ResponsiveScaleProfile.js",
+            "self_ms": 1.09,
+            "total_ms": 1.09,
+            "self_share_pct": 3.429,
+            "total_share_pct": 0.176
+          },
+          {
+            "function_name": "getNightModeState",
+            "file": "runtime/helpers.js",
+            "self_ms": 1.087,
+            "total_ms": 2.168,
+            "self_share_pct": 3.42,
+            "total_share_pct": 0.349
+          },
+          {
+            "function_name": "paintNow",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 1.084,
+            "total_ms": 54.227,
+            "self_share_pct": 3.41,
+            "total_share_pct": 8.732
+          }
+        ],
+        "top_by_total": [
+          {
+            "function_name": "commitIfReady",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 54.837,
+            "self_share_pct": 0,
+            "total_share_pct": 8.83
+          },
+          {
+            "function_name": "(anonymous)",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 54.837,
+            "self_share_pct": 0,
+            "total_share_pct": 8.83
+          },
+          {
+            "function_name": "paintNow",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 1.084,
+            "total_ms": 54.227,
+            "self_share_pct": 3.41,
+            "total_share_pct": 8.732
+          },
+          {
+            "function_name": "(anonymous)",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 0,
+            "total_ms": 54.227,
+            "self_share_pct": 0,
+            "total_share_pct": 8.732
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
+            "self_ms": 1.188,
+            "total_ms": 49.911,
+            "self_share_pct": 3.737,
+            "total_share_pct": 8.037
+          },
+          {
+            "function_name": "onCommit",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 1.091,
+            "total_ms": 37.315,
+            "self_share_pct": 3.432,
+            "total_share_pct": 6.009
+          },
+          {
+            "function_name": "reconcileSession",
+            "file": "runtime/SurfaceSessionController.js",
+            "self_ms": 0,
+            "total_ms": 36.224,
+            "self_share_pct": 0,
+            "total_share_pct": 5.833
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 0,
+            "total_ms": 33.001,
+            "self_share_pct": 0,
+            "total_share_pct": 5.314
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 0,
+            "total_ms": 33.001,
+            "self_share_pct": 0,
+            "total_share_pct": 5.314
+          },
+          {
+            "function_name": "applySurfaceContractStyles",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 1.137,
+            "total_ms": 18.573,
+            "self_share_pct": 3.577,
+            "total_share_pct": 2.991
+          },
+          {
+            "function_name": "drawRelationRows",
+            "file": "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
+            "self_ms": 3.254,
+            "total_ms": 17.204,
+            "self_share_pct": 10.237,
+            "total_share_pct": 2.77
+          },
+          {
+            "function_name": "drawFittedLine",
+            "file": "shared/widget-kits/text/TextTileLayout.js",
+            "self_ms": 2.144,
+            "total_ms": 12.865,
+            "self_share_pct": 6.745,
+            "total_share_pct": 2.072
+          },
+          {
+            "function_name": "resolveShellElement",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 12.15,
+            "self_share_pct": 0,
+            "total_share_pct": 1.957
+          },
+          {
+            "function_name": "renderHtml",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 0,
+            "total_ms": 9.132,
+            "self_share_pct": 0,
+            "total_share_pct": 1.471
+          },
+          {
+            "function_name": "renderHtml",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 0,
+            "total_ms": 9.132,
+            "self_share_pct": 0,
+            "total_share_pct": 1.471
+          }
+        ],
+        "hottest_self_share_pct": 10.288,
+        "top5_self_share_pct": 44.085,
+        "total_profiled_ms": 621.004,
+        "source": "cpu-profile"
+      }
+    },
+    "gpspage_all_widgets": {
+      "sample_count": 200,
+      "compute_ms": {
+        "count": 200,
+        "min": 5.854,
+        "max": 13.18,
+        "mean": 6.786,
+        "p50": 6.52,
+        "p95": 9.387,
+        "p99": 10.588
+      },
+      "wait_ms": {
+        "count": 200,
+        "min": 14.372,
+        "max": 32.49,
+        "mean": 16.793,
+        "p50": 16.279,
+        "p95": 20.766,
+        "p99": 24.089
+      },
+      "total_ms": {
+        "count": 200,
+        "min": 18.135,
+        "max": 38.764,
+        "mean": 21.195,
+        "p50": 20.587,
+        "p95": 25.929,
+        "p99": 29.793
+      },
+      "wait_ratio": {
+        "count": 200,
+        "min": 0.551,
+        "max": 0.774,
+        "mean": 0.712,
+        "p50": 0.712,
+        "p95": 0.745,
+        "p99": 0.761
+      },
+      "wait_breakdown_ms": {
+        "host_commit_wait_ms": {
+          "count": 200,
+          "min": 7.029,
+          "max": 19.676,
+          "mean": 8.487,
+          "p50": 8.179,
+          "p95": 11.28,
+          "p99": 14.239
+        },
+        "surface_reconcile_wait_ms": {
+          "count": 200,
+          "min": 2.25,
+          "max": 6.889,
+          "mean": 2.62,
+          "p50": 2.528,
+          "p95": 3.2,
+          "p99": 3.92
+        },
+        "canvas_paint_queue_wait_ms": {
+          "count": 200,
+          "min": 4.932,
+          "max": 9.624,
+          "mean": 5.686,
+          "p50": 5.479,
+          "p95": 7.12,
+          "p99": 9.573
+        }
+      },
+      "long_tasks": {
+        "count_50ms": 0,
+        "max_ms": 0
+      },
+      "hotspots": {
+        "top_by_self": [
+          {
+            "function_name": "mergeRendererProps",
+            "file": "cluster/rendering/RendererPropsWidget.js",
+            "self_ms": 86.744,
+            "total_ms": 86.744,
+            "self_share_pct": 14.575,
+            "total_share_pct": 0.665
+          },
+          {
+            "function_name": "applySurfaceContractStyles",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 32.439,
+            "total_ms": 203.513,
+            "self_share_pct": 5.45,
+            "total_share_pct": 1.56
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "cluster/rendering/RendererPropsWidget.js",
+            "self_ms": 16.158,
+            "total_ms": 825.803,
+            "self_share_pct": 2.715,
+            "total_share_pct": 6.328
+          },
+          {
+            "function_name": "applyFormatter",
+            "file": "runtime/helpers.js",
+            "self_ms": 13.167,
+            "total_ms": 27.168,
+            "self_share_pct": 2.212,
+            "total_share_pct": 0.208
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "shared/widget-kits/linear/LinearGaugeEngine.js",
+            "self_ms": 12.993,
+            "total_ms": 240.703,
+            "self_share_pct": 2.183,
+            "total_share_pct": 1.845
+          },
+          {
+            "function_name": "withCtx.strokeStyle",
+            "file": "shared/widget-kits/radial/RadialFrameRenderer.js",
+            "self_ms": 11.883,
+            "total_ms": 60.496,
+            "self_share_pct": 1.997,
+            "total_share_pct": 0.464
+          },
+          {
+            "function_name": "setFont",
+            "file": "shared/widget-kits/radial/RadialTextFitting.js",
+            "self_ms": 11.772,
+            "total_ms": 11.772,
+            "self_share_pct": 1.978,
+            "total_share_pct": 0.09
+          },
+          {
+            "function_name": "mapCluster",
+            "file": "cluster/mappers/ClusterMapperRegistry.js",
+            "self_ms": 10.955,
+            "total_ms": 25.029,
+            "self_share_pct": 1.841,
+            "total_share_pct": 0.192
+          },
+          {
+            "function_name": "buildShellHtml",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 9.791,
+            "total_ms": 44.228,
+            "self_share_pct": 1.645,
+            "total_share_pct": 0.339
+          },
+          {
+            "function_name": "fitTextPx",
+            "file": "shared/widget-kits/radial/RadialTextFitting.js",
+            "self_ms": 9.787,
+            "total_ms": 150.284,
+            "self_share_pct": 1.644,
+            "total_share_pct": 1.152
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "shared/widget-kits/radial/SemicircleRadialEngine.js",
+            "self_ms": 9.725,
+            "total_ms": 275.663,
+            "self_share_pct": 1.634,
+            "total_share_pct": 2.112
+          },
+          {
+            "function_name": "computeProfile",
+            "file": "shared/widget-kits/layout/ResponsiveScaleProfile.js",
+            "self_ms": 9.656,
+            "total_ms": 12.9,
+            "self_share_pct": 1.622,
+            "total_share_pct": 0.099
+          },
+          {
+            "function_name": "renderHtml",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 9.207,
+            "total_ms": 126.825,
+            "self_share_pct": 1.547,
+            "total_share_pct": 0.972
+          },
+          {
+            "function_name": "findDescendantByClass",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 8.729,
+            "total_ms": 43.86,
+            "self_share_pct": 1.467,
+            "total_share_pct": 0.336
+          },
+          {
+            "function_name": "withCtx",
+            "file": "shared/widget-kits/radial/RadialCanvasPrimitives.js",
+            "self_ms": 8.61,
+            "total_ms": 91.838,
+            "self_share_pct": 1.447,
+            "total_share_pct": 0.704
+          }
+        ],
+        "top_by_total": [
+          {
+            "function_name": "(anonymous)",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 6.433,
+            "total_ms": 1247.083,
+            "self_share_pct": 1.081,
+            "total_share_pct": 9.556
+          },
+          {
+            "function_name": "commitIfReady",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 0,
+            "total_ms": 1240.65,
+            "self_share_pct": 0,
+            "total_share_pct": 9.507
+          },
+          {
+            "function_name": "(anonymous)",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 2.134,
+            "total_ms": 1102.663,
+            "self_share_pct": 0.359,
+            "total_share_pct": 8.45
+          },
+          {
+            "function_name": "paintNow",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 7.494,
+            "total_ms": 1100.529,
+            "self_share_pct": 1.259,
+            "total_share_pct": 8.433
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "cluster/rendering/RendererPropsWidget.js",
+            "self_ms": 16.158,
+            "total_ms": 825.803,
+            "self_share_pct": 2.715,
+            "total_share_pct": 6.328
+          },
+          {
+            "function_name": "resolveShellElement",
+            "file": "runtime/HostCommitController.js",
+            "self_ms": 1.104,
+            "total_ms": 596.312,
+            "self_share_pct": 0.185,
+            "total_share_pct": 4.57
+          },
+          {
+            "function_name": "onCommit",
+            "file": "cluster/ClusterWidget.js",
+            "self_ms": 6.63,
+            "total_ms": 531.589,
+            "self_share_pct": 1.114,
+            "total_share_pct": 4.074
+          },
+          {
+            "function_name": "reconcileSession",
+            "file": "runtime/SurfaceSessionController.js",
+            "self_ms": 4.337,
+            "total_ms": 519.561,
+            "self_share_pct": 0.729,
+            "total_share_pct": 3.981
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/ClusterRendererRouter.js",
+            "self_ms": 3.252,
+            "total_ms": 457.007,
+            "self_share_pct": 0.546,
+            "total_share_pct": 3.502
+          },
+          {
+            "function_name": "attach",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 4.407,
+            "total_ms": 435.031,
+            "self_share_pct": 0.74,
+            "total_share_pct": 3.334
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "shared/widget-kits/radial/SemicircleRadialEngine.js",
+            "self_ms": 9.725,
+            "total_ms": 275.663,
+            "self_share_pct": 1.634,
+            "total_share_pct": 2.112
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "shared/widget-kits/linear/LinearGaugeEngine.js",
+            "self_ms": 12.993,
+            "total_ms": 240.703,
+            "self_share_pct": 2.183,
+            "total_share_pct": 1.845
+          },
+          {
+            "function_name": "applySurfaceContractStyles",
+            "file": "cluster/rendering/CanvasDomSurfaceAdapter.js",
+            "self_ms": 32.439,
+            "total_ms": 203.513,
+            "self_share_pct": 5.45,
+            "total_share_pct": 1.56
+          },
+          {
+            "function_name": "resolveWidgetRoot",
+            "file": "runtime/helpers.js",
+            "self_ms": 5.395,
+            "total_ms": 183.9,
+            "self_share_pct": 0.906,
+            "total_share_pct": 1.409
+          },
+          {
+            "function_name": "renderCanvas",
+            "file": "shared/widget-kits/radial/FullCircleRadialEngine.js",
+            "self_ms": 5.52,
+            "total_ms": 161.269,
+            "self_share_pct": 0.927,
+            "total_share_pct": 1.236
+          }
+        ],
+        "hottest_self_share_pct": 14.575,
+        "top5_self_share_pct": 27.135,
+        "total_profiled_ms": 13049.694,
+        "source": "cpu-profile"
+      }
+    }
+  },
+  "hotspot_summary": {
+    "scenario_hottest": [
+      {
+        "scenario": "speed_radial",
+        "function_name": "fitTextPx",
+        "file": "shared/widget-kits/radial/RadialTextFitting.js",
+        "self_ms": 3.234,
+        "total_ms": 29.06,
+        "self_share_pct": 6.813,
+        "total_share_pct": 2.607
+      },
+      {
+        "scenario": "wind_radial",
+        "function_name": "measureBlockSizes",
+        "file": "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+        "self_ms": 8.639,
+        "total_ms": 61.949,
+        "self_share_pct": 16.833,
+        "total_share_pct": 5.758
+      },
+      {
+        "scenario": "xte_text",
+        "function_name": "renderCanvas",
+        "file": "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
+        "self_ms": 17.44,
+        "total_ms": 54.753,
+        "self_share_pct": 40.926,
+        "total_share_pct": 10.112
+      },
+      {
+        "scenario": "active_route_html",
+        "function_name": "renderMetricTile",
+        "file": "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+        "self_ms": 2.889,
+        "total_ms": 3.986,
+        "self_share_pct": 15.993,
+        "total_share_pct": 1.634
+      },
+      {
+        "scenario": "map_zoom_html",
+        "function_name": "measureText",
+        "file": "shared/widget-kits/nav/MapZoomHtmlFit.js",
+        "self_ms": 4.321,
+        "total_ms": 4.321,
+        "self_share_pct": 17.184,
+        "total_share_pct": 1.194
+      },
+      {
+        "scenario": "center_display_text",
+        "function_name": "setFont",
+        "file": "shared/widget-kits/radial/RadialTextFitting.js",
+        "self_ms": 3.27,
+        "total_ms": 3.27,
+        "self_share_pct": 10.288,
+        "total_share_pct": 0.527
+      },
+      {
+        "scenario": "gpspage_all_widgets",
+        "function_name": "mergeRendererProps",
+        "file": "cluster/rendering/RendererPropsWidget.js",
+        "self_ms": 86.744,
+        "total_ms": 86.744,
+        "self_share_pct": 14.575,
+        "total_share_pct": 0.665
+      }
+    ],
+    "hottest_overall": [
+      {
+        "scenario": "xte_text",
+        "function_name": "renderCanvas",
+        "file": "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
+        "self_ms": 17.44,
+        "total_ms": 54.753,
+        "self_share_pct": 40.926,
+        "total_share_pct": 10.112
+      },
+      {
+        "scenario": "map_zoom_html",
+        "function_name": "measureText",
+        "file": "shared/widget-kits/nav/MapZoomHtmlFit.js",
+        "self_ms": 4.321,
+        "total_ms": 4.321,
+        "self_share_pct": 17.184,
+        "total_share_pct": 1.194
+      },
+      {
+        "scenario": "wind_radial",
+        "function_name": "measureBlockSizes",
+        "file": "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+        "self_ms": 8.639,
+        "total_ms": 61.949,
+        "self_share_pct": 16.833,
+        "total_share_pct": 5.758
+      },
+      {
+        "scenario": "active_route_html",
+        "function_name": "renderMetricTile",
+        "file": "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+        "self_ms": 2.889,
+        "total_ms": 3.986,
+        "self_share_pct": 15.993,
+        "total_share_pct": 1.634
+      },
+      {
+        "scenario": "gpspage_all_widgets",
+        "function_name": "mergeRendererProps",
+        "file": "cluster/rendering/RendererPropsWidget.js",
+        "self_ms": 86.744,
+        "total_ms": 86.744,
+        "self_share_pct": 14.575,
+        "total_share_pct": 0.665
+      },
+      {
+        "scenario": "center_display_text",
+        "function_name": "setFont",
+        "file": "shared/widget-kits/radial/RadialTextFitting.js",
+        "self_ms": 3.27,
+        "total_ms": 3.27,
+        "self_share_pct": 10.288,
+        "total_share_pct": 0.527
+      },
+      {
+        "scenario": "speed_radial",
+        "function_name": "fitTextPx",
+        "file": "shared/widget-kits/radial/RadialTextFitting.js",
+        "self_ms": 3.234,
+        "total_ms": 29.06,
+        "self_share_pct": 6.813,
+        "total_share_pct": 2.607
+      }
+    ]
+  },
+  "hotspot_allowlist": {
+    "speed_radial": [],
+    "wind_radial": [],
+    "xte_text": [],
+    "active_route_html": [],
+    "map_zoom_html": [],
+    "center_display_text": [],
+    "gpspage_all_widgets": []
+  }
+}

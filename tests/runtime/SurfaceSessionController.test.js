@@ -1,8 +1,9 @@
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
 describe("runtime/SurfaceSessionController.js", function () {
-  function loadFactory() {
+  function loadFactory(overrides) {
     const context = createScriptContext({
+      ...(overrides || {}),
       DyniPlugin: {
         runtime: {},
         state: {},
@@ -231,6 +232,41 @@ describe("runtime/SurfaceSessionController.js", function () {
     expect(session.isCurrentRevision(7)).toBe(true);
     expect(session.isCurrentRevision(6)).toBe(false);
     expect(session.isCurrentRevision(8)).toBe(false);
+  });
+
+  it("emits reconcileSession lifecycle spans when perf hooks are installed", function () {
+    const spans = [];
+    const createSurfaceSessionController = loadFactory({
+      __DYNI_PERF_HOOKS__: {
+        startSpan(name, tags) {
+          return { name, tags: tags || null };
+        },
+        endSpan(token, tags) {
+          spans.push({
+            name: token && token.name,
+            tags: {
+              ...(token && token.tags ? token.tags : {}),
+              ...(tags && typeof tags === "object" ? tags : {})
+            }
+          });
+        }
+      }
+    });
+    const htmlController = createControllerMock("html");
+    const createSurfaceController = vi.fn(function () {
+      return htmlController;
+    });
+    const session = createSurfaceSessionController({
+      createSurfaceController: createSurfaceController
+    });
+
+    session.reconcileSession(createPayload("html", { id: "shell" }, 1, { value: 1 }));
+    session.reconcileSession(createPayload("html", { id: "shell" }, 2, { value: 2 }));
+
+    const reconcileSpans = spans.filter((entry) => entry.name === "SurfaceSessionController.reconcileSession");
+    expect(reconcileSpans).toHaveLength(2);
+    expect(reconcileSpans[0].tags.surface).toBe("html");
+    expect(reconcileSpans[1].tags.revision).toBe(2);
   });
 
   it("destroy tears down active controller and is idempotent", function () {
