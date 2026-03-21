@@ -33,6 +33,7 @@ Ownership split:
 | `captionUnitScale` | number | `0.8` | Caption/unit scale ratio vs value text |
 | `default` | string | `"---"` | Placeholder for missing/invalid zoom values |
 | `editing` | boolean | `false` | Forces passive click ownership in editor mode |
+| `dyniLayoutEditing` | boolean | `false` | Dyninstruments runtime fallback for layout edit mode when AvNav strips `editing` from render props |
 
 ## Visual Contract
 

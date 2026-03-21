@@ -121,6 +121,11 @@ updateFunction: function(values) -> object
 
 Used when editor values change (for example KEY-driven dynamic store key mapping). In dyninstruments, update functions are composed in `runtime/widget-registrar.js` via `composeUpdates(spec.updateFunction, widgetDef.def.updateFunction)`.
 
+Renderer-facing edit-mode note:
+
+- AvNav forwards `editing` to `updateFunction(values)` but strips it from render props.
+- `runtime/widget-registrar.js` mirrors that signal to `dyniLayoutEditing` so interactive renderers can keep host click ownership in layout edit mode.
+
 ### cluster
 
 Internal cluster ID (for example `"speed"`, `"wind"`) used by ClusterWidget mapper routing.

@@ -106,6 +106,12 @@ describe("runtime/widget-registrar.js", function () {
 
     const updated = registeredDef.updateFunction({ a: 1 });
     expect(updated).toEqual({ a: 1, fromSpec: true, fromDef: true });
+
+    const updatedEditing = registeredDef.updateFunction({ a: 1, editing: true });
+    expect(updatedEditing).toEqual({ a: 1, editing: true, fromSpec: true, fromDef: true, dyniLayoutEditing: true });
+
+    const updatedNotEditing = registeredDef.updateFunction({ a: 1, editing: false });
+    expect(updatedNotEditing).toEqual({ a: 1, editing: false, fromSpec: true, fromDef: true, dyniLayoutEditing: false });
     expect(registeredDef.renderCanvas).toBeUndefined();
   });
 

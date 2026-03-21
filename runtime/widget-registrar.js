@@ -9,6 +9,19 @@
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
   const hasOwn = Object.prototype.hasOwnProperty;
+  const LAYOUT_EDITING_HINT_KEY = "dyniLayoutEditing";
+
+  function applyLayoutEditingHint(sourceValues, candidate) {
+    if (!sourceValues || typeof sourceValues !== "object") {
+      return candidate;
+    }
+    if (!hasOwn.call(sourceValues, "editing")) {
+      return candidate;
+    }
+    const out = (candidate && typeof candidate === "object") ? candidate : {};
+    out[LAYOUT_EDITING_HINT_KEY] = sourceValues.editing === true;
+    return out;
+  }
 
   function composeUpdates() {
     const fns = Array.prototype.slice.call(arguments).filter(function (fn) {
@@ -21,10 +34,11 @@
 
     return function (values) {
       const ctx = this;
-      return fns.reduce(function (acc, fn) {
+      const next = fns.reduce(function (acc, fn) {
         const r = fn.call(ctx, acc);
         return (r && typeof r === "object") ? r : acc;
       }, values);
+      return applyLayoutEditingHint(values, next);
     };
   }
 

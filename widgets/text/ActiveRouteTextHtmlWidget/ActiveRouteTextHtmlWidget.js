@@ -147,9 +147,14 @@
     );
   }
 
+  function isEditingMode(props) {
+    const p = props && typeof props === "object" ? props : {};
+    return p.editing === true || p.dyniLayoutEditing === true;
+  }
+
   function openActiveRoute(hostContext, props) {
     const p = props && typeof props === "object" ? props : null;
-    if (p && p.editing === true) {
+    if (isEditingMode(p)) {
       return false;
     }
     if (!canDispatchOpenRoute(hostContext)) {
@@ -199,7 +204,7 @@
       )
       : "";
     const mode = resolveMode(p, hostContext);
-    const isEditing = p.editing === true;
+    const isEditing = isEditingMode(p);
     const dispatchOpenRoute = canDispatchOpenRoute(hostContext);
     const canOpenRoute = !isEditing && dispatchOpenRoute;
     const captureClicks = canOpenRoute;
