@@ -119,9 +119,14 @@
     );
   }
 
+  function isEditingMode(props) {
+    const p = props || {};
+    return p.editing === true || p.dyniLayoutEditing === true;
+  }
+
   function dispatchCheckAutoZoom(hostContext, props) {
     const p = props || {};
-    if (p.editing === true) {
+    if (isEditingMode(p)) {
       return false;
     }
     if (!canDispatchCheckAutoZoom(hostContext)) {
@@ -190,7 +195,7 @@
       const zoomText = formatZoom(zoomNumber, defaultText, Helpers);
       const requiredText = formatZoom(requiredZoomNumber, defaultText, Helpers);
       const showRequired = typeof requiredZoomNumber === "number" && requiredZoomNumber !== zoomNumber;
-      const isEditing = p.editing === true;
+      const isEditing = isEditingMode(p);
       const canDispatch = !isEditing && canDispatchCheckAutoZoom(hostContext);
       const captionUnitScale = clampCaptionUnitScale(p.captionUnitScale);
 

@@ -55,6 +55,8 @@ ActiveRouteTextHtmlWidget: {
 | `ratioThresholdNormal` | number | `1.2` | Ratio below this -> `high` |
 | `ratioThresholdFlat` | number | `3.8` | Ratio above this -> `flat` |
 | `default` | string | `"---"` | Placeholder for missing/invalid values |
+| `editing` | boolean | `false` | Forces passive click ownership in editor mode |
+| `dyniLayoutEditing` | boolean | `false` | Dyninstruments runtime fallback for layout edit mode when AvNav strips `editing` from render props |
 
 ## Visual Contract
 

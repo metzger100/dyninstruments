@@ -123,6 +123,23 @@ describe("MapZoomTextHtmlWidget", function () {
     expect(checkAutoZoom).not.toHaveBeenCalled();
   });
 
+  it("keeps click ownership passive when dyniLayoutEditing is forwarded", function () {
+    const renderer = createRenderer();
+    const checkAutoZoom = vi.fn(() => true);
+    const hostContext = createHostContext({
+      capability: "dispatch",
+      checkAutoZoom: checkAutoZoom
+    });
+    const html = renderer.renderHtml.call(hostContext, makeProps({ dyniLayoutEditing: true }));
+    const handlers = renderer.namedHandlers({ dyniLayoutEditing: true }, hostContext);
+
+    expect(html).toContain("dyni-map-zoom-open-passive");
+    expect(html).not.toContain('onclick="catchAll"');
+    expect(html).not.toContain("dyni-map-zoom-open-hotspot");
+    expect(handlers.mapZoomCheckAutoZoom()).toBe(false);
+    expect(checkAutoZoom).not.toHaveBeenCalled();
+  });
+
   it("dispatches host map.checkAutoZoom when capability is dispatch", function () {
     const renderer = createRenderer();
     const checkAutoZoom = vi.fn(() => true);

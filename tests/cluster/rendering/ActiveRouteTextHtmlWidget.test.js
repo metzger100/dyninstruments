@@ -201,6 +201,25 @@ describe("ActiveRouteTextHtmlWidget", function () {
     expect(openActiveRoute).not.toHaveBeenCalled();
   });
 
+  it("stays passive when dyniLayoutEditing is forwarded by the registrar", function () {
+    const renderer = createRenderer().renderer;
+    const openActiveRoute = vi.fn(() => true);
+    const hostContext = createHostContext({
+      capability: "dispatch",
+      openActiveRoute: openActiveRoute
+    });
+    const html = renderer.renderHtml.call(hostContext, makeProps({ dyniLayoutEditing: true }));
+
+    expect(html).toContain("dyni-active-route-open-passive");
+    expect(html).not.toContain('onclick="catchAll"');
+    expect(html).not.toContain("dyni-active-route-open-hotspot");
+    expect(html).not.toContain('onclick="activeRouteOpen"');
+
+    const handlers = renderer.namedHandlers({ dyniLayoutEditing: true }, hostContext);
+    expect(handlers.activeRouteOpen()).toBe(false);
+    expect(openActiveRoute).not.toHaveBeenCalled();
+  });
+
   it("marks disconnect state and uses default placeholders through formatter contract", function () {
     const applyFormatter = vi.fn(function (value, options) {
       return value == null ? options.default : String(value);
