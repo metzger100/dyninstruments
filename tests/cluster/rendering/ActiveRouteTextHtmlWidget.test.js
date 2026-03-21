@@ -1,9 +1,23 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("ActiveRouteTextHtmlWidget", function () {
-  function createRenderer(applyFormatterImpl) {
+  function createRenderer(options) {
+    const opts = options || {};
+    const fitCompute = opts.fitCompute || vi.fn(function () {
+      return {
+        routeNameStyle: "font-size:14px;",
+        metrics: {
+          remain: { valueStyle: "font-size:18px;", unitStyle: "font-size:11px;" },
+          eta: { valueStyle: "font-size:17px;", unitStyle: "font-size:10px;" },
+          next: { valueStyle: "font-size:16px;", unitStyle: "font-size:9px;" }
+        }
+      };
+    });
+    const fitService = {
+      compute: fitCompute
+    };
     const Helpers = {
-      applyFormatter: applyFormatterImpl || function (value, options) {
+      applyFormatter: opts.applyFormatter || function (value, options) {
         const cfg = options || {};
         const formatter = cfg.formatter;
         const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
@@ -20,10 +34,23 @@ describe("ActiveRouteTextHtmlWidget", function () {
           return "DIR:" + String(value);
         }
         return String(value);
+      },
+      getModule: function (id) {
+        if (id === "ActiveRouteHtmlFit") {
+          return {
+            create: function () {
+              return fitService;
+            }
+          };
+        }
+        throw new Error("Unknown module requested: " + id);
       }
     };
 
-    return loadFresh("widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js").create({}, Helpers);
+    return {
+      renderer: loadFresh("widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js").create({}, Helpers),
+      fitCompute: fitCompute
+    };
   }
 
   function createHostContext(options) {
@@ -53,10 +80,14 @@ describe("ActiveRouteTextHtmlWidget", function () {
     return hostContext;
   }
 
+  function escapeForRegExp(value) {
+    return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
   function expectMetricValueRow(html, metricId, valueText, unitText) {
     expect(html).toContain('class="dyni-active-route-metric dyni-active-route-metric-' + metricId + '"');
-    expect(html).toContain('class="dyni-active-route-metric-value">' + valueText + "</span>");
-    expect(html).toContain('class="dyni-active-route-metric-unit">' + unitText + "</span>");
+    expect(html).toMatch(new RegExp('class="dyni-active-route-metric-value"[^>]*>' + escapeForRegExp(valueText) + "</span>"));
+    expect(html).toMatch(new RegExp('class="dyni-active-route-metric-unit"[^>]*>' + escapeForRegExp(unitText) + "</span>"));
   }
 
   function makeProps(overrides) {
@@ -83,8 +114,9 @@ describe("ActiveRouteTextHtmlWidget", function () {
     }, overrides || {});
   }
 
-  it("renders interactive html with catchAll wrapper and activeRouteOpen target", function () {
-    const renderer = createRenderer();
+  it("renders interactive html with catchAll wrapper and full-surface activeRouteOpen hotspot", function () {
+    const setup = createRenderer();
+    const renderer = setup.renderer;
     const hostContext = createHostContext({ capability: "dispatch" });
     const html = renderer.renderHtml.call(hostContext, makeProps());
 
@@ -94,20 +126,22 @@ describe("ActiveRouteTextHtmlWidget", function () {
     expect(html).toContain("dyni-active-route-open-dispatch");
     expect(html).toContain("dyni-active-route-mode-normal");
     expect(html).toContain('onclick="catchAll"');
+    expect(html).toContain('class="dyni-active-route-open-hotspot"');
     expect(html).toContain('onclick="activeRouteOpen"');
-    expect(html).toContain('class="dyni-active-route-route-name dyni-active-route-open-action is-dispatch"');
+    expect(html).not.toContain("dyni-active-route-open-action");
     expect(html).not.toContain("data-dyni-active-route");
     expect(html).not.toContain("data-dyni-disconnect");
     expect(html).not.toContain("data-dyni-open-state");
     expect(html).not.toContain("data-dyni-action");
-    expect(html).toContain(">Harbor Run</div>");
+    expect(html).toMatch(/class="dyni-active-route-route-name"[^>]*>Harbor Run<\/div>/);
     expectMetricValueRow(html, "remain", "DIST:12.4:nm", "nm");
     expectMetricValueRow(html, "eta", "TIME:2026-03-06T11:45:00Z", "");
     expectMetricValueRow(html, "next", "DIR:93", "deg");
+    expect(setup.fitCompute).toHaveBeenCalledTimes(1);
   });
 
   it("marks open action as passive when host capability is not dispatch", function () {
-    const renderer = createRenderer();
+    const renderer = createRenderer().renderer;
     const openActiveRoute = vi.fn(() => true);
     const hostContext = createHostContext({
       capability: "passive",
@@ -123,7 +157,8 @@ describe("ActiveRouteTextHtmlWidget", function () {
     }));
 
     expect(html).toContain("dyni-active-route-open-passive");
-    expect(html).toContain("is-passive");
+    expect(html).not.toContain("dyni-active-route-open-hotspot");
+    expect(html).not.toContain('onclick="activeRouteOpen"');
     expect(html).not.toContain("dyni-active-route-metric-next");
     expect(html).not.toContain("DIR:93");
 
@@ -133,7 +168,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
   });
 
   it("dispatches openActiveRoute only when capability is dispatch", function () {
-    const renderer = createRenderer();
+    const renderer = createRenderer().renderer;
     const openActiveRoute = vi.fn(() => true);
     const hostContext = createHostContext({
       capability: "dispatch",
@@ -150,7 +185,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const applyFormatter = vi.fn(function (value, options) {
       return value == null ? options.default : String(value);
     });
-    const renderer = createRenderer(applyFormatter);
+    const renderer = createRenderer({ applyFormatter: applyFormatter }).renderer;
     const html = renderer.renderHtml.call(createHostContext(), makeProps({ disconnect: true }));
 
     expect(html).toContain("dyni-active-route-disconnect");
@@ -161,7 +196,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
   });
 
   it("updates resize signature only when layout-relevant text/state changes", function () {
-    const renderer = createRenderer();
+    const renderer = createRenderer().renderer;
     const hostContext = createHostContext();
     const base = makeProps();
 
@@ -185,31 +220,56 @@ describe("ActiveRouteTextHtmlWidget", function () {
   });
 
   it("assigns high mode class when shell ratio is below the high threshold", function () {
-    const renderer = createRenderer();
+    const renderer = createRenderer().renderer;
     const hostContext = createHostContext({ shellSize: { width: 100, height: 220 } });
     const html = renderer.renderHtml.call(hostContext, makeProps());
     expect(html).toContain("dyni-active-route-mode-high");
   });
 
   it("assigns flat mode class when shell ratio is above the flat threshold", function () {
-    const renderer = createRenderer();
+    const renderer = createRenderer().renderer;
     const hostContext = createHostContext({ shellSize: { width: 500, height: 100 } });
     const html = renderer.renderHtml.call(hostContext, makeProps());
     expect(html).toContain("dyni-active-route-mode-flat");
   });
 
   it("keeps normal mode in vertical panel even when shell ratio is above the flat threshold", function () {
-    const renderer = createRenderer();
+    const renderer = createRenderer().renderer;
     const hostContext = createHostContext({ shellSize: { width: 500, height: 100 } });
     const html = renderer.renderHtml.call(hostContext, makeProps({ mode: "vertical" }));
     expect(html).toContain("dyni-active-route-mode-normal");
     expect(html).not.toContain("dyni-active-route-mode-flat");
   });
 
-  it("escapes route and metric text content", function () {
-    const renderer = createRenderer(function () {
-      return '<span class="unsafe">x</span>';
+  it("applies computed fit styles for route and metric values without ellipsis content", function () {
+    const fitCompute = vi.fn(function () {
+      return {
+        routeNameStyle: "font-size:8px;",
+        metrics: {
+          remain: { valueStyle: "font-size:7px;", unitStyle: "font-size:6px;" },
+          eta: { valueStyle: "font-size:6px;", unitStyle: "" },
+          next: { valueStyle: "font-size:5px;", unitStyle: "font-size:4px;" }
+        }
+      };
     });
+    const renderer = createRenderer({ fitCompute: fitCompute }).renderer;
+    const html = renderer.renderHtml.call(createHostContext(), makeProps({
+      routeName: "Very Long Route Name Alpha Bravo Charlie Delta Echo Foxtrot"
+    }));
+
+    expect(html).toMatch(/class="dyni-active-route-route-name" style="font-size:8px;">Very Long Route Name/);
+    expect(html).toContain('class="dyni-active-route-metric-value" style="font-size:7px;"');
+    expect(html).toContain('class="dyni-active-route-metric-unit" style="font-size:6px;"');
+    expect(html).not.toContain("...");
+    expect(fitCompute).toHaveBeenCalledTimes(1);
+  });
+
+  it("escapes route and metric text content", function () {
+    const renderer = createRenderer({
+      applyFormatter: function () {
+        return '<span class="unsafe">x</span>';
+      }
+    }).renderer;
     const html = renderer.renderHtml.call(createHostContext(), {
       routeName: '<img src=x onerror=alert(1)>',
       display: {
@@ -241,7 +301,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
   });
 
   it("fails closed when required active-route props are missing", function () {
-    const renderer = createRenderer();
+    const renderer = createRenderer().renderer;
     expect(function () {
       renderer.renderHtml.call(createHostContext(), { default: "---" });
     }).toThrow("props.display is required");

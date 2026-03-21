@@ -80,15 +80,14 @@
       globalKey: "DyniResponsiveScaleProfile"
     },
     ActiveRouteLayout: {
-      js: BASE + "shared/widget-kits/nav/ActiveRouteLayout.js",
-      css: undefined,
-      globalKey: "DyniActiveRouteLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+      js: BASE + "shared/widget-kits/nav/ActiveRouteLayout.js", css: undefined, globalKey: "DyniActiveRouteLayout", deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+    },
+    ActiveRouteHtmlFit: {
+      js: BASE + "shared/widget-kits/nav/ActiveRouteHtmlFit.js", css: undefined, globalKey: "DyniActiveRouteHtmlFit",
+      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout"]
     },
     CanvasLayerCache: {
-      js: BASE + "shared/widget-kits/canvas/CanvasLayerCache.js",
-      css: undefined,
-      globalKey: "DyniCanvasLayerCache"
+      js: BASE + "shared/widget-kits/canvas/CanvasLayerCache.js", css: undefined, globalKey: "DyniCanvasLayerCache"
     },
     XteHighwayPrimitives: {
       js: BASE + "shared/widget-kits/xte/XteHighwayPrimitives.js",
@@ -203,13 +202,14 @@
     },
     ActiveRouteTextWidget: {
       js: BASE + "widgets/text/ActiveRouteTextWidget/ActiveRouteTextWidget.js",
-      css: undefined,
-      globalKey: "DyniActiveRouteTextWidget",
+      css: undefined, globalKey: "DyniActiveRouteTextWidget",
       deps: ["ThemeResolver", "TextLayoutEngine", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout"]
     },
     ActiveRouteTextHtmlWidget: {
       js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
-      css: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css", globalKey: "DyniActiveRouteTextHtmlWidget"
+      css: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css",
+      globalKey: "DyniActiveRouteTextHtmlWidget",
+      deps: ["ActiveRouteHtmlFit"]
     },
     CenterDisplayTextWidget: {
       js: BASE + "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",

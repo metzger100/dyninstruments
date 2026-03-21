@@ -1,5 +1,6 @@
 /* ActiveRoute interactive html surface */
 .widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html {
+  position: relative;
   width: 100%;
   height: 100%;
   min-width: 0;
@@ -32,6 +33,8 @@
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-route-name {
+  position: relative;
+  z-index: 1;
   grid-area: name;
   min-width: 0;
   min-height: 0;
@@ -39,7 +42,6 @@
   align-items: center;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-mode-normal .dyni-active-route-route-name {
@@ -53,22 +55,29 @@
   opacity: 0.78;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-open-action.is-dispatch {
+.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-open-dispatch {
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 0.08em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-open-action.is-passive {
+.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-open-passive {
   cursor: default;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metrics {
+  position: relative;
+  z-index: 1;
   grid-area: metrics;
   min-width: 0;
   min-height: 0;
   display: grid;
   gap: 0.14em 0.2em;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-open-hotspot {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: transparent;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-mode-normal .dyni-active-route-metrics {
@@ -124,13 +133,15 @@
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metric-value {
   min-width: 0;
+  max-width: 100%;
+  flex: 1 1 auto;
   font-weight: var(--dyni-font-weight, 700);
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metric-unit {
+  flex: 0 0 auto;
   font-weight: var(--dyni-label-weight, 700);
   opacity: 0.78;
   white-space: nowrap;

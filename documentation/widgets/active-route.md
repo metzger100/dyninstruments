@@ -45,7 +45,8 @@ ActiveRouteTextWidget: {
 ActiveRouteTextHtmlWidget: {
   js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
   css: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css",
-  globalKey: "DyniActiveRouteTextHtmlWidget"
+  globalKey: "DyniActiveRouteTextHtmlWidget",
+  deps: ["ActiveRouteHtmlFit"]
 }
 ```
 
@@ -115,7 +116,7 @@ otherwise -> normal
 - `remain` -> `formatDistance(remain, remainUnit)`
 - `eta` -> `formatTime(eta)`
 - `nextCourse` -> `formatDirection(nextCourse)`
-- `routeName` is fitted single-line text with ellipsis trimming
+- `routeName` is fitted single-line text by responsive downscaling (no ellipsis); any remaining overflow is hard-clipped by the HTML container
 
 When `disconnect` is true:
 
@@ -131,7 +132,8 @@ When `disconnect` is true:
 - Markup includes route-name block plus metric tiles for `RTE`, `ETA`, and conditional `NEXT` while approaching.
 - Disconnect state is exposed via wrapper class/marker for html-surface lifecycle wiring.
 - Wrapper includes `onclick="catchAll"` for empty-space click consumption.
-- Route-name action target uses named handler wiring (`activeRouteOpen`) owned by `HtmlSurfaceController` lifecycle attach/update/detach.
+- Dispatch-capable state renders a full-widget transparent hotspot with named handler wiring (`activeRouteOpen`) so any click inside the widget opens route editor.
+- Clickability indicator is cursor-only (`pointer`) in dispatch mode; no additional badge/underline marker is rendered.
 - `resizeSignature(props)` drives layout-relevant `triggerResize()` calls through `HtmlSurfaceController`.
 
 ## Visual State

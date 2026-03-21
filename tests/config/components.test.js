@@ -87,6 +87,9 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteLayout.globalKey).toBe("DyniActiveRouteLayout");
     expect(components.ActiveRouteLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/ActiveRouteLayout.js");
     expect(components.ActiveRouteLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
+    expect(components.ActiveRouteHtmlFit.globalKey).toBe("DyniActiveRouteHtmlFit");
+    expect(components.ActiveRouteHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/ActiveRouteHtmlFit.js");
+    expect(components.ActiveRouteHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout"]);
     expect(components.CenterDisplayLayout.globalKey).toBe("DyniCenterDisplayLayout");
     expect(components.CenterDisplayLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/CenterDisplayLayout.js");
     expect(components.CenterDisplayLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
@@ -117,7 +120,7 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteTextHtmlWidget.globalKey).toBe("DyniActiveRouteTextHtmlWidget");
     expect(components.ActiveRouteTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js");
     expect(components.ActiveRouteTextHtmlWidget.css).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css");
-    expect(components.ActiveRouteTextHtmlWidget.deps).toBeUndefined();
+    expect(components.ActiveRouteTextHtmlWidget.deps).toEqual(["ActiveRouteHtmlFit"]);
     expect(components.CanvasDomSurfaceAdapter.globalKey).toBe("DyniCanvasDomSurfaceAdapter");
     expect(components.CanvasDomSurfaceAdapter.js).toBe("http://host/plugins/dyninstruments/cluster/rendering/CanvasDomSurfaceAdapter.js");
     expect(components.CanvasDomSurfaceAdapter.deps).toEqual(["ThemeResolver"]);
