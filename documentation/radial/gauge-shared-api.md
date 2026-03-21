@@ -33,7 +33,7 @@ Shared gauge logic is split into focused core modules:
 
 ## Module Registration
 
-`config/components.js` registers these shared modules:
+`config/components/registry-shared-foundation.js` and `config/components/registry-shared-engines.js` (assembled by `config/components.js`) register these shared modules:
 
 ```javascript
 RadialAngleMath: { js: BASE + "shared/widget-kits/radial/RadialAngleMath.js", globalKey: "DyniRadialAngleMath" },

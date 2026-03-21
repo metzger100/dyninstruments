@@ -12,7 +12,7 @@ Responsive ring, label, marker, and pointer geometry come from `FullCircleRadial
 ## Module Registration
 
 ```javascript
-// In config/components.js
+// In config/components/registry-widgets.js (assembled by config/components.js)
 CompassRadialWidget: {
   js: BASE + "widgets/radial/CompassRadialWidget/CompassRadialWidget.js",
   css: undefined,

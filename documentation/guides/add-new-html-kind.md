@@ -81,7 +81,7 @@ Required output in the widget module doc:
 
 ## Step 4: Register Component
 
-Add component entry in `config/components.js` and include CSS if renderer needs local styling.
+Add component entry in `config/components/registry-widgets.js` and include CSS if renderer needs local styling.
 
 ```javascript
 NewHtmlWidget: {
@@ -91,7 +91,7 @@ NewHtmlWidget: {
 }
 ```
 
-If cluster-routed, add the component to `ClusterRendererRouter` dependencies and renderer inventory.
+If cluster-routed, add the component ID to `ClusterRendererRouter.deps` in `config/components/registry-cluster.js`, then update renderer inventory.
 
 ## Step 5: Add Kind Catalog Tuple
 
@@ -174,7 +174,7 @@ npm run test
 - [ ] HTML renderer exposes `renderHtml`, `namedHandlers`, `resizeSignature`
 - [ ] Visual mode matrix + class schema + token map are documented
 - [ ] Layout/fit ownership split is documented and aligned with actual owner modules
-- [ ] Component registered in `config/components.js`
+- [ ] Component registered in `config/components/registry-widgets.js`
 - [ ] Router inventory updated in `cluster/rendering/ClusterRendererRouter.js`
 - [ ] Kind catalog tuple added with `surface: "html"`
 - [ ] Mapper branch remains declarative and renderer-aligned

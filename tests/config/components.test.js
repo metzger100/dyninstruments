@@ -1,5 +1,22 @@
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
+const COMPONENT_REGISTRY_FRAGMENT_SCRIPTS = [
+  "config/components/registry-shared-foundation.js",
+  "config/components/registry-shared-engines.js",
+  "config/components/registry-widgets.js",
+  "config/components/registry-cluster.js"
+];
+
+function runScripts(context, scripts) {
+  scripts.forEach(function (scriptPath) {
+    runIifeScript(scriptPath, context);
+  });
+}
+
+function loadFullComponentRegistry(context) {
+  runScripts(context, ["runtime/namespace.js"].concat(COMPONENT_REGISTRY_FRAGMENT_SCRIPTS, ["config/components.js"]));
+}
+
 describe("config/components.js", function () {
   it("creates component registry from baseUrl", function () {
     const context = createScriptContext({
@@ -11,7 +28,7 @@ describe("config/components.js", function () {
       }
     });
 
-    runIifeScript("config/components.js", context);
+    loadFullComponentRegistry(context);
 
     const components = context.DyniPlugin.config.components;
     expect(components.ClusterWidget.deps).toEqual([
@@ -169,5 +186,47 @@ describe("config/components.js", function () {
     expect(function () {
       runIifeScript("config/components.js", context);
     }).toThrow("baseUrl missing");
+  });
+
+  it("throws when a required registry group is missing", function () {
+    const context = createScriptContext({
+      DyniPlugin: {
+        baseUrl: "http://host/plugins/dyninstruments/",
+        runtime: {},
+        state: {},
+        config: { shared: {}, clusters: [] }
+      }
+    });
+
+    runScripts(context, [
+      "runtime/namespace.js",
+      "config/components/registry-shared-foundation.js",
+      "config/components/registry-shared-engines.js",
+      "config/components/registry-widgets.js"
+    ]);
+
+    expect(function () {
+      runIifeScript("config/components.js", context);
+    }).toThrow("missing component registry group 'cluster'");
+  });
+
+  it("throws when registry groups contain duplicate component ids", function () {
+    const context = createScriptContext({
+      DyniPlugin: {
+        baseUrl: "http://host/plugins/dyninstruments/",
+        runtime: {},
+        state: {},
+        config: { shared: {}, clusters: [] }
+      }
+    });
+
+    runScripts(context, ["runtime/namespace.js"].concat(COMPONENT_REGISTRY_FRAGMENT_SCRIPTS));
+
+    const groups = context.DyniPlugin.config.shared.componentRegistryGroups;
+    groups.cluster.RadialAngleMath = groups.sharedFoundation.RadialAngleMath;
+
+    expect(function () {
+      runIifeScript("config/components.js", context);
+    }).toThrow("duplicate component id 'RadialAngleMath'");
   });
 });

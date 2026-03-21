@@ -207,7 +207,7 @@ Allowed inline exceptions:
 
 1. Rename cluster-rendering components to role-based IDs (remove cluster prefixes).
 2. Keep `componentId`, UMD `globalKey`, returned `id`, and file basename aligned.
-3. Update mapper `renderer` values and `config/components.js` registrations together.
+3. Update mapper `renderer` values and component registry registrations together (`config/components/registry-*.js`, assembled by `config/components.js`).
 
 ### Hotspot growth
 

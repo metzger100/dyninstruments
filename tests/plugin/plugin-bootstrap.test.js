@@ -25,10 +25,25 @@ describe("plugin.js bootstrap", function () {
     expect(dom.appendedScripts.length).toBeGreaterThan(10);
     expect(dom.appendedScripts[0].src).toBe("http://host/plugins/dyninstruments/runtime/namespace.js");
     const loadedScriptSrc = dom.appendedScripts.map((item) => item.src);
+    const registrySharedFoundationIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-shared-foundation.js");
+    const registrySharedEnginesIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-shared-engines.js");
+    const registryWidgetsIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-widgets.js");
+    const registryClusterIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-cluster.js");
+    const componentsConfigIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components.js");
     const hostCommitIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/HostCommitController.js");
     const surfaceSessionIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/SurfaceSessionController.js");
     const initIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/init.js");
 
+    expect(registrySharedFoundationIndex).toBeGreaterThan(-1);
+    expect(registrySharedEnginesIndex).toBeGreaterThan(-1);
+    expect(registryWidgetsIndex).toBeGreaterThan(-1);
+    expect(registryClusterIndex).toBeGreaterThan(-1);
+    expect(componentsConfigIndex).toBeGreaterThan(-1);
+    expect(registrySharedFoundationIndex).toBeLessThan(registrySharedEnginesIndex);
+    expect(registrySharedEnginesIndex).toBeLessThan(registryWidgetsIndex);
+    expect(registryWidgetsIndex).toBeLessThan(registryClusterIndex);
+    expect(registryClusterIndex).toBeLessThan(componentsConfigIndex);
+    expect(componentsConfigIndex).toBeLessThan(hostCommitIndex);
     expect(hostCommitIndex).toBeGreaterThan(-1);
     expect(surfaceSessionIndex).toBeGreaterThan(-1);
     expect(hostCommitIndex).toBeLessThan(initIndex);

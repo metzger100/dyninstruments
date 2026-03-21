@@ -103,7 +103,7 @@ Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
 }));
 ```
 
-## Step 2: Register Module in `config/components.js`
+## Step 2: Register Module in `config/components/registry-widgets.js`
 
 Add module entry:
 
@@ -120,7 +120,7 @@ NewDialWidget: {
 
 If `ClusterWidget` should render this dial, update both declaration and runtime selection:
 
-1. In `config/components.js`, add `"NewDialWidget"` to `ClusterRendererRouter.deps`.
+1. In `config/components/registry-widgets.js`, add `"NewDialWidget"` to `RendererPropsWidget.deps`.
 2. In `cluster/rendering/ClusterRendererRouter.js`, instantiate and expose the new renderer:
 
 ```javascript
@@ -170,8 +170,8 @@ Decision guide:
 ## Checklist
 
 - [ ] Dial wrapper created in `widgets/radial/NewDialWidget/NewDialWidget.js`
-- [ ] Module registered in `config/components.js` with `deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]`
-- [ ] Added to `ClusterRendererRouter.deps` (if ClusterWidget-rendered)
+- [ ] Module registered in `config/components/registry-widgets.js` with `deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]`
+- [ ] Added to `RendererPropsWidget.deps` in `config/components/registry-widgets.js` (if ClusterWidget-rendered)
 - [ ] Renderer wired in `cluster/rendering/ClusterRendererRouter.js` (if ClusterWidget-rendered)
 - [ ] Kind catalog tuple added in `cluster/rendering/ClusterKindCatalog.js` with `surface: "canvas-dom"`
 - [ ] Mapper returns `renderer: "NewDialWidget"` with declarative, normalized props

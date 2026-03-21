@@ -155,9 +155,9 @@ Only expose keys relevant for the selected kind via `condition`.
 
 ## Step 4: Register Component + Router
 
-1. `config/components.js`
+1. `config/components/registry-widgets.js`
 - Add `NewLinearWidget` entry
-- Add it to `ClusterRendererRouter.deps`
+- Add it to `RendererPropsWidget.deps`
 
 2. `cluster/rendering/ClusterRendererRouter.js`
 - Instantiate renderer spec in `create()`
@@ -216,7 +216,7 @@ Manual checks:
 - [ ] Cluster `kind` select extended in `config/clusters/<cluster>.js`
 - [ ] Editable parameter conditions added for new linear keys
 - [ ] Wrapper module added in `widgets/linear/`
-- [ ] Component registered in `config/components.js`
+- [ ] Component registered in `config/components/registry-widgets.js`
 - [ ] Router wiring updated in `cluster/rendering/ClusterRendererRouter.js`
 - [ ] Kind catalog tuple added in `cluster/rendering/ClusterKindCatalog.js` with `surface: "canvas-dom"`
 - [ ] Mapper routes kind to new renderer with normalized props
