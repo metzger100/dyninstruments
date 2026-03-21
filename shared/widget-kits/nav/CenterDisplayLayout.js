@@ -209,7 +209,7 @@
       latRect: makeRect(coordX, rect.y, coordWidth, lineHeight),
       lonRect: makeRect(coordX, rect.y + lineHeight, coordWidth, Math.max(1, rect.y + rect.h - (rect.y + lineHeight))),
       captionAlign: "left",
-      coordAlign: "right"
+      coordAlign: "center"
     };
   }
 

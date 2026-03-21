@@ -149,6 +149,21 @@ describe("CenterDisplayTextWidget", function () {
     return captured;
   }
 
+  function captureTextCalls(ctx) {
+    const captured = [];
+    const originalFillText = ctx.fillText;
+    ctx.fillText = function () {
+      captured.push({
+        text: String(arguments[0]),
+        x: arguments[1],
+        y: arguments[2],
+        textAlign: ctx.textAlign
+      });
+      return originalFillText.apply(this, arguments);
+    };
+    return captured;
+  }
+
   function parseFontPx(font) {
     const match = /(\d+)px/.exec(String(font || ""));
     return match ? Number(match[1]) : 0;
@@ -219,20 +234,23 @@ describe("CenterDisplayTextWidget", function () {
     expect(wp.y).toBeLessThan(boat.y);
   });
 
-  it("renders normal mode with caption left and coordinates right", function () {
+  it("renders normal mode with caption left and centered coordinates", function () {
     const helpers = makeHelpers();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({ rectWidth: 260, rectHeight: 180, ctx });
+    const calls = captureTextCalls(ctx);
 
-    spec.renderCanvas(canvas, makeProps());
+    spec.renderCanvas(canvas, makeProps({ activeMeasure: undefined }));
 
     const texts = fillTextCalls(ctx);
     const center = findFirstText(texts, "CENTER");
     const lat = findFirstText(texts, "LAT:54.123");
     const lon = findFirstText(texts, "LON:10.456");
     const wp = findFirstText(texts, "WP");
+    const latCall = calls.find((entry) => entry.text.indexOf("LAT:") === 0);
+    const lonCall = calls.find((entry) => entry.text.indexOf("LON:") === 0);
 
     expect(center).toBeTruthy();
     expect(lat).toBeTruthy();
@@ -240,6 +258,10 @@ describe("CenterDisplayTextWidget", function () {
     expect(wp).toBeTruthy();
     expect(center.x).toBeLessThan(lat.x);
     expect(center.x).toBeLessThan(lon.x);
+    expect(latCall).toBeTruthy();
+    expect(lonCall).toBeTruthy();
+    expect(latCall.textAlign).toBe("center");
+    expect(lonCall.textAlign).toBe("center");
     expect(lat.y).toBeLessThan(wp.y);
     expect(lon.y).toBeLessThan(wp.y);
   });
@@ -262,6 +284,36 @@ describe("CenterDisplayTextWidget", function () {
     expect(center.x).toBeLessThan(wp.x);
     expect(lat.x).toBeLessThan(wp.x);
     expect(wp.y).toBeLessThan(boat.y);
+  });
+
+  it("centers relation rows while keeping the WP and POS captions attached to their values", function () {
+    const helpers = makeHelpers();
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
+      .create({}, helpers);
+    const cases = [
+      { width: 140, height: 260, mode: "high" },
+      { width: 260, height: 180, mode: "normal" },
+      { width: 520, height: 100, mode: "flat" }
+    ];
+
+    cases.forEach((size) => {
+      const ctx = createMockContext2D();
+      const canvas = createMockCanvas({ rectWidth: size.width, rectHeight: size.height, ctx });
+
+      spec.renderCanvas(canvas, makeProps({ activeMeasure: undefined }));
+
+      const texts = fillTextCalls(ctx);
+      const wp = findFirstText(texts, "WP");
+      const pos = findFirstText(texts, "POS");
+      const layout = computeLayoutSnapshot(size.width, size.height, size.mode, 2);
+
+      expect(wp).toBeTruthy();
+      expect(pos).toBeTruthy();
+      expect(wp.x).toBeGreaterThan(layout.rowRects[0].x);
+      expect(wp.x).toBeLessThan(layout.rowRects[0].x + (layout.rowRects[0].w / 2));
+      expect(pos.x).toBeGreaterThan(layout.rowRects[1].x);
+      expect(pos.x).toBeLessThan(layout.rowRects[1].x + (layout.rowRects[1].w / 2));
+    });
   });
 
   it("omits the measure row when no active measure is available", function () {
