@@ -157,6 +157,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     }));
 
     expect(html).toContain("dyni-active-route-open-passive");
+    expect(html).not.toContain('onclick="catchAll"');
     expect(html).not.toContain("dyni-active-route-open-hotspot");
     expect(html).not.toContain('onclick="activeRouteOpen"');
     expect(html).not.toContain("dyni-active-route-metric-next");
@@ -179,6 +180,25 @@ describe("ActiveRouteTextHtmlWidget", function () {
     expect(typeof handlers.activeRouteOpen).toBe("function");
     expect(handlers.activeRouteOpen()).toBe(true);
     expect(openActiveRoute).toHaveBeenCalledTimes(1);
+  });
+
+  it("allows host click handling in edit mode even when route-open capability is dispatch", function () {
+    const renderer = createRenderer().renderer;
+    const openActiveRoute = vi.fn(() => true);
+    const hostContext = createHostContext({
+      capability: "dispatch",
+      openActiveRoute: openActiveRoute
+    });
+    const html = renderer.renderHtml.call(hostContext, makeProps({ editing: true }));
+
+    expect(html).toContain("dyni-active-route-open-passive");
+    expect(html).not.toContain('onclick="catchAll"');
+    expect(html).not.toContain("dyni-active-route-open-hotspot");
+    expect(html).not.toContain('onclick="activeRouteOpen"');
+
+    const handlers = renderer.namedHandlers({ editing: true }, hostContext);
+    expect(handlers.activeRouteOpen()).toBe(false);
+    expect(openActiveRoute).not.toHaveBeenCalled();
   });
 
   it("marks disconnect state and uses default placeholders through formatter contract", function () {
