@@ -1,6 +1,6 @@
 # Component System
 
-**Status:** ✅ Implemented | `config/components.js` (`config.components`) + `runtime/component-loader.js` (`loadComponent`)
+**Status:** ✅ Implemented | `config/components/registry-*.js` fragments + `config/components.js` assembler + `runtime/component-loader.js` (`loadComponent`)
 
 ## Overview
 
@@ -9,14 +9,27 @@ dyninstruments uses a custom runtime component loader. Components are UMD-wrappe
 Ownership split:
 
 - `plugin.js` bootstraps internal scripts (`runtime/*`, `config/*`) in fixed order
-- `config/components.js` defines component registry entries
+- `config/components/registry-*.js` define domain-specific component registry fragments
+- `config/components.js` fail-closed assembles fragments into `config.components`
 - `runtime/component-loader.js` resolves dependencies and injects component JS/CSS
 - `runtime/HostCommitController.js` provides deferred commit scheduling for HTML-shell mounting
 - `runtime/SurfaceSessionController.js` owns per-instance `html`/`canvas-dom` lifecycle state
 
 ## `config.components` Registry
 
-Defined in `config/components.js`. It maps component IDs to file paths, global keys, and optional dependencies (`deps`).
+`config.components` is assembled from these fragment groups:
+
+- `config/components/registry-shared-foundation.js` (`sharedFoundation`)
+- `config/components/registry-shared-engines.js` (`sharedEngines`)
+- `config/components/registry-widgets.js` (`widgets`)
+- `config/components/registry-cluster.js` (`cluster`)
+
+`config/components.js` merges groups in fixed order (`sharedFoundation -> sharedEngines -> widgets -> cluster`) and fail-closes when:
+
+- a required group is missing
+- duplicate component IDs exist across groups
+
+The final assembled map still uses the same component ID -> `{ js, css, globalKey, deps }` shape consumed by `runtime/component-loader.js`.
 
 `ClusterWidget` depends on modular internals instead of embedding logic in one file:
 
@@ -160,9 +173,10 @@ In the current init flow, theme presets are applied to discovered `.widget.dynip
 ## Adding a New Component
 
 1. Create UMD component file
-2. Add component ID entry in `config/components.js`
-3. Add `deps` to existing component IDs when needed
+2. Add component ID entry in the correct fragment file under `config/components/`
+3. Add `deps` to existing component IDs when needed (usually same fragment, or cross-fragment by ID)
 4. Add CSS path if required
+5. If the component should be loaded as a `ClusterWidget` renderer/mapper dependency, update the owning dependency list entry (for example `ClusterRendererRouter` or `ClusterMapperRegistry`) in the same fragment model
 
 ## Related
 

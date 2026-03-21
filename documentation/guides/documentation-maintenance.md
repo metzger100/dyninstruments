@@ -73,7 +73,7 @@ For cleanup sessions tracked by garbage-collection baseline markers:
 
 | Change Type | Minimum Docs to Update |
 |---|---|
-| New/changed module in `config/components.js` | `documentation/architecture/component-system.md`, affected module doc in `documentation/widgets/` |
+| New/changed module in `config/components/registry-*.js` or `config/components.js` assembly | `documentation/architecture/component-system.md`, affected module doc in `documentation/widgets/` |
 | New cluster or new cluster kind | `documentation/guides/add-new-cluster.md`, `documentation/architecture/cluster-widget-system.md`, relevant module docs |
 | New gauge renderer | `documentation/guides/add-new-gauge.md`, `documentation/widgets/semicircle-gauges.md` or dedicated module doc |
 | Changes in registration/lifecycle flow (`runtime/init.js`, `runtime/widget-registrar.js`) | `documentation/avnav-api/plugin-lifecycle.md`, `documentation/architecture/component-system.md` |

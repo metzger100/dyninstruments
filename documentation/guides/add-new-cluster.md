@@ -142,7 +142,7 @@ Create `cluster/mappers/NewClusterMapper.js`:
 
 Update both config-time and runtime mapper lists:
 
-1. `config/components.js`
+1. `config/components/registry-cluster.js`
 - Add module entry for `NewClusterMapper`
 - Add to `ClusterMapperRegistry.deps`
 2. `cluster/mappers/ClusterMapperRegistry.js`
@@ -152,8 +152,8 @@ Update both config-time and runtime mapper lists:
 
 If mapper returns `renderer: "NewGauge"`:
 
-1. Register `NewGauge` in `config/components.js`
-2. Add `NewGauge` to `ClusterRendererRouter.deps` in `config/components.js`
+1. Register `NewGauge` in `config/components/registry-widgets.js`
+2. Add `NewGauge` to `RendererPropsWidget.deps` in `config/components/registry-widgets.js`
 3. Wire runtime selection in `cluster/rendering/ClusterRendererRouter.js`:
 - add `NewGauge: Helpers.getModule("NewGauge").create(def, Helpers)` to `rendererSpecs`
 4. Add or update the route tuple in `cluster/rendering/ClusterKindCatalog.js` with explicit `surface`:
@@ -200,8 +200,8 @@ For a new `kind` in an existing cluster:
 - [ ] Cluster config created/updated in `config/clusters/`
 - [ ] Cluster script included in `plugin.js` internal load order
 - [ ] Mapper module added/updated in `cluster/mappers/`
-- [ ] Module entry added in `config/components.js`
-- [ ] Mapper added in `ClusterMapperRegistry.deps` (`config/components.js`)
+- [ ] Module entry added in `config/components/registry-cluster.js`
+- [ ] Mapper added in `ClusterMapperRegistry.deps` (`config/components/registry-cluster.js`)
 - [ ] Mapper added in runtime `MAPPER_MODULE_IDS` (`cluster/mappers/ClusterMapperRegistry.js`)
 - [ ] Renderer wiring updated (if radial)
 - [ ] Kind catalog tuple added/updated with explicit `surface`

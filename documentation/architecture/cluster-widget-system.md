@@ -177,7 +177,7 @@ Rule:
 
 Must be registered in two places:
 
-1. `config/components.js`
+1. `config/components/registry-cluster.js`
 - add component entry
 - add dependency in `ClusterMapperRegistry.deps`
 2. `cluster/mappers/ClusterMapperRegistry.js`
@@ -198,9 +198,9 @@ Must be updated in three places:
 
 Must be registered in runtime dependency + router inventory:
 
-1. `config/components.js`
+1. `config/components/registry-widgets.js` (or `registry-cluster.js` for cluster-owned renderers)
 - add renderer component entry
-- add dependency in `ClusterRendererRouter.deps`
+- add dependency in `RendererPropsWidget.deps` for canvas/text renderer widgets, or in `ClusterRendererRouter.deps` for direct router-owned entries (for example HTML renderers)
 2. `cluster/rendering/ClusterRendererRouter.js`
 - add `rendererName: rendererSpec` in router inventory
 - if mapper uses `rendererProps`, route through `RendererPropsWidget`

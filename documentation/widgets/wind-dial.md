@@ -12,7 +12,7 @@ Responsive ring, label, and pointer geometry come from `FullCircleRadialLayout` 
 ## Module Registration
 
 ```javascript
-// In config/components.js
+// In config/components/registry-widgets.js (assembled by config/components.js)
 WindRadialWidget: {
   js: BASE + "widgets/radial/WindRadialWidget/WindRadialWidget.js",
   css: undefined,

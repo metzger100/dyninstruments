@@ -29,7 +29,7 @@ The four semicircle gauges share one renderer implementation:
 
 ## Module Dependencies
 
-In `config/components.js`, all four gauges depend on both `SemicircleRadialEngine` and `RadialValueMath`:
+In `config/components/registry-widgets.js` (assembled by `config/components.js`), all four gauges depend on both `SemicircleRadialEngine` and `RadialValueMath`:
 
 ```text
 SpeedRadialWidget/DepthRadialWidget/TemperatureRadialWidget/VoltageRadialWidget

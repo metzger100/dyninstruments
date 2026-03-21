@@ -1,13 +1,10 @@
 #!/usr/bin/env node
 
-import fs from "node:fs";
-import path from "node:path";
-import vm from "node:vm";
+import { loadComponentsRegistry as loadComponentsRegistryFromScripts, SENTINEL_BASE } from "./components-registry-loader.mjs";
 
 const ROOT = process.cwd();
 const COMPONENTS_CONFIG_REL = "config/components.js";
 const ARCHITECTURE_PATH = "ARCHITECTURE.md";
-const SENTINEL_BASE = "__CHECK_BASE__/";
 
 const violations = [];
 const byType = Object.create(null);
@@ -35,23 +32,16 @@ if (violations.length > 0) {
 console.log("SUMMARY_JSON=" + JSON.stringify(summary));
 
 function loadComponentsRegistry() {
-  const componentsPath = path.join(ROOT, COMPONENTS_CONFIG_REL);
-  const source = fs.readFileSync(componentsPath, "utf8");
-  const sandbox = { DyniPlugin: { baseUrl: SENTINEL_BASE, config: {} } };
-
+  let components = null;
   try {
-    vm.runInNewContext(source, sandbox, { filename: COMPONENTS_CONFIG_REL });
+    components = loadComponentsRegistryFromScripts(ROOT);
   } catch (error) {
     addViolation(
       "components-config-parse",
-      `[dependency] ${COMPONENTS_CONFIG_REL}: failed to evaluate config. ${String(error && error.message ? error.message : error)}`
+      `[dependency] ${COMPONENTS_CONFIG_REL}: failed to evaluate component registry scripts. ${String(error && error.message ? error.message : error)}`
     );
     return { items: [], byId: new Map() };
   }
-
-  const components = sandbox.DyniPlugin && sandbox.DyniPlugin.config
-    ? sandbox.DyniPlugin.config.components
-    : null;
 
   if (!components || typeof components !== "object") {
     addViolation(

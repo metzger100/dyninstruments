@@ -14,7 +14,7 @@ This renderer uses the shared text compaction contract from `TextLayoutEngine.co
 
 ## Key Details
 
-- Registered as `PositionCoordinateWidget` in `config/components.js`
+- Registered as `PositionCoordinateWidget` in `config/components/registry-widgets.js` (assembled by `config/components.js`)
 - Routed from `NavMapper` for `kind: "positionBoat"` and `kind: "positionWp"`
 - Routed directly from `VesselMapper` for `kind: "dateTime"` and `kind: "timeStatus"` via `displayVariant`
 - Depends on shared utilities: `ThemeResolver` + `TextLayoutEngine`

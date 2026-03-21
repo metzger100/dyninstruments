@@ -9,6 +9,7 @@ const SCAN_ROOTS = [
   "runtime",
   "cluster",
   "config/components.js",
+  "config/components",
   "config/shared",
   "shared",
   "widgets"

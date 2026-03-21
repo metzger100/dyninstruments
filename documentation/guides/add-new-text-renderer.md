@@ -211,7 +211,7 @@ Key rule: parse and format widget data inside the renderer; do not move layout i
 
 ## Step 2: Register in Component Registry
 
-Add the new component in `config/components.js`:
+Add the new component in `config/components/registry-widgets.js`:
 
 ```javascript
 RouteSummaryTextWidget: {
@@ -226,7 +226,7 @@ RouteSummaryTextWidget: {
 
 If the widget is selected via `props.renderer` in cluster flow:
 
-1. Add the component ID to `ClusterRendererRouter.deps` in `config/components.js`.
+1. Add the component ID to `RendererPropsWidget.deps` in `config/components/registry-widgets.js`.
 2. Add runtime instance in `cluster/rendering/ClusterRendererRouter.js` `rendererSpecs`.
 
 Example:
@@ -313,7 +313,7 @@ Rule of thumb: default to extension; create a new renderer only when the view co
 - [ ] UMD renderer module created in `widgets/text/<WidgetName>/`
 - [ ] Renderer instantiates `ThemeResolver` and `TextLayoutEngine`
 - [ ] Renderer parses widget-specific props and selects formatters internally
-- [ ] Component registered in `config/components.js`
+- [ ] Component registered in `config/components/registry-widgets.js`
 - [ ] `ClusterRendererRouter` deps/spec wiring updated (if cluster-rendered)
 - [ ] Mapper routing stays declarative and uses formatter catalog names
 - [ ] Resize, theme color, disconnect, and formatter behavior verified
