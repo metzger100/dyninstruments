@@ -121,6 +121,19 @@
     };
   }
 
+  function scoreThreeRowsCandidate(display, sizes, boxW, blockH) {
+    const valuePx = Math.max(0, Number(sizes && sizes.vPx) || 0);
+    const captionPx = display.caption
+      ? Math.max(0, Number(sizes && sizes.cPx) || 0)
+      : valuePx;
+    const unitPx = display.unit
+      ? Math.max(0, Number(sizes && sizes.uPx) || 0)
+      : valuePx;
+    const minLegibility = Math.min(captionPx, valuePx, unitPx);
+    const avgLegibility = (captionPx + valuePx + unitPx) / 3;
+    return (minLegibility * 1000000) + (avgLegibility * 10000) + (boxW * 10) + blockH;
+  }
+
   function drawFlatText(state, display, fitCache) {
     const text = state.text;
     const boxes = state.layout.flat;
@@ -269,17 +282,13 @@
         }
 
         const valueHeight = Math.max(1, Math.floor(mh / (1 + 2 * secScale)));
-        const valuePx = text.fitTextPx(
-          state.ctx,
-          display.valueText,
-          boxWidth,
-          valueHeight,
-          state.family,
-          state.valueWeight
-        );
-        const score = valuePx * 10000 + boxWidth * 10 + mh;
+        if (valueHeight <= 0) {
+          continue;
+        }
+        const sizes = computeThreeRowsSizes(state, display, boxWidth, mh);
+        const score = scoreThreeRowsCandidate(display, sizes, boxWidth, mh);
         if (!best || score > best.score) {
-          best = { blockH: mh, boxW: boxWidth, score: score };
+          best = { blockH: mh, boxW: boxWidth, score: score, sizes: sizes };
         }
       }
 
@@ -288,7 +297,7 @@
       layout = writeFitCache(fitCache, "normal", key, {
         blockH: blockH,
         boxW: boxW,
-        sizes: computeThreeRowsSizes(state, display, boxW, blockH)
+        sizes: best && best.sizes ? best.sizes : computeThreeRowsSizes(state, display, boxW, blockH)
       });
     }
 

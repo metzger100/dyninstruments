@@ -22,6 +22,7 @@ describe("TextLayoutEngine", function () {
     const primitiveModule = loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js");
     const compositeModule = loadFresh("shared/widget-kits/text/TextLayoutComposite.js");
     const textLayoutModule = loadFresh("shared/widget-kits/radial/RadialTextLayout.js");
+    const textFittingModule = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
     const responsiveProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const valueMathModule = {
       create() {
@@ -47,6 +48,7 @@ describe("TextLayoutEngine", function () {
       getModule(id) {
         if (id === "RadialValueMath") return valueMathModule;
         if (id === "RadialTextLayout") return textLayoutModule;
+        if (id === "RadialTextFitting") return textFittingModule;
         if (id === "TextLayoutPrimitives") return primitiveModule;
         if (id === "TextLayoutComposite") return compositeModule;
         if (id === "ResponsiveScaleProfile") return responsiveProfileModule;

@@ -177,6 +177,11 @@ Caption  Value  Unit
 
 All three layouts now consume `SemicircleRadialLayout` boxes plus `SemicircleRadialTextLayout` ceiling scaling; they no longer rely on fixed user-visible minima like `18`, `10`, `8`, `6`, or `4`.
 
+Text fit contract for semicircle gauges:
+- Caption, value, and unit must stay inside their assigned layout boxes in `flat`, `normal`, and `high` modes.
+- Compact canvases are allowed to downscale text aggressively to preserve containment; overlap into ring/tick/pointer geometry is not allowed.
+- Final draw-time clamping remains active even after cached fit selection to absorb measurement/rounding drift.
+
 ## Tick Rendering
 
 - Major ticks: `len=theme.radial.ticks.majorLen`, `width=theme.radial.ticks.majorWidth`

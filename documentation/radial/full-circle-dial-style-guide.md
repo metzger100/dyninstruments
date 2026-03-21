@@ -117,6 +117,12 @@ High-mode slot factors (`FullCircleRadialLayout.computeLayout()`):
 - Engine defaults: `highTopFactor=0.85`, `highBottomFactor=0.85`
 - Compass override: `highTopFactor=0.9`, `highBottomFactor=0.9`
 
+Text fit contract for full-circle dials:
+- Caption, value, and unit rendering is fail-safe: text must remain inside mode-owned slots/boxes in `flat`, `normal`, and `high`.
+- `normal` mode candidate scoring considers caption/value/unit legibility together (single and dual layouts), not value-only scoring.
+- `flat` side-slot rows use final draw-time clamping to prevent side-strip overflow from long labels/units.
+- In very compact sizes, text may scale down strongly to keep the dial geometry unobstructed.
+
 Normal-mode layout tokens (`theme.radial.fullCircle.normal.*`):
 
 | Token | Default | Clamp range |
