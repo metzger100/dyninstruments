@@ -70,7 +70,8 @@ Ownership split:
 Text-fit behavior:
 
 - value and required rows receive independent inline `font-size` styles
-- caption/unit fitting stays adaptive for tight layouts, but each is capped to `captionUnitScale * valuePx`
+- `MapZoomHtmlFit` uses the shared `TextLayoutEngine` fit path (same scale-coupled semantics as canvas SOG)
+- caption/unit sizing follows `captionUnitScale` with adaptive value/caption tradeoff so text fills available space for maximum readability
 - fit is recomputed from shell size, mode, and text lengths on render/resize-signature updates
 
 ### Layering and Click Ownership
@@ -164,7 +165,8 @@ Source tests: `tests/cluster/rendering/MapZoomTextHtmlWidget.test.js`.
 - [ ] `high`/`normal`/`flat` classes switch by shell ratio + collapse rules
 - [ ] `flat` uses inline row; `normal` uses value-row + caption-row; `high` uses caption/value/unit rows
 - [ ] caption and value downscale independently when shell space is reduced
-- [ ] caption/unit fit never exceeds configured `captionUnitScale * valuePx` cap
+- [ ] flat-mode caption/unit follow configured `captionUnitScale` as scale-coupled secondary text sizing
+- [ ] changing `captionUnitScale` increases/decreases secondary text with corresponding value-size tradeoff
 - [ ] navpage vertical stacks preserve map zoom tile size via `aspect-ratio` + `min-height` guard
 - [ ] Required zoom row renders only when zoom values differ
 - [ ] Escaped output prevents raw markup injection

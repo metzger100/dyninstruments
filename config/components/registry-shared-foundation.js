@@ -33,7 +33,8 @@
     MapZoomHtmlFit: {
       js: BASE + "shared/widget-kits/nav/MapZoomHtmlFit.js",
       css: undefined,
-      globalKey: "DyniMapZoomHtmlFit"
+      globalKey: "DyniMapZoomHtmlFit",
+      deps: ["TextLayoutEngine"]
     },
     CanvasLayerCache: {
       js: BASE + "shared/widget-kits/canvas/CanvasLayerCache.js",
