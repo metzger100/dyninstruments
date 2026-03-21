@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteTextHtmlWidget - Interactive HTML renderer for nav active-route kind
  * Documentation: documentation/widgets/active-route.md
- * Depends: none
+ * Depends: ActiveRouteHtmlFit
  */
 
 (function (root, factory) {
@@ -33,6 +33,11 @@
       .replace(/'/g, "&#39;");
   };
 
+  const toStyleAttr = function (style) {
+    const text = trimText(style);
+    return text ? (' style="' + text + '"') : "";
+  };
+
   const formatMetric = function (rawValue, formatter, formatterParameters, defaultText, Helpers) {
     const out = String(Helpers.applyFormatter(rawValue, {
       formatter: formatter,
@@ -42,23 +47,32 @@
     return out.trim() ? out : defaultText;
   };
 
-  const renderMetricTile = function (metricId, caption, value, unit, escapeHtmlText) {
+  const renderMetricTile = function (metricId, caption, value, unit, style, escapeHtmlText) {
+    const valueStyle = style && typeof style.valueStyle === "string" ? style.valueStyle : "";
+    const unitStyle = style && typeof style.unitStyle === "string" ? style.unitStyle : "";
     return ""
       + '<div class="dyni-active-route-metric dyni-active-route-metric-' + metricId + '">'
       + '<div class="dyni-active-route-metric-caption">' + escapeHtmlText(caption) + "</div>"
       + '<div class="dyni-active-route-metric-value-row">'
-      + '<span class="dyni-active-route-metric-value">' + escapeHtmlText(value) + "</span>"
-      + '<span class="dyni-active-route-metric-unit">' + escapeHtmlText(unit) + "</span>"
+      + '<span class="dyni-active-route-metric-value"' + toStyleAttr(valueStyle) + ">" + escapeHtmlText(value) + "</span>"
+      + '<span class="dyni-active-route-metric-unit"' + toStyleAttr(unitStyle) + ">" + escapeHtmlText(unit) + "</span>"
       + "</div>"
       + "</div>";
   };
 
-  function resolveShellRect(hostContext) {
+  function resolveHostElements(hostContext) {
     const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
     const commitState = ctx && ctx.__dyniHostCommitState ? ctx.__dyniHostCommitState : null;
     const shellEl = commitState && commitState.shellEl ? commitState.shellEl : null;
     const rootEl = commitState && commitState.rootEl ? commitState.rootEl : null;
-    const targetEl = shellEl || rootEl;
+    return {
+      shellEl: shellEl,
+      rootEl: rootEl,
+      targetEl: shellEl || rootEl
+    };
+  }
+
+  function resolveShellRectFromTarget(targetEl) {
     if (!targetEl || typeof targetEl.getBoundingClientRect !== "function") {
       return null;
     }
@@ -69,6 +83,10 @@
       return null;
     }
     return { width: width, height: height };
+  }
+
+  function resolveShellRect(hostContext) {
+    return resolveShellRectFromTarget(resolveHostElements(hostContext).targetEl);
   }
 
   function resolveMode(props, hostContext) {
@@ -201,6 +219,8 @@
   }
 
   function create(def, Helpers) {
+    const htmlFit = Helpers.getModule("ActiveRouteHtmlFit").create(def, Helpers);
+
     const namedHandlers = function (props, hostContext) {
       return {
         activeRouteOpen: function activeRouteOpenHandler() {
@@ -211,6 +231,16 @@
 
     const renderHtml = function (props) {
       const model = buildRenderModel(props, Helpers, this);
+      const elements = resolveHostElements(this);
+      const shellRect = resolveShellRectFromTarget(elements.targetEl);
+      const fitStyles = htmlFit.compute({
+        model: model,
+        hostContext: this,
+        targetEl: elements.targetEl,
+        shellRect: shellRect
+      }) || { routeNameStyle: "", metrics: Object.create(null) };
+      const routeNameStyle = fitStyles.routeNameStyle || "";
+      const metricStyles = fitStyles.metrics || Object.create(null);
 
       const wrapperClasses = ["dyni-active-route-html"];
       if (model.isApproaching) {
@@ -223,19 +253,43 @@
       wrapperClasses.push("dyni-active-route-mode-" + model.mode);
 
       let metricsHtml = "";
-      metricsHtml += renderMetricTile("remain", model.remainCaption, model.remainText, model.remainUnit, escapeHtmlText);
-      metricsHtml += renderMetricTile("eta", model.etaCaption, model.etaText, model.etaUnit, escapeHtmlText);
+      metricsHtml += renderMetricTile(
+        "remain",
+        model.remainCaption,
+        model.remainText,
+        model.remainUnit,
+        metricStyles.remain,
+        escapeHtmlText
+      );
+      metricsHtml += renderMetricTile(
+        "eta",
+        model.etaCaption,
+        model.etaText,
+        model.etaUnit,
+        metricStyles.eta,
+        escapeHtmlText
+      );
       if (model.isApproaching) {
-        metricsHtml += renderMetricTile("next", model.nextCourseCaption, model.nextCourseText, model.nextCourseUnit, escapeHtmlText);
+        metricsHtml += renderMetricTile(
+          "next",
+          model.nextCourseCaption,
+          model.nextCourseText,
+          model.nextCourseUnit,
+          metricStyles.next,
+          escapeHtmlText
+        );
       }
+
+      const openHotspotHtml = model.canOpenRoute
+        ? ('<div class="dyni-active-route-open-hotspot" onclick="' + OPEN_HANDLER_NAME + '"></div>')
+        : "";
 
       return ""
         + '<div class="' + wrapperClasses.join(" ") + '"'
         + ' onclick="catchAll"'
         + ">"
-        + '<div class="dyni-active-route-route-name dyni-active-route-open-action ' + (model.canOpenRoute ? "is-dispatch" : "is-passive") + '"'
-        + ' onclick="' + OPEN_HANDLER_NAME + '"'
-        + '>'
+        + openHotspotHtml
+        + '<div class="dyni-active-route-route-name"' + toStyleAttr(routeNameStyle) + ">"
         + escapeHtmlText(model.routeNameText)
         + "</div>"
         + '<div class="dyni-active-route-metrics">' + metricsHtml + "</div>"
@@ -244,6 +298,7 @@
 
     const resizeSignature = function (props) {
       const model = buildRenderModel(props, Helpers, this);
+      const rect = resolveShellRect(this);
       return [
         model.routeNameText.length,
         model.remainText.length,
@@ -251,7 +306,9 @@
         model.isApproaching ? model.nextCourseText.length : 0,
         model.mode,
         model.isApproaching ? 1 : 0,
-        model.disconnect ? 1 : 0
+        model.disconnect ? 1 : 0,
+        rect ? Math.round(rect.width) : 0,
+        rect ? Math.round(rect.height) : 0
       ].join("|");
     };
 
