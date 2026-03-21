@@ -1,0 +1,6 @@
+/* Copy this whole block into AvNav user.css for manual testing.
+   Fixture only, not production styling. */
+
+.widget.dyniplugin {
+  --dyni-theme-preset: bold;
+}
