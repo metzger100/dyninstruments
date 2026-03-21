@@ -75,6 +75,8 @@ describe("CenterDisplayLayout", function () {
       expectRectInside(out.center.captionRect, out.center.rect);
       expectRectInside(out.center.latRect, out.center.rect);
       expectRectInside(out.center.lonRect, out.center.rect);
+      expect(out.center.captionAlign).toBe("left");
+      expect(out.center.coordAlign).toBe("center");
       out.rowRects.forEach((rect, index) => {
         expectRectInside(rect, contentRect);
         expect(rect.h).toBeGreaterThanOrEqual(Math.floor(contentRect.h * 0.12));

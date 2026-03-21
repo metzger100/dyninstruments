@@ -9,7 +9,7 @@ Responsive center-position renderer used by `ClusterWidget` via `NavMapper` for 
 It keeps core data parity with AvNav `CenterDisplay` while using a readability-first canvas layout:
 
 - internal center caption + always-visible stacked coordinates
-- waypoint and boat relation rows always present
+- waypoint and boat relation rows always present as centered caption/value pairs
 - optional measure row when a first measure point is available
 - adaptive geometry derived from measured text and available canvas space; no fixed pixel layout floors
 - compact tiles linearly tighten mode-specific panel shares and increase fitted text fill from `minDim <= 80` to `minDim >= 180`
@@ -128,7 +128,7 @@ otherwise -> normal
 
 - full-width top band
 - center caption in a measured left column
-- two coordinate lines stacked in a right column
+- two coordinate lines stacked in a centered right column
 - relation rows stacked below using full widget width
 - the balanced two-coordinate-row rhythm is preserved while smaller tiles linearly reduce caption-column share
 
@@ -143,7 +143,7 @@ otherwise -> normal
 - center coordinates -> `formatLonLatsDecimal(value, axis)`
 - relation courses -> `formatDirection(course)`
 - relation distances -> `formatDistance(distance, unit)`
-- relation rows render as adaptive single-line groups: `label | course / distance`, tightening separators when width is constrained
+- relation rows render as adaptive centered caption/value groups: `label | course / distance`, so captions stay visually attached to their values while the pair stays balanced within the row when width is available
 
 Measure row behavior:
 

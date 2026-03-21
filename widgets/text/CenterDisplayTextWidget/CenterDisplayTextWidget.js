@@ -256,23 +256,30 @@
     const labelWidth = row.caption
       ? Math.max(0, Math.min(maxLabelWidth, availableLabelWidth, Math.floor(desiredLabelWidth)))
       : 0;
-    const valueOffset = row.caption ? (labelWidth + gap) : 0;
+    const availableValueWidth = Math.max(1, rect.w - labelWidth - (row.caption ? gap : 0));
+    const valueText = fullValueWidth <= availableValueWidth + 0.01
+      ? row.fullValueText
+      : row.compactValueText;
+    const valueWidth = valueText === row.fullValueText ? fullValueWidth : compactValueWidth;
+    const pairWidth = labelWidth + (row.caption ? gap : 0) + valueWidth;
+    const pairX = rect.x + Math.max(0, Math.floor((rect.w - pairWidth) / 2));
+    const valueOffset = row.caption ? (pairX - rect.x + labelWidth + gap) : (pairX - rect.x);
     const valueRect = {
       x: rect.x + valueOffset,
       y: rect.y,
-      w: Math.max(1, rect.w - valueOffset),
+      w: Math.max(1, rect.x + rect.w - (rect.x + valueOffset)),
       h: rect.h
     };
 
     return {
       labelRect: {
-        x: rect.x,
+        x: pairX,
         y: rect.y,
         w: labelWidth,
         h: rect.h
       },
       valueRect: valueRect,
-      valueText: fullValueWidth <= valueRect.w + 0.01 ? row.fullValueText : row.compactValueText,
+      valueText: valueText,
       labelMaxPx: labelMaxPx,
       valueMaxPx: valueMaxPx
     };
@@ -306,7 +313,7 @@
         ctx: state.ctx,
         text: rowLayout.valueText,
         rect: rowLayout.valueRect,
-        align: "right",
+        align: "left",
         family: family,
         weight: valueWeight,
         maxPx: rowLayout.valueMaxPx,
