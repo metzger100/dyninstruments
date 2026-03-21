@@ -55,6 +55,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     expect(second).toBe(first);
     expect(typeof first.getCapabilities).toBe("function");
     expect(typeof first.routePoints.activate).toBe("function");
+    expect(typeof first.map.checkAutoZoom).toBe("function");
     expect(typeof first.routeEditor.openActiveRoute).toBe("function");
     expect(typeof first.routeEditor.openEditRoute).toBe("function");
     expect(typeof first.ais.showInfo).toBe("function");
@@ -69,24 +70,28 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     expect(nav).toEqual({
       pageId: "navpage",
       routePoints: { activate: "unsupported" },
+      map: { checkAutoZoom: "dispatch" },
       routeEditor: { openActiveRoute: "dispatch", openEditRoute: "unsupported" },
       ais: { showInfo: "dispatch" }
     });
     expect(gps).toEqual({
       pageId: "gpspage",
       routePoints: { activate: "dispatch" },
+      map: { checkAutoZoom: "unsupported" },
       routeEditor: { openActiveRoute: "passive", openEditRoute: "unsupported" },
       ais: { showInfo: "dispatch" }
     });
     expect(editRoute).toEqual({
       pageId: "editroutepage",
       routePoints: { activate: "dispatch" },
+      map: { checkAutoZoom: "unsupported" },
       routeEditor: { openActiveRoute: "unsupported", openEditRoute: "dispatch" },
       ais: { showInfo: "unsupported" }
     });
     expect(other).toEqual({
       pageId: "other",
       routePoints: { activate: "unsupported" },
+      map: { checkAutoZoom: "unsupported" },
       routeEditor: { openActiveRoute: "unsupported", openEditRoute: "unsupported" },
       ais: { showInfo: "unsupported" }
     });
@@ -119,7 +124,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     }).toThrow(/TemporaryHostActionBridge: routePoints\.activate returned false/);
   });
 
-  it("dispatches route-editor and ais actions through page onItemClick handlers", function () {
+  it("dispatches map, route-editor, and ais actions through page onItemClick handlers", function () {
     const navHandler = vi.fn();
     const gpsHandler = vi.fn();
     const editHandler = vi.fn();
@@ -142,11 +147,13 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     const gpsBridge = createBridgeContext({ pageRoots: { gpspage: gpsRoot } }).bridge;
     const editBridge = createBridgeContext({ pageRoots: { editroutepage: editRoot } }).bridge;
 
+    expect(navBridge.getHostActions().map.checkAutoZoom()).toBe(true);
     expect(navBridge.getHostActions().routeEditor.openActiveRoute()).toBe(true);
     expect(gpsBridge.getHostActions().ais.showInfo("123456789")).toBe(true);
     expect(editBridge.getHostActions().routeEditor.openEditRoute()).toBe(true);
 
-    expect(navHandler.mock.calls[0][0].avnav).toEqual({ item: { name: "ActiveRoute" } });
+    expect(navHandler.mock.calls[0][0].avnav).toEqual({ item: { name: "Zoom" } });
+    expect(navHandler.mock.calls[1][0].avnav).toEqual({ item: { name: "ActiveRoute" } });
     expect(gpsHandler.mock.calls[0][0].avnav).toEqual({ item: { name: "AisTarget" }, mmsi: "123456789" });
     expect(editHandler.mock.calls[0][0].avnav).toEqual({ item: { name: "EditRoute" } });
   });
@@ -155,6 +162,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     const gpsBridge = createBridgeContext({ pageRoots: { gpspage: makeElement() } }).bridge;
     const otherBridge = createBridgeContext({ pageRoots: {} }).bridge;
 
+    expect(gpsBridge.getHostActions().map.checkAutoZoom()).toBe(false);
     expect(gpsBridge.getHostActions().routeEditor.openActiveRoute()).toBe(false);
     expect(otherBridge.getHostActions().ais.showInfo("123")).toBe(false);
   });

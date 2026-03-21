@@ -95,6 +95,7 @@ Contract summary:
 - mirrors the widget-facing namespace shape:
   - `hostActions.getCapabilities()`
   - `hostActions.routePoints.activate(index)`
+  - `hostActions.map.checkAutoZoom()`
   - `hostActions.routeEditor.openActiveRoute()`
   - `hostActions.routeEditor.openEditRoute()`
   - `hostActions.ais.showInfo(mmsi)`

@@ -49,6 +49,7 @@
         "EnvironmentMapper",
         "WindMapper",
         "NavMapper",
+        "MapMapper",
         "AnchorMapper",
         "VesselMapper"
       ]
@@ -70,6 +71,7 @@
         "ThreeValueTextWidget",
         "PositionCoordinateWidget",
         "ActiveRouteTextHtmlWidget",
+        "MapZoomTextHtmlWidget",
         "CenterDisplayTextWidget",
         "RendererPropsWidget"
       ]
@@ -104,6 +106,11 @@
       css: undefined,
       globalKey: "DyniNavMapper",
       deps: ["ActiveRouteViewModel"]
+    },
+    MapMapper: {
+      js: BASE + "cluster/mappers/MapMapper.js",
+      css: undefined,
+      globalKey: "DyniMapMapper"
     },
     SpeedMapper: {
       js: BASE + "cluster/mappers/SpeedMapper.js",

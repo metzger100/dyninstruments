@@ -8,6 +8,7 @@ describe("ClusterMapperRegistry", function () {
       EnvironmentMapper: { create: () => ({ cluster: "environment", translate: () => ({}) }) },
       WindMapper: { create: () => ({ cluster: "wind", translate: () => ({}) }) },
       NavMapper: { create: () => ({ cluster: "nav", translate: (p) => ({ n: p.kind }) }) },
+      MapMapper: { create: () => ({ cluster: "map", translate: (p) => ({ m: p.kind }) }) },
       AnchorMapper: { create: () => ({ cluster: "anchor", translate: () => ({}) }) },
       VesselMapper: { create: () => ({ cluster: "vessel", translate: () => ({}) }) }
     };
@@ -23,6 +24,7 @@ describe("ClusterMapperRegistry", function () {
     const reg = loadFresh("cluster/mappers/ClusterMapperRegistry.js").create({ cluster: "speed" }, makeHelpers());
 
     expect(reg.mapCluster({ cluster: "nav", kind: "eta" }, () => ({}))).toEqual({ n: "eta" });
+    expect(reg.mapCluster({ cluster: "map", kind: "zoom" }, () => ({}))).toEqual({ m: "zoom" });
     expect(reg.mapCluster({ kind: "sog" }, () => ({}))).toEqual({ s: "sog" });
   });
 

@@ -167,6 +167,9 @@
             ? "dispatch"
             : "unsupported"
         },
+        map: {
+          checkAutoZoom: pageId === "navpage" ? "dispatch" : "unsupported"
+        },
         routeEditor: {
           openActiveRoute: pageId === "navpage"
             ? "dispatch"
@@ -212,6 +215,19 @@
             throw createBridgeError("routePoints.activate returned false on " + capabilities.pageId);
           }
           return true;
+        }
+      },
+      map: {
+        checkAutoZoom: function () {
+          ensureActive();
+          const capabilities = computeCapabilities();
+          if (capabilities.map.checkAutoZoom !== "dispatch") {
+            return false;
+          }
+          // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native Zoom dispatch until core exposes map actions.
+          return dispatchViaPageItemClick("map.checkAutoZoom", {
+            item: { name: "Zoom" }
+          });
         }
       },
       routeEditor: {

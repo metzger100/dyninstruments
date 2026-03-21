@@ -1,0 +1,78 @@
+/**
+ * Module: DyniPlugin Map Cluster - Map-focused instruments (center display and zoom action)
+ * Documentation: documentation/guides/add-new-cluster.md
+ * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js
+ */
+(function (root) {
+  "use strict";
+
+  const ns = root.DyniPlugin;
+  const config = ns.config;
+  const shared = config.shared;
+
+  const makePerKindTextParams = shared.makePerKindTextParams;
+  const opt = shared.opt;
+  const MAP_KIND = shared.kindMaps.MAP_KIND;
+  const CENTER_DISPLAY_CONDITION = { kind: "centerDisplay" };
+
+  config.clusters.push({
+    widget: "ClusterWidget",
+    def: {
+      name: "dyni_Map_Instruments",
+      description: "Map values (Center display / Zoom)",
+      caption: "", unit: "", default: "---",
+      cluster: "map",
+      storeKeys: {
+        zoom: "map.currentZoom",
+        requiredZoom: "map.requiredZoom",
+        centerCourse: "nav.center.course",
+        centerDistance: "nav.center.distance",
+        centerMarkerCourse: "nav.center.markerCourse",
+        centerMarkerDistance: "nav.center.markerDistance",
+        centerPosition: "map.centerPosition",
+        activeMeasure: "map.activeMeasure",
+        measureRhumbLine: "properties.measureRhumbLine",
+        lockPosition: "map.lockPosition"
+      },
+      editableParameters: {
+        kind: {
+          type: "SELECT",
+          list: [
+            opt("Center display", "centerDisplay"),
+            opt("Zoom", "zoom")
+          ],
+          default: "centerDisplay",
+          name: "Instrument"
+        },
+        centerDisplayRatioThresholdNormal: {
+          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          internal: true,
+          name: "CenterDisplay: 3-Rows Threshold",
+          condition: CENTER_DISPLAY_CONDITION
+        },
+        centerDisplayRatioThresholdFlat: {
+          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.4,
+          internal: true,
+          name: "CenterDisplay: 1-Row Threshold",
+          condition: CENTER_DISPLAY_CONDITION
+        },
+        caption: false,
+        unit: false,
+        formatter: false,
+        formatterParameters: false,
+        className: true,
+        ...makePerKindTextParams(MAP_KIND)
+      },
+      updateFunction: function (values) {
+        const out = values ? { ...values } : {};
+        const kind = (values && values.kind) || "centerDisplay";
+        if (kind === "centerDisplay") {
+          out.visible = !(values && values.lockPosition) || !!(values && values.editing);
+        } else if (Object.prototype.hasOwnProperty.call(out, "visible")) {
+          delete out.visible;
+        }
+        return out;
+      }
+    }
+  });
+}(this));

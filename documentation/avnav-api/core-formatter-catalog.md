@@ -67,6 +67,13 @@ Source of truth: AvNav `viewer/util/formatter.js` snapshot verified on 2026-02-2
 | `eta` | `formatTime` | `[]` |
 | `nextCourse` | `formatDirection` | `[]` |
 
+## Normative MapZoom Renderer Contract
+
+| Field | Formatter | formatterParameters |
+|---|---|---|
+| `zoom` | `formatDecimalOpt` | `[2, 1]` |
+| `requiredZoom` | `formatDecimalOpt` | `[2, 1]` |
+
 ## Normative CenterDisplay Renderer Contract
 
 | Field | Formatter | formatterParameters |

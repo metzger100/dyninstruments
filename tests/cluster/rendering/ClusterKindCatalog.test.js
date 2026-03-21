@@ -10,7 +10,7 @@ describe("ClusterKindCatalog", function () {
     const catalog = catalogFactory.createDefaultCatalog();
 
     const routes = catalog.listRoutes();
-    expect(routes).toHaveLength(51);
+    expect(routes).toHaveLength(52);
 
     const activeRoute = catalog.resolveRoute("nav", "activeRoute");
     expect(activeRoute).toEqual({
@@ -18,6 +18,15 @@ describe("ClusterKindCatalog", function () {
       kind: "activeRoute",
       viewModelId: "ActiveRouteViewModel",
       rendererId: "ActiveRouteTextHtmlWidget",
+      surface: "html"
+    });
+
+    const mapZoom = catalog.resolveRoute("map", "zoom");
+    expect(mapZoom).toEqual({
+      cluster: "map",
+      kind: "zoom",
+      viewModelId: "MapperOutputViewModel",
+      rendererId: "MapZoomTextHtmlWidget",
       surface: "html"
     });
   });

@@ -17,28 +17,37 @@ describe("static cluster configs", function () {
     runIifeScript("config/clusters/course-heading.js", context);
     runIifeScript("config/clusters/speed.js", context);
     runIifeScript("config/clusters/wind.js", context);
+    runIifeScript("config/clusters/map.js", context);
     runIifeScript("config/clusters/anchor.js", context);
 
     return context.DyniPlugin.config.clusters.map((x) => x.def);
   }
 
-  it("registers course/speed/wind/anchor definitions with expected defaults", function () {
+  it("registers course/speed/wind/map/anchor definitions with expected defaults", function () {
     const defs = loadClusters();
     const byCluster = Object.fromEntries(defs.map((d) => [d.cluster, d]));
 
     expect(byCluster.courseHeading.name).toBe("dyni_CourseHeading_Instruments");
     expect(byCluster.speed.name).toBe("dyni_Speed_Instruments");
     expect(byCluster.wind.name).toBe("dyni_Wind_Instruments");
+    expect(byCluster.map.name).toBe("dyni_Map_Instruments");
     expect(byCluster.anchor.name).toBe("dyni_Anchor_Instruments");
 
     expect(byCluster.courseHeading.editableParameters.kind.default).toBe("cog");
     expect(byCluster.speed.editableParameters.kind.default).toBe("sog");
     expect(byCluster.wind.editableParameters.kind.default).toBe("angleTrue");
+    expect(byCluster.map.editableParameters.kind.default).toBe("centerDisplay");
     expect(byCluster.anchor.editableParameters.kind.default).toBe("distance");
     expect(byCluster.courseHeading.editableParameters.kind.name).toBe("Instrument");
     expect(byCluster.speed.editableParameters.kind.name).toBe("Instrument");
     expect(byCluster.wind.editableParameters.kind.name).toBe("Instrument");
+    expect(byCluster.map.editableParameters.kind.name).toBe("Instrument");
     expect(byCluster.anchor.editableParameters.kind.name).toBe("Instrument");
+    expect(byCluster.map.editableParameters.kind.list.map((entry) => entry.value))
+      .toEqual(expect.arrayContaining(["centerDisplay", "zoom"]));
+    expect(byCluster.map.editableParameters.centerDisplayRatioThresholdNormal.condition).toEqual({ kind: "centerDisplay" });
+    expect(byCluster.map.editableParameters.centerDisplayRatioThresholdNormal.internal).toBe(true);
+    expect(byCluster.map.editableParameters.caption_zoom.condition).toEqual({ kind: "zoom" });
     expect(byCluster.speed.editableParameters.kind.list.map((entry) => entry.value))
       .toEqual(expect.arrayContaining(["sogLinear", "stwLinear"]));
     expect(byCluster.courseHeading.editableParameters.kind.list.map((entry) => entry.value))

@@ -4,7 +4,7 @@
 
 ## Overview
 
-Responsive center-position renderer used by `ClusterWidget` via `NavMapper` for `kind: "centerDisplay"`.
+Responsive center-position renderer used by `ClusterWidget` via `MapMapper` for `kind: "centerDisplay"`.
 
 It keeps core data parity with AvNav `CenterDisplay` while using a readability-first canvas layout:
 
@@ -14,7 +14,7 @@ It keeps core data parity with AvNav `CenterDisplay` while using a readability-f
 - adaptive geometry derived from measured text and available canvas space; no fixed pixel layout floors
 - compact tiles linearly tighten mode-specific panel shares and increase fitted text fill from `minDim <= 80` to `minDim >= 180`
 - compact tiles also increase fitted text fill linearly so captions, coordinates, and relation values occupy more of each row without changing the normal-mode panel split
-- core visibility semantics handled in nav-cluster `updateFunction`: visible only when `!lockPosition || editing`
+- core visibility semantics handled in map-cluster `updateFunction`: visible only when `!lockPosition || editing`
 
 This is a dedicated renderer, not a `PositionCoordinateWidget` variant, because it owns a different top-panel + relation-row contract across aspect ratios.
 

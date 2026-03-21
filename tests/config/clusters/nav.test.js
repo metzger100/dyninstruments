@@ -32,26 +32,14 @@ describe("config/clusters/nav.js", function () {
     expect(def.storeKeys.activeRouteEta).toBe("nav.route.eta");
     expect(def.storeKeys.activeRouteNextCourse).toBe("nav.route.nextCourse");
     expect(def.storeKeys.activeRouteApproaching).toBe("nav.route.isApproaching");
-    expect(def.storeKeys.centerCourse).toBe("nav.center.course");
-    expect(def.storeKeys.centerDistance).toBe("nav.center.distance");
-    expect(def.storeKeys.centerMarkerCourse).toBe("nav.center.markerCourse");
-    expect(def.storeKeys.centerMarkerDistance).toBe("nav.center.markerDistance");
-    expect(def.storeKeys.centerPosition).toBe("map.centerPosition");
-    expect(def.storeKeys.activeMeasure).toBe("map.activeMeasure");
-    expect(def.storeKeys.measureRhumbLine).toBe("properties.measureRhumbLine");
-    expect(def.storeKeys.lockPosition).toBe("map.lockPosition");
     expect(def.editableParameters.kind.default).toBe("eta");
     expect(def.editableParameters.kind.name).toBe("Instrument");
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "activeRoute")).toBe(true);
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "activeRouteInteractive")).toBe(false);
-    expect(def.editableParameters.kind.list.some((entry) => entry.value === "centerDisplay")).toBe(true);
+    expect(def.editableParameters.kind.list.some((entry) => entry.value === "centerDisplay")).toBe(false);
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "xteDisplay")).toBe(true);
-    expect(def.editableParameters.centerDisplayRatioThresholdNormal.condition).toEqual({ kind: "centerDisplay" });
-    expect(def.editableParameters.centerDisplayRatioThresholdFlat.condition).toEqual({ kind: "centerDisplay" });
-    expect(def.editableParameters.centerDisplayRatioThresholdNormal.internal).toBe(true);
-    expect(def.editableParameters.centerDisplayRatioThresholdFlat.internal).toBe(true);
-    expect(def.editableParameters.centerDisplayRatioThresholdNormal.default).toBe(1.1);
-    expect(def.editableParameters.centerDisplayRatioThresholdFlat.default).toBe(2.4);
+    expect(def.editableParameters.centerDisplayRatioThresholdNormal).toBeUndefined();
+    expect(def.editableParameters.centerDisplayRatioThresholdFlat).toBeUndefined();
     expect(def.editableParameters.leadingZero.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.xteRatioThresholdNormal.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.xteRatioThresholdFlat.condition).toEqual({ kind: "xteDisplay" });
@@ -91,14 +79,8 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.unit_xteDisplay).toBeUndefined();
     expect(def.editableParameters.caption_activeRoute).toBeUndefined();
     expect(def.editableParameters.unit_activeRoute).toBeUndefined();
-    expect(def.editableParameters.caption_centerDisplayPosition.condition).toEqual({ kind: "centerDisplay" });
-    expect(def.editableParameters.unit_centerDisplayPosition.condition).toEqual({ kind: "centerDisplay" });
-    expect(def.editableParameters.caption_centerDisplayMarker.displayName).toBe("Waypoint caption");
-    expect(def.editableParameters.unit_centerDisplayMarker.displayName).toBe("Waypoint distance unit");
-    expect(def.editableParameters.caption_centerDisplayBoat.displayName).toBe("Boat caption");
-    expect(def.editableParameters.unit_centerDisplayBoat.displayName).toBe("Boat distance unit");
-    expect(def.editableParameters.caption_centerDisplayMeasure.displayName).toBe("Measure caption");
-    expect(def.editableParameters.unit_centerDisplayMeasure.displayName).toBe("Measure distance unit");
+    expect(def.editableParameters.caption_centerDisplayPosition).toBeUndefined();
+    expect(def.editableParameters.unit_centerDisplayPosition).toBeUndefined();
     expect(def.editableParameters.caption_activeRouteRemain.condition).toEqual({ kind: "activeRoute" });
     expect(def.editableParameters.unit_activeRouteRemain.condition).toEqual({ kind: "activeRoute" });
     expect(def.editableParameters.caption_activeRouteEta.condition).toEqual({ kind: "activeRoute" });
@@ -164,17 +146,8 @@ describe("config/clusters/nav.js", function () {
 
   });
 
-  it("applies core visibility semantics for centerDisplay and clears stale visible on other kinds", function () {
+  it("clears stale visible state on nav kinds", function () {
     const def = loadNavDef();
-
-    const unlocked = def.updateFunction({ kind: "centerDisplay", lockPosition: false, editing: false });
-    expect(unlocked.visible).toBe(true);
-
-    const lockedEditing = def.updateFunction({ kind: "centerDisplay", lockPosition: true, editing: true });
-    expect(lockedEditing.visible).toBe(true);
-
-    const locked = def.updateFunction({ kind: "centerDisplay", lockPosition: true, editing: false });
-    expect(locked.visible).toBe(false);
 
     const cleared = def.updateFunction({ kind: "eta", visible: true });
     expect(cleared.visible).toBeUndefined();

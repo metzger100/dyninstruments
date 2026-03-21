@@ -55,6 +55,7 @@ ClusterWidget
 │   ├── EnvironmentMapper
 │   ├── WindMapper
 │   ├── NavMapper
+│   ├── MapMapper
 │   ├── AnchorMapper
 │   └── VesselMapper
 └── ClusterRendererRouter
@@ -74,6 +75,7 @@ ClusterWidget
     │       ├── TextTileLayout
     │       └── ActiveRouteLayout
     │           └── ResponsiveScaleProfile
+    ├── MapZoomTextHtmlWidget
     ├── RendererPropsWidget
     │   ├── WindRadialWidget
     │   ├── CompassRadialWidget

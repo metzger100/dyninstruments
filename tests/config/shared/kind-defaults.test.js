@@ -24,12 +24,7 @@ describe("config/shared/kind-defaults.js", function () {
     expect(maps.WIND_KIND.speedTrue.unit).toBe("kn");
     expect(maps.NAV_KIND.dst.unit).toBe("nm");
     expect(maps.NAV_KIND.rteDistance.unit).toBe("nm");
-    expect(maps.NAV_KIND.centerDisplayPosition.kind).toBe("centerDisplay");
-    expect(maps.NAV_KIND.centerDisplayPosition.cap).toBe("CENTER");
-    expect(maps.NAV_KIND.centerDisplayMarker.unit).toBe("nm");
-    expect(maps.NAV_KIND.centerDisplayBoat.cap).toBe("POS");
-    expect(maps.NAV_KIND.centerDisplayBoat.captionName).toBe("Boat caption");
-    expect(maps.NAV_KIND.centerDisplayMeasure.unitName).toBe("Measure distance unit");
+    expect(maps.NAV_KIND.centerDisplayPosition).toBeUndefined();
     expect(maps.NAV_KIND.activeRouteRemain.kind).toBe("activeRoute");
     expect(maps.NAV_KIND.activeRouteRemain.cap).toBe("RTE");
     expect(maps.NAV_KIND.activeRouteEta.kind).toBe("activeRoute");
@@ -42,6 +37,14 @@ describe("config/shared/kind-defaults.js", function () {
     expect(maps.NAV_KIND.xteDisplayCog.unit).toBe("°");
     expect(maps.NAV_KIND.xteDisplayDst.kind).toBe("xteDisplay");
     expect(maps.NAV_KIND.xteDisplayBrg.captionName).toBe("BRG caption");
+    expect(maps.MAP_KIND.zoom.cap).toBe("ZOOM");
+    expect(maps.MAP_KIND.zoom.unit).toBe("");
+    expect(maps.MAP_KIND.centerDisplayPosition.kind).toBe("centerDisplay");
+    expect(maps.MAP_KIND.centerDisplayPosition.cap).toBe("CENTER");
+    expect(maps.MAP_KIND.centerDisplayMarker.unit).toBe("nm");
+    expect(maps.MAP_KIND.centerDisplayBoat.cap).toBe("POS");
+    expect(maps.MAP_KIND.centerDisplayBoat.captionName).toBe("Boat caption");
+    expect(maps.MAP_KIND.centerDisplayMeasure.unitName).toBe("Measure distance unit");
     expect(maps.WIND_KIND.angleTrueRadialAngle.kind).toBe("angleTrueRadial");
     expect(maps.WIND_KIND.angleTrueRadialSpeed.unitName).toBe("Speed unit");
     expect(maps.WIND_KIND.angleApparentRadialAngle.cap).toBe("AWA");
