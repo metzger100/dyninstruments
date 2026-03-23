@@ -141,7 +141,6 @@
 - **Which AI model should I use for a task?** → [QUALITY.md#model-selection-log](QUALITY.md#model-selection-log)
 
 ## Feature-Specific Lookups
-**"Where is PLAN4.md located?"** → [/notes/implementation-plans/PLAN4.md](/notes/implementation-plans/PLAN4.md)
 **"How do I add warning/alarm sectors to a gauge?"** → [radial/gauge-style-guide.md](radial/gauge-style-guide.md#sector-logic),
 **"How do I make a gauge respond to aspect ratio?"** → [radial/gauge-style-guide.md](radial/gauge-style-guide.md#layout-modes)
 **"How does the active-route layout react to aspect ratio?"** → [widgets/active-route.md](widgets/active-route.md#layout-modes)
