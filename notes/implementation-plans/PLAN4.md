@@ -1,865 +1,644 @@
-# PLAN4 — Runtime & Theme Lifecycle Cleanup After renderHtml Refactor
+# PLAN4 — Runtime & Theme Lifecycle Cleanup After `renderHtml` Refactor
 
 ## Status
 
-Cleanup plan for lifecycle misalignments, duplicated utilities, timing bugs, and documentation gaps accumulated during the renderCanvas → renderHtml host registration refactor.
+Rewritten after repository verification.
+
+This plan keeps the verified problem list, removes unsupported assumptions, and uses conservative implementation language where multiple code-level solutions appear viable. The coding agent may choose equivalent implementations as long as the behavioral and documentation outcomes below are met.
 
 ---
 
 ## Goal
 
-After this plan is implemented, the runtime and theme lifecycle should be tight, fast, and fail-fast — no speculative fallbacks, no duplicated logic, no timing-dependent workarounds, no silent degradation. Documentation must accurately describe the current runtime architecture end-to-end.
+Reduce lifecycle drift, duplicate utility logic, and avoidable runtime work introduced around the `renderCanvas` → `renderHtml` host registration transition, while keeping the existing AvNav host path intact.
 
-Binding targets:
+Expected outcomes after completion:
 
-- **ThemeResolver** discovers preset names from CSS variables at render time, closing the proven timing gap where `--dyni-theme-preset` set in `user.css` has no effect.
-
-- **Duplicated utility functions** (`startPerfSpan`/`endPerfSpan`, `toFiniteNumber`/`escapeHtml`/`resolveShellRect`/`resolveMode`/`isEditingMode`, `getNightModeState`, `normalizePresetName`, `loadScriptOnce`) are extracted into shared modules or explicitly suppressed with documented reasons.
-
-- **Hot-path waste** (per-call `computeCapabilities`, per-call `getState` shallow copy, double model computation in `resizeSignature`, whole-body `MutationObserver`) is eliminated or bounded.
-
-- **Framework-method typeof guards** on ThemeResolver invalidation APIs are removed after confirmed module loading.
-
-- **CanvasDomSurfaceAdapter** is brought back under the ≤400-line budget.
-
-- **`documentation/architecture/runtime-lifecycle.md`** is extended with the complete lifecycle analysis performed during this plan's investigation, and all affected architecture/convention/guide docs are updated.
+- Theme preset selection works when `--dyni-theme-preset` is provided via CSS, including the case where widget roots are mounted after runtime init.
+- Duplicate utilities are either consolidated into canonical shared modules or explicitly suppressed with a documented rationale where runtime layering prevents direct reuse.
+- Runtime hot paths avoid obvious repeated work without weakening correctness across page changes or remounts.
+- `HostCommitController` fallback behavior remains present but is more bounded and easier to reason about.
+- `CanvasDomSurfaceAdapter.js` returns to the file-size budget.
+- Runtime architecture documentation is updated, including a new `documentation/architecture/runtime-lifecycle.md` page.
 
 ---
 
-## Lifecycle & Flow Analysis
+## Verified Baseline
 
-This section records the end-to-end lifecycle analysis that motivated the problem list. It serves as the investigative reference for all phases.
+The following points were rechecked against the repository before this rewrite:
 
-### Bootstrap Flow
+1. `shared/theme/ThemeResolver.js` resolves preset names from `data-dyni-theme` but does not currently fall back to `--dyni-theme-preset` at render time.
+2. `getNightModeState` is duplicated between `shared/theme/ThemeResolver.js` and `runtime/helpers.js`.
+3. Perf-span helper logic is duplicated across cluster/runtime files.
+4. HTML-widget utility helpers are duplicated across multiple HTML widgets and fit modules.
+5. `shared/widget-kits/nav/MapZoomHtmlFit.js` still hardcodes font weights instead of reading them from theme tokens.
+6. `runtime/HostCommitController.js` falls back to a whole-body `MutationObserver`.
+7. `runtime/TemporaryHostActionBridge.js` recomputes capability state repeatedly.
+8. `runtime/HostCommitController.js` allocates a fresh shallow state object on every `getState()` call.
+9. `loadScriptOnce` is duplicated between `plugin.js` and `runtime/component-loader.js`.
+10. `normalizePresetName` is duplicated across theme-related files.
+11. Theme invalidation call sites still contain framework-method `typeof` guards.
+12. `cluster/rendering/CanvasDomSurfaceAdapter.js` exceeds the preferred line budget.
+13. `documentation/architecture/runtime-lifecycle.md` does not currently exist and should be created during the documentation phase.
+14. `plugin.js` currently defines 26 internal script loads.
+15. `runInit()` is invoked twice in the current flow: once inside `runtime/init.js` and once again from `plugin.js`, with the init guard preventing duplicate work.
 
-`plugin.js` loads 25 internal scripts sequentially via a Promise chain. Each script resolves before the next loads. After all scripts, `runtime/init.js` auto-invokes `runInit()`.
+---
 
-```
-plugin.js
-  ├─ Guard: avnav.api present
-  ├─ Resolve AVNAV_BASE_URL → baseUrl
-  ├─ Create namespace: window.DyniPlugin = { baseUrl }
-  └─ Sequential Promise chain:
-       runtime/namespace.js           ← DyniPlugin.{runtime, state, config}
-       runtime/helpers.js             ← applyFormatter, setupCanvas, resolveTypography
-       runtime/editable-defaults.js
-       config/components/registry-*.js (×4) → config/components.js
-       config/shared/*.js (×3)
-       config/clusters/*.js (×8)      ← push into config.clusters[]
-       config/widget-definitions.js   ← config.widgetDefinitions = config.clusters
-       runtime/component-loader.js    ← loadScriptOnce ⚠ duplicated from plugin.js
-       runtime/widget-registrar.js
-       runtime/HostCommitController.js
-       runtime/SurfaceSessionController.js
-       runtime/TemporaryHostActionBridge.js
-       runtime/init.js                ← runInit() auto-invoked
-```
+## Lifecycle Notes
 
-**Dependency wall:** Runtime IIFEs execute on `DyniPlugin.runtime` and have no access to UMD components loaded later by `component-loader.js`. This is why runtime files cannot call `Helpers.getModule()` and must either duplicate shared utilities or access them via the runtime namespace.
+These notes exist to anchor the plan. They are descriptive, not prescriptive.
 
-### Init Flow
+### Bootstrap and init
 
-`runInit()` creates the Helpers object, loads all UMD components via `component-loader.js`, registers each widget definition with AvNav, and resolves the theme preset:
+- `plugin.js` loads 26 internal scripts in sequence.
+- `runtime/namespace.js` creates the runtime namespace early.
+- Shared UMD components are loaded later by `runtime/component-loader.js` during `runInit()`.
+- `runtime/init.js` self-invokes `runInit()`.
+- `plugin.js` invokes `window.DyniPlugin.runtime.runInit()` again after the internal script chain completes.
+- The current init guard prevents duplicate initialization.
 
-```
-runInit()
-  ├─ Guard: avnav.api present, state.initStarted not set
-  ├─ Create TemporaryHostActionBridge → state.hostActionBridge
-  ├─ Build Helpers (applyFormatter, setupCanvas, getModule, ...)
-  ├─ Create ComponentLoader from config.components registry
-  ├─ uniqueComponents(widgetDefinitions) + force-include ThemePresets
-  ├─ Promise.all(loadComponent for each unique component)
-  │   └─ Each: resolve deps → loadCssOnce + loadScriptOnce → verify .create
-  ├─ For each widgetDef: registerWidget(component, widgetDef, Helpers)
-  ├─ Stash state.themeResolverModule, build state.themePresetApi
-  ├─ resolveThemePresetName():
-  │   1. readThemePresetFromSettingsApi() → null (stub)
-  │   2. window.DyniPlugin.theme string
-  │   3. CSS --dyni-theme-preset on .widget.dyniplugin roots
-  │   4. CSS --dyni-theme-preset on <html> or <body>
-  │   5. "default"
-  └─ applyThemePresetToRegisteredWidgets(presetName)
-       querySelectorAll(".widget.dyniplugin") → roots
-       ⚠ At init time, AvNav may not have mounted containers yet.
-       If roots.length === 0, preset is saved in state but never applied to DOM.
-```
+Consequence: runtime IIFE files cannot assume shared UMD helpers are available during namespace bootstrap.
 
-### Widget Registration
+### Theme preset timing
 
-`registerWidget` calls `component.create(def, Helpers)` to build the component spec. For `ClusterWidget`, this creates the full routing infrastructure at registration time: `mapperToolkit`, `rendererRouter` (which resolves all renderer specs and validates the kind catalog), and `mapperRegistry`. The spec is then registered with AvNav via `avnav.api.registerWidget`.
+- Runtime init tries to resolve and apply a preset name before AvNav is guaranteed to have mounted `.widget.dyniplugin` roots.
+- Later, render-time token resolution works because tokens are read from computed style on demand.
+- Preset-name discovery does not currently have an equivalent render-time CSS fallback.
 
-All `renderHtml`, `initFunction`, and `finalizeFunction` are wrapped to inject `ctx.hostActions` before each call. `translateFunction` is NOT wrapped — it is a pure data transform.
+Consequence: preset names supplied by CSS can be missed even though token overrides work.
 
-### Render Cycle (per frame)
+### TemporaryHostActionBridge lifecycle
 
-AvNav calls `translateFunction`, then `renderHtml` on every store key change:
+- `state.hostActionBridge` is created once during init and then reused.
+- The current bridge code derives page-specific capability state from the live document during action calls.
+- The repository does not currently show bridge recreation on page transitions.
 
-```
-translateFunction(props)
-  └─ mapperRegistry.mapCluster(props, toolkit)
-       └─ mapper.translate(props, toolkit) → renderer-specific props
+Consequence: any optimization here must preserve correctness if the current page changes while the bridge instance remains alive.
 
-renderHtml(translatedProps)
-  ├─ resolveRuntimeState(ctx)
-  │   └─ Lazy-init HostCommitController + SurfaceSessionController on first call
-  ├─ hostCommitController.recordRender(props)  → revision++
-  ├─ ctx.__dyniHostCommitState = getState()
-  │   ⚠ Creates new 10-property object every call (Problem 8)
-  ├─ rendererRouter.renderHtml(props)
-  │   ├─ kindCatalog.resolveRoute(cluster, kind) → { rendererId, surface }
-  │   ├─ buildShellHtml(routeState, hostContext)
-  │   │   └─ renderSurfaceShell:
-  │   │        canvas-dom: static shell HTML
-  │   │        html: HtmlSurfaceController.renderSurfaceShell
-  │   │              ├─ Pre-bind named handlers on ctx.eventHandler
-  │   │              ├─ rendererSpec.renderHtml(props) → inner HTML
-  │   │              └─ Wrap in <div class="dyni-surface-html">
-  │   └─ Return HTML string
-  ├─ hostCommitController.scheduleCommit({ onCommit: ... })
-  │   └─ onCommit (fires after AvNav commits HTML to DOM):
-  │        ├─ rendererRouter.createSessionPayload(commitPayload)
-  │        └─ surfaceSessionController.reconcileSession(sessionPayload)
-  └─ Return HTML string to AvNav host
-```
+### Host commit fallback lifecycle
 
-### Host Commit Scheduling
+- `HostCommitController` currently performs two RAF attempts before falling back to a body-wide `MutationObserver`.
+- The controller already uses a timeout handle for existing deferred work.
 
-`HostCommitController` resolves shell elements in the DOM after AvNav commits the HTML string:
-
-```
-scheduleCommit(callbacks)
-  └─ scheduleRafAttempt(revision, callbacks, attempt=1)
-       RAF-1 → commitIfReady("raf-1")
-         ├─ Stale revision? → abort
-         ├─ resolveShellElement() → querySelector('[data-dyni-instance="..."]')
-         ├─ Not found → attempt 2
-         └─ Found → resolveRootElement → onCommit(...)
-
-       RAF-2 → commitIfReady("raf-2")
-         ├─ Not found → installDeferredObservers()
-         │   ├─ MutationObserver on document.body { childList, subtree }
-         │   │   ⚠ Fires on EVERY unrelated DOM mutation (Problem 6)
-         │   └─ setTimeout(0) fallback
-         └─ Found → onCommit(...)
-```
-
-Only 2 RAF attempts before the expensive MutationObserver fallback. No timeout ceiling — the observer runs indefinitely until the element appears or a new render makes the revision stale.
-
-### Surface Session State Machine
-
-`SurfaceSessionController.reconcileSession(payload)`:
-
-| Condition | Action |
-|---|---|
-| `revision < mountedRevision` | Skip (stale) |
-| No active controller | Create → `attach(payload)` |
-| Same surface, same shellEl | `update(payload)` |
-| Same surface, different shellEl | `detach("remount")` → `attach(payload)` |
-| Different surface | `detach` → `destroy` → create new → `attach(payload)` |
-
-### HTML Surface Lifecycle
-
-For `activeRoute` and `zoom` kinds:
-
-```
-renderSurfaceShell (during renderHtml, before DOM exists):
-  ├─ Pre-bind named handlers ← required for onclick attrs in HTML
-  ├─ rendererSpec.renderHtml(props) → inner HTML string
-  └─ Wrap in <div class="dyni-surface-html">
-
-attach (after host commit):
-  ├─ Rebind named handlers (with current props closure)
-  ├─ Compute initial resizeSignature
-  └─ rendererSpec.initFunction(props) → this.triggerResize()
-
-update (subsequent renders):
-  ├─ Rebind named handlers with new props
-  ├─ Compare resizeSignature → if changed, triggerResize()
-  │   ⚠ resizeSignature recomputes the full render model
-  └─ Return { updated, changed }
-
-detach/destroy:
-  └─ Remove owned handlers, clear state
-```
-
-Handler pre-bind / rebind subtlety: handlers are pre-bound during `renderSurfaceShell` and rebound during `attach` and every `update`. On normal update cycles (not first mount), the pre-bind in `renderSurfaceShell` is always followed by an `update` rebind — every render does handler binding twice.
-
-### Canvas-DOM Surface Lifecycle
-
-For all gauge, text, dial, and display kinds:
-
-```
-renderSurfaceShell: static HTML (no renderer involvement)
-
-attach:
-  ├─ Find .dyni-surface-canvas, find .dyni-surface-canvas-mount
-  ├─ Create <canvas>, apply contract styles (100% w/h, font-size: initial)
-  ├─ Append canvas, bind ResizeObserver → schedulePaint("size")
-  └─ schedulePaint("attach") → RAF → paintNow → renderCanvas(canvas, props)
-
-update:
-  ├─ shallowEqual(oldProps, newProps) → skip if equal
-  └─ schedulePaint("update") → RAF → paintNow
-
-Paint coalescing: dirty flags (paint/size/theme) coalesced into single RAF.
-
-Theme invalidation:
-  invalidateTheme() → ThemeResolver.invalidateRoot → schedulePaint("theme")
-  ⚠ callThemeInvalidation uses typeof guards (Problem 11)
-
-detach/destroy: cancel RAF, disconnect ResizeObserver, remove canvas
-```
-
-### Theme Token Resolution at Render Time
-
-```
-ThemeResolver.resolveForRoot(rootEl):
-  ├─ Night mode check (body/html .nightMode) → invalidateAll if changed
-  ├─ Return cached if present
-  ├─ getActivePresetName(rootEl, presetDefs)
-  │   └─ rootEl.getAttribute("data-dyni-theme")
-  │      ⚠ NO fallback to getComputedStyle("--dyni-theme-preset") (Problem 1)
-  ├─ Lookup preset values from ThemePresets.PRESETS[presetName]
-  └─ resolveTokens([computedStyle], presetValues)
-       Per token: CSS override → preset value → built-in default
-```
-
-The per-token CSS read path works correctly. Only the preset *name* discovery is broken — it has no CSS fallback.
-
-### Event Handler & Click Dispatch
-
-```
-HTML onclick="handlerName" → AvNav resolves against ctx.eventHandler
-
-activeRouteOpen:
-  canDispatchOpenRoute(hostContext) → hostActions.getCapabilities()
-  hostActions.routeEditor.openActiveRoute()
-  → TemporaryHostActionBridge.dispatchViaPageItemClick
-
-mapZoomCheckAutoZoom:
-  canDispatchCheckAutoZoom(hostContext) → hostActions.getCapabilities()
-  hostActions.map.checkAutoZoom()
-  → TemporaryHostActionBridge.dispatchViaPageItemClick
-
-Bridge dispatch chain:
-  ensureActive() → computeCapabilities()
-  ⚠ detectPageId: 3× getElementById probes, recomputed every call (Problem 7)
-  → findPageItemClickHandler via React fiber walk → handler(syntheticEvent)
-```
-
-### Kind-Switch Flow (Surface Transition)
-
-When `kind` changes from a canvas-dom kind to an html kind (e.g. `sogRadial` → `activeRoute`):
-
-1. `translateFunction` → NavMapper maps activeRoute data
-2. `renderHtml` → router resolves `surface: "html"`, `HtmlSurfaceController.renderSurfaceShell` pre-binds handlers and renders inner HTML
-3. `scheduleCommit` → RAF chain → commit fires
-4. `reconcileSession({ surface: "html" })`:
-   - Old surface was `canvas-dom` → surface switch
-   - Old controller: `detach("surface-switch")` (cancel RAF, disconnect ResizeObserver, remove canvas)
-   - Old controller: `destroy()`
-   - New controller: `createSurfaceController("html")` → `attach(payload)` (bind handlers, init)
-
-Kind switches within the same surface (e.g. `sogRadial` → `stwRadial`) are handled by the dynamic controller inside `ClusterRendererRouter` without destroying the surface controller.
+Consequence: any observer ceiling or timeout addition should account for the existing timeout state rather than assuming a free timer slot.
 
 ---
 
 ## Problem Analysis
 
-### Problem 1: ThemeResolver cannot read `--dyni-theme-preset` from CSS at render time
+### Problem 1 — Theme preset name is not reliably discovered from CSS at render time
 
-`getActivePresetName()` in `shared/theme/ThemeResolver.js` (line 149) reads only the `data-dyni-theme` DOM attribute via `rootEl.getAttribute("data-dyni-theme")`. That attribute is set by `runtime/init.js` via `applyThemePresetToRegisteredWidgets()`, but at init time the `.widget.dyniplugin` containers may not exist yet (AvNav React hasn't mounted them).
+`ThemeResolver` currently relies on the `data-dyni-theme` attribute for preset-name discovery. Because widget roots may not exist when runtime init runs, the attribute may never be written before the first render. Per-token CSS reads still work, but preset-name discovery does not benefit from that path.
 
-When AvNav later mounts a container and calls `renderHtml`, `ThemeResolver.resolveForRoot(rootEl)` discovers no `data-dyni-theme` attribute and defaults to `"default"`, ignoring any `--dyni-theme-preset` CSS variable set in `user.css`.
+**Desired outcome:** preset-name resolution should support the priority chain:
 
-Individual CSS tokens work because `resolveTokens()` reads each token via `getComputedStyle()` on every cache miss. The preset *name* has no equivalent render-time CSS read path.
+1. `data-dyni-theme` on the root
+2. `--dyni-theme-preset` from computed style
+3. built-in `"default"`
 
-**Evidence:** Setting `--dyni-theme-preset: bold` in `user.css` scoped to `.widget.dyniplugin` has no visible effect. Setting individual tokens like `--dyni-pointer: #00ff00` on the same selector works correctly.
+### Problem 2 — `getNightModeState` has two owners
 
-**Files:** `shared/theme/ThemeResolver.js` (lines 149–154), `tests/shared/theme/ThemeResolver.test.js`
+The same logic exists in `ThemeResolver` and `runtime/helpers.js`.
 
-**Fix direction:** Make `getActivePresetName()` fall back to reading `--dyni-theme-preset` from `getComputedStyle(rootEl)` when `rootEl.getAttribute("data-dyni-theme")` returns `null`. Use `getAttribute() !== null` to distinguish "explicitly set to default" from "never set". The priority chain is preserved: DOM attribute (set by runtime/init or console) > CSS variable (set by `user.css`) > built-in default.
+**Desired outcome:** one canonical implementation, or one canonical implementation plus an explicit suppression where direct reuse is not practical because of lifecycle/layering constraints.
 
-### Problem 2: `getNightModeState()` duplicated between ThemeResolver and helpers
+### Problem 3 — Perf-span wiring is duplicated across multiple files
 
-`shared/theme/ThemeResolver.js` (line 164) and `runtime/helpers.js` (line 101) contain body-identical implementations. Both check `document.documentElement.classList` and `document.body.classList` for the `.nightMode` class.
+The same span helper logic appears in cluster-facing modules and runtime-facing modules.
 
-**Files:** `shared/theme/ThemeResolver.js` (lines 164–180), `runtime/helpers.js` (lines 101–114)
+**Desired outcome:** one shared implementation for UMD consumers; runtime IIFE handling may use either a thin runtime-local helper or an explicit documented suppression if direct reuse is awkward under the current load order.
 
-**Smell rules:** `duplicate-functions` (block), core principle #8.
+### Problem 4 — HTML widget utility helpers are duplicated
 
-**Fix direction:** ThemeResolver is a self-contained UMD component and must not depend on runtime (core principle #4). The canonical implementation stays in ThemeResolver. Export it on the module surface. `runtime/helpers.js` delegates to `DyniComponents.DyniThemeResolver.create.getNightModeState` after component loading, or carries an explicit `dyni-lint-disable-next-line duplicate-functions` suppression with reason.
+`toFiniteNumber`, `trimText`, `escapeHtml`, `toStyleAttr`, `resolveShellRect`, `resolveMode`, and `isEditingMode` appear in multiple files in slightly different forms.
 
-### Problem 3: `startPerfSpan` / `endPerfSpan` / `PERF_HOOK_KEY` / `GLOBAL_ROOT` duplicated across 6 files
+**Desired outcome:** one canonical HTML-widget utility module for UMD consumers.
 
-The perf-hook wiring pattern is copy-pasted:
+### Problem 5 — `MapZoomHtmlFit` hardcodes font weights
 
-| File | Lines | Pattern |
-|---|---|---|
-| `cluster/ClusterWidget.js` | 14–35 | `GLOBAL_ROOT`, `PERF_HOOK_KEY`, `startPerfSpan`, `endPerfSpan` |
-| `cluster/rendering/ClusterRendererRouter.js` | 13–34 | Identical |
-| `cluster/rendering/HtmlSurfaceController.js` | 14–39 | Identical + extra `GLOBAL_ROOT` usage |
-| `cluster/rendering/CanvasDomSurfaceAdapter.js` | 20–27 | Condensed variant + `GLOBAL_ROOT` reuse for RAF/ResizeObserver |
-| `runtime/HostCommitController.js` | 12, 70–76 | `PERF_HOOK_KEY` + `resolvePerfHooks()` — body-identical logic |
-| `runtime/SurfaceSessionController.js` | 11, 78–84 | `PERF_HOOK_KEY` + `resolvePerfHooks()` — body-identical logic |
+The module currently uses constants where `ActiveRouteHtmlFit` already demonstrates a theme-token-driven approach.
 
-**Smell rules:** `duplicate-functions` (block), `duplicate-block-clones` (block), core principle #8.
+**Desired outcome:** read font weights from theme tokens rather than constants.
 
-**Fix direction:** Extract `shared/widget-kits/perf/PerfSpanHelper.js` UMD micro-module. The four cluster/shared consumers import via `Helpers.getModule("PerfSpanHelper")`. Runtime IIFEs either access a shared implementation attached to `DyniPlugin.runtime.perf` during namespace bootstrap, or carry explicit `dyni-lint-disable-next-line duplicate-functions` suppressions.
+### Problem 6 — `HostCommitController` observer fallback is broad and unbounded
 
-### Problem 4: Utility functions duplicated across HTML widgets and HtmlFit modules
+The fallback observer currently watches `document.body` with `subtree: true`, which can react to unrelated DOM activity. The plan should keep the fallback, but reduce its blast radius where practical and bound its lifetime.
 
-| Function | ActiveRouteTextHtmlWidget | MapZoomTextHtmlWidget | MapZoomHtmlFit | ActiveRouteHtmlFit |
-|---|---|---|---|---|
-| `toFiniteNumber` | line 22 | line 21 | line 24 | line 19 |
-| `trimText` | line 18 | line 26 | — | — |
-| `escapeHtmlText` / `escapeHtml` | line 27 (`escapeHtmlText`) | line 30 (`escapeHtml`) | — | — |
-| `toStyleAttr` | line 36 | line 39 | — | — |
-| `resolveShellRect` | line 88 (via helper) | line 61 | line 33 | — |
-| `resolveMode` | line 92 | line 76 | — | — |
-| `isEditingMode` | line 150 | line 122 | — | — |
+**Desired outcome:** more RAF budget before fallback, bounded observer lifetime, and narrower observation scope if reliable.
 
-`resolveShellRect` in MapZoomTextHtmlWidget (line 61) and MapZoomHtmlFit (line 33) are body-identical inline expansions. `escapeHtmlText` and `escapeHtml` are the same function under different names.
+### Problem 7 — `TemporaryHostActionBridge` repeats capability work
 
-**Smell rules:** `duplicate-functions` (block), `duplicate-block-clones` (block), core principle #8.
+Capability and page-detection work is repeated across facade methods.
 
-**Fix direction:** Extract `shared/widget-kits/html/HtmlWidgetUtils.js` UMD module. All four consumer files delegate via `Helpers.getModule("HtmlWidgetUtils")`.
+**Desired outcome:** reduce repeated work without assuming bridge-lifetime page stability unless the implementation also introduces an invalidation or recreation mechanism that makes such caching safe.
 
-### Problem 5: MapZoomHtmlFit hardcodes font weights instead of reading ThemeResolver tokens
+### Problem 8 — `HostCommitController.getState()` allocates on every read
 
-`shared/widget-kits/nav/MapZoomHtmlFit.js` lines 20–21:
+The current API creates a new shallow object on each render cycle.
 
-```javascript
-const VALUE_WEIGHT = 700;
-const LABEL_WEIGHT = 700;
-```
+**Desired outcome:** avoid repeated allocation when the underlying controller state has not changed.
 
-`ActiveRouteHtmlFit.js` correctly resolves `ThemeResolver` via `Helpers.getModule("ThemeResolver")` (line 115) and reads `tokens.font.weight` (line 132). `MapZoomHtmlFit` does not import ThemeResolver at all.
+### Problem 9 — `loadScriptOnce` is duplicated
 
-**Smell rules:** `css-js-default-duplication` (warn), `hardcoded-runtime-default` (block).
+The same helper exists in both `plugin.js` and `runtime/component-loader.js`.
 
-**Fix direction:** MapZoomHtmlFit resolves `ThemeResolver` and reads `font.weight` / `font.labelWeight` from `resolveForRoot()`. Remove hardcoded constants.
+**Desired outcome:** one canonical implementation, or a documented suppression if the load order makes reuse too invasive for this plan.
 
-### Problem 6: HostCommitController uses MutationObserver on `document.body` with `subtree: true`
+### Problem 10 — `normalizePresetName` is duplicated
 
-`runtime/HostCommitController.js` line 218: after two RAF attempts, `installDeferredObservers()` creates:
+Theme normalization logic appears in more than one theme-related file.
 
-```javascript
-state.observer.observe(doc.body, { childList: true, subtree: true });
-```
+**Desired outcome:** one canonical normalization helper exposed from the theme preset side.
 
-This observer fires on every DOM mutation across the entire AvNav application. Each firing triggers `commitIfReady()` which runs `document.querySelector()`. There is no timeout ceiling — the observer runs indefinitely.
+### Problem 11 — Theme invalidation still uses framework-method `typeof` guards
 
-**Fix direction:** (a) Increase RAF budget from 2 to 4. (b) Add a timeout ceiling (2000ms) that disconnects the observer and calls `clearPendingState` with `"timeout-ceiling"` status. (c) If a parent container selector is known, scope the observer to that parent.
+The current code contains defensive `typeof` guards around APIs that appear to be required by the module contract.
 
-### Problem 7: TemporaryHostActionBridge recomputes `computeCapabilities()` on every action call
+**Desired outcome:** remove redundant guards where the module contract already guarantees the method, while keeping null checks where object presence can still vary.
 
-`computeCapabilities()` (line 158) calls `detectPageId(doc)` (up to 3 `getElementById` probes) and `getRoutePointsApi()` on every facade method: `getCapabilities` (line 199), `routePoints.activate` (line 203), `map.checkAutoZoom` (line 223), `routeEditor.openActiveRoute` (line 237), `routeEditor.openEditRoute` (line 250), `ais.showInfo` (line 261), and `dispatchViaPageItemClick` (line 186).
+### Problem 12 — `CanvasDomSurfaceAdapter.js` exceeds the file-size budget
 
-The page ID is stable during a bridge instance's lifetime. The capabilities are deterministic given page ID + API presence.
+The file is above the preferred 400-line threshold.
 
-**Fix direction:** Compute capabilities once at `create()` time and cache. Keep a fresh `getRoutePointsApi()` probe only in `routePoints.activate`.
-
-### Problem 8: HostCommitController.getState() creates a full shallow copy on every call
-
-Lines 78–92: `getState()` creates a new object with 10 properties every call. Called from `ClusterWidget.renderHtml()` (line 130) on every render cycle for `ctx.__dyniHostCommitState`.
-
-**Fix direction:** Cache a snapshot object. Rebuild it only in mutation methods (`initState`, `recordRender`, `commitIfReady`). `getState()` returns the cached reference.
-
-### Problem 9: `loadScriptOnce` duplicated between `plugin.js` and `runtime/component-loader.js`
-
-`plugin.js` line 22 and `runtime/component-loader.js` line 33: body-identical implementations.
-
-**Smell rules:** `duplicate-functions` (block), core principle #8.
-
-**Fix direction:** `plugin.js` runs before `component-loader.js`. Attach on namespace in `plugin.js` (`DyniPlugin.runtime.loadScriptOnce = loadScriptOnce`). `component-loader.js` reuses it. If load-order cannot be guaranteed, add explicit suppression.
-
-### Problem 10: `normalizePresetName` duplicated across three theme files
-
-Three near-identical implementations:
-
-| File | Line | Validation source |
-|---|---|---|
-| `shared/theme/ThemeResolver.js` | 138 | Passed `presetDefs` argument |
-| `shared/theme/ThemePresets.js` | 83 | Module-scoped `PRESETS` constant |
-| `runtime/init.js` | 91 | `knownPresetNames().includes()` |
-
-All three: check type is string, trim, lowercase, validate against known presets, default to `"default"`.
-
-**Smell rules:** `duplicate-functions` (block), core principle #8.
-
-**Fix direction:** The canonical implementation belongs in `ThemePresets` (which owns the preset catalog). `ThemeResolver` delegates to `ThemePresets.normalizePresetName` or uses a shared pure function that accepts the preset-names list as argument. `runtime/init.js` delegates to `ThemePresets` module after it is loaded during `runInit`.
-
-### Problem 11: Framework-method typeof guards on ThemeResolver invalidation API
-
-Two locations use `typeof resolverMod.invalidateRoot === "function"` / `typeof resolverMod.invalidateAll === "function"`:
-
-- `runtime/init.js` `invalidateThemeResolverCache()` (lines 142–150)
-- `cluster/rendering/CanvasDomSurfaceAdapter.js` `callThemeInvalidation()` (lines 148–160)
-
-After ThemeResolver module loading, both `invalidateRoot` and `invalidateAll` are guaranteed by its module contract. Both guards also fall through to `invalidateAll` as a secondary check, creating a two-tier defensive pattern against an already-validated module.
-
-**Smell rules:** `framework-method-typeof-guard` (block), `redundant-internal-fallback` (block).
-
-**Fix direction:** Call `invalidateRoot` directly. Remove fallback branches. If the init.js timing requires the guard (ThemeResolver not yet loaded at call time), add an explicit `dyni-lint-disable-next-line` suppression.
-
-### Problem 12: `CanvasDomSurfaceAdapter.js` at 447 lines exceeds ≤400-line budget
-
-`cluster/rendering/CanvasDomSurfaceAdapter.js` is at 447 lines. Core principle #5 requires ≤400 lines.
-
-**Fix direction:** Phase 1 perf extraction removes ~8 lines. Further extraction candidates: the recursive `findDescendantByClass` utility (lines 36–53) and `callThemeInvalidation` (lines 148–160). Replace `findDescendantByClass` with `querySelector` calls which already exist as fallbacks. Simplify `callThemeInvalidation` after removing typeof guards (Problem 11). Target: ≤395 lines.
+**Desired outcome:** remove redundant guards only on paths whose controller contract already guarantees the method. Guards that protect mixed controller types must remain until the contract is expanded.
 
 ---
 
 ## Hard Constraints
 
-### Dependency Layering (Core Principle #4)
+### Architecture
 
-```
-widgets → shared
-cluster → cluster / widgets / shared
-shared → shared
-config = pure data
-runtime → runtime only (must not depend on widgets / cluster / shared)
-```
+- Do not change the AvNav host registration strategy.
+- Do not add ES module imports.
+- Do not add a bundler or build step.
+- Keep runtime IIFE files independent of `Helpers.getModule()` unless a verified load-order-safe mechanism is introduced.
 
-Runtime IIFE files (`runtime/*.js`) are attached to `DyniPlugin.runtime` and cannot use `Helpers.getModule()`. Any shared utility they need must either be attached to the runtime namespace during bootstrap or duplicated with an explicit suppression.
+### Theme behavior
 
-### UMD/IIFE Only (Core Principle #1)
+- Preserve the theme priority model:
+  - preset name: DOM attribute → CSS variable → built-in default
+  - token value: CSS override → preset value → built-in default
+- Do not regress direct token overrides from CSS.
 
-No ES module `import`/`export`. No bundler. No build step. All files must be plain JS loadable via `<script>` tags.
+### Runtime correctness
 
-### File Size (Core Principle #5)
+- Do not trade correctness for caching in page-sensitive runtime code.
+- Do not remove the `MutationObserver` fallback entirely.
+- Do not assume bridge recreation on page changes unless code added in this plan makes that true.
 
-≤400 lines per JS file. `CanvasDomSurfaceAdapter.js` currently violates this at 447 lines.
+### Scope
 
-### Theme Priority Chain
-
-The per-token resolution order must remain: CSS custom property override > preset value > ThemeResolver built-in default. The preset *name* resolution order must become: DOM attribute > CSS variable > built-in default.
-
-### Smell Rules
-
-All rules in `documentation/conventions/smell-prevention.md` are binding. Every intentional exception needs a `dyni-lint-disable-*` suppression with reason.
+- Do not change `config/clusters/*.js` definitions.
+- Do not rewrite stable canvas-only widgets unless they share code with in-scope modules.
+- Do not perform source-code changes in the documentation phase.
 
 ---
 
 ## Implementation Order
 
-### Phase 1 — Extract shared utility modules
+### Phase 1 — Consolidate shared utilities conservatively
 
-**Goal:** Eliminate cross-file duplication (Problems 3, 4, 9) and bring `CanvasDomSurfaceAdapter.js` under the line budget (Problem 12).
+**Intent:** reduce proven duplication and move obvious shared logic into canonical utility modules where layering allows it.
 
-**Dependencies:** None. Purely additive extraction.
+**Dependencies:** none.
 
-**A. Create `shared/widget-kits/perf/PerfSpanHelper.js`**
+#### 1A. Create `shared/widget-kits/perf/PerfSpanHelper.js`
 
-UMD micro-module exporting `startPerfSpan(name, tags)` and `endPerfSpan(span, tags)`. Owns `GLOBAL_ROOT` and `PERF_HOOK_KEY`. Module header per coding standards.
+Create a small UMD helper for perf-span start/end behavior used by UMD consumers.
 
-**B. Create `tests/shared/perf/PerfSpanHelper.test.js`**
+#### 1B. Add `tests/shared/perf/PerfSpanHelper.test.js`
 
-Unit tests covering: span start/end with hooks installed, span start/end without hooks (returns null, no-op), tag passthrough.
+Cover:
 
-**C. Wire PerfSpanHelper into the component registry**
+- hooks present
+- hooks absent
+- tag passthrough
+- no-op close behavior
 
-Register in the relevant `config/components/registry-*.js` file and `config/components.js`.
+#### 1C. Register the helper in component config
 
-**D. Replace duplicated perf blocks in cluster/shared consumers**
+Register the new helper in the appropriate shared component registry. Update consumer dependency declarations in the affected registries where the new helper becomes a direct dependency. Update registry tests accordingly.
 
-In `cluster/ClusterWidget.js`, `cluster/rendering/ClusterRendererRouter.js`, `cluster/rendering/HtmlSurfaceController.js`, and `cluster/rendering/CanvasDomSurfaceAdapter.js`: remove local `GLOBAL_ROOT`, `PERF_HOOK_KEY`, `startPerfSpan`, `endPerfSpan`. Replace with `Helpers.getModule("PerfSpanHelper")` delegation in `create()`.
+#### 1D. Rewire UMD consumers to the shared perf helper
 
-Note: `CanvasDomSurfaceAdapter.js` also uses `GLOBAL_ROOT` for RAF/ResizeObserver resolution. Those references stay local (they are not perf-hook logic).
+Candidate files:
 
-**E. Handle runtime IIFE perf copies**
+- `cluster/ClusterWidget.js`
+- `cluster/rendering/ClusterRendererRouter.js`
+- `cluster/rendering/HtmlSurfaceController.js`
+- `cluster/rendering/CanvasDomSurfaceAdapter.js`
 
-For `runtime/HostCommitController.js` and `runtime/SurfaceSessionController.js`:
-- Option A (preferred): during namespace bootstrap (`runtime/namespace.js`), attach the shared perf implementation on `DyniPlugin.runtime.perf = { startSpan, endSpan }`. Both files reference `runtime.perf.*`.
-- Option B (fallback): add explicit `dyni-lint-disable-next-line duplicate-functions -- canonical source: shared/widget-kits/perf/PerfSpanHelper.js; runtime IIFE cannot access UMD components` suppressions.
+Local non-perf uses of `GLOBAL_ROOT` may remain local if they are not part of the duplicated perf logic.
 
-**F. Create `shared/widget-kits/html/HtmlWidgetUtils.js`**
+#### 1E. Handle runtime perf duplication without assuming impossible load order
 
-UMD module exporting: `toFiniteNumber`, `trimText`, `escapeHtml`, `toStyleAttr`, `resolveShellRect`, `resolveMode`, `isEditingMode`. Canonical function names (rename `escapeHtmlText` → `escapeHtml` everywhere).
+For runtime IIFE files such as:
 
-**G. Create `tests/shared/html/HtmlWidgetUtils.test.js`**
+- `runtime/HostCommitController.js`
+- `runtime/SurfaceSessionController.js`
 
-Unit tests for each function. Cover edge cases: `toFiniteNumber(NaN)`, `toFiniteNumber(Infinity)`, `escapeHtml` with `<>&"'` characters, `resolveShellRect` with zero dimensions, `resolveMode` with missing ratio thresholds, `isEditingMode` with `dyniLayoutEditing` present/absent.
+the implementation should choose one of these conservative options:
 
-**H. Wire HtmlWidgetUtils into the component registry**
+- **Option A:** keep the local logic for now and add explicit suppression/comments pointing to the canonical shared helper.
+- **Option B:** introduce a small runtime-local helper that is loaded as part of the internal script chain before the consuming runtime files.
+- **Option C:** reuse an existing runtime namespace helper only if the actual script order is verified and the resulting wiring stays simpler than a suppression.
 
-Register in the relevant `config/components/registry-*.js` and `config/components.js`.
+Do not assume a shared UMD helper can be attached during `runtime/namespace.js` bootstrap, because shared UMD components are loaded later.
 
-**I. Replace duplicated utilities in HTML widget consumers**
+#### 1F. Create `shared/widget-kits/html/HtmlWidgetUtils.js`
 
-In `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js`: remove local `toFiniteNumber`, `trimText`, `escapeHtmlText`, `toStyleAttr`, `resolveShellRectFromTarget`, `resolveShellRect`, `resolveMode`, `isEditingMode`. Delegate to `Helpers.getModule("HtmlWidgetUtils")`.
+Create a shared UMD utility module for duplicated HTML-widget helpers. Canonical names should be used consistently, including `escapeHtml`.
 
-In `widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js`: same removal, delegate.
+#### 1G. Add `tests/shared/html/HtmlWidgetUtils.test.js`
 
-In `shared/widget-kits/nav/MapZoomHtmlFit.js`: remove local `toFiniteNumber`, `resolveShellRect`. Delegate.
+Cover edge cases for numeric normalization, HTML escaping, style serialization, shell rect resolution, mode selection, and editing-mode detection.
 
-In `shared/widget-kits/nav/ActiveRouteHtmlFit.js`: remove local `toFiniteNumber`. Delegate.
+#### 1H. Register the HTML helper in component config
 
-**J. Deduplicate `loadScriptOnce`**
+Register in the appropriate shared component registry. Update consumer dependency declarations in the affected registries where the new helper becomes a direct dependency. Update registry tests accordingly.
 
-In `plugin.js`, after namespace bootstrap: `DyniPlugin.runtime.loadScriptOnce = loadScriptOnce`. In `component-loader.js`: `const loadScriptOnce = runtime.loadScriptOnce`. If load-order testing shows the namespace isn't ready at `component-loader.js` parse time, add explicit suppression instead.
+#### 1I. Rewire UMD HTML-widget consumers
 
-**K. Bring `CanvasDomSurfaceAdapter.js` under 400 lines**
+Primary candidates:
 
-After perf extraction (~8 lines saved), extract `findDescendantByClass` (lines 36–53) — replace with `shellEl.querySelector(selector)` calls which already exist as fallbacks in `findSurfaceElement` and `findMountElement`. This removes the recursive tree walker entirely. Target: ≤395 lines after all Phase 1 changes.
+- `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js`
+- `widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js`
+- `shared/widget-kits/nav/MapZoomHtmlFit.js`
+- `shared/widget-kits/nav/ActiveRouteHtmlFit.js`
 
-**Touch:** `shared/widget-kits/perf/PerfSpanHelper.js` (created), `tests/shared/perf/PerfSpanHelper.test.js` (created), `shared/widget-kits/html/HtmlWidgetUtils.js` (created), `tests/shared/html/HtmlWidgetUtils.test.js` (created), `config/components/registry-shared-foundation.js` or equivalent (modified), `config/components.js` (modified), `cluster/ClusterWidget.js`, `cluster/rendering/ClusterRendererRouter.js`, `cluster/rendering/HtmlSurfaceController.js`, `cluster/rendering/CanvasDomSurfaceAdapter.js`, `runtime/HostCommitController.js`, `runtime/SurfaceSessionController.js`, `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js`, `widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js`, `shared/widget-kits/nav/MapZoomHtmlFit.js`, `shared/widget-kits/nav/ActiveRouteHtmlFit.js`, `plugin.js`, `runtime/component-loader.js`.
+#### 1J. Deduplicate `loadScriptOnce` if the wiring stays low-risk
 
-**Test exit:** `npx vitest run` all tests pass. `node tools/check-patterns.mjs` reports no new warnings. `npm run check:all` passes including file-size check. `grep -rn "function startPerfSpan\|function endPerfSpan" cluster/ shared/` shows only one definition in `PerfSpanHelper.js` (plus explicitly suppressed runtime copies if Option B). `grep -rn "function toFiniteNumber\|function trimText\|function escapeHtml\|function toStyleAttr" widgets/text/ shared/widget-kits/` shows only one definition per function in `HtmlWidgetUtils.js`. `wc -l cluster/rendering/CanvasDomSurfaceAdapter.js` ≤ 400.
+Preferred direction:
 
----
+- expose one canonical implementation from `plugin.js`
+- have `runtime/component-loader.js` reuse it
 
-### Phase 2 — Fix ThemeResolver preset bug, deduplicate theme utilities, wire MapZoomHtmlFit
+Fallback:
 
-**Goal:** Close the CSS-variable preset timing gap (Problem 1), consolidate `getNightModeState` (Problem 2), consolidate `normalizePresetName` (Problem 10), wire MapZoomHtmlFit to ThemeResolver (Problem 5), and remove framework-method typeof guards on invalidation APIs (Problem 11).
+- keep the duplicate temporarily with explicit suppression if reuse adds risky bootstrap coupling
 
-**Dependencies:** Phase 1 must be complete (`MapZoomHtmlFit` was modified in Phase 1 for `toFiniteNumber`/`resolveShellRect` extraction; Phase 2 modifies it further).
+The coding agent may choose the lower-risk path.
 
-**A. Fix `getActivePresetName` CSS variable fallback**
+#### 1K. Bring `CanvasDomSurfaceAdapter.js` back under budget
 
-In `shared/theme/ThemeResolver.js`, modify `getActivePresetName(rootEl, presetDefs)`:
+Use extraction and small helper removals first. Replacing recursive DOM search helpers with direct `querySelector` paths is acceptable if behavior stays equivalent.
 
-1. `const attr = rootEl.getAttribute("data-dyni-theme");`
-2. If `attr !== null`: return `normalizePresetName(attr, presetDefs);` — DOM attribute wins.
-3. Else: read `"--dyni-theme-preset"` from `getComputedStyle(rootEl)`.
-4. If CSS value is a valid preset name: return it.
-5. Else: return `"default"`.
+**Exit conditions:**
 
-This preserves the priority chain: DOM attribute (explicit runtime/init set) > CSS variable (`user.css`) > built-in default.
-
-**B. Consolidate `normalizePresetName`**
-
-Export a pure `normalizePresetName(presetName, presetNamesList)` function from `ThemePresets.js` on the module surface (`create.normalizePresetName`). `ThemeResolver.js` uses it with its resolved `presetDefs` keys. `runtime/init.js` uses it with `knownPresetNames()`. Remove the local implementations from ThemeResolver and init.js.
-
-Since `runtime/init.js` is an IIFE and ThemePresets is loaded during `runInit()` before `normalizePresetName` is first called, the timing is safe — `ThemePresets` module is available via `byId.ThemePresets` or `DyniComponents.DyniThemePresets`.
-
-**C. Export `getNightModeState` from ThemeResolver**
-
-In `shared/theme/ThemeResolver.js`: export `getNightModeState` on `create.getNightModeState`. In `runtime/helpers.js`: after component loading, delegate to `DyniComponents.DyniThemeResolver.create.getNightModeState` if available. If the timing is unreliable (helpers is created before ThemeResolver loads), add `dyni-lint-disable-next-line duplicate-functions -- canonical source: ThemeResolver.js; helpers.js resolveTypography is called during component init before ThemeResolver may be loaded` suppression.
-
-**D. Wire MapZoomHtmlFit to ThemeResolver**
-
-In `shared/widget-kits/nav/MapZoomHtmlFit.js`: add `ThemeResolver` to `Depends` header. In `create(def, Helpers)`, resolve `ThemeResolver` and create an instance. In the `compute()` flow, read `tokens.font.weight` and `tokens.font.labelWeight` from `resolver.resolveForRoot(rootEl)`, matching the pattern in `ActiveRouteHtmlFit.js` (line 132). Remove `VALUE_WEIGHT` and `LABEL_WEIGHT` constants.
-
-**E. Remove framework-method typeof guards on invalidation**
-
-In `runtime/init.js` `invalidateThemeResolverCache()`: replace the two `typeof` checks with a direct `resolverMod.invalidateRoot(rootEl)` call. Add a null guard on `resolverMod` only (which is already present).
-
-In `cluster/rendering/CanvasDomSurfaceAdapter.js` `callThemeInvalidation()`: replace the two `typeof` checks with a direct `themeResolver.invalidateRoot(targetRootEl)` call. `themeResolver` is resolved at `create` time via `Helpers.getModule("ThemeResolver")` — it is guaranteed to have `invalidateRoot`. Simplify or inline `callThemeInvalidation` since it becomes a one-liner.
-
-**F. Add ThemeResolver preset-via-CSS tests**
-
-In `tests/shared/theme/ThemeResolver.test.js`, add tests covering:
-- `--dyni-theme-preset: bold` in computed style with no DOM attribute → preset `bold` is active
-- DOM attribute `data-dyni-theme="slim"` with `--dyni-theme-preset: bold` → preset `slim` wins
-- Neither attribute nor CSS variable → preset `"default"`
-- Empty/invalid CSS variable value → preset `"default"`
-
-**G. Add MapZoomHtmlFit font-weight-from-theme tests**
-
-In `tests/shared/nav/MapZoomHtmlFit.test.js`: verify font weights come from ThemeResolver tokens and respond to preset changes (e.g., `slim` preset sets `font.labelWeight` to 400).
-
-**Touch:** `shared/theme/ThemeResolver.js`, `shared/theme/ThemePresets.js`, `runtime/init.js`, `runtime/helpers.js`, `shared/widget-kits/nav/MapZoomHtmlFit.js`, `cluster/rendering/CanvasDomSurfaceAdapter.js`, `tests/shared/theme/ThemeResolver.test.js`, `tests/shared/nav/MapZoomHtmlFit.test.js`.
-
-**Test exit:** `npx vitest run` all tests pass. `node tools/check-patterns.mjs` reports zero `hardcoded-runtime-default` and zero `framework-method-typeof-guard` regressions. `npm run check:all` passes. Manual test: set `--dyni-theme-preset: bold` in `user.css` scoped to `.widget.dyniplugin`, reload, confirm bold preset visuals appear. `grep -rn "VALUE_WEIGHT\|LABEL_WEIGHT" shared/widget-kits/nav/MapZoomHtmlFit.js` returns empty. `grep -rn "function normalizePresetName" --include="*.js" | grep -v test | grep -v node_modules` shows only `ThemePresets.js`.
+- shared utility tests pass
+- file-size budget passes
+- no new duplication regressions are introduced
 
 ---
 
-### Phase 3 — Tighten runtime hot paths
+### Phase 2 — Fix theme preset timing and consolidate theme helpers
 
-**Goal:** Eliminate unnecessary recomputation in `TemporaryHostActionBridge` (Problem 7) and unnecessary allocation in `HostCommitController.getState()` (Problem 8).
+**Intent:** close the user-visible preset bug and reduce theme utility duplication.
 
-**Dependencies:** None. These changes are internal to runtime files.
+**Dependencies:** Phase 1 should be complete where it touches `MapZoomHtmlFit`.
 
-**A. Cache `computeCapabilities` at bridge create time**
+#### 2A. Add render-time CSS fallback for preset-name discovery
 
-In `runtime/TemporaryHostActionBridge.js`: compute capabilities once at `create()` time. Store as `cachedCapabilities`. Replace all `computeCapabilities()` callsites in facade methods with `cachedCapabilities`. Keep `getRoutePointsApi()` as a fresh probe only inside `routePoints.activate()` where the API presence is the live dispatch gate. `destroy()` nulls `cachedCapabilities` alongside `cachedFacade`.
+In `ThemeResolver`, prefer:
 
-**B. Cache `getState()` snapshot in HostCommitController**
+1. `data-dyni-theme` when present
+2. computed `--dyni-theme-preset`
+3. `"default"`
 
-In `runtime/HostCommitController.js`: add a `cachedStateSnapshot` variable. Rebuild it in the three mutation methods: `initState`, `recordRender`, `commitIfReady`. Have `getState()` return `cachedStateSnapshot` directly. This eliminates a 10-property object allocation on every `renderHtml` cycle.
+Use attribute presence rather than truthiness so an explicit default-like value is distinguishable from an unset attribute.
 
-Do not freeze the snapshot — downstream consumers may store references.
+#### 2B. Consolidate `normalizePresetName`
 
-**C. Add tests**
+Prefer a single canonical helper exposed from `ThemePresets`. `ThemeResolver` and `runtime/init.js` should delegate to it if that wiring remains straightforward.
 
-In `tests/runtime/TemporaryHostActionBridge.test.js`: verify capabilities are computed once at create time; `routePoints.activate` still probes the live API; `destroy()` invalidates cached state.
+If the implementation agent finds a safer single-owner location with the same practical effect, that is acceptable.
 
-In `tests/runtime/HostCommitController.test.js`: verify `getState()` returns the same object reference between mutations; the snapshot updates after `recordRender`, `commitIfReady`, `initState`.
+#### 2C. Consolidate `getNightModeState`
 
-**Touch:** `runtime/TemporaryHostActionBridge.js`, `runtime/HostCommitController.js`, `tests/runtime/TemporaryHostActionBridge.test.js`, `tests/runtime/HostCommitController.test.js`.
+Preferred direction:
 
-**Test exit:** `npx vitest run` all tests pass. `npm run check:all` passes. `grep -n "computeCapabilities()" runtime/TemporaryHostActionBridge.js` shows only one call site (at create time).
+- canonical implementation owned by `ThemeResolver`
+
+Acceptable alternatives:
+
+- runtime delegation after component load
+- explicit suppression in `runtime/helpers.js` if delegation would create timing fragility
+
+The implementation should favor correctness and load-order simplicity over forced indirection.
+
+#### 2D. Wire `MapZoomHtmlFit` to theme tokens
+
+Read text weights from theme tokens rather than constants, following the same general pattern already used elsewhere. If MapZoomHtmlFit reads weights through ThemeResolver, add the corresponding direct dependency in registry-shared-foundation.js.
+
+#### 2E. Remove redundant invalidation `typeof` guards where contractually safe
+
+Retain null checks where the owning object may still be absent. Remove redundant invalidation typeof guards only where every concrete controller on that call path guarantees invalidateTheme. Keep the ClusterRendererRouter guard unless HtmlSurfaceController is extended to expose invalidateTheme.
+
+#### 2F. Add or extend tests
+
+At minimum, cover:
+
+- CSS preset fallback with no DOM attribute
+- DOM attribute winning over CSS preset
+- invalid CSS preset falling back to default
+- `MapZoomHtmlFit` using theme-derived font weights
+
+**Exit conditions:**
+
+- CSS preset selection works in automated tests
+- theme normalization has one owner or one owner plus justified suppression
+- no unnecessary framework-method `typeof` guards remain in the targeted paths
 
 ---
 
-### Phase 4 — Scope MutationObserver fallback
+### Phase 3 — Reduce runtime hot-path work without weakening page correctness
 
-**Goal:** Reduce the blast radius of the `MutationObserver` fallback in `HostCommitController` (Problem 6).
+**Intent:** trim repeated work in runtime code while keeping page-sensitive behavior correct.
 
-**Dependencies:** Phase 3 should be complete (Phase 3 modified `HostCommitController.js`; Phase 4 modifies it further).
+**Dependencies:** none.
 
-**A. Increase RAF budget**
+#### 3A. Rework `TemporaryHostActionBridge` capability handling conservatively
 
-In `runtime/HostCommitController.js` `scheduleRafAttempt()`: change the recursion guard from `if (attempt < 2)` to `if (attempt < 4)`. Four RAF attempts cover the typical AvNav React commit timing without needing the observer fallback.
+Do not hard-code a single implementation strategy here.
 
-**B. Add timeout ceiling to observer**
+Acceptable outcomes include:
 
-In `installDeferredObservers()`: after creating the observer, schedule a ceiling timer (2000ms) that disconnects the observer and calls `clearPendingState` with status `"timeout-ceiling"` if the shell element has not been found. Store the ceiling handle and clean it up in `clearAsyncHandles()` / `clearTimeoutHandle()`.
+- caching only page-invariant parts of capability state
+- caching with explicit invalidation when page identity changes
+- bridge recreation on page changes, if that lifecycle is introduced clearly
+- another equivalent design that removes obvious repeated work and preserves correct dispatch
 
-**C. Scope observer if possible**
+Unacceptable outcome:
 
-If the `instanceId` or parent container selector is available at schedule time, observe the nearest known ancestor instead of `document.body`. If the parent is not reliably known at observer-install time, keep `document.body` but document the ceiling as the primary mitigation.
+- bridge-lifetime caching that can stale page-specific behavior.
 
-**D. Add tests**
+#### 3B. Cache `HostCommitController.getState()` snapshots
 
-In `tests/runtime/HostCommitController.test.js`: verify 4 RAF attempts before observer fallback; observer disconnects after ceiling timeout; observer disconnects on successful commit; stale revision abandons observer.
+A cached snapshot updated on controller state mutation is a reasonable target. The snapshot does not need to be frozen.
 
-**Touch:** `runtime/HostCommitController.js`, `tests/runtime/HostCommitController.test.js`.
+#### 3C. Add or extend runtime tests
 
-**Test exit:** `npx vitest run` all tests pass. `npm run check:all` passes. `grep -n "attempt < " runtime/HostCommitController.js` confirms budget is 4. `grep -n "subtree: true" runtime/HostCommitController.js` — if present, verify a ceiling timer accompanies it.
+At minimum, verify:
+
+- action dispatch remains correct across page-sensitive scenarios
+- any caching or snapshot scheme updates when source state changes
+- `getState()` no longer allocates a fresh equivalent object on every read
+
+**Exit conditions:**
+
+- repeated bridge work is reduced
+- page-specific capabilities remain correct
+- `HostCommitController.getState()` avoids avoidable allocation
 
 ---
 
-### Phase 5 — Documentation update
+### Phase 4 — Bound the `MutationObserver` fallback
 
-**Goal:** Update runtime lifecycle documentation, architecture docs, and guides to reflect all changes from Phases 1–4 and the lifecycle analysis performed during this plan's investigation.
+**Intent:** keep the fallback but make it less expensive and less open-ended.
 
-**Dependencies:** All previous phases must be complete. This phase is documentation only.
+**Dependencies:** Phase 3 should be complete because both phases touch `HostCommitController.js`.
 
-**Scope boundary:** Do not change any source code. If you discover a source code inconsistency while reviewing docs, note it as a TECH-DEBT item rather than fixing it here.
+#### 4A. Increase the RAF budget before observer fallback
 
-**A. `documentation/architecture/runtime-lifecycle.md`**
+Moving from 2 RAF attempts to 4 is a reasonable baseline unless tests indicate a different number is measurably better.
 
-This file already exists and documents the runtime lifecycle. Extend and correct it:
+#### 4B. Add an observer ceiling
 
-1. Update the Bootstrap Flow section to note the `loadScriptOnce` deduplication (if implemented) or suppression status.
-2. Update Init Flow to document the CSS-variable preset fallback in ThemeResolver — remove the "Known gap" paragraph and replace with the corrected behavior.
-3. Update Host Commit Scheduling to reflect the 4-attempt RAF budget and the timeout ceiling.
-4. Add a section on paint coalescing within CanvasDomSurfaceAdapter (dirty flag mechanics: `paintDirty`, `sizeDirty`, `themeDirty`).
-5. Add a section documenting the handler pre-bind / rebind lifecycle for HTML surface renderers, noting that every render cycle binds handlers twice (pre-bind in `renderSurfaceShell` + rebind in `update`).
-6. Update TemporaryHostActionBridge dispatch chain to note capabilities caching.
-7. Update Theme Preset Resolution to document the render-time CSS-variable fallback in `getActivePresetName` and the consolidation of `normalizePresetName` into ThemePresets.
-8. Add a section on `resizeSignature` recomputation cost — document that both HTML widgets recompute the full model in `resizeSignature`, which duplicates the model computation from `renderHtml`.
-9. Add a section on known performance characteristics: cached capabilities, cached `getState` snapshot, paint coalescing, and the observer ceiling.
+A roughly 2000ms ceiling is an acceptable target. The implementation should account for the controller’s existing timeout state.
 
-**B. `documentation/architecture/host-commit-controller.md`**
+Likely implementation choices:
 
-1. Update the deferred commit sequence diagram to show 4 RAF attempts instead of 2.
-2. Document the MutationObserver timeout ceiling (2000ms).
-3. Document the `getState()` snapshot caching behavior.
+- add a dedicated observer-ceiling handle, or
+- refactor timeout state so the existing handle can safely manage both behaviors
 
-**C. `documentation/architecture/surface-session-controller.md`**
+Either is acceptable if cleanup stays clear.
 
-1. Review and verify all lifecycle transitions match the current code after Phase 3 changes.
+#### 4C. Narrow the observation scope if a reliable parent is known
 
-**D. `documentation/architecture/canvas-dom-surface-adapter.md`**
+If a stable ancestor can be identified without introducing fragility, observe that ancestor instead of `document.body`. If not, keep the body observer and rely on the RAF budget plus ceiling as the primary mitigation.
 
-1. Document the removal of `findDescendantByClass` in favor of `querySelector`.
-2. Document the removal of `callThemeInvalidation` typeof guards.
-3. Verify file-size compliance is documented.
+#### 4D. Add or extend tests
 
-**E. `documentation/shared/theme-tokens.md`**
+At minimum, verify:
 
-1. Update "Runtime Integration" section to document the CSS-variable fallback in `getActivePresetName`.
-2. Update the preset source precedence list to show the corrected render-time behavior:
-   - DOM attribute `data-dyni-theme` (set by runtime/init or console)
-   - CSS variable `--dyni-theme-preset` (set by `user.css`)
-   - Built-in `"default"`
-3. Remove or update the "Known gap" language about CSS presets not working.
-4. Document the `normalizePresetName` consolidation into ThemePresets.
-5. Document the `getNightModeState` export from ThemeResolver.
+- the updated RAF budget
+- observer teardown on success
+- observer teardown on timeout ceiling
+- stale renders abandoning fallback work
 
-**F. `documentation/shared/helpers.md`**
+**Exit conditions:**
 
-1. Document the `getNightModeState` delegation to ThemeResolver (or suppression status).
+- observer fallback remains functional
+- fallback lifetime is bounded
+- cleanup paths are explicit and tested
 
-**G. `documentation/conventions/coding-standards.md`**
+---
 
-1. Add `PerfSpanHelper` and `HtmlWidgetUtils` to the Shared Utilities list.
-2. Update Reference Implementations if any new modules serve as canonical examples.
+### Phase 5 — Update documentation
 
-**H. `documentation/conventions/smell-prevention.md`**
+**Intent:** document the post-cleanup lifecycle and remove stale assumptions from documentation.
 
-1. Verify the `duplicate-functions` and `duplicate-block-clones` fix playbooks cover the extraction patterns used in Phase 1.
-2. If new suppressions were added in runtime files, document the suppression rationale pattern for runtime IIFE files.
+**Dependencies:** all code phases complete.
 
-**I. `documentation/guides/add-new-html-kind.md`**
+**Scope boundary:** documentation only.
 
-1. Update to reference `HtmlWidgetUtils` for shared utility functions.
-2. Note that HTML widget utility functions (`toFiniteNumber`, `escapeHtml`, `resolveShellRect`, etc.) must come from `HtmlWidgetUtils`, not be duplicated locally.
+#### 5A. Create `documentation/architecture/runtime-lifecycle.md`
 
-**J. `documentation/TABLEOFCONTENTS.md`**
+This file does not currently exist. Create it and document the runtime/bootstrap/render lifecycle as it exists after the code phases are complete.
 
-1. Add entries for `PerfSpanHelper` and `HtmlWidgetUtils` modules.
-2. Add or verify entries for the extended runtime-lifecycle documentation.
-3. Verify all existing links still resolve.
+The page should include, at minimum:
 
-**K. `documentation/TECH-DEBT.md`**
+- bootstrap script flow
+- the two `runInit()` call sites and the init guard
+- widget registration timing
+- render and commit flow
+- theme preset resolution behavior
+- bridge dispatch lifecycle
+- host commit fallback lifecycle
+- notable performance characteristics and known trade-offs that remain
 
-1. Note `resizeSignature` model recomputation as a known performance cost — both HTML widgets recompute the full render model for signature comparison, duplicating the work done in `renderHtml`. This is not addressed in this plan but should be tracked for future optimization.
-2. Note handler double-binding as a known lifecycle cost.
-3. Note `SurfaceSessionController.getState()` has the same shallow-copy pattern as `HostCommitController.getState()` but is called less frequently — track for consistency cleanup if desired.
+#### 5B. Update architecture docs that are directly affected
 
-**L. `documentation/QUALITY.md`**
+Primary candidates:
 
-1. Update the quality scorecard to reflect the post-Phase-4 gate state.
+- `documentation/architecture/host-commit-controller.md`
+- `documentation/architecture/surface-session-controller.md`
+- `documentation/architecture/canvas-dom-surface-adapter.md`
 
-**M. Remove implementation-plan phase references from docs**
+#### 5C. Update shared/theme documentation
 
-In all documentation files: if any docs reference PLAN4 phases or steps, replace those references with standalone descriptions that do not depend on the plan. Documentation must be self-contained.
+Primary candidates:
 
-**Touch:** `documentation/architecture/runtime-lifecycle.md`, `documentation/architecture/host-commit-controller.md`, `documentation/architecture/surface-session-controller.md`, `documentation/architecture/canvas-dom-surface-adapter.md`, `documentation/shared/theme-tokens.md`, `documentation/shared/helpers.md`, `documentation/conventions/coding-standards.md`, `documentation/conventions/smell-prevention.md`, `documentation/guides/add-new-html-kind.md`, `documentation/TABLEOFCONTENTS.md`, `documentation/TECH-DEBT.md`, `documentation/QUALITY.md`.
+- `documentation/shared/theme-tokens.md`
+- `documentation/shared/helpers.md`
 
-**Test exit:** `npm run check:all` passes (including `check:docs` and `check:doc-reachability` if they exist). All internal documentation cross-references resolve. `grep -rn "PLAN4\|Phase [0-9]" documentation/` returns no dangling plan references. The TABLEOFCONTENTS.md index covers every module and documentation page.
+These should reflect:
+
+- CSS preset fallback behavior
+- preset normalization ownership
+- `getNightModeState` ownership/delegation
+- any remaining justified suppressions
+
+#### 5D. Update conventions and guide docs
+
+Primary candidates:
+
+- `documentation/conventions/coding-standards.md`
+- `documentation/conventions/smell-prevention.md`
+- `documentation/guides/add-new-html-kind.md`
+
+These should reflect the new shared helper modules and the approved suppression pattern, if suppressions remain.
+
+#### 5E. Update indexes and quality tracking
+
+Primary candidates:
+
+- `documentation/TABLEOFCONTENTS.md`
+- `documentation/TECH-DEBT.md`
+- `documentation/QUALITY.md`
+
+Track any intentionally deferred cleanup such as:
+
+- `resizeSignature` recomputation cost
+- handler double-binding cost
+- any remaining runtime-local duplication left in place by design
+
+#### 5F. Remove plan-dependent references from docs
+
+Documentation should describe the system directly and should not depend on “Phase 1/2/3/4” wording from this plan.
+
+**Exit conditions:**
+
+- documentation links resolve
+- new runtime lifecycle doc exists
+- docs match the implemented behavior
+- any leftovers are recorded as debt, not silently ignored
 
 ---
 
 ## Affected File Map
 
-| File | Phase | Change |
-|---|---|---|
-| `shared/widget-kits/perf/PerfSpanHelper.js` | 1 | Created |
-| `tests/shared/perf/PerfSpanHelper.test.js` | 1 | Created |
-| `shared/widget-kits/html/HtmlWidgetUtils.js` | 1 | Created |
-| `tests/shared/html/HtmlWidgetUtils.test.js` | 1 | Created |
-| `config/components/registry-shared-foundation.js` | 1 | Register new modules |
-| `config/components.js` | 1 | Register new modules |
-| `cluster/ClusterWidget.js` | 1 | Replace local perf block with PerfSpanHelper |
-| `cluster/rendering/ClusterRendererRouter.js` | 1 | Replace local perf block with PerfSpanHelper |
-| `cluster/rendering/HtmlSurfaceController.js` | 1 | Replace local perf block with PerfSpanHelper |
-| `cluster/rendering/CanvasDomSurfaceAdapter.js` | 1, 2 | Replace perf block, remove findDescendantByClass, remove typeof guards |
-| `runtime/HostCommitController.js` | 1, 3, 4 | Perf wiring, cached getState, RAF budget, observer ceiling |
-| `runtime/SurfaceSessionController.js` | 1 | Perf wiring |
-| `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js` | 1 | Replace local utilities with HtmlWidgetUtils |
-| `widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js` | 1 | Replace local utilities with HtmlWidgetUtils |
-| `shared/widget-kits/nav/MapZoomHtmlFit.js` | 1, 2 | Replace local utilities, wire ThemeResolver |
-| `shared/widget-kits/nav/ActiveRouteHtmlFit.js` | 1 | Replace local toFiniteNumber |
-| `plugin.js` | 1 | Expose loadScriptOnce on namespace |
-| `runtime/component-loader.js` | 1 | Reuse namespace loadScriptOnce |
-| `shared/theme/ThemeResolver.js` | 2 | CSS-variable fallback, export getNightModeState, delegate normalizePresetName |
-| `shared/theme/ThemePresets.js` | 2 | Export normalizePresetName on module surface |
-| `runtime/init.js` | 2 | Delegate normalizePresetName, remove typeof guards |
-| `runtime/helpers.js` | 2 | Delegate getNightModeState |
-| `runtime/TemporaryHostActionBridge.js` | 3 | Cache computeCapabilities |
-| `tests/shared/theme/ThemeResolver.test.js` | 2 | CSS-variable preset tests |
-| `tests/shared/nav/MapZoomHtmlFit.test.js` | 2 | Font-weight-from-theme tests |
-| `tests/runtime/TemporaryHostActionBridge.test.js` | 3 | Caching tests |
-| `tests/runtime/HostCommitController.test.js` | 3, 4 | Snapshot caching, RAF budget, ceiling tests |
-| `documentation/architecture/runtime-lifecycle.md` | 5 | Extend with lifecycle analysis findings |
-| `documentation/architecture/host-commit-controller.md` | 5 | RAF budget, ceiling, snapshot caching |
-| `documentation/architecture/surface-session-controller.md` | 5 | Review |
-| `documentation/architecture/canvas-dom-surface-adapter.md` | 5 | Remove findDescendantByClass, typeof guard docs |
-| `documentation/shared/theme-tokens.md` | 5 | CSS-variable fallback, normalizePresetName, getNightModeState |
-| `documentation/shared/helpers.md` | 5 | getNightModeState delegation |
-| `documentation/conventions/coding-standards.md` | 5 | Add PerfSpanHelper, HtmlWidgetUtils to shared utilities |
-| `documentation/conventions/smell-prevention.md` | 5 | Verify playbooks |
-| `documentation/guides/add-new-html-kind.md` | 5 | Reference HtmlWidgetUtils |
-| `documentation/TABLEOFCONTENTS.md` | 5 | Add new module entries |
-| `documentation/TECH-DEBT.md` | 5 | Track resizeSignature cost, handler double-bind, SurfaceSessionController.getState |
-| `documentation/QUALITY.md` | 5 | Update scorecard |
+| File                                                                  | Likely phase | Planned change                                                                                                                                                         |
+| --------------------------------------------------------------------- | ------------:| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shared/widget-kits/perf/PerfSpanHelper.js`                           | 1            | Create shared perf helper                                                                                                                                              |
+| `tests/shared/perf/PerfSpanHelper.test.js`                            | 1            | Add tests                                                                                                                                                              |
+| `shared/widget-kits/html/HtmlWidgetUtils.js`                          | 1            | Create shared HTML utility helper                                                                                                                                      |
+| `tests/shared/html/HtmlWidgetUtils.test.js`                           | 1            | Add tests                                                                                                                                                              |
+| `config/components/registry-shared-foundation.js`                     | 1            | Register new shared helpers                                                                                                                                            |
+| `config/components/registry-cluster.js`                               | 1            | Add direct PerfSpanHelper deps for cluster consumers that are rewired to the shared helper                                                                             |
+| `cluster/ClusterWidget.js`                                            | 1            | Rewire perf helper use                                                                                                                                                 |
+| `cluster/rendering/ClusterRendererRouter.js`                          | 1, 2         | Rewire perf helper use, Rewire perf helper use; remove invalidateTheme method guard only if all routed controllers guarantee invalidateTheme, otherwise keep the guard |
+| `cluster/rendering/HtmlSurfaceController.js`                          | 1            | Rewire perf helper use                                                                                                                                                 |
+| `cluster/rendering/CanvasDomSurfaceAdapter.js`                        | 1, 2         | Rewire perf helper, simplify local helpers, reduce file size                                                                                                           |
+| `runtime/HostCommitController.js`                                     | 1, 3, 4      | Perf handling decision, state snapshot caching, fallback bounding                                                                                                      |
+| `runtime/SurfaceSessionController.js`                                 | 1            | Perf handling decision                                                                                                                                                 |
+| `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js` | 1            | Rewire HTML utility use                                                                                                                                                |
+| `widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js`         | 1            | Rewire HTML utility use                                                                                                                                                |
+| `shared/widget-kits/nav/MapZoomHtmlFit.js`                            | 1, 2         | Rewire HTML utility use, theme token weights                                                                                                                           |
+| `shared/widget-kits/nav/ActiveRouteHtmlFit.js`                        | 1            | Rewire HTML utility use                                                                                                                                                |
+| `plugin.js`                                                           | 1, 5         | Possible `loadScriptOnce` canonicalization, lifecycle docs alignment                                                                                                   |
+| `runtime/component-loader.js`                                         | 1            | Possible `loadScriptOnce` reuse                                                                                                                                        |
+| `shared/theme/ThemeResolver.js`                                       | 2            | CSS preset fallback, helper ownership cleanup                                                                                                                          |
+| `shared/theme/ThemePresets.js`                                        | 2            | Canonical preset normalization helper                                                                                                                                  |
+| `runtime/init.js`                                                     | 2, 5         | Theme helper delegation and lifecycle documentation alignment                                                                                                          |
+| `runtime/helpers.js`                                                  | 2            | `getNightModeState` delegation or suppression                                                                                                                          |
+| `runtime/TemporaryHostActionBridge.js`                                | 3            | Reduce repeated capability work safely                                                                                                                                 |
+| `tests/shared/theme/ThemeResolver.test.js`                            | 2            | Add CSS preset tests                                                                                                                                                   |
+| `tests/shared/nav/MapZoomHtmlFit.test.js`                             | 2            | Add theme-weight tests                                                                                                                                                 |
+| `tests/runtime/TemporaryHostActionBridge.test.js`                     | 3            | Add bridge correctness/perf tests                                                                                                                                      |
+| `tests/runtime/HostCommitController.test.js`                          | 3, 4         | Add snapshot and fallback tests                                                                                                                                        |
+| `tests/config/components.test.js`                                     | 1            | Update expected dependency arrays for rewired shared-helper consumers                                                                                                  |
+| `documentation/architecture/runtime-lifecycle.md`                     | 5            | Create new doc                                                                                                                                                         |
+| `documentation/architecture/host-commit-controller.md`                | 5            | Update fallback documentation                                                                                                                                          |
+| `documentation/architecture/surface-session-controller.md`            | 5            | Review/update lifecycle details                                                                                                                                        |
+| `documentation/architecture/canvas-dom-surface-adapter.md`            | 5            | Update simplified adapter details                                                                                                                                      |
+| `documentation/shared/theme-tokens.md`                                | 5            | Update preset behavior and helper ownership                                                                                                                            |
+| `documentation/shared/helpers.md`                                     | 5            | Update helper ownership/delegation                                                                                                                                     |
+| `documentation/conventions/coding-standards.md`                       | 5            | Add shared helper guidance                                                                                                                                             |
+| `documentation/conventions/smell-prevention.md`                       | 5            | Add extraction/suppression guidance                                                                                                                                    |
+| `documentation/guides/add-new-html-kind.md`                           | 5            | Reference shared HTML utility module                                                                                                                                   |
+| `documentation/TABLEOFCONTENTS.md`                                    | 5            | Add new doc/module entries                                                                                                                                             |
+| `documentation/TECH-DEBT.md`                                          | 5            | Record any deferred cleanup                                                                                                                                            |
+| `documentation/QUALITY.md`                                            | 5            | Update quality status                                                                                                                                                  |
 
 ---
 
-## Don'ts
+## Don’ts
 
-- **Don't change the AvNav host registration path.** The `renderHtml` host path is stable and correct. This plan cleans internals only.
-
-- **Don't add ES module imports to any file.** All files remain UMD or IIFE.
-
-- **Don't add a bundler or build step.**
-
-- **Don't make runtime IIFE files depend on `Helpers.getModule()`.** Use namespace-attached utilities or explicit lint suppressions.
-
-- **Don't break the theme priority chain.** Per-token: CSS override > preset value > built-in default. Preset name: DOM attribute > CSS variable > built-in default.
-
-- **Don't remove the MutationObserver fallback entirely.** It handles a real edge case. The plan scopes and ceilings it; it does not eliminate it.
-
-- **Don't cache capabilities across bridge instances.** Each `create()` call computes its own capabilities. The cache is per-instance, invalidated by `destroy()`.
-
-- **Don't freeze the `getState()` snapshot.** Downstream consumers may store references; freezing could break subtle patterns.
-
-- **Don't modify `config/clusters/*.js` config definitions.** Config is stable and out of scope.
-
-- **Don't touch canvas-only widgets** (radial/linear gauges) unless they share code with in-scope modules.
-
-- **Don't exceed 400 lines per JS file.** New modules must be well under budget. Monitor consumer files after extraction.
-
-- **Don't change source code in Phase 5.** Documentation only. Note any code inconsistencies as TECH-DEBT items.
+- Do not change the AvNav registration model.
+- Do not introduce ES modules or a build step.
+- Do not force runtime IIFE files to consume UMD helpers through unsupported bootstrap assumptions.
+- Do not remove the observer fallback entirely.
+- Do not implement unsafe bridge-lifetime capability caching.
+- Do not weaken theme precedence.
+- Do not use the documentation phase to sneak in source changes.
+- Do not exceed the file-size budget after extraction work.
 
 ---
 
 ## Deployment Boundaries
 
-| Deployable unit | Phases | Rationale |
-|---|---|---|
-| Shared utility extraction | 1 | Safe: purely additive modules + consumer rewiring. All existing behavior preserved. |
-| Theme lifecycle fixes | 2 | Must follow Phase 1 (shared file overlap). Fixes a user-facing bug (preset via CSS). |
-| Runtime hot-path optimization | 3 | Independent of Phases 1–2. Internal performance improvement. |
-| Observer scoping | 4 | Must follow Phase 3 (same file). Internal resilience improvement. |
-| Documentation | 5 | Must follow all code phases. No code changes. |
+| Deployable unit            | Phases | Notes                                                                       |
+| -------------------------- | ------ | --------------------------------------------------------------------------- |
+| Shared utility extraction  | 1      | Mostly additive and local rewiring                                          |
+| Theme lifecycle fixes      | 2      | User-visible bug fix; should follow shared helper extraction where relevant |
+| Runtime hot-path cleanup   | 3      | Internal runtime work; correctness-sensitive                                |
+| Observer fallback bounding | 4      | Internal resilience work in same controller as Phase 3                      |
+| Documentation              | 5      | After code phases only                                                      |
 
 ---
 
 ## Acceptance Criteria
 
-### Shared Utilities
+### Shared utilities
 
-- `PerfSpanHelper` is the single owner of perf-hook wiring. No file outside `PerfSpanHelper.js` and explicitly suppressed runtime IIFEs defines `startPerfSpan` or `endPerfSpan`.
+- UMD consumers have a canonical perf helper.
+- HTML-widget utility helpers have a canonical owner.
+- Any remaining runtime-local duplication is explicitly justified in code comments and docs.
+- `CanvasDomSurfaceAdapter.js` returns to the size budget.
 
-- `HtmlWidgetUtils` is the single owner of HTML widget utility functions. No file outside `HtmlWidgetUtils.js` defines `toFiniteNumber`, `trimText`, `escapeHtml`, `toStyleAttr`, `resolveShellRect`, `resolveMode`, or `isEditingMode`.
+### Theme lifecycle
 
-- `loadScriptOnce` exists once in `plugin.js` and is reused by `component-loader.js` (or explicitly suppressed).
+- CSS preset selection works when `--dyni-theme-preset` is set on widget roots.
+- DOM attribute preset selection still takes precedence over CSS.
+- Theme normalization has one canonical owner or one canonical owner plus a clearly justified compatibility wrapper.
+- `MapZoomHtmlFit` uses theme-derived text weights.
+- Redundant invalidation method typeof guards are removed only from call paths with a guaranteed invalidateTheme contract; mixed-controller paths retain guards until the contract is unified.
 
-- `CanvasDomSurfaceAdapter.js` is ≤400 lines.
+### Runtime hot paths
 
-### Theme Lifecycle
+- `TemporaryHostActionBridge` no longer repeats avoidable capability work in every action method.
+- Any caching strategy remains correct across page changes.
+- `HostCommitController.getState()` avoids repeated equivalent allocations.
 
-- Setting `--dyni-theme-preset: bold` in `user.css` scoped to `.widget.dyniplugin` produces bold preset visuals. This is verified by automated tests and manual testing.
+### Observer fallback
 
-- `normalizePresetName` exists once in `ThemePresets.js`. `ThemeResolver.js` and `runtime/init.js` delegate to it.
-
-- `getNightModeState` has a canonical implementation in `ThemeResolver`. `helpers.js` delegates or carries an explicit suppression.
-
-- `MapZoomHtmlFit` reads font weights from ThemeResolver tokens. Changing `--dyni-font-weight: 400` in CSS affects MapZoom widget text weight.
-
-- No `typeof resolverMod.invalidateRoot === "function"` guards remain in `runtime/init.js` or `CanvasDomSurfaceAdapter.js` after Phase 2.
-
-### Runtime Hot Paths
-
-- `TemporaryHostActionBridge` computes capabilities once at `create()` time. `detectPageId` is not called on every action dispatch.
-
-- `HostCommitController.getState()` returns a cached snapshot that is only rebuilt on state mutations.
-
-### Observer Resilience
-
-- `HostCommitController` makes 4 RAF attempts before falling back to `MutationObserver`.
-
-- The `MutationObserver` disconnects after a 2000ms ceiling if the shell element is never found.
+- More RAF attempts are made before observer fallback than today.
+- Observer fallback has a bounded lifetime.
+- Cleanup on success, timeout, and stale revision is covered by tests.
 
 ### Documentation
 
-- `documentation/architecture/runtime-lifecycle.md` accurately describes all lifecycle and flow paths as they exist after Phase 4.
-
-- `documentation/shared/theme-tokens.md` documents the corrected preset resolution behavior.
-
-- `documentation/TABLEOFCONTENTS.md` includes entries for `PerfSpanHelper` and `HtmlWidgetUtils`.
-
-- No documentation file references PLAN4 phases or steps.
+- `documentation/architecture/runtime-lifecycle.md` exists.
+- Updated docs describe the actual implemented lifecycle.
+- Index and cross-links resolve.
+- Deferred cleanup is recorded explicitly.
 
 ---
 
 ## Related
 
-- [PLAN1.md](PLAN1.md) — Original renderHtml architecture plan that introduced the infrastructure this plan cleans
-- [PLAN3.md](PLAN3.md) — Atomicity linter cleanup that established smell-rule severity model
-- [core-principles.md](../../documentation/core-principles.md) — Principles #1, #4, #5, #8, #15, #16, #17, #18
-- [coding-standards.md](../../documentation/conventions/coding-standards.md) — UMD template, file-size limits, shared-utility rules
-- [smell-prevention.md](../../documentation/conventions/smell-prevention.md) — `duplicate-functions`, `duplicate-block-clones`, `hardcoded-runtime-default`, `framework-method-typeof-guard`
-- [theme-tokens.md](../../documentation/shared/theme-tokens.md) — ThemeResolver API, preset system, runtime integration
-- [runtime-lifecycle.md](../../documentation/architecture/runtime-lifecycle.md) — Lifecycle reference to be extended in Phase 5
-- [host-commit-controller.md](../../documentation/architecture/host-commit-controller.md) — Commit scheduling architecture
-- [surface-session-controller.md](../../documentation/architecture/surface-session-controller.md) — Surface lifecycle state machine
-- [canvas-dom-surface-adapter.md](../../documentation/architecture/canvas-dom-surface-adapter.md) — Canvas-DOM adapter architecture
+- [PLAN1.md](PLAN1.md) — original `renderHtml` architecture plan
+- [PLAN3.md](PLAN3.md) — smell-rule cleanup background
+- [core-principles.md](../../documentation/core-principles.md) — architectural principles
+- [coding-standards.md](../../documentation/conventions/coding-standards.md) — UMD templates and file-size rules
+- [smell-prevention.md](../../documentation/conventions/smell-prevention.md) — duplication and suppression guidance
+- [theme-tokens.md](../../documentation/shared/theme-tokens.md) — theme token system
+- [host-commit-controller.md](../../documentation/architecture/host-commit-controller.md) — commit scheduling architecture
+- [surface-session-controller.md](../../documentation/architecture/surface-session-controller.md) — surface lifecycle state machine
+- [canvas-dom-surface-adapter.md](../../documentation/architecture/canvas-dom-surface-adapter.md) — canvas/dom adapter architecture
+
+Planned documentation addition in Phase 5:
+
+- `documentation/architecture/runtime-lifecycle.md`
