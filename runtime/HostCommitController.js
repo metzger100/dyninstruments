@@ -9,6 +9,8 @@
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
   const hasOwn = Object.prototype.hasOwnProperty;
+  const MAX_RAF_ATTEMPTS = 4;
+  const OBSERVER_TIMEOUT_MS = 2000;
 
   let instanceCounter = 0;
 
@@ -234,8 +236,17 @@
 
       if (state.timeoutHandle == null) {
         setStateField("timeoutHandle", setTimer(function () {
-          commitIfReady(targetRevision, callbacks, "timeout");
-        }, 0));
+          if (commitIfReady(targetRevision, callbacks, "observer-timeout")) {
+            return;
+          }
+          clearAsyncHandles();
+          clearPendingState({
+            status: "observer-timeout",
+            waitStage: "observer-timeout",
+            revision: targetRevision,
+            instanceId: state.instanceId
+          });
+        }, OBSERVER_TIMEOUT_MS));
       }
     }
 
@@ -243,11 +254,11 @@
       setStateField("rafHandle", requestFrame(function () {
         setStateField("rafHandle", null);
 
-        if (commitIfReady(targetRevision, callbacks, attempt === 1 ? "raf-1" : "raf-2")) {
+        if (commitIfReady(targetRevision, callbacks, "raf-" + String(attempt))) {
           return;
         }
 
-        if (attempt < 2) {
+        if (attempt < MAX_RAF_ATTEMPTS) {
           scheduleRafAttempt(targetRevision, callbacks, attempt + 1);
           return;
         }

@@ -244,7 +244,7 @@ describe("runtime/HostCommitController.js", function () {
     expect(harness.rafQueue).toHaveLength(1);
   });
 
-  it("activates MutationObserver fallback after two rAF misses", function () {
+  it("activates MutationObserver fallback after four rAF misses", function () {
     const harness = createHarness();
     const controller = harness.createController();
     const onCommit = vi.fn();
@@ -254,12 +254,15 @@ describe("runtime/HostCommitController.js", function () {
 
     harness.runNextRaf();
     harness.runNextRaf();
+    harness.runNextRaf();
+    harness.runNextRaf();
 
     expect(harness.observerInstances).toHaveLength(1);
     const observer = harness.observerInstances[0];
     expect(observer.observe).toHaveBeenCalledTimes(1);
     expect(observer.observe).toHaveBeenCalledWith(harness.document.body, { childList: true, subtree: true });
     expect(harness.timeoutQueue).toHaveLength(1);
+    expect(harness.timeoutQueue[0].delay).toBe(2000);
 
     const rootEl = createHostRoot();
     const shellEl = createShell(rootEl);
@@ -284,6 +287,8 @@ describe("runtime/HostCommitController.js", function () {
 
     controller.recordRender({ value: 10 });
     controller.scheduleCommit({ onCommit: vi.fn() });
+    harness.runNextRaf();
+    harness.runNextRaf();
     harness.runNextRaf();
     harness.runNextRaf();
 
@@ -313,6 +318,8 @@ describe("runtime/HostCommitController.js", function () {
     controller.scheduleCommit({ onCommit: onCommit });
     harness.runNextRaf();
     harness.runNextRaf();
+    harness.runNextRaf();
+    harness.runNextRaf();
 
     expect(harness.observerInstances).toHaveLength(0);
     expect(harness.timeoutQueue).toHaveLength(1);
@@ -322,6 +329,67 @@ describe("runtime/HostCommitController.js", function () {
 
     expect(onCommit).toHaveBeenCalledTimes(1);
     expect(onCommit.mock.calls[0][0].rootEl).toBe(rootEl);
+  });
+
+  it("abandons observer fallback after timeout ceiling when shell never appears", function () {
+    const harness = createHarness();
+    const controller = harness.createController();
+    const onCommit = vi.fn();
+
+    controller.recordRender({ value: 12 });
+    controller.scheduleCommit({ onCommit: onCommit });
+
+    harness.runNextRaf();
+    harness.runNextRaf();
+    harness.runNextRaf();
+    harness.runNextRaf();
+
+    expect(harness.observerInstances).toHaveLength(1);
+    const observer = harness.observerInstances[0];
+    expect(harness.timeoutQueue).toHaveLength(1);
+    expect(harness.timeoutQueue[0].delay).toBe(2000);
+
+    harness.runNextTimeout();
+
+    expect(onCommit).not.toHaveBeenCalled();
+    expect(observer.disconnect).toHaveBeenCalledTimes(1);
+    const state = controller.getState();
+    expect(state.commitPending).toBe(false);
+    expect(state.scheduledRevision).toBe(null);
+    expect(state.mountedRevision).toBe(0);
+    expect(harness.spans.some((entry) => entry.tags.waitStage === "observer-timeout")).toBe(true);
+  });
+
+  it("abandons active observer fallback handles when a newer revision is scheduled", function () {
+    const harness = createHarness();
+    const controller = harness.createController();
+    const onCommitOld = vi.fn();
+    const onCommitNew = vi.fn();
+    const rootEl = createHostRoot();
+    const shellEl = createShell(rootEl);
+
+    controller.recordRender({ value: 1 });
+    controller.scheduleCommit({ onCommit: onCommitOld });
+    harness.runNextRaf();
+    harness.runNextRaf();
+    harness.runNextRaf();
+    harness.runNextRaf();
+
+    const oldObserver = harness.observerInstances[0];
+    const oldTimeoutId = harness.timeoutQueue[0].id;
+
+    controller.recordRender({ value: 2 });
+    controller.scheduleCommit({ onCommit: onCommitNew });
+
+    expect(oldObserver.disconnect).toHaveBeenCalledTimes(1);
+    expect(harness.clearedTimeouts).toContain(oldTimeoutId);
+    expect(onCommitOld).not.toHaveBeenCalled();
+
+    harness.setShell(shellEl);
+    harness.runNextRaf();
+
+    expect(onCommitNew).toHaveBeenCalledTimes(1);
+    expect(onCommitNew.mock.calls[0][0].revision).toBe(2);
   });
 
   it("records wait-stage classification for each host-commit completion path", function () {
@@ -354,6 +422,8 @@ describe("runtime/HostCommitController.js", function () {
     observerController.scheduleCommit({ onCommit: vi.fn() });
     observerHarness.runNextRaf();
     observerHarness.runNextRaf();
+    observerHarness.runNextRaf();
+    observerHarness.runNextRaf();
     observerHarness.setShell(observerShell);
     observerHarness.triggerObserver(0);
     expect(observerHarness.spans.some((entry) => entry.tags.waitStage === "mutation-observer")).toBe(true);
@@ -366,9 +436,24 @@ describe("runtime/HostCommitController.js", function () {
     timeoutController.scheduleCommit({ onCommit: vi.fn() });
     timeoutHarness.runNextRaf();
     timeoutHarness.runNextRaf();
+    timeoutHarness.runNextRaf();
+    timeoutHarness.runNextRaf();
     timeoutHarness.setShell(timeoutShell);
     timeoutHarness.runNextTimeout();
     expect(timeoutHarness.spans.some((entry) => entry.tags.waitStage === "timeout")).toBe(true);
+
+    const rafFourHarness = createHarness();
+    const rafFourController = rafFourHarness.createController();
+    const rafFourRoot = createHostRoot();
+    const rafFourShell = createShell(rafFourRoot);
+    rafFourController.recordRender({ value: 5 });
+    rafFourController.scheduleCommit({ onCommit: vi.fn() });
+    rafFourHarness.runNextRaf();
+    rafFourHarness.runNextRaf();
+    rafFourHarness.runNextRaf();
+    rafFourHarness.setShell(rafFourShell);
+    rafFourHarness.runNextRaf();
+    expect(rafFourHarness.spans.some((entry) => entry.tags.waitStage === "raf-4")).toBe(true);
   });
 
   it("returns the same getState snapshot reference when state is unchanged", function () {
