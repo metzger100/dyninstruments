@@ -28,6 +28,7 @@
 - Dedup: repeated `scheduleCommit()` for the same revision is a no-op
 - Timeout ceiling behavior: after observer ceiling expires, one final readiness probe runs; unresolved commits are explicitly abandoned and pending state is cleared.
 - Cleanup always tears down pending rAF/observer/timeout handles (success, stale, timeout-abandon, cleanup/reset)
+- `timeoutHandle` is the single timeout owner for both no-observer fallback probes and observer-ceiling teardown.
 - `getState()` uses snapshot memoization: repeated reads return the same object reference until controller state mutates
 - Wait-stage tags: `raf-1`, `raf-2`, `raf-3`, `raf-4`, `mutation-observer`, `observer-timeout`, `timeout`, `cleanup`, `reset`, `stale`
 
@@ -70,5 +71,6 @@ Snapshot semantics:
 ## Related
 
 - [component-system.md](component-system.md)
+- [runtime-lifecycle.md](runtime-lifecycle.md)
 - [cluster-widget-system.md](cluster-widget-system.md)
 - [surface-session-controller.md](surface-session-controller.md)

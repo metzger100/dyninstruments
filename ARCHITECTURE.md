@@ -54,6 +54,7 @@ Widget feature code depends on shared code. Cluster orchestration code may depen
 
 - [documentation/TABLEOFCONTENTS.md](documentation/TABLEOFCONTENTS.md)
 - [documentation/architecture/component-system.md](documentation/architecture/component-system.md)
+- [documentation/architecture/runtime-lifecycle.md](documentation/architecture/runtime-lifecycle.md)
 - [documentation/architecture/cluster-widget-system.md](documentation/architecture/cluster-widget-system.md)
 - [documentation/architecture/host-commit-controller.md](documentation/architecture/host-commit-controller.md)
 - [documentation/architecture/surface-session-controller.md](documentation/architecture/surface-session-controller.md)

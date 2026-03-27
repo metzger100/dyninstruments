@@ -18,6 +18,7 @@
   - throws when `createSurfaceController` is missing
   - throws when returned controllers do not implement `attach`/`update`/`detach`/`destroy`
 - Stale guard: `reconcileSession(payload)` returns `false` when `payload.revision < mountedRevision`
+- Called from `ClusterWidget` host-commit pipeline (`HostCommitController.onCommit` -> router `createSessionPayload` -> `reconcileSession`)
 - Same-surface transitions:
   - same shell: `update(payload)`
   - remount/new shell: `detach("remount")` then `attach(payload)`
@@ -59,5 +60,6 @@ session.getState();
 ## Related
 
 - [host-commit-controller.md](host-commit-controller.md)
+- [runtime-lifecycle.md](runtime-lifecycle.md)
 - [cluster-widget-system.md](cluster-widget-system.md)
 - [component-system.md](component-system.md)

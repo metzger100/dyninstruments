@@ -204,6 +204,7 @@ In the current init flow, theme presets are applied to discovered `.widget.dynip
 ## Related
 
 - [cluster-widget-system.md](cluster-widget-system.md) — `ClusterWidget` modular mapper architecture
+- [runtime-lifecycle.md](runtime-lifecycle.md) — bootstrap/init/render lifecycle ownership
 - [host-commit-controller.md](host-commit-controller.md) — standalone deferred commit controller API
 - [../shared/helpers.md](../shared/helpers.md) — `Helpers` passed to `create`
 - [../guides/add-new-gauge.md](../guides/add-new-gauge.md) — gauge workflow

@@ -44,6 +44,7 @@ Required renderer contract:
 - `renderHtml(props)` returns HTML string
 - `namedHandlers(props, hostContext)` returns `{ handlerName: fn }`
 - `resizeSignature(props, hostContext)` returns primitive signature (`string|number|boolean|null`)
+- Reuse `HtmlWidgetUtils` for shared HTML helpers (`escapeHtml`, `toStyleAttr`, `resolveShellRect`, `resolveRatioMode`, `isEditingMode`) instead of creating local copies.
 
 Minimal shape:
 
@@ -172,6 +173,7 @@ npm run test
 
 - [ ] ViewModel contract exists (or existing one reused)
 - [ ] HTML renderer exposes `renderHtml`, `namedHandlers`, `resizeSignature`
+- [ ] HTML renderer reuses `HtmlWidgetUtils` for escaping/style/shell/ratio/editing helpers
 - [ ] Visual mode matrix + class schema + token map are documented
 - [ ] Layout/fit ownership split is documented and aligned with actual owner modules
 - [ ] Component registered in `config/components/registry-widgets.js`

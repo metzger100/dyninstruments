@@ -135,5 +135,6 @@ const gaugeUtils = gaugeUtilsModule && gaugeUtilsModule.create(def, Helpers);
 ## Related
 
 - [css-theming.md](css-theming.md)
+- [../architecture/runtime-lifecycle.md](../architecture/runtime-lifecycle.md)
 - [../avnav-api/formatters.md](../avnav-api/formatters.md)
 - [../architecture/component-system.md](../architecture/component-system.md)

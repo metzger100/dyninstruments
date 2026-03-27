@@ -27,6 +27,7 @@
   - resize observation + repaint scheduling
   - explicit `invalidateTheme()` path with ThemeResolver cache invalidation
   - attach/update/detach/destroy lifecycle
+- Current size note: adapter remains warning-tier in `check:filesize` and is tracked in [../TECH-DEBT.md](../TECH-DEBT.md) while the runtime contract stays stable.
 
 ## API/Interfaces
 
@@ -63,5 +64,6 @@ controller.invalidateTheme(reason);
 ## Related
 
 - [cluster-widget-system.md](cluster-widget-system.md)
+- [runtime-lifecycle.md](runtime-lifecycle.md)
 - [surface-session-controller.md](surface-session-controller.md)
 - [host-commit-controller.md](host-commit-controller.md)

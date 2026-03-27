@@ -21,6 +21,7 @@
 - Preset normalization owner: `ThemePresets.normalizePresetName` / `ThemePresets.create.normalizePresetName`
 - Caching: `WeakMap` per root element
 - Canvas renderer call pattern: `const rootEl = Helpers.resolveWidgetRoot(canvas) || canvas; resolver.resolveForRoot(rootEl)`
+- Night-mode owner: `Helpers.getNightModeState(rootEl)` from `runtime/helpers.js`
 - Invalidation: cache reset when `Helpers.getNightModeState(rootEl)` changes
 - Numeric parsing: `parseFloat`, fallback on `NaN`
 - Color parsing: `trim`, fallback on empty string
@@ -211,5 +212,6 @@ Preset selection from `user.css`:
 ## Related
 
 - [css-theming.md](css-theming.md)
+- [../architecture/runtime-lifecycle.md](../architecture/runtime-lifecycle.md)
 - [../architecture/component-system.md](../architecture/component-system.md)
 - [../radial/gauge-shared-api.md](../radial/gauge-shared-api.md)

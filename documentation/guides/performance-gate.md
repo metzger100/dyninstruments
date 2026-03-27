@@ -26,7 +26,7 @@ Use this guide for perf harness execution and strict gate evaluation against com
   - `ClusterWidget.translateFunction`
   - `ClusterWidget.renderHtml`
   - `ClusterRendererRouter.renderHtml`
-  - `HostCommitController.scheduleCommit->onCommit` (`stage`: `raf-1`, `raf-2`, `mutation-observer`, `timeout`)
+  - `HostCommitController.scheduleCommit->onCommit` (`waitStage`: `raf-1`, `raf-2`, `raf-3`, `raf-4`, `mutation-observer`, `observer-timeout`, `timeout`)
   - `SurfaceSessionController.reconcileSession`
   - `HtmlSurfaceController.attach`
   - `HtmlSurfaceController.update`

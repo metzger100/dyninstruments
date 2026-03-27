@@ -226,8 +226,9 @@ Allowed inline exceptions:
 
 1. Remove widget-local copy-paste blocks and move shared logic into `shared/widget-kits/`.
 2. Prefer shared API calls (`RadialValueMath.*`, shared renderers) over repeated local helper implementations.
-3. Keep duplicated orchestration stubs (`create`, `translate`, `translateFunction`, `renderHtml`, `renderCanvas`) minimal; all substantive logic belongs in shared modules or surface owners.
-4. Add/adjust tests to lock expected shared-helper behavior after extraction.
+3. For runtime IIFE perf instrumentation, use `runtime/PerfSpanHelper.js` (`runtime.getPerfSpanApi()`) as the canonical owner; if bootstrap constraints force temporary local duplication, keep a rule-specific suppression + debt entry.
+4. Keep duplicated orchestration stubs (`create`, `translate`, `translateFunction`, `renderHtml`, `renderCanvas`) minimal; all substantive logic belongs in shared modules or surface owners.
+5. Add/adjust tests to lock expected shared-helper behavior after extraction.
 
 ### Oneliner line-limit bypass
 
