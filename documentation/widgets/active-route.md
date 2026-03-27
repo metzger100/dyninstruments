@@ -21,6 +21,7 @@ Domain ownership:
 
 - Shared layout owner: `shared/widget-kits/nav/ActiveRouteLayout.js`
 - Shared fit owner: `shared/widget-kits/nav/ActiveRouteHtmlFit.js`
+- Shared HTML utility owner: `shared/widget-kits/html/HtmlWidgetUtils.js`
 - Shared compact curve owner: `shared/widget-kits/layout/ResponsiveScaleProfile.js`
 - HTML lifecycle owner: `cluster/rendering/HtmlSurfaceController.js`
 - Host click action bridge: `hostActions.routeEditor.openActiveRoute()` via named handler `activeRouteOpen`
@@ -32,7 +33,7 @@ ActiveRouteTextHtmlWidget: {
   js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
   css: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css",
   globalKey: "DyniActiveRouteTextHtmlWidget",
-  deps: ["ActiveRouteHtmlFit"]
+  deps: ["ActiveRouteHtmlFit", "HtmlWidgetUtils"]
 }
 ```
 

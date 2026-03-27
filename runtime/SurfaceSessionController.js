@@ -1,14 +1,13 @@
 /**
  * Module: DyniPlugin SurfaceSessionController - Surface lifecycle state machine for attach/update/detach transitions
  * Documentation: documentation/architecture/surface-session-controller.md
- * Depends: runtime/namespace.js
+ * Depends: runtime/namespace.js, runtime/PerfSpanHelper.js
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
-  const PERF_HOOK_KEY = "__DYNI_PERF_HOOKS__";
   const SUPPORTED_SURFACES = {
     html: true,
     "canvas-dom": true
@@ -70,18 +69,13 @@
 
   function createSurfaceSessionController(options) {
     const opts = options || {};
+    const perf = (runtime && typeof runtime.getPerfSpanApi === "function")
+      ? runtime.getPerfSpanApi()
+      : null;
     const createSurfaceController = opts.createSurfaceController;
     ensureFactory(createSurfaceController);
 
     let state = createInitialState();
-
-    function resolvePerfHooks() {
-      const hooks = root[PERF_HOOK_KEY];
-      if (!hooks || typeof hooks.startSpan !== "function" || typeof hooks.endSpan !== "function") {
-        return null;
-      }
-      return hooks;
-    }
 
     function getState() {
       return {
@@ -122,9 +116,8 @@
     }
 
     function reconcileSession(payload) {
-      const hooks = resolvePerfHooks();
-      const spanToken = hooks
-        ? hooks.startSpan("SurfaceSessionController.reconcileSession", {
+      const spanToken = perf
+        ? perf.startSpan("SurfaceSessionController.reconcileSession", {
           surface: payload && payload.surface,
           revision: payload && payload.revision
         })
@@ -172,8 +165,8 @@
         return true;
       }
       finally {
-        if (hooks && spanToken) {
-          hooks.endSpan(spanToken, {
+        if (perf && spanToken) {
+          perf.endSpan(spanToken, {
             surface: payload && payload.surface,
             revision: payload && payload.revision
           });

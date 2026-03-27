@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteHtmlFit - Shared text-fit model for ActiveRoute interactive HTML renderer
  * Documentation: documentation/widgets/active-route.md
- * Depends: ThemeResolver, RadialTextLayout, TextTileLayout, ActiveRouteLayout
+ * Depends: ThemeResolver, RadialTextLayout, TextTileLayout, ActiveRouteLayout, HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -15,11 +15,6 @@
   const ROUTE_NAME_MAX_PX_RATIO_HIGH = 0.54;
   const ROUTE_NAME_MAX_PX_RATIO_NORMAL = 0.66;
   const MEASURE_CTX_KEY = "__dyniActiveRouteTextMeasureCtx";
-
-  function toFiniteNumber(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
-  }
 
   function parseFontPx(font) {
     const source = String(font || "");
@@ -77,8 +72,8 @@
     return measureCtx;
   }
 
-  function toFontSizeStyle(px) {
-    const n = toFiniteNumber(px);
+  function toFontSizeStyle(px, htmlUtils) {
+    const n = htmlUtils.toFiniteNumber(px);
     if (!(n > 0)) {
       return "";
     }
@@ -113,6 +108,7 @@
 
   function create(def, Helpers) {
     const theme = Helpers.getModule("ThemeResolver").create(def, Helpers);
+    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const radialText = Helpers.getModule("RadialTextLayout").create(def, Helpers);
     const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
     const layoutApi = Helpers.getModule("ActiveRouteLayout").create(def, Helpers);
@@ -188,13 +184,13 @@
         });
         const fit = measurement && measurement.fit ? measurement.fit : null;
         metricStyles[metric.id] = {
-          valueStyle: toFontSizeStyle(fit && fit.vPx),
-          unitStyle: toFontSizeStyle(fit && fit.uPx)
+          valueStyle: toFontSizeStyle(fit && fit.vPx, htmlUtils),
+          unitStyle: toFontSizeStyle(fit && fit.uPx, htmlUtils)
         };
       }
 
       return {
-        routeNameStyle: toFontSizeStyle(nameFit && nameFit.px),
+        routeNameStyle: toFontSizeStyle(nameFit && nameFit.px, htmlUtils),
         metrics: metricStyles
       };
     }

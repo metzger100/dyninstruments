@@ -1,7 +1,7 @@
 /**
  * Module: CanvasDomSurfaceAdapter - Standalone canvas-dom surface controller for internal canvas lifecycle
  * Documentation: documentation/architecture/canvas-dom-surface-adapter.md
- * Depends: ThemeResolver
+ * Depends: ThemeResolver, PerfSpanHelper
  */
 
 (function (root, factory) {
@@ -18,13 +18,6 @@
   const CANVAS_CLASS = "dyni-surface-canvas-node";
   const RENDER_NOT_READY = { updated: false, changed: false };
   const GLOBAL_ROOT = (typeof globalThis !== "undefined") ? globalThis : (typeof self !== "undefined" ? self : {});
-  function startPerfSpan(name, tags) {
-    const hooks = GLOBAL_ROOT.__DYNI_PERF_HOOKS__;
-    return (hooks && typeof hooks.startSpan === "function") ? { hooks: hooks, token: hooks.startSpan(name, tags || null) } : null;
-  }
-  function endPerfSpan(span, tags) {
-    if (span && span.hooks && typeof span.hooks.endSpan === "function") span.hooks.endSpan(span.token, tags || null);
-  }
 
   function hasClass(el, className) {
     return !!(el &&
@@ -90,6 +83,7 @@
 
   function create(def, Helpers) {
     const themeResolver = Helpers.getModule("ThemeResolver");
+    const perf = Helpers.getModule("PerfSpanHelper").create(def, Helpers);
 
     function renderSurfaceShell() {
       return SHELL_HTML;
@@ -165,7 +159,7 @@
         }
         cancelFrame(rafHandle);
         rafHandle = null;
-        endPerfSpan(pendingPaintWaitSpan, {
+        perf.endSpan(pendingPaintWaitSpan, {
           rendererId: rendererSpec.id || "unknown",
           status: "canceled"
         });
@@ -276,7 +270,7 @@
           return;
         }
 
-        const renderSpan = startPerfSpan("Renderer.renderCanvas", {
+        const renderSpan = perf.startSpan("Renderer.renderCanvas", {
           rendererId: rendererSpec.id || "unknown",
           cluster: props && props.cluster,
           kind: props && props.kind
@@ -289,13 +283,13 @@
           }
         }
         finally {
-          endPerfSpan(renderSpan, {
+          perf.endSpan(renderSpan, {
             rendererId: rendererSpec.id || "unknown",
             cluster: props && props.cluster,
             kind: props && props.kind
           });
         }
-        endPerfSpan(pendingPaintWaitSpan, {
+        perf.endSpan(pendingPaintWaitSpan, {
           rendererId: rendererSpec.id || "unknown",
           revision: revision,
           status: "painted"
@@ -314,7 +308,7 @@
           return false;
         }
 
-        pendingPaintWaitSpan = startPerfSpan("CanvasDomSurfaceAdapter.schedulePaint->paintNow", {
+        pendingPaintWaitSpan = perf.startSpan("CanvasDomSurfaceAdapter.schedulePaint->paintNow", {
           rendererId: rendererSpec.id || "unknown",
           reason: reason || "update",
           revision: revision
@@ -398,7 +392,7 @@
         cancelPendingFrame();
         disconnectObserver();
         removeCanvasNode();
-        endPerfSpan(pendingPaintWaitSpan, {
+        perf.endSpan(pendingPaintWaitSpan, {
           rendererId: rendererSpec.id || "unknown",
           status: "detached"
         });

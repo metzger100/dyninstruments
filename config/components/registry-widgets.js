@@ -22,13 +22,13 @@
       js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
       css: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css",
       globalKey: "DyniActiveRouteTextHtmlWidget",
-      deps: ["ActiveRouteHtmlFit"]
+      deps: ["ActiveRouteHtmlFit", "HtmlWidgetUtils"]
     },
     MapZoomTextHtmlWidget: {
       js: BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
       css: BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css",
       globalKey: "DyniMapZoomTextHtmlWidget",
-      deps: ["MapZoomHtmlFit"]
+      deps: ["MapZoomHtmlFit", "HtmlWidgetUtils"]
     },
     CenterDisplayTextWidget: {
       js: BASE + "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",

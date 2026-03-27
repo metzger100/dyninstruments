@@ -1,7 +1,7 @@
 /**
  * Module: MapZoomHtmlFit - Per-element text fitting for map zoom HTML renderer
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: Helpers.resolveFontFamily, TextLayoutEngine
+ * Depends: Helpers.resolveFontFamily, TextLayoutEngine, HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -21,28 +21,8 @@
   const LABEL_WEIGHT = 700;
   const SECONDARY_DEFAULT_SCALE = 0.8;
 
-  function toFiniteNumber(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
-  }
-
   function numberOr(value, defaultNumber) {
     return typeof value === "number" ? value : defaultNumber;
-  }
-
-  function resolveShellRect(hostContext) {
-    const commit = hostContext && hostContext.__dyniHostCommitState;
-    const target = commit && (commit.shellEl || commit.rootEl);
-    if (!target || typeof target.getBoundingClientRect !== "function") {
-      return null;
-    }
-    const rect = target.getBoundingClientRect();
-    const width = toFiniteNumber(rect && rect.width);
-    const height = toFiniteNumber(rect && rect.height);
-    if (!(width > 0) || !(height > 0)) {
-      return null;
-    }
-    return { width: width, height: height };
   }
 
   function buildApproximateMeasureContext() {
@@ -91,23 +71,23 @@
     return out;
   }
 
-  function toFontStyle(px) {
-    const resolved = toFiniteNumber(px);
+  function toFontStyle(px, htmlUtils) {
+    const resolved = htmlUtils.toFiniteNumber(px);
     const out = Math.floor(numberOr(resolved, 0));
     return out > 0 ? ("font-size:" + out + "px;") : "";
   }
 
-  function estimateMainUsedHeight(args) {
+  function estimateMainUsedHeight(args, htmlUtils) {
     const cfg = args || {};
     const fit = cfg.fit;
     if (!fit || typeof fit !== "object") {
       return 0;
     }
-    const captionPx = toFiniteNumber(fit.cPx);
-    const valuePx = toFiniteNumber(fit.vPx);
-    const unitPx = toFiniteNumber(fit.uPx);
-    const secondaryPx = toFiniteNumber(fit.sPx);
-    const gapValue = toFiniteNumber(cfg.gapPx);
+    const captionPx = htmlUtils.toFiniteNumber(fit.cPx);
+    const valuePx = htmlUtils.toFiniteNumber(fit.vPx);
+    const unitPx = htmlUtils.toFiniteNumber(fit.uPx);
+    const secondaryPx = htmlUtils.toFiniteNumber(fit.sPx);
+    const gapValue = htmlUtils.toFiniteNumber(cfg.gapPx);
     const gap = Math.max(0, Math.floor(numberOr(gapValue, 0)));
     const captionSafe = numberOr(captionPx, 0);
     const valueSafe = numberOr(valuePx, 0);
@@ -202,7 +182,7 @@
     };
   }
 
-  function fitRequiredPx(args) {
+  function fitRequiredPx(args, htmlUtils) {
     const cfg = args || {};
     if (!hasText(cfg.requiredText)) {
       return { px: 0 };
@@ -211,7 +191,7 @@
       fit: cfg.mainFit,
       mode: cfg.mode,
       gapPx: cfg.gapPx
-    });
+    }, htmlUtils);
     const rowGap = mainUsedH > 0 ? cfg.gapPx : 0;
     const remainingH = Math.max(0, cfg.maxH - mainUsedH - rowGap);
     if (!(remainingH > 0)) {
@@ -234,6 +214,7 @@
 
   function create(def, Helpers) {
     const textApi = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
+    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
 
     function compute(args) {
       const cfg = args || {};
@@ -242,7 +223,7 @@
       if (!model || typeof model !== "object") {
         return EMPTY_STYLES;
       }
-      const rect = cfg.shellRect || resolveShellRect(hostContext);
+      const rect = cfg.shellRect || htmlUtils.resolveShellRect(hostContext);
       if (!rect) {
         return EMPTY_STYLES;
       }
@@ -260,7 +241,7 @@
       const contentH = Math.max(1, shellH - responsiveInsets.innerY * 2);
       const innerY = Math.max(1, Math.floor(responsiveInsets.innerY));
       const gapPx = Math.max(1, Math.floor(responsiveInsets.gapBase));
-      const secScaleRaw = toFiniteNumber(model.captionUnitScale);
+      const secScaleRaw = htmlUtils.toFiniteNumber(model.captionUnitScale);
       const secScale = secScaleRaw > 0 ? secScaleRaw : SECONDARY_DEFAULT_SCALE;
       const mode = typeof model.mode === "string" && model.mode.length
         ? model.mode
@@ -291,13 +272,13 @@
         maxH: contentH,
         gapPx: gapPx,
         family: family
-      });
+      }, htmlUtils);
 
       return {
-        captionStyle: toFontStyle(mainFit.captionPx),
-        valueStyle: toFontStyle(mainFit.valuePx),
-        unitStyle: toFontStyle(mainFit.unitPx),
-        requiredStyle: toFontStyle(requiredFit.px)
+        captionStyle: toFontStyle(mainFit.captionPx, htmlUtils),
+        valueStyle: toFontStyle(mainFit.valuePx, htmlUtils),
+        unitStyle: toFontStyle(mainFit.unitPx, htmlUtils),
+        requiredStyle: toFontStyle(requiredFit.px, htmlUtils)
       };
     }
 

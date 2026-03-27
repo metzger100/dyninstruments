@@ -149,6 +149,15 @@ Rule: Before creating any new widget, check this table. If your widget matches a
 Reusable logic MUST go in `shared/widget-kits/`. Never duplicate functions across widgets.
 
 Current shared utilities include:
+- `HtmlWidgetUtils.toFiniteNumber()`
+- `HtmlWidgetUtils.trimText()`
+- `HtmlWidgetUtils.escapeHtml()`
+- `HtmlWidgetUtils.toStyleAttr()`
+- `HtmlWidgetUtils.resolveShellRect()`
+- `HtmlWidgetUtils.resolveRatioMode()`
+- `HtmlWidgetUtils.isEditingMode()`
+- `PerfSpanHelper.startSpan()`
+- `PerfSpanHelper.endSpan()`
 - `RadialValueMath.clamp()`
 - `RadialValueMath.isFiniteNumber()`
 - `RadialValueMath.extractNumberText()`

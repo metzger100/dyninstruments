@@ -43,6 +43,9 @@ describe("ActiveRouteTextHtmlWidget", function () {
             }
           };
         }
+        if (id === "HtmlWidgetUtils") {
+          return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
+        }
         throw new Error("Unknown module requested: " + id);
       }
     };

@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin HostCommitController - Deferred host commit scheduling for HTML shell mounting
  * Documentation: documentation/architecture/component-system.md
- * Depends: runtime/namespace.js, requestAnimationFrame, MutationObserver
+ * Depends: runtime/namespace.js, runtime/PerfSpanHelper.js, requestAnimationFrame, MutationObserver
  */
 (function (root) {
   "use strict";
@@ -9,7 +9,6 @@
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
   const hasOwn = Object.prototype.hasOwnProperty;
-  const PERF_HOOK_KEY = "__DYNI_PERF_HOOKS__";
 
   let instanceCounter = 0;
 
@@ -36,6 +35,9 @@
 
   function createHostCommitController(options) {
     const opts = options || {};
+    const perf = (runtime && typeof runtime.getPerfSpanApi === "function")
+      ? runtime.getPerfSpanApi()
+      : null;
     const instancePrefix = (typeof opts.instancePrefix === "string" && opts.instancePrefix)
       ? opts.instancePrefix
       : "dyni-host-";
@@ -66,14 +68,6 @@
 
     let state = createState(nextInstanceId(instancePrefix));
     let pendingWaitSpanToken = null;
-
-    function resolvePerfHooks() {
-      const hooks = root[PERF_HOOK_KEY];
-      if (!hooks || typeof hooks.startSpan !== "function" || typeof hooks.endSpan !== "function") {
-        return null;
-      }
-      return hooks;
-    }
 
     function getState() {
       return {
@@ -122,9 +116,8 @@
     }
 
     function clearPendingState(tags) {
-      const hooks = resolvePerfHooks();
-      if (hooks && pendingWaitSpanToken) {
-        hooks.endSpan(pendingWaitSpanToken, tags || null);
+      if (perf && pendingWaitSpanToken) {
+        perf.endSpan(pendingWaitSpanToken, tags || null);
       }
       pendingWaitSpanToken = null;
       state.commitPending = false;
@@ -258,7 +251,6 @@
 
     function scheduleCommit(callbacks) {
       const targetRevision = state.renderRevision;
-      const hooks = resolvePerfHooks();
 
       if (state.commitPending && state.scheduledRevision === targetRevision) {
         return false;
@@ -271,8 +263,8 @@
 
       state.commitPending = true;
       state.scheduledRevision = targetRevision;
-      pendingWaitSpanToken = hooks
-        ? hooks.startSpan("HostCommitController.scheduleCommit->onCommit", {
+      pendingWaitSpanToken = perf
+        ? perf.startSpan("HostCommitController.scheduleCommit->onCommit", {
           instanceId: state.instanceId,
           revision: targetRevision
         })

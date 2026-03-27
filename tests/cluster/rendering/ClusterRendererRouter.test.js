@@ -137,6 +137,7 @@ describe("ClusterRendererRouter", function () {
     handles.htmlOwner = htmlOwner;
 
     const modules = {
+      PerfSpanHelper: loadFresh("shared/widget-kits/perf/PerfSpanHelper.js"),
       ClusterKindCatalog: opts.catalogModule || loadFresh("cluster/rendering/ClusterKindCatalog.js"),
       CanvasDomSurfaceAdapter: { create: () => canvasAdapter },
       HtmlSurfaceController: { create: () => htmlOwner },

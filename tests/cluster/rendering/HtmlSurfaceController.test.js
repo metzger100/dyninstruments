@@ -2,7 +2,14 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 describe("HtmlSurfaceController", function () {
   function createModule() {
-    return loadFresh("cluster/rendering/HtmlSurfaceController.js").create({}, {});
+    return loadFresh("cluster/rendering/HtmlSurfaceController.js").create({}, {
+      getModule(id) {
+        if (id === "PerfSpanHelper") {
+          return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
+        }
+        throw new Error("unexpected module: " + id);
+      }
+    });
   }
 
   function makePayload(props, revision, shellEl) {

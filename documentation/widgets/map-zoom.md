@@ -17,6 +17,7 @@ Ownership split:
 - `MapMapper` maps zoom payload (`zoom`, `requiredZoom`, caption/unit defaults)
 - `MapZoomTextHtmlWidget` renders escaped HTML and named handler contract
 - `MapZoomHtmlFit` owns per-element caption/value/unit/required text fitting
+- `HtmlWidgetUtils` owns shared HTML utility helpers (`escapeHtml`, style attrs, shell/ratio helpers)
 - `HtmlSurfaceController` owns named-handler lifecycle
 - `TemporaryHostActionBridge` owns page-aware `hostActions.map.checkAutoZoom()` dispatch capability
 

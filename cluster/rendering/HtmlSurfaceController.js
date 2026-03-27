@@ -1,7 +1,7 @@
 /**
  * Module: HtmlSurfaceController - Strict html-surface lifecycle owner for attach/update/detach/destroy
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: none
+ * Depends: PerfSpanHelper
  */
 
 (function (root, factory) {
@@ -11,32 +11,10 @@
 }(this, function () {
   "use strict";
 
-  const GLOBAL_ROOT = (typeof globalThis !== "undefined")
-    ? globalThis
-    : (typeof self !== "undefined" ? self : {});
   const SURFACE_ID = "html";
   const SURFACE_CLASS = "dyni-surface-html";
   const PREBOUND_HANDLER_NAMES = "__dyniHtmlSurfacePreboundHandlers";
   const FORBIDDEN_HANDLER_NAME = "catchAll";
-  const PERF_HOOK_KEY = "__DYNI_PERF_HOOKS__";
-
-  function startPerfSpan(name, tags) {
-    const hooks = GLOBAL_ROOT[PERF_HOOK_KEY];
-    if (!hooks || typeof hooks.startSpan !== "function") {
-      return null;
-    }
-    return {
-      hooks: hooks,
-      token: hooks.startSpan(name, tags || null)
-    };
-  }
-
-  function endPerfSpan(span, tags) {
-    if (!span || !span.hooks || typeof span.hooks.endSpan !== "function") {
-      return;
-    }
-    span.hooks.endSpan(span.token, tags || null);
-  }
 
   function ensurePayload(methodName, payload) {
     if (!payload || typeof payload !== "object") {
@@ -173,6 +151,8 @@
   }
 
   function create(def, Helpers) {
+    const perf = Helpers.getModule("PerfSpanHelper").create(def, Helpers);
+
     function renderSurfaceShell(options) {
       const opts = options || {};
       const rendererSpec = opts.rendererSpec;
@@ -183,7 +163,7 @@
       ensureHostContext("renderSurfaceShell", hostContext);
       bindPreRenderHandlers(rendererSpec, props, hostContext);
 
-      const renderSpan = startPerfSpan("Renderer.renderHtml", {
+      const renderSpan = perf.startSpan("Renderer.renderHtml", {
         rendererId: rendererSpec.id || "unknown",
         cluster: props && props.cluster,
         kind: props && props.kind
@@ -193,7 +173,7 @@
         rendered = rendererSpec.renderHtml.call(hostContext, props);
       }
       finally {
-        endPerfSpan(renderSpan, {
+        perf.endSpan(renderSpan, {
           rendererId: rendererSpec.id || "unknown",
           cluster: props && props.cluster,
           kind: props && props.kind
@@ -241,7 +221,7 @@
       }
 
       function attach(payload) {
-        const span = startPerfSpan("HtmlSurfaceController.attach", {
+        const span = perf.startSpan("HtmlSurfaceController.attach", {
           rendererId: rendererSpec.id || "unknown",
           revision: payload && payload.revision
         });
@@ -267,7 +247,7 @@
           }
         }
         finally {
-          endPerfSpan(span, {
+          perf.endSpan(span, {
             rendererId: rendererSpec.id || "unknown",
             revision: payload && payload.revision
           });
@@ -275,7 +255,7 @@
       }
 
       function update(payload) {
-        const span = startPerfSpan("HtmlSurfaceController.update", {
+        const span = perf.startSpan("HtmlSurfaceController.update", {
           rendererId: rendererSpec.id || "unknown",
           revision: payload && payload.revision
         });
@@ -301,7 +281,7 @@
           };
         }
         finally {
-          endPerfSpan(span, {
+          perf.endSpan(span, {
             rendererId: rendererSpec.id || "unknown",
             revision: payload && payload.revision
           });

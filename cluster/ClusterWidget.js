@@ -1,40 +1,20 @@
 /**
  * Module: ClusterWidget - Cluster lifecycle orchestrator with deferred host commit and surface sessions
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ClusterMapperToolkit, ClusterRendererRouter, ClusterMapperRegistry, HostCommitController, SurfaceSessionController
+ * Depends: PerfSpanHelper, ClusterMapperToolkit, ClusterRendererRouter, ClusterMapperRegistry, HostCommitController, SurfaceSessionController
  */
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniClusterWidget = factory(); }
+ else { (root.DyniComponents = root.DyniComponents || {}).DyniClusterWidget = factory(); }
 }(this, function () {
   "use strict";
 
-  const GLOBAL_ROOT = (typeof globalThis !== "undefined")
-    ? globalThis
-    : (typeof self !== "undefined" ? self : {});
-  const PERF_HOOK_KEY = "__DYNI_PERF_HOOKS__";
-
-  function startPerfSpan(name, tags) {
-    const hooks = GLOBAL_ROOT[PERF_HOOK_KEY];
-    if (!hooks || typeof hooks.startSpan !== "function") {
-      return null;
-    }
-    return {
-      hooks: hooks,
-      token: hooks.startSpan(name, tags || null)
-    };
-  }
-
-  function endPerfSpan(span, tags) {
-    if (!span || !span.hooks || typeof span.hooks.endSpan !== "function") {
-      return;
-    }
-    span.hooks.endSpan(span.token, tags || null);
-  }
-
   function resolveRuntimeApi() {
+    const GLOBAL_ROOT = (typeof globalThis !== "undefined")
+      ? globalThis
+      : (typeof self !== "undefined" ? self : {});
     const ns = GLOBAL_ROOT.DyniPlugin;
     return ns && ns.runtime ? ns.runtime : null;
   }
@@ -47,6 +27,7 @@
 
   function create(def, Helpers) {
     const runtimeApi = resolveRuntimeApi();
+    const perf = Helpers.getModule("PerfSpanHelper").create(def, Helpers);
     ensureFactory(runtimeApi, "createHostCommitController");
     ensureFactory(runtimeApi, "createSurfaceSessionController");
 
@@ -98,7 +79,7 @@
 
     function translateFunction(props) {
       const routeProps = props || {};
-      const span = startPerfSpan("ClusterWidget.translateFunction", {
+      const span = perf.startSpan("ClusterWidget.translateFunction", {
         cluster: routeProps.cluster,
         kind: routeProps.kind
       });
@@ -106,7 +87,7 @@
         return mapperRegistry.mapCluster(routeProps, mapperToolkit.createToolkit);
       }
       finally {
-        endPerfSpan(span, {
+        perf.endSpan(span, {
           cluster: routeProps.cluster,
           kind: routeProps.kind
         });
@@ -120,7 +101,7 @@
     function renderHtml(props) {
       const ctx = this || {};
       const routeProps = props || {};
-      const span = startPerfSpan("ClusterWidget.renderHtml", {
+      const span = perf.startSpan("ClusterWidget.renderHtml", {
         cluster: routeProps.cluster,
         kind: routeProps.kind
       });
@@ -141,7 +122,7 @@
         return html;
       }
       finally {
-        endPerfSpan(span, {
+        perf.endSpan(span, {
           cluster: routeProps.cluster,
           kind: routeProps.kind
         });

@@ -25,6 +25,7 @@ describe("plugin.js bootstrap", function () {
     expect(dom.appendedScripts.length).toBeGreaterThan(10);
     expect(dom.appendedScripts[0].src).toBe("http://host/plugins/dyninstruments/runtime/namespace.js");
     const loadedScriptSrc = dom.appendedScripts.map((item) => item.src);
+    const perfHelperIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/PerfSpanHelper.js");
     const registrySharedFoundationIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-shared-foundation.js");
     const registrySharedEnginesIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-shared-engines.js");
     const registryWidgetsIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-widgets.js");
@@ -34,6 +35,8 @@ describe("plugin.js bootstrap", function () {
     const surfaceSessionIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/SurfaceSessionController.js");
     const initIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/init.js");
 
+    expect(perfHelperIndex).toBeGreaterThan(-1);
+    expect(perfHelperIndex).toBeLessThan(registrySharedFoundationIndex);
     expect(registrySharedFoundationIndex).toBeGreaterThan(-1);
     expect(registrySharedEnginesIndex).toBeGreaterThan(-1);
     expect(registryWidgetsIndex).toBeGreaterThan(-1);
@@ -50,6 +53,7 @@ describe("plugin.js bootstrap", function () {
     expect(surfaceSessionIndex).toBeLessThan(initIndex);
     expect(dom.appendedScripts[dom.appendedScripts.length - 1].src)
       .toBe("http://host/plugins/dyninstruments/runtime/init.js");
+    expect(typeof context.window.DyniPlugin.runtime.loadScriptOnce).toBe("function");
     expect(runInit).toHaveBeenCalledOnce();
   });
 

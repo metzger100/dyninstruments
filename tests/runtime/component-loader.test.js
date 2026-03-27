@@ -74,4 +74,33 @@ describe("runtime/component-loader.js", function () {
     const ids = loader.uniqueComponents([{ widget: "A" }, { widget: "A" }, { widget: "C" }]);
     expect(new Set(ids)).toEqual(new Set(["A", "B", "C"]));
   });
+
+  it("reuses runtime.loadScriptOnce when plugin bootstrap already provided it", async function () {
+    const dom = createDomHarness();
+    const runtimeLoadScriptOnce = vi.fn(() => Promise.resolve());
+    const context = createScriptContext({
+      document: dom.document,
+      DyniPlugin: {
+        runtime: {
+          loadScriptOnce: runtimeLoadScriptOnce
+        },
+        state: {},
+        config: { shared: {}, clusters: [] }
+      },
+      DyniComponents: {
+        DyniA: { id: "A", create() {} }
+      }
+    });
+
+    runIifeScript("runtime/component-loader.js", context);
+    const loader = context.DyniPlugin.runtime.createComponentLoader({
+      A: { js: "/a.js", css: undefined, globalKey: "DyniA" }
+    });
+
+    await loader.loadComponent("A");
+    await flushPromises();
+
+    expect(runtimeLoadScriptOnce).toHaveBeenCalledWith("dyni-js-A", "/a.js");
+    expect(dom.appendedScripts).toHaveLength(0);
+  });
 });

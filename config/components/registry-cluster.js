@@ -32,7 +32,7 @@
       js: BASE + "cluster/rendering/CanvasDomSurfaceAdapter.js",
       css: undefined,
       globalKey: "DyniCanvasDomSurfaceAdapter",
-      deps: ["ThemeResolver"]
+      deps: ["ThemeResolver", "PerfSpanHelper"]
     },
     ClusterKindCatalog: {
       js: BASE + "cluster/rendering/ClusterKindCatalog.js",
@@ -73,7 +73,8 @@
         "ActiveRouteTextHtmlWidget",
         "MapZoomTextHtmlWidget",
         "CenterDisplayTextWidget",
-        "RendererPropsWidget"
+        "RendererPropsWidget",
+        "PerfSpanHelper"
       ]
     },
     ClusterWidget: {
@@ -83,7 +84,8 @@
       deps: [
         "ClusterMapperToolkit",
         "ClusterRendererRouter",
-        "ClusterMapperRegistry"
+        "ClusterMapperRegistry",
+        "PerfSpanHelper"
       ]
     },
     CourseHeadingMapper: {
@@ -99,7 +101,8 @@
     HtmlSurfaceController: {
       js: BASE + "cluster/rendering/HtmlSurfaceController.js",
       css: undefined,
-      globalKey: "DyniHtmlSurfaceController"
+      globalKey: "DyniHtmlSurfaceController",
+      deps: ["PerfSpanHelper"]
     },
     NavMapper: {
       js: BASE + "cluster/mappers/NavMapper.js",

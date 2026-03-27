@@ -49,6 +49,10 @@
   }
 
   function createComponentLoader(components) {
+    const runtimeLoadScriptOnce = runtime && typeof runtime.loadScriptOnce === "function"
+      ? runtime.loadScriptOnce
+      : loadScriptOnce;
+
     // Invariant: components is the fully assembled registry from config/components.js.
     const registry = components;
     const loadCache = new Map();
@@ -72,7 +76,7 @@
         .then(function () {
           return Promise.all([
             loadCssOnce("dyni-css-" + id, m.css),
-            loadScriptOnce("dyni-js-" + id, m.js)
+            runtimeLoadScriptOnce("dyni-js-" + id, m.js)
           ]);
         })
         .then(function () {
@@ -113,6 +117,8 @@
   }
 
   runtime.loadCssOnce = loadCssOnce;
-  runtime.loadScriptOnce = loadScriptOnce;
+  runtime.loadScriptOnce = runtime && typeof runtime.loadScriptOnce === "function"
+    ? runtime.loadScriptOnce
+    : loadScriptOnce;
   runtime.createComponentLoader = createComponentLoader;
 }(this));

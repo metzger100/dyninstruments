@@ -22,7 +22,7 @@
       js: BASE + "shared/widget-kits/nav/ActiveRouteHtmlFit.js",
       css: undefined,
       globalKey: "DyniActiveRouteHtmlFit",
-      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout"]
+      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils"]
     },
     ActiveRouteLayout: {
       js: BASE + "shared/widget-kits/nav/ActiveRouteLayout.js",
@@ -34,7 +34,7 @@
       js: BASE + "shared/widget-kits/nav/MapZoomHtmlFit.js",
       css: undefined,
       globalKey: "DyniMapZoomHtmlFit",
-      deps: ["TextLayoutEngine"]
+      deps: ["TextLayoutEngine", "HtmlWidgetUtils"]
     },
     CanvasLayerCache: {
       js: BASE + "shared/widget-kits/canvas/CanvasLayerCache.js",
@@ -51,6 +51,11 @@
       js: BASE + "shared/widget-kits/nav/CenterDisplayMath.js",
       css: undefined,
       globalKey: "DyniCenterDisplayMath"
+    },
+    HtmlWidgetUtils: {
+      js: BASE + "shared/widget-kits/html/HtmlWidgetUtils.js",
+      css: undefined,
+      globalKey: "DyniHtmlWidgetUtils"
     },
     LayoutRectMath: {
       js: BASE + "shared/widget-kits/layout/LayoutRectMath.js",
@@ -77,6 +82,11 @@
       js: BASE + "shared/widget-kits/linear/LinearGaugeTextLayout.js",
       css: undefined,
       globalKey: "DyniLinearGaugeTextLayout"
+    },
+    PerfSpanHelper: {
+      js: BASE + "shared/widget-kits/perf/PerfSpanHelper.js",
+      css: undefined,
+      globalKey: "DyniPerfSpanHelper"
     },
     RadialAngleMath: {
       js: BASE + "shared/widget-kits/radial/RadialAngleMath.js",

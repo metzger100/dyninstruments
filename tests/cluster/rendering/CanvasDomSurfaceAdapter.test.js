@@ -132,6 +132,9 @@ describe("CanvasDomSurfaceAdapter", function () {
         if (id === "ThemeResolver") {
           return themeModule;
         }
+        if (id === "PerfSpanHelper") {
+          return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
+        }
         throw new Error("unexpected module: " + id);
       }
     };
@@ -205,8 +208,14 @@ describe("CanvasDomSurfaceAdapter", function () {
 
   it("renders a structurally stable shell markup", function () {
     const adapter = loadFresh("cluster/rendering/CanvasDomSurfaceAdapter.js").create({}, {
-      getModule() {
-        return { invalidateRoot: vi.fn(), invalidateAll: vi.fn() };
+      getModule(id) {
+        if (id === "ThemeResolver") {
+          return { invalidateRoot: vi.fn(), invalidateAll: vi.fn() };
+        }
+        if (id === "PerfSpanHelper") {
+          return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
+        }
+        throw new Error("unexpected module: " + id);
       }
     });
 
@@ -330,8 +339,14 @@ describe("CanvasDomSurfaceAdapter", function () {
 
   it("throws for strict non-compat contracts", function () {
     const adapter = loadFresh("cluster/rendering/CanvasDomSurfaceAdapter.js").create({}, {
-      getModule() {
-        return { invalidateRoot: vi.fn(), invalidateAll: vi.fn() };
+      getModule(id) {
+        if (id === "ThemeResolver") {
+          return { invalidateRoot: vi.fn(), invalidateAll: vi.fn() };
+        }
+        if (id === "PerfSpanHelper") {
+          return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
+        }
+        throw new Error("unexpected module: " + id);
       }
     });
 

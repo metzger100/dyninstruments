@@ -4,6 +4,7 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 describe("MapZoomTextHtmlWidget", function () {
   const MODULE_PATH_BY_ID = {
+    HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
     MapZoomHtmlFit: "shared/widget-kits/nav/MapZoomHtmlFit.js",
     TextLayoutEngine: "shared/widget-kits/text/TextLayoutEngine.js",
     RadialValueMath: "shared/widget-kits/radial/RadialValueMath.js",

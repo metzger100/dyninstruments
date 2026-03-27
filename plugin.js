@@ -44,10 +44,13 @@
   const BASE = getBaseUrl();
   const ns = window.DyniPlugin = window.DyniPlugin || {};
   ns.baseUrl = BASE;
+  ns.runtime = ns.runtime || {};
+  ns.runtime.loadScriptOnce = loadScriptOnce;
 
   // Invariant: this load order is authoritative for all internal namespace/config/runtime setup.
   const internalScripts = [
     "runtime/namespace.js",
+    "runtime/PerfSpanHelper.js",
     "runtime/helpers.js",
     "runtime/editable-defaults.js",
     "config/components/registry-shared-foundation.js",

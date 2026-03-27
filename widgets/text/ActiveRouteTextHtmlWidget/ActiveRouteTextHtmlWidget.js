@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteTextHtmlWidget - Interactive HTML renderer for nav active-route kind
  * Documentation: documentation/widgets/active-route.md
- * Depends: ActiveRouteHtmlFit
+ * Depends: ActiveRouteHtmlFit, HtmlWidgetUtils
  */
 
 (function (root, factory) {
@@ -15,29 +15,6 @@
   const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.2;
   const DEFAULT_RATIO_THRESHOLD_FLAT = 3.8;
 
-  const trimText = function (value) {
-    return (value == null) ? "" : String(value).trim();
-  };
-
-  const toFiniteNumber = function (value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
-  };
-
-  const escapeHtmlText = function (value) {
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  };
-
-  const toStyleAttr = function (style) {
-    const text = trimText(style);
-    return text ? (' style="' + text + '"') : "";
-  };
-
   const formatMetric = function (rawValue, formatter, formatterParameters, defaultText, Helpers) {
     const out = String(Helpers.applyFormatter(rawValue, {
       formatter: formatter,
@@ -47,15 +24,15 @@
     return out.trim() ? out : defaultText;
   };
 
-  const renderMetricTile = function (metricId, caption, value, unit, style, escapeHtmlText) {
+  const renderMetricTile = function (metricId, caption, value, unit, style, htmlUtils) {
     const valueStyle = style && typeof style.valueStyle === "string" ? style.valueStyle : "";
     const unitStyle = style && typeof style.unitStyle === "string" ? style.unitStyle : "";
     return ""
       + '<div class="dyni-active-route-metric dyni-active-route-metric-' + metricId + '">'
-      + '<div class="dyni-active-route-metric-caption">' + escapeHtmlText(caption) + "</div>"
+      + '<div class="dyni-active-route-metric-caption">' + htmlUtils.escapeHtml(caption) + "</div>"
       + '<div class="dyni-active-route-metric-value-row">'
-      + '<span class="dyni-active-route-metric-value"' + toStyleAttr(valueStyle) + ">" + escapeHtmlText(value) + "</span>"
-      + '<span class="dyni-active-route-metric-unit"' + toStyleAttr(unitStyle) + ">" + escapeHtmlText(unit) + "</span>"
+      + '<span class="dyni-active-route-metric-value"' + htmlUtils.toStyleAttr(valueStyle) + ">" + htmlUtils.escapeHtml(value) + "</span>"
+      + '<span class="dyni-active-route-metric-unit"' + htmlUtils.toStyleAttr(unitStyle) + ">" + htmlUtils.escapeHtml(unit) + "</span>"
       + "</div>"
       + "</div>";
   };
@@ -72,45 +49,23 @@
     };
   }
 
-  function resolveShellRectFromTarget(targetEl) {
-    if (!targetEl || typeof targetEl.getBoundingClientRect !== "function") {
-      return null;
-    }
-    const rect = targetEl.getBoundingClientRect();
-    const width = toFiniteNumber(rect && rect.width);
-    const height = toFiniteNumber(rect && rect.height);
-    if (!(width > 0) || !(height > 0)) {
-      return null;
-    }
-    return { width: width, height: height };
+  function resolveShellRectFromTarget(targetEl, hostContext, htmlUtils) {
+    return htmlUtils.resolveShellRect(hostContext, targetEl);
   }
 
-  function resolveShellRect(hostContext) {
-    return resolveShellRectFromTarget(resolveHostElements(hostContext).targetEl);
+  function resolveShellRect(hostContext, htmlUtils) {
+    return resolveShellRectFromTarget(resolveHostElements(hostContext).targetEl, hostContext, htmlUtils);
   }
 
-  function resolveMode(props, hostContext) {
+  function resolveMode(props, hostContext, htmlUtils) {
     const p = props || {};
-    const normalThresholdRaw = toFiniteNumber(p.ratioThresholdNormal);
-    const flatThresholdRaw = toFiniteNumber(p.ratioThresholdFlat);
-    const normalThreshold = typeof normalThresholdRaw === "number"
-      ? normalThresholdRaw
-      : DEFAULT_RATIO_THRESHOLD_NORMAL;
-    const flatThreshold = typeof flatThresholdRaw === "number"
-      ? flatThresholdRaw
-      : DEFAULT_RATIO_THRESHOLD_FLAT;
-    const rect = resolveShellRect(hostContext);
-    if (!rect) {
-      return "normal";
-    }
-    const ratio = rect.width / rect.height;
-    if (ratio < normalThreshold) {
-      return "high";
-    }
-    if (ratio > flatThreshold) {
-      return "flat";
-    }
-    return "normal";
+    return htmlUtils.resolveRatioMode({
+      ratioThresholdNormal: p.ratioThresholdNormal,
+      ratioThresholdFlat: p.ratioThresholdFlat,
+      defaultRatioThresholdNormal: DEFAULT_RATIO_THRESHOLD_NORMAL,
+      defaultRatioThresholdFlat: DEFAULT_RATIO_THRESHOLD_FLAT,
+      hostContext: hostContext
+    });
   }
 
   function ensureDisplayProps(props) {
@@ -147,14 +102,9 @@
     );
   }
 
-  function isEditingMode(props) {
-    const p = props && typeof props === "object" ? props : {};
-    return p.editing === true || p.dyniLayoutEditing === true;
-  }
-
-  function openActiveRoute(hostContext, props) {
+  function openActiveRoute(hostContext, props, htmlUtils) {
     const p = props && typeof props === "object" ? props : null;
-    if (isEditingMode(p)) {
+    if (htmlUtils.isEditingMode(p)) {
       return false;
     }
     if (!canDispatchOpenRoute(hostContext)) {
@@ -163,7 +113,7 @@
     return hostContext.hostActions.routeEditor.openActiveRoute() !== false;
   }
 
-  function buildRenderModel(props, Helpers, hostContext) {
+  function buildRenderModel(props, Helpers, hostContext, htmlUtils) {
     const p = ensureDisplayProps(props);
     const display = p.display;
     const captions = p.captions;
@@ -171,14 +121,14 @@
     const isApproaching = display.isApproaching === true;
     const disconnect = p.disconnect === true;
     const defaultText = String(p.default);
-    const routeNameText = trimText(p.routeName) || defaultText;
+    const routeNameText = htmlUtils.trimText(p.routeName) || defaultText;
 
-    const remainCaption = trimText(captions.remain);
-    const etaCaption = trimText(captions.eta);
-    const nextCourseCaption = trimText(captions.nextCourse);
-    const remainUnit = trimText(units.remain);
-    const etaUnit = trimText(units.eta);
-    const nextCourseUnit = trimText(units.nextCourse);
+    const remainCaption = htmlUtils.trimText(captions.remain);
+    const etaCaption = htmlUtils.trimText(captions.eta);
+    const nextCourseCaption = htmlUtils.trimText(captions.nextCourse);
+    const remainUnit = htmlUtils.trimText(units.remain);
+    const etaUnit = htmlUtils.trimText(units.eta);
+    const nextCourseUnit = htmlUtils.trimText(units.nextCourse);
 
     const remainText = formatMetric(
       disconnect ? undefined : display.remain,
@@ -203,8 +153,8 @@
         Helpers
       )
       : "";
-    const mode = resolveMode(p, hostContext);
-    const isEditing = isEditingMode(p);
+    const mode = resolveMode(p, hostContext, htmlUtils);
+    const isEditing = htmlUtils.isEditingMode(p);
     const dispatchOpenRoute = canDispatchOpenRoute(hostContext);
     const canOpenRoute = !isEditing && dispatchOpenRoute;
     const captureClicks = canOpenRoute;
@@ -231,19 +181,20 @@
 
   function create(def, Helpers) {
     const htmlFit = Helpers.getModule("ActiveRouteHtmlFit").create(def, Helpers);
+    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
 
     const namedHandlers = function (props, hostContext) {
       return {
         activeRouteOpen: function activeRouteOpenHandler() {
-          return openActiveRoute(hostContext, props);
+          return openActiveRoute(hostContext, props, htmlUtils);
         }
       };
     };
 
     const renderHtml = function (props) {
-      const model = buildRenderModel(props, Helpers, this);
+      const model = buildRenderModel(props, Helpers, this, htmlUtils);
       const elements = resolveHostElements(this);
-      const shellRect = resolveShellRectFromTarget(elements.targetEl);
+      const shellRect = resolveShellRectFromTarget(elements.targetEl, this, htmlUtils);
       const fitStyles = htmlFit.compute({
         model: model,
         hostContext: this,
@@ -270,7 +221,7 @@
         model.remainText,
         model.remainUnit,
         metricStyles.remain,
-        escapeHtmlText
+        htmlUtils
       );
       metricsHtml += renderMetricTile(
         "eta",
@@ -278,7 +229,7 @@
         model.etaText,
         model.etaUnit,
         metricStyles.eta,
-        escapeHtmlText
+        htmlUtils
       );
       if (model.isApproaching) {
         metricsHtml += renderMetricTile(
@@ -287,7 +238,7 @@
           model.nextCourseText,
           model.nextCourseUnit,
           metricStyles.next,
-          escapeHtmlText
+          htmlUtils
         );
       }
 
@@ -301,16 +252,16 @@
         + wrapperOnClickAttr
         + ">"
         + openHotspotHtml
-        + '<div class="dyni-active-route-route-name"' + toStyleAttr(routeNameStyle) + ">"
-        + escapeHtmlText(model.routeNameText)
+        + '<div class="dyni-active-route-route-name"' + htmlUtils.toStyleAttr(routeNameStyle) + ">"
+        + htmlUtils.escapeHtml(model.routeNameText)
         + "</div>"
         + '<div class="dyni-active-route-metrics">' + metricsHtml + "</div>"
         + "</div>";
     };
 
     const resizeSignature = function (props) {
-      const model = buildRenderModel(props, Helpers, this);
-      const rect = resolveShellRect(this);
+      const model = buildRenderModel(props, Helpers, this, htmlUtils);
+      const rect = resolveShellRect(this, htmlUtils);
       return [
         model.routeNameText.length,
         model.remainText.length,

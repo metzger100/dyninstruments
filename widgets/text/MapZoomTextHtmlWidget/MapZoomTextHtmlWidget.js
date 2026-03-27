@@ -1,7 +1,7 @@
 /**
  * Module: MapZoomTextHtmlWidget - Interactive HTML renderer for map zoom kind
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: Helpers.applyFormatter, MapZoomHtmlFit, hostActions.map.checkAutoZoom
+ * Depends: Helpers.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, hostActions.map.checkAutoZoom
  */
 
 (function (root, factory) {
@@ -18,29 +18,6 @@
   const MIN_CAPTION_UNIT_SCALE = 0.5;
   const MAX_CAPTION_UNIT_SCALE = 1.5;
 
-  const toFiniteNumber = function (value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
-  };
-
-  const trimText = function (value) {
-    return value == null ? "" : String(value).trim();
-  };
-
-  const escapeHtml = function (value) {
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  };
-
-  const toStyleAttr = function (style) {
-    const text = trimText(style);
-    return text ? (' style="' + text + '"') : "";
-  };
-
   function formatZoom(value, defaultText, Helpers) {
     const out = String(Helpers.applyFormatter(value, {
       formatter: "formatDecimalOpt",
@@ -50,47 +27,23 @@
     return out.trim() ? out : defaultText;
   }
 
-  function clampCaptionUnitScale(value) {
-    const scale = toFiniteNumber(value);
+  function clampCaptionUnitScale(value, htmlUtils) {
+    const scale = htmlUtils.toFiniteNumber(value);
     if (typeof scale !== "number") {
       return DEFAULT_CAPTION_UNIT_SCALE;
     }
     return Math.max(MIN_CAPTION_UNIT_SCALE, Math.min(MAX_CAPTION_UNIT_SCALE, scale));
   }
 
-  function resolveShellRect(hostContext) {
-    const commit = hostContext && hostContext.__dyniHostCommitState;
-    const target = commit && (commit.shellEl || commit.rootEl);
-    if (!target || typeof target.getBoundingClientRect !== "function") {
-      return null;
-    }
-    const rect = target.getBoundingClientRect();
-    const width = toFiniteNumber(rect && rect.width);
-    const height = toFiniteNumber(rect && rect.height);
-    if (!(width > 0) || !(height > 0)) {
-      return null;
-    }
-    return { width: width, height: height };
-  }
-
-  function resolveMode(props, hostContext) {
+  function resolveMode(props, hostContext, htmlUtils) {
     const p = props || {};
-    const normal = toFiniteNumber(p.ratioThresholdNormal);
-    const flat = toFiniteNumber(p.ratioThresholdFlat);
-    const normalThreshold = typeof normal === "number" ? normal : DEFAULT_RATIO_THRESHOLD_NORMAL;
-    const flatThreshold = typeof flat === "number" ? flat : DEFAULT_RATIO_THRESHOLD_FLAT;
-    const rect = resolveShellRect(hostContext);
-    if (!rect) {
-      return "normal";
-    }
-    const ratio = rect.width / rect.height;
-    if (ratio < normalThreshold) {
-      return "high";
-    }
-    if (ratio > flatThreshold) {
-      return "flat";
-    }
-    return "normal";
+    return htmlUtils.resolveRatioMode({
+      ratioThresholdNormal: p.ratioThresholdNormal,
+      ratioThresholdFlat: p.ratioThresholdFlat,
+      defaultRatioThresholdNormal: DEFAULT_RATIO_THRESHOLD_NORMAL,
+      defaultRatioThresholdFlat: DEFAULT_RATIO_THRESHOLD_FLAT,
+      hostContext: hostContext
+    });
   }
 
   function resolveDisplayMode(baseMode, caption, unit) {
@@ -119,14 +72,9 @@
     );
   }
 
-  function isEditingMode(props) {
+  function dispatchCheckAutoZoom(hostContext, props, htmlUtils) {
     const p = props || {};
-    return p.editing === true || p.dyniLayoutEditing === true;
-  }
-
-  function dispatchCheckAutoZoom(hostContext, props) {
-    const p = props || {};
-    if (isEditingMode(p)) {
+    if (htmlUtils.isEditingMode(p)) {
       return false;
     }
     if (!canDispatchCheckAutoZoom(hostContext)) {
@@ -143,14 +91,14 @@
     return p;
   }
 
-  function renderMainRows(model) {
+  function renderMainRows(model, htmlUtils) {
     if (model.mode === "flat") {
       return ""
         + '<div class="dyni-map-zoom-main dyni-map-zoom-main-flat">'
         + '<div class="dyni-map-zoom-inline-row">'
-        + '<span class="dyni-map-zoom-caption"' + toStyleAttr(model.captionStyle) + ">" + escapeHtml(model.caption) + "</span>"
-        + '<span class="dyni-map-zoom-value"' + toStyleAttr(model.valueStyle) + ">" + escapeHtml(model.zoomText) + "</span>"
-        + '<span class="dyni-map-zoom-unit"' + toStyleAttr(model.unitStyle) + ">" + escapeHtml(model.unit) + "</span>"
+        + '<span class="dyni-map-zoom-caption"' + htmlUtils.toStyleAttr(model.captionStyle) + ">" + htmlUtils.escapeHtml(model.caption) + "</span>"
+        + '<span class="dyni-map-zoom-value"' + htmlUtils.toStyleAttr(model.valueStyle) + ">" + htmlUtils.escapeHtml(model.zoomText) + "</span>"
+        + '<span class="dyni-map-zoom-unit"' + htmlUtils.toStyleAttr(model.unitStyle) + ">" + htmlUtils.escapeHtml(model.unit) + "</span>"
         + "</div>"
         + "</div>";
     }
@@ -158,46 +106,47 @@
       return ""
         + '<div class="dyni-map-zoom-main dyni-map-zoom-main-high">'
         + '<div class="dyni-map-zoom-caption-row">'
-        + '<span class="dyni-map-zoom-caption"' + toStyleAttr(model.captionStyle) + ">" + escapeHtml(model.caption) + "</span>"
+        + '<span class="dyni-map-zoom-caption"' + htmlUtils.toStyleAttr(model.captionStyle) + ">" + htmlUtils.escapeHtml(model.caption) + "</span>"
         + "</div>"
         + '<div class="dyni-map-zoom-value-row">'
-        + '<span class="dyni-map-zoom-value"' + toStyleAttr(model.valueStyle) + ">" + escapeHtml(model.zoomText) + "</span>"
+        + '<span class="dyni-map-zoom-value"' + htmlUtils.toStyleAttr(model.valueStyle) + ">" + htmlUtils.escapeHtml(model.zoomText) + "</span>"
         + "</div>"
         + '<div class="dyni-map-zoom-unit-row">'
-        + '<span class="dyni-map-zoom-unit"' + toStyleAttr(model.unitStyle) + ">" + escapeHtml(model.unit) + "</span>"
+        + '<span class="dyni-map-zoom-unit"' + htmlUtils.toStyleAttr(model.unitStyle) + ">" + htmlUtils.escapeHtml(model.unit) + "</span>"
         + "</div>"
         + "</div>";
     }
     return ""
       + '<div class="dyni-map-zoom-main dyni-map-zoom-main-normal">'
       + '<div class="dyni-map-zoom-value-row">'
-      + '<span class="dyni-map-zoom-value"' + toStyleAttr(model.valueStyle) + ">" + escapeHtml(model.zoomText) + "</span>"
-      + '<span class="dyni-map-zoom-unit"' + toStyleAttr(model.unitStyle) + ">" + escapeHtml(model.unit) + "</span>"
+      + '<span class="dyni-map-zoom-value"' + htmlUtils.toStyleAttr(model.valueStyle) + ">" + htmlUtils.escapeHtml(model.zoomText) + "</span>"
+      + '<span class="dyni-map-zoom-unit"' + htmlUtils.toStyleAttr(model.unitStyle) + ">" + htmlUtils.escapeHtml(model.unit) + "</span>"
       + "</div>"
       + '<div class="dyni-map-zoom-caption-row">'
-      + '<span class="dyni-map-zoom-caption"' + toStyleAttr(model.captionStyle) + ">" + escapeHtml(model.caption) + "</span>"
+      + '<span class="dyni-map-zoom-caption"' + htmlUtils.toStyleAttr(model.captionStyle) + ">" + htmlUtils.escapeHtml(model.caption) + "</span>"
       + "</div>"
       + "</div>";
   }
 
   function create(def, Helpers) {
     const htmlFit = Helpers.getModule("MapZoomHtmlFit").create(def, Helpers);
+    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
 
     function buildModel(props, hostContext) {
       const p = ensureProps(props);
       const defaultText = String(p.default);
-      const caption = trimText(p.caption);
-      const unit = trimText(p.unit);
-      const ratioMode = resolveMode(p, hostContext);
+      const caption = htmlUtils.trimText(p.caption);
+      const unit = htmlUtils.trimText(p.unit);
+      const ratioMode = resolveMode(p, hostContext, htmlUtils);
       const mode = resolveDisplayMode(ratioMode, caption, unit);
-      const zoomNumber = toFiniteNumber(p.zoom);
-      const requiredZoomNumber = toFiniteNumber(p.requiredZoom);
+      const zoomNumber = htmlUtils.toFiniteNumber(p.zoom);
+      const requiredZoomNumber = htmlUtils.toFiniteNumber(p.requiredZoom);
       const zoomText = formatZoom(zoomNumber, defaultText, Helpers);
       const requiredText = formatZoom(requiredZoomNumber, defaultText, Helpers);
       const showRequired = typeof requiredZoomNumber === "number" && requiredZoomNumber !== zoomNumber;
-      const isEditing = isEditingMode(p);
+      const isEditing = htmlUtils.isEditingMode(p);
       const canDispatch = !isEditing && canDispatchCheckAutoZoom(hostContext);
-      const captionUnitScale = clampCaptionUnitScale(p.captionUnitScale);
+      const captionUnitScale = clampCaptionUnitScale(p.captionUnitScale, htmlUtils);
 
       const modelBase = {
         mode: mode,
@@ -212,7 +161,7 @@
       const fitStyles = htmlFit.compute({
         model: modelBase,
         hostContext: hostContext,
-        shellRect: resolveShellRect(hostContext)
+        shellRect: htmlUtils.resolveShellRect(hostContext)
       });
 
       return {
@@ -234,7 +183,7 @@
     const namedHandlers = function (props, hostContext) {
       return {
         mapZoomCheckAutoZoom: function mapZoomCheckAutoZoomHandler() {
-          return dispatchCheckAutoZoom(hostContext, props);
+          return dispatchCheckAutoZoom(hostContext, props, htmlUtils);
         }
       };
     };
@@ -255,21 +204,21 @@
         ? ('<div class="dyni-map-zoom-open-hotspot" onclick="' + CHECK_AUTO_ZOOM_HANDLER_NAME + '"></div>')
         : "";
       const requiredHtml = model.showRequired
-        ? ('<div class="dyni-map-zoom-required"' + toStyleAttr(model.requiredStyle) + ">" + escapeHtml(model.requiredText) + "</div>")
+        ? ('<div class="dyni-map-zoom-required"' + htmlUtils.toStyleAttr(model.requiredStyle) + ">" + htmlUtils.escapeHtml(model.requiredText) + "</div>")
         : "";
       const scaleStyle = ' style="--dyni-map-zoom-sec-scale:' + model.captionUnitScale + ';"';
 
       return ""
         + '<div class="' + classes.join(" ") + '"' + scaleStyle + wrapperOnClickAttr + ">"
         + hotspotHtml
-        + renderMainRows(model)
+        + renderMainRows(model, htmlUtils)
         + requiredHtml
         + "</div>";
     };
 
     const resizeSignature = function (props) {
       const model = buildModel(props, this);
-      const rect = resolveShellRect(this);
+      const rect = htmlUtils.resolveShellRect(this);
       return [
         model.caption.length,
         model.zoomText.length,

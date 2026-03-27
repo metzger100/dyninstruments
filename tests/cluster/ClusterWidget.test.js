@@ -132,6 +132,7 @@ describe("ClusterWidget", function () {
 
     const Helpers = {
       getModule(id) {
+        if (id === "PerfSpanHelper") return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
         if (id === "ClusterMapperToolkit") return { create: () => ({ createToolkit }) };
         if (id === "ClusterMapperRegistry") return { create: () => ({ mapCluster }) };
         if (id === "ClusterRendererRouter") {
@@ -222,6 +223,7 @@ describe("ClusterWidget", function () {
 
     const Helpers = {
       getModule(id) {
+        if (id === "PerfSpanHelper") return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
         if (id === "ClusterMapperToolkit") return { create: () => ({ createToolkit: vi.fn() }) };
         if (id === "ClusterMapperRegistry") return { create: () => ({ mapCluster: vi.fn(() => ({})) }) };
         if (id === "ClusterRendererRouter") {

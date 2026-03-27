@@ -9,9 +9,11 @@ dyninstruments uses a custom runtime component loader. Components are UMD-wrappe
 Ownership split:
 
 - `plugin.js` bootstraps internal scripts (`runtime/*`, `config/*`) in fixed order
+- `plugin.js` exposes canonical `runtime.loadScriptOnce(id, src)` before internal script bootstrap
 - `config/components/registry-*.js` define domain-specific component registry fragments
 - `config/components.js` fail-closed assembles fragments into `config.components`
 - `runtime/component-loader.js` resolves dependencies and injects component JS/CSS
+- `runtime/PerfSpanHelper.js` exposes runtime perf-span API for runtime IIFE modules
 - `runtime/HostCommitController.js` provides deferred commit scheduling for HTML-shell mounting
 - `runtime/SurfaceSessionController.js` owns per-instance `html`/`canvas-dom` lifecycle state
 
@@ -41,12 +43,15 @@ The final assembled map still uses the same component ID -> `{ js, css, globalKe
 `ClusterRendererRouter` depends on kind/surface routing owners plus renderer components used at runtime.
 `ThemeResolver` is a shared plugin-wide token resolver used by both gauge and text rendering paths.
 `ThemePresets` is a shared runtime preset applier that sets `data-dyni-theme` on container roots.
+`PerfSpanHelper` is a shared UMD owner for perf-span start/end behavior used by cluster UMD consumers.
+`HtmlWidgetUtils` is a shared UMD owner for HTML-widget utility helpers (`escapeHtml`, `toStyleAttr`, ratio/shell helpers).
 Dedicated nav renderers may also depend on shared layout-owner modules that consume `ResponsiveScaleProfile`.
 
 ## Dependency Graph
 
 ```text
 ClusterWidget
+├── PerfSpanHelper
 ├── ClusterMapperToolkit
 │   └── RadialAngleMath
 ├── ClusterMapperRegistry
@@ -59,9 +64,13 @@ ClusterWidget
 │   ├── AnchorMapper
 │   └── VesselMapper
 └── ClusterRendererRouter
+    ├── PerfSpanHelper
     ├── ClusterKindCatalog
     ├── CanvasDomSurfaceAdapter
+    │   ├── ThemeResolver
+    │   └── PerfSpanHelper
     ├── HtmlSurfaceController
+    │   └── PerfSpanHelper
     ├── ThreeValueTextWidget
     │   ├── ThemeResolver
     │   └── TextLayoutEngine
@@ -69,13 +78,18 @@ ClusterWidget
     │   ├── ThemeResolver
     │   └── TextLayoutEngine
     ├── ActiveRouteTextHtmlWidget
-    │   └── ActiveRouteHtmlFit
-    │       ├── ThemeResolver
-    │       ├── RadialTextLayout
-    │       ├── TextTileLayout
-    │       └── ActiveRouteLayout
-    │           └── ResponsiveScaleProfile
+    │   ├── ActiveRouteHtmlFit
+    │   │   ├── ThemeResolver
+    │   │   ├── RadialTextLayout
+    │   │   ├── TextTileLayout
+    │   │   └── ActiveRouteLayout
+    │   │       └── ResponsiveScaleProfile
+    │   └── HtmlWidgetUtils
     ├── MapZoomTextHtmlWidget
+    │   ├── MapZoomHtmlFit
+    │   │   ├── TextLayoutEngine
+    │   │   └── HtmlWidgetUtils
+    │   └── HtmlWidgetUtils
     ├── RendererPropsWidget
     │   ├── WindRadialWidget
     │   ├── CompassRadialWidget
@@ -117,6 +131,12 @@ TextLayoutEngine
 
 runtime/init.js (explicit load)
   └── ThemePresets
+
+runtime/HostCommitController.js
+  └── runtime/PerfSpanHelper.js API (`runtime.getPerfSpanApi()`)
+
+runtime/SurfaceSessionController.js
+  └── runtime/PerfSpanHelper.js API (`runtime.getPerfSpanApi()`)
 ```
 
 `PositionCoordinateWidget` no longer depends on `ThreeValueTextWidget`; widget-to-widget coupling has been removed from the dependency graph.

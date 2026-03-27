@@ -110,6 +110,7 @@ describe("runtime/HostCommitController.js", function () {
       }
     });
 
+    runIifeScript("runtime/PerfSpanHelper.js", context);
     runIifeScript("runtime/HostCommitController.js", context);
 
     function runNextRaf() {
