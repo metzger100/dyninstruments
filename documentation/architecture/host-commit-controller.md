@@ -23,6 +23,7 @@
 - Stale guard: scheduled commit revision must equal current `renderRevision`
 - Dedup: repeated `scheduleCommit()` for the same revision is a no-op
 - Cleanup always tears down pending rAF/observer/timeout handles
+- `getState()` uses snapshot memoization: repeated reads return the same object reference until controller state mutates
 
 ## API/Interfaces
 
@@ -50,6 +51,11 @@ controller.getState();
 ### State Shape (`getState`)
 
 `instanceId`, `renderRevision`, `mountedRevision`, `lastProps`, `rootEl`, `shellEl`, `scheduledRevision`, `rafHandle`, `observer`, `timeoutHandle`, `commitPending`
+
+Snapshot semantics:
+
+- reference is stable across repeated reads while state is unchanged
+- a new snapshot object is created after each meaningful state mutation boundary (`recordRender`, scheduling, commit resolution, cleanup/reset, async-handle teardown)
 
 ### `onCommit(payload)` Shape
 

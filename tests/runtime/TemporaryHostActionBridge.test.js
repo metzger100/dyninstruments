@@ -15,6 +15,9 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     const opts = options || {};
     const pageRoots = opts.pageRoots || {};
     const routePointsActivate = opts.routePointsActivate || vi.fn(() => true);
+    const getElementById = vi.fn(function (id) {
+      return Object.prototype.hasOwnProperty.call(pageRoots, id) ? pageRoots[id] : null;
+    });
     const context = createScriptContext({
       DyniPlugin: {
         runtime: {},
@@ -29,9 +32,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
         }
       },
       document: {
-        getElementById(id) {
-          return Object.prototype.hasOwnProperty.call(pageRoots, id) ? pageRoots[id] : null;
-        }
+        getElementById: getElementById
       }
     });
 
@@ -39,7 +40,8 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     return {
       context,
       bridge: context.DyniPlugin.runtime.createTemporaryHostActionBridge(),
-      routePointsActivate
+      routePointsActivate,
+      getElementById
     };
   }
 
@@ -95,6 +97,79 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       routeEditor: { openActiveRoute: "unsupported", openEditRoute: "unsupported" },
       ais: { showInfo: "unsupported" }
     });
+  });
+
+  it("memoizes and freezes capability snapshots until page or relay inputs change", function () {
+    const pageRoots = { gpspage: makeElement() };
+    const { bridge, context } = createBridgeContext({ pageRoots: pageRoots });
+    const hostActions = bridge.getHostActions();
+    const first = hostActions.getCapabilities();
+    const second = hostActions.getCapabilities();
+
+    expect(first).toBe(second);
+    expect(Object.isFrozen(first)).toBe(true);
+    expect(Object.isFrozen(first.routePoints)).toBe(true);
+    expect(Object.isFrozen(first.routeEditor)).toBe(true);
+    expect(first.pageId).toBe("gpspage");
+    expect(first.routePoints.activate).toBe("dispatch");
+
+    context.avnav.api.routePoints = {};
+    const relayChanged = hostActions.getCapabilities();
+    expect(relayChanged).not.toBe(first);
+    expect(relayChanged.routePoints.activate).toBe("unsupported");
+
+    delete pageRoots.gpspage;
+    pageRoots.navpage = makeElement();
+    const pageChanged = hostActions.getCapabilities();
+    expect(pageChanged).not.toBe(relayChanged);
+    expect(pageChanged.pageId).toBe("navpage");
+  });
+
+  it("updates capabilities and dispatch behavior when the same bridge sees a page change", function () {
+    const navHandler = vi.fn();
+    const gpsHandler = vi.fn();
+    const pageRoots = {
+      navpage: makeElement({
+        __reactFiber$nav: { memoizedProps: { onItemClick: navHandler }, return: null }
+      })
+    };
+    const { bridge } = createBridgeContext({ pageRoots: pageRoots });
+    const hostActions = bridge.getHostActions();
+
+    expect(hostActions.getCapabilities().pageId).toBe("navpage");
+    expect(hostActions.map.checkAutoZoom()).toBe(true);
+    expect(navHandler).toHaveBeenCalledTimes(1);
+
+    delete pageRoots.navpage;
+    pageRoots.gpspage = makeElement({
+      __reactFiber$gps: { memoizedProps: { onItemClick: gpsHandler }, return: null }
+    });
+
+    const gpsCapabilities = hostActions.getCapabilities();
+    expect(gpsCapabilities.pageId).toBe("gpspage");
+    expect(gpsCapabilities.map.checkAutoZoom).toBe("unsupported");
+    expect(gpsCapabilities.ais.showInfo).toBe("dispatch");
+    expect(hostActions.map.checkAutoZoom()).toBe(false);
+    expect(hostActions.ais.showInfo("123")).toBe(true);
+    expect(gpsHandler).toHaveBeenCalledTimes(1);
+  });
+
+  it("resolves capabilities once per dispatch path instead of recomputing twice", function () {
+    const navHandler = vi.fn();
+    const navRoot = makeElement({
+      __reactFiber$nav: { memoizedProps: { onItemClick: navHandler }, return: null }
+    });
+    const { bridge, getElementById } = createBridgeContext({ pageRoots: { navpage: navRoot } });
+
+    getElementById.mockClear();
+    expect(bridge.getHostActions().map.checkAutoZoom()).toBe(true);
+    expect(navHandler).toHaveBeenCalledTimes(1);
+    expect(getElementById.mock.calls.map((call) => call[0])).toEqual([
+      "editroutepage",
+      "gpspage",
+      "navpage",
+      "navpage"
+    ]);
   });
 
   it("delegates routePoints.activate through avnav.api and returns false only for unsupported pages", function () {

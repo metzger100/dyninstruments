@@ -113,6 +113,8 @@ Contract summary:
   - `hostActions.routeEditor.openActiveRoute()`
   - `hostActions.routeEditor.openEditRoute()`
   - `hostActions.ais.showInfo(mmsi)`
+- `hostActions.getCapabilities()` returns a memoized capability snapshot and refreshes it when page identity or route-points relay availability changes
+- capability snapshots are frozen (`Object.freeze`) to keep bridge-owned state immutable for consumers
 - `runtime/init.js` owns bridge creation before widget registration; helper/runtime code treats that as an internal contract
 - widgets may also read the same facade from `this.hostActions` because `runtime/widget-registrar.js` injects it before lifecycle/render callbacks
 - all host DOM / `window.avnav` coupling stays inside the runtime bridge; widget and cluster code must not reach around this helper

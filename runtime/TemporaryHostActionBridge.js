@@ -144,6 +144,8 @@
     const doc = rootRef.document;
     let destroyed = false;
     let cachedFacade = null;
+    let cachedCapabilitiesKey = null;
+    let cachedCapabilitiesSnapshot = null;
 
     function ensureActive() {
       if (destroyed) {
@@ -155,12 +157,27 @@
       return rootRef.avnav && rootRef.avnav.api && rootRef.avnav.api.routePoints;
     }
 
-    function computeCapabilities() {
-      const pageId = detectPageId(doc);
-      const routePointsApi = getRoutePointsApi();
-      const hasRoutePointsRelay = !!(routePointsApi && typeof routePointsApi.activate === "function");
+    function freezeCapabilitiesSnapshot(snapshot) {
+      if (!snapshot || typeof snapshot !== "object") {
+        return snapshot;
+      }
+      if (snapshot.routePoints) {
+        Object.freeze(snapshot.routePoints);
+      }
+      if (snapshot.map) {
+        Object.freeze(snapshot.map);
+      }
+      if (snapshot.routeEditor) {
+        Object.freeze(snapshot.routeEditor);
+      }
+      if (snapshot.ais) {
+        Object.freeze(snapshot.ais);
+      }
+      return Object.freeze(snapshot);
+    }
 
-      return {
+    function buildCapabilitiesSnapshot(pageId, hasRoutePointsRelay) {
+      return freezeCapabilitiesSnapshot({
         pageId: pageId,
         routePoints: {
           activate: (hasRoutePointsRelay && (pageId === "gpspage" || pageId === "editroutepage"))
@@ -179,14 +196,26 @@
         ais: {
           showInfo: (pageId === "navpage" || pageId === "gpspage") ? "dispatch" : "unsupported"
         }
-      };
+      });
     }
 
-    function dispatchViaPageItemClick(actionName, avnavData) {
-      const capabilities = computeCapabilities();
-      const handler = findPageItemClickHandler(capabilities.pageId, doc);
+    function resolveCapabilities() {
+      const pageId = detectPageId(doc);
+      const routePointsApi = getRoutePointsApi();
+      const hasRoutePointsRelay = !!(routePointsApi && typeof routePointsApi.activate === "function");
+      const cacheKey = pageId + "|" + (hasRoutePointsRelay ? "1" : "0");
+      if (cacheKey === cachedCapabilitiesKey && cachedCapabilitiesSnapshot) {
+        return cachedCapabilitiesSnapshot;
+      }
+      cachedCapabilitiesKey = cacheKey;
+      cachedCapabilitiesSnapshot = buildCapabilitiesSnapshot(pageId, hasRoutePointsRelay);
+      return cachedCapabilitiesSnapshot;
+    }
+
+    function dispatchViaPageItemClick(actionName, pageId, avnavData) {
+      const handler = findPageItemClickHandler(pageId, doc);
       if (typeof handler !== "function") {
-        throw createBridgeError(actionName + " missing host onItemClick handler on " + capabilities.pageId);
+        throw createBridgeError(actionName + " missing host onItemClick handler on " + pageId);
       }
       handler(createSyntheticEvent(avnavData));
       return true;
@@ -195,12 +224,12 @@
     cachedFacade = {
       getCapabilities: function () {
         ensureActive();
-        return computeCapabilities();
+        return resolveCapabilities();
       },
       routePoints: {
         activate: function (index) {
           ensureActive();
-          const capabilities = computeCapabilities();
+          const capabilities = resolveCapabilities();
           if (capabilities.routePoints.activate !== "dispatch") {
             return false;
           }
@@ -220,12 +249,12 @@
       map: {
         checkAutoZoom: function () {
           ensureActive();
-          const capabilities = computeCapabilities();
+          const capabilities = resolveCapabilities();
           if (capabilities.map.checkAutoZoom !== "dispatch") {
             return false;
           }
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native Zoom dispatch until core exposes map actions.
-          return dispatchViaPageItemClick("map.checkAutoZoom", {
+          return dispatchViaPageItemClick("map.checkAutoZoom", capabilities.pageId, {
             item: { name: "Zoom" }
           });
         }
@@ -233,23 +262,23 @@
       routeEditor: {
         openActiveRoute: function () {
           ensureActive();
-          const capabilities = computeCapabilities();
+          const capabilities = resolveCapabilities();
           if (capabilities.routeEditor.openActiveRoute !== "dispatch") {
             return false;
           }
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native ActiveRoute dispatch until core exposes routeEditor actions.
-          return dispatchViaPageItemClick("routeEditor.openActiveRoute", {
+          return dispatchViaPageItemClick("routeEditor.openActiveRoute", capabilities.pageId, {
             item: { name: "ActiveRoute" }
           });
         },
         openEditRoute: function () {
           ensureActive();
-          const capabilities = computeCapabilities();
+          const capabilities = resolveCapabilities();
           if (capabilities.routeEditor.openEditRoute !== "dispatch") {
             return false;
           }
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native EditRoute dialog dispatch until core exposes routeEditor actions.
-          return dispatchViaPageItemClick("routeEditor.openEditRoute", {
+          return dispatchViaPageItemClick("routeEditor.openEditRoute", capabilities.pageId, {
             item: { name: "EditRoute" }
           });
         }
@@ -257,13 +286,13 @@
       ais: {
         showInfo: function (mmsi) {
           ensureActive();
-          const capabilities = computeCapabilities();
+          const capabilities = resolveCapabilities();
           if (capabilities.ais.showInfo !== "dispatch") {
             return false;
           }
           const normalizedMmsi = normalizeMmsi(mmsi);
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native AIS info dispatch until core exposes AIS actions.
-          return dispatchViaPageItemClick("ais.showInfo", {
+          return dispatchViaPageItemClick("ais.showInfo", capabilities.pageId, {
             item: { name: "AisTarget" },
             mmsi: normalizedMmsi
           });
@@ -278,6 +307,8 @@
       },
       destroy: function () {
         destroyed = true;
+        cachedCapabilitiesKey = null;
+        cachedCapabilitiesSnapshot = null;
         cachedFacade = null;
       }
     };

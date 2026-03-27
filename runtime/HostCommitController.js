@@ -67,10 +67,27 @@
       : root.MutationObserver;
 
     let state = createState(nextInstanceId(instancePrefix));
+    let stateSnapshot = null;
+    let stateSnapshotDirty = true;
     let pendingWaitSpanToken = null;
 
+    function markStateSnapshotDirty() {
+      stateSnapshotDirty = true;
+    }
+
+    function setStateField(key, value) {
+      if (state[key] === value) {
+        return;
+      }
+      state[key] = value;
+      markStateSnapshotDirty();
+    }
+
     function getState() {
-      return {
+      if (!stateSnapshotDirty && stateSnapshot) {
+        return stateSnapshot;
+      }
+      stateSnapshot = {
         instanceId: state.instanceId,
         renderRevision: state.renderRevision,
         mountedRevision: state.mountedRevision,
@@ -83,6 +100,8 @@
         timeoutHandle: state.timeoutHandle,
         commitPending: state.commitPending
       };
+      stateSnapshotDirty = false;
+      return stateSnapshot;
     }
 
     function clearRafHandle() {
@@ -90,7 +109,7 @@
         return;
       }
       cancelFrame(state.rafHandle);
-      state.rafHandle = null;
+      setStateField("rafHandle", null);
     }
 
     function clearObserver() {
@@ -98,7 +117,7 @@
         return;
       }
       state.observer.disconnect();
-      state.observer = null;
+      setStateField("observer", null);
     }
 
     function clearTimeoutHandle() {
@@ -106,7 +125,7 @@
         return;
       }
       clearTimer(state.timeoutHandle);
-      state.timeoutHandle = null;
+      setStateField("timeoutHandle", null);
     }
 
     function clearAsyncHandles() {
@@ -120,8 +139,8 @@
         perf.endSpan(pendingWaitSpanToken, tags || null);
       }
       pendingWaitSpanToken = null;
-      state.commitPending = false;
-      state.scheduledRevision = null;
+      setStateField("commitPending", false);
+      setStateField("scheduledRevision", null);
     }
 
     function resolveShellElement() {
@@ -172,9 +191,9 @@
       }
 
       clearAsyncHandles();
-      state.shellEl = shellEl;
-      state.rootEl = rootEl;
-      state.mountedRevision = targetRevision;
+      setStateField("shellEl", shellEl);
+      setStateField("rootEl", rootEl);
+      setStateField("mountedRevision", targetRevision);
       clearPendingState({
         status: "committed",
         waitStage: waitStage || "unknown",
@@ -197,31 +216,32 @@
 
     function installDeferredObservers(targetRevision, callbacks) {
       if (!MutationObserverCtor || typeof MutationObserverCtor !== "function") {
-          state.timeoutHandle = setTimer(function () {
-            commitIfReady(targetRevision, callbacks, "timeout");
-          }, 0);
-          return;
-        }
+        setStateField("timeoutHandle", setTimer(function () {
+          commitIfReady(targetRevision, callbacks, "timeout");
+        }, 0));
+        return;
+      }
 
       if (!state.observer) {
-        state.observer = new MutationObserverCtor(function () {
+        const observer = new MutationObserverCtor(function () {
           commitIfReady(targetRevision, callbacks, "mutation-observer");
         });
+        setStateField("observer", observer);
         if (doc && doc.body) {
-          state.observer.observe(doc.body, { childList: true, subtree: true });
+          observer.observe(doc.body, { childList: true, subtree: true });
         }
       }
 
       if (state.timeoutHandle == null) {
-        state.timeoutHandle = setTimer(function () {
+        setStateField("timeoutHandle", setTimer(function () {
           commitIfReady(targetRevision, callbacks, "timeout");
-        }, 0);
+        }, 0));
       }
     }
 
     function scheduleRafAttempt(targetRevision, callbacks, attempt) {
-      state.rafHandle = requestFrame(function () {
-        state.rafHandle = null;
+      setStateField("rafHandle", requestFrame(function () {
+        setStateField("rafHandle", null);
 
         if (commitIfReady(targetRevision, callbacks, attempt === 1 ? "raf-1" : "raf-2")) {
           return;
@@ -233,19 +253,20 @@
         }
 
         installDeferredObservers(targetRevision, callbacks);
-      });
+      }));
     }
 
     function initState() {
       clearAsyncHandles();
       clearPendingState({ status: "reset", waitStage: "reset", revision: state.renderRevision, instanceId: state.instanceId });
       state = createState(nextInstanceId(instancePrefix));
+      markStateSnapshotDirty();
       return getState();
     }
 
     function recordRender(props) {
-      state.lastProps = props;
-      state.renderRevision += 1;
+      setStateField("lastProps", props);
+      setStateField("renderRevision", state.renderRevision + 1);
       return state.renderRevision;
     }
 
@@ -261,8 +282,8 @@
         clearPendingState();
       }
 
-      state.commitPending = true;
-      state.scheduledRevision = targetRevision;
+      setStateField("commitPending", true);
+      setStateField("scheduledRevision", targetRevision);
       pendingWaitSpanToken = perf
         ? perf.startSpan("HostCommitController.scheduleCommit->onCommit", {
           instanceId: state.instanceId,
@@ -281,8 +302,8 @@
         revision: state.renderRevision,
         instanceId: state.instanceId
       });
-      state.rootEl = null;
-      state.shellEl = null;
+      setStateField("rootEl", null);
+      setStateField("shellEl", null);
     }
 
     return {

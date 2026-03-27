@@ -370,4 +370,53 @@ describe("runtime/HostCommitController.js", function () {
     timeoutHarness.runNextTimeout();
     expect(timeoutHarness.spans.some((entry) => entry.tags.waitStage === "timeout")).toBe(true);
   });
+
+  it("returns the same getState snapshot reference when state is unchanged", function () {
+    const harness = createHarness();
+    const controller = harness.createController();
+
+    const first = controller.getState();
+    const second = controller.getState();
+
+    expect(second).toBe(first);
+  });
+
+  it("returns a new getState snapshot after each meaningful state mutation", function () {
+    const harness = createHarness();
+    const controller = harness.createController();
+    const onCommit = vi.fn();
+
+    const initial = controller.getState();
+    controller.recordRender({ value: 1 });
+    const afterRender = controller.getState();
+    expect(afterRender).not.toBe(initial);
+    expect(controller.getState()).toBe(afterRender);
+
+    controller.scheduleCommit({ onCommit: onCommit });
+    const afterSchedule = controller.getState();
+    expect(afterSchedule).not.toBe(afterRender);
+    expect(afterSchedule.commitPending).toBe(true);
+    expect(controller.getState()).toBe(afterSchedule);
+  });
+
+  it("keeps post-commit state snapshots stable across repeated reads", function () {
+    const harness = createHarness();
+    const controller = harness.createController();
+    const rootEl = createHostRoot();
+    const shellEl = createShell(rootEl);
+    const onCommit = vi.fn();
+
+    harness.setShell(shellEl);
+    controller.recordRender({ kind: "activeRoute" });
+    controller.scheduleCommit({ onCommit: onCommit });
+    harness.runNextRaf();
+
+    const first = controller.getState();
+    const second = controller.getState();
+
+    expect(onCommit).toHaveBeenCalledTimes(1);
+    expect(first.commitPending).toBe(false);
+    expect(first.mountedRevision).toBe(1);
+    expect(second).toBe(first);
+  });
 });
