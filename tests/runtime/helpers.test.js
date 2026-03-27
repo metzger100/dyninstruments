@@ -347,6 +347,15 @@ describe("runtime/helpers.js", function () {
     expect(runtime.resolveFontFamily(canvas)).toBe(DEFAULT_FONT_STACK);
   });
 
+  it("exposes getNightModeState through runtime and Helpers", function () {
+    const night = { value: true };
+    const rootEl = createRoot(createDoc(night));
+    const runtime = loadRuntimeHelpers();
+
+    expect(runtime.getNightModeState(rootEl)).toBe(true);
+    expect(runtime.createHelpers(function () {}).getNightModeState(rootEl)).toBe(true);
+  });
+
   it("exposes the singleton hostActions facade through runtime and Helpers", function () {
     const hostActions = { routePoints: {}, routeEditor: {}, ais: {}, getCapabilities: vi.fn() };
     const runtime = loadRuntimeHelpers({

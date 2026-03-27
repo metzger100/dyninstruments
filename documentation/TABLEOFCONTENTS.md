@@ -123,10 +123,12 @@
 - **Plugin-wide theme token resolver** → [shared/theme-tokens.md](shared/theme-tokens.md)
 - **Shared text layout/cache facade for text widgets** → [shared/text-layout-engine.md](shared/text-layout-engine.md)
 - **Theme presets (default/slim/bold/night/highcontrast)** → [shared/theme-tokens.md](shared/theme-tokens.md#preset-definitions)
+- **Where is canonical preset-name normalization owned?** → [shared/theme-tokens.md](shared/theme-tokens.md#preset-system)
 - **Runtime preset application flow** → [shared/theme-tokens.md](shared/theme-tokens.md#runtime-integration)
 - **How do I select a preset from AvNav user.css?** → [shared/theme-tokens.md](shared/theme-tokens.md#runtime-integration)
 - **How to test presets via browser console** → [shared/theme-tokens.md](shared/theme-tokens.md#manual-testing-browser-console)
 - **Widget border styling** → [shared/css-theming.md](shared/css-theming.md)
+- **Where is canonical night-mode lookup defined for runtime/helpers?** → [shared/helpers.md](shared/helpers.md#getnightmodestate)
 
 ## Documentation Maintenance
 

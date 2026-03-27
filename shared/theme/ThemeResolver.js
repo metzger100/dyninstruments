@@ -1,7 +1,7 @@
 /**
  * Module: ThemeResolver - Plugin-wide CSS token resolver with root-scoped cache
  * Documentation: documentation/shared/theme-tokens.md
- * Depends: CSS custom properties, document root night mode class
+ * Depends: ThemePresets, Helpers.getNightModeState, CSS custom properties
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) {
@@ -31,6 +31,7 @@
   "use strict";
 
   const EMPTY_PRESET = {};
+  const DEFAULT_PRESET_NAME = "default";
 
   // dyni-lint-disable-next-line css-js-default-duplication -- ThemeResolver is the documented theme-token boundary and owns per-token defaults.
   function defineToken(path, cssVar, type, defaultValue) {
@@ -120,37 +121,78 @@
       : { hasValue: false, value: tokenDef.defaultValue };
   }
 
-  function resolvePresetDefs(Helpers) {
-    // dyni-lint-disable-next-line framework-method-typeof-guard -- ThemeResolver may resolve before ThemePresets is registered during runtime bootstrap.
-    const presetsMod = Helpers && typeof Helpers.getModule === "function"
-      ? Helpers.getModule("ThemePresets")
-      : null;
+  function resolvePresetModule(Helpers) {
+    if (!Helpers || typeof Helpers.getModule !== "function") {
+      return {
+        PRESETS: { default: EMPTY_PRESET },
+        normalizePresetName: function () {
+          return DEFAULT_PRESET_NAME;
+        }
+      };
+    }
+    const presetsMod = Helpers.getModule("ThemePresets");
+    if (!presetsMod || typeof presetsMod !== "object") {
+      throw new Error("ThemeResolver: ThemePresets module is required");
+    }
+    return presetsMod;
+  }
 
-    if (presetsMod && presetsMod.PRESETS && typeof presetsMod.PRESETS === "object") {
+  function resolveNightModeGetter(Helpers) {
+    if (!Helpers || typeof Helpers.getModule !== "function") {
+      return function () {
+        return false;
+      };
+    }
+    if (typeof Helpers.getNightModeState !== "function") {
+      throw new Error("ThemeResolver: Helpers.getNightModeState() is required");
+    }
+    return Helpers.getNightModeState;
+  }
+
+  function resolvePresetDefs(presetsMod) {
+    if (presetsMod.PRESETS && typeof presetsMod.PRESETS === "object") {
       return presetsMod.PRESETS;
     }
-    if (presetsMod && presetsMod.create && presetsMod.create.PRESETS && typeof presetsMod.create.PRESETS === "object") {
+    if (presetsMod.create && presetsMod.create.PRESETS && typeof presetsMod.create.PRESETS === "object") {
       return presetsMod.create.PRESETS;
     }
-    return { default: EMPTY_PRESET };
+    throw new Error("ThemeResolver: ThemePresets.PRESETS is required");
   }
 
-  function normalizePresetName(presetName, presetDefs) {
-    if (typeof presetName !== "string") {
-      return "default";
+  function resolvePresetNormalizer(presetsMod) {
+    if (typeof presetsMod.normalizePresetName === "function") {
+      return presetsMod.normalizePresetName;
     }
-    const normalized = presetName.trim().toLowerCase();
-    if (!normalized || !Object.prototype.hasOwnProperty.call(presetDefs, normalized)) {
-      return "default";
+    if (presetsMod.create && typeof presetsMod.create.normalizePresetName === "function") {
+      return presetsMod.create.normalizePresetName;
     }
-    return normalized;
+    throw new Error("ThemeResolver: ThemePresets.normalizePresetName() is required");
   }
 
-  function getActivePresetName(rootEl, presetDefs) {
-    if (!rootEl || typeof rootEl.getAttribute !== "function") {
-      return "default";
+  function readPresetCssVar(style) {
+    if (!style || typeof style.getPropertyValue !== "function") {
+      return "";
     }
-    return normalizePresetName(rootEl.getAttribute("data-dyni-theme"), presetDefs);
+    // dyni-lint-disable-next-line css-js-default-duplication -- ThemeResolver is the documented boundary owner for reading preset selection from CSS.
+    const raw = style.getPropertyValue("--dyni-theme-preset");
+    return typeof raw === "string" ? raw.trim() : "";
+  }
+
+  function getActivePresetName(rootEl, rootStyle, normalizePresetName) {
+    if (!rootEl) {
+      return DEFAULT_PRESET_NAME;
+    }
+    if (typeof rootEl.hasAttribute === "function" &&
+      rootEl.hasAttribute("data-dyni-theme") &&
+      typeof rootEl.getAttribute === "function") {
+      return normalizePresetName(rootEl.getAttribute("data-dyni-theme"));
+    }
+
+    const cssPresetName = readPresetCssVar(rootStyle);
+    if (cssPresetName) {
+      return normalizePresetName(cssPresetName);
+    }
+    return DEFAULT_PRESET_NAME;
   }
 
   function getComputedStyleSafe(el) {
@@ -159,24 +201,6 @@
     }
     const style = getComputedStyle(el);
     return style && typeof style.getPropertyValue === "function" ? style : null;
-  }
-
-  function getNightModeState(rootEl) {
-    if (!rootEl) {
-      return false;
-    }
-    const doc = rootEl.ownerDocument;
-    if (!doc) {
-      return false;
-    }
-
-    const docRootEl = doc.documentElement;
-    if (docRootEl && docRootEl.classList && docRootEl.classList.contains("nightMode")) {
-      return true;
-    }
-
-    const body = doc.body;
-    return !!(body && body.classList && body.classList.contains("nightMode"));
   }
 
   function resolveTokens(styles, presetValues) {
@@ -217,7 +241,10 @@
   }
 
   function create(def, Helpers) {
-    const presetDefs = resolvePresetDefs(Helpers);
+    const presetsMod = resolvePresetModule(Helpers);
+    const presetDefs = resolvePresetDefs(presetsMod);
+    const normalizePresetName = resolvePresetNormalizer(presetsMod);
+    const getNightModeState = resolveNightModeGetter(Helpers);
 
     function resolveForRoot(rootEl) {
       if (!rootEl) {
@@ -235,12 +262,13 @@
         return byRoot.get(rootEl);
       }
 
-      const presetName = getActivePresetName(rootEl, presetDefs);
+      const rootStyle = getComputedStyleSafe(rootEl);
+      const presetName = getActivePresetName(rootEl, rootStyle, normalizePresetName);
       const presetValues = Object.prototype.hasOwnProperty.call(presetDefs, presetName)
         ? presetDefs[presetName]
         : EMPTY_PRESET;
 
-      const resolved = resolveTokens([getComputedStyleSafe(rootEl)], presetValues);
+      const resolved = resolveTokens([rootStyle], presetValues);
       byRoot.set(rootEl, resolved);
       return resolved;
     }

@@ -9,15 +9,18 @@
     define([], function () {
       const mod = factory();
       mod.PRESETS = mod.create.PRESETS;
+      mod.normalizePresetName = mod.create.normalizePresetName;
       return mod;
     });
   } else if (typeof module === "object" && module.exports) {
     const mod = factory();
     mod.PRESETS = mod.create.PRESETS;
+    mod.normalizePresetName = mod.create.normalizePresetName;
     module.exports = mod;
   } else {
     (root.DyniComponents = root.DyniComponents || {}).DyniThemePresets = factory();
     root.DyniComponents.DyniThemePresets.PRESETS = root.DyniComponents.DyniThemePresets.create.PRESETS;
+    root.DyniComponents.DyniThemePresets.normalizePresetName = root.DyniComponents.DyniThemePresets.create.normalizePresetName;
   }
 }(this, function () {
   "use strict";
@@ -116,11 +119,13 @@
       id: "ThemePresets",
       presets: PRESETS,
       apply: apply,
-      remove: remove
+      remove: remove,
+      normalizePresetName: normalizePresetName
     };
   }
 
   create.PRESETS = PRESETS;
+  create.normalizePresetName = normalizePresetName;
 
   return { id: "ThemePresets", create };
 }));

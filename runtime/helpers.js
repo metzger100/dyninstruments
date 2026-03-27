@@ -171,6 +171,7 @@
       resolveTextColor: resolveTextColor,
       resolveFontFamily: resolveFontFamily,
       resolveWidgetRoot: resolveWidgetRoot,
+      getNightModeState: getNightModeState,
       getHostActions: getHostActions,
       getModule: getModule
     };
@@ -181,6 +182,7 @@
   runtime.resolveTextColor = resolveTextColor;
   runtime.resolveFontFamily = resolveFontFamily;
   runtime.resolveWidgetRoot = resolveWidgetRoot;
+  runtime.getNightModeState = getNightModeState;
   runtime.getHostActions = getHostActions;
   runtime.createHelpers = createHelpers;
 }(this));

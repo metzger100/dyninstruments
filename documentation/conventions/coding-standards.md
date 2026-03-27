@@ -15,6 +15,7 @@ Use this document for runtime-safe component structure and naming. It defines fi
 - Reusable logic belongs in shared kits, not in duplicated widget-local helpers.
 - Preserve explicit falsy defaults (`""`, `0`, `false`) via property-presence/nullish checks; never use truthy fallback for configured defaults.
 - Cache-owning modules must expose explicit invalidation APIs and mutation paths must call them.
+- Preset-name normalization is single-owner: use `ThemePresets.normalizePresetName`, do not duplicate in runtime/theme consumers.
 - Cluster mappers are declarative routing/normalization only; formatter and presentation behavior belongs in renderer modules.
 - User-visible responsive floors must come from the shared responsive-profile contract; widget-local floors are allowed only for technical safety bounds.
 - Fail-fast / keep-it-simple: validate and default at boundaries, then trust the resulting internal contract.
@@ -156,6 +157,7 @@ Current shared utilities include:
 - `HtmlWidgetUtils.resolveShellRect()`
 - `HtmlWidgetUtils.resolveRatioMode()`
 - `HtmlWidgetUtils.isEditingMode()`
+- `ThemePresets.normalizePresetName()`
 - `PerfSpanHelper.startSpan()`
 - `PerfSpanHelper.endSpan()`
 - `RadialValueMath.clamp()`
@@ -172,6 +174,7 @@ Current shared utilities include:
 - `RadialTextLayout.fitSingleTextPx()`
 - `RadialTextLayout.drawDisconnectOverlay()`
 - `Helpers.applyFormatter()`
+- `Helpers.getNightModeState()`
 
 Check these before writing any helper function. For shared gauge utility APIs, see [../radial/gauge-shared-api.md](../radial/gauge-shared-api.md).
 

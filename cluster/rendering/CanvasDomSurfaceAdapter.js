@@ -140,17 +140,10 @@
       let pendingPaintWaitSpan = null;
 
       function callThemeInvalidation(targetRootEl) {
-        if (!themeResolver || typeof themeResolver !== "object") {
+        if (!themeResolver) {
           return;
         }
-
-        if (typeof themeResolver.invalidateRoot === "function") {
-          themeResolver.invalidateRoot(targetRootEl);
-          return;
-        }
-        if (typeof themeResolver.invalidateAll === "function") {
-          themeResolver.invalidateAll();
-        }
+        themeResolver.invalidateRoot(targetRootEl);
       }
 
       function cancelPendingFrame() {

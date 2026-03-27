@@ -1,7 +1,7 @@
 /**
  * Module: MapZoomHtmlFit - Per-element text fitting for map zoom HTML renderer
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: Helpers.resolveFontFamily, TextLayoutEngine, HtmlWidgetUtils
+ * Depends: Helpers.resolveFontFamily, Helpers.resolveWidgetRoot, TextLayoutEngine, HtmlWidgetUtils, ThemeResolver
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -17,8 +17,6 @@
     unitStyle: "",
     requiredStyle: ""
   });
-  const VALUE_WEIGHT = 700;
-  const LABEL_WEIGHT = 700;
   const SECONDARY_DEFAULT_SCALE = 0.8;
 
   function numberOr(value, defaultNumber) {
@@ -110,6 +108,10 @@
     return String(value).trim().length > 0;
   }
 
+  function isDomElement(value) {
+    return !!(value && value.nodeType === 1);
+  }
+
   function toMainFitState(args) {
     const cfg = args || {};
     const text = cfg.textApi;
@@ -127,8 +129,8 @@
         valueText: cfg.valueText,
         unitText: cfg.unitText,
         family: cfg.family,
-        valueWeight: VALUE_WEIGHT,
-        labelWeight: LABEL_WEIGHT
+        valueWeight: cfg.valueWeight,
+        labelWeight: cfg.labelWeight
       });
       return {
         captionPx: fitHigh.cPx,
@@ -151,8 +153,8 @@
         valueText: cfg.valueText,
         unitText: cfg.unitText,
         family: cfg.family,
-        valueWeight: VALUE_WEIGHT,
-        labelWeight: LABEL_WEIGHT
+        valueWeight: cfg.valueWeight,
+        labelWeight: cfg.labelWeight
       });
       return {
         captionPx: fitNormal.cPx,
@@ -171,8 +173,8 @@
       maxW: cfg.maxW,
       maxH: cfg.maxH,
       family: cfg.family,
-      valueWeight: VALUE_WEIGHT,
-      labelWeight: LABEL_WEIGHT
+      valueWeight: cfg.valueWeight,
+      labelWeight: cfg.labelWeight
     });
     return {
       captionPx: hasText(cfg.captionText) ? fitFlat.sPx : 0,
@@ -205,7 +207,7 @@
       maxW: cfg.maxW,
       maxH: Math.max(1, remainingH),
       family: cfg.family,
-      weight: LABEL_WEIGHT
+      weight: cfg.labelWeight
     });
     return {
       px: requiredFit.px
@@ -215,6 +217,7 @@
   function create(def, Helpers) {
     const textApi = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+    const themeApi = Helpers.getModule("ThemeResolver").create(def, Helpers);
 
     function compute(args) {
       const cfg = args || {};
@@ -234,6 +237,13 @@
       }
       const target = getMeasureTarget(hostContext);
       const family = Helpers.resolveFontFamily(target || undefined);
+      const rootCandidate = Helpers.resolveWidgetRoot(target);
+      const themeRoot = isDomElement(rootCandidate)
+        ? rootCandidate
+        : (isDomElement(target) ? target : null);
+      const tokens = themeApi.resolveForRoot(themeRoot);
+      const valueWeight = tokens.font.weight;
+      const labelWeight = tokens.font.labelWeight;
       const shellW = Math.max(1, Math.round(rect.width));
       const shellH = Math.max(1, Math.round(rect.height));
       const responsiveInsets = textApi.computeResponsiveInsets(shellW, shellH);
@@ -260,7 +270,9 @@
         captionText: model.caption,
         valueText: model.zoomText,
         unitText: model.unit,
-        family: family
+        family: family,
+        valueWeight: valueWeight,
+        labelWeight: labelWeight
       });
       const requiredFit = fitRequiredPx({
         textApi: textApi,
@@ -271,7 +283,8 @@
         maxW: contentW,
         maxH: contentH,
         gapPx: gapPx,
-        family: family
+        family: family,
+        labelWeight: labelWeight
       }, htmlUtils);
 
       return {

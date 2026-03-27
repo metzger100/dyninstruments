@@ -106,7 +106,15 @@ describe("runtime/init.js", function () {
       if (id === "ThemePresets") {
         return Promise.resolve({
           id: "ThemePresets",
-          create: () => ({ presets: { default: {}, slim: {}, bold: {} }, apply: applyPreset, remove: vi.fn() })
+          create: () => ({
+            presets: { default: {}, slim: {}, bold: {} },
+            apply: applyPreset,
+            remove: vi.fn(),
+            normalizePresetName(name) {
+              const normalized = typeof name === "string" ? name.trim().toLowerCase() : "";
+              return normalized === "slim" || normalized === "bold" ? normalized : "default";
+            }
+          })
         });
       }
       return Promise.resolve({ id: "A", create: () => ({}) });
@@ -168,7 +176,13 @@ describe("runtime/init.js", function () {
           create: () => ({
             presets: { default: {}, slim: {}, bold: {}, night: {}, highcontrast: {} },
             apply: applyPreset,
-            remove: vi.fn()
+            remove: vi.fn(),
+            normalizePresetName(name) {
+              const normalized = typeof name === "string" ? name.trim().toLowerCase() : "";
+              return ["default", "slim", "bold", "night", "highcontrast"].includes(normalized)
+                ? normalized
+                : "default";
+            }
           })
         });
       }
@@ -238,7 +252,13 @@ describe("runtime/init.js", function () {
           create: () => ({
             presets: { default: {}, slim: {}, bold: {}, night: {}, highcontrast: {} },
             apply: applyPreset,
-            remove: vi.fn()
+            remove: vi.fn(),
+            normalizePresetName(name) {
+              const normalized = typeof name === "string" ? name.trim().toLowerCase() : "";
+              return ["default", "slim", "bold", "night", "highcontrast"].includes(normalized)
+                ? normalized
+                : "default";
+            }
           })
         });
       }
@@ -309,7 +329,13 @@ describe("runtime/init.js", function () {
           create: () => ({
             presets: { default: {}, slim: {}, bold: {}, night: {}, highcontrast: {} },
             apply: applyPreset,
-            remove: vi.fn()
+            remove: vi.fn(),
+            normalizePresetName(name) {
+              const normalized = typeof name === "string" ? name.trim().toLowerCase() : "";
+              return ["default", "slim", "bold", "night", "highcontrast"].includes(normalized)
+                ? normalized
+                : "default";
+            }
           })
         });
       }
@@ -379,7 +405,13 @@ describe("runtime/init.js", function () {
           create: () => ({
             presets: { default: {}, slim: {}, bold: {}, night: {}, highcontrast: {} },
             apply: applyPreset,
-            remove: vi.fn()
+            remove: vi.fn(),
+            normalizePresetName(name) {
+              const normalized = typeof name === "string" ? name.trim().toLowerCase() : "";
+              return ["default", "slim", "bold", "night", "highcontrast"].includes(normalized)
+                ? normalized
+                : "default";
+            }
           })
         });
       }
@@ -465,7 +497,11 @@ describe("runtime/init.js", function () {
           create: () => ({
             presets: { default: {}, bold: {} },
             apply: applyPreset,
-            remove: vi.fn()
+            remove: vi.fn(),
+            normalizePresetName(name) {
+              const normalized = typeof name === "string" ? name.trim().toLowerCase() : "";
+              return normalized === "bold" ? "bold" : "default";
+            }
           })
         });
       }

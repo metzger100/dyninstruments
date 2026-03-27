@@ -42,7 +42,7 @@ The final assembled map still uses the same component ID -> `{ js, css, globalKe
 `ClusterMapperRegistry` depends on all per-cluster mapper components.
 `ClusterRendererRouter` depends on kind/surface routing owners plus renderer components used at runtime.
 `ThemeResolver` is a shared plugin-wide token resolver used by both gauge and text rendering paths.
-`ThemePresets` is a shared runtime preset applier that sets `data-dyni-theme` on container roots.
+`ThemePresets` is a shared runtime preset applier that sets `data-dyni-theme` on container roots and owns canonical preset normalization (`normalizePresetName`).
 `PerfSpanHelper` is a shared UMD owner for perf-span start/end behavior used by cluster UMD consumers.
 `HtmlWidgetUtils` is a shared UMD owner for HTML-widget utility helpers (`escapeHtml`, `toStyleAttr`, ratio/shell helpers).
 Dedicated nav renderers may also depend on shared layout-owner modules that consume `ResponsiveScaleProfile`.
@@ -88,7 +88,8 @@ ClusterWidget
     ├── MapZoomTextHtmlWidget
     │   ├── MapZoomHtmlFit
     │   │   ├── TextLayoutEngine
-    │   │   └── HtmlWidgetUtils
+    │   │   ├── HtmlWidgetUtils
+    │   │   └── ThemeResolver
     │   └── HtmlWidgetUtils
     ├── RendererPropsWidget
     │   ├── WindRadialWidget

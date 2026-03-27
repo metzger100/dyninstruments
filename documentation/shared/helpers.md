@@ -4,7 +4,7 @@
 
 ## Overview
 
-`Helpers` is passed as second argument to `module.create(def, Helpers)`. It provides canvas setup utilities, root-scoped typography/theming, formatter application, host-action access, and module access.
+`Helpers` is passed as second argument to `module.create(def, Helpers)`. It provides canvas setup utilities, root-scoped typography/theming, canonical night-mode state lookup, formatter application, host-action access, and module access.
 
 ## API Reference
 
@@ -61,6 +61,20 @@ Usage contract:
 
 - Theme callers that start from canvas inputs must resolve root first and call `ThemeResolver.resolveForRoot(rootEl)`.
 - This keeps root discovery logic in one runtime owner instead of duplicating `.closest(...)` logic across renderers.
+
+### getNightModeState
+
+Returns whether the owning document is currently in night mode (`documentElement` or `body` has `nightMode` class).
+
+```javascript
+const isNight = Helpers.getNightModeState(rootEl);
+```
+
+Ownership contract:
+
+- canonical owner is `runtime/helpers.js`
+- used by `ThemeResolver` for cache invalidation when day/night state changes
+- fail-fast internal contract: helper is expected to exist on `Helpers`
 
 ### applyFormatter
 

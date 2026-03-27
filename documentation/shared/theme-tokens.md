@@ -4,7 +4,7 @@
 
 ## Overview
 
-`ThemeResolver` provides plugin-wide token resolution from CSS custom properties. The API is strictly root-first: `resolveForRoot(rootEl)` reads the widget root directly, applies the selected preset from `data-dyni-theme`, prefers explicit CSS custom-property overrides, and caches the merged result per root. `runtime/init.js` discovers `.widget.dyniplugin` roots directly when applying presets.
+`ThemeResolver` provides plugin-wide token resolution from CSS custom properties. The API is strictly root-first: `resolveForRoot(rootEl)` reads the widget root directly, resolves preset names with precedence `data-dyni-theme -> --dyni-theme-preset -> default`, prefers explicit CSS token overrides, and caches the merged result per root. `runtime/init.js` discovers `.widget.dyniplugin` roots directly when applying presets.
 
 `ThemePresets` provides named runtime presets by setting a preset selector attribute (`data-dyni-theme`) on widget root containers.
 
@@ -18,9 +18,10 @@
 - Invalidation API: `invalidateRoot(rootEl)`, `invalidateAll()`
 - Token metadata API: `TOKEN_DEFS` / `create.TOKEN_DEFS`
 - Preset metadata API: reads `ThemePresets.PRESETS` / `ThemePresets.create.PRESETS`
+- Preset normalization owner: `ThemePresets.normalizePresetName` / `ThemePresets.create.normalizePresetName`
 - Caching: `WeakMap` per root element
 - Canvas renderer call pattern: `const rootEl = Helpers.resolveWidgetRoot(canvas) || canvas; resolver.resolveForRoot(rootEl)`
-- Invalidation: cache reset when root `.nightMode` class state changes
+- Invalidation: cache reset when `Helpers.getNightModeState(rootEl)` changes
 - Numeric parsing: `parseFloat`, fallback on `NaN`
 - Color parsing: `trim`, fallback on empty string
 - Default token values are JS-owned in `ThemeResolver`
@@ -98,7 +99,10 @@ Base pointer size by renderer:
 1. Determine current night-mode root class state (`.nightMode`)
 2. If state changed since last call, clear cached tokens
 3. Return cached tokens for root when present
-4. Resolve the active preset from `data-dyni-theme`
+4. Resolve preset name from:
+   - `data-dyni-theme` when the attribute is present
+   - `--dyni-theme-preset` CSS variable on the same root
+   - fallback `default`
 5. Read explicit CSS token overrides from the root computed style
 6. Merge in order: CSS override -> preset value -> built-in default
 7. Store in cache and return token object
@@ -128,6 +132,9 @@ const presetsApi = presetsMod.create(def, Helpers);
 presetsApi.presets; // { default, slim, bold, night, highcontrast }
 presetsMod.PRESETS;
 presetsMod.create.PRESETS;
+presetsMod.normalizePresetName("bold");
+presetsMod.create.normalizePresetName("bold");
+presetsApi.normalizePresetName("bold");
 presetsApi.apply(containerEl, "slim");
 presetsApi.remove(containerEl);
 ```
@@ -142,6 +149,7 @@ presetsApi.remove(containerEl);
 4. Removes `data-dyni-theme` for `default`
 
 `ThemePresets.remove(containerEl)` removes `data-dyni-theme`.
+`ThemePresets.normalizePresetName(presetName)` is the canonical preset-name normalizer used by both runtime preset selection and `ThemeResolver`.
 
 `default` preset is intentionally empty (`{}`), so applying `default` clears the preset selector attribute and falls back to `ThemeResolver` built-in defaults.
 
@@ -167,6 +175,7 @@ Only values that differ from theme defaults are included.
   3. CSS variable `--dyni-theme-preset` (typically from AvNav `user.css`)
   4. `default`
 - Invalid preset names from any source resolve to `default`.
+- Runtime delegates preset normalization to `ThemePresets.normalizePresetName` (single owner).
 - Discovery pattern: iterate `.widget.dyniplugin` roots directly and apply the preset to those roots. When no widget root is mounted yet, the document-level CSS fallback remains the last resort.
 
 After preset application, runtime explicitly invalidates `ThemeResolver` token cache via `invalidateRoot(rootEl)` so subsequent `resolveForRoot(rootEl)` reads refreshed values.

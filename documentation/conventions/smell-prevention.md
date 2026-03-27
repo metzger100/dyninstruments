@@ -75,7 +75,7 @@ Allowed inline exceptions:
 ### Theme cache drift
 
 1. Add/verify `invalidateRoot` and `invalidateAll` on cache-owning module API.
-2. Call invalidation from every runtime mutation path.
+2. Call `invalidateRoot(rootEl)` directly from every runtime mutation path that updates a specific widget root.
 3. Add/adjust tests for mutation -> invalidation -> refreshed resolve.
 
 ### Dynamic key stale state
@@ -148,8 +148,9 @@ Allowed inline exceptions:
 ### Framework method typeof guard
 
 1. Remove `typeof Helpers.* === "function"` and module-alias method guards after internal resolution.
-2. Keep bootstrap- or DOM-boundary exceptions explicit with rule-specific suppressions.
-3. Extend alias detection coverage when a new internal resolver pattern is introduced.
+2. Keep runtime/theme invalidation call paths on direct contract calls (`resolver.invalidateRoot(...)`) once module ownership is established.
+3. Keep bootstrap- or DOM-boundary exceptions explicit with rule-specific suppressions.
+4. Extend alias detection coverage when a new internal resolver pattern is introduced.
 
 ### Inline config default duplication
 

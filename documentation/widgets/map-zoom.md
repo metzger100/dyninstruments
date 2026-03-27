@@ -17,6 +17,7 @@ Ownership split:
 - `MapMapper` maps zoom payload (`zoom`, `requiredZoom`, caption/unit defaults)
 - `MapZoomTextHtmlWidget` renders escaped HTML and named handler contract
 - `MapZoomHtmlFit` owns per-element caption/value/unit/required text fitting
+- `MapZoomHtmlFit` also resolves theme font weights (`font.weight`, `font.labelWeight`) via `ThemeResolver`
 - `HtmlWidgetUtils` owns shared HTML utility helpers (`escapeHtml`, style attrs, shell/ratio helpers)
 - `HtmlSurfaceController` owns named-handler lifecycle
 - `TemporaryHostActionBridge` owns page-aware `hostActions.map.checkAutoZoom()` dispatch capability
@@ -72,6 +73,7 @@ Text-fit behavior:
 
 - value and required rows receive independent inline `font-size` styles
 - `MapZoomHtmlFit` uses the shared `TextLayoutEngine` fit path (same scale-coupled semantics as canvas SOG)
+- value/caption/unit/required fit weights come from theme tokens (`font.weight`, `font.labelWeight`), not hardcoded constants
 - caption/unit sizing follows `captionUnitScale` with adaptive value/caption tradeoff so text fills available space for maximum readability
 - fit is recomputed from shell size, mode, and text lengths on render/resize-signature updates
 

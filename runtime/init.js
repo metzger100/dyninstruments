@@ -9,7 +9,6 @@
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
   const state = ns.state;
-  const DEFAULT_PRESET_NAMES = ["default", "slim", "bold", "night", "highcontrast"];
 
   function createGetComponent(components) {
     return function getComponent(id) {
@@ -73,30 +72,11 @@
     return value || null;
   }
 
-  function knownPresetNames() {
-    const presets = state.themePresetApi && state.themePresetApi.presets;
-    if (!presets || typeof presets !== "object") {
-      return DEFAULT_PRESET_NAMES.slice();
-    }
-    const names = Object.keys(presets);
-    if (!names.length) {
-      return ["default"];
-    }
-    if (!Object.prototype.hasOwnProperty.call(presets, "default")) {
-      names.push("default");
-    }
-    return names;
-  }
-
   function normalizePresetName(presetName) {
-    if (typeof presetName !== "string") {
+    if (!state.themePresetApi || typeof state.themePresetApi.normalizePresetName !== "function") {
       return "default";
     }
-    const normalized = presetName.trim().toLowerCase();
-    if (!normalized) {
-      return "default";
-    }
-    return knownPresetNames().includes(normalized) ? normalized : "default";
+    return state.themePresetApi.normalizePresetName(presetName);
   }
 
   function resolveThemePresetName() {
@@ -127,7 +107,10 @@
       return null;
     }
     const api = component.create({}, Helpers);
-    if (!api || typeof api.apply !== "function" || typeof api.remove !== "function") {
+    if (!api ||
+      typeof api.apply !== "function" ||
+      typeof api.remove !== "function" ||
+      typeof api.normalizePresetName !== "function") {
       return null;
     }
     return api;
@@ -138,15 +121,7 @@
     if (!resolverMod) {
       return;
     }
-
-    if (typeof resolverMod.invalidateRoot === "function") {
-      resolverMod.invalidateRoot(rootEl);
-      return;
-    }
-
-    if (typeof resolverMod.invalidateAll === "function") {
-      resolverMod.invalidateAll();
-    }
+    resolverMod.invalidateRoot(rootEl);
   }
 
   function applyThemePresetToContainer(rootEl, presetName) {
@@ -218,7 +193,9 @@
         });
 
         state.themeResolverModule = byId.ThemeResolver ||
-          ((Helpers && typeof Helpers.getModule === "function") ? Helpers.getModule("ThemeResolver") : null);
+          (Object.prototype.hasOwnProperty.call(components, "ThemeResolver")
+            ? Helpers.getModule("ThemeResolver")
+            : null);
         state.themePresetApi = buildThemePresetApi(byId.ThemePresets, Helpers);
         state.themePresetName = resolveThemePresetName();
         applyThemePresetToRegisteredWidgets(state.themePresetName);

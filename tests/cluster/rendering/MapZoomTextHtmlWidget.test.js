@@ -6,6 +6,8 @@ describe("MapZoomTextHtmlWidget", function () {
   const MODULE_PATH_BY_ID = {
     HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
     MapZoomHtmlFit: "shared/widget-kits/nav/MapZoomHtmlFit.js",
+    ThemeResolver: "shared/theme/ThemeResolver.js",
+    ThemePresets: "shared/theme/ThemePresets.js",
     TextLayoutEngine: "shared/widget-kits/text/TextLayoutEngine.js",
     RadialValueMath: "shared/widget-kits/radial/RadialValueMath.js",
     RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
@@ -32,6 +34,12 @@ describe("MapZoomTextHtmlWidget", function () {
       },
       resolveFontFamily: opts.resolveFontFamily || function () {
         return "sans-serif";
+      },
+      resolveWidgetRoot: opts.resolveWidgetRoot || function () {
+        return null;
+      },
+      getNightModeState: opts.getNightModeState || function () {
+        return false;
       },
       getModule: opts.getModule || function (id) {
         const relPath = MODULE_PATH_BY_ID[id];

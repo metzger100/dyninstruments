@@ -30,8 +30,12 @@ describe("ThemePresets", function () {
   it("exposes all expected preset names and empty default preset", function () {
     const { mod, api } = createApi();
     expect(mod.PRESETS).toBe(mod.create.PRESETS);
+    expect(mod.normalizePresetName).toBe(mod.create.normalizePresetName);
     expect(Object.keys(api.presets).sort()).toEqual(["bold", "default", "highcontrast", "night", "slim"]);
     expect(api.presets.default).toEqual({});
+    expect(typeof api.normalizePresetName).toBe("function");
+    expect(api.normalizePresetName(" BOLD ")).toBe("bold");
+    expect(api.normalizePresetName("missing")).toBe("default");
   });
 
   it("apply sets data-dyni-theme for non-default presets", function () {

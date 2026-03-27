@@ -35,6 +35,9 @@ describe("ThemeResolver", function () {
     const attrs = Object.create(null);
     const root = {
       ownerDocument: doc,
+      hasAttribute(name) {
+        return Object.prototype.hasOwnProperty.call(attrs, name);
+      },
       getAttribute(name) {
         return Object.prototype.hasOwnProperty.call(attrs, name) ? attrs[name] : null;
       },
@@ -56,6 +59,18 @@ describe("ThemeResolver", function () {
     return {
       getModule(id) {
         return id === "ThemePresets" ? presetsMod : null;
+      },
+      getNightModeState(rootEl) {
+        const doc = rootEl && rootEl.ownerDocument;
+        if (!doc) {
+          return false;
+        }
+        const docRootEl = doc.documentElement;
+        if (docRootEl && docRootEl.classList && docRootEl.classList.contains("nightMode")) {
+          return true;
+        }
+        const body = doc.body;
+        return !!(body && body.classList && body.classList.contains("nightMode"));
       }
     };
   }
@@ -132,6 +147,58 @@ describe("ThemeResolver", function () {
     expect(out.colors.pointer).toBe("#00aaff");
     expect(out.colors.warning).toBe("#8b6914");
     expect(resolver.resolveForRoot(rootEl)).toBe(out);
+  });
+
+  it("resolves preset from CSS variable when data-dyni-theme attribute is absent", function () {
+    const mod = loadFresh("shared/theme/ThemeResolver.js");
+    const doc = createDoc({ value: false });
+    const rootEl = createRoot(doc);
+    installComputedStyle(new Map([
+      [rootEl, {
+        "--dyni-theme-preset": " bold "
+      }]
+    ]));
+
+    const resolver = mod.create({}, createHelpers());
+    const out = resolver.resolveForRoot(rootEl);
+
+    expect(out.radial.pointer.widthFactor).toBe(1.54);
+    expect(out.linear.pointer.widthFactor).toBe(1.54);
+  });
+
+  it("prefers data-dyni-theme attribute over CSS preset variable", function () {
+    const mod = loadFresh("shared/theme/ThemeResolver.js");
+    const doc = createDoc({ value: false });
+    const rootEl = createRoot(doc);
+    rootEl.setAttribute("data-dyni-theme", "slim");
+    installComputedStyle(new Map([
+      [rootEl, {
+        "--dyni-theme-preset": "bold"
+      }]
+    ]));
+
+    const resolver = mod.create({}, createHelpers());
+    const out = resolver.resolveForRoot(rootEl);
+
+    expect(out.radial.pointer.widthFactor).toBe(0.72);
+    expect(out.linear.track.widthFactor).toBe(0.12);
+  });
+
+  it("falls back to default preset when CSS preset variable is invalid", function () {
+    const mod = loadFresh("shared/theme/ThemeResolver.js");
+    const doc = createDoc({ value: false });
+    const rootEl = createRoot(doc);
+    installComputedStyle(new Map([
+      [rootEl, {
+        "--dyni-theme-preset": "not-a-preset"
+      }]
+    ]));
+
+    const resolver = mod.create({}, createHelpers());
+    const out = resolver.resolveForRoot(rootEl);
+
+    expect(out.radial.pointer.widthFactor).toBe(mod.DEFAULTS.radial.pointer.widthFactor);
+    expect(out.linear.track.widthFactor).toBe(mod.DEFAULTS.linear.track.widthFactor);
   });
 
   it("reuses the cache by root identity", function () {
