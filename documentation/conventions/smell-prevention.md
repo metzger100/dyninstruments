@@ -14,6 +14,7 @@ Warn-only rollout rules are tracked debt until they are promoted to `block`.
 |---|---|---|---|---|
 | Theme cache drift | Token cache never invalidated after theme preset mutation | Cache-owning modules expose explicit invalidation APIs and callers invoke them on mutation | `check-smell-contracts` (`theme-cache-invalidation`) | block |
 | Dynamic key stale state | `storeKeys.value` remains when dynamic key field is cleared | Clear stale dynamic store keys when key input is empty | `check-smell-contracts` (`dynamic-storekey-clears-on-empty`) | block |
+| Absolute user-home path leak | Repository content includes machine-local absolute paths such as `/home/<user>/...` or `/Users/<user>/...` | Keep repository paths project-relative or placeholder/redacted (`/path/to/...`, `/home/<user>/...`) | `check-patterns` (`absolute-user-home-path`) | block |
 | Falsy default clobbering | `x.default || "---"` | Preserve explicit falsy defaults using property-presence/nullish semantics | `check-patterns` (`default-truthy-fallback`) + `check-smell-contracts` (`falsy-default-preservation`) | block |
 | Redundant internal fallback | Renderer/local code re-applies fallback for props/defaults already guaranteed by mapper/editable contracts (or wraps `Helpers.applyFormatter` default with the same fallback again) | Trust internal contracts for guaranteed props/defaults; keep fallbacks only for external/runtime uncertainty (AvNav/browser APIs) | `check-patterns` (`redundant-internal-fallback`) | block |
 | Invalid lint suppression | Inline `dyni-lint-disable-*` directive is malformed or references unknown rule | Suppress only the named rule and always include a short reason | `check-patterns` (`invalid-lint-suppression`) | block |
@@ -83,6 +84,12 @@ Allowed inline exceptions:
 1. In cluster `updateFunction`, branch on empty key input.
 2. Remove stale `storeKeys.<dynamic>` when empty.
 3. Add config-cluster tests for empty-key cleanup.
+
+### Absolute user-home path leak
+
+1. Replace machine-local absolute paths with repo-relative references, runtime variables, or placeholders (`/path/to/...`, `/home/<user>/...`).
+2. Keep installation docs generic (`<AVNAV_DATA_DIR>`, `<YOUR_AVNAV_PLUGIN_DIR>`) instead of personal home directories.
+3. If a real path is temporarily unavoidable in a test fixture, add a rule-specific suppression and an explicit reason.
 
 ### Falsy default clobbering
 

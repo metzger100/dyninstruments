@@ -55,6 +55,16 @@ export const RULES = [
     message: ({ file, line, detail }) => `[invalid-lint-suppression] ${file}:${line}\n${detail}`
   },
   {
+    name: "absolute-user-home-path",
+    severity: "block",
+    scope: {
+      include: ["**/*.md", "**/*.js", "**/*.mjs", "**/*.cjs", "**/*.json", "**/*.yml", "**/*.yaml", "**/*.txt", "**/*.sh"],
+      exclude: ["tests/**", "tools/**", ".vscode/**", ".idea/**"]
+    },
+    detect: /(?:\/home\/[A-Za-z0-9_.-]+\/|\/Users\/[A-Za-z0-9_.-]+\/)/g,
+    message: ({ file, line, match }) => `[absolute-user-home-path] ${file}:${line}\nAbsolute user-home path detected (${match[0]}). Use project-relative or redacted placeholders instead (for example '/path/to/...', '/home/<user>/...').`
+  },
+  {
     name: "duplicate-functions",
     scope: {
       include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js"],

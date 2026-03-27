@@ -79,17 +79,17 @@ The goal is maximum readability at the helm with minimal configuration overhead.
 **Raspberry Pi (default):**
 
 ```bash
-cd /home/pi/avnav/data/plugins
+cd <AVNAV_DATA_DIR>/plugins
 unzip /path/to/dyninstruments.zip
-# result: /home/pi/avnav/data/plugins/dyninstruments/
+# result: <AVNAV_DATA_DIR>/plugins/dyninstruments/
 ```
 
 **Other Linux setups (example):**
 
 ```bash
-cd /home/<user>/avnav/plugins
+cd <YOUR_AVNAV_PLUGIN_DIR>
 unzip /path/to/dyninstruments.zip
-# result: /home/<user>/avnav/plugins/dyninstruments/
+# result: <YOUR_AVNAV_PLUGIN_DIR>/dyninstruments/
 ```
 
 Restart the AvNav server after installation.

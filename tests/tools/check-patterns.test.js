@@ -1071,6 +1071,52 @@ tiny();
   });
 }(this));
 `
+    },
+    {
+      rule: "absolute-user-home-path",
+      severity: "block",
+      rel: "runtime/example.js",
+      positive: `
+(function () {
+  "use strict";
+  function readPath() {
+    const absolute = "/home/alice/Documents/avnav/viewer/util/api.js";
+    return absolute;
+  }
+  readPath();
+}());
+`,
+      clean: `
+(function () {
+  "use strict";
+  function readPath() {
+    const absolute = "/home/<user>/project/file.js";
+    return absolute;
+  }
+  readPath();
+}());
+`,
+      disableNextLine: `
+(function () {
+  "use strict";
+  function readPath() {
+    // dyni-lint-disable-next-line absolute-user-home-path -- test fixture intentionally keeps one real-looking home path sample
+    const absolute = "/Users/alice/Documents/avnav/viewer/util/api.js";
+    return absolute;
+  }
+  readPath();
+}());
+`,
+      disableLine: `
+(function () {
+  "use strict";
+  function readPath() {
+    const absolute = "/home/alice/Documents/avnav/viewer/util/api.js"; /* dyni-lint-disable-line absolute-user-home-path -- test fixture intentionally keeps one real-looking home path sample */
+    return absolute;
+  }
+  readPath();
+}());
+`
     }
   ];
 
