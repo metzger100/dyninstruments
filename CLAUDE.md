@@ -1,6 +1,6 @@
 # CLAUDE.md - Project Standards & Workflow
 
-This file is Claude Code-facing guidance for this repository.
+This file is guidance for agents working in this repository.
 
 <!-- BEGIN SHARED_INSTRUCTIONS -->
 **Critical:** AGENTS.md is a routing map. Use it to find focused docs, not to store full implementation details.
@@ -127,10 +127,8 @@ Task: Add new BarometerGauge
 - HTML surface lifecycle owner: [cluster/rendering/HtmlSurfaceController.js](cluster/rendering/HtmlSurfaceController.js)
 - Shared active-route domain owner: [cluster/viewmodels/ActiveRouteViewModel.js](cluster/viewmodels/ActiveRouteViewModel.js)
 - Native HTML renderer entrypoint: [widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js](widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js)
-- Security and safety rules: `documentation/conventions/safety-guidelines.md` (planned, not yet implemented)
 - Step-by-step implementation workflows: [documentation/guides/](documentation/guides/)
-- Role definitions and task templates: `documentation/agentprompts/` (planned, not yet implemented)
-- Multi-session active execution plans: `exec-plans/active/` (planned, not yet implemented)
+- Multi-session active execution plans: [`exec-plans/active/`](xec-plans/active/)
 
 ---
 
