@@ -128,7 +128,7 @@ Task: Add new BarometerGauge
 - Shared active-route domain owner: [cluster/viewmodels/ActiveRouteViewModel.js](cluster/viewmodels/ActiveRouteViewModel.js)
 - Native HTML renderer entrypoint: [widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js](widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js)
 - Step-by-step implementation workflows: [documentation/guides/](documentation/guides/)
-- Multi-session active execution plans: [`exec-plans/active/`](xec-plans/active/)
+- Multi-session active execution plans: [exec-plans/active/](exec-plans/active/)
 
 ---
 
