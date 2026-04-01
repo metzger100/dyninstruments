@@ -1,76 +1,98 @@
 ---
 name: improve-codebase-architecture
-description: Explore a codebase to find opportunities for architectural improvement, focusing on making the codebase more testable by deepening shallow modules. Use when user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more AI-navigable.
+description: Analyze a dyninstruments subsystem, compare several interface designs, and write a repo-local architectural improvement plan in exec-plans/active/PLAN*.md.
 ---
 
 # Improve Codebase Architecture
 
-Explore a codebase like an AI would, surface architectural friction, discover opportunities for improving testability, and propose module-deepening refactors as GitHub issue RFCs.
+Use this skill when the user wants to simplify a subsystem, deepen a module, reduce coupling, or redesign an interface.
 
-A **deep module** (John Ousterhout, "A Philosophy of Software Design") has a small interface hiding a large implementation. Deep modules are more testable, more AI-navigable, and let you test at the boundary instead of inside.
+## 1. Mandatory repo preflight
 
-## Process
+Always start by reading:
 
-### 1. Explore the codebase
+1. `documentation/TABLEOFCONTENTS.md`
+2. `documentation/conventions/coding-standards.md`
+3. `documentation/conventions/smell-prevention.md`
 
-Use the Agent tool with subagent_type=Explore to navigate the codebase naturally. Do NOT follow rigid heuristics — explore organically and note where you experience friction:
+Then read only the most relevant architecture docs, guides, and source files for the subsystem under discussion.
 
-- Where does understanding one concept require bouncing between many small files?
-- Where are modules so shallow that the interface is nearly as complex as the implementation?
-- Where have pure functions been extracted just for testability, but the real bugs hide in how they're called?
-- Where do tightly-coupled modules create integration risk in the seams between them?
-- Which parts of the codebase are untested, or hard to test?
+Also inspect nearby execution plans in `exec-plans/active/` and `exec-plans/completed/` so the artifact matches existing repo expectations.
 
-The friction you encounter IS the signal.
+## 2. Explore the subsystem and verify the pain
 
-### 2. Present candidates
+Inspect the codebase and verify:
 
-Present a numbered list of deepening opportunities. For each candidate, show:
+- the current owners of the behavior
+- the entry points callers use today
+- duplicated logic or shallow seams
+- where host/browser/config coupling enters
+- current tests and docs for the area
 
-- **Cluster**: Which modules/concepts are involved
-- **Why they're coupled**: Shared types, call patterns, co-ownership of a concept
-- **Dependency category**: See [REFERENCE.md](REFERENCE.md) for the four categories
-- **Test impact**: What existing tests would be replaced by boundary tests
+Capture this as concrete repo facts. Use specific files, modules, and docs when verified.
 
-Do NOT propose interfaces yet. Ask the user: "Which of these would you like to explore?"
+## 3. Define the architectural target
 
-### 3. User picks a candidate
+State clearly what should improve. Examples:
 
-### 4. Frame the problem space
+- fewer entry points
+- simpler caller ergonomics
+- clearer ownership boundaries
+- better host isolation
+- less registration/config duplication
+- easier testing at a stable interface
 
-Before spawning sub-agents, write a user-facing explanation of the problem space for the chosen candidate:
+## 4. Classify the dominant boundary
 
-- The constraints any new interface would need to satisfy
-- The dependencies it would need to rely on
-- A rough illustrative code sketch to make the constraints concrete — this is not a proposal, just a way to ground the constraints
+Use the dependency categories in `REFERENCE.md` to classify the main dependency shape involved:
 
-Show this to the user, then immediately proceed to Step 5. The user reads and thinks about the problem while the sub-agents work in parallel.
+- pure in-process
+- browser / DOM boundary
+- host integration boundary
+- registry / configuration boundary
+- true external boundary
 
-### 5. Design multiple interfaces
+Use the classification to shape the design and testing recommendation.
 
-Spawn 3+ sub-agents in parallel using the Agent tool. Each must produce a **radically different** interface for the deepened module.
+## 5. Produce 3-4 interface designs
 
-Prompt each sub-agent with a separate technical brief (file paths, coupling details, dependency category, what's being hidden). This brief is independent of the user-facing explanation in Step 4. Give each agent a different design constraint:
+Compare several concrete interface designs. Do this sequentially; do not assume any special sub-agent tooling.
 
-- Agent 1: "Minimize the interface — aim for 1-3 entry points max"
-- Agent 2: "Maximize flexibility — support many use cases and extension"
-- Agent 3: "Optimize for the most common caller — make the default case trivial"
-- Agent 4 (if applicable): "Design around the ports & adapters pattern for cross-boundary dependencies"
+Give each design a different constraint:
 
-Each sub-agent outputs:
+- Design A: minimize the interface, target 1-3 entry points
+- Design B: maximize flexibility and extension room
+- Design C: optimize for the common caller so the default case is trivial
+- Design D: ports/adapters shape for boundary-heavy code, only if it genuinely fits
 
-1. Interface signature (types, methods, params)
-2. Usage example showing how callers use it
-3. What complexity it hides internally
-4. Dependency strategy (how deps are handled — see [REFERENCE.md](REFERENCE.md))
-5. Trade-offs
+For each design, provide:
 
-Present designs sequentially, then compare them in prose.
+1. interface signature
+2. short usage example
+3. what complexity it hides internally
+4. dependency strategy using the repo-specific categories from `REFERENCE.md`
+5. trade-offs
 
-After comparing, give your own recommendation: which design you think is strongest and why. If elements from different designs would combine well, propose a hybrid. Be opinionated — the user wants a strong read, not just a menu.
+## 6. Recommend one direction
 
-### 6. User picks an interface (or accepts recommendation)
+Do not stop at a menu. Give a strong recommendation for the best design for this repo.
 
-### 7. Create GitHub issue
+If a hybrid is best, say which pieces should be combined and why.
 
-Create a refactor RFC as a GitHub issue using `gh issue create`. Use the template in [REFERENCE.md](REFERENCE.md). Do NOT ask the user to review before creating — just create it and share the URL.
+Ground the recommendation in:
+
+- current repo patterns
+- expected testability
+- migration cost
+- documentation churn
+- fit with AvNav/plugin/runtime constraints
+
+## 7. Write the architectural plan artifact
+
+Create `exec-plans/active/PLAN<N>.md` using the next free plan number after checking active and completed plans.
+
+Use the template in `REFERENCE.md` as the base, adapted to the concrete subsystem.
+
+## 8. Output rule
+
+Do not default to GitHub issues or `gh issue create`. In this repository, the primary artifact is the local execution plan under `exec-plans/active/`.

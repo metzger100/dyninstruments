@@ -1,107 +1,151 @@
 ---
 name: prd-to-plan
-description: Turn a PRD into a multi-phase implementation plan using tracer-bullet vertical slices, saved as a local Markdown file in ./plans/. Use when user wants to break down a PRD, create an implementation plan, plan phases from a PRD, or mentions "tracer bullets".
+description: Turn a PRD or feature brief into a repo-local dyninstruments execution plan with phased vertical slices, saved in exec-plans/active/PLAN*.md.
 ---
 
 # PRD to Plan
 
-Break a PRD into a phased implementation plan using vertical slices (tracer bullets). Output is a Markdown file in `./plans/`.
+Convert a PRD into a phased, implementation-ready execution plan that matches this repository's planning style.
 
-## Process
+## 1. Confirm the source brief
 
-### 1. Confirm the PRD is in context
+The PRD, feature brief, or requirement set should already be in context. If it is not, ask the user to paste it or point to the file.
 
-The PRD should already be in the conversation. If it isn't, ask the user to paste it or point you to the file.
+## 2. Mandatory repo preflight
 
-### 2. Explore the codebase
+Always read before planning:
 
-If you have not already explored the codebase, do so to understand the current architecture, existing patterns, and integration layers.
+1. `documentation/TABLEOFCONTENTS.md`
+2. `documentation/conventions/coding-standards.md`
+3. `documentation/conventions/smell-prevention.md`
 
-### 3. Identify durable architectural decisions
+Then read only the most relevant additional docs and source areas for the requested feature. Prefer existing guides, widget docs, architecture docs, and the nearest current implementation.
 
-Before slicing, identify high-level decisions that are unlikely to change throughout implementation:
+Also inspect existing plans in:
 
-- Route structures / URL patterns
-- Database schema shape
-- Key data models
-- Authentication / authorization approach
-- Third-party service boundaries
+- `exec-plans/active/`
+- `exec-plans/completed/`
 
-These go in the plan header so every phase can reference them.
+Match their tone, structure, and specificity.
 
-### 4. Draft vertical slices
+## 3. Verify the current baseline in the repo
 
-Break the PRD into **tracer bullet** phases. Each phase is a thin vertical slice that cuts through ALL integration layers end-to-end, NOT a horizontal slice of one layer.
+Before drafting phases, verify the current implementation reality and capture it concretely.
 
-<vertical-slice-rules>
-- Each slice delivers a narrow but COMPLETE path through every layer (schema, API, UI, tests)
-- A completed slice is demoable or verifiable on its own
-- Prefer many thin slices over few thick ones
-- Do NOT include specific file names, function names, or implementation details that are likely to change as later phases are built
-- DO include durable decisions: route paths, schema shapes, data model names
-</vertical-slice-rules>
+The baseline should use specific modules, configs, docs, and contracts when they are already stable and verified in the repo. In this repository, concrete references are preferred over vague guesses.
 
-### 5. Quiz the user
+Typical baseline items include:
 
-Present the proposed breakdown as a numbered list. For each phase show:
+- relevant cluster config owners under `config/clusters/`
+- mapper or view-model owners under `cluster/`
+- renderer/widget owners under `widgets/` or `cluster/rendering/`
+- shared helpers, formatters, and layout utilities
+- existing docs that define the behavior or style contract
+- existing tests or coverage gaps in the affected area
 
-- **Title**: short descriptive name
-- **User stories covered**: which user stories from the PRD this addresses
+## 4. Capture durable repo-specific decisions
 
-Ask the user:
+Before slicing work, identify decisions that are unlikely to change during implementation. Prefer dyninstruments-specific decisions such as:
 
-- Does the granularity feel right? (too coarse / too fine)
-- Should any phases be merged or split further?
+- cluster / kind ownership
+- surface choice (`html` vs `canvas-dom`)
+- store keys and data sources
+- editable parameter ownership
+- host-action or `avnav.api` boundaries
+- shared layout / fit / rendering ownership
+- documentation owners that must stay in sync
 
-Iterate until the user approves the breakdown.
+Do not force generic sections like routes, database schema, or auth unless the feature genuinely needs them.
 
-### 6. Write the plan file
+## 5. Draft thin vertical slices
 
-Create `./plans/` if it doesn't exist. Write the plan as a Markdown file named after the feature (e.g. `./plans/user-onboarding.md`). Use the template below.
+Break the work into tracer-bullet phases.
 
-<plan-template>
-# Plan: <Feature Name>
+### Vertical slice rules
 
-> Source PRD: <brief identifier or link>
+- Each phase must be end-to-end through the real repo layers it touches.
+- A phase should be demoable or verifiable on its own.
+- Prefer many thin slices over a few large ones.
+- Use concrete module references when they are verified and durable enough to guide the work.
+- Avoid speculative file names or invented abstractions.
+- Include tests and documentation in the slices where behavior or contracts change.
 
-## Architectural decisions
+In this repo, a thin slice often cuts through some subset of:
 
-Durable decisions that apply across all phases:
+- config and kind registration
+- mapper or view-model shaping
+- renderer / widget implementation
+- CSS or visual contract updates
+- tests
+- documentation
 
-- **Routes**: ...
-- **Schema**: ...
-- **Key models**: ...
-- (add/remove sections as appropriate)
+## 6. Review the proposed phase breakdown with the user
 
----
+Present the phase breakdown as a numbered list. For each phase include:
+
+- title
+- user stories or goals covered
+- what becomes verifiable after that phase
+
+Ask whether the granularity is right and whether any phases should be merged, split, or reordered.
+
+## 7. Write the plan file
+
+Write the approved plan to `exec-plans/active/PLAN<N>.md`, where `<N>` is the next free plan number after checking both `exec-plans/active/` and `exec-plans/completed/`.
+
+Use a structure like this:
+
+```md
+# PLAN<N> — <Feature Name>
+
+## Status
+
+Short status note describing why the plan exists and what source brief it was derived from.
+
+## Goal
+
+What the feature should accomplish for the user.
+
+## Verified Baseline
+
+A numbered list of repo facts verified before planning. Include concrete files/modules/docs when relevant.
+
+## Durable Decisions / Constraints
+
+The stable architectural decisions and repo constraints that all phases must respect.
 
 ## Phase 1: <Title>
 
-**User stories**: <list from PRD>
+### Scope
 
-### What to build
-
-A concise description of this vertical slice. Describe the end-to-end behavior, not layer-by-layer implementation.
-
-### Acceptance criteria
-
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
-
----
-
-## Phase 2: <Title>
-
-**User stories**: <list from PRD>
-
-### What to build
-
-...
+Describe the thin vertical slice.
 
 ### Acceptance criteria
 
 - [ ] ...
 
-<!-- Repeat for each phase -->
-</plan-template>
+### Notes / affected areas
+
+- ...
+
+## Phase 2: <Title>
+
+...
+
+## Testing and Validation
+
+- tests to add or update
+- docs to update
+- final verification expectations
+- `npm run check:all` for code changes
+
+## Out of Scope
+
+Items intentionally excluded from this plan.
+```
+
+## 8. Final expectations
+
+- The plan must fit the repo's real architecture, not a generic app template.
+- If the plan changes behavior or contracts, name the docs that must be updated.
+- If the plan implies cleanup work, note whether `npm run gc:status` and `npm run gc:update-baseline` will be needed.

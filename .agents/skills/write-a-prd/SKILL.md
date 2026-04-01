@@ -1,74 +1,134 @@
 ---
 name: write-a-prd
-description: Create a PRD through user interview, codebase exploration, and module design, then submit as a GitHub issue. Use when user wants to write a PRD, create a product requirements document, or plan a new feature.
+description: Create a repo-local feature brief / PRD for dyninstruments through codebase exploration and user interview, then save it as an exec-plans/active/PLAN*.md artifact instead of a GitHub issue.
 ---
 
-This skill will be invoked when the user wants to create a PRD. You may skip steps if you don't consider them necessary.
+# Write a PRD
 
-1. Ask the user for a long, detailed description of the problem they want to solve and any potential ideas for solutions.
+Use this skill when the user wants to define a feature, clarify requirements, or write an implementation-ready PRD that fits this repository.
 
-2. Explore the repo to verify their assertions and understand the current state of the codebase.
+## 1. Capture the problem and desired outcome
 
-3. Interview the user relentlessly about every aspect of this plan until you reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one.
+If the user already described the feature, start there. Otherwise ask for:
 
-4. Sketch out the major modules you will need to build or modify to complete the implementation. Actively look for opportunities to extract deep modules that can be tested in isolation.
+- the user problem
+- the intended outcome
+- who benefits
+- constraints or must-haves
+- any implementation ideas already on the table
 
-A deep module (as opposed to a shallow module) is one which encapsulates a lot of functionality in a simple, testable interface which rarely changes.
+## 2. Mandatory repo preflight
 
-Check with the user that these modules match their expectations. Check with the user which modules they want tests written for.
+Always read first:
 
-5. Once you have a complete understanding of the problem and solution, use the template below to write the PRD. The PRD should be submitted as a GitHub issue.
+1. `documentation/TABLEOFCONTENTS.md`
+2. `documentation/conventions/coding-standards.md`
+3. `documentation/conventions/smell-prevention.md`
 
-<prd-template>
+Then read only the most relevant additional docs and code paths.
+
+## 3. Explore the repo before making requirements claims
+
+Verify the current architecture and existing feature surface so the PRD reflects the real codebase.
+
+Look for:
+
+- nearest existing widget, renderer, cluster, or guide
+- current editable parameters and config ownership
+- runtime or host constraints
+- documentation that defines user-visible behavior
+- existing tests or coverage gaps
+
+## 4. Interview until the feature boundary is clear
+
+Resolve the major branches of the design tree, including:
+
+- target cluster and kind
+- data inputs and store keys
+- user-visible behavior and state changes
+- interaction model, if any
+- visual / layout expectations
+- surface choice (`html` vs `canvas-dom`)
+- settings/editables
+- success criteria
+- out-of-scope items
+
+When a question can be answered from the repo, inspect the repo instead of asking the user.
+
+## 5. Sketch the module impact in repo terms
+
+Describe the likely modules, seams, and docs that the feature will touch. Prefer dyninstruments concepts over generic app architecture.
+
+Typical areas include:
+
+- cluster config and kind registration
+- mapper / view-model shaping
+- renderer/widget implementation
+- shared layout or helper utilities
+- CSS/state contract
+- tests
+- documentation
+
+Deep modules are encouraged, but the proposal must respect this repo's existing ownership and file-size constraints.
+
+## 6. Write the PRD as a repo-local artifact
+
+Save the result to `exec-plans/active/PLAN<N>.md` using the next free plan number after checking active and completed plans.
+
+Use a structure like this:
+
+```md
+# PLAN<N> — <Feature Name>
+
+## Status
+
+Why this feature brief exists and what request it came from.
 
 ## Problem Statement
 
-The problem that the user is facing, from the user's perspective.
+The problem from the end-user or maintainer perspective.
 
-## Solution
+## Goals
 
-The solution to the problem, from the user's perspective.
+The outcomes this feature must achieve.
 
 ## User Stories
 
-A LONG, numbered list of user stories. Each user story should be in the format of:
+A numbered list of concrete user stories.
 
-1. As an <actor>, I want a <feature>, so that <benefit>
+## Verified Baseline
 
-<user-story-example>
-1. As a mobile bank customer, I want to see balance on my accounts, so that I can make better informed decisions about my spending
-</user-story-example>
+Concrete repo facts checked before writing the PRD.
 
-This list of user stories should be extremely extensive and cover all aspects of the feature.
+## Proposed Solution
+
+High-level solution shaped around the real repo architecture.
 
 ## Implementation Decisions
 
-A list of implementation decisions that were made. This can include:
-
-- The modules that will be built/modified
-- The interfaces of those modules that will be modified
-- Technical clarifications from the developer
-- Architectural decisions
-- Schema changes
-- API contracts
-- Specific interactions
-
-Do NOT include specific file paths or code snippets. They may end up being outdated very quickly.
+Durable technical choices already understood.
 
 ## Testing Decisions
 
-A list of testing decisions that were made. Include:
+What should be tested, how success is verified, and any prior-art tests to mirror.
 
-- A description of what makes a good test (only test external behavior, not implementation details)
-- Which modules will be tested
-- Prior art for the tests (i.e. similar types of tests in the codebase)
+## Documentation Impact
+
+Docs that must be created or updated.
 
 ## Out of Scope
 
-A description of the things that are out of scope for this PRD.
+Explicit non-goals.
 
-## Further Notes
+## Open Questions
 
-Any further notes about the feature.
+Any unresolved items.
+```
 
-</prd-template>
+## 7. Optional handoff
+
+If the user wants an execution plan immediately after the PRD, convert the approved brief into phased work using the `prd-to-plan` approach and keep the output in the repo-local `exec-plans/active/` workflow.
+
+## 8. Output rule
+
+Do not default to a GitHub issue. In this repository, the primary artifact is the local markdown plan/brief under `exec-plans/active/`.

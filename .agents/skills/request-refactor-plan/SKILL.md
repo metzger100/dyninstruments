@@ -1,68 +1,143 @@
 ---
 name: request-refactor-plan
-description: Create a detailed refactor plan with tiny commits via user interview, then file it as a GitHub issue. Use when user wants to plan a refactor, create a refactoring RFC, or break a refactor into safe incremental steps.
+description: Create a dyninstruments refactor execution plan with safe incremental steps, concrete repo references, and a repo-local PLAN artifact instead of a GitHub issue.
 ---
 
-This skill will be invoked when the user wants to create a refactor request. You should go through the steps below. You may skip steps if you don't consider them necessary.
+# Request Refactor Plan
 
-1. Ask the user for a long, detailed description of the problem they want to solve and any potential ideas for solutions.
+Use this skill when the user wants to plan a refactor, reduce architectural friction, or break a risky change into safe incremental steps.
 
-2. Explore the repo to verify their assertions and understand the current state of the codebase.
+## 1. Get the refactor problem into context
 
-3. Ask whether they have considered other options, and present other options to them.
+If the user has already described the problem, start from that description. Otherwise ask for:
 
-4. Interview the user about the implementation. Be extremely detailed and thorough.
+- the pain they are seeing
+- the area of the repo involved
+- any ideas they already have
+- constraints, risks, or deadlines
 
-5. Hammer out the exact scope of the implementation. Work out what you plan to change and what you plan not to change.
+## 2. Mandatory repo preflight
 
-6. Look in the codebase to check for test coverage of this area of the codebase. If there is insufficient test coverage, ask the user what their plans for testing are.
+Always read first:
 
-7. Break the implementation into a plan of tiny commits. Remember Martin Fowler's advice to "make each refactoring step as small as possible, so that you can always see the program working."
+1. `documentation/TABLEOFCONTENTS.md`
+2. `documentation/conventions/coding-standards.md`
+3. `documentation/conventions/smell-prevention.md`
 
-8. Create a GitHub issue with the refactor plan. Use the following template for the issue description:
+Then inspect only the most relevant docs, code paths, and nearest execution plans.
 
-<refactor-plan-template>
+## 3. Verify the current state instead of trusting assumptions
+
+Explore the repo to confirm:
+
+- which modules currently own the behavior
+- where the coupling or duplication lives
+- what invariants must not break
+- what tests already protect the area
+- what docs currently describe the contract
+
+Use concrete file and module references when they are verified. In this repo, that level of specificity is expected in plans.
+
+## 4. Clarify scope and non-goals
+
+Narrow the refactor until there is a crisp boundary around:
+
+- what will change
+- what must remain behaviorally identical
+- what follow-up work is intentionally deferred
+
+Be explicit about repo-specific constraints such as UMD boundaries, host integration, surface ownership, config ownership, and file-size limits.
+
+## 5. Evaluate alternatives
+
+Present at least 2 plausible approaches when the choice is non-trivial. Explain trade-offs in terms of:
+
+- coupling reduction
+- testability
+- migration risk
+- documentation churn
+- compatibility with existing repo patterns
+
+## 6. Inspect coverage and regression protection
+
+Check what tests exist in the affected area and note any gaps. If the refactor is not well protected, include a step early in the plan to add safety coverage before deeper changes.
+
+Good tests in this repo should focus on external behavior and stable contracts, not internal implementation trivia.
+
+## 7. Break the work into small safe steps
+
+Write the implementation as tiny working steps that keep the codebase usable after each step.
+
+Use concrete module names and files when verified. Avoid only when the path is speculative.
+
+A good step sequence usually looks like:
+
+1. add or strengthen regression protection
+2. extract or normalize contracts
+3. migrate one call site or rendering path at a time
+4. remove dead paths / duplication
+5. update docs
+6. run final validation
+
+## 8. Write the repo-local plan artifact
+
+Create `exec-plans/active/PLAN<N>.md` using the next free plan number after checking active and completed plans.
+
+Use a structure like this:
+
+```md
+# PLAN<N> — <Refactor Name>
+
+## Status
+
+Why this refactor plan exists.
 
 ## Problem Statement
 
-The problem that the developer is facing, from the developer's perspective.
+Describe the friction from the maintainer's perspective.
 
-## Solution
+## Verified Baseline
 
-The solution to the problem, from the developer's perspective.
+Concrete repo facts verified before planning.
 
-## Commits
+## Desired End State
 
-A LONG, detailed implementation plan. Write the plan in plain English, breaking down the implementation into the tiniest commits possible. Each commit should leave the codebase in a working state.
+What the architecture should look like after the refactor.
 
-## Decision Document
+## Decision Log
 
-A list of implementation decisions that were made. This can include:
+Durable choices that shape the refactor.
 
-- The modules that will be built/modified
-- The interfaces of those modules that will be modified
-- Technical clarifications from the developer
-- Architectural decisions
-- Schema changes
-- API contracts
-- Specific interactions
+## Stepwise Implementation Plan
 
-Do NOT include specific file paths or code snippets. They may end up being outdated very quickly.
+### Step 1: ...
+- goal
+- affected areas
+- safety checks
 
-## Testing Decisions
+### Step 2: ...
+...
 
-A list of testing decisions that were made. Include:
+## Testing Strategy
 
-- A description of what makes a good test (only test external behavior, not implementation details)
-- Which modules will be tested
-- Prior art for the tests (i.e. similar types of tests in the codebase)
+- protection to add first
+- behaviors to verify
+- prior-art tests to mirror
+
+## Documentation Updates
+
+Docs that must change if contracts or behavior move.
 
 ## Out of Scope
 
-A description of the things that are out of scope for this refactor.
+What this refactor intentionally does not do.
 
-## Further Notes (optional)
+## Validation
 
-Any further notes about the refactor.
+- `npm run check:all`
+- any cleanup or baseline commands if relevant
+```
 
-</refactor-plan-template>
+## 9. Output rule
+
+Do not default to creating a GitHub issue. In this repo, the primary artifact is the local execution plan under `exec-plans/active/`. Only create an issue if the user explicitly asks for one.

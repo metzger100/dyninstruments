@@ -1,78 +1,125 @@
 # Reference
 
-## Dependency Categories
+## Architecture Evaluation Lens for dyninstruments
 
-When assessing a candidate for deepening, classify its dependencies:
+When proposing a deeper or simpler interface, classify the dominant boundary involved.
 
-### 1. In-process
+### 1. Pure in-process boundary
 
-Pure computation, in-memory state, no I/O. Always deepenable — just merge the modules and test directly.
+Pure computation, layout math, formatting, config normalization, or other logic that can be exercised entirely in memory.
 
-### 2. Local-substitutable
+Recommendation pattern:
 
-Dependencies that have local test stand-ins (e.g., PGLite for Postgres, in-memory filesystem). Deepenable if the test substitute exists. The deepened module is tested with the local stand-in running in the test suite.
+- merge shallow helpers behind one clear owner
+- expose one small stable interface
+- test behavior at that interface
 
-### 3. Remote but owned (Ports & Adapters)
+### 2. Browser / DOM boundary
 
-Your own services across a network boundary (microservices, internal APIs). Define a port (interface) at the module boundary. The deep module owns the logic; the transport is injected. Tests use an in-memory adapter. Production uses the real HTTP/gRPC/queue adapter.
+Logic depends on DOM measurement, CSS classes, resize handling, or widget lifecycle, but is still local to the browser runtime.
 
-Recommendation shape: "Define a shared interface (port), implement an HTTP adapter for production and an in-memory adapter for testing, so the logic can be tested as one deep module even though it's deployed across a network boundary."
+Recommendation pattern:
 
-### 4. True external (Mock)
+- keep DOM-touching code at the boundary
+- move decision-making and normalization behind a testable facade
+- use jsdom-friendly seams where practical
 
-Third-party services (Stripe, Twilio, etc.) you don't control. Mock at the boundary. The deepened module takes the external dependency as an injected port, and tests provide a mock implementation.
+### 3. Host integration boundary
+
+Logic depends on AvNav host capabilities, `window.avnav`, host actions, or page-specific dispatch behavior.
+
+Recommendation pattern:
+
+- isolate host coupling behind a small adapter or capability facade
+- make the rest of the logic consume normalized host capabilities
+- test core logic without requiring real host runtime access
+
+### 4. Registry / configuration boundary
+
+Behavior is spread across kind catalogs, config registries, editables, or mapper wiring.
+
+Recommendation pattern:
+
+- reduce duplication in registration and normalization flows
+- keep the source of truth obvious
+- avoid introducing a generic layer that obscures ownership
+
+### 5. True external boundary
+
+Rare in this repo, but applies when a dependency cannot be exercised directly in tests.
+
+Recommendation pattern:
+
+- inject a narrow boundary
+- use a focused test double
+- keep the interface centered on repo behavior, not vendor API shape
 
 ## Testing Strategy
 
-The core principle: **replace, don't layer.**
+Core principle: test the deepest stable interface you can justify.
 
-- Old unit tests on shallow modules are waste once boundary tests exist — delete them
-- Write new tests at the deepened module's interface boundary
-- Tests assert on observable outcomes through the public interface, not internal state
-- Tests should survive internal refactors — they describe behavior, not implementation
+- Prefer behavior tests over implementation-detail tests.
+- Replace shallow redundant tests once stronger boundary tests cover the behavior.
+- For refactors, add regression protection before moving ownership.
+- Keep tests aligned with stable contracts so internal reorganization stays cheap.
 
-## Issue Template
+## PLAN Template
 
-<issue-template>
+```md
+# PLAN<N> — <Architecture Improvement Name>
+
+## Status
+
+Why the architectural review / refactor proposal exists.
 
 ## Problem
 
-Describe the architectural friction:
+Describe the friction clearly.
 
-- Which modules are shallow and tightly coupled
-- What integration risk exists in the seams between them
-- Why this makes the codebase harder to navigate and maintain
+## Verified Baseline
 
-## Proposed Interface
+Concrete repo facts checked before proposing changes.
 
-The chosen interface design:
+## Candidate Interface Designs
 
-- Interface signature (types, methods, params)
-- Usage example showing how callers use it
-- What complexity it hides internally
+### Option A — Minimal interface
+- interface signature
+- usage example
+- complexity hidden internally
+- dependency strategy
+- trade-offs
 
-## Dependency Strategy
+### Option B — Flexible interface
+...
 
-Which category applies and how dependencies are handled:
+### Option C — Common-case optimized interface
+...
 
-- **In-process**: merged directly
-- **Local-substitutable**: tested with [specific stand-in]
-- **Ports & adapters**: port definition, production adapter, test adapter
-- **Mock**: mock boundary for external services
+### Option D — Ports / adapters boundary (only if applicable)
+...
+
+## Recommendation
+
+Strong opinion on which design best fits this repo and why.
+
+## Migration Strategy
+
+How callers move to the recommended interface safely.
 
 ## Testing Strategy
 
-- **New boundary tests to write**: describe the behaviors to verify at the interface
-- **Old tests to delete**: list the shallow module tests that become redundant
-- **Test environment needs**: any local stand-ins or adapters required
+New boundary tests, obsolete tests, and regression coverage to add first.
 
-## Implementation Recommendations
+## Documentation Impact
 
-Durable architectural guidance that is NOT coupled to current file paths:
+Docs that should change if the design lands.
 
-- What the module should own (responsibilities)
-- What it should hide (implementation details)
-- What it should expose (the interface contract)
-- How callers should migrate to the new interface
+## Out of Scope
 
-</issue-template>
+What this architecture work intentionally does not solve.
+
+## Validation
+
+- `npm run check:all`
+- any cleanup commands if relevant
+```
