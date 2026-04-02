@@ -63,3 +63,4 @@ session.getState();
 - [runtime-lifecycle.md](runtime-lifecycle.md)
 - [cluster-widget-system.md](cluster-widget-system.md)
 - [component-system.md](component-system.md)
+- [html-renderer-lifecycle.md](html-renderer-lifecycle.md)

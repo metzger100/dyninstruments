@@ -120,5 +120,7 @@ Use this template section in each HTML widget module doc:
 
 - [../guides/add-new-html-kind.md](../guides/add-new-html-kind.md)
 - [../widgets/active-route.md](../widgets/active-route.md)
+- [../architecture/html-renderer-lifecycle.md](../architecture/html-renderer-lifecycle.md)
+- [../architecture/vertical-container-contract.md](../architecture/vertical-container-contract.md)
 - [css-theming.md](css-theming.md)
 - [responsive-scale-profile.md](responsive-scale-profile.md)

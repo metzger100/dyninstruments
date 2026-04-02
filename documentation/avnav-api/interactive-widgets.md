@@ -52,6 +52,7 @@ renderHtml: function(props) {
 Use a wrapper `onclick="catchAll"` so empty-space taps inside the widget also stop bubbling.
 
 For dyninstruments cluster HTML kinds, only `catchAll` is global. Named handlers are session-owned by `HtmlSurfaceController` and are attached/removed via `attach`/`detach`/`destroy`.
+Dispatch-capable HTML kinds can predeclare handler names in markup, but committed-DOM-dependent interaction wiring still belongs to post-mount attach/update phases; see [../architecture/html-renderer-lifecycle.md](../architecture/html-renderer-lifecycle.md).
 
 ### Approach B: `renderHtml` Returning React/HTM Elements
 
@@ -97,3 +98,4 @@ For a Regatta Timer or similar control-heavy widget:
 - [plugin-lifecycle.md](plugin-lifecycle.md) — registration, `eventHandler`, lifecycle hooks
 - [editable-parameters.md](editable-parameters.md) — parameter definitions for interactive widgets
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md) — cluster routing for non-interactive renderers
+- [../architecture/html-renderer-lifecycle.md](../architecture/html-renderer-lifecycle.md) — committed-DOM timing for HTML interaction wiring

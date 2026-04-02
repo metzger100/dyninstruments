@@ -164,6 +164,7 @@ This is dyninstruments-only runtime behavior, not official AvNav API.
 - HTML renderers provide `resizeSignature(props)` through the HTML surface contract.
 - On signature change, `HtmlSurfaceController` calls `triggerResize()` exactly once for that update pass.
 - This keeps layout-sensitive HTML kinds responsive without global observers.
+- Some HTML kinds require one corrective rerender after first mount when committed DOM ancestry (`shellEl`/`rootEl`) becomes available; see [../architecture/html-renderer-lifecycle.md](../architecture/html-renderer-lifecycle.md).
 
 ### Module create() Pattern
 
@@ -212,3 +213,4 @@ After registration, `runtime/init.js` applies theme presets by discovering `.wid
 - [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md) — contract boundaries and tuple policy
 - [interactive-widgets.md](interactive-widgets.md) — preventing instrument-dashboard (`GpsPage`) click-to-navigate for interactive content
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md) — ClusterWidget mapper
+- [../architecture/html-renderer-lifecycle.md](../architecture/html-renderer-lifecycle.md) — corrective rerender and committed-DOM lifecycle contract

@@ -127,6 +127,11 @@ Navpage vertical guard:
 - contract: `height: auto`, `aspect-ratio: 2 / 1`, `min-height: 4.8em`
 - purpose: prevent map zoom tile shrink in vertical navpage stacks
 
+Implementation note:
+
+- `MapZoomTextHtmlWidget` follows the corrective-rerender pattern (`initFunction().triggerResize()` + committed host facts) documented in [../architecture/html-renderer-lifecycle.md](../architecture/html-renderer-lifecycle.md).
+- Vertical-stack behavior is CSS-only (`.widgetContainer.vertical` presentation overrides); JS renderers do not inject height, per [../architecture/vertical-container-contract.md](../architecture/vertical-container-contract.md).
+
 ## Formatting and Fail-Closed Contract
 
 Formatting:
@@ -181,3 +186,5 @@ Source tests: `tests/cluster/rendering/MapZoomTextHtmlWidget.test.js`.
 - [../shared/html-widget-visual-style-guide.md](../shared/html-widget-visual-style-guide.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
 - [../avnav-api/plugin-lifecycle.md](../avnav-api/plugin-lifecycle.md)
+- [../architecture/html-renderer-lifecycle.md](../architecture/html-renderer-lifecycle.md)
+- [../architecture/vertical-container-contract.md](../architecture/vertical-container-contract.md)

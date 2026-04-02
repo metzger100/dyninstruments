@@ -71,3 +71,4 @@ spacePx = max(floor, floor((spanPx * ratio) / (sqrt(count) * textFillScale)))
 
 - [../widgets/center-display.md](../widgets/center-display.md)
 - [../conventions/coding-standards.md](../conventions/coding-standards.md)
+- [../architecture/vertical-container-contract.md](../architecture/vertical-container-contract.md)

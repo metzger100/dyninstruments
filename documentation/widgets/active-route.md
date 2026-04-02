@@ -195,6 +195,11 @@ Fail-closed behavior:
 | rounded shell width | geometry-driven fit updates |
 | rounded shell height | geometry-driven fit updates |
 
+Implementation note:
+
+- `ActiveRouteTextHtmlWidget` uses `initFunction().triggerResize()` to force a corrective rerender once committed host facts are available.
+- Layout/fit reads committed DOM ancestry from host commit state (`__dyniHostCommitState`); see [../architecture/html-renderer-lifecycle.md](../architecture/html-renderer-lifecycle.md).
+
 ## Visual Regression Checklist
 
 Source tests: `tests/cluster/rendering/ActiveRouteTextHtmlWidget.test.js`, `tests/shared/nav/ActiveRouteLayout.test.js`.
@@ -214,4 +219,5 @@ Source tests: `tests/cluster/rendering/ActiveRouteTextHtmlWidget.test.js`, `test
 - [../shared/html-widget-visual-style-guide.md](../shared/html-widget-visual-style-guide.md)
 - [../guides/add-new-html-kind.md](../guides/add-new-html-kind.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
+- [../architecture/html-renderer-lifecycle.md](../architecture/html-renderer-lifecycle.md)
 - [../shared/responsive-scale-profile.md](../shared/responsive-scale-profile.md)

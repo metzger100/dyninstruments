@@ -78,6 +78,7 @@ This page documents the live runtime lifecycle after the `renderHtml` host-path 
 - [cluster-widget-system.md](cluster-widget-system.md)
 - [host-commit-controller.md](host-commit-controller.md)
 - [surface-session-controller.md](surface-session-controller.md)
+- [html-renderer-lifecycle.md](html-renderer-lifecycle.md)
 - [canvas-dom-surface-adapter.md](canvas-dom-surface-adapter.md)
 - [../shared/theme-tokens.md](../shared/theme-tokens.md)
 - [../shared/helpers.md](../shared/helpers.md)
