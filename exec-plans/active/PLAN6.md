@@ -1,4 +1,4 @@
-# PLAN5 — Route Points List Widget (`nav/routePoints`)
+# PLAN6 — Route Points List Widget (`nav/routePoints`)
 
 ## Status
 
