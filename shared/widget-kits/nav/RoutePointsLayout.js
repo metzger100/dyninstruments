@@ -210,16 +210,14 @@
         ratioThresholdFlat: cfg.ratioThresholdFlat,
         isVerticalContainer: isVerticalContainer
       });
-      const rowHeight = computeRowHeight(contentRect.w, contentRect.h, isVerticalContainer);
+      const rowHeightSourceWidth = isVerticalContainer
+        ? Math.max(1, Math.floor(clampNumber(cfg.verticalAnchorWidth, 1, Number.MAX_SAFE_INTEGER, contentRect.w)))
+        : contentRect.w;
+      const rowHeight = computeRowHeight(rowHeightSourceWidth, contentRect.h, isVerticalContainer);
       const rowGap = Math.max(1, Math.floor(rowHeight * ROW_GAP_RATIO));
       const headerGap = Math.max(1, Math.floor(rowHeight * HEADER_GAP_RATIO));
       const rowPadding = Math.max(1, Math.floor(rowHeight * ROW_PADDING_RATIO));
-      const trailingGutterPx = Math.max(0, Math.floor(clampNumber(
-        cfg.trailingGutterPx,
-        0,
-        Number.MAX_SAFE_INTEGER,
-        0
-      )));
+      const trailingGutterPx = Math.max(0, Math.floor(clampNumber(cfg.trailingGutterPx, 0, Number.MAX_SAFE_INTEGER, 0)));
 
       let headerRect = null;
       let listRect = contentRect;
@@ -337,7 +335,7 @@
         header: header,
         list: {
           style: toSizeStyle(layout.listRect),
-          contentStyle: "min-height:" + Math.max(0, layout.listContentHeight) + "px;"
+          contentStyle: "min-height:" + Math.max(0, layout.listContentHeight) + "px;gap:" + Math.max(0, layout.rowGap) + "px;"
         },
         rows: layout.rows.map(function (row) {
           return {

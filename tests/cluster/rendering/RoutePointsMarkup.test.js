@@ -31,7 +31,7 @@ describe("RoutePointsMarkup", function () {
         },
         list: {
           style: "width:100px;height:160px;",
-          contentStyle: "min-height:90px;"
+          contentStyle: "min-height:90px;gap:2px;"
         },
         rows: [
           {
@@ -159,6 +159,7 @@ describe("RoutePointsMarkup", function () {
     expect(html).toContain('style="height:180px;"');
     expect(html).toContain('style="width:100px;height:20px;"');
     expect(html).toContain('style="width:100px;height:160px;"');
+    expect(html).toContain('style="min-height:90px;gap:2px;"');
     expect(html).toContain('style="font-size:11px;"');
     expect(html).toContain('style="font-size:10px;"');
     expect(html).toContain('style="width:9px;height:9px;"');

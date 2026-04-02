@@ -219,6 +219,7 @@ describe("RoutePointsLayout", function () {
     expect(inline.list.style).toContain("width:" + out.listRect.w + "px;");
     expect(inline.list.style).toContain("height:" + out.listRect.h + "px;");
     expect(inline.list.contentStyle).toContain("min-height:" + out.listContentHeight + "px;");
+    expect(inline.list.contentStyle).toContain("gap:" + out.rowGap + "px;");
     expect(inline.rows[0].rowStyle).toContain("height:" + out.rows[0].rowRect.h + "px;");
     expect(inline.rows[0].nameStyle).toContain("width:" + out.rows[0].nameRect.w + "px;");
     expect(inline.rows[0].markerDotStyle).toMatch(/^width:\d+px;height:\d+px;$/);

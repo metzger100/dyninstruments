@@ -178,6 +178,7 @@
         ratioThresholdNormal: model.ratioThresholdNormal,
         ratioThresholdFlat: model.ratioThresholdFlat,
         isVerticalContainer: model.isVerticalContainer === true,
+        verticalAnchorWidth: W,
         showHeader: model.showHeader,
         pointCount: pointCount,
         responsive: insets.responsive,

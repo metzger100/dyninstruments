@@ -182,6 +182,7 @@ Anchor model:
 - Host-sized path: `computeProfile(W, H)` (`minDim = min(W, H)`).
 - Vertical path: `computeProfile(W, W)` (`minDim = W`).
 - Row-height floor clamp via `computeInsetPx(...)`, ceiling clamp in layout owner.
+- Vertical render-model flow passes shell width as the layout `verticalAnchorWidth` so row-height anchoring remains consistent between `computeNaturalHeight(...)` and the final list viewport geometry.
 
 Structural geometry owner:
 
@@ -189,6 +190,7 @@ Structural geometry owner:
 - Widget CSS does not redefine mode geometry ratios or row/header dimensions.
 - Row geometry accepts `trailingGutterPx` and reserves that width before marker placement so marker cells do not collide with visible scrollbars.
 - Marker dot size is geometry-driven (`markerDotStyle`) and derived from marker-cell dimensions.
+- List content style includes both modeled `min-height` and `gap` (`rowGap`) so inter-row spacing in DOM matches layout math.
 
 ## Text-Fit Contract (Owner: RoutePointsHtmlFit)
 

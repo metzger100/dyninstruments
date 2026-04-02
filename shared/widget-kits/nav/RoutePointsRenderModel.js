@@ -252,6 +252,7 @@
         ratioThresholdNormal: layout.ratioThresholdNormal,
         ratioThresholdFlat: layout.ratioThresholdFlat,
         isVerticalContainer: isVerticalContainer,
+        verticalAnchorWidth: shellWidth,
         showHeader: showHeader,
         pointCount: pointCount,
         responsive: insets.responsive,

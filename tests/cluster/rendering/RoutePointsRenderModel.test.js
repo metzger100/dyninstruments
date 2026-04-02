@@ -125,6 +125,11 @@ describe("RoutePointsRenderModel", function () {
     return match ? Number(match[1]) : 0;
   }
 
+  function extractMinHeight(style) {
+    const match = String(style || "").match(/min-height:(\d+)px;/);
+    return match ? Number(match[1]) : 0;
+  }
+
   it("builds course/distance rows with placeholder first row and name fallback", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
@@ -274,6 +279,7 @@ describe("RoutePointsRenderModel", function () {
       ratioThresholdNormal: model.ratioThresholdNormal,
       ratioThresholdFlat: model.ratioThresholdFlat,
       isVerticalContainer: true,
+      verticalAnchorWidth: model.shellWidth,
       showHeader: model.showHeader,
       pointCount: model.pointCount,
       responsive: insets.responsive,
@@ -284,6 +290,35 @@ describe("RoutePointsRenderModel", function () {
     expect(model.layoutShellHeight).not.toBe(model.shellHeight);
     expect(model.inlineGeometry.wrapper.style).toContain("height:" + expectedHeight + "px;");
     expect(extractHeight(model.inlineGeometry.list.style)).toBe(expectedLayout.listRect.h);
+  });
+
+  it("keeps vertical list viewport height aligned with row-stack min-height when uncapped", function () {
+    const renderModel = createRenderModel();
+    const points = [];
+    for (let i = 0; i < 25; i += 1) {
+      points.push({ name: "WP" + i, lat: 54 + i * 0.01, lon: 10 + i * 0.01 });
+    }
+    const props = makeProps({
+      domain: {
+        route: { name: "Long Route", points: points },
+        routeName: "Long Route",
+        pointCount: points.length,
+        selectedIndex: 12,
+        isActiveRoute: false,
+        showLatLon: false,
+        useRhumbLine: false
+      }
+    });
+    const model = renderModel.buildModel({
+      props: props,
+      hostContext: createHostContext(),
+      shellRect: { width: 320, height: 900 },
+      isVerticalCommitted: true,
+      viewportHeight: 2000
+    });
+
+    expect(model.naturalHeight.isCapped).toBe(false);
+    expect(extractHeight(model.inlineGeometry.list.style)).toBe(extractMinHeight(model.inlineGeometry.list.contentStyle));
   });
 
   it("fails closed when route payload is missing", function () {
