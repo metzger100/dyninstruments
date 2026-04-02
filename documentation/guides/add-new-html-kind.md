@@ -23,6 +23,8 @@ Read first:
 - [../avnav-api/interactive-widgets.md](../avnav-api/interactive-widgets.md)
 - [../shared/html-widget-visual-style-guide.md](../shared/html-widget-visual-style-guide.md)
 - [../widgets/active-route.md](../widgets/active-route.md)
+- [../architecture/html-renderer-lifecycle.md](../architecture/html-renderer-lifecycle.md)
+- [../architecture/vertical-container-contract.md](../architecture/vertical-container-contract.md)
 
 ## Step 1: Define or Reuse a ViewModel Contract
 
@@ -154,6 +156,77 @@ Do not ship a new HTML kind if any of these are violated:
 - no ad hoc `data-dyni-*` state markers when class/state contract is sufficient
 - no mapper presentation logic leakage (format/layout/display stays renderer/shared-owner responsibility)
 
+## Lifecycle Patterns for Complex HTML Kinds
+
+### Corrective Rerender Pattern (Committed DOM Dependencies)
+
+- Use this pattern when renderer behavior depends on committed DOM ancestry or mounted geometry (for example `.widgetContainer.vertical` detection).
+- Add `initFunction` to the renderer contract and call `this.triggerResize()` once after first mount.
+- First render must stay host-sized and avoid committed-DOM checks; corrective rerender and later updates may use committed host facts.
+- Full lifecycle and fail-closed rules: [../architecture/html-renderer-lifecycle.md](../architecture/html-renderer-lifecycle.md).
+- Reference implementation: `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js` lines 278-281.
+
+### Renderer Split Pattern (When a Single File Nears 400 Lines)
+
+When a complex HTML kind approaches file-size limits, split into separately registered UMD modules:
+
+| Module | Responsibility | DOM access |
+|---|---|---|
+| Shell (entrypoint) | lifecycle orchestration + `renderHtml`/`namedHandlers`/`resizeSignature`/`initFunction` export | reads `hostContext.__dyniHostCommitState` |
+| RenderModel | pure normalization and display-model assembly | none |
+| Markup | pure HTML assembly, escaped text, structural/style attrs | none |
+| DomEffects | committed-DOM side effects (ancestry checks, post-commit corrections) | reads/writes committed DOM |
+
+- Each module has its own UMD registration in `config/components/registry-widgets.js`.
+- Shell depends on helper modules through normal `deps` chaining.
+- `ClusterRendererRouter` depends only on the shell component.
+
+### Box-Driven Text Fitting Workflow
+
+For fitted HTML text (inline style, not canvas drawing), use this flow:
+
+1. Layout owner computes box rects for each text element.
+2. Fit owner measures against each box using `RadialTextLayout.fitSingleTextPx(...)` or `TextTileLayout.measureFittedLine(...)`.
+3. Fit owner returns only inline `font-size:Npx;` style strings.
+4. Markup owner applies those style strings via `style="..."`.
+
+Rules:
+
+- Reduce font size only when text does not fit.
+- Do not use ellipsis truncation for fitted text; keep `white-space: nowrap` + `overflow: hidden`.
+- Fit logic must not alter/trim/abbreviate text content.
+- Forbidden in fitted HTML flow: `drawFittedLine(...)`, `trimToWidth(...)`, or helpers that mutate emitted text.
+
+### Page-Aware Handler Registration
+
+Use explicit dispatch/passive mode switching when interaction is page-dependent:
+
+1. Add a capability gate (`canDispatch(hostContext)`) that checks `hostActions.getCapabilities()` for required dispatch and page constraints.
+2. `namedHandlers(props, hostContext)` returns `{ handlerName: fn }` in dispatch mode and `{}` in passive mode.
+3. Add `onclick="handlerName"` and `onclick="catchAll"` only when dispatch mode is active.
+4. Never return `catchAll` from `namedHandlers`; it is host-owned and pre-registered.
+5. In layout editing mode (`isEditingMode(props) === true`), always return passive.
+
+Reference: `ActiveRouteTextHtmlWidget` (`canDispatchOpenRoute`, `activeRouteOpen`).
+
+### Grouped Mapper Output for Complex Payloads
+
+When one mapper branch needs more than 8 top-level props (`mapper-output-complexity`), group renderer payload fields:
+
+```javascript
+return {
+  renderer: "NewHtmlWidget",
+  domain: { /* route/selection/display state */ },
+  layout: { /* thresholds, toggles */ },
+  formatting: { /* units, labels */ }
+};
+```
+
+- Keep stable top-level shape: `renderer` + named groups.
+- Add new groups only when a concrete field requires them.
+- Keep existing group structure stable once implemented.
+- `domain` owns what to render, `layout` owns geometry inputs, `formatting` owns text presentation inputs.
+
 ## Validation
 
 Required completion gate:
@@ -181,6 +254,11 @@ npm run test
 - [ ] Kind catalog tuple added with `surface: "html"`
 - [ ] Mapper branch remains declarative and renderer-aligned
 - [ ] Required HTML-kind test matrix is covered
+- [ ] Complex renderer split into Shell + helpers if approaching 400-line budget
+- [ ] Corrective rerender pattern used when committed DOM ancestry is needed
+- [ ] Text fitting follows box-driven workflow (font-size only, no text alteration)
+- [ ] Handler registration is page-aware (dispatch/passive, never returns `catchAll`)
+- [ ] Mapper output uses grouped sub-objects if >8 top-level props
 - [ ] `npm run check:all` passes
 
 ## Related
