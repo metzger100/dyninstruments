@@ -31,6 +31,8 @@
 - **Where is active-route domain normalization/disconnect ownership defined?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md#viewmodel-modules)
 - **Where is strict `cluster + kind -> surface + renderer` routing defined?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
 - **How does the surface-aware router build shell markup and session payloads?** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
+- **How does the HTML renderer lifecycle work (two-phase render, corrective rerender, committed host facts)?** → [architecture/html-renderer-lifecycle.md](architecture/html-renderer-lifecycle.md)
+- **How does `.widgetContainer.vertical` detection and natural height computation work?** → [architecture/vertical-container-contract.md](architecture/vertical-container-contract.md)
 - **How does deferred host commit scheduling work for `renderHtml` shells?** → [architecture/host-commit-controller.md](architecture/host-commit-controller.md)
 - **How does per-instance surface session switching (`attach`/`update`/`detach`/`destroy`) work?** → [architecture/surface-session-controller.md](architecture/surface-session-controller.md)
 - **How does the `canvas-dom` surface adapter integrate with the router (`renderSurfaceShell`, `createSurfaceController`, strict contracts)?** → [architecture/canvas-dom-surface-adapter.md](architecture/canvas-dom-surface-adapter.md)
@@ -154,6 +156,8 @@
 **"How are full-circle pointers configured?"** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#pointer-variants),
 **"How does full-circle tick rendering work?"** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#tick-rendering)
 **"How do full-circle layout modes work?"** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md#layout-modes),
+**"How do I read committed DOM state in an HTML renderer?"** → [architecture/html-renderer-lifecycle.md](architecture/html-renderer-lifecycle.md)
+**"How do I make an HTML widget compute its own height in `.widgetContainer.vertical`?"** → [architecture/vertical-container-contract.md](architecture/vertical-container-contract.md)
 **"Where are shared theme tokens resolved?"** → [shared/theme-tokens.md](shared/theme-tokens.md)
 **"How do I switch a theme preset at runtime?"** → [shared/theme-tokens.md](shared/theme-tokens.md#runtime-integration)
 **"Can user.css choose the active preset?"** → [shared/theme-tokens.md](shared/theme-tokens.md#runtime-integration)

@@ -68,9 +68,19 @@ Snapshot semantics:
 
 `payload.instanceId`, `payload.revision`, `payload.props`, `payload.rootEl`, `payload.shellEl`, `payload.state`
 
+## Renderer-Side Consumption (`__dyniHostCommitState`)
+
+- `cluster/ClusterWidget.js` writes `hostContext.__dyniHostCommitState` on init (`initRuntimeState`), refreshes it on each render pass (`renderHtml`), and nulls it on finalize (`finalizeFunction`).
+- HTML renderers consume committed element references from that state: `shellEl` and `rootEl`.
+- Standard resolution contract: `targetEl = commitState.shellEl || commitState.rootEl`.
+- If `__dyniHostCommitState` is missing or null, renderers must fail closed: skip committed-DOM logic and use host-sized assumptions.
+- Ownership is single-writer (`ClusterWidget` / `HostCommitController`); renderer modules treat the state as read-only.
+- For full timing rules and corrective-rerender flow, see [html-renderer-lifecycle.md](html-renderer-lifecycle.md).
+
 ## Related
 
 - [component-system.md](component-system.md)
 - [runtime-lifecycle.md](runtime-lifecycle.md)
 - [cluster-widget-system.md](cluster-widget-system.md)
 - [surface-session-controller.md](surface-session-controller.md)
+- [html-renderer-lifecycle.md](html-renderer-lifecycle.md)

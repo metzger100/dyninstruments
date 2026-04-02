@@ -118,6 +118,7 @@ Task: Add new BarometerGauge
 - Feature and API lookups: [documentation/TABLEOFCONTENTS.md](documentation/TABLEOFCONTENTS.md)
 - Non-negotiable project rules: [documentation/core-principles.md](documentation/core-principles.md)
 - Root structural orientation map for AI sessions: [ARCHITECTURE.md](ARCHITECTURE.md)
+- HTML renderer lifecycle patterns (two-phase render, committed facts, post-commit effects): [documentation/architecture/html-renderer-lifecycle.md](documentation/architecture/html-renderer-lifecycle.md)
 - Coding patterns, naming, headers, and canonical examples: [documentation/conventions/coding-standards.md](documentation/conventions/coding-standards.md)
 - Documentation writing format and token budget: [documentation/conventions/documentation-format.md](documentation/conventions/documentation-format.md)
 - Host deferred-commit ownership: [documentation/architecture/host-commit-controller.md](documentation/architecture/host-commit-controller.md)
