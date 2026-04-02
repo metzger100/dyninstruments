@@ -53,6 +53,7 @@
 
 - **Three-value text renderer (layout modes, props)** → [widgets/three-elements.md](widgets/three-elements.md)
 - **Active-route HTML renderer (visual contract, layout/fit constants)** → [widgets/active-route.md](widgets/active-route.md)
+- **Route-points HTML renderer (layout modes, fit contract, interaction gating)** → [widgets/route-points.md](widgets/route-points.md)
 - **Map-zoom HTML renderer and click/hotspot ownership** → [widgets/map-zoom.md](widgets/map-zoom.md)
 - **Center display renderer (center position + row composition)** → [widgets/center-display.md](widgets/center-display.md)
 - **Position coordinate renderer and supported kinds** → [widgets/position-coordinates.md](widgets/position-coordinates.md)
@@ -93,6 +94,10 @@
 - **Full-circle proportions, pointers, ticks, layout modes** → [radial/full-circle-dial-style-guide.md](radial/full-circle-dial-style-guide.md)
 - **Committed DOM reads and corrective rerender timing for HTML kinds** → [architecture/html-renderer-lifecycle.md](architecture/html-renderer-lifecycle.md)
 - **Intrinsic height workflow in `.widgetContainer.vertical`** → [architecture/vertical-container-contract.md](architecture/vertical-container-contract.md)
+- **How does the RoutePoints HTML renderer work?** → [widgets/route-points.md](widgets/route-points.md)
+- **What is the RoutePoints layout and fit contract?** → [widgets/route-points.md](widgets/route-points.md)
+- **How does the `.widgetContainer.vertical` height work for routePoints?** → [widgets/route-points.md#widgetcontainervertical-behavior](widgets/route-points.md#widgetcontainervertical-behavior)
+- **How does RoutePoints row click interaction work (page-aware dispatch)?** → [widgets/route-points.md#interaction-contract](widgets/route-points.md#interaction-contract)
 - **HTML widget classes/states contract and required HTML-kind tests** → [shared/html-widget-visual-style-guide.md](shared/html-widget-visual-style-guide.md), [guides/add-new-html-kind.md#step-7-required-html-kind-test-matrix](guides/add-new-html-kind.md#step-7-required-html-kind-test-matrix)
 - **Theme preset resolution, runtime switching, and day/night ownership** → [shared/theme-tokens.md](shared/theme-tokens.md), [shared/css-theming.md](shared/css-theming.md)
 - **HiDPI canvas scaling** → [shared/helpers.md#setupcanvas](shared/helpers.md#setupcanvas)

@@ -1,6 +1,6 @@
 # Quality Scorecard
 
-**Last updated:** 2026-03-27
+**Last updated:** 2026-04-02
 
 ## Layer Health
 
@@ -18,16 +18,17 @@ Notes:
 - `Size OK = check` means no `>400` violations but at least one `>=300` warning.
 - Strict grading is applied: unresolved medium/high drift prevents an `A`.
 - Smell prevention gate is fail-closed (see `documentation/conventions/smell-prevention.md`).
-- Validation run (`2026-03-27`): `npm run check:all` passed with `97/97` test files and `589/589` tests green.
-- `check:patterns` summary (`2026-03-27`): `failures=0`, `warnings=0`; promoted fail-fast/atomicity rules (`internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `widget-renderer-default-duplication`, `engine-layout-default-drift`, `canvas-api-typeof-guard`, `try-finally-canvas-drawing`, `framework-method-typeof-guard`, `inline-config-default-duplication`) all sit at `0`, and responsive rules remain `0`.
-- `check:filesize` summary (`2026-03-27`): `warnings=10`, `violations=0`, `onelinerWarnings=0`.
-- Coverage summary (`coverage/coverage-summary.json`, `2026-03-27`): lines/statements `94.61%`, functions `92.64%`, branches `73.32%`.
+- Validation run (`2026-04-02`): `npm run check:all` passed with `104/104` test files and `641/641` tests green.
+- `check:patterns` summary (`2026-04-02`): `failures=0`, `warnings=3` (`premature-legacy-support` on route-points helper fallback paths). Promoted fail-fast/atomicity rules (`internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `widget-renderer-default-duplication`, `engine-layout-default-drift`, `canvas-api-typeof-guard`, `try-finally-canvas-drawing`, `framework-method-typeof-guard`, `inline-config-default-duplication`) remain at `0`, and responsive block rules remain `0`.
+- `check:filesize` summary (`2026-04-02`): `warnings=12`, `violations=0`, `onelinerWarnings=0`.
+- Coverage summary (`coverage/coverage-summary.json`, `2026-04-02`): lines/statements `94.67%`, functions `92.77%`, branches `73.52%`.
 
 ## Known Drift Patterns
 
 | Pattern | Severity | Files | Status |
 |---|---|---|---|
-| File-size hotspot growth near threshold | MED | `cluster/rendering/CanvasDomSurfaceAdapter.js`, `cluster/rendering/ClusterRendererRouter.js`, `config/clusters/environment.js`, `shared/widget-kits/linear/LinearGaugeEngine.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialTextLayout.js`, `shared/widget-kits/text/TextLayoutComposite.js`, `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js`, `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js` | ⚠ Active (`check:filesize` warnings: 10, violations: 0) |
+| File-size hotspot growth near threshold | MED | `cluster/rendering/CanvasDomSurfaceAdapter.js`, `cluster/rendering/ClusterRendererRouter.js`, `config/clusters/environment.js`, `shared/widget-kits/linear/LinearGaugeEngine.js`, `shared/widget-kits/nav/RoutePointsLayout.js`, `shared/widget-kits/nav/RoutePointsRenderModel.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialTextLayout.js`, `shared/widget-kits/text/TextLayoutComposite.js`, `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js`, `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js` | ⚠ Active (`check:filesize` warnings: 12, violations: 0) |
+| Warn-tier fallback/legacy backlog | MED | `shared/widget-kits/nav/RoutePointsDomEffects.js` (2), `shared/widget-kits/nav/RoutePointsRenderModel.js` (1) | ⚠ Active (`premature-legacy-support` warnings: 3) |
 
 ## Model Selection Log
 
@@ -47,6 +48,7 @@ Notes:
 | Canvas API guard cleanup | GPT-5 Codex | Good | Removed the internal `setLineDash`/`strokeRect` capability guards, added direct `LinearCanvasPrimitives` coverage, updated the shared canvas mock contract, and revalidated the March 10, 2026 gate state with `check:all`. |
 | Severity promotion closeout | GPT-5 Codex | Good | Promoted the cleared atomicity and fail-fast rules to `block`, updated severity-sensitive checker fixtures, resynced the enforcement-owner docs, and kept the March 10, 2026 full gate green. |
 | Runtime lifecycle documentation closeout | GPT-5 Codex | Good | Added `documentation/architecture/runtime-lifecycle.md`, resynced runtime/theme architecture docs to the live bootstrap + fallback behavior, updated debt/index references, and revalidated the March 27, 2026 full gate state with `check:all`. |
+| RoutePoints Phase 5 documentation closeout | GPT-5 Codex | Good | Added `documentation/widgets/route-points.md`, updated architecture/index/guide touchpoints plus debt/roadmap tracking, and revalidated April 2, 2026 with `docs:check` + full `check:all`. |
 
 Append new rows when model choice materially affects outcome.
 

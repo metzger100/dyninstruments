@@ -13,14 +13,14 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ### Planned integration directions
 
-- `nav`: `routePoints`, `editRoute`
+- `nav`: `editRoute`
 - planned new clusters: `ais` (for example `aisTarget`)
 - page/header utility parity: `alarm`
 - `default`: likely a dedicated utility/default widget instead of a cluster kind
 
 ### Practical implementation order
 
-1. Route workflow widgets: `RoutePoints`, `EditRoute`
+1. Route workflow widget: `EditRoute`
 2. AIS workflow widget: `AisTarget`
 3. Page/header utility parity: `Alarm`
 
@@ -70,7 +70,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | radGauge_Temperature         | dyni_Environment_Instruments → `tempRadial`                                  | ✅ covered                                  |
 | radGauge_Voltage             | dyni_Vessel_Instruments → `voltageRadial`                                    | ✅ covered                                  |
 | RadialGauge                  | —                                                                            | ❌ not covered yet                          |
-| RoutePoints                  | —                                                                            | ❌ not covered yet                          |
+| RoutePoints                  | dyni_Nav_Instruments → `routePoints`                                         | ✅ covered                                  |
 | RteDistance                  | dyni_Nav_Instruments → `rteDistance`                                         | ✅ covered                                  |
 | RteEta                       | dyni_Nav_Instruments → `rteEta`                                              | ✅ covered                                  |
 | signalKCelsius               | dyni_Environment_Instruments → `temp` / `tempLinear`                         | ✅ covered                                  |

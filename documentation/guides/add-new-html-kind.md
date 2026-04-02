@@ -209,6 +209,19 @@ Use explicit dispatch/passive mode switching when interaction is page-dependent:
 
 Reference: `ActiveRouteTextHtmlWidget` (`canDispatchOpenRoute`, `activeRouteOpen`).
 
+### List Widget Vertical-Height Pattern
+
+Use this pattern for list-style HTML kinds that need intrinsic height in `.widgetContainer.vertical`:
+
+1. Keep first render host-sized (no committed ancestry assumptions).
+2. Use `initFunction().triggerResize()` for one corrective rerender after attach.
+3. Resolve committed vertical ancestry via host commit state + DOM effects owner.
+4. Compute natural height in layout owner and apply wrapper-owned inline height.
+5. Exclude self-induced wrapper height from vertical resize signature inputs.
+6. Keep selected-row visibility corrections in a bounded, stale-safe post-commit DOM effect.
+
+Reference implementation: [../widgets/route-points.md](../widgets/route-points.md).
+
 ### Grouped Mapper Output for Complex Payloads
 
 When one mapper branch needs more than 8 top-level props (`mapper-output-complexity`), group renderer payload fields:
@@ -265,5 +278,6 @@ npm run test
 
 - [../shared/html-widget-visual-style-guide.md](../shared/html-widget-visual-style-guide.md)
 - [../widgets/active-route.md](../widgets/active-route.md)
+- [../widgets/route-points.md](../widgets/route-points.md)
 - [add-new-cluster.md](add-new-cluster.md)
 - [add-new-text-renderer.md](add-new-text-renderer.md)
