@@ -112,6 +112,9 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteHtmlFit.globalKey).toBe("DyniActiveRouteHtmlFit");
     expect(components.ActiveRouteHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/ActiveRouteHtmlFit.js");
     expect(components.ActiveRouteHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils"]);
+    expect(components.RoutePointsHtmlFit.globalKey).toBe("DyniRoutePointsHtmlFit");
+    expect(components.RoutePointsHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsHtmlFit.js");
+    expect(components.RoutePointsHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "RoutePointsLayout", "HtmlWidgetUtils"]);
     expect(components.MapZoomHtmlFit.globalKey).toBe("DyniMapZoomHtmlFit");
     expect(components.MapZoomHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/MapZoomHtmlFit.js");
     expect(components.MapZoomHtmlFit.deps).toEqual(["TextLayoutEngine", "HtmlWidgetUtils", "ThemeResolver"]);
