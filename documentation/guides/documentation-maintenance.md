@@ -125,5 +125,6 @@ Non-zero exit means docs are not consistent.
 ## Related
 
 - [../TABLEOFCONTENTS.md](../TABLEOFCONTENTS.md)
+- [exec-plan-authoring.md](exec-plan-authoring.md)
 - [../architecture/component-system.md](../architecture/component-system.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
