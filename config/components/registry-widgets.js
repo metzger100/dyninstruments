@@ -24,6 +24,34 @@
       globalKey: "DyniActiveRouteTextHtmlWidget",
       deps: ["ActiveRouteHtmlFit", "HtmlWidgetUtils"]
     },
+    RoutePointsRenderModel: {
+      js: BASE + "shared/widget-kits/nav/RoutePointsRenderModel.js",
+      css: undefined,
+      globalKey: "DyniRoutePointsRenderModel",
+      deps: ["CenterDisplayMath", "RoutePointsLayout", "HtmlWidgetUtils"]
+    },
+    RoutePointsMarkup: {
+      js: BASE + "shared/widget-kits/nav/RoutePointsMarkup.js",
+      css: undefined,
+      globalKey: "DyniRoutePointsMarkup"
+    },
+    RoutePointsDomEffects: {
+      js: BASE + "shared/widget-kits/nav/RoutePointsDomEffects.js",
+      css: undefined,
+      globalKey: "DyniRoutePointsDomEffects"
+    },
+    RoutePointsTextHtmlWidget: {
+      js: BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js",
+      css: BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.css",
+      globalKey: "DyniRoutePointsTextHtmlWidget",
+      deps: [
+        "RoutePointsHtmlFit",
+        "HtmlWidgetUtils",
+        "RoutePointsRenderModel",
+        "RoutePointsMarkup",
+        "RoutePointsDomEffects"
+      ]
+    },
     MapZoomTextHtmlWidget: {
       js: BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
       css: BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css",

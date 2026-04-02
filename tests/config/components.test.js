@@ -152,6 +152,28 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js");
     expect(components.ActiveRouteTextHtmlWidget.css).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css");
     expect(components.ActiveRouteTextHtmlWidget.deps).toEqual(["ActiveRouteHtmlFit", "HtmlWidgetUtils"]);
+    expect(components.RoutePointsRenderModel.globalKey).toBe("DyniRoutePointsRenderModel");
+    expect(components.RoutePointsRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsRenderModel.js");
+    expect(components.RoutePointsRenderModel.css).toBeUndefined();
+    expect(components.RoutePointsRenderModel.deps).toEqual(["CenterDisplayMath", "RoutePointsLayout", "HtmlWidgetUtils"]);
+    expect(components.RoutePointsMarkup.globalKey).toBe("DyniRoutePointsMarkup");
+    expect(components.RoutePointsMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsMarkup.js");
+    expect(components.RoutePointsMarkup.css).toBeUndefined();
+    expect(components.RoutePointsMarkup.deps).toBeUndefined();
+    expect(components.RoutePointsDomEffects.globalKey).toBe("DyniRoutePointsDomEffects");
+    expect(components.RoutePointsDomEffects.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsDomEffects.js");
+    expect(components.RoutePointsDomEffects.css).toBeUndefined();
+    expect(components.RoutePointsDomEffects.deps).toBeUndefined();
+    expect(components.RoutePointsTextHtmlWidget.globalKey).toBe("DyniRoutePointsTextHtmlWidget");
+    expect(components.RoutePointsTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js");
+    expect(components.RoutePointsTextHtmlWidget.css).toBe("http://host/plugins/dyninstruments/widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.css");
+    expect(components.RoutePointsTextHtmlWidget.deps).toEqual([
+      "RoutePointsHtmlFit",
+      "HtmlWidgetUtils",
+      "RoutePointsRenderModel",
+      "RoutePointsMarkup",
+      "RoutePointsDomEffects"
+    ]);
     expect(components.RoutePointsViewModel.globalKey).toBe("DyniRoutePointsViewModel");
     expect(components.RoutePointsViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/RoutePointsViewModel.js");
     expect(components.RoutePointsViewModel.css).toBeUndefined();
@@ -190,6 +212,7 @@ describe("config/components.js", function () {
     expect(components.ClusterRendererRouter.deps).toContain("HtmlSurfaceController");
     expect(components.ClusterRendererRouter.deps).toContain("PositionCoordinateWidget");
     expect(components.ClusterRendererRouter.deps).toContain("ActiveRouteTextHtmlWidget");
+    expect(components.ClusterRendererRouter.deps).toContain("RoutePointsTextHtmlWidget");
     expect(components.ClusterRendererRouter.deps).toContain("MapZoomTextHtmlWidget");
     expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).toContain("PerfSpanHelper");
