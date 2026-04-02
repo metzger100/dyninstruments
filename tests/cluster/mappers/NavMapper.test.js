@@ -31,6 +31,9 @@ function createMapper() {
       if (id === "ActiveRouteViewModel") {
         return loadFresh("cluster/viewmodels/ActiveRouteViewModel.js");
       }
+      if (id === "RoutePointsViewModel") {
+        return loadFresh("cluster/viewmodels/RoutePointsViewModel.js");
+      }
       throw new Error("unexpected module: " + id);
     }
   };
@@ -208,6 +211,103 @@ describe("NavMapper", function () {
     const mapper = createMapper();
     const out = mapper.translate({ kind: "xteDisplay", xte: 0.2, cog: 90, dtw: 1.1, btw: 95 }, toolkit);
     expect(out.rendererProps.showWpName).toBe(false);
+  });
+
+  it("maps routePoints to grouped renderer payload", function () {
+    const mapper = createMapper();
+    const editingRoute = {
+      name: "  Harbor Run  ",
+      points: [
+        { name: "  Start  ", lat: "54.1", lon: "10.4" },
+        { name: "  ", lat: "bad", lon: "bad" }
+      ]
+    };
+    const out = mapper.translate({
+      kind: "routePoints",
+      editingRoute: editingRoute,
+      editingIndex: "1",
+      activeName: "  Harbor Run  ",
+      routeShowLL: true,
+      useRhumbLine: false,
+      routePointsRatioThresholdNormal: "1.1",
+      routePointsRatioThresholdFlat: "3.7",
+      showHeader: true,
+      distanceUnit: "nm",
+      courseUnit: "°",
+      waypointsText: "wps"
+    }, toolkit);
+
+    expect(out).toEqual({
+      renderer: "RoutePointsTextHtmlWidget",
+      domain: {
+        route: {
+          name: "Harbor Run",
+          points: [
+            { name: "Start", lat: 54.1, lon: 10.4 },
+            { name: "1", lat: undefined, lon: undefined }
+          ],
+          sourceRoute: editingRoute
+        },
+        routeName: "Harbor Run",
+        pointCount: 2,
+        selectedIndex: 1,
+        isActiveRoute: true,
+        showLatLon: true,
+        useRhumbLine: false
+      },
+      layout: {
+        ratioThresholdNormal: 1.1,
+        ratioThresholdFlat: 3.7,
+        showHeader: true
+      },
+      formatting: {
+        distanceUnit: "nm",
+        courseUnit: "°",
+        waypointsText: "wps"
+      }
+    });
+  });
+
+  it("maps routePoints with null route when editingRoute is missing", function () {
+    const mapper = createMapper();
+    const out = mapper.translate({
+      kind: "routePoints",
+      editingRoute: null,
+      showHeader: false,
+      distanceUnit: "km",
+      courseUnit: "deg",
+      waypointsText: "points"
+    }, toolkit);
+
+    expect(out.domain.route).toBeNull();
+    expect(out.domain.routeName).toBe("");
+    expect(out.domain.pointCount).toBe(0);
+    expect(out.layout.showHeader).toBe(false);
+    expect(out.formatting).toEqual({
+      distanceUnit: "km",
+      courseUnit: "deg",
+      waypointsText: "points"
+    });
+  });
+
+  it("maps routePoints with empty points as a valid empty route payload", function () {
+    const mapper = createMapper();
+    const editingRoute = { name: "Empty", points: [] };
+    const out = mapper.translate({
+      kind: "routePoints",
+      editingRoute: editingRoute,
+      showHeader: true,
+      distanceUnit: "nm",
+      courseUnit: "°",
+      waypointsText: "waypoints"
+    }, toolkit);
+
+    expect(out.domain.route).toEqual({
+      name: "Empty",
+      points: [],
+      sourceRoute: editingRoute
+    });
+    expect(out.domain.pointCount).toBe(0);
   });
 
 });

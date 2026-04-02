@@ -1,5 +1,5 @@
 /**
- * Module: DyniPlugin Nav Cluster - Canonical navigation widget config (ETA, distances, positions)
+ * Module: DyniPlugin Nav Cluster - Canonical navigation widget config (ETA, distances, positions, route points)
  * Documentation: documentation/guides/add-new-cluster.md
  * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/common-editables.js
  */
@@ -46,6 +46,11 @@
         activeRouteEta: "nav.route.eta",
         activeRouteNextCourse: "nav.route.nextCourse",
         activeRouteApproaching: "nav.route.isApproaching",
+        editingRoute: "nav.routeHandler.editingRoute",
+        editingIndex: "nav.routeHandler.editingIndex",
+        activeName: "nav.routeHandler.activeName",
+        useRhumbLine: "nav.routeHandler.useRhumbLine",
+        routeShowLL: "properties.routeShowLL",
         rteDistance: "nav.route.remain",
         vmg: "nav.wp.vmg",
         positionBoat: "nav.gps.position",
@@ -61,6 +66,7 @@
             opt("Remaining route distance", "rteDistance"),
             opt("VMG to waypoint", "vmg"),
             opt("Active route", "activeRoute"),
+            opt("Route points list", "routePoints"),
             opt("Boat position (GPS)", "positionBoat"),
             opt("Active waypoint position", "positionWp"),
             opt("XTE highway display", "xteDisplay")
@@ -97,6 +103,42 @@
           internal: true,
           name: "ActiveRoute: 1-Row Threshold",
           condition: { kind: "activeRoute" }
+        },
+        routePointsRatioThresholdNormal: {
+          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+          internal: true,
+          name: "RoutePoints: 3-Rows Threshold",
+          condition: { kind: "routePoints" }
+        },
+        routePointsRatioThresholdFlat: {
+          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.5,
+          internal: true,
+          name: "RoutePoints: 1-Row Threshold",
+          condition: { kind: "routePoints" }
+        },
+        showHeader: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Show header",
+          condition: { kind: "routePoints" }
+        },
+        distanceUnit: {
+          type: "STRING",
+          default: "nm",
+          name: "Distance unit",
+          condition: { kind: "routePoints" }
+        },
+        courseUnit: {
+          type: "STRING",
+          default: "°",
+          name: "Course unit",
+          condition: { kind: "routePoints" }
+        },
+        waypointsText: {
+          type: "STRING",
+          default: "waypoints",
+          name: "Waypoints label",
+          condition: { kind: "routePoints" }
         },
         showWpNameXteDisplay: {
           type: "BOOLEAN",

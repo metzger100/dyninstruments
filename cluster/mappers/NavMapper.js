@@ -1,7 +1,7 @@
 /**
  * Module: NavMapper - Cluster translation for navigation ETA/distance/position kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ClusterMapperToolkit, ActiveRouteViewModel
+ * Depends: ClusterMapperToolkit, ActiveRouteViewModel, RoutePointsViewModel
  */
 
 (function (root, factory) {
@@ -13,6 +13,7 @@
 
   function create(def, Helpers) {
     const activeRouteViewModel = Helpers.getModule("ActiveRouteViewModel").create(def, Helpers);
+    const routePointsViewModel = Helpers.getModule("RoutePointsViewModel").create(def, Helpers);
 
     function translate(props, toolkit) {
       const p = props || {};
@@ -53,6 +54,31 @@
           units: activeRouteDomain.units,
           ratioThresholdNormal: num(p.activeRouteRatioThresholdNormal),
           ratioThresholdFlat: num(p.activeRouteRatioThresholdFlat)
+        };
+      }
+      if (req === "routePoints") {
+        const routePointsDomain = routePointsViewModel.build(p, toolkit);
+        return {
+          renderer: "RoutePointsTextHtmlWidget",
+          domain: {
+            route: routePointsDomain.route,
+            routeName: routePointsDomain.route ? routePointsDomain.route.name : "",
+            pointCount: routePointsDomain.route ? routePointsDomain.route.points.length : 0,
+            selectedIndex: routePointsDomain.selectedIndex,
+            isActiveRoute: routePointsDomain.isActiveRoute,
+            showLatLon: routePointsDomain.showLatLon,
+            useRhumbLine: routePointsDomain.useRhumbLine
+          },
+          layout: {
+            ratioThresholdNormal: num(p.routePointsRatioThresholdNormal),
+            ratioThresholdFlat: num(p.routePointsRatioThresholdFlat),
+            showHeader: p.showHeader
+          },
+          formatting: {
+            distanceUnit: p.distanceUnit,
+            courseUnit: p.courseUnit,
+            waypointsText: p.waypointsText
+          }
         };
       }
       if (req === "positionBoat") {

@@ -149,6 +149,10 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js");
     expect(components.ActiveRouteTextHtmlWidget.css).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css");
     expect(components.ActiveRouteTextHtmlWidget.deps).toEqual(["ActiveRouteHtmlFit", "HtmlWidgetUtils"]);
+    expect(components.RoutePointsViewModel.globalKey).toBe("DyniRoutePointsViewModel");
+    expect(components.RoutePointsViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/RoutePointsViewModel.js");
+    expect(components.RoutePointsViewModel.css).toBeUndefined();
+    expect(components.RoutePointsViewModel.deps).toBeUndefined();
     expect(components.MapZoomTextHtmlWidget.globalKey).toBe("DyniMapZoomTextHtmlWidget");
     expect(components.MapZoomTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js");
     expect(components.MapZoomTextHtmlWidget.css).toBe("http://host/plugins/dyninstruments/widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css");
@@ -189,7 +193,7 @@ describe("config/components.js", function () {
     expect(components.ClusterRendererRouter.deps).not.toContain("WindRadialWidget");
     expect(components.PositionCoordinateWidget.deps).not.toContain("ThreeValueTextWidget");
     expect(components.NavMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/NavMapper.js");
-    expect(components.NavMapper.deps).toEqual(["ActiveRouteViewModel"]);
+    expect(components.NavMapper.deps).toEqual(["ActiveRouteViewModel", "RoutePointsViewModel"]);
     expect(components.MapMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/MapMapper.js");
     expect(components.ClusterMapperRegistry.deps).toContain("NavMapper");
     expect(components.ClusterMapperRegistry.deps).toContain("MapMapper");

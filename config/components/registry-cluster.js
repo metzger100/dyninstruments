@@ -23,6 +23,11 @@
       css: undefined,
       globalKey: "DyniActiveRouteViewModel"
     },
+    RoutePointsViewModel: {
+      js: BASE + "cluster/viewmodels/RoutePointsViewModel.js",
+      css: undefined,
+      globalKey: "DyniRoutePointsViewModel"
+    },
     AnchorMapper: {
       js: BASE + "cluster/mappers/AnchorMapper.js",
       css: undefined,
@@ -108,7 +113,7 @@
       js: BASE + "cluster/mappers/NavMapper.js",
       css: undefined,
       globalKey: "DyniNavMapper",
-      deps: ["ActiveRouteViewModel"]
+      deps: ["ActiveRouteViewModel", "RoutePointsViewModel"]
     },
     MapMapper: {
       js: BASE + "cluster/mappers/MapMapper.js",

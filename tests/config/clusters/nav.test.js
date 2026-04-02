@@ -32,9 +32,15 @@ describe("config/clusters/nav.js", function () {
     expect(def.storeKeys.activeRouteEta).toBe("nav.route.eta");
     expect(def.storeKeys.activeRouteNextCourse).toBe("nav.route.nextCourse");
     expect(def.storeKeys.activeRouteApproaching).toBe("nav.route.isApproaching");
+    expect(def.storeKeys.editingRoute).toBe("nav.routeHandler.editingRoute");
+    expect(def.storeKeys.editingIndex).toBe("nav.routeHandler.editingIndex");
+    expect(def.storeKeys.activeName).toBe("nav.routeHandler.activeName");
+    expect(def.storeKeys.useRhumbLine).toBe("nav.routeHandler.useRhumbLine");
+    expect(def.storeKeys.routeShowLL).toBe("properties.routeShowLL");
     expect(def.editableParameters.kind.default).toBe("eta");
     expect(def.editableParameters.kind.name).toBe("Instrument");
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "activeRoute")).toBe(true);
+    expect(def.editableParameters.kind.list.some((entry) => entry.value === "routePoints")).toBe(true);
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "activeRouteInteractive")).toBe(false);
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "centerDisplay")).toBe(false);
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "xteDisplay")).toBe(true);
@@ -51,6 +57,20 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.activeRouteRatioThresholdFlat.internal).toBe(true);
     expect(def.editableParameters.activeRouteRatioThresholdNormal.default).toBe(1.2);
     expect(def.editableParameters.activeRouteRatioThresholdFlat.default).toBe(3.8);
+    expect(def.editableParameters.routePointsRatioThresholdNormal.condition).toEqual({ kind: "routePoints" });
+    expect(def.editableParameters.routePointsRatioThresholdFlat.condition).toEqual({ kind: "routePoints" });
+    expect(def.editableParameters.routePointsRatioThresholdNormal.internal).toBe(true);
+    expect(def.editableParameters.routePointsRatioThresholdFlat.internal).toBe(true);
+    expect(def.editableParameters.routePointsRatioThresholdNormal.default).toBe(1.0);
+    expect(def.editableParameters.routePointsRatioThresholdFlat.default).toBe(3.5);
+    expect(def.editableParameters.showHeader.condition).toEqual({ kind: "routePoints" });
+    expect(def.editableParameters.showHeader.default).toBe(true);
+    expect(def.editableParameters.distanceUnit.condition).toEqual({ kind: "routePoints" });
+    expect(def.editableParameters.distanceUnit.default).toBe("nm");
+    expect(def.editableParameters.courseUnit.condition).toEqual({ kind: "routePoints" });
+    expect(def.editableParameters.courseUnit.default).toBe("°");
+    expect(def.editableParameters.waypointsText.condition).toEqual({ kind: "routePoints" });
+    expect(def.editableParameters.waypointsText.default).toBe("waypoints");
     expect(def.editableParameters.showWpNameXteDisplay.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.showWpNameXteDisplay.default).toBe(false);
     expect(def.editableParameters.ratioThresholdNormal.condition).toEqual([
@@ -79,6 +99,8 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.unit_xteDisplay).toBeUndefined();
     expect(def.editableParameters.caption_activeRoute).toBeUndefined();
     expect(def.editableParameters.unit_activeRoute).toBeUndefined();
+    expect(def.editableParameters.caption_routePoints).toBeUndefined();
+    expect(def.editableParameters.unit_routePoints).toBeUndefined();
     expect(def.editableParameters.caption_centerDisplayPosition).toBeUndefined();
     expect(def.editableParameters.unit_centerDisplayPosition).toBeUndefined();
     expect(def.editableParameters.caption_activeRouteRemain.condition).toEqual({ kind: "activeRoute" });
