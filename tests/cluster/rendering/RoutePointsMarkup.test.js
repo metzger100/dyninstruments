@@ -40,7 +40,8 @@ describe("RoutePointsMarkup", function () {
             middleStyle: "width:60px;height:40px;",
             nameStyle: "width:30px;height:40px;",
             infoStyle: "width:30px;height:40px;",
-            markerStyle: "width:20px;height:40px;"
+            markerStyle: "width:20px;height:40px;",
+            markerDotStyle: "width:9px;height:9px;"
           },
           {
             rowStyle: "width:100px;height:40px;",
@@ -48,7 +49,8 @@ describe("RoutePointsMarkup", function () {
             middleStyle: "width:60px;height:40px;",
             nameStyle: "width:30px;height:40px;",
             infoStyle: "width:30px;height:40px;",
-            markerStyle: "width:20px;height:40px;"
+            markerStyle: "width:20px;height:40px;",
+            markerDotStyle: "width:9px;height:9px;"
           }
         ]
       }
@@ -159,5 +161,6 @@ describe("RoutePointsMarkup", function () {
     expect(html).toContain('style="width:100px;height:160px;"');
     expect(html).toContain('style="font-size:11px;"');
     expect(html).toContain('style="font-size:10px;"');
+    expect(html).toContain('style="width:9px;height:9px;"');
   });
 });

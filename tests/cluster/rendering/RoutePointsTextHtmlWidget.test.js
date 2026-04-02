@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("RoutePointsTextHtmlWidget", function () {
@@ -186,5 +188,23 @@ describe("RoutePointsTextHtmlWidget", function () {
     setup.renderer.initFunction.call({ triggerResize: triggerResize });
 
     expect(triggerResize).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps mode-specific wrapper/header flex-direction css contract", function () {
+    const cssPath = path.join(
+      process.cwd(),
+      "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.css"
+    );
+    const css = fs.readFileSync(cssPath, "utf8");
+
+    expect(css).toContain(".dyni-route-points-mode-flat");
+    expect(css).toContain("flex-direction: row;");
+    expect(css).toContain(".dyni-route-points-mode-high .dyni-route-points-header");
+    expect(css).toContain(".dyni-route-points-mode-flat .dyni-route-points-header");
+    expect(css).toContain(".dyni-route-points-mode-normal .dyni-route-points-header");
+    expect(css).toContain(".dyni-route-points-header");
+    expect(css).toContain("flex: 0 0 auto;");
+    expect(css).toContain(".dyni-route-points-text");
+    expect(css).toContain("overflow: visible;");
   });
 });

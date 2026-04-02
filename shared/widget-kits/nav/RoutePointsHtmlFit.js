@@ -163,7 +163,12 @@
       }
 
       const W = Math.max(1, Math.round(shellRect.width));
-      const H = Math.max(1, Math.round(shellRect.height));
+      const layoutShellHeight = htmlUtils.toFiniteNumber(model.layoutShellHeight);
+      const H = Math.max(1, Math.round(
+        (typeof layoutShellHeight === "number" && layoutShellHeight > 0)
+          ? layoutShellHeight
+          : shellRect.height
+      ));
       const pointCount = toPointCount(model, htmlUtils);
       const insets = layoutApi.computeInsets(W, H);
       const contentRect = layoutApi.createContentRect(W, H, insets);
@@ -175,7 +180,8 @@
         isVerticalContainer: model.isVerticalContainer === true,
         showHeader: model.showHeader,
         pointCount: pointCount,
-        responsive: insets.responsive
+        responsive: insets.responsive,
+        trailingGutterPx: model.scrollbarGutterPx
       });
       const headerTexts = toHeaderTexts(model, pointCount);
       const textFillScale = layout.responsive && layout.responsive.textFillScale;

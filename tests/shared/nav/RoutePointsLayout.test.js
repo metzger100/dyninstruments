@@ -125,6 +125,28 @@ describe("RoutePointsLayout", function () {
     expect(out.rows[0].infoRect.x).toBeGreaterThan(out.rows[0].nameRect.x);
   });
 
+  it("reserves trailing gutter before marker placement when scrollbar width is provided", function () {
+    const layout = createLayout();
+    const built = buildContentRect(layout, 300, 220);
+    const withGutter = layout.computeLayout({
+      contentRect: built.contentRect,
+      mode: "normal",
+      pointCount: 1,
+      showHeader: true,
+      trailingGutterPx: 14
+    });
+    const noGutter = layout.computeLayout({
+      contentRect: built.contentRect,
+      mode: "normal",
+      pointCount: 1,
+      showHeader: true,
+      trailingGutterPx: 0
+    });
+
+    expect(withGutter.trailingGutterPx).toBe(14);
+    expect(withGutter.rows[0].markerRect.x).toBeLessThan(noGutter.rows[0].markerRect.x);
+  });
+
   it("builds flat mode with a header side panel and right-side list", function () {
     const layout = createLayout();
     const built = buildContentRect(layout, 520, 160);
@@ -199,6 +221,7 @@ describe("RoutePointsLayout", function () {
     expect(inline.list.contentStyle).toContain("min-height:" + out.listContentHeight + "px;");
     expect(inline.rows[0].rowStyle).toContain("height:" + out.rows[0].rowRect.h + "px;");
     expect(inline.rows[0].nameStyle).toContain("width:" + out.rows[0].nameRect.w + "px;");
+    expect(inline.rows[0].markerDotStyle).toMatch(/^width:\d+px;height:\d+px;$/);
   });
 
   it("handles zero-point and single-point routes without invalid geometry", function () {

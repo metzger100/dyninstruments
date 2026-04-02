@@ -171,6 +171,8 @@ Mode matrix:
 | `HEADER_GAP_RATIO` | `0.08` | Header-to-list gap ratio |
 | `ROW_PADDING_RATIO` | `0.025` | Row inner padding ratio |
 | `HEADER_SPLIT_GAP_RATIO` | `0.05` | Header name/meta split gap ratio |
+| `MARKER_DIAMETER_RATIO` | `0.48` | Marker dot size share of marker cell |
+| `MARKER_DIAMETER_MIN_PX` / `MARKER_DIAMETER_MAX_PX` | `3` / `24` | Marker dot pixel clamps |
 | `MAX_VIEWPORT_HEIGHT_RATIO` | `0.75` | Vertical natural-height cap ratio (`75vh`) |
 | `RESPONSIVE_SCALES.textFillScale` | `1.18` | Shared text-fit fill profile value |
 | `RESPONSIVE_SCALES.flatHeadPanelScale` | `0.84` | Flat panel share responsive scaler |
@@ -185,6 +187,8 @@ Structural geometry owner:
 
 - `computeInlineGeometry(...)` is the sole source of wrapper/header/list/row/cell inline dimensions.
 - Widget CSS does not redefine mode geometry ratios or row/header dimensions.
+- Row geometry accepts `trailingGutterPx` and reserves that width before marker placement so marker cells do not collide with visible scrollbars.
+- Marker dot size is geometry-driven (`markerDotStyle`) and derived from marker-cell dimensions.
 
 ## Text-Fit Contract (Owner: RoutePointsHtmlFit)
 
@@ -201,7 +205,7 @@ Output contract:
 - Returns style-only decisions (`font-size:<n>px;`) for header and each row cell.
 - Fit output never contains user text payload.
 - Source model text is never trimmed/altered by fit.
-- Markup keeps `white-space: nowrap` + `overflow: hidden`; size reduction handles overflow.
+- Markup keeps `white-space: nowrap`; fit uses each raw text-box height as the sizing ceiling and scales down only when required.
 
 ## Formatter Contract
 
@@ -250,6 +254,7 @@ Stale safety:
 - Vertical mode forces `high` layout and uses width-only row-height anchoring (`computeProfile(W, W)`).
 - Natural height is computed from row rhythm and capped at `75vh`.
 - Wrapper (`.dyni-route-points-html`) receives inline `height:<cappedPx>px;`.
+- Vertical layout geometry uses the same capped natural height as its effective shell height input (single height model for wrapper and inner list rows).
 - List container scrolls when content exceeds capped viewport height.
 - CSS keeps `height:auto` in vertical stacks so inline wrapper height owns final sizing.
 
@@ -279,7 +284,8 @@ Non-vertical signature parts:
 6. `canActivateRoutePoint` flag
 7. rounded shell width
 8. rounded shell height
-9. `isVerticalCommitted` flag (`0`)
+9. measured scrollbar gutter width (`scrollbarGutterPx`)
+10. `isVerticalCommitted` flag (`0`)
 
 Vertical signature parts:
 
@@ -290,6 +296,7 @@ Vertical signature parts:
 5. `showLatLon` flag
 6. `selectedIndex`
 7. `canActivateRoutePoint` flag
+8. measured scrollbar gutter width (`scrollbarGutterPx`)
 
 Vertical signature excludes shell height to avoid self-induced resize churn from intrinsic wrapper-height updates.
 

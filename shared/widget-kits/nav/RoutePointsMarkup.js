@@ -95,7 +95,9 @@
         + "</div>"
         + "</div>"
         + '<div class="dyni-route-points-marker-cell"' + htmlUtils.toStyleAttr(geom.markerStyle) + ">"
-        + '<span class="' + markerClasses.join(" ") + '"></span>'
+        + '<span class="' + markerClasses.join(" ") + '"'
+        + htmlUtils.toStyleAttr(geom.markerDotStyle)
+        + "></span>"
         + "</div>"
         + "</div>";
     }

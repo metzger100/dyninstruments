@@ -29,6 +29,9 @@
   const HEADER_GAP_RATIO = 0.08;
   const ROW_PADDING_RATIO = 0.025;
   const HEADER_SPLIT_GAP_RATIO = 0.05;
+  const MARKER_DIAMETER_RATIO = 0.48;
+  const MARKER_DIAMETER_MIN_PX = 3;
+  const MARKER_DIAMETER_MAX_PX = 24;
   const MAX_VIEWPORT_HEIGHT_RATIO = 0.75;
   const RESPONSIVE_SCALES = {
     textFillScale: 1.18,
@@ -147,11 +150,12 @@
       };
     }
 
-    function buildRowCells(rowRect, mode, rowPadding, rowGap) {
+    function buildRowCells(rowRect, mode, rowPadding, rowGap, trailingGutterPx) {
+      const rawTrailingGutter = Math.max(0, Math.floor(clampNumber(trailingGutterPx, 0, Number.MAX_SAFE_INTEGER, 0)));
       const innerRect = makeRect(
         rowRect.x + rowPadding,
         rowRect.y + rowPadding,
-        Math.max(0, rowRect.w - rowPadding * 2),
+        Math.max(0, rowRect.w - rowPadding * 2 - rawTrailingGutter),
         Math.max(0, rowRect.h - rowPadding * 2)
       );
       const squareSize = Math.max(1, Math.min(innerRect.h, innerRect.w));
@@ -210,6 +214,12 @@
       const rowGap = Math.max(1, Math.floor(rowHeight * ROW_GAP_RATIO));
       const headerGap = Math.max(1, Math.floor(rowHeight * HEADER_GAP_RATIO));
       const rowPadding = Math.max(1, Math.floor(rowHeight * ROW_PADDING_RATIO));
+      const trailingGutterPx = Math.max(0, Math.floor(clampNumber(
+        cfg.trailingGutterPx,
+        0,
+        Number.MAX_SAFE_INTEGER,
+        0
+      )));
 
       let headerRect = null;
       let listRect = contentRect;
@@ -250,7 +260,7 @@
       for (let i = 0; i < pointCount; i += 1) {
         const rowRect = makeRect(listRect.x, rowY, listRect.w, rowHeight);
         rowRects.push(rowRect);
-        rows.push(buildRowCells(rowRect, mode, rowPadding, rowGap));
+        rows.push(buildRowCells(rowRect, mode, rowPadding, rowGap, trailingGutterPx));
         rowY += rowHeight + rowGap;
       }
 
@@ -266,6 +276,7 @@
         rowGap: rowGap,
         headerGap: showHeader ? headerGap : 0,
         rowPadding: rowPadding,
+        trailingGutterPx: trailingGutterPx,
         responsive: responsive,
         contentRect: contentRect,
         headerRect: headerRect,
@@ -282,6 +293,21 @@
       const layout = cfg.layout || computeLayout(cfg);
       const wrapperHeightPx = Math.floor(clampNumber(cfg.wrapperHeight, -1, Number.MAX_SAFE_INTEGER, -1));
       const wrapperHeight = wrapperHeightPx >= 0 ? wrapperHeightPx : null;
+
+      function toMarkerDotStyle(markerRect) {
+        const safeRect = markerRect || { w: 0, h: 0 };
+        const markerLimit = Math.max(1, Math.min(
+          Math.max(0, Math.floor(safeRect.w || 0)),
+          Math.max(0, Math.floor(safeRect.h || 0))
+        ));
+        const scaled = Math.floor(markerLimit * MARKER_DIAMETER_RATIO);
+        const preferred = Math.max(
+          MARKER_DIAMETER_MIN_PX,
+          Math.min(MARKER_DIAMETER_MAX_PX, scaled)
+        );
+        const diameter = Math.max(1, Math.min(markerLimit, preferred));
+        return "width:" + diameter + "px;height:" + diameter + "px;";
+      }
 
       const wrapperStyle =
         "padding:" +
@@ -306,6 +332,7 @@
         mode: layout.mode,
         showHeader: layout.showHeader,
         rowGapPx: layout.rowGap,
+        trailingGutterPx: layout.trailingGutterPx,
         wrapper: { style: wrapperStyle },
         header: header,
         list: {
@@ -319,7 +346,8 @@
             middleStyle: toSizeStyle(row.middleRect),
             nameStyle: toSizeStyle(row.nameRect),
             infoStyle: toSizeStyle(row.infoRect),
-            markerStyle: toSizeStyle(row.markerRect)
+            markerStyle: toSizeStyle(row.markerRect),
+            markerDotStyle: toMarkerDotStyle(row.markerRect)
           };
         })
       };
@@ -382,6 +410,9 @@
         ROW_GAP_RATIO: ROW_GAP_RATIO,
         HEADER_GAP_RATIO: HEADER_GAP_RATIO,
         ROW_PADDING_RATIO: ROW_PADDING_RATIO,
+        MARKER_DIAMETER_RATIO: MARKER_DIAMETER_RATIO,
+        MARKER_DIAMETER_MIN_PX: MARKER_DIAMETER_MIN_PX,
+        MARKER_DIAMETER_MAX_PX: MARKER_DIAMETER_MAX_PX,
         MAX_VIEWPORT_HEIGHT_RATIO: MAX_VIEWPORT_HEIGHT_RATIO
       },
       resolveMode: resolveMode,

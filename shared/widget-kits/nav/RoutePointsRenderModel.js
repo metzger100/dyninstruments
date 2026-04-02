@@ -155,6 +155,7 @@
     const m = model || {};
     const shellWidth = toSafeInteger(m.shellWidth, 0);
     const shellHeight = toSafeInteger(m.shellHeight, 0);
+    const scrollbarGutterPx = Math.max(0, toSafeInteger(m.scrollbarGutterPx, 0));
 
     if (m.isVerticalContainer === true) {
       return [
@@ -164,7 +165,8 @@
         m.showHeader ? 1 : 0,
         m.showLatLon ? 1 : 0,
         toSafeInteger(m.selectedIndex, -1),
-        m.canActivateRoutePoint ? 1 : 0
+        m.canActivateRoutePoint ? 1 : 0,
+        scrollbarGutterPx
       ];
     }
 
@@ -177,6 +179,7 @@
       m.canActivateRoutePoint ? 1 : 0,
       shellWidth,
       shellHeight,
+      scrollbarGutterPx,
       0
     ];
   }
@@ -201,6 +204,7 @@
       const shellRect = cfg.shellRect && typeof cfg.shellRect === "object" ? cfg.shellRect : null;
       const shellWidth = shellRect ? Math.max(1, Math.round(toFiniteNumber(shellRect.width) || 0)) : 1;
       const shellHeight = shellRect ? Math.max(1, Math.round(toFiniteNumber(shellRect.height) || 0)) : 1;
+      const scrollbarGutterPx = Math.max(0, toSafeInteger(cfg.scrollbarGutterPx, 0));
       const showHeader = layout.showHeader !== false;
       const showLatLon = domain.showLatLon === true;
       const useRhumbLine = domain.useRhumbLine === true;
@@ -228,19 +232,6 @@
         isVerticalContainer: isVerticalContainer
       });
 
-      const insets = layoutApi.computeInsets(shellWidth, shellHeight);
-      const contentRect = layoutApi.createContentRect(shellWidth, shellHeight, insets);
-      const layoutOutput = layoutApi.computeLayout({
-        contentRect: contentRect,
-        mode: resolvedMode,
-        ratioThresholdNormal: layout.ratioThresholdNormal,
-        ratioThresholdFlat: layout.ratioThresholdFlat,
-        isVerticalContainer: isVerticalContainer,
-        showHeader: showHeader,
-        pointCount: pointCount,
-        responsive: insets.responsive
-      });
-
       const naturalHeight = isVerticalContainer
         ? layoutApi.computeNaturalHeight({
           W: shellWidth,
@@ -250,6 +241,22 @@
         })
         : null;
 
+      const effectiveShellHeight = naturalHeight
+        ? Math.max(1, toSafeInteger(naturalHeight.cappedHeight, shellHeight))
+        : shellHeight;
+      const insets = layoutApi.computeInsets(shellWidth, effectiveShellHeight);
+      const contentRect = layoutApi.createContentRect(shellWidth, effectiveShellHeight, insets);
+      const layoutOutput = layoutApi.computeLayout({
+        contentRect: contentRect,
+        mode: resolvedMode,
+        ratioThresholdNormal: layout.ratioThresholdNormal,
+        ratioThresholdFlat: layout.ratioThresholdFlat,
+        isVerticalContainer: isVerticalContainer,
+        showHeader: showHeader,
+        pointCount: pointCount,
+        responsive: insets.responsive,
+        trailingGutterPx: scrollbarGutterPx
+      });
       const inlineGeometry = layoutApi.computeInlineGeometry({
         layout: layoutOutput,
         wrapperHeight: naturalHeight ? naturalHeight.cappedHeight : undefined
@@ -302,6 +309,7 @@
         useRhumbLine: useRhumbLine,
         isVerticalContainer: isVerticalContainer,
         naturalHeight: naturalHeight,
+        layoutShellHeight: effectiveShellHeight,
         inlineGeometry: inlineGeometry,
         points: rows,
         pointCount: pointCount,
@@ -309,6 +317,7 @@
         hasValidSelection: hasValidSelection,
         canActivateRoutePoint: canActivate,
         isActiveRoute: isActiveRoute,
+        scrollbarGutterPx: scrollbarGutterPx,
         shellWidth: shellWidth,
         shellHeight: shellHeight,
         ratioThresholdNormal: layout.ratioThresholdNormal,

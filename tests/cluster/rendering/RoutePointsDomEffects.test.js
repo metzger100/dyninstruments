@@ -21,6 +21,8 @@ describe("RoutePointsDomEffects", function () {
     root.appendChild(list);
 
     defineFixedMetric(list, "clientHeight", 40);
+    defineFixedMetric(list, "clientWidth", 96);
+    defineFixedMetric(list, "offsetWidth", 112);
 
     for (let i = 0; i < rowCount; i += 1) {
       const row = document.createElement("div");
@@ -103,12 +105,22 @@ describe("RoutePointsDomEffects", function () {
 
     expect(domEffects.applyCommittedEffects({ targetEl: null })).toEqual({
       targetEl: null,
-      isVerticalCommitted: false
+      isVerticalCommitted: false,
+      scrollbarGutterPx: 0
     });
 
     expect(domEffects.applyCommittedEffects({ targetEl: detached })).toEqual({
       targetEl: null,
-      isVerticalCommitted: false
+      isVerticalCommitted: false,
+      scrollbarGutterPx: 0
     });
+  });
+
+  it("measures list scrollbar gutter width from committed root", function () {
+    const domEffects = createDomEffects();
+    const created = createListRoot(2);
+
+    expect(domEffects.measureListScrollbarGutter(created.root)).toBe(16);
+    expect(domEffects.applyCommittedEffects({ targetEl: created.root }).scrollbarGutterPx).toBe(16);
   });
 });

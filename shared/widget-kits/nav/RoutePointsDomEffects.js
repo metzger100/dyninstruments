@@ -109,6 +109,27 @@
     return !!targetEl.closest(".widgetContainer.vertical");
   }
 
+  function measureListScrollbarGutter(targetEl) {
+    if (!targetEl) {
+      return 0;
+    }
+    const listEl = typeof targetEl.querySelector === "function"
+      ? targetEl.querySelector(".dyni-route-points-list")
+      : null;
+    if (!listEl) {
+      return 0;
+    }
+
+    const offsetWidth = Number(listEl.offsetWidth);
+    const clientWidth = Number(listEl.clientWidth);
+    if (!(offsetWidth > 0) || !Number.isFinite(clientWidth)) {
+      return 0;
+    }
+
+    const gutterPx = Math.floor(offsetWidth - clientWidth);
+    return gutterPx > 0 ? gutterPx : 0;
+  }
+
   function ensureSelectedRowVisible(listEl, selectedIndex) {
     const index = toSafeInteger(selectedIndex, -1);
     if (!listEl || index < 0 || typeof listEl.querySelector !== "function") {
@@ -202,13 +223,15 @@
     if (!targetEl || !isConnectedNode(targetEl)) {
       return {
         targetEl: null,
-        isVerticalCommitted: false
+        isVerticalCommitted: false,
+        scrollbarGutterPx: 0
       };
     }
 
     return {
       targetEl: targetEl,
-      isVerticalCommitted: isVerticalContainer(targetEl)
+      isVerticalCommitted: isVerticalContainer(targetEl),
+      scrollbarGutterPx: measureListScrollbarGutter(targetEl)
     };
   }
 
@@ -216,6 +239,7 @@
     return {
       id: "RoutePointsDomEffects",
       isVerticalContainer: isVerticalContainer,
+      measureListScrollbarGutter: measureListScrollbarGutter,
       ensureSelectedRowVisible: ensureSelectedRowVisible,
       scheduleSelectedRowVisibility: scheduleSelectedRowVisibility,
       applyCommittedEffects: applyCommittedEffects

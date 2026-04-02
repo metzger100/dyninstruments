@@ -29,7 +29,8 @@
         shellEl: null,
         rootEl: null,
         targetEl: null,
-        isVerticalCommitted: false
+        isVerticalCommitted: false,
+        scrollbarGutterPx: 0
       };
     }
 
@@ -42,7 +43,8 @@
       shellEl: elements.shellEl,
       rootEl: elements.rootEl,
       targetEl: effects && effects.targetEl ? effects.targetEl : null,
-      isVerticalCommitted: !!(effects && effects.isVerticalCommitted)
+      isVerticalCommitted: !!(effects && effects.isVerticalCommitted),
+      scrollbarGutterPx: effects ? effects.scrollbarGutterPx : 0
     };
   }
 
@@ -78,6 +80,7 @@
         hostContext: hostContext,
         shellRect: shellRect,
         isVerticalCommitted: committed.isVerticalCommitted,
+        scrollbarGutterPx: committed.scrollbarGutterPx,
         viewportHeight: viewportHeight
       });
 

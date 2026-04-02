@@ -8,7 +8,6 @@
   min-height: 0;
   box-sizing: border-box;
   display: flex;
-  flex-direction: column;
   overflow: hidden;
   color: inherit;
 }
@@ -33,10 +32,29 @@
   box-sizing: border-box;
 }
 
+.widget.dyniplugin .widgetData.dyni-shell .dyni-route-points-mode-high,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-route-points-mode-normal {
+  flex-direction: column;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-route-points-mode-flat {
+  flex-direction: row;
+}
+
 .widget.dyniplugin .widgetData.dyni-shell .dyni-route-points-header {
   display: flex;
+  flex: 0 0 auto;
   align-items: stretch;
   justify-content: stretch;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-route-points-mode-high .dyni-route-points-header,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-route-points-mode-flat .dyni-route-points-header {
+  flex-direction: column;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-route-points-mode-normal .dyni-route-points-header {
+  flex-direction: row;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-route-points-header-route,
@@ -115,8 +133,8 @@
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-route-points-marker {
   display: inline-block;
-  width: 0.7em;
-  height: 0.7em;
+  width: var(--dyni-route-points-marker-size, 0.62em);
+  height: var(--dyni-route-points-marker-size, 0.62em);
   border-radius: 999px;
   border: 1px solid currentColor;
   opacity: 0.45;
@@ -140,7 +158,7 @@
   min-width: 0;
   max-width: 100%;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: visible;
   line-height: 1;
 }
 

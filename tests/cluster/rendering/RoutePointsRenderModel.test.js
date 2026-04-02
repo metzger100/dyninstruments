@@ -1,6 +1,21 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("RoutePointsRenderModel", function () {
+  function createLayoutApi() {
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    return loadFresh("shared/widget-kits/nav/RoutePointsLayout.js").create({}, {
+      getModule(id) {
+        if (id === "ResponsiveScaleProfile") {
+          return responsiveScaleProfile;
+        }
+        if (id === "LayoutRectMath") {
+          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+        }
+        throw new Error("unexpected module: " + id);
+      }
+    });
+  }
+
   function createRenderModel(options) {
     const opts = options || {};
     const moduleCache = Object.create(null);
@@ -103,6 +118,11 @@ describe("RoutePointsRenderModel", function () {
         waypointsText: "waypoints"
       }
     }, overrides || {});
+  }
+
+  function extractHeight(style) {
+    const match = String(style || "").match(/height:(\d+)px;/);
+    return match ? Number(match[1]) : 0;
   }
 
   it("builds course/distance rows with placeholder first row and name fallback", function () {
@@ -231,6 +251,39 @@ describe("RoutePointsRenderModel", function () {
     expect(verticalA.mode).toBe("high");
     expect(verticalA.resizeSignatureParts.join("|")).toBe(verticalB.resizeSignatureParts.join("|"));
     expect(nonVerticalA.resizeSignatureParts.join("|")).not.toBe(nonVerticalB.resizeSignatureParts.join("|"));
+  });
+
+  it("uses capped natural height as the effective vertical layout height input", function () {
+    const renderModel = createRenderModel();
+    const layoutApi = createLayoutApi();
+    const props = makeProps();
+    const model = renderModel.buildModel({
+      props: props,
+      hostContext: createHostContext(),
+      shellRect: { width: 260, height: 520 },
+      isVerticalCommitted: true,
+      viewportHeight: 500
+    });
+
+    const expectedHeight = model.naturalHeight.cappedHeight;
+    const insets = layoutApi.computeInsets(model.shellWidth, expectedHeight);
+    const contentRect = layoutApi.createContentRect(model.shellWidth, expectedHeight, insets);
+    const expectedLayout = layoutApi.computeLayout({
+      contentRect: contentRect,
+      mode: model.mode,
+      ratioThresholdNormal: model.ratioThresholdNormal,
+      ratioThresholdFlat: model.ratioThresholdFlat,
+      isVerticalContainer: true,
+      showHeader: model.showHeader,
+      pointCount: model.pointCount,
+      responsive: insets.responsive,
+      trailingGutterPx: model.scrollbarGutterPx
+    });
+
+    expect(model.layoutShellHeight).toBe(expectedHeight);
+    expect(model.layoutShellHeight).not.toBe(model.shellHeight);
+    expect(model.inlineGeometry.wrapper.style).toContain("height:" + expectedHeight + "px;");
+    expect(extractHeight(model.inlineGeometry.list.style)).toBe(expectedLayout.listRect.h);
   });
 
   it("fails closed when route payload is missing", function () {
