@@ -103,31 +103,12 @@ Task: Add new BarometerGauge
 
 ---
 
-## 3. File Size Limits
-
-- **Target: <=400 lines per JS file**
-- Shared drawing/layout code → split reusable components in `shared/widget-kits/radial/` (`RadialAngleMath`, `RadialTickMath`, `RadialCanvasPrimitives`, `RadialFrameRenderer`)
-- Gauge-specific code only in individual gauge component files
-- Cluster configs live under `config/clusters/`
-- If a legacy file exceeds 400 lines, keep new logic isolated and avoid increasing size further
-
----
-
 ## 4. File Map
 
 - Feature and API lookups: [documentation/TABLEOFCONTENTS.md](documentation/TABLEOFCONTENTS.md)
 - Non-negotiable project rules: [documentation/core-principles.md](documentation/core-principles.md)
-- Root structural orientation map for AI sessions: [ARCHITECTURE.md](ARCHITECTURE.md)
-- HTML renderer lifecycle patterns (two-phase render, committed facts, post-commit effects): [documentation/architecture/html-renderer-lifecycle.md](documentation/architecture/html-renderer-lifecycle.md)
-- Coding patterns, naming, headers, and canonical examples: [documentation/conventions/coding-standards.md](documentation/conventions/coding-standards.md)
-- Documentation writing format and token budget: [documentation/conventions/documentation-format.md](documentation/conventions/documentation-format.md)
-- Host deferred-commit ownership: [documentation/architecture/host-commit-controller.md](documentation/architecture/host-commit-controller.md)
-- Surface session lifecycle ownership: [documentation/architecture/surface-session-controller.md](documentation/architecture/surface-session-controller.md)
-- Canvas surface adapter ownership: [documentation/architecture/canvas-dom-surface-adapter.md](documentation/architecture/canvas-dom-surface-adapter.md)
-- Kind catalog ownership: [cluster/rendering/ClusterKindCatalog.js](cluster/rendering/ClusterKindCatalog.js)
-- HTML surface lifecycle owner: [cluster/rendering/HtmlSurfaceController.js](cluster/rendering/HtmlSurfaceController.js)
-- Shared active-route domain owner: [cluster/viewmodels/ActiveRouteViewModel.js](cluster/viewmodels/ActiveRouteViewModel.js)
-- Native HTML renderer entrypoint: [widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js](widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js)
+- Root structural orientation map: [ARCHITECTURE.md](ARCHITECTURE.md)
+- HTML renderer lifecycle patterns: [documentation/architecture/html-renderer-lifecycle.md](documentation/architecture/html-renderer-lifecycle.md)
 - Step-by-step implementation workflows: [documentation/guides/](documentation/guides/)
 - Multi-session active execution plans: [exec-plans/active/](exec-plans/active/)
 
@@ -153,25 +134,8 @@ Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 
 ## 7. Smell Prevention & Fail-Closed Rules
 
-- Mandatory on every task: follow `documentation/conventions/coding-standards.md` and `documentation/conventions/smell-prevention.md` as binding rules, not optional references.
-- Required completion gate is `npm run check:all` (`check:core` + `test:coverage:check` + `perf:check`).
-- Smell rules and enforcement matrix are documented in [documentation/conventions/smell-prevention.md](documentation/conventions/smell-prevention.md).
-- Duplicate detection is fail-closed via `tools/check-patterns.mjs` rules `duplicate-functions` (body/shape function clones) and `duplicate-block-clones` (long cross-file cloned blocks).
-- Fail-fast / keep-it-simple is mandatory.
-  - Defaults and validation belong at boundaries; internal code should trust normalized contracts.
-  - Do not add speculative legacy/compat/fallback support or duplicate CSS/config defaults in runtime code.
-- Defaults must preserve explicit falsy values (`""`, `0`, `false`).
-  - Never use truthy fallback for configured defaults (no `x.default || "...")`.
-  - Use property-presence/nullish semantics instead.
-- Intentional fallback exceptions must use rule-specific suppression comments with a reason.
-  - `// dyni-lint-disable-next-line <rule-name> -- <reason>`
-  - `/* dyni-lint-disable-line <rule-name> -- <reason> */`
-- Cache-owning modules must expose invalidation API.
-  - Required contract: expose invalidation methods and call them whenever state mutation changes cached values.
-  - Theme token cache must be invalidated after runtime preset application.
-- Warn-only fallback/legacy lint rules must still be reviewed and tracked in `documentation/TECH-DEBT.md` until promoted to block mode.
-- Pushes must be fail-closed.
-  - Install tracked hooks once: `npm run hooks:install`
-  - Verify hook setup: `npm run hooks:doctor`
-  - Pre-push hook runs `npm run check:all` and blocks push on failures.
+- Mandatory on every task: follow `documentation/conventions/coding-standards.md` and `documentation/conventions/smell-prevention.md` as binding rules.
+- Required completion gate: `npm run check:all` (`check:core` + `test:coverage:check` + `perf:check`).
+- Full smell catalog, enforcement matrix, and suppression syntax: [documentation/conventions/smell-prevention.md](documentation/conventions/smell-prevention.md).
+- Fail-fast / keep-it-simple is mandatory. Details: [documentation/conventions/coding-standards.md](documentation/conventions/coding-standards.md#fail-fast-keep-it-simple).
 <!-- END SHARED_INSTRUCTIONS -->
