@@ -126,10 +126,11 @@
       }) || { headerFit: null, rowFits: [] };
 
       if (setup.model.hasValidSelection) {
-        domEffects.scheduleSelectedRowVisibility({
+        domEffects.maybeRevealActiveRow({
           hostContext: this,
           rootEl: targetEl,
-          selectedIndex: setup.model.selectedIndex
+          selectedIndex: setup.model.selectedIndex,
+          activeKey: setup.model.activeWaypointKey
         });
       }
 

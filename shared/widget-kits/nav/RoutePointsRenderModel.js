@@ -184,6 +184,42 @@
     ];
   }
 
+  function appendIdentityPart(parts, label, value) {
+    if (value == null) {
+      return;
+    }
+    const text = String(value).trim();
+    if (text) {
+      parts.push(label + ":" + text);
+    }
+  }
+
+  function appendCoordinatePart(parts, label, value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) {
+      return;
+    }
+    parts.push(label + ":" + n.toFixed(6));
+  }
+
+  function buildPointIdentityKey(point, rowIndex) {
+    const p = toPoint(point);
+    const parts = [];
+    appendIdentityPart(parts, "id", p.id);
+    appendIdentityPart(parts, "uid", p.uid);
+    appendIdentityPart(parts, "uuid", p.uuid);
+    appendIdentityPart(parts, "key", p.key);
+    appendIdentityPart(parts, "pointId", p.pointId);
+    appendCoordinatePart(parts, "lat", p.lat);
+    appendCoordinatePart(parts, "lon", p.lon);
+    appendIdentityPart(parts, "name", p.name);
+
+    if (parts.length <= 0) {
+      return "idx:" + String(rowIndex);
+    }
+    return parts.join("|");
+  }
+
   function create(def, Helpers) {
     const centerMath = Helpers.getModule("CenterDisplayMath").create(def, Helpers);
     const layoutApi = Helpers.getModule("RoutePointsLayout").create(def, Helpers);
@@ -210,6 +246,9 @@
       const useRhumbLine = domain.useRhumbLine === true;
       const selectedIndex = toSafeInteger(domain.selectedIndex, -1);
       const hasValidSelection = selectedIndex >= 0 && selectedIndex < pointCount;
+      const activeKey = hasValidSelection
+        ? buildPointIdentityKey(points[selectedIndex], selectedIndex)
+        : null;
       const defaultText = Object.prototype.hasOwnProperty.call(props, "default")
         ? String(props.default)
         : PLACEHOLDER_VALUE;
@@ -315,6 +354,7 @@
         points: rows,
         pointCount: pointCount,
         selectedIndex: selectedIndex,
+        activeWaypointKey: activeKey,
         hasValidSelection: hasValidSelection,
         canActivateRoutePoint: canActivate,
         isActiveRoute: isActiveRoute,

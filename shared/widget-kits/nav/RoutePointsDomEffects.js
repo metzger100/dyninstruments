@@ -11,6 +11,10 @@
   "use strict";
 
   const EFFECT_STATE_KEY = "__dyniRoutePointsDomEffects";
+  const ALLOWED_REVEAL_REASONS = {
+    mount: true,
+    "active-change": true
+  };
 
   function toSafeInteger(value, fallback) {
     const n = Number(value);
@@ -47,7 +51,10 @@
     if (!ctx[EFFECT_STATE_KEY]) {
       ctx[EFFECT_STATE_KEY] = {
         token: 0,
-        timerHandle: null
+        timerHandle: null,
+        hasInitialActiveReveal: false,
+        lastAutoScrolledActiveKey: null,
+        lastSeenActiveKey: null
       };
     }
     return ctx[EFFECT_STATE_KEY];
@@ -173,7 +180,53 @@
     return true;
   }
 
-  function scheduleSelectedRowVisibility(args) {
+  function normalizeRevealReason(reason) {
+    const text = typeof reason === "string" ? reason.trim() : "";
+    if (
+      text === "mount" ||
+      text === "active-change" ||
+      text === "resize" ||
+      text === "refit" ||
+      text === "layout" ||
+      text === "data-refresh"
+    ) {
+      return text;
+    }
+    return "";
+  }
+
+  function normalizeActiveKey(activeKey, selectedIndex) {
+    const text = activeKey == null ? "" : String(activeKey).trim();
+    if (text) {
+      return text;
+    }
+    return "idx:" + String(selectedIndex);
+  }
+
+  function resolveRevealReason(state, explicitReason, activeKey) {
+    if (explicitReason) {
+      return explicitReason;
+    }
+    if (state.hasInitialActiveReveal !== true) {
+      return "mount";
+    }
+    if (state.lastSeenActiveKey !== activeKey) {
+      return "active-change";
+    }
+    return "data-refresh";
+  }
+
+  function shouldAutoReveal(reason, state, activeKey) {
+    if (!ALLOWED_REVEAL_REASONS[reason]) {
+      return false;
+    }
+    if (reason === "mount") {
+      return state.hasInitialActiveReveal !== true;
+    }
+    return state.lastAutoScrolledActiveKey !== activeKey;
+  }
+
+  function maybeRevealActiveRow(args) {
     const cfg = args || {};
     const hostContext = cfg.hostContext;
     const state = getEffectState(hostContext);
@@ -182,14 +235,24 @@
     }
 
     const selectedIndex = toSafeInteger(cfg.selectedIndex, -1);
-    state.token += 1;
-    const token = state.token;
-
-    clearPending(state);
-
     if (selectedIndex < 0) {
+      clearPending(state);
+      state.lastSeenActiveKey = null;
       return false;
     }
+
+    const activeKey = normalizeActiveKey(cfg.activeKey, selectedIndex);
+    const explicitReason = normalizeRevealReason(cfg.reason);
+    const reason = resolveRevealReason(state, explicitReason, activeKey);
+    state.lastSeenActiveKey = activeKey;
+
+    if (!shouldAutoReveal(reason, state, activeKey)) {
+      return false;
+    }
+
+    state.token += 1;
+    const token = state.token;
+    clearPending(state);
 
     const scheduledRoot = cfg.rootEl || resolveHostCommitTarget(hostContext);
     state.timerHandle = setTimeout(function () {
@@ -212,9 +275,16 @@
 
       const listEl = currentRoot.querySelector(".dyni-route-points-list");
       ensureSelectedRowVisible(listEl, selectedIndex);
+      state.hasInitialActiveReveal = true;
+      state.lastAutoScrolledActiveKey = activeKey;
+      state.lastSeenActiveKey = activeKey;
     }, 0);
 
     return true;
+  }
+
+  function scheduleSelectedRowVisibility(args) {
+    return maybeRevealActiveRow(args);
   }
 
   function applyCommittedEffects(args) {
@@ -241,6 +311,7 @@
       isVerticalContainer: isVerticalContainer,
       measureListScrollbarGutter: measureListScrollbarGutter,
       ensureSelectedRowVisible: ensureSelectedRowVisible,
+      maybeRevealActiveRow: maybeRevealActiveRow,
       scheduleSelectedRowVisibility: scheduleSelectedRowVisibility,
       applyCommittedEffects: applyCommittedEffects
     };

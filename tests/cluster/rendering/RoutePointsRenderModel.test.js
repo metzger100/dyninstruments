@@ -152,8 +152,41 @@ describe("RoutePointsRenderModel", function () {
     expect(model.points[0].infoText).toBe("---°/---nm");
     expect(model.points[1].infoText).toMatch(/^DIR:\d+°\/DST:\d+nm$/);
     expect(model.points[2].nameText).toBe("2");
+    expect(model.activeWaypointKey).toContain("lat:54.300000");
+    expect(model.activeWaypointKey).toContain("lon:10.600000");
     expect(model.hasValidSelection).toBe(true);
     expect(model.canActivateRoutePoint).toBe(true);
+  });
+
+  it("prefers stable raw waypoint identity fields for active waypoint key", function () {
+    const renderModel = createRenderModel();
+    const props = makeProps({
+      domain: {
+        route: {
+          name: "Identity Route",
+          points: [
+            { id: "wp-0", name: "Start", lat: 54.1, lon: 10.4 },
+            { uid: "wp-1", name: "Mid", lat: 54.2, lon: 10.5 }
+          ]
+        },
+        routeName: "Identity Route",
+        pointCount: 2,
+        selectedIndex: 0,
+        isActiveRoute: false,
+        showLatLon: false,
+        useRhumbLine: false
+      }
+    });
+
+    const model = renderModel.buildModel({
+      props: props,
+      hostContext: createHostContext(),
+      shellRect: { width: 320, height: 180 },
+      isVerticalCommitted: false
+    });
+
+    expect(model.activeWaypointKey).toContain("id:wp-0");
+    expect(model.activeWaypointKey).not.toBe("idx:0");
   });
 
   it("formats lat/lon rows through formatLonLats and preserves formatter placeholder output", function () {

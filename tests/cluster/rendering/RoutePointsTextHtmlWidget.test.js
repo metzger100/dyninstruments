@@ -16,7 +16,7 @@ describe("RoutePointsTextHtmlWidget", function () {
     });
     const canActivate = opts.canActivate || vi.fn(() => false);
     const markupRender = opts.markupRender || vi.fn(() => "<div>markup</div>");
-    const scheduleSelected = opts.scheduleSelected || vi.fn(() => true);
+    const maybeReveal = opts.maybeReveal || vi.fn(() => true);
     const applyCommittedEffects = opts.applyCommittedEffects || vi.fn(function (args) {
       return {
         targetEl: args && args.targetEl ? args.targetEl : null,
@@ -59,7 +59,8 @@ describe("RoutePointsTextHtmlWidget", function () {
             create() {
               return {
                 applyCommittedEffects: applyCommittedEffects,
-                scheduleSelectedRowVisibility: scheduleSelected
+                maybeRevealActiveRow: maybeReveal,
+                scheduleSelectedRowVisibility: maybeReveal
               };
             }
           };
@@ -73,7 +74,7 @@ describe("RoutePointsTextHtmlWidget", function () {
       buildModel,
       canActivate,
       markupRender,
-      scheduleSelected,
+      maybeReveal,
       applyCommittedEffects,
       fitCompute
     };
@@ -135,6 +136,7 @@ describe("RoutePointsTextHtmlWidget", function () {
         points: [{ index: 0 }],
         hasValidSelection: true,
         selectedIndex: 0,
+        activeWaypointKey: "id:wp-0",
         resizeSignatureParts: ["x", "y"]
       }))
     });
@@ -145,8 +147,8 @@ describe("RoutePointsTextHtmlWidget", function () {
     expect(setup.applyCommittedEffects).toHaveBeenCalledTimes(1);
     expect(setup.fitCompute).toHaveBeenCalledTimes(1);
     expect(setup.markupRender).toHaveBeenCalledTimes(1);
-    expect(setup.scheduleSelected).toHaveBeenCalledWith(
-      expect.objectContaining({ selectedIndex: 0 })
+    expect(setup.maybeReveal).toHaveBeenCalledWith(
+      expect.objectContaining({ selectedIndex: 0, activeKey: "id:wp-0" })
     );
   });
 
@@ -163,7 +165,7 @@ describe("RoutePointsTextHtmlWidget", function () {
 
     setup.renderer.renderHtml.call(createHostContext(), {});
 
-    expect(setup.scheduleSelected).not.toHaveBeenCalled();
+    expect(setup.maybeReveal).not.toHaveBeenCalled();
   });
 
   it("derives resize signature from model resizeSignatureParts", function () {

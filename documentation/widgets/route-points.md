@@ -247,15 +247,24 @@ Owner: `RoutePointsDomEffects`.
 
 Flow:
 
-1. Renderer schedules post-commit pass when `hasValidSelection === true`.
-2. Deferred pass resolves current committed root/list.
-3. `ensureSelectedRowVisible(listEl, selectedIndex)` mutates `scrollTop` only if selected row is outside viewport.
+1. Renderer calls `maybeRevealActiveRow(...)` when `hasValidSelection === true` and passes `activeKey`.
+2. Effects layer applies semantic gate:
+   - allow `mount` once (`hasInitialActiveReveal === false`)
+   - allow `active-change` only when `activeKey` differs from `lastAutoScrolledActiveKey`
+   - deny `resize`, `refit`, `layout`, and `data-refresh`
+3. Deferred pass resolves current committed root/list.
+4. If a reveal is permitted, `ensureSelectedRowVisible(listEl, selectedIndex)` mutates `scrollTop` only when the selected row is outside viewport.
 
 Stale safety:
 
 - Passes are tokened per host context.
 - Older scheduled passes are dropped when superseded.
 - Detached/mismatched roots are ignored (no mutation).
+
+Important:
+
+- Viewport visibility never authorizes auto-scroll by itself.
+- Re-render/layout/refit churn with unchanged active waypoint preserves user scroll position.
 
 ## `.widgetContainer.vertical` Behavior
 
