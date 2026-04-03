@@ -88,6 +88,10 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteViewModel.globalKey).toBe("DyniActiveRouteViewModel");
     expect(components.ActiveRouteViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/ActiveRouteViewModel.js");
     expect(components.ActiveRouteViewModel.deps).toBeUndefined();
+    expect(components.EditRouteViewModel.globalKey).toBe("DyniEditRouteViewModel");
+    expect(components.EditRouteViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/EditRouteViewModel.js");
+    expect(components.EditRouteViewModel.css).toBeUndefined();
+    expect(components.EditRouteViewModel.deps).toEqual(["CenterDisplayMath"]);
     expect(components.TextLayoutPrimitives.globalKey).toBe("DyniTextLayoutPrimitives");
     expect(components.TextLayoutPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextLayoutPrimitives.js");
     expect(components.TextLayoutPrimitives.deps).toEqual(["RadialTextLayout"]);
@@ -233,7 +237,7 @@ describe("config/components.js", function () {
     expect(components.ClusterRendererRouter.deps).not.toContain("WindRadialWidget");
     expect(components.PositionCoordinateWidget.deps).not.toContain("ThreeValueTextWidget");
     expect(components.NavMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/NavMapper.js");
-    expect(components.NavMapper.deps).toEqual(["ActiveRouteViewModel", "RoutePointsViewModel"]);
+    expect(components.NavMapper.deps).toEqual(["ActiveRouteViewModel", "EditRouteViewModel", "RoutePointsViewModel"]);
     expect(components.MapMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/MapMapper.js");
     expect(components.ClusterMapperRegistry.deps).toContain("NavMapper");
     expect(components.ClusterMapperRegistry.deps).toContain("MapMapper");

@@ -40,6 +40,7 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.kind.default).toBe("eta");
     expect(def.editableParameters.kind.name).toBe("Instrument");
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "activeRoute")).toBe(true);
+    expect(def.editableParameters.kind.list.some((entry) => entry.value === "editRoute")).toBe(true);
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "routePoints")).toBe(true);
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "activeRouteInteractive")).toBe(false);
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "centerDisplay")).toBe(false);
@@ -57,6 +58,12 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.activeRouteRatioThresholdFlat.internal).toBe(true);
     expect(def.editableParameters.activeRouteRatioThresholdNormal.default).toBe(1.2);
     expect(def.editableParameters.activeRouteRatioThresholdFlat.default).toBe(3.8);
+    expect(def.editableParameters.editRouteRatioThresholdNormal.condition).toEqual({ kind: "editRoute" });
+    expect(def.editableParameters.editRouteRatioThresholdFlat.condition).toEqual({ kind: "editRoute" });
+    expect(def.editableParameters.editRouteRatioThresholdNormal.internal).toBe(true);
+    expect(def.editableParameters.editRouteRatioThresholdFlat.internal).toBe(true);
+    expect(def.editableParameters.editRouteRatioThresholdNormal.default).toBe(1.2);
+    expect(def.editableParameters.editRouteRatioThresholdFlat.default).toBe(3.8);
     expect(def.editableParameters.routePointsRatioThresholdNormal.condition).toEqual({ kind: "routePoints" });
     expect(def.editableParameters.routePointsRatioThresholdFlat.condition).toEqual({ kind: "routePoints" });
     expect(def.editableParameters.routePointsRatioThresholdNormal.internal).toBe(true);
@@ -99,6 +106,8 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.unit_xteDisplay).toBeUndefined();
     expect(def.editableParameters.caption_activeRoute).toBeUndefined();
     expect(def.editableParameters.unit_activeRoute).toBeUndefined();
+    expect(def.editableParameters.caption_editRoute).toBeUndefined();
+    expect(def.editableParameters.unit_editRoute).toBeUndefined();
     expect(def.editableParameters.caption_routePoints).toBeUndefined();
     expect(def.editableParameters.unit_routePoints).toBeUndefined();
     expect(def.editableParameters.caption_centerDisplayPosition).toBeUndefined();

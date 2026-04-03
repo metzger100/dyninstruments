@@ -28,7 +28,7 @@
     widget: "ClusterWidget",
     def: {
       name: "dyni_Nav_Instruments",
-      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Active route / Positions / XTE display)",
+      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Active route / Edit route / Route points / Positions / XTE display)",
       caption: "", unit: "", default: "---",
       cluster: "nav",
       storeKeys: {
@@ -66,6 +66,7 @@
             opt("Remaining route distance", "rteDistance"),
             opt("VMG to waypoint", "vmg"),
             opt("Active route", "activeRoute"),
+            opt("Edit route", "editRoute"),
             opt("Route points list", "routePoints"),
             opt("Boat position (GPS)", "positionBoat"),
             opt("Active waypoint position", "positionWp"),
@@ -103,6 +104,18 @@
           internal: true,
           name: "ActiveRoute: 1-Row Threshold",
           condition: { kind: "activeRoute" }
+        },
+        editRouteRatioThresholdNormal: {
+          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.2,
+          internal: true,
+          name: "EditRoute: 3-Rows Threshold",
+          condition: { kind: "editRoute" }
+        },
+        editRouteRatioThresholdFlat: {
+          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.8,
+          internal: true,
+          name: "EditRoute: 1-Row Threshold",
+          condition: { kind: "editRoute" }
         },
         routePointsRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,

@@ -1,7 +1,7 @@
 /**
  * Module: NavMapper - Cluster translation for navigation ETA/distance/position kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ClusterMapperToolkit, ActiveRouteViewModel, RoutePointsViewModel
+ * Depends: ClusterMapperToolkit, ActiveRouteViewModel, EditRouteViewModel, RoutePointsViewModel
  */
 
 (function (root, factory) {
@@ -13,6 +13,7 @@
 
   function create(def, Helpers) {
     const activeRouteViewModel = Helpers.getModule("ActiveRouteViewModel").create(def, Helpers);
+    const editRouteViewModel = Helpers.getModule("EditRouteViewModel").create(def, Helpers);
     const routePointsViewModel = Helpers.getModule("RoutePointsViewModel").create(def, Helpers);
 
     function translate(props, toolkit) {
@@ -78,6 +79,28 @@
             distanceUnit: p.distanceUnit,
             courseUnit: p.courseUnit,
             waypointsText: p.waypointsText
+          }
+        };
+      }
+      if (req === "editRoute") {
+        const editRouteDomain = editRouteViewModel.build(p, toolkit);
+        const route = editRouteDomain.route;
+        return {
+          renderer: "EditRouteTextHtmlWidget",
+          domain: {
+            hasRoute: editRouteDomain.hasRoute,
+            routeName: route ? route.displayName : "",
+            pointCount: route ? route.pointCount : 0,
+            totalDistance: route ? route.totalDistance : undefined,
+            remainingDistance: editRouteDomain.remainingDistance,
+            eta: editRouteDomain.eta,
+            isActiveRoute: editRouteDomain.isActiveRoute,
+            isLocalRoute: route ? route.isLocalRoute : false,
+            isServerRoute: route ? route.isServerRoute : false
+          },
+          layout: {
+            ratioThresholdNormal: num(p.editRouteRatioThresholdNormal),
+            ratioThresholdFlat: num(p.editRouteRatioThresholdFlat)
           }
         };
       }

@@ -31,8 +31,14 @@ function createMapper() {
       if (id === "ActiveRouteViewModel") {
         return loadFresh("cluster/viewmodels/ActiveRouteViewModel.js");
       }
+      if (id === "EditRouteViewModel") {
+        return loadFresh("cluster/viewmodels/EditRouteViewModel.js");
+      }
       if (id === "RoutePointsViewModel") {
         return loadFresh("cluster/viewmodels/RoutePointsViewModel.js");
+      }
+      if (id === "CenterDisplayMath") {
+        return loadFresh("shared/widget-kits/nav/CenterDisplayMath.js");
       }
       throw new Error("unexpected module: " + id);
     }
@@ -308,6 +314,78 @@ describe("NavMapper", function () {
       sourceRoute: editingRoute
     });
     expect(out.domain.pointCount).toBe(0);
+  });
+
+  it("maps editRoute to grouped renderer payload", function () {
+    const mapper = createMapper();
+    const eta = new Date("2026-03-06T11:45:00Z");
+    const editingRoute = {
+      name: "local@Harbor Run",
+      points: [
+        { lat: 54.1, lon: 10.4 },
+        { lat: 54.2, lon: 10.5 }
+      ],
+      computeLength() {
+        return 1512.2;
+      }
+    };
+    const out = mapper.translate({
+      kind: "editRoute",
+      editingRoute: editingRoute,
+      activeName: "local@Harbor Run",
+      rteDistance: "4.8",
+      rteEta: eta,
+      editRouteRatioThresholdNormal: "1.23",
+      editRouteRatioThresholdFlat: "3.95"
+    }, toolkit);
+
+    expect(out).toEqual({
+      renderer: "EditRouteTextHtmlWidget",
+      domain: {
+        hasRoute: true,
+        routeName: "Harbor Run",
+        pointCount: 2,
+        totalDistance: 1512.2,
+        remainingDistance: 4.8,
+        eta: eta,
+        isActiveRoute: true,
+        isLocalRoute: true,
+        isServerRoute: false
+      },
+      layout: {
+        ratioThresholdNormal: 1.23,
+        ratioThresholdFlat: 3.95
+      }
+    });
+  });
+
+  it("maps editRoute safely when editingRoute is missing", function () {
+    const mapper = createMapper();
+    const out = mapper.translate({
+      kind: "editRoute",
+      editingRoute: null,
+      editRouteRatioThresholdNormal: "1.2",
+      editRouteRatioThresholdFlat: "3.8"
+    }, toolkit);
+
+    expect(out).toEqual({
+      renderer: "EditRouteTextHtmlWidget",
+      domain: {
+        hasRoute: false,
+        routeName: "",
+        pointCount: 0,
+        totalDistance: undefined,
+        remainingDistance: undefined,
+        eta: undefined,
+        isActiveRoute: false,
+        isLocalRoute: false,
+        isServerRoute: false
+      },
+      layout: {
+        ratioThresholdNormal: 1.2,
+        ratioThresholdFlat: 3.8
+      }
+    });
   });
 
 });
