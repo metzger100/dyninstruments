@@ -52,7 +52,7 @@ Use this guide when writing execution plans for complex work that spans files or
 
 ## Related
 
-- [PLAN6.md](../../exec-plans/active/PLAN6.md)
+- [PLAN6.md](../../exec-plans/completed/PLAN6.md)
 - [../conventions/coding-standards.md](../conventions/coding-standards.md)
 - [../conventions/documentation-format.md](../conventions/documentation-format.md)
 - [documentation-maintenance.md](documentation-maintenance.md)
