@@ -64,6 +64,7 @@
     { cluster: "nav", kind: "rteDistance", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
     { cluster: "nav", kind: "vmg", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
     { cluster: "nav", kind: "activeRoute", viewModelId: "ActiveRouteViewModel", rendererId: "ActiveRouteTextHtmlWidget", surface: "html" },
+    { cluster: "nav", kind: "editRoute", viewModelId: "EditRouteViewModel", rendererId: "EditRouteTextHtmlWidget", surface: "html" },
     { cluster: "nav", kind: "routePoints", viewModelId: "RoutePointsViewModel", rendererId: "RoutePointsTextHtmlWidget", surface: "html" },
     { cluster: "nav", kind: "positionBoat", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "PositionCoordinateWidget", surface: "canvas-dom" },
     { cluster: "nav", kind: "positionWp", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "PositionCoordinateWidget", surface: "canvas-dom" },

@@ -5,6 +5,7 @@ describe("ClusterRendererRouter", function () {
     "ThreeValueTextWidget",
     "PositionCoordinateWidget",
     "ActiveRouteTextHtmlWidget",
+    "EditRouteTextHtmlWidget",
     "RoutePointsTextHtmlWidget",
     "MapZoomTextHtmlWidget",
     "CenterDisplayTextWidget",
@@ -107,6 +108,10 @@ describe("ClusterRendererRouter", function () {
       renderCanvas: false,
       renderHtml: vi.fn(() => "<div>route-points</div>")
     });
+    rendererSpecs.EditRouteTextHtmlWidget = makeRendererSpec("EditRouteTextHtmlWidget", {
+      renderCanvas: false,
+      renderHtml: vi.fn(() => "<div>edit-route</div>")
+    });
     Object.assign(rendererSpecs, opts.rendererSpecs || {});
 
     const canvasAdapter = {
@@ -149,6 +154,7 @@ describe("ClusterRendererRouter", function () {
       ThreeValueTextWidget: { create: () => rendererSpecs.ThreeValueTextWidget },
       PositionCoordinateWidget: { create: () => rendererSpecs.PositionCoordinateWidget },
       ActiveRouteTextHtmlWidget: { create: () => rendererSpecs.ActiveRouteTextHtmlWidget },
+      EditRouteTextHtmlWidget: { create: () => rendererSpecs.EditRouteTextHtmlWidget },
       RoutePointsTextHtmlWidget: { create: () => rendererSpecs.RoutePointsTextHtmlWidget },
       MapZoomTextHtmlWidget: { create: () => rendererSpecs.MapZoomTextHtmlWidget },
       CenterDisplayTextWidget: { create: () => rendererSpecs.CenterDisplayTextWidget },
@@ -181,7 +187,7 @@ describe("ClusterRendererRouter", function () {
     const h = createHarness();
     const routes = h.router.listRoutes();
 
-    expect(routes).toHaveLength(53);
+    expect(routes).toHaveLength(54);
     routes.forEach(function (route) {
       const resolved = h.router.resolveRouteSpec({
         cluster: route.cluster,

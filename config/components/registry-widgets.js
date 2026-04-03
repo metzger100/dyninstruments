@@ -24,6 +24,23 @@
       globalKey: "DyniActiveRouteTextHtmlWidget",
       deps: ["ActiveRouteHtmlFit", "HtmlWidgetUtils"]
     },
+    EditRouteRenderModel: {
+      js: BASE + "shared/widget-kits/nav/EditRouteRenderModel.js",
+      css: undefined,
+      globalKey: "DyniEditRouteRenderModel",
+      deps: ["EditRouteLayout", "HtmlWidgetUtils"]
+    },
+    EditRouteMarkup: {
+      js: BASE + "shared/widget-kits/nav/EditRouteMarkup.js",
+      css: undefined,
+      globalKey: "DyniEditRouteMarkup"
+    },
+    EditRouteTextHtmlWidget: {
+      js: BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js",
+      css: BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css",
+      globalKey: "DyniEditRouteTextHtmlWidget",
+      deps: ["EditRouteHtmlFit", "HtmlWidgetUtils", "EditRouteRenderModel", "EditRouteMarkup"]
+    },
     RoutePointsRenderModel: {
       js: BASE + "shared/widget-kits/nav/RoutePointsRenderModel.js",
       css: undefined,

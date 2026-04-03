@@ -82,6 +82,7 @@
         "ThreeValueTextWidget",
         "PositionCoordinateWidget",
         "ActiveRouteTextHtmlWidget",
+        "EditRouteTextHtmlWidget",
         "RoutePointsTextHtmlWidget",
         "MapZoomTextHtmlWidget",
         "CenterDisplayTextWidget",

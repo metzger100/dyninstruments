@@ -1,0 +1,158 @@
+/* EditRoute HTML renderer styles */
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-areas:
+    "name"
+    "metrics";
+  grid-template-rows: minmax(0, 0.32fr) minmax(0, 0.68fr);
+  gap: 0.14em;
+  padding: 0.14em 0.18em;
+  color: inherit;
+}
+
+.widgetContainer.vertical .widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html {
+  height: auto;
+  aspect-ratio: 7 / 8;
+  min-height: 8em;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html.dyni-edit-route-mode-flat {
+  grid-template-areas: "name metrics";
+  grid-template-columns: minmax(0, 0.58fr) minmax(0, 0.42fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0.16em;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html.dyni-edit-route-mode-high {
+  grid-template-rows: minmax(0, 0.2fr) minmax(0, 0.8fr);
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html.dyni-edit-route-open-dispatch {
+  cursor: pointer;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html.dyni-edit-route-open-passive {
+  cursor: default;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-open-hotspot {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: transparent;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-name-bar {
+  position: relative;
+  z-index: 1;
+  grid-area: name;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.18em;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-name-text,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-source-badge,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-metric-label,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-metric-value {
+  min-width: 0;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-name-text {
+  flex: 1 1 auto;
+  font-weight: var(--dyni-font-weight, 700);
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-source-badge {
+  flex: 0 0 auto;
+  padding: 0.12em 0.32em;
+  border-radius: 0.3em;
+  border: 1px solid currentColor;
+  font-weight: var(--dyni-label-weight, 700);
+  opacity: 0.82;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-metrics {
+  position: relative;
+  z-index: 1;
+  grid-area: metrics;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  gap: 0.12em 0.16em;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-mode-flat .dyni-edit-route-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-mode-normal .dyni-edit-route-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-mode-high .dyni-edit-route-metrics {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-metric {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  row-gap: 0.08em;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-metric-row {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 0.36fr) minmax(0, 0.64fr);
+  column-gap: 0.14em;
+  align-items: center;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-metric-label {
+  font-weight: var(--dyni-label-weight, 700);
+  opacity: 0.8;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-metric-value {
+  font-weight: var(--dyni-font-weight, 700);
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-mode-flat .dyni-edit-route-metric-value,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-mode-normal .dyni-edit-route-metric-value {
+  text-align: center;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-mode-high .dyni-edit-route-metric-value {
+  text-align: right;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html.dyni-edit-route-active-route {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.26);
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html.dyni-edit-route-no-route .dyni-edit-route-name-bar {
+  align-items: center;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html.dyni-edit-route-no-route .dyni-edit-route-name-text {
+  text-align: center;
+  opacity: 0.9;
+}
