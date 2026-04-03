@@ -13,7 +13,7 @@
 - Surface-aware router + shell owner: `cluster/rendering/ClusterRendererRouter.js`
 - Canvas surface owner: `cluster/rendering/CanvasDomSurfaceAdapter.js`
 - HTML surface owner: `cluster/rendering/HtmlSurfaceController.js`
-- Shared domain viewmodels: `cluster/viewmodels/*.js` (current: `ActiveRouteViewModel.js`, `RoutePointsViewModel.js`)
+- Shared domain viewmodels: `cluster/viewmodels/*.js` (current: `ActiveRouteViewModel.js`, `EditRouteViewModel.js`, `RoutePointsViewModel.js`)
 - Per-cluster mappers: `cluster/mappers/*.js`
 
 ## Runtime Flow
@@ -29,11 +29,12 @@
 - numeric output for `ThreeValueTextWidget` (default text kinds)
 - stacked pair or variant output for `PositionCoordinateWidget` (`positionBoat`/`positionWp`, vessel `dateTime`, vessel `timeStatus`)
 - dedicated html-renderer output for `ActiveRouteTextHtmlWidget` (`nav` `activeRoute`)
+- dedicated html-renderer output for `EditRouteTextHtmlWidget` (`nav` `editRoute`)
 - dedicated html-renderer output for `RoutePointsTextHtmlWidget` (`nav` `routePoints`)
 - dedicated html-renderer output for `MapZoomTextHtmlWidget` (`map` `zoom`)
 - dedicated text-renderer output for `CenterDisplayTextWidget` (`map` `centerDisplay`)
 - graphic output with `renderer: "..."`
-`NavMapper` delegates active-route domain normalization (`routeName`, `disconnect`, `display`, captions/units) to `ActiveRouteViewModel`, and route-points domain normalization (`route`, `selectedIndex`, `isActiveRoute`, display flags) to `RoutePointsViewModel`.
+`NavMapper` delegates active-route domain normalization (`routeName`, `disconnect`, `display`, captions/units) to `ActiveRouteViewModel`, edit-route normalization (`route`, active/local/server/source flags, distance/eta gating) to `EditRouteViewModel`, and route-points domain normalization (`route`, `selectedIndex`, `isActiveRoute`, display flags) to `RoutePointsViewModel`.
 5. `ClusterWidget.initFunction(props)` creates per-instance runtime state:
 - `HostCommitController` for deferred host commit
 - `SurfaceSessionController` for active surface lifecycle ownership
@@ -51,7 +52,7 @@ Contract note:
 - Router does not expose host `renderCanvas`.
 - `ClusterWidget` is registered renderHtml-only on the host path.
 - Existing canvas renderers run only through the internal `canvas-dom` adapter.
-- Native HTML kinds run through `HtmlSurfaceController` (current shipped tuples: `nav/activeRoute`, `nav/routePoints`, `map/zoom`).
+- Native HTML kinds run through `HtmlSurfaceController` (current shipped tuples: `nav/activeRoute`, `nav/editRoute`, `nav/routePoints`, `map/zoom`).
 
 ## Mapper Modules
 
@@ -85,6 +86,7 @@ Mapper boundary:
 ## ViewModel Modules
 
 - `cluster/viewmodels/ActiveRouteViewModel.js`: shared active-route domain contract owner for `nav/activeRoute` payload normalization and disconnect derivation.
+- `cluster/viewmodels/EditRouteViewModel.js`: shared edit-route domain contract owner for `nav/editRoute` editing-route normalization, active/local/server derivation, and total-distance fallback behavior.
 - `cluster/viewmodels/RoutePointsViewModel.js`: shared route-points domain contract owner for `nav/routePoints` route/point normalization plus selection and active-route flags.
 - Viewmodels are mapper-owned domain helpers; they do not render HTML/canvas and do not own surface lifecycle.
 
@@ -121,7 +123,7 @@ Strict routing rules:
 Shipped tuples include both surfaces:
 
 - `surface: "canvas-dom"` for existing canvas-backed kinds
-- `surface: "html"` for native HTML kinds (`nav/activeRoute`, `nav/routePoints`, `map/zoom`)
+- `surface: "html"` for native HTML kinds (`nav/activeRoute`, `nav/editRoute`, `nav/routePoints`, `map/zoom`)
 
 ## Surface-Aware Router
 
@@ -130,6 +132,7 @@ Shipped tuples include both surfaces:
 - `ThreeValueTextWidget`
 - `PositionCoordinateWidget` (stacked pair text renderer for nav positions plus vessel `dateTime` / `timeStatus` variants)
 - `ActiveRouteTextHtmlWidget`
+- `EditRouteTextHtmlWidget`
 - `RoutePointsTextHtmlWidget`
 - `MapZoomTextHtmlWidget`
 - `CenterDisplayTextWidget`

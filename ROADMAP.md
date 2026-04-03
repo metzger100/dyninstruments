@@ -13,23 +13,23 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ### Planned integration directions
 
-- `nav`: `editRoute`
 - planned new clusters: `ais` (for example `aisTarget`)
 - page/header utility parity: `alarm`
 - `default`: likely a dedicated utility/default widget instead of a cluster kind
 
 ### Practical implementation order
 
-1. Route workflow widget: `EditRoute`
-2. AIS workflow widget: `AisTarget`
-3. Page/header utility parity: `Alarm`
+1. AIS workflow widget: `AisTarget`
+2. Page/header utility parity: `Alarm`
+3. Utility/default parity widget: `Default`
 
 ### Core interaction notes
 
 - Passive widget: `CenterDisplay`
-- Page-routed click on passive renderer: `Zoom`, `ActiveRoute`, `EditRoute`
+- Page-routed click with capability gating: `Zoom`, `ActiveRoute`, `EditRoute`
 - Widget-owned click target with page/API workflow: `RoutePoints`, `AisTarget`
 - Page-shell-owned widget: `Alarm`
+- `EditRoute` native HTML contract: `documentation/widgets/edit-route.md`
 
 ### Additional non-core concepts
 
@@ -55,7 +55,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | Default                      | —                                                                            | ❌ not covered yet                          |
 | DepthDisplay                 | dyni_Environment_Instruments → `depth` / `depthLinear`                       | ✅ covered                                  |
 | DST                          | dyni_Nav_Instruments → `dst`                                                 | ✅ covered                                  |
-| EditRoute                    | —                                                                            | ❌ not covered yet                          |
+| EditRoute                    | dyni_Nav_Instruments → `editRoute`                                           | ✅ covered                                  |
 | ETA                          | dyni_Nav_Instruments → `eta`                                                 | ✅ covered                                  |
 | HDM                          | dyni_CourseHeading_Instruments → `hdm`                                       | ✅ covered                                  |
 | HDT                          | dyni_CourseHeading_Instruments → `hdt`                                       | ✅ covered                                  |
