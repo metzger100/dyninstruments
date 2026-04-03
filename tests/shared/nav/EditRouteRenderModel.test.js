@@ -177,8 +177,14 @@ describe("EditRouteRenderModel", function () {
     expect(model.metrics.dst.valueText).toBe("DST(nm):1234.5");
     expect(model.metrics.rte.valueText).toBe("DST(nm):321.4");
     expect(model.metrics.eta.valueText).toBe("TIME:2026-03-06T11:45:00Z");
+    expect(model.metrics.pts.unitText).toBe("");
+    expect(model.metrics.eta.unitText).toBe("");
     expect(model.metrics.dst.unitText).toBe("nm");
     expect(model.metrics.rte.unitText).toBe("nm");
+    expect(model.metrics.pts.hasUnit).toBe(false);
+    expect(model.metrics.eta.hasUnit).toBe(false);
+    expect(model.metrics.dst.hasUnit).toBe(true);
+    expect(model.metrics.rte.hasUnit).toBe(true);
   });
 
   it("keeps RTE and ETA placeholders in non-flat mode for inactive routes", function () {
@@ -207,6 +213,7 @@ describe("EditRouteRenderModel", function () {
     expect(model.metrics.rte.valueText).toBe("---");
     expect(model.metrics.rte.unitText).toBe("nm");
     expect(model.metrics.eta.valueText).toBe("---");
+    expect(model.metrics.eta.unitText).toBe("");
   });
 
   it("keeps all 4 metrics visible in flat mode", function () {
@@ -352,6 +359,30 @@ describe("EditRouteRenderModel", function () {
     expect(model.metrics.rte.valueText).toBe("DST(mi):321.4");
     expect(model.metrics.dst.unitText).toBe("km");
     expect(model.metrics.rte.unitText).toBe("mi");
+    expect(model.metrics.pts.hasUnit).toBe(false);
+    expect(model.metrics.eta.hasUnit).toBe(false);
+  });
+
+  it("does not expose units for ETA/PTS and drops unit slots when DST/RTE units are empty", function () {
+    const renderModel = createRenderModel();
+    const model = renderModel.buildModel({
+      props: makeProps({
+        units: {
+          dst: "",
+          rte: ""
+        }
+      }),
+      hostContext: createHostContext("dispatch"),
+      shellRect: { width: 320, height: 210 },
+      isVerticalCommitted: false
+    });
+
+    expect(model.metrics.pts.hasUnit).toBe(false);
+    expect(model.metrics.eta.hasUnit).toBe(false);
+    expect(model.metrics.dst.hasUnit).toBe(false);
+    expect(model.metrics.rte.hasUnit).toBe(false);
+    expect(model.metrics.dst.unitText).toBe("");
+    expect(model.metrics.rte.unitText).toBe("");
   });
 
   it("changes resize signature when caption or unit text changes", function () {

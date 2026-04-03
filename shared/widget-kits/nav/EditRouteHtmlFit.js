@@ -17,8 +17,8 @@
     high: 0.56
   };
   const SOURCE_BADGE_MAX_PX_RATIO = 0.7;
-  const METRIC_LABEL_MAX_PX_RATIO = 0.52;
   const METRIC_VALUE_MAX_PX_RATIO = 0.9;
+  const METRIC_SECONDARY_TO_VALUE_RATIO = 0.8;
   const METRIC_IDS = ["pts", "dst", "rte", "eta"];
 
   function parseFontPx(font) {
@@ -140,27 +140,46 @@
     return "";
   }
 
-  function measureStyle(args) {
+  function measurePx(args) {
     const cfg = args || {};
     const rect = cfg.rect;
     if (!cfg.text) {
-      return "";
+      return 0;
     }
     if (!rect || !(rect.w > 0) || !(rect.h > 0)) {
-      return "";
+      return 0;
     }
+    const explicitMaxPx = cfg.htmlUtils.toFiniteNumber(cfg.maxPx);
+    const ratio = cfg.htmlUtils.toFiniteNumber(cfg.maxPxRatio);
+    const ratioMaxPx = Math.max(1, Math.floor(rect.h * (ratio > 0 ? ratio : 1)));
+    const requestedMaxPx = explicitMaxPx > 0 ? explicitMaxPx : ratioMaxPx;
     const fit = cfg.tileLayout.measureFittedLine({
       textApi: cfg.textApi,
       ctx: cfg.ctx,
       text: cfg.text,
       maxW: Math.max(1, Math.floor(rect.w)),
       maxH: Math.max(1, Math.floor(rect.h)),
-      maxPx: Math.max(1, Math.floor(rect.h * cfg.maxPxRatio)),
+      maxPx: Math.max(1, Math.floor(requestedMaxPx)),
       textFillScale: cfg.textFillScale,
       family: cfg.family,
       weight: cfg.weight
     });
-    return toStyle(fit && fit.px, cfg.htmlUtils);
+    return cfg.htmlUtils.toFiniteNumber(fit && fit.px) || 0;
+  }
+
+  function measureStyle(args) {
+    const px = measurePx(args);
+    return toStyle(px, args && args.htmlUtils);
+  }
+
+  function resolveSecondaryMaxPx(valuePx, valueRect) {
+    const safeValuePx = Number(valuePx);
+    if (Number.isFinite(safeValuePx) && safeValuePx > 0) {
+      return Math.max(1, Math.floor(safeValuePx * METRIC_SECONDARY_TO_VALUE_RATIO));
+    }
+    const rect = valueRect && typeof valueRect === "object" ? valueRect : {};
+    const baseValuePx = Math.max(1, Math.floor((Math.max(1, Number(rect.h) || 1)) * METRIC_VALUE_MAX_PX_RATIO));
+    return Math.max(1, Math.floor(baseValuePx * METRIC_SECONDARY_TO_VALUE_RATIO));
   }
 
   function resolveNamePxRatio(mode) {
@@ -261,44 +280,53 @@
         if (!box) {
           continue;
         }
+        const valueRect = box.valueTextRect || box.valueRect;
+        const labelText = resolveMetricLabel(model, id);
+        const valueText = resolveMetricValue(model, id);
+        const unitText = resolveMetricUnit(model, id);
+        const valuePx = measurePx({
+          rect: valueRect,
+          text: valueText,
+          maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+          textApi: textApi,
+          tileLayout: tileLayout,
+          ctx: measureCtx,
+          family: family,
+          weight: valueWeight,
+          textFillScale: textFillScale,
+          htmlUtils: htmlUtils
+        });
+        const secondaryMaxPx = resolveSecondaryMaxPx(valuePx, valueRect);
+
         fitOut.metrics[id] = {
           labelStyle: measureStyle({
             rect: box.labelRect,
-            text: resolveMetricLabel(model, id),
-            maxPxRatio: METRIC_LABEL_MAX_PX_RATIO,
-            textApi: textApi,
-            tileLayout: tileLayout,
-            ctx: measureCtx,
-            family: family,
-            weight: labelWeight,
-            textFillScale: textFillScale,
-            htmlUtils: htmlUtils
-          }),
-          valueRowStyle: "",
-          valueStyle: measureStyle({
-            rect: box.valueTextRect || box.valueRect,
-            text: resolveMetricValue(model, id),
+            text: labelText,
+            maxPx: secondaryMaxPx,
             maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
             textApi: textApi,
             tileLayout: tileLayout,
             ctx: measureCtx,
             family: family,
-            weight: valueWeight,
-            textFillScale: textFillScale,
+            weight: labelWeight,
+            textFillScale: 1,
             htmlUtils: htmlUtils
           }),
-          unitStyle: measureStyle({
-            rect: box.unitRect || box.valueRect,
-            text: resolveMetricUnit(model, id),
-            maxPxRatio: METRIC_LABEL_MAX_PX_RATIO,
+          valueRowStyle: "",
+          valueStyle: toStyle(valuePx, htmlUtils),
+          unitStyle: box.unitRect ? measureStyle({
+            rect: box.unitRect,
+            text: unitText,
+            maxPx: secondaryMaxPx,
+            maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
             textApi: textApi,
             tileLayout: tileLayout,
             ctx: measureCtx,
             family: family,
             weight: labelWeight,
-            textFillScale: textFillScale,
+            textFillScale: 1,
             htmlUtils: htmlUtils
-          })
+          }) : ""
         };
       }
 

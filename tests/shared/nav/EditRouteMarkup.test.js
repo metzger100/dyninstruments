@@ -23,10 +23,10 @@ describe("EditRouteMarkup", function () {
       metricVisibility: { pts: true, dst: true, rte: true, eta: true },
       visibleMetricIds: ["pts", "dst", "rte", "eta"],
       metrics: {
-        pts: { labelText: "PTS:", valueText: "005", unitText: "" },
-        dst: { labelText: "DST:", valueText: "12.3", unitText: "nm" },
-        rte: { labelText: "RTE:", valueText: "3.9", unitText: "nm" },
-        eta: { labelText: "ETA:", valueText: "12:34", unitText: "" }
+        pts: { labelText: "PTS:", valueText: "005", unitText: "", hasUnit: false },
+        dst: { labelText: "DST:", valueText: "12.3", unitText: "nm", hasUnit: true },
+        rte: { labelText: "RTE:", valueText: "3.9", unitText: "nm", hasUnit: true },
+        eta: { labelText: "ETA:", valueText: "12:34", unitText: "", hasUnit: false }
       }
     }, overrides || {});
   }
@@ -70,6 +70,13 @@ describe("EditRouteMarkup", function () {
     expect(etaIndex).toBeGreaterThan(rteIndex);
     expect(html).toContain("dyni-edit-route-metric-unit");
     expect(html).toContain(">nm</span>");
+    const ptsSlice = html.slice(
+      html.indexOf("dyni-edit-route-metric-pts"),
+      html.indexOf("dyni-edit-route-metric-dst")
+    );
+    const etaSlice = html.slice(html.indexOf("dyni-edit-route-metric-eta"));
+    expect(ptsSlice).not.toContain("dyni-edit-route-metric-unit");
+    expect(etaSlice).not.toContain("dyni-edit-route-metric-unit");
   });
 
   it("renders passive mode without catchAll/hotspot", function () {
@@ -140,6 +147,26 @@ describe("EditRouteMarkup", function () {
     const etaSlice = html.slice(html.indexOf("dyni-edit-route-metric-eta"));
     expect(ptsSlice).not.toContain("dyni-edit-route-metric-unit");
     expect(etaSlice).not.toContain("dyni-edit-route-metric-unit");
+  });
+
+  it("does not render unit nodes for ETA/PTS in high mode", function () {
+    const markup = createMarkup();
+    const html = markup.render({
+      model: makeModel({ mode: "high" }),
+      fit: makeFit(),
+      htmlUtils: createHtmlUtils()
+    });
+
+    const ptsSlice = html.slice(
+      html.indexOf("dyni-edit-route-metric-pts"),
+      html.indexOf("dyni-edit-route-metric-dst")
+    );
+    const etaSlice = html.slice(html.indexOf("dyni-edit-route-metric-eta"));
+    expect(ptsSlice).not.toContain("dyni-edit-route-metric-unit");
+    expect(etaSlice).not.toContain("dyni-edit-route-metric-unit");
+    expect(html).toContain("dyni-edit-route-metric-dst");
+    expect(html).toContain("dyni-edit-route-metric-rte");
+    expect(html).toContain(">nm</span>");
   });
 
   it("uses high-mode row topology and escapes text content", function () {

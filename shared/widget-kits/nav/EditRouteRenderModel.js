@@ -153,12 +153,23 @@
       const nameText = hasRoute
         ? htmlUtils.trimText(domain.routeName)
         : NO_ROUTE_TEXT;
+      const metricUnits = {
+        dst: hasRoute ? normalizeMetricUnit(unitsConfig.dst, htmlUtils) : "",
+        rte: hasRoute ? normalizeMetricUnit(unitsConfig.rte, htmlUtils) : ""
+      };
+      const metricHasUnit = {
+        pts: false,
+        dst: !!metricUnits.dst,
+        rte: !!metricUnits.rte,
+        eta: false
+      };
 
       const layout = layoutApi.computeLayout({
         W: shellSize.width,
         H: shellSize.height,
         hasRoute: hasRoute,
         isLocalRoute: isLocalRoute,
+        metricHasUnit: metricHasUnit,
         ratioThresholdNormal: layoutConfig.ratioThresholdNormal,
         ratioThresholdFlat: layoutConfig.ratioThresholdFlat,
         isVerticalCommitted: cfg.isVerticalCommitted === true
@@ -172,34 +183,34 @@
           rte: normalizeMetricLabel(captionsConfig.rte, htmlUtils),
           eta: normalizeMetricLabel(captionsConfig.eta, htmlUtils)
         };
-        const metricUnits = {
-          dst: normalizeMetricUnit(unitsConfig.dst, htmlUtils),
-          rte: normalizeMetricUnit(unitsConfig.rte, htmlUtils)
-        };
 
         metrics.pts = {
           id: "pts",
           labelText: metricCaptions.pts,
           valueText: formatMetric(domain.pointCount, "formatDecimal", [3], defaultText, Helpers),
-          unitText: ""
+          unitText: "",
+          hasUnit: false
         };
         metrics.dst = {
           id: "dst",
           labelText: metricCaptions.dst,
           valueText: formatMetric(domain.totalDistance, "formatDistance", [metricUnits.dst], defaultText, Helpers),
-          unitText: metricUnits.dst
+          unitText: metricUnits.dst,
+          hasUnit: metricHasUnit.dst
         };
         metrics.rte = {
           id: "rte",
           labelText: metricCaptions.rte,
           valueText: formatMetric(isActiveRoute ? domain.remainingDistance : undefined, "formatDistance", [metricUnits.rte], defaultText, Helpers),
-          unitText: metricUnits.rte
+          unitText: metricUnits.rte,
+          hasUnit: metricHasUnit.rte
         };
         metrics.eta = {
           id: "eta",
           labelText: metricCaptions.eta,
           valueText: formatMetric(isActiveRoute ? domain.eta : undefined, "formatTime", [], defaultText, Helpers),
-          unitText: ""
+          unitText: "",
+          hasUnit: false
         };
       }
 

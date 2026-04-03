@@ -229,31 +229,42 @@ describe("EditRouteHtmlFit", function () {
     expect(extractPx(longBadge.sourceBadgeStyle)).toBeLessThan(extractPx(shortBadge.sourceBadgeStyle));
   });
 
-  it("fits metric labels and values independently per metric box", function () {
+  it("keeps caption and unit font sizes tied to value font size (~0.8x)", function () {
     const h = createHarness();
     const out = h.fit.compute({
       model: buildModel({
+        mode: "high",
         metrics: {
-          pts: {
-            labelText: "POINTS-LABEL-THAT-IS-LONG",
-            valueText: "1"
+          dst: {
+            labelText: "DST:",
+            valueText: "12.3",
+            unitText: "nm"
           }
         }
       }),
       targetEl: h.targetEl,
       hostContext: h.hostContext,
-      shellRect: { width: 320, height: 190 }
+      shellRect: { width: 320, height: 260 }
     });
 
-    expect(extractPx(out.metrics.pts.labelStyle)).toBeLessThan(extractPx(out.metrics.pts.valueStyle));
+    const valuePx = extractPx(out.metrics.dst.valueStyle);
+    const labelPx = extractPx(out.metrics.dst.labelStyle);
+    const unitPx = extractPx(out.metrics.dst.unitStyle);
+    const expectedSecondary = Math.max(1, Math.floor(valuePx * 0.8));
+
+    expect(valuePx).toBeGreaterThan(0);
+    expect(labelPx).toBeLessThanOrEqual(expectedSecondary);
+    expect(labelPx).toBeGreaterThanOrEqual(Math.max(1, expectedSecondary - 1));
+    expect(unitPx).toBeLessThanOrEqual(expectedSecondary);
+    expect(unitPx).toBeGreaterThanOrEqual(Math.max(1, expectedSecondary - 1));
   });
 
-  it("fits DST/RTE unit text independently from value text", function () {
+  it("shrinks long caption/unit text safely while keeping value fit intact", function () {
     const h = createHarness();
     const shortOut = h.fit.compute({
       model: buildModel({
         metrics: {
-          dst: { unitText: "nm" }
+          dst: { labelText: "DST:", unitText: "nm", valueText: "12.3" }
         }
       }),
       targetEl: h.targetEl,
@@ -263,7 +274,11 @@ describe("EditRouteHtmlFit", function () {
     const longOut = h.fit.compute({
       model: buildModel({
         metrics: {
-          dst: { unitText: "nautical-miles-long-unit" }
+          dst: {
+            labelText: "REMAINING-DISTANCE-LABEL:",
+            valueText: "12.3",
+            unitText: "nautical-miles-long-unit"
+          }
         }
       }),
       targetEl: h.targetEl,
@@ -271,8 +286,37 @@ describe("EditRouteHtmlFit", function () {
       shellRect: { width: 320, height: 190 }
     });
 
+    const longValuePx = extractPx(longOut.metrics.dst.valueStyle);
+    const longTargetSecondary = Math.max(1, Math.floor(longValuePx * 0.8));
+    expect(extractPx(longOut.metrics.dst.labelStyle)).toBeLessThanOrEqual(longTargetSecondary);
     expect(extractPx(longOut.metrics.dst.unitStyle)).toBeLessThan(extractPx(shortOut.metrics.dst.unitStyle));
+    expect(extractPx(longOut.metrics.dst.unitStyle)).toBeLessThanOrEqual(longTargetSecondary);
     expect(extractPx(longOut.metrics.dst.valueStyle)).toBeGreaterThan(0);
+  });
+
+  it("uses full value width for ETA/PTS when no unit exists", function () {
+    const h = createHarness();
+    ["normal", "high"].forEach((mode) => {
+      const out = h.fit.compute({
+        model: buildModel({
+          mode: mode,
+          metrics: {
+            pts: { labelText: "PTS:", valueText: "123456789012" },
+            dst: { labelText: "DST:", valueText: "123456789012", unitText: "nm" },
+            rte: { labelText: "RTE:", valueText: "123456789012", unitText: "nm" },
+            eta: { labelText: "ETA:", valueText: "123456789012" }
+          }
+        }),
+        targetEl: h.targetEl,
+        hostContext: h.hostContext,
+        shellRect: { width: 320, height: 210 }
+      });
+
+      expect(extractPx(out.metrics.eta.valueStyle)).toBeGreaterThan(extractPx(out.metrics.dst.valueStyle));
+      expect(extractPx(out.metrics.pts.valueStyle)).toBeGreaterThan(extractPx(out.metrics.rte.valueStyle));
+      expect(out.metrics.eta.unitStyle).toBe("");
+      expect(out.metrics.pts.unitStyle).toBe("");
+    });
   });
 
   it("computes only name fit in no-route state", function () {

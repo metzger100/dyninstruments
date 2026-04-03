@@ -53,6 +53,7 @@
     highNameBandScale: 0.88,
     normalNameBandScale: 0.9
   };
+  const DEFAULT_METRIC_HAS_UNIT = { pts: false, dst: true, rte: true, eta: false };
 
   function create(def, Helpers) {
     const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
@@ -205,20 +206,21 @@
         + "gap:" + toPx(gapPx) + ";";
     }
 
-    function createHighMetricRow(rowRect, insets) {
+    function createHighMetricRow(rowRect, insets, hasUnit) {
       return geometryApi.createHighMetricRow({
         rowRect: rowRect,
         insets: insets,
         labelRatio: HIGH_ROW_LABEL_RATIO,
         labelMinRatio: HIGH_ROW_LABEL_MIN_RATIO,
         labelMaxRatio: HIGH_ROW_LABEL_MAX_RATIO,
+        includeUnit: hasUnit === true,
         unitShare: METRIC_UNIT_SHARE,
         unitMinPx: METRIC_UNIT_MIN_PX,
         unitMaxRatio: METRIC_UNIT_MAX_RATIO
       });
     }
 
-    function computeFlatMetricsLayout(metricsRect, insets, responsive, out) {
+    function computeFlatMetricsLayout(metricsRect, insets, responsive, out, metricHasUnit) {
       const singleRowTiles = mathApi.splitRow(metricsRect, insets.gap, 4, makeRect);
       const minTileWidth = Math.max(1, FLAT_METRIC_MIN_TILE_WIDTH);
       const canUseTwoRows = metricsRect.h >= FLAT_TWO_ROW_MIN_METRICS_HEIGHT;
@@ -241,13 +243,13 @@
         unitPlacement: "none"
       });
       out.metricBoxes.dst = createMetricTile(tiles[1], insets, responsive, {
-        unitPlacement: "stacked",
+        unitPlacement: metricHasUnit.dst ? "stacked" : "none",
         unitShare: FLAT_UNIT_STACK_SHARE,
         unitMinPx: FLAT_UNIT_STACK_MIN_PX,
         unitMaxRatio: FLAT_UNIT_STACK_MAX_RATIO
       });
       out.metricBoxes.rte = createMetricTile(tiles[2], insets, responsive, {
-        unitPlacement: "stacked",
+        unitPlacement: metricHasUnit.rte ? "stacked" : "none",
         unitShare: FLAT_UNIT_STACK_SHARE,
         unitMinPx: FLAT_UNIT_STACK_MIN_PX,
         unitMaxRatio: FLAT_UNIT_STACK_MAX_RATIO
@@ -280,11 +282,19 @@
       });
       const insets = computeInsets(W, effectiveH, { isVerticalCommitted: verticalShell.isVerticalCommitted });
       const contentRect = cfg.contentRect || createContentRect(W, effectiveH, insets);
-      const metricVisibility = {
-        pts: hasRoute,
-        dst: hasRoute,
-        rte: hasRoute,
-        eta: hasRoute
+      const metricVisibility = { pts: hasRoute, dst: hasRoute, rte: hasRoute, eta: hasRoute };
+      const metricHasUnitConfig = cfg.metricHasUnit && typeof cfg.metricHasUnit === "object"
+        ? cfg.metricHasUnit
+        : {};
+      const metricHasUnit = {
+        pts: metricHasUnitConfig.pts === true,
+        dst: Object.prototype.hasOwnProperty.call(metricHasUnitConfig, "dst")
+          ? metricHasUnitConfig.dst === true
+          : DEFAULT_METRIC_HAS_UNIT.dst,
+        rte: Object.prototype.hasOwnProperty.call(metricHasUnitConfig, "rte")
+          ? metricHasUnitConfig.rte === true
+          : DEFAULT_METRIC_HAS_UNIT.rte,
+        eta: metricHasUnitConfig.eta === true
       };
 
       const out = {
@@ -342,7 +352,7 @@
         );
 
         out.nameBarRect = makeRect(contentRect.x, contentRect.y, contentRect.w, nameHeight);
-        computeFlatMetricsLayout(metricsRect, insets, insets.responsive, out);
+        computeFlatMetricsLayout(metricsRect, insets, insets.responsive, out, metricHasUnit);
         out.flatStackGapPx = insets.gap;
         out.flatWrapperLayoutStyle = buildFlatWrapperLayoutStyle({
           nameHeight: out.nameBarRect.h,
@@ -372,16 +382,24 @@
           const rows = mathApi.splitStack(metricsRect, insets.gap, 2, makeRect);
           const firstRow = mathApi.splitRow(rows[0], insets.gap, 2, makeRect);
           const secondRow = mathApi.splitRow(rows[1], insets.gap, 2, makeRect);
-          out.metricBoxes.pts = createMetricTile(firstRow[0], insets, insets.responsive, {});
-          out.metricBoxes.dst = createMetricTile(firstRow[1], insets, insets.responsive, {});
-          out.metricBoxes.rte = createMetricTile(secondRow[0], insets, insets.responsive, {});
-          out.metricBoxes.eta = createMetricTile(secondRow[1], insets, insets.responsive, {});
+          out.metricBoxes.pts = createMetricTile(firstRow[0], insets, insets.responsive, {
+            unitPlacement: "none"
+          });
+          out.metricBoxes.dst = createMetricTile(firstRow[1], insets, insets.responsive, {
+            unitPlacement: metricHasUnit.dst ? "inline" : "none"
+          });
+          out.metricBoxes.rte = createMetricTile(secondRow[0], insets, insets.responsive, {
+            unitPlacement: metricHasUnit.rte ? "inline" : "none"
+          });
+          out.metricBoxes.eta = createMetricTile(secondRow[1], insets, insets.responsive, {
+            unitPlacement: "none"
+          });
         } else {
           const rows = mathApi.splitStack(metricsRect, insets.gap, 4, makeRect);
-          out.metricBoxes.pts = createHighMetricRow(rows[0], insets);
-          out.metricBoxes.dst = createHighMetricRow(rows[1], insets);
-          out.metricBoxes.rte = createHighMetricRow(rows[2], insets);
-          out.metricBoxes.eta = createHighMetricRow(rows[3], insets);
+          out.metricBoxes.pts = createHighMetricRow(rows[0], insets, false);
+          out.metricBoxes.dst = createHighMetricRow(rows[1], insets, metricHasUnit.dst);
+          out.metricBoxes.rte = createHighMetricRow(rows[2], insets, metricHasUnit.rte);
+          out.metricBoxes.eta = createHighMetricRow(rows[3], insets, false);
         }
       }
 

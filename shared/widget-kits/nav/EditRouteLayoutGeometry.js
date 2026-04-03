@@ -200,7 +200,7 @@
       const valueParts = computeInlineValueRects({
         valueRect: valueRect,
         insets: cfg.insets,
-        includeUnit: true,
+        includeUnit: cfg.includeUnit !== false,
         unitShare: cfg.unitShare,
         unitMinPx: cfg.unitMinPx,
         unitMaxRatio: cfg.unitMaxRatio

@@ -32,7 +32,17 @@
     return mode === "flat" && (metricId === "dst" || metricId === "rte");
   }
 
-  function shouldRenderUnitNode(mode, metricId) {
+  function hasMetricUnit(metric, unitText) {
+    if (metric && metric.hasUnit === true) {
+      return true;
+    }
+    return String(unitText || "").trim().length > 0;
+  }
+
+  function shouldRenderUnitNode(mode, metricId, metric, unitText) {
+    if (!hasMetricUnit(metric, unitText)) {
+      return false;
+    }
     if (mode === "flat") {
       return metricId === "dst" || metricId === "rte";
     }
@@ -57,7 +67,7 @@
       ? ("row-gap:" + String(Math.floor(model.flatStackGapPx)) + "px;")
       : "";
     const valueRowStyle = mergeStyles(metricFit.valueRowStyle, stackGapStyle);
-    const unitNode = shouldRenderUnitNode(mode, metricId)
+    const unitNode = shouldRenderUnitNode(mode, metricId, metric, unitText)
       ? ('<span class="dyni-edit-route-metric-unit"'
         + htmlUtils.toStyleAttr(metricFit.unitStyle)
         + ">"

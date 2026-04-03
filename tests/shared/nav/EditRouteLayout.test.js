@@ -75,6 +75,10 @@ describe("EditRouteLayout", function () {
     expect(out.metricBoxes.dst).toBeTruthy();
     expect(out.metricBoxes.rte).toBeTruthy();
     expect(out.metricBoxes.eta).toBeTruthy();
+    expect(out.metricBoxes.pts.unitRect).toBeNull();
+    expect(out.metricBoxes.eta.unitRect).toBeNull();
+    expect(out.metricBoxes.pts.valueTextRect.w).toBe(out.metricBoxes.pts.valueRect.w);
+    expect(out.metricBoxes.eta.valueTextRect.w).toBe(out.metricBoxes.eta.valueRect.w);
     expect(out.metricBoxes.rte.valueTextRect.w).toBeGreaterThan(0);
     expect(out.metricBoxes.rte.unitRect.w).toBeGreaterThan(0);
   });
@@ -95,7 +99,30 @@ describe("EditRouteLayout", function () {
     expect(out.metricBoxes.dst.tileRect.y).toBeGreaterThan(out.metricBoxes.pts.tileRect.y);
     expect(out.metricBoxes.rte.tileRect.y).toBeGreaterThan(out.metricBoxes.dst.tileRect.y);
     expect(out.metricBoxes.eta.tileRect.y).toBeGreaterThan(out.metricBoxes.rte.tileRect.y);
+    expect(out.metricBoxes.pts.unitRect).toBeNull();
+    expect(out.metricBoxes.eta.unitRect).toBeNull();
     expect(out.metricBoxes.rte.unitRect.x).toBeGreaterThan(out.metricBoxes.rte.valueTextRect.x);
+  });
+
+  it("does not reserve unit boxes when a metric has no unit", function () {
+    const layout = createLayout();
+    const out = layout.computeLayout({
+      mode: "normal",
+      W: 320,
+      H: 220,
+      hasRoute: true,
+      isLocalRoute: false,
+      metricHasUnit: {
+        pts: false,
+        dst: true,
+        rte: false,
+        eta: false
+      }
+    });
+
+    expect(out.metricBoxes.dst.unitRect).toBeTruthy();
+    expect(out.metricBoxes.rte.unitRect).toBeNull();
+    expect(out.metricBoxes.rte.valueTextRect.w).toBe(out.metricBoxes.rte.valueRect.w);
   });
 
   it("omits all metric boxes when no route is available", function () {
