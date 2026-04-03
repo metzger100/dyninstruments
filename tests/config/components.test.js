@@ -113,6 +113,9 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteLayout.globalKey).toBe("DyniActiveRouteLayout");
     expect(components.ActiveRouteLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/ActiveRouteLayout.js");
     expect(components.ActiveRouteLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
+    expect(components.EditRouteLayout.globalKey).toBe("DyniEditRouteLayout");
+    expect(components.EditRouteLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteLayout.js");
+    expect(components.EditRouteLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
     expect(components.RoutePointsLayoutSizing.globalKey).toBe("DyniRoutePointsLayoutSizing");
     expect(components.RoutePointsLayoutSizing.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsLayoutSizing.js");
     expect(components.RoutePointsLayoutSizing.deps).toBeUndefined();
