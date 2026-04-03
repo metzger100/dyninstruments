@@ -107,23 +107,35 @@ describe("EditRouteMarkup", function () {
     expect(html).not.toContain("dyni-edit-route-metric-pts");
   });
 
-  it("omits RTE/ETA tiles in flat mode", function () {
+  it("renders all 4 metrics in flat mode and keeps unit nodes only for DST/RTE", function () {
     const markup = createMarkup();
     const html = markup.render({
       model: makeModel({
         mode: "flat",
-        visibleMetricIds: ["pts", "dst"],
-        metricVisibility: { pts: true, dst: true, rte: false, eta: false }
+        flatMetricRows: 1,
+        visibleMetricIds: ["pts", "dst", "rte", "eta"],
+        metricVisibility: { pts: true, dst: true, rte: true, eta: true }
       }),
       fit: makeFit(),
       htmlUtils: createHtmlUtils()
     });
 
     expect(html).toContain("dyni-edit-route-mode-flat");
+    expect(html).toContain("dyni-edit-route-flat-rows-1");
     expect(html).toContain("dyni-edit-route-metric-pts");
     expect(html).toContain("dyni-edit-route-metric-dst");
-    expect(html).not.toContain("dyni-edit-route-metric-rte");
-    expect(html).not.toContain("dyni-edit-route-metric-eta");
+    expect(html).toContain("dyni-edit-route-metric-rte");
+    expect(html).toContain("dyni-edit-route-metric-eta");
+    expect(html).toContain("dyni-edit-route-metric-dst");
+    expect(html).toContain("dyni-edit-route-metric-value-stack");
+    expect(html).toContain('class="dyni-edit-route-metric-unit"');
+    const ptsSlice = html.slice(
+      html.indexOf("dyni-edit-route-metric-pts"),
+      html.indexOf("dyni-edit-route-metric-dst")
+    );
+    const etaSlice = html.slice(html.indexOf("dyni-edit-route-metric-eta"));
+    expect(ptsSlice).not.toContain("dyni-edit-route-metric-unit");
+    expect(etaSlice).not.toContain("dyni-edit-route-metric-unit");
   });
 
   it("uses high-mode row topology and escapes text content", function () {

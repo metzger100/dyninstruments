@@ -235,6 +235,8 @@
         metrics: metrics,
         metricVisibility: layout.metricVisibility || {},
         visibleMetricIds: visibleMetricIds,
+        flatMetricRows: layout.flatMetricRows || 0,
+        flatMetricColumns: layout.flatMetricColumns || 0,
         wrapperStyle: wrapperStyle
       };
       model.resizeSignatureParts = buildResizeSignatureParts(model);

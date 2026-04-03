@@ -20,6 +20,17 @@
     return value == null ? "" : String(value);
   }
 
+  function isFlatDistanceMetric(mode, metricId) {
+    return mode === "flat" && (metricId === "dst" || metricId === "rte");
+  }
+
+  function shouldRenderUnitNode(mode, metricId) {
+    if (mode === "flat") {
+      return metricId === "dst" || metricId === "rte";
+    }
+    return true;
+  }
+
   function renderMetric(model, fit, metricId, htmlUtils) {
     const metrics = toObject(model.metrics);
     const metric = toObject(metrics[metricId]);
@@ -29,6 +40,17 @@
     const labelText = toText(metric.labelText);
     const valueText = toText(metric.valueText);
     const unitText = toText(metric.unitText);
+    const valueClasses = ["dyni-edit-route-metric-value"];
+    if (isFlatDistanceMetric(mode, metricId)) {
+      valueClasses.push("dyni-edit-route-metric-value-stack");
+    }
+    const unitNode = shouldRenderUnitNode(mode, metricId)
+      ? ('<span class="dyni-edit-route-metric-unit"'
+        + htmlUtils.toStyleAttr(metricFit.unitStyle)
+        + ">"
+        + htmlUtils.escapeHtml(unitText)
+        + "</span>")
+      : "";
 
     if (mode === "high") {
       return ""
@@ -38,7 +60,7 @@
         + ">"
         + htmlUtils.escapeHtml(labelText)
         + "</div>"
-        + '<div class="dyni-edit-route-metric-value"'
+        + '<div class="' + valueClasses.join(" ") + '"'
         + htmlUtils.toStyleAttr(metricFit.valueRowStyle)
         + ">"
         + '<span class="dyni-edit-route-metric-value-text"'
@@ -46,11 +68,7 @@
         + ">"
         + htmlUtils.escapeHtml(valueText)
         + "</span>"
-        + '<span class="dyni-edit-route-metric-unit"'
-        + htmlUtils.toStyleAttr(metricFit.unitStyle)
-        + ">"
-        + htmlUtils.escapeHtml(unitText)
-        + "</span>"
+        + unitNode
         + "</div>"
         + "</div>";
     }
@@ -62,7 +80,7 @@
       + ">"
       + htmlUtils.escapeHtml(labelText)
       + "</div>"
-      + '<div class="dyni-edit-route-metric-value"'
+      + '<div class="' + valueClasses.join(" ") + '"'
       + htmlUtils.toStyleAttr(metricFit.valueRowStyle)
       + ">"
       + '<span class="dyni-edit-route-metric-value-text"'
@@ -70,11 +88,7 @@
       + ">"
       + htmlUtils.escapeHtml(valueText)
       + "</span>"
-      + '<span class="dyni-edit-route-metric-unit"'
-      + htmlUtils.toStyleAttr(metricFit.unitStyle)
-      + ">"
-      + htmlUtils.escapeHtml(unitText)
-      + "</span>"
+      + unitNode
       + "</div>"
       + "</div>";
   }
@@ -95,6 +109,9 @@
         "dyni-edit-route-mode-" + mode,
         canOpen ? "dyni-edit-route-open-dispatch" : "dyni-edit-route-open-passive"
       ];
+      if (mode === "flat") {
+        wrapperClasses.push("dyni-edit-route-flat-rows-" + (model.flatMetricRows === 2 ? "2" : "1"));
+      }
       if (model.isActiveRoute === true) {
         wrapperClasses.push("dyni-edit-route-active-route");
       }

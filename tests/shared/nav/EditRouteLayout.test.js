@@ -3,20 +3,29 @@ const { loadFresh } = require("../../helpers/load-umd");
 describe("EditRouteLayout", function () {
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const editRouteLayoutMath = loadFresh("shared/widget-kits/nav/EditRouteLayoutMath.js");
+    const editRouteLayoutGeometry = loadFresh("shared/widget-kits/nav/EditRouteLayoutGeometry.js");
     return loadFresh("shared/widget-kits/nav/EditRouteLayout.js").create({}, {
       getModule(id) {
         if (id === "ResponsiveScaleProfile") {
           return responsiveScaleProfile;
         }
         if (id === "LayoutRectMath") {
-          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+          return layoutRectMath;
+        }
+        if (id === "EditRouteLayoutMath") {
+          return editRouteLayoutMath;
+        }
+        if (id === "EditRouteLayoutGeometry") {
+          return editRouteLayoutGeometry;
         }
         throw new Error("unexpected module: " + id);
       }
     });
   }
 
-  it("returns flat boxes for name, PTS, and DST only", function () {
+  it("returns flat boxes for name, PTS, DST, RTE, and ETA", function () {
     const layout = createLayout();
     const out = layout.computeLayout({
       W: 520,
@@ -28,14 +37,21 @@ describe("EditRouteLayout", function () {
     });
 
     expect(out.mode).toBe("flat");
-    expect(out.metricVisibility).toEqual({ pts: true, dst: true, rte: false, eta: false });
+    expect(out.metricVisibility).toEqual({ pts: true, dst: true, rte: true, eta: true });
+    expect(out.nameBarRect.w).toBe(out.contentRect.w);
+    expect(out.flatMetricRows).toBeGreaterThanOrEqual(1);
+    expect(out.flatMetricColumns).toBeGreaterThanOrEqual(2);
     expect(out.metricBoxes.pts).toBeTruthy();
     expect(out.metricBoxes.dst).toBeTruthy();
-    expect(out.metricBoxes.rte).toBeUndefined();
-    expect(out.metricBoxes.eta).toBeUndefined();
+    expect(out.metricBoxes.rte).toBeTruthy();
+    expect(out.metricBoxes.eta).toBeTruthy();
+    expect(out.metricBoxes.pts.unitRect).toBeNull();
+    expect(out.metricBoxes.eta.unitRect).toBeNull();
     expect(out.metricBoxes.dst.valueTextRect).toBeTruthy();
     expect(out.metricBoxes.dst.unitRect).toBeTruthy();
-    expect(out.metricBoxes.dst.unitRect.x).toBeGreaterThan(out.metricBoxes.dst.valueTextRect.x);
+    expect(out.metricBoxes.rte.unitRect).toBeTruthy();
+    expect(out.metricBoxes.dst.unitRect.y).toBeGreaterThan(out.metricBoxes.dst.valueTextRect.y);
+    expect(out.metricBoxes.rte.unitRect.y).toBeGreaterThan(out.metricBoxes.rte.valueTextRect.y);
   });
 
   it("returns normal boxes for name, PTS, DST, RTE, and ETA", function () {

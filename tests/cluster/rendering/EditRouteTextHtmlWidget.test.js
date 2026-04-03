@@ -180,8 +180,11 @@ describe("EditRouteTextHtmlWidget", function () {
     const css = fs.readFileSync(cssPath, "utf8");
 
     expect(css).toContain(".dyni-edit-route-mode-flat .dyni-edit-route-metrics");
+    expect(css).toContain(".dyni-edit-route-mode-flat.dyni-edit-route-flat-rows-2 .dyni-edit-route-metrics");
     expect(css).toContain(".dyni-edit-route-mode-normal .dyni-edit-route-metrics");
     expect(css).toContain(".dyni-edit-route-mode-high .dyni-edit-route-metrics");
+    expect(css).toContain(".dyni-edit-route-mode-flat .dyni-edit-route-metric-value-stack");
+    expect(css).not.toContain("0.58fr");
     expect(css).toContain(".dyni-edit-route-open-hotspot");
     expect(css).toContain(".dyni-edit-route-open-dispatch");
     expect(css).toContain(".dyni-edit-route-open-passive");

@@ -67,6 +67,8 @@ describe("EditRouteHtmlFit", function () {
     const htmlUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
     const responsiveScaleProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMathModule = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const editRouteLayoutMathModule = loadFresh("shared/widget-kits/nav/EditRouteLayoutMath.js");
+    const editRouteLayoutGeometryModule = loadFresh("shared/widget-kits/nav/EditRouteLayoutGeometry.js");
     const editRouteLayoutModule = loadFresh("shared/widget-kits/nav/EditRouteLayout.js");
     const textTileLayoutModule = loadFresh("shared/widget-kits/text/TextTileLayout.js");
     const radialTextApi = createRadialTextApi();
@@ -103,6 +105,12 @@ describe("EditRouteHtmlFit", function () {
         if (id === "EditRouteLayout") {
           return editRouteLayoutModule;
         }
+        if (id === "EditRouteLayoutMath") {
+          return editRouteLayoutMathModule;
+        }
+        if (id === "EditRouteLayoutGeometry") {
+          return editRouteLayoutGeometryModule;
+        }
         if (id === "HtmlWidgetUtils") {
           return htmlUtilsModule;
         }
@@ -136,7 +144,7 @@ describe("EditRouteHtmlFit", function () {
   it("returns stable style payloads for all visible boxes per mode", function () {
     const h = createHarness();
     const expectedMetricsByMode = {
-      flat: ["pts", "dst"],
+      flat: ["pts", "dst", "rte", "eta"],
       normal: ["pts", "dst", "rte", "eta"],
       high: ["pts", "dst", "rte", "eta"]
     };

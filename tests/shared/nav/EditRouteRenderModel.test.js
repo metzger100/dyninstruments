@@ -33,6 +33,12 @@ describe("EditRouteRenderModel", function () {
           if (id === "EditRouteLayout") {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayout.js");
           }
+          else if (id === "EditRouteLayoutMath") {
+            moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayoutMath.js");
+          }
+          else if (id === "EditRouteLayoutGeometry") {
+            moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayoutGeometry.js");
+          }
           else if (id === "HtmlWidgetUtils") {
             moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
           }
@@ -175,7 +181,7 @@ describe("EditRouteRenderModel", function () {
     expect(model.metrics.eta.valueText).toBe("---");
   });
 
-  it("hides RTE and ETA in flat mode", function () {
+  it("keeps all 4 metrics visible in flat mode", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
       props: makeProps(),
@@ -185,7 +191,36 @@ describe("EditRouteRenderModel", function () {
     });
 
     expect(model.mode).toBe("flat");
-    expect(model.visibleMetricIds).toEqual(["pts", "dst"]);
+    expect(model.visibleMetricIds).toEqual(["pts", "dst", "rte", "eta"]);
+    expect(model.flatMetricRows).toBeGreaterThanOrEqual(1);
+    expect(model.flatMetricColumns).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps RTE/ETA placeholders in flat mode for inactive routes", function () {
+    const renderModel = createRenderModel();
+    const model = renderModel.buildModel({
+      props: makeProps({
+        domain: {
+          hasRoute: true,
+          routeName: "Harbor Run",
+          pointCount: 5,
+          totalDistance: 1234.5,
+          remainingDistance: 321.4,
+          eta: "2026-03-06T11:45:00Z",
+          isActiveRoute: false,
+          isLocalRoute: false,
+          isServerRoute: true
+        }
+      }),
+      hostContext: createHostContext("dispatch"),
+      shellRect: { width: 620, height: 120 },
+      isVerticalCommitted: false
+    });
+
+    expect(model.mode).toBe("flat");
+    expect(model.visibleMetricIds).toEqual(["pts", "dst", "rte", "eta"]);
+    expect(model.metrics.rte.valueText).toBe("---");
+    expect(model.metrics.eta.valueText).toBe("---");
   });
 
   it("forces high mode and applies width-driven vertical shell geometry", function () {

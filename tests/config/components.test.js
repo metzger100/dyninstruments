@@ -115,7 +115,13 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
     expect(components.EditRouteLayout.globalKey).toBe("DyniEditRouteLayout");
     expect(components.EditRouteLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteLayout.js");
-    expect(components.EditRouteLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
+    expect(components.EditRouteLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath", "EditRouteLayoutMath", "EditRouteLayoutGeometry"]);
+    expect(components.EditRouteLayoutMath.globalKey).toBe("DyniEditRouteLayoutMath");
+    expect(components.EditRouteLayoutMath.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteLayoutMath.js");
+    expect(components.EditRouteLayoutMath.deps).toBeUndefined();
+    expect(components.EditRouteLayoutGeometry.globalKey).toBe("DyniEditRouteLayoutGeometry");
+    expect(components.EditRouteLayoutGeometry.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteLayoutGeometry.js");
+    expect(components.EditRouteLayoutGeometry.deps).toEqual(["LayoutRectMath", "EditRouteLayoutMath"]);
     expect(components.EditRouteHtmlFit.globalKey).toBe("DyniEditRouteHtmlFit");
     expect(components.EditRouteHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteHtmlFit.js");
     expect(components.EditRouteHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "EditRouteLayout", "HtmlWidgetUtils"]);

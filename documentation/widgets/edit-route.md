@@ -14,7 +14,7 @@ Route tuple:
 
 ## Key Details
 
-- Core parity scope: editing-route summary (`name`, `PTS`, `DST`, and mode-dependent `RTE`/`ETA`) plus workflow-entry click behavior.
+- Core parity scope: editing-route summary (`name`, `PTS`, `DST`, `RTE`, `ETA`) plus workflow-entry click behavior.
 - Captions are configurable for all four metrics (`PTS`, `DST`, `RTE`, `ETA`).
 - Distance units are configurable for `DST` and `RTE` metric tiles.
 - Dyninstruments follow-up fix: default visible remaining-distance caption is `RTE` (core AvNav still labels this field `RTG` in some surfaces).
@@ -26,7 +26,7 @@ Route tuple:
 - local route shows a `LOCAL` badge in the name bar.
 - non-local/server route shows no source badge.
 - Mode mapping:
-- `flat` -> core horizontal-equivalent density (`name`, `PTS`, `DST` only)
+- `flat` -> compact two-band density (`name`, `PTS`, `DST`, `RTE`, `ETA`)
 - `normal`/`high` -> core non-horizontal-equivalent density (`name`, `PTS`, `DST`, `RTE`, `ETA`)
 - `.widgetContainer.vertical` forces `high` and applies native shell profile (`height:auto; aspect-ratio:7/8; min-height:8em;`).
 - No-route contract: show `No Route` in the name area and omit metric boxes.
@@ -123,7 +123,7 @@ Nav-cluster store keys:
 
 | Mode | Route Present | No Route |
 |---|---|---|
-| `flat` | `name + PTS + DST` | `No Route` only |
+| `flat` | `name + PTS + DST + RTE + ETA` | `No Route` only |
 | `normal` | `name + PTS + DST + RTE + ETA` (2x2 metrics) | `No Route` only |
 | `high` | `name + PTS + DST + RTE + ETA` (4 stacked metric rows) | `No Route` only |
 
@@ -136,10 +136,11 @@ Field-order contract:
 
 Visibility rules:
 
-- `RTE` and `ETA` never render in `flat`.
-- `RTE` and `ETA` always render in `normal`/`high` when a route exists.
-- Inactive routes keep `RTE`/`ETA` placeholders (`---`) in `normal`/`high`.
-- `DST` and `RTE` unit spans render in metric value rows; `PTS` and `ETA` do not render unit text.
+- `RTE` and `ETA` render in `flat`/`normal`/`high` whenever a route exists.
+- Inactive routes keep `RTE`/`ETA` placeholders (`---`) in every route-present mode.
+- `flat` uses top-row name + bottom metrics topology with metric order `PTS`, `DST`, `RTE`, `ETA`.
+- `flat` renders `DST`/`RTE` units below values and renders `PTS`/`ETA` without unit nodes.
+- `normal`/`high` keep inline value/unit composition.
 
 Vertical behavior (`.widgetContainer.vertical`):
 

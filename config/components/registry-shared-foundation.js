@@ -34,7 +34,18 @@
       js: BASE + "shared/widget-kits/nav/EditRouteLayout.js",
       css: undefined,
       globalKey: "DyniEditRouteLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "EditRouteLayoutMath", "EditRouteLayoutGeometry"]
+    },
+    EditRouteLayoutMath: {
+      js: BASE + "shared/widget-kits/nav/EditRouteLayoutMath.js",
+      css: undefined,
+      globalKey: "DyniEditRouteLayoutMath"
+    },
+    EditRouteLayoutGeometry: {
+      js: BASE + "shared/widget-kits/nav/EditRouteLayoutGeometry.js",
+      css: undefined,
+      globalKey: "DyniEditRouteLayoutGeometry",
+      deps: ["LayoutRectMath", "EditRouteLayoutMath"]
     },
     EditRouteHtmlFit: {
       js: BASE + "shared/widget-kits/nav/EditRouteHtmlFit.js",
