@@ -18,6 +18,7 @@
   const ROW_HEIGHT_MAX_PX = 62;
   const ROW_HEIGHT_MIN_PX_VERTICAL = 22;
   const ROW_HEIGHT_MAX_PX_VERTICAL = 48;
+  const HIGH_MODE_ROW_HEIGHT_MULTIPLIER = 1.5;
   const HEADER_HEIGHT_SHARE_HIGH = 1.0;
   const HEADER_HEIGHT_SHARE_NORMAL = 0.6;
   const HEAD_PANEL_WIDTH_RATIO_FLAT = 0.36;
@@ -65,7 +66,11 @@
       return "normal";
     }
 
-    function computeRowHeight(W, H, isVerticalContainer) {
+    function resolveRowHeightMultiplier(mode) {
+      return mode === "high" ? HIGH_MODE_ROW_HEIGHT_MULTIPLIER : 1;
+    }
+
+    function computeRowHeight(W, H, isVerticalContainer, mode) {
       const isVertical = isVerticalContainer === true;
       const safeW = Math.max(1, Math.floor(clampNumber(W, 1, Number.MAX_SAFE_INTEGER, 1)));
       const safeH = isVertical
@@ -74,8 +79,13 @@
       const profile = profileApi.computeProfile(safeW, safeH, { scales: RESPONSIVE_SCALES });
       const minClamp = isVertical ? ROW_HEIGHT_MIN_PX_VERTICAL : ROW_HEIGHT_MIN_PX;
       const maxClamp = isVertical ? ROW_HEIGHT_MAX_PX_VERTICAL : ROW_HEIGHT_MAX_PX;
-      const rowHeight = profileApi.computeInsetPx(profile, ROW_HEIGHT_RATIO, minClamp);
-      return Math.max(minClamp, Math.min(maxClamp, Math.floor(rowHeight)));
+      const baseRowHeight = Math.max(
+        minClamp,
+        Math.min(maxClamp, Math.floor(profileApi.computeInsetPx(profile, ROW_HEIGHT_RATIO, minClamp)))
+      );
+      const multiplier = resolveRowHeightMultiplier(mode);
+      const scaledMaxClamp = Math.max(minClamp, Math.floor(maxClamp * multiplier));
+      return Math.max(minClamp, Math.min(scaledMaxClamp, Math.floor(baseRowHeight * multiplier)));
     }
 
     function computeInsets(W, H) {
@@ -139,7 +149,7 @@
       const rowHeightSourceWidth = isVerticalContainer
         ? Math.max(1, Math.floor(clampNumber(cfg.verticalAnchorWidth, 1, Number.MAX_SAFE_INTEGER, contentRect.w)))
         : contentRect.w;
-      const rowHeight = computeRowHeight(rowHeightSourceWidth, contentRect.h, isVerticalContainer);
+      const rowHeight = computeRowHeight(rowHeightSourceWidth, contentRect.h, isVerticalContainer, mode);
       const rowGap = Math.max(1, Math.floor(rowHeight * ROW_GAP_RATIO));
       const headerGap = Math.max(1, Math.floor(rowHeight * HEADER_GAP_RATIO));
       const rowPadding = Math.max(1, Math.floor(rowHeight * ROW_PADDING_RATIO));
@@ -287,7 +297,7 @@
       const width = Math.max(1, Math.floor(clampNumber(cfg.W, 1, Number.MAX_SAFE_INTEGER, 1)));
       const pointCount = toCount(cfg.pointCount);
       const showHeader = cfg.showHeader !== false;
-      const rowHeight = computeRowHeight(width, width, true);
+      const rowHeight = computeRowHeight(width, width, true, "high");
       const rowGap = Math.max(1, Math.floor(rowHeight * ROW_GAP_RATIO));
       const headerGap = showHeader ? Math.max(1, Math.floor(rowHeight * HEADER_GAP_RATIO)) : 0;
       const headerHeight = showHeader
@@ -336,6 +346,7 @@
         ROW_HEIGHT_MAX_PX: ROW_HEIGHT_MAX_PX,
         ROW_HEIGHT_MIN_PX_VERTICAL: ROW_HEIGHT_MIN_PX_VERTICAL,
         ROW_HEIGHT_MAX_PX_VERTICAL: ROW_HEIGHT_MAX_PX_VERTICAL,
+        HIGH_MODE_ROW_HEIGHT_MULTIPLIER: HIGH_MODE_ROW_HEIGHT_MULTIPLIER,
         HEADER_HEIGHT_SHARE_HIGH: HEADER_HEIGHT_SHARE_HIGH,
         HEADER_HEIGHT_SHARE_NORMAL: HEADER_HEIGHT_SHARE_NORMAL,
         HEADER_HEIGHT_FLOOR_ROWS_NORMAL: sizingApi.constants.HEADER_HEIGHT_FLOOR_ROWS_NORMAL,

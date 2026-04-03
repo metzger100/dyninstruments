@@ -57,6 +57,19 @@ describe("RoutePointsLayout", function () {
     expect(verticalHuge).toBe(layout.constants.ROW_HEIGHT_MAX_PX_VERTICAL);
   });
 
+  it("keeps normal and flat row-height baselines unchanged while scaling high mode by 1.5x", function () {
+    const layout = createLayout();
+    const baseHost = layout.computeRowHeight(240, 280, false, "normal");
+    const baseVertical = layout.computeRowHeight(240, 280, true, "normal");
+    const highHost = layout.computeRowHeight(240, 280, false, "high");
+    const highVertical = layout.computeRowHeight(240, 280, true, "high");
+
+    expect(layout.computeRowHeight(240, 280, false, "flat")).toBe(baseHost);
+    expect(layout.computeRowHeight(240, 280, false, "normal")).toBe(baseHost);
+    expect(highHost).toBe(Math.floor(baseHost * layout.constants.HIGH_MODE_ROW_HEIGHT_MULTIPLIER));
+    expect(highVertical).toBe(Math.floor(baseVertical * layout.constants.HIGH_MODE_ROW_HEIGHT_MULTIPLIER));
+  });
+
   it("applies the row-height floor budget in normal mode", function () {
     const layout = createLayout();
     const built = buildContentRect(layout, 240, 280);
@@ -136,10 +149,13 @@ describe("RoutePointsLayout", function () {
       expect(row.nameRect.x).toBe(row.infoRect.x);
       expect(row.infoRect.y).toBeGreaterThanOrEqual(row.nameRect.y + row.nameRect.h);
       expect(row.markerRect.x + row.markerRect.w).toBeLessThanOrEqual(row.rowRect.x + row.rowRect.w);
+      expect(row.markerRect.h).toBe(row.rowRect.h - out.rowPadding * 2);
       if (index > 0) {
         expect(out.rows[index].rowRect.y).toBeGreaterThan(out.rows[index - 1].rowRect.y);
       }
     });
+
+    expect(out.listContentHeight).toBe(out.pointCount * out.rowHeight + Math.max(0, out.pointCount - 1) * out.rowGap);
   });
 
   it("builds normal mode with side-by-side header and 4-column rows", function () {
@@ -164,6 +180,7 @@ describe("RoutePointsLayout", function () {
   it("forces compact row policy in vertical containers", function () {
     const layout = createLayout();
     const built = buildContentRect(layout, 180, 340);
+    const baseVerticalRowHeight = layout.computeRowHeight(built.contentRect.w, built.contentRect.h, true, "normal");
     const out = layout.computeLayout({
       contentRect: built.contentRect,
       mode: "normal",
@@ -177,6 +194,7 @@ describe("RoutePointsLayout", function () {
     expect(out.mode).toBe("high");
     expect(out.rowPolicy.showOrdinal).toBe(false);
     expect(out.rows[0].ordinalRect.w).toBe(0);
+    expect(out.rowHeight).toBe(Math.floor(baseVerticalRowHeight * layout.constants.HIGH_MODE_ROW_HEIGHT_MULTIPLIER));
     expect(inline.showOrdinal).toBe(false);
     expect(inline.rows[0].ordinalStyle).toBe("");
     expect(inline.rows[0].nameStyle).toMatch(/width:\d+px;/);

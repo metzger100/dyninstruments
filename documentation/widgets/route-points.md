@@ -171,6 +171,7 @@ Row policy contract:
 | `ROW_HEIGHT_RATIO` | `0.22` | Row-height ratio against profile anchor |
 | `ROW_HEIGHT_MIN_PX` / `ROW_HEIGHT_MAX_PX` | `18` / `62` | Host-sized row-height clamps |
 | `ROW_HEIGHT_MIN_PX_VERTICAL` / `ROW_HEIGHT_MAX_PX_VERTICAL` | `22` / `48` | Vertical-mode tighter row-height clamps |
+| `HIGH_MODE_ROW_HEIGHT_MULTIPLIER` | `1.5` | Applies to all `high` rows (including committed vertical `high`) after base row-height resolution |
 | `HEADER_HEIGHT_SHARE_HIGH` | `1.0` | High-mode header height share vs row height |
 | `HEADER_HEIGHT_SHARE_NORMAL` | `0.6` | Normal-mode header height share vs row height |
 | `HEADER_HEIGHT_FLOOR_ROWS_NORMAL` | `1.45` | Mode-aware minimum header budget for `normal` (`max(existing, rowHeight * floor)`) |
@@ -194,7 +195,7 @@ Anchor model:
 
 - Host-sized path: `computeProfile(W, H)` (`minDim = min(W, H)`).
 - Vertical path: `computeProfile(W, W)` (`minDim = W`).
-- Row-height floor clamp via `computeInsetPx(...)`, ceiling clamp in layout owner.
+- Base row-height floor/ceiling clamp via `computeInsetPx(...)` in layout owner, then mode-aware scaling (`1.0` for `normal`/`flat`, `1.5` for `high`).
 - Header height uses the existing mode share as the baseline and then applies a rowHeight-driven minimum floor (plus narrow-vertical boost when applicable).
 - Vertical render-model flow passes shell width as the layout `verticalAnchorWidth` so row-height anchoring remains consistent between `computeNaturalHeight(...)` and the final list viewport geometry.
 

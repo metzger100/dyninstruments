@@ -383,7 +383,7 @@ describe("RoutePointsRenderModel", function () {
       hostContext: createHostContext(),
       shellRect: { width: 320, height: 900 },
       isVerticalCommitted: true,
-      viewportHeight: 2000
+      viewportHeight: 10000
     });
 
     expect(model.naturalHeight.isCapped).toBe(false);
