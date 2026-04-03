@@ -109,6 +109,12 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteLayout.globalKey).toBe("DyniActiveRouteLayout");
     expect(components.ActiveRouteLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/ActiveRouteLayout.js");
     expect(components.ActiveRouteLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
+    expect(components.RoutePointsLayoutSizing.globalKey).toBe("DyniRoutePointsLayoutSizing");
+    expect(components.RoutePointsLayoutSizing.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsLayoutSizing.js");
+    expect(components.RoutePointsLayoutSizing.deps).toBeUndefined();
+    expect(components.RoutePointsLayout.globalKey).toBe("DyniRoutePointsLayout");
+    expect(components.RoutePointsLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsLayout.js");
+    expect(components.RoutePointsLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath", "RoutePointsLayoutSizing"]);
     expect(components.ActiveRouteHtmlFit.globalKey).toBe("DyniActiveRouteHtmlFit");
     expect(components.ActiveRouteHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/ActiveRouteHtmlFit.js");
     expect(components.ActiveRouteHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils"]);

@@ -3,6 +3,7 @@ const { loadFresh } = require("../../helpers/load-umd");
 describe("RoutePointsRenderModel", function () {
   function createLayoutApi() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const routePointsLayoutSizing = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
     return loadFresh("shared/widget-kits/nav/RoutePointsLayout.js").create({}, {
       getModule(id) {
         if (id === "ResponsiveScaleProfile") {
@@ -10,6 +11,9 @@ describe("RoutePointsRenderModel", function () {
         }
         if (id === "LayoutRectMath") {
           return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+        }
+        if (id === "RoutePointsLayoutSizing") {
+          return routePointsLayoutSizing;
         }
         throw new Error("unexpected module: " + id);
       }
@@ -60,6 +64,9 @@ describe("RoutePointsRenderModel", function () {
           }
           else if (id === "LayoutRectMath") {
             moduleCache[id] = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+          }
+          else if (id === "RoutePointsLayoutSizing") {
+            moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
           }
           else {
             throw new Error("unexpected module: " + id);

@@ -17,6 +17,7 @@ Ownership split:
 - `cluster/viewmodels/RoutePointsViewModel.js`: route/point normalization and selection/domain flags
 - `shared/widget-kits/nav/RoutePointsRenderModel.js`: renderer-facing model normalization and formatter composition
 - `shared/widget-kits/nav/RoutePointsLayout.js`: structural geometry + vertical natural-height math
+- `shared/widget-kits/nav/RoutePointsLayoutSizing.js`: shared numeric helpers + rowHeight-driven header/marker sizing policy
 - `shared/widget-kits/nav/RoutePointsHtmlFit.js`: per-box text fit style output (`font-size:<n>px;`)
 - `shared/widget-kits/nav/RoutePointsMarkup.js`: escaped HTML assembly + class/state + inline geometry application
 - `shared/widget-kits/nav/RoutePointsDomEffects.js`: committed-DOM vertical detection + selected-row visibility pass
@@ -41,7 +42,7 @@ RoutePointsTextHtmlWidget: {
 
 Helper module registration:
 
-- `RoutePointsLayout` and `RoutePointsHtmlFit` in `config/components/registry-shared-foundation.js`
+- `RoutePointsLayoutSizing`, `RoutePointsLayout`, and `RoutePointsHtmlFit` in `config/components/registry-shared-foundation.js`
 - `RoutePointsRenderModel`, `RoutePointsMarkup`, and `RoutePointsDomEffects` in `config/components/registry-widgets.js`
 - `RoutePointsViewModel` in `config/components/registry-cluster.js`
 
@@ -153,7 +154,7 @@ Mode matrix:
 | `normal` | side-by-side (`routeName | meta`) | `ordinal | name | info | marker` |
 | `flat` | side panel (`routeName` over `meta`) | `ordinal | name | info | marker` |
 
-## Layout Constants (Owner: RoutePointsLayout)
+## Layout Constants (Owner: RoutePointsLayout + RoutePointsLayoutSizing)
 
 | Constant | Value | Purpose |
 |---|---|---|
@@ -165,6 +166,11 @@ Mode matrix:
 | `ROW_HEIGHT_MIN_PX_VERTICAL` / `ROW_HEIGHT_MAX_PX_VERTICAL` | `22` / `48` | Vertical-mode tighter row-height clamps |
 | `HEADER_HEIGHT_SHARE_HIGH` | `1.0` | High-mode header height share vs row height |
 | `HEADER_HEIGHT_SHARE_NORMAL` | `0.6` | Normal-mode header height share vs row height |
+| `HEADER_HEIGHT_FLOOR_ROWS_NORMAL` | `1.45` | Mode-aware minimum header budget for `normal` (`max(existing, rowHeight * floor)`) |
+| `HEADER_HEIGHT_FLOOR_ROWS_HIGH` | `2.0` | Mode-aware minimum header budget for `high` (`max(existing, rowHeight * floor)`) |
+| `HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_NORMAL` | `0.10` | Additional rowHeight-share boost for narrow vertical `normal` shells |
+| `HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_HIGH` | `0.20` | Additional rowHeight-share boost for narrow vertical `high` shells |
+| `HEADER_NARROW_VERTICAL_WIDTH_TO_ROW_RATIO` | `5.0` | Width-to-rowHeight threshold used to classify narrow vertical shells |
 | `HEAD_PANEL_WIDTH_RATIO_FLAT` | `0.36` | Flat-mode header-panel width share |
 | `HEAD_PANEL_MIN_RATIO_FLAT` / `HEAD_PANEL_MAX_RATIO_FLAT` | `0.22` / `0.48` | Flat head-panel share clamp window |
 | `ROW_GAP_RATIO` | `0.06` | Vertical row gap ratio |
@@ -182,6 +188,7 @@ Anchor model:
 - Host-sized path: `computeProfile(W, H)` (`minDim = min(W, H)`).
 - Vertical path: `computeProfile(W, W)` (`minDim = W`).
 - Row-height floor clamp via `computeInsetPx(...)`, ceiling clamp in layout owner.
+- Header height uses the existing mode share as the baseline and then applies a rowHeight-driven minimum floor (plus narrow-vertical boost when applicable).
 - Vertical render-model flow passes shell width as the layout `verticalAnchorWidth` so row-height anchoring remains consistent between `computeNaturalHeight(...)` and the final list viewport geometry.
 
 Structural geometry owner:

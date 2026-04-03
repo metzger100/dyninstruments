@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsLayout - Responsive geometry owner for the route-points HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, RoutePointsLayoutSizing
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -18,58 +18,29 @@
   const ROW_HEIGHT_MAX_PX = 62;
   const ROW_HEIGHT_MIN_PX_VERTICAL = 22;
   const ROW_HEIGHT_MAX_PX_VERTICAL = 48;
-
   const HEADER_HEIGHT_SHARE_HIGH = 1.0;
   const HEADER_HEIGHT_SHARE_NORMAL = 0.6;
   const HEAD_PANEL_WIDTH_RATIO_FLAT = 0.36;
   const HEAD_PANEL_MIN_RATIO_FLAT = 0.22;
   const HEAD_PANEL_MAX_RATIO_FLAT = 0.48;
-
   const ROW_GAP_RATIO = 0.06;
   const HEADER_GAP_RATIO = 0.08;
   const ROW_PADDING_RATIO = 0.025;
   const HEADER_SPLIT_GAP_RATIO = 0.05;
-  const MARKER_DIAMETER_RATIO = 0.48;
-  const MARKER_DIAMETER_MIN_PX = 3;
-  const MARKER_DIAMETER_MAX_PX = 24;
   const MAX_VIEWPORT_HEIGHT_RATIO = 0.75;
   const RESPONSIVE_SCALES = {
     textFillScale: 1.18,
     flatHeadPanelScale: 0.84
   };
 
-  function clampNumber(value, minValue, maxValue, defaultValue) {
-    const n = Number(value);
-    if (!Number.isFinite(n)) {
-      return defaultValue;
-    }
-    return Math.max(minValue, Math.min(maxValue, n));
-  }
-
-  function toCount(value) {
-    const n = Number(value);
-    if (!Number.isFinite(n)) {
-      return 0;
-    }
-    return Math.max(0, Math.floor(n));
-  }
-
-  function toSizeStyle(rect) {
-    const safeRect = rect || { w: 0, h: 0 };
-    return "width:" + Math.max(0, safeRect.w) + "px;height:" + Math.max(0, safeRect.h) + "px;";
-  }
-
-  function resolveWindowViewportHeight() {
-    if (typeof window !== "undefined" && Number.isFinite(window.innerHeight) && window.innerHeight > 0) {
-      return Math.floor(window.innerHeight);
-    }
-    return 0;
-  }
-
   function create(def, Helpers) {
     const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
     const rectApi = Helpers.getModule("LayoutRectMath").create(def, Helpers);
+    const sizingApi = Helpers.getModule("RoutePointsLayoutSizing").create(def, Helpers);
     const makeRect = rectApi.makeRect;
+    const clampNumber = sizingApi.clampNumber;
+    const toCount = sizingApi.toCount;
+    const toSizeStyle = sizingApi.toSizeStyle;
 
     function resolveMode(args) {
       const cfg = args || {};
@@ -84,7 +55,6 @@
       const ratio = W / H;
       const ratioThresholdNormal = clampNumber(cfg.ratioThresholdNormal, 0.5, 2.0, 1.0);
       const ratioThresholdFlat = clampNumber(cfg.ratioThresholdFlat, 1.5, 6.0, 3.5);
-
       if (ratio < ratioThresholdNormal) {
         return "high";
       }
@@ -168,7 +138,6 @@
         const splitGap = Math.min(innerGap, Math.max(0, middleRect.h - 1));
         const topHeight = Math.max(0, Math.floor(Math.max(0, middleRect.h - splitGap) / 2));
         const bottomHeight = Math.max(0, middleRect.h - topHeight - splitGap);
-
         return {
           rowRect: rowRect,
           ordinalRect: makeRect(innerRect.x, innerRect.y, squareSize, innerRect.h),
@@ -184,7 +153,6 @@
       const infoWidth = Math.max(0, middleWidth - nameWidth - innerGap);
       const nameX = innerRect.x + squareSize + innerGap;
       const infoX = nameX + nameWidth + innerGap;
-
       return {
         rowRect: rowRect,
         ordinalRect: makeRect(innerRect.x, innerRect.y, squareSize, innerRect.h),
@@ -218,10 +186,8 @@
       const headerGap = Math.max(1, Math.floor(rowHeight * HEADER_GAP_RATIO));
       const rowPadding = Math.max(1, Math.floor(rowHeight * ROW_PADDING_RATIO));
       const trailingGutterPx = Math.max(0, Math.floor(clampNumber(cfg.trailingGutterPx, 0, Number.MAX_SAFE_INTEGER, 0)));
-
       let headerRect = null;
       let listRect = contentRect;
-
       if (showHeader) {
         if (mode === "flat") {
           const panelShare = profileApi.scaleShare(
@@ -241,7 +207,14 @@
           );
         } else {
           const headerShare = mode === "high" ? HEADER_HEIGHT_SHARE_HIGH : HEADER_HEIGHT_SHARE_NORMAL;
-          const headerHeight = Math.max(1, Math.floor(rowHeight * headerShare));
+          const existingHeaderHeight = Math.max(1, Math.floor(rowHeight * headerShare));
+          const headerHeight = sizingApi.computeHeaderHeight({
+            mode: mode,
+            rowHeight: rowHeight,
+            existingHeaderHeight: existingHeaderHeight,
+            isVerticalContainer: isVerticalContainer,
+            contentWidth: contentRect.w
+          });
           headerRect = makeRect(contentRect.x, contentRect.y, contentRect.w, headerHeight);
           listRect = makeRect(
             contentRect.x,
@@ -292,21 +265,6 @@
       const wrapperHeightPx = Math.floor(clampNumber(cfg.wrapperHeight, -1, Number.MAX_SAFE_INTEGER, -1));
       const wrapperHeight = wrapperHeightPx >= 0 ? wrapperHeightPx : null;
 
-      function toMarkerDotStyle(markerRect) {
-        const safeRect = markerRect || { w: 0, h: 0 };
-        const markerLimit = Math.max(1, Math.min(
-          Math.max(0, Math.floor(safeRect.w || 0)),
-          Math.max(0, Math.floor(safeRect.h || 0))
-        ));
-        const scaled = Math.floor(markerLimit * MARKER_DIAMETER_RATIO);
-        const preferred = Math.max(
-          MARKER_DIAMETER_MIN_PX,
-          Math.min(MARKER_DIAMETER_MAX_PX, scaled)
-        );
-        const diameter = Math.max(1, Math.min(markerLimit, preferred));
-        return "width:" + diameter + "px;height:" + diameter + "px;";
-      }
-
       const wrapperStyle =
         "padding:" +
         Math.max(0, layout.contentRect.y) +
@@ -345,7 +303,7 @@
             nameStyle: toSizeStyle(row.nameRect),
             infoStyle: toSizeStyle(row.infoRect),
             markerStyle: toSizeStyle(row.markerRect),
-            markerDotStyle: toMarkerDotStyle(row.markerRect)
+            markerDotStyle: sizingApi.toMarkerDotStyle(row.markerRect)
           };
         })
       };
@@ -353,25 +311,28 @@
 
     function computeNaturalHeight(args) {
       const cfg = args || {};
-      const width = Math.max(1, Math.floor(clampNumber(
-        cfg.W,
-        1,
-        Number.MAX_SAFE_INTEGER,
-        1
-      )));
+      const width = Math.max(1, Math.floor(clampNumber(cfg.W, 1, Number.MAX_SAFE_INTEGER, 1)));
       const pointCount = toCount(cfg.pointCount);
       const showHeader = cfg.showHeader !== false;
       const rowHeight = computeRowHeight(width, width, true);
       const rowGap = Math.max(1, Math.floor(rowHeight * ROW_GAP_RATIO));
       const headerGap = showHeader ? Math.max(1, Math.floor(rowHeight * HEADER_GAP_RATIO)) : 0;
-      const headerHeight = showHeader ? Math.max(1, Math.floor(rowHeight * HEADER_HEIGHT_SHARE_HIGH)) : 0;
+      const headerHeight = showHeader
+        ? sizingApi.computeHeaderHeight({
+          mode: "high",
+          rowHeight: rowHeight,
+          existingHeaderHeight: Math.max(1, Math.floor(rowHeight * HEADER_HEIGHT_SHARE_HIGH)),
+          isVerticalContainer: true,
+          contentWidth: width
+        })
+        : 0;
       const insets = computeInsets(width, width);
       const outerPaddingY = Math.max(0, insets.innerY * 2);
       const listContentHeight = Math.max(0, pointCount * rowHeight + Math.max(0, pointCount - 1) * rowGap);
       const naturalHeight = Math.max(0, outerPaddingY + headerHeight + headerGap + listContentHeight);
       const viewportHeight = Math.max(
         0,
-        Math.floor(clampNumber(cfg.viewportHeight, 0, Number.MAX_SAFE_INTEGER, resolveWindowViewportHeight()))
+        Math.floor(clampNumber(cfg.viewportHeight, 0, Number.MAX_SAFE_INTEGER, sizingApi.resolveWindowViewportHeight()))
       );
       const capHeight = viewportHeight > 0
         ? Math.max(0, Math.floor(viewportHeight * MAX_VIEWPORT_HEIGHT_RATIO))
@@ -404,13 +365,18 @@
         ROW_HEIGHT_MAX_PX_VERTICAL: ROW_HEIGHT_MAX_PX_VERTICAL,
         HEADER_HEIGHT_SHARE_HIGH: HEADER_HEIGHT_SHARE_HIGH,
         HEADER_HEIGHT_SHARE_NORMAL: HEADER_HEIGHT_SHARE_NORMAL,
+        HEADER_HEIGHT_FLOOR_ROWS_NORMAL: sizingApi.constants.HEADER_HEIGHT_FLOOR_ROWS_NORMAL,
+        HEADER_HEIGHT_FLOOR_ROWS_HIGH: sizingApi.constants.HEADER_HEIGHT_FLOOR_ROWS_HIGH,
+        HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_NORMAL: sizingApi.constants.HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_NORMAL,
+        HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_HIGH: sizingApi.constants.HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_HIGH,
+        HEADER_NARROW_VERTICAL_WIDTH_TO_ROW_RATIO: sizingApi.constants.HEADER_NARROW_VERTICAL_WIDTH_TO_ROW_RATIO,
         HEAD_PANEL_WIDTH_RATIO_FLAT: HEAD_PANEL_WIDTH_RATIO_FLAT,
         ROW_GAP_RATIO: ROW_GAP_RATIO,
         HEADER_GAP_RATIO: HEADER_GAP_RATIO,
         ROW_PADDING_RATIO: ROW_PADDING_RATIO,
-        MARKER_DIAMETER_RATIO: MARKER_DIAMETER_RATIO,
-        MARKER_DIAMETER_MIN_PX: MARKER_DIAMETER_MIN_PX,
-        MARKER_DIAMETER_MAX_PX: MARKER_DIAMETER_MAX_PX,
+        MARKER_DIAMETER_RATIO: sizingApi.constants.MARKER_DIAMETER_RATIO,
+        MARKER_DIAMETER_MIN_PX: sizingApi.constants.MARKER_DIAMETER_MIN_PX,
+        MARKER_DIAMETER_MAX_PX: sizingApi.constants.MARKER_DIAMETER_MAX_PX,
         MAX_VIEWPORT_HEIGHT_RATIO: MAX_VIEWPORT_HEIGHT_RATIO
       },
       resolveMode: resolveMode,

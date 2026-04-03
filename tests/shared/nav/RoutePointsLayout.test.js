@@ -3,6 +3,7 @@ const { loadFresh } = require("../../helpers/load-umd");
 describe("RoutePointsLayout", function () {
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const routePointsLayoutSizing = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
     return loadFresh("shared/widget-kits/nav/RoutePointsLayout.js").create({}, {
       getModule(id) {
         if (id === "ResponsiveScaleProfile") {
@@ -10,6 +11,9 @@ describe("RoutePointsLayout", function () {
         }
         if (id === "LayoutRectMath") {
           return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+        }
+        if (id === "RoutePointsLayoutSizing") {
+          return routePointsLayoutSizing;
         }
         throw new Error("unexpected module: " + id);
       }
@@ -50,16 +54,9 @@ describe("RoutePointsLayout", function () {
     expect(verticalHuge).toBe(layout.constants.ROW_HEIGHT_MAX_PX_VERTICAL);
   });
 
-  it("derives header heights from row-height shares for high and normal modes", function () {
+  it("applies the row-height floor budget in normal mode", function () {
     const layout = createLayout();
     const built = buildContentRect(layout, 240, 280);
-
-    const high = layout.computeLayout({
-      contentRect: built.contentRect,
-      mode: "high",
-      pointCount: 3,
-      showHeader: true
-    });
     const normal = layout.computeLayout({
       contentRect: built.contentRect,
       mode: "normal",
@@ -67,8 +64,39 @@ describe("RoutePointsLayout", function () {
       showHeader: true
     });
 
-    expect(high.headerRect.h).toBe(Math.floor(high.rowHeight * layout.constants.HEADER_HEIGHT_SHARE_HIGH));
-    expect(normal.headerRect.h).toBe(Math.floor(normal.rowHeight * layout.constants.HEADER_HEIGHT_SHARE_NORMAL));
+    expect(normal.headerRect.h).toBe(Math.floor(normal.rowHeight * layout.constants.HEADER_HEIGHT_FLOOR_ROWS_NORMAL));
+  });
+
+  it("applies the row-height floor budget in high mode", function () {
+    const layout = createLayout();
+    const built = buildContentRect(layout, 240, 280);
+    const high = layout.computeLayout({
+      contentRect: built.contentRect,
+      mode: "high",
+      pointCount: 3,
+      showHeader: true
+    });
+
+    expect(high.headerRect.h).toBe(Math.floor(high.rowHeight * layout.constants.HEADER_HEIGHT_FLOOR_ROWS_HIGH));
+  });
+
+  it("adds a narrow-vertical header boost on top of the high-mode floor budget", function () {
+    const layout = createLayout();
+    const built = buildContentRect(layout, 140, 420);
+    const out = layout.computeLayout({
+      contentRect: built.contentRect,
+      mode: "normal",
+      pointCount: 4,
+      showHeader: true,
+      isVerticalContainer: true,
+      verticalAnchorWidth: built.contentRect.w
+    });
+    const expectedRows =
+      layout.constants.HEADER_HEIGHT_FLOOR_ROWS_HIGH +
+      layout.constants.HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_HIGH;
+
+    expect(out.mode).toBe("high");
+    expect(out.headerRect.h).toBe(Math.floor(out.rowHeight * expectedRows));
   });
 
   it("computes content rect from insets", function () {

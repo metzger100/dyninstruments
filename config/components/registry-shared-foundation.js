@@ -30,11 +30,16 @@
       globalKey: "DyniActiveRouteLayout",
       deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
     },
+    RoutePointsLayoutSizing: {
+      js: BASE + "shared/widget-kits/nav/RoutePointsLayoutSizing.js",
+      css: undefined,
+      globalKey: "DyniRoutePointsLayoutSizing"
+    },
     RoutePointsLayout: {
       js: BASE + "shared/widget-kits/nav/RoutePointsLayout.js",
       css: undefined,
       globalKey: "DyniRoutePointsLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "RoutePointsLayoutSizing"]
     },
     RoutePointsHtmlFit: {
       js: BASE + "shared/widget-kits/nav/RoutePointsHtmlFit.js",

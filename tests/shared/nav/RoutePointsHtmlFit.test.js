@@ -40,6 +40,7 @@ describe("RoutePointsHtmlFit", function () {
     const htmlUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
     const responsiveScaleProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMathModule = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const routePointsLayoutSizingModule = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
     const routePointsLayoutModule = loadFresh("shared/widget-kits/nav/RoutePointsLayout.js");
     const textTileLayoutModule = loadFresh("shared/widget-kits/text/TextTileLayout.js");
     const radialTextApi = createRadialTextApi();
@@ -84,6 +85,9 @@ describe("RoutePointsHtmlFit", function () {
         }
         if (id === "LayoutRectMath") {
           return layoutRectMathModule;
+        }
+        if (id === "RoutePointsLayoutSizing") {
+          return routePointsLayoutSizingModule;
         }
         throw new Error("unexpected module: " + id);
       }
