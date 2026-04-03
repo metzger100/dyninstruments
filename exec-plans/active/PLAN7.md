@@ -21,8 +21,9 @@ Add a new native HTML kind `editRoute` to the `nav` cluster that reproduces the 
 Expected outcomes after completion:
 
 * A new `EditRouteTextHtmlWidget` renders a compact editing-route summary based on the **editing route**, not the active-route store.
-* The widget preserves the core data model:
 
+* The widget preserves the core data model:
+  
   * route display name
   * point count
   * total route distance
@@ -30,16 +31,23 @@ Expected outcomes after completion:
   * active-route state based on exact route-name equality
   * local/server route-source state matching core `route.isServer()` semantics
   * `No Route` state when no editing route is available
-* The core horizontal vs non-horizontal density split is preserved through dyn mode mapping:
 
+* The core horizontal vs non-horizontal density split is preserved through dyn mode mapping:
+  
   * `flat` = core horizontal-equivalent density
   * `normal` and `high` = core non-horizontal-equivalent density
   * `.widgetContainer.vertical` forces `high`
+
 * The widget remains a **summary/workflow-entry widget only**. It does **not** embed buttons, per-field controls, point editing, rename, load/save, delete, stop-nav, or waypoint editing.
+
 * Clicking the widget opens the host edit-route workflow **only** when the host bridge reports `routeEditor.openEditRoute === "dispatch"`; today that is `editroutepage` only.
+
 * On `navpage`, `gpspage`, and all unsupported/passive contexts, the widget stays passive and does not steal clicks.
+
 * In layout-editing mode, the widget is always passive.
+
 * Native HTML implementation follows the same architectural layering already used for `activeRoute` and `routePoints`: viewmodel → mapper → kind catalog/router → HTML shell → shared layout/fit/render-model/markup helpers.
+
 * Documentation and regression coverage make the parity boundary explicit: **widget parity** is required, but **page/dialog workflow parity** remains host-owned.
 
 ---
@@ -53,7 +61,7 @@ The following points were rechecked against the repositories before this plan wa
 
 2. **Core `EditRouteWidget` reads the editing route, not the active-route leg.**
    `EditRouteWidget.storeKeys = editor.getStoreKeys(...)` and `RouteEdit.MODES.EDIT` in `viewer/nav/routeeditor.js` bind to:
-
+   
    * `nav.routeHandler.editingRoute`
    * `nav.routeHandler.editingIndex`
    * `nav.routeHandler.activeName`
@@ -63,7 +71,7 @@ The following points were rechecked against the repositories before this plan wa
    In `viewer/nav/routeeditor.js`, the helper `isActive(route, activeName)` returns `route.name === activeName`. `StateHelper.getRouteIndexFlag(state)` uses that rule for both route-editor and leg-based states.
 
 4. **Core widget display fields are exactly:**
-
+   
    * `route.displayName()`
    * `route.points.length`
    * `route.computeLength(0, props.useRhumbLine)`
@@ -84,7 +92,7 @@ The following points were rechecked against the repositories before this plan wa
    `EditRouteWidget.jsx` passes `disconnect={!route.isServer()}`.
    `viewer/components/WidgetBase.jsx` renders the disconnected icon in the header when `disconnect === true`.
    `viewer/nav/routeobjects.js` defines:
-
+   
    * `LOCAL_PREFIX = "local@"`
    * `Route.displayName()` strips that prefix
    * `Route.isServer()` is based on `isServerName(name)`
@@ -95,7 +103,7 @@ The following points were rechecked against the repositories before this plan wa
 
 10. **Core edit-route dialog/workflow lives in `EditRoutePage.jsx`, not in the widget.**
     `viewer/gui/EditRoutePage.jsx`:
-
+    
     * `widgetClick()` handles `item.name === "EditRoute"` by opening `EditRouteDialog`
     * `checkRouteWritable()` prompts “save as new local route” when disconnected from a server route
     * `EditRouteDialog` owns rename/load/download/points/stop/delete/save-as/save
@@ -108,7 +116,7 @@ The following points were rechecked against the repositories before this plan wa
     In `viewer/components/RoutePointsWidget.jsx`, row clicks are relayed upward via `props.onClick`. In `EditRoutePage.widgetClick`, `item.name === "RoutePoints"` selects/centers/open-dialog logic. This is important because the same separation also applies to `EditRoute`.
 
 13. **Core `NavPage` and `GpsPage` do not meaningfully support `EditRoute` widget entry.**
-
+    
     * `viewer/gui/NavPage.jsx`: special-cases `ActiveRoute`, not `EditRoute`
     * `viewer/gui/GpsPage.jsx`: no `EditRoute` special case
       Therefore, native dyn interaction must not assume that every page can dispatch edit-route workflow.
@@ -116,7 +124,7 @@ The following points were rechecked against the repositories before this plan wa
 14. **dyn `TemporaryHostActionBridge` already exposes the right host action.**
     `runtime/TemporaryHostActionBridge.js` defines `hostActions.routeEditor.openEditRoute()`.
     Capability snapshot:
-
+    
     * `routeEditor.openEditRoute === "dispatch"` only on `editroutepage`
     * `"unsupported"` elsewhere
 
@@ -124,13 +132,13 @@ The following points were rechecked against the repositories before this plan wa
     `TemporaryHostActionBridge.routeEditor.openEditRoute()` dispatches a synthetic page click with `item: { name: "EditRoute" }`, which reuses host-owned `onItemClick` / `widgetClick` logic.
 
 16. **dyn already has two strong architectural references for this widget:**
-
+    
     * `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js` for a compact summary widget with full-surface hotspot/catchAll behavior
     * `shared/widget-kits/nav/RoutePointsRenderModel.js` for page-aware host-action gating and passive-by-default interaction
 
 17. **dyn HTML widget interaction rules are already documented.**
     `documentation/avnav-api/interactive-widgets.md` and `documentation/guides/add-new-html-kind.md` require:
-
+    
     * `catchAll` referenced in markup, never returned from `namedHandlers`
     * passive behavior in unsupported contexts
     * passive behavior in layout-editing mode
@@ -138,7 +146,7 @@ The following points were rechecked against the repositories before this plan wa
 
 18. **The `nav` cluster already exposes the data needed for `editRoute`.**
     `config/clusters/nav.js` already has:
-
+    
     * `editingRoute`
     * `editingIndex`
     * `activeName`
@@ -289,17 +297,21 @@ RTG tile | ETA tile
 Rules:
 
 * `nameBar` spans the full width.
-* Below `nameBar` is a 2×2 metric grid.
-* Tile positions are fixed:
 
+* Below `nameBar` is a 2×2 metric grid.
+
+* Tile positions are fixed:
+  
   * top-left = `PTS`
   * top-right = `DST`
   * bottom-left = `RTG`
   * bottom-right = `ETA`
-* `RTG` and `ETA` always have boxes in this mode when a route exists:
 
+* `RTG` and `ETA` always have boxes in this mode when a route exists:
+  
   * active route → populate from data if available
   * inactive route → render formatter placeholders
+
 * Metric labels remain visible even when values are placeholders.
 
 Missing-data behavior:
@@ -325,12 +337,16 @@ ETA row: label | value
 Rules:
 
 * `nameBar` spans the full width on top.
-* Each metric gets its own horizontal row.
-* Each metric row is a two-cell structure:
 
+* Each metric gets its own horizontal row.
+
+* Each metric row is a two-cell structure:
+  
   * left cell = fixed label (`PTS:`, `DST:`, `RTG:`, `ETA:`)
   * right cell = fitted value text
+
 * `RTG` and `ETA` rows are always present when a route exists, with the same active/inactive placeholder rules as `normal`.
+
 * This mode is purely summary; there are no row-level hotspots or inline controls.
 
 Missing-data behavior:
@@ -340,27 +356,31 @@ Missing-data behavior:
 
 ##### `.widgetContainer.vertical`
 
-This is an explicit plan contract.
+This is an explicit PLAN7 implementation contract.
 
 **Behavior:**
 
 1. Force mode = `high`.
+
 2. Keep the same field set and row order as `high`.
-3. Use a widget-owned vertical shell profile derived from the core CSS:
 
-   * core width comes from `.smallWidget(@size1)` with `@size1 = 7em`
-   * core vertical min-height is `8em`
-4. Therefore the native HTML widget must use a vertical profile equivalent to:
+3. Preserve the **core parity requirement** that vertical `editRoute` behaves like a compact summary widget with no list growth and with a vertical minimum-height equivalent to core `EditRouteWidget`.
 
+4. The native HTML implementation may additionally use a dyn-owned vertical shell profile for stable HTML sizing, matching the pattern already used by native `activeRoute`:
+   
    * `height: auto`
    * `aspect-ratio: 7 / 8`
    * `min-height: 8em`
-5. Vertical mode is still a summary widget. There is no intrinsic-height growth by point count and no scrolling behavior.
+
+5. This `7 / 8` aspect-ratio rule is an **implementation choice for dyn native HTML**, not a claim about core AvNav having an intrinsic aspect-ratio contract for `EditRoute`.
+
+6. Vertical mode is still a summary widget. There is no intrinsic-height growth by point count and no scrolling behavior.
 
 **Why this contract is code-grounded:**
 
-* Core `EditRouteWidget` has fixed small-widget width and a vertical min-height rule in `viewer/style/widgets.less`.
-* Unlike `routePoints`, there is no variable-length list that needs content-driven height.
+* Core `EditRouteWidget` has fixed small-widget sizing and a vertical `min-height: 8em` rule in `viewer/style/widgets.less`.
+* Core AvNav does **not** define a vertical aspect-ratio for `EditRoute`; width remains host/container-driven in vertical stacks.
+* PLAN7 intentionally keeps parity on the field set, density, and minimum-height behavior, while allowing dyn native HTML to use a fixed `7 / 8` vertical shell profile for predictable rendering.
 
 #### Visual state contract
 
@@ -417,20 +437,33 @@ The widget does not compute intrinsic height in standard containers.
 
 #### Special case: `.widgetContainer.vertical`
 
-The vertical contract is simpler than `routePoints` and follows the core widget more closely.
+The vertical contract is stricter than the normal host-sized path because the native widget owns part of its vertical shell sizing.
 
 Required behavior:
 
 1. First render may not know committed ancestry; assume normal host-sized rendering.
-2. After attach, `initFunction().triggerResize()` requests one corrective rerender.
-3. The corrective rerender resolves committed ancestry via `targetEl.closest(".widgetContainer.vertical")`.
-4. If vertical ancestry is present:
 
+2. After attach, `initFunction().triggerResize()` requests one corrective rerender.
+
+3. The corrective rerender resolves committed ancestry via `targetEl.closest(".widgetContainer.vertical")`.
+
+4. If vertical ancestry is present:
+   
    * force `high`
-   * use the vertical aspect-ratio/min-height profile described above
-   * use width-only geometry anchoring for layout/fit measurements
-5. Later updates re-evaluate committed ancestry through the normal render path.
-6. No widget-owned observer is required.
+   * apply the widget-owned vertical shell profile described above
+   * treat width as the stable anchor for vertical sizing decisions
+   * derive an **effective vertical layout height** from the widget-owned shell profile instead of trusting raw `shellRect.height`
+
+5. All layout geometry, content-rect construction, and fit-box measurement in committed vertical mode must use that **effective vertical layout height**, not raw shell height.
+
+6. Later updates re-evaluate committed ancestry through the normal render path.
+
+7. No widget-owned observer is required.
+
+Implementation note:
+
+* Excluding raw shell height from the vertical resize signature is necessary but not sufficient.
+* The render-model/layout path must also replace raw shell height with the modeled effective vertical height when computing boxes, otherwise vertical text-fit and geometry can diverge from the actual rendered shell.
 
 ### Text Sizing
 
@@ -772,7 +805,9 @@ Therefore, committed vertical detection can be handled in the renderer shell wit
 * First render must tolerate missing committed ancestry and render as non-vertical.
 * `initFunction().triggerResize()` must request one corrective rerender after attach.
 * Vertical committed ancestry must be re-evaluated during later updates.
-* In vertical mode, the resize signature must exclude shell height if the widget’s own aspect-ratio/min-height profile controls the effective height, to avoid self-induced loops.
+* In committed vertical mode, the widget must derive a stable **effective layout height** from its own vertical shell profile and use that height for layout/fit geometry.
+* In vertical mode, the resize signature must exclude raw shell height when the widget’s own aspect-ratio/min-height profile controls the effective height, to avoid self-induced loops.
+* Vertical anchor inputs used by render-model, layout, and fit must stay internally consistent so the modeled height and final box geometry are based on the same width-driven vertical profile.
 
 ### Scope
 
@@ -797,8 +832,9 @@ Create a new UMD module.
 Contract:
 
 * `build(props, toolkit)` returns a normalized edit-route domain object.
-* Required derived outputs:
 
+* Required derived outputs:
+  
   * `route` → normalized summary route object or `null`
   * `hasRoute`
   * `isActiveRoute`
@@ -840,20 +876,29 @@ Distance calculation:
 Cover:
 
 * missing `editingRoute`
-* `editingRoute` without `points`
-* empty route (`points: []`)
-* local name prefix stripping
-* server/local flag derivation
-* exact active-name equality
-* remaining/ETA gated by active state
-* total distance for:
 
+* `editingRoute` without `points`
+
+* empty route (`points: []`)
+
+* local name prefix stripping
+
+* server/local flag derivation
+
+* exact active-name equality
+
+* remaining/ETA gated by active state
+
+* total distance for:
+  
   * empty route
   * one-point route
   * multi-point route
   * invalid leg data
   * rhumb-line vs great-circle branch
+
 * blank route name remains blank
+
 * malformed route never throws
 
 #### 1C. Register `EditRouteViewModel` in `config/components/registry-cluster.js`
@@ -904,20 +949,19 @@ opt("Edit route", "editRoute")
 ```
 
 2. Add kind-scoped internal editables:
-
 * `editRouteRatioThresholdNormal`
-
+  
   * float
   * default `1.2`
   * condition `{ kind: "editRoute" }`
-* `editRouteRatioThresholdFlat`
 
+* `editRouteRatioThresholdFlat`
+  
   * float
   * default `3.8`
   * condition `{ kind: "editRoute" }`
-
 3. Reuse the existing store keys already present in `nav.js`:
-
+   
    * `editingRoute`
    * `editingIndex`
    * `activeName`
@@ -962,34 +1006,41 @@ This module is the single owner of measurement geometry.
 Responsibilities:
 
 * resolve mode (`flat`, `normal`, `high`)
-* accept committed vertical override from the renderer shell
-* compute measurement rects for:
 
+* accept committed vertical override from the renderer shell
+
+* accept an **effective layout height** supplied by the render-model when committed vertical mode is active
+
+* compute measurement rects for:
+  
   * `nameText`
   * `sourceBadge`
   * `PTS`
   * `DST`
   * `RTG`
   * `ETA`
-* compute visibility flags for metric boxes based on:
 
+* compute visibility flags for metric boxes based on:
+  
   * `hasRoute`
   * mode
-* compute vertical-shell profile metadata:
 
+* compute vertical-shell profile metadata:
+  
   * force-high
-  * width-only anchor path
+  * width-driven vertical profile
   * wrapper inline style recommendations (`height:auto`, `aspect-ratio:7/8`, `min-height:8em`)
 
 Geometry anchor:
 
 * host-sized shells: use `ResponsiveScaleProfile.computeProfile(W, H, spec)` so `minDim = min(W, H)`
-* committed vertical shells: use `ResponsiveScaleProfile.computeProfile(W, W, spec)` so `minDim = W`
+* committed vertical shells: use a width-driven geometry path and the render-model’s **effective layout height**, rather than raw `shellRect.height`
 
 Important design note:
 
 * Unlike `routePoints`, this widget does **not** need list-row structural inline geometry.
 * CSS may own the structural grid template, but `EditRouteLayout` must remain the measurement owner for fit boxes and the authoritative owner of which boxes exist in each mode/state.
+* In committed vertical mode, the layout contract is: **mode/topology + wrapper style + effective height must agree**. The layout module must not silently fall back to raw shell height once a width-driven vertical profile is active.
 
 #### 2B. Add `tests/shared/nav/EditRouteLayout.test.js`
 
@@ -1026,14 +1077,16 @@ No extra sizing helper file is required unless the implementation proves the con
 Responsibilities:
 
 * compute font-size decisions for:
-
+  
   * `nameText`
   * `sourceBadge`
   * metric labels
   * metric values
-* consume measurement rects from `EditRouteLayout`
-* use the same fit discipline as other native HTML widgets:
 
+* consume measurement rects from `EditRouteLayout`
+
+* use the same fit discipline as other native HTML widgets:
+  
   * shrink only when needed
   * no text mutation
   * no ellipsis
@@ -1076,25 +1129,37 @@ This module is the pure normalization/render-contract owner for the renderer.
 Responsibilities:
 
 * consume mapper `domain` + `layout`
-* resolve committed vertical override passed from the renderer shell
-* resolve mode
-* compute field visibility
-* format visible texts using core formatters:
 
+* resolve committed vertical override passed from the renderer shell
+
+* resolve mode
+
+* when committed vertical mode is active, compute a width-driven **effective vertical layout height** from the widget-owned vertical shell profile
+
+* pass that effective height into layout/fit instead of raw `shellRect.height`
+
+* compute field visibility
+
+* format visible texts using core formatters:
+  
   * `formatDecimal(pointCount, 3)`
   * `formatDistance(totalDistance)`
   * `formatDistance(remainingDistance)`
   * `formatTime(eta)`
-* produce placeholder-bearing field texts where core would do so
-* expose CSS state flags:
 
+* produce placeholder-bearing field texts where core would do so
+
+* expose CSS state flags:
+  
   * `hasRoute`
   * `isActiveRoute`
   * `isLocalRoute`
   * `isServerRoute`
   * `canOpenEditRoute`
   * `captureClicks`
+
 * expose wrapper-style metadata for vertical mode
+
 * build stable resize-signature inputs
 
 Interaction gating contract:
@@ -1108,6 +1173,12 @@ Interaction gating contract:
 
 All other cases are passive.
 
+Vertical geometry contract:
+
+* In non-vertical mode, raw shell width/height may be used normally.
+* In committed vertical mode, raw shell width remains the anchor input, but raw shell height must **not** be treated as the authoritative content height when the widget’s own vertical shell profile determines the rendered height.
+* The render-model must therefore compute and expose the **effective vertical layout height** that matches the chosen vertical shell profile, so layout and fit operate on the same geometry the widget is actually trying to render.
+
 #### 4B. Create `shared/widget-kits/nav/EditRouteMarkup.js`
 
 This module is the HTML-string assembly owner.
@@ -1115,18 +1186,24 @@ This module is the HTML-string assembly owner.
 Responsibilities:
 
 * emit wrapper classes:
-
+  
   * `dyni-edit-route-html`
   * `dyni-edit-route-mode-flat|normal|high`
   * `dyni-edit-route-active-route`
   * `dyni-edit-route-local-route`
   * `dyni-edit-route-no-route`
   * `dyni-edit-route-open-dispatch|passive`
+
 * emit the exact box topology from the concept spec
+
 * emit hotspot/catchAll attributes only in dispatch mode
+
 * emit no inline controls
+
 * emit no onclicks in passive mode
+
 * apply fit styles to the matching nodes
+
 * apply vertical wrapper inline styles when requested by the layout/render model
 
 #### 4C. Create `widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js`
@@ -1269,38 +1346,38 @@ Record any explicitly deferred work only if a real deferral remains after implem
 
 ## Affected File Map
 
-| File                                                               |   Likely phase | Planned change                                                          |
-| ------------------------------------------------------------------ | -------------: | ----------------------------------------------------------------------- |
-| `cluster/viewmodels/EditRouteViewModel.js`                         |              1 | Create new viewmodel                                                    |
-| `tests/cluster/viewmodels/EditRouteViewModel.test.js`              |              1 | Create viewmodel tests                                                  |
-| `cluster/mappers/NavMapper.js`                                     |              1 | Add `editRoute` mapper branch and instantiate new viewmodel             |
-| `config/clusters/nav.js`                                           |              1 | Add `editRoute` kind option and internal ratio-threshold editables      |
-| `config/shared/kind-defaults.js`                                   |              1 | No changes required; fixed labels stay renderer-owned                   |
-| `config/components/registry-cluster.js`                            |           1, 4 | Register `EditRouteViewModel`; update mapper/router deps                |
-| `tests/cluster/mappers/NavMapper.test.js`                          |              1 | Add `editRoute` mapper tests                                            |
-| `tests/config/clusters/nav.test.js`                                |              1 | Add kind/editable coverage                                              |
-| `shared/widget-kits/nav/EditRouteLayout.js`                        |              2 | Create layout owner                                                     |
-| `tests/shared/nav/EditRouteLayout.test.js`                         |              2 | Create layout tests                                                     |
-| `config/components/registry-shared-foundation.js`                  |           2, 3 | Register `EditRouteLayout` and `EditRouteHtmlFit`                       |
-| `shared/widget-kits/nav/EditRouteHtmlFit.js`                       |              3 | Create fit owner                                                        |
-| `tests/shared/nav/EditRouteHtmlFit.test.js`                        |              3 | Create fit tests                                                        |
-| `shared/widget-kits/nav/EditRouteRenderModel.js`                   |              4 | Create pure render-model owner                                          |
-| `shared/widget-kits/nav/EditRouteMarkup.js`                        |              4 | Create pure markup owner                                                |
-| `widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js`  |              4 | Create HTML renderer shell                                              |
-| `widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css` |              4 | Create widget CSS                                                       |
-| `config/components/registry-widgets.js`                            |              4 | Register render-model, markup, renderer                                 |
-| `cluster/rendering/ClusterKindCatalog.js`                          |              4 | Add `nav/editRoute` tuple                                               |
-| `cluster/rendering/ClusterRendererRouter.js`                       |              4 | Add renderer to inventory                                               |
-| `tests/cluster/rendering/EditRouteTextHtmlWidget.test.js`          |              4 | Create renderer integration tests                                       |
-| `tests/shared/nav/EditRouteRenderModel.test.js`                    |              4 | Create render-model tests                                               |
-| `tests/shared/nav/EditRouteMarkup.test.js`                         |              4 | Create markup tests                                                     |
-| `tests/config/components.test.js`                                  |     1, 2, 3, 4 | Update expected dependency arrays                                       |
-| `documentation/widgets/edit-route.md`                              |              5 | Create widget doc                                                       |
-| `documentation/architecture/cluster-widget-system.md`              |              5 | Add editRoute references                                                |
-| `documentation/TABLEOFCONTENTS.md`                                 |              5 | Add doc entry                                                           |
-| `ROADMAP.md`                                                       |              5 | Update coverage/status                                                  |
-| `documentation/QUALITY.md`                                         |              5 | Update quality status if needed                                         |
-| `documentation/TECH-DEBT.md`                                       |              5 | Record explicit deferrals if any                                        |
+| File                                                               | Likely phase   | Planned change                                                          |
+| ------------------------------------------------------------------ | --------------:| ----------------------------------------------------------------------- |
+| `cluster/viewmodels/EditRouteViewModel.js`                         | 1              | Create new viewmodel                                                    |
+| `tests/cluster/viewmodels/EditRouteViewModel.test.js`              | 1              | Create viewmodel tests                                                  |
+| `cluster/mappers/NavMapper.js`                                     | 1              | Add `editRoute` mapper branch and instantiate new viewmodel             |
+| `config/clusters/nav.js`                                           | 1              | Add `editRoute` kind option and internal ratio-threshold editables      |
+| `config/shared/kind-defaults.js`                                   | 1              | No changes required; fixed labels stay renderer-owned                   |
+| `config/components/registry-cluster.js`                            | 1, 4           | Register `EditRouteViewModel`; update mapper/router deps                |
+| `tests/cluster/mappers/NavMapper.test.js`                          | 1              | Add `editRoute` mapper tests                                            |
+| `tests/config/clusters/nav.test.js`                                | 1              | Add kind/editable coverage                                              |
+| `shared/widget-kits/nav/EditRouteLayout.js`                        | 2              | Create layout owner                                                     |
+| `tests/shared/nav/EditRouteLayout.test.js`                         | 2              | Create layout tests                                                     |
+| `config/components/registry-shared-foundation.js`                  | 2, 3           | Register `EditRouteLayout` and `EditRouteHtmlFit`                       |
+| `shared/widget-kits/nav/EditRouteHtmlFit.js`                       | 3              | Create fit owner                                                        |
+| `tests/shared/nav/EditRouteHtmlFit.test.js`                        | 3              | Create fit tests                                                        |
+| `shared/widget-kits/nav/EditRouteRenderModel.js`                   | 4              | Create pure render-model owner                                          |
+| `shared/widget-kits/nav/EditRouteMarkup.js`                        | 4              | Create pure markup owner                                                |
+| `widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js`  | 4              | Create HTML renderer shell                                              |
+| `widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css` | 4              | Create widget CSS                                                       |
+| `config/components/registry-widgets.js`                            | 4              | Register render-model, markup, renderer                                 |
+| `cluster/rendering/ClusterKindCatalog.js`                          | 4              | Add `nav/editRoute` tuple                                               |
+| `cluster/rendering/ClusterRendererRouter.js`                       | 4              | Add renderer to inventory                                               |
+| `tests/cluster/rendering/EditRouteTextHtmlWidget.test.js`          | 4              | Create renderer integration tests                                       |
+| `tests/shared/nav/EditRouteRenderModel.test.js`                    | 4              | Create render-model tests                                               |
+| `tests/shared/nav/EditRouteMarkup.test.js`                         | 4              | Create markup tests                                                     |
+| `tests/config/components.test.js`                                  | 1, 2, 3, 4     | Update expected dependency arrays                                       |
+| `documentation/widgets/edit-route.md`                              | 5              | Create widget doc                                                       |
+| `documentation/architecture/cluster-widget-system.md`              | 5              | Add editRoute references                                                |
+| `documentation/TABLEOFCONTENTS.md`                                 | 5              | Add doc entry                                                           |
+| `ROADMAP.md`                                                       | 5              | Update coverage/status                                                  |
+| `documentation/QUALITY.md`                                         | 5              | Update quality status if needed                                         |
+| `documentation/TECH-DEBT.md`                                       | 5              | Record explicit deferrals if any                                        |
 | `runtime/TemporaryHostActionBridge.js`                             | reference only | No source change planned; existing `openEditRoute` capability is reused |
 | `documentation/avnav-api/plugin-lifecycle.md`                      | reference only | Existing host-action documentation already covers `openEditRoute()`     |
 | `documentation/avnav-api/interactive-widgets.md`                   | reference only | Existing `catchAll`/passive interaction rules already cover this widget |
@@ -1328,7 +1405,8 @@ Record any explicitly deferred work only if a real deferral remains after implem
 * Do not use ellipsis or trimmed text output in the native renderer.
 * Do not collapse `RTG`/`ETA` boxes in `normal` or `high` just because the route is inactive; placeholders are required there.
 * Do not show `RTG`/`ETA` in `flat`; core horizontal parity omits them.
-* Do not leave `.widgetContainer.vertical` behavior as an implementation guess; it must force `high` and use the core-derived `7/8` aspect-ratio plus `8em` minimum-height contract.
+* Do not claim that the native vertical `7 / 8` shell profile is a core AvNav aspect-ratio rule; it is a dyn implementation choice.
+* Do not leave committed vertical geometry half-specified: once the widget owns vertical shell sizing, layout and fit must use the modeled effective vertical height rather than raw shell height.
 * Do not include shell height in the resize signature when vertical mode is driven by the widget’s own aspect-ratio/min-height profile.
 * Do not use the documentation phase to slip in code changes.
 
@@ -1369,8 +1447,9 @@ Record any explicitly deferred work only if a real deferral remains after implem
 * No-route state omits all metric boxes in all modes.
 * Local-route state includes a badge box in all route-present modes.
 * Committed vertical ancestry forces `high`.
-* Vertical mode uses the width-only anchor path.
-* Vertical metadata yields `height:auto`, `aspect-ratio:7/8`, `min-height:8em`.
+* Vertical mode applies the dyn-owned wrapper profile `height:auto`, `aspect-ratio:7/8`, `min-height:8em`.
+* That `7 / 8` profile is treated as a dyn implementation choice, not as a claimed core AvNav aspect-ratio rule.
+* In committed vertical mode, layout geometry uses a width-driven **effective layout height**, not raw shell height.
 
 ### Fit
 
@@ -1383,43 +1462,63 @@ Record any explicitly deferred work only if a real deferral remains after implem
 ### Renderer
 
 * `EditRouteTextHtmlWidget` hides the native head.
-* First render works without committed ancestry.
-* `initFunction().triggerResize()` requests one corrective rerender after attach.
-* Later updates re-evaluate committed vertical ancestry.
-* Wrapper classes reflect:
 
+* First render works without committed ancestry.
+
+* `initFunction().triggerResize()` requests one corrective rerender after attach.
+
+* Later updates re-evaluate committed vertical ancestry.
+
+* Wrapper classes reflect:
+  
   * mode
   * active route
   * local route
   * no route
   * dispatch/passive
+
 * No-route rendering shows `No Route` only.
+
 * `flat` never shows `RTG` or `ETA`.
+
 * `normal` and `high` always include `RTG` and `ETA` boxes for route-present state, with placeholders when inactive or missing.
+
 * Local/source badge appears only for local routes.
+
 * Vertical mode renders the `high` topology and the vertical shell profile.
+
+* In committed vertical mode, render-model/layout/fit all use the same width-driven **effective layout height**.
+
 * Vertical resize-signature logic does not loop on self-induced height changes.
 
 ### Interaction parity
 
 * The widget is full-surface clickable only in dispatch mode.
-* Dispatch mode requires:
 
+* Dispatch mode requires:
+  
   * host not in layout editing
   * `hostActions.routeEditor.openEditRoute` function
   * `capabilities.routeEditor.openEditRoute === "dispatch"`
-* On `editroutepage`, dispatch mode is active and clicking opens the host edit-route workflow.
-* On `navpage`, the widget is passive.
-* On `gpspage`, the widget is passive.
-* On unknown/other pages, the widget is passive.
-* In layout-editing mode, the widget is passive even on `editroutepage`.
-* In dispatch mode:
 
+* On `editroutepage`, dispatch mode is active and clicking opens the host edit-route workflow.
+
+* On `navpage`, the widget is passive.
+
+* On `gpspage`, the widget is passive.
+
+* On unknown/other pages, the widget is passive.
+
+* In layout-editing mode, the widget is passive even on `editroutepage`.
+
+* In dispatch mode:
+  
   * markup includes wrapper `onclick="catchAll"`
   * markup includes a full-surface hotspot with `onclick="editRouteOpen"`
   * `namedHandlers()` returns only `{ editRouteOpen: fn }`
-* In passive mode:
 
+* In passive mode:
+  
   * no wrapper click attribute
   * no hotspot
   * `namedHandlers()` returns `{}`
