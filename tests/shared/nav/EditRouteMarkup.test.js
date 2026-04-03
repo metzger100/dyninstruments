@@ -113,6 +113,8 @@ describe("EditRouteMarkup", function () {
       model: makeModel({
         mode: "flat",
         flatMetricRows: 1,
+        flatStackGapPx: 3,
+        metricsStyle: "grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(1,minmax(0,1fr));gap:3px;",
         visibleMetricIds: ["pts", "dst", "rte", "eta"],
         metricVisibility: { pts: true, dst: true, rte: true, eta: true }
       }),
@@ -128,6 +130,8 @@ describe("EditRouteMarkup", function () {
     expect(html).toContain("dyni-edit-route-metric-eta");
     expect(html).toContain("dyni-edit-route-metric-dst");
     expect(html).toContain("dyni-edit-route-metric-value-stack");
+    expect(html).toContain('class="dyni-edit-route-metrics" style="grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(1,minmax(0,1fr));gap:3px;"');
+    expect(html).toContain("row-gap:3px;");
     expect(html).toContain('class="dyni-edit-route-metric-unit"');
     const ptsSlice = html.slice(
       html.indexOf("dyni-edit-route-metric-pts"),

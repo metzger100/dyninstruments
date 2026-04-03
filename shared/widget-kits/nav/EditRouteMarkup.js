@@ -20,6 +20,14 @@
     return value == null ? "" : String(value);
   }
 
+  function mergeStyles(primaryStyle, secondaryStyle) {
+    const first = String(primaryStyle || "").trim();
+    const second = String(secondaryStyle || "").trim();
+    return ""
+      + (first ? (first.endsWith(";") ? first : first + ";") : "")
+      + (second ? (second.endsWith(";") ? second : second + ";") : "");
+  }
+
   function isFlatDistanceMetric(mode, metricId) {
     return mode === "flat" && (metricId === "dst" || metricId === "rte");
   }
@@ -40,10 +48,15 @@
     const labelText = toText(metric.labelText);
     const valueText = toText(metric.valueText);
     const unitText = toText(metric.unitText);
+    const isFlatDistance = isFlatDistanceMetric(mode, metricId);
     const valueClasses = ["dyni-edit-route-metric-value"];
-    if (isFlatDistanceMetric(mode, metricId)) {
+    if (isFlatDistance) {
       valueClasses.push("dyni-edit-route-metric-value-stack");
     }
+    const stackGapStyle = (isFlatDistance && model.flatStackGapPx > 0)
+      ? ("row-gap:" + String(Math.floor(model.flatStackGapPx)) + "px;")
+      : "";
+    const valueRowStyle = mergeStyles(metricFit.valueRowStyle, stackGapStyle);
     const unitNode = shouldRenderUnitNode(mode, metricId)
       ? ('<span class="dyni-edit-route-metric-unit"'
         + htmlUtils.toStyleAttr(metricFit.unitStyle)
@@ -61,7 +74,7 @@
         + htmlUtils.escapeHtml(labelText)
         + "</div>"
         + '<div class="' + valueClasses.join(" ") + '"'
-        + htmlUtils.toStyleAttr(metricFit.valueRowStyle)
+        + htmlUtils.toStyleAttr(valueRowStyle)
         + ">"
         + '<span class="dyni-edit-route-metric-value-text"'
         + htmlUtils.toStyleAttr(metricFit.valueStyle)
@@ -81,7 +94,7 @@
       + htmlUtils.escapeHtml(labelText)
       + "</div>"
       + '<div class="' + valueClasses.join(" ") + '"'
-      + htmlUtils.toStyleAttr(metricFit.valueRowStyle)
+      + htmlUtils.toStyleAttr(valueRowStyle)
       + ">"
       + '<span class="dyni-edit-route-metric-value-text"'
       + htmlUtils.toStyleAttr(metricFit.valueStyle)
@@ -129,6 +142,7 @@
       const showSourceBadge = hasRoute && isLocalRoute;
       const nameTextStyle = fit.nameTextStyle;
       const sourceBadgeStyle = fit.sourceBadgeStyle;
+      const metricsStyle = mode === "flat" ? toText(model.metricsStyle) : "";
 
       let metricsHtml = "";
       if (hasRoute) {
@@ -166,7 +180,11 @@
           : "")
         + "</div>"
         + (hasRoute
-          ? ('<div class="dyni-edit-route-metrics">' + metricsHtml + "</div>")
+          ? ('<div class="dyni-edit-route-metrics"'
+            + htmlUtils.toStyleAttr(metricsStyle)
+            + ">"
+            + metricsHtml
+            + "</div>")
           : "")
         + "</div>";
     }

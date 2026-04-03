@@ -41,6 +41,10 @@ describe("EditRouteLayout", function () {
     expect(out.nameBarRect.w).toBe(out.contentRect.w);
     expect(out.flatMetricRows).toBeGreaterThanOrEqual(1);
     expect(out.flatMetricColumns).toBeGreaterThanOrEqual(2);
+    expect(out.flatWrapperLayoutStyle).toContain("grid-template-rows:minmax(0,");
+    expect(out.flatWrapperLayoutStyle).toContain("gap:");
+    expect(out.flatMetricsLayoutStyle).toContain("grid-template-columns:repeat(" + String(out.flatMetricColumns));
+    expect(out.flatStackGapPx).toBe(out.insets.gap);
     expect(out.metricBoxes.pts).toBeTruthy();
     expect(out.metricBoxes.dst).toBeTruthy();
     expect(out.metricBoxes.rte).toBeTruthy();
@@ -109,6 +113,11 @@ describe("EditRouteLayout", function () {
       expect(out.metricVisibility).toEqual({ pts: false, dst: false, rte: false, eta: false });
       expect(Object.keys(out.metricBoxes)).toEqual([]);
       expect(out.sourceBadgeRect).toBeNull();
+      if (mode === "flat") {
+        expect(out.flatWrapperLayoutStyle).toContain('grid-template-areas:"name";');
+        expect(out.flatWrapperLayoutStyle).toContain("padding:");
+        expect(out.flatMetricsLayoutStyle).toBe("");
+      }
     });
   });
 

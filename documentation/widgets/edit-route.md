@@ -14,7 +14,7 @@ Route tuple:
 
 ## Key Details
 
-- Core parity scope: editing-route summary (`name`, `PTS`, `DST`, `RTE`, `ETA`) plus workflow-entry click behavior.
+- Core parity scope keeps the same summary/workflow-entry role, but dyn flat density intentionally diverges from core horizontal by also showing `RTE`/`ETA`.
 - Captions are configurable for all four metrics (`PTS`, `DST`, `RTE`, `ETA`).
 - Distance units are configurable for `DST` and `RTE` metric tiles.
 - Dyninstruments follow-up fix: default visible remaining-distance caption is `RTE` (core AvNav still labels this field `RTG` in some surfaces).
@@ -26,7 +26,7 @@ Route tuple:
 - local route shows a `LOCAL` badge in the name bar.
 - non-local/server route shows no source badge.
 - Mode mapping:
-- `flat` -> compact two-band density (`name`, `PTS`, `DST`, `RTE`, `ETA`)
+- `flat` -> dyn follow-up compact two-band density (`name`, `PTS`, `DST`, `RTE`, `ETA`)
 - `normal`/`high` -> core non-horizontal-equivalent density (`name`, `PTS`, `DST`, `RTE`, `ETA`)
 - `.widgetContainer.vertical` forces `high` and applies native shell profile (`height:auto; aspect-ratio:7/8; min-height:8em;`).
 - No-route contract: show `No Route` in the name area and omit metric boxes.

@@ -28,8 +28,6 @@
     "name"
     "metrics";
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(0, 0.36fr) minmax(0, 0.64fr);
-  gap: 0.12em;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html.dyni-edit-route-mode-high {
@@ -125,6 +123,10 @@
   row-gap: 0.08em;
 }
 
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-mode-flat .dyni-edit-route-metric {
+  row-gap: 0;
+}
+
 .widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-metric-row {
   min-width: 0;
   min-height: 0;
@@ -151,7 +153,7 @@
 .widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-mode-flat .dyni-edit-route-metric-value-stack {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
-  row-gap: 0.04em;
+  row-gap: 0;
   align-items: center;
   justify-items: center;
 }

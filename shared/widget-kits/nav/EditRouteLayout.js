@@ -156,6 +156,11 @@
       });
     }
 
+    function toPx(value) {
+      const px = Math.max(0, Math.floor(mathApi.clampNumber(value, 0, Number.MAX_SAFE_INTEGER, 0)));
+      return String(px) + "px";
+    }
+
     function createMetricTile(tileRect, insets, responsive, options) {
       const opts = options || {};
       const unitPlacement = Object.prototype.hasOwnProperty.call(opts, "unitPlacement")
@@ -173,6 +178,31 @@
         unitMinPx: typeof opts.unitMinPx === "number" ? opts.unitMinPx : METRIC_UNIT_MIN_PX,
         unitMaxRatio: typeof opts.unitMaxRatio === "number" ? opts.unitMaxRatio : METRIC_UNIT_MAX_RATIO
       });
+    }
+
+    function buildFlatWrapperLayoutStyle(args) {
+      const cfg = args || {};
+      const nameHeight = Math.max(1, Math.floor(mathApi.clampNumber(cfg.nameHeight, 1, Number.MAX_SAFE_INTEGER, 1)));
+      const metricsHeight = Math.max(0, Math.floor(mathApi.clampNumber(cfg.metricsHeight, 0, Number.MAX_SAFE_INTEGER, 0)));
+      const gapPx = Math.max(0, Math.floor(mathApi.clampNumber(cfg.gap, 0, Number.MAX_SAFE_INTEGER, 0)));
+      const insets = cfg.insets;
+      const rowAreas = cfg.hasMetrics === true ? '"name" "metrics"' : '"name"';
+      const rowSpec = cfg.hasMetrics === true
+        ? ("minmax(0," + toPx(nameHeight) + ") minmax(0," + toPx(metricsHeight) + ")")
+        : ("minmax(0," + toPx(nameHeight) + ")");
+      return ""
+        + "grid-template-areas:" + rowAreas + ";"
+        + "grid-template-columns:minmax(0,1fr);"
+        + "grid-template-rows:" + rowSpec + ";"
+        + "gap:" + toPx(gapPx) + ";"
+        + "padding:" + toPx(insets.innerY) + " " + toPx(insets.padX) + ";";
+    }
+
+    function buildFlatMetricsLayoutStyle(rows, columns, gapPx) {
+      return ""
+        + "grid-template-columns:repeat(" + String(columns) + ",minmax(0,1fr));"
+        + "grid-template-rows:repeat(" + String(rows) + ",minmax(0,1fr));"
+        + "gap:" + toPx(gapPx) + ";";
     }
 
     function createHighMetricRow(rowRect, insets) {
@@ -272,11 +302,24 @@
         metricVisibility: metricVisibility,
         metricBoxes: Object.create(null),
         flatMetricRows: 0,
-        flatMetricColumns: 0
+        flatMetricColumns: 0,
+        flatWrapperLayoutStyle: "",
+        flatMetricsLayoutStyle: "",
+        flatStackGapPx: 0
       };
 
       if (!hasRoute) {
         out.nameBarRect = contentRect;
+        if (mode === "flat") {
+          out.flatStackGapPx = 0;
+          out.flatWrapperLayoutStyle = buildFlatWrapperLayoutStyle({
+            nameHeight: contentRect.h,
+            metricsHeight: 0,
+            gap: 0,
+            insets: insets,
+            hasMetrics: false
+          });
+        }
         const emptyNameRects = computeNameRects(contentRect, false, insets);
         out.nameTextRect = emptyNameRects.nameTextRect;
         out.sourceBadgeRect = emptyNameRects.sourceBadgeRect;
@@ -300,6 +343,15 @@
 
         out.nameBarRect = makeRect(contentRect.x, contentRect.y, contentRect.w, nameHeight);
         computeFlatMetricsLayout(metricsRect, insets, insets.responsive, out);
+        out.flatStackGapPx = insets.gap;
+        out.flatWrapperLayoutStyle = buildFlatWrapperLayoutStyle({
+          nameHeight: out.nameBarRect.h,
+          metricsHeight: metricsRect.h,
+          gap: insets.gap,
+          insets: insets,
+          hasMetrics: true
+        });
+        out.flatMetricsLayoutStyle = buildFlatMetricsLayoutStyle(out.flatMetricRows, out.flatMetricColumns, insets.gap);
       } else {
         const baseNameShare = mode === "high" ? NAME_BAND_RATIO_HIGH : NAME_BAND_RATIO_NORMAL;
         const scale = mode === "high" ? insets.responsive.highNameBandScale : insets.responsive.normalNameBandScale;

@@ -211,9 +211,19 @@
         hostContext: cfg.hostContext,
         htmlUtils: htmlUtils
       });
-      const wrapperStyle = layout.verticalShell && typeof layout.verticalShell.wrapperStyle === "string"
-        ? layout.verticalShell.wrapperStyle
+      const verticalWrapperStyle = layout.verticalShell && typeof layout.verticalShell.wrapperStyle === "string"
+        ? layout.verticalShell.wrapperStyle.trim()
         : "";
+      const flatWrapperStyle = layout.mode === "flat" && typeof layout.flatWrapperLayoutStyle === "string"
+        ? layout.flatWrapperLayoutStyle.trim()
+        : "";
+      const wrapperStyle = ""
+        + (verticalWrapperStyle
+          ? (verticalWrapperStyle.endsWith(";") ? verticalWrapperStyle : verticalWrapperStyle + ";")
+          : "")
+        + (flatWrapperStyle
+          ? (flatWrapperStyle.endsWith(";") ? flatWrapperStyle : flatWrapperStyle + ";")
+          : "");
 
       const model = {
         mode: layout.mode,
@@ -237,6 +247,8 @@
         visibleMetricIds: visibleMetricIds,
         flatMetricRows: layout.flatMetricRows || 0,
         flatMetricColumns: layout.flatMetricColumns || 0,
+        metricsStyle: layout.mode === "flat" ? (layout.flatMetricsLayoutStyle || "") : "",
+        flatStackGapPx: layout.mode === "flat" ? (layout.flatStackGapPx || 0) : 0,
         wrapperStyle: wrapperStyle
       };
       model.resizeSignatureParts = buildResizeSignatureParts(model);
