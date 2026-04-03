@@ -18,6 +18,7 @@ Ownership split:
 - `shared/widget-kits/nav/RoutePointsRenderModel.js`: renderer-facing model normalization and formatter composition
 - `shared/widget-kits/nav/RoutePointsLayout.js`: structural geometry + vertical natural-height math
 - `shared/widget-kits/nav/RoutePointsLayoutSizing.js`: shared numeric helpers + rowHeight-driven header/marker sizing policy
+- `shared/widget-kits/nav/RoutePointsRowGeometry.js`: row policy + row cell geometry (`showOrdinal` in compact modes)
 - `shared/widget-kits/nav/RoutePointsHtmlFit.js`: per-box text fit style output (`font-size:<n>px;`)
 - `shared/widget-kits/nav/RoutePointsMarkup.js`: escaped HTML assembly + class/state + inline geometry application
 - `shared/widget-kits/nav/RoutePointsDomEffects.js`: committed-DOM vertical detection + selected-row visibility pass
@@ -42,7 +43,7 @@ RoutePointsTextHtmlWidget: {
 
 Helper module registration:
 
-- `RoutePointsLayoutSizing`, `RoutePointsLayout`, and `RoutePointsHtmlFit` in `config/components/registry-shared-foundation.js`
+- `RoutePointsLayoutSizing`, `RoutePointsRowGeometry`, `RoutePointsLayout`, and `RoutePointsHtmlFit` in `config/components/registry-shared-foundation.js`
 - `RoutePointsRenderModel`, `RoutePointsMarkup`, and `RoutePointsDomEffects` in `config/components/registry-widgets.js`
 - `RoutePointsViewModel` in `config/components/registry-cluster.js`
 
@@ -150,9 +151,15 @@ Mode matrix:
 
 | Mode | Header layout | Row layout |
 |---|---|---|
-| `high` | stacked (`routeName` over `meta`) | `ordinal | (name over info) | marker` |
+| `high` | stacked (`routeName` over `meta`) | `(name over info) | marker` |
 | `normal` | side-by-side (`routeName | meta`) | `ordinal | name | info | marker` |
 | `flat` | side panel (`routeName` over `meta`) | `ordinal | name | info | marker` |
+
+Row policy contract:
+
+- `showOrdinal === true` in `normal` and `flat`
+- `showOrdinal === false` in `high` and committed `.widgetContainer.vertical`
+- When `showOrdinal === false`, ordinal cell geometry width is `0`, markup omits `.dyni-route-points-ordinal`, and released width is reallocated to the middle text region before text-fit runs.
 
 ## Layout Constants (Owner: RoutePointsLayout + RoutePointsLayoutSizing)
 
@@ -359,7 +366,7 @@ Checklist:
 
 - [ ] `high`/`normal`/`flat` mode classes resolve by ratio + vertical override
 - [ ] header on/off behavior reflects `showHeader`
-- [ ] row render includes ordinal/name/info/marker with selected state class toggles
+- [ ] row render includes ordinal in `normal`/`flat`, omits ordinal in compact `high`/vertical, and keeps marker alignment with selected state class toggles
 - [ ] empty waypoint names render zero-based index fallback text
 - [ ] info cell formatter contract holds for lat/lon, segment math, and placeholders
 - [ ] escaped output protects route/header/row text

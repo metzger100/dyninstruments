@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsLayout - Responsive geometry owner for the route-points HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, RoutePointsLayoutSizing
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, RoutePointsLayoutSizing, RoutePointsRowGeometry
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -37,6 +37,7 @@
     const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
     const rectApi = Helpers.getModule("LayoutRectMath").create(def, Helpers);
     const sizingApi = Helpers.getModule("RoutePointsLayoutSizing").create(def, Helpers);
+    const rowGeometryApi = Helpers.getModule("RoutePointsRowGeometry").create(def, Helpers);
     const makeRect = rectApi.makeRect;
     const clampNumber = sizingApi.clampNumber;
     const toCount = sizingApi.toCount;
@@ -120,49 +121,6 @@
       };
     }
 
-    function buildRowCells(rowRect, mode, rowPadding, rowGap, trailingGutterPx) {
-      const rawTrailingGutter = Math.max(0, Math.floor(clampNumber(trailingGutterPx, 0, Number.MAX_SAFE_INTEGER, 0)));
-      const innerRect = makeRect(
-        rowRect.x + rowPadding,
-        rowRect.y + rowPadding,
-        Math.max(0, rowRect.w - rowPadding * 2 - rawTrailingGutter),
-        Math.max(0, rowRect.h - rowPadding * 2)
-      );
-      const squareSize = Math.max(1, Math.min(innerRect.h, innerRect.w));
-      const innerGap = Math.max(0, Math.floor(rowGap));
-
-      if (mode === "high") {
-        const middleX = innerRect.x + squareSize + innerGap;
-        const middleWidth = Math.max(0, innerRect.w - squareSize * 2 - innerGap * 2);
-        const middleRect = makeRect(middleX, innerRect.y, middleWidth, innerRect.h);
-        const splitGap = Math.min(innerGap, Math.max(0, middleRect.h - 1));
-        const topHeight = Math.max(0, Math.floor(Math.max(0, middleRect.h - splitGap) / 2));
-        const bottomHeight = Math.max(0, middleRect.h - topHeight - splitGap);
-        return {
-          rowRect: rowRect,
-          ordinalRect: makeRect(innerRect.x, innerRect.y, squareSize, innerRect.h),
-          middleRect: middleRect,
-          nameRect: makeRect(middleRect.x, middleRect.y, middleRect.w, topHeight),
-          infoRect: makeRect(middleRect.x, middleRect.y + topHeight + splitGap, middleRect.w, bottomHeight),
-          markerRect: makeRect(innerRect.x + innerRect.w - squareSize, innerRect.y, squareSize, innerRect.h)
-        };
-      }
-
-      const middleWidth = Math.max(0, innerRect.w - squareSize * 2 - innerGap * 3);
-      const nameWidth = Math.max(0, Math.floor(Math.max(0, middleWidth - innerGap) / 2));
-      const infoWidth = Math.max(0, middleWidth - nameWidth - innerGap);
-      const nameX = innerRect.x + squareSize + innerGap;
-      const infoX = nameX + nameWidth + innerGap;
-      return {
-        rowRect: rowRect,
-        ordinalRect: makeRect(innerRect.x, innerRect.y, squareSize, innerRect.h),
-        middleRect: makeRect(nameX, innerRect.y, nameWidth + innerGap + infoWidth, innerRect.h),
-        nameRect: makeRect(nameX, innerRect.y, nameWidth, innerRect.h),
-        infoRect: makeRect(infoX, innerRect.y, infoWidth, innerRect.h),
-        markerRect: makeRect(innerRect.x + innerRect.w - squareSize, innerRect.y, squareSize, innerRect.h)
-      };
-    }
-
     function computeLayout(args) {
       const cfg = args || {};
       const contentRect = cfg.contentRect || makeRect(0, 0, 0, 0);
@@ -186,6 +144,10 @@
       const headerGap = Math.max(1, Math.floor(rowHeight * HEADER_GAP_RATIO));
       const rowPadding = Math.max(1, Math.floor(rowHeight * ROW_PADDING_RATIO));
       const trailingGutterPx = Math.max(0, Math.floor(clampNumber(cfg.trailingGutterPx, 0, Number.MAX_SAFE_INTEGER, 0)));
+      const rowPolicy = rowGeometryApi.resolveRowPolicy({
+        mode: mode,
+        isVerticalContainer: isVerticalContainer
+      });
       let headerRect = null;
       let listRect = contentRect;
       if (showHeader) {
@@ -231,7 +193,14 @@
       for (let i = 0; i < pointCount; i += 1) {
         const rowRect = makeRect(listRect.x, rowY, listRect.w, rowHeight);
         rowRects.push(rowRect);
-        rows.push(buildRowCells(rowRect, mode, rowPadding, rowGap, trailingGutterPx));
+        rows.push(rowGeometryApi.buildRowCells({
+          rowRect: rowRect,
+          mode: mode,
+          rowPadding: rowPadding,
+          rowGap: rowGap,
+          trailingGutterPx: trailingGutterPx,
+          policy: rowPolicy
+        }));
         rowY += rowHeight + rowGap;
       }
 
@@ -247,6 +216,7 @@
         rowGap: rowGap,
         headerGap: showHeader ? headerGap : 0,
         rowPadding: rowPadding,
+        rowPolicy: rowPolicy,
         trailingGutterPx: trailingGutterPx,
         responsive: responsive,
         contentRect: contentRect,
@@ -262,6 +232,7 @@
     function computeInlineGeometry(args) {
       const cfg = args || {};
       const layout = cfg.layout || computeLayout(cfg);
+      const showOrdinal = layout.rowPolicy ? layout.rowPolicy.showOrdinal === true : true;
       const wrapperHeightPx = Math.floor(clampNumber(cfg.wrapperHeight, -1, Number.MAX_SAFE_INTEGER, -1));
       const wrapperHeight = wrapperHeightPx >= 0 ? wrapperHeightPx : null;
 
@@ -287,6 +258,7 @@
       return {
         mode: layout.mode,
         showHeader: layout.showHeader,
+        showOrdinal: showOrdinal,
         rowGapPx: layout.rowGap,
         trailingGutterPx: layout.trailingGutterPx,
         wrapper: { style: wrapperStyle },
@@ -296,9 +268,10 @@
           contentStyle: "min-height:" + Math.max(0, layout.listContentHeight) + "px;gap:" + Math.max(0, layout.rowGap) + "px;"
         },
         rows: layout.rows.map(function (row) {
+          const rowShowOrdinal = row.showOrdinal !== false && showOrdinal;
           return {
             rowStyle: toSizeStyle(row.rowRect),
-            ordinalStyle: toSizeStyle(row.ordinalRect),
+            ordinalStyle: rowShowOrdinal ? toSizeStyle(row.ordinalRect) : "",
             middleStyle: toSizeStyle(row.middleRect),
             nameStyle: toSizeStyle(row.nameRect),
             infoStyle: toSizeStyle(row.infoRect),

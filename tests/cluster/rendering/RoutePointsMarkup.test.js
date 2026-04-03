@@ -18,6 +18,7 @@ describe("RoutePointsMarkup", function () {
       metaText: "2 waypoints",
       canActivateRoutePoint: true,
       isActiveRoute: true,
+      showOrdinal: true,
       points: [
         { index: 0, ordinalText: "1", nameText: "Start", infoText: "---°/---nm", selected: false },
         { index: 1, ordinalText: "2", nameText: "Finish", infoText: "DIR:89°/DST:2:nm", selected: true }
@@ -88,6 +89,7 @@ describe("RoutePointsMarkup", function () {
     expect(html).toContain('data-rp-row="1"');
     expect(html).toContain("dyni-route-points-row-selected");
     expect(html).toContain("dyni-route-points-marker-selected");
+    expect(html).toContain("dyni-route-points-ordinal");
   });
 
   it("renders passive mode without click handlers", function () {
@@ -102,6 +104,29 @@ describe("RoutePointsMarkup", function () {
     expect(html).not.toContain('onclick="catchAll"');
     expect(html).not.toContain('onclick="routePointActivate"');
     expect(html).not.toContain("data-rp-idx=");
+  });
+
+  it("does not render ordinal cell markup when compact row policy disables it", function () {
+    const markup = createMarkup();
+    const compactGeometry = makeModel().inlineGeometry.rows.map((row) =>
+      Object.assign({}, row, { ordinalStyle: "" })
+    );
+    const html = markup.render({
+      model: makeModel({
+        mode: "high",
+        showOrdinal: false,
+        inlineGeometry: Object.assign({}, makeModel().inlineGeometry, { rows: compactGeometry })
+      }),
+      fit: makeFit({
+        rowFits: makeFit().rowFits.map((row) => Object.assign({}, row, { ordinalStyle: "" }))
+      }),
+      htmlUtils: createHtmlUtils()
+    });
+
+    expect(html).not.toContain("dyni-route-points-ordinal");
+    expect(html).toContain("dyni-route-points-name");
+    expect(html).toContain("dyni-route-points-info");
+    expect(html).toContain("dyni-route-points-marker-cell");
   });
 
   it("fails closed for missing route by rendering no header content and no rows", function () {

@@ -15,6 +15,9 @@ describe("RoutePointsLayout", function () {
         if (id === "RoutePointsLayoutSizing") {
           return routePointsLayoutSizing;
         }
+        if (id === "RoutePointsRowGeometry") {
+          return loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js");
+        }
         throw new Error("unexpected module: " + id);
       }
     });
@@ -123,13 +126,16 @@ describe("RoutePointsLayout", function () {
     });
 
     expect(out.mode).toBe("high");
+    expect(out.rowPolicy.showOrdinal).toBe(false);
     expect(out.headerRect).not.toBeNull();
     expect(out.listRect.y).toBeGreaterThan(out.headerRect.y);
     expect(out.rows).toHaveLength(3);
 
     out.rows.forEach((row, index) => {
+      expect(row.ordinalRect.w).toBe(0);
       expect(row.nameRect.x).toBe(row.infoRect.x);
       expect(row.infoRect.y).toBeGreaterThanOrEqual(row.nameRect.y + row.nameRect.h);
+      expect(row.markerRect.x + row.markerRect.w).toBeLessThanOrEqual(row.rowRect.x + row.rowRect.w);
       if (index > 0) {
         expect(out.rows[index].rowRect.y).toBeGreaterThan(out.rows[index - 1].rowRect.y);
       }
@@ -147,10 +153,34 @@ describe("RoutePointsLayout", function () {
     });
 
     expect(out.mode).toBe("normal");
+    expect(out.rowPolicy.showOrdinal).toBe(true);
     expect(out.headerLayout.routeNameRect.y).toBe(out.headerLayout.metaRect.y);
     expect(out.headerLayout.metaRect.x).toBeGreaterThan(out.headerLayout.routeNameRect.x);
+    expect(out.rows[0].ordinalRect.w).toBeGreaterThan(0);
     expect(out.rows[0].nameRect.y).toBe(out.rows[0].infoRect.y);
     expect(out.rows[0].infoRect.x).toBeGreaterThan(out.rows[0].nameRect.x);
+  });
+
+  it("forces compact row policy in vertical containers", function () {
+    const layout = createLayout();
+    const built = buildContentRect(layout, 180, 340);
+    const out = layout.computeLayout({
+      contentRect: built.contentRect,
+      mode: "normal",
+      pointCount: 2,
+      showHeader: true,
+      isVerticalContainer: true,
+      verticalAnchorWidth: built.contentRect.w
+    });
+    const inline = layout.computeInlineGeometry({ layout: out });
+
+    expect(out.mode).toBe("high");
+    expect(out.rowPolicy.showOrdinal).toBe(false);
+    expect(out.rows[0].ordinalRect.w).toBe(0);
+    expect(inline.showOrdinal).toBe(false);
+    expect(inline.rows[0].ordinalStyle).toBe("");
+    expect(inline.rows[0].nameStyle).toMatch(/width:\d+px;/);
+    expect(inline.rows[0].infoStyle).toMatch(/width:\d+px;/);
   });
 
   it("reserves trailing gutter before marker placement when scrollbar width is provided", function () {

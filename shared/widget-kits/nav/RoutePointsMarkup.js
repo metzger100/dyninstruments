@@ -47,6 +47,7 @@
     const rows = model.points;
     const rowGeometry = geometry.rows;
     const rowFits = fit.rowFits;
+    const showOrdinal = model.showOrdinal !== false;
     let html = "";
 
     for (let i = 0; i < rows.length; i += 1) {
@@ -65,19 +66,25 @@
         ? (' onclick="routePointActivate" data-rp-idx="' + String(row.index) + '"')
         : "";
 
+      const ordinalHtml = showOrdinal
+        ? (
+          '<div class="dyni-route-points-ordinal"' + htmlUtils.toStyleAttr(geom.ordinalStyle) + ">"
+          + '<span class="dyni-route-points-text dyni-route-points-ordinal-text"'
+          + htmlUtils.toStyleAttr(rowFit.ordinalStyle)
+          + ">"
+          + htmlUtils.escapeHtml(row.ordinalText)
+          + "</span>"
+          + "</div>"
+        )
+        : "";
+
       html += ""
         + '<div class="' + rowClasses.join(" ") + '"'
         + ' data-rp-row="' + String(row.index) + '"'
         + activateAttrs
         + htmlUtils.toStyleAttr(geom.rowStyle)
         + ">"
-        + '<div class="dyni-route-points-ordinal"' + htmlUtils.toStyleAttr(geom.ordinalStyle) + ">"
-        + '<span class="dyni-route-points-text dyni-route-points-ordinal-text"'
-        + htmlUtils.toStyleAttr(rowFit.ordinalStyle)
-        + ">"
-        + htmlUtils.escapeHtml(row.ordinalText)
-        + "</span>"
-        + "</div>"
+        + ordinalHtml
         + '<div class="dyni-route-points-middle"' + htmlUtils.toStyleAttr(geom.middleStyle) + ">"
         + '<div class="dyni-route-points-name"' + htmlUtils.toStyleAttr(geom.nameStyle) + ">"
         + '<span class="dyni-route-points-text dyni-route-points-name-text"'

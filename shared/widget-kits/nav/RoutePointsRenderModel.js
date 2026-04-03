@@ -301,6 +301,7 @@
         layout: layoutOutput,
         wrapperHeight: naturalHeight ? naturalHeight.cappedHeight : undefined
       });
+      const showOrdinal = !!(layoutOutput.rowPolicy && layoutOutput.rowPolicy.showOrdinal);
 
       const rows = [];
       for (let i = 0; i < pointCount; i += 1) {
@@ -351,6 +352,7 @@
         naturalHeight: naturalHeight,
         layoutShellHeight: effectiveShellHeight,
         inlineGeometry: inlineGeometry,
+        showOrdinal: showOrdinal,
         points: rows,
         pointCount: pointCount,
         selectedIndex: selectedIndex,

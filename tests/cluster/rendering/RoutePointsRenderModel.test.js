@@ -15,6 +15,9 @@ describe("RoutePointsRenderModel", function () {
         if (id === "RoutePointsLayoutSizing") {
           return routePointsLayoutSizing;
         }
+        if (id === "RoutePointsRowGeometry") {
+          return loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js");
+        }
         throw new Error("unexpected module: " + id);
       }
     });
@@ -67,6 +70,9 @@ describe("RoutePointsRenderModel", function () {
           }
           else if (id === "RoutePointsLayoutSizing") {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
+          }
+          else if (id === "RoutePointsRowGeometry") {
+            moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js");
           }
           else {
             throw new Error("unexpected module: " + id);
@@ -156,6 +162,26 @@ describe("RoutePointsRenderModel", function () {
     expect(model.activeWaypointKey).toContain("lon:10.600000");
     expect(model.hasValidSelection).toBe(true);
     expect(model.canActivateRoutePoint).toBe(true);
+    expect(model.showOrdinal).toBe(true);
+    expect(model.inlineGeometry.showOrdinal).toBe(true);
+  });
+
+  it("disables ordinal in high mode and keeps row text geometry available", function () {
+    const renderModel = createRenderModel();
+    const model = renderModel.buildModel({
+      props: makeProps(),
+      hostContext: createHostContext(),
+      shellRect: { width: 180, height: 340 },
+      isVerticalCommitted: false
+    });
+
+    expect(model.mode).toBe("high");
+    expect(model.showOrdinal).toBe(false);
+    expect(model.inlineGeometry.showOrdinal).toBe(false);
+    expect(model.inlineGeometry.rows[0].ordinalStyle).toBe("");
+    expect(model.inlineGeometry.rows[0].nameStyle).toMatch(/width:\d+px;/);
+    expect(model.inlineGeometry.rows[0].infoStyle).toMatch(/width:\d+px;/);
+    expect(model.inlineGeometry.rows[0].markerStyle).toMatch(/width:\d+px;/);
   });
 
   it("prefers stable raw waypoint identity fields for active waypoint key", function () {
@@ -294,6 +320,9 @@ describe("RoutePointsRenderModel", function () {
     });
 
     expect(verticalA.mode).toBe("high");
+    expect(verticalA.showOrdinal).toBe(false);
+    expect(verticalB.showOrdinal).toBe(false);
+    expect(nonVerticalA.showOrdinal).toBe(true);
     expect(verticalA.resizeSignatureParts.join("|")).toBe(verticalB.resizeSignatureParts.join("|"));
     expect(nonVerticalA.resizeSignatureParts.join("|")).not.toBe(nonVerticalB.resizeSignatureParts.join("|"));
   });

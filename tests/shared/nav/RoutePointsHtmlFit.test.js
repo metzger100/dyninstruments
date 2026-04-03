@@ -89,6 +89,9 @@ describe("RoutePointsHtmlFit", function () {
         if (id === "RoutePointsLayoutSizing") {
           return routePointsLayoutSizingModule;
         }
+        if (id === "RoutePointsRowGeometry") {
+          return loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js");
+        }
         throw new Error("unexpected module: " + id);
       }
     };
@@ -196,6 +199,21 @@ describe("RoutePointsHtmlFit", function () {
     });
 
     expect(extractPx(high.rowFits[0].nameStyle)).toBeLessThan(extractPx(normal.rowFits[0].nameStyle));
+  });
+
+  it("keeps name/info text fitting active when compact high rows hide ordinal", function () {
+    const h = createHarness();
+    const out = h.fit.compute({
+      model: buildModel({ mode: "high", points: [{ ordinalText: "1", nameText: "Alpha", infoText: "089°/12.3nm" }] }),
+      hostContext: h.hostContext,
+      targetEl: h.targetEl,
+      shellRect: { width: 240, height: 360 }
+    });
+
+    expect(out.rowFits).toHaveLength(1);
+    expect(out.rowFits[0].ordinalStyle).toBe("");
+    expectStyleFormat(out.rowFits[0].nameStyle);
+    expectStyleFormat(out.rowFits[0].infoStyle);
   });
 
   it("returns an empty rowFits array for zero-point routes", function () {
