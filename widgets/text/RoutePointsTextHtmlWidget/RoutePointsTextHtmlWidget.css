@@ -8,7 +8,7 @@
   min-height: 0;
   box-sizing: border-box;
   display: flex;
-  overflow: hidden;
+  overflow: visible;
   color: inherit;
 }
 
@@ -61,7 +61,7 @@
 .widget.dyniplugin .widgetData.dyni-shell .dyni-route-points-header-meta {
   display: flex;
   align-items: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-route-points-header-route {
@@ -90,7 +90,7 @@
   display: flex;
   align-items: stretch;
   border-radius: 0.24em;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-route-points-middle {
@@ -114,7 +114,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-route-points-name {
