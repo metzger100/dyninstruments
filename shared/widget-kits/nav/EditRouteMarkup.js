@@ -10,7 +10,7 @@
 }(this, function () {
   "use strict";
 
-  const METRIC_IDS = ["pts", "dst", "rtg", "eta"];
+  const METRIC_IDS = ["pts", "dst", "rte", "eta"];
 
   function toObject(value) {
     return value && typeof value === "object" ? value : {};
@@ -28,6 +28,7 @@
     const metricClass = "dyni-edit-route-metric-" + metricId;
     const labelText = toText(metric.labelText);
     const valueText = toText(metric.valueText);
+    const unitText = toText(metric.unitText);
 
     if (mode === "high") {
       return ""
@@ -38,9 +39,18 @@
         + htmlUtils.escapeHtml(labelText)
         + "</div>"
         + '<div class="dyni-edit-route-metric-value"'
+        + htmlUtils.toStyleAttr(metricFit.valueRowStyle)
+        + ">"
+        + '<span class="dyni-edit-route-metric-value-text"'
         + htmlUtils.toStyleAttr(metricFit.valueStyle)
         + ">"
         + htmlUtils.escapeHtml(valueText)
+        + "</span>"
+        + '<span class="dyni-edit-route-metric-unit"'
+        + htmlUtils.toStyleAttr(metricFit.unitStyle)
+        + ">"
+        + htmlUtils.escapeHtml(unitText)
+        + "</span>"
         + "</div>"
         + "</div>";
     }
@@ -53,9 +63,18 @@
       + htmlUtils.escapeHtml(labelText)
       + "</div>"
       + '<div class="dyni-edit-route-metric-value"'
+      + htmlUtils.toStyleAttr(metricFit.valueRowStyle)
+      + ">"
+      + '<span class="dyni-edit-route-metric-value-text"'
       + htmlUtils.toStyleAttr(metricFit.valueStyle)
       + ">"
       + htmlUtils.escapeHtml(valueText)
+      + "</span>"
+      + '<span class="dyni-edit-route-metric-unit"'
+      + htmlUtils.toStyleAttr(metricFit.unitStyle)
+      + ">"
+      + htmlUtils.escapeHtml(unitText)
+      + "</span>"
       + "</div>"
       + "</div>";
   }

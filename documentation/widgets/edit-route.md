@@ -14,7 +14,10 @@ Route tuple:
 
 ## Key Details
 
-- Core parity scope: editing-route summary (`name`, `PTS`, `DST`, and mode-dependent `RTG`/`ETA`) plus workflow-entry click behavior.
+- Core parity scope: editing-route summary (`name`, `PTS`, `DST`, and mode-dependent `RTE`/`ETA`) plus workflow-entry click behavior.
+- Captions are configurable for all four metrics (`PTS`, `DST`, `RTE`, `ETA`).
+- Distance units are configurable for `DST` and `RTE` metric tiles.
+- Dyninstruments follow-up fix: default visible remaining-distance caption is `RTE` (core AvNav still labels this field `RTG` in some surfaces).
 - Host workflow remains host-owned (`EditRouteDialog`, point editing, rename/load/save/delete, writable prompts).
 - Source route is always `editingRoute` (not active-route leg state).
 - Active-state rule is exact raw-name equality: `editingRoute.name === activeName`.
@@ -24,7 +27,7 @@ Route tuple:
 - non-local/server route shows no source badge.
 - Mode mapping:
 - `flat` -> core horizontal-equivalent density (`name`, `PTS`, `DST` only)
-- `normal`/`high` -> core non-horizontal-equivalent density (`name`, `PTS`, `DST`, `RTG`, `ETA`)
+- `normal`/`high` -> core non-horizontal-equivalent density (`name`, `PTS`, `DST`, `RTE`, `ETA`)
 - `.widgetContainer.vertical` forces `high` and applies native shell profile (`height:auto; aspect-ratio:7/8; min-height:8em;`).
 - No-route contract: show `No Route` in the name area and omit metric boxes.
 
@@ -77,6 +80,12 @@ Kind catalog tuple:
 | `domain.isServerRoute` | boolean | `false` | Server route source flag |
 | `layout.ratioThresholdNormal` | number | `1.2` | Ratio below this resolves `high` |
 | `layout.ratioThresholdFlat` | number | `3.8` | Ratio above this resolves `flat` |
+| `captions.pts` | string | `"PTS"` | PTS caption text |
+| `captions.dst` | string | `"DST"` | DST caption text |
+| `captions.rte` | string | `"RTE"` | Remaining-distance caption text |
+| `captions.eta` | string | `"ETA"` | ETA caption text |
+| `units.dst` | string | `"nm"` | DST distance unit text + `formatDistance` parameter |
+| `units.rte` | string | `"nm"` | RTE distance unit text + `formatDistance` parameter |
 | `default` | string | `"---"` | Formatter placeholder fallback |
 | `editing` / `dyniLayoutEditing` | boolean | `false` | Forces passive interaction mode |
 
@@ -115,21 +124,22 @@ Nav-cluster store keys:
 | Mode | Route Present | No Route |
 |---|---|---|
 | `flat` | `name + PTS + DST` | `No Route` only |
-| `normal` | `name + PTS + DST + RTG + ETA` (2x2 metrics) | `No Route` only |
-| `high` | `name + PTS + DST + RTG + ETA` (4 stacked metric rows) | `No Route` only |
+| `normal` | `name + PTS + DST + RTE + ETA` (2x2 metrics) | `No Route` only |
+| `high` | `name + PTS + DST + RTE + ETA` (4 stacked metric rows) | `No Route` only |
 
 Field-order contract:
 
 1. `PTS`
 2. `DST`
-3. `RTG`
+3. `RTE`
 4. `ETA`
 
 Visibility rules:
 
-- `RTG` and `ETA` never render in `flat`.
-- `RTG` and `ETA` always render in `normal`/`high` when a route exists.
-- Inactive routes keep `RTG`/`ETA` placeholders (`---`) in `normal`/`high`.
+- `RTE` and `ETA` never render in `flat`.
+- `RTE` and `ETA` always render in `normal`/`high` when a route exists.
+- Inactive routes keep `RTE`/`ETA` placeholders (`---`) in `normal`/`high`.
+- `DST` and `RTE` unit spans render in metric value rows; `PTS` and `ETA` do not render unit text.
 
 Vertical behavior (`.widgetContainer.vertical`):
 
@@ -182,8 +192,8 @@ These remain host-owned workflow behavior.
 ## State Examples
 
 - no route: name bar shows `No Route`, no metrics, dispatch/passive class depends on capability.
-- active server route in `normal`: name bar + `PTS/DST/RTG/ETA` with populated `RTG/ETA`, no `LOCAL` badge.
-- inactive local route in `high`: name bar + `LOCAL` badge + stacked metric rows, `RTG/ETA` placeholders.
+- active server route in `normal`: name bar + `PTS/DST/RTE/ETA` with populated `RTE/ETA`, no `LOCAL` badge.
+- inactive local route in `high`: name bar + `LOCAL` badge + stacked metric rows, `RTE/ETA` placeholders.
 - passive page (`navpage`/`gpspage`): normal rendering remains visible but no `catchAll`/hotspot click ownership.
 
 ## Tests

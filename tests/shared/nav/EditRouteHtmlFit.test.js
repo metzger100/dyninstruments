@@ -47,10 +47,10 @@ describe("EditRouteHtmlFit", function () {
       nameText: "Harbor Loop",
       sourceBadgeText: "LOCAL",
       metrics: {
-        pts: { labelText: "PTS:", valueText: "005" },
-        dst: { labelText: "DST:", valueText: "12.3nm" },
-        rtg: { labelText: "RTG:", valueText: "4.9nm" },
-        eta: { labelText: "ETA:", valueText: "12:34" }
+        pts: { labelText: "PTS:", valueText: "005", unitText: "" },
+        dst: { labelText: "DST:", valueText: "12.3", unitText: "nm" },
+        rte: { labelText: "RTE:", valueText: "4.9", unitText: "nm" },
+        eta: { labelText: "ETA:", valueText: "12:34", unitText: "" }
       }
     };
 
@@ -137,8 +137,8 @@ describe("EditRouteHtmlFit", function () {
     const h = createHarness();
     const expectedMetricsByMode = {
       flat: ["pts", "dst"],
-      normal: ["pts", "dst", "rtg", "eta"],
-      high: ["pts", "dst", "rtg", "eta"]
+      normal: ["pts", "dst", "rte", "eta"],
+      high: ["pts", "dst", "rte", "eta"]
     };
 
     ["flat", "normal", "high"].forEach((mode) => {
@@ -155,7 +155,9 @@ describe("EditRouteHtmlFit", function () {
       expect(Object.keys(out.metrics)).toEqual(expectedMetricsByMode[mode]);
       expectedMetricsByMode[mode].forEach((id) => {
         expectStyleFormat(out.metrics[id].labelStyle);
+        expectStyleFormat(out.metrics[id].valueRowStyle);
         expectStyleFormat(out.metrics[id].valueStyle);
+        expectStyleFormat(out.metrics[id].unitStyle);
       });
     });
     expect(h.themeApi.resolveForRoot).toHaveBeenCalledWith(h.targetEl);
@@ -236,6 +238,33 @@ describe("EditRouteHtmlFit", function () {
     });
 
     expect(extractPx(out.metrics.pts.labelStyle)).toBeLessThan(extractPx(out.metrics.pts.valueStyle));
+  });
+
+  it("fits DST/RTE unit text independently from value text", function () {
+    const h = createHarness();
+    const shortOut = h.fit.compute({
+      model: buildModel({
+        metrics: {
+          dst: { unitText: "nm" }
+        }
+      }),
+      targetEl: h.targetEl,
+      hostContext: h.hostContext,
+      shellRect: { width: 320, height: 190 }
+    });
+    const longOut = h.fit.compute({
+      model: buildModel({
+        metrics: {
+          dst: { unitText: "nautical-miles-long-unit" }
+        }
+      }),
+      targetEl: h.targetEl,
+      hostContext: h.hostContext,
+      shellRect: { width: 320, height: 190 }
+    });
+
+    expect(extractPx(longOut.metrics.dst.unitStyle)).toBeLessThan(extractPx(shortOut.metrics.dst.unitStyle));
+    expect(extractPx(longOut.metrics.dst.valueStyle)).toBeGreaterThan(0);
   });
 
   it("computes only name fit in no-route state", function () {

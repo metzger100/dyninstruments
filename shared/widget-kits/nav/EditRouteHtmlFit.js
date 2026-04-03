@@ -19,7 +19,7 @@
   const SOURCE_BADGE_MAX_PX_RATIO = 0.7;
   const METRIC_LABEL_MAX_PX_RATIO = 0.52;
   const METRIC_VALUE_MAX_PX_RATIO = 0.9;
-  const METRIC_IDS = ["pts", "dst", "rtg", "eta"];
+  const METRIC_IDS = ["pts", "dst", "rte", "eta"];
 
   function parseFontPx(font) {
     const source = String(font || "");
@@ -123,9 +123,29 @@
     return "";
   }
 
+  function resolveMetricUnit(model, id) {
+    const entry = toMetricEntry(model, id);
+    if (entry.unitText != null) {
+      return toText(entry.unitText);
+    }
+    if (entry.unit != null) {
+      return toText(entry.unit);
+    }
+    if (model && model[id + "UnitText"] != null) {
+      return toText(model[id + "UnitText"]);
+    }
+    if (model && model[id + "Unit"] != null) {
+      return toText(model[id + "Unit"]);
+    }
+    return "";
+  }
+
   function measureStyle(args) {
     const cfg = args || {};
     const rect = cfg.rect;
+    if (!cfg.text) {
+      return "";
+    }
     if (!rect || !(rect.w > 0) || !(rect.h > 0)) {
       return "";
     }
@@ -254,8 +274,9 @@
             textFillScale: textFillScale,
             htmlUtils: htmlUtils
           }),
+          valueRowStyle: "",
           valueStyle: measureStyle({
-            rect: box.valueRect,
+            rect: box.valueTextRect || box.valueRect,
             text: resolveMetricValue(model, id),
             maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
             textApi: textApi,
@@ -263,6 +284,18 @@
             ctx: measureCtx,
             family: family,
             weight: valueWeight,
+            textFillScale: textFillScale,
+            htmlUtils: htmlUtils
+          }),
+          unitStyle: measureStyle({
+            rect: box.unitRect || box.valueRect,
+            text: resolveMetricUnit(model, id),
+            maxPxRatio: METRIC_LABEL_MAX_PX_RATIO,
+            textApi: textApi,
+            tileLayout: tileLayout,
+            ctx: measureCtx,
+            family: family,
+            weight: labelWeight,
             textFillScale: textFillScale,
             htmlUtils: htmlUtils
           })

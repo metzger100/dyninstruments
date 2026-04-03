@@ -22,7 +22,13 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   caption_xteDisplayDst: "DST CAP",
   unit_xteDisplayDst: "nmD",
   caption_xteDisplayBrg: "BRG CAP",
-  unit_xteDisplayBrg: "degM"
+  unit_xteDisplayBrg: "degM",
+  caption_editRoutePts: "PTS CAP",
+  caption_editRouteDst: "DST CAP",
+  unit_editRouteDst: "nmE",
+  caption_editRouteRte: "RTE CAP",
+  unit_editRouteRte: "kmR",
+  caption_editRouteEta: "ETA CAP"
 });
 
 function createMapper() {
@@ -355,8 +361,37 @@ describe("NavMapper", function () {
       layout: {
         ratioThresholdNormal: 1.23,
         ratioThresholdFlat: 3.95
+      },
+      captions: {
+        pts: "PTS CAP",
+        dst: "DST CAP",
+        rte: "RTE CAP",
+        eta: "ETA CAP"
+      },
+      units: {
+        dst: "nmE",
+        rte: "kmR"
       }
     });
+  });
+
+  it("maps editRoute with default RTE caption (not RTG) when configured defaults are used", function () {
+    const mapper = createMapper();
+    const defaultToolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
+      caption_editRoutePts: "PTS",
+      caption_editRouteDst: "DST",
+      unit_editRouteDst: "nm",
+      caption_editRouteRte: "RTE",
+      unit_editRouteRte: "nm",
+      caption_editRouteEta: "ETA"
+    });
+    const out = mapper.translate({
+      kind: "editRoute",
+      editingRoute: { name: "Harbor Run", points: [] }
+    }, defaultToolkit);
+
+    expect(out.captions.rte).toBe("RTE");
+    expect(out.captions.rte).not.toBe("RTG");
   });
 
   it("maps editRoute safely when editingRoute is missing", function () {
@@ -384,6 +419,16 @@ describe("NavMapper", function () {
       layout: {
         ratioThresholdNormal: 1.2,
         ratioThresholdFlat: 3.8
+      },
+      captions: {
+        pts: "PTS CAP",
+        dst: "DST CAP",
+        rte: "RTE CAP",
+        eta: "ETA CAP"
+      },
+      units: {
+        dst: "nmE",
+        rte: "kmR"
       }
     });
   });

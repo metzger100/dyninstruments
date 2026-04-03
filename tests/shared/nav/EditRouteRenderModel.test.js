@@ -16,7 +16,8 @@ describe("EditRouteRenderModel", function () {
         return Number(value).toFixed(places);
       }
       if (cfg.formatter === "formatDistance") {
-        return "DST:" + Number(value).toFixed(1);
+        const unit = Array.isArray(cfg.formatterParameters) ? String(cfg.formatterParameters[0] || "") : "";
+        return "DST(" + unit + "):" + Number(value).toFixed(1);
       }
       if (cfg.formatter === "formatTime") {
         return "TIME:" + String(value);
@@ -80,6 +81,16 @@ describe("EditRouteRenderModel", function () {
       layout: {
         ratioThresholdNormal: 1.2,
         ratioThresholdFlat: 3.8
+      },
+      captions: {
+        pts: "PTS",
+        dst: "DST",
+        rte: "RTE",
+        eta: "ETA"
+      },
+      units: {
+        dst: "nm",
+        rte: "nm"
       }
     }, overrides || {});
   }
@@ -125,12 +136,18 @@ describe("EditRouteRenderModel", function () {
     expect(model.canOpenEditRoute).toBe(true);
     expect(model.captureClicks).toBe(true);
     expect(model.metrics.pts.valueText).toBe("5.000");
-    expect(model.metrics.dst.valueText).toBe("DST:1234.5");
-    expect(model.metrics.rtg.valueText).toBe("DST:321.4");
+    expect(model.metrics.pts.labelText).toBe("PTS:");
+    expect(model.metrics.dst.labelText).toBe("DST:");
+    expect(model.metrics.rte.labelText).toBe("RTE:");
+    expect(model.metrics.eta.labelText).toBe("ETA:");
+    expect(model.metrics.dst.valueText).toBe("DST(nm):1234.5");
+    expect(model.metrics.rte.valueText).toBe("DST(nm):321.4");
     expect(model.metrics.eta.valueText).toBe("TIME:2026-03-06T11:45:00Z");
+    expect(model.metrics.dst.unitText).toBe("nm");
+    expect(model.metrics.rte.unitText).toBe("nm");
   });
 
-  it("keeps RTG and ETA placeholders in non-flat mode for inactive routes", function () {
+  it("keeps RTE and ETA placeholders in non-flat mode for inactive routes", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
       props: makeProps({
@@ -152,12 +169,13 @@ describe("EditRouteRenderModel", function () {
     });
 
     expect(model.mode).toBe("normal");
-    expect(model.visibleMetricIds).toEqual(["pts", "dst", "rtg", "eta"]);
-    expect(model.metrics.rtg.valueText).toBe("---");
+    expect(model.visibleMetricIds).toEqual(["pts", "dst", "rte", "eta"]);
+    expect(model.metrics.rte.valueText).toBe("---");
+    expect(model.metrics.rte.unitText).toBe("nm");
     expect(model.metrics.eta.valueText).toBe("---");
   });
 
-  it("hides RTG and ETA in flat mode", function () {
+  it("hides RTE and ETA in flat mode", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
       props: makeProps(),
@@ -238,5 +256,72 @@ describe("EditRouteRenderModel", function () {
 
     expect(unsupported.canOpenEditRoute).toBe(false);
     expect(editingMode.canOpenEditRoute).toBe(false);
+  });
+
+  it("uses configured caption and DST/RTE units in formatter inputs", function () {
+    const renderModel = createRenderModel();
+    const model = renderModel.buildModel({
+      props: makeProps({
+        captions: {
+          pts: "POINTS",
+          dst: "DIST",
+          rte: "LEFT",
+          eta: "ARRIVE"
+        },
+        units: {
+          dst: "km",
+          rte: "mi"
+        }
+      }),
+      hostContext: createHostContext("dispatch"),
+      shellRect: { width: 320, height: 210 },
+      isVerticalCommitted: false
+    });
+
+    expect(model.metrics.pts.labelText).toBe("POINTS:");
+    expect(model.metrics.dst.labelText).toBe("DIST:");
+    expect(model.metrics.rte.labelText).toBe("LEFT:");
+    expect(model.metrics.eta.labelText).toBe("ARRIVE:");
+    expect(model.metrics.dst.valueText).toBe("DST(km):1234.5");
+    expect(model.metrics.rte.valueText).toBe("DST(mi):321.4");
+    expect(model.metrics.dst.unitText).toBe("km");
+    expect(model.metrics.rte.unitText).toBe("mi");
+  });
+
+  it("changes resize signature when caption or unit text changes", function () {
+    const renderModel = createRenderModel();
+    const base = renderModel.buildModel({
+      props: makeProps(),
+      hostContext: createHostContext("dispatch"),
+      shellRect: { width: 320, height: 210 },
+      isVerticalCommitted: false
+    });
+    const captionChanged = renderModel.buildModel({
+      props: makeProps({
+        captions: {
+          pts: "PTS",
+          dst: "DISTANCE",
+          rte: "RTE",
+          eta: "ETA"
+        }
+      }),
+      hostContext: createHostContext("dispatch"),
+      shellRect: { width: 320, height: 210 },
+      isVerticalCommitted: false
+    });
+    const unitChanged = renderModel.buildModel({
+      props: makeProps({
+        units: {
+          dst: "km",
+          rte: "nm"
+        }
+      }),
+      hostContext: createHostContext("dispatch"),
+      shellRect: { width: 320, height: 210 },
+      isVerticalCommitted: false
+    });
+
+    expect(base.resizeSignatureParts.join("|")).not.toBe(captionChanged.resizeSignatureParts.join("|"));
+    expect(base.resizeSignatureParts.join("|")).not.toBe(unitChanged.resizeSignatureParts.join("|"));
   });
 });

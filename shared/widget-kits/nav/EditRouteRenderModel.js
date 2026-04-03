@@ -10,15 +10,9 @@
 }(this, function () {
   "use strict";
 
-  const METRIC_IDS = ["pts", "dst", "rtg", "eta"];
+  const METRIC_IDS = ["pts", "dst", "rte", "eta"];
   const NO_ROUTE_TEXT = "No Route";
   const SOURCE_BADGE_TEXT = "LOCAL";
-  const METRIC_LABELS = Object.freeze({
-    pts: "PTS:",
-    dst: "DST:",
-    rtg: "RTG:",
-    eta: "ETA:"
-  });
 
   function toObject(value) {
     return value && typeof value === "object" ? value : {};
@@ -42,6 +36,22 @@
       return String(props.default);
     }
     return undefined;
+  }
+
+  function normalizeMetricLabel(value, htmlUtils) {
+    const text = htmlUtils.trimText(value);
+    return text ? text + ":" : "";
+  }
+
+  function normalizeMetricUnit(value, htmlUtils) {
+    return htmlUtils.trimText(value);
+  }
+
+  function toSignatureToken(value) {
+    if (value == null) {
+      return "";
+    }
+    return encodeURIComponent(String(value));
   }
 
   function callFormatter(value, formatter, formatterParameters, defaultText, Helpers) {
@@ -102,14 +112,15 @@
       m.isServerRoute ? 1 : 0,
       m.canOpenEditRoute ? 1 : 0,
       m.isVerticalCommitted ? 1 : 0,
-      m.nameText ? String(m.nameText).length : 0
+      "N" + toSignatureToken(m.nameText)
     ];
 
     for (let i = 0; i < m.visibleMetricIds.length; i += 1) {
       const id = m.visibleMetricIds[i];
       const metric = m.metrics && m.metrics[id] ? m.metrics[id] : {};
-      parts.push(metric.labelText ? String(metric.labelText).length : 0);
-      parts.push(metric.valueText ? String(metric.valueText).length : 0);
+      parts.push("L" + toSignatureToken(metric.labelText));
+      parts.push("V" + toSignatureToken(metric.valueText));
+      parts.push("U" + toSignatureToken(metric.unitText));
     }
 
     if (m.isVerticalCommitted) {
@@ -131,6 +142,8 @@
       const props = toObject(cfg.props);
       const domain = toObject(props.domain);
       const layoutConfig = toObject(props.layout);
+      const captionsConfig = toObject(props.captions);
+      const unitsConfig = toObject(props.units);
       const shellSize = toShellSize(cfg.shellRect);
       const hasRoute = domain.hasRoute === true;
       const isActiveRoute = hasRoute && domain.isActiveRoute === true;
@@ -153,25 +166,40 @@
 
       const metrics = Object.create(null);
       if (hasRoute) {
+        const metricCaptions = {
+          pts: normalizeMetricLabel(captionsConfig.pts, htmlUtils),
+          dst: normalizeMetricLabel(captionsConfig.dst, htmlUtils),
+          rte: normalizeMetricLabel(captionsConfig.rte, htmlUtils),
+          eta: normalizeMetricLabel(captionsConfig.eta, htmlUtils)
+        };
+        const metricUnits = {
+          dst: normalizeMetricUnit(unitsConfig.dst, htmlUtils),
+          rte: normalizeMetricUnit(unitsConfig.rte, htmlUtils)
+        };
+
         metrics.pts = {
           id: "pts",
-          labelText: METRIC_LABELS.pts,
-          valueText: formatMetric(domain.pointCount, "formatDecimal", [3], defaultText, Helpers)
+          labelText: metricCaptions.pts,
+          valueText: formatMetric(domain.pointCount, "formatDecimal", [3], defaultText, Helpers),
+          unitText: ""
         };
         metrics.dst = {
           id: "dst",
-          labelText: METRIC_LABELS.dst,
-          valueText: formatMetric(domain.totalDistance, "formatDistance", [], defaultText, Helpers)
+          labelText: metricCaptions.dst,
+          valueText: formatMetric(domain.totalDistance, "formatDistance", [metricUnits.dst], defaultText, Helpers),
+          unitText: metricUnits.dst
         };
-        metrics.rtg = {
-          id: "rtg",
-          labelText: METRIC_LABELS.rtg,
-          valueText: formatMetric(isActiveRoute ? domain.remainingDistance : undefined, "formatDistance", [], defaultText, Helpers)
+        metrics.rte = {
+          id: "rte",
+          labelText: metricCaptions.rte,
+          valueText: formatMetric(isActiveRoute ? domain.remainingDistance : undefined, "formatDistance", [metricUnits.rte], defaultText, Helpers),
+          unitText: metricUnits.rte
         };
         metrics.eta = {
           id: "eta",
-          labelText: METRIC_LABELS.eta,
-          valueText: formatMetric(isActiveRoute ? domain.eta : undefined, "formatTime", [], defaultText, Helpers)
+          labelText: metricCaptions.eta,
+          valueText: formatMetric(isActiveRoute ? domain.eta : undefined, "formatTime", [], defaultText, Helpers),
+          unitText: ""
         };
       }
 

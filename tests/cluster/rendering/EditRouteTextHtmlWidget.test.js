@@ -185,6 +185,8 @@ describe("EditRouteTextHtmlWidget", function () {
     expect(css).toContain(".dyni-edit-route-open-hotspot");
     expect(css).toContain(".dyni-edit-route-open-dispatch");
     expect(css).toContain(".dyni-edit-route-open-passive");
+    expect(css).toContain(".dyni-edit-route-metric-value-text");
+    expect(css).toContain(".dyni-edit-route-metric-unit");
     expect(css).toContain(".widgetContainer.vertical .widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html");
     expect(css).toContain("aspect-ratio: 7 / 8;");
     expect(css).toContain("min-height: 8em;");

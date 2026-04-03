@@ -117,6 +117,42 @@
           name: "EditRoute: 1-Row Threshold",
           condition: { kind: "editRoute" }
         },
+        caption_editRoutePts: {
+          type: "STRING",
+          default: "PTS",
+          name: "PTS caption",
+          condition: { kind: "editRoute" }
+        },
+        caption_editRouteDst: {
+          type: "STRING",
+          default: "DST",
+          name: "DST caption",
+          condition: { kind: "editRoute" }
+        },
+        unit_editRouteDst: {
+          type: "STRING",
+          default: "nm",
+          name: "DST unit",
+          condition: { kind: "editRoute" }
+        },
+        caption_editRouteRte: {
+          type: "STRING",
+          default: "RTE",
+          name: "RTE caption",
+          condition: { kind: "editRoute" }
+        },
+        unit_editRouteRte: {
+          type: "STRING",
+          default: "nm",
+          name: "RTE unit",
+          condition: { kind: "editRoute" }
+        },
+        caption_editRouteEta: {
+          type: "STRING",
+          default: "ETA",
+          name: "ETA caption",
+          condition: { kind: "editRoute" }
+        },
         routePointsRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
           internal: true,

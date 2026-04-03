@@ -101,6 +101,16 @@
           layout: {
             ratioThresholdNormal: num(p.editRouteRatioThresholdNormal),
             ratioThresholdFlat: num(p.editRouteRatioThresholdFlat)
+          },
+          captions: {
+            pts: cap("editRoutePts"),
+            dst: cap("editRouteDst"),
+            rte: cap("editRouteRte"),
+            eta: cap("editRouteEta")
+          },
+          units: {
+            dst: unit("editRouteDst"),
+            rte: unit("editRouteRte")
           }
         };
       }

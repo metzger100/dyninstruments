@@ -34,7 +34,7 @@
 - dedicated html-renderer output for `MapZoomTextHtmlWidget` (`map` `zoom`)
 - dedicated text-renderer output for `CenterDisplayTextWidget` (`map` `centerDisplay`)
 - graphic output with `renderer: "..."`
-`NavMapper` delegates active-route domain normalization (`routeName`, `disconnect`, `display`, captions/units) to `ActiveRouteViewModel`, edit-route normalization (`route`, active/local/server/source flags, distance/eta gating) to `EditRouteViewModel`, and route-points domain normalization (`route`, `selectedIndex`, `isActiveRoute`, display flags) to `RoutePointsViewModel`.
+`NavMapper` delegates active-route domain normalization (`routeName`, `disconnect`, `display`, captions/units) to `ActiveRouteViewModel`, edit-route normalization (`route`, active/local/server/source flags, distance/eta gating) to `EditRouteViewModel` and composes renderer-facing `captions`/`units` config for `EditRouteTextHtmlWidget`, and route-points domain normalization (`route`, `selectedIndex`, `isActiveRoute`, display flags) to `RoutePointsViewModel`.
 5. `ClusterWidget.initFunction(props)` creates per-instance runtime state:
 - `HostCommitController` for deferred host commit
 - `SurfaceSessionController` for active surface lifecycle ownership
@@ -86,7 +86,7 @@ Mapper boundary:
 ## ViewModel Modules
 
 - `cluster/viewmodels/ActiveRouteViewModel.js`: shared active-route domain contract owner for `nav/activeRoute` payload normalization and disconnect derivation.
-- `cluster/viewmodels/EditRouteViewModel.js`: shared edit-route domain contract owner for `nav/editRoute` editing-route normalization, active/local/server derivation, and total-distance fallback behavior.
+- `cluster/viewmodels/EditRouteViewModel.js`: shared edit-route domain contract owner for `nav/editRoute` editing-route normalization, active/local/server derivation, and total-distance fallback behavior. Caption/unit text config remains mapper-owned (`NavMapper` `captions`/`units` groups).
 - `cluster/viewmodels/RoutePointsViewModel.js`: shared route-points domain contract owner for `nav/routePoints` route/point normalization plus selection and active-route flags.
 - Viewmodels are mapper-owned domain helpers; they do not render HTML/canvas and do not own surface lifecycle.
 

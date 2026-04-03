@@ -28,14 +28,17 @@ describe("EditRouteLayout", function () {
     });
 
     expect(out.mode).toBe("flat");
-    expect(out.metricVisibility).toEqual({ pts: true, dst: true, rtg: false, eta: false });
+    expect(out.metricVisibility).toEqual({ pts: true, dst: true, rte: false, eta: false });
     expect(out.metricBoxes.pts).toBeTruthy();
     expect(out.metricBoxes.dst).toBeTruthy();
-    expect(out.metricBoxes.rtg).toBeUndefined();
+    expect(out.metricBoxes.rte).toBeUndefined();
     expect(out.metricBoxes.eta).toBeUndefined();
+    expect(out.metricBoxes.dst.valueTextRect).toBeTruthy();
+    expect(out.metricBoxes.dst.unitRect).toBeTruthy();
+    expect(out.metricBoxes.dst.unitRect.x).toBeGreaterThan(out.metricBoxes.dst.valueTextRect.x);
   });
 
-  it("returns normal boxes for name, PTS, DST, RTG, and ETA", function () {
+  it("returns normal boxes for name, PTS, DST, RTE, and ETA", function () {
     const layout = createLayout();
     const out = layout.computeLayout({
       W: 320,
@@ -47,11 +50,13 @@ describe("EditRouteLayout", function () {
     });
 
     expect(out.mode).toBe("normal");
-    expect(out.metricVisibility).toEqual({ pts: true, dst: true, rtg: true, eta: true });
+    expect(out.metricVisibility).toEqual({ pts: true, dst: true, rte: true, eta: true });
     expect(out.metricBoxes.pts).toBeTruthy();
     expect(out.metricBoxes.dst).toBeTruthy();
-    expect(out.metricBoxes.rtg).toBeTruthy();
+    expect(out.metricBoxes.rte).toBeTruthy();
     expect(out.metricBoxes.eta).toBeTruthy();
+    expect(out.metricBoxes.rte.valueTextRect.w).toBeGreaterThan(0);
+    expect(out.metricBoxes.rte.unitRect.w).toBeGreaterThan(0);
   });
 
   it("returns high mode as stacked metric rows", function () {
@@ -68,8 +73,9 @@ describe("EditRouteLayout", function () {
     expect(out.mode).toBe("high");
     expect(out.metricBoxes.pts.labelRect.x).toBeLessThan(out.metricBoxes.pts.valueRect.x);
     expect(out.metricBoxes.dst.tileRect.y).toBeGreaterThan(out.metricBoxes.pts.tileRect.y);
-    expect(out.metricBoxes.rtg.tileRect.y).toBeGreaterThan(out.metricBoxes.dst.tileRect.y);
-    expect(out.metricBoxes.eta.tileRect.y).toBeGreaterThan(out.metricBoxes.rtg.tileRect.y);
+    expect(out.metricBoxes.rte.tileRect.y).toBeGreaterThan(out.metricBoxes.dst.tileRect.y);
+    expect(out.metricBoxes.eta.tileRect.y).toBeGreaterThan(out.metricBoxes.rte.tileRect.y);
+    expect(out.metricBoxes.rte.unitRect.x).toBeGreaterThan(out.metricBoxes.rte.valueTextRect.x);
   });
 
   it("omits all metric boxes when no route is available", function () {
@@ -84,7 +90,7 @@ describe("EditRouteLayout", function () {
         isLocalRoute: true
       });
 
-      expect(out.metricVisibility).toEqual({ pts: false, dst: false, rtg: false, eta: false });
+      expect(out.metricVisibility).toEqual({ pts: false, dst: false, rte: false, eta: false });
       expect(Object.keys(out.metricBoxes)).toEqual([]);
       expect(out.sourceBadgeRect).toBeNull();
     });

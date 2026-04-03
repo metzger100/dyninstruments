@@ -31,6 +31,9 @@
   const HIGH_ROW_LABEL_RATIO = 0.34;
   const HIGH_ROW_LABEL_MIN_RATIO = 0.22;
   const HIGH_ROW_LABEL_MAX_RATIO = 0.46;
+  const METRIC_UNIT_SHARE = 0.28;
+  const METRIC_UNIT_MIN_PX = 12;
+  const METRIC_UNIT_MAX_RATIO = 0.46;
   const VERTICAL_ASPECT_RATIO = { width: 7, height: 8 };
   const VERTICAL_MIN_HEIGHT = "8em";
   const RESPONSIVE_SCALES = {
@@ -207,6 +210,24 @@
       };
     }
 
+    function computeMetricValueRects(valueRect, insets) {
+      const gap = Math.max(1, Math.floor(insets.gap));
+      const usableWidth = Math.max(1, valueRect.w - gap);
+      const maxUnitWidth = Math.max(METRIC_UNIT_MIN_PX, Math.floor(valueRect.w * METRIC_UNIT_MAX_RATIO));
+      let unitWidth = Math.max(
+        METRIC_UNIT_MIN_PX,
+        Math.min(maxUnitWidth, Math.floor(usableWidth * METRIC_UNIT_SHARE))
+      );
+      if (unitWidth >= usableWidth) {
+        unitWidth = Math.max(1, usableWidth - 1);
+      }
+      const valueTextWidth = Math.max(1, valueRect.w - unitWidth - gap);
+      return {
+        valueTextRect: makeRect(valueRect.x, valueRect.y, valueTextWidth, valueRect.h),
+        unitRect: makeRect(valueRect.x + valueTextWidth + gap, valueRect.y, unitWidth, valueRect.h)
+      };
+    }
+
     function createMetricTile(tileRect, insets, responsive) {
       const spacing = profileApi.computeIntrinsicTileSpacing(
         responsive,
@@ -223,10 +244,13 @@
         Math.max(1, tileRect.w - insets.metricPadX * 2),
         valueHeight
       );
+      const valueParts = computeMetricValueRects(valueRect, insets);
       return {
         tileRect: tileRect,
         labelRect: labelRect,
-        valueRect: valueRect
+        valueRect: valueRect,
+        valueTextRect: valueParts.valueTextRect,
+        unitRect: valueParts.unitRect
       };
     }
 
@@ -238,10 +262,13 @@
       const valueWidth = Math.max(1, rowRect.w - labelWidth - gap);
       const labelRect = makeRect(rowRect.x, rowRect.y, labelWidth, rowRect.h);
       const valueRect = makeRect(rowRect.x + labelWidth + gap, rowRect.y, valueWidth, rowRect.h);
+      const valueParts = computeMetricValueRects(valueRect, insets);
       return {
         tileRect: rowRect,
         labelRect: labelRect,
-        valueRect: valueRect
+        valueRect: valueRect,
+        valueTextRect: valueParts.valueTextRect,
+        unitRect: valueParts.unitRect
       };
     }
 
@@ -271,7 +298,7 @@
       const metricVisibility = {
         pts: hasRoute,
         dst: hasRoute,
-        rtg: hasRoute && mode !== "flat",
+        rte: hasRoute && mode !== "flat",
         eta: hasRoute && mode !== "flat"
       };
 
@@ -341,13 +368,13 @@
           const secondRow = splitRow(rows[1], insets.gap, 2, makeRect);
           out.metricBoxes.pts = createMetricTile(firstRow[0], insets, insets.responsive);
           out.metricBoxes.dst = createMetricTile(firstRow[1], insets, insets.responsive);
-          out.metricBoxes.rtg = createMetricTile(secondRow[0], insets, insets.responsive);
+          out.metricBoxes.rte = createMetricTile(secondRow[0], insets, insets.responsive);
           out.metricBoxes.eta = createMetricTile(secondRow[1], insets, insets.responsive);
         } else {
           const rows = splitStack(metricsRect, insets.gap, 4, makeRect);
           out.metricBoxes.pts = createHighMetricRow(rows[0], insets);
           out.metricBoxes.dst = createHighMetricRow(rows[1], insets);
-          out.metricBoxes.rtg = createHighMetricRow(rows[2], insets);
+          out.metricBoxes.rte = createHighMetricRow(rows[2], insets);
           out.metricBoxes.eta = createHighMetricRow(rows[3], insets);
         }
       }
