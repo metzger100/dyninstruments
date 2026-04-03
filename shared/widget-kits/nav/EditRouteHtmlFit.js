@@ -1,0 +1,282 @@
+/**
+ * Module: EditRouteHtmlFit - Per-box text-fit owner for edit-route HTML renderer
+ * Documentation: documentation/architecture/cluster-widget-system.md
+ * Depends: ThemeResolver, RadialTextLayout, TextTileLayout, EditRouteLayout, HtmlWidgetUtils
+ */
+(function (root, factory) {
+  if (typeof define === "function" && define.amd) define([], factory);
+  else if (typeof module === "object" && module.exports) module.exports = factory();
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniEditRouteHtmlFit = factory(); }
+}(this, function () {
+  "use strict";
+
+  const MEASURE_CTX_KEY = "__dyniEditRouteTextMeasureCtx";
+  const NAME_MAX_PX_RATIO = {
+    flat: 0.5,
+    normal: 0.66,
+    high: 0.56
+  };
+  const SOURCE_BADGE_MAX_PX_RATIO = 0.7;
+  const METRIC_LABEL_MAX_PX_RATIO = 0.52;
+  const METRIC_VALUE_MAX_PX_RATIO = 0.9;
+  const METRIC_IDS = ["pts", "dst", "rtg", "eta"];
+
+  function parseFontPx(font) {
+    const source = String(font || "");
+    const match = source.match(/(\d+(?:\.\d+)?)px/);
+    return match ? Number(match[1]) : 12;
+  }
+
+  function createApproximateMeasureContext() {
+    return {
+      font: "700 12px sans-serif",
+      measureText: function (text) {
+        const px = Math.max(1, parseFontPx(this.font));
+        return { width: String(text).length * px * 0.56 };
+      }
+    };
+  }
+
+  function resolveMeasureContext(hostContext, targetEl) {
+    const ctxStore = hostContext && typeof hostContext === "object" ? hostContext : null;
+    if (ctxStore && ctxStore[MEASURE_CTX_KEY]) {
+      return ctxStore[MEASURE_CTX_KEY];
+    }
+
+    const ownerDocument = targetEl && targetEl.ownerDocument
+      ? targetEl.ownerDocument
+      : (typeof document !== "undefined" ? document : null);
+    let measureCtx = null;
+    if (ownerDocument && typeof ownerDocument.createElement === "function") {
+      const canvas = ownerDocument.createElement("canvas");
+      if (canvas && typeof canvas.getContext === "function") {
+        measureCtx = canvas.getContext("2d");
+      }
+    }
+
+    const resolved = measureCtx || createApproximateMeasureContext();
+    if (ctxStore) {
+      ctxStore[MEASURE_CTX_KEY] = resolved;
+    }
+    return resolved;
+  }
+
+  function toStyle(px, htmlUtils) {
+    const n = htmlUtils.toFiniteNumber(px);
+    if (!(n > 0)) {
+      return "";
+    }
+    return "font-size:" + Math.max(1, Math.floor(n)) + "px;";
+  }
+
+  function toText(value) {
+    return value == null ? "" : String(value);
+  }
+
+  function toMetricEntry(model, id) {
+    const m = model && typeof model === "object" ? model : {};
+    const groups = [m.metrics, m.metricTexts];
+    for (let i = 0; i < groups.length; i += 1) {
+      const group = groups[i];
+      if (!group || typeof group !== "object" || !(id in group)) {
+        continue;
+      }
+      const entry = group[id];
+      if (entry && typeof entry === "object") {
+        return entry;
+      }
+    }
+    return {};
+  }
+
+  function resolveMetricLabel(model, id) {
+    const entry = toMetricEntry(model, id);
+    if (entry.labelText != null) {
+      return toText(entry.labelText);
+    }
+    if (entry.label != null) {
+      return toText(entry.label);
+    }
+    if (model && model[id + "LabelText"] != null) {
+      return toText(model[id + "LabelText"]);
+    }
+    if (model && model[id + "Label"] != null) {
+      return toText(model[id + "Label"]);
+    }
+    return "";
+  }
+
+  function resolveMetricValue(model, id) {
+    const entry = toMetricEntry(model, id);
+    if (entry.valueText != null) {
+      return toText(entry.valueText);
+    }
+    if (entry.value != null) {
+      return toText(entry.value);
+    }
+    if (model && model[id + "ValueText"] != null) {
+      return toText(model[id + "ValueText"]);
+    }
+    if (model && model[id + "Value"] != null) {
+      return toText(model[id + "Value"]);
+    }
+    return "";
+  }
+
+  function measureStyle(args) {
+    const cfg = args || {};
+    const rect = cfg.rect;
+    if (!rect || !(rect.w > 0) || !(rect.h > 0)) {
+      return "";
+    }
+    const fit = cfg.tileLayout.measureFittedLine({
+      textApi: cfg.textApi,
+      ctx: cfg.ctx,
+      text: cfg.text,
+      maxW: Math.max(1, Math.floor(rect.w)),
+      maxH: Math.max(1, Math.floor(rect.h)),
+      maxPx: Math.max(1, Math.floor(rect.h * cfg.maxPxRatio)),
+      textFillScale: cfg.textFillScale,
+      family: cfg.family,
+      weight: cfg.weight
+    });
+    return toStyle(fit && fit.px, cfg.htmlUtils);
+  }
+
+  function resolveNamePxRatio(mode) {
+    if (mode === "flat") {
+      return NAME_MAX_PX_RATIO.flat;
+    }
+    if (mode === "high") {
+      return NAME_MAX_PX_RATIO.high;
+    }
+    return NAME_MAX_PX_RATIO.normal;
+  }
+
+  function create(def, Helpers) {
+    const theme = Helpers.getModule("ThemeResolver").create(def, Helpers);
+    const textApi = Helpers.getModule("RadialTextLayout").create(def, Helpers);
+    const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
+    const layoutApi = Helpers.getModule("EditRouteLayout").create(def, Helpers);
+    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+
+    function compute(args) {
+      const cfg = args || {};
+      const model = cfg.model || null;
+      const shellRect = cfg.shellRect || null;
+      const targetEl = cfg.targetEl || null;
+      if (!model || !shellRect || !targetEl) {
+        return null;
+      }
+
+      const rootEl = Helpers.resolveWidgetRoot(targetEl) || targetEl;
+      const tokens = theme.resolveForRoot(rootEl);
+      const family = Helpers.resolveFontFamily(targetEl);
+      const measureCtx = resolveMeasureContext(cfg.hostContext, targetEl);
+      if (!measureCtx || typeof measureCtx.measureText !== "function") {
+        return null;
+      }
+
+      const shellWidth = Math.max(1, Math.round(shellRect.width));
+      const shellHeight = Math.max(1, Math.round(shellRect.height));
+      const explicitLayoutHeight = htmlUtils.toFiniteNumber(model.layoutShellHeight);
+      const verticalHeight = htmlUtils.toFiniteNumber(model.effectiveLayoutHeight);
+      const layoutHeight = explicitLayoutHeight > 0
+        ? explicitLayoutHeight
+        : (verticalHeight > 0 ? verticalHeight : shellHeight);
+
+      const layout = layoutApi.computeLayout({
+        W: shellWidth,
+        H: layoutHeight,
+        mode: model.mode,
+        hasRoute: model.hasRoute === true,
+        isLocalRoute: model.isLocalRoute === true,
+        ratioThresholdNormal: model.ratioThresholdNormal,
+        ratioThresholdFlat: model.ratioThresholdFlat,
+        isVerticalCommitted: model.isVerticalCommitted === true,
+        effectiveLayoutHeight: verticalHeight
+      });
+
+      const valueWeight = tokens.font.weight;
+      const labelWeight = tokens.font.labelWeight;
+      const textFillScale = layout.responsive && layout.responsive.textFillScale;
+      const fitOut = {
+        nameTextStyle: measureStyle({
+          rect: layout.nameTextRect,
+          text: toText(model.nameText != null ? model.nameText : model.routeNameText),
+          maxPxRatio: resolveNamePxRatio(layout.mode),
+          textApi: textApi,
+          tileLayout: tileLayout,
+          ctx: measureCtx,
+          family: family,
+          weight: valueWeight,
+          textFillScale: textFillScale,
+          htmlUtils: htmlUtils
+        }),
+        sourceBadgeStyle: "",
+        metrics: Object.create(null)
+      };
+
+      if (layout.sourceBadgeRect) {
+        fitOut.sourceBadgeStyle = measureStyle({
+          rect: layout.sourceBadgeRect,
+          text: toText(model.sourceBadgeText),
+          maxPxRatio: SOURCE_BADGE_MAX_PX_RATIO,
+          textApi: textApi,
+          tileLayout: tileLayout,
+          ctx: measureCtx,
+          family: family,
+          weight: labelWeight,
+          textFillScale: textFillScale,
+          htmlUtils: htmlUtils
+        });
+      }
+
+      for (let i = 0; i < METRIC_IDS.length; i += 1) {
+        const id = METRIC_IDS[i];
+        if (!layout.metricVisibility[id]) {
+          continue;
+        }
+        const box = layout.metricBoxes[id];
+        if (!box) {
+          continue;
+        }
+        fitOut.metrics[id] = {
+          labelStyle: measureStyle({
+            rect: box.labelRect,
+            text: resolveMetricLabel(model, id),
+            maxPxRatio: METRIC_LABEL_MAX_PX_RATIO,
+            textApi: textApi,
+            tileLayout: tileLayout,
+            ctx: measureCtx,
+            family: family,
+            weight: labelWeight,
+            textFillScale: textFillScale,
+            htmlUtils: htmlUtils
+          }),
+          valueStyle: measureStyle({
+            rect: box.valueRect,
+            text: resolveMetricValue(model, id),
+            maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+            textApi: textApi,
+            tileLayout: tileLayout,
+            ctx: measureCtx,
+            family: family,
+            weight: valueWeight,
+            textFillScale: textFillScale,
+            htmlUtils: htmlUtils
+          })
+        };
+      }
+
+      return fitOut;
+    }
+
+    return {
+      id: "EditRouteHtmlFit",
+      compute: compute
+    };
+  }
+
+  return { id: "EditRouteHtmlFit", create: create };
+}));
