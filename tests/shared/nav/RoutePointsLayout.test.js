@@ -322,7 +322,7 @@ describe("RoutePointsLayout", function () {
     });
   });
 
-  it("computes vertical natural height from point-count rhythm and caps at 75vh", function () {
+  it("computes vertical natural height from point-count rhythm and caps at 60vh", function () {
     const layout = createLayout();
     const zeroRows = layout.computeNaturalHeight({ W: 240, pointCount: 0, showHeader: true, viewportHeight: 800 });
     const oneRow = layout.computeNaturalHeight({ W: 240, pointCount: 1, showHeader: true, viewportHeight: 800 });

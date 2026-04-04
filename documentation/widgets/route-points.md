@@ -187,7 +187,7 @@ Row policy contract:
 | `HEADER_SPLIT_GAP_RATIO` | `0.05` | Header name/meta split gap ratio |
 | `MARKER_DIAMETER_RATIO` | `0.48` | Marker dot size share of marker cell |
 | `MARKER_DIAMETER_MIN_PX` / `MARKER_DIAMETER_MAX_PX` | `3` / `24` | Marker dot pixel clamps |
-| `MAX_VIEWPORT_HEIGHT_RATIO` | `0.75` | Vertical natural-height cap ratio (`75vh`) |
+| `MAX_VIEWPORT_HEIGHT_RATIO` | `0.6` | Vertical natural-height cap ratio (`60vh`) |
 | `RESPONSIVE_SCALES.textFillScale` | `1.18` | Shared text-fit fill profile value |
 | `RESPONSIVE_SCALES.flatHeadPanelScale` | `0.84` | Flat panel share responsive scaler |
 
@@ -278,7 +278,7 @@ Important:
 
 - Vertical ancestry is committed-DOM derived (`targetEl.closest(".widgetContainer.vertical")`).
 - Vertical mode forces `high` layout and uses width-only row-height anchoring (`computeProfile(W, W)`).
-- Natural height is computed from row rhythm and capped at `75vh`.
+- Natural height is computed from row rhythm and capped at `60vh`.
 - Wrapper (`.dyni-route-points-html`) receives inline `height:<cappedPx>px;`.
 - Vertical layout geometry uses the same capped natural height as its effective shell height input (single height model for wrapper and inner list rows).
 - List container scrolls when content exceeds capped viewport height.
@@ -373,7 +373,7 @@ Checklist:
 - [ ] escaped output protects route/header/row text
 - [ ] dispatch/passive interaction wiring follows page-aware capability gate
 - [ ] selected-row visibility pass scrolls off-screen selection into view and drops stale passes
-- [ ] vertical natural height is wrapper-owned, capped at `75vh`, and does not destabilize vertical resize signature
+- [ ] vertical natural height is wrapper-owned, capped at `60vh`, and does not destabilize vertical resize signature
 - [ ] fit output contains only `font-size` style decisions and keeps source text unchanged
 
 ## Related

@@ -28,7 +28,7 @@
   const HEADER_GAP_RATIO = 0.08;
   const ROW_PADDING_RATIO = 0.025;
   const HEADER_SPLIT_GAP_RATIO = 0.05;
-  const MAX_VIEWPORT_HEIGHT_RATIO = 0.75;
+  const MAX_VIEWPORT_HEIGHT_RATIO = 0.6;
   const RESPONSIVE_SCALES = {
     textFillScale: 1.18,
     flatHeadPanelScale: 0.84

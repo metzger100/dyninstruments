@@ -40,7 +40,7 @@ naturalHeight =
   outerPadding
 ```
 
-- Cap to `75vh` using `window.innerHeight` (or injected `viewportHeight` in tests).
+- Cap to `60vh` using `window.innerHeight` (or injected `viewportHeight` in tests).
 - Clamp derived heights to `>= 0`.
 - Apply height inline on widget wrapper (for example `.dyni-<widget>-html`).
 - Never mutate shared host/surface elements (`.dyni-surface-html`, `.widgetData.dyni-shell`).
