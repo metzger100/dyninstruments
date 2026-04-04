@@ -15,6 +15,8 @@
     const sizingApi = Helpers.getModule("RoutePointsLayoutSizing").create(def, Helpers);
     const makeRect = rectApi.makeRect;
     const clampNumber = sizingApi.clampNumber;
+    const computeMarkerDiameter = sizingApi.computeMarkerDiameter;
+    const computeMarkerCellWidth = sizingApi.computeMarkerCellWidth;
 
     function resolveRowPolicy(args) {
       const cfg = args || {};
@@ -48,13 +50,15 @@
       const innerRect = cfg.innerRect;
       const rowRect = cfg.rowRect;
       const squareSize = cfg.squareSize;
+      const markerCellWidth = cfg.markerCellWidth;
+      const markerDiameter = cfg.markerDiameter;
       const innerGap = cfg.innerGap;
       const showOrdinal = cfg.showOrdinal === true;
       const leadingWidth = showOrdinal ? squareSize : 0;
       const leadingGap = showOrdinal ? innerGap : 0;
       const trailingGap = innerGap;
       const middleX = innerRect.x + leadingWidth + leadingGap;
-      const middleWidth = Math.max(0, innerRect.w - leadingWidth - leadingGap - squareSize - trailingGap);
+      const middleWidth = Math.max(0, innerRect.w - leadingWidth - leadingGap - markerCellWidth - trailingGap);
       const middleRect = makeRect(middleX, innerRect.y, middleWidth, innerRect.h);
       const splitGap = Math.min(innerGap, Math.max(0, middleRect.h - 1));
       const topHeight = Math.max(0, Math.floor(Math.max(0, middleRect.h - splitGap) / 2));
@@ -67,7 +71,8 @@
         middleRect: middleRect,
         nameRect: makeRect(middleRect.x, middleRect.y, middleRect.w, topHeight),
         infoRect: makeRect(middleRect.x, middleRect.y + topHeight + splitGap, middleRect.w, bottomHeight),
-        markerRect: makeRect(innerRect.x + innerRect.w - squareSize, innerRect.y, squareSize, innerRect.h)
+        markerRect: makeRect(innerRect.x + innerRect.w - markerCellWidth, innerRect.y, markerCellWidth, innerRect.h),
+        markerDiameter: markerDiameter
       };
     }
 
@@ -76,11 +81,13 @@
       const innerRect = cfg.innerRect;
       const rowRect = cfg.rowRect;
       const squareSize = cfg.squareSize;
+      const markerCellWidth = cfg.markerCellWidth;
+      const markerDiameter = cfg.markerDiameter;
       const innerGap = cfg.innerGap;
       const showOrdinal = cfg.showOrdinal === true;
       const leadingWidth = showOrdinal ? squareSize : 0;
       const leadingGap = showOrdinal ? innerGap : 0;
-      const middleWidth = Math.max(0, innerRect.w - leadingWidth - leadingGap - squareSize - innerGap * 2);
+      const middleWidth = Math.max(0, innerRect.w - leadingWidth - leadingGap - markerCellWidth - innerGap * 2);
       const nameWidth = Math.max(0, Math.floor(Math.max(0, middleWidth - innerGap) / 2));
       const infoWidth = Math.max(0, middleWidth - nameWidth - innerGap);
       const nameX = innerRect.x + leadingWidth + leadingGap;
@@ -93,7 +100,8 @@
         middleRect: makeRect(nameX, innerRect.y, nameWidth + innerGap + infoWidth, innerRect.h),
         nameRect: makeRect(nameX, innerRect.y, nameWidth, innerRect.h),
         infoRect: makeRect(infoX, innerRect.y, infoWidth, innerRect.h),
-        markerRect: makeRect(innerRect.x + innerRect.w - squareSize, innerRect.y, squareSize, innerRect.h)
+        markerRect: makeRect(innerRect.x + innerRect.w - markerCellWidth, innerRect.y, markerCellWidth, innerRect.h),
+        markerDiameter: markerDiameter
       };
     }
 
@@ -114,6 +122,12 @@
         Math.max(0, rowRect.h - rowPadding * 2)
       );
       const squareSize = Math.max(1, Math.min(innerRect.h, innerRect.w));
+      const markerDiameterFromHeight = computeMarkerDiameter(innerRect.h);
+      const markerCellWidth = computeMarkerCellWidth({
+        markerDiameter: markerDiameterFromHeight,
+        maxWidth: innerRect.w
+      });
+      const markerDiameter = Math.max(1, Math.min(markerDiameterFromHeight, markerCellWidth, innerRect.h));
       const innerGap = Math.max(0, Math.floor(rowGap));
       const mode = cfg.mode;
       if (mode === "high") {
@@ -121,6 +135,8 @@
           rowRect: rowRect,
           innerRect: innerRect,
           squareSize: squareSize,
+          markerCellWidth: markerCellWidth,
+          markerDiameter: markerDiameter,
           innerGap: innerGap,
           showOrdinal: policy.showOrdinal
         });
@@ -129,6 +145,8 @@
         rowRect: rowRect,
         innerRect: innerRect,
         squareSize: squareSize,
+        markerCellWidth: markerCellWidth,
+        markerDiameter: markerDiameter,
         innerGap: innerGap,
         showOrdinal: policy.showOrdinal
       });

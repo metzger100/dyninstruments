@@ -279,6 +279,17 @@
         },
         rows: layout.rows.map(function (row) {
           const rowShowOrdinal = row.showOrdinal !== false && showOrdinal;
+          const markerDiameter = Math.max(
+            1,
+            Math.floor(
+              clampNumber(
+                row.markerDiameter,
+                1,
+                sizingApi.constants.MARKER_DIAMETER_MAX_PX,
+                sizingApi.computeMarkerDiameter(row.markerRect ? row.markerRect.h : 1)
+              )
+            )
+          );
           return {
             rowStyle: toSizeStyle(row.rowRect),
             ordinalStyle: rowShowOrdinal ? toSizeStyle(row.ordinalRect) : "",
@@ -286,7 +297,7 @@
             nameStyle: toSizeStyle(row.nameRect),
             infoStyle: toSizeStyle(row.infoRect),
             markerStyle: toSizeStyle(row.markerRect),
-            markerDotStyle: sizingApi.toMarkerDotStyle(row.markerRect)
+            markerDotStyle: sizingApi.toMarkerDotStyle(markerDiameter)
           };
         })
       };
@@ -361,6 +372,9 @@
         MARKER_DIAMETER_RATIO: sizingApi.constants.MARKER_DIAMETER_RATIO,
         MARKER_DIAMETER_MIN_PX: sizingApi.constants.MARKER_DIAMETER_MIN_PX,
         MARKER_DIAMETER_MAX_PX: sizingApi.constants.MARKER_DIAMETER_MAX_PX,
+        MARKER_CELL_PADDING_X_RATIO: sizingApi.constants.MARKER_CELL_PADDING_X_RATIO,
+        MARKER_CELL_PADDING_X_MIN_PX: sizingApi.constants.MARKER_CELL_PADDING_X_MIN_PX,
+        MARKER_CELL_PADDING_X_MAX_PX: sizingApi.constants.MARKER_CELL_PADDING_X_MAX_PX,
         MAX_VIEWPORT_HEIGHT_RATIO: MAX_VIEWPORT_HEIGHT_RATIO
       },
       resolveMode: resolveMode,

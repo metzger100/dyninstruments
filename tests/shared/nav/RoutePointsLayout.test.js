@@ -31,6 +31,23 @@ describe("RoutePointsLayout", function () {
     };
   }
 
+  function parseMarkerDiameter(style) {
+    const match = /^width:(\d+)px;height:(\d+)px;$/.exec(style || "");
+    if (!match) {
+      return 0;
+    }
+    return Number(match[1]) === Number(match[2]) ? Number(match[1]) : 0;
+  }
+
+  function expectedMarkerDiameterFromHeight(layout, markerHeight) {
+    const scaled = Math.floor(Math.max(1, markerHeight) * layout.constants.MARKER_DIAMETER_RATIO);
+    const preferred = Math.max(
+      layout.constants.MARKER_DIAMETER_MIN_PX,
+      Math.min(layout.constants.MARKER_DIAMETER_MAX_PX, scaled)
+    );
+    return Math.max(1, Math.min(Math.max(1, markerHeight), preferred));
+  }
+
   it("uses min(W,H) for host-sized row-height anchoring and W-only anchoring in vertical mode", function () {
     const layout = createLayout();
 
@@ -221,6 +238,51 @@ describe("RoutePointsLayout", function () {
 
     expect(withGutter.trailingGutterPx).toBe(14);
     expect(withGutter.rows[0].markerRect.x).toBeLessThan(noGutter.rows[0].markerRect.x);
+  });
+
+  it("keeps marker diameter tied to row height while using a compact marker column in normal mode", function () {
+    const layout = createLayout();
+    const built = buildContentRect(layout, 320, 180);
+    const out = layout.computeLayout({
+      contentRect: built.contentRect,
+      mode: "normal",
+      pointCount: 2,
+      showHeader: true
+    });
+    const inline = layout.computeInlineGeometry({ layout: out });
+    const row = out.rows[0];
+    const markerDiameter = parseMarkerDiameter(inline.rows[0].markerDotStyle);
+    const expectedMarkerDiameter = expectedMarkerDiameterFromHeight(layout, row.markerRect.h);
+    const legacyCellDrivenDiameter = Math.floor(Math.max(1, row.markerRect.w) * layout.constants.MARKER_DIAMETER_RATIO);
+
+    expect(markerDiameter).toBe(expectedMarkerDiameter);
+    expect(markerDiameter).toBe(row.markerDiameter);
+    expect(row.markerRect.w).toBeLessThan(row.markerRect.h);
+    expect(markerDiameter).toBeGreaterThan(legacyCellDrivenDiameter);
+    expect(markerDiameter).toBeLessThanOrEqual(row.markerRect.w);
+    expect(row.markerRect.x).toBeGreaterThanOrEqual(row.rowRect.x);
+    expect(row.markerRect.x + row.markerRect.w).toBeLessThanOrEqual(row.rowRect.x + row.rowRect.w);
+  });
+
+  it("keeps marker geometry compact and bounded in high mode", function () {
+    const layout = createLayout();
+    const built = buildContentRect(layout, 200, 340);
+    const out = layout.computeLayout({
+      contentRect: built.contentRect,
+      mode: "high",
+      pointCount: 2,
+      showHeader: true
+    });
+    const inline = layout.computeInlineGeometry({ layout: out });
+    const row = out.rows[0];
+    const markerDiameter = parseMarkerDiameter(inline.rows[0].markerDotStyle);
+
+    expect(row.markerRect.w).toBeLessThan(row.markerRect.h);
+    expect(markerDiameter).toBe(row.markerDiameter);
+    expect(row.markerRect.x).toBeGreaterThanOrEqual(row.rowRect.x);
+    expect(row.markerRect.x + row.markerRect.w).toBeLessThanOrEqual(row.rowRect.x + row.rowRect.w);
+    expect(row.markerRect.y).toBeGreaterThanOrEqual(row.rowRect.y);
+    expect(row.markerRect.y + row.markerRect.h).toBeLessThanOrEqual(row.rowRect.y + row.rowRect.h);
   });
 
   it("builds flat mode with a header side panel and right-side list", function () {

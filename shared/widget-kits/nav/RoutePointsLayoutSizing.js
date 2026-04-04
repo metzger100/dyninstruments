@@ -18,6 +18,9 @@
   const MARKER_DIAMETER_RATIO = 0.48;
   const MARKER_DIAMETER_MIN_PX = 3;
   const MARKER_DIAMETER_MAX_PX = 24;
+  const MARKER_CELL_PADDING_X_RATIO = 0.2;
+  const MARKER_CELL_PADDING_X_MIN_PX = 1;
+  const MARKER_CELL_PADDING_X_MAX_PX = 8;
 
   function clampNumber(value, minValue, maxValue, defaultValue) {
     const n = Number(value);
@@ -47,18 +50,51 @@
     return 0;
   }
 
-  function toMarkerDotStyle(markerRect) {
-    const safeRect = markerRect || { w: 0, h: 0 };
-    const markerLimit = Math.max(1, Math.min(
-      Math.max(0, Math.floor(safeRect.w || 0)),
-      Math.max(0, Math.floor(safeRect.h || 0))
-    ));
-    const scaled = Math.floor(markerLimit * MARKER_DIAMETER_RATIO);
+  function computeMarkerDiameter(markerHeightPx) {
+    const markerHeight = Math.max(
+      1,
+      Math.floor(clampNumber(markerHeightPx, 1, Number.MAX_SAFE_INTEGER, 1))
+    );
+    const scaled = Math.floor(markerHeight * MARKER_DIAMETER_RATIO);
     const preferred = Math.max(
       MARKER_DIAMETER_MIN_PX,
       Math.min(MARKER_DIAMETER_MAX_PX, scaled)
     );
-    const diameter = Math.max(1, Math.min(markerLimit, preferred));
+    return Math.max(1, Math.min(markerHeight, preferred));
+  }
+
+  function computeMarkerCellPaddingX(markerDiameterPx) {
+    const markerDiameter = Math.max(
+      1,
+      Math.floor(clampNumber(markerDiameterPx, 1, Number.MAX_SAFE_INTEGER, 1))
+    );
+    const scaled = Math.round(markerDiameter * MARKER_CELL_PADDING_X_RATIO);
+    return Math.max(
+      MARKER_CELL_PADDING_X_MIN_PX,
+      Math.min(MARKER_CELL_PADDING_X_MAX_PX, scaled)
+    );
+  }
+
+  function computeMarkerCellWidth(args) {
+    const cfg = args || {};
+    const markerDiameter = Math.max(
+      1,
+      Math.floor(clampNumber(cfg.markerDiameter, 1, Number.MAX_SAFE_INTEGER, 1))
+    );
+    const markerPaddingX = computeMarkerCellPaddingX(markerDiameter);
+    const compactWidth = markerDiameter + markerPaddingX * 2;
+    const maxWidth = Math.max(
+      1,
+      Math.floor(clampNumber(cfg.maxWidth, 1, Number.MAX_SAFE_INTEGER, compactWidth))
+    );
+    return Math.max(1, Math.min(compactWidth, maxWidth));
+  }
+
+  function toMarkerDotStyle(markerDiameterPx) {
+    const diameter = Math.max(
+      1,
+      Math.floor(clampNumber(markerDiameterPx, 1, MARKER_DIAMETER_MAX_PX, MARKER_DIAMETER_MIN_PX))
+    );
     return "width:" + diameter + "px;height:" + diameter + "px;";
   }
 
@@ -124,12 +160,18 @@
         HEADER_NARROW_VERTICAL_WIDTH_TO_ROW_RATIO: HEADER_NARROW_VERTICAL_WIDTH_TO_ROW_RATIO,
         MARKER_DIAMETER_RATIO: MARKER_DIAMETER_RATIO,
         MARKER_DIAMETER_MIN_PX: MARKER_DIAMETER_MIN_PX,
-        MARKER_DIAMETER_MAX_PX: MARKER_DIAMETER_MAX_PX
+        MARKER_DIAMETER_MAX_PX: MARKER_DIAMETER_MAX_PX,
+        MARKER_CELL_PADDING_X_RATIO: MARKER_CELL_PADDING_X_RATIO,
+        MARKER_CELL_PADDING_X_MIN_PX: MARKER_CELL_PADDING_X_MIN_PX,
+        MARKER_CELL_PADDING_X_MAX_PX: MARKER_CELL_PADDING_X_MAX_PX
       },
       clampNumber: clampNumber,
       toCount: toCount,
       toSizeStyle: toSizeStyle,
       resolveWindowViewportHeight: resolveWindowViewportHeight,
+      computeMarkerDiameter: computeMarkerDiameter,
+      computeMarkerCellPaddingX: computeMarkerCellPaddingX,
+      computeMarkerCellWidth: computeMarkerCellWidth,
       toMarkerDotStyle: toMarkerDotStyle,
       computeHeaderHeight: computeHeaderHeight
     };
