@@ -39,9 +39,6 @@
   const METRIC_UNIT_MIN_PX = 12;
   const METRIC_UNIT_MAX_RATIO = 0.46;
 
-  const FLAT_UNIT_STACK_SHARE = 0.36;
-  const FLAT_UNIT_STACK_MIN_PX = 10;
-  const FLAT_UNIT_STACK_MAX_RATIO = 0.48;
   const FLAT_METRIC_MIN_TILE_WIDTH = 74;
   const FLAT_TWO_ROW_MIN_METRICS_HEIGHT = 56;
 
@@ -243,16 +240,10 @@
         unitPlacement: "none"
       });
       out.metricBoxes.dst = createMetricTile(tiles[1], insets, responsive, {
-        unitPlacement: metricHasUnit.dst ? "stacked" : "none",
-        unitShare: FLAT_UNIT_STACK_SHARE,
-        unitMinPx: FLAT_UNIT_STACK_MIN_PX,
-        unitMaxRatio: FLAT_UNIT_STACK_MAX_RATIO
+        unitPlacement: metricHasUnit.dst ? "inline" : "none"
       });
       out.metricBoxes.rte = createMetricTile(tiles[2], insets, responsive, {
-        unitPlacement: metricHasUnit.rte ? "stacked" : "none",
-        unitShare: FLAT_UNIT_STACK_SHARE,
-        unitMinPx: FLAT_UNIT_STACK_MIN_PX,
-        unitMaxRatio: FLAT_UNIT_STACK_MAX_RATIO
+        unitPlacement: metricHasUnit.rte ? "inline" : "none"
       });
       out.metricBoxes.eta = createMetricTile(tiles[3], insets, responsive, {
         unitPlacement: "none"
@@ -314,14 +305,12 @@
         flatMetricRows: 0,
         flatMetricColumns: 0,
         flatWrapperLayoutStyle: "",
-        flatMetricsLayoutStyle: "",
-        flatStackGapPx: 0
+        flatMetricsLayoutStyle: ""
       };
 
       if (!hasRoute) {
         out.nameBarRect = contentRect;
         if (mode === "flat") {
-          out.flatStackGapPx = 0;
           out.flatWrapperLayoutStyle = buildFlatWrapperLayoutStyle({
             nameHeight: contentRect.h,
             metricsHeight: 0,
@@ -353,7 +342,6 @@
 
         out.nameBarRect = makeRect(contentRect.x, contentRect.y, contentRect.w, nameHeight);
         computeFlatMetricsLayout(metricsRect, insets, insets.responsive, out, metricHasUnit);
-        out.flatStackGapPx = insets.gap;
         out.flatWrapperLayoutStyle = buildFlatWrapperLayoutStyle({
           nameHeight: out.nameBarRect.h,
           metricsHeight: metricsRect.h,

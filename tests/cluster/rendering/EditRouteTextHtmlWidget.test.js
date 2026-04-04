@@ -183,7 +183,7 @@ describe("EditRouteTextHtmlWidget", function () {
     expect(css).toContain(".dyni-edit-route-mode-flat.dyni-edit-route-flat-rows-2 .dyni-edit-route-metrics");
     expect(css).toContain(".dyni-edit-route-mode-normal .dyni-edit-route-metrics");
     expect(css).toContain(".dyni-edit-route-mode-high .dyni-edit-route-metrics");
-    expect(css).toContain(".dyni-edit-route-mode-flat .dyni-edit-route-metric-value-stack");
+    expect(css).not.toContain(".dyni-edit-route-mode-flat .dyni-edit-route-metric-value-stack");
     expect(css).not.toContain("0.58fr");
     expect(css).not.toContain("grid-template-rows: minmax(0, 0.36fr) minmax(0, 0.64fr);");
     expect(css).toContain(".dyni-edit-route-open-hotspot");

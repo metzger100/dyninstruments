@@ -44,7 +44,6 @@ describe("EditRouteLayout", function () {
     expect(out.flatWrapperLayoutStyle).toContain("grid-template-rows:minmax(0,");
     expect(out.flatWrapperLayoutStyle).toContain("gap:");
     expect(out.flatMetricsLayoutStyle).toContain("grid-template-columns:repeat(" + String(out.flatMetricColumns));
-    expect(out.flatStackGapPx).toBe(out.insets.gap);
     expect(out.metricBoxes.pts).toBeTruthy();
     expect(out.metricBoxes.dst).toBeTruthy();
     expect(out.metricBoxes.rte).toBeTruthy();
@@ -54,8 +53,8 @@ describe("EditRouteLayout", function () {
     expect(out.metricBoxes.dst.valueTextRect).toBeTruthy();
     expect(out.metricBoxes.dst.unitRect).toBeTruthy();
     expect(out.metricBoxes.rte.unitRect).toBeTruthy();
-    expect(out.metricBoxes.dst.unitRect.y).toBeGreaterThan(out.metricBoxes.dst.valueTextRect.y);
-    expect(out.metricBoxes.rte.unitRect.y).toBeGreaterThan(out.metricBoxes.rte.valueTextRect.y);
+    expect(out.metricBoxes.dst.unitRect.x).toBeGreaterThan(out.metricBoxes.dst.valueTextRect.x);
+    expect(out.metricBoxes.rte.unitRect.x).toBeGreaterThan(out.metricBoxes.rte.valueTextRect.x);
   });
 
   it("returns normal boxes for name, PTS, DST, RTE, and ETA", function () {

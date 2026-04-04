@@ -154,7 +154,6 @@ describe("EditRouteRenderModel", function () {
     expect(model.wrapperStyle).toContain('grid-template-areas:"name";');
     expect(model.wrapperStyle).toContain("padding:");
     expect(model.metricsStyle).toBe("");
-    expect(model.flatStackGapPx).toBe(0);
   });
 
   it("formats route metrics and exposes dispatch click state when capability allows it", function () {
@@ -231,7 +230,6 @@ describe("EditRouteRenderModel", function () {
     expect(model.flatMetricColumns).toBeGreaterThanOrEqual(2);
     expect(model.wrapperStyle).toContain("grid-template-rows:minmax(0,");
     expect(model.metricsStyle).toContain("grid-template-columns:repeat(");
-    expect(model.flatStackGapPx).toBeGreaterThan(0);
   });
 
   it("keeps RTE/ETA placeholders in flat mode for inactive routes", function () {

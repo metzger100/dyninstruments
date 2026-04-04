@@ -139,7 +139,7 @@ Visibility rules:
 - `RTE` and `ETA` render in `flat`/`normal`/`high` whenever a route exists.
 - Inactive routes keep `RTE`/`ETA` placeholders (`---`) in every route-present mode.
 - `flat` uses top-row name + bottom metrics topology with metric order `PTS`, `DST`, `RTE`, `ETA`.
-- `flat` renders `DST`/`RTE` units below values and renders `PTS`/`ETA` without unit nodes.
+- `flat` renders `DST`/`RTE` as inline value+unit pairs and renders `PTS`/`ETA` without unit nodes.
 - `normal`/`high` keep inline value/unit composition.
 
 Vertical behavior (`.widgetContainer.vertical`):

@@ -259,7 +259,6 @@
         flatMetricRows: layout.flatMetricRows || 0,
         flatMetricColumns: layout.flatMetricColumns || 0,
         metricsStyle: layout.mode === "flat" ? (layout.flatMetricsLayoutStyle || "") : "",
-        flatStackGapPx: layout.mode === "flat" ? (layout.flatStackGapPx || 0) : 0,
         wrapperStyle: wrapperStyle
       };
       model.resizeSignatureParts = buildResizeSignatureParts(model);

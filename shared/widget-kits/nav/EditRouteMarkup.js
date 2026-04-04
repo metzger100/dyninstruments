@@ -20,18 +20,6 @@
     return value == null ? "" : String(value);
   }
 
-  function mergeStyles(primaryStyle, secondaryStyle) {
-    const first = String(primaryStyle || "").trim();
-    const second = String(secondaryStyle || "").trim();
-    return ""
-      + (first ? (first.endsWith(";") ? first : first + ";") : "")
-      + (second ? (second.endsWith(";") ? second : second + ";") : "");
-  }
-
-  function isFlatDistanceMetric(mode, metricId) {
-    return mode === "flat" && (metricId === "dst" || metricId === "rte");
-  }
-
   function hasMetricUnit(metric, unitText) {
     if (metric && metric.hasUnit === true) {
       return true;
@@ -58,15 +46,7 @@
     const labelText = toText(metric.labelText);
     const valueText = toText(metric.valueText);
     const unitText = toText(metric.unitText);
-    const isFlatDistance = isFlatDistanceMetric(mode, metricId);
-    const valueClasses = ["dyni-edit-route-metric-value"];
-    if (isFlatDistance) {
-      valueClasses.push("dyni-edit-route-metric-value-stack");
-    }
-    const stackGapStyle = (isFlatDistance && model.flatStackGapPx > 0)
-      ? ("row-gap:" + String(Math.floor(model.flatStackGapPx)) + "px;")
-      : "";
-    const valueRowStyle = mergeStyles(metricFit.valueRowStyle, stackGapStyle);
+    const valueRowStyle = metricFit.valueRowStyle;
     const unitNode = shouldRenderUnitNode(mode, metricId, metric, unitText)
       ? ('<span class="dyni-edit-route-metric-unit"'
         + htmlUtils.toStyleAttr(metricFit.unitStyle)
@@ -83,7 +63,7 @@
         + ">"
         + htmlUtils.escapeHtml(labelText)
         + "</div>"
-        + '<div class="' + valueClasses.join(" ") + '"'
+        + '<div class="dyni-edit-route-metric-value"'
         + htmlUtils.toStyleAttr(valueRowStyle)
         + ">"
         + '<span class="dyni-edit-route-metric-value-text"'
@@ -103,7 +83,7 @@
       + ">"
       + htmlUtils.escapeHtml(labelText)
       + "</div>"
-      + '<div class="' + valueClasses.join(" ") + '"'
+      + '<div class="dyni-edit-route-metric-value"'
       + htmlUtils.toStyleAttr(valueRowStyle)
       + ">"
       + '<span class="dyni-edit-route-metric-value-text"'
