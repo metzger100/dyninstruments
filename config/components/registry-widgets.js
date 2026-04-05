@@ -88,7 +88,7 @@
     },
     AisTargetTextHtmlWidget: {
       js: BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js",
-      css: undefined,
+      css: BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css",
       globalKey: "DyniAisTargetTextHtmlWidget",
       deps: ["AisTargetHtmlFit", "HtmlWidgetUtils", "AisTargetRenderModel", "AisTargetMarkup"]
     },

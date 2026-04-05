@@ -243,7 +243,7 @@ describe("config/components.js", function () {
     expect(components.AisTargetMarkup.deps).toBeUndefined();
     expect(components.AisTargetTextHtmlWidget.globalKey).toBe("DyniAisTargetTextHtmlWidget");
     expect(components.AisTargetTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js");
-    expect(components.AisTargetTextHtmlWidget.css).toBeUndefined();
+    expect(components.AisTargetTextHtmlWidget.css).toBe("http://host/plugins/dyninstruments/widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css");
     expect(components.AisTargetTextHtmlWidget.deps).toEqual(["AisTargetHtmlFit", "HtmlWidgetUtils", "AisTargetRenderModel", "AisTargetMarkup"]);
     expect(components.CanvasDomSurfaceAdapter.globalKey).toBe("DyniCanvasDomSurfaceAdapter");
     expect(components.CanvasDomSurfaceAdapter.js).toBe("http://host/plugins/dyninstruments/cluster/rendering/CanvasDomSurfaceAdapter.js");
