@@ -1,105 +1,521 @@
-# PLAN8 — AIS Target HTML Widget (`ais/aisTarget`)
+# PLAN8 — AIS Target Summary Widget (`ais/aisTarget`)
 
 ## Status
 
-Written from direct inspection of the current AvNav `AisTarget` implementation and the current dyninstruments HTML widget stack.
+This plan is written from direct inspection of the current AvNav AIS target implementation and the current dyninstruments HTML widget stack.
 
-This plan sets **functional and informational parity** with AvNav, while making **dyninstruments** the sole source of truth for visual structure, HTML contracts, CSS class shape, layout ownership, fit ownership, and interaction wiring style.
-
-AvNav is the reference for:
-
-- which AIS target is summarized
-- which fields are shown
-- when `TCPA` vs `BRG` is shown
-- how `nameOrmmsi` and `passFront` are derived
-- color-role precedence
-- widget-owned click entry into the host AIS workflow
-
-Dyninstruments is the reference for:
+It targets **functional and informational parity for the active-target summary state** of AvNav `AisTargetWidget`, while making **dyninstruments** the sole source of truth for:
 
 - HTML widget architecture
-- mode switching (`high` / `normal` / `flat`)
-- class naming and additive state classes
-- tile/band styling
-- layout-owner and fit-owner split
-- hotspot and `catchAll` usage
-- CSS scope rules
-- docs and regression structure
+- wrapper/class contracts
+- mode switching and responsive layout
+- layout ownership and fit ownership
+- click-capture style and named-handler wiring
+- widget-local CSS scope
+- documentation and regression structure
+
+Throughout this plan, `ais/aisTarget` is documentation shorthand for the tuple:
+
+- `cluster: "ais"`
+- `kind: "aisTarget"`
+
+Layouts and tests must use the actual `cluster` + `kind` fields used by the current dyninstruments system.
 
 ## Goal
 
-Add a new native HTML widget kind `aisTarget` as `ais/aisTarget`.
+Add a new native HTML widget kind `aisTarget` in a new `ais` cluster.
 
 Expected outcome:
 
-- a new `ais` cluster exists in dyninstruments
-- `ais/aisTarget` is available in layouts as a native HTML kind
-- the widget provides the same AIS summary intent and workflow-entry behavior as AvNav
-- the widget does **not** copy AvNav’s visual composition, DOM structure, or filler geometry
-- the widget follows dyninstruments’ existing HTML style and contracts, with `ActiveRoute` as the primary visual/system reference
+- dyninstruments ships a new `ais` cluster
+- layouts can instantiate the widget with `cluster: "ais"` and `kind: "aisTarget"`
+- the widget reproduces the current AvNav active-target summary role and click-entry behavior
+- the widget follows current dyninstruments HTML widget conventions, using `activeRoute`, `editRoute`, and `routePoints` as the live reference set
+- the widget does **not** copy AvNav’s internal widget-body DOM structure, filler geometry, class names, or CSS concepts
+
+## Scope Boundary
+
+This plan preserves AvNav parity for the **active summary contract**:
+
+- which target is summarized
+- which values are shown
+- the exact `tcpa > 0` branch rule
+- `nameOrMmsi` derivation
+- `frontText` derivation from `passFront`
+- color-role precedence
+- widget-owned click entry into the host AIS info workflow
+
+This plan does **not** require parity for AvNav’s internal widget-body layout, filler cells, or page-specific dialog wrappers.
+
+This plan also defines a dyn-specific placeholder presentation for the no-target case. That placeholder is a dyn contract, not an AvNav visual parity requirement.
 
 ## Repo-grounded Findings
 
-### AvNav `AisTarget` behavior that must be preserved
+### AvNav behavior that must be preserved
 
-1. The widget summarizes the host-selected AIS target from `nav.ais.nearest`; target selection already happens in `aisdata.js` and must not be reimplemented.
-2. The selected target source has host precedence: warning target first, then tracked target, then the target flagged nearest.
-3. The widget is a widget-owned click entry point. It raises a click carrying `mmsi`, but the page owns the actual AIS dialog/page workflow.
-4. `NavPage` and `GpsPage` both recognize `AisTarget`, but they do not host the same downstream UI. The dyn widget therefore needs workflow-entry parity, not dialog-cloning parity.
-5. Compact mode shows a reduced field set: front initial, `DST`, and either `TCPA` or `BRG`, plus optional local state accent.
-6. Full mode shows the richer field set: `DST`, `nameOrmmsi`, `frontText`, and either `{DCPA, TCPA}` or `{BRG}`.
-7. The branch rule is exact: `tcpa > 0` means show `DCPA` + `TCPA`; otherwise show `BRG`.
-8. `nameOrmmsi` fallback order is: AtoN name override when type 21 and usable, then ship name, then MMSI.
-9. `passFront` text behavior is: `Front`, `Back`, `Pass`, `Done`, or `-`, based on `cpa` and `passFront`.
-10. `legacy` is a real editable and must ship in PLAN8.
-11. Color precedence is: warning, then nearest, then tracking, then normal.
-12. No valid MMSI means the widget still renders on GPS and during layout editing, but not as a normal active summary everywhere else.
+1. The summarized target comes from `nav.ais.nearest`; target selection is already resolved in `viewer/nav/aisdata.js` and must not be reimplemented in dyninstruments.
+2. Current target precedence in `viewer/nav/aisdata.js` is:
+  - warning target first
+  - tracked target second
+  - nearest flagged target third
+3. `viewer/components/AisTargetWidget.jsx` is a click-entry widget. It emits click context containing `mmsi`; the page owns the actual AIS info workflow.
+4. `viewer/gui/NavPage.jsx` and `viewer/gui/GpsPage.jsx` both dispatch into the host AIS info flow, but they do not wrap it identically:
+  - `NavPage` opens `GuardedAisDialog` around `AisInfoWithFunctions`
+  - `GpsPage` opens `AisInfoWithFunctions` directly
+    Therefore dyninstruments must match workflow-entry behavior, not clone page wrapper structure.
+5. Compact AvNav mode shows:
+  - `frontInitial`
+  - `DST`
+  - either `TCPA` or `BRG`
+  - optional local color badge in non-legacy mode
+6. Full AvNav mode shows:
+  - `DST`
+  - `nameOrMmsi`
+  - `frontText`
+  - either `DCPA` + `TCPA`, or `BRG`
+7. The branch rule is exact in `viewer/components/AisTargetWidget.jsx`:
+  - `tcpa > 0` -> show `DCPA` and `TCPA`
+  - otherwise -> show `BRG`
+8. The current AvNav formatter behavior in `viewer/nav/aisformatter.jsx` is:
+  - `nameOrmmsi`: AtoN name when `type == 21` and usable, else ship name, else MMSI
+  - `passFront`: `Front`, `Back`, `Pass`, `Done`, or `-`
+9. `legacy` is a real editable in `viewer/components/AisTargetWidget.jsx` and defaults to `false`.
+10. Current AvNav color precedence in `viewer/util/propertyhandler.js` is:
+  - warning
+  - nearest
+  - tracking
+  - normal
+11. AvNav renders the widget body when `target.mmsi !== undefined`, or on GPS page, or in layout editing. Otherwise it returns `null`.
+12. AvNav’s body structure includes widget-specific classes and filler geometry such as `AisSmallDisplay`, `AisFullDisplay`, `aisPart`, and a blank filler cell in the `BRG` branch. Those structures are not dyninstruments contracts and must not be imported.
 
-### dyninstruments `ActiveRoute` findings that must shape this widget
+### dyninstruments conventions that must shape the widget
 
-1. `ActiveRouteTextHtmlWidget` is the canonical dyninstruments HTML reference for a compact, ratio-driven, text-first summary widget.
-2. The standard dyn mode split is `high` / `normal` / `flat`, with ratio thresholds defaulting to `1.2` and `3.8`.
-3. Dyn HTML widgets use additive wrapper state classes such as `dyni-<widget>-mode-high`, `dyni-<widget>-open-dispatch`, and `dyni-<widget>-open-passive`.
-4. Dyn metric presentation uses compact tiles with a caption line and an inline value/unit row.
-5. Dyn widgets separate layout ownership and text-fit ownership into shared modules; CSS is not allowed to become a second geometry owner.
-6. Dyn interaction wiring uses full-surface capture only when the renderer intentionally owns interaction. Wrapper `onclick="catchAll"` and a named handler hotspot are added only in active dispatch states.
-7. `ActiveRoute` documents the visual contract first and keeps host shell/root ownership outside widget-local CSS.
-8. Dyn vertical behavior for compact HTML widgets is presentation-oriented, not an excuse to import foreign layout contracts.
+1. Native HTML routing is governed by `cluster/rendering/ClusterKindCatalog.js` and `cluster/rendering/ClusterRendererRouter.js`.
+2. Current native HTML reference widgets are:
+  - `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js`
+  - `widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js`
+  - `widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js`
+3. `documentation/widgets/active-route.md` is the canonical simple HTML-kind reference, but `editRoute` and `routePoints` are also current live references for grouped payloads, renderer-side render-model ownership, and page-aware interaction.
+4. Current dyn HTML mode selection is `high` / `normal` / `flat`, using ratio thresholds with defaults `1.2` and `3.8`.
+5. Current dyn HTML widgets use additive wrapper state classes such as:
+  - `dyni-active-route-mode-high`
+  - `dyni-edit-route-open-passive`
+  - `dyni-route-points-mode-flat`
+6. Current dyn HTML widgets separate:
+  - viewmodel-owned domain normalization
+  - mapper-owned renderer payload composition
+  - renderer-side render-model ownership for page/editing/capability policy when needed
+  - layout owner geometry
+  - fit owner text measurement and font sizing
+7. Current dyn interaction style uses `onclick="catchAll"` only when the widget intentionally owns empty-space clicks.
+8. `runtime/TemporaryHostActionBridge.js` already exposes `hostActions.ais.showInfo(mmsi)` and reports dispatch support on `navpage` and `gpspage`.
+9. Widget-local CSS is not allowed to take over shell/root ownership. That boundary is documented in `documentation/shared/html-widget-visual-style-guide.md`.
 
 ## Product Direction
 
-`ais/aisTarget` is a **dyninstruments widget with AvNav parity**, not a visual clone of AvNav’s `AisTargetWidget`.
+`aisTarget` is a dyninstruments widget with AvNav active-summary parity.
 
 That means:
 
-- preserve data semantics and click semantics
-- do **not** preserve AvNav DOM shape
-- do **not** preserve AvNav row-for-row composition
-- do **not** preserve AvNav filler slots purely to mimic appearance
-- do **not** import AvNav-specific CSS concepts such as `aisPart`, `AisSmallDisplay`, or `AisFullDisplay`
-- do **not** use AvNav core as the visual reference for `high` / `normal` / `flat`
+- preserve AvNav data semantics
+- preserve AvNav workflow-entry semantics
+- use current dyninstruments HTML architecture and styling language
+- do **not** preserve AvNav row topology
+- do **not** preserve AvNav filler cells or blank alignment slots
+- do **not** preserve AvNav class names such as `aisPart`, `AisSmallDisplay`, or `AisFullDisplay`
+- do **not** create a widget-local shell contract that overrides dyn shell ownership
 
-The dyn visual reference is `ActiveRoute`, adapted to AIS content.
+## Architecture
+
+### Cluster and tuple
+
+Create a new cluster config:
+
+- `config/clusters/ais.js`
+
+Add a new route tuple:
+
+```javascript
+{ cluster: "ais", kind: "aisTarget", viewModelId: "AisTargetViewModel", rendererId: "AisTargetTextHtmlWidget", surface: "html" }
+```
+
+Rationale:
+
+- AIS target semantics are not route-summary semantics
+- source keys and color roles are AIS-specific
+- `ROADMAP.md` already anticipates AIS coverage
+- future AIS widgets should live in the same cluster
+
+### Implementation pattern
+
+Follow the current dyn HTML split used by `editRoute` and `routePoints`:
+
+- domain normalization in a shared viewmodel
+- renderer-facing grouped payload from the mapper
+- renderer-side render model for page/editing/capability policy
+- shared layout owner
+- shared fit owner
+- shared markup owner
+- HTML shell renderer plus CSS
+
+Required modules:
+
+- `config/clusters/ais.js`
+- `cluster/viewmodels/AisTargetViewModel.js`
+- `cluster/mappers/AisMapper.js`
+- `shared/widget-kits/ais/AisTargetRenderModel.js`
+- `shared/widget-kits/ais/AisTargetLayout.js`
+- `shared/widget-kits/ais/AisTargetHtmlFit.js`
+- `shared/widget-kits/ais/AisTargetMarkup.js`
+- `widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js`
+- `widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css`
+
+Required registration touchpoints:
+
+- `plugin.js`
+- `config/components/registry-cluster.js`
+- `config/components/registry-shared-foundation.js`
+- `config/components/registry-widgets.js`
+- `cluster/mappers/ClusterMapperRegistry.js`
+- `cluster/rendering/ClusterKindCatalog.js`
+- `cluster/rendering/ClusterRendererRouter.js`
+
+No change to `config/shared/kind-defaults.js` is required for PLAN8 because labels and units are widget-owned and fixed in the first version.
+
+### Ownership split
+
+#### `AisTargetViewModel`
+
+Owns only domain normalization and parity-derived data.
+
+It must **not** own page-aware render policy, editing policy, or host capability policy.
+
+Required outputs:
+
+- `mmsiRaw`
+- `mmsiNormalized`
+- `hasTargetIdentity`
+- `hasDispatchMmsi`
+- `distance`
+- `cpa`
+- `tcpa`
+- `headingTo`
+- `nameOrMmsi`
+- `frontText`
+- `frontInitial`
+- `showTcpaBranch`
+- `warning`
+- `nextWarning`
+- `nearest`
+- `trackedMatch`
+- `colorRole`
+- `hasColorRole`
+
+#### `AisMapper`
+
+Owns mapper routing and grouped renderer payload composition.
+
+Recommended output shape:
+
+```javascript
+{
+  renderer: "AisTargetTextHtmlWidget",
+  domain: { ... },
+  layout: { ... },
+  appearance: { ... },
+  labels: { ... },
+  units: { ... },
+  default: "---"
+}
+```
+
+#### `AisTargetRenderModel`
+
+Owns renderer-facing behavior that depends on current runtime context rather than raw AIS domain data.
+
+Required responsibilities:
+
+- page-aware render state (`data`, `placeholder`, `hidden`)
+- layout-editing gating via `HtmlWidgetUtils.isEditingMode(props)`
+- capability gating via `hostActions.getCapabilities()`
+- dispatch vs capture-only vs passive interaction mode
+- placeholder policy
+- wrapper class/state selection inputs
+- resize-signature inputs
+
+#### `AisTargetLayout`
+
+Owns:
+
+- mode-specific geometry
+- branch-aware metric arrangement
+- placeholder geometry
+- compact identity-band and metric-rail arrangement
+
+#### `AisTargetHtmlFit`
+
+Owns:
+
+- text measurement
+- mode-aware font sizing for identity, metric values, units, and front text
+- inline style output only
+
+#### `AisTargetMarkup`
+
+Owns:
+
+- escaped HTML assembly
+- wrapper/class contract
+- hotspot markup
+- renderer-applied inline style attributes from fit output
+
+#### `AisTargetTextHtmlWidget`
+
+Owns the HTML surface shell contract:
+
+- `renderHtml`
+- `namedHandlers`
+- `resizeSignature`
+- optional `initFunction` if committed DOM facts are needed for a corrective rerender
+
+## Cluster Config Contract
+
+`config/clusters/ais.js` must register a `ClusterWidget` cluster with:
+
+- `cluster: "ais"`
+- a `kind` editable containing at least `aisTarget`
+- AIS source store keys
+- widget-specific editables only
+
+Required store keys:
+
+- `target: "nav.ais.nearest"`
+- `trackedMmsi: "nav.ais.trackedMmsi"`
+- `aisMarkAllWarning: "properties.aisMarkAllWarning"`
+- `aisWarningColor: "properties.style.aisWarningColor"`
+- `aisNearestColor: "properties.style.aisNearestColor"`
+- `aisTrackingColor: "properties.style.aisTrackingColor"`
+- `aisNormalColor: "properties.style.aisNormalColor"`
+
+Required editables:
+
+- `kind`
+- `legacy`
+- `aisTargetRatioThresholdNormal`
+- `aisTargetRatioThresholdFlat`
+- `className`
+
+The generic text-widget editables `caption`, `unit`, `formatter`, and `formatterParameters` must stay disabled for this kind because the HTML body owns the metric labels and unit strings.
+
+## Functional Contract
+
+### Target source
+
+The widget must consume the host-selected target from `nav.ais.nearest`.
+
+It must not reimplement warning/nearest/tracking target selection.
+
+### Identity and dispatch gating
+
+Use two distinct identity states:
+
+- `hasTargetIdentity` -> `target.mmsi !== undefined`
+- `hasDispatchMmsi` -> normalized MMSI is a non-empty dispatch-safe string
+
+`hasTargetIdentity` controls whether the widget is in active-data state.
+
+`hasDispatchMmsi` controls click dispatch and tracking-match checks.
+
+### MMSI normalization
+
+Normalization rules for dispatch and tracked-match checks:
+
+- finite number -> decimal string
+- non-empty trimmed string -> trimmed string
+- anything else -> invalid dispatch MMSI
+
+No dispatch may occur without `hasDispatchMmsi === true`.
+
+### Derived values
+
+#### `nameOrMmsi`
+
+Must match current AvNav formatter behavior from `viewer/nav/aisformatter.jsx`:
+
+1. AtoN `name` when `type == 21` and usable
+2. otherwise `shipname` when usable
+3. otherwise MMSI
+
+#### `frontText`
+
+Must match current AvNav `passFront` formatter behavior:
+
+- `-` when `cpa` is absent/falsy
+- `Front` when `passFront > 0`
+- `Back` when `passFront < 0`
+- `Pass` when `passFront === 0`
+- `Done` when `cpa` exists but `passFront` is absent
+
+#### `frontInitial`
+
+Must be the first character of `frontText` when `frontText` is non-empty; otherwise `-`.
+
+### Branch rule
+
+This rule is exact and must be used consistently in viewmodel output, render model, layout, markup, resize signature, and tests:
+
+- `tcpa > 0` -> show `DCPA` and `TCPA`
+- otherwise -> show `BRG`
+
+### Formatting parity
+
+Rendered values must match current AvNav display semantics for the active-target state.
+
+Required fields:
+
+- `distance` -> caption `DST`, unit `nm`, distance formatting parity with AvNav
+- `cpa` -> caption `DCPA`, unit `nm`, distance formatting parity with AvNav
+- `tcpa` -> caption `TCPA`, unit `min`, same minute conversion/display semantics as current AvNav `aisformatter.jsx`
+- `headingTo` -> caption `BRG`, unit `°`, direction-formatting parity with AvNav
+- `nameOrMmsi`
+- `frontText`
+
+For PLAN8, labels and units are fixed widget-owned strings:
+
+- `DST`
+- `DCPA`
+- `TCPA`
+- `BRG`
+- `nm`
+- `min`
+- `°`
+
+### Color-role precedence
+
+Color role must match current AvNav semantics exactly:
+
+1. `warning` when `(warning && aisMarkAllWarning) || nextWarning`
+2. else `nearest` when `nearest`
+3. else `tracking` when `trackedMatch`
+4. else `normal` when color is applicable
+5. else no color role
+
+Color is applicable only when a usable target MMSI exists for color treatment, matching current AvNav behavior.
+
+### `legacy`
+
+`legacy` is required and defaults to `false`.
+
+Behavior:
+
+- `legacy === false`:
+  - keep wrapper visually neutral
+  - show a local dyn-specific accent element when color exists
+- `legacy === true`:
+  - tint the wrapper using the resolved AIS color
+  - suppress the local accent element
+
+This preserves the functional legacy split from AvNav without copying AvNav body geometry.
+
+## Render-State Contract
+
+Render state is renderer-side policy owned by `AisTargetRenderModel`.
+
+States:
+
+- `data`
+- `placeholder`
+- `hidden`
+
+Rules:
+
+- `data` when `hasTargetIdentity === true`
+- `placeholder` when `hasTargetIdentity === false` and either:
+  - current page is `gpspage`, or
+  - layout editing is active
+- `hidden` otherwise
+
+### Placeholder contract
+
+Placeholder presentation is a dyn-specific contract.
+
+Required behavior:
+
+- fixed centered placeholder text: `No AIS`
+- no fake metric tiles
+- no fake units
+- no active color accent
+- no claim of AvNav visual parity for the placeholder body
+
+## Interaction Contract
+
+### Workflow ownership
+
+The widget owns summary display and click capture.
+
+The host owns the actual AIS info workflow.
+
+Dispatch target:
+
+- `hostActions.ais.showInfo(mmsi)`
+
+No new bridge API is required.
+
+### Supported pages
+
+Current dispatch-capable host pages are determined by `hostActions.getCapabilities()` and currently correspond to:
+
+- `navpage`
+- `gpspage`
+
+On other pages, the widget is passive.
+
+### Interaction states
+
+Keep these states distinct:
+
+- `captureClicks`
+- `canDispatchShowInfo`
+
+Rules:
+
+- editing mode -> always passive
+- if render state is `data` and `hasDispatchMmsi === true` and `ais.showInfo === "dispatch"` -> capture and dispatch
+- if render state is `placeholder` on `gpspage` and `ais.showInfo === "dispatch"` -> capture only, swallow click, do not dispatch
+- otherwise -> passive
+
+### Click ownership style
+
+Follow the current dyn HTML interaction contract:
+
+- wrapper adds `onclick="catchAll"` only when `captureClicks === true`
+- hotspot element exists only when `captureClicks === true`
+- hotspot uses a named handler such as `onclick="aisTargetShowInfo"`
+- `namedHandlers()` should return the named handler only when capture is active
+
+Handler behavior:
+
+- dispatch state -> call `hostActions.ais.showInfo(mmsiNormalized)`
+- capture-only placeholder state -> return `false`
+- passive state -> expose no named handler and no hotspot
 
 ## Visual Contract
 
 ### Visual language
 
-The widget shall use dyninstruments’ existing HTML summary language:
+The widget must use current dyninstruments HTML summary language:
 
 - one wrapper block
 - one identity band or compact identity cell
-- metric tiles with caption/value/unit structure
-- optional small local state accent element in non-legacy mode
-- additive wrapper state classes for mode, data state, branch state, and interaction state
-- font family and foreground color from shared dyn helpers/theme owners
-- label/value emphasis via theme token weights, matching current dyn HTML widgets
+- metric tiles using caption + value + unit structure
+- optional small local accent element in non-legacy mode
+- additive wrapper state classes
+- shared theme/font ownership from existing dyn helpers
+- dyn-controlled layout and fit ownership with no CSS back-door geometry system
 
-There shall be **no** attempt to recreate the AvNav `WidgetFrame` appearance inside the widget body.
+The widget must not attempt to reproduce AvNav `WidgetFrame` internals inside the widget body.
 
-### CSS state classes
-
-Required wrapper/state classes:
+### Required wrapper state classes
 
 - `dyni-ais-target-html`
 - `dyni-ais-target-mode-high`
@@ -108,9 +524,10 @@ Required wrapper/state classes:
 - `dyni-ais-target-data`
 - `dyni-ais-target-placeholder`
 - `dyni-ais-target-open-dispatch`
+- `dyni-ais-target-open-capture`
 - `dyni-ais-target-open-passive`
 - `dyni-ais-target-branch-tcpa`
-- `dyni-ais-target-branch-heading`
+- `dyni-ais-target-branch-brg`
 - `dyni-ais-target-legacy`
 - `dyni-ais-target-local-accent`
 - `dyni-ais-target-color-warning`
@@ -118,11 +535,7 @@ Required wrapper/state classes:
 - `dyni-ais-target-color-tracking`
 - `dyni-ais-target-color-normal`
 
-The renderer may add one neutral no-color state class if that simplifies CSS, but it must stay within the documented class contract.
-
-### Element class contract
-
-Required element classes:
+### Required element classes
 
 - `.dyni-ais-target-identity`
 - `.dyni-ais-target-name`
@@ -139,352 +552,115 @@ Required element classes:
 
 ### Mode rules
 
-`aisTarget` follows the same mode-selection pattern used by `ActiveRoute`.
-
-Defaults:
+Use the current dyn ratio-mode pattern:
 
 - `aisTargetRatioThresholdNormal = 1.2`
 - `aisTargetRatioThresholdFlat = 3.8`
 
 Rule:
 
-- ratio `< normal threshold` → `high`
-- ratio `> flat threshold` → `flat`
-- otherwise → `normal`
+- ratio `< normal threshold` -> `high`
+- ratio `> flat threshold` -> `flat`
+- otherwise -> `normal`
 
-This widget does **not** introduce a separate AvNav-derived vertical mode contract. If `.widgetContainer.vertical` affects presentation, it must do so in the normal dyn CSS/presentation way rather than by importing foreign visual rules.
+The widget does not introduce an AvNav-specific vertical mode contract.
+
+If committed host ancestry such as `.widgetContainer.vertical` affects final presentation, it must do so through the standard dyn renderer/layout lifecycle rather than by importing foreign layout rules.
 
 ### Mode matrix
 
-The field set keeps AvNav parity. The composition uses dyninstruments topology.
+The field set follows AvNav active-summary parity. The topology follows dyn styling.
 
 #### `flat`
 
-Purpose: compact one-band summary, same information density target as AvNav compact mode.
+Purpose: one-band compact summary with AvNav compact information density.
 
 Visible content:
 
 - `frontInitial`
 - `distance`
-- `tcpa` **or** `headingTo`
-- optional local state accent when non-legacy
+- `tcpa` or `headingTo`
+- optional local accent when non-legacy and color exists
 
 Hidden in `flat`:
 
-- `nameOrmmsi`
+- `nameOrMmsi`
 - `cpa`
 - full `frontText`
 
 Topology:
 
 - compact leading identity cell for `frontInitial`
-- compact metric rail for `DST` and the secondary metric (`TCPA` or `BRG`)
+- compact metric rail for `DST` and secondary metric
 - optional slim accent element
-
-This is a dyn compact rail, not an AvNav `AisSmallDisplay` clone.
 
 #### `normal`
 
-Purpose: balanced summary widget matching dyn summary styling.
+Purpose: balanced dyn summary widget.
 
 Visible content:
 
-- `nameOrmmsi`
+- `nameOrMmsi`
 - `frontText`
 - `distance`
 - `cpa` + `tcpa` when `tcpa > 0`
 - `headingTo` when `tcpa <= 0`
-- optional local state accent when non-legacy
+- optional local accent when non-legacy and color exists
 
 Topology:
 
-- top identity band containing `nameOrmmsi` and optional local accent
-- metric grid below the identity band
+- identity band at top with `nameOrMmsi` and optional accent
+- metric grid below
 - footer/state row for `frontText`
 
-Branch-specific layout:
+Branch layouts:
 
-- `tcpa > 0`: metric grid shows `DST`, `DCPA`, `TCPA`
-- `tcpa <= 0`: metric grid shows `DST`, `BRG`
-
-There is **no** blank filler tile whose only purpose is to mimic AvNav spacing.
+- `tcpa` branch -> `DST`, `DCPA`, `TCPA`
+- `BRG` branch -> `DST`, `BRG`
 
 #### `high`
 
-Purpose: narrow-shell stacked version of the same `normal` information set.
+Purpose: narrow stacked version of the same richer information set.
 
 Visible content:
 
-- `nameOrmmsi`
+- `nameOrMmsi`
 - `frontText`
 - `distance`
 - `cpa` + `tcpa` when `tcpa > 0`
 - `headingTo` when `tcpa <= 0`
-- optional local state accent when non-legacy
+- optional local accent when non-legacy and color exists
 
 Topology:
 
 - identity band at top
-- stacked metric region optimized for narrow width
+- stacked metric region for narrow width
 - front/state row at bottom
 
-Branch-specific layout:
+Branch layouts:
 
-- `tcpa > 0`: `DST` plus a two-metric secondary row for `DCPA` and `TCPA`
-- `tcpa <= 0`: `DST` plus a full-width `BRG` tile
-
-Again, this is a dyn stacked tile layout, not a reproduction of AvNav full-mode rows.
+- `tcpa` branch -> `DST` plus a secondary row for `DCPA` and `TCPA`
+- `BRG` branch -> `DST` plus a full-width `BRG` tile
 
 ### Visual anti-goals
 
-The implementation must not ship any of these:
-
-- direct copy of AvNav `AisTargetWidget` markup structure
-- empty visual filler slots just to imitate AvNav alignment
-- AvNav class names or AvNav DOM naming
-- a widget-local shell contract that overrides dyn host shell ownership
-- a second geometry system hidden in CSS
-
-## Functional Contract
-
-### Target source
-
-Use host-selected target data from:
-
-- `nav.ais.nearest`
-- `nav.ais.trackedMmsi`
-- `properties.aisMarkAllWarning`
-- `properties.style.aisWarningColor`
-- `properties.style.aisNearestColor`
-- `properties.style.aisTrackingColor`
-- `properties.style.aisNormalColor`
-
-Do not re-implement nearest-target selection logic.
-
-### Required derived values
-
-A dedicated `AisTargetViewModel` shall normalize and derive at least:
-
-- `mmsiNormalized`
-- `hasValidMmsi`
-- `distance`
-- `cpa`
-- `tcpa`
-- `headingTo`
-- `nameOrMmsi`
-- `frontText`
-- `frontInitial`
-- `showTcpaBranch`
-- `colorRole`
-- `hasColor`
-- `renderPolicy`
-
-### MMSI normalization
-
-Valid MMSI input for dispatch/render gating:
-
-- finite number → decimal string
-- non-empty trimmed string → trimmed string
-- anything else → invalid
-
-No dispatch may occur without a valid normalized MMSI.
-
-### Branch rule
-
-The branch rule is exact and must be used consistently in viewmodel, mapper, layout, resize signature, and tests:
-
-- `tcpa > 0` → show `DCPA` and `TCPA`
-- otherwise → show `BRG`
-
-### Text formatting
-
-PLAN8 mirrors the relevant AvNav formatter semantics, but through dyninstruments’ own viewmodel/formatter path.
-
-Required subset:
-
-- `distance` → `DST`, unit `nm`
-- `cpa` → `DCPA`, unit `nm`
-- `tcpa` → `TCPA`, unit `min`
-- `headingTo` → `BRG`, unit `°`
-- `nameOrmmsi`
-- `passFront`
-
-Fixed captions and units are acceptable for PLAN8. No invented per-field editable label system is required.
-
-### `legacy`
-
-`legacy` is required and defaults to `false`.
-
-Behavior:
-
-- `legacy === false`: neutral wrapper, local accent element only
-- `legacy === true`: wrapper tint from the active AIS color role, no local accent element
-
-This preserves AvNav behavior, but the accent geometry remains dyn-specific.
-
-### Color-role precedence
-
-Use this order:
-
-1. `warning` when `(warning && aisMarkAllWarning) || nextWarning`
-2. else `nearest` when `nearest`
-3. else `tracking` when normalized target MMSI matches tracked MMSI
-4. else `normal` when there is a valid MMSI
-5. else no color
-
-## Render Policy
-
-### Data / placeholder / hidden
-
-Render policy:
-
-- `data` when `hasValidMmsi`
-- `placeholder` when there is no valid MMSI and either:
-  - current page is `gpspage`, or
-  - layout editing is active
-- `hidden` otherwise
-
-### Placeholder contract
-
-Placeholder text is fixed as `No AIS`.
-
-Placeholder markup:
-
-- centered placeholder text only
-- no fake metric tiles
-- no fake units
-- no color accent
-
-## Interaction Contract
-
-### Workflow split
-
-The dyn widget owns summary display and click capture.
-The host owns the actual AIS info workflow and page-specific dialog behavior.
-
-PLAN8 therefore dispatches only through the existing bridge action:
-
-- `hostActions.ais.showInfo(mmsi)`
-
-No new bridge API is needed.
-
-### Page-aware behavior
-
-Supported dispatch pages are the pages already exposed by the current host capabilities:
-
-- `navpage`
-- `gpspage`
-
-On unsupported pages, the widget is passive.
-
-### Capture and dispatch states
-
-Keep these states separate:
-
-- `captureClicks`
-- `canDispatchShowInfo`
-
-Rules:
-
-- `captureClicks === true` when the widget is not editing and the host capability for `ais.showInfo` is dispatch-capable, and either:
-  - a valid MMSI exists, or
-  - the current page is `gpspage` and the widget is visible in placeholder mode
-- `canDispatchShowInfo === true` only when `captureClicks === true` and `hasValidMmsi === true`
-
-### Click ownership style
-
-Use the current dyn HTML interaction style:
-
-- wrapper adds `onclick="catchAll"` only when `captureClicks === true`
-- named hotspot element uses `onclick="aisTargetShowInfo"`
-- named handler is returned only when the widget is in a capture-capable state
-
-Handler behavior:
-
-- when `canDispatchShowInfo === true`, call `hostActions.ais.showInfo(mmsiNormalized)`
-- when the widget is capturing only to block host fallthrough, return `false` and do nothing else
-- when passive, expose no handler and no hotspot
-
-### Editing mode
-
-In layout-editing mode:
-
-- always passive
-- no capture
-- no dispatch
-- placeholder allowed according to render policy
-
-## Architecture
-
-### Cluster choice
-
-Create a new `ais` cluster.
-
-Reasons:
-
-- `ROADMAP.md` already anticipates an `ais` cluster
-- AIS target logic is not route-summary logic
-- store keys and color semantics are AIS-specific
-- future AIS widgets belong in the same cluster
-
-### Preferred implementation pattern
-
-Use `ActiveRoute` as the primary structural reference:
-
-- shared viewmodel for domain normalization
-- mapper branch for renderer payload
-- shared layout owner
-- shared fit owner
-- one HTML widget shell with CSS
-
-Required shared modules:
-
-- `cluster/viewmodels/AisTargetViewModel.js`
-- `cluster/mappers/AisMapper.js`
-- `shared/widget-kits/ais/AisTargetLayout.js`
-- `shared/widget-kits/ais/AisTargetHtmlFit.js`
-- `widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js`
-- `widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css`
-
-Optional extraction rule:
-
-- if the widget shell stays readable, keep render-model and markup local to the shell, as `ActiveRoute` does
-- only extract `AisTargetRenderModel` or `AisTargetMarkup` if the shell becomes too large or mixed-responsibility
-
-This keeps PLAN8 aligned with dyninstruments’ current HTML practice instead of over-specifying a foreign visual topology.
-
-## Mapper Contract
-
-`AisMapper` shall emit a dedicated renderer payload for `aisTarget`.
-
-Recommended grouped shape:
-
-- `renderer`
-- `domain`
-- `layout`
-- `appearance`
-- `labels`
-- `units`
-
-Minimum content:
-
-- normalized display data and branch booleans
-- ratio thresholds
-- `legacy`
-- color role inputs or resolved color values
-- fixed labels and units
-
-Interaction gating remains renderer-owned because it depends on page capabilities and editing mode.
-
-## Layout and Fit Contract
+The implementation must not ship any of the following:
+
+- AvNav body markup copied from `viewer/components/AisTargetWidget.jsx`
+- blank filler cells used only to imitate AvNav spacing
+- AvNav class names or DOM naming
+- widget-local shell/root CSS takeover
+- a second hidden geometry system in CSS
+
+## Layout, Fit, and Markup Contract
 
 ### Layout ownership
 
 `AisTargetLayout` owns:
 
-- content rects and gaps
-- mode-specific band/tile arrangement
+- content rectangles and gaps
 - branch-aware tile arrangement
+- mode-specific band/grid/rail topology
 - placeholder geometry
 
 ### Fit ownership
@@ -492,46 +668,82 @@ Interaction gating remains renderer-owned because it depends on page capabilitie
 `AisTargetHtmlFit` owns:
 
 - text measurement
-- font-size output for identity, value, and unit text
-- mode-aware tile fitting
+- value/unit font-size output
+- name/front-text fitting
+- mode-aware font-size adjustments
 
-### Renderer ownership
+### Markup ownership
 
-The renderer owns:
+`AisTargetMarkup` owns:
 
-- escaped HTML markup
-- class/state selection
-- style attribute injection from fit output
-- named handler exposure
-- resize signature assembly
+- escaped output
+- element ordering
+- class emission
+- inline style application from fit results
+- hotspot emission when active
 
 ### Explicit fit rules
 
 - metric fields use caption/value/unit markup with inline units
-- text-only fields (`nameOrMmsi`, `frontText`, `frontInitial`) do not allocate unit geometry
-- no CSS-only unit stacking variant in `flat`
-- no hidden ghost tiles for fields that are not displayed
+- `nameOrMmsi`, `frontText`, and `frontInitial` are text-only fields and do not allocate unit geometry
+- no ghost tiles for hidden fields
+- no filler tile in the `BRG` branch
+- fitted text uses font-size reduction, not ellipsis mutation of content
 
 ## Resize Signature Contract
 
 `resizeSignature` must include all layout-relevant inputs, at minimum:
 
 - resolved mode
-- render policy
-- branch state (`tcpa` vs `heading`)
+- render state
+- branch state (`tcpa` vs `brg`)
 - `legacy`
-- capture/dispatch state
-- shell width
-- shell height
-- lengths or values of all visible text strings
+- interaction state (`dispatch`, `capture-only`, `passive`)
+- rounded shell width
+- rounded shell height
+- lengths of all visible text strings
 
-The signature must change when any visible field set or interaction state changes.
+The signature must change whenever the visible field set, layout branch, or click-ownership state changes.
+
+## Documentation Contract
+
+Create:
+
+- `documentation/widgets/ais-target.md`
+
+Update:
+
+- `documentation/architecture/cluster-widget-system.md`
+- `documentation/avnav-api/interactive-widgets.md`
+- `documentation/avnav-api/plugin-lifecycle.md`
+- `documentation/avnav-api/core-key-catalog.md`
+- `ROADMAP.md`
+
+The new widget doc must follow the current dyn HTML widget documentation style used by:
+
+- `documentation/widgets/active-route.md`
+- `documentation/widgets/edit-route.md`
+- `documentation/widgets/route-points.md`
+
+Required doc sections:
+
+- overview
+- ownership split
+- module registration
+- props / grouped mapper payload
+- wrapper state table
+- element class table
+- mode matrix
+- interaction contract
+- layout ownership note
+- fit ownership note
+- regression checklist
 
 ## Implementation Phases
 
-### Phase 1 — Cluster and data path
+### Phase 1 — Cluster, mapper, and kind routing
 
-Create and register:
+Create:
 
 - `config/clusters/ais.js`
 - `cluster/viewmodels/AisTargetViewModel.js`
@@ -547,16 +759,18 @@ Update:
 
 Phase outcome:
 
-- `ais/aisTarget` can be declared
-- renderer wiring exists
-- target normalization contract is testable before HTML styling lands
+- `cluster: "ais"`, `kind: "aisTarget"` is a recognized tuple
+- mapper output is testable before HTML work lands
+- no missing cluster or renderer route failures remain
 
-### Phase 2 — Layout, fit, renderer shell, and CSS
+### Phase 2 — Shared HTML owners and shell renderer
 
 Create:
 
+- `shared/widget-kits/ais/AisTargetRenderModel.js`
 - `shared/widget-kits/ais/AisTargetLayout.js`
 - `shared/widget-kits/ais/AisTargetHtmlFit.js`
+- `shared/widget-kits/ais/AisTargetMarkup.js`
 - `widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js`
 - `widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css`
 
@@ -564,150 +778,183 @@ Update:
 
 - `config/components/registry-shared-foundation.js`
 - `config/components/registry-widgets.js`
-- `config/components/registry-cluster.js`
 
 Phase outcome:
 
-- dyn-style HTML contract exists
-- mode classes and tile layouts render correctly
-- interaction wiring follows dyn hotspot/catchAll rules
+- dyn HTML structure exists
+- mode classes and branch-aware tile layouts render correctly
+- page-aware interaction follows current dyn handler ownership rules
 
-### Phase 3 — Tests, fixtures, and docs
+### Phase 3 — Tests and docs
 
 Add or update:
 
 - cluster config tests
-- mapper and viewmodel tests
-- shared layout and fit tests
+- mapper tests
+- viewmodel tests
+- render-model tests
+- layout tests
+- fit tests
+- markup tests
 - renderer tests
-- layout fixture coverage
 - widget documentation
 - roadmap coverage
 
 Phase outcome:
 
-- visual contract is documented
-- layout and interaction regressions are pinned
-- `AisTarget` is marked covered in roadmap/docs
+- behavior is pinned by automated tests
+- visual and interaction contracts are documented
+- AIS target coverage is visible in roadmap/docs
 
 ## Test Plan
+
+### Cluster config tests
+
+Pin:
+
+- new `ais` cluster registration
+- `kind === "aisTarget"` availability
+- required store keys
+- `legacy` and ratio-threshold editables
+- disabled generic text editables
 
 ### ViewModel tests
 
 Pin:
 
+- `hasTargetIdentity` vs `hasDispatchMmsi`
 - MMSI normalization
-- `nameOrmmsi` fallback order
-- `passFront` text derivation
-- `tcpa > 0` branch selection
-- color-role precedence inputs
-- fail-closed behavior for malformed targets
+- `nameOrMmsi` fallback order
+- `frontText` derivation
+- `frontInitial` derivation
+- exact `tcpa > 0` branch selection
+- color-role precedence
+- tracked-match normalization behavior
 
 ### Mapper tests
 
 Pin:
 
-- renderer selection
+- `kind === "aisTarget"` renderer selection
 - grouped payload shape
 - threshold propagation
 - `legacy` propagation
-- fixed labels/units contract
+- fixed labels and units
+
+### Render-model tests
+
+Pin:
+
+- `data` / `placeholder` / `hidden` render-state rules
+- supported-page dispatch gating
+- GPS placeholder capture-only behavior
+- editing-mode passive behavior
+- wrapper state selection inputs
+- resize-signature parts
 
 ### Layout/Fit tests
 
 Pin:
 
 - `high` / `normal` / `flat` topology
-- `flat` omission of name and `DCPA`
-- no blank filler tile in the `BRG` branch
-- inline unit placement
-- no unit geometry on text-only cells
-- placeholder geometry without ghost tiles
+- `flat` omission of `nameOrMmsi` and `DCPA`
+- `BRG` branch has no filler tile
+- text-only fields have no unit geometry
+- placeholder geometry has no ghost tiles
+
+### Markup tests
+
+Pin:
+
+- required wrapper state classes
+- required element classes
+- hotspot emission only in capture states
+- escaped output
+- legacy vs non-legacy markup differences
 
 ### Renderer tests
 
 Pin:
 
-- wrapper state classes
-- dispatch vs passive click wiring
-- placeholder vs hidden behavior
-- GPS placeholder click swallow behavior
-- legacy vs non-legacy color output
-- escaped output
-- resize signature sensitivity to layout-affecting inputs
-
-## Documentation Updates
-
-Create:
-
-- `documentation/widgets/ais-target.md`
-
-Update:
-
-- `documentation/architecture/cluster-widget-system.md`
-- `documentation/avnav-api/interactive-widgets.md`
-- `documentation/avnav-api/plugin-lifecycle.md`
-- `documentation/avnav-api/core-key-catalog.md`
-- `ROADMAP.md`
-
-The widget doc must follow the same format used by `documentation/widgets/active-route.md`:
-
-- CSS/state table
-- element class table
-- mode matrix
-- layout ownership note
-- fit ownership note
-- layering and click ownership note
-- regression checklist
+- dispatch mode emits `catchAll`, hotspot, and named handler
+- capture-only placeholder mode swallows click without dispatch
+- passive mode emits no hotspot and no named handler
+- supported pages dispatch through `hostActions.ais.showInfo(mmsi)`
+- unsupported pages remain passive
+- resize signature changes on field-set and interaction-state changes
 
 ## Non-goals
 
 PLAN8 does not include:
 
 - AIS dialog implementation
-- AIS action buttons such as track/hide/locate
-- new bridge API
-- map-centering workflow
-- duplication of AvNav page/dialog internals
+- AIS control buttons such as track, hide, locate, or center-on-map
+- new host bridge APIs
+- reproduction of page-specific dialog wrappers
+- import of AvNav filler geometry
 - visual cloning of AvNav `AisTargetWidget`
-- importing AvNav filler geometry or row topology into dyn CSS/HTML
+- per-field editable label or unit customization in the first version
 
 ## Acceptance Criteria
 
 1. A new `ais` cluster exists and is bootstrap-loaded.
-2. Layouts can instantiate `ais/aisTarget` without missing-kind or missing-module failures.
-3. The widget consumes `nav.ais.nearest` and does not reimplement host target selection.
-4. `legacy` is supported with default `false`.
-5. `flat` shows `frontInitial`, `DST`, and either `TCPA` or `BRG`, with no `nameOrmmsi` and no `DCPA`.
-6. `normal` and `high` show the richer AIS summary field set, but through dyn identity-band/tile layouts rather than AvNav row cloning.
-7. `tcpa > 0` is the sole branch rule for `DCPA/TCPA` versus `BRG`.
-8. The `BRG` branch does not allocate a dummy filler tile just to mirror AvNav spacing.
-9. Non-legacy mode uses a local dyn accent element instead of full-background tint.
-10. Legacy mode tints the wrapper and suppresses the local accent element.
-11. Color precedence matches AvNav warning/nearest/tracking/normal semantics.
-12. Placeholder behavior is `gpspage` + editing only; otherwise no-valid-MMSI collapses to hidden.
-13. On supported pages with valid MMSI, the widget owns the full click surface and dispatches through `hostActions.ais.showInfo(mmsi)`.
-14. On GPS placeholder-without-MMSI, the widget swallows the click to prevent host fallthrough.
-15. Editing mode is always passive.
-16. Widget-local CSS does not override dyn host shell/root ownership.
-17. Layout and fit ownership are separated into shared modules.
-18. Docs follow the dyn HTML widget visual contract format.
-19. Tests pin mode topology, branch switching, placeholder policy, interaction wiring, and no-filler dyn layout behavior.
-20. `ROADMAP.md` marks `AisTarget` as covered.
+2. Layouts can instantiate the widget using `cluster: "ais"` and `kind: "aisTarget"`.
+3. `ClusterKindCatalog` contains the strict tuple for `ais/aisTarget` with `surface: "html"`.
+4. The widget consumes `nav.ais.nearest` and does not reimplement target selection.
+5. Active-summary field content matches current AvNav behavior for:
+  - `nameOrMmsi`
+  - `frontText`
+  - `frontInitial`
+  - `DST`
+  - `DCPA`
+  - `TCPA`
+  - `BRG`
+6. `tcpa > 0` is the only branch rule for `DCPA/TCPA` versus `BRG`.
+7. `flat` shows `frontInitial`, `DST`, and either `TCPA` or `BRG`, with no `nameOrMmsi` and no `DCPA`.
+8. `normal` and `high` show the richer AIS summary field set through dyn identity-band/tile layouts.
+9. The `BRG` branch contains no dummy filler tile.
+10. `legacy` defaults to `false` and is fully supported.
+11. Non-legacy mode uses a local dyn accent element when color exists.
+12. Legacy mode tints the wrapper and suppresses the local accent element.
+13. Color precedence matches AvNav warning/nearest/tracking/normal semantics.
+14. Render state follows:
+  - `data` when a target identity exists
+  - `placeholder` on GPS or in layout editing when no target identity exists
+  - `hidden` otherwise
+15. Placeholder presentation is dyn-owned and explicitly not an AvNav body clone.
+16. On supported pages with valid dispatch MMSI, the widget owns the click surface and dispatches through `hostActions.ais.showInfo(mmsi)`.
+17. On GPS placeholder-without-dispatch-MMSI, the widget captures and swallows the click to prevent host fallthrough.
+18. Editing mode is always passive.
+19. Widget-local CSS does not override dyn shell/root ownership.
+20. Layout, fit, render-model, and markup ownership are separated into shared modules.
+21. Docs follow the current dyn HTML widget documentation format.
+22. Tests pin field parity, branch switching, render-state policy, interaction wiring, and no-filler layout behavior.
+23. `ROADMAP.md` marks AIS target coverage.
 
 ## Related
 
-- `viewer/components/AisTargetWidget.jsx` in AvNav
-- `viewer/nav/aisformatter.jsx` in AvNav
-- `viewer/nav/aisdata.js` in AvNav
-- `viewer/gui/NavPage.jsx` in AvNav
-- `viewer/gui/GpsPage.jsx` in AvNav
-- `viewer/util/propertyhandler.js` in AvNav
-- `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js` in dyninstruments
-- `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css` in dyninstruments
-- `shared/widget-kits/nav/ActiveRouteLayout.js` in dyninstruments
-- `shared/widget-kits/nav/ActiveRouteHtmlFit.js` in dyninstruments
-- `documentation/widgets/active-route.md` in dyninstruments
-- `documentation/shared/html-widget-visual-style-guide.md` in dyninstruments
-- `documentation/guides/add-new-html-kind.md` in dyninstruments
-- `ROADMAP.md` in dyninstruments
+AvNav:
+
+- `viewer/components/AisTargetWidget.jsx`
+- `viewer/nav/aisformatter.jsx`
+- `viewer/nav/aisdata.js`
+- `viewer/gui/NavPage.jsx`
+- `viewer/gui/GpsPage.jsx`
+- `viewer/util/propertyhandler.js`
+
+Dyninstruments:
+
+- `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js`
+- `widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js`
+- `widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js`
+- `shared/widget-kits/nav/ActiveRouteLayout.js`
+- `shared/widget-kits/nav/ActiveRouteHtmlFit.js`
+- `shared/widget-kits/nav/EditRouteRenderModel.js`
+- `shared/widget-kits/nav/RoutePointsRenderModel.js`
+- `documentation/widgets/active-route.md`
+- `documentation/widgets/edit-route.md`
+- `documentation/widgets/route-points.md`
+- `documentation/shared/html-widget-visual-style-guide.md`
+- `documentation/guides/add-new-html-kind.md`
+- `runtime/TemporaryHostActionBridge.js`
+- `ROADMAP.md`
