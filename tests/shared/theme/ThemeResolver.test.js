@@ -133,6 +133,30 @@ describe("ThemeResolver", function () {
     expect(out.colors.ais.warning).toBe(mod.DEFAULTS.colors.ais.warning);
   });
 
+  it("resolveForRoot applies all AIS accent token overrides", function () {
+    const mod = loadFresh("shared/theme/ThemeResolver.js");
+    const doc = createDoc({ value: false });
+    const rootEl = createRoot(doc);
+    installComputedStyle(new Map([
+      [rootEl, {
+        "--dyni-ais-warning": " #f39b52 ",
+        "--dyni-ais-nearest": " #66b8ff ",
+        "--dyni-ais-tracking": " #89d38f ",
+        "--dyni-ais-normal": " #8da0b3 "
+      }]
+    ]));
+
+    const resolver = mod.create({}, createHelpers());
+    const out = resolver.resolveForRoot(rootEl);
+
+    expect(out.colors.ais).toEqual({
+      warning: "#f39b52",
+      nearest: "#66b8ff",
+      tracking: "#89d38f",
+      normal: "#8da0b3"
+    });
+  });
+
   it("resolveForRoot resolves tokens for the supplied widget root", function () {
     const mod = loadFresh("shared/theme/ThemeResolver.js");
     const doc = createDoc({ value: false });

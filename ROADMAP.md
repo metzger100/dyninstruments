@@ -13,15 +13,14 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ### Planned integration directions
 
-- planned new clusters: `ais` (for example `aisTarget`)
+- AIS summary/workflow-entry parity is shipped in map cluster kind `aisTarget`
 - page/header utility parity: `alarm`
 - `default`: likely a dedicated utility/default widget instead of a cluster kind
 
 ### Practical implementation order
 
-1. AIS workflow widget: `AisTarget`
-2. Page/header utility parity: `Alarm`
-3. Utility/default parity widget: `Default`
+1. Page/header utility parity: `Alarm`
+2. Utility/default parity widget: `Default`
 
 ### Core interaction notes
 
@@ -42,7 +41,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | AvNav Widget                 | dyninstruments                                                               | Coverage                                    |
 | ---------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------- |
 | ActiveRoute                  | dyni_Nav_Instruments → `activeRoute`                                         | ✅ covered                                  |
-| AisTarget                    | —                                                                            | ❌ not covered yet                          |
+| AisTarget                    | dyni_Map_Instruments → `aisTarget`                                           | ✅ covered                                  |
 | Alarm                        | —                                                                            | ❌ not covered yet                          |
 | AnchorBearing                | dyni_Anchor_Instruments → `bearing`                                          | ✅ covered                                  |
 | AnchorDistance               | dyni_Anchor_Instruments → `distance`                                         | ✅ covered                                  |

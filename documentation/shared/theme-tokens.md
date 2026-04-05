@@ -43,6 +43,10 @@
 | `colors.alarm` | `--dyni-alarm` | `#ff7a76` | string |
 | `colors.laylineStb` | `--dyni-layline-stb` | `#82b683` | string |
 | `colors.laylinePort` | `--dyni-layline-port` | `#ff7a76` | string |
+| `colors.ais.warning` | `--dyni-ais-warning` | `#f39b52` | string |
+| `colors.ais.nearest` | `--dyni-ais-nearest` | `#66b8ff` | string |
+| `colors.ais.tracking` | `--dyni-ais-tracking` | `#89d38f` | string |
+| `colors.ais.normal` | `--dyni-ais-normal` | `#8da0b3` | string |
 | `ticks.majorLen` | `--dyni-radial-tick-major-len` | `12` | number |
 | `ticks.majorWidth` | `--dyni-radial-tick-major-width` | `3` | number |
 | `ticks.minorLen` | `--dyni-radial-tick-minor-len` | `7` | number |
@@ -75,6 +79,12 @@
 
 - `font.weight` is used for primary numeric value text in semicircle gauges, WindRadialWidget, CompassRadialWidget, ThreeValueTextWidget, and PositionCoordinateWidget.
 - `font.labelWeight` is used for captions/units, tick labels, dial cardinal labels, and disconnect overlay text.
+
+## AIS Accent Token Usage
+
+- `AisTargetHtmlFit` resolves state-accent colors from `colors.ais.<role>`.
+- Role mapping: `warning`, `nearest`, `tracking`, `normal`.
+- Accent rendering is token-driven (`ThemeResolver`) and does not read AvNav AIS style-store color keys.
 
 ## Pointer Factor Semantics
 

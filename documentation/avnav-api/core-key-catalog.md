@@ -60,6 +60,9 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `map` | `activeMeasure` | `map.activeMeasure` | `centerDisplay` |
 | `map` | `measureRhumbLine` | `properties.measureRhumbLine` | `centerDisplay` |
 | `map` | `lockPosition` | `map.lockPosition` | `centerDisplay` visibility |
+| `map` | `target` | `nav.ais.nearest` | `aisTarget` |
+| `map` | `trackedMmsi` | `nav.ais.trackedMmsi` | `aisTarget` |
+| `map` | `aisMarkAllWarning` | `properties.aisMarkAllWarning` | `aisTarget` |
 | `anchor` | `distance` | `nav.anchor.distance` | `distance` |
 | `anchor` | `watch` | `nav.anchor.watchDistance` | `watch` |
 | `anchor` | `bearing` | `nav.anchor.direction` | `bearing` |
@@ -98,6 +101,7 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `activeRoute` | `activeRouteName`, `activeRouteRemain`, `activeRouteEta`, `activeRouteNextCourse`, `activeRouteApproaching` | renderer wrapper (`ActiveRouteTextHtmlWidget`, html surface) using `formatDistance` (`activeRouteRemain`) + `[remainUnit]`, `formatTime` (`activeRouteEta`) + `[]`, `formatDirection` (`activeRouteNextCourse`) + `[]` | next course is degree-based; `NEXT` tile only renders while approaching |
 | `zoom` | `zoom`, `requiredZoom` | renderer wrapper (`MapZoomTextHtmlWidget`, html surface) using `formatDecimalOpt` (`zoom`, `requiredZoom`) + `[2, 1]` | `requiredZoom` is shown as parenthesized secondary text only when different from `zoom` |
 | `centerDisplay` | `centerPosition`, `centerMarkerCourse`, `centerMarkerDistance`, `centerCourse`, `centerDistance`, `activeMeasure`, `measureRhumbLine`, `lockPosition` | renderer wrapper (`CenterDisplayTextWidget`) using `formatLonLatsDecimal` (center coordinates) + `formatDirection` (relation courses) + `formatDistance` (relation distances) | map-cluster kind; measure row is computed client-side from `activeMeasure.getPointAtIndex(0)` and omitted when unavailable; widget visibility follows `!lockPosition \|\| editing` |
+| `aisTarget` | `target`, `trackedMmsi`, `aisMarkAllWarning` | renderer wrapper (`AisTargetTextHtmlWidget`, html surface) using `formatDistance` (`distance`, `cpa`) + `[metricUnit]`, `formatDecimal` (`tcpa / 60`) + `[3, Math.abs(tcpa) > 60 ? 0 : 2]`, `formatDirection` (`headingTo`) + `[]` | branch rule is `tcpa > 0` (`DST + DCPA + TCPA`) else `DST + BRG`; `trackedMmsi` raw equality is used for tracking role while dispatch uses normalized MMSI |
 | `xteDisplay` | `xte`, `cog`, `dtw`, `btw`, `wpName` | renderer wrapper (`XteDisplayWidget`) using `formatDistance` (`xte`, `dtw`) + `formatDirection360` (`cog`, `btw`) | fail-closed if required numeric inputs are missing |
 | `vmg` | `vmg` | `formatSpeed` + `[unit]` | speed text |
 | `positionBoat`, `positionWp` | `positionBoat` / `positionWp` | `formatLonLats` + coordinate formatter `formatLonLatsDecimal` | position object expected |
@@ -123,6 +127,9 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `map.activeMeasure` | Current measure object passed through live store state | medium | `viewer/util/keys.jsx`, `viewer/components/CenterDisplayWidget.jsx` (2026-03-08) |
 | `properties.measureRhumbLine` | Measure mode toggle for rhumb-line vs great-circle calculations | high | `viewer/util/keys.jsx`, `viewer/components/CenterDisplayWidget.jsx` (2026-03-08) |
 | `map.lockPosition` | Map lock state used to hide/show `CenterDisplay` | high | `viewer/components/MapPage.jsx` (2026-03-08) |
+| `nav.ais.nearest` | Host-selected AIS target summary object (`mmsi`, distance/CPA/TCPA/BRG fields, warning/nearest flags) | high | `viewer/components/AisTargetWidget.jsx` (2026-04-06) |
+| `nav.ais.trackedMmsi` | Host tracked AIS target identifier used for tracking-color precedence | high | `viewer/components/AisTargetWidget.jsx`, `viewer/util/propertyhandler.js` (2026-04-06) |
+| `properties.aisMarkAllWarning` | AIS warning policy toggle participating in warning-color precedence | high | `viewer/util/propertyhandler.js` (2026-04-06) |
 | `nav.gps.signalk.navigation.attitude.pitch` | SignalK pitch (radians) | medium | `config/clusters/vessel.js`, `server/handler/signalkhandler.py`, vessel mapper |
 | `nav.gps.signalk.navigation.attitude.roll` | SignalK roll (radians) | medium | `config/clusters/vessel.js`, `server/handler/signalkhandler.py`, vessel mapper |
 

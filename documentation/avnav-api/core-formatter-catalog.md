@@ -74,6 +74,20 @@ Source of truth: AvNav `viewer/util/formatter.js` snapshot verified on 2026-02-2
 | `zoom` | `formatDecimalOpt` | `[2, 1]` |
 | `requiredZoom` | `formatDecimalOpt` | `[2, 1]` |
 
+## Normative AisTarget Renderer Contract
+
+| Field | Formatter | formatterParameters |
+|---|---|---|
+| `distance` | `formatDistance` | `[dstUnit]` |
+| `cpa` | `formatDistance` | `[cpaUnit]` |
+| `tcpa / 60` | `formatDecimal` | `[3, Math.abs(tcpa) > 60 ? 0 : 2]` |
+| `headingTo` | `formatDirection` | `[]` |
+
+Branch semantics:
+
+- `tcpa > 0` -> show `DST + DCPA + TCPA`
+- `tcpa <= 0` -> show `DST + BRG`
+
 ## Normative CenterDisplay Renderer Contract
 
 | Field | Formatter | formatterParameters |
