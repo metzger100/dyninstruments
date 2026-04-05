@@ -1,7 +1,7 @@
 /**
- * Module: MapMapper - Cluster translation for map center-display and zoom kinds
+ * Module: MapMapper - Cluster translation for map center-display, zoom, and AIS target kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ClusterMapperToolkit
+ * Depends: ClusterMapperToolkit, AisTargetViewModel
  */
 
 (function (root, factory) {
@@ -11,7 +11,9 @@
 }(this, function () {
   "use strict";
 
-  function create() {
+  function create(def, Helpers) {
+    const aisTargetViewModel = Helpers.getModule("AisTargetViewModel").create(def, Helpers);
+
     function translate(props, toolkit) {
       const p = props || {};
       const cap = toolkit.cap;
@@ -63,6 +65,30 @@
           requiredZoom: num(p.requiredZoom),
           caption: cap("zoom"),
           unit: unit("zoom")
+        };
+      }
+
+      if (req === "aisTarget") {
+        return {
+          renderer: "AisTargetTextHtmlWidget",
+          domain: aisTargetViewModel.build(p),
+          layout: {
+            ratioThresholdNormal: num(p.aisTargetRatioThresholdNormal),
+            ratioThresholdFlat: num(p.aisTargetRatioThresholdFlat)
+          },
+          captions: {
+            dst: cap("aisTargetDst"),
+            cpa: cap("aisTargetCpa"),
+            tcpa: cap("aisTargetTcpa"),
+            brg: cap("aisTargetBrg")
+          },
+          units: {
+            dst: unit("aisTargetDst"),
+            cpa: unit("aisTargetCpa"),
+            tcpa: unit("aisTargetTcpa"),
+            brg: unit("aisTargetBrg")
+          },
+          default: p.default
         };
       }
 
