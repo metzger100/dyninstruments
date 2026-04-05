@@ -1,7 +1,7 @@
 /**
  * Module: ClusterRendererRouter - Strict kind/surface router with shell rendering and surface-controller helpers
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: PerfSpanHelper, ClusterKindCatalog, CanvasDomSurfaceAdapter, HtmlSurfaceController, RendererPropsWidget, ActiveRouteTextHtmlWidget, EditRouteTextHtmlWidget, RoutePointsTextHtmlWidget, MapZoomTextHtmlWidget
+ * Depends: PerfSpanHelper, ClusterKindCatalog, CanvasDomSurfaceAdapter, HtmlSurfaceController, RendererPropsWidget, ActiveRouteTextHtmlWidget, EditRouteTextHtmlWidget, RoutePointsTextHtmlWidget, MapZoomTextHtmlWidget, AisTargetTextHtmlWidget
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -40,6 +40,7 @@
       EditRouteTextHtmlWidget: Helpers.getModule("EditRouteTextHtmlWidget").create(def, Helpers),
       RoutePointsTextHtmlWidget: Helpers.getModule("RoutePointsTextHtmlWidget").create(def, Helpers),
       MapZoomTextHtmlWidget: Helpers.getModule("MapZoomTextHtmlWidget").create(def, Helpers),
+      AisTargetTextHtmlWidget: Helpers.getModule("AisTargetTextHtmlWidget").create(def, Helpers),
       CenterDisplayTextWidget: Helpers.getModule("CenterDisplayTextWidget").create(def, Helpers),
       WindRadialWidget: rendererPropsWidget.create(def, Helpers, "WindRadialWidget"),
       CompassRadialWidget: rendererPropsWidget.create(def, Helpers, "CompassRadialWidget"),

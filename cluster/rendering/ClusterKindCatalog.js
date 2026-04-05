@@ -73,6 +73,7 @@
     // map
     { cluster: "map", kind: "centerDisplay", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "CenterDisplayTextWidget", surface: "canvas-dom" },
     { cluster: "map", kind: "zoom", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "MapZoomTextHtmlWidget", surface: "html" },
+    { cluster: "map", kind: "aisTarget", viewModelId: "AisTargetViewModel", rendererId: "AisTargetTextHtmlWidget", surface: "html" },
 
     // anchor
     { cluster: "anchor", kind: "distance", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },

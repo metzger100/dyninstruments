@@ -85,6 +85,9 @@ describe("config/components.js", function () {
     expect(components.RadialTextFitting.deps).toBeUndefined();
     expect(components.RadialTextLayout.deps).toEqual(["RadialTextFitting"]);
     expect(components.ClusterMapperToolkit.deps).toEqual(["RadialAngleMath"]);
+    expect(components.AisTargetViewModel.globalKey).toBe("DyniAisTargetViewModel");
+    expect(components.AisTargetViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/AisTargetViewModel.js");
+    expect(components.AisTargetViewModel.deps).toBeUndefined();
     expect(components.ActiveRouteViewModel.globalKey).toBe("DyniActiveRouteViewModel");
     expect(components.ActiveRouteViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/ActiveRouteViewModel.js");
     expect(components.ActiveRouteViewModel.deps).toBeUndefined();
@@ -224,6 +227,10 @@ describe("config/components.js", function () {
     expect(components.MapZoomTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js");
     expect(components.MapZoomTextHtmlWidget.css).toBe("http://host/plugins/dyninstruments/widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css");
     expect(components.MapZoomTextHtmlWidget.deps).toEqual(["MapZoomHtmlFit", "HtmlWidgetUtils"]);
+    expect(components.AisTargetTextHtmlWidget.globalKey).toBe("DyniAisTargetTextHtmlWidget");
+    expect(components.AisTargetTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js");
+    expect(components.AisTargetTextHtmlWidget.css).toBeUndefined();
+    expect(components.AisTargetTextHtmlWidget.deps).toEqual(["HtmlWidgetUtils"]);
     expect(components.CanvasDomSurfaceAdapter.globalKey).toBe("DyniCanvasDomSurfaceAdapter");
     expect(components.CanvasDomSurfaceAdapter.js).toBe("http://host/plugins/dyninstruments/cluster/rendering/CanvasDomSurfaceAdapter.js");
     expect(components.CanvasDomSurfaceAdapter.deps).toEqual(["ThemeResolver", "PerfSpanHelper"]);
@@ -257,6 +264,7 @@ describe("config/components.js", function () {
     expect(components.ClusterRendererRouter.deps).toContain("EditRouteTextHtmlWidget");
     expect(components.ClusterRendererRouter.deps).toContain("RoutePointsTextHtmlWidget");
     expect(components.ClusterRendererRouter.deps).toContain("MapZoomTextHtmlWidget");
+    expect(components.ClusterRendererRouter.deps).toContain("AisTargetTextHtmlWidget");
     expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).toContain("PerfSpanHelper");
     expect(components.ClusterRendererRouter.deps).not.toContain("WindRadialWidget");
@@ -264,6 +272,7 @@ describe("config/components.js", function () {
     expect(components.NavMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/NavMapper.js");
     expect(components.NavMapper.deps).toEqual(["ActiveRouteViewModel", "EditRouteViewModel", "RoutePointsViewModel"]);
     expect(components.MapMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/MapMapper.js");
+    expect(components.MapMapper.deps).toEqual(["AisTargetViewModel"]);
     expect(components.ClusterMapperRegistry.deps).toContain("NavMapper");
     expect(components.ClusterMapperRegistry.deps).toContain("MapMapper");
     expect(components.WindMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/WindMapper.js");

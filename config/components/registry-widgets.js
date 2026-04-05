@@ -75,6 +75,12 @@
       globalKey: "DyniMapZoomTextHtmlWidget",
       deps: ["MapZoomHtmlFit", "HtmlWidgetUtils"]
     },
+    AisTargetTextHtmlWidget: {
+      js: BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js",
+      css: undefined,
+      globalKey: "DyniAisTargetTextHtmlWidget",
+      deps: ["HtmlWidgetUtils"]
+    },
     CenterDisplayTextWidget: {
       js: BASE + "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
       css: undefined,

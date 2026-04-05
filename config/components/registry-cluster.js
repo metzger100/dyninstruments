@@ -18,6 +18,11 @@
   const groups = shared.componentRegistryGroups = shared.componentRegistryGroups || {};
 
   groups.cluster = {
+    AisTargetViewModel: {
+      js: BASE + "cluster/viewmodels/AisTargetViewModel.js",
+      css: undefined,
+      globalKey: "DyniAisTargetViewModel"
+    },
     ActiveRouteViewModel: {
       js: BASE + "cluster/viewmodels/ActiveRouteViewModel.js",
       css: undefined,
@@ -85,6 +90,7 @@
         "EditRouteTextHtmlWidget",
         "RoutePointsTextHtmlWidget",
         "MapZoomTextHtmlWidget",
+        "AisTargetTextHtmlWidget",
         "CenterDisplayTextWidget",
         "RendererPropsWidget",
         "PerfSpanHelper"
@@ -126,7 +132,8 @@
     MapMapper: {
       js: BASE + "cluster/mappers/MapMapper.js",
       css: undefined,
-      globalKey: "DyniMapMapper"
+      globalKey: "DyniMapMapper",
+      deps: ["AisTargetViewModel"]
     },
     SpeedMapper: {
       js: BASE + "cluster/mappers/SpeedMapper.js",

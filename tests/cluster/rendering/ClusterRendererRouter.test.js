@@ -8,6 +8,7 @@ describe("ClusterRendererRouter", function () {
     "EditRouteTextHtmlWidget",
     "RoutePointsTextHtmlWidget",
     "MapZoomTextHtmlWidget",
+    "AisTargetTextHtmlWidget",
     "CenterDisplayTextWidget",
     "WindRadialWidget",
     "CompassRadialWidget",
@@ -112,6 +113,10 @@ describe("ClusterRendererRouter", function () {
       renderCanvas: false,
       renderHtml: vi.fn(() => "<div>edit-route</div>")
     });
+    rendererSpecs.AisTargetTextHtmlWidget = makeRendererSpec("AisTargetTextHtmlWidget", {
+      renderCanvas: false,
+      renderHtml: vi.fn(() => '<div class="dyni-ais-target-html"></div>')
+    });
     Object.assign(rendererSpecs, opts.rendererSpecs || {});
 
     const canvasAdapter = {
@@ -157,6 +162,7 @@ describe("ClusterRendererRouter", function () {
       EditRouteTextHtmlWidget: { create: () => rendererSpecs.EditRouteTextHtmlWidget },
       RoutePointsTextHtmlWidget: { create: () => rendererSpecs.RoutePointsTextHtmlWidget },
       MapZoomTextHtmlWidget: { create: () => rendererSpecs.MapZoomTextHtmlWidget },
+      AisTargetTextHtmlWidget: { create: () => rendererSpecs.AisTargetTextHtmlWidget },
       CenterDisplayTextWidget: { create: () => rendererSpecs.CenterDisplayTextWidget },
       RendererPropsWidget: {
         create: function (def, Helpers, targetRendererId) {
@@ -187,7 +193,7 @@ describe("ClusterRendererRouter", function () {
     const h = createHarness();
     const routes = h.router.listRoutes();
 
-    expect(routes).toHaveLength(54);
+    expect(routes).toHaveLength(55);
     routes.forEach(function (route) {
       const resolved = h.router.resolveRouteSpec({
         cluster: route.cluster,

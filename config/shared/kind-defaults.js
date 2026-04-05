@@ -161,6 +161,34 @@
     },
     MAP_KIND: {
       zoom: { cap: "ZOOM", unit: "" },
+      aisTargetDst: {
+        cap: "DST",
+        unit: "nm",
+        kind: "aisTarget",
+        captionName: "Distance caption",
+        unitName: "Distance unit"
+      },
+      aisTargetCpa: {
+        cap: "DCPA",
+        unit: "nm",
+        kind: "aisTarget",
+        captionName: "DCPA caption",
+        unitName: "DCPA unit"
+      },
+      aisTargetTcpa: {
+        cap: "TCPA",
+        unit: "min",
+        kind: "aisTarget",
+        captionName: "TCPA caption",
+        unitName: "TCPA unit"
+      },
+      aisTargetBrg: {
+        cap: "BRG",
+        unit: "\u00b0",
+        kind: "aisTarget",
+        captionName: "BRG caption",
+        unitName: "BRG unit"
+      },
       centerDisplayPosition: {
         cap: "CENTER",
         unit: "",

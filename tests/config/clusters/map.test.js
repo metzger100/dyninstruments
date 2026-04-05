@@ -31,11 +31,15 @@ describe("config/clusters/map.js", function () {
     expect(def.storeKeys.activeMeasure).toBe("map.activeMeasure");
     expect(def.storeKeys.measureRhumbLine).toBe("properties.measureRhumbLine");
     expect(def.storeKeys.lockPosition).toBe("map.lockPosition");
+    expect(def.storeKeys.target).toBe("nav.ais.nearest");
+    expect(def.storeKeys.trackedMmsi).toBe("nav.ais.trackedMmsi");
+    expect(def.storeKeys.aisMarkAllWarning).toBe("properties.aisMarkAllWarning");
 
     expect(def.editableParameters.kind.default).toBe("centerDisplay");
     expect(def.editableParameters.kind.list).toEqual([
       { name: "Center display", value: "centerDisplay" },
-      { name: "Zoom", value: "zoom" }
+      { name: "Zoom", value: "zoom" },
+      { name: "AIS target", value: "aisTarget" }
     ]);
 
     expect(def.editableParameters.centerDisplayRatioThresholdNormal.internal).toBe(true);
@@ -44,11 +48,27 @@ describe("config/clusters/map.js", function () {
     expect(def.editableParameters.centerDisplayRatioThresholdFlat.condition).toEqual({ kind: "centerDisplay" });
     expect(def.editableParameters.centerDisplayRatioThresholdNormal.default).toBe(1.1);
     expect(def.editableParameters.centerDisplayRatioThresholdFlat.default).toBe(2.4);
+    expect(def.editableParameters.aisTargetRatioThresholdNormal.internal).toBe(true);
+    expect(def.editableParameters.aisTargetRatioThresholdFlat.internal).toBe(true);
+    expect(def.editableParameters.aisTargetRatioThresholdNormal.condition).toEqual({ kind: "aisTarget" });
+    expect(def.editableParameters.aisTargetRatioThresholdFlat.condition).toEqual({ kind: "aisTarget" });
+    expect(def.editableParameters.aisTargetRatioThresholdNormal.default).toBe(1.2);
+    expect(def.editableParameters.aisTargetRatioThresholdFlat.default).toBe(3.8);
 
     expect(def.editableParameters.caption_zoom.condition).toEqual({ kind: "zoom" });
     expect(def.editableParameters.unit_zoom.condition).toEqual({ kind: "zoom" });
     expect(def.editableParameters.caption_zoom.default).toBe("ZOOM");
     expect(def.editableParameters.unit_zoom.default).toBe("");
+    expect(def.editableParameters.caption_aisTargetDst.default).toBe("DST");
+    expect(def.editableParameters.unit_aisTargetDst.default).toBe("nm");
+    expect(def.editableParameters.caption_aisTargetCpa.default).toBe("DCPA");
+    expect(def.editableParameters.unit_aisTargetCpa.default).toBe("nm");
+    expect(def.editableParameters.caption_aisTargetTcpa.default).toBe("TCPA");
+    expect(def.editableParameters.unit_aisTargetTcpa.default).toBe("min");
+    expect(def.editableParameters.caption_aisTargetBrg.default).toBe("BRG");
+    expect(def.editableParameters.unit_aisTargetBrg.default).toBe("°");
+    expect(def.editableParameters.caption_aisTargetTcpa.displayName).toBe("TCPA caption");
+    expect(def.editableParameters.unit_aisTargetBrg.displayName).toBe("BRG unit");
     expect(def.editableParameters.caption_centerDisplayPosition.condition).toEqual({ kind: "centerDisplay" });
     expect(def.editableParameters.unit_centerDisplayPosition.condition).toEqual({ kind: "centerDisplay" });
     expect(def.editableParameters.caption_centerDisplayMeasure.displayName).toBe("Measure caption");
