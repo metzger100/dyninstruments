@@ -112,7 +112,8 @@ describe("ThemeResolver", function () {
         "--dyni-pointer": "  #123456  ",
         "--dyni-linear-track-width": " 0.2 ",
         "--dyni-linear-pointer-width": " 0.9 ",
-        "--dyni-xte-line-width-factor": " 1.5 "
+        "--dyni-xte-line-width-factor": " 1.5 ",
+        "--dyni-ais-nearest": " #00ffaa "
       }]
     ]));
 
@@ -128,6 +129,8 @@ describe("ThemeResolver", function () {
     expect(out.linear.pointer.lengthFactor).toBe(2.2);
     expect(out.xte.lineWidthFactor).toBe(1.5);
     expect(out.xte.boatSizeFactor).toBe(mod.DEFAULTS.xte.boatSizeFactor);
+    expect(out.colors.ais.nearest).toBe("#00ffaa");
+    expect(out.colors.ais.warning).toBe(mod.DEFAULTS.colors.ais.warning);
   });
 
   it("resolveForRoot resolves tokens for the supplied widget root", function () {
@@ -288,6 +291,22 @@ describe("ThemeResolver", function () {
       tokenDef.cssVar === "--dyni-xte-boat-size-factor"
     ))).toBe(true);
     expect(mod.TOKEN_DEFS.some((tokenDef) => (
+      tokenDef.path === "colors.ais.warning" &&
+      tokenDef.cssVar === "--dyni-ais-warning"
+    ))).toBe(true);
+    expect(mod.TOKEN_DEFS.some((tokenDef) => (
+      tokenDef.path === "colors.ais.nearest" &&
+      tokenDef.cssVar === "--dyni-ais-nearest"
+    ))).toBe(true);
+    expect(mod.TOKEN_DEFS.some((tokenDef) => (
+      tokenDef.path === "colors.ais.tracking" &&
+      tokenDef.cssVar === "--dyni-ais-tracking"
+    ))).toBe(true);
+    expect(mod.TOKEN_DEFS.some((tokenDef) => (
+      tokenDef.path === "colors.ais.normal" &&
+      tokenDef.cssVar === "--dyni-ais-normal"
+    ))).toBe(true);
+    expect(mod.TOKEN_DEFS.some((tokenDef) => (
       tokenDef.path === "linear.track.widthFactor" &&
       tokenDef.cssVar === "--dyni-linear-track-width"
     ))).toBe(true);
@@ -316,6 +335,10 @@ describe("ThemeResolver", function () {
     expect(mod.DEFAULTS.linear.labels.insetFactor).toBe(1.8);
     expect(mod.DEFAULTS.xte.lineWidthFactor).toBe(1.5);
     expect(mod.DEFAULTS.xte.boatSizeFactor).toBe(1);
+    expect(mod.DEFAULTS.colors.ais.warning).toBe("#f39b52");
+    expect(mod.DEFAULTS.colors.ais.nearest).toBe("#66b8ff");
+    expect(mod.DEFAULTS.colors.ais.tracking).toBe("#89d38f");
+    expect(mod.DEFAULTS.colors.ais.normal).toBe("#8da0b3");
     expect(Object.prototype.hasOwnProperty.call(mod.DEFAULTS.radial.pointer, "sideFactor")).toBe(false);
     expect(Object.prototype.hasOwnProperty.call(mod.DEFAULTS.linear.pointer, "sideFactor")).toBe(false);
     expect(Object.keys(mod.DEFAULTS.xte).sort()).toEqual(["boatSizeFactor", "lineWidthFactor"]);

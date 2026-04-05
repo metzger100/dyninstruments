@@ -18,6 +18,17 @@
   const groups = shared.componentRegistryGroups = shared.componentRegistryGroups || {};
 
   groups.widgets = {
+    AisTargetRenderModel: {
+      js: BASE + "shared/widget-kits/nav/AisTargetRenderModel.js",
+      css: undefined,
+      globalKey: "DyniAisTargetRenderModel",
+      deps: ["AisTargetLayout", "HtmlWidgetUtils"]
+    },
+    AisTargetMarkup: {
+      js: BASE + "shared/widget-kits/nav/AisTargetMarkup.js",
+      css: undefined,
+      globalKey: "DyniAisTargetMarkup"
+    },
     ActiveRouteTextHtmlWidget: {
       js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
       css: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css",
@@ -79,7 +90,7 @@
       js: BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js",
       css: undefined,
       globalKey: "DyniAisTargetTextHtmlWidget",
-      deps: ["HtmlWidgetUtils"]
+      deps: ["AisTargetHtmlFit", "HtmlWidgetUtils", "AisTargetRenderModel", "AisTargetMarkup"]
     },
     CenterDisplayTextWidget: {
       js: BASE + "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",

@@ -18,6 +18,18 @@
   const groups = shared.componentRegistryGroups = shared.componentRegistryGroups || {};
 
   groups.sharedFoundation = {
+    AisTargetLayout: {
+      js: BASE + "shared/widget-kits/nav/AisTargetLayout.js",
+      css: undefined,
+      globalKey: "DyniAisTargetLayout",
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+    },
+    AisTargetHtmlFit: {
+      js: BASE + "shared/widget-kits/nav/AisTargetHtmlFit.js",
+      css: undefined,
+      globalKey: "DyniAisTargetHtmlFit",
+      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils"]
+    },
     ActiveRouteHtmlFit: {
       js: BASE + "shared/widget-kits/nav/ActiveRouteHtmlFit.js",
       css: undefined,

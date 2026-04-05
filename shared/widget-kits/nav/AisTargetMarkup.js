@@ -1,0 +1,143 @@
+/**
+ * Module: AisTargetMarkup - Pure HTML assembly owner for AIS target renderer output
+ * Documentation: documentation/architecture/cluster-widget-system.md
+ * Depends: none
+ */
+(function (root, factory) {
+  if (typeof define === "function" && define.amd) define([], factory);
+  else if (typeof module === "object" && module.exports) module.exports = factory();
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetMarkup = factory(); }
+}(this, function () {
+  "use strict";
+
+  function toObject(value) {
+    return value && typeof value === "object" ? value : {};
+  }
+
+  function toText(value) {
+    return value == null ? "" : String(value);
+  }
+
+  function renderMetric(args) {
+    const cfg = args || {};
+    const metricId = cfg.metricId;
+    const metric = toObject(cfg.metric);
+    const metricFit = toObject(cfg.metricFit);
+    const htmlUtils = cfg.htmlUtils;
+
+    return ""
+      + '<div class="dyni-ais-target-metric dyni-ais-target-metric-' + metricId + '">'
+      + '<div class="dyni-ais-target-metric-caption"'
+      + htmlUtils.toStyleAttr(metricFit.captionStyle)
+      + ">"
+      + htmlUtils.escapeHtml(toText(metric.captionText))
+      + "</div>"
+      + '<div class="dyni-ais-target-metric-value"'
+      + htmlUtils.toStyleAttr(metricFit.valueStyle)
+      + ">"
+      + htmlUtils.escapeHtml(toText(metric.valueText))
+      + "</div>"
+      + '<div class="dyni-ais-target-metric-unit"'
+      + htmlUtils.toStyleAttr(metricFit.unitStyle)
+      + ">"
+      + htmlUtils.escapeHtml(toText(metric.unitText))
+      + "</div>"
+      + "</div>";
+  }
+
+  function renderDataBody(model, fit, htmlUtils) {
+    const metricIds = model.visibleMetricIds;
+    const metrics = toObject(model.metrics);
+    const metricFits = toObject(fit.metrics);
+
+    let identityHtml = "";
+    if (model.mode === "flat") {
+      identityHtml = ""
+        + '<div class="dyni-ais-target-identity">'
+        + '<div class="dyni-ais-target-front-initial"'
+        + htmlUtils.toStyleAttr(fit.frontInitialStyle)
+        + ">"
+        + htmlUtils.escapeHtml(toText(model.frontInitialText))
+        + "</div>"
+        + "</div>";
+    } else {
+      identityHtml = ""
+        + '<div class="dyni-ais-target-identity">'
+        + '<div class="dyni-ais-target-name"'
+        + htmlUtils.toStyleAttr(fit.nameStyle)
+        + ">"
+        + htmlUtils.escapeHtml(toText(model.nameText))
+        + "</div>"
+        + '<div class="dyni-ais-target-front"'
+        + htmlUtils.toStyleAttr(fit.frontStyle)
+        + ">"
+        + htmlUtils.escapeHtml(toText(model.frontText))
+        + "</div>"
+        + "</div>";
+    }
+
+    let metricsHtml = "";
+    for (let i = 0; i < metricIds.length; i += 1) {
+      const id = metricIds[i];
+      metricsHtml += renderMetric({
+        metricId: id,
+        metric: metrics[id],
+        metricFit: metricFits[id],
+        htmlUtils: htmlUtils
+      });
+    }
+
+    return ""
+      + identityHtml
+      + '<div class="dyni-ais-target-metrics">'
+      + metricsHtml
+      + "</div>";
+  }
+
+  function create() {
+    function render(args) {
+      const cfg = args || {};
+      const model = toObject(cfg.model);
+      const fit = toObject(cfg.fit);
+      const htmlUtils = cfg.htmlUtils;
+      const wrapperClasses = model.wrapperClasses;
+
+      const wrapperOnClick = model.captureClicks === true ? ' onclick="catchAll"' : "";
+      const hotspotHtml = model.showHotspot === true
+        ? '<div class="dyni-ais-target-open-hotspot" onclick="aisTargetShowInfo"></div>'
+        : "";
+      const accentHtml = model.hasAccent === true
+        ? ('<div class="dyni-ais-target-state-accent"' + htmlUtils.toStyleAttr(fit.accentStyle) + "></div>")
+        : "";
+
+      let bodyHtml = "";
+      if (model.renderState === "placeholder") {
+        bodyHtml = ""
+          + '<div class="dyni-ais-target-placeholder-text"'
+          + htmlUtils.toStyleAttr(fit.placeholderStyle)
+          + ">"
+          + htmlUtils.escapeHtml(toText(model.placeholderText))
+          + "</div>";
+      } else if (model.renderState === "data") {
+        bodyHtml = renderDataBody(model, fit, htmlUtils);
+      }
+
+      return ""
+        + '<div class="' + wrapperClasses.join(" ") + '"'
+        + wrapperOnClick
+        + htmlUtils.toStyleAttr(model.wrapperStyle)
+        + ">"
+        + accentHtml
+        + hotspotHtml
+        + bodyHtml
+        + "</div>";
+    }
+
+    return {
+      id: "AisTargetMarkup",
+      render: render
+    };
+  }
+
+  return { id: "AisTargetMarkup", create: create };
+}));
