@@ -8,285 +8,336 @@ describe("tests/layouts/gpspage-all-widgets.json", function () {
     return JSON.parse(fs.readFileSync(fixturePath, "utf8"));
   }
 
-  function stripLabelFields(value) {
-    if (Array.isArray(value)) {
-      return value.map(stripLabelFields);
-    }
-    if (!value || typeof value !== "object") {
-      return value;
-    }
-
-    const out = {};
-    Object.keys(value).forEach(function (key) {
-      if (key === "caption" || key === "unit") return;
-      if (key.indexOf("caption_") === 0) return;
-      if (key.indexOf("unit_") === 0) return;
-      out[key] = stripLabelFields(value[key]);
+  function slotKinds(page, slotName) {
+    return (page[slotName] || []).map(function (entry) {
+      return entry.kind;
     });
-    return out;
   }
 
-  function findWidget(page, kind) {
-    const slotNames = Object.keys(page);
-    for (let i = 0; i < slotNames.length; i += 1) {
-      const slot = page[slotNames[i]];
+  function slotNames(page, slotName) {
+    return (page[slotName] || []).map(function (entry) {
+      return entry.name;
+    });
+  }
+
+  function findWidget(page, kindOrName) {
+    const pageSlotNames = Object.keys(page);
+    for (let i = 0; i < pageSlotNames.length; i += 1) {
+      const slot = page[pageSlotNames[i]];
       if (!Array.isArray(slot)) continue;
       const widget = slot.find(function (entry) {
-        return entry && entry.kind === kind;
+        return entry && (entry.kind === kindOrName || entry.name === kindOrName);
       });
       if (widget) return widget;
     }
-    throw new Error("Missing widget kind " + kind);
+    throw new Error("Missing widget " + kindOrName);
   }
 
-  it("keeps gpspage1 and gpspage2 aligned except for label overrides", function () {
+  it("provides four gps showcase/comparison pages plus nav/edit pages", function () {
     const layout = loadLayout();
-    const page1 = layout.widgets.gpspage1;
-    const page2 = layout.widgets.gpspage2;
 
     expect(layout.layoutVersion).toBe(1);
     expect(layout.properties.layers.ais).toBe(true);
-    expect(Object.keys(layout.widgets)).toEqual(expect.arrayContaining([
+    expect(Object.keys(layout.widgets)).toEqual([
       "gpspage1",
       "gpspage2",
       "gpspage3",
       "gpspage4",
-      "gpspage5"
-    ]));
-
-    expect(page1.left).toHaveLength(12);
-    expect(page1.left_anchor).toHaveLength(8);
-    expect(page1.right).toHaveLength(4);
-    expect(page2.left).toHaveLength(12);
-    expect(page2.left_anchor).toHaveLength(8);
-    expect(page2.right).toHaveLength(4);
-
-    expect(stripLabelFields(page1)).toEqual(stripLabelFields(page2));
+      "navpage",
+      "editroutepage"
+    ]);
   });
 
-  it("uses default labels on gpspage1 and expanded labels on gpspage2", function () {
+  it("keeps gpspage1 and gpspage2 aligned and covers the intended dyni renderers", function () {
     const layout = loadLayout();
     const page1 = layout.widgets.gpspage1;
     const page2 = layout.widgets.gpspage2;
 
-    expect(findWidget(page1, "hdtRadial")).toEqual({
-      kind: "hdtRadial",
-      name: "dyni_CourseHeading_Instruments",
-      weight: 1.5
-    });
-    expect(findWidget(page1, "activeRoute")).toEqual({
-      kind: "activeRoute",
-      name: "dyni_Nav_Instruments",
-      weight: 1.5
+    expect(page1.left).toHaveLength(7);
+    expect(page1.m1).toHaveLength(7);
+    expect(page1.right).toHaveLength(7);
+
+    expect(page2.left).toHaveLength(7);
+    expect(page2.m1).toHaveLength(7);
+    expect(page2.right).toHaveLength(7);
+
+    expect(slotKinds(page1, "left")).toEqual([
+      "hdtRadial",
+      "hdtLinear",
+      "sogRadial",
+      "sogLinear",
+      "depthRadial",
+      "depthLinear",
+      "tempRadial"
+    ]);
+
+    expect(slotKinds(page1, "m1")).toEqual([
+      "tempLinear",
+      "angleTrueRadial",
+      "angleTrueLinear",
+      "voltageRadial",
+      "voltageLinear",
+      "cog",
+      "positionBoat"
+    ]);
+
+    expect(slotKinds(page1, "right")).toEqual([
+      "activeRoute",
+      "centerDisplay",
+      "xteDisplay",
+      "zoom",
+      "aisTarget",
+      "editRoute",
+      "routePoints"
+    ]);
+
+    expect(slotKinds(page2, "left")).toEqual(slotKinds(page1, "left"));
+    expect(slotKinds(page2, "m1")).toEqual(slotKinds(page1, "m1"));
+    expect(slotKinds(page2, "right")).toEqual(slotKinds(page1, "right"));
+  });
+
+  it("uses explicit non-default settings on gpspage2", function () {
+    const layout = loadLayout();
+    const page2 = layout.widgets.gpspage2;
+
+    expect(findWidget(page2, "hdtLinear")).toMatchObject({
+      caption_hdtLinear: "Heading True — Linear Compass Tape",
+      unit_hdtLinear: "degrees true",
+      compassLinearTickMajor: 45,
+      compassLinearTickMinor: 15,
+      compassLinearShowEndLabels: true
     });
 
-    const page2Expectations = [
-      {
-        kind: "hdtRadial",
-        fields: {
-          caption_hdtRadial: "True Heading - Radial",
-          unit_hdtRadial: "Degree"
-        }
-      },
-      {
-        kind: "hdtLinear",
-        fields: {
-          caption_hdtLinear: "True Heading - Linear",
-          unit_hdtLinear: "Degree"
-        }
-      },
-      {
-        kind: "sogRadial",
-        fields: {
-          caption_sogRadial: "Speed Over Ground - Radial",
-          unit_sogRadial: "Knot"
-        }
-      },
-      {
-        kind: "sogLinear",
-        fields: {
-          caption_sogLinear: "Speed Over Ground - Linear",
-          unit_sogLinear: "Knot"
-        }
-      },
-      {
-        kind: "depthRadial",
-        fields: {
-          caption_depthRadial: "Depth Below Transducer - Radial",
-          unit_depthRadial: "Meter"
-        }
-      },
-      {
-        kind: "depthLinear",
-        fields: {
-          caption_depthLinear: "Depth Below Transducer - Linear",
-          unit_depthLinear: "Meter"
-        }
-      },
-      {
-        kind: "tempRadial",
-        fields: {
-          caption_tempRadial: "Water Temperature - Radial",
-          unit_tempRadial: "Degree Celsius"
-        }
-      },
-      {
-        kind: "tempLinear",
-        fields: {
-          caption_tempLinear: "Water Temperature - Linear",
-          unit_tempLinear: "Degree Celsius"
-        }
-      },
-      {
-        kind: "angleTrueRadial",
-        fields: {
-          caption_angleTrueRadialAngle: "True Wind Angle - Radial",
-          unit_angleTrueRadialAngle: "Degree",
-          caption_angleTrueRadialSpeed: "True Wind Speed - Radial",
-          unit_angleTrueRadialSpeed: "Knot"
-        }
-      },
-      {
-        kind: "angleTrueLinear",
-        fields: {
-          caption_angleTrueLinearAngle: "True Wind Angle - Linear",
-          unit_angleTrueLinearAngle: "Degree",
-          caption_angleTrueLinearSpeed: "True Wind Speed - Linear",
-          unit_angleTrueLinearSpeed: "Knot"
-        }
-      },
-      {
-        kind: "voltageRadial",
-        fields: {
-          caption_voltageRadial: "Battery Voltage - Radial",
-          unit_voltageRadial: "Volt"
-        }
-      },
-      {
-        kind: "voltageLinear",
-        fields: {
-          caption_voltageLinear: "Battery Voltage - Linear",
-          unit_voltageLinear: "Volt"
-        }
-      },
-      {
-        kind: "cog",
-        fields: {
-          caption_cog: "Course Over Ground",
-          unit_cog: "Degree"
-        }
-      },
-      {
-        kind: "sog",
-        fields: {
-          caption_sog: "Speed Over Ground",
-          unit_sog: "Knot"
-        }
-      },
-      {
-        kind: "dst",
-        fields: {
-          caption_dst: "Distance to Waypoint",
-          unit_dst: "Nautical Mile"
-        }
-      },
-      {
-        kind: "distance",
-        fields: {
-          caption_distance: "Distance From Anchor",
-          unit_distance: "Meter"
-        }
-      },
-      {
-        kind: "voltage",
-        fields: {
-          caption_voltage: "Battery Voltage",
-          unit_voltage: "Volt"
-        }
-      },
-      {
-        kind: "pitch",
-        fields: {
-          caption_pitch: "Pitch Angle",
-          unit_pitch: "Degree"
-        }
-      },
-      {
-        kind: "roll",
-        fields: {
-          caption_roll: "Roll Angle",
-          unit_roll: "Degree"
-        }
-      },
-      {
-        kind: "positionBoat",
-        fields: {
-          caption_positionBoat: "Boat Position",
-          unit_positionBoat: ""
-        }
-      },
-      {
-        kind: "activeRoute",
-        fields: {
-          caption_activeRouteRemain: "Route Distance Remaining",
-          unit_activeRouteRemain: "Nautical Mile",
-          caption_activeRouteEta: "Estimated Time of Arrival",
-          unit_activeRouteEta: "",
-          caption_activeRouteNextCourse: "Next Course",
-          unit_activeRouteNextCourse: "Degree"
-        }
-      },
-      {
-        kind: "centerDisplay",
-        fields: {
-          caption_centerDisplayPosition: "Center Position",
-          unit_centerDisplayPosition: "",
-          caption_centerDisplayMarker: "Waypoint Distance",
-          unit_centerDisplayMarker: "Nautical Mile",
-          caption_centerDisplayBoat: "Boat Distance",
-          unit_centerDisplayBoat: "Nautical Mile",
-          caption_centerDisplayMeasure: "Measure Distance",
-          unit_centerDisplayMeasure: "Nautical Mile"
-        }
-      },
-      {
-        kind: "xteDisplay",
-        fields: {
-          caption_xteDisplayXte: "Cross Track Error",
-          unit_xteDisplayXte: "Nautical Mile",
-          caption_xteDisplayCog: "Course Over Ground",
-          unit_xteDisplayCog: "Degree",
-          caption_xteDisplayDst: "Distance to Waypoint",
-          unit_xteDisplayDst: "Nautical Mile",
-          caption_xteDisplayBrg: "Bearing to Waypoint",
-          unit_xteDisplayBrg: "Degree"
-        }
-      },
-      {
-        kind: "zoom",
-        fields: {
-          caption_zoom: "Map Zoom Level",
-          unit_zoom: ""
-        }
-      }
-    ];
+    expect(findWidget(page2, "sogRadial")).toMatchObject({
+      caption_sogRadial: "Speed Over Ground — Radial Gauge",
+      unit_sogRadial: "knots through GPS",
+      speedRadialMaxValue: 16,
+      speedRadialShowEndLabels: true,
+      speedRadialWarningFrom: 12,
+      speedRadialAlarmFrom: 14
+    });
 
-    page2Expectations.forEach(function (entry) {
-      const widget = findWidget(page2, entry.kind);
-      Object.keys(entry.fields).forEach(function (key) {
-        expect(widget[key]).toBe(entry.fields[key]);
+    expect(findWidget(page2, "depthLinear")).toMatchObject({
+      caption_depthLinear: "Depth Below Transducer — Linear Gauge",
+      unit_depthLinear: "meters below transducer",
+      depthLinearMaxValue: 12,
+      depthLinearShowEndLabels: true,
+      depthLinearWarningFrom: 4,
+      depthLinearAlarmFrom: 2
+    });
+
+    expect(findWidget(page2, "tempLinear")).toMatchObject({
+      caption_tempLinear: "Water Temperature — Linear Gauge",
+      unit_tempLinear: "degrees Celsius",
+      tempLinearMinValue: -5,
+      tempLinearMaxValue: 45,
+      tempLinearShowEndLabels: true,
+      tempLinearWarningEnabled: true,
+      tempLinearAlarmEnabled: true
+    });
+
+    expect(findWidget(page2, "angleTrueLinear")).toMatchObject({
+      caption_angleTrueLinearAngle: "True Wind Angle — Linear",
+      unit_angleTrueLinearAngle: "degrees relative",
+      caption_angleTrueLinearSpeed: "True Wind Speed — Linear",
+      unit_angleTrueLinearSpeed: "knots apparent-to-true",
+      windLinearTickMajor: 45,
+      windLinearShowEndLabels: true,
+      windLinearLayMin: 30,
+      windLinearLayMax: 60
+    });
+
+    expect(findWidget(page2, "voltageRadial")).toMatchObject({
+      caption_voltageRadial: "Battery Voltage — Radial Gauge",
+      unit_voltageRadial: "volts DC",
+      voltageRadialMinValue: 10.5,
+      voltageRadialMaxValue: 15.5,
+      voltageRadialShowEndLabels: true,
+      voltageRadialWarningFrom: 12.4,
+      voltageRadialAlarmFrom: 11.8
+    });
+
+    expect(findWidget(page2, "cog")).toMatchObject({
+      caption_cog: "Course Over Ground — Primary Numeric",
+      unit_cog: "degrees true",
+      leadingZero: false
+    });
+
+    expect(findWidget(page2, "positionBoat")).toMatchObject({
+      caption_positionBoat: "Boat Position — Current GPS Fix",
+      unit_positionBoat: ""
+    });
+
+    expect(findWidget(page2, "activeRoute")).toMatchObject({
+      caption_activeRouteRemain: "Remaining Route Distance",
+      unit_activeRouteRemain: "nautical miles",
+      caption_activeRouteEta: "Estimated Time of Arrival",
+      caption_activeRouteNextCourse: "Upcoming Course Change"
+    });
+
+    expect(findWidget(page2, "centerDisplay")).toMatchObject({
+      caption_centerDisplayPosition: "Center Coordinates",
+      caption_centerDisplayMarker: "Waypoint Distance From Center",
+      caption_centerDisplayBoat: "Boat Distance From Center",
+      caption_centerDisplayMeasure: "Measured Segment Distance"
+    });
+
+    expect(findWidget(page2, "xteDisplay")).toMatchObject({
+      caption_xteDisplayXte: "Cross Track Error",
+      caption_xteDisplayCog: "Course Over Ground",
+      caption_xteDisplayDst: "Distance To Waypoint",
+      caption_xteDisplayBrg: "Bearing To Waypoint",
+      showWpNameXteDisplay: true,
+      leadingZero: false
+    });
+
+    expect(findWidget(page2, "zoom")).toMatchObject({
+      caption_zoom: "Map Zoom — Active Scale"
+    });
+
+    expect(findWidget(page2, "aisTarget")).toMatchObject({
+      caption_aisTargetDst: "Target Distance",
+      caption_aisTargetCpa: "Closest Point of Approach",
+      caption_aisTargetTcpa: "Time To Closest Point",
+      caption_aisTargetBrg: "Target Bearing"
+    });
+
+    expect(findWidget(page2, "editRoute")).toMatchObject({
+      caption_editRoutePts: "Planned Waypoints",
+      caption_editRouteDst: "Leg Distance Remaining",
+      unit_editRouteDst: "nautical miles",
+      caption_editRouteRte: "Route Distance Remaining",
+      unit_editRouteRte: "nautical miles",
+      caption_editRouteEta: "Estimated Route Arrival"
+    });
+
+    expect(findWidget(page2, "routePoints")).toMatchObject({
+      showHeader: false,
+      distanceUnit: "nautical miles",
+      courseUnit: "degrees true",
+      waypointsText: "planned waypoints"
+    });
+  });
+
+  it("uses gpspage3 and gpspage4 as four-column dyni-vs-AvNav comparison pages", function () {
+    const layout = loadLayout();
+    const page3 = layout.widgets.gpspage3;
+    const page4 = layout.widgets.gpspage4;
+
+    expect(slotKinds(page3, "left")).toEqual([
+      "cog",
+      "hdtLinear",
+      "hdtRadial",
+      "sogRadial",
+      "tempLinear",
+      "depthLinear"
+    ]);
+
+    expect(slotNames(page3, "m1")).toEqual([
+      "COG",
+      "linGauge_Compass",
+      "radGauge_Compass",
+      "radGauge_Speed",
+      "linGauge_Temperature",
+      "DepthBelowTransducer"
+    ]);
+
+    expect(slotKinds(page3, "m2")).toEqual([
+      "positionBoat",
+      "rteEta",
+      "xteDisplay",
+      "dateTime",
+      "timeStatus",
+      "positionWp"
+    ]);
+
+    expect(slotNames(page3, "right")).toEqual([
+      "Position",
+      "RteEta",
+      "XteDisplay",
+      "DateTime",
+      "TimeStatus",
+      "WpPosition"
+    ]);
+
+    expect(slotKinds(page4, "left").slice(0, 5)).toEqual([
+      "angleApparentLinear",
+      "angleApparentRadial",
+      "pitch",
+      "roll",
+      "activeRoute"
+    ]);
+    expect(page4.left[5]).toMatchObject({
+      name: "dyni_Map_Instruments",
+      weight: 1
+    });
+    expect(page4.left[5].kind).toBeUndefined();
+
+    expect(slotNames(page4, "m1")).toEqual([
+      "WindDisplay",
+      "WindGraphics",
+      "signalKPitch",
+      "signalKRoll",
+      "ActiveRoute",
+      "CenterDisplay"
+    ]);
+
+    expect(slotKinds(page4, "m2")).toEqual([
+      "zoom",
+      "editRoute",
+      "routePoints",
+      "aisTarget",
+      "positionWp",
+      "voltageLinear"
+    ]);
+
+    expect(slotNames(page4, "right")).toEqual([
+      "Zoom",
+      "EditRoute",
+      "RoutePoints",
+      "AisTarget",
+      "WpPosition",
+      "signalKPitch"
+    ]);
+
+    ["left", "m2"].forEach(function (slotName) {
+      page3[slotName].forEach(function (entry) {
+        expect(entry.name.indexOf("dyni_")).toBe(0);
+      });
+    });
+
+    ["m1", "right"].forEach(function (slotName) {
+      page3[slotName].forEach(function (entry) {
+        expect(entry.name.indexOf("dyni_")).toBe(-1);
+      });
+    });
+
+    page4.left.forEach(function (entry) {
+      expect(entry.name.indexOf("dyni_")).toBe(0);
+    });
+
+    page4.m2.forEach(function (entry) {
+      expect(entry.name.indexOf("dyni_")).toBe(0);
+    });
+
+    ["m1", "right"].forEach(function (slotName) {
+      page4[slotName].forEach(function (entry) {
+        expect(entry.name.indexOf("dyni_")).toBe(-1);
       });
     });
   });
 
-  it("keeps gpspage3 to gpspage5 unchanged", function () {
+  it("keeps navpage and editroutepage available", function () {
     const layout = loadLayout();
 
-    expect(layout.widgets.gpspage3.left[0].kind).toBe("voltageLinear");
-    expect(layout.widgets.gpspage3.left[0].storeKeys.value).toBe("nav.gps.depthBelowTransducer");
-    expect(layout.widgets.gpspage4.m1[0].caption).toBe("COG");
-    expect(layout.widgets.gpspage4.m2[2].name).toBe("WindGraphics");
-    expect(layout.widgets.gpspage5.left[0].name).toBe("ActiveRoute");
-    expect(layout.widgets.gpspage5.right[2].kind).toBe("zoom");
+    expect(layout.widgets.navpage.left[0].name).toBe("dyni_Map_Instruments");
+    expect(layout.widgets.navpage.bottomRight[3].kind).toBe("positionBoat");
+
+    expect(layout.widgets.editroutepage.left[0]).toMatchObject({
+      name: "dyni_Nav_Instruments",
+      kind: "editRoute"
+    });
+    expect(layout.widgets.editroutepage.left[2].name).toBe("EditRoute");
+    expect(layout.widgets.editroutepage.top_small[0].name).toBe("EditRoute");
   });
 });

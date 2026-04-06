@@ -1,5 +1,7 @@
 /* Copy this whole block into AvNav user.css for manual testing.
-   Fixture only, not production styling. */
+   Fixture only, not production styling.
+   Uses all available theme tokens with deliberately non-default values.
+*/
 
 .widget.dyniplugin {
   --dyni-theme-preset: default;
@@ -7,9 +9,13 @@
   /* Colors */
   --dyni-pointer: #00f5ff;
   --dyni-warning: #ff00e6;
-  --dyni-alarm: #18ff52;
-  --dyni-layline-stb: #006dff;
-  --dyni-layline-port: #ff2a00;
+  --dyni-alarm: #2bff00;
+  --dyni-layline-stb: #0047ff;
+  --dyni-layline-port: #ff6a00;
+  --dyni-ais-warning: #ff8a00;
+  --dyni-ais-nearest: #00d0ff;
+  --dyni-ais-tracking: #5cff7a;
+  --dyni-ais-normal: #d0d7e0;
 
   /* Radial */
   --dyni-radial-tick-major-len: 22;

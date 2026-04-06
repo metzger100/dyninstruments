@@ -1,5 +1,5 @@
 {
-  "description": "The system default layout. No keys and no properties.",
+  "description": "Dyninstruments test layout: renderer showcase on gpspage1/2 and dyni-vs-AvNav comparisons on gpspage3/4.",
   "layoutVersion": 1,
   "properties": {
     "layers": {
@@ -12,126 +12,111 @@
         {
           "kind": "hdtRadial",
           "name": "dyni_CourseHeading_Instruments",
-          "weight": 1.5
+          "weight": 1.25
         },
         {
           "kind": "hdtLinear",
           "name": "dyni_CourseHeading_Instruments",
-          "weight": 1.5
+          "weight": 1.1
         },
         {
           "kind": "sogRadial",
           "name": "dyni_Speed_Instruments",
-          "weight": 1.5
+          "weight": 1.2
         },
         {
           "kind": "sogLinear",
           "name": "dyni_Speed_Instruments",
-          "weight": 1.5
+          "weight": 1.05
         },
         {
           "kind": "depthRadial",
           "name": "dyni_Environment_Instruments",
-          "weight": 1.25
+          "weight": 1.2
         },
         {
           "kind": "depthLinear",
           "name": "dyni_Environment_Instruments",
-          "weight": 1.25
+          "weight": 1.05
         },
         {
           "kind": "tempRadial",
           "name": "dyni_Environment_Instruments",
-          "weight": 1.25
-        },
+          "weight": 1.15
+        }
+      ],
+      "m1": [
         {
           "kind": "tempLinear",
           "name": "dyni_Environment_Instruments",
-          "weight": 1.25
+          "weight": 1
         },
         {
           "kind": "angleTrueRadial",
           "name": "dyni_Wind_Instruments",
-          "weight": 1.5
+          "weight": 1.3
         },
         {
           "kind": "angleTrueLinear",
           "name": "dyni_Wind_Instruments",
-          "weight": 1.5
+          "weight": 1.15
         },
         {
           "kind": "voltageRadial",
           "name": "dyni_Vessel_Instruments",
-          "weight": 1.25
+          "weight": 1.15
         },
         {
           "kind": "voltageLinear",
           "name": "dyni_Vessel_Instruments",
-          "weight": 1.25
-        }
-      ],
-      "left_anchor": [
+          "weight": 1
+        },
         {
           "kind": "cog",
           "name": "dyni_CourseHeading_Instruments",
-          "weight": 1
-        },
-        {
-          "kind": "sog",
-          "name": "dyni_Speed_Instruments",
-          "weight": 1
-        },
-        {
-          "kind": "dst",
-          "name": "dyni_Nav_Instruments",
-          "weight": 1
-        },
-        {
-          "kind": "distance",
-          "name": "dyni_Anchor_Instruments",
-          "weight": 1
-        },
-        {
-          "kind": "voltage",
-          "name": "dyni_Vessel_Instruments",
-          "weight": 1
-        },
-        {
-          "kind": "pitch",
-          "name": "dyni_Vessel_Instruments",
-          "weight": 1
-        },
-        {
-          "kind": "roll",
-          "name": "dyni_Vessel_Instruments",
-          "weight": 1
+          "weight": 0.95
         },
         {
           "kind": "positionBoat",
           "name": "dyni_Nav_Instruments",
-          "weight": 1.25
+          "weight": 1.2
         }
       ],
       "right": [
         {
           "kind": "activeRoute",
           "name": "dyni_Nav_Instruments",
-          "weight": 1.5
+          "weight": 1.35
         },
         {
           "kind": "centerDisplay",
           "name": "dyni_Map_Instruments",
-          "weight": 1.5
+          "weight": 1.25
         },
         {
           "kind": "xteDisplay",
           "name": "dyni_Nav_Instruments",
-          "weight": 1.5
+          "weight": 1.3
         },
         {
           "kind": "zoom",
           "name": "dyni_Map_Instruments",
+          "weight": 0.85
+        },
+        {
+          "kind": "aisTarget",
+          "name": "dyni_Map_Instruments",
           "weight": 1.25
+        },
+        {
+          "kind": "editRoute",
+          "name": "dyni_Nav_Instruments",
+          "weight": 1.25
+        },
+        {
+          "kind": "routePoints",
+          "name": "dyni_Nav_Instruments",
+          "weight": 1.55
         }
       ]
     },
@@ -140,147 +125,185 @@
         {
           "kind": "hdtRadial",
           "name": "dyni_CourseHeading_Instruments",
-          "weight": 1.5,
-          "caption_hdtRadial": "True Heading - Radial",
-          "unit_hdtRadial": "Degree"
+          "weight": 1.25,
+          "caption_hdtRadial": "Heading True — Full Circle Compass",
+          "unit_hdtRadial": "degrees true",
+          "captionUnitScale": 1.25
         },
         {
           "kind": "hdtLinear",
           "name": "dyni_CourseHeading_Instruments",
-          "weight": 1.5,
-          "caption_hdtLinear": "True Heading - Linear",
-          "unit_hdtLinear": "Degree"
+          "weight": 1.1,
+          "caption_hdtLinear": "Heading True — Linear Compass Tape",
+          "unit_hdtLinear": "degrees true",
+          "compassLinearTickMajor": 45,
+          "compassLinearTickMinor": 15,
+          "compassLinearShowEndLabels": true,
+          "captionUnitScale": 1.2
         },
         {
           "kind": "sogRadial",
           "name": "dyni_Speed_Instruments",
-          "weight": 1.5,
-          "caption_sogRadial": "Speed Over Ground - Radial",
-          "unit_sogRadial": "Knot"
+          "weight": 1.2,
+          "caption_sogRadial": "Speed Over Ground — Radial Gauge",
+          "unit_sogRadial": "knots through GPS",
+          "speedRadialMaxValue": 16,
+          "speedRadialTickMajor": 2,
+          "speedRadialTickMinor": 0.5,
+          "speedRadialShowEndLabels": true,
+          "speedRadialWarningFrom": 12,
+          "speedRadialAlarmFrom": 14,
+          "captionUnitScale": 1.2
         },
         {
           "kind": "sogLinear",
           "name": "dyni_Speed_Instruments",
-          "weight": 1.5,
-          "caption_sogLinear": "Speed Over Ground - Linear",
-          "unit_sogLinear": "Knot"
+          "weight": 1.05,
+          "caption_sogLinear": "Speed Over Ground — Linear Gauge",
+          "unit_sogLinear": "knots through GPS",
+          "speedLinearMaxValue": 16,
+          "speedLinearTickMajor": 2,
+          "speedLinearTickMinor": 0.5,
+          "speedLinearShowEndLabels": true,
+          "speedLinearWarningFrom": 12,
+          "speedLinearAlarmFrom": 14,
+          "captionUnitScale": 1.2
         },
         {
           "kind": "depthRadial",
           "name": "dyni_Environment_Instruments",
-          "weight": 1.25,
-          "caption_depthRadial": "Depth Below Transducer - Radial",
-          "unit_depthRadial": "Meter"
+          "weight": 1.2,
+          "caption_depthRadial": "Depth Below Transducer — Radial Gauge",
+          "unit_depthRadial": "meters below transducer",
+          "depthRadialMaxValue": 12,
+          "depthRadialTickMajor": 2,
+          "depthRadialTickMinor": 0.5,
+          "depthRadialShowEndLabels": true,
+          "depthRadialWarningFrom": 4,
+          "depthRadialAlarmFrom": 2,
+          "captionUnitScale": 1.2
         },
         {
           "kind": "depthLinear",
           "name": "dyni_Environment_Instruments",
-          "weight": 1.25,
-          "caption_depthLinear": "Depth Below Transducer - Linear",
-          "unit_depthLinear": "Meter"
+          "weight": 1.05,
+          "caption_depthLinear": "Depth Below Transducer — Linear Gauge",
+          "unit_depthLinear": "meters below transducer",
+          "depthLinearMaxValue": 12,
+          "depthLinearTickMajor": 2,
+          "depthLinearTickMinor": 0.5,
+          "depthLinearShowEndLabels": true,
+          "depthLinearWarningFrom": 4,
+          "depthLinearAlarmFrom": 2,
+          "captionUnitScale": 1.2
         },
         {
           "kind": "tempRadial",
           "name": "dyni_Environment_Instruments",
-          "weight": 1.25,
-          "caption_tempRadial": "Water Temperature - Radial",
-          "unit_tempRadial": "Degree Celsius"
-        },
+          "weight": 1.15,
+          "caption_tempRadial": "Water Temperature — Radial Gauge",
+          "unit_tempRadial": "degrees Celsius",
+          "tempRadialMinValue": -5,
+          "tempRadialMaxValue": 45,
+          "tempRadialTickMajor": 5,
+          "tempRadialTickMinor": 1,
+          "tempRadialShowEndLabels": true,
+          "tempRadialWarningEnabled": true,
+          "tempRadialAlarmEnabled": true,
+          "tempRadialWarningFrom": 28,
+          "tempRadialAlarmFrom": 34,
+          "captionUnitScale": 1.2
+        }
+      ],
+      "m1": [
         {
           "kind": "tempLinear",
           "name": "dyni_Environment_Instruments",
-          "weight": 1.25,
-          "caption_tempLinear": "Water Temperature - Linear",
-          "unit_tempLinear": "Degree Celsius"
+          "weight": 1,
+          "caption_tempLinear": "Water Temperature — Linear Gauge",
+          "unit_tempLinear": "degrees Celsius",
+          "tempLinearMinValue": -5,
+          "tempLinearMaxValue": 45,
+          "tempLinearTickMajor": 5,
+          "tempLinearTickMinor": 1,
+          "tempLinearShowEndLabels": true,
+          "tempLinearWarningEnabled": true,
+          "tempLinearAlarmEnabled": true,
+          "tempLinearWarningFrom": 28,
+          "tempLinearAlarmFrom": 34,
+          "captionUnitScale": 1.2
         },
         {
           "kind": "angleTrueRadial",
           "name": "dyni_Wind_Instruments",
-          "weight": 1.5,
-          "caption_angleTrueRadialAngle": "True Wind Angle - Radial",
-          "unit_angleTrueRadialAngle": "Degree",
-          "caption_angleTrueRadialSpeed": "True Wind Speed - Radial",
-          "unit_angleTrueRadialSpeed": "Knot"
+          "weight": 1.3,
+          "caption_angleTrueRadialAngle": "True Wind Angle — Circular",
+          "unit_angleTrueRadialAngle": "degrees relative",
+          "caption_angleTrueRadialSpeed": "True Wind Speed — Circular",
+          "unit_angleTrueRadialSpeed": "knots apparent-to-true",
+          "windRadialLayMin": 35,
+          "windRadialLayMax": 55,
+          "captionUnitScale": 1.15
         },
         {
           "kind": "angleTrueLinear",
           "name": "dyni_Wind_Instruments",
-          "weight": 1.5,
-          "caption_angleTrueLinearAngle": "True Wind Angle - Linear",
-          "unit_angleTrueLinearAngle": "Degree",
-          "caption_angleTrueLinearSpeed": "True Wind Speed - Linear",
-          "unit_angleTrueLinearSpeed": "Knot"
+          "weight": 1.15,
+          "caption_angleTrueLinearAngle": "True Wind Angle — Linear",
+          "unit_angleTrueLinearAngle": "degrees relative",
+          "caption_angleTrueLinearSpeed": "True Wind Speed — Linear",
+          "unit_angleTrueLinearSpeed": "knots apparent-to-true",
+          "windLinearTickMajor": 45,
+          "windLinearTickMinor": 15,
+          "windLinearShowEndLabels": true,
+          "windLinearLayMin": 30,
+          "windLinearLayMax": 60,
+          "captionUnitScale": 1.15
         },
         {
           "kind": "voltageRadial",
           "name": "dyni_Vessel_Instruments",
-          "weight": 1.25,
-          "caption_voltageRadial": "Battery Voltage - Radial",
-          "unit_voltageRadial": "Volt"
+          "weight": 1.15,
+          "caption_voltageRadial": "Battery Voltage — Radial Gauge",
+          "unit_voltageRadial": "volts DC",
+          "voltageRadialMinValue": 10.5,
+          "voltageRadialMaxValue": 15.5,
+          "voltageRadialTickMajor": 0.5,
+          "voltageRadialTickMinor": 0.1,
+          "voltageRadialShowEndLabels": true,
+          "voltageRadialWarningFrom": 12.4,
+          "voltageRadialAlarmFrom": 11.8,
+          "captionUnitScale": 1.2
         },
         {
           "kind": "voltageLinear",
           "name": "dyni_Vessel_Instruments",
-          "weight": 1.25,
-          "caption_voltageLinear": "Battery Voltage - Linear",
-          "unit_voltageLinear": "Volt"
-        }
-      ],
-      "left_anchor": [
+          "weight": 1,
+          "caption_voltageLinear": "Battery Voltage — Linear Gauge",
+          "unit_voltageLinear": "volts DC",
+          "voltageLinearMinValue": 10.5,
+          "voltageLinearMaxValue": 15.5,
+          "voltageLinearTickMajor": 0.5,
+          "voltageLinearTickMinor": 0.1,
+          "voltageLinearShowEndLabels": true,
+          "voltageLinearWarningFrom": 12.4,
+          "voltageLinearAlarmFrom": 11.8,
+          "captionUnitScale": 1.2
+        },
         {
           "kind": "cog",
           "name": "dyni_CourseHeading_Instruments",
-          "weight": 1,
-          "caption_cog": "Course Over Ground",
-          "unit_cog": "Degree"
-        },
-        {
-          "kind": "sog",
-          "name": "dyni_Speed_Instruments",
-          "weight": 1,
-          "caption_sog": "Speed Over Ground",
-          "unit_sog": "Knot"
-        },
-        {
-          "kind": "dst",
-          "name": "dyni_Nav_Instruments",
-          "weight": 1,
-          "caption_dst": "Distance to Waypoint",
-          "unit_dst": "Nautical Mile"
-        },
-        {
-          "kind": "distance",
-          "name": "dyni_Anchor_Instruments",
-          "weight": 1,
-          "caption_distance": "Distance From Anchor",
-          "unit_distance": "Meter"
-        },
-        {
-          "kind": "voltage",
-          "name": "dyni_Vessel_Instruments",
-          "weight": 1,
-          "caption_voltage": "Battery Voltage",
-          "unit_voltage": "Volt"
-        },
-        {
-          "kind": "pitch",
-          "name": "dyni_Vessel_Instruments",
-          "weight": 1,
-          "caption_pitch": "Pitch Angle",
-          "unit_pitch": "Degree"
-        },
-        {
-          "kind": "roll",
-          "name": "dyni_Vessel_Instruments",
-          "weight": 1,
-          "caption_roll": "Roll Angle",
-          "unit_roll": "Degree"
+          "weight": 0.95,
+          "caption_cog": "Course Over Ground — Primary Numeric",
+          "unit_cog": "degrees true",
+          "leadingZero": false,
+          "captionUnitScale": 1.25
         },
         {
           "kind": "positionBoat",
           "name": "dyni_Nav_Instruments",
-          "weight": 1.25,
-          "caption_positionBoat": "Boat Position",
+          "weight": 1.2,
+          "caption_positionBoat": "Boat Position — Current GPS Fix",
           "unit_positionBoat": ""
         }
       ],
@@ -288,89 +311,323 @@
         {
           "kind": "activeRoute",
           "name": "dyni_Nav_Instruments",
-          "weight": 1.5,
-          "caption_activeRouteRemain": "Route Distance Remaining",
-          "unit_activeRouteRemain": "Nautical Mile",
+          "weight": 1.35,
+          "caption_activeRouteRemain": "Remaining Route Distance",
+          "unit_activeRouteRemain": "nautical miles",
           "caption_activeRouteEta": "Estimated Time of Arrival",
           "unit_activeRouteEta": "",
-          "caption_activeRouteNextCourse": "Next Course",
-          "unit_activeRouteNextCourse": "Degree"
+          "caption_activeRouteNextCourse": "Upcoming Course Change",
+          "unit_activeRouteNextCourse": "degrees true"
         },
         {
           "kind": "centerDisplay",
           "name": "dyni_Map_Instruments",
-          "weight": 1.5,
-          "caption_centerDisplayPosition": "Center Position",
+          "weight": 1.25,
+          "caption_centerDisplayPosition": "Center Coordinates",
           "unit_centerDisplayPosition": "",
-          "caption_centerDisplayMarker": "Waypoint Distance",
-          "unit_centerDisplayMarker": "Nautical Mile",
-          "caption_centerDisplayBoat": "Boat Distance",
-          "unit_centerDisplayBoat": "Nautical Mile",
-          "caption_centerDisplayMeasure": "Measure Distance",
-          "unit_centerDisplayMeasure": "Nautical Mile"
+          "caption_centerDisplayMarker": "Waypoint Distance From Center",
+          "unit_centerDisplayMarker": "nautical miles",
+          "caption_centerDisplayBoat": "Boat Distance From Center",
+          "unit_centerDisplayBoat": "nautical miles",
+          "caption_centerDisplayMeasure": "Measured Segment Distance",
+          "unit_centerDisplayMeasure": "nautical miles"
         },
         {
           "kind": "xteDisplay",
           "name": "dyni_Nav_Instruments",
-          "weight": 1.5,
+          "weight": 1.3,
           "caption_xteDisplayXte": "Cross Track Error",
-          "unit_xteDisplayXte": "Nautical Mile",
+          "unit_xteDisplayXte": "nautical miles",
           "caption_xteDisplayCog": "Course Over Ground",
-          "unit_xteDisplayCog": "Degree",
-          "caption_xteDisplayDst": "Distance to Waypoint",
-          "unit_xteDisplayDst": "Nautical Mile",
-          "caption_xteDisplayBrg": "Bearing to Waypoint",
-          "unit_xteDisplayBrg": "Degree"
+          "unit_xteDisplayCog": "degrees true",
+          "caption_xteDisplayDst": "Distance To Waypoint",
+          "unit_xteDisplayDst": "nautical miles",
+          "caption_xteDisplayBrg": "Bearing To Waypoint",
+          "unit_xteDisplayBrg": "degrees true",
+          "showWpNameXteDisplay": true,
+          "leadingZero": false
         },
         {
           "kind": "zoom",
           "name": "dyni_Map_Instruments",
-          "weight": 1.25,
-          "caption_zoom": "Map Zoom Level",
+          "weight": 0.85,
+          "caption_zoom": "Map Zoom — Active Scale",
           "unit_zoom": ""
+        },
+        {
+          "kind": "aisTarget",
+          "name": "dyni_Map_Instruments",
+          "weight": 1.25,
+          "caption_aisTargetDst": "Target Distance",
+          "unit_aisTargetDst": "nautical miles",
+          "caption_aisTargetCpa": "Closest Point of Approach",
+          "unit_aisTargetCpa": "nautical miles",
+          "caption_aisTargetTcpa": "Time To Closest Point",
+          "unit_aisTargetTcpa": "minutes",
+          "caption_aisTargetBrg": "Target Bearing",
+          "unit_aisTargetBrg": "degrees true"
+        },
+        {
+          "kind": "editRoute",
+          "name": "dyni_Nav_Instruments",
+          "weight": 1.25,
+          "caption_editRoutePts": "Planned Waypoints",
+          "caption_editRouteDst": "Leg Distance Remaining",
+          "unit_editRouteDst": "nautical miles",
+          "caption_editRouteRte": "Route Distance Remaining",
+          "unit_editRouteRte": "nautical miles",
+          "caption_editRouteEta": "Estimated Route Arrival"
+        },
+        {
+          "kind": "routePoints",
+          "name": "dyni_Nav_Instruments",
+          "weight": 1.55,
+          "showHeader": false,
+          "distanceUnit": "nautical miles",
+          "courseUnit": "degrees true",
+          "waypointsText": "planned waypoints"
         }
       ]
     },
     "gpspage3": {
       "left": [
         {
-          "kind": "voltageLinear",
-          "storeKeys": {
-            "value": "nav.gps.depthBelowTransducer"
-          },
-          "name": "dyni_Vessel_Instruments"
-        },
-        {
-          "kind": "hdmLinear",
+          "kind": "cog",
           "name": "dyni_CourseHeading_Instruments",
-          "weight": 3
+          "weight": 1
         },
         {
-          "kind": "angleApparentLinear",
-          "name": "dyni_Wind_Instruments",
-          "weight": 3
+          "kind": "hdtLinear",
+          "name": "dyni_CourseHeading_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "hdtRadial",
+          "name": "dyni_CourseHeading_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "sogRadial",
+          "name": "dyni_Speed_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "tempLinear",
+          "name": "dyni_Environment_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "depthLinear",
+          "name": "dyni_Environment_Instruments",
+          "weight": 1
+        }
+      ],
+      "m1": [
+        {
+          "name": "COG"
+        },
+        {
+          "name": "linGauge_Compass",
+          "unit": "°",
+          "storeKeys": {
+            "value": "nav.gps.course"
+          },
+          "colorPlate": "rgba(255, 255, 255, 0)",
+          "inputRadian": false
+        },
+        {
+          "name": "radGauge_Compass",
+          "unit": "°",
+          "storeKeys": {
+            "value": "nav.gps.course"
+          },
+          "drawValue": true,
+          "valueFontFactor": 12,
+          "colorPlate": "rgba(255, 255, 255, 0)",
+          "valueBox": false,
+          "inputRadian": false
+        },
+        {
+          "name": "radGauge_Speed",
+          "storeKeys": {
+            "value": "nav.gps.speed"
+          },
+          "drawValue": true,
+          "valueFontFactor": 12,
+          "colorPlate": "rgba(255, 255, 255, 0)",
+          "minValue": 0,
+          "maxValue": 16,
+          "colorHighlight": "rgba(200, 50, 50, .75)",
+          "startHighlight": 15
+        },
+        {
+          "name": "linGauge_Temperature",
+          "storeKeys": {
+            "value": "nav.gps.waterTemp"
+          },
+          "minValue": 0,
+          "maxValue": 40,
+          "inputIsKelvin": true
+        },
+        {
+          "name": "DepthBelowTransducer"
+        }
+      ],
+      "m2": [
+        {
+          "kind": "positionBoat",
+          "name": "dyni_Nav_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "rteEta",
+          "name": "dyni_Nav_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "xteDisplay",
+          "name": "dyni_Nav_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "dateTime",
+          "name": "dyni_Vessel_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "timeStatus",
+          "name": "dyni_Vessel_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "positionWp",
+          "name": "dyni_Nav_Instruments",
+          "weight": 1
         }
       ],
       "right": [
         {
-          "kind": "depthLinear",
-          "name": "dyni_Environment_Instruments"
+          "name": "Position"
         },
         {
-          "kind": "tempLinear",
-          "name": "dyni_Environment_Instruments"
+          "name": "RteEta"
         },
         {
-          "kind": "stwLinear",
-          "name": "dyni_Speed_Instruments"
+          "name": "XteDisplay"
         },
         {
-          "kind": "sogLinear",
-          "speedLinearMaxValue": 20,
-          "speedLinearShowEndLabels": true,
-          "speedLinearWarningFrom": 10,
-          "speedLinearAlarmFrom": 15,
-          "name": "dyni_Speed_Instruments"
+          "name": "DateTime"
+        },
+        {
+          "name": "TimeStatus"
+        },
+        {
+          "name": "WpPosition"
+        }
+      ]
+    },
+    "gpspage4": {
+      "left": [
+        {
+          "kind": "angleApparentLinear",
+          "name": "dyni_Wind_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "angleApparentRadial",
+          "name": "dyni_Wind_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "pitch",
+          "name": "dyni_Vessel_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "roll",
+          "name": "dyni_Vessel_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "activeRoute",
+          "name": "dyni_Nav_Instruments",
+          "weight": 1
+        },
+        {
+          "name": "dyni_Map_Instruments",
+          "weight": 1
+        }
+      ],
+      "m1": [
+        {
+          "name": "WindDisplay"
+        },
+        {
+          "name": "WindGraphics"
+        },
+        {
+          "name": "signalKPitch"
+        },
+        {
+          "name": "signalKRoll"
+        },
+        {
+          "name": "ActiveRoute"
+        },
+        {
+          "name": "CenterDisplay"
+        }
+      ],
+      "m2": [
+        {
+          "kind": "zoom",
+          "name": "dyni_Map_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "editRoute",
+          "name": "dyni_Nav_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "routePoints",
+          "name": "dyni_Nav_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "aisTarget",
+          "name": "dyni_Map_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "positionWp",
+          "name": "dyni_Nav_Instruments",
+          "weight": 1
+        },
+        {
+          "kind": "voltageLinear",
+          "name": "dyni_Vessel_Instruments",
+          "weight": 1
+        }
+      ],
+      "right": [
+        {
+          "name": "Zoom"
+        },
+        {
+          "name": "EditRoute"
+        },
+        {
+          "name": "RoutePoints"
+        },
+        {
+          "name": "AisTarget"
+        },
+        {
+          "name": "WpPosition"
+        },
+        {
+          "name": "signalKPitch"
         }
       ]
     },
@@ -385,9 +642,6 @@
           "kind": "zoom"
         },
         {
-          "name": "Zoom"
-        },
-        {
           "kind": "angleApparent",
           "name": "dyni_Wind_Instruments"
         },
@@ -400,7 +654,8 @@
           "name": "dyni_Environment_Instruments"
         },
         {
-          "name": "AisTarget"
+          "kind": "aisTarget",
+          "name": "dyni_Map_Instruments"
         },
         {
           "kind": "activeRoute",
@@ -488,6 +743,56 @@
     "editroutepage": {
       "left": [
         {
+          "name": "dyni_Nav_Instruments",
+          "className": "dyniplugin dyni-host-html dyni-hide-native-head",
+          "kind": "editRoute",
+          "leadingZero": true,
+          "caption_editRoutePts": "PTS",
+          "caption_editRouteDst": "DST",
+          "unit_editRouteDst": "nm",
+          "caption_editRouteRte": "RTE",
+          "unit_editRouteRte": "nm",
+          "caption_editRouteEta": "ETA",
+          "showHeader": true,
+          "distanceUnit": "nm",
+          "courseUnit": "°",
+          "waypointsText": "waypoints",
+          "showWpNameXteDisplay": false,
+          "caption_eta": "ETA",
+          "unit_eta": "",
+          "caption_rteEta": "RTE ETA",
+          "unit_rteEta": "",
+          "caption_dst": "DST",
+          "unit_dst": "nm",
+          "caption_rteDistance": "RTE",
+          "unit_rteDistance": "nm",
+          "caption_vmg": "VMG",
+          "unit_vmg": "kn",
+          "caption_positionBoat": "POS",
+          "unit_positionBoat": "",
+          "caption_positionWp": "WP",
+          "unit_positionWp": "",
+          "caption_activeRouteRemain": "RTE",
+          "unit_activeRouteRemain": "nm",
+          "caption_activeRouteEta": "ETA",
+          "unit_activeRouteEta": "",
+          "caption_activeRouteNextCourse": "NEXT",
+          "unit_activeRouteNextCourse": "°",
+          "caption_xteDisplayXte": "XTE",
+          "unit_xteDisplayXte": "nm",
+          "caption_xteDisplayCog": "COG",
+          "unit_xteDisplayCog": "°",
+          "caption_xteDisplayDst": "DST",
+          "unit_xteDisplayDst": "nm",
+          "caption_xteDisplayBrg": "BRG",
+          "unit_xteDisplayBrg": "°",
+          "captionUnitScale": 0.8
+        },
+        {
+          "kind": "routePoints",
+          "name": "dyni_Nav_Instruments"
+        },
+        {
           "name": "EditRoute"
         },
         {
@@ -526,187 +831,6 @@
         },
         {
           "name": "Position"
-        }
-      ]
-    },
-    "gpspage4": {
-      "left": [
-        {
-          "name": "dyni_CourseHeading_Instruments"
-        },
-        {
-          "kind": "hdmLinear",
-          "name": "dyni_CourseHeading_Instruments"
-        },
-        {
-          "kind": "hdmRadial",
-          "name": "dyni_CourseHeading_Instruments"
-        },
-        {
-          "kind": "tempLinear",
-          "name": "dyni_Environment_Instruments"
-        },
-        {
-          "kind": "sogRadial",
-          "name": "dyni_Speed_Instruments"
-        }
-      ],
-      "right": [
-        {
-          "name": "Position"
-        },
-        {
-          "name": "RteEta",
-          "caption": "RTE-ETA",
-          "unit": "h"
-        },
-        {
-          "name": "XteDisplay",
-          "xteMax": 1
-        },
-        {
-          "name": "DateTime"
-        },
-        {
-          "name": "TimeStatus"
-        }
-      ],
-      "m1": [
-        {
-          "name": "COG",
-          "caption": "COG",
-          "unit": "°"
-        },
-        {
-          "name": "linGauge_Compass",
-          "unit": "°",
-          "storeKeys": {
-            "value": "nav.gps.course"
-          },
-          "colorPlate": "rgba(255, 255, 255, 0)",
-          "inputRadian": false
-        },
-        {
-          "name": "radGauge_Compass",
-          "unit": "°",
-          "storeKeys": {
-            "value": "nav.gps.course"
-          },
-          "drawValue": true,
-          "valueFontFactor": 12,
-          "colorPlate": "rgba(255, 255, 255, 0)",
-          "valueBox": false,
-          "inputRadian": false
-        },
-        {
-          "storeKeys": {
-            "value": "nav.gps.waterTemp"
-          },
-          "minValue": 0,
-          "maxValue": 40,
-          "inputIsKelvin": true,
-          "name": "linGauge_Temperature"
-        },
-        {
-          "name": "radGauge_Speed",
-          "storeKeys": {
-            "value": "nav.gps.speed"
-          },
-          "drawValue": true,
-          "valueFontFactor": 12,
-          "colorPlate": "rgba(255, 255, 255, 0)",
-          "minValue": 0,
-          "maxValue": 16,
-          "colorHighlight": "rgba(200, 50, 50, .75)",
-          "startHighlight": 15
-        }
-      ],
-      "m3": [
-        {
-          "kind": "positionBoat",
-          "name": "dyni_Nav_Instruments"
-        },
-        {
-          "kind": "rteEta",
-          "name": "dyni_Nav_Instruments"
-        },
-        {
-          "kind": "xteDisplay",
-          "name": "dyni_Nav_Instruments",
-          "dragId": 1
-        },
-        {
-          "kind": "dateTime",
-          "name": "dyni_Vessel_Instruments"
-        },
-        {
-          "kind": "timeStatus",
-          "name": "dyni_Vessel_Instruments"
-        }
-      ],
-      "m2": [
-        {
-          "kind": "angleApparentLinear",
-          "windLinearRatioThresholdNormal": 2,
-          "windLinearRatioThresholdFlat": 3,
-          "name": "dyni_Wind_Instruments"
-        },
-        {
-          "kind": "angleApparentRadial",
-          "name": "dyni_Wind_Instruments"
-        },
-        {
-          "name": "WindGraphics",
-          "scaleAngle": 50,
-          "show360": false,
-          "kind": "auto",
-          "caption": "Wind"
-        }
-      ]
-    },
-    "gpspage5": {
-      "left": [
-        {
-          "name": "ActiveRoute"
-        },
-        {
-          "name": "CenterDisplay"
-        },
-        {
-          "name": "RoutePoints"
-        },
-        {
-          "name": "EditRoute"
-        },
-        {
-          "name": "Zoom"
-        },
-        {
-          "name": "AisTarget"
-        }
-      ],
-      "right": [
-        {
-          "kind": "activeRoute",
-          "name": "dyni_Nav_Instruments"
-        },
-        {
-          "name": "dyni_Map_Instruments"
-        },
-        {
-          "kind": "zoom",
-          "name": "dyni_Map_Instruments"
-        },
-        {
-          "unit_sog": "",
-          "name": "dyni_Speed_Instruments"
-        },
-        {
-          "name": "dyni_Nav_Instruments"
-        },
-        {
-          "kind": "centerDisplay",
-          "name": "dyni_Nav_Instruments"
         }
       ]
     }

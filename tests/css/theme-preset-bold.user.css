@@ -1,6 +1,26 @@
 /* Copy this whole block into AvNav user.css for manual testing.
-   Fixture only, not production styling. */
+   Fixture only, not production styling.
 
-.widget.dyniplugin {
+   Preset cycle by widget order:
+   1 = default (no preset override)
+   2 = slim
+   3 = bold
+   4 = night
+   5 = highcontrast
+*/
+
+.widgetContainer > .widgetWeight:nth-child(5n + 2) > .widget.dyniplugin {
+  --dyni-theme-preset: slim;
+}
+
+.widgetContainer > .widgetWeight:nth-child(5n + 3) > .widget.dyniplugin {
   --dyni-theme-preset: bold;
+}
+
+.widgetContainer > .widgetWeight:nth-child(5n + 4) > .widget.dyniplugin {
+  --dyni-theme-preset: night;
+}
+
+.widgetContainer > .widgetWeight:nth-child(5n + 5) > .widget.dyniplugin {
+  --dyni-theme-preset: highcontrast;
 }
