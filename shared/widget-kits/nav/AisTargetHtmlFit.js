@@ -11,8 +11,8 @@
   "use strict";
 
   const MEASURE_CTX_KEY = "__dyniAisTargetTextMeasureCtx";
-  const NAME_MAX_PX_RATIO = { flat: 0.52, normal: 0.56, high: 0.44 };
-  const FRONT_MAX_PX_RATIO = { flat: 0.52, normal: 0.66, high: 0.7 };
+  const NAME_MAX_PX_RATIO = { flat: 0.52, normal: 0.62, high: 0.56 };
+  const FRONT_MAX_PX_RATIO = { flat: 0.52, normal: 0.72, high: 0.74 };
   const METRIC_VALUE_MAX_PX_RATIO = 0.9;
   const METRIC_SECONDARY_TO_VALUE_RATIO = 0.8;
   function toObject(value) { return value && typeof value === "object" ? value : {}; }
@@ -127,16 +127,6 @@
     }
     return FRONT_MAX_PX_RATIO.normal;
   }
-  function usesSharedIdentityFit(layout) {
-    return !!layout
-      && typeof layout === "object"
-      && (layout.isVerticalCommitted === true || layout.mode === "normal" || layout.mode === "high");
-  }
-  function resolveSharedIdentityPx(namePxCandidate, frontPxCandidate) {
-    const namePx = Math.max(0, Number(namePxCandidate) || 0);
-    const frontPx = Math.max(0, Number(frontPxCandidate) || 0);
-    return (namePx > 0 && frontPx > 0) ? Math.min(namePx, frontPx) : Math.max(namePx, frontPx);
-  }
   function resolveStackedMetricBox(box) {
     const tile = box && typeof box === "object" ? box : null;
     if (!tile || !tile.captionRect || !tile.valueRect || !tile.unitRect) {
@@ -220,56 +210,28 @@
       if (model.renderState !== "data") {
         return out;
       }
-      if (usesSharedIdentityFit(layout)) {
-        const namePxCandidate = measurePx({
-          rect: layout.nameRect,
-          text: toText(model.nameText),
-          maxPxRatio: resolveNameRatio(layout.mode),
-          textApi: textApi,
-          tileLayout: tileLayout,
-          ctx: measureCtx,
-          family: family,
-          weight: valueWeight,
-          textFillScale: textFillScale
-        }, htmlUtils, tileLayout);
-        const frontPxCandidate = measurePx({
-          rect: layout.frontRect,
-          text: toText(model.frontText),
-          maxPxRatio: resolveFrontRatio(layout.mode),
-          textApi: textApi,
-          tileLayout: tileLayout,
-          ctx: measureCtx,
-          family: family,
-          weight: labelWeight,
-          textFillScale: textFillScale
-        }, htmlUtils, tileLayout);
-        const identityStyle = toStyle(resolveSharedIdentityPx(namePxCandidate, frontPxCandidate), htmlUtils);
-        out.nameStyle = identityStyle;
-        out.frontStyle = identityStyle;
-      } else {
-        out.nameStyle = measureStyle({
-          rect: layout.nameRect,
-          text: toText(model.nameText),
-          maxPxRatio: resolveNameRatio(layout.mode),
-          textApi: textApi,
-          tileLayout: tileLayout,
-          ctx: measureCtx,
-          family: family,
-          weight: valueWeight,
-          textFillScale: textFillScale
-        }, htmlUtils, tileLayout);
-        out.frontStyle = measureStyle({
-          rect: layout.frontRect,
-          text: toText(model.frontText),
-          maxPxRatio: resolveFrontRatio(layout.mode),
-          textApi: textApi,
-          tileLayout: tileLayout,
-          ctx: measureCtx,
-          family: family,
-          weight: labelWeight,
-          textFillScale: textFillScale
-        }, htmlUtils, tileLayout);
-      }
+      out.nameStyle = measureStyle({
+        rect: layout.nameRect,
+        text: toText(model.nameText),
+        maxPxRatio: resolveNameRatio(layout.mode),
+        textApi: textApi,
+        tileLayout: tileLayout,
+        ctx: measureCtx,
+        family: family,
+        weight: valueWeight,
+        textFillScale: textFillScale
+      }, htmlUtils, tileLayout);
+      out.frontStyle = measureStyle({
+        rect: layout.frontRect,
+        text: toText(model.frontText),
+        maxPxRatio: resolveFrontRatio(layout.mode),
+        textApi: textApi,
+        tileLayout: tileLayout,
+        ctx: measureCtx,
+        family: family,
+        weight: labelWeight,
+        textFillScale: textFillScale
+      }, htmlUtils, tileLayout);
       const metricIds = model.visibleMetricIds;
       const metrics = toObject(model.metrics);
       const isFlatMode = layout.mode === "flat";

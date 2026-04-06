@@ -151,6 +151,8 @@
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal .dyni-ais-target-metric-caption,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-metric-caption {
+  display: flex;
+  align-items: flex-end;
   text-align: left;
 }
 

@@ -296,6 +296,9 @@ describe("AisTargetTextHtmlWidget", function () {
     expect(css).toContain(".dyni-ais-target-mode-flat .dyni-ais-target-metrics");
     expect(css).toContain(".dyni-ais-target-mode-normal .dyni-ais-target-metric");
     expect(css).toContain(".dyni-ais-target-mode-high .dyni-ais-target-metrics");
+    expect(css).toContain(".dyni-ais-target-mode-normal .dyni-ais-target-metric-caption,");
+    expect(css).toContain(".dyni-ais-target-mode-high .dyni-ais-target-metric-caption");
+    expect(css).toContain("align-items: flex-end;");
     expect(css).toContain(".dyni-ais-target-metric-value");
     expect(css).toContain("grid-template-rows: minmax(0, auto) minmax(0, auto) minmax(0, auto);");
     expect(css).toContain("grid-template-columns: minmax(0, auto) minmax(0, 1fr);");

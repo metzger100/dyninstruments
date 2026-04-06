@@ -123,6 +123,8 @@ describe("AisTargetRenderModel", function () {
     expect(model.layout.insets.accentReserve).toBeGreaterThan(0);
     expect(model.layout.accentRect.w).toBeGreaterThanOrEqual(6);
     expect(model.layout.insets.identityGap).toBeGreaterThanOrEqual(model.layout.insets.metricGridGap);
+    expect(Math.abs(model.layout.nameRect.h - model.layout.frontRect.h)).toBeLessThanOrEqual(1);
+    expect(model.layout.metricBoxes.dst.unitRect.w / model.layout.metricBoxes.dst.valueRect.w).toBeGreaterThan(0.24);
     expect(Object.prototype.hasOwnProperty.call(model, "frontInitialText")).toBe(false);
     expect(model.metrics.dst.valueText).toBe("formatDistance|4.2|nm");
     expect(model.metrics.cpa.valueText).toBe("formatDistance|0.7|nm");
@@ -342,5 +344,6 @@ describe("AisTargetRenderModel", function () {
 
     expect(verticalA.resizeSignatureParts.join("|")).toBe(verticalB.resizeSignatureParts.join("|"));
     expect(hostSizedA.resizeSignatureParts.join("|")).not.toBe(hostSizedB.resizeSignatureParts.join("|"));
+    expect(Math.abs(verticalA.layout.nameRect.h - verticalA.layout.frontRect.h)).toBeLessThanOrEqual(1);
   });
 });

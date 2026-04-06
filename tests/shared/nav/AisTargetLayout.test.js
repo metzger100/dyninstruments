@@ -105,6 +105,7 @@ describe("AisTargetLayout", function () {
     });
 
     expect(out.mode).toBe("normal");
+    expect(Math.abs(out.nameRect.h - out.frontRect.h)).toBeLessThanOrEqual(1);
     expect(out.metricOrder).toEqual(["dst", "cpa", "tcpa", "brg"]);
     expect(out.metricBoxes.dst.y).toBe(out.metricBoxes.cpa.y);
     expect(out.metricBoxes.tcpa.y).toBeGreaterThan(out.metricBoxes.dst.y);
@@ -150,6 +151,7 @@ describe("AisTargetLayout", function () {
     });
 
     expect(out.mode).toBe("high");
+    expect(Math.abs(out.nameRect.h - out.frontRect.h)).toBeLessThanOrEqual(1);
     expect(out.metricOrder).toEqual(["dst", "cpa", "tcpa", "brg"]);
     expect(out.metricBoxes.cpa.y).toBeGreaterThan(out.metricBoxes.dst.y);
     expect(out.metricBoxes.tcpa.y).toBeGreaterThan(out.metricBoxes.cpa.y);
@@ -277,6 +279,30 @@ describe("AisTargetLayout", function () {
     expect(verticalB.mode).toBe("high");
     expect(verticalA.responsive.minDim).toBe(240);
     expect(verticalA.responsive.textFillScale).toBe(verticalB.responsive.textFillScale);
-    expect(verticalA.metricsRect.h).toBeGreaterThan(verticalA.identityRect.h * 2);
+    expect(Math.abs(verticalA.nameRect.h - verticalA.frontRect.h)).toBeLessThanOrEqual(1);
+    expect(verticalA.metricsRect.h).toBeGreaterThan(verticalA.identityRect.h);
+  });
+
+  it("allocates more inline unit width in normal and high metric rows", function () {
+    const layout = createLayout();
+    const normal = layout.computeLayout({
+      mode: "normal",
+      W: 300,
+      H: 190,
+      renderState: "data",
+      showTcpaBranch: true
+    });
+    const high = layout.computeLayout({
+      mode: "high",
+      W: 180,
+      H: 320,
+      renderState: "data",
+      showTcpaBranch: true
+    });
+
+    const normalUnitShare = normal.metricBoxes.dst.unitRect.w / normal.metricBoxes.dst.valueRect.w;
+    const highUnitShare = high.metricBoxes.dst.unitRect.w / high.metricBoxes.dst.valueRect.w;
+    expect(normalUnitShare).toBeGreaterThan(0.24);
+    expect(highUnitShare).toBeGreaterThan(0.21);
   });
 });

@@ -237,7 +237,7 @@ describe("AisTargetHtmlFit", function () {
     expect(out.accentStyle).toBe("background-color:#66b8ff;");
   });
 
-  it("uses a shared identity font size in normal, high, and committed vertical modes", function () {
+  it("fits name and status independently in normal, high, and committed vertical modes", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
     const hostContext = { __dyniAisTargetTextMeasureCtx: createMeasureContext() };
@@ -246,13 +246,21 @@ describe("AisTargetHtmlFit", function () {
     const verticalShell = { width: 220, height: 120 };
 
     const normalOut = h.fit.compute({
-      model: buildModel(h, normalShell, { mode: "normal" }),
+      model: buildModel(h, normalShell, {
+        mode: "normal",
+        nameText: "Extremely Long Vessel Name That Needs More Width",
+        frontText: "Front"
+      }),
       targetEl,
       hostContext,
       shellRect: normalShell
     });
     const highOut = h.fit.compute({
-      model: buildModel(h, highShell, { mode: "high" }),
+      model: buildModel(h, highShell, {
+        mode: "high",
+        nameText: "Extremely Long Vessel Name That Needs More Width",
+        frontText: "Front"
+      }),
       targetEl,
       hostContext,
       shellRect: highShell
@@ -261,7 +269,9 @@ describe("AisTargetHtmlFit", function () {
       model: buildModel(h, verticalShell, {
         mode: "normal",
         isVerticalCommitted: true,
-        effectiveLayoutHeight: 300
+        effectiveLayoutHeight: 300,
+        nameText: "Extremely Long Vessel Name That Needs More Width",
+        frontText: "Front"
       }),
       targetEl,
       hostContext,
@@ -271,9 +281,9 @@ describe("AisTargetHtmlFit", function () {
     expect(extractPx(normalOut.nameStyle)).toBeGreaterThan(0);
     expect(extractPx(highOut.nameStyle)).toBeGreaterThan(0);
     expect(extractPx(verticalOut.nameStyle)).toBeGreaterThan(0);
-    expect(extractPx(normalOut.nameStyle)).toBe(extractPx(normalOut.frontStyle));
-    expect(extractPx(highOut.nameStyle)).toBe(extractPx(highOut.frontStyle));
-    expect(extractPx(verticalOut.nameStyle)).toBe(extractPx(verticalOut.frontStyle));
+    expect(extractPx(normalOut.nameStyle)).not.toBe(extractPx(normalOut.frontStyle));
+    expect(extractPx(highOut.nameStyle)).not.toBe(extractPx(highOut.frontStyle));
+    expect(extractPx(verticalOut.nameStyle)).not.toBe(extractPx(verticalOut.frontStyle));
   });
 
   it("fits normal/high values against valueTextRect while flat uses stacked valueRect", function () {
@@ -396,6 +406,56 @@ describe("AisTargetHtmlFit", function () {
     expect(extractPx(out.metrics.cpa.valueStyle)).toBeGreaterThanOrEqual(extractPx(out.metrics.cpa.captionStyle));
     expect(extractPx(out.metrics.tcpa.captionStyle)).toBeGreaterThan(0);
     expect(extractPx(out.metrics.tcpa.valueStyle)).toBeGreaterThanOrEqual(extractPx(out.metrics.tcpa.captionStyle));
+  });
+
+  it("keeps caption/unit under the 0.8 secondary ratio while fitting each side independently", function () {
+    const h = createHarness();
+    const targetEl = document.createElement("div");
+    const hostContext = { __dyniAisTargetTextMeasureCtx: createMeasureContext() };
+    const shellRect = { width: 320, height: 180 };
+    const model = buildModel(h, shellRect, {
+      mode: "normal",
+      metrics: {
+        dst: {
+          captionText: "VERYLONGCAPTION",
+          valueText: "123.45",
+          unitText: "nm"
+        }
+      },
+      layout: {
+        mode: "normal",
+        responsive: { textFillScale: 1 },
+        placeholderRect: { x: 0, y: 0, w: 320, h: 180 },
+        nameRect: { x: 0, y: 0, w: 160, h: 20 },
+        frontRect: { x: 0, y: 22, w: 160, h: 20 },
+        metricBoxes: {
+          dst: {
+            x: 0,
+            y: 50,
+            w: 300,
+            h: 80,
+            labelRect: { x: 0, y: 50, w: 36, h: 20 },
+            valueRect: { x: 38, y: 50, w: 170, h: 20 },
+            valueTextRect: { x: 38, y: 50, w: 118, h: 20 },
+            unitRect: { x: 158, y: 50, w: 50, h: 20 }
+          }
+        }
+      }
+    });
+    model.visibleMetricIds = ["dst"];
+
+    const out = h.fit.compute({ model: model, targetEl, hostContext, shellRect });
+    const valuePx = extractPx(out.metrics.dst.valueStyle);
+    const captionPx = extractPx(out.metrics.dst.captionStyle);
+    const unitPx = extractPx(out.metrics.dst.unitStyle);
+    const secondaryMaxPx = Math.max(1, Math.floor(valuePx * 0.8));
+
+    expect(valuePx).toBeGreaterThan(0);
+    expect(captionPx).toBeGreaterThan(0);
+    expect(unitPx).toBeGreaterThan(0);
+    expect(captionPx).toBeLessThan(unitPx);
+    expect(captionPx).toBeLessThanOrEqual(secondaryMaxPx);
+    expect(unitPx).toBeLessThanOrEqual(secondaryMaxPx);
   });
 
   it("shrinks long name and long metric values instead of clipping", function () {

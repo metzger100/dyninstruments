@@ -30,15 +30,18 @@
   const ACCENT_WIDTH_FLOOR_PX = 7;
   const ACCENT_GAP_FLOOR_PX = 3;
   const FLAT_IDENTITY_SHARE = 0.26;
-  const NORMAL_NAME_BAND_SHARE = 0.22;
-  const HIGH_NAME_BAND_SHARE = 0.12;
-  const NORMAL_FRONT_SHARE = 0.19;
-  const HIGH_FRONT_SHARE = 0.16;
-  const NORMAL_FRONT_MIN_HEIGHT_RATIO = 0.095;
-  const HIGH_FRONT_MIN_HEIGHT_RATIO = 0.105;
+  const NORMAL_IDENTITY_BLOCK_SHARE = 0.5;
+  const HIGH_IDENTITY_BLOCK_SHARE = 0.4;
+  const NORMAL_IDENTITY_ROW_MIN_HEIGHT_RATIO = 0.11;
+  const HIGH_IDENTITY_ROW_MIN_HEIGHT_RATIO = 0.1;
   const VERTICAL_ASPECT_RATIO = { width: 7, height: 8 };
   const VERTICAL_MIN_HEIGHT = "8em";
-  const RESPONSIVE_SCALES = { textFillScale: 1.18, flatIdentityScale: 0.88, normalNameScale: 0.86, highNameScale: 0.72 };
+  const RESPONSIVE_SCALES = {
+    textFillScale: 1.18,
+    flatIdentityScale: 0.88,
+    normalIdentityScale: 0.94,
+    highIdentityScale: 0.9
+  };
 
   function create(def, Helpers) {
     const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
@@ -48,7 +51,6 @@
     const clampNumber = layoutMath.clampNumber;
     const splitStack = layoutMath.splitStack;
     const splitRow = layoutMath.splitRow;
-    const resolveIdentityBandHeights = layoutMath.resolveIdentityBandHeights;
 
     function computeVerticalShellProfile(args) {
       const cfg = args || {};
@@ -192,6 +194,32 @@
         );
       }
     }
+    function resolveEqualIdentityLayout(contentRect, insets, identityShare, rowMinHeight) {
+      const identityGap = Math.max(0, insets.identityGap);
+      const identityMetricsGap = Math.max(0, insets.identityMetricsGap);
+      const maxIdentityHeight = Math.max(1, contentRect.h - identityMetricsGap - 1);
+      const boundedRowMinHeight = Math.max(1, Math.floor(Number(rowMinHeight) || 1));
+      const minIdentityHeight = Math.min(
+        maxIdentityHeight,
+        Math.max(1, boundedRowMinHeight * 2 + identityGap)
+      );
+      let identityHeight = Math.max(1, Math.floor(contentRect.h * identityShare));
+      identityHeight = Math.max(minIdentityHeight, Math.min(maxIdentityHeight, identityHeight));
+      const metricsHeight = Math.max(1, contentRect.h - identityHeight - identityMetricsGap);
+      const identityRect = makeRect(contentRect.x, contentRect.y, contentRect.w, identityHeight);
+      const identityRows = splitStack(identityRect, identityGap, 2, makeRect);
+      return {
+        identityRect: identityRect,
+        nameRect: identityRows[0],
+        frontRect: identityRows[1],
+        metricsRect: makeRect(
+          contentRect.x,
+          identityRect.y + identityRect.h + identityMetricsGap,
+          contentRect.w,
+          metricsHeight
+        )
+      };
+    }
 
     function computeLayout(args) {
       const cfg = args || {};
@@ -304,68 +332,60 @@
       }
 
       if (mode === "normal") {
-        const nameShare = profileApi.scaleShare(
-          NORMAL_NAME_BAND_SHARE,
-          insets.responsive.normalNameScale,
-          0.16,
-          0.33
+        const identityShare = profileApi.scaleShare(
+          NORMAL_IDENTITY_BLOCK_SHARE,
+          insets.responsive.normalIdentityScale,
+          0.42,
+          0.62
         );
-        const frontMinHeight = profileApi.computeInsetPx(insets.responsive, NORMAL_FRONT_MIN_HEIGHT_RATIO, 2);
-        const bandHeights = resolveIdentityBandHeights(
-          contentRect.h,
-          insets.identityGap,
-          insets.identityMetricsGap,
-          nameShare,
-          NORMAL_FRONT_SHARE,
-          frontMinHeight
+        const rowMinHeight = profileApi.computeInsetPx(
+          insets.responsive,
+          NORMAL_IDENTITY_ROW_MIN_HEIGHT_RATIO,
+          3
         );
-        const nameHeight = bandHeights.nameHeight;
-        const frontHeight = bandHeights.frontHeight;
-        const metricsHeight = bandHeights.metricsHeight;
-        const nameRect = makeRect(contentRect.x, contentRect.y, contentRect.w, nameHeight);
-        const frontRect = makeRect(contentRect.x, nameRect.y + nameRect.h + insets.identityGap, contentRect.w, frontHeight);
-        const metricsRect = makeRect(contentRect.x, frontRect.y + frontRect.h + insets.identityMetricsGap, contentRect.w, metricsHeight);
+        const equalIdentityLayout = resolveEqualIdentityLayout(
+          contentRect,
+          insets,
+          identityShare,
+          rowMinHeight
+        );
 
-        out.identityRect = makeRect(nameRect.x, nameRect.y, nameRect.w, nameRect.h + insets.identityGap + frontRect.h);
-        out.nameRect = nameRect;
-        out.frontRect = frontRect;
-        out.metricsRect = metricsRect;
+        out.identityRect = equalIdentityLayout.identityRect;
+        out.nameRect = equalIdentityLayout.nameRect;
+        out.frontRect = equalIdentityLayout.frontRect;
+        out.metricsRect = equalIdentityLayout.metricsRect;
 
-        const metricRows = splitStack(metricsRect, insets.metricGridGap, 2, makeRect);
+        const metricRows = splitStack(out.metricsRect, insets.metricGridGap, 2, makeRect);
         const rowA = splitRow(metricRows[0], insets.metricGridGap, 2, makeRect);
         const rowB = splitRow(metricRows[1], insets.metricGridGap, 2, makeRect);
         fillInlineMetricBoxes(out, [rowA[0], rowA[1], rowB[0], rowB[1]], insets.responsive, mode);
         return finalize(out);
       }
 
-      const nameShare = profileApi.scaleShare(
-        HIGH_NAME_BAND_SHARE,
-        insets.responsive.highNameScale,
-        0.11,
-        0.23
+      const identityShare = profileApi.scaleShare(
+        HIGH_IDENTITY_BLOCK_SHARE,
+        insets.responsive.highIdentityScale,
+        0.3,
+        0.52
       );
-      const frontMinHeight = profileApi.computeInsetPx(insets.responsive, HIGH_FRONT_MIN_HEIGHT_RATIO, 2);
-      const bandHeights = resolveIdentityBandHeights(
-        contentRect.h,
-        insets.identityGap,
-        insets.identityMetricsGap,
-        nameShare,
-        HIGH_FRONT_SHARE,
-        frontMinHeight
+      const rowMinHeight = profileApi.computeInsetPx(
+        insets.responsive,
+        HIGH_IDENTITY_ROW_MIN_HEIGHT_RATIO,
+        3
       );
-      const nameHeight = bandHeights.nameHeight;
-      const frontHeight = bandHeights.frontHeight;
-      const metricsHeight = bandHeights.metricsHeight;
-      const nameRect = makeRect(contentRect.x, contentRect.y, contentRect.w, nameHeight);
-      const frontRect = makeRect(contentRect.x, nameRect.y + nameRect.h + insets.identityGap, contentRect.w, frontHeight);
-      const metricsRect = makeRect(contentRect.x, frontRect.y + frontRect.h + insets.identityMetricsGap, contentRect.w, metricsHeight);
+      const equalIdentityLayout = resolveEqualIdentityLayout(
+        contentRect,
+        insets,
+        identityShare,
+        rowMinHeight
+      );
 
-      out.identityRect = makeRect(nameRect.x, nameRect.y, nameRect.w, nameRect.h + insets.identityGap + frontRect.h);
-      out.nameRect = nameRect;
-      out.frontRect = frontRect;
-      out.metricsRect = metricsRect;
+      out.identityRect = equalIdentityLayout.identityRect;
+      out.nameRect = equalIdentityLayout.nameRect;
+      out.frontRect = equalIdentityLayout.frontRect;
+      out.metricsRect = equalIdentityLayout.metricsRect;
 
-      fillInlineMetricBoxes(out, splitStack(metricsRect, insets.metricGridGap, 4, makeRect), insets.responsive, mode);
+      fillInlineMetricBoxes(out, splitStack(out.metricsRect, insets.metricGridGap, 4, makeRect), insets.responsive, mode);
       return finalize(out);
     }
 
