@@ -110,6 +110,51 @@
     return 1.0;
   }
 
+  function resolveEdgePlacement(x, width, isStart, isEnd, state, fontPx) {
+    const scaleLeft = Math.min(
+      Number(state.layout.scaleX0) || 0,
+      Number(state.layout.scaleX1) || 0
+    );
+    const scaleRight = Math.max(
+      Number(state.layout.scaleX0) || 0,
+      Number(state.layout.scaleX1) || 0
+    );
+    const edgePad = Math.max(1, Math.floor(fontPx * 0.08));
+
+    if (isStart && isEnd) {
+      return {
+        textAlign: "center",
+        drawX: Math.round(x),
+        left: x - width / 2,
+        right: x + width / 2
+      };
+    }
+    if (isStart) {
+      const drawX = Math.round(scaleLeft + edgePad);
+      return {
+        textAlign: "left",
+        drawX: drawX,
+        left: drawX,
+        right: drawX + width
+      };
+    }
+    if (isEnd) {
+      const drawX = Math.round(scaleRight - edgePad);
+      return {
+        textAlign: "right",
+        drawX: drawX,
+        left: drawX - width,
+        right: drawX
+      };
+    }
+    return {
+      textAlign: "center",
+      drawX: Math.round(x),
+      left: x - width / 2,
+      right: x + width / 2
+    };
+  }
+
   function drawTickLabels(layerCtx, state, ticks, showEndLabels, math, labelFormatter) {
     if (!math || !state || !state.labelFontPx || !ticks || !ticks.major || !ticks.major.length) {
       return;
@@ -124,9 +169,13 @@
       Number(state.theme.linear.ticks.minorLen) || 0
     );
     const labelInsetPx = Math.max(2, Math.floor(Number(state.labelInsetPx) || 2));
+    const trackBottomLimit = Math.round(state.layout.trackBox.y + state.layout.trackBox.h - fontPx - 1);
+    const inlineTopLimit = state.layout.inlineBox
+      ? Math.round(state.layout.inlineBox.y - fontPx - 2)
+      : trackBottomLimit;
     const labelY = Math.min(
       Math.round(state.layout.trackY + tickReach + labelInsetPx),
-      Math.round(state.layout.trackBox.y + state.layout.trackBox.h - fontPx - 1)
+      Math.min(trackBottomLimit, inlineTopLimit)
     );
     const minGap = Math.max(2, Math.floor(fontPx * 0.2));
     let lastRight = -Infinity;
@@ -159,14 +208,15 @@
         continue;
       }
       const width = layerCtx.measureText(label).width;
-      const left = x - width / 2;
-      const right = x + width / 2;
-      if (left <= lastRight + minGap) {
+      const placement = resolveEdgePlacement(x, width, isStart, isEnd, state, fontPx);
+      if (placement.left <= lastRight + minGap) {
         continue;
       }
-      layerCtx.fillText(label, Math.round(x), labelY);
-      lastRight = right;
+      layerCtx.textAlign = placement.textAlign;
+      layerCtx.fillText(label, placement.drawX, labelY);
+      lastRight = placement.right;
     }
+    layerCtx.textAlign = "center";
   }
 
   function drawCaptionRow(state, textApi, caption, box, secScale, align) {

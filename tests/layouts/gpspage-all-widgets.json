@@ -791,12 +791,6 @@
         {
           "kind": "routePoints",
           "name": "dyni_Nav_Instruments"
-        },
-        {
-          "name": "EditRoute"
-        },
-        {
-          "name": "RoutePoints"
         }
       ],
       "left_small": [],

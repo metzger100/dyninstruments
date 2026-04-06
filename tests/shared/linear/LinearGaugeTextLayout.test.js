@@ -115,6 +115,77 @@ describe("LinearGaugeTextLayout", function () {
     expect(calls.map((entry) => entry.text)).toEqual(["C0", "C50", "C100"]);
   });
 
+  it("uses edge-aware alignment for first and last tick labels", function () {
+    const textLayout = loadFresh("shared/widget-kits/linear/LinearGaugeTextLayout.js").create();
+    const calls = [];
+    const layerCtx = {
+      font: "",
+      textAlign: "",
+      textBaseline: "",
+      measureText(text) {
+        return { width: String(text || "").length * 6 };
+      },
+      fillText(text, x, y) {
+        calls.push({ text: text, x: x, y: y, align: layerCtx.textAlign });
+      }
+    };
+
+    textLayout.drawTickLabels(
+      layerCtx,
+      createState(1),
+      { major: [0, 50, 100], minor: [] },
+      true,
+      {
+        mapValueToX(value, minV, maxV, x0, x1) {
+          return x0 + (x1 - x0) * ((value - minV) / (maxV - minV));
+        },
+        formatTickLabel(value) {
+          return String(value);
+        }
+      }
+    );
+
+    expect(calls.map((entry) => entry.align)).toEqual(["left", "center", "right"]);
+    expect(calls[0].x).toBe(1);
+    expect(calls[2].x).toBe(99);
+    expect(layerCtx.textAlign).toBe("center");
+  });
+
+  it("caps tick label y against inlineBox top when present", function () {
+    const textLayout = loadFresh("shared/widget-kits/linear/LinearGaugeTextLayout.js").create();
+    const calls = [];
+    const state = createState(1);
+    state.layout.inlineBox = { x: 0, y: 26, w: 100, h: 12 };
+    const layerCtx = {
+      font: "",
+      textAlign: "",
+      textBaseline: "",
+      measureText(text) {
+        return { width: String(text || "").length * 6 };
+      },
+      fillText(text, x, y) {
+        calls.push({ text: text, x: x, y: y });
+      }
+    };
+
+    textLayout.drawTickLabels(
+      layerCtx,
+      state,
+      { major: [0], minor: [] },
+      true,
+      {
+        mapValueToX() {
+          return 0;
+        },
+        formatTickLabel() {
+          return "0";
+        }
+      }
+    );
+
+    expect(calls[0].y).toBe(12);
+  });
+
   it("uses layout-owned label font sizes without a local readable-floor override", function () {
     const textLayout = loadFresh("shared/widget-kits/linear/LinearGaugeTextLayout.js").create();
     const fonts = [];
