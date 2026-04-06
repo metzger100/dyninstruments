@@ -11,24 +11,9 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ## Roadmap
 
-### Planned integration directions
+### Core widgets to implement
 
-- AIS summary/workflow-entry parity is shipped in map cluster kind `aisTarget`
-- page/header utility parity: `alarm`
-- `default`: likely a dedicated utility/default widget instead of a cluster kind
-
-### Practical implementation order
-
-1. Page/header utility parity: `Alarm`
-2. Utility/default parity widget: `Default`
-
-### Core interaction notes
-
-- Passive widget: `CenterDisplay`
-- Page-routed click with capability gating: `Zoom`, `ActiveRoute`, `EditRoute`
-- Widget-owned click target with page/API workflow: `RoutePoints`, `AisTarget`
 - Page-shell-owned widget: `Alarm`
-- `EditRoute` native HTML contract: `documentation/widgets/edit-route.md`
 
 ### Additional non-core concepts
 
