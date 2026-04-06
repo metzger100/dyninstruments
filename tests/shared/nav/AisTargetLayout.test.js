@@ -20,19 +20,19 @@ describe("AisTargetLayout", function () {
     });
   }
 
-  function expectInlineSubRects(box) {
+  function expectStackedSubRects(box) {
     expect(box.captionRect).toBeTruthy();
-    expect(box.valueRowRect).toBeTruthy();
-    expect(box.valueTextRect).toBeTruthy();
-    expect(box.unitRect).toBeTruthy();
-    expect(box.valueTextRect.w).toBeLessThanOrEqual(box.valueRowRect.w);
-  }
-
-  function expectHighSubRects(box) {
-    expect(box.labelRect).toBeTruthy();
     expect(box.valueRect).toBeTruthy();
     expect(box.unitRect).toBeTruthy();
-    expect(box.valueRect.x).toBeGreaterThanOrEqual(box.labelRect.x + box.labelRect.w);
+    expect(box.valueRect.y).toBeGreaterThanOrEqual(box.captionRect.y + box.captionRect.h);
+    expect(box.unitRect.y).toBeGreaterThanOrEqual(box.valueRect.y + box.valueRect.h);
+  }
+
+  function expectHorizontalSubRects(box) {
+    expect(box.captionRect).toBeTruthy();
+    expect(box.valueRect).toBeTruthy();
+    expect(box.unitRect).toBeTruthy();
+    expect(box.valueRect.x).toBeGreaterThanOrEqual(box.captionRect.x + box.captionRect.w);
     expect(box.unitRect.x).toBeGreaterThanOrEqual(box.valueRect.x + box.valueRect.w);
   }
 
@@ -44,7 +44,7 @@ describe("AisTargetLayout", function () {
     expect(layout.resolveMode({ W: 520, H: 120, ratioThresholdNormal: 1.2, ratioThresholdFlat: 3.8 })).toBe("flat");
   });
 
-  it("builds flat data layout with all four metrics and inline sub-rects", function () {
+  it("builds flat data layout as fixed 1x4 metrics with stacked sub-rects", function () {
     const layout = createLayout();
     const out = layout.computeLayout({
       mode: "flat",
@@ -61,15 +61,17 @@ describe("AisTargetLayout", function () {
     expect(out.frontRect).toBeTruthy();
     expect(out.metricVisibility).toEqual({ dst: true, cpa: true, tcpa: true, brg: true });
     expect(out.metricOrder).toEqual(["dst", "cpa", "tcpa", "brg"]);
-    expect(out.flatMetricRows).toBe(1);
-    expect(out.flatMetricColumns).toBe(4);
+    expect(out.flatMetricRows).toBeUndefined();
+    expect(out.flatMetricColumns).toBeUndefined();
+
     ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
       expect(out.metricBoxes[id]).toBeTruthy();
-      expectInlineSubRects(out.metricBoxes[id]);
+      expectStackedSubRects(out.metricBoxes[id]);
+      expect(out.metricBoxes[id].y).toBe(out.metricBoxes.dst.y);
     });
   });
 
-  it("switches flat data layout to 2x2 metrics when tiles are narrow", function () {
+  it("keeps flat mode 1x4 even on narrow shells (no two-row fallback)", function () {
     const layout = createLayout();
     const out = layout.computeLayout({
       mode: "flat",
@@ -80,13 +82,12 @@ describe("AisTargetLayout", function () {
     });
 
     expect(out.mode).toBe("flat");
-    expect(out.flatMetricRows).toBe(2);
-    expect(out.flatMetricColumns).toBe(2);
-    expect(out.metricBoxes.tcpa.y).toBeGreaterThan(out.metricBoxes.dst.y);
-    expect(out.metricBoxes.brg.y).toBeGreaterThan(out.metricBoxes.cpa.y);
+    expect(out.metricBoxes.tcpa.y).toBe(out.metricBoxes.dst.y);
+    expect(out.metricBoxes.brg.y).toBe(out.metricBoxes.cpa.y);
+    expect(out.metricBoxes.tcpa.x).toBeGreaterThan(out.metricBoxes.cpa.x);
   });
 
-  it("builds normal data layout as a 2x2 metrics grid with inline sub-rects", function () {
+  it("builds normal data layout as a 2x2 grid with one-line horizontal metric boxes", function () {
     const layout = createLayout();
     const out = layout.computeLayout({
       mode: "normal",
@@ -104,11 +105,11 @@ describe("AisTargetLayout", function () {
     expect(out.metricBoxes.tcpa.y).toBeGreaterThan(out.metricBoxes.dst.y);
     expect(out.metricBoxes.brg.y).toBeGreaterThan(out.metricBoxes.cpa.y);
     ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
-      expectInlineSubRects(out.metricBoxes[id]);
+      expectHorizontalSubRects(out.metricBoxes[id]);
     });
   });
 
-  it("builds high data layout as four stacked metric rows with row sub-rects", function () {
+  it("builds high data layout as four stacked rows with one-line horizontal metric boxes", function () {
     const layout = createLayout();
     const out = layout.computeLayout({
       mode: "high",
@@ -124,7 +125,7 @@ describe("AisTargetLayout", function () {
     expect(out.metricBoxes.tcpa.y).toBeGreaterThan(out.metricBoxes.cpa.y);
     expect(out.metricBoxes.brg.y).toBeGreaterThan(out.metricBoxes.tcpa.y);
     ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
-      expectHighSubRects(out.metricBoxes[id]);
+      expectHorizontalSubRects(out.metricBoxes[id]);
     });
   });
 

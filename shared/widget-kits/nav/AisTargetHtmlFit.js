@@ -14,7 +14,7 @@
   const NAME_MAX_PX_RATIO = { flat: 0.52, normal: 0.62, high: 0.52 };
   const FRONT_MAX_PX_RATIO = { flat: 0.52, normal: 0.56, high: 0.48 };
   const METRIC_VALUE_MAX_PX_RATIO = 0.9;
-  const METRIC_SECONDARY_TO_VALUE_RATIO = 0.76;
+  const METRIC_SECONDARY_TO_VALUE_RATIO = 0.8;
 
   function toObject(value) {
     return value && typeof value === "object" ? value : {};
@@ -154,26 +154,15 @@
     return FRONT_MAX_PX_RATIO.normal;
   }
 
-  function resolveMetricRects(box, mode) {
+  function resolveMetricBox(box) {
     const tile = box && typeof box === "object" ? box : null;
-    if (!tile) {
+    if (!tile || !tile.captionRect || !tile.valueRect || !tile.unitRect) {
       return null;
     }
-
-    if (mode === "high") {
-      return {
-        labelRect: tile.labelRect || tile.captionRect || tile,
-        valueRect: tile.valueRect || tile.valueTextRect || tile,
-        unitRect: tile.unitRect || tile.valueRect || tile,
-        valueRowRect: tile.valueRect || tile.valueRowRect || tile
-      };
-    }
-
     return {
-      labelRect: tile.captionRect || tile.labelRect || tile,
-      valueRect: tile.valueTextRect || tile.valueRect || tile,
-      unitRect: tile.unitRect || tile.valueTextRect || tile,
-      valueRowRect: tile.valueRowRect || tile.valueRect || tile
+      captionRect: tile.captionRect,
+      valueRect: tile.valueRect,
+      unitRect: tile.unitRect
     };
   }
 
@@ -268,11 +257,11 @@
         textFillScale: textFillScale
       }, htmlUtils, tileLayout);
 
-      const metricIds = model.visibleMetricIds;
+      const metricIds = Array.isArray(model.visibleMetricIds) ? model.visibleMetricIds : [];
       const metrics = toObject(model.metrics);
       for (let i = 0; i < metricIds.length; i += 1) {
         const id = metricIds[i];
-        const rects = resolveMetricRects(layout.metricBoxes[id], model.mode);
+        const rects = resolveMetricBox(layout.metricBoxes[id]);
         const metric = toObject(metrics[id]);
         if (!rects) {
           continue;
@@ -298,7 +287,7 @@
 
         out.metrics[id] = {
           captionStyle: measureStyle({
-            rect: rects.labelRect,
+            rect: rects.captionRect,
             text: toText(metric.captionText),
             maxPx: secondaryMaxPx,
             maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
@@ -309,8 +298,6 @@
             weight: labelWeight,
             textFillScale: 1
           }, htmlUtils, tileLayout),
-          valueRowStyle: "",
-          valueTextStyle: toStyle(valuePx, htmlUtils),
           valueStyle: toStyle(valuePx, htmlUtils),
           unitStyle: measureStyle({
             rect: rects.unitRect,

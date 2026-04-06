@@ -149,10 +149,10 @@ describe("AisTargetRenderModel", function () {
     expect(model.nameText).toBe("Athena");
     expect(model.frontText).toBe("Back");
     expect(model.wrapperClasses).toContain("dyni-ais-target-branch-brg");
-    expect(model.wrapperClasses).toContain("dyni-ais-target-flat-rows-1");
+    expect(model.wrapperClasses.join(" ")).not.toContain("flat-rows");
   });
 
-  it("keeps all four metrics visible for flat, normal, and high data modes", function () {
+  it("keeps all four metrics visible for flat, normal, and high data modes without flat-row state classes", function () {
     const setup = createRenderModel();
     ["flat", "normal", "high"].forEach((mode) => {
       const shellRect = mode === "flat" ? { width: 620, height: 120 } : { width: 280, height: 220 };
@@ -166,6 +166,7 @@ describe("AisTargetRenderModel", function () {
 
       expect(model.visibleMetricIds).toEqual(["dst", "cpa", "tcpa", "brg"]);
       expect(model.metricVisibility).toEqual({ dst: true, cpa: true, tcpa: true, brg: true });
+      expect(model.wrapperClasses.join(" ")).not.toContain("flat-rows");
     });
   });
 

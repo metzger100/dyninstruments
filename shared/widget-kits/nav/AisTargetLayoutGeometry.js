@@ -12,16 +12,20 @@
 
   const METRIC_INSET_X_RATIO = 0.04;
   const METRIC_INSET_Y_RATIO = 0.06;
-  const METRIC_CAPTION_SHARE = 0.38;
-  const METRIC_CAPTION_MIN_RATIO = 0.24;
-  const METRIC_CAPTION_MAX_RATIO = 0.56;
-  const METRIC_UNIT_SHARE = 0.28;
-  const METRIC_UNIT_MIN_PX = 10;
-  const METRIC_UNIT_MAX_RATIO = 0.46;
+  const HORIZONTAL_CAPTION_SHARE = 0.26;
+  const HORIZONTAL_CAPTION_MIN_RATIO = 0.18;
+  const HORIZONTAL_CAPTION_MAX_RATIO = 0.38;
+  const HORIZONTAL_UNIT_SHARE = 0.22;
+  const HORIZONTAL_UNIT_MIN_PX = 8;
+  const HORIZONTAL_UNIT_MAX_RATIO = 0.34;
 
-  const HIGH_LABEL_SHARE = 0.34;
-  const HIGH_LABEL_MIN_RATIO = 0.22;
-  const HIGH_LABEL_MAX_RATIO = 0.48;
+  const STACKED_CAPTION_SHARE = 0.3;
+  const STACKED_CAPTION_MIN_RATIO = 0.2;
+  const STACKED_CAPTION_MAX_RATIO = 0.42;
+  const STACKED_UNIT_SHARE = 0.24;
+  const STACKED_UNIT_MIN_RATIO = 0.14;
+  const STACKED_UNIT_MAX_RATIO = 0.34;
+  const STACKED_ROW_GAP_RATIO = 0.02;
 
   function toMetricBox(tileRect, details) {
     return {
@@ -30,11 +34,8 @@
       w: tileRect.w,
       h: tileRect.h,
       captionRect: details.captionRect || null,
-      valueRowRect: details.valueRowRect || null,
-      valueTextRect: details.valueTextRect || null,
-      unitRect: details.unitRect || null,
-      labelRect: details.labelRect || null,
-      valueRect: details.valueRect || null
+      valueRect: details.valueRect || null,
+      unitRect: details.unitRect || null
     };
   }
 
@@ -49,12 +50,12 @@
     );
   }
 
-  function resolveUnitWidth(width) {
+  function resolveUnitWidth(width, share, minPx, maxRatio) {
     const safeW = Math.max(1, Math.floor(Number(width) || 1));
-    const preferred = Math.floor(safeW * METRIC_UNIT_SHARE);
-    const maxPx = Math.max(1, Math.floor(safeW * METRIC_UNIT_MAX_RATIO));
-    const minPx = Math.min(Math.max(1, METRIC_UNIT_MIN_PX), maxPx);
-    let out = Math.max(minPx, preferred);
+    const preferred = Math.floor(safeW * share);
+    const maxPx = Math.max(1, Math.floor(safeW * maxRatio));
+    const boundedMin = Math.min(Math.max(1, minPx), maxPx);
+    let out = Math.max(boundedMin, preferred);
     out = Math.min(maxPx, out);
     if (safeW - out < 8) {
       out = Math.max(1, safeW - 8);
@@ -62,74 +63,84 @@
     return Math.max(1, out);
   }
 
-  function createInlineMetricBox(tileRect, insets, responsive, profileApi, makeRect) {
+  function createHorizontalMetricBox(tileRect, responsive, profileApi, makeRect) {
     const padX = profileApi.computeInsetPx(responsive, METRIC_INSET_X_RATIO, 1);
     const padY = profileApi.computeInsetPx(responsive, METRIC_INSET_Y_RATIO, 1);
     const inner = shrinkRect(tileRect, padX, padY, makeRect);
-    const ratio = profileApi.scaleShare(
-      METRIC_CAPTION_SHARE,
+    const captionShare = profileApi.scaleShare(
+      HORIZONTAL_CAPTION_SHARE,
       responsive.textFillScale,
-      METRIC_CAPTION_MIN_RATIO,
-      METRIC_CAPTION_MAX_RATIO
+      HORIZONTAL_CAPTION_MIN_RATIO,
+      HORIZONTAL_CAPTION_MAX_RATIO
     );
-    const rowGap = Math.max(0, Math.min(2, Math.floor((insets && insets.gap) || 0) - 1));
-    const captionHeight = Math.max(1, Math.floor(inner.h * ratio));
-    const valueRowHeight = Math.max(1, inner.h - captionHeight - rowGap);
-    const captionRect = makeRect(inner.x, inner.y, inner.w, captionHeight);
-    const valueRowRect = makeRect(inner.x, captionRect.y + captionRect.h + rowGap, inner.w, valueRowHeight);
-    const unitWidth = resolveUnitWidth(valueRowRect.w);
-    const valueTextWidth = Math.max(1, valueRowRect.w - unitWidth);
-    const valueTextRect = makeRect(valueRowRect.x, valueRowRect.y, valueTextWidth, valueRowRect.h);
+    const captionWidth = Math.max(1, Math.floor(inner.w * captionShare));
+    const trailingWidth = Math.max(1, inner.w - captionWidth);
+    const unitWidth = resolveUnitWidth(
+      trailingWidth,
+      HORIZONTAL_UNIT_SHARE,
+      HORIZONTAL_UNIT_MIN_PX,
+      HORIZONTAL_UNIT_MAX_RATIO
+    );
+    const valueWidth = Math.max(1, trailingWidth - unitWidth);
+    const captionRect = makeRect(inner.x, inner.y, captionWidth, inner.h);
+    const valueRect = makeRect(captionRect.x + captionRect.w, inner.y, valueWidth, inner.h);
     const unitRect = makeRect(
-      valueTextRect.x + valueTextRect.w,
-      valueRowRect.y,
-      valueRowRect.w - valueTextWidth,
-      valueRowRect.h
+      valueRect.x + valueRect.w,
+      inner.y,
+      Math.max(1, trailingWidth - valueWidth),
+      inner.h
     );
 
     return toMetricBox(tileRect, {
       captionRect: captionRect,
-      valueRowRect: valueRowRect,
-      valueTextRect: valueTextRect,
-      unitRect: unitRect,
-      labelRect: captionRect,
-      valueRect: valueTextRect
+      valueRect: valueRect,
+      unitRect: unitRect
     });
   }
 
-  function createHighMetricBox(rowRect, responsive, profileApi, makeRect) {
+  function createStackedMetricBox(tileRect, responsive, profileApi, makeRect) {
     const padX = profileApi.computeInsetPx(responsive, METRIC_INSET_X_RATIO, 1);
     const padY = profileApi.computeInsetPx(responsive, METRIC_INSET_Y_RATIO, 1);
-    const inner = shrinkRect(rowRect, padX, padY, makeRect);
-    const labelShare = profileApi.scaleShare(
-      HIGH_LABEL_SHARE,
+    const gap = profileApi.computeInsetPx(responsive, STACKED_ROW_GAP_RATIO, 0);
+    const inner = shrinkRect(tileRect, padX, padY, makeRect);
+    const captionShare = profileApi.scaleShare(
+      STACKED_CAPTION_SHARE,
       responsive.textFillScale,
-      HIGH_LABEL_MIN_RATIO,
-      HIGH_LABEL_MAX_RATIO
+      STACKED_CAPTION_MIN_RATIO,
+      STACKED_CAPTION_MAX_RATIO
     );
-    const labelWidth = Math.max(1, Math.floor(inner.w * labelShare));
-    const trailingWidth = Math.max(1, inner.w - labelWidth);
-    const unitWidth = resolveUnitWidth(trailingWidth);
-    const valueWidth = Math.max(1, trailingWidth - unitWidth);
-    const labelRect = makeRect(inner.x, inner.y, labelWidth, inner.h);
-    const valueRect = makeRect(labelRect.x + labelRect.w, inner.y, valueWidth, inner.h);
-    const unitRect = makeRect(valueRect.x + valueRect.w, inner.y, trailingWidth - valueWidth, inner.h);
+    const unitShare = profileApi.scaleShare(
+      STACKED_UNIT_SHARE,
+      responsive.textFillScale,
+      STACKED_UNIT_MIN_RATIO,
+      STACKED_UNIT_MAX_RATIO
+    );
+    const totalGap = gap * 2;
+    const usableHeight = Math.max(1, inner.h - totalGap);
+    const captionHeight = Math.max(1, Math.floor(usableHeight * captionShare));
+    const unitHeight = Math.max(1, Math.floor(usableHeight * unitShare));
+    const valueHeight = Math.max(1, usableHeight - captionHeight - unitHeight);
+    const captionRect = makeRect(inner.x, inner.y, inner.w, captionHeight);
+    const valueRect = makeRect(inner.x, captionRect.y + captionRect.h + gap, inner.w, valueHeight);
+    const unitRect = makeRect(
+      inner.x,
+      valueRect.y + valueRect.h + gap,
+      inner.w,
+      Math.max(1, inner.h - captionHeight - valueHeight - totalGap)
+    );
 
-    return toMetricBox(rowRect, {
-      labelRect: labelRect,
+    return toMetricBox(tileRect, {
+      captionRect: captionRect,
       valueRect: valueRect,
-      unitRect: unitRect,
-      captionRect: labelRect,
-      valueRowRect: valueRect,
-      valueTextRect: valueRect
+      unitRect: unitRect
     });
   }
 
   function create() {
     return {
       id: "AisTargetLayoutGeometry",
-      createInlineMetricBox: createInlineMetricBox,
-      createHighMetricBox: createHighMetricBox
+      createHorizontalMetricBox: createHorizontalMetricBox,
+      createStackedMetricBox: createStackedMetricBox
     };
   }
 

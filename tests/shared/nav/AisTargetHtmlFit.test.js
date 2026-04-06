@@ -203,7 +203,7 @@ describe("AisTargetHtmlFit", function () {
     expect(out.accentStyle).toBe("");
   });
 
-  it("fits flat mode with name/front and all four inline metric styles", function () {
+  it("fits flat mode with styles for all four stacked metrics", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
     const hostContext = { __dyniAisTargetTextMeasureCtx: createMeasureContext() };
@@ -224,30 +224,24 @@ describe("AisTargetHtmlFit", function () {
 
     expectStyleFormat(out.nameStyle);
     expectStyleFormat(out.frontStyle);
-    expect(out.frontInitialStyle).toBe("");
     expect(Object.keys(out.metrics)).toEqual(["dst", "cpa", "tcpa", "brg"]);
     ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
       expectStyleFormat(out.metrics[id].captionStyle);
-      expectStyleFormat(out.metrics[id].valueTextStyle);
+      expectStyleFormat(out.metrics[id].valueStyle);
       expectStyleFormat(out.metrics[id].unitStyle);
-      expect(typeof out.metrics[id].valueRowStyle).toBe("string");
+      expect(extractPx(out.metrics[id].valueStyle)).toBeGreaterThan(3);
     });
     expect(out.accentStyle).toBe("background-color:#66b8ff;");
   });
 
-  it("fits value text against metric sub-rects instead of full tile width", function () {
+  it("uses captionRect/valueRect/unitRect for fitting and ignores old value-row fields", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
     const hostContext = { __dyniAisTargetTextMeasureCtx: createMeasureContext() };
     const shellRect = { width: 320, height: 180 };
-    const model = buildModel(h, shellRect, {
-      metrics: {
-        dst: {
-          captionText: "DST",
-          valueText: "SUPERCALIFRAGILISTIC",
-          unitText: "nm"
-        }
-      },
+
+    const narrowModel = buildModel(h, shellRect, {
+      metrics: { dst: { valueText: "12345678901234567890" } },
       layout: {
         mode: "normal",
         responsive: { textFillScale: 1 },
@@ -260,82 +254,84 @@ describe("AisTargetHtmlFit", function () {
             y: 50,
             w: 300,
             h: 80,
-            captionRect: { x: 0, y: 50, w: 120, h: 14 },
-            valueRowRect: { x: 0, y: 66, w: 120, h: 14 },
-            valueTextRect: { x: 0, y: 66, w: 40, h: 14 },
-            unitRect: { x: 42, y: 66, w: 20, h: 14 }
-          },
-          cpa: {
-            x: 0,
-            y: 0,
-            w: 1,
-            h: 1,
-            captionRect: { x: 0, y: 0, w: 1, h: 1 },
-            valueRowRect: { x: 0, y: 0, w: 1, h: 1 },
-            valueTextRect: { x: 0, y: 0, w: 1, h: 1 },
-            unitRect: { x: 0, y: 0, w: 1, h: 1 }
-          },
-          tcpa: {
-            x: 0,
-            y: 0,
-            w: 1,
-            h: 1,
-            captionRect: { x: 0, y: 0, w: 1, h: 1 },
-            valueRowRect: { x: 0, y: 0, w: 1, h: 1 },
-            valueTextRect: { x: 0, y: 0, w: 1, h: 1 },
-            unitRect: { x: 0, y: 0, w: 1, h: 1 }
-          },
-          brg: {
-            x: 0,
-            y: 0,
-            w: 1,
-            h: 1,
-            captionRect: { x: 0, y: 0, w: 1, h: 1 },
-            valueRowRect: { x: 0, y: 0, w: 1, h: 1 },
-            valueTextRect: { x: 0, y: 0, w: 1, h: 1 },
-            unitRect: { x: 0, y: 0, w: 1, h: 1 }
+            captionRect: { x: 0, y: 50, w: 70, h: 14 },
+            valueRect: { x: 72, y: 50, w: 34, h: 14 },
+            unitRect: { x: 108, y: 50, w: 20, h: 14 },
+            valueRowRect: { x: 0, y: 0, w: 300, h: 80 },
+            valueTextRect: { x: 0, y: 0, w: 300, h: 80 }
           }
         }
       }
     });
+    narrowModel.visibleMetricIds = ["dst"];
 
-    const out = h.fit.compute({
-      model: model,
-      targetEl: targetEl,
-      hostContext: hostContext,
-      shellRect: shellRect
+    const wideModel = buildModel(h, shellRect, {
+      metrics: { dst: { valueText: "12345678901234567890" } },
+      layout: {
+        mode: "normal",
+        responsive: { textFillScale: 1 },
+        placeholderRect: { x: 0, y: 0, w: 320, h: 180 },
+        nameRect: { x: 0, y: 0, w: 160, h: 20 },
+        frontRect: { x: 0, y: 22, w: 160, h: 20 },
+        metricBoxes: {
+          dst: {
+            x: 0,
+            y: 50,
+            w: 300,
+            h: 80,
+            captionRect: { x: 0, y: 50, w: 70, h: 14 },
+            valueRect: { x: 72, y: 50, w: 120, h: 14 },
+            unitRect: { x: 194, y: 50, w: 20, h: 14 },
+            valueRowRect: { x: 0, y: 0, w: 1, h: 1 },
+            valueTextRect: { x: 0, y: 0, w: 1, h: 1 }
+          }
+        }
+      }
     });
+    wideModel.visibleMetricIds = ["dst"];
 
-    expect(extractPx(out.metrics.dst.valueTextStyle)).toBeLessThanOrEqual(3);
+    const narrowOut = h.fit.compute({ model: narrowModel, targetEl, hostContext, shellRect });
+    const wideOut = h.fit.compute({ model: wideModel, targetEl, hostContext, shellRect });
+
+    expect(extractPx(narrowOut.metrics.dst.valueStyle)).toBeLessThan(extractPx(wideOut.metrics.dst.valueStyle));
+    expect(extractPx(narrowOut.metrics.dst.valueStyle)).toBeGreaterThan(0);
   });
 
-  it("fits high mode label/value/unit styles for single-line row layout", function () {
+  it("keeps representative normal/high shells above microscopic sizing", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
     const hostContext = { __dyniAisTargetTextMeasureCtx: createMeasureContext() };
-    const shellRect = { width: 220, height: 320 };
-    const model = buildModel(h, shellRect, {
+
+    const normalShell = { width: 300, height: 190 };
+    const highShell = { width: 180, height: 320 };
+    const normalModel = buildModel(h, normalShell, {
+      mode: "normal",
+      metrics: {
+        dst: { valueText: "123.456" },
+        cpa: { valueText: "98.76" },
+        tcpa: { valueText: "123.4" },
+        brg: { valueText: "359.9" }
+      }
+    });
+    const highModel = buildModel(h, highShell, {
       mode: "high",
-      showTcpaBranch: true,
-      visibleMetricIds: ["dst", "cpa", "tcpa", "brg"]
+      metrics: {
+        dst: { valueText: "123.456" },
+        cpa: { valueText: "98.76" },
+        tcpa: { valueText: "123.4" },
+        brg: { valueText: "359.9" }
+      }
     });
 
-    const out = h.fit.compute({
-      model: model,
-      targetEl: targetEl,
-      hostContext: hostContext,
-      shellRect: shellRect
+    const normalOut = h.fit.compute({ model: normalModel, targetEl, hostContext, shellRect: normalShell });
+    const highOut = h.fit.compute({ model: highModel, targetEl, hostContext, shellRect: highShell });
+
+    ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
+      expect(extractPx(normalOut.metrics[id].valueStyle)).toBeGreaterThan(3);
+      expect(extractPx(highOut.metrics[id].valueStyle)).toBeGreaterThan(3);
+      expect(extractPx(normalOut.metrics[id].captionStyle)).toBeLessThanOrEqual(extractPx(normalOut.metrics[id].valueStyle));
+      expect(extractPx(highOut.metrics[id].captionStyle)).toBeLessThanOrEqual(extractPx(highOut.metrics[id].valueStyle));
     });
-
-    const valuePx = extractPx(out.metrics.dst.valueTextStyle);
-    const captionPx = extractPx(out.metrics.dst.captionStyle);
-    const unitPx = extractPx(out.metrics.dst.unitStyle);
-
-    expect(valuePx).toBeGreaterThan(0);
-    expect(captionPx).toBeGreaterThan(0);
-    expect(unitPx).toBeGreaterThan(0);
-    expect(captionPx).toBeLessThanOrEqual(valuePx);
-    expect(unitPx).toBeLessThanOrEqual(Math.max(1, Math.floor(valuePx * 0.76)));
   });
 
   it("shrinks long name and long metric values instead of clipping", function () {
@@ -364,7 +360,7 @@ describe("AisTargetHtmlFit", function () {
     });
 
     expect(extractPx(longOut.nameStyle)).toBeLessThan(extractPx(shortOut.nameStyle));
-    expect(extractPx(longOut.metrics.dst.valueTextStyle)).toBeLessThanOrEqual(extractPx(shortOut.metrics.dst.valueTextStyle));
+    expect(extractPx(longOut.metrics.dst.valueStyle)).toBeLessThanOrEqual(extractPx(shortOut.metrics.dst.valueStyle));
     expect(h.themeApi.resolveForRoot).toHaveBeenCalledWith(targetEl);
   });
 

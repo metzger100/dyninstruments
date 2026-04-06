@@ -12,6 +12,7 @@
 
   const PLACEHOLDER_TEXT = "No AIS";
   const METRIC_ORDER = ["dst", "cpa", "tcpa", "brg"];
+  const DATA_METRIC_VISIBILITY = { dst: true, cpa: true, tcpa: true, brg: true };
 
   function toObject(value) {
     return value && typeof value === "object" ? value : {};
@@ -144,11 +145,6 @@
     parts.push("N:" + toSignatureText(m.nameText));
     parts.push("R:" + toSignatureText(m.frontText));
 
-    if (m.mode === "flat") {
-      parts.push("FR" + Math.max(1, Math.floor(Number(m.flatMetricRows) || 1)));
-      parts.push("FC" + Math.max(1, Math.floor(Number(m.flatMetricColumns) || 1)));
-    }
-
     const metricIds = Array.isArray(m.visibleMetricIds) ? m.visibleMetricIds : METRIC_ORDER;
     const metrics = toObject(m.metrics);
     for (let i = 0; i < metricIds.length; i += 1) {
@@ -255,11 +251,9 @@
 
       const hasData = renderState === "data";
       const metricVisibility = hasData
-        ? layout.metricVisibility
+        ? DATA_METRIC_VISIBILITY
         : { dst: false, cpa: false, tcpa: false, brg: false };
-      const visibleMetricIds = hasData
-        ? (Array.isArray(layout.metricOrder) && layout.metricOrder.length ? layout.metricOrder.slice() : METRIC_ORDER.slice())
-        : [];
+      const visibleMetricIds = hasData ? METRIC_ORDER.slice() : [];
       const colorRole = (hasData && domain.hasColorRole === true)
         ? normalizeText(domain.colorRole)
         : "";
@@ -273,9 +267,6 @@
         "dyni-ais-target-branch-" + (showTcpaBranch ? "tcpa" : "brg")
       ];
 
-      if (layout.mode === "flat") {
-        wrapperClasses.push("dyni-ais-target-flat-rows-" + (layout.flatMetricRows === 2 ? "2" : "1"));
-      }
       if (hasAccent) {
         wrapperClasses.push("dyni-ais-target-color-" + colorRole);
       }
@@ -304,8 +295,6 @@
         metrics: metrics,
         metricVisibility: metricVisibility,
         visibleMetricIds: visibleMetricIds,
-        flatMetricRows: layout.flatMetricRows,
-        flatMetricColumns: layout.flatMetricColumns,
         colorRole: colorRole,
         hasAccent: hasAccent,
         wrapperClasses: wrapperClasses

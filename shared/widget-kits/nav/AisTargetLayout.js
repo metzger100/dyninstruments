@@ -12,26 +12,23 @@
 
   const METRIC_ORDER = ["dst", "cpa", "tcpa", "brg"];
 
-  const PAD_X_RATIO = 0.04;
+  const PAD_X_RATIO = 0.035;
   const PAD_Y_RATIO = 0.03;
-  const GAP_RATIO = 0.035;
+  const GAP_RATIO = 0.03;
 
-  const FLAT_IDENTITY_SHARE = 0.34;
-  const NORMAL_NAME_BAND_SHARE = 0.36;
-  const HIGH_NAME_BAND_SHARE = 0.28;
-  const NORMAL_FRONT_SHARE = 0.28;
-  const HIGH_FRONT_SHARE = 0.24;
-
-  const FLAT_METRIC_MIN_TILE_WIDTH = 74;
-  const FLAT_TWO_ROW_MIN_METRICS_HEIGHT = 56;
+  const FLAT_IDENTITY_SHARE = 0.26;
+  const NORMAL_NAME_BAND_SHARE = 0.3;
+  const HIGH_NAME_BAND_SHARE = 0.22;
+  const NORMAL_FRONT_SHARE = 0.22;
+  const HIGH_FRONT_SHARE = 0.2;
 
   const VERTICAL_ASPECT_RATIO = { width: 7, height: 8 };
   const VERTICAL_MIN_HEIGHT = "8em";
   const RESPONSIVE_SCALES = {
     textFillScale: 1.18,
-    flatIdentityScale: 0.9,
-    normalNameScale: 0.92,
-    highNameScale: 0.88
+    flatIdentityScale: 0.88,
+    normalNameScale: 0.9,
+    highNameScale: 0.86
   };
 
   function clampNumber(value, minValue, maxValue, defaultValue) {
@@ -44,15 +41,16 @@
 
   function splitStack(rect, gapPx, count, makeRect) {
     const out = [];
-    const totalGap = Math.max(0, count - 1) * gapPx;
+    const safeCount = Math.max(1, count);
+    const totalGap = Math.max(0, safeCount - 1) * gapPx;
     const usable = Math.max(0, rect.h - totalGap);
-    const base = Math.floor(usable / Math.max(1, count));
+    const base = Math.floor(usable / safeCount);
     let y = rect.y;
     let used = 0;
 
-    for (let i = 0; i < count; i += 1) {
+    for (let i = 0; i < safeCount; i += 1) {
       const remaining = usable - used;
-      const h = i === count - 1 ? Math.max(0, remaining) : Math.max(0, base);
+      const h = i === safeCount - 1 ? Math.max(0, remaining) : Math.max(0, base);
       out.push(makeRect(rect.x, y, rect.w, h));
       y += h + gapPx;
       used += h;
@@ -63,15 +61,16 @@
 
   function splitRow(rect, gapPx, count, makeRect) {
     const out = [];
-    const totalGap = Math.max(0, count - 1) * gapPx;
+    const safeCount = Math.max(1, count);
+    const totalGap = Math.max(0, safeCount - 1) * gapPx;
     const usable = Math.max(0, rect.w - totalGap);
-    const base = Math.floor(usable / Math.max(1, count));
+    const base = Math.floor(usable / safeCount);
     let x = rect.x;
     let used = 0;
 
-    for (let i = 0; i < count; i += 1) {
+    for (let i = 0; i < safeCount; i += 1) {
       const remaining = usable - used;
-      const w = i === count - 1 ? Math.max(0, remaining) : Math.max(0, base);
+      const w = i === safeCount - 1 ? Math.max(0, remaining) : Math.max(0, base);
       out.push(makeRect(x, rect.y, w, rect.h));
       x += w + gapPx;
       used += w;
@@ -181,12 +180,22 @@
       return renderState === "data" ? METRIC_ORDER.slice() : [];
     }
 
-    function fillInlineMetrics(out, metricTiles, insets) {
+    function fillHorizontalMetricBoxes(out, tileRects, responsive) {
       for (let i = 0; i < METRIC_ORDER.length; i += 1) {
-        out.metricBoxes[METRIC_ORDER[i]] = geometryApi.createInlineMetricBox(
-          metricTiles[i],
-          insets,
-          insets.responsive,
+        out.metricBoxes[METRIC_ORDER[i]] = geometryApi.createHorizontalMetricBox(
+          tileRects[i],
+          responsive,
+          profileApi,
+          makeRect
+        );
+      }
+    }
+
+    function fillStackedMetricBoxes(out, tileRects, responsive) {
+      for (let i = 0; i < METRIC_ORDER.length; i += 1) {
+        out.metricBoxes[METRIC_ORDER[i]] = geometryApi.createStackedMetricBox(
+          tileRects[i],
+          responsive,
           profileApi,
           makeRect
         );
@@ -243,8 +252,6 @@
         metricBoxes: Object.create(null),
         metricVisibility: metricVisibility,
         metricOrder: metricOrder,
-        flatMetricRows: 0,
-        flatMetricColumns: 0,
         wrapperStyle: verticalShell.wrapperStyle
       };
 
@@ -256,38 +263,32 @@
         const identityShare = profileApi.scaleShare(
           FLAT_IDENTITY_SHARE,
           insets.responsive.flatIdentityScale,
-          0.24,
-          0.5
+          0.2,
+          0.42
         );
         const identityWidth = Math.max(1, Math.floor(contentRect.w * identityShare));
         const metricsWidth = Math.max(1, contentRect.w - identityWidth - insets.gap);
         const identityRect = makeRect(contentRect.x, contentRect.y, identityWidth, contentRect.h);
-        const metricsRect = makeRect(identityRect.x + identityRect.w + insets.gap, contentRect.y, metricsWidth, contentRect.h);
+        const metricsRect = makeRect(
+          identityRect.x + identityRect.w + insets.gap,
+          contentRect.y,
+          metricsWidth,
+          contentRect.h
+        );
         const nameHeight = Math.max(1, Math.floor(identityRect.h * 0.58));
         const frontHeight = Math.max(1, identityRect.h - nameHeight - insets.gap);
 
         out.identityRect = identityRect;
         out.nameRect = makeRect(identityRect.x, identityRect.y, identityRect.w, nameHeight);
-        out.frontRect = makeRect(identityRect.x, out.nameRect.y + out.nameRect.h + insets.gap, identityRect.w, frontHeight);
+        out.frontRect = makeRect(
+          identityRect.x,
+          out.nameRect.y + out.nameRect.h + insets.gap,
+          identityRect.w,
+          frontHeight
+        );
         out.metricsRect = metricsRect;
 
-        const singleRowTiles = splitRow(metricsRect, insets.gap, 4, makeRect);
-        const canUseTwoRows = metricsRect.h >= FLAT_TWO_ROW_MIN_METRICS_HEIGHT;
-        const useTwoRows = canUseTwoRows && singleRowTiles[0].w < FLAT_METRIC_MIN_TILE_WIDTH;
-        let metricTiles = singleRowTiles;
-
-        if (useTwoRows) {
-          const rows = splitStack(metricsRect, insets.gap, 2, makeRect);
-          metricTiles = splitRow(rows[0], insets.gap, 2, makeRect)
-            .concat(splitRow(rows[1], insets.gap, 2, makeRect));
-          out.flatMetricRows = 2;
-          out.flatMetricColumns = 2;
-        } else {
-          out.flatMetricRows = 1;
-          out.flatMetricColumns = 4;
-        }
-
-        fillInlineMetrics(out, metricTiles, insets);
+        fillStackedMetricBoxes(out, splitRow(metricsRect, insets.gap, 4, makeRect), insets.responsive);
         return out;
       }
 
@@ -295,8 +296,8 @@
         const nameShare = profileApi.scaleShare(
           NORMAL_NAME_BAND_SHARE,
           insets.responsive.normalNameScale,
-          0.24,
-          0.5
+          0.22,
+          0.42
         );
         const nameHeight = Math.max(1, Math.floor(contentRect.h * nameShare));
         const bodyHeight = Math.max(1, contentRect.h - nameHeight - insets.gap);
@@ -314,15 +315,15 @@
         const metricRows = splitStack(metricsRect, insets.gap, 2, makeRect);
         const rowA = splitRow(metricRows[0], insets.gap, 2, makeRect);
         const rowB = splitRow(metricRows[1], insets.gap, 2, makeRect);
-        fillInlineMetrics(out, [rowA[0], rowA[1], rowB[0], rowB[1]], insets);
+        fillHorizontalMetricBoxes(out, [rowA[0], rowA[1], rowB[0], rowB[1]], insets.responsive);
         return out;
       }
 
       const nameShare = profileApi.scaleShare(
         HIGH_NAME_BAND_SHARE,
         insets.responsive.highNameScale,
-        0.18,
-        0.38
+        0.16,
+        0.32
       );
       const nameHeight = Math.max(1, Math.floor(contentRect.h * nameShare));
       const bodyHeight = Math.max(1, contentRect.h - nameHeight - insets.gap);
@@ -337,16 +338,7 @@
       out.frontRect = frontRect;
       out.metricsRect = metricsRect;
 
-      const metricRows = splitStack(metricsRect, insets.gap, 4, makeRect);
-      for (let i = 0; i < METRIC_ORDER.length; i += 1) {
-        out.metricBoxes[METRIC_ORDER[i]] = geometryApi.createHighMetricBox(
-          metricRows[i],
-          insets.responsive,
-          profileApi,
-          makeRect
-        );
-      }
-
+      fillHorizontalMetricBoxes(out, splitStack(metricsRect, insets.gap, 4, makeRect), insets.responsive);
       return out;
     }
 

@@ -60,7 +60,6 @@ This widget is intentionally summary/workflow-entry only. It does not embed AIS 
 | `dyni-ais-target-mode-high` | mode resolver | Tall layout |
 | `dyni-ais-target-mode-normal` | mode resolver | Balanced layout |
 | `dyni-ais-target-mode-flat` | mode resolver | Wide layout |
-| `dyni-ais-target-flat-rows-1` / `dyni-ais-target-flat-rows-2` | layout resolver | Flat metrics `1x4` vs `2x2` arrangement |
 | `dyni-ais-target-data` | render-state resolver | Target summary visible |
 | `dyni-ais-target-placeholder` | render-state resolver | Passive placeholder (`No AIS`) |
 | `dyni-ais-target-hidden` | render-state resolver | Hidden output state |
@@ -81,8 +80,7 @@ This widget is intentionally summary/workflow-entry only. It does not embed AIS 
 | `.dyni-ais-target-metrics` | Metric grid container |
 | `.dyni-ais-target-metric-*` | Per-metric tile (`dst`, `cpa`, `tcpa`, `brg`) |
 | `.dyni-ais-target-metric-caption` | Caption line |
-| `.dyni-ais-target-metric-value-row` | Inline value/unit row wrapper |
-| `.dyni-ais-target-metric-value-text` | Primary value text |
+| `.dyni-ais-target-metric-value` | Primary value text |
 | `.dyni-ais-target-metric-unit` | Unit text (secondary) |
 | `.dyni-ais-target-state-accent` | Left accent strip (theme token color) |
 | `.dyni-ais-target-open-hotspot` | Full-surface click hotspot (`onclick="aisTargetShowInfo"`) |
@@ -144,14 +142,15 @@ Mode matrix:
 
 | Mode | Identity fields | Metric arrangement |
 |---|---|---|
-| `flat` | `nameOrMmsi` + `frontText` | adaptive `1x4` (preferred) or `2x2` |
+| `flat` | `nameOrMmsi` + `frontText` | fixed `1x4` |
 | `normal` | `nameOrMmsi` + `frontText` | `2x2` |
 | `high` | `nameOrMmsi` + `frontText` | `4` stacked rows |
 
 Line-layout rules:
 
+- `flat`: caption (line 1), value (line 2), unit (line 3)
+- `normal`: caption + value + unit on one line
 - `high`: caption + value + unit on one line
-- `normal`/`flat`: caption on first line, value + unit inline on second line
 
 Render-state policy:
 
@@ -189,6 +188,14 @@ Theme/token contract:
 - accent strip color is token-derived from `ThemeResolver.resolveForRoot(root).colors.ais.<role>`
 - used role keys: `warning`, `nearest`, `tracking`, `normal`
 - no AvNav AIS style-store color reads are used in renderer code
+
+Sizing discipline:
+
+- AIS metric fitting is geometry-driven and follows the EditRoute-style pattern:
+  - fit value text first against `valueRect`
+  - derive caption/unit max size proportionally from fitted value size
+  - fit caption/unit against `captionRect` and `unitRect`
+- No flat `2x2` fallback is used; flat remains `1x4` and clipping prevention is handled by geometry + fit allocation.
 
 ## Resize Signature Contract
 

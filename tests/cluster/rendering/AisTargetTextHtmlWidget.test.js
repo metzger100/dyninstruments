@@ -12,10 +12,10 @@ describe("AisTargetTextHtmlWidget", function () {
         frontStyle: "font-size:10px;",
         placeholderStyle: "font-size:11px;",
         metrics: {
-          dst: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-          cpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-          tcpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-          brg: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:11px;", unitStyle: "font-size:7px;" }
+          dst: { captionStyle: "font-size:8px;", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+          cpa: { captionStyle: "font-size:8px;", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+          tcpa: { captionStyle: "font-size:8px;", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+          brg: { captionStyle: "font-size:8px;", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" }
         },
         accentStyle: "background-color:#c33;"
       };
@@ -284,10 +284,15 @@ describe("AisTargetTextHtmlWidget", function () {
     const css = fs.readFileSync(cssPath, "utf8");
 
     expect(css).toContain(".dyni-ais-target-mode-flat");
-    expect(css).toContain(".dyni-ais-target-mode-flat.dyni-ais-target-flat-rows-2 .dyni-ais-target-metrics");
+    expect(css).toContain(".dyni-ais-target-mode-flat .dyni-ais-target-metrics");
+    expect(css).toContain(".dyni-ais-target-mode-normal .dyni-ais-target-metric");
     expect(css).toContain(".dyni-ais-target-mode-high .dyni-ais-target-metrics");
-    expect(css).toContain(".dyni-ais-target-metric-value-row");
-    expect(css).toContain(".dyni-ais-target-metric-value-text");
+    expect(css).toContain(".dyni-ais-target-metric-value");
+    expect(css).toContain("grid-template-rows: minmax(0, 0.3fr) minmax(0, 0.46fr) minmax(0, 0.24fr);");
+    expect(css).toContain("grid-template-columns: minmax(0, 0.28fr) minmax(0, 0.5fr) minmax(0, 0.22fr);");
+    expect(css).not.toContain("dyni-ais-target-flat-rows-2");
+    expect(css).not.toContain("dyni-ais-target-metric-value-row");
+    expect(css).not.toContain("dyni-ais-target-metric-value-text");
     expect(css).toContain(".dyni-ais-target-open-hotspot");
     expect(css).toContain(".dyni-ais-target-open-dispatch");
     expect(css).toContain(".dyni-ais-target-open-passive");

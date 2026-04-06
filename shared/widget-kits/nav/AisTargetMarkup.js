@@ -32,19 +32,15 @@
       + ">"
       + htmlUtils.escapeHtml(toText(metric.captionText))
       + "</div>"
-      + '<div class="dyni-ais-target-metric-value-row"'
-      + htmlUtils.toStyleAttr(metricFit.valueRowStyle)
-      + ">"
-      + '<span class="dyni-ais-target-metric-value-text"'
-      + htmlUtils.toStyleAttr(metricFit.valueTextStyle || metricFit.valueStyle)
+      + '<div class="dyni-ais-target-metric-value"'
+      + htmlUtils.toStyleAttr(metricFit.valueStyle)
       + ">"
       + htmlUtils.escapeHtml(toText(metric.valueText))
-      + "</span>"
-      + '<span class="dyni-ais-target-metric-unit"'
+      + "</div>"
+      + '<div class="dyni-ais-target-metric-unit"'
       + htmlUtils.toStyleAttr(metricFit.unitStyle)
       + ">"
       + htmlUtils.escapeHtml(toText(metric.unitText))
-      + "</span>"
       + "</div>"
       + "</div>";
   }

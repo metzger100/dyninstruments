@@ -9,6 +9,12 @@ describe("AisTargetMarkup", function () {
     return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js").create();
   }
 
+  function parseHtml(html) {
+    const host = document.createElement("div");
+    host.innerHTML = html;
+    return host;
+  }
+
   function makeModel(overrides) {
     return Object.assign({
       mode: "normal",
@@ -48,19 +54,28 @@ describe("AisTargetMarkup", function () {
       placeholderStyle: "font-size:12px;",
       accentStyle: "background-color:#f39b52;",
       metrics: {
-        dst: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
-        cpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
-        tcpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
-        brg: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:12px;", unitStyle: "font-size:9px;" }
+        dst: { captionStyle: "font-size:8px;", valueStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
+        cpa: { captionStyle: "font-size:8px;", valueStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
+        tcpa: { captionStyle: "font-size:8px;", valueStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
+        brg: { captionStyle: "font-size:8px;", valueStyle: "font-size:12px;", unitStyle: "font-size:9px;" }
       }
     }, overrides || {});
     out.metrics = Object.assign({}, {
-      dst: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
-      cpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
-      tcpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
-      brg: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:12px;", unitStyle: "font-size:9px;" }
+      dst: { captionStyle: "font-size:8px;", valueStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
+      cpa: { captionStyle: "font-size:8px;", valueStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
+      tcpa: { captionStyle: "font-size:8px;", valueStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
+      brg: { captionStyle: "font-size:8px;", valueStyle: "font-size:12px;", unitStyle: "font-size:9px;" }
     }, overrides && overrides.metrics ? overrides.metrics : {});
     return out;
+  }
+
+  function expectMetricStructure(root, id) {
+    const metric = root.querySelector(".dyni-ais-target-metric-" + id);
+    expect(metric).toBeTruthy();
+    expect(metric.children).toHaveLength(3);
+    expect(metric.children[0].className).toContain("dyni-ais-target-metric-caption");
+    expect(metric.children[1].className).toContain("dyni-ais-target-metric-value");
+    expect(metric.children[2].className).toContain("dyni-ais-target-metric-unit");
   }
 
   it("renders dispatch-mode wrapper, accent, hotspot, and ordered metric tiles", function () {
@@ -70,19 +85,18 @@ describe("AisTargetMarkup", function () {
       fit: makeFit(),
       htmlUtils: createHtmlUtils()
     });
+    const root = parseHtml(html);
 
     expect(html).toContain('class="dyni-ais-target-html dyni-ais-target-mode-normal dyni-ais-target-data dyni-ais-target-open-dispatch dyni-ais-target-branch-tcpa dyni-ais-target-color-warning"');
     expect(html).toContain('onclick="catchAll"');
     expect(html).toContain('class="dyni-ais-target-open-hotspot" onclick="aisTargetShowInfo"');
     expect(html).toContain('class="dyni-ais-target-state-accent" style="background-color:#f39b52;"');
-    expect(html).toContain("dyni-ais-target-name");
-    expect(html).toContain("dyni-ais-target-front");
-    expect(html).toContain("dyni-ais-target-metric-dst");
-    expect(html).toContain("dyni-ais-target-metric-cpa");
-    expect(html).toContain("dyni-ais-target-metric-tcpa");
-    expect(html).toContain("dyni-ais-target-metric-brg");
-    expect(html).toContain("dyni-ais-target-metric-value-row");
-    expect(html).toContain("dyni-ais-target-metric-value-text");
+    expect(root.querySelector(".dyni-ais-target-name")).toBeTruthy();
+    expect(root.querySelector(".dyni-ais-target-front")).toBeTruthy();
+
+    ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
+      expectMetricStructure(root, id);
+    });
 
     const dstIndex = html.indexOf("dyni-ais-target-metric-dst");
     const cpaIndex = html.indexOf("dyni-ais-target-metric-cpa");
@@ -119,33 +133,32 @@ describe("AisTargetMarkup", function () {
     expect(html).not.toContain("dyni-ais-target-state-accent");
   });
 
-  it("renders flat data body with name/front and all four metrics", function () {
+  it("renders all four metrics and identity in all data modes", function () {
     const markup = createMarkup();
-    const html = markup.render({
-      model: makeModel({
-        mode: "flat",
-        showTcpaBranch: false,
-        wrapperClasses: [
-          "dyni-ais-target-html",
-          "dyni-ais-target-mode-flat",
-          "dyni-ais-target-data",
-          "dyni-ais-target-open-dispatch",
-          "dyni-ais-target-branch-brg",
-          "dyni-ais-target-flat-rows-2"
-        ],
-        visibleMetricIds: ["dst", "cpa", "tcpa", "brg"]
-      }),
-      fit: makeFit(),
-      htmlUtils: createHtmlUtils()
-    });
 
-    expect(html).toContain("dyni-ais-target-name");
-    expect(html).toContain('class="dyni-ais-target-front"');
-    expect(html).not.toContain("dyni-ais-target-front-initial");
-    expect(html).toContain("dyni-ais-target-metric-dst");
-    expect(html).toContain("dyni-ais-target-metric-cpa");
-    expect(html).toContain("dyni-ais-target-metric-tcpa");
-    expect(html).toContain("dyni-ais-target-metric-brg");
+    ["flat", "normal", "high"].forEach((mode) => {
+      const html = markup.render({
+        model: makeModel({
+          mode: mode,
+          wrapperClasses: [
+            "dyni-ais-target-html",
+            "dyni-ais-target-mode-" + mode,
+            "dyni-ais-target-data",
+            "dyni-ais-target-open-dispatch",
+            "dyni-ais-target-branch-brg"
+          ]
+        }),
+        fit: makeFit(),
+        htmlUtils: createHtmlUtils()
+      });
+      const root = parseHtml(html);
+
+      expect(root.querySelector(".dyni-ais-target-name")).toBeTruthy();
+      expect(root.querySelector(".dyni-ais-target-front")).toBeTruthy();
+      ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
+        expectMetricStructure(root, id);
+      });
+    });
   });
 
   it("renders placeholder state with placeholder text only", function () {
@@ -197,7 +210,7 @@ describe("AisTargetMarkup", function () {
     expect(html).toContain('class="dyni-ais-target-name" style="font-size:13px;"');
     expect(html).toContain('class="dyni-ais-target-front" style="font-size:11px;"');
     expect(html).toContain('class="dyni-ais-target-metric-caption" style="font-size:8px;"');
-    expect(html).toContain('class="dyni-ais-target-metric-value-text" style="font-size:12px;"');
+    expect(html).toContain('class="dyni-ais-target-metric-value" style="font-size:12px;"');
     expect(html).toContain('class="dyni-ais-target-metric-unit" style="font-size:9px;"');
     expect(html).toContain("&lt;img src=x onerror=&quot;1&quot;&gt;");
     expect(html).toContain("&quot;Front&quot;");
