@@ -9,26 +9,30 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetLayout = factory(); }
 }(this, function () {
   "use strict";
-
   const METRIC_ORDER = ["dst", "cpa", "tcpa", "brg"];
-
-  const PAD_X_RATIO = 0.03;
-  const PAD_Y_RATIO = 0.025;
-  const GAP_RATIO = 0.02;
-
+  const DEFAULT_PAD_X_RATIO = 0.03;
+  const DEFAULT_PAD_Y_RATIO = 0.025;
+  const DEFAULT_GAP_RATIO = 0.02;
+  const HIGH_PAD_X_RATIO = 0.023;
+  const HIGH_PAD_Y_RATIO = 0.018;
+  const HIGH_GAP_RATIO = 0.012;
+  const VERTICAL_PAD_X_RATIO = 0.021;
+  const VERTICAL_PAD_Y_RATIO = 0.016;
+  const VERTICAL_GAP_RATIO = 0.01;
+  const ACCENT_WIDTH_RATIO = 0.02;
+  const ACCENT_GAP_RATIO = 0.012;
   const FLAT_IDENTITY_SHARE = 0.26;
   const NORMAL_NAME_BAND_SHARE = 0.24;
-  const HIGH_NAME_BAND_SHARE = 0.18;
-  const NORMAL_FRONT_SHARE = 0.16;
-  const HIGH_FRONT_SHARE = 0.14;
-
+  const HIGH_NAME_BAND_SHARE = 0.14;
+  const NORMAL_FRONT_SHARE = 0.15;
+  const HIGH_FRONT_SHARE = 0.1;
   const VERTICAL_ASPECT_RATIO = { width: 7, height: 8 };
   const VERTICAL_MIN_HEIGHT = "8em";
   const RESPONSIVE_SCALES = {
     textFillScale: 1.18,
     flatIdentityScale: 0.88,
     normalNameScale: 0.9,
-    highNameScale: 0.86
+    highNameScale: 0.78
   };
 
   function clampNumber(value, minValue, maxValue, defaultValue) {
@@ -145,26 +149,36 @@
       return "normal";
     }
 
-    function computeInsets(W, H, isVerticalCommitted) {
+    function computeInsets(W, H, isVerticalCommitted, mode, hasAccent) {
       const safeW = Math.max(1, Math.floor(clampNumber(W, 1, Number.MAX_SAFE_INTEGER, 1)));
       const safeH = Math.max(1, Math.floor(clampNumber(H, 1, Number.MAX_SAFE_INTEGER, 1)));
       const anchorHeight = isVerticalCommitted === true ? safeW : safeH;
       const responsive = profileApi.computeProfile(safeW, anchorHeight, { scales: RESPONSIVE_SCALES });
-
+      const isVertical = isVerticalCommitted === true;
+      const isHigh = mode === "high";
+      const padXRatio = isVertical ? VERTICAL_PAD_X_RATIO : (isHigh ? HIGH_PAD_X_RATIO : DEFAULT_PAD_X_RATIO);
+      const padYRatio = isVertical ? VERTICAL_PAD_Y_RATIO : (isHigh ? HIGH_PAD_Y_RATIO : DEFAULT_PAD_Y_RATIO);
+      const gapRatio = isVertical ? VERTICAL_GAP_RATIO : (isHigh ? HIGH_GAP_RATIO : DEFAULT_GAP_RATIO);
+      const accentWidth = hasAccent === true ? profileApi.computeInsetPx(responsive, ACCENT_WIDTH_RATIO, 1) : 0;
+      const accentGap = hasAccent === true ? profileApi.computeInsetPx(responsive, ACCENT_GAP_RATIO, 1) : 0;
       return {
-        padX: profileApi.computeInsetPx(responsive, PAD_X_RATIO, 1),
-        padY: profileApi.computeInsetPx(responsive, PAD_Y_RATIO, 1),
-        gap: profileApi.computeInsetPx(responsive, GAP_RATIO, 1),
+        padX: profileApi.computeInsetPx(responsive, padXRatio, 1),
+        padY: profileApi.computeInsetPx(responsive, padYRatio, 1),
+        gap: profileApi.computeInsetPx(responsive, gapRatio, 1),
+        accentWidth: accentWidth,
+        accentGap: accentGap,
+        accentReserve: accentWidth + accentGap,
         responsive: responsive
       };
     }
 
     function createContentRect(W, H, insets) {
-      const ins = insets || computeInsets(W, H, false);
+      const ins = insets || computeInsets(W, H, false, "normal", false);
+      const leftPad = ins.padX + Math.max(0, ins.accentReserve || 0);
       return makeRect(
-        ins.padX,
+        leftPad,
         ins.padY,
-        Math.max(1, Math.floor(Number(W) || 1) - ins.padX * 2),
+        Math.max(1, Math.floor(Number(W) || 1) - ins.padX * 2 - Math.max(0, ins.accentReserve || 0)),
         Math.max(1, Math.floor(Number(H) || 1) - ins.padY * 2)
       );
     }
@@ -180,13 +194,14 @@
       return renderState === "data" ? METRIC_ORDER.slice() : [];
     }
 
-    function fillInlineMetricBoxes(out, tileRects, responsive) {
+    function fillInlineMetricBoxes(out, tileRects, responsive, mode) {
       for (let i = 0; i < METRIC_ORDER.length; i += 1) {
         out.metricBoxes[METRIC_ORDER[i]] = geometryApi.createInlineMetricBox(
           tileRects[i],
           responsive,
           profileApi,
-          makeRect
+          makeRect,
+          { mode: mode }
         );
       }
     }
@@ -208,6 +223,7 @@
         ? cfg.renderState
         : "hidden";
       const showTcpaBranch = cfg.showTcpaBranch === true;
+      const hasAccent = cfg.hasAccent === true && renderState === "data";
       const shellWidth = Math.max(1, Math.floor(clampNumber(cfg.W, 1, Number.MAX_SAFE_INTEGER, 1)));
       const shellHeight = Math.max(1, Math.floor(clampNumber(cfg.H, 1, Number.MAX_SAFE_INTEGER, 1)));
 
@@ -226,7 +242,13 @@
         ratioThresholdFlat: cfg.ratioThresholdFlat,
         isVerticalCommitted: verticalShell.isVerticalCommitted
       });
-      const insets = computeInsets(shellWidth, effectiveHeight, verticalShell.isVerticalCommitted);
+      const insets = computeInsets(
+        shellWidth,
+        effectiveHeight,
+        verticalShell.isVerticalCommitted,
+        mode,
+        hasAccent
+      );
       const contentRect = createContentRect(shellWidth, effectiveHeight, insets);
       const metricVisibility = resolveMetricVisibility(renderState);
       const metricOrder = resolveMetricOrder(renderState);
@@ -240,9 +262,18 @@
         shellWidth: shellWidth,
         shellHeight: shellHeight,
         effectiveLayoutHeight: effectiveHeight,
+        hasAccent: hasAccent,
         insets: insets,
         responsive: insets.responsive,
         contentRect: contentRect,
+        accentRect: hasAccent
+          ? makeRect(
+            insets.padX,
+            insets.padY,
+            Math.max(1, insets.accentWidth),
+            Math.max(1, effectiveHeight - insets.padY * 2)
+          )
+          : null,
         placeholderRect: contentRect,
         identityRect: null,
         nameRect: null,
@@ -252,11 +283,16 @@
         metricBoxes: Object.create(null),
         metricVisibility: metricVisibility,
         metricOrder: metricOrder,
+        inlineGeometry: null,
         wrapperStyle: verticalShell.wrapperStyle
       };
+      function finalize(layoutOut) {
+        layoutOut.inlineGeometry = geometryApi.computeInlineGeometry(layoutOut);
+        return layoutOut;
+      }
 
       if (renderState !== "data") {
-        return out;
+        return finalize(out);
       }
 
       if (mode === "flat") {
@@ -289,7 +325,7 @@
         out.metricsRect = metricsRect;
 
         fillStackedMetricBoxes(out, splitRow(metricsRect, insets.gap, 4, makeRect), insets.responsive);
-        return out;
+        return finalize(out);
       }
 
       if (mode === "normal") {
@@ -315,8 +351,8 @@
         const metricRows = splitStack(metricsRect, insets.gap, 2, makeRect);
         const rowA = splitRow(metricRows[0], insets.gap, 2, makeRect);
         const rowB = splitRow(metricRows[1], insets.gap, 2, makeRect);
-        fillInlineMetricBoxes(out, [rowA[0], rowA[1], rowB[0], rowB[1]], insets.responsive);
-        return out;
+        fillInlineMetricBoxes(out, [rowA[0], rowA[1], rowB[0], rowB[1]], insets.responsive, mode);
+        return finalize(out);
       }
 
       const nameShare = profileApi.scaleShare(
@@ -338,8 +374,8 @@
       out.frontRect = frontRect;
       out.metricsRect = metricsRect;
 
-      fillInlineMetricBoxes(out, splitStack(metricsRect, insets.gap, 4, makeRect), insets.responsive);
-      return out;
+      fillInlineMetricBoxes(out, splitStack(metricsRect, insets.gap, 4, makeRect), insets.responsive, mode);
+      return finalize(out);
     }
 
     return {

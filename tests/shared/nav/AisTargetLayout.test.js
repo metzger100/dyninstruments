@@ -108,6 +108,31 @@ describe("AisTargetLayout", function () {
     ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
       expectInlineSubRects(out.metricBoxes[id]);
     });
+    expect(out.inlineGeometry.wrapperStyle).toContain("grid-template-areas:\"identity\" \"metrics\"");
+    expect(out.inlineGeometry.metricStyles.tcpa.valueRowStyle).toContain("grid-template-columns:");
+  });
+
+  it("favors value width for DCPA/TCPA in normal and high inline rows", function () {
+    const layout = createLayout();
+    const normal = layout.computeLayout({
+      mode: "normal",
+      W: 300,
+      H: 190,
+      renderState: "data",
+      showTcpaBranch: true
+    });
+    const high = layout.computeLayout({
+      mode: "high",
+      W: 180,
+      H: 320,
+      renderState: "data",
+      showTcpaBranch: true
+    });
+
+    expect(normal.metricBoxes.cpa.valueTextRect.w).toBeGreaterThan(normal.metricBoxes.cpa.labelRect.w);
+    expect(normal.metricBoxes.tcpa.valueTextRect.w).toBeGreaterThan(normal.metricBoxes.tcpa.labelRect.w);
+    expect(high.metricBoxes.cpa.valueTextRect.w).toBeGreaterThan(high.metricBoxes.cpa.labelRect.w);
+    expect(high.metricBoxes.tcpa.valueTextRect.w).toBeGreaterThan(high.metricBoxes.tcpa.labelRect.w);
   });
 
   it("builds high data layout as four stacked rows with inline label/value-group metric boxes", function () {
@@ -147,6 +172,31 @@ describe("AisTargetLayout", function () {
       expect(Object.keys(out.metricBoxes)).toEqual([]);
       expect(out.placeholderRect).toEqual(out.contentRect);
     });
+  });
+
+  it("reserves accent strip space in layout geometry when accent is active", function () {
+    const layout = createLayout();
+    const withoutAccent = layout.computeLayout({
+      mode: "normal",
+      W: 320,
+      H: 180,
+      renderState: "data",
+      showTcpaBranch: true,
+      hasAccent: false
+    });
+    const withAccent = layout.computeLayout({
+      mode: "normal",
+      W: 320,
+      H: 180,
+      renderState: "data",
+      showTcpaBranch: true,
+      hasAccent: true
+    });
+
+    expect(withAccent.contentRect.x).toBeGreaterThan(withoutAccent.contentRect.x);
+    expect(withAccent.contentRect.w).toBeLessThan(withoutAccent.contentRect.w);
+    expect(withAccent.accentRect).toBeTruthy();
+    expect(withAccent.insets.accentReserve).toBeGreaterThan(0);
   });
 
   it("exposes committed vertical shell profile with 7/8 ratio and 8em min-height", function () {
@@ -189,5 +239,6 @@ describe("AisTargetLayout", function () {
     expect(verticalB.mode).toBe("high");
     expect(verticalA.responsive.minDim).toBe(240);
     expect(verticalA.responsive.textFillScale).toBe(verticalB.responsive.textFillScale);
+    expect(verticalA.metricsRect.h).toBeGreaterThan(verticalA.identityRect.h * 2);
   });
 });

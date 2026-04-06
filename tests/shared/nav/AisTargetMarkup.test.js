@@ -32,6 +32,18 @@ describe("AisTargetMarkup", function () {
         "dyni-ais-target-branch-tcpa",
         "dyni-ais-target-color-warning"
       ],
+      inlineGeometry: {
+        wrapperStyle: "padding:4px 4px 4px 8px;",
+        identityStyle: "grid-template-rows:minmax(0,12px) minmax(0,10px);",
+        metricsStyle: "grid-template-columns:minmax(0,100px) minmax(0,100px);",
+        accentStyle: "left:4px;top:4px;bottom:4px;width:3px;",
+        metricStyles: {
+          dst: { metricStyle: "grid-template-columns:minmax(0,30px) minmax(0,70px);", valueRowStyle: "grid-template-columns:minmax(0,50px) minmax(0,20px);" },
+          cpa: { metricStyle: "grid-template-columns:minmax(0,30px) minmax(0,70px);", valueRowStyle: "grid-template-columns:minmax(0,50px) minmax(0,20px);" },
+          tcpa: { metricStyle: "grid-template-columns:minmax(0,30px) minmax(0,70px);", valueRowStyle: "grid-template-columns:minmax(0,50px) minmax(0,20px);" },
+          brg: { metricStyle: "grid-template-columns:minmax(0,30px) minmax(0,70px);", valueRowStyle: "grid-template-columns:minmax(0,50px) minmax(0,20px);" }
+        }
+      },
       nameText: "Poseidon",
       frontText: "Front",
       frontInitialText: "F",
@@ -103,7 +115,7 @@ describe("AisTargetMarkup", function () {
     expect(html).toContain('class="dyni-ais-target-html dyni-ais-target-mode-normal dyni-ais-target-data dyni-ais-target-open-dispatch dyni-ais-target-branch-tcpa dyni-ais-target-color-warning"');
     expect(html).toContain('onclick="catchAll"');
     expect(html).toContain('class="dyni-ais-target-open-hotspot" onclick="aisTargetShowInfo"');
-    expect(html).toContain('class="dyni-ais-target-state-accent" style="background-color:#f39b52;"');
+    expect(html).toContain('class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:3px;background-color:#f39b52;"');
     expect(root.querySelector(".dyni-ais-target-name")).toBeTruthy();
     expect(root.querySelector(".dyni-ais-target-front")).toBeTruthy();
 
@@ -225,7 +237,7 @@ describe("AisTargetMarkup", function () {
       htmlUtils: createHtmlUtils()
     });
 
-    expect(html).toContain('style="height:auto;aspect-ratio:7/8;min-height:8em;"');
+    expect(html).toContain('style="height:auto;aspect-ratio:7/8;min-height:8em;padding:4px 4px 4px 8px;"');
     expect(html).toContain('class="dyni-ais-target-name" style="font-size:13px;"');
     expect(html).toContain('class="dyni-ais-target-front" style="font-size:11px;"');
     expect(html).toContain('class="dyni-ais-target-metric-caption" style="font-size:8px;"');
@@ -238,5 +250,21 @@ describe("AisTargetMarkup", function () {
     expect(html).toContain("&lt;4.2&gt;");
     expect(html).toContain("&lt;nm&gt;");
     expect(html).not.toContain('<img src=x onerror="1">');
+  });
+
+  it("applies layout-driven geometry styles for wrapper, accent, identity, metrics, and inline value rows", function () {
+    const markup = createMarkup();
+    const html = markup.render({
+      model: makeModel(),
+      fit: makeFit(),
+      htmlUtils: createHtmlUtils()
+    });
+
+    expect(html).toContain('style="height:auto;aspect-ratio:7/8;min-height:8em;padding:4px 4px 4px 8px;"');
+    expect(html).toContain('class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:3px;background-color:#f39b52;"');
+    expect(html).toContain('class="dyni-ais-target-identity" style="grid-template-rows:minmax(0,12px) minmax(0,10px);"');
+    expect(html).toContain('class="dyni-ais-target-metrics" style="grid-template-columns:minmax(0,100px) minmax(0,100px);"');
+    expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-cpa" style="grid-template-columns:minmax(0,30px) minmax(0,70px);"');
+    expect(html).toContain('class="dyni-ais-target-metric-value-row" style="grid-template-columns:minmax(0,50px) minmax(0,20px);"');
   });
 });

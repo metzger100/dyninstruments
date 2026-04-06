@@ -18,17 +18,36 @@
     return value == null ? "" : String(value);
   }
 
+  function joinStyles() {
+    const parts = [];
+    for (let i = 0; i < arguments.length; i += 1) {
+      const value = arguments[i];
+      if (value == null) {
+        continue;
+      }
+      const text = String(value).trim();
+      if (!text) {
+        continue;
+      }
+      parts.push(text);
+    }
+    return parts.join("");
+  }
+
   function renderMetric(args) {
     const cfg = args || {};
     const metricId = cfg.metricId;
     const mode = cfg.mode;
     const metric = toObject(cfg.metric);
     const metricFit = toObject(cfg.metricFit);
+    const metricGeometry = toObject(cfg.metricGeometry);
     const htmlUtils = cfg.htmlUtils;
 
     if (mode === "flat") {
       return ""
-        + '<div class="dyni-ais-target-metric dyni-ais-target-metric-' + metricId + '">'
+        + '<div class="dyni-ais-target-metric dyni-ais-target-metric-' + metricId + '"'
+        + htmlUtils.toStyleAttr(metricGeometry.metricStyle)
+        + ">"
         + '<div class="dyni-ais-target-metric-caption"'
         + htmlUtils.toStyleAttr(metricFit.captionStyle)
         + ">"
@@ -48,14 +67,16 @@
     }
 
     return ""
-      + '<div class="dyni-ais-target-metric dyni-ais-target-metric-' + metricId + '">'
+      + '<div class="dyni-ais-target-metric dyni-ais-target-metric-' + metricId + '"'
+      + htmlUtils.toStyleAttr(metricGeometry.metricStyle)
+      + ">"
       + '<div class="dyni-ais-target-metric-caption"'
       + htmlUtils.toStyleAttr(metricFit.captionStyle)
       + ">"
       + htmlUtils.escapeHtml(toText(metric.captionText))
       + "</div>"
       + '<div class="dyni-ais-target-metric-value-row"'
-      + htmlUtils.toStyleAttr(metricFit.valueRowStyle)
+      + htmlUtils.toStyleAttr(joinStyles(metricGeometry.valueRowStyle, metricFit.valueRowStyle))
       + ">"
       + '<span class="dyni-ais-target-metric-value-text"'
       + htmlUtils.toStyleAttr(metricFit.valueStyle)
@@ -75,9 +96,13 @@
     const metricIds = model.visibleMetricIds;
     const metrics = toObject(model.metrics);
     const metricFits = toObject(fit.metrics);
+    const geometry = toObject(model.inlineGeometry);
+    const metricGeometry = toObject(geometry.metricStyles);
 
     const identityHtml = ""
-      + '<div class="dyni-ais-target-identity">'
+      + '<div class="dyni-ais-target-identity"'
+      + htmlUtils.toStyleAttr(geometry.identityStyle)
+      + ">"
       + '<div class="dyni-ais-target-name"'
       + htmlUtils.toStyleAttr(fit.nameStyle)
       + ">"
@@ -98,13 +123,16 @@
         mode: model.mode,
         metric: metrics[id],
         metricFit: metricFits[id],
+        metricGeometry: metricGeometry[id],
         htmlUtils: htmlUtils
       });
     }
 
     return ""
       + identityHtml
-      + '<div class="dyni-ais-target-metrics">'
+      + '<div class="dyni-ais-target-metrics"'
+      + htmlUtils.toStyleAttr(geometry.metricsStyle)
+      + ">"
       + metricsHtml
       + "</div>";
   }
@@ -116,13 +144,16 @@
       const fit = toObject(cfg.fit);
       const htmlUtils = cfg.htmlUtils;
       const wrapperClasses = model.wrapperClasses;
+      const geometry = toObject(model.inlineGeometry);
 
       const wrapperOnClick = model.captureClicks === true ? ' onclick="catchAll"' : "";
       const hotspotHtml = model.showHotspot === true
         ? '<div class="dyni-ais-target-open-hotspot" onclick="aisTargetShowInfo"></div>'
         : "";
       const accentHtml = model.hasAccent === true
-        ? ('<div class="dyni-ais-target-state-accent"' + htmlUtils.toStyleAttr(fit.accentStyle) + "></div>")
+        ? ('<div class="dyni-ais-target-state-accent"'
+          + htmlUtils.toStyleAttr(joinStyles(geometry.accentStyle, fit.accentStyle))
+          + "></div>")
         : "";
 
       let bodyHtml = "";
@@ -140,7 +171,7 @@
       return ""
         + '<div class="' + wrapperClasses.join(" ") + '"'
         + wrapperOnClick
-        + htmlUtils.toStyleAttr(model.wrapperStyle)
+        + htmlUtils.toStyleAttr(joinStyles(model.wrapperStyle, geometry.wrapperStyle))
         + ">"
         + accentHtml
         + hotspotHtml

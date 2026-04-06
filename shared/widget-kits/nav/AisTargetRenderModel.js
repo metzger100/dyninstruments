@@ -185,12 +185,18 @@
       });
 
       const showTcpaBranch = domain.showTcpaBranch === true;
+      const hasData = renderState === "data";
+      const colorRole = (hasData && domain.hasColorRole === true)
+        ? normalizeText(domain.colorRole)
+        : "";
+      const hasAccent = colorRole === "warning" || colorRole === "nearest" || colorRole === "tracking" || colorRole === "normal";
       const layout = layoutApi.computeLayout({
         W: shellSize.width,
         H: shellSize.height,
         mode: cfg.mode,
         renderState: renderState,
         showTcpaBranch: showTcpaBranch,
+        hasAccent: hasAccent,
         ratioThresholdNormal: layoutConfig.ratioThresholdNormal,
         ratioThresholdFlat: layoutConfig.ratioThresholdFlat,
         isVerticalCommitted: cfg.isVerticalCommitted === true,
@@ -249,15 +255,10 @@
         }
       };
 
-      const hasData = renderState === "data";
       const metricVisibility = hasData
         ? DATA_METRIC_VISIBILITY
         : { dst: false, cpa: false, tcpa: false, brg: false };
       const visibleMetricIds = hasData ? METRIC_ORDER.slice() : [];
-      const colorRole = (hasData && domain.hasColorRole === true)
-        ? normalizeText(domain.colorRole)
-        : "";
-      const hasAccent = colorRole === "warning" || colorRole === "nearest" || colorRole === "tracking" || colorRole === "normal";
 
       const wrapperClasses = [
         "dyni-ais-target-html",
@@ -284,6 +285,7 @@
         isVerticalCommitted: layout.isVerticalCommitted === true,
         effectiveLayoutHeight: layout.effectiveLayoutHeight,
         wrapperStyle: layout.wrapperStyle,
+        inlineGeometry: layout.inlineGeometry || {},
         layout: layout,
         captureClicks: interactionState === "dispatch",
         showHotspot: interactionState === "dispatch",

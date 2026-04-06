@@ -116,6 +116,10 @@ describe("AisTargetRenderModel", function () {
     expect(model.wrapperClasses).toContain("dyni-ais-target-open-dispatch");
     expect(model.wrapperClasses).toContain("dyni-ais-target-branch-tcpa");
     expect(model.wrapperClasses).toContain("dyni-ais-target-color-warning");
+    expect(model.inlineGeometry.wrapperStyle).toContain("grid-template-areas");
+    expect(model.inlineGeometry.metricStyles.cpa.valueRowStyle).toContain("grid-template-columns:");
+    expect(model.layout.accentRect).toBeTruthy();
+    expect(model.layout.insets.accentReserve).toBeGreaterThan(0);
     expect(model.metrics.dst.valueText).toBe("formatDistance|4.2|nm");
     expect(model.metrics.cpa.valueText).toBe("formatDistance|0.7|nm");
     expect(model.metrics.tcpa.valueText).toBe("formatDecimal|0.5|3,2");

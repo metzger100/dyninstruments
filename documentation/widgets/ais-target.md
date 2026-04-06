@@ -17,9 +17,9 @@ Ownership split:
 - `AisTargetViewModel` normalizes selected target domain from `nav.ais.nearest`
 - `MapMapper` maps grouped renderer payload (`domain`, `layout`, `captions`, `units`, `default`)
 - `AisTargetRenderModel` owns render-state, interaction-state, branch signal, and formatter wiring
-- `AisTargetLayout` owns `flat`/`normal`/`high` geometry plus committed vertical shell profile
+- `AisTargetLayout` owns `flat`/`normal`/`high` geometry, accent-reserve accounting, committed vertical shell profile, and inline layout style payloads
 - `AisTargetHtmlFit` owns text fitting and AIS accent token resolution
-- `AisTargetMarkup` owns escaped HTML markup assembly and conditional hotspot/accent nodes
+- `AisTargetMarkup` owns escaped HTML markup assembly and applies layout+fit style payloads to wrapper/identity/metrics/tile/value-row nodes
 - `HtmlSurfaceController` owns HTML lifecycle (`attach`/`update`/`detach`/`destroy`)
 - `TemporaryHostActionBridge` owns page-aware `hostActions.ais.showInfo(mmsi)` dispatch
 
@@ -98,7 +98,7 @@ This widget is intentionally summary/workflow-entry only. It does not embed AIS 
 
 Accent-strip visual rule:
 
-- Left accent strip remains subtle and thin but uses widened dimensions (`0.34em` width/radius).
+- Left accent strip remains subtle and thin, and its reserved width/gap is layout-owned (not CSS padding hacks).
 
 Dispatch mode:
 
@@ -154,6 +154,12 @@ Line-layout rules:
 - `normal`: label column + value-group column (`value-text` + `unit`)
 - `high`: label column + value-group column (`value-text` + `unit`)
 
+Layout-driven geometry contract:
+
+- `AisTargetLayout` exports inline geometry styles for wrapper, identity block, metrics grid, metric tiles, and normal/high value rows.
+- `AisTargetMarkup` applies that geometry payload directly; widget CSS is fallback/skin and must not redefine owning fractions/splits.
+- `AisTargetHtmlFit` measures against the same layout boxes (`nameRect`, `frontRect`, metric sub-rects) that are rendered.
+
 Render-state policy:
 
 | State | Rule |
@@ -198,6 +204,8 @@ Sizing discipline:
   - `normal`/`high`: fit value text first against `valueTextRect` (inside `valueRect`)
   - derive caption/unit max size proportionally from fitted value size
   - `normal`/`high`: fit label and unit against `labelRect` and `unitRect`
+- `normal`/`high` inline rows now bias more width to numeric value text (especially in `high`) to avoid `DCPA`/`TCPA` clipping while improving legibility.
+- Committed vertical and `high` modes reduce non-data whitespace (name/front band + gaps/padding) to increase information density.
 - No flat `2x2` fallback is used; flat remains `1x4` and clipping prevention is handled by geometry + fit allocation.
 
 ## Resize Signature Contract

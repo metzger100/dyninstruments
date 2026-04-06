@@ -178,6 +178,10 @@ describe("AisTargetTextHtmlWidget", function () {
     expect(html).toContain('class="dyni-ais-target-metric-value-row"');
     expect(html).toContain('class="dyni-ais-target-metric-value-text"');
     expect(html).not.toContain('class="dyni-ais-target-metric-value"');
+    expect(html).toContain("grid-template-areas:");
+    expect(html).toContain('class="dyni-ais-target-identity" style="grid-template-rows:');
+    expect(html).toContain('class="dyni-ais-target-metrics" style="grid-template-columns:');
+    expect(html).toContain('class="dyni-ais-target-metric-value-row" style="grid-template-columns:');
 
     const handlers = setup.renderer.namedHandlers(props, hostContext);
     expect(Object.keys(handlers)).toEqual(["aisTargetShowInfo"]);
@@ -293,9 +297,10 @@ describe("AisTargetTextHtmlWidget", function () {
     expect(css).toContain(".dyni-ais-target-mode-normal .dyni-ais-target-metric");
     expect(css).toContain(".dyni-ais-target-mode-high .dyni-ais-target-metrics");
     expect(css).toContain(".dyni-ais-target-metric-value");
-    expect(css).toContain("grid-template-rows: minmax(0, 0.3fr) minmax(0, 0.46fr) minmax(0, 0.24fr);");
-    expect(css).toContain("grid-template-columns: minmax(0, 0.34fr) minmax(0, 0.66fr);");
+    expect(css).toContain("grid-template-rows: minmax(0, auto) minmax(0, auto) minmax(0, auto);");
+    expect(css).toContain("grid-template-columns: minmax(0, auto) minmax(0, 1fr);");
     expect(css).not.toContain("dyni-ais-target-flat-rows-2");
+    expect(css).not.toContain("padding-left: calc(0.18em + 0.34em);");
     expect(css).toContain("dyni-ais-target-metric-value-row");
     expect(css).toContain("dyni-ais-target-metric-value-text");
     expect(css).toContain(".dyni-ais-target-open-hotspot");
