@@ -84,6 +84,8 @@
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-front,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-caption,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value-row,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value-text,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-unit {
   min-width: 0;
   line-height: 1;
@@ -140,7 +142,7 @@
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal .dyni-ais-target-metric,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-metric {
-  grid-template-columns: minmax(0, 0.28fr) minmax(0, 0.5fr) minmax(0, 0.22fr);
+  grid-template-columns: minmax(0, 0.34fr) minmax(0, 0.66fr);
   grid-template-rows: minmax(0, 1fr);
   column-gap: 0.12em;
   row-gap: 0;
@@ -160,18 +162,38 @@
   text-align: left;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value {
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value-text {
   font-weight: var(--dyni-font-weight, 700);
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value {
   text-align: right;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value-row {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 0.12em;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-flat .dyni-ais-target-metric-value {
   text-align: center;
 }
 
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal .dyni-ais-target-metric-value-text,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-metric-value-text {
+  min-width: 0;
+  flex: 1 1 auto;
+  text-align: right;
+}
+
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-unit {
   font-weight: var(--dyni-label-weight, 700);
   opacity: 0.78;
+  flex: 0 0 auto;
   text-align: left;
 }
 

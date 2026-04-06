@@ -80,7 +80,9 @@ This widget is intentionally summary/workflow-entry only. It does not embed AIS 
 | `.dyni-ais-target-metrics` | Metric grid container |
 | `.dyni-ais-target-metric-*` | Per-metric tile (`dst`, `cpa`, `tcpa`, `brg`) |
 | `.dyni-ais-target-metric-caption` | Caption line |
-| `.dyni-ais-target-metric-value` | Primary value text |
+| `.dyni-ais-target-metric-value` | Flat-mode primary value text (stacked layout) |
+| `.dyni-ais-target-metric-value-row` | Normal/high value-group row (value + unit) |
+| `.dyni-ais-target-metric-value-text` | Normal/high primary value text inside value-group |
 | `.dyni-ais-target-metric-unit` | Unit text (secondary) |
 | `.dyni-ais-target-state-accent` | Left accent strip (theme token color) |
 | `.dyni-ais-target-open-hotspot` | Full-surface click hotspot (`onclick="aisTargetShowInfo"`) |
@@ -149,8 +151,8 @@ Mode matrix:
 Line-layout rules:
 
 - `flat`: caption (line 1), value (line 2), unit (line 3)
-- `normal`: caption + value + unit on one line
-- `high`: caption + value + unit on one line
+- `normal`: label column + value-group column (`value-text` + `unit`)
+- `high`: label column + value-group column (`value-text` + `unit`)
 
 Render-state policy:
 
@@ -192,9 +194,10 @@ Theme/token contract:
 Sizing discipline:
 
 - AIS metric fitting is geometry-driven and follows the EditRoute-style pattern:
-  - fit value text first against `valueRect`
+  - `flat`: fit value against stacked `valueRect`, then caption/unit against `captionRect`/`unitRect`
+  - `normal`/`high`: fit value text first against `valueTextRect` (inside `valueRect`)
   - derive caption/unit max size proportionally from fitted value size
-  - fit caption/unit against `captionRect` and `unitRect`
+  - `normal`/`high`: fit label and unit against `labelRect` and `unitRect`
 - No flat `2x2` fallback is used; flat remains `1x4` and clipping prevention is handled by geometry + fit allocation.
 
 ## Resize Signature Contract

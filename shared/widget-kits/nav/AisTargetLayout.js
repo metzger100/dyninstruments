@@ -12,15 +12,15 @@
 
   const METRIC_ORDER = ["dst", "cpa", "tcpa", "brg"];
 
-  const PAD_X_RATIO = 0.035;
-  const PAD_Y_RATIO = 0.03;
-  const GAP_RATIO = 0.03;
+  const PAD_X_RATIO = 0.03;
+  const PAD_Y_RATIO = 0.025;
+  const GAP_RATIO = 0.02;
 
   const FLAT_IDENTITY_SHARE = 0.26;
-  const NORMAL_NAME_BAND_SHARE = 0.3;
-  const HIGH_NAME_BAND_SHARE = 0.22;
-  const NORMAL_FRONT_SHARE = 0.22;
-  const HIGH_FRONT_SHARE = 0.2;
+  const NORMAL_NAME_BAND_SHARE = 0.24;
+  const HIGH_NAME_BAND_SHARE = 0.18;
+  const NORMAL_FRONT_SHARE = 0.16;
+  const HIGH_FRONT_SHARE = 0.14;
 
   const VERTICAL_ASPECT_RATIO = { width: 7, height: 8 };
   const VERTICAL_MIN_HEIGHT = "8em";
@@ -180,9 +180,9 @@
       return renderState === "data" ? METRIC_ORDER.slice() : [];
     }
 
-    function fillHorizontalMetricBoxes(out, tileRects, responsive) {
+    function fillInlineMetricBoxes(out, tileRects, responsive) {
       for (let i = 0; i < METRIC_ORDER.length; i += 1) {
-        out.metricBoxes[METRIC_ORDER[i]] = geometryApi.createHorizontalMetricBox(
+        out.metricBoxes[METRIC_ORDER[i]] = geometryApi.createInlineMetricBox(
           tileRects[i],
           responsive,
           profileApi,
@@ -296,8 +296,8 @@
         const nameShare = profileApi.scaleShare(
           NORMAL_NAME_BAND_SHARE,
           insets.responsive.normalNameScale,
-          0.22,
-          0.42
+          0.18,
+          0.36
         );
         const nameHeight = Math.max(1, Math.floor(contentRect.h * nameShare));
         const bodyHeight = Math.max(1, contentRect.h - nameHeight - insets.gap);
@@ -315,15 +315,15 @@
         const metricRows = splitStack(metricsRect, insets.gap, 2, makeRect);
         const rowA = splitRow(metricRows[0], insets.gap, 2, makeRect);
         const rowB = splitRow(metricRows[1], insets.gap, 2, makeRect);
-        fillHorizontalMetricBoxes(out, [rowA[0], rowA[1], rowB[0], rowB[1]], insets.responsive);
+        fillInlineMetricBoxes(out, [rowA[0], rowA[1], rowB[0], rowB[1]], insets.responsive);
         return out;
       }
 
       const nameShare = profileApi.scaleShare(
         HIGH_NAME_BAND_SHARE,
         insets.responsive.highNameScale,
-        0.16,
-        0.32
+        0.14,
+        0.28
       );
       const nameHeight = Math.max(1, Math.floor(contentRect.h * nameShare));
       const bodyHeight = Math.max(1, contentRect.h - nameHeight - insets.gap);
@@ -338,7 +338,7 @@
       out.frontRect = frontRect;
       out.metricsRect = metricsRect;
 
-      fillHorizontalMetricBoxes(out, splitStack(metricsRect, insets.gap, 4, makeRect), insets.responsive);
+      fillInlineMetricBoxes(out, splitStack(metricsRect, insets.gap, 4, makeRect), insets.responsive);
       return out;
     }
 

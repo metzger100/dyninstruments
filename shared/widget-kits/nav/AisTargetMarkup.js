@@ -21,26 +21,52 @@
   function renderMetric(args) {
     const cfg = args || {};
     const metricId = cfg.metricId;
+    const mode = cfg.mode;
     const metric = toObject(cfg.metric);
     const metricFit = toObject(cfg.metricFit);
     const htmlUtils = cfg.htmlUtils;
 
+    if (mode === "flat") {
+      return ""
+        + '<div class="dyni-ais-target-metric dyni-ais-target-metric-' + metricId + '">'
+        + '<div class="dyni-ais-target-metric-caption"'
+        + htmlUtils.toStyleAttr(metricFit.captionStyle)
+        + ">"
+        + htmlUtils.escapeHtml(toText(metric.captionText))
+        + "</div>"
+        + '<div class="dyni-ais-target-metric-value"'
+        + htmlUtils.toStyleAttr(metricFit.valueStyle)
+        + ">"
+        + htmlUtils.escapeHtml(toText(metric.valueText))
+        + "</div>"
+        + '<div class="dyni-ais-target-metric-unit"'
+        + htmlUtils.toStyleAttr(metricFit.unitStyle)
+        + ">"
+        + htmlUtils.escapeHtml(toText(metric.unitText))
+        + "</div>"
+        + "</div>";
+    }
+
     return ""
-      + '<div class="dyni-ais-target-metric dyni-ais-target-metric-' + metricId + '">' 
+      + '<div class="dyni-ais-target-metric dyni-ais-target-metric-' + metricId + '">'
       + '<div class="dyni-ais-target-metric-caption"'
       + htmlUtils.toStyleAttr(metricFit.captionStyle)
       + ">"
       + htmlUtils.escapeHtml(toText(metric.captionText))
       + "</div>"
-      + '<div class="dyni-ais-target-metric-value"'
+      + '<div class="dyni-ais-target-metric-value-row"'
+      + htmlUtils.toStyleAttr(metricFit.valueRowStyle)
+      + ">"
+      + '<span class="dyni-ais-target-metric-value-text"'
       + htmlUtils.toStyleAttr(metricFit.valueStyle)
       + ">"
       + htmlUtils.escapeHtml(toText(metric.valueText))
-      + "</div>"
-      + '<div class="dyni-ais-target-metric-unit"'
+      + "</span>"
+      + '<span class="dyni-ais-target-metric-unit"'
       + htmlUtils.toStyleAttr(metricFit.unitStyle)
       + ">"
       + htmlUtils.escapeHtml(toText(metric.unitText))
+      + "</span>"
       + "</div>"
       + "</div>";
   }
@@ -69,6 +95,7 @@
       const id = metricIds[i];
       metricsHtml += renderMetric({
         metricId: id,
+        mode: model.mode,
         metric: metrics[id],
         metricFit: metricFits[id],
         htmlUtils: htmlUtils

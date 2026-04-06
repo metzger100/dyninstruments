@@ -227,6 +227,7 @@ describe("AisTargetHtmlFit", function () {
     expect(Object.keys(out.metrics)).toEqual(["dst", "cpa", "tcpa", "brg"]);
     ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
       expectStyleFormat(out.metrics[id].captionStyle);
+      expectStyleFormat(out.metrics[id].valueRowStyle);
       expectStyleFormat(out.metrics[id].valueStyle);
       expectStyleFormat(out.metrics[id].unitStyle);
       expect(extractPx(out.metrics[id].valueStyle)).toBeGreaterThan(3);
@@ -234,7 +235,7 @@ describe("AisTargetHtmlFit", function () {
     expect(out.accentStyle).toBe("background-color:#66b8ff;");
   });
 
-  it("uses captionRect/valueRect/unitRect for fitting and ignores old value-row fields", function () {
+  it("fits normal/high values against valueTextRect while flat uses stacked valueRect", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
     const hostContext = { __dyniAisTargetTextMeasureCtx: createMeasureContext() };
@@ -254,11 +255,10 @@ describe("AisTargetHtmlFit", function () {
             y: 50,
             w: 300,
             h: 80,
-            captionRect: { x: 0, y: 50, w: 70, h: 14 },
-            valueRect: { x: 72, y: 50, w: 34, h: 14 },
-            unitRect: { x: 108, y: 50, w: 20, h: 14 },
-            valueRowRect: { x: 0, y: 0, w: 300, h: 80 },
-            valueTextRect: { x: 0, y: 0, w: 300, h: 80 }
+            labelRect: { x: 0, y: 50, w: 70, h: 14 },
+            valueRect: { x: 72, y: 50, w: 220, h: 14 },
+            valueTextRect: { x: 72, y: 50, w: 20, h: 14 },
+            unitRect: { x: 94, y: 50, w: 30, h: 14 }
           }
         }
       }
@@ -279,11 +279,10 @@ describe("AisTargetHtmlFit", function () {
             y: 50,
             w: 300,
             h: 80,
-            captionRect: { x: 0, y: 50, w: 70, h: 14 },
-            valueRect: { x: 72, y: 50, w: 120, h: 14 },
-            unitRect: { x: 194, y: 50, w: 20, h: 14 },
-            valueRowRect: { x: 0, y: 0, w: 1, h: 1 },
-            valueTextRect: { x: 0, y: 0, w: 1, h: 1 }
+            labelRect: { x: 0, y: 50, w: 70, h: 14 },
+            valueRect: { x: 72, y: 50, w: 220, h: 14 },
+            valueTextRect: { x: 72, y: 50, w: 130, h: 14 },
+            unitRect: { x: 204, y: 50, w: 30, h: 14 }
           }
         }
       }
@@ -295,6 +294,8 @@ describe("AisTargetHtmlFit", function () {
 
     expect(extractPx(narrowOut.metrics.dst.valueStyle)).toBeLessThan(extractPx(wideOut.metrics.dst.valueStyle));
     expect(extractPx(narrowOut.metrics.dst.valueStyle)).toBeGreaterThan(0);
+    expectStyleFormat(narrowOut.metrics.dst.valueRowStyle);
+    expectStyleFormat(wideOut.metrics.dst.valueRowStyle);
   });
 
   it("keeps representative normal/high shells above microscopic sizing", function () {
@@ -327,6 +328,8 @@ describe("AisTargetHtmlFit", function () {
     const highOut = h.fit.compute({ model: highModel, targetEl, hostContext, shellRect: highShell });
 
     ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
+      expectStyleFormat(normalOut.metrics[id].valueRowStyle);
+      expectStyleFormat(highOut.metrics[id].valueRowStyle);
       expect(extractPx(normalOut.metrics[id].valueStyle)).toBeGreaterThan(3);
       expect(extractPx(highOut.metrics[id].valueStyle)).toBeGreaterThan(3);
       expect(extractPx(normalOut.metrics[id].captionStyle)).toBeLessThanOrEqual(extractPx(normalOut.metrics[id].valueStyle));

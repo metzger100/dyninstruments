@@ -28,12 +28,13 @@ describe("AisTargetLayout", function () {
     expect(box.unitRect.y).toBeGreaterThanOrEqual(box.valueRect.y + box.valueRect.h);
   }
 
-  function expectHorizontalSubRects(box) {
-    expect(box.captionRect).toBeTruthy();
+  function expectInlineSubRects(box) {
+    expect(box.labelRect).toBeTruthy();
     expect(box.valueRect).toBeTruthy();
+    expect(box.valueTextRect).toBeTruthy();
     expect(box.unitRect).toBeTruthy();
-    expect(box.valueRect.x).toBeGreaterThanOrEqual(box.captionRect.x + box.captionRect.w);
-    expect(box.unitRect.x).toBeGreaterThanOrEqual(box.valueRect.x + box.valueRect.w);
+    expect(box.valueRect.x).toBeGreaterThanOrEqual(box.labelRect.x + box.labelRect.w);
+    expect(box.unitRect.x).toBeGreaterThanOrEqual(box.valueTextRect.x + box.valueTextRect.w);
   }
 
   it("resolves high/normal/flat mode by ratio thresholds", function () {
@@ -87,7 +88,7 @@ describe("AisTargetLayout", function () {
     expect(out.metricBoxes.tcpa.x).toBeGreaterThan(out.metricBoxes.cpa.x);
   });
 
-  it("builds normal data layout as a 2x2 grid with one-line horizontal metric boxes", function () {
+  it("builds normal data layout as a 2x2 grid with inline label/value-group metric boxes", function () {
     const layout = createLayout();
     const out = layout.computeLayout({
       mode: "normal",
@@ -105,11 +106,11 @@ describe("AisTargetLayout", function () {
     expect(out.metricBoxes.tcpa.y).toBeGreaterThan(out.metricBoxes.dst.y);
     expect(out.metricBoxes.brg.y).toBeGreaterThan(out.metricBoxes.cpa.y);
     ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
-      expectHorizontalSubRects(out.metricBoxes[id]);
+      expectInlineSubRects(out.metricBoxes[id]);
     });
   });
 
-  it("builds high data layout as four stacked rows with one-line horizontal metric boxes", function () {
+  it("builds high data layout as four stacked rows with inline label/value-group metric boxes", function () {
     const layout = createLayout();
     const out = layout.computeLayout({
       mode: "high",
@@ -125,7 +126,7 @@ describe("AisTargetLayout", function () {
     expect(out.metricBoxes.tcpa.y).toBeGreaterThan(out.metricBoxes.cpa.y);
     expect(out.metricBoxes.brg.y).toBeGreaterThan(out.metricBoxes.tcpa.y);
     ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
-      expectHorizontalSubRects(out.metricBoxes[id]);
+      expectInlineSubRects(out.metricBoxes[id]);
     });
   });
 

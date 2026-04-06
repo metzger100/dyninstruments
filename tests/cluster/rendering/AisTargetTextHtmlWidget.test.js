@@ -12,10 +12,10 @@ describe("AisTargetTextHtmlWidget", function () {
         frontStyle: "font-size:10px;",
         placeholderStyle: "font-size:11px;",
         metrics: {
-          dst: { captionStyle: "font-size:8px;", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-          cpa: { captionStyle: "font-size:8px;", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-          tcpa: { captionStyle: "font-size:8px;", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-          brg: { captionStyle: "font-size:8px;", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" }
+          dst: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+          cpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+          tcpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+          brg: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" }
         },
         accentStyle: "background-color:#c33;"
       };
@@ -175,6 +175,9 @@ describe("AisTargetTextHtmlWidget", function () {
     expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-cpa"');
     expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-tcpa"');
     expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-brg"');
+    expect(html).toContain('class="dyni-ais-target-metric-value-row"');
+    expect(html).toContain('class="dyni-ais-target-metric-value-text"');
+    expect(html).not.toContain('class="dyni-ais-target-metric-value"');
 
     const handlers = setup.renderer.namedHandlers(props, hostContext);
     expect(Object.keys(handlers)).toEqual(["aisTargetShowInfo"]);
@@ -218,6 +221,8 @@ describe("AisTargetTextHtmlWidget", function () {
     expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-cpa"');
     expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-tcpa"');
     expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-brg"');
+    expect(html).toContain('class="dyni-ais-target-metric-value"');
+    expect(html).not.toContain('class="dyni-ais-target-metric-value-row"');
     expect(html).not.toContain("dyni-ais-target-front-initial");
   });
 
@@ -289,10 +294,10 @@ describe("AisTargetTextHtmlWidget", function () {
     expect(css).toContain(".dyni-ais-target-mode-high .dyni-ais-target-metrics");
     expect(css).toContain(".dyni-ais-target-metric-value");
     expect(css).toContain("grid-template-rows: minmax(0, 0.3fr) minmax(0, 0.46fr) minmax(0, 0.24fr);");
-    expect(css).toContain("grid-template-columns: minmax(0, 0.28fr) minmax(0, 0.5fr) minmax(0, 0.22fr);");
+    expect(css).toContain("grid-template-columns: minmax(0, 0.34fr) minmax(0, 0.66fr);");
     expect(css).not.toContain("dyni-ais-target-flat-rows-2");
-    expect(css).not.toContain("dyni-ais-target-metric-value-row");
-    expect(css).not.toContain("dyni-ais-target-metric-value-text");
+    expect(css).toContain("dyni-ais-target-metric-value-row");
+    expect(css).toContain("dyni-ais-target-metric-value-text");
     expect(css).toContain(".dyni-ais-target-open-hotspot");
     expect(css).toContain(".dyni-ais-target-open-dispatch");
     expect(css).toContain(".dyni-ais-target-open-passive");

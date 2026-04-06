@@ -154,7 +154,7 @@
     return FRONT_MAX_PX_RATIO.normal;
   }
 
-  function resolveMetricBox(box) {
+  function resolveStackedMetricBox(box) {
     const tile = box && typeof box === "object" ? box : null;
     if (!tile || !tile.captionRect || !tile.valueRect || !tile.unitRect) {
       return null;
@@ -162,6 +162,19 @@
     return {
       captionRect: tile.captionRect,
       valueRect: tile.valueRect,
+      unitRect: tile.unitRect
+    };
+  }
+
+  function resolveInlineMetricBox(box) {
+    const tile = box && typeof box === "object" ? box : null;
+    if (!tile || !tile.labelRect || !tile.valueRect || !tile.unitRect) {
+      return null;
+    }
+    return {
+      labelRect: tile.labelRect,
+      valueRect: tile.valueRect,
+      valueTextRect: tile.valueTextRect || tile.valueRect,
       unitRect: tile.unitRect
     };
   }
@@ -259,16 +272,73 @@
 
       const metricIds = model.visibleMetricIds;
       const metrics = toObject(model.metrics);
+      const isFlatMode = layout.mode === "flat";
       for (let i = 0; i < metricIds.length; i += 1) {
         const id = metricIds[i];
-        const rects = resolveMetricBox(layout.metricBoxes[id]);
         const metric = toObject(metrics[id]);
-        if (!rects) {
+        if (isFlatMode) {
+          const flatRects = resolveStackedMetricBox(layout.metricBoxes[id]);
+          if (!flatRects) {
+            continue;
+          }
+
+          const flatValuePx = measurePx({
+            rect: flatRects.valueRect,
+            text: toText(metric.valueText),
+            maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+            textApi: textApi,
+            tileLayout: tileLayout,
+            ctx: measureCtx,
+            family: family,
+            weight: valueWeight,
+            textFillScale: textFillScale
+          }, htmlUtils, tileLayout);
+          const flatSecondaryMaxPx = fitMath.resolveSecondaryMaxPx({
+            valuePx: flatValuePx,
+            valueRect: flatRects.valueRect,
+            valueMaxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+            secondaryToValueRatio: METRIC_SECONDARY_TO_VALUE_RATIO
+          });
+
+          out.metrics[id] = {
+            captionStyle: measureStyle({
+              rect: flatRects.captionRect,
+              text: toText(metric.captionText),
+              maxPx: flatSecondaryMaxPx,
+              maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+              textApi: textApi,
+              tileLayout: tileLayout,
+              ctx: measureCtx,
+              family: family,
+              weight: labelWeight,
+              textFillScale: 1
+            }, htmlUtils, tileLayout),
+            valueRowStyle: "",
+            valueStyle: toStyle(flatValuePx, htmlUtils),
+            unitStyle: measureStyle({
+              rect: flatRects.unitRect,
+              text: toText(metric.unitText),
+              maxPx: flatSecondaryMaxPx,
+              maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+              textApi: textApi,
+              tileLayout: tileLayout,
+              ctx: measureCtx,
+              family: family,
+              weight: labelWeight,
+              textFillScale: 1
+            }, htmlUtils, tileLayout)
+          };
           continue;
         }
 
-        const valuePx = measurePx({
-          rect: rects.valueRect,
+        const inlineRects = resolveInlineMetricBox(layout.metricBoxes[id]);
+        if (!inlineRects) {
+          continue;
+        }
+
+        const inlineValueRect = inlineRects.valueTextRect || inlineRects.valueRect;
+        const inlineValuePx = measurePx({
+          rect: inlineValueRect,
           text: toText(metric.valueText),
           maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
           textApi: textApi,
@@ -278,18 +348,18 @@
           weight: valueWeight,
           textFillScale: textFillScale
         }, htmlUtils, tileLayout);
-        const secondaryMaxPx = fitMath.resolveSecondaryMaxPx({
-          valuePx: valuePx,
-          valueRect: rects.valueRect,
+        const inlineSecondaryMaxPx = fitMath.resolveSecondaryMaxPx({
+          valuePx: inlineValuePx,
+          valueRect: inlineValueRect,
           valueMaxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
           secondaryToValueRatio: METRIC_SECONDARY_TO_VALUE_RATIO
         });
 
         out.metrics[id] = {
           captionStyle: measureStyle({
-            rect: rects.captionRect,
+            rect: inlineRects.labelRect,
             text: toText(metric.captionText),
-            maxPx: secondaryMaxPx,
+            maxPx: inlineSecondaryMaxPx,
             maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
             textApi: textApi,
             tileLayout: tileLayout,
@@ -298,11 +368,12 @@
             weight: labelWeight,
             textFillScale: 1
           }, htmlUtils, tileLayout),
-          valueStyle: toStyle(valuePx, htmlUtils),
+          valueRowStyle: "",
+          valueStyle: toStyle(inlineValuePx, htmlUtils),
           unitStyle: measureStyle({
-            rect: rects.unitRect,
+            rect: inlineRects.unitRect,
             text: toText(metric.unitText),
-            maxPx: secondaryMaxPx,
+            maxPx: inlineSecondaryMaxPx,
             maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
             textApi: textApi,
             tileLayout: tileLayout,
