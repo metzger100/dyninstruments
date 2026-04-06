@@ -193,7 +193,7 @@ For fitted HTML text (inline style, not canvas drawing), use this flow:
 Rules:
 
 - Reduce font size only when text does not fit.
-- Do not use ellipsis truncation for fitted text; keep `white-space: nowrap` + `overflow: hidden`.
+- Do not use ellipsis truncation for fitted text; keep `white-space: nowrap`.
 - Fit logic must not alter/trim/abbreviate text content.
 - Forbidden in fitted HTML flow: `drawFittedLine(...)`, `trimToWidth(...)`, or helpers that mutate emitted text.
 

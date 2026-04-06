@@ -104,7 +104,9 @@ describe("RoutePointsHtmlFit", function () {
     const base = {
       mode: "normal",
       showHeader: true,
+      hasRoute: true,
       routeNameText: "Harbor Run",
+      emptyText: "",
       metaText: "2 waypoints",
       ratioThresholdNormal: 1.0,
       ratioThresholdFlat: 3.5,
@@ -130,6 +132,16 @@ describe("RoutePointsHtmlFit", function () {
     expect(style).toMatch(/^font-size:\d+px;$/);
   }
 
+  function resolveEmptyCapRatio(mode) {
+    if (mode === "flat") {
+      return 0.5;
+    }
+    if (mode === "high") {
+      return 0.56;
+    }
+    return 0.66;
+  }
+
   it("produces header and row style strings", function () {
     const h = createHarness();
     const out = h.fit.compute({
@@ -143,6 +155,7 @@ describe("RoutePointsHtmlFit", function () {
     expect(out.headerFit).not.toBeNull();
     expectStyleFormat(out.headerFit.routeNameStyle);
     expectStyleFormat(out.headerFit.metaStyle);
+    expect(out.emptyStyle).toBe("");
     expect(out.rowFits).toHaveLength(2);
     out.rowFits.forEach((row) => {
       expectStyleFormat(row.ordinalStyle);
@@ -226,6 +239,38 @@ describe("RoutePointsHtmlFit", function () {
     });
 
     expect(out.rowFits).toEqual([]);
+  });
+
+  it("measures placeholder fit for no-route state with mode-capped max font size", function () {
+    const h = createHarness();
+    const shellRect = { width: 300, height: 180 };
+    const insets = h.layout.computeInsets(shellRect.width, shellRect.height);
+    const contentRect = h.layout.createContentRect(shellRect.width, shellRect.height, insets);
+    const modes = ["flat", "normal", "high"];
+
+    modes.forEach((mode) => {
+      const out = h.fit.compute({
+        model: buildModel({
+          mode: mode,
+          hasRoute: false,
+          routeNameText: "",
+          emptyText: "A",
+          points: [],
+          metaText: "0 waypoints"
+        }),
+        hostContext: h.hostContext,
+        targetEl: h.targetEl,
+        shellRect: shellRect
+      });
+
+      expect(out.rowFits).toEqual([]);
+      expectStyleFormat(out.emptyStyle);
+
+      const emptyPx = extractPx(out.emptyStyle);
+      const capPx = Math.max(1, Math.floor(contentRect.h * resolveEmptyCapRatio(mode)));
+      expect(emptyPx).toBeGreaterThan(0);
+      expect(emptyPx).toBeLessThanOrEqual(capPx);
+    });
   });
 
   it("scales down font size for long text", function () {

@@ -11,6 +11,11 @@
   "use strict";
 
   const MEASURE_CTX_KEY = "__dyniRoutePointsTextMeasureCtx";
+  const EMPTY_MAX_PX_RATIO = {
+    flat: 0.5,
+    normal: 0.66,
+    high: 0.56
+  };
 
   function createMeasureContext() {
     return {
@@ -115,6 +120,16 @@
     };
   }
 
+  function resolveEmptyMaxPxRatio(mode) {
+    if (mode === "flat") {
+      return EMPTY_MAX_PX_RATIO.flat;
+    }
+    if (mode === "high") {
+      return EMPTY_MAX_PX_RATIO.high;
+    }
+    return EMPTY_MAX_PX_RATIO.normal;
+  }
+
   function create(def, Helpers) {
     const theme = Helpers.getModule("ThemeResolver").create(def, Helpers);
     const radialText = Helpers.getModule("RadialTextLayout").create(def, Helpers);
@@ -128,13 +143,17 @@
       if (!rect || !(rect.w > 0) || !(rect.h > 0)) {
         return "";
       }
+      const ratio = htmlUtils.toFiniteNumber(cfg.maxPxRatio);
+      const maxPx = ratio > 0
+        ? Math.max(1, Math.floor(rect.h * ratio))
+        : Math.max(1, Math.floor(rect.h));
       const fit = tileLayout.measureFittedLine({
         textApi: radialText,
         ctx: cfg.ctx,
         text: cfg.text,
         maxW: Math.max(1, Math.floor(rect.w)),
         maxH: Math.max(1, Math.floor(rect.h)),
-        maxPx: Math.max(1, Math.floor(rect.h)),
+        maxPx: maxPx,
         textFillScale: cfg.textFillScale,
         family: cfg.family,
         weight: cfg.weight
@@ -241,9 +260,23 @@
         });
       }
 
+      let emptyStyle = "";
+      if (model.hasRoute !== true) {
+        emptyStyle = measureStyle({
+          rect: contentRect,
+          ctx: env.measureCtx,
+          text: toText(model.emptyText || model.routeNameText || "No Route"),
+          textFillScale: textFillScale,
+          family: env.family,
+          weight: env.valueWeight,
+          maxPxRatio: resolveEmptyMaxPxRatio(model.mode)
+        });
+      }
+
       return {
         headerFit: headerFit,
-        rowFits: rowFits
+        rowFits: rowFits,
+        emptyStyle: emptyStyle
       };
     }
 

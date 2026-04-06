@@ -155,7 +155,7 @@ describe("RoutePointsRenderModel", function () {
     expect(model.mode).toBe("normal");
     expect(model.pointCount).toBe(3);
     expect(model.metaText).toBe("3 waypoints");
-    expect(model.points[0].infoText).toBe("---°/---nm");
+    expect(model.points[0].infoText).toBe("--°/--nm");
     expect(model.points[1].infoText).toMatch(/^DIR:\d+°\/DST:\d+nm$/);
     expect(model.points[2].nameText).toBe("2");
     expect(model.activeWaypointKey).toContain("lat:54.300000");
@@ -164,6 +164,7 @@ describe("RoutePointsRenderModel", function () {
     expect(model.canActivateRoutePoint).toBe(true);
     expect(model.showOrdinal).toBe(true);
     expect(model.inlineGeometry.showOrdinal).toBe(true);
+    expect(model.emptyText).toBe("");
   });
 
   it("disables ordinal in high mode and keeps row text geometry available", function () {
@@ -410,6 +411,8 @@ describe("RoutePointsRenderModel", function () {
     });
 
     expect(model.hasRoute).toBe(false);
+    expect(model.routeNameText).toBe("No Route");
+    expect(model.emptyText).toBe("No Route");
     expect(model.pointCount).toBe(0);
     expect(model.points).toEqual([]);
     expect(model.hasValidSelection).toBe(false);

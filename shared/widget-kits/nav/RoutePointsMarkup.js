@@ -14,6 +14,10 @@
     return value && typeof value === "object" ? value : {};
   }
 
+  function toText(value) {
+    return value == null ? "" : String(value);
+  }
+
   function renderHeader(model, geometry, fit, htmlUtils) {
     if (model.showHeader !== true || model.hasRoute !== true) {
       return "";
@@ -112,6 +116,19 @@
     return html;
   }
 
+  function renderEmpty(model, fit, htmlUtils) {
+    const text = toText(model.emptyText || model.routeNameText || "No Route");
+
+    return ""
+      + '<div class="dyni-route-points-empty">'
+      + '<span class="dyni-route-points-text dyni-route-points-empty-text"'
+      + htmlUtils.toStyleAttr(toText(fit.emptyStyle))
+      + ">"
+      + htmlUtils.escapeHtml(text)
+      + "</span>"
+      + "</div>";
+  }
+
   function create() {
     function render(args) {
       const cfg = args || {};
@@ -130,6 +147,9 @@
       if (model.isActiveRoute === true) {
         wrapperClasses.push("dyni-route-points-active-route");
       }
+      if (model.hasRoute !== true) {
+        wrapperClasses.push("dyni-route-points-no-route");
+      }
 
       const wrapperOnClick = model.canActivateRoutePoint === true ? ' onclick="catchAll"' : "";
       const rowsHtml = renderRows(model, geometry, fit, htmlUtils);
@@ -139,16 +159,20 @@
         + wrapperOnClick
         + htmlUtils.toStyleAttr(geometry.wrapper && geometry.wrapper.style)
         + ">"
-        + renderHeader(model, geometry, fit, htmlUtils)
-        + '<div class="dyni-route-points-list"'
-        + htmlUtils.toStyleAttr(geometry.list && geometry.list.style)
-        + ">"
-        + '<div class="dyni-route-points-list-content"'
-        + htmlUtils.toStyleAttr(geometry.list && geometry.list.contentStyle)
-        + ">"
-        + rowsHtml
-        + "</div>"
-        + "</div>"
+        + (model.hasRoute === true
+          ? (
+            renderHeader(model, geometry, fit, htmlUtils)
+            + '<div class="dyni-route-points-list"'
+            + htmlUtils.toStyleAttr(geometry.list && geometry.list.style)
+            + ">"
+            + '<div class="dyni-route-points-list-content"'
+            + htmlUtils.toStyleAttr(geometry.list && geometry.list.contentStyle)
+            + ">"
+            + rowsHtml
+            + "</div>"
+            + "</div>"
+          )
+          : renderEmpty(model, fit, htmlUtils))
         + "</div>";
     }
 

@@ -12,7 +12,6 @@
   justify-content: center;
   gap: 0.1em;
   padding: 0.16em 0.2em;
-  overflow: hidden;
   --dyni-map-zoom-sec-scale: 0.8;
   --dyni-map-zoom-value-size: 1.62em;
 }

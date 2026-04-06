@@ -19,8 +19,9 @@ describe("RoutePointsMarkup", function () {
       canActivateRoutePoint: true,
       isActiveRoute: true,
       showOrdinal: true,
+      emptyText: "",
       points: [
-        { index: 0, ordinalText: "1", nameText: "Start", infoText: "---°/---nm", selected: false },
+        { index: 0, ordinalText: "1", nameText: "Start", infoText: "--°/--nm", selected: false },
         { index: 1, ordinalText: "2", nameText: "Finish", infoText: "DIR:89°/DST:2:nm", selected: true }
       ],
       inlineGeometry: {
@@ -64,6 +65,7 @@ describe("RoutePointsMarkup", function () {
         routeNameStyle: "font-size:11px;",
         metaStyle: "font-size:9px;"
       },
+      emptyStyle: "",
       rowFits: [
         { ordinalStyle: "font-size:8px;", nameStyle: "font-size:10px;", infoStyle: "font-size:8px;" },
         { ordinalStyle: "font-size:8px;", nameStyle: "font-size:10px;", infoStyle: "font-size:8px;" }
@@ -129,17 +131,23 @@ describe("RoutePointsMarkup", function () {
     expect(html).toContain("dyni-route-points-marker-cell");
   });
 
-  it("fails closed for missing route by rendering no header content and no rows", function () {
+  it("renders dedicated no-route placeholder branch", function () {
     const markup = createMarkup();
     const html = markup.render({
-      model: makeModel({ hasRoute: false, points: [], showHeader: true }),
-      fit: makeFit({ rowFits: [] }),
+      model: makeModel({ hasRoute: false, emptyText: "No Route", points: [], showHeader: true }),
+      fit: makeFit({ rowFits: [], emptyStyle: "font-size:12px;" }),
       htmlUtils: createHtmlUtils()
     });
 
     expect(html).toContain("dyni-route-points-html");
+    expect(html).toContain("dyni-route-points-no-route");
+    expect(html).toContain("dyni-route-points-empty");
+    expect(html).toContain("dyni-route-points-empty-text");
+    expect(html).toContain("No Route");
+    expect(html).toContain('style="font-size:12px;"');
     expect(html).not.toContain("dyni-route-points-header");
     expect(html).not.toContain("dyni-route-points-row");
+    expect(html).not.toContain("dyni-route-points-list");
   });
 
   it("escapes all route/header/row text", function () {

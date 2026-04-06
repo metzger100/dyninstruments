@@ -92,6 +92,7 @@ Store key inputs (nav cluster):
 | `dyni-route-points-dispatch` | capability + non-editing gate | Interactive row activation mode |
 | `dyni-route-points-passive` | fallback mode | Display-only mode |
 | `dyni-route-points-active-route` | `domain.isActiveRoute === true` | Active editing-route state |
+| `dyni-route-points-no-route` | `domain.route` missing/invalid | Dedicated empty-state branch |
 | `dyni-route-points-row-selected` | row selection state | Selected row highlight |
 | `dyni-route-points-marker-selected` | row selection state | Selected marker fill/highlight |
 
@@ -104,6 +105,8 @@ Store key inputs (nav cluster):
 | `.dyni-route-points-header-meta` | Waypoint-count meta container |
 | `.dyni-route-points-list` | Scroll container |
 | `.dyni-route-points-list-content` | Row stack container |
+| `.dyni-route-points-empty` | No-route centered placeholder container |
+| `.dyni-route-points-empty-text` | No-route placeholder text node |
 | `.dyni-route-points-row` | One waypoint row |
 | `.dyni-route-points-ordinal` | Row ordinal cell |
 | `.dyni-route-points-middle` | Name/info composite region |
@@ -154,6 +157,11 @@ Mode matrix:
 | `high` | stacked (`routeName` over `meta`) | `(name over info) | marker` |
 | `normal` | side-by-side (`routeName | meta`) | `ordinal | name | info | marker` |
 | `flat` | side panel (`routeName` over `meta`) | `ordinal | name | info | marker` |
+
+No-route branch:
+
+- When `hasRoute !== true`, markup omits header/list/rows and renders `.dyni-route-points-empty` with centered `No Route` text.
+- Wrapper keeps mode + dispatch/passive classes and adds `dyni-route-points-no-route`.
 
 Row policy contract:
 
@@ -220,6 +228,7 @@ Measured fit path:
 Output contract:
 
 - Returns style-only decisions (`font-size:<n>px;`) for header and each row cell.
+- Returns `emptyStyle` for the no-route placeholder text (`model.emptyText` fallback `No Route`), measured against the full content rect with mode-aware max-font caps (`flat: 0.5`, `normal: 0.66`, `high: 0.56`) to match edit-route title-band sizing policy.
 - Fit output never contains user text payload.
 - Source model text is never trimmed/altered by fit.
 - Markup keeps `white-space: nowrap`; fit uses each raw text-box height as the sizing ceiling and scales down only when required.
@@ -228,7 +237,7 @@ Output contract:
 
 Header:
 
-- Route name: `domain.routeName` (trimmed text, no formatter).
+- Route name: `domain.routeName` (trimmed text, no formatter) when route exists; fallback `No Route` when route is missing.
 - Meta text: `"{pointCount} {waypointsText}"` (or just count when suffix empty).
 
 Row name fallback:
@@ -241,13 +250,13 @@ Info cell:
   - formatter: `formatLonLats({ lat, lon })`
   - invalid coordinates preserve formatter placeholder output
 - `showLatLon === false`:
-  - row `0`: placeholder `"---{courseUnit}/---{distanceUnit}"`
+  - row `0`: placeholder `"--{courseUnit}/--{distanceUnit}"`
   - row `>= 1` with finite previous+current coordinates:
     - `CenterDisplayMath.computeCourseDistance(prev, curr, useRhumbLine)` returns `{ course, distance }`
     - course formatter: `formatDirection(course)`
     - distance formatter: `formatDistance(distance, distanceUnit)` where `distance` is passed as meters directly
     - composed text: `"{courseText}{courseUnit}/{distanceText}{distanceUnit}"`
-  - invalid segment endpoint coordinates: placeholder `"---{courseUnit}/---{distanceUnit}"`
+  - invalid segment endpoint coordinates: placeholder `"--{courseUnit}/--{distanceUnit}"`
 
 ## Selected-Row Visibility Contract
 

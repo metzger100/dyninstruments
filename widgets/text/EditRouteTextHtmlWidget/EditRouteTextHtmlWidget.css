@@ -68,7 +68,6 @@
   min-width: 0;
   line-height: 1;
   white-space: nowrap;
-  overflow: hidden;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-name-text {
@@ -187,4 +186,22 @@
 .widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html.dyni-edit-route-no-route .dyni-edit-route-name-text {
   text-align: center;
   opacity: 0.9;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html.dyni-edit-route-no-route {
+  grid-template-areas: "name";
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html.dyni-edit-route-no-route .dyni-edit-route-name-bar {
+  justify-content: center;
+  align-items: center;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html.dyni-edit-route-no-route .dyni-edit-route-name-text {
+  flex: 0 1 auto;
+  max-width: 100%;
+  text-align: center;
 }

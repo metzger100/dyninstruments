@@ -10,7 +10,8 @@
 }(this, function () {
   "use strict";
 
-  const PLACEHOLDER_VALUE = "---"; /* dyni-lint-disable-line hardcoded-runtime-default -- RoutePoints segment info contract requires a fixed placeholder token. */
+  const PLACEHOLDER_VALUE = "--"; /* dyni-lint-disable-line hardcoded-runtime-default -- RoutePoints segment info contract requires a fixed placeholder token. */
+  const NO_ROUTE_TEXT = "No Route";
 
   function toFiniteNumber(value) {
     const n = Number(value);
@@ -255,7 +256,9 @@
       const distanceUnit = toText(formatting.distanceUnit, htmlUtils);
       const courseUnit = toText(formatting.courseUnit, htmlUtils);
       const waypointsText = toText(formatting.waypointsText, htmlUtils);
-      const routeNameText = toText(domain.routeName, htmlUtils);
+      const routeNameText = route
+        ? toText(domain.routeName, htmlUtils)
+        : NO_ROUTE_TEXT;
       const isActiveRoute = domain.isActiveRoute === true;
       const canActivate = canActivateRoutePoint({
         props: props,
@@ -340,6 +343,7 @@
         showHeader: showHeader,
         hasRoute: !!route,
         routeNameText: routeNameText,
+        emptyText: route ? "" : NO_ROUTE_TEXT,
         metaText: waypointsText
           ? String(pointCount) + " " + waypointsText
           : String(pointCount),

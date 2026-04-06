@@ -41,7 +41,6 @@
   display: flex;
   align-items: center;
   white-space: nowrap;
-  overflow: hidden;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-mode-normal .dyni-active-route-route-name {
