@@ -11,8 +11,8 @@
   "use strict";
 
   const MEASURE_CTX_KEY = "__dyniAisTargetTextMeasureCtx";
-  const NAME_MAX_PX_RATIO = { flat: 0.52, normal: 0.62, high: 0.56 };
-  const FRONT_MAX_PX_RATIO = { flat: 0.52, normal: 0.72, high: 0.74 };
+  const NAME_MAX_PX_RATIO = { flat: 0.52, normal: 0.78, high: 0.72 };
+  const FRONT_MAX_PX_RATIO = { flat: 0.52, normal: 0.78, high: 0.75 };
   const METRIC_VALUE_MAX_PX_RATIO = 0.9;
   const METRIC_SECONDARY_TO_VALUE_RATIO = 0.8;
   function toObject(value) { return value && typeof value === "object" ? value : {}; }

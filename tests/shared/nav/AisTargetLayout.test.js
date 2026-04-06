@@ -239,6 +239,46 @@ describe("AisTargetLayout", function () {
     expect(high.insets.identityMetricsGap).toBeGreaterThanOrEqual(high.insets.metricGridGap);
   });
 
+  it("tightens normal/high/vertical identity gaps while keeping them positive", function () {
+    const layout = createLayout();
+    const normal = layout.computeLayout({
+      mode: "normal",
+      W: 320,
+      H: 200,
+      renderState: "data",
+      showTcpaBranch: true
+    });
+    const high = layout.computeLayout({
+      mode: "high",
+      W: 180,
+      H: 320,
+      renderState: "data",
+      showTcpaBranch: true
+    });
+    const vertical = layout.computeLayout({
+      W: 220,
+      H: 120,
+      renderState: "data",
+      showTcpaBranch: true,
+      isVerticalCommitted: true,
+      effectiveLayoutHeight: 320
+    });
+
+    const normalGap = normal.frontRect.y - (normal.nameRect.y + normal.nameRect.h);
+    const highGap = high.frontRect.y - (high.nameRect.y + high.nameRect.h);
+    const verticalGap = vertical.frontRect.y - (vertical.nameRect.y + vertical.nameRect.h);
+
+    expect(normalGap).toBe(normal.insets.identityGap);
+    expect(highGap).toBe(high.insets.identityGap);
+    expect(verticalGap).toBe(vertical.insets.identityGap);
+    expect(normalGap).toBeGreaterThan(0);
+    expect(highGap).toBeGreaterThan(0);
+    expect(verticalGap).toBeGreaterThan(0);
+    expect(normalGap).toBeLessThan(4);
+    expect(highGap).toBeLessThan(2);
+    expect(verticalGap).toBeLessThan(2);
+  });
+
   it("exposes committed vertical shell profile with 7/8 ratio and 8em min-height", function () {
     const layout = createLayout();
     const vertical = layout.computeVerticalShellProfile({

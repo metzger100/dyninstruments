@@ -88,9 +88,23 @@
   font-weight: var(--dyni-font-weight, 700);
 }
 
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal .dyni-ais-target-name,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-name,
+.widgetContainer.vertical .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html.dyni-ais-target-vertical .dyni-ais-target-name {
+  display: flex;
+  align-items: flex-end;
+}
+
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-front {
   font-weight: var(--dyni-label-weight, 700);
   opacity: 0.82;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal .dyni-ais-target-front,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-front,
+.widgetContainer.vertical .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html.dyni-ais-target-vertical .dyni-ais-target-front {
+  display: flex;
+  align-items: flex-start;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metrics {
