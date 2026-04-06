@@ -89,6 +89,9 @@ describe("AisTargetHtmlFit", function () {
         if (id === "LayoutRectMath") {
           return layoutRectMathModule;
         }
+        if (id === "AisTargetLayoutGeometry") {
+          return loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
+        }
         throw new Error("unexpected module: " + id);
       }
     };
@@ -112,7 +115,7 @@ describe("AisTargetHtmlFit", function () {
       nameText: "Poseidon",
       frontText: "Front",
       frontInitialText: "F",
-      visibleMetricIds: ["dst", "cpa", "tcpa"],
+      visibleMetricIds: ["dst", "cpa", "tcpa", "brg"],
       metrics: {
         dst: { captionText: "DST", valueText: "4.2", unitText: "nm" },
         cpa: { captionText: "DCPA", valueText: "0.7", unitText: "nm" },
@@ -197,7 +200,7 @@ describe("AisTargetHtmlFit", function () {
     expect(out.accentStyle).toBe("");
   });
 
-  it("fits flat BRG mode with front initial + DST/BRG metric styles", function () {
+  it("fits flat mode with name/front and all four inline metric styles", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
     const hostContext = { __dyniAisTargetTextMeasureCtx: createMeasureContext() };
@@ -206,7 +209,7 @@ describe("AisTargetHtmlFit", function () {
       mode: "flat",
       showTcpaBranch: false,
       colorRole: "nearest",
-      visibleMetricIds: ["dst", "brg"]
+      visibleMetricIds: ["dst", "cpa", "tcpa", "brg"]
     });
 
     const out = h.fit.compute({
@@ -216,28 +219,133 @@ describe("AisTargetHtmlFit", function () {
       shellRect: shellRect
     });
 
-    expectStyleFormat(out.frontInitialStyle);
-    expect(out.nameStyle).toBe("");
-    expect(out.frontStyle).toBe("");
-    expect(Object.keys(out.metrics)).toEqual(["dst", "brg"]);
-    expectStyleFormat(out.metrics.dst.captionStyle);
-    expectStyleFormat(out.metrics.dst.valueStyle);
-    expectStyleFormat(out.metrics.dst.unitStyle);
-    expectStyleFormat(out.metrics.brg.captionStyle);
-    expectStyleFormat(out.metrics.brg.valueStyle);
-    expectStyleFormat(out.metrics.brg.unitStyle);
+    expectStyleFormat(out.nameStyle);
+    expectStyleFormat(out.frontStyle);
+    expect(out.frontInitialStyle).toBe("");
+    expect(Object.keys(out.metrics)).toEqual(["dst", "cpa", "tcpa", "brg"]);
+    ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
+      expectStyleFormat(out.metrics[id].captionStyle);
+      expectStyleFormat(out.metrics[id].valueTextStyle);
+      expectStyleFormat(out.metrics[id].unitStyle);
+      expect(typeof out.metrics[id].valueRowStyle).toBe("string");
+    });
     expect(out.accentStyle).toBe("background-color:#66b8ff;");
   });
 
-  it("fits normal mode name/front text and shrinks long names without truncating", function () {
+  it("fits value text against metric sub-rects instead of full tile width", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
     const hostContext = { __dyniAisTargetTextMeasureCtx: createMeasureContext() };
-    const shellRect = { width: 320, height: 200 };
+    const shellRect = { width: 320, height: 180 };
+    const model = buildModel(h, shellRect, {
+      metrics: {
+        dst: {
+          captionText: "DST",
+          valueText: "SUPERCALIFRAGILISTIC",
+          unitText: "nm"
+        }
+      },
+      layout: {
+        mode: "normal",
+        responsive: { textFillScale: 1 },
+        placeholderRect: { x: 0, y: 0, w: 320, h: 180 },
+        nameRect: { x: 0, y: 0, w: 160, h: 20 },
+        frontRect: { x: 0, y: 22, w: 160, h: 20 },
+        metricBoxes: {
+          dst: {
+            x: 0,
+            y: 50,
+            w: 300,
+            h: 80,
+            captionRect: { x: 0, y: 50, w: 120, h: 14 },
+            valueRowRect: { x: 0, y: 66, w: 120, h: 14 },
+            valueTextRect: { x: 0, y: 66, w: 40, h: 14 },
+            unitRect: { x: 42, y: 66, w: 20, h: 14 }
+          },
+          cpa: {
+            x: 0,
+            y: 0,
+            w: 1,
+            h: 1,
+            captionRect: { x: 0, y: 0, w: 1, h: 1 },
+            valueRowRect: { x: 0, y: 0, w: 1, h: 1 },
+            valueTextRect: { x: 0, y: 0, w: 1, h: 1 },
+            unitRect: { x: 0, y: 0, w: 1, h: 1 }
+          },
+          tcpa: {
+            x: 0,
+            y: 0,
+            w: 1,
+            h: 1,
+            captionRect: { x: 0, y: 0, w: 1, h: 1 },
+            valueRowRect: { x: 0, y: 0, w: 1, h: 1 },
+            valueTextRect: { x: 0, y: 0, w: 1, h: 1 },
+            unitRect: { x: 0, y: 0, w: 1, h: 1 }
+          },
+          brg: {
+            x: 0,
+            y: 0,
+            w: 1,
+            h: 1,
+            captionRect: { x: 0, y: 0, w: 1, h: 1 },
+            valueRowRect: { x: 0, y: 0, w: 1, h: 1 },
+            valueTextRect: { x: 0, y: 0, w: 1, h: 1 },
+            unitRect: { x: 0, y: 0, w: 1, h: 1 }
+          }
+        }
+      }
+    });
 
-    const shortModel = buildModel(h, shellRect, { nameText: "A" });
-    const longName = "Extremely Long AIS Target Name That Must Shrink To Fit";
-    const longModel = buildModel(h, shellRect, { nameText: longName });
+    const out = h.fit.compute({
+      model: model,
+      targetEl: targetEl,
+      hostContext: hostContext,
+      shellRect: shellRect
+    });
+
+    expect(extractPx(out.metrics.dst.valueTextStyle)).toBeLessThanOrEqual(3);
+  });
+
+  it("fits high mode label/value/unit styles for single-line row layout", function () {
+    const h = createHarness();
+    const targetEl = document.createElement("div");
+    const hostContext = { __dyniAisTargetTextMeasureCtx: createMeasureContext() };
+    const shellRect = { width: 220, height: 320 };
+    const model = buildModel(h, shellRect, {
+      mode: "high",
+      showTcpaBranch: true,
+      visibleMetricIds: ["dst", "cpa", "tcpa", "brg"]
+    });
+
+    const out = h.fit.compute({
+      model: model,
+      targetEl: targetEl,
+      hostContext: hostContext,
+      shellRect: shellRect
+    });
+
+    const valuePx = extractPx(out.metrics.dst.valueTextStyle);
+    const captionPx = extractPx(out.metrics.dst.captionStyle);
+    const unitPx = extractPx(out.metrics.dst.unitStyle);
+
+    expect(valuePx).toBeGreaterThan(0);
+    expect(captionPx).toBeGreaterThan(0);
+    expect(unitPx).toBeGreaterThan(0);
+    expect(captionPx).toBeLessThanOrEqual(valuePx);
+    expect(unitPx).toBeLessThanOrEqual(Math.max(1, Math.floor(valuePx * 0.76)));
+  });
+
+  it("shrinks long name and long metric values instead of clipping", function () {
+    const h = createHarness();
+    const targetEl = document.createElement("div");
+    const hostContext = { __dyniAisTargetTextMeasureCtx: createMeasureContext() };
+    const shellRect = { width: 320, height: 220 };
+
+    const shortModel = buildModel(h, shellRect, { nameText: "A", metrics: { dst: { valueText: "1.0" } } });
+    const longModel = buildModel(h, shellRect, {
+      nameText: "Extremely Long AIS Target Name That Must Shrink To Fit",
+      metrics: { dst: { valueText: "12345678901234567890" } }
+    });
 
     const shortOut = h.fit.compute({
       model: shortModel,
@@ -252,43 +360,9 @@ describe("AisTargetHtmlFit", function () {
       shellRect: shellRect
     });
 
-    expectStyleFormat(shortOut.nameStyle);
-    expectStyleFormat(shortOut.frontStyle);
-    expectStyleFormat(longOut.nameStyle);
-    expectStyleFormat(longOut.frontStyle);
     expect(extractPx(longOut.nameStyle)).toBeLessThan(extractPx(shortOut.nameStyle));
-    expect(longModel.nameText).toBe(longName);
+    expect(extractPx(longOut.metrics.dst.valueTextStyle)).toBeLessThanOrEqual(extractPx(shortOut.metrics.dst.valueTextStyle));
     expect(h.themeApi.resolveForRoot).toHaveBeenCalledWith(targetEl);
-  });
-
-  it("keeps metric caption/unit sizes coupled below value size (~0.76x)", function () {
-    const h = createHarness();
-    const targetEl = document.createElement("div");
-    const hostContext = { __dyniAisTargetTextMeasureCtx: createMeasureContext() };
-    const shellRect = { width: 320, height: 220 };
-    const model = buildModel(h, shellRect, {
-      mode: "high",
-      showTcpaBranch: true,
-      visibleMetricIds: ["dst", "cpa", "tcpa"]
-    });
-
-    const out = h.fit.compute({
-      model: model,
-      targetEl: targetEl,
-      hostContext: hostContext,
-      shellRect: shellRect
-    });
-
-    const valuePx = extractPx(out.metrics.dst.valueStyle);
-    const captionPx = extractPx(out.metrics.dst.captionStyle);
-    const unitPx = extractPx(out.metrics.dst.unitStyle);
-    const unitLimit = Math.max(1, Math.floor(valuePx * 0.76));
-
-    expect(valuePx).toBeGreaterThan(0);
-    expect(captionPx).toBeGreaterThan(0);
-    expect(captionPx).toBeLessThanOrEqual(valuePx);
-    expect(unitPx).toBeLessThanOrEqual(unitLimit);
-    expect(unitPx).toBeGreaterThanOrEqual(Math.max(1, unitLimit - 1));
   });
 
   it("does not emit accent style when accent state is disabled", function () {

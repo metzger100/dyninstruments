@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetLayout - Responsive geometry owner for AIS target HTML summary rendering
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, AisTargetLayoutGeometry
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,15 +10,20 @@
 }(this, function () {
   "use strict";
 
+  const METRIC_ORDER = ["dst", "cpa", "tcpa", "brg"];
+
   const PAD_X_RATIO = 0.04;
   const PAD_Y_RATIO = 0.03;
   const GAP_RATIO = 0.035;
 
-  const FLAT_IDENTITY_SHARE = 0.24;
+  const FLAT_IDENTITY_SHARE = 0.34;
   const NORMAL_NAME_BAND_SHARE = 0.36;
   const HIGH_NAME_BAND_SHARE = 0.28;
-  const NORMAL_FRONT_SHARE = 0.26;
+  const NORMAL_FRONT_SHARE = 0.28;
   const HIGH_FRONT_SHARE = 0.24;
+
+  const FLAT_METRIC_MIN_TILE_WIDTH = 74;
+  const FLAT_TWO_ROW_MIN_METRICS_HEIGHT = 56;
 
   const VERTICAL_ASPECT_RATIO = { width: 7, height: 8 };
   const VERTICAL_MIN_HEIGHT = "8em";
@@ -78,6 +83,7 @@
   function create(def, Helpers) {
     const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
     const makeRect = Helpers.getModule("LayoutRectMath").create(def, Helpers).makeRect;
+    const geometryApi = Helpers.getModule("AisTargetLayoutGeometry").create(def, Helpers);
 
     function computeVerticalShellProfile(args) {
       const cfg = args || {};
@@ -164,43 +170,27 @@
       );
     }
 
-    function resolveMetricVisibility(mode, renderState, showTcpaBranch) {
-      const isData = renderState === "data";
-      const showTcpa = showTcpaBranch === true;
-      if (!isData) {
-        return {
-          dst: false,
-          cpa: false,
-          tcpa: false,
-          brg: false
-        };
+    function resolveMetricVisibility(renderState) {
+      if (renderState !== "data") {
+        return { dst: false, cpa: false, tcpa: false, brg: false };
       }
-
-      if (mode === "flat") {
-        return {
-          dst: true,
-          cpa: false,
-          tcpa: showTcpa,
-          brg: !showTcpa
-        };
-      }
-
-      return {
-        dst: true,
-        cpa: showTcpa,
-        tcpa: showTcpa,
-        brg: !showTcpa
-      };
+      return { dst: true, cpa: true, tcpa: true, brg: true };
     }
 
-    function resolveMetricOrder(mode, renderState, showTcpaBranch) {
-      if (renderState !== "data") {
-        return [];
+    function resolveMetricOrder(renderState) {
+      return renderState === "data" ? METRIC_ORDER.slice() : [];
+    }
+
+    function fillInlineMetrics(out, metricTiles, insets) {
+      for (let i = 0; i < METRIC_ORDER.length; i += 1) {
+        out.metricBoxes[METRIC_ORDER[i]] = geometryApi.createInlineMetricBox(
+          metricTiles[i],
+          insets,
+          insets.responsive,
+          profileApi,
+          makeRect
+        );
       }
-      if (mode === "flat") {
-        return showTcpaBranch ? ["dst", "tcpa"] : ["dst", "brg"];
-      }
-      return showTcpaBranch ? ["dst", "cpa", "tcpa"] : ["dst", "brg"];
     }
 
     function computeLayout(args) {
@@ -229,8 +219,8 @@
       });
       const insets = computeInsets(shellWidth, effectiveHeight, verticalShell.isVerticalCommitted);
       const contentRect = createContentRect(shellWidth, effectiveHeight, insets);
-      const metricVisibility = resolveMetricVisibility(mode, renderState, showTcpaBranch);
-      const metricOrder = resolveMetricOrder(mode, renderState, showTcpaBranch);
+      const metricVisibility = resolveMetricVisibility(renderState);
+      const metricOrder = resolveMetricOrder(renderState);
 
       const out = {
         mode: mode,
@@ -253,6 +243,8 @@
         metricBoxes: Object.create(null),
         metricVisibility: metricVisibility,
         metricOrder: metricOrder,
+        flatMetricRows: 0,
+        flatMetricColumns: 0,
         wrapperStyle: verticalShell.wrapperStyle
       };
 
@@ -264,24 +256,38 @@
         const identityShare = profileApi.scaleShare(
           FLAT_IDENTITY_SHARE,
           insets.responsive.flatIdentityScale,
-          0.18,
-          0.35
+          0.24,
+          0.5
         );
         const identityWidth = Math.max(1, Math.floor(contentRect.w * identityShare));
-        const remainingWidth = Math.max(1, contentRect.w - identityWidth - insets.gap);
+        const metricsWidth = Math.max(1, contentRect.w - identityWidth - insets.gap);
         const identityRect = makeRect(contentRect.x, contentRect.y, identityWidth, contentRect.h);
-        const metricsRect = makeRect(identityRect.x + identityRect.w + insets.gap, contentRect.y, remainingWidth, contentRect.h);
-        const metricRects = splitRow(metricsRect, insets.gap, 2, makeRect);
+        const metricsRect = makeRect(identityRect.x + identityRect.w + insets.gap, contentRect.y, metricsWidth, contentRect.h);
+        const nameHeight = Math.max(1, Math.floor(identityRect.h * 0.58));
+        const frontHeight = Math.max(1, identityRect.h - nameHeight - insets.gap);
 
         out.identityRect = identityRect;
-        out.frontInitialRect = identityRect;
+        out.nameRect = makeRect(identityRect.x, identityRect.y, identityRect.w, nameHeight);
+        out.frontRect = makeRect(identityRect.x, out.nameRect.y + out.nameRect.h + insets.gap, identityRect.w, frontHeight);
         out.metricsRect = metricsRect;
-        out.metricBoxes.dst = metricRects[0];
-        if (showTcpaBranch) {
-          out.metricBoxes.tcpa = metricRects[1];
+
+        const singleRowTiles = splitRow(metricsRect, insets.gap, 4, makeRect);
+        const canUseTwoRows = metricsRect.h >= FLAT_TWO_ROW_MIN_METRICS_HEIGHT;
+        const useTwoRows = canUseTwoRows && singleRowTiles[0].w < FLAT_METRIC_MIN_TILE_WIDTH;
+        let metricTiles = singleRowTiles;
+
+        if (useTwoRows) {
+          const rows = splitStack(metricsRect, insets.gap, 2, makeRect);
+          metricTiles = splitRow(rows[0], insets.gap, 2, makeRect)
+            .concat(splitRow(rows[1], insets.gap, 2, makeRect));
+          out.flatMetricRows = 2;
+          out.flatMetricColumns = 2;
         } else {
-          out.metricBoxes.brg = metricRects[1];
+          out.flatMetricRows = 1;
+          out.flatMetricColumns = 4;
         }
+
+        fillInlineMetrics(out, metricTiles, insets);
         return out;
       }
 
@@ -305,17 +311,10 @@
         out.frontRect = frontRect;
         out.metricsRect = metricsRect;
 
-        if (showTcpaBranch) {
-          const metricRows = splitStack(metricsRect, insets.gap, 2, makeRect);
-          const topRow = splitRow(metricRows[0], insets.gap, 2, makeRect);
-          out.metricBoxes.dst = topRow[0];
-          out.metricBoxes.cpa = topRow[1];
-          out.metricBoxes.tcpa = metricRows[1];
-        } else {
-          const metricCols = splitRow(metricsRect, insets.gap, 2, makeRect);
-          out.metricBoxes.dst = metricCols[0];
-          out.metricBoxes.brg = metricCols[1];
-        }
+        const metricRows = splitStack(metricsRect, insets.gap, 2, makeRect);
+        const rowA = splitRow(metricRows[0], insets.gap, 2, makeRect);
+        const rowB = splitRow(metricRows[1], insets.gap, 2, makeRect);
+        fillInlineMetrics(out, [rowA[0], rowA[1], rowB[0], rowB[1]], insets);
         return out;
       }
 
@@ -338,14 +337,14 @@
       out.frontRect = frontRect;
       out.metricsRect = metricsRect;
 
-      const rowCount = showTcpaBranch ? 3 : 2;
-      const metricRows = splitStack(metricsRect, insets.gap, rowCount, makeRect);
-      out.metricBoxes.dst = metricRows[0];
-      if (showTcpaBranch) {
-        out.metricBoxes.cpa = metricRows[1];
-        out.metricBoxes.tcpa = metricRows[2];
-      } else {
-        out.metricBoxes.brg = metricRows[1];
+      const metricRows = splitStack(metricsRect, insets.gap, 4, makeRect);
+      for (let i = 0; i < METRIC_ORDER.length; i += 1) {
+        out.metricBoxes[METRIC_ORDER[i]] = geometryApi.createHighMetricBox(
+          metricRows[i],
+          insets.responsive,
+          profileApi,
+          makeRect
+        );
       }
 
       return out;
@@ -359,6 +358,7 @@
       createContentRect: createContentRect,
       computeLayout: computeLayout,
       constants: {
+        METRIC_ORDER: METRIC_ORDER,
         VERTICAL_ASPECT_RATIO: VERTICAL_ASPECT_RATIO,
         VERTICAL_MIN_HEIGHT: VERTICAL_MIN_HEIGHT,
         RESPONSIVE_SCALES: RESPONSIVE_SCALES

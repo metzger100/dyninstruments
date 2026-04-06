@@ -16,7 +16,7 @@ Ownership split:
 
 - `AisTargetViewModel` normalizes selected target domain from `nav.ais.nearest`
 - `MapMapper` maps grouped renderer payload (`domain`, `layout`, `captions`, `units`, `default`)
-- `AisTargetRenderModel` owns render-state, interaction-state, branch selection, and formatter wiring
+- `AisTargetRenderModel` owns render-state, interaction-state, branch signal, and formatter wiring
 - `AisTargetLayout` owns `flat`/`normal`/`high` geometry plus committed vertical shell profile
 - `AisTargetHtmlFit` owns text fitting and AIS accent token resolution
 - `AisTargetMarkup` owns escaped HTML markup assembly and conditional hotspot/accent nodes
@@ -34,12 +34,12 @@ This widget is intentionally summary/workflow-entry only. It does not embed AIS 
 | `domain.mmsiNormalized` | string | `""` | Normalized MMSI for host action dispatch |
 | `domain.nameOrMmsi` | string | `""` | Name fallback chain (`name`/`shipname`/`mmsi`) |
 | `domain.frontText` | string | `"-"` | Front/back/pass state text |
-| `domain.frontInitial` | string | `"-"` | Initial for flat mode identity tile |
+| `domain.frontInitial` | string | `"-"` | Legacy initial source field (not required for visible data contract) |
 | `domain.distance` | number | — | Distance input for `DST` |
 | `domain.cpa` | number | — | CPA input for `DCPA` |
 | `domain.tcpa` | number | — | TCPA input (seconds) |
 | `domain.headingTo` | number | — | Bearing input for `BRG` |
-| `domain.showTcpaBranch` | boolean | `false` | `true` => `DCPA` + `TCPA`, `false` => `BRG` |
+| `domain.showTcpaBranch` | boolean | `false` | Semantic branch signal (`tcpa`/`brg` class), not a visibility gate |
 | `domain.colorRole` | string | `""` | `warning`/`nearest`/`tracking`/`normal` |
 | `domain.hasColorRole` | boolean | `false` | Enables accent role class and accent strip |
 | `layout.ratioThresholdNormal` | number | `1.2` | Ratio below/at this threshold -> `high` |
@@ -60,13 +60,14 @@ This widget is intentionally summary/workflow-entry only. It does not embed AIS 
 | `dyni-ais-target-mode-high` | mode resolver | Tall layout |
 | `dyni-ais-target-mode-normal` | mode resolver | Balanced layout |
 | `dyni-ais-target-mode-flat` | mode resolver | Wide layout |
+| `dyni-ais-target-flat-rows-1` / `dyni-ais-target-flat-rows-2` | layout resolver | Flat metrics `1x4` vs `2x2` arrangement |
 | `dyni-ais-target-data` | render-state resolver | Target summary visible |
 | `dyni-ais-target-placeholder` | render-state resolver | Passive placeholder (`No AIS`) |
 | `dyni-ais-target-hidden` | render-state resolver | Hidden output state |
 | `dyni-ais-target-open-dispatch` | interaction resolver | Active click capture/dispatch |
 | `dyni-ais-target-open-passive` | interaction resolver | Passive click ownership |
-| `dyni-ais-target-branch-tcpa` | branch resolver | `DST + DCPA + TCPA` branch |
-| `dyni-ais-target-branch-brg` | branch resolver | `DST + BRG` branch |
+| `dyni-ais-target-branch-tcpa` | branch resolver | Semantic branch signal |
+| `dyni-ais-target-branch-brg` | branch resolver | Semantic branch signal |
 | `dyni-ais-target-color-warning` / `-nearest` / `-tracking` / `-normal` | color-role resolver | Accent role class for token color mapping |
 | `dyni-ais-target-vertical` | committed ancestry check | `.widgetContainer.vertical` committed shell mode |
 
@@ -75,14 +76,14 @@ This widget is intentionally summary/workflow-entry only. It does not embed AIS 
 | Selector | Purpose |
 |---|---|
 | `.dyni-ais-target-identity` | Identity panel wrapper |
-| `.dyni-ais-target-name` | Full name/MMSI line (`normal`/`high`) |
-| `.dyni-ais-target-front` | Front/back/pass text line (`normal`/`high`) |
-| `.dyni-ais-target-front-initial` | Initial-only identity tile (`flat`) |
+| `.dyni-ais-target-name` | Name/MMSI line |
+| `.dyni-ais-target-front` | Front/back/pass line |
 | `.dyni-ais-target-metrics` | Metric grid container |
 | `.dyni-ais-target-metric-*` | Per-metric tile (`dst`, `cpa`, `tcpa`, `brg`) |
 | `.dyni-ais-target-metric-caption` | Caption line |
-| `.dyni-ais-target-metric-value` | Value line |
-| `.dyni-ais-target-metric-unit` | Unit line (`:empty` hidden) |
+| `.dyni-ais-target-metric-value-row` | Inline value/unit row wrapper |
+| `.dyni-ais-target-metric-value-text` | Primary value text |
+| `.dyni-ais-target-metric-unit` | Unit text (secondary) |
 | `.dyni-ais-target-state-accent` | Left accent strip (theme token color) |
 | `.dyni-ais-target-open-hotspot` | Full-surface click hotspot (`onclick="aisTargetShowInfo"`) |
 | `.dyni-ais-target-placeholder-text` | Placeholder text node |
@@ -94,6 +95,10 @@ This widget is intentionally summary/workflow-entry only. It does not embed AIS 
 | Accent strip | `.dyni-ais-target-state-accent` | `0` | Visual state role indicator |
 | Base content | identity + metrics + placeholder | `1` | Summary text and metric tiles |
 | Interaction overlay | `.dyni-ais-target-open-hotspot` | `2` | Full-widget dispatch target |
+
+Accent-strip visual rule:
+
+- Left accent strip remains subtle and thin but uses widened dimensions (`0.34em` width/radius).
 
 Dispatch mode:
 
@@ -124,13 +129,29 @@ Committed vertical ancestry (`.widgetContainer.vertical`) forces `high` and swit
 - `aspect-ratio:7/8`
 - `min-height:8em`
 
+Data-visibility rule:
+
+- In `renderState === "data"`, every mode always renders:
+  - `nameOrMmsi`
+  - `frontText`
+  - `DST`
+  - `DCPA`
+  - `TCPA`
+  - `BRG`
+- Missing/malformed values keep the metric tile and use formatter/default fallback text (`default`, typically `---`).
+
 Mode matrix:
 
-| Mode | Identity fields | Metric field set |
+| Mode | Identity fields | Metric arrangement |
 |---|---|---|
-| `flat` | `frontInitial` only | `DST` + (`TCPA` or `BRG`) |
-| `normal` | `nameOrMmsi` + `frontText` | `DST` + (`DCPA` + `TCPA` or `BRG`) |
-| `high` | `nameOrMmsi` + `frontText` | `DST` + (`DCPA` + `TCPA` or `BRG`) |
+| `flat` | `nameOrMmsi` + `frontText` | adaptive `1x4` (preferred) or `2x2` |
+| `normal` | `nameOrMmsi` + `frontText` | `2x2` |
+| `high` | `nameOrMmsi` + `frontText` | `4` stacked rows |
+
+Line-layout rules:
+
+- `high`: caption + value + unit on one line
+- `normal`/`flat`: caption on first line, value + unit inline on second line
 
 Render-state policy:
 
@@ -158,10 +179,10 @@ Formatter contract:
 - `tcpa` -> `formatDecimal(tcpa / 60, 3, Math.abs(tcpa) > 60 ? 0 : 2)`
 - `headingTo` -> `formatDirection(headingTo)`
 
-Branch rule:
+Branch signal rule:
 
-- `tcpa > 0` => `TCPA` branch (`DST`, `DCPA`, `TCPA`)
-- otherwise => `BRG` branch (`DST`, `BRG`)
+- `domain.showTcpaBranch` continues to control wrapper branch class (`dyni-ais-target-branch-*`) for semantic parity.
+- Branch signal does not change which metric tiles are rendered.
 
 Theme/token contract:
 
@@ -175,12 +196,12 @@ Theme/token contract:
 
 - mode
 - render state
-- branch state (`tcpa`/`brg`)
+- branch signal (`tcpa`/`brg`)
 - interaction state (`dispatch`/`passive`)
 - vertical committed flag
 - shell width
 - shell height (non-vertical) or effective layout height (vertical)
-- field-length terms for visible text nodes (identity + metric caption/value/unit)
+- field-length terms for visible text nodes (identity + all four metric caption/value/unit triplets)
 
 In committed vertical mode, raw host shell height is excluded in favor of the effective widget-owned vertical height to avoid self-induced resize loops.
 

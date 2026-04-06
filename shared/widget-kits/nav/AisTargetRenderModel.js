@@ -11,6 +11,7 @@
   "use strict";
 
   const PLACEHOLDER_TEXT = "No AIS";
+  const METRIC_ORDER = ["dst", "cpa", "tcpa", "brg"];
 
   function toObject(value) {
     return value && typeof value === "object" ? value : {};
@@ -36,6 +37,10 @@
       return 0;
     }
     return String(value).length;
+  }
+
+  function toSignatureText(value) {
+    return value == null ? "" : String(value);
   }
 
   function normalizeText(value) {
@@ -110,13 +115,6 @@
     return canDispatch ? "dispatch" : "passive";
   }
 
-  function buildMetricOrder(mode, showTcpaBranch) {
-    if (mode === "flat") {
-      return showTcpaBranch ? ["dst", "tcpa"] : ["dst", "brg"];
-    }
-    return showTcpaBranch ? ["dst", "cpa", "tcpa"] : ["dst", "brg"];
-  }
-
   function buildResizeSignatureParts(model) {
     const m = model || {};
     const parts = [
@@ -143,20 +141,21 @@
       return parts;
     }
 
+    parts.push("N:" + toSignatureText(m.nameText));
+    parts.push("R:" + toSignatureText(m.frontText));
+
     if (m.mode === "flat") {
-      parts.push("F" + toSignatureLength(m.frontInitialText));
-    } else {
-      parts.push("N" + toSignatureLength(m.nameText));
-      parts.push("R" + toSignatureLength(m.frontText));
+      parts.push("FR" + Math.max(1, Math.floor(Number(m.flatMetricRows) || 1)));
+      parts.push("FC" + Math.max(1, Math.floor(Number(m.flatMetricColumns) || 1)));
     }
 
-    const metricIds = m.visibleMetricIds;
+    const metricIds = Array.isArray(m.visibleMetricIds) ? m.visibleMetricIds : METRIC_ORDER;
     const metrics = toObject(m.metrics);
     for (let i = 0; i < metricIds.length; i += 1) {
       const metric = toObject(metrics[metricIds[i]]);
-      parts.push("C" + toSignatureLength(metric.captionText));
-      parts.push("V" + toSignatureLength(metric.valueText));
-      parts.push("U" + toSignatureLength(metric.unitText));
+      parts.push("C:" + toSignatureText(metric.captionText));
+      parts.push("V:" + toSignatureText(metric.valueText));
+      parts.push("U:" + toSignatureText(metric.unitText));
     }
 
     return parts;
@@ -189,26 +188,31 @@
         isEditingMode: isEditingMode
       });
 
+      const showTcpaBranch = domain.showTcpaBranch === true;
       const layout = layoutApi.computeLayout({
         W: shellSize.width,
         H: shellSize.height,
         mode: cfg.mode,
         renderState: renderState,
-        showTcpaBranch: domain.showTcpaBranch === true,
+        showTcpaBranch: showTcpaBranch,
         ratioThresholdNormal: layoutConfig.ratioThresholdNormal,
         ratioThresholdFlat: layoutConfig.ratioThresholdFlat,
         isVerticalCommitted: cfg.isVerticalCommitted === true,
         effectiveLayoutHeight: cfg.effectiveLayoutHeight
       });
 
-      const showTcpaBranch = domain.showTcpaBranch === true;
+      const distance = htmlUtils.toFiniteNumber(domain.distance);
+      const cpa = htmlUtils.toFiniteNumber(domain.cpa);
+      const tcpaSeconds = htmlUtils.toFiniteNumber(domain.tcpa);
+      const headingTo = htmlUtils.toFiniteNumber(domain.headingTo);
+
       const metrics = {
         dst: {
           id: "dst",
           captionText: normalizeText(captions.dst),
           unitText: normalizeText(units.dst),
           valueText: formatWithFormatter({
-            value: domain.distance,
+            value: distance,
             formatter: "formatDistance",
             formatterParameters: [units.dst],
             defaultText: defaultText
@@ -219,7 +223,7 @@
           captionText: normalizeText(captions.cpa),
           unitText: normalizeText(units.cpa),
           valueText: formatWithFormatter({
-            value: domain.cpa,
+            value: cpa,
             formatter: "formatDistance",
             formatterParameters: [units.cpa],
             defaultText: defaultText
@@ -230,9 +234,9 @@
           captionText: normalizeText(captions.tcpa),
           unitText: normalizeText(units.tcpa),
           valueText: formatWithFormatter({
-            value: typeof domain.tcpa === "number" ? (domain.tcpa / 60) : undefined,
+            value: typeof tcpaSeconds === "number" ? (tcpaSeconds / 60) : undefined,
             formatter: "formatDecimal",
-            formatterParameters: [3, Math.abs(domain.tcpa) > 60 ? 0 : 2],
+            formatterParameters: [3, (typeof tcpaSeconds === "number" && Math.abs(tcpaSeconds) > 60) ? 0 : 2],
             defaultText: defaultText
           }, Helpers)
         },
@@ -241,7 +245,7 @@
           captionText: normalizeText(captions.brg),
           unitText: normalizeText(units.brg),
           valueText: formatWithFormatter({
-            value: domain.headingTo,
+            value: headingTo,
             formatter: "formatDirection",
             formatterParameters: [],
             defaultText: defaultText
@@ -254,7 +258,7 @@
         ? layout.metricVisibility
         : { dst: false, cpa: false, tcpa: false, brg: false };
       const visibleMetricIds = hasData
-        ? buildMetricOrder(layout.mode, showTcpaBranch)
+        ? (Array.isArray(layout.metricOrder) && layout.metricOrder.length ? layout.metricOrder.slice() : METRIC_ORDER.slice())
         : [];
       const colorRole = (hasData && domain.hasColorRole === true)
         ? normalizeText(domain.colorRole)
@@ -269,6 +273,9 @@
         "dyni-ais-target-branch-" + (showTcpaBranch ? "tcpa" : "brg")
       ];
 
+      if (layout.mode === "flat") {
+        wrapperClasses.push("dyni-ais-target-flat-rows-" + (layout.flatMetricRows === 2 ? "2" : "1"));
+      }
       if (hasAccent) {
         wrapperClasses.push("dyni-ais-target-color-" + colorRole);
       }
@@ -297,6 +304,8 @@
         metrics: metrics,
         metricVisibility: metricVisibility,
         visibleMetricIds: visibleMetricIds,
+        flatMetricRows: layout.flatMetricRows,
+        flatMetricColumns: layout.flatMetricColumns,
         colorRole: colorRole,
         hasAccent: hasAccent,
         wrapperClasses: wrapperClasses

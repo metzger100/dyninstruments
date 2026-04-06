@@ -38,7 +38,7 @@
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html.dyni-ais-target-mode-flat {
   grid-template-areas: "identity metrics";
-  grid-template-columns: minmax(0, 0.3fr) minmax(0, 0.7fr);
+  grid-template-columns: minmax(0, 0.34fr) minmax(0, 0.66fr);
   grid-template-rows: minmax(0, 1fr);
 }
 
@@ -56,8 +56,8 @@
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-state-accent {
   position: absolute;
   inset: 0 auto 0 0;
-  width: 0.24em;
-  border-radius: 0.24em;
+  width: 0.34em;
+  border-radius: 0.34em;
   z-index: 0;
 }
 
@@ -65,7 +65,7 @@
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html.dyni-ais-target-color-nearest,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html.dyni-ais-target-color-tracking,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html.dyni-ais-target-color-normal {
-  padding-left: calc(0.18em + 0.24em);
+  padding-left: calc(0.18em + 0.34em);
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-identity {
@@ -80,9 +80,15 @@
   gap: 0.08em;
 }
 
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-flat .dyni-ais-target-identity {
+  justify-content: center;
+}
+
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-name,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-front,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-front-initial {
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-caption,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value-text,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-unit {
   min-width: 0;
   line-height: 1;
   white-space: nowrap;
@@ -98,18 +104,6 @@
   opacity: 0.82;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-front-initial {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: var(--dyni-font-weight, 700);
-  text-align: center;
-}
-
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-flat .dyni-ais-target-identity {
-  align-items: center;
-}
-
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metrics {
   position: relative;
   z-index: 1;
@@ -120,51 +114,40 @@
   gap: 0.1em 0.14em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-flat.dyni-ais-target-branch-tcpa .dyni-ais-target-metrics,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-flat.dyni-ais-target-branch-brg .dyni-ais-target-metrics {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-flat .dyni-ais-target-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-template-rows: minmax(0, 1fr);
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal.dyni-ais-target-branch-tcpa .dyni-ais-target-metrics {
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-flat.dyni-ais-target-flat-rows-2 .dyni-ais-target-metrics {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: repeat(2, minmax(0, 1fr));
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal.dyni-ais-target-branch-tcpa .dyni-ais-target-metric-tcpa {
-  grid-column: 1 / span 2;
-}
-
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal.dyni-ais-target-branch-brg .dyni-ais-target-metrics {
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal .dyni-ais-target-metrics {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: minmax(0, 1fr);
-}
-
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high.dyni-ais-target-branch-tcpa .dyni-ais-target-metrics {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-}
-
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high.dyni-ais-target-branch-brg .dyni-ais-target-metrics {
-  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-metrics {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: repeat(4, minmax(0, 1fr));
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric {
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
   row-gap: 0.05em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-caption,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-unit {
-  min-width: 0;
-  line-height: 1;
-  white-space: nowrap;
-  overflow: hidden;
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-metric {
+  grid-template-columns: minmax(0, 0.34fr) minmax(0, 0.66fr);
+  grid-template-rows: minmax(0, 1fr);
+  column-gap: 0.14em;
+  row-gap: 0;
+  align-items: center;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-caption {
@@ -172,15 +155,43 @@
   opacity: 0.8;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value {
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-metric-caption {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value-row {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.14em;
+  line-height: 1;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-metric-value-row {
+  grid-column: 2;
+  grid-row: 1;
+  justify-content: flex-end;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value-text {
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 auto;
   font-weight: var(--dyni-font-weight, 700);
+  text-align: right;
+}
+
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-flat .dyni-ais-target-metric-value-text,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal .dyni-ais-target-metric-value-text {
   text-align: center;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-unit {
+  flex: 0 0 auto;
   font-weight: var(--dyni-label-weight, 700);
   opacity: 0.78;
-  text-align: right;
 }
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-unit:empty {

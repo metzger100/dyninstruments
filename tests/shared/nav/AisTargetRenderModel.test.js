@@ -25,6 +25,8 @@ describe("AisTargetRenderModel", function () {
             moduleCache[id] = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
           } else if (id === "LayoutRectMath") {
             moduleCache[id] = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+          } else if (id === "AisTargetLayoutGeometry") {
+            moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
           } else {
             throw new Error("unexpected module: " + id);
           }
@@ -95,7 +97,7 @@ describe("AisTargetRenderModel", function () {
     return out;
   }
 
-  it("builds dispatch data state with branch-specific fields and formatter output", function () {
+  it("builds dispatch data state with all metrics and formatter output", function () {
     const setup = createRenderModel();
     const model = setup.renderModel.buildModel({
       props: makeProps(),
@@ -109,7 +111,8 @@ describe("AisTargetRenderModel", function () {
     expect(model.interactionState).toBe("dispatch");
     expect(model.captureClicks).toBe(true);
     expect(model.showHotspot).toBe(true);
-    expect(model.visibleMetricIds).toEqual(["dst", "cpa", "tcpa"]);
+    expect(model.visibleMetricIds).toEqual(["dst", "cpa", "tcpa", "brg"]);
+    expect(model.metricVisibility).toEqual({ dst: true, cpa: true, tcpa: true, brg: true });
     expect(model.wrapperClasses).toContain("dyni-ais-target-open-dispatch");
     expect(model.wrapperClasses).toContain("dyni-ais-target-branch-tcpa");
     expect(model.wrapperClasses).toContain("dyni-ais-target-color-warning");
@@ -123,13 +126,15 @@ describe("AisTargetRenderModel", function () {
     }));
   });
 
-  it("uses BRG branch metric set in flat mode without DCPA/TCPA tiles", function () {
+  it("keeps full identity text and all four metrics in flat BRG branch mode", function () {
     const setup = createRenderModel();
     const model = setup.renderModel.buildModel({
       props: makeProps({
         domain: {
           showTcpaBranch: false,
-          tcpa: 0
+          tcpa: 0,
+          nameOrMmsi: "Athena",
+          frontText: "Back"
         }
       }),
       hostContext: createHostContext({ pageId: "navpage", showInfo: "dispatch" }),
@@ -139,9 +144,29 @@ describe("AisTargetRenderModel", function () {
     });
 
     expect(model.mode).toBe("flat");
-    expect(model.visibleMetricIds).toEqual(["dst", "brg"]);
-    expect(model.metricVisibility).toEqual({ dst: true, cpa: false, tcpa: false, brg: true });
+    expect(model.visibleMetricIds).toEqual(["dst", "cpa", "tcpa", "brg"]);
+    expect(model.metricVisibility).toEqual({ dst: true, cpa: true, tcpa: true, brg: true });
+    expect(model.nameText).toBe("Athena");
+    expect(model.frontText).toBe("Back");
     expect(model.wrapperClasses).toContain("dyni-ais-target-branch-brg");
+    expect(model.wrapperClasses).toContain("dyni-ais-target-flat-rows-1");
+  });
+
+  it("keeps all four metrics visible for flat, normal, and high data modes", function () {
+    const setup = createRenderModel();
+    ["flat", "normal", "high"].forEach((mode) => {
+      const shellRect = mode === "flat" ? { width: 620, height: 120 } : { width: 280, height: 220 };
+      const model = setup.renderModel.buildModel({
+        props: makeProps({ domain: { showTcpaBranch: false, tcpa: 0 } }),
+        hostContext: createHostContext({ pageId: "navpage", showInfo: "dispatch" }),
+        shellRect: shellRect,
+        mode: mode,
+        isVerticalCommitted: false
+      });
+
+      expect(model.visibleMetricIds).toEqual(["dst", "cpa", "tcpa", "brg"]);
+      expect(model.metricVisibility).toEqual({ dst: true, cpa: true, tcpa: true, brg: true });
+    });
   });
 
   it("keeps placeholder state on gpspage without target identity", function () {
@@ -223,6 +248,53 @@ describe("AisTargetRenderModel", function () {
       formatter: "formatDecimal",
       formatterParameters: [3, 0]
     }));
+  });
+
+  it("updates resize signature when any of the four metric strings changes", function () {
+    const setup = createRenderModel();
+    const hostContext = createHostContext({ pageId: "navpage", showInfo: "dispatch" });
+    const shellRect = { width: 320, height: 180 };
+    const baseSig = setup.renderModel.buildModel({
+      props: makeProps(),
+      hostContext: hostContext,
+      shellRect: shellRect,
+      mode: "normal",
+      isVerticalCommitted: false
+    }).resizeSignatureParts.join("|");
+
+    const sigDistance = setup.renderModel.buildModel({
+      props: makeProps({ domain: { distance: 9.1 } }),
+      hostContext: hostContext,
+      shellRect: shellRect,
+      mode: "normal",
+      isVerticalCommitted: false
+    }).resizeSignatureParts.join("|");
+    const sigCpa = setup.renderModel.buildModel({
+      props: makeProps({ domain: { cpa: 1.9 } }),
+      hostContext: hostContext,
+      shellRect: shellRect,
+      mode: "normal",
+      isVerticalCommitted: false
+    }).resizeSignatureParts.join("|");
+    const sigTcpa = setup.renderModel.buildModel({
+      props: makeProps({ domain: { tcpa: 12 } }),
+      hostContext: hostContext,
+      shellRect: shellRect,
+      mode: "normal",
+      isVerticalCommitted: false
+    }).resizeSignatureParts.join("|");
+    const sigBrg = setup.renderModel.buildModel({
+      props: makeProps({ domain: { headingTo: 302 } }),
+      hostContext: hostContext,
+      shellRect: shellRect,
+      mode: "normal",
+      isVerticalCommitted: false
+    }).resizeSignatureParts.join("|");
+
+    expect(sigDistance).not.toBe(baseSig);
+    expect(sigCpa).not.toBe(baseSig);
+    expect(sigTcpa).not.toBe(baseSig);
+    expect(sigBrg).not.toBe(baseSig);
   });
 
   it("keeps vertical resize signatures stable across host-height drift", function () {

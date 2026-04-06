@@ -22,7 +22,12 @@
       js: BASE + "shared/widget-kits/nav/AisTargetLayout.js",
       css: undefined,
       globalKey: "DyniAisTargetLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "AisTargetLayoutGeometry"]
+    },
+    AisTargetLayoutGeometry: {
+      js: BASE + "shared/widget-kits/nav/AisTargetLayoutGeometry.js",
+      css: undefined,
+      globalKey: "DyniAisTargetLayoutGeometry"
     },
     AisTargetHtmlFit: {
       js: BASE + "shared/widget-kits/nav/AisTargetHtmlFit.js",

@@ -12,10 +12,10 @@ describe("AisTargetTextHtmlWidget", function () {
         frontStyle: "font-size:10px;",
         placeholderStyle: "font-size:11px;",
         metrics: {
-          dst: { captionStyle: "font-size:8px;", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-          cpa: { captionStyle: "font-size:8px;", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-          tcpa: { captionStyle: "font-size:8px;", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-          brg: { captionStyle: "font-size:8px;", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" }
+          dst: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+          cpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+          tcpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+          brg: { captionStyle: "font-size:8px;", valueRowStyle: "", valueTextStyle: "font-size:11px;", unitStyle: "font-size:7px;" }
         },
         accentStyle: "background-color:#c33;"
       };
@@ -65,6 +65,9 @@ describe("AisTargetTextHtmlWidget", function () {
         }
         if (id === "LayoutRectMath") {
           return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+        }
+        if (id === "AisTargetLayoutGeometry") {
+          return loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
         }
         throw new Error("unexpected module: " + id);
       }
@@ -171,7 +174,7 @@ describe("AisTargetTextHtmlWidget", function () {
     expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-dst"');
     expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-cpa"');
     expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-tcpa"');
-    expect(html).not.toContain('class="dyni-ais-target-metric dyni-ais-target-metric-brg"');
+    expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-brg"');
 
     const handlers = setup.renderer.namedHandlers(props, hostContext);
     expect(Object.keys(handlers)).toEqual(["aisTargetShowInfo"]);
@@ -195,7 +198,7 @@ describe("AisTargetTextHtmlWidget", function () {
     expect(hostContext.hostActions.ais.showInfo).not.toHaveBeenCalled();
   });
 
-  it("uses flat BRG field set: front initial + DST + BRG with no name/front or DCPA/TCPA", function () {
+  it("renders flat mode with name/front and all four metrics", function () {
     const renderer = createRenderer().renderer;
     const hostContext = createHostContext({ shellRect: { width: 640, height: 120 } });
     const props = makeProps({
@@ -209,13 +212,13 @@ describe("AisTargetTextHtmlWidget", function () {
 
     expect(html).toContain("dyni-ais-target-mode-flat");
     expect(html).toContain("dyni-ais-target-branch-brg");
-    expect(html).toContain("dyni-ais-target-front-initial");
+    expect(html).toContain("dyni-ais-target-name");
+    expect(html).toContain('class="dyni-ais-target-front"');
     expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-dst"');
+    expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-cpa"');
+    expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-tcpa"');
     expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-brg"');
-    expect(html).not.toContain("dyni-ais-target-name");
-    expect(html).not.toContain('class="dyni-ais-target-front"');
-    expect(html).not.toContain('class="dyni-ais-target-metric dyni-ais-target-metric-cpa"');
-    expect(html).not.toContain('class="dyni-ais-target-metric dyni-ais-target-metric-tcpa"');
+    expect(html).not.toContain("dyni-ais-target-front-initial");
   });
 
   it("updates resize signature when branch or interaction state changes", function () {
@@ -273,7 +276,7 @@ describe("AisTargetTextHtmlWidget", function () {
     }));
   });
 
-  it("keeps css selectors for state, branch, and vertical contracts", function () {
+  it("keeps css selectors for state, mode, inline metric structure, and vertical contracts", function () {
     const cssPath = path.join(
       process.cwd(),
       "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"
@@ -281,12 +284,16 @@ describe("AisTargetTextHtmlWidget", function () {
     const css = fs.readFileSync(cssPath, "utf8");
 
     expect(css).toContain(".dyni-ais-target-mode-flat");
-    expect(css).toContain(".dyni-ais-target-mode-normal.dyni-ais-target-branch-tcpa .dyni-ais-target-metrics");
-    expect(css).toContain(".dyni-ais-target-mode-high.dyni-ais-target-branch-brg .dyni-ais-target-metrics");
+    expect(css).toContain(".dyni-ais-target-mode-flat.dyni-ais-target-flat-rows-2 .dyni-ais-target-metrics");
+    expect(css).toContain(".dyni-ais-target-mode-high .dyni-ais-target-metrics");
+    expect(css).toContain(".dyni-ais-target-metric-value-row");
+    expect(css).toContain(".dyni-ais-target-metric-value-text");
     expect(css).toContain(".dyni-ais-target-open-hotspot");
     expect(css).toContain(".dyni-ais-target-open-dispatch");
     expect(css).toContain(".dyni-ais-target-open-passive");
     expect(css).toContain(".dyni-ais-target-state-accent");
+    expect(css).toContain("width: 0.34em;");
+    expect(css).toContain("border-radius: 0.34em;");
     expect(css).toContain(".dyni-ais-target-placeholder-text");
     expect(css).toContain(".widgetContainer.vertical .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html");
     expect(css).toContain("aspect-ratio: 7 / 8;");

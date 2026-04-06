@@ -118,7 +118,10 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
     expect(components.AisTargetLayout.globalKey).toBe("DyniAisTargetLayout");
     expect(components.AisTargetLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetLayout.js");
-    expect(components.AisTargetLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
+    expect(components.AisTargetLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath", "AisTargetLayoutGeometry"]);
+    expect(components.AisTargetLayoutGeometry.globalKey).toBe("DyniAisTargetLayoutGeometry");
+    expect(components.AisTargetLayoutGeometry.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetLayoutGeometry.js");
+    expect(components.AisTargetLayoutGeometry.deps).toBeUndefined();
     expect(components.EditRouteLayout.globalKey).toBe("DyniEditRouteLayout");
     expect(components.EditRouteLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteLayout.js");
     expect(components.EditRouteLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath", "EditRouteLayoutMath", "EditRouteLayoutGeometry"]);

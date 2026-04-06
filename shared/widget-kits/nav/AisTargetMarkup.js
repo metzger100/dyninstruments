@@ -26,21 +26,25 @@
     const htmlUtils = cfg.htmlUtils;
 
     return ""
-      + '<div class="dyni-ais-target-metric dyni-ais-target-metric-' + metricId + '">'
+      + '<div class="dyni-ais-target-metric dyni-ais-target-metric-' + metricId + '">' 
       + '<div class="dyni-ais-target-metric-caption"'
       + htmlUtils.toStyleAttr(metricFit.captionStyle)
       + ">"
       + htmlUtils.escapeHtml(toText(metric.captionText))
       + "</div>"
-      + '<div class="dyni-ais-target-metric-value"'
-      + htmlUtils.toStyleAttr(metricFit.valueStyle)
+      + '<div class="dyni-ais-target-metric-value-row"'
+      + htmlUtils.toStyleAttr(metricFit.valueRowStyle)
+      + ">"
+      + '<span class="dyni-ais-target-metric-value-text"'
+      + htmlUtils.toStyleAttr(metricFit.valueTextStyle || metricFit.valueStyle)
       + ">"
       + htmlUtils.escapeHtml(toText(metric.valueText))
-      + "</div>"
-      + '<div class="dyni-ais-target-metric-unit"'
+      + "</span>"
+      + '<span class="dyni-ais-target-metric-unit"'
       + htmlUtils.toStyleAttr(metricFit.unitStyle)
       + ">"
       + htmlUtils.escapeHtml(toText(metric.unitText))
+      + "</span>"
       + "</div>"
       + "</div>";
   }
@@ -50,31 +54,19 @@
     const metrics = toObject(model.metrics);
     const metricFits = toObject(fit.metrics);
 
-    let identityHtml = "";
-    if (model.mode === "flat") {
-      identityHtml = ""
-        + '<div class="dyni-ais-target-identity">'
-        + '<div class="dyni-ais-target-front-initial"'
-        + htmlUtils.toStyleAttr(fit.frontInitialStyle)
-        + ">"
-        + htmlUtils.escapeHtml(toText(model.frontInitialText))
-        + "</div>"
-        + "</div>";
-    } else {
-      identityHtml = ""
-        + '<div class="dyni-ais-target-identity">'
-        + '<div class="dyni-ais-target-name"'
-        + htmlUtils.toStyleAttr(fit.nameStyle)
-        + ">"
-        + htmlUtils.escapeHtml(toText(model.nameText))
-        + "</div>"
-        + '<div class="dyni-ais-target-front"'
-        + htmlUtils.toStyleAttr(fit.frontStyle)
-        + ">"
-        + htmlUtils.escapeHtml(toText(model.frontText))
-        + "</div>"
-        + "</div>";
-    }
+    const identityHtml = ""
+      + '<div class="dyni-ais-target-identity">'
+      + '<div class="dyni-ais-target-name"'
+      + htmlUtils.toStyleAttr(fit.nameStyle)
+      + ">"
+      + htmlUtils.escapeHtml(toText(model.nameText))
+      + "</div>"
+      + '<div class="dyni-ais-target-front"'
+      + htmlUtils.toStyleAttr(fit.frontStyle)
+      + ">"
+      + htmlUtils.escapeHtml(toText(model.frontText))
+      + "</div>"
+      + "</div>";
 
     let metricsHtml = "";
     for (let i = 0; i < metricIds.length; i += 1) {

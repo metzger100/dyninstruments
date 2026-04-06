@@ -12,9 +12,28 @@ describe("AisTargetLayout", function () {
         if (id === "LayoutRectMath") {
           return layoutRectMath;
         }
+        if (id === "AisTargetLayoutGeometry") {
+          return loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
+        }
         throw new Error("unexpected module: " + id);
       }
     });
+  }
+
+  function expectInlineSubRects(box) {
+    expect(box.captionRect).toBeTruthy();
+    expect(box.valueRowRect).toBeTruthy();
+    expect(box.valueTextRect).toBeTruthy();
+    expect(box.unitRect).toBeTruthy();
+    expect(box.valueTextRect.w).toBeLessThanOrEqual(box.valueRowRect.w);
+  }
+
+  function expectHighSubRects(box) {
+    expect(box.labelRect).toBeTruthy();
+    expect(box.valueRect).toBeTruthy();
+    expect(box.unitRect).toBeTruthy();
+    expect(box.valueRect.x).toBeGreaterThanOrEqual(box.labelRect.x + box.labelRect.w);
+    expect(box.unitRect.x).toBeGreaterThanOrEqual(box.valueRect.x + box.valueRect.w);
   }
 
   it("resolves high/normal/flat mode by ratio thresholds", function () {
@@ -25,10 +44,11 @@ describe("AisTargetLayout", function () {
     expect(layout.resolveMode({ W: 520, H: 120, ratioThresholdNormal: 1.2, ratioThresholdFlat: 3.8 })).toBe("flat");
   });
 
-  it("builds flat BRG layout with front initial and two metric boxes", function () {
+  it("builds flat data layout with all four metrics and inline sub-rects", function () {
     const layout = createLayout();
     const out = layout.computeLayout({
-      W: 520,
+      mode: "flat",
+      W: 620,
       H: 120,
       renderState: "data",
       showTcpaBranch: false,
@@ -37,20 +57,39 @@ describe("AisTargetLayout", function () {
     });
 
     expect(out.mode).toBe("flat");
-    expect(out.frontInitialRect).toBeTruthy();
-    expect(out.nameRect).toBeNull();
-    expect(out.frontRect).toBeNull();
-    expect(out.metricVisibility).toEqual({ dst: true, cpa: false, tcpa: false, brg: true });
-    expect(out.metricOrder).toEqual(["dst", "brg"]);
-    expect(out.metricBoxes.dst).toBeTruthy();
-    expect(out.metricBoxes.brg).toBeTruthy();
-    expect(out.metricBoxes.cpa).toBeUndefined();
-    expect(out.metricBoxes.tcpa).toBeUndefined();
+    expect(out.nameRect).toBeTruthy();
+    expect(out.frontRect).toBeTruthy();
+    expect(out.metricVisibility).toEqual({ dst: true, cpa: true, tcpa: true, brg: true });
+    expect(out.metricOrder).toEqual(["dst", "cpa", "tcpa", "brg"]);
+    expect(out.flatMetricRows).toBe(1);
+    expect(out.flatMetricColumns).toBe(4);
+    ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
+      expect(out.metricBoxes[id]).toBeTruthy();
+      expectInlineSubRects(out.metricBoxes[id]);
+    });
   });
 
-  it("builds normal TCPA layout with DST + DCPA top row and full-width TCPA row", function () {
+  it("switches flat data layout to 2x2 metrics when tiles are narrow", function () {
     const layout = createLayout();
     const out = layout.computeLayout({
+      mode: "flat",
+      W: 290,
+      H: 140,
+      renderState: "data",
+      showTcpaBranch: true
+    });
+
+    expect(out.mode).toBe("flat");
+    expect(out.flatMetricRows).toBe(2);
+    expect(out.flatMetricColumns).toBe(2);
+    expect(out.metricBoxes.tcpa.y).toBeGreaterThan(out.metricBoxes.dst.y);
+    expect(out.metricBoxes.brg.y).toBeGreaterThan(out.metricBoxes.cpa.y);
+  });
+
+  it("builds normal data layout as a 2x2 metrics grid with inline sub-rects", function () {
+    const layout = createLayout();
+    const out = layout.computeLayout({
+      mode: "normal",
       W: 320,
       H: 210,
       renderState: "data",
@@ -60,17 +99,16 @@ describe("AisTargetLayout", function () {
     });
 
     expect(out.mode).toBe("normal");
-    expect(out.metricVisibility).toEqual({ dst: true, cpa: true, tcpa: true, brg: false });
-    expect(out.metricOrder).toEqual(["dst", "cpa", "tcpa"]);
-    expect(out.metricBoxes.dst).toBeTruthy();
-    expect(out.metricBoxes.cpa).toBeTruthy();
-    expect(out.metricBoxes.tcpa).toBeTruthy();
-    expect(out.metricBoxes.brg).toBeUndefined();
-    expect(out.metricBoxes.tcpa.w).toBe(out.metricsRect.w);
+    expect(out.metricOrder).toEqual(["dst", "cpa", "tcpa", "brg"]);
+    expect(out.metricBoxes.dst.y).toBe(out.metricBoxes.cpa.y);
     expect(out.metricBoxes.tcpa.y).toBeGreaterThan(out.metricBoxes.dst.y);
+    expect(out.metricBoxes.brg.y).toBeGreaterThan(out.metricBoxes.cpa.y);
+    ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
+      expectInlineSubRects(out.metricBoxes[id]);
+    });
   });
 
-  it("builds high BRG layout as stacked DST/BRG rows without filler tiles", function () {
+  it("builds high data layout as four stacked metric rows with row sub-rects", function () {
     const layout = createLayout();
     const out = layout.computeLayout({
       mode: "high",
@@ -81,12 +119,13 @@ describe("AisTargetLayout", function () {
     });
 
     expect(out.mode).toBe("high");
-    expect(out.metricOrder).toEqual(["dst", "brg"]);
-    expect(out.metricBoxes.dst).toBeTruthy();
-    expect(out.metricBoxes.brg).toBeTruthy();
-    expect(out.metricBoxes.cpa).toBeUndefined();
-    expect(out.metricBoxes.tcpa).toBeUndefined();
-    expect(out.metricBoxes.brg.y).toBeGreaterThan(out.metricBoxes.dst.y);
+    expect(out.metricOrder).toEqual(["dst", "cpa", "tcpa", "brg"]);
+    expect(out.metricBoxes.cpa.y).toBeGreaterThan(out.metricBoxes.dst.y);
+    expect(out.metricBoxes.tcpa.y).toBeGreaterThan(out.metricBoxes.cpa.y);
+    expect(out.metricBoxes.brg.y).toBeGreaterThan(out.metricBoxes.tcpa.y);
+    ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
+      expectHighSubRects(out.metricBoxes[id]);
+    });
   });
 
   it("omits metric boxes for placeholder and hidden states", function () {
@@ -125,7 +164,7 @@ describe("AisTargetLayout", function () {
     expect(vertical.wrapperStyle).toContain("min-height:8em;");
   });
 
-  it("anchors responsive compaction to width in committed vertical mode", function () {
+  it("anchors responsive compaction to width in committed vertical mode and forces high", function () {
     const layout = createLayout();
     const verticalA = layout.computeLayout({
       W: 240,
