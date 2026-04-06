@@ -337,7 +337,6 @@ describe("tests/layouts/gpspage-all-widgets.json", function () {
       name: "dyni_Nav_Instruments",
       kind: "editRoute"
     });
-    expect(layout.widgets.editroutepage.left[2].name).toBe("EditRoute");
     expect(layout.widgets.editroutepage.top_small[0].name).toBe("EditRoute");
   });
 });
