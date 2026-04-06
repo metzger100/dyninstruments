@@ -120,6 +120,9 @@ describe("EditRouteHtmlFit", function () {
         if (id === "LayoutRectMath") {
           return layoutRectMathModule;
         }
+        if (id === "TextFitMath") {
+          return loadFresh("shared/widget-kits/text/TextFitMath.js");
+        }
         throw new Error("unexpected module: " + id);
       }
     };

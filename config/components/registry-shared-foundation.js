@@ -33,7 +33,7 @@
       js: BASE + "shared/widget-kits/nav/AisTargetHtmlFit.js",
       css: undefined,
       globalKey: "DyniAisTargetHtmlFit",
-      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils"]
+      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils", "TextFitMath"]
     },
     ActiveRouteHtmlFit: {
       js: BASE + "shared/widget-kits/nav/ActiveRouteHtmlFit.js",
@@ -68,7 +68,7 @@
       js: BASE + "shared/widget-kits/nav/EditRouteHtmlFit.js",
       css: undefined,
       globalKey: "DyniEditRouteHtmlFit",
-      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "EditRouteLayout", "HtmlWidgetUtils"]
+      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "EditRouteLayout", "HtmlWidgetUtils", "TextFitMath"]
     },
     RoutePointsLayoutSizing: {
       js: BASE + "shared/widget-kits/nav/RoutePointsLayoutSizing.js",
@@ -218,6 +218,11 @@
       js: BASE + "shared/widget-kits/text/TextTileLayout.js",
       css: undefined,
       globalKey: "DyniTextTileLayout"
+    },
+    TextFitMath: {
+      js: BASE + "shared/widget-kits/text/TextFitMath.js",
+      css: undefined,
+      globalKey: "DyniTextFitMath"
     },
     ThemePresets: {
       js: BASE + "shared/theme/ThemePresets.js",

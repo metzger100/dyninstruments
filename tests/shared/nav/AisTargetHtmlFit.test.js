@@ -89,6 +89,9 @@ describe("AisTargetHtmlFit", function () {
         if (id === "LayoutRectMath") {
           return layoutRectMathModule;
         }
+        if (id === "TextFitMath") {
+          return loadFresh("shared/widget-kits/text/TextFitMath.js");
+        }
         if (id === "AisTargetLayoutGeometry") {
           return loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
         }

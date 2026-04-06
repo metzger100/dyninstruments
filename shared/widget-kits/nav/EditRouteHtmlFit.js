@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteHtmlFit - Per-box text-fit owner for edit-route HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ThemeResolver, RadialTextLayout, TextTileLayout, EditRouteLayout, HtmlWidgetUtils
+ * Depends: ThemeResolver, RadialTextLayout, TextTileLayout, EditRouteLayout, HtmlWidgetUtils, TextFitMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -172,16 +172,6 @@
     return toStyle(px, args && args.htmlUtils);
   }
 
-  function resolveSecondaryMaxPx(valuePx, valueRect) {
-    const safeValuePx = Number(valuePx);
-    if (Number.isFinite(safeValuePx) && safeValuePx > 0) {
-      return Math.max(1, Math.floor(safeValuePx * METRIC_SECONDARY_TO_VALUE_RATIO));
-    }
-    const rect = valueRect && typeof valueRect === "object" ? valueRect : {};
-    const baseValuePx = Math.max(1, Math.floor((Math.max(1, Number(rect.h) || 1)) * METRIC_VALUE_MAX_PX_RATIO));
-    return Math.max(1, Math.floor(baseValuePx * METRIC_SECONDARY_TO_VALUE_RATIO));
-  }
-
   function resolveNamePxRatio(mode) {
     if (mode === "flat") {
       return NAME_MAX_PX_RATIO.flat;
@@ -198,6 +188,7 @@
     const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
     const layoutApi = Helpers.getModule("EditRouteLayout").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+    const fitMath = Helpers.getModule("TextFitMath").create(def, Helpers);
 
     function compute(args) {
       const cfg = args || {};
@@ -296,7 +287,12 @@
           textFillScale: textFillScale,
           htmlUtils: htmlUtils
         });
-        const secondaryMaxPx = resolveSecondaryMaxPx(valuePx, valueRect);
+        const secondaryMaxPx = fitMath.resolveSecondaryMaxPx({
+          valuePx: valuePx,
+          valueRect: valueRect,
+          valueMaxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+          secondaryToValueRatio: METRIC_SECONDARY_TO_VALUE_RATIO
+        });
 
         fitOut.metrics[id] = {
           labelStyle: measureStyle({

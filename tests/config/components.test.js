@@ -107,6 +107,9 @@ describe("config/components.js", function () {
     expect(components.TextTileLayout.globalKey).toBe("DyniTextTileLayout");
     expect(components.TextTileLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextTileLayout.js");
     expect(components.TextTileLayout.deps).toBeUndefined();
+    expect(components.TextFitMath.globalKey).toBe("DyniTextFitMath");
+    expect(components.TextFitMath.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextFitMath.js");
+    expect(components.TextFitMath.deps).toBeUndefined();
     expect(components.LayoutRectMath.globalKey).toBe("DyniLayoutRectMath");
     expect(components.LayoutRectMath.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/layout/LayoutRectMath.js");
     expect(components.LayoutRectMath.deps).toBeUndefined();
@@ -133,7 +136,7 @@ describe("config/components.js", function () {
     expect(components.EditRouteLayoutGeometry.deps).toEqual(["LayoutRectMath", "EditRouteLayoutMath"]);
     expect(components.EditRouteHtmlFit.globalKey).toBe("DyniEditRouteHtmlFit");
     expect(components.EditRouteHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteHtmlFit.js");
-    expect(components.EditRouteHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "EditRouteLayout", "HtmlWidgetUtils"]);
+    expect(components.EditRouteHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "EditRouteLayout", "HtmlWidgetUtils", "TextFitMath"]);
     expect(components.EditRouteRenderModel.globalKey).toBe("DyniEditRouteRenderModel");
     expect(components.EditRouteRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteRenderModel.js");
     expect(components.EditRouteRenderModel.css).toBeUndefined();
@@ -161,7 +164,7 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils"]);
     expect(components.AisTargetHtmlFit.globalKey).toBe("DyniAisTargetHtmlFit");
     expect(components.AisTargetHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetHtmlFit.js");
-    expect(components.AisTargetHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils"]);
+    expect(components.AisTargetHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils", "TextFitMath"]);
     expect(components.RoutePointsHtmlFit.globalKey).toBe("DyniRoutePointsHtmlFit");
     expect(components.RoutePointsHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsHtmlFit.js");
     expect(components.RoutePointsHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "RoutePointsLayout", "HtmlWidgetUtils"]);

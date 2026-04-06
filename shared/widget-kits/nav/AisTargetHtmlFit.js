@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetHtmlFit - Text-fit and accent-style owner for AIS target HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ThemeResolver, RadialTextLayout, TextTileLayout, AisTargetLayout, HtmlWidgetUtils
+ * Depends: ThemeResolver, RadialTextLayout, TextTileLayout, AisTargetLayout, HtmlWidgetUtils, TextFitMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -154,16 +154,6 @@
     return FRONT_MAX_PX_RATIO.normal;
   }
 
-  function resolveSecondaryMaxPx(valuePx, valueRect) {
-    const safeValuePx = Number(valuePx);
-    if (Number.isFinite(safeValuePx) && safeValuePx > 0) {
-      return Math.max(1, Math.floor(safeValuePx * METRIC_SECONDARY_TO_VALUE_RATIO));
-    }
-    const rect = valueRect && typeof valueRect === "object" ? valueRect : {};
-    const baseValuePx = Math.max(1, Math.floor((Math.max(1, Number(rect.h) || 1)) * METRIC_VALUE_MAX_PX_RATIO));
-    return Math.max(1, Math.floor(baseValuePx * METRIC_SECONDARY_TO_VALUE_RATIO));
-  }
-
   function resolveMetricRects(box, mode) {
     const tile = box && typeof box === "object" ? box : null;
     if (!tile) {
@@ -193,6 +183,7 @@
     const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
     const layoutApi = Helpers.getModule("AisTargetLayout").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+    const fitMath = Helpers.getModule("TextFitMath").create(def, Helpers);
 
     function compute(args) {
       const cfg = args || {};
@@ -298,7 +289,12 @@
           weight: valueWeight,
           textFillScale: textFillScale
         }, htmlUtils, tileLayout);
-        const secondaryMaxPx = resolveSecondaryMaxPx(valuePx, rects.valueRect);
+        const secondaryMaxPx = fitMath.resolveSecondaryMaxPx({
+          valuePx: valuePx,
+          valueRect: rects.valueRect,
+          valueMaxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+          secondaryToValueRatio: METRIC_SECONDARY_TO_VALUE_RATIO
+        });
 
         out.metrics[id] = {
           captionStyle: measureStyle({
