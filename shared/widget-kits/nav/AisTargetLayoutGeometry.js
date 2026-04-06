@@ -12,8 +12,8 @@
 
   const STACKED_METRIC_INSET_X_RATIO = 0.034;
   const STACKED_METRIC_INSET_Y_RATIO = 0.048;
-  const INLINE_VALUE_GAP_RATIO_NORMAL = 0.016;
-  const INLINE_VALUE_GAP_RATIO_HIGH = 0.012;
+  const INLINE_VALUE_GAP_RATIO_NORMAL = 0.013;
+  const INLINE_VALUE_GAP_RATIO_HIGH = 0.009;
   const INLINE_SETTINGS_BY_MODE = {
     normal: {
       labelShare: 0.29,
@@ -23,12 +23,12 @@
       unitMinPx: 8,
       unitMaxRatio: 0.34,
       gapRatio: INLINE_VALUE_GAP_RATIO_NORMAL,
-      padXRatio: 0.022,
-      padYRatio: 0.022,
+      padXRatio: 0.018,
+      padYRatio: 0.018,
       padXFloorPx: 1,
       padYFloorPx: 1,
-      maxPadXTileRatio: 0.1,
-      maxPadYTileRatio: 0.16
+      maxPadXTileRatio: 0.085,
+      maxPadYTileRatio: 0.13
     },
     high: {
       labelShare: 0.24,
@@ -38,12 +38,12 @@
       unitMinPx: 7,
       unitMaxRatio: 0.3,
       gapRatio: INLINE_VALUE_GAP_RATIO_HIGH,
-      padXRatio: 0.018,
-      padYRatio: 0.018,
+      padXRatio: 0.013,
+      padYRatio: 0.013,
       padXFloorPx: 1,
       padYFloorPx: 1,
-      maxPadXTileRatio: 0.09,
-      maxPadYTileRatio: 0.14
+      maxPadXTileRatio: 0.075,
+      maxPadYTileRatio: 0.11
     }
   };
 

@@ -46,7 +46,6 @@ describe("AisTargetMarkup", function () {
       },
       nameText: "Poseidon",
       frontText: "Front",
-      frontInitialText: "F",
       placeholderText: "No AIS",
       visibleMetricIds: ["dst", "cpa", "tcpa", "brg"],
       metrics: {
@@ -60,7 +59,6 @@ describe("AisTargetMarkup", function () {
 
   function makeFit(overrides) {
     const out = Object.assign({
-      frontInitialStyle: "font-size:16px;",
       nameStyle: "font-size:13px;",
       frontStyle: "font-size:11px;",
       placeholderStyle: "font-size:12px;",

@@ -292,7 +292,6 @@
         dispatchMmsi: normalizeText(domain.mmsiNormalized),
         nameText: normalizeText(domain.nameOrMmsi),
         frontText: normalizeText(domain.frontText),
-        frontInitialText: normalizeText(domain.frontInitial),
         placeholderText: PLACEHOLDER_TEXT,
         metrics: metrics,
         metricVisibility: metricVisibility,

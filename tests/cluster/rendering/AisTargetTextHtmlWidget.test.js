@@ -7,7 +7,6 @@ describe("AisTargetTextHtmlWidget", function () {
     const opts = options || {};
     const fitCompute = opts.fitCompute || vi.fn(function () {
       return {
-        frontInitialStyle: "font-size:14px;",
         nameStyle: "font-size:12px;",
         frontStyle: "font-size:10px;",
         placeholderStyle: "font-size:11px;",
@@ -129,7 +128,6 @@ describe("AisTargetTextHtmlWidget", function () {
         colorRole: "warning",
         nameOrMmsi: "Poseidon",
         frontText: "Front",
-        frontInitial: "F",
         distance: 4.2,
         cpa: 0.7,
         tcpa: 42,
@@ -214,7 +212,6 @@ describe("AisTargetTextHtmlWidget", function () {
     const props = makeProps({
       domain: {
         showTcpaBranch: false,
-        frontInitial: "B",
         frontText: "Back"
       }
     });

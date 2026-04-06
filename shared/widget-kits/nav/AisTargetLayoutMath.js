@@ -56,14 +56,15 @@
     return out;
   }
 
-  function resolveIdentityBandHeights(contentHeight, gapPx, nameShare, frontShare, frontMinHeight) {
+  function resolveIdentityBandHeights(contentHeight, identityGapPx, identityMetricsGapPx, nameShare, frontShare, frontMinHeight) {
     const safeContentHeight = Math.max(1, Math.floor(Number(contentHeight) || 1));
-    const safeGap = Math.max(0, Math.floor(Number(gapPx) || 0));
+    const safeIdentityGap = Math.max(0, Math.floor(Number(identityGapPx) || 0));
+    const safeIdentityMetricsGap = Math.max(0, Math.floor(Number(identityMetricsGapPx) || 0));
     const safeNameShare = clampNumber(nameShare, 0.05, 0.9, 0.2);
     const safeFrontShare = clampNumber(frontShare, 0.05, 0.9, 0.16);
     const nameHeight = Math.max(1, Math.floor(safeContentHeight * safeNameShare));
-    const bodyHeight = Math.max(1, safeContentHeight - nameHeight - safeGap);
-    const frontAndMetricsHeight = Math.max(1, bodyHeight - safeGap);
+    const bodyHeight = Math.max(1, safeContentHeight - nameHeight - safeIdentityGap);
+    const frontAndMetricsHeight = Math.max(1, bodyHeight - safeIdentityMetricsGap);
     const maxFrontHeight = Math.max(1, frontAndMetricsHeight - 1);
     const boundedFrontMin = Math.min(maxFrontHeight, Math.max(1, Math.floor(Number(frontMinHeight) || 1)));
     let frontHeight = Math.max(boundedFrontMin, Math.floor(bodyHeight * safeFrontShare));

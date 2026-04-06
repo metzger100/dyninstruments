@@ -15,21 +15,13 @@
   const FRONT_MAX_PX_RATIO = { flat: 0.52, normal: 0.66, high: 0.7 };
   const METRIC_VALUE_MAX_PX_RATIO = 0.9;
   const METRIC_SECONDARY_TO_VALUE_RATIO = 0.8;
-
-  function toObject(value) {
-    return value && typeof value === "object" ? value : {};
-  }
-
-  function toText(value) {
-    return value == null ? "" : String(value);
-  }
-
+  function toObject(value) { return value && typeof value === "object" ? value : {}; }
+  function toText(value) { return value == null ? "" : String(value); }
   function parseFontPx(font) {
     const source = String(font || "");
     const match = source.match(/(\d+(?:\.\d+)?)px/);
     return match ? Number(match[1]) : 12;
   }
-
   function createApproximateMeasureContext() {
     return {
       font: "700 12px sans-serif",
@@ -39,7 +31,6 @@
       }
     };
   }
-
   function resolveMeasureContext(hostContext, targetEl) {
     const ctxStore = hostContext && typeof hostContext === "object"
       ? hostContext
@@ -63,19 +54,13 @@
         canvasContext = probe.getContext("2d");
       }
     }
-
     const resolved = canvasContext || createApproximateMeasureContext();
     if (ctxStore) {
       ctxStore[MEASURE_CTX_KEY] = resolved;
     }
     return resolved;
   }
-
-  function resolveRootElement(Helpers, targetEl) {
-    const candidate = Helpers.resolveWidgetRoot(targetEl);
-    return candidate || targetEl;
-  }
-
+  function resolveRootElement(Helpers, targetEl) { return Helpers.resolveWidgetRoot(targetEl) || targetEl; }
   function toStyle(px, htmlUtils) {
     const n = htmlUtils.toFiniteNumber(px);
     if (!(n > 0)) {
@@ -83,7 +68,6 @@
     }
     return "font-size:" + Math.max(1, Math.floor(n)) + "px;";
   }
-
   function measurePx(args, htmlUtils, tileLayout) {
     const cfg = args || {};
     const rect = cfg.rect;
@@ -93,7 +77,6 @@
     if (!cfg.text) {
       return 0;
     }
-
     const explicitMaxPx = htmlUtils.toFiniteNumber(cfg.maxPx);
     const requestedMaxPx = explicitMaxPx > 0
       ? explicitMaxPx
@@ -109,19 +92,13 @@
       family: cfg.family,
       weight: cfg.weight
     });
-
     return htmlUtils.toFiniteNumber(fit && fit.px) || 0;
   }
-
-  function measureStyle(args, htmlUtils, tileLayout) {
-    return toStyle(measurePx(args, htmlUtils, tileLayout), htmlUtils);
-  }
-
+  function measureStyle(args, htmlUtils, tileLayout) { return toStyle(measurePx(args, htmlUtils, tileLayout), htmlUtils); }
   function resolveAccentStyle(model, tokens) {
     if (!model || model.hasAccent !== true) {
       return "";
     }
-
     const colorRole = model.colorRole;
     const aisTokens = tokens && tokens.colors && tokens.colors.ais ? tokens.colors.ais : null;
     const color = aisTokens && typeof aisTokens[colorRole] === "string"
@@ -130,10 +107,8 @@
     if (!color) {
       return "";
     }
-
     return "background-color:" + color + ";";
   }
-
   function resolveNameRatio(mode) {
     if (mode === "flat") {
       return NAME_MAX_PX_RATIO.flat;
@@ -143,7 +118,6 @@
     }
     return NAME_MAX_PX_RATIO.normal;
   }
-
   function resolveFrontRatio(mode) {
     if (mode === "flat") {
       return FRONT_MAX_PX_RATIO.flat;
@@ -153,7 +127,16 @@
     }
     return FRONT_MAX_PX_RATIO.normal;
   }
-
+  function usesSharedIdentityFit(layout) {
+    return !!layout
+      && typeof layout === "object"
+      && (layout.isVerticalCommitted === true || layout.mode === "normal" || layout.mode === "high");
+  }
+  function resolveSharedIdentityPx(namePxCandidate, frontPxCandidate) {
+    const namePx = Math.max(0, Number(namePxCandidate) || 0);
+    const frontPx = Math.max(0, Number(frontPxCandidate) || 0);
+    return (namePx > 0 && frontPx > 0) ? Math.min(namePx, frontPx) : Math.max(namePx, frontPx);
+  }
   function resolveStackedMetricBox(box) {
     const tile = box && typeof box === "object" ? box : null;
     if (!tile || !tile.captionRect || !tile.valueRect || !tile.unitRect) {
@@ -165,7 +148,6 @@
       unitRect: tile.unitRect
     };
   }
-
   function resolveInlineMetricBox(box) {
     const tile = box && typeof box === "object" ? box : null;
     if (!tile || !tile.labelRect || !tile.valueRect || !tile.unitRect) {
@@ -178,7 +160,6 @@
       unitRect: tile.unitRect
     };
   }
-
   function create(def, Helpers) {
     const theme = Helpers.getModule("ThemeResolver").create(def, Helpers);
     const textApi = Helpers.getModule("RadialTextLayout").create(def, Helpers);
@@ -186,7 +167,6 @@
     const layoutApi = Helpers.getModule("AisTargetLayout").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const fitMath = Helpers.getModule("TextFitMath").create(def, Helpers);
-
     function compute(args) {
       const cfg = args || {};
       const model = cfg.model || null;
@@ -195,7 +175,6 @@
       if (!model || !shellRect || !targetEl) {
         return null;
       }
-
       const rootEl = resolveRootElement(Helpers, targetEl);
       const tokens = theme.resolveForRoot(rootEl);
       const family = Helpers.resolveFontFamily(targetEl);
@@ -203,7 +182,6 @@
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
         return null;
       }
-
       const shellWidth = Math.max(1, Math.round(shellRect.width));
       const shellHeight = Math.max(1, Math.round(shellRect.height));
       const layout = model.layout || layoutApi.computeLayout({
@@ -218,16 +196,13 @@
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       const textFillScale = layout.responsive && layout.responsive.textFillScale;
-
       const out = {
-        frontInitialStyle: "",
         nameStyle: "",
         frontStyle: "",
         placeholderStyle: "",
         metrics: Object.create(null),
         accentStyle: resolveAccentStyle(model, tokens)
       };
-
       if (model.renderState === "placeholder") {
         out.placeholderStyle = measureStyle({
           rect: layout.placeholderRect,
@@ -242,34 +217,59 @@
         }, htmlUtils, tileLayout);
         return out;
       }
-
       if (model.renderState !== "data") {
         return out;
       }
-
-      out.nameStyle = measureStyle({
-        rect: layout.nameRect,
-        text: toText(model.nameText),
-        maxPxRatio: resolveNameRatio(model.mode),
-        textApi: textApi,
-        tileLayout: tileLayout,
-        ctx: measureCtx,
-        family: family,
-        weight: valueWeight,
-        textFillScale: textFillScale
-      }, htmlUtils, tileLayout);
-      out.frontStyle = measureStyle({
-        rect: layout.frontRect,
-        text: toText(model.frontText),
-        maxPxRatio: resolveFrontRatio(model.mode),
-        textApi: textApi,
-        tileLayout: tileLayout,
-        ctx: measureCtx,
-        family: family,
-        weight: labelWeight,
-        textFillScale: textFillScale
-      }, htmlUtils, tileLayout);
-
+      if (usesSharedIdentityFit(layout)) {
+        const namePxCandidate = measurePx({
+          rect: layout.nameRect,
+          text: toText(model.nameText),
+          maxPxRatio: resolveNameRatio(layout.mode),
+          textApi: textApi,
+          tileLayout: tileLayout,
+          ctx: measureCtx,
+          family: family,
+          weight: valueWeight,
+          textFillScale: textFillScale
+        }, htmlUtils, tileLayout);
+        const frontPxCandidate = measurePx({
+          rect: layout.frontRect,
+          text: toText(model.frontText),
+          maxPxRatio: resolveFrontRatio(layout.mode),
+          textApi: textApi,
+          tileLayout: tileLayout,
+          ctx: measureCtx,
+          family: family,
+          weight: labelWeight,
+          textFillScale: textFillScale
+        }, htmlUtils, tileLayout);
+        const identityStyle = toStyle(resolveSharedIdentityPx(namePxCandidate, frontPxCandidate), htmlUtils);
+        out.nameStyle = identityStyle;
+        out.frontStyle = identityStyle;
+      } else {
+        out.nameStyle = measureStyle({
+          rect: layout.nameRect,
+          text: toText(model.nameText),
+          maxPxRatio: resolveNameRatio(layout.mode),
+          textApi: textApi,
+          tileLayout: tileLayout,
+          ctx: measureCtx,
+          family: family,
+          weight: valueWeight,
+          textFillScale: textFillScale
+        }, htmlUtils, tileLayout);
+        out.frontStyle = measureStyle({
+          rect: layout.frontRect,
+          text: toText(model.frontText),
+          maxPxRatio: resolveFrontRatio(layout.mode),
+          textApi: textApi,
+          tileLayout: tileLayout,
+          ctx: measureCtx,
+          family: family,
+          weight: labelWeight,
+          textFillScale: textFillScale
+        }, htmlUtils, tileLayout);
+      }
       const metricIds = model.visibleMetricIds;
       const metrics = toObject(model.metrics);
       const isFlatMode = layout.mode === "flat";
@@ -387,12 +387,10 @@
 
       return out;
     }
-
     return {
       id: "AisTargetHtmlFit",
       compute: compute
     };
   }
-
   return { id: "AisTargetHtmlFit", create: create };
 }));

@@ -120,7 +120,6 @@ describe("AisTargetHtmlFit", function () {
       colorRole: "warning",
       nameText: "Poseidon",
       frontText: "Front",
-      frontInitialText: "F",
       visibleMetricIds: ["dst", "cpa", "tcpa", "brg"],
       metrics: {
         dst: { captionText: "DST", valueText: "4.2", unitText: "nm" },
@@ -201,7 +200,7 @@ describe("AisTargetHtmlFit", function () {
     expectStyleFormat(out.placeholderStyle);
     expect(out.nameStyle).toBe("");
     expect(out.frontStyle).toBe("");
-    expect(out.frontInitialStyle).toBe("");
+    expect(Object.prototype.hasOwnProperty.call(out, "frontInitialStyle")).toBe(false);
     expect(Object.keys(out.metrics)).toEqual([]);
     expect(out.accentStyle).toBe("");
   });
@@ -236,6 +235,45 @@ describe("AisTargetHtmlFit", function () {
       expect(extractPx(out.metrics[id].valueStyle)).toBeGreaterThan(3);
     });
     expect(out.accentStyle).toBe("background-color:#66b8ff;");
+  });
+
+  it("uses a shared identity font size in normal, high, and committed vertical modes", function () {
+    const h = createHarness();
+    const targetEl = document.createElement("div");
+    const hostContext = { __dyniAisTargetTextMeasureCtx: createMeasureContext() };
+    const normalShell = { width: 320, height: 190 };
+    const highShell = { width: 180, height: 320 };
+    const verticalShell = { width: 220, height: 120 };
+
+    const normalOut = h.fit.compute({
+      model: buildModel(h, normalShell, { mode: "normal" }),
+      targetEl,
+      hostContext,
+      shellRect: normalShell
+    });
+    const highOut = h.fit.compute({
+      model: buildModel(h, highShell, { mode: "high" }),
+      targetEl,
+      hostContext,
+      shellRect: highShell
+    });
+    const verticalOut = h.fit.compute({
+      model: buildModel(h, verticalShell, {
+        mode: "normal",
+        isVerticalCommitted: true,
+        effectiveLayoutHeight: 300
+      }),
+      targetEl,
+      hostContext,
+      shellRect: verticalShell
+    });
+
+    expect(extractPx(normalOut.nameStyle)).toBeGreaterThan(0);
+    expect(extractPx(highOut.nameStyle)).toBeGreaterThan(0);
+    expect(extractPx(verticalOut.nameStyle)).toBeGreaterThan(0);
+    expect(extractPx(normalOut.nameStyle)).toBe(extractPx(normalOut.frontStyle));
+    expect(extractPx(highOut.nameStyle)).toBe(extractPx(highOut.frontStyle));
+    expect(extractPx(verticalOut.nameStyle)).toBe(extractPx(verticalOut.frontStyle));
   });
 
   it("fits normal/high values against valueTextRect while flat uses stacked valueRect", function () {

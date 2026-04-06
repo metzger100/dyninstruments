@@ -63,6 +63,7 @@ describe("AisTargetLayout", function () {
     expect(out.mode).toBe("flat");
     expect(out.nameRect).toBeTruthy();
     expect(out.frontRect).toBeTruthy();
+    expect(Object.prototype.hasOwnProperty.call(out, "frontInitialRect")).toBe(false);
     expect(out.metricVisibility).toEqual({ dst: true, cpa: true, tcpa: true, brg: true });
     expect(out.metricOrder).toEqual(["dst", "cpa", "tcpa", "brg"]);
     expect(out.flatMetricRows).toBeUndefined();
@@ -199,7 +200,41 @@ describe("AisTargetLayout", function () {
     expect(withAccent.contentRect.x).toBeGreaterThan(withoutAccent.contentRect.x);
     expect(withAccent.contentRect.w).toBeLessThan(withoutAccent.contentRect.w);
     expect(withAccent.accentRect).toBeTruthy();
-    expect(withAccent.insets.accentReserve).toBeGreaterThan(0);
+    expect(withAccent.accentRect.w).toBeGreaterThanOrEqual(6);
+    expect(withAccent.insets.accentGap).toBeGreaterThanOrEqual(3);
+    expect(withAccent.insets.accentReserve).toBeGreaterThan(withoutAccent.insets.accentReserve);
+  });
+
+  it("keeps identity spacing independent from denser metric grid spacing", function () {
+    const layout = createLayout();
+    const normal = layout.computeLayout({
+      mode: "normal",
+      W: 320,
+      H: 200,
+      renderState: "data",
+      showTcpaBranch: true
+    });
+    const high = layout.computeLayout({
+      mode: "high",
+      W: 180,
+      H: 320,
+      renderState: "data",
+      showTcpaBranch: true
+    });
+
+    const normalIdentityGap = normal.frontRect.y - (normal.nameRect.y + normal.nameRect.h);
+    const normalMetricRowGap = normal.metricBoxes.tcpa.y - (normal.metricBoxes.dst.y + normal.metricBoxes.dst.h);
+    const highIdentityGap = high.frontRect.y - (high.nameRect.y + high.nameRect.h);
+    const highMetricRowGap = high.metricBoxes.cpa.y - (high.metricBoxes.dst.y + high.metricBoxes.dst.h);
+
+    expect(normalIdentityGap).toBe(normal.insets.identityGap);
+    expect(highIdentityGap).toBe(high.insets.identityGap);
+    expect(normalMetricRowGap).toBe(normal.insets.metricGridGap);
+    expect(highMetricRowGap).toBe(high.insets.metricGridGap);
+    expect(normalIdentityGap).toBeGreaterThanOrEqual(normalMetricRowGap);
+    expect(highIdentityGap).toBeGreaterThanOrEqual(highMetricRowGap);
+    expect(normal.insets.identityMetricsGap).toBeGreaterThanOrEqual(normal.insets.metricGridGap);
+    expect(high.insets.identityMetricsGap).toBeGreaterThanOrEqual(high.insets.metricGridGap);
   });
 
   it("exposes committed vertical shell profile with 7/8 ratio and 8em min-height", function () {

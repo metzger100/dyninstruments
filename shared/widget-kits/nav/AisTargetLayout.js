@@ -10,19 +10,25 @@
 }(this, function () {
   "use strict";
   const METRIC_ORDER = ["dst", "cpa", "tcpa", "brg"];
-  const DEFAULT_PAD_X_RATIO = 0.03;
-  const DEFAULT_PAD_Y_RATIO = 0.025;
-  const DEFAULT_GAP_RATIO = 0.02;
-  const HIGH_PAD_X_RATIO = 0.023;
-  const HIGH_PAD_Y_RATIO = 0.018;
-  const HIGH_GAP_RATIO = 0.012;
-  const VERTICAL_PAD_X_RATIO = 0.021;
-  const VERTICAL_PAD_Y_RATIO = 0.016;
-  const VERTICAL_GAP_RATIO = 0.01;
-  const ACCENT_WIDTH_RATIO = 0.026;
-  const ACCENT_GAP_RATIO = 0.016;
-  const ACCENT_WIDTH_FLOOR_PX = 2;
-  const ACCENT_GAP_FLOOR_PX = 2;
+  const DEFAULT_SHELL_PAD_X_RATIO = 0.026;
+  const DEFAULT_SHELL_PAD_Y_RATIO = 0.021;
+  const DEFAULT_IDENTITY_GAP_RATIO = 0.02;
+  const DEFAULT_IDENTITY_METRICS_GAP_RATIO = 0.015;
+  const DEFAULT_METRIC_GRID_GAP_RATIO = 0.014;
+  const HIGH_SHELL_PAD_X_RATIO = 0.02;
+  const HIGH_SHELL_PAD_Y_RATIO = 0.015;
+  const HIGH_IDENTITY_GAP_RATIO = 0.012;
+  const HIGH_IDENTITY_METRICS_GAP_RATIO = 0.009;
+  const HIGH_METRIC_GRID_GAP_RATIO = 0.008;
+  const VERTICAL_SHELL_PAD_X_RATIO = 0.018;
+  const VERTICAL_SHELL_PAD_Y_RATIO = 0.013;
+  const VERTICAL_IDENTITY_GAP_RATIO = 0.01;
+  const VERTICAL_IDENTITY_METRICS_GAP_RATIO = 0.008;
+  const VERTICAL_METRIC_GRID_GAP_RATIO = 0.007;
+  const ACCENT_WIDTH_RATIO = 0.078;
+  const ACCENT_GAP_RATIO = 0.019;
+  const ACCENT_WIDTH_FLOOR_PX = 7;
+  const ACCENT_GAP_FLOOR_PX = 3;
   const FLAT_IDENTITY_SHARE = 0.26;
   const NORMAL_NAME_BAND_SHARE = 0.22;
   const HIGH_NAME_BAND_SHARE = 0.12;
@@ -112,15 +118,29 @@
       const responsive = profileApi.computeProfile(safeW, anchorHeight, { scales: RESPONSIVE_SCALES });
       const isVertical = isVerticalCommitted === true;
       const isHigh = mode === "high";
-      const padXRatio = isVertical ? VERTICAL_PAD_X_RATIO : (isHigh ? HIGH_PAD_X_RATIO : DEFAULT_PAD_X_RATIO);
-      const padYRatio = isVertical ? VERTICAL_PAD_Y_RATIO : (isHigh ? HIGH_PAD_Y_RATIO : DEFAULT_PAD_Y_RATIO);
-      const gapRatio = isVertical ? VERTICAL_GAP_RATIO : (isHigh ? HIGH_GAP_RATIO : DEFAULT_GAP_RATIO);
+      const shellPadXRatio = isVertical
+        ? VERTICAL_SHELL_PAD_X_RATIO
+        : (isHigh ? HIGH_SHELL_PAD_X_RATIO : DEFAULT_SHELL_PAD_X_RATIO);
+      const shellPadYRatio = isVertical
+        ? VERTICAL_SHELL_PAD_Y_RATIO
+        : (isHigh ? HIGH_SHELL_PAD_Y_RATIO : DEFAULT_SHELL_PAD_Y_RATIO);
+      const identityGapRatio = isVertical
+        ? VERTICAL_IDENTITY_GAP_RATIO
+        : (isHigh ? HIGH_IDENTITY_GAP_RATIO : DEFAULT_IDENTITY_GAP_RATIO);
+      const identityMetricsGapRatio = isVertical
+        ? VERTICAL_IDENTITY_METRICS_GAP_RATIO
+        : (isHigh ? HIGH_IDENTITY_METRICS_GAP_RATIO : DEFAULT_IDENTITY_METRICS_GAP_RATIO);
+      const metricGridGapRatio = isVertical
+        ? VERTICAL_METRIC_GRID_GAP_RATIO
+        : (isHigh ? HIGH_METRIC_GRID_GAP_RATIO : DEFAULT_METRIC_GRID_GAP_RATIO);
       const accentWidth = hasAccent === true ? profileApi.computeInsetPx(responsive, ACCENT_WIDTH_RATIO, ACCENT_WIDTH_FLOOR_PX) : 0;
       const accentGap = hasAccent === true ? profileApi.computeInsetPx(responsive, ACCENT_GAP_RATIO, ACCENT_GAP_FLOOR_PX) : 0;
       return {
-        padX: profileApi.computeInsetPx(responsive, padXRatio, 1),
-        padY: profileApi.computeInsetPx(responsive, padYRatio, 1),
-        gap: profileApi.computeInsetPx(responsive, gapRatio, 1),
+        padX: profileApi.computeInsetPx(responsive, shellPadXRatio, 1),
+        padY: profileApi.computeInsetPx(responsive, shellPadYRatio, 1),
+        identityGap: profileApi.computeInsetPx(responsive, identityGapRatio, 1),
+        identityMetricsGap: profileApi.computeInsetPx(responsive, identityMetricsGapRatio, 1),
+        metricGridGap: profileApi.computeInsetPx(responsive, metricGridGapRatio, 1),
         accentWidth: accentWidth,
         accentGap: accentGap,
         accentReserve: accentWidth + accentGap,
@@ -234,7 +254,6 @@
         identityRect: null,
         nameRect: null,
         frontRect: null,
-        frontInitialRect: null,
         metricsRect: null,
         metricBoxes: Object.create(null),
         metricVisibility: metricVisibility,
@@ -259,28 +278,28 @@
           0.42
         );
         const identityWidth = Math.max(1, Math.floor(contentRect.w * identityShare));
-        const metricsWidth = Math.max(1, contentRect.w - identityWidth - insets.gap);
+        const metricsWidth = Math.max(1, contentRect.w - identityWidth - insets.identityMetricsGap);
         const identityRect = makeRect(contentRect.x, contentRect.y, identityWidth, contentRect.h);
         const metricsRect = makeRect(
-          identityRect.x + identityRect.w + insets.gap,
+          identityRect.x + identityRect.w + insets.identityMetricsGap,
           contentRect.y,
           metricsWidth,
           contentRect.h
         );
         const nameHeight = Math.max(1, Math.floor(identityRect.h * 0.58));
-        const frontHeight = Math.max(1, identityRect.h - nameHeight - insets.gap);
+        const frontHeight = Math.max(1, identityRect.h - nameHeight - insets.identityGap);
 
         out.identityRect = identityRect;
         out.nameRect = makeRect(identityRect.x, identityRect.y, identityRect.w, nameHeight);
         out.frontRect = makeRect(
           identityRect.x,
-          out.nameRect.y + out.nameRect.h + insets.gap,
+          out.nameRect.y + out.nameRect.h + insets.identityGap,
           identityRect.w,
           frontHeight
         );
         out.metricsRect = metricsRect;
 
-        fillStackedMetricBoxes(out, splitRow(metricsRect, insets.gap, 4, makeRect), insets.responsive);
+        fillStackedMetricBoxes(out, splitRow(metricsRect, insets.metricGridGap, 4, makeRect), insets.responsive);
         return finalize(out);
       }
 
@@ -292,22 +311,29 @@
           0.33
         );
         const frontMinHeight = profileApi.computeInsetPx(insets.responsive, NORMAL_FRONT_MIN_HEIGHT_RATIO, 2);
-        const bandHeights = resolveIdentityBandHeights(contentRect.h, insets.gap, nameShare, NORMAL_FRONT_SHARE, frontMinHeight);
+        const bandHeights = resolveIdentityBandHeights(
+          contentRect.h,
+          insets.identityGap,
+          insets.identityMetricsGap,
+          nameShare,
+          NORMAL_FRONT_SHARE,
+          frontMinHeight
+        );
         const nameHeight = bandHeights.nameHeight;
         const frontHeight = bandHeights.frontHeight;
         const metricsHeight = bandHeights.metricsHeight;
         const nameRect = makeRect(contentRect.x, contentRect.y, contentRect.w, nameHeight);
-        const frontRect = makeRect(contentRect.x, nameRect.y + nameRect.h + insets.gap, contentRect.w, frontHeight);
-        const metricsRect = makeRect(contentRect.x, frontRect.y + frontRect.h + insets.gap, contentRect.w, metricsHeight);
+        const frontRect = makeRect(contentRect.x, nameRect.y + nameRect.h + insets.identityGap, contentRect.w, frontHeight);
+        const metricsRect = makeRect(contentRect.x, frontRect.y + frontRect.h + insets.identityMetricsGap, contentRect.w, metricsHeight);
 
-        out.identityRect = makeRect(nameRect.x, nameRect.y, nameRect.w, nameRect.h + insets.gap + frontRect.h);
+        out.identityRect = makeRect(nameRect.x, nameRect.y, nameRect.w, nameRect.h + insets.identityGap + frontRect.h);
         out.nameRect = nameRect;
         out.frontRect = frontRect;
         out.metricsRect = metricsRect;
 
-        const metricRows = splitStack(metricsRect, insets.gap, 2, makeRect);
-        const rowA = splitRow(metricRows[0], insets.gap, 2, makeRect);
-        const rowB = splitRow(metricRows[1], insets.gap, 2, makeRect);
+        const metricRows = splitStack(metricsRect, insets.metricGridGap, 2, makeRect);
+        const rowA = splitRow(metricRows[0], insets.metricGridGap, 2, makeRect);
+        const rowB = splitRow(metricRows[1], insets.metricGridGap, 2, makeRect);
         fillInlineMetricBoxes(out, [rowA[0], rowA[1], rowB[0], rowB[1]], insets.responsive, mode);
         return finalize(out);
       }
@@ -319,20 +345,27 @@
         0.23
       );
       const frontMinHeight = profileApi.computeInsetPx(insets.responsive, HIGH_FRONT_MIN_HEIGHT_RATIO, 2);
-      const bandHeights = resolveIdentityBandHeights(contentRect.h, insets.gap, nameShare, HIGH_FRONT_SHARE, frontMinHeight);
+      const bandHeights = resolveIdentityBandHeights(
+        contentRect.h,
+        insets.identityGap,
+        insets.identityMetricsGap,
+        nameShare,
+        HIGH_FRONT_SHARE,
+        frontMinHeight
+      );
       const nameHeight = bandHeights.nameHeight;
       const frontHeight = bandHeights.frontHeight;
       const metricsHeight = bandHeights.metricsHeight;
       const nameRect = makeRect(contentRect.x, contentRect.y, contentRect.w, nameHeight);
-      const frontRect = makeRect(contentRect.x, nameRect.y + nameRect.h + insets.gap, contentRect.w, frontHeight);
-      const metricsRect = makeRect(contentRect.x, frontRect.y + frontRect.h + insets.gap, contentRect.w, metricsHeight);
+      const frontRect = makeRect(contentRect.x, nameRect.y + nameRect.h + insets.identityGap, contentRect.w, frontHeight);
+      const metricsRect = makeRect(contentRect.x, frontRect.y + frontRect.h + insets.identityMetricsGap, contentRect.w, metricsHeight);
 
-      out.identityRect = makeRect(nameRect.x, nameRect.y, nameRect.w, nameRect.h + insets.gap + frontRect.h);
+      out.identityRect = makeRect(nameRect.x, nameRect.y, nameRect.w, nameRect.h + insets.identityGap + frontRect.h);
       out.nameRect = nameRect;
       out.frontRect = frontRect;
       out.metricsRect = metricsRect;
 
-      fillInlineMetricBoxes(out, splitStack(metricsRect, insets.gap, 4, makeRect), insets.responsive, mode);
+      fillInlineMetricBoxes(out, splitStack(metricsRect, insets.metricGridGap, 4, makeRect), insets.responsive, mode);
       return finalize(out);
     }
 

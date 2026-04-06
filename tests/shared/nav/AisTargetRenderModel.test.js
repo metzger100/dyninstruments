@@ -67,7 +67,6 @@ describe("AisTargetRenderModel", function () {
         showTcpaBranch: true,
         nameOrMmsi: "Poseidon",
         frontText: "Front",
-        frontInitial: "F",
         distance: 4.2,
         cpa: 0.7,
         tcpa: 30,
@@ -122,6 +121,9 @@ describe("AisTargetRenderModel", function () {
     expect(model.inlineGeometry.metricStyles.cpa.valueRowStyle).toContain("grid-template-columns:");
     expect(model.layout.accentRect).toBeTruthy();
     expect(model.layout.insets.accentReserve).toBeGreaterThan(0);
+    expect(model.layout.accentRect.w).toBeGreaterThanOrEqual(6);
+    expect(model.layout.insets.identityGap).toBeGreaterThanOrEqual(model.layout.insets.metricGridGap);
+    expect(Object.prototype.hasOwnProperty.call(model, "frontInitialText")).toBe(false);
     expect(model.metrics.dst.valueText).toBe("formatDistance|4.2|nm");
     expect(model.metrics.cpa.valueText).toBe("formatDistance|0.7|nm");
     expect(model.metrics.tcpa.valueText).toBe("formatDecimal|0.5|3,2");

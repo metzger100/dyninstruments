@@ -82,7 +82,6 @@
 
     function buildDefaultFit() {
       return {
-        frontInitialStyle: "",
         nameStyle: "",
         frontStyle: "",
         placeholderStyle: "",
