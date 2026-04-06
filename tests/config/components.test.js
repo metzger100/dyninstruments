@@ -121,7 +121,15 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
     expect(components.AisTargetLayout.globalKey).toBe("DyniAisTargetLayout");
     expect(components.AisTargetLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetLayout.js");
-    expect(components.AisTargetLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath", "AisTargetLayoutGeometry"]);
+    expect(components.AisTargetLayout.deps).toEqual([
+      "ResponsiveScaleProfile",
+      "LayoutRectMath",
+      "AisTargetLayoutGeometry",
+      "AisTargetLayoutMath"
+    ]);
+    expect(components.AisTargetLayoutMath.globalKey).toBe("DyniAisTargetLayoutMath");
+    expect(components.AisTargetLayoutMath.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetLayoutMath.js");
+    expect(components.AisTargetLayoutMath.deps).toBeUndefined();
     expect(components.AisTargetLayoutGeometry.globalKey).toBe("DyniAisTargetLayoutGeometry");
     expect(components.AisTargetLayoutGeometry.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetLayoutGeometry.js");
     expect(components.AisTargetLayoutGeometry.deps).toBeUndefined();

@@ -204,6 +204,9 @@ Sizing discipline:
   - `normal`/`high`: fit value text first against `valueTextRect` (inside `valueRect`)
   - derive caption/unit max size proportionally from fitted value size
   - `normal`/`high`: fit label and unit against `labelRect` and `unitRect`
+- Accent strip thickness and accent-to-content spacing are layout-owned with responsive minimum floors; CSS remains skin/fallback only.
+- `normal`/`high` identity layout enforces a minimum front/status band height before metrics allocation, so status text stays legible in compact shells.
+- Metric tile inset policy is split by mode family: stacked (`flat`) keeps its original inset rhythm, inline (`normal`/`high`) uses denser tile-aware insets for higher data density.
 - `normal`/`high` inline rows now bias more width to numeric value text (especially in `high`) to avoid `DCPA`/`TCPA` clipping while improving legibility.
 - Committed vertical and `high` modes reduce non-data whitespace (name/front band + gaps/padding) to increase information density.
 - No flat `2x2` fallback is used; flat remains `1x4` and clipping prevention is handled by geometry + fit allocation.

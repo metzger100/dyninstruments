@@ -27,6 +27,8 @@ describe("AisTargetRenderModel", function () {
             moduleCache[id] = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
           } else if (id === "AisTargetLayoutGeometry") {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
+          } else if (id === "AisTargetLayoutMath") {
+            moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
           } else {
             throw new Error("unexpected module: " + id);
           }

@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetLayout - Responsive geometry owner for AIS target HTML summary rendering
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, AisTargetLayoutGeometry
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, AisTargetLayoutGeometry, AisTargetLayoutMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -19,74 +19,30 @@
   const VERTICAL_PAD_X_RATIO = 0.021;
   const VERTICAL_PAD_Y_RATIO = 0.016;
   const VERTICAL_GAP_RATIO = 0.01;
-  const ACCENT_WIDTH_RATIO = 0.02;
-  const ACCENT_GAP_RATIO = 0.012;
+  const ACCENT_WIDTH_RATIO = 0.026;
+  const ACCENT_GAP_RATIO = 0.016;
+  const ACCENT_WIDTH_FLOOR_PX = 2;
+  const ACCENT_GAP_FLOOR_PX = 2;
   const FLAT_IDENTITY_SHARE = 0.26;
-  const NORMAL_NAME_BAND_SHARE = 0.24;
-  const HIGH_NAME_BAND_SHARE = 0.14;
-  const NORMAL_FRONT_SHARE = 0.15;
-  const HIGH_FRONT_SHARE = 0.1;
+  const NORMAL_NAME_BAND_SHARE = 0.22;
+  const HIGH_NAME_BAND_SHARE = 0.12;
+  const NORMAL_FRONT_SHARE = 0.19;
+  const HIGH_FRONT_SHARE = 0.16;
+  const NORMAL_FRONT_MIN_HEIGHT_RATIO = 0.095;
+  const HIGH_FRONT_MIN_HEIGHT_RATIO = 0.105;
   const VERTICAL_ASPECT_RATIO = { width: 7, height: 8 };
   const VERTICAL_MIN_HEIGHT = "8em";
-  const RESPONSIVE_SCALES = {
-    textFillScale: 1.18,
-    flatIdentityScale: 0.88,
-    normalNameScale: 0.9,
-    highNameScale: 0.78
-  };
-
-  function clampNumber(value, minValue, maxValue, defaultValue) {
-    const n = Number(value);
-    if (!Number.isFinite(n)) {
-      return defaultValue;
-    }
-    return Math.max(minValue, Math.min(maxValue, n));
-  }
-
-  function splitStack(rect, gapPx, count, makeRect) {
-    const out = [];
-    const safeCount = Math.max(1, count);
-    const totalGap = Math.max(0, safeCount - 1) * gapPx;
-    const usable = Math.max(0, rect.h - totalGap);
-    const base = Math.floor(usable / safeCount);
-    let y = rect.y;
-    let used = 0;
-
-    for (let i = 0; i < safeCount; i += 1) {
-      const remaining = usable - used;
-      const h = i === safeCount - 1 ? Math.max(0, remaining) : Math.max(0, base);
-      out.push(makeRect(rect.x, y, rect.w, h));
-      y += h + gapPx;
-      used += h;
-    }
-
-    return out;
-  }
-
-  function splitRow(rect, gapPx, count, makeRect) {
-    const out = [];
-    const safeCount = Math.max(1, count);
-    const totalGap = Math.max(0, safeCount - 1) * gapPx;
-    const usable = Math.max(0, rect.w - totalGap);
-    const base = Math.floor(usable / safeCount);
-    let x = rect.x;
-    let used = 0;
-
-    for (let i = 0; i < safeCount; i += 1) {
-      const remaining = usable - used;
-      const w = i === safeCount - 1 ? Math.max(0, remaining) : Math.max(0, base);
-      out.push(makeRect(x, rect.y, w, rect.h));
-      x += w + gapPx;
-      used += w;
-    }
-
-    return out;
-  }
+  const RESPONSIVE_SCALES = { textFillScale: 1.18, flatIdentityScale: 0.88, normalNameScale: 0.86, highNameScale: 0.72 };
 
   function create(def, Helpers) {
     const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
     const makeRect = Helpers.getModule("LayoutRectMath").create(def, Helpers).makeRect;
     const geometryApi = Helpers.getModule("AisTargetLayoutGeometry").create(def, Helpers);
+    const layoutMath = Helpers.getModule("AisTargetLayoutMath").create(def, Helpers);
+    const clampNumber = layoutMath.clampNumber;
+    const splitStack = layoutMath.splitStack;
+    const splitRow = layoutMath.splitRow;
+    const resolveIdentityBandHeights = layoutMath.resolveIdentityBandHeights;
 
     function computeVerticalShellProfile(args) {
       const cfg = args || {};
@@ -159,8 +115,8 @@
       const padXRatio = isVertical ? VERTICAL_PAD_X_RATIO : (isHigh ? HIGH_PAD_X_RATIO : DEFAULT_PAD_X_RATIO);
       const padYRatio = isVertical ? VERTICAL_PAD_Y_RATIO : (isHigh ? HIGH_PAD_Y_RATIO : DEFAULT_PAD_Y_RATIO);
       const gapRatio = isVertical ? VERTICAL_GAP_RATIO : (isHigh ? HIGH_GAP_RATIO : DEFAULT_GAP_RATIO);
-      const accentWidth = hasAccent === true ? profileApi.computeInsetPx(responsive, ACCENT_WIDTH_RATIO, 1) : 0;
-      const accentGap = hasAccent === true ? profileApi.computeInsetPx(responsive, ACCENT_GAP_RATIO, 1) : 0;
+      const accentWidth = hasAccent === true ? profileApi.computeInsetPx(responsive, ACCENT_WIDTH_RATIO, ACCENT_WIDTH_FLOOR_PX) : 0;
+      const accentGap = hasAccent === true ? profileApi.computeInsetPx(responsive, ACCENT_GAP_RATIO, ACCENT_GAP_FLOOR_PX) : 0;
       return {
         padX: profileApi.computeInsetPx(responsive, padXRatio, 1),
         padY: profileApi.computeInsetPx(responsive, padYRatio, 1),
@@ -332,13 +288,14 @@
         const nameShare = profileApi.scaleShare(
           NORMAL_NAME_BAND_SHARE,
           insets.responsive.normalNameScale,
-          0.18,
-          0.36
+          0.16,
+          0.33
         );
-        const nameHeight = Math.max(1, Math.floor(contentRect.h * nameShare));
-        const bodyHeight = Math.max(1, contentRect.h - nameHeight - insets.gap);
-        const frontHeight = Math.max(1, Math.floor(bodyHeight * NORMAL_FRONT_SHARE));
-        const metricsHeight = Math.max(1, bodyHeight - frontHeight - insets.gap);
+        const frontMinHeight = profileApi.computeInsetPx(insets.responsive, NORMAL_FRONT_MIN_HEIGHT_RATIO, 2);
+        const bandHeights = resolveIdentityBandHeights(contentRect.h, insets.gap, nameShare, NORMAL_FRONT_SHARE, frontMinHeight);
+        const nameHeight = bandHeights.nameHeight;
+        const frontHeight = bandHeights.frontHeight;
+        const metricsHeight = bandHeights.metricsHeight;
         const nameRect = makeRect(contentRect.x, contentRect.y, contentRect.w, nameHeight);
         const frontRect = makeRect(contentRect.x, nameRect.y + nameRect.h + insets.gap, contentRect.w, frontHeight);
         const metricsRect = makeRect(contentRect.x, frontRect.y + frontRect.h + insets.gap, contentRect.w, metricsHeight);
@@ -358,13 +315,14 @@
       const nameShare = profileApi.scaleShare(
         HIGH_NAME_BAND_SHARE,
         insets.responsive.highNameScale,
-        0.14,
-        0.28
+        0.11,
+        0.23
       );
-      const nameHeight = Math.max(1, Math.floor(contentRect.h * nameShare));
-      const bodyHeight = Math.max(1, contentRect.h - nameHeight - insets.gap);
-      const frontHeight = Math.max(1, Math.floor(bodyHeight * HIGH_FRONT_SHARE));
-      const metricsHeight = Math.max(1, bodyHeight - frontHeight - insets.gap);
+      const frontMinHeight = profileApi.computeInsetPx(insets.responsive, HIGH_FRONT_MIN_HEIGHT_RATIO, 2);
+      const bandHeights = resolveIdentityBandHeights(contentRect.h, insets.gap, nameShare, HIGH_FRONT_SHARE, frontMinHeight);
+      const nameHeight = bandHeights.nameHeight;
+      const frontHeight = bandHeights.frontHeight;
+      const metricsHeight = bandHeights.metricsHeight;
       const nameRect = makeRect(contentRect.x, contentRect.y, contentRect.w, nameHeight);
       const frontRect = makeRect(contentRect.x, nameRect.y + nameRect.h + insets.gap, contentRect.w, frontHeight);
       const metricsRect = makeRect(contentRect.x, frontRect.y + frontRect.h + insets.gap, contentRect.w, metricsHeight);

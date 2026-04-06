@@ -69,6 +69,9 @@ describe("AisTargetTextHtmlWidget", function () {
         if (id === "AisTargetLayoutGeometry") {
           return loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
         }
+        if (id === "AisTargetLayoutMath") {
+          return loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
+        }
         throw new Error("unexpected module: " + id);
       }
     };

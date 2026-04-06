@@ -10,8 +10,8 @@
 }(this, function () {
   "use strict";
 
-  const METRIC_INSET_X_RATIO = 0.034;
-  const METRIC_INSET_Y_RATIO = 0.048;
+  const STACKED_METRIC_INSET_X_RATIO = 0.034;
+  const STACKED_METRIC_INSET_Y_RATIO = 0.048;
   const INLINE_VALUE_GAP_RATIO_NORMAL = 0.016;
   const INLINE_VALUE_GAP_RATIO_HIGH = 0.012;
   const INLINE_SETTINGS_BY_MODE = {
@@ -22,7 +22,13 @@
       unitShare: 0.22,
       unitMinPx: 8,
       unitMaxRatio: 0.34,
-      gapRatio: INLINE_VALUE_GAP_RATIO_NORMAL
+      gapRatio: INLINE_VALUE_GAP_RATIO_NORMAL,
+      padXRatio: 0.022,
+      padYRatio: 0.022,
+      padXFloorPx: 1,
+      padYFloorPx: 1,
+      maxPadXTileRatio: 0.1,
+      maxPadYTileRatio: 0.16
     },
     high: {
       labelShare: 0.24,
@@ -31,7 +37,13 @@
       unitShare: 0.2,
       unitMinPx: 7,
       unitMaxRatio: 0.3,
-      gapRatio: INLINE_VALUE_GAP_RATIO_HIGH
+      gapRatio: INLINE_VALUE_GAP_RATIO_HIGH,
+      padXRatio: 0.018,
+      padYRatio: 0.018,
+      padXFloorPx: 1,
+      padYFloorPx: 1,
+      maxPadXTileRatio: 0.09,
+      maxPadYTileRatio: 0.14
     }
   };
 
@@ -88,11 +100,33 @@
     return INLINE_SETTINGS_BY_MODE.normal;
   }
 
+  function resolveInlineInsetPx(tileSpan, responsive, profileApi, ratio, floorPx, maxTileRatio) {
+    const safeSpan = Math.max(1, Math.floor(Number(tileSpan) || 1));
+    const safeFloor = Math.max(0, Math.floor(Number(floorPx) || 0));
+    const responsiveInset = profileApi.computeInsetPx(responsive, ratio, safeFloor);
+    const maxByTile = Math.max(safeFloor, Math.floor(safeSpan * maxTileRatio));
+    return Math.max(1, Math.min(responsiveInset, maxByTile));
+  }
+
   function createInlineMetricBox(tileRect, responsive, profileApi, makeRect, options) {
     const cfg = options && typeof options === "object" ? options : {};
     const settings = resolveInlineSettings(cfg.mode);
-    const padX = profileApi.computeInsetPx(responsive, METRIC_INSET_X_RATIO, 1);
-    const padY = profileApi.computeInsetPx(responsive, METRIC_INSET_Y_RATIO, 1);
+    const padX = resolveInlineInsetPx(
+      tileRect.w,
+      responsive,
+      profileApi,
+      settings.padXRatio,
+      settings.padXFloorPx,
+      settings.maxPadXTileRatio
+    );
+    const padY = resolveInlineInsetPx(
+      tileRect.h,
+      responsive,
+      profileApi,
+      settings.padYRatio,
+      settings.padYFloorPx,
+      settings.maxPadYTileRatio
+    );
     const gap = profileApi.computeInsetPx(responsive, settings.gapRatio, 1);
     const inner = shrinkRect(tileRect, padX, padY, makeRect);
     const labelShare = profileApi.scaleShare(
@@ -134,8 +168,8 @@
   }
 
   function createStackedMetricBox(tileRect, responsive, profileApi, makeRect) {
-    const padX = profileApi.computeInsetPx(responsive, METRIC_INSET_X_RATIO, 1);
-    const padY = profileApi.computeInsetPx(responsive, METRIC_INSET_Y_RATIO, 1);
+    const padX = profileApi.computeInsetPx(responsive, STACKED_METRIC_INSET_X_RATIO, 1);
+    const padY = profileApi.computeInsetPx(responsive, STACKED_METRIC_INSET_Y_RATIO, 1);
     const gap = profileApi.computeInsetPx(responsive, STACKED_ROW_GAP_RATIO, 0);
     const inner = shrinkRect(tileRect, padX, padY, makeRect);
     const captionShare = profileApi.scaleShare(
