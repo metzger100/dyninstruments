@@ -257,7 +257,7 @@
         textFillScale: textFillScale
       }, htmlUtils, tileLayout);
 
-      const metricIds = Array.isArray(model.visibleMetricIds) ? model.visibleMetricIds : [];
+      const metricIds = model.visibleMetricIds;
       const metrics = toObject(model.metrics);
       for (let i = 0; i < metricIds.length; i += 1) {
         const id = metricIds[i];
