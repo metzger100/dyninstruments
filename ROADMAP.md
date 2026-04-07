@@ -14,6 +14,8 @@ It tracks pre-release priorities and AvNav widget coverage status.
 ### Core widgets to implement
 
 - Page-shell-owned widget: `Alarm`
+- Add 180° option to the linear compasses
+- Extend the theming presets and scope to also alter the borders, foreground and background colors
 
 ### Additional non-core concepts
 
