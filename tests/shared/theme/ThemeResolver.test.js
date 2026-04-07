@@ -122,11 +122,18 @@ describe("ThemeResolver", function () {
 
     expect(out.colors.pointer).toBe("#123456");
     expect(out.colors.warning).toBe(mod.DEFAULTS.colors.warning);
-    expect(out.linear.track.widthFactor).toBe(0.2);
-    expect(out.linear.pointer.widthFactor).toBe(0.9);
     expect(out.radial.ring.arcLineWidth).toBe(2.5);
+    expect(out.radial.ring.widthFactor).toBe(mod.DEFAULTS.radial.ring.widthFactor);
+    expect(out.radial.ticks.majorLen).toBe(mod.DEFAULTS.radial.ticks.majorLen);
+    expect(out.radial.ticks.minorLen).toBe(mod.DEFAULTS.radial.ticks.minorLen);
     expect(out.radial.pointer.widthFactor).toBe(1.54);
-    expect(out.linear.pointer.lengthFactor).toBe(2.2);
+    expect(out.radial.pointer.lengthFactor).toBe(mod.DEFAULTS.radial.pointer.lengthFactor);
+    expect(out.linear.track.widthFactor).toBe(0.2);
+    expect(out.linear.track.lineWidth).toBe(2.5);
+    expect(out.linear.ticks.majorLen).toBe(mod.DEFAULTS.linear.ticks.majorLen);
+    expect(out.linear.ticks.minorLen).toBe(mod.DEFAULTS.linear.ticks.minorLen);
+    expect(out.linear.pointer.widthFactor).toBe(0.9);
+    expect(out.linear.pointer.lengthFactor).toBe(mod.DEFAULTS.linear.pointer.lengthFactor);
     expect(out.xte.lineWidthFactor).toBe(1.5);
     expect(out.xte.boatSizeFactor).toBe(mod.DEFAULTS.xte.boatSizeFactor);
     expect(out.colors.ais.nearest).toBe("#00ffaa");
@@ -208,7 +215,12 @@ describe("ThemeResolver", function () {
     const out = resolver.resolveForRoot(rootEl);
 
     expect(out.radial.pointer.widthFactor).toBe(0.72);
-    expect(out.linear.track.widthFactor).toBe(0.12);
+    expect(out.radial.ring.widthFactor).toBe(mod.DEFAULTS.radial.ring.widthFactor);
+    expect(out.radial.ticks.majorLen).toBe(mod.DEFAULTS.radial.ticks.majorLen);
+    expect(out.radial.ticks.minorLen).toBe(mod.DEFAULTS.radial.ticks.minorLen);
+    expect(out.linear.track.widthFactor).toBe(mod.DEFAULTS.linear.track.widthFactor);
+    expect(out.linear.ticks.majorLen).toBe(mod.DEFAULTS.linear.ticks.majorLen);
+    expect(out.linear.ticks.minorLen).toBe(mod.DEFAULTS.linear.ticks.minorLen);
   });
 
   it("falls back to default preset when CSS preset variable is invalid", function () {

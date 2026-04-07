@@ -2,7 +2,7 @@
  * Module: ThemePresets - Shared theme preset selector API for widget root containers
  * Documentation: documentation/shared/theme-tokens.md
  * Depends: none
- * Thickness hierarchy: slim < default < bold; only stroke-related tokens shift.
+ * Thickness hierarchy: slim < default < bold; only thickness-related tokens shift.
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) {
@@ -29,13 +29,13 @@
     default: {},
     slim: {
       radial: {
-        ring: { arcLineWidth: 1, widthFactor: 0.12 },
-        ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
+        ring: { arcLineWidth: 1 },
+        ticks: { majorWidth: 2, minorWidth: 1 },
         pointer: { widthFactor: 0.72 }
       },
       linear: {
-        track: { widthFactor: 0.12, lineWidth: 1 },
-        ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
+        track: { lineWidth: 1 },
+        ticks: { majorWidth: 2, minorWidth: 1 },
         pointer: { widthFactor: 0.72 }
       },
       font: { labelWeight: 400 },
@@ -43,14 +43,14 @@
     },
     bold: {
       radial: {
-        ring: { arcLineWidth: 2.5, widthFactor: 0.2 },
-        ticks: { majorLen: 16, majorWidth: 4, minorLen: 9, minorWidth: 2 },
-        pointer: { widthFactor: 1.54, lengthFactor: 2.2 }
+        ring: { arcLineWidth: 2.5 },
+        ticks: { majorWidth: 4, minorWidth: 2 },
+        pointer: { widthFactor: 1.54 }
       },
       linear: {
-        track: { widthFactor: 0.2, lineWidth: 2.5 },
-        ticks: { majorLen: 16, majorWidth: 4, minorLen: 9, minorWidth: 2 },
-        pointer: { widthFactor: 1.54, lengthFactor: 2.2 }
+        track: { lineWidth: 2.5 },
+        ticks: { majorWidth: 4, minorWidth: 2 },
+        pointer: { widthFactor: 1.54 }
       },
       xte: { lineWidthFactor: 2 }
     },

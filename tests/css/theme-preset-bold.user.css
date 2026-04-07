@@ -9,18 +9,18 @@
    5 = highcontrast
 */
 
-.widgetContainer > .widgetWeight:nth-child(5n + 2) > .widget.dyniplugin {
+.widget.dyniplugin {
   --dyni-theme-preset: slim;
 }
 
-.widgetContainer > .widgetWeight:nth-child(5n + 3) > .widget.dyniplugin {
+.widget.dyniplugin {
   --dyni-theme-preset: bold;
 }
 
-.widgetContainer > .widgetWeight:nth-child(5n + 4) > .widget.dyniplugin {
+.widget.dyniplugin {
   --dyni-theme-preset: night;
 }
 
-.widgetContainer > .widgetWeight:nth-child(5n + 5) > .widget.dyniplugin {
+.widget.dyniplugin {
   --dyni-theme-preset: highcontrast;
 }

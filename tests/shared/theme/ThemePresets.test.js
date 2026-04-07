@@ -75,21 +75,36 @@ describe("ThemePresets", function () {
     const { api } = createApi();
 
     expect(api.presets.slim.radial.ring.arcLineWidth).toBe(1);
-    expect(api.presets.slim.radial.ticks.majorLen).toBe(9);
+    expect(Object.prototype.hasOwnProperty.call(api.presets.slim.radial.ring, "widthFactor")).toBe(false);
+    expect(api.presets.slim.radial.ticks.majorWidth).toBe(2);
+    expect(api.presets.slim.radial.ticks.minorWidth).toBe(1);
+    expect(Object.prototype.hasOwnProperty.call(api.presets.slim.radial.ticks, "majorLen")).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(api.presets.slim.radial.ticks, "minorLen")).toBe(false);
     expect(api.presets.slim.radial.pointer.widthFactor).toBe(0.72);
-    expect(api.presets.slim.linear.track.widthFactor).toBe(0.12);
+    expect(Object.prototype.hasOwnProperty.call(api.presets.slim.radial.pointer, "lengthFactor")).toBe(false);
+    expect(api.presets.slim.linear.track.lineWidth).toBe(1);
+    expect(Object.prototype.hasOwnProperty.call(api.presets.slim.linear.track, "widthFactor")).toBe(false);
+    expect(api.presets.slim.linear.ticks.majorWidth).toBe(2);
     expect(api.presets.slim.linear.ticks.minorWidth).toBe(1);
-    expect(api.presets.slim.linear.ticks.minorLen).toBe(5);
+    expect(Object.prototype.hasOwnProperty.call(api.presets.slim.linear.ticks, "majorLen")).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(api.presets.slim.linear.ticks, "minorLen")).toBe(false);
+    expect(api.presets.slim.linear.pointer.widthFactor).toBe(0.72);
+    expect(Object.prototype.hasOwnProperty.call(api.presets.slim.linear.pointer, "lengthFactor")).toBe(false);
+    expect(api.presets.slim.font.labelWeight).toBe(400);
     expect(api.presets.slim.xte.lineWidthFactor).toBe(1);
 
-    expect(api.presets.bold.radial.ring.widthFactor).toBe(0.2);
+    expect(api.presets.bold.radial.ring.arcLineWidth).toBe(2.5);
+    expect(Object.prototype.hasOwnProperty.call(api.presets.bold.radial.ring, "widthFactor")).toBe(false);
     expect(api.presets.bold.radial.ticks.majorWidth).toBe(4);
+    expect(api.presets.bold.radial.ticks.minorWidth).toBe(2);
+    expect(Object.prototype.hasOwnProperty.call(api.presets.bold.radial.ticks, "majorLen")).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(api.presets.bold.radial.ticks, "minorLen")).toBe(false);
     expect(api.presets.bold.radial.pointer.widthFactor).toBe(1.54);
-    expect(api.presets.bold.radial.pointer.lengthFactor).toBe(2.2);
-    expect(api.presets.bold.linear.track.widthFactor).toBe(0.2);
+    expect(Object.prototype.hasOwnProperty.call(api.presets.bold.radial.pointer, "lengthFactor")).toBe(false);
     expect(api.presets.bold.linear.track.lineWidth).toBe(2.5);
+    expect(Object.prototype.hasOwnProperty.call(api.presets.bold.linear.track, "widthFactor")).toBe(false);
     expect(api.presets.bold.linear.pointer.widthFactor).toBe(1.54);
-    expect(api.presets.bold.linear.pointer.lengthFactor).toBe(2.2);
+    expect(Object.prototype.hasOwnProperty.call(api.presets.bold.linear.pointer, "lengthFactor")).toBe(false);
     expect(api.presets.bold.xte.lineWidthFactor).toBe(2);
 
     expect(api.presets.night.colors.pointer).toBe("#cc2222");

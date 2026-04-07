@@ -167,12 +167,13 @@ presetsApi.remove(containerEl);
 ## Preset Definitions
 
 Only values that differ from theme defaults are included.
+`slim` and `bold` are thickness-only presets: they adjust stroke/weight tokens, not geometry tokens such as tick length, ring width, or pointer length.
 
 | Preset | Overrides |
 |---|---|
 | `default` | none |
-| `slim` | `ring.arcLineWidth=1`, `ring.widthFactor=0.12`, `ticks.majorLen=9`, `ticks.majorWidth=2`, `ticks.minorLen=5`, `ticks.minorWidth=1`, `pointer.widthFactor=0.72`, `linear.track.widthFactor=0.12`, `linear.track.lineWidth=1`, `linear.ticks.majorLen=9`, `linear.ticks.majorWidth=2`, `linear.ticks.minorLen=5`, `linear.ticks.minorWidth=1`, `linear.pointer.widthFactor=0.72`, `font.labelWeight=400`, `xte.lineWidthFactor=1` |
-| `bold` | `ring.arcLineWidth=2.5`, `ring.widthFactor=0.2`, `ticks.majorLen=16`, `ticks.majorWidth=4`, `ticks.minorLen=9`, `ticks.minorWidth=2`, `pointer.widthFactor=1.54`, `pointer.lengthFactor=2.2`, `linear.track.widthFactor=0.2`, `linear.track.lineWidth=2.5`, `linear.ticks.majorLen=16`, `linear.ticks.majorWidth=4`, `linear.ticks.minorLen=9`, `linear.ticks.minorWidth=2`, `linear.pointer.widthFactor=1.54`, `linear.pointer.lengthFactor=2.2`, `xte.lineWidthFactor=2` |
+| `slim` | `ring.arcLineWidth=1`, `ticks.majorWidth=2`, `ticks.minorWidth=1`, `pointer.widthFactor=0.72`, `linear.track.lineWidth=1`, `linear.ticks.majorWidth=2`, `linear.ticks.minorWidth=1`, `linear.pointer.widthFactor=0.72`, `font.labelWeight=400`, `xte.lineWidthFactor=1` |
+| `bold` | `ring.arcLineWidth=2.5`, `ticks.majorWidth=4`, `ticks.minorWidth=2`, `pointer.widthFactor=1.54`, `linear.track.lineWidth=2.5`, `linear.ticks.majorWidth=4`, `linear.ticks.minorWidth=2`, `linear.pointer.widthFactor=1.54`, `xte.lineWidthFactor=2` |
 | `night` | `colors.pointer=#cc2222`, `colors.warning=#8b6914`, `colors.alarm=#992222`, `colors.laylineStb=#3d6b3d`, `colors.laylinePort=#8b3333` |
 | `highcontrast` | `colors.pointer=#ff0000`, `colors.warning=#ffcc00`, `colors.alarm=#ff3300`, `ring.arcLineWidth=2`, `ticks.majorWidth=3`, `ticks.minorWidth=2`, `pointer.widthFactor=1.4`, `linear.track.lineWidth=2`, `linear.ticks.majorWidth=3`, `linear.ticks.minorWidth=2`, `linear.pointer.widthFactor=1.4`, `xte.lineWidthFactor=1.3` |
 
