@@ -48,9 +48,10 @@ Visual specification for full-circle dial widgets. Constants and formulas are im
 | `topStrip` | `max(0, floor((contentRect.h - 2*R) / 2))` | `FullCircleRadialLayout.computeLayout()` |
 | `bottomStrip` | `topStrip` | `computeGeometry()` |
 
-Tick lengths are token-defined pixel values (not `R`-scaled):
-- Major: `theme.radial.ticks.majorLen` (default `9`)
-- Minor: `theme.radial.ticks.minorLen` (default `5`)
+Tick lengths are token-defined pixel values that the engine scales with `compactGeometryScale` before drawing:
+- Major: `max(1, round(theme.radial.ticks.majorLen * compactGeometryScale))`
+- Minor: `max(1, round(theme.radial.ticks.minorLen * compactGeometryScale))`
+- The engine applies a soft cap of `labelInset - 2` on compact dials to keep inward ticks out of the label lane.
 
 ## Colors
 

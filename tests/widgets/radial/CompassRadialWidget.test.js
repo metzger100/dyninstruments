@@ -242,12 +242,19 @@ describe("CompassRadialWidget", function () {
       strokeStyle: harness.theme.colors.pointer
     });
     expect(harness.calls.ring[0].lineWidth).toBe(harness.theme.radial.ring.arcLineWidth);
+    const expectedTickCap = Math.max(1, Math.floor(layout.labels.radiusOffset - 2));
     expect(harness.calls.ticks[0].major).toEqual({
-      len: harness.theme.radial.ticks.majorLen,
+      len: Math.min(
+        Math.max(1, Math.round(harness.theme.radial.ticks.majorLen * layout.compactGeometryScale)),
+        expectedTickCap
+      ),
       width: harness.theme.radial.ticks.majorWidth
     });
     expect(harness.calls.ticks[0].minor).toEqual({
-      len: harness.theme.radial.ticks.minorLen,
+      len: Math.min(
+        Math.max(1, Math.round(harness.theme.radial.ticks.minorLen * layout.compactGeometryScale)),
+        expectedTickCap
+      ),
       width: harness.theme.radial.ticks.minorWidth
     });
   });

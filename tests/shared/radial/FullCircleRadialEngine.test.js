@@ -186,6 +186,44 @@ describe("FullCircleRadialEngine", function () {
     expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.radial.pointer.lengthFactor);
   });
 
+  it("scales tick lengths with compact geometry and keeps the cache key aligned", function () {
+    const harness = createHarness();
+    let capturedState = null;
+    const renderer = harness.engine.createRenderer({
+      cacheLayers: ["layer"],
+      buildStaticKey() {
+        return { marker: "compact" };
+      },
+      rebuildLayer(layerCtx, layerName, state, props, api) {
+        capturedState = state;
+        api.drawFullCircleTicks(layerCtx, {
+          startDeg: 0,
+          endDeg: 360,
+          stepMajor: 30,
+          stepMinor: 10
+        });
+      }
+    });
+
+    renderer(createMockCanvas({ rectWidth: 120, rectHeight: 80, ctx: createMockContext2D() }), {});
+
+    const expectedMajorLen = Math.min(
+      Math.max(1, Math.round(harness.theme.radial.ticks.majorLen * capturedState.compactGeometryScale)),
+      Math.max(1, Math.floor(capturedState.labels.radiusOffset - 2))
+    );
+    const expectedMinorLen = Math.min(
+      Math.max(1, Math.round(harness.theme.radial.ticks.minorLen * capturedState.compactGeometryScale)),
+      Math.max(1, Math.floor(capturedState.labels.radiusOffset - 2))
+    );
+
+    expect(harness.calls.ticks[0].major.len).toBe(expectedMajorLen);
+    expect(harness.calls.ticks[0].minor.len).toBe(expectedMinorLen);
+
+    const parsedStaticKey = JSON.parse(capturedState.staticKey);
+    expect(parsedStaticKey.engine.ticksMajorLen).toBe(expectedMajorLen);
+    expect(parsedStaticKey.engine.ticksMinorLen).toBe(expectedMinorLen);
+  });
+
   it("matches callback-visible layout state with or without wrapper-owned ratioDefaults when config thresholds are present", function () {
     function captureState(specOverrides) {
       const harness = createHarness();

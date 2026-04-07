@@ -62,6 +62,7 @@ const renderCanvas = engine.createRenderer(spec);
 - `slots` (`leftTop`, `leftBottom`, `rightTop`, `rightBottom`, `top`, `bottom`)
 - `bufferW`, `bufferH`, `dpr`, `staticKey`
 - Shared toolkit handles: `draw`, `text`, `value`, `angle`
+- Full-circle tick lengths are resolved responsively from theme tokens using `state.compactGeometryScale` and a small label-lane cap before `drawFullCircleTicks()` runs.
 
 ### Callback API (`api`)
 

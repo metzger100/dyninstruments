@@ -12,10 +12,10 @@
   --dyni-alarm: #2bff00;
   --dyni-layline-stb: #0047ff;
   --dyni-layline-port: #ff6a00;
-  --dyni-ais-warning: #ff8a00;
-  --dyni-ais-nearest: #00d0ff;
-  --dyni-ais-tracking: #5cff7a;
-  --dyni-ais-normal: #d0d7e0;
+  --dyni-ais-warning: #7a00ff;
+  --dyni-ais-nearest: #ff2e88;
+  --dyni-ais-tracking: #ffd400;
+  --dyni-ais-normal: #6b4f2a;
 
   /* Radial */
   --dyni-radial-tick-major-len: 22;

@@ -25,6 +25,25 @@
     const n = Number(value);
     return isFinite(n) ? n : defaultValue;
   }
+  function resolveResponsiveTickLen(rawLen, state) {
+    const base = Number(rawLen);
+    if (!isFinite(base)) {
+      return 1;
+    }
+
+    const scale = Number(state.compactGeometryScale);
+    const responsiveScale = isFinite(scale) && scale > 0 ? scale : 1;
+    const scaled = Math.max(1, Math.round(base * responsiveScale));
+
+    const labelInset = Number(state.labels.radiusOffset);
+    if (!isFinite(labelInset) || labelInset <= 0) {
+      return scaled;
+    }
+
+    // Soft cap keeps inward ticks clear of the label lane on compact dials.
+    const cap = Math.max(1, Math.floor(labelInset - 2));
+    return Math.min(scaled, cap);
+  }
   function fullCircleNormalizeLayers(raw) {
     const source = Array.isArray(raw) ? raw : null;
     if (!source || !source.length) {
@@ -146,9 +165,9 @@
             labelInsetVal: layout.labels.radiusOffset,
             labelPx: layout.labels.fontPx,
             ringLineWidth: theme.radial.ring.arcLineWidth,
-            ticksMajorLen: theme.radial.ticks.majorLen,
+            ticksMajorLen: resolveResponsiveTickLen(theme.radial.ticks.majorLen, state),
             ticksMajorWidth: theme.radial.ticks.majorWidth,
-            ticksMinorLen: theme.radial.ticks.minorLen,
+            ticksMinorLen: resolveResponsiveTickLen(theme.radial.ticks.minorLen, state),
             ticksMinorWidth: theme.radial.ticks.minorWidth,
             pointerWidth: theme.radial.pointer.widthFactor,
             pointerLength: theme.radial.pointer.lengthFactor,
@@ -181,11 +200,17 @@
               stepMinor: pickFinite(options.stepMinor, 10),
               includeEnd: !!options.includeEnd,
               major: {
-                len: value.isFiniteNumber(options.majorLen) ? options.majorLen : state.theme.radial.ticks.majorLen,
+                len: resolveResponsiveTickLen(
+                  value.isFiniteNumber(options.majorLen) ? options.majorLen : state.theme.radial.ticks.majorLen,
+                  state
+                ),
                 width: value.isFiniteNumber(options.majorWidth) ? options.majorWidth : state.theme.radial.ticks.majorWidth
               },
               minor: {
-                len: value.isFiniteNumber(options.minorLen) ? options.minorLen : state.theme.radial.ticks.minorLen,
+                len: resolveResponsiveTickLen(
+                  value.isFiniteNumber(options.minorLen) ? options.minorLen : state.theme.radial.ticks.minorLen,
+                  state
+                ),
                 width: value.isFiniteNumber(options.minorWidth) ? options.minorWidth : state.theme.radial.ticks.minorWidth
               }
             });

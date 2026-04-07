@@ -400,12 +400,19 @@ describe("WindRadialWidget", function () {
     expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.radial.pointer.lengthFactor);
     expect(pointerCalls[0].depth).toBe(layout.geom.needleDepth);
     expect(ringCalls[0].lineWidth).toBe(themeDefaults.radial.ring.arcLineWidth);
+    const expectedTickCap = Math.max(1, Math.floor(layout.labels.radiusOffset - 2));
     expect(tickCalls[0].major).toEqual({
-      len: themeDefaults.radial.ticks.majorLen,
+      len: Math.min(
+        Math.max(1, Math.round(themeDefaults.radial.ticks.majorLen * layout.compactGeometryScale)),
+        expectedTickCap
+      ),
       width: themeDefaults.radial.ticks.majorWidth
     });
     expect(tickCalls[0].minor).toEqual({
-      len: themeDefaults.radial.ticks.minorLen,
+      len: Math.min(
+        Math.max(1, Math.round(themeDefaults.radial.ticks.minorLen * layout.compactGeometryScale)),
+        expectedTickCap
+      ),
       width: themeDefaults.radial.ticks.minorWidth
     });
     expect(labelCalls[0].radiusOffset).toBe(layout.labels.radiusOffset);
