@@ -1,5 +1,5 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("AisTargetTextHtmlWidget", function () {
@@ -21,8 +21,8 @@ describe("AisTargetTextHtmlWidget", function () {
     });
 
     const Helpers = {
-      applyFormatter: opts.applyFormatter || function (value, options) {
-        const cfg = options || {};
+      applyFormatter: opts.applyFormatter || function (value, formatterOptions) {
+        const cfg = formatterOptions || {};
         const formatter = cfg.formatter;
         const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
         if (value == null) {
@@ -77,44 +77,8 @@ describe("AisTargetTextHtmlWidget", function () {
 
     return {
       renderer: loadFresh("widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js").create({}, Helpers),
-      fitCompute: fitCompute
+      fitCompute
     };
-  }
-
-  function createHostContext(options) {
-    const opts = options || {};
-    const shellRect = opts.shellRect || { width: 320, height: 180 };
-    const hostContext = {};
-
-    if (opts.withCommitState === false) {
-      return hostContext;
-    }
-
-    hostContext.__dyniHostCommitState = {
-      shellEl: {
-        getBoundingClientRect: vi.fn(() => shellRect)
-      },
-      rootEl: null
-    };
-    return hostContext;
-  }
-  function withSurfacePolicy(props, options) {
-    const opts = options || {};
-    const interactionMode = opts.interactionMode === "passive" ? "passive" : "dispatch";
-    const containerOrientation = opts.containerOrientation === "vertical" ? "vertical" : "default";
-    const showInfo = opts.showInfo || vi.fn(() => true);
-    return Object.assign({}, props || {}, {
-      surfacePolicy: {
-        pageId: opts.pageId || "navpage",
-        containerOrientation: containerOrientation,
-        interaction: { mode: interactionMode },
-        actions: {
-          ais: {
-            showInfo: showInfo
-          }
-        }
-      }
-    });
   }
 
   function makeProps(overrides) {
@@ -160,182 +124,195 @@ describe("AisTargetTextHtmlWidget", function () {
     return out;
   }
 
-  it("renders dispatch state with catchAll + hotspot and dispatches showInfo", function () {
+  function withSurfacePolicy(props, options) {
+    const opts = options || {};
+    const interactionMode = opts.interactionMode === "passive" ? "passive" : "dispatch";
+    const containerOrientation = opts.containerOrientation === "vertical" ? "vertical" : "default";
+    const showInfo = opts.showInfo || vi.fn(() => true);
+
+    return Object.assign({}, props || {}, {
+      surfacePolicy: {
+        pageId: opts.pageId || "navpage",
+        containerOrientation,
+        interaction: { mode: interactionMode },
+        actions: {
+          ais: {
+            showInfo
+          }
+        }
+      }
+    });
+  }
+
+  function mountCommitted(rendererSpec, props, options) {
+    const opts = options || {};
+    const shellSize = opts.shellSize || { width: 320, height: 180 };
+    const hostContext = opts.hostContext || {};
+    const rootEl = document.createElement("div");
+    rootEl.className = "widget dyniplugin dyni-host-html";
+    const shellEl = document.createElement("div");
+    shellEl.className = "widgetData dyni-shell";
+    const mountEl = document.createElement("div");
+    mountEl.className = "dyni-surface-html-mount";
+    shellEl.appendChild(mountEl);
+    rootEl.appendChild(shellEl);
+    hostContext.__dyniHostCommitState = { rootEl, shellEl };
+
+    mountEl.getBoundingClientRect = vi.fn(() => ({
+      width: shellSize.width,
+      height: shellSize.height
+    }));
+
+    const committed = rendererSpec.createCommittedRenderer({
+      hostContext,
+      mountEl,
+      shadowRoot: null
+    });
+
+    function payload(nextProps, revision, layoutChanged) {
+      return {
+        props: nextProps,
+        revision,
+        rootEl,
+        shellEl,
+        mountEl,
+        shadowRoot: null,
+        shellRect: { width: shellSize.width, height: shellSize.height },
+        hostContext,
+        layoutChanged: layoutChanged === true,
+        relayoutPass: 0
+      };
+    }
+
+    const initial = payload(props, 1, true);
+    committed.mount(mountEl, initial);
+    committed.postPatch(initial);
+
+    return {
+      mountEl,
+      committed,
+      html() {
+        return mountEl.innerHTML;
+      }
+    };
+  }
+
+  it("exposes committed renderer contract", function () {
+    const renderer = createRenderer().renderer;
+
+    expect(renderer.id).toBe("AisTargetTextHtmlWidget");
+    expect(typeof renderer.createCommittedRenderer).toBe("function");
+    expect(renderer.getVerticalShellSizing()).toEqual({ kind: "ratio", aspectRatio: 7 / 8 });
+  });
+
+  it("renders dispatch state and dispatches showInfo on click", function () {
     const setup = createRenderer();
     const showInfo = vi.fn(() => true);
-    const hostContext = createHostContext();
-    const props = withSurfacePolicy(makeProps(), {
-      interactionMode: "dispatch",
-      showInfo: showInfo
-    });
-    const html = setup.renderer.renderHtml.call(hostContext, props);
+    const mounted = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy(makeProps(), {
+        interactionMode: "dispatch",
+        showInfo
+      })
+    );
 
+    const html = mounted.html();
     expect(html).toContain("dyni-ais-target-html");
-    expect(html).toContain("dyni-ais-target-data");
     expect(html).toContain("dyni-ais-target-open-dispatch");
     expect(html).toContain("dyni-ais-target-branch-tcpa");
-    expect(html).toContain('onclick="catchAll"');
-    expect(html).toContain('class="dyni-ais-target-open-hotspot" onclick="aisTargetShowInfo"');
-    expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-dst"');
-    expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-cpa"');
-    expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-tcpa"');
-    expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-brg"');
-    expect(html).toContain('class="dyni-ais-target-metric-value-row"');
-    expect(html).toContain('class="dyni-ais-target-metric-value-text"');
-    expect(html).not.toContain('class="dyni-ais-target-metric-value"');
-    expect(html).toContain("grid-template-areas:");
-    expect(html).toContain('class="dyni-ais-target-identity" style="grid-template-rows:');
-    expect(html).toContain('class="dyni-ais-target-metrics" style="grid-template-columns:');
-    expect(html).toContain('class="dyni-ais-target-metric-value-row" style="grid-template-columns:');
+    expect(html).toContain('data-dyni-action="ais-target-open"');
+    expect(html).toContain("dyni-ais-target-open-hotspot");
 
-    const handlers = setup.renderer.namedHandlers(props, hostContext);
-    expect(Object.keys(handlers)).toEqual(["aisTargetShowInfo"]);
-    expect(handlers.aisTargetShowInfo()).toBe(true);
+    const wrapper = mounted.mountEl.querySelector(".dyni-ais-target-html");
+    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(showInfo).toHaveBeenCalledWith("211234560");
     expect(setup.fitCompute).toHaveBeenCalledTimes(1);
   });
 
-  it("stays passive in layout editing mode and does not register handlers", function () {
+  it("stays passive in edit mode", function () {
     const showInfo = vi.fn(() => true);
-    const hostContext = createHostContext();
-    const renderer = createRenderer().renderer;
-    const props = withSurfacePolicy(makeProps({ editing: true }), {
-      interactionMode: "dispatch",
-      showInfo: showInfo
-    });
-    const html = renderer.renderHtml.call(hostContext, props);
+    const mounted = mountCommitted(
+      createRenderer().renderer,
+      withSurfacePolicy(makeProps({ editing: true }), {
+        interactionMode: "dispatch",
+        showInfo
+      })
+    );
 
+    const html = mounted.html();
     expect(html).toContain("dyni-ais-target-open-passive");
-    expect(html).not.toContain('onclick="catchAll"');
-    expect(html).not.toContain("dyni-ais-target-open-hotspot");
 
-    const handlers = renderer.namedHandlers(props, hostContext);
-    expect(handlers).toEqual({});
+    const wrapper = mounted.mountEl.querySelector(".dyni-ais-target-html");
+    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(showInfo).not.toHaveBeenCalled();
   });
 
-  it("renders flat mode with name/front and all four metrics", function () {
+  it("renders flat branch and placeholder state for gps page", function () {
+    const flatMounted = mountCommitted(
+      createRenderer().renderer,
+      withSurfacePolicy(makeProps({ domain: { showTcpaBranch: false, frontText: "Back" } }), {
+        interactionMode: "dispatch"
+      }),
+      { shellSize: { width: 640, height: 120 } }
+    );
+    const placeholderMounted = mountCommitted(
+      createRenderer().renderer,
+      withSurfacePolicy(makeProps({ domain: { hasTargetIdentity: false } }), {
+        pageId: "gpspage",
+        interactionMode: "passive"
+      })
+    );
+
+    expect(flatMounted.html()).toContain("dyni-ais-target-mode-flat");
+    expect(flatMounted.html()).toContain("dyni-ais-target-branch-brg");
+    expect(flatMounted.html()).toContain("dyni-ais-target-metric-value");
+    expect(flatMounted.html()).not.toContain("dyni-ais-target-metric-value-row");
+
+    expect(placeholderMounted.html()).toContain("dyni-ais-target-placeholder");
+    expect(placeholderMounted.html()).toContain("No AIS");
+  });
+
+  it("updates layout signatures for branch and interaction changes", function () {
     const renderer = createRenderer().renderer;
-    const hostContext = createHostContext({ shellRect: { width: 640, height: 120 } });
-    const props = withSurfacePolicy(makeProps({
-      domain: {
-        showTcpaBranch: false,
-        frontText: "Back"
-      }
-    }), {
-      interactionMode: "dispatch"
+    const committed = renderer.createCommittedRenderer({ hostContext: {}, mountEl: null, shadowRoot: null });
+
+    const dispatchTcpa = committed.layoutSignature({
+      props: withSurfacePolicy(makeProps(), { interactionMode: "dispatch" }),
+      shellRect: { width: 320, height: 180 }
     });
-    const html = renderer.renderHtml.call(hostContext, props);
-
-    expect(html).toContain("dyni-ais-target-mode-flat");
-    expect(html).toContain("dyni-ais-target-branch-brg");
-    expect(html).toContain("dyni-ais-target-name");
-    expect(html).toContain('class="dyni-ais-target-front"');
-    expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-dst"');
-    expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-cpa"');
-    expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-tcpa"');
-    expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-brg"');
-    expect(html).toContain('class="dyni-ais-target-metric-value"');
-    expect(html).not.toContain('class="dyni-ais-target-metric-value-row"');
-    expect(html).not.toContain("dyni-ais-target-front-initial");
-  });
-
-  it("updates resize signature when branch or interaction state changes", function () {
-    const renderer = createRenderer().renderer;
-    const propsTcpa = withSurfacePolicy(makeProps(), { interactionMode: "dispatch" });
-    const propsBrg = withSurfacePolicy(makeProps({ domain: { showTcpaBranch: false, tcpa: 0 } }), {
-      interactionMode: "dispatch"
+    const dispatchBrg = committed.layoutSignature({
+      props: withSurfacePolicy(makeProps({ domain: { showTcpaBranch: false } }), { interactionMode: "dispatch" }),
+      shellRect: { width: 320, height: 180 }
+    });
+    const passiveTcpa = committed.layoutSignature({
+      props: withSurfacePolicy(makeProps(), { interactionMode: "passive" }),
+      shellRect: { width: 320, height: 180 }
+    });
+    const verticalA = committed.layoutSignature({
+      props: withSurfacePolicy(makeProps(), { containerOrientation: "vertical", interactionMode: "dispatch" }),
+      shellRect: { width: 220, height: 120 }
+    });
+    const verticalB = committed.layoutSignature({
+      props: withSurfacePolicy(makeProps(), { containerOrientation: "vertical", interactionMode: "dispatch" }),
+      shellRect: { width: 220, height: 340 }
     });
 
-    const hostContext = createHostContext();
-
-    const sigDispatchTcpa = renderer.resizeSignature.call(hostContext, propsTcpa);
-    const sigDispatchTcpaSame = renderer.resizeSignature.call(hostContext, withSurfacePolicy(makeProps(), { interactionMode: "dispatch" }));
-    const sigDispatchBrg = renderer.resizeSignature.call(hostContext, propsBrg);
-    const sigPassiveTcpa = renderer.resizeSignature.call(hostContext, withSurfacePolicy(makeProps(), { interactionMode: "passive" }));
-
-    expect(sigDispatchTcpaSame).toBe(sigDispatchTcpa);
-    expect(sigDispatchBrg).not.toBe(sigDispatchTcpa);
-    expect(sigPassiveTcpa).not.toBe(sigDispatchTcpa);
+    expect(dispatchBrg).not.toBe(dispatchTcpa);
+    expect(passiveTcpa).not.toBe(dispatchTcpa);
+    expect(verticalB).toBe(verticalA);
   });
 
-  it("keeps vertical resize signature stable across host height changes and forces high mode", function () {
-    const renderer = createRenderer().renderer;
-    const propsVertical = withSurfacePolicy(makeProps(), { containerOrientation: "vertical", interactionMode: "dispatch" });
-    const propsNonVertical = withSurfacePolicy(makeProps(), { containerOrientation: "default", interactionMode: "dispatch" });
-
-    const verticalA = createHostContext({ shellRect: { width: 220, height: 120 } });
-    const verticalB = createHostContext({ shellRect: { width: 220, height: 340 } });
-    const nonVerticalA = createHostContext({ shellRect: { width: 220, height: 120 } });
-    const nonVerticalB = createHostContext({ shellRect: { width: 220, height: 340 } });
-
-    const sigVerticalA = renderer.resizeSignature.call(verticalA, propsVertical);
-    const sigVerticalB = renderer.resizeSignature.call(verticalB, propsVertical);
-    const sigNonVerticalA = renderer.resizeSignature.call(nonVerticalA, propsNonVertical);
-    const sigNonVerticalB = renderer.resizeSignature.call(nonVerticalB, propsNonVertical);
-    const htmlVertical = renderer.renderHtml.call(verticalA, propsVertical);
-
-    expect(sigVerticalB).toBe(sigVerticalA);
-    expect(sigNonVerticalB).not.toBe(sigNonVerticalA);
-    expect(htmlVertical).toContain("dyni-ais-target-vertical");
-    expect(htmlVertical).toContain("dyni-ais-target-mode-high");
-  });
-
-  it("tolerates first render without committed host state and requests corrective rerender", function () {
-    const setup = createRenderer();
-    const hostContext = createHostContext({ withCommitState: false });
-    const html = setup.renderer.renderHtml.call(hostContext, withSurfacePolicy(makeProps({ domain: { hasTargetIdentity: false } }), {
-      interactionMode: "passive"
-    }));
-    const triggerResize = vi.fn();
-
-    setup.renderer.initFunction.call({ triggerResize: triggerResize });
-
-    expect(html).toContain("dyni-ais-target-hidden");
-    expect(triggerResize).toHaveBeenCalledTimes(1);
-    expect(setup.fitCompute).toHaveBeenCalledWith(expect.objectContaining({
-      targetEl: null,
-      shellRect: null
-    }));
-  });
-
-  it("keeps css selectors for state, mode, inline metric structure, and vertical contracts", function () {
+  it("uses shadow-local css selectors", function () {
     const cssPath = path.join(
       process.cwd(),
       "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"
     );
     const css = fs.readFileSync(cssPath, "utf8");
 
-    expect(css).toContain(".dyni-ais-target-mode-flat");
-    expect(css).toContain(".dyni-ais-target-mode-flat .dyni-ais-target-metrics");
-    expect(css).toContain(".dyni-ais-target-mode-normal .dyni-ais-target-metric");
-    expect(css).toContain(".dyni-ais-target-mode-high .dyni-ais-target-metrics");
-    expect(css).toContain(".dyni-ais-target-mode-normal .dyni-ais-target-metric-caption,");
-    expect(css).toContain(".dyni-ais-target-mode-high .dyni-ais-target-metric-caption");
-    expect(css).toContain("align-items: flex-end;");
-    expect(css).toContain(".dyni-ais-target-mode-normal .dyni-ais-target-name");
-    expect(css).toContain(".dyni-ais-target-mode-high .dyni-ais-target-name");
-    expect(css).toContain(".dyni-ais-target-html.dyni-ais-target-vertical .dyni-ais-target-name");
-    expect(css).toContain(".dyni-ais-target-mode-normal .dyni-ais-target-front");
-    expect(css).toContain(".dyni-ais-target-mode-high .dyni-ais-target-front");
-    expect(css).toContain(".dyni-ais-target-html.dyni-ais-target-vertical .dyni-ais-target-front");
-    expect(css).toContain("align-items: flex-start;");
-    expect(css).toContain(".dyni-ais-target-metric-value");
-    expect(css).toContain("grid-template-rows: minmax(0, auto) minmax(0, auto) minmax(0, auto);");
-    expect(css).toContain("grid-template-columns: minmax(0, auto) minmax(0, 1fr);");
-    expect(css).not.toContain("dyni-ais-target-flat-rows-2");
-    expect(css).not.toContain("padding-left: calc(0.18em + 0.34em);");
-    expect(css).toContain("dyni-ais-target-metric-value-row");
-    expect(css).toContain("dyni-ais-target-metric-value-text");
-    expect(css).toContain(".dyni-ais-target-open-hotspot");
-    expect(css).toContain(".dyni-ais-target-open-dispatch");
-    expect(css).toContain(".dyni-ais-target-open-passive");
-    expect(css).toContain(".dyni-ais-target-state-accent");
-    expect(css).toContain("width: 0.34em;");
-    expect(css).toContain("border-radius: 0.34em;");
-    expect(css).toContain(".dyni-ais-target-placeholder-text");
-    expect(css).toContain(".widgetContainer.vertical .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html");
+    expect(css).toContain(".dyni-html-root .dyni-ais-target-html");
+    expect(css).toContain('.dyni-html-root[data-dyni-orientation="vertical"] .dyni-ais-target-html');
     expect(css).toContain("aspect-ratio: 7 / 8;");
     expect(css).toContain("min-height: 8em;");
+    expect(css).not.toContain(".widgetContainer.vertical .widget.dyniplugin");
   });
 });

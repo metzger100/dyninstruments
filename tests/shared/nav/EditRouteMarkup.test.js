@@ -57,8 +57,8 @@ describe("EditRouteMarkup", function () {
     expect(html).toContain("dyni-edit-route-active-route");
     expect(html).toContain("dyni-edit-route-local-route");
     expect(html).toContain("dyni-edit-route-open-dispatch");
-    expect(html).toContain('onclick="catchAll"');
-    expect(html).toContain('class="dyni-edit-route-open-hotspot" onclick="editRouteOpen"');
+    expect(html).toContain('data-dyni-action="edit-route-open"');
+    expect(html).toContain('class="dyni-edit-route-open-hotspot"');
 
     const ptsIndex = html.indexOf("dyni-edit-route-metric-pts");
     const dstIndex = html.indexOf("dyni-edit-route-metric-dst");
@@ -88,7 +88,7 @@ describe("EditRouteMarkup", function () {
     });
 
     expect(html).toContain("dyni-edit-route-open-passive");
-    expect(html).not.toContain('onclick="catchAll"');
+    expect(html).toContain('data-dyni-action="edit-route-open"');
     expect(html).not.toContain("dyni-edit-route-open-hotspot");
   });
 

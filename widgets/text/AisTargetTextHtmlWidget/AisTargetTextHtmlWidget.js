@@ -18,25 +18,6 @@
     return value && typeof value === "object" ? value : {};
   }
 
-  function resolveCommitState(hostContext) {
-    if (!hostContext || typeof hostContext !== "object") {
-      return null;
-    }
-    const commitState = hostContext.__dyniHostCommitState;
-    return commitState && typeof commitState === "object" ? commitState : null;
-  }
-
-  function resolveCommittedElements(hostContext) {
-    const commitState = resolveCommitState(hostContext);
-    const shellEl = commitState ? (commitState.shellEl || null) : null;
-    const rootEl = commitState ? (commitState.rootEl || null) : null;
-    const targetEl = shellEl || rootEl || null;
-    return {
-      shellEl: shellEl,
-      rootEl: rootEl,
-      targetEl: targetEl
-    };
-  }
   function resolveSurfacePolicy(props) {
     const p = props && typeof props === "object" ? props : null;
     return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
@@ -48,109 +29,170 @@
     const renderModel = Helpers.getModule("AisTargetRenderModel").create(def, Helpers);
     const markup = Helpers.getModule("AisTargetMarkup").create(def, Helpers);
 
-    function buildSetup(props, hostContext) {
+    function buildModel(props, shellRect) {
       const p = props || {};
       const layout = toObject(p.layout);
       const surfacePolicy = resolveSurfacePolicy(p);
-      const committed = resolveCommittedElements(hostContext);
-      const shellRect = htmlUtils.resolveShellRect(hostContext, committed.targetEl);
-      const mode = htmlUtils.resolveRatioMode({
+      const mode = htmlUtils.resolveRatioModeForRect({
         ratioThresholdNormal: layout.ratioThresholdNormal,
         ratioThresholdFlat: layout.ratioThresholdFlat,
         defaultRatioThresholdNormal: DEFAULT_RATIO_THRESHOLD_NORMAL,
         defaultRatioThresholdFlat: DEFAULT_RATIO_THRESHOLD_FLAT,
         defaultMode: "normal",
-        hostContext: hostContext,
-        targetEl: committed.targetEl
+        shellRect: shellRect
       });
-      const model = renderModel.buildModel({
+
+      return renderModel.buildModel({
         props: p,
         shellRect: shellRect,
         mode: mode,
         isVerticalCommitted: !!(surfacePolicy && surfacePolicy.containerOrientation === "vertical")
       });
-
-      return {
-        model: model,
-        shellRect: shellRect,
-        targetEl: committed.targetEl
-      };
     }
 
-    function buildDefaultFit() {
-      return {
+    function createCommittedRenderer(rendererContext) {
+      const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
+      const hostContext = context.hostContext || {};
+
+      let mountEl = null;
+      let rootEl = null;
+      let wrapperEl = null;
+      let clickHandler = null;
+      let lastProps = null;
+      let lastModel = null;
+      let lastFit = {
         nameStyle: "",
         frontStyle: "",
         placeholderStyle: "",
         metrics: Object.create(null),
         accentStyle: ""
       };
-    }
 
-    const renderHtml = function (props) {
-      const setup = buildSetup(props, this);
-      const fit = htmlFit.compute({
-        model: setup.model,
-        hostContext: this,
-        targetEl: setup.targetEl,
-        shellRect: setup.shellRect
-      }) || buildDefaultFit();
+      function bindDispatchListener(model) {
+        if (wrapperEl && clickHandler) {
+          wrapperEl.removeEventListener("click", clickHandler);
+        }
+        clickHandler = null;
 
-      return markup.render({
-        model: setup.model,
-        fit: fit,
-        htmlUtils: htmlUtils
-      });
-    };
+        if (!wrapperEl || model.interactionState !== "dispatch" || !model.dispatchMmsi) {
+          return;
+        }
 
-    const namedHandlers = function (props, hostContext) {
-      const setup = buildSetup(props, hostContext);
-      const surfacePolicy = resolveSurfacePolicy(props);
-      const aisActions = surfacePolicy && surfacePolicy.actions ? surfacePolicy.actions.ais : null;
-      if (setup.model.interactionState !== "dispatch" || !setup.model.dispatchMmsi) {
-        return {};
+        clickHandler = function onDispatchClick(ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const policy = resolveSurfacePolicy(lastProps);
+          const aisActions = policy && policy.actions ? policy.actions.ais : null;
+          if (!aisActions || typeof aisActions.showInfo !== "function") {
+            return;
+          }
+          if (!lastModel || lastModel.interactionState !== "dispatch" || !lastModel.dispatchMmsi) {
+            return;
+          }
+          aisActions.showInfo(lastModel.dispatchMmsi);
+        };
+        wrapperEl.addEventListener("click", clickHandler);
+      }
+
+      function patchDom(payload) {
+        const shellRect = payload.shellRect || null;
+        const model = buildModel(payload.props, shellRect);
+        const fit = payload.layoutChanged || !lastFit
+          ? (htmlFit.compute({
+            model: model,
+            hostContext: hostContext,
+            targetEl: payload.rootEl,
+            shellRect: shellRect
+          }) || {
+            nameStyle: "",
+            frontStyle: "",
+            placeholderStyle: "",
+            metrics: Object.create(null),
+            accentStyle: ""
+          })
+          : lastFit;
+
+        htmlUtils.applyMirroredContext(rootEl, payload.props);
+        wrapperEl = htmlUtils.patchInnerHtml(rootEl, markup.render({
+          model: model,
+          fit: fit,
+          htmlUtils: htmlUtils
+        }));
+        lastProps = payload.props;
+        lastModel = model;
+        lastFit = fit;
+
+        bindDispatchListener(model);
+      }
+
+      function mount(mountHostEl, payload) {
+        mountEl = mountHostEl;
+        rootEl = mountEl.ownerDocument.createElement("div");
+        mountEl.appendChild(rootEl);
+        patchDom(payload);
+      }
+
+      function update(payload) {
+        patchDom(payload);
+      }
+
+      function postPatch() {
+        return false;
+      }
+
+      function detach() {
+        if (wrapperEl && clickHandler) {
+          wrapperEl.removeEventListener("click", clickHandler);
+        }
+        clickHandler = null;
+        wrapperEl = null;
+        lastProps = null;
+        lastModel = null;
+        lastFit = {
+          nameStyle: "",
+          frontStyle: "",
+          placeholderStyle: "",
+          metrics: Object.create(null),
+          accentStyle: ""
+        };
+        if (rootEl && rootEl.parentNode) {
+          rootEl.parentNode.removeChild(rootEl);
+        }
+        rootEl = null;
+        mountEl = null;
+      }
+
+      function destroy() {
+        detach();
+      }
+
+      function layoutSignature(payload) {
+        const model = buildModel(payload && payload.props ? payload.props : {}, payload && payload.shellRect ? payload.shellRect : null);
+        return model.resizeSignatureParts.join("|");
       }
 
       return {
-        aisTargetShowInfo: function aisTargetShowInfo() {
-          const latest = buildSetup(props, hostContext).model;
-          if (latest.interactionState !== "dispatch" || !latest.dispatchMmsi) {
-            return false;
-          }
-          if (!aisActions || typeof aisActions.showInfo !== "function") {
-            return false;
-          }
-          return aisActions.showInfo(latest.dispatchMmsi) !== false;
-        }
+        mount: mount,
+        update: update,
+        postPatch: postPatch,
+        detach: detach,
+        destroy: destroy,
+        layoutSignature: layoutSignature
       };
-    };
+    }
 
-    const resizeSignature = function (props) {
-      const setup = buildSetup(props, this);
-      return setup.model.resizeSignatureParts.join("|");
-    };
-
-    const initFunction = function () {
-      if (this && typeof this.triggerResize === "function") {
-        this.triggerResize();
-      }
-    };
-
-    const translateFunction = function () {
+    function translateFunction() {
       return {};
-    };
+    }
 
-    const getVerticalShellSizing = function () {
+    function getVerticalShellSizing() {
       return { kind: "ratio", aspectRatio: 7 / 8 };
-    };
+    }
 
     return {
       id: "AisTargetTextHtmlWidget",
       wantsHideNativeHead: true,
-      renderHtml: renderHtml,
-      namedHandlers: namedHandlers,
-      resizeSignature: resizeSignature,
-      initFunction: initFunction,
+      createCommittedRenderer: createCommittedRenderer,
       getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };

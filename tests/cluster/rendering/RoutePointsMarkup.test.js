@@ -85,9 +85,9 @@ describe("RoutePointsMarkup", function () {
     expect(html).toContain("dyni-route-points-mode-normal");
     expect(html).toContain("dyni-route-points-dispatch");
     expect(html).toContain("dyni-route-points-active-route");
-    expect(html).toContain('onclick="catchAll"');
-    expect(html).toContain('onclick="routePointActivate" data-rp-idx="0"');
-    expect(html).toContain('onclick="routePointActivate" data-rp-idx="1"');
+    expect(html).toContain('data-dyni-action="route-points-activate"');
+    expect(html).toContain('data-rp-idx="0"');
+    expect(html).toContain('data-rp-idx="1"');
     expect(html).toContain('data-rp-row="1"');
     expect(html).toContain("dyni-route-points-row-selected");
     expect(html).toContain("dyni-route-points-marker-selected");
@@ -103,9 +103,9 @@ describe("RoutePointsMarkup", function () {
     });
 
     expect(html).toContain("dyni-route-points-passive");
-    expect(html).not.toContain('onclick="catchAll"');
-    expect(html).not.toContain('onclick="routePointActivate"');
-    expect(html).not.toContain("data-rp-idx=");
+    expect(html).toContain('data-dyni-action="route-points-activate"');
+    expect(html).toContain('data-rp-idx="0"');
+    expect(html).toContain('data-rp-idx="1"');
   });
 
   it("does not render ordinal cell markup when compact row policy disables it", function () {

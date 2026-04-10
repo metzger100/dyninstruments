@@ -10,23 +10,6 @@
 }(this, function () {
   "use strict";
 
-  function resolveHostCommitState(hostContext) {
-    if (!hostContext || typeof hostContext !== "object") {
-      return null;
-    }
-    return hostContext.__dyniHostCommitState || null;
-  }
-
-  function resolveCommittedElements(hostContext) {
-    const commitState = resolveHostCommitState(hostContext);
-    const shellEl = commitState && commitState.shellEl ? commitState.shellEl : null;
-    const rootEl = commitState && commitState.rootEl ? commitState.rootEl : null;
-    return {
-      shellEl: shellEl,
-      rootEl: rootEl,
-      targetEl: shellEl || rootEl || null
-    };
-  }
   function resolveSurfacePolicy(props) {
     const p = props && typeof props === "object" ? props : null;
     return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
@@ -38,88 +21,147 @@
     const renderModel = Helpers.getModule("EditRouteRenderModel").create(def, Helpers);
     const markup = Helpers.getModule("EditRouteMarkup").create(def, Helpers);
 
-    function buildModel(props, hostContext) {
-      const committed = resolveCommittedElements(hostContext);
+    function buildModel(props, shellRect) {
       const surfacePolicy = resolveSurfacePolicy(props);
       const vertical = !!(surfacePolicy && surfacePolicy.containerOrientation === "vertical");
-      const shellRect = htmlUtils.resolveShellRect(hostContext, committed.targetEl);
-      const model = renderModel.buildModel({
+      return renderModel.buildModel({
         props: props,
-        hostContext: hostContext,
         shellRect: shellRect,
         isVerticalCommitted: vertical
       });
+    }
+
+    function createCommittedRenderer(rendererContext) {
+      const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
+      const hostContext = context.hostContext || {};
+
+      let mountEl = null;
+      let rootEl = null;
+      let wrapperEl = null;
+      let clickHandler = null;
+      let lastProps = null;
+      let lastFit = {
+        nameTextStyle: "",
+        sourceBadgeStyle: "",
+        metrics: Object.create(null)
+      };
+
+      function bindDispatchListener(model) {
+        if (wrapperEl && clickHandler) {
+          wrapperEl.removeEventListener("click", clickHandler);
+        }
+        clickHandler = null;
+
+        if (!wrapperEl || model.canOpenEditRoute !== true) {
+          return;
+        }
+
+        clickHandler = function onDispatchClick(ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const policy = resolveSurfacePolicy(lastProps);
+          const routeEditorActions = policy && policy.actions ? policy.actions.routeEditor : null;
+          if (!routeEditorActions || typeof routeEditorActions.openEditRoute !== "function") {
+            return;
+          }
+          routeEditorActions.openEditRoute();
+        };
+        wrapperEl.addEventListener("click", clickHandler);
+      }
+
+      function patchDom(payload) {
+        const shellRect = payload.shellRect || null;
+        const model = buildModel(payload.props, shellRect);
+        const fit = payload.layoutChanged || !lastFit
+          ? (htmlFit.compute({
+            model: model,
+            hostContext: hostContext,
+            targetEl: payload.rootEl,
+            shellRect: shellRect
+          }) || {
+            nameTextStyle: "",
+            sourceBadgeStyle: "",
+            metrics: Object.create(null)
+          })
+          : lastFit;
+
+        htmlUtils.applyMirroredContext(rootEl, payload.props);
+        wrapperEl = htmlUtils.patchInnerHtml(rootEl, markup.render({
+          model: model,
+          fit: fit,
+          htmlUtils: htmlUtils
+        }));
+        lastFit = fit;
+        lastProps = payload.props;
+
+        bindDispatchListener(model);
+      }
+
+      function mount(mountHostEl, payload) {
+        mountEl = mountHostEl;
+        rootEl = mountEl.ownerDocument.createElement("div");
+        mountEl.appendChild(rootEl);
+        patchDom(payload);
+      }
+
+      function update(payload) {
+        patchDom(payload);
+      }
+
+      function postPatch() {
+        return false;
+      }
+
+      function detach() {
+        if (wrapperEl && clickHandler) {
+          wrapperEl.removeEventListener("click", clickHandler);
+        }
+        clickHandler = null;
+        wrapperEl = null;
+        lastProps = null;
+        lastFit = {
+          nameTextStyle: "",
+          sourceBadgeStyle: "",
+          metrics: Object.create(null)
+        };
+        if (rootEl && rootEl.parentNode) {
+          rootEl.parentNode.removeChild(rootEl);
+        }
+        rootEl = null;
+        mountEl = null;
+      }
+
+      function destroy() {
+        detach();
+      }
+
+      function layoutSignature(payload) {
+        const model = buildModel(payload && payload.props ? payload.props : {}, payload && payload.shellRect ? payload.shellRect : null);
+        return model.resizeSignatureParts.join("|");
+      }
+
       return {
-        model: model,
-        targetEl: committed.targetEl,
-        shellRect: shellRect
+        mount: mount,
+        update: update,
+        postPatch: postPatch,
+        detach: detach,
+        destroy: destroy,
+        layoutSignature: layoutSignature
       };
     }
 
-    const namedHandlers = function (props, hostContext) {
-      const surfacePolicy = resolveSurfacePolicy(props);
-      const routeEditorActions = surfacePolicy && surfacePolicy.actions ? surfacePolicy.actions.routeEditor : null;
-      const canOpen = renderModel.canOpenEditRoute({
-        props: props
-      });
-      if (!canOpen) {
-        return {};
-      }
-      return {
-        editRouteOpen: function editRouteOpenHandler() {
-          if (!renderModel.canOpenEditRoute({ props: props })) {
-            return false;
-          }
-          if (!routeEditorActions || typeof routeEditorActions.openEditRoute !== "function") {
-            return false;
-          }
-          return routeEditorActions.openEditRoute() !== false;
-        }
-      };
-    };
-
-    const renderHtml = function (props) {
-      const setup = buildModel(props, this);
-      const fit = htmlFit.compute({
-        model: setup.model,
-        hostContext: this,
-        targetEl: setup.targetEl,
-        shellRect: setup.shellRect
-      }) || { nameTextStyle: "", sourceBadgeStyle: "", metrics: Object.create(null) };
-
-      return markup.render({
-        model: setup.model,
-        fit: fit,
-        htmlUtils: htmlUtils
-      });
-    };
-
-    const resizeSignature = function (props) {
-      const setup = buildModel(props, this);
-      return setup.model.resizeSignatureParts.join("|");
-    };
-
-    const initFunction = function () {
-      if (this && typeof this.triggerResize === "function") {
-        this.triggerResize();
-      }
-    };
-
-    const translateFunction = function () {
+    function translateFunction() {
       return {};
-    };
+    }
 
-    const getVerticalShellSizing = function () {
+    function getVerticalShellSizing() {
       return { kind: "ratio", aspectRatio: 7 / 8 };
-    };
+    }
 
     return {
       id: "EditRouteTextHtmlWidget",
       wantsHideNativeHead: true,
-      renderHtml: renderHtml,
-      namedHandlers: namedHandlers,
-      resizeSignature: resizeSignature,
-      initFunction: initFunction,
+      createCommittedRenderer: createCommittedRenderer,
       getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };

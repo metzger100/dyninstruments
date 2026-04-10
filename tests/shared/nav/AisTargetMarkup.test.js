@@ -111,8 +111,8 @@ describe("AisTargetMarkup", function () {
     const root = parseHtml(html);
 
     expect(html).toContain('class="dyni-ais-target-html dyni-ais-target-mode-normal dyni-ais-target-data dyni-ais-target-open-dispatch dyni-ais-target-branch-tcpa dyni-ais-target-color-warning"');
-    expect(html).toContain('onclick="catchAll"');
-    expect(html).toContain('class="dyni-ais-target-open-hotspot" onclick="aisTargetShowInfo"');
+    expect(html).toContain('data-dyni-action="ais-target-open"');
+    expect(html).toContain('class="dyni-ais-target-open-hotspot"');
     expect(html).toContain('class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:3px;background-color:#f39b52;"');
     expect(root.querySelector(".dyni-ais-target-name")).toBeTruthy();
     expect(root.querySelector(".dyni-ais-target-front")).toBeTruthy();
@@ -151,7 +151,7 @@ describe("AisTargetMarkup", function () {
     });
 
     expect(html).toContain("dyni-ais-target-open-passive");
-    expect(html).not.toContain('onclick="catchAll"');
+    expect(html).toContain('data-dyni-action="ais-target-open"');
     expect(html).not.toContain("dyni-ais-target-open-hotspot");
     expect(html).not.toContain("dyni-ais-target-state-accent");
   });

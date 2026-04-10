@@ -262,7 +262,7 @@
         return;
       }
 
-      const currentRoot = resolveHostCommitTarget(hostContext) || cfg.rootEl || null;
+      const currentRoot = cfg.rootEl || resolveHostCommitTarget(hostContext) || null;
       if (!isConnectedNode(currentRoot)) {
         return;
       }

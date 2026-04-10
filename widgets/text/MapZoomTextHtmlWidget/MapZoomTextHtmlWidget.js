@@ -11,42 +11,25 @@
 }(this, function () {
   "use strict";
 
-  const CHECK_AUTO_ZOOM_HANDLER_NAME = "mapZoomCheckAutoZoom";
   const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.0;
   const DEFAULT_RATIO_THRESHOLD_FLAT = 3.0;
   const DEFAULT_CAPTION_UNIT_SCALE = 0.8;
   const MIN_CAPTION_UNIT_SCALE = 0.5;
   const MAX_CAPTION_UNIT_SCALE = 1.5;
 
-  function formatZoom(value, defaultText, Helpers) {
-    const out = String(Helpers.applyFormatter(value, {
-      formatter: "formatDecimalOpt",
-      formatterParameters: [2, 1],
-      default: defaultText
-    }));
-    return out.trim() ? out : defaultText;
-  }
-
-  function clampCaptionUnitScale(value, htmlUtils) {
-    const scale = htmlUtils.toFiniteNumber(value);
-    if (typeof scale !== "number") {
-      return DEFAULT_CAPTION_UNIT_SCALE;
-    }
-    return Math.max(MIN_CAPTION_UNIT_SCALE, Math.min(MAX_CAPTION_UNIT_SCALE, scale));
-  }
-
-  function resolveMode(props, hostContext, htmlUtils) {
+  function resolveDisplayMode(props, shellRect, htmlUtils) {
     const p = props || {};
-    return htmlUtils.resolveRatioMode({
+    return htmlUtils.resolveRatioModeForRect({
       ratioThresholdNormal: p.ratioThresholdNormal,
       ratioThresholdFlat: p.ratioThresholdFlat,
       defaultRatioThresholdNormal: DEFAULT_RATIO_THRESHOLD_NORMAL,
       defaultRatioThresholdFlat: DEFAULT_RATIO_THRESHOLD_FLAT,
-      hostContext: hostContext
+      defaultMode: "normal",
+      shellRect: shellRect
     });
   }
 
-  function resolveDisplayMode(baseMode, caption, unit) {
+  function resolveComposedMode(baseMode, caption, unit) {
     if (!caption) {
       return "flat";
     }
@@ -58,8 +41,7 @@
 
   function getSurfacePolicy(props) {
     const p = props && typeof props === "object" ? props : null;
-    const policy = p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
-    return policy;
+    return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
   }
 
   function canDispatchCheckAutoZoom(props) {
@@ -82,12 +64,56 @@
     return policy.actions.map.checkAutoZoom() !== false;
   }
 
+  function clampCaptionUnitScale(value, htmlUtils) {
+    const scale = htmlUtils.toFiniteNumber(value);
+    if (typeof scale !== "number") {
+      return DEFAULT_CAPTION_UNIT_SCALE;
+    }
+    return Math.max(MIN_CAPTION_UNIT_SCALE, Math.min(MAX_CAPTION_UNIT_SCALE, scale));
+  }
+
+  function formatZoom(value, defaultText, Helpers) {
+    const out = String(Helpers.applyFormatter(value, {
+      formatter: "formatDecimalOpt",
+      formatterParameters: [2, 1],
+      default: defaultText
+    }));
+    return out.trim() ? out : defaultText;
+  }
+
   function ensureProps(props) {
     const p = props || {};
     if (!Object.prototype.hasOwnProperty.call(p, "default")) {
       throw new Error("MapZoomTextHtmlWidget: props.default is required");
     }
     return p;
+  }
+
+  function buildModel(props, shellRect, Helpers, htmlUtils) {
+    const p = ensureProps(props);
+    const defaultText = String(p.default);
+    const caption = htmlUtils.trimText(p.caption);
+    const unit = htmlUtils.trimText(p.unit);
+    const ratioMode = resolveDisplayMode(p, shellRect, htmlUtils);
+    const mode = resolveComposedMode(ratioMode, caption, unit);
+    const zoomNumber = htmlUtils.toFiniteNumber(p.zoom);
+    const requiredZoomNumber = htmlUtils.toFiniteNumber(p.requiredZoom);
+    const zoomText = formatZoom(zoomNumber, defaultText, Helpers);
+    const requiredText = formatZoom(requiredZoomNumber, defaultText, Helpers);
+    const showRequired = typeof requiredZoomNumber === "number" && requiredZoomNumber !== zoomNumber;
+    const isEditing = htmlUtils.isEditingMode(p);
+    const canDispatch = !isEditing && canDispatchCheckAutoZoom(p);
+
+    return {
+      mode: mode,
+      caption: caption,
+      unit: unit,
+      zoomText: zoomText,
+      requiredText: showRequired ? "(" + requiredText + ")" : "",
+      showRequired: showRequired,
+      canDispatch: canDispatch,
+      captionUnitScale: clampCaptionUnitScale(p.captionUnitScale, htmlUtils)
+    };
   }
 
   function renderMainRows(model, htmlUtils) {
@@ -127,132 +153,185 @@
       + "</div>";
   }
 
+  function renderMarkup(model, htmlUtils) {
+    const classes = [
+      "dyni-map-zoom-html",
+      "dyni-map-zoom-mode-" + model.mode,
+      model.canDispatch ? "dyni-map-zoom-open-dispatch" : "dyni-map-zoom-open-passive"
+    ];
+    if (model.showRequired) {
+      classes.push("dyni-map-zoom-has-required");
+    }
+
+    const requiredHtml = model.showRequired
+      ? ('<div class="dyni-map-zoom-required"' + htmlUtils.toStyleAttr(model.requiredStyle) + ">" + htmlUtils.escapeHtml(model.requiredText) + "</div>")
+      : "";
+    const scaleStyle = ' style="--dyni-map-zoom-sec-scale:' + model.captionUnitScale + ';"';
+
+    return ""
+      + '<div class="' + classes.join(" ") + '"' + scaleStyle + ' data-dyni-action="map-zoom-check-auto">'
+      + '<div class="dyni-map-zoom-open-hotspot"></div>'
+      + renderMainRows(model, htmlUtils)
+      + requiredHtml
+      + "</div>";
+  }
+
   function create(def, Helpers) {
     const htmlFit = Helpers.getModule("MapZoomHtmlFit").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
 
-    function buildModel(props, hostContext) {
-      const p = ensureProps(props);
-      const defaultText = String(p.default);
-      const caption = htmlUtils.trimText(p.caption);
-      const unit = htmlUtils.trimText(p.unit);
-      const ratioMode = resolveMode(p, hostContext, htmlUtils);
-      const mode = resolveDisplayMode(ratioMode, caption, unit);
-      const zoomNumber = htmlUtils.toFiniteNumber(p.zoom);
-      const requiredZoomNumber = htmlUtils.toFiniteNumber(p.requiredZoom);
-      const zoomText = formatZoom(zoomNumber, defaultText, Helpers);
-      const requiredText = formatZoom(requiredZoomNumber, defaultText, Helpers);
-      const showRequired = typeof requiredZoomNumber === "number" && requiredZoomNumber !== zoomNumber;
-      const isEditing = htmlUtils.isEditingMode(p);
-      const canDispatch = !isEditing && canDispatchCheckAutoZoom(p);
-      const captionUnitScale = clampCaptionUnitScale(p.captionUnitScale, htmlUtils);
+    function createCommittedRenderer(rendererContext) {
+      const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
+      const hostContext = context.hostContext || {};
 
-      const modelBase = {
-        mode: mode,
-        caption: caption,
-        unit: unit,
-        zoomText: zoomText,
-        requiredText: showRequired ? "(" + requiredText + ")" : "",
-        showRequired: showRequired,
-        canDispatch: canDispatch,
-        captionUnitScale: captionUnitScale
+      let mountEl = null;
+      let rootEl = null;
+      let wrapperEl = null;
+      let clickHandler = null;
+      let lastProps = null;
+      let lastFit = {
+        captionStyle: "",
+        valueStyle: "",
+        unitStyle: "",
+        requiredStyle: ""
       };
-      const fitStyles = htmlFit.compute({
-        model: modelBase,
-        hostContext: hostContext,
-        shellRect: htmlUtils.resolveShellRect(hostContext)
-      });
+
+      function bindDispatchListener(model) {
+        if (wrapperEl && clickHandler) {
+          wrapperEl.removeEventListener("click", clickHandler);
+        }
+        clickHandler = null;
+
+        if (!wrapperEl || model.canDispatch !== true) {
+          return;
+        }
+
+        clickHandler = function onDispatchClick(ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          dispatchCheckAutoZoom(lastProps, htmlUtils);
+        };
+        wrapperEl.addEventListener("click", clickHandler);
+      }
+
+      function patchDom(payload) {
+        const shellRect = payload.shellRect || null;
+        const baseModel = buildModel(payload.props, shellRect, Helpers, htmlUtils);
+        const fit = payload.layoutChanged || !lastFit
+          ? (htmlFit.compute({
+            model: baseModel,
+            hostContext: hostContext,
+            targetEl: payload.rootEl,
+            shellRect: shellRect
+          }) || {
+            captionStyle: "",
+            valueStyle: "",
+            unitStyle: "",
+            requiredStyle: ""
+          })
+          : lastFit;
+
+        const renderModel = {
+          mode: baseModel.mode,
+          caption: baseModel.caption,
+          unit: baseModel.unit,
+          zoomText: baseModel.zoomText,
+          requiredText: baseModel.requiredText,
+          showRequired: baseModel.showRequired,
+          canDispatch: baseModel.canDispatch,
+          captionUnitScale: baseModel.captionUnitScale,
+          captionStyle: fit.captionStyle,
+          valueStyle: fit.valueStyle,
+          unitStyle: fit.unitStyle,
+          requiredStyle: fit.requiredStyle
+        };
+
+        htmlUtils.applyMirroredContext(rootEl, payload.props);
+        wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(renderModel, htmlUtils));
+        lastFit = fit;
+        lastProps = payload.props;
+
+        bindDispatchListener(renderModel);
+      }
+
+      function mount(mountHostEl, payload) {
+        mountEl = mountHostEl;
+        rootEl = mountEl.ownerDocument.createElement("div");
+        mountEl.appendChild(rootEl);
+        patchDom(payload);
+      }
+
+      function update(payload) {
+        patchDom(payload);
+      }
+
+      function postPatch() {
+        return false;
+      }
+
+      function detach() {
+        if (wrapperEl && clickHandler) {
+          wrapperEl.removeEventListener("click", clickHandler);
+        }
+        clickHandler = null;
+        wrapperEl = null;
+        lastProps = null;
+        lastFit = {
+          captionStyle: "",
+          valueStyle: "",
+          unitStyle: "",
+          requiredStyle: ""
+        };
+        if (rootEl && rootEl.parentNode) {
+          rootEl.parentNode.removeChild(rootEl);
+        }
+        rootEl = null;
+        mountEl = null;
+      }
+
+      function destroy() {
+        detach();
+      }
+
+      function layoutSignature(payload) {
+        const shellRect = payload && payload.shellRect ? payload.shellRect : null;
+        const model = buildModel(payload && payload.props ? payload.props : {}, shellRect, Helpers, htmlUtils);
+        return [
+          model.caption.length,
+          model.zoomText.length,
+          model.unit.length,
+          model.requiredText.length,
+          model.mode,
+          model.captionUnitScale,
+          model.showRequired ? 1 : 0,
+          model.canDispatch ? 1 : 0,
+          shellRect ? Math.round(shellRect.width) : 0,
+          shellRect ? Math.round(shellRect.height) : 0
+        ].join("|");
+      }
 
       return {
-        mode: modelBase.mode,
-        caption: modelBase.caption,
-        unit: modelBase.unit,
-        zoomText: modelBase.zoomText,
-        requiredText: modelBase.requiredText,
-        showRequired: modelBase.showRequired,
-        canDispatch: modelBase.canDispatch,
-        captionUnitScale: modelBase.captionUnitScale,
-        captionStyle: fitStyles.captionStyle,
-        valueStyle: fitStyles.valueStyle,
-        unitStyle: fitStyles.unitStyle,
-        requiredStyle: fitStyles.requiredStyle
+        mount: mount,
+        update: update,
+        postPatch: postPatch,
+        detach: detach,
+        destroy: destroy,
+        layoutSignature: layoutSignature
       };
     }
 
-    const namedHandlers = function (props) {
-      return {
-        mapZoomCheckAutoZoom: function mapZoomCheckAutoZoomHandler() {
-          return dispatchCheckAutoZoom(props, htmlUtils);
-        }
-      };
-    };
-
-    const renderHtml = function (props) {
-      const model = buildModel(props, this);
-      const classes = [
-        "dyni-map-zoom-html",
-        "dyni-map-zoom-mode-" + model.mode,
-        model.canDispatch ? "dyni-map-zoom-open-dispatch" : "dyni-map-zoom-open-passive"
-      ];
-      if (model.showRequired) {
-        classes.push("dyni-map-zoom-has-required");
-      }
-
-      const wrapperOnClickAttr = model.canDispatch ? ' onclick="catchAll"' : "";
-      const hotspotHtml = model.canDispatch
-        ? ('<div class="dyni-map-zoom-open-hotspot" onclick="' + CHECK_AUTO_ZOOM_HANDLER_NAME + '"></div>')
-        : "";
-      const requiredHtml = model.showRequired
-        ? ('<div class="dyni-map-zoom-required"' + htmlUtils.toStyleAttr(model.requiredStyle) + ">" + htmlUtils.escapeHtml(model.requiredText) + "</div>")
-        : "";
-      const scaleStyle = ' style="--dyni-map-zoom-sec-scale:' + model.captionUnitScale + ';"';
-
-      return ""
-        + '<div class="' + classes.join(" ") + '"' + scaleStyle + wrapperOnClickAttr + ">"
-        + hotspotHtml
-        + renderMainRows(model, htmlUtils)
-        + requiredHtml
-        + "</div>";
-    };
-
-    const resizeSignature = function (props) {
-      const model = buildModel(props, this);
-      const rect = htmlUtils.resolveShellRect(this);
-      return [
-        model.caption.length,
-        model.zoomText.length,
-        model.unit.length,
-        model.requiredText.length,
-        model.mode,
-        model.captionUnitScale,
-        model.showRequired ? 1 : 0,
-        model.canDispatch ? 1 : 0,
-        rect ? Math.round(rect.width) : 0,
-        rect ? Math.round(rect.height) : 0
-      ].join("|");
-    };
-
-    const initFunction = function () {
-      if (this && typeof this.triggerResize === "function") {
-        this.triggerResize();
-      }
-    };
-
-    const translateFunction = function () {
+    function translateFunction() {
       return {};
-    };
+    }
 
-    const getVerticalShellSizing = function () {
+    function getVerticalShellSizing() {
       return { kind: "ratio", aspectRatio: 2 };
-    };
+    }
 
     return {
       id: "MapZoomTextHtmlWidget",
       wantsHideNativeHead: true,
-      renderHtml: renderHtml,
-      namedHandlers: namedHandlers,
-      resizeSignature: resizeSignature,
-      initFunction: initFunction,
+      createCommittedRenderer: createCommittedRenderer,
       getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };

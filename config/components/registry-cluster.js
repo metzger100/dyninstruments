@@ -81,6 +81,11 @@
       css: undefined,
       globalKey: "DyniClusterSurfacePolicy"
     },
+    SurfaceControllerFactory: {
+      js: BASE + "cluster/rendering/SurfaceControllerFactory.js",
+      css: undefined,
+      globalKey: "DyniSurfaceControllerFactory"
+    },
     ClusterRendererRouter: {
       js: BASE + "cluster/rendering/ClusterRendererRouter.js",
       css: undefined,
@@ -90,6 +95,7 @@
         "ClusterSurfacePolicy",
         "CanvasDomSurfaceAdapter",
         "HtmlSurfaceController",
+        "SurfaceControllerFactory",
         "ThreeValueTextWidget",
         "PositionCoordinateWidget",
         "ActiveRouteTextHtmlWidget",

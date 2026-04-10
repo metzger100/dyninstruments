@@ -12,162 +12,184 @@ describe("HtmlSurfaceController", function () {
     });
   }
 
-  function makePayload(props, revision, shellEl) {
+  function createSurfaceDom() {
+    const rootEl = document.createElement("div");
+    const shellEl = document.createElement("div");
+    const mountEl = document.createElement("div");
+    mountEl.className = "dyni-surface-html-mount";
+    mountEl.getBoundingClientRect = vi.fn(() => ({ width: 320, height: 180 }));
+    shellEl.appendChild(mountEl);
+    rootEl.appendChild(shellEl);
+    return { rootEl, shellEl, mountEl };
+  }
+
+  function makePayload(surfaceDom, props, revision) {
     return {
       surface: "html",
-      rootEl: { id: "root" },
-      shellEl: shellEl || { id: "shell" },
-      props: props,
-      revision: revision
+      rootEl: surfaceDom.rootEl,
+      shellEl: surfaceDom.shellEl,
+      props: props || {},
+      revision
     };
   }
 
-  it("renders html shell and pre-binds named handlers on the same render pass", function () {
+  it("renders html shell with mount host", function () {
     const module = createModule();
-    const activeRouteOpen = vi.fn();
-    const hostContext = { eventHandler: [] };
     const rendererSpec = {
-      renderHtml: vi.fn(() => '<button onclick="activeRouteOpen">ok</button>'),
-      namedHandlers: vi.fn(() => ({ activeRouteOpen: activeRouteOpen })),
-      resizeSignature: vi.fn(() => "sig-1")
+      createCommittedRenderer: vi.fn()
     };
 
     const html = module.renderSurfaceShell({
-      rendererSpec: rendererSpec,
+      rendererSpec,
       props: { kind: "activeRoute" },
-      hostContext: hostContext
+      hostContext: {}
     });
 
-    expect(rendererSpec.namedHandlers).toHaveBeenCalledWith({ kind: "activeRoute" }, hostContext);
-    expect(rendererSpec.renderHtml).toHaveBeenCalledWith({ kind: "activeRoute" });
-    expect(hostContext.eventHandler.activeRouteOpen).toBe(activeRouteOpen);
-    expect(html).toBe('<div class="dyni-surface-html"><button onclick="activeRouteOpen">ok</button></div>');
+    expect(html).toBe('<div class="dyni-surface-html"><div class="dyni-surface-html-mount" data-dyni-html-mount="1"></div></div>');
+    expect(rendererSpec.createCommittedRenderer).not.toHaveBeenCalled();
   });
 
-  it("implements strict html lifecycle with owned handler cleanup and resize signaling", function () {
+  it("implements committed renderer lifecycle including relayout update", function () {
     const module = createModule();
-    const initFunction = vi.fn();
-    const triggerResize = vi.fn();
-    const namedOpen = vi.fn();
-    const namedOpenNext = vi.fn();
-    const hostContext = {
-      eventHandler: [],
-      triggerResize: triggerResize
+    const hostContext = {};
+    const surfaceDom = createSurfaceDom();
+
+    const rendererInstance = {
+      mount: vi.fn(function (mountTarget) {
+        const marker = document.createElement("div");
+        marker.className = "dyni-shadow-marker";
+        mountTarget.appendChild(marker);
+      }),
+      update: vi.fn(),
+      postPatch: vi.fn()
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce({ relayout: true })
+        .mockReturnValue(false),
+      detach: vi.fn(),
+      destroy: vi.fn(),
+      layoutSignature: vi.fn(function (payload) {
+        return payload && payload.props ? payload.props.sig : "none";
+      })
     };
-    hostContext.eventHandler.catchAll = vi.fn();
+
+    const rendererSpec = {
+      id: "spec-id",
+      createCommittedRenderer: vi.fn(function () {
+        return rendererInstance;
+      })
+    };
 
     const controller = module.createSurfaceController({
-      rendererSpec: {
-        initFunction: initFunction,
-        renderHtml: vi.fn(() => "<div></div>"),
-        namedHandlers: vi.fn((props) => {
-          return props.mode === "next"
-            ? { activeRouteOpenNext: namedOpenNext }
-            : { activeRouteOpen: namedOpen };
-        }),
-        resizeSignature: vi.fn((props) => String(props.sig))
-      },
-      hostContext: hostContext
+      rendererSpec,
+      hostContext
     });
-    const shellEl = { id: "shell" };
-    const attachProps = { mode: "initial", sig: "a" };
-    const updateProps = { mode: "next", sig: "b" };
 
-    controller.attach(makePayload(attachProps, 1, shellEl));
-    expect(initFunction).toHaveBeenCalledWith(attachProps);
-    expect(hostContext.eventHandler.activeRouteOpen).toBe(namedOpen);
-    expect(typeof hostContext.eventHandler.catchAll).toBe("function");
+    controller.attach(makePayload(surfaceDom, { sig: "a" }, 1));
 
-    const updateResult = controller.update(makePayload(updateProps, 2, shellEl));
-    expect(updateResult).toEqual({ updated: true, changed: true });
-    expect(triggerResize).toHaveBeenCalledTimes(1);
-    expect(hostContext.eventHandler.activeRouteOpen).toBeUndefined();
-    expect(hostContext.eventHandler.activeRouteOpenNext).toBe(namedOpenNext);
+    expect(rendererSpec.createCommittedRenderer).toHaveBeenCalledWith(expect.objectContaining({
+      hostContext,
+      mountEl: surfaceDom.mountEl,
+      shadowRoot: expect.any(Object)
+    }));
+    expect(rendererInstance.mount).toHaveBeenCalledTimes(1);
+    expect(rendererInstance.mount.mock.calls[0][0]).toBe(surfaceDom.mountEl.shadowRoot);
+    expect(rendererInstance.mount.mock.calls[0][1]).toEqual(expect.objectContaining({
+      props: { sig: "a" },
+      layoutChanged: true,
+      relayoutPass: 0
+    }));
+    expect(surfaceDom.mountEl.innerHTML).toBe("");
+    expect(surfaceDom.mountEl.shadowRoot.querySelector(".dyni-shadow-marker")).toBeTruthy();
 
-    const stableUpdate = controller.update(makePayload(updateProps, 3, shellEl));
-    expect(stableUpdate).toEqual({ updated: false, changed: false });
-    expect(triggerResize).toHaveBeenCalledTimes(1);
+    const stableUpdate = controller.update(makePayload(surfaceDom, { sig: "a" }, 2));
+    expect(stableUpdate).toEqual({ updated: true, changed: true, layoutChanged: false });
+    expect(rendererInstance.update).toHaveBeenCalledTimes(2);
+    expect(rendererInstance.update.mock.calls[0][0]).toEqual(expect.objectContaining({
+      layoutChanged: false,
+      relayoutPass: 0
+    }));
+    expect(rendererInstance.update.mock.calls[1][0]).toEqual(expect.objectContaining({
+      layoutChanged: true,
+      relayoutPass: 1
+    }));
+
+    const changedUpdate = controller.update(makePayload(surfaceDom, { sig: "b" }, 3));
+    expect(changedUpdate).toEqual({ updated: true, changed: true, layoutChanged: true });
 
     controller.detach("surface-switch");
-    expect(hostContext.eventHandler.activeRouteOpenNext).toBeUndefined();
-    expect(typeof hostContext.eventHandler.catchAll).toBe("function");
+    expect(rendererInstance.detach).toHaveBeenCalledWith("surface-switch");
+    expect(surfaceDom.mountEl.shadowRoot.innerHTML).toBe("");
 
     expect(function () {
-      controller.update(makePayload({ value: 3, sig: "c" }, 4));
+      controller.update(makePayload(surfaceDom, { sig: "c" }, 4));
     }).toThrow("requires an attached surface");
 
+    controller.attach(makePayload(surfaceDom, { sig: "d" }, 5));
     controller.destroy();
-    controller.destroy();
+    expect(rendererInstance.destroy).toHaveBeenCalledTimes(1);
 
     expect(function () {
-      controller.attach(makePayload({ value: 4, sig: "d" }, 5));
+      controller.attach(makePayload(surfaceDom, { sig: "e" }, 6));
     }).toThrow("attach() after destroy()");
   });
 
   it("throws for strict renderer contracts and invalid payload", function () {
     const module = createModule();
-    const hostContext = { eventHandler: [] };
+    const surfaceDom = createSurfaceDom();
 
     expect(function () {
-      module.renderSurfaceShell({
-        rendererSpec: { renderHtml: vi.fn(() => "<div></div>") },
-        props: {},
-        hostContext: hostContext
-      });
-    }).toThrow("rendererSpec.namedHandlers()");
-
-    expect(function () {
-      module.renderSurfaceShell({
-        rendererSpec: {
-          renderHtml: vi.fn(() => "<div></div>"),
-          namedHandlers: vi.fn(() => ({ catchAll: vi.fn() })),
-          resizeSignature: vi.fn(() => "x")
-        },
-        props: {},
-        hostContext: hostContext
-      });
-    }).toThrow("must not own 'catchAll'");
+      module.renderSurfaceShell({ rendererSpec: {}, props: {}, hostContext: {} });
+    }).toThrow("rendererSpec.createCommittedRenderer()");
 
     expect(function () {
       module.createSurfaceController({
-        rendererSpec: {
-          renderHtml: vi.fn(() => "<div></div>"),
-          namedHandlers: vi.fn(() => ({ activeRouteOpen: vi.fn() }))
-        },
-        hostContext: hostContext
+        rendererSpec: { createCommittedRenderer: vi.fn() },
+        hostContext: null
       });
-    }).toThrow("rendererSpec.resizeSignature()");
+    }).toThrow("requires hostContext object");
 
+    const invalidController = module.createSurfaceController({
+      rendererSpec: {
+        createCommittedRenderer: vi.fn(() => ({
+          mount: vi.fn(),
+          update: vi.fn(),
+          postPatch: vi.fn(),
+          detach: vi.fn()
+        }))
+      },
+      hostContext: {}
+    });
+
+    expect(function () {
+      invalidController.attach(makePayload(surfaceDom, {}, 1));
+    }).toThrow("must implement destroy()");
+
+    const rendererInstance = {
+      mount: vi.fn(),
+      update: vi.fn(),
+      postPatch: vi.fn(() => false),
+      detach: vi.fn(),
+      destroy: vi.fn(),
+      layoutSignature: vi.fn(() => "sig")
+    };
     const controller = module.createSurfaceController({
       rendererSpec: {
-        renderHtml: vi.fn(() => "<div></div>"),
-        namedHandlers: vi.fn(() => ({ activeRouteOpen: vi.fn() })),
-        resizeSignature: vi.fn(() => "sig")
+        createCommittedRenderer: vi.fn(() => rendererInstance)
       },
-      hostContext: hostContext
+      hostContext: {}
     });
 
     expect(function () {
       controller.attach({});
     }).toThrow("payload.revision");
 
-    expect(function () {
-      controller.attach({
-        surface: "canvas-dom",
-        rootEl: { id: "root" },
-        shellEl: { id: "shell" },
-        props: {},
-        revision: 1
-      });
-    }).toThrow("payload.surface === 'html'");
-
-    controller.attach(makePayload({ value: 1 }, 1));
+    controller.attach(makePayload(surfaceDom, {}, 1));
     expect(function () {
       controller.update({
         surface: "html",
-        rootEl: { id: "root" },
-        shellEl: { id: "shell-next" },
-        props: { value: 2 },
+        rootEl: surfaceDom.rootEl,
+        shellEl: document.createElement("div"),
+        props: {},
         revision: 2
       });
     }).toThrow("different shellEl");

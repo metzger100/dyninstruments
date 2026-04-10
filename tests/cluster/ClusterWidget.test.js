@@ -168,7 +168,6 @@ describe("ClusterWidget", function () {
     expect(runtime.createSurfaceSessionController).toHaveBeenCalledTimes(1);
     expect(routeSurfaceFactory).toHaveBeenCalledWith(widgetContext);
     expect(sessionController.initState).toHaveBeenCalledTimes(1);
-    expect(typeof widgetContext.eventHandler.catchAll).toBe("function");
     expect(widgetContext.__dyniHostCommitState).toMatchObject({ instanceId: "dyni-host-42" });
 
     const output = widget.renderHtml.call(widgetContext, { cluster: "speed", kind: "sog" });

@@ -1,5 +1,5 @@
 /**
- * Module: HtmlSurfaceController - Strict html-surface lifecycle owner for attach/update/detach/destroy
+ * Module: HtmlSurfaceController - Committed html-surface lifecycle owner for shell rendering and shadow DOM mount/update/detach/destroy
  * Documentation: documentation/architecture/cluster-widget-system.md
  * Depends: PerfSpanHelper
  */
@@ -13,8 +13,15 @@
 
   const SURFACE_ID = "html";
   const SURFACE_CLASS = "dyni-surface-html";
-  const PREBOUND_HANDLER_NAMES = "__dyniHtmlSurfacePreboundHandlers";
-  const FORBIDDEN_HANDLER_NAME = "catchAll";
+  const MOUNT_CLASS = "dyni-surface-html-mount";
+
+  function resolveRuntimeApi() {
+    const globalRoot = (typeof globalThis !== "undefined")
+      ? globalThis
+      : (typeof self !== "undefined" ? self : {});
+    const ns = globalRoot.DyniPlugin;
+    return ns && ns.runtime ? ns.runtime : null;
+  }
 
   function ensurePayload(methodName, payload) {
     if (!payload || typeof payload !== "object") {
@@ -44,180 +51,177 @@
     if (!rendererSpec || typeof rendererSpec !== "object") {
       throw new Error("HtmlSurfaceController: " + methodName + "() requires rendererSpec object");
     }
-    if (typeof rendererSpec.renderHtml !== "function") {
-      throw new Error("HtmlSurfaceController: " + methodName + "() requires rendererSpec.renderHtml()");
-    }
-    if (typeof rendererSpec.namedHandlers !== "function") {
-      throw new Error("HtmlSurfaceController: " + methodName + "() requires rendererSpec.namedHandlers()");
-    }
-    if (typeof rendererSpec.resizeSignature !== "function") {
-      throw new Error("HtmlSurfaceController: " + methodName + "() requires rendererSpec.resizeSignature()");
+    if (typeof rendererSpec.createCommittedRenderer !== "function") {
+      throw new Error("HtmlSurfaceController: " + methodName + "() requires rendererSpec.createCommittedRenderer()");
     }
   }
 
-  function ensureEventHandlerStore(hostContext) {
-    if (!hostContext.eventHandler || typeof hostContext.eventHandler !== "object") {
-      hostContext.eventHandler = [];
+  function ensureRendererInstance(methodName, instance) {
+    if (!instance || typeof instance !== "object") {
+      throw new Error("HtmlSurfaceController: " + methodName + "() renderer factory must return an object instance");
     }
-    return hostContext.eventHandler;
-  }
-
-  function normalizeHandlerNames(handlerMap, methodName) {
-    if (!handlerMap || typeof handlerMap !== "object" || Array.isArray(handlerMap)) {
-      throw new Error("HtmlSurfaceController: " + methodName + "() requires namedHandlers() to return an object map");
-    }
-    const names = Object.keys(handlerMap);
-    for (let i = 0; i < names.length; i += 1) {
-      const name = names[i];
-      if (!name || typeof name !== "string") {
-        throw new Error("HtmlSurfaceController: " + methodName + "() namedHandlers() returned invalid handler name");
-      }
-      if (name === FORBIDDEN_HANDLER_NAME) {
-        throw new Error("HtmlSurfaceController: " + methodName + "() must not own '" + FORBIDDEN_HANDLER_NAME + "' handler");
-      }
-      if (typeof handlerMap[name] !== "function") {
-        throw new Error("HtmlSurfaceController: " + methodName + "() namedHandlers()['" + name + "'] must be a function");
-      }
-    }
-    return names;
-  }
-
-  function bindNamedHandlers(hostContext, handlerMap, previousNames, methodName) {
-    const names = normalizeHandlerNames(handlerMap, methodName);
-    const handlers = ensureEventHandlerStore(hostContext);
-    const previous = previousNames;
-    const nextLookup = Object.create(null);
-
-    for (let i = 0; i < names.length; i += 1) {
-      nextLookup[names[i]] = true;
-      handlers[names[i]] = handlerMap[names[i]];
-    }
-
-    for (let i = 0; i < previous.length; i += 1) {
-      const oldName = previous[i];
-      if (oldName === FORBIDDEN_HANDLER_NAME || nextLookup[oldName]) {
-        continue;
-      }
-      if (Object.prototype.hasOwnProperty.call(handlers, oldName)) {
-        delete handlers[oldName];
-      }
-    }
-
-    return names;
-  }
-
-  function removeNamedHandlers(hostContext, names) {
-    const handlers = ensureEventHandlerStore(hostContext);
-    const list = names;
-    for (let i = 0; i < list.length; i += 1) {
-      const name = list[i];
-      if (!name || name === FORBIDDEN_HANDLER_NAME) {
-        continue;
-      }
-      if (Object.prototype.hasOwnProperty.call(handlers, name)) {
-        delete handlers[name];
+    const methods = ["mount", "update", "postPatch", "detach", "destroy"];
+    for (let i = 0; i < methods.length; i += 1) {
+      const method = methods[i];
+      if (typeof instance[method] !== "function") {
+        throw new Error("HtmlSurfaceController: " + methodName + "() committed renderer must implement " + method + "()");
       }
     }
   }
 
-  function normalizeResizeSignature(signature, methodName) {
+  function normalizeSignature(signature, methodName) {
     if (signature == null) {
       return "null";
     }
-    const t = typeof signature;
-    if (t === "string" || t === "number" || t === "boolean") {
-      return t + ":" + String(signature);
+    const type = typeof signature;
+    if (type === "string" || type === "number" || type === "boolean") {
+      return type + ":" + String(signature);
     }
-    throw new Error("HtmlSurfaceController: " + methodName + "() resizeSignature() must return primitive signature");
+    throw new Error("HtmlSurfaceController: " + methodName + "() layoutSignature() must return primitive signature");
   }
 
-  function resolveNamedHandlers(rendererSpec, props, hostContext, methodName) {
-    const handlerMap = rendererSpec.namedHandlers(props, hostContext);
-    normalizeHandlerNames(handlerMap, methodName);
-    return handlerMap;
+  function resolveLayoutSignature(rendererInstance, rendererPayload, methodName) {
+    if (typeof rendererInstance.layoutSignature !== "function") {
+      return "none";
+    }
+    return normalizeSignature(rendererInstance.layoutSignature(rendererPayload), methodName);
   }
 
-  function resolveResizeSignature(rendererSpec, props, hostContext, methodName) {
-    return normalizeResizeSignature(rendererSpec.resizeSignature(props, hostContext), methodName);
+  function ensureMountHost(shellEl) {
+    if (!shellEl || typeof shellEl.querySelector !== "function") {
+      throw new Error("HtmlSurfaceController: shell element does not support querySelector()");
+    }
+    const mountEl = shellEl.querySelector("." + MOUNT_CLASS);
+    if (!mountEl) {
+      throw new Error("HtmlSurfaceController: shell is missing ." + MOUNT_CLASS + " mount host");
+    }
+    return mountEl;
   }
 
-  function bindPreRenderHandlers(rendererSpec, props, hostContext) {
-    const previous = Array.isArray(hostContext[PREBOUND_HANDLER_NAMES])
-      ? hostContext[PREBOUND_HANDLER_NAMES]
-      : [];
-    const handlerMap = resolveNamedHandlers(rendererSpec, props, hostContext, "renderSurfaceShell");
-    const names = bindNamedHandlers(hostContext, handlerMap, previous, "renderSurfaceShell");
-    hostContext[PREBOUND_HANDLER_NAMES] = names.slice();
+  function ensureShadowRoot(mountEl) {
+    if (mountEl.shadowRoot) {
+      return mountEl.shadowRoot;
+    }
+    if (typeof mountEl.attachShadow !== "function") {
+      throw new Error("HtmlSurfaceController: mount host does not support attachShadow()");
+    }
+    return mountEl.attachShadow({ mode: "open" });
+  }
+
+  function measureShellRect(mountEl) {
+    if (!mountEl || typeof mountEl.getBoundingClientRect !== "function") {
+      return null;
+    }
+    const rect = mountEl.getBoundingClientRect();
+    const width = Number(rect && rect.width);
+    const height = Number(rect && rect.height);
+    if (!(width > 0) || !(height > 0)) {
+      return null;
+    }
+    return {
+      width: width,
+      height: height
+    };
+  }
+
+  function createRendererPayload(state, payload, layoutChanged, relayoutPass) {
+    return {
+      props: payload.props,
+      revision: payload.revision,
+      rootEl: payload.rootEl,
+      shellEl: payload.shellEl,
+      mountEl: state.mountEl,
+      shadowRoot: state.shadowRoot,
+      shellRect: measureShellRect(state.mountEl),
+      hostContext: state.hostContext,
+      layoutChanged: layoutChanged === true,
+      relayoutPass: relayoutPass || 0
+    };
+  }
+
+  function shouldRelayout(result) {
+    if (result === true) {
+      return true;
+    }
+    return !!(result && typeof result === "object" && result.relayout === true);
+  }
+
+  function ensureShadowCssCached(themeRuntime, url) {
+    if (!themeRuntime || typeof themeRuntime.getShadowCssText !== "function") {
+      throw new Error("HtmlSurfaceController: runtime._theme.getShadowCssText() is required for shadow CSS injection");
+    }
+    const cssText = themeRuntime.getShadowCssText(url);
+    if (typeof cssText !== "string") {
+      throw new Error("HtmlSurfaceController: missing preloaded shadow CSS text for '" + url + "'");
+    }
+    return cssText;
+  }
+
+  function injectShadowStyles(shadowRoot, shadowCssUrls, themeRuntime) {
+    if (!Array.isArray(shadowCssUrls) || !shadowCssUrls.length) {
+      return;
+    }
+    for (let i = 0; i < shadowCssUrls.length; i += 1) {
+      const url = shadowCssUrls[i];
+      if (typeof url !== "string" || !url) {
+        continue;
+      }
+      const selector = 'style[data-dyni-shadow-css="' + url.replace(/"/g, "\\\"") + '"]';
+      if (typeof shadowRoot.querySelector === "function" && shadowRoot.querySelector(selector)) {
+        continue;
+      }
+      const cssText = ensureShadowCssCached(themeRuntime, url);
+      const styleEl = shadowRoot.ownerDocument.createElement("style");
+      styleEl.setAttribute("data-dyni-shadow-css", url);
+      styleEl.textContent = cssText;
+      shadowRoot.appendChild(styleEl);
+    }
   }
 
   function create(def, Helpers) {
     const perf = Helpers.getModule("PerfSpanHelper").create(def, Helpers);
+    const runtimeApi = resolveRuntimeApi();
+    const themeRuntime = runtimeApi && runtimeApi._theme ? runtimeApi._theme : null;
 
     function renderSurfaceShell(options) {
       const opts = options || {};
-      const rendererSpec = opts.rendererSpec;
-      const props = opts.props;
-      const hostContext = Object.prototype.hasOwnProperty.call(opts, "hostContext") ? opts.hostContext : null;
-
-      ensureRendererSpec("renderSurfaceShell", rendererSpec);
-      ensureHostContext("renderSurfaceShell", hostContext);
-      bindPreRenderHandlers(rendererSpec, props, hostContext);
-
-      const renderSpan = perf.startSpan("Renderer.renderHtml", {
-        rendererId: rendererSpec.id || "unknown",
-        cluster: props && props.cluster,
-        kind: props && props.kind
-      });
-      let rendered;
-      try {
-        rendered = rendererSpec.renderHtml.call(hostContext, props);
-      }
-      finally {
-        perf.endSpan(renderSpan, {
-          rendererId: rendererSpec.id || "unknown",
-          cluster: props && props.cluster,
-          kind: props && props.kind
-        });
-      }
-      if (typeof rendered !== "string") {
-        throw new Error("HtmlSurfaceController: renderSurfaceShell() requires rendererSpec.renderHtml() to return string");
-      }
-      const innerHtml = rendered;
-
-      return '<div class="' + SURFACE_CLASS + '">' + innerHtml + "</div>";
+      ensureRendererSpec("renderSurfaceShell", opts.rendererSpec);
+      return '<div class="' + SURFACE_CLASS + '"><div class="' + MOUNT_CLASS + '" data-dyni-html-mount="1"></div></div>';
     }
 
     function createSurfaceController(options) {
       const opts = options || {};
       const rendererSpec = opts.rendererSpec || null;
       const hostContext = Object.prototype.hasOwnProperty.call(opts, "hostContext") ? opts.hostContext : null;
+      const shadowCssUrls = Array.isArray(opts.shadowCssUrls) ? opts.shadowCssUrls.slice() : [];
+
       ensureRendererSpec("createSurfaceController", rendererSpec);
       ensureHostContext("createSurfaceController", hostContext);
 
       let attached = false;
       let destroyed = false;
-      let rootEl = null;
-      let shellEl = null;
-      let props = undefined;
-      let revision = 0;
-      let ownedHandlerNames = [];
-      let resizeSignature = "null";
+      let lastLayoutSignature = "none";
 
-      function bindOwnedHandlers(nextProps, methodName) {
-        const handlerMap = resolveNamedHandlers(rendererSpec, nextProps, hostContext, methodName);
-        ownedHandlerNames = bindNamedHandlers(hostContext, handlerMap, ownedHandlerNames, methodName);
-      }
+      const state = {
+        hostContext: hostContext,
+        shellEl: null,
+        mountEl: null,
+        shadowRoot: null,
+        renderer: null
+      };
 
-      function refreshResizeSignature(nextProps, methodName) {
-        const nextSignature = resolveResizeSignature(rendererSpec, nextProps, hostContext, methodName);
-        if (nextSignature === resizeSignature) {
-          return false;
+      function runPostPatch(payload, rendererPayload) {
+        if (!state.renderer) {
+          return;
         }
-        resizeSignature = nextSignature;
-        if (typeof hostContext.triggerResize === "function") {
-          hostContext.triggerResize();
+        const postPatchResult = state.renderer.postPatch(rendererPayload);
+        if (!shouldRelayout(postPatchResult)) {
+          return;
         }
-        return true;
+
+        const relayoutPayload = createRendererPayload(state, payload, true, 1);
+        state.renderer.update(relayoutPayload);
+        state.renderer.postPatch(relayoutPayload);
       }
 
       function attach(payload) {
@@ -230,21 +234,25 @@
         }
         ensurePayload("attach", payload);
         try {
-          rootEl = payload.rootEl;
-          shellEl = payload.shellEl;
-          props = payload.props;
-          revision = payload.revision;
-          bindOwnedHandlers(props, "attach");
-          resizeSignature = resolveResizeSignature(rendererSpec, props, hostContext, "attach");
-          attached = true;
+          state.mountEl = ensureMountHost(payload.shellEl);
+          state.shadowRoot = ensureShadowRoot(state.mountEl);
+          state.shellEl = payload.shellEl;
+          injectShadowStyles(state.shadowRoot, shadowCssUrls, themeRuntime);
 
-          if (typeof rendererSpec.initFunction === "function") {
-            if (hostContext) {
-              rendererSpec.initFunction.call(hostContext, props);
-            } else {
-              rendererSpec.initFunction(props);
-            }
-          }
+          const rendererInstance = rendererSpec.createCommittedRenderer({
+            hostContext: hostContext,
+            shadowRoot: state.shadowRoot,
+            mountEl: state.mountEl
+          });
+          ensureRendererInstance("attach", rendererInstance);
+          state.renderer = rendererInstance;
+
+          const rendererPayload = createRendererPayload(state, payload, true, 0);
+          lastLayoutSignature = resolveLayoutSignature(rendererInstance, rendererPayload, "attach");
+          rendererInstance.mount(state.shadowRoot, rendererPayload);
+          runPostPatch(payload, rendererPayload);
+
+          attached = true;
         }
         finally {
           perf.endSpan(span, {
@@ -260,24 +268,26 @@
           revision: payload && payload.revision
         });
         ensurePayload("update", payload);
-        if (!attached) {
+        if (!attached || !state.renderer) {
           throw new Error("HtmlSurfaceController: update() requires an attached surface");
         }
-        if (payload.shellEl !== shellEl) {
+        if (payload.shellEl !== state.shellEl) {
           throw new Error("HtmlSurfaceController: update() received a different shellEl; remount required");
         }
         try {
-          const changed = props !== payload.props;
-          bindOwnedHandlers(payload.props, "update");
-          const resized = refreshResizeSignature(payload.props, "update");
-          rootEl = payload.rootEl;
-          shellEl = payload.shellEl;
-          props = payload.props;
-          revision = payload.revision;
+          const signaturePayload = createRendererPayload(state, payload, false, 0);
+          const nextLayoutSignature = resolveLayoutSignature(state.renderer, signaturePayload, "update");
+          const layoutChanged = nextLayoutSignature !== lastLayoutSignature;
+          lastLayoutSignature = nextLayoutSignature;
+
+          const rendererPayload = createRendererPayload(state, payload, layoutChanged, 0);
+          state.renderer.update(rendererPayload);
+          runPostPatch(payload, rendererPayload);
 
           return {
-            updated: changed || resized,
-            changed: changed
+            updated: true,
+            changed: true,
+            layoutChanged: layoutChanged
           };
         }
         finally {
@@ -289,22 +299,28 @@
       }
 
       function detach(reason) {
-        removeNamedHandlers(hostContext, ownedHandlerNames);
-        ownedHandlerNames = [];
-        if (Array.isArray(hostContext[PREBOUND_HANDLER_NAMES])) {
-          hostContext[PREBOUND_HANDLER_NAMES] = [];
+        if (!state.renderer) {
+          attached = false;
+          return;
         }
-        rootEl = null;
-        shellEl = null;
-        props = undefined;
-        revision = 0;
-        resizeSignature = "null";
+        state.renderer.detach(reason || "detach");
+        if (state.shadowRoot && state.shadowRoot.textContent !== undefined) {
+          state.shadowRoot.textContent = "";
+        }
+        state.renderer = null;
+        state.shellEl = null;
+        state.mountEl = null;
+        state.shadowRoot = null;
+        lastLayoutSignature = "none";
         attached = false;
       }
 
       function destroy() {
         if (destroyed) {
           return;
+        }
+        if (state.renderer) {
+          state.renderer.destroy();
         }
         detach("destroy");
         destroyed = true;

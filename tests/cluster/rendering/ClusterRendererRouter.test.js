@@ -33,11 +33,22 @@ describe("ClusterRendererRouter", function () {
       renderCanvas: options.renderCanvas === false ? undefined : vi.fn()
     };
 
-    if (typeof options.renderHtml === "function") {
-      spec.renderHtml = options.renderHtml;
+    if (typeof options.createCommittedRenderer === "function") {
+      spec.createCommittedRenderer = options.createCommittedRenderer;
     }
 
     return spec;
+  }
+
+  function makeCommittedRenderer() {
+    return {
+      mount: vi.fn(),
+      update: vi.fn(),
+      postPatch: vi.fn(() => false),
+      detach: vi.fn(),
+      destroy: vi.fn(),
+      layoutSignature: vi.fn(() => "sig")
+    };
   }
 
   function makeControllerMock(id) {
@@ -99,23 +110,23 @@ describe("ClusterRendererRouter", function () {
     });
     rendererSpecs.ActiveRouteTextHtmlWidget = makeRendererSpec("ActiveRouteTextHtmlWidget", {
       renderCanvas: false,
-      renderHtml: vi.fn(() => "<div>interactive-route</div>")
+      createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
     });
     rendererSpecs.MapZoomTextHtmlWidget = makeRendererSpec("MapZoomTextHtmlWidget", {
       renderCanvas: false,
-      renderHtml: vi.fn(() => "<div>zoom</div>")
+      createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
     });
     rendererSpecs.RoutePointsTextHtmlWidget = makeRendererSpec("RoutePointsTextHtmlWidget", {
       renderCanvas: false,
-      renderHtml: vi.fn(() => "<div>route-points</div>")
+      createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
     });
     rendererSpecs.EditRouteTextHtmlWidget = makeRendererSpec("EditRouteTextHtmlWidget", {
       renderCanvas: false,
-      renderHtml: vi.fn(() => "<div>edit-route</div>")
+      createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
     });
     rendererSpecs.AisTargetTextHtmlWidget = makeRendererSpec("AisTargetTextHtmlWidget", {
       renderCanvas: false,
-      renderHtml: vi.fn(() => '<div class="dyni-ais-target-html"></div>')
+      createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
     });
     Object.assign(rendererSpecs, opts.rendererSpecs || {});
 
@@ -129,18 +140,7 @@ describe("ClusterRendererRouter", function () {
     };
 
     const htmlOwner = {
-      renderSurfaceShell: vi.fn(function (params) {
-        const rendererSpec = params.rendererSpec;
-        const props = params.props;
-        const hostContext = params.hostContext;
-        let inner = "";
-        if (rendererSpec && typeof rendererSpec.renderHtml === "function") {
-          inner = hostContext
-            ? rendererSpec.renderHtml.call(hostContext, props)
-            : rendererSpec.renderHtml(props);
-        }
-        return '<div class="dyni-surface-html">' + inner + "</div>";
-      }),
+      renderSurfaceShell: vi.fn(() => '<div class="dyni-surface-html"><div class="dyni-surface-html-mount" data-dyni-html-mount="1"></div></div>'),
       createSurfaceController: vi.fn(function () {
         const next = makeControllerMock("html-" + handles.htmlControllers.length);
         handles.htmlControllers.push(next);
@@ -157,6 +157,7 @@ describe("ClusterRendererRouter", function () {
       ClusterSurfacePolicy: loadFresh("cluster/rendering/ClusterSurfacePolicy.js"),
       CanvasDomSurfaceAdapter: { create: () => canvasAdapter },
       HtmlSurfaceController: { create: () => htmlOwner },
+      SurfaceControllerFactory: loadFresh("cluster/rendering/SurfaceControllerFactory.js"),
       ThreeValueTextWidget: { create: () => rendererSpecs.ThreeValueTextWidget },
       PositionCoordinateWidget: { create: () => rendererSpecs.PositionCoordinateWidget },
       ActiveRouteTextHtmlWidget: { create: () => rendererSpecs.ActiveRouteTextHtmlWidget },
@@ -243,7 +244,7 @@ describe("ClusterRendererRouter", function () {
 
     const htmlRenderer = makeRendererSpec("ActiveRouteTextHtmlWidget", {
       renderCanvas: false,
-      renderHtml: vi.fn(() => "<button>route</button>")
+      createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
     });
 
     const h = createHarness({
@@ -261,7 +262,7 @@ describe("ClusterRendererRouter", function () {
     expect(h.handles.htmlOwner.renderSurfaceShell).toHaveBeenCalledTimes(1);
     expect(out).toContain('data-dyni-surface="html"');
     expect(out).toContain("dyni-surface-html");
-    expect(out).toContain("<button>route</button>");
+    expect(out).toContain("dyni-surface-html-mount");
   });
 
   it("throws for missing tuples and mapper renderer mismatches", function () {

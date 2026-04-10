@@ -125,9 +125,8 @@
         wrapperClasses.push("dyni-edit-route-no-route");
       }
 
-      const wrapperOnClick = model.captureClicks === true ? ' onclick="catchAll"' : "";
       const openHotspot = canOpen
-        ? '<div class="dyni-edit-route-open-hotspot" onclick="editRouteOpen"></div>'
+        ? '<div class="dyni-edit-route-open-hotspot"></div>'
         : "";
       const showSourceBadge = hasRoute && isLocalRoute;
       const nameTextStyle = fit.nameTextStyle;
@@ -149,7 +148,7 @@
 
       return ""
         + '<div class="' + wrapperClasses.join(" ") + '"'
-        + wrapperOnClick
+        + ' data-dyni-action="edit-route-open"'
         + htmlUtils.toStyleAttr(model.wrapperStyle)
         + ">"
         + openHotspot

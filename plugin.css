@@ -28,6 +28,7 @@
 .widget.dyniplugin .widgetData.dyni-shell,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-surface-html,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-html-mount,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas-mount,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas-node {
   width: 100% !important;
@@ -36,6 +37,7 @@
 
 .widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-surface-html,
+.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-html-mount,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas-mount,
 .widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas-node {
   height: 100% !important;

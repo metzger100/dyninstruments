@@ -1,6 +1,6 @@
 /* AIS target summary HTML renderer styles */
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html {
+.dyni-html-root .dyni-ais-target-html {
   position: relative;
   width: 100%;
   height: 100%;
@@ -18,38 +18,38 @@
   color: inherit;
 }
 
-.widgetContainer.vertical .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html {
+.dyni-html-root[data-dyni-orientation="vertical"] .dyni-ais-target-html {
   height: auto;
   aspect-ratio: 7 / 8;
   min-height: 8em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html.dyni-ais-target-hidden {
+.dyni-html-root .dyni-ais-target-html.dyni-ais-target-hidden {
   display: none;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html.dyni-ais-target-open-dispatch {
+.dyni-html-root .dyni-ais-target-html.dyni-ais-target-open-dispatch {
   cursor: pointer;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html.dyni-ais-target-open-passive {
+.dyni-html-root .dyni-ais-target-html.dyni-ais-target-open-passive {
   cursor: default;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html.dyni-ais-target-mode-flat {
+.dyni-html-root .dyni-ais-target-html.dyni-ais-target-mode-flat {
   grid-template-areas: "identity metrics";
   grid-template-columns: minmax(0, auto) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-open-hotspot {
+.dyni-html-root .dyni-ais-target-open-hotspot {
   position: absolute;
   inset: 0;
   z-index: 2;
   background: transparent;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-state-accent {
+.dyni-html-root .dyni-ais-target-state-accent {
   position: absolute;
   inset: 0 auto 0 0;
   width: 0.34em;
@@ -57,7 +57,7 @@
   z-index: 0;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-identity {
+.dyni-html-root .dyni-ais-target-identity {
   position: relative;
   z-index: 1;
   grid-area: identity;
@@ -70,43 +70,43 @@
   row-gap: 0;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-name,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-front,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-caption,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value-row,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value-text,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-unit {
+.dyni-html-root .dyni-ais-target-name,
+.dyni-html-root .dyni-ais-target-front,
+.dyni-html-root .dyni-ais-target-metric-caption,
+.dyni-html-root .dyni-ais-target-metric-value,
+.dyni-html-root .dyni-ais-target-metric-value-row,
+.dyni-html-root .dyni-ais-target-metric-value-text,
+.dyni-html-root .dyni-ais-target-metric-unit {
   min-width: 0;
   line-height: 1;
   white-space: nowrap;
 
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-name {
+.dyni-html-root .dyni-ais-target-name {
   font-weight: var(--dyni-font-weight, 700);
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal .dyni-ais-target-name,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-name,
-.widgetContainer.vertical .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html.dyni-ais-target-vertical .dyni-ais-target-name {
+.dyni-html-root .dyni-ais-target-mode-normal .dyni-ais-target-name,
+.dyni-html-root .dyni-ais-target-mode-high .dyni-ais-target-name,
+.dyni-html-root[data-dyni-orientation="vertical"] .dyni-ais-target-html.dyni-ais-target-vertical .dyni-ais-target-name {
   display: flex;
   align-items: flex-end;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-front {
+.dyni-html-root .dyni-ais-target-front {
   font-weight: var(--dyni-label-weight, 700);
   opacity: 0.82;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal .dyni-ais-target-front,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-front,
-.widgetContainer.vertical .widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html.dyni-ais-target-vertical .dyni-ais-target-front {
+.dyni-html-root .dyni-ais-target-mode-normal .dyni-ais-target-front,
+.dyni-html-root .dyni-ais-target-mode-high .dyni-ais-target-front,
+.dyni-html-root[data-dyni-orientation="vertical"] .dyni-ais-target-html.dyni-ais-target-vertical .dyni-ais-target-front {
   display: flex;
   align-items: flex-start;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metrics {
+.dyni-html-root .dyni-ais-target-metrics {
   position: relative;
   z-index: 1;
   grid-area: metrics;
@@ -116,22 +116,22 @@
   gap: 0;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-flat .dyni-ais-target-metrics {
+.dyni-html-root .dyni-ais-target-mode-flat .dyni-ais-target-metrics {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-template-rows: minmax(0, auto);
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal .dyni-ais-target-metrics {
+.dyni-html-root .dyni-ais-target-mode-normal .dyni-ais-target-metrics {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: repeat(2, minmax(0, 1fr));
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-metrics {
+.dyni-html-root .dyni-ais-target-mode-high .dyni-ais-target-metrics {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: repeat(4, minmax(0, auto));
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric {
+.dyni-html-root .dyni-ais-target-metric {
   min-width: 0;
   min-height: 0;
   display: grid;
@@ -141,44 +141,44 @@
   column-gap: 0;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-flat .dyni-ais-target-metric {
+.dyni-html-root .dyni-ais-target-mode-flat .dyni-ais-target-metric {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, auto) minmax(0, auto) minmax(0, auto);
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal .dyni-ais-target-metric,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-metric {
+.dyni-html-root .dyni-ais-target-mode-normal .dyni-ais-target-metric,
+.dyni-html-root .dyni-ais-target-mode-high .dyni-ais-target-metric {
   grid-template-columns: minmax(0, auto) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   column-gap: 0;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-caption {
+.dyni-html-root .dyni-ais-target-metric-caption {
   font-weight: var(--dyni-label-weight, 700);
   opacity: 0.8;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-flat .dyni-ais-target-metric-caption {
+.dyni-html-root .dyni-ais-target-mode-flat .dyni-ais-target-metric-caption {
   text-align: center;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal .dyni-ais-target-metric-caption,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-metric-caption {
+.dyni-html-root .dyni-ais-target-mode-normal .dyni-ais-target-metric-caption,
+.dyni-html-root .dyni-ais-target-mode-high .dyni-ais-target-metric-caption {
   display: flex;
   align-items: flex-end;
   text-align: left;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value-text {
+.dyni-html-root .dyni-ais-target-metric-value,
+.dyni-html-root .dyni-ais-target-metric-value-text {
   font-weight: var(--dyni-font-weight, 700);
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value {
+.dyni-html-root .dyni-ais-target-metric-value {
   text-align: right;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-value-row {
+.dyni-html-root .dyni-ais-target-metric-value-row {
   min-width: 0;
   min-height: 0;
   display: grid;
@@ -188,37 +188,37 @@
   column-gap: 0.12em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-flat .dyni-ais-target-metric-value {
+.dyni-html-root .dyni-ais-target-mode-flat .dyni-ais-target-metric-value {
   text-align: center;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-normal .dyni-ais-target-metric-value-text,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-high .dyni-ais-target-metric-value-text {
+.dyni-html-root .dyni-ais-target-mode-normal .dyni-ais-target-metric-value-text,
+.dyni-html-root .dyni-ais-target-mode-high .dyni-ais-target-metric-value-text {
   min-width: 0;
   text-align: right;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-unit {
+.dyni-html-root .dyni-ais-target-metric-unit {
   font-weight: var(--dyni-label-weight, 700);
   opacity: 0.78;
   text-align: left;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-mode-flat .dyni-ais-target-metric-unit {
+.dyni-html-root .dyni-ais-target-mode-flat .dyni-ais-target-metric-unit {
   text-align: center;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-metric-unit:empty {
+.dyni-html-root .dyni-ais-target-metric-unit:empty {
   display: none;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-html.dyni-ais-target-placeholder {
+.dyni-html-root .dyni-ais-target-html.dyni-ais-target-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-ais-target-placeholder-text {
+.dyni-html-root .dyni-ais-target-placeholder-text {
   position: relative;
   z-index: 1;
   min-width: 0;

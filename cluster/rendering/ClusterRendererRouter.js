@@ -1,7 +1,7 @@
 /**
  * Module: ClusterRendererRouter - Strict kind/surface router with shell rendering and surface-controller helpers
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: PerfSpanHelper, ClusterKindCatalog, ClusterSurfacePolicy, CanvasDomSurfaceAdapter, HtmlSurfaceController, RendererPropsWidget, ActiveRouteTextHtmlWidget, EditRouteTextHtmlWidget, RoutePointsTextHtmlWidget, MapZoomTextHtmlWidget, AisTargetTextHtmlWidget
+ * Depends: PerfSpanHelper, ClusterKindCatalog, ClusterSurfacePolicy, CanvasDomSurfaceAdapter, HtmlSurfaceController, SurfaceControllerFactory, RendererPropsWidget, ActiveRouteTextHtmlWidget, EditRouteTextHtmlWidget, RoutePointsTextHtmlWidget, MapZoomTextHtmlWidget, AisTargetTextHtmlWidget
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -22,6 +22,21 @@
     const text = trimText(styleText);
     return text ? (' style="' + text + '"') : "";
   }
+  function resolveRuntimeConfig() {
+    const globalRoot = (typeof globalThis !== "undefined")
+      ? globalThis
+      : (typeof self !== "undefined" ? self : {});
+    const ns = globalRoot.DyniPlugin;
+    return ns && ns.config ? ns.config : null;
+  }
+  function resolveRendererShadowCss(rendererId) {
+    const config = resolveRuntimeConfig();
+    const components = config && config.components && typeof config.components === "object"
+      ? config.components
+      : null;
+    const componentDef = components && components[rendererId] ? components[rendererId] : null;
+    return componentDef && Array.isArray(componentDef.shadowCss) ? componentDef.shadowCss.slice() : [];
+  }
   function ensurePropsObject(props) {
     if (!props || typeof props !== "object") {
       throw new Error("ClusterRendererRouter: props must be an object");
@@ -39,6 +54,7 @@
     const canvasDomAdapter = Helpers.getModule("CanvasDomSurfaceAdapter").create(def, Helpers);
     const htmlSurfaceOwner = Helpers.getModule("HtmlSurfaceController").create(def, Helpers);
     const surfacePolicy = Helpers.getModule("ClusterSurfacePolicy").create(def, Helpers);
+    const surfaceControllerFactory = Helpers.getModule("SurfaceControllerFactory").create(def, Helpers);
     const threeSpec = Helpers.getModule("ThreeValueTextWidget").create(def, Helpers);
     const rendererPropsWidget = Helpers.getModule("RendererPropsWidget");
     const rendererSpecs = {
@@ -74,8 +90,10 @@
       if (route.surface === "canvas-dom" && typeof rendererSpec.renderCanvas !== "function") {
         throw new Error("ClusterRendererRouter: renderer '" + route.rendererId + "' must implement renderCanvas() for surface 'canvas-dom'");
       }
-      if (route.surface === "html" && typeof rendererSpec.renderHtml !== "function") {
-        throw new Error("ClusterRendererRouter: renderer '" + route.rendererId + "' must implement renderHtml() for surface 'html'");
+      if (route.surface === "html" && typeof rendererSpec.createCommittedRenderer !== "function") {
+        throw new Error(
+          "ClusterRendererRouter: renderer '" + route.rendererId + "' must implement createCommittedRenderer() for surface 'html'"
+        );
       }
     }
     const wantsHide = Object.keys(rendererSpecs).some(function (rendererId) {
@@ -106,161 +124,6 @@
         route: route,
         rendererSpec: rendererSpec,
         props: props
-      };
-    }
-    function ensureSurfacePayload(methodName, payload) {
-      if (!payload || typeof payload !== "object") {
-        throw new Error("ClusterRendererRouter: " + methodName + " requires a payload object");
-      }
-      if (!payload.rootEl) {
-        throw new Error("ClusterRendererRouter: " + methodName + " requires payload.rootEl");
-      }
-      if (!payload.shellEl) {
-        throw new Error("ClusterRendererRouter: " + methodName + " requires payload.shellEl");
-      }
-      ensureFiniteRevision(payload, methodName);
-      ensurePropsObject(payload.props);
-    }
-    function withSurfacePayload(payload, surface) {
-      return {
-        surface: surface,
-        rootEl: payload.rootEl,
-        shellEl: payload.shellEl,
-        props: payload.props,
-        revision: payload.revision
-      };
-    }
-    function createCanvasDomDynamicController(hostContext) {
-      let activeRendererId = null;
-      let activeController = null;
-      function createInnerController(rendererSpec) {
-        return canvasDomAdapter.createSurfaceController({
-          rendererSpec: rendererSpec,
-          hostContext: hostContext
-        });
-      }
-      function attach(payload) {
-        ensureSurfacePayload("attach", payload);
-        const state = resolveRouteState(payload.props);
-        if (state.route.surface !== "canvas-dom") {
-          throw new Error("ClusterRendererRouter: attach() expected canvas-dom route, got '" + state.route.surface + "'");
-        }
-        if (activeController) {
-          activeController.destroy();
-        }
-        activeRendererId = state.route.rendererId;
-        activeController = createInnerController(state.rendererSpec);
-        activeController.attach(withSurfacePayload(payload, "canvas-dom"));
-      }
-      function update(payload) {
-        ensureSurfacePayload("update", payload);
-        if (!activeController) {
-          throw new Error("ClusterRendererRouter: update() requires an attached canvas-dom controller");
-        }
-        const state = resolveRouteState(payload.props);
-        if (state.route.surface !== "canvas-dom") {
-          throw new Error("ClusterRendererRouter: update() expected canvas-dom route, got '" + state.route.surface + "'");
-        }
-        if (state.route.rendererId !== activeRendererId) {
-          activeController.detach("renderer-switch");
-          activeController.destroy();
-          activeRendererId = state.route.rendererId;
-          activeController = createInnerController(state.rendererSpec);
-          activeController.attach(withSurfacePayload(payload, "canvas-dom"));
-          return { updated: true, changed: true, remounted: true };
-        }
-        return activeController.update(withSurfacePayload(payload, "canvas-dom"));
-      }
-      function detach(reason) {
-        if (!activeController) {
-          return;
-        }
-        activeController.detach(reason);
-        activeRendererId = null;
-      }
-      function destroy() {
-        if (!activeController) {
-          return;
-        }
-        activeController.destroy();
-        activeController = null;
-        activeRendererId = null;
-      }
-      function invalidateTheme(reason) {
-        if (!activeController || typeof activeController.invalidateTheme !== "function") {
-          return false;
-        }
-        return activeController.invalidateTheme(reason);
-      }
-      return {
-        attach: attach,
-        update: update,
-        detach: detach,
-        destroy: destroy,
-        invalidateTheme: invalidateTheme
-      };
-    }
-    function createHtmlDynamicController(hostContext) {
-      let activeRendererId = null;
-      let activeController = null;
-      function createInnerController(rendererSpec) {
-        return htmlSurfaceOwner.createSurfaceController({
-          rendererSpec: rendererSpec,
-          hostContext: hostContext
-        });
-      }
-      function attach(payload) {
-        ensureSurfacePayload("attach", payload);
-        const state = resolveRouteState(payload.props);
-        if (state.route.surface !== "html") {
-          throw new Error("ClusterRendererRouter: attach() expected html route, got '" + state.route.surface + "'");
-        }
-        if (activeController) {
-          activeController.destroy();
-        }
-        activeRendererId = state.route.rendererId;
-        activeController = createInnerController(state.rendererSpec);
-        activeController.attach(withSurfacePayload(payload, "html"));
-      }
-      function update(payload) {
-        ensureSurfacePayload("update", payload);
-        if (!activeController) {
-          throw new Error("ClusterRendererRouter: update() requires an attached html controller");
-        }
-        const state = resolveRouteState(payload.props);
-        if (state.route.surface !== "html") {
-          throw new Error("ClusterRendererRouter: update() expected html route, got '" + state.route.surface + "'");
-        }
-        if (state.route.rendererId !== activeRendererId) {
-          activeController.detach("renderer-switch");
-          activeController.destroy();
-          activeRendererId = state.route.rendererId;
-          activeController = createInnerController(state.rendererSpec);
-          activeController.attach(withSurfacePayload(payload, "html"));
-          return { updated: true, changed: true, remounted: true };
-        }
-        return activeController.update(withSurfacePayload(payload, "html"));
-      }
-      function detach(reason) {
-        if (!activeController) {
-          return;
-        }
-        activeController.detach(reason);
-        activeRendererId = null;
-      }
-      function destroy() {
-        if (!activeController) {
-          return;
-        }
-        activeController.destroy();
-        activeController = null;
-        activeRendererId = null;
-      }
-      return {
-        attach: attach,
-        update: update,
-        detach: detach,
-        destroy: destroy
       };
     }
     function resolveInstanceId(ctx) {
@@ -339,14 +202,15 @@
       return kindCatalog.listRoutes();
     }
     function createSurfaceControllerFactory(hostContext) {
-      return function createSurfaceController(surface) {
-        if (surface === "canvas-dom") {
-          return createCanvasDomDynamicController(hostContext);
-        }
-        if (surface === "html") {
-          return createHtmlDynamicController(hostContext);
-        }
-        throw new Error("ClusterRendererRouter: unsupported surface '" + String(surface) + "'");
+      const createSurfaceController = surfaceControllerFactory.createDynamicFactory({
+        errorPrefix: "ClusterRendererRouter",
+        resolveRouteState: resolveRouteState,
+        canvasDomAdapter: canvasDomAdapter,
+        htmlSurfaceOwner: htmlSurfaceOwner,
+        resolveRendererShadowCss: resolveRendererShadowCss
+      });
+      return function createSurfaceControllerForHost(surface) {
+        return createSurfaceController(surface, hostContext);
       };
     }
     function createSessionPayload(commitPayload, hostContext) {

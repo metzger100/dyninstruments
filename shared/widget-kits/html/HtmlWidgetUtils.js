@@ -55,6 +55,19 @@
 
   function resolveRatioMode(options) {
     const opts = options || {};
+    const rect = resolveShellRect(opts.hostContext, opts.targetEl);
+    return resolveRatioModeForRect({
+      ratioThresholdNormal: opts.ratioThresholdNormal,
+      ratioThresholdFlat: opts.ratioThresholdFlat,
+      defaultRatioThresholdNormal: opts.defaultRatioThresholdNormal,
+      defaultRatioThresholdFlat: opts.defaultRatioThresholdFlat,
+      defaultMode: opts.defaultMode,
+      shellRect: rect
+    });
+  }
+
+  function resolveRatioModeForRect(options) {
+    const opts = options || {};
     const normalThresholdRaw = toFiniteNumber(opts.ratioThresholdNormal);
     const flatThresholdRaw = toFiniteNumber(opts.ratioThresholdFlat);
     const defaultNormalRaw = toFiniteNumber(opts.defaultRatioThresholdNormal);
@@ -66,7 +79,7 @@
       ? flatThresholdRaw
       : (typeof defaultFlatRaw === "number" ? defaultFlatRaw : 3);
     const defaultMode = trimText(opts.defaultMode) || "normal";
-    const rect = resolveShellRect(opts.hostContext, opts.targetEl);
+    const rect = opts.shellRect;
 
     if (!rect) {
       return defaultMode;
@@ -80,6 +93,144 @@
       return "flat";
     }
     return "normal";
+  }
+
+  function toClassToken(value) {
+    return String(value || "")
+      .replace(/[^a-zA-Z0-9_-]/g, "-")
+      .replace(/-{2,}/g, "-");
+  }
+
+  function resolveSurfacePolicy(props) {
+    const p = props && typeof props === "object" ? props : null;
+    return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
+  }
+
+  function applyMirroredContext(rootEl, props) {
+    if (!rootEl || typeof rootEl.setAttribute !== "function") {
+      return;
+    }
+    const policy = resolveSurfacePolicy(props);
+    const pageId = policy && typeof policy.pageId === "string" && policy.pageId
+      ? policy.pageId
+      : "other";
+    const orientation = policy && policy.containerOrientation === "vertical"
+      ? "vertical"
+      : "default";
+
+    rootEl.className = "dyni-html-root dyni-page-" + toClassToken(pageId) + " dyni-orientation-" + toClassToken(orientation);
+    rootEl.setAttribute("data-dyni-page-id", pageId);
+    rootEl.setAttribute("data-dyni-orientation", orientation);
+  }
+
+  function syncAttributes(currentEl, nextEl) {
+    if (!currentEl || !nextEl || !currentEl.attributes || !nextEl.attributes) {
+      return;
+    }
+    const currentAttrs = currentEl.attributes;
+    for (let i = currentAttrs.length - 1; i >= 0; i -= 1) {
+      const attr = currentAttrs[i];
+      if (!nextEl.hasAttribute(attr.name)) {
+        currentEl.removeAttribute(attr.name);
+      }
+    }
+    const nextAttrs = nextEl.attributes;
+    for (let i = 0; i < nextAttrs.length; i += 1) {
+      const attr = nextAttrs[i];
+      if (currentEl.getAttribute(attr.name) !== attr.value) {
+        currentEl.setAttribute(attr.name, attr.value);
+      }
+    }
+  }
+
+  function canSyncInPlace(currentNode, nextNode) {
+    if (!currentNode || !nextNode) {
+      return false;
+    }
+    if (currentNode.nodeType !== nextNode.nodeType) {
+      return false;
+    }
+    if (currentNode.nodeType === 1) {
+      return currentNode.tagName === nextNode.tagName;
+    }
+    return true;
+  }
+
+  function syncNodeTree(currentNode, nextNode) {
+    if (!canSyncInPlace(currentNode, nextNode)) {
+      return;
+    }
+    if (currentNode.nodeType === 3 || currentNode.nodeType === 8) {
+      if (currentNode.nodeValue !== nextNode.nodeValue) {
+        currentNode.nodeValue = nextNode.nodeValue;
+      }
+      return;
+    }
+    if (currentNode.nodeType !== 1) {
+      return;
+    }
+
+    syncAttributes(currentNode, nextNode);
+
+    let currentChild = currentNode.firstChild;
+    let nextChild = nextNode.firstChild;
+    while (currentChild || nextChild) {
+      if (!nextChild) {
+        const toRemove = currentChild;
+        currentChild = currentChild.nextSibling;
+        currentNode.removeChild(toRemove);
+        continue;
+      }
+      if (!currentChild) {
+        currentNode.appendChild(nextChild.cloneNode(true));
+        nextChild = nextChild.nextSibling;
+        continue;
+      }
+      if (canSyncInPlace(currentChild, nextChild)) {
+        syncNodeTree(currentChild, nextChild);
+      } else {
+        currentNode.replaceChild(nextChild.cloneNode(true), currentChild);
+      }
+      currentChild = currentChild.nextSibling;
+      nextChild = nextChild.nextSibling;
+    }
+  }
+
+  function patchInnerHtml(rootEl, nextHtml) {
+    if (!rootEl || typeof rootEl.appendChild !== "function") {
+      return null;
+    }
+    const markup = nextHtml == null ? "" : String(nextHtml);
+    const doc = rootEl.ownerDocument;
+    const template = doc.createElement("template");
+    template.innerHTML = markup;
+    const nextRoot = template.content.firstElementChild;
+
+    if (!nextRoot) {
+      rootEl.textContent = "";
+      return null;
+    }
+
+    let currentRoot = rootEl.firstElementChild;
+    while (rootEl.firstChild && rootEl.firstChild !== currentRoot) {
+      rootEl.removeChild(rootEl.firstChild);
+    }
+
+    if (!currentRoot) {
+      rootEl.appendChild(nextRoot.cloneNode(true));
+      return rootEl.firstElementChild;
+    }
+
+    if (!canSyncInPlace(currentRoot, nextRoot)) {
+      rootEl.replaceChild(nextRoot.cloneNode(true), currentRoot);
+      return rootEl.firstElementChild;
+    }
+
+    syncNodeTree(currentRoot, nextRoot);
+    while (currentRoot.nextSibling) {
+      rootEl.removeChild(currentRoot.nextSibling);
+    }
+    return currentRoot;
   }
 
   function isEditingMode(props) {
@@ -104,6 +255,9 @@
       toStyleAttr: toStyleAttr,
       resolveShellRect: resolveShellRect,
       resolveRatioMode: resolveRatioMode,
+      resolveRatioModeForRect: resolveRatioModeForRect,
+      applyMirroredContext: applyMirroredContext,
+      patchInnerHtml: patchInnerHtml,
       isEditingMode: isEditingMode,
       canDispatchSurfaceInteraction: canDispatchSurfaceInteraction
     };

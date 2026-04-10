@@ -66,9 +66,7 @@
         markerClasses.push("dyni-route-points-marker-selected");
       }
 
-      const activateAttrs = model.canActivateRoutePoint === true
-        ? (' onclick="routePointActivate" data-rp-idx="' + String(row.index) + '"')
-        : "";
+      const activateAttrs = ' data-rp-idx="' + String(row.index) + '"';
 
       const ordinalHtml = showOrdinal
         ? (
@@ -151,12 +149,11 @@
         wrapperClasses.push("dyni-route-points-no-route");
       }
 
-      const wrapperOnClick = model.canActivateRoutePoint === true ? ' onclick="catchAll"' : "";
       const rowsHtml = renderRows(model, geometry, fit, htmlUtils);
 
       return ""
         + '<div class="' + wrapperClasses.join(" ") + '"'
-        + wrapperOnClick
+        + ' data-dyni-action="route-points-activate"'
         + htmlUtils.toStyleAttr(geometry.wrapper && geometry.wrapper.style)
         + ">"
         + (model.hasRoute === true

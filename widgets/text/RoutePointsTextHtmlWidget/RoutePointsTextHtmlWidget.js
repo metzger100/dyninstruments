@@ -10,43 +10,6 @@
 }(this, function () {
   "use strict";
 
-  function resolveCommittedElements(hostContext) {
-    const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
-    const commitState = ctx && ctx.__dyniHostCommitState ? ctx.__dyniHostCommitState : null;
-    const shellEl = commitState && commitState.shellEl ? commitState.shellEl : null;
-    const rootEl = commitState && commitState.rootEl ? commitState.rootEl : null;
-    return {
-      shellEl: shellEl,
-      rootEl: rootEl,
-      targetEl: shellEl || rootEl || null
-    };
-  }
-
-  function resolveCommittedFacts(hostContext, domEffects) {
-    const elements = resolveCommittedElements(hostContext);
-    if (!elements.targetEl) {
-      return {
-        shellEl: null,
-        rootEl: null,
-        targetEl: null,
-        isVerticalCommitted: false,
-        scrollbarGutterPx: 0
-      };
-    }
-
-    const effects = domEffects.applyCommittedEffects({
-      hostContext: hostContext,
-      targetEl: elements.targetEl
-    });
-
-    return {
-      shellEl: elements.shellEl,
-      rootEl: elements.rootEl,
-      targetEl: effects && effects.targetEl ? effects.targetEl : null,
-      isVerticalCommitted: !!(effects && effects.isVerticalCommitted),
-      scrollbarGutterPx: effects ? effects.scrollbarGutterPx : 0
-    };
-  }
   function resolveSurfacePolicy(props) {
     const p = props && typeof props === "object" ? props : null;
     return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
@@ -76,96 +39,163 @@
     const markup = Helpers.getModule("RoutePointsMarkup").create(def, Helpers);
     const domEffects = Helpers.getModule("RoutePointsDomEffects").create(def, Helpers);
 
-    function buildModel(props, hostContext) {
-      const committed = resolveCommittedFacts(hostContext, domEffects);
+    function buildModel(props, shellRect, scrollbarGutterPx) {
       const surfacePolicy = resolveSurfacePolicy(props);
-      const shellRect = htmlUtils.resolveShellRect(hostContext, committed.targetEl);
       const viewportHeight = props && props.viewportHeight;
-      const model = renderModel.buildModel({
+      return renderModel.buildModel({
         props: props,
         shellRect: shellRect,
         isVerticalCommitted: !!(surfacePolicy && surfacePolicy.containerOrientation === "vertical"),
-        scrollbarGutterPx: committed.scrollbarGutterPx,
+        scrollbarGutterPx: scrollbarGutterPx,
         viewportHeight: viewportHeight
       });
+    }
+
+    function createCommittedRenderer(rendererContext) {
+      const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
+      const hostContext = context.hostContext || {};
+
+      let mountEl = null;
+      let rootEl = null;
+      let wrapperEl = null;
+      let clickHandler = null;
+      let lastProps = null;
+      let lastModel = null;
+      let lastFit = { headerFit: null, rowFits: [] };
+      let scrollbarGutterPx = 0;
+
+      function bindDispatchListener(model) {
+        if (wrapperEl && clickHandler) {
+          wrapperEl.removeEventListener("click", clickHandler);
+        }
+        clickHandler = null;
+
+        if (!wrapperEl || model.canActivateRoutePoint !== true) {
+          return;
+        }
+
+        clickHandler = function onDispatchClick(ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+
+          const pointIndex = resolveEventIndex(ev);
+          if (pointIndex < 0) {
+            return;
+          }
+
+          const policy = resolveSurfacePolicy(lastProps);
+          const routePointActions = policy && policy.actions ? policy.actions.routePoints : null;
+          if (!routePointActions || typeof routePointActions.activate !== "function") {
+            return;
+          }
+          routePointActions.activate(pointIndex);
+        };
+
+        wrapperEl.addEventListener("click", clickHandler);
+      }
+
+      function patchDom(payload) {
+        const shellRect = payload.shellRect || null;
+        const model = buildModel(payload.props, shellRect, scrollbarGutterPx);
+        const fit = payload.layoutChanged || !lastFit
+          ? (htmlFit.compute({
+            model: model,
+            hostContext: hostContext,
+            targetEl: payload.rootEl,
+            shellRect: shellRect
+          }) || { headerFit: null, rowFits: [] })
+          : lastFit;
+
+        htmlUtils.applyMirroredContext(rootEl, payload.props);
+        wrapperEl = htmlUtils.patchInnerHtml(rootEl, markup.render({
+          model: model,
+          fit: fit,
+          htmlUtils: htmlUtils
+        }));
+        lastProps = payload.props;
+        lastModel = model;
+        lastFit = fit;
+
+        bindDispatchListener(model);
+      }
+
+      function mount(mountHostEl, payload) {
+        mountEl = mountHostEl;
+        rootEl = mountEl.ownerDocument.createElement("div");
+        mountEl.appendChild(rootEl);
+        patchDom(payload);
+      }
+
+      function update(payload) {
+        patchDom(payload);
+      }
+
+      function postPatch() {
+        if (!wrapperEl || !lastModel) {
+          return false;
+        }
+
+        const nextScrollbarGutterPx = domEffects.measureListScrollbarGutter(wrapperEl);
+        const gutterChanged = nextScrollbarGutterPx !== scrollbarGutterPx;
+        scrollbarGutterPx = nextScrollbarGutterPx;
+
+        if (lastModel.hasValidSelection) {
+          domEffects.maybeRevealActiveRow({
+            hostContext: hostContext,
+            rootEl: wrapperEl,
+            selectedIndex: lastModel.selectedIndex,
+            activeKey: lastModel.activeWaypointKey
+          });
+        }
+
+        return gutterChanged ? { relayout: true } : false;
+      }
+
+      function detach() {
+        if (wrapperEl && clickHandler) {
+          wrapperEl.removeEventListener("click", clickHandler);
+        }
+        clickHandler = null;
+        wrapperEl = null;
+        lastProps = null;
+        lastModel = null;
+        lastFit = { headerFit: null, rowFits: [] };
+        scrollbarGutterPx = 0;
+        if (rootEl && rootEl.parentNode) {
+          rootEl.parentNode.removeChild(rootEl);
+        }
+        rootEl = null;
+        mountEl = null;
+      }
+
+      function destroy() {
+        detach();
+      }
+
+      function layoutSignature(payload) {
+        const model = buildModel(
+          payload && payload.props ? payload.props : {},
+          payload && payload.shellRect ? payload.shellRect : null,
+          scrollbarGutterPx
+        );
+        return model.resizeSignatureParts.join("|");
+      }
 
       return {
-        model: model,
-        committed: committed,
-        shellRect: shellRect
+        mount: mount,
+        update: update,
+        postPatch: postPatch,
+        detach: detach,
+        destroy: destroy,
+        layoutSignature: layoutSignature
       };
     }
 
-    const namedHandlers = function (props, hostContext) {
-      const surfacePolicy = resolveSurfacePolicy(props);
-      const routePointActions = surfacePolicy && surfacePolicy.actions ? surfacePolicy.actions.routePoints : null;
-      const active = renderModel.canActivateRoutePoint({
-        props: props
-      });
-
-      if (!active) {
-        return {};
-      }
-
-      return {
-        routePointActivate: function routePointActivate(ev) {
-          const pointIndex = resolveEventIndex(ev);
-          if (pointIndex < 0) {
-            return false;
-          }
-          if (!renderModel.canActivateRoutePoint({ props: props })) {
-            return false;
-          }
-          if (!routePointActions || typeof routePointActions.activate !== "function") {
-            return false;
-          }
-          return routePointActions.activate(pointIndex) !== false;
-        }
-      };
-    };
-
-    const renderHtml = function (props) {
-      const setup = buildModel(props, this);
-      const targetEl = setup.committed.targetEl;
-      const fit = htmlFit.compute({
-        model: setup.model,
-        hostContext: this,
-        targetEl: targetEl,
-        shellRect: setup.shellRect
-      }) || { headerFit: null, rowFits: [] };
-
-      if (setup.model.hasValidSelection) {
-        domEffects.maybeRevealActiveRow({
-          hostContext: this,
-          rootEl: targetEl,
-          selectedIndex: setup.model.selectedIndex,
-          activeKey: setup.model.activeWaypointKey
-        });
-      }
-
-      return markup.render({
-        model: setup.model,
-        fit: fit,
-        htmlUtils: htmlUtils
-      });
-    };
-
-    const resizeSignature = function (props) {
-      const setup = buildModel(props, this);
-      return setup.model.resizeSignatureParts.join("|");
-    };
-
-    const initFunction = function () {
-      if (this && typeof this.triggerResize === "function") {
-        this.triggerResize();
-      }
-    };
-
-    const translateFunction = function () {
+    function translateFunction() {
       return {};
-    };
+    }
 
-    const getVerticalShellSizing = function (sizingContext, surfacePolicy) {
+    function getVerticalShellSizing(sizingContext, surfacePolicy) {
       if (!surfacePolicy || surfacePolicy.containerOrientation !== "vertical") {
         return undefined;
       }
@@ -189,15 +219,12 @@
         kind: "natural",
         height: String(Math.max(0, Math.floor(naturalHeight.cappedHeight))) + "px"
       };
-    };
+    }
 
     return {
       id: "RoutePointsTextHtmlWidget",
       wantsHideNativeHead: true,
-      renderHtml: renderHtml,
-      namedHandlers: namedHandlers,
-      resizeSignature: resizeSignature,
-      initFunction: initFunction,
+      createCommittedRenderer: createCommittedRenderer,
       getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };

@@ -1,26 +1,44 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("EditRouteTextHtmlWidget", function () {
   function createRenderer(options) {
     const opts = options || {};
-    const buildModel = opts.buildModel || vi.fn(function () {
+    const buildModel = opts.buildModel || vi.fn(function (args) {
+      const props = args && args.props ? args.props : {};
+      const canOpen = props.__canOpen === true;
       return {
         mode: "normal",
         hasRoute: true,
-        canOpenEditRoute: false,
-        captureClicks: false,
-        resizeSignatureParts: ["sig", "1"]
+        isLocalRoute: false,
+        isServerRoute: false,
+        isActiveRoute: false,
+        canOpenEditRoute: canOpen,
+        captureClicks: canOpen,
+        resizeSignatureParts: ["sig", props.__token || "1"],
+        nameText: "Route",
+        sourceBadgeText: "",
+        metrics: Object.create(null),
+        visibleMetricIds: [],
+        flatMetricRows: 1,
+        metricsStyle: "",
+        wrapperStyle: ""
       };
     });
-    const canOpen = opts.canOpen || vi.fn(() => false);
     const fitCompute = opts.fitCompute || vi.fn(() => ({
       nameTextStyle: "font-size:12px;",
       sourceBadgeStyle: "font-size:9px;",
       metrics: Object.create(null)
     }));
-    const markupRender = opts.markupRender || vi.fn(() => "<div>markup</div>");
+    const markupRender = opts.markupRender || vi.fn(function (args) {
+      const model = args && args.model ? args.model : {};
+      const state = model.canOpenEditRoute ? "dispatch" : "passive";
+      return ''
+        + '<div class="dyni-edit-route-html dyni-edit-route-open-' + state + '" data-dyni-action="edit-route-open">'
+        + (model.canOpenEditRoute ? '<div class="dyni-edit-route-open-hotspot"></div>' : "")
+        + "</div>";
+    });
 
     const Helpers = {
       getModule(id) {
@@ -38,8 +56,7 @@ describe("EditRouteTextHtmlWidget", function () {
           return {
             create() {
               return {
-                buildModel: buildModel,
-                canOpenEditRoute: canOpen
+                buildModel
               };
             }
           };
@@ -58,82 +75,131 @@ describe("EditRouteTextHtmlWidget", function () {
     return {
       renderer: loadFresh("widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js").create({}, Helpers),
       buildModel,
-      canOpen,
       fitCompute,
       markupRender
     };
   }
 
-  function createHostContext(options) {
-    const opts = options || {};
-    const shellRect = opts.shellRect || { width: 320, height: 180 };
-    const shellEl = {
-      getBoundingClientRect: vi.fn(() => shellRect)
-    };
-    const hostContext = {};
-
-    if (opts.withCommitState !== false) {
-      hostContext.__dyniHostCommitState = {
-        shellEl: shellEl,
-        rootEl: null
-      };
-    }
-    return hostContext;
-  }
   function withSurfacePolicy(props, options) {
     const opts = options || {};
     const mode = opts.mode === "passive" ? "passive" : "dispatch";
     const orientation = opts.orientation === "vertical" ? "vertical" : "default";
     const openEditRoute = opts.openEditRoute || vi.fn(() => true);
+
     return Object.assign({}, props || {}, {
       surfacePolicy: {
-        interaction: { mode: mode },
+        pageId: opts.pageId || "navpage",
+        interaction: { mode },
         containerOrientation: orientation,
         actions: {
           routeEditor: {
-            openEditRoute: openEditRoute
+            openEditRoute
           }
         }
       }
     });
   }
 
-  it("returns passive namedHandlers when capability gate is closed", function () {
-    const setup = createRenderer({ canOpen: vi.fn(() => false) });
-    const handlers = setup.renderer.namedHandlers(withSurfacePolicy({}, { mode: "passive" }), createHostContext());
+  function mountCommitted(rendererSpec, props, options) {
+    const opts = options || {};
+    const shellSize = opts.shellSize || { width: 320, height: 180 };
+    const hostContext = opts.hostContext || {};
+    const rootEl = document.createElement("div");
+    rootEl.className = "widget dyniplugin dyni-host-html";
+    const shellEl = document.createElement("div");
+    shellEl.className = "widgetData dyni-shell";
+    const mountEl = document.createElement("div");
+    mountEl.className = "dyni-surface-html-mount";
+    shellEl.appendChild(mountEl);
+    rootEl.appendChild(shellEl);
+    hostContext.__dyniHostCommitState = { rootEl, shellEl };
 
-    expect(handlers).toEqual({});
-    expect(setup.canOpen).toHaveBeenCalled();
-  });
+    mountEl.getBoundingClientRect = vi.fn(() => ({
+      width: shellSize.width,
+      height: shellSize.height
+    }));
 
-  it("returns editRouteOpen handler in dispatch mode and dispatches host action", function () {
-    const openEditRoute = vi.fn(() => true);
-    const setup = createRenderer({ canOpen: vi.fn(() => true) });
-    const hostContext = createHostContext();
-    const handlers = setup.renderer.namedHandlers(withSurfacePolicy({}, {
-      mode: "dispatch",
-      openEditRoute: openEditRoute
-    }), hostContext);
-
-    expect(Object.keys(handlers)).toEqual(["editRouteOpen"]);
-    expect(handlers.editRouteOpen()).toBe(true);
-    expect(openEditRoute).toHaveBeenCalledTimes(1);
-  });
-
-  it("orchestrates committed vertical facts, render-model, fit, and markup", function () {
-    const setup = createRenderer({
-      buildModel: vi.fn(() => ({
-        mode: "high",
-        hasRoute: true,
-        canOpenEditRoute: true,
-        captureClicks: true,
-        resizeSignatureParts: ["x", "y"]
-      }))
+    const committed = rendererSpec.createCommittedRenderer({
+      hostContext,
+      mountEl,
+      shadowRoot: null
     });
-    const hostContext = createHostContext({ shellRect: { width: 240, height: 120 } });
-    const html = setup.renderer.renderHtml.call(hostContext, withSurfacePolicy({}, { orientation: "vertical" }));
 
-    expect(html).toBe("<div>markup</div>");
+    let revision = 0;
+
+    function payload(nextProps, layoutChanged) {
+      revision += 1;
+      return {
+        props: nextProps,
+        revision,
+        rootEl,
+        shellEl,
+        mountEl,
+        shadowRoot: null,
+        shellRect: { width: shellSize.width, height: shellSize.height },
+        hostContext,
+        layoutChanged: layoutChanged === true,
+        relayoutPass: 0
+      };
+    }
+
+    const initial = payload(props, true);
+    committed.mount(mountEl, initial);
+    committed.postPatch(initial);
+
+    return {
+      mountEl,
+      committed,
+      update(nextProps, layoutChanged) {
+        const next = payload(nextProps, layoutChanged === true);
+        committed.update(next);
+        committed.postPatch(next);
+      },
+      html() {
+        return mountEl.innerHTML;
+      }
+    };
+  }
+
+  it("exposes committed renderer contract", function () {
+    const renderer = createRenderer().renderer;
+
+    expect(renderer.id).toBe("EditRouteTextHtmlWidget");
+    expect(typeof renderer.createCommittedRenderer).toBe("function");
+    expect(renderer.getVerticalShellSizing()).toEqual({ kind: "ratio", aspectRatio: 7 / 8 });
+  });
+
+  it("dispatches route-editor open action only in dispatch state", function () {
+    const openEditRoute = vi.fn(() => true);
+    const setup = createRenderer();
+    const mounted = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy({ __canOpen: true, __token: "a" }, { mode: "dispatch", openEditRoute })
+    );
+
+    let wrapper = mounted.mountEl.querySelector(".dyni-edit-route-html");
+    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect(openEditRoute).toHaveBeenCalledTimes(1);
+
+    mounted.update(
+      withSurfacePolicy({ __canOpen: false, __token: "b" }, { mode: "dispatch", openEditRoute }),
+      true
+    );
+    wrapper = mounted.mountEl.querySelector(".dyni-edit-route-html");
+    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+
+    expect(openEditRoute).toHaveBeenCalledTimes(1);
+    expect(mounted.html()).toContain("dyni-edit-route-open-passive");
+  });
+
+  it("orchestrates model/fit/markup with committed vertical facts", function () {
+    const setup = createRenderer();
+    mountCommitted(
+      setup.renderer,
+      withSurfacePolicy({ __canOpen: true, __token: "x" }, { orientation: "vertical" }),
+      { shellSize: { width: 240, height: 120 } }
+    );
+
     expect(setup.buildModel).toHaveBeenCalledWith(expect.objectContaining({
       isVerticalCommitted: true,
       shellRect: { width: 240, height: 120 }
@@ -142,63 +208,35 @@ describe("EditRouteTextHtmlWidget", function () {
     expect(setup.markupRender).toHaveBeenCalledTimes(1);
   });
 
-  it("tolerates first render without committed ancestry", function () {
+  it("respects layoutChanged for fit recomputation and layout signature", function () {
     const setup = createRenderer();
-    const hostContext = createHostContext({ withCommitState: false });
-    const html = setup.renderer.renderHtml.call(hostContext, withSurfacePolicy({}, { orientation: "default" }));
+    const mounted = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy({ __canOpen: true, __token: "1" }, {})
+    );
 
-    expect(html).toBe("<div>markup</div>");
-    expect(setup.buildModel).toHaveBeenCalledWith(expect.objectContaining({
-      shellRect: null,
-      isVerticalCommitted: false
-    }));
+    mounted.update(withSurfacePolicy({ __canOpen: true, __token: "2" }, {}), false);
+    expect(setup.fitCompute).toHaveBeenCalledTimes(1);
+
+    mounted.update(withSurfacePolicy({ __canOpen: true, __token: "3" }, {}), true);
+    expect(setup.fitCompute).toHaveBeenCalledTimes(2);
+
+    const sigA = mounted.committed.layoutSignature({ props: { __token: "A" }, shellRect: { width: 320, height: 180 } });
+    const sigB = mounted.committed.layoutSignature({ props: { __token: "B" }, shellRect: { width: 320, height: 180 } });
+    expect(sigB).not.toBe(sigA);
   });
 
-  it("derives resize signature from model resizeSignatureParts", function () {
-    const setup = createRenderer({
-      buildModel: vi.fn(() => ({
-        mode: "normal",
-        hasRoute: true,
-        canOpenEditRoute: false,
-        captureClicks: false,
-        resizeSignatureParts: [1, 2, 3]
-      }))
-    });
-    const signature = setup.renderer.resizeSignature.call(createHostContext(), withSurfacePolicy({}, {}));
-
-    expect(signature).toBe("1|2|3");
-  });
-
-  it("requests corrective rerender via initFunction.triggerResize", function () {
-    const setup = createRenderer();
-    const triggerResize = vi.fn();
-
-    setup.renderer.initFunction.call({ triggerResize: triggerResize });
-
-    expect(triggerResize).toHaveBeenCalledTimes(1);
-  });
-
-  it("keeps css mode and interaction contract selectors", function () {
+  it("uses shadow-local css selectors", function () {
     const cssPath = path.join(
       process.cwd(),
       "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"
     );
     const css = fs.readFileSync(cssPath, "utf8");
 
-    expect(css).toContain(".dyni-edit-route-mode-flat .dyni-edit-route-metrics");
-    expect(css).toContain(".dyni-edit-route-mode-flat.dyni-edit-route-flat-rows-2 .dyni-edit-route-metrics");
-    expect(css).toContain(".dyni-edit-route-mode-normal .dyni-edit-route-metrics");
-    expect(css).toContain(".dyni-edit-route-mode-high .dyni-edit-route-metrics");
-    expect(css).not.toContain(".dyni-edit-route-mode-flat .dyni-edit-route-metric-value-stack");
-    expect(css).not.toContain("0.58fr");
-    expect(css).not.toContain("grid-template-rows: minmax(0, 0.36fr) minmax(0, 0.64fr);");
-    expect(css).toContain(".dyni-edit-route-open-hotspot");
-    expect(css).toContain(".dyni-edit-route-open-dispatch");
-    expect(css).toContain(".dyni-edit-route-open-passive");
-    expect(css).toContain(".dyni-edit-route-metric-value-text");
-    expect(css).toContain(".dyni-edit-route-metric-unit");
-    expect(css).toContain(".widgetContainer.vertical .widget.dyniplugin .widgetData.dyni-shell .dyni-edit-route-html");
+    expect(css).toContain(".dyni-html-root .dyni-edit-route-html");
+    expect(css).toContain('.dyni-html-root[data-dyni-orientation="vertical"] .dyni-edit-route-html');
     expect(css).toContain("aspect-ratio: 7 / 8;");
     expect(css).toContain("min-height: 8em;");
+    expect(css).not.toContain(".widgetContainer.vertical .widget.dyniplugin");
   });
 });

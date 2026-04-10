@@ -1,5 +1,5 @@
 /* ActiveRoute interactive html surface */
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html {
+.dyni-html-root .dyni-active-route-html {
   position: relative;
   width: 100%;
   height: 100%;
@@ -15,24 +15,24 @@
   box-sizing: border-box;
 }
 
-#navpage .widgetContainer.vertical .widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html {
+.dyni-html-root[data-dyni-orientation="vertical"] .dyni-active-route-html {
   height: auto;
   aspect-ratio: 2 / 1;
   min-height: 4.8em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-mode-high {
+.dyni-html-root .dyni-active-route-html.dyni-active-route-mode-high {
   grid-template-rows: minmax(0, 0.22fr) minmax(0, 0.78fr);
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-mode-flat {
+.dyni-html-root .dyni-active-route-html.dyni-active-route-mode-flat {
   grid-template-areas: "name metrics";
   grid-template-columns: minmax(0, 0.38fr) minmax(0, 0.62fr);
   grid-template-rows: minmax(0, 1fr);
   gap: 0.18em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-route-name {
+.dyni-html-root .dyni-active-route-route-name {
   position: relative;
   z-index: 1;
   grid-area: name;
@@ -43,26 +43,26 @@
   white-space: nowrap;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-mode-normal .dyni-active-route-route-name {
+.dyni-html-root .dyni-active-route-html.dyni-active-route-mode-normal .dyni-active-route-route-name {
   font-weight: var(--dyni-font-weight, 700);
   opacity: 0.92;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-mode-high .dyni-active-route-route-name,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-mode-flat .dyni-active-route-route-name {
+.dyni-html-root .dyni-active-route-html.dyni-active-route-mode-high .dyni-active-route-route-name,
+.dyni-html-root .dyni-active-route-html.dyni-active-route-mode-flat .dyni-active-route-route-name {
   font-weight: var(--dyni-label-weight, 700);
   opacity: 0.78;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-open-dispatch {
+.dyni-html-root .dyni-active-route-html.dyni-active-route-open-dispatch {
   cursor: pointer;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-open-passive {
+.dyni-html-root .dyni-active-route-html.dyni-active-route-open-passive {
   cursor: default;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metrics {
+.dyni-html-root .dyni-active-route-metrics {
   position: relative;
   z-index: 1;
   grid-area: metrics;
@@ -72,41 +72,41 @@
   gap: 0.14em 0.2em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-open-hotspot {
+.dyni-html-root .dyni-active-route-open-hotspot {
   position: absolute;
   inset: 0;
   z-index: 2;
   background: transparent;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-mode-normal .dyni-active-route-metrics {
+.dyni-html-root .dyni-active-route-html.dyni-active-route-mode-normal .dyni-active-route-metrics {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-auto-rows: minmax(0, 1fr);
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-mode-normal.dyni-active-route-approaching .dyni-active-route-metrics {
+.dyni-html-root .dyni-active-route-html.dyni-active-route-mode-normal.dyni-active-route-approaching .dyni-active-route-metrics {
   grid-template-rows: repeat(2, minmax(0, 1fr));
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-mode-normal.dyni-active-route-approaching .dyni-active-route-metric-next {
+.dyni-html-root .dyni-active-route-html.dyni-active-route-mode-normal.dyni-active-route-approaching .dyni-active-route-metric-next {
   grid-column: 1 / span 2;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-mode-flat .dyni-active-route-metrics {
+.dyni-html-root .dyni-active-route-html.dyni-active-route-mode-flat .dyni-active-route-metrics {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-auto-rows: minmax(0, 1fr);
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-mode-flat.dyni-active-route-approaching .dyni-active-route-metrics {
+.dyni-html-root .dyni-active-route-html.dyni-active-route-mode-flat.dyni-active-route-approaching .dyni-active-route-metrics {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-html.dyni-active-route-mode-high .dyni-active-route-metrics {
+.dyni-html-root .dyni-active-route-html.dyni-active-route-mode-high .dyni-active-route-metrics {
   grid-template-columns: minmax(0, 1fr);
   grid-auto-rows: minmax(0, 1fr);
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metric {
+.dyni-html-root .dyni-active-route-metric {
   min-width: 0;
   min-height: 0;
   display: grid;
@@ -115,13 +115,13 @@
   align-content: stretch;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metric-caption {
+.dyni-html-root .dyni-active-route-metric-caption {
   font-weight: var(--dyni-label-weight, 700);
   opacity: 0.78;
   line-height: 1;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metric-value-row {
+.dyni-html-root .dyni-active-route-metric-value-row {
   min-width: 0;
   display: flex;
   align-items: baseline;
@@ -131,7 +131,7 @@
   min-height: 0
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metric-value {
+.dyni-html-root .dyni-active-route-metric-value {
   min-width: 0;
   max-width: 100%;
   flex: 1 1 auto;
@@ -139,13 +139,13 @@
   white-space: nowrap;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metric-unit {
+.dyni-html-root .dyni-active-route-metric-unit {
   flex: 0 0 auto;
   font-weight: var(--dyni-label-weight, 700);
   opacity: 0.78;
   white-space: nowrap;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-active-route-metric-unit:empty {
+.dyni-html-root .dyni-active-route-metric-unit:empty {
   display: none;
 }

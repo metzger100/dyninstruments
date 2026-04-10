@@ -1,6 +1,6 @@
 /* Map zoom HTML renderer styles */
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-html {
+.dyni-html-root .dyni-map-zoom-html {
   position: relative;
   width: 100%;
   height: 100%;
@@ -16,39 +16,39 @@
   --dyni-map-zoom-value-size: 1.62em;
 }
 
-#navpage .widgetContainer.vertical .widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-html {
+.dyni-html-root[data-dyni-orientation="vertical"] .dyni-map-zoom-html {
   height: auto;
   aspect-ratio: 2 / 1;
   min-height: 4.8em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-html.dyni-map-zoom-mode-high {
+.dyni-html-root .dyni-map-zoom-html.dyni-map-zoom-mode-high {
   --dyni-map-zoom-value-size: 1.62em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-html.dyni-map-zoom-mode-normal {
+.dyni-html-root .dyni-map-zoom-html.dyni-map-zoom-mode-normal {
   --dyni-map-zoom-value-size: 1.56em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-html.dyni-map-zoom-mode-flat {
+.dyni-html-root .dyni-map-zoom-html.dyni-map-zoom-mode-flat {
   --dyni-map-zoom-value-size: 1.48em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-html.dyni-map-zoom-open-dispatch {
+.dyni-html-root .dyni-map-zoom-html.dyni-map-zoom-open-dispatch {
   cursor: pointer;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-html.dyni-map-zoom-open-passive {
+.dyni-html-root .dyni-map-zoom-html.dyni-map-zoom-open-passive {
   cursor: default;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-open-hotspot {
+.dyni-html-root .dyni-map-zoom-open-hotspot {
   position: absolute;
   inset: 0;
   z-index: 2;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-main {
+.dyni-html-root .dyni-map-zoom-main {
   position: relative;
   z-index: 1;
   min-width: 0;
@@ -58,16 +58,16 @@
   justify-content: center;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-main-flat,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-main-normal,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-main-high {
+.dyni-html-root .dyni-map-zoom-main-flat,
+.dyni-html-root .dyni-map-zoom-main-normal,
+.dyni-html-root .dyni-map-zoom-main-high {
   gap: 0.06em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-inline-row,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-value-row,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-caption-row,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-unit-row {
+.dyni-html-root .dyni-map-zoom-inline-row,
+.dyni-html-root .dyni-map-zoom-value-row,
+.dyni-html-root .dyni-map-zoom-caption-row,
+.dyni-html-root .dyni-map-zoom-unit-row {
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -75,33 +75,33 @@
   line-height: 1;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-main-flat .dyni-map-zoom-inline-row {
+.dyni-html-root .dyni-map-zoom-main-flat .dyni-map-zoom-inline-row {
   justify-content: center;
   gap: 0.16em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-main-normal .dyni-map-zoom-value-row {
+.dyni-html-root .dyni-map-zoom-main-normal .dyni-map-zoom-value-row {
   justify-content: center;
   gap: 0.16em;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-main-normal .dyni-map-zoom-caption-row {
+.dyni-html-root .dyni-map-zoom-main-normal .dyni-map-zoom-caption-row {
   justify-content: flex-start;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-main-high .dyni-map-zoom-caption-row {
+.dyni-html-root .dyni-map-zoom-main-high .dyni-map-zoom-caption-row {
   justify-content: flex-start;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-main-high .dyni-map-zoom-value-row {
+.dyni-html-root .dyni-map-zoom-main-high .dyni-map-zoom-value-row {
   justify-content: center;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-main-high .dyni-map-zoom-unit-row {
+.dyni-html-root .dyni-map-zoom-main-high .dyni-map-zoom-unit-row {
   justify-content: flex-end;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-caption {
+.dyni-html-root .dyni-map-zoom-caption {
   font-size: calc(var(--dyni-map-zoom-value-size) * var(--dyni-map-zoom-sec-scale));
   font-weight: var(--dyni-label-weight, 700);
   color: inherit;
@@ -109,11 +109,11 @@
   white-space: nowrap;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-caption:empty {
+.dyni-html-root .dyni-map-zoom-caption:empty {
   display: none;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-value {
+.dyni-html-root .dyni-map-zoom-value {
   font-size: var(--dyni-map-zoom-value-size);
   line-height: 1;
   font-weight: var(--dyni-font-weight, 700);
@@ -121,7 +121,7 @@
   white-space: nowrap;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-unit {
+.dyni-html-root .dyni-map-zoom-unit {
   font-size: calc(var(--dyni-map-zoom-value-size) * var(--dyni-map-zoom-sec-scale));
   font-weight: var(--dyni-label-weight, 700);
   opacity: 0.88;
@@ -129,11 +129,11 @@
   white-space: nowrap;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-unit:empty {
+.dyni-html-root .dyni-map-zoom-unit:empty {
   display: none;
 }
 
-.widget.dyniplugin .widgetData.dyni-shell .dyni-map-zoom-required {
+.dyni-html-root .dyni-map-zoom-required {
   position: relative;
   z-index: 1;
   font-size: calc(var(--dyni-map-zoom-value-size) * 0.56);

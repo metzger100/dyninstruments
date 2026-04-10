@@ -42,16 +42,6 @@
     const rendererRouter = Helpers.getModule("ClusterRendererRouter").create(def, Helpers);
     const mapperRegistry = Helpers.getModule("ClusterMapperRegistry").create(def, Helpers);
 
-    function registerCatchAllHandler(ctx) {
-      if (!ctx || typeof ctx !== "object") {
-        return;
-      }
-      const handlers = (ctx.eventHandler && typeof ctx.eventHandler === "object")
-        ? ctx.eventHandler
-        : (ctx.eventHandler = []);
-      handlers.catchAll = function catchAll() {};
-    }
-
     function initRuntimeState(ctx) {
       const previous = ctx.__dyniClusterState;
       if (previous) {
@@ -73,7 +63,6 @@
       surfaceSessionController.initState();
       ctx.__dyniClusterState = state;
 
-      registerCatchAllHandler(ctx);
       return state;
     }
 
@@ -121,6 +110,9 @@
 
         state.hostCommitController.scheduleCommit({
           onCommit: function (commitPayload) {
+            ctx.__dyniHostCommitState = commitPayload && commitPayload.state
+              ? commitPayload.state
+              : state.hostCommitController.getState();
             runtimeApi._theme.applyToRoot(commitPayload.rootEl);
             const sessionPayload = rendererRouter.createSessionPayload(commitPayload, ctx);
             state.surfaceSessionController.reconcileSession(sessionPayload);

@@ -11,60 +11,18 @@
 }(this, function () {
   "use strict";
 
-  const OPEN_HANDLER_NAME = "activeRouteOpen";
   const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.2;
   const DEFAULT_RATIO_THRESHOLD_FLAT = 3.8;
 
-  const formatMetric = function (rawValue, formatter, formatterParameters, defaultText, Helpers) {
-    const out = String(Helpers.applyFormatter(rawValue, {
-      formatter: formatter,
-      formatterParameters: formatterParameters,
-      default: defaultText
-    }));
-    return out.trim() ? out : defaultText;
-  };
-
-  const renderMetricTile = function (metricId, caption, value, unit, style, htmlUtils) {
-    const valueStyle = style && typeof style.valueStyle === "string" ? style.valueStyle : "";
-    const unitStyle = style && typeof style.unitStyle === "string" ? style.unitStyle : "";
-    return ""
-      + '<div class="dyni-active-route-metric dyni-active-route-metric-' + metricId + '">'
-      + '<div class="dyni-active-route-metric-caption">' + htmlUtils.escapeHtml(caption) + "</div>"
-      + '<div class="dyni-active-route-metric-value-row">'
-      + '<span class="dyni-active-route-metric-value"' + htmlUtils.toStyleAttr(valueStyle) + ">" + htmlUtils.escapeHtml(value) + "</span>"
-      + '<span class="dyni-active-route-metric-unit"' + htmlUtils.toStyleAttr(unitStyle) + ">" + htmlUtils.escapeHtml(unit) + "</span>"
-      + "</div>"
-      + "</div>";
-  };
-
-  function resolveHostElements(hostContext) {
-    const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
-    const commitState = ctx && ctx.__dyniHostCommitState ? ctx.__dyniHostCommitState : null;
-    const shellEl = commitState && commitState.shellEl ? commitState.shellEl : null;
-    const rootEl = commitState && commitState.rootEl ? commitState.rootEl : null;
-    return {
-      shellEl: shellEl,
-      rootEl: rootEl,
-      targetEl: shellEl || rootEl
-    };
-  }
-
-  function resolveShellRectFromTarget(targetEl, hostContext, htmlUtils) {
-    return htmlUtils.resolveShellRect(hostContext, targetEl);
-  }
-
-  function resolveShellRect(hostContext, htmlUtils) {
-    return resolveShellRectFromTarget(resolveHostElements(hostContext).targetEl, hostContext, htmlUtils);
-  }
-
-  function resolveMode(props, hostContext, htmlUtils) {
+  function resolveDisplayMode(props, shellRect, htmlUtils) {
     const p = props || {};
-    return htmlUtils.resolveRatioMode({
+    return htmlUtils.resolveRatioModeForRect({
       ratioThresholdNormal: p.ratioThresholdNormal,
       ratioThresholdFlat: p.ratioThresholdFlat,
       defaultRatioThresholdNormal: DEFAULT_RATIO_THRESHOLD_NORMAL,
       defaultRatioThresholdFlat: DEFAULT_RATIO_THRESHOLD_FLAT,
-      hostContext: hostContext
+      defaultMode: "normal",
+      shellRect: shellRect
     });
   }
 
@@ -87,8 +45,7 @@
 
   function getSurfacePolicy(props) {
     const p = props && typeof props === "object" ? props : null;
-    const policy = p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
-    return policy;
+    return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
   }
 
   function canDispatchOpenRoute(props) {
@@ -111,7 +68,16 @@
     return policy.actions.routeEditor.openActiveRoute() !== false;
   }
 
-  function buildRenderModel(props, Helpers, hostContext, htmlUtils) {
+  function formatMetric(rawValue, formatter, formatterParameters, defaultText, Helpers) {
+    const out = String(Helpers.applyFormatter(rawValue, {
+      formatter: formatter,
+      formatterParameters: formatterParameters,
+      default: defaultText
+    }));
+    return out.trim() ? out : defaultText;
+  }
+
+  function buildRenderModel(props, shellRect, Helpers, htmlUtils) {
     const p = ensureDisplayProps(props);
     const display = p.display;
     const captions = p.captions;
@@ -151,16 +117,14 @@
         Helpers
       )
       : "";
-    const mode = resolveMode(p, hostContext, htmlUtils);
+
+    const mode = resolveDisplayMode(p, shellRect, htmlUtils);
     const isEditing = htmlUtils.isEditingMode(p);
-    const dispatchOpenRoute = canDispatchOpenRoute(p);
-    const canOpenRoute = !isEditing && dispatchOpenRoute;
-    const captureClicks = canOpenRoute;
+    const canOpenRoute = !isEditing && canDispatchOpenRoute(p);
 
     return {
       routeNameText: routeNameText,
       mode: mode,
-      isEditing: isEditing,
       isApproaching: isApproaching,
       disconnect: disconnect,
       remainCaption: remainCaption,
@@ -173,127 +137,181 @@
       etaText: etaText,
       nextCourseText: nextCourseText,
       canOpenRoute: canOpenRoute,
-      captureClicks: captureClicks
+      captureClicks: canOpenRoute
     };
+  }
+
+  function renderMetricTile(metricId, caption, value, unit, style, htmlUtils) {
+    const valueStyle = style && typeof style.valueStyle === "string" ? style.valueStyle : "";
+    const unitStyle = style && typeof style.unitStyle === "string" ? style.unitStyle : "";
+    return ""
+      + '<div class="dyni-active-route-metric dyni-active-route-metric-' + metricId + '">'
+      + '<div class="dyni-active-route-metric-caption">' + htmlUtils.escapeHtml(caption) + "</div>"
+      + '<div class="dyni-active-route-metric-value-row">'
+      + '<span class="dyni-active-route-metric-value"' + htmlUtils.toStyleAttr(valueStyle) + ">" + htmlUtils.escapeHtml(value) + "</span>"
+      + '<span class="dyni-active-route-metric-unit"' + htmlUtils.toStyleAttr(unitStyle) + ">" + htmlUtils.escapeHtml(unit) + "</span>"
+      + "</div>"
+      + "</div>";
+  }
+
+  function renderMarkup(model, fitStyles, htmlUtils) {
+    const routeNameStyle = fitStyles && fitStyles.routeNameStyle ? fitStyles.routeNameStyle : "";
+    const metricStyles = fitStyles && fitStyles.metrics ? fitStyles.metrics : Object.create(null);
+
+    const wrapperClasses = ["dyni-active-route-html"];
+    if (model.isApproaching) {
+      wrapperClasses.push("dyni-active-route-approaching");
+    }
+    if (model.disconnect) {
+      wrapperClasses.push("dyni-active-route-disconnect");
+    }
+    wrapperClasses.push(model.canOpenRoute ? "dyni-active-route-open-dispatch" : "dyni-active-route-open-passive");
+    wrapperClasses.push("dyni-active-route-mode-" + model.mode);
+
+    let metricsHtml = "";
+    metricsHtml += renderMetricTile("remain", model.remainCaption, model.remainText, model.remainUnit, metricStyles.remain, htmlUtils);
+    metricsHtml += renderMetricTile("eta", model.etaCaption, model.etaText, model.etaUnit, metricStyles.eta, htmlUtils);
+    if (model.isApproaching) {
+      metricsHtml += renderMetricTile("next", model.nextCourseCaption, model.nextCourseText, model.nextCourseUnit, metricStyles.next, htmlUtils);
+    }
+
+    return ""
+      + '<div class="' + wrapperClasses.join(" ") + '"'
+      + ' data-dyni-action="active-route-open"'
+      + '>'
+      + '<div class="dyni-active-route-open-hotspot"></div>'
+      + '<div class="dyni-active-route-route-name"' + htmlUtils.toStyleAttr(routeNameStyle) + ">"
+      + htmlUtils.escapeHtml(model.routeNameText)
+      + "</div>"
+      + '<div class="dyni-active-route-metrics">' + metricsHtml + "</div>"
+      + "</div>";
   }
 
   function create(def, Helpers) {
     const htmlFit = Helpers.getModule("ActiveRouteHtmlFit").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
 
-    const namedHandlers = function (props) {
-      return {
-        activeRouteOpen: function activeRouteOpenHandler() {
-          return openActiveRoute(props, htmlUtils);
+    function createCommittedRenderer(rendererContext) {
+      const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
+      const hostContext = context.hostContext || {};
+
+      let mountEl = null;
+      let rootEl = null;
+      let wrapperEl = null;
+      let clickHandler = null;
+      let lastFit = { routeNameStyle: "", metrics: Object.create(null) };
+      let lastProps = null;
+
+      function bindDispatchListener(model) {
+        if (wrapperEl && clickHandler) {
+          wrapperEl.removeEventListener("click", clickHandler);
         }
+        clickHandler = null;
+
+        if (!wrapperEl || model.captureClicks !== true) {
+          return;
+        }
+
+        clickHandler = function onDispatchClick(ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          openActiveRoute(lastProps, htmlUtils);
+        };
+        wrapperEl.addEventListener("click", clickHandler);
+      }
+
+      function patchDom(payload) {
+        const shellRect = payload.shellRect || null;
+        const model = buildRenderModel(payload.props, shellRect, Helpers, htmlUtils);
+        const fit = payload.layoutChanged || !lastFit
+          ? (htmlFit.compute({
+            model: model,
+            hostContext: hostContext,
+            targetEl: payload.rootEl,
+            shellRect: shellRect
+          }) || { routeNameStyle: "", metrics: Object.create(null) })
+          : lastFit;
+
+        htmlUtils.applyMirroredContext(rootEl, payload.props);
+        wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(model, fit, htmlUtils));
+        lastFit = fit;
+        lastProps = payload.props;
+
+        bindDispatchListener(model);
+      }
+
+      function mount(mountHostEl, payload) {
+        mountEl = mountHostEl;
+        rootEl = mountEl.ownerDocument.createElement("div");
+        mountEl.appendChild(rootEl);
+        patchDom(payload);
+      }
+
+      function update(payload) {
+        patchDom(payload);
+      }
+
+      function postPatch() {
+        return false;
+      }
+
+      function detach() {
+        if (wrapperEl && clickHandler) {
+          wrapperEl.removeEventListener("click", clickHandler);
+        }
+        clickHandler = null;
+        wrapperEl = null;
+        lastProps = null;
+        lastFit = { routeNameStyle: "", metrics: Object.create(null) };
+        if (rootEl && rootEl.parentNode) {
+          rootEl.parentNode.removeChild(rootEl);
+        }
+        rootEl = null;
+        mountEl = null;
+      }
+
+      function destroy() {
+        detach();
+      }
+
+      function layoutSignature(payload) {
+        const shellRect = payload && payload.shellRect ? payload.shellRect : null;
+        const model = buildRenderModel(payload && payload.props ? payload.props : {}, shellRect, Helpers, htmlUtils);
+        return [
+          model.routeNameText.length,
+          model.remainText.length,
+          model.etaText.length,
+          model.isApproaching ? model.nextCourseText.length : 0,
+          model.mode,
+          model.isApproaching ? 1 : 0,
+          model.disconnect ? 1 : 0,
+          shellRect ? Math.round(shellRect.width) : 0,
+          shellRect ? Math.round(shellRect.height) : 0
+        ].join("|");
+      }
+
+      return {
+        mount: mount,
+        update: update,
+        postPatch: postPatch,
+        detach: detach,
+        destroy: destroy,
+        layoutSignature: layoutSignature
       };
-    };
+    }
 
-    const renderHtml = function (props) {
-      const model = buildRenderModel(props, Helpers, this, htmlUtils);
-      const elements = resolveHostElements(this);
-      const shellRect = resolveShellRectFromTarget(elements.targetEl, this, htmlUtils);
-      const fitStyles = htmlFit.compute({
-        model: model,
-        hostContext: this,
-        targetEl: elements.targetEl,
-        shellRect: shellRect
-      }) || { routeNameStyle: "", metrics: Object.create(null) };
-      const routeNameStyle = fitStyles.routeNameStyle || "";
-      const metricStyles = fitStyles.metrics || Object.create(null);
-
-      const wrapperClasses = ["dyni-active-route-html"];
-      if (model.isApproaching) {
-        wrapperClasses.push("dyni-active-route-approaching");
-      }
-      if (model.disconnect) {
-        wrapperClasses.push("dyni-active-route-disconnect");
-      }
-      wrapperClasses.push(model.canOpenRoute ? "dyni-active-route-open-dispatch" : "dyni-active-route-open-passive");
-      wrapperClasses.push("dyni-active-route-mode-" + model.mode);
-
-      let metricsHtml = "";
-      metricsHtml += renderMetricTile(
-        "remain",
-        model.remainCaption,
-        model.remainText,
-        model.remainUnit,
-        metricStyles.remain,
-        htmlUtils
-      );
-      metricsHtml += renderMetricTile(
-        "eta",
-        model.etaCaption,
-        model.etaText,
-        model.etaUnit,
-        metricStyles.eta,
-        htmlUtils
-      );
-      if (model.isApproaching) {
-        metricsHtml += renderMetricTile(
-          "next",
-          model.nextCourseCaption,
-          model.nextCourseText,
-          model.nextCourseUnit,
-          metricStyles.next,
-          htmlUtils
-        );
-      }
-
-      const openHotspotHtml = model.canOpenRoute
-        ? ('<div class="dyni-active-route-open-hotspot" onclick="' + OPEN_HANDLER_NAME + '"></div>')
-        : "";
-      const wrapperOnClickAttr = model.captureClicks ? ' onclick="catchAll"' : "";
-
-      return ""
-        + '<div class="' + wrapperClasses.join(" ") + '"'
-        + wrapperOnClickAttr
-        + ">"
-        + openHotspotHtml
-        + '<div class="dyni-active-route-route-name"' + htmlUtils.toStyleAttr(routeNameStyle) + ">"
-        + htmlUtils.escapeHtml(model.routeNameText)
-        + "</div>"
-        + '<div class="dyni-active-route-metrics">' + metricsHtml + "</div>"
-        + "</div>";
-    };
-
-    const resizeSignature = function (props) {
-      const model = buildRenderModel(props, Helpers, this, htmlUtils);
-      const rect = resolveShellRect(this, htmlUtils);
-      return [
-        model.routeNameText.length,
-        model.remainText.length,
-        model.etaText.length,
-        model.isApproaching ? model.nextCourseText.length : 0,
-        model.mode,
-        model.isApproaching ? 1 : 0,
-        model.disconnect ? 1 : 0,
-        rect ? Math.round(rect.width) : 0,
-        rect ? Math.round(rect.height) : 0
-      ].join("|");
-    };
-
-    const initFunction = function () {
-      if (this && typeof this.triggerResize === "function") {
-        this.triggerResize();
-      }
-    };
-
-    const translateFunction = function () {
+    function translateFunction() {
       return {};
-    };
+    }
 
-    const getVerticalShellSizing = function () {
+    function getVerticalShellSizing() {
       return { kind: "ratio", aspectRatio: 2 };
-    };
+    }
 
     return {
       id: "ActiveRouteTextHtmlWidget",
       wantsHideNativeHead: true,
-      renderHtml: renderHtml,
-      namedHandlers: namedHandlers,
-      resizeSignature: resizeSignature,
-      initFunction: initFunction,
+      createCommittedRenderer: createCommittedRenderer,
       getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };

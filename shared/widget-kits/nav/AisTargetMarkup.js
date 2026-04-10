@@ -146,9 +146,8 @@
       const wrapperClasses = model.wrapperClasses;
       const geometry = toObject(model.inlineGeometry);
 
-      const wrapperOnClick = model.captureClicks === true ? ' onclick="catchAll"' : "";
       const hotspotHtml = model.showHotspot === true
-        ? '<div class="dyni-ais-target-open-hotspot" onclick="aisTargetShowInfo"></div>'
+        ? '<div class="dyni-ais-target-open-hotspot"></div>'
         : "";
       const accentHtml = model.hasAccent === true
         ? ('<div class="dyni-ais-target-state-accent"'
@@ -170,7 +169,7 @@
 
       return ""
         + '<div class="' + wrapperClasses.join(" ") + '"'
-        + wrapperOnClick
+        + ' data-dyni-action="ais-target-open"'
         + htmlUtils.toStyleAttr(joinStyles(model.wrapperStyle, geometry.wrapperStyle))
         + ">"
         + accentHtml
