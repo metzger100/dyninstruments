@@ -43,16 +43,17 @@ describe("AisTargetRenderModel", function () {
     };
   }
 
-  function createHostContext(options) {
+  function withSurfacePolicy(props, options) {
     const opts = options || {};
-    return {
-      hostActions: {
-        getCapabilities: vi.fn(() => ({
-          pageId: opts.pageId || "navpage",
-          ais: { showInfo: opts.showInfo || "dispatch" }
-        }))
+    return Object.assign({}, props || {}, {
+      surfacePolicy: {
+        interaction: {
+          mode: opts.mode === "passive" ? "passive" : "dispatch"
+        },
+        pageId: typeof opts.pageId === "string" ? opts.pageId : "navpage",
+        containerOrientation: opts.orientation === "vertical" ? "vertical" : "default"
       }
-    };
+    });
   }
 
   function makeProps(overrides) {
@@ -101,8 +102,7 @@ describe("AisTargetRenderModel", function () {
   it("builds dispatch data state with all metrics and formatter output", function () {
     const setup = createRenderModel();
     const model = setup.renderModel.buildModel({
-      props: makeProps(),
-      hostContext: createHostContext({ pageId: "navpage", showInfo: "dispatch" }),
+      props: withSurfacePolicy(makeProps(), { pageId: "navpage", mode: "dispatch" }),
       shellRect: { width: 320, height: 180 },
       mode: "normal",
       isVerticalCommitted: false
@@ -139,15 +139,14 @@ describe("AisTargetRenderModel", function () {
   it("keeps full identity text and all four metrics in flat BRG branch mode", function () {
     const setup = createRenderModel();
     const model = setup.renderModel.buildModel({
-      props: makeProps({
+      props: withSurfacePolicy(makeProps({
         domain: {
           showTcpaBranch: false,
           tcpa: 0,
           nameOrMmsi: "Athena",
           frontText: "Back"
         }
-      }),
-      hostContext: createHostContext({ pageId: "navpage", showInfo: "dispatch" }),
+      }), { pageId: "navpage", mode: "dispatch" }),
       shellRect: { width: 620, height: 120 },
       mode: "flat",
       isVerticalCommitted: false
@@ -167,8 +166,10 @@ describe("AisTargetRenderModel", function () {
     ["flat", "normal", "high"].forEach((mode) => {
       const shellRect = mode === "flat" ? { width: 620, height: 120 } : { width: 280, height: 220 };
       const model = setup.renderModel.buildModel({
-        props: makeProps({ domain: { showTcpaBranch: false, tcpa: 0 } }),
-        hostContext: createHostContext({ pageId: "navpage", showInfo: "dispatch" }),
+        props: withSurfacePolicy(
+          makeProps({ domain: { showTcpaBranch: false, tcpa: 0 } }),
+          { pageId: "navpage", mode: "dispatch" }
+        ),
         shellRect: shellRect,
         mode: mode,
         isVerticalCommitted: false
@@ -183,13 +184,12 @@ describe("AisTargetRenderModel", function () {
   it("keeps placeholder state on gpspage without target identity", function () {
     const setup = createRenderModel();
     const model = setup.renderModel.buildModel({
-      props: makeProps({
+      props: withSurfacePolicy(makeProps({
         domain: {
           hasTargetIdentity: false,
           hasDispatchMmsi: false
         }
-      }),
-      hostContext: createHostContext({ pageId: "gpspage", showInfo: "dispatch" }),
+      }), { pageId: "gpspage", mode: "dispatch" }),
       shellRect: { width: 300, height: 170 },
       mode: "normal",
       isVerticalCommitted: false
@@ -206,13 +206,12 @@ describe("AisTargetRenderModel", function () {
   it("keeps hidden state outside gpspage when no target identity exists", function () {
     const setup = createRenderModel();
     const model = setup.renderModel.buildModel({
-      props: makeProps({
+      props: withSurfacePolicy(makeProps({
         domain: {
           hasTargetIdentity: false,
           hasDispatchMmsi: false
         }
-      }),
-      hostContext: createHostContext({ pageId: "navpage", showInfo: "dispatch" }),
+      }), { pageId: "navpage", mode: "dispatch" }),
       shellRect: { width: 300, height: 170 },
       mode: "normal",
       isVerticalCommitted: false
@@ -227,8 +226,7 @@ describe("AisTargetRenderModel", function () {
   it("forces passive interaction in editing mode even when dispatch capability exists", function () {
     const setup = createRenderModel();
     const model = setup.renderModel.buildModel({
-      props: makeProps({ editing: true }),
-      hostContext: createHostContext({ pageId: "navpage", showInfo: "dispatch" }),
+      props: withSurfacePolicy(makeProps({ editing: true }), { pageId: "navpage", mode: "dispatch" }),
       shellRect: { width: 320, height: 180 },
       mode: "normal",
       isVerticalCommitted: false
@@ -243,13 +241,12 @@ describe("AisTargetRenderModel", function () {
   it("uses tcpa decimal precision 0 when absolute tcpa exceeds 60 seconds", function () {
     const setup = createRenderModel();
     setup.renderModel.buildModel({
-      props: makeProps({
+      props: withSurfacePolicy(makeProps({
         domain: {
           tcpa: 7200,
           showTcpaBranch: true
         }
-      }),
-      hostContext: createHostContext({ pageId: "navpage", showInfo: "dispatch" }),
+      }), { pageId: "navpage", mode: "dispatch" }),
       shellRect: { width: 320, height: 180 },
       mode: "normal",
       isVerticalCommitted: false
@@ -263,40 +260,35 @@ describe("AisTargetRenderModel", function () {
 
   it("updates resize signature when any of the four metric strings changes", function () {
     const setup = createRenderModel();
-    const hostContext = createHostContext({ pageId: "navpage", showInfo: "dispatch" });
+    const props = withSurfacePolicy(makeProps(), { pageId: "navpage", mode: "dispatch" });
     const shellRect = { width: 320, height: 180 };
     const baseSig = setup.renderModel.buildModel({
-      props: makeProps(),
-      hostContext: hostContext,
+      props: props,
       shellRect: shellRect,
       mode: "normal",
       isVerticalCommitted: false
     }).resizeSignatureParts.join("|");
 
     const sigDistance = setup.renderModel.buildModel({
-      props: makeProps({ domain: { distance: 9.1 } }),
-      hostContext: hostContext,
+      props: withSurfacePolicy(makeProps({ domain: { distance: 9.1 } }), { pageId: "navpage", mode: "dispatch" }),
       shellRect: shellRect,
       mode: "normal",
       isVerticalCommitted: false
     }).resizeSignatureParts.join("|");
     const sigCpa = setup.renderModel.buildModel({
-      props: makeProps({ domain: { cpa: 1.9 } }),
-      hostContext: hostContext,
+      props: withSurfacePolicy(makeProps({ domain: { cpa: 1.9 } }), { pageId: "navpage", mode: "dispatch" }),
       shellRect: shellRect,
       mode: "normal",
       isVerticalCommitted: false
     }).resizeSignatureParts.join("|");
     const sigTcpa = setup.renderModel.buildModel({
-      props: makeProps({ domain: { tcpa: 12 } }),
-      hostContext: hostContext,
+      props: withSurfacePolicy(makeProps({ domain: { tcpa: 12 } }), { pageId: "navpage", mode: "dispatch" }),
       shellRect: shellRect,
       mode: "normal",
       isVerticalCommitted: false
     }).resizeSignatureParts.join("|");
     const sigBrg = setup.renderModel.buildModel({
-      props: makeProps({ domain: { headingTo: 302 } }),
-      hostContext: hostContext,
+      props: withSurfacePolicy(makeProps({ domain: { headingTo: 302 } }), { pageId: "navpage", mode: "dispatch" }),
       shellRect: shellRect,
       mode: "normal",
       isVerticalCommitted: false
@@ -310,33 +302,28 @@ describe("AisTargetRenderModel", function () {
 
   it("keeps vertical resize signatures stable across host-height drift", function () {
     const setup = createRenderModel();
-    const props = makeProps();
-    const hostContext = createHostContext({ pageId: "navpage", showInfo: "dispatch" });
+    const props = withSurfacePolicy(makeProps(), { pageId: "navpage", mode: "dispatch", orientation: "vertical" });
 
     const verticalA = setup.renderModel.buildModel({
       props: props,
-      hostContext: hostContext,
       shellRect: { width: 220, height: 120 },
       mode: "normal",
       isVerticalCommitted: true
     });
     const verticalB = setup.renderModel.buildModel({
       props: props,
-      hostContext: hostContext,
       shellRect: { width: 220, height: 360 },
       mode: "normal",
       isVerticalCommitted: true
     });
     const hostSizedA = setup.renderModel.buildModel({
-      props: props,
-      hostContext: hostContext,
+      props: withSurfacePolicy(makeProps(), { pageId: "navpage", mode: "dispatch" }),
       shellRect: { width: 220, height: 120 },
       mode: "normal",
       isVerticalCommitted: false
     });
     const hostSizedB = setup.renderModel.buildModel({
-      props: props,
-      hostContext: hostContext,
+      props: withSurfacePolicy(makeProps(), { pageId: "navpage", mode: "dispatch" }),
       shellRect: { width: 220, height: 360 },
       mode: "normal",
       isVerticalCommitted: false

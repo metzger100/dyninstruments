@@ -1,7 +1,7 @@
 /**
  * Module: ClusterRendererRouter - Strict kind/surface router with shell rendering and surface-controller helpers
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: PerfSpanHelper, ClusterKindCatalog, CanvasDomSurfaceAdapter, HtmlSurfaceController, RendererPropsWidget, ActiveRouteTextHtmlWidget, EditRouteTextHtmlWidget, RoutePointsTextHtmlWidget, MapZoomTextHtmlWidget, AisTargetTextHtmlWidget
+ * Depends: PerfSpanHelper, ClusterKindCatalog, ClusterSurfacePolicy, CanvasDomSurfaceAdapter, HtmlSurfaceController, RendererPropsWidget, ActiveRouteTextHtmlWidget, EditRouteTextHtmlWidget, RoutePointsTextHtmlWidget, MapZoomTextHtmlWidget, AisTargetTextHtmlWidget
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,6 +14,13 @@
     return String(value || "")
       .replace(/[^a-zA-Z0-9_-]/g, "-")
       .replace(/-{2,}/g, "-");
+  }
+  function trimText(value) {
+    return value == null ? "" : String(value).trim();
+  }
+  function toStyleAttr(styleText) {
+    const text = trimText(styleText);
+    return text ? (' style="' + text + '"') : "";
   }
   function ensurePropsObject(props) {
     if (!props || typeof props !== "object") {
@@ -31,6 +38,7 @@
     const kindCatalog = kindCatalogModule.createDefaultCatalog();
     const canvasDomAdapter = Helpers.getModule("CanvasDomSurfaceAdapter").create(def, Helpers);
     const htmlSurfaceOwner = Helpers.getModule("HtmlSurfaceController").create(def, Helpers);
+    const surfacePolicy = Helpers.getModule("ClusterSurfacePolicy").create(def, Helpers);
     const threeSpec = Helpers.getModule("ThreeValueTextWidget").create(def, Helpers);
     const rendererPropsWidget = Helpers.getModule("RendererPropsWidget");
     const rendererSpecs = {
@@ -301,6 +309,7 @@
       return '<div class="' + shellClasses.join(" ") + '"' +
         ' data-dyni-instance="' + String(instanceId) + '"' +
         ' data-dyni-surface="' + String(routeState.route.surface) + '"' +
+        toStyleAttr(surfacePolicy.buildShellSizingStyle(routeState.shellSizing)) +
         '>' + shellInner + "</div>";
     }
     function renderHtml(props) {
@@ -311,7 +320,10 @@
       });
       try {
         const routeState = resolveRouteState(routeProps);
-        return buildShellHtml(routeState, this);
+        const routedState = surfacePolicy.resolveRouteStateWithPolicy(routeState, this, {
+          allowNatural: false
+        });
+        return buildShellHtml(routedState, this);
       }
       finally {
         perf.endSpan(span, {
@@ -337,7 +349,7 @@
         throw new Error("ClusterRendererRouter: unsupported surface '" + String(surface) + "'");
       };
     }
-    function createSessionPayload(commitPayload) {
+    function createSessionPayload(commitPayload, hostContext) {
       if (!commitPayload || typeof commitPayload !== "object") {
         throw new Error("ClusterRendererRouter: createSessionPayload() requires a payload object");
       }
@@ -349,13 +361,18 @@
         throw new Error("ClusterRendererRouter: createSessionPayload() requires payload.shellEl");
       }
       const routeState = resolveRouteState(commitPayload.props);
+      const routedState = surfacePolicy.resolveRouteStateWithPolicy(routeState, hostContext, {
+        allowNatural: true,
+        shellWidth: surfacePolicy.resolveShellWidth(commitPayload.shellEl)
+      });
+      surfacePolicy.applyShellSizingToElement(commitPayload.shellEl, routedState.shellSizing);
       return {
-        surface: routeState.route.surface,
+        surface: routedState.route.surface,
         rootEl: commitPayload.rootEl,
         shellEl: commitPayload.shellEl,
-        props: routeState.props,
+        props: routedState.props,
         revision: commitPayload.revision,
-        route: routeState.route
+        route: routedState.route
       };
     }
     return {

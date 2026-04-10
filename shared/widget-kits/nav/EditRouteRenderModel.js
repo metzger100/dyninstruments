@@ -73,35 +73,6 @@
     return String(callFormatter(undefined, formatter, formatterParameters, defaultText, Helpers));
   }
 
-  function canOpenEditRoute(args) {
-    const cfg = args || {};
-    const htmlUtils = cfg.htmlUtils;
-    if (!htmlUtils) {
-      return false;
-    }
-
-    const props = toObject(cfg.props);
-    if (htmlUtils.isEditingMode(props)) {
-      return false;
-    }
-
-    const hostContext = cfg.hostContext && typeof cfg.hostContext === "object" ? cfg.hostContext : null;
-    const hostActions = hostContext && hostContext.hostActions ? hostContext.hostActions : null;
-    if (!hostActions || typeof hostActions.getCapabilities !== "function") {
-      return false;
-    }
-    if (!hostActions.routeEditor || typeof hostActions.routeEditor.openEditRoute !== "function") {
-      return false;
-    }
-
-    const capabilities = hostActions.getCapabilities();
-    return !!(
-      capabilities &&
-      capabilities.routeEditor &&
-      capabilities.routeEditor.openEditRoute === "dispatch"
-    );
-  }
-
   function buildResizeSignatureParts(model) {
     const m = model || {};
     const parts = [
@@ -136,6 +107,7 @@
   function create(def, Helpers) {
     const layoutApi = Helpers.getModule("EditRouteLayout").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+    const navInteractionPolicy = Helpers.getModule("NavInteractionPolicy").create(def, Helpers);
 
     function buildModel(args) {
       const cfg = args || {};
@@ -217,11 +189,7 @@
       const visibleMetricIds = METRIC_IDS.filter(function (id) {
         return !!(layout.metricVisibility && layout.metricVisibility[id]);
       });
-      const dispatch = canOpenEditRoute({
-        props: props,
-        hostContext: cfg.hostContext,
-        htmlUtils: htmlUtils
-      });
+      const dispatch = navInteractionPolicy.canDispatchWhenNotEditing(props);
       const verticalWrapperStyle = layout.verticalShell && typeof layout.verticalShell.wrapperStyle === "string"
         ? layout.verticalShell.wrapperStyle.trim()
         : "";
@@ -270,11 +238,7 @@
       buildModel: buildModel,
       buildResizeSignatureParts: buildResizeSignatureParts,
       canOpenEditRoute: function (args) {
-        return canOpenEditRoute({
-          props: args && args.props,
-          hostContext: args && args.hostContext,
-          htmlUtils: htmlUtils
-        });
+        return navInteractionPolicy.canDispatchWhenNotEditing(args && args.props);
       }
     };
   }

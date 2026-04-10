@@ -122,7 +122,7 @@
         state.hostCommitController.scheduleCommit({
           onCommit: function (commitPayload) {
             runtimeApi._theme.applyToRoot(commitPayload.rootEl);
-            const sessionPayload = rendererRouter.createSessionPayload(commitPayload);
+            const sessionPayload = rendererRouter.createSessionPayload(commitPayload, ctx);
             state.surfaceSessionController.reconcileSession(sessionPayload);
           }
         });

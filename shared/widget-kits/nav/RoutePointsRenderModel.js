@@ -56,48 +56,6 @@
     );
   }
 
-  function toCapabilities(hostContext) {
-    const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
-    const hostActions = ctx && ctx.hostActions ? ctx.hostActions : null;
-    if (!hostActions || typeof hostActions.getCapabilities !== "function") {
-      return null;
-    }
-    const capabilities = hostActions.getCapabilities();
-    return capabilities && typeof capabilities === "object" ? capabilities : null;
-  }
-
-  function canActivateRoutePoint(args) {
-    const cfg = args || {};
-    const htmlUtils = cfg.htmlUtils;
-    if (!htmlUtils) {
-      return false;
-    }
-
-    const props = toObject(cfg.props);
-    if (htmlUtils.isEditingMode(props)) {
-      return false;
-    }
-
-    const hostContext = cfg.hostContext && typeof cfg.hostContext === "object" ? cfg.hostContext : null;
-    const hostActions = hostContext && hostContext.hostActions ? hostContext.hostActions : null;
-    if (!hostActions || typeof hostActions.getCapabilities !== "function") {
-      return false;
-    }
-    if (!hostActions.routePoints || typeof hostActions.routePoints.activate !== "function") {
-      return false;
-    }
-
-    const capabilities = toCapabilities(hostContext);
-    if (!capabilities || !capabilities.routePoints || !capabilities.routeEditor) {
-      return false;
-    }
-
-    return (
-      capabilities.routePoints.activate === "dispatch" &&
-      capabilities.routeEditor.openEditRoute === "dispatch"
-    );
-  }
-
   function formatLatLonInfo(point, defaultText, Helpers) {
     return String(Helpers.applyFormatter({ lat: point.lat, lon: point.lon }, {
       formatter: "formatLonLats",
@@ -225,6 +183,7 @@
     const centerMath = Helpers.getModule("CenterDisplayMath").create(def, Helpers);
     const layoutApi = Helpers.getModule("RoutePointsLayout").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+    const navInteractionPolicy = Helpers.getModule("NavInteractionPolicy").create(def, Helpers);
 
     function buildModel(args) {
       const cfg = args || {};
@@ -260,11 +219,7 @@
         ? toText(domain.routeName, htmlUtils)
         : NO_ROUTE_TEXT;
       const isActiveRoute = domain.isActiveRoute === true;
-      const canActivate = canActivateRoutePoint({
-        props: props,
-        hostContext: cfg.hostContext,
-        htmlUtils: htmlUtils
-      });
+      const canActivate = navInteractionPolicy.canDispatchWhenNotEditing(props);
 
       const resolvedMode = layoutApi.resolveMode({
         W: shellWidth,
@@ -380,11 +335,7 @@
       buildModel: buildModel,
       buildResizeSignatureParts: buildResizeSignatureParts,
       canActivateRoutePoint: function (args) {
-        return canActivateRoutePoint({
-          props: args && args.props,
-          hostContext: args && args.hostContext,
-          htmlUtils: htmlUtils
-        });
+        return navInteractionPolicy.canDispatchWhenNotEditing(args && args.props);
       }
     };
   }

@@ -66,25 +66,11 @@ describe("EditRouteTextHtmlWidget", function () {
 
   function createHostContext(options) {
     const opts = options || {};
-    const vertical = opts.vertical === true;
     const shellRect = opts.shellRect || { width: 320, height: 180 };
     const shellEl = {
-      getBoundingClientRect: vi.fn(() => shellRect),
-      closest: vi.fn((selector) => {
-        if (selector === ".widgetContainer.vertical" && vertical) {
-          return {};
-        }
-        return null;
-      })
+      getBoundingClientRect: vi.fn(() => shellRect)
     };
-    const hostContext = {
-      hostActions: {
-        routeEditor: {
-          openEditRoute: opts.openEditRoute || vi.fn(() => true)
-        },
-        getCapabilities: vi.fn(() => ({ routeEditor: { openEditRoute: opts.capability || "dispatch" } }))
-      }
-    };
+    const hostContext = {};
 
     if (opts.withCommitState !== false) {
       hostContext.__dyniHostCommitState = {
@@ -94,10 +80,27 @@ describe("EditRouteTextHtmlWidget", function () {
     }
     return hostContext;
   }
+  function withSurfacePolicy(props, options) {
+    const opts = options || {};
+    const mode = opts.mode === "passive" ? "passive" : "dispatch";
+    const orientation = opts.orientation === "vertical" ? "vertical" : "default";
+    const openEditRoute = opts.openEditRoute || vi.fn(() => true);
+    return Object.assign({}, props || {}, {
+      surfacePolicy: {
+        interaction: { mode: mode },
+        containerOrientation: orientation,
+        actions: {
+          routeEditor: {
+            openEditRoute: openEditRoute
+          }
+        }
+      }
+    });
+  }
 
   it("returns passive namedHandlers when capability gate is closed", function () {
     const setup = createRenderer({ canOpen: vi.fn(() => false) });
-    const handlers = setup.renderer.namedHandlers({}, createHostContext());
+    const handlers = setup.renderer.namedHandlers(withSurfacePolicy({}, { mode: "passive" }), createHostContext());
 
     expect(handlers).toEqual({});
     expect(setup.canOpen).toHaveBeenCalled();
@@ -106,8 +109,11 @@ describe("EditRouteTextHtmlWidget", function () {
   it("returns editRouteOpen handler in dispatch mode and dispatches host action", function () {
     const openEditRoute = vi.fn(() => true);
     const setup = createRenderer({ canOpen: vi.fn(() => true) });
-    const hostContext = createHostContext({ openEditRoute: openEditRoute });
-    const handlers = setup.renderer.namedHandlers({}, hostContext);
+    const hostContext = createHostContext();
+    const handlers = setup.renderer.namedHandlers(withSurfacePolicy({}, {
+      mode: "dispatch",
+      openEditRoute: openEditRoute
+    }), hostContext);
 
     expect(Object.keys(handlers)).toEqual(["editRouteOpen"]);
     expect(handlers.editRouteOpen()).toBe(true);
@@ -124,8 +130,8 @@ describe("EditRouteTextHtmlWidget", function () {
         resizeSignatureParts: ["x", "y"]
       }))
     });
-    const hostContext = createHostContext({ vertical: true, shellRect: { width: 240, height: 120 } });
-    const html = setup.renderer.renderHtml.call(hostContext, {});
+    const hostContext = createHostContext({ shellRect: { width: 240, height: 120 } });
+    const html = setup.renderer.renderHtml.call(hostContext, withSurfacePolicy({}, { orientation: "vertical" }));
 
     expect(html).toBe("<div>markup</div>");
     expect(setup.buildModel).toHaveBeenCalledWith(expect.objectContaining({
@@ -139,7 +145,7 @@ describe("EditRouteTextHtmlWidget", function () {
   it("tolerates first render without committed ancestry", function () {
     const setup = createRenderer();
     const hostContext = createHostContext({ withCommitState: false });
-    const html = setup.renderer.renderHtml.call(hostContext, {});
+    const html = setup.renderer.renderHtml.call(hostContext, withSurfacePolicy({}, { orientation: "default" }));
 
     expect(html).toBe("<div>markup</div>");
     expect(setup.buildModel).toHaveBeenCalledWith(expect.objectContaining({
@@ -158,7 +164,7 @@ describe("EditRouteTextHtmlWidget", function () {
         resizeSignatureParts: [1, 2, 3]
       }))
     });
-    const signature = setup.renderer.resizeSignature.call(createHostContext(), {});
+    const signature = setup.renderer.resizeSignature.call(createHostContext(), withSurfacePolicy({}, {}));
 
     expect(signature).toBe("1|2|3");
   });

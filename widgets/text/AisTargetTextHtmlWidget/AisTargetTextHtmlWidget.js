@@ -37,12 +37,9 @@
       targetEl: targetEl
     };
   }
-
-  function isVerticalCommitted(targetEl) {
-    if (!targetEl || typeof targetEl.closest !== "function") {
-      return false;
-    }
-    return !!targetEl.closest(".widgetContainer.vertical");
+  function resolveSurfacePolicy(props) {
+    const p = props && typeof props === "object" ? props : null;
+    return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
   }
 
   function create(def, Helpers) {
@@ -54,6 +51,7 @@
     function buildSetup(props, hostContext) {
       const p = props || {};
       const layout = toObject(p.layout);
+      const surfacePolicy = resolveSurfacePolicy(p);
       const committed = resolveCommittedElements(hostContext);
       const shellRect = htmlUtils.resolveShellRect(hostContext, committed.targetEl);
       const mode = htmlUtils.resolveRatioMode({
@@ -67,10 +65,9 @@
       });
       const model = renderModel.buildModel({
         props: p,
-        hostContext: hostContext,
         shellRect: shellRect,
         mode: mode,
-        isVerticalCommitted: isVerticalCommitted(committed.targetEl)
+        isVerticalCommitted: !!(surfacePolicy && surfacePolicy.containerOrientation === "vertical")
       });
 
       return {
@@ -108,6 +105,8 @@
 
     const namedHandlers = function (props, hostContext) {
       const setup = buildSetup(props, hostContext);
+      const surfacePolicy = resolveSurfacePolicy(props);
+      const aisActions = surfacePolicy && surfacePolicy.actions ? surfacePolicy.actions.ais : null;
       if (setup.model.interactionState !== "dispatch" || !setup.model.dispatchMmsi) {
         return {};
       }
@@ -118,8 +117,6 @@
           if (latest.interactionState !== "dispatch" || !latest.dispatchMmsi) {
             return false;
           }
-          const actions = hostContext && hostContext.hostActions;
-          const aisActions = actions && actions.ais;
           if (!aisActions || typeof aisActions.showInfo !== "function") {
             return false;
           }
@@ -143,6 +140,10 @@
       return {};
     };
 
+    const getVerticalShellSizing = function () {
+      return { kind: "ratio", aspectRatio: 7 / 8 };
+    };
+
     return {
       id: "AisTargetTextHtmlWidget",
       wantsHideNativeHead: true,
@@ -150,6 +151,7 @@
       namedHandlers: namedHandlers,
       resizeSignature: resizeSignature,
       initFunction: initFunction,
+      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };
   }

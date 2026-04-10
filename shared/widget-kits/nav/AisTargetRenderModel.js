@@ -60,22 +60,6 @@
     return String(Helpers.applyFormatter(cfg.value, options));
   }
 
-  function resolveCapabilities(hostContext) {
-    if (!hostContext || typeof hostContext !== "object" || !hostContext.hostActions) {
-      return null;
-    }
-    const getCapabilities = hostContext.hostActions.getCapabilities;
-    if (typeof getCapabilities !== "function") {
-      return null;
-    }
-
-    const capabilities = getCapabilities.call(hostContext.hostActions);
-    if (!capabilities || typeof capabilities !== "object") {
-      return null;
-    }
-    return capabilities;
-  }
-
   function resolveRenderState(args) {
     const cfg = args || {};
     const domain = toObject(cfg.domain);
@@ -87,8 +71,7 @@
       return "placeholder";
     }
 
-    const capabilities = cfg.capabilities;
-    if (capabilities && capabilities.pageId === "gpspage") {
+    if (cfg.pageId === "gpspage") {
       return "placeholder";
     }
 
@@ -105,12 +88,9 @@
     }
 
     const domain = toObject(cfg.domain);
-    const capabilities = cfg.capabilities;
     const canDispatch = !!(
       domain.hasDispatchMmsi === true &&
-      capabilities &&
-      capabilities.ais &&
-      capabilities.ais.showInfo === "dispatch"
+      cfg.surfaceInteractionMode === "dispatch"
     );
 
     return canDispatch ? "dispatch" : "passive";
@@ -171,16 +151,20 @@
       const shellSize = toSafeSizeRect(cfg.shellRect, htmlUtils);
       const defaultText = resolveDefaultText(props);
       const isEditingMode = htmlUtils.isEditingMode(props);
-      const capabilities = resolveCapabilities(cfg.hostContext);
+      const surfacePolicy = props.surfacePolicy && typeof props.surfacePolicy === "object"
+        ? props.surfacePolicy
+        : null;
       const renderState = resolveRenderState({
         domain: domain,
-        capabilities: capabilities,
+        pageId: surfacePolicy && typeof surfacePolicy.pageId === "string" ? surfacePolicy.pageId : "other",
         isEditingMode: isEditingMode
       });
       const interactionState = resolveInteractionState({
         domain: domain,
         renderState: renderState,
-        capabilities: capabilities,
+        surfaceInteractionMode: surfacePolicy && surfacePolicy.interaction
+          ? surfacePolicy.interaction.mode
+          : "passive",
         isEditingMode: isEditingMode
       });
 
@@ -313,7 +297,7 @@
         const cfg = args || {};
         return resolveRenderState({
           domain: cfg.domain,
-          capabilities: cfg.capabilities,
+          pageId: cfg.pageId,
           isEditingMode: cfg.isEditingMode === true
         });
       },
@@ -322,7 +306,7 @@
         return resolveInteractionState({
           domain: cfg.domain,
           renderState: cfg.renderState,
-          capabilities: cfg.capabilities,
+          surfaceInteractionMode: cfg.surfaceInteractionMode,
           isEditingMode: cfg.isEditingMode === true
         });
       }

@@ -76,12 +76,18 @@
       globalKey: "DyniClusterMapperToolkit",
       deps: ["RadialAngleMath"]
     },
+    ClusterSurfacePolicy: {
+      js: BASE + "cluster/rendering/ClusterSurfacePolicy.js",
+      css: undefined,
+      globalKey: "DyniClusterSurfacePolicy"
+    },
     ClusterRendererRouter: {
       js: BASE + "cluster/rendering/ClusterRendererRouter.js",
       css: undefined,
       globalKey: "DyniClusterRendererRouter",
       deps: [
         "ClusterKindCatalog",
+        "ClusterSurfacePolicy",
         "CanvasDomSurfaceAdapter",
         "HtmlSurfaceController",
         "ThreeValueTextWidget",

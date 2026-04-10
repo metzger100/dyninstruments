@@ -82,12 +82,16 @@
     function translateFunction() {
       return {};
     }
+    function getVerticalShellSizing() {
+      return { kind: "ratio", aspectRatio: 1 };
+    }
 
     return {
       id: "SpeedRadialWidget",
       version: "0.5.0",
       wantsHideNativeHead: true,
       renderCanvas,
+      getVerticalShellSizing,
       translateFunction
     };
   }

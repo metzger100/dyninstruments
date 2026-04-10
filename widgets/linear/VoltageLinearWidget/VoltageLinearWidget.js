@@ -113,12 +113,16 @@
     function translateFunction() {
       return {};
     }
+    function getVerticalShellSizing() {
+      return { kind: "ratio", aspectRatio: 2 };
+    }
 
     return {
       id: "VoltageLinearWidget",
       version: "0.1.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
+      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };
   }

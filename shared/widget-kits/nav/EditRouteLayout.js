@@ -85,7 +85,7 @@
         isVerticalCommitted: true,
         forceHigh: true,
         effectiveLayoutHeight: effectiveLayoutHeight,
-        wrapperStyle: "height:auto;aspect-ratio:7/8;min-height:" + VERTICAL_MIN_HEIGHT + ";",
+        wrapperStyle: "",
         aspectRatio: "7/8",
         minHeight: VERTICAL_MIN_HEIGHT
       };

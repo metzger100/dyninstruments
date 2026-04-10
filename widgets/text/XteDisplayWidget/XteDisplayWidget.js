@@ -285,11 +285,16 @@
       staticLayer.invalidate();
     }
 
+    function getVerticalShellSizing() {
+      return { kind: "ratio", aspectRatio: 2 };
+    }
+
     return {
       id: "XteDisplayWidget",
       version: "1.0.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
+      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction,
       finalizeFunction: finalizeFunction
     };

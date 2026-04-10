@@ -95,12 +95,16 @@
     function translateFunction() {
       return {};
     }
+    function getVerticalShellSizing() {
+      return { kind: "ratio", aspectRatio: 1 };
+    }
 
     return {
       id: "VoltageRadialWidget",
       version: "0.2.0",
       wantsHideNativeHead: true,
       renderCanvas,
+      getVerticalShellSizing,
       translateFunction
     };
   }

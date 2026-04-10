@@ -399,7 +399,16 @@
     }
 
     function translateFunction() { return {}; }
-    return { id: "CenterDisplayTextWidget", wantsHideNativeHead: true, renderCanvas: renderCanvas, translateFunction: translateFunction };
+    function getVerticalShellSizing() {
+      return { kind: "ratio", aspectRatio: 7 / 8 };
+    }
+    return {
+      id: "CenterDisplayTextWidget",
+      wantsHideNativeHead: true,
+      renderCanvas: renderCanvas,
+      getVerticalShellSizing: getVerticalShellSizing,
+      translateFunction: translateFunction
+    };
   }
   return { id: "CenterDisplayTextWidget", create: create };
 }));

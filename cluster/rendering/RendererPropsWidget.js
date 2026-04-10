@@ -58,11 +58,26 @@
       return undefined;
     }
 
+    function getVerticalShellSizing(sizingContext, surfacePolicy) {
+      if (!targetSpec || typeof targetSpec.getVerticalShellSizing !== "function") {
+        return undefined;
+      }
+      const context = sizingContext && typeof sizingContext === "object"
+        ? sizingContext
+        : {};
+      const payload = mergeRendererProps(context.payload || {});
+      return targetSpec.getVerticalShellSizing.call(this, {
+        ...context,
+        payload: payload
+      }, surfacePolicy);
+    }
+
     return {
       id: "RendererPropsWidget",
       wantsHideNativeHead: !!(targetSpec && targetSpec.wantsHideNativeHead),
       renderHtml: renderHtml,
       renderCanvas: renderCanvas,
+      getVerticalShellSizing: getVerticalShellSizing,
       initFunction: initFunction,
       translateFunction: translateFunction,
       finalizeFunction: finalizeFunction

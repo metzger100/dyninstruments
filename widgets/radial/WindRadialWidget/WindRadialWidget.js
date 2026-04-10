@@ -159,12 +159,16 @@
     function translateFunction() {
       return {};
     }
+    function getVerticalShellSizing() {
+      return { kind: "ratio", aspectRatio: 1 };
+    }
 
     return {
       id: "WindRadialWidget",
       version: "1.9.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
+      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };
   }

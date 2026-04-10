@@ -243,9 +243,6 @@
       const cfg = args || {};
       const layout = cfg.layout || computeLayout(cfg);
       const showOrdinal = layout.rowPolicy ? layout.rowPolicy.showOrdinal === true : true;
-      const wrapperHeightPx = Math.floor(clampNumber(cfg.wrapperHeight, -1, Number.MAX_SAFE_INTEGER, -1));
-      const wrapperHeight = wrapperHeightPx >= 0 ? wrapperHeightPx : null;
-
       const wrapperStyle =
         "padding:" +
         Math.max(0, layout.contentRect.y) +
@@ -254,8 +251,7 @@
         "px;" +
         "gap:" +
         Math.max(0, layout.headerGap) +
-        "px;" +
-        (wrapperHeight === null ? "" : "height:" + wrapperHeight + "px;");
+        "px;";
 
       const header = layout.headerRect
         ? {

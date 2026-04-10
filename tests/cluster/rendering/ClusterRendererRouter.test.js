@@ -154,6 +154,7 @@ describe("ClusterRendererRouter", function () {
     const modules = {
       PerfSpanHelper: loadFresh("shared/widget-kits/perf/PerfSpanHelper.js"),
       ClusterKindCatalog: opts.catalogModule || loadFresh("cluster/rendering/ClusterKindCatalog.js"),
+      ClusterSurfacePolicy: loadFresh("cluster/rendering/ClusterSurfacePolicy.js"),
       CanvasDomSurfaceAdapter: { create: () => canvasAdapter },
       HtmlSurfaceController: { create: () => htmlOwner },
       ThreeValueTextWidget: { create: () => rendererSpecs.ThreeValueTextWidget },

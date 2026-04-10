@@ -292,8 +292,7 @@ describe("AisTargetLayout", function () {
     expect(vertical.effectiveLayoutHeight).toBe(320);
     expect(vertical.aspectRatio).toBe("7/8");
     expect(vertical.minHeight).toBe("8em");
-    expect(vertical.wrapperStyle).toContain("aspect-ratio:7/8;");
-    expect(vertical.wrapperStyle).toContain("min-height:8em;");
+    expect(vertical.wrapperStyle).toBe("");
   });
 
   it("anchors responsive compaction to width in committed vertical mode and forces high", function () {

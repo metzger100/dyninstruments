@@ -65,6 +65,15 @@ describe("RoutePointsTextHtmlWidget", function () {
             }
           };
         }
+        if (id === "RoutePointsLayout") {
+          return {
+            create() {
+              return {
+                computeNaturalHeight: vi.fn(() => ({ cappedHeight: 240 }))
+              };
+            }
+          };
+        }
         throw new Error("unexpected module: " + id);
       }
     };
@@ -88,18 +97,30 @@ describe("RoutePointsTextHtmlWidget", function () {
       __dyniHostCommitState: {
         shellEl: shellEl,
         rootEl: null
-      },
-      hostActions: {
-        routePoints: {
-          activate: vi.fn(() => true)
-        }
       }
     };
+  }
+  function withSurfacePolicy(props, options) {
+    const opts = options || {};
+    const mode = opts.mode === "passive" ? "passive" : "dispatch";
+    const activate = opts.activate || vi.fn(() => true);
+    const orientation = opts.orientation === "vertical" ? "vertical" : "default";
+    return Object.assign({}, props || {}, {
+      surfacePolicy: {
+        interaction: { mode: mode },
+        containerOrientation: orientation,
+        actions: {
+          routePoints: {
+            activate: activate
+          }
+        }
+      }
+    });
   }
 
   it("returns passive namedHandlers when activation gate is closed", function () {
     const setup = createRenderer({ canActivate: vi.fn(() => false) });
-    const handlers = setup.renderer.namedHandlers({}, createHostContext());
+    const handlers = setup.renderer.namedHandlers(withSurfacePolicy({}, { mode: "passive" }), createHostContext());
 
     expect(handlers).toEqual({});
     expect(setup.canActivate).toHaveBeenCalled();
@@ -107,8 +128,12 @@ describe("RoutePointsTextHtmlWidget", function () {
 
   it("dispatches routePointActivate for valid row clicks and ignores invalid clicks", function () {
     const setup = createRenderer({ canActivate: vi.fn(() => true) });
+    const activate = vi.fn(() => true);
     const hostContext = createHostContext();
-    const handlers = setup.renderer.namedHandlers({}, hostContext);
+    const handlers = setup.renderer.namedHandlers(withSurfacePolicy({}, {
+      mode: "dispatch",
+      activate: activate
+    }), hostContext);
 
     expect(Object.keys(handlers)).toEqual(["routePointActivate"]);
     expect(handlers.routePointActivate({ target: { closest: () => null } })).toBe(false);
@@ -126,7 +151,7 @@ describe("RoutePointsTextHtmlWidget", function () {
     };
 
     expect(handlers.routePointActivate(event)).toBe(true);
-    expect(hostContext.hostActions.routePoints.activate).toHaveBeenCalledWith(3);
+    expect(activate).toHaveBeenCalledWith(3);
   });
 
   it("orchestrates committed facts, fit, markup, and post-commit visibility scheduling", function () {
@@ -141,7 +166,9 @@ describe("RoutePointsTextHtmlWidget", function () {
       }))
     });
     const hostContext = createHostContext();
-    const html = setup.renderer.renderHtml.call(hostContext, { viewportHeight: 900 });
+    const html = setup.renderer.renderHtml.call(hostContext, withSurfacePolicy({ viewportHeight: 900 }, {
+      mode: "dispatch"
+    }));
 
     expect(html).toBe("<div>markup</div>");
     expect(setup.applyCommittedEffects).toHaveBeenCalledTimes(1);
@@ -163,7 +190,7 @@ describe("RoutePointsTextHtmlWidget", function () {
       }))
     });
 
-    setup.renderer.renderHtml.call(createHostContext(), {});
+    setup.renderer.renderHtml.call(createHostContext(), withSurfacePolicy({}, { mode: "passive" }));
 
     expect(setup.maybeReveal).not.toHaveBeenCalled();
   });
@@ -179,7 +206,7 @@ describe("RoutePointsTextHtmlWidget", function () {
       }))
     });
 
-    const signature = setup.renderer.resizeSignature.call(createHostContext(), {});
+    const signature = setup.renderer.resizeSignature.call(createHostContext(), withSurfacePolicy({}, { mode: "passive" }));
     expect(signature).toBe("1|2|3");
   });
 

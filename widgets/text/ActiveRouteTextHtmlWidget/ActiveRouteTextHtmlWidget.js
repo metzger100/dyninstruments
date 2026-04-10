@@ -85,32 +85,30 @@
     return p;
   }
 
-  function canDispatchOpenRoute(hostContext) {
-    const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
-    const hostActions = ctx && ctx.hostActions ? ctx.hostActions : null;
-    if (!hostActions || typeof hostActions.getCapabilities !== "function") {
-      return false;
-    }
-    if (!hostActions.routeEditor || typeof hostActions.routeEditor.openActiveRoute !== "function") {
-      return false;
-    }
-    const capabilities = hostActions.getCapabilities();
-    return !!(
-      capabilities &&
-      capabilities.routeEditor &&
-      capabilities.routeEditor.openActiveRoute === "dispatch"
-    );
+  function getSurfacePolicy(props) {
+    const p = props && typeof props === "object" ? props : null;
+    const policy = p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
+    return policy;
   }
 
-  function openActiveRoute(hostContext, props, htmlUtils) {
+  function canDispatchOpenRoute(props) {
+    const policy = getSurfacePolicy(props);
+    return !!(policy && policy.interaction && policy.interaction.mode === "dispatch");
+  }
+
+  function openActiveRoute(props, htmlUtils) {
     const p = props && typeof props === "object" ? props : null;
     if (htmlUtils.isEditingMode(p)) {
       return false;
     }
-    if (!canDispatchOpenRoute(hostContext)) {
+    const policy = getSurfacePolicy(p);
+    if (!policy || !policy.actions || !policy.actions.routeEditor || typeof policy.actions.routeEditor.openActiveRoute !== "function") {
       return false;
     }
-    return hostContext.hostActions.routeEditor.openActiveRoute() !== false;
+    if (!canDispatchOpenRoute(p)) {
+      return false;
+    }
+    return policy.actions.routeEditor.openActiveRoute() !== false;
   }
 
   function buildRenderModel(props, Helpers, hostContext, htmlUtils) {
@@ -155,7 +153,7 @@
       : "";
     const mode = resolveMode(p, hostContext, htmlUtils);
     const isEditing = htmlUtils.isEditingMode(p);
-    const dispatchOpenRoute = canDispatchOpenRoute(hostContext);
+    const dispatchOpenRoute = canDispatchOpenRoute(p);
     const canOpenRoute = !isEditing && dispatchOpenRoute;
     const captureClicks = canOpenRoute;
 
@@ -183,10 +181,10 @@
     const htmlFit = Helpers.getModule("ActiveRouteHtmlFit").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
 
-    const namedHandlers = function (props, hostContext) {
+    const namedHandlers = function (props) {
       return {
         activeRouteOpen: function activeRouteOpenHandler() {
-          return openActiveRoute(hostContext, props, htmlUtils);
+          return openActiveRoute(props, htmlUtils);
         }
       };
     };
@@ -285,6 +283,10 @@
       return {};
     };
 
+    const getVerticalShellSizing = function () {
+      return { kind: "ratio", aspectRatio: 2 };
+    };
+
     return {
       id: "ActiveRouteTextHtmlWidget",
       wantsHideNativeHead: true,
@@ -292,6 +294,7 @@
       namedHandlers: namedHandlers,
       resizeSignature: resizeSignature,
       initFunction: initFunction,
+      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };
   }

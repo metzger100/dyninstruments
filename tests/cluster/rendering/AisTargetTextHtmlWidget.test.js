@@ -84,19 +84,7 @@ describe("AisTargetTextHtmlWidget", function () {
   function createHostContext(options) {
     const opts = options || {};
     const shellRect = opts.shellRect || { width: 320, height: 180 };
-    const vertical = opts.vertical === true;
-    const showInfo = opts.showInfo || vi.fn(() => true);
-    const hostContext = {
-      hostActions: {
-        ais: {
-          showInfo: showInfo
-        },
-        getCapabilities: vi.fn(() => ({
-          pageId: opts.pageId || "navpage",
-          ais: { showInfo: opts.capability || "dispatch" }
-        }))
-      }
-    };
+    const hostContext = {};
 
     if (opts.withCommitState === false) {
       return hostContext;
@@ -104,17 +92,29 @@ describe("AisTargetTextHtmlWidget", function () {
 
     hostContext.__dyniHostCommitState = {
       shellEl: {
-        getBoundingClientRect: vi.fn(() => shellRect),
-        closest: vi.fn((selector) => {
-          if (selector === ".widgetContainer.vertical" && vertical) {
-            return {};
-          }
-          return null;
-        })
+        getBoundingClientRect: vi.fn(() => shellRect)
       },
       rootEl: null
     };
     return hostContext;
+  }
+  function withSurfacePolicy(props, options) {
+    const opts = options || {};
+    const interactionMode = opts.interactionMode === "passive" ? "passive" : "dispatch";
+    const containerOrientation = opts.containerOrientation === "vertical" ? "vertical" : "default";
+    const showInfo = opts.showInfo || vi.fn(() => true);
+    return Object.assign({}, props || {}, {
+      surfacePolicy: {
+        pageId: opts.pageId || "navpage",
+        containerOrientation: containerOrientation,
+        interaction: { mode: interactionMode },
+        actions: {
+          ais: {
+            showInfo: showInfo
+          }
+        }
+      }
+    });
   }
 
   function makeProps(overrides) {
@@ -162,8 +162,12 @@ describe("AisTargetTextHtmlWidget", function () {
 
   it("renders dispatch state with catchAll + hotspot and dispatches showInfo", function () {
     const setup = createRenderer();
-    const hostContext = createHostContext({ capability: "dispatch" });
-    const props = makeProps();
+    const showInfo = vi.fn(() => true);
+    const hostContext = createHostContext();
+    const props = withSurfacePolicy(makeProps(), {
+      interactionMode: "dispatch",
+      showInfo: showInfo
+    });
     const html = setup.renderer.renderHtml.call(hostContext, props);
 
     expect(html).toContain("dyni-ais-target-html");
@@ -187,14 +191,18 @@ describe("AisTargetTextHtmlWidget", function () {
     const handlers = setup.renderer.namedHandlers(props, hostContext);
     expect(Object.keys(handlers)).toEqual(["aisTargetShowInfo"]);
     expect(handlers.aisTargetShowInfo()).toBe(true);
-    expect(hostContext.hostActions.ais.showInfo).toHaveBeenCalledWith("211234560");
+    expect(showInfo).toHaveBeenCalledWith("211234560");
     expect(setup.fitCompute).toHaveBeenCalledTimes(1);
   });
 
   it("stays passive in layout editing mode and does not register handlers", function () {
-    const hostContext = createHostContext({ capability: "dispatch" });
+    const showInfo = vi.fn(() => true);
+    const hostContext = createHostContext();
     const renderer = createRenderer().renderer;
-    const props = makeProps({ editing: true });
+    const props = withSurfacePolicy(makeProps({ editing: true }), {
+      interactionMode: "dispatch",
+      showInfo: showInfo
+    });
     const html = renderer.renderHtml.call(hostContext, props);
 
     expect(html).toContain("dyni-ais-target-open-passive");
@@ -203,17 +211,19 @@ describe("AisTargetTextHtmlWidget", function () {
 
     const handlers = renderer.namedHandlers(props, hostContext);
     expect(handlers).toEqual({});
-    expect(hostContext.hostActions.ais.showInfo).not.toHaveBeenCalled();
+    expect(showInfo).not.toHaveBeenCalled();
   });
 
   it("renders flat mode with name/front and all four metrics", function () {
     const renderer = createRenderer().renderer;
     const hostContext = createHostContext({ shellRect: { width: 640, height: 120 } });
-    const props = makeProps({
+    const props = withSurfacePolicy(makeProps({
       domain: {
         showTcpaBranch: false,
         frontText: "Back"
       }
+    }), {
+      interactionMode: "dispatch"
     });
     const html = renderer.renderHtml.call(hostContext, props);
 
@@ -232,16 +242,17 @@ describe("AisTargetTextHtmlWidget", function () {
 
   it("updates resize signature when branch or interaction state changes", function () {
     const renderer = createRenderer().renderer;
-    const propsTcpa = makeProps();
-    const propsBrg = makeProps({ domain: { showTcpaBranch: false, tcpa: 0 } });
+    const propsTcpa = withSurfacePolicy(makeProps(), { interactionMode: "dispatch" });
+    const propsBrg = withSurfacePolicy(makeProps({ domain: { showTcpaBranch: false, tcpa: 0 } }), {
+      interactionMode: "dispatch"
+    });
 
-    const dispatchHost = createHostContext({ capability: "dispatch" });
-    const passiveHost = createHostContext({ capability: "passive" });
+    const hostContext = createHostContext();
 
-    const sigDispatchTcpa = renderer.resizeSignature.call(dispatchHost, propsTcpa);
-    const sigDispatchTcpaSame = renderer.resizeSignature.call(dispatchHost, makeProps());
-    const sigDispatchBrg = renderer.resizeSignature.call(dispatchHost, propsBrg);
-    const sigPassiveTcpa = renderer.resizeSignature.call(passiveHost, propsTcpa);
+    const sigDispatchTcpa = renderer.resizeSignature.call(hostContext, propsTcpa);
+    const sigDispatchTcpaSame = renderer.resizeSignature.call(hostContext, withSurfacePolicy(makeProps(), { interactionMode: "dispatch" }));
+    const sigDispatchBrg = renderer.resizeSignature.call(hostContext, propsBrg);
+    const sigPassiveTcpa = renderer.resizeSignature.call(hostContext, withSurfacePolicy(makeProps(), { interactionMode: "passive" }));
 
     expect(sigDispatchTcpaSame).toBe(sigDispatchTcpa);
     expect(sigDispatchBrg).not.toBe(sigDispatchTcpa);
@@ -250,18 +261,19 @@ describe("AisTargetTextHtmlWidget", function () {
 
   it("keeps vertical resize signature stable across host height changes and forces high mode", function () {
     const renderer = createRenderer().renderer;
-    const props = makeProps();
+    const propsVertical = withSurfacePolicy(makeProps(), { containerOrientation: "vertical", interactionMode: "dispatch" });
+    const propsNonVertical = withSurfacePolicy(makeProps(), { containerOrientation: "default", interactionMode: "dispatch" });
 
-    const verticalA = createHostContext({ vertical: true, shellRect: { width: 220, height: 120 } });
-    const verticalB = createHostContext({ vertical: true, shellRect: { width: 220, height: 340 } });
-    const nonVerticalA = createHostContext({ vertical: false, shellRect: { width: 220, height: 120 } });
-    const nonVerticalB = createHostContext({ vertical: false, shellRect: { width: 220, height: 340 } });
+    const verticalA = createHostContext({ shellRect: { width: 220, height: 120 } });
+    const verticalB = createHostContext({ shellRect: { width: 220, height: 340 } });
+    const nonVerticalA = createHostContext({ shellRect: { width: 220, height: 120 } });
+    const nonVerticalB = createHostContext({ shellRect: { width: 220, height: 340 } });
 
-    const sigVerticalA = renderer.resizeSignature.call(verticalA, props);
-    const sigVerticalB = renderer.resizeSignature.call(verticalB, props);
-    const sigNonVerticalA = renderer.resizeSignature.call(nonVerticalA, props);
-    const sigNonVerticalB = renderer.resizeSignature.call(nonVerticalB, props);
-    const htmlVertical = renderer.renderHtml.call(verticalA, props);
+    const sigVerticalA = renderer.resizeSignature.call(verticalA, propsVertical);
+    const sigVerticalB = renderer.resizeSignature.call(verticalB, propsVertical);
+    const sigNonVerticalA = renderer.resizeSignature.call(nonVerticalA, propsNonVertical);
+    const sigNonVerticalB = renderer.resizeSignature.call(nonVerticalB, propsNonVertical);
+    const htmlVertical = renderer.renderHtml.call(verticalA, propsVertical);
 
     expect(sigVerticalB).toBe(sigVerticalA);
     expect(sigNonVerticalB).not.toBe(sigNonVerticalA);
@@ -271,8 +283,10 @@ describe("AisTargetTextHtmlWidget", function () {
 
   it("tolerates first render without committed host state and requests corrective rerender", function () {
     const setup = createRenderer();
-    const hostContext = createHostContext({ withCommitState: false, capability: "passive" });
-    const html = setup.renderer.renderHtml.call(hostContext, makeProps({ domain: { hasTargetIdentity: false } }));
+    const hostContext = createHostContext({ withCommitState: false });
+    const html = setup.renderer.renderHtml.call(hostContext, withSurfacePolicy(makeProps({ domain: { hasTargetIdentity: false } }), {
+      interactionMode: "passive"
+    }));
     const triggerResize = vi.fn();
 
     setup.renderer.initFunction.call({ triggerResize: triggerResize });

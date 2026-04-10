@@ -87,6 +87,14 @@
     return p.editing === true || p.dyniLayoutEditing === true;
   }
 
+  function canDispatchSurfaceInteraction(props) {
+    const p = props && typeof props === "object" ? props : {};
+    const surfacePolicy = p.surfacePolicy && typeof p.surfacePolicy === "object"
+      ? p.surfacePolicy
+      : null;
+    return !!(surfacePolicy && surfacePolicy.interaction && surfacePolicy.interaction.mode === "dispatch");
+  }
+
   function create() {
     return {
       id: "HtmlWidgetUtils",
@@ -96,7 +104,8 @@
       toStyleAttr: toStyleAttr,
       resolveShellRect: resolveShellRect,
       resolveRatioMode: resolveRatioMode,
-      isEditingMode: isEditingMode
+      isEditingMode: isEditingMode,
+      canDispatchSurfaceInteraction: canDispatchSurfaceInteraction
     };
   }
 

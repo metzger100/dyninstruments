@@ -42,6 +42,9 @@ describe("EditRouteRenderModel", function () {
           else if (id === "HtmlWidgetUtils") {
             moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
           }
+          else if (id === "NavInteractionPolicy") {
+            moduleCache[id] = loadFresh("shared/widget-kits/nav/NavInteractionPolicy.js");
+          }
           else if (id === "ResponsiveScaleProfile") {
             moduleCache[id] = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
           }
@@ -59,16 +62,16 @@ describe("EditRouteRenderModel", function () {
     return loadFresh("shared/widget-kits/nav/EditRouteRenderModel.js").create({}, Helpers);
   }
 
-  function createHostContext(mode) {
-    const capability = typeof mode === "string" ? mode : "dispatch";
-    return {
-      hostActions: {
-        getCapabilities: vi.fn(() => ({ routeEditor: { openEditRoute: capability } })),
-        routeEditor: {
-          openEditRoute: vi.fn(() => true)
-        }
+  function withSurfacePolicy(props, options) {
+    const opts = options || {};
+    return Object.assign({}, props || {}, {
+      surfacePolicy: {
+        interaction: {
+          mode: opts.mode === "passive" ? "passive" : "dispatch"
+        },
+        containerOrientation: opts.orientation === "vertical" ? "vertical" : "default"
       }
-    };
+    });
   }
 
   function makeProps(overrides) {
@@ -104,7 +107,7 @@ describe("EditRouteRenderModel", function () {
   it("builds no-route state with No Route label and no metrics", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: makeProps({
+      props: withSurfacePolicy(makeProps({
         domain: {
           hasRoute: false,
           routeName: "",
@@ -116,8 +119,7 @@ describe("EditRouteRenderModel", function () {
           isLocalRoute: false,
           isServerRoute: false
         }
-      }),
-      hostContext: createHostContext("dispatch"),
+      }), { mode: "dispatch" }),
       shellRect: { width: 320, height: 160 },
       isVerticalCommitted: false
     });
@@ -132,7 +134,7 @@ describe("EditRouteRenderModel", function () {
   it("keeps flat no-route wrapper geometry aligned via inline layout style", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: makeProps({
+      props: withSurfacePolicy(makeProps({
         domain: {
           hasRoute: false,
           routeName: "",
@@ -144,8 +146,7 @@ describe("EditRouteRenderModel", function () {
           isLocalRoute: false,
           isServerRoute: false
         }
-      }),
-      hostContext: createHostContext("dispatch"),
+      }), { mode: "dispatch" }),
       shellRect: { width: 620, height: 120 },
       isVerticalCommitted: false
     });
@@ -159,8 +160,7 @@ describe("EditRouteRenderModel", function () {
   it("formats route metrics and exposes dispatch click state when capability allows it", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: makeProps(),
-      hostContext: createHostContext("dispatch"),
+      props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
       shellRect: { width: 320, height: 210 },
       isVerticalCommitted: false
     });
@@ -189,7 +189,7 @@ describe("EditRouteRenderModel", function () {
   it("keeps RTE and ETA placeholders in non-flat mode for inactive routes", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: makeProps({
+      props: withSurfacePolicy(makeProps({
         domain: {
           hasRoute: true,
           routeName: "Harbor Run",
@@ -201,8 +201,7 @@ describe("EditRouteRenderModel", function () {
           isLocalRoute: false,
           isServerRoute: true
         }
-      }),
-      hostContext: createHostContext("dispatch"),
+      }), { mode: "dispatch" }),
       shellRect: { width: 320, height: 210 },
       isVerticalCommitted: false
     });
@@ -218,8 +217,7 @@ describe("EditRouteRenderModel", function () {
   it("keeps all 4 metrics visible in flat mode", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: makeProps(),
-      hostContext: createHostContext("dispatch"),
+      props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
       shellRect: { width: 620, height: 120 },
       isVerticalCommitted: false
     });
@@ -235,7 +233,7 @@ describe("EditRouteRenderModel", function () {
   it("keeps RTE/ETA placeholders in flat mode for inactive routes", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: makeProps({
+      props: withSurfacePolicy(makeProps({
         domain: {
           hasRoute: true,
           routeName: "Harbor Run",
@@ -247,8 +245,7 @@ describe("EditRouteRenderModel", function () {
           isLocalRoute: false,
           isServerRoute: true
         }
-      }),
-      hostContext: createHostContext("dispatch"),
+      }), { mode: "dispatch" }),
       shellRect: { width: 620, height: 120 },
       isVerticalCommitted: false
     });
@@ -262,8 +259,7 @@ describe("EditRouteRenderModel", function () {
   it("forces high mode and applies width-driven vertical shell geometry", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: makeProps(),
-      hostContext: createHostContext("dispatch"),
+      props: withSurfacePolicy(makeProps(), { mode: "dispatch", orientation: "vertical" }),
       shellRect: { width: 210, height: 90 },
       isVerticalCommitted: true
     });
@@ -271,8 +267,8 @@ describe("EditRouteRenderModel", function () {
     expect(model.mode).toBe("high");
     expect(model.isVerticalCommitted).toBe(true);
     expect(model.effectiveLayoutHeight).toBe(240);
-    expect(model.wrapperStyle).toContain("aspect-ratio:7/8;");
-    expect(model.wrapperStyle).toContain("min-height:8em;");
+    expect(model.wrapperStyle).not.toContain("aspect-ratio:7/8;");
+    expect(model.wrapperStyle).not.toContain("min-height:8em;");
   });
 
   it("keeps vertical resize signatures stable across host-height drift", function () {
@@ -280,26 +276,22 @@ describe("EditRouteRenderModel", function () {
     const props = makeProps();
 
     const verticalA = renderModel.buildModel({
-      props: props,
-      hostContext: createHostContext("dispatch"),
+      props: withSurfacePolicy(props, { mode: "dispatch", orientation: "vertical" }),
       shellRect: { width: 240, height: 120 },
       isVerticalCommitted: true
     });
     const verticalB = renderModel.buildModel({
-      props: props,
-      hostContext: createHostContext("dispatch"),
+      props: withSurfacePolicy(props, { mode: "dispatch", orientation: "vertical" }),
       shellRect: { width: 240, height: 480 },
       isVerticalCommitted: true
     });
     const nonVerticalA = renderModel.buildModel({
-      props: props,
-      hostContext: createHostContext("dispatch"),
+      props: withSurfacePolicy(props, { mode: "dispatch" }),
       shellRect: { width: 240, height: 120 },
       isVerticalCommitted: false
     });
     const nonVerticalB = renderModel.buildModel({
-      props: props,
-      hostContext: createHostContext("dispatch"),
+      props: withSurfacePolicy(props, { mode: "dispatch" }),
       shellRect: { width: 240, height: 480 },
       isVerticalCommitted: false
     });
@@ -310,17 +302,14 @@ describe("EditRouteRenderModel", function () {
 
   it("stays passive when capability is unsupported or layout editing is active", function () {
     const renderModel = createRenderModel();
-    const hostContext = createHostContext("unsupported");
 
     const unsupported = renderModel.buildModel({
-      props: makeProps(),
-      hostContext: hostContext,
+      props: withSurfacePolicy(makeProps(), { mode: "passive" }),
       shellRect: { width: 320, height: 220 },
       isVerticalCommitted: false
     });
     const editingMode = renderModel.buildModel({
-      props: makeProps({ editing: true }),
-      hostContext: createHostContext("dispatch"),
+      props: withSurfacePolicy(makeProps({ editing: true }), { mode: "dispatch" }),
       shellRect: { width: 320, height: 220 },
       isVerticalCommitted: false
     });
@@ -332,7 +321,7 @@ describe("EditRouteRenderModel", function () {
   it("uses configured caption and DST/RTE units in formatter inputs", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: makeProps({
+      props: withSurfacePolicy(makeProps({
         captions: {
           pts: "POINTS",
           dst: "DIST",
@@ -343,8 +332,7 @@ describe("EditRouteRenderModel", function () {
           dst: "km",
           rte: "mi"
         }
-      }),
-      hostContext: createHostContext("dispatch"),
+      }), { mode: "dispatch" }),
       shellRect: { width: 320, height: 210 },
       isVerticalCommitted: false
     });
@@ -364,13 +352,12 @@ describe("EditRouteRenderModel", function () {
   it("does not expose units for ETA/PTS and drops unit slots when DST/RTE units are empty", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: makeProps({
+      props: withSurfacePolicy(makeProps({
         units: {
           dst: "",
           rte: ""
         }
-      }),
-      hostContext: createHostContext("dispatch"),
+      }), { mode: "dispatch" }),
       shellRect: { width: 320, height: 210 },
       isVerticalCommitted: false
     });
@@ -386,32 +373,29 @@ describe("EditRouteRenderModel", function () {
   it("changes resize signature when caption or unit text changes", function () {
     const renderModel = createRenderModel();
     const base = renderModel.buildModel({
-      props: makeProps(),
-      hostContext: createHostContext("dispatch"),
+      props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
       shellRect: { width: 320, height: 210 },
       isVerticalCommitted: false
     });
     const captionChanged = renderModel.buildModel({
-      props: makeProps({
+      props: withSurfacePolicy(makeProps({
         captions: {
           pts: "PTS",
           dst: "DISTANCE",
           rte: "RTE",
           eta: "ETA"
         }
-      }),
-      hostContext: createHostContext("dispatch"),
+      }), { mode: "dispatch" }),
       shellRect: { width: 320, height: 210 },
       isVerticalCommitted: false
     });
     const unitChanged = renderModel.buildModel({
-      props: makeProps({
+      props: withSurfacePolicy(makeProps({
         units: {
           dst: "km",
           rte: "nm"
         }
-      }),
-      hostContext: createHostContext("dispatch"),
+      }), { mode: "dispatch" }),
       shellRect: { width: 320, height: 210 },
       isVerticalCommitted: false
     });

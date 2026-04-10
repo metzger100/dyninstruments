@@ -27,12 +27,9 @@
       targetEl: shellEl || rootEl || null
     };
   }
-
-  function isVerticalCommitted(targetEl) {
-    if (!targetEl || typeof targetEl.closest !== "function") {
-      return false;
-    }
-    return !!targetEl.closest(".widgetContainer.vertical");
+  function resolveSurfacePolicy(props) {
+    const p = props && typeof props === "object" ? props : null;
+    return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
   }
 
   function create(def, Helpers) {
@@ -43,7 +40,8 @@
 
     function buildModel(props, hostContext) {
       const committed = resolveCommittedElements(hostContext);
-      const vertical = isVerticalCommitted(committed.targetEl);
+      const surfacePolicy = resolveSurfacePolicy(props);
+      const vertical = !!(surfacePolicy && surfacePolicy.containerOrientation === "vertical");
       const shellRect = htmlUtils.resolveShellRect(hostContext, committed.targetEl);
       const model = renderModel.buildModel({
         props: props,
@@ -59,19 +57,23 @@
     }
 
     const namedHandlers = function (props, hostContext) {
+      const surfacePolicy = resolveSurfacePolicy(props);
+      const routeEditorActions = surfacePolicy && surfacePolicy.actions ? surfacePolicy.actions.routeEditor : null;
       const canOpen = renderModel.canOpenEditRoute({
-        props: props,
-        hostContext: hostContext
+        props: props
       });
       if (!canOpen) {
         return {};
       }
       return {
         editRouteOpen: function editRouteOpenHandler() {
-          if (!renderModel.canOpenEditRoute({ props: props, hostContext: hostContext })) {
+          if (!renderModel.canOpenEditRoute({ props: props })) {
             return false;
           }
-          return hostContext.hostActions.routeEditor.openEditRoute() !== false;
+          if (!routeEditorActions || typeof routeEditorActions.openEditRoute !== "function") {
+            return false;
+          }
+          return routeEditorActions.openEditRoute() !== false;
         }
       };
     };
@@ -107,6 +109,10 @@
       return {};
     };
 
+    const getVerticalShellSizing = function () {
+      return { kind: "ratio", aspectRatio: 7 / 8 };
+    };
+
     return {
       id: "EditRouteTextHtmlWidget",
       wantsHideNativeHead: true,
@@ -114,6 +120,7 @@
       namedHandlers: namedHandlers,
       resizeSignature: resizeSignature,
       initFunction: initFunction,
+      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };
   }

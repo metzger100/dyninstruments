@@ -227,7 +227,6 @@ describe("EditRouteLayout", function () {
 
     expect(vertical.aspectRatio).toBe("7/8");
     expect(vertical.minHeight).toBe("8em");
-    expect(vertical.wrapperStyle).toContain("aspect-ratio:7/8;");
-    expect(vertical.wrapperStyle).toContain("min-height:8em;");
+    expect(vertical.wrapperStyle).toBe("");
   });
 });

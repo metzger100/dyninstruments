@@ -151,7 +151,7 @@ describe("config/components.js", function () {
     expect(components.EditRouteRenderModel.globalKey).toBe("DyniEditRouteRenderModel");
     expect(components.EditRouteRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteRenderModel.js");
     expect(components.EditRouteRenderModel.css).toBeUndefined();
-    expect(components.EditRouteRenderModel.deps).toEqual(["EditRouteLayout", "HtmlWidgetUtils"]);
+    expect(components.EditRouteRenderModel.deps).toEqual(["EditRouteLayout", "HtmlWidgetUtils", "NavInteractionPolicy"]);
     expect(components.EditRouteMarkup.globalKey).toBe("DyniEditRouteMarkup");
     expect(components.EditRouteMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteMarkup.js");
     expect(components.EditRouteMarkup.css).toBeUndefined();
@@ -225,7 +225,7 @@ describe("config/components.js", function () {
     expect(components.RoutePointsRenderModel.globalKey).toBe("DyniRoutePointsRenderModel");
     expect(components.RoutePointsRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsRenderModel.js");
     expect(components.RoutePointsRenderModel.css).toBeUndefined();
-    expect(components.RoutePointsRenderModel.deps).toEqual(["CenterDisplayMath", "RoutePointsLayout", "HtmlWidgetUtils"]);
+    expect(components.RoutePointsRenderModel.deps).toEqual(["CenterDisplayMath", "RoutePointsLayout", "HtmlWidgetUtils", "NavInteractionPolicy"]);
     expect(components.RoutePointsMarkup.globalKey).toBe("DyniRoutePointsMarkup");
     expect(components.RoutePointsMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsMarkup.js");
     expect(components.RoutePointsMarkup.css).toBeUndefined();
@@ -293,6 +293,7 @@ describe("config/components.js", function () {
     ]);
     expect(components.RendererPropsWidget.globalKey).toBe("DyniRendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).toContain("ClusterKindCatalog");
+    expect(components.ClusterRendererRouter.deps).toContain("ClusterSurfacePolicy");
     expect(components.ClusterRendererRouter.deps).toContain("CanvasDomSurfaceAdapter");
     expect(components.ClusterRendererRouter.deps).toContain("HtmlSurfaceController");
     expect(components.ClusterRendererRouter.deps).toContain("PositionCoordinateWidget");

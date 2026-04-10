@@ -58,17 +58,8 @@ describe("ActiveRouteTextHtmlWidget", function () {
 
   function createHostContext(options) {
     const opts = options || {};
-    const openActiveRoute = opts.openActiveRoute || vi.fn(() => true);
-    const capability = opts.capability || "dispatch";
     const shellSize = opts.shellSize;
-    const hostContext = {
-      hostActions: {
-        getCapabilities: vi.fn(() => ({ routeEditor: { openActiveRoute: capability } })),
-        routeEditor: {
-          openActiveRoute: openActiveRoute
-        }
-      }
-    };
+    const hostContext = {};
     if (shellSize && Number.isFinite(shellSize.width) && Number.isFinite(shellSize.height)) {
       hostContext.__dyniHostCommitState = {
         shellEl: {
@@ -81,6 +72,21 @@ describe("ActiveRouteTextHtmlWidget", function () {
       };
     }
     return hostContext;
+  }
+  function withSurfacePolicy(props, options) {
+    const opts = options || {};
+    const mode = opts.mode === "passive" ? "passive" : "dispatch";
+    const openActiveRoute = opts.openActiveRoute || vi.fn(() => true);
+    return Object.assign({}, props || {}, {
+      surfacePolicy: {
+        interaction: { mode: mode },
+        actions: {
+          routeEditor: {
+            openActiveRoute: openActiveRoute
+          }
+        }
+      }
+    });
   }
 
   function escapeForRegExp(value) {
@@ -120,8 +126,12 @@ describe("ActiveRouteTextHtmlWidget", function () {
   it("renders interactive html with catchAll wrapper and full-surface activeRouteOpen hotspot", function () {
     const setup = createRenderer();
     const renderer = setup.renderer;
-    const hostContext = createHostContext({ capability: "dispatch" });
-    const html = renderer.renderHtml.call(hostContext, makeProps());
+    const openActiveRoute = vi.fn(() => true);
+    const hostContext = createHostContext();
+    const html = renderer.renderHtml.call(hostContext, withSurfacePolicy(makeProps(), {
+      mode: "dispatch",
+      openActiveRoute: openActiveRoute
+    }));
 
     expect(renderer.id).toBe("ActiveRouteTextHtmlWidget");
     expect(html).toContain("dyni-active-route-html");
@@ -146,17 +156,17 @@ describe("ActiveRouteTextHtmlWidget", function () {
   it("marks open action as passive when host capability is not dispatch", function () {
     const renderer = createRenderer().renderer;
     const openActiveRoute = vi.fn(() => true);
-    const hostContext = createHostContext({
-      capability: "passive",
-      openActiveRoute: openActiveRoute
-    });
-    const html = renderer.renderHtml.call(hostContext, makeProps({
+    const hostContext = createHostContext();
+    const html = renderer.renderHtml.call(hostContext, withSurfacePolicy(makeProps({
       display: {
         remain: 12.4,
         eta: "2026-03-06T11:45:00Z",
         nextCourse: 93,
         isApproaching: false
       }
+    }), {
+      mode: "passive",
+      openActiveRoute: openActiveRoute
     }));
 
     expect(html).toContain("dyni-active-route-open-passive");
@@ -166,7 +176,10 @@ describe("ActiveRouteTextHtmlWidget", function () {
     expect(html).not.toContain("dyni-active-route-metric-next");
     expect(html).not.toContain("DIR:93");
 
-    const handlers = renderer.namedHandlers({}, hostContext);
+    const handlers = renderer.namedHandlers(withSurfacePolicy({}, {
+      mode: "passive",
+      openActiveRoute: openActiveRoute
+    }), hostContext);
     expect(handlers.activeRouteOpen()).toBe(false);
     expect(openActiveRoute).not.toHaveBeenCalled();
   });
@@ -174,11 +187,11 @@ describe("ActiveRouteTextHtmlWidget", function () {
   it("dispatches openActiveRoute only when capability is dispatch", function () {
     const renderer = createRenderer().renderer;
     const openActiveRoute = vi.fn(() => true);
-    const hostContext = createHostContext({
-      capability: "dispatch",
+    const hostContext = createHostContext();
+    const handlers = renderer.namedHandlers(withSurfacePolicy({}, {
+      mode: "dispatch",
       openActiveRoute: openActiveRoute
-    });
-    const handlers = renderer.namedHandlers({}, hostContext);
+    }), hostContext);
 
     expect(typeof handlers.activeRouteOpen).toBe("function");
     expect(handlers.activeRouteOpen()).toBe(true);
@@ -188,18 +201,21 @@ describe("ActiveRouteTextHtmlWidget", function () {
   it("allows host click handling in edit mode even when route-open capability is dispatch", function () {
     const renderer = createRenderer().renderer;
     const openActiveRoute = vi.fn(() => true);
-    const hostContext = createHostContext({
-      capability: "dispatch",
+    const hostContext = createHostContext();
+    const html = renderer.renderHtml.call(hostContext, withSurfacePolicy(makeProps({ editing: true }), {
+      mode: "dispatch",
       openActiveRoute: openActiveRoute
-    });
-    const html = renderer.renderHtml.call(hostContext, makeProps({ editing: true }));
+    }));
 
     expect(html).toContain("dyni-active-route-open-passive");
     expect(html).not.toContain('onclick="catchAll"');
     expect(html).not.toContain("dyni-active-route-open-hotspot");
     expect(html).not.toContain('onclick="activeRouteOpen"');
 
-    const handlers = renderer.namedHandlers({ editing: true }, hostContext);
+    const handlers = renderer.namedHandlers(withSurfacePolicy({ editing: true }, {
+      mode: "dispatch",
+      openActiveRoute: openActiveRoute
+    }), hostContext);
     expect(handlers.activeRouteOpen()).toBe(false);
     expect(openActiveRoute).not.toHaveBeenCalled();
   });
@@ -207,18 +223,21 @@ describe("ActiveRouteTextHtmlWidget", function () {
   it("stays passive when dyniLayoutEditing is forwarded by the registrar", function () {
     const renderer = createRenderer().renderer;
     const openActiveRoute = vi.fn(() => true);
-    const hostContext = createHostContext({
-      capability: "dispatch",
+    const hostContext = createHostContext();
+    const html = renderer.renderHtml.call(hostContext, withSurfacePolicy(makeProps({ dyniLayoutEditing: true }), {
+      mode: "dispatch",
       openActiveRoute: openActiveRoute
-    });
-    const html = renderer.renderHtml.call(hostContext, makeProps({ dyniLayoutEditing: true }));
+    }));
 
     expect(html).toContain("dyni-active-route-open-passive");
     expect(html).not.toContain('onclick="catchAll"');
     expect(html).not.toContain("dyni-active-route-open-hotspot");
     expect(html).not.toContain('onclick="activeRouteOpen"');
 
-    const handlers = renderer.namedHandlers({ dyniLayoutEditing: true }, hostContext);
+    const handlers = renderer.namedHandlers(withSurfacePolicy({ dyniLayoutEditing: true }, {
+      mode: "dispatch",
+      openActiveRoute: openActiveRoute
+    }), hostContext);
     expect(handlers.activeRouteOpen()).toBe(false);
     expect(openActiveRoute).not.toHaveBeenCalled();
   });

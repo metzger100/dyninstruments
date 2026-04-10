@@ -18,6 +18,12 @@
   const groups = shared.componentRegistryGroups = shared.componentRegistryGroups || {};
 
   groups.widgets = {
+    NavInteractionPolicy: {
+      js: BASE + "shared/widget-kits/nav/NavInteractionPolicy.js",
+      css: undefined,
+      globalKey: "DyniNavInteractionPolicy",
+      deps: ["HtmlWidgetUtils"]
+    },
     AisTargetRenderModel: {
       js: BASE + "shared/widget-kits/nav/AisTargetRenderModel.js",
       css: undefined,
@@ -40,7 +46,7 @@
       js: BASE + "shared/widget-kits/nav/EditRouteRenderModel.js",
       css: undefined,
       globalKey: "DyniEditRouteRenderModel",
-      deps: ["EditRouteLayout", "HtmlWidgetUtils"]
+      deps: ["EditRouteLayout", "HtmlWidgetUtils", "NavInteractionPolicy"]
     },
     EditRouteMarkup: {
       js: BASE + "shared/widget-kits/nav/EditRouteMarkup.js",
@@ -58,7 +64,7 @@
       js: BASE + "shared/widget-kits/nav/RoutePointsRenderModel.js",
       css: undefined,
       globalKey: "DyniRoutePointsRenderModel",
-      deps: ["CenterDisplayMath", "RoutePointsLayout", "HtmlWidgetUtils"]
+      deps: ["CenterDisplayMath", "RoutePointsLayout", "HtmlWidgetUtils", "NavInteractionPolicy"]
     },
     RoutePointsMarkup: {
       js: BASE + "shared/widget-kits/nav/RoutePointsMarkup.js",

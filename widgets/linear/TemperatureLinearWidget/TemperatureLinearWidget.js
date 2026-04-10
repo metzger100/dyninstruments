@@ -105,12 +105,16 @@
     function translateFunction() {
       return {};
     }
+    function getVerticalShellSizing() {
+      return { kind: "ratio", aspectRatio: 2 };
+    }
 
     return {
       id: "TemperatureLinearWidget",
       version: "0.1.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
+      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };
   }

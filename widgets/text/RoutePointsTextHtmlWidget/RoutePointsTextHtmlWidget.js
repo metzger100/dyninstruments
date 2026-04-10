@@ -47,6 +47,10 @@
       scrollbarGutterPx: effects ? effects.scrollbarGutterPx : 0
     };
   }
+  function resolveSurfacePolicy(props) {
+    const p = props && typeof props === "object" ? props : null;
+    return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
+  }
 
   function resolveEventIndex(ev) {
     const target = ev && ev.target;
@@ -68,18 +72,19 @@
     const htmlFit = Helpers.getModule("RoutePointsHtmlFit").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const renderModel = Helpers.getModule("RoutePointsRenderModel").create(def, Helpers);
+    const layoutApi = Helpers.getModule("RoutePointsLayout").create(def, Helpers);
     const markup = Helpers.getModule("RoutePointsMarkup").create(def, Helpers);
     const domEffects = Helpers.getModule("RoutePointsDomEffects").create(def, Helpers);
 
     function buildModel(props, hostContext) {
       const committed = resolveCommittedFacts(hostContext, domEffects);
+      const surfacePolicy = resolveSurfacePolicy(props);
       const shellRect = htmlUtils.resolveShellRect(hostContext, committed.targetEl);
       const viewportHeight = props && props.viewportHeight;
       const model = renderModel.buildModel({
         props: props,
-        hostContext: hostContext,
         shellRect: shellRect,
-        isVerticalCommitted: committed.isVerticalCommitted,
+        isVerticalCommitted: !!(surfacePolicy && surfacePolicy.containerOrientation === "vertical"),
         scrollbarGutterPx: committed.scrollbarGutterPx,
         viewportHeight: viewportHeight
       });
@@ -92,9 +97,10 @@
     }
 
     const namedHandlers = function (props, hostContext) {
+      const surfacePolicy = resolveSurfacePolicy(props);
+      const routePointActions = surfacePolicy && surfacePolicy.actions ? surfacePolicy.actions.routePoints : null;
       const active = renderModel.canActivateRoutePoint({
-        props: props,
-        hostContext: hostContext
+        props: props
       });
 
       if (!active) {
@@ -107,10 +113,13 @@
           if (pointIndex < 0) {
             return false;
           }
-          if (!renderModel.canActivateRoutePoint({ props: props, hostContext: hostContext })) {
+          if (!renderModel.canActivateRoutePoint({ props: props })) {
             return false;
           }
-          return hostContext.hostActions.routePoints.activate(pointIndex) !== false;
+          if (!routePointActions || typeof routePointActions.activate !== "function") {
+            return false;
+          }
+          return routePointActions.activate(pointIndex) !== false;
         }
       };
     };
@@ -156,6 +165,32 @@
       return {};
     };
 
+    const getVerticalShellSizing = function (sizingContext, surfacePolicy) {
+      if (!surfacePolicy || surfacePolicy.containerOrientation !== "vertical") {
+        return undefined;
+      }
+      const ctx = sizingContext && typeof sizingContext === "object" ? sizingContext : {};
+      const payload = ctx.payload && typeof ctx.payload === "object" ? ctx.payload : {};
+      const domain = payload.domain && typeof payload.domain === "object" ? payload.domain : {};
+      const layout = payload.layout && typeof payload.layout === "object" ? payload.layout : {};
+      const shellWidth = htmlUtils.toFiniteNumber(ctx.shellWidth);
+      if (!(shellWidth > 0)) {
+        return undefined;
+      }
+      const pointCountRaw = htmlUtils.toFiniteNumber(domain.pointCount);
+      const pointCount = pointCountRaw >= 0 ? Math.floor(pointCountRaw) : 0;
+      const naturalHeight = layoutApi.computeNaturalHeight({
+        W: shellWidth,
+        pointCount: pointCount,
+        showHeader: layout.showHeader !== false,
+        viewportHeight: htmlUtils.toFiniteNumber(ctx.viewportHeight)
+      });
+      return {
+        kind: "natural",
+        height: String(Math.max(0, Math.floor(naturalHeight.cappedHeight))) + "px"
+      };
+    };
+
     return {
       id: "RoutePointsTextHtmlWidget",
       wantsHideNativeHead: true,
@@ -163,6 +198,7 @@
       namedHandlers: namedHandlers,
       resizeSignature: resizeSignature,
       initFunction: initFunction,
+      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };
   }

@@ -62,6 +62,9 @@ describe("RoutePointsRenderModel", function () {
           else if (id === "HtmlWidgetUtils") {
             moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
           }
+          else if (id === "NavInteractionPolicy") {
+            moduleCache[id] = loadFresh("shared/widget-kits/nav/NavInteractionPolicy.js");
+          }
           else if (id === "ResponsiveScaleProfile") {
             moduleCache[id] = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
           }
@@ -85,20 +88,20 @@ describe("RoutePointsRenderModel", function () {
     return loadFresh("shared/widget-kits/nav/RoutePointsRenderModel.js").create({}, Helpers);
   }
 
-  function createHostContext(capabilities) {
-    const caps = capabilities || {
-      routePoints: { activate: "dispatch" },
-      routeEditor: { openEditRoute: "dispatch" }
-    };
-
-    return {
-      hostActions: {
-        getCapabilities: vi.fn(() => caps),
-        routePoints: {
-          activate: vi.fn(() => true)
+  function withSurfacePolicy(props, options) {
+    const opts = options || {};
+    const interactionMode = opts.mode === "passive" ? "passive" : "dispatch";
+    return Object.assign({}, props || {}, {
+      surfacePolicy: {
+        interaction: { mode: interactionMode },
+        containerOrientation: opts.orientation === "vertical" ? "vertical" : "default",
+        actions: {
+          routePoints: {
+            activate: vi.fn(() => true)
+          }
         }
       }
-    };
+    });
   }
 
   function makeProps(overrides) {
@@ -146,8 +149,7 @@ describe("RoutePointsRenderModel", function () {
   it("builds course/distance rows with placeholder first row and name fallback", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: makeProps(),
-      hostContext: createHostContext(),
+      props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
       shellRect: { width: 320, height: 180 },
       isVerticalCommitted: false
     });
@@ -170,8 +172,7 @@ describe("RoutePointsRenderModel", function () {
   it("disables ordinal in high mode and keeps row text geometry available", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: makeProps(),
-      hostContext: createHostContext(),
+      props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
       shellRect: { width: 180, height: 340 },
       isVerticalCommitted: false
     });
@@ -206,8 +207,7 @@ describe("RoutePointsRenderModel", function () {
     });
 
     const model = renderModel.buildModel({
-      props: props,
-      hostContext: createHostContext(),
+      props: withSurfacePolicy(props, { mode: "dispatch" }),
       shellRect: { width: 320, height: 180 },
       isVerticalCommitted: false
     });
@@ -247,8 +247,7 @@ describe("RoutePointsRenderModel", function () {
     });
 
     const model = renderModel.buildModel({
-      props: props,
-      hostContext: createHostContext(),
+      props: withSurfacePolicy(props, { mode: "dispatch" }),
       shellRect: { width: 320, height: 180 },
       isVerticalCommitted: false
     });
@@ -266,27 +265,15 @@ describe("RoutePointsRenderModel", function () {
     const props = makeProps();
 
     expect(renderModel.canActivateRoutePoint({
-      props: props,
-      hostContext: createHostContext({
-        routePoints: { activate: "dispatch" },
-        routeEditor: { openEditRoute: "dispatch" }
-      })
+      props: withSurfacePolicy(props, { mode: "dispatch" })
     })).toBe(true);
 
     expect(renderModel.canActivateRoutePoint({
-      props: props,
-      hostContext: createHostContext({
-        routePoints: { activate: "dispatch" },
-        routeEditor: { openEditRoute: "unsupported" }
-      })
+      props: withSurfacePolicy(props, { mode: "passive" })
     })).toBe(false);
 
     expect(renderModel.canActivateRoutePoint({
-      props: makeProps({ editing: true }),
-      hostContext: createHostContext({
-        routePoints: { activate: "dispatch" },
-        routeEditor: { openEditRoute: "dispatch" }
-      })
+      props: withSurfacePolicy(makeProps({ editing: true }), { mode: "dispatch" })
     })).toBe(false);
   });
 
@@ -295,27 +282,23 @@ describe("RoutePointsRenderModel", function () {
     const props = makeProps();
 
     const verticalA = renderModel.buildModel({
-      props: props,
-      hostContext: createHostContext(),
+      props: withSurfacePolicy(props, { mode: "dispatch", orientation: "vertical" }),
       shellRect: { width: 260, height: 120 },
       isVerticalCommitted: true
     });
     const verticalB = renderModel.buildModel({
-      props: props,
-      hostContext: createHostContext(),
+      props: withSurfacePolicy(props, { mode: "dispatch", orientation: "vertical" }),
       shellRect: { width: 260, height: 400 },
       isVerticalCommitted: true
     });
 
     const nonVerticalA = renderModel.buildModel({
-      props: props,
-      hostContext: createHostContext(),
+      props: withSurfacePolicy(props, { mode: "dispatch" }),
       shellRect: { width: 260, height: 120 },
       isVerticalCommitted: false
     });
     const nonVerticalB = renderModel.buildModel({
-      props: props,
-      hostContext: createHostContext(),
+      props: withSurfacePolicy(props, { mode: "dispatch" }),
       shellRect: { width: 260, height: 400 },
       isVerticalCommitted: false
     });
@@ -333,8 +316,7 @@ describe("RoutePointsRenderModel", function () {
     const layoutApi = createLayoutApi();
     const props = makeProps();
     const model = renderModel.buildModel({
-      props: props,
-      hostContext: createHostContext(),
+      props: withSurfacePolicy(props, { mode: "dispatch", orientation: "vertical" }),
       shellRect: { width: 260, height: 520 },
       isVerticalCommitted: true,
       viewportHeight: 500
@@ -358,7 +340,7 @@ describe("RoutePointsRenderModel", function () {
 
     expect(model.layoutShellHeight).toBe(expectedHeight);
     expect(model.layoutShellHeight).not.toBe(model.shellHeight);
-    expect(model.inlineGeometry.wrapper.style).toContain("height:" + expectedHeight + "px;");
+    expect(model.inlineGeometry.wrapper.style).not.toContain("height:");
     expect(extractHeight(model.inlineGeometry.list.style)).toBe(expectedLayout.listRect.h);
   });
 
@@ -380,8 +362,7 @@ describe("RoutePointsRenderModel", function () {
       }
     });
     const model = renderModel.buildModel({
-      props: props,
-      hostContext: createHostContext(),
+      props: withSurfacePolicy(props, { mode: "dispatch", orientation: "vertical" }),
       shellRect: { width: 320, height: 900 },
       isVerticalCommitted: true,
       viewportHeight: 10000
@@ -394,7 +375,7 @@ describe("RoutePointsRenderModel", function () {
   it("fails closed when route payload is missing", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: makeProps({
+      props: withSurfacePolicy(makeProps({
         domain: {
           route: null,
           routeName: "",
@@ -404,8 +385,7 @@ describe("RoutePointsRenderModel", function () {
           showLatLon: false,
           useRhumbLine: false
         }
-      }),
-      hostContext: createHostContext(),
+      }), { mode: "dispatch" }),
       shellRect: { width: 220, height: 140 },
       isVerticalCommitted: false
     });

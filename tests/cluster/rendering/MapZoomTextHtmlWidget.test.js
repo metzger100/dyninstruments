@@ -59,17 +59,8 @@ describe("MapZoomTextHtmlWidget", function () {
 
   function createHostContext(options) {
     const opts = options || {};
-    const capability = opts.capability || "dispatch";
-    const checkAutoZoom = opts.checkAutoZoom || vi.fn(() => true);
     const shellSize = opts.shellSize;
-    const hostContext = {
-      hostActions: {
-        getCapabilities: vi.fn(() => ({ map: { checkAutoZoom: capability } })),
-        map: {
-          checkAutoZoom: checkAutoZoom
-        }
-      }
-    };
+    const hostContext = {};
     if (shellSize && Number.isFinite(shellSize.width) && Number.isFinite(shellSize.height)) {
       const rootEl = document.createElement("div");
       rootEl.className = "widget dyniplugin";
@@ -85,6 +76,21 @@ describe("MapZoomTextHtmlWidget", function () {
       };
     }
     return hostContext;
+  }
+  function withSurfacePolicy(props, options) {
+    const opts = options || {};
+    const mode = opts.mode === "passive" ? "passive" : "dispatch";
+    const checkAutoZoom = opts.checkAutoZoom || vi.fn(() => true);
+    return Object.assign({}, props || {}, {
+      surfacePolicy: {
+        interaction: { mode: mode },
+        actions: {
+          map: {
+            checkAutoZoom: checkAutoZoom
+          }
+        }
+      }
+    });
   }
 
   function makeProps(overrides) {
@@ -113,7 +119,11 @@ describe("MapZoomTextHtmlWidget", function () {
 
   it("renders dispatch mode with catchAll and full-surface map zoom hotspot", function () {
     const renderer = createRenderer();
-    const html = renderer.renderHtml.call(createHostContext({ capability: "dispatch" }), makeProps());
+    const checkAutoZoom = vi.fn(() => true);
+    const html = renderer.renderHtml.call(createHostContext(), withSurfacePolicy(makeProps(), {
+      mode: "dispatch",
+      checkAutoZoom: checkAutoZoom
+    }));
 
     expect(renderer.id).toBe("MapZoomTextHtmlWidget");
     expect(html).toContain("dyni-map-zoom-html");
@@ -126,12 +136,15 @@ describe("MapZoomTextHtmlWidget", function () {
   it("stays passive when map zoom dispatch capability is not available", function () {
     const renderer = createRenderer();
     const checkAutoZoom = vi.fn(() => true);
-    const hostContext = createHostContext({
-      capability: "unsupported",
+    const hostContext = createHostContext();
+    const html = renderer.renderHtml.call(hostContext, withSurfacePolicy(makeProps(), {
+      mode: "passive",
       checkAutoZoom: checkAutoZoom
-    });
-    const html = renderer.renderHtml.call(hostContext, makeProps());
-    const handlers = renderer.namedHandlers({}, hostContext);
+    }));
+    const handlers = renderer.namedHandlers(withSurfacePolicy({}, {
+      mode: "passive",
+      checkAutoZoom: checkAutoZoom
+    }), hostContext);
 
     expect(html).toContain("dyni-map-zoom-open-passive");
     expect(html).not.toContain('onclick="catchAll"');
@@ -143,12 +156,15 @@ describe("MapZoomTextHtmlWidget", function () {
   it("allows host click ownership in edit mode even when dispatch capability exists", function () {
     const renderer = createRenderer();
     const checkAutoZoom = vi.fn(() => true);
-    const hostContext = createHostContext({
-      capability: "dispatch",
+    const hostContext = createHostContext();
+    const html = renderer.renderHtml.call(hostContext, withSurfacePolicy(makeProps({ editing: true }), {
+      mode: "dispatch",
       checkAutoZoom: checkAutoZoom
-    });
-    const html = renderer.renderHtml.call(hostContext, makeProps({ editing: true }));
-    const handlers = renderer.namedHandlers({ editing: true }, hostContext);
+    }));
+    const handlers = renderer.namedHandlers(withSurfacePolicy({ editing: true }, {
+      mode: "dispatch",
+      checkAutoZoom: checkAutoZoom
+    }), hostContext);
 
     expect(html).toContain("dyni-map-zoom-open-passive");
     expect(html).not.toContain('onclick="catchAll"');
@@ -160,12 +176,15 @@ describe("MapZoomTextHtmlWidget", function () {
   it("keeps click ownership passive when dyniLayoutEditing is forwarded", function () {
     const renderer = createRenderer();
     const checkAutoZoom = vi.fn(() => true);
-    const hostContext = createHostContext({
-      capability: "dispatch",
+    const hostContext = createHostContext();
+    const html = renderer.renderHtml.call(hostContext, withSurfacePolicy(makeProps({ dyniLayoutEditing: true }), {
+      mode: "dispatch",
       checkAutoZoom: checkAutoZoom
-    });
-    const html = renderer.renderHtml.call(hostContext, makeProps({ dyniLayoutEditing: true }));
-    const handlers = renderer.namedHandlers({ dyniLayoutEditing: true }, hostContext);
+    }));
+    const handlers = renderer.namedHandlers(withSurfacePolicy({ dyniLayoutEditing: true }, {
+      mode: "dispatch",
+      checkAutoZoom: checkAutoZoom
+    }), hostContext);
 
     expect(html).toContain("dyni-map-zoom-open-passive");
     expect(html).not.toContain('onclick="catchAll"');
@@ -177,11 +196,11 @@ describe("MapZoomTextHtmlWidget", function () {
   it("dispatches host map.checkAutoZoom when capability is dispatch", function () {
     const renderer = createRenderer();
     const checkAutoZoom = vi.fn(() => true);
-    const hostContext = createHostContext({
-      capability: "dispatch",
+    const hostContext = createHostContext();
+    const handlers = renderer.namedHandlers(withSurfacePolicy({}, {
+      mode: "dispatch",
       checkAutoZoom: checkAutoZoom
-    });
-    const handlers = renderer.namedHandlers({}, hostContext);
+    }), hostContext);
 
     expect(typeof handlers.mapZoomCheckAutoZoom).toBe("function");
     expect(handlers.mapZoomCheckAutoZoom()).toBe(true);
@@ -190,14 +209,21 @@ describe("MapZoomTextHtmlWidget", function () {
 
   it("formats zoom text and renders required zoom in parentheses only when different", function () {
     const renderer = createRenderer();
-    const hostContext = createHostContext({ capability: "dispatch" });
-    const htmlWithRequired = renderer.renderHtml.call(hostContext, makeProps({
+    const checkAutoZoom = vi.fn(() => true);
+    const hostContext = createHostContext();
+    const htmlWithRequired = renderer.renderHtml.call(hostContext, withSurfacePolicy(makeProps({
       zoom: 12.2,
       requiredZoom: 10.8
+    }), {
+      mode: "dispatch",
+      checkAutoZoom: checkAutoZoom
     }));
-    const htmlWithoutRequired = renderer.renderHtml.call(hostContext, makeProps({
+    const htmlWithoutRequired = renderer.renderHtml.call(hostContext, withSurfacePolicy(makeProps({
       zoom: 12.2,
       requiredZoom: 12.2
+    }), {
+      mode: "dispatch",
+      checkAutoZoom: checkAutoZoom
     }));
 
     expect(htmlWithRequired).toContain('class="dyni-map-zoom-value">Z:12.2</span>');
@@ -209,11 +235,11 @@ describe("MapZoomTextHtmlWidget", function () {
     const renderer = createRenderer();
     const highHtml = renderer.renderHtml.call(
       createHostContext({ shellSize: { width: 90, height: 200 } }),
-      makeProps({ unit: "x" })
+      withSurfacePolicy(makeProps({ unit: "x" }), { mode: "dispatch" })
     );
     const flatHtml = renderer.renderHtml.call(
       createHostContext({ shellSize: { width: 460, height: 100 } }),
-      makeProps()
+      withSurfacePolicy(makeProps(), { mode: "dispatch" })
     );
 
     expect(highHtml).toContain("dyni-map-zoom-mode-high");
@@ -224,11 +250,11 @@ describe("MapZoomTextHtmlWidget", function () {
     const renderer = createRenderer();
     const flatHtml = renderer.renderHtml.call(
       createHostContext({ shellSize: { width: 460, height: 100 } }),
-      makeProps({ unit: "x" })
+      withSurfacePolicy(makeProps({ unit: "x" }), { mode: "dispatch" })
     );
     const normalHtml = renderer.renderHtml.call(
       createHostContext({ shellSize: { width: 220, height: 100 } }),
-      makeProps({ unit: "x" })
+      withSurfacePolicy(makeProps({ unit: "x" }), { mode: "dispatch" })
     );
 
     expect(flatHtml).toContain("dyni-map-zoom-main-flat");
@@ -246,11 +272,11 @@ describe("MapZoomTextHtmlWidget", function () {
     const renderer = createRenderer();
     const highHtml = renderer.renderHtml.call(
       createHostContext({ shellSize: { width: 90, height: 200 } }),
-      makeProps({ unit: "x" })
+      withSurfacePolicy(makeProps({ unit: "x" }), { mode: "dispatch" })
     );
     const collapsedHtml = renderer.renderHtml.call(
       createHostContext({ shellSize: { width: 90, height: 200 } }),
-      makeProps({ unit: "" })
+      withSurfacePolicy(makeProps({ unit: "" }), { mode: "dispatch" })
     );
 
     expect(highHtml).toContain("dyni-map-zoom-mode-high");
@@ -268,14 +294,14 @@ describe("MapZoomTextHtmlWidget", function () {
   it("renders required zoom row for finite different values including zero", function () {
     const renderer = createRenderer();
     const hostContext = createHostContext();
-    const withZeroRequired = renderer.renderHtml.call(hostContext, makeProps({
+    const withZeroRequired = renderer.renderHtml.call(hostContext, withSurfacePolicy(makeProps({
       zoom: 12.2,
       requiredZoom: 0
-    }));
-    const withoutRequired = renderer.renderHtml.call(hostContext, makeProps({
+    }), { mode: "dispatch" }));
+    const withoutRequired = renderer.renderHtml.call(hostContext, withSurfacePolicy(makeProps({
       zoom: 12.2,
       requiredZoom: 12.2
-    }));
+    }), { mode: "dispatch" }));
 
     expect(withZeroRequired).toContain('class="dyni-map-zoom-required">(Z:0)</div>');
     expect(withoutRequired).not.toContain("dyni-map-zoom-required");

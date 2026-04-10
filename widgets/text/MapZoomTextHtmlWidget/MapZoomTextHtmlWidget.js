@@ -1,7 +1,7 @@
 /**
  * Module: MapZoomTextHtmlWidget - Interactive HTML renderer for map zoom kind
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: Helpers.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, hostActions.map.checkAutoZoom
+ * Depends: Helpers.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils
  */
 
 (function (root, factory) {
@@ -56,31 +56,30 @@
     return baseMode;
   }
 
-  function canDispatchCheckAutoZoom(hostContext) {
-    const actions = hostContext && hostContext.hostActions;
-    if (!actions || typeof actions.getCapabilities !== "function") {
-      return false;
-    }
-    if (!actions.map || typeof actions.map.checkAutoZoom !== "function") {
-      return false;
-    }
-    const capabilities = actions.getCapabilities();
-    return !!(
-      capabilities &&
-      capabilities.map &&
-      capabilities.map.checkAutoZoom === "dispatch"
-    );
+  function getSurfacePolicy(props) {
+    const p = props && typeof props === "object" ? props : null;
+    const policy = p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
+    return policy;
   }
 
-  function dispatchCheckAutoZoom(hostContext, props, htmlUtils) {
+  function canDispatchCheckAutoZoom(props) {
+    const policy = getSurfacePolicy(props);
+    return !!(policy && policy.interaction && policy.interaction.mode === "dispatch");
+  }
+
+  function dispatchCheckAutoZoom(props, htmlUtils) {
     const p = props || {};
     if (htmlUtils.isEditingMode(p)) {
       return false;
     }
-    if (!canDispatchCheckAutoZoom(hostContext)) {
+    const policy = getSurfacePolicy(p);
+    if (!policy || !policy.actions || !policy.actions.map || typeof policy.actions.map.checkAutoZoom !== "function") {
       return false;
     }
-    return hostContext.hostActions.map.checkAutoZoom() !== false;
+    if (!canDispatchCheckAutoZoom(p)) {
+      return false;
+    }
+    return policy.actions.map.checkAutoZoom() !== false;
   }
 
   function ensureProps(props) {
@@ -145,7 +144,7 @@
       const requiredText = formatZoom(requiredZoomNumber, defaultText, Helpers);
       const showRequired = typeof requiredZoomNumber === "number" && requiredZoomNumber !== zoomNumber;
       const isEditing = htmlUtils.isEditingMode(p);
-      const canDispatch = !isEditing && canDispatchCheckAutoZoom(hostContext);
+      const canDispatch = !isEditing && canDispatchCheckAutoZoom(p);
       const captionUnitScale = clampCaptionUnitScale(p.captionUnitScale, htmlUtils);
 
       const modelBase = {
@@ -180,10 +179,10 @@
       };
     }
 
-    const namedHandlers = function (props, hostContext) {
+    const namedHandlers = function (props) {
       return {
         mapZoomCheckAutoZoom: function mapZoomCheckAutoZoomHandler() {
-          return dispatchCheckAutoZoom(hostContext, props, htmlUtils);
+          return dispatchCheckAutoZoom(props, htmlUtils);
         }
       };
     };
@@ -243,6 +242,10 @@
       return {};
     };
 
+    const getVerticalShellSizing = function () {
+      return { kind: "ratio", aspectRatio: 2 };
+    };
+
     return {
       id: "MapZoomTextHtmlWidget",
       wantsHideNativeHead: true,
@@ -250,6 +253,7 @@
       namedHandlers: namedHandlers,
       resizeSignature: resizeSignature,
       initFunction: initFunction,
+      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };
   }
