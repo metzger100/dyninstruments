@@ -57,6 +57,23 @@
     const registry = components;
     const loadCache = new Map();
 
+    function validateComponentApi(componentId, componentDef, mod) {
+      const apiShape = componentDef.apiShape || "factory";
+      if (apiShape === "factory") {
+        if (!mod || typeof mod.create !== "function") {
+          throw new Error("Component not found or invalid: " + componentDef.globalKey);
+        }
+        return mod;
+      }
+      if (apiShape === "module") {
+        if (!mod || typeof mod !== "object") {
+          throw new Error("Component not found or invalid: " + componentDef.globalKey);
+        }
+        return mod;
+      }
+      throw new Error("Unsupported apiShape '" + apiShape + "' for component: " + componentId);
+    }
+
     function loadComponent(id) {
       if (loadCache.has(id)) {
         return loadCache.get(id);
@@ -81,10 +98,7 @@
         })
         .then(function () {
           const mod = root.DyniComponents[m.globalKey];
-          if (!mod || typeof mod.create !== "function") {
-            throw new Error("Component not found or invalid: " + m.globalKey);
-          }
-          return mod;
+          return validateComponentApi(id, m, mod);
         });
 
       loadCache.set(id, p);

@@ -17,47 +17,6 @@
     };
   }
 
-  // Stub for future AvNav/plugin settings API integration.
-  function readThemePresetFromSettingsApi() {
-    return null;
-  }
-
-  function readThemePresetFromCss() {
-    const doc = root.document;
-    if (!doc || typeof root.getComputedStyle !== "function") {
-      return null;
-    }
-
-    const roots = listPluginContainers(doc);
-    for (let i = 0; i < roots.length; i++) {
-      const value = readThemePresetCssVarFromElement(roots[i]);
-      if (value) {
-        return value;
-      }
-    }
-
-    const docRootValue = readThemePresetCssVarFromElement(doc.documentElement);
-    if (docRootValue) {
-      return docRootValue;
-    }
-
-    return readThemePresetCssVarFromElement(doc.body);
-  }
-
-  function isPluginContainer(rootEl) {
-    return !!(rootEl &&
-      rootEl.classList &&
-      typeof rootEl.classList.contains === "function" &&
-      rootEl.classList.contains("dyniplugin"));
-  }
-
-  function listPluginContainers(doc) {
-    if (!doc || typeof doc.querySelectorAll !== "function") {
-      return [];
-    }
-    return Array.prototype.slice.call(doc.querySelectorAll(".widget.dyniplugin"));
-  }
-
   function readThemePresetCssVarFromElement(el) {
     if (!el || typeof root.getComputedStyle !== "function") {
       return null;
@@ -72,89 +31,36 @@
     return value || null;
   }
 
-  function normalizePresetName(presetName) {
-    if (!state.themePresetApi || typeof state.themePresetApi.normalizePresetName !== "function") {
+  function normalizePresetName(themeModel, presetName) {
+    if (!themeModel || typeof themeModel.normalizePresetName !== "function") {
       return "default";
     }
-    return state.themePresetApi.normalizePresetName(presetName);
+    return themeModel.normalizePresetName(presetName);
   }
 
-  function resolveThemePresetName() {
-    return resolveThemePresetNameForContainer(null);
+  function resolveStartupThemePresetName(themeModel) {
+    const doc = root.document;
+    if (!doc) {
+      return "default";
+    }
+    const cssPreset = readThemePresetCssVarFromElement(doc.documentElement);
+    return normalizePresetName(themeModel, cssPreset);
   }
 
-  function resolveThemePresetNameForContainer(rootEl) {
-    const fromSettingsApi = readThemePresetFromSettingsApi();
-    if (typeof fromSettingsApi === "string" && fromSettingsApi.trim()) {
-      return normalizePresetName(fromSettingsApi);
+  function configureThemeResolver(themeResolver, themeModel) {
+    if (!themeResolver || typeof themeResolver.configure !== "function") {
+      throw new Error("dyninstruments: ThemeResolver.configure() is required");
     }
-    if (typeof ns.theme === "string" && ns.theme.trim()) {
-      return normalizePresetName(ns.theme);
-    }
-    const fromRootCss = readThemePresetCssVarFromElement(rootEl);
-    if (typeof fromRootCss === "string" && fromRootCss.trim()) {
-      return normalizePresetName(fromRootCss);
-    }
-    const fromCss = readThemePresetFromCss();
-    if (typeof fromCss === "string" && fromCss.trim()) {
-      return normalizePresetName(fromCss);
-    }
-    return "default";
-  }
-
-  function buildThemePresetApi(component, Helpers) {
-    if (!component || typeof component.create !== "function") {
-      return null;
-    }
-    const api = component.create({}, Helpers);
-    if (!api ||
-      typeof api.apply !== "function" ||
-      typeof api.remove !== "function" ||
-      typeof api.normalizePresetName !== "function") {
-      return null;
-    }
-    return api;
-  }
-
-  function invalidateThemeResolverCache(rootEl) {
-    const resolverMod = state.themeResolverModule;
-    if (!resolverMod) {
-      return;
-    }
-    resolverMod.invalidateRoot(rootEl);
-  }
-
-  function applyThemePresetToContainer(rootEl, presetName) {
-    if (!isPluginContainer(rootEl)) {
-      return;
-    }
-    if (!state.themePresetApi || typeof state.themePresetApi.apply !== "function") {
-      return;
-    }
-
-    const selected = (typeof presetName === "string" && presetName.trim())
-      ? normalizePresetName(presetName)
-      : resolveThemePresetNameForContainer(rootEl);
-
-    state.themePresetApi.apply(rootEl, selected);
-    invalidateThemeResolverCache(rootEl);
-  }
-
-  function applyThemePresetToRegisteredWidgets(presetName) {
-    const selected = (typeof presetName === "string" && presetName.trim())
-      ? normalizePresetName(presetName)
-      : normalizePresetName(resolveThemePresetName());
-
-    state.themePresetName = selected;
-    const roots = listPluginContainers(root.document);
-    roots.forEach(function (rootEl) {
-      applyThemePresetToContainer(rootEl, selected);
+    themeResolver.configure({
+      ThemeModel: themeModel,
+      getNightModeState(rootEl) {
+        return !!(rootEl && typeof rootEl.closest === "function" && rootEl.closest(".nightMode"));
+      },
+      getActivePresetName() {
+        return state.themePresetName || "default";
+      }
     });
-    return roots.length;
   }
-
-  runtime.applyThemePresetToContainer = applyThemePresetToContainer;
-  runtime.applyThemePresetToRegisteredWidgets = applyThemePresetToRegisteredWidgets;
 
   function runInit() {
     if (state.initStarted) {
@@ -178,7 +84,8 @@
     const Helpers = runtime.createHelpers(createGetComponent(components));
     const loader = runtime.createComponentLoader(components);
     const needed = loader.uniqueComponents(widgetDefinitions).slice();
-    if (!needed.includes("ThemePresets")) needed.push("ThemePresets");
+    if (!needed.includes("ThemeModel")) needed.push("ThemeModel");
+    if (!needed.includes("ThemeResolver")) needed.push("ThemeResolver");
 
     state.initPromise = Promise.all(needed.map(loader.loadComponent))
       .then(function (componentsLoaded) {
@@ -192,20 +99,21 @@
           runtime.registerWidget(component, widgetDef, Helpers);
         });
 
-        state.themeResolverModule = byId.ThemeResolver ||
+        const themeModel = byId.ThemeModel ||
+          (Object.prototype.hasOwnProperty.call(components, "ThemeModel")
+            ? Helpers.getModule("ThemeModel")
+            : null);
+        state.themePresetName = resolveStartupThemePresetName(themeModel);
+        const themeResolver = byId.ThemeResolver ||
           (Object.prototype.hasOwnProperty.call(components, "ThemeResolver")
             ? Helpers.getModule("ThemeResolver")
             : null);
-        state.themePresetApi = buildThemePresetApi(byId.ThemePresets, Helpers);
-        state.themePresetName = resolveThemePresetName();
-        applyThemePresetToRegisteredWidgets(state.themePresetName);
+        configureThemeResolver(themeResolver, themeModel);
 
         root.avnav.api.log("dyninstruments component init ok (clustered): " + widgetDefinitions.length + " widgets");
       })
       .catch(function (e) {
         state.initStarted = false;
-        state.themePresetApi = null;
-        state.themeResolverModule = null;
         state.hostActionBridge.destroy();
         state.hostActionBridge = null;
         console.error("dyninstruments init failed:", e);

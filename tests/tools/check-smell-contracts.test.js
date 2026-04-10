@@ -41,16 +41,37 @@ describe("tools/check-smell-contracts.mjs", function () {
     expect(result.findings).toHaveLength(0);
   });
 
-  it("fails theme-cache-invalidation when invalidate API is missing", function () {
+  it("fails theme-cache-invalidation when legacy resolver API is present", function () {
     const cwd = createWorkspace({
+      "shared/theme/ThemeModel.js": `
+(function (root, factory) {
+  if (typeof module === "object" && module.exports) module.exports = factory();
+}(this, function () {
+  return {
+    id: "ThemeModel",
+    normalizePresetName(name) { return String(name || "").trim() || "default"; },
+    getTokenDefinitions() { return [{ path: "colors.pointer", inputVar: "--dyni-pointer", type: "color", default: "#111111" }]; },
+    getOutputTokenDefinitions() { return []; },
+    getPresetMode() { return {}; },
+    getPresetBase() { return {}; }
+  };
+}));
+`,
       "shared/theme/ThemeResolver.js": `
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();
 }(this, function () {
-  function create() {
-    return { resolve: function () { return { colors: { pointer: "#111111" } }; } };
-  }
-  return { id: "ThemeResolver", create: create };
+  return {
+    id: "ThemeResolver",
+    create: function () { return {}; },
+    resolveForRoot: function () { return { colors: { pointer: "#111111" } }; },
+    configure: function () {}
+  };
+}));
+`,
+      "runtime/init.js": `
+(function () {
+  function invalidateThemeResolverCache() {}
 }));
 `
     });

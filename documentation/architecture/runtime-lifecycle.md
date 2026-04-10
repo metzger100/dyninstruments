@@ -19,10 +19,10 @@ This page documents the live runtime lifecycle after the `renderHtml` host-path 
   - verifies `avnav.api`
   - creates singleton `state.hostActionBridge` (`TemporaryHostActionBridge`)
   - builds `Helpers` and component loader
-  - loads all components required by `widgetDefinitions` plus `ThemePresets`
+  - loads all components required by `widgetDefinitions` plus `ThemeModel`
   - registers widgets via `runtime.registerWidget(...)`
-  - caches `ThemeResolver` module reference
-  - builds theme preset API and applies selected preset to mounted `.widget.dyniplugin` roots
+  - reads startup theme preset once from `document.documentElement` (`--dyni-theme-preset`) and stores normalized `state.themePresetName`
+  - configures `ThemeResolver` with runtime-owned preset selection (`getActivePresetName -> state.themePresetName`)
 - Cluster render path (`ClusterWidget`):
   - `translateFunction()` maps cluster props via `ClusterMapperRegistry`
   - `renderHtml()` increments host render revision (`HostCommitController.recordRender`)
@@ -30,16 +30,10 @@ This page documents the live runtime lifecycle after the `renderHtml` host-path 
   - `HostCommitController.scheduleCommit()` resolves mounted shell/root asynchronously
   - `onCommit` callback builds session payload and reconciles via `SurfaceSessionController.reconcileSession(...)`
 - Theme preset selection:
-  - init-time preset source precedence:
-    - `readThemePresetFromSettingsApi()` stub
-    - `window.DyniPlugin.theme`
-    - root-level `--dyni-theme-preset`
-    - CSS scan fallback (`.widget.dyniplugin` roots, then `documentElement`, then `body`)
+  - startup source:
+    - root-level `--dyni-theme-preset` on `document.documentElement`
     - built-in `default`
-  - render-time `ThemeResolver` preset precedence:
-    - `data-dyni-theme`
-    - root-level `--dyni-theme-preset`
-    - built-in `default`
+  - `ThemeResolver` preset selection is runtime-injected (`configure({ getActivePresetName })`), not resolver-owned DOM ingestion
   - token precedence per key:
     - CSS token override -> preset token -> built-in resolver default
 - Host-action bridge lifecycle:
@@ -59,8 +53,6 @@ This page documents the live runtime lifecycle after the `renderHtml` host-path 
 | Owner | API | Contract |
 |---|---|---|
 | `runtime/init.js` | `runtime.runInit()` | Idempotent startup boundary returning `state.initPromise` |
-| `runtime/init.js` | `runtime.applyThemePresetToContainer(rootEl, preset?)` | Applies normalized preset to one plugin root and invalidates theme cache |
-| `runtime/init.js` | `runtime.applyThemePresetToRegisteredWidgets(preset?)` | Applies preset across mounted plugin roots |
 | `runtime/HostCommitController.js` | `createHostCommitController(options?)` | Deferred shell/root commit scheduler with stale guards and bounded observer fallback |
 | `runtime/SurfaceSessionController.js` | `createSurfaceSessionController({ createSurfaceController })` | Per-instance surface state machine (`html`/`canvas-dom`) |
 | `runtime/TemporaryHostActionBridge.js` | `createTemporaryHostActionBridge()` | Page-sensitive host action facade + capability snapshots |

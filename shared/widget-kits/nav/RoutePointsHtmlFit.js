@@ -131,7 +131,7 @@
   }
 
   function create(def, Helpers) {
-    const theme = Helpers.getModule("ThemeResolver").create(def, Helpers);
+    const theme = Helpers.getModule("ThemeResolver");
     const radialText = Helpers.getModule("RadialTextLayout").create(def, Helpers);
     const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
     const layoutApi = Helpers.getModule("RoutePointsLayout").create(def, Helpers);

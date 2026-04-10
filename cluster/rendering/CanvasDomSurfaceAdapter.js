@@ -1,7 +1,7 @@
 /**
  * Module: CanvasDomSurfaceAdapter - Standalone canvas-dom surface controller for internal canvas lifecycle
  * Documentation: documentation/architecture/canvas-dom-surface-adapter.md
- * Depends: ThemeResolver, PerfSpanHelper
+ * Depends: PerfSpanHelper
  */
 
 (function (root, factory) {
@@ -82,7 +82,6 @@
   }
 
   function create(def, Helpers) {
-    const themeResolver = Helpers.getModule("ThemeResolver");
     const perf = Helpers.getModule("PerfSpanHelper").create(def, Helpers);
 
     function renderSurfaceShell() {
@@ -138,13 +137,6 @@
       let sizeDirty = false;
       let themeDirty = false;
       let pendingPaintWaitSpan = null;
-
-      function callThemeInvalidation(targetRootEl) {
-        if (!themeResolver) {
-          return;
-        }
-        themeResolver.invalidateRoot(targetRootEl);
-      }
 
       function cancelPendingFrame() {
         if (rafHandle == null) {
@@ -409,7 +401,6 @@
         if (!attached || destroyed) {
           return false;
         }
-        callThemeInvalidation(rootEl);
         schedulePaint("theme");
         return true;
       }

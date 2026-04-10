@@ -40,12 +40,8 @@ describe("ThreeValueTextWidget", function () {
       getModule(id) {
         if (id === "ThemeResolver") {
           return {
-            create() {
-              return {
-                resolveForRoot() {
-                  return { font: { weight: 730, labelWeight: 610 } };
-                }
-              };
+            resolveForRoot() {
+              return { font: { weight: 730, labelWeight: 610 } };
             }
           };
         }

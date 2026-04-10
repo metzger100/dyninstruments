@@ -63,29 +63,54 @@ export function runSmellContractsCli(argv = process.argv.slice(2)) {
 
 function runThemeCacheInvalidationRule() {
   const out = [];
-  const rel = "shared/theme/ThemeResolver.js";
-  if (!exists(rel)) {
-    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "ThemeResolver module is missing."));
+  const resolverRel = "shared/theme/ThemeResolver.js";
+  const modelRel = "shared/theme/ThemeModel.js";
+  if (!exists(resolverRel)) {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver module is missing."));
+    return out;
+  }
+  if (!exists(modelRel)) {
+    out.push(makeFinding(modelRel, 1, "theme-cache-invalidation", "ThemeModel module is missing."));
     return out;
   }
 
-  let loaded;
+  let loadedResolver;
+  let loadedModel;
   try {
-    loaded = loadUmdModule(rel, {});
+    loadedResolver = loadUmdModule(resolverRel, {});
+    loadedModel = loadUmdModule(modelRel, {});
   } catch (e) {
-    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "Failed to load ThemeResolver: " + e.message));
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Failed to load theme modules: " + e.message));
     return out;
   }
 
-  const mod = loaded.mod;
-  const sandbox = loaded.sandbox;
-  if (!mod || typeof mod.create !== "function") {
-    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "ThemeResolver must export create()."));
+  const resolverMod = loadedResolver.mod;
+  const resolverSandbox = loadedResolver.sandbox;
+  const modelMod = loadedModel.mod;
+
+  if (!resolverMod || typeof resolverMod.resolveForRoot !== "function") {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must expose resolveForRoot(rootEl)."));
+    return out;
+  }
+  if (typeof resolverMod.configure !== "function") {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must expose configure({...})."));
+    return out;
+  }
+  if (typeof resolverMod.create === "function") {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must not export create()."));
+    return out;
+  }
+  if (typeof resolverMod.invalidateRoot === "function" || typeof resolverMod.invalidateAll === "function") {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must not expose invalidateRoot()/invalidateAll()."));
+    return out;
+  }
+  if (!modelMod || typeof modelMod.normalizePresetName !== "function" || typeof modelMod.getTokenDefinitions !== "function") {
+    out.push(makeFinding(modelRel, 1, "theme-cache-invalidation", "ThemeModel direct module API is invalid."));
     return out;
   }
 
   let pointer = "#111111";
-  sandbox.getComputedStyle = function () {
+  resolverSandbox.getComputedStyle = function () {
     return {
       getPropertyValue(name) {
         if (name === "--dyni-pointer") return pointer;
@@ -95,46 +120,36 @@ function runThemeCacheInvalidationRule() {
   };
 
   const rootEl = {
+    hasAttribute() {
+      return false;
+    },
     getAttribute() {
       return null;
     },
-    ownerDocument: {
-      documentElement: { classList: { contains() { return false; } } },
-      body: { classList: { contains() { return false; } } }
+    closest() {
+      return null;
     }
   };
 
-  const resolver = mod.create({}, {});
-  if (!resolver || typeof resolver.resolveForRoot !== "function") {
-    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "ThemeResolver.create() must return resolveForRoot(rootEl)."));
-    return out;
-  }
-  if (typeof resolver.invalidateRoot !== "function" || typeof resolver.invalidateAll !== "function") {
-    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "ThemeResolver.create() must return invalidateRoot() and invalidateAll()."));
-    return out;
-  }
-  if (typeof mod.invalidateRoot !== "function" || typeof mod.invalidateAll !== "function") {
-    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "ThemeResolver module must expose invalidateRoot() and invalidateAll()."));
-    return out;
-  }
+  resolverMod.configure({
+    ThemeModel: modelMod,
+    getNightModeState() {
+      return false;
+    }
+  });
 
-  const first = resolver.resolveForRoot(rootEl);
+  const first = resolverMod.resolveForRoot(rootEl);
   pointer = "#222222";
-  resolver.invalidateRoot(rootEl);
-  const second = resolver.resolveForRoot(rootEl);
+  const second = resolverMod.resolveForRoot(rootEl);
   if (!second || !second.colors || second.colors.pointer !== "#222222") {
-    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "invalidateRoot(rootEl) must refresh cached tokens for that root."));
-  }
-
-  pointer = "#333333";
-  resolver.invalidateAll();
-  const third = resolver.resolveForRoot(rootEl);
-  if (!third || !third.colors || third.colors.pointer !== "#333333") {
-    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "invalidateAll() must refresh cached tokens."));
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must recompute CSS token values without invalidation APIs."));
   }
 
   if (!first || !first.colors || first.colors.pointer !== "#111111") {
-    out.push(makeFinding(rel, 1, "theme-cache-invalidation", "resolveForRoot(rootEl) should return initial pointer token value."));
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "resolveForRoot(rootEl) should return initial pointer token value."));
+  }
+  if (first === second) {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must not cache by root identity."));
   }
 
   const initRel = "runtime/init.js";
@@ -143,8 +158,8 @@ function runThemeCacheInvalidationRule() {
     return out;
   }
   const initText = readFile(initRel);
-  if (!/state\.themePresetApi\.apply\([^)]*\);\s*invalidateThemeResolverCache\s*\(/s.test(initText)) {
-    out.push(makeFinding(initRel, 1, "theme-cache-invalidation", "runtime/init.js must invoke ThemeResolver cache invalidation after preset application."));
+  if (/invalidateThemeResolverCache/.test(initText) || /themeResolverModule/.test(initText)) {
+    out.push(makeFinding(initRel, 1, "theme-cache-invalidation", "runtime/init.js must not keep ThemeResolver cache invalidation wiring."));
   }
 
   return out;

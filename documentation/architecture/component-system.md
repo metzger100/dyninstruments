@@ -42,7 +42,7 @@ The final assembled map still uses the same component ID -> `{ js, css, globalKe
 `ClusterMapperRegistry` depends on all per-cluster mapper components.
 `ClusterRendererRouter` depends on kind/surface routing owners plus renderer components used at runtime.
 `ThemeResolver` is a shared plugin-wide token resolver used by both gauge and text rendering paths.
-`ThemePresets` is a shared runtime preset applier that sets `data-dyni-theme` on container roots and owns canonical preset normalization (`normalizePresetName`).
+`ThemeModel` is the shared semantic owner for token metadata, preset metadata, and preset-name normalization (`normalizePresetName`).
 `PerfSpanHelper` is a shared UMD owner for perf-span start/end behavior used by cluster UMD consumers.
 `HtmlWidgetUtils` is a shared UMD owner for HTML-widget utility helpers (`escapeHtml`, `toStyleAttr`, ratio/shell helpers).
 Dedicated nav renderers may also depend on shared layout-owner modules that consume `ResponsiveScaleProfile`.
@@ -131,7 +131,7 @@ TextLayoutEngine
       └── TextLayoutPrimitives
 
 runtime/init.js (explicit load)
-  └── ThemePresets
+  └── ThemeModel
 
 runtime/HostCommitController.js
   └── runtime/PerfSpanHelper.js API (`runtime.getPerfSpanApi()`)
@@ -167,8 +167,10 @@ runtime/SurfaceSessionController.js
 2. Recursively load dependencies first (`Promise.all(deps.map(loadComponent))`)
 3. Load CSS via `loadCssOnce()` (`<link>`)
 4. Load JS via `loadScriptOnce()` (`<script>`)
-5. Verify component exists on `window.DyniComponents[globalKey]` and has `create`
-6. Return component object (`{ id, create }`)
+5. Validate component API shape:
+   - `factory`: module exists and has `create`
+   - `module`: module exists as direct API object
+6. Return resolved component/module object
 
 ## Registration Flow
 
@@ -177,7 +179,7 @@ runtime/SurfaceSessionController.js
 ```javascript
 const loader = runtime.createComponentLoader(config.components);
 const needed = loader.uniqueComponents(config.widgetDefinitions);
-if (!needed.includes("ThemePresets")) needed.push("ThemePresets");
+if (!needed.includes("ThemeModel")) needed.push("ThemeModel");
 
 Promise.all(needed.map(loader.loadComponent)).then(function (componentsLoaded) {
   const byId = {};
@@ -186,12 +188,10 @@ Promise.all(needed.map(loader.loadComponent)).then(function (componentsLoaded) {
   config.widgetDefinitions.forEach(function (widgetDef) {
     runtime.registerWidget(byId[widgetDef.widget], widgetDef, Helpers);
   });
-
-  runtime.applyThemePresetToRegisteredWidgets();
 });
 ```
 
-In the current init flow, theme presets are applied to discovered `.widget.dyniplugin` roots directly after widget registration.
+In the current init flow, startup preset selection is captured once from `:root` and persisted in runtime state for theme-runtime wiring.
 
 ## Adding a New Component
 

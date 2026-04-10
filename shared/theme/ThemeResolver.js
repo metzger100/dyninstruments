@@ -1,202 +1,51 @@
 /**
- * Module: ThemeResolver - Plugin-wide CSS token resolver with root-scoped cache
+ * Module: ThemeResolver - Plugin-wide theme token resolver
  * Documentation: documentation/shared/theme-tokens.md
- * Depends: ThemePresets, Helpers.getNightModeState, CSS custom properties
+ * Depends: ThemeModel, CSS custom properties
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) {
     define([], function () {
-      const mod = factory();
-      mod.DEFAULTS = mod.create.DEFAULTS;
-      mod.TOKEN_DEFS = mod.create.TOKEN_DEFS;
-      mod.invalidateRoot = mod.create.invalidateRoot;
-      mod.invalidateAll = mod.create.invalidateAll;
-      return mod;
+      return factory(root);
     });
   } else if (typeof module === "object" && module.exports) {
-    const mod = factory();
-    mod.DEFAULTS = mod.create.DEFAULTS;
-    mod.TOKEN_DEFS = mod.create.TOKEN_DEFS;
-    mod.invalidateRoot = mod.create.invalidateRoot;
-    mod.invalidateAll = mod.create.invalidateAll;
-    module.exports = mod;
+    module.exports = factory(root);
   } else {
-    (root.DyniComponents = root.DyniComponents || {}).DyniThemeResolver = factory();
-    root.DyniComponents.DyniThemeResolver.DEFAULTS = root.DyniComponents.DyniThemeResolver.create.DEFAULTS;
-    root.DyniComponents.DyniThemeResolver.TOKEN_DEFS = root.DyniComponents.DyniThemeResolver.create.TOKEN_DEFS;
-    root.DyniComponents.DyniThemeResolver.invalidateRoot = root.DyniComponents.DyniThemeResolver.create.invalidateRoot;
-    root.DyniComponents.DyniThemeResolver.invalidateAll = root.DyniComponents.DyniThemeResolver.create.invalidateAll;
+    (root.DyniComponents = root.DyniComponents || {}).DyniThemeResolver = factory(root);
   }
-}(this, function () {
+}(this, function (root) {
   "use strict";
 
-  const EMPTY_PRESET = {};
-  const DEFAULT_PRESET_NAME = "default";
+  let config = null;
+  let requiredThemeModel = null;
 
-  // dyni-lint-disable-next-line css-js-default-duplication -- ThemeResolver is the documented theme-token boundary and owns per-token defaults.
-  function defineToken(path, cssVar, type, defaultValue) {
-    return { path: path, cssVar: cssVar, type: type, defaultValue: defaultValue }; /* dyni-lint-disable-line css-js-default-duplication -- ThemeResolver is the documented theme-token boundary and owns per-token defaults. */
+  function toObject(value) {
+    return value && typeof value === "object" ? value : null;
   }
-
-  const TOKEN_DEFS = [
-    defineToken("colors.pointer", "--dyni-pointer", "color", "#ff2b2b"),
-    defineToken("colors.warning", "--dyni-warning", "color", "#e7c66a"),
-    defineToken("colors.alarm", "--dyni-alarm", "color", "#ff7a76"),
-    defineToken("colors.laylineStb", "--dyni-layline-stb", "color", "#82b683"),
-    defineToken("colors.laylinePort", "--dyni-layline-port", "color", "#ff7a76"),
-    defineToken("colors.ais.warning", "--dyni-ais-warning", "color", "#f39b52"),
-    defineToken("colors.ais.nearest", "--dyni-ais-nearest", "color", "#66b8ff"),
-    defineToken("colors.ais.tracking", "--dyni-ais-tracking", "color", "#89d38f"),
-    defineToken("colors.ais.normal", "--dyni-ais-normal", "color", "#8da0b3"),
-    defineToken("radial.ticks.majorLen", "--dyni-radial-tick-major-len", "number", 12),
-    defineToken("radial.ticks.majorWidth", "--dyni-radial-tick-major-width", "number", 3),
-    defineToken("radial.ticks.minorLen", "--dyni-radial-tick-minor-len", "number", 7),
-    defineToken("radial.ticks.minorWidth", "--dyni-radial-tick-minor-width", "number", 1.5),
-    defineToken("radial.pointer.widthFactor", "--dyni-radial-pointer-width", "number", 1),
-    defineToken("radial.pointer.lengthFactor", "--dyni-radial-pointer-length", "number", 2),
-    defineToken("radial.ring.arcLineWidth", "--dyni-radial-arc-linewidth", "number", 2),
-    defineToken("radial.ring.widthFactor", "--dyni-radial-ring-width", "number", 0.16),
-    defineToken("radial.labels.insetFactor", "--dyni-radial-label-inset", "number", 1.8),
-    defineToken("radial.labels.fontFactor", "--dyni-radial-label-font", "number", 0.14),
-    defineToken("radial.fullCircle.normal.innerMarginFactor", "--dyni-radial-fullcircle-normal-inner-margin", "number", 0.03),
-    defineToken("radial.fullCircle.normal.minHeightFactor", "--dyni-radial-fullcircle-normal-min-height", "number", 0.45),
-    defineToken("radial.fullCircle.normal.dualGapFactor", "--dyni-radial-fullcircle-normal-dual-gap", "number", 0.05),
-    defineToken("linear.track.widthFactor", "--dyni-linear-track-width", "number", 0.16),
-    defineToken("linear.track.lineWidth", "--dyni-linear-track-linewidth", "number", 2),
-    defineToken("linear.ticks.majorLen", "--dyni-linear-tick-major-len", "number", 12),
-    defineToken("linear.ticks.majorWidth", "--dyni-linear-tick-major-width", "number", 3),
-    defineToken("linear.ticks.minorLen", "--dyni-linear-tick-minor-len", "number", 7),
-    defineToken("linear.ticks.minorWidth", "--dyni-linear-tick-minor-width", "number", 1.5),
-    defineToken("linear.pointer.widthFactor", "--dyni-linear-pointer-width", "number", 1),
-    defineToken("linear.pointer.lengthFactor", "--dyni-linear-pointer-length", "number", 2),
-    defineToken("linear.labels.insetFactor", "--dyni-linear-label-inset", "number", 1.8),
-    defineToken("linear.labels.fontFactor", "--dyni-linear-label-font", "number", 0.14),
-    defineToken("font.weight", "--dyni-font-weight", "number", 700),
-    defineToken("font.labelWeight", "--dyni-label-weight", "number", 700),
-    defineToken("xte.lineWidthFactor", "--dyni-xte-line-width-factor", "number", 1.5),
-    defineToken("xte.boatSizeFactor", "--dyni-xte-boat-size-factor", "number", 1)
-  ];
 
   function setByPath(target, pathSegments, value) {
     let cursor = target;
-    for (let i = 0; i < pathSegments.length - 1; i++) {
+    const lastIndex = pathSegments.length - 1;
+    for (let i = 0; i < lastIndex; i += 1) {
       const segment = pathSegments[i];
-      if (!cursor[segment] || typeof cursor[segment] !== "object") cursor[segment] = {};
+      const next = cursor[segment];
+      if (!next || typeof next !== "object") {
+        cursor[segment] = Object.create(null);
+      }
       cursor = cursor[segment];
     }
-    cursor[pathSegments[pathSegments.length - 1]] = value;
+    cursor[pathSegments[lastIndex]] = value;
   }
-
-  function buildDefaults() {
-    const defaults = {};
-    TOKEN_DEFS.forEach(function (tokenDef) {
-      setByPath(defaults, tokenDef.path.split("."), tokenDef.defaultValue);
-    });
-    return defaults;
-  }
-
-  const DEFAULTS = buildDefaults();
 
   function getByPath(source, pathSegments) {
     let cursor = source;
-    for (let i = 0; i < pathSegments.length; i++) {
+    for (let i = 0; i < pathSegments.length; i += 1) {
       if (!cursor || typeof cursor !== "object" || !Object.prototype.hasOwnProperty.call(cursor, pathSegments[i])) {
         return undefined;
       }
       cursor = cursor[pathSegments[i]];
     }
     return cursor;
-  }
-
-  function readTokenOverride(style, tokenDef) {
-    if (!style || typeof style.getPropertyValue !== "function") {
-      return { hasValue: false, value: tokenDef.defaultValue };
-    }
-    const raw = style.getPropertyValue(tokenDef.cssVar);
-    if (tokenDef.type === "number") {
-      const parsed = parseFloat(raw);
-      return Number.isFinite(parsed)
-        ? { hasValue: true, value: parsed }
-        : { hasValue: false, value: tokenDef.defaultValue };
-    }
-    const val = typeof raw === "string" ? raw.trim() : "";
-    return val
-      ? { hasValue: true, value: val }
-      : { hasValue: false, value: tokenDef.defaultValue };
-  }
-
-  function resolvePresetModule(Helpers) {
-    if (!Helpers || typeof Helpers.getModule !== "function") {
-      return {
-        PRESETS: { default: EMPTY_PRESET },
-        normalizePresetName: function () {
-          return DEFAULT_PRESET_NAME;
-        }
-      };
-    }
-    const presetsMod = Helpers.getModule("ThemePresets");
-    if (!presetsMod || typeof presetsMod !== "object") {
-      throw new Error("ThemeResolver: ThemePresets module is required");
-    }
-    return presetsMod;
-  }
-
-  function resolveNightModeGetter(Helpers) {
-    if (!Helpers || typeof Helpers.getModule !== "function") {
-      return function () {
-        return false;
-      };
-    }
-    if (typeof Helpers.getNightModeState !== "function") {
-      throw new Error("ThemeResolver: Helpers.getNightModeState() is required");
-    }
-    return Helpers.getNightModeState;
-  }
-
-  function resolvePresetDefs(presetsMod) {
-    if (presetsMod.PRESETS && typeof presetsMod.PRESETS === "object") {
-      return presetsMod.PRESETS;
-    }
-    if (presetsMod.create && presetsMod.create.PRESETS && typeof presetsMod.create.PRESETS === "object") {
-      return presetsMod.create.PRESETS;
-    }
-    throw new Error("ThemeResolver: ThemePresets.PRESETS is required");
-  }
-
-  function resolvePresetNormalizer(presetsMod) {
-    if (typeof presetsMod.normalizePresetName === "function") {
-      return presetsMod.normalizePresetName;
-    }
-    if (presetsMod.create && typeof presetsMod.create.normalizePresetName === "function") {
-      return presetsMod.create.normalizePresetName;
-    }
-    throw new Error("ThemeResolver: ThemePresets.normalizePresetName() is required");
-  }
-
-  function readPresetCssVar(style) {
-    if (!style || typeof style.getPropertyValue !== "function") {
-      return "";
-    }
-    // dyni-lint-disable-next-line css-js-default-duplication -- ThemeResolver is the documented boundary owner for reading preset selection from CSS.
-    const raw = style.getPropertyValue("--dyni-theme-preset");
-    return typeof raw === "string" ? raw.trim() : "";
-  }
-
-  function getActivePresetName(rootEl, rootStyle, normalizePresetName) {
-    if (!rootEl) {
-      return DEFAULT_PRESET_NAME;
-    }
-    if (typeof rootEl.hasAttribute === "function" &&
-      rootEl.hasAttribute("data-dyni-theme") &&
-      typeof rootEl.getAttribute === "function") {
-      return normalizePresetName(rootEl.getAttribute("data-dyni-theme"));
-    }
-
-    const cssPresetName = readPresetCssVar(rootStyle);
-    if (cssPresetName) {
-      return normalizePresetName(cssPresetName);
-    }
-    return DEFAULT_PRESET_NAME;
   }
 
   function getComputedStyleSafe(el) {
@@ -207,87 +56,165 @@
     return style && typeof style.getPropertyValue === "function" ? style : null;
   }
 
-  function resolveTokens(styles, presetValues) {
-    const out = {};
-    TOKEN_DEFS.forEach(function (tokenDef) {
-      const pathSegments = tokenDef.path.split(".");
-      let value = getByPath(presetValues, pathSegments);
-      if (typeof value === "undefined") {
-        value = tokenDef.defaultValue;
-      }
+  function readCssInputVar(style, inputVar) {
+    if (!style || typeof style.getPropertyValue !== "function" || !inputVar) {
+      return "";
+    }
+    const raw = style.getPropertyValue(inputVar);
+    return typeof raw === "string" ? raw.trim() : "";
+  }
 
-      for (let i = 0; i < styles.length; i++) {
-        const override = readTokenOverride(styles[i], tokenDef);
-        if (override.hasValue) {
-          value = override.value;
-          break;
+  function readTokenInputOverride(style, tokenDef, inputReader) {
+    const raw = inputReader(style, tokenDef.inputVar);
+    if (!raw) {
+      return { hasValue: false, value: tokenDef.default };
+    }
+    if (tokenDef.type === "number") {
+      const parsed = parseFloat(raw);
+      return Number.isFinite(parsed)
+        ? { hasValue: true, value: parsed }
+        : { hasValue: false, value: tokenDef.default };
+    }
+    return { hasValue: true, value: raw };
+  }
+
+  function resolveThemeModel() {
+    const configured = toObject(config) && toObject(config).ThemeModel;
+    if (configured && typeof configured.getTokenDefinitions === "function") {
+      return configured;
+    }
+    const dyni = root && root.DyniComponents;
+    const discovered = dyni && dyni.DyniThemeModel;
+    if (discovered && typeof discovered.getTokenDefinitions === "function") {
+      return discovered;
+    }
+    if (requiredThemeModel && typeof requiredThemeModel.getTokenDefinitions === "function") {
+      return requiredThemeModel;
+    }
+    if (typeof require === "function") {
+      try {
+        const loaded = require("./ThemeModel.js");
+        if (loaded && typeof loaded.getTokenDefinitions === "function") {
+          requiredThemeModel = loaded;
+          return requiredThemeModel;
         }
       }
-
-      setByPath(out, pathSegments, value);
-    });
-    return out;
-  }
-
-  let byRoot = new WeakMap();
-  let lastNightModeState = null;
-
-  function invalidateRoot(rootEl) {
-    if (!rootEl) {
-      return;
+      // dyni-lint-disable-next-line catch-fallback-without-suppression -- CommonJS require fallback is optional for test/runtime host boundaries.
+      catch (error) { /* no-op */ }
     }
-    byRoot.delete(rootEl);
+    throw new Error("ThemeResolver: ThemeModel is required");
   }
 
-  function invalidateAll() {
-    byRoot = new WeakMap();
-    lastNightModeState = null;
-  }
-
-  function create(def, Helpers) {
-    const presetsMod = resolvePresetModule(Helpers);
-    const presetDefs = resolvePresetDefs(presetsMod);
-    const normalizePresetName = resolvePresetNormalizer(presetsMod);
-    const getNightModeState = resolveNightModeGetter(Helpers);
-
-    function resolveForRoot(rootEl) {
-      if (!rootEl) {
-        return resolveTokens([], EMPTY_PRESET);
-      }
-
-      const nightMode = getNightModeState(rootEl);
-      if (lastNightModeState === null) lastNightModeState = nightMode;
-      else if (nightMode !== lastNightModeState) {
-        invalidateAll();
-        lastNightModeState = nightMode;
-      }
-
-      if (byRoot.has(rootEl)) {
-        return byRoot.get(rootEl);
-      }
-
-      const rootStyle = getComputedStyleSafe(rootEl);
-      const presetName = getActivePresetName(rootEl, rootStyle, normalizePresetName);
-      const presetValues = Object.prototype.hasOwnProperty.call(presetDefs, presetName)
-        ? presetDefs[presetName]
-        : EMPTY_PRESET;
-
-      const resolved = resolveTokens([rootStyle], presetValues);
-      byRoot.set(rootEl, resolved);
-      return resolved;
+  function resolveNightModeGetter() {
+    const configured = toObject(config) && config.getNightModeState;
+    if (typeof configured === "function") {
+      return configured;
     }
-
-    return {
-      resolveForRoot: resolveForRoot,
-      invalidateRoot: invalidateRoot,
-      invalidateAll: invalidateAll
+    return function (rootEl) {
+      return !!(rootEl && typeof rootEl.closest === "function" && rootEl.closest(".nightMode"));
     };
   }
 
-  create.DEFAULTS = DEFAULTS;
-  create.TOKEN_DEFS = TOKEN_DEFS;
-  create.invalidateRoot = invalidateRoot;
-  create.invalidateAll = invalidateAll;
+  function resolveInputReader() {
+    const configured = toObject(config) && config.readCssInputVar;
+    if (typeof configured === "function") {
+      return configured;
+    }
+    return readCssInputVar;
+  }
 
-  return { id: "ThemeResolver", create };
+  function resolveActivePresetNameGetter(themeModel) {
+    const configured = toObject(config) && config.getActivePresetName;
+    if (typeof configured === "function") {
+      return configured;
+    }
+    return function () {
+      return "default";
+    };
+  }
+
+  function isCommittedPluginRoot(rootEl) {
+    return !!(rootEl &&
+      rootEl.nodeType === 1 &&
+      rootEl.classList &&
+      typeof rootEl.classList.contains === "function" &&
+      rootEl.classList.contains("widget") &&
+      rootEl.classList.contains("dyniplugin"));
+  }
+
+  function requireCommittedPluginRoot(rootEl) {
+    if (!isCommittedPluginRoot(rootEl)) {
+      throw new Error("ThemeResolver.resolveForRoot: rootEl must be a committed .widget.dyniplugin root element");
+    }
+  }
+
+  function resolveForRoot(rootEl) {
+    requireCommittedPluginRoot(rootEl);
+    const themeModel = resolveThemeModel();
+    const inputReader = resolveInputReader();
+    const getNightModeState = resolveNightModeGetter();
+    const getActivePresetName = resolveActivePresetNameGetter(themeModel);
+    const style = getComputedStyleSafe(rootEl);
+    const mode = getNightModeState(rootEl) ? "night" : "day";
+    const presetName = themeModel.normalizePresetName(getActivePresetName(rootEl, style, mode));
+    const presetMode = themeModel.getPresetMode(presetName, mode);
+    const presetBase = themeModel.getPresetBase(presetName);
+    const out = {};
+
+    themeModel.getTokenDefinitions().forEach(function (tokenDef) {
+      const pathSegments = tokenDef.path.split(".");
+      const rootOverride = readTokenInputOverride(style, tokenDef, inputReader);
+      if (rootOverride.hasValue) {
+        setByPath(out, pathSegments, rootOverride.value);
+        return;
+      }
+
+      const presetModeValue = getByPath(presetMode, pathSegments);
+      if (typeof presetModeValue !== "undefined") {
+        setByPath(out, pathSegments, presetModeValue);
+        return;
+      }
+
+      const presetBaseValue = getByPath(presetBase, pathSegments);
+      if (typeof presetBaseValue !== "undefined") {
+        setByPath(out, pathSegments, presetBaseValue);
+        return;
+      }
+
+      const modeDefault = tokenDef.defaultByMode && Object.prototype.hasOwnProperty.call(tokenDef.defaultByMode, mode)
+        ? tokenDef.defaultByMode[mode]
+        : undefined;
+      if (typeof modeDefault !== "undefined") {
+        setByPath(out, pathSegments, modeDefault);
+        return;
+      }
+
+      setByPath(out, pathSegments, tokenDef.default);
+    });
+
+    return out;
+  }
+
+  function configure(nextConfig) {
+    config = toObject(nextConfig) || null;
+    return moduleApi;
+  }
+
+  function getTokenDefinitions() {
+    return resolveThemeModel().getTokenDefinitions();
+  }
+
+  function getOutputTokenDefinitions() {
+    return resolveThemeModel().getOutputTokenDefinitions();
+  }
+
+  const moduleApi = {
+    id: "ThemeResolver",
+    configure: configure,
+    resolveForRoot: resolveForRoot,
+    getTokenDefinitions: getTokenDefinitions,
+    getOutputTokenDefinitions: getOutputTokenDefinitions
+  };
+
+  return moduleApi;
 }));

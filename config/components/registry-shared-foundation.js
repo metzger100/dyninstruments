@@ -229,15 +229,18 @@
       css: undefined,
       globalKey: "DyniTextFitMath"
     },
-    ThemePresets: {
-      js: BASE + "shared/theme/ThemePresets.js",
+    ThemeModel: {
+      js: BASE + "shared/theme/ThemeModel.js",
       css: undefined,
-      globalKey: "DyniThemePresets"
+      globalKey: "DyniThemeModel",
+      apiShape: "module"
     },
     ThemeResolver: {
       js: BASE + "shared/theme/ThemeResolver.js",
       css: undefined,
-      globalKey: "DyniThemeResolver"
+      globalKey: "DyniThemeResolver",
+      deps: ["ThemeModel"],
+      apiShape: "module"
     },
     XteHighwayLayout: {
       js: BASE + "shared/widget-kits/xte/XteHighwayLayout.js",

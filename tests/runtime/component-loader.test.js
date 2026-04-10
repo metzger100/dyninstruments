@@ -63,6 +63,28 @@ describe("runtime/component-loader.js", function () {
     await expect(loader.loadComponent("Broken")).rejects.toThrow("Component not found or invalid");
   });
 
+  it("accepts module-shaped components when apiShape is module", async function () {
+    const { runtime, context } = setup();
+    context.DyniComponents.ThemeModel = { id: "ThemeModel", normalizePresetName() { return "default"; } };
+
+    const loader = runtime.createComponentLoader({
+      ThemeModel: { js: "/theme-model.js", css: undefined, globalKey: "ThemeModel", apiShape: "module" }
+    });
+
+    await expect(loader.loadComponent("ThemeModel")).resolves.toEqual(context.DyniComponents.ThemeModel);
+  });
+
+  it("rejects unknown apiShape values", async function () {
+    const { runtime, context } = setup();
+    context.DyniComponents.Weird = { id: "Weird", create() {} };
+
+    const loader = runtime.createComponentLoader({
+      Weird: { js: "/weird.js", css: undefined, globalKey: "Weird", apiShape: "mystery" }
+    });
+
+    await expect(loader.loadComponent("Weird")).rejects.toThrow("Unsupported apiShape");
+  });
+
   it("collects unique widgets with transitive dependencies", function () {
     const { runtime } = setup();
     const loader = runtime.createComponentLoader({

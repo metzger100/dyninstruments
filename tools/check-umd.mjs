@@ -12,6 +12,10 @@ const REFERENCE_IMPL = "widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js";
 const UMD_WRAPPER_RE = /^\(function\s*\(\s*root\s*,\s*factory\s*\)\s*\{/;
 const DYNI_COMPONENTS_RE = /root\.DyniComponents\s*=\s*root\.DyniComponents\s*\|\|\s*{}/;
 const CREATE_EXPORT_RE = /return\s*{\s*id\s*:\s*["'][^"']+["']\s*,\s*create(?:\s*:\s*create)?\s*,?\s*};?/m;
+const MODULE_EXPORT_ALLOWLIST = new Set([
+  "shared/theme/ThemeModel.js",
+  "shared/theme/ThemeResolver.js"
+]);
 
 const violations = [];
 const byType = Object.create(null);
@@ -54,6 +58,10 @@ function validateFile(file, content) {
       "missing-registration",
       `[umd-missing] ${file}: Missing DyniComponents registration. Expected 'root.DyniComponents = root.DyniComponents || {}'. All component files must use the standard UMD wrapper. See ${STANDARDS_REF} for the template. Reference implementation: ${REFERENCE_IMPL}`
     );
+  }
+
+  if (MODULE_EXPORT_ALLOWLIST.has(file)) {
+    return;
   }
 
   if (!CREATE_EXPORT_RE.test(content)) {

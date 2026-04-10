@@ -69,7 +69,7 @@ describe("AisTargetHtmlFit", function () {
       },
       getModule(id) {
         if (id === "ThemeResolver") {
-          return { create: () => themeApi };
+          return themeApi;
         }
         if (id === "RadialTextLayout") {
           return { create: () => radialTextApi };

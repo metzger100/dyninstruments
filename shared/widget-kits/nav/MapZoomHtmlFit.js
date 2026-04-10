@@ -217,7 +217,7 @@
   function create(def, Helpers) {
     const textApi = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const themeApi = Helpers.getModule("ThemeResolver").create(def, Helpers);
+    const themeApi = Helpers.getModule("ThemeResolver");
 
     function compute(args) {
       const cfg = args || {};

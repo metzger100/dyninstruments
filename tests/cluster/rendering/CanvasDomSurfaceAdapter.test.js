@@ -123,15 +123,8 @@ describe("CanvasDomSurfaceAdapter", function () {
     const rendererSpec = {
       renderCanvas: vi.fn()
     };
-    const themeModule = opts.themeModule || {
-      invalidateRoot: vi.fn(),
-      invalidateAll: vi.fn()
-    };
     const helpers = {
       getModule(id) {
-        if (id === "ThemeResolver") {
-          return themeModule;
-        }
         if (id === "PerfSpanHelper") {
           return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
         }
@@ -198,7 +191,6 @@ describe("CanvasDomSurfaceAdapter", function () {
       rootEl,
       payload,
       rendererSpec: opts.rendererSpec || rendererSpec,
-      themeModule,
       observerInstances,
       frameQueue,
       canceledFrames,
@@ -209,9 +201,6 @@ describe("CanvasDomSurfaceAdapter", function () {
   it("renders a structurally stable shell markup", function () {
     const adapter = loadFresh("cluster/rendering/CanvasDomSurfaceAdapter.js").create({}, {
       getModule(id) {
-        if (id === "ThemeResolver") {
-          return { invalidateRoot: vi.fn(), invalidateAll: vi.fn() };
-        }
         if (id === "PerfSpanHelper") {
           return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
         }
@@ -283,7 +272,6 @@ describe("CanvasDomSurfaceAdapter", function () {
     h.rendererSpec.renderCanvas.mockClear();
 
     expect(h.controller.invalidateTheme("theme-change")).toBe(true);
-    expect(h.themeModule.invalidateRoot).toHaveBeenCalledWith(h.rootEl);
     expect(h.frameQueue).toHaveLength(1);
 
     h.runNextFrame();
@@ -340,9 +328,6 @@ describe("CanvasDomSurfaceAdapter", function () {
   it("throws for strict non-compat contracts", function () {
     const adapter = loadFresh("cluster/rendering/CanvasDomSurfaceAdapter.js").create({}, {
       getModule(id) {
-        if (id === "ThemeResolver") {
-          return { invalidateRoot: vi.fn(), invalidateAll: vi.fn() };
-        }
         if (id === "PerfSpanHelper") {
           return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
         }

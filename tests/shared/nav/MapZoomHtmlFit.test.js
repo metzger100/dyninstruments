@@ -70,7 +70,7 @@ describe("MapZoomHtmlFit", function () {
           return htmlUtilsModule;
         }
         if (id === "ThemeResolver") {
-          return { create: () => themeApi };
+          return themeApi;
         }
         throw new Error("unexpected module: " + id);
       }

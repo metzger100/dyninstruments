@@ -7,7 +7,6 @@ describe("MapZoomTextHtmlWidget", function () {
     HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
     MapZoomHtmlFit: "shared/widget-kits/nav/MapZoomHtmlFit.js",
     ThemeResolver: "shared/theme/ThemeResolver.js",
-    ThemePresets: "shared/theme/ThemePresets.js",
     TextLayoutEngine: "shared/widget-kits/text/TextLayoutEngine.js",
     RadialValueMath: "shared/widget-kits/radial/RadialValueMath.js",
     RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",

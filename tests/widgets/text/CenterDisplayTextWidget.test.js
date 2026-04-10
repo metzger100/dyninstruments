@@ -67,12 +67,8 @@ describe("CenterDisplayTextWidget", function () {
       getModule(id) {
         if (id === "ThemeResolver") {
           return {
-            create() {
-              return {
-                resolveForRoot() {
-                  return themeTokens;
-                }
-              };
+            resolveForRoot() {
+              return themeTokens;
             }
           };
         }

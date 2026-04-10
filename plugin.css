@@ -21,12 +21,7 @@
 .widget.dyniplugin {
   box-sizing: border-box;
   position: relative;
-  border: 1px solid var(--dyni-border-day, rgba(0, 0, 0, 0.30));
-}
-
-/* Night mode border color. */
-.nightMode .widget.dyniplugin {
-  border-color: var(--dyni-border-night, rgba(252, 11, 11, 0.18));
+  border: 1px solid var(--dyni-border, rgba(0, 0, 0, 0.30));
 }
 
 /* Host shell and surfaces fill the widget area on the renderHtml host path. */

@@ -68,7 +68,8 @@ function loadComponentsRegistry() {
     const globalKey = entry && typeof entry.globalKey === "string" ? entry.globalKey : "";
     const js = entry && typeof entry.js === "string" ? entry.js : "";
     const jsPath = stripSentinelBase(normalizeSlashes(js));
-    const item = { componentId, globalKey, jsPath };
+    const apiShape = entry && typeof entry.apiShape === "string" ? entry.apiShape : "factory";
+    const item = { componentId, globalKey, jsPath, apiShape };
 
     items.push(item);
 
@@ -160,6 +161,10 @@ function validateComponentFiles(componentFiles, registryData) {
 
     const registration = registeredItems[0];
     const content = fs.readFileSync(path.join(ROOT, file), "utf8");
+
+    if (registration.apiShape === "module") {
+      continue;
+    }
 
     const umdGlobalKey = extractUmdGlobalKey(content);
     if (!umdGlobalKey) {

@@ -76,9 +76,12 @@ describe("config/components.js", function () {
       "LinearGaugeLayout",
       "LinearGaugeTextLayout"
     ]);
-    expect(components.ThemePresets.globalKey).toBe("DyniThemePresets");
-    expect(components.ThemePresets.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemePresets.js");
-    expect(components.ThemePresets.deps).toBeUndefined();
+    expect(components.ThemeModel.globalKey).toBe("DyniThemeModel");
+    expect(components.ThemeModel.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemeModel.js");
+    expect(components.ThemeModel.deps).toBeUndefined();
+    expect(components.ThemeModel.apiShape).toBe("module");
+    expect(components.ThemeResolver.deps).toEqual(["ThemeModel"]);
+    expect(components.ThemeResolver.apiShape).toBe("module");
     expect(components.RadialTickMath.deps).toEqual(["RadialAngleMath"]);
     expect(components.RadialTextFitting.globalKey).toBe("DyniRadialTextFitting");
     expect(components.RadialTextFitting.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/RadialTextFitting.js");

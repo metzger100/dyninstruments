@@ -8,33 +8,22 @@ describe("ThemeResolver", function () {
   });
 
   afterEach(function () {
-    if (typeof previousGetComputedStyle === "undefined") delete globalThis.getComputedStyle;
-    else globalThis.getComputedStyle = previousGetComputedStyle;
+    if (typeof previousGetComputedStyle === "undefined") {
+      delete globalThis.getComputedStyle;
+    } else {
+      globalThis.getComputedStyle = previousGetComputedStyle;
+    }
   });
 
-  function createDoc(nightRef) {
+  function createRoot() {
+    const attrs = Object.create(null);
     return {
-      documentElement: {
-        classList: {
-          contains(name) {
-            return name === "nightMode" && !!nightRef.value;
-          }
+      nodeType: 1,
+      classList: {
+        contains(name) {
+          return name === "widget" || name === "dyniplugin";
         }
       },
-      body: {
-        classList: {
-          contains() {
-            return false;
-          }
-        }
-      }
-    };
-  }
-
-  function createRoot(doc) {
-    const attrs = Object.create(null);
-    const root = {
-      ownerDocument: doc,
       hasAttribute(name) {
         return Object.prototype.hasOwnProperty.call(attrs, name);
       },
@@ -47,30 +36,8 @@ describe("ThemeResolver", function () {
       removeAttribute(name) {
         delete attrs[String(name)];
       },
-      closest(selector) {
-        return selector === ".widget, .DirectWidget" ? root : null;
-      }
-    };
-    return root;
-  }
-
-  function createHelpers() {
-    const presetsMod = loadFresh("shared/theme/ThemePresets.js");
-    return {
-      getModule(id) {
-        return id === "ThemePresets" ? presetsMod : null;
-      },
-      getNightModeState(rootEl) {
-        const doc = rootEl && rootEl.ownerDocument;
-        if (!doc) {
-          return false;
-        }
-        const docRootEl = doc.documentElement;
-        if (docRootEl && docRootEl.classList && docRootEl.classList.contains("nightMode")) {
-          return true;
-        }
-        const body = doc.body;
-        return !!(body && body.classList && body.classList.contains("nightMode"));
+      closest() {
+        return null;
       }
     };
   }
@@ -89,294 +56,154 @@ describe("ThemeResolver", function () {
     };
   }
 
-  it("resolveForRoot returns full defaults when CSS variables are not set", function () {
-    installComputedStyle(new Map());
-
-    const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const doc = createDoc({ value: false });
-    const rootEl = createRoot(doc);
-    const resolver = mod.create({}, createHelpers());
-    const out = resolver.resolveForRoot(rootEl);
-
-    expect(Object.keys(out).sort()).toEqual(["colors", "font", "linear", "radial", "xte"]);
-    expect(out).toEqual(mod.DEFAULTS);
-  });
-
-  it("resolveForRoot respects CSS variable overrides and preset values on the root", function () {
-    const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const doc = createDoc({ value: false });
-    const rootEl = createRoot(doc);
-    rootEl.setAttribute("data-dyni-theme", "bold");
-    installComputedStyle(new Map([
-      [rootEl, {
-        "--dyni-pointer": "  #123456  ",
-        "--dyni-linear-track-width": " 0.2 ",
-        "--dyni-linear-pointer-width": " 0.9 ",
-        "--dyni-xte-line-width-factor": " 1.5 ",
-        "--dyni-ais-nearest": " #00ffaa "
-      }]
-    ]));
-
-    const resolver = mod.create({}, createHelpers());
-    const out = resolver.resolveForRoot(rootEl);
-
-    expect(out.colors.pointer).toBe("#123456");
-    expect(out.colors.warning).toBe(mod.DEFAULTS.colors.warning);
-    expect(out.radial.ring.arcLineWidth).toBe(2.5);
-    expect(out.radial.ring.widthFactor).toBe(mod.DEFAULTS.radial.ring.widthFactor);
-    expect(out.radial.ticks.majorLen).toBe(mod.DEFAULTS.radial.ticks.majorLen);
-    expect(out.radial.ticks.minorLen).toBe(mod.DEFAULTS.radial.ticks.minorLen);
-    expect(out.radial.pointer.widthFactor).toBe(1.54);
-    expect(out.radial.pointer.lengthFactor).toBe(mod.DEFAULTS.radial.pointer.lengthFactor);
-    expect(out.linear.track.widthFactor).toBe(0.2);
-    expect(out.linear.track.lineWidth).toBe(2.5);
-    expect(out.linear.ticks.majorLen).toBe(mod.DEFAULTS.linear.ticks.majorLen);
-    expect(out.linear.ticks.minorLen).toBe(mod.DEFAULTS.linear.ticks.minorLen);
-    expect(out.linear.pointer.widthFactor).toBe(0.9);
-    expect(out.linear.pointer.lengthFactor).toBe(mod.DEFAULTS.linear.pointer.lengthFactor);
-    expect(out.xte.lineWidthFactor).toBe(1.5);
-    expect(out.xte.boatSizeFactor).toBe(mod.DEFAULTS.xte.boatSizeFactor);
-    expect(out.colors.ais.nearest).toBe("#00ffaa");
-    expect(out.colors.ais.warning).toBe(mod.DEFAULTS.colors.ais.warning);
-  });
-
-  it("resolveForRoot applies all AIS accent token overrides", function () {
-    const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const doc = createDoc({ value: false });
-    const rootEl = createRoot(doc);
-    installComputedStyle(new Map([
-      [rootEl, {
-        "--dyni-ais-warning": " #f39b52 ",
-        "--dyni-ais-nearest": " #66b8ff ",
-        "--dyni-ais-tracking": " #89d38f ",
-        "--dyni-ais-normal": " #8da0b3 "
-      }]
-    ]));
-
-    const resolver = mod.create({}, createHelpers());
-    const out = resolver.resolveForRoot(rootEl);
-
-    expect(out.colors.ais).toEqual({
-      warning: "#f39b52",
-      nearest: "#66b8ff",
-      tracking: "#89d38f",
-      normal: "#8da0b3"
+  function createResolver(options) {
+    const opts = options || {};
+    const themeModel = opts.themeModel || loadFresh("shared/theme/ThemeModel.js");
+    const resolver = loadFresh("shared/theme/ThemeResolver.js");
+    resolver.configure({
+      ThemeModel: themeModel,
+      getNightModeState: typeof opts.getNightModeState === "function" ? opts.getNightModeState : function () {
+        return false;
+      },
+      getActivePresetName: typeof opts.getActivePresetName === "function" ? opts.getActivePresetName : undefined
     });
-  });
+    return { resolver: resolver, themeModel: themeModel };
+  }
 
-  it("resolveForRoot resolves tokens for the supplied widget root", function () {
-    const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const doc = createDoc({ value: false });
-    const rootEl = createRoot(doc);
-    rootEl.setAttribute("data-dyni-theme", "night");
-    installComputedStyle(new Map([
-      [rootEl, {
-        "--dyni-pointer": " #00aaff "
-      }]
-    ]));
-
-    const resolver = mod.create({}, createHelpers());
+  it("resolves full defaults when CSS variables are not set", function () {
+    installComputedStyle(new Map());
+    const rootEl = createRoot();
+    const { resolver, themeModel } = createResolver();
     const out = resolver.resolveForRoot(rootEl);
 
-    expect(out.colors.pointer).toBe("#00aaff");
-    expect(out.colors.warning).toBe("#8b6914");
-    expect(resolver.resolveForRoot(rootEl)).toBe(out);
+    expect(Object.keys(out).sort()).toEqual(["colors", "font", "linear", "radial", "surface", "xte"]);
+    expect(out.surface.border).toBe(themeModel.BASE_DEFAULTS.surface.border);
+    expect(out.surface.bg).toBe("white");
+    expect(out.font.weight).toBe(700);
   });
 
-  it("resolves preset from CSS variable when data-dyni-theme attribute is absent", function () {
-    const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const doc = createDoc({ value: false });
-    const rootEl = createRoot(doc);
+  it("applies preset overrides from configured getActivePresetName", function () {
+    installComputedStyle(new Map());
+    const rootEl = createRoot();
+    const { resolver } = createResolver({
+      getActivePresetName() {
+        return "bold";
+      }
+    });
+    const out = resolver.resolveForRoot(rootEl);
+
+    expect(out.radial.ring.arcLineWidth).toBe(2.5);
+    expect(out.linear.pointer.widthFactor).toBe(1.54);
+    expect(out.xte.lineWidthFactor).toBe(2);
+  });
+
+  it("defaults to default preset when getActivePresetName is not configured", function () {
+    const rootEl = createRoot();
     installComputedStyle(new Map([
       [rootEl, {
         "--dyni-theme-preset": " bold "
       }]
     ]));
-
-    const resolver = mod.create({}, createHelpers());
+    const { resolver } = createResolver();
     const out = resolver.resolveForRoot(rootEl);
 
-    expect(out.radial.pointer.widthFactor).toBe(1.54);
-    expect(out.linear.pointer.widthFactor).toBe(1.54);
+    expect(out.radial.pointer.widthFactor).toBe(1);
+    expect(out.linear.track.lineWidth).toBe(2);
+    expect(out.font.labelWeight).toBe(700);
   });
 
-  it("prefers data-dyni-theme attribute over CSS preset variable", function () {
-    const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const doc = createDoc({ value: false });
-    const rootEl = createRoot(doc);
-    rootEl.setAttribute("data-dyni-theme", "slim");
+  it("maps preset name night to default and still applies night mode defaults", function () {
+    const rootEl = createRoot();
+    installComputedStyle(new Map());
+
+    const { resolver } = createResolver({
+      getNightModeState() {
+        return true;
+      },
+      getActivePresetName() {
+        return "night";
+      }
+    });
+    const out = resolver.resolveForRoot(rootEl);
+
+    expect(out.surface.bg).toBe("black");
+    expect(out.surface.border).toBe("rgba(252, 11, 11, 0.18)");
+    expect(out.colors.pointer).toBe("#cc2222");
+  });
+
+  it("prefers explicit root css token overrides over presets/defaults", function () {
+    const rootEl = createRoot();
     installComputedStyle(new Map([
       [rootEl, {
-        "--dyni-theme-preset": "bold"
+        "--dyni-pointer": " #123456 ",
+        "--dyni-linear-track-linewidth": " 9 ",
+        "--dyni-font-weight": " 600 "
       }]
     ]));
 
-    const resolver = mod.create({}, createHelpers());
+    const { resolver } = createResolver({
+      getActivePresetName() {
+        return "bold";
+      }
+    });
     const out = resolver.resolveForRoot(rootEl);
 
-    expect(out.radial.pointer.widthFactor).toBe(0.72);
-    expect(out.radial.ring.widthFactor).toBe(mod.DEFAULTS.radial.ring.widthFactor);
-    expect(out.radial.ticks.majorLen).toBe(mod.DEFAULTS.radial.ticks.majorLen);
-    expect(out.radial.ticks.minorLen).toBe(mod.DEFAULTS.radial.ticks.minorLen);
-    expect(out.linear.track.widthFactor).toBe(mod.DEFAULTS.linear.track.widthFactor);
-    expect(out.linear.ticks.majorLen).toBe(mod.DEFAULTS.linear.ticks.majorLen);
-    expect(out.linear.ticks.minorLen).toBe(mod.DEFAULTS.linear.ticks.minorLen);
+    expect(out.colors.pointer).toBe("#123456");
+    expect(out.linear.track.lineWidth).toBe(9);
+    expect(out.font.weight).toBe(600);
   });
 
-  it("falls back to default preset when CSS preset variable is invalid", function () {
-    const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const doc = createDoc({ value: false });
-    const rootEl = createRoot(doc);
-    installComputedStyle(new Map([
-      [rootEl, {
-        "--dyni-theme-preset": "not-a-preset"
-      }]
-    ]));
-
-    const resolver = mod.create({}, createHelpers());
-    const out = resolver.resolveForRoot(rootEl);
-
-    expect(out.radial.pointer.widthFactor).toBe(mod.DEFAULTS.radial.pointer.widthFactor);
-    expect(out.linear.track.widthFactor).toBe(mod.DEFAULTS.linear.track.widthFactor);
-  });
-
-  it("reuses the cache by root identity", function () {
+  it("does not cache by root identity", function () {
     const calls = { value: 0 };
+    const rootEl = createRoot();
     installComputedStyle(new Map(), calls);
 
-    const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const doc = createDoc({ value: false });
-    const rootEl = createRoot(doc);
-    const resolver = mod.create({}, createHelpers());
-
+    const { resolver } = createResolver();
     const first = resolver.resolveForRoot(rootEl);
     const second = resolver.resolveForRoot(rootEl);
 
-    expect(first).toBe(second);
-    expect(calls.value).toBe(1);
-  });
-
-  it("refreshes token cache only after explicit invalidation", function () {
-    const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const doc = createDoc({ value: false });
-    const rootEl = createRoot(doc);
-    installComputedStyle(new Map());
-
-    const resolver = mod.create({}, createHelpers());
-    const first = resolver.resolveForRoot(rootEl);
-
-    rootEl.setAttribute("data-dyni-theme", "bold");
-    const stillCached = resolver.resolveForRoot(rootEl);
-    expect(stillCached.radial.pointer.widthFactor).toBe(first.radial.pointer.widthFactor);
-
-    resolver.invalidateRoot(rootEl);
-    const refreshed = resolver.resolveForRoot(rootEl);
-    expect(refreshed.radial.pointer.widthFactor).toBe(1.54);
-
-    rootEl.removeAttribute("data-dyni-theme");
-    resolver.invalidateAll();
-    const refreshedAll = resolver.resolveForRoot(rootEl);
-    expect(refreshedAll.radial.pointer.widthFactor).toBe(mod.DEFAULTS.radial.pointer.widthFactor);
-  });
-
-  it("invalidates cache when night mode class state changes", function () {
-    const calls = { value: 0 };
-    installComputedStyle(new Map(), calls);
-
-    const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const night = { value: false };
-    const doc = createDoc(night);
-    const rootEl = createRoot(doc);
-    const resolver = mod.create({}, createHelpers());
-
-    const dayTokens = resolver.resolveForRoot(rootEl);
-    night.value = true;
-    const nightTokens = resolver.resolveForRoot(rootEl);
-
-    expect(dayTokens).not.toBe(nightTokens);
+    expect(first).not.toBe(second);
     expect(calls.value).toBe(2);
   });
 
-  it("exposes the root-first API on the resolver instance", function () {
+  it("exposes direct module API without create/invalidation methods", function () {
     const mod = loadFresh("shared/theme/ThemeResolver.js");
-    const resolver = mod.create({}, createHelpers());
-
-    expect(typeof resolver.resolveForRoot).toBe("function");
-    expect(typeof resolver.invalidateRoot).toBe("function");
-    expect(typeof resolver.invalidateAll).toBe("function");
+    expect(mod.id).toBe("ThemeResolver");
+    expect(typeof mod.configure).toBe("function");
+    expect(typeof mod.resolveForRoot).toBe("function");
+    expect(typeof mod.create).toBe("undefined");
+    expect(typeof mod.invalidateRoot).toBe("undefined");
+    expect(typeof mod.invalidateAll).toBe("undefined");
   });
 
-  it("exposes DEFAULTS on module and create function", function () {
-    const mod = loadFresh("shared/theme/ThemeResolver.js");
-    expect(mod.DEFAULTS).toBe(mod.create.DEFAULTS);
-    expect(mod.TOKEN_DEFS).toBe(mod.create.TOKEN_DEFS);
-    expect(typeof mod.invalidateRoot).toBe("function");
-    expect(typeof mod.invalidateAll).toBe("function");
-    expect(Array.isArray(mod.TOKEN_DEFS)).toBe(true);
-    expect(mod.TOKEN_DEFS.some((tokenDef) => tokenDef.path === "radial.pointer.widthFactor" && tokenDef.cssVar === "--dyni-radial-pointer-width")).toBe(true);
-    expect(mod.TOKEN_DEFS.some((tokenDef) => (
-      tokenDef.path === "radial.fullCircle.normal.innerMarginFactor" &&
-      tokenDef.cssVar === "--dyni-radial-fullcircle-normal-inner-margin"
-    ))).toBe(true);
-    expect(mod.TOKEN_DEFS.some((tokenDef) => (
-      tokenDef.path === "xte.lineWidthFactor" &&
-      tokenDef.cssVar === "--dyni-xte-line-width-factor"
-    ))).toBe(true);
-    expect(mod.TOKEN_DEFS.some((tokenDef) => (
-      tokenDef.path === "xte.boatSizeFactor" &&
-      tokenDef.cssVar === "--dyni-xte-boat-size-factor"
-    ))).toBe(true);
-    expect(mod.TOKEN_DEFS.some((tokenDef) => (
-      tokenDef.path === "colors.ais.warning" &&
-      tokenDef.cssVar === "--dyni-ais-warning"
-    ))).toBe(true);
-    expect(mod.TOKEN_DEFS.some((tokenDef) => (
-      tokenDef.path === "colors.ais.nearest" &&
-      tokenDef.cssVar === "--dyni-ais-nearest"
-    ))).toBe(true);
-    expect(mod.TOKEN_DEFS.some((tokenDef) => (
-      tokenDef.path === "colors.ais.tracking" &&
-      tokenDef.cssVar === "--dyni-ais-tracking"
-    ))).toBe(true);
-    expect(mod.TOKEN_DEFS.some((tokenDef) => (
-      tokenDef.path === "colors.ais.normal" &&
-      tokenDef.cssVar === "--dyni-ais-normal"
-    ))).toBe(true);
-    expect(mod.TOKEN_DEFS.some((tokenDef) => (
-      tokenDef.path === "linear.track.widthFactor" &&
-      tokenDef.cssVar === "--dyni-linear-track-width"
-    ))).toBe(true);
-    expect(mod.TOKEN_DEFS.some((tokenDef) => (
-      tokenDef.path === "linear.pointer.lengthFactor" &&
-      tokenDef.cssVar === "--dyni-linear-pointer-length"
-    ))).toBe(true);
-    expect(mod.TOKEN_DEFS.some((tokenDef) => (
-      tokenDef.path === "linear.pointer.widthFactor" &&
-      tokenDef.cssVar === "--dyni-linear-pointer-width"
-    ))).toBe(true);
-    expect(mod.DEFAULTS.radial.pointer.widthFactor).toBe(1);
-    expect(mod.DEFAULTS.radial.ring.arcLineWidth).toBe(2);
-    expect(mod.DEFAULTS.radial.ring.widthFactor).toBe(0.16);
-    expect(mod.DEFAULTS.radial.ticks.majorLen).toBe(12);
-    expect(mod.DEFAULTS.radial.ticks.minorWidth).toBe(1.5);
-    expect(mod.DEFAULTS.radial.fullCircle.normal.innerMarginFactor).toBe(0.03);
-    expect(mod.DEFAULTS.radial.fullCircle.normal.minHeightFactor).toBe(0.45);
-    expect(mod.DEFAULTS.radial.fullCircle.normal.dualGapFactor).toBe(0.05);
-    expect(mod.DEFAULTS.linear.track.widthFactor).toBe(0.16);
-    expect(mod.DEFAULTS.linear.track.lineWidth).toBe(2);
-    expect(mod.DEFAULTS.linear.ticks.majorWidth).toBe(3);
-    expect(mod.DEFAULTS.linear.ticks.minorLen).toBe(7);
-    expect(mod.DEFAULTS.linear.pointer.widthFactor).toBe(1);
-    expect(mod.DEFAULTS.linear.pointer.lengthFactor).toBe(2);
-    expect(mod.DEFAULTS.linear.labels.insetFactor).toBe(1.8);
-    expect(mod.DEFAULTS.xte.lineWidthFactor).toBe(1.5);
-    expect(mod.DEFAULTS.xte.boatSizeFactor).toBe(1);
-    expect(mod.DEFAULTS.colors.ais.warning).toBe("#f39b52");
-    expect(mod.DEFAULTS.colors.ais.nearest).toBe("#66b8ff");
-    expect(mod.DEFAULTS.colors.ais.tracking).toBe("#89d38f");
-    expect(mod.DEFAULTS.colors.ais.normal).toBe("#8da0b3");
-    expect(Object.prototype.hasOwnProperty.call(mod.DEFAULTS.radial.pointer, "sideFactor")).toBe(false);
-    expect(Object.prototype.hasOwnProperty.call(mod.DEFAULTS.linear.pointer, "sideFactor")).toBe(false);
-    expect(Object.keys(mod.DEFAULTS.xte).sort()).toEqual(["boatSizeFactor", "lineWidthFactor"]);
+  it("returns token definitions and output token definitions from ThemeModel", function () {
+    const { resolver } = createResolver();
+    const tokenDefs = resolver.getTokenDefinitions();
+    const outputTokenDefs = resolver.getOutputTokenDefinitions();
+
+    expect(Array.isArray(tokenDefs)).toBe(true);
+    expect(tokenDefs.some((tokenDef) => tokenDef.path === "surface.border" && tokenDef.inputVar === "--dyni-border")).toBe(true);
+    expect(outputTokenDefs.some((tokenDef) => tokenDef.outputVar === "--dyni-theme-font-family")).toBe(true);
+    expect(outputTokenDefs).toHaveLength(6);
+  });
+
+  it("throws when root is missing", function () {
+    installComputedStyle(new Map());
+    const { resolver } = createResolver();
+    expect(() => resolver.resolveForRoot(null)).toThrow(/committed \.widget\.dyniplugin root element/);
+  });
+
+  it("throws when root is not a committed plugin root", function () {
+    const invalidRoot = {
+      nodeType: 1,
+      classList: {
+        contains(name) {
+          return name === "widget";
+        }
+      }
+    };
+    installComputedStyle(new Map());
+    const { resolver } = createResolver();
+    expect(() => resolver.resolveForRoot(invalidRoot)).toThrow(/committed \.widget\.dyniplugin root element/);
   });
 });

@@ -11,7 +11,7 @@
   "use strict";
 
   function create(def, Helpers) {
-    const theme = Helpers.getModule("ThemeResolver").create(def, Helpers);
+    const theme = Helpers.getModule("ThemeResolver");
     const text = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
     const fitCache = text.createFitCache(["high", "normal", "flat"]);
 

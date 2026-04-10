@@ -11,7 +11,7 @@
   "use strict";
 
   function create(def, Helpers) {
-    const theme = Helpers.getModule("ThemeResolver").create(def, Helpers);
+    const theme = Helpers.getModule("ThemeResolver");
     const text = Helpers.getModule("RadialTextLayout").create(def, Helpers);
     const value = Helpers.getModule("RadialValueMath").create(def, Helpers);
     const angle = Helpers.getModule("RadialAngleMath").create(def, Helpers);
