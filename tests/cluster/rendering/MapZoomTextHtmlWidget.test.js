@@ -35,7 +35,10 @@ describe("MapZoomTextHtmlWidget", function () {
         return "sans-serif";
       },
       resolveWidgetRoot: opts.resolveWidgetRoot || function () {
-        return null;
+        if (!arguments[0] || typeof arguments[0].closest !== "function") {
+          return null;
+        }
+        return arguments[0].closest(".widget, .DirectWidget");
       },
       getNightModeState: opts.getNightModeState || function () {
         return false;
@@ -68,14 +71,17 @@ describe("MapZoomTextHtmlWidget", function () {
       }
     };
     if (shellSize && Number.isFinite(shellSize.width) && Number.isFinite(shellSize.height)) {
+      const rootEl = document.createElement("div");
+      rootEl.className = "widget dyniplugin";
+      const shellEl = document.createElement("div");
+      rootEl.appendChild(shellEl);
+      shellEl.getBoundingClientRect = vi.fn(() => ({
+        width: shellSize.width,
+        height: shellSize.height
+      }));
       hostContext.__dyniHostCommitState = {
-        shellEl: {
-          getBoundingClientRect: vi.fn(() => ({
-            width: shellSize.width,
-            height: shellSize.height
-          }))
-        },
-        rootEl: null
+        shellEl: shellEl,
+        rootEl: rootEl
       };
     }
     return hostContext;

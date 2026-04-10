@@ -120,6 +120,12 @@ function runThemeCacheInvalidationRule() {
   };
 
   const rootEl = {
+    nodeType: 1,
+    classList: {
+      contains(name) {
+        return name === "widget" || name === "dyniplugin";
+      }
+    },
     hasAttribute() {
       return false;
     },

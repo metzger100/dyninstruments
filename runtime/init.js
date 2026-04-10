@@ -57,7 +57,7 @@
         return !!(rootEl && typeof rootEl.closest === "function" && rootEl.closest(".nightMode"));
       },
       getActivePresetName() {
-        return state.themePresetName || "default";
+        return state.themePresetName;
       }
     });
   }
