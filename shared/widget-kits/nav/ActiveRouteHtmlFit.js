@@ -123,11 +123,11 @@
         return null;
       }
 
-      const rootEl = Helpers.resolveWidgetRoot(targetEl) || targetEl;
+      const rootEl = Helpers.requirePluginRoot(targetEl);
       const tokens = theme.resolveForRoot(rootEl);
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
-      const family = Helpers.resolveFontFamily(targetEl);
+      const family = tokens.font.family;
       const ownerDocument = resolveOwnerDocument(targetEl);
       const measureCtx = resolveMeasureContext(hostContext, ownerDocument);
       if (!measureCtx || typeof measureCtx.measureText !== "function") {

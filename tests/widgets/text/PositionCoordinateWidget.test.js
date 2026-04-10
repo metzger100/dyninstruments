@@ -15,7 +15,10 @@ describe("PositionCoordinateWidget", function () {
   });
 
   function makeHelpers() {
-    const themeTokens = { font: { weight: 730, labelWeight: 610 } };
+    const themeTokens = {
+      surface: { fg: "#fff" },
+      font: { family: "sans-serif", weight: 730, labelWeight: 610 }
+    };
     const fontWeightCalls = [];
     const fontCalls = [];
     const modules = {
@@ -66,7 +69,7 @@ describe("PositionCoordinateWidget", function () {
       resolveTextColor() {
         return "#fff";
       },
-      resolveWidgetRoot(target) {
+      requirePluginRoot(target) {
         return target;
       },
       getModule(id) {

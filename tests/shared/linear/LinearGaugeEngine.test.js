@@ -24,6 +24,9 @@ describe("LinearGaugeEngine", function () {
     };
 
     const theme = opts.theme || {
+      surface: {
+        fg: "#fff"
+      },
       colors: {
         pointer: "#ff2b2b",
         warning: "#e7c66a",
@@ -56,6 +59,7 @@ describe("LinearGaugeEngine", function () {
         labels: { insetFactor: 1.2, fontFactor: 0.2 }
       },
       font: {
+        family: "sans-serif",
         weight: 700,
         labelWeight: 650
       },
@@ -63,6 +67,16 @@ describe("LinearGaugeEngine", function () {
         lineWidthFactor: 1
       }
     };
+    if (!theme.surface || typeof theme.surface !== "object") {
+      theme.surface = { fg: "#fff" };
+    } else if (!theme.surface.fg) {
+      theme.surface.fg = "#fff";
+    }
+    if (!theme.font || typeof theme.font !== "object") {
+      theme.font = { family: "sans-serif", weight: 700, labelWeight: 650 };
+    } else if (!theme.font.family) {
+      theme.font.family = "sans-serif";
+    }
 
     const primitivesModule = {
       create() {
@@ -105,7 +119,7 @@ describe("LinearGaugeEngine", function () {
       resolveTextColor() {
         return "#fff";
       },
-      resolveWidgetRoot(target) {
+      requirePluginRoot(target) {
         return target;
       },
       getModule(id) {

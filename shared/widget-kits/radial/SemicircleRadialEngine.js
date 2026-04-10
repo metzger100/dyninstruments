@@ -32,9 +32,9 @@
       return setup && setup.W && setup.H && setup.ctx ? setup : null;
     }
 
-    function setupTextPaint(canvas, ctx) {
-      const family = Helpers.resolveFontFamily(canvas);
-      const color = Helpers.resolveTextColor(canvas);
+    function setupTextPaint(theme, ctx) {
+      const family = theme.font.family;
+      const color = theme.surface.fg;
       ctx.fillStyle = color;
       ctx.strokeStyle = color;
       return { family: family, color: color };
@@ -126,8 +126,9 @@
         const ctx = surface.ctx;
         const W = surface.W;
         const H = surface.H;
-        const theme = GU.theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas);
-        const paint = setupTextPaint(canvas, ctx);
+        const rootEl = Helpers.requirePluginRoot(canvas);
+        const theme = GU.theme.resolveForRoot(rootEl);
+        const paint = setupTextPaint(theme, ctx);
         const mode = layoutApi.computeMode(
           W,
           H,

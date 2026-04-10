@@ -9,11 +9,7 @@
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
   const hasOwn = Object.prototype.hasOwnProperty;
-  const TEXT_COLOR_VARS = ["--dyni-fg", "--instrument-fg", "--mainfg"];
-  // dyni-lint-disable-next-line css-js-default-duplication -- Typography defaults are owned at the helper/CSS boundary and documented in shared/helpers.md.
-  const DEFAULT_FONT_STACK = '"Inter","SF Pro Text",-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
   const layoutByCanvas = new WeakMap();
-  const typographyByRoot = new WeakMap();
 
   function applyFormatter(raw, props) {
     const p = props || {};
@@ -85,79 +81,57 @@
     };
   }
 
-  function resolveWidgetRoot(target) {
+  function resolveTargetNode(target) {
     if (!target) {
       return null;
     }
-    if (typeof target.closest === "function") {
-      const found = target.closest(".widget, .DirectWidget");
-      if (found) {
-        return found;
+    if (typeof target.nodeType === "number") {
+      return target;
+    }
+    if (typeof target.composedPath === "function") {
+      const path = target.composedPath();
+      if (Array.isArray(path) && path.length && typeof path[0].nodeType === "number") {
+        return path[0];
       }
     }
-    return target.parentElement || null;
+    if (target.target && typeof target.target.nodeType === "number") {
+      return target.target;
+    }
+    return null;
+  }
+
+  function resolveParentInComposedTree(node) {
+    if (!node) {
+      return null;
+    }
+    if (node.nodeType === 11 && node.host) { // ShadowRoot
+      return node.host;
+    }
+    if (node.parentNode) {
+      return node.parentNode;
+    }
+    if (node.host) {
+      return node.host;
+    }
+    return null;
+  }
+
+  function requirePluginRoot(target) {
+    let node = resolveTargetNode(target);
+    while (node) {
+      if (node.nodeType === 1 && typeof node.closest === "function") {
+        const rootEl = node.closest(".widget.dyniplugin");
+        if (rootEl) {
+          return rootEl;
+        }
+      }
+      node = resolveParentInComposedTree(node);
+    }
+    throw new Error("dyninstruments: Helpers.requirePluginRoot() requires a committed .widget.dyniplugin root");
   }
 
   function getNightModeState(rootEl) {
-    const doc = rootEl && rootEl.ownerDocument;
-    if (!doc) {
-      return false;
-    }
-
-    const docRootEl = doc.documentElement;
-    if (docRootEl && docRootEl.classList && docRootEl.classList.contains("nightMode")) {
-      return true;
-    }
-
-    const body = doc.body;
-    return !!(body && body.classList && body.classList.contains("nightMode"));
-  }
-
-  function resolveTypography(target) {
-    const rootEl = resolveWidgetRoot(target) || target;
-    const nightMode = getNightModeState(rootEl);
-    const cached = typographyByRoot.get(rootEl);
-    if (cached && cached.nightMode === nightMode) {
-      return cached;
-    }
-
-    if (cached) {
-      typographyByRoot.delete(rootEl);
-    }
-
-    const st = getComputedStyle(rootEl);
-
-    let textColor = "";
-    for (const cssVar of TEXT_COLOR_VARS) {
-      const val = st.getPropertyValue(cssVar).trim();
-      if (!val) {
-        continue;
-      }
-      textColor = val;
-      break;
-    }
-    if (!textColor) textColor = st.color || "#000"; /* dyni-lint-disable-line hardcoded-runtime-default -- Typography resolution owns the browser-level foreground fallback when dyni CSS vars are absent. */ /* dyni-lint-disable-line css-js-default-duplication -- Typography resolution is the CSS boundary for foreground color fallback; see documentation/shared/helpers.md. */
-
-    // dyni-lint-disable-next-line css-js-default-duplication -- Typography resolution is the CSS boundary for the dyni font variable lookup.
-    const fontVar = st.getPropertyValue("--dyni-font");
-    // dyni-lint-disable-next-line css-js-default-duplication -- Typography resolution owns the documented default font stack when the CSS token is unset.
-    const fontFamily = fontVar && fontVar.trim() ? fontVar.trim() : DEFAULT_FONT_STACK;
-
-    const resolved = {
-      nightMode: nightMode,
-      textColor: textColor,
-      fontFamily: fontFamily
-    };
-    typographyByRoot.set(rootEl, resolved);
-    return resolved;
-  }
-
-  function resolveTextColor(canvas) {
-    return resolveTypography(canvas).textColor;
-  }
-
-  function resolveFontFamily(canvas) {
-    return resolveTypography(canvas).fontFamily;
+    return !!(rootEl && typeof rootEl.closest === "function" && rootEl.closest(".nightMode"));
   }
 
   function getHostActions() {
@@ -168,9 +142,7 @@
     return {
       applyFormatter: applyFormatter,
       setupCanvas: setupCanvas,
-      resolveTextColor: resolveTextColor,
-      resolveFontFamily: resolveFontFamily,
-      resolveWidgetRoot: resolveWidgetRoot,
+      requirePluginRoot: requirePluginRoot,
       getNightModeState: getNightModeState,
       getHostActions: getHostActions,
       getModule: getModule
@@ -179,9 +151,7 @@
 
   runtime.applyFormatter = applyFormatter;
   runtime.setupCanvas = setupCanvas;
-  runtime.resolveTextColor = resolveTextColor;
-  runtime.resolveFontFamily = resolveFontFamily;
-  runtime.resolveWidgetRoot = resolveWidgetRoot;
+  runtime.requirePluginRoot = requirePluginRoot;
   runtime.getNightModeState = getNightModeState;
   runtime.getHostActions = getHostActions;
   runtime.createHelpers = createHelpers;

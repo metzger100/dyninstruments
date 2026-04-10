@@ -34,14 +34,17 @@ describe("ThreeValueTextWidget", function () {
       resolveTextColor() {
         return "#fff";
       },
-      resolveWidgetRoot(target) {
+      requirePluginRoot(target) {
         return target;
       },
       getModule(id) {
         if (id === "ThemeResolver") {
           return {
             resolveForRoot() {
-              return { font: { weight: 730, labelWeight: 610 } };
+              return {
+                surface: { fg: "#fff" },
+                font: { family: "sans-serif", weight: 730, labelWeight: 610 }
+              };
             }
           };
         }

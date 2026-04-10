@@ -138,19 +138,11 @@
           activeRendererId = null;
         }
 
-        function invalidateTheme(reason) {
-          if (!activeController || typeof activeController.invalidateTheme !== "function") {
-            return false;
-          }
-          return activeController.invalidateTheme(reason);
-        }
-
         return {
           attach: attach,
           update: update,
           detach: detach,
-          destroy: destroy,
-          invalidateTheme: invalidateTheme
+          destroy: destroy
         };
       }
 

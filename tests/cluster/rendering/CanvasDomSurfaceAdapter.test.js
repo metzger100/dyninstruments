@@ -265,21 +265,6 @@ describe("CanvasDomSurfaceAdapter", function () {
     expect(h.rendererSpec.renderCanvas).not.toHaveBeenCalled();
   });
 
-  it("invalidateTheme forces repaint without prop changes", function () {
-    const h = createHarness();
-    h.controller.attach(h.payload({ value: 3 }, 1));
-    h.runNextFrame();
-    h.rendererSpec.renderCanvas.mockClear();
-
-    expect(h.controller.invalidateTheme("theme-change")).toBe(true);
-    expect(h.frameQueue).toHaveLength(1);
-
-    h.runNextFrame();
-
-    expect(h.rendererSpec.renderCanvas).toHaveBeenCalledTimes(1);
-    expect(h.rendererSpec.renderCanvas).toHaveBeenCalledWith(h.dom.createdCanvases[0], { value: 3 });
-  });
-
   it("emits schedulePaint and renderer spans when perf hooks are active", function () {
     const spans = [];
     const previousHooks = globalThis.__DYNI_PERF_HOOKS__;

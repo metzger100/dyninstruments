@@ -70,10 +70,11 @@
       }
 
       ctx.clearRect(0, 0, W, H);
-      const theme = toolkit.theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas);
+      const rootEl = Helpers.requirePluginRoot(canvas);
+      const theme = toolkit.theme.resolveForRoot(rootEl);
       const xteTheme = theme.xte || DEFAULT_XTE_THEME;
-      const textColor = Helpers.resolveTextColor(canvas);
-      const family = Helpers.resolveFontFamily(canvas);
+      const textColor = theme.surface.fg;
+      const family = theme.font.family;
       const valueWeight = theme.font.weight;
       const labelWeight = theme.font.labelWeight;
       const lineWidthFactor = xteTheme.lineWidthFactor > 0 ? xteTheme.lineWidthFactor : 1;

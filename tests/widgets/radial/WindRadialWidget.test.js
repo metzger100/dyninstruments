@@ -83,6 +83,9 @@ describe("WindRadialWidget", function () {
       text: 0
     };
     const theme = {
+      surface: {
+        fg: "#fff"
+      },
       colors: {
         pointer: "#ff2b2b",
         laylineStb: "#82b683",
@@ -109,6 +112,7 @@ describe("WindRadialWidget", function () {
         }
       },
       font: {
+        family: "sans-serif",
         weight: 700,
         labelWeight: 700
       }
@@ -134,7 +138,7 @@ describe("WindRadialWidget", function () {
         resolveTextColor() {
           return "#fff";
         },
-        resolveWidgetRoot(target) {
+        requirePluginRoot(target) {
           return target;
         },
         getModule(id) {
@@ -244,6 +248,9 @@ describe("WindRadialWidget", function () {
     const tickCalls = [];
     const labelCalls = [];
     const themeDefaults = {
+      surface: {
+        fg: "#fff"
+      },
       colors: {
         pointer: "#ff2b2b",
         laylineStb: "#82b683",
@@ -270,6 +277,7 @@ describe("WindRadialWidget", function () {
         }
       },
       font: {
+        family: "sans-serif",
         weight: 720,
         labelWeight: 660
       }
@@ -296,7 +304,7 @@ describe("WindRadialWidget", function () {
         resolveTextColor() {
           return "#fff";
         },
-        resolveWidgetRoot(target) {
+        requirePluginRoot(target) {
           return target;
         },
         getModule(id) {
@@ -449,7 +457,7 @@ describe("WindRadialWidget", function () {
         resolveTextColor() {
           return "#fff";
         },
-        resolveWidgetRoot(target) {
+        requirePluginRoot(target) {
           return target;
         },
         getModule(id) {
@@ -473,6 +481,9 @@ describe("WindRadialWidget", function () {
                 theme: {
                   resolveForRoot() {
                     return {
+                      surface: {
+                        fg: "#fff"
+                      },
                       colors: {
                         pointer: "#ff2b2b",
                         laylineStb: "#82b683",
@@ -499,6 +510,7 @@ describe("WindRadialWidget", function () {
                         }
                       },
                       font: {
+                        family: "sans-serif",
                         weight: 700,
                         labelWeight: 700
                       }

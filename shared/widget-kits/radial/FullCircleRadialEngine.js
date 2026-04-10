@@ -91,13 +91,14 @@
           return;
         }
 
-        const theme = GU.theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas);
+        const rootEl = Helpers.requirePluginRoot(canvas);
+        const theme = GU.theme.resolveForRoot(rootEl);
         const valueWeight = theme.font.weight;
         const labelWeight = theme.font.labelWeight;
 
         ctx.clearRect(0, 0, W, H);
-        const family = Helpers.resolveFontFamily(canvas);
-        const color = Helpers.resolveTextColor(canvas);
+        const family = theme.font.family;
+        const color = theme.surface.fg;
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
 

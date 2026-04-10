@@ -64,7 +64,7 @@ describe("AisTargetHtmlFit", function () {
       resolveFontFamily() {
         return "sans-serif";
       },
-      resolveWidgetRoot(target) {
+      requirePluginRoot(target) {
         return target || null;
       },
       getModule(id) {

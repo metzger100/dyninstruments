@@ -19,6 +19,9 @@ describe("XteDisplayWidget", function () {
     };
 
     const defaultTheme = {
+      surface: {
+        fg: "#ffffff"
+      },
       colors: {
         pointer: "#aa0011",
         laylineStb: "#00aa66",
@@ -27,12 +30,14 @@ describe("XteDisplayWidget", function () {
         alarm: "#ff3344"
       },
       font: {
+        family: "sans-serif",
         weight: 720,
         labelWeight: 640
       }
     };
     const themeOverrides = opts.theme || {};
     const theme = {
+      surface: Object.assign({}, defaultTheme.surface, themeOverrides.surface || {}),
       colors: Object.assign({}, defaultTheme.colors, themeOverrides.colors || {}),
       font: Object.assign({}, defaultTheme.font, themeOverrides.font || {})
     };
@@ -89,7 +94,7 @@ describe("XteDisplayWidget", function () {
       resolveFontFamily() {
         return "sans-serif";
       },
-      resolveWidgetRoot(target) {
+      requirePluginRoot(target) {
         return target;
       },
       getModule(id) {

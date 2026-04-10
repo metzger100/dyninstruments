@@ -135,7 +135,6 @@
       let destroyed = false;
       let paintDirty = false;
       let sizeDirty = false;
-      let themeDirty = false;
       let pendingPaintWaitSpan = null;
 
       function cancelPendingFrame() {
@@ -170,16 +169,11 @@
       function clearRenderFlags() {
         paintDirty = false;
         sizeDirty = false;
-        themeDirty = false;
       }
 
       function markDirty(reason) {
         if (reason === "size") {
           sizeDirty = true;
-          return;
-        }
-        if (reason === "theme") {
-          themeDirty = true;
           return;
         }
         paintDirty = true;
@@ -251,7 +245,7 @@
       }
 
       function paintNow() {
-        if (!attached || !canvasEl || (!paintDirty && !sizeDirty && !themeDirty)) {
+        if (!attached || !canvasEl || (!paintDirty && !sizeDirty)) {
           return;
         }
 
@@ -397,20 +391,11 @@
         destroyed = true;
       }
 
-      function invalidateTheme(reason) {
-        if (!attached || destroyed) {
-          return false;
-        }
-        schedulePaint("theme");
-        return true;
-      }
-
       return {
         attach: attach,
         update: update,
         detach: detach,
-        destroy: destroy,
-        invalidateTheme: invalidateTheme
+        destroy: destroy
       };
     }
 

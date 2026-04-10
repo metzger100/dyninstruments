@@ -105,8 +105,7 @@
     const theme = cfg.theme;
     const targetEl = cfg.targetEl;
     const hostContext = cfg.hostContext;
-    const rootCandidate = Helpers.resolveWidgetRoot(targetEl);
-    const themeRoot = rootCandidate || targetEl;
+    const themeRoot = Helpers.requirePluginRoot(targetEl);
     const tokenSet = theme.resolveForRoot(themeRoot);
     const measureCtx = resolveMeasureContext(hostContext, targetEl);
     if (!measureCtx || typeof measureCtx.measureText !== "function") {
@@ -114,7 +113,7 @@
     }
     return {
       measureCtx: measureCtx,
-      family: Helpers.resolveFontFamily(targetEl),
+      family: tokenSet.font.family,
       valueWeight: tokenSet.font.weight,
       labelWeight: tokenSet.font.labelWeight
     };

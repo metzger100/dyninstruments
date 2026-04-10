@@ -131,9 +131,10 @@
         const ctx = surface.ctx;
         const W = surface.W;
         const H = surface.H;
-        const theme = GU.theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas);
-        const family = Helpers.resolveFontFamily(canvas);
-        const color = Helpers.resolveTextColor(canvas);
+        const rootEl = Helpers.requirePluginRoot(canvas);
+        const theme = GU.theme.resolveForRoot(rootEl);
+        const family = theme.font.family;
+        const color = theme.surface.fg;
         const mode = layoutApi.computeMode(
           W,
           H,

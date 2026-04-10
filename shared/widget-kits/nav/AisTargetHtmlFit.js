@@ -60,7 +60,14 @@
     }
     return resolved;
   }
-  function resolveRootElement(Helpers, targetEl) { return Helpers.resolveWidgetRoot(targetEl) || targetEl; }
+  function resolveThemeTypography(Helpers, themeApi, targetEl) {
+    const rootEl = Helpers.requirePluginRoot(targetEl);
+    const tokens = themeApi.resolveForRoot(rootEl);
+    return {
+      tokens: tokens,
+      family: tokens.font.family
+    };
+  }
   function toStyle(px, htmlUtils) {
     const n = htmlUtils.toFiniteNumber(px);
     if (!(n > 0)) {
@@ -165,13 +172,13 @@
       if (!model || !shellRect || !targetEl) {
         return null;
       }
-      const rootEl = resolveRootElement(Helpers, targetEl);
-      const tokens = theme.resolveForRoot(rootEl);
-      const family = Helpers.resolveFontFamily(targetEl);
+      const typography = resolveThemeTypography(Helpers, theme, targetEl);
       const measureCtx = resolveMeasureContext(cfg.hostContext, targetEl);
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
         return null;
       }
+      const tokens = typography.tokens;
+      const family = typography.family;
       const shellWidth = Math.max(1, Math.round(shellRect.width));
       const shellHeight = Math.max(1, Math.round(shellRect.height));
       const layout = model.layout || layoutApi.computeLayout({

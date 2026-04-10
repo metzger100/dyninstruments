@@ -57,8 +57,7 @@ describe("ClusterRendererRouter", function () {
       attach: vi.fn(),
       update: vi.fn(() => ({ updated: true, changed: true })),
       detach: vi.fn(),
-      destroy: vi.fn(),
-      invalidateTheme: vi.fn(() => true)
+      destroy: vi.fn()
     };
   }
 

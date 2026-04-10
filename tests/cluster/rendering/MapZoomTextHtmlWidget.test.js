@@ -34,7 +34,7 @@ describe("MapZoomTextHtmlWidget", function () {
       resolveFontFamily: opts.resolveFontFamily || function () {
         return "sans-serif";
       },
-      resolveWidgetRoot: opts.resolveWidgetRoot || function () {
+      requirePluginRoot: opts.requirePluginRoot || function () {
         if (!arguments[0] || typeof arguments[0].closest !== "function") {
           return null;
         }

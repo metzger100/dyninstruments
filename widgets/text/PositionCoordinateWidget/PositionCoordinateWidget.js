@@ -1,7 +1,7 @@
 /**
  * Module: PositionCoordinateWidget - Stacked latitude/longitude renderer for nav position kinds
  * Documentation: documentation/widgets/position-coordinates.md
- * Depends: ThemeResolver, TextLayoutEngine, Helpers.applyFormatter, Helpers.setupCanvas, Helpers.resolveTextColor, Helpers.resolveFontFamily
+ * Depends: ThemeResolver, TextLayoutEngine, Helpers.applyFormatter, Helpers.setupCanvas, Helpers.requirePluginRoot
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -159,9 +159,10 @@
       }
       ctx.clearRect(0, 0, W, H);
       ctx.textBaseline = "middle";
-      const tokens = theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas);
-      const family = Helpers.resolveFontFamily(canvas);
-      const color = Helpers.resolveTextColor(canvas);
+      const rootEl = Helpers.requirePluginRoot(canvas);
+      const tokens = theme.resolveForRoot(rootEl);
+      const family = tokens.font.family;
+      const color = tokens.surface.fg;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       ctx.fillStyle = color;

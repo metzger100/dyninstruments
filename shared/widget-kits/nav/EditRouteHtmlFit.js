@@ -199,9 +199,9 @@
         return null;
       }
 
-      const rootEl = Helpers.resolveWidgetRoot(targetEl) || targetEl;
+      const rootEl = Helpers.requirePluginRoot(targetEl);
       const tokens = theme.resolveForRoot(rootEl);
-      const family = Helpers.resolveFontFamily(targetEl);
+      const family = tokens.font.family;
       const measureCtx = resolveMeasureContext(cfg.hostContext, targetEl);
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
         return null;

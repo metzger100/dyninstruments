@@ -2,72 +2,51 @@ const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 const { createMockCanvas, createMockContext2D } = require("../helpers/mock-canvas");
 
 describe("runtime/helpers.js", function () {
-  const DEFAULT_FONT_STACK = '"Inter","SF Pro Text",-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
-
-  function createDoc(nightRef) {
-    return {
-      documentElement: {
-        classList: {
-          contains(name) {
-            return name === "nightMode" && !!nightRef.value;
-          }
+  function createElementNode(classNames, parentNode) {
+    const classes = Array.isArray(classNames) ? classNames.slice() : [];
+    const classSet = new Set(classes);
+    const node = {
+      nodeType: 1,
+      parentNode: parentNode || null,
+      classList: {
+        contains(name) {
+          return classSet.has(name);
         }
-      },
-      body: {
-        classList: {
-          contains() {
-            return false;
-          }
-        }
-      }
-    };
-  }
-
-  function createRoot(doc) {
-    const attrs = Object.create(null);
-    const root = {
-      ownerDocument: doc,
-      parentElement: null,
-      getAttribute(name) {
-        return Object.prototype.hasOwnProperty.call(attrs, name) ? attrs[name] : null;
-      },
-      setAttribute(name, value) {
-        attrs[String(name)] = String(value);
-      },
-      removeAttribute(name) {
-        delete attrs[String(name)];
       },
       closest(selector) {
-        return selector === ".widget, .DirectWidget" ? root : null;
-      }
-    };
-    return root;
-  }
-
-  function createCanvas(doc, rootEl) {
-    return {
-      ownerDocument: doc,
-      parentElement: rootEl || null,
-      closest(selector) {
-        return selector === ".widget, .DirectWidget" ? rootEl || null : null;
-      }
-    };
-  }
-
-  function createComputedStyle(styleByEl, calls) {
-    return function (el) {
-      if (calls) {
-        calls.push(el);
-      }
-      const values = typeof styleByEl === "function"
-        ? styleByEl(el)
-        : (styleByEl && styleByEl.has(el) ? styleByEl.get(el) : {});
-      return {
-        color: Object.prototype.hasOwnProperty.call(values, "color") ? values.color : "rgb(1, 2, 3)",
-        getPropertyValue(name) {
-          return Object.prototype.hasOwnProperty.call(values, name) ? values[name] : "";
+        let cursor = node;
+        while (cursor) {
+          if (cursor.nodeType === 1) {
+            if (selector === ".widget.dyniplugin" &&
+              cursor.classList.contains("widget") &&
+              cursor.classList.contains("dyniplugin")) {
+              return cursor;
+            }
+            if (selector === ".nightMode" && cursor.classList.contains("nightMode")) {
+              return cursor;
+            }
+          }
+          if (cursor.parentNode) {
+            cursor = cursor.parentNode;
+            continue;
+          }
+          if (cursor.nodeType === 11 && cursor.host) {
+            cursor = cursor.host;
+            continue;
+          }
+          cursor = null;
         }
-      };
+        return null;
+      }
+    };
+    return node;
+  }
+
+  function createShadowRootNode(host) {
+    return {
+      nodeType: 11,
+      host: host || null,
+      parentNode: null
     };
   }
 
@@ -247,109 +226,48 @@ describe("runtime/helpers.js", function () {
     expect(sized.ctx.calls.filter((c) => c.name === "setTransform")).toHaveLength(2);
   });
 
-  it("resolveTextColor and resolveFontFamily read from a root element directly", function () {
-    const night = { value: false };
-    const doc = createDoc(night);
-    const rootEl = createRoot(doc);
-    const calls = [];
+  it("requirePluginRoot resolves the committed plugin root from descendants", function () {
+    const runtime = loadRuntimeHelpers();
+    const rootEl = createElementNode(["widget", "dyniplugin"], null);
+    const childEl = createElementNode(["dyni-child"], rootEl);
 
-    const runtime = loadRuntimeHelpers({
-      getComputedStyle: createComputedStyle(new Map([
-        [rootEl, {
-          "--dyni-fg": " #abcdef ",
-          "--dyni-font": " \"Fira Sans\" "
-        }]
-      ]), calls)
-    });
-
-    expect(runtime.resolveTextColor(rootEl)).toBe("#abcdef");
-    expect(runtime.resolveFontFamily(rootEl)).toBe("\"Fira Sans\"");
-    expect(calls).toEqual([rootEl]);
+    expect(runtime.requirePluginRoot(rootEl)).toBe(rootEl);
+    expect(runtime.requirePluginRoot(childEl)).toBe(rootEl);
+    expect(runtime.createHelpers(function () {}).requirePluginRoot(childEl)).toBe(rootEl);
   });
 
-  it("adapts canvas inputs through the owning root", function () {
-    const night = { value: false };
-    const doc = createDoc(night);
-    const rootEl = createRoot(doc);
-    const canvas = createCanvas(doc, rootEl);
-    const calls = [];
+  it("requirePluginRoot crosses ShadowRoot boundaries through host nodes", function () {
+    const runtime = loadRuntimeHelpers();
+    const rootEl = createElementNode(["widget", "dyniplugin"], null);
+    const shadowHost = createElementNode(["dyni-shadow-host"], rootEl);
+    const shadowRoot = createShadowRootNode(shadowHost);
+    shadowHost.shadowRoot = shadowRoot;
+    const nestedNode = createElementNode(["dyni-nested"], shadowRoot);
 
-    const runtime = loadRuntimeHelpers({
-      getComputedStyle: createComputedStyle(new Map([
-        [rootEl, {
-          "--dyni-fg": " #abcdef ",
-          "--dyni-font": " \"Fira Sans\" "
-        }],
-        [canvas, {
-          "--dyni-fg": " #ff00ff ",
-          "--dyni-font": " \"Wrong Font\" "
-        }]
-      ]), calls)
-    });
-
-    expect(runtime.resolveTextColor(canvas)).toBe("#abcdef");
-    expect(runtime.resolveFontFamily(canvas)).toBe("\"Fira Sans\"");
-    expect(calls).toEqual([rootEl]);
+    expect(runtime.requirePluginRoot(nestedNode)).toBe(rootEl);
   });
 
-  it("shares one root-owned typography cache across root and canvas calls and refreshes on night mode changes", function () {
-    const calls = [];
-    const night = { value: false };
-    const doc = createDoc(night);
-    const rootEl = createRoot(doc);
-    const canvas = createCanvas(doc, rootEl);
-
-    const runtime = loadRuntimeHelpers({
-      getComputedStyle: createComputedStyle(function (el) {
-        if (el === rootEl) {
-          return {
-            color: night.value ? "rgb(200, 200, 200)" : "rgb(10, 20, 30)",
-            "--dyni-fg": night.value ? " #222222 " : " #111111 ",
-            "--dyni-font": night.value ? " \"Night Font\" " : " \"Day Font\" "
-          };
-        }
-        return {
-          color: "rgb(9, 9, 9)",
-          "--dyni-fg": " #999999 ",
-          "--dyni-font": " \"Canvas Font\" "
-        };
-      }, calls)
-    });
-
-    expect(runtime.resolveTextColor(rootEl)).toBe("#111111");
-    expect(runtime.resolveFontFamily(canvas)).toBe("\"Day Font\"");
-    expect(calls).toHaveLength(1);
-    expect(calls[0]).toBe(rootEl);
-
-    night.value = true;
-    expect(runtime.resolveTextColor(canvas)).toBe("#222222");
-    expect(runtime.resolveFontFamily(rootEl)).toBe("\"Night Font\"");
-    expect(calls).toHaveLength(2);
-    expect(calls[1]).toBe(rootEl);
-  });
-
-  it("keeps documented fallback return values when vars are unset", function () {
-    const night = { value: false };
-    const canvas = { ownerDocument: createDoc(night) };
-
-    const runtime = loadRuntimeHelpers({
-      getComputedStyle() {
-        return {
-          color: "rgb(1, 2, 3)",
-          getPropertyValue() {
-            return "";
-          }
-        };
+  it("requirePluginRoot accepts event-like targets and throws when no plugin root exists", function () {
+    const runtime = loadRuntimeHelpers();
+    const rootEl = createElementNode(["widget", "dyniplugin"], null);
+    const leaf = createElementNode(["dyni-leaf"], rootEl);
+    const eventLike = {
+      target: leaf,
+      composedPath() {
+        return [leaf, rootEl];
       }
-    });
+    };
+    const orphan = createElementNode(["dyni-orphan"], null);
 
-    expect(runtime.resolveTextColor(canvas)).toBe("rgb(1, 2, 3)");
-    expect(runtime.resolveFontFamily(canvas)).toBe(DEFAULT_FONT_STACK);
+    expect(runtime.requirePluginRoot(eventLike)).toBe(rootEl);
+    expect(function () {
+      runtime.requirePluginRoot(orphan);
+    }).toThrow();
   });
 
   it("exposes getNightModeState through runtime and Helpers", function () {
-    const night = { value: true };
-    const rootEl = createRoot(createDoc(night));
+    const nightContainer = createElementNode(["nightMode"], null);
+    const rootEl = createElementNode(["widget", "dyniplugin"], nightContainer);
     const runtime = loadRuntimeHelpers();
 
     expect(runtime.getNightModeState(rootEl)).toBe(true);

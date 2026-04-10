@@ -1,7 +1,7 @@
 /**
  * Module: MapZoomHtmlFit - Per-element text fitting for map zoom HTML renderer
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: Helpers.resolveFontFamily, Helpers.resolveWidgetRoot, TextLayoutEngine, HtmlWidgetUtils, ThemeResolver
+ * Depends: Helpers.requirePluginRoot, TextLayoutEngine, HtmlWidgetUtils, ThemeResolver
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -106,10 +106,6 @@
 
   function hasText(value) {
     return String(value).trim().length > 0;
-  }
-
-  function isDomElement(value) {
-    return !!(value && value.nodeType === 1);
   }
 
   function toMainFitState(args) {
@@ -236,12 +232,9 @@
         return EMPTY_STYLES;
       }
       const target = getMeasureTarget(hostContext);
-      const family = Helpers.resolveFontFamily(target || undefined);
-      const rootCandidate = Helpers.resolveWidgetRoot(target);
-      const themeRoot = isDomElement(rootCandidate)
-        ? rootCandidate
-        : (isDomElement(target) ? target : null);
+      const themeRoot = Helpers.requirePluginRoot(target || cfg.targetEl);
       const tokens = themeApi.resolveForRoot(themeRoot);
+      const family = tokens.font.family;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       const shellW = Math.max(1, Math.round(rect.width));

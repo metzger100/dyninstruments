@@ -52,6 +52,9 @@ describe("CompassRadialWidget", function () {
       textDraws: 0
     };
     const theme = {
+      surface: {
+        fg: "#fff"
+      },
       colors: {
         pointer: "#ff2b2b"
       },
@@ -76,6 +79,7 @@ describe("CompassRadialWidget", function () {
         }
       },
       font: {
+        family: "sans-serif",
         weight: 705,
         labelWeight: 645
       }
@@ -98,7 +102,7 @@ describe("CompassRadialWidget", function () {
         resolveTextColor() {
           return "#fff";
         },
-        resolveWidgetRoot(target) {
+        requirePluginRoot(target) {
           return target;
         },
         getModule(id) {

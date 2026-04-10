@@ -344,9 +344,10 @@
       ctx.clearRect(0, 0, W, H);
       ctx.textBaseline = "middle";
 
-      const tokens = theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas);
-      const family = Helpers.resolveFontFamily(canvas);
-      const color = Helpers.resolveTextColor(canvas);
+      const rootEl = Helpers.requirePluginRoot(canvas);
+      const tokens = theme.resolveForRoot(rootEl);
+      const family = tokens.font.family;
+      const color = tokens.surface.fg;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       const defaultText = String(p.default);

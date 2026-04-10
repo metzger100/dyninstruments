@@ -4,7 +4,11 @@ const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-ca
 describe("CenterDisplayTextWidget", function () {
   function makeHelpers() {
     const themeTokens = {
+      surface: {
+        fg: "#ffffff"
+      },
       font: {
+        family: "sans-serif",
         weight: 720,
         labelWeight: 610
       }
@@ -61,7 +65,7 @@ describe("CenterDisplayTextWidget", function () {
       resolveTextColor() {
         return "#ffffff";
       },
-      resolveWidgetRoot(target) {
+      requirePluginRoot(target) {
         return target;
       },
       getModule(id) {

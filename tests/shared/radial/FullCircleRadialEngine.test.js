@@ -17,6 +17,9 @@ describe("FullCircleRadialEngine", function () {
       meta: []
     };
     const theme = {
+      surface: {
+        fg: "#fff"
+      },
       colors: {
         pointer: "#ff2b2b",
         laylineStb: "#82b683",
@@ -43,6 +46,7 @@ describe("FullCircleRadialEngine", function () {
         }
       },
       font: {
+        family: "sans-serif",
         weight: 700,
         labelWeight: 650
       }
@@ -71,7 +75,7 @@ describe("FullCircleRadialEngine", function () {
       resolveTextColor() {
         return "#fff";
       },
-      resolveWidgetRoot(target) {
+      requirePluginRoot(target) {
         return target;
       },
       getModule(id) {

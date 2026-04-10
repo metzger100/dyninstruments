@@ -52,6 +52,36 @@ describe("SemicircleRadialEngine", function () {
   }
 
   function makeHelpers(modules) {
+    function withCanonicalThemeTokens(toolkit) {
+      if (!toolkit || typeof toolkit.create !== "function") {
+        return toolkit;
+      }
+      return {
+        create(def, Helpers) {
+          const created = toolkit.create(def, Helpers);
+          if (!created || !created.theme || typeof created.theme.resolveForRoot !== "function") {
+            return created;
+          }
+          const originalResolveForRoot = created.theme.resolveForRoot;
+          created.theme.resolveForRoot = function (rootEl) {
+            const resolved = originalResolveForRoot(rootEl);
+            if (!resolved.surface || typeof resolved.surface !== "object") {
+              resolved.surface = { fg: "#fff" };
+            } else if (!resolved.surface.fg) {
+              resolved.surface.fg = "#fff";
+            }
+            if (!resolved.font || typeof resolved.font !== "object") {
+              resolved.font = { family: "sans-serif", weight: 700, labelWeight: 700 };
+            } else if (!resolved.font.family) {
+              resolved.font.family = "sans-serif";
+            }
+            return resolved;
+          };
+          return created;
+        }
+      };
+    }
+
     return {
       setupCanvas(canvas) {
         const ctx = canvas.getContext("2d");
@@ -68,11 +98,14 @@ describe("SemicircleRadialEngine", function () {
       resolveTextColor() {
         return "#fff";
       },
-      resolveWidgetRoot(target) {
+      requirePluginRoot(target) {
         return target;
       },
       getModule(id) {
         if (modules[id]) {
+          if (id === "RadialToolkit") {
+            return withCanonicalThemeTokens(modules[id]);
+          }
           return modules[id];
         }
         throw new Error("unexpected module: " + id);
@@ -87,6 +120,9 @@ describe("SemicircleRadialEngine", function () {
     const arcRingCalls = [];
     const buildSectorsCalls = [];
     const themeDefaults = {
+      surface: {
+        fg: "#fff"
+      },
       colors: {
         pointer: "#ff2b2b",
         warning: "#e7c66a",
@@ -115,6 +151,7 @@ describe("SemicircleRadialEngine", function () {
         }
       },
       font: {
+        family: "sans-serif",
         weight: 710,
         labelWeight: 680
       }
