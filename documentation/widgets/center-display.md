@@ -153,7 +153,7 @@ Measure row behavior:
 
 ## Visual State
 
-- text color comes from `Helpers.resolveTextColor(canvas)`
+- text color comes from `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg`
 - coordinate/value groups use `theme.font.weight`
 - captions/row labels use `theme.font.labelWeight`
 - compact layouts also raise fitted line-height ceilings linearly, making smaller widgets read denser while larger widgets retain the existing text rhythm

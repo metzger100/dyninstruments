@@ -127,7 +127,7 @@ const fullCircle = Helpers.getModule("FullCircleRadialEngine") && Helpers.getMod
 | `draw` | object | merged API from `RadialCanvasPrimitives` + `RadialFrameRenderer` |
 
 Color-token flow:
-- Resolve once per render path with `theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas)`.
+- Resolve once per render path with `theme.resolveForRoot(Helpers.requirePluginRoot(canvas))`.
 - Pass resolved token object down to sector builders and draw helpers where needed.
 
 ## Draw API (`RadialToolkit.draw`)

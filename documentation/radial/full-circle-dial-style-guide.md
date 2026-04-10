@@ -12,7 +12,7 @@ Visual specification for full-circle dial widgets. Constants and formulas are im
 - Shared responsive owner: `FullCircleRadialLayout.computeMode()` / `computeInsets()` / `computeLayout()`.
 - Angle conversion uses `RadialAngleMath.degToCanvasRad()` defaults: `zeroDegAt="north"`, clockwise positive.
 - Geometry and mode slots are computed once per frame in engine state and reused by widget callbacks.
-- Theme/token sources come from `ThemeResolver` via `RadialToolkit.theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas)`.
+- Theme/token sources come from `ThemeResolver` via `RadialToolkit.theme.resolveForRoot(Helpers.requirePluginRoot(canvas))`.
 
 ## Arc Configuration
 
@@ -60,9 +60,9 @@ Tick lengths are token-defined pixel values that the engine scales with `compact
 | Pointer fill | `theme.colors.pointer` | `--dyni-pointer` | `#ff2b2b` |
 | Layline starboard | `theme.colors.laylineStb` | `--dyni-layline-stb` | `#82b683` |
 | Layline port | `theme.colors.laylinePort` | `--dyni-layline-port` | `#ff7a76` |
-| Ring stroke | resolved text color | `Helpers.resolveTextColor(canvas)` | runtime CSS-derived |
-| Tick stroke | resolved text color | `Helpers.resolveTextColor(canvas)` | runtime CSS-derived |
-| Label text | resolved text color | `Helpers.resolveTextColor(canvas)` | runtime CSS-derived |
+| Ring stroke | resolved text color | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` | runtime CSS-derived |
+| Tick stroke | resolved text color | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` | runtime CSS-derived |
+| Label text | resolved text color | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` | runtime CSS-derived |
 
 Ring stroke width: `theme.radial.ring.arcLineWidth` (default `1`).
 
@@ -87,7 +87,7 @@ Shared pointer shape controls:
 
 Label typography:
 - Weight: `theme.font.labelWeight`
-- Family: `Helpers.resolveFontFamily(canvas)`
+- Family: `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).font.family`
 - Font size: `labelPx = max(1, floor(R * theme.radial.labels.fontFactor * compactGeometryScale))`
 
 ## Layout Modes

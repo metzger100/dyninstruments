@@ -289,9 +289,9 @@ draw({ strokeRect() {} });
     const result = run({
       "shared/theme/ThemeResolver.js": `
 function resolvePresetDefs(Helpers) {
-  // dyni-lint-disable-next-line framework-method-typeof-guard -- ThemeResolver may resolve before ThemePresets is registered during runtime bootstrap
+  // dyni-lint-disable-next-line framework-method-typeof-guard -- ThemeResolver bootstrap fixture validates helper-method guard suppression.
   const presetsMod = Helpers && typeof Helpers.getModule === "function"
-    ? Helpers.getModule("ThemePresets")
+    ? Helpers.getModule("ThemeModel")
     : null;
   return presetsMod;
 }

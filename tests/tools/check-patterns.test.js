@@ -1117,6 +1117,78 @@ tiny();
   readPath();
 }());
 `
+    },
+    {
+      rule: "removed-theme-surface-architecture",
+      severity: "block",
+      rel: "runtime/example.js",
+      positive: `
+(function () {
+  "use strict";
+  function wireLegacy(widget) {
+    const handlers = namedHandlers(widget);
+    widget.eventHandler.catchAll = function () {};
+    return handlers;
+  }
+  wireLegacy({});
+}());
+`,
+      clean: `
+(function () {
+  "use strict";
+  function wireCommitted(widget) {
+    return widget;
+  }
+  wireCommitted({});
+}());
+`,
+      disableNextLine: `
+(function () {
+  "use strict";
+  function wireLegacy(widget) {
+    // dyni-lint-disable-next-line removed-theme-surface-architecture -- negative fixture for legacy-path rule coverage
+    const handlers = namedHandlers(widget);
+    return handlers;
+  }
+  wireLegacy({});
+}());
+`,
+      disableLine: `
+(function () {
+  "use strict";
+  function wireLegacy(widget) {
+    const handlers = namedHandlers(widget); /* dyni-lint-disable-line removed-theme-surface-architecture -- negative fixture for legacy-path rule coverage */
+    return handlers;
+  }
+  wireLegacy({});
+}());
+`
+    },
+    {
+      rule: "legacy-theme-css-input-consumer",
+      severity: "block",
+      rel: "widgets/text/SampleWidget.css",
+      positive: `
+.dyni-html-root .sample-value {
+  font-weight: var(--dyni-font-weight, 700);
+}
+`,
+      clean: `
+.dyni-html-root .sample-value {
+  font-weight: var(--dyni-theme-font-weight, 700);
+}
+`,
+      disableNextLine: `
+.dyni-html-root .sample-value {
+  /* dyni-lint-disable-next-line legacy-theme-css-input-consumer -- negative fixture for css token migration rule coverage */
+  font-weight: var(--dyni-font-weight, 700);
+}
+`,
+      disableLine: `
+.dyni-html-root .sample-value {
+  font-weight: var(--dyni-font-weight, 700); /* dyni-lint-disable-line legacy-theme-css-input-consumer -- negative fixture for css token migration rule coverage */
+}
+`
     }
   ];
 

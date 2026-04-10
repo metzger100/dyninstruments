@@ -1,140 +1,99 @@
 # Helpers Object
 
-**Status:** ✅ Implemented | Defined in `runtime/helpers.js`, passed to module `create()` calls by `runtime/init.js`
+**Status:** ✅ Implemented | Defined in runtime/helpers.js and passed to component factory modules
 
 ## Overview
 
-`Helpers` is passed as second argument to `module.create(def, Helpers)`. It provides canvas setup utilities, root-scoped typography/theming, canonical night-mode state lookup, formatter application, host-action access, and module access.
+Helpers is passed as the second argument to component create(def, Helpers).
+
+Current helper API includes:
+
+- setupCanvas
+- requirePluginRoot
+- getNightModeState
+- applyFormatter
+- getHostActions
+- getModule
+
+Legacy helper theme fallbacks (resolveTextColor, resolveFontFamily, resolveWidgetRoot) are not part of the production contract.
 
 ## API Reference
 
 ### setupCanvas
 
-Prepares a HiDPI-safe canvas and returns CSS-pixel drawing dimensions.
+Prepares a HiDPI-safe canvas and returns drawing context plus CSS-pixel dimensions.
 
-```javascript
-const { ctx, W, H } = Helpers.setupCanvas(canvas);
-```
+Returns object with:
 
-Implementation summary:
+- ctx
+- W
+- H
 
-- uses a per-canvas `WeakMap` layout cache (`clientWidth`, `clientHeight`, `cssWidth`, `cssHeight`)
-- compares current `canvas.clientWidth/clientHeight` with cached values
-- cache hit: reuses cached `cssWidth/cssHeight` and skips `getBoundingClientRect()`
-- cache miss: reads `canvas.getBoundingClientRect()`, updates cached layout entry, then continues
-- computes buffer size each call (`canvas.width/height` = CSS size × `devicePixelRatio`) and updates only when changed
-- always applies `ctx.setTransform(dpr, 0, 0, dpr, 0, 0)` on every call
-- returns `{ ctx, W, H }` in CSS pixels
+### requirePluginRoot
 
-### resolveTextColor
+Strict committed-root discovery helper for theme consumers.
 
-Resolves foreground color from the owning widget root with priority:
+Accepts:
 
-1. `--dyni-fg`
-2. `--instrument-fg`
-3. `--mainfg`
-4. `getComputedStyle(rootOrCanvas).color` or `#000`
+- element
+- ShadowRoot
+- event target / event-like object
+- canvas element
+- node inside committed shadow content
 
-Caching behavior:
+Behavior:
 
-- typography values are cached in a per-root `WeakMap` entry (`textColor`, `fontFamily`, `nightMode`)
-- canvas inputs are adapted to their owning widget root before cache lookup
-- each call compares cached `nightMode` to current root `.nightMode` class state
-- unchanged mode returns cached value without a new `getComputedStyle()` call
-- changed mode recomputes from CSS and refreshes cache entry
-
-### resolveFontFamily
-
-Reads `--dyni-font` from the owning widget root and falls back to default stack (`Inter`, system fonts, emoji fonts).
-
-`resolveFontFamily()` shares the same per-root typography cache as `resolveTextColor()`, so one style read can serve both values while day/night mode state is unchanged.
-
-### resolveWidgetRoot
-
-Resolves the owning widget root (`.widget` or `.DirectWidget`) for a DOM target.
-
-```javascript
-const rootEl = Helpers.resolveWidgetRoot(canvasOrElement);
-```
-
-Usage contract:
-
-- Theme callers that start from canvas inputs must resolve root first and call `ThemeResolver.resolveForRoot(rootEl)`.
-- This keeps root discovery logic in one runtime owner instead of duplicating `.closest(...)` logic across renderers.
+- walks composed tree and crosses ShadowRoot host boundaries
+- returns nearest committed .widget.dyniplugin root
+- throws if no committed plugin root exists
 
 ### getNightModeState
 
-Returns whether the owning document is currently in night mode (`documentElement` or `body` has `nightMode` class).
+Returns true when the committed plugin root is inside a .nightMode ancestor.
 
-```javascript
-const isNight = Helpers.getNightModeState(rootEl);
-```
+Canonical check:
 
-Ownership contract:
+- !!rootEl.closest('.nightMode')
 
-- canonical owner is `runtime/helpers.js`
-- used by `ThemeResolver` for cache invalidation when day/night state changes
-- fail-fast internal contract: helper is expected to exist on `Helpers`
+No canonical fallback to documentElement/body.
 
 ### applyFormatter
 
-Applies formatter to raw value:
+Centralized formatter dispatch boundary.
 
-1. Reads `props.formatterParameters`
-2. If `raw == null` or `Number.isNaN(raw)`:
-   - return `props.default` when `default` key is explicitly present (including `""`, `0`, `false`)
-   - otherwise return `"---"`
-3. Normalizes parameters:
-   - array -> used as-is
-   - string -> split by comma
-   - otherwise -> `[]`
-4. Dispatch order:
-   - `props.formatter` function -> call directly
-   - `props.formatter` string -> resolve and call `avnav.api.formatter[name]` when present
-5. Formatter exceptions are intentionally caught; processing continues with raw-string fallback
-6. If no formatter is available, or formatter dispatch fails, return `String(raw)`
+- preserves explicit falsy defaults via property-presence checks
+- applies function formatter or avnav.api formatter by name
+- catches formatter exceptions at this external boundary
+- falls back to String(raw) when formatter dispatch is unavailable/fails
 
 ### getHostActions
 
-Returns the singleton host-action facade owned by `runtime/TemporaryHostActionBridge.js`.
+Returns the runtime-owned host action facade created by TemporaryHostActionBridge.
 
-```javascript
-const hostActions = Helpers.getHostActions();
-const capabilities = hostActions.getCapabilities();
-```
+Bridge facade includes:
 
-Contract summary:
+- getCapabilities()
+- routePoints.activate({ index, pointSnapshot })
+- routeEditor.openActiveRoute()
+- routeEditor.openEditRoute()
+- map.checkAutoZoom()
+- ais.showInfo(mmsi)
 
-- intended for interactive route/AIS parity work only
-- mirrors the widget-facing namespace shape:
-  - `hostActions.getCapabilities()`
-  - `hostActions.routePoints.activate(index)`
-  - `hostActions.map.checkAutoZoom()`
-  - `hostActions.routeEditor.openActiveRoute()`
-  - `hostActions.routeEditor.openEditRoute()`
-  - `hostActions.ais.showInfo(mmsi)`
-- `hostActions.getCapabilities()` returns a memoized capability snapshot and refreshes it when page identity or route-points relay availability changes
-- capability snapshots are frozen (`Object.freeze`) to keep bridge-owned state immutable for consumers
-- `runtime/init.js` owns bridge creation before widget registration; helper/runtime code treats that as an internal contract
-- widgets may also read the same facade from `this.hostActions` because `runtime/widget-registrar.js` injects it before lifecycle/render callbacks
-- all host DOM / `window.avnav` coupling stays inside the runtime bridge; widget and cluster code must not reach around this helper
+Renderers should consume normalized callbacks through runtime surface policy.
 
 ### getModule
 
-Accesses loaded modules by `config.components` ID.
+Returns loaded module by config.components ID.
 
-```javascript
-const gaugeUtilsModule = Helpers.getModule("RadialToolkit");
-const gaugeUtils = gaugeUtilsModule && gaugeUtilsModule.create(def, Helpers);
-```
+## Theme Consumer Pattern
 
-## Internal Helper Not in `Helpers`
+Theme consumers use strict root resolution + ThemeResolver:
 
-`defaultsFromEditableParams(editableParams)` (from `runtime/editable-defaults.js`) is used in `runtime/widget-registrar.js` and is not exposed to module code.
+1. rootEl = Helpers.requirePluginRoot(target)
+2. theme = ThemeResolver.resolveForRoot(rootEl)
 
 ## Related
 
-- [css-theming.md](css-theming.md)
-- [../architecture/runtime-lifecycle.md](../architecture/runtime-lifecycle.md)
-- [../avnav-api/formatters.md](../avnav-api/formatters.md)
-- [../architecture/component-system.md](../architecture/component-system.md)
+- theme-tokens.md
+- css-theming.md
+- ../architecture/runtime-lifecycle.md

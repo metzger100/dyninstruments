@@ -87,7 +87,7 @@ otherwise -> normal
 
 ## Themeable Typography
 
-- Theme tokens are resolved per render via `ThemeResolver.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas)`.
+- Theme tokens are resolved per render via `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas))`.
 - Primary numeric value text uses `theme.font.weight`.
 - Caption and unit text uses `theme.font.labelWeight`.
 - Disconnect overlay text uses `theme.font.labelWeight`.

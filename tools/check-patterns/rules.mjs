@@ -55,6 +55,33 @@ export const RULES = [
     message: ({ file, line, detail }) => `[invalid-lint-suppression] ${file}:${line}\n${detail}`
   },
   {
+    name: "removed-theme-surface-architecture",
+    severity: "block",
+    scope: {
+      include: [
+        "plugin.js",
+        "runtime/**/*.js",
+        "cluster/**/*.js",
+        "shared/**/*.js",
+        "widgets/**/*.js",
+        "config/**/*.js"
+      ],
+      exclude: ["tests/**", "tools/**"]
+    },
+    detect: /\bThemePresets\b|data-dyni-theme|applyThemePreset|ThemeResolver\.create\s*\(|invalidateTheme\s*\(|namedHandlers\s*\(|\bcatchAll\b|triggerResize\s*\(|onclick="/g,
+    message: ({ file, line, match }) => `[removed-theme-surface-architecture] ${file}:${line}\nRemoved PLAN9 architecture token detected (${match[0]}). Do not reintroduce legacy theme/surface interaction paths.`
+  },
+  {
+    name: "legacy-theme-css-input-consumer",
+    severity: "block",
+    scope: {
+      include: ["plugin.css", "widgets/**/*.css"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    detect: /--dyni-border-day|--dyni-border-night|--dyni-font-weight|--dyni-label-weight/g,
+    message: ({ file, line, match }) => `[legacy-theme-css-input-consumer] ${file}:${line}\nLegacy CSS input var '${match[0]}' detected. Migrated surface/typography consumers must use --dyni-theme-* outputs.`
+  },
+  {
     name: "absolute-user-home-path",
     severity: "block",
     scope: {

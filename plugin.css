@@ -1,14 +1,12 @@
 /* dyninstruments — plugin-wide styles (clustered build)
    Scope styling only to widgets of this plugin. */
 
-/* 0) Plugin font (scoped): used by canvas and any HTML renderers. */
-.widget.dyniplugin,
-.widget.dyniplugin.dyni-host-html,
-.widget.dyniplugin .widgetData.dyni-shell {
-  --dyni-font: "Inter", "SF Pro Text", -apple-system, "Segoe UI", Roboto,
-               "Helvetica Neue", "Noto Sans", Ubuntu, Cantarell, "Liberation Sans",
-               Arial, system-ui, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
-  font-family: var(--dyni-font);
+/* 0) Theme output consumption (root-owned surface contract). */
+.widget.dyniplugin {
+  color: var(--dyni-theme-surface-fg);
+  background-color: var(--dyni-theme-surface-bg);
+  border-color: var(--dyni-theme-surface-border);
+  font-family: var(--dyni-theme-font-family);
 }
 
 /* 1) Hide AvNav's native header/value ONLY inside our widgets. */
@@ -21,7 +19,7 @@
 .widget.dyniplugin {
   box-sizing: border-box;
   position: relative;
-  border: 1px solid var(--dyni-border, rgba(0, 0, 0, 0.30));
+  border: 1px solid var(--dyni-theme-surface-border);
 }
 
 /* Host shell and surfaces fill the widget area on the renderHtml host path. */

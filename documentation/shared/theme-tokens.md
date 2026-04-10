@@ -1,111 +1,83 @@
 # Theme Tokens
 
-**Status:** ✅ Implemented | `shared/theme/ThemeModel.js` + `shared/theme/ThemeResolver.js`
+**Status:** ✅ Implemented | ThemeModel semantic ownership + ThemeResolver strict root resolution
 
 ## Overview
 
-Theme ownership is split into two direct-module components:
+Theme ownership is split into two module-shaped components:
 
-- `ThemeModel` owns token metadata, preset metadata, normalization, and merge-order semantics.
-- `ThemeResolver` resolves concrete token values for a widget root via CSS inputs + `ThemeModel` metadata.
+- ThemeModel: semantic owner of token metadata, preset metadata, defaults, mode overrides, normalization, and output metadata
+- ThemeResolver: strict root-only resolver that consumes ThemeModel metadata and root CSS input overrides
 
-Both modules are registered with `apiShape: "module"` and do not use `create(def, Helpers)`.
+Both are registered with apiShape module and do not use create().
 
-## Key Details
+## Public Input Variables (Migrated Shared Surface/Typography)
 
-- `ThemeModel` global key: `DyniThemeModel`
-- `ThemeResolver` global key: `DyniThemeResolver`
-- `ThemeResolver` API:
-  - `configure({ ThemeModel, getNightModeState, getActivePresetName, readCssInputVar })`
-  - `resolveForRoot(rootEl) -> themeTokens` (throws unless `rootEl` is committed `.widget.dyniplugin`)
-  - `getTokenDefinitions()`
-  - `getOutputTokenDefinitions()`
-- Resolver caching was removed; there is no `invalidateRoot()` / `invalidateAll()` API.
-
-## Shared Input Variables
-
-Canonical shared inputs for migrated surface/typography tokens:
-
-- `--dyni-fg`
-- `--dyni-bg`
-- `--dyni-border`
-- `--dyni-font`
-- `--dyni-font-weight`
-- `--dyni-label-weight`
-
-Legacy split border vars are removed from shared theme ownership:
-
-- `--dyni-border-day`
-- `--dyni-border-night`
+- --dyni-fg
+- --dyni-bg
+- --dyni-border
+- --dyni-font
+- --dyni-font-weight
+- --dyni-label-weight
 
 ## Materialized Output Variables
 
-Theme output materialization uses:
-
-- `--dyni-theme-surface-fg`
-- `--dyni-theme-surface-bg`
-- `--dyni-theme-surface-border`
-- `--dyni-theme-font-family`
-- `--dyni-theme-font-weight`
-- `--dyni-theme-font-label-weight`
+- --dyni-theme-surface-fg
+- --dyni-theme-surface-bg
+- --dyni-theme-surface-border
+- --dyni-theme-font-family
+- --dyni-theme-font-weight
+- --dyni-theme-font-label-weight
 
 ## Presets and Modes
 
 Supported preset families:
 
-- `default`
-- `slim`
-- `bold`
-- `highcontrast`
+- default
+- slim
+- bold
+- highcontrast
 
-Normalization owner:
+Mode axis:
 
-- `ThemeModel.normalizePresetName(name)`
+- day
+- night
 
-Special rule:
+Preset normalization:
 
-- `night` is normalized to `default` as a preset name.
-- Night behavior is mode-driven, not a standalone preset family.
+- night is not a legal preset family; normalizePresetName maps it to default
 
 ## Resolution Order
 
-For each token path, resolution order is:
+Per token path:
 
-1. explicit root CSS input override (`inputVar`)
+1. explicit root CSS input override
 2. active preset mode override
 3. active preset base override
-4. global mode default (`defaultByMode`)
-5. global base default (`default`)
+4. global mode default
+5. global base default
 
-## API Usage
+## Strict Root Contract
 
-```javascript
-const themeModel = Helpers.getModule("ThemeModel");
-const themeResolver = Helpers.getModule("ThemeResolver");
+ThemeResolver.resolveForRoot(rootEl) requires committed .widget.dyniplugin root and throws on invalid input.
 
-themeResolver.configure({
-  ThemeModel: themeModel,
-  getActivePresetName() {
-    return state.themePresetName;
-  },
-  getNightModeState(rootEl) {
-    return !!(rootEl && rootEl.closest && rootEl.closest(".nightMode"));
-  }
-});
-
-const rootEl = committedPluginRootEl;
-const tokens = themeResolver.resolveForRoot(rootEl);
-```
+There is no resolver cache and no invalidation API.
 
 ## Runtime Integration
 
-`runtime/init.js` explicitly ensures `ThemeModel` is loaded and reads `--dyni-theme-preset` once from `document.documentElement`.
-`ThemeResolver` does not ingest preset selection from DOM attributes; runtime injects the active preset through `configure({ getActivePresetName })`.
-`runtime/init.js` configures `ThemeResolver` with `ThemeModel`, strict root night-mode detection, and runtime-owned active preset selection (`state.themePresetName`).
+runtime/init.js:
+
+- reads --dyni-theme-preset once from document.documentElement
+- configures runtime._theme
+- runtime._theme configures ThemeResolver with ThemeModel + runtime-owned preset getter + canonical night-mode getter
+
+runtime._theme.applyToRoot(rootEl):
+
+- resolves canonical theme outputs
+- overwrites all required output vars on every commit
 
 ## Related
 
-- [css-theming.md](css-theming.md)
-- [../architecture/runtime-lifecycle.md](../architecture/runtime-lifecycle.md)
-- [../architecture/component-system.md](../architecture/component-system.md)
-- [../radial/gauge-shared-api.md](../radial/gauge-shared-api.md)
+- css-theming.md
+- ../architecture/runtime-lifecycle.md
+- ../architecture/component-system.md

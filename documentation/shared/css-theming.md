@@ -1,195 +1,81 @@
 # CSS Theming
 
-**Status:** ✅ Implemented | plugin.css + runtime token resolver
+**Status:** ✅ Implemented | Input vars resolved by ThemeResolver + commit-time output materialization by runtime._theme
 
 ## Overview
 
-dyninstruments uses CSS custom properties for theming, scoped to `.widget.dyniplugin` roots. Structural styles stay in `plugin.css`, while `ThemeResolver` merges explicit CSS token overrides with runtime preset/default values. The preset bootstrap path is root-only; head hiding is expressed through the static `dyni-hide-native-head` class on the registered widget root. Typography helpers resolve from the owning widget root, so canvas remains the geometry/drawing owner.
+dyninstruments theme flow has two layers:
 
-Theme values are layered:
+1. input variables (raw --dyni-*) read from committed plugin root
+2. output variables (--dyni-theme-*) overwritten on every commit and consumed by migrated CSS
 
-1. Explicit CSS token overrides on the widget/canvas inheritance chain (typically AvNav `user.css`)
-2. Optional runtime preset selected via `ThemePresets.apply(containerEl, presetName)` (`data-dyni-theme` on widget container)
-3. Built-in `ThemeResolver` token defaults
-4. Day/night class-dependent CSS for structural styling (`.nightMode ...`)
+Ownership:
 
-## CSS Custom Properties
+- ThemeModel: canonical semantic token/preset owner
+- ThemeResolver: strict root-only resolution boundary
+- runtime._theme: commit-time output writer on committed .widget.dyniplugin roots
 
-### Font
+## Input Variables
 
-| Variable | Purpose | Default |
-|---|---|---|
-| `--dyni-font` | Font family stack for canvas and HTML | `"Inter","SF Pro Text",-apple-system,"Segoe UI",Roboto,...` |
+Canonical shared inputs for migrated surface/typography tokens:
 
-Set on `.widget.dyniplugin` and inherited through the widget subtree. Read by `Helpers.resolveFontFamily(rootOrCanvas)`.
-`Helpers` caches resolved font family per widget root, so repeated renders do not call `getComputedStyle()` again while mode stays unchanged.
+- --dyni-fg
+- --dyni-bg
+- --dyni-border
+- --dyni-font
+- --dyni-font-weight
+- --dyni-label-weight
 
-### Colors (Foreground)
+Raw --dyni-* inputs are input-only. They are not consumed by migrated renderer CSS directly.
 
-Read by `Helpers.resolveTextColor(rootOrCanvas)` in priority order:
+## Output Variables
 
-| Variable | Purpose | Fallback |
-|---|---|---|
-| `--dyni-fg` | Plugin-specific foreground | (not set by default) |
-| `--instrument-fg` | AvNav instrument foreground | (set by AvNav theme) |
-| `--mainfg` | AvNav main foreground | (set by AvNav theme) |
+Mandatory materialized outputs:
 
-If none set: falls back to `getComputedStyle(rootOrCanvas).color` or `"#000"`.
-`Helpers.resolveTextColor()` shares a per-root typography cache with `resolveFontFamily()`, reducing repeated style reads in steady day or night mode.
+- --dyni-theme-surface-fg
+- --dyni-theme-surface-bg
+- --dyni-theme-surface-border
+- --dyni-theme-font-family
+- --dyni-theme-font-weight
+- --dyni-theme-font-label-weight
 
-### Border
+Outputs are written only as inline style on committed plugin roots and are overwritten every commit.
 
-| Variable | Purpose | Default |
-|---|---|---|
-| `--dyni-border-day` | Border color in day mode | `rgba(0, 0, 0, 0.30)` |
-| `--dyni-border-night` | Border color in night mode | `rgba(252, 11, 11, 0.18)` |
+## Root Consumer Rule
 
-### Theme Tokens (ThemeResolver)
+The plugin root is the canonical light-DOM surface consumer:
 
-Read by `ThemeResolver.resolveForRoot(rootEl)` (canvas renderers resolve `rootEl` via `Helpers.resolveWidgetRoot(canvas)`):
+- color: --dyni-theme-surface-fg
+- background-color: --dyni-theme-surface-bg
+- border-color: --dyni-theme-surface-border
+- font-family: --dyni-theme-font-family
 
-| Variable | Purpose | Default |
-|---|---|---|
-| `--dyni-pointer` | Pointer color | `#ff2b2b` |
-| `--dyni-warning` | Warning sector color | `#e7c66a` |
-| `--dyni-alarm` | Alarm sector color | `#ff7a76` |
-| `--dyni-layline-stb` | Starboard layline color | `#82b683` |
-| `--dyni-layline-port` | Port layline color | `#ff7a76` |
-| `--dyni-radial-tick-major-len` | Major tick length | `12` |
-| `--dyni-radial-tick-major-width` | Major tick stroke width | `3` |
-| `--dyni-radial-tick-minor-len` | Minor tick length | `7` |
-| `--dyni-radial-tick-minor-width` | Minor tick stroke width | `1.5` |
-| `--dyni-radial-pointer-width` | Pointer full-width factor | `1` |
-| `--dyni-radial-pointer-length` | Pointer length factor | `2` |
-| `--dyni-radial-arc-linewidth` | Arc line width | `2` |
-| `--dyni-radial-ring-width` | Ring width factor | `0.16` |
-| `--dyni-radial-label-inset` | Label inset factor | `1.8` |
-| `--dyni-radial-label-font` | Label font factor | `0.14` |
-| `--dyni-radial-fullcircle-normal-inner-margin` | Full-circle normal-mode inner margin factor | `0.03` |
-| `--dyni-radial-fullcircle-normal-min-height` | Full-circle normal-mode minimum block height factor | `0.45` |
-| `--dyni-radial-fullcircle-normal-dual-gap` | Full-circle normal-mode dual-column gap factor | `0.05` |
-| `--dyni-linear-track-width` | Linear track thickness factor | `0.16` |
-| `--dyni-linear-track-linewidth` | Linear track stroke width | `2` |
-| `--dyni-linear-tick-major-len` | Linear major tick length | `12` |
-| `--dyni-linear-tick-major-width` | Linear major tick stroke width | `3` |
-| `--dyni-linear-tick-minor-len` | Linear minor tick length | `7` |
-| `--dyni-linear-tick-minor-width` | Linear minor tick stroke width | `1.5` |
-| `--dyni-linear-pointer-width` | Linear pointer full-width factor | `1` |
-| `--dyni-linear-pointer-length` | Linear pointer length factor | `2` |
-| `--dyni-linear-label-inset` | Linear label inset factor | `1.8` |
-| `--dyni-linear-label-font` | Linear label font factor | `0.14` |
-| `--dyni-font-weight` | Primary font weight | `700` |
-| `--dyni-label-weight` | Label font weight | `700` |
-| `--dyni-xte-line-width-factor` | XTE highway stroke thickness multiplier | `1.5` |
-| `--dyni-xte-boat-size-factor` | XTE boat indicator size multiplier | `1` |
+Root does not set one global font-weight.
 
-Pointer sizing semantics:
-- full rendered width: `max(8, floor(basePointerSize * widthFactor))`
-- rendered length: `max(8, floor(basePointerSize * lengthFactor))`
-- radial base size: unscaled `needleDepth`
-- linear base size: unscaled `pointerDepthBase` unless an explicit pixel `depth` override is supplied
+## Shadow CSS Rule
 
-### Preset Layer (ThemePresets)
+Committed HTML renderer CSS is shadow-local and consumes migrated output vars.
 
-`ThemePresets` sets a preset selector attribute directly on the widget root container (`.widget` / `.DirectWidget`).
+- use --dyni-theme-font-weight and --dyni-theme-font-label-weight
+- do not consume raw --dyni-font-weight / --dyni-label-weight in migrated renderer CSS
+- do not use outer-document ancestry selectors in committed renderer shadow styles
 
-- `apply(containerEl, presetName)`:
-  - normalizes `presetName`
-  - sets `data-dyni-theme="<preset>"` for non-default presets
-  - removes `data-dyni-theme` when preset is `default`
-- `remove(containerEl)`:
-  - removes `data-dyni-theme` from the container
+## Vertical Shell Rule
 
-`ThemeResolver` reads `data-dyni-theme`, resolves the matching entry from `ThemePresets.PRESETS`, and uses that preset as the fallback layer before built-in token defaults.
+Shared shell CSS must not override runtime-owned vertical reserved shell height on .widgetData.dyni-shell.
 
-### User CSS Overrides
+Inner mount/surface descendants may still fill inside the reserved shell.
 
-Preset selection can be provided from AvNav `user.css` via `--dyni-theme-preset`:
+## Preset Ingestion Rule
 
-```css
-.widget.dyniplugin {
-  --dyni-theme-preset: slim;
-}
-```
-
-Per-token overrides can be applied in `user.css` and override preset values directly:
-
-```css
-.widget.dyniplugin {
-  --dyni-pointer: #00aaff;
-  --dyni-radial-pointer-width: 1.2;
-  --dyni-linear-pointer-width: 1.2;
-  --dyni-radial-arc-linewidth: 1.5;
-  --dyni-linear-track-linewidth: 1.5;
-  --dyni-xte-line-width-factor: 1.25;
-  --dyni-xte-boat-size-factor: 1.2;
-}
-```
-
-## Day/Night Mode
-
-AvNav adds `.nightMode` class to the page root in night mode. CSS handles border and token adaptation:
-
-```css
-/* Day mode (default) */
-.widget.dyniplugin { border: 1px solid var(--dyni-border-day, rgba(0,0,0,0.30)); }
-
-/* Night mode */
-.nightMode .widget.dyniplugin {
-  border-color: var(--dyni-border-night, rgba(252,11,11,0.18));
-}
-```
-
-Night-mode border adaptation is CSS-only. `ThemeResolver` keeps the token defaults/preset map in JS and re-reads explicit CSS overrides after cache invalidation.
-`Helpers` typography cache also tracks the current root `.nightMode` state per widget root; when the mode flips, the next `resolveTextColor()` / `resolveFontFamily()` call refreshes cached values from `getComputedStyle()`.
-
-## Head Hiding
-
-When a module sets `wantsHideNativeHead: true`, the registration wrapper adds the static `dyni-hide-native-head` class to the widget root. CSS then hides AvNav's native header:
-
-```css
-.widget.dyniplugin.dyni-hide-native-head .widgetHead,
-.widget.dyniplugin.dyni-hide-native-head .valueData {
-  display: none !important;
-}
-```
-
-Surface shell and internal canvas fill the full widget area:
-
-```css
-.widget.dyniplugin .widgetData.dyni-shell,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-html,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas-mount,
-.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas-node {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-}
-.widget.dyniplugin .widgetData.dyni-shell {
-  max-width: 100% !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  align-self: stretch;
-}
-.widget.dyniplugin .widgetData.dyni-shell .dyni-surface-canvas {
-  font-size: initial;
-}
-```
-
-## Module CSS Files
-
-Most visual/style contracts are centralized in `plugin.css`. Native HTML kinds may ship component-local CSS for inner content styling (example: `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css`), but root/shell/surface ownership stays in shared host CSS.
-
-- **plugin.css** — plugin-wide root, shell, head-hiding, and surface fill contracts
-- **Widget-local CSS (optional)** — renderer-local markup styling for native HTML kinds
-
-## File Location
-
-- **plugin.css** — project root
+- startup reads --dyni-theme-preset once from document.documentElement
+- runtime stores normalized preset name
+- no per-root preset selectors
+- no data-dyni-theme attribute path
+- no public applyThemePreset API path
 
 ## Related
 
-- [helpers.md](helpers.md) — How resolveTextColor/resolveFontFamily read CSS
-- [theme-tokens.md](theme-tokens.md) — ThemeResolver tokens and cache behavior
-- [../radial/gauge-style-guide.md](../radial/gauge-style-guide.md) — Canvas color palette
+- theme-tokens.md
+- ../architecture/runtime-lifecycle.md
+- ../architecture/html-renderer-lifecycle.md

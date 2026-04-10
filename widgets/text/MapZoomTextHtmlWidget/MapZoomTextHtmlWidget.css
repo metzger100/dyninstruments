@@ -103,7 +103,7 @@
 
 .dyni-html-root .dyni-map-zoom-caption {
   font-size: calc(var(--dyni-map-zoom-value-size) * var(--dyni-map-zoom-sec-scale));
-  font-weight: var(--dyni-label-weight, 700);
+  font-weight: var(--dyni-theme-font-label-weight, 700);
   color: inherit;
   line-height: 1;
   white-space: nowrap;
@@ -116,14 +116,14 @@
 .dyni-html-root .dyni-map-zoom-value {
   font-size: var(--dyni-map-zoom-value-size);
   line-height: 1;
-  font-weight: var(--dyni-font-weight, 700);
+  font-weight: var(--dyni-theme-font-weight, 700);
   text-align: center;
   white-space: nowrap;
 }
 
 .dyni-html-root .dyni-map-zoom-unit {
   font-size: calc(var(--dyni-map-zoom-value-size) * var(--dyni-map-zoom-sec-scale));
-  font-weight: var(--dyni-label-weight, 700);
+  font-weight: var(--dyni-theme-font-label-weight, 700);
   opacity: 0.88;
   line-height: 1;
   white-space: nowrap;
@@ -138,7 +138,7 @@
   z-index: 1;
   font-size: calc(var(--dyni-map-zoom-value-size) * 0.56);
   line-height: 1;
-  font-weight: var(--dyni-label-weight, 700);
+  font-weight: var(--dyni-theme-font-label-weight, 700);
   text-align: center;
   opacity: 0.8;
   white-space: nowrap;

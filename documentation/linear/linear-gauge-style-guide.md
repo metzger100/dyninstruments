@@ -46,7 +46,7 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 - Warning sector: `theme.colors.warning`
 - Alarm sector: `theme.colors.alarm`
 - Pointer: `theme.colors.pointer`
-- Track stroke/ticks/labels: `Helpers.resolveTextColor()`
+- Track stroke/ticks/labels: `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg`
 
 ## Sector Semantics
 

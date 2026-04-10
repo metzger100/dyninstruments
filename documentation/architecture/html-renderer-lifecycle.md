@@ -1,73 +1,71 @@
 # HTML Renderer Lifecycle
 
-**Status:** ✅ Reference | Two-phase HTML render contract and committed-host-state usage
+**Status:** ✅ Implemented | Commit-driven shadow-root lifecycle for surface html kinds
 
 ## Overview
 
-This document defines the renderer-side lifecycle contract for `surface: "html"` kinds. It covers first-render limits, corrective rerender timing, committed host-state consumption, and resize-signature stability.
+dyninstruments HTML kinds are commit-driven. Pre-commit shell output is inert; semantic rendering begins only after host commit inside HtmlSurfaceController.
 
-## Key Details
+## Authoritative Contract
 
-- HTML renderers run under `HtmlSurfaceController` (`attach`/`update`/`detach`/`destroy`) and must also follow host-commit timing from `ClusterWidget`.
-- `renderHtml(props)` runs before returned markup is mounted, so committed DOM ancestry is not reliable in first render.
-- `initFunction().triggerResize()` is the canonical corrective-rerender hook for renderers that need committed DOM facts.
-- Corrective rerender and later updates may consume committed host state from `hostContext.__dyniHostCommitState`.
+ClusterRendererRouter.renderHtml(...):
 
-## API/Interfaces
+- returns inert shell markup only
+- includes a stable mount host (.dyni-surface-html-mount)
+- contains only stable route/surface metadata and shell sizing state
 
-### Two-Phase Render Pattern
+HtmlSurfaceController.createSurfaceController(...) owns committed lifecycle:
 
-| Phase | Timing | DOM state | Renderer behavior |
-|---|---|---|---|
-| First render | `renderHtml(props)` before mount | No committed DOM | Use host-sized assumptions only. No committed-ancestry reads. |
-| Corrective rerender | After `initFunction().triggerResize()` | Committed DOM available | Read `hostContext.__dyniHostCommitState`; apply committed-DOM layout corrections. |
-| Normal updates | Later `renderHtml(props)` passes | Committed DOM available | Re-evaluate committed facts each pass; same contract as corrective rerender. |
+- attach(payload)
+- update(payload)
+- detach(reason)
+- destroy()
 
-### `hostContext.__dyniHostCommitState` Contract
+Committed renderer instances implement:
 
-Set by `ClusterWidget`, owned by `HostCommitController`, read by HTML renderers:
+- mount(mountEl, payload)
+- update(payload)
+- postPatch(payload)
+- detach(reason)
+- destroy()
+- optional layoutSignature(payload)
 
-```text
-hostContext.__dyniHostCommitState = {
-  instanceId: string,
-  renderRevision: number,
-  mountedRevision: number,
-  lastProps: object | undefined,
-  rootEl: Element | null,
-  shellEl: Element | null,
-  scheduledRevision: number | null,
-  rafHandle: number | null,
-  observer: MutationObserver | null,
-  timeoutHandle: number | null,
-  commitPending: boolean
-}
-```
+## shellRect Contract
 
-Renderer consumption rules:
+shellRect remains authoritative for committed HTML layout and fit.
 
-- Read-only usage: renderers must not mutate this object.
-- Standard target resolution: `targetEl = shellEl || rootEl`.
-- If state is missing, null, or unresolved (`shellEl`/`rootEl` absent), fail closed: skip committed-DOM work, keep host-sized assumptions, do not throw.
-- Canonical reference implementation: `ActiveRouteTextHtmlWidget.resolveHostElements`.
+- measured from .dyni-surface-html-mount
+- provided to committed renderers in payload.shellRect
+- used for geometry-driven fit/layout
 
-### Post-Commit DOM Effects Pattern
+There is no triggerResize() contract.
 
-- Keep committed-DOM side effects in a dedicated module owned by the renderer family.
-- Schedule effects after `attach` and after rerenders that can change committed DOM state.
-- Effects must be bounded (no unbounded polling), stale-safe (drop outdated work), and idempotent.
-- Effects must not mutate state in ways that churn `resizeSignature`.
+## Layout and Relayout
 
-### Resize-Signature Stability Rules
+- layoutSignature(payload) indicates layout-relevant input changes
+- update(payload) patches DOM in place
+- postPatch(payload) may request one bounded internal relayout pass
+- unbounded rerender loops are not part of the contract
 
-- `resizeSignature(props, hostContext)` must include every external input that changes layout or fit geometry.
-- Do not include self-produced outputs (for example widget-computed height), or signatures will churn.
-- If behavior has multiple modes, signatures may use mode-specific input sets; the mode flag itself must remain in both signatures.
-- `HtmlSurfaceController` triggers `hostContext.triggerResize()` once per signature change; stable signatures prevent rerender loops.
+## Interaction Ownership
+
+dyninstruments HTML surfaces do not rely on AvNav UserHtml event translation.
+
+- no namedHandlers() contract
+- no onclick="handlerName" wiring contract
+- no global catchAll dependency for dyninstruments HTML surfaces
+
+Committed renderers attach and remove direct DOM listeners under dispatch/passive runtime policy.
+
+## Styling Ownership
+
+- committed HTML styles are shadow-local
+- runtime preloads and injects per-renderer shadow CSS bundles
+- required outer context (pageId, orientation, interaction mode) is mirrored into shadow-visible attributes/classes
 
 ## Related
 
-- [host-commit-controller.md](host-commit-controller.md)
-- [surface-session-controller.md](surface-session-controller.md)
-- [cluster-widget-system.md](cluster-widget-system.md)
-- [../guides/add-new-html-kind.md](../guides/add-new-html-kind.md)
-- [vertical-container-contract.md](vertical-container-contract.md)
+- cluster-widget-system.md
+- runtime-lifecycle.md
+- vertical-container-contract.md
+- canvas-dom-surface-adapter.md

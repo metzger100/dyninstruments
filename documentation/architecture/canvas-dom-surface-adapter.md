@@ -1,69 +1,41 @@
 # Canvas DOM Surface Adapter
 
-**Status:** ✅ Implemented | `canvas-dom` surface owner used by `ClusterRendererRouter`
+**Status:** ✅ Implemented | Committed canvas surface lifecycle owner for canvas-dom routes
 
 ## Overview
 
-`cluster/rendering/CanvasDomSurfaceAdapter.js` owns the internal canvas lifecycle on the HTML host path.
-`ClusterRendererRouter` uses it for:
+cluster/rendering/CanvasDomSurfaceAdapter.js owns committed canvas lifecycle on the renderHtml host path.
 
-- stable canvas-surface shell generation (`renderSurfaceShell`)
-- `canvas-dom` controller creation (`createSurfaceController`) for surface-session lifecycle hooks
+Router responsibilities:
 
-## Key Details
+- render inert canvas shell markup
+- create committed canvas surface controllers
 
-- File: `cluster/rendering/CanvasDomSurfaceAdapter.js`
-- Component ID: `CanvasDomSurfaceAdapter`
-- Router integration owner: `cluster/rendering/ClusterRendererRouter.js` (`canvas-dom` branch)
-- Strict contract:
-  - throws when `rendererSpec.renderCanvas` is missing
-  - throws when `ResizeObserver` is unavailable
-  - throws when shell mount target `.dyni-surface-canvas-mount` is missing
-- Shell markup owner:
-  - `renderSurfaceShell()` returns stable canvas-surface markup
-  - no prop-dependent HTML changes inside the canvas mount subtree
-- Surface contract ownership:
-  - internal canvas node creation/removal
-  - resize observation + repaint scheduling
-  - explicit `invalidateTheme()` path with ThemeResolver cache invalidation
-  - attach/update/detach/destroy lifecycle
-- Current size note: adapter remains warning-tier in `check:filesize` and is tracked in [../TECH-DEBT.md](../TECH-DEBT.md) while the runtime contract stays stable.
+Adapter responsibilities:
 
-## API/Interfaces
+- mount/update/detach/destroy canvas lifecycle
+- resize observation and repaint scheduling
+- renderCanvas(canvas, props) dispatch to routed renderer
+- compatibility with central theme and shell sizing contracts
 
-```javascript
-const adapter = Helpers.getModule("CanvasDomSurfaceAdapter").create(def, Helpers);
+## Contract Highlights
 
-adapter.renderSurfaceShell(); // -> stable HTML string
+- renderSurfaceShell() returns stable shell markup with .dyni-surface-canvas-mount
+- createSurfaceController(...) fail-closes when rendererSpec.renderCanvas is missing
+- first canvas paint occurs after commit on a themed root (theme outputs already materialized)
+- no invalidateTheme() API exists in this architecture
 
-const controller = adapter.createSurfaceController({
-  rendererSpec,                // required, must implement renderCanvas(canvas, props)
-  hostContext,                 // optional
-  requestAnimationFrame,       // optional override
-  cancelAnimationFrame,        // optional override
-  ResizeObserver               // optional override; required by contract
-});
+## Vertical Sizing Integration
 
-controller.attach({ surface, rootEl, shellEl, props, revision });
-controller.update({ surface, rootEl, shellEl, props, revision });
-controller.detach(reason);
-controller.destroy();
-controller.invalidateTheme(reason);
-```
+Canvas shells use the same central vertical sizing pipeline as HTML shells.
 
-### Payload Contract (`attach` / `update`)
-
-| Key | Type | Required | Notes |
-|---|---|---|---|
-| `surface` | `string` | no | when present, must be `"canvas-dom"` |
-| `rootEl` | `Element` | yes | widget root for theme invalidation |
-| `shellEl` | `Element` | yes | shell containing `.dyni-surface-canvas-mount` |
-| `props` | `any` | no | renderer props snapshot |
-| `revision` | `number` | yes | finite revision id from runtime/session ownership |
+- ratio sizing materialized through shell aspect-ratio
+- natural sizing materialized through shell height
+- width remains host-owned in vertical mode
 
 ## Related
 
-- [cluster-widget-system.md](cluster-widget-system.md)
-- [runtime-lifecycle.md](runtime-lifecycle.md)
-- [surface-session-controller.md](surface-session-controller.md)
-- [host-commit-controller.md](host-commit-controller.md)
+- cluster-widget-system.md
+- runtime-lifecycle.md
+- surface-session-controller.md
+- host-commit-controller.md

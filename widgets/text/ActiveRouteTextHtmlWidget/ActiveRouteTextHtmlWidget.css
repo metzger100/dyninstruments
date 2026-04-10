@@ -44,13 +44,13 @@
 }
 
 .dyni-html-root .dyni-active-route-html.dyni-active-route-mode-normal .dyni-active-route-route-name {
-  font-weight: var(--dyni-font-weight, 700);
+  font-weight: var(--dyni-theme-font-weight, 700);
   opacity: 0.92;
 }
 
 .dyni-html-root .dyni-active-route-html.dyni-active-route-mode-high .dyni-active-route-route-name,
 .dyni-html-root .dyni-active-route-html.dyni-active-route-mode-flat .dyni-active-route-route-name {
-  font-weight: var(--dyni-label-weight, 700);
+  font-weight: var(--dyni-theme-font-label-weight, 700);
   opacity: 0.78;
 }
 
@@ -116,7 +116,7 @@
 }
 
 .dyni-html-root .dyni-active-route-metric-caption {
-  font-weight: var(--dyni-label-weight, 700);
+  font-weight: var(--dyni-theme-font-label-weight, 700);
   opacity: 0.78;
   line-height: 1;
 }
@@ -135,13 +135,13 @@
   min-width: 0;
   max-width: 100%;
   flex: 1 1 auto;
-  font-weight: var(--dyni-font-weight, 700);
+  font-weight: var(--dyni-theme-font-weight, 700);
   white-space: nowrap;
 }
 
 .dyni-html-root .dyni-active-route-metric-unit {
   flex: 0 0 auto;
-  font-weight: var(--dyni-label-weight, 700);
+  font-weight: var(--dyni-theme-font-label-weight, 700);
   opacity: 0.78;
   white-space: nowrap;
 }

@@ -1,76 +1,72 @@
 # Runtime Lifecycle
 
-**Status:** ✅ Implemented | Bootstrap/init/render lifecycle across runtime, theme, and host-action bridges
+**Status:** ✅ Implemented | plugin startup ownership + runtime theme commit materialization + commit-driven surface reconciliation
 
 ## Overview
 
-This page documents the live runtime lifecycle after the `renderHtml` host-path refactor. It covers bootstrap order, `runInit()` idempotence, deferred commit/session flow, theme preset resolution, and current runtime trade-offs.
+This document describes the live runtime lifecycle after PLAN9.
 
-## Key Details
+Authoritative owners:
 
-- Bootstrap owner: `plugin.js`
-  - Defines canonical `runtime.loadScriptOnce(id, src)` first.
-  - Loads 27 internal scripts in fixed order (`runtime/*`, `config/*`, then controllers/init).
-- Init call sites:
-  - `runtime/init.js` self-invokes `runInit()`.
-  - `plugin.js` calls `window.DyniPlugin.runtime.runInit()` again after the internal chain resolves.
-  - Guard contract: `state.initStarted` + `state.initPromise` prevent duplicate initialization work.
-- Runtime init order (`runtime/init.js`):
-  - verifies `avnav.api`
-  - creates singleton `state.hostActionBridge` (`TemporaryHostActionBridge`)
-  - builds `Helpers` and component loader
-  - loads all components required by `widgetDefinitions` plus `ThemeModel`
-  - registers widgets via `runtime.registerWidget(...)`
-  - reads startup theme preset once from `document.documentElement` (`--dyni-theme-preset`) and stores normalized `state.themePresetName`
-  - configures `ThemeResolver` with runtime-owned preset selection (`getActivePresetName -> state.themePresetName`)
-- Cluster render path (`ClusterWidget`):
-  - `translateFunction()` maps cluster props via `ClusterMapperRegistry`
-  - `renderHtml()` increments host render revision (`HostCommitController.recordRender`)
-  - `ClusterRendererRouter.renderHtml()` returns shell markup with `data-dyni-instance`
-  - `HostCommitController.scheduleCommit()` resolves mounted shell/root asynchronously
-  - `onCommit` callback builds session payload and reconciles via `SurfaceSessionController.reconcileSession(...)`
-- Theme preset selection:
-  - startup source:
-    - root-level `--dyni-theme-preset` on `document.documentElement`
-    - built-in `default`
-  - `ThemeResolver` preset selection is runtime-injected (`configure({ getActivePresetName })`), not resolver-owned DOM ingestion
-  - token precedence per key:
-    - CSS token override -> preset token -> built-in resolver default
-- Host-action bridge lifecycle:
-  - Created once during init, accessed through `Helpers.getHostActions()`.
-  - Capability snapshot cache key is `pageId + routePointsRelayPresence`.
-  - Cache auto-refreshes when page identity or route-points relay availability changes.
-  - `map/routeEditor/ais` dispatch stays page-sensitive via live DOM + React fiber handler lookup.
-- Host commit fallback lifecycle (`HostCommitController`):
-  - readiness probes: `raf-1` -> `raf-2` -> `raf-3` -> `raf-4`
-  - fallback: `MutationObserver(document.body, { childList: true, subtree: true })`
-  - observer ceiling: 2000ms, then final probe/abandon path
-  - no-observer fallback: zero-delay timeout probe
-  - stale-revision guard abandons outdated scheduled commits and clears pending state
+- plugin.js: sole automatic startup owner
+- runtime/init.js: startup wiring only (runInit), no self-invocation
+- runtime/theme-runtime.js: internal theme lifecycle owner (runtime._theme)
+- cluster/ClusterWidget.js: commit ordering owner (theme apply before surface reconcile)
+- runtime/TemporaryHostActionBridge.js: temporary host-action shim owner
 
-## API/Interfaces
+## Startup Sequence
 
-| Owner | API | Contract |
-|---|---|---|
-| `runtime/init.js` | `runtime.runInit()` | Idempotent startup boundary returning `state.initPromise` |
-| `runtime/HostCommitController.js` | `createHostCommitController(options?)` | Deferred shell/root commit scheduler with stale guards and bounded observer fallback |
-| `runtime/SurfaceSessionController.js` | `createSurfaceSessionController({ createSurfaceController })` | Per-instance surface state machine (`html`/`canvas-dom`) |
-| `runtime/TemporaryHostActionBridge.js` | `createTemporaryHostActionBridge()` | Page-sensitive host action facade + capability snapshots |
+1. plugin.js bootstraps internal scripts in fixed order and loads runtime/theme-runtime.js before runtime/init.js.
+2. plugin.js calls window.DyniPlugin.runtime.runInit() exactly once.
+3. runtime/init.js creates the host-action bridge singleton.
+4. runtime/init.js resolves required components via runtime/component-loader.js.
+5. runtime/init.js eager-loads ThemeModel and ThemeResolver.
+6. runtime/init.js reads --dyni-theme-preset once from document.documentElement.
+7. runtime/init.js normalizes that preset through ThemeModel.
+8. runtime/init.js configures runtime._theme (which configures ThemeResolver).
+9. runtime/init.js preloads committed HTML shadow CSS bundles as text.
+10. widget registration proceeds.
 
-## Remaining Trade-offs
+Startup does not scan plugin roots and does not apply per-root theme state.
 
-- `runInit()` is intentionally called from two places; init guard keeps behavior correct, but bootstrap does one extra method call.
-- `HostCommitController` fallback observer still scopes to `document.body` because no stable per-instance ancestor is guaranteed pre-commit.
-- `TemporaryHostActionBridge` still performs live page-handler discovery for dispatch paths, favoring correctness across page transitions over aggressive caching.
-- HTML lifecycle still computes renderer handler/signature state during shell render and attach/update phases; this is tracked as runtime cost debt.
+## Commit Sequence
+
+For every host commit, ClusterWidget enforces this order:
+
+1. host commit resolves committed root and shell elements
+2. runtime._theme.applyToRoot(rootEl) overwrites required --dyni-theme-* outputs
+3. ClusterRendererRouter.createSessionPayload(...) resolves route/surface policy and shell sizing materialization
+4. SurfaceSessionController.reconcileSession(...) attaches or updates html/canvas-dom surfaces
+
+There is no theme-change gate before apply. Outputs are applied on every commit.
+
+## Preset Ingestion Contract
+
+- startup source is only document.documentElement --dyni-theme-preset
+- preset is read once at startup and stored in runtime-owned state
+- no live reread loop exists
+- no public imperative preset mutation API exists
+
+## Surface Policy and Bridge Ownership
+
+Runtime resolves one normalized surface policy object per routed update.
+
+Policy includes:
+
+- pageId
+- containerOrientation (from props.mode)
+- interaction.mode (dispatch or passive)
+- normalized callbacks under surfacePolicy.actions
+- host facts for rendering/sizing (for example viewport height)
+
+Renderers do not probe host React/DOM internals directly. Host coupling stays in TemporaryHostActionBridge.
 
 ## Related
 
-- [component-system.md](component-system.md)
-- [cluster-widget-system.md](cluster-widget-system.md)
-- [host-commit-controller.md](host-commit-controller.md)
-- [surface-session-controller.md](surface-session-controller.md)
-- [html-renderer-lifecycle.md](html-renderer-lifecycle.md)
-- [canvas-dom-surface-adapter.md](canvas-dom-surface-adapter.md)
-- [../shared/theme-tokens.md](../shared/theme-tokens.md)
-- [../shared/helpers.md](../shared/helpers.md)
+- component-system.md
+- cluster-widget-system.md
+- html-renderer-lifecycle.md
+- vertical-container-contract.md
+- surface-session-controller.md
+- host-commit-controller.md
+- ../shared/theme-tokens.md

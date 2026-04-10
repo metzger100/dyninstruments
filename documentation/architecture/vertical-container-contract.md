@@ -1,68 +1,66 @@
 # Vertical Container Contract
 
-**Status:** ✅ Reference | `.widgetContainer.vertical` detection and intrinsic-height contract for HTML kinds
+**Status:** ✅ Implemented | Widget-owned vertical shell sizing with runtime materialization
 
 ## Overview
 
-This document defines how HTML renderers should behave when hosted inside `.widgetContainer.vertical`. It separates shipped CSS-only behavior from the architectural intrinsic-height contract for kinds that must compute natural height.
+Vertical sizing is a shell contract shared across HTML and canvas surfaces.
 
-## Key Details
+- outside .widgetContainer.vertical: host owns dimensions
+- inside .widgetContainer.vertical: host owns width, widget owns height
 
-- `.widgetContainer.vertical` is host-owned layout context; the plugin does not own when this class is applied.
-- Shipped behavior today is CSS-only presentation override in:
-  - `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css`
-  - `widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css`
-- Architectural intrinsic-height contract (for kinds that need it): force `high` mode, width-only responsive anchor, natural-height computation, wrapper-owned height injection.
+Runtime owns request/materialization timing; widgets own height policy.
 
-## API/Interfaces
+## Canonical Vertical Context
 
-### Detection Contract
+Pre-commit vertical context comes from props.mode.
 
-- Detection requires committed ancestry: `targetEl.closest(".widgetContainer.vertical")`.
-- Detection is authoritative only after mount (corrective rerender or later updates).
-- First pre-commit `renderHtml()` pass must treat vertical state as unknown and use host-sized assumptions.
+- props.mode === vertical -> vertical policy
+- otherwise non-vertical policy
 
-### Width-Only Anchor Contract
+Committed DOM ancestry checks are not canonical for pre-commit policy.
 
-- In vertical mode, shell height can be widget-produced and must not be used as responsive anchor.
-- Use `ResponsiveScaleProfile.computeProfile(W, W, spec)` so `minDim` is width-anchored.
-- Derive row/header/gap geometry from that width-only profile.
+## Widget-Owned Sizing API
 
-### Natural Height Contract (Architectural Pattern)
+Widgets that support vertical mode expose:
 
-For kinds that need intrinsic sizing, compute wrapper height as:
+getVerticalShellSizing(sizingContext, surfacePolicy)
 
-```text
-naturalHeight =
-  headerHeight + headerGap +
-  rowCount * rowHeight +
-  max(0, rowCount - 1) * rowGap +
-  outerPadding
-```
+sizingContext contains:
 
-- Cap to `60vh` using `window.innerHeight` (or injected `viewportHeight` in tests).
-- Clamp derived heights to `>= 0`.
-- Apply height inline on widget wrapper (for example `.dyni-<widget>-html`).
-- Never mutate shared host/surface elements (`.dyni-surface-html`, `.widgetData.dyni-shell`).
+- payload (normalized routed payload)
+- shellWidth (authoritative host width when available)
+- viewportHeight (runtime-owned host fact)
 
-### Vertical-Mode Resize Signature Contract
+Legal return shapes:
 
-- Exclude shell height from signature in vertical mode (height is widget-produced).
-- Include shell width, row/point count inputs, mode flag, and `isVerticalCommitted` flag.
-- Signature must stay stable when only widget-computed height changes.
+- ratio sizing: { kind: ratio, aspectRatio }
+- natural sizing: { kind: natural, height }
 
-### CSS Pattern
+Materialization rules:
 
-```css
-.widgetContainer.vertical .widget.dyniplugin .widgetData.dyni-shell .dyni-<widget>-html {
-  height: auto;
-  /* natural height is injected inline by renderer */
-}
-```
+- ratio -> shell aspect-ratio style
+- natural -> shell height style
+
+Runtime does not derive alternate formulas from returned height.
+
+## RoutePoints Exception
+
+RoutePoints is the only width-derived natural-height widget.
+
+- first pass may not have authoritative width pre-commit
+- exact width-derived natural height is finalized on first commit before surface attach
+- viewport cap policy is widget-owned (currently 60vh)
+
+## CSS Ownership Rule
+
+Vertical shell reserved height is runtime-owned on the inert shell.
+
+- shell CSS must not override reserved shell height with unconditional fill rules on .widgetData.dyni-shell
+- inner surface descendants may still fill within the reserved shell
 
 ## Related
 
-- [html-renderer-lifecycle.md](html-renderer-lifecycle.md)
-- [../shared/responsive-scale-profile.md](../shared/responsive-scale-profile.md)
-- [../shared/html-widget-visual-style-guide.md](../shared/html-widget-visual-style-guide.md)
-- [../guides/add-new-html-kind.md](../guides/add-new-html-kind.md)
+- html-renderer-lifecycle.md
+- cluster-widget-system.md
+- ../shared/responsive-scale-profile.md

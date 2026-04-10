@@ -60,7 +60,7 @@ Ownership:
 | Warning sector | `theme.colors.warning` | `#e7c66a` | Matte yellow |
 | Alarm sector | `theme.colors.alarm` | `#ff7a76` | Matte red |
 | Pointer | `theme.colors.pointer` | `#ff2b2b` | Red triangle |
-| Text/ticks/arc stroke | `Helpers.resolveTextColor()` | CSS-resolved | Foreground |
+| Text/ticks/arc stroke | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` | CSS-resolved | Foreground |
 | Layline starboard (WindRadialWidget) | `theme.colors.laylineStb` | `#82b683` | Starboard tack |
 | Layline port (WindRadialWidget) | `theme.colors.laylinePort` | `#ff7a76` | Port tack |
 
@@ -186,7 +186,7 @@ Text fit contract for semicircle gauges:
 
 - Major ticks: `len=theme.radial.ticks.majorLen`, `width=theme.radial.ticks.majorWidth`
 - Minor ticks: `len=theme.radial.ticks.minorLen`, `width=theme.radial.ticks.minorWidth`
-- Labels: `weight=theme.font.labelWeight`, font family from `resolveFontFamily()`
+- Labels: `weight=theme.font.labelWeight`, font family from `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).font.family`
 - End labels optional via `showEndLabels`
 
 ## Background Cache Rules

@@ -1,216 +1,28 @@
-# AvNav Plugin Lifecycle
+# Plugin Lifecycle (AvNav Host API)
 
-**Status:** ✅ Reference | Official AvNav API + dyninstruments internals (marked)
+**Status:** ✅ Reference | Host-facing widget lifecycle callbacks and dyninstruments integration notes
 
 ## Overview
 
-Reference for AvNav widget lifecycle APIs and the dyninstruments runtime flow used to register widgets and render values.
+AvNav registers widgets via registerWidget and calls lifecycle callbacks on host context.
 
-## Global Variables
+Common callbacks:
 
-| Variable | Scope | Description |
-|---|---|---|
-| `AVNAV_BASE_URL` | plugin.js, user.js | URL to plugin directory. Use to load assets/scripts. |
-| `AVNAV_PLUGIN_NAME` | plugin.js only | Plugin name string provided by AvNav. |
+- translateFunction(props)
+- renderHtml(props)
+- initFunction()
+- finalizeFunction()
 
-## Widget Registration
+## dyninstruments Notes
 
-```javascript
-avnav.api.registerWidget(definition, editableParameters)
-```
-
-### definition Object
-
-| Field | Type | Widget Types | Description |
-|---|---|---|---|
-| name | string | all | Unique widget name |
-| type | string (opt) | all | `"radialGauge"`, `"linearGauge"`, `"map"`; omitted for user widgets |
-| storeKeys | object | all | Key-to-store-path map |
-| caption | string (opt) | all | Default caption |
-| unit | string (opt) | all | Default unit |
-| formatter | function (opt) | defaultWidget, radialGauge, linearGauge | Value formatter |
-| translateFunction | fn(props) → obj (opt) | all except map | Transform values before rendering |
-| renderHtml | fn(props) → string (opt) | userWidget | Returns HTML string |
-| renderCanvas | fn(canvas, props) (opt) | userWidget, map | Draws on canvas |
-| initFunction | fn(props) (opt) | userWidget, map | Called once when widget is created |
-| finalizeFunction | fn() (opt) | userWidget, map | Called before widget is destroyed |
-
-Use `function` keyword (not arrow functions) when `this` binding to WidgetContext is required.
-
-## storeKeys
-
-Maps symbolic names to AvNav internal store paths. AvNav resolves them to live values:
-
-```javascript
-storeKeys: {
-  speed: "nav.gps.speed",
-  depth: "nav.gps.depthBelowTransducer"
-}
-```
-
-For plugin-maintained key/unit contracts (including roll/pitch), see [core-key-catalog.md](core-key-catalog.md).
-
-### Common Vessel Time/Status Keys
-
-- `nav.gps.rtime` — GPS time value used by vessel `clock`, `dateTime`, and `timeStatus` kinds.
-- `nav.gps.valid` — GPS validity flag used by vessel `timeStatus` kind.
-- Dynamic SignalK passthrough keys (for example `nav.gps.signalk.*`) require explicit formatter/unit tuples; do not assume units without checking [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md).
-
-## Widget Context
-
-Available as `this` in `initFunction`, `finalizeFunction`, `renderHtml`, and (for widgets that register it) `renderCanvas`.
-
-| Property/Method | Widget Type | Description |
-|---|---|---|
-| `eventHandler` | userWidget | Register HTML event handlers |
-| `hostActions` | dyninstruments userWidget | Temporary runtime facade for route/AIS host workflows |
-| `triggerRedraw()` | userWidget | Force re-render |
-| `triggerRender()` | map | Force map render |
-| `lonLatToPixel(lon, lat)` | map | Coordinates → canvas pixels |
-| `pixelToLonLat(x, y)` | map | Canvas pixels → coordinates |
-| `getScale()` | map | Display scale factor |
-| `getRotation()` | map | Map rotation in radians |
-| `getContext()` | map | Canvas context during render |
-| `getDimensions()` | map | Canvas size |
-
-### Interactive Click Handling on `GpsPage` (AvNav Instrument Dashboard)
-
-AvNav's instrument dashboard page (`GpsPage`) uses container-level click handling that can navigate back to map. For interactive controls (buttons, toggles, timers), stop propagation inside widget content.
-
-- `renderHtml` string + `this.eventHandler`: AvNav wraps handlers and applies propagation/default blocking automatically.
-- `renderHtml` returning React/HTM elements: call `ev.stopPropagation()` manually in handlers.
-
-Details and event-chain analysis: [interactive-widgets.md](interactive-widgets.md).
-
-### Runtime-Exposed Action Caveat
-
-- Current core source attaches `routePoints` to `window.avnav.api` in `viewer/util/api.js`, and core pages use it as a handler registry/action relay from `viewer/gui/GpsPage.jsx` and `viewer/gui/EditRoutePage.jsx`.
-- Maintainer guidance remains: there is no generalized concept yet for exposing host actions to plugins.
-- Treat `routePoints` as runtime-exposed implementation detail unless core later documents it as stable plugin API.
-- Preferred near-term approach for route/AIS/editor workflows: own the interaction inside plugin `renderHtml` / React code and use AvNav-side actions only as optional fallback.
-- Tag temporary code for this gap with `// dyni-workaround(avnav-plugin-actions) -- <reason>`.
-
-## Render Cycle (AvNav Standard)
-
-```text
-1. AvNav reads store values via storeKeys
-2. translateFunction(storeValues) called (if defined)
-3. renderCanvas(canvas, mergedProps) or renderHtml(mergedProps) called
-```
-
-`mergedProps` includes editable parameter values, store values, and translate output.
-
-## dyninstruments Host Contract (Current)
-
-- Cluster widgets are registered on the host path with `renderHtml` (no host `renderCanvas` registration).
-- Existing canvas renderers stay valid as internal renderer contracts and are mounted through `CanvasDomSurfaceAdapter`.
-- Runtime commit/surface ownership is explicit:
-  - `HostCommitController`: deferred shell/root commit
-  - `SurfaceSessionController`: per-instance `attach/update/detach/destroy` lifecycle
-  - `HtmlSurfaceController`: named HTML handler ownership per active HTML surface session
-
----
-
-## dyninstruments Internals (Not Official AvNav API)
-
-### updateFunction
-
-```javascript
-updateFunction: function(values) -> object
-```
-
-Used when editor values change (for example KEY-driven dynamic store key mapping). In dyninstruments, update functions are composed in `runtime/widget-registrar.js` via `composeUpdates(spec.updateFunction, widgetDef.def.updateFunction)`.
-
-Renderer-facing edit-mode note:
-
-- AvNav forwards `editing` to `updateFunction(values)` but strips it from render props.
-- `runtime/widget-registrar.js` mirrors that signal to `dyniLayoutEditing` so interactive renderers can keep host click ownership in layout edit mode.
-
-### cluster
-
-Internal cluster ID (for example `"speed"`, `"wind"`) used by ClusterWidget mapper routing.
-
-### wantsHideNativeHead
-
-When `true`, `runtime/widget-registrar.js` adds the static `dyni-hide-native-head` class to the registered widget root. CSS then hides AvNav native `.widgetHead` and `.valueData` through `.widget.dyniplugin.dyni-hide-native-head`.
-
-### hostActions
-
-`runtime/widget-registrar.js` injects `this.hostActions` before `initFunction`, `renderHtml`, and `finalizeFunction`.
-`ClusterWidget` is now registered renderHtml-only on the host path (no host `renderCanvas` registration).
-
-Current dyninstruments facade:
-
-- `this.hostActions.getCapabilities()`
-- `this.hostActions.routePoints.activate(index)`
-- `this.hostActions.map.checkAutoZoom()`
-- `this.hostActions.routeEditor.openActiveRoute()`
-- `this.hostActions.routeEditor.openEditRoute()`
-- `this.hostActions.ais.showInfo(mmsi)`
-
-This is dyninstruments-only runtime behavior, not official AvNav API.
-
-### eventHandler Ownership
-
-- `ClusterWidget.initFunction` registers `eventHandler.catchAll` once as global wrapper handler.
-- `HtmlSurfaceController` owns named control handlers for the active HTML surface session:
-  - bind on `attach`
-  - refresh on `update`
-  - remove on `detach` and `destroy`
-- `catchAll` is not surface-owned; it remains global to consume empty-space clicks on interactive wrappers.
-
-### HTML Resize Contract
-
-- HTML renderers provide `resizeSignature(props)` through the HTML surface contract.
-- On signature change, `HtmlSurfaceController` calls `triggerResize()` exactly once for that update pass.
-- This keeps layout-sensitive HTML kinds responsive without global observers.
-- Some HTML kinds require one corrective rerender after first mount when committed DOM ancestry (`shellEl`/`rootEl`) becomes available; see [../architecture/html-renderer-lifecycle.md](../architecture/html-renderer-lifecycle.md).
-
-### Module create() Pattern
-
-dyninstruments modules expose `create(def, Helpers)`:
-
-```javascript
-function create(def, Helpers) {
-  function renderHtml(props) { /* ... */ }
-  function initFunction(props) { /* ... */ }
-  function finalizeFunction() { /* ... */ }
-  return { id: "ModuleName", wantsHideNativeHead: true, renderHtml, initFunction, finalizeFunction };
-}
-```
-
-### dyninstruments Runtime Registration Flow
-
-```text
-1. plugin.js bootstraps internal scripts
-2. runtime/init.js creates `TemporaryHostActionBridge`
-3. runtime/component-loader.js loads required modules from config.widgetDefinitions
-4. runtime/widget-registrar.js merges module spec + cluster definition and injects `hostActions`
-5. avnav.api.registerWidget(definition, editableParameters)
-```
-
-After registration, `runtime/init.js` applies theme presets by discovering `.widget.dyniplugin` roots directly.
-
-### dyninstruments Render Flow
-
-```text
-1. User changes editable parameter -> updateFunction(values)
-2. AvNav reads store values via storeKeys
-3. ClusterWidget.translateFunction(mergedProps)
-   -> numeric: { value, caption, unit, formatter, formatterParameters }
-   -> graphic: { renderer: "SpeedRadialWidget", value, caption, unit, ... }
-4. ClusterWidget.renderHtml() returns shell markup via ClusterRendererRouter
-5. HostCommitController deferred commit resolves root/shell by data-dyni-instance
-6. SurfaceSessionController reconciles attach/update/remount/surface-switch lifecycle
-7. canvas kinds repaint through CanvasDomSurfaceAdapter internal canvas lifecycle
-```
+- dyninstruments cluster widgets use renderHtml host path only
+- pre-commit renderHtml returns inert shell markup
+- committed HTML and canvas rendering happens after host commit through surface controllers
+- theme outputs are applied to committed root before session reconcile
+- dyninstruments HTML interaction uses committed direct DOM listeners, not host inline handler translation
 
 ## Related
 
-- [editable-parameters.md](editable-parameters.md) — parameter types and conditions
-- [formatters.md](formatters.md) — formatter registration and built-ins
-- [core-key-catalog.md](core-key-catalog.md) — key/unit catalog for core integration
-- [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md) — contract boundaries and tuple policy
-- [interactive-widgets.md](interactive-widgets.md) — preventing instrument-dashboard (`GpsPage`) click-to-navigate for interactive content
-- [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md) — ClusterWidget mapper
-- [../architecture/html-renderer-lifecycle.md](../architecture/html-renderer-lifecycle.md) — corrective rerender and committed-DOM lifecycle contract
+- ../architecture/runtime-lifecycle.md
+- ../architecture/cluster-widget-system.md
+- ../architecture/html-renderer-lifecycle.md

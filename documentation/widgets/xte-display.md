@@ -74,14 +74,14 @@ Otherwise the widget shows placeholder text for missing/disconnected values and 
 
 ## Theme Token Usage
 
-Theme is resolved once per frame via `RadialToolkit.theme.resolveForRoot(Helpers.resolveWidgetRoot(canvas) || canvas)`.
+Theme is resolved once per frame via `RadialToolkit.theme.resolveForRoot(Helpers.requirePluginRoot(canvas))`.
 
 | Visual element | Token |
 |---|---|
 | Boat marker + active centerline | `theme.colors.pointer` |
 | Out-of-scale clamp marker | `theme.colors.alarm` |
-| Road edge + horizon strokes | `Helpers.resolveTextColor(canvas)` |
-| Perspective bars + center seam markers | `Helpers.resolveTextColor(canvas)` |
+| Road edge + horizon strokes | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` |
+| Perspective bars + center seam markers | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` |
 | Highway stroke thickness | `theme.xte.lineWidthFactor` (fallback `1` when invalid or `<=0`) |
 | Boat indicator size | `theme.xte.boatSizeFactor` (fallback `1` when invalid or `<=0`) |
 | Value text weight | `theme.font.weight` |

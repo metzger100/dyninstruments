@@ -1,229 +1,77 @@
 # Cluster Widget System
 
-**Status:** ✅ Implemented | Strict kind-catalog + surface-aware router + host commit/session wiring
+**Status:** ✅ Implemented | Strict route catalog + commit-driven shell/surface orchestration
 
 ## Overview
 
-`ClusterWidget` is the meta-module used by all cluster widgets. It uses a modular internal architecture:
+ClusterWidget is the runtime orchestrator used by cluster-based widgets.
 
-- Thin orchestrator: `cluster/ClusterWidget.js`
-- Mapping toolkit: `cluster/mappers/ClusterMapperToolkit.js`
-- Cluster mapper map: `cluster/mappers/ClusterMapperRegistry.js`
-- Kind/surface routing spec: `cluster/rendering/ClusterKindCatalog.js`
-- Surface-aware router + shell owner: `cluster/rendering/ClusterRendererRouter.js`
-- Canvas surface owner: `cluster/rendering/CanvasDomSurfaceAdapter.js`
-- HTML surface owner: `cluster/rendering/HtmlSurfaceController.js`
-- Shared domain viewmodels: `cluster/viewmodels/*.js` (current: `ActiveRouteViewModel.js`, `AisTargetViewModel.js`, `EditRouteViewModel.js`, `RoutePointsViewModel.js`)
-- Per-cluster mappers: `cluster/mappers/*.js`
+Primary owners:
+
+- cluster/ClusterWidget.js: lifecycle orchestration and commit ordering
+- cluster/mappers/ClusterMapperRegistry.js: cluster mapper resolution
+- cluster/rendering/ClusterKindCatalog.js: strict cluster/kind route tuples
+- cluster/rendering/ClusterRendererRouter.js: shell rendering and surface routing
+- cluster/rendering/ClusterSurfacePolicy.js: centralized surface policy + vertical shell sizing integration
+- cluster/rendering/HtmlSurfaceController.js: committed HTML lifecycle owner
+- cluster/rendering/CanvasDomSurfaceAdapter.js: committed canvas lifecycle owner
 
 ## Runtime Flow
 
-1. AvNav calls `ClusterWidget.translateFunction(props)`
-2. `ClusterMapperRegistry` resolves cluster by `props.cluster || def.cluster`
-3. `ClusterMapperToolkit.createToolkit(props)` provides:
-- `cap(kind)`
-- `unit(kind)`
-- `out(value, caption, unit, formatter, formatterParameters)`
-- `makeAngleFormatter(isDirection, leadingZero, fallback)`
-4. Matching mapper module translates to either:
-- numeric output for `ThreeValueTextWidget` (default text kinds)
-- stacked pair or variant output for `PositionCoordinateWidget` (`positionBoat`/`positionWp`, vessel `dateTime`, vessel `timeStatus`)
-- dedicated html-renderer output for `ActiveRouteTextHtmlWidget` (`nav` `activeRoute`)
-- dedicated html-renderer output for `EditRouteTextHtmlWidget` (`nav` `editRoute`)
-- dedicated html-renderer output for `RoutePointsTextHtmlWidget` (`nav` `routePoints`)
-- dedicated html-renderer output for `MapZoomTextHtmlWidget` (`map` `zoom`)
-- dedicated html-renderer output for `AisTargetTextHtmlWidget` (`map` `aisTarget`)
-- dedicated text-renderer output for `CenterDisplayTextWidget` (`map` `centerDisplay`)
-- graphic output with `renderer: "..."`
-`NavMapper` delegates active-route domain normalization (`routeName`, `disconnect`, `display`, captions/units) to `ActiveRouteViewModel`, edit-route normalization (`route`, active/local/server/source flags, distance/eta gating) to `EditRouteViewModel` and composes renderer-facing `captions`/`units` config for `EditRouteTextHtmlWidget`, and route-points domain normalization (`route`, `selectedIndex`, `isActiveRoute`, display flags) to `RoutePointsViewModel`. `MapMapper` delegates AIS summary normalization (`nameOrMmsi`, `frontText`, branch state, dispatch identity, color role) to `AisTargetViewModel`.
-5. `ClusterWidget.initFunction(props)` creates per-instance runtime state:
-- `HostCommitController` for deferred host commit
-- `SurfaceSessionController` for active surface lifecycle ownership
-- global `eventHandler.catchAll` registration
-6. `ClusterWidget.renderHtml(props)` records revision via host-commit state, delegates shell rendering to `ClusterRendererRouter`, then schedules deferred commit
-7. `ClusterRendererRouter` resolves route strictly by `props.cluster + props.kind` via `ClusterKindCatalog` (fail-closed; no unknown-kind fallback)
-8. Router renders shell-first markup: `.widgetData.dyni-shell` with `data-dyni-instance`, `data-dyni-surface`, and `.dyni-kind-*`
-9. Surface shell owner by route surface:
-- `canvas-dom` -> `CanvasDomSurfaceAdapter.renderSurfaceShell()` (stable mount subtree)
-- `html` -> `HtmlSurfaceController.renderSurfaceShell(...)`
-10. On deferred commit callback, `ClusterWidget` builds session payload via `router.createSessionPayload(...)` and reconciles via `SurfaceSessionController.reconcileSession(...)`
-11. `ClusterWidget.finalizeFunction()` cleans up host-commit handles and destroys the active surface session
+1. host calls translateFunction(props)
+2. mapper registry resolves cluster mapper and returns normalized renderer payload
+3. renderHtml(props) returns inert shell markup only
+4. HostCommitController resolves committed root/shell for the latest render revision
+5. ClusterWidget commit callback applies runtime._theme outputs to root
+6. router creates session payload (including normalized surfacePolicy and shell sizing materialization)
+7. SurfaceSessionController reconciles html/canvas-dom surface session
 
-Contract note:
-- Router does not expose host `renderCanvas`.
-- `ClusterWidget` is registered renderHtml-only on the host path.
-- Existing canvas renderers run only through the internal `canvas-dom` adapter.
-- Native HTML kinds run through `HtmlSurfaceController` (current shipped tuples: `nav/activeRoute`, `nav/editRoute`, `nav/routePoints`, `map/zoom`, `map/aisTarget`).
+## Theme and Commit Ordering
 
-## Mapper Modules
+Commit order is strict:
 
-Current mapper modules:
+- runtime._theme.applyToRoot(rootEl)
+- then surface session reconcile
 
-- `CourseHeadingMapper.js` (`courseHeading`)
-- `SpeedMapper.js` (`speed`)
-- `EnvironmentMapper.js` (`environment`)
-- `WindMapper.js` (`wind`)
-- `NavMapper.js` (`nav`)
-- `MapMapper.js` (`map`)
-- `AnchorMapper.js` (`anchor`)
-- `VesselMapper.js` (`vessel`)
+This ensures both HTML and canvas render against the same committed theme outputs.
 
-Each module implements:
+## Surface Policy Ownership
 
-```javascript
-function create(def, Helpers) {
-  function translate(props, toolkit) {
-    return {};
-  }
-  return { cluster: "clusterName", translate };
-}
-```
+ClusterSurfacePolicy resolves one normalized policy object per routed update.
 
-Mapper boundary:
-- Keep mapper modules declarative (`create` + `translate` only).
-- Mapper responsibilities: kind routing, output shape mapping, numeric normalization, renderer selection.
-- Renderer responsibilities: formatter/status/display logic and layout behavior.
+Policy includes:
 
-## ViewModel Modules
+- pageId
+- containerOrientation from props.mode
+- interaction.mode (dispatch or passive)
+- normalized action callbacks under surfacePolicy.actions
+- host facts such as viewport height
 
-- `cluster/viewmodels/ActiveRouteViewModel.js`: shared active-route domain contract owner for `nav/activeRoute` payload normalization and disconnect derivation.
-- `cluster/viewmodels/AisTargetViewModel.js`: shared AIS summary domain contract owner for `map/aisTarget` target identity, dispatch identity normalization, branch selection, and color-role precedence.
-- `cluster/viewmodels/EditRouteViewModel.js`: shared edit-route domain contract owner for `nav/editRoute` editing-route normalization, active/local/server derivation, and total-distance fallback behavior. Caption/unit text config remains mapper-owned (`NavMapper` `captions`/`units` groups).
-- `cluster/viewmodels/RoutePointsViewModel.js`: shared route-points domain contract owner for `nav/routePoints` route/point normalization plus selection and active-route flags.
-- Viewmodels are mapper-owned domain helpers; they do not render HTML/canvas and do not own surface lifecycle.
+Renderers do not call host capability APIs directly.
 
-## Vessel Kind Contract Tuples
+## Vertical Shell Sizing Ownership
 
-| kind | renderer path | store field(s) | raw unit/type | formatter contract |
-|---|---|---|---|---|
-| `dateTime` | `PositionCoordinateWidget` (`displayVariant: "dateTime"`) | `clock` | Date/time value | axis formatters `formatDate`/`formatTime` |
-| `timeStatus` | `PositionCoordinateWidget` (`displayVariant: "timeStatus"`) | `gpsValid`, `clock` | bool-like + Date/time | status-circle formatter + `formatTime` |
-| `pitch` | default `ThreeValueTextWidget` path | `pitch` | radians number or `undefined` | **mandatory:** `formatDirection` + `[true, true, false]` |
-| `roll` | default `ThreeValueTextWidget` path | `roll` | radians number or `undefined` | **mandatory:** `formatDirection` + `[true, true, false]` |
+In vertical mode:
 
-Reference: [plugin-core-contracts.md](plugin-core-contracts.md), [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md), [../avnav-api/core-key-catalog.md](../avnav-api/core-key-catalog.md).
+- host owns width
+- widget owns height through getVerticalShellSizing(...)
+- runtime/router materializes ratio sizing via aspect-ratio and natural sizing via height on the inert shell
 
-## Kind Catalog & Surface Routing
+RoutePoints is the only width-derived natural-height exception finalized at first commit before surface attach.
 
-`ClusterKindCatalog` is the single source of truth for route selection.
-Each entry contains:
+## HTML Route Contract
 
-- `cluster`
-- `kind`
-- `viewModelId`
-- `rendererId`
-- `surface` (`html` or `canvas-dom`)
+HTML routes are split into:
 
-Strict routing rules:
+- shell spec: inert shell + stable mount host
+- committed renderer factory: mount/update/postPatch/detach/destroy
 
-- Missing `cluster + kind` tuple throws.
-- Duplicate tuples throw at catalog build time.
-- Unsupported `surface` values throw.
-- Unknown `rendererId` values throw during router initialization.
-- Mapper-provided `props.renderer` must match the catalog `rendererId` for the same tuple; mismatch throws.
-
-Shipped tuples include both surfaces:
-
-- `surface: "canvas-dom"` for existing canvas-backed kinds
-- `surface: "html"` for native HTML kinds (`nav/activeRoute`, `nav/editRoute`, `nav/routePoints`, `map/zoom`, `map/aisTarget`)
-
-## Surface-Aware Router
-
-`ClusterRendererRouter` owns renderer inventory and surface shell routing for:
-
-- `ThreeValueTextWidget`
-- `PositionCoordinateWidget` (stacked pair text renderer for nav positions plus vessel `dateTime` / `timeStatus` variants)
-- `ActiveRouteTextHtmlWidget`
-- `EditRouteTextHtmlWidget`
-- `RoutePointsTextHtmlWidget`
-- `MapZoomTextHtmlWidget`
-- `AisTargetTextHtmlWidget`
-- `CenterDisplayTextWidget`
-- `WindRadialWidget`
-- `CompassRadialWidget`
-- `SpeedRadialWidget`
-- `SpeedLinearWidget`
-- `DepthRadialWidget`
-- `DepthLinearWidget`
-- `TemperatureRadialWidget`
-- `TemperatureLinearWidget`
-- `VoltageRadialWidget`
-- `VoltageLinearWidget`
-- `XteDisplayWidget`
-
-`wantsHideNativeHead` remains aggregated (`true` if any referenced renderer requests it).
-
-`RendererPropsWidget` still applies mapper-owned `rendererProps` merges for delegated gauge renderers.
-
-Surface owner contract:
-
-- `CanvasDomSurfaceAdapter.createSurfaceController(...)` -> `attach/update/detach/destroy` + optional `invalidateTheme`
-- `HtmlSurfaceController.createSurfaceController(...)` -> strict `attach/update/detach/destroy`
-- Router helper APIs consumed by `ClusterWidget`:
-- `createSurfaceControllerFactory(hostContext)`
-- `createSessionPayload(commitPayload)`
-
-Naming boundary:
-- Components under `cluster/rendering/` use role-based IDs, not cluster-prefixed IDs.
-
-## `cluster/rendering/` Boundary
-
-What belongs in `cluster/rendering/`:
-
-- the router (`ClusterRendererRouter`)
-- router-owned generic infrastructure (`RendererPropsWidget`)
-- true sub-renderers whose primary responsibility is cluster-side rendering orchestration
-
-What does not belong in `cluster/rendering/`:
-
-- per-kind mapper-to-widget shim files that only forward props to a widget in `widgets/`
-- translation-only logic that belongs in mappers
-- adaptation logic that can live inside the target renderer as a renderer-owned variant contract
-
-Rule:
-- If multiple kinds share the same visual/layout contract, extend the existing renderer with a variant prop (for example `PositionCoordinateWidget` `displayVariant`) instead of adding a new cluster-side forwarding shim.
-
-## Registration Rules for New Components
-
-### New Mapper Component
-
-Must be registered in two places:
-
-1. `config/components/registry-cluster.js`
-- add component entry
-- add dependency in `ClusterMapperRegistry.deps`
-2. `cluster/mappers/ClusterMapperRegistry.js`
-- add `cluster: moduleId` entry to `MAPPER_MODULE_IDS`
-
-### New Kind Route (Cluster + Kind)
-
-Must be updated in three places:
-
-1. cluster config (`config/clusters/*.js`)
-- add kind option/editables/store keys
-2. mapper (`cluster/mappers/*Mapper.js`)
-- map kind output shape and normalized props
-3. kind catalog (`cluster/rendering/ClusterKindCatalog.js`)
-- add strict tuple with `viewModelId`, `rendererId`, and `surface`
-
-### New Renderer Component / Route Target
-
-Must be registered in runtime dependency + router inventory:
-
-1. `config/components/registry-widgets.js` (or `registry-cluster.js` for cluster-owned renderers)
-- add renderer component entry
-- add dependency in `RendererPropsWidget.deps` for canvas/text renderer widgets, or in `ClusterRendererRouter.deps` for direct router-owned entries (for example HTML renderers)
-2. `cluster/rendering/ClusterRendererRouter.js`
-- add `rendererName: rendererSpec` in router inventory
-- if mapper uses `rendererProps`, route through `RendererPropsWidget`
-- ensure catalog tuples point to the new `rendererId`
+No named-handler or onclick host translation contract is used for dyninstruments HTML surfaces.
 
 ## Related
 
-- [component-system.md](component-system.md) — component registry and dependency loading
-- [../avnav-api/plugin-lifecycle.md](../avnav-api/plugin-lifecycle.md) — `translateFunction` lifecycle
-- [plugin-core-contracts.md](plugin-core-contracts.md) — core tuple schema and incident constraints
-- [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md) — canonical formatter signatures
-- [../avnav-api/core-key-catalog.md](../avnav-api/core-key-catalog.md) — key/unit catalog
-- [../guides/add-new-cluster.md](../guides/add-new-cluster.md) — cluster authoring workflow
-- [../guides/add-new-full-circle-dial.md](../guides/add-new-full-circle-dial.md) — full-circle dial renderer workflow
+- component-system.md
+- runtime-lifecycle.md
+- html-renderer-lifecycle.md
+- vertical-container-contract.md
+- canvas-dom-surface-adapter.md

@@ -72,7 +72,7 @@
 
 .dyni-html-root .dyni-edit-route-name-text {
   flex: 1 1 auto;
-  font-weight: var(--dyni-font-weight, 700);
+  font-weight: var(--dyni-theme-font-weight, 700);
 }
 
 .dyni-html-root .dyni-edit-route-source-badge {
@@ -80,7 +80,7 @@
   padding: 0.12em 0.32em;
   border-radius: 0.3em;
   border: 1px solid currentColor;
-  font-weight: var(--dyni-label-weight, 700);
+  font-weight: var(--dyni-theme-font-label-weight, 700);
   opacity: 0.82;
 }
 
@@ -136,7 +136,7 @@
 }
 
 .dyni-html-root .dyni-edit-route-metric-label {
-  font-weight: var(--dyni-label-weight, 700);
+  font-weight: var(--dyni-theme-font-label-weight, 700);
   opacity: 0.8;
 }
 
@@ -153,12 +153,12 @@
   min-width: 0;
   max-width: 100%;
   flex: 1 1 auto;
-  font-weight: var(--dyni-font-weight, 700);
+  font-weight: var(--dyni-theme-font-weight, 700);
 }
 
 .dyni-html-root .dyni-edit-route-metric-unit {
   flex: 0 0 auto;
-  font-weight: var(--dyni-label-weight, 700);
+  font-weight: var(--dyni-theme-font-label-weight, 700);
   opacity: 0.78;
 }
 

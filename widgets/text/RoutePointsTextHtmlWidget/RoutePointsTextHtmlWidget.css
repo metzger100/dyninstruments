@@ -70,12 +70,12 @@
 }
 
 .dyni-html-root .dyni-route-points-header-route {
-  font-weight: var(--dyni-font-weight, 700);
+  font-weight: var(--dyni-theme-font-weight, 700);
 }
 
 .dyni-html-root .dyni-route-points-header-meta {
   justify-content: flex-end;
-  font-weight: var(--dyni-label-weight, 700);
+  font-weight: var(--dyni-theme-font-label-weight, 700);
   opacity: 0.84;
 }
 
@@ -141,7 +141,7 @@
 }
 
 .dyni-html-root .dyni-route-points-ordinal {
-  font-weight: var(--dyni-label-weight, 700);
+  font-weight: var(--dyni-theme-font-label-weight, 700);
   opacity: 0.88;
 }
 
@@ -177,11 +177,11 @@
 }
 
 .dyni-html-root .dyni-route-points-name-text {
-  font-weight: var(--dyni-font-weight, 700);
+  font-weight: var(--dyni-theme-font-weight, 700);
 }
 
 .dyni-html-root .dyni-route-points-empty-text {
-  font-weight: var(--dyni-font-weight, 700);
+  font-weight: var(--dyni-theme-font-weight, 700);
   max-width: 100%;
   text-align: center;
   white-space: nowrap;
@@ -191,7 +191,7 @@
 .dyni-html-root .dyni-route-points-info-text,
 .dyni-html-root .dyni-route-points-ordinal-text,
 .dyni-html-root .dyni-route-points-header-meta-text {
-  font-weight: var(--dyni-label-weight, 700);
+  font-weight: var(--dyni-theme-font-label-weight, 700);
 }
 
 .dyni-html-root .dyni-route-points-dispatch .dyni-route-points-row {

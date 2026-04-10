@@ -66,7 +66,7 @@ Fail-closed expectation:
 
 HTML renderer docs must state the visual token boundary:
 
-- Font family and foreground color come from helper/theme owners (`Helpers.resolveFontFamily`, `Helpers.resolveTextColor`, `ThemeResolver.resolveForRoot` where needed).
+- Font family and foreground color come from the strict theme boundary (`ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(target))`).
 - Font weight and label weight come from theme token contract (`tokens.font.weight`, `tokens.font.labelWeight`) when fit/layout logic depends on weights.
 - Do not duplicate `plugin.css` or `ThemeResolver` defaults in widget-local docs/code unless boundary ownership requires it.
 
