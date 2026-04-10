@@ -56,8 +56,8 @@
     }
     return {
       routePoints: {
-        activate: function (index) {
-          return callAction("routePoints", "activate", [index]);
+        activate: function (payload) {
+          return callAction("routePoints", "activate", [payload]);
         }
       },
       map: {
@@ -119,9 +119,7 @@
     if (rendererId === "RoutePointsTextHtmlWidget") {
       return capabilities &&
         capabilities.routePoints &&
-        capabilities.routePoints.activate === "dispatch" &&
-        capabilities.routeEditor &&
-        capabilities.routeEditor.openEditRoute === "dispatch"
+        capabilities.routePoints.activate === "dispatch"
         ? "dispatch"
         : "passive";
     }

@@ -45,6 +45,21 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     };
   }
 
+  function makeRoutePointPayload(index, overrides) {
+    const basePoint = {
+      idx: index,
+      name: "WP" + String(index),
+      lat: 54 + index * 0.01,
+      lon: 10 + index * 0.01,
+      routeName: "Harbor Run",
+      selected: false
+    };
+    return {
+      index: index,
+      pointSnapshot: Object.assign(basePoint, overrides || {})
+    };
+  }
+
   it("returns a singleton hostActions facade with the documented shape", function () {
     const navRoot = makeElement({
       __reactFiber$nav: { memoizedProps: { onItemClick: vi.fn() }, return: null }
@@ -66,7 +81,16 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
   it("reports page-aware capabilities for nav, gps, edit-route, and other pages", function () {
     const nav = createBridgeContext({ pageRoots: { navpage: makeElement() } }).bridge.getHostActions().getCapabilities();
     const gps = createBridgeContext({ pageRoots: { gpspage: makeElement() } }).bridge.getHostActions().getCapabilities();
-    const editRoute = createBridgeContext({ pageRoots: { editroutepage: makeElement() } }).bridge.getHostActions().getCapabilities();
+    const editRoute = createBridgeContext({
+      pageRoots: {
+        editroutepage: makeElement({
+          __reactFiber$edit: { memoizedProps: { widgetClick: vi.fn() }, return: null }
+        })
+      }
+    }).bridge.getHostActions().getCapabilities();
+    const editRouteNoParity = createBridgeContext({
+      pageRoots: { editroutepage: makeElement() }
+    }).bridge.getHostActions().getCapabilities();
     const other = createBridgeContext({ pageRoots: {} }).bridge.getHostActions().getCapabilities();
 
     expect(nav).toEqual({
@@ -90,6 +114,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       routeEditor: { openActiveRoute: "unsupported", openEditRoute: "dispatch" },
       ais: { showInfo: "unsupported" }
     });
+    expect(editRouteNoParity.routePoints.activate).toBe("unsupported");
     expect(other).toEqual({
       pageId: "other",
       routePoints: { activate: "unsupported" },
@@ -172,30 +197,30 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     ]);
   });
 
-  it("delegates routePoints.activate through avnav.api and returns false only for unsupported pages", function () {
+  it("delegates routePoints.activate through avnav.api on gpspage and returns false for unsupported pages", function () {
     const routePointsActivate = vi.fn(() => true);
     const { bridge } = createBridgeContext({
       pageRoots: { gpspage: makeElement() },
       routePointsActivate
     });
 
-    expect(bridge.getHostActions().routePoints.activate(3)).toBe(true);
+    expect(bridge.getHostActions().routePoints.activate(makeRoutePointPayload(3))).toBe(true);
     expect(routePointsActivate).toHaveBeenCalledWith(3);
 
     const unsupported = createBridgeContext({
       pageRoots: { navpage: makeElement() }
     }).bridge;
-    expect(unsupported.getHostActions().routePoints.activate(1)).toBe(false);
+    expect(unsupported.getHostActions().routePoints.activate(makeRoutePointPayload(1))).toBe(false);
   });
 
-  it("throws explicit errors when a dispatch-capable routePoints path fails", function () {
+  it("throws explicit errors when a dispatch-capable gps routePoints relay path fails", function () {
     const { bridge } = createBridgeContext({
-      pageRoots: { editroutepage: makeElement() },
+      pageRoots: { gpspage: makeElement() },
       routePointsActivate: vi.fn(() => false)
     });
 
     expect(function () {
-      bridge.getHostActions().routePoints.activate(2);
+      bridge.getHostActions().routePoints.activate(makeRoutePointPayload(2));
     }).toThrow(/TemporaryHostActionBridge: routePoints\.activate returned false/);
   });
 
@@ -220,17 +245,43 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
 
     const navBridge = createBridgeContext({ pageRoots: { navpage: navRoot } }).bridge;
     const gpsBridge = createBridgeContext({ pageRoots: { gpspage: gpsRoot } }).bridge;
-    const editBridge = createBridgeContext({ pageRoots: { editroutepage: editRoot } }).bridge;
+    const editRelay = vi.fn(() => true);
+    const editBridgeContext = createBridgeContext({
+      pageRoots: { editroutepage: editRoot },
+      routePointsActivate: editRelay
+    });
+    const editBridge = editBridgeContext.bridge;
 
     expect(navBridge.getHostActions().map.checkAutoZoom()).toBe(true);
     expect(navBridge.getHostActions().routeEditor.openActiveRoute()).toBe(true);
     expect(gpsBridge.getHostActions().ais.showInfo("123456789")).toBe(true);
     expect(editBridge.getHostActions().routeEditor.openEditRoute()).toBe(true);
+    expect(editBridge.getHostActions().routePoints.activate(makeRoutePointPayload(7, { selected: true }))).toBe(true);
 
     expect(navHandler.mock.calls[0][0].avnav).toEqual({ item: { name: "Zoom" } });
     expect(navHandler.mock.calls[1][0].avnav).toEqual({ item: { name: "ActiveRoute" } });
     expect(gpsHandler.mock.calls[0][0].avnav).toEqual({ item: { name: "AisTarget" }, mmsi: "123456789" });
     expect(editHandler.mock.calls[0][0].avnav).toEqual({ item: { name: "EditRoute" } });
+    expect(editHandler.mock.calls[1][0].avnav).toEqual({
+      item: { name: "RoutePoints" },
+      point: { idx: 7, name: "WP7", lat: 54.07, lon: 10.07, routeName: "Harbor Run", selected: true }
+    });
+    expect(editRelay).not.toHaveBeenCalled();
+  });
+
+  it("fails closed on editroutepage when parity dispatch was granted but handler disappears", function () {
+    const editRoot = makeElement({
+      __reactFiber$edit: { memoizedProps: { widgetClick: vi.fn() }, return: null }
+    });
+    const { bridge } = createBridgeContext({ pageRoots: { editroutepage: editRoot } });
+    const hostActions = bridge.getHostActions();
+
+    expect(hostActions.getCapabilities().routePoints.activate).toBe("dispatch");
+    delete editRoot.__reactFiber$edit;
+
+    expect(function () {
+      hostActions.routePoints.activate(makeRoutePointPayload(1));
+    }).toThrow(/TemporaryHostActionBridge: routePoints\.activate parity dispatch unavailable on editroutepage/);
   });
 
   it("returns false for passive or unsupported action modes before dispatch", function () {

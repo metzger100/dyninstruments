@@ -167,6 +167,9 @@ describe("RoutePointsRenderModel", function () {
     expect(model.showOrdinal).toBe(true);
     expect(model.inlineGeometry.showOrdinal).toBe(true);
     expect(model.emptyText).toBe("");
+    expect(model.points[2].pointSnapshot).toMatchObject({
+      idx: 2, name: "", lat: 54.3, lon: 10.6, routeName: "Harbor Run", selected: true
+    });
   });
 
   it("disables ordinal in high mode and keeps row text geometry available", function () {

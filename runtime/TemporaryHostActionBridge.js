@@ -20,6 +20,11 @@
     return !!obj && Object.prototype.hasOwnProperty.call(obj, key);
   }
 
+  function toFiniteNumber(value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : undefined;
+  }
+
   function getPageRoot(pageId, doc) {
     if (!doc || typeof doc.getElementById !== "function" || pageId === "other") {
       return null;
@@ -101,13 +106,16 @@
     return targets;
   }
 
-  function findPageItemClickHandler(pageId, doc) {
+  function findPageDispatchHandler(pageId, doc, propNames) {
     const pageRoot = getPageRoot(pageId, doc);
     const targets = collectDispatchTargets(pageRoot);
+    const names = Array.isArray(propNames) && propNames.length > 0 ? propNames : ["onItemClick"];
     for (let i = 0; i < targets.length; i++) {
-      const handler = findFiberProp(targets[i], "onItemClick");
-      if (typeof handler === "function") {
-        return handler;
+      for (let j = 0; j < names.length; j++) {
+        const handler = findFiberProp(targets[i], names[j]);
+        if (typeof handler === "function") {
+          return handler;
+        }
       }
     }
     return null;
@@ -128,6 +136,66 @@
       throw createBridgeError("routePoints.activate requires a non-negative integer index");
     }
     return normalized;
+  }
+
+  function normalizeRoutePointActivationPayload(payload) {
+    if (!payload || typeof payload !== "object") {
+      throw createBridgeError("routePoints.activate requires payload { index, pointSnapshot }");
+    }
+    if (!payload.pointSnapshot || typeof payload.pointSnapshot !== "object") {
+      throw createBridgeError("routePoints.activate requires pointSnapshot payload");
+    }
+    return {
+      index: normalizeRoutePointIndex(payload.index),
+      pointSnapshot: payload.pointSnapshot
+    };
+  }
+
+  function buildEditRoutePointPayload(pointSnapshot) {
+    if (!pointSnapshot || typeof pointSnapshot !== "object") {
+      throw createBridgeError("routePoints.activate requires pointSnapshot on editroutepage");
+    }
+    if (!hasOwn(pointSnapshot, "idx")) {
+      throw createBridgeError("routePoints.activate requires pointSnapshot.idx on editroutepage");
+    }
+
+    const idx = normalizeRoutePointIndex(pointSnapshot.idx);
+    const lat = toFiniteNumber(pointSnapshot.lat);
+    const lon = toFiniteNumber(pointSnapshot.lon);
+
+    if (typeof lat !== "number" || typeof lon !== "number") {
+      throw createBridgeError("routePoints.activate requires finite pointSnapshot.lat/lon on editroutepage");
+    }
+
+    if (!hasOwn(pointSnapshot, "routeName")) {
+      throw createBridgeError("routePoints.activate requires pointSnapshot.routeName on editroutepage");
+    }
+
+    const hostPoint = {
+      idx: idx,
+      name: pointSnapshot.name == null ? "" : String(pointSnapshot.name).trim(),
+      lat: lat,
+      lon: lon,
+      routeName: pointSnapshot.routeName == null ? "" : String(pointSnapshot.routeName).trim()
+    };
+
+    if (hasOwn(pointSnapshot, "course")) {
+      const course = toFiniteNumber(pointSnapshot.course);
+      if (typeof course === "number") {
+        hostPoint.course = course;
+      }
+    }
+    if (hasOwn(pointSnapshot, "distance")) {
+      const distance = toFiniteNumber(pointSnapshot.distance);
+      if (typeof distance === "number") {
+        hostPoint.distance = distance;
+      }
+    }
+    if (hasOwn(pointSnapshot, "selected")) {
+      hostPoint.selected = pointSnapshot.selected === true;
+    }
+
+    return hostPoint;
   }
 
   function normalizeMmsi(mmsi) {
@@ -176,13 +244,13 @@
       return Object.freeze(snapshot);
     }
 
-    function buildCapabilitiesSnapshot(pageId, hasRoutePointsRelay) {
+    function buildCapabilitiesSnapshot(pageId, hasRoutePointsRelay, hasEditRouteParityDispatch) {
       return freezeCapabilitiesSnapshot({
         pageId: pageId,
         routePoints: {
-          activate: (hasRoutePointsRelay && (pageId === "gpspage" || pageId === "editroutepage"))
-            ? "dispatch"
-            : "unsupported"
+          activate: pageId === "gpspage"
+            ? (hasRoutePointsRelay ? "dispatch" : "unsupported")
+            : (pageId === "editroutepage" && hasEditRouteParityDispatch ? "dispatch" : "unsupported")
         },
         map: {
           checkAutoZoom: pageId === "navpage" ? "dispatch" : "unsupported"
@@ -203,19 +271,27 @@
       const pageId = detectPageId(doc);
       const routePointsApi = getRoutePointsApi();
       const hasRoutePointsRelay = !!(routePointsApi && typeof routePointsApi.activate === "function");
-      const cacheKey = pageId + "|" + (hasRoutePointsRelay ? "1" : "0");
+      const hasEditRouteParityDispatch = pageId === "editroutepage"
+        && typeof findPageDispatchHandler(pageId, doc, ["onItemClick", "widgetClick"]) === "function";
+      const cacheKey = pageId
+        + "|" + (hasRoutePointsRelay ? "1" : "0")
+        + "|" + (hasEditRouteParityDispatch ? "1" : "0");
       if (cacheKey === cachedCapabilitiesKey && cachedCapabilitiesSnapshot) {
         return cachedCapabilitiesSnapshot;
       }
       cachedCapabilitiesKey = cacheKey;
-      cachedCapabilitiesSnapshot = buildCapabilitiesSnapshot(pageId, hasRoutePointsRelay);
+      cachedCapabilitiesSnapshot = buildCapabilitiesSnapshot(
+        pageId,
+        hasRoutePointsRelay,
+        hasEditRouteParityDispatch
+      );
       return cachedCapabilitiesSnapshot;
     }
 
-    function dispatchViaPageItemClick(actionName, pageId, avnavData) {
-      const handler = findPageItemClickHandler(pageId, doc);
+    function dispatchViaPageHandler(actionName, pageId, avnavData, propNames, missingLabel) {
+      const handler = findPageDispatchHandler(pageId, doc, propNames);
       if (typeof handler !== "function") {
-        throw createBridgeError(actionName + " missing host onItemClick handler on " + pageId);
+        throw createBridgeError(actionName + " missing host " + missingLabel + " handler on " + pageId);
       }
       handler(createSyntheticEvent(avnavData));
       return true;
@@ -227,19 +303,36 @@
         return resolveCapabilities();
       },
       routePoints: {
-        activate: function (index) {
+        activate: function (payload) {
           ensureActive();
           const capabilities = resolveCapabilities();
           if (capabilities.routePoints.activate !== "dispatch") {
+            if (capabilities.pageId === "editroutepage") {
+              throw createBridgeError("routePoints.activate parity dispatch unavailable on editroutepage");
+            }
             return false;
+          }
+          const activation = normalizeRoutePointActivationPayload(payload);
+          if (capabilities.pageId === "editroutepage") {
+            const parityPoint = buildEditRoutePointPayload(activation.pointSnapshot);
+            // dyni-workaround(avnav-plugin-actions) -- keep RoutePoints parity in EditRoutePage via host click wiring until core exposes a stable plugin host-action API.
+            return dispatchViaPageHandler(
+              "routePoints.activate",
+              capabilities.pageId,
+              {
+                item: { name: "RoutePoints" },
+                point: parityPoint
+              },
+              ["onItemClick", "widgetClick"],
+              "onItemClick/widgetClick"
+            );
           }
           const routePointsApi = getRoutePointsApi();
           if (!routePointsApi || typeof routePointsApi.activate !== "function") {
             throw createBridgeError("routePoints.activate relay missing on " + capabilities.pageId);
           }
-          const normalizedIndex = normalizeRoutePointIndex(index);
           // dyni-workaround(avnav-plugin-actions) -- routePoints is runtime-exposed but not yet a documented plugin host-action API.
-          const dispatched = routePointsApi.activate(normalizedIndex);
+          const dispatched = routePointsApi.activate(activation.index);
           if (dispatched === false) {
             throw createBridgeError("routePoints.activate returned false on " + capabilities.pageId);
           }
@@ -254,9 +347,9 @@
             return false;
           }
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native Zoom dispatch until core exposes map actions.
-          return dispatchViaPageItemClick("map.checkAutoZoom", capabilities.pageId, {
+          return dispatchViaPageHandler("map.checkAutoZoom", capabilities.pageId, {
             item: { name: "Zoom" }
-          });
+          }, ["onItemClick"], "onItemClick");
         }
       },
       routeEditor: {
@@ -267,9 +360,9 @@
             return false;
           }
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native ActiveRoute dispatch until core exposes routeEditor actions.
-          return dispatchViaPageItemClick("routeEditor.openActiveRoute", capabilities.pageId, {
+          return dispatchViaPageHandler("routeEditor.openActiveRoute", capabilities.pageId, {
             item: { name: "ActiveRoute" }
-          });
+          }, ["onItemClick"], "onItemClick");
         },
         openEditRoute: function () {
           ensureActive();
@@ -278,9 +371,9 @@
             return false;
           }
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native EditRoute dialog dispatch until core exposes routeEditor actions.
-          return dispatchViaPageItemClick("routeEditor.openEditRoute", capabilities.pageId, {
+          return dispatchViaPageHandler("routeEditor.openEditRoute", capabilities.pageId, {
             item: { name: "EditRoute" }
-          });
+          }, ["onItemClick"], "onItemClick");
         }
       },
       ais: {
@@ -292,10 +385,10 @@
           }
           const normalizedMmsi = normalizeMmsi(mmsi);
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native AIS info dispatch until core exposes AIS actions.
-          return dispatchViaPageItemClick("ais.showInfo", capabilities.pageId, {
+          return dispatchViaPageHandler("ais.showInfo", capabilities.pageId, {
             item: { name: "AisTarget" },
             mmsi: normalizedMmsi
-          });
+          }, ["onItemClick"], "onItemClick");
         }
       }
     };

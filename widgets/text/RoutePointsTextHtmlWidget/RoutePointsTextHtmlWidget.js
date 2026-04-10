@@ -31,6 +31,17 @@
     return parsed;
   }
 
+  function resolvePointSnapshot(model, pointIndex) {
+    const points = model.points;
+    for (let i = 0; i < points.length; i += 1) {
+      const row = points[i];
+      if (row.index === pointIndex) {
+        return row.pointSnapshot || null;
+      }
+    }
+    return null;
+  }
+
   function create(def, Helpers) {
     const htmlFit = Helpers.getModule("RoutePointsHtmlFit").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
@@ -88,7 +99,10 @@
           if (!routePointActions || typeof routePointActions.activate !== "function") {
             return;
           }
-          routePointActions.activate(pointIndex);
+          routePointActions.activate({
+            index: pointIndex,
+            pointSnapshot: resolvePointSnapshot(lastModel, pointIndex)
+          });
         };
 
         wrapperEl.addEventListener("click", clickHandler);

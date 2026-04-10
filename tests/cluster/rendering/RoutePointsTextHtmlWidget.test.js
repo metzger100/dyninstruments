@@ -221,15 +221,32 @@ describe("RoutePointsTextHtmlWidget", function () {
       withSurfacePolicy({
         __canActivate: true,
         __points: [
-          { index: 0, ordinalText: "1", nameText: "WP1", infoText: "I", selected: false },
-          { index: 3, ordinalText: "4", nameText: "WP4", infoText: "I", selected: true }
+          {
+            index: 0,
+            ordinalText: "1",
+            nameText: "WP1",
+            infoText: "I",
+            selected: false,
+            pointSnapshot: { idx: 0, name: "WP1", lat: 54.1, lon: 10.1, routeName: "Route", selected: false }
+          },
+          {
+            index: 3,
+            ordinalText: "4",
+            nameText: "WP4",
+            infoText: "I",
+            selected: true,
+            pointSnapshot: { idx: 3, name: "WP4", lat: 54.4, lon: 10.4, routeName: "Route", selected: true }
+          }
         ]
       }, { mode: "dispatch", activate })
     );
 
     const row = mounted.mountEl.querySelector('[data-rp-idx="3"]');
     row.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-    expect(activate).toHaveBeenCalledWith(3);
+    expect(activate).toHaveBeenCalledWith({
+      index: 3,
+      pointSnapshot: { idx: 3, name: "WP4", lat: 54.4, lon: 10.4, routeName: "Route", selected: true }
+    });
 
     const wrapper = mounted.mountEl.querySelector(".dyni-route-points-html");
     wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));

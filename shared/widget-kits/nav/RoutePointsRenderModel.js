@@ -179,6 +179,30 @@
     return parts.join("|");
   }
 
+  function buildPointSnapshot(point, rowIndex, routeName, selected, htmlUtils) {
+    const p = toPoint(point);
+    const idxRaw = toFiniteNumber(p.idx);
+    const courseRaw = toFiniteNumber(p.course);
+    const distanceRaw = toFiniteNumber(p.distance);
+    const snapshot = {
+      idx: Number.isInteger(idxRaw) && idxRaw >= 0 ? idxRaw : rowIndex,
+      name: toText(p.name, htmlUtils),
+      lat: htmlUtils.toFiniteNumber(p.lat),
+      lon: htmlUtils.toFiniteNumber(p.lon),
+      routeName: routeName,
+      selected: selected === true
+    };
+
+    if (typeof courseRaw === "number") {
+      snapshot.course = courseRaw;
+    }
+    if (typeof distanceRaw === "number") {
+      snapshot.distance = distanceRaw;
+    }
+
+    return snapshot;
+  }
+
   function create(def, Helpers) {
     const centerMath = Helpers.getModule("CenterDisplayMath").create(def, Helpers);
     const layoutApi = Helpers.getModule("RoutePointsLayout").create(def, Helpers);
@@ -289,7 +313,14 @@
           ordinalText: String(i + 1),
           nameText: nameText,
           infoText: infoText,
-          selected: i === selectedIndex
+          selected: i === selectedIndex,
+          pointSnapshot: buildPointSnapshot(
+            currentPoint,
+            i,
+            routeNameText,
+            i === selectedIndex,
+            htmlUtils
+          )
         });
       }
 
