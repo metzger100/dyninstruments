@@ -31,7 +31,8 @@
     },
     ActiveRouteTextHtmlWidget: {
       js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
-      css: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css",
+      css: undefined,
+      shadowCss: [BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css"],
       globalKey: "DyniActiveRouteTextHtmlWidget",
       deps: ["ActiveRouteHtmlFit", "HtmlWidgetUtils"]
     },
@@ -48,7 +49,8 @@
     },
     EditRouteTextHtmlWidget: {
       js: BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js",
-      css: BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css",
+      css: undefined,
+      shadowCss: [BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"],
       globalKey: "DyniEditRouteTextHtmlWidget",
       deps: ["EditRouteHtmlFit", "HtmlWidgetUtils", "EditRouteRenderModel", "EditRouteMarkup"]
     },
@@ -70,7 +72,8 @@
     },
     RoutePointsTextHtmlWidget: {
       js: BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js",
-      css: BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.css",
+      css: undefined,
+      shadowCss: [BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.css"],
       globalKey: "DyniRoutePointsTextHtmlWidget",
       deps: [
         "RoutePointsHtmlFit",
@@ -82,13 +85,15 @@
     },
     MapZoomTextHtmlWidget: {
       js: BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
-      css: BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css",
+      css: undefined,
+      shadowCss: [BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css"],
       globalKey: "DyniMapZoomTextHtmlWidget",
       deps: ["MapZoomHtmlFit", "HtmlWidgetUtils"]
     },
     AisTargetTextHtmlWidget: {
       js: BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js",
-      css: BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css",
+      css: undefined,
+      shadowCss: [BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"],
       globalKey: "DyniAisTargetTextHtmlWidget",
       deps: ["AisTargetHtmlFit", "HtmlWidgetUtils", "AisTargetRenderModel", "AisTargetMarkup"]
     },

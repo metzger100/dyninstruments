@@ -353,6 +353,9 @@ function createHarnessEnvironment(options) {
   runIifeScript(rootDir, "runtime/helpers.js");
   runIifeScript(rootDir, "runtime/HostCommitController.js");
   runIifeScript(rootDir, "runtime/SurfaceSessionController.js");
+  globalThis.DyniPlugin.runtime._theme = {
+    applyToRoot() {}
+  };
 
   globalThis.DyniPlugin.state.hostActionBridge = {
     getHostActions: createHostActions

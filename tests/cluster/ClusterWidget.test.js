@@ -93,8 +93,12 @@ describe("ClusterWidget", function () {
   }
 
   function setupRuntime(createSurfaceSessionController) {
+    const themeRuntime = {
+      applyToRoot: vi.fn()
+    };
     const hostCommitController = createHostCommitControllerMock();
     const runtime = {
+      _theme: themeRuntime,
       createHostCommitController: vi.fn(function () {
         return hostCommitController;
       }),
@@ -103,7 +107,7 @@ describe("ClusterWidget", function () {
       })
     };
     globalThis.DyniPlugin = { runtime: runtime };
-    return { runtime, hostCommitController };
+    return { runtime, hostCommitController, themeRuntime };
   }
 
   afterEach(function () {
@@ -120,7 +124,7 @@ describe("ClusterWidget", function () {
       reconcileSession: vi.fn(() => true),
       destroy: vi.fn()
     };
-    const { runtime, hostCommitController } = setupRuntime(function () {
+    const { runtime, hostCommitController, themeRuntime } = setupRuntime(function () {
       return sessionController;
     });
 
@@ -172,8 +176,12 @@ describe("ClusterWidget", function () {
     expect(hostCommitController.recordRender).toHaveBeenCalledWith({ cluster: "speed", kind: "sog" });
     expect(renderHtml).toHaveBeenCalledWith({ cluster: "speed", kind: "sog" });
     expect(hostCommitController.scheduleCommit).toHaveBeenCalledTimes(1);
+    expect(themeRuntime.applyToRoot).toHaveBeenCalledWith({ id: "root-1" });
     expect(createSessionPayload).toHaveBeenCalledTimes(1);
     expect(sessionController.reconcileSession).toHaveBeenCalledTimes(1);
+    expect(themeRuntime.applyToRoot.mock.invocationCallOrder[0]).toBeLessThan(
+      sessionController.reconcileSession.mock.invocationCallOrder[0]
+    );
     expect(sessionController.reconcileSession.mock.calls[0][0]).toMatchObject({
       surface: "canvas-dom",
       revision: 1,

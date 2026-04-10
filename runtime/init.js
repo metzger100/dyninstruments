@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Init - Runtime initialization and widget registration
  * Documentation: documentation/architecture/component-system.md
- * Depends: runtime/helpers.js, runtime/component-loader.js, runtime/widget-registrar.js, config/widget-definitions.js
+ * Depends: runtime/theme-runtime.js, runtime/helpers.js, runtime/component-loader.js, runtime/widget-registrar.js, config/widget-definitions.js
  */
 (function (root) {
   "use strict";
@@ -9,6 +9,7 @@
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
   const state = ns.state;
+  const hasOwn = Object.prototype.hasOwnProperty;
 
   function createGetComponent(components) {
     return function getComponent(id) {
@@ -47,19 +48,36 @@
     return normalizePresetName(themeModel, cssPreset);
   }
 
-  function configureThemeResolver(themeResolver, themeModel) {
-    if (!themeResolver || typeof themeResolver.configure !== "function") {
-      throw new Error("dyninstruments: ThemeResolver.configure() is required");
+  function requireThemeRuntimeBoundary() {
+    if (!runtime._theme || typeof runtime._theme.configure !== "function" || typeof runtime._theme.applyToRoot !== "function") {
+      throw new Error("dyninstruments: runtime._theme boundary is required");
     }
-    themeResolver.configure({
-      ThemeModel: themeModel,
-      getNightModeState(rootEl) {
-        return !!(rootEl && typeof rootEl.closest === "function" && rootEl.closest(".nightMode"));
-      },
-      getActivePresetName() {
-        return state.themePresetName;
+    return runtime._theme;
+  }
+
+  function collectShadowCssUrls(components, componentIds) {
+    if (!Array.isArray(componentIds) || !componentIds.length) {
+      return [];
+    }
+
+    const seen = Object.create(null);
+    const urls = [];
+    for (let i = 0; i < componentIds.length; i += 1) {
+      const componentId = componentIds[i];
+      const componentDef = components[componentId];
+      if (!componentDef || !Array.isArray(componentDef.shadowCss)) {
+        continue;
       }
-    });
+      for (let j = 0; j < componentDef.shadowCss.length; j += 1) {
+        const url = componentDef.shadowCss[j];
+        if (typeof url !== "string" || !url || seen[url]) {
+          continue;
+        }
+        seen[url] = true;
+        urls.push(url);
+      }
+    }
+    return urls;
   }
 
   function runInit() {
@@ -78,6 +96,7 @@
     const config = ns.config;
     const components = config.components;
     const widgetDefinitions = config.widgetDefinitions;
+    const themeRuntime = requireThemeRuntimeBoundary();
 
     state.initStarted = true;
 
@@ -86,29 +105,39 @@
     const needed = loader.uniqueComponents(widgetDefinitions).slice();
     if (!needed.includes("ThemeModel")) needed.push("ThemeModel");
     if (!needed.includes("ThemeResolver")) needed.push("ThemeResolver");
+    const shadowCssUrls = collectShadowCssUrls(components, needed);
 
-    state.initPromise = Promise.all(needed.map(loader.loadComponent))
-      .then(function (componentsLoaded) {
+    state.initPromise = Promise.all([
+      Promise.all(needed.map(loader.loadComponent)),
+      themeRuntime.preloadShadowCssUrls(shadowCssUrls)
+    ])
+      .then(function (startupResults) {
+        const componentsLoaded = startupResults[0];
         const byId = {};
         componentsLoaded.forEach(function (component) {
           byId[component.id] = component;
+        });
+
+        const themeModel = byId.ThemeModel ||
+          (hasOwn.call(components, "ThemeModel")
+            ? Helpers.getModule("ThemeModel")
+            : null);
+        const themeResolver = byId.ThemeResolver ||
+          (hasOwn.call(components, "ThemeResolver")
+            ? Helpers.getModule("ThemeResolver")
+            : null);
+        const startupPresetName = resolveStartupThemePresetName(themeModel);
+
+        themeRuntime.configure({
+          ThemeModel: themeModel,
+          ThemeResolver: themeResolver,
+          activePresetName: startupPresetName
         });
 
         widgetDefinitions.forEach(function (widgetDef) {
           const component = byId[widgetDef.widget];
           runtime.registerWidget(component, widgetDef, Helpers);
         });
-
-        const themeModel = byId.ThemeModel ||
-          (Object.prototype.hasOwnProperty.call(components, "ThemeModel")
-            ? Helpers.getModule("ThemeModel")
-            : null);
-        state.themePresetName = resolveStartupThemePresetName(themeModel);
-        const themeResolver = byId.ThemeResolver ||
-          (Object.prototype.hasOwnProperty.call(components, "ThemeResolver")
-            ? Helpers.getModule("ThemeResolver")
-            : null);
-        configureThemeResolver(themeResolver, themeModel);
 
         root.avnav.api.log("dyninstruments component init ok (clustered): " + widgetDefinitions.length + " widgets");
       })
@@ -124,5 +153,4 @@
   }
 
   runtime.runInit = runInit;
-  runInit();
 }(this));

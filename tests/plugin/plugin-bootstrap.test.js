@@ -33,6 +33,7 @@ describe("plugin.js bootstrap", function () {
     const componentsConfigIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components.js");
     const hostCommitIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/HostCommitController.js");
     const surfaceSessionIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/SurfaceSessionController.js");
+    const themeRuntimeIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/theme-runtime.js");
     const initIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/init.js");
 
     expect(perfHelperIndex).toBeGreaterThan(-1);
@@ -49,8 +50,9 @@ describe("plugin.js bootstrap", function () {
     expect(componentsConfigIndex).toBeLessThan(hostCommitIndex);
     expect(hostCommitIndex).toBeGreaterThan(-1);
     expect(surfaceSessionIndex).toBeGreaterThan(-1);
-    expect(hostCommitIndex).toBeLessThan(initIndex);
-    expect(surfaceSessionIndex).toBeLessThan(initIndex);
+    expect(hostCommitIndex).toBeLessThan(themeRuntimeIndex);
+    expect(surfaceSessionIndex).toBeLessThan(themeRuntimeIndex);
+    expect(themeRuntimeIndex).toBeLessThan(initIndex);
     expect(dom.appendedScripts[dom.appendedScripts.length - 1].src)
       .toBe("http://host/plugins/dyninstruments/runtime/init.js");
     expect(typeof context.window.DyniPlugin.runtime.loadScriptOnce).toBe("function");

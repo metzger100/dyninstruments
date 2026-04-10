@@ -75,6 +75,7 @@
     "runtime/HostCommitController.js",
     "runtime/SurfaceSessionController.js",
     "runtime/TemporaryHostActionBridge.js",
+    "runtime/theme-runtime.js",
     "runtime/init.js"
   ];
 

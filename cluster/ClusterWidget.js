@@ -25,11 +25,18 @@
     }
   }
 
+  function ensureThemeRuntime(runtimeApi) {
+    if (!runtimeApi || !runtimeApi._theme || typeof runtimeApi._theme.applyToRoot !== "function") {
+      throw new Error("ClusterWidget: runtime._theme.applyToRoot must be available");
+    }
+  }
+
   function create(def, Helpers) {
     const runtimeApi = resolveRuntimeApi();
     const perf = Helpers.getModule("PerfSpanHelper").create(def, Helpers);
     ensureFactory(runtimeApi, "createHostCommitController");
     ensureFactory(runtimeApi, "createSurfaceSessionController");
+    ensureThemeRuntime(runtimeApi);
 
     const mapperToolkit = Helpers.getModule("ClusterMapperToolkit").create(def, Helpers);
     const rendererRouter = Helpers.getModule("ClusterRendererRouter").create(def, Helpers);
@@ -114,6 +121,7 @@
 
         state.hostCommitController.scheduleCommit({
           onCommit: function (commitPayload) {
+            runtimeApi._theme.applyToRoot(commitPayload.rootEl);
             const sessionPayload = rendererRouter.createSessionPayload(commitPayload);
             state.surfaceSessionController.reconcileSession(sessionPayload);
           }

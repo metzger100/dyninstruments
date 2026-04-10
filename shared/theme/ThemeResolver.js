@@ -148,48 +148,72 @@
     }
   }
 
-  function resolveForRoot(rootEl) {
-    requireCommittedPluginRoot(rootEl);
-    const themeModel = resolveThemeModel();
+  function createResolutionContext(rootEl, themeModel) {
     const inputReader = resolveInputReader();
     const getNightModeState = resolveNightModeGetter();
     const getActivePresetName = resolveActivePresetNameGetter(themeModel);
     const style = getComputedStyleSafe(rootEl);
     const mode = getNightModeState(rootEl) ? "night" : "day";
     const presetName = themeModel.normalizePresetName(getActivePresetName(rootEl, style, mode));
-    const presetMode = themeModel.getPresetMode(presetName, mode);
-    const presetBase = themeModel.getPresetBase(presetName);
+    return {
+      inputReader: inputReader,
+      style: style,
+      mode: mode,
+      presetMode: themeModel.getPresetMode(presetName, mode),
+      presetBase: themeModel.getPresetBase(presetName)
+    };
+  }
+
+  function resolveTokenValue(tokenDef, context) {
+    const pathSegments = tokenDef.path.split(".");
+    const rootOverride = readTokenInputOverride(context.style, tokenDef, context.inputReader);
+    if (rootOverride.hasValue) {
+      return rootOverride.value;
+    }
+
+    const presetModeValue = getByPath(context.presetMode, pathSegments);
+    if (typeof presetModeValue !== "undefined") {
+      return presetModeValue;
+    }
+
+    const presetBaseValue = getByPath(context.presetBase, pathSegments);
+    if (typeof presetBaseValue !== "undefined") {
+      return presetBaseValue;
+    }
+
+    const modeDefault = tokenDef.defaultByMode && Object.prototype.hasOwnProperty.call(tokenDef.defaultByMode, context.mode)
+      ? tokenDef.defaultByMode[context.mode]
+      : undefined;
+    if (typeof modeDefault !== "undefined") {
+      return modeDefault;
+    }
+
+    return tokenDef.default;
+  }
+
+  function resolveForRoot(rootEl) {
+    requireCommittedPluginRoot(rootEl);
+    const themeModel = resolveThemeModel();
+    const context = createResolutionContext(rootEl, themeModel);
     const out = {};
 
     themeModel.getTokenDefinitions().forEach(function (tokenDef) {
       const pathSegments = tokenDef.path.split(".");
-      const rootOverride = readTokenInputOverride(style, tokenDef, inputReader);
-      if (rootOverride.hasValue) {
-        setByPath(out, pathSegments, rootOverride.value);
-        return;
-      }
+      setByPath(out, pathSegments, resolveTokenValue(tokenDef, context));
+    });
 
-      const presetModeValue = getByPath(presetMode, pathSegments);
-      if (typeof presetModeValue !== "undefined") {
-        setByPath(out, pathSegments, presetModeValue);
-        return;
-      }
+    return out;
+  }
 
-      const presetBaseValue = getByPath(presetBase, pathSegments);
-      if (typeof presetBaseValue !== "undefined") {
-        setByPath(out, pathSegments, presetBaseValue);
-        return;
-      }
+  function resolveOutputsForRoot(rootEl) {
+    requireCommittedPluginRoot(rootEl);
+    const themeModel = resolveThemeModel();
+    const context = createResolutionContext(rootEl, themeModel);
+    const out = {};
 
-      const modeDefault = tokenDef.defaultByMode && Object.prototype.hasOwnProperty.call(tokenDef.defaultByMode, mode)
-        ? tokenDef.defaultByMode[mode]
-        : undefined;
-      if (typeof modeDefault !== "undefined") {
-        setByPath(out, pathSegments, modeDefault);
-        return;
-      }
-
-      setByPath(out, pathSegments, tokenDef.default);
+    themeModel.getOutputTokenDefinitions().forEach(function (tokenDef) {
+      const pathSegments = tokenDef.path.split(".");
+      setByPath(out, pathSegments, resolveTokenValue(tokenDef, context));
     });
 
     return out;
@@ -212,6 +236,7 @@
     id: "ThemeResolver",
     configure: configure,
     resolveForRoot: resolveForRoot,
+    resolveOutputsForRoot: resolveOutputsForRoot,
     getTokenDefinitions: getTokenDefinitions,
     getOutputTokenDefinitions: getOutputTokenDefinitions
   };
