@@ -40,12 +40,23 @@ shellRect remains authoritative for committed HTML layout and fit.
 
 There is no triggerResize() contract.
 
+## Committed Surface Box Contract
+
+HtmlSurfaceController owns a base shadow-root stylesheet that is injected once per shadow root.
+
+- style marker: `style[data-dyni-shadow-base="html-surface-box-contract"]`
+- contract targets: `:host` and `.dyni-html-root`
+- base semantics: `display:block`, `width:100%`, `height:100%`, `min-width:0`, `min-height:0`, `box-sizing:border-box`
+
+This keeps the measured mount-host `shellRect` and committed subtree sizing aligned for all HTML kinds.
+
 ## Layout and Relayout
 
 - layoutSignature(payload) indicates layout-relevant input changes
 - update(payload) patches DOM in place
 - postPatch(payload) may request one bounded internal relayout pass
 - unbounded rerender loops are not part of the contract
+- no ResizeObserver-driven relayout loop is part of this contract
 
 ## Interaction Ownership
 

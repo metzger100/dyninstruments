@@ -1,6 +1,8 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("HtmlSurfaceController", function () {
+  const originalDyniPlugin = globalThis.DyniPlugin;
+
   function createModule() {
     return loadFresh("cluster/rendering/HtmlSurfaceController.js").create({}, {
       getModule(id) {
@@ -23,6 +25,10 @@ describe("HtmlSurfaceController", function () {
     return { rootEl, shellEl, mountEl };
   }
 
+  function getBaseContractStyles(shadowRoot) {
+    return shadowRoot.querySelectorAll('style[data-dyni-shadow-base="html-surface-box-contract"]');
+  }
+
   function makePayload(surfaceDom, props, revision) {
     return {
       surface: "html",
@@ -32,6 +38,14 @@ describe("HtmlSurfaceController", function () {
       revision
     };
   }
+
+  afterEach(function () {
+    if (typeof originalDyniPlugin === "undefined") {
+      delete globalThis.DyniPlugin;
+    } else {
+      globalThis.DyniPlugin = originalDyniPlugin;
+    }
+  });
 
   it("renders html shell with mount host", function () {
     const module = createModule();
@@ -98,6 +112,7 @@ describe("HtmlSurfaceController", function () {
       layoutChanged: true,
       relayoutPass: 0
     }));
+    expect(getBaseContractStyles(surfaceDom.mountEl.shadowRoot)).toHaveLength(1);
     expect(surfaceDom.mountEl.innerHTML).toBe("");
     expect(surfaceDom.mountEl.shadowRoot.querySelector(".dyni-shadow-marker")).toBeTruthy();
 
@@ -131,6 +146,68 @@ describe("HtmlSurfaceController", function () {
     expect(function () {
       controller.attach(makePayload(surfaceDom, { sig: "e" }, 6));
     }).toThrow("attach() after destroy()");
+  });
+
+  it("injects base surface box contract once per attach and keeps widget shadow css injection", function () {
+    const getShadowCssText = vi.fn((url) => {
+      if (url === "/css/a.css") {
+        return ".a { color: red; }";
+      }
+      if (url === "/css/b.css") {
+        return ".b { color: blue; }";
+      }
+      return "";
+    });
+    globalThis.DyniPlugin = {
+      runtime: {
+        _theme: {
+          getShadowCssText
+        }
+      }
+    };
+
+    const module = createModule();
+    const surfaceDom = createSurfaceDom();
+    const rendererInstance = {
+      mount: vi.fn(),
+      update: vi.fn(),
+      postPatch: vi.fn(() => false),
+      detach: vi.fn(),
+      destroy: vi.fn()
+    };
+    const controller = module.createSurfaceController({
+      rendererSpec: {
+        createCommittedRenderer: vi.fn(() => rendererInstance)
+      },
+      hostContext: {},
+      shadowCssUrls: ["/css/a.css", "/css/b.css", "/css/a.css"]
+    });
+
+    controller.attach(makePayload(surfaceDom, {}, 1));
+
+    const shadowRoot = surfaceDom.mountEl.shadowRoot;
+    const baseStyle = getBaseContractStyles(shadowRoot);
+    expect(baseStyle).toHaveLength(1);
+    expect(baseStyle[0].textContent).toContain(":host");
+    expect(baseStyle[0].textContent).toContain(".dyni-html-root");
+    expect(shadowRoot.querySelectorAll('style[data-dyni-shadow-css="/css/a.css"]')).toHaveLength(1);
+    expect(shadowRoot.querySelectorAll('style[data-dyni-shadow-css="/css/b.css"]')).toHaveLength(1);
+    expect(getShadowCssText).toHaveBeenCalledTimes(2);
+
+    controller.update(makePayload(surfaceDom, {}, 2));
+    expect(getBaseContractStyles(shadowRoot)).toHaveLength(1);
+    expect(shadowRoot.querySelectorAll('style[data-dyni-shadow-css="/css/a.css"]')).toHaveLength(1);
+    expect(shadowRoot.querySelectorAll('style[data-dyni-shadow-css="/css/b.css"]')).toHaveLength(1);
+    expect(getShadowCssText).toHaveBeenCalledTimes(2);
+
+    controller.detach("detach");
+    expect(shadowRoot.innerHTML).toBe("");
+
+    controller.attach(makePayload(surfaceDom, {}, 3));
+    expect(getBaseContractStyles(shadowRoot)).toHaveLength(1);
+    expect(shadowRoot.querySelectorAll('style[data-dyni-shadow-css="/css/a.css"]')).toHaveLength(1);
+    expect(shadowRoot.querySelectorAll('style[data-dyni-shadow-css="/css/b.css"]')).toHaveLength(1);
+    expect(getShadowCssText).toHaveBeenCalledTimes(4);
   });
 
   it("throws for strict renderer contracts and invalid payload", function () {

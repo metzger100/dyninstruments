@@ -11,6 +11,7 @@ It defines visual ownership, CSS/state contracts, responsive-mode documentation 
 
 - Scope: native HTML kinds only (`surface: "html"`), not `canvas-dom` wrappers.
 - HTML renderers own inner markup/classes; shared host CSS owns root/shell/surface fill behavior.
+- HtmlSurfaceController injects the committed shadow-root base box contract (`:host` and `.dyni-html-root` fill semantics) once per shadow root.
 - Responsive geometry ownership and text-fit ownership must be split across shared layout/fit modules.
 - Visual docs must include exact class/state contracts and normative constants when they are runtime-owned.
 
@@ -19,6 +20,7 @@ It defines visual ownership, CSS/state contracts, responsive-mode documentation 
 | Area | Owner | Non-owner rule |
 |---|---|---|
 | Root widget and shell sizing (`.widget.dyniplugin`, `.widgetData.dyni-shell`, `.dyni-surface-html`) | `plugin.css` and host lifecycle modules | Widget-local CSS must not override shell/root fill contracts |
+| Committed shadow box contract (`:host`, `.dyni-html-root`) | `cluster/rendering/HtmlSurfaceController.js` | Widget-local CSS/docs must not re-own the base fill contract |
 | HTML surface lifecycle (`attach`/`update`/`detach`/`destroy`) | `cluster/rendering/HtmlSurfaceController.js` | Widget docs must not claim lifecycle ownership |
 | Domain normalization (`display`, `captions`, `units`, disconnect derivation) | mapper + viewmodel modules | HTML renderer docs must consume normalized payload contract |
 | Responsive geometry (`rects`, shares, insets, mode-specific splits) | shared layout-owner module | Renderer must not define a second compact curve |
@@ -55,12 +57,13 @@ Each HTML widget doc must include:
 Document the split explicitly:
 
 - Layout module: computes insets/content rects/mode rectangles/tile spacing.
-- Fit module: measures text and emits inline style payload (`font-size:...`).
+- Fit module: measures text and emits inline style payload (`font-size:...`) for each text role (caption/value/unit/name as applicable).
 - Renderer: injects style attributes onto markup and escapes text content.
 
 Fail-closed expectation:
 
 - If fit context cannot be established, renderer should keep valid markup behavior without throwing from the fit path.
+- Resize behavior stays on normal host commit/update flow; do not add observer-driven fitting loops or triggerResize shims.
 
 ## Token Usage Contract
 

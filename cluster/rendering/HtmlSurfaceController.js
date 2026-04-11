@@ -14,6 +14,26 @@
   const SURFACE_ID = "html";
   const SURFACE_CLASS = "dyni-surface-html";
   const MOUNT_CLASS = "dyni-surface-html-mount";
+  const BASE_SHADOW_STYLE_ATTR = "data-dyni-shadow-base";
+  const BASE_SHADOW_STYLE_ID = "html-surface-box-contract";
+  const BASE_SHADOW_STYLE_CSS = [
+    ":host {",
+    "  display: block;",
+    "  width: 100%;",
+    "  height: 100%;",
+    "  min-width: 0;",
+    "  min-height: 0;",
+    "  box-sizing: border-box;",
+    "}",
+    ".dyni-html-root {",
+    "  display: block;",
+    "  width: 100%;",
+    "  height: 100%;",
+    "  min-width: 0;",
+    "  min-height: 0;",
+    "  box-sizing: border-box;",
+    "}"
+  ].join("\n");
 
   function resolveRuntimeApi() {
     const globalRoot = (typeof globalThis !== "undefined")
@@ -157,6 +177,17 @@
     return cssText;
   }
 
+  function injectBaseShadowStyle(shadowRoot) {
+    const selector = 'style[' + BASE_SHADOW_STYLE_ATTR + '="' + BASE_SHADOW_STYLE_ID + '"]';
+    if (typeof shadowRoot.querySelector === "function" && shadowRoot.querySelector(selector)) {
+      return;
+    }
+    const styleEl = shadowRoot.ownerDocument.createElement("style");
+    styleEl.setAttribute(BASE_SHADOW_STYLE_ATTR, BASE_SHADOW_STYLE_ID);
+    styleEl.textContent = BASE_SHADOW_STYLE_CSS;
+    shadowRoot.appendChild(styleEl);
+  }
+
   function injectShadowStyles(shadowRoot, shadowCssUrls, themeRuntime) {
     if (!Array.isArray(shadowCssUrls) || !shadowCssUrls.length) {
       return;
@@ -237,6 +268,7 @@
           state.mountEl = ensureMountHost(payload.shellEl);
           state.shadowRoot = ensureShadowRoot(state.mountEl);
           state.shellEl = payload.shellEl;
+          injectBaseShadowStyle(state.shadowRoot);
           injectShadowStyles(state.shadowRoot, shadowCssUrls, themeRuntime);
 
           const rendererInstance = rendererSpec.createCommittedRenderer({

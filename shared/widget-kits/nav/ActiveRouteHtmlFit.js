@@ -183,7 +183,22 @@
           captionHeightPx: spacing.captionHeightPx
         });
         const fit = measurement && measurement.fit ? measurement.fit : null;
+        const captionText = htmlUtils.trimText(metric.caption);
+        const captionFit = captionText
+          ? tileLayout.measureFittedLine({
+            textApi: radialText,
+            ctx: measureCtx,
+            text: captionText,
+            maxW: measurement ? measurement.textW : 1,
+            maxH: measurement ? measurement.capH : 1,
+            maxPx: measurement ? measurement.capMaxPx : 1,
+            textFillScale: layout.responsive.textFillScale,
+            family: family,
+            weight: labelWeight
+          })
+          : null;
         metricStyles[metric.id] = {
+          captionStyle: toFontSizeStyle(captionFit && captionFit.px, htmlUtils),
           valueStyle: toFontSizeStyle(fit && fit.vPx, htmlUtils),
           unitStyle: toFontSizeStyle(fit && fit.uPx, htmlUtils)
         };
