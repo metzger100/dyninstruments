@@ -234,9 +234,9 @@ describe("EditRouteTextHtmlWidget", function () {
     const css = fs.readFileSync(cssPath, "utf8");
 
     expect(css).toContain(".dyni-html-root .dyni-edit-route-html");
-    expect(css).toContain('.dyni-html-root[data-dyni-orientation="vertical"] .dyni-edit-route-html');
-    expect(css).toContain("aspect-ratio: 7 / 8;");
-    expect(css).toContain("min-height: 8em;");
     expect(css).not.toContain(".widgetContainer.vertical .widget.dyniplugin");
+    // Vertical mode must not self-expand beyond the committed surface box
+    expect(css).not.toMatch(/aspect-ratio.*7\s*\/\s*8/);
+    expect(css).not.toMatch(/min-height.*8em/);
   });
 });

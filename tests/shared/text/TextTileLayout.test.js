@@ -34,7 +34,8 @@ describe("TextTileLayout", function () {
     expect(measurement.textX).toBe(6);
     expect(measurement.textW).toBe(26);
     expect(measurement.capH).toBe(3);
-    expect(measurement.valueH).toBe(9);
+    // valueH includes the ROW_SAFE_RATIO (0.85) safety margin: floor((12 - 3) * 0.85) = 7
+    expect(measurement.valueH).toBe(7);
   });
 
   it("keeps a 2px technical value-height guard when compact caption spacing would overconsume the tile", function () {

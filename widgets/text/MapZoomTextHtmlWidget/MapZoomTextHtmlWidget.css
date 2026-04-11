@@ -16,11 +16,9 @@
   --dyni-map-zoom-value-size: 1.62em;
 }
 
-.dyni-html-root[data-dyni-orientation="vertical"] .dyni-map-zoom-html {
-  height: auto;
-  aspect-ratio: 2 / 1;
-  min-height: 4.8em;
-}
+/* Vertical mode: the committed surface box (.dyni-html-root) owns the authoritative geometry.
+   The inner wrappers must not self-expand beyond shellRect; no height/aspect/min-height
+   overrides are applied so width:100%/height:100% from the base rule remains in effect. */
 
 .dyni-html-root .dyni-map-zoom-html.dyni-map-zoom-mode-high {
   --dyni-map-zoom-value-size: 1.62em;

@@ -130,4 +130,125 @@ describe("MapZoomHtmlFit", function () {
     expect(h.calls.flat[0].valueWeight).toBe(730);
     expect(h.calls.flat[0].labelWeight).toBe(610);
   });
+
+  it("shrinks fitted text under tighter geometry and keeps non-trivial output", function () {
+    const MODULE_PATH_BY_ID = {
+      HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
+      ThemeResolver: "shared/theme/ThemeResolver.js",
+      TextLayoutEngine: "shared/widget-kits/text/TextLayoutEngine.js",
+      RadialValueMath: "shared/widget-kits/radial/RadialValueMath.js",
+      RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
+      TextLayoutPrimitives: "shared/widget-kits/text/TextLayoutPrimitives.js",
+      TextLayoutComposite: "shared/widget-kits/text/TextLayoutComposite.js",
+      ResponsiveScaleProfile: "shared/widget-kits/layout/ResponsiveScaleProfile.js",
+      RadialTextLayout: "shared/widget-kits/radial/RadialTextLayout.js",
+      RadialTextFitting: "shared/widget-kits/radial/RadialTextFitting.js"
+    };
+    const moduleCache = Object.create(null);
+    const Helpers = {
+      applyFormatter(value) { return String(value); },
+      resolveFontFamily() { return "sans-serif"; },
+      requirePluginRoot(target) { return target; },
+      getNightModeState() { return false; },
+      getModule(id) {
+        const relPath = MODULE_PATH_BY_ID[id];
+        if (!relPath) throw new Error("unexpected module: " + id);
+        if (!moduleCache[id]) moduleCache[id] = loadFresh(relPath);
+        return moduleCache[id];
+      }
+    };
+
+    const fit = loadFresh("shared/widget-kits/nav/MapZoomHtmlFit.js").create({}, Helpers);
+    const model = {
+      mode: "normal",
+      caption: "ZOOM",
+      zoomText: "12.2",
+      unit: "x",
+      captionUnitScale: 0.8,
+      showRequired: false,
+      requiredText: ""
+    };
+    const hostContext = {};
+    const rootEl = document.createElement("div");
+    rootEl.className = "widget dyniplugin dyni-host-html";
+    hostContext.__dyniHostCommitState = { rootEl: rootEl, shellEl: null };
+
+    // Spacious geometry
+    const spaciousResult = fit.compute({
+      model: model,
+      hostContext: hostContext,
+      shellRect: { width: 320, height: 180 }
+    });
+    const spaciousValuePx = parseInt(spaciousResult.valueStyle.match(/(\d+)/)[1], 10);
+
+    // Tight geometry (same aspect ratio, smaller)
+    const tightResult = fit.compute({
+      model: model,
+      hostContext: hostContext,
+      shellRect: { width: 160, height: 90 }
+    });
+    const tightValuePx = parseInt(tightResult.valueStyle.match(/(\d+)/)[1], 10);
+
+    // Tight geometry should produce a smaller fitted font size
+    expect(tightValuePx).toBeLessThan(spaciousValuePx);
+    // Both should still be non-trivial (at least 8px)
+    expect(spaciousValuePx).toBeGreaterThanOrEqual(8);
+    expect(tightValuePx).toBeGreaterThanOrEqual(8);
+  });
+
+  it("produces fitted text under tight flat-mode geometry", function () {
+    const MODULE_PATH_BY_ID = {
+      HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
+      ThemeResolver: "shared/theme/ThemeResolver.js",
+      TextLayoutEngine: "shared/widget-kits/text/TextLayoutEngine.js",
+      RadialValueMath: "shared/widget-kits/radial/RadialValueMath.js",
+      RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
+      TextLayoutPrimitives: "shared/widget-kits/text/TextLayoutPrimitives.js",
+      TextLayoutComposite: "shared/widget-kits/text/TextLayoutComposite.js",
+      ResponsiveScaleProfile: "shared/widget-kits/layout/ResponsiveScaleProfile.js",
+      RadialTextLayout: "shared/widget-kits/radial/RadialTextLayout.js",
+      RadialTextFitting: "shared/widget-kits/radial/RadialTextFitting.js"
+    };
+    const moduleCache = Object.create(null);
+    const Helpers = {
+      applyFormatter(value) { return String(value); },
+      resolveFontFamily() { return "sans-serif"; },
+      requirePluginRoot(target) { return target; },
+      getNightModeState() { return false; },
+      getModule(id) {
+        const relPath = MODULE_PATH_BY_ID[id];
+        if (!relPath) throw new Error("unexpected module: " + id);
+        if (!moduleCache[id]) moduleCache[id] = loadFresh(relPath);
+        return moduleCache[id];
+      }
+    };
+
+    const fit = loadFresh("shared/widget-kits/nav/MapZoomHtmlFit.js").create({}, Helpers);
+    const model = {
+      mode: "flat",
+      caption: "ZOOM",
+      zoomText: "12.2",
+      unit: "x",
+      captionUnitScale: 0.8,
+      showRequired: false,
+      requiredText: ""
+    };
+    const hostContext = {};
+    const rootEl = document.createElement("div");
+    rootEl.className = "widget dyniplugin dyni-host-html";
+    hostContext.__dyniHostCommitState = { rootEl: rootEl, shellEl: null };
+
+    // Tight flat geometry
+    const tightFlatResult = fit.compute({
+      model: model,
+      hostContext: hostContext,
+      shellRect: { width: 220, height: 40 }
+    });
+
+    // Fit output should exist with a non-empty value style
+    expect(tightFlatResult.valueStyle).toBeTruthy();
+    expect(tightFlatResult.valueStyle).toMatch(/font-size:\d+px/);
+    const tightFlatValuePx = parseInt(tightFlatResult.valueStyle.match(/(\d+)/)[1], 10);
+    expect(tightFlatValuePx).toBeGreaterThanOrEqual(6);
+  });
 });

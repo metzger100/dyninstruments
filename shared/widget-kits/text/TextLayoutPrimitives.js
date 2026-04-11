@@ -163,6 +163,11 @@
       return { vPx: vPx, uPx: unitText ? uPx : 0, vW: vW, uW: uW, total: total, gap: gap };
     }
 
+    // Vertical safety factor: fitted text must stay inside its allocated row band.
+    // Browser glyph paint can exceed nominal line-height at tight sizes; reserve ~15%
+    // of the row height as a safe visual margin.
+    const ROW_SAFE_RATIO = 0.85;
+
     function fitInlineTriplet(args) {
       const cfg = args || {};
       const ctx = cfg.ctx;
@@ -179,7 +184,8 @@
       const scale = isFinite(secScale) ? secScale : 0.8;
       const steps = Math.max(1, Math.floor(Number(cfg.steps) || 14));
       const minPx = Math.max(1, Math.floor(Number(cfg.minPx) || 1));
-      const maxPx = Math.max(minPx, Math.floor(Number(cfg.maxPx) || (maxH * 1.6)));
+      const safeMaxH = Math.max(1, Math.floor(maxH * ROW_SAFE_RATIO));
+      const maxPx = Math.max(minPx, Math.floor(Number(cfg.maxPx) || (safeMaxH * 1.6)));
       const extraValueCheck = typeof cfg.extraValueCheck === "function"
         ? cfg.extraValueCheck
         : null;
@@ -198,7 +204,7 @@
         const cW = captionText ? ctx.measureText(captionText).width : 0;
         const uW = unitText ? ctx.measureText(unitText).width : 0;
         const total = (captionText ? cW + gap : 0) + vW + (unitText ? gap + uW : 0);
-        const ok = total <= maxW + 0.01 && vPx <= maxH && sPx <= maxH &&
+        const ok = total <= maxW + 0.01 && vPx <= safeMaxH && sPx <= safeMaxH &&
           (!extraValueCheck || extraValueCheck({
             valuePx: vPx,
             secondaryPx: sPx,

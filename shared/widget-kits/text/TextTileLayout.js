@@ -46,6 +46,11 @@
     };
   }
 
+  // Vertical safety factor: fitted text must stay inside its allocated row band.
+  // Browser glyph paint can exceed nominal line-height at tight sizes; reserve ~15%
+  // of the value-row height as a safe visual margin.
+  const VALUE_ROW_SAFE_RATIO = 0.85;
+
   function resolveMetricHeights(totalHeight, captionHeightRatio, captionHeightPx) {
     const safeHeight = Math.max(1, Math.floor(Number(totalHeight) || 0));
     const defaultCaptionHeight = Math.max(1, Math.floor(safeHeight * captionHeightRatio));
@@ -61,9 +66,12 @@
     }
 
     const capH = Math.max(1, Math.min(safeHeight - 2, requestedCaptionHeight));
+    const rawValueH = Math.max(2, safeHeight - capH);
+    // Apply safety factor so fitted text stays visually inside the row band
+    const valueH = Math.max(2, Math.floor(rawValueH * VALUE_ROW_SAFE_RATIO));
     return {
       capH: capH,
-      valueH: Math.max(2, safeHeight - capH)
+      valueH: valueH
     };
   }
 

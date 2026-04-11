@@ -73,6 +73,24 @@ HTML renderer docs must state the visual token boundary:
 - Font weight and label weight come from theme token contract (`tokens.font.weight`, `tokens.font.labelWeight`) when fit/layout logic depends on weights.
 - Do not duplicate `plugin.css` or `ThemeResolver` defaults in widget-local docs/code unless boundary ownership requires it.
 
+## Committed Surface Box Contract
+
+The committed HTML surface box (`shellRect` from `.dyni-surface-html-mount`, rendered as `.dyni-html-root` in shadow DOM) is the authoritative geometry source for all committed HTML widgets.
+
+Rules:
+- Inner widget wrappers (`.dyni-*-html`) must resolve their size against `width: 100%` / `height: 100%` from the base rule.
+- Vertical-mode CSS must not use `height: auto`, `aspect-ratio`, or `min-height` on the inner wrapper to self-expand beyond the surface box.
+- If a true minimum-size policy is needed, it must not be enforced by making the committed inner widget render bigger than the surface box.
+- Resize stays on normal host commit/update flow; no observer-driven fitting loops or triggerResize shims.
+
+## Text-Fit Safety Margin
+
+Fitted text must stay visually inside its allocated row/inline band. Browser glyph paint can exceed nominal `line-height: 1` at tight sizes.
+
+- Shared fit primitives apply a `ROW_SAFE_RATIO` (0.85) safety factor to row height ceilings.
+- This benefits all widgets that use `TextTileLayout`, `TextLayoutComposite`, and `TextLayoutPrimitives`.
+- Fit payload format remains unchanged; the safety factor is applied during height budget computation.
+
 ## Anti-Patterns (Fail-Closed)
 
 | Anti-pattern | Required alternative | Related smell rule |
@@ -81,6 +99,7 @@ HTML renderer docs must state the visual token boundary:
 | Renderer defines responsive hard floors independent of shared profile | Move compaction math to layout owner + `ResponsiveScaleProfile` | `responsive-layout-hard-floor`, `responsive-profile-ownership` |
 | Runtime state encoded in ad hoc attributes | Use explicit contract classes and documented handler names | compatibility cleanup policy |
 | Renderer re-documents fallback literals owned by config/theme | Keep defaults at config/theme boundary and reference owner | `hardcoded-runtime-default`, `inline-config-default-duplication` |
+| Inner widget wrapper self-expands beyond committed surface box | Rely on `width:100%`/`height:100%` from base rule; no vertical-mode overrides | surface box contract |
 
 ## Visual Contract Template
 

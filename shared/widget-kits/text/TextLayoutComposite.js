@@ -10,6 +10,11 @@
 }(this, function () {
   "use strict";
 
+  // Vertical safety factor: fitted text must stay inside its allocated row band.
+  // Browser glyph paint can exceed nominal line-height at tight sizes; reserve ~15%
+  // of the row height as a safe visual margin.
+  const ROW_SAFE_RATIO = 0.85;
+
   function clampTextFillScale(value) {
     const n = Number(value);
     return Number.isFinite(n) && n > 0 ? n : 1;
@@ -41,9 +46,9 @@
       const hMid = Math.round(H * (1 / (1 + scale + scale)));
       const hBot = H - hTop - hMid;
       const maxW = Math.max(1, W - padX * 2);
-      const maxHTop = Math.max(1, hTop - innerY * 2);
-      const maxHMid = Math.max(1, hMid - innerY * 2);
-      const maxHBot = Math.max(1, hBot - innerY * 2);
+      const maxHTop = Math.max(1, Math.floor((hTop - innerY * 2) * ROW_SAFE_RATIO));
+      const maxHMid = Math.max(1, Math.floor((hMid - innerY * 2) * ROW_SAFE_RATIO));
+      const maxHBot = Math.max(1, Math.floor((hBot - innerY * 2) * ROW_SAFE_RATIO));
       const capMaxPx = scaleTextCeiling(Math.min(Math.floor(maxHMid * scale), maxHTop), maxHTop, textFillScale);
       const unitMaxPx = scaleTextCeiling(Math.min(Math.floor(maxHMid * scale), maxHBot), maxHBot, textFillScale);
       const vFit = primitive.fitSingleLineBinary({
@@ -119,8 +124,8 @@
       const hTop = Math.round(H * (1 / (1 + scale)));
       const hBot = H - hTop;
       const maxW = Math.max(1, W - padX * 2);
-      const maxHTop = Math.max(1, hTop - innerY * 2);
-      const maxHBot = Math.max(1, hBot - innerY * 2);
+      const maxHTop = Math.max(1, Math.floor((hTop - innerY * 2) * ROW_SAFE_RATIO));
+      const maxHBot = Math.max(1, Math.floor((hBot - innerY * 2) * ROW_SAFE_RATIO));
       const capMaxPx = scaleTextCeiling(Math.min(Math.floor(maxHTop * scale), maxHBot), maxHBot, textFillScale);
       const pair = primitive.fitValueUnitRow({
         ctx: cfg.ctx,
