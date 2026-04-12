@@ -13,6 +13,7 @@
   const GLOBAL_ROOT = (typeof globalThis !== "undefined")
     ? globalThis
     : (typeof self !== "undefined" ? self : {});
+  const DEFAULT_CAPABILITIES = Object.freeze({ pageId: "other" });
 
   function toFiniteNumber(value) {
     const n = Number(value);
@@ -34,20 +35,17 @@
     return hostActions && typeof hostActions === "object" ? hostActions : null;
   }
 
-  function resolveHostCapabilities(hostContext) {
-    const hostActions = resolveHostActions(hostContext);
-    if (!hostActions || typeof hostActions.getCapabilities !== "function") {
-      return { pageId: "other" };
-    }
-    const capabilities = hostActions.getCapabilities();
+  function normalizeHostCapabilities(capabilities) {
     if (!capabilities || typeof capabilities !== "object") {
-      return { pageId: "other" };
+      return DEFAULT_CAPABILITIES;
     }
-    return capabilities;
+    if (capabilities.pageId) {
+      return capabilities;
+    }
+    return Object.assign({}, capabilities, { pageId: "other" });
   }
 
-  function createNormalizedActions(hostContext) {
-    const hostActions = resolveHostActions(hostContext);
+  function createNormalizedActions(hostActions) {
     function callAction(ownerKey, actionKey, args) {
       if (!hostActions || !hostActions[ownerKey] || typeof hostActions[ownerKey][actionKey] !== "function") {
         return false;
@@ -79,6 +77,68 @@
         }
       }
     };
+  }
+
+  function createHostContextCache() {
+    return {
+      hostActions: null,
+      rawCapabilities: null,
+      normalizedCapabilities: DEFAULT_CAPABILITIES,
+      normalizedActions: createNormalizedActions(null)
+    };
+  }
+
+  function resolveHostContextCache(hostContext, cacheByHostContext) {
+    const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
+    if (!ctx) {
+      return null;
+    }
+    let cached = cacheByHostContext.get(ctx);
+    if (!cached) {
+      cached = createHostContextCache();
+      cacheByHostContext.set(ctx, cached);
+    }
+    return cached;
+  }
+
+  function resolveHostCapabilities(hostContext, cacheByHostContext) {
+    const hostActions = resolveHostActions(hostContext);
+    const hostCache = resolveHostContextCache(hostContext, cacheByHostContext);
+    if (hostCache && hostCache.hostActions !== hostActions) {
+      hostCache.hostActions = hostActions;
+      hostCache.rawCapabilities = null;
+      hostCache.normalizedCapabilities = DEFAULT_CAPABILITIES;
+      hostCache.normalizedActions = createNormalizedActions(hostActions);
+    }
+    if (!hostActions || typeof hostActions.getCapabilities !== "function") {
+      return DEFAULT_CAPABILITIES;
+    }
+    const rawCapabilities = hostActions.getCapabilities();
+    if (!hostCache) {
+      return normalizeHostCapabilities(rawCapabilities);
+    }
+    if (hostCache.rawCapabilities === rawCapabilities) {
+      return hostCache.normalizedCapabilities;
+    }
+    const normalizedCapabilities = normalizeHostCapabilities(rawCapabilities);
+    hostCache.rawCapabilities = rawCapabilities;
+    hostCache.normalizedCapabilities = normalizedCapabilities;
+    return normalizedCapabilities;
+  }
+
+  function resolveNormalizedActions(hostContext, cacheByHostContext) {
+    const hostActions = resolveHostActions(hostContext);
+    const hostCache = resolveHostContextCache(hostContext, cacheByHostContext);
+    if (!hostCache) {
+      return createNormalizedActions(hostActions);
+    }
+    if (hostCache.hostActions !== hostActions) {
+      hostCache.hostActions = hostActions;
+      hostCache.rawCapabilities = null;
+      hostCache.normalizedCapabilities = DEFAULT_CAPABILITIES;
+      hostCache.normalizedActions = createNormalizedActions(hostActions);
+    }
+    return hostCache.normalizedActions;
   }
 
   function resolveContainerOrientation(props) {
@@ -131,28 +191,45 @@
     return typeof viewport === "number" && viewport > 0 ? Math.floor(viewport) : 0;
   }
 
-  function buildSurfacePolicy(routeState, hostContext) {
-    const capabilities = resolveHostCapabilities(hostContext);
+  function buildSurfacePolicy(routeState, hostContext, cacheByHostContext) {
+    const capabilities = resolveHostCapabilities(hostContext, cacheByHostContext);
     return {
       pageId: capabilities.pageId || "other",
       containerOrientation: resolveContainerOrientation(routeState.props),
       interaction: {
         mode: resolveInteractionMode(routeState, capabilities)
       },
-      actions: createNormalizedActions(hostContext),
+      actions: resolveNormalizedActions(hostContext, cacheByHostContext),
       hostFacts: {
         viewportHeight: resolveViewportHeight()
       }
     };
   }
 
-  function withSurfacePolicyProps(routeState, hostContext) {
-    const surfacePolicy = buildSurfacePolicy(routeState, hostContext);
-    return {
-      ...routeState.props,
-      surfacePolicy: surfacePolicy,
-      viewportHeight: surfacePolicy.hostFacts && surfacePolicy.hostFacts.viewportHeight
-    };
+  function materializeRuntimeField(props, key, value) {
+    const descriptor = Object.getOwnPropertyDescriptor(props, key);
+    if (descriptor && descriptor.enumerable === false && descriptor.configurable === true && descriptor.writable === true) {
+      props[key] = value;
+      return;
+    }
+    Object.defineProperty(props, key, {
+      configurable: true,
+      enumerable: false,
+      writable: true,
+      value: value
+    });
+  }
+
+  function withSurfacePolicyProps(routeState, hostContext, cacheByHostContext) {
+    const surfacePolicy = buildSurfacePolicy(routeState, hostContext, cacheByHostContext);
+    const routedProps = routeState.props;
+    materializeRuntimeField(routedProps, "surfacePolicy", surfacePolicy);
+    materializeRuntimeField(
+      routedProps,
+      "viewportHeight",
+      surfacePolicy.hostFacts && surfacePolicy.hostFacts.viewportHeight
+    );
+    return routedProps;
   }
 
   function isVerticalPolicy(surfacePolicy) {
@@ -200,8 +277,8 @@
     return parseVerticalSizing(sizing, opts.allowNatural === true);
   }
 
-  function resolveRouteStateWithPolicy(routeState, hostContext, sizingOptions) {
-    const routedProps = withSurfacePolicyProps(routeState, hostContext);
+  function resolveRouteStateWithPolicy(routeState, hostContext, sizingOptions, cacheByHostContext) {
+    const routedProps = withSurfacePolicyProps(routeState, hostContext, cacheByHostContext);
     const shellSizing = resolveVerticalShellSizing(
       routeState,
       routedProps,
@@ -256,9 +333,12 @@
   }
 
   function create() {
+    const cacheByHostContext = new WeakMap();
     return {
       id: "ClusterSurfacePolicy",
-      resolveRouteStateWithPolicy: resolveRouteStateWithPolicy,
+      resolveRouteStateWithPolicy: function (routeState, hostContext, sizingOptions) {
+        return resolveRouteStateWithPolicy(routeState, hostContext, sizingOptions, cacheByHostContext);
+      },
       buildShellSizingStyle: buildShellSizingStyle,
       resolveShellWidth: resolveShellWidth,
       applyShellSizingToElement: applyShellSizingToElement
