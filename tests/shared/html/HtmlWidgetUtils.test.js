@@ -1,6 +1,8 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("HtmlWidgetUtils", function () {
+  const LAST_PATCHED_MARKUP_KEY = "__dyniLastPatchedMarkup";
+
   function createUtils() {
     return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js").create();
   }
@@ -87,5 +89,77 @@ describe("HtmlWidgetUtils", function () {
     expect(utils.isEditingMode({ dyniLayoutEditing: true })).toBe(true);
     expect(utils.isEditingMode({ editing: false, dyniLayoutEditing: false })).toBe(false);
     expect(utils.isEditingMode(null)).toBe(false);
+  });
+
+  it("uses the jsdom fast path and preserves no-op identity on unchanged markup", function () {
+    const utils = createUtils();
+    const root = document.createElement("div");
+    const createElementSpy = vi.spyOn(root.ownerDocument, "createElement");
+    try {
+      const markup = '<div class="wrapper"><span>Alpha</span></div>';
+      const firstResult = utils.patchInnerHtml(root, markup);
+      const firstChild = root.firstElementChild;
+      const secondResult = utils.patchInnerHtml(root, markup);
+
+      expect(createElementSpy).not.toHaveBeenCalled();
+      expect(root.innerHTML).toBe(markup);
+      expect(firstResult).toBe(firstChild);
+      expect(secondResult).toBe(firstChild);
+      expect(root.firstElementChild).toBe(firstChild);
+      expect(root[LAST_PATCHED_MARKUP_KEY]).toBe(markup);
+    } finally {
+      createElementSpy.mockRestore();
+    }
+  });
+
+  it("persists last-markup across append/sync/replace/empty paths", function () {
+    const utils = createUtils();
+    const doc = document.implementation.createHTMLDocument("non-jsdom");
+    const root = doc.createElement("div");
+
+    const appendMarkup = '<div class="one">A</div>';
+    const syncMarkup = '<div class="one">B</div>';
+    const replaceMarkup = '<section class="two">C</section>';
+
+    utils.patchInnerHtml(root, appendMarkup);
+    expect(root[LAST_PATCHED_MARKUP_KEY]).toBe(appendMarkup);
+
+    const syncNode = root.firstElementChild;
+    utils.patchInnerHtml(root, syncMarkup);
+    expect(root[LAST_PATCHED_MARKUP_KEY]).toBe(syncMarkup);
+    expect(root.firstElementChild).toBe(syncNode);
+    expect(root.firstElementChild.textContent).toBe("B");
+
+    utils.patchInnerHtml(root, replaceMarkup);
+    expect(root[LAST_PATCHED_MARKUP_KEY]).toBe(replaceMarkup);
+    expect(root.firstElementChild.tagName).toBe("SECTION");
+
+    const cleared = utils.patchInnerHtml(root, "");
+    expect(cleared).toBe(null);
+    expect(root[LAST_PATCHED_MARKUP_KEY]).toBe("");
+    expect(root.firstElementChild).toBe(null);
+
+    const descriptor = Object.getOwnPropertyDescriptor(root, LAST_PATCHED_MARKUP_KEY);
+    expect(descriptor).toBeTruthy();
+    expect(descriptor.enumerable).toBe(false);
+  });
+
+  it("keeps structural sync behavior in non-jsdom environments", function () {
+    const utils = createUtils();
+    const doc = document.implementation.createHTMLDocument("non-jsdom");
+    const root = doc.createElement("div");
+    const createElementSpy = vi.spyOn(doc, "createElement");
+    try {
+      utils.patchInnerHtml(root, '<div class="root"><span>One</span></div>');
+      const stableRoot = root.firstElementChild;
+      const result = utils.patchInnerHtml(root, '<div class="root"><span>Two</span></div>');
+
+      expect(createElementSpy).toHaveBeenCalledWith("template");
+      expect(result).toBe(stableRoot);
+      expect(root.firstElementChild).toBe(stableRoot);
+      expect(root.querySelector("span").textContent).toBe("Two");
+    } finally {
+      createElementSpy.mockRestore();
+    }
   });
 });

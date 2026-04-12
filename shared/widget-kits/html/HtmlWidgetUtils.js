@@ -156,6 +156,43 @@
     return true;
   }
 
+  const LAST_PATCHED_MARKUP_KEY = "__dyniLastPatchedMarkup";
+
+  function readLastPatchedMarkup(rootEl) {
+    return rootEl ? rootEl[LAST_PATCHED_MARKUP_KEY] : undefined;
+  }
+
+  function writeLastPatchedMarkup(rootEl, markup) {
+    if (!rootEl) {
+      return;
+    }
+    const value = markup == null ? "" : String(markup);
+    const desc = Object.getOwnPropertyDescriptor(rootEl, LAST_PATCHED_MARKUP_KEY);
+    if (desc && desc.writable) {
+      rootEl[LAST_PATCHED_MARKUP_KEY] = value;
+      return;
+    }
+    if (desc && !desc.configurable) {
+      return;
+    }
+    if (!Object.isExtensible(rootEl)) {
+      return;
+    }
+    Object.defineProperty(rootEl, LAST_PATCHED_MARKUP_KEY, {
+      value: value,
+      writable: true,
+      configurable: true,
+      enumerable: false
+    });
+  }
+
+  function isJsDomEnvironment(rootEl) {
+    const doc = rootEl && rootEl.ownerDocument;
+    const ownerView = doc && doc.defaultView;
+    const userAgent = ownerView && ownerView.navigator ? String(ownerView.navigator.userAgent || "") : "";
+    return /jsdom/i.test(userAgent);
+  }
+
   function syncNodeTree(currentNode, nextNode) {
     if (!canSyncInPlace(currentNode, nextNode)) {
       return;
@@ -201,6 +238,16 @@
       return null;
     }
     const markup = nextHtml == null ? "" : String(nextHtml);
+    if (readLastPatchedMarkup(rootEl) === markup) {
+      return rootEl.firstElementChild || null;
+    }
+
+    if (isJsDomEnvironment(rootEl)) {
+      rootEl.innerHTML = markup;
+      writeLastPatchedMarkup(rootEl, markup);
+      return rootEl.firstElementChild || null;
+    }
+
     const doc = rootEl.ownerDocument;
     const template = doc.createElement("template");
     template.innerHTML = markup;
@@ -208,6 +255,7 @@
 
     if (!nextRoot) {
       rootEl.textContent = "";
+      writeLastPatchedMarkup(rootEl, markup);
       return null;
     }
 
@@ -218,11 +266,13 @@
 
     if (!currentRoot) {
       rootEl.appendChild(nextRoot.cloneNode(true));
+      writeLastPatchedMarkup(rootEl, markup);
       return rootEl.firstElementChild;
     }
 
     if (!canSyncInPlace(currentRoot, nextRoot)) {
       rootEl.replaceChild(nextRoot.cloneNode(true), currentRoot);
+      writeLastPatchedMarkup(rootEl, markup);
       return rootEl.firstElementChild;
     }
 
@@ -230,6 +280,7 @@
     while (currentRoot.nextSibling) {
       rootEl.removeChild(currentRoot.nextSibling);
     }
+    writeLastPatchedMarkup(rootEl, markup);
     return currentRoot;
   }
 
