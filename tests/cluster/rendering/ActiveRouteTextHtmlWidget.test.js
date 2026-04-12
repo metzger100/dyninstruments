@@ -39,6 +39,9 @@ describe("ActiveRouteTextHtmlWidget", function () {
         if (id === "HtmlWidgetUtils") {
           return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
         }
+        if (id === "PreparedPayloadModelCache") {
+          return loadFresh("shared/widget-kits/html/PreparedPayloadModelCache.js");
+        }
         throw new Error("unexpected module: " + id);
       }
     };
@@ -237,5 +240,109 @@ describe("ActiveRouteTextHtmlWidget", function () {
     // Vertical mode must not self-expand beyond the committed surface box
     expect(css).not.toMatch(/aspect-ratio.*2\s*\/\s*1/);
     expect(css).not.toMatch(/min-height.*4\.8em/);
+  });
+
+  it("reuses prepared semantic model across layoutSignature and patchDom and invalidates on structural boundaries", function () {
+    const applyFormatter = vi.fn(function (value, formatterOptions) {
+      const cfg = formatterOptions || {};
+      if (value == null) {
+        return cfg.default;
+      }
+      if (cfg.formatter === "formatDistance") {
+        return "DIST:" + String(value);
+      }
+      if (cfg.formatter === "formatTime") {
+        return "TIME:" + String(value);
+      }
+      if (cfg.formatter === "formatDirection") {
+        return "DIR:" + String(value);
+      }
+      return String(value);
+    });
+    const setup = createRenderer({ applyFormatter });
+    const hostContext = {};
+    const committed = setup.renderer.createCommittedRenderer({ hostContext, mountEl: null, shadowRoot: null });
+    const rootEl = document.createElement("div");
+    const shellEl = document.createElement("div");
+    const mountEl = document.createElement("div");
+    rootEl.appendChild(shellEl);
+    shellEl.appendChild(mountEl);
+
+    function buildPayload(props, revision, shellRect, layoutChanged) {
+      return {
+        props,
+        revision,
+        rootEl,
+        shellEl,
+        mountEl,
+        shadowRoot: null,
+        shellRect,
+        hostContext,
+        layoutChanged: layoutChanged === true,
+        relayoutPass: 0
+      };
+    }
+
+    const propsA = withSurfacePolicy(makeProps(), { mode: "dispatch" });
+    const initial = buildPayload(propsA, 1, { width: 320, height: 180 }, true);
+    committed.layoutSignature(initial);
+    committed.mount(mountEl, initial);
+    expect(applyFormatter).toHaveBeenCalledTimes(3);
+
+    const revisionChanged = buildPayload(propsA, 2, { width: 320, height: 180 }, false);
+    committed.layoutSignature(revisionChanged);
+    committed.update(revisionChanged);
+    expect(applyFormatter).toHaveBeenCalledTimes(6);
+
+    const propsIdentityChanged = buildPayload(withSurfacePolicy(makeProps(), { mode: "dispatch" }), 2, { width: 320, height: 180 }, false);
+    committed.layoutSignature(propsIdentityChanged);
+    committed.update(propsIdentityChanged);
+    expect(applyFormatter).toHaveBeenCalledTimes(9);
+
+    const shellSizeChanged = buildPayload(propsIdentityChanged.props, 2, { width: 321, height: 180 }, true);
+    committed.layoutSignature(shellSizeChanged);
+    committed.update(shellSizeChanged);
+    expect(applyFormatter).toHaveBeenCalledTimes(12);
+  });
+
+  it("clears prepared semantic model state on detach and destroy", function () {
+    const applyFormatter = vi.fn(function (value, formatterOptions) {
+      const cfg = formatterOptions || {};
+      return value == null ? cfg.default : String(value);
+    });
+    const setup = createRenderer({ applyFormatter });
+    const hostContext = {};
+    const committed = setup.renderer.createCommittedRenderer({ hostContext, mountEl: null, shadowRoot: null });
+    const rootEl = document.createElement("div");
+    const shellEl = document.createElement("div");
+    const mountEl = document.createElement("div");
+    rootEl.appendChild(shellEl);
+    shellEl.appendChild(mountEl);
+
+    const payload = {
+      props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
+      revision: 7,
+      rootEl,
+      shellEl,
+      mountEl,
+      shadowRoot: null,
+      shellRect: { width: 320, height: 180 },
+      hostContext,
+      layoutChanged: true,
+      relayoutPass: 0
+    };
+
+    committed.layoutSignature(payload);
+    committed.mount(mountEl, payload);
+    expect(applyFormatter).toHaveBeenCalledTimes(3);
+
+    committed.detach("test");
+    committed.layoutSignature(payload);
+    expect(applyFormatter).toHaveBeenCalledTimes(6);
+
+    committed.mount(mountEl, payload);
+    committed.destroy();
+    committed.layoutSignature(payload);
+    expect(applyFormatter).toHaveBeenCalledTimes(9);
   });
 });

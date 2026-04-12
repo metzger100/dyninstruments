@@ -14,7 +14,8 @@ describe("MapZoomTextHtmlWidget", function () {
     TextLayoutComposite: "shared/widget-kits/text/TextLayoutComposite.js",
     ResponsiveScaleProfile: "shared/widget-kits/layout/ResponsiveScaleProfile.js",
     RadialTextLayout: "shared/widget-kits/radial/RadialTextLayout.js",
-    RadialTextFitting: "shared/widget-kits/radial/RadialTextFitting.js"
+    RadialTextFitting: "shared/widget-kits/radial/RadialTextFitting.js",
+    PreparedPayloadModelCache: "shared/widget-kits/html/PreparedPayloadModelCache.js"
   };
 
   function createRenderer(options) {
@@ -283,5 +284,111 @@ describe("MapZoomTextHtmlWidget", function () {
     // Vertical mode must not self-expand beyond the committed surface box
     expect(css).not.toMatch(/aspect-ratio.*2\s*\/\s*1/);
     expect(css).not.toMatch(/min-height.*4\.8em/);
+  });
+
+  it("reuses prepared semantic model across layoutSignature and patchDom and invalidates on structural boundaries", function () {
+    const applyFormatter = vi.fn(function (value, formatterOptions) {
+      const cfg = formatterOptions || {};
+      if (value == null) {
+        return cfg.default;
+      }
+      if (cfg.formatter === "formatDecimalOpt") {
+        return "Z:" + String(value);
+      }
+      return String(value);
+    });
+    const renderer = createRenderer({ applyFormatter });
+    const hostContext = {};
+    const committed = renderer.createCommittedRenderer({ hostContext, mountEl: null, shadowRoot: null });
+    const rootEl = document.createElement("div");
+    rootEl.className = "widget dyniplugin dyni-host-html";
+    const shellEl = document.createElement("div");
+    shellEl.className = "widgetData dyni-shell";
+    const mountEl = document.createElement("div");
+    mountEl.className = "dyni-surface-html-mount";
+    rootEl.appendChild(shellEl);
+    shellEl.appendChild(mountEl);
+    hostContext.__dyniHostCommitState = { rootEl, shellEl };
+
+    function buildPayload(props, revision, shellRect, layoutChanged) {
+      return {
+        props,
+        revision,
+        rootEl,
+        shellEl,
+        mountEl,
+        shadowRoot: null,
+        shellRect,
+        hostContext,
+        layoutChanged: layoutChanged === true,
+        relayoutPass: 0
+      };
+    }
+
+    const propsA = withSurfacePolicy(makeProps(), { mode: "dispatch" });
+    const initial = buildPayload(propsA, 1, { width: 320, height: 180 }, true);
+    committed.layoutSignature(initial);
+    committed.mount(mountEl, initial);
+    expect(applyFormatter).toHaveBeenCalledTimes(2);
+
+    const revisionChanged = buildPayload(propsA, 2, { width: 320, height: 180 }, false);
+    committed.layoutSignature(revisionChanged);
+    committed.update(revisionChanged);
+    expect(applyFormatter).toHaveBeenCalledTimes(4);
+
+    const propsIdentityChanged = buildPayload(withSurfacePolicy(makeProps(), { mode: "dispatch" }), 2, { width: 320, height: 180 }, false);
+    committed.layoutSignature(propsIdentityChanged);
+    committed.update(propsIdentityChanged);
+    expect(applyFormatter).toHaveBeenCalledTimes(6);
+
+    const shellSizeChanged = buildPayload(propsIdentityChanged.props, 2, { width: 321, height: 180 }, true);
+    committed.layoutSignature(shellSizeChanged);
+    committed.update(shellSizeChanged);
+    expect(applyFormatter).toHaveBeenCalledTimes(8);
+  });
+
+  it("clears prepared semantic model state on detach and destroy", function () {
+    const applyFormatter = vi.fn(function (value, formatterOptions) {
+      const cfg = formatterOptions || {};
+      return value == null ? cfg.default : String(value);
+    });
+    const renderer = createRenderer({ applyFormatter });
+    const hostContext = {};
+    const committed = renderer.createCommittedRenderer({ hostContext, mountEl: null, shadowRoot: null });
+    const rootEl = document.createElement("div");
+    rootEl.className = "widget dyniplugin dyni-host-html";
+    const shellEl = document.createElement("div");
+    shellEl.className = "widgetData dyni-shell";
+    const mountEl = document.createElement("div");
+    mountEl.className = "dyni-surface-html-mount";
+    rootEl.appendChild(shellEl);
+    shellEl.appendChild(mountEl);
+    hostContext.__dyniHostCommitState = { rootEl, shellEl };
+
+    const payload = {
+      props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
+      revision: 5,
+      rootEl,
+      shellEl,
+      mountEl,
+      shadowRoot: null,
+      shellRect: { width: 320, height: 180 },
+      hostContext,
+      layoutChanged: true,
+      relayoutPass: 0
+    };
+
+    committed.layoutSignature(payload);
+    committed.mount(mountEl, payload);
+    expect(applyFormatter).toHaveBeenCalledTimes(2);
+
+    committed.detach("test");
+    committed.layoutSignature(payload);
+    expect(applyFormatter).toHaveBeenCalledTimes(4);
+
+    committed.mount(mountEl, payload);
+    committed.destroy();
+    committed.layoutSignature(payload);
+    expect(applyFormatter).toHaveBeenCalledTimes(6);
   });
 });

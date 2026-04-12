@@ -179,6 +179,7 @@
   function create(def, Helpers) {
     const htmlFit = Helpers.getModule("MapZoomHtmlFit").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+    const preparedPayloadModelCache = Helpers.getModule("PreparedPayloadModelCache").create(def, Helpers);
 
     function createCommittedRenderer(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
@@ -195,6 +196,11 @@
         unitStyle: "",
         requiredStyle: ""
       };
+      const preparedPayload = preparedPayloadModelCache.createPreparedModelCache({
+        buildModel: function (props, shellRect) {
+          return buildModel(props, shellRect, Helpers, htmlUtils);
+        }
+      });
 
       function bindDispatchListener(model) {
         if (wrapperEl && clickHandler) {
@@ -215,8 +221,9 @@
       }
 
       function patchDom(payload) {
+        const prepared = preparedPayload.getPreparedPayload(payload);
         const shellRect = payload.shellRect || null;
-        const baseModel = buildModel(payload.props, shellRect, Helpers, htmlUtils);
+        const baseModel = prepared.model;
         const fit = payload.layoutChanged || !lastFit
           ? (htmlFit.compute({
             model: baseModel,
@@ -249,7 +256,7 @@
         htmlUtils.applyMirroredContext(rootEl, payload.props);
         wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(renderModel, htmlUtils));
         lastFit = fit;
-        lastProps = payload.props;
+        lastProps = prepared.props;
 
         bindDispatchListener(renderModel);
       }
@@ -276,6 +283,7 @@
         clickHandler = null;
         wrapperEl = null;
         lastProps = null;
+        preparedPayload.clear();
         lastFit = {
           captionStyle: "",
           valueStyle: "",
@@ -290,12 +298,14 @@
       }
 
       function destroy() {
+        preparedPayload.clear();
         detach();
       }
 
       function layoutSignature(payload) {
+        const prepared = preparedPayload.getPreparedPayload(payload);
+        const model = prepared.model;
         const shellRect = payload && payload.shellRect ? payload.shellRect : null;
-        const model = buildModel(payload && payload.props ? payload.props : {}, shellRect, Helpers, htmlUtils);
         return [
           model.caption.length,
           model.zoomText.length,

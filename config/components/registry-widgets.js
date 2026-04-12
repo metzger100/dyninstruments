@@ -40,7 +40,7 @@
       css: undefined,
       shadowCss: [BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css"],
       globalKey: "DyniActiveRouteTextHtmlWidget",
-      deps: ["ActiveRouteHtmlFit", "HtmlWidgetUtils"]
+      deps: ["ActiveRouteHtmlFit", "HtmlWidgetUtils", "PreparedPayloadModelCache"]
     },
     EditRouteRenderModel: {
       js: BASE + "shared/widget-kits/nav/EditRouteRenderModel.js",
@@ -94,7 +94,7 @@
       css: undefined,
       shadowCss: [BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css"],
       globalKey: "DyniMapZoomTextHtmlWidget",
-      deps: ["MapZoomHtmlFit", "HtmlWidgetUtils"]
+      deps: ["MapZoomHtmlFit", "HtmlWidgetUtils", "PreparedPayloadModelCache"]
     },
     AisTargetTextHtmlWidget: {
       js: BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js",

@@ -125,6 +125,11 @@
       css: undefined,
       globalKey: "DyniHtmlWidgetUtils"
     },
+    PreparedPayloadModelCache: {
+      js: BASE + "shared/widget-kits/html/PreparedPayloadModelCache.js",
+      css: undefined,
+      globalKey: "DyniPreparedPayloadModelCache"
+    },
     LayoutRectMath: {
       js: BASE + "shared/widget-kits/layout/LayoutRectMath.js",
       css: undefined,

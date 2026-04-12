@@ -191,6 +191,7 @@
   function create(def, Helpers) {
     const htmlFit = Helpers.getModule("ActiveRouteHtmlFit").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+    const preparedPayloadModelCache = Helpers.getModule("PreparedPayloadModelCache").create(def, Helpers);
 
     function createCommittedRenderer(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
@@ -202,6 +203,11 @@
       let clickHandler = null;
       let lastFit = { routeNameStyle: "", metrics: Object.create(null) };
       let lastProps = null;
+      const preparedPayload = preparedPayloadModelCache.createPreparedModelCache({
+        buildModel: function (props, shellRect) {
+          return buildRenderModel(props, shellRect, Helpers, htmlUtils);
+        }
+      });
 
       function bindDispatchListener(model) {
         if (wrapperEl && clickHandler) {
@@ -222,8 +228,9 @@
       }
 
       function patchDom(payload) {
+        const prepared = preparedPayload.getPreparedPayload(payload);
         const shellRect = payload.shellRect || null;
-        const model = buildRenderModel(payload.props, shellRect, Helpers, htmlUtils);
+        const model = prepared.model;
         const fit = payload.layoutChanged || !lastFit
           ? (htmlFit.compute({
             model: model,
@@ -236,7 +243,7 @@
         htmlUtils.applyMirroredContext(rootEl, payload.props);
         wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(model, fit, htmlUtils));
         lastFit = fit;
-        lastProps = payload.props;
+        lastProps = prepared.props;
 
         bindDispatchListener(model);
       }
@@ -263,6 +270,7 @@
         clickHandler = null;
         wrapperEl = null;
         lastProps = null;
+        preparedPayload.clear();
         lastFit = { routeNameStyle: "", metrics: Object.create(null) };
         if (rootEl && rootEl.parentNode) {
           rootEl.parentNode.removeChild(rootEl);
@@ -272,12 +280,14 @@
       }
 
       function destroy() {
+        preparedPayload.clear();
         detach();
       }
 
       function layoutSignature(payload) {
+        const prepared = preparedPayload.getPreparedPayload(payload);
+        const model = prepared.model;
         const shellRect = payload && payload.shellRect ? payload.shellRect : null;
-        const model = buildRenderModel(payload && payload.props ? payload.props : {}, shellRect, Helpers, htmlUtils);
         return [
           model.routeNameText.length,
           model.remainText.length,
