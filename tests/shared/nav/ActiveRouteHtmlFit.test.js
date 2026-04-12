@@ -162,4 +162,80 @@ describe("ActiveRouteHtmlFit", function () {
       hostContext: {}
     })).toBeNull();
   });
+
+  it("reuses identical fit requests and misses when semantic or geometric inputs change", function () {
+    const h = createHarness();
+    const targetEl = document.createElement("div");
+    const hostContext = { __dyniActiveRouteTextMeasureCtx: createMeasureContext() };
+    const baseModel = makeModel({ routeNameText: "Coastal Route" });
+    const stableRect = { width: 320, height: 180 };
+
+    const first = h.fit.compute({
+      model: baseModel,
+      shellRect: stableRect,
+      targetEl: targetEl,
+      hostContext: hostContext
+    });
+    const second = h.fit.compute({
+      model: baseModel,
+      shellRect: stableRect,
+      targetEl: targetEl,
+      hostContext: hostContext
+    });
+    expect(second).toBe(first);
+    expect(hostContext.__dyniActiveRouteHtmlFitCache).toBeTruthy();
+
+    const semanticMiss = h.fit.compute({
+      model: makeModel({ routeNameText: "Ocean Crossing" }),
+      shellRect: stableRect,
+      targetEl: targetEl,
+      hostContext: hostContext
+    });
+    expect(semanticMiss).not.toBe(first);
+
+    const geometryMiss = h.fit.compute({
+      model: baseModel,
+      shellRect: { width: 360, height: 180 },
+      targetEl: targetEl,
+      hostContext: hostContext
+    });
+    expect(geometryMiss).not.toBe(semanticMiss);
+  });
+
+  it("avoids cache collisions when semantic text contains delimiter characters", function () {
+    const h = createHarness();
+    const targetEl = document.createElement("div");
+    const hostContext = { __dyniActiveRouteTextMeasureCtx: createMeasureContext() };
+    const shellRect = { width: 320, height: 180 };
+    const modelA = makeModel({
+      routeNameText: "A|B",
+      remainCaption: "C"
+    });
+    const modelB = makeModel({
+      routeNameText: "A",
+      remainCaption: "B|C"
+    });
+
+    const first = h.fit.compute({
+      model: modelA,
+      shellRect: shellRect,
+      targetEl: targetEl,
+      hostContext: hostContext
+    });
+    const second = h.fit.compute({
+      model: modelB,
+      shellRect: shellRect,
+      targetEl: targetEl,
+      hostContext: hostContext
+    });
+    expect(second).not.toBe(first);
+
+    const secondRepeat = h.fit.compute({
+      model: modelB,
+      shellRect: shellRect,
+      targetEl: targetEl,
+      hostContext: hostContext
+    });
+    expect(secondRepeat).toBe(second);
+  });
 });

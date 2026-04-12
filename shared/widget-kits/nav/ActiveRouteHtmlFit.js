@@ -15,6 +15,7 @@
   const ROUTE_NAME_MAX_PX_RATIO_HIGH = 0.54;
   const ROUTE_NAME_MAX_PX_RATIO_NORMAL = 0.66;
   const MEASURE_CTX_KEY = "__dyniActiveRouteTextMeasureCtx";
+  const FIT_CACHE_KEY = "__dyniActiveRouteHtmlFitCache";
 
   function parseFontPx(font) {
     const source = String(font || "");
@@ -72,6 +73,17 @@
     return measureCtx;
   }
 
+  function resolveFitCache(hostContext) {
+    const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
+    if (!ctx) {
+      return null;
+    }
+    if (!ctx[FIT_CACHE_KEY] || typeof ctx[FIT_CACHE_KEY] !== "object") {
+      ctx[FIT_CACHE_KEY] = { signature: "", result: null };
+    }
+    return ctx[FIT_CACHE_KEY];
+  }
+
   function toFontSizeStyle(px, htmlUtils) {
     const n = htmlUtils.toFiniteNumber(px);
     if (!(n > 0)) {
@@ -106,6 +118,34 @@
     return specs;
   }
 
+  function buildFitSignature(args) {
+    const cfg = args || {};
+    const model = cfg.model;
+    if (!model || typeof model !== "object") {
+      return "";
+    }
+    return JSON.stringify([
+      cfg.width,
+      cfg.height,
+      cfg.family,
+      cfg.valueWeight,
+      cfg.labelWeight,
+      model.mode,
+      model.isApproaching ? 1 : 0,
+      model.disconnect ? 1 : 0,
+      model.routeNameText,
+      model.remainCaption,
+      model.remainText,
+      model.remainUnit,
+      model.etaCaption,
+      model.etaText,
+      model.etaUnit,
+      model.nextCourseCaption,
+      model.nextCourseText,
+      model.nextCourseUnit
+    ]);
+  }
+
   function create(def, Helpers) {
     const theme = Helpers.getModule("ThemeResolver");
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
@@ -136,6 +176,18 @@
 
       const W = Math.max(1, Math.round(shellRect.width));
       const H = Math.max(1, Math.round(shellRect.height));
+      const fitCache = resolveFitCache(hostContext);
+      const fitSignature = buildFitSignature({
+        width: W,
+        height: H,
+        family: family,
+        valueWeight: valueWeight,
+        labelWeight: labelWeight,
+        model: model
+      });
+      if (fitCache && fitCache.signature === fitSignature && fitCache.result) {
+        return fitCache.result;
+      }
       const insets = layoutApi.computeInsets(W, H);
       const contentRect = layoutApi.createContentRect(W, H, insets);
       const layout = layoutApi.computeLayout({
@@ -204,10 +256,15 @@
         };
       }
 
-      return {
+      const out = {
         routeNameStyle: toFontSizeStyle(nameFit && nameFit.px, htmlUtils),
         metrics: metricStyles
       };
+      if (fitCache) {
+        fitCache.signature = fitSignature;
+        fitCache.result = out;
+      }
+      return out;
     }
 
     return {

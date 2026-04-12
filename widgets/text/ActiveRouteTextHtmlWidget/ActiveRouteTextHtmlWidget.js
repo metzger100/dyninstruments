@@ -13,6 +13,10 @@
 
   const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.2;
   const DEFAULT_RATIO_THRESHOLD_FLAT = 3.8;
+  const EMPTY_FIT = {
+    routeNameStyle: "",
+    metrics: Object.create(null)
+  };
 
   function resolveDisplayMode(props, shellRect, htmlUtils) {
     const p = props || {};
@@ -201,7 +205,7 @@
       let rootEl = null;
       let wrapperEl = null;
       let clickHandler = null;
-      let lastFit = { routeNameStyle: "", metrics: Object.create(null) };
+      let lastFit = EMPTY_FIT;
       let lastProps = null;
       const preparedPayload = preparedPayloadModelCache.createPreparedModelCache({
         buildModel: function (props, shellRect) {
@@ -231,13 +235,13 @@
         const prepared = preparedPayload.getPreparedPayload(payload);
         const shellRect = payload.shellRect || null;
         const model = prepared.model;
-        const fit = payload.layoutChanged || !lastFit
+        const fit = shellRect
           ? (htmlFit.compute({
             model: model,
             hostContext: hostContext,
             targetEl: payload.rootEl,
             shellRect: shellRect
-          }) || { routeNameStyle: "", metrics: Object.create(null) })
+          }) || EMPTY_FIT)
           : lastFit;
 
         htmlUtils.applyMirroredContext(rootEl, payload.props);
@@ -271,7 +275,7 @@
         wrapperEl = null;
         lastProps = null;
         preparedPayload.clear();
-        lastFit = { routeNameStyle: "", metrics: Object.create(null) };
+        lastFit = EMPTY_FIT;
         if (rootEl && rootEl.parentNode) {
           rootEl.parentNode.removeChild(rootEl);
         }

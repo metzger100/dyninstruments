@@ -202,6 +202,50 @@ describe("ActiveRouteTextHtmlWidget", function () {
     expect(openActiveRoute).not.toHaveBeenCalled();
   });
 
+  it("always consults ActiveRouteHtmlFit when a shell rect exists", function () {
+    const fitCompute = vi.fn(function () {
+      return {
+        routeNameStyle: "font-size:14px;",
+        metrics: {
+          remain: { captionStyle: "font-size:12px;", valueStyle: "font-size:18px;", unitStyle: "font-size:11px;" },
+          eta: { captionStyle: "font-size:11px;", valueStyle: "font-size:17px;", unitStyle: "font-size:10px;" },
+          next: { captionStyle: "font-size:10px;", valueStyle: "font-size:16px;", unitStyle: "font-size:9px;" }
+        }
+      };
+    });
+    const setup = createRenderer({ fitCompute });
+    const hostContext = {};
+    const committed = setup.renderer.createCommittedRenderer({ hostContext, mountEl: null, shadowRoot: null });
+    const rootEl = document.createElement("div");
+    const shellEl = document.createElement("div");
+    const mountEl = document.createElement("div");
+    rootEl.appendChild(shellEl);
+    shellEl.appendChild(mountEl);
+
+    function payload(revision, layoutChanged) {
+      return {
+        props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
+        revision: revision,
+        rootEl: rootEl,
+        shellEl: shellEl,
+        mountEl: mountEl,
+        shadowRoot: null,
+        shellRect: { width: 320, height: 180 },
+        hostContext: hostContext,
+        layoutChanged: layoutChanged === true,
+        relayoutPass: 0
+      };
+    }
+
+    const initial = payload(1, true);
+    committed.mount(mountEl, initial);
+    expect(fitCompute).toHaveBeenCalledTimes(1);
+
+    const stableUpdate = payload(2, false);
+    committed.update(stableUpdate);
+    expect(fitCompute).toHaveBeenCalledTimes(2);
+  });
+
   it("updates layout signature when ratio-driven mode changes", function () {
     const setup = createRenderer();
     const committed = setup.renderer.createCommittedRenderer({ hostContext: {}, mountEl: null, shadowRoot: null });

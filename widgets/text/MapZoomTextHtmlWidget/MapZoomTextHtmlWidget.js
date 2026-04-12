@@ -16,6 +16,12 @@
   const DEFAULT_CAPTION_UNIT_SCALE = 0.8;
   const MIN_CAPTION_UNIT_SCALE = 0.5;
   const MAX_CAPTION_UNIT_SCALE = 1.5;
+  const EMPTY_FIT = {
+    captionStyle: "",
+    valueStyle: "",
+    unitStyle: "",
+    requiredStyle: ""
+  };
 
   function resolveDisplayMode(props, shellRect, htmlUtils) {
     const p = props || {};
@@ -190,12 +196,7 @@
       let wrapperEl = null;
       let clickHandler = null;
       let lastProps = null;
-      let lastFit = {
-        captionStyle: "",
-        valueStyle: "",
-        unitStyle: "",
-        requiredStyle: ""
-      };
+      let lastFit = EMPTY_FIT;
       const preparedPayload = preparedPayloadModelCache.createPreparedModelCache({
         buildModel: function (props, shellRect) {
           return buildModel(props, shellRect, Helpers, htmlUtils);
@@ -224,18 +225,13 @@
         const prepared = preparedPayload.getPreparedPayload(payload);
         const shellRect = payload.shellRect || null;
         const baseModel = prepared.model;
-        const fit = payload.layoutChanged || !lastFit
+        const fit = shellRect
           ? (htmlFit.compute({
             model: baseModel,
             hostContext: hostContext,
             targetEl: payload.rootEl,
             shellRect: shellRect
-          }) || {
-            captionStyle: "",
-            valueStyle: "",
-            unitStyle: "",
-            requiredStyle: ""
-          })
+          }) || EMPTY_FIT)
           : lastFit;
 
         const renderModel = {
@@ -298,7 +294,6 @@
       }
 
       function destroy() {
-        preparedPayload.clear();
         detach();
       }
 

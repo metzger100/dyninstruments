@@ -11,6 +11,7 @@
   "use strict";
 
   const MEASURE_CTX_KEY = "__dyniMapZoomMeasureCtx";
+  const FIT_CACHE_KEY = "__dyniMapZoomHtmlFitCache";
   const EMPTY_STYLES = Object.freeze({
     captionStyle: "",
     valueStyle: "",
@@ -67,6 +68,20 @@
       hostContext[MEASURE_CTX_KEY] = out;
     }
     return out;
+  }
+
+  function resolveFitCache(hostContext) {
+    const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
+    if (!ctx) {
+      return null;
+    }
+    const existing = ctx[FIT_CACHE_KEY];
+    if (existing && typeof existing === "object") {
+      return existing;
+    }
+    const cache = { signature: "", result: null };
+    ctx[FIT_CACHE_KEY] = cache;
+    return cache;
   }
 
   function toFontStyle(px, htmlUtils) {
@@ -210,6 +225,28 @@
     };
   }
 
+  function buildFitSignature(args) {
+    const cfg = args || {};
+    const model = cfg.model;
+    if (!model || typeof model !== "object") {
+      return "";
+    }
+    return JSON.stringify([
+      cfg.width,
+      cfg.height,
+      cfg.family,
+      cfg.valueWeight,
+      cfg.labelWeight,
+      cfg.mode,
+      cfg.secScale,
+      model.showRequired ? 1 : 0,
+      model.caption,
+      model.zoomText,
+      model.unit,
+      model.requiredText
+    ]);
+  }
+
   function create(def, Helpers) {
     const textApi = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
@@ -249,6 +286,20 @@
       const mode = typeof model.mode === "string" && model.mode.length
         ? model.mode
         : "normal";
+      const fitCache = resolveFitCache(hostContext);
+      const fitSignature = buildFitSignature({
+        width: shellW,
+        height: shellH,
+        family: family,
+        valueWeight: valueWeight,
+        labelWeight: labelWeight,
+        mode: mode,
+        secScale: secScale,
+        model: model
+      });
+      if (fitCache && fitCache.signature === fitSignature && fitCache.result) {
+        return fitCache.result;
+      }
 
       const mainFit = toMainFitState({
         textApi: textApi,
@@ -280,12 +331,17 @@
         labelWeight: labelWeight
       }, htmlUtils);
 
-      return {
+      const out = {
         captionStyle: toFontStyle(mainFit.captionPx, htmlUtils),
         valueStyle: toFontStyle(mainFit.valuePx, htmlUtils),
         unitStyle: toFontStyle(mainFit.unitPx, htmlUtils),
         requiredStyle: toFontStyle(requiredFit.px, htmlUtils)
       };
+      if (fitCache) {
+        fitCache.signature = fitSignature;
+        fitCache.result = out;
+      }
+      return out;
     }
 
     return {

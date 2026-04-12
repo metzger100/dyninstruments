@@ -87,6 +87,7 @@ describe("MapZoomHtmlFit", function () {
       zoomText: "12.2",
       unit: "x",
       captionUnitScale: 0.8,
+      canDispatch: true,
       showRequired: !!showRequired,
       requiredText: showRequired ? "(10.8)" : ""
     };
@@ -250,5 +251,76 @@ describe("MapZoomHtmlFit", function () {
     expect(tightFlatResult.valueStyle).toMatch(/font-size:\d+px/);
     const tightFlatValuePx = parseInt(tightFlatResult.valueStyle.match(/(\d+)/)[1], 10);
     expect(tightFlatValuePx).toBeGreaterThanOrEqual(6);
+  });
+
+  it("reuses identical fit requests and misses on geometry or semantic changes", function () {
+    const h = createHarness();
+    const baseModel = createModel("normal", true);
+    const stableRect = { width: 220, height: 110 };
+    const stableArgs = {
+      model: baseModel,
+      hostContext: h.hostContext,
+      shellRect: stableRect
+    };
+
+    const first = h.fit.compute(stableArgs);
+    expect(h.calls.normal).toHaveLength(1);
+    expect(h.calls.required).toHaveLength(1);
+    expect(h.hostContext.__dyniMapZoomHtmlFitCache).toBeTruthy();
+
+    const second = h.fit.compute(stableArgs);
+    expect(second).toBe(first);
+    expect(h.calls.normal).toHaveLength(1);
+    expect(h.calls.required).toHaveLength(1);
+
+    const geometryMiss = h.fit.compute({
+      model: baseModel,
+      hostContext: h.hostContext,
+      shellRect: { width: 240, height: 110 }
+    });
+    expect(geometryMiss).not.toBe(first);
+    expect(h.calls.normal).toHaveLength(2);
+    expect(h.calls.required).toHaveLength(2);
+
+    const semanticMiss = h.fit.compute({
+      model: Object.assign({}, baseModel, { zoomText: "11.0" }),
+      hostContext: h.hostContext,
+      shellRect: stableRect
+    });
+    expect(semanticMiss).not.toBe(geometryMiss);
+    expect(h.calls.normal).toHaveLength(3);
+    expect(h.calls.required).toHaveLength(3);
+  });
+
+  it("avoids cache collisions when semantic text contains delimiter characters", function () {
+    const h = createHarness();
+    const shellRect = { width: 220, height: 110 };
+    const modelA = createModel("normal", true);
+    const modelB = createModel("normal", true);
+    modelA.caption = "A|B";
+    modelA.zoomText = "C";
+    modelB.caption = "A";
+    modelB.zoomText = "B|C";
+
+    const first = h.fit.compute({
+      model: modelA,
+      hostContext: h.hostContext,
+      shellRect: shellRect
+    });
+    const second = h.fit.compute({
+      model: modelB,
+      hostContext: h.hostContext,
+      shellRect: shellRect
+    });
+    expect(second).not.toBe(first);
+    expect(h.calls.normal).toHaveLength(2);
+
+    const secondRepeat = h.fit.compute({
+      model: modelB,
+      hostContext: h.hostContext,
+      shellRect: shellRect
+    });
+    expect(secondRepeat).toBe(second);
+    expect(h.calls.normal).toHaveLength(2);
   });
 });
