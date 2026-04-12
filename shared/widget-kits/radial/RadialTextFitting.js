@@ -10,8 +10,11 @@
 }(this, function () {
   "use strict";
 
+  const hasOwn = Object.prototype.hasOwnProperty;
   const MIN_FONT_PX = 0.5;
   const WIDTH_EPSILON = 0.01;
+  const FONT_STATE_KEY = "__dyniRadialTextFontState";
+  const WIDTH_CACHE_KEY = "__dyniRadialTextWidthCache";
 
   function clampPositive(value, defaultValue) {
     const n = Number(value);
@@ -22,11 +25,39 @@
   }
 
   function create() {
+    function resolveWidthCache(ctx) {
+      if (!ctx || (typeof ctx !== "object" && typeof ctx !== "function")) {
+        return null;
+      }
+      if (!ctx[WIDTH_CACHE_KEY] || typeof ctx[WIDTH_CACHE_KEY] !== "object") {
+        ctx[WIDTH_CACHE_KEY] = Object.create(null);
+      }
+      return ctx[WIDTH_CACHE_KEY];
+    }
+
     function setFont(ctx, px, weight, family) {
       const size = Math.max(MIN_FONT_PX, Number(px) || 0);
       const fontWeight = isFinite(Number(weight)) ? Math.floor(Number(weight)) : 400;
-      ctx.font = fontWeight + " " + size + "px " + (family || "sans-serif");
+      const fontValue = fontWeight + " " + size + "px " + (family || "sans-serif");
+      if (ctx[FONT_STATE_KEY] !== fontValue || ctx.font !== fontValue) {
+        ctx.font = fontValue;
+        ctx[FONT_STATE_KEY] = fontValue;
+      }
       return size;
+    }
+
+    function measureTextWidth(ctx, text) {
+      const content = String(text || "");
+      const widthCache = resolveWidthCache(ctx);
+      const cacheKey = String(ctx.font || "") + "\n" + content;
+      if (widthCache && hasOwn.call(widthCache, cacheKey)) {
+        return widthCache[cacheKey];
+      }
+      const width = ctx.measureText(content).width;
+      if (widthCache) {
+        widthCache[cacheKey] = width;
+      }
+      return width;
     }
 
     function fitTextPx(ctx, text, maxW, maxH, family, weight) {
@@ -41,7 +72,7 @@
 
       const content = String(text);
       setFont(ctx, ceilingPx, weight, family);
-      const width = ctx.measureText(content).width;
+      const width = measureTextWidth(ctx, content);
       if (width <= widthLimit + WIDTH_EPSILON) {
         return ceilingPx;
       }
@@ -72,12 +103,12 @@
 
       function totalWidth(vPx, uPx, gap) {
         setFont(ctx, vPx, valueWeight, family);
-        const valueW = ctx.measureText(String(value)).width;
+        const valueW = measureTextWidth(ctx, value);
         if (!hasUnit) {
           return valueW;
         }
         setFont(ctx, uPx, labelWeight, family);
-        return valueW + gap + ctx.measureText(String(unit)).width;
+        return valueW + gap + measureTextWidth(ctx, unit);
       }
 
       let vPx = maxH;
@@ -131,13 +162,13 @@
         let total = 0;
         if (hasCaption) {
           setFont(ctx, cPx, labelWeight, family);
-          total += ctx.measureText(String(caption)).width + g1;
+          total += measureTextWidth(ctx, caption) + g1;
         }
         setFont(ctx, vPx, valueWeight, family);
-        total += ctx.measureText(String(value)).width;
+        total += measureTextWidth(ctx, value);
         if (hasUnit) {
           setFont(ctx, uPx, labelWeight, family);
-          total += g2 + ctx.measureText(String(unit)).width;
+          total += g2 + measureTextWidth(ctx, unit);
         }
         return total;
       }
@@ -178,6 +209,7 @@
       WIDTH_EPSILON: WIDTH_EPSILON,
       clampPositive: clampPositive,
       setFont: setFont,
+      measureTextWidth: measureTextWidth,
       fitTextPx: fitTextPx,
       fitSingleTextPx: fitSingleTextPx,
       measureValueUnitFit: measureValueUnitFit,

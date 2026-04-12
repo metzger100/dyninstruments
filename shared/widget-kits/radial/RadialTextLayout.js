@@ -26,6 +26,7 @@
     const WIDTH_EPSILON = fitting.WIDTH_EPSILON;
     const clampPositive = fitting.clampPositive;
     const setFont = fitting.setFont;
+    const measureTextWidth = fitting.measureTextWidth;
     const fitTextPx = fitting.fitTextPx;
     const fitSingleTextPx = fitting.fitSingleTextPx;
     const measureValueUnitFit = fitting.measureValueUnitFit;
@@ -40,7 +41,7 @@
 
       const mode = align || "left";
       ctx.textAlign = mode;
-      const measured = ctx.measureText(content).width;
+      const measured = measureTextWidth(ctx, content);
       if (measured <= widthLimit + WIDTH_EPSILON) {
         ctx.fillText(content, anchorX, y);
         return;
@@ -80,12 +81,12 @@
       const uPx = Math.max(MIN_FONT_PX, Number(data.uPx) || 0);
       const gap = Math.max(0, Math.floor(Number(data.gap) || 0));
       setFont(ctx, vPx, valueWeight, family);
-      const valueW = ctx.measureText(String(value)).width;
+      const valueW = measureTextWidth(ctx, value);
 
       let unitW = 0;
       if (unit) {
         setFont(ctx, uPx, labelWeight, family);
-        unitW = ctx.measureText(String(unit)).width;
+        unitW = measureTextWidth(ctx, unit);
       }
 
       const total = valueW + (unit ? (gap + unitW) : 0);
@@ -134,12 +135,12 @@
       if (caption) {
         setFont(ctx, data.cPx, labelWeight, family);
         ctx.fillText(String(caption), xStart, yMid);
-        xStart += ctx.measureText(String(caption)).width + data.g1;
+        xStart += measureTextWidth(ctx, caption) + data.g1;
       }
 
       setFont(ctx, data.vPx, valueWeight, family);
       ctx.fillText(String(value), xStart, yMid);
-      xStart += ctx.measureText(String(value)).width;
+      xStart += measureTextWidth(ctx, value);
 
       if (unit) {
         xStart += data.g2;
@@ -215,6 +216,7 @@
       id: "RadialTextLayout",
       version: "0.1.0",
       setFont: setFont,
+      measureTextWidth: measureTextWidth,
       fitTextPx: fitTextPx,
       fitSingleTextPx: fitSingleTextPx,
       measureValueUnitFit: measureValueUnitFit,

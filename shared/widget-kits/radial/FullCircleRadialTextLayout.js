@@ -86,14 +86,46 @@
     };
   }
 
+  function resolveBlockMeasureCache(state) {
+    if (!state || typeof state !== "object") {
+      return null;
+    }
+    if (!state.__dyniFullCircleBlockMeasureCache || typeof state.__dyniFullCircleBlockMeasureCache !== "object") {
+      state.__dyniFullCircleBlockMeasureCache = Object.create(null);
+    }
+    return state.__dyniFullCircleBlockMeasureCache;
+  }
+
+  function buildBlockMeasureSignature(state, display, boxWidth, blockHeight) {
+    const content = display || {};
+    const family = state && state.family;
+    return JSON.stringify([
+      Math.max(1, Math.floor(Number(boxWidth) || 0)),
+      Math.max(1, Math.floor(Number(blockHeight) || 0)),
+      resolveSecondaryScale(content.secScale),
+      resolveTextFillScale(state),
+      String(family),
+      Number(state && state.valueWeight) || 0,
+      Number(state && state.labelWeight) || 0,
+      String(content.caption),
+      String(content.value),
+      String(content.unit)
+    ]);
+  }
+
   function measureBlockSizes(state, display, boxWidth, blockHeight) {
+    const cache = resolveBlockMeasureCache(state);
+    const signature = cache ? buildBlockMeasureSignature(state, display, boxWidth, blockHeight) : "";
+    if (cache && hasOwn.call(cache, signature)) {
+      return cache[signature];
+    }
     const secScale = resolveSecondaryScale(display.secScale);
     const ceiling = Math.max(1, Math.floor(Number(blockHeight) || 0));
     const valueHeight = Math.max(1, Math.floor(ceiling / (1 + 2 * secScale)));
     const captionHeight = Math.max(1, Math.floor(valueHeight * secScale));
     const unitHeight = Math.max(1, Math.floor(valueHeight * secScale));
     const textFillScale = resolveTextFillScale(state);
-    return {
+    const sizes = {
       cPx: growSize(
         state.text.fitTextPx(state.ctx, display.caption, boxWidth, captionHeight, state.family, state.labelWeight),
         captionHeight,
@@ -113,6 +145,10 @@
       hVal: valueHeight,
       hUnit: unitHeight
     };
+    if (cache) {
+      cache[signature] = sizes;
+    }
+    return sizes;
   }
 
   function mergeBlockSizes(leftSizes, rightSizes) {
@@ -154,20 +190,8 @@
 
   function drawBlock(state, x, y, width, height, display, align, sizes) {
     state.text.drawThreeRowsBlock(
-      state.ctx,
-      state.family,
-      x,
-      y,
-      width,
-      height,
-      display.caption,
-      display.value,
-      display.unit,
-      display.secScale,
-      align,
-      sizes,
-      state.valueWeight,
-      state.labelWeight
+      state.ctx, state.family, x, y, width, height, display.caption, display.value, display.unit, display.secScale,
+      align, sizes, state.valueWeight, state.labelWeight
     );
   }
 
@@ -179,30 +203,15 @@
     if (!box || box.w <= 0 || box.h <= 0) {
       return;
     }
-    const fit = boostValueUnitFit(state, state.text.measureValueUnitFit(
-      state.ctx,
-      state.family,
-      display.value,
+    const fit = boostValueUnitFit(
+      state,
+      state.text.measureValueUnitFit(state.ctx, state.family, display.value, display.unit, box.w, box.h, display.secScale, state.valueWeight, state.labelWeight),
       display.unit,
-      box.w,
-      box.h,
-      display.secScale,
-      state.valueWeight,
-      state.labelWeight
-    ), display.unit, box.h);
+      box.h
+    );
     state.text.drawValueUnitWithFit(
-      state.ctx,
-      state.family,
-      box.x,
-      box.y,
-      box.w,
-      box.h,
-      display.value,
-      display.unit,
-      fit,
-      "center",
-      state.valueWeight,
-      state.labelWeight
+      state.ctx, state.family, box.x, box.y, box.w, box.h, display.value, display.unit, fit, "center",
+      state.valueWeight, state.labelWeight
     );
   }
 
@@ -233,42 +242,21 @@
     if (!top || !bottom) {
       return;
     }
-    const fit = boostValueUnitFit(state, state.text.measureValueUnitFit(
-      state.ctx,
-      state.family,
-      display.value,
+    const fit = boostValueUnitFit(
+      state,
+      state.text.measureValueUnitFit(
+        state.ctx, state.family, display.value, display.unit, bottom.w, bottom.h, display.secScale, state.valueWeight, state.labelWeight
+      ),
       display.unit,
-      bottom.w,
-      bottom.h,
-      display.secScale,
-      state.valueWeight,
-      state.labelWeight
-    ), display.unit, bottom.h);
+      bottom.h
+    );
     state.text.drawCaptionMax(
-      state.ctx,
-      state.family,
-      top.x,
-      top.y,
-      top.w,
-      top.h,
-      display.caption,
-      growSize(Math.floor(fit.vPx * resolveSecondaryScale(display.secScale)), top.h, state.textFillScale),
-      align,
-      state.labelWeight
+      state.ctx, state.family, top.x, top.y, top.w, top.h, display.caption,
+      growSize(Math.floor(fit.vPx * resolveSecondaryScale(display.secScale)), top.h, state.textFillScale), align, state.labelWeight
     );
     state.text.drawValueUnitWithFit(
-      state.ctx,
-      state.family,
-      bottom.x,
-      bottom.y,
-      bottom.w,
-      bottom.h,
-      display.value,
-      display.unit,
-      fit,
-      align,
-      state.valueWeight,
-      state.labelWeight
+      state.ctx, state.family, bottom.x, bottom.y, bottom.w, bottom.h, display.value, display.unit, fit, align,
+      state.valueWeight, state.labelWeight
     );
   }
 
@@ -277,31 +265,18 @@
     if (!slot) {
       return;
     }
-    const fit = boostInlineFit(state, state.text.fitInlineCapValUnit(
-      state.ctx,
-      state.family,
+    const fit = boostInlineFit(
+      state,
+      state.text.fitInlineCapValUnit(
+        state.ctx, state.family, display.caption, display.value, display.unit, slot.w, slot.h, display.secScale, state.valueWeight, state.labelWeight
+      ),
       display.caption,
-      display.value,
       display.unit,
-      slot.w,
-      slot.h,
-      display.secScale,
-      state.valueWeight,
-      state.labelWeight
-    ), display.caption, display.unit, slot.h);
+      slot.h
+    );
     state.text.drawInlineCapValUnit(
-      state.ctx,
-      state.family,
-      slot.x,
-      slot.y,
-      slot.w,
-      slot.h,
-      display.caption,
-      display.value,
-      display.unit,
-      fit,
-      state.valueWeight,
-      state.labelWeight
+      state.ctx, state.family, slot.x, slot.y, slot.w, slot.h, display.caption, display.value, display.unit, fit,
+      state.valueWeight, state.labelWeight
     );
   }
 

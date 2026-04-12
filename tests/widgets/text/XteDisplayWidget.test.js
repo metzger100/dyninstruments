@@ -136,6 +136,9 @@ describe("XteDisplayWidget", function () {
                   setFont(ctx, px, weight, family) {
                     ctx.font = weight + " " + px + "px " + family;
                   },
+                  measureTextWidth(ctx, text) {
+                    return ctx.measureText(String(text || "")).width;
+                  },
                   drawCaptionMax(ctx, family, x, y, w, h, caption) {
                     calls.captionRows.push({ caption: String(caption), w, h });
                   },

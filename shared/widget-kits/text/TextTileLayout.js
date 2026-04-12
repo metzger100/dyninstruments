@@ -10,6 +10,9 @@
 }(this, function () {
   "use strict";
 
+  const hasOwn = Object.prototype.hasOwnProperty;
+  const CONTEXT_CACHE_KEY = "__dyniTextTileLayoutCache";
+
   function clampNumber(value, defaultValue) {
     const n = Number(value);
     return Number.isFinite(n) ? n : defaultValue;
@@ -22,13 +25,30 @@
     return Math.min(safeMax, Math.max(1, Math.floor(safeBase * scale)));
   }
 
+  function resolveContextCache(ctx) {
+    if (!ctx || (typeof ctx !== "object" && typeof ctx !== "function")) {
+      return null;
+    }
+    if (!ctx[CONTEXT_CACHE_KEY] || typeof ctx[CONTEXT_CACHE_KEY] !== "object") {
+      ctx[CONTEXT_CACHE_KEY] = {
+        metricTiles: Object.create(null),
+        fittedLines: Object.create(null)
+      };
+    }
+    return ctx[CONTEXT_CACHE_KEY];
+  }
+
+  function measureWidth(textApi, ctx, text) {
+    return textApi.measureTextWidth(ctx, text);
+  }
+
   function trimToWidth(ctx, textApi, text, px, maxW, family, weight) {
     let out = typeof text === "string" ? text : String(text);
     if (!out) {
       return "";
     }
     textApi.setFont(ctx, px, weight, family);
-    while (out.length > 2 && ctx.measureText(out).width > maxW) {
+    while (out.length > 2 && measureWidth(textApi, ctx, out) > maxW) {
       out = out.slice(0, -1);
     }
     return out;
@@ -75,6 +95,46 @@
     };
   }
 
+  function buildMetricTileSignature(cfg) {
+    const rect = cfg && cfg.rect ? cfg.rect : {};
+    const metric = cfg && cfg.metric ? cfg.metric : {};
+    const family = cfg && cfg.family;
+    const captionMaxPx = Number(cfg && cfg.captionMaxPx);
+    const valueMaxPx = Number(cfg && cfg.valueMaxPx);
+    return JSON.stringify([
+      Number(rect.x) || 0,
+      Number(rect.y) || 0,
+      Number(rect.w) || 0,
+      Number(rect.h) || 0,
+      clampNumber(cfg.padX, 0),
+      clampNumber(cfg.captionHeightRatio, 0.34),
+      Number.isFinite(Number(cfg.captionHeightPx)) ? Math.floor(Number(cfg.captionHeightPx)) : "",
+      Number.isFinite(captionMaxPx) ? captionMaxPx : "",
+      Number.isFinite(valueMaxPx) ? valueMaxPx : "",
+      clampNumber(cfg.textFillScale, 1),
+      String(family),
+      Number(cfg.valueWeight) || 0,
+      Number(cfg.labelWeight) || 0,
+      Number(cfg.secScale) || 0,
+      String(metric.caption),
+      String(metric.value),
+      String(metric.unit)
+    ]);
+  }
+
+  function buildFittedLineSignature(cfg) {
+    const family = cfg && cfg.family;
+    return JSON.stringify([
+      String(cfg.text),
+      Math.max(1, clampNumber(cfg.maxW, 0)),
+      Math.max(1, clampNumber(cfg.maxH, 0)),
+      clampNumber(cfg.maxPx, 0),
+      clampNumber(cfg.textFillScale, 1),
+      String(family),
+      Number(cfg.weight) || 0
+    ]);
+  }
+
   function create() {
     function measureMetricTile(args) {
       const cfg = args || {};
@@ -85,6 +145,11 @@
       const textFillScale = clampNumber(cfg.textFillScale, 1);
       if (!metric || !rect) {
         return null;
+      }
+      const contextCache = resolveContextCache(cfg.ctx);
+      const metricSignature = contextCache ? buildMetricTileSignature(cfg) : "";
+      if (contextCache && hasOwn.call(contextCache.metricTiles, metricSignature)) {
+        return contextCache.metricTiles[metricSignature];
       }
       const textRect = resolveMetricTextRect(rect, cfg.padX);
       const heights = resolveMetricHeights(rect.h, captionHeightRatio, cfg.captionHeightPx);
@@ -104,7 +169,7 @@
         cfg.valueWeight,
         cfg.labelWeight
       );
-      return {
+      const measurement = {
         capH: capH,
         capMaxPx: capMaxPx,
         valueY: valueY,
@@ -114,6 +179,10 @@
         textW: textRect.w,
         fit: fit
       };
+      if (contextCache) {
+        contextCache.metricTiles[metricSignature] = measurement;
+      }
+      return measurement;
     }
 
     function drawMetricTile(args) {
@@ -161,6 +230,11 @@
     function measureFittedLine(args) {
       const cfg = args || {};
       const textApi = cfg.textApi;
+      const contextCache = resolveContextCache(cfg.ctx);
+      const fittedLineSignature = contextCache ? buildFittedLineSignature(cfg) : "";
+      if (contextCache && hasOwn.call(contextCache.fittedLines, fittedLineSignature)) {
+        return contextCache.fittedLines[fittedLineSignature];
+      }
       const maxW = Math.max(1, clampNumber(cfg.maxW, 0));
       const maxH = Math.max(1, clampNumber(cfg.maxH, 0));
       const basePx = resolveScaledMaxPx(clampNumber(cfg.maxPx, maxH), maxH, cfg.textFillScale);
@@ -175,10 +249,14 @@
         cfg.weight
       );
       const fittedText = trimToWidth(cfg.ctx, textApi, source, px, maxW, cfg.family, cfg.weight);
-      return {
+      const fit = {
         px: px,
         text: fittedText
       };
+      if (contextCache) {
+        contextCache.fittedLines[fittedLineSignature] = fit;
+      }
+      return fit;
     }
 
     function drawFittedLine(args) {

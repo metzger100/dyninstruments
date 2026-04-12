@@ -1,10 +1,16 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("TextTileLayout", function () {
-  function createTextApi() {
+  function createTextApi(counter) {
     return {
       setFont() {},
+      measureTextWidth(ctx, text) {
+        return ctx.measureText(String(text || "")).width;
+      },
       measureValueUnitFit() {
+        if (counter && typeof counter.calls === "number") {
+          counter.calls += 1;
+        }
         return { vPx: 12, uPx: 8, gap: 4, total: 24 };
       },
       drawCaptionMax() {},
@@ -13,6 +19,35 @@ describe("TextTileLayout", function () {
         return 10;
       }
     };
+  }
+
+  function createMeasureCtx() {
+    return {
+      font: "700 12px sans-serif",
+      measureText() {
+        return { width: 10 };
+      }
+    };
+  }
+
+  function createMetricTileArgs(overrides) {
+    const opts = overrides || {};
+    const base = {
+      textApi: opts.textApi,
+      ctx: opts.ctx,
+      metric: { caption: "COG", value: "123", unit: "°" },
+      rect: { x: 4, y: 6, w: 30, h: 12 },
+      padX: 2,
+      captionHeightPx: 3,
+      captionMaxPx: 4,
+      valueMaxPx: 7,
+      textFillScale: 1.18,
+      family: "sans-serif",
+      valueWeight: 700,
+      labelWeight: 600,
+      secScale: 0.8
+    };
+    return Object.assign(base, opts);
   }
 
   it("uses layout-owned metric spacing inputs for padding and caption height", function () {
@@ -56,5 +91,44 @@ describe("TextTileLayout", function () {
 
     expect(measurement.capH).toBe(3);
     expect(measurement.valueH).toBe(2);
+  });
+
+  it("reuses the same metric-tile measurement object for identical inputs on the same context", function () {
+    const tileLayout = loadFresh("shared/widget-kits/text/TextTileLayout.js").create();
+    const counter = { calls: 0 };
+    const textApi = createTextApi(counter);
+    const ctx = createMeasureCtx();
+
+    const first = tileLayout.measureMetricTile(createMetricTileArgs({ textApi, ctx }));
+    const second = tileLayout.measureMetricTile(createMetricTileArgs({ textApi, ctx }));
+
+    expect(second).toBe(first);
+    expect(counter.calls).toBe(1);
+  });
+
+  it("misses metric-tile cache when valueMaxPx changes", function () {
+    const tileLayout = loadFresh("shared/widget-kits/text/TextTileLayout.js").create();
+    const counter = { calls: 0 };
+    const textApi = createTextApi(counter);
+    const ctx = createMeasureCtx();
+
+    const first = tileLayout.measureMetricTile(createMetricTileArgs({ textApi, ctx, valueMaxPx: 7 }));
+    const second = tileLayout.measureMetricTile(createMetricTileArgs({ textApi, ctx, valueMaxPx: 5 }));
+
+    expect(second).not.toBe(first);
+    expect(counter.calls).toBe(2);
+  });
+
+  it("misses metric-tile cache when captionMaxPx changes", function () {
+    const tileLayout = loadFresh("shared/widget-kits/text/TextTileLayout.js").create();
+    const counter = { calls: 0 };
+    const textApi = createTextApi(counter);
+    const ctx = createMeasureCtx();
+
+    const first = tileLayout.measureMetricTile(createMetricTileArgs({ textApi, ctx, captionMaxPx: 4 }));
+    const second = tileLayout.measureMetricTile(createMetricTileArgs({ textApi, ctx, captionMaxPx: 2 }));
+
+    expect(second).not.toBe(first);
+    expect(counter.calls).toBe(2);
   });
 });

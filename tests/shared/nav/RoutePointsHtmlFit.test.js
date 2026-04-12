@@ -22,6 +22,7 @@ describe("RoutePointsHtmlFit", function () {
       const safeFamily = typeof family === "string" && family ? family : "sans-serif";
       ctx.font = safeWeight + " " + safePx + "px " + safeFamily;
     });
+    api.measureTextWidth = vi.fn((ctx, text) => ctx.measureText(String(text || "")).width);
     api.fitSingleTextPx = vi.fn((ctx, text, maxPx, maxW, maxH, family, weight) => {
       const start = Math.max(1, Math.floor(Math.min(Number(maxPx) || 1, Number(maxH) || 1)));
       const safeText = String(text);

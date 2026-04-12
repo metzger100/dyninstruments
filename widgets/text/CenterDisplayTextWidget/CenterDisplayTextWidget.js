@@ -10,6 +10,7 @@
 }(this, function () {
   "use strict";
 
+  const hasOwn = Object.prototype.hasOwnProperty;
   const DEGREE_UNIT = "\u00b0";
 
   function trimString(value) {
@@ -99,15 +100,21 @@
       })
     };
   }
-  function measureTextWidth(ctx, textApi, text, family, weight, px) {
+  function measureTextWidth(ctx, textApi, text, family, weight, px, frameWidthCache) {
     textApi.setFont(ctx, Math.max(1, Math.floor(Number(px) || 0)), weight, family);
-    return ctx.measureText(String(text || "")).width;
-  }
-  function computeLineMaxPx(rect, ratio) {
-    return Math.max(1, Math.floor(rect.h * ratio));
+    const content = String(text || "");
+    const cacheKey = String(ctx.font || "") + "\n" + content;
+    if (frameWidthCache && hasOwn.call(frameWidthCache, cacheKey)) {
+      return frameWidthCache[cacheKey];
+    }
+    const width = textApi.measureTextWidth(ctx, content);
+    if (frameWidthCache) {
+      frameWidthCache[cacheKey] = width;
+    }
+    return width;
   }
   function computeResponsiveLineMaxPx(rect, ratio, fillScale) {
-    return computeLineMaxPx(rect, ratio * fillScale);
+    return Math.max(1, Math.floor(rect.h * ratio * fillScale));
   }
   function computeRelationValueMaxPx(layout, textFillScale) {
     const rowRects = layout.rowRects;
@@ -137,21 +144,23 @@
     const baseRowLabelPx = Math.max(1, Math.floor(cfg.contentRect.h / Math.max(3, rows.length + 1)));
     const baseRowValuePx = Math.max(1, Math.floor(baseRowLabelPx * 1.18));
     const positionCaptionWidth = cfg.positionCaption
-      ? measureTextWidth(cfg.ctx, cfg.textApi, cfg.positionCaption, cfg.family, cfg.labelWeight, baseCaptionPx)
+      ? measureTextWidth(cfg.ctx, cfg.textApi, cfg.positionCaption, cfg.family, cfg.labelWeight, baseCaptionPx, cfg.frameWidthCache)
       : 0;
     const coordWidth = Math.max(
-      measureTextWidth(cfg.ctx, cfg.textApi, cfg.latText, cfg.family, cfg.valueWeight, baseCoordPx),
-      measureTextWidth(cfg.ctx, cfg.textApi, cfg.lonText, cfg.family, cfg.valueWeight, baseCoordPx)
+      measureTextWidth(cfg.ctx, cfg.textApi, cfg.latText, cfg.family, cfg.valueWeight, baseCoordPx, cfg.frameWidthCache),
+      measureTextWidth(cfg.ctx, cfg.textApi, cfg.lonText, cfg.family, cfg.valueWeight, baseCoordPx, cfg.frameWidthCache)
     );
     let rowBlockWidth = 0;
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       const labelWidth = row.caption
-        ? measureTextWidth(cfg.ctx, cfg.textApi, row.caption, cfg.family, cfg.labelWeight, baseRowLabelPx)
+        ? measureTextWidth(cfg.ctx, cfg.textApi, row.caption, cfg.family, cfg.labelWeight, baseRowLabelPx, cfg.frameWidthCache)
         : 0;
       const valueWidth = Math.min(
-        measureTextWidth(cfg.ctx, cfg.textApi, row.fullValueText, cfg.family, cfg.valueWeight, baseRowValuePx),
-        measureTextWidth(cfg.ctx, cfg.textApi, row.compactValueText, cfg.family, cfg.valueWeight, baseRowValuePx)
+        measureTextWidth(cfg.ctx, cfg.textApi, row.fullValueText, cfg.family, cfg.valueWeight, baseRowValuePx, cfg.frameWidthCache),
+        measureTextWidth(
+          cfg.ctx, cfg.textApi, row.compactValueText, cfg.family, cfg.valueWeight, baseRowValuePx, cfg.frameWidthCache
+        )
       );
       rowBlockWidth = Math.max(rowBlockWidth, labelWidth + cfg.gap + valueWidth);
     }
@@ -232,23 +241,13 @@
     const labelMaxPx = computeResponsiveLineMaxPx(rect, 0.58, textFillScale);
     const valueMaxPx = computeResponsiveLineMaxPx(rect, 0.66, textFillScale);
     const desiredLabelWidth = row.caption
-      ? measureTextWidth(state.ctx, state.radialText, row.caption, family, labelWeight, labelMaxPx)
+      ? measureTextWidth(state.ctx, state.radialText, row.caption, family, labelWeight, labelMaxPx, state.frameWidthCache)
       : 0;
     const fullValueWidth = measureTextWidth(
-      state.ctx,
-      state.radialText,
-      row.fullValueText,
-      family,
-      valueWeight,
-      valueMaxPx
+      state.ctx, state.radialText, row.fullValueText, family, valueWeight, valueMaxPx, state.frameWidthCache
     );
     const compactValueWidth = measureTextWidth(
-      state.ctx,
-      state.radialText,
-      row.compactValueText,
-      family,
-      valueWeight,
-      valueMaxPx
+      state.ctx, state.radialText, row.compactValueText, family, valueWeight, valueMaxPx, state.frameWidthCache
     );
     const maxLabelWidth = Math.floor(rect.w * 0.40);
     const minValueWidth = Math.floor(rect.w * 0.42);
@@ -264,21 +263,9 @@
     const pairWidth = labelWidth + (row.caption ? gap : 0) + valueWidth;
     const pairX = rect.x + Math.max(0, Math.floor((rect.w - pairWidth) / 2));
     const valueOffset = row.caption ? (pairX - rect.x + labelWidth + gap) : (pairX - rect.x);
-    const valueRect = {
-      x: rect.x + valueOffset,
-      y: rect.y,
-      w: Math.max(1, rect.x + rect.w - (rect.x + valueOffset)),
-      h: rect.h
-    };
-
     return {
-      labelRect: {
-        x: pairX,
-        y: rect.y,
-        w: labelWidth,
-        h: rect.h
-      },
-      valueRect: valueRect,
+      labelRect: { x: pairX, y: rect.y, w: labelWidth, h: rect.h },
+      valueRect: { x: rect.x + valueOffset, y: rect.y, w: Math.max(1, rect.x + rect.w - (rect.x + valueOffset)), h: rect.h },
       valueText: valueText,
       labelMaxPx: labelMaxPx,
       valueMaxPx: valueMaxPx
@@ -362,6 +349,7 @@
       const insets = layoutApi.computeInsets(W, H);
       const contentRect = layoutApi.createContentRect(W, H, insets);
       const displayState = buildDisplayState(p, math, defaultText, Helpers);
+      const frameWidthCache = Object.create(null);
       const hints = computeMeasurementHints({
         ctx: ctx,
         textApi: radialText,
@@ -373,7 +361,8 @@
         gap: insets.gap,
         family: family,
         valueWeight: valueWeight,
-        labelWeight: labelWeight
+        labelWeight: labelWeight,
+        frameWidthCache: frameWidthCache
       });
       const layout = layoutApi.computeLayout({
         contentRect: contentRect,
@@ -392,7 +381,8 @@
         tileLayout: tileLayout,
         textFillScale: layout.responsive.textFillScale,
         layoutApi: layoutApi,
-        responsive: layout.responsive
+        responsive: layout.responsive,
+        frameWidthCache: frameWidthCache
       };
 
       drawCenterPanel(layout, renderState, displayState, family, valueWeight, labelWeight, color);
