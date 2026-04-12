@@ -15,13 +15,47 @@ describe("ThemeResolver", function () {
     }
   });
 
-  function createRoot() {
+  function createStyle(initialValues) {
+    const values = Object.create(null);
+    if (initialValues && typeof initialValues === "object") {
+      Object.keys(initialValues).forEach(function (name) {
+        values[name] = String(initialValues[name]);
+      });
+    }
+    return {
+      getPropertyValue(name) {
+        return Object.prototype.hasOwnProperty.call(values, name) ? values[name] : "";
+      },
+      setProperty(name, value) {
+        values[String(name)] = String(value);
+      },
+      removeProperty(name) {
+        delete values[String(name)];
+      }
+    };
+  }
+
+  function createRoot(options) {
+    const opts = options || {};
     const attrs = Object.create(null);
+    let className = typeof opts.className === "string" ? opts.className : "widget dyniplugin";
+    const style = createStyle(opts.styleValues);
+
+    attrs.class = className;
+
     return {
       nodeType: 1,
+      style: style,
+      get className() {
+        return className;
+      },
+      set className(value) {
+        className = String(value || "");
+        attrs.class = className;
+      },
       classList: {
         contains(name) {
-          return name === "widget" || name === "dyniplugin";
+          return String(className).split(/\s+/).filter(Boolean).indexOf(name) >= 0;
         }
       },
       hasAttribute(name) {
@@ -32,9 +66,15 @@ describe("ThemeResolver", function () {
       },
       setAttribute(name, value) {
         attrs[String(name)] = String(value);
+        if (String(name) === "class") {
+          className = String(value);
+        }
       },
       removeAttribute(name) {
         delete attrs[String(name)];
+        if (String(name) === "class") {
+          className = "";
+        }
       },
       closest() {
         return null;
@@ -47,7 +87,11 @@ describe("ThemeResolver", function () {
       if (calls) {
         calls.value += 1;
       }
-      const values = styleByEl && styleByEl.get(el) ? styleByEl.get(el) : {};
+      const style = styleByEl && styleByEl.get(el);
+      if (style && typeof style.getPropertyValue === "function") {
+        return style;
+      }
+      const values = style && typeof style === "object" ? style : {};
       return {
         getPropertyValue(name) {
           return Object.prototype.hasOwnProperty.call(values, name) ? values[name] : "";
@@ -153,17 +197,94 @@ describe("ThemeResolver", function () {
     expect(out.font.weight).toBe(600);
   });
 
-  it("does not cache by root identity", function () {
+  it("returns the same frozen object for identical root snapshots", function () {
     const calls = { value: 0 };
     const rootEl = createRoot();
-    installComputedStyle(new Map(), calls);
+    const computedValues = { "--dyni-pointer": "#111111" };
+    installComputedStyle(new Map([[rootEl, computedValues]]), calls);
 
     const { resolver } = createResolver();
     const first = resolver.resolveForRoot(rootEl);
     const second = resolver.resolveForRoot(rootEl);
 
+    expect(first).toBe(second);
+    expect(calls.value).toBe(1);
+    expect(Object.isFrozen(first)).toBe(true);
+    expect(Object.isFrozen(first.colors)).toBe(true);
+  });
+
+  it("reuses immutable output-only snapshots for identical root snapshots", function () {
+    const rootEl = createRoot();
+    installComputedStyle(new Map([[rootEl, rootEl.style]]));
+
+    const { resolver } = createResolver();
+    const first = resolver.resolveOutputsForRoot(rootEl);
+    const second = resolver.resolveOutputsForRoot(rootEl);
+
+    expect(first).toBe(second);
+    expect(Object.isFrozen(first)).toBe(true);
+    expect(first.surface).toBeDefined();
+  });
+
+  it("returns a different object when inline ThemeModel input vars change", function () {
+    const rootEl = createRoot();
+    rootEl.style.setProperty("--dyni-pointer", "#111111");
+    installComputedStyle(new Map([[rootEl, rootEl.style]]));
+
+    const { resolver } = createResolver();
+    const first = resolver.resolveForRoot(rootEl);
+    rootEl.style.setProperty("--dyni-pointer", "#222222");
+    const second = resolver.resolveForRoot(rootEl);
+
     expect(first).not.toBe(second);
-    expect(calls.value).toBe(2);
+    expect(second.colors.pointer).toBe("#222222");
+  });
+
+  it("returns a different object when committed root class signature changes", function () {
+    const rootEl = createRoot();
+    installComputedStyle(new Map([[rootEl, rootEl.style]]));
+
+    const { resolver } = createResolver();
+    const first = resolver.resolveForRoot(rootEl);
+    rootEl.className = "widget dyniplugin theme-alt";
+    const second = resolver.resolveForRoot(rootEl);
+
+    expect(first).not.toBe(second);
+  });
+
+  it("ignores resolver-owned output vars in cache snapshot identity", function () {
+    const rootEl = createRoot();
+    const computedValues = { "--dyni-pointer": "#111111" };
+    installComputedStyle(new Map([[rootEl, computedValues]]));
+
+    const { resolver } = createResolver();
+    const first = resolver.resolveForRoot(rootEl);
+    computedValues["--dyni-theme-surface-fg"] = "#00ff00";
+    const second = resolver.resolveForRoot(rootEl);
+
+    expect(first).toBe(second);
+  });
+
+  it("clears snapshot caches when configure() is called", function () {
+    const rootEl = createRoot({
+      styleValues: {
+        "--dyni-pointer": "#111111"
+      }
+    });
+    installComputedStyle(new Map([[rootEl, rootEl.style]]));
+
+    const { resolver, themeModel } = createResolver();
+    const first = resolver.resolveForRoot(rootEl);
+
+    resolver.configure({
+      ThemeModel: themeModel,
+      getNightModeState() {
+        return false;
+      }
+    });
+
+    const second = resolver.resolveForRoot(rootEl);
+    expect(first).not.toBe(second);
   });
 
   it("exposes direct module API without create/invalidation methods", function () {

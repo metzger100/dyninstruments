@@ -18,6 +18,8 @@
 
   let config = null;
   let requiredThemeModel = null;
+  let themeMetadataByModel = new WeakMap();
+  let rootResolutionCache = new WeakMap();
 
   function toObject(value) {
     return value && typeof value === "object" ? value : null;
@@ -56,12 +58,60 @@
     return style && typeof style.getPropertyValue === "function" ? style : null;
   }
 
+  function getInlineStyleSafe(rootEl) {
+    const style = rootEl && rootEl.style;
+    return style && typeof style.getPropertyValue === "function" ? style : null;
+  }
+
   function readCssInputVar(style, inputVar) {
     if (!style || typeof style.getPropertyValue !== "function" || !inputVar) {
       return "";
     }
     const raw = style.getPropertyValue(inputVar);
     return typeof raw === "string" ? raw.trim() : "";
+  }
+
+  function createTokenMetadata(tokenDefs) {
+    const entries = [];
+    const inputVars = [];
+    const seenInputVars = Object.create(null);
+
+    for (let i = 0; i < tokenDefs.length; i += 1) {
+      const tokenDef = tokenDefs[i];
+      const pathSegments = Object.freeze(tokenDef.path.split("."));
+      entries.push(Object.freeze({
+        tokenDef: tokenDef,
+        pathSegments: pathSegments
+      }));
+
+      const inputVar = tokenDef && tokenDef.inputVar;
+      if (typeof inputVar === "string" && inputVar.length > 0 && !seenInputVars[inputVar]) {
+        seenInputVars[inputVar] = true;
+        inputVars.push(inputVar);
+      }
+    }
+
+    return Object.freeze({
+      entries: Object.freeze(entries),
+      inputVars: Object.freeze(inputVars)
+    });
+  }
+
+  function resolveThemeMetadata(themeModel) {
+    if (themeMetadataByModel.has(themeModel)) {
+      return themeMetadataByModel.get(themeModel);
+    }
+
+    const tokenMetadata = createTokenMetadata(themeModel.getTokenDefinitions());
+    const outputTokenMetadata = createTokenMetadata(themeModel.getOutputTokenDefinitions());
+    const metadata = Object.freeze({
+      tokenEntries: tokenMetadata.entries,
+      outputTokenEntries: outputTokenMetadata.entries,
+      snapshotInputVars: tokenMetadata.inputVars
+    });
+
+    themeMetadataByModel.set(themeModel, metadata);
+    return metadata;
   }
 
   function readTokenInputOverride(style, tokenDef, inputReader) {
@@ -79,7 +129,8 @@
   }
 
   function resolveThemeModel() {
-    const configured = toObject(config) && toObject(config).ThemeModel;
+    const cfg = toObject(config);
+    const configured = cfg && cfg.ThemeModel;
     if (configured && typeof configured.getTokenDefinitions === "function") {
       return configured;
     }
@@ -106,7 +157,8 @@
   }
 
   function resolveNightModeGetter() {
-    const configured = toObject(config) && config.getNightModeState;
+    const cfg = toObject(config);
+    const configured = cfg && cfg.getNightModeState;
     if (typeof configured === "function") {
       return configured;
     }
@@ -116,7 +168,8 @@
   }
 
   function resolveInputReader() {
-    const configured = toObject(config) && config.readCssInputVar;
+    const cfg = toObject(config);
+    const configured = cfg && cfg.readCssInputVar;
     if (typeof configured === "function") {
       return configured;
     }
@@ -124,7 +177,8 @@
   }
 
   function resolveActivePresetNameGetter(themeModel) {
-    const configured = toObject(config) && config.getActivePresetName;
+    const cfg = toObject(config);
+    const configured = cfg && cfg.getActivePresetName;
     if (typeof configured === "function") {
       return configured;
     }
@@ -148,24 +202,58 @@
     }
   }
 
-  function createResolutionContext(rootEl, themeModel) {
-    const inputReader = resolveInputReader();
+  function getRootClassSignature(rootEl) {
+    let rawClassName = "";
+    if (!rootEl) {
+      return rawClassName;
+    }
+    if (typeof rootEl.className === "string") {
+      rawClassName = rootEl.className;
+    } else if (typeof rootEl.getAttribute === "function") {
+      const classAttr = rootEl.getAttribute("class");
+      rawClassName = typeof classAttr === "string" ? classAttr : "";
+    }
+    return rawClassName.trim().replace(/\s+/g, " ");
+  }
+
+  function buildInlineInputSignature(inlineStyle, inputVars) {
+    const parts = [];
+    for (let i = 0; i < inputVars.length; i += 1) {
+      const inputVar = inputVars[i];
+      parts.push(inputVar + "=" + readCssInputVar(inlineStyle, inputVar));
+    }
+    return parts.join(";");
+  }
+
+  function createRootSnapshot(rootEl, themeModel, metadata) {
     const getNightModeState = resolveNightModeGetter();
     const getActivePresetName = resolveActivePresetNameGetter(themeModel);
-    const style = getComputedStyleSafe(rootEl);
     const mode = getNightModeState(rootEl) ? "night" : "day";
-    const presetName = themeModel.normalizePresetName(getActivePresetName(rootEl, style, mode));
+    const inlineStyle = getInlineStyleSafe(rootEl);
+    const presetName = themeModel.normalizePresetName(getActivePresetName(rootEl, inlineStyle, mode));
+    const classSignature = getRootClassSignature(rootEl);
+    const inlineInputSignature = buildInlineInputSignature(inlineStyle, metadata.snapshotInputVars);
+
     return {
-      inputReader: inputReader,
-      style: style,
       mode: mode,
-      presetMode: themeModel.getPresetMode(presetName, mode),
-      presetBase: themeModel.getPresetBase(presetName)
+      presetName: presetName,
+      signature: mode + "|" + presetName + "|" + classSignature + "|" + inlineInputSignature
     };
   }
 
-  function resolveTokenValue(tokenDef, context) {
-    const pathSegments = tokenDef.path.split(".");
+  function createResolutionContext(rootEl, themeModel, snapshot) {
+    const inputReader = resolveInputReader();
+    const style = getComputedStyleSafe(rootEl);
+    return {
+      inputReader: inputReader,
+      style: style,
+      mode: snapshot.mode,
+      presetMode: themeModel.getPresetMode(snapshot.presetName, snapshot.mode),
+      presetBase: themeModel.getPresetBase(snapshot.presetName)
+    };
+  }
+
+  function resolveTokenValue(tokenDef, pathSegments, context) {
     const rootOverride = readTokenInputOverride(context.style, tokenDef, context.inputReader);
     if (rootOverride.hasValue) {
       return rootOverride.value;
@@ -191,36 +279,78 @@
     return tokenDef.default;
   }
 
-  function resolveForRoot(rootEl) {
-    requireCommittedPluginRoot(rootEl);
-    const themeModel = resolveThemeModel();
-    const context = createResolutionContext(rootEl, themeModel);
+  function createRootCacheBucket() {
+    return {
+      full: new Map(),
+      output: new Map()
+    };
+  }
+
+  function resolveRootCacheBucket(rootEl) {
+    let bucket = rootResolutionCache.get(rootEl);
+    if (!bucket) {
+      bucket = createRootCacheBucket();
+      rootResolutionCache.set(rootEl, bucket);
+    }
+    return bucket;
+  }
+
+  function deepFreeze(value) {
+    if (!value || typeof value !== "object" || Object.isFrozen(value)) {
+      return value;
+    }
+    Object.freeze(value);
+    const keys = Object.keys(value);
+    for (let i = 0; i < keys.length; i += 1) {
+      deepFreeze(value[keys[i]]);
+    }
+    return value;
+  }
+
+  function resolveTokenEntries(entries, context) {
     const out = {};
-
-    themeModel.getTokenDefinitions().forEach(function (tokenDef) {
-      const pathSegments = tokenDef.path.split(".");
-      setByPath(out, pathSegments, resolveTokenValue(tokenDef, context));
-    });
-
+    for (let i = 0; i < entries.length; i += 1) {
+      const entry = entries[i];
+      setByPath(out, entry.pathSegments, resolveTokenValue(entry.tokenDef, entry.pathSegments, context));
+    }
     return out;
   }
 
-  function resolveOutputsForRoot(rootEl) {
+  function resolveWithCache(rootEl, kind) {
     requireCommittedPluginRoot(rootEl);
     const themeModel = resolveThemeModel();
-    const context = createResolutionContext(rootEl, themeModel);
-    const out = {};
+    const metadata = resolveThemeMetadata(themeModel);
+    const snapshot = createRootSnapshot(rootEl, themeModel, metadata);
+    const bucket = resolveRootCacheBucket(rootEl);
+    const cache = kind === "output" ? bucket.output : bucket.full;
 
-    themeModel.getOutputTokenDefinitions().forEach(function (tokenDef) {
-      const pathSegments = tokenDef.path.split(".");
-      setByPath(out, pathSegments, resolveTokenValue(tokenDef, context));
-    });
+    if (cache.has(snapshot.signature)) {
+      return cache.get(snapshot.signature);
+    }
 
-    return out;
+    const context = createResolutionContext(rootEl, themeModel, snapshot);
+    const entries = kind === "output" ? metadata.outputTokenEntries : metadata.tokenEntries;
+    const resolved = deepFreeze(resolveTokenEntries(entries, context));
+    cache.set(snapshot.signature, resolved);
+    return resolved;
+  }
+
+  function resolveForRoot(rootEl) {
+    return resolveWithCache(rootEl, "full");
+  }
+
+  function resolveOutputsForRoot(rootEl) {
+    return resolveWithCache(rootEl, "output");
+  }
+
+  function resetCacheState() {
+    themeMetadataByModel = new WeakMap();
+    rootResolutionCache = new WeakMap();
   }
 
   function configure(nextConfig) {
     config = toObject(nextConfig) || null;
+    resetCacheState();
     return moduleApi;
   }
 

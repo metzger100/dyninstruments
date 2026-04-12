@@ -1,6 +1,6 @@
 # Theme Tokens
 
-**Status:** ✅ Implemented | ThemeModel semantic ownership + ThemeResolver strict root resolution
+**Status:** ✅ Implemented | ThemeModel semantic ownership + ThemeResolver strict root resolution and snapshot reuse
 
 ## Overview
 
@@ -8,6 +8,7 @@ Theme ownership is split into two module-shaped components:
 
 - ThemeModel: semantic owner of token metadata, preset metadata, defaults, mode overrides, normalization, and output metadata
 - ThemeResolver: strict root-only resolver that consumes ThemeModel metadata and root CSS input overrides
+- ThemeResolver returns immutable snapshot objects and reuses object identity for identical committed-root snapshots
 
 Both are registered with apiShape module and do not use create().
 
@@ -61,7 +62,16 @@ Per token path:
 
 ThemeResolver.resolveForRoot(rootEl) requires committed .widget.dyniplugin root and throws on invalid input.
 
-There is no resolver cache and no invalidation API.
+ThemeResolver caches immutable snapshots per committed root using canonical snapshot inputs:
+
+- mode
+- normalized preset name
+- committed root class string
+- inline signature of ThemeModel input vars only
+
+Resolver-owned `--dyni-theme-*` output vars are excluded from snapshot identity.
+
+configure(...) clears resolver metadata and per-root snapshot caches.
 
 ## Runtime Integration
 

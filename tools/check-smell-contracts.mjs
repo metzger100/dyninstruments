@@ -109,21 +109,34 @@ function runThemeCacheInvalidationRule() {
     return out;
   }
 
-  let pointer = "#111111";
+  const inlineValues = Object.create(null);
+  const inlineStyleApi = {
+    getPropertyValue(name) {
+      return Object.prototype.hasOwnProperty.call(inlineValues, name) ? inlineValues[name] : "";
+    },
+    setProperty(name, value) {
+      inlineValues[String(name)] = String(value);
+    }
+  };
+  inlineStyleApi.setProperty("--dyni-pointer", "#111111");
+
+  let computedStyleCalls = 0;
   resolverSandbox.getComputedStyle = function () {
+    computedStyleCalls += 1;
     return {
       getPropertyValue(name) {
-        if (name === "--dyni-pointer") return pointer;
-        return "";
+        return inlineStyleApi.getPropertyValue(name);
       }
     };
   };
 
   const rootEl = {
     nodeType: 1,
+    className: "widget dyniplugin",
+    style: inlineStyleApi,
     classList: {
       contains(name) {
-        return name === "widget" || name === "dyniplugin";
+        return String(rootEl.className).split(/\s+/).filter(Boolean).includes(name);
       }
     },
     hasAttribute() {
@@ -145,17 +158,53 @@ function runThemeCacheInvalidationRule() {
   });
 
   const first = resolverMod.resolveForRoot(rootEl);
-  pointer = "#222222";
   const second = resolverMod.resolveForRoot(rootEl);
-  if (!second || !second.colors || second.colors.pointer !== "#222222") {
-    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must recompute CSS token values without invalidation APIs."));
+  if (first !== second) {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must return the same snapshot object for identical canonical root state."));
   }
-
   if (!first || !first.colors || first.colors.pointer !== "#111111") {
     out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "resolveForRoot(rootEl) should return initial pointer token value."));
   }
-  if (first === second) {
-    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must not cache by root identity."));
+  if (!Object.isFrozen(first) || !Object.isFrozen(first.colors)) {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver cached snapshots must be immutable."));
+  }
+  if (computedStyleCalls !== 1) {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Identical snapshot cache hits must not reread getComputedStyle(rootEl)."));
+  }
+
+  const outputFirst = resolverMod.resolveOutputsForRoot(rootEl);
+  const outputSecond = resolverMod.resolveOutputsForRoot(rootEl);
+  if (outputFirst !== outputSecond) {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "resolveOutputsForRoot(rootEl) must reuse cached snapshots for identical canonical root state."));
+  }
+  if (!Object.isFrozen(outputFirst)) {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Output snapshot cache entries must be immutable."));
+  }
+
+  rootEl.style.setProperty("--dyni-pointer", "#222222");
+  const changed = resolverMod.resolveForRoot(rootEl);
+  if (changed === second) {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Inline ThemeModel input var changes must invalidate ThemeResolver snapshot cache."));
+  }
+  if (!changed || !changed.colors || changed.colors.pointer !== "#222222") {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must resolve updated canonical input values after cache invalidation."));
+  }
+
+  rootEl.style.setProperty("--dyni-theme-surface-fg", "#00ff00");
+  const outputVarChanged = resolverMod.resolveForRoot(rootEl);
+  if (outputVarChanged !== changed) {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Resolver-owned --dyni-theme-* outputs must be excluded from snapshot identity."));
+  }
+
+  resolverMod.configure({
+    ThemeModel: modelMod,
+    getNightModeState() {
+      return false;
+    }
+  });
+  const afterConfigure = resolverMod.resolveForRoot(rootEl);
+  if (afterConfigure === changed) {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "configure(...) must clear ThemeResolver metadata and root snapshot caches."));
   }
 
   const initRel = "runtime/init.js";
