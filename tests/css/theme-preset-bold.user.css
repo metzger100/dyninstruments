@@ -18,9 +18,5 @@
 }
 
 .widget.dyniplugin {
-  --dyni-theme-preset: night;
-}
-
-.widget.dyniplugin {
   --dyni-theme-preset: highcontrast;
 }

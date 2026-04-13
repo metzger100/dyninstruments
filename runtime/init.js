@@ -126,12 +126,11 @@
           (hasOwn.call(components, "ThemeResolver")
             ? Helpers.getModule("ThemeResolver")
             : null);
-        const startupPresetName = resolveStartupThemePresetName(themeModel);
 
         themeRuntime.configure({
           ThemeModel: themeModel,
           ThemeResolver: themeResolver,
-          activePresetName: startupPresetName
+          activePresetName: "default"
         });
 
         widgetDefinitions.forEach(function (widgetDef) {

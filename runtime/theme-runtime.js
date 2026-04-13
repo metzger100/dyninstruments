@@ -142,13 +142,27 @@
       getNightModeState(rootEl) {
         return !!(rootEl && typeof rootEl.closest === "function" && rootEl.closest(".nightMode"));
       },
-      getActivePresetName() {
-        return activePresetName;
+      getActivePresetName(rootEl) {
+        const rootPreset = readThemePresetCssVarFromElement(rootEl);
+        return normalizePresetName(themeModel, rootPreset || activePresetName);
       }
     });
 
     configured = true;
     return activePresetName;
+  }
+
+  function readThemePresetCssVarFromElement(el) {
+    if (!el || typeof root.getComputedStyle !== "function") {
+      return null;
+    }
+    const style = root.getComputedStyle(el);
+    if (!style || typeof style.getPropertyValue !== "function") {
+      return null;
+    }
+    const raw = style.getPropertyValue("--dyni-theme-preset");
+    const value = (typeof raw === "string") ? raw.trim() : "";
+    return value || null;
   }
 
   function applyToRoot(rootEl) {
