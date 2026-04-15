@@ -14,8 +14,21 @@ It tracks pre-release priorities and AvNav widget coverage status.
 ### Core widgets to implement
 
 - Page-shell-owned widget: `Alarm`
-- Add 180° option to the linear compasses
+
+### Fixes for existing widgets and architecture
+
 - Add option to hide additional Metrics in XTE
+- Unified widget state model:
+  - Unified widget state model: normal, Disconnected, No Route, No Target; the semantic state should always replace the entire normal content.
+  - Unified placeholder for missing or invalid values: always ---, never mixed fallbacks such as --, 0, or --:--.
+  - Clearly and correctly distinguish between missing route and missing target; No Route, No Target, and Disconnected should only appear in the respective valid cases.
+  - Standardize widget-specific semantics: ETA/DST/VMG are target-based, route widgets are route-based, and position/time widgets have clearly defined behavior when data is missing.
+  - Tie interaction to the visible state: semantic empty states do not make widgets automatically clickable; Disconnected is always passive, and activation is only enabled where it makes sense functionally.
+- Default on: display coordinates using tabular numbers, aligned and stacked vertically where possible.
+- Default off: plugin-wide consistent numeric display using stableDigits: stabilize width, use leading zeros, especially for course/angle/count values.
+- Default off: time display with hideSeconds: optionally hide seconds.
+- Smooth graphical indicators gently: pointers, markers, gauges, and the XTE path should appear steadier through bounded retargeted easing.
+- Add 180° option to the linear compasses
 
 ### Additional non-core concepts
 
