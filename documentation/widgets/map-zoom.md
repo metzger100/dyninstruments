@@ -28,6 +28,17 @@ MapZoomTextHtmlWidget renders map zoom state as a committed HTML surface.
 - Inner widget wrappers (`.dyni-map-zoom-html`) must not self-expand beyond the surface box.
 - Vertical-mode CSS no longer uses `height: auto`, `aspect-ratio`, or `min-height` overrides on the inner wrapper.
 
+## Text-Fit Contract
+
+- `shared/widget-kits/nav/MapZoomHtmlFit.js` owns text measurement and emits:
+  - `captionStyle`
+  - `valueStyle`
+  - `unitStyle`
+  - `requiredStyle`
+- `MapZoomTextHtmlWidget` reuses semantic model work via `PreparedPayloadModelCache` across `layoutSignature` and `patchDom`.
+- Prepared payload cache invalidation boundaries: payload revision change, props identity change, shell size change, and renderer `detach`/`destroy`.
+- Renderer consults `MapZoomHtmlFit.compute(...)` whenever `shellRect` exists; `MapZoomHtmlFit` performs hostContext-local signature caching for identical fit requests.
+
 ## Related
 
 - ../architecture/html-renderer-lifecycle.md

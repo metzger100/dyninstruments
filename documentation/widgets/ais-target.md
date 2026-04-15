@@ -24,7 +24,10 @@ AisTargetTextHtmlWidget renders AIS target summary state on the committed HTML s
 
 ## Vertical Contract
 
-getVerticalShellSizing returns ratio sizing with aspect ratio 7/8 in vertical mode.
+- getVerticalShellSizing returns ratio sizing with aspect ratio 7/8 in vertical mode.
+- The committed surface box (`shellRect` / `.dyni-html-root`) owns the authoritative geometry.
+- Inner widget wrappers (`.dyni-ais-target-html`) must not self-expand beyond the surface box.
+- Vertical-mode CSS no longer uses `height: auto`, `aspect-ratio`, or `min-height` overrides on the inner wrapper.
 
 ## Related
 

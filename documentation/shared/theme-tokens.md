@@ -80,6 +80,7 @@ runtime/init.js:
 - reads --dyni-theme-preset once from document.documentElement
 - configures runtime._theme
 - runtime._theme configures ThemeResolver with ThemeModel + runtime-owned preset getter + canonical night-mode getter
+- runtime-owned preset is fallback; committed-root `--dyni-theme-preset` overrides are read per root and normalized before resolve
 
 runtime._theme.applyToRoot(rootEl):
 

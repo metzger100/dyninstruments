@@ -69,8 +69,9 @@ Inner mount/surface descendants may still fill inside the reserved shell.
 ## Preset Ingestion Rule
 
 - startup reads --dyni-theme-preset once from document.documentElement
-- runtime stores normalized preset name
-- no per-root preset selectors
+- runtime stores that normalized preset as fallback
+- committed root can override preset via `--dyni-theme-preset`
+- resolver normalizes committed-root override and falls back to runtime preset when unset
 - no data-dyni-theme attribute path
 - no public applyThemePreset API path
 

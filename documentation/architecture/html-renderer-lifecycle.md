@@ -58,6 +58,23 @@ This keeps the measured mount-host `shellRect` and committed subtree sizing alig
 - unbounded rerender loops are not part of the contract
 - no ResizeObserver-driven relayout loop is part of this contract
 
+## Prepared Payload Reuse
+
+`shared/widget-kits/html/PreparedPayloadModelCache.js` provides committed-renderer-local semantic model reuse.
+
+- cache key fields: payload `revision`, `props` identity, `shellRect.width`, `shellRect.height`
+- intended use: reuse model work across `layoutSignature(payload)` and `patch/update` in the same lifecycle phase
+- renderer must clear prepared payload cache on `detach` and `destroy`
+
+## DOM Patch Utility Contract
+
+`HtmlWidgetUtils.patchInnerHtml(rootEl, markup)` is the shared committed DOM patch boundary.
+
+- stores last patched markup in non-enumerable `__dyniLastPatchedMarkup`
+- identical markup is a no-op and preserves root identity
+- jsdom path uses direct `innerHTML` assignment for deterministic tests
+- browser/non-jsdom path keeps structural in-place sync semantics
+
 ## Interaction Ownership
 
 dyninstruments HTML surfaces do not rely on AvNav UserHtml event translation.

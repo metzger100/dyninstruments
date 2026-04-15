@@ -28,6 +28,11 @@ Assembly fail-closes when:
 - required group is missing
 - duplicate component IDs exist
 
+Recent shared-foundation/runtime registrations:
+
+- `PreparedPayloadModelCache` is registered in `registry-shared-foundation.js`
+- `ActiveRouteTextHtmlWidget` and `MapZoomTextHtmlWidget` include `PreparedPayloadModelCache` in `deps`
+
 ## API Shape Contract
 
 Loader supports exactly two explicit API shapes:

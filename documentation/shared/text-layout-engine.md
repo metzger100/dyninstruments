@@ -22,6 +22,8 @@ The engine is split into small shared modules to stay under hotspot/file-size li
 - Widgets pass preformatted strings; engine does not parse coordinates or select formatters.
 - Fit cache is widget-instance local (`createFitCache()` in widget `create()` scope).
 - Layout mode routing supports `flat` / `normal` / `high`.
+- Shared fit primitives apply a row safety factor (`ROW_SAFE_RATIO = 0.85`) so fitted glyphs stay inside row bands at tight sizes.
+- `TextTileLayout` keeps context-local measurement caches (`metricTiles`, `fittedLines`) keyed by semantic + geometry signatures.
 
 ## Ownership Contract
 

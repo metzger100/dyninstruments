@@ -170,11 +170,12 @@ Color-token flow:
 ## RadialTextLayout API
 
 `RadialTextLayout.create()` returns shared text helpers:
-`setFont`, `fitTextPx`, `fitSingleTextPx`, `measureValueUnitFit`, `drawCaptionMax`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`, `drawDisconnectOverlay`.
+`setFont`, `measureTextWidth`, `fitTextPx`, `fitSingleTextPx`, `measureValueUnitFit`, `drawCaptionMax`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`, `drawDisconnectOverlay`.
 
 Key signatures:
 
 - `setFont(ctx, px, weight, family)`
+- `measureTextWidth(ctx, text)`
 - `fitTextPx(ctx, text, maxW, maxH, family, weight)`
 - `fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, weight)`
 - Composite helpers (`measureValueUnitFit`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`) accept both `valueWeight` and `labelWeight` numeric arguments.

@@ -158,6 +158,7 @@ Current shared utilities include:
 - `HtmlWidgetUtils.resolveShellRect()`
 - `HtmlWidgetUtils.resolveRatioMode()`
 - `HtmlWidgetUtils.isEditingMode()`
+- `PreparedPayloadModelCache.createPreparedModelCache()`
 - `ThemeModel.normalizePresetName()`
 - `PerfSpanHelper.startSpan()`
 - `PerfSpanHelper.endSpan()`
@@ -172,6 +173,7 @@ Current shared utilities include:
 - `RadialValueMath.computeMode()`
 - `RadialValueMath.computeSemicircleGeometry()`
 - `RadialTextLayout.setFont()`
+- `RadialTextLayout.measureTextWidth()`
 - `RadialTextLayout.fitSingleTextPx()`
 - `RadialTextLayout.drawDisconnectOverlay()`
 - `Helpers.applyFormatter()`

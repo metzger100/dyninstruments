@@ -42,6 +42,9 @@ ActiveRouteTextHtmlWidget is a committed HTML renderer routed by ClusterRenderer
   - `metrics.<id>.unitStyle`
 - `ActiveRouteTextHtmlWidget.renderMetricTile()` applies all metric fit styles, including caption fit on `.dyni-active-route-metric-caption`.
 - Missing fit inputs fail closed (`compute()` returns `null`), and renderer output stays valid without extra relayout loops.
+- `ActiveRouteTextHtmlWidget` reuses semantic model work via `PreparedPayloadModelCache` across `layoutSignature` and `patchDom`.
+- Prepared payload cache invalidation boundaries: payload revision change, props identity change, shell size change, and renderer `detach`/`destroy`.
+- Renderer consults `ActiveRouteHtmlFit.compute(...)` whenever `shellRect` exists; `ActiveRouteHtmlFit` performs hostContext-local signature caching to deduplicate identical fit requests.
 
 ## Related
 

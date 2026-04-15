@@ -43,8 +43,9 @@ There is no theme-change gate before apply. Outputs are applied on every commit.
 ## Preset Ingestion Contract
 
 - startup source is only document.documentElement --dyni-theme-preset
-- preset is read once at startup and stored in runtime-owned state
-- no live reread loop exists
+- startup value is normalized and stored as runtime-owned fallback preset
+- ThemeResolver preset getter reads committed-root `--dyni-theme-preset` per root and falls back to the runtime-owned preset
+- effective preset is always normalized through ThemeModel
 - no public imperative preset mutation API exists
 
 ## Surface Policy and Bridge Ownership

@@ -47,6 +47,18 @@ Policy includes:
 - normalized action callbacks under surfacePolicy.actions
 - host facts such as viewport height
 
+Route-prop materialization contract:
+
+- routeState.props identity is preserved (no clone per update)
+- runtime-only fields are materialized as non-enumerable props:
+  - surfacePolicy
+  - viewportHeight
+
+Host-context cache contract:
+
+- normalized action wrappers are cached per hostContext and refreshed when hostActions owner changes
+- normalized capabilities are cached per hostContext and recomputed only when raw capability object identity changes
+
 Renderers do not call host capability APIs directly.
 
 ## Vertical Shell Sizing Ownership
