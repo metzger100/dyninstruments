@@ -84,6 +84,7 @@
 - **Theme token resolver (preset system, runtime integration, testing hooks)** → [shared/theme-tokens.md](shared/theme-tokens.md)
 - **Bundled Roboto/Roboto Mono assets and offline font-loading contract** → [shared/bundled-fonts.md](shared/bundled-fonts.md)
 - **HTML widget visual style contract** → [shared/html-widget-visual-style-guide.md](shared/html-widget-visual-style-guide.md)
+- **Hide seconds formatter swap contract** → [shared/hide-seconds.md](shared/hide-seconds.md)
 
 ## Documentation Maintenance
 

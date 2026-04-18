@@ -164,6 +164,7 @@
       const isLocalRoute = hasRoute && domain.isLocalRoute === true;
       const isServerRoute = hasRoute && domain.isServerRoute === true;
       const defaultText = resolveDefaultText(props);
+      const etaFormatter = domain.hideSeconds === true ? "formatClock" : "formatTime";
       const nameText = hasRoute
         ? htmlUtils.trimText(domain.routeName)
         : "";
@@ -249,7 +250,7 @@
           ...buildMetricValueText(
             formatMetric(
               isActiveRoute ? domain.eta : undefined,
-              "formatTime",
+              etaFormatter,
               [],
               defaultText,
               Helpers,

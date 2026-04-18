@@ -59,6 +59,12 @@ describe("NavMapper", function () {
     expect(mapper.translate({ kind: "rteEta", rteEta: 1700000100 }, toolkit).formatter).toBe("formatTime");
   });
 
+  it("maps ETA kinds with formatClock when hideSeconds is enabled", function () {
+    const mapper = createMapper();
+    expect(mapper.translate({ kind: "eta", eta: 1700000000, hideSeconds: true }, toolkit).formatter).toBe("formatClock");
+    expect(mapper.translate({ kind: "rteEta", rteEta: 1700000100, hideSeconds: true }, toolkit).formatter).toBe("formatClock");
+  });
+
   it("maps distance kinds with formatDistance", function () {
     const mapper = createMapper();
     const out = mapper.translate({ kind: "rteDistance", rteDistance: 12.3 }, toolkit);
@@ -98,7 +104,8 @@ describe("NavMapper", function () {
       activeRouteRatioThresholdNormal: "1.25",
       activeRouteRatioThresholdFlat: "4.4",
       wpServer: true,
-      disconnect: true
+      disconnect: true,
+      hideSeconds: true
     }, toolkit);
 
     expect(out).toEqual({
@@ -121,6 +128,7 @@ describe("NavMapper", function () {
         eta: "",
         nextCourse: "degN"
       },
+      hideSeconds: true,
       ratioThresholdNormal: 1.25,
       ratioThresholdFlat: 4.4
     });
@@ -349,6 +357,7 @@ describe("NavMapper", function () {
       activeName: "local@Harbor Run",
       rteDistance: "4.8",
       rteEta: eta,
+      hideSeconds: true,
       editRouteRatioThresholdNormal: "1.23",
       editRouteRatioThresholdFlat: "3.95"
     }, toolkit);
@@ -362,6 +371,7 @@ describe("NavMapper", function () {
         totalDistance: 1512.2,
         remainingDistance: 4.8,
         eta: eta,
+        hideSeconds: true,
         isActiveRoute: true,
         isLocalRoute: true,
         isServerRoute: false
@@ -420,6 +430,7 @@ describe("NavMapper", function () {
         totalDistance: undefined,
         remainingDistance: undefined,
         eta: undefined,
+        hideSeconds: false,
         isActiveRoute: false,
         isLocalRoute: false,
         isServerRoute: false

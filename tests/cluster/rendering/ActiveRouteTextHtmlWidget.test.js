@@ -27,6 +27,9 @@ describe("ActiveRouteTextHtmlWidget", function () {
         if (cfg.formatter === "formatTime") {
           return "TIME:" + String(value);
         }
+        if (cfg.formatter === "formatClock") {
+          return "CLOCK:" + String(value);
+        }
         if (cfg.formatter === "formatDirection") {
           return "DIR:" + String(value);
         }
@@ -251,6 +254,17 @@ describe("ActiveRouteTextHtmlWidget", function () {
     expect(noRouteByEmptyName.html()).toContain("No Route");
   });
 
+  it("renders ETA with formatClock when hideSeconds is enabled", function () {
+    const setup = createRenderer();
+    const mounted = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy(makeProps({ hideSeconds: true }), { mode: "dispatch" })
+    );
+
+    expect(mounted.html()).toContain("CLOCK:");
+    expect(mounted.html()).toContain("dyni-active-route-html");
+  });
+
   it("normalizes known formatter fallback tokens to the configured default", function () {
     const setup = createRenderer({
       applyFormatter(value, formatterOptions) {
@@ -260,6 +274,9 @@ describe("ActiveRouteTextHtmlWidget", function () {
         }
         if (cfg.formatter === "formatTime") {
           return "--:--:--";
+        }
+        if (cfg.formatter === "formatClock") {
+          return "--:--";
         }
         if (cfg.formatter === "formatDirection") {
           return "NO DATA";
@@ -388,6 +405,9 @@ describe("ActiveRouteTextHtmlWidget", function () {
       }
       if (cfg.formatter === "formatTime") {
         return "TIME:" + String(value);
+      }
+      if (cfg.formatter === "formatClock") {
+        return "CLOCK:" + String(value);
       }
       if (cfg.formatter === "formatDirection") {
         return "DIR:" + String(value);

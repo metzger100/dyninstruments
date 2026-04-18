@@ -29,10 +29,10 @@
       const req = p.kind;
 
       if (req === "eta") {
-        return out(p.eta, cap("eta"), unit("eta"), "formatTime", []);
+        return out(p.eta, cap("eta"), unit("eta"), p.hideSeconds === true ? "formatClock" : "formatTime", []);
       }
       if (req === "rteEta") {
-        return out(p.rteEta, cap("rteEta"), unit("rteEta"), "formatTime", []);
+        return out(p.rteEta, cap("rteEta"), unit("rteEta"), p.hideSeconds === true ? "formatClock" : "formatTime", []);
       }
       if (req === "dst") {
         return out(p.dst, cap("dst"), unit("dst"), "formatDistance", []);
@@ -50,6 +50,7 @@
           renderer: "ActiveRouteTextHtmlWidget",
           routeName: activeRouteDomain.routeName,
           disconnect: p.disconnect === true,
+          hideSeconds: activeRouteDomain.hideSeconds,
           display: activeRouteDomain.display,
           captions: activeRouteDomain.captions,
           units: activeRouteDomain.units,
@@ -94,6 +95,7 @@
             totalDistance: route ? route.totalDistance : undefined,
             remainingDistance: editRouteDomain.remainingDistance,
             eta: editRouteDomain.eta,
+            hideSeconds: editRouteDomain.hideSeconds,
             isActiveRoute: editRouteDomain.isActiveRoute,
             isLocalRoute: route ? route.isLocalRoute : false,
             isServerRoute: route ? route.isServerRoute : false

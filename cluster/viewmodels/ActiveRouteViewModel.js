@@ -46,7 +46,8 @@
           remain: unit("activeRouteRemain"),
           eta: unit("activeRouteEta"),
           nextCourse: unit("activeRouteNextCourse")
-        }
+        },
+        hideSeconds: p.hideSeconds === true
       };
     }
 

@@ -219,6 +219,22 @@ They are scoped per cluster via `condition` lists (no global shared editable):
 - `config/clusters/wind.js`
   - `stableDigits`: `angleTrueRadial`, `angleApparentRadial`, `angleTrueLinear`, `angleApparentLinear`
 
+### Phase 7 Time Display Editables (dyninstruments-internal)
+
+`hideSeconds` is a per-widget BOOLEAN toggle, default `false`, defined only in the clusters where time text is rendered.
+
+- `config/clusters/nav.js`
+  - `eta`
+  - `rteEta`
+  - `activeRoute`
+  - `editRoute`
+- `config/clusters/vessel.js`
+  - `clock`
+  - `dateTime`
+  - `timeStatus`
+
+The option swaps `formatTime` for `formatClock` at the mapper or render-model boundary. No shared editable is used in `config/shared/common-editables.js`.
+
 ## Related
 
 - [plugin-lifecycle.md](plugin-lifecycle.md) — Widget registration, updateFunction for KEY params

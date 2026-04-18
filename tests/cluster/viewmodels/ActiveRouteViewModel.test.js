@@ -60,8 +60,20 @@ describe("ActiveRouteViewModel", function () {
         remain: "nmA",
         eta: "",
         nextCourse: "degN"
-      }
+      },
+      hideSeconds: false
     });
+  });
+
+  it("threads hideSeconds from props", function () {
+    const vm = createViewModel();
+    const out = vm.build({
+      activeRouteName: "Harbor Run",
+      hideSeconds: true,
+      wpServer: true
+    }, createToolkit());
+
+    expect(out.hideSeconds).toBe(true);
   });
 
   it("derives disconnect from explicit flag, wp-server disconnect, or empty route name", function () {

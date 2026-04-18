@@ -59,6 +59,11 @@ ActiveRouteTextHtmlWidget is a committed HTML renderer routed by ClusterRenderer
 - Metric value spans add `.dyni-tabular` when stable digits are enabled.
 - Fit is two-pass in `ActiveRouteHtmlFit`: padded value first, fallback value when the padded metric clips.
 
+## Phase 7 Options
+
+- `hideSeconds` (default `false`) switches the ETA metric from `formatTime` to `formatClock`.
+- The resulting `--:--` fallback still normalizes to `---` through `PlaceholderNormalize`.
+
 ## Related
 
 - ../architecture/html-renderer-lifecycle.md

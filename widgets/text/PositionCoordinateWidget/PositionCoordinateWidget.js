@@ -68,13 +68,14 @@
   function resolveVariantProps(props) {
     const p = props || {};
     const displayVariant = normalizeDisplayVariant(p.displayVariant);
+    const timeFormatter = p.hideSeconds === true ? "formatClock" : "formatTime";
 
     if (displayVariant === DISPLAY_VARIANT_DATE_TIME) {
       return {
         ...p,
         displayVariant: displayVariant,
         coordinateFormatterLat: "formatDate",
-        coordinateFormatterLon: "formatTime",
+        coordinateFormatterLon: timeFormatter,
         coordinateFlatFromAxes: true,
         coordinateRawValues: true
       };
@@ -85,7 +86,7 @@
         ...p,
         displayVariant: displayVariant,
         coordinateFormatterLat: statusCircleFormatter,
-        coordinateFormatterLon: "formatTime",
+        coordinateFormatterLon: timeFormatter,
         coordinateFlatFromAxes: true,
         coordinateRawValues: true
       };

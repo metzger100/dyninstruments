@@ -44,7 +44,8 @@ describe("EditRouteViewModel", function () {
       hasRoute: true,
       isActiveRoute: false,
       remainingDistance: undefined,
-      eta: undefined
+      eta: undefined,
+      hideSeconds: false
     });
   });
 
@@ -64,6 +65,16 @@ describe("EditRouteViewModel", function () {
     expect(blankOut.route.displayName).toBe("");
     expect(blankOut.route.isLocalRoute).toBe(true);
     expect(blankOut.route.isServerRoute).toBe(false);
+  });
+
+  it("threads hideSeconds from props", function () {
+    const vm = createViewModel();
+    const out = vm.build({
+      editingRoute: { name: "Harbor Run", points: [] },
+      hideSeconds: true
+    });
+
+    expect(out.hideSeconds).toBe(true);
   });
 
   it("derives active state from exact raw-name equality and gates remain/eta by active state", function () {

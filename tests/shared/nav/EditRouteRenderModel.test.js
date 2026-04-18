@@ -22,6 +22,9 @@ describe("EditRouteRenderModel", function () {
       if (cfg.formatter === "formatTime") {
         return "TIME:" + String(value);
       }
+      if (cfg.formatter === "formatClock") {
+        return "CLOCK:" + String(value);
+      }
       return String(value);
     };
 
@@ -320,6 +323,9 @@ describe("EditRouteRenderModel", function () {
         if (cfg.formatter === "formatTime") {
           return "--:--:--";
         }
+        if (cfg.formatter === "formatClock") {
+          return "--:--";
+        }
         return cfg.default;
       }
     });
@@ -360,6 +366,9 @@ describe("EditRouteRenderModel", function () {
         if (cfg.formatter === "formatTime") {
           return "12:34";
         }
+        if (cfg.formatter === "formatClock") {
+          return "12:34";
+        }
         return value == null ? cfg.default : String(value);
       }
     });
@@ -378,6 +387,49 @@ describe("EditRouteRenderModel", function () {
     expect(model.metrics.rte.fallbackValueText).toBe("3.4");
     expect(model.metrics.eta.valueText).toBe(" 12:34");
     expect(model.metrics.eta.fallbackValueText).toBe("12:34");
+  });
+
+  it("uses formatClock for ETA when hideSeconds is enabled", function () {
+    const renderModel = createRenderModel({
+      applyFormatter(value, formatterOptions) {
+        const cfg = formatterOptions || {};
+        if (cfg.formatter === "formatClock") {
+          return "CLOCK:" + String(value);
+        }
+        if (cfg.formatter === "formatTime") {
+          return "TIME:" + String(value);
+        }
+        if (cfg.formatter === "formatDecimal") {
+          return "DEC:" + String(value);
+        }
+        if (cfg.formatter === "formatDistance") {
+          return "DST:" + String(value);
+        }
+        return value == null ? cfg.default : String(value);
+      }
+    });
+    const eta = new Date("2026-03-06T11:45:00Z");
+    const model = renderModel.buildModel({
+      props: withSurfacePolicy(makeProps({
+        domain: {
+          hasRoute: true,
+          routeName: "Harbor Run",
+          pointCount: 5,
+          totalDistance: 1234.5,
+          remainingDistance: 321.4,
+          eta: eta,
+          hideSeconds: true,
+          isActiveRoute: true,
+          isLocalRoute: false,
+          isServerRoute: true
+        }
+      }), { mode: "dispatch" }),
+      shellRect: { width: 320, height: 210 },
+      isVerticalCommitted: false
+    });
+
+    expect(model.metrics.eta.valueText).toBe("CLOCK:" + String(eta));
+    expect(model.metrics.eta.fallbackValueText).toBe("CLOCK:" + String(eta));
   });
 
   it("forces high mode and applies width-driven vertical shell geometry", function () {

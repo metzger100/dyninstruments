@@ -108,6 +108,14 @@ describe("config/clusters/nav.js", function () {
       { kind: "activeRoute" },
       { kind: "editRoute" }
     ]);
+    expect(def.editableParameters.hideSeconds.default).toBe(false);
+    expect(def.editableParameters.hideSeconds.name).toBe("Hide seconds");
+    expect(def.editableParameters.hideSeconds.condition).toEqual([
+      { kind: "eta" },
+      { kind: "rteEta" },
+      { kind: "activeRoute" },
+      { kind: "editRoute" }
+    ]);
     expect(def.editableParameters.ratioThresholdNormal.condition).toEqual([
       { kind: "eta" },
       { kind: "rteEta" },

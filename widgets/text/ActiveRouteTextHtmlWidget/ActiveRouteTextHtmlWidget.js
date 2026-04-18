@@ -126,6 +126,7 @@
     const isApproaching = display.isApproaching === true;
     const kind = resolveStateKind(p, htmlUtils, stateScreenPrecedence);
     const defaultText = String(p.default);
+    const etaFormatter = p.hideSeconds === true ? "formatClock" : "formatTime";
     const stableDigitsEnabled = p.stableDigits === true;
     const mode = resolveDisplayMode(p, shellRect, htmlUtils);
     const isEditing = htmlUtils.isEditingMode(p);
@@ -161,7 +162,7 @@
     );
     const etaRawText = formatMetric(
       display.eta,
-      "formatTime",
+      etaFormatter,
       [],
       defaultText,
       Helpers,

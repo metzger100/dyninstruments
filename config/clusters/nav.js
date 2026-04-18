@@ -215,6 +215,17 @@
             { kind: "editRoute" }
           ]
         },
+        hideSeconds: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide seconds",
+          condition: [
+            { kind: "eta" },
+            { kind: "rteEta" },
+            { kind: "activeRoute" },
+            { kind: "editRoute" }
+          ]
+        },
         caption: false,
         unit: false,
         formatter: false,

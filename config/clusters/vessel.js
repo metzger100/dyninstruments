@@ -211,6 +211,16 @@
             { kind: "voltageRadial" }
           ]
         },
+        hideSeconds: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide seconds",
+          condition: [
+            { kind: "clock" },
+            { kind: "dateTime" },
+            { kind: "timeStatus" }
+          ]
+        },
 
         caption: false,
         unit: false,

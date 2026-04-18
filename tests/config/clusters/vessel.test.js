@@ -55,6 +55,13 @@ describe("config/clusters/vessel.js", function () {
       { kind: "voltageLinear" },
       { kind: "voltageRadial" }
     ]);
+    expect(def.editableParameters.hideSeconds.default).toBe(false);
+    expect(def.editableParameters.hideSeconds.name).toBe("Hide seconds");
+    expect(def.editableParameters.hideSeconds.condition).toEqual([
+      { kind: "clock" },
+      { kind: "dateTime" },
+      { kind: "timeStatus" }
+    ]);
 
     expect(def.editableParameters.voltageRadialMinValue).toBeTruthy();
     expect(def.editableParameters.voltageRadialMaxValue).toBeTruthy();

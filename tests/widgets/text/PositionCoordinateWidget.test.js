@@ -48,6 +48,7 @@ describe("PositionCoordinateWidget", function () {
       } catch (ignore) {}
 
       if (raw == null || Number.isNaN(raw)) return (props && props.default) || "---";
+      if (props && props.formatter === "formatClock") return "CLOCK:" + String(raw);
       return String(raw);
     };
     const applyFormatter = vi.fn(typeof opts.applyFormatter === "function" ? opts.applyFormatter : defaultApplyFormatter);
@@ -363,6 +364,45 @@ describe("PositionCoordinateWidget", function () {
     }));
   });
 
+  it("uses formatClock on the lon axis for dateTime when hideSeconds is enabled", function () {
+    const rawClock = new Date("2026-02-22T15:00:00Z");
+    globalThis.avnav = {
+      api: {
+        formatter: {
+          formatDate(value) { return value === rawClock ? "DATE" : "DATE_BAD"; },
+          formatTime(value) { return value === rawClock ? "TIME" : "TIME_BAD"; },
+          formatClock(value) { return value === rawClock ? "CLOCK" : "CLOCK_BAD"; }
+        }
+      }
+    };
+
+    const helpers = makeHelpers();
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
+      .create({}, helpers);
+
+    const ctx = createMockContext2D();
+    const canvas = createMockCanvas({
+      rectWidth: 420,
+      rectHeight: 100,
+      ctx
+    });
+
+    spec.renderCanvas(canvas, {
+      value: [rawClock, rawClock],
+      displayVariant: "dateTime",
+      hideSeconds: true,
+      ratioThresholdNormal: 1.35,
+      ratioThresholdFlat: 3.0,
+      default: "NA"
+    });
+
+    expect(fillTextValues(ctx)).toContain("DATE CLOCK");
+    expect(helpers.applyFormatter).toHaveBeenCalledWith(rawClock, expect.objectContaining({
+      formatter: "formatClock",
+      formatterParameters: []
+    }));
+  });
+
   it("renders status circle on top line and formatted time on bottom in flat axis mode", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
     const statusFormatter = vi.fn((raw) => {
@@ -430,6 +470,43 @@ describe("PositionCoordinateWidget", function () {
     expect(fillTextValues(ctx)).toContain("🟢 TIME_OBJ");
     expect(helpers.applyFormatter).toHaveBeenCalledWith(rawClock, expect.objectContaining({
       formatter: "formatTime",
+      formatterParameters: []
+    }));
+  });
+
+  it("uses formatClock on the lon axis for timeStatus when hideSeconds is enabled", function () {
+    const rawClock = new Date("2026-02-22T15:00:00Z");
+    globalThis.avnav = {
+      api: {
+        formatter: {
+          formatClock(value) { return value === rawClock ? "CLOCK_OBJ" : "CLOCK_BAD"; }
+        }
+      }
+    };
+
+    const helpers = makeHelpers();
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
+      .create({}, helpers);
+
+    const ctx = createMockContext2D();
+    const canvas = createMockCanvas({
+      rectWidth: 420,
+      rectHeight: 100,
+      ctx
+    });
+
+    spec.renderCanvas(canvas, {
+      value: [rawClock, true],
+      displayVariant: "timeStatus",
+      hideSeconds: true,
+      ratioThresholdNormal: 1.0,
+      ratioThresholdFlat: 3.0,
+      default: "NA"
+    });
+
+    expect(fillTextValues(ctx)).toContain("🟢 CLOCK_OBJ");
+    expect(helpers.applyFormatter).toHaveBeenCalledWith(rawClock, expect.objectContaining({
+      formatter: "formatClock",
       formatterParameters: []
     }));
   });

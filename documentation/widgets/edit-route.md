@@ -44,6 +44,11 @@ EditRouteTextHtmlWidget is a committed HTML renderer for the nav editRoute kind.
 - Metric value text spans add `.dyni-tabular` when `stableDigitsEnabled` is true.
 - Values keep full and compact variants through existing layout logic; placeholders remain `---`.
 
+## Phase 7 Options
+
+- `hideSeconds` (default `false`) switches the ETA metric from `formatTime` to `formatClock`.
+- The `--:--` fallback still normalizes to `---` through `PlaceholderNormalize`.
+
 ## Related
 
 - ../architecture/html-renderer-lifecycle.md

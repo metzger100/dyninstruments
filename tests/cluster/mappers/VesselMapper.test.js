@@ -128,6 +128,15 @@ describe("VesselMapper", function () {
     expect(clockOut.value).toBe(rawClock);
   });
 
+  it("uses formatClock for clock when hideSeconds is enabled", function () {
+    const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
+    const rawClock = new Date("2026-02-22T14:30:00Z");
+    const clockOut = mapper.translate({ kind: "clock", clock: rawClock, hideSeconds: true }, toolkit);
+
+    expect(clockOut.formatter).toBe("formatClock");
+    expect(clockOut.value).toBe(rawClock);
+  });
+
   it("maps dateTime to PositionCoordinateWidget with direct variant props", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
@@ -145,6 +154,7 @@ describe("VesselMapper", function () {
     expect(out.unit).toBe("");
     expect(out.ratioThresholdNormal).toBe(1.35);
     expect(out.ratioThresholdFlat).toBe(4.55);
+    expect(out.hideSeconds).toBe(false);
   });
 
   it("maps timeStatus to PositionCoordinateWidget with direct variant props", function () {
@@ -156,6 +166,29 @@ describe("VesselMapper", function () {
     expect(out.value).toEqual([rawClock, true]);
     expect(out.caption).toBe("");
     expect(out.unit).toBe("");
+    expect(out.hideSeconds).toBe(false);
+  });
+
+  it("threads hideSeconds through dateTime and timeStatus outputs", function () {
+    const rawClock = new Date("2026-02-22T15:00:00Z");
+    const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
+
+    const dateTimeOut = mapper.translate({
+      kind: "dateTime",
+      clock: rawClock,
+      hideSeconds: true,
+      default: "---"
+    }, toolkit);
+    expect(dateTimeOut.hideSeconds).toBe(true);
+
+    const timeStatusOut = mapper.translate({
+      kind: "timeStatus",
+      clock: rawClock,
+      gpsValid: true,
+      hideSeconds: true,
+      default: "---"
+    }, toolkit);
+    expect(timeStatusOut.hideSeconds).toBe(true);
   });
 
   it("maps pitch and roll to formatDirection in signed-degree mode with radian input", function () {

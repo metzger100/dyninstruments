@@ -47,13 +47,14 @@ This renderer uses the shared text compaction contract from `TextLayoutEngine.co
 | `coordinateFormatterParametersLat` | array/string | — | Optional axis override params for top formatter |
 | `coordinateFormatterParametersLon` | array/string | — | Optional axis override params for bottom formatter |
 | `coordinateFlatFromAxes` | boolean | `false` | In flat mode, render value by joining top-axis and bottom-axis formatter outputs |
+| `hideSeconds` | boolean | `false` | When true, `dateTime` and `timeStatus` switch the lon-axis formatter from `formatTime` to `formatClock` |
 
 ## Coordinate Formatting
 
 - `flat` mode uses `Helpers.applyFormatter(value, props)` (normally `formatLonLats`)
 - When `coordinateFlatFromAxes` is true, flat mode formats both axes (`lat` + `lon`) and joins them into one line
-- `displayVariant: "dateTime"` enables renderer-owned raw-value formatting with `formatDate` (top) and `formatTime` (bottom), and joins both outputs in flat mode
-- `displayVariant: "timeStatus"` enables renderer-owned status-circle formatting (top) plus `formatTime` (bottom), and joins both outputs in flat mode
+- `displayVariant: "dateTime"` enables renderer-owned raw-value formatting with `formatDate` (top) and `formatTime` (bottom), and joins both outputs in flat mode; when `hideSeconds` is true, the bottom axis uses `formatClock`
+- `displayVariant: "timeStatus"` enables renderer-owned status-circle formatting (top) plus `formatTime` (bottom), and joins both outputs in flat mode; when `hideSeconds` is true, the bottom axis uses `formatClock`
 - For vessel `timeStatus`, emoji status markers (`🟢`/`🔴`) use an extra vertical fit guard in flat and stacked layouts to prevent border clipping
 - `normal`/`high` modes use `Helpers.applyFormatter(value, { formatter: coordinateFormatter, formatterParameters: [...coordinateFormatterParameters, axis] })`
 - Axis mapping is fixed: `lat` -> first (top) line, `lon` -> second (bottom) line
@@ -80,6 +81,11 @@ return {
 - `coordinatesTabular` (default `true`) switches coordinate rendering to `theme.font.familyMono`.
 - Applies in stacked and flat variants (including `dateTime` / `timeStatus` display variants).
 - `coordinatesTabular: false` keeps coordinate rendering on `theme.font.family`.
+
+## Phase 7 Options
+
+- `hideSeconds` (default `false`) swaps the time axis in `dateTime` and `timeStatus` from `formatTime` to `formatClock`.
+- The `formatClock` fallback `--:--` still normalizes to `---` through `PlaceholderNormalize`.
 
 ## Related
 

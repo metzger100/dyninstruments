@@ -193,6 +193,20 @@ describe("EditRouteTextHtmlWidget", function () {
     expect(mounted.html()).toContain("dyni-edit-route-open-passive");
   });
 
+  it("passes hideSeconds through to the render model", function () {
+    const setup = createRenderer();
+    mountCommitted(
+      setup.renderer,
+      withSurfacePolicy({ __canOpen: true, hideSeconds: true, __token: "hide-seconds" }, { mode: "dispatch" })
+    );
+
+    expect(setup.buildModel).toHaveBeenCalledWith(expect.objectContaining({
+      props: expect.objectContaining({
+        hideSeconds: true
+      })
+    }));
+  });
+
   it("orchestrates model/fit/markup with committed vertical facts", function () {
     const setup = createRenderer();
     mountCommitted(

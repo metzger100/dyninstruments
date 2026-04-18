@@ -79,7 +79,7 @@
         return out(p.value, cap("voltage"), u, "formatDecimal", [3, 1, true]);
       }
       if (req === "clock") {
-        return out(p.clock, cap("clock"), unit("clock"), "formatTime", []);
+        return out(p.clock, cap("clock"), unit("clock"), p.hideSeconds === true ? "formatClock" : "formatTime", []);
       }
       if (req === "dateTime") {
         return {
@@ -88,6 +88,7 @@
           value: [p.clock, p.clock],
           caption: cap("dateTime"),
           unit: unit("dateTime"),
+          hideSeconds: p.hideSeconds === true,
           ratioThresholdNormal: num(p.dateTimeRatioThresholdNormal),
           ratioThresholdFlat: num(p.dateTimeRatioThresholdFlat)
         };
@@ -98,7 +99,8 @@
           displayVariant: "timeStatus",
           value: [p.clock, p.gpsValid],
           caption: cap("timeStatus"),
-          unit: unit("timeStatus")
+          unit: unit("timeStatus"),
+          hideSeconds: p.hideSeconds === true
         };
       }
       if (req === "pitch") {
