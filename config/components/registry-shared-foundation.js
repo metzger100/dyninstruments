@@ -130,6 +130,33 @@
       css: undefined,
       globalKey: "DyniPreparedPayloadModelCache"
     },
+    StateScreenLabels: {
+      js: BASE + "shared/widget-kits/state/StateScreenLabels.js",
+      css: undefined,
+      globalKey: "DyniStateScreenLabels"
+    },
+    StateScreenPrecedence: {
+      js: BASE + "shared/widget-kits/state/StateScreenPrecedence.js",
+      css: undefined,
+      globalKey: "DyniStateScreenPrecedence"
+    },
+    StateScreenInteraction: {
+      js: BASE + "shared/widget-kits/state/StateScreenInteraction.js",
+      css: undefined,
+      globalKey: "DyniStateScreenInteraction"
+    },
+    StateScreenMarkup: {
+      js: BASE + "shared/widget-kits/state/StateScreenMarkup.js",
+      css: undefined,
+      globalKey: "DyniStateScreenMarkup",
+      deps: ["HtmlWidgetUtils", "StateScreenLabels"]
+    },
+    StateScreenCanvasOverlay: {
+      js: BASE + "shared/widget-kits/state/StateScreenCanvasOverlay.js",
+      css: undefined,
+      globalKey: "DyniStateScreenCanvasOverlay",
+      deps: ["StateScreenLabels"]
+    },
     LayoutRectMath: {
       js: BASE + "shared/widget-kits/layout/LayoutRectMath.js",
       css: undefined,

@@ -61,3 +61,33 @@
   flex: 0 0 auto;
   height: auto;
 }
+
+/* Semantic state-screen wrappers for shared empty/disconnected states. */
+.widget.dyniplugin .dyni-state-disconnected,
+.widget.dyniplugin .dyni-state-no-route,
+.widget.dyniplugin .dyni-state-no-target,
+.widget.dyniplugin .dyni-state-no-ais {
+  position: relative;
+  container-type: size;
+}
+
+.widget.dyniplugin .dyni-state-screen-body {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.widget.dyniplugin .dyni-state-screen-label {
+  display: block;
+  line-height: 1;
+  font-weight: var(--dyni-theme-font-label-weight, 650);
+  font-size: clamp(12px, 18vmin, 96px);
+  font-size: clamp(12px, min(18cqw, 18cqh), 96px);
+}
+
+.widget.dyniplugin .dyni-state-hidden {
+  display: none !important;
+}

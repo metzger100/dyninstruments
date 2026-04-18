@@ -28,6 +28,7 @@
 - **Surface session switching (`attach`/`update`/`detach`/`destroy`)** → [architecture/surface-session-controller.md](architecture/surface-session-controller.md)
 - **`canvas-dom` adapter integration contract** → [architecture/canvas-dom-surface-adapter.md](architecture/canvas-dom-surface-adapter.md)
 - **Plugin↔core tuple contracts** → [architecture/plugin-core-contracts.md](architecture/plugin-core-contracts.md)
+- **State-screen shared vocabulary, precedence, and render primitives** → [shared/state-screens.md](shared/state-screens.md)
 - **Helpers contract (`setupCanvas`, theme/night lookups, formatter dispatch)** → [shared/helpers.md](shared/helpers.md)
 
 ## Conventions
@@ -108,3 +109,4 @@
 - **SignalK key selector contract in editor forms** → [avnav-api/editable-parameters.md#key-details](avnav-api/editable-parameters.md#key-details)
 - **Roll/pitch formatter tuple contract** → [architecture/plugin-core-contracts.md](architecture/plugin-core-contracts.md), [avnav-api/core-formatter-catalog.md](avnav-api/core-formatter-catalog.md), [avnav-api/core-key-catalog.md](avnav-api/core-key-catalog.md)
 - **Interactive dashboard button/toggle behavior on `GpsPage`** → [avnav-api/interactive-widgets.md](avnav-api/interactive-widgets.md)
+- **State-screen precedence and shared labels** → [shared/state-screens.md](shared/state-screens.md)
