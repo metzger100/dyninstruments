@@ -62,6 +62,7 @@ Root does not set one global font-weight.
 - `font-family: var(--dyni-theme-font-family-mono), var(--dyni-theme-font-family)`
 
 Use this class on spans that require column-stable digits (for example coordinate rows and stable-digit numeric cells).
+StableDigits usage details and padded/fallback behavior are documented in [stable-digits.md](stable-digits.md).
 
 ## Shadow CSS Rule
 

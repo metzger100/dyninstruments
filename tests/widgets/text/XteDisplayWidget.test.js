@@ -226,6 +226,9 @@ describe("XteDisplayWidget", function () {
         if (id === "PlaceholderNormalize") {
           return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         }
+        if (id === "StableDigits") {
+          return loadFresh("shared/widget-kits/format/StableDigits.js");
+        }
         if (id === "StateScreenLabels") {
           return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
         }
@@ -630,5 +633,26 @@ describe("XteDisplayWidget", function () {
     expect(largeHarness.calls.modeHistory[0]).toBe("normal");
     expect(compactHarness.calls.waypointTextFillScales[0]).toBeGreaterThan(largeHarness.calls.waypointTextFillScales[0]);
     expect(compactHarness.calls.metricTextFillScales[0]).toBeGreaterThan(largeHarness.calls.metricTextFillScales[0]);
+  });
+
+  it("keeps XTE side suffix alignment for R/L and preserves an empty slot at zero", function () {
+    function renderXteValue(xte) {
+      const harness = createHarness();
+      harness.spec.renderCanvas(
+        createMockCanvas({ rectWidth: 520, rectHeight: 260, ctx: createMockContext2D() }),
+        makeProps({ stableDigits: true, xte: xte })
+      );
+      return harness.calls.valueRows[1].value;
+    }
+
+    const rightValue = renderXteValue(0.25);
+    const leftValue = renderXteValue(-0.25);
+    const zeroValue = renderXteValue(0);
+
+    expect(rightValue.endsWith("R")).toBe(true);
+    expect(leftValue.endsWith("L")).toBe(true);
+    expect(/[RL]$/.test(zeroValue)).toBe(false);
+    expect(rightValue.length).toBe(leftValue.length);
+    expect(rightValue.length).toBe(zeroValue.length);
   });
 });

@@ -20,6 +20,14 @@
     return x;
   }
 
+  function resolveFamily(family, options) {
+    const opts = options && typeof options === "object" ? options : null;
+    if (!opts || opts.useMono !== true) {
+      return family;
+    }
+    return opts.monoFamily || family;
+  }
+
   function create(def, Helpers) {
     const fitting = Helpers.getModule("RadialTextFitting").create(def, Helpers);
     const MIN_FONT_PX = fitting.MIN_FONT_PX;
@@ -55,7 +63,7 @@
       ctx.restore();
     }
 
-    function drawCaptionMax(ctx, family, x, y, w, h, caption, capMaxPx, align, labelWeight) {
+    function drawCaptionMax(ctx, family, x, y, w, h, caption, capMaxPx, align, labelWeight, textOptions) {
       if (w <= 0 || h <= 0 || !caption) {
         return;
       }
@@ -65,13 +73,13 @@
         cPx = Math.min(cPx, clampPositive(capMaxPx, MIN_FONT_PX));
       }
 
-      setFont(ctx, cPx, labelWeight, family);
+      setFont(ctx, cPx, labelWeight, resolveFamily(family, textOptions));
       ctx.textBaseline = "top";
       const mode = align || "left";
       drawClampedLine(ctx, caption, lineAnchor(x, w, mode), y, w, mode);
     }
 
-    function drawValueUnitWithFit(ctx, family, x, y, w, h, value, unit, fit, align, valueWeight, labelWeight) {
+    function drawValueUnitWithFit(ctx, family, x, y, w, h, value, unit, fit, align, valueWeight, labelWeight, textOptions) {
       if (w <= 0 || h <= 0 || !value) {
         return;
       }
@@ -80,7 +88,8 @@
       const vPx = Math.max(MIN_FONT_PX, Number(data.vPx) || 0);
       const uPx = Math.max(MIN_FONT_PX, Number(data.uPx) || 0);
       const gap = Math.max(0, Math.floor(Number(data.gap) || 0));
-      setFont(ctx, vPx, valueWeight, family);
+      const valueFamily = resolveFamily(family, textOptions);
+      setFont(ctx, vPx, valueWeight, valueFamily);
       const valueW = measureTextWidth(ctx, value);
 
       let unitW = 0;
@@ -104,7 +113,7 @@
       ctx.scale(rowScale, 1);
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
-      setFont(ctx, vPx, valueWeight, family);
+      setFont(ctx, vPx, valueWeight, valueFamily);
       ctx.fillText(String(value), xStart, yVal);
       if (unit) {
         setFont(ctx, uPx, labelWeight, family);
@@ -113,7 +122,7 @@
       ctx.restore();
     }
 
-    function drawInlineCapValUnit(ctx, family, x, y, w, h, caption, value, unit, fit, valueWeight, labelWeight) {
+    function drawInlineCapValUnit(ctx, family, x, y, w, h, caption, value, unit, fit, valueWeight, labelWeight, textOptions) {
       if (w <= 0 || h <= 0 || !value) {
         return;
       }
@@ -138,7 +147,7 @@
         xStart += measureTextWidth(ctx, caption) + data.g1;
       }
 
-      setFont(ctx, data.vPx, valueWeight, family);
+      setFont(ctx, data.vPx, valueWeight, resolveFamily(family, textOptions));
       ctx.fillText(String(value), xStart, yMid);
       xStart += measureTextWidth(ctx, value);
 
@@ -151,7 +160,7 @@
       ctx.restore();
     }
 
-    function drawThreeRowsBlock(ctx, family, x, y, w, h, caption, value, unit, secScale, align, sizes, valueWeight, labelWeight) {
+    function drawThreeRowsBlock(ctx, family, x, y, w, h, caption, value, unit, secScale, align, sizes, valueWeight, labelWeight, textOptions) {
       const mode = align || "center";
       let cPx;
       let vPx;
@@ -187,7 +196,7 @@
         drawClampedLine(ctx, caption, anchor, yCap, w, mode);
       }
       if (value) {
-        setFont(ctx, vPx, valueWeight, family);
+        setFont(ctx, vPx, valueWeight, resolveFamily(family, textOptions));
         drawClampedLine(ctx, value, anchor, yVal, w, mode);
       }
       if (unit) {

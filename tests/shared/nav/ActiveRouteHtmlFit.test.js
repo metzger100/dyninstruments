@@ -75,14 +75,18 @@ describe("ActiveRouteHtmlFit", function () {
       mode: "normal",
       isApproaching: true,
       routeNameText: "Harbor Route",
+      stableDigitsEnabled: false,
       remainCaption: "RTE",
       remainText: "12.4",
+      remainFallbackText: "12.4",
       remainUnit: "nm",
       etaCaption: "ETA",
       etaText: "14:25",
+      etaFallbackText: "14:25",
       etaUnit: "utc",
       nextCourseCaption: "NEXT",
       nextCourseText: "093",
+      nextCourseFallbackText: "093",
       nextCourseUnit: "deg"
     }, overrides || {});
   }
@@ -237,5 +241,27 @@ describe("ActiveRouteHtmlFit", function () {
       hostContext: hostContext
     });
     expect(secondRepeat).toBe(second);
+  });
+
+  it("switches to fallback metric value when padded stable-digits text clips", function () {
+    const h = createHarness();
+    const targetEl = document.createElement("div");
+    const hostContext = { __dyniActiveRouteTextMeasureCtx: createMeasureContext() };
+    const out = h.fit.compute({
+      model: makeModel({
+        stableDigitsEnabled: true,
+        isApproaching: false,
+        remainText: " 00012345.6",
+        remainFallbackText: "12345.6",
+        etaText: " 0012:34",
+        etaFallbackText: "12:34"
+      }),
+      shellRect: { width: 20, height: 36 },
+      targetEl: targetEl,
+      hostContext: hostContext
+    });
+
+    expect(out.metricValues.remain).toBe("12345.6");
+    expect(out.metricValues.eta).toBe("12:34");
   });
 });

@@ -53,6 +53,12 @@ ActiveRouteTextHtmlWidget is a committed HTML renderer routed by ClusterRenderer
 - Prepared payload cache invalidation boundaries: payload revision change, props identity change, shell size change, and renderer `detach`/`destroy`.
 - Renderer consults `ActiveRouteHtmlFit.compute(...)` whenever `shellRect` exists; `ActiveRouteHtmlFit` performs hostContext-local signature caching to deduplicate identical fit requests.
 
+## Phase 6 Options
+
+- `stableDigits` (default `false`) enables `StableDigits.normalize(...)` for remain/ETA/next-course metric text.
+- Metric value spans add `.dyni-tabular` when stable digits are enabled.
+- Fit is two-pass in `ActiveRouteHtmlFit`: padded value first, fallback value when the padded metric clips.
+
 ## Related
 
 - ../architecture/html-renderer-lifecycle.md

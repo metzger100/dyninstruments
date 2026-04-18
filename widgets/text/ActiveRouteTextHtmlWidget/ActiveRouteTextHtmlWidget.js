@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteTextHtmlWidget - Interactive HTML renderer for nav active-route kind
  * Documentation: documentation/widgets/active-route.md
- * Depends: ActiveRouteHtmlFit, HtmlWidgetUtils, PreparedPayloadModelCache, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
+ * Depends: ActiveRouteHtmlFit, HtmlWidgetUtils, PreparedPayloadModelCache, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
  */
 
 (function (root, factory) {
@@ -98,12 +98,23 @@
     ]);
   }
 
+  function normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
+    if (!stableDigitsEnabled) {
+      return { padded: rawText, fallback: rawText };
+    }
+    return stableDigits.normalize(rawText, {
+      integerWidth: stableDigits.resolveIntegerWidth(rawText, minWidth),
+      reserveSignSlot: true
+    });
+  }
+
   function buildRenderModel(
     props,
     shellRect,
     Helpers,
     htmlUtils,
     placeholderNormalize,
+    stableDigits,
     stateScreenLabels,
     stateScreenPrecedence,
     stateScreenInteraction
@@ -115,6 +126,7 @@
     const isApproaching = display.isApproaching === true;
     const kind = resolveStateKind(p, htmlUtils, stateScreenPrecedence);
     const defaultText = String(p.default);
+    const stableDigitsEnabled = p.stableDigits === true;
     const mode = resolveDisplayMode(p, shellRect, htmlUtils);
     const isEditing = htmlUtils.isEditingMode(p);
     const canOpenRoute = !isEditing && canDispatchOpenRoute(p);
@@ -139,7 +151,7 @@
     const remainUnit = htmlUtils.trimText(units.remain);
     const etaUnit = htmlUtils.trimText(units.eta);
     const nextCourseUnit = htmlUtils.trimText(units.nextCourse);
-    const remainText = formatMetric(
+    const remainRawText = formatMetric(
       display.remain,
       "formatDistance",
       [remainUnit],
@@ -147,7 +159,7 @@
       Helpers,
       placeholderNormalize
     );
-    const etaText = formatMetric(
+    const etaRawText = formatMetric(
       display.eta,
       "formatTime",
       [],
@@ -155,7 +167,7 @@
       Helpers,
       placeholderNormalize
     );
-    const nextCourseText = isApproaching
+    const nextCourseRawText = isApproaching
       ? formatMetric(
         display.nextCourse,
         "formatDirection",
@@ -165,6 +177,9 @@
         placeholderNormalize
       )
       : "";
+    const remainStable = normalizeStableValue(remainRawText, stableDigitsEnabled, stableDigits, 2);
+    const etaStable = normalizeStableValue(etaRawText, stableDigitsEnabled, stableDigits, 2);
+    const nextStable = normalizeStableValue(nextCourseRawText, stableDigitsEnabled, stableDigits, 3);
 
     return {
       kind: kind,
@@ -178,22 +193,30 @@
       remainUnit: remainUnit,
       etaUnit: etaUnit,
       nextCourseUnit: nextCourseUnit,
-      remainText: remainText,
-      etaText: etaText,
-      nextCourseText: nextCourseText,
+      stableDigitsEnabled: stableDigitsEnabled,
+      remainText: remainStable.padded,
+      remainFallbackText: remainStable.fallback,
+      etaText: etaStable.padded,
+      etaFallbackText: etaStable.fallback,
+      nextCourseText: nextStable.padded,
+      nextCourseFallbackText: nextStable.fallback,
       interactionState: interactionState
     };
   }
 
-  function renderMetricTile(metricId, caption, value, unit, style, htmlUtils) {
+  function renderMetricTile(metricId, caption, value, unit, style, htmlUtils, tabular) {
     const captionStyle = style && typeof style.captionStyle === "string" ? style.captionStyle : "";
     const valueStyle = style && typeof style.valueStyle === "string" ? style.valueStyle : "";
     const unitStyle = style && typeof style.unitStyle === "string" ? style.unitStyle : "";
+    const valueClasses = ["dyni-active-route-metric-value"];
+    if (tabular) {
+      valueClasses.push("dyni-tabular");
+    }
     return ""
       + '<div class="dyni-active-route-metric dyni-active-route-metric-' + metricId + '">'
       + '<div class="dyni-active-route-metric-caption"' + htmlUtils.toStyleAttr(captionStyle) + ">" + htmlUtils.escapeHtml(caption) + "</div>"
       + '<div class="dyni-active-route-metric-value-row">'
-      + '<span class="dyni-active-route-metric-value"' + htmlUtils.toStyleAttr(valueStyle) + ">" + htmlUtils.escapeHtml(value) + "</span>"
+      + '<span class="' + valueClasses.join(" ") + '"' + htmlUtils.toStyleAttr(valueStyle) + ">" + htmlUtils.escapeHtml(value) + "</span>"
       + '<span class="dyni-active-route-metric-unit"' + htmlUtils.toStyleAttr(unitStyle) + ">" + htmlUtils.escapeHtml(unit) + "</span>"
       + "</div>"
       + "</div>";
@@ -223,11 +246,19 @@
       wrapperClasses.push("dyni-active-route-approaching");
     }
 
-    let metricsHtml = "";
-    metricsHtml += renderMetricTile("remain", model.remainCaption, model.remainText, model.remainUnit, metricStyles.remain, htmlUtils);
-    metricsHtml += renderMetricTile("eta", model.etaCaption, model.etaText, model.etaUnit, metricStyles.eta, htmlUtils);
+    const metricValueOverrides = fitStyles && fitStyles.metricValues ? fitStyles.metricValues : Object.create(null);
+    const metricSpecs = [
+      { id: "remain", caption: model.remainCaption, value: model.remainText, unit: model.remainUnit },
+      { id: "eta", caption: model.etaCaption, value: model.etaText, unit: model.etaUnit }
+    ];
     if (model.isApproaching) {
-      metricsHtml += renderMetricTile("next", model.nextCourseCaption, model.nextCourseText, model.nextCourseUnit, metricStyles.next, htmlUtils);
+      metricSpecs.push({ id: "next", caption: model.nextCourseCaption, value: model.nextCourseText, unit: model.nextCourseUnit });
+    }
+    let metricsHtml = "";
+    for (let i = 0; i < metricSpecs.length; i += 1) {
+      const metric = metricSpecs[i];
+      const value = typeof metricValueOverrides[metric.id] === "string" ? metricValueOverrides[metric.id] : metric.value;
+      metricsHtml += renderMetricTile(metric.id, metric.caption, value, metric.unit, metricStyles[metric.id], htmlUtils, model.stableDigitsEnabled);
     }
 
     return ""
@@ -247,6 +278,7 @@
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const preparedPayloadModelCache = Helpers.getModule("PreparedPayloadModelCache").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
@@ -270,6 +302,7 @@
             Helpers,
             htmlUtils,
             placeholderNormalize,
+            stableDigits,
             stateScreenLabels,
             stateScreenPrecedence,
             stateScreenInteraction

@@ -125,6 +125,7 @@
         wrapperEl = htmlUtils.patchInnerHtml(rootEl, markup.render({
           model: model,
           fit: fit,
+          coordinatesTabular: payload.props && payload.props.coordinatesTabular !== false,
           htmlUtils: htmlUtils
         }));
         lastProps = payload.props;

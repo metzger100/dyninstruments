@@ -39,6 +39,7 @@
 - **Canvas layer caching conventions and shared cache facade** → [conventions/canvas-layer-caching.md](conventions/canvas-layer-caching.md), [shared/canvas-layer-cache.md](shared/canvas-layer-cache.md)
 - **Responsive compaction contract** → [shared/responsive-scale-profile.md](shared/responsive-scale-profile.md)
 - **Placeholder normalization contract (`---` fallback unification)** → [shared/placeholder-normalize.md](shared/placeholder-normalize.md)
+- **Stable-digits contract (padded/fallback numeric normalization)** → [shared/stable-digits.md](shared/stable-digits.md)
 - **Documentation format rules** → [conventions/documentation-format.md](conventions/documentation-format.md)
 - **Core non-negotiable rules** → [core-principles.md](core-principles.md)
 

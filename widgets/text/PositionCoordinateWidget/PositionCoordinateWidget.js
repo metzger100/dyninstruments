@@ -165,7 +165,10 @@
       ctx.textBaseline = "middle";
       const rootEl = Helpers.requirePluginRoot(canvas);
       const tokens = theme.resolveForRoot(rootEl);
-      const family = tokens.font.family;
+      const coordinatesTabular = p.coordinatesTabular !== false;
+      const family = coordinatesTabular
+        ? (tokens.font.familyMono || tokens.font.family)
+        : tokens.font.family;
       const color = tokens.surface.fg;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;

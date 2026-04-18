@@ -104,14 +104,27 @@
 
   function buildMetricSpecs(model) {
     const specs = [
-      { id: "remain", caption: model.remainCaption, value: model.remainText, unit: model.remainUnit },
-      { id: "eta", caption: model.etaCaption, value: model.etaText, unit: model.etaUnit }
+      {
+        id: "remain",
+        caption: model.remainCaption,
+        value: model.remainText,
+        fallbackValue: model.remainFallbackText,
+        unit: model.remainUnit
+      },
+      {
+        id: "eta",
+        caption: model.etaCaption,
+        value: model.etaText,
+        fallbackValue: model.etaFallbackText,
+        unit: model.etaUnit
+      }
     ];
     if (model.isApproaching) {
       specs.push({
         id: "next",
         caption: model.nextCourseCaption,
         value: model.nextCourseText,
+        fallbackValue: model.nextCourseFallbackText,
         unit: model.nextCourseUnit
       });
     }
@@ -136,12 +149,15 @@
       model.routeNameText,
       model.remainCaption,
       model.remainText,
+      model.remainFallbackText,
       model.remainUnit,
       model.etaCaption,
       model.etaText,
+      model.etaFallbackText,
       model.etaUnit,
       model.nextCourseCaption,
       model.nextCourseText,
+      model.nextCourseFallbackText,
       model.nextCourseUnit
     ]);
   }
@@ -213,6 +229,7 @@
       });
 
       const metricStyles = Object.create(null);
+      const metricValues = Object.create(null);
       const metricSpecs = buildMetricSpecs(model);
       for (let i = 0; i < metricSpecs.length; i += 1) {
         const metric = metricSpecs[i];
@@ -221,7 +238,7 @@
           continue;
         }
         const spacing = layoutApi.computeMetricTileSpacing(metricRect, layout.responsive);
-        const measurement = tileLayout.measureMetricTile({
+        const primaryMeasurement = tileLayout.measureMetricTile({
           textApi: radialText,
           ctx: measureCtx,
           metric: metric,
@@ -234,6 +251,36 @@
           padX: spacing.padX,
           captionHeightPx: spacing.captionHeightPx
         });
+        const primaryFit = primaryMeasurement && primaryMeasurement.fit ? primaryMeasurement.fit : null;
+        const primaryClipped = !!(primaryMeasurement && primaryFit && primaryFit.total > primaryMeasurement.textW + 0.01);
+        const useFallback = model.stableDigitsEnabled === true &&
+          primaryClipped &&
+          typeof metric.fallbackValue === "string" &&
+          metric.fallbackValue !== metric.value;
+        const metricForFit = useFallback
+          ? {
+            id: metric.id,
+            caption: metric.caption,
+            value: metric.fallbackValue,
+            fallbackValue: metric.fallbackValue,
+            unit: metric.unit
+          }
+          : metric;
+        const measurement = useFallback
+          ? tileLayout.measureMetricTile({
+            textApi: radialText,
+            ctx: measureCtx,
+            metric: metricForFit,
+            rect: metricRect,
+            textFillScale: layout.responsive.textFillScale,
+            family: family,
+            valueWeight: valueWeight,
+            labelWeight: labelWeight,
+            secScale: METRIC_SEC_SCALE,
+            padX: spacing.padX,
+            captionHeightPx: spacing.captionHeightPx
+          })
+          : primaryMeasurement;
         const fit = measurement && measurement.fit ? measurement.fit : null;
         const captionText = htmlUtils.trimText(metric.caption);
         const captionFit = captionText
@@ -249,6 +296,7 @@
             weight: labelWeight
           })
           : null;
+        metricValues[metric.id] = metricForFit.value;
         metricStyles[metric.id] = {
           captionStyle: toFontSizeStyle(captionFit && captionFit.px, htmlUtils),
           valueStyle: toFontSizeStyle(fit && fit.vPx, htmlUtils),
@@ -258,7 +306,8 @@
 
       const out = {
         routeNameStyle: toFontSizeStyle(nameFit && nameFit.px, htmlUtils),
-        metrics: metricStyles
+        metrics: metricStyles,
+        metricValues: metricValues
       };
       if (fitCache) {
         fitCache.signature = fitSignature;

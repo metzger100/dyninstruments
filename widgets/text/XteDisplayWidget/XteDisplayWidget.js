@@ -1,7 +1,7 @@
 /**
  * Module: XteDisplayWidget - Responsive XTE highway renderer with integrated nav metrics
  * Documentation: documentation/widgets/xte-display.md
- * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives, XteHighwayLayout, TextTileLayout, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives, XteHighwayLayout, TextTileLayout, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -20,6 +20,7 @@
     const layoutApi = Helpers.getModule("XteHighwayLayout").create(def, Helpers);
     const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
@@ -87,7 +88,10 @@
       const theme = toolkit.theme.resolveForRoot(rootEl);
       const xteTheme = theme.xte || DEFAULT_XTE_THEME;
       const textColor = theme.surface.fg;
-      const family = theme.font.family;
+      const stableDigitsEnabled = p.stableDigits === true;
+      const family = stableDigitsEnabled
+        ? (theme.font.familyMono || theme.font.family)
+        : theme.font.family;
       const valueWeight = theme.font.weight;
       const labelWeight = theme.font.labelWeight;
       const stateKind = resolveStateKind(p);
@@ -210,17 +214,48 @@
       }));
       const bearingValue = placeholderNormalize.normalize(bearingValueRaw, defaultText);
 
-      const metrics = {
-        cog: { caption: p.trackCaption, value: trackValue, unit: p.trackUnit },
-        xte: { caption: p.xteCaption, value: xteDistance + xteSide, unit: "" },
-        dtw: { caption: p.dtwCaption, value: dtwDistance, unit: p.dtwUnit },
-        btw: { caption: p.btwCaption, value: bearingValue, unit: p.btwUnit }
-      };
       const metricSpacing = {
         cog: layoutApi.computeMetricTileSpacing(layout.metricRects.cog, layout.responsive),
         xte: layoutApi.computeMetricTileSpacing(layout.metricRects.xte, layout.responsive),
         dtw: layoutApi.computeMetricTileSpacing(layout.metricRects.dtw, layout.responsive),
         btw: layoutApi.computeMetricTileSpacing(layout.metricRects.btw, layout.responsive)
+      };
+      let xteValueText = xteDistance + xteSide;
+      if (stableDigitsEnabled) {
+        const xteStable = stableDigits.normalize(xteDistance, {
+          integerWidth: stableDigits.resolveIntegerWidth(xteDistance, 2),
+          reserveSignSlot: false,
+          sideSuffix: xteSide,
+          reserveSideSuffixSlot: true
+        });
+        xteValueText = xteStable.padded;
+        if (xteStable.padded !== xteStable.fallback) {
+          const probe = tileLayout.measureMetricTile({
+            textApi: toolkit.text,
+            ctx: ctx,
+            metric: { caption: p.xteCaption, value: xteStable.padded, unit: "" },
+            rect: layout.metricRects.xte,
+            family: family,
+            valueWeight: valueWeight,
+            labelWeight: labelWeight,
+            secScale: 0.7,
+            textFillScale: layout.responsive.textFillScale,
+            padX: metricSpacing.xte.padX,
+            captionHeightPx: metricSpacing.xte.captionHeightPx
+          });
+          const fit = probe && probe.fit ? probe.fit : null;
+          const clipped = !!(probe && fit && fit.total > probe.textW + 0.01);
+          if (clipped) {
+            xteValueText = xteStable.fallback;
+          }
+        }
+      }
+
+      const metrics = {
+        cog: { caption: p.trackCaption, value: trackValue, unit: p.trackUnit },
+        xte: { caption: p.xteCaption, value: xteValueText, unit: "" },
+        dtw: { caption: p.dtwCaption, value: dtwDistance, unit: p.dtwUnit },
+        btw: { caption: p.btwCaption, value: bearingValue, unit: p.btwUnit }
       };
 
       const waypointFit = reserveNameSpace ? tileLayout.measureFittedLine({

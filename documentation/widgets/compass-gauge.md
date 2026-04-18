@@ -118,6 +118,11 @@ Responsive ownership:
 |---|---|---|
 | `RadialValueMath.formatDirection360(v, leadingZero)` | heading deg | `0..359` string |
 
+## Phase 6 Options
+
+- `stableDigits` (default `false`) enables `StableDigits.normalize(...)` for heading value text.
+- When enabled, heading value text uses `theme.font.familyMono`.
+
 ## Exports
 
 ```javascript

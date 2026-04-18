@@ -13,8 +13,16 @@
   function create(def, Helpers) {
     const text = Helpers.getModule("RadialTextLayout").create(def, Helpers);
 
-    function primitiveSetFont(ctx, px, weight, family) {
-      text.setFont(ctx, px, weight, family);
+    function resolveFamily(family, options) {
+      const opts = options && typeof options === "object" ? options : null;
+      if (!opts || opts.useMono !== true) {
+        return family;
+      }
+      return opts.monoFamily || family;
+    }
+
+    function primitiveSetFont(ctx, px, weight, family, options) {
+      text.setFont(ctx, px, weight, resolveFamily(family, options));
     }
 
     function fitSingleLineBinary(args) {
@@ -29,6 +37,7 @@
       const minPx = Math.max(1, Math.floor(Number(cfg.minPx) || 1));
       const maxPx = Math.max(minPx, Math.floor(Number(cfg.maxPx) || maxH));
       const extraCheck = typeof cfg.extraCheck === "function" ? cfg.extraCheck : null;
+      const monoOptions = { useMono: cfg.useMono === true, monoFamily: cfg.monoFamily };
       let lo = minPx;
       let hi = maxPx;
       let bestPx = minPx;
@@ -38,7 +47,7 @@
       for (let i = 0; i < steps; i++) {
         const mid = (lo + hi) / 2;
         const px = Math.max(minPx, Math.min(maxPx, Math.floor(mid)));
-        primitiveSetFont(ctx, px, weight, family);
+        primitiveSetFont(ctx, px, weight, family, monoOptions);
         const metrics = ctx.measureText(textValue);
         const width = metrics.width;
         const okWidth = width <= maxW + 0.01;
@@ -59,7 +68,7 @@
         }
       }
 
-      primitiveSetFont(ctx, bestPx, weight, family);
+      primitiveSetFont(ctx, bestPx, weight, family, monoOptions);
       const finalMetrics = bestMetrics || ctx.measureText(textValue);
       return {
         px: bestPx,
@@ -80,6 +89,7 @@
       const minPx = Math.max(1, Math.floor(Number(cfg.minPx) || 1));
       const maxPx = Math.max(minPx, Math.floor(Number(cfg.maxPx) || maxH));
       const extraCheck = typeof cfg.extraCheck === "function" ? cfg.extraCheck : null;
+      const monoOptions = { useMono: cfg.useMono === true, monoFamily: cfg.monoFamily };
       if (!rows.length) {
         return { px: minPx, widths: [] };
       }
@@ -92,7 +102,7 @@
       for (let i = 0; i < steps; i++) {
         const mid = (lo + hi) / 2;
         const px = Math.max(minPx, Math.min(maxPx, Math.floor(mid)));
-        primitiveSetFont(ctx, px, weight, family);
+        primitiveSetFont(ctx, px, weight, family, monoOptions);
         const widths = [];
         let ok = px <= maxH;
 
@@ -140,10 +150,11 @@
       const family = cfg.family;
       const valueWeight = cfg.valueWeight;
       const labelWeight = cfg.labelWeight;
+      const valueMonoOptions = { useMono: cfg.useMono === true, monoFamily: cfg.monoFamily };
 
       let vPx = Math.max(1, Math.floor(Math.min(baseValuePx, maxH)));
       let uPx = Math.max(1, Math.floor(Math.min(vPx * scale, maxH)));
-      primitiveSetFont(ctx, vPx, valueWeight, family);
+      primitiveSetFont(ctx, vPx, valueWeight, family, valueMonoOptions);
       let vW = valueText ? ctx.measureText(valueText).width : 0;
       primitiveSetFont(ctx, uPx, labelWeight, family);
       let uW = unitText ? ctx.measureText(unitText).width : 0;
@@ -153,7 +164,7 @@
         const widthScale = Math.max(0.1, maxW / Math.max(1, total));
         vPx = Math.max(1, Math.floor(Math.min(maxH, vPx * widthScale)));
         uPx = Math.max(1, Math.floor(Math.min(maxH, uPx * widthScale)));
-        primitiveSetFont(ctx, vPx, valueWeight, family);
+      primitiveSetFont(ctx, vPx, valueWeight, family, valueMonoOptions);
         vW = valueText ? ctx.measureText(valueText).width : 0;
         primitiveSetFont(ctx, uPx, labelWeight, family);
         uW = unitText ? ctx.measureText(unitText).width : 0;
@@ -186,6 +197,7 @@
       const minPx = Math.max(1, Math.floor(Number(cfg.minPx) || 1));
       const safeMaxH = Math.max(1, Math.floor(maxH * ROW_SAFE_RATIO));
       const maxPx = Math.max(minPx, Math.floor(Number(cfg.maxPx) || (safeMaxH * 1.6)));
+      const valueMonoOptions = { useMono: cfg.useMono === true, monoFamily: cfg.monoFamily };
       const extraValueCheck = typeof cfg.extraValueCheck === "function"
         ? cfg.extraValueCheck
         : null;
@@ -197,7 +209,7 @@
         const mid = (lo + hi) / 2;
         const vPx = Math.max(minPx, Math.min(maxPx, Math.floor(mid)));
         const sPx = Math.max(1, Math.floor(vPx * scale));
-        primitiveSetFont(ctx, vPx, valueWeight, family);
+        primitiveSetFont(ctx, vPx, valueWeight, family, valueMonoOptions);
         const valueMetrics = ctx.measureText(valueText);
         const vW = valueMetrics.width;
         primitiveSetFont(ctx, sPx, labelWeight, family);
@@ -223,7 +235,7 @@
       if (best) {
         return best;
       }
-      primitiveSetFont(ctx, minPx, valueWeight, family);
+      primitiveSetFont(ctx, minPx, valueWeight, family, valueMonoOptions);
       const baseValueWidth = ctx.measureText(valueText).width;
       primitiveSetFont(ctx, minPx, labelWeight, family);
       const baseCaptionWidth = captionText ? ctx.measureText(captionText).width : 0;
@@ -253,6 +265,7 @@
       const family = cfg.family;
       const valueWeight = cfg.valueWeight;
       const labelWeight = cfg.labelWeight;
+      const valueMonoOptions = { useMono: cfg.useMono === true, monoFamily: cfg.monoFamily };
       const yMid = y + Math.floor(H / 2);
       const gap = Math.max(0, Number(fit.gap) || 0);
       const total = Math.max(0, Number(fit.total) || 0);
@@ -267,7 +280,7 @@
         ctx.fillText(captionText, xPos, yMid);
         xPos += cW + gap;
       }
-      primitiveSetFont(ctx, fit.vPx, valueWeight, family);
+      primitiveSetFont(ctx, fit.vPx, valueWeight, family, valueMonoOptions);
       ctx.fillText(valueText, xPos, yMid);
       xPos += vW;
       if (unitText) {

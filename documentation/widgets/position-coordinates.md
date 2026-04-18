@@ -75,6 +75,12 @@ return {
 };
 ```
 
+## Phase 6 Options
+
+- `coordinatesTabular` (default `true`) switches coordinate rendering to `theme.font.familyMono`.
+- Applies in stacked and flat variants (including `dateTime` / `timeStatus` display variants).
+- `coordinatesTabular: false` keeps coordinate rendering on `theme.font.family`.
+
 ## Related
 
 - [three-elements.md](three-elements.md)

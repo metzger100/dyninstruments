@@ -1,7 +1,7 @@
 /**
  * Module: LinearGaugeEngine - Shared renderer pipeline for linear gauge widgets
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: RadialToolkit, CanvasLayerCache, LinearCanvasPrimitives, LinearGaugeMath, LinearGaugeLayout, LinearGaugeTextLayout, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: RadialToolkit, CanvasLayerCache, LinearCanvasPrimitives, LinearGaugeMath, LinearGaugeLayout, LinearGaugeTextLayout, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -26,6 +26,7 @@
     const math = Helpers.getModule("LinearGaugeMath").create(def, Helpers);
     const layoutApi = Helpers.getModule("LinearGaugeLayout").create(def, Helpers);
     const textLayout = Helpers.getModule("LinearGaugeTextLayout").create(def, Helpers);
+    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
@@ -44,6 +45,13 @@
 
     function resolveCompactGeometryScale(textFillScale) {
       return Math.max(0.5, 1 - Math.max(0, textFillScale - 1));
+    }
+
+    function resolveIntegerWidth(textValue, axisMax, minWidth) {
+      const match = String(textValue).match(/^\s*[+-]?(\d+)/);
+      const textDigits = match ? match[1].length : 0;
+      const axisDigits = Math.max(1, String(Math.floor(Math.abs(Number(axisMax) || 0))).length);
+      return Math.max(minWidth, textDigits, axisDigits);
     }
 
     function drawStaticLayer(layerCtx, state, ticks, showEndLabels, sectors, labelFormatter) {
@@ -136,7 +144,10 @@
         const H = surface.H;
         const rootEl = Helpers.requirePluginRoot(canvas);
         const theme = GU.theme.resolveForRoot(rootEl);
-        const family = theme.font.family;
+        const stableDigitsEnabled = p.stableDigits === true;
+        const family = stableDigitsEnabled
+          ? (theme.font.familyMono || theme.font.family)
+          : theme.font.family;
         const color = theme.surface.fg;
         const labelWeight = theme.font.labelWeight;
         const stateKind = stateScreenPrecedence.pickFirst([{ kind: "disconnected", when: p.disconnect === true }, { kind: "data", when: true }]);
@@ -171,7 +182,13 @@
         const raw = (typeof p.value !== "undefined") ? p.value : p[cfg.rawValueKey];
         const unit = String(hasOwn.call(p, "unit") ? p.unit : unitDefault).trim();
         const display = formatDisplay(raw, p, unit);
-        const valueText = display.text.trim() || p.default;
+        const valueRawText = display.text.trim() || p.default;
+        const valueText = stableDigitsEnabled
+          ? stableDigits.normalize(valueRawText, {
+            integerWidth: resolveIntegerWidth(valueRawText, axis.max, 2),
+            reserveSignSlot: true
+          }).padded
+          : valueRawText;
         const secScale = value.clamp(p.captionUnitScale, 0.3, 3.0);
         const rowBoxes = {
           captionBox: null,

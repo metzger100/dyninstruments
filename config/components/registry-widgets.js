@@ -53,6 +53,7 @@
         "HtmlWidgetUtils",
         "PreparedPayloadModelCache",
         "PlaceholderNormalize",
+        "StableDigits",
         "StateScreenLabels",
         "StateScreenPrecedence",
         "StateScreenInteraction",
@@ -68,6 +69,7 @@
         "HtmlWidgetUtils",
         "NavInteractionPolicy",
         "PlaceholderNormalize",
+        "StableDigits",
         "StateScreenLabels",
         "StateScreenPrecedence",
         "StateScreenInteraction"
@@ -159,7 +161,7 @@
         "CenterDisplayLayout",
         "CenterDisplayMath",
         "CenterDisplayStateAdapter",
-        "PlaceholderNormalize"
+        "CenterDisplayRenderModel"
       ]
     },
     CompassLinearWidget: {
@@ -172,7 +174,7 @@
       js: BASE + "widgets/radial/CompassRadialWidget/CompassRadialWidget.js",
       css: undefined,
       globalKey: "DyniCompassRadialWidget",
-      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]
+      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "StableDigits"]
     },
     DepthLinearWidget: {
       js: BASE + "widgets/linear/DepthLinearWidget/DepthLinearWidget.js",
@@ -240,7 +242,7 @@
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
       css: undefined,
       globalKey: "DyniThreeValueTextWidget",
-      deps: ["ThemeResolver", "TextLayoutEngine", "PlaceholderNormalize", "StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
+      deps: ["ThemeResolver", "TextLayoutEngine", "PlaceholderNormalize", "StableDigits", "StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
     },
     VoltageLinearWidget: {
       js: BASE + "widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js",
@@ -258,13 +260,13 @@
       js: BASE + "widgets/linear/WindLinearWidget/WindLinearWidget.js",
       css: undefined,
       globalKey: "DyniWindLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath"]
+      deps: ["LinearGaugeEngine", "RadialValueMath", "StableDigits"]
     },
     WindRadialWidget: {
       js: BASE + "widgets/radial/WindRadialWidget/WindRadialWidget.js",
       css: undefined,
       globalKey: "DyniWindRadialWidget",
-      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]
+      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "StableDigits"]
     },
     XteDisplayWidget: {
       js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
@@ -277,6 +279,7 @@
         "XteHighwayLayout",
         "TextTileLayout",
         "PlaceholderNormalize",
+        "StableDigits",
         "StateScreenLabels",
         "StateScreenPrecedence",
         "StateScreenCanvasOverlay"

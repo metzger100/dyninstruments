@@ -126,6 +126,12 @@
       globalKey: "DyniCenterDisplayStateAdapter",
       deps: ["StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
     },
+    CenterDisplayRenderModel: {
+      js: BASE + "shared/widget-kits/nav/CenterDisplayRenderModel.js",
+      css: undefined,
+      globalKey: "DyniCenterDisplayRenderModel",
+      deps: ["PlaceholderNormalize", "StableDigits"]
+    },
     HtmlWidgetUtils: {
       js: BASE + "shared/widget-kits/html/HtmlWidgetUtils.js",
       css: undefined,
@@ -135,6 +141,12 @@
       js: BASE + "shared/widget-kits/format/PlaceholderNormalize.js",
       css: undefined,
       globalKey: "DyniPlaceholderNormalize"
+    },
+    StableDigits: {
+      js: BASE + "shared/widget-kits/format/StableDigits.js",
+      css: undefined,
+      globalKey: "DyniStableDigits",
+      deps: ["PlaceholderNormalize"]
     },
     PreparedPayloadModelCache: {
       js: BASE + "shared/widget-kits/html/PreparedPayloadModelCache.js",

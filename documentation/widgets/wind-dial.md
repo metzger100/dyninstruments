@@ -116,6 +116,11 @@ Responsive ownership:
 | `RadialValueMath.formatAngle180(v, leadingZero)` | angle deg | `-180..180` string |
 | `Helpers.applyFormatter(v, { formatter, formatterParameters })` | speed value | formatted speed string |
 
+## Phase 6 Options
+
+- `stableDigits` (default `false`) applies `StableDigits.normalize(...)` to angle and speed display strings.
+- When enabled, dial value text uses `theme.font.familyMono`.
+
 ## Exports
 
 ```javascript

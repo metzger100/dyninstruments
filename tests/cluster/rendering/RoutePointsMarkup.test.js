@@ -228,4 +228,23 @@ describe("RoutePointsMarkup", function () {
     expect(html).toContain('style="font-size:10px;"');
     expect(html).toContain('style="width:9px;height:9px;"');
   });
+
+  it("adds tabular class on row info text when lat/lon mode and coordinatesTabular are enabled", function () {
+    const markup = createMarkup();
+    const htmlTabular = markup.render({
+      model: makeModel({ showLatLon: true }),
+      fit: makeFit(),
+      coordinatesTabular: true,
+      htmlUtils: createHtmlUtils()
+    });
+    const htmlNonTabular = markup.render({
+      model: makeModel({ showLatLon: true }),
+      fit: makeFit(),
+      coordinatesTabular: false,
+      htmlUtils: createHtmlUtils()
+    });
+
+    expect(htmlTabular).toContain("dyni-route-points-info-text dyni-tabular");
+    expect(htmlNonTabular).not.toContain("dyni-route-points-info-text dyni-tabular");
+  });
 });

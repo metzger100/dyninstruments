@@ -41,10 +41,13 @@
     const metrics = toObject(model.metrics);
     const metric = toObject(metrics[metricId]);
     const metricFit = toObject(toObject(fit.metrics)[metricId]);
+    const metricValues = toObject(fit.metricValues);
     const mode = model.mode || "normal";
     const metricClass = "dyni-edit-route-metric-" + metricId;
     const labelText = toText(metric.labelText);
-    const valueText = toText(metric.valueText);
+    const valueText = Object.prototype.hasOwnProperty.call(metricValues, metricId)
+      ? toText(metricValues[metricId])
+      : toText(metric.valueText);
     const unitText = toText(metric.unitText);
     const valueRowStyle = metricFit.valueRowStyle;
     const unitNode = shouldRenderUnitNode(mode, metricId, metric, unitText)
@@ -54,6 +57,10 @@
         + htmlUtils.escapeHtml(unitText)
         + "</span>")
       : "";
+    const valueTextClasses = ["dyni-edit-route-metric-value-text"];
+    if (model.stableDigitsEnabled === true) {
+      valueTextClasses.push("dyni-tabular");
+    }
 
     if (mode === "high") {
       return ""
@@ -66,7 +73,7 @@
         + '<div class="dyni-edit-route-metric-value"'
         + htmlUtils.toStyleAttr(valueRowStyle)
         + ">"
-        + '<span class="dyni-edit-route-metric-value-text"'
+        + '<span class="' + valueTextClasses.join(" ") + '"'
         + htmlUtils.toStyleAttr(metricFit.valueStyle)
         + ">"
         + htmlUtils.escapeHtml(valueText)
@@ -86,7 +93,7 @@
       + '<div class="dyni-edit-route-metric-value"'
       + htmlUtils.toStyleAttr(valueRowStyle)
       + ">"
-      + '<span class="dyni-edit-route-metric-value-text"'
+      + '<span class="' + valueTextClasses.join(" ") + '"'
       + htmlUtils.toStyleAttr(metricFit.valueStyle)
       + ">"
       + htmlUtils.escapeHtml(valueText)

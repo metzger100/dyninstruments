@@ -244,6 +244,35 @@ describe("EditRouteMarkup", function () {
     expect(html).toContain('class="dyni-edit-route-metric-unit" style="font-size:9px;"');
   });
 
+  it("adds dyni-tabular class on metric value text when stableDigits is enabled", function () {
+    const markup = createMarkup();
+    const html = markup.render({
+      model: makeModel({ stableDigitsEnabled: true }),
+      fit: makeFit(),
+      htmlUtils: createHtmlUtils()
+    });
+
+    expect(html).toContain("dyni-edit-route-metric-value-text dyni-tabular");
+  });
+
+  it("uses fit-selected metricValues override when present", function () {
+    const markup = createMarkup();
+    const html = markup.render({
+      model: makeModel({
+        metrics: {
+          dst: { labelText: "DST:", valueText: "PADDED-LONG", unitText: "nm", hasUnit: true }
+        }
+      }),
+      fit: makeFit({
+        metricValues: { dst: "123.4" }
+      }),
+      htmlUtils: createHtmlUtils()
+    });
+
+    expect(html).toContain(">123.4</span>");
+    expect(html).not.toContain(">PADDED-LONG</span>");
+  });
+
   it("renders custom caption and unit overrides", function () {
     const markup = createMarkup();
     const html = markup.render({

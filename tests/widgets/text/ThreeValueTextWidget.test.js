@@ -45,7 +45,7 @@ describe("ThreeValueTextWidget", function () {
             resolveForRoot() {
               return {
                 surface: { fg: "#fff" },
-                font: { family: "sans-serif", weight: 730, labelWeight: 610 }
+                font: { family: "sans-serif", familyMono: "monospace", weight: 730, labelWeight: 610 }
               };
             }
           };
@@ -87,6 +87,9 @@ describe("ThreeValueTextWidget", function () {
         }
         if (id === "PlaceholderNormalize") {
           return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
+        }
+        if (id === "StableDigits") {
+          return loadFresh("shared/widget-kits/format/StableDigits.js");
         }
         if (id === "StateScreenLabels") {
           return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
@@ -377,5 +380,20 @@ describe("ThreeValueTextWidget", function () {
     const textValues = captured.map((entry) => entry.text);
     expect(textValues).toContain("GPS Lost");
     expect(textValues).not.toContain("12.3");
+  });
+
+  it("uses padded mono value text when stableDigits is enabled", function () {
+    const helpers = makeHelpers();
+    const spec = loadFresh("widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js").create({}, helpers);
+    const captured = renderCaptured(spec, 220, 140, {
+      value: 7.5,
+      caption: "SPD",
+      unit: "kn",
+      stableDigits: true
+    });
+    const valueCall = findTextCall(captured, " 07.5");
+
+    expect(valueCall).toBeTruthy();
+    expect(String(valueCall.font)).toContain("monospace");
   });
 });

@@ -9,6 +9,8 @@ describe("WindLinearWidget", function () {
     mod.create({}, {
       applyFormatter,
       getModule(id) {
+        if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
+        if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         if (id === "RadialValueMath") {
           return {
             create() {
@@ -134,6 +136,8 @@ describe("WindLinearWidget", function () {
         return String(value);
       },
       getModule(id) {
+        if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
+        if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         if (id === "RadialValueMath") {
           return {
             create() {
@@ -226,6 +230,8 @@ describe("WindLinearWidget", function () {
         return String(value);
       },
       getModule(id) {
+        if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
+        if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         if (id === "RadialValueMath") {
           return {
             create() {

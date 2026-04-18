@@ -1,7 +1,7 @@
 /**
  * Module: WindRadialWidget - Full-circle wind dial for angle and speed pairs
  * Documentation: documentation/widgets/wind-dial.md
- * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout
+ * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout, StableDigits
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,6 +13,7 @@
   function create(def, Helpers) {
     const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers);
     const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers);
+    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
 
     function windFormatSpeedText(raw, props, speedUnit) {
       const p = props || {};
@@ -41,6 +42,20 @@
       if (Number.isFinite(p.angle)) {
         angleText = state.value.formatAngle180(p.angle, !!p.leadingZero);
       }
+      const speedText = windFormatSpeedText(p.speed, p, speedUnit);
+      const stableDigitsEnabled = p.stableDigits === true;
+      if (stableDigitsEnabled) {
+        angleText = stableDigits.normalize(angleText, {
+          integerWidth: stableDigits.resolveIntegerWidth(angleText, 2),
+          reserveSignSlot: true
+        }).padded;
+      }
+      const speedValueText = stableDigitsEnabled
+        ? stableDigits.normalize(speedText, {
+          integerWidth: stableDigits.resolveIntegerWidth(speedText, 2),
+          reserveSignSlot: true
+        }).padded
+        : speedText;
 
       return {
         angle: p.angle,
@@ -55,7 +70,7 @@
         },
         right: {
           caption: String(p.speedCaption).trim(),
-          value: windFormatSpeedText(p.speed, p, speedUnit),
+          value: speedValueText,
           unit: speedUnit,
           secScale: secScale
         }

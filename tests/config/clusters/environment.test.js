@@ -37,6 +37,13 @@ describe("config/clusters/environment.js", function () {
     expect(def.editableParameters.tempLinearWarningFrom.name).toBe("Warning at or above");
     expect(def.editableParameters.tempRadialAlarmFrom.name).toBe("Alarm at or above");
     expect(def.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
+    expect(def.editableParameters.stableDigits.default).toBe(false);
+    expect(def.editableParameters.stableDigits.condition).toEqual([
+      { kind: "depthLinear" },
+      { kind: "depthRadial" },
+      { kind: "tempLinear" },
+      { kind: "tempRadial" }
+    ]);
   });
 
   it("injects pressure store key from value when pressure kind is active", function () {

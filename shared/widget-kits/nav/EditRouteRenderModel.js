@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteRenderModel - Pure normalization and display model owner for edit-route HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: EditRouteLayout, HtmlWidgetUtils, NavInteractionPolicy, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction
+ * Depends: EditRouteLayout, HtmlWidgetUtils, NavInteractionPolicy, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -100,6 +100,7 @@
       const metric = m.metrics && m.metrics[id] ? m.metrics[id] : {};
       parts.push("L" + toSignatureToken(metric.labelText));
       parts.push("V" + toSignatureToken(metric.valueText));
+      parts.push("F" + toSignatureToken(metric.fallbackValueText));
       parts.push("U" + toSignatureToken(metric.unitText));
     }
 
@@ -118,6 +119,7 @@
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const navInteractionPolicy = Helpers.getModule("NavInteractionPolicy").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
@@ -140,6 +142,24 @@
       const shellSize = toShellSize(cfg.shellRect);
       const kind = resolveStateKind(props, domain);
       const hasRoute = kind === "data" && domain.hasRoute === true;
+      const stableDigitsEnabled = props.stableDigits === true;
+      function buildMetricValueText(rawText, minWidth) {
+        if (!stableDigitsEnabled) {
+          return {
+            valueText: rawText,
+            fallbackValueText: rawText
+          };
+        }
+        const stable = stableDigits.normalize(rawText, {
+          integerWidth: stableDigits.resolveIntegerWidth(rawText, minWidth),
+          reserveSignSlot: true
+        });
+        return {
+          valueText: stable.padded,
+          fallbackValueText: stable.fallback
+        };
+      }
+
       const isActiveRoute = hasRoute && domain.isActiveRoute === true;
       const isLocalRoute = hasRoute && domain.isLocalRoute === true;
       const isServerRoute = hasRoute && domain.isServerRoute === true;
@@ -182,27 +202,43 @@
         metrics.pts = {
           id: "pts",
           labelText: metricCaptions.pts,
-          valueText: formatMetric(domain.pointCount, "formatDecimal", [3], defaultText, Helpers, placeholderNormalize),
+          ...buildMetricValueText(
+            formatMetric(domain.pointCount, "formatDecimal", [3], defaultText, Helpers, placeholderNormalize),
+            3
+          ),
           unitText: "",
           hasUnit: false
         };
         metrics.dst = {
           id: "dst",
           labelText: metricCaptions.dst,
-          valueText: formatMetric(domain.totalDistance, "formatDistance", [metricUnits.dst], defaultText, Helpers, placeholderNormalize),
+          ...buildMetricValueText(
+            formatMetric(
+              domain.totalDistance,
+              "formatDistance",
+              [metricUnits.dst],
+              defaultText,
+              Helpers,
+              placeholderNormalize
+            ),
+            2
+          ),
           unitText: metricUnits.dst,
           hasUnit: metricHasUnit.dst
         };
         metrics.rte = {
           id: "rte",
           labelText: metricCaptions.rte,
-          valueText: formatMetric(
-            isActiveRoute ? domain.remainingDistance : undefined,
-            "formatDistance",
-            [metricUnits.rte],
-            defaultText,
-            Helpers,
-            placeholderNormalize
+          ...buildMetricValueText(
+            formatMetric(
+              isActiveRoute ? domain.remainingDistance : undefined,
+              "formatDistance",
+              [metricUnits.rte],
+              defaultText,
+              Helpers,
+              placeholderNormalize
+            ),
+            2
           ),
           unitText: metricUnits.rte,
           hasUnit: metricHasUnit.rte
@@ -210,13 +246,16 @@
         metrics.eta = {
           id: "eta",
           labelText: metricCaptions.eta,
-          valueText: formatMetric(
-            isActiveRoute ? domain.eta : undefined,
-            "formatTime",
-            [],
-            defaultText,
-            Helpers,
-            placeholderNormalize
+          ...buildMetricValueText(
+            formatMetric(
+              isActiveRoute ? domain.eta : undefined,
+              "formatTime",
+              [],
+              defaultText,
+              Helpers,
+              placeholderNormalize
+            ),
+            2
           ),
           unitText: "",
           hasUnit: false
@@ -254,6 +293,7 @@
         isActiveRoute: isActiveRoute,
         isLocalRoute: isLocalRoute,
         isServerRoute: isServerRoute,
+        stableDigitsEnabled: stableDigitsEnabled,
         interactionState: interactionState,
         canOpenEditRoute: canOpenEditRoute,
         captureClicks: canOpenEditRoute,

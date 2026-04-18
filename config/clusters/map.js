@@ -73,6 +73,18 @@
           name: "AisTarget: 1-Row Threshold",
           condition: AIS_TARGET_CONDITION
         },
+        coordinatesTabular: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Tabular coordinates",
+          condition: CENTER_DISPLAY_CONDITION
+        },
+        stableDigits: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Stable digits",
+          condition: CENTER_DISPLAY_CONDITION
+        },
         caption: false,
         unit: false,
         formatter: false,

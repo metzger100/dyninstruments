@@ -98,7 +98,9 @@
         const theme = GU.theme.resolveForRoot(rootEl);
         const valueWeight = theme.font.weight;
         const labelWeight = theme.font.labelWeight;
-        const family = theme.font.family;
+        const family = p.stableDigits === true
+          ? (theme.font.familyMono || theme.font.family)
+          : theme.font.family;
         const color = theme.surface.fg;
         const stateKind = stateScreenPrecedence.pickFirst([{ kind: "disconnected", when: p.disconnect === true }, { kind: "data", when: true }]);
 

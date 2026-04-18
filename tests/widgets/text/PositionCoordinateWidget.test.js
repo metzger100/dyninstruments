@@ -18,7 +18,7 @@ describe("PositionCoordinateWidget", function () {
     const opts = options || {};
     const themeTokens = {
       surface: { fg: "#fff" },
-      font: { family: "sans-serif", weight: 730, labelWeight: 610 }
+      font: { family: "sans-serif", familyMono: "monospace", weight: 730, labelWeight: 610 }
     };
     const fontWeightCalls = [];
     const fontCalls = [];
@@ -233,6 +233,49 @@ describe("PositionCoordinateWidget", function () {
     expect(flatFormatter).toHaveBeenCalled();
     expect(helpers.fontWeightCalls).toContain(730);
     expect(helpers.fontWeightCalls).toContain(610);
+  });
+
+  it("uses mono coordinate font when coordinatesTabular is enabled", function () {
+    function coordinateFormatter(raw, formatterOptions) {
+      const cfg = formatterOptions || {};
+      if (cfg.formatter === "formatLonLatsDecimal") {
+        const axis = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters[cfg.formatterParameters.length - 1] : "";
+        return (axis === "lat" ? "LAT:" : "LON:") + String(raw);
+      }
+      return raw == null ? cfg.default : String(raw);
+    }
+
+    const helpersTabular = makeHelpers({ applyFormatter: coordinateFormatter });
+    const specTabular = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
+      .create({}, helpersTabular);
+    const tabularCtx = createMockContext2D();
+    const tabularCanvas = createMockCanvas({ rectWidth: 220, rectHeight: 140, ctx: tabularCtx });
+    const tabularCaptured = captureTextCalls(tabularCtx);
+    specTabular.renderCanvas(tabularCanvas, {
+      value: { lat: 54.1, lon: 10.2 },
+      caption: "POS",
+      coordinatesTabular: true
+    });
+
+    const helpersPlain = makeHelpers({ applyFormatter: coordinateFormatter });
+    const specPlain = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
+      .create({}, helpersPlain);
+    const plainCtx = createMockContext2D();
+    const plainCanvas = createMockCanvas({ rectWidth: 220, rectHeight: 140, ctx: plainCtx });
+    const plainCaptured = captureTextCalls(plainCtx);
+    specPlain.renderCanvas(plainCanvas, {
+      value: { lat: 54.1, lon: 10.2 },
+      caption: "POS",
+      coordinatesTabular: false
+    });
+
+    const tabularLat = tabularCaptured.find((entry) => entry.text.indexOf("LAT:54.1") === 0);
+    const plainLat = plainCaptured.find((entry) => entry.text.indexOf("LAT:54.1") === 0);
+
+    expect(tabularLat).toBeTruthy();
+    expect(plainLat).toBeTruthy();
+    expect(String(tabularLat.font)).toContain("monospace");
+    expect(String(plainLat.font)).toContain("sans-serif");
   });
 
   it("supports axis-specific formatters and flat rendering from stacked axes", function () {

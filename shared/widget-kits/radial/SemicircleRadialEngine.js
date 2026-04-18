@@ -1,7 +1,7 @@
 /**
  * Module: SemicircleRadialEngine - Shared renderer for semicircle gauge widgets
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: RadialToolkit, SemicircleRadialLayout, SemicircleRadialTextLayout, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: RadialToolkit, SemicircleRadialLayout, SemicircleRadialTextLayout, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -23,6 +23,7 @@
     const GU = Helpers.getModule("RadialToolkit").create(def, Helpers);
     const layoutApi = Helpers.getModule("SemicircleRadialLayout").create(def, Helpers);
     const textLayout = Helpers.getModule("SemicircleRadialTextLayout").create(def, Helpers);
+    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
@@ -41,6 +42,14 @@
       ctx.fillStyle = color;
       ctx.strokeStyle = color;
       return { family: family, color: color };
+    }
+
+    function resolveIntegerWidth(textValue, rangeMax, minWidth) {
+      const match = String(textValue).match(/^\s*[+-]?(\d+)/);
+      const textDigits = match ? match[1].length : 0;
+      const maxAbs = Math.max(0, Math.abs(Number(rangeMax) || 0));
+      const rangeDigits = Math.max(1, String(Math.floor(maxAbs)).length);
+      return Math.max(minWidth, textDigits, rangeDigits);
     }
 
     function drawMajorValueLabels(ctx, family, geom, labels, minV, maxV, majorStep, arc, showEndLabels, labelWeight) {
@@ -133,6 +142,7 @@
         const theme = GU.theme.resolveForRoot(rootEl);
         const paint = setupTextPaint(theme, ctx);
         const labelWeight = theme.font.labelWeight;
+        const stableDigitsEnabled = p.stableDigits === true;
         const stateKind = stateScreenPrecedence.pickFirst([{ kind: "disconnected", when: p.disconnect === true }, { kind: "data", when: true }]);
         ctx.clearRect(0, 0, W, H);
         if (stateKind !== stateScreenLabels.KINDS.DATA) {
@@ -155,14 +165,22 @@
           responsive: insets.responsive
         });
         const valueWeight = theme.font.weight;
-        const family = paint.family;
+        const family = stableDigitsEnabled
+          ? (theme.font.familyMono || paint.family)
+          : paint.family;
         const color = paint.color;
         const caption = String(p.caption).trim();
         const unit = String(hasOwn.call(p, "unit") ? p.unit : unitDefault).trim();
         const raw = (typeof p.value !== "undefined") ? p.value : p[cfg.rawValueKey];
         const display = formatDisplay(raw, p, unit);
-        const valueText = display.text.trim() || p.default;
         const range = value.normalizeRange(p[rangeProps.min], p[rangeProps.max], rangeDefaults.min, rangeDefaults.max);
+        const valueRawText = display.text.trim() || p.default;
+        const valueText = stableDigitsEnabled
+          ? stableDigits.normalize(valueRawText, {
+            integerWidth: resolveIntegerWidth(valueRawText, range.max, 2),
+            reserveSignSlot: true
+          }).padded
+          : valueRawText;
         const tickPreset = tickSteps(range.range);
         const tickMajor = value.isFiniteNumber(p[tickProps.major]) ? p[tickProps.major] : tickPreset.major;
         const tickMinor = value.isFiniteNumber(p[tickProps.minor]) ? p[tickProps.minor] : tickPreset.minor;

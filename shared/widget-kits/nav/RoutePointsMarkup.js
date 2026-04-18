@@ -47,7 +47,7 @@
       + "</div>";
   }
 
-  function renderRows(model, geometry, fit, htmlUtils) {
+  function renderRows(model, geometry, fit, htmlUtils, coordinatesTabular) {
     const rows = model.points;
     const rowGeometry = geometry.rows;
     const rowFits = fit.rowFits;
@@ -80,6 +80,11 @@
         )
         : "";
 
+      const infoTextClasses = ["dyni-route-points-text", "dyni-route-points-info-text"];
+      if (model.showLatLon === true && coordinatesTabular !== false) {
+        infoTextClasses.push("dyni-tabular");
+      }
+
       html += ""
         + '<div class="' + rowClasses.join(" ") + '"'
         + ' data-rp-row="' + String(row.index) + '"'
@@ -96,7 +101,7 @@
         + "</span>"
         + "</div>"
         + '<div class="dyni-route-points-info"' + htmlUtils.toStyleAttr(geom.infoStyle) + ">"
-        + '<span class="dyni-route-points-text dyni-route-points-info-text"'
+        + '<span class="' + infoTextClasses.join(" ") + '"'
         + htmlUtils.toStyleAttr(rowFit.infoStyle)
         + ">"
         + htmlUtils.escapeHtml(row.infoText)
@@ -122,6 +127,7 @@
       const model = toObject(cfg.model);
       const fit = toObject(cfg.fit);
       const htmlUtils = cfg.htmlUtils;
+      const coordinatesTabular = cfg.coordinatesTabular !== false;
       const geometry = toObject(model.inlineGeometry);
       const interactionState = model.interactionState === "dispatch" ? "dispatch" : "passive";
       const wrapperClasses = [
@@ -143,7 +149,7 @@
         });
       }
 
-      const rowsHtml = renderRows(model, geometry, fit, htmlUtils);
+      const rowsHtml = renderRows(model, geometry, fit, htmlUtils, coordinatesTabular);
 
       return ""
         + '<div class="' + wrapperClasses.join(" ") + '"'

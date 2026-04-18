@@ -1,7 +1,7 @@
 /**
  * Module: ThreeValueTextWidget - Responsive caption/value/unit numeric canvas renderer
  * Documentation: documentation/widgets/three-elements.md
- * Depends: Helpers.applyFormatter, ThemeResolver, TextLayoutEngine, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: Helpers.applyFormatter, ThemeResolver, TextLayoutEngine, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,6 +14,7 @@
     const theme = Helpers.getModule("ThemeResolver");
     const text = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
@@ -32,7 +33,10 @@
       ctx.textBaseline = "middle";
       const rootEl = Helpers.requirePluginRoot(canvas);
       const tokens = theme.resolveForRoot(rootEl);
-      const family = tokens.font.family;
+      const stableDigitsEnabled = props.stableDigits === true;
+      const family = stableDigitsEnabled
+        ? (tokens.font.familyMono || tokens.font.family)
+        : tokens.font.family;
       const color = tokens.surface.fg;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
@@ -57,10 +61,17 @@
       const defaultText = Object.prototype.hasOwnProperty.call(props || {}, "default")
         ? String(props.default)
         : undefined;
-      const valueText = placeholderNormalize.normalize(
+      const normalizedValueText = placeholderNormalize.normalize(
         String(Helpers.applyFormatter(props.value, props)),
         defaultText
       );
+      const stableValue = stableDigitsEnabled
+        ? stableDigits.normalize(normalizedValueText, {
+          integerWidth: stableDigits.resolveIntegerWidth(normalizedValueText, 2),
+          reserveSignSlot: true
+        })
+        : { padded: normalizedValueText, fallback: normalizedValueText };
+      const valueText = stableValue.padded;
       const modeData = text.computeModeLayout({
         W: W,
         H: H,

@@ -45,6 +45,9 @@ describe("ActiveRouteTextHtmlWidget", function () {
         if (id === "PlaceholderNormalize") {
           return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         }
+        if (id === "StableDigits") {
+          return loadFresh("shared/widget-kits/format/StableDigits.js");
+        }
         if (id === "StateScreenLabels") {
           return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
         }
@@ -274,6 +277,20 @@ describe("ActiveRouteTextHtmlWidget", function () {
     expect(valueTexts).toEqual(["---", "---", "---"]);
     expect(mounted.html()).not.toContain("--:--:--");
     expect(mounted.html()).not.toContain("NO DATA");
+  });
+
+  it("adds dyni-tabular class to metric values when stableDigits is enabled", function () {
+    const setup = createRenderer();
+    const mounted = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy(makeProps({ stableDigits: true }), { mode: "dispatch" })
+    );
+
+    const valueEls = mounted.mountEl.querySelectorAll(".dyni-active-route-metric-value");
+    expect(valueEls.length).toBeGreaterThan(0);
+    valueEls.forEach((el) => {
+      expect(el.classList.contains("dyni-tabular")).toBe(true);
+    });
   });
 
   it("always consults ActiveRouteHtmlFit when a shell rect exists", function () {

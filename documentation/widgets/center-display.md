@@ -164,6 +164,12 @@ Measure row behavior:
 - compact layouts also raise fitted line-height ceilings linearly, making smaller widgets read denser while larger widgets retain the existing text rhythm
 - no icon sprites, no new theme tokens, no CSS defaults beyond normal dyninstruments widget styling
 
+## Phase 6 Options
+
+- `coordinatesTabular` (default `true`) routes center-position coordinate rows to `theme.font.familyMono`.
+- `stableDigits` (default `false`) enables stable-digit normalization on relation values (`course / distance`) and routes those value rows to `theme.font.familyMono`.
+- Relation rows keep two text variants (`fullValueText` and compact fallback) and select the compact variant when row width is constrained.
+
 ## Related
 
 - [active-route.md](active-route.md)

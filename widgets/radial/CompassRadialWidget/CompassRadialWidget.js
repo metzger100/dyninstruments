@@ -1,7 +1,7 @@
 /**
  * Module: CompassRadialWidget - Full-circle rotating compass with upright labels
  * Documentation: documentation/widgets/compass-gauge.md
- * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout
+ * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout, StableDigits
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -16,6 +16,7 @@
   function create(def, Helpers) {
     const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers);
     const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers);
+    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
 
     function buildCompassLabelSprites(canvas, state) {
       const sprites = [];
@@ -72,14 +73,21 @@
     function compassDisplay(state, props) {
       const p = props || {};
       const heading = p.heading;
+      const headingText = state.value.isFiniteNumber(heading)
+        ? state.value.formatDirection360(heading, !!p.leadingZero)
+        : p.default;
+      const valueText = p.stableDigits === true
+        ? stableDigits.normalize(headingText, {
+          integerWidth: 3,
+          reserveSignSlot: false
+        }).padded
+        : headingText;
       return {
         heading: heading,
         marker: p.markerCourse,
         caption: String(p.caption).trim(),
         unit: String(p.unit).trim(),
-        value: state.value.isFiniteNumber(heading)
-          ? state.value.formatDirection360(heading, !!p.leadingZero)
-          : p.default,
+        value: valueText,
         secScale: state.value.clamp(p.captionUnitScale, 0.3, 3.0)
       };
     }

@@ -110,6 +110,24 @@ describe("static cluster configs", function () {
     expect(byCluster.wind.editableParameters.windLinearRatioThresholdNormal.internal).toBe(true);
     expect(byCluster.wind.editableParameters.captionUnitScale.internal).not.toBe(true);
     expect(byCluster.wind.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
+    expect(byCluster.speed.editableParameters.stableDigits.condition).toEqual([
+      { kind: "sogLinear" },
+      { kind: "stwLinear" },
+      { kind: "sogRadial" },
+      { kind: "stwRadial" }
+    ]);
+    expect(byCluster.courseHeading.editableParameters.stableDigits.condition).toEqual([
+      { kind: "hdtRadial" },
+      { kind: "hdmRadial" },
+      { kind: "hdtLinear" },
+      { kind: "hdmLinear" }
+    ]);
+    expect(byCluster.wind.editableParameters.stableDigits.condition).toEqual([
+      { kind: "angleTrueRadial" },
+      { kind: "angleApparentRadial" },
+      { kind: "angleTrueLinear" },
+      { kind: "angleApparentLinear" }
+    ]);
     expect(byCluster.wind.editableParameters.windLinearTickMajor.name).toBe("Major tick step");
     expect(byCluster.wind.editableParameters.windLinearTickMinor.name).toBe("Minor tick step");
     expect(byCluster.wind.editableParameters.windLinearShowEndLabels.name).toBe("Show min/max labels");

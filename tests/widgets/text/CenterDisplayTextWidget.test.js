@@ -10,6 +10,7 @@ describe("CenterDisplayTextWidget", function () {
       },
       font: {
         family: "sans-serif",
+        familyMono: "monospace",
         weight: 720,
         labelWeight: 610
       }
@@ -26,7 +27,8 @@ describe("CenterDisplayTextWidget", function () {
       LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
       ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
       CenterDisplayLayout: loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js"),
-      CenterDisplayMath: loadFresh("shared/widget-kits/nav/CenterDisplayMath.js")
+      CenterDisplayMath: loadFresh("shared/widget-kits/nav/CenterDisplayMath.js"),
+      CenterDisplayRenderModel: loadFresh("shared/widget-kits/nav/CenterDisplayRenderModel.js")
     };
 
     return {
@@ -83,6 +85,9 @@ describe("CenterDisplayTextWidget", function () {
         if (id === "PlaceholderNormalize") {
           return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         }
+        if (id === "StableDigits") {
+          return loadFresh("shared/widget-kits/format/StableDigits.js");
+        }
         if (id === "CenterDisplayStateAdapter") {
           return loadFresh("shared/widget-kits/text/CenterDisplayStateAdapter.js");
         }
@@ -130,6 +135,8 @@ describe("CenterDisplayTextWidget", function () {
       },
       ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal") ? opts.ratioThresholdNormal : 1.1,
       ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat") ? opts.ratioThresholdFlat : 2.4,
+      coordinatesTabular: opts.coordinatesTabular,
+      stableDigits: opts.stableDigits === true,
       disconnect: opts.disconnect === true,
       default: Object.prototype.hasOwnProperty.call(opts, "default") ? opts.default : "---"
     };
@@ -536,6 +543,46 @@ describe("CenterDisplayTextWidget", function () {
     expect(parseFontPx(compactWpValue.font) / compactLayout.rowRects[0].h).toBeGreaterThan(
       parseFontPx(largeWpValue.font) / largeLayout.rowRects[0].h
     );
+  });
+
+  it("uses mono family for tabular coordinates and stable-digit relation rows", function () {
+    const helpersMono = makeHelpers();
+    const specMono = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
+      .create({}, helpersMono);
+    const monoCtx = createMockContext2D();
+    const monoFonts = captureTextFonts(monoCtx);
+    const monoCanvas = createMockCanvas({ rectWidth: 260, rectHeight: 180, ctx: monoCtx });
+    specMono.renderCanvas(monoCanvas, makeProps({
+      activeMeasure: undefined,
+      coordinatesTabular: true,
+      stableDigits: true
+    }));
+
+    const helpersPlain = makeHelpers();
+    const specPlain = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
+      .create({}, helpersPlain);
+    const plainCtx = createMockContext2D();
+    const plainFonts = captureTextFonts(plainCtx);
+    const plainCanvas = createMockCanvas({ rectWidth: 260, rectHeight: 180, ctx: plainCtx });
+    specPlain.renderCanvas(plainCanvas, makeProps({
+      activeMeasure: undefined,
+      coordinatesTabular: false,
+      stableDigits: false
+    }));
+
+    const monoLat = monoFonts.find((entry) => entry.text.indexOf("LAT:") === 0);
+    const plainLat = plainFonts.find((entry) => entry.text.indexOf("LAT:") === 0);
+    const monoRelation = monoFonts.find((entry) => entry.text.indexOf("92") >= 0 && entry.text.indexOf("/") >= 0);
+    const plainRelation = plainFonts.find((entry) => entry.text.indexOf("92") >= 0 && entry.text.indexOf("/") >= 0);
+
+    expect(monoLat).toBeTruthy();
+    expect(plainLat).toBeTruthy();
+    expect(monoRelation).toBeTruthy();
+    expect(plainRelation).toBeTruthy();
+    expect(String(monoLat.font)).toContain("monospace");
+    expect(String(monoRelation.font)).toContain("monospace");
+    expect(String(plainLat.font)).toContain("sans-serif");
+    expect(String(plainRelation.font)).toContain("sans-serif");
   });
 
   it("renders disconnected state-screen instead of center and relation rows", function () {

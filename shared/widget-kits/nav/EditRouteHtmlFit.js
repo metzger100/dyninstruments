@@ -123,6 +123,23 @@
     return "";
   }
 
+  function resolveMetricFallbackValue(model, id) {
+    const entry = toMetricEntry(model, id);
+    if (entry.fallbackValueText != null) {
+      return toText(entry.fallbackValueText);
+    }
+    if (entry.fallbackValue != null) {
+      return toText(entry.fallbackValue);
+    }
+    if (model && model[id + "FallbackValueText"] != null) {
+      return toText(model[id + "FallbackValueText"]);
+    }
+    if (model && model[id + "FallbackValue"] != null) {
+      return toText(model[id + "FallbackValue"]);
+    }
+    return resolveMetricValue(model, id);
+  }
+
   function resolveMetricUnit(model, id) {
     const entry = toMetricEntry(model, id);
     if (entry.unitText != null) {
@@ -140,20 +157,20 @@
     return "";
   }
 
-  function measurePx(args) {
+  function measureLineFit(args) {
     const cfg = args || {};
     const rect = cfg.rect;
     if (!cfg.text) {
-      return 0;
+      return null;
     }
     if (!rect || !(rect.w > 0) || !(rect.h > 0)) {
-      return 0;
+      return null;
     }
     const explicitMaxPx = cfg.htmlUtils.toFiniteNumber(cfg.maxPx);
     const ratio = cfg.htmlUtils.toFiniteNumber(cfg.maxPxRatio);
     const ratioMaxPx = Math.max(1, Math.floor(rect.h * (ratio > 0 ? ratio : 1)));
     const requestedMaxPx = explicitMaxPx > 0 ? explicitMaxPx : ratioMaxPx;
-    const fit = cfg.tileLayout.measureFittedLine({
+    return cfg.tileLayout.measureFittedLine({
       textApi: cfg.textApi,
       ctx: cfg.ctx,
       text: cfg.text,
@@ -164,7 +181,77 @@
       family: cfg.family,
       weight: cfg.weight
     });
+  }
+
+  function measurePx(args) {
+    const cfg = args || {};
+    const fit = measureLineFit(cfg);
     return cfg.htmlUtils.toFiniteNumber(fit && fit.px) || 0;
+  }
+
+  function isLineTrimmed(lineFit, sourceText) {
+    if (!lineFit || typeof lineFit !== "object") {
+      return false;
+    }
+    if (!Object.prototype.hasOwnProperty.call(lineFit, "text")) {
+      return false;
+    }
+    return String(lineFit.text) !== toText(sourceText);
+  }
+
+  function resolveMetricValueFamily(model, tokens) {
+    const font = tokens && tokens.font ? tokens.font : {};
+    if (model && model.stableDigitsEnabled === true) {
+      return font.familyMono || font.family || "";
+    }
+    return font.family || "";
+  }
+
+  function selectMetricValue(args) {
+    const cfg = args || {};
+    const primaryText = toText(cfg.primaryText);
+    const fallbackText = toText(cfg.fallbackText);
+    const primaryFit = measureLineFit({
+      rect: cfg.rect,
+      text: primaryText,
+      maxPxRatio: cfg.maxPxRatio,
+      textApi: cfg.textApi,
+      tileLayout: cfg.tileLayout,
+      ctx: cfg.ctx,
+      family: cfg.valueFamily,
+      weight: cfg.valueWeight,
+      textFillScale: cfg.textFillScale,
+      htmlUtils: cfg.htmlUtils
+    });
+    const useFallback = cfg.stableDigitsEnabled === true &&
+      fallbackText &&
+      fallbackText !== primaryText &&
+      isLineTrimmed(primaryFit, primaryText);
+    if (!useFallback) {
+      return {
+        text: primaryText,
+        fit: primaryFit
+      };
+    }
+    return {
+      text: fallbackText,
+      fit: measureLineFit({
+        rect: cfg.rect,
+        text: fallbackText,
+        maxPxRatio: cfg.maxPxRatio,
+        textApi: cfg.textApi,
+        tileLayout: cfg.tileLayout,
+        ctx: cfg.ctx,
+        family: cfg.valueFamily,
+        weight: cfg.valueWeight,
+        textFillScale: cfg.textFillScale,
+        htmlUtils: cfg.htmlUtils
+      })
+    };
+  }
+
+  function resolveMetricPx(lineFit, htmlUtils) {
+    return htmlUtils.toFiniteNumber(lineFit && lineFit.px) || 0;
   }
 
   function measureStyle(args) {
@@ -202,6 +289,7 @@
       const rootEl = Helpers.requirePluginRoot(targetEl);
       const tokens = theme.resolveForRoot(rootEl);
       const family = tokens.font.family;
+      const valueFamily = resolveMetricValueFamily(model, tokens);
       const measureCtx = resolveMeasureContext(cfg.hostContext, targetEl);
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
         return null;
@@ -244,7 +332,8 @@
           htmlUtils: htmlUtils
         }),
         sourceBadgeStyle: "",
-        metrics: Object.create(null)
+        metrics: Object.create(null),
+        metricValues: Object.create(null)
       };
 
       if (layout.sourceBadgeRect) {
@@ -274,19 +363,23 @@
         const valueRect = box.valueTextRect || box.valueRect;
         const labelText = resolveMetricLabel(model, id);
         const valueText = resolveMetricValue(model, id);
+        const fallbackValueText = resolveMetricFallbackValue(model, id);
         const unitText = resolveMetricUnit(model, id);
-        const valuePx = measurePx({
+        const selectedValue = selectMetricValue({
+          stableDigitsEnabled: model.stableDigitsEnabled === true,
+          primaryText: valueText,
+          fallbackText: fallbackValueText,
           rect: valueRect,
-          text: valueText,
           maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
           textApi: textApi,
           tileLayout: tileLayout,
           ctx: measureCtx,
-          family: family,
-          weight: valueWeight,
+          valueFamily: valueFamily || family,
+          valueWeight: valueWeight,
           textFillScale: textFillScale,
           htmlUtils: htmlUtils
         });
+        const valuePx = resolveMetricPx(selectedValue.fit, htmlUtils);
         const secondaryMaxPx = fitMath.resolveSecondaryMaxPx({
           valuePx: valuePx,
           valueRect: valueRect,
@@ -324,6 +417,7 @@
             htmlUtils: htmlUtils
           }) : ""
         };
+        fitOut.metricValues[id] = selectedValue.text;
       }
 
       return fitOut;

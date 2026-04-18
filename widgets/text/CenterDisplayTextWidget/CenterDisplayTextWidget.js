@@ -1,7 +1,7 @@
 /**
  * Module: CenterDisplayTextWidget - Responsive center-position renderer for the nav cluster
  * Documentation: documentation/widgets/center-display.md
- * Depends: ThemeResolver, TextLayoutEngine, RadialTextLayout, TextTileLayout, CenterDisplayLayout, CenterDisplayMath, CenterDisplayStateAdapter, PlaceholderNormalize
+ * Depends: ThemeResolver, TextLayoutEngine, RadialTextLayout, TextTileLayout, CenterDisplayLayout, CenterDisplayMath, CenterDisplayStateAdapter, CenterDisplayRenderModel
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,96 +11,6 @@
   "use strict";
 
   const hasOwn = Object.prototype.hasOwnProperty;
-  const DEGREE_UNIT = "\u00b0";
-
-  function trimString(value) { return value == null ? "" : String(value).trim(); }
-  function appendUnit(text, unit, defaultText) { return (!unit || text === defaultText) ? text : text + unit; }
-  function formatCoordinate(point, axis, defaultText, Helpers, placeholderNormalize) {
-    const raw = point && axis === "lat" ? point.lat : point && point.lon;
-    const out = String(Helpers.applyFormatter(raw, {
-      formatter: "formatLonLatsDecimal",
-      formatterParameters: [axis],
-      default: defaultText
-    }));
-    return placeholderNormalize.normalize(out, defaultText);
-  }
-  function formatCourse(value, defaultText, Helpers, placeholderNormalize) {
-    const out = String(Helpers.applyFormatter(value, {
-      formatter: "formatDirection",
-      formatterParameters: [],
-      default: defaultText
-    }));
-    return placeholderNormalize.normalize(out, defaultText);
-  }
-  function formatDistance(value, unit, defaultText, Helpers, placeholderNormalize) {
-    const out = String(Helpers.applyFormatter(value, {
-      formatter: "formatDistance",
-      formatterParameters: [unit],
-      default: defaultText
-    }));
-    return placeholderNormalize.normalize(out, defaultText);
-  }
-  function buildDisplayState(props, math, defaultText, Helpers, placeholderNormalize) {
-    const p = props || {};
-    const display = (p.display && typeof p.display === "object") ? p.display : {};
-    const captions = (p.captions && typeof p.captions === "object") ? p.captions : {};
-    const units = (p.units && typeof p.units === "object") ? p.units : {};
-    const position = math.normalizePoint(display.position);
-    const measureInfo = (display.measure && typeof display.measure === "object") ? display.measure : {};
-    const measureStart = math.extractMeasureStart(measureInfo.activeMeasure);
-    const measureRelation = (measureStart && position)
-      ? math.computeCourseDistance(measureStart, position, measureInfo.useRhumbLine === true)
-      : null;
-
-    const rows = [];
-    if (measureRelation) {
-      rows.push({
-        id: "measure",
-        caption: trimString(captions.measure),
-        unit: trimString(units.measure),
-        course: measureRelation.course,
-        distance: measureRelation.distance
-      });
-    }
-    rows.push({
-      id: "marker",
-      caption: trimString(captions.marker),
-      unit: trimString(units.marker),
-      course: display.marker ? display.marker.course : undefined,
-      distance: display.marker ? display.marker.distance : undefined
-    });
-    rows.push({
-      id: "boat",
-      caption: trimString(captions.boat),
-      unit: trimString(units.boat),
-      course: display.boat ? display.boat.course : undefined,
-      distance: display.boat ? display.boat.distance : undefined
-    });
-
-    return {
-      positionCaption: trimString(captions.position),
-      latText: formatCoordinate(position, "lat", defaultText, Helpers, placeholderNormalize),
-      lonText: formatCoordinate(position, "lon", defaultText, Helpers, placeholderNormalize),
-      rows: rows.map(function (row) {
-        const courseText = appendUnit(
-          formatCourse(row.course, defaultText, Helpers, placeholderNormalize),
-          DEGREE_UNIT,
-          defaultText
-        );
-        const distanceText = appendUnit(
-          formatDistance(row.distance, row.unit, defaultText, Helpers, placeholderNormalize),
-          row.unit,
-          defaultText
-        );
-        return {
-          id: row.id,
-          caption: row.caption,
-          fullValueText: courseText + " / " + distanceText,
-          compactValueText: courseText + "/" + distanceText
-        };
-      })
-    };
-  }
   function measureTextWidth(ctx, textApi, text, family, weight, px, frameWidthCache) {
     textApi.setFont(ctx, Math.max(1, Math.floor(Number(px) || 0)), weight, family);
     const content = String(text || "");
@@ -143,22 +53,52 @@
     const baseRowLabelPx = Math.max(1, Math.floor(cfg.contentRect.h / Math.max(3, rows.length + 1)));
     const baseRowValuePx = Math.max(1, Math.floor(baseRowLabelPx * 1.18));
     const positionCaptionWidth = cfg.positionCaption
-      ? measureTextWidth(cfg.ctx, cfg.textApi, cfg.positionCaption, cfg.family, cfg.labelWeight, baseCaptionPx, cfg.frameWidthCache)
+      ? measureTextWidth(
+        cfg.ctx,
+        cfg.textApi,
+        cfg.positionCaption,
+        cfg.labelFamily,
+        cfg.labelWeight,
+        baseCaptionPx,
+        cfg.frameWidthCache
+      )
       : 0;
     const coordWidth = Math.max(
-      measureTextWidth(cfg.ctx, cfg.textApi, cfg.latText, cfg.family, cfg.valueWeight, baseCoordPx, cfg.frameWidthCache),
-      measureTextWidth(cfg.ctx, cfg.textApi, cfg.lonText, cfg.family, cfg.valueWeight, baseCoordPx, cfg.frameWidthCache)
+      measureTextWidth(cfg.ctx, cfg.textApi, cfg.latText, cfg.coordFamily, cfg.valueWeight, baseCoordPx, cfg.frameWidthCache),
+      measureTextWidth(cfg.ctx, cfg.textApi, cfg.lonText, cfg.coordFamily, cfg.valueWeight, baseCoordPx, cfg.frameWidthCache)
     );
     let rowBlockWidth = 0;
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       const labelWidth = row.caption
-        ? measureTextWidth(cfg.ctx, cfg.textApi, row.caption, cfg.family, cfg.labelWeight, baseRowLabelPx, cfg.frameWidthCache)
+        ? measureTextWidth(
+          cfg.ctx,
+          cfg.textApi,
+          row.caption,
+          cfg.labelFamily,
+          cfg.labelWeight,
+          baseRowLabelPx,
+          cfg.frameWidthCache
+        )
         : 0;
       const valueWidth = Math.min(
-        measureTextWidth(cfg.ctx, cfg.textApi, row.fullValueText, cfg.family, cfg.valueWeight, baseRowValuePx, cfg.frameWidthCache),
         measureTextWidth(
-          cfg.ctx, cfg.textApi, row.compactValueText, cfg.family, cfg.valueWeight, baseRowValuePx, cfg.frameWidthCache
+          cfg.ctx,
+          cfg.textApi,
+          row.fullValueText,
+          cfg.relationValueFamily,
+          cfg.valueWeight,
+          baseRowValuePx,
+          cfg.frameWidthCache
+        ),
+        measureTextWidth(
+          cfg.ctx,
+          cfg.textApi,
+          row.compactValueText,
+          cfg.relationValueFamily,
+          cfg.valueWeight,
+          baseRowValuePx,
+          cfg.frameWidthCache
         )
       );
       rowBlockWidth = Math.max(rowBlockWidth, labelWidth + cfg.gap + valueWidth);
@@ -192,7 +132,7 @@
     };
   }
 
-  function drawCenterPanel(layout, state, displayState, family, valueWeight, labelWeight, color) {
+  function drawCenterPanel(layout, state, displayState, labelFamily, valueFamily, valueWeight, labelWeight, color) {
     const textFillScale = layout.responsive.textFillScale;
     const relationValueMaxPx = computeRelationValueMaxPx(layout, textFillScale);
     state.ctx.fillStyle = color;
@@ -202,7 +142,7 @@
       text: displayState.positionCaption,
       rect: layout.center.captionRect,
       align: layout.center.captionAlign,
-      family: family,
+      family: labelFamily,
       weight: labelWeight,
       maxPx: computeResponsiveLineMaxPx(layout.center.captionRect, 0.76, textFillScale),
       padX: state.layoutApi.computeTextPadPx(layout.center.captionRect, layout.responsive),
@@ -214,7 +154,7 @@
       text: displayState.latText,
       rect: layout.center.latRect,
       align: layout.center.coordAlign,
-      family: family,
+      family: valueFamily,
       weight: valueWeight,
       maxPx: relationValueMaxPx,
       padX: state.layoutApi.computeTextPadPx(layout.center.latRect, layout.responsive),
@@ -226,7 +166,7 @@
       text: displayState.lonText,
       rect: layout.center.lonRect,
       align: layout.center.coordAlign,
-      family: family,
+      family: valueFamily,
       weight: valueWeight,
       maxPx: relationValueMaxPx,
       padX: state.layoutApi.computeTextPadPx(layout.center.lonRect, layout.responsive),
@@ -234,19 +174,39 @@
     });
   }
 
-  function computeRowLayout(row, rect, state, family, valueWeight, labelWeight) {
+  function computeRowLayout(row, rect, state, labelFamily, valueFamily, valueWeight, labelWeight) {
     const gap = state.layoutApi.computeRowValueGapPx(rect, state.responsive);
     const textFillScale = state.textFillScale;
     const labelMaxPx = computeResponsiveLineMaxPx(rect, 0.58, textFillScale);
     const valueMaxPx = computeResponsiveLineMaxPx(rect, 0.66, textFillScale);
     const desiredLabelWidth = row.caption
-      ? measureTextWidth(state.ctx, state.radialText, row.caption, family, labelWeight, labelMaxPx, state.frameWidthCache)
+      ? measureTextWidth(
+        state.ctx,
+        state.radialText,
+        row.caption,
+        labelFamily,
+        labelWeight,
+        labelMaxPx,
+        state.frameWidthCache
+      )
       : 0;
     const fullValueWidth = measureTextWidth(
-      state.ctx, state.radialText, row.fullValueText, family, valueWeight, valueMaxPx, state.frameWidthCache
+      state.ctx,
+      state.radialText,
+      row.fullValueText,
+      valueFamily,
+      valueWeight,
+      valueMaxPx,
+      state.frameWidthCache
     );
     const compactValueWidth = measureTextWidth(
-      state.ctx, state.radialText, row.compactValueText, family, valueWeight, valueMaxPx, state.frameWidthCache
+      state.ctx,
+      state.radialText,
+      row.compactValueText,
+      valueFamily,
+      valueWeight,
+      valueMaxPx,
+      state.frameWidthCache
     );
     const maxLabelWidth = Math.floor(rect.w * 0.40);
     const minValueWidth = Math.floor(rect.w * 0.42);
@@ -271,7 +231,7 @@
     };
   }
 
-  function drawRelationRows(layout, rows, state, family, valueWeight, labelWeight, color) {
+  function drawRelationRows(layout, rows, state, labelFamily, valueFamily, valueWeight, labelWeight, color) {
     state.ctx.fillStyle = color;
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -279,7 +239,7 @@
       if (!rect || !(rect.w > 0) || !(rect.h > 0)) {
         continue;
       }
-      const rowLayout = computeRowLayout(row, rect, state, family, valueWeight, labelWeight);
+      const rowLayout = computeRowLayout(row, rect, state, labelFamily, valueFamily, valueWeight, labelWeight);
       if (row.caption && rowLayout.labelRect.w > 0) {
         state.tileLayout.drawFittedLine({
           textApi: state.radialText,
@@ -287,7 +247,7 @@
           text: row.caption,
           rect: rowLayout.labelRect,
           align: "left",
-          family: family,
+          family: labelFamily,
           weight: labelWeight,
           maxPx: rowLayout.labelMaxPx,
           padX: state.layoutApi.computeTextPadPx(rowLayout.labelRect, layout.responsive),
@@ -300,7 +260,7 @@
         text: rowLayout.valueText,
         rect: rowLayout.valueRect,
         align: "left",
-        family: family,
+        family: valueFamily,
         weight: valueWeight,
         maxPx: rowLayout.valueMaxPx,
         padX: state.layoutApi.computeTextPadPx(rowLayout.valueRect, layout.responsive),
@@ -317,7 +277,7 @@
     const layoutApi = Helpers.getModule("CenterDisplayLayout").create(def, Helpers);
     const math = Helpers.getModule("CenterDisplayMath").create(def, Helpers);
     const centerDisplayStateAdapter = Helpers.getModule("CenterDisplayStateAdapter").create(def, Helpers);
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const centerDisplayRenderModel = Helpers.getModule("CenterDisplayRenderModel").create(def, Helpers);
 
     function renderCanvas(canvas, props) {
       const p = props || {};
@@ -335,6 +295,11 @@
       const rootEl = Helpers.requirePluginRoot(canvas);
       const tokens = theme.resolveForRoot(rootEl);
       const family = tokens.font.family;
+      const monoFamily = tokens.font.familyMono || family;
+      const coordinatesTabular = p.coordinatesTabular !== false;
+      const stableDigitsEnabled = p.stableDigits === true;
+      const centerValueFamily = coordinatesTabular ? monoFamily : family;
+      const relationValueFamily = stableDigitsEnabled ? monoFamily : family;
       const color = tokens.surface.fg;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
@@ -360,7 +325,7 @@
       });
       const insets = layoutApi.computeInsets(W, H);
       const contentRect = layoutApi.createContentRect(W, H, insets);
-      const displayState = buildDisplayState(p, math, defaultText, Helpers, placeholderNormalize);
+      const displayState = centerDisplayRenderModel.buildDisplayState(p, math, defaultText);
       const frameWidthCache = Object.create(null);
       const hints = computeMeasurementHints({
         ctx: ctx,
@@ -371,7 +336,9 @@
         lonText: displayState.lonText,
         contentRect: contentRect,
         gap: insets.gap,
-        family: family,
+        labelFamily: family,
+        coordFamily: centerValueFamily,
+        relationValueFamily: relationValueFamily,
         valueWeight: valueWeight,
         labelWeight: labelWeight,
         frameWidthCache: frameWidthCache
@@ -397,8 +364,17 @@
         frameWidthCache: frameWidthCache
       };
 
-      drawCenterPanel(layout, renderState, displayState, family, valueWeight, labelWeight, color);
-      drawRelationRows(layout, displayState.rows, renderState, family, valueWeight, labelWeight, color);
+      drawCenterPanel(layout, renderState, displayState, family, centerValueFamily, valueWeight, labelWeight, color);
+      drawRelationRows(
+        layout,
+        displayState.rows,
+        renderState,
+        family,
+        relationValueFamily,
+        valueWeight,
+        labelWeight,
+        color
+      );
     }
 
     function translateFunction() { return {}; }

@@ -195,6 +195,26 @@
           name: "Show waypoint name",
           condition: { kind: "xteDisplay" }
         },
+        coordinatesTabular: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Tabular coordinates",
+          condition: [
+            { kind: "routePoints" },
+            { kind: "positionBoat" },
+            { kind: "positionWp" }
+          ]
+        },
+        stableDigits: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Stable digits",
+          condition: [
+            { kind: "xteDisplay" },
+            { kind: "activeRoute" },
+            { kind: "editRoute" }
+          ]
+        },
         caption: false,
         unit: false,
         formatter: false,

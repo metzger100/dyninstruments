@@ -1,7 +1,7 @@
 /**
  * Module: WindLinearWidget - Linear wind gauge with angle pointer, layline sectors, and dual angle/speed text
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, RadialValueMath
+ * Depends: LinearGaugeEngine, RadialValueMath, StableDigits
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,6 +14,7 @@
   function create(def, Helpers) {
     const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
+    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
 
     function splitHorizontal(box, gapPx) {
       const gap = Math.max(0, Math.floor(gapPx));
@@ -55,19 +56,33 @@
       const angleUnit = String(p.angleUnit).trim();
       const speedUnit = String(p.speedUnit).trim();
       const secScale = valueMath.clamp(p.captionUnitScale, 0.3, 3.0);
+      const speedRawText = resolveSpeedText(p.speed, p, speedUnit, defaultText);
+      const stableDigitsEnabled = p.stableDigits === true;
+      const angleValueText = stableDigitsEnabled
+        ? stableDigits.normalize(angleText, {
+          integerWidth: stableDigits.resolveIntegerWidth(angleText, 2),
+          reserveSignSlot: true
+        }).padded
+        : angleText;
+      const speedValueText = stableDigitsEnabled
+        ? stableDigits.normalize(speedRawText, {
+          integerWidth: stableDigits.resolveIntegerWidth(speedRawText, 2),
+          reserveSignSlot: true
+        }).padded
+        : speedRawText;
 
       return {
         num: isFinite(angleNum) ? angleNum : NaN,
-        text: angleText,
+        text: angleValueText,
         secScale: secScale,
         left: {
           caption: String(p.angleCaption).trim(),
-          value: angleText,
+          value: angleValueText,
           unit: angleUnit
         },
         right: {
           caption: String(p.speedCaption).trim(),
-          value: resolveSpeedText(p.speed, p, speedUnit, defaultText),
+          value: speedValueText,
           unit: speedUnit
         }
       };

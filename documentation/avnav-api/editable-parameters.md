@@ -193,6 +193,32 @@ const commonThreeElementsEditables = {
 };
 ```
 
+### Phase 6 Numeric Render Editables (dyninstruments-internal)
+
+Two per-widget editables control numeric/coordinate stability:
+
+- `stableDigits` (`BOOLEAN`, default `false`)
+- `coordinatesTabular` (`BOOLEAN`, default `true`)
+
+They are scoped per cluster via `condition` lists (no global shared editable):
+
+- `config/clusters/nav.js`
+  - `coordinatesTabular`: `routePoints`, `positionBoat`, `positionWp`
+  - `stableDigits`: `xteDisplay`, `activeRoute`, `editRoute`
+- `config/clusters/map.js`
+  - `coordinatesTabular`: `centerDisplay`
+  - `stableDigits`: `centerDisplay`
+- `config/clusters/speed.js`
+  - `stableDigits`: `sogLinear`, `stwLinear`, `sogRadial`, `stwRadial`
+- `config/clusters/environment.js`
+  - `stableDigits`: `depthLinear`, `depthRadial`, `tempLinear`, `tempRadial`
+- `config/clusters/vessel.js`
+  - `stableDigits`: `voltageLinear`, `voltageRadial`
+- `config/clusters/course-heading.js`
+  - `stableDigits`: `hdtRadial`, `hdmRadial`, `hdtLinear`, `hdmLinear`
+- `config/clusters/wind.js`
+  - `stableDigits`: `angleTrueRadial`, `angleApparentRadial`, `angleTrueLinear`, `angleApparentLinear`
+
 ## Related
 
 - [plugin-lifecycle.md](plugin-lifecycle.md) — Widget registration, updateFunction for KEY params

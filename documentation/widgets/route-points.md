@@ -51,6 +51,12 @@ In .widgetContainer.vertical, runtime requests widget-owned sizing and materiali
 - layoutSignature excludes non-authoritative vertical shell height churn
 - postPatch may trigger one bounded relayout pass (for example scrollbar-gutter correction)
 
+## Phase 6 Options
+
+- `coordinatesTabular` (default `true`) is threaded into `RoutePointsMarkup`.
+- When `showLatLon === true` and `coordinatesTabular !== false`, route-point info spans use `.dyni-tabular`.
+- Segment compound placeholders (for example `--kt/--nm`) are intentionally preserved.
+
 ## Related
 
 - ../architecture/vertical-container-contract.md

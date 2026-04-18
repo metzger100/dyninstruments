@@ -54,6 +54,9 @@ describe("EditRouteRenderModel", function () {
           else if (id === "PlaceholderNormalize") {
             moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
           }
+          else if (id === "StableDigits") {
+            moduleCache[id] = loadFresh("shared/widget-kits/format/StableDigits.js");
+          }
           else if (id === "StateScreenLabels") {
             moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
           }
@@ -342,6 +345,39 @@ describe("EditRouteRenderModel", function () {
     expect(model.metrics.dst.valueText).toBe("---");
     expect(model.metrics.rte.valueText).toBe("---");
     expect(model.metrics.eta.valueText).toBe("---");
+  });
+
+  it("enables stable-digits padding for numeric edit-route metrics when configured", function () {
+    const renderModel = createRenderModel({
+      applyFormatter(value, formatterOptions) {
+        const cfg = formatterOptions || {};
+        if (cfg.formatter === "formatDecimal") {
+          return "7.0";
+        }
+        if (cfg.formatter === "formatDistance") {
+          return "3.4";
+        }
+        if (cfg.formatter === "formatTime") {
+          return "12:34";
+        }
+        return value == null ? cfg.default : String(value);
+      }
+    });
+    const model = renderModel.buildModel({
+      props: withSurfacePolicy(makeProps({ stableDigits: true }), { mode: "dispatch" }),
+      shellRect: { width: 320, height: 210 },
+      isVerticalCommitted: false
+    });
+
+    expect(model.stableDigitsEnabled).toBe(true);
+    expect(model.metrics.pts.valueText).toBe(" 007.0");
+    expect(model.metrics.pts.fallbackValueText).toBe("7.0");
+    expect(model.metrics.dst.valueText).toBe(" 03.4");
+    expect(model.metrics.dst.fallbackValueText).toBe("3.4");
+    expect(model.metrics.rte.valueText).toBe(" 03.4");
+    expect(model.metrics.rte.fallbackValueText).toBe("3.4");
+    expect(model.metrics.eta.valueText).toBe(" 12:34");
+    expect(model.metrics.eta.fallbackValueText).toBe("12:34");
   });
 
   it("forces high mode and applies width-driven vertical shell geometry", function () {

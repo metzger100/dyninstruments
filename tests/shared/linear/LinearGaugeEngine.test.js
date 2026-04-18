@@ -123,6 +123,8 @@ describe("LinearGaugeEngine", function () {
         return target;
       },
       getModule(id) {
+        if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
+        if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
         if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
         if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");

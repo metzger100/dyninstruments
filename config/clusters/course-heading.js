@@ -112,6 +112,17 @@
           type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
           name: "Caption/Unit size"
         },
+        stableDigits: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Stable digits",
+          condition: [
+            { kind: "hdtRadial" },
+            { kind: "hdmRadial" },
+            { kind: "hdtLinear" },
+            { kind: "hdmLinear" }
+          ]
+        },
 
         // hide low-levels
         caption: false,

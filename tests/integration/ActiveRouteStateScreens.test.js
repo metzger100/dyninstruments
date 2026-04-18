@@ -61,6 +61,9 @@ function createActiveRouteWidget() {
       if (id === "PlaceholderNormalize") {
         return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
       }
+      if (id === "StableDigits") {
+        return loadFresh("shared/widget-kits/format/StableDigits.js");
+      }
       if (id === "StateScreenLabels") {
         return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
       }

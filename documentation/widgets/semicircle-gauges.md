@@ -125,6 +125,12 @@ Removed from wrappers:
 - Invalidation is automatic by key mismatch when any text, typography, scale, or geometry input changes.
 - Draw calls still execute every frame; only intermediate fitting outputs (chosen sizes/layout fit results) are reused on cache hits.
 
+## Phase 6 Options
+
+- `stableDigits` (default `false`) is available on speed/environment semicircle/linear gauge kinds.
+- When enabled, main gauge value text is normalized via `StableDigits` and rendered with `theme.font.familyMono`.
+- `stableDigits: false` preserves pre-phase rendering and typography behavior.
+
 ## Related
 
 - [../radial/gauge-shared-api.md](../radial/gauge-shared-api.md)

@@ -120,6 +120,12 @@ return {
 };
 ```
 
+## Phase 6 Options
+
+- `stableDigits` (default `false`) enables `StableDigits.normalize(...)` for the primary value text.
+- When enabled, value rendering switches to `theme.font.familyMono` and keeps sign-slot alignment where available.
+- Placeholders are short-circuited unchanged (`---` remains `---`).
+
 ## Related
 
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)

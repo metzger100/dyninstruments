@@ -172,6 +172,12 @@ Dynamic elements are never cached:
 - overflow alarm cue
 - live metric text
 
+## Phase 6 Options
+
+- `stableDigits` (default `false`) enables stable-digit normalization of XTE value text.
+- XTE uses `sideSuffix` (`R`/`L`/empty) with `reserveSideSuffixSlot` so side alignment stays stable at zero crossing.
+- The XTE metric uses two-pass selection: padded value first, fallback value when padded text clips.
+
 ## Related
 
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)
