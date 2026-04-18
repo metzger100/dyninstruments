@@ -125,6 +125,11 @@
       css: undefined,
       globalKey: "DyniHtmlWidgetUtils"
     },
+    PlaceholderNormalize: {
+      js: BASE + "shared/widget-kits/format/PlaceholderNormalize.js",
+      css: undefined,
+      globalKey: "DyniPlaceholderNormalize"
+    },
     PreparedPayloadModelCache: {
       js: BASE + "shared/widget-kits/html/PreparedPayloadModelCache.js",
       css: undefined,

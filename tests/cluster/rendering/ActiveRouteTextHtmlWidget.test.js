@@ -42,6 +42,9 @@ describe("ActiveRouteTextHtmlWidget", function () {
         if (id === "PreparedPayloadModelCache") {
           return loadFresh("shared/widget-kits/html/PreparedPayloadModelCache.js");
         }
+        if (id === "PlaceholderNormalize") {
+          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
+        }
         throw new Error("unexpected module: " + id);
       }
     };
@@ -200,6 +203,34 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const wrapper = mounted.mountEl.querySelector(".dyni-active-route-html");
     wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(openActiveRoute).not.toHaveBeenCalled();
+  });
+
+  it("normalizes known formatter fallback tokens to the configured default", function () {
+    const setup = createRenderer({
+      applyFormatter(value, formatterOptions) {
+        const cfg = formatterOptions || {};
+        if (cfg.formatter === "formatDistance") {
+          return "  -";
+        }
+        if (cfg.formatter === "formatTime") {
+          return "--:--:--";
+        }
+        if (cfg.formatter === "formatDirection") {
+          return "NO DATA";
+        }
+        return value == null ? cfg.default : String(value);
+      }
+    });
+    const mounted = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy(makeProps(), { mode: "dispatch" })
+    );
+
+    const valueTexts = Array.from(mounted.mountEl.querySelectorAll(".dyni-active-route-metric-value"))
+      .map((el) => el.textContent);
+    expect(valueTexts).toEqual(["---", "---", "---"]);
+    expect(mounted.html()).not.toContain("--:--:--");
+    expect(mounted.html()).not.toContain("NO DATA");
   });
 
   it("always consults ActiveRouteHtmlFit when a shell rect exists", function () {

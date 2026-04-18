@@ -2,7 +2,8 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("CenterDisplayTextWidget", function () {
-  function makeHelpers() {
+  function makeHelpers(options) {
+    const opts = options || {};
     const themeTokens = {
       surface: {
         fg: "#ffffff"
@@ -29,26 +30,29 @@ describe("CenterDisplayTextWidget", function () {
     };
 
     return {
-      applyFormatter(value, opts) {
-        if (opts.formatter === "formatLonLatsDecimal") {
-          if (typeof value !== "number" || !isFinite(value)) {
-            return opts.default;
-          }
-          return (opts.formatterParameters[0] === "lat" ? "LAT:" : "LON:") + value.toFixed(3);
+      applyFormatter(value, formatterOptions) {
+        if (typeof opts.applyFormatter === "function") {
+          return opts.applyFormatter(value, formatterOptions);
         }
-        if (opts.formatter === "formatDirection") {
+        if (formatterOptions.formatter === "formatLonLatsDecimal") {
           if (typeof value !== "number" || !isFinite(value)) {
-            return opts.default;
+            return formatterOptions.default;
+          }
+          return (formatterOptions.formatterParameters[0] === "lat" ? "LAT:" : "LON:") + value.toFixed(3);
+        }
+        if (formatterOptions.formatter === "formatDirection") {
+          if (typeof value !== "number" || !isFinite(value)) {
+            return formatterOptions.default;
           }
           return String(Math.round(value));
         }
-        if (opts.formatter === "formatDistance") {
+        if (formatterOptions.formatter === "formatDistance") {
           if (typeof value !== "number" || !isFinite(value)) {
-            return opts.default;
+            return formatterOptions.default;
           }
           return value.toFixed(1);
         }
-        return value == null ? opts.default : String(value);
+        return value == null ? formatterOptions.default : String(value);
       },
       setupCanvas(canvas) {
         const ctx = canvas.getContext("2d");
@@ -75,6 +79,9 @@ describe("CenterDisplayTextWidget", function () {
               return themeTokens;
             }
           };
+        }
+        if (id === "PlaceholderNormalize") {
+          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         }
         if (modules[id]) {
           return modules[id];
@@ -349,6 +356,41 @@ describe("CenterDisplayTextWidget", function () {
     const texts = fillTextCalls(ctx);
     expect(findAllTexts(texts, "---").length).toBeGreaterThanOrEqual(2);
     expect(findAllTexts(texts, "--- / ---").length).toBe(2);
+  });
+
+  it("normalizes known formatter fallback tokens for coordinates and relation rows", function () {
+    const helpers = makeHelpers({
+      applyFormatter(value, formatterOptions) {
+        const cfg = formatterOptions || {};
+        if (cfg.formatter === "formatLonLatsDecimal") {
+          return cfg.formatterParameters && cfg.formatterParameters[0] === "lat"
+            ? "-----"
+            : "NO DATA";
+        }
+        if (cfg.formatter === "formatDirection") {
+          return "--:--:--";
+        }
+        if (cfg.formatter === "formatDistance") {
+          return "    -";
+        }
+        return cfg.default;
+      }
+    });
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
+      .create({}, helpers);
+    const ctx = createMockContext2D();
+    const canvas = createMockCanvas({ rectWidth: 260, rectHeight: 180, ctx });
+
+    spec.renderCanvas(canvas, makeProps({
+      activeMeasure: undefined,
+      default: "---"
+    }));
+
+    const texts = fillTextCalls(ctx).map((entry) => entry.text);
+    expect(texts.filter((entry) => entry === "---").length).toBeGreaterThanOrEqual(2);
+    expect(texts.filter((entry) => entry === "--- / ---").length).toBe(2);
+    expect(texts).not.toContain("NO DATA");
+    expect(texts).not.toContain("-----");
   });
 
   it("keeps compact nav-page-like sizes inside the canvas while preserving waypoint and boat rows", function () {

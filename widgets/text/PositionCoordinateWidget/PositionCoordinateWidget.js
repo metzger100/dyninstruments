@@ -1,7 +1,7 @@
 /**
  * Module: PositionCoordinateWidget - Stacked latitude/longitude renderer for nav position kinds
  * Documentation: documentation/widgets/position-coordinates.md
- * Depends: ThemeResolver, TextLayoutEngine, Helpers.applyFormatter, Helpers.setupCanvas, Helpers.requirePluginRoot
+ * Depends: ThemeResolver, TextLayoutEngine, PlaceholderNormalize, Helpers.applyFormatter, Helpers.setupCanvas, Helpers.requirePluginRoot
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -109,7 +109,7 @@
       appendAxisParam: !hasOverride
     };
   }
-  function formatAxisValue(rawValue, axis, defaultText, props, Helpers) {
+  function formatAxisValue(rawValue, axis, defaultText, props, Helpers, placeholderNormalize) {
     const rawMode = props && props.coordinateRawValues === true;
     if (rawMode) {
       if (rawValue == null || (typeof rawValue === "number" && Number.isNaN(rawValue))) {
@@ -129,7 +129,7 @@
       formatterParameters: cfg.params,
       default: defaultText
     }));
-    return out.trim() ? out : defaultText;
+    return placeholderNormalize.normalize(out, defaultText);
   }
   function isTimeStatusMarker(text) {
     const normalized = String(text).trim();
@@ -147,6 +147,7 @@
   function create(def, Helpers) {
     const theme = Helpers.getModule("ThemeResolver");
     const text = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
     const fitCache = text.createFitCache(["flat", "stacked"]);
     function renderCanvas(canvas, props) {
       const p = resolveVariantProps(props);
@@ -181,14 +182,14 @@
         const pairRaw = readCoordinatePair(p.value, true);
         const useAxisFlat = !!p.coordinateFlatFromAxes;
         const topText = useAxisFlat
-          ? formatAxisValue(pairRaw ? pairRaw.lat : null, "lat", defaultText, p, Helpers)
+          ? formatAxisValue(pairRaw ? pairRaw.lat : null, "lat", defaultText, p, Helpers, placeholderNormalize)
           : "";
         const bottomText = useAxisFlat
-          ? formatAxisValue(pairRaw ? pairRaw.lon : null, "lon", defaultText, p, Helpers)
+          ? formatAxisValue(pairRaw ? pairRaw.lon : null, "lon", defaultText, p, Helpers, placeholderNormalize)
           : "";
-        const valueText = String(useAxisFlat
+        const valueText = useAxisFlat
           ? ((topText + " " + bottomText).trim() || defaultText)
-          : Helpers.applyFormatter(p.value, p));
+          : placeholderNormalize.normalize(String(Helpers.applyFormatter(p.value, p)), defaultText);
         const statusEmoji = useAxisFlat && isTimeStatusMarker(topText);
         const key = text.makeFitCacheKey({
           mode: "flat",
@@ -238,10 +239,10 @@
       } else {
         const parsed = readCoordinatePair(p.value, p.coordinateRawValues === true);
         const latText = parsed
-          ? formatAxisValue(parsed.lat, "lat", defaultText, p, Helpers)
+          ? formatAxisValue(parsed.lat, "lat", defaultText, p, Helpers, placeholderNormalize)
           : defaultText;
         const lonText = parsed
-          ? formatAxisValue(parsed.lon, "lon", defaultText, p, Helpers)
+          ? formatAxisValue(parsed.lon, "lon", defaultText, p, Helpers, placeholderNormalize)
           : defaultText;
         const topStatusEmoji = isTimeStatusMarker(latText);
         const key = text.makeFitCacheKey({

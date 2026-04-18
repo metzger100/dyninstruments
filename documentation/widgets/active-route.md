@@ -10,6 +10,7 @@ ActiveRouteTextHtmlWidget is a committed HTML renderer routed by ClusterRenderer
 - shell: inert pre-commit markup only
 - semantic DOM: committed renderer mount/update lifecycle in shadow root
 - interaction: runtime surface policy dispatch/passive mode
+- formatter fallback outputs are normalized through `PlaceholderNormalize`; missing metric values render as `---`
 
 ## Interaction Contract
 

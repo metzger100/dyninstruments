@@ -151,7 +151,7 @@ describe("config/components.js", function () {
     expect(components.EditRouteRenderModel.globalKey).toBe("DyniEditRouteRenderModel");
     expect(components.EditRouteRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteRenderModel.js");
     expect(components.EditRouteRenderModel.css).toBeUndefined();
-    expect(components.EditRouteRenderModel.deps).toEqual(["EditRouteLayout", "HtmlWidgetUtils", "NavInteractionPolicy"]);
+    expect(components.EditRouteRenderModel.deps).toEqual(["EditRouteLayout", "HtmlWidgetUtils", "NavInteractionPolicy", "PlaceholderNormalize"]);
     expect(components.EditRouteMarkup.globalKey).toBe("DyniEditRouteMarkup");
     expect(components.EditRouteMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteMarkup.js");
     expect(components.EditRouteMarkup.css).toBeUndefined();
@@ -185,6 +185,9 @@ describe("config/components.js", function () {
     expect(components.HtmlWidgetUtils.globalKey).toBe("DyniHtmlWidgetUtils");
     expect(components.HtmlWidgetUtils.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/html/HtmlWidgetUtils.js");
     expect(components.HtmlWidgetUtils.deps).toBeUndefined();
+    expect(components.PlaceholderNormalize.globalKey).toBe("DyniPlaceholderNormalize");
+    expect(components.PlaceholderNormalize.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/format/PlaceholderNormalize.js");
+    expect(components.PlaceholderNormalize.deps).toBeUndefined();
     expect(components.PreparedPayloadModelCache.globalKey).toBe("DyniPreparedPayloadModelCache");
     expect(components.PreparedPayloadModelCache.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/html/PreparedPayloadModelCache.js");
     expect(components.PreparedPayloadModelCache.deps).toBeUndefined();
@@ -206,20 +209,32 @@ describe("config/components.js", function () {
     expect(components.TemperatureRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
     expect(components.VoltageLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.VoltageRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
-    expect(components.XteDisplayWidget.deps).toEqual(["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives", "XteHighwayLayout", "TextTileLayout"]);
+    expect(components.XteDisplayWidget.deps).toEqual([
+      "RadialToolkit",
+      "CanvasLayerCache",
+      "XteHighwayPrimitives",
+      "XteHighwayLayout",
+      "TextTileLayout",
+      "PlaceholderNormalize"
+    ]);
     expect(components.WindRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
     expect(components.CompassRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
     expect(components.WindLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.CompassLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.RadialToolkit.deps).toContain("ThemeResolver");
-    expect(components.ThreeValueTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
-    expect(components.PositionCoordinateWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine"]);
+    expect(components.ThreeValueTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine", "PlaceholderNormalize"]);
+    expect(components.PositionCoordinateWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine", "PlaceholderNormalize"]);
     expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
     expect(components.ActiveRouteTextHtmlWidget.globalKey).toBe("DyniActiveRouteTextHtmlWidget");
     expect(components.ActiveRouteTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js");
     expect(components.ActiveRouteTextHtmlWidget.css).toBeUndefined();
     expect(components.ActiveRouteTextHtmlWidget.shadowCss).toEqual(["http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css"]);
-    expect(components.ActiveRouteTextHtmlWidget.deps).toEqual(["ActiveRouteHtmlFit", "HtmlWidgetUtils", "PreparedPayloadModelCache"]);
+    expect(components.ActiveRouteTextHtmlWidget.deps).toEqual([
+      "ActiveRouteHtmlFit",
+      "HtmlWidgetUtils",
+      "PreparedPayloadModelCache",
+      "PlaceholderNormalize"
+    ]);
     expect(components.EditRouteTextHtmlWidget.globalKey).toBe("DyniEditRouteTextHtmlWidget");
     expect(components.EditRouteTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js");
     expect(components.EditRouteTextHtmlWidget.css).toBeUndefined();
@@ -228,7 +243,13 @@ describe("config/components.js", function () {
     expect(components.RoutePointsRenderModel.globalKey).toBe("DyniRoutePointsRenderModel");
     expect(components.RoutePointsRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsRenderModel.js");
     expect(components.RoutePointsRenderModel.css).toBeUndefined();
-    expect(components.RoutePointsRenderModel.deps).toEqual(["CenterDisplayMath", "RoutePointsLayout", "HtmlWidgetUtils", "NavInteractionPolicy"]);
+    expect(components.RoutePointsRenderModel.deps).toEqual([
+      "CenterDisplayMath",
+      "RoutePointsLayout",
+      "HtmlWidgetUtils",
+      "NavInteractionPolicy",
+      "PlaceholderNormalize"
+    ]);
     expect(components.RoutePointsMarkup.globalKey).toBe("DyniRoutePointsMarkup");
     expect(components.RoutePointsMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsMarkup.js");
     expect(components.RoutePointsMarkup.css).toBeUndefined();
@@ -260,7 +281,7 @@ describe("config/components.js", function () {
     expect(components.AisTargetRenderModel.globalKey).toBe("DyniAisTargetRenderModel");
     expect(components.AisTargetRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetRenderModel.js");
     expect(components.AisTargetRenderModel.css).toBeUndefined();
-    expect(components.AisTargetRenderModel.deps).toEqual(["AisTargetLayout", "HtmlWidgetUtils"]);
+    expect(components.AisTargetRenderModel.deps).toEqual(["AisTargetLayout", "HtmlWidgetUtils", "PlaceholderNormalize"]);
     expect(components.AisTargetMarkup.globalKey).toBe("DyniAisTargetMarkup");
     expect(components.AisTargetMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetMarkup.js");
     expect(components.AisTargetMarkup.css).toBeUndefined();

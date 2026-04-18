@@ -51,6 +51,9 @@ describe("EditRouteRenderModel", function () {
           else if (id === "LayoutRectMath") {
             moduleCache[id] = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
           }
+          else if (id === "PlaceholderNormalize") {
+            moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
+          }
           else {
             throw new Error("unexpected module: " + id);
           }
@@ -252,6 +255,49 @@ describe("EditRouteRenderModel", function () {
 
     expect(model.mode).toBe("flat");
     expect(model.visibleMetricIds).toEqual(["pts", "dst", "rte", "eta"]);
+    expect(model.metrics.rte.valueText).toBe("---");
+    expect(model.metrics.eta.valueText).toBe("---");
+  });
+
+  it("normalizes formatter fallback tokens to --- across edit-route metrics", function () {
+    const renderModel = createRenderModel({
+      applyFormatter(value, formatterOptions) {
+        const cfg = formatterOptions || {};
+        if (value != null && !Number.isNaN(value)) {
+          return "OK";
+        }
+        if (cfg.formatter === "formatDecimal") {
+          return "-----";
+        }
+        if (cfg.formatter === "formatDistance") {
+          return "    -";
+        }
+        if (cfg.formatter === "formatTime") {
+          return "--:--:--";
+        }
+        return cfg.default;
+      }
+    });
+    const model = renderModel.buildModel({
+      props: withSurfacePolicy(makeProps({
+        domain: {
+          hasRoute: true,
+          routeName: "Harbor Run",
+          pointCount: undefined,
+          totalDistance: undefined,
+          remainingDistance: undefined,
+          eta: undefined,
+          isActiveRoute: false,
+          isLocalRoute: false,
+          isServerRoute: true
+        }
+      }), { mode: "dispatch" }),
+      shellRect: { width: 320, height: 210 },
+      isVerticalCommitted: false
+    });
+
+    expect(model.metrics.pts.valueText).toBe("---");
+    expect(model.metrics.dst.valueText).toBe("---");
     expect(model.metrics.rte.valueText).toBe("---");
     expect(model.metrics.eta.valueText).toBe("---");
   });

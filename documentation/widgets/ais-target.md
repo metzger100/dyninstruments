@@ -9,6 +9,7 @@ AisTargetTextHtmlWidget renders AIS target summary state on the committed HTML s
 - surface: html
 - policy source: runtime surfacePolicy
 - style scope: shadow-local CSS
+- formatter fallback outputs are normalized through `PlaceholderNormalize`; missing metric values render as `---`
 
 ## Interaction Contract
 

@@ -38,6 +38,7 @@
 - **Smell remediation playbooks** → [conventions/smell-fix-playbooks.md](conventions/smell-fix-playbooks.md)
 - **Canvas layer caching conventions and shared cache facade** → [conventions/canvas-layer-caching.md](conventions/canvas-layer-caching.md), [shared/canvas-layer-cache.md](shared/canvas-layer-cache.md)
 - **Responsive compaction contract** → [shared/responsive-scale-profile.md](shared/responsive-scale-profile.md)
+- **Placeholder normalization contract (`---` fallback unification)** → [shared/placeholder-normalize.md](shared/placeholder-normalize.md)
 - **Documentation format rules** → [conventions/documentation-format.md](conventions/documentation-format.md)
 - **Core non-negotiable rules** → [core-principles.md](core-principles.md)
 
@@ -110,3 +111,4 @@
 - **Roll/pitch formatter tuple contract** → [architecture/plugin-core-contracts.md](architecture/plugin-core-contracts.md), [avnav-api/core-formatter-catalog.md](avnav-api/core-formatter-catalog.md), [avnav-api/core-key-catalog.md](avnav-api/core-key-catalog.md)
 - **Interactive dashboard button/toggle behavior on `GpsPage`** → [avnav-api/interactive-widgets.md](avnav-api/interactive-widgets.md)
 - **State-screen precedence and shared labels** → [shared/state-screens.md](shared/state-screens.md)
+- **Missing-value placeholder normalization and RoutePoints carve-out** → [shared/placeholder-normalize.md](shared/placeholder-normalize.md), [widgets/route-points.md](widgets/route-points.md)

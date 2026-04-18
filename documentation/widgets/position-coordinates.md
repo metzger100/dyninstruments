@@ -58,6 +58,7 @@ This renderer uses the shared text compaction contract from `TextLayoutEngine.co
 - `normal`/`high` modes use `Helpers.applyFormatter(value, { formatter: coordinateFormatter, formatterParameters: [...coordinateFormatterParameters, axis] })`
 - Axis mapping is fixed: `lat` -> first (top) line, `lon` -> second (bottom) line
 - Axis-specific formatter overrides use `coordinateFormatterLat` / `coordinateFormatterLon` (and corresponding parameter overrides) before generic `coordinateFormatter`
+- Axis formatter outputs are normalized through `PlaceholderNormalize`; known formatter fallback tokens render as `---`
 - If formatter is unavailable/fails, renders `default` fallback text
 - Invalid/missing coordinates render `default` fallback text
 - Fit/layout caching is widget-local and keyed by text, dimensions, mode, typography, and layout scale via `TextLayoutEngine`.

@@ -14,7 +14,7 @@ Graphic navigation widget with a 2.5D highway view for cross-track guidance and 
 
 The highway frame follows the same solid-line visual language as the radial and linear instruments: foreground road rails, horizon line, clean perspective bars, and a pointer-colored live guidance overlay without translucent lane-surface shading.
 
-Renderer keeps the highway frame visible when data is missing. Missing/disconnected metrics render with the configured placeholder (default `---`), and the moving XTE indicator is suppressed until the full guidance set is valid again.
+Renderer keeps the highway frame visible when data is missing. Missing/disconnected metrics render with the configured placeholder (default `---`) after `PlaceholderNormalize` normalization, and the moving XTE indicator is suppressed until the full guidance set is valid again.
 
 Layout ownership:
 

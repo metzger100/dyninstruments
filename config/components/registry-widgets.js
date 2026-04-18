@@ -28,7 +28,7 @@
       js: BASE + "shared/widget-kits/nav/AisTargetRenderModel.js",
       css: undefined,
       globalKey: "DyniAisTargetRenderModel",
-      deps: ["AisTargetLayout", "HtmlWidgetUtils"]
+      deps: ["AisTargetLayout", "HtmlWidgetUtils", "PlaceholderNormalize"]
     },
     AisTargetMarkup: {
       js: BASE + "shared/widget-kits/nav/AisTargetMarkup.js",
@@ -40,13 +40,13 @@
       css: undefined,
       shadowCss: [BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css"],
       globalKey: "DyniActiveRouteTextHtmlWidget",
-      deps: ["ActiveRouteHtmlFit", "HtmlWidgetUtils", "PreparedPayloadModelCache"]
+      deps: ["ActiveRouteHtmlFit", "HtmlWidgetUtils", "PreparedPayloadModelCache", "PlaceholderNormalize"]
     },
     EditRouteRenderModel: {
       js: BASE + "shared/widget-kits/nav/EditRouteRenderModel.js",
       css: undefined,
       globalKey: "DyniEditRouteRenderModel",
-      deps: ["EditRouteLayout", "HtmlWidgetUtils", "NavInteractionPolicy"]
+      deps: ["EditRouteLayout", "HtmlWidgetUtils", "NavInteractionPolicy", "PlaceholderNormalize"]
     },
     EditRouteMarkup: {
       js: BASE + "shared/widget-kits/nav/EditRouteMarkup.js",
@@ -64,7 +64,7 @@
       js: BASE + "shared/widget-kits/nav/RoutePointsRenderModel.js",
       css: undefined,
       globalKey: "DyniRoutePointsRenderModel",
-      deps: ["CenterDisplayMath", "RoutePointsLayout", "HtmlWidgetUtils", "NavInteractionPolicy"]
+      deps: ["CenterDisplayMath", "RoutePointsLayout", "HtmlWidgetUtils", "NavInteractionPolicy", "PlaceholderNormalize"]
     },
     RoutePointsMarkup: {
       js: BASE + "shared/widget-kits/nav/RoutePointsMarkup.js",
@@ -113,7 +113,8 @@
         "RadialTextLayout",
         "TextTileLayout",
         "CenterDisplayLayout",
-        "CenterDisplayMath"
+        "CenterDisplayMath",
+        "PlaceholderNormalize"
       ]
     },
     CompassLinearWidget: {
@@ -144,7 +145,7 @@
       js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
       css: undefined,
       globalKey: "DyniPositionCoordinateWidget",
-      deps: ["ThemeResolver", "TextLayoutEngine"]
+      deps: ["ThemeResolver", "TextLayoutEngine", "PlaceholderNormalize"]
     },
     RendererPropsWidget: {
       js: BASE + "cluster/rendering/RendererPropsWidget.js",
@@ -194,7 +195,7 @@
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
       css: undefined,
       globalKey: "DyniThreeValueTextWidget",
-      deps: ["ThemeResolver", "TextLayoutEngine"]
+      deps: ["ThemeResolver", "TextLayoutEngine", "PlaceholderNormalize"]
     },
     VoltageLinearWidget: {
       js: BASE + "widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js",
@@ -224,7 +225,7 @@
       js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
       css: undefined,
       globalKey: "DyniXteDisplayWidget",
-      deps: ["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives", "XteHighwayLayout", "TextTileLayout"]
+      deps: ["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives", "XteHighwayLayout", "TextTileLayout", "PlaceholderNormalize"]
     }
   };
 }(this));

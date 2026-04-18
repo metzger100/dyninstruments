@@ -1,7 +1,7 @@
 /**
  * Module: CenterDisplayTextWidget - Responsive center-position renderer for the nav cluster
  * Documentation: documentation/widgets/center-display.md
- * Depends: ThemeResolver, TextLayoutEngine, RadialTextLayout, TextTileLayout, CenterDisplayLayout, CenterDisplayMath
+ * Depends: ThemeResolver, TextLayoutEngine, RadialTextLayout, TextTileLayout, CenterDisplayLayout, CenterDisplayMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -22,32 +22,32 @@
     }
     return text + unit;
   }
-  function formatCoordinate(point, axis, defaultText, Helpers) {
+  function formatCoordinate(point, axis, defaultText, Helpers, placeholderNormalize) {
     const raw = point && axis === "lat" ? point.lat : point && point.lon;
     const out = String(Helpers.applyFormatter(raw, {
       formatter: "formatLonLatsDecimal",
       formatterParameters: [axis],
       default: defaultText
     }));
-    return out.trim() ? out : defaultText;
+    return placeholderNormalize.normalize(out, defaultText);
   }
-  function formatCourse(value, defaultText, Helpers) {
+  function formatCourse(value, defaultText, Helpers, placeholderNormalize) {
     const out = String(Helpers.applyFormatter(value, {
       formatter: "formatDirection",
       formatterParameters: [],
       default: defaultText
     }));
-    return out.trim() ? out : defaultText;
+    return placeholderNormalize.normalize(out, defaultText);
   }
-  function formatDistance(value, unit, defaultText, Helpers) {
+  function formatDistance(value, unit, defaultText, Helpers, placeholderNormalize) {
     const out = String(Helpers.applyFormatter(value, {
       formatter: "formatDistance",
       formatterParameters: [unit],
       default: defaultText
     }));
-    return out.trim() ? out : defaultText;
+    return placeholderNormalize.normalize(out, defaultText);
   }
-  function buildDisplayState(props, math, defaultText, Helpers) {
+  function buildDisplayState(props, math, defaultText, Helpers, placeholderNormalize) {
     const p = props || {};
     const display = (p.display && typeof p.display === "object") ? p.display : {};
     const captions = (p.captions && typeof p.captions === "object") ? p.captions : {};
@@ -86,11 +86,19 @@
 
     return {
       positionCaption: trimString(captions.position),
-      latText: formatCoordinate(position, "lat", defaultText, Helpers),
-      lonText: formatCoordinate(position, "lon", defaultText, Helpers),
+      latText: formatCoordinate(position, "lat", defaultText, Helpers, placeholderNormalize),
+      lonText: formatCoordinate(position, "lon", defaultText, Helpers, placeholderNormalize),
       rows: rows.map(function (row) {
-        const courseText = appendUnit(formatCourse(row.course, defaultText, Helpers), DEGREE_UNIT, defaultText);
-        const distanceText = appendUnit(formatDistance(row.distance, row.unit, defaultText, Helpers), row.unit, defaultText);
+        const courseText = appendUnit(
+          formatCourse(row.course, defaultText, Helpers, placeholderNormalize),
+          DEGREE_UNIT,
+          defaultText
+        );
+        const distanceText = appendUnit(
+          formatDistance(row.distance, row.unit, defaultText, Helpers, placeholderNormalize),
+          row.unit,
+          defaultText
+        );
         return {
           id: row.id,
           caption: row.caption,
@@ -317,6 +325,7 @@
     const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
     const layoutApi = Helpers.getModule("CenterDisplayLayout").create(def, Helpers);
     const math = Helpers.getModule("CenterDisplayMath").create(def, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
     function renderCanvas(canvas, props) {
       const p = props || {};
@@ -348,7 +357,7 @@
       });
       const insets = layoutApi.computeInsets(W, H);
       const contentRect = layoutApi.createContentRect(W, H, insets);
-      const displayState = buildDisplayState(p, math, defaultText, Helpers);
+      const displayState = buildDisplayState(p, math, defaultText, Helpers, placeholderNormalize);
       const frameWidthCache = Object.create(null);
       const hints = computeMeasurementHints({
         ctx: ctx,

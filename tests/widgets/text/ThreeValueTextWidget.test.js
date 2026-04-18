@@ -2,14 +2,16 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("ThreeValueTextWidget", function () {
-  function makeHelpers() {
-    const applyFormatter = vi.fn((raw, props) => {
+  function makeHelpers(options) {
+    const opts = options || {};
+    const defaultApplyFormatter = (raw, props) => {
       const fallback = (props && Object.prototype.hasOwnProperty.call(props, "default"))
         ? props.default
         : "---";
       if (raw == null || Number.isNaN(raw)) return fallback;
       return String(raw);
-    });
+    };
+    const applyFormatter = vi.fn(typeof opts.applyFormatter === "function" ? opts.applyFormatter : defaultApplyFormatter);
     const modules = {
       TextLayoutEngine: loadFresh("shared/widget-kits/text/TextLayoutEngine.js"),
       TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
@@ -82,6 +84,9 @@ describe("ThreeValueTextWidget", function () {
               };
             }
           };
+        }
+        if (id === "PlaceholderNormalize") {
+          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         }
         if (modules[id]) {
           return modules[id];
@@ -328,5 +333,24 @@ describe("ThreeValueTextWidget", function () {
       const largeRatio = parseFontPx(largeTarget.font) / item.usableHeight(item.large.height, largeInsets, largeMode.secScale);
       expect(compactRatio).toBeGreaterThanOrEqual(largeRatio * 0.9);
     });
+  });
+
+  it("normalizes formatter fallback tokens to --- for rendered values", function () {
+    const helpers = makeHelpers({
+      applyFormatter() {
+        return "--:--:--";
+      }
+    });
+    const spec = loadFresh("widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js").create({}, helpers);
+    const captured = renderCaptured(spec, 220, 140, {
+      value: 12.3,
+      caption: "SPD",
+      unit: "kn",
+      default: "---"
+    });
+
+    const textValues = captured.map((entry) => entry.text);
+    expect(textValues).toContain("---");
+    expect(textValues).not.toContain("--:--:--");
   });
 });

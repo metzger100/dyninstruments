@@ -11,6 +11,7 @@ This renderer uses the shared text compaction contract from `TextLayoutEngine.co
 - compact tiles use shared profile-owned insets and gap compaction
 - `high` / `normal` composite fits consume shared `textFillScale` for stronger compact caption/unit fill
 - `flat` mode keeps the same render contract, but now benefits from compact insets and the lowered inline minimum fit floor
+- formatted value output is normalized through `PlaceholderNormalize`; missing values render as `---`
 
 ## Module Registration
 

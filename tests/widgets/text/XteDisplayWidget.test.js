@@ -61,24 +61,28 @@ describe("XteDisplayWidget", function () {
     });
     const realTileLayout = loadFresh("shared/widget-kits/text/TextTileLayout.js").create();
 
-    const spec = loadFresh("widgets/text/XteDisplayWidget/XteDisplayWidget.js").create({}, {
-      applyFormatter(value, opts) {
-        if (opts.formatter === "formatDistance") {
+    const applyFormatter = typeof opts.applyFormatter === "function"
+      ? opts.applyFormatter
+      : function (value, formatterOptions) {
+        if (formatterOptions.formatter === "formatDistance") {
           if (typeof value !== "number" || !isFinite(value)) {
             return "---";
           }
           return (value / distanceDivisor).toFixed(2);
         }
-        if (opts.formatter === "formatDirection360") {
+        if (formatterOptions.formatter === "formatDirection360") {
           if (typeof value !== "number" || !isFinite(value)) {
             return "---";
           }
           const rounded = ((Math.round(value) % 360) + 360) % 360;
-          const leading = !!(opts.formatterParameters && opts.formatterParameters[0]);
+          const leading = !!(formatterOptions.formatterParameters && formatterOptions.formatterParameters[0]);
           return leading ? String(rounded).padStart(3, "0") : String(rounded);
         }
         return String(value);
-      },
+      };
+
+    const spec = loadFresh("widgets/text/XteDisplayWidget/XteDisplayWidget.js").create({}, {
+      applyFormatter: applyFormatter,
       setupCanvas(canvas) {
         const ctx = canvas.getContext("2d");
         const rect = canvas.getBoundingClientRect();
@@ -218,6 +222,9 @@ describe("XteDisplayWidget", function () {
               };
             }
           };
+        }
+        if (id === "PlaceholderNormalize") {
+          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         }
         throw new Error("Unexpected module: " + id);
       }
@@ -509,6 +516,29 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.valueRows[5].value).toBe("---");
     expect(harness.calls.valueRows[6].value).toBe("---");
     expect(harness.calls.valueRows[7].value).toBe("---");
+  });
+
+  it("normalizes known formatter fallback tokens to --- across all metric rows", function () {
+    const harness = createHarness({
+      applyFormatter(value, formatterOptions) {
+        const cfg = formatterOptions || {};
+        if (cfg.formatter === "formatDistance") {
+          return "    -";
+        }
+        if (cfg.formatter === "formatDirection360") {
+          return "--:--:--";
+        }
+        return cfg.default;
+      }
+    });
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeProps());
+
+    expect(harness.calls.valueRows[0].value).toBe("---");
+    expect(harness.calls.valueRows[1].value).toBe("---");
+    expect(harness.calls.valueRows[2].value).toBe("---");
+    expect(harness.calls.valueRows[3].value).toBe("---");
   });
 
   it("uses provided DST unit directly without local fallback", function () {

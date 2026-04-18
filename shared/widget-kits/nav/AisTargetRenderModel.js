@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetRenderModel - Pure normalization and display-model owner for AIS target HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: AisTargetLayout, HtmlWidgetUtils
+ * Depends: AisTargetLayout, HtmlWidgetUtils, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -48,7 +48,7 @@
     return value == null ? "" : String(value);
   }
 
-  function formatWithFormatter(args, Helpers) {
+  function formatWithFormatter(args, Helpers, placeholderNormalize) {
     const cfg = args || {};
     const options = {
       formatter: cfg.formatter,
@@ -57,7 +57,8 @@
     if (typeof cfg.defaultText !== "undefined") {
       options.default = cfg.defaultText;
     }
-    return String(Helpers.applyFormatter(cfg.value, options));
+    const text = String(Helpers.applyFormatter(cfg.value, options));
+    return placeholderNormalize.normalize(text, cfg.defaultText);
   }
 
   function resolveRenderState(args) {
@@ -140,6 +141,7 @@
   function create(def, Helpers) {
     const layoutApi = Helpers.getModule("AisTargetLayout").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
     function buildModel(args) {
       const cfg = args || {};
@@ -202,7 +204,7 @@
             formatter: "formatDistance",
             formatterParameters: [units.dst],
             defaultText: defaultText
-          }, Helpers)
+          }, Helpers, placeholderNormalize)
         },
         cpa: {
           id: "cpa",
@@ -213,7 +215,7 @@
             formatter: "formatDistance",
             formatterParameters: [units.cpa],
             defaultText: defaultText
-          }, Helpers)
+          }, Helpers, placeholderNormalize)
         },
         tcpa: {
           id: "tcpa",
@@ -224,7 +226,7 @@
             formatter: "formatDecimal",
             formatterParameters: [3, (typeof tcpaSeconds === "number" && Math.abs(tcpaSeconds) > 60) ? 0 : 2],
             defaultText: defaultText
-          }, Helpers)
+          }, Helpers, placeholderNormalize)
         },
         brg: {
           id: "brg",
@@ -235,7 +237,7 @@
             formatter: "formatDirection",
             formatterParameters: [],
             defaultText: defaultText
-          }, Helpers)
+          }, Helpers, placeholderNormalize)
         }
       };
 

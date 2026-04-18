@@ -10,6 +10,7 @@ EditRouteTextHtmlWidget is a committed HTML renderer for the nav editRoute kind.
 - committed DOM owner: createCommittedRenderer lifecycle
 - style scope: shadow-local CSS
 - policy source: runtime-injected surfacePolicy
+- formatter fallback outputs are normalized through `PlaceholderNormalize`; missing metric values render as `---`
 
 ## Interaction Contract
 

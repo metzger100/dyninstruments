@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteTextHtmlWidget - Interactive HTML renderer for nav active-route kind
  * Documentation: documentation/widgets/active-route.md
- * Depends: ActiveRouteHtmlFit, HtmlWidgetUtils
+ * Depends: ActiveRouteHtmlFit, HtmlWidgetUtils, PreparedPayloadModelCache, PlaceholderNormalize
  */
 
 (function (root, factory) {
@@ -72,16 +72,16 @@
     return policy.actions.routeEditor.openActiveRoute() !== false;
   }
 
-  function formatMetric(rawValue, formatter, formatterParameters, defaultText, Helpers) {
+  function formatMetric(rawValue, formatter, formatterParameters, defaultText, Helpers, placeholderNormalize) {
     const out = String(Helpers.applyFormatter(rawValue, {
       formatter: formatter,
       formatterParameters: formatterParameters,
       default: defaultText
     }));
-    return out.trim() ? out : defaultText;
+    return placeholderNormalize.normalize(out, defaultText);
   }
 
-  function buildRenderModel(props, shellRect, Helpers, htmlUtils) {
+  function buildRenderModel(props, shellRect, Helpers, htmlUtils, placeholderNormalize) {
     const p = ensureDisplayProps(props);
     const display = p.display;
     const captions = p.captions;
@@ -103,14 +103,16 @@
       "formatDistance",
       [remainUnit],
       defaultText,
-      Helpers
+      Helpers,
+      placeholderNormalize
     );
     const etaText = formatMetric(
       disconnect ? undefined : display.eta,
       "formatTime",
       [],
       defaultText,
-      Helpers
+      Helpers,
+      placeholderNormalize
     );
     const nextCourseText = isApproaching
       ? formatMetric(
@@ -118,7 +120,8 @@
         "formatDirection",
         [],
         defaultText,
-        Helpers
+        Helpers,
+        placeholderNormalize
       )
       : "";
 
@@ -196,6 +199,7 @@
     const htmlFit = Helpers.getModule("ActiveRouteHtmlFit").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const preparedPayloadModelCache = Helpers.getModule("PreparedPayloadModelCache").create(def, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
     function createCommittedRenderer(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
@@ -209,7 +213,7 @@
       let lastProps = null;
       const preparedPayload = preparedPayloadModelCache.createPreparedModelCache({
         buildModel: function (props, shellRect) {
-          return buildRenderModel(props, shellRect, Helpers, htmlUtils);
+          return buildRenderModel(props, shellRect, Helpers, htmlUtils, placeholderNormalize);
         }
       });
 

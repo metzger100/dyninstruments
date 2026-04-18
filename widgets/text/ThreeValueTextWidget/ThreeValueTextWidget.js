@@ -1,7 +1,7 @@
 /**
  * Module: ThreeValueTextWidget - Responsive caption/value/unit numeric canvas renderer
  * Documentation: documentation/widgets/three-elements.md
- * Depends: Helpers.applyFormatter, ThemeResolver, TextLayoutEngine
+ * Depends: Helpers.applyFormatter, ThemeResolver, TextLayoutEngine, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,6 +13,7 @@
   function create(def, Helpers) {
     const theme = Helpers.getModule("ThemeResolver");
     const text = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
     const fitCache = text.createFitCache(["high", "normal", "flat"]);
 
     function renderCanvas(canvas, props) {
@@ -34,7 +35,13 @@
       const labelWeight = tokens.font.labelWeight;
       ctx.fillStyle = color;
 
-      const valueText = String(Helpers.applyFormatter(props.value, props));
+      const defaultText = Object.prototype.hasOwnProperty.call(props || {}, "default")
+        ? String(props.default)
+        : undefined;
+      const valueText = placeholderNormalize.normalize(
+        String(Helpers.applyFormatter(props.value, props)),
+        defaultText
+      );
       const modeData = text.computeModeLayout({
         W: W,
         H: H,

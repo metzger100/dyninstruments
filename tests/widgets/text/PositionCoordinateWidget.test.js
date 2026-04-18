@@ -14,7 +14,8 @@ describe("PositionCoordinateWidget", function () {
     else globalThis.avnav = previousAvnav;
   });
 
-  function makeHelpers() {
+  function makeHelpers(options) {
+    const opts = options || {};
     const themeTokens = {
       surface: { fg: "#fff" },
       font: { family: "sans-serif", weight: 730, labelWeight: 610 }
@@ -27,7 +28,7 @@ describe("PositionCoordinateWidget", function () {
       TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
       ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js")
     };
-    const applyFormatter = vi.fn((raw, props) => {
+    const defaultApplyFormatter = (raw, props) => {
       const fpRaw = props && props.formatterParameters;
       const fp = Array.isArray(fpRaw) ? fpRaw : (typeof fpRaw === "string" ? fpRaw.split(",") : []);
       try {
@@ -48,7 +49,8 @@ describe("PositionCoordinateWidget", function () {
 
       if (raw == null || Number.isNaN(raw)) return (props && props.default) || "---";
       return String(raw);
-    });
+    };
+    const applyFormatter = vi.fn(typeof opts.applyFormatter === "function" ? opts.applyFormatter : defaultApplyFormatter);
 
     return {
       fontWeightCalls,
@@ -147,6 +149,9 @@ describe("PositionCoordinateWidget", function () {
               };
             }
           };
+        }
+        if (id === "PlaceholderNormalize") {
+          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         }
         if (modules[id]) {
           return modules[id];
@@ -687,6 +692,40 @@ describe("PositionCoordinateWidget", function () {
     expect(texts).toContain("54.1");
     expect(texts).toContain("10.9");
     expect(texts).not.toContain("NA");
+  });
+
+  it("normalizes known formatter fallback tokens for axis-rendered coordinate values", function () {
+    const helpers = makeHelpers({
+      applyFormatter(raw, props) {
+        const cfg = props || {};
+        if (cfg.formatter === "formatLonLatsDecimal") {
+          return (cfg.formatterParameters && cfg.formatterParameters[0] === "lat")
+            ? "-----"
+            : "NO DATA";
+        }
+        return cfg.default;
+      }
+    });
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
+      .create({}, helpers);
+    const ctx = createMockContext2D();
+    const canvas = createMockCanvas({
+      rectWidth: 220,
+      rectHeight: 140,
+      ctx
+    });
+
+    spec.renderCanvas(canvas, {
+      value: { lat: 54.1, lon: 10.9 },
+      default: "---",
+      ratioThresholdNormal: 1.0,
+      ratioThresholdFlat: 3.0
+    });
+
+    const texts = fillTextValues(ctx);
+    expect(texts.filter((entry) => entry === "---").length).toBeGreaterThanOrEqual(2);
+    expect(texts).not.toContain("NO DATA");
+    expect(texts).not.toContain("-----");
   });
 
   it("does not infer formatter failure from raw-equality output", function () {

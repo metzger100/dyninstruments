@@ -1,7 +1,7 @@
 /**
  * Module: XteDisplayWidget - Responsive XTE highway renderer with integrated nav metrics
  * Documentation: documentation/widgets/xte-display.md
- * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives, XteHighwayLayout, TextTileLayout
+ * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives, XteHighwayLayout, TextTileLayout, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -19,6 +19,7 @@
     const primitives = Helpers.getModule("XteHighwayPrimitives").create(def, Helpers);
     const layoutApi = Helpers.getModule("XteHighwayLayout").create(def, Helpers);
     const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
     const staticLayer = cacheFactory.createLayerCache({ layers: ["back"] });
 
     function finiteNumber(value) {
@@ -143,23 +144,27 @@
       const dtwRaw = disconnected ? undefined : p.dtw;
       const btwRaw = disconnected ? undefined : p.btw;
       const headingParams = [p.leadingZero !== false];
+      const defaultText = placeholderNormalize.normalize(undefined, p.default);
 
-      const xteDistance = Helpers.applyFormatter(
+      const xteDistanceRaw = String(Helpers.applyFormatter(
         finiteNumber(xteRaw) ? Math.abs(xteRaw) : undefined,
         {
         formatter: "formatDistance",
         formatterParameters: [p.xteUnit],
-        default: p.default
+        default: defaultText
         }
-      );
+      ));
+      const xteDistance = placeholderNormalize.normalize(xteDistanceRaw, defaultText);
 
-      const dtwDistance = Helpers.applyFormatter(dtwRaw, {
+      const dtwDistanceRaw = String(Helpers.applyFormatter(dtwRaw, {
         formatter: "formatDistance",
         formatterParameters: [p.dtwUnit],
-        default: p.default
-      });
+        default: defaultText
+      }));
+      const dtwDistance = placeholderNormalize.normalize(dtwDistanceRaw, defaultText);
 
-      const xteSide = finiteNumber(xteRaw) ? (xteRaw > 0 ? "R" : (xteRaw < 0 ? "L" : "")) : "";
+      const xteDistanceMissing = placeholderNormalize.isPlaceholder(xteDistanceRaw);
+      const xteSide = (!xteDistanceMissing && finiteNumber(xteRaw)) ? (xteRaw > 0 ? "R" : (xteRaw < 0 ? "L" : "")) : "";
       if (guidanceAvailable) {
         const xteDisplayAbs = parseNumericText(xteDistance, Math.abs(xteRaw));
         const signedDisplayXte = xteRaw < 0 ? -xteDisplayAbs : xteDisplayAbs;
@@ -168,17 +173,19 @@
         primitives.drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, xteDynamicStyle);
       }
 
-      const trackValue = Helpers.applyFormatter(cogRaw, {
+      const trackValueRaw = String(Helpers.applyFormatter(cogRaw, {
         formatter: "formatDirection360",
         formatterParameters: headingParams,
-        default: p.default
-      });
+        default: defaultText
+      }));
+      const trackValue = placeholderNormalize.normalize(trackValueRaw, defaultText);
 
-      const bearingValue = Helpers.applyFormatter(btwRaw, {
+      const bearingValueRaw = String(Helpers.applyFormatter(btwRaw, {
         formatter: "formatDirection360",
         formatterParameters: headingParams,
-        default: p.default
-      });
+        default: defaultText
+      }));
+      const bearingValue = placeholderNormalize.normalize(bearingValueRaw, defaultText);
 
       const metrics = {
         cog: { caption: p.trackCaption, value: trackValue, unit: p.trackUnit },

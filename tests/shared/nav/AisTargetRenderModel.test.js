@@ -29,6 +29,8 @@ describe("AisTargetRenderModel", function () {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
           } else if (id === "AisTargetLayoutMath") {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
+          } else if (id === "PlaceholderNormalize") {
+            moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
           } else {
             throw new Error("unexpected module: " + id);
           }
@@ -159,6 +161,35 @@ describe("AisTargetRenderModel", function () {
     expect(model.frontText).toBe("Back");
     expect(model.wrapperClasses).toContain("dyni-ais-target-branch-brg");
     expect(model.wrapperClasses.join(" ")).not.toContain("flat-rows");
+  });
+
+  it("normalizes formatter fallback tokens to --- across AIS metrics", function () {
+    const setup = createRenderModel({
+      applyFormatter(value, formatterOptions) {
+        const cfg = formatterOptions || {};
+        if (cfg.formatter === "formatDistance") {
+          return "    -";
+        }
+        if (cfg.formatter === "formatDecimal") {
+          return "-----";
+        }
+        if (cfg.formatter === "formatDirection") {
+          return "NO DATA";
+        }
+        return cfg.default;
+      }
+    });
+    const model = setup.renderModel.buildModel({
+      props: withSurfacePolicy(makeProps(), { pageId: "navpage", mode: "dispatch" }),
+      shellRect: { width: 320, height: 180 },
+      mode: "normal",
+      isVerticalCommitted: false
+    });
+
+    expect(model.metrics.dst.valueText).toBe("---");
+    expect(model.metrics.cpa.valueText).toBe("---");
+    expect(model.metrics.tcpa.valueText).toBe("---");
+    expect(model.metrics.brg.valueText).toBe("---");
   });
 
   it("keeps all four metrics visible for flat, normal, and high data modes without flat-row state classes", function () {

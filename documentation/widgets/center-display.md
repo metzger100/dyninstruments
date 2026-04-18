@@ -144,6 +144,7 @@ otherwise -> normal
 - center coordinates -> `formatLonLatsDecimal(value, axis)`
 - relation courses -> `formatDirection(course)`
 - relation distances -> `formatDistance(distance, unit)`
+- all formatter outputs are normalized through `PlaceholderNormalize`; missing metric/coordinate values render as `---`
 - relation rows render as adaptive centered caption/value groups: `label | course / distance`, so captions stay visually attached to their values while the pair stays balanced within the row when width is available
 
 Measure row behavior:

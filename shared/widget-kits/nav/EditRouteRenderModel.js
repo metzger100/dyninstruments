@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteRenderModel - Pure normalization and display model owner for edit-route HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: EditRouteLayout, HtmlWidgetUtils
+ * Depends: EditRouteLayout, HtmlWidgetUtils, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -65,12 +65,9 @@
     return Helpers.applyFormatter(value, opts);
   }
 
-  function formatMetric(value, formatter, formatterParameters, defaultText, Helpers) {
+  function formatMetric(value, formatter, formatterParameters, defaultText, Helpers, placeholderNormalize) {
     const text = String(callFormatter(value, formatter, formatterParameters, defaultText, Helpers));
-    if (text.trim()) {
-      return text;
-    }
-    return String(callFormatter(undefined, formatter, formatterParameters, defaultText, Helpers));
+    return placeholderNormalize.normalize(text, defaultText);
   }
 
   function buildResizeSignatureParts(model) {
@@ -108,6 +105,7 @@
     const layoutApi = Helpers.getModule("EditRouteLayout").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const navInteractionPolicy = Helpers.getModule("NavInteractionPolicy").create(def, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
     function buildModel(args) {
       const cfg = args || {};
@@ -159,28 +157,42 @@
         metrics.pts = {
           id: "pts",
           labelText: metricCaptions.pts,
-          valueText: formatMetric(domain.pointCount, "formatDecimal", [3], defaultText, Helpers),
+          valueText: formatMetric(domain.pointCount, "formatDecimal", [3], defaultText, Helpers, placeholderNormalize),
           unitText: "",
           hasUnit: false
         };
         metrics.dst = {
           id: "dst",
           labelText: metricCaptions.dst,
-          valueText: formatMetric(domain.totalDistance, "formatDistance", [metricUnits.dst], defaultText, Helpers),
+          valueText: formatMetric(domain.totalDistance, "formatDistance", [metricUnits.dst], defaultText, Helpers, placeholderNormalize),
           unitText: metricUnits.dst,
           hasUnit: metricHasUnit.dst
         };
         metrics.rte = {
           id: "rte",
           labelText: metricCaptions.rte,
-          valueText: formatMetric(isActiveRoute ? domain.remainingDistance : undefined, "formatDistance", [metricUnits.rte], defaultText, Helpers),
+          valueText: formatMetric(
+            isActiveRoute ? domain.remainingDistance : undefined,
+            "formatDistance",
+            [metricUnits.rte],
+            defaultText,
+            Helpers,
+            placeholderNormalize
+          ),
           unitText: metricUnits.rte,
           hasUnit: metricHasUnit.rte
         };
         metrics.eta = {
           id: "eta",
           labelText: metricCaptions.eta,
-          valueText: formatMetric(isActiveRoute ? domain.eta : undefined, "formatTime", [], defaultText, Helpers),
+          valueText: formatMetric(
+            isActiveRoute ? domain.eta : undefined,
+            "formatTime",
+            [],
+            defaultText,
+            Helpers,
+            placeholderNormalize
+          ),
           unitText: "",
           hasUnit: false
         };

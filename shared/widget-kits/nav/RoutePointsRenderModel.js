@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsRenderModel - Pure normalization and display model owner for route-points HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: CenterDisplayMath, RoutePointsLayout, HtmlWidgetUtils
+ * Depends: CenterDisplayMath, RoutePointsLayout, HtmlWidgetUtils, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -56,34 +56,43 @@
     );
   }
 
-  function formatLatLonInfo(point, defaultText, Helpers) {
-    return String(Helpers.applyFormatter({ lat: point.lat, lon: point.lon }, {
+  function formatLatLonInfo(point, defaultText, Helpers, placeholderNormalize) {
+    const text = String(Helpers.applyFormatter({ lat: point.lat, lon: point.lon }, {
       formatter: "formatLonLats",
       formatterParameters: [],
       default: defaultText
     }));
+    return placeholderNormalize.normalize(text, defaultText);
   }
 
-  function formatCourseDistanceInfo(previousPoint, currentPoint, useRhumbLine, distanceUnit, courseUnit, Helpers, centerMath) {
+  function formatCourseDistanceInfo(args) {
+    const cfg = args || {};
+    const previousPoint = cfg.previousPoint;
+    const currentPoint = cfg.currentPoint;
+    const distanceUnit = cfg.distanceUnit;
+    const courseUnit = cfg.courseUnit;
+
     if (!previousPoint || !currentPoint) {
       return PLACEHOLDER_VALUE + courseUnit + "/" + PLACEHOLDER_VALUE + distanceUnit;
     }
 
-    const leg = centerMath.computeCourseDistance(previousPoint, currentPoint, useRhumbLine === true);
+    const leg = cfg.centerMath.computeCourseDistance(previousPoint, currentPoint, cfg.useRhumbLine === true);
     if (!leg) {
       return PLACEHOLDER_VALUE + courseUnit + "/" + PLACEHOLDER_VALUE + distanceUnit;
     }
 
-    const courseText = String(Helpers.applyFormatter(leg.course, {
+    const courseTextRaw = String(cfg.Helpers.applyFormatter(leg.course, {
       formatter: "formatDirection",
       formatterParameters: [],
-      default: PLACEHOLDER_VALUE
+      default: cfg.defaultText
     }));
-    const distanceText = String(Helpers.applyFormatter(leg.distance, {
+    const distanceTextRaw = String(cfg.Helpers.applyFormatter(leg.distance, {
       formatter: "formatDistance",
       formatterParameters: [distanceUnit],
-      default: PLACEHOLDER_VALUE
+      default: cfg.defaultText
     }));
+    const courseText = cfg.placeholderNormalize.normalize(courseTextRaw, cfg.defaultText);
+    const distanceText = cfg.placeholderNormalize.normalize(distanceTextRaw, cfg.defaultText);
 
     return courseText + courseUnit + "/" + distanceText + distanceUnit;
   }
@@ -91,7 +100,7 @@
   function buildRowInfo(args) {
     const cfg = args || {};
     if (cfg.showLatLon === true) {
-      return formatLatLonInfo(cfg.currentPoint, cfg.defaultText, cfg.Helpers);
+      return formatLatLonInfo(cfg.currentPoint, cfg.defaultText, cfg.Helpers, cfg.placeholderNormalize);
     }
     if (cfg.index <= 0) {
       return PLACEHOLDER_VALUE + cfg.courseUnit + "/" + PLACEHOLDER_VALUE + cfg.distanceUnit;
@@ -99,15 +108,7 @@
     if (!cfg.previousValid || !cfg.currentValid) {
       return PLACEHOLDER_VALUE + cfg.courseUnit + "/" + PLACEHOLDER_VALUE + cfg.distanceUnit;
     }
-    return formatCourseDistanceInfo(
-      cfg.previousPoint,
-      cfg.currentPoint,
-      cfg.useRhumbLine,
-      cfg.distanceUnit,
-      cfg.courseUnit,
-      cfg.Helpers,
-      cfg.centerMath
-    );
+    return formatCourseDistanceInfo(cfg);
   }
 
   function buildResizeSignatureParts(model) {
@@ -208,6 +209,7 @@
     const layoutApi = Helpers.getModule("RoutePointsLayout").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const navInteractionPolicy = Helpers.getModule("NavInteractionPolicy").create(def, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
     function buildModel(args) {
       const cfg = args || {};
@@ -235,7 +237,7 @@
         : null;
       const defaultText = Object.prototype.hasOwnProperty.call(props, "default")
         ? String(props.default)
-        : PLACEHOLDER_VALUE;
+        : placeholderNormalize.normalize(undefined, undefined);
       const distanceUnit = toText(formatting.distanceUnit, htmlUtils);
       const courseUnit = toText(formatting.courseUnit, htmlUtils);
       const waypointsText = toText(formatting.waypointsText, htmlUtils);
@@ -305,7 +307,8 @@
           courseUnit: courseUnit,
           defaultText: defaultText,
           Helpers: Helpers,
-          centerMath: centerMath
+          centerMath: centerMath,
+          placeholderNormalize: placeholderNormalize
         });
 
         rows.push({

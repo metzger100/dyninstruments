@@ -71,6 +71,9 @@ describe("AisTargetTextHtmlWidget", function () {
         if (id === "AisTargetLayoutMath") {
           return loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
         }
+        if (id === "PlaceholderNormalize") {
+          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
+        }
         throw new Error("unexpected module: " + id);
       }
     };

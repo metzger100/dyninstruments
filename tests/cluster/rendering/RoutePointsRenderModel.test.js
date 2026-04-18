@@ -77,6 +77,9 @@ describe("RoutePointsRenderModel", function () {
           else if (id === "RoutePointsRowGeometry") {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js");
           }
+          else if (id === "PlaceholderNormalize") {
+            moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
+          }
           else {
             throw new Error("unexpected module: " + id);
           }
@@ -219,12 +222,12 @@ describe("RoutePointsRenderModel", function () {
     expect(model.activeWaypointKey).not.toBe("idx:0");
   });
 
-  it("formats lat/lon rows through formatLonLats and preserves formatter placeholder output", function () {
+  it("formats lat/lon rows through formatLonLats and normalizes known formatter placeholders", function () {
     const applyFormatter = vi.fn(function (value, formatterOptions) {
       const cfg = formatterOptions || {};
       if (cfg.formatter === "formatLonLats") {
         if (!value || !Number.isFinite(value.lat) || !Number.isFinite(value.lon)) {
-          return "LL-PLACEHOLDER";
+          return "-----";
         }
         return "LL:" + value.lat + "," + value.lon;
       }
@@ -256,10 +259,40 @@ describe("RoutePointsRenderModel", function () {
     });
 
     expect(model.points[0].infoText).toBe("LL:54.1,10.4");
-    expect(model.points[1].infoText).toBe("LL-PLACEHOLDER");
+    expect(model.points[1].infoText).toBe("---");
     expect(applyFormatter).toHaveBeenCalledWith(
       expect.objectContaining({ lat: undefined, lon: 10.5 }),
       expect.objectContaining({ formatter: "formatLonLats" })
+    );
+  });
+
+  it("normalizes course and distance formatter fallback tokens while preserving compound row format", function () {
+    const applyFormatter = vi.fn(function (value, formatterOptions) {
+      const cfg = formatterOptions || {};
+      if (cfg.formatter === "formatDirection") {
+        return "--:--";
+      }
+      if (cfg.formatter === "formatDistance") {
+        return "    -";
+      }
+      return cfg.default;
+    });
+    const renderModel = createRenderModel({ applyFormatter: applyFormatter });
+    const model = renderModel.buildModel({
+      props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
+      shellRect: { width: 320, height: 180 },
+      isVerticalCommitted: false
+    });
+
+    expect(model.points[0].infoText).toBe("--°/--nm");
+    expect(model.points[1].infoText).toBe("---°/---nm");
+    expect(applyFormatter).toHaveBeenCalledWith(
+      expect.any(Number),
+      expect.objectContaining({ formatter: "formatDirection" })
+    );
+    expect(applyFormatter).toHaveBeenCalledWith(
+      expect.any(Number),
+      expect.objectContaining({ formatter: "formatDistance" })
     );
   });
 
