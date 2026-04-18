@@ -18,13 +18,19 @@ describe("ThemeModel", function () {
     const surfaceBorder = model.getTokenDefinition("surface.border");
     const surfaceBg = model.getTokenDefinition("surface.bg");
     const fontFamily = model.getTokenDefinition("font.family");
+    const fontFamilyMono = model.getTokenDefinition("font.familyMono");
 
     expect(surfaceBorder.inputVar).toBe("--dyni-border");
     expect(surfaceBorder.outputVar).toBe("--dyni-theme-surface-border");
     expect(surfaceBg.inputVar).toBe("--dyni-bg");
     expect(surfaceBg.outputVar).toBe("--dyni-theme-surface-bg");
     expect(fontFamily.outputVar).toBe("--dyni-theme-font-family");
-    expect(model.getOutputTokenDefinitions()).toHaveLength(6);
+    expect(fontFamily.default.startsWith('"Roboto"')).toBe(true);
+    expect(fontFamilyMono.inputVar).toBe("--dyni-font-mono");
+    expect(fontFamilyMono.outputVar).toBe("--dyni-theme-font-family-mono");
+    expect(fontFamilyMono.default).toBe('"Roboto Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace');
+    expect(model.getTokenDefinitions().some((tokenDef) => tokenDef.path === "font.familyMono")).toBe(true);
+    expect(model.getOutputTokenDefinitions()).toHaveLength(7);
   });
 
   it("contains expected preset override spot values", function () {

@@ -16,7 +16,8 @@
 
   const DEFAULT_PRESET_NAME = "default";
   const SUPPORTED_MODES = ["day", "night"];
-  const DEFAULT_FONT_STACK = '"Inter","SF Pro Text",-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
+  const DEFAULT_FONT_STACK = '"Roboto","Inter","SF Pro Text",-apple-system,"Segoe UI","Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
+  const DEFAULT_MONO_STACK = '"Roboto Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace';
 
   const MERGE_ORDER = Object.freeze([
     "rootInputOverride",
@@ -42,6 +43,7 @@
     defineToken("surface.bg", "--dyni-bg", "color", "white", { night: "black" }, "--dyni-theme-surface-bg"),
     defineToken("surface.border", "--dyni-border", "color", "rgba(0, 0, 0, 0.30)", { night: "rgba(252, 11, 11, 0.18)" }, "--dyni-theme-surface-border"),
     defineToken("font.family", "--dyni-font", "string", DEFAULT_FONT_STACK, undefined, "--dyni-theme-font-family"),
+    defineToken("font.familyMono", "--dyni-font-mono", "string", DEFAULT_MONO_STACK, undefined, "--dyni-theme-font-family-mono"),
     defineToken("font.weight", "--dyni-font-weight", "number", 700, undefined, "--dyni-theme-font-weight"),
     defineToken("font.labelWeight", "--dyni-label-weight", "number", 700, undefined, "--dyni-theme-font-label-weight"),
 

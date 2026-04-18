@@ -1,12 +1,62 @@
 /* dyninstruments — plugin-wide styles (clustered build)
    Scope styling only to widgets of this plugin. */
 
+@font-face {
+  font-family: "Roboto";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local("Roboto"),
+    local("Roboto Regular"),
+    url("assets/fonts/Roboto-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Roboto";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local("Roboto Bold"),
+    local("Roboto-Bold"),
+    url("assets/fonts/Roboto-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Roboto Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local("Roboto Mono"),
+    local("RobotoMono-Regular"),
+    url("assets/fonts/RobotoMono-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Roboto Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local("Roboto Mono Bold"),
+    local("RobotoMono-Bold"),
+    url("assets/fonts/RobotoMono-Bold.woff2") format("woff2");
+}
+
 /* 0) Theme output consumption (root-owned surface contract). */
 .widget.dyniplugin {
   color: var(--dyni-theme-surface-fg);
   background-color: var(--dyni-theme-surface-bg);
   border-color: var(--dyni-theme-surface-border);
   font-family: var(--dyni-theme-font-family);
+}
+
+/* Tabular numeric rendering class for aligned digit columns. */
+.dyni-tabular {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--dyni-theme-font-family-mono), var(--dyni-theme-font-family);
 }
 
 /* 1) Hide AvNav's native header/value ONLY inside our widgets. */

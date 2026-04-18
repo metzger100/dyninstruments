@@ -12,12 +12,20 @@ Theme ownership is split into two module-shaped components:
 
 Both are registered with apiShape module and do not use create().
 
+## Exposed Semantic Token Paths
+
+- `font.family`
+- `font.familyMono`
+- `font.weight`
+- `font.labelWeight`
+
 ## Public Input Variables (Migrated Shared Surface/Typography)
 
 - --dyni-fg
 - --dyni-bg
 - --dyni-border
 - --dyni-font
+- --dyni-font-mono
 - --dyni-font-weight
 - --dyni-label-weight
 
@@ -27,6 +35,7 @@ Both are registered with apiShape module and do not use create().
 - --dyni-theme-surface-bg
 - --dyni-theme-surface-border
 - --dyni-theme-font-family
+- --dyni-theme-font-family-mono
 - --dyni-theme-font-weight
 - --dyni-theme-font-label-weight
 

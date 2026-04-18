@@ -240,6 +240,20 @@ describe("ThemeResolver", function () {
     expect(second.colors.pointer).toBe("#222222");
   });
 
+  it("returns a different object when inline mono font input var changes", function () {
+    const rootEl = createRoot();
+    rootEl.style.setProperty("--dyni-font-mono", '"Roboto Mono", monospace');
+    installComputedStyle(new Map([[rootEl, rootEl.style]]));
+
+    const { resolver } = createResolver();
+    const first = resolver.resolveForRoot(rootEl);
+    rootEl.style.setProperty("--dyni-font-mono", '"Fira Code", monospace');
+    const second = resolver.resolveForRoot(rootEl);
+
+    expect(first).not.toBe(second);
+    expect(second.font.familyMono).toBe('"Fira Code", monospace');
+  });
+
   it("returns a different object when committed root class signature changes", function () {
     const rootEl = createRoot();
     installComputedStyle(new Map([[rootEl, rootEl.style]]));
@@ -304,8 +318,10 @@ describe("ThemeResolver", function () {
 
     expect(Array.isArray(tokenDefs)).toBe(true);
     expect(tokenDefs.some((tokenDef) => tokenDef.path === "surface.border" && tokenDef.inputVar === "--dyni-border")).toBe(true);
+    expect(tokenDefs.some((tokenDef) => tokenDef.path === "font.familyMono" && tokenDef.inputVar === "--dyni-font-mono")).toBe(true);
     expect(outputTokenDefs.some((tokenDef) => tokenDef.outputVar === "--dyni-theme-font-family")).toBe(true);
-    expect(outputTokenDefs).toHaveLength(6);
+    expect(outputTokenDefs.some((tokenDef) => tokenDef.outputVar === "--dyni-theme-font-family-mono")).toBe(true);
+    expect(outputTokenDefs).toHaveLength(7);
   });
 
   it("throws when root is missing", function () {

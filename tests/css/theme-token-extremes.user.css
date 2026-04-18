@@ -47,6 +47,8 @@
   --dyni-linear-label-font: 0.2;
 
   /* Font */
+  --dyni-font: "Atkinson Hyperlegible", "Segoe UI", sans-serif;
+  --dyni-font-mono: "JetBrains Mono", "SF Mono", "Menlo", monospace;
   --dyni-font-weight: 900;
   --dyni-label-weight: 300;
 

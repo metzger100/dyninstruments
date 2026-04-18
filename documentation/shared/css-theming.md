@@ -23,6 +23,7 @@ Canonical shared inputs for migrated surface/typography tokens:
 - --dyni-bg
 - --dyni-border
 - --dyni-font
+- --dyni-font-mono
 - --dyni-font-weight
 - --dyni-label-weight
 
@@ -36,6 +37,7 @@ Mandatory materialized outputs:
 - --dyni-theme-surface-bg
 - --dyni-theme-surface-border
 - --dyni-theme-font-family
+- --dyni-theme-font-family-mono
 - --dyni-theme-font-weight
 - --dyni-theme-font-label-weight
 
@@ -51,6 +53,15 @@ The plugin root is the canonical light-DOM surface consumer:
 - font-family: --dyni-theme-font-family
 
 Root does not set one global font-weight.
+
+## Tabular Class
+
+`.dyni-tabular` is the canonical class for tabular numeric rendering:
+
+- `font-variant-numeric: tabular-nums`
+- `font-family: var(--dyni-theme-font-family-mono), var(--dyni-theme-font-family)`
+
+Use this class on spans that require column-stable digits (for example coordinate rows and stable-digit numeric cells).
 
 ## Shadow CSS Rule
 
