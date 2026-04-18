@@ -10,7 +10,7 @@ Shared gauge logic is split into focused core modules:
 - `RadialTickMath` for major/minor tick angle generation
 - `RadialCanvasPrimitives` for low-level canvas primitives
 - `RadialFrameRenderer` for radial tick/label/frame drawing
-- `RadialTextLayout` for text fitting/drawing and disconnect overlay
+- `RadialTextLayout` for text fitting/drawing
 - `RadialValueMath` for numeric/range/geometry helpers
 - `TextLayoutPrimitives` for binary-fit and inline draw primitives
 - `TextLayoutComposite` for reusable multi-row text layouts
@@ -170,7 +170,7 @@ Color-token flow:
 ## RadialTextLayout API
 
 `RadialTextLayout.create()` returns shared text helpers:
-`setFont`, `measureTextWidth`, `fitTextPx`, `fitSingleTextPx`, `measureValueUnitFit`, `drawCaptionMax`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`, `drawDisconnectOverlay`.
+`setFont`, `measureTextWidth`, `fitTextPx`, `fitSingleTextPx`, `measureValueUnitFit`, `drawCaptionMax`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawInlineCapValUnit`, `drawThreeRowsBlock`.
 
 Key signatures:
 
@@ -215,7 +215,7 @@ Optional `overrides` fields:
 `TextLayoutEngine.create(def, Helpers)` returns:
 
 - Cache/mode helpers: `createFitCache`, `clearFitCache`, `makeFitCacheKey`, `readFitCache`, `writeFitCache`, `resolveFitCache`, `computeModeLayout`, `computeInsets`
-- Primitive text helpers: `setFont`, `fitSingleLineBinary`, `fitMultiRowBinary`, `fitValueUnitRow`, `fitInlineTriplet`, `drawInlineTriplet`, `drawDisconnectOverlay`
+- Primitive text helpers: `setFont`, `fitSingleLineBinary`, `fitMultiRowBinary`, `fitValueUnitRow`, `fitInlineTriplet`, `drawInlineTriplet`
 - Composite block helpers: `fitThreeRowBlock`, `drawThreeRowBlock`, `fitValueUnitCaptionRows`, `drawValueUnitCaptionRows`, `fitTwoRowsWithHeader`, `drawTwoRowsWithHeader`
 
 ## SemicircleRadialEngine API
@@ -316,7 +316,6 @@ Responsive ownership for the full-circle family:
 | `rebuildLayer` | `(layerCtx, layerName, state, props, api) => void` | no | Static-layer rebuild callback |
 | `drawFrame` | `(state, props, api) => void` | no | Per-frame dynamic draw callback |
 | `drawMode` | `{flat?,high?,normal?}` | no | Mode-specific text/layout callback map |
-| `drawDisconnect` | boolean | no | Set `false` to skip shared disconnect overlay |
 
 ### Callback API helpers
 

@@ -48,7 +48,7 @@ SpeedRadialWidget/DepthRadialWidget/TemperatureRadialWidget/VoltageRadialWidget
 3. `SemicircleRadialLayout.computeInsets()` / `computeLayout()` for shared responsive geometry, label metrics, and mode boxes
 4. Arc ring + sectors + pointer + ticks + labels
 5. `SemicircleRadialTextLayout.drawModeText()` for flat/high/normal caption-value-unit layout
-6. Disconnect overlay
+6. State-screen branch: for non-data kinds (for example `disconnect === true`), clear and draw shared state-screen instead of gauge content
 
 Pointer and sector rendering in shared gauge paths use direct scalar token values passed at callsites.
 
@@ -107,7 +107,7 @@ Each wrapper defines:
 Removed from wrappers:
 
 - text fitting and draw helpers
-- disconnect overlay helpers
+- state-screen branching helpers
 - tick/value-angle helpers
 - sector conversion helpers
 - semicircle geometry/mode boilerplate

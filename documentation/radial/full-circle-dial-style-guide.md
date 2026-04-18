@@ -174,14 +174,14 @@ Compass target marker (`CompassRadialWidget`, per-frame):
 - Marker angle relative to rotated card: `markerCourse - heading`
 - Marker dimensions: `len=markerLen`, `width=markerWidth`
 
-## Disconnect Overlay
+## Canvas State-Screens
 
-Shared behavior from `RadialTextLayout.drawDisconnectOverlay()`:
-- Trigger: `props.disconnect === true` and `drawDisconnect !== false`
-- Overlay: fill full canvas with `globalAlpha=0.20` and resolved text color
-- Label: centered `NO DATA`
-- Label font size: `max(12, floor(min(W, H) * 0.18))`
-- Label typography: resolved font family + `theme.font.labelWeight`
+Full-circle dials resolve state-screens before layer rebuild/draw callbacks:
+
+- `disconnected` candidate: `p.disconnect === true`
+- fallback candidate: `data`
+
+When `kind !== "data"`, the engine clears the canvas and draws the shared `StateScreenCanvasOverlay` label (`GPS Lost` for `disconnected`). The legacy `drawDisconnect` guard path no longer exists.
 
 ## Related
 

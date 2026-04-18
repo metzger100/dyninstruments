@@ -156,8 +156,7 @@
       fitValueUnitCaptionRows: composite.fitValueUnitCaptionRows,
       drawValueUnitCaptionRows: composite.drawValueUnitCaptionRows,
       fitTwoRowsWithHeader: composite.fitTwoRowsWithHeader,
-      drawTwoRowsWithHeader: composite.drawTwoRowsWithHeader,
-      drawDisconnectOverlay: primitive.drawDisconnectOverlay
+      drawTwoRowsWithHeader: composite.drawTwoRowsWithHeader
     };
   }
 

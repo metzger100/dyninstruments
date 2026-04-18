@@ -148,6 +148,9 @@ describe("WindRadialWidget", function () {
           if (id === "CanvasLayerCache") return layerCache;
           if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
           if (id === "LayoutRectMath") return layoutRectMath;
+          if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+          if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+          if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
           if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
@@ -314,6 +317,9 @@ describe("WindRadialWidget", function () {
           if (id === "CanvasLayerCache") return layerCache;
           if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
           if (id === "LayoutRectMath") return layoutRectMath;
+          if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+          if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+          if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
           if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
@@ -467,6 +473,9 @@ describe("WindRadialWidget", function () {
           if (id === "CanvasLayerCache") return layerCache;
           if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
           if (id === "LayoutRectMath") return layoutRectMath;
+          if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+          if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+          if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
           if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {

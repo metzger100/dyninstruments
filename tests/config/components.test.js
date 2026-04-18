@@ -57,7 +57,14 @@ describe("config/components.js", function () {
     expect(components.FullCircleRadialLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
     expect(components.FullCircleRadialEngine.globalKey).toBe("DyniFullCircleRadialEngine");
     expect(components.FullCircleRadialEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialEngine.js");
-    expect(components.FullCircleRadialEngine.deps).toEqual(["RadialToolkit", "CanvasLayerCache", "FullCircleRadialLayout"]);
+    expect(components.FullCircleRadialEngine.deps).toEqual([
+      "RadialToolkit",
+      "CanvasLayerCache",
+      "FullCircleRadialLayout",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenCanvasOverlay"
+    ]);
     expect(components.FullCircleRadialTextLayout.globalKey).toBe("DyniFullCircleRadialTextLayout");
     expect(components.FullCircleRadialTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialTextLayout.js");
     expect(components.SemicircleRadialLayout.globalKey).toBe("DyniSemicircleRadialLayout");
@@ -74,7 +81,10 @@ describe("config/components.js", function () {
       "LinearCanvasPrimitives",
       "LinearGaugeMath",
       "LinearGaugeLayout",
-      "LinearGaugeTextLayout"
+      "LinearGaugeTextLayout",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenCanvasOverlay"
     ]);
     expect(components.ThemeModel.globalKey).toBe("DyniThemeModel");
     expect(components.ThemeModel.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemeModel.js");
@@ -208,7 +218,14 @@ describe("config/components.js", function () {
     expect(components.XteHighwayLayout.globalKey).toBe("DyniXteHighwayLayout");
     expect(components.XteHighwayLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/xte/XteHighwayLayout.js");
     expect(components.XteHighwayLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
-    expect(components.SemicircleRadialEngine.deps).toEqual(["RadialToolkit", "SemicircleRadialLayout", "SemicircleRadialTextLayout"]);
+    expect(components.SemicircleRadialEngine.deps).toEqual([
+      "RadialToolkit",
+      "SemicircleRadialLayout",
+      "SemicircleRadialTextLayout",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenCanvasOverlay"
+    ]);
     expect(components.SpeedRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
     expect(components.SpeedLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.DepthLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
@@ -223,15 +240,32 @@ describe("config/components.js", function () {
       "XteHighwayPrimitives",
       "XteHighwayLayout",
       "TextTileLayout",
-      "PlaceholderNormalize"
+      "PlaceholderNormalize",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenCanvasOverlay"
     ]);
     expect(components.WindRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
     expect(components.CompassRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
     expect(components.WindLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.CompassLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.RadialToolkit.deps).toContain("ThemeResolver");
-    expect(components.ThreeValueTextWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine", "PlaceholderNormalize"]);
-    expect(components.PositionCoordinateWidget.deps).toEqual(["ThemeResolver", "TextLayoutEngine", "PlaceholderNormalize"]);
+    expect(components.ThreeValueTextWidget.deps).toEqual([
+      "ThemeResolver",
+      "TextLayoutEngine",
+      "PlaceholderNormalize",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenCanvasOverlay"
+    ]);
+    expect(components.PositionCoordinateWidget.deps).toEqual([
+      "ThemeResolver",
+      "TextLayoutEngine",
+      "PlaceholderNormalize",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenCanvasOverlay"
+    ]);
     expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
     expect(components.ActiveRouteTextHtmlWidget.globalKey).toBe("DyniActiveRouteTextHtmlWidget");
     expect(components.ActiveRouteTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js");

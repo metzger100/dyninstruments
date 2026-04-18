@@ -158,7 +158,7 @@ Mapper rule:
 - Resize widget through `flat`, `normal`, and `high` layouts
 - Confirm pointer tracks live value/angle updates
 - Confirm day/night theme token colors apply (ring, labels, pointer, optional sectors)
-- Confirm `disconnect` overlay behavior (`NO DATA`) is correct
+- Confirm `disconnect === true` shows the shared state-screen (`GPS Lost`) on a cleared canvas
 
 ## Adding a New Kind to an Existing Dial
 
@@ -176,7 +176,7 @@ Decision guide:
 - [ ] Kind catalog tuple added in `cluster/rendering/ClusterKindCatalog.js` with `surface: "canvas-dom"`
 - [ ] Mapper returns `renderer: "NewDialWidget"` with declarative, normalized props
 - [ ] Layout behavior verified in `flat`, `normal`, `high`
-- [ ] Pointer tracking, theme colors, and disconnect overlay verified
+- [ ] Pointer tracking, theme colors, and disconnect state-screen behavior verified
 
 ## Related
 

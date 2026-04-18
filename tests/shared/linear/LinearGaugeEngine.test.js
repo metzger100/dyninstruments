@@ -123,6 +123,9 @@ describe("LinearGaugeEngine", function () {
         return target;
       },
       getModule(id) {
+        if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+        if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+        if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
         if (id === "CanvasLayerCache") return cacheMod;
         if (id === "LinearCanvasPrimitives") return primitivesModule;
         if (id === "ResponsiveScaleProfile") return responsiveScaleProfileMod;
@@ -958,5 +961,28 @@ describe("LinearGaugeEngine", function () {
 
     expect(shortHarness.calls.pointer[0].opts.depth).not.toBe(longHarness.calls.pointer[0].opts.depth);
     expect(shortHarness.calls.pointer[0].opts.side).toBe(longHarness.calls.pointer[0].opts.side);
+  });
+
+  it("renders disconnected state-screen before linear draw pipeline", function () {
+    const harness = createHarness();
+    const renderer = harness.engine.createRenderer({
+      rawValueKey: "value",
+      rangeDefaults: { min: 0, max: 100 },
+      rangeProps: { min: "min", max: "max" },
+      tickProps: { major: "major", minor: "minor", showEndLabels: "showEndLabels" }
+    });
+    const ctx = createMockContext2D();
+    const canvas = createMockCanvas({ rectWidth: 280, rectHeight: 220, ctx: ctx });
+
+    renderer(canvas, { disconnect: true, value: 40, min: 0, max: 100, major: 20, minor: 10 });
+
+    expect(harness.calls.track).toHaveLength(0);
+    expect(harness.calls.ticks).toHaveLength(0);
+    expect(harness.calls.pointer).toHaveLength(0);
+    expect(
+      ctx.calls
+        .filter((entry) => entry.name === "fillText")
+        .map((entry) => String(entry.args[0]))
+    ).toContain("GPS Lost");
   });
 });

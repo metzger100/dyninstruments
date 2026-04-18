@@ -175,7 +175,7 @@ Current shared utilities include:
 - `RadialTextLayout.setFont()`
 - `RadialTextLayout.measureTextWidth()`
 - `RadialTextLayout.fitSingleTextPx()`
-- `RadialTextLayout.drawDisconnectOverlay()`
+- `StateScreenCanvasOverlay.drawStateScreen()`
 - `Helpers.applyFormatter()`
 - `Helpers.getNightModeState()`
 

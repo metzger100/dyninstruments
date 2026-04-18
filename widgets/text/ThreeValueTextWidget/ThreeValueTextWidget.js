@@ -1,7 +1,7 @@
 /**
  * Module: ThreeValueTextWidget - Responsive caption/value/unit numeric canvas renderer
  * Documentation: documentation/widgets/three-elements.md
- * Depends: Helpers.applyFormatter, ThemeResolver, TextLayoutEngine, PlaceholderNormalize
+ * Depends: Helpers.applyFormatter, ThemeResolver, TextLayoutEngine, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,6 +14,9 @@
     const theme = Helpers.getModule("ThemeResolver");
     const text = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
+    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
+    const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
     const fitCache = text.createFitCache(["high", "normal", "flat"]);
 
     function renderCanvas(canvas, props) {
@@ -34,6 +37,22 @@
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       ctx.fillStyle = color;
+      const stateKind = stateScreenPrecedence.pickFirst([
+        { kind: "disconnected", when: props.disconnect === true },
+        { kind: "data", when: true }
+      ]);
+      if (stateKind !== stateScreenLabels.KINDS.DATA) {
+        stateScreenCanvasOverlay.drawStateScreen({
+          ctx: ctx,
+          W: W,
+          H: H,
+          family: family,
+          color: color,
+          labelWeight: labelWeight,
+          kind: stateKind
+        });
+        return;
+      }
 
       const defaultText = Object.prototype.hasOwnProperty.call(props || {}, "default")
         ? String(props.default)
@@ -163,16 +182,6 @@
         });
       }
 
-      if (props.disconnect) {
-        text.drawDisconnectOverlay({
-          ctx: ctx,
-          W: W,
-          H: H,
-          family: family,
-          color: color,
-          labelWeight: labelWeight
-        });
-      }
     }
 
     function translateFunction() { return {}; }

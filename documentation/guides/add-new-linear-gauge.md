@@ -208,7 +208,8 @@ Manual checks:
 - Resize: `high`, `normal`, `flat`
 - Pointer tracks value and clamps at axis edges
 - Sector behavior matches selected profile
-- Day/night colors and disconnect overlay are correct
+- Day/night colors are correct
+- `disconnect === true` shows the shared state-screen (`GPS Lost`) on a cleared canvas (no gauge visible behind it)
 
 ## Checklist
 

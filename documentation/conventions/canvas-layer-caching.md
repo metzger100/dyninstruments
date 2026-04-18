@@ -23,7 +23,7 @@ Cache these static elements:
 Do not cache these dynamic elements:
 - Live values (`heading`, `speed`, `angle`, sensor values)
 - Live text output (formatted value/caption/unit)
-- Disconnect/no-data overlay state
+- State-screen branch conditions (`disconnected`, `noTarget`, etc.)
 - Marker/needle positions driven by live values
 
 ## Cache Key Design Rules
@@ -37,7 +37,7 @@ Include in static key:
 
 Exclude from static key:
 - Live data values (`heading`, `speed`, `angle`, current reading)
-- Disconnect state
+- State-screen-driving state (for example `disconnect`)
 - Per-frame marker/needle angles or positions
 - Per-frame formatter outputs
 
@@ -59,7 +59,8 @@ cache.ensureLayer(canvas, staticKey, function (layerCtx, layerName, layerCanvas)
 });
 
 cache.blit(targetCtx);
-// dynamic pointer/text/overlay drawing happens after blit
+// dynamic pointer/text drawing happens after blit
+// or render the shared state-screen and skip normal drawing for non-data kinds
 ```
 
 `CanvasLayerCache` rebuilds when:

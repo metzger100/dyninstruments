@@ -17,14 +17,14 @@ This renderer uses the shared text compaction contract from `TextLayoutEngine.co
 - Registered as `PositionCoordinateWidget` in `config/components/registry-widgets.js` (assembled by `config/components.js`)
 - Routed from `NavMapper` for `kind: "positionBoat"` and `kind: "positionWp"`
 - Routed directly from `VesselMapper` for `kind: "dateTime"` and `kind: "timeStatus"` via `displayVariant`
-- Depends on shared utilities: `ThemeResolver` + `TextLayoutEngine`
+- Depends on shared utilities: `ThemeResolver`, `TextLayoutEngine`, `StateScreenPrecedence`, `StateScreenCanvasOverlay`
 - No widget-to-widget dependency on `ThreeValueTextWidget`
 - `flat` mode renders one-line `caption/value/unit` directly in this widget
 - `normal`/`high` modes render stacked coordinates:
 - Header row: caption (left), unit (right)
 - Body row 1: latitude
 - Body row 2: longitude
-- Typography is theme-driven per render: coordinate/value text uses `theme.font.weight`, header caption/unit and disconnect overlay use `theme.font.labelWeight`
+- Typography is theme-driven per render: coordinate/value text uses `theme.font.weight`, header caption/unit and state-screen labels use `theme.font.labelWeight`
 - Uses layout editables: `ratioThresholdNormal`, `ratioThresholdFlat`, `captionUnitScale`
 
 ## Props
@@ -38,7 +38,7 @@ This renderer uses the shared text compaction contract from `TextLayoutEngine.co
 | `ratioThresholdNormal` | number | `1.0` | `ratio < threshold -> high` |
 | `ratioThresholdFlat` | number | `3.0` | `ratio > threshold -> flat` |
 | `captionUnitScale` | number | `0.8` | Header scale relative to coordinate lines |
-| `disconnect` | boolean | `false` | Draws `NO DATA` overlay |
+| `disconnect` | boolean | `false` | Renders `disconnected` state-screen (`GPS Lost`) and suppresses coordinate rows |
 | `displayVariant` | string | `"position"` | Renderer-owned variant contract: `"position"`, `"dateTime"`, or `"timeStatus"` |
 | `coordinateFormatter` | string/function | `"formatLonLatsDecimal"` | Stacked-mode coordinate formatter (`lat`/`lon` axis passed as extra parameter) |
 | `coordinateFormatterParameters` | array/string | `[]` | Base params for stacked-mode formatter before appending axis |

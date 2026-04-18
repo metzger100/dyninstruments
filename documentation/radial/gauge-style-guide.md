@@ -194,14 +194,19 @@ Text fit contract for semicircle gauges:
 Semicircle gauges follow the shared cache convention through `CanvasLayerCache`.
 
 - Cache static background elements (ring/arc, ticks, static label assets).
-- Keep dynamic elements uncached (live pointer/value text, disconnect overlay).
+- Keep dynamic elements uncached (live pointer/value text, state-screen overlays).
 - Build keys from geometry + style/theme tokens + typography + label signatures.
 - Exclude live data values and per-frame marker/pointer positions from keys.
 - Full convention: [../conventions/canvas-layer-caching.md](../conventions/canvas-layer-caching.md).
 
-## Disconnect Overlay
+## Canvas State-Screens
 
-When `props.disconnect === true`, `drawDisconnectOverlay()` renders a dim overlay with centered `NO DATA`.
+Semicircle gauges resolve state-screens before layout/draw work:
+
+- `disconnected` candidate: `p.disconnect === true`
+- fallback candidate: `data`
+
+When `kind !== "data"`, the engine clears the canvas and renders the shared `StateScreenCanvasOverlay` label (`GPS Lost` for `disconnected`).
 
 ## Related
 

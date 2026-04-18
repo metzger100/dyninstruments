@@ -1,7 +1,7 @@
 /**
  * Module: FullCircleRadialEngine - Shared renderer pipeline for full-circle dial widgets
  * Documentation: documentation/radial/full-circle-dial-engine.md
- * Depends: RadialToolkit, CanvasLayerCache, FullCircleRadialLayout
+ * Depends: RadialToolkit, CanvasLayerCache, FullCircleRadialLayout, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -66,6 +66,9 @@
     const GU = Helpers.getModule("RadialToolkit").create(def, Helpers);
     const layerCacheApi = Helpers.getModule("CanvasLayerCache").create(def, Helpers);
     const layoutApi = Helpers.getModule("FullCircleRadialLayout").create(def, Helpers);
+    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
+    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
+    const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
     const draw = GU.draw;
     const text = GU.text;
     const value = GU.value;
@@ -95,10 +98,15 @@
         const theme = GU.theme.resolveForRoot(rootEl);
         const valueWeight = theme.font.weight;
         const labelWeight = theme.font.labelWeight;
-
-        ctx.clearRect(0, 0, W, H);
         const family = theme.font.family;
         const color = theme.surface.fg;
+        const stateKind = stateScreenPrecedence.pickFirst([{ kind: "disconnected", when: p.disconnect === true }, { kind: "data", when: true }]);
+
+        ctx.clearRect(0, 0, W, H);
+        if (stateKind !== stateScreenLabels.KINDS.DATA) {
+          stateScreenCanvasOverlay.drawStateScreen({ ctx: ctx, W: W, H: H, family: family, color: color, labelWeight: labelWeight, kind: stateKind });
+          return;
+        }
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
 
@@ -280,9 +288,6 @@
           modeRenderer(state, p, api);
         }
 
-        if (cfg.drawDisconnect !== false && p.disconnect) {
-          text.drawDisconnectOverlay(ctx, W, H, family, color, null, labelWeight);
-        }
       };
     };
 

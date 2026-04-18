@@ -23,7 +23,7 @@
 | TD-004 | 2026-02-20 | Unified speed formatting behavior and removed duplicate widget-local logic; graphic speed rendering now routes through shared formatter boundary. |
 | TD-005 | 2026-02-20 | Unified mode detection in text widgets via `RadialValueMath.computeMode`; duplicate local ratio mode logic removed there. |
 | TD-006 | 2026-02-20 | Removed local `clamp` copies in text widgets; both now consume `RadialValueMath.clamp`. |
-| TD-007 | 2026-02-20 | Removed local text helper duplicates by reusing `RadialTextLayout.setFont`, `RadialTextLayout.drawDisconnectOverlay`, and `RadialTextLayout.fitSingleTextPx`. |
+| TD-007 | 2026-02-20 | Removed local text helper duplicates by reusing shared text helpers (`RadialTextLayout.setFont`, `RadialTextLayout.fitSingleTextPx`). Legacy `drawDisconnectOverlay` was later retired in favor of shared state-screen rendering. |
 | TD-009 | 2026-02-20 | Annotated intentional fallback catches in `ClusterRendererRouter`, `runtime/helpers`, `RadialValueMath`, `TemperatureRadialWidget`, `VoltageRadialWidget`, and `PositionCoordinateWidget`; production empty-catch findings cleared. |
 | TD-010 | 2026-02-20 | Removed widget-to-widget dependency: `PositionCoordinateWidget` no longer depends on `ThreeValueTextWidget`; dependency graph now follows layer rules. |
 | TD-008 | 2026-02-20 | Removed direct `avnav.api` access from `SpeedRadialWidget`, `TemperatureRadialWidget`, `VoltageRadialWidget`, `WindRadialWidget`, and `PositionCoordinateWidget`; all formatter access now goes through `Helpers.applyFormatter` with mapper-provided formatter props. |

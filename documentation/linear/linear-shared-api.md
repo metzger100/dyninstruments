@@ -190,7 +190,8 @@ const renderCanvas = engine.createRenderer({
 ## Runtime Behavior
 
 - Static cached layer: track, sectors, ticks, labels.
-- Dynamic per frame: pointer, caption/value/unit text, disconnect overlay.
+- Dynamic per frame: pointer plus caption/value/unit text.
+- `disconnect === true` short-circuits normal drawing and renders the shared canvas state-screen (`GPS Lost`) on a cleared canvas.
 - Cache key excludes live values and includes geometry/theme/tick/sector signatures.
 - `showEndLabels` defaults to false unless mapper sets it true.
 - Compact tiles now get smaller insets/gaps from `LinearGaugeLayout`, slimmer default track/pointer/marker geometry, and larger fitted text ceilings via `state.textFillScale`.

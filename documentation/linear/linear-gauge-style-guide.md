@@ -19,6 +19,7 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 - Compass linear supports waypoint marker display (`markerCourse`) relative to current heading.
 - Wind linear (`angleTrueLinear`, `angleApparentLinear`) renders angle+speed together and supports mirrored layline sectors.
 - Wind linear overrides the generic `normal` / `high` text geometry: `normal` uses the stacked dual block below the gauge, and `high` uses inline top metric + middle gauge + inline bottom metric.
+- Canvas state-screen behavior is engine-owned: `p.disconnect === true` resolves to `disconnected`, clears the canvas, and renders shared `StateScreenCanvasOverlay` (`GPS Lost`) before any gauge drawing.
 
 ## Supported Profiles
 

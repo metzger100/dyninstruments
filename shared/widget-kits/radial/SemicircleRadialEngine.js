@@ -1,7 +1,7 @@
 /**
  * Module: SemicircleRadialEngine - Shared renderer for semicircle gauge widgets
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: RadialToolkit, SemicircleRadialLayout, SemicircleRadialTextLayout
+ * Depends: RadialToolkit, SemicircleRadialLayout, SemicircleRadialTextLayout, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -23,6 +23,9 @@
     const GU = Helpers.getModule("RadialToolkit").create(def, Helpers);
     const layoutApi = Helpers.getModule("SemicircleRadialLayout").create(def, Helpers);
     const textLayout = Helpers.getModule("SemicircleRadialTextLayout").create(def, Helpers);
+    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
+    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
+    const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
     const text = GU.text;
     const value = GU.value;
     const draw = GU.draw;
@@ -129,6 +132,13 @@
         const rootEl = Helpers.requirePluginRoot(canvas);
         const theme = GU.theme.resolveForRoot(rootEl);
         const paint = setupTextPaint(theme, ctx);
+        const labelWeight = theme.font.labelWeight;
+        const stateKind = stateScreenPrecedence.pickFirst([{ kind: "disconnected", when: p.disconnect === true }, { kind: "data", when: true }]);
+        ctx.clearRect(0, 0, W, H);
+        if (stateKind !== stateScreenLabels.KINDS.DATA) {
+          stateScreenCanvasOverlay.drawStateScreen({ ctx: ctx, W: W, H: H, family: paint.family, color: paint.color, labelWeight: labelWeight, kind: stateKind });
+          return;
+        }
         const mode = layoutApi.computeMode(
           W,
           H,
@@ -145,7 +155,6 @@
           responsive: insets.responsive
         });
         const valueWeight = theme.font.weight;
-        const labelWeight = theme.font.labelWeight;
         const family = paint.family;
         const color = paint.color;
         const caption = String(p.caption).trim();
@@ -165,8 +174,6 @@
         const angleNow = Number.isFinite(clampedValue)
           ? value.valueToAngle(clampedValue, range.min, range.max, arc, true)
           : NaN;
-
-        ctx.clearRect(0, 0, W, H);
 
         draw.drawArcRing(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, arc.startDeg, arc.endDeg, {
           lineWidth: theme.radial.ring.arcLineWidth
@@ -235,9 +242,6 @@
           secScale: value.clamp(p.captionUnitScale, 0.3, 3.0)
         }, fitCache);
 
-        if (p.disconnect) {
-          text.drawDisconnectOverlay(ctx, W, H, family, color, null, labelWeight);
-        }
       };
     }
 

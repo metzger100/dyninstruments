@@ -1,7 +1,7 @@
 /**
  * Module: XteDisplayWidget - Responsive XTE highway renderer with integrated nav metrics
  * Documentation: documentation/widgets/xte-display.md
- * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives, XteHighwayLayout, TextTileLayout, PlaceholderNormalize
+ * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives, XteHighwayLayout, TextTileLayout, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -20,6 +20,9 @@
     const layoutApi = Helpers.getModule("XteHighwayLayout").create(def, Helpers);
     const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
+    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
+    const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
     const staticLayer = cacheFactory.createLayerCache({ layers: ["back"] });
 
     function finiteNumber(value) {
@@ -59,6 +62,15 @@
       return raw.trim();
     }
 
+    function resolveStateKind(props) {
+      const p = props || {};
+      return stateScreenPrecedence.pickFirst([
+        { kind: "disconnected", when: p.disconnect === true },
+        { kind: "noTarget", when: typeof p.wpName === "string" && p.wpName.trim() === "" },
+        { kind: "data", when: true }
+      ]);
+    }
+
     function renderCanvas(canvas, props) {
       const p = props || {};
       const setup = Helpers.setupCanvas(canvas);
@@ -78,6 +90,19 @@
       const family = theme.font.family;
       const valueWeight = theme.font.weight;
       const labelWeight = theme.font.labelWeight;
+      const stateKind = resolveStateKind(p);
+      if (stateKind !== stateScreenLabels.KINDS.DATA) {
+        stateScreenCanvasOverlay.drawStateScreen({
+          ctx: ctx,
+          W: W,
+          H: H,
+          family: family,
+          color: textColor,
+          labelWeight: labelWeight,
+          kind: stateKind
+        });
+        return;
+      }
       const lineWidthFactor = xteTheme.lineWidthFactor > 0 ? xteTheme.lineWidthFactor : 1;
       const boatSizeFactor = xteTheme.boatSizeFactor > 0 ? xteTheme.boatSizeFactor : 1;
 
@@ -96,9 +121,7 @@
         boatSizeFactor: boatSizeFactor
       };
 
-      const disconnected = p.disconnect === true;
       const guidanceAvailable =
-        !disconnected &&
         finiteNumber(p.xte) &&
         finiteNumber(p.cog) &&
         finiteNumber(p.dtw) &&
@@ -109,7 +132,7 @@
       const mode = layoutApi.computeMode(W, H, normalThreshold, flatThreshold);
       const insets = layoutApi.computeInsets(W, H);
       const contentRect = layoutApi.createContentRect(W, H, insets);
-      const wpName = disconnected ? "" : trimWaypointName(p.wpName);
+      const wpName = trimWaypointName(p.wpName);
       const reserveNameSpace = (p.showWpName !== false) && !!wpName;
       const layout = layoutApi.computeLayout({
         contentRect: contentRect,
@@ -139,10 +162,10 @@
       });
       staticLayer.blit(ctx);
 
-      const xteRaw = disconnected ? undefined : p.xte;
-      const cogRaw = disconnected ? undefined : p.cog;
-      const dtwRaw = disconnected ? undefined : p.dtw;
-      const btwRaw = disconnected ? undefined : p.btw;
+      const xteRaw = p.xte;
+      const cogRaw = p.cog;
+      const dtwRaw = p.dtw;
+      const btwRaw = p.btw;
       const headingParams = [p.leadingZero !== false];
       const defaultText = placeholderNormalize.normalize(undefined, p.default);
 

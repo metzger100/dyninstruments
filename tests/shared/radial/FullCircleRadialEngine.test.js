@@ -79,6 +79,9 @@ describe("FullCircleRadialEngine", function () {
         return target;
       },
       getModule(id) {
+        if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+        if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+        if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
         if (id === "CanvasLayerCache") {
           return cacheMod;
         }
@@ -392,5 +395,32 @@ describe("FullCircleRadialEngine", function () {
     renderer(canvas, { variant: "x" });
 
     expect(harness.calls.meta).toEqual([8, 8]);
+  });
+
+  it("renders disconnected state-screen before frame callbacks", function () {
+    const harness = createHarness();
+    let drawFrameCalls = 0;
+    let rebuildCalls = 0;
+    const renderer = harness.engine.createRenderer({
+      cacheLayers: ["face"],
+      rebuildLayer() {
+        rebuildCalls += 1;
+      },
+      drawFrame() {
+        drawFrameCalls += 1;
+      }
+    });
+    const ctx = createMockContext2D();
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 160, ctx: ctx });
+
+    renderer(canvas, { disconnect: true });
+
+    expect(drawFrameCalls).toBe(0);
+    expect(rebuildCalls).toBe(0);
+    expect(
+      ctx.calls
+        .filter((entry) => entry.name === "fillText")
+        .map((entry) => String(entry.args[0]))
+    ).toContain("GPS Lost");
   });
 });

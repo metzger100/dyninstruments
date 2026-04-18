@@ -158,6 +158,7 @@
         "TextTileLayout",
         "CenterDisplayLayout",
         "CenterDisplayMath",
+        "CenterDisplayStateAdapter",
         "PlaceholderNormalize"
       ]
     },
@@ -189,7 +190,7 @@
       js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
       css: undefined,
       globalKey: "DyniPositionCoordinateWidget",
-      deps: ["ThemeResolver", "TextLayoutEngine", "PlaceholderNormalize"]
+      deps: ["ThemeResolver", "TextLayoutEngine", "PlaceholderNormalize", "StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
     },
     RendererPropsWidget: {
       js: BASE + "cluster/rendering/RendererPropsWidget.js",
@@ -239,7 +240,7 @@
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
       css: undefined,
       globalKey: "DyniThreeValueTextWidget",
-      deps: ["ThemeResolver", "TextLayoutEngine", "PlaceholderNormalize"]
+      deps: ["ThemeResolver", "TextLayoutEngine", "PlaceholderNormalize", "StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
     },
     VoltageLinearWidget: {
       js: BASE + "widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js",
@@ -269,7 +270,17 @@
       js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
       css: undefined,
       globalKey: "DyniXteDisplayWidget",
-      deps: ["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives", "XteHighwayLayout", "TextTileLayout", "PlaceholderNormalize"]
+      deps: [
+        "RadialToolkit",
+        "CanvasLayerCache",
+        "XteHighwayPrimitives",
+        "XteHighwayLayout",
+        "TextTileLayout",
+        "PlaceholderNormalize",
+        "StateScreenLabels",
+        "StateScreenPrecedence",
+        "StateScreenCanvasOverlay"
+      ]
     }
   };
 }(this));

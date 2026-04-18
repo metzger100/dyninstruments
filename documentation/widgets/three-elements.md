@@ -21,7 +21,14 @@ ThreeValueTextWidget: {
   js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
   css: undefined,
   globalKey: "DyniThreeValueTextWidget",
-  deps: ["ThemeResolver", "TextLayoutEngine"]
+  deps: [
+    "ThemeResolver",
+    "TextLayoutEngine",
+    "PlaceholderNormalize",
+    "StateScreenLabels",
+    "StateScreenPrecedence",
+    "StateScreenCanvasOverlay"
+  ]
 }
 ```
 
@@ -40,7 +47,7 @@ Used by `ClusterWidget` as default renderer.
 | `ratioThresholdNormal` | number | `1.0` | Ratio below this -> `high` |
 | `ratioThresholdFlat` | number | `3.0` | Ratio above this -> `flat` |
 | `captionUnitScale` | number | `0.8` | Caption/unit font ratio vs value |
-| `disconnect` | boolean | `false` | Show `NO DATA` overlay |
+| `disconnect` | boolean | `false` | Render `disconnected` state-screen (`GPS Lost`) and suppress normal content |
 
 ## Layout Modes
 
@@ -84,14 +91,15 @@ otherwise -> normal
 | `TextLayoutEngine.fitThreeRowBlock(...)` | Fit `high` mode caption/value/unit rows |
 | `TextLayoutEngine.fitValueUnitCaptionRows(...)` | Fit `normal` mode value+unit + caption rows |
 | `TextLayoutEngine.fitInlineTriplet(...)` | Fit `flat` mode inline caption/value/unit row |
-| `TextLayoutEngine.drawDisconnectOverlay(...)` | Draw overlay text |
+| `StateScreenPrecedence.pickFirst(...)` | Resolve `disconnected` vs `data` state |
+| `StateScreenCanvasOverlay.drawStateScreen(...)` | Draw shared canvas state-screen label |
 
 ## Themeable Typography
 
 - Theme tokens are resolved per render via `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas))`.
 - Primary numeric value text uses `theme.font.weight`.
 - Caption and unit text uses `theme.font.labelWeight`.
-- Disconnect overlay text uses `theme.font.labelWeight`.
+- State-screen label text uses `theme.font.labelWeight`.
 
 ## Performance
 

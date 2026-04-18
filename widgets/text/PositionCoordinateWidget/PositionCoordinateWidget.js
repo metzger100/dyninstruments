@@ -1,7 +1,7 @@
 /**
  * Module: PositionCoordinateWidget - Stacked latitude/longitude renderer for nav position kinds
  * Documentation: documentation/widgets/position-coordinates.md
- * Depends: ThemeResolver, TextLayoutEngine, PlaceholderNormalize, Helpers.applyFormatter, Helpers.setupCanvas, Helpers.requirePluginRoot
+ * Depends: ThemeResolver, TextLayoutEngine, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay, Helpers.applyFormatter, Helpers.setupCanvas, Helpers.requirePluginRoot
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -148,6 +148,9 @@
     const theme = Helpers.getModule("ThemeResolver");
     const text = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
+    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
+    const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
     const fitCache = text.createFitCache(["flat", "stacked"]);
     function renderCanvas(canvas, props) {
       const p = resolveVariantProps(props);
@@ -167,6 +170,22 @@
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       ctx.fillStyle = color;
+      const stateKind = stateScreenPrecedence.pickFirst([
+        { kind: "disconnected", when: p.disconnect === true },
+        { kind: "data", when: true }
+      ]);
+      if (stateKind !== stateScreenLabels.KINDS.DATA) {
+        stateScreenCanvasOverlay.drawStateScreen({
+          ctx: ctx,
+          W: W,
+          H: H,
+          family: family,
+          color: color,
+          labelWeight: labelWeight,
+          kind: stateKind
+        });
+        return;
+      }
       const modeData = text.computeModeLayout({
         W: W, H: H,
         ratioThresholdNormal: p.ratioThresholdNormal,
@@ -289,15 +308,6 @@
           topText: latText, bottomText: lonText,
           family: family,
           valueWeight: valueWeight,
-          labelWeight: labelWeight
-        });
-      }
-      if (p.disconnect) {
-        text.drawDisconnectOverlay({
-          ctx: ctx,
-          W: W, H: H,
-          family: family,
-          color: color,
           labelWeight: labelWeight
         });
       }

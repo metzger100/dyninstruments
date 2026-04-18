@@ -1,5 +1,5 @@
 /**
- * Module: RadialTextLayout - Shared text fitting and overlay helpers for gauge widgets
+ * Module: RadialTextLayout - Shared text fitting helpers for gauge widgets
  * Documentation: documentation/radial/gauge-shared-api.md
  * Depends: RadialTextFitting
  */
@@ -196,22 +196,6 @@
       }
     }
 
-    function drawDisconnectOverlay(ctx, W, H, family, color, label, labelWeight) {
-      ctx.save();
-      ctx.globalAlpha = 0.20;
-      ctx.fillStyle = color;
-      ctx.fillRect(0, 0, W, H);
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = color;
-      const px = Math.max(12, Math.floor(Math.min(W, H) * 0.18));
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      setFont(ctx, px, labelWeight, family);
-      // dyni-lint-disable-next-line hardcoded-runtime-default -- Disconnect overlay owns the documented default label when callers do not supply one.
-      ctx.fillText(label || "NO DATA", Math.floor(W / 2), Math.floor(H / 2));
-      ctx.restore();
-    }
-
     return {
       id: "RadialTextLayout",
       version: "0.1.0",
@@ -224,8 +208,7 @@
       drawValueUnitWithFit: drawValueUnitWithFit,
       fitInlineCapValUnit: fitInlineCapValUnit,
       drawInlineCapValUnit: drawInlineCapValUnit,
-      drawThreeRowsBlock: drawThreeRowsBlock,
-      drawDisconnectOverlay: drawDisconnectOverlay
+      drawThreeRowsBlock: drawThreeRowsBlock
     };
   }
 

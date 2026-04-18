@@ -22,7 +22,7 @@
       js: BASE + "shared/widget-kits/radial/FullCircleRadialEngine.js",
       css: undefined,
       globalKey: "DyniFullCircleRadialEngine",
-      deps: ["RadialToolkit", "CanvasLayerCache", "FullCircleRadialLayout"]
+      deps: ["RadialToolkit", "CanvasLayerCache", "FullCircleRadialLayout", "StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
     },
     FullCircleRadialLayout: {
       js: BASE + "shared/widget-kits/radial/FullCircleRadialLayout.js",
@@ -39,7 +39,17 @@
       js: BASE + "shared/widget-kits/linear/LinearGaugeEngine.js",
       css: undefined,
       globalKey: "DyniLinearGaugeEngine",
-      deps: ["RadialToolkit", "CanvasLayerCache", "LinearCanvasPrimitives", "LinearGaugeMath", "LinearGaugeLayout", "LinearGaugeTextLayout"]
+      deps: [
+        "RadialToolkit",
+        "CanvasLayerCache",
+        "LinearCanvasPrimitives",
+        "LinearGaugeMath",
+        "LinearGaugeLayout",
+        "LinearGaugeTextLayout",
+        "StateScreenLabels",
+        "StateScreenPrecedence",
+        "StateScreenCanvasOverlay"
+      ]
     },
     RadialToolkit: {
       js: BASE + "shared/widget-kits/radial/RadialToolkit.js",
@@ -51,7 +61,7 @@
       js: BASE + "shared/widget-kits/radial/SemicircleRadialEngine.js",
       css: undefined,
       globalKey: "DyniSemicircleRadialEngine",
-      deps: ["RadialToolkit", "SemicircleRadialLayout", "SemicircleRadialTextLayout"]
+      deps: ["RadialToolkit", "SemicircleRadialLayout", "SemicircleRadialTextLayout", "StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
     },
     SemicircleRadialLayout: {
       js: BASE + "shared/widget-kits/radial/SemicircleRadialLayout.js",

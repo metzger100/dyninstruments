@@ -88,6 +88,15 @@ describe("ThreeValueTextWidget", function () {
         if (id === "PlaceholderNormalize") {
           return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         }
+        if (id === "StateScreenLabels") {
+          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+        }
+        if (id === "StateScreenPrecedence") {
+          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+        }
+        if (id === "StateScreenCanvasOverlay") {
+          return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
+        }
         if (modules[id]) {
           return modules[id];
         }
@@ -352,5 +361,21 @@ describe("ThreeValueTextWidget", function () {
     const textValues = captured.map((entry) => entry.text);
     expect(textValues).toContain("---");
     expect(textValues).not.toContain("--:--:--");
+  });
+
+  it("renders disconnected state-screen instead of numeric content", function () {
+    const helpers = makeHelpers();
+    const spec = loadFresh("widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js").create({}, helpers);
+    const captured = renderCaptured(spec, 220, 140, {
+      value: 12.3,
+      caption: "SPD",
+      unit: "kn",
+      disconnect: true,
+      default: "---"
+    });
+
+    const textValues = captured.map((entry) => entry.text);
+    expect(textValues).toContain("GPS Lost");
+    expect(textValues).not.toContain("12.3");
   });
 });

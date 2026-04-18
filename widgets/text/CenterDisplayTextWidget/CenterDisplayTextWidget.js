@@ -1,7 +1,7 @@
 /**
  * Module: CenterDisplayTextWidget - Responsive center-position renderer for the nav cluster
  * Documentation: documentation/widgets/center-display.md
- * Depends: ThemeResolver, TextLayoutEngine, RadialTextLayout, TextTileLayout, CenterDisplayLayout, CenterDisplayMath, PlaceholderNormalize
+ * Depends: ThemeResolver, TextLayoutEngine, RadialTextLayout, TextTileLayout, CenterDisplayLayout, CenterDisplayMath, CenterDisplayStateAdapter, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,15 +13,8 @@
   const hasOwn = Object.prototype.hasOwnProperty;
   const DEGREE_UNIT = "\u00b0";
 
-  function trimString(value) {
-    return value == null ? "" : String(value).trim();
-  }
-  function appendUnit(text, unit, defaultText) {
-    if (!unit || text === defaultText) {
-      return text;
-    }
-    return text + unit;
-  }
+  function trimString(value) { return value == null ? "" : String(value).trim(); }
+  function appendUnit(text, unit, defaultText) { return (!unit || text === defaultText) ? text : text + unit; }
   function formatCoordinate(point, axis, defaultText, Helpers, placeholderNormalize) {
     const raw = point && axis === "lat" ? point.lat : point && point.lon;
     const out = String(Helpers.applyFormatter(raw, {
@@ -121,9 +114,7 @@
     }
     return width;
   }
-  function computeResponsiveLineMaxPx(rect, ratio, fillScale) {
-    return Math.max(1, Math.floor(rect.h * ratio * fillScale));
-  }
+  function computeResponsiveLineMaxPx(rect, ratio, fillScale) { return Math.max(1, Math.floor(rect.h * ratio * fillScale)); }
   function computeRelationValueMaxPx(layout, textFillScale) {
     const rowRects = layout.rowRects;
     let maxPx = 0;
@@ -325,6 +316,7 @@
     const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
     const layoutApi = Helpers.getModule("CenterDisplayLayout").create(def, Helpers);
     const math = Helpers.getModule("CenterDisplayMath").create(def, Helpers);
+    const centerDisplayStateAdapter = Helpers.getModule("CenterDisplayStateAdapter").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
     function renderCanvas(canvas, props) {
@@ -346,6 +338,17 @@
       const color = tokens.surface.fg;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
+      if (centerDisplayStateAdapter.renderStateScreenIfNeeded({
+        ctx: ctx,
+        W: W,
+        H: H,
+        props: p,
+        family: family,
+        color: color,
+        labelWeight: labelWeight
+      })) {
+        return;
+      }
       const defaultText = String(p.default);
       const modeData = text.computeModeLayout({
         W: W,
@@ -399,9 +402,7 @@
     }
 
     function translateFunction() { return {}; }
-    function getVerticalShellSizing() {
-      return { kind: "ratio", aspectRatio: 7 / 8 };
-    }
+    function getVerticalShellSizing() { return { kind: "ratio", aspectRatio: 7 / 8 }; }
     return {
       id: "CenterDisplayTextWidget",
       wantsHideNativeHead: true,

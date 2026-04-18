@@ -277,19 +277,6 @@
       }
     }
 
-    function primitiveDrawDisconnectOverlay(args) {
-      const cfg = args || {};
-      text.drawDisconnectOverlay(
-        cfg.ctx,
-        cfg.W,
-        cfg.H,
-        cfg.family,
-        cfg.color,
-        cfg.label,
-        cfg.labelWeight
-      );
-    }
-
     return {
       id: "TextLayoutPrimitives",
       setFont: primitiveSetFont,
@@ -297,8 +284,7 @@
       fitMultiRowBinary: fitMultiRowBinary,
       fitValueUnitRow: fitValueUnitRow,
       fitInlineTriplet: fitInlineTriplet,
-      drawInlineTriplet: drawInlineTriplet,
-      drawDisconnectOverlay: primitiveDrawDisconnectOverlay
+      drawInlineTriplet: drawInlineTriplet
     };
   }
 

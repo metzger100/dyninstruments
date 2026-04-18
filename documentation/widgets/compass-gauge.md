@@ -34,7 +34,7 @@ CompassRadialWidget: {
 | `compassRadialRatioThresholdFlat` | number | `2.2` | Ratio above -> `flat` |
 | `captionUnitScale` | number | `0.8` | Caption/unit ratio vs value |
 | `default` | string | `"---"` | Fallback text for invalid heading |
-| `disconnect` | boolean | `false` | Draw `NO DATA` overlay |
+| `disconnect` | boolean | `false` | Show shared `disconnected` state-screen (`GPS Lost`) and skip dial rendering |
 
 ## Compass Dial Drawing (via `RadialToolkit.draw`)
 
@@ -62,7 +62,7 @@ Rendering order keeps labels on top for readability.
 - Heading rotation application for the cached face (`drawCachedLayer(..., {rotationDeg})`)
 - Fixed lubber pointer
 - Optional target marker
-- Live value text + `disconnect` overlay
+- Live value text in `data` state; shared state-screen on non-data kinds
 
 ### Rotation Model
 

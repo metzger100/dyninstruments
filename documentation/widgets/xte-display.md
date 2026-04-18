@@ -14,7 +14,13 @@ Graphic navigation widget with a 2.5D highway view for cross-track guidance and 
 
 The highway frame follows the same solid-line visual language as the radial and linear instruments: foreground road rails, horizon line, clean perspective bars, and a pointer-colored live guidance overlay without translucent lane-surface shading.
 
-Renderer keeps the highway frame visible when data is missing. Missing/disconnected metrics render with the configured placeholder (default `---`) after `PlaceholderNormalize` normalization, and the moving XTE indicator is suppressed until the full guidance set is valid again.
+Renderer now resolves canvas state-screens before highway drawing:
+
+- `disconnected` when `p.disconnect === true` (label: `GPS Lost`)
+- `noTarget` when `typeof p.wpName === "string" && p.wpName.trim() === ""` (label: `No Waypoint`)
+- `data` otherwise
+
+In `data`, the highway frame stays visible when guidance fields are missing; missing metrics still normalize to `---` and the moving XTE indicator is suppressed until guidance inputs are valid.
 
 Layout ownership:
 
@@ -30,7 +36,17 @@ XteDisplayWidget: {
   js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
   css: undefined,
   globalKey: "DyniXteDisplayWidget",
-  deps: ["RadialToolkit", "CanvasLayerCache", "XteHighwayPrimitives", "XteHighwayLayout", "TextTileLayout"]
+  deps: [
+    "RadialToolkit",
+    "CanvasLayerCache",
+    "XteHighwayPrimitives",
+    "XteHighwayLayout",
+    "TextTileLayout",
+    "PlaceholderNormalize",
+    "StateScreenLabels",
+    "StateScreenPrecedence",
+    "StateScreenCanvasOverlay"
+  ]
 }
 ```
 
@@ -43,7 +59,7 @@ XteDisplayWidget: {
 | `dtw` | number | — | Distance to waypoint |
 | `btw` | number | — | Bearing to waypoint |
 | `wpName` | string | `""` | Waypoint name |
-| `disconnect` | boolean | `false` | Suppress live guidance and force placeholder metric values |
+| `disconnect` | boolean | `false` | Render `disconnected` state-screen and suppress normal highway/metric content |
 | `xteCaption` | string | `"XTE"` | Caption for XTE field |
 | `trackCaption` | string | `"COG"` | Caption for track field |
 | `dtwCaption` | string | `"DST"` | Caption for distance field |
@@ -60,7 +76,7 @@ XteDisplayWidget: {
 
 ## Guidance Data Contract
 
-Widget always renders the static highway frame.
+In `data` state, the widget always renders the static highway frame.
 
 The moving XTE indicator renders only if all are valid:
 
@@ -68,9 +84,8 @@ The moving XTE indicator renders only if all are valid:
 - finite `cog`
 - finite `dtw`
 - finite `btw`
-- `disconnect !== true`
 
-Otherwise the widget shows placeholder text for missing/disconnected values and skips the dynamic highway indicator.
+Otherwise (while still in `data`) the widget shows placeholder text for missing values and skips the dynamic highway indicator.
 
 ## Theme Token Usage
 

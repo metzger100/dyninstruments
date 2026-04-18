@@ -120,6 +120,12 @@
       css: undefined,
       globalKey: "DyniCenterDisplayMath"
     },
+    CenterDisplayStateAdapter: {
+      js: BASE + "shared/widget-kits/text/CenterDisplayStateAdapter.js",
+      css: undefined,
+      globalKey: "DyniCenterDisplayStateAdapter",
+      deps: ["StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
+    },
     HtmlWidgetUtils: {
       js: BASE + "shared/widget-kits/html/HtmlWidgetUtils.js",
       css: undefined,

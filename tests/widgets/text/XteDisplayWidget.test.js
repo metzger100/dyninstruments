@@ -226,6 +226,15 @@ describe("XteDisplayWidget", function () {
         if (id === "PlaceholderNormalize") {
           return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         }
+        if (id === "StateScreenLabels") {
+          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+        }
+        if (id === "StateScreenPrecedence") {
+          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+        }
+        if (id === "StateScreenCanvasOverlay") {
+          return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
+        }
         throw new Error("Unexpected module: " + id);
       }
     });
@@ -254,6 +263,12 @@ describe("XteDisplayWidget", function () {
       xteRatioThresholdNormal: 0.85,
       xteRatioThresholdFlat: 2.3
     }, overrides || {});
+  }
+
+  function fillTextValues(ctx) {
+    return ctx.calls
+      .filter((entry) => entry.name === "fillText")
+      .map((entry) => String(entry.args[0]));
   }
 
   it("selects flat/normal/high modes from aspect ratio", function () {
@@ -510,12 +525,22 @@ describe("XteDisplayWidget", function () {
 
     harness.spec.renderCanvas(canvas, makeProps({ disconnect: true }));
     expect(harness.calls.overlays).toBe(0);
-    expect(harness.calls.staticDraws).toHaveLength(2);
+    expect(harness.calls.staticDraws).toHaveLength(1);
     expect(harness.calls.dynamicDraws).toHaveLength(0);
-    expect(harness.calls.valueRows[4].value).toBe("---");
-    expect(harness.calls.valueRows[5].value).toBe("---");
-    expect(harness.calls.valueRows[6].value).toBe("---");
-    expect(harness.calls.valueRows[7].value).toBe("---");
+    expect(harness.calls.valueRows).toHaveLength(4);
+    expect(fillTextValues(canvas.__ctx)).toContain("GPS Lost");
+  });
+
+  it("renders noTarget state-screen when wpName is an empty string", function () {
+    const harness = createHarness();
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeProps({ wpName: "" }));
+
+    expect(harness.calls.staticDraws).toHaveLength(0);
+    expect(harness.calls.dynamicDraws).toHaveLength(0);
+    expect(harness.calls.valueRows).toHaveLength(0);
+    expect(fillTextValues(canvas.__ctx)).toContain("No Waypoint");
   });
 
   it("normalizes known formatter fallback tokens to --- across all metric rows", function () {

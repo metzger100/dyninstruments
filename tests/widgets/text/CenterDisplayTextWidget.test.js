@@ -83,6 +83,18 @@ describe("CenterDisplayTextWidget", function () {
         if (id === "PlaceholderNormalize") {
           return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         }
+        if (id === "CenterDisplayStateAdapter") {
+          return loadFresh("shared/widget-kits/text/CenterDisplayStateAdapter.js");
+        }
+        if (id === "StateScreenLabels") {
+          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+        }
+        if (id === "StateScreenPrecedence") {
+          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+        }
+        if (id === "StateScreenCanvasOverlay") {
+          return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
+        }
         if (modules[id]) {
           return modules[id];
         }
@@ -118,6 +130,7 @@ describe("CenterDisplayTextWidget", function () {
       },
       ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal") ? opts.ratioThresholdNormal : 1.1,
       ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat") ? opts.ratioThresholdFlat : 2.4,
+      disconnect: opts.disconnect === true,
       default: Object.prototype.hasOwnProperty.call(opts, "default") ? opts.default : "---"
     };
   }
@@ -365,7 +378,7 @@ describe("CenterDisplayTextWidget", function () {
         if (cfg.formatter === "formatLonLatsDecimal") {
           return cfg.formatterParameters && cfg.formatterParameters[0] === "lat"
             ? "-----"
-            : "NO DATA";
+            : "--:--";
         }
         if (cfg.formatter === "formatDirection") {
           return "--:--:--";
@@ -389,8 +402,8 @@ describe("CenterDisplayTextWidget", function () {
     const texts = fillTextCalls(ctx).map((entry) => entry.text);
     expect(texts.filter((entry) => entry === "---").length).toBeGreaterThanOrEqual(2);
     expect(texts.filter((entry) => entry === "--- / ---").length).toBe(2);
-    expect(texts).not.toContain("NO DATA");
     expect(texts).not.toContain("-----");
+    expect(texts).not.toContain("--:--");
   });
 
   it("keeps compact nav-page-like sizes inside the canvas while preserving waypoint and boat rows", function () {
@@ -523,5 +536,21 @@ describe("CenterDisplayTextWidget", function () {
     expect(parseFontPx(compactWpValue.font) / compactLayout.rowRects[0].h).toBeGreaterThan(
       parseFontPx(largeWpValue.font) / largeLayout.rowRects[0].h
     );
+  });
+
+  it("renders disconnected state-screen instead of center and relation rows", function () {
+    const helpers = makeHelpers();
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
+      .create({}, helpers);
+    const ctx = createMockContext2D();
+    const canvas = createMockCanvas({ rectWidth: 260, rectHeight: 180, ctx });
+
+    spec.renderCanvas(canvas, makeProps({ disconnect: true }));
+
+    const texts = fillTextCalls(ctx).map((entry) => entry.text);
+    expect(texts).toContain("GPS Lost");
+    expect(texts).not.toContain("CENTER");
+    expect(texts).not.toContain("WP");
+    expect(texts).not.toContain("POS");
   });
 });

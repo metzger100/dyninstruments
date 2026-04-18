@@ -122,7 +122,7 @@ describe("PositionCoordinateWidget", function () {
                   fontWeightCalls.push(overlayWeight);
                   fontCalls.push({ weight: overlayWeight, px: size });
                   ctx.font = String(overlayWeight) + " " + size + "px " + (family || "sans-serif");
-                  ctx.fillText(label || "NO DATA", Math.floor(W / 2), Math.floor(H / 2));
+                  ctx.fillText(label || "DISCONNECTED", Math.floor(W / 2), Math.floor(H / 2));
                   ctx.restore();
                 }
               };
@@ -152,6 +152,15 @@ describe("PositionCoordinateWidget", function () {
         }
         if (id === "PlaceholderNormalize") {
           return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
+        }
+        if (id === "StateScreenLabels") {
+          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+        }
+        if (id === "StateScreenPrecedence") {
+          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+        }
+        if (id === "StateScreenCanvasOverlay") {
+          return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
         }
         if (modules[id]) {
           return modules[id];
@@ -701,7 +710,7 @@ describe("PositionCoordinateWidget", function () {
         if (cfg.formatter === "formatLonLatsDecimal") {
           return (cfg.formatterParameters && cfg.formatterParameters[0] === "lat")
             ? "-----"
-            : "NO DATA";
+            : "--:--";
         }
         return cfg.default;
       }
@@ -724,8 +733,8 @@ describe("PositionCoordinateWidget", function () {
 
     const texts = fillTextValues(ctx);
     expect(texts.filter((entry) => entry === "---").length).toBeGreaterThanOrEqual(2);
-    expect(texts).not.toContain("NO DATA");
     expect(texts).not.toContain("-----");
+    expect(texts).not.toContain("--:--");
   });
 
   it("does not infer formatter failure from raw-equality output", function () {
@@ -761,7 +770,7 @@ describe("PositionCoordinateWidget", function () {
     expect(texts).not.toContain("NA");
   });
 
-  it("draws disconnect overlay text", function () {
+  it("renders disconnected state-screen text", function () {
     const helpers = makeHelpers();
     const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
       .create({}, helpers);
@@ -780,7 +789,9 @@ describe("PositionCoordinateWidget", function () {
       ratioThresholdFlat: 3.0
     });
 
-    expect(fillTextValues(ctx)).toContain("NO DATA");
-    expect(helpers.fontWeightCalls).toContain(610);
+    const texts = fillTextValues(ctx);
+    expect(texts).toContain("GPS Lost");
+    expect(texts).not.toContain("1");
+    expect(texts).not.toContain("2");
   });
 });

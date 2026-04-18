@@ -13,12 +13,13 @@
 - Component ID: `FullCircleRadialEngine`
 - Global key: `DyniFullCircleRadialEngine`
 - File: `shared/widget-kits/radial/FullCircleRadialEngine.js`
-- Depends: `RadialToolkit`, `CanvasLayerCache`, `FullCircleRadialLayout`
+- Depends: `RadialToolkit`, `CanvasLayerCache`, `FullCircleRadialLayout`, `StateScreenLabels`, `StateScreenPrecedence`, `StateScreenCanvasOverlay`
 - Layout owner: `FullCircleRadialLayout` (`shared/widget-kits/radial/FullCircleRadialLayout.js`)
 - Companion helper: `FullCircleRadialTextLayout` (`shared/widget-kits/radial/FullCircleRadialTextLayout.js`)
 - Cache backend: shared `CanvasLayerCache.createLayerCache({ layers })`
 - Mode selection/insets/geometry: `FullCircleRadialLayout.computeMode()` + `computeInsets()` + `computeLayout()`
 - Normal-mode text packing is theme-tunable via `fullCircle.normal.*` tokens (`innerMarginFactor`, `minHeightFactor`, `dualGapFactor`)
+- State-screen branch: `disconnect === true` resolves to `disconnected`, clears canvas, and renders shared state-screen label instead of dial content
 
 ## Ownership Contract
 
@@ -48,7 +49,6 @@ const renderCanvas = engine.createRenderer(spec);
 | `rebuildLayer` | `(layerCtx, layerName, state, props, api) => void` | no | Rebuild callback for static layers |
 | `drawFrame` | `(state, props, api) => void` | no | Per-frame dynamic render callback |
 | `drawMode` | `{flat?,high?,normal?}` | no | Mode-specific text/layout callbacks |
-| `drawDisconnect` | `boolean` | no | `false` disables shared disconnect overlay draw |
 
 ### Callback state (`state`)
 

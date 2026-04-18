@@ -81,7 +81,8 @@ CenterDisplayTextWidget: {
     "RadialTextLayout",
     "TextTileLayout",
     "CenterDisplayLayout",
-    "CenterDisplayMath"
+    "CenterDisplayMath",
+    "CenterDisplayStateAdapter"
   ]
 }
 ```
@@ -106,6 +107,7 @@ CenterDisplayTextWidget: {
 | `units.measure` | string | `"nm"` | Measure distance unit for `formatDistance` |
 | `ratioThresholdNormal` | number | `1.1` | Ratio below this -> `high` |
 | `ratioThresholdFlat` | number | `2.4` | Ratio above this -> `flat` |
+| `disconnect` | boolean | `false` | Render `disconnected` state-screen (`GPS Lost`) and suppress center/relation rows |
 | `default` | string | `"---"` | Placeholder for missing coordinates or relation values |
 
 ## Layout Modes
@@ -158,6 +160,7 @@ Measure row behavior:
 - text color comes from `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg`
 - coordinate/value groups use `theme.font.weight`
 - captions/row labels use `theme.font.labelWeight`
+- disconnected state-screen label uses shared `StateScreenCanvasOverlay` with `theme.font.labelWeight`
 - compact layouts also raise fitted line-height ceilings linearly, making smaller widgets read denser while larger widgets retain the existing text rhythm
 - no icon sprites, no new theme tokens, no CSS defaults beyond normal dyninstruments widget styling
 
