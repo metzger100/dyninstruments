@@ -61,6 +61,7 @@ describe("config/components.js", function () {
       "RadialToolkit",
       "CanvasLayerCache",
       "FullCircleRadialLayout",
+      "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenCanvasOverlay"
@@ -82,6 +83,7 @@ describe("config/components.js", function () {
       "LinearGaugeMath",
       "LinearGaugeLayout",
       "LinearGaugeTextLayout",
+      "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenCanvasOverlay"
@@ -166,6 +168,7 @@ describe("config/components.js", function () {
       "HtmlWidgetUtils",
       "NavInteractionPolicy",
       "PlaceholderNormalize",
+      "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenInteraction"
@@ -222,6 +225,7 @@ describe("config/components.js", function () {
       "RadialToolkit",
       "SemicircleRadialLayout",
       "SemicircleRadialTextLayout",
+      "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenCanvasOverlay"
@@ -241,19 +245,21 @@ describe("config/components.js", function () {
       "XteHighwayLayout",
       "TextTileLayout",
       "PlaceholderNormalize",
+      "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenCanvasOverlay"
     ]);
-    expect(components.WindRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
-    expect(components.CompassRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout"]);
-    expect(components.WindLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
+    expect(components.WindRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout", "StableDigits"]);
+    expect(components.CompassRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout", "StableDigits"]);
+    expect(components.WindLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "StableDigits"]);
     expect(components.CompassLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.RadialToolkit.deps).toContain("ThemeResolver");
     expect(components.ThreeValueTextWidget.deps).toEqual([
       "ThemeResolver",
       "TextLayoutEngine",
       "PlaceholderNormalize",
+      "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenCanvasOverlay"
@@ -276,6 +282,7 @@ describe("config/components.js", function () {
       "HtmlWidgetUtils",
       "PreparedPayloadModelCache",
       "PlaceholderNormalize",
+      "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenInteraction",
