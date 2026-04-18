@@ -31,6 +31,12 @@ describe("AisTargetRenderModel", function () {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
           } else if (id === "PlaceholderNormalize") {
             moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
+          } else if (id === "StateScreenLabels") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+          } else if (id === "StateScreenPrecedence") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+          } else if (id === "StateScreenInteraction") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
           } else {
             throw new Error("unexpected module: " + id);
           }
@@ -110,7 +116,7 @@ describe("AisTargetRenderModel", function () {
       isVerticalCommitted: false
     });
 
-    expect(model.renderState).toBe("data");
+    expect(model.kind).toBe("data");
     expect(model.interactionState).toBe("dispatch");
     expect(model.captureClicks).toBe(true);
     expect(model.showHotspot).toBe(true);
@@ -212,7 +218,7 @@ describe("AisTargetRenderModel", function () {
     });
   });
 
-  it("keeps placeholder state on gpspage without target identity", function () {
+  it("keeps noAis state on gpspage without target identity", function () {
     const setup = createRenderModel();
     const model = setup.renderModel.buildModel({
       props: withSurfacePolicy(makeProps({
@@ -226,12 +232,11 @@ describe("AisTargetRenderModel", function () {
       isVerticalCommitted: false
     });
 
-    expect(model.renderState).toBe("placeholder");
+    expect(model.kind).toBe("noAis");
     expect(model.interactionState).toBe("passive");
     expect(model.captureClicks).toBe(false);
     expect(model.visibleMetricIds).toEqual([]);
-    expect(model.placeholderText).toBe("No AIS");
-    expect(model.wrapperClasses).toContain("dyni-ais-target-placeholder");
+    expect(model.stateLabel).toBe("No AIS");
   });
 
   it("keeps hidden state outside gpspage when no target identity exists", function () {
@@ -248,10 +253,42 @@ describe("AisTargetRenderModel", function () {
       isVerticalCommitted: false
     });
 
-    expect(model.renderState).toBe("hidden");
+    expect(model.kind).toBe("hidden");
     expect(model.interactionState).toBe("passive");
     expect(model.visibleMetricIds).toEqual([]);
-    expect(model.wrapperClasses).toContain("dyni-ais-target-hidden");
+    expect(model.stateLabel).toBe("");
+  });
+
+  it("keeps hidden before disconnected outside gpspage and shows disconnected on gpspage", function () {
+    const setup = createRenderModel();
+    const hidden = setup.renderModel.buildModel({
+      props: withSurfacePolicy(makeProps({
+        disconnect: true,
+        domain: {
+          hasTargetIdentity: false,
+          hasDispatchMmsi: false
+        }
+      }), { pageId: "other", mode: "dispatch" }),
+      shellRect: { width: 300, height: 170 },
+      mode: "normal",
+      isVerticalCommitted: false
+    });
+    const disconnected = setup.renderModel.buildModel({
+      props: withSurfacePolicy(makeProps({
+        disconnect: true,
+        domain: {
+          hasTargetIdentity: false,
+          hasDispatchMmsi: false
+        }
+      }), { pageId: "gpspage", mode: "dispatch" }),
+      shellRect: { width: 300, height: 170 },
+      mode: "normal",
+      isVerticalCommitted: false
+    });
+
+    expect(hidden.kind).toBe("hidden");
+    expect(disconnected.kind).toBe("disconnected");
+    expect(disconnected.stateLabel).toBe("GPS Lost");
   });
 
   it("forces passive interaction in editing mode even when dispatch capability exists", function () {
@@ -263,7 +300,7 @@ describe("AisTargetRenderModel", function () {
       isVerticalCommitted: false
     });
 
-    expect(model.renderState).toBe("data");
+    expect(model.kind).toBe("data");
     expect(model.interactionState).toBe("passive");
     expect(model.captureClicks).toBe(false);
     expect(model.showHotspot).toBe(false);

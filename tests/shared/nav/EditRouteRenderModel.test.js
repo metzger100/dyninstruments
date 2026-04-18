@@ -54,6 +54,15 @@ describe("EditRouteRenderModel", function () {
           else if (id === "PlaceholderNormalize") {
             moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
           }
+          else if (id === "StateScreenLabels") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+          }
+          else if (id === "StateScreenPrecedence") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+          }
+          else if (id === "StateScreenInteraction") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
+          }
           else {
             throw new Error("unexpected module: " + id);
           }
@@ -107,7 +116,7 @@ describe("EditRouteRenderModel", function () {
     }, overrides || {});
   }
 
-  it("builds no-route state with No Route label and no metrics", function () {
+  it("builds no-route state-screen model with passive interaction and no metrics", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
       props: withSurfacePolicy(makeProps({
@@ -127,11 +136,44 @@ describe("EditRouteRenderModel", function () {
       isVerticalCommitted: false
     });
 
+    expect(model.kind).toBe("noRoute");
+    expect(model.stateLabel).toBe("No Route");
     expect(model.hasRoute).toBe(false);
-    expect(model.nameText).toBe("No Route");
+    expect(model.nameText).toBe("");
     expect(model.visibleMetricIds).toEqual([]);
+    expect(model.interactionState).toBe("passive");
+    expect(model.canOpenEditRoute).toBe(false);
     expect(model.isLocalRoute).toBe(false);
     expect(model.isServerRoute).toBe(false);
+  });
+
+  it("classifies disconnected state-screen from raw disconnect signal", function () {
+    const renderModel = createRenderModel();
+    const model = renderModel.buildModel({
+      props: withSurfacePolicy(makeProps({
+        disconnect: true,
+        domain: {
+          hasRoute: true,
+          routeName: "Harbor Run",
+          pointCount: 5,
+          totalDistance: 1234.5,
+          remainingDistance: 321.4,
+          eta: "2026-03-06T11:45:00Z",
+          isActiveRoute: true,
+          isLocalRoute: false,
+          isServerRoute: true
+        }
+      }), { mode: "dispatch" }),
+      shellRect: { width: 320, height: 160 },
+      isVerticalCommitted: false
+    });
+
+    expect(model.kind).toBe("disconnected");
+    expect(model.stateLabel).toBe("GPS Lost");
+    expect(model.hasRoute).toBe(false);
+    expect(model.interactionState).toBe("passive");
+    expect(model.canOpenEditRoute).toBe(false);
+    expect(model.visibleMetricIds).toEqual([]);
   });
 
   it("keeps flat no-route wrapper geometry aligned via inline layout style", function () {

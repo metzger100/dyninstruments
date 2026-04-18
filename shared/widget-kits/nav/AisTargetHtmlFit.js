@@ -181,11 +181,12 @@
       const family = typography.family;
       const shellWidth = Math.max(1, Math.round(shellRect.width));
       const shellHeight = Math.max(1, Math.round(shellRect.height));
+      const kind = typeof model.kind === "string" ? model.kind : "data";
       const layout = model.layout || layoutApi.computeLayout({
         W: shellWidth,
         H: shellHeight,
         mode: model.mode,
-        renderState: model.renderState,
+        renderState: kind === "data" ? "data" : "placeholder",
         showTcpaBranch: model.showTcpaBranch === true,
         isVerticalCommitted: model.isVerticalCommitted === true,
         effectiveLayoutHeight: model.effectiveLayoutHeight
@@ -200,21 +201,7 @@
         metrics: Object.create(null),
         accentStyle: resolveAccentStyle(model, tokens)
       };
-      if (model.renderState === "placeholder") {
-        out.placeholderStyle = measureStyle({
-          rect: layout.placeholderRect,
-          text: toText(model.placeholderText),
-          maxPxRatio: 0.34,
-          textApi: textApi,
-          tileLayout: tileLayout,
-          ctx: measureCtx,
-          family: family,
-          weight: valueWeight,
-          textFillScale: textFillScale
-        }, htmlUtils, tileLayout);
-        return out;
-      }
-      if (model.renderState !== "data") {
+      if (kind !== "data") {
         return out;
       }
       out.nameStyle = measureStyle({

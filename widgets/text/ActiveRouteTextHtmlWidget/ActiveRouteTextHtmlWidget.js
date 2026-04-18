@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteTextHtmlWidget - Interactive HTML renderer for nav active-route kind
  * Documentation: documentation/widgets/active-route.md
- * Depends: ActiveRouteHtmlFit, HtmlWidgetUtils, PreparedPayloadModelCache, PlaceholderNormalize
+ * Depends: ActiveRouteHtmlFit, HtmlWidgetUtils, PreparedPayloadModelCache, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
  */
 
 (function (root, factory) {
@@ -81,25 +81,66 @@
     return placeholderNormalize.normalize(out, defaultText);
   }
 
-  function buildRenderModel(props, shellRect, Helpers, htmlUtils, placeholderNormalize) {
+  function textLength(value) {
+    if (value == null) {
+      return 0;
+    }
+    return String(value).length;
+  }
+
+  function resolveStateKind(props, htmlUtils, stateScreenPrecedence) {
+    const p = props || {};
+    return stateScreenPrecedence.pickFirst([
+      { kind: "disconnected", when: p.disconnect === true },
+      { kind: "noRoute", when: p.wpServer === false },
+      { kind: "noRoute", when: htmlUtils.trimText(p.routeName) === "" },
+      { kind: "data", when: true }
+    ]);
+  }
+
+  function buildRenderModel(
+    props,
+    shellRect,
+    Helpers,
+    htmlUtils,
+    placeholderNormalize,
+    stateScreenLabels,
+    stateScreenPrecedence,
+    stateScreenInteraction
+  ) {
     const p = ensureDisplayProps(props);
     const display = p.display;
     const captions = p.captions;
     const units = p.units;
     const isApproaching = display.isApproaching === true;
-    const disconnect = p.disconnect === true;
+    const kind = resolveStateKind(p, htmlUtils, stateScreenPrecedence);
     const defaultText = String(p.default);
-    const routeNameText = htmlUtils.trimText(p.routeName) || defaultText;
+    const mode = resolveDisplayMode(p, shellRect, htmlUtils);
+    const isEditing = htmlUtils.isEditingMode(p);
+    const canOpenRoute = !isEditing && canDispatchOpenRoute(p);
+    const interactionState = stateScreenInteraction.resolveInteraction({
+      kind: kind,
+      baseInteraction: canOpenRoute ? "dispatch" : "passive"
+    });
 
+    if (kind !== stateScreenLabels.KINDS.DATA) {
+      return {
+        kind: kind,
+        stateLabel: stateScreenLabels.LABELS[kind] || "",
+        mode: mode,
+        interactionState: interactionState
+      };
+    }
+
+    const routeNameText = htmlUtils.trimText(p.routeName) || defaultText;
     const remainCaption = htmlUtils.trimText(captions.remain);
     const etaCaption = htmlUtils.trimText(captions.eta);
     const nextCourseCaption = htmlUtils.trimText(captions.nextCourse);
     const remainUnit = htmlUtils.trimText(units.remain);
     const etaUnit = htmlUtils.trimText(units.eta);
     const nextCourseUnit = htmlUtils.trimText(units.nextCourse);
-
     const remainText = formatMetric(
-      disconnect ? undefined : display.remain,
+      display.remain,
       "formatDistance",
       [remainUnit],
       defaultText,
@@ -107,7 +148,7 @@
       placeholderNormalize
     );
     const etaText = formatMetric(
-      disconnect ? undefined : display.eta,
+      display.eta,
       "formatTime",
       [],
       defaultText,
@@ -116,7 +157,7 @@
     );
     const nextCourseText = isApproaching
       ? formatMetric(
-        disconnect ? undefined : display.nextCourse,
+        display.nextCourse,
         "formatDirection",
         [],
         defaultText,
@@ -125,15 +166,12 @@
       )
       : "";
 
-    const mode = resolveDisplayMode(p, shellRect, htmlUtils);
-    const isEditing = htmlUtils.isEditingMode(p);
-    const canOpenRoute = !isEditing && canDispatchOpenRoute(p);
-
     return {
+      kind: kind,
+      stateLabel: "",
       routeNameText: routeNameText,
       mode: mode,
       isApproaching: isApproaching,
-      disconnect: disconnect,
       remainCaption: remainCaption,
       etaCaption: etaCaption,
       nextCourseCaption: nextCourseCaption,
@@ -143,8 +181,7 @@
       remainText: remainText,
       etaText: etaText,
       nextCourseText: nextCourseText,
-      canOpenRoute: canOpenRoute,
-      captureClicks: canOpenRoute
+      interactionState: interactionState
     };
   }
 
@@ -162,19 +199,29 @@
       + "</div>";
   }
 
-  function renderMarkup(model, fitStyles, htmlUtils) {
+  function renderMarkup(model, fitStyles, htmlUtils, stateScreenLabels, stateScreenMarkup) {
     const routeNameStyle = fitStyles && fitStyles.routeNameStyle ? fitStyles.routeNameStyle : "";
     const metricStyles = fitStyles && fitStyles.metrics ? fitStyles.metrics : Object.create(null);
 
-    const wrapperClasses = ["dyni-active-route-html"];
+    const wrapperClasses = [
+      "dyni-active-route-html",
+      model.interactionState === "dispatch"
+        ? "dyni-active-route-open-dispatch"
+        : "dyni-active-route-open-passive",
+      "dyni-active-route-mode-" + model.mode
+    ];
+    if (model.kind !== stateScreenLabels.KINDS.DATA) {
+      return stateScreenMarkup.renderStateScreen({
+        kind: model.kind,
+        label: model.stateLabel,
+        wrapperClasses: wrapperClasses,
+        extraAttrs: 'data-dyni-action="active-route-open"',
+        htmlUtils: htmlUtils
+      });
+    }
     if (model.isApproaching) {
       wrapperClasses.push("dyni-active-route-approaching");
     }
-    if (model.disconnect) {
-      wrapperClasses.push("dyni-active-route-disconnect");
-    }
-    wrapperClasses.push(model.canOpenRoute ? "dyni-active-route-open-dispatch" : "dyni-active-route-open-passive");
-    wrapperClasses.push("dyni-active-route-mode-" + model.mode);
 
     let metricsHtml = "";
     metricsHtml += renderMetricTile("remain", model.remainCaption, model.remainText, model.remainUnit, metricStyles.remain, htmlUtils);
@@ -200,6 +247,10 @@
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const preparedPayloadModelCache = Helpers.getModule("PreparedPayloadModelCache").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
+    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
+    const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
+    const stateScreenMarkup = Helpers.getModule("StateScreenMarkup").create(def, Helpers);
 
     function createCommittedRenderer(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
@@ -213,7 +264,16 @@
       let lastProps = null;
       const preparedPayload = preparedPayloadModelCache.createPreparedModelCache({
         buildModel: function (props, shellRect) {
-          return buildRenderModel(props, shellRect, Helpers, htmlUtils, placeholderNormalize);
+          return buildRenderModel(
+            props,
+            shellRect,
+            Helpers,
+            htmlUtils,
+            placeholderNormalize,
+            stateScreenLabels,
+            stateScreenPrecedence,
+            stateScreenInteraction
+          );
         }
       });
 
@@ -223,7 +283,7 @@
         }
         clickHandler = null;
 
-        if (!wrapperEl || model.captureClicks !== true) {
+        if (!wrapperEl || model.interactionState !== "dispatch") {
           return;
         }
 
@@ -249,7 +309,7 @@
           : lastFit;
 
         htmlUtils.applyMirroredContext(rootEl, payload.props);
-        wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(model, fit, htmlUtils));
+        wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(model, fit, htmlUtils, stateScreenLabels, stateScreenMarkup));
         lastFit = fit;
         lastProps = prepared.props;
 
@@ -297,13 +357,15 @@
         const model = prepared.model;
         const shellRect = payload && payload.shellRect ? payload.shellRect : null;
         return [
-          model.routeNameText.length,
-          model.remainText.length,
-          model.etaText.length,
-          model.isApproaching ? model.nextCourseText.length : 0,
+          model.kind,
+          textLength(model.routeNameText),
+          textLength(model.remainText),
+          textLength(model.etaText),
+          model.isApproaching ? textLength(model.nextCourseText) : 0,
           model.mode,
           model.isApproaching ? 1 : 0,
-          model.disconnect ? 1 : 0,
+          model.interactionState === "dispatch" ? 1 : 0,
+          textLength(model.stateLabel),
           shellRect ? Math.round(shellRect.width) : 0,
           shellRect ? Math.round(shellRect.height) : 0
         ].join("|");

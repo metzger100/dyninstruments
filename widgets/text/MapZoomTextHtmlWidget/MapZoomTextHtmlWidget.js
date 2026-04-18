@@ -1,7 +1,7 @@
 /**
  * Module: MapZoomTextHtmlWidget - Interactive HTML renderer for map zoom kind
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: Helpers.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils
+ * Depends: Helpers.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, PreparedPayloadModelCache, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
  */
 
 (function (root, factory) {
@@ -95,13 +95,29 @@
     return p;
   }
 
-  function buildModel(props, shellRect, Helpers, htmlUtils) {
+  function textLength(value) {
+    if (value == null) {
+      return 0;
+    }
+    return String(value).length;
+  }
+
+  function resolveStateKind(props, stateScreenPrecedence) {
+    const p = props || {};
+    return stateScreenPrecedence.pickFirst([
+      { kind: "disconnected", when: p.disconnect === true },
+      { kind: "data", when: true }
+    ]);
+  }
+
+  function buildModel(props, shellRect, Helpers, htmlUtils, stateScreenLabels, stateScreenPrecedence, stateScreenInteraction) {
     const p = ensureProps(props);
     const defaultText = String(p.default);
     const caption = htmlUtils.trimText(p.caption);
     const unit = htmlUtils.trimText(p.unit);
     const ratioMode = resolveDisplayMode(p, shellRect, htmlUtils);
     const mode = resolveComposedMode(ratioMode, caption, unit);
+    const kind = resolveStateKind(p, stateScreenPrecedence);
     const zoomNumber = htmlUtils.toFiniteNumber(p.zoom);
     const requiredZoomNumber = htmlUtils.toFiniteNumber(p.requiredZoom);
     const zoomText = formatZoom(zoomNumber, defaultText, Helpers);
@@ -109,15 +125,30 @@
     const showRequired = typeof requiredZoomNumber === "number" && requiredZoomNumber !== zoomNumber;
     const isEditing = htmlUtils.isEditingMode(p);
     const canDispatch = !isEditing && canDispatchCheckAutoZoom(p);
+    const interactionState = stateScreenInteraction.resolveInteraction({
+      kind: kind,
+      baseInteraction: canDispatch ? "dispatch" : "passive"
+    });
+    if (kind !== stateScreenLabels.KINDS.DATA) {
+      return {
+        kind: kind,
+        stateLabel: stateScreenLabels.LABELS[kind] || "",
+        mode: mode,
+        interactionState: interactionState,
+        captionUnitScale: clampCaptionUnitScale(p.captionUnitScale, htmlUtils)
+      };
+    }
 
     return {
+      kind: kind,
+      stateLabel: "",
       mode: mode,
       caption: caption,
       unit: unit,
       zoomText: zoomText,
       requiredText: showRequired ? "(" + requiredText + ")" : "",
       showRequired: showRequired,
-      canDispatch: canDispatch,
+      interactionState: interactionState,
       captionUnitScale: clampCaptionUnitScale(p.captionUnitScale, htmlUtils)
     };
   }
@@ -159,23 +190,35 @@
       + "</div>";
   }
 
-  function renderMarkup(model, htmlUtils) {
+  function renderMarkup(model, htmlUtils, stateScreenLabels, stateScreenMarkup) {
     const classes = [
       "dyni-map-zoom-html",
       "dyni-map-zoom-mode-" + model.mode,
-      model.canDispatch ? "dyni-map-zoom-open-dispatch" : "dyni-map-zoom-open-passive"
+      model.interactionState === "dispatch"
+        ? "dyni-map-zoom-open-dispatch"
+        : "dyni-map-zoom-open-passive"
     ];
     if (model.showRequired) {
       classes.push("dyni-map-zoom-has-required");
+    }
+    const scaleStyle = '--dyni-map-zoom-sec-scale:' + model.captionUnitScale + ";";
+    if (model.kind !== stateScreenLabels.KINDS.DATA) {
+      return stateScreenMarkup.renderStateScreen({
+        kind: model.kind,
+        label: model.stateLabel,
+        wrapperClasses: classes,
+        extraAttrs: 'data-dyni-action="map-zoom-check-auto" style="' + scaleStyle + '"',
+        htmlUtils: htmlUtils
+      });
     }
 
     const requiredHtml = model.showRequired
       ? ('<div class="dyni-map-zoom-required"' + htmlUtils.toStyleAttr(model.requiredStyle) + ">" + htmlUtils.escapeHtml(model.requiredText) + "</div>")
       : "";
-    const scaleStyle = ' style="--dyni-map-zoom-sec-scale:' + model.captionUnitScale + ';"';
+    const styleAttr = ' style="' + scaleStyle + '"';
 
     return ""
-      + '<div class="' + classes.join(" ") + '"' + scaleStyle + ' data-dyni-action="map-zoom-check-auto">'
+      + '<div class="' + classes.join(" ") + '"' + styleAttr + ' data-dyni-action="map-zoom-check-auto">'
       + '<div class="dyni-map-zoom-open-hotspot"></div>'
       + renderMainRows(model, htmlUtils)
       + requiredHtml
@@ -186,6 +229,10 @@
     const htmlFit = Helpers.getModule("MapZoomHtmlFit").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const preparedPayloadModelCache = Helpers.getModule("PreparedPayloadModelCache").create(def, Helpers);
+    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
+    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
+    const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
+    const stateScreenMarkup = Helpers.getModule("StateScreenMarkup").create(def, Helpers);
 
     function createCommittedRenderer(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
@@ -199,7 +246,15 @@
       let lastFit = EMPTY_FIT;
       const preparedPayload = preparedPayloadModelCache.createPreparedModelCache({
         buildModel: function (props, shellRect) {
-          return buildModel(props, shellRect, Helpers, htmlUtils);
+          return buildModel(
+            props,
+            shellRect,
+            Helpers,
+            htmlUtils,
+            stateScreenLabels,
+            stateScreenPrecedence,
+            stateScreenInteraction
+          );
         }
       });
 
@@ -209,7 +264,7 @@
         }
         clickHandler = null;
 
-        if (!wrapperEl || model.canDispatch !== true) {
+        if (!wrapperEl || model.interactionState !== "dispatch") {
           return;
         }
 
@@ -236,12 +291,14 @@
 
         const renderModel = {
           mode: baseModel.mode,
+          kind: baseModel.kind,
+          stateLabel: baseModel.stateLabel,
+          interactionState: baseModel.interactionState,
           caption: baseModel.caption,
           unit: baseModel.unit,
           zoomText: baseModel.zoomText,
           requiredText: baseModel.requiredText,
           showRequired: baseModel.showRequired,
-          canDispatch: baseModel.canDispatch,
           captionUnitScale: baseModel.captionUnitScale,
           captionStyle: fit.captionStyle,
           valueStyle: fit.valueStyle,
@@ -250,7 +307,7 @@
         };
 
         htmlUtils.applyMirroredContext(rootEl, payload.props);
-        wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(renderModel, htmlUtils));
+        wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(renderModel, htmlUtils, stateScreenLabels, stateScreenMarkup));
         lastFit = fit;
         lastProps = prepared.props;
 
@@ -302,14 +359,16 @@
         const model = prepared.model;
         const shellRect = payload && payload.shellRect ? payload.shellRect : null;
         return [
-          model.caption.length,
-          model.zoomText.length,
-          model.unit.length,
-          model.requiredText.length,
+          model.kind,
+          textLength(model.caption),
+          textLength(model.zoomText),
+          textLength(model.unit),
+          textLength(model.requiredText),
           model.mode,
           model.captionUnitScale,
           model.showRequired ? 1 : 0,
-          model.canDispatch ? 1 : 0,
+          model.interactionState === "dispatch" ? 1 : 0,
+          textLength(model.stateLabel),
           shellRect ? Math.round(shellRect.width) : 0,
           shellRect ? Math.round(shellRect.height) : 0
         ].join("|");

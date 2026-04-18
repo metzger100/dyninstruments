@@ -144,7 +144,7 @@ describe("NavMapper", function () {
     expect(out.units.nextCourse).toBe("degN");
   });
 
-  it("derives activeRoute disconnect from wpServer or empty route-name state", function () {
+  it("maps activeRoute disconnect from raw connectionLost signal only", function () {
     const mapper = createMapper();
 
     const wpServerDown = mapper.translate({
@@ -152,14 +152,22 @@ describe("NavMapper", function () {
       activeRouteName: "Harbor Run",
       wpServer: false
     }, toolkit);
-    expect(wpServerDown.disconnect).toBe(true);
+    expect(wpServerDown.disconnect).toBe(false);
 
     const emptyName = mapper.translate({
       kind: "activeRoute",
       activeRouteName: "   ",
       wpServer: true
     }, toolkit);
-    expect(emptyName.disconnect).toBe(true);
+    expect(emptyName.disconnect).toBe(false);
+
+    const disconnected = mapper.translate({
+      kind: "activeRoute",
+      activeRouteName: "Harbor Run",
+      wpServer: true,
+      disconnect: true
+    }, toolkit);
+    expect(disconnected.disconnect).toBe(true);
   });
 
   it("maps positions with lon/lat formatter", function () {

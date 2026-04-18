@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteRenderModel - Pure normalization and display model owner for edit-route HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: EditRouteLayout, HtmlWidgetUtils, PlaceholderNormalize
+ * Depends: EditRouteLayout, HtmlWidgetUtils, NavInteractionPolicy, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,7 +11,6 @@
   "use strict";
 
   const METRIC_IDS = ["pts", "dst", "rte", "eta"];
-  const NO_ROUTE_TEXT = "No Route";
   const SOURCE_BADGE_TEXT = "LOCAL";
 
   function toObject(value) {
@@ -73,15 +72,28 @@
   function buildResizeSignatureParts(model) {
     const m = model || {};
     const parts = [
+      m.kind || "data",
       m.mode || "normal",
-      m.hasRoute ? 1 : 0,
+      m.interactionState || "passive",
       m.isActiveRoute ? 1 : 0,
       m.isLocalRoute ? 1 : 0,
       m.isServerRoute ? 1 : 0,
-      m.canOpenEditRoute ? 1 : 0,
       m.isVerticalCommitted ? 1 : 0,
-      "N" + toSignatureToken(m.nameText)
+      "S" + toSignatureToken(m.stateLabel)
     ];
+
+    if (m.kind !== "data") {
+      if (m.isVerticalCommitted) {
+        parts.push(Math.max(1, Math.round(toFiniteNumber(m.shellWidth) || 1)));
+        parts.push(Math.max(1, Math.round(toFiniteNumber(m.effectiveLayoutHeight) || 1)));
+      } else {
+        parts.push(Math.max(1, Math.round(toFiniteNumber(m.shellWidth) || 1)));
+        parts.push(Math.max(1, Math.round(toFiniteNumber(m.shellHeight) || 1)));
+      }
+      return parts;
+    }
+
+    parts.push("N" + toSignatureToken(m.nameText));
 
     for (let i = 0; i < m.visibleMetricIds.length; i += 1) {
       const id = m.visibleMetricIds[i];
@@ -106,6 +118,17 @@
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const navInteractionPolicy = Helpers.getModule("NavInteractionPolicy").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
+    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
+    const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
+
+    function resolveStateKind(props, domain) {
+      return stateScreenPrecedence.pickFirst([
+        { kind: "disconnected", when: props.disconnect === true },
+        { kind: "noRoute", when: domain.hasRoute !== true },
+        { kind: "data", when: true }
+      ]);
+    }
 
     function buildModel(args) {
       const cfg = args || {};
@@ -115,14 +138,16 @@
       const captionsConfig = toObject(props.captions);
       const unitsConfig = toObject(props.units);
       const shellSize = toShellSize(cfg.shellRect);
-      const hasRoute = domain.hasRoute === true;
+      const kind = resolveStateKind(props, domain);
+      const hasRoute = kind === "data" && domain.hasRoute === true;
       const isActiveRoute = hasRoute && domain.isActiveRoute === true;
       const isLocalRoute = hasRoute && domain.isLocalRoute === true;
       const isServerRoute = hasRoute && domain.isServerRoute === true;
       const defaultText = resolveDefaultText(props);
       const nameText = hasRoute
         ? htmlUtils.trimText(domain.routeName)
-        : NO_ROUTE_TEXT;
+        : "";
+      const stateLabel = kind === "data" ? "" : (stateScreenLabels.LABELS[kind] || "");
       const metricUnits = {
         dst: hasRoute ? normalizeMetricUnit(unitsConfig.dst, htmlUtils) : "",
         rte: hasRoute ? normalizeMetricUnit(unitsConfig.rte, htmlUtils) : ""
@@ -201,7 +226,12 @@
       const visibleMetricIds = METRIC_IDS.filter(function (id) {
         return !!(layout.metricVisibility && layout.metricVisibility[id]);
       });
-      const dispatch = navInteractionPolicy.canDispatchWhenNotEditing(props);
+      const baseInteraction = navInteractionPolicy.canDispatchWhenNotEditing(props) ? "dispatch" : "passive";
+      const interactionState = stateScreenInteraction.resolveInteraction({
+        kind: kind,
+        baseInteraction: baseInteraction
+      });
+      const canOpenEditRoute = interactionState === "dispatch";
       const verticalWrapperStyle = layout.verticalShell && typeof layout.verticalShell.wrapperStyle === "string"
         ? layout.verticalShell.wrapperStyle.trim()
         : "";
@@ -217,13 +247,16 @@
           : "");
 
       const model = {
+        kind: kind,
+        stateLabel: stateLabel,
         mode: layout.mode,
         hasRoute: hasRoute,
         isActiveRoute: isActiveRoute,
         isLocalRoute: isLocalRoute,
         isServerRoute: isServerRoute,
-        canOpenEditRoute: dispatch,
-        captureClicks: dispatch,
+        interactionState: interactionState,
+        canOpenEditRoute: canOpenEditRoute,
+        captureClicks: canOpenEditRoute,
         isVerticalCommitted: layout.isVerticalCommitted === true,
         shellWidth: shellSize.width,
         shellHeight: shellSize.height,
@@ -250,7 +283,15 @@
       buildModel: buildModel,
       buildResizeSignatureParts: buildResizeSignatureParts,
       canOpenEditRoute: function (args) {
-        return navInteractionPolicy.canDispatchWhenNotEditing(args && args.props);
+        const cfg = args || {};
+        const props = toObject(cfg.props);
+        const domain = toObject(props.domain);
+        const kind = resolveStateKind(props, domain);
+        const baseInteraction = navInteractionPolicy.canDispatchWhenNotEditing(props) ? "dispatch" : "passive";
+        return stateScreenInteraction.resolveInteraction({
+          kind: kind,
+          baseInteraction: baseInteraction
+        }) === "dispatch";
       }
     };
   }

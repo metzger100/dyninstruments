@@ -11,6 +11,12 @@ RoutePointsTextHtmlWidget is the committed HTML renderer for nav route points.
 - interaction callbacks: surfacePolicy.actions.routePoints.activate({ index, pointSnapshot })
 - host parity bridge: TemporaryHostActionBridge runtime boundary
 
+## State Screens
+
+- Resolver order: `disconnected` (`p.disconnect === true`) -> `noRoute` (`domain.route` missing) -> `data`
+- Non-`data` states render through `StateScreenMarkup` and suppress row/list content
+- Non-`data` states force passive interaction (no row activation dispatch)
+
 ## Placeholder Contract
 
 - Per-field formatter fallback values are normalized through `PlaceholderNormalize`; missing per-field text renders as `---`.

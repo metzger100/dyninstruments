@@ -7,20 +7,24 @@ describe("RoutePointsTextHtmlWidget", function () {
     const opts = options || {};
     const buildModel = opts.buildModel || vi.fn(function (args) {
       const props = args && args.props ? args.props : {};
+      const interactionState = props.__interactionState
+        || (props.__canActivate === true ? "dispatch" : "passive");
       const points = Array.isArray(props.__points)
         ? props.__points
         : [{ index: 0, ordinalText: "1", nameText: "WP1", infoText: "I", selected: false }];
       return {
         mode: props.__mode || "normal",
+        kind: props.__kind || "data",
+        stateLabel: props.__stateLabel || "",
+        interactionState,
         showHeader: true,
         showOrdinal: true,
-        hasRoute: true,
+        hasRoute: (props.__kind || "data") === "data",
         routeNameText: "Route",
-        emptyText: "No Route",
         metaText: "1 WP",
         points,
         isActiveRoute: false,
-        canActivateRoutePoint: props.__canActivate === true,
+        canActivateRoutePoint: interactionState === "dispatch",
         hasValidSelection: props.__hasValidSelection === true,
         selectedIndex: Number.isInteger(props.__selectedIndex) ? props.__selectedIndex : -1,
         activeWaypointKey: props.__activeKey || null,
@@ -100,6 +104,12 @@ describe("RoutePointsTextHtmlWidget", function () {
               };
             }
           };
+        }
+        if (id === "StateScreenMarkup") {
+          return loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
+        }
+        if (id === "StateScreenLabels") {
+          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
         }
         throw new Error("unexpected module: " + id);
       }
@@ -251,6 +261,29 @@ describe("RoutePointsTextHtmlWidget", function () {
     const wrapper = mounted.mountEl.querySelector(".dyni-route-points-html");
     wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(activate).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders disconnected state-screen and blocks row activation", function () {
+    const activate = vi.fn(() => true);
+    const setup = createRenderer();
+    const mounted = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy({
+        __kind: "disconnected",
+        __stateLabel: "GPS Lost",
+        __interactionState: "passive",
+        __canActivate: false,
+        __points: []
+      }, { mode: "dispatch", activate })
+    );
+
+    expect(mounted.html()).toContain("dyni-state-disconnected");
+    expect(mounted.html()).toContain("GPS Lost");
+    expect(mounted.html()).toContain("dyni-route-points-passive");
+
+    const wrapper = mounted.mountEl.querySelector(".dyni-route-points-html");
+    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect(activate).not.toHaveBeenCalled();
   });
 
   it("runs post-patch reveal effects only for valid selections", function () {

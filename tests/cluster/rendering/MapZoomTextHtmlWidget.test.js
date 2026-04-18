@@ -15,7 +15,11 @@ describe("MapZoomTextHtmlWidget", function () {
     ResponsiveScaleProfile: "shared/widget-kits/layout/ResponsiveScaleProfile.js",
     RadialTextLayout: "shared/widget-kits/radial/RadialTextLayout.js",
     RadialTextFitting: "shared/widget-kits/radial/RadialTextFitting.js",
-    PreparedPayloadModelCache: "shared/widget-kits/html/PreparedPayloadModelCache.js"
+    PreparedPayloadModelCache: "shared/widget-kits/html/PreparedPayloadModelCache.js",
+    StateScreenLabels: "shared/widget-kits/state/StateScreenLabels.js",
+    StateScreenPrecedence: "shared/widget-kits/state/StateScreenPrecedence.js",
+    StateScreenInteraction: "shared/widget-kits/state/StateScreenInteraction.js",
+    StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js"
   };
 
   function createRenderer(options) {
@@ -185,6 +189,24 @@ describe("MapZoomTextHtmlWidget", function () {
 
     const html = mounted.html();
     expect(html).toContain("dyni-map-zoom-open-passive");
+
+    const wrapper = mounted.mountEl.querySelector(".dyni-map-zoom-html");
+    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect(checkAutoZoom).not.toHaveBeenCalled();
+  });
+
+  it("renders disconnected state-screen and disables dispatch", function () {
+    const renderer = createRenderer();
+    const checkAutoZoom = vi.fn(() => true);
+    const mounted = mountCommitted(
+      renderer,
+      withSurfacePolicy(makeProps({ disconnect: true }), { mode: "dispatch", checkAutoZoom })
+    );
+
+    expect(mounted.html()).toContain("dyni-state-disconnected");
+    expect(mounted.html()).toContain("GPS Lost");
+    expect(mounted.html()).toContain("dyni-map-zoom-open-passive");
+    expect(mounted.html()).not.toContain("dyni-map-zoom-open-hotspot");
 
     const wrapper = mounted.mountEl.querySelector(".dyni-map-zoom-html");
     wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));

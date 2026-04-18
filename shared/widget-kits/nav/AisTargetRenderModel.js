@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetRenderModel - Pure normalization and display-model owner for AIS target HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: AisTargetLayout, HtmlWidgetUtils, PlaceholderNormalize
+ * Depends: AisTargetLayout, HtmlWidgetUtils, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,7 +10,6 @@
 }(this, function () {
   "use strict";
 
-  const PLACEHOLDER_TEXT = "No AIS";
   const METRIC_ORDER = ["dst", "cpa", "tcpa", "brg"];
   const DATA_METRIC_VISIBILITY = { dst: true, cpa: true, tcpa: true, brg: true };
 
@@ -61,47 +60,38 @@
     return placeholderNormalize.normalize(text, cfg.defaultText);
   }
 
-  function resolveRenderState(args) {
+  function resolveStateKind(args, stateScreenPrecedence) {
     const cfg = args || {};
     const domain = toObject(cfg.domain);
-    if (domain.hasTargetIdentity === true) {
-      return "data";
-    }
-
-    if (cfg.isEditingMode === true) {
-      return "placeholder";
-    }
-
-    if (cfg.pageId === "gpspage") {
-      return "placeholder";
-    }
-
-    return "hidden";
+    return stateScreenPrecedence.pickFirst([
+      {
+        kind: "hidden",
+        when: domain.hasTargetIdentity === false
+          && cfg.isEditingMode !== true
+          && cfg.pageId !== "gpspage"
+      },
+      { kind: "disconnected", when: cfg.disconnect === true },
+      { kind: "noAis", when: domain.hasTargetIdentity === false },
+      { kind: "data", when: true }
+    ]);
   }
 
-  function resolveInteractionState(args) {
+  function resolveInteractionState(args, stateScreenInteraction) {
     const cfg = args || {};
-    if (cfg.isEditingMode === true) {
-      return "passive";
-    }
-    if (cfg.renderState !== "data") {
-      return "passive";
-    }
-
-    const domain = toObject(cfg.domain);
-    const canDispatch = !!(
-      domain.hasDispatchMmsi === true &&
-      cfg.surfaceInteractionMode === "dispatch"
-    );
-
-    return canDispatch ? "dispatch" : "passive";
+    const baseInteraction = cfg.isEditingMode === true
+      ? "passive"
+      : (cfg.canDispatch ? "dispatch" : "passive");
+    return stateScreenInteraction.resolveInteraction({
+      kind: cfg.kind,
+      baseInteraction: baseInteraction
+    });
   }
 
   function buildResizeSignatureParts(model) {
     const m = model || {};
     const parts = [
       m.mode || "normal",
-      m.renderState || "hidden",
+      m.kind || "hidden",
       m.showTcpaBranch ? "tcpa" : "brg",
       m.interactionState || "passive",
       m.isVerticalCommitted === true ? 1 : 0,
@@ -114,12 +104,8 @@
       parts.push(Math.max(1, Math.round(Number(m.shellHeight) || 1)));
     }
 
-    if (m.renderState === "placeholder") {
-      parts.push("P" + toSignatureLength(m.placeholderText));
-      return parts;
-    }
-
-    if (m.renderState !== "data") {
+    if (m.kind !== "data") {
+      parts.push("S" + toSignatureLength(m.stateLabel));
       return parts;
     }
 
@@ -142,6 +128,9 @@
     const layoutApi = Helpers.getModule("AisTargetLayout").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
+    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
+    const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
 
     function buildModel(args) {
       const cfg = args || {};
@@ -156,22 +145,24 @@
       const surfacePolicy = props.surfacePolicy && typeof props.surfacePolicy === "object"
         ? props.surfacePolicy
         : null;
-      const renderState = resolveRenderState({
+      const kind = resolveStateKind({
         domain: domain,
         pageId: surfacePolicy && typeof surfacePolicy.pageId === "string" ? surfacePolicy.pageId : "other",
-        isEditingMode: isEditingMode
-      });
+        isEditingMode: isEditingMode,
+        disconnect: props.disconnect === true
+      }, stateScreenPrecedence);
+      const canDispatch = !!(
+        domain.hasDispatchMmsi === true &&
+        surfacePolicy && surfacePolicy.interaction && surfacePolicy.interaction.mode === "dispatch"
+      );
       const interactionState = resolveInteractionState({
-        domain: domain,
-        renderState: renderState,
-        surfaceInteractionMode: surfacePolicy && surfacePolicy.interaction
-          ? surfacePolicy.interaction.mode
-          : "passive",
+        kind: kind,
+        canDispatch: canDispatch,
         isEditingMode: isEditingMode
-      });
+      }, stateScreenInteraction);
 
-      const showTcpaBranch = domain.showTcpaBranch === true;
-      const hasData = renderState === "data";
+      const showTcpaBranch = kind === "data" && domain.showTcpaBranch === true;
+      const hasData = kind === "data";
       const colorRole = (hasData && domain.hasColorRole === true)
         ? normalizeText(domain.colorRole)
         : "";
@@ -180,7 +171,7 @@
         W: shellSize.width,
         H: shellSize.height,
         mode: cfg.mode,
-        renderState: renderState,
+        renderState: hasData ? "data" : "placeholder",
         showTcpaBranch: showTcpaBranch,
         hasAccent: hasAccent,
         ratioThresholdNormal: layoutConfig.ratioThresholdNormal,
@@ -188,11 +179,10 @@
         isVerticalCommitted: cfg.isVerticalCommitted === true,
         effectiveLayoutHeight: cfg.effectiveLayoutHeight
       });
-
-      const distance = htmlUtils.toFiniteNumber(domain.distance);
-      const cpa = htmlUtils.toFiniteNumber(domain.cpa);
-      const tcpaSeconds = htmlUtils.toFiniteNumber(domain.tcpa);
-      const headingTo = htmlUtils.toFiniteNumber(domain.headingTo);
+      const distance = hasData ? htmlUtils.toFiniteNumber(domain.distance) : undefined;
+      const cpa = hasData ? htmlUtils.toFiniteNumber(domain.cpa) : undefined;
+      const tcpaSeconds = hasData ? htmlUtils.toFiniteNumber(domain.tcpa) : undefined;
+      const headingTo = hasData ? htmlUtils.toFiniteNumber(domain.headingTo) : undefined;
 
       const metrics = {
         dst: {
@@ -249,10 +239,12 @@
       const wrapperClasses = [
         "dyni-ais-target-html",
         "dyni-ais-target-mode-" + layout.mode,
-        "dyni-ais-target-" + renderState,
         "dyni-ais-target-open-" + interactionState,
         "dyni-ais-target-branch-" + (showTcpaBranch ? "tcpa" : "brg")
       ];
+      if (hasData) {
+        wrapperClasses.push("dyni-ais-target-data");
+      }
 
       if (hasAccent) {
         wrapperClasses.push("dyni-ais-target-color-" + colorRole);
@@ -262,8 +254,9 @@
       }
 
       const model = {
+        kind: kind,
+        stateLabel: kind === "data" ? "" : (stateScreenLabels.LABELS[kind] || ""),
         mode: layout.mode,
-        renderState: renderState,
         interactionState: interactionState,
         showTcpaBranch: showTcpaBranch,
         shellWidth: shellSize.width,
@@ -278,7 +271,6 @@
         dispatchMmsi: normalizeText(domain.mmsiNormalized),
         nameText: normalizeText(domain.nameOrMmsi),
         frontText: normalizeText(domain.frontText),
-        placeholderText: PLACEHOLDER_TEXT,
         metrics: metrics,
         metricVisibility: metricVisibility,
         visibleMetricIds: visibleMetricIds,
@@ -294,24 +286,7 @@
     return {
       id: "AisTargetRenderModel",
       buildModel: buildModel,
-      buildResizeSignatureParts: buildResizeSignatureParts,
-      resolveRenderState: function (args) {
-        const cfg = args || {};
-        return resolveRenderState({
-          domain: cfg.domain,
-          pageId: cfg.pageId,
-          isEditingMode: cfg.isEditingMode === true
-        });
-      },
-      resolveInteractionState: function (args) {
-        const cfg = args || {};
-        return resolveInteractionState({
-          domain: cfg.domain,
-          renderState: cfg.renderState,
-          surfaceInteractionMode: cfg.surfaceInteractionMode,
-          isEditingMode: cfg.isEditingMode === true
-        });
-      }
+      buildResizeSignatureParts: buildResizeSignatureParts
     };
   }
 

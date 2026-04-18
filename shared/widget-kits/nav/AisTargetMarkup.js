@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetMarkup - Pure HTML assembly owner for AIS target renderer output
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: none
+ * Depends: StateScreenMarkup
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -137,7 +137,9 @@
       + "</div>";
   }
 
-  function create() {
+  function create(def, Helpers) {
+    const stateScreenMarkup = Helpers.getModule("StateScreenMarkup").create(def, Helpers);
+
     function render(args) {
       const cfg = args || {};
       const model = toObject(cfg.model);
@@ -145,6 +147,15 @@
       const htmlUtils = cfg.htmlUtils;
       const wrapperClasses = model.wrapperClasses;
       const geometry = toObject(model.inlineGeometry);
+      if (model.kind && model.kind !== "data") {
+        return stateScreenMarkup.renderStateScreen({
+          kind: model.kind,
+          label: toText(model.stateLabel),
+          wrapperClasses: wrapperClasses,
+          extraAttrs: 'data-dyni-action="ais-target-open"' + htmlUtils.toStyleAttr(joinStyles(model.wrapperStyle, geometry.wrapperStyle)),
+          htmlUtils: htmlUtils
+        });
+      }
 
       const hotspotHtml = model.showHotspot === true
         ? '<div class="dyni-ais-target-open-hotspot"></div>'
@@ -155,17 +166,7 @@
           + "></div>")
         : "";
 
-      let bodyHtml = "";
-      if (model.renderState === "placeholder") {
-        bodyHtml = ""
-          + '<div class="dyni-ais-target-placeholder-text"'
-          + htmlUtils.toStyleAttr(fit.placeholderStyle)
-          + ">"
-          + htmlUtils.escapeHtml(toText(model.placeholderText))
-          + "</div>";
-      } else if (model.renderState === "data") {
-        bodyHtml = renderDataBody(model, fit, htmlUtils);
-      }
+      const bodyHtml = renderDataBody(model, fit, htmlUtils);
 
       return ""
         + '<div class="' + wrapperClasses.join(" ") + '"'

@@ -80,6 +80,15 @@ describe("RoutePointsRenderModel", function () {
           else if (id === "PlaceholderNormalize") {
             moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
           }
+          else if (id === "StateScreenLabels") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+          }
+          else if (id === "StateScreenPrecedence") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+          }
+          else if (id === "StateScreenInteraction") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
+          }
           else {
             throw new Error("unexpected module: " + id);
           }
@@ -169,7 +178,8 @@ describe("RoutePointsRenderModel", function () {
     expect(model.canActivateRoutePoint).toBe(true);
     expect(model.showOrdinal).toBe(true);
     expect(model.inlineGeometry.showOrdinal).toBe(true);
-    expect(model.emptyText).toBe("");
+    expect(model.kind).toBe("data");
+    expect(model.interactionState).toBe("dispatch");
     expect(model.points[2].pointSnapshot).toMatchObject({
       idx: 2, name: "", lat: 54.3, lon: 10.6, routeName: "Harbor Run", selected: true
     });
@@ -426,11 +436,44 @@ describe("RoutePointsRenderModel", function () {
       isVerticalCommitted: false
     });
 
+    expect(model.kind).toBe("noRoute");
+    expect(model.stateLabel).toBe("No Route");
     expect(model.hasRoute).toBe(false);
-    expect(model.routeNameText).toBe("No Route");
-    expect(model.emptyText).toBe("No Route");
+    expect(model.routeNameText).toBe("");
     expect(model.pointCount).toBe(0);
     expect(model.points).toEqual([]);
     expect(model.hasValidSelection).toBe(false);
+  });
+
+  it("classifies disconnected before noRoute and disables row activation", function () {
+    const renderModel = createRenderModel();
+    const model = renderModel.buildModel({
+      props: withSurfacePolicy(makeProps({
+        disconnect: true,
+        domain: {
+          route: {
+            name: "Harbor Run",
+            points: [
+              { name: "Start", lat: 54.1, lon: 10.4 }
+            ]
+          },
+          routeName: "Harbor Run",
+          pointCount: 1,
+          selectedIndex: 0,
+          isActiveRoute: false,
+          showLatLon: false,
+          useRhumbLine: false
+        }
+      }), { mode: "dispatch" }),
+      shellRect: { width: 320, height: 180 },
+      isVerticalCommitted: false
+    });
+
+    expect(model.kind).toBe("disconnected");
+    expect(model.stateLabel).toBe("GPS Lost");
+    expect(model.hasRoute).toBe(false);
+    expect(model.points).toEqual([]);
+    expect(model.canActivateRoutePoint).toBe(false);
+    expect(model.interactionState).toBe("passive");
   });
 });

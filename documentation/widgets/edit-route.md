@@ -12,6 +12,12 @@ EditRouteTextHtmlWidget is a committed HTML renderer for the nav editRoute kind.
 - policy source: runtime-injected surfacePolicy
 - formatter fallback outputs are normalized through `PlaceholderNormalize`; missing metric values render as `---`
 
+## State Screens
+
+- Resolver order: `disconnected` (`p.disconnect === true`) -> `noRoute` (`domain.hasRoute !== true`) -> `data`
+- Non-`data` states render through shared `StateScreenMarkup`
+- Non-`data` states are always passive via `StateScreenInteraction`
+
 ## Interaction Contract
 
 - dispatch mode attaches direct click listeners

@@ -2,7 +2,27 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 describe("AisTargetMarkup", function () {
   function createMarkup() {
-    return loadFresh("shared/widget-kits/nav/AisTargetMarkup.js").create();
+    const moduleCache = Object.create(null);
+    const Helpers = {
+      getModule(id) {
+        if (!moduleCache[id]) {
+          if (id === "StateScreenMarkup") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
+          }
+          else if (id === "StateScreenLabels") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+          }
+          else if (id === "HtmlWidgetUtils") {
+            moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
+          }
+          else {
+            throw new Error("unexpected module: " + id);
+          }
+        }
+        return moduleCache[id];
+      }
+    };
+    return loadFresh("shared/widget-kits/nav/AisTargetMarkup.js").create({}, Helpers);
   }
 
   function createHtmlUtils() {
@@ -18,7 +38,8 @@ describe("AisTargetMarkup", function () {
   function makeModel(overrides) {
     return Object.assign({
       mode: "normal",
-      renderState: "data",
+      kind: "data",
+      stateLabel: "",
       showTcpaBranch: true,
       captureClicks: true,
       showHotspot: true,
@@ -46,7 +67,6 @@ describe("AisTargetMarkup", function () {
       },
       nameText: "Poseidon",
       frontText: "Front",
-      placeholderText: "No AIS",
       visibleMetricIds: ["dst", "cpa", "tcpa", "brg"],
       metrics: {
         dst: { captionText: "DST", valueText: "4.2", unitText: "nm" },
@@ -190,18 +210,18 @@ describe("AisTargetMarkup", function () {
     });
   });
 
-  it("renders placeholder state with placeholder text only", function () {
+  it("renders noAis state through shared state-screen markup", function () {
     const markup = createMarkup();
     const html = markup.render({
       model: makeModel({
-        renderState: "placeholder",
+        kind: "noAis",
+        stateLabel: "No AIS",
         captureClicks: false,
         showHotspot: false,
         hasAccent: false,
         wrapperClasses: [
           "dyni-ais-target-html",
           "dyni-ais-target-mode-normal",
-          "dyni-ais-target-placeholder",
           "dyni-ais-target-open-passive",
           "dyni-ais-target-branch-tcpa"
         ],
@@ -211,8 +231,8 @@ describe("AisTargetMarkup", function () {
       htmlUtils: createHtmlUtils()
     });
 
-    expect(html).toContain("dyni-ais-target-placeholder");
-    expect(html).toContain("dyni-ais-target-placeholder-text");
+    expect(html).toContain("dyni-state-no-ais");
+    expect(html).toContain("dyni-state-screen-body");
     expect(html).toContain(">No AIS<");
     expect(html).not.toContain("dyni-ais-target-identity");
     expect(html).not.toContain("dyni-ais-target-metrics");

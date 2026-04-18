@@ -9,6 +9,7 @@ describe("EditRouteTextHtmlWidget", function () {
       const props = args && args.props ? args.props : {};
       const canOpen = props.__canOpen === true;
       return {
+        kind: props.__kind || "data",
         mode: "normal",
         hasRoute: true,
         isLocalRoute: false,

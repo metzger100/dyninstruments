@@ -151,11 +151,19 @@ describe("config/components.js", function () {
     expect(components.EditRouteRenderModel.globalKey).toBe("DyniEditRouteRenderModel");
     expect(components.EditRouteRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteRenderModel.js");
     expect(components.EditRouteRenderModel.css).toBeUndefined();
-    expect(components.EditRouteRenderModel.deps).toEqual(["EditRouteLayout", "HtmlWidgetUtils", "NavInteractionPolicy", "PlaceholderNormalize"]);
+    expect(components.EditRouteRenderModel.deps).toEqual([
+      "EditRouteLayout",
+      "HtmlWidgetUtils",
+      "NavInteractionPolicy",
+      "PlaceholderNormalize",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenInteraction"
+    ]);
     expect(components.EditRouteMarkup.globalKey).toBe("DyniEditRouteMarkup");
     expect(components.EditRouteMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteMarkup.js");
     expect(components.EditRouteMarkup.css).toBeUndefined();
-    expect(components.EditRouteMarkup.deps).toBeUndefined();
+    expect(components.EditRouteMarkup.deps).toEqual(["StateScreenMarkup"]);
     expect(components.RoutePointsLayoutSizing.globalKey).toBe("DyniRoutePointsLayoutSizing");
     expect(components.RoutePointsLayoutSizing.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsLayoutSizing.js");
     expect(components.RoutePointsLayoutSizing.deps).toBeUndefined();
@@ -233,7 +241,11 @@ describe("config/components.js", function () {
       "ActiveRouteHtmlFit",
       "HtmlWidgetUtils",
       "PreparedPayloadModelCache",
-      "PlaceholderNormalize"
+      "PlaceholderNormalize",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenInteraction",
+      "StateScreenMarkup"
     ]);
     expect(components.EditRouteTextHtmlWidget.globalKey).toBe("DyniEditRouteTextHtmlWidget");
     expect(components.EditRouteTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js");
@@ -248,12 +260,15 @@ describe("config/components.js", function () {
       "RoutePointsLayout",
       "HtmlWidgetUtils",
       "NavInteractionPolicy",
-      "PlaceholderNormalize"
+      "PlaceholderNormalize",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenInteraction"
     ]);
     expect(components.RoutePointsMarkup.globalKey).toBe("DyniRoutePointsMarkup");
     expect(components.RoutePointsMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsMarkup.js");
     expect(components.RoutePointsMarkup.css).toBeUndefined();
-    expect(components.RoutePointsMarkup.deps).toBeUndefined();
+    expect(components.RoutePointsMarkup.deps).toEqual(["StateScreenMarkup"]);
     expect(components.RoutePointsDomEffects.globalKey).toBe("DyniRoutePointsDomEffects");
     expect(components.RoutePointsDomEffects.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsDomEffects.js");
     expect(components.RoutePointsDomEffects.css).toBeUndefined();
@@ -277,15 +292,30 @@ describe("config/components.js", function () {
     expect(components.MapZoomTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js");
     expect(components.MapZoomTextHtmlWidget.css).toBeUndefined();
     expect(components.MapZoomTextHtmlWidget.shadowCss).toEqual(["http://host/plugins/dyninstruments/widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css"]);
-    expect(components.MapZoomTextHtmlWidget.deps).toEqual(["MapZoomHtmlFit", "HtmlWidgetUtils", "PreparedPayloadModelCache"]);
+    expect(components.MapZoomTextHtmlWidget.deps).toEqual([
+      "MapZoomHtmlFit",
+      "HtmlWidgetUtils",
+      "PreparedPayloadModelCache",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenInteraction",
+      "StateScreenMarkup"
+    ]);
     expect(components.AisTargetRenderModel.globalKey).toBe("DyniAisTargetRenderModel");
     expect(components.AisTargetRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetRenderModel.js");
     expect(components.AisTargetRenderModel.css).toBeUndefined();
-    expect(components.AisTargetRenderModel.deps).toEqual(["AisTargetLayout", "HtmlWidgetUtils", "PlaceholderNormalize"]);
+    expect(components.AisTargetRenderModel.deps).toEqual([
+      "AisTargetLayout",
+      "HtmlWidgetUtils",
+      "PlaceholderNormalize",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenInteraction"
+    ]);
     expect(components.AisTargetMarkup.globalKey).toBe("DyniAisTargetMarkup");
     expect(components.AisTargetMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetMarkup.js");
     expect(components.AisTargetMarkup.css).toBeUndefined();
-    expect(components.AisTargetMarkup.deps).toBeUndefined();
+    expect(components.AisTargetMarkup.deps).toEqual(["StateScreenMarkup"]);
     expect(components.AisTargetTextHtmlWidget.globalKey).toBe("DyniAisTargetTextHtmlWidget");
     expect(components.AisTargetTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js");
     expect(components.AisTargetTextHtmlWidget.css).toBeUndefined();

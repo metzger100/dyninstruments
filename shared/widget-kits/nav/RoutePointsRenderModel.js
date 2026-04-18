@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsRenderModel - Pure normalization and display model owner for route-points HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: CenterDisplayMath, RoutePointsLayout, HtmlWidgetUtils, PlaceholderNormalize
+ * Depends: CenterDisplayMath, RoutePointsLayout, HtmlWidgetUtils, NavInteractionPolicy, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,7 +11,6 @@
   "use strict";
 
   const PLACEHOLDER_VALUE = "--"; /* dyni-lint-disable-line hardcoded-runtime-default -- RoutePoints segment info contract requires a fixed placeholder token. */
-  const NO_ROUTE_TEXT = "No Route";
 
   function toFiniteNumber(value) {
     const n = Number(value);
@@ -117,6 +116,29 @@
     const shellHeight = toSafeInteger(m.shellHeight, 0);
     const scrollbarGutterPx = Math.max(0, toSafeInteger(m.scrollbarGutterPx, 0));
 
+    if (m.kind && m.kind !== "data") {
+      if (m.isVerticalContainer === true) {
+        return [
+          m.kind,
+          shellWidth,
+          m.showHeader ? 1 : 0,
+          m.interactionState || "passive",
+          m.stateLabel || "",
+          scrollbarGutterPx
+        ];
+      }
+      return [
+        m.kind,
+        m.mode || "normal",
+        m.showHeader ? 1 : 0,
+        m.interactionState || "passive",
+        shellWidth,
+        shellHeight,
+        m.stateLabel || "",
+        scrollbarGutterPx
+      ];
+    }
+
     if (m.isVerticalContainer === true) {
       return [
         1,
@@ -210,6 +232,17 @@
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const navInteractionPolicy = Helpers.getModule("NavInteractionPolicy").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
+    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
+    const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
+
+    function resolveStateKind(props, route) {
+      return stateScreenPrecedence.pickFirst([
+        { kind: "disconnected", when: props.disconnect === true },
+        { kind: "noRoute", when: !route },
+        { kind: "data", when: true }
+      ]);
+    }
 
     function buildModel(args) {
       const cfg = args || {};
@@ -220,7 +253,9 @@
       const isVerticalContainer = cfg.isVerticalCommitted === true;
 
       const route = toRoute(domain.route);
-      const points = route ? route.points : [];
+      const kind = resolveStateKind(props, route);
+      const hasRoute = kind === "data" && !!route;
+      const points = hasRoute ? route.points : [];
       const pointCount = points.length;
 
       const shellRect = cfg.shellRect && typeof cfg.shellRect === "object" ? cfg.shellRect : null;
@@ -241,11 +276,17 @@
       const distanceUnit = toText(formatting.distanceUnit, htmlUtils);
       const courseUnit = toText(formatting.courseUnit, htmlUtils);
       const waypointsText = toText(formatting.waypointsText, htmlUtils);
-      const routeNameText = route
+      const routeNameText = hasRoute
         ? toText(domain.routeName, htmlUtils)
-        : NO_ROUTE_TEXT;
+        : "";
+      const stateLabel = kind === "data" ? "" : (stateScreenLabels.LABELS[kind] || "");
       const isActiveRoute = domain.isActiveRoute === true;
-      const canActivate = navInteractionPolicy.canDispatchWhenNotEditing(props);
+      const baseInteraction = navInteractionPolicy.canDispatchWhenNotEditing(props) ? "dispatch" : "passive";
+      const interactionState = stateScreenInteraction.resolveInteraction({
+        kind: kind,
+        baseInteraction: baseInteraction
+      });
+      const canActivate = interactionState === "dispatch";
 
       const resolvedMode = layoutApi.resolveMode({
         W: shellWidth,
@@ -328,14 +369,16 @@
       }
 
       const model = {
+        kind: kind,
+        stateLabel: stateLabel,
+        interactionState: interactionState,
         mode: layoutOutput.mode,
         showHeader: showHeader,
-        hasRoute: !!route,
+        hasRoute: hasRoute,
         routeNameText: routeNameText,
-        emptyText: route ? "" : NO_ROUTE_TEXT,
-        metaText: waypointsText
+        metaText: hasRoute && waypointsText
           ? String(pointCount) + " " + waypointsText
-          : String(pointCount),
+          : (hasRoute ? String(pointCount) : ""),
         waypointsText: waypointsText,
         distanceUnit: distanceUnit,
         courseUnit: courseUnit,

@@ -45,6 +45,18 @@ describe("ActiveRouteTextHtmlWidget", function () {
         if (id === "PlaceholderNormalize") {
           return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         }
+        if (id === "StateScreenLabels") {
+          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+        }
+        if (id === "StateScreenPrecedence") {
+          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+        }
+        if (id === "StateScreenInteraction") {
+          return loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
+        }
+        if (id === "StateScreenMarkup") {
+          return loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
+        }
         throw new Error("unexpected module: " + id);
       }
     };
@@ -59,6 +71,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     return Object.assign({
       routeName: "Harbor Run",
       disconnect: false,
+      wpServer: true,
       display: {
         remain: 12.4,
         eta: "2026-03-06T11:45:00Z",
@@ -203,6 +216,36 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const wrapper = mounted.mountEl.querySelector(".dyni-active-route-html");
     wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(openActiveRoute).not.toHaveBeenCalled();
+  });
+
+  it("renders disconnected and no-route state screens with passive interaction", function () {
+    const setup = createRenderer();
+    const openActiveRoute = vi.fn(() => true);
+
+    const disconnected = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy(makeProps({ disconnect: true }), { mode: "dispatch", openActiveRoute })
+    );
+    expect(disconnected.html()).toContain("dyni-state-disconnected");
+    expect(disconnected.html()).toContain("GPS Lost");
+    expect(disconnected.html()).toContain("dyni-active-route-open-passive");
+    expect(disconnected.html()).not.toContain("dyni-active-route-open-hotspot");
+    disconnected.mountEl.querySelector(".dyni-active-route-html").dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect(openActiveRoute).not.toHaveBeenCalled();
+
+    const noRouteByWpServer = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy(makeProps({ disconnect: false, wpServer: false, routeName: "Harbor Run" }), { mode: "dispatch", openActiveRoute })
+    );
+    expect(noRouteByWpServer.html()).toContain("dyni-state-no-route");
+    expect(noRouteByWpServer.html()).toContain("No Route");
+
+    const noRouteByEmptyName = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy(makeProps({ disconnect: false, wpServer: true, routeName: "   " }), { mode: "dispatch", openActiveRoute })
+    );
+    expect(noRouteByEmptyName.html()).toContain("dyni-state-no-route");
+    expect(noRouteByEmptyName.html()).toContain("No Route");
   });
 
   it("normalizes known formatter fallback tokens to the configured default", function () {

@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteMarkup - Pure HTML assembly owner for edit-route renderer output
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: none
+ * Depends: StateScreenMarkup
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -96,7 +96,9 @@
       + "</div>";
   }
 
-  function create() {
+  function create(def, Helpers) {
+    const stateScreenMarkup = Helpers.getModule("StateScreenMarkup").create(def, Helpers);
+
     function render(args) {
       const cfg = args || {};
       const model = toObject(cfg.model);
@@ -105,12 +107,13 @@
       const mode = model.mode || "normal";
       const hasRoute = model.hasRoute === true;
       const isLocalRoute = model.isLocalRoute === true;
-      const canOpen = model.canOpenEditRoute === true;
+      const interactionState = model.interactionState === "dispatch" ? "dispatch" : "passive";
+      const canOpen = interactionState === "dispatch";
 
       const wrapperClasses = [
         "dyni-edit-route-html",
         "dyni-edit-route-mode-" + mode,
-        canOpen ? "dyni-edit-route-open-dispatch" : "dyni-edit-route-open-passive"
+        "dyni-edit-route-open-" + interactionState
       ];
       if (mode === "flat") {
         wrapperClasses.push("dyni-edit-route-flat-rows-" + (model.flatMetricRows === 2 ? "2" : "1"));
@@ -121,8 +124,14 @@
       if (isLocalRoute) {
         wrapperClasses.push("dyni-edit-route-local-route");
       }
-      if (!hasRoute) {
-        wrapperClasses.push("dyni-edit-route-no-route");
+      if (model.kind && model.kind !== "data") {
+        return stateScreenMarkup.renderStateScreen({
+          kind: model.kind,
+          label: toText(model.stateLabel),
+          wrapperClasses: wrapperClasses,
+          extraAttrs: 'data-dyni-action="edit-route-open"' + htmlUtils.toStyleAttr(model.wrapperStyle),
+          htmlUtils: htmlUtils
+        });
       }
 
       const openHotspot = canOpen

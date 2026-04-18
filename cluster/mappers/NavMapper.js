@@ -49,7 +49,7 @@
         return {
           renderer: "ActiveRouteTextHtmlWidget",
           routeName: activeRouteDomain.routeName,
-          disconnect: activeRouteDomain.disconnect,
+          disconnect: p.disconnect === true,
           display: activeRouteDomain.display,
           captions: activeRouteDomain.captions,
           units: activeRouteDomain.units,

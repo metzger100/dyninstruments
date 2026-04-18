@@ -111,7 +111,8 @@
       function patchDom(payload) {
         const shellRect = payload.shellRect || null;
         const model = buildModel(payload.props, shellRect, scrollbarGutterPx);
-        const fit = payload.layoutChanged || !lastFit
+        const shouldComputeFit = model.kind === "data" && (payload.layoutChanged || !lastFit);
+        const fit = shouldComputeFit
           ? (htmlFit.compute({
             model: model,
             hostContext: hostContext,

@@ -12,6 +12,12 @@ ActiveRouteTextHtmlWidget is a committed HTML renderer routed by ClusterRenderer
 - interaction: runtime surface policy dispatch/passive mode
 - formatter fallback outputs are normalized through `PlaceholderNormalize`; missing metric values render as `---`
 
+## State Screens
+
+- Resolver order: `disconnected` (`p.disconnect === true`) -> `noRoute` (`p.wpServer === false`) -> `noRoute` (`p.routeName === ""`) -> `data`
+- Non-`data` states render via `StateScreenMarkup` with shared labels (`GPS Lost`, `No Route`)
+- Non-`data` states force passive interaction through `StateScreenInteraction`
+
 ## Interaction Contract
 
 - dispatch mode attaches direct click listeners on the committed wrapper

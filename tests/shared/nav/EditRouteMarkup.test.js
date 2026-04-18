@@ -2,7 +2,27 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 describe("EditRouteMarkup", function () {
   function createMarkup() {
-    return loadFresh("shared/widget-kits/nav/EditRouteMarkup.js").create();
+    const moduleCache = Object.create(null);
+    const Helpers = {
+      getModule(id) {
+        if (!moduleCache[id]) {
+          if (id === "StateScreenMarkup") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
+          }
+          else if (id === "StateScreenLabels") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+          }
+          else if (id === "HtmlWidgetUtils") {
+            moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
+          }
+          else {
+            throw new Error("unexpected module: " + id);
+          }
+        }
+        return moduleCache[id];
+      }
+    };
+    return loadFresh("shared/widget-kits/nav/EditRouteMarkup.js").create({}, Helpers);
   }
 
   function createHtmlUtils() {
@@ -12,6 +32,9 @@ describe("EditRouteMarkup", function () {
   function makeModel(overrides) {
     return Object.assign({
       mode: "normal",
+      kind: "data",
+      stateLabel: "",
+      interactionState: "dispatch",
       hasRoute: true,
       isActiveRoute: true,
       isLocalRoute: true,
@@ -82,7 +105,13 @@ describe("EditRouteMarkup", function () {
   it("renders passive mode without catchAll/hotspot", function () {
     const markup = createMarkup();
     const html = markup.render({
-      model: makeModel({ canOpenEditRoute: false, captureClicks: false, isLocalRoute: false, sourceBadgeText: "" }),
+      model: makeModel({
+        interactionState: "passive",
+        canOpenEditRoute: false,
+        captureClicks: false,
+        isLocalRoute: false,
+        sourceBadgeText: ""
+      }),
       fit: makeFit(),
       htmlUtils: createHtmlUtils()
     });
@@ -92,13 +121,16 @@ describe("EditRouteMarkup", function () {
     expect(html).not.toContain("dyni-edit-route-open-hotspot");
   });
 
-  it("renders no-route state with name bar only", function () {
+  it("renders no-route state through shared state-screen markup", function () {
     const markup = createMarkup();
     const html = markup.render({
       model: makeModel({
+        kind: "noRoute",
+        stateLabel: "No Route",
+        interactionState: "passive",
         hasRoute: false,
         isLocalRoute: false,
-        nameText: "No Route",
+        nameText: "",
         canOpenEditRoute: false,
         captureClicks: false,
         visibleMetricIds: [],
@@ -108,10 +140,11 @@ describe("EditRouteMarkup", function () {
       htmlUtils: createHtmlUtils()
     });
 
-    expect(html).toContain("dyni-edit-route-no-route");
+    expect(html).toContain("dyni-state-no-route");
     expect(html).toContain("No Route");
+    expect(html).toContain("dyni-state-screen-body");
+    expect(html).not.toContain("dyni-edit-route-open-hotspot");
     expect(html).not.toContain("dyni-edit-route-metrics");
-    expect(html).not.toContain("dyni-edit-route-metric-pts");
   });
 
   it("renders all 4 metrics in flat mode and keeps unit nodes only for DST/RTE", function () {

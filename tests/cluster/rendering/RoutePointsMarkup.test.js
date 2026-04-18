@@ -2,7 +2,27 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 describe("RoutePointsMarkup", function () {
   function createMarkup() {
-    return loadFresh("shared/widget-kits/nav/RoutePointsMarkup.js").create();
+    const moduleCache = Object.create(null);
+    const Helpers = {
+      getModule(id) {
+        if (!moduleCache[id]) {
+          if (id === "StateScreenMarkup") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
+          }
+          else if (id === "StateScreenLabels") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+          }
+          else if (id === "HtmlWidgetUtils") {
+            moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
+          }
+          else {
+            throw new Error("unexpected module: " + id);
+          }
+        }
+        return moduleCache[id];
+      }
+    };
+    return loadFresh("shared/widget-kits/nav/RoutePointsMarkup.js").create({}, Helpers);
   }
 
   function createHtmlUtils() {
@@ -12,6 +32,9 @@ describe("RoutePointsMarkup", function () {
   function makeModel(overrides) {
     return Object.assign({
       mode: "normal",
+      kind: "data",
+      stateLabel: "",
+      interactionState: "dispatch",
       showHeader: true,
       hasRoute: true,
       routeNameText: "Harbor Run",
@@ -19,7 +42,6 @@ describe("RoutePointsMarkup", function () {
       canActivateRoutePoint: true,
       isActiveRoute: true,
       showOrdinal: true,
-      emptyText: "",
       points: [
         { index: 0, ordinalText: "1", nameText: "Start", infoText: "--°/--nm", selected: false },
         { index: 1, ordinalText: "2", nameText: "Finish", infoText: "DIR:89°/DST:2:nm", selected: true }
@@ -97,7 +119,11 @@ describe("RoutePointsMarkup", function () {
   it("renders passive mode without click handlers", function () {
     const markup = createMarkup();
     const html = markup.render({
-      model: makeModel({ canActivateRoutePoint: false, isActiveRoute: false }),
+      model: makeModel({
+        interactionState: "passive",
+        canActivateRoutePoint: false,
+        isActiveRoute: false
+      }),
       fit: makeFit(),
       htmlUtils: createHtmlUtils()
     });
@@ -131,20 +157,25 @@ describe("RoutePointsMarkup", function () {
     expect(html).toContain("dyni-route-points-marker-cell");
   });
 
-  it("renders dedicated no-route placeholder branch", function () {
+  it("renders no-route state through shared state-screen markup", function () {
     const markup = createMarkup();
     const html = markup.render({
-      model: makeModel({ hasRoute: false, emptyText: "No Route", points: [], showHeader: true }),
+      model: makeModel({
+        kind: "noRoute",
+        stateLabel: "No Route",
+        interactionState: "passive",
+        hasRoute: false,
+        points: [],
+        showHeader: true
+      }),
       fit: makeFit({ rowFits: [], emptyStyle: "font-size:12px;" }),
       htmlUtils: createHtmlUtils()
     });
 
     expect(html).toContain("dyni-route-points-html");
-    expect(html).toContain("dyni-route-points-no-route");
-    expect(html).toContain("dyni-route-points-empty");
-    expect(html).toContain("dyni-route-points-empty-text");
+    expect(html).toContain("dyni-state-no-route");
+    expect(html).toContain("dyni-state-screen-body");
     expect(html).toContain("No Route");
-    expect(html).toContain('style="font-size:12px;"');
     expect(html).not.toContain("dyni-route-points-header");
     expect(html).not.toContain("dyni-route-points-row");
     expect(html).not.toContain("dyni-route-points-list");

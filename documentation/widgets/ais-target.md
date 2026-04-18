@@ -11,6 +11,12 @@ AisTargetTextHtmlWidget renders AIS target summary state on the committed HTML s
 - style scope: shadow-local CSS
 - formatter fallback outputs are normalized through `PlaceholderNormalize`; missing metric values render as `---`
 
+## State Screens
+
+- Resolver order (AIS exception): `hidden` -> `disconnected` -> `noAis` -> `data`
+- `hidden` keeps AIS invisible outside `gpspage` when no target identity and not editing
+- `disconnected` and `noAis` render via `StateScreenMarkup`; non-`data` interaction is always passive
+
 ## Interaction Contract
 
 - dispatch mode attaches direct listener and dispatches surfacePolicy.actions.ais.showInfo(mmsi)

@@ -28,30 +28,56 @@
       js: BASE + "shared/widget-kits/nav/AisTargetRenderModel.js",
       css: undefined,
       globalKey: "DyniAisTargetRenderModel",
-      deps: ["AisTargetLayout", "HtmlWidgetUtils", "PlaceholderNormalize"]
+      deps: [
+        "AisTargetLayout",
+        "HtmlWidgetUtils",
+        "PlaceholderNormalize",
+        "StateScreenLabels",
+        "StateScreenPrecedence",
+        "StateScreenInteraction"
+      ]
     },
     AisTargetMarkup: {
       js: BASE + "shared/widget-kits/nav/AisTargetMarkup.js",
       css: undefined,
-      globalKey: "DyniAisTargetMarkup"
+      globalKey: "DyniAisTargetMarkup",
+      deps: ["StateScreenMarkup"]
     },
     ActiveRouteTextHtmlWidget: {
       js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
       css: undefined,
       shadowCss: [BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css"],
       globalKey: "DyniActiveRouteTextHtmlWidget",
-      deps: ["ActiveRouteHtmlFit", "HtmlWidgetUtils", "PreparedPayloadModelCache", "PlaceholderNormalize"]
+      deps: [
+        "ActiveRouteHtmlFit",
+        "HtmlWidgetUtils",
+        "PreparedPayloadModelCache",
+        "PlaceholderNormalize",
+        "StateScreenLabels",
+        "StateScreenPrecedence",
+        "StateScreenInteraction",
+        "StateScreenMarkup"
+      ]
     },
     EditRouteRenderModel: {
       js: BASE + "shared/widget-kits/nav/EditRouteRenderModel.js",
       css: undefined,
       globalKey: "DyniEditRouteRenderModel",
-      deps: ["EditRouteLayout", "HtmlWidgetUtils", "NavInteractionPolicy", "PlaceholderNormalize"]
+      deps: [
+        "EditRouteLayout",
+        "HtmlWidgetUtils",
+        "NavInteractionPolicy",
+        "PlaceholderNormalize",
+        "StateScreenLabels",
+        "StateScreenPrecedence",
+        "StateScreenInteraction"
+      ]
     },
     EditRouteMarkup: {
       js: BASE + "shared/widget-kits/nav/EditRouteMarkup.js",
       css: undefined,
-      globalKey: "DyniEditRouteMarkup"
+      globalKey: "DyniEditRouteMarkup",
+      deps: ["StateScreenMarkup"]
     },
     EditRouteTextHtmlWidget: {
       js: BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js",
@@ -64,12 +90,22 @@
       js: BASE + "shared/widget-kits/nav/RoutePointsRenderModel.js",
       css: undefined,
       globalKey: "DyniRoutePointsRenderModel",
-      deps: ["CenterDisplayMath", "RoutePointsLayout", "HtmlWidgetUtils", "NavInteractionPolicy", "PlaceholderNormalize"]
+      deps: [
+        "CenterDisplayMath",
+        "RoutePointsLayout",
+        "HtmlWidgetUtils",
+        "NavInteractionPolicy",
+        "PlaceholderNormalize",
+        "StateScreenLabels",
+        "StateScreenPrecedence",
+        "StateScreenInteraction"
+      ]
     },
     RoutePointsMarkup: {
       js: BASE + "shared/widget-kits/nav/RoutePointsMarkup.js",
       css: undefined,
-      globalKey: "DyniRoutePointsMarkup"
+      globalKey: "DyniRoutePointsMarkup",
+      deps: ["StateScreenMarkup"]
     },
     RoutePointsDomEffects: {
       js: BASE + "shared/widget-kits/nav/RoutePointsDomEffects.js",
@@ -94,7 +130,15 @@
       css: undefined,
       shadowCss: [BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css"],
       globalKey: "DyniMapZoomTextHtmlWidget",
-      deps: ["MapZoomHtmlFit", "HtmlWidgetUtils", "PreparedPayloadModelCache"]
+      deps: [
+        "MapZoomHtmlFit",
+        "HtmlWidgetUtils",
+        "PreparedPayloadModelCache",
+        "StateScreenLabels",
+        "StateScreenPrecedence",
+        "StateScreenInteraction",
+        "StateScreenMarkup"
+      ]
     },
     AisTargetTextHtmlWidget: {
       js: BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js",

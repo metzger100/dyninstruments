@@ -74,6 +74,18 @@ describe("AisTargetTextHtmlWidget", function () {
         if (id === "PlaceholderNormalize") {
           return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         }
+        if (id === "StateScreenLabels") {
+          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+        }
+        if (id === "StateScreenPrecedence") {
+          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+        }
+        if (id === "StateScreenInteraction") {
+          return loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
+        }
+        if (id === "StateScreenMarkup") {
+          return loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
+        }
         throw new Error("unexpected module: " + id);
       }
     };
@@ -250,7 +262,7 @@ describe("AisTargetTextHtmlWidget", function () {
     expect(showInfo).not.toHaveBeenCalled();
   });
 
-  it("renders flat branch and placeholder state for gps page", function () {
+  it("renders flat branch and noAis state for gps page", function () {
     const flatMounted = mountCommitted(
       createRenderer().renderer,
       withSurfacePolicy(makeProps({ domain: { showTcpaBranch: false, frontText: "Back" } }), {
@@ -271,8 +283,36 @@ describe("AisTargetTextHtmlWidget", function () {
     expect(flatMounted.html()).toContain("dyni-ais-target-metric-value");
     expect(flatMounted.html()).not.toContain("dyni-ais-target-metric-value-row");
 
-    expect(placeholderMounted.html()).toContain("dyni-ais-target-placeholder");
+    expect(placeholderMounted.html()).toContain("dyni-state-no-ais");
     expect(placeholderMounted.html()).toContain("No AIS");
+  });
+
+  it("applies AIS hidden/disconnected precedence exception", function () {
+    const hiddenMounted = mountCommitted(
+      createRenderer().renderer,
+      withSurfacePolicy(makeProps({
+        disconnect: true,
+        domain: { hasTargetIdentity: false, hasDispatchMmsi: false }
+      }), {
+        pageId: "other",
+        interactionMode: "dispatch"
+      })
+    );
+    expect(hiddenMounted.html()).toContain("dyni-state-hidden");
+    expect(hiddenMounted.html()).not.toContain("GPS Lost");
+
+    const disconnectedMounted = mountCommitted(
+      createRenderer().renderer,
+      withSurfacePolicy(makeProps({
+        disconnect: true,
+        domain: { hasTargetIdentity: false, hasDispatchMmsi: false }
+      }), {
+        pageId: "gpspage",
+        interactionMode: "dispatch"
+      })
+    );
+    expect(disconnectedMounted.html()).toContain("dyni-state-disconnected");
+    expect(disconnectedMounted.html()).toContain("GPS Lost");
   });
 
   it("updates layout signatures for branch and interaction changes", function () {

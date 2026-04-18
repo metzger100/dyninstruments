@@ -112,11 +112,11 @@ describe("AisTargetHtmlFit", function () {
     const patch = overrides || {};
     const base = {
       mode: "normal",
-      renderState: "data",
+      kind: "data",
       showTcpaBranch: true,
       isVerticalCommitted: false,
       effectiveLayoutHeight: shellRect.height,
-      placeholderText: "No AIS",
+      stateLabel: "",
       hasAccent: true,
       colorRole: "warning",
       nameText: "Poseidon",
@@ -139,7 +139,7 @@ describe("AisTargetHtmlFit", function () {
       W: shellRect.width,
       H: shellRect.height,
       mode: model.mode,
-      renderState: model.renderState,
+      renderState: model.kind === "data" ? "data" : "placeholder",
       showTcpaBranch: model.showTcpaBranch,
       isVerticalCommitted: model.isVerticalCommitted,
       effectiveLayoutHeight: model.effectiveLayoutHeight
@@ -180,13 +180,13 @@ describe("AisTargetHtmlFit", function () {
     })).toBeNull();
   });
 
-  it("fits placeholder mode with placeholder-only style payload", function () {
+  it("returns empty fit payload for non-data state-screen kinds", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
     const hostContext = { __dyniAisTargetTextMeasureCtx: createMeasureContext() };
     const shellRect = { width: 320, height: 180 };
     const model = buildModel(h, shellRect, {
-      renderState: "placeholder",
+      kind: "noAis",
       hasAccent: false,
       visibleMetricIds: []
     });
@@ -198,7 +198,7 @@ describe("AisTargetHtmlFit", function () {
       shellRect: shellRect
     });
 
-    expectStyleFormat(out.placeholderStyle);
+    expect(out.placeholderStyle).toBe("");
     expect(out.nameStyle).toBe("");
     expect(out.frontStyle).toBe("");
     expect(Object.prototype.hasOwnProperty.call(out, "frontInitialStyle")).toBe(false);

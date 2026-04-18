@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsMarkup - Pure HTML assembly owner for route-points renderer output
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: none
+ * Depends: StateScreenMarkup
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -114,39 +114,33 @@
     return html;
   }
 
-  function renderEmpty(model, fit, htmlUtils) {
-    const text = toText(model.emptyText || model.routeNameText || "No Route");
+  function create(def, Helpers) {
+    const stateScreenMarkup = Helpers.getModule("StateScreenMarkup").create(def, Helpers);
 
-    return ""
-      + '<div class="dyni-route-points-empty">'
-      + '<span class="dyni-route-points-text dyni-route-points-empty-text"'
-      + htmlUtils.toStyleAttr(toText(fit.emptyStyle))
-      + ">"
-      + htmlUtils.escapeHtml(text)
-      + "</span>"
-      + "</div>";
-  }
-
-  function create() {
     function render(args) {
       const cfg = args || {};
       const model = toObject(cfg.model);
       const fit = toObject(cfg.fit);
       const htmlUtils = cfg.htmlUtils;
       const geometry = toObject(model.inlineGeometry);
+      const interactionState = model.interactionState === "dispatch" ? "dispatch" : "passive";
       const wrapperClasses = [
         "dyni-route-points-html",
         "dyni-route-points-mode-" + (model.mode || "normal"),
-        model.canActivateRoutePoint === true
-          ? "dyni-route-points-dispatch"
-          : "dyni-route-points-passive"
+        interactionState === "dispatch" ? "dyni-route-points-dispatch" : "dyni-route-points-passive"
       ];
 
       if (model.isActiveRoute === true) {
         wrapperClasses.push("dyni-route-points-active-route");
       }
-      if (model.hasRoute !== true) {
-        wrapperClasses.push("dyni-route-points-no-route");
+      if (model.kind && model.kind !== "data") {
+        return stateScreenMarkup.renderStateScreen({
+          kind: model.kind,
+          label: toText(model.stateLabel),
+          wrapperClasses: wrapperClasses,
+          extraAttrs: 'data-dyni-action="route-points-activate"' + htmlUtils.toStyleAttr(geometry.wrapper && geometry.wrapper.style),
+          htmlUtils: htmlUtils
+        });
       }
 
       const rowsHtml = renderRows(model, geometry, fit, htmlUtils);
@@ -156,20 +150,16 @@
         + ' data-dyni-action="route-points-activate"'
         + htmlUtils.toStyleAttr(geometry.wrapper && geometry.wrapper.style)
         + ">"
-        + (model.hasRoute === true
-          ? (
-            renderHeader(model, geometry, fit, htmlUtils)
-            + '<div class="dyni-route-points-list"'
-            + htmlUtils.toStyleAttr(geometry.list && geometry.list.style)
-            + ">"
-            + '<div class="dyni-route-points-list-content"'
-            + htmlUtils.toStyleAttr(geometry.list && geometry.list.contentStyle)
-            + ">"
-            + rowsHtml
-            + "</div>"
-            + "</div>"
-          )
-          : renderEmpty(model, fit, htmlUtils))
+        + renderHeader(model, geometry, fit, htmlUtils)
+        + '<div class="dyni-route-points-list"'
+        + htmlUtils.toStyleAttr(geometry.list && geometry.list.style)
+        + ">"
+        + '<div class="dyni-route-points-list-content"'
+        + htmlUtils.toStyleAttr(geometry.list && geometry.list.contentStyle)
+        + ">"
+        + rowsHtml
+        + "</div>"
+        + "</div>"
         + "</div>";
     }
 

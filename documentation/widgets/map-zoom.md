@@ -10,6 +10,12 @@ MapZoomTextHtmlWidget renders map zoom state as a committed HTML surface.
 - shell: inert pre-commit
 - semantic content: committed shadow-root renderer
 
+## State Screens
+
+- Resolver order: `disconnected` (`p.disconnect === true`) -> `data`
+- `disconnected` renders shared `StateScreenMarkup` label (`GPS Lost`)
+- Non-`data` states force passive interaction and remove action hotspot ownership
+
 ## Interaction Contract
 
 - dispatch mode: direct click listener dispatches surfacePolicy.actions.map.checkAutoZoom()
