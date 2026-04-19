@@ -6,6 +6,7 @@ const COMPONENT_REGISTRY_FRAGMENT_SCRIPTS = [
   "config/components/registry-widgets.js",
   "config/components/registry-cluster.js"
 ];
+const SHARED_HTML_SHADOW_CSS = "http://host/plugins/dyninstruments/shared/html/HtmlShadowCommon.css";
 
 function runScripts(context, scripts) {
   scripts.forEach(function (scriptPath) {
@@ -282,7 +283,10 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteTextHtmlWidget.globalKey).toBe("DyniActiveRouteTextHtmlWidget");
     expect(components.ActiveRouteTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js");
     expect(components.ActiveRouteTextHtmlWidget.css).toBeUndefined();
-    expect(components.ActiveRouteTextHtmlWidget.shadowCss).toEqual(["http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css"]);
+    expect(components.ActiveRouteTextHtmlWidget.shadowCss).toEqual([
+      SHARED_HTML_SHADOW_CSS,
+      "http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css"
+    ]);
     expect(components.ActiveRouteTextHtmlWidget.deps).toEqual([
       "ActiveRouteHtmlFit",
       "HtmlWidgetUtils",
@@ -297,7 +301,10 @@ describe("config/components.js", function () {
     expect(components.EditRouteTextHtmlWidget.globalKey).toBe("DyniEditRouteTextHtmlWidget");
     expect(components.EditRouteTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js");
     expect(components.EditRouteTextHtmlWidget.css).toBeUndefined();
-    expect(components.EditRouteTextHtmlWidget.shadowCss).toEqual(["http://host/plugins/dyninstruments/widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"]);
+    expect(components.EditRouteTextHtmlWidget.shadowCss).toEqual([
+      SHARED_HTML_SHADOW_CSS,
+      "http://host/plugins/dyninstruments/widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"
+    ]);
     expect(components.EditRouteTextHtmlWidget.deps).toEqual(["EditRouteHtmlFit", "HtmlWidgetUtils", "EditRouteRenderModel", "EditRouteMarkup"]);
     expect(components.RoutePointsRenderModel.globalKey).toBe("DyniRoutePointsRenderModel");
     expect(components.RoutePointsRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsRenderModel.js");
@@ -325,7 +332,10 @@ describe("config/components.js", function () {
     expect(components.RoutePointsTextHtmlWidget.globalKey).toBe("DyniRoutePointsTextHtmlWidget");
     expect(components.RoutePointsTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js");
     expect(components.RoutePointsTextHtmlWidget.css).toBeUndefined();
-    expect(components.RoutePointsTextHtmlWidget.shadowCss).toEqual(["http://host/plugins/dyninstruments/widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.css"]);
+    expect(components.RoutePointsTextHtmlWidget.shadowCss).toEqual([
+      SHARED_HTML_SHADOW_CSS,
+      "http://host/plugins/dyninstruments/widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.css"
+    ]);
     expect(components.RoutePointsTextHtmlWidget.deps).toEqual([
       "RoutePointsHtmlFit",
       "HtmlWidgetUtils",
@@ -340,7 +350,10 @@ describe("config/components.js", function () {
     expect(components.MapZoomTextHtmlWidget.globalKey).toBe("DyniMapZoomTextHtmlWidget");
     expect(components.MapZoomTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js");
     expect(components.MapZoomTextHtmlWidget.css).toBeUndefined();
-    expect(components.MapZoomTextHtmlWidget.shadowCss).toEqual(["http://host/plugins/dyninstruments/widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css"]);
+    expect(components.MapZoomTextHtmlWidget.shadowCss).toEqual([
+      SHARED_HTML_SHADOW_CSS,
+      "http://host/plugins/dyninstruments/widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css"
+    ]);
     expect(components.MapZoomTextHtmlWidget.deps).toEqual([
       "MapZoomHtmlFit",
       "HtmlWidgetUtils",
@@ -371,7 +384,10 @@ describe("config/components.js", function () {
     expect(components.AisTargetTextHtmlWidget.globalKey).toBe("DyniAisTargetTextHtmlWidget");
     expect(components.AisTargetTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js");
     expect(components.AisTargetTextHtmlWidget.css).toBeUndefined();
-    expect(components.AisTargetTextHtmlWidget.shadowCss).toEqual(["http://host/plugins/dyninstruments/widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"]);
+    expect(components.AisTargetTextHtmlWidget.shadowCss).toEqual([
+      SHARED_HTML_SHADOW_CSS,
+      "http://host/plugins/dyninstruments/widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"
+    ]);
     expect(components.AisTargetTextHtmlWidget.deps).toEqual(["AisTargetHtmlFit", "HtmlWidgetUtils", "AisTargetRenderModel", "AisTargetMarkup"]);
     expect(components.CanvasDomSurfaceAdapter.globalKey).toBe("DyniCanvasDomSurfaceAdapter");
     expect(components.CanvasDomSurfaceAdapter.js).toBe("http://host/plugins/dyninstruments/cluster/rendering/CanvasDomSurfaceAdapter.js");

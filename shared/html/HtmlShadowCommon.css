@@ -1,0 +1,5 @@
+/* Shared shadow CSS for HTML widgets */
+.dyni-tabular {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--dyni-theme-font-family-mono), var(--dyni-theme-font-family);
+}

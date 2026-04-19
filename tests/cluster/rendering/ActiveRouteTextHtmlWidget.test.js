@@ -3,6 +3,8 @@ const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("ActiveRouteTextHtmlWidget", function () {
+  const ORIGINAL_DYNI_PLUGIN = globalThis.DyniPlugin;
+
   function createRenderer(options) {
     const opts = options || {};
     const fitCompute = opts.fitCompute || vi.fn(function () {
@@ -73,6 +75,14 @@ describe("ActiveRouteTextHtmlWidget", function () {
     };
   }
 
+  afterEach(function () {
+    if (typeof ORIGINAL_DYNI_PLUGIN === "undefined") {
+      delete globalThis.DyniPlugin;
+    } else {
+      globalThis.DyniPlugin = ORIGINAL_DYNI_PLUGIN;
+    }
+  });
+
   function makeProps(overrides) {
     return Object.assign({
       routeName: "Harbor Run",
@@ -116,6 +126,26 @@ describe("ActiveRouteTextHtmlWidget", function () {
         }
       }
     });
+  }
+
+  function createSurfaceDom() {
+    const rootEl = document.createElement("div");
+    rootEl.className = "widget dyniplugin dyni-host-html";
+    const shellEl = document.createElement("div");
+    shellEl.className = "widgetData dyni-shell";
+    const mountEl = document.createElement("div");
+    mountEl.className = "dyni-surface-html-mount";
+    shellEl.appendChild(mountEl);
+    rootEl.appendChild(shellEl);
+    mountEl.getBoundingClientRect = vi.fn(() => ({
+      width: 320,
+      height: 180
+    }));
+    return {
+      rootEl,
+      shellEl,
+      mountEl
+    };
   }
 
   function mountCommitted(rendererSpec, props, options) {
@@ -308,6 +338,65 @@ describe("ActiveRouteTextHtmlWidget", function () {
     valueEls.forEach((el) => {
       expect(el.classList.contains("dyni-tabular")).toBe(true);
     });
+  });
+
+  it("injects shared shadow css for stable digits into the committed shadow root", function () {
+    const setup = createRenderer();
+    const surfaceDom = createSurfaceDom();
+    const sharedShadowCssUrl = "http://host/plugins/dyninstruments/shared/html/HtmlShadowCommon.css";
+    const widgetShadowCssUrl = "http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css";
+    const sharedShadowCssPath = path.join(process.cwd(), "shared/html/HtmlShadowCommon.css");
+    const widgetShadowCssPath = path.join(process.cwd(), "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css");
+    const getShadowCssText = vi.fn(function (url) {
+      if (url === sharedShadowCssUrl) {
+        return fs.readFileSync(sharedShadowCssPath, "utf8");
+      }
+      if (url === widgetShadowCssUrl) {
+        return fs.readFileSync(widgetShadowCssPath, "utf8");
+      }
+      return "";
+    });
+
+    globalThis.DyniPlugin = {
+      runtime: {
+        _theme: {
+          getShadowCssText
+        }
+      }
+    };
+
+    const htmlSurfaceController = loadFresh("cluster/rendering/HtmlSurfaceController.js").create({}, {
+      getModule(id) {
+        if (id === "PerfSpanHelper") {
+          return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
+        }
+        throw new Error("unexpected module: " + id);
+      }
+    });
+    const controller = htmlSurfaceController.createSurfaceController({
+      rendererSpec: setup.renderer,
+      hostContext: {},
+      shadowCssUrls: [sharedShadowCssUrl, widgetShadowCssUrl]
+    });
+
+    controller.attach({
+      surface: "html",
+      rootEl: surfaceDom.rootEl,
+      shellEl: surfaceDom.shellEl,
+      props: withSurfacePolicy(makeProps({ stableDigits: true }), { mode: "dispatch" }),
+      revision: 1
+    });
+
+    const shadowRoot = surfaceDom.mountEl.shadowRoot;
+    const styles = Array.from(shadowRoot.querySelectorAll("style[data-dyni-shadow-css]"));
+    expect(styles.map((styleEl) => styleEl.getAttribute("data-dyni-shadow-css"))).toEqual([
+      sharedShadowCssUrl,
+      widgetShadowCssUrl
+    ]);
+    expect(styles[0].textContent).toContain(".dyni-tabular");
+    expect(shadowRoot.querySelector(".dyni-active-route-metric-value.dyni-tabular")).toBeTruthy();
+    expect(getShadowCssText).toHaveBeenCalledWith(sharedShadowCssUrl);
+    expect(getShadowCssText).toHaveBeenCalledWith(widgetShadowCssUrl);
   });
 
   it("always consults ActiveRouteHtmlFit when a shell rect exists", function () {

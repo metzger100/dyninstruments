@@ -15,6 +15,8 @@
     throw new Error("dyninstruments: baseUrl missing before config/components/registry-widgets.js load");
   }
 
+  const SHARED_HTML_SHADOW_CSS = BASE + "shared/html/HtmlShadowCommon.css";
+
   const groups = shared.componentRegistryGroups = shared.componentRegistryGroups || {};
 
   groups.widgets = {
@@ -47,7 +49,7 @@
     ActiveRouteTextHtmlWidget: {
       js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
       css: undefined,
-      shadowCss: [BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css"],
+      shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css"],
       globalKey: "DyniActiveRouteTextHtmlWidget",
       deps: [
         "ActiveRouteHtmlFit",
@@ -85,7 +87,7 @@
     EditRouteTextHtmlWidget: {
       js: BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js",
       css: undefined,
-      shadowCss: [BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"],
+      shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"],
       globalKey: "DyniEditRouteTextHtmlWidget",
       deps: ["EditRouteHtmlFit", "HtmlWidgetUtils", "EditRouteRenderModel", "EditRouteMarkup"]
     },
@@ -120,7 +122,7 @@
     RoutePointsTextHtmlWidget: {
       js: BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js",
       css: undefined,
-      shadowCss: [BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.css"],
+      shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.css"],
       globalKey: "DyniRoutePointsTextHtmlWidget",
       deps: [
         "RoutePointsHtmlFit",
@@ -133,7 +135,7 @@
     MapZoomTextHtmlWidget: {
       js: BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
       css: undefined,
-      shadowCss: [BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css"],
+      shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css"],
       globalKey: "DyniMapZoomTextHtmlWidget",
       deps: [
         "MapZoomHtmlFit",
@@ -150,7 +152,7 @@
     AisTargetTextHtmlWidget: {
       js: BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js",
       css: undefined,
-      shadowCss: [BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"],
+      shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"],
       globalKey: "DyniAisTargetTextHtmlWidget",
       deps: ["AisTargetHtmlFit", "HtmlWidgetUtils", "AisTargetRenderModel", "AisTargetMarkup"]
     },
