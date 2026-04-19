@@ -204,13 +204,14 @@
         },
         stableDigits: {
           type: "BOOLEAN",
-          default: false,
           name: "Stable digits",
           condition: [
             { kind: "voltage" },
             { kind: "voltageLinear" },
             { kind: "voltageRadial" },
             { kind: "clock" },
+            { kind: "dateTime" },
+            { kind: "timeStatus" },
             { kind: "pitch" },
             { kind: "roll" }
           ]

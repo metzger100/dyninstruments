@@ -174,9 +174,12 @@ describe("static cluster configs", function () {
       { kind: "voltageLinear" },
       { kind: "voltageRadial" },
       { kind: "clock" },
+      { kind: "dateTime" },
+      { kind: "timeStatus" },
       { kind: "pitch" },
       { kind: "roll" }
     ]);
+    expect(Object.prototype.hasOwnProperty.call(byCluster.vessel.editableParameters.stableDigits, "default")).toBe(false);
     expect(byCluster.anchor.editableParameters.stableDigits.default).toBe(false);
     expect(byCluster.anchor.editableParameters.stableDigits.condition).toEqual([
       { kind: "distance" },

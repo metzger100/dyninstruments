@@ -50,12 +50,14 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.dateTimeRatioThresholdFlat.internal).toBe(true);
     expect(def.editableParameters.captionUnitScale.internal).not.toBe(true);
     expect(def.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
-    expect(def.editableParameters.stableDigits.default).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(def.editableParameters.stableDigits, "default")).toBe(false);
     expect(def.editableParameters.stableDigits.condition).toEqual([
       { kind: "voltage" },
       { kind: "voltageLinear" },
       { kind: "voltageRadial" },
       { kind: "clock" },
+      { kind: "dateTime" },
+      { kind: "timeStatus" },
       { kind: "pitch" },
       { kind: "roll" }
     ]);

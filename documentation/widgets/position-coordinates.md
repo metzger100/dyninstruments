@@ -24,7 +24,8 @@ This renderer uses the shared text compaction contract from `TextLayoutEngine.co
 - Header row: caption (left), unit (right)
 - Body row 1: latitude
 - Body row 2: longitude
-- When `coordinatesTabular` is `true`, stacked latitude/longitude rows are right-aligned so digits line up vertically
+- When `coordinatesTabular` is `true`, stacked latitude/longitude rows are right-aligned so digits line up vertically on the `position` variant
+- `dateTime` and `timeStatus` ignore `coordinatesTabular`, center-align their text, and default to mono font via `stableDigits`
 - Typography is theme-driven per render: coordinate/value text uses `theme.font.weight`, header caption/unit and state-screen labels use `theme.font.labelWeight`
 - Uses layout editables: `ratioThresholdNormal`, `ratioThresholdFlat`, `captionUnitScale`
 
@@ -79,9 +80,9 @@ return {
 
 ## Phase 6 Options
 
-- `coordinatesTabular` (default `true`) switches coordinate rendering to `theme.font.familyMono`.
-- Applies in stacked and flat variants (including `dateTime` / `timeStatus` display variants).
-- `coordinatesTabular: false` keeps coordinate rendering on `theme.font.family`.
+- `coordinatesTabular` (default `true`) switches `position` coordinate rendering to `theme.font.familyMono`.
+- Applies in stacked and flat `position` variants only.
+- `coordinatesTabular: false` keeps `position` coordinate rendering on `theme.font.family`.
 
 ## Phase 7 Options
 

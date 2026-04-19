@@ -166,14 +166,18 @@
       ctx.textBaseline = "middle";
       const rootEl = Helpers.requirePluginRoot(canvas);
       const tokens = theme.resolveForRoot(rootEl);
+      const displayVariant = normalizeDisplayVariant(p.displayVariant);
+      const isCoordinateVariant = displayVariant === DISPLAY_VARIANT_POSITION;
       const coordinatesTabular = p.coordinatesTabular !== false;
-      const family = coordinatesTabular
+      const effectiveCoordinatesTabular = isCoordinateVariant ? coordinatesTabular : false;
+      const stableDigitsEnabled = isCoordinateVariant ? p.stableDigits === true : p.stableDigits !== false;
+      const family = (effectiveCoordinatesTabular || stableDigitsEnabled)
         ? (tokens.font.familyMono || tokens.font.family)
         : tokens.font.family;
       const color = tokens.surface.fg;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
-      const coordinateAlign = coordinatesTabular ? "right" : "center";
+      const coordinateAlign = effectiveCoordinatesTabular ? "right" : "center";
       ctx.fillStyle = color;
       const stateKind = stateScreenPrecedence.pickFirst([
         { kind: "disconnected", when: p.disconnect === true },
