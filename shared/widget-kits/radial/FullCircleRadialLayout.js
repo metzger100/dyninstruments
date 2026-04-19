@@ -17,7 +17,7 @@
   const POINTER_DEPTH_FACTOR = 0.11;
   const MARKER_LENGTH_FACTOR = 0.75;
   const MARKER_WIDTH_FACTOR = 0.20;
-  const LABEL_SPRITE_RADIUS_FACTOR = 1.6;
+  const LABEL_SPRITE_RADIUS_FACTOR = 2.2;
   const NORMAL_SAFE_EXTRA_FACTOR = 0.06;
   const NORMAL_COMPACT_CENTER_HEIGHT_FACTOR = 0.9;
   const NORMAL_DUAL_COMPACT_WIDTH_FACTOR = 1.0;
@@ -58,7 +58,7 @@
     const ringW = Math.max(1, Math.floor(radius * ringWidthFactor * compactGeometryScale));
     const labelInsetFactor = clampNumber(labels.insetFactor, 0, Number.MAX_SAFE_INTEGER, 1.8);
     const labelRadiusOffset = Math.max(1, Math.floor(ringW * labelInsetFactor));
-    const labelFontFactor = clampNumber(labels.fontFactor, 0, Number.MAX_SAFE_INTEGER, 0.14);
+    const labelFontFactor = clampNumber(labels.fontFactor, 0.18, Number.MAX_SAFE_INTEGER, 0.18);
     const labelFontPx = Math.max(1, Math.floor(radius * labelFontFactor * compactGeometryScale));
     const pointerDepth = Math.max(1, Math.floor(radius * POINTER_DEPTH_FACTOR * compactGeometryScale));
     const fixedPointerDepth = Math.max(pointerDepth, Math.floor(ringW * 0.6));

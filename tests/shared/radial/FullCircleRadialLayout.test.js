@@ -107,4 +107,29 @@ describe("FullCircleRadialLayout", function () {
     expect(compact.normal.safeRadius).toBeGreaterThan(0);
     expect(compact.normal.dualCompactInset).toBeGreaterThan(0);
   });
+
+  it("uses the updated full-circle label defaults when the theme omits a font factor", function () {
+    const layout = createLayout();
+    const insets = layout.computeInsets(220, 220);
+    const out = layout.computeLayout({
+      W: 220,
+      H: 220,
+      mode: "normal",
+      theme: {
+        radial: {
+          ring: { widthFactor: 0.35 },
+          labels: { insetFactor: 2.1 }
+        }
+      },
+      insets: insets,
+      responsive: insets.responsive
+    });
+
+    expect(out.geom.labelRadius).toBe(
+      Math.max(0, out.geom.R - Math.max(1, Math.floor(out.geom.ringW * 2.2)))
+    );
+    expect(out.labels.fontPx).toBe(
+      Math.max(1, Math.floor(out.geom.R * 0.18 * out.compactGeometryScale))
+    );
+  });
 });

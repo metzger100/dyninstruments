@@ -41,8 +41,8 @@ Visual specification for full-circle dial widgets. Constants and formulas are im
 | `markerLen` | `max(1, floor(ringW * 0.75))` | `FullCircleRadialLayout.computeLayout()` |
 | `markerWidth` | `max(1, floor(ringW * 0.20))` | `FullCircleRadialLayout.computeLayout()` |
 | `labelInsetVal` | `max(1, floor(ringW * theme.radial.labels.insetFactor))` | `FullCircleRadialLayout.computeLayout()` |
-| `labelPx` | `max(1, floor(R * theme.radial.labels.fontFactor * compactGeometryScale))` | `FullCircleRadialLayout.computeLayout()` |
-| `labelRadius` | `max(0, R - max(1, floor(ringW * 1.6)))` | `FullCircleRadialLayout.computeLayout()` |
+| `labelPx` | `max(1, floor(R * max(theme.radial.labels.fontFactor, 0.18) * compactGeometryScale))` | `FullCircleRadialLayout.computeLayout()` |
+| `labelRadius` | `max(0, R - max(1, floor(ringW * 2.2)))` | `FullCircleRadialLayout.computeLayout()` |
 | `leftStrip` | `max(0, floor((contentRect.w - 2*R) / 2))` | `FullCircleRadialLayout.computeLayout()` |
 | `rightStrip` | `leftStrip` | `computeGeometry()` |
 | `topStrip` | `max(0, floor((contentRect.h - 2*R) / 2))` | `FullCircleRadialLayout.computeLayout()` |
@@ -88,7 +88,7 @@ Shared pointer shape controls:
 Label typography:
 - Weight: `theme.font.labelWeight`
 - Family: `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).font.family`
-- Font size: `labelPx = max(1, floor(R * theme.radial.labels.fontFactor * compactGeometryScale))`
+- Font size: `labelPx = max(1, floor(R * max(theme.radial.labels.fontFactor, 0.18) * compactGeometryScale))`
 
 ## Layout Modes
 
