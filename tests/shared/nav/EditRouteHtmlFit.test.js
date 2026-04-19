@@ -119,6 +119,7 @@ describe("EditRouteHtmlFit", function () {
     const editRouteLayoutMathModule = loadFresh("shared/widget-kits/nav/EditRouteLayoutMath.js");
     const editRouteLayoutGeometryModule = loadFresh("shared/widget-kits/nav/EditRouteLayoutGeometry.js");
     const editRouteLayoutModule = loadFresh("shared/widget-kits/nav/EditRouteLayout.js");
+    const editRouteHtmlFitSupportModule = loadFresh("shared/widget-kits/nav/EditRouteHtmlFitSupport.js");
     const textTileLayoutModule = loadFresh("shared/widget-kits/text/TextTileLayout.js");
     const textTileLayout = textTileLayoutModule.create();
     const textTileLayoutSpy = Object.assign({}, textTileLayout, {
@@ -161,6 +162,9 @@ describe("EditRouteHtmlFit", function () {
         }
         if (id === "EditRouteLayout") {
           return editRouteLayoutModule;
+        }
+        if (id === "EditRouteHtmlFitSupport") {
+          return editRouteHtmlFitSupportModule;
         }
         if (id === "EditRouteLayoutMath") {
           return editRouteLayoutMathModule;

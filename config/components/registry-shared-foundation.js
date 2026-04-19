@@ -69,11 +69,16 @@
       globalKey: "DyniEditRouteLayoutGeometry",
       deps: ["LayoutRectMath", "EditRouteLayoutMath"]
     },
+    EditRouteHtmlFitSupport: {
+      js: BASE + "shared/widget-kits/nav/EditRouteHtmlFitSupport.js",
+      css: undefined,
+      globalKey: "DyniEditRouteHtmlFitSupport"
+    },
     EditRouteHtmlFit: {
       js: BASE + "shared/widget-kits/nav/EditRouteHtmlFit.js",
       css: undefined,
       globalKey: "DyniEditRouteHtmlFit",
-      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "EditRouteLayout", "HtmlWidgetUtils", "TextFitMath"]
+      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "EditRouteLayout", "HtmlWidgetUtils", "TextFitMath", "EditRouteHtmlFitSupport"]
     },
     RoutePointsLayoutSizing: {
       js: BASE + "shared/widget-kits/nav/RoutePointsLayoutSizing.js",

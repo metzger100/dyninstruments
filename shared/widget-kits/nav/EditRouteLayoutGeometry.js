@@ -87,38 +87,6 @@
       };
     }
 
-    function computeStackedValueRects(args) {
-      const cfg = args || {};
-      const valueRect = cfg.valueRect || makeRect(0, 0, 1, 1);
-      const includeUnit = cfg.includeUnit !== false;
-      if (!includeUnit) {
-        return {
-          valueTextRect: makeRect(valueRect.x, valueRect.y, valueRect.w, valueRect.h),
-          unitRect: null
-        };
-      }
-
-      const gap = Math.max(1, resolveInsetValue(cfg.insets, "gap", 1));
-      const usableHeight = Math.max(1, valueRect.h - gap);
-      const unitShare = mathApi.clampNumber(cfg.unitShare, 0, 1, 0.36);
-      const unitMinPx = Math.max(1, Math.floor(mathApi.clampNumber(cfg.unitMinPx, 1, Number.MAX_SAFE_INTEGER, 10)));
-      const unitMaxRatio = mathApi.clampNumber(cfg.unitMaxRatio, 0, 1, 0.48);
-      const maxUnitHeight = Math.max(unitMinPx, Math.floor(valueRect.h * unitMaxRatio));
-
-      let unitHeight = Math.max(
-        unitMinPx,
-        Math.min(maxUnitHeight, Math.floor(usableHeight * unitShare))
-      );
-      if (unitHeight >= usableHeight) {
-        unitHeight = Math.max(1, usableHeight - 1);
-      }
-      const valueTextHeight = Math.max(1, valueRect.h - unitHeight - gap);
-      return {
-        valueTextRect: makeRect(valueRect.x, valueRect.y, valueRect.w, valueTextHeight),
-        unitRect: makeRect(valueRect.x, valueRect.y + valueTextHeight + gap, valueRect.w, unitHeight)
-      };
-    }
-
     function createMetricTile(args) {
       const cfg = args || {};
       const tileRect = cfg.tileRect || makeRect(0, 0, 1, 1);
