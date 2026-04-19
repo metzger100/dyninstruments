@@ -65,7 +65,8 @@
     const tokens = themeApi.resolveForRoot(rootEl);
     return {
       tokens: tokens,
-      family: tokens.font.family
+      family: tokens.font.family,
+      monoFamily: tokens.font.familyMono || tokens.font.family
     };
   }
   function toStyle(px, htmlUtils) {
@@ -99,9 +100,48 @@
       family: cfg.family,
       weight: cfg.weight
     });
-    return htmlUtils.toFiniteNumber(fit && fit.px) || 0;
+    if (!fit) {
+      return null;
+    }
+    cfg.textApi.setFont(cfg.ctx, fit.px, cfg.weight, cfg.family);
+    return {
+      px: fit.px,
+      text: fit.text,
+      width: cfg.ctx.measureText(toText(cfg.text)).width
+    };
   }
-  function measureStyle(args, htmlUtils, tileLayout) { return toStyle(measurePx(args, htmlUtils, tileLayout), htmlUtils); }
+  function measureStyle(args, htmlUtils, tileLayout) { return toStyle((measurePx(args, htmlUtils, tileLayout) || {}).px, htmlUtils); }
+  function selectMetricValueFit(args, htmlUtils, tileLayout) {
+    const cfg = args || {};
+    const valueText = toText(cfg.valueText);
+    const fallbackText = cfg.fallbackText == null ? valueText : toText(cfg.fallbackText);
+    const valueFit = measurePx({
+      rect: cfg.rect,
+      text: valueText,
+      maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+      textApi: cfg.textApi,
+      tileLayout: tileLayout,
+      ctx: cfg.ctx,
+      family: cfg.family,
+      weight: cfg.weight,
+      textFillScale: cfg.textFillScale
+    }, htmlUtils, tileLayout);
+    if (!valueFit || !fallbackText || fallbackText === valueText || valueFit.width <= Math.max(1, Math.floor(cfg.rect.w)) + 0.01) {
+      return { valueText: valueText, valuePx: valueFit && valueFit.px ? valueFit.px : 0 };
+    }
+    const fallbackFit = measurePx({
+      rect: cfg.rect,
+      text: fallbackText,
+      maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+      textApi: cfg.textApi,
+      tileLayout: tileLayout,
+      ctx: cfg.ctx,
+      family: cfg.family,
+      weight: cfg.weight,
+      textFillScale: cfg.textFillScale
+    }, htmlUtils, tileLayout);
+    return { valueText: fallbackText, valuePx: fallbackFit && fallbackFit.px ? fallbackFit.px : 0 };
+  }
   function resolveAccentStyle(model, tokens) {
     if (!model || model.hasAccent !== true) {
       return "";
@@ -179,6 +219,7 @@
       }
       const tokens = typography.tokens;
       const family = typography.family;
+      const metricFamily = model.stableDigitsEnabled === true ? typography.monoFamily : family;
       const shellWidth = Math.max(1, Math.round(shellRect.width));
       const shellHeight = Math.max(1, Math.round(shellRect.height));
       const kind = typeof model.kind === "string" ? model.kind : "data";
@@ -237,20 +278,18 @@
           if (!flatRects) {
             continue;
           }
-
-          const flatValuePx = measurePx({
+          const flatValueFit = selectMetricValueFit({
             rect: flatRects.valueRect,
-            text: toText(metric.valueText),
-            maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+            valueText: metric.valueText,
+            fallbackText: metric.fallbackValueText,
             textApi: textApi,
-            tileLayout: tileLayout,
             ctx: measureCtx,
-            family: family,
+            family: metricFamily,
             weight: valueWeight,
             textFillScale: textFillScale
           }, htmlUtils, tileLayout);
           const flatSecondaryMaxPx = fitMath.resolveSecondaryMaxPx({
-            valuePx: flatValuePx,
+            valuePx: flatValueFit.valuePx,
             valueRect: flatRects.valueRect,
             valueMaxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
             secondaryToValueRatio: METRIC_SECONDARY_TO_VALUE_RATIO
@@ -270,7 +309,8 @@
               textFillScale: 1
             }, htmlUtils, tileLayout),
             valueRowStyle: "",
-            valueStyle: toStyle(flatValuePx, htmlUtils),
+            valueStyle: toStyle(flatValueFit.valuePx, htmlUtils),
+            valueText: flatValueFit.valueText,
             unitStyle: measureStyle({
               rect: flatRects.unitRect,
               text: toText(metric.unitText),
@@ -293,19 +333,18 @@
         }
 
         const inlineValueRect = inlineRects.valueTextRect || inlineRects.valueRect;
-        const inlineValuePx = measurePx({
+        const inlineValueFit = selectMetricValueFit({
           rect: inlineValueRect,
-          text: toText(metric.valueText),
-          maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+          valueText: metric.valueText,
+          fallbackText: metric.fallbackValueText,
           textApi: textApi,
-          tileLayout: tileLayout,
           ctx: measureCtx,
-          family: family,
+          family: metricFamily,
           weight: valueWeight,
           textFillScale: textFillScale
         }, htmlUtils, tileLayout);
         const inlineSecondaryMaxPx = fitMath.resolveSecondaryMaxPx({
-          valuePx: inlineValuePx,
+          valuePx: inlineValueFit.valuePx,
           valueRect: inlineValueRect,
           valueMaxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
           secondaryToValueRatio: METRIC_SECONDARY_TO_VALUE_RATIO
@@ -325,7 +364,8 @@
             textFillScale: 1
           }, htmlUtils, tileLayout),
           valueRowStyle: "",
-          valueStyle: toStyle(inlineValuePx, htmlUtils),
+          valueStyle: toStyle(inlineValueFit.valuePx, htmlUtils),
+          valueText: inlineValueFit.valueText,
           unitStyle: measureStyle({
             rect: inlineRects.unitRect,
             text: toText(metric.unitText),

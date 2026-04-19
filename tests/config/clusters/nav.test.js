@@ -111,7 +111,8 @@ describe("config/clusters/nav.js", function () {
       { kind: "vmg" },
       { kind: "xteDisplay" },
       { kind: "activeRoute" },
-      { kind: "editRoute" }
+      { kind: "editRoute" },
+      { kind: "routePoints" }
     ]);
     expect(def.editableParameters.hideSeconds.default).toBe(false);
     expect(def.editableParameters.hideSeconds.name).toBe("Hide seconds");

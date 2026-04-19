@@ -74,6 +74,9 @@ describe("AisTargetTextHtmlWidget", function () {
         if (id === "PlaceholderNormalize") {
           return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         }
+        if (id === "StableDigits") {
+          return loadFresh("shared/widget-kits/format/StableDigits.js");
+        }
         if (id === "StateScreenLabels") {
           return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
         }
@@ -285,6 +288,28 @@ describe("AisTargetTextHtmlWidget", function () {
 
     expect(placeholderMounted.html()).toContain("dyni-state-no-ais");
     expect(placeholderMounted.html()).toContain("No AIS");
+  });
+
+  it("renders stableDigits metric values with tabular classes", function () {
+    const renderer = createRenderer({
+      applyFormatter(value, formatterOptions) {
+        const cfg = formatterOptions || {};
+        if (value == null) {
+          return cfg.default;
+        }
+        return String(value);
+      }
+    }).renderer;
+    const mounted = mountCommitted(
+      renderer,
+      withSurfacePolicy(makeProps({ stableDigits: true }), {
+        interactionMode: "dispatch"
+      })
+    );
+
+    expect(mounted.html()).toContain("dyni-ais-target-metric-value-text dyni-tabular");
+    expect(mounted.html()).toContain("04.2");
+    expect(mounted.html()).toContain("00.7");
   });
 
   it("applies AIS hidden/disconnected precedence exception", function () {

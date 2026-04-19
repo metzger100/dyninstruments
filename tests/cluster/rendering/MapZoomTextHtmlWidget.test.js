@@ -6,6 +6,7 @@ describe("MapZoomTextHtmlWidget", function () {
   const MODULE_PATH_BY_ID = {
     HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
     MapZoomHtmlFit: "shared/widget-kits/nav/MapZoomHtmlFit.js",
+    StableDigits: "shared/widget-kits/format/StableDigits.js",
     ThemeResolver: "shared/theme/ThemeResolver.js",
     TextLayoutEngine: "shared/widget-kits/text/TextLayoutEngine.js",
     RadialValueMath: "shared/widget-kits/radial/RadialValueMath.js",
@@ -233,6 +234,27 @@ describe("MapZoomTextHtmlWidget", function () {
     expect(mounted.html()).not.toContain("NO DATA");
   });
 
+  it("renders stable digits with tabular value classes and padded numbers", function () {
+    const renderer = createRenderer({
+      applyFormatter(value, formatterOptions) {
+        const cfg = formatterOptions || {};
+        if (value == null) {
+          return cfg.default;
+        }
+        return String(value);
+      }
+    });
+    const mounted = mountCommitted(
+      renderer,
+      withSurfacePolicy(makeProps({ stableDigits: true, zoom: 7.2, requiredZoom: 6.5 }), { mode: "dispatch" })
+    );
+
+    expect(mounted.html()).toContain("dyni-map-zoom-value dyni-tabular");
+    expect(mounted.html()).toContain("dyni-map-zoom-required dyni-tabular");
+    expect(mounted.html()).toContain("07.2");
+    expect(mounted.html()).toContain("(06.5)");
+  });
+
   it("always consults MapZoomHtmlFit when a shell rect exists", function () {
     const fitCompute = vi.fn(function () {
       return {
@@ -369,12 +391,17 @@ describe("MapZoomTextHtmlWidget", function () {
       props: withSurfacePolicy(makeProps({ caption: "ZOOM EXT" }), { mode: "dispatch" }),
       shellRect: { width: 300, height: 100 }
     });
+    const stableDigitsChanged = committed.layoutSignature({
+      props: withSurfacePolicy(makeProps({ stableDigits: true, zoom: 12.2, requiredZoom: 11.9 }), { mode: "dispatch" }),
+      shellRect: { width: 300, height: 100 }
+    });
     const shapeChanged = committed.layoutSignature({
       props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
       shellRect: { width: 90, height: 200 }
     });
 
     expect(captionChanged).not.toBe(base);
+    expect(stableDigitsChanged).not.toBe(base);
     expect(shapeChanged).not.toBe(base);
   });
 

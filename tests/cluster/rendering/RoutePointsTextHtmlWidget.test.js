@@ -17,6 +17,7 @@ describe("RoutePointsTextHtmlWidget", function () {
         kind: props.__kind || "data",
         stateLabel: props.__stateLabel || "",
         interactionState,
+        stableDigitsEnabled: props.__stableDigits === true,
         showHeader: true,
         showOrdinal: true,
         hasRoute: (props.__kind || "data") === "data",
@@ -330,6 +331,62 @@ describe("RoutePointsTextHtmlWidget", function () {
     );
 
     expect(mounted.postPatchResult).toEqual({ relayout: true });
+  });
+
+  it("adds tabular class to route-point info text when stableDigits is enabled", function () {
+    const setup = createRenderer();
+    const mounted = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy({
+        __canActivate: true,
+        __stableDigits: true,
+        __points: [
+          { index: 0, ordinalText: "1", nameText: "WP1", infoText: "09°/1.2nm", selected: false }
+        ]
+      }, { mode: "dispatch" })
+    );
+
+    expect(mounted.html()).toContain("dyni-route-points-info-text dyni-tabular");
+  });
+
+  it("renders fallback stableDigits info text through the widget path", function () {
+    const setup = createRenderer({
+      fitCompute: vi.fn(function () {
+        return {
+          headerFit: { routeNameStyle: "", metaStyle: "" },
+          rowFits: [
+            {
+              ordinalStyle: "font-size:8px;",
+              nameStyle: "font-size:10px;",
+              infoStyle: "font-size:8px;",
+              infoText: "360°/12.3nm"
+            }
+          ],
+          emptyStyle: ""
+        };
+      })
+    });
+    const mounted = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy({
+        __canActivate: true,
+        __stableDigits: true,
+        __points: [
+          {
+            index: 0,
+            ordinalText: "1",
+            nameText: "Finish",
+            infoText: "00360°/00012.3nm",
+            infoFallbackText: "360°/12.3nm",
+            selected: true
+          }
+        ]
+      }, { mode: "dispatch" })
+    );
+
+    expect(mounted.html()).toContain("360°/12.3nm");
+    expect(mounted.html()).not.toContain("00360°/00012.3nm");
+    expect(mounted.html()).toContain("dyni-route-points-info-text dyni-tabular");
   });
 
   it("derives layout signature from model resizeSignatureParts", function () {

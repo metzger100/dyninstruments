@@ -32,6 +32,7 @@
         "AisTargetLayout",
         "HtmlWidgetUtils",
         "PlaceholderNormalize",
+        "StableDigits",
         "StateScreenLabels",
         "StateScreenPrecedence",
         "StateScreenInteraction"
@@ -94,10 +95,12 @@
       globalKey: "DyniRoutePointsRenderModel",
       deps: [
         "CenterDisplayMath",
+        "RoutePointsHtmlFit",
         "RoutePointsLayout",
         "HtmlWidgetUtils",
         "NavInteractionPolicy",
         "PlaceholderNormalize",
+        "StableDigits",
         "StateScreenLabels",
         "StateScreenPrecedence",
         "StateScreenInteraction"
@@ -137,6 +140,7 @@
         "HtmlWidgetUtils",
         "PlaceholderNormalize",
         "PreparedPayloadModelCache",
+        "StableDigits",
         "StateScreenLabels",
         "StateScreenPrecedence",
         "StateScreenInteraction",

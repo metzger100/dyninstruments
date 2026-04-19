@@ -122,6 +122,9 @@ function createRenderModelHelpers() {
         else if (id === "RoutePointsLayout") {
           moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsLayout.js");
         }
+        else if (id === "RoutePointsHtmlFit") {
+          moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js");
+        }
         else if (id === "RoutePointsLayoutSizing") {
           moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
         }

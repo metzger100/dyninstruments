@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsRenderModel - Pure normalization and display model owner for route-points HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: CenterDisplayMath, RoutePointsLayout, HtmlWidgetUtils, NavInteractionPolicy, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction
+ * Depends: CenterDisplayMath, RoutePointsHtmlFit, RoutePointsLayout, HtmlWidgetUtils, NavInteractionPolicy, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -9,8 +9,6 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniRoutePointsRenderModel = factory(); }
 }(this, function () {
   "use strict";
-
-  const PLACEHOLDER_VALUE = "--"; /* dyni-lint-disable-line hardcoded-runtime-default -- RoutePoints segment info contract requires a fixed placeholder token. */
 
   function toFiniteNumber(value) {
     const n = Number(value);
@@ -45,6 +43,8 @@
     return pointValue && typeof pointValue === "object" ? pointValue : {};
   }
 
+  const PLACEHOLDER_VALUE = "--"; /* dyni-lint-disable-line hardcoded-runtime-default -- RoutePoints segment info contract requires a fixed placeholder token. */
+
   function hasFiniteCoordinates(point, htmlUtils) {
     if (!point || typeof point !== "object") {
       return false;
@@ -53,61 +53,6 @@
       typeof htmlUtils.toFiniteNumber(point.lat) === "number" &&
       typeof htmlUtils.toFiniteNumber(point.lon) === "number"
     );
-  }
-
-  function formatLatLonInfo(point, defaultText, Helpers, placeholderNormalize) {
-    const text = String(Helpers.applyFormatter({ lat: point.lat, lon: point.lon }, {
-      formatter: "formatLonLats",
-      formatterParameters: [],
-      default: defaultText
-    }));
-    return placeholderNormalize.normalize(text, defaultText);
-  }
-
-  function formatCourseDistanceInfo(args) {
-    const cfg = args || {};
-    const previousPoint = cfg.previousPoint;
-    const currentPoint = cfg.currentPoint;
-    const distanceUnit = cfg.distanceUnit;
-    const courseUnit = cfg.courseUnit;
-
-    if (!previousPoint || !currentPoint) {
-      return PLACEHOLDER_VALUE + courseUnit + "/" + PLACEHOLDER_VALUE + distanceUnit;
-    }
-
-    const leg = cfg.centerMath.computeCourseDistance(previousPoint, currentPoint, cfg.useRhumbLine === true);
-    if (!leg) {
-      return PLACEHOLDER_VALUE + courseUnit + "/" + PLACEHOLDER_VALUE + distanceUnit;
-    }
-
-    const courseTextRaw = String(cfg.Helpers.applyFormatter(leg.course, {
-      formatter: "formatDirection",
-      formatterParameters: [],
-      default: cfg.defaultText
-    }));
-    const distanceTextRaw = String(cfg.Helpers.applyFormatter(leg.distance, {
-      formatter: "formatDistance",
-      formatterParameters: [distanceUnit],
-      default: cfg.defaultText
-    }));
-    const courseText = cfg.placeholderNormalize.normalize(courseTextRaw, cfg.defaultText);
-    const distanceText = cfg.placeholderNormalize.normalize(distanceTextRaw, cfg.defaultText);
-
-    return courseText + courseUnit + "/" + distanceText + distanceUnit;
-  }
-
-  function buildRowInfo(args) {
-    const cfg = args || {};
-    if (cfg.showLatLon === true) {
-      return formatLatLonInfo(cfg.currentPoint, cfg.defaultText, cfg.Helpers, cfg.placeholderNormalize);
-    }
-    if (cfg.index <= 0) {
-      return PLACEHOLDER_VALUE + cfg.courseUnit + "/" + PLACEHOLDER_VALUE + cfg.distanceUnit;
-    }
-    if (!cfg.previousValid || !cfg.currentValid) {
-      return PLACEHOLDER_VALUE + cfg.courseUnit + "/" + PLACEHOLDER_VALUE + cfg.distanceUnit;
-    }
-    return formatCourseDistanceInfo(cfg);
   }
 
   function buildResizeSignatureParts(model) {
@@ -132,6 +77,7 @@
         m.mode || "normal",
         m.showHeader ? 1 : 0,
         m.interactionState || "passive",
+        m.stableDigitsEnabled === true ? 1 : 0,
         shellWidth,
         shellHeight,
         m.stateLabel || "",
@@ -146,6 +92,7 @@
         toSafeInteger(m.pointCount, 0),
         m.showHeader ? 1 : 0,
         m.showLatLon ? 1 : 0,
+        m.stableDigitsEnabled === true ? 1 : 0,
         toSafeInteger(m.selectedIndex, -1),
         m.canActivateRoutePoint ? 1 : 0,
         scrollbarGutterPx
@@ -157,6 +104,7 @@
       m.mode || "normal",
       m.showHeader ? 1 : 0,
       m.showLatLon ? 1 : 0,
+      m.stableDigitsEnabled === true ? 1 : 0,
       toSafeInteger(m.selectedIndex, -1),
       m.canActivateRoutePoint ? 1 : 0,
       shellWidth,
@@ -227,11 +175,13 @@
   }
 
   function create(def, Helpers) {
+    const routePointsHtmlFit = Helpers.getModule("RoutePointsHtmlFit").create;
     const centerMath = Helpers.getModule("CenterDisplayMath").create(def, Helpers);
     const layoutApi = Helpers.getModule("RoutePointsLayout").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const navInteractionPolicy = Helpers.getModule("NavInteractionPolicy").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
@@ -265,6 +215,7 @@
       const showHeader = layout.showHeader !== false;
       const showLatLon = domain.showLatLon === true;
       const useRhumbLine = domain.useRhumbLine === true;
+      const stableDigitsEnabled = props.stableDigits === true;
       const selectedIndex = toSafeInteger(domain.selectedIndex, -1);
       const hasValidSelection = selectedIndex >= 0 && selectedIndex < pointCount;
       const activeKey = hasValidSelection
@@ -336,7 +287,7 @@
         const previousValid = hasFiniteCoordinates(previousPoint, htmlUtils);
         const normalizedName = toText(currentPoint.name, htmlUtils);
         const nameText = normalizedName || String(i);
-        const infoText = buildRowInfo({
+        const infoText = routePointsHtmlFit.buildRowInfoText({
           index: i,
           showLatLon: showLatLon,
           previousPoint: previousPoint,
@@ -349,14 +300,18 @@
           defaultText: defaultText,
           Helpers: Helpers,
           centerMath: centerMath,
-          placeholderNormalize: placeholderNormalize
+          placeholderNormalize: placeholderNormalize,
+          stableDigitsEnabled: stableDigitsEnabled,
+          stableDigits: stableDigits,
+          placeholderValue: PLACEHOLDER_VALUE
         });
 
         rows.push({
           index: i,
           ordinalText: String(i + 1),
           nameText: nameText,
-          infoText: infoText,
+          infoText: infoText.valueText,
+          infoFallbackText: infoText.fallbackValueText,
           selected: i === selectedIndex,
           pointSnapshot: buildPointSnapshot(
             currentPoint,
@@ -396,6 +351,7 @@
         hasValidSelection: hasValidSelection,
         canActivateRoutePoint: canActivate,
         isActiveRoute: isActiveRoute,
+        stableDigitsEnabled: stableDigitsEnabled,
         scrollbarGutterPx: scrollbarGutterPx,
         shellWidth: shellWidth,
         shellHeight: shellHeight,

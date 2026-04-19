@@ -67,6 +67,7 @@
       }
 
       const activateAttrs = ' data-rp-idx="' + String(row.index) + '"';
+      const infoText = rowFit.infoText != null ? rowFit.infoText : row.infoText;
 
       const ordinalHtml = showOrdinal
         ? (
@@ -82,6 +83,9 @@
 
       const infoTextClasses = ["dyni-route-points-text", "dyni-route-points-info-text"];
       if (model.showLatLon === true && coordinatesTabular !== false) {
+        infoTextClasses.push("dyni-tabular");
+      }
+      if (model.stableDigitsEnabled === true && model.showLatLon !== true) {
         infoTextClasses.push("dyni-tabular");
       }
 
@@ -104,7 +108,7 @@
         + '<span class="' + infoTextClasses.join(" ") + '"'
         + htmlUtils.toStyleAttr(rowFit.infoStyle)
         + ">"
-        + htmlUtils.escapeHtml(row.infoText)
+        + htmlUtils.escapeHtml(infoText)
         + "</span>"
         + "</div>"
         + "</div>"

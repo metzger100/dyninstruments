@@ -83,7 +83,11 @@
           type: "BOOLEAN",
           default: false,
           name: "Stable digits",
-          condition: CENTER_DISPLAY_CONDITION
+          condition: [
+            CENTER_DISPLAY_CONDITION,
+            { kind: "zoom" },
+            { kind: "aisTarget" }
+          ]
         },
         caption: false,
         unit: false,

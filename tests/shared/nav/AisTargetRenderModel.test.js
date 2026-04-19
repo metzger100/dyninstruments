@@ -37,6 +37,8 @@ describe("AisTargetRenderModel", function () {
             moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
           } else if (id === "StateScreenInteraction") {
             moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
+          } else if (id === "StableDigits") {
+            moduleCache[id] = loadFresh("shared/widget-kits/format/StableDigits.js");
           } else {
             throw new Error("unexpected module: " + id);
           }
@@ -142,6 +144,32 @@ describe("AisTargetRenderModel", function () {
       formatter: "formatDecimal",
       formatterParameters: [3, 2]
     }));
+  });
+
+  it("pads metric values and exposes fallback values when stableDigits is enabled", function () {
+    const setup = createRenderModel({
+      applyFormatter(value, formatterOptions) {
+        const cfg = formatterOptions || {};
+        if (value == null || Number.isNaN(value)) {
+          return Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
+        }
+        return String(value);
+      }
+    });
+    const model = setup.renderModel.buildModel({
+      props: withSurfacePolicy(makeProps({ stableDigits: true }), { pageId: "navpage", mode: "dispatch" }),
+      shellRect: { width: 320, height: 180 },
+      mode: "normal",
+      isVerticalCommitted: false
+    });
+
+    expect(model.stableDigitsEnabled).toBe(true);
+    expect(model.metrics.dst.valueText).toBe("04.2");
+    expect(model.metrics.dst.fallbackValueText).toBe("4.2");
+    expect(model.metrics.cpa.valueText).toBe("00.7");
+    expect(model.metrics.cpa.fallbackValueText).toBe("0.7");
+    expect(model.metrics.brg.valueText).toBe("112");
+    expect(model.metrics.brg.fallbackValueText).toBe("112");
   });
 
   it("keeps full identity text and all four metrics in flat BRG branch mode", function () {

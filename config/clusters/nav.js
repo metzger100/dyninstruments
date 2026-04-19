@@ -217,7 +217,8 @@
             { kind: "vmg" },
             { kind: "xteDisplay" },
             { kind: "activeRoute" },
-            { kind: "editRoute" }
+            { kind: "editRoute" },
+            { kind: "routePoints" }
           ]
         },
         easing: {

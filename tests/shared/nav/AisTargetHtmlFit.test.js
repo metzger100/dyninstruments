@@ -55,6 +55,8 @@ describe("AisTargetHtmlFit", function () {
           }
         },
         font: {
+          family: "sans-serif",
+          familyMono: "monospace",
           weight: 720,
           labelWeight: 610
         }
@@ -105,7 +107,7 @@ describe("AisTargetHtmlFit", function () {
 
     const layout = aisTargetLayoutModule.create({}, Helpers);
     const fit = loadFresh("shared/widget-kits/nav/AisTargetHtmlFit.js").create({}, Helpers);
-    return { fit, layout, themeApi };
+    return { fit, layout, themeApi, radialTextApi };
   }
 
   function buildModel(harness, shellRect, overrides) {
@@ -236,6 +238,30 @@ describe("AisTargetHtmlFit", function () {
       expect(extractPx(out.metrics[id].valueStyle)).toBeGreaterThan(3);
     });
     expect(out.accentStyle).toBe("background-color:#66b8ff;");
+  });
+
+  it("uses mono family for metric value measurement when stableDigits is enabled", function () {
+    const h = createHarness();
+    const targetEl = document.createElement("div");
+    const hostContext = { __dyniAisTargetTextMeasureCtx: createMeasureContext() };
+    const shellRect = { width: 320, height: 180 };
+    const model = buildModel(h, shellRect, {
+      stableDigitsEnabled: true,
+      metrics: {
+        dst: { valueText: "4.2" }
+      }
+    });
+
+    h.fit.compute({
+      model: model,
+      targetEl: targetEl,
+      hostContext: hostContext,
+      shellRect: shellRect
+    });
+
+    const valueCall = h.radialTextApi.fitSingleTextPx.mock.calls.find((args) => args[1] === "4.2");
+    expect(valueCall).toBeDefined();
+    expect(valueCall[5]).toBe("monospace");
   });
 
   it("fits name and status independently in normal, high, and committed vertical modes", function () {

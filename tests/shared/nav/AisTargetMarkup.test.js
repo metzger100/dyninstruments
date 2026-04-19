@@ -151,6 +151,26 @@ describe("AisTargetMarkup", function () {
     expect(brgIndex).toBeGreaterThan(tcpaIndex);
   });
 
+  it("renders the fit-selected metric text when a fallback value is chosen", function () {
+    const markup = createMarkup();
+    const model = makeModel();
+    model.metrics = Object.assign({}, model.metrics, {
+      dst: { captionText: "DST", valueText: "04.2", unitText: "nm" }
+    });
+    const html = markup.render({
+      model: model,
+      fit: makeFit({
+        metrics: {
+          dst: { valueText: "4.2" }
+        }
+      }),
+      htmlUtils: createHtmlUtils()
+    });
+    const root = parseHtml(html);
+
+    expect(root.querySelector(".dyni-ais-target-metric-dst .dyni-ais-target-metric-value-text").textContent).toBe("4.2");
+  });
+
   it("renders passive mode without catchAll/hotspot/accent", function () {
     const markup = createMarkup();
     const html = markup.render({

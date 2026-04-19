@@ -304,10 +304,12 @@ describe("config/components.js", function () {
     expect(components.RoutePointsRenderModel.css).toBeUndefined();
     expect(components.RoutePointsRenderModel.deps).toEqual([
       "CenterDisplayMath",
+      "RoutePointsHtmlFit",
       "RoutePointsLayout",
       "HtmlWidgetUtils",
       "NavInteractionPolicy",
       "PlaceholderNormalize",
+      "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenInteraction"
@@ -344,6 +346,7 @@ describe("config/components.js", function () {
       "HtmlWidgetUtils",
       "PlaceholderNormalize",
       "PreparedPayloadModelCache",
+      "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenInteraction",
@@ -356,6 +359,7 @@ describe("config/components.js", function () {
       "AisTargetLayout",
       "HtmlWidgetUtils",
       "PlaceholderNormalize",
+      "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenInteraction"

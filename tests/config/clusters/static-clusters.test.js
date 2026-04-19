@@ -167,7 +167,8 @@ describe("static cluster configs", function () {
       { kind: "vmg" },
       { kind: "xteDisplay" },
       { kind: "activeRoute" },
-      { kind: "editRoute" }
+      { kind: "editRoute" },
+      { kind: "routePoints" }
     ]);
     expect(byCluster.vessel.editableParameters.stableDigits.condition).toEqual([
       { kind: "voltage" },

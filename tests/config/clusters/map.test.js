@@ -51,7 +51,11 @@ describe("config/clusters/map.js", function () {
     expect(def.editableParameters.coordinatesTabular.default).toBe(true);
     expect(def.editableParameters.coordinatesTabular.condition).toEqual({ kind: "centerDisplay" });
     expect(def.editableParameters.stableDigits.default).toBe(false);
-    expect(def.editableParameters.stableDigits.condition).toEqual({ kind: "centerDisplay" });
+    expect(def.editableParameters.stableDigits.condition).toEqual([
+      { kind: "centerDisplay" },
+      { kind: "zoom" },
+      { kind: "aisTarget" }
+    ]);
     expect(def.editableParameters.aisTargetRatioThresholdNormal.internal).toBe(true);
     expect(def.editableParameters.aisTargetRatioThresholdFlat.internal).toBe(true);
     expect(def.editableParameters.aisTargetRatioThresholdNormal.condition).toEqual({ kind: "aisTarget" });

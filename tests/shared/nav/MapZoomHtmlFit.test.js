@@ -1,13 +1,25 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("MapZoomHtmlFit", function () {
-  function createHarness() {
+  function createHarness(options) {
+    const opts = options || {};
     const calls = {
       high: [],
       normal: [],
       flat: [],
-      required: []
+      singleLine: []
     };
+    const valuePxByText = opts.valuePxByText || Object.create(null);
+    const requiredPxByText = opts.requiredPxByText || Object.create(null);
+    const singleLineWidthByText = opts.singleLineWidthByText || Object.create(null);
+
+    function resolvePx(map, text, fallback) {
+      const key = String(text);
+      if (Object.prototype.hasOwnProperty.call(map, key)) {
+        return map[key];
+      }
+      return fallback;
+    }
 
     const textApi = {
       computeResponsiveInsets: vi.fn(() => ({
@@ -18,25 +30,27 @@ describe("MapZoomHtmlFit", function () {
       })),
       fitThreeRowBlock: vi.fn((args) => {
         calls.high.push(args);
-        return { cPx: 10, vPx: 20, uPx: 8 };
+        return { cPx: 10, vPx: resolvePx(valuePxByText, args.valueText, 20), uPx: 8 };
       }),
       fitValueUnitCaptionRows: vi.fn((args) => {
         calls.normal.push(args);
-        return { cPx: 10, vPx: 20, uPx: 8 };
+        return { cPx: 10, vPx: resolvePx(valuePxByText, args.valueText, 20), uPx: 8 };
       }),
       fitInlineTriplet: vi.fn((args) => {
         calls.flat.push(args);
-        return { sPx: 10, vPx: 20 };
+        return { sPx: 10, vPx: resolvePx(valuePxByText, args.valueText, 20) };
       }),
       fitSingleLineBinary: vi.fn((args) => {
-        calls.required.push(args);
-        return { px: 7 };
+        calls.singleLine.push(args);
+        const px = resolvePx(requiredPxByText, args.text, 7);
+        const width = resolvePx(singleLineWidthByText, args.text, px);
+        return { px: px, width: width };
       })
     };
 
     const themeApi = {
       resolveForRoot: vi.fn(() => ({
-        font: { weight: 730, labelWeight: 610 }
+        font: { family: "sans-serif", familyMono: "monospace", weight: 730, labelWeight: 610 }
       }))
     };
 
@@ -106,8 +120,8 @@ describe("MapZoomHtmlFit", function () {
     expect(h.calls.normal).toHaveLength(1);
     expect(h.calls.normal[0].valueWeight).toBe(730);
     expect(h.calls.normal[0].labelWeight).toBe(610);
-    expect(h.calls.required).toHaveLength(1);
-    expect(h.calls.required[0].weight).toBe(610);
+    expect(h.calls.singleLine.length).toBeGreaterThanOrEqual(3);
+    expect(h.calls.singleLine.some((call) => call.weight === 610)).toBe(true);
   });
 
   it("uses theme token weights for high and flat fitting paths", function () {
@@ -130,6 +144,77 @@ describe("MapZoomHtmlFit", function () {
     expect(h.calls.flat).toHaveLength(1);
     expect(h.calls.flat[0].valueWeight).toBe(730);
     expect(h.calls.flat[0].labelWeight).toBe(610);
+  });
+
+  it("uses mono family and invalidates the fit cache when stableDigits toggles", function () {
+    const h = createHarness();
+    const stableRect = { width: 220, height: 110 };
+    const baseModel = Object.assign(createModel("normal", true), {
+      stableDigitsEnabled: false,
+      zoomFallbackText: "12.2",
+      requiredFallbackText: "(10.8)"
+    });
+
+    const first = h.fit.compute({
+      model: baseModel,
+      hostContext: h.hostContext,
+      shellRect: stableRect
+    });
+    expect(h.calls.normal).toHaveLength(1);
+    expect(h.calls.normal[0].family).toBe("sans-serif");
+    expect(h.calls.singleLine.length).toBeGreaterThanOrEqual(3);
+    expect(h.calls.singleLine[0].family).toBe("sans-serif");
+
+    const second = h.fit.compute({
+      model: Object.assign({}, baseModel, { stableDigitsEnabled: true }),
+      hostContext: h.hostContext,
+      shellRect: stableRect
+    });
+    expect(second).not.toBe(first);
+    expect(h.calls.normal).toHaveLength(2);
+    expect(h.calls.normal[1].family).toBe("sans-serif");
+    expect(h.calls.normal[1].useMono).toBe(true);
+    expect(h.calls.normal[1].monoFamily).toBe("monospace");
+  });
+
+  it("falls back to unpadded zoom and required text when the padded fit is tighter", function () {
+    const h = createHarness({
+      valuePxByText: {
+        "07.2": 8,
+        "7.2": 12
+      },
+      singleLineWidthByText: {
+        "07.2": 1000,
+        "7.2": 10,
+        "(06.5)": 1000,
+        "(6.5)": 10
+      },
+      requiredPxByText: {
+        "(06.5)": 7,
+        "(6.5)": 11
+      }
+    });
+
+    const out = h.fit.compute({
+      model: Object.assign(createModel("normal", true), {
+        stableDigitsEnabled: true,
+        zoomText: "07.2",
+        zoomFallbackText: "7.2",
+        requiredText: "(06.5)",
+        requiredFallbackText: "(6.5)"
+      }),
+      hostContext: h.hostContext,
+      shellRect: { width: 180, height: 100 }
+    });
+
+    expect(out.zoomText).toBe("7.2");
+    expect(out.requiredText).toBe("(6.5)");
+    expect(h.calls.normal).toHaveLength(2);
+    expect(h.calls.normal[0].valueText).toBe("07.2");
+    expect(h.calls.normal[1].valueText).toBe("7.2");
+    expect(h.calls.singleLine.some((call) => call.text === "07.2")).toBe(true);
+    expect(h.calls.singleLine.some((call) => call.text === "(06.5)")).toBe(true);
+    expect(h.calls.singleLine.some((call) => call.text === "(6.5)")).toBe(true);
   });
 
   it("shrinks fitted text under tighter geometry and keeps non-trivial output", function () {
@@ -265,13 +350,13 @@ describe("MapZoomHtmlFit", function () {
 
     const first = h.fit.compute(stableArgs);
     expect(h.calls.normal).toHaveLength(1);
-    expect(h.calls.required).toHaveLength(1);
+    expect(h.calls.singleLine.length).toBeGreaterThanOrEqual(3);
     expect(h.hostContext.__dyniMapZoomHtmlFitCache).toBeTruthy();
 
     const second = h.fit.compute(stableArgs);
     expect(second).toBe(first);
     expect(h.calls.normal).toHaveLength(1);
-    expect(h.calls.required).toHaveLength(1);
+    expect(h.calls.singleLine.length).toBeGreaterThanOrEqual(3);
 
     const geometryMiss = h.fit.compute({
       model: baseModel,
@@ -280,7 +365,7 @@ describe("MapZoomHtmlFit", function () {
     });
     expect(geometryMiss).not.toBe(first);
     expect(h.calls.normal).toHaveLength(2);
-    expect(h.calls.required).toHaveLength(2);
+    expect(h.calls.singleLine.length).toBeGreaterThanOrEqual(6);
 
     const semanticMiss = h.fit.compute({
       model: Object.assign({}, baseModel, { zoomText: "11.0" }),
@@ -289,7 +374,7 @@ describe("MapZoomHtmlFit", function () {
     });
     expect(semanticMiss).not.toBe(geometryMiss);
     expect(h.calls.normal).toHaveLength(3);
-    expect(h.calls.required).toHaveLength(3);
+    expect(h.calls.singleLine.length).toBeGreaterThanOrEqual(9);
   });
 
   it("avoids cache collisions when semantic text contains delimiter characters", function () {

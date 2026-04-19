@@ -1,7 +1,7 @@
 /**
  * Module: MapZoomTextHtmlWidget - Interactive HTML renderer for map zoom kind
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: Helpers.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, PlaceholderNormalize, PreparedPayloadModelCache, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
+ * Depends: Helpers.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, PlaceholderNormalize, PreparedPayloadModelCache, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
  */
 
 (function (root, factory) {
@@ -20,7 +20,8 @@
     captionStyle: "",
     valueStyle: "",
     unitStyle: "",
-    requiredStyle: ""
+    requiredStyle: "",
+    zoomText: "", requiredText: ""
   };
 
   function resolveDisplayMode(props, shellRect, htmlUtils) {
@@ -110,7 +111,7 @@
     ]);
   }
 
-  function buildModel(props, shellRect, Helpers, htmlUtils, stateScreenLabels, stateScreenPrecedence, stateScreenInteraction) {
+  function buildModel(props, shellRect, Helpers, htmlUtils, stateScreenLabels, stateScreenPrecedence, stateScreenInteraction, stableDigits) {
     const p = ensureProps(props);
     const defaultText = String(p.default);
     const caption = htmlUtils.trimText(p.caption);
@@ -121,8 +122,21 @@
     const zoomNumber = htmlUtils.toFiniteNumber(p.zoom);
     const requiredZoomNumber = htmlUtils.toFiniteNumber(p.requiredZoom);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(null, Helpers);
-    const zoomText = formatZoom(zoomNumber, defaultText, Helpers, placeholderNormalize);
-    const requiredText = formatZoom(requiredZoomNumber, defaultText, Helpers, placeholderNormalize);
+    const stableDigitsEnabled = p.stableDigits === true;
+    const zoomRawText = formatZoom(zoomNumber, defaultText, Helpers, placeholderNormalize);
+    const zoomStable = stableDigitsEnabled
+      ? stableDigits.normalize(zoomRawText, {
+        integerWidth: stableDigits.resolveIntegerWidth(zoomRawText, 2),
+        reserveSignSlot: false
+      })
+      : { padded: zoomRawText, fallback: zoomRawText };
+    const requiredRawText = formatZoom(requiredZoomNumber, defaultText, Helpers, placeholderNormalize);
+    const requiredStable = stableDigitsEnabled && typeof requiredZoomNumber === "number"
+      ? stableDigits.normalize(requiredRawText, {
+        integerWidth: stableDigits.resolveIntegerWidth(requiredRawText, 2),
+        reserveSignSlot: false
+      })
+      : { padded: requiredRawText, fallback: requiredRawText };
     const showRequired = typeof requiredZoomNumber === "number" && requiredZoomNumber !== zoomNumber;
     const isEditing = htmlUtils.isEditingMode(p);
     const canDispatch = !isEditing && canDispatchCheckAutoZoom(p);
@@ -136,7 +150,8 @@
         stateLabel: stateScreenLabels.LABELS[kind] || "",
         mode: mode,
         interactionState: interactionState,
-        captionUnitScale: clampCaptionUnitScale(p.captionUnitScale, htmlUtils)
+        captionUnitScale: clampCaptionUnitScale(p.captionUnitScale, htmlUtils),
+        stableDigitsEnabled: stableDigitsEnabled
       };
     }
 
@@ -146,12 +161,23 @@
       mode: mode,
       caption: caption,
       unit: unit,
-      zoomText: zoomText,
-      requiredText: showRequired ? "(" + requiredText + ")" : "",
+      zoomText: zoomStable.padded,
+      zoomFallbackText: zoomStable.fallback,
+      requiredText: showRequired ? "(" + requiredStable.padded + ")" : "",
+      requiredFallbackText: showRequired ? "(" + requiredStable.fallback + ")" : "",
       showRequired: showRequired,
       interactionState: interactionState,
-      captionUnitScale: clampCaptionUnitScale(p.captionUnitScale, htmlUtils)
+      captionUnitScale: clampCaptionUnitScale(p.captionUnitScale, htmlUtils),
+      stableDigitsEnabled: stableDigitsEnabled
     };
+  }
+
+  function buildTextClasses(baseClass, stableDigitsEnabled) {
+    const classes = [baseClass];
+    if (stableDigitsEnabled === true) {
+      classes.push("dyni-tabular");
+    }
+    return classes.join(" ");
   }
 
   function renderMainRows(model, htmlUtils) {
@@ -160,7 +186,7 @@
         + '<div class="dyni-map-zoom-main dyni-map-zoom-main-flat">'
         + '<div class="dyni-map-zoom-inline-row">'
         + '<span class="dyni-map-zoom-caption"' + htmlUtils.toStyleAttr(model.captionStyle) + ">" + htmlUtils.escapeHtml(model.caption) + "</span>"
-        + '<span class="dyni-map-zoom-value"' + htmlUtils.toStyleAttr(model.valueStyle) + ">" + htmlUtils.escapeHtml(model.zoomText) + "</span>"
+        + '<span class="' + buildTextClasses("dyni-map-zoom-value", model.stableDigitsEnabled) + '"' + htmlUtils.toStyleAttr(model.valueStyle) + ">" + htmlUtils.escapeHtml(model.zoomText) + "</span>"
         + '<span class="dyni-map-zoom-unit"' + htmlUtils.toStyleAttr(model.unitStyle) + ">" + htmlUtils.escapeHtml(model.unit) + "</span>"
         + "</div>"
         + "</div>";
@@ -172,7 +198,7 @@
         + '<span class="dyni-map-zoom-caption"' + htmlUtils.toStyleAttr(model.captionStyle) + ">" + htmlUtils.escapeHtml(model.caption) + "</span>"
         + "</div>"
         + '<div class="dyni-map-zoom-value-row">'
-        + '<span class="dyni-map-zoom-value"' + htmlUtils.toStyleAttr(model.valueStyle) + ">" + htmlUtils.escapeHtml(model.zoomText) + "</span>"
+        + '<span class="' + buildTextClasses("dyni-map-zoom-value", model.stableDigitsEnabled) + '"' + htmlUtils.toStyleAttr(model.valueStyle) + ">" + htmlUtils.escapeHtml(model.zoomText) + "</span>"
         + "</div>"
         + '<div class="dyni-map-zoom-unit-row">'
         + '<span class="dyni-map-zoom-unit"' + htmlUtils.toStyleAttr(model.unitStyle) + ">" + htmlUtils.escapeHtml(model.unit) + "</span>"
@@ -182,7 +208,7 @@
     return ""
       + '<div class="dyni-map-zoom-main dyni-map-zoom-main-normal">'
       + '<div class="dyni-map-zoom-value-row">'
-      + '<span class="dyni-map-zoom-value"' + htmlUtils.toStyleAttr(model.valueStyle) + ">" + htmlUtils.escapeHtml(model.zoomText) + "</span>"
+      + '<span class="' + buildTextClasses("dyni-map-zoom-value", model.stableDigitsEnabled) + '"' + htmlUtils.toStyleAttr(model.valueStyle) + ">" + htmlUtils.escapeHtml(model.zoomText) + "</span>"
       + '<span class="dyni-map-zoom-unit"' + htmlUtils.toStyleAttr(model.unitStyle) + ">" + htmlUtils.escapeHtml(model.unit) + "</span>"
       + "</div>"
       + '<div class="dyni-map-zoom-caption-row">'
@@ -214,7 +240,7 @@
     }
 
     const requiredHtml = model.showRequired
-      ? ('<div class="dyni-map-zoom-required"' + htmlUtils.toStyleAttr(model.requiredStyle) + ">" + htmlUtils.escapeHtml(model.requiredText) + "</div>")
+      ? ('<div class="' + buildTextClasses("dyni-map-zoom-required", model.stableDigitsEnabled) + '"' + htmlUtils.toStyleAttr(model.requiredStyle) + ">" + htmlUtils.escapeHtml(model.requiredText) + "</div>")
       : "";
     const styleAttr = ' style="' + scaleStyle + '"';
 
@@ -229,6 +255,7 @@
   function create(def, Helpers) {
     const htmlFit = Helpers.getModule("MapZoomHtmlFit").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
     const preparedPayloadModelCache = Helpers.getModule("PreparedPayloadModelCache").create(def, Helpers);
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
@@ -254,8 +281,8 @@
             htmlUtils,
             stateScreenLabels,
             stateScreenPrecedence,
-            stateScreenInteraction
-          );
+            stateScreenInteraction,
+            stableDigits);
         }
       });
 
@@ -297,10 +324,11 @@
           interactionState: baseModel.interactionState,
           caption: baseModel.caption,
           unit: baseModel.unit,
-          zoomText: baseModel.zoomText,
-          requiredText: baseModel.requiredText,
+          zoomText: fit.zoomText || baseModel.zoomText,
+          requiredText: fit.requiredText || baseModel.requiredText,
           showRequired: baseModel.showRequired,
           captionUnitScale: baseModel.captionUnitScale,
+          stableDigitsEnabled: baseModel.stableDigitsEnabled === true,
           captionStyle: fit.captionStyle,
           valueStyle: fit.valueStyle,
           unitStyle: fit.unitStyle,
@@ -342,7 +370,9 @@
           captionStyle: "",
           valueStyle: "",
           unitStyle: "",
-          requiredStyle: ""
+          requiredStyle: "",
+          zoomText: "",
+          requiredText: ""
         };
         if (rootEl && rootEl.parentNode) {
           rootEl.parentNode.removeChild(rootEl);
@@ -363,8 +393,11 @@
           model.kind,
           textLength(model.caption),
           textLength(model.zoomText),
+          textLength(model.zoomFallbackText),
+          model.stableDigitsEnabled === true ? 1 : 0,
           textLength(model.unit),
           textLength(model.requiredText),
+          textLength(model.requiredFallbackText),
           model.mode,
           model.captionUnitScale,
           model.showRequired ? 1 : 0,

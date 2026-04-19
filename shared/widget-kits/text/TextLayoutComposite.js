@@ -59,7 +59,9 @@
         maxW: maxW,
         maxH: maxHMid,
         family: cfg.family,
-        weight: cfg.valueWeight
+        weight: cfg.valueWeight,
+        useMono: cfg.useMono === true,
+        monoFamily: cfg.monoFamily
       });
       const cFit = cfg.captionText
         ? primitive.fitSingleLineBinary({
@@ -138,7 +140,9 @@
         maxH: maxHTop,
         family: cfg.family,
         valueWeight: cfg.valueWeight,
-        labelWeight: cfg.labelWeight
+        labelWeight: cfg.labelWeight,
+        useMono: cfg.useMono === true,
+        monoFamily: cfg.monoFamily
       });
       const capFit = cfg.captionText
         ? primitive.fitSingleLineBinary({

@@ -116,6 +116,72 @@ describe("RoutePointsMarkup", function () {
     expect(html).toContain("dyni-route-points-ordinal");
   });
 
+  it("renders lat/lon rows with coordinatesTabular enabled", function () {
+    const markup = createMarkup();
+    const model = makeModel({
+      showLatLon: true,
+      points: [
+        { index: 0, ordinalText: "1", nameText: "Start", infoText: "54.102 N / 10.400 E", selected: false },
+        { index: 1, ordinalText: "2", nameText: "Finish", infoText: "081°/01.2nm", selected: true }
+      ]
+    });
+    const fit = makeFit({
+      rowFits: [
+        { ordinalStyle: "font-size:8px;", nameStyle: "font-size:10px;", infoStyle: "font-size:8px;", infoText: "54.102 N / 10.400 E" },
+        { ordinalStyle: "font-size:8px;", nameStyle: "font-size:10px;", infoStyle: "font-size:8px;", infoText: "081°/01.2nm" }
+      ]
+    });
+    const html = markup.render({
+      model: model,
+      fit: fit,
+      coordinatesTabular: true,
+      htmlUtils: createHtmlUtils()
+    });
+
+    expect(html).toContain("081°/01.2nm");
+    expect(html).toContain("dyni-route-points-info-text dyni-tabular");
+  });
+
+  it("renders fit-selected fallback text for stableDigits course-distance rows", function () {
+    const markup = createMarkup();
+    const model = makeModel({
+      showLatLon: false,
+      stableDigitsEnabled: true,
+      points: [
+        {
+          index: 0,
+          ordinalText: "1",
+          nameText: "Finish",
+          infoText: "00360°/00012.3nm",
+          infoFallbackText: "360°/12.3nm",
+          selected: true
+        }
+      ],
+      inlineGeometry: Object.assign({}, makeModel().inlineGeometry, {
+        rows: [makeModel().inlineGeometry.rows[0]]
+      })
+    });
+    const fit = makeFit({
+      rowFits: [
+        {
+          ordinalStyle: "font-size:8px;",
+          nameStyle: "font-size:10px;",
+          infoStyle: "font-size:8px;",
+          infoText: "360°/12.3nm"
+        }
+      ]
+    });
+    const html = markup.render({
+      model: model,
+      fit: fit,
+      htmlUtils: createHtmlUtils()
+    });
+
+    expect(html).toContain("360°/12.3nm");
+    expect(html).not.toContain("00360°/00012.3nm");
+    expect(html).toContain("dyni-route-points-info-text dyni-tabular");
+  });
+
   it("renders passive mode without click handlers", function () {
     const markup = createMarkup();
     const html = markup.render({

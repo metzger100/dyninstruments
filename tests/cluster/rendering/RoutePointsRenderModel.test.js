@@ -77,8 +77,14 @@ describe("RoutePointsRenderModel", function () {
           else if (id === "RoutePointsRowGeometry") {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js");
           }
+          else if (id === "RoutePointsHtmlFit") {
+            moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js");
+          }
           else if (id === "PlaceholderNormalize") {
             moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
+          }
+          else if (id === "StableDigits") {
+            moduleCache[id] = loadFresh("shared/widget-kits/format/StableDigits.js");
           }
           else if (id === "StateScreenLabels") {
             moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");

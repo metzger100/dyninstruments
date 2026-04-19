@@ -120,14 +120,13 @@
   }
 
   function hasText(value) {
-    return String(value).trim().length > 0;
+    return value != null && String(value).trim().length > 0;
   }
 
   function toMainFitState(args) {
     const cfg = args || {};
     const text = cfg.textApi;
-    const mode = cfg.mode;
-    if (mode === "high") {
+    if (cfg.mode === "high") {
       const fitHigh = text.fitThreeRowBlock({
         ctx: cfg.ctx,
         W: cfg.maxW,
@@ -141,16 +140,13 @@
         unitText: cfg.unitText,
         family: cfg.family,
         valueWeight: cfg.valueWeight,
-        labelWeight: cfg.labelWeight
+        labelWeight: cfg.labelWeight,
+        useMono: cfg.useMono === true,
+        monoFamily: cfg.monoFamily
       });
-      return {
-        captionPx: fitHigh.cPx,
-        valuePx: fitHigh.vPx,
-        unitPx: fitHigh.uPx,
-        modeFit: fitHigh
-      };
+      return { captionPx: fitHigh.cPx, valuePx: fitHigh.vPx, unitPx: fitHigh.uPx, modeFit: fitHigh };
     }
-    if (mode === "normal") {
+    if (cfg.mode === "normal") {
       const fitNormal = text.fitValueUnitCaptionRows({
         ctx: cfg.ctx,
         W: cfg.maxW,
@@ -165,14 +161,11 @@
         unitText: cfg.unitText,
         family: cfg.family,
         valueWeight: cfg.valueWeight,
-        labelWeight: cfg.labelWeight
+        labelWeight: cfg.labelWeight,
+        useMono: cfg.useMono === true,
+        monoFamily: cfg.monoFamily
       });
-      return {
-        captionPx: fitNormal.cPx,
-        valuePx: fitNormal.vPx,
-        unitPx: fitNormal.uPx,
-        modeFit: fitNormal
-      };
+      return { captionPx: fitNormal.cPx, valuePx: fitNormal.vPx, unitPx: fitNormal.uPx, modeFit: fitNormal };
     }
     const fitFlat = text.fitInlineTriplet({
       ctx: cfg.ctx,
@@ -185,7 +178,9 @@
       maxH: cfg.maxH,
       family: cfg.family,
       valueWeight: cfg.valueWeight,
-      labelWeight: cfg.labelWeight
+      labelWeight: cfg.labelWeight,
+      useMono: cfg.useMono === true,
+      monoFamily: cfg.monoFamily
     });
     return {
       captionPx: hasText(cfg.captionText) ? fitFlat.sPx : 0,
@@ -193,6 +188,24 @@
       unitPx: hasText(cfg.unitText) ? fitFlat.sPx : 0,
       modeFit: fitFlat
     };
+  }
+
+  function isTextCleanFit(args) {
+    const cfg = args || {};
+    if (!hasText(cfg.text) || !(cfg.px > 0)) {
+      return false;
+    }
+    const fit = cfg.textApi.fitSingleLineBinary({
+      ctx: cfg.ctx,
+      text: cfg.text,
+      minPx: Math.max(1, Math.floor(cfg.px)),
+      maxPx: Math.max(1, Math.floor(cfg.px)),
+      maxW: Math.max(1, Math.floor(cfg.maxW)),
+      maxH: Math.max(1, Math.floor(cfg.maxH)),
+      family: cfg.family,
+      weight: cfg.weight
+    });
+    return numberOr(fit && fit.width, 0) <= Math.max(1, Math.floor(cfg.maxW)) + 0.01;
   }
 
   function fitRequiredPx(args, htmlUtils) {
@@ -235,15 +248,19 @@
       cfg.width,
       cfg.height,
       cfg.family,
+      cfg.valueFamily,
       cfg.valueWeight,
       cfg.labelWeight,
       cfg.mode,
       cfg.secScale,
       model.showRequired ? 1 : 0,
+      model.stableDigitsEnabled ? 1 : 0,
       model.caption,
       model.zoomText,
+      model.zoomFallbackText,
       model.unit,
-      model.requiredText
+      model.requiredText,
+      model.requiredFallbackText
     ]);
   }
 
@@ -272,6 +289,9 @@
       const themeRoot = Helpers.requirePluginRoot(target || cfg.targetEl);
       const tokens = themeApi.resolveForRoot(themeRoot);
       const family = tokens.font.family;
+      const valueFamily = model.stableDigitsEnabled === true && tokens.font.familyMono
+        ? tokens.font.familyMono
+        : family;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       const shellW = Math.max(1, Math.round(rect.width));
@@ -291,6 +311,7 @@
         width: shellW,
         height: shellH,
         family: family,
+        valueFamily: valueFamily,
         valueWeight: valueWeight,
         labelWeight: labelWeight,
         mode: mode,
@@ -301,7 +322,7 @@
         return fitCache.result;
       }
 
-      const mainFit = toMainFitState({
+      const mainFitArgs = {
         textApi: textApi,
         mode: mode,
         ctx: measureCtx,
@@ -309,33 +330,65 @@
         maxH: contentH,
         gapPx: gapPx,
         innerY: innerY,
+        padX: responsiveInsets.padX,
         textFillScale: responsiveInsets.responsive.textFillScale,
         secScale: secScale,
         captionText: model.caption,
-        valueText: model.zoomText,
+        valueFamily: valueFamily,
         unitText: model.unit,
         family: family,
+        useMono: model.stableDigitsEnabled === true,
+        monoFamily: valueFamily,
         valueWeight: valueWeight,
         labelWeight: labelWeight
-      });
-      const requiredFit = fitRequiredPx({
+      };
+      const mainFit = toMainFitState(Object.assign({ valueText: model.zoomText }, mainFitArgs));
+      const mainCandidate = isTextCleanFit({
+        textApi: textApi,
+        ctx: measureCtx,
+        text: model.zoomText,
+        px: mainFit.valuePx,
+        maxW: contentW,
+        maxH: contentH,
+        family: valueFamily,
+        weight: valueWeight
+      }) || !hasText(model.zoomFallbackText) || model.zoomFallbackText === model.zoomText
+        ? mainFit
+        : toMainFitState(Object.assign({ valueText: model.zoomFallbackText }, mainFitArgs));
+      const requiredFitArgs = {
         textApi: textApi,
         mode: mode,
-        mainFit: mainFit.modeFit,
-        requiredText: model.showRequired ? model.requiredText : "",
+        mainFit: mainCandidate.modeFit,
         ctx: measureCtx,
         maxW: contentW,
         maxH: contentH,
         gapPx: gapPx,
-        family: family,
+        family: valueFamily,
         labelWeight: labelWeight
-      }, htmlUtils);
+      };
+      const requiredPrimary = fitRequiredPx(Object.assign({
+        requiredText: model.showRequired ? model.requiredText : ""
+      }, requiredFitArgs), htmlUtils);
+      const requiredCandidate = isTextCleanFit({
+        textApi: textApi,
+        ctx: measureCtx,
+        text: model.requiredText,
+        px: requiredPrimary.px,
+        maxW: contentW,
+        maxH: contentH,
+        family: valueFamily,
+        weight: labelWeight
+      }) || !hasText(model.requiredFallbackText) || model.requiredFallbackText === model.requiredText
+        ? requiredPrimary
+        : fitRequiredPx(Object.assign({ requiredText: model.requiredFallbackText }, requiredFitArgs), htmlUtils);
 
       const out = {
-        captionStyle: toFontStyle(mainFit.captionPx, htmlUtils),
-        valueStyle: toFontStyle(mainFit.valuePx, htmlUtils),
-        unitStyle: toFontStyle(mainFit.unitPx, htmlUtils),
-        requiredStyle: toFontStyle(requiredFit.px, htmlUtils)
+        captionStyle: toFontStyle(mainCandidate.captionPx, htmlUtils),
+        valueStyle: toFontStyle(mainCandidate.valuePx, htmlUtils),
+        unitStyle: toFontStyle(mainCandidate.unitPx, htmlUtils),
+        requiredStyle: toFontStyle(requiredCandidate.px, htmlUtils),
+        zoomText: mainCandidate === mainFit ? model.zoomText : model.zoomFallbackText,
+        requiredText: requiredCandidate === requiredPrimary ? model.requiredText : model.requiredFallbackText
       };
       if (fitCache) {
         fitCache.signature = fitSignature;

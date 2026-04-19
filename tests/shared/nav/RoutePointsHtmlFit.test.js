@@ -48,6 +48,8 @@ describe("RoutePointsHtmlFit", function () {
     const themeApi = {
       resolveForRoot: vi.fn(() => ({
         font: {
+          family: "sans-serif",
+          familyMono: "monospace",
           weight: 720,
           labelWeight: 610
         }
@@ -98,7 +100,7 @@ describe("RoutePointsHtmlFit", function () {
     };
     const fit = loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js").create({}, Helpers);
     const layout = routePointsLayoutModule.create({}, Helpers);
-    return { fit, layout, targetEl, hostContext, themeApi };
+    return { fit, layout, targetEl, hostContext, themeApi, radialTextApi };
   }
 
   function buildModel(overrides) {
@@ -359,9 +361,52 @@ describe("RoutePointsHtmlFit", function () {
     expectStyleFormat(out.rowFits[0].ordinalStyle);
     expectStyleFormat(out.rowFits[0].nameStyle);
     expectStyleFormat(out.rowFits[0].infoStyle);
+    expect(out.rowFits[0].infoText).toBe(longInfo);
     expect(JSON.stringify(out)).not.toContain(longRouteName);
     expect(JSON.stringify(out)).not.toContain(longMeta);
     expect(JSON.stringify(out)).not.toContain(longName);
-    expect(JSON.stringify(out)).not.toContain(longInfo);
+  });
+
+  it("uses mono family for course/distance info when stableDigits is enabled", function () {
+    const h = createHarness();
+    const shellRect = { width: 300, height: 180 };
+
+    h.fit.compute({
+      model: buildModel({
+        points: [
+          { ordinalText: "1", nameText: "Start", infoText: "09°/1.2nm" }
+        ],
+        stableDigitsEnabled: true
+      }),
+      hostContext: h.hostContext,
+      targetEl: h.targetEl,
+      shellRect: shellRect
+    });
+
+    const infoCall = h.radialTextApi.fitSingleTextPx.mock.calls.find((args) => args[1] === "09°/1.2nm");
+    expect(infoCall).toBeDefined();
+    expect(infoCall[5]).toBe("monospace");
+  });
+
+  it("falls back to infoFallbackText for narrow stableDigits course-distance rows", function () {
+    const h = createHarness();
+    const shellRect = { width: 40, height: 120 };
+    const model = buildModel({
+      stableDigitsEnabled: true,
+      points: [
+        { ordinalText: "1", nameText: "Start", infoText: "000°/000.0nm", infoFallbackText: "0°/0.0nm" },
+        { ordinalText: "2", nameText: "Finish", infoText: "00360°/00012.3nm", infoFallbackText: "360°/12.3nm" }
+      ]
+    });
+
+    const out = h.fit.compute({
+      model: model,
+      hostContext: h.hostContext,
+      targetEl: h.targetEl,
+      shellRect: shellRect
+    });
+
+    expect(out.rowFits[1].infoText).toBe("360°/12.3nm");
+    expectStyleFormat(out.rowFits[1].infoStyle);
   });
 });

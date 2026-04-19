@@ -42,6 +42,9 @@
     const metricFit = toObject(cfg.metricFit);
     const metricGeometry = toObject(cfg.metricGeometry);
     const htmlUtils = cfg.htmlUtils;
+    const stableDigitsEnabled = cfg.stableDigitsEnabled === true;
+    const valueClass = stableDigitsEnabled ? " dyni-tabular" : "";
+    const valueText = toText(metricFit.valueText != null ? metricFit.valueText : metric.valueText);
 
     if (mode === "flat") {
       return ""
@@ -53,10 +56,10 @@
         + ">"
         + htmlUtils.escapeHtml(toText(metric.captionText))
         + "</div>"
-        + '<div class="dyni-ais-target-metric-value"'
+        + '<div class="dyni-ais-target-metric-value' + valueClass + '"'
         + htmlUtils.toStyleAttr(metricFit.valueStyle)
         + ">"
-        + htmlUtils.escapeHtml(toText(metric.valueText))
+        + htmlUtils.escapeHtml(valueText)
         + "</div>"
         + '<div class="dyni-ais-target-metric-unit"'
         + htmlUtils.toStyleAttr(metricFit.unitStyle)
@@ -78,10 +81,10 @@
       + '<div class="dyni-ais-target-metric-value-row"'
       + htmlUtils.toStyleAttr(joinStyles(metricGeometry.valueRowStyle, metricFit.valueRowStyle))
       + ">"
-      + '<span class="dyni-ais-target-metric-value-text"'
+      + '<span class="dyni-ais-target-metric-value-text' + valueClass + '"'
       + htmlUtils.toStyleAttr(metricFit.valueStyle)
       + ">"
-      + htmlUtils.escapeHtml(toText(metric.valueText))
+      + htmlUtils.escapeHtml(valueText)
       + "</span>"
       + '<span class="dyni-ais-target-metric-unit"'
       + htmlUtils.toStyleAttr(metricFit.unitStyle)
@@ -124,6 +127,7 @@
         metric: metrics[id],
         metricFit: metricFits[id],
         metricGeometry: metricGeometry[id],
+        stableDigitsEnabled: model.stableDigitsEnabled,
         htmlUtils: htmlUtils
       });
     }

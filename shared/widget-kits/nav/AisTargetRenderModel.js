@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetRenderModel - Pure normalization and display-model owner for AIS target HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: AisTargetLayout, HtmlWidgetUtils, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction
+ * Depends: AisTargetLayout, HtmlWidgetUtils, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -94,6 +94,7 @@
       m.kind || "hidden",
       m.showTcpaBranch ? "tcpa" : "brg",
       m.interactionState || "passive",
+      m.stableDigitsEnabled === true ? 1 : 0,
       m.isVerticalCommitted === true ? 1 : 0,
       Math.max(1, Math.round(Number(m.shellWidth) || 1))
     ];
@@ -128,9 +129,27 @@
     const layoutApi = Helpers.getModule("AisTargetLayout").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
+
+    function normalizeStableMetricValue(rawText, minWidth, stableDigitsEnabled) {
+      if (stableDigitsEnabled !== true) {
+        return {
+          valueText: rawText,
+          fallbackValueText: rawText
+        };
+      }
+      const stable = stableDigits.normalize(rawText, {
+        integerWidth: stableDigits.resolveIntegerWidth(rawText, minWidth),
+        reserveSignSlot: false
+      });
+      return {
+        valueText: stable.padded,
+        fallbackValueText: stable.fallback
+      };
+    }
 
     function buildModel(args) {
       const cfg = args || {};
@@ -151,6 +170,7 @@
         isEditingMode: isEditingMode,
         disconnect: props.disconnect === true
       }, stateScreenPrecedence);
+      const stableDigitsEnabled = props.stableDigits === true;
       const canDispatch = !!(
         domain.hasDispatchMmsi === true &&
         surfacePolicy && surfacePolicy.interaction && surfacePolicy.interaction.mode === "dispatch"
@@ -189,45 +209,45 @@
           id: "dst",
           captionText: normalizeText(captions.dst),
           unitText: normalizeText(units.dst),
-          valueText: formatWithFormatter({
+          ...normalizeStableMetricValue(formatWithFormatter({
             value: distance,
             formatter: "formatDistance",
             formatterParameters: [units.dst],
             defaultText: defaultText
-          }, Helpers, placeholderNormalize)
+          }, Helpers, placeholderNormalize), 2, stableDigitsEnabled)
         },
         cpa: {
           id: "cpa",
           captionText: normalizeText(captions.cpa),
           unitText: normalizeText(units.cpa),
-          valueText: formatWithFormatter({
+          ...normalizeStableMetricValue(formatWithFormatter({
             value: cpa,
             formatter: "formatDistance",
             formatterParameters: [units.cpa],
             defaultText: defaultText
-          }, Helpers, placeholderNormalize)
+          }, Helpers, placeholderNormalize), 2, stableDigitsEnabled)
         },
         tcpa: {
           id: "tcpa",
           captionText: normalizeText(captions.tcpa),
           unitText: normalizeText(units.tcpa),
-          valueText: formatWithFormatter({
+          ...normalizeStableMetricValue(formatWithFormatter({
             value: typeof tcpaSeconds === "number" ? (tcpaSeconds / 60) : undefined,
             formatter: "formatDecimal",
             formatterParameters: [3, (typeof tcpaSeconds === "number" && Math.abs(tcpaSeconds) > 60) ? 0 : 2],
             defaultText: defaultText
-          }, Helpers, placeholderNormalize)
+          }, Helpers, placeholderNormalize), 2, stableDigitsEnabled)
         },
         brg: {
           id: "brg",
           captionText: normalizeText(captions.brg),
           unitText: normalizeText(units.brg),
-          valueText: formatWithFormatter({
+          ...normalizeStableMetricValue(formatWithFormatter({
             value: headingTo,
             formatter: "formatDirection",
             formatterParameters: [],
             defaultText: defaultText
-          }, Helpers, placeholderNormalize)
+          }, Helpers, placeholderNormalize), 3, stableDigitsEnabled)
         }
       };
 
@@ -268,6 +288,7 @@
         layout: layout,
         captureClicks: interactionState === "dispatch",
         showHotspot: interactionState === "dispatch",
+        stableDigitsEnabled: stableDigitsEnabled,
         dispatchMmsi: normalizeText(domain.mmsiNormalized),
         nameText: normalizeText(domain.nameOrMmsi),
         frontText: normalizeText(domain.frontText),
