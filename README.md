@@ -263,8 +263,6 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full layer map and dependency rul
 
 ## Roadmap (Short)
 
-- Foundation refactors are complete (bootstrap split, shared gauge core, semicircle engine unification).
-- Linear parity for non-compass/non-wind radial kinds is complete (`sogLinear`, `stwLinear`, `depthLinear`, `tempLinear`, `voltageLinear`).
 - Next focus is coverage expansion for remaining AvNav widget categories.
 - Cluster-first integration remains the primary strategy.
 - Backward compatibility is not guaranteed during pre-release.
