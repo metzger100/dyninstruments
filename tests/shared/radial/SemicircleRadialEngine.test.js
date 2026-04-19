@@ -119,6 +119,129 @@ describe("SemicircleRadialEngine", function () {
     };
   }
 
+  function createRenderOrderHarness(sectorList) {
+    const sequence = [];
+    const arcRingCalls = [];
+    const pointerCalls = [];
+    const tickCalls = [];
+    const labelCalls = [];
+    const buildSectorsCalls = [];
+    const themeDefaults = {
+      surface: {
+        fg: "#fff"
+      },
+      colors: {
+        pointer: "#ff2b2b",
+        warning: "#e7c66a",
+        alarm: "#ff7a76",
+        laylineStb: "#82b683",
+        laylinePort: "#ff7a76"
+      },
+      radial: {
+        ticks: {
+          majorLen: 13,
+          majorWidth: 4,
+          minorLen: 7,
+          minorWidth: 2
+        },
+        pointer: {
+          widthFactor: 1.02,
+          lengthFactor: 1.7
+        },
+        ring: {
+          arcLineWidth: 2.5,
+          widthFactor: 0.18
+        },
+        labels: {
+          insetFactor: 2.2,
+          fontFactor: 0.2
+        }
+      },
+      font: {
+        family: "sans-serif",
+        weight: 710,
+        labelWeight: 680
+      }
+    };
+    const resolveTheme = vi.fn(function () {
+      return themeDefaults;
+    });
+    const gaugeValueMath = createValueMath();
+    const gaugeToolkit = {
+      create() {
+        return {
+          theme: { resolveForRoot: resolveTheme },
+          text: {
+            drawDisconnectOverlay() {}
+          },
+          value: gaugeValueMath,
+          draw: {
+            drawArcRing(ctx, cx, cy, rOuter, startDeg, endDeg, opts) {
+              sequence.push("ring");
+              arcRingCalls.push(opts);
+            },
+            drawAnnularSector(ctx, cx, cy, rOuter, opts) {
+              sequence.push("sector");
+            },
+            drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, opts) {
+              sequence.push("pointer");
+              pointerCalls.push(opts);
+            },
+            drawTicksFromAngles(ctx, cx, cy, rOuter, ticks, opts) {
+              sequence.push("ticks");
+              tickCalls.push(opts);
+            },
+            drawLabels(ctx, cx, cy, rOuter, opts) {
+              sequence.push("labels");
+              labelCalls.push(opts);
+            }
+          }
+        };
+      }
+    };
+    const textLayoutCalls = [];
+    const modules = {
+      RadialToolkit: gaugeToolkit,
+      SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
+      SemicircleRadialTextLayout: {
+        create() {
+          return {
+            createFitCache() {
+              return {};
+            },
+            drawModeText(state, display) {
+              textLayoutCalls.push({ state, display });
+            }
+          };
+        }
+      },
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
+    };
+    const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
+      .create({}, makeHelpers(modules))
+      .createRenderer({
+        ...makeBaseSpec(),
+        buildSectors(props, minV, maxV, arc, valueUtils, theme) {
+          buildSectorsCalls.push({ props, minV, maxV, arc, valueUtils, theme });
+          return sectorList;
+        }
+      });
+
+    return {
+      renderer,
+      sequence,
+      arcRingCalls,
+      pointerCalls,
+      tickCalls,
+      labelCalls,
+      buildSectorsCalls,
+      textLayoutCalls,
+      resolveTheme,
+      themeDefaults
+    };
+  }
+
   it("resolves theme once and applies tokenized geometry and label metrics from the layout owner", function () {
     const pointerCalls = [];
     const tickCalls = [];
@@ -265,6 +388,64 @@ describe("SemicircleRadialEngine", function () {
     expect(labelCalls[0].weight).toBe(themeDefaults.font.labelWeight);
     expect(textLayoutCalls).toHaveLength(1);
     expect(textLayoutCalls[0].state.layout.mode).toBe("flat");
+  });
+
+  it("draws sectors before the arc ring and keeps the ring ahead of pointer, ticks, and labels", function () {
+    const harness = createRenderOrderHarness([
+      {
+        a0: 20,
+        a1: 40,
+        color: "#e7c66a"
+      }
+    ]);
+    const canvas = createMockCanvas({
+      rectWidth: 480,
+      rectHeight: 110,
+      ctx: createMockContext2D()
+    });
+
+    harness.renderer(canvas, {
+      value: 12.3,
+      caption: "SPD",
+      unit: "kn"
+    });
+
+    const sectorIndex = harness.sequence.indexOf("sector");
+    const ringIndex = harness.sequence.indexOf("ring");
+    const pointerIndex = harness.sequence.indexOf("pointer");
+    const ticksIndex = harness.sequence.indexOf("ticks");
+    const labelsIndex = harness.sequence.indexOf("labels");
+
+    expect(sectorIndex).toBeGreaterThanOrEqual(0);
+    expect(ringIndex).toBeGreaterThan(sectorIndex);
+    expect(pointerIndex).toBeGreaterThan(ringIndex);
+    expect(ticksIndex).toBeGreaterThan(ringIndex);
+    expect(labelsIndex).toBeGreaterThan(ringIndex);
+    expect(harness.arcRingCalls).toHaveLength(1);
+    expect(harness.pointerCalls).toHaveLength(1);
+    expect(harness.tickCalls).toHaveLength(1);
+    expect(harness.labelCalls).toHaveLength(1);
+  });
+
+  it("still draws the ring, pointer, ticks, and labels when no sectors are returned", function () {
+    const harness = createRenderOrderHarness([]);
+    const canvas = createMockCanvas({
+      rectWidth: 480,
+      rectHeight: 110,
+      ctx: createMockContext2D()
+    });
+
+    harness.renderer(canvas, {
+      value: 12.3,
+      caption: "SPD",
+      unit: "kn"
+    });
+
+    expect(harness.sequence.filter((item) => item === "sector")).toHaveLength(0);
+    expect(harness.sequence.filter((item) => item === "ring")).toHaveLength(1);
+    expect(harness.sequence.filter((item) => item === "pointer")).toHaveLength(1);
+    expect(harness.sequence.filter((item) => item === "ticks")).toHaveLength(1);
+    expect(harness.sequence.filter((item) => item === "labels")).toHaveLength(1);
   });
 
   it("matches callback-visible layout state with or without wrapper-owned ratioDefaults when config thresholds are present", function () {

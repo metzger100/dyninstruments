@@ -195,10 +195,6 @@
           : NaN;
         const easedAngle = springMotion.resolve(canvas, angleNow, p.easing !== false, Date.now());
 
-        draw.drawArcRing(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, arc.startDeg, arc.endDeg, {
-          lineWidth: theme.radial.ring.arcLineWidth
-        });
-
         for (let i = 0; i < sectorList.length; i += 1) {
           const sector = sectorList[i];
           if (!sector || !value.isFiniteNumber(sector.a0) || !value.isFiniteNumber(sector.a1)) {
@@ -211,6 +207,10 @@
             fillStyle: sector.color
           });
         }
+
+        draw.drawArcRing(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, arc.startDeg, arc.endDeg, {
+          lineWidth: theme.radial.ring.arcLineWidth
+        });
 
         if (value.isFiniteNumber(easedAngle)) {
           draw.drawPointerAtRim(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, easedAngle, {

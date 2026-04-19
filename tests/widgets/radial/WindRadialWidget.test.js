@@ -83,7 +83,8 @@ describe("WindRadialWidget", function () {
       ticks: 0,
       labels: 0,
       pointer: 0,
-      text: 0
+      text: 0,
+      sequence: []
     };
     const theme = {
       surface: {
@@ -163,9 +164,11 @@ describe("WindRadialWidget", function () {
               return {
                 draw: {
                   drawRing() {
+                    calls.sequence.push("ring");
                     calls.ring += 1;
                   },
                   drawAnnularSector() {
+                    calls.sequence.push("sector");
                     calls.layline += 1;
                   },
                   drawPointerAtRim() {
@@ -441,6 +444,21 @@ describe("WindRadialWidget", function () {
     expect(labelCalls[0].radiusOffset).toBe(layout.labels.radiusOffset);
     expect(labelCalls[0].fontPx).toBe(layout.labels.fontPx);
     expect(labelCalls[0].weight).toBe(themeDefaults.font.labelWeight);
+  });
+
+  it("draws laylines before the full-circle ring in the cached back layer", function () {
+    const harness = createWindCachingHarness();
+    const canvas = createMockCanvas({ rectWidth: 480, rectHeight: 110, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeWindProps());
+
+    expect(harness.calls.sequence.slice(0, 3)).toEqual(["sector", "sector", "ring"]);
+    expect(harness.calls.ring).toBe(1);
+    expect(harness.calls.layline).toBe(2);
+    expect(harness.calls.ticks).toBe(1);
+    expect(harness.calls.labels).toBe(1);
+    expect(harness.calls.pointer).toBe(1);
+    expect(harness.calls.text).toBeGreaterThan(0);
   });
 
   it("does not append unit into value text when formatter returns raw passthrough", function () {

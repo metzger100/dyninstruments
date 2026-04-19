@@ -102,7 +102,6 @@
       rebuildLayer: function (layerCtx, layerName, state, props, api) {
         const display = windDisplay(state, props);
         if (layerName === "back") {
-          api.drawFullCircleRing(layerCtx);
           if (display.layEnabled && display.windRadialLayMax > display.windRadialLayMin) {
             state.draw.drawAnnularSector(layerCtx, state.geom.cx, state.geom.cy, state.geom.rOuter, {
               startDeg: display.windRadialLayMin,
@@ -119,6 +118,7 @@
               alpha: 1
             });
           }
+          api.drawFullCircleRing(layerCtx);
           return;
         }
 
