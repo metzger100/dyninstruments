@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution plan for five regressions and issues identified after PLAN11 completion.
+Execution plan for six regressions and issues identified after PLAN11 completion.
 Each phase is scoped for one Codex session. Phases are independent and may execute in any order.
 
 ---
@@ -14,8 +14,9 @@ Each phase is scoped for one Codex session. Phases are independent and may execu
 | 1 | Spring ease on linear compass eases the pointer instead of the scale; no 180° range support | `LinearGaugeEngine.js`, `CompassLinearWidget.js`, `config/clusters/course-heading.js` | `springMotion.resolve()` is applied to `displayState.num` which feeds the pointer; for compass-mode the axis should be eased, not the pointer. Additionally, the visible heading window is hardcoded to 360°; a 180° option is needed. |
 | 2 | Coordinates monospace but not aligned; N/E sizes not coupled | `TextLayoutComposite.js`, `PositionCoordinateWidget.js` | `drawTwoRowsWithHeader` uses `ctx.textAlign = "center"`; needs right-alignment and the existing `fitMultiRowBinary` coupling must be surfaced correctly |
 | 3 | Radial compass labels clip into major ticks and are too small | `FullCircleRadialLayout.js`, `CompassRadialWidget.js` | `LABEL_SPRITE_RADIUS_FACTOR = 1.6` places labels too close to tick ends; `labelFontFactor = 0.14` produces undersized text |
-| 4 | Normal/high mode row spacing too large, value row undersized | `LinearGaugeLayout.js`, `LinearGaugeTextLayout.js` | `HIGH_TEXT_GAP_FACTOR = 1.2` and `HIGH_CAPTION_SHARE_RATIO = 0.36` plus `splitCaptionValueRows` secScale compounding steals vertical space from the value row |
+| 4 | ThreeValueTextWidget: normal/high mode row spacing too large, value row undersized | `TextLayoutComposite.js` | `ROW_SAFE_RATIO = 0.85` and `innerY * 2` per-row padding compound across three rows, wasting ~30% of height as whitespace and compressing the value row |
 | 5 | Radial gauge sectors overlay the scale ring line | `SemicircleRadialEngine.js`, `WindRadialWidget.js` | `drawArcRing` / `drawFullCircleRing` is called before sector fills, so sectors paint over the ring stroke |
+| 6 | CenterDisplay coordinates not aligned and sizes not coupled | `CenterDisplayTextWidget.js`, `CenterDisplayLayout.js` | `coordAlign` hardcoded to `"center"` in layout; lat/lon fitted independently via `drawFittedLine` instead of sharing a coupled font size |
 
 ---
 
@@ -388,25 +389,26 @@ The exact values (2.2, 0.18) are starting points. After applying them:
 
 ---
 
-## Phase 4 — Fix row spacing in normal and high modes for linear gauges
+## Phase 4 — Fix row spacing in ThreeValueTextWidget (COG, SOG, AWS, etc.)
 
 ### Context for Codex
 
-`LinearGaugeLayout.js` defines layout constants for the linear gauge engine. In **high mode**
-(`computeStackedLayout`, line 89), the vertical budget is split as:
-- `HIGH_TEXT_GAP_FACTOR = 1.2` — gap between scale area and text area = `gap * 1.2`
-- `HIGH_SCALE_HEIGHT_RATIO = 0.44` — scale gets 44% of `(contentRect.h - textGap)`
-- `HIGH_CAPTION_SHARE_RATIO = 0.36` — caption row gets 36% of the remaining text area
+`ThreeValueTextWidget.js` is the classic three-element numeric display used for COG, SOG,
+AWS, and similar kinds. It renders caption / value / unit using two layout functions from
+`TextLayoutComposite.js`:
+- **High mode** → `fitThreeRowBlock` / `drawThreeRowBlock` (3 stacked rows)
+- **Normal mode** → `fitValueUnitCaptionRows` / `drawValueUnitCaptionRows` (value+unit top row, caption bottom row)
 
-Then `splitCaptionValueRows` (line 223) re-distributes caption and value rows using
-`secScale` (default 0.8), giving caption 44% and value 56% of the combined text height.
-The compounding of these allocations leaves the value row significantly undersized with
-visible whitespace between the scale and the text rows.
+Both functions apply per-row padding and safety margins that compound and waste significant
+vertical space, making the value row undersized with visible whitespace between rows.
 
-In **normal mode** (inline variant, `computeInlineLayout`, line 135):
-- `NORMAL_INLINE_HEIGHT_RATIO = 0.42` — inline text band gets 42% of content height
-- The track gap (`NORMAL_TOP_MARGIN_RATIO = 0.05`) plus `NORMAL_SCALE_HEIGHT_RATIO = 0.50`
-  take significant vertical space
+In `TextLayoutComposite.js`:
+- `ROW_SAFE_RATIO = 0.85` (line 16) — reserves 15% of each row height as safety margin
+- `innerY * 2` is subtracted from each row before applying `ROW_SAFE_RATIO`
+- For `fitThreeRowBlock` with `secScale=0.8` and `H=100`, `innerY≈3`:
+  - hTop(caption)=31px, hMid(value)=38px, hBot(unit)=31px
+  - maxHMid = floor((38 − 6) × 0.85) = 27px — value gets only 27% of widget height
+  - Total overhead: 18px (innerY×6) + ~13px (ROW_SAFE_RATIO) ≈ 31px wasted
 
 ### Mandatory preflight
 
@@ -414,55 +416,88 @@ Read these files before any code changes:
 - documentation/TABLEOFCONTENTS.md
 - documentation/conventions/coding-standards.md
 - documentation/conventions/smell-prevention.md
-- documentation/linear/linear-shared-api.md
+- documentation/shared/text-layout-engine.md
 
-### Task: Reduce row spacing and increase value row allocation in linear gauge normal/high modes
+### Task: Reduce row spacing overhead in ThreeValueTextWidget's high and normal modes
 
 #### Problem
 
-In `shared/widget-kits/linear/LinearGaugeLayout.js`:
-- **High mode**: Too much vertical space allocated to the gap and caption, leaving the value
-  row undersized. `HIGH_TEXT_GAP_FACTOR = 1.2`, `HIGH_SCALE_HEIGHT_RATIO = 0.44`, and
-  `HIGH_CAPTION_SHARE_RATIO = 0.36` compound to compress the value row.
-- **Normal mode** (inline): The inline text band (`NORMAL_INLINE_HEIGHT_RATIO = 0.42`) is
-  compressed because the scale and top margin take too much space.
+In `shared/widget-kits/text/TextLayoutComposite.js`, the `fitThreeRowBlock` (high mode)
+and `fitValueUnitCaptionRows` (normal mode) functions apply too much per-row vertical
+overhead. This affects `ThreeValueTextWidget` (COG, SOG, AWS, etc.) — the classic
+three-element numeric displays.
 
-Additionally, `splitCaptionValueRows` (line 223) re-distributes using `secScale=0.8`,
-giving caption 44% of the combined text height — further shrinking the value area.
+Two sources of overhead compound across rows:
+1. `ROW_SAFE_RATIO = 0.85` (line 16) — 15% safety margin per row is too aggressive.
+2. `innerY * 2` subtracted from each row — padding applied top and bottom of every row.
+
+For a 100px-tall widget in high mode with `innerY=3` and `secScale=0.8`:
+- 18px lost to innerY (6px × 3 rows)
+- ~13px lost to ROW_SAFE_RATIO (15% of remaining per row)
+- The value row gets only ~27px out of 100px
 
 #### Required changes
 
-1. **`LinearGaugeLayout.js`** — Adjust high-mode constants:
-   - Reduce `HIGH_TEXT_GAP_FACTOR` from `1.2` to `0.6`. The gap between scale and text
-     should be minimal — just enough visual separation.
-   - Reduce `HIGH_SCALE_HEIGHT_RATIO` from `0.44` to `0.38`. Give more vertical budget
-     to the text area below the scale.
-   - Reduce `HIGH_CAPTION_SHARE_RATIO` from `0.36` to `0.28`. Caption is secondary
-     information; the value row should dominate.
+All changes are in `shared/widget-kits/text/TextLayoutComposite.js`.
+No changes to `ThreeValueTextWidget.js`, `LinearGaugeLayout.js`, or any widget file.
 
-2. **`LinearGaugeLayout.js`** — Adjust normal-mode constants:
-   - Increase `NORMAL_INLINE_HEIGHT_RATIO` from `0.42` to `0.48`. Give more height to
-     the inline text band.
-   - Reduce `NORMAL_TOP_MARGIN_RATIO` from `0.05` to `0.03`. Less wasted space above
-     the scale.
+1. **Increase `ROW_SAFE_RATIO`** from `0.85` to `0.92`:
+   - The 15% safety margin was too conservative. Browser glyph overshoot rarely exceeds
+     5–8% of font size. A 92% ratio still provides safety while reclaiming ~7% per row.
+   - This is a single constant at line 16 used by `fitThreeRowBlock` and
+     `fitValueUnitCaptionRows`.
 
-3. **`LinearGaugeLayout.js` — `splitCaptionValueRows`**: Bias the split toward the value row:
-   - Change the caption share formula from `ratio / (1 + ratio)` to a formula that gives
-     less space to caption. With `secScale = 0.8`:
-     - Current: `captionShare = 0.8 / 1.8 = 0.44` → caption gets 44%.
-     - Target: caption should get ~30–35%.
-     - New formula: `const captionShare = (ratio * 0.75) / (1 + ratio);`
-       With `secScale = 0.8`: `captionShare = 0.6 / 1.8 = 0.33` → caption gets 33%.
-     - This preserves the secScale sensitivity (larger secScale = larger caption) while
-       shifting the balance toward the value row.
+2. **Reduce `innerY` multiplier in `fitThreeRowBlock`** (high mode, line 36):
+   - Change the maxH computation for ALL THREE rows from `innerY * 2` to `innerY`:
+     ```js
+     const maxHTop = Math.max(1, Math.floor((hTop - innerY) * ROW_SAFE_RATIO));
+     const maxHMid = Math.max(1, Math.floor((hMid - innerY) * ROW_SAFE_RATIO));
+     const maxHBot = Math.max(1, Math.floor((hBot - innerY) * ROW_SAFE_RATIO));
+     ```
+   - Rationale: The three rows are stacked directly — the bottom padding of one row and
+     the top padding of the next overlap visually. Using `innerY * 1` per row provides
+     the same visual separation as `innerY * 2` did for a single isolated row.
+
+3. **Reduce `innerY` multiplier in `fitValueUnitCaptionRows`** (normal mode, line 115):
+   - Same change: `innerY * 2` → `innerY` for maxH computation:
+     ```js
+     const maxHTop = Math.max(1, Math.floor((hTop - innerY) * ROW_SAFE_RATIO));
+     const maxHBot = Math.max(1, Math.floor((hBot - innerY) * ROW_SAFE_RATIO));
+     ```
+
+4. **Reduce `innerY` multiplier in `fitTwoRowsWithHeader`** (line 201) for consistency:
+   - The coordinate two-row layout uses the same pattern. Apply the same change:
+     ```js
+     const maxRowH = Math.max(1, Math.min(row1H, row2H) - innerY);
+     ```
+     And for header:
+     ```js
+     const maxHeaderH = Math.max(1, headerH - innerY);
+     ```
+
+#### Impact analysis
+
+- **ThreeValueTextWidget** (COG, SOG, AWS, BRG, etc.): Primary fix target. The value
+  row will be visibly larger in high and normal modes. High mode: value gets ~35px out
+  of 100px instead of 27px (≈30% improvement).
+- **PositionCoordinateWidget**: Uses `fitTwoRowsWithHeader` — will also benefit from the
+  reduced overhead in its stacked coordinate display (change 4).
+- **LinearGaugeEngine**: Uses `LinearGaugeLayout.splitCaptionValueRows` and
+  `LinearGaugeTextLayout.drawCaptionRow`/`drawValueUnitRow` — these do NOT use the
+  TextLayoutComposite functions and are therefore **unaffected** by this change.
+- **SemicircleRadialEngine** / **FullCircleRadialEngine**: Use their own text layout
+  modules (`SemicircleRadialTextLayout`, `FullCircleRadialTextLayout`) which do NOT
+  use `ROW_SAFE_RATIO` — **unaffected**.
+- **CenterDisplayTextWidget**: Uses `TextTileLayout.drawFittedLine` — **unaffected**.
 
 #### Verification
 
-- In high mode at various aspect ratios, the value row is visually dominant and the gap
-  between scale and text is minimal.
-- In normal mode, the inline text band uses the available space efficiently.
-- Caption text remains legible (not clipped or invisible).
-- Flat mode is unaffected (uses separate layout function).
+- ThreeValueTextWidget in high mode: value row is visually dominant, no excessive
+  whitespace between caption/value/unit rows.
+- ThreeValueTextWidget in normal mode: value+unit row fills its allocation efficiently.
+- Flat mode: uses `fitInlineTriplet` which does not use `ROW_SAFE_RATIO` — unaffected.
+- PositionCoordinateWidget stacked mode: coordinates display correctly with tighter spacing.
+- No text clipping at small widget sizes (the 92% safety ratio still prevents overshoot).
 - Run `npm run check:all` at the end.
 
 ---
@@ -553,6 +588,213 @@ before `drawAnnularSector` at lines 107–121.
 - Wind widget lay-line sectors do not cover the ring in full-circle mode.
 - Widgets without sectors (e.g., compass) are unaffected.
 - Run `npm run check:all` at the end.
+
+---
+
+## Phase 6 — Fix coordinate alignment and size coupling in CenterDisplay
+
+### Context for Codex
+
+Phase 2 fixed coordinate alignment for `PositionCoordinateWidget` (which uses
+`TextLayoutComposite.fitTwoRowsWithHeader`), but `CenterDisplayTextWidget` uses a completely
+different rendering pipeline — `TextTileLayout.drawFittedLine` — and was not covered.
+
+`CenterDisplayTextWidget.js` renders lat/lon via `drawCenterPanel` (lines 135–175) which
+calls `tileLayout.drawFittedLine(...)` for each coordinate line independently, with
+`align: layout.center.coordAlign`. The `coordAlign` value comes from `CenterDisplayLayout.js`
+where it is hardcoded to `"center"` in both `splitStackedPanel` (line 193) and
+`splitNormalPanel` (line 212).
+
+Each coordinate line is fitted independently via `measureFittedLine` → `fitSingleTextPx`,
+so lat and lon can end up at different font sizes. The widget already computes
+`coordinatesTabular` (line 299) and selects `monoFamily` when true, but alignment and size
+coupling are missing.
+
+### Mandatory preflight
+
+Read these files before any code changes:
+- documentation/TABLEOFCONTENTS.md
+- documentation/conventions/coding-standards.md
+- documentation/conventions/smell-prevention.md
+- documentation/widgets/center-display.md
+
+### Task: Fix coordinate alignment and size coupling in CenterDisplayTextWidget
+
+#### Problem
+
+Two issues remain in `CenterDisplayTextWidget` after Phase 2:
+1. **Alignment**: `CenterDisplayLayout.js` hardcodes `coordAlign: "center"` in both
+   `splitStackedPanel` (line 193) and `splitNormalPanel` (line 212). When
+   `coordinatesTabular` is true (default), monospace coordinates need right-alignment so
+   digits line up vertically.
+2. **Size coupling**: `drawCenterPanel` (CenterDisplayTextWidget.js lines 151–174) calls
+   `drawFittedLine` for latText and lonText independently. Each call runs
+   `measureFittedLine` → `fitSingleTextPx` separately, so lat and lon can end up at
+   different font sizes. They must share the same (smaller) size.
+
+#### Verified baseline
+
+- `CenterDisplayTextWidget.js` line 299: `const coordinatesTabular = p.coordinatesTabular !== false;`
+- `CenterDisplayTextWidget.js` line 301: `const centerValueFamily = coordinatesTabular ? monoFamily : family;`
+- `CenterDisplayTextWidget.js` lines 135–175: `drawCenterPanel` draws caption, lat, lon
+  via `tileLayout.drawFittedLine(...)` with `align: layout.center.coordAlign`.
+- `CenterDisplayLayout.js` line 193: `coordAlign: "center"` in `splitStackedPanel`
+  (used by high mode and flat mode).
+- `CenterDisplayLayout.js` line 212: `coordAlign: "center"` in `splitNormalPanel`
+  (used by normal mode).
+- `TextTileLayout.js` `drawFittedLine` (line 262) supports `cfg.align` values:
+  `"center"`, `"right"`, `"left"`. It accepts a pre-computed `cfg.fit` (line 269:
+  `const fit = cfg.fit || measureFittedLine({...})`), skipping internal measurement
+  when provided.
+- `TextTileLayout.js` `measureFittedLine` (line 230) returns `{ px, text }`.
+
+#### Required changes
+
+##### 1. Thread `coordinatesTabular` into the layout's `coordAlign`
+
+**`CenterDisplayLayout.js`** — Both `splitStackedPanel` and `splitNormalPanel` must accept
+a `coordAlign` parameter:
+
+- `splitStackedPanel(rect, captionRatio, coordAlign)`:
+  Change `coordAlign: "center"` (line 193) to `coordAlign: coordAlign || "center"`.
+- `splitNormalPanel(rect, gap, captionShare, coordAlign)`:
+  Change `coordAlign: "center"` (line 212) to `coordAlign: coordAlign || "center"`.
+- In `computeLayout`, read `cfg.coordAlign` and pass it through to both split functions.
+  There are 4 call sites to update (flat mode line 116, high mode line 134, normal mode
+  line 138, and any other `splitStackedPanel`/`splitNormalPanel` call).
+
+**`CenterDisplayTextWidget.js`** — Pass `coordAlign` when calling `layoutApi.computeLayout`:
+```js
+const layout = layoutApi.computeLayout({
+  // ... existing args ...
+  coordAlign: coordinatesTabular ? "right" : "center"
+});
+```
+No changes needed in `drawCenterPanel` — it already reads `layout.center.coordAlign`.
+
+##### 2. Couple lat/lon font sizes
+
+**`CenterDisplayTextWidget.js`** — Modify `drawCenterPanel` to pre-measure both lines and
+use the smaller fitted size for both:
+
+```js
+function drawCenterPanel(layout, state, displayState, labelFamily, valueFamily, valueWeight, labelWeight, color) {
+  var textFillScale = layout.responsive.textFillScale;
+  var relationValueMaxPx = computeRelationValueMaxPx(layout, textFillScale);
+  state.ctx.fillStyle = color;
+
+  // Draw caption (unchanged)
+  state.tileLayout.drawFittedLine({
+    textApi: state.radialText,
+    ctx: state.ctx,
+    text: displayState.positionCaption,
+    rect: layout.center.captionRect,
+    align: layout.center.captionAlign,
+    family: labelFamily,
+    weight: labelWeight,
+    maxPx: computeResponsiveLineMaxPx(layout.center.captionRect, 0.76, textFillScale),
+    padX: state.layoutApi.computeTextPadPx(layout.center.captionRect, layout.responsive),
+    color: color
+  });
+
+  // Pre-measure lat and lon independently
+  var latFit = state.tileLayout.measureFittedLine({
+    textApi: state.radialText,
+    ctx: state.ctx,
+    text: displayState.latText,
+    maxW: layout.center.latRect.w,
+    maxH: layout.center.latRect.h,
+    maxPx: relationValueMaxPx,
+    textFillScale: textFillScale,
+    family: valueFamily,
+    weight: valueWeight
+  });
+  var lonFit = state.tileLayout.measureFittedLine({
+    textApi: state.radialText,
+    ctx: state.ctx,
+    text: displayState.lonText,
+    maxW: layout.center.lonRect.w,
+    maxH: layout.center.lonRect.h,
+    maxPx: relationValueMaxPx,
+    textFillScale: textFillScale,
+    family: valueFamily,
+    weight: valueWeight
+  });
+
+  // Couple: use the smaller px so both lines share the same font size
+  var coupledPx = Math.min(latFit.px, lonFit.px);
+  var coupledLatFit = coupledPx < latFit.px ? { px: coupledPx, text: latFit.text } : latFit;
+  var coupledLonFit = coupledPx < lonFit.px ? { px: coupledPx, text: lonFit.text } : lonFit;
+
+  // Draw lat with coupled fit
+  state.tileLayout.drawFittedLine({
+    textApi: state.radialText,
+    ctx: state.ctx,
+    text: displayState.latText,
+    rect: layout.center.latRect,
+    align: layout.center.coordAlign,
+    family: valueFamily,
+    weight: valueWeight,
+    fit: coupledLatFit,
+    padX: state.layoutApi.computeTextPadPx(layout.center.latRect, layout.responsive),
+    color: color
+  });
+
+  // Draw lon with coupled fit
+  state.tileLayout.drawFittedLine({
+    textApi: state.radialText,
+    ctx: state.ctx,
+    text: displayState.lonText,
+    rect: layout.center.lonRect,
+    align: layout.center.coordAlign,
+    family: valueFamily,
+    weight: valueWeight,
+    fit: coupledLonFit,
+    padX: state.layoutApi.computeTextPadPx(layout.center.lonRect, layout.responsive),
+    color: color
+  });
+}
+```
+
+##### 3. No changes needed in TextTileLayout.js
+
+`drawFittedLine` already supports `cfg.fit` pass-through and all three alignment values.
+
+##### 4. RoutePointsTextHtmlWidget — already handled
+
+RoutePoints is an HTML widget that applies CSS class `dyni-tabular` for coordinate
+alignment (RoutePointsMarkup.js line 85). Not affected by this canvas-level fix.
+
+#### Edge cases
+
+- When `coordinatesTabular` is false (non-default), `coordAlign` falls back to `"center"`
+  and lat/lon are fitted independently (existing behavior). Size coupling still applies —
+  matched sizes benefit proportional fonts too. If this causes regression for proportional
+  fonts, make coupling conditional on `coordinatesTabular`.
+- When one coordinate is a placeholder (`"---"`) and the other is a real value, the
+  placeholder is shorter. The coupled px is determined by the longer real value — the
+  placeholder renders at the same larger size. Correct behavior.
+- `relationValueMaxPx` ceiling is shared for both lines. Coupling only further constrains
+  below this ceiling — no risk of exceeding bounds.
+
+#### Verification
+
+- CenterDisplay in high/normal/flat modes: lat and lon render at the same font size.
+- CenterDisplay with `coordinatesTabular: true` (default): coordinates are right-aligned,
+  digits line up vertically.
+- CenterDisplay with `coordinatesTabular: false`: coordinates are center-aligned (existing
+  behavior).
+- PositionCoordinateWidget: Phase 2 fix still works (no regression).
+- RoutePoints: HTML tabular alignment still works (no regression).
+- Run `npm run check:all` at the end.
+
+- Each issue's visual regression is corrected as described.
+- No other widget behavior regresses.
+- No file exceeds 400 non-empty lines.
+- Every modified file retains its Module/Documentation/Depends header.
+- No new smell violations (`npm run check:all` passes).
+- Coverage thresholds remain satisfied.
+- PLAN10 perf gates remain satisfied (`perf:check` passes).
 
 ---
 
