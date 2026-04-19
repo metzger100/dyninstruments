@@ -3,3 +3,31 @@
   font-variant-numeric: tabular-nums;
   font-family: var(--dyni-theme-font-family-mono), var(--dyni-theme-font-family);
 }
+
+.dyni-state-disconnected,
+.dyni-state-no-route,
+.dyni-state-no-target,
+.dyni-state-no-ais {
+  position: relative;
+  container-type: size;
+}
+
+.dyni-state-screen-body {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.dyni-state-screen-label {
+  display: block;
+  line-height: 1;
+  font-weight: var(--dyni-theme-font-label-weight, 700);
+  font-size: min(18cqw, 18cqh);
+}
+
+.dyni-state-hidden {
+  display: none !important;
+}

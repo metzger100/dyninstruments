@@ -394,7 +394,71 @@ describe("ActiveRouteTextHtmlWidget", function () {
       widgetShadowCssUrl
     ]);
     expect(styles[0].textContent).toContain(".dyni-tabular");
+    expect(styles[0].textContent).toContain(".dyni-state-screen-body");
+    expect(styles[0].textContent).toContain(".dyni-state-screen-label");
+    expect(styles[0].textContent).toContain("font-weight: var(--dyni-theme-font-label-weight, 700);");
+    expect(styles[0].textContent).not.toContain("font-weight: var(--dyni-theme-font-label-weight, 650);");
     expect(shadowRoot.querySelector(".dyni-active-route-metric-value.dyni-tabular")).toBeTruthy();
+    expect(getShadowCssText).toHaveBeenCalledWith(sharedShadowCssUrl);
+    expect(getShadowCssText).toHaveBeenCalledWith(widgetShadowCssUrl);
+  });
+
+  it("renders no-route state screens in the committed shadow root with shared shadow css", function () {
+    const setup = createRenderer();
+    const surfaceDom = createSurfaceDom();
+    const sharedShadowCssUrl = "http://host/plugins/dyninstruments/shared/html/HtmlShadowCommon.css";
+    const widgetShadowCssUrl = "http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css";
+    const sharedShadowCssPath = path.join(process.cwd(), "shared/html/HtmlShadowCommon.css");
+    const widgetShadowCssPath = path.join(process.cwd(), "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css");
+    const getShadowCssText = vi.fn(function (url) {
+      if (url === sharedShadowCssUrl) {
+        return fs.readFileSync(sharedShadowCssPath, "utf8");
+      }
+      if (url === widgetShadowCssUrl) {
+        return fs.readFileSync(widgetShadowCssPath, "utf8");
+      }
+      return "";
+    });
+
+    globalThis.DyniPlugin = {
+      runtime: {
+        _theme: {
+          getShadowCssText
+        }
+      }
+    };
+
+    const htmlSurfaceController = loadFresh("cluster/rendering/HtmlSurfaceController.js").create({}, {
+      getModule(id) {
+        if (id === "PerfSpanHelper") {
+          return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
+        }
+        throw new Error("unexpected module: " + id);
+      }
+    });
+    const controller = htmlSurfaceController.createSurfaceController({
+      rendererSpec: setup.renderer,
+      hostContext: {},
+      shadowCssUrls: [sharedShadowCssUrl, widgetShadowCssUrl]
+    });
+
+    controller.attach({
+      surface: "html",
+      rootEl: surfaceDom.rootEl,
+      shellEl: surfaceDom.shellEl,
+      props: withSurfacePolicy(makeProps({ disconnect: false, wpServer: false, routeName: "Harbor Run" }), { mode: "dispatch" }),
+      revision: 1
+    });
+
+    const shadowRoot = surfaceDom.mountEl.shadowRoot;
+    expect(shadowRoot.querySelector(".dyni-state-no-route")).toBeTruthy();
+    expect(shadowRoot.querySelector(".dyni-state-screen-body")).toBeTruthy();
+    expect(shadowRoot.querySelector(".dyni-state-screen-label").textContent).toBe("No Route");
+
+    const styles = Array.from(shadowRoot.querySelectorAll("style[data-dyni-shadow-css]"));
+    expect(styles[0].textContent).toContain(".dyni-state-screen-body");
+    expect(styles[0].textContent).toContain(".dyni-state-screen-label");
+    expect(styles[0].textContent).toContain("font-weight: var(--dyni-theme-font-label-weight, 700);");
     expect(getShadowCssText).toHaveBeenCalledWith(sharedShadowCssUrl);
     expect(getShadowCssText).toHaveBeenCalledWith(widgetShadowCssUrl);
   });
