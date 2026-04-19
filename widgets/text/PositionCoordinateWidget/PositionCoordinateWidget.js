@@ -173,6 +173,7 @@
       const color = tokens.surface.fg;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
+      const coordinateAlign = coordinatesTabular ? "right" : "center";
       ctx.fillStyle = color;
       const stateKind = stateScreenPrecedence.pickFirst([
         { kind: "disconnected", when: p.disconnect === true },
@@ -274,6 +275,7 @@
           caption: modeData.caption, unit: modeData.unit,
           latText: latText, lonText: lonText,
           secScale: modeData.secScale,
+          align: coordinateAlign,
           family: family,
           valueWeight: valueWeight, labelWeight: labelWeight
         });
@@ -291,6 +293,7 @@
             unitText: modeData.unit,
             topText: latText,
             bottomText: lonText,
+            align: coordinateAlign,
             family: family,
             valueWeight: valueWeight,
             labelWeight: labelWeight,

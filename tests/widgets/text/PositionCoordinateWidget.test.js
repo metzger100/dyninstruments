@@ -16,17 +16,32 @@ describe("PositionCoordinateWidget", function () {
 
   function makeHelpers(options) {
     const opts = options || {};
+    const fitKeyCalls = Array.isArray(opts.fitKeyCalls) ? opts.fitKeyCalls : null;
     const themeTokens = {
       surface: { fg: "#fff" },
       font: { family: "sans-serif", familyMono: "monospace", weight: 730, labelWeight: 610 }
     };
     const fontWeightCalls = [];
     const fontCalls = [];
+    const textLayoutEngineModule = loadFresh("shared/widget-kits/text/TextLayoutEngine.js");
     const modules = {
-      TextLayoutEngine: loadFresh("shared/widget-kits/text/TextLayoutEngine.js"),
       TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
       TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
       ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js")
+    };
+    modules.TextLayoutEngine = {
+      create(def, helperApi) {
+        const engine = textLayoutEngineModule.create(def, helperApi);
+        if (!fitKeyCalls) {
+          return engine;
+        }
+        const originalMakeFitCacheKey = engine.makeFitCacheKey;
+        engine.makeFitCacheKey = function (parts) {
+          fitKeyCalls.push(parts);
+          return originalMakeFitCacheKey.call(engine, parts);
+        };
+        return engine;
+      }
     };
     const defaultApplyFormatter = (raw, props) => {
       const fpRaw = props && props.formatterParameters;
@@ -277,6 +292,44 @@ describe("PositionCoordinateWidget", function () {
     expect(plainLat).toBeTruthy();
     expect(String(tabularLat.font)).toContain("monospace");
     expect(String(plainLat.font)).toContain("sans-serif");
+  });
+
+  it("right-aligns tabular stacked coordinates and keys the fit by alignment", function () {
+    const fitKeyCalls = [];
+    const helpers = makeHelpers({ fitKeyCalls: fitKeyCalls });
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
+      .create({}, helpers);
+
+    const tabularCtx = createMockContext2D();
+    const tabularCanvas = createMockCanvas({ rectWidth: 220, rectHeight: 140, ctx: tabularCtx });
+    spec.renderCanvas(tabularCanvas, {
+      value: { lat: 54.1, lon: 10.2 },
+      caption: "POS",
+      coordinatesTabular: true
+    });
+
+    const tabularKey = fitKeyCalls.find((entry) => entry && Object.prototype.hasOwnProperty.call(entry, "latText"));
+    const tabularLat = tabularCtx.calls.find((entry) => entry.name === "fillText" && String(entry.args[0]) === "54.1");
+
+    expect(tabularKey.align).toBe("right");
+    expect(String(tabularCtx.textAlign)).toBe("right");
+    expect(tabularLat.args[1]).toBeGreaterThan(110);
+
+    fitKeyCalls.length = 0;
+    const plainCtx = createMockContext2D();
+    const plainCanvas = createMockCanvas({ rectWidth: 220, rectHeight: 140, ctx: plainCtx });
+    spec.renderCanvas(plainCanvas, {
+      value: { lat: 54.1, lon: 10.2 },
+      caption: "POS",
+      coordinatesTabular: false
+    });
+
+    const plainKey = fitKeyCalls.find((entry) => entry && Object.prototype.hasOwnProperty.call(entry, "latText"));
+    const plainLat = plainCtx.calls.find((entry) => entry.name === "fillText" && String(entry.args[0]) === "54.1");
+
+    expect(plainKey.align).toBe("center");
+    expect(String(plainCtx.textAlign)).toBe("center");
+    expect(plainLat.args[1]).toBeLessThanOrEqual(110);
   });
 
   it("supports axis-specific formatters and flat rendering from stacked axes", function () {

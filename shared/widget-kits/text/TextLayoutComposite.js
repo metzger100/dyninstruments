@@ -201,6 +201,7 @@
     function fitTwoRowsWithHeader(args) {
       const cfg = args || {};
       const hasHeader = !!cfg.captionText || !!cfg.unitText;
+      const align = cfg.align === "right" ? "right" : "center";
       const W = Math.max(1, Number(cfg.W) || 0);
       const H = Math.max(1, Number(cfg.H) || 0);
       const padX = Math.max(0, Number(cfg.padX) || 0);
@@ -283,6 +284,7 @@
         row1H: row1H,
         row2H: row2H,
         linePx: rowFit.px,
+        align: align,
         capPx: capPx,
         unitPx: unitPx
       };
@@ -309,9 +311,11 @@
       const yTop = fit.headerH + Math.floor(fit.row1H / 2);
       const yBottom = fit.headerH + fit.row1H + Math.floor(fit.row2H / 2);
       primitive.setFont(ctx, fit.linePx, cfg.valueWeight, cfg.family);
-      ctx.textAlign = "center";
-      ctx.fillText(cfg.topText, Math.floor(W / 2), yTop);
-      ctx.fillText(cfg.bottomText, Math.floor(W / 2), yBottom);
+      const align = fit.align === "right" ? "right" : "center";
+      const x = align === "right" ? W - cfg.padX : Math.floor(W / 2);
+      ctx.textAlign = align;
+      ctx.fillText(cfg.topText, x, yTop);
+      ctx.fillText(cfg.bottomText, x, yBottom);
     }
 
     return {

@@ -42,6 +42,8 @@ The engine is split into small shared modules to stay under hotspot/file-size li
 - Responsive scaling: `scaleMaxTextPx`
 - Primitive fit/draw: `setFont`, `fitSingleLineBinary`, `fitMultiRowBinary`, `fitValueUnitRow`, `fitInlineTriplet`, `drawInlineTriplet`
 - Composite layouts: `fitThreeRowBlock`, `drawThreeRowBlock`, `fitValueUnitCaptionRows`, `drawValueUnitCaptionRows`, `fitTwoRowsWithHeader`, `drawTwoRowsWithHeader`
+- `fitTwoRowsWithHeader` accepts `align` (`"center"` default, `"right"` for tabular stacked coordinates) and returns it as `fit.align`
+- `drawTwoRowsWithHeader` uses `fit.align` for the top and bottom value rows while keeping the header row alignment unchanged
 
 Responsive inset shape:
 

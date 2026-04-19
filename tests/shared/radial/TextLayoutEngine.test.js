@@ -210,6 +210,49 @@ describe("TextLayoutEngine", function () {
     expect(inline.sPx).toBeGreaterThan(0);
   });
 
+  it("propagates stacked row alignment through fit and draw", function () {
+    const engine = createEngine();
+    const fitCtx = createSizingContext();
+    const fit = engine.fitTwoRowsWithHeader({
+      ctx: fitCtx,
+      mode: "normal",
+      W: 200,
+      H: 100,
+      padX: 12,
+      innerY: 2,
+      secScale: 0.8,
+      captionText: "POS",
+      unitText: "nm",
+      topText: "LAT",
+      bottomText: "LON",
+      align: "right",
+      family: "sans-serif",
+      valueWeight: 730,
+      labelWeight: 610
+    });
+    const drawCtx = createMockContext2D();
+
+    engine.drawTwoRowsWithHeader({
+      ctx: drawCtx,
+      fit: fit,
+      W: 200,
+      padX: 12,
+      captionText: "POS",
+      unitText: "nm",
+      topText: "LAT",
+      bottomText: "LON",
+      family: "sans-serif",
+      valueWeight: 730,
+      labelWeight: 610
+    });
+
+    const fillCalls = drawCtx.calls.filter((entry) => entry.name === "fillText");
+    expect(fit.align).toBe("right");
+    expect(drawCtx.textAlign).toBe("right");
+    expect(fillCalls[2].args[1]).toBe(188);
+    expect(fillCalls[3].args[1]).toBe(188);
+  });
+
   it("keeps shared composite fit paths usable on very small tiles", function () {
     const engine = createEngine();
     const ctx = createSizingContext();
