@@ -210,6 +210,11 @@
           default: false,
           name: "Stable digits",
           condition: [
+            { kind: "eta" },
+            { kind: "rteEta" },
+            { kind: "dst" },
+            { kind: "rteDistance" },
+            { kind: "vmg" },
             { kind: "xteDisplay" },
             { kind: "activeRoute" },
             { kind: "editRoute" }

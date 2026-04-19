@@ -127,6 +127,10 @@
           default: false,
           name: "Stable digits",
           condition: [
+            { kind: "cog" },
+            { kind: "hdt" },
+            { kind: "hdm" },
+            { kind: "brg" },
             { kind: "hdtRadial" },
             { kind: "hdmRadial" },
             { kind: "hdtLinear" },

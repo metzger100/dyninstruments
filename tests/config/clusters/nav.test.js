@@ -104,6 +104,11 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.stableDigits.default).toBe(false);
     expect(def.editableParameters.stableDigits.name).toBe("Stable digits");
     expect(def.editableParameters.stableDigits.condition).toEqual([
+      { kind: "eta" },
+      { kind: "rteEta" },
+      { kind: "dst" },
+      { kind: "rteDistance" },
+      { kind: "vmg" },
       { kind: "xteDisplay" },
       { kind: "activeRoute" },
       { kind: "editRoute" }

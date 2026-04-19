@@ -337,10 +337,13 @@
           default: false,
           name: "Stable digits",
           condition: [
+            { kind: "depth" },
             { kind: "depthLinear" },
             { kind: "depthRadial" },
+            { kind: "temp" },
             { kind: "tempLinear" },
-            { kind: "tempRadial" }
+            { kind: "tempRadial" },
+            { kind: "pressure" }
           ]
         },
 

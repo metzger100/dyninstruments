@@ -204,6 +204,8 @@
           default: false,
           name: "Stable digits",
           condition: [
+            { kind: "sog" },
+            { kind: "stw" },
             { kind: "sogLinear" },
             { kind: "stwLinear" },
             { kind: "sogRadial" },

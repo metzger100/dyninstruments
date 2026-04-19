@@ -50,7 +50,17 @@
         formatterParameters: false,
         className: true,
         ...makePerKindTextParams(ANCHOR_KIND),
-        ...commonThreeElementsEditables
+        ...commonThreeElementsEditables,
+        stableDigits: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Stable digits",
+          condition: [
+            { kind: "distance" },
+            { kind: "watch" },
+            { kind: "bearing" }
+          ]
+        }
       }
     }
   });

@@ -39,10 +39,13 @@ describe("config/clusters/environment.js", function () {
     expect(def.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
     expect(def.editableParameters.stableDigits.default).toBe(false);
     expect(def.editableParameters.stableDigits.condition).toEqual([
+      { kind: "depth" },
       { kind: "depthLinear" },
       { kind: "depthRadial" },
+      { kind: "temp" },
       { kind: "tempLinear" },
-      { kind: "tempRadial" }
+      { kind: "tempRadial" },
+      { kind: "pressure" }
     ]);
   });
 

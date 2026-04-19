@@ -186,6 +186,11 @@
           default: false,
           name: "Stable digits",
           condition: [
+            { kind: "angleTrue" },
+            { kind: "angleApparent" },
+            { kind: "angleTrueDirection" },
+            { kind: "speedTrue" },
+            { kind: "speedApparent" },
             { kind: "angleTrueRadial" },
             { kind: "angleApparentRadial" },
             { kind: "angleTrueLinear" },

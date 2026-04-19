@@ -52,8 +52,12 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
     expect(def.editableParameters.stableDigits.default).toBe(false);
     expect(def.editableParameters.stableDigits.condition).toEqual([
+      { kind: "voltage" },
       { kind: "voltageLinear" },
-      { kind: "voltageRadial" }
+      { kind: "voltageRadial" },
+      { kind: "clock" },
+      { kind: "pitch" },
+      { kind: "roll" }
     ]);
     expect(def.editableParameters.hideSeconds.default).toBe(false);
     expect(def.editableParameters.hideSeconds.name).toBe("Hide seconds");

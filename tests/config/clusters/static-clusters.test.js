@@ -16,7 +16,10 @@ describe("static cluster configs", function () {
 
     runIifeScript("config/clusters/course-heading.js", context);
     runIifeScript("config/clusters/speed.js", context);
+    runIifeScript("config/clusters/environment.js", context);
     runIifeScript("config/clusters/wind.js", context);
+    runIifeScript("config/clusters/nav.js", context);
+    runIifeScript("config/clusters/vessel.js", context);
     runIifeScript("config/clusters/map.js", context);
     runIifeScript("config/clusters/anchor.js", context);
 
@@ -119,22 +122,66 @@ describe("static cluster configs", function () {
     expect(byCluster.wind.editableParameters.captionUnitScale.internal).not.toBe(true);
     expect(byCluster.wind.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
     expect(byCluster.speed.editableParameters.stableDigits.condition).toEqual([
+      { kind: "sog" },
+      { kind: "stw" },
       { kind: "sogLinear" },
       { kind: "stwLinear" },
       { kind: "sogRadial" },
       { kind: "stwRadial" }
     ]);
     expect(byCluster.courseHeading.editableParameters.stableDigits.condition).toEqual([
+      { kind: "cog" },
+      { kind: "hdt" },
+      { kind: "hdm" },
+      { kind: "brg" },
       { kind: "hdtRadial" },
       { kind: "hdmRadial" },
       { kind: "hdtLinear" },
       { kind: "hdmLinear" }
     ]);
+    expect(byCluster.environment.editableParameters.stableDigits.condition).toEqual([
+      { kind: "depth" },
+      { kind: "depthLinear" },
+      { kind: "depthRadial" },
+      { kind: "temp" },
+      { kind: "tempLinear" },
+      { kind: "tempRadial" },
+      { kind: "pressure" }
+    ]);
     expect(byCluster.wind.editableParameters.stableDigits.condition).toEqual([
+      { kind: "angleTrue" },
+      { kind: "angleApparent" },
+      { kind: "angleTrueDirection" },
+      { kind: "speedTrue" },
+      { kind: "speedApparent" },
       { kind: "angleTrueRadial" },
       { kind: "angleApparentRadial" },
       { kind: "angleTrueLinear" },
       { kind: "angleApparentLinear" }
+    ]);
+    expect(byCluster.nav.editableParameters.stableDigits.condition).toEqual([
+      { kind: "eta" },
+      { kind: "rteEta" },
+      { kind: "dst" },
+      { kind: "rteDistance" },
+      { kind: "vmg" },
+      { kind: "xteDisplay" },
+      { kind: "activeRoute" },
+      { kind: "editRoute" }
+    ]);
+    expect(byCluster.vessel.editableParameters.stableDigits.condition).toEqual([
+      { kind: "voltage" },
+      { kind: "voltageLinear" },
+      { kind: "voltageRadial" },
+      { kind: "clock" },
+      { kind: "pitch" },
+      { kind: "roll" }
+    ]);
+    expect(byCluster.anchor.editableParameters.stableDigits.default).toBe(false);
+    expect(byCluster.anchor.editableParameters.stableDigits.condition).toEqual([
+      { kind: "distance" },
+      { kind: "watch" },
+      { kind: "bearing" }
     ]);
     expect(byCluster.wind.editableParameters.windLinearTickMajor.name).toBe("Major tick step");
     expect(byCluster.wind.editableParameters.windLinearTickMinor.name).toBe("Minor tick step");

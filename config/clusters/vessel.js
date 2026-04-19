@@ -207,8 +207,12 @@
           default: false,
           name: "Stable digits",
           condition: [
+            { kind: "voltage" },
             { kind: "voltageLinear" },
-            { kind: "voltageRadial" }
+            { kind: "voltageRadial" },
+            { kind: "clock" },
+            { kind: "pitch" },
+            { kind: "roll" }
           ]
         },
         easing: {
