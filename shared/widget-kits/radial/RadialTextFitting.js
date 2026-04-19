@@ -86,7 +86,7 @@
       return fitTextPx(ctx, text, maxW, ceilingPx, family, weight);
     }
 
-    function measureValueUnitFit(ctx, family, value, unit, w, h, secScale, valueWeight, labelWeight) {
+    function measureValueUnitFit(ctx, family, value, unit, w, h, secScale, valueWeight, labelWeight, textOptions) {
       if (!value) {
         return { vPx: 0, uPx: 0, gap: 0, total: 0 };
       }
@@ -96,13 +96,17 @@
       const hasUnit = !!unit;
       const ratio = Number(secScale);
       const scale = isFinite(ratio) ? ratio : 0.8;
+      const opts = textOptions && typeof textOptions === "object" ? textOptions : null;
+      const valueFamily = opts && opts.useMono === true
+        ? (opts.monoFamily || family)
+        : family;
 
       if (maxW <= 0) {
         return { vPx: MIN_FONT_PX, uPx: hasUnit ? MIN_FONT_PX : 0, gap: 0, total: 0 };
       }
 
       function totalWidth(vPx, uPx, gap) {
-        setFont(ctx, vPx, valueWeight, family);
+        setFont(ctx, vPx, valueWeight, valueFamily);
         const valueW = measureTextWidth(ctx, value);
         if (!hasUnit) {
           return valueW;

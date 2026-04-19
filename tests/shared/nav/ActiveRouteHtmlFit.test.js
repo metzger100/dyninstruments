@@ -2,19 +2,37 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 describe("ActiveRouteHtmlFit", function () {
   function createMeasureContext() {
-    return {
-      font: "700 12px sans-serif",
-      measureText(text) {
-        const source = String(this.font || "");
-        const match = source.match(/(\d+(?:\.\d+)?)px/);
-        const px = match ? Number(match[1]) : 12;
-        const safePx = Number.isFinite(px) ? px : 12;
-        return { width: String(text).length * safePx * 0.56 };
-      }
+    const ctx = {
+      fonts: [],
+      calls: []
     };
+    Object.defineProperty(ctx, "font", {
+      enumerable: true,
+      configurable: true,
+      get() {
+        return this._font || "700 12px sans-serif";
+      },
+      set(value) {
+        this._font = String(value || "");
+        this.fonts.push(this._font);
+      }
+    });
+    ctx.font = "700 12px sans-serif";
+    ctx.measureText = function (text) {
+      this.calls.push({
+        text: String(text),
+        font: String(this.font || "")
+      });
+      const source = String(this.font || "");
+      const match = source.match(/(\d+(?:\.\d+)?)px/);
+      const px = match ? Number(match[1]) : 12;
+      const safePx = Number.isFinite(px) ? px : 12;
+      return { width: String(text).length * safePx * 0.56 };
+    };
+    return ctx;
   }
 
-  function createHarness() {
+  function createHarness(themeOverrides) {
     const htmlUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
     const textTileLayoutModule = loadFresh("shared/widget-kits/text/TextTileLayout.js");
     const activeRouteLayoutModule = loadFresh("shared/widget-kits/nav/ActiveRouteLayout.js");
@@ -22,13 +40,25 @@ describe("ActiveRouteHtmlFit", function () {
     const radialTextFittingModule = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
     const responsiveScaleProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMathModule = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const themeTokens = Object.assign({
+      font: {
+        weight: 720,
+        labelWeight: 610,
+        family: "sans-serif",
+        familyMono: "mono-serif"
+      }
+    }, themeOverrides || {});
+    if (!themeTokens.font || typeof themeTokens.font !== "object") {
+      themeTokens.font = {
+        weight: 720,
+        labelWeight: 610,
+        family: "sans-serif",
+        familyMono: "mono-serif"
+      };
+    }
     const themeApi = {
       resolveForRoot: vi.fn(() => ({
-        font: {
-          weight: 720,
-          labelWeight: 610,
-          family: "sans-serif"
-        }
+        font: themeTokens.font
       }))
     };
 
@@ -66,7 +96,8 @@ describe("ActiveRouteHtmlFit", function () {
     };
 
     return {
-      fit: loadFresh("shared/widget-kits/nav/ActiveRouteHtmlFit.js").create({}, Helpers)
+      fit: loadFresh("shared/widget-kits/nav/ActiveRouteHtmlFit.js").create({}, Helpers),
+      themeTokens: themeTokens
     };
   }
 
@@ -206,6 +237,69 @@ describe("ActiveRouteHtmlFit", function () {
     expect(geometryMiss).not.toBe(semanticMiss);
   });
 
+  it("uses mono value family and invalidates cache when stableDigits toggles", function () {
+    const h = createHarness();
+    const targetEl = document.createElement("div");
+    const measureCtx = createMeasureContext();
+    const hostContext = { __dyniActiveRouteTextMeasureCtx: measureCtx };
+    const shellRect = { width: 320, height: 180 };
+
+    const proportional = h.fit.compute({
+      model: makeModel({ stableDigitsEnabled: false }),
+      shellRect: shellRect,
+      targetEl: targetEl,
+      hostContext: hostContext
+    });
+    const mono = h.fit.compute({
+      model: makeModel({ stableDigitsEnabled: true }),
+      shellRect: shellRect,
+      targetEl: targetEl,
+      hostContext: hostContext
+    });
+    const monoRepeat = h.fit.compute({
+      model: makeModel({ stableDigitsEnabled: true }),
+      shellRect: shellRect,
+      targetEl: targetEl,
+      hostContext: hostContext
+    });
+
+    expect(mono).not.toBe(proportional);
+    expect(monoRepeat).toBe(mono);
+    expect(measureCtx.calls.some((call) => call.text === "12.4" && call.font.includes("mono-serif"))).toBe(true);
+    expect(measureCtx.calls.some((call) => call.text === "nm" && call.font.includes("sans-serif"))).toBe(true);
+  });
+
+  it("invalidates the top-level cache when familyMono changes under stableDigits", function () {
+    const h = createHarness({
+      font: {
+        weight: 720,
+        labelWeight: 610,
+        family: "sans-serif",
+        familyMono: "mono-a"
+      }
+    });
+    const targetEl = document.createElement("div");
+    const hostContext = { __dyniActiveRouteTextMeasureCtx: createMeasureContext() };
+    const shellRect = { width: 320, height: 180 };
+    const model = makeModel({ stableDigitsEnabled: true });
+
+    const first = h.fit.compute({
+      model: model,
+      shellRect: shellRect,
+      targetEl: targetEl,
+      hostContext: hostContext
+    });
+    h.themeTokens.font.familyMono = "mono-b";
+    const second = h.fit.compute({
+      model: model,
+      shellRect: shellRect,
+      targetEl: targetEl,
+      hostContext: hostContext
+    });
+
+    expect(second).not.toBe(first);
+  });
+
   it("avoids cache collisions when semantic text contains delimiter characters", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
@@ -263,5 +357,7 @@ describe("ActiveRouteHtmlFit", function () {
 
     expect(out.metricValues.remain).toBe("12345.6");
     expect(out.metricValues.eta).toBe("12:34");
+    expect(hostContext.__dyniActiveRouteTextMeasureCtx.calls.some((call) => call.text === " 00012345.6" && call.font.includes("mono-serif"))).toBe(true);
+    expect(hostContext.__dyniActiveRouteTextMeasureCtx.calls.some((call) => call.text === "nm" && call.font.includes("sans-serif"))).toBe(true);
   });
 });

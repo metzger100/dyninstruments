@@ -141,11 +141,13 @@
       cfg.width,
       cfg.height,
       cfg.family,
+      cfg.valueFamily,
       cfg.valueWeight,
       cfg.labelWeight,
       model.mode,
       model.isApproaching ? 1 : 0,
       model.disconnect ? 1 : 0,
+      model.stableDigitsEnabled ? 1 : 0,
       model.routeNameText,
       model.remainCaption,
       model.remainText,
@@ -160,6 +162,14 @@
       model.nextCourseFallbackText,
       model.nextCourseUnit
     ]);
+  }
+
+  function resolveMetricValueFamily(model, tokens, baseFamily) {
+    const font = tokens && tokens.font ? tokens.font : {};
+    if (model && model.stableDigitsEnabled === true) {
+      return font.familyMono || baseFamily || font.family || "";
+    }
+    return baseFamily || font.family || "";
   }
 
   function create(def, Helpers) {
@@ -184,6 +194,13 @@
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       const family = tokens.font.family;
+      const valueFamily = resolveMetricValueFamily(model, tokens, family);
+      const valueTextOptions = model.stableDigitsEnabled === true
+        ? {
+          useMono: true,
+          monoFamily: tokens.font.familyMono || family
+        }
+        : null;
       const ownerDocument = resolveOwnerDocument(targetEl);
       const measureCtx = resolveMeasureContext(hostContext, ownerDocument);
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
@@ -197,6 +214,7 @@
         width: W,
         height: H,
         family: family,
+        valueFamily: valueFamily,
         valueWeight: valueWeight,
         labelWeight: labelWeight,
         model: model
@@ -249,7 +267,8 @@
           labelWeight: labelWeight,
           secScale: METRIC_SEC_SCALE,
           padX: spacing.padX,
-          captionHeightPx: spacing.captionHeightPx
+          captionHeightPx: spacing.captionHeightPx,
+          valueTextOptions: valueTextOptions
         });
         const primaryFit = primaryMeasurement && primaryMeasurement.fit ? primaryMeasurement.fit : null;
         const primaryClipped = !!(primaryMeasurement && primaryFit && primaryFit.total > primaryMeasurement.textW + 0.01);
@@ -278,7 +297,8 @@
             labelWeight: labelWeight,
             secScale: METRIC_SEC_SCALE,
             padX: spacing.padX,
-            captionHeightPx: spacing.captionHeightPx
+            captionHeightPx: spacing.captionHeightPx,
+            valueTextOptions: valueTextOptions
           })
           : primaryMeasurement;
         const fit = measurement && measurement.fit ? measurement.fit : null;

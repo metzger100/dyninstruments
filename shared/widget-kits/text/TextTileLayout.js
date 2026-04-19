@@ -99,8 +99,12 @@
     const rect = cfg && cfg.rect ? cfg.rect : {};
     const metric = cfg && cfg.metric ? cfg.metric : {};
     const family = cfg && cfg.family;
+    const valueTextOptions = cfg && cfg.valueTextOptions && typeof cfg.valueTextOptions === "object"
+      ? cfg.valueTextOptions
+      : null;
     const captionMaxPx = Number(cfg && cfg.captionMaxPx);
     const valueMaxPx = Number(cfg && cfg.valueMaxPx);
+    const useMono = valueTextOptions && valueTextOptions.useMono === true;
     return JSON.stringify([
       Number(rect.x) || 0,
       Number(rect.y) || 0,
@@ -113,6 +117,8 @@
       Number.isFinite(valueMaxPx) ? valueMaxPx : "",
       clampNumber(cfg.textFillScale, 1),
       String(family),
+      useMono ? 1 : 0,
+      useMono ? String(valueTextOptions.monoFamily || "") : "",
       Number(cfg.valueWeight) || 0,
       Number(cfg.labelWeight) || 0,
       Number(cfg.secScale) || 0,
@@ -167,7 +173,8 @@
         valueMaxPx,
         cfg.secScale,
         cfg.valueWeight,
-        cfg.labelWeight
+        cfg.labelWeight,
+        cfg.valueTextOptions
       );
       const measurement = {
         capH: capH,
