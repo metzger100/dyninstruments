@@ -22,7 +22,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ### Additional non-core concepts
 
-- OBP60-style instruments: graphical Roll/Pitch, Clock, Rudder, Keel
+- OBP60-style instruments: graphical Roll/Pitch, analog Clock, Rudder, Keel
 - C-net 2000 style multi instruments: history graphs, interactive regatta clock, anchor nav plot
 - Wind four-corner graphic for `TWA`/`TWS`/`AWA`/`AWS`
 

@@ -131,7 +131,7 @@ otherwise -> normal
 
 - full-width top band
 - center caption in a measured left column
-- two coordinate lines stacked in a centered right column
+- two coordinate lines stacked in a right column, right-aligned when tabular coordinates are enabled
 - relation rows stacked below using full widget width
 - the balanced two-coordinate-row rhythm is preserved while smaller tiles linearly reduce caption-column share
 
@@ -166,7 +166,7 @@ Measure row behavior:
 
 ## Phase 6 Options
 
-- `coordinatesTabular` (default `true`) routes center-position coordinate rows to `theme.font.familyMono`.
+- `coordinatesTabular` (default `true`) routes center-position coordinate rows to `theme.font.familyMono` and right-aligns them so digits line up vertically.
 - `stableDigits` (default `false`) enables stable-digit normalization on relation values (`course / distance`) and routes those value rows to `theme.font.familyMono`.
 - Relation rows keep two text variants (`fullValueText` and compact fallback) and select the compact variant when row width is constrained.
 

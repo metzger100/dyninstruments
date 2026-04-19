@@ -9,7 +9,6 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniCenterDisplayTextWidget = factory(); }
 }(this, function () {
   "use strict";
-
   const hasOwn = Object.prototype.hasOwnProperty;
   function measureTextWidth(ctx, textApi, text, family, weight, px, frameWidthCache) {
     textApi.setFont(ctx, Math.max(1, Math.floor(Number(px) || 0)), weight, family);
@@ -44,7 +43,6 @@
     }
     return Math.max(minShare, Math.min(maxShare, n));
   }
-
   function computeMeasurementHints(args) {
     const cfg = args || {};
     const rows = cfg.rows;
@@ -63,10 +61,8 @@
         cfg.frameWidthCache
       )
       : 0;
-    const coordWidth = Math.max(
-      measureTextWidth(cfg.ctx, cfg.textApi, cfg.latText, cfg.coordFamily, cfg.valueWeight, baseCoordPx, cfg.frameWidthCache),
-      measureTextWidth(cfg.ctx, cfg.textApi, cfg.lonText, cfg.coordFamily, cfg.valueWeight, baseCoordPx, cfg.frameWidthCache)
-    );
+    const coordWidth = Math.max(measureTextWidth(cfg.ctx, cfg.textApi, cfg.latText, cfg.coordFamily, cfg.valueWeight, baseCoordPx, cfg.frameWidthCache),
+      measureTextWidth(cfg.ctx, cfg.textApi, cfg.lonText, cfg.coordFamily, cfg.valueWeight, baseCoordPx, cfg.frameWidthCache));
     let rowBlockWidth = 0;
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -103,7 +99,6 @@
       );
       rowBlockWidth = Math.max(rowBlockWidth, labelWidth + cfg.gap + valueWidth);
     }
-
     const normalCaptionShare = positionCaptionWidth > 0
       ? clampShare(
         (positionCaptionWidth + cfg.gap) / Math.max(1, positionCaptionWidth + coordWidth + cfg.gap * 2),
@@ -123,18 +118,39 @@
       0.16,
       0.34
     );
-
     return {
-      normalCaptionShare: normalCaptionShare,
-      flatCenterShare: flatCenterShare,
-      highCaptionRatio: stackedCaptionRatio,
-      flatCaptionRatio: clampShare((stackedCaptionRatio || 0.24) * 0.92, 0.16, 0.34)
+      normalCaptionShare: normalCaptionShare, flatCenterShare: flatCenterShare,
+      highCaptionRatio: stackedCaptionRatio, flatCaptionRatio: clampShare((stackedCaptionRatio || 0.24) * 0.92, 0.16, 0.34)
     };
   }
-
   function drawCenterPanel(layout, state, displayState, labelFamily, valueFamily, valueWeight, labelWeight, color) {
     const textFillScale = layout.responsive.textFillScale;
     const relationValueMaxPx = computeRelationValueMaxPx(layout, textFillScale);
+    const latFit = state.tileLayout.measureFittedLine({
+      textApi: state.radialText,
+      ctx: state.ctx,
+      text: displayState.latText,
+      maxW: layout.center.latRect.w,
+      maxH: layout.center.latRect.h,
+      maxPx: relationValueMaxPx,
+      textFillScale: textFillScale,
+      family: valueFamily,
+      weight: valueWeight
+    });
+    const lonFit = state.tileLayout.measureFittedLine({
+      textApi: state.radialText,
+      ctx: state.ctx,
+      text: displayState.lonText,
+      maxW: layout.center.lonRect.w,
+      maxH: layout.center.lonRect.h,
+      maxPx: relationValueMaxPx,
+      textFillScale: textFillScale,
+      family: valueFamily,
+      weight: valueWeight
+    });
+    const coupledPx = Math.min(latFit.px, lonFit.px);
+    const coupledLatFit = latFit.px === coupledPx ? latFit : { px: coupledPx, text: latFit.text };
+    const coupledLonFit = lonFit.px === coupledPx ? lonFit : { px: coupledPx, text: lonFit.text };
     state.ctx.fillStyle = color;
     state.tileLayout.drawFittedLine({
       textApi: state.radialText,
@@ -156,7 +172,7 @@
       align: layout.center.coordAlign,
       family: valueFamily,
       weight: valueWeight,
-      maxPx: relationValueMaxPx,
+      fit: coupledLatFit,
       padX: state.layoutApi.computeTextPadPx(layout.center.latRect, layout.responsive),
       color: color
     });
@@ -168,12 +184,11 @@
       align: layout.center.coordAlign,
       family: valueFamily,
       weight: valueWeight,
-      maxPx: relationValueMaxPx,
+      fit: coupledLonFit,
       padX: state.layoutApi.computeTextPadPx(layout.center.lonRect, layout.responsive),
       color: color
     });
   }
-
   function computeRowLayout(row, rect, state, labelFamily, valueFamily, valueWeight, labelWeight) {
     const gap = state.layoutApi.computeRowValueGapPx(rect, state.responsive);
     const textFillScale = state.textFillScale;
@@ -230,7 +245,6 @@
       valueMaxPx: valueMaxPx
     };
   }
-
   function drawRelationRows(layout, rows, state, labelFamily, valueFamily, valueWeight, labelWeight, color) {
     state.ctx.fillStyle = color;
     for (let i = 0; i < rows.length; i++) {
@@ -268,7 +282,6 @@
       });
     }
   }
-
   function create(def, Helpers) {
     const theme = Helpers.getModule("ThemeResolver");
     const text = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
@@ -278,7 +291,6 @@
     const math = Helpers.getModule("CenterDisplayMath").create(def, Helpers);
     const centerDisplayStateAdapter = Helpers.getModule("CenterDisplayStateAdapter").create(def, Helpers);
     const centerDisplayRenderModel = Helpers.getModule("CenterDisplayRenderModel").create(def, Helpers);
-
     function renderCanvas(canvas, props) {
       const p = props || {};
       const setup = Helpers.setupCanvas(canvas);
@@ -288,10 +300,8 @@
       if (!ctx || !W || !H) {
         return;
       }
-
       ctx.clearRect(0, 0, W, H);
       ctx.textBaseline = "middle";
-
       const rootEl = Helpers.requirePluginRoot(canvas);
       const tokens = theme.resolveForRoot(rootEl);
       const family = tokens.font.family;
@@ -352,7 +362,8 @@
         normalCaptionShare: hints.normalCaptionShare,
         flatCenterShare: hints.flatCenterShare,
         highCaptionRatio: hints.highCaptionRatio,
-        flatCaptionRatio: hints.flatCaptionRatio
+        flatCaptionRatio: hints.flatCaptionRatio,
+        coordAlign: coordinatesTabular ? "right" : "center"
       });
       const renderState = {
         ctx: ctx,
@@ -363,7 +374,6 @@
         responsive: layout.responsive,
         frameWidthCache: frameWidthCache
       };
-
       drawCenterPanel(layout, renderState, displayState, family, centerValueFamily, valueWeight, labelWeight, color);
       drawRelationRows(
         layout,
@@ -376,7 +386,6 @@
         color
       );
     }
-
     function translateFunction() { return {}; }
     function getVerticalShellSizing() { return { kind: "ratio", aspectRatio: 7 / 8 }; }
     return {

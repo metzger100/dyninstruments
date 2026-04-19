@@ -23,7 +23,7 @@ describe("CenterDisplayLayout", function () {
     expect(inner.y + inner.h).toBeLessThanOrEqual(outer.y + outer.h);
   }
 
-  function buildSnapshot(layout, width, height, mode, relationCount) {
+  function buildSnapshot(layout, width, height, mode, relationCount, coordAlign) {
     const insets = layout.computeInsets(width, height);
     const contentRect = layout.createContentRect(width, height, insets);
     const out = layout.computeLayout({
@@ -35,7 +35,8 @@ describe("CenterDisplayLayout", function () {
       normalCaptionShare: 0.28,
       flatCenterShare: 0.42,
       highCaptionRatio: 0.24,
-      flatCaptionRatio: 0.22
+      flatCaptionRatio: 0.22,
+      coordAlign: coordAlign
     });
     return {
       insets: insets,
@@ -84,6 +85,18 @@ describe("CenterDisplayLayout", function () {
           expect(rect.y).toBeGreaterThan(out.rowRects[index - 1].y);
         }
       });
+    });
+  });
+
+  it("threads caller-provided coordAlign through all center panel split modes", function () {
+    const layout = createLayout();
+    [
+      { width: 140, height: 260, mode: "high" },
+      { width: 260, height: 180, mode: "normal" },
+      { width: 520, height: 100, mode: "flat" }
+    ].forEach((testCase) => {
+      const snapshot = buildSnapshot(layout, testCase.width, testCase.height, testCase.mode, 2, "right");
+      expect(snapshot.out.center.coordAlign).toBe("right");
     });
   });
 

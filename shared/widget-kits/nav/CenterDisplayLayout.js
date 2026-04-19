@@ -115,7 +115,8 @@
           mode: mode,
           center: splitStackedPanel(
             centerRect,
-            profileApi.scaleShare(flatCaptionBase, responsive.stackedCaptionScale, 0.16, 0.34)
+            profileApi.scaleShare(flatCaptionBase, responsive.stackedCaptionScale, 0.16, 0.34),
+            cfg.coordAlign
           ),
           rowRects: splitRows(rowsRect, relationCount, gap),
           responsive: responsive
@@ -133,9 +134,10 @@
         center: mode === "high"
           ? splitStackedPanel(
             vertical.centerRect,
-            profileApi.scaleShare(highCaptionBase, responsive.stackedCaptionScale, 0.16, 0.34)
+            profileApi.scaleShare(highCaptionBase, responsive.stackedCaptionScale, 0.16, 0.34),
+            cfg.coordAlign
           )
-          : splitNormalPanel(vertical.centerRect, gap, normalCaptionShare),
+          : splitNormalPanel(vertical.centerRect, gap, normalCaptionShare, cfg.coordAlign),
         rowRects: splitRows(vertical.rowsRect, relationCount, gap),
         responsive: responsive
       };
@@ -178,7 +180,7 @@
     return rows;
   }
 
-  function splitStackedPanel(rect, captionRatio) {
+  function splitStackedPanel(rect, captionRatio, coordAlign) {
     const ratio = clampNumber(captionRatio, 0.16, 0.34, HIGH_STACKED_CAPTION_RATIO);
     const captionHeight = Math.max(1, Math.floor(rect.h * ratio));
     const bodyY = rect.y + captionHeight;
@@ -190,11 +192,11 @@
       latRect: makeRect(rect.x, bodyY, rect.w, lineHeight),
       lonRect: makeRect(rect.x, bodyY + lineHeight, rect.w, Math.max(1, rect.y + rect.h - (bodyY + lineHeight))),
       captionAlign: "center",
-      coordAlign: "center"
+      coordAlign: coordAlign || "center"
     };
   }
 
-  function splitNormalPanel(rect, gap, captionShare) {
+  function splitNormalPanel(rect, gap, captionShare, coordAlign) {
     const safeGap = Math.max(0, Math.floor(gap));
     const maxCaptionRatio = Math.min(NORMAL_CAPTION_MAX_RATIO, 1 - NORMAL_COORD_MIN_RATIO);
     const share = clampNumber(captionShare, NORMAL_CAPTION_MIN_RATIO, maxCaptionRatio, NORMAL_CAPTION_COL_RATIO);
@@ -209,7 +211,7 @@
       latRect: makeRect(coordX, rect.y, coordWidth, lineHeight),
       lonRect: makeRect(coordX, rect.y + lineHeight, coordWidth, Math.max(1, rect.y + rect.h - (rect.y + lineHeight))),
       captionAlign: "left",
-      coordAlign: "center"
+      coordAlign: coordAlign || "center"
     };
   }
 

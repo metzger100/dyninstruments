@@ -262,7 +262,7 @@ describe("CenterDisplayTextWidget", function () {
     expect(wp.y).toBeLessThan(boat.y);
   });
 
-  it("renders normal mode with caption left and centered coordinates", function () {
+  it("renders normal mode with caption left and right-aligned tabular coordinates", function () {
     const helpers = makeHelpers();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
@@ -288,10 +288,39 @@ describe("CenterDisplayTextWidget", function () {
     expect(center.x).toBeLessThan(lon.x);
     expect(latCall).toBeTruthy();
     expect(lonCall).toBeTruthy();
-    expect(latCall.textAlign).toBe("center");
-    expect(lonCall.textAlign).toBe("center");
+    expect(latCall.textAlign).toBe("right");
+    expect(lonCall.textAlign).toBe("right");
     expect(lat.y).toBeLessThan(wp.y);
     expect(lon.y).toBeLessThan(wp.y);
+  });
+
+  it("keeps non-tabular center coordinates center-aligned in normal and high modes", function () {
+    const helpers = makeHelpers();
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
+      .create({}, helpers);
+    const cases = [
+      { width: 260, height: 180, activeMeasure: undefined },
+      { width: 140, height: 260, activeMeasure: undefined }
+    ];
+
+    cases.forEach((size) => {
+      const ctx = createMockContext2D();
+      const calls = captureTextCalls(ctx);
+      const canvas = createMockCanvas({ rectWidth: size.width, rectHeight: size.height, ctx });
+
+      spec.renderCanvas(canvas, makeProps({
+        activeMeasure: size.activeMeasure,
+        coordinatesTabular: false
+      }));
+
+      const latCall = calls.find((entry) => entry.text.indexOf("LAT:") === 0);
+      const lonCall = calls.find((entry) => entry.text.indexOf("LON:") === 0);
+
+      expect(latCall).toBeTruthy();
+      expect(lonCall).toBeTruthy();
+      expect(latCall.textAlign).toBe("center");
+      expect(lonCall.textAlign).toBe("center");
+    });
   });
 
   it("renders flat mode with the center panel on the left and rows on the right", function () {
@@ -326,6 +355,7 @@ describe("CenterDisplayTextWidget", function () {
 
     cases.forEach((size) => {
       const ctx = createMockContext2D();
+      const calls = captureTextCalls(ctx);
       const canvas = createMockCanvas({ rectWidth: size.width, rectHeight: size.height, ctx });
 
       spec.renderCanvas(canvas, makeProps({ activeMeasure: undefined }));
@@ -333,10 +363,16 @@ describe("CenterDisplayTextWidget", function () {
       const texts = fillTextCalls(ctx);
       const wp = findFirstText(texts, "WP");
       const pos = findFirstText(texts, "POS");
+      const latCall = calls.find((entry) => entry.text.indexOf("LAT:") === 0);
+      const lonCall = calls.find((entry) => entry.text.indexOf("LON:") === 0);
       const layout = computeLayoutSnapshot(size.width, size.height, size.mode, 2);
 
       expect(wp).toBeTruthy();
       expect(pos).toBeTruthy();
+      expect(latCall).toBeTruthy();
+      expect(lonCall).toBeTruthy();
+      expect(latCall.textAlign).toBe("right");
+      expect(lonCall.textAlign).toBe("right");
       expect(wp.x).toBeGreaterThan(layout.rowRects[0].x);
       expect(wp.x).toBeLessThan(layout.rowRects[0].x + (layout.rowRects[0].w / 2));
       expect(pos.x).toBeGreaterThan(layout.rowRects[1].x);
@@ -477,7 +513,7 @@ describe("CenterDisplayTextWidget", function () {
     });
   });
 
-  it("keeps coordinate font sizes aligned with relation value rows in normal and flat modes", function () {
+  it("keeps coordinate font sizes coupled in normal and flat modes", function () {
     const helpers = makeHelpers();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
@@ -502,9 +538,26 @@ describe("CenterDisplayTextWidget", function () {
       expect(lonCall).toBeTruthy();
       expect(wpValueCall).toBeTruthy();
       expect(boatValueCall).toBeTruthy();
-      expect(Math.abs(parseFontPx(latCall.font) - parseFontPx(wpValueCall.font))).toBeLessThanOrEqual(1);
-      expect(Math.abs(parseFontPx(lonCall.font) - parseFontPx(boatValueCall.font))).toBeLessThanOrEqual(1);
+      expect(Math.abs(parseFontPx(latCall.font) - parseFontPx(lonCall.font))).toBeLessThanOrEqual(1);
     });
+  });
+
+  it("keeps coordinate font sizes coupled in high mode", function () {
+    const helpers = makeHelpers();
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
+      .create({}, helpers);
+    const ctx = createMockContext2D();
+    const fonts = captureTextFonts(ctx);
+    const canvas = createMockCanvas({ rectWidth: 140, rectHeight: 260, ctx });
+
+    spec.renderCanvas(canvas, makeProps({ activeMeasure: undefined }));
+
+    const latCall = fonts.find((entry) => entry.text === "LAT:54.123");
+    const lonCall = fonts.find((entry) => entry.text === "LON:10.456");
+
+    expect(latCall).toBeTruthy();
+    expect(lonCall).toBeTruthy();
+    expect(Math.abs(parseFontPx(latCall.font) - parseFontPx(lonCall.font))).toBeLessThanOrEqual(1);
   });
 
   it("increases compact text fill on smaller normal widgets without changing the layout mode", function () {
