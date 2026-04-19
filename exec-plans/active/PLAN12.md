@@ -11,7 +11,7 @@ Each phase is scoped for one Codex session. Phases are independent and may execu
 
 | # | Title | Affected files | Root cause |
 |---|-------|---------------|------------|
-| 1 | Spring ease on linear compass eases the pointer instead of the scale | `LinearGaugeEngine.js`, `CompassLinearWidget.js` | `springMotion.resolve()` is applied to `displayState.num` which feeds the pointer; for compass-mode the axis should be eased, not the pointer |
+| 1 | Spring ease on linear compass eases the pointer instead of the scale; no 180° range support | `LinearGaugeEngine.js`, `CompassLinearWidget.js`, `config/clusters/course-heading.js` | `springMotion.resolve()` is applied to `displayState.num` which feeds the pointer; for compass-mode the axis should be eased, not the pointer. Additionally, the visible heading window is hardcoded to 360°; a 180° option is needed. |
 | 2 | Coordinates monospace but not aligned; N/E sizes not coupled | `TextLayoutComposite.js`, `PositionCoordinateWidget.js` | `drawTwoRowsWithHeader` uses `ctx.textAlign = "center"`; needs right-alignment and the existing `fitMultiRowBinary` coupling must be surfaced correctly |
 | 3 | Radial compass labels clip into major ticks and are too small | `FullCircleRadialLayout.js`, `CompassRadialWidget.js` | `LABEL_SPRITE_RADIUS_FACTOR = 1.6` places labels too close to tick ends; `labelFontFactor = 0.14` produces undersized text |
 | 4 | Normal/high mode row spacing too large, value row undersized | `LinearGaugeLayout.js`, `LinearGaugeTextLayout.js` | `HIGH_TEXT_GAP_FACTOR = 1.2` and `HIGH_CAPTION_SHARE_RATIO = 0.36` plus `splitCaptionValueRows` secScale compounding steals vertical space from the value row |
@@ -19,18 +19,31 @@ Each phase is scoped for one Codex session. Phases are independent and may execu
 
 ---
 
-## Phase 1 — Fix spring easing on linear compass (scale eased, pointer fixed)
+## Phase 1 — Fix spring easing on linear compass (scale eased, pointer fixed) + 180° range support
 
 ### Context for Codex
 
-The linear compass (`CompassLinearWidget.js`) uses `LinearGaugeEngine.js` to render a horizontal heading scale with a fixed center pointer. The scale's visible range is centered on the current heading via `resolveAxis(props, range, defaultAxis)` which returns `{ min: heading - 180, max: heading + 180 }`. The pointer is drawn at the heading value on the scale, which visually sits at the center.
+The linear compass (`CompassLinearWidget.js`) uses `LinearGaugeEngine.js` to render a
+horizontal heading scale with a fixed center pointer. The scale's visible range is centered
+on the current heading via `resolveAxis(props, range, defaultAxis)` which currently
+hardcodes `{ min: heading - 180, max: heading + 180 }` — a 360° window. A planned 180°
+mode will show `{ min: heading - 90, max: heading + 90 }`.
 
-PLAN11 added `SpringEasing` to `LinearGaugeEngine`. The engine creates `springMotion` at module scope (line 33) and calls `springMotion.resolve(canvas, displayState.num, easingEnabled, Date.now())` at line 280 to produce `easedDisplayNum`. This eased value is used by `drawApi.drawDefaultPointer` (line 367). The result is that the **pointer** animates smoothly but the **scale** jumps instantly — the opposite of the intended behavior.
+PLAN11 added `SpringEasing` to `LinearGaugeEngine`. The engine creates `springMotion` at
+module scope (line 33) and calls `springMotion.resolve(canvas, displayState.num,
+easingEnabled, Date.now())` at line 280 to produce `easedDisplayNum`. This eased value is
+used by `drawApi.drawDefaultPointer` (line 367). The result is that the **pointer** animates
+smoothly but the **scale** jumps instantly — the opposite of the intended behavior.
 
 For a compass, the correct behavior is:
 - The **scale** (axis) animates smoothly toward the new heading (spring-eased).
-- The **pointer** is always fixed at the visual center of the scale (no easing on the pointer itself).
-- The marker course indicator must also be positioned relative to the eased heading.
+- The **pointer** is always fixed at the visual center of the scale (no easing on the pointer).
+- The marker course indicator is positioned relative to the eased heading.
+- All of the above must work for both 360° and 180° visible ranges.
+
+The tick steps are currently hardcoded to `{ major: 30, minor: 10 }` via the `tickSteps`
+callback. For a 180° window, denser ticks (`{ major: 15, minor: 5 }`) are appropriate so the
+half-range doesn't look sparse.
 
 ### Prompt
 
@@ -43,8 +56,16 @@ Read these files before any code changes:
 - documentation/conventions/smell-prevention.md
 - documentation/shared/spring-easing.md
 - documentation/linear/linear-shared-api.md
+- documentation/avnav-api/editable-parameters.md
 
-## Task: Fix spring easing for linear compass — ease the scale, not the pointer
+## Task: Fix spring easing for linear compass + add 180° range support
+
+This task has two interleaved goals:
+A. Fix the spring easing so the **scale** eases (not the pointer).
+B. Add a `compassLinearRange` editable (360° default, 180° option) that controls the
+   visible heading window width. Both goals touch the same code paths — `resolveAxis`,
+   `tickSteps`, `drawFrame`, and the engine's `springTarget` — so they are implemented
+   together.
 
 ### Problem
 
@@ -54,101 +75,83 @@ For the compass linear widget, this eases the pointer position instead of the sc
 
 The compass widget (`widgets/linear/CompassLinearWidget/CompassLinearWidget.js`) defines:
 - `resolveAxis(props, range, defaultAxis)` — returns `{ min: heading-180, max: heading+180 }`
-- `drawFrame(state, props, display, api)` — calls `api.drawDefaultPointer()` and draws a marker
-
-The **scale** should ease (the axis slides smoothly) and the **pointer** should be fixed at
-the center of the visible range.
+  (hardcoded 360° window)
+- `drawFrame(state, props, display, api)` — calls `api.drawDefaultPointer()` and draws a
+  marker
+- `tickSteps: function () { return { major: 30, minor: 10 }; }` (hardcoded)
 
 ### Required changes
 
-1. **`CompassLinearWidget.js`**: The compass must own its own spring motion instance
-   (via `SpringEasing.create(def, Helpers).createMotion({ wrap: 360 })`), apply it to the
-   raw heading BEFORE passing it to `resolveAxis`, and draw the pointer at the eased
-   heading value (which is always the visual center of the eased axis). The marker must
-   be positioned relative to the eased heading.
+#### A. Engine: `springTarget: "axis"` mode
 
-   - Add `SpringEasing` to the Depends header and to `getModule` calls.
-   - Create `const springMotion = Helpers.getModule("SpringEasing").create(def, Helpers).createMotion({ wrap: 360 });`
-   - In `resolveAxis`: accept the heading value that will be passed from the engine's
-     render path. The easing must happen at the call site that supplies the heading to
-     `resolveAxis`, not inside `resolveAxis` itself (resolveAxis is called by the engine
-     during the render path before the easer runs).
-   - Change the approach: instead of easing inside `resolveAxis`, the compass should
-     use the engine's `drawFrame` callback. In `drawFrame`, resolve the eased heading
-     via `springMotion.resolve(state.canvas || api.canvas, display.num, props.easing !== false, Date.now())`,
-     then recompute the axis from the eased heading, remap the pointer and marker
-     positions to the eased axis.
-   
-   Actually, the simplest correct approach:
-   - Override `resolveAxis` to accept `props` and use a spring-eased heading internally.
-     But `resolveAxis` doesn't have access to the canvas element needed for per-instance
-     spring state.
-   
-   **Recommended approach**: Modify `resolveAxis` in CompassLinearWidget to use the raw
-   heading for axis computation. Then in `drawFrame`:
-   a. Compute the eased heading via the compass's own `springMotion.resolve(...)`.
-   b. The axis provided by the engine is based on the raw heading.
-   c. The pointer should be drawn at the raw heading value on the raw axis (which is the
-      center — this is already correct).
-   d. The STATIC LAYER (ticks, labels) must shift to reflect the eased heading. This means
-      the axis passed to the static layer should use the eased heading.
-   
-   But the static layer is cached — it can't ease per-frame. So the correct design is:
-   
-   **Final approach**:
-   a. `resolveAxis` uses a spring-eased heading. To get per-instance state, the heading
-      easing must happen BEFORE `resolveAxis` is called, which means the eased heading
-      must be threaded through `props`.
-   b. The engine calls `resolveAxisFn(p, range, defaultAxis, hookApiBase)` at line 182.
-      The compass's `resolveAxis` reads the heading from `props`.
-   c. The compass can pre-process the heading using a separate mechanism: add an
-      `interceptProps` or `preprocessValue` hook to the engine spec. Or: have the compass
-      modify `p.heading` in-place inside a `beforeRender` callback.
-   
-   **Simplest correct approach given the engine architecture**:
-   - The engine already has the spring easing for the pointer (`easedDisplayNum`).
-   - For compass-mode (`axisMode: "fixed360"`), the engine should use the eased value
-     to compute the axis instead of using it for the pointer.
-   - Add a new engine spec flag: `springTarget: "axis"` (default: `"pointer"`).
-   - When `springTarget === "axis"`:
-     - The spring eases the display value as before, producing `easedDisplayNum`.
-     - `resolveAxis` receives the eased value in the heading prop instead of the raw value.
-     - The static layer key includes the eased heading (invalidating the cache each frame
-       during animation — acceptable since compass already invalidates on heading change).
-     - The pointer draws at the **eased** value (which is the center of the eased axis).
-     - In compass's `drawFrame`, `api.drawDefaultPointer()` uses `easedDisplayNum` which
-       is the eased heading — this puts the pointer at the center of the eased axis. Correct.
-   - When `springTarget === "pointer"` (default, current behavior):
-     - No change. The axis is raw, the pointer is eased.
-
-2. **`LinearGaugeEngine.js`**: Add support for `cfg.springTarget`.
-   - Read `cfg.springTarget` alongside other config (default: `"pointer"`).
-   - Move the `springMotion.resolve(...)` call to just before the axis resolution.
+1. **`LinearGaugeEngine.js`** — Add support for `cfg.springTarget`:
+   - Read `const springTarget = cfg.springTarget === "axis" ? "axis" : "pointer";`
+     alongside other config at the top of `createRenderer`.
+   - Move the `springMotion.resolve(...)` call BEFORE the axis resolution (before line 182
+     where `resolveAxisFn` is called).
    - If `springTarget === "axis"`:
-     - Compute `easedDisplayNum` from the raw heading.
-     - Override the raw value key in `p` (or pass eased heading to resolveAxisFn) before
-       calling `resolveAxisFn`.
-     - The `resolveAxis` callback receives the eased heading as `p.value` or `p.heading`.
-     - The pointer draws at `easedDisplayNum` on the eased axis (which is visually fixed
-       at center).
-     - The static layer cache key must include the eased axis min/max (already does via
-       `axisMin`/`axisMax` in the static key).
+     - Compute `easedDisplayNum` from the raw display value.
+     - Create a shallow copy of `p` (or a proxy object) that overrides the raw value key
+       (`p.value` or `p[cfg.rawValueKey]`) with the eased value, so that `resolveAxisFn`
+       receives the eased heading.
+     - The pointer draws at `easedDisplayNum` on the eased axis (visually fixed at center).
+     - The static layer cache key already includes `axisMin`/`axisMax` (line 291–292),
+       which will change each frame during animation — invalidating the cache. Acceptable
+       because the compass already invalidates on every heading change.
    - If `springTarget === "pointer"` (default):
-     - Current behavior: axis is raw, pointer position is eased.
+     - Current behavior unchanged: axis is raw, pointer position is eased.
+   - Expose `easedDisplayNum` on the `displayState` object:
+     `displayState.easedNum = easedDisplayNum;`
+     so that `drawFrame` callbacks can access the eased value.
 
-3. **`CompassLinearWidget.js`**: Set `springTarget: "axis"` in the `createRenderer` spec.
-   - The compass's `drawFrame` continues to call `api.drawDefaultPointer()` — but now it
-     draws at the eased heading position on the eased axis (center).
-   - The marker must be positioned relative to the eased heading:
-     `const markerWrapped = easedHeading + norm180(marker - easedHeading);`
-     The `drawFrame` callback needs access to the eased heading. Pass it via `displayState`
-     or as a property on `drawApi`.
-   - Expose `easedDisplayNum` on the `displayState` object or on `drawApi` so that
-     `drawFrame` callbacks can use it. Add `displayState.easedNum = easedDisplayNum;`
-     in the engine after computing it.
+#### B. Compass widget: configurable range + adapted tick steps
 
-4. **`drawFrame` in CompassLinearWidget.js**: Update to use the eased heading for the
-   marker calculation:
+2. **`CompassLinearWidget.js`** — Make the visible range configurable:
+   - Read `const compassRange = (p.compassLinearRange === 180) ? 180 : 360;`
+     Compute `const halfRange = compassRange / 2;`
+   - Update `resolveAxis` to use `halfRange`:
+     ```js
+     function resolveAxis(props, range, defaultAxis) {
+       const p = props || {};
+       const heading = Number((typeof p.value !== "undefined") ? p.value : p.heading);
+       if (!isFinite(heading)) { return defaultAxis; }
+       const half = (p.compassLinearRange === 180) ? 90 : 180;
+       return { min: heading - half, max: heading + half };
+     }
+     ```
+     Note: `resolveAxis` receives `p` as its first argument from the engine (line 182).
+     When `springTarget === "axis"`, the engine overrides `p.value`/`p.heading` with the
+     eased value, so `resolveAxis` sees the eased heading. The range prop
+     (`p.compassLinearRange`) is unaffected by the override.
+   - Update `tickSteps` to adapt based on the range:
+     ```js
+     tickSteps: function (axisSpan) {
+       // axisSpan is computed by the engine as axis.max - axis.min, but the compass
+       // resolves its own axis, so use the props-based range instead.
+       // However, tickSteps only receives the span. Use it:
+       if (axisSpan <= 180) {
+         return { major: 15, minor: 5 };
+       }
+       return { major: 30, minor: 10 };
+     }
+     ```
+     Verify: The engine calls `tickSteps(axis.max - axis.min)` at line 211. For a 360°
+     window `axisSpan = 360`, for 180° `axisSpan = 180`. The `tickSteps` callback already
+     receives the span. No engine change needed for this.
+
+3. **`CompassLinearWidget.js`** — Set `springTarget: "axis"` in the `createRenderer` spec:
+   ```js
+   const renderCanvas = engine.createRenderer({
+     rawValueKey: "heading",
+     unitDefault: "°",
+     axisMode: "fixed360",
+     springTarget: "axis",           // <-- NEW
+     // ... rest unchanged
+   });
+   ```
+
+4. **`drawFrame` in CompassLinearWidget.js** — Use the eased heading for marker
+   calculation:
    ```js
    function drawFrame(state, props, display, api) {
      api.drawDefaultPointer();
@@ -161,26 +164,67 @@ the center of the visible range.
      });
    }
    ```
+   The `norm180` helper wraps the delta to `[-180, +180)`. For a 180° visible axis
+   (±90° from heading), markers more than 90° away will be clamped off-screen by
+   `mapValueToX(..., true)` inside `drawMarkerAtValue` — correct behavior.
 
-5. **Return `wantsFollowUpFrame`**: The engine already checks `springMotion.isActive(canvas)`
-   at line 392. When `springTarget === "axis"`, the spring animates the axis, so each frame
-   the static layer cache is invalidated (axis changes), and the spring requests follow-up
-   frames until settled. This is correct and no additional change is needed for animation
-   scheduling.
+5. **Return `wantsFollowUpFrame`**: The engine already checks
+   `springMotion.isActive(canvas)` at line 392. When `springTarget === "axis"`, the spring
+   animates the axis, so each frame the static layer cache is invalidated (axis changes),
+   and the spring requests follow-up frames until settled. No additional change needed for
+   animation scheduling.
+
+#### C. Editable: `compassLinearRange`
+
+6. **`config/clusters/course-heading.js`** — Add the range editable alongside the existing
+   compass linear settings (after `compassLinearShowEndLabels` at line 104):
+   ```js
+   compassLinearRange: {
+     type: "SELECT",
+     selectList: [
+       { name: "360°", value: 360 },
+       { name: "180°", value: 180 }
+     ],
+     default: 360,
+     name: "Visible range",
+     condition: [{ kind: "hdtLinear" }, { kind: "hdmLinear" }]
+   },
+   ```
+   Follow the `compassLinearTickMinor` pattern: per-widget in the cluster config, condition
+   scoped to linear compass kinds only. This matches the PLAN11 convention for per-widget
+   editables.
+
+### Interaction between range and spring
+
+The spring wrap is always 360° (heading values are 0–360°). The visible range
+(`compassLinearRange`) only affects the axis window and tick density — not the spring
+dynamics. When the heading wraps from 359° to 1°, the spring takes the shortest arc
+(−2°) regardless of whether the visible window is 360° or 180°.
+
+For the 180° window, a large heading change (e.g., 90°) causes the static layer to scroll
+through many intermediate positions during the spring animation. Each intermediate position
+invalidates the static layer cache. This is identical to the 360° case — the compass
+already invalidates on every heading change. Performance is bounded by the existing soft cap
+(600 consecutive animate frames).
 
 ### Tests
 
-- Verify that with `springTarget: "axis"`, after a heading change, the axis (min/max)
-  smoothly transitions while the pointer remains at the center of the axis.
-- Verify that with `springTarget: "pointer"` (default), existing non-compass linear gauges
-  still ease the pointer.
-- Verify the marker position tracks the eased heading correctly.
-- Verify `wantsFollowUpFrame` is returned while the spring is active.
+- `springTarget: "axis"` + 360° range: after a heading change, the axis (min/max) smoothly
+  transitions while the pointer remains at the center.
+- `springTarget: "axis"` + 180° range: same behavior with a narrower window; ticks are
+  at 15°/5° intervals.
+- `springTarget: "pointer"` (default): existing non-compass linear gauges still ease the
+  pointer. No behavioral change.
+- Marker position tracks the eased heading correctly in both range modes.
+- Marker > 90° from heading in 180° mode is clamped off-screen.
+- `wantsFollowUpFrame` is returned while the spring is active.
+- `compassLinearRange` editable appears only for `hdtLinear`/`hdmLinear` kinds.
+- Wrap-around (e.g., 350° → 10°) takes the short arc in both range modes.
 
 ### Constraints
 
 - Do not change the `SpringEasing` module itself.
-- Do not break existing non-compass linear gauges (Speed, Depth, etc.).
+- Do not break existing non-compass linear gauges (Speed, Depth, Temp, Voltage, Wind).
 - File size limit: no file exceeds 400 non-empty lines.
 - Run `npm run check:all` at the end.
 ```
