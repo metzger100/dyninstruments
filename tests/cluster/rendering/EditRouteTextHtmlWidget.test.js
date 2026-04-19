@@ -223,6 +223,104 @@ describe("EditRouteTextHtmlWidget", function () {
     expect(setup.markupRender).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps compact normal mode on the normal metric path", function () {
+    const setup = createRenderer({
+      buildModel: vi.fn(function (args) {
+        const props = args && args.props ? args.props : {};
+        return {
+          kind: "data",
+          mode: "normal",
+          hasRoute: true,
+          isLocalRoute: false,
+          isServerRoute: false,
+          isActiveRoute: false,
+          canOpenEditRoute: true,
+          captureClicks: true,
+          resizeSignatureParts: ["sig", props.__token || "compact"],
+          nameText: "Route",
+          sourceBadgeText: "",
+          metrics: Object.create(null),
+          visibleMetricIds: ["pts", "dst", "rte", "eta"],
+          flatMetricRows: 1,
+          metricsStyle: "",
+          wrapperStyle: ""
+        };
+      }),
+      markupRender(args) {
+        const model = args && args.model ? args.model : {};
+        return ""
+          + '<div class="dyni-edit-route-html dyni-edit-route-mode-' + model.mode + '">'
+          + '<div class="dyni-edit-route-metrics">'
+          + '<div class="dyni-edit-route-metric"></div>'
+          + "</div>"
+          + "</div>";
+      }
+    });
+
+    const mounted = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy({ __canOpen: true, __token: "compact" }, { mode: "dispatch" }),
+      { shellSize: { width: 220, height: 180 } }
+    );
+
+    expect(setup.buildModel).toHaveBeenCalledWith(expect.objectContaining({
+      shellRect: { width: 220, height: 180 }
+    }));
+    expect(setup.fitCompute).toHaveBeenCalledTimes(1);
+    expect(mounted.html()).toContain("dyni-edit-route-mode-normal");
+    expect(mounted.html()).toContain('class="dyni-edit-route-metric"');
+    expect(mounted.html()).not.toContain("dyni-edit-route-metric-row");
+  });
+
+  it("keeps high mode on the row layout path", function () {
+    const setup = createRenderer({
+      buildModel: vi.fn(function (args) {
+        const props = args && args.props ? args.props : {};
+        return {
+          kind: "data",
+          mode: "high",
+          hasRoute: true,
+          isLocalRoute: false,
+          isServerRoute: false,
+          isActiveRoute: false,
+          canOpenEditRoute: true,
+          captureClicks: true,
+          resizeSignatureParts: ["sig", props.__token || "high"],
+          nameText: "Route",
+          sourceBadgeText: "",
+          metrics: Object.create(null),
+          visibleMetricIds: ["pts", "dst", "rte", "eta"],
+          flatMetricRows: 1,
+          metricsStyle: "",
+          wrapperStyle: ""
+        };
+      }),
+      markupRender(args) {
+        const model = args && args.model ? args.model : {};
+        return ""
+          + '<div class="dyni-edit-route-html dyni-edit-route-mode-' + model.mode + '">'
+          + '<div class="dyni-edit-route-metrics">'
+          + '<div class="dyni-edit-route-metric-row"></div>'
+          + "</div>"
+          + "</div>";
+      }
+    });
+
+    const mounted = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy({ __canOpen: true, __token: "high" }, { mode: "dispatch" }),
+      { shellSize: { width: 180, height: 280 } }
+    );
+
+    expect(setup.buildModel).toHaveBeenCalledWith(expect.objectContaining({
+      shellRect: { width: 180, height: 280 }
+    }));
+    expect(setup.fitCompute).toHaveBeenCalledTimes(1);
+    expect(mounted.html()).toContain("dyni-edit-route-mode-high");
+    expect(mounted.html()).toContain('class="dyni-edit-route-metric-row"');
+    expect(mounted.html()).not.toContain('class="dyni-edit-route-metric"');
+  });
+
   it("respects layoutChanged for fit recomputation and layout signature", function () {
     const setup = createRenderer();
     const mounted = mountCommitted(
@@ -253,5 +351,26 @@ describe("EditRouteTextHtmlWidget", function () {
     // Vertical mode must not self-expand beyond the committed surface box
     expect(css).not.toMatch(/aspect-ratio.*7\s*\/\s*8/);
     expect(css).not.toMatch(/min-height.*8em/);
+    expect(css).toContain("padding: 0.08em 0.12em;");
+    expect(css).toContain("gap: 0.08em;");
+    expect(css).toContain("row-gap: 0.04em;");
+    expect(css).not.toContain("grid-template-rows: auto minmax(0, 1fr);");
+    expect(css).toContain("grid-template-rows: minmax(0, 0.34fr) minmax(0, 0.66fr);");
+    expect(css).toContain("align-content: stretch;");
+    expect(css).toContain("flex: 0 1 auto;");
+    expect(css).toContain("flex: 0 0 auto;");
+    expect(css).not.toContain("overflow: hidden;");
+  });
+
+  it("keeps metric row fractions and shrink guards in css", function () {
+    const cssPath = path.join(
+      process.cwd(),
+      "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"
+    );
+    const css = fs.readFileSync(cssPath, "utf8");
+
+    expect(css).toMatch(/\.dyni-html-root \.dyni-edit-route-metric-label \{[\s\S]*?min-height: 0;/);
+    expect(css).toMatch(/\.dyni-html-root \.dyni-edit-route-metric-value \{[\s\S]*?min-height: 0;/);
+    expect(css).not.toContain("overflow: hidden;");
   });
 });

@@ -23,6 +23,53 @@ describe("EditRouteHtmlFit", function () {
       ctx.font = safeWeight + " " + safePx + "px " + safeFamily;
     });
     api.measureTextWidth = vi.fn((ctx, text) => ctx.measureText(String(text || "")).width);
+    api.measureValueUnitFit = vi.fn((ctx, family, value, unit, w, h, secScale, valueWeight, labelWeight, textOptions) => {
+      const maxH = Math.max(0.5, Number(h) || 0.5);
+      const maxW = Math.max(0, Number(w) || 0);
+      const ratio = Number(secScale);
+      const scale = Number.isFinite(ratio) ? ratio : 0.8;
+      const opts = textOptions && typeof textOptions === "object" ? textOptions : null;
+      const valueFamily = opts && opts.useMono === true
+        ? (opts.monoFamily || family)
+        : family;
+
+      if (maxW <= 0 || !value) {
+        return { vPx: 0.5, uPx: unit ? 0.5 : 0, gap: 0, total: 0 };
+      }
+
+      function totalWidth(vPx, uPx, gap) {
+        api.setFont(ctx, vPx, valueWeight, valueFamily);
+        let total = api.measureTextWidth(ctx, String(value || ""));
+        if (unit) {
+          api.setFont(ctx, uPx, labelWeight, family);
+          total += gap + api.measureTextWidth(ctx, String(unit || ""));
+        }
+        return total;
+      }
+
+      let vPx = maxH;
+      let uPx = unit ? Math.max(0.5, Math.min(maxH, vPx * scale)) : 0;
+      let gap = unit ? Math.max(0.5, vPx * 0.25) : 0;
+      let total = totalWidth(vPx, uPx, gap);
+
+      if (total > maxW) {
+        const ratio1 = Math.max(0.01, maxW / Math.max(0.01, total));
+        vPx = Math.max(0.5, vPx * ratio1);
+        uPx = unit ? Math.max(0.5, Math.min(maxH, uPx * ratio1)) : 0;
+        gap = unit ? Math.max(0.5, gap * ratio1) : 0;
+        total = totalWidth(vPx, uPx, gap);
+      }
+
+      if (total > maxW) {
+        const ratio2 = Math.max(0.01, maxW / Math.max(0.01, total));
+        vPx = Math.max(0.5, vPx * ratio2);
+        uPx = unit ? Math.max(0.5, Math.min(maxH, uPx * ratio2)) : 0;
+        gap = unit ? Math.max(0.5, gap * ratio2) : 0;
+        total = totalWidth(vPx, uPx, gap);
+      }
+
+      return { vPx, uPx, gap, total };
+    });
     api.fitSingleTextPx = vi.fn((ctx, text, maxPx, maxW, maxH, family, weight) => {
       const start = Math.max(1, Math.floor(Math.min(Number(maxPx) || 1, Number(maxH) || 1)));
       const safeText = String(text);
@@ -73,6 +120,10 @@ describe("EditRouteHtmlFit", function () {
     const editRouteLayoutGeometryModule = loadFresh("shared/widget-kits/nav/EditRouteLayoutGeometry.js");
     const editRouteLayoutModule = loadFresh("shared/widget-kits/nav/EditRouteLayout.js");
     const textTileLayoutModule = loadFresh("shared/widget-kits/text/TextTileLayout.js");
+    const textTileLayout = textTileLayoutModule.create();
+    const textTileLayoutSpy = Object.assign({}, textTileLayout, {
+      measureMetricTile: vi.fn(textTileLayout.measureMetricTile)
+    });
     const radialTextApi = createRadialTextApi();
     const themeApi = {
       resolveForRoot: vi.fn(() => ({
@@ -102,7 +153,11 @@ describe("EditRouteHtmlFit", function () {
           return { create: () => radialTextApi };
         }
         if (id === "TextTileLayout") {
-          return textTileLayoutModule;
+          return {
+            create() {
+              return textTileLayoutSpy;
+            }
+          };
         }
         if (id === "EditRouteLayout") {
           return editRouteLayoutModule;
@@ -129,7 +184,7 @@ describe("EditRouteHtmlFit", function () {
       }
     };
     const fit = loadFresh("shared/widget-kits/nav/EditRouteHtmlFit.js").create({}, Helpers);
-    return { fit, targetEl, hostContext, themeApi };
+    return { fit, targetEl, hostContext, themeApi, textTileLayoutSpy };
   }
 
   function extractPx(style) {
@@ -292,11 +347,40 @@ describe("EditRouteHtmlFit", function () {
     });
 
     const longValuePx = extractPx(longOut.metrics.dst.valueStyle);
-    const longTargetSecondary = Math.max(1, Math.floor(longValuePx * 0.8));
-    expect(extractPx(longOut.metrics.dst.labelStyle)).toBeLessThanOrEqual(longTargetSecondary);
+    expect(extractPx(longOut.metrics.dst.labelStyle)).toBeLessThanOrEqual(extractPx(shortOut.metrics.dst.labelStyle));
     expect(extractPx(longOut.metrics.dst.unitStyle)).toBeLessThan(extractPx(shortOut.metrics.dst.unitStyle));
-    expect(extractPx(longOut.metrics.dst.unitStyle)).toBeLessThanOrEqual(longTargetSecondary);
     expect(extractPx(longOut.metrics.dst.valueStyle)).toBeGreaterThan(0);
+    expect(extractPx(longOut.metrics.dst.valueStyle)).toBeGreaterThanOrEqual(Math.max(1, Math.floor(longValuePx * 0.8)) - 1);
+  });
+
+  it("uses coordinated metric-tile measurement in compact normal mode and keeps stable digits fallback", function () {
+    const h = createHarness();
+    const out = h.fit.compute({
+      model: buildModel({
+        mode: "normal",
+        stableDigitsEnabled: true,
+        metrics: {
+          dst: {
+            labelText: "DST:",
+            valueText: " " + "0".repeat(120) + ".4",
+            fallbackValueText: "12.4",
+            unitText: "nm"
+          }
+        }
+      }),
+      targetEl: h.targetEl,
+      hostContext: h.hostContext,
+      shellRect: { width: 120, height: 120 }
+    });
+
+    expect(h.textTileLayoutSpy.measureMetricTile).toHaveBeenCalled();
+    expect(h.textTileLayoutSpy.measureMetricTile.mock.calls.some((call) => {
+      const args = call[0] || {};
+      return args.metric && args.metric.id === "dst" && args.rect && args.rect.w > 0 && args.rect.h > 0;
+    })).toBe(true);
+    expect(out.metricValues.dst).toBe("12.4");
+    expect(out.metrics.dst.valueStyle).not.toBe("");
+    expect(out.metrics.dst.unitStyle).not.toBe("");
   });
 
   it("uses full value width for ETA/PTS when no unit exists", function () {

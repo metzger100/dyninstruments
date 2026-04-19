@@ -123,22 +123,13 @@
       const cfg = args || {};
       const tileRect = cfg.tileRect || makeRect(0, 0, 1, 1);
       const metricPadX = resolveInsetValue(cfg.insets, "metricPadX", 1);
-      const responsive = cfg.responsive || null;
-      const profileApi = cfg.profileApi;
-      if (!profileApi || typeof profileApi.computeIntrinsicTileSpacing !== "function") {
-        throw new Error("EditRouteLayoutGeometry.createMetricTile requires profileApi.computeIntrinsicTileSpacing");
-      }
-
-      const metricTilePadRatio = mathApi.clampNumber(cfg.metricTilePadRatio, 0, 1, 0.04);
       const metricTileCaptionRatio = mathApi.clampNumber(cfg.metricTileCaptionRatio, 0, 1, 0.34);
-      const spacing = profileApi.computeIntrinsicTileSpacing(
-        responsive,
-        tileRect,
-        metricTilePadRatio,
-        metricTileCaptionRatio
-      );
-      const labelHeight = Math.max(1, Math.min(tileRect.h, Math.floor(spacing.captionHeightPx)));
-      const valueHeight = Math.max(1, tileRect.h - labelHeight);
+      // Keep the JS split aligned with the CSS fr-based row split.
+      const safeTileHeight = Math.max(1, Math.floor(Number(tileRect.h) || 0));
+      const labelHeight = safeTileHeight <= 1
+        ? 1
+        : Math.max(1, Math.min(safeTileHeight - 1, Math.round(safeTileHeight * metricTileCaptionRatio)));
+      const valueHeight = Math.max(1, safeTileHeight - labelHeight);
       const labelRect = makeRect(tileRect.x + metricPadX, tileRect.y, Math.max(1, tileRect.w - metricPadX * 2), labelHeight);
       const valueRect = makeRect(
         tileRect.x + metricPadX,
@@ -147,42 +138,12 @@
         valueHeight
       );
 
-      const unitPlacement = Object.prototype.hasOwnProperty.call(cfg, "unitPlacement")
-        ? cfg.unitPlacement
-        : "inline";
-      let valueParts;
-      if (unitPlacement === "none") {
-        valueParts = computeInlineValueRects({
-          valueRect: valueRect,
-          insets: cfg.insets,
-          includeUnit: false
-        });
-      } else if (unitPlacement === "stacked") {
-        valueParts = computeStackedValueRects({
-          valueRect: valueRect,
-          insets: cfg.insets,
-          includeUnit: true,
-          unitShare: cfg.unitShare,
-          unitMinPx: cfg.unitMinPx,
-          unitMaxRatio: cfg.unitMaxRatio
-        });
-      } else {
-        valueParts = computeInlineValueRects({
-          valueRect: valueRect,
-          insets: cfg.insets,
-          includeUnit: true,
-          unitShare: cfg.unitShare,
-          unitMinPx: cfg.unitMinPx,
-          unitMaxRatio: cfg.unitMaxRatio
-        });
-      }
-
       return {
         tileRect: tileRect,
         labelRect: labelRect,
         valueRect: valueRect,
-        valueTextRect: valueParts.valueTextRect,
-        unitRect: valueParts.unitRect
+        valueTextRect: valueRect,
+        unitRect: null
       };
     }
 

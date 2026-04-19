@@ -318,6 +318,12 @@
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       const textFillScale = layout.responsive && layout.responsive.textFillScale;
+      const valueTextOptions = model.stableDigitsEnabled === true
+        ? {
+          useMono: true,
+          monoFamily: tokens.font.familyMono || family
+        }
+        : null;
       const fitOut = {
         nameTextStyle: measureStyle({
           rect: layout.nameTextRect,
@@ -360,64 +366,148 @@
         if (!box) {
           continue;
         }
-        const valueRect = box.valueTextRect || box.valueRect;
+        const metricRect = box.tileRect || box.valueRect || box.labelRect;
+        const spacing = layoutApi.computeMetricTileSpacing(metricRect, layout.responsive);
         const labelText = resolveMetricLabel(model, id);
         const valueText = resolveMetricValue(model, id);
         const fallbackValueText = resolveMetricFallbackValue(model, id);
         const unitText = resolveMetricUnit(model, id);
-        const selectedValue = selectMetricValue({
-          stableDigitsEnabled: model.stableDigitsEnabled === true,
-          primaryText: valueText,
-          fallbackText: fallbackValueText,
-          rect: valueRect,
-          maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+        if (layout.mode === "high") {
+          const valueRect = box.valueTextRect || box.valueRect;
+          const selectedValue = selectMetricValue({
+            stableDigitsEnabled: model.stableDigitsEnabled === true,
+            primaryText: valueText,
+            fallbackText: fallbackValueText,
+            rect: valueRect,
+            maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+            textApi: textApi,
+            tileLayout: tileLayout,
+            ctx: measureCtx,
+            valueFamily: valueFamily || family,
+            valueWeight: valueWeight,
+            textFillScale: textFillScale,
+            htmlUtils: htmlUtils
+          });
+          const valuePx = resolveMetricPx(selectedValue.fit, htmlUtils);
+          const secondaryMaxPx = fitMath.resolveSecondaryMaxPx({
+            valuePx: valuePx,
+            valueRect: valueRect,
+            valueMaxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+            secondaryToValueRatio: METRIC_SECONDARY_TO_VALUE_RATIO
+          });
+
+          fitOut.metrics[id] = {
+            labelStyle: measureStyle({
+              rect: box.labelRect,
+              text: labelText,
+              maxPx: secondaryMaxPx,
+              maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+              textApi: textApi,
+              tileLayout: tileLayout,
+              ctx: measureCtx,
+              family: family,
+              weight: labelWeight,
+              textFillScale: 1,
+              htmlUtils: htmlUtils
+            }),
+            valueRowStyle: "",
+            valueStyle: toStyle(valuePx, htmlUtils),
+            unitStyle: box.unitRect ? measureStyle({
+              rect: box.unitRect,
+              text: unitText,
+              maxPx: secondaryMaxPx,
+              maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+              textApi: textApi,
+              tileLayout: tileLayout,
+              ctx: measureCtx,
+              family: family,
+              weight: labelWeight,
+              textFillScale: 1,
+              htmlUtils: htmlUtils
+            }) : ""
+          };
+          fitOut.metricValues[id] = selectedValue.text;
+          continue;
+        }
+
+        const primaryMeasurement = tileLayout.measureMetricTile({
           textApi: textApi,
-          tileLayout: tileLayout,
           ctx: measureCtx,
-          valueFamily: valueFamily || family,
+          metric: {
+            id: id,
+            caption: labelText,
+            value: valueText,
+            fallbackValue: fallbackValueText,
+            unit: unitText
+          },
+          rect: metricRect,
+          textFillScale: layout.responsive.textFillScale,
+          family: family,
           valueWeight: valueWeight,
-          textFillScale: textFillScale,
-          htmlUtils: htmlUtils
+          labelWeight: labelWeight,
+          secScale: METRIC_SECONDARY_TO_VALUE_RATIO,
+          padX: spacing.padX,
+          captionHeightPx: spacing.captionHeightPx,
+          valueTextOptions: valueTextOptions
         });
-        const valuePx = resolveMetricPx(selectedValue.fit, htmlUtils);
-        const secondaryMaxPx = fitMath.resolveSecondaryMaxPx({
-          valuePx: valuePx,
-          valueRect: valueRect,
-          valueMaxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
-          secondaryToValueRatio: METRIC_SECONDARY_TO_VALUE_RATIO
-        });
+        const primaryClipped = !!(primaryMeasurement && primaryMeasurement.fit && primaryMeasurement.fit.total > primaryMeasurement.textW + 0.01);
+        const useFallback = model.stableDigitsEnabled === true &&
+          primaryClipped &&
+          typeof fallbackValueText === "string" &&
+          fallbackValueText !== valueText;
+        const activeMetric = useFallback
+          ? {
+            id: id,
+            caption: labelText,
+            value: fallbackValueText,
+            fallbackValue: fallbackValueText,
+            unit: unitText
+          }
+          : {
+            id: id,
+            caption: labelText,
+            value: valueText,
+            fallbackValue: fallbackValueText,
+            unit: unitText
+          };
+        const measurement = useFallback
+          ? tileLayout.measureMetricTile({
+            textApi: textApi,
+            ctx: measureCtx,
+            metric: activeMetric,
+            rect: metricRect,
+            textFillScale: layout.responsive.textFillScale,
+            family: family,
+            valueWeight: valueWeight,
+            labelWeight: labelWeight,
+            secScale: METRIC_SECONDARY_TO_VALUE_RATIO,
+            padX: spacing.padX,
+            captionHeightPx: spacing.captionHeightPx,
+            valueTextOptions: valueTextOptions
+          })
+          : primaryMeasurement;
+        const captionText = labelText;
+        const captionFit = captionText
+          ? tileLayout.measureFittedLine({
+            textApi: textApi,
+            ctx: measureCtx,
+            text: captionText,
+            maxW: measurement ? measurement.textW : 1,
+            maxH: measurement ? measurement.capH : 1,
+            maxPx: measurement ? measurement.capMaxPx : 1,
+            textFillScale: layout.responsive.textFillScale,
+            family: family,
+            weight: labelWeight
+          })
+          : null;
 
         fitOut.metrics[id] = {
-          labelStyle: measureStyle({
-            rect: box.labelRect,
-            text: labelText,
-            maxPx: secondaryMaxPx,
-            maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
-            textApi: textApi,
-            tileLayout: tileLayout,
-            ctx: measureCtx,
-            family: family,
-            weight: labelWeight,
-            textFillScale: 1,
-            htmlUtils: htmlUtils
-          }),
+          labelStyle: toStyle(captionFit && captionFit.px, htmlUtils),
           valueRowStyle: "",
-          valueStyle: toStyle(valuePx, htmlUtils),
-          unitStyle: box.unitRect ? measureStyle({
-            rect: box.unitRect,
-            text: unitText,
-            maxPx: secondaryMaxPx,
-            maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
-            textApi: textApi,
-            tileLayout: tileLayout,
-            ctx: measureCtx,
-            family: family,
-            weight: labelWeight,
-            textFillScale: 1,
-            htmlUtils: htmlUtils
-          }) : ""
+          valueStyle: toStyle(measurement && measurement.fit ? measurement.fit.vPx : 0, htmlUtils),
+          unitStyle: unitText ? toStyle(measurement && measurement.fit ? measurement.fit.uPx : 0, htmlUtils) : ""
         };
-        fitOut.metricValues[id] = selectedValue.text;
+        fitOut.metricValues[id] = useFallback ? fallbackValueText : valueText;
       }
 
       return fitOut;

@@ -389,6 +389,43 @@ describe("EditRouteRenderModel", function () {
     expect(model.metrics.eta.fallbackValueText).toBe("12:34");
   });
 
+  it("keeps stable-digits padding intact in compact normal mode", function () {
+    const renderModel = createRenderModel({
+      applyFormatter(value, formatterOptions) {
+        const cfg = formatterOptions || {};
+        if (cfg.formatter === "formatDecimal") {
+          return "7.0";
+        }
+        if (cfg.formatter === "formatDistance") {
+          return "3.4";
+        }
+        if (cfg.formatter === "formatTime") {
+          return "12:34";
+        }
+        if (cfg.formatter === "formatClock") {
+          return "12:34";
+        }
+        return value == null ? cfg.default : String(value);
+      }
+    });
+    const model = renderModel.buildModel({
+      props: withSurfacePolicy(makeProps({ stableDigits: true }), { mode: "dispatch" }),
+      shellRect: { width: 220, height: 180 },
+      isVerticalCommitted: false
+    });
+
+    expect(model.mode).toBe("normal");
+    expect(model.stableDigitsEnabled).toBe(true);
+    expect(model.metrics.pts.valueText).toBe(" 007.0");
+    expect(model.metrics.pts.fallbackValueText).toBe("7.0");
+    expect(model.metrics.dst.valueText).toBe(" 03.4");
+    expect(model.metrics.dst.fallbackValueText).toBe("3.4");
+    expect(model.metrics.rte.valueText).toBe(" 03.4");
+    expect(model.metrics.rte.fallbackValueText).toBe("3.4");
+    expect(model.metrics.eta.valueText).toBe(" 12:34");
+    expect(model.metrics.eta.fallbackValueText).toBe("12:34");
+  });
+
   it("uses formatClock for ETA when hideSeconds is enabled", function () {
     const renderModel = createRenderModel({
       applyFormatter(value, formatterOptions) {

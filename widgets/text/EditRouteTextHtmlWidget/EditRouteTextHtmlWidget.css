@@ -12,8 +12,8 @@
     "name"
     "metrics";
   grid-template-rows: minmax(0, 0.32fr) minmax(0, 0.68fr);
-  gap: 0.14em;
-  padding: 0.14em 0.18em;
+  gap: 0.08em;
+  padding: 0.08em 0.12em;
   color: inherit;
 }
 
@@ -89,7 +89,7 @@
   min-width: 0;
   min-height: 0;
   display: grid;
-  gap: 0.12em 0.16em;
+  gap: 0.08em 0.1em;
 }
 
 .dyni-html-root .dyni-edit-route-mode-flat .dyni-edit-route-metrics {
@@ -116,8 +116,9 @@
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  row-gap: 0.08em;
+  grid-template-rows: minmax(0, 0.34fr) minmax(0, 0.66fr);
+  row-gap: 0.04em;
+  align-content: stretch;
 }
 
 .dyni-html-root .dyni-edit-route-mode-flat .dyni-edit-route-metric {
@@ -134,23 +135,25 @@
 }
 
 .dyni-html-root .dyni-edit-route-metric-label {
+  min-height: 0;
   font-weight: var(--dyni-theme-font-label-weight, 700);
   opacity: 0.8;
 }
 
 .dyni-html-root .dyni-edit-route-metric-value {
   min-width: 0;
+  min-height: 0;
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: 0.14em;
+  gap: 0.08em;
   line-height: 1;
 }
 
 .dyni-html-root .dyni-edit-route-metric-value-text {
   min-width: 0;
   max-width: 100%;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   font-weight: var(--dyni-theme-font-weight, 700);
 }
 

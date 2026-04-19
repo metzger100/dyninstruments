@@ -10,11 +10,11 @@
 }(this, function () {
   "use strict";
 
-  const PAD_X_RATIO = 0.04;
-  const INNER_Y_RATIO = 0.03;
-  const GAP_RATIO = 0.04;
+  const PAD_X_RATIO = 0.03;
+  const INNER_Y_RATIO = 0.028;
+  const GAP_RATIO = 0.03;
   const NAME_PAD_X_RATIO = 0.025;
-  const METRIC_TILE_PAD_RATIO = 0.04;
+  const METRIC_TILE_PAD_RATIO = 0.03;
   const METRIC_TILE_CAPTION_RATIO = 0.34;
 
   const NAME_BAND_RATIO_FLAT = 0.36;
@@ -152,6 +152,15 @@
         sourceBadgeMinPx: SOURCE_BADGE_MIN_PX,
         sourceBadgeMaxRatio: SOURCE_BADGE_MAX_RATIO
       });
+    }
+
+    function computeMetricTileSpacing(rect, responsive) {
+      return profileApi.computeIntrinsicTileSpacing(
+        responsive,
+        rect,
+        METRIC_TILE_PAD_RATIO,
+        METRIC_TILE_CAPTION_RATIO
+      );
     }
 
     function toPx(value) {
@@ -406,6 +415,7 @@
       computeVerticalShellProfile: computeVerticalShellProfile,
       computeInsets: computeInsets,
       createContentRect: createContentRect,
+      computeMetricTileSpacing: computeMetricTileSpacing,
       resolveMode: resolveMode,
       computeLayout: computeLayout
     };

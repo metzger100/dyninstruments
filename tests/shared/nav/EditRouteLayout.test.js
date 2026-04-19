@@ -50,11 +50,10 @@ describe("EditRouteLayout", function () {
     expect(out.metricBoxes.eta).toBeTruthy();
     expect(out.metricBoxes.pts.unitRect).toBeNull();
     expect(out.metricBoxes.eta.unitRect).toBeNull();
-    expect(out.metricBoxes.dst.valueTextRect).toBeTruthy();
-    expect(out.metricBoxes.dst.unitRect).toBeTruthy();
-    expect(out.metricBoxes.rte.unitRect).toBeTruthy();
-    expect(out.metricBoxes.dst.unitRect.x).toBeGreaterThan(out.metricBoxes.dst.valueTextRect.x);
-    expect(out.metricBoxes.rte.unitRect.x).toBeGreaterThan(out.metricBoxes.rte.valueTextRect.x);
+    expect(out.metricBoxes.dst.valueTextRect).toEqual(out.metricBoxes.dst.valueRect);
+    expect(out.metricBoxes.rte.valueTextRect).toEqual(out.metricBoxes.rte.valueRect);
+    expect(out.metricBoxes.dst.unitRect).toBeNull();
+    expect(out.metricBoxes.rte.unitRect).toBeNull();
   });
 
   it("returns normal boxes for name, PTS, DST, RTE, and ETA", function () {
@@ -78,8 +77,8 @@ describe("EditRouteLayout", function () {
     expect(out.metricBoxes.eta.unitRect).toBeNull();
     expect(out.metricBoxes.pts.valueTextRect.w).toBe(out.metricBoxes.pts.valueRect.w);
     expect(out.metricBoxes.eta.valueTextRect.w).toBe(out.metricBoxes.eta.valueRect.w);
-    expect(out.metricBoxes.rte.valueTextRect.w).toBeGreaterThan(0);
-    expect(out.metricBoxes.rte.unitRect.w).toBeGreaterThan(0);
+    expect(out.metricBoxes.rte.valueTextRect.w).toBe(out.metricBoxes.rte.valueRect.w);
+    expect(out.metricBoxes.rte.unitRect).toBeNull();
   });
 
   it("returns high mode as stacked metric rows", function () {
@@ -119,7 +118,7 @@ describe("EditRouteLayout", function () {
       }
     });
 
-    expect(out.metricBoxes.dst.unitRect).toBeTruthy();
+    expect(out.metricBoxes.dst.unitRect).toBeNull();
     expect(out.metricBoxes.rte.unitRect).toBeNull();
     expect(out.metricBoxes.rte.valueTextRect.w).toBe(out.metricBoxes.rte.valueRect.w);
   });
