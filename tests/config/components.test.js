@@ -83,6 +83,7 @@ describe("config/components.js", function () {
       "LinearGaugeMath",
       "LinearGaugeLayout",
       "LinearGaugeTextLayout",
+      "SpringEasing",
       "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
@@ -225,6 +226,7 @@ describe("config/components.js", function () {
       "RadialToolkit",
       "SemicircleRadialLayout",
       "SemicircleRadialTextLayout",
+      "SpringEasing",
       "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
@@ -244,14 +246,15 @@ describe("config/components.js", function () {
       "XteHighwayPrimitives",
       "XteHighwayLayout",
       "TextTileLayout",
+      "SpringEasing",
       "PlaceholderNormalize",
       "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenCanvasOverlay"
     ]);
-    expect(components.WindRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout", "StableDigits"]);
-    expect(components.CompassRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout", "StableDigits"]);
+    expect(components.WindRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout", "SpringEasing", "StableDigits"]);
+    expect(components.CompassRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout", "SpringEasing", "StableDigits"]);
     expect(components.WindLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "StableDigits"]);
     expect(components.CompassLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
     expect(components.RadialToolkit.deps).toContain("ThemeResolver");

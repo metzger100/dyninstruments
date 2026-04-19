@@ -123,6 +123,17 @@
             { kind: "hdmLinear" }
           ]
         },
+        easing: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Smooth motion",
+          condition: [
+            { kind: "hdtRadial" },
+            { kind: "hdmRadial" },
+            { kind: "hdtLinear" },
+            { kind: "hdmLinear" }
+          ]
+        },
 
         // hide low-levels
         caption: false,

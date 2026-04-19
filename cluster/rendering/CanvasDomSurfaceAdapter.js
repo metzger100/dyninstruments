@@ -136,6 +136,7 @@
       let paintDirty = false;
       let sizeDirty = false;
       let pendingPaintWaitSpan = null;
+      let consecutiveAnimateFrames = 0;
 
       function cancelPendingFrame() {
         if (rafHandle == null) {
@@ -172,6 +173,9 @@
       }
 
       function markDirty(reason) {
+        if (reason !== "animate") {
+          consecutiveAnimateFrames = 0;
+        }
         if (reason === "size") {
           sizeDirty = true;
           return;
@@ -254,11 +258,12 @@
           cluster: props && props.cluster,
           kind: props && props.kind
         });
+        let paintResult;
         try {
           if (hostContext) {
-            rendererSpec.renderCanvas.call(hostContext, canvasEl, props);
+            paintResult = rendererSpec.renderCanvas.call(hostContext, canvasEl, props);
           } else {
-            rendererSpec.renderCanvas(canvasEl, props);
+            paintResult = rendererSpec.renderCanvas(canvasEl, props);
           }
         }
         finally {
@@ -275,6 +280,11 @@
         });
         pendingPaintWaitSpan = null;
         clearRenderFlags();
+        if (paintResult && paintResult.wantsFollowUpFrame === true && consecutiveAnimateFrames < 600) {
+          if (schedulePaint("animate")) {
+            consecutiveAnimateFrames += 1;
+          }
+        }
       }
 
       function schedulePaint(reason) {

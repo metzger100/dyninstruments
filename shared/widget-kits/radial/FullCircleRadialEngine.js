@@ -277,8 +277,9 @@
           });
         }
 
+        let drawResult = null;
         if (typeof cfg.drawFrame === "function") {
-          cfg.drawFrame(state, p, api);
+          drawResult = cfg.drawFrame(state, p, api);
         }
         else if (layerCanvases[layers[0]]) {
           api.drawCachedLayer(layers[0]);
@@ -286,8 +287,12 @@
 
         const drawMode = hasOwn.call(cfg, "drawMode") ? cfg.drawMode : null;
         const modeRenderer = drawMode && drawMode[state.mode];
+        let modeResult = null;
         if (typeof modeRenderer === "function") {
-          modeRenderer(state, p, api);
+          modeResult = modeRenderer(state, p, api);
+        }
+        if ((drawResult && drawResult.wantsFollowUpFrame === true) || (modeResult && modeResult.wantsFollowUpFrame === true)) {
+          return { wantsFollowUpFrame: true };
         }
 
       };

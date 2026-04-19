@@ -185,6 +185,17 @@
           name: "DepthRadialWidget: Flat Threshold",
           condition: { kind: "depthRadial" }
         },
+        easing: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Smooth motion",
+          condition: [
+            { kind: "depthLinear" },
+            { kind: "depthRadial" },
+            { kind: "tempLinear" },
+            { kind: "tempRadial" }
+          ]
+        },
 
         // -------------- TemperatureLinearWidget (linear) settings --------------------
         tempLinearMinValue: {

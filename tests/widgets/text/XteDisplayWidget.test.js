@@ -229,6 +229,9 @@ describe("XteDisplayWidget", function () {
         if (id === "StableDigits") {
           return loadFresh("shared/widget-kits/format/StableDigits.js");
         }
+        if (id === "SpringEasing") {
+          return loadFresh("shared/widget-kits/anim/SpringEasing.js");
+        }
         if (id === "StateScreenLabels") {
           return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
         }
@@ -432,12 +435,12 @@ describe("XteDisplayWidget", function () {
     const harness = createHarness();
     const canvas = createMockCanvas({ rectWidth: 300, rectHeight: 180, ctx: createMockContext2D() });
 
-    harness.spec.renderCanvas(canvas, makeProps({ xte: 0.1 }));
-    harness.spec.renderCanvas(canvas, makeProps({ xte: 1.0 }));
-    harness.spec.renderCanvas(canvas, makeProps({ xte: 0.2 }));
-    harness.spec.renderCanvas(canvas, makeProps({ xte: 0.2 }));
-    harness.spec.renderCanvas(canvas, makeProps({ xte: 0.2 }));
-    harness.spec.renderCanvas(canvas, makeProps({ xte: 0.2 }));
+    harness.spec.renderCanvas(canvas, makeProps({ xte: 0.1, easing: false }));
+    harness.spec.renderCanvas(canvas, makeProps({ xte: 1.0, easing: false }));
+    harness.spec.renderCanvas(canvas, makeProps({ xte: 0.2, easing: false }));
+    harness.spec.renderCanvas(canvas, makeProps({ xte: 0.2, easing: false }));
+    harness.spec.renderCanvas(canvas, makeProps({ xte: 0.2, easing: false }));
+    harness.spec.renderCanvas(canvas, makeProps({ xte: 0.2, easing: false }));
 
     expect(harness.calls.dynamicDraws[0].xteNormalized).toBeCloseTo(0.1, 6);
     expect(harness.calls.dynamicDraws[1].xteNormalized).toBeCloseTo(1.0, 6);
@@ -654,5 +657,29 @@ describe("XteDisplayWidget", function () {
     expect(/[RL]$/.test(zeroValue)).toBe(false);
     expect(rightValue.length).toBe(leftValue.length);
     expect(rightValue.length).toBe(zeroValue.length);
+  });
+
+  it("keeps spring state keyed by canvas and snaps immediately when easing is disabled", function () {
+    const harness = createHarness();
+    const canvasA = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+    const canvasB = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+    const nowSpy = vi.spyOn(Date, "now");
+
+    try {
+      nowSpy.mockReturnValue(0);
+      expect(harness.spec.renderCanvas(canvasA, makeProps({ xte: 0.25 }))).toBeUndefined();
+
+      nowSpy.mockReturnValue(16);
+      expect(harness.spec.renderCanvas(canvasA, makeProps({ xte: 1.25 }))).toEqual({ wantsFollowUpFrame: true });
+
+      nowSpy.mockReturnValue(16);
+      expect(harness.spec.renderCanvas(canvasB, makeProps({ xte: 1.25 }))).toBeUndefined();
+
+      nowSpy.mockReturnValue(32);
+      expect(harness.spec.renderCanvas(canvasA, makeProps({ xte: 1.25, easing: false }))).toBeUndefined();
+    }
+    finally {
+      nowSpy.mockRestore();
+    }
   });
 });

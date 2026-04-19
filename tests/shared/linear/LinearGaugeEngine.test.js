@@ -128,6 +128,7 @@ describe("LinearGaugeEngine", function () {
         if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
         if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
         if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
+        if (id === "SpringEasing") return loadFresh("shared/widget-kits/anim/SpringEasing.js");
         if (id === "CanvasLayerCache") return cacheMod;
         if (id === "LinearCanvasPrimitives") return primitivesModule;
         if (id === "ResponsiveScaleProfile") return responsiveScaleProfileMod;
@@ -963,6 +964,46 @@ describe("LinearGaugeEngine", function () {
 
     expect(shortHarness.calls.pointer[0].opts.depth).not.toBe(longHarness.calls.pointer[0].opts.depth);
     expect(shortHarness.calls.pointer[0].opts.side).toBe(longHarness.calls.pointer[0].opts.side);
+  });
+
+  it("keeps spring state keyed by canvas and snaps immediately when easing is disabled", function () {
+    const harness = createHarness();
+    const renderer = harness.engine.createRenderer({
+      rawValueKey: "speed",
+      rangeDefaults: { min: 0, max: 30 },
+      rangeProps: { min: "min", max: "max" },
+      tickProps: { major: "major", minor: "minor", showEndLabels: "showEndLabels" },
+      ratioProps: { normal: "n", flat: "f" },
+      ratioDefaults: { normal: 1.1, flat: 3.5 }
+    });
+    const canvasA = createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() });
+    const canvasB = createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() });
+    const nowSpy = vi.spyOn(Date, "now");
+
+    try {
+      nowSpy.mockReturnValue(0);
+      expect(renderer(canvasA, { speed: 0, min: 0, max: 30, major: 10, minor: 5, showEndLabels: false })).toBeUndefined();
+
+      nowSpy.mockReturnValue(16);
+      expect(renderer(canvasA, { speed: 20, min: 0, max: 30, major: 10, minor: 5, showEndLabels: false })).toEqual({ wantsFollowUpFrame: true });
+
+      nowSpy.mockReturnValue(16);
+      expect(renderer(canvasB, { speed: 20, min: 0, max: 30, major: 10, minor: 5, showEndLabels: false })).toBeUndefined();
+
+      nowSpy.mockReturnValue(32);
+      expect(renderer(canvasA, {
+        speed: 20,
+        min: 0,
+        max: 30,
+        major: 10,
+        minor: 5,
+        showEndLabels: false,
+        easing: false
+      })).toBeUndefined();
+    }
+    finally {
+      nowSpy.mockRestore();
+    }
   });
 
   it("renders disconnected state-screen before linear draw pipeline", function () {

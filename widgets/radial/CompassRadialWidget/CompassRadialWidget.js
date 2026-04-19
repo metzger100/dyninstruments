@@ -1,7 +1,7 @@
 /**
  * Module: CompassRadialWidget - Full-circle rotating compass with upright labels
  * Documentation: documentation/widgets/compass-gauge.md
- * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout, StableDigits
+ * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout, SpringEasing, StableDigits
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -17,6 +17,7 @@
     const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers);
     const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers);
     const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
+    const springMotion = Helpers.getModule("SpringEasing").create(def, Helpers).createMotion({ wrap: 360 });
 
     function buildCompassLabelSprites(canvas, state) {
       const sprites = [];
@@ -121,22 +122,27 @@
       },
       drawFrame: function (state, props, api) {
         const display = compassDisplay(state, props);
+        const easingEnabled = props.easing !== false;
+        const easedHeading = springMotion.resolve(state.canvas, display.heading, easingEnabled, Date.now());
         let rotationDeg = 0;
-        if (Number.isFinite(display.heading)) {
-          rotationDeg = -display.heading;
+        if (Number.isFinite(easedHeading)) {
+          rotationDeg = -easedHeading;
         }
 
         api.drawCachedLayer("face", { rotationDeg: rotationDeg });
         api.drawFixedPointer(state.ctx, 0, { depth: state.geom.fixedPointerDepth });
 
-        if (Number.isFinite(display.marker) && Number.isFinite(display.heading)) {
-          state.draw.drawRimMarker(state.ctx, state.geom.cx, state.geom.cy, state.geom.rOuter, display.marker - display.heading, {
+        if (Number.isFinite(display.marker) && Number.isFinite(easedHeading)) {
+          state.draw.drawRimMarker(state.ctx, state.geom.cx, state.geom.cy, state.geom.rOuter, display.marker - easedHeading, {
             len: state.geom.markerLen,
             width: state.geom.markerWidth,
             strokeStyle: state.theme.colors.pointer
           });
         }
         drawCompassCachedLabels(state, rotationDeg, api);
+        if (springMotion.isActive(state.canvas)) {
+          return { wantsFollowUpFrame: true };
+        }
       },
       drawMode: {
         flat: function (state, props) {

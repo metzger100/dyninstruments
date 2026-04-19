@@ -215,6 +215,12 @@
             { kind: "editRoute" }
           ]
         },
+        easing: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Smooth motion",
+          condition: { kind: "xteDisplay" }
+        },
         hideSeconds: {
           type: "BOOLEAN",
           default: false,

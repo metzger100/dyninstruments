@@ -210,6 +210,17 @@
             { kind: "stwRadial" }
           ]
         },
+        easing: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Smooth motion",
+          condition: [
+            { kind: "sogLinear" },
+            { kind: "stwLinear" },
+            { kind: "sogRadial" },
+            { kind: "stwRadial" }
+          ]
+        },
 
         caption: false,
         unit: false,

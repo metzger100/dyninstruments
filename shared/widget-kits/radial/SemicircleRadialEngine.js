@@ -1,7 +1,7 @@
 /**
  * Module: SemicircleRadialEngine - Shared renderer for semicircle gauge widgets
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: RadialToolkit, SemicircleRadialLayout, SemicircleRadialTextLayout, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: RadialToolkit, SemicircleRadialLayout, SemicircleRadialTextLayout, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -27,6 +27,7 @@
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
+    const springMotion = Helpers.getModule("SpringEasing").create(def, Helpers).createMotion();
     const text = GU.text;
     const value = GU.value;
     const draw = GU.draw;
@@ -192,6 +193,7 @@
         const angleNow = Number.isFinite(clampedValue)
           ? value.valueToAngle(clampedValue, range.min, range.max, arc, true)
           : NaN;
+        const easedAngle = springMotion.resolve(canvas, angleNow, p.easing !== false, Date.now());
 
         draw.drawArcRing(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, arc.startDeg, arc.endDeg, {
           lineWidth: theme.radial.ring.arcLineWidth
@@ -210,8 +212,8 @@
           });
         }
 
-        if (value.isFiniteNumber(angleNow)) {
-          draw.drawPointerAtRim(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, angleNow, {
+        if (value.isFiniteNumber(easedAngle)) {
+          draw.drawPointerAtRim(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, easedAngle, {
             depth: layout.geom.needleDepth,
             fillStyle: theme.colors.pointer,
             variant: "long",
@@ -253,12 +255,16 @@
           geom: layout.geom,
           responsive: layout.responsive,
           textFillScale: layout.textFillScale
-        }, {
+          }, {
           caption: caption,
           valueText: valueText,
           unit: unit,
           secScale: value.clamp(p.captionUnitScale, 0.3, 3.0)
         }, fitCache);
+
+        if (springMotion.isActive(canvas)) {
+          return { wantsFollowUpFrame: true };
+        }
 
       };
     }

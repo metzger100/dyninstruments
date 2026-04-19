@@ -192,6 +192,17 @@
             { kind: "angleApparentLinear" }
           ]
         },
+        easing: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Smooth motion",
+          condition: [
+            { kind: "angleTrueRadial" },
+            { kind: "angleApparentRadial" },
+            { kind: "angleTrueLinear" },
+            { kind: "angleApparentLinear" }
+          ]
+        },
 
         caption: false,
         unit: false,

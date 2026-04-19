@@ -174,7 +174,7 @@
       js: BASE + "widgets/radial/CompassRadialWidget/CompassRadialWidget.js",
       css: undefined,
       globalKey: "DyniCompassRadialWidget",
-      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "StableDigits"]
+      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "SpringEasing", "StableDigits"]
     },
     DepthLinearWidget: {
       js: BASE + "widgets/linear/DepthLinearWidget/DepthLinearWidget.js",
@@ -266,7 +266,7 @@
       js: BASE + "widgets/radial/WindRadialWidget/WindRadialWidget.js",
       css: undefined,
       globalKey: "DyniWindRadialWidget",
-      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "StableDigits"]
+      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "SpringEasing", "StableDigits"]
     },
     XteDisplayWidget: {
       js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
@@ -278,6 +278,7 @@
         "XteHighwayPrimitives",
         "XteHighwayLayout",
         "TextTileLayout",
+        "SpringEasing",
         "PlaceholderNormalize",
         "StableDigits",
         "StateScreenLabels",

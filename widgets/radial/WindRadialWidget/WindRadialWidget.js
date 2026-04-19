@@ -1,7 +1,7 @@
 /**
  * Module: WindRadialWidget - Full-circle wind dial for angle and speed pairs
  * Documentation: documentation/widgets/wind-dial.md
- * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout, StableDigits
+ * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout, SpringEasing, StableDigits
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,6 +14,7 @@
     const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers);
     const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers);
     const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
+    const springMotion = Helpers.getModule("SpringEasing").create(def, Helpers).createMotion({ wrap: 360 });
 
     function windFormatSpeedText(raw, props, speedUnit) {
       const p = props || {};
@@ -144,13 +145,18 @@
       },
       drawFrame: function (state, props, api) {
         const display = windDisplay(state, props);
+        const easingEnabled = props.easing !== false;
+        const easedAngle = springMotion.resolve(state.canvas, display.angle, easingEnabled, Date.now());
         api.drawCachedLayer("back");
-        if (state.value.isFiniteNumber(display.angle)) {
-          api.drawFixedPointer(state.ctx, display.angle, {
+        if (state.value.isFiniteNumber(easedAngle)) {
+          api.drawFixedPointer(state.ctx, easedAngle, {
             depth: state.geom.needleDepth
           });
         }
         api.drawCachedLayer("front");
+        if (springMotion.isActive(state.canvas)) {
+          return { wantsFollowUpFrame: true };
+        }
       },
       drawMode: {
         flat: function (state, props) {

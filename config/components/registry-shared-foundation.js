@@ -148,6 +148,11 @@
       globalKey: "DyniStableDigits",
       deps: ["PlaceholderNormalize"]
     },
+    SpringEasing: {
+      js: BASE + "shared/widget-kits/anim/SpringEasing.js",
+      css: undefined,
+      globalKey: "DyniSpringEasing"
+    },
     PreparedPayloadModelCache: {
       js: BASE + "shared/widget-kits/html/PreparedPayloadModelCache.js",
       css: undefined,

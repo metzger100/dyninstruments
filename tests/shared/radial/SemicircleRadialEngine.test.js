@@ -107,6 +107,7 @@ describe("SemicircleRadialEngine", function () {
         if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
         if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
         if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
+        if (id === "SpringEasing") return loadFresh("shared/widget-kits/anim/SpringEasing.js");
         if (modules[id]) {
           if (id === "RadialToolkit") {
             return withCanonicalThemeTokens(modules[id]);

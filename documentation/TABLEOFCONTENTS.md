@@ -30,6 +30,7 @@
 - **Plugin↔core tuple contracts** → [architecture/plugin-core-contracts.md](architecture/plugin-core-contracts.md)
 - **State-screen shared vocabulary, precedence, and render primitives** → [shared/state-screens.md](shared/state-screens.md)
 - **Helpers contract (`setupCanvas`, theme/night lookups, formatter dispatch)** → [shared/helpers.md](shared/helpers.md)
+- **Spring easing integrator and canvas motion controller** → [shared/spring-easing.md](shared/spring-easing.md)
 
 ## Conventions
 

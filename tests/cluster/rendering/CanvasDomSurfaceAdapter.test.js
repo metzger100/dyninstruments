@@ -296,6 +296,45 @@ describe("CanvasDomSurfaceAdapter", function () {
     }
   });
 
+  it("schedules follow-up frames after clearRenderFlags when the renderer asks for them", function () {
+    let calls = 0;
+    const rendererSpec = {
+      renderCanvas: vi.fn(function () {
+        calls += 1;
+        return calls === 1 ? { wantsFollowUpFrame: true } : undefined;
+      })
+    };
+    const h = createHarness({ rendererSpec: rendererSpec });
+
+    h.controller.attach(h.payload({ value: 1 }, 1));
+    h.runNextFrame();
+
+    expect(rendererSpec.renderCanvas).toHaveBeenCalledTimes(1);
+    expect(h.frameQueue).toHaveLength(1);
+
+    h.runNextFrame();
+
+    expect(rendererSpec.renderCanvas).toHaveBeenCalledTimes(2);
+    expect(h.frameQueue).toHaveLength(0);
+  });
+
+  it("stops animate follow-up scheduling after 600 consecutive frames", function () {
+    const rendererSpec = {
+      renderCanvas: vi.fn(function () {
+        return { wantsFollowUpFrame: true };
+      })
+    };
+    const h = createHarness({ rendererSpec: rendererSpec });
+
+    h.controller.attach(h.payload({ value: 1 }, 1));
+    for (let i = 0; i < 601; i += 1) {
+      h.runNextFrame();
+    }
+
+    expect(rendererSpec.renderCanvas).toHaveBeenCalledTimes(601);
+    expect(h.frameQueue).toHaveLength(0);
+  });
+
   it("detach disconnects observer, cancels pending frames, and clears canvas refs from mount", function () {
     const h = createHarness();
     h.controller.attach(h.payload({ value: 1 }, 1));

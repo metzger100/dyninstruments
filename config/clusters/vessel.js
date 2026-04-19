@@ -211,6 +211,15 @@
             { kind: "voltageRadial" }
           ]
         },
+        easing: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Smooth motion",
+          condition: [
+            { kind: "voltageLinear" },
+            { kind: "voltageRadial" }
+          ]
+        },
         hideSeconds: {
           type: "BOOLEAN",
           default: false,

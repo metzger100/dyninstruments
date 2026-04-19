@@ -1,7 +1,7 @@
 /**
  * Module: LinearGaugeEngine - Shared renderer pipeline for linear gauge widgets
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: RadialToolkit, CanvasLayerCache, LinearCanvasPrimitives, LinearGaugeMath, LinearGaugeLayout, LinearGaugeTextLayout, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: RadialToolkit, CanvasLayerCache, LinearCanvasPrimitives, LinearGaugeMath, LinearGaugeLayout, LinearGaugeTextLayout, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -30,6 +30,7 @@
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
+    const springMotion = Helpers.getModule("SpringEasing").create(def, Helpers).createMotion();
     const text = GU.text;
     const value = GU.value;
 
@@ -275,6 +276,8 @@
           rowBoxes: rowBoxes,
           parsed: display
         };
+        const easingEnabled = p.easing !== false;
+        const easedDisplayNum = springMotion.resolve(canvas, displayState.num, easingEnabled, Date.now());
         const tickLabelFormatter = typeof cfg.formatTickLabel === "function"
           ? function (tickValue, tickState) { return cfg.formatTickLabel(tickValue, tickState || state, p, hookApi); }
           : null;
@@ -361,16 +364,18 @@
         }
 
         const drawApi = {
-          drawDefaultPointer: function (opts) { drawPointerAtValue(ctx, displayState.num, opts); },
+          drawDefaultPointer: function (opts) { drawPointerAtValue(ctx, easedDisplayNum, opts); },
           drawPointerAtValue: function (valueNum, opts) { drawPointerAtValue(ctx, valueNum, opts); },
           drawMarkerAtValue: function (valueNum, opts) { drawMarkerAtValue(ctx, valueNum, opts); }
         };
-        if (typeof cfg.drawFrame === "function") cfg.drawFrame(state, p, displayState, Object.assign({}, hookApi, drawApi));
+        let drawResult = null;
+        if (typeof cfg.drawFrame === "function") drawResult = cfg.drawFrame(state, p, displayState, Object.assign({}, hookApi, drawApi));
         else drawApi.drawDefaultPointer();
 
         const modeRenderer = cfg.drawMode && cfg.drawMode[state.mode];
+        let modeResult = null;
         if (typeof modeRenderer === "function") {
-          modeRenderer(state, p, displayState, Object.assign({}, hookApi, drawApi));
+          modeResult = modeRenderer(state, p, displayState, Object.assign({}, hookApi, drawApi));
         } else if (state.mode === "high") {
           textLayout.drawCaptionRow(state, text, displayState.caption, rowBoxes.captionBox, secScale, "center");
           textLayout.drawValueUnitRow(state, text, valueText, unit, rowBoxes.valueBox, secScale, "center");
@@ -379,6 +384,14 @@
         } else {
           textLayout.drawCaptionRow(state, text, displayState.caption, rowBoxes.captionBox, secScale, "right");
           textLayout.drawValueUnitRow(state, text, valueText, unit, rowBoxes.valueBox, secScale, "right");
+        }
+
+        if (
+          (drawResult && drawResult.wantsFollowUpFrame === true)
+          || (modeResult && modeResult.wantsFollowUpFrame === true)
+          || springMotion.isActive(canvas)
+        ) {
+          return { wantsFollowUpFrame: true };
         }
 
       };

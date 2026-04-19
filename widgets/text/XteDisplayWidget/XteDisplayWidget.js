@@ -1,7 +1,7 @@
 /**
  * Module: XteDisplayWidget - Responsive XTE highway renderer with integrated nav metrics
  * Documentation: documentation/widgets/xte-display.md
- * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives, XteHighwayLayout, TextTileLayout, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives, XteHighwayLayout, TextTileLayout, SpringEasing, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -19,6 +19,7 @@
     const primitives = Helpers.getModule("XteHighwayPrimitives").create(def, Helpers);
     const layoutApi = Helpers.getModule("XteHighwayLayout").create(def, Helpers);
     const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
+    const springMotion = Helpers.getModule("SpringEasing").create(def, Helpers).createMotion();
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
     const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
@@ -124,6 +125,7 @@
         lineWidthFactor: lineWidthFactor,
         boatSizeFactor: boatSizeFactor
       };
+      const easingEnabled = p.easing !== false;
 
       const guidanceAvailable =
         finiteNumber(p.xte) &&
@@ -195,8 +197,10 @@
       if (guidanceAvailable) {
         const xteDisplayAbs = parseNumericText(xteDistance, Math.abs(xteRaw));
         const signedDisplayXte = xteRaw < 0 ? -xteDisplayAbs : xteDisplayAbs;
-        const xteNormalized = signedDisplayXte / FIXED_XTE_SCALE;
         const overflow = Math.abs(xteDisplayAbs) > FIXED_XTE_SCALE;
+        const xteTarget = signedDisplayXte / FIXED_XTE_SCALE;
+        const xteEased = springMotion.resolve(canvas, xteTarget, easingEnabled, Date.now());
+        const xteNormalized = finiteNumber(xteEased) ? xteEased : (signedDisplayXte / FIXED_XTE_SCALE);
         primitives.drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, xteDynamicStyle);
       }
 
@@ -341,6 +345,10 @@
         padX: metricSpacing.btw.padX,
         captionHeightPx: metricSpacing.btw.captionHeightPx
       });
+
+      if (guidanceAvailable && springMotion.isActive(canvas)) {
+        return { wantsFollowUpFrame: true };
+      }
     }
 
     function translateFunction() {
