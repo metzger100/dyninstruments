@@ -11,9 +11,9 @@
   "use strict";
 
   // Vertical safety factor: fitted text must stay inside its allocated row band.
-  // Browser glyph paint can exceed nominal line-height at tight sizes; reserve ~15%
+  // Browser glyph paint can exceed nominal line-height at tight sizes; reserve ~8%
   // of the row height as a safe visual margin.
-  const ROW_SAFE_RATIO = 0.85;
+  const ROW_SAFE_RATIO = 0.92;
 
   function clampTextFillScale(value) {
     const n = Number(value);
@@ -46,9 +46,9 @@
       const hMid = Math.round(H * (1 / (1 + scale + scale)));
       const hBot = H - hTop - hMid;
       const maxW = Math.max(1, W - padX * 2);
-      const maxHTop = Math.max(1, Math.floor((hTop - innerY * 2) * ROW_SAFE_RATIO));
-      const maxHMid = Math.max(1, Math.floor((hMid - innerY * 2) * ROW_SAFE_RATIO));
-      const maxHBot = Math.max(1, Math.floor((hBot - innerY * 2) * ROW_SAFE_RATIO));
+      const maxHTop = Math.max(1, Math.floor((hTop - innerY) * ROW_SAFE_RATIO));
+      const maxHMid = Math.max(1, Math.floor((hMid - innerY) * ROW_SAFE_RATIO));
+      const maxHBot = Math.max(1, Math.floor((hBot - innerY) * ROW_SAFE_RATIO));
       const capMaxPx = scaleTextCeiling(Math.min(Math.floor(maxHMid * scale), maxHTop), maxHTop, textFillScale);
       const unitMaxPx = scaleTextCeiling(Math.min(Math.floor(maxHMid * scale), maxHBot), maxHBot, textFillScale);
       const vFit = primitive.fitSingleLineBinary({
@@ -124,8 +124,8 @@
       const hTop = Math.round(H * (1 / (1 + scale)));
       const hBot = H - hTop;
       const maxW = Math.max(1, W - padX * 2);
-      const maxHTop = Math.max(1, Math.floor((hTop - innerY * 2) * ROW_SAFE_RATIO));
-      const maxHBot = Math.max(1, Math.floor((hBot - innerY * 2) * ROW_SAFE_RATIO));
+      const maxHTop = Math.max(1, Math.floor((hTop - innerY) * ROW_SAFE_RATIO));
+      const maxHBot = Math.max(1, Math.floor((hBot - innerY) * ROW_SAFE_RATIO));
       const capMaxPx = scaleTextCeiling(Math.min(Math.floor(maxHTop * scale), maxHBot), maxHBot, textFillScale);
       const pair = primitive.fitValueUnitRow({
         ctx: cfg.ctx,
@@ -221,7 +221,7 @@
       const bodyH = Math.max(1, H - headerH);
       const row1H = Math.max(1, Math.floor(bodyH / 2));
       const row2H = Math.max(1, bodyH - row1H);
-      const maxRowH = Math.max(1, Math.min(row1H, row2H) - innerY * 2);
+      const maxRowH = Math.max(1, Math.min(row1H, row2H) - innerY);
       const maxRowW = Math.max(1, W - padX * 2);
       const rowFit = primitive.fitMultiRowBinary({
         ctx: cfg.ctx,
@@ -240,7 +240,7 @@
       let capPx = 0;
       let unitPx = 0;
       if (hasHeader) {
-        const maxHeaderH = Math.max(1, headerH - innerY * 2);
+        const maxHeaderH = Math.max(1, headerH - innerY);
         const headerBase = scaleTextCeiling(
           Math.min(maxHeaderH, Math.floor(rowFit.px * scale)),
           maxHeaderH,
