@@ -53,7 +53,8 @@ describe("CourseHeadingMapper", function () {
       compassLinearRatioThresholdFlat: "3.5",
       compassLinearTickMajor: "30",
       compassLinearTickMinor: "10",
-      compassLinearShowEndLabels: false
+      compassLinearShowEndLabels: false,
+      compassLinearRange: "180"
     }, toolkit);
 
     expect(out.renderer).toBe("CompassLinearWidget");
@@ -68,7 +69,8 @@ describe("CourseHeadingMapper", function () {
       compassLinearRatioThresholdFlat: 3.5,
       compassLinearTickMajor: 30,
       compassLinearTickMinor: 10,
-      compassLinearShowEndLabels: false
+      compassLinearShowEndLabels: false,
+      compassLinearRange: 180
     });
   });
 

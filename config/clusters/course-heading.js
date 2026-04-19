@@ -106,6 +106,16 @@
           name: "Show min/max labels",
           condition: [{ kind: "hdtLinear" }, { kind: "hdmLinear" }]
         },
+        compassLinearRange: {
+          type: "SELECT",
+          list: [
+            { name: "360°", value: 360 },
+            { name: "180°", value: 180 }
+          ],
+          default: 360,
+          name: "Visible range",
+          condition: [{ kind: "hdtLinear" }, { kind: "hdmLinear" }]
+        },
 
         // Shared caption/unit-to-value scale applies to both numeric & radial
         captionUnitScale: {

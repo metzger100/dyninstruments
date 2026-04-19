@@ -71,16 +71,18 @@
       if (!isFinite(heading)) {
         return defaultAxis;
       }
+      const compassRange = (p.compassLinearRange === 180) ? 180 : 360;
+      const halfRange = compassRange / 2;
       return {
-        min: heading - 180,
-        max: heading + 180
+        min: heading - halfRange,
+        max: heading + halfRange
       };
     }
 
     function drawFrame(state, props, display, api) {
       api.drawDefaultPointer();
 
-      const heading = Number(display && display.num);
+      const heading = Number(display && display.easedNum);
       const marker = Number(props && props.markerCourse);
       if (!isFinite(heading) || !isFinite(marker)) {
         return;
@@ -95,6 +97,8 @@
       rawValueKey: "heading",
       unitDefault: "°",
       axisMode: "fixed360",
+      springTarget: "axis",
+      springWrap: 360,
       tickProps: {
         major: "compassLinearTickMajor",
         minor: "compassLinearTickMinor",
@@ -104,7 +108,10 @@
         normal: "compassLinearRatioThresholdNormal",
         flat: "compassLinearRatioThresholdFlat"
       },
-      tickSteps: function () {
+      tickSteps: function (axisSpan) {
+        if (axisSpan <= 180) {
+          return { major: 15, minor: 5 };
+        }
         return { major: 30, minor: 10 };
       },
       formatDisplay: formatDisplay,

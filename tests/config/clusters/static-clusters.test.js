@@ -103,6 +103,14 @@ describe("static cluster configs", function () {
       { kind: "hdmLinear" }
     ]);
     expect(byCluster.courseHeading.editableParameters.compassLinearRatioThresholdNormal.internal).toBe(true);
+    expect(byCluster.courseHeading.editableParameters.compassLinearRange.default).toBe(360);
+    expect(byCluster.courseHeading.editableParameters.compassLinearRange.name).toBe("Visible range");
+    expect(byCluster.courseHeading.editableParameters.compassLinearRange.list.map((entry) => entry.value))
+      .toEqual([360, 180]);
+    expect(byCluster.courseHeading.editableParameters.compassLinearRange.condition).toEqual([
+      { kind: "hdtLinear" },
+      { kind: "hdmLinear" }
+    ]);
     expect(byCluster.wind.editableParameters.windLinearRatioThresholdNormal.condition).toEqual([
       { kind: "angleTrueLinear" },
       { kind: "angleApparentLinear" }

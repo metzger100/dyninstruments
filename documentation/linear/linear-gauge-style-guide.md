@@ -17,6 +17,7 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 - Shared theme tokens come from `theme.linear.*` and `theme.colors.*`.
 - Compass linear (`hdtLinear`, `hdmLinear`) keeps the pointer fixed at center and scrolls the `0..360` scale under it.
 - Compass linear supports waypoint marker display (`markerCourse`) relative to current heading.
+- Compass linear uses `springTarget: "axis"` and `springWrap: 360` so the scale eases around a fixed center pointer on the shortest wrapped arc, and `compassLinearRange` selects a 360° or 180° visible window.
 - Wind linear (`angleTrueLinear`, `angleApparentLinear`) renders angle+speed together and supports mirrored layline sectors.
 - Wind linear overrides the generic `normal` / `high` text geometry: `normal` uses the stacked dual block below the gauge, and `high` uses inline top metric + middle gauge + inline bottom metric.
 - Canvas state-screen behavior is engine-owned: `p.disconnect === true` resolves to `disconnected`, clears the canvas, and renders shared `StateScreenCanvasOverlay` (`GPS Lost`) before any gauge drawing.
@@ -30,7 +31,7 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 | Temperature linear | `tempLinear` | `range` | Editable `min/max` | `formatTemperature` | Optional high-end warning/alarm |
 | Voltage linear | `voltageLinear` | `range` | Editable `min/max` | `formatDecimal` | Low-end warning/alarm |
 | Wind angle linear | `angleTrueLinear`, `angleApparentLinear` | `centered180` | Fixed `-180..180` | Angle formatter contract | Mirrored layline sectors (optional) |
-| Compass linear | `hdtLinear`, `hdmLinear`, `cogLinear` | `fixed360` | Fixed `0..360` | `formatDirection360` | Usually none |
+| Compass linear | `hdtLinear`, `hdmLinear`, `cogLinear` | `fixed360` | Fixed `0..360` visible window, optionally 180° | `formatDirection360` | Usually none |
 
 ## Style and Proportions
 

@@ -56,7 +56,8 @@
             compassLinearRatioThresholdFlat: num(p.compassLinearRatioThresholdFlat),
             compassLinearTickMajor: num(p.compassLinearTickMajor),
             compassLinearTickMinor: num(p.compassLinearTickMinor),
-            compassLinearShowEndLabels: !!p.compassLinearShowEndLabels
+            compassLinearShowEndLabels: !!p.compassLinearShowEndLabels,
+            compassLinearRange: num(p.compassLinearRange)
           }
         };
       }

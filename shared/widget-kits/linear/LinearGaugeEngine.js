@@ -30,7 +30,6 @@
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
-    const springMotion = Helpers.getModule("SpringEasing").create(def, Helpers).createMotion();
     const text = GU.text;
     const value = GU.value;
 
@@ -111,6 +110,11 @@
       const rangeProps = hasOwn.call(cfg, "rangeProps") ? cfg.rangeProps : DEFAULT_RANGE_PROPS;
       const tickProps = hasOwn.call(cfg, "tickProps") ? cfg.tickProps : DEFAULT_TICK_PROPS;
       const unitDefault = hasOwn.call(cfg, "unitDefault") ? cfg.unitDefault : "";
+      const springTarget = cfg.springTarget === "axis" ? "axis" : "pointer";
+      const springWrap = Number(cfg.springWrap);
+      const springMotion = Helpers.getModule("SpringEasing")
+        .create(def, Helpers)
+        .createMotion(Number.isFinite(springWrap) ? { wrap: springWrap } : {});
       const layoutCfg = hasOwn.call(cfg, "layout") ? cfg.layout : null;
       const resolveAxisFn = typeof cfg.resolveAxis === "function" ? cfg.resolveAxis : null;
       const buildTicksFn = typeof cfg.buildTicks === "function" ? cfg.buildTicks : null;
@@ -177,12 +181,23 @@
         const textFillScale = resolveTextFillScale(layout.responsive);
         const compactGeometryScale = resolveCompactGeometryScale(textFillScale);
         const range = value.normalizeRange(p[rangeProps.min], p[rangeProps.max], rangeDefaults.min, rangeDefaults.max);
-        const hookApiBase = { primitives: primitives, math: math, textLayout: textLayout, text: text, value: value, theme: theme };
-        const defaultAxis = math.resolveAxisDomain(axisMode, range);
-        const axis = resolveAxisFn ? resolveAxisFn(p, range, defaultAxis, hookApiBase) : defaultAxis;
         const raw = (typeof p.value !== "undefined") ? p.value : p[cfg.rawValueKey];
         const unit = String(hasOwn.call(p, "unit") ? p.unit : unitDefault).trim();
         const display = formatDisplay(raw, p, unit);
+        const easingEnabled = p.easing !== false;
+        const easedDisplayNum = springMotion.resolve(canvas, display.num, easingEnabled, Date.now());
+        const axisProps = springTarget === "axis"
+          ? Object.assign({}, p)
+          : p;
+        if (springTarget === "axis") {
+          if (cfg.rawValueKey && cfg.rawValueKey !== "value") {
+            axisProps[cfg.rawValueKey] = easedDisplayNum;
+          }
+          axisProps.value = easedDisplayNum;
+        }
+        const hookApiBase = { primitives: primitives, math: math, textLayout: textLayout, text: text, value: value, theme: theme };
+        const defaultAxis = math.resolveAxisDomain(axisMode, range);
+        const axis = resolveAxisFn ? resolveAxisFn(axisProps, range, defaultAxis, hookApiBase) : defaultAxis;
         const valueRawText = display.text.trim() || p.default;
         const valueText = stableDigitsEnabled
           ? stableDigits.normalize(valueRawText, {
@@ -269,6 +284,7 @@
         const displayState = {
           raw: raw,
           num: display.num,
+          easedNum: easedDisplayNum,
           text: valueText,
           unit: unit,
           caption: String(p.caption).trim(),
@@ -276,8 +292,6 @@
           rowBoxes: rowBoxes,
           parsed: display
         };
-        const easingEnabled = p.easing !== false;
-        const easedDisplayNum = springMotion.resolve(canvas, displayState.num, easingEnabled, Date.now());
         const tickLabelFormatter = typeof cfg.formatTickLabel === "function"
           ? function (tickValue, tickState) { return cfg.formatTickLabel(tickValue, tickState || state, p, hookApi); }
           : null;

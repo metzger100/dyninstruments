@@ -45,10 +45,7 @@ The tick steps are currently hardcoded to `{ major: 30, minor: 10 }` via the `ti
 callback. For a 180° window, denser ticks (`{ major: 15, minor: 5 }`) are appropriate so the
 half-range doesn't look sparse.
 
-### Prompt
-
-```
-## Mandatory preflight
+### Mandatory preflight
 
 Read these files before any code changes:
 - documentation/TABLEOFCONTENTS.md
@@ -58,7 +55,7 @@ Read these files before any code changes:
 - documentation/linear/linear-shared-api.md
 - documentation/avnav-api/editable-parameters.md
 
-## Task: Fix spring easing for linear compass + add 180° range support
+### Task: Fix spring easing for linear compass + add 180° range support
 
 This task has two interleaved goals:
 A. Fix the spring easing so the **scale** eases (not the pointer).
@@ -67,7 +64,7 @@ B. Add a `compassLinearRange` editable (360° default, 180° option) that contro
    `tickSteps`, `drawFrame`, and the engine's `springTarget` — so they are implemented
    together.
 
-### Problem
+#### Problem
 
 In `shared/widget-kits/linear/LinearGaugeEngine.js`, the spring easing is applied to the
 display value (`displayState.num`) at line 280 and fed to `drawDefaultPointer` at line 367.
@@ -80,9 +77,9 @@ The compass widget (`widgets/linear/CompassLinearWidget/CompassLinearWidget.js`)
   marker
 - `tickSteps: function () { return { major: 30, minor: 10 }; }` (hardcoded)
 
-### Required changes
+#### Required changes
 
-#### A. Engine: `springTarget: "axis"` mode
+##### A. Engine: `springTarget: "axis"` mode
 
 1. **`LinearGaugeEngine.js`** — Add support for `cfg.springTarget`:
    - Read `const springTarget = cfg.springTarget === "axis" ? "axis" : "pointer";`
@@ -104,7 +101,7 @@ The compass widget (`widgets/linear/CompassLinearWidget/CompassLinearWidget.js`)
      `displayState.easedNum = easedDisplayNum;`
      so that `drawFrame` callbacks can access the eased value.
 
-#### B. Compass widget: configurable range + adapted tick steps
+##### B. Compass widget: configurable range + adapted tick steps
 
 2. **`CompassLinearWidget.js`** — Make the visible range configurable:
    - Read `const compassRange = (p.compassLinearRange === 180) ? 180 : 360;`
@@ -174,7 +171,7 @@ The compass widget (`widgets/linear/CompassLinearWidget/CompassLinearWidget.js`)
    and the spring requests follow-up frames until settled. No additional change needed for
    animation scheduling.
 
-#### C. Editable: `compassLinearRange`
+##### C. Editable: `compassLinearRange`
 
 6. **`config/clusters/course-heading.js`** — Add the range editable alongside the existing
    compass linear settings (after `compassLinearShowEndLabels` at line 104):
@@ -194,7 +191,7 @@ The compass widget (`widgets/linear/CompassLinearWidget/CompassLinearWidget.js`)
    scoped to linear compass kinds only. This matches the PLAN11 convention for per-widget
    editables.
 
-### Interaction between range and spring
+#### Interaction between range and spring
 
 The spring wrap is always 360° (heading values are 0–360°). The visible range
 (`compassLinearRange`) only affects the axis window and tick density — not the spring
@@ -207,7 +204,7 @@ invalidates the static layer cache. This is identical to the 360° case — the 
 already invalidates on every heading change. Performance is bounded by the existing soft cap
 (600 consecutive animate frames).
 
-### Tests
+#### Tests
 
 - `springTarget: "axis"` + 360° range: after a heading change, the axis (min/max) smoothly
   transitions while the pointer remains at the center.
@@ -221,13 +218,12 @@ already invalidates on every heading change. Performance is bounded by the exist
 - `compassLinearRange` editable appears only for `hdtLinear`/`hdmLinear` kinds.
 - Wrap-around (e.g., 350° → 10°) takes the short arc in both range modes.
 
-### Constraints
+#### Constraints
 
 - Do not change the `SpringEasing` module itself.
 - Do not break existing non-compass linear gauges (Speed, Depth, Temp, Voltage, Wind).
 - File size limit: no file exceeds 400 non-empty lines.
 - Run `npm run check:all` at the end.
-```
 
 ---
 
@@ -243,10 +239,7 @@ already finds a single `px` that fits ALL rows — so font sizes are coupled to 
 constraint. But the visual alignment is wrong: monospace coordinates should be right-aligned
 so digits line up vertically.
 
-### Prompt
-
-```
-## Mandatory preflight
+### Mandatory preflight
 
 Read these files before any code changes:
 - documentation/TABLEOFCONTENTS.md
@@ -254,9 +247,9 @@ Read these files before any code changes:
 - documentation/conventions/smell-prevention.md
 - documentation/shared/text-layout-engine.md
 
-## Task: Right-align stacked coordinates and ensure coupled sizing
+### Task: Right-align stacked coordinates and ensure coupled sizing
 
-### Problem
+#### Problem
 
 In `shared/widget-kits/text/TextLayoutComposite.js`, the `drawTwoRowsWithHeader` function
 (line 291) draws both coordinate rows with `ctx.textAlign = "center"` (line 312). Monospace
@@ -268,7 +261,7 @@ Additionally, coordinates may render at different sizes if the `fitMultiRowBinar
 is not properly constraining both rows. Verify that both rows always use the shared
 `fit.linePx` value.
 
-### Required changes
+#### Required changes
 
 1. **`TextLayoutComposite.js` — `fitTwoRowsWithHeader` and `drawTwoRowsWithHeader`**:
    Add an `align` option to the fit/draw API:
@@ -293,7 +286,7 @@ is not properly constraining both rows. Verify that both rows always use the sha
 3. **Fit cache key**: The `makeFitCacheKey` call (line 271) must include `align` in the
    key object so that switching between tabular and non-tabular modes invalidates the cache.
 
-### Verification
+#### Verification
 
 - Stacked coordinates (normal/high mode) render right-aligned when `coordinatesTabular`
   is true (default).
@@ -301,7 +294,6 @@ is not properly constraining both rows. Verify that both rows always use the sha
 - When `coordinatesTabular` is false, coordinates render center-aligned (existing behavior).
 - Flat mode (single inline row) is unaffected.
 - Run `npm run check:all` at the end.
-```
 
 ---
 
@@ -325,10 +317,7 @@ The `CompassRadialWidget.js` builds label sprites in `buildCompassLabelSprites` 
 using `state.labels.fontPx` and positions them at `state.labels.spriteRadius` =
 `geom.labelRadius`.
 
-### Prompt
-
-```
-## Mandatory preflight
+### Mandatory preflight
 
 Read these files before any code changes:
 - documentation/TABLEOFCONTENTS.md
@@ -337,16 +326,16 @@ Read these files before any code changes:
 - documentation/radial/full-circle-dial-engine.md
 - documentation/widgets/compass-gauge.md
 
-## Task: Fix radial compass labels — increase size and push inward from ticks
+### Task: Fix radial compass labels — increase size and push inward from ticks
 
-### Problem
+#### Problem
 
 In `shared/widget-kits/radial/FullCircleRadialLayout.js`, the compass labels are:
 1. Too small: `labelFontFactor` defaults to 0.14, producing tiny text.
 2. Clipping into major ticks: `LABEL_SPRITE_RADIUS_FACTOR = 1.6` places labels too close
    to tick ends. The gap between tick ends and label center is only ~`ringW * 0.2 - 2` px.
 
-### Required changes
+#### Required changes
 
 1. **`FullCircleRadialLayout.js`** — Adjust two constants in `computeModeGeometry`:
    - Increase `LABEL_SPRITE_RADIUS_FACTOR` from `1.6` to `2.2`. This pushes labels
@@ -381,7 +370,7 @@ In `shared/widget-kits/radial/FullCircleRadialLayout.js`, the compass labels are
    font factor change to compass-only by passing `labelFontFactor` via the compass's
    layout config. If the wind widget looks fine, no scoping is needed.
 
-### Tuning guidance
+#### Tuning guidance
 
 The exact values (2.2, 0.18) are starting points. After applying them:
 - Check that labels don't extend past the inner edge of the ring (label center minus half
@@ -390,13 +379,12 @@ The exact values (2.2, 0.18) are starting points. After applying them:
   each other. The compass has 8 labels (N, NE, E, SE, S, SW, W, NW); at small sizes,
   adjacent labels may collide. Consider a minimum font size floor of 8px.
 
-### Tests
+#### Tests
 
 - Visual verification: compass labels do not overlap ticks at sizes 120×120, 200×200, 400×400.
 - Labels are legible (font size ≥ 8px) at all sizes.
 - Wind widget labels remain correctly positioned and sized.
 - Run `npm run check:all` at the end.
-```
 
 ---
 
@@ -420,10 +408,7 @@ In **normal mode** (inline variant, `computeInlineLayout`, line 135):
 - The track gap (`NORMAL_TOP_MARGIN_RATIO = 0.05`) plus `NORMAL_SCALE_HEIGHT_RATIO = 0.50`
   take significant vertical space
 
-### Prompt
-
-```
-## Mandatory preflight
+### Mandatory preflight
 
 Read these files before any code changes:
 - documentation/TABLEOFCONTENTS.md
@@ -431,9 +416,9 @@ Read these files before any code changes:
 - documentation/conventions/smell-prevention.md
 - documentation/linear/linear-shared-api.md
 
-## Task: Reduce row spacing and increase value row allocation in linear gauge normal/high modes
+### Task: Reduce row spacing and increase value row allocation in linear gauge normal/high modes
 
-### Problem
+#### Problem
 
 In `shared/widget-kits/linear/LinearGaugeLayout.js`:
 - **High mode**: Too much vertical space allocated to the gap and caption, leaving the value
@@ -445,7 +430,7 @@ In `shared/widget-kits/linear/LinearGaugeLayout.js`:
 Additionally, `splitCaptionValueRows` (line 223) re-distributes using `secScale=0.8`,
 giving caption 44% of the combined text height — further shrinking the value area.
 
-### Required changes
+#### Required changes
 
 1. **`LinearGaugeLayout.js`** — Adjust high-mode constants:
    - Reduce `HIGH_TEXT_GAP_FACTOR` from `1.2` to `0.6`. The gap between scale and text
@@ -471,7 +456,7 @@ giving caption 44% of the combined text height — further shrinking the value a
      - This preserves the secScale sensitivity (larger secScale = larger caption) while
        shifting the balance toward the value row.
 
-### Verification
+#### Verification
 
 - In high mode at various aspect ratios, the value row is visually dominant and the gap
   between scale and text is minimal.
@@ -479,7 +464,6 @@ giving caption 44% of the combined text height — further shrinking the value a
 - Caption text remains legible (not clipped or invisible).
 - Flat mode is unaffected (uses separate layout function).
 - Run `npm run check:all` at the end.
-```
 
 ---
 
@@ -499,10 +483,7 @@ broken ring.
 Same pattern in `WindRadialWidget.js` (lines 106–121): `drawFullCircleRing` first, then
 `drawAnnularSector` on top.
 
-### Prompt
-
-```
-## Mandatory preflight
+### Mandatory preflight
 
 Read these files before any code changes:
 - documentation/TABLEOFCONTENTS.md
@@ -511,9 +492,9 @@ Read these files before any code changes:
 - documentation/widgets/semicircle-gauges.md
 - documentation/widgets/wind-dial.md
 
-## Task: Draw the scale ring after sectors so the ring line is always visible
+### Task: Draw the scale ring after sectors so the ring line is always visible
 
-### Problem
+#### Problem
 
 In `shared/widget-kits/radial/SemicircleRadialEngine.js`, `drawArcRing` (line 198) is
 called before the sector loop (lines 202–213). The sectors fill the same annular region as
@@ -524,7 +505,7 @@ Same issue in `widgets/radial/WindRadialWidget/WindRadialWidget.js` in the `rebu
 callback for the "back" layer: `api.drawFullCircleRing(layerCtx)` at line 106 is called
 before `drawAnnularSector` at lines 107–121.
 
-### Required changes
+#### Required changes
 
 1. **`SemicircleRadialEngine.js`**: Move the `draw.drawArcRing(...)` call (currently at
    line 198) to AFTER the sector loop (after line 213). The new order should be:
@@ -564,7 +545,7 @@ before `drawAnnularSector` at lines 107–121.
    sectors, but linear sectors are positioned at `sectorBandY` (above the track), not on
    top of it. No change needed for linear.
 
-### Verification
+#### Verification
 
 - When sectors are defined (e.g., Speed gauge with warning/alarm zones), the ring line is
   fully visible and continuous around the entire arc, including where sectors are drawn.
@@ -572,7 +553,6 @@ before `drawAnnularSector` at lines 107–121.
 - Wind widget lay-line sectors do not cover the ring in full-circle mode.
 - Widgets without sectors (e.g., compass) are unaffected.
 - Run `npm run check:all` at the end.
-```
 
 ---
 

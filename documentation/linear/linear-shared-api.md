@@ -84,6 +84,8 @@ Common `spec` fields:
 - `buildSectors(props, minV, maxV, axis, valueApi, theme) -> [{ from, to, color }]`
 - `buildStaticKey(state, props)`
 - `resolveAxis(props, range, defaultAxis, api) -> { min, max }` (optional)
+- `springTarget`: `"pointer" | "axis"` (optional; compass wrappers use `"axis"` when the scale should ease around a fixed center pointer)
+- `springWrap`: numeric wrap span for `SpringEasing.createMotion()` when the spring should take the shortest wrapped arc (optional; compass wrappers use `360`)
 - `buildTicks(axis, tickMajor, tickMinor, props, api) -> { major, minor }` (optional)
 - `formatTickLabel(value, state, props, api) -> string` (optional)
 - `drawFrame(state, props, display, api)` (optional)
@@ -172,6 +174,8 @@ const renderCanvas = engine.createRenderer({
   rawValueKey: "heading",
   unitDefault: "deg",
   axisMode: "fixed360",
+  springTarget: "axis",
+  springWrap: 360,
   tickProps: {
     major: "compassLinearTickMajor",
     minor: "compassLinearTickMinor",

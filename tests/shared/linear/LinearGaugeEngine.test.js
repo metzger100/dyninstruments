@@ -128,7 +128,7 @@ describe("LinearGaugeEngine", function () {
         if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
         if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
         if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
-        if (id === "SpringEasing") return loadFresh("shared/widget-kits/anim/SpringEasing.js");
+        if (id === "SpringEasing") return opts.springEasingModule || loadFresh("shared/widget-kits/anim/SpringEasing.js");
         if (id === "CanvasLayerCache") return cacheMod;
         if (id === "LinearCanvasPrimitives") return primitivesModule;
         if (id === "ResponsiveScaleProfile") return responsiveScaleProfileMod;
@@ -255,6 +255,140 @@ describe("LinearGaugeEngine", function () {
     expect(captureState({
       ratioDefaults: { normal: 1.1, flat: 3.5 }
     })).toEqual(captureState());
+  });
+
+  it("eases the compass axis when springTarget is axis and keeps the default pointer path intact otherwise", function () {
+    const springEasingModule = {
+      create() {
+        return {
+          createMotion() {
+            return {
+              resolve(canvas, value) {
+                void canvas;
+                return Number(value) + 100;
+              },
+              isActive() {
+                return false;
+              }
+            };
+          }
+        };
+      }
+    };
+
+    function renderWithTarget(springTarget) {
+      const harness = createHarness({ springEasingModule: springEasingModule });
+      let resolveAxisHeading = null;
+      let displaySnapshot = null;
+      const renderer = harness.engine.createRenderer({
+        rawValueKey: "heading",
+        axisMode: "fixed360",
+        springTarget: springTarget,
+        rangeDefaults: { min: 0, max: 360 },
+        rangeProps: { min: "min", max: "max" },
+        tickProps: { major: "major", minor: "minor", showEndLabels: "showEndLabels" },
+        resolveAxis(props) {
+          resolveAxisHeading = props.heading;
+          return {
+            min: Number(props.heading) - 1,
+            max: Number(props.heading) + 1
+          };
+        },
+        drawFrame(state, props, display, api) {
+          displaySnapshot = display;
+          api.drawDefaultPointer();
+        }
+      });
+
+      renderer(createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() }), {
+        heading: 10,
+        min: 0,
+        max: 360,
+        major: 90,
+        minor: 30
+      });
+
+      return {
+        harness: harness,
+        resolveAxisHeading: resolveAxisHeading,
+        displaySnapshot: displaySnapshot
+      };
+    }
+
+    const axisTarget = renderWithTarget("axis");
+    const pointerTarget = renderWithTarget("pointer");
+
+    expect(axisTarget.displaySnapshot.num).toBe(10);
+    expect(axisTarget.displaySnapshot.easedNum).toBe(110);
+    expect(axisTarget.resolveAxisHeading).toBe(110);
+    expect(axisTarget.harness.calls.pointer[0].x)
+      .toBe(Math.round((axisTarget.harness.calls.track[0].x0 + axisTarget.harness.calls.track[0].x1) / 2));
+
+    expect(pointerTarget.displaySnapshot.num).toBe(10);
+    expect(pointerTarget.displaySnapshot.easedNum).toBe(110);
+    expect(pointerTarget.resolveAxisHeading).toBe(10);
+    expect(pointerTarget.harness.calls.pointer[0].x).toBe(pointerTarget.harness.calls.track[0].x1);
+  });
+
+  it("takes the shortest wrapped arc across the 0/360 seam when springWrap is 360", function () {
+    const harness = createHarness();
+    const nowSpy = vi.spyOn(Date, "now");
+
+    try {
+      const headingsForward = [];
+      const forwardRenderer = harness.engine.createRenderer({
+        rawValueKey: "heading",
+        axisMode: "fixed360",
+        springTarget: "axis",
+        springWrap: 360,
+        rangeDefaults: { min: 0, max: 360 },
+        rangeProps: { min: "min", max: "max" },
+        tickProps: { major: "major", minor: "minor", showEndLabels: "showEndLabels" },
+        resolveAxis(props) {
+          headingsForward.push(Number(props.heading));
+          return {
+            min: Number(props.heading) - 1,
+            max: Number(props.heading) + 1
+          };
+        }
+      });
+      const forwardCanvas = createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() });
+      nowSpy.mockReturnValue(0);
+      forwardRenderer(forwardCanvas, { heading: 350, min: 0, max: 360, major: 90, minor: 30 });
+      nowSpy.mockReturnValue(16);
+      forwardRenderer(forwardCanvas, { heading: 10, min: 0, max: 360, major: 90, minor: 30 });
+
+      const headingsBackward = [];
+      const backwardRenderer = harness.engine.createRenderer({
+        rawValueKey: "heading",
+        axisMode: "fixed360",
+        springTarget: "axis",
+        springWrap: 360,
+        rangeDefaults: { min: 0, max: 360 },
+        rangeProps: { min: "min", max: "max" },
+        tickProps: { major: "major", minor: "minor", showEndLabels: "showEndLabels" },
+        resolveAxis(props) {
+          headingsBackward.push(Number(props.heading));
+          return {
+            min: Number(props.heading) - 1,
+            max: Number(props.heading) + 1
+          };
+        }
+      });
+      const backwardCanvas = createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() });
+      nowSpy.mockReturnValue(0);
+      backwardRenderer(backwardCanvas, { heading: 10, min: 0, max: 360, major: 90, minor: 30 });
+      nowSpy.mockReturnValue(16);
+      backwardRenderer(backwardCanvas, { heading: 350, min: 0, max: 360, major: 90, minor: 30 });
+
+      expect(headingsForward[0]).toBe(350);
+      expect(headingsForward[1]).toBeGreaterThan(350);
+      expect(headingsBackward[0]).toBe(10);
+      expect(headingsBackward[1]).toBeLessThan(10);
+    }
+    finally {
+      nowSpy.mockRestore();
+    }
   });
 
   it("matches callback-visible axis and layout state with or without wrapper-owned rangeDefaults when config bounds are present", function () {

@@ -49,12 +49,15 @@ describe("CompassLinearWidget", function () {
       flat: "compassLinearRatioThresholdFlat"
     });
     expect(captured).not.toHaveProperty("ratioDefaults");
-    expect(captured.tickSteps()).toEqual({ major: 30, minor: 10 });
+    expect(captured.springTarget).toBe("axis");
+    expect(captured.springWrap).toBe(360);
+    expect(captured.tickSteps(360)).toEqual({ major: 30, minor: 10 });
+    expect(captured.tickSteps(180)).toEqual({ major: 15, minor: 5 });
 
     const axisA = captured.resolveAxis({ heading: 10 }, {}, { min: 0, max: 360 });
-    const axisB = captured.resolveAxis({ heading: 40 }, {}, { min: 0, max: 360 });
+    const axisB = captured.resolveAxis({ heading: 40, compassLinearRange: 180 }, {}, { min: 0, max: 360 });
     expect(axisA).toEqual({ min: -170, max: 190 });
-    expect(axisB).toEqual({ min: -140, max: 220 });
+    expect(axisB).toEqual({ min: -50, max: 130 });
 
     const headingRatioA = (10 - axisA.min) / (axisA.max - axisA.min);
     const headingRatioB = (40 - axisB.min) / (axisB.max - axisB.min);
@@ -80,14 +83,14 @@ describe("CompassLinearWidget", function () {
       }
     };
 
-    captured.drawFrame(state, { markerCourse: 10 }, { num: 350 }, api);
+    captured.drawFrame(state, { markerCourse: 10 }, { num: 350, easedNum: 350 }, api);
     expect(api.drawDefaultPointer).toHaveBeenCalledTimes(1);
     expect(api.drawMarkerAtValue).toHaveBeenNthCalledWith(1, 370, {
       strokeStyle: "#ff2b2b"
     });
 
-    captured.drawFrame(state, { markerCourse: 300 }, { num: 350 }, api);
-    expect(api.drawMarkerAtValue).toHaveBeenNthCalledWith(2, 300, {
+    captured.drawFrame(state, { markerCourse: 300 }, { num: 350, easedNum: 10 }, api);
+    expect(api.drawMarkerAtValue).toHaveBeenNthCalledWith(2, -60, {
       strokeStyle: "#ff2b2b"
     });
   });
