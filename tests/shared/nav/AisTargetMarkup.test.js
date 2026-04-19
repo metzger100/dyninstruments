@@ -9,6 +9,9 @@ describe("AisTargetMarkup", function () {
           if (id === "StateScreenMarkup") {
             moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
           }
+          else if (id === "StateScreenTextFit") {
+            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenTextFit.js");
+          }
           else if (id === "StateScreenLabels") {
             moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
           }

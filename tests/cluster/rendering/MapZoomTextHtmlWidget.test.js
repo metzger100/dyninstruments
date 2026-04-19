@@ -21,6 +21,7 @@ describe("MapZoomTextHtmlWidget", function () {
     StateScreenLabels: "shared/widget-kits/state/StateScreenLabels.js",
     StateScreenPrecedence: "shared/widget-kits/state/StateScreenPrecedence.js",
     StateScreenInteraction: "shared/widget-kits/state/StateScreenInteraction.js",
+    StateScreenTextFit: "shared/widget-kits/state/StateScreenTextFit.js",
     StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js"
   };
 

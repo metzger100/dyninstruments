@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteTextHtmlWidget - HTML renderer shell for nav edit-route summary kind
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: EditRouteHtmlFit, HtmlWidgetUtils, EditRouteRenderModel, EditRouteMarkup
+ * Depends: EditRouteHtmlFit, HtmlWidgetUtils, EditRouteRenderModel, EditRouteMarkup, ThemeResolver
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -20,6 +20,7 @@
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const renderModel = Helpers.getModule("EditRouteRenderModel").create(def, Helpers);
     const markup = Helpers.getModule("EditRouteMarkup").create(def, Helpers);
+    const themeResolver = Helpers.getModule("ThemeResolver");
 
     function buildModel(props, shellRect) {
       const surfacePolicy = resolveSurfacePolicy(props);
@@ -71,6 +72,7 @@
 
       function patchDom(payload) {
         const shellRect = payload.shellRect || null;
+        const theme = themeResolver.resolveForRoot(payload.rootEl);
         const model = buildModel(payload.props, shellRect);
         const shouldComputeFit = model.kind === "data" && (payload.layoutChanged || !lastFit);
         const fit = shouldComputeFit
@@ -90,7 +92,10 @@
         wrapperEl = htmlUtils.patchInnerHtml(rootEl, markup.render({
           model: model,
           fit: fit,
-          htmlUtils: htmlUtils
+          htmlUtils: htmlUtils,
+          shellRect: shellRect,
+          fontFamily: theme.font.family,
+          fontWeight: theme.font.labelWeight
         }));
         lastFit = fit;
         lastProps = payload.props;

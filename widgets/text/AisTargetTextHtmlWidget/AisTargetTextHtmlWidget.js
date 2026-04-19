@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetTextHtmlWidget - Native HTML AIS target summary renderer shell
  * Documentation: documentation/guides/add-new-html-kind.md
- * Depends: AisTargetHtmlFit, HtmlWidgetUtils, AisTargetRenderModel, AisTargetMarkup
+ * Depends: AisTargetHtmlFit, HtmlWidgetUtils, AisTargetRenderModel, AisTargetMarkup, ThemeResolver
  */
 
 (function (root, factory) {
@@ -28,6 +28,7 @@
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const renderModel = Helpers.getModule("AisTargetRenderModel").create(def, Helpers);
     const markup = Helpers.getModule("AisTargetMarkup").create(def, Helpers);
+    const themeResolver = Helpers.getModule("ThemeResolver");
 
     function buildModel(props, shellRect) {
       const p = props || {};
@@ -95,8 +96,9 @@
       }
 
       function patchDom(payload) {
-        const shellRect = payload.shellRect || null;
-        const model = buildModel(payload.props, shellRect);
+      const shellRect = payload.shellRect || null;
+      const theme = themeResolver.resolveForRoot(payload.rootEl);
+      const model = buildModel(payload.props, shellRect);
         const fit = payload.layoutChanged || !lastFit
           ? (htmlFit.compute({
             model: model,
@@ -116,7 +118,10 @@
         wrapperEl = htmlUtils.patchInnerHtml(rootEl, markup.render({
           model: model,
           fit: fit,
-          htmlUtils: htmlUtils
+          htmlUtils: htmlUtils,
+          shellRect: shellRect,
+          fontFamily: theme.font.family,
+          fontWeight: theme.font.labelWeight
         }));
         lastProps = payload.props;
         lastModel = model;

@@ -280,6 +280,9 @@ describe("config/components.js", function () {
       "StateScreenCanvasOverlay"
     ]);
     expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
+    expect(components.StateScreenTextFit.globalKey).toBe("DyniStateScreenTextFit");
+    expect(components.StateScreenTextFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/state/StateScreenTextFit.js");
+    expect(components.StateScreenMarkup.deps).toEqual(["HtmlWidgetUtils", "StateScreenLabels", "StateScreenTextFit"]);
     expect(components.ActiveRouteTextHtmlWidget.globalKey).toBe("DyniActiveRouteTextHtmlWidget");
     expect(components.ActiveRouteTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js");
     expect(components.ActiveRouteTextHtmlWidget.css).toBeUndefined();
@@ -293,6 +296,7 @@ describe("config/components.js", function () {
       "PreparedPayloadModelCache",
       "PlaceholderNormalize",
       "StableDigits",
+      "ThemeResolver",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenInteraction",
@@ -305,7 +309,7 @@ describe("config/components.js", function () {
       SHARED_HTML_SHADOW_CSS,
       "http://host/plugins/dyninstruments/widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"
     ]);
-    expect(components.EditRouteTextHtmlWidget.deps).toEqual(["EditRouteHtmlFit", "HtmlWidgetUtils", "EditRouteRenderModel", "EditRouteMarkup"]);
+    expect(components.EditRouteTextHtmlWidget.deps).toEqual(["EditRouteHtmlFit", "HtmlWidgetUtils", "EditRouteRenderModel", "EditRouteMarkup", "ThemeResolver"]);
     expect(components.RoutePointsRenderModel.globalKey).toBe("DyniRoutePointsRenderModel");
     expect(components.RoutePointsRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsRenderModel.js");
     expect(components.RoutePointsRenderModel.css).toBeUndefined();
@@ -341,7 +345,8 @@ describe("config/components.js", function () {
       "HtmlWidgetUtils",
       "RoutePointsRenderModel",
       "RoutePointsMarkup",
-      "RoutePointsDomEffects"
+      "RoutePointsDomEffects",
+      "ThemeResolver"
     ]);
     expect(components.RoutePointsViewModel.globalKey).toBe("DyniRoutePointsViewModel");
     expect(components.RoutePointsViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/RoutePointsViewModel.js");
@@ -360,6 +365,7 @@ describe("config/components.js", function () {
       "PlaceholderNormalize",
       "PreparedPayloadModelCache",
       "StableDigits",
+      "ThemeResolver",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenInteraction",
@@ -388,7 +394,7 @@ describe("config/components.js", function () {
       SHARED_HTML_SHADOW_CSS,
       "http://host/plugins/dyninstruments/widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"
     ]);
-    expect(components.AisTargetTextHtmlWidget.deps).toEqual(["AisTargetHtmlFit", "HtmlWidgetUtils", "AisTargetRenderModel", "AisTargetMarkup"]);
+    expect(components.AisTargetTextHtmlWidget.deps).toEqual(["AisTargetHtmlFit", "HtmlWidgetUtils", "AisTargetRenderModel", "AisTargetMarkup", "ThemeResolver"]);
     expect(components.CanvasDomSurfaceAdapter.globalKey).toBe("DyniCanvasDomSurfaceAdapter");
     expect(components.CanvasDomSurfaceAdapter.js).toBe("http://host/plugins/dyninstruments/cluster/rendering/CanvasDomSurfaceAdapter.js");
     expect(components.CanvasDomSurfaceAdapter.deps).toEqual(["ThemeResolver", "PerfSpanHelper"]);

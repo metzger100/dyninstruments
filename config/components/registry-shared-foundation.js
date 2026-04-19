@@ -178,11 +178,16 @@
       css: undefined,
       globalKey: "DyniStateScreenInteraction"
     },
+    StateScreenTextFit: {
+      js: BASE + "shared/widget-kits/state/StateScreenTextFit.js",
+      css: undefined,
+      globalKey: "DyniStateScreenTextFit"
+    },
     StateScreenMarkup: {
       js: BASE + "shared/widget-kits/state/StateScreenMarkup.js",
       css: undefined,
       globalKey: "DyniStateScreenMarkup",
-      deps: ["HtmlWidgetUtils", "StateScreenLabels"]
+      deps: ["HtmlWidgetUtils", "StateScreenLabels", "StateScreenTextFit"]
     },
     StateScreenCanvasOverlay: {
       js: BASE + "shared/widget-kits/state/StateScreenCanvasOverlay.js",

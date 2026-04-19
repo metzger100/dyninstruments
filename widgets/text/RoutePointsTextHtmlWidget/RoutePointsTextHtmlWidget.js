@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsTextHtmlWidget - HTML renderer shell for nav route-points kind
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: RoutePointsHtmlFit, HtmlWidgetUtils, RoutePointsRenderModel, RoutePointsMarkup, RoutePointsDomEffects
+ * Depends: RoutePointsHtmlFit, HtmlWidgetUtils, RoutePointsRenderModel, RoutePointsMarkup, RoutePointsDomEffects, ThemeResolver
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -49,6 +49,7 @@
     const layoutApi = Helpers.getModule("RoutePointsLayout").create(def, Helpers);
     const markup = Helpers.getModule("RoutePointsMarkup").create(def, Helpers);
     const domEffects = Helpers.getModule("RoutePointsDomEffects").create(def, Helpers);
+    const themeResolver = Helpers.getModule("ThemeResolver");
 
     function buildModel(props, shellRect, scrollbarGutterPx) {
       const surfacePolicy = resolveSurfacePolicy(props);
@@ -110,6 +111,7 @@
 
       function patchDom(payload) {
         const shellRect = payload.shellRect || null;
+        const theme = themeResolver.resolveForRoot(payload.rootEl);
         const model = buildModel(payload.props, shellRect, scrollbarGutterPx);
         const shouldComputeFit = model.kind === "data" && (payload.layoutChanged || !lastFit);
         const fit = shouldComputeFit
@@ -126,7 +128,10 @@
           model: model,
           fit: fit,
           coordinatesTabular: payload.props && payload.props.coordinatesTabular !== false,
-          htmlUtils: htmlUtils
+          htmlUtils: htmlUtils,
+          shellRect: shellRect,
+          fontFamily: theme.font.family,
+          fontWeight: theme.font.labelWeight
         }));
         lastProps = payload.props;
         lastModel = model;

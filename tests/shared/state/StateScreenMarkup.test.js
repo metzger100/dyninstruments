@@ -1,7 +1,9 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("StateScreenMarkup", function () {
-  function createMarkup() {
+  function createMarkup(options) {
+    const opts = options || {};
+    const textFitCompute = opts.textFitCompute || vi.fn(() => "font-size:18px;");
     return loadFresh("shared/widget-kits/state/StateScreenMarkup.js").create({}, {
       getModule(id) {
         if (id === "StateScreenLabels") {
@@ -9,6 +11,9 @@ describe("StateScreenMarkup", function () {
         }
         if (id === "HtmlWidgetUtils") {
           return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
+        }
+        if (id === "StateScreenTextFit") {
+          return { create: () => ({ compute: textFitCompute }) };
         }
         throw new Error("unexpected module: " + id);
       }
@@ -28,7 +33,7 @@ describe("StateScreenMarkup", function () {
       kind: "noRoute",
       wrapperClasses: ["dyni-edit-route-html", "dyni-edit-route-open-dispatch"],
       extraAttrs: 'data-dyni-action="edit-route-open"',
-      fitStyle: "font-size:18px;"
+      labelStyle: "font-size:18px;"
     }));
 
     expect(root.className).toContain("dyni-edit-route-html");
@@ -41,6 +46,26 @@ describe("StateScreenMarkup", function () {
     expect(label).toBeTruthy();
     expect(label.textContent).toBe("No Route");
     expect(label.getAttribute("style")).toBe("font-size:18px;");
+  });
+
+  it("forwards themed font settings to the fit helper", function () {
+    const textFitCompute = vi.fn(() => "font-size:16px;");
+    const markup = createMarkup({ textFitCompute });
+
+    const root = parseHtml(markup.renderStateScreen({
+      kind: "noRoute",
+      wrapperClasses: ["dyni-edit-route-html"],
+      shellRect: { width: 2, height: 2 },
+      fontFamily: "My Font",
+      fontWeight: 612
+    }));
+
+    expect(root.querySelector(".dyni-state-screen-label").getAttribute("style")).toBe("font-size:16px;");
+    expect(textFitCompute).toHaveBeenCalledWith(expect.objectContaining({
+      label: "No Route",
+      family: "My Font",
+      weight: 612
+    }));
   });
 
   it("renders hidden state as wrapper-only without body content", function () {

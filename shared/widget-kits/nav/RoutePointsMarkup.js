@@ -149,7 +149,10 @@
           label: toText(model.stateLabel),
           wrapperClasses: wrapperClasses,
           extraAttrs: 'data-dyni-action="route-points-activate"' + htmlUtils.toStyleAttr(geometry.wrapper && geometry.wrapper.style),
-          htmlUtils: htmlUtils
+          htmlUtils: htmlUtils,
+          shellRect: cfg.shellRect,
+          fontFamily: cfg.fontFamily,
+          fontWeight: cfg.fontWeight
         });
       }
 

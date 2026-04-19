@@ -66,12 +66,13 @@ describe("plugin.css font-face rules", function () {
     });
   });
 
-  it("uses the 700 fallback label weight for shared state screens", function () {
+  it("keeps the 700 fallback label weight for shared state screens without CSS sizing", function () {
     const cssPath = path.join(process.cwd(), "plugin.css");
     const cssText = fs.readFileSync(cssPath, "utf8");
 
     expect(cssText).toContain("font-weight: var(--dyni-theme-font-label-weight, 700);");
-    expect(cssText).toContain("font-size: min(18cqw, 18cqh);");
+    expect(cssText).toContain(".widget.dyniplugin .dyni-state-screen-label {");
+    expect(cssText).not.toContain("font-size: min(18cqw, 18cqh);");
     expect(cssText).not.toContain("font-weight: var(--dyni-theme-font-label-weight, 650);");
     expect(cssText).not.toContain("font-size: clamp(12px, 18vmin, 96px);");
     expect(cssText).not.toContain("font-size: clamp(12px, min(18cqw, 18cqh), 96px);");

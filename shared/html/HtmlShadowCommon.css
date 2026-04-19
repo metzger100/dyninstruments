@@ -25,7 +25,6 @@
   display: block;
   line-height: 1;
   font-weight: var(--dyni-theme-font-label-weight, 700);
-  font-size: min(18cqw, 18cqh);
 }
 
 .dyni-state-hidden {

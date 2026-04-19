@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteTextHtmlWidget - Interactive HTML renderer for nav active-route kind
  * Documentation: documentation/widgets/active-route.md
- * Depends: ActiveRouteHtmlFit, HtmlWidgetUtils, PreparedPayloadModelCache, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
+ * Depends: ActiveRouteHtmlFit, HtmlWidgetUtils, PreparedPayloadModelCache, PlaceholderNormalize, StableDigits, ThemeResolver, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
  */
 
 (function (root, factory) {
@@ -223,7 +223,7 @@
       + "</div>";
   }
 
-  function renderMarkup(model, fitStyles, htmlUtils, stateScreenLabels, stateScreenMarkup) {
+  function renderMarkup(model, fitStyles, shellRect, theme, htmlUtils, stateScreenLabels, stateScreenMarkup) {
     const routeNameStyle = fitStyles && fitStyles.routeNameStyle ? fitStyles.routeNameStyle : "";
     const metricStyles = fitStyles && fitStyles.metrics ? fitStyles.metrics : Object.create(null);
 
@@ -240,7 +240,10 @@
         label: model.stateLabel,
         wrapperClasses: wrapperClasses,
         extraAttrs: 'data-dyni-action="active-route-open"',
-        htmlUtils: htmlUtils
+        htmlUtils: htmlUtils,
+        shellRect: shellRect,
+        fontFamily: theme.font.family,
+        fontWeight: theme.font.labelWeight
       });
     }
     if (model.isApproaching) {
@@ -283,7 +286,7 @@
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
-    const stateScreenMarkup = Helpers.getModule("StateScreenMarkup").create(def, Helpers);
+    const stateScreenMarkup = Helpers.getModule("StateScreenMarkup").create(def, Helpers); const themeResolver = Helpers.getModule("ThemeResolver");
 
     function createCommittedRenderer(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
@@ -331,7 +334,7 @@
 
       function patchDom(payload) {
         const prepared = preparedPayload.getPreparedPayload(payload);
-        const shellRect = payload.shellRect || null;
+        const shellRect = payload.shellRect || null; const theme = themeResolver.resolveForRoot(payload.rootEl);
         const model = prepared.model;
         const fit = shellRect
           ? (htmlFit.compute({
@@ -343,7 +346,7 @@
           : lastFit;
 
         htmlUtils.applyMirroredContext(rootEl, payload.props);
-        wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(model, fit, htmlUtils, stateScreenLabels, stateScreenMarkup));
+        wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(model, fit, shellRect, theme, htmlUtils, stateScreenLabels, stateScreenMarkup));
         lastFit = fit;
         lastProps = prepared.props;
 

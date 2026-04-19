@@ -65,6 +65,23 @@ describe("ActiveRouteTextHtmlWidget", function () {
         if (id === "StateScreenMarkup") {
           return loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
         }
+        if (id === "StateScreenTextFit") {
+          return loadFresh("shared/widget-kits/state/StateScreenTextFit.js");
+        }
+        if (id === "ThemeResolver") {
+          return {
+            resolveForRoot() {
+              return {
+                font: {
+                  family: "sans-serif",
+                  familyMono: "monospace",
+                  weight: 720,
+                  labelWeight: 610
+                }
+              };
+            }
+          };
+        }
         throw new Error("unexpected module: " + id);
       }
     };
@@ -284,6 +301,19 @@ describe("ActiveRouteTextHtmlWidget", function () {
     expect(noRouteByEmptyName.html()).toContain("No Route");
   });
 
+  it("keeps inline fitted font sizing on tiny state screens", function () {
+    const setup = createRenderer();
+    const mounted = mountCommitted(
+      setup.renderer,
+      withSurfacePolicy(makeProps({ disconnect: true }), { mode: "dispatch" }),
+      { shellSize: { width: 2, height: 2 } }
+    );
+
+    const label = mounted.mountEl.querySelector(".dyni-state-screen-label");
+    expect(label.textContent).toBe("GPS Lost");
+    expect(label.getAttribute("style")).toBe("font-size:1px;");
+  });
+
   it("renders ETA with formatClock when hideSeconds is enabled", function () {
     const setup = createRenderer();
     const mounted = mountCommitted(
@@ -453,7 +483,9 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const shadowRoot = surfaceDom.mountEl.shadowRoot;
     expect(shadowRoot.querySelector(".dyni-state-no-route")).toBeTruthy();
     expect(shadowRoot.querySelector(".dyni-state-screen-body")).toBeTruthy();
-    expect(shadowRoot.querySelector(".dyni-state-screen-label").textContent).toBe("No Route");
+    const labelEl = shadowRoot.querySelector(".dyni-state-screen-label");
+    expect(labelEl.textContent).toBe("No Route");
+    expect(labelEl.getAttribute("style")).toMatch(/font-size:\d+px;/);
 
     const styles = Array.from(shadowRoot.querySelectorAll("style[data-dyni-shadow-css]"));
     expect(styles[0].textContent).toContain(".dyni-state-screen-body");

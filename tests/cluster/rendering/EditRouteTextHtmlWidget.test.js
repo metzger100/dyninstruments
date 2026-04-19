@@ -53,6 +53,20 @@ describe("EditRouteTextHtmlWidget", function () {
         if (id === "HtmlWidgetUtils") {
           return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
         }
+        if (id === "ThemeResolver") {
+          return {
+            resolveForRoot() {
+              return {
+                font: {
+                  family: "sans-serif",
+                  familyMono: "monospace",
+                  weight: 720,
+                  labelWeight: 610
+                }
+              };
+            }
+          };
+        }
         if (id === "EditRouteRenderModel") {
           return {
             create() {

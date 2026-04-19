@@ -157,7 +157,10 @@
           label: toText(model.stateLabel),
           wrapperClasses: wrapperClasses,
           extraAttrs: 'data-dyni-action="ais-target-open"' + htmlUtils.toStyleAttr(joinStyles(model.wrapperStyle, geometry.wrapperStyle)),
-          htmlUtils: htmlUtils
+          htmlUtils: htmlUtils,
+          shellRect: cfg.shellRect,
+          fontFamily: cfg.fontFamily,
+          fontWeight: cfg.fontWeight
         });
       }
 

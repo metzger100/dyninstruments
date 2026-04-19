@@ -1,7 +1,7 @@
 /**
  * Module: MapZoomTextHtmlWidget - Interactive HTML renderer for map zoom kind
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: Helpers.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, PlaceholderNormalize, PreparedPayloadModelCache, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
+ * Depends: Helpers.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, PlaceholderNormalize, PreparedPayloadModelCache, StableDigits, ThemeResolver, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
  */
 
 (function (root, factory) {
@@ -217,7 +217,7 @@
       + "</div>";
   }
 
-  function renderMarkup(model, htmlUtils, stateScreenLabels, stateScreenMarkup) {
+  function renderMarkup(model, shellRect, theme, htmlUtils, stateScreenLabels, stateScreenMarkup) {
     const classes = [
       "dyni-map-zoom-html",
       "dyni-map-zoom-mode-" + model.mode,
@@ -225,9 +225,7 @@
         ? "dyni-map-zoom-open-dispatch"
         : "dyni-map-zoom-open-passive"
     ];
-    if (model.showRequired) {
-      classes.push("dyni-map-zoom-has-required");
-    }
+    if (model.showRequired) { classes.push("dyni-map-zoom-has-required"); }
     const scaleStyle = '--dyni-map-zoom-sec-scale:' + model.captionUnitScale + ";";
     if (model.kind !== stateScreenLabels.KINDS.DATA) {
       return stateScreenMarkup.renderStateScreen({
@@ -235,7 +233,9 @@
         label: model.stateLabel,
         wrapperClasses: classes,
         extraAttrs: 'data-dyni-action="map-zoom-check-auto" style="' + scaleStyle + '"',
-        htmlUtils: htmlUtils
+        htmlUtils: htmlUtils,
+        shellRect: shellRect,
+        fontFamily: theme.font.family, fontWeight: theme.font.labelWeight
       });
     }
 
@@ -260,7 +260,7 @@
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
-    const stateScreenMarkup = Helpers.getModule("StateScreenMarkup").create(def, Helpers);
+    const stateScreenMarkup = Helpers.getModule("StateScreenMarkup").create(def, Helpers); const themeResolver = Helpers.getModule("ThemeResolver");
 
     function createCommittedRenderer(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
@@ -306,7 +306,7 @@
 
       function patchDom(payload) {
         const prepared = preparedPayload.getPreparedPayload(payload);
-        const shellRect = payload.shellRect || null;
+        const shellRect = payload.shellRect || null; const theme = themeResolver.resolveForRoot(payload.rootEl);
         const baseModel = prepared.model;
         const fit = shellRect
           ? (htmlFit.compute({
@@ -336,7 +336,7 @@
         };
 
         htmlUtils.applyMirroredContext(rootEl, payload.props);
-        wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(renderModel, htmlUtils, stateScreenLabels, stateScreenMarkup));
+        wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(renderModel, shellRect, theme, htmlUtils, stateScreenLabels, stateScreenMarkup));
         lastFit = fit;
         lastProps = prepared.props;
 

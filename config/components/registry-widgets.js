@@ -57,6 +57,7 @@
         "PreparedPayloadModelCache",
         "PlaceholderNormalize",
         "StableDigits",
+        "ThemeResolver",
         "StateScreenLabels",
         "StateScreenPrecedence",
         "StateScreenInteraction",
@@ -89,7 +90,7 @@
       css: undefined,
       shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"],
       globalKey: "DyniEditRouteTextHtmlWidget",
-      deps: ["EditRouteHtmlFit", "HtmlWidgetUtils", "EditRouteRenderModel", "EditRouteMarkup"]
+      deps: ["EditRouteHtmlFit", "HtmlWidgetUtils", "EditRouteRenderModel", "EditRouteMarkup", "ThemeResolver"]
     },
     RoutePointsRenderModel: {
       js: BASE + "shared/widget-kits/nav/RoutePointsRenderModel.js",
@@ -129,7 +130,8 @@
         "HtmlWidgetUtils",
         "RoutePointsRenderModel",
         "RoutePointsMarkup",
-        "RoutePointsDomEffects"
+        "RoutePointsDomEffects",
+        "ThemeResolver"
       ]
     },
     MapZoomTextHtmlWidget: {
@@ -143,6 +145,7 @@
         "PlaceholderNormalize",
         "PreparedPayloadModelCache",
         "StableDigits",
+        "ThemeResolver",
         "StateScreenLabels",
         "StateScreenPrecedence",
         "StateScreenInteraction",
@@ -154,7 +157,7 @@
       css: undefined,
       shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"],
       globalKey: "DyniAisTargetTextHtmlWidget",
-      deps: ["AisTargetHtmlFit", "HtmlWidgetUtils", "AisTargetRenderModel", "AisTargetMarkup"]
+      deps: ["AisTargetHtmlFit", "HtmlWidgetUtils", "AisTargetRenderModel", "AisTargetMarkup", "ThemeResolver"]
     },
     CenterDisplayTextWidget: {
       js: BASE + "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",

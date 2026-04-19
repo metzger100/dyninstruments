@@ -74,6 +74,20 @@ describe("RoutePointsTextHtmlWidget", function () {
         if (id === "HtmlWidgetUtils") {
           return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
         }
+        if (id === "ThemeResolver") {
+          return {
+            resolveForRoot() {
+              return {
+                font: {
+                  family: "sans-serif",
+                  familyMono: "monospace",
+                  weight: 720,
+                  labelWeight: 610
+                }
+              };
+            }
+          };
+        }
         if (id === "RoutePointsRenderModel") {
           return {
             create() {
@@ -108,6 +122,9 @@ describe("RoutePointsTextHtmlWidget", function () {
         }
         if (id === "StateScreenMarkup") {
           return loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
+        }
+        if (id === "StateScreenTextFit") {
+          return loadFresh("shared/widget-kits/state/StateScreenTextFit.js");
         }
         if (id === "StateScreenLabels") {
           return loadFresh("shared/widget-kits/state/StateScreenLabels.js");

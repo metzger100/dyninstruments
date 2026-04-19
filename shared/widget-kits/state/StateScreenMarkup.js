@@ -1,7 +1,7 @@
 /**
  * Module: StateScreenMarkup - Shared HTML wrapper/body markup for semantic state-screens
  * Documentation: documentation/shared/state-screens.md
- * Depends: HtmlWidgetUtils, StateScreenLabels
+ * Depends: HtmlWidgetUtils, StateScreenLabels, StateScreenTextFit
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -84,6 +84,26 @@
     const labelsApi = Helpers.getModule("StateScreenLabels");
     const labels = labelsApi.create(def, Helpers);
     const defaultHtmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+    const stateScreenTextFit = Helpers.getModule("StateScreenTextFit").create(def, Helpers);
+
+    function resolveLabelStyle(cfg, labelText) {
+      const explicit = typeof cfg.labelStyle === "string" ? cfg.labelStyle : cfg.fitStyle;
+      if (typeof explicit === "string" && explicit.trim()) {
+        return explicit;
+      }
+      return stateScreenTextFit.compute({
+        label: labelText,
+        shellRect: cfg.shellRect,
+        availableRect: cfg.availableRect,
+        textApi: cfg.textApi,
+        measureCtx: cfg.measureCtx,
+        family: cfg.fontFamily,
+        weight: cfg.fontWeight,
+        hostContext: cfg.hostContext,
+        targetEl: cfg.targetEl,
+        ownerDocument: cfg.ownerDocument
+      });
+    }
 
     function renderStateScreen(args) {
       const cfg = args || {};
@@ -95,6 +115,7 @@
       const labelText = typeof cfg.label === "string"
         ? cfg.label
         : (labels.LABELS[kind] || "");
+      const labelStyle = resolveLabelStyle(cfg, labelText);
       const attrs = resolveExtraAttrs(cfg.extraAttrs, htmlUtils);
 
       if (kind === labels.KINDS.HIDDEN) {
@@ -104,7 +125,7 @@
       return ''
         + '<div class="' + wrapperClasses.join(" ") + '"' + attrs + ">"
         + '<div class="dyni-state-screen-body">'
-        + '<span class="dyni-state-screen-label"' + htmlUtils.toStyleAttr(cfg.fitStyle) + ">"
+        + '<span class="dyni-state-screen-label"' + htmlUtils.toStyleAttr(labelStyle) + ">"
         + htmlUtils.escapeHtml(labelText)
         + "</span>"
         + "</div>"

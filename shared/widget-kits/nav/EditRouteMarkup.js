@@ -137,7 +137,10 @@
           label: toText(model.stateLabel),
           wrapperClasses: wrapperClasses,
           extraAttrs: 'data-dyni-action="edit-route-open"' + htmlUtils.toStyleAttr(model.wrapperStyle),
-          htmlUtils: htmlUtils
+          htmlUtils: htmlUtils,
+          shellRect: cfg.shellRect,
+          fontFamily: cfg.fontFamily,
+          fontWeight: cfg.fontWeight
         });
       }
 

@@ -37,6 +37,7 @@ describe("MapZoomTextHtmlWidget fallback rendering", function () {
         if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
         if (id === "StateScreenInteraction") return loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
         if (id === "StateScreenMarkup") return loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
+        if (id === "StateScreenTextFit") return loadFresh("shared/widget-kits/state/StateScreenTextFit.js");
         if (id === "ThemeResolver") {
           if (!moduleCache[id]) {
             moduleCache[id] = {
