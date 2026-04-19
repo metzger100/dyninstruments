@@ -13,6 +13,21 @@ describe("DepthLinearWidget", function () {
     const mod = loadFresh("widgets/linear/DepthLinearWidget/DepthLinearWidget.js");
     const spec = mod.create({}, {
       getModule(id) {
+        if (id === "PlaceholderNormalize") {
+          return {
+            create() {
+              return {
+                normalize(text, defaultText) {
+                  if (text == null) {
+                    return defaultText == null ? "---" : defaultText;
+                  }
+                  const value = String(text).trim();
+                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+                }
+              };
+            }
+          };
+        }
         if (id === "RadialValueMath") {
           return {
             create() {
@@ -80,6 +95,21 @@ describe("DepthLinearWidget", function () {
     const mod = loadFresh("widgets/linear/DepthLinearWidget/DepthLinearWidget.js");
     mod.create({}, {
       getModule(id) {
+        if (id === "PlaceholderNormalize") {
+          return {
+            create() {
+              return {
+                normalize(text, defaultText) {
+                  if (text == null) {
+                    return defaultText == null ? "---" : defaultText;
+                  }
+                  const value = String(text).trim();
+                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+                }
+              };
+            }
+          };
+        }
         if (id === "RadialValueMath") {
           return {
             create() {

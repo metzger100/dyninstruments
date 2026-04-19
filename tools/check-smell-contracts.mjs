@@ -13,7 +13,10 @@ const RULES = [
   { name: "falsy-default-preservation", run: runFalsyDefaultPreservationRule },
   { name: "mapper-output-no-nan", run: runMapperOutputNoNaNRule },
   { name: "text-layout-hotspot-budget", run: runTextLayoutHotspotBudgetRule },
-  { name: "coordinate-formatter-no-raw-equality-fallback", run: runCoordinateFormatterRule }
+  { name: "coordinate-formatter-no-raw-equality-fallback", run: runCoordinateFormatterRule },
+  { name: "placeholder-contract", run: runPlaceholderContractRule },
+  { name: "dash-literal-contract", run: runDashLiteralContractRule },
+  { name: "state-screen-precedence-contract", run: runStateScreenPrecedenceContractRule }
 ];
 
 export function runSmellContracts(options = {}) {
@@ -474,6 +477,139 @@ function runCoordinateFormatterRule() {
   return out;
 }
 
+function runPlaceholderContractRule() {
+  const out = [];
+  const files = collectSourceFiles(["cluster", "shared/widget-kits", "widgets"]);
+
+  for (const rel of files) {
+    if (rel === "shared/widget-kits/format/PlaceholderNormalize.js") continue;
+    if (rel === "shared/widget-kits/nav/RoutePointsRenderModel.js") continue;
+
+    const text = readFile(rel);
+    const applyMatches = findLineMatches(text, /Helpers\.applyFormatter\s*\(/g);
+    if (!applyMatches.length) continue;
+
+    const normalizeMatches = findLineMatches(text, /(?:PlaceholderNormalize|placeholderNormalize)\.normalize\s*\(/g);
+    for (const applyLine of applyMatches) {
+      const close = normalizeMatches.some((line) => Math.abs(line - applyLine) <= 12);
+      if (!close) {
+        out.push(makeFinding(rel, applyLine, "placeholder-contract", "Every Helpers.applyFormatter call site must stay paired with a nearby PlaceholderNormalize.normalize call."));
+      }
+    }
+  }
+
+  return out;
+}
+
+function runDashLiteralContractRule() {
+  const out = [];
+  const files = collectSourceFiles(["cluster", "shared/widget-kits", "widgets"]);
+  const bannedExact = new Set(["NO DATA", "--:--", "--:--:--", "-----"]);
+
+  for (const rel of files) {
+    if (rel === "shared/widget-kits/format/PlaceholderNormalize.js") continue;
+    if (rel === "shared/widget-kits/nav/RoutePointsRenderModel.js") continue;
+
+    const text = readFile(rel);
+    const stringLiterals = findStringLiterals(text);
+    for (const lit of stringLiterals) {
+      const trimmed = lit.value.trim();
+      if (bannedExact.has(trimmed)) {
+        out.push(makeFinding(rel, lit.line, "dash-literal-contract", `Forbidden placeholder literal "${trimmed}" found in widget source.`));
+        continue;
+      }
+      if (/^-{2,}$/.test(trimmed)) {
+        out.push(makeFinding(rel, lit.line, "dash-literal-contract", `Dash-only string literal "${trimmed}" is forbidden outside PlaceholderNormalize and RoutePointsRenderModel.`));
+      }
+    }
+  }
+
+  return out;
+}
+
+function runStateScreenPrecedenceContractRule() {
+  const out = [];
+  const files = collectSourceFiles(["cluster", "shared/widget-kits", "widgets"]);
+  const rankMap = {
+    disconnected: 0,
+    noRoute: 1,
+    noTarget: 2,
+    noAis: 3,
+    hidden: 4,
+    data: 5
+  };
+
+  for (const rel of files) {
+    if (rel === "shared/widget-kits/state/StateScreenPrecedence.js") continue;
+    const text = readFile(rel);
+    const callSites = findPickFirstCallSites(text);
+    for (const callSite of callSites) {
+      if (!callSite.inlineArray) {
+        out.push(makeFinding(rel, callSite.line, "state-screen-precedence-contract", "pickFirst() calls must pass an inline array literal so precedence can be validated."));
+        continue;
+      }
+
+      const kinds = callSite.kinds;
+      if (!kinds.length) {
+        out.push(makeFinding(rel, callSite.line, "state-screen-precedence-contract", "pickFirst([...]) must include at least one kind entry."));
+        continue;
+      }
+
+      const dataIndex = kinds.indexOf("data");
+      if (dataIndex !== -1) {
+        if (dataIndex !== kinds.length - 1) {
+          out.push(makeFinding(rel, callSite.line, "state-screen-precedence-contract", "data must be the last state-screen candidate."));
+        }
+        if (!callSite.dataWhenTrue) {
+          out.push(makeFinding(rel, callSite.line, "state-screen-precedence-contract", "data must use when: true."));
+        }
+      } else {
+        out.push(makeFinding(rel, callSite.line, "state-screen-precedence-contract", "pickFirst([...]) must include a data catch-all candidate."));
+      }
+
+      const hasHiddenFirst = kinds[0] === "hidden";
+      if (hasHiddenFirst) {
+        if (kinds[1] !== "disconnected") {
+          out.push(makeFinding(rel, callSite.line, "state-screen-precedence-contract", "AIS exception requires hidden to be followed immediately by disconnected."));
+          continue;
+        }
+      }
+      else if (kinds[0] !== "disconnected") {
+        out.push(makeFinding(rel, callSite.line, "state-screen-precedence-contract", "disconnected must be the first state-screen candidate unless the AIS hidden exception is used."));
+        continue;
+      }
+
+      let previousRank = -1;
+      const allowedKinds = hasHiddenFirst
+        ? new Set(["disconnected", "noAis", "data"])
+        : null;
+      const orderKinds = hasHiddenFirst ? kinds.slice(1) : kinds;
+      for (let i = 0; i < orderKinds.length; i += 1) {
+        const kind = orderKinds[i];
+        if (allowedKinds && !allowedKinds.has(kind)) {
+          out.push(makeFinding(rel, callSite.line, "state-screen-precedence-contract", "AIS state-screen order must be hidden > disconnected > noAis > data."));
+          previousRank = 999;
+          break;
+        }
+        const rank = rankMap[kind];
+        if (typeof rank !== "number") {
+          out.push(makeFinding(rel, callSite.line, "state-screen-precedence-contract", "Unknown state-screen kind '" + String(kind) + "'."));
+          previousRank = 999;
+          break;
+        }
+        if (rank < previousRank) {
+          out.push(makeFinding(rel, callSite.line, "state-screen-precedence-contract", "pickFirst([...]) candidates must follow canonical order disconnected > noRoute > noTarget > noAis > hidden > data."));
+          previousRank = 999;
+          break;
+        }
+        previousRank = rank;
+      }
+    }
+  }
+
+  return out;
+}
+
 function collectInvalidNumbers(value, prefix, out) {
   if (typeof value === "number" && !Number.isFinite(value)) {
     out.push(prefix + "=" + String(value));
@@ -574,6 +710,135 @@ function makeFinding(file, line, rule, detail) {
 
 function compareFindings(a, b) {
   return a.file.localeCompare(b.file) || a.line - b.line;
+}
+
+function collectSourceFiles(roots) {
+  const out = [];
+  for (const relRoot of roots) {
+    const abs = path.join(ROOT, relRoot);
+    if (!fs.existsSync(abs)) continue;
+    walkJsFiles(abs, relRoot.replace(/\\/g, "/"), out);
+  }
+  return out.sort();
+}
+
+function walkJsFiles(absDir, relDir, out) {
+  const entries = fs.readdirSync(absDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const abs = path.join(absDir, entry.name);
+    const rel = relDir ? relDir + "/" + entry.name : entry.name;
+    if (entry.isDirectory()) {
+      walkJsFiles(abs, rel, out);
+      continue;
+    }
+    if (entry.isFile() && entry.name.endsWith(".js")) {
+      out.push(rel.replace(/\\/g, "/"));
+    }
+  }
+}
+
+function findLineMatches(text, regex) {
+  const matches = [];
+  let match;
+  while ((match = regex.exec(text))) {
+    matches.push(lineFromIndex(text, match.index));
+  }
+  return matches;
+}
+
+function findStringLiterals(text) {
+  const out = [];
+  const re = /(["'])([^"'\\\n]*(?:\\.[^"'\\\n]*)*)\1/g;
+  let match;
+  while ((match = re.exec(text))) {
+    out.push({
+      line: lineFromIndex(text, match.index),
+      value: unescapeString(match[2])
+    });
+  }
+  return out;
+}
+
+function findPickFirstCallSites(text) {
+  const out = [];
+  let index = 0;
+  while ((index = text.indexOf("pickFirst", index)) !== -1) {
+    const line = lineFromIndex(text, index);
+    let cursor = index + "pickFirst".length;
+    cursor = skipWhitespace(text, cursor);
+    if (text[cursor] !== "(") {
+      index = cursor;
+      continue;
+    }
+    cursor = skipWhitespace(text, cursor + 1);
+    if (text[cursor] !== "[") {
+      out.push({ line: line, inlineArray: false, kinds: [], dataWhenTrue: false });
+      index = cursor;
+      continue;
+    }
+
+    const arrayStart = cursor;
+    const arrayEnd = findMatchingBracket(text, arrayStart, "[", "]");
+    if (arrayEnd === -1) {
+      out.push({ line: line, inlineArray: true, kinds: [], dataWhenTrue: false });
+      index = cursor + 1;
+      continue;
+    }
+
+    const callTail = skipWhitespace(text, arrayEnd + 1);
+    if (text[callTail] !== ")") {
+      out.push({ line: line, inlineArray: true, kinds: [], dataWhenTrue: false });
+      index = arrayEnd + 1;
+      continue;
+    }
+
+    const arrayText = text.slice(arrayStart, arrayEnd + 1);
+    const kindMatches = Array.from(arrayText.matchAll(/kind:\s*["']([^"']+)["']/g)).map((m) => m[1]);
+    const dataWhenTrue = /kind:\s*["']data["'][\s\S]*?when:\s*true/.test(arrayText);
+    out.push({ line: line, inlineArray: true, kinds: kindMatches, dataWhenTrue: dataWhenTrue });
+    index = arrayEnd + 1;
+  }
+  return out;
+}
+
+function findMatchingBracket(text, startIndex, openChar, closeChar) {
+  let depth = 0;
+  for (let i = startIndex; i < text.length; i += 1) {
+    const ch = text[i];
+    if (ch === openChar) depth += 1;
+    else if (ch === closeChar) {
+      depth -= 1;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+function skipWhitespace(text, index) {
+  let i = index;
+  while (i < text.length && /\s/.test(text[i])) i += 1;
+  return i;
+}
+
+function lineFromIndex(text, index) {
+  return text.slice(0, index).split(/\r?\n/).length;
+}
+
+function unescapeString(value) {
+  return value.replace(/\\(['"\\nrtbfv])/g, function (_, ch) {
+    switch (ch) {
+      case "n": return "\n";
+      case "r": return "\r";
+      case "t": return "\t";
+      case "b": return "\b";
+      case "f": return "\f";
+      case "v": return "\v";
+      case "'": return "'";
+      case '"': return '"';
+      case "\\": return "\\";
+      default: return ch;
+    }
+  });
 }
 
 function deepMerge(base, ext) {

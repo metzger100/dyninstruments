@@ -232,14 +232,14 @@ describe("config/components.js", function () {
       "StateScreenPrecedence",
       "StateScreenCanvasOverlay"
     ]);
-    expect(components.SpeedRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
-    expect(components.SpeedLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
-    expect(components.DepthLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
+    expect(components.SpeedRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]);
+    expect(components.SpeedLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
+    expect(components.DepthLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
     expect(components.DepthRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
-    expect(components.TemperatureLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
-    expect(components.TemperatureRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
-    expect(components.VoltageLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
-    expect(components.VoltageRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
+    expect(components.TemperatureLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
+    expect(components.TemperatureRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]);
+    expect(components.VoltageLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
+    expect(components.VoltageRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]);
     expect(components.XteDisplayWidget.deps).toEqual([
       "RadialToolkit",
       "CanvasLayerCache",
@@ -339,6 +339,7 @@ describe("config/components.js", function () {
     expect(components.MapZoomTextHtmlWidget.deps).toEqual([
       "MapZoomHtmlFit",
       "HtmlWidgetUtils",
+      "PlaceholderNormalize",
       "PreparedPayloadModelCache",
       "StateScreenLabels",
       "StateScreenPrecedence",

@@ -168,6 +168,24 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 2. Use explicit formatter dispatch/fallback only.
 3. Add renderer tests to ensure raw-string formatter output is treated as valid.
 
+### Placeholder normalization drift
+
+1. Move placeholder replacement to `PlaceholderNormalize.normalize(...)` at the render boundary.
+2. Remove widget-local placeholder fallback branches once the shared helper is wired in.
+3. Keep RoutePoints compound placeholders as the only documented carve-out.
+
+### Dash-literal placeholder drift
+
+1. Remove banned literal placeholder strings from widget/runtime source.
+2. Route all placeholder text through `PlaceholderNormalize`.
+3. Preserve the RoutePoints compound-placeholder carve-out when it is the intended contract.
+
+### State-screen precedence drift
+
+1. Keep `pickFirst([...])` calls inline so the checker can inspect the precedence order.
+2. Put `disconnected` first, with the AIS `hidden` exception allowed only when it must precede `disconnected`.
+3. Keep `data` as the final catch-all candidate.
+
 ### Cross-file clone drift
 
 1. Remove widget-local copy-paste blocks and move shared logic into `shared/widget-kits/`.

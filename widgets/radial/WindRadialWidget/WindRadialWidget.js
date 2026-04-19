@@ -1,7 +1,7 @@
 /**
  * Module: WindRadialWidget - Full-circle wind dial for angle and speed pairs
  * Documentation: documentation/widgets/wind-dial.md
- * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout, SpringEasing, StableDigits
+ * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout, SpringEasing, StableDigits, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -15,27 +15,32 @@
     const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers);
     const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
     const springMotion = Helpers.getModule("SpringEasing").create(def, Helpers).createMotion({ wrap: 360 });
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
     function windFormatSpeedText(raw, props, speedUnit) {
       const p = props || {};
       const n = Number(raw);
       if (!isFinite(n)) {
-        return p.default;
+        return Object.prototype.hasOwnProperty.call(p, "default")
+          ? p.default
+          : placeholderNormalize.normalize(undefined, undefined);
       }
 
       const formatter = p.formatter;
       const formatterParameters = p.formatterParameters;
 
-      return String(Helpers.applyFormatter(n, {
+      return placeholderNormalize.normalize(String(Helpers.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
         default: p.default
-      }));
+      })), Object.prototype.hasOwnProperty.call(p, "default") ? p.default : placeholderNormalize.normalize(undefined, undefined));
     }
 
     function windDisplay(state, props) {
       const p = props || {};
-      const defaultText = p.default;
+      const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
+        ? p.default
+        : placeholderNormalize.normalize(undefined, undefined);
       const angleUnit = String(p.angleUnit).trim();
       const speedUnit = String(p.speedUnit).trim();
       const secScale = state.value.clamp(p.captionUnitScale, 0.3, 3.0);

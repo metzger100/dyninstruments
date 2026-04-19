@@ -1,7 +1,7 @@
 /**
  * Module: MapZoomTextHtmlWidget - Interactive HTML renderer for map zoom kind
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: Helpers.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, PreparedPayloadModelCache, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
+ * Depends: Helpers.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, PlaceholderNormalize, PreparedPayloadModelCache, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
  */
 
 (function (root, factory) {
@@ -78,12 +78,12 @@
     return Math.max(MIN_CAPTION_UNIT_SCALE, Math.min(MAX_CAPTION_UNIT_SCALE, scale));
   }
 
-  function formatZoom(value, defaultText, Helpers) {
-    const out = String(Helpers.applyFormatter(value, {
+  function formatZoom(value, defaultText, Helpers, placeholderNormalize) {
+    const out = placeholderNormalize.normalize(String(Helpers.applyFormatter(value, {
       formatter: "formatDecimalOpt",
       formatterParameters: [2, 1],
       default: defaultText
-    }));
+    })), defaultText);
     return out.trim() ? out : defaultText;
   }
 
@@ -120,8 +120,9 @@
     const kind = resolveStateKind(p, stateScreenPrecedence);
     const zoomNumber = htmlUtils.toFiniteNumber(p.zoom);
     const requiredZoomNumber = htmlUtils.toFiniteNumber(p.requiredZoom);
-    const zoomText = formatZoom(zoomNumber, defaultText, Helpers);
-    const requiredText = formatZoom(requiredZoomNumber, defaultText, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(null, Helpers);
+    const zoomText = formatZoom(zoomNumber, defaultText, Helpers, placeholderNormalize);
+    const requiredText = formatZoom(requiredZoomNumber, defaultText, Helpers, placeholderNormalize);
     const showRequired = typeof requiredZoomNumber === "number" && requiredZoomNumber !== zoomNumber;
     const isEditing = htmlUtils.isEditingMode(p);
     const canDispatch = !isEditing && canDispatchCheckAutoZoom(p);

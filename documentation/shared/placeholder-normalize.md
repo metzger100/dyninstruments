@@ -5,7 +5,7 @@
 ## Overview
 
 `PlaceholderNormalize` is the shared normalization helper for formatter fallback text.
-In Phase 2, adoption is limited to the plan-target modules; other widgets still keep local placeholder handling until their migration phase.
+By the end of PLAN11, every widget/render-model path uses this helper at the render boundary, with the RoutePoints compound-placeholder carve-out preserved explicitly.
 
 ## Key Details
 
@@ -22,6 +22,8 @@ In Phase 2, adoption is limited to the plan-target modules; other widgets still 
 - Empty string (`""`)
 - Whitespace-only text
 - Dash-only text (via `DASH_ONLY_RE = /^\\s*-+\\s*$/`)
+- `"  -"` (`formatSpeed` fallback)
+- `"    -"` (`formatDistance` fallback)
 - `"--:--"` (`formatClock` fallback)
 - `"--:--:--"` (`formatTime` fallback)
 - `"----/--/--"` (`formatDate` fallback)
@@ -31,16 +33,8 @@ In Phase 2, adoption is limited to the plan-target modules; other widgets still 
 
 - Render-model/widget code must call `normalize(...)` directly on formatter outputs before writing display text.
 - Do not reintroduce widget-local `trim() ? text : default` placeholder branches for known formatter fallbacks.
-- RoutePoints missing-leg compound placeholders (for example `"--°/--nm"` and equivalent unit combinations) are an explicit carve-out and remain unchanged.
-- Phase 2 adoption scope:
-  - `ActiveRouteTextHtmlWidget`
-  - `EditRouteRenderModel`
-  - `RoutePointsRenderModel` (with missing-leg carve-out preserved)
-  - `AisTargetRenderModel`
-  - `XteDisplayWidget`
-  - `PositionCoordinateWidget`
-  - `ThreeValueTextWidget`
-  - `CenterDisplayTextWidget`
+- RoutePoints missing-leg compound placeholders (for example `"--kt/--nm"` and equivalent unit combinations) are an explicit carve-out and remain unchanged.
+- `PlaceholderNormalize.normalize(...)` is the single owner of canonical placeholder replacement across the plugin.
 
 ## Related
 

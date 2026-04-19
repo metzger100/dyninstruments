@@ -1,7 +1,7 @@
 /**
  * Module: WindLinearWidget - Linear wind gauge with angle pointer, layline sectors, and dual angle/speed text
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, RadialValueMath, StableDigits
+ * Depends: LinearGaugeEngine, RadialValueMath, StableDigits, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -15,6 +15,7 @@
     const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
     const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
     function splitHorizontal(box, gapPx) {
       const gap = Math.max(0, Math.floor(gapPx));
@@ -36,18 +37,20 @@
       const formatterParameters = hasOwn.call(p, "formatterParameters")
         ? p.formatterParameters
         : [speedUnit];
-      const out = String(Helpers.applyFormatter(n, {
+      const out = placeholderNormalize.normalize(String(Helpers.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
         default: defaultText
-      }));
+      })), defaultText);
       const trimmed = out.trim();
       return trimmed || defaultText;
     }
 
     function windDisplay(rawAngle, props) {
       const p = props || {};
-      const defaultText = p.default;
+      const defaultText = hasOwn.call(p, "default")
+        ? p.default
+        : placeholderNormalize.normalize(undefined, undefined);
       const angle = Number(rawAngle);
       const angleText = isFinite(angle)
         ? valueMath.formatAngle180(angle, !!p.leadingZero)

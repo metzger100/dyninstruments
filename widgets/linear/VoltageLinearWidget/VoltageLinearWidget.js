@@ -1,7 +1,7 @@
 /**
  * Module: VoltageLinearWidget - Linear voltage gauge with low-end warning/alarm sectors
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, RadialValueMath
+ * Depends: LinearGaugeEngine, RadialValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,10 +13,13 @@
   function create(def, Helpers) {
     const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
     function formatDisplay(raw, props) {
       const p = props || {};
-      const defaultText = p.default;
+      const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
+        ? p.default
+        : placeholderNormalize.normalize(undefined, undefined);
       const n = Number(raw);
       if (!isFinite(n)) {
         return { num: NaN, text: defaultText };
@@ -26,11 +29,11 @@
       const formatterParameters = (typeof p.formatterParameters !== "undefined")
         ? p.formatterParameters
         : [3, 1, true];
-      const formatted = String(Helpers.applyFormatter(n, {
+      const formatted = placeholderNormalize.normalize(String(Helpers.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
         default: defaultText
-      }));
+      })), defaultText);
 
       const numberText = valueMath.extractNumberText(formatted);
       const parsed = numberText ? Number(numberText) : NaN;

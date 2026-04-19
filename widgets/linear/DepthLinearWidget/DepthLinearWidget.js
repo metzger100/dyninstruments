@@ -1,7 +1,7 @@
 /**
  * Module: DepthLinearWidget - Linear depth gauge with low-end warning/alarm sectors
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, RadialValueMath
+ * Depends: LinearGaugeEngine, RadialValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,12 +14,12 @@
   function create(def, Helpers) {
     const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
     function resolveDefaultText(props) {
       if (props && hasOwn.call(props, "default")) {
         return props.default;
       }
-      // dyni-lint-disable-next-line hardcoded-runtime-default -- Standalone formatter helpers still need the shared missing-value placeholder when no default prop is supplied.
-      return "---";
+      return placeholderNormalize.normalize(undefined, undefined);
     }
 
     function formatDisplay(raw, props) {

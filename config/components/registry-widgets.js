@@ -135,6 +135,7 @@
       deps: [
         "MapZoomHtmlFit",
         "HtmlWidgetUtils",
+        "PlaceholderNormalize",
         "PreparedPayloadModelCache",
         "StateScreenLabels",
         "StateScreenPrecedence",
@@ -180,7 +181,7 @@
       js: BASE + "widgets/linear/DepthLinearWidget/DepthLinearWidget.js",
       css: undefined,
       globalKey: "DyniDepthLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath"]
+      deps: ["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]
     },
     DepthRadialWidget: {
       js: BASE + "widgets/radial/DepthRadialWidget/DepthRadialWidget.js",
@@ -218,25 +219,25 @@
       js: BASE + "widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js",
       css: undefined,
       globalKey: "DyniSpeedLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath"]
+      deps: ["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]
     },
     SpeedRadialWidget: {
       js: BASE + "widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js",
       css: undefined,
       globalKey: "DyniSpeedRadialWidget",
-      deps: ["SemicircleRadialEngine", "RadialValueMath"]
+      deps: ["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]
     },
     TemperatureLinearWidget: {
       js: BASE + "widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js",
       css: undefined,
       globalKey: "DyniTemperatureLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath"]
+      deps: ["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]
     },
     TemperatureRadialWidget: {
       js: BASE + "widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js",
       css: undefined,
       globalKey: "DyniTemperatureRadialWidget",
-      deps: ["SemicircleRadialEngine", "RadialValueMath"]
+      deps: ["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]
     },
     ThreeValueTextWidget: {
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
@@ -248,13 +249,13 @@
       js: BASE + "widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js",
       css: undefined,
       globalKey: "DyniVoltageLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath"]
+      deps: ["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]
     },
     VoltageRadialWidget: {
       js: BASE + "widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js",
       css: undefined,
       globalKey: "DyniVoltageRadialWidget",
-      deps: ["SemicircleRadialEngine", "RadialValueMath"]
+      deps: ["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]
     },
     WindLinearWidget: {
       js: BASE + "widgets/linear/WindLinearWidget/WindLinearWidget.js",

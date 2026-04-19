@@ -15,6 +15,7 @@ describe("MapZoomTextHtmlWidget", function () {
     ResponsiveScaleProfile: "shared/widget-kits/layout/ResponsiveScaleProfile.js",
     RadialTextLayout: "shared/widget-kits/radial/RadialTextLayout.js",
     RadialTextFitting: "shared/widget-kits/radial/RadialTextFitting.js",
+    PlaceholderNormalize: "shared/widget-kits/format/PlaceholderNormalize.js",
     PreparedPayloadModelCache: "shared/widget-kits/html/PreparedPayloadModelCache.js",
     StateScreenLabels: "shared/widget-kits/state/StateScreenLabels.js",
     StateScreenPrecedence: "shared/widget-kits/state/StateScreenPrecedence.js",
@@ -211,6 +212,25 @@ describe("MapZoomTextHtmlWidget", function () {
     const wrapper = mounted.mountEl.querySelector(".dyni-map-zoom-html");
     wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(checkAutoZoom).not.toHaveBeenCalled();
+  });
+
+  it("normalizes placeholder formatter output to the shared default token", function () {
+    const renderer = createRenderer({
+      applyFormatter(value, formatterOptions) {
+        const cfg = formatterOptions || {};
+        if (cfg.formatter === "formatDecimalOpt") {
+          return "NO DATA";
+        }
+        return value == null ? cfg.default : String(value);
+      }
+    });
+    const mounted = mountCommitted(
+      renderer,
+      withSurfacePolicy(makeProps({ zoom: 12.2, requiredZoom: 11.9 }), { mode: "dispatch" })
+    );
+
+    expect(mounted.html()).toContain("---");
+    expect(mounted.html()).not.toContain("NO DATA");
   });
 
   it("always consults MapZoomHtmlFit when a shell rect exists", function () {

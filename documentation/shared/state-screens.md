@@ -23,6 +23,8 @@ Each widget owns resolver logic and uses shared helpers for labels, precedence, 
 - `StateScreenInteraction.resolveInteraction({ kind, baseInteraction })` forces `passive` for any non-`data` kind.
 - `StateScreenMarkup.renderStateScreen(...)` emits wrapper markup with `dyni-state-<kind>` class and passive interaction class normalization.
 - `StateScreenCanvasOverlay.drawStateScreen(...)` draws dim-and-label overlay for non-`hidden` non-`data` kinds.
+- `pickFirst([...])` call sites stay inline so the precedence contract can validate the candidate order mechanically.
+- Canonical order is enforced at the call site: `disconnected > noRoute > noTarget > noAis > hidden > data`, with AIS allowed to use `hidden > disconnected > noAis > data`.
 
 ## API/Interfaces
 

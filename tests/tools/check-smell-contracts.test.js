@@ -241,4 +241,63 @@ function format(out, n, fallbackText) {
     expect(result.summary.ok).toBe(false);
     expect(messages(result)).toContain("[coordinate-formatter-no-raw-equality-fallback]");
   });
+
+  it("fails placeholder-contract when formatter output is not normalized nearby", function () {
+    const cwd = createWorkspace({
+      "shared/widget-kits/nav/EditRouteRenderModel.js": `
+function render(Helpers) {
+  const text = Helpers.applyFormatter(10, { formatter: "formatDistance", default: "---" });
+  return text;
+}
+`
+    });
+
+    const result = runSmellContracts({
+      root: cwd,
+      enabledRules: ["placeholder-contract"],
+      print: false
+    });
+    expect(result.summary.ok).toBe(false);
+    expect(messages(result)).toContain("[placeholder-contract]");
+  });
+
+  it("fails dash-literal-contract when a widget source keeps a banned placeholder literal", function () {
+    const cwd = createWorkspace({
+      "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js": `
+function render() {
+  return "NO DATA";
+}
+`
+    });
+
+    const result = runSmellContracts({
+      root: cwd,
+      enabledRules: ["dash-literal-contract"],
+      print: false
+    });
+    expect(result.summary.ok).toBe(false);
+    expect(messages(result)).toContain("[dash-literal-contract]");
+  });
+
+  it("fails state-screen-precedence-contract when pickFirst order is not canonical", function () {
+    const cwd = createWorkspace({
+      "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js": `
+function resolve(precedence, props) {
+  return precedence.pickFirst([
+    { kind: "noRoute", when: props.routeName === "" },
+    { kind: "disconnected", when: props.disconnect === true },
+    { kind: "data", when: true }
+  ]);
+}
+`
+    });
+
+    const result = runSmellContracts({
+      root: cwd,
+      enabledRules: ["state-screen-precedence-contract"],
+      print: false
+    });
+    expect(result.summary.ok).toBe(false);
+    expect(messages(result)).toContain("[state-screen-precedence-contract]");
+  });
 });

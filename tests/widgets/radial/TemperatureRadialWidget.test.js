@@ -15,6 +15,21 @@ describe("TemperatureRadialWidget", function () {
     const spec = mod.create({}, {
       applyFormatter,
       getModule(id) {
+        if (id === "PlaceholderNormalize") {
+          return {
+            create() {
+              return {
+                normalize(text, defaultText) {
+                  if (text == null) {
+                    return defaultText == null ? "---" : defaultText;
+                  }
+                  const value = String(text).trim();
+                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+                }
+              };
+            }
+          };
+        }
         if (id === "RadialValueMath") {
           return {
             create() {
@@ -75,6 +90,21 @@ describe("TemperatureRadialWidget", function () {
         return "not-a-number";
       },
       getModule(id) {
+        if (id === "PlaceholderNormalize") {
+          return {
+            create() {
+              return {
+                normalize(text, defaultText) {
+                  if (text == null) {
+                    return defaultText == null ? "---" : defaultText;
+                  }
+                  const value = String(text).trim();
+                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+                }
+              };
+            }
+          };
+        }
         if (id === "RadialValueMath") {
           return {
             create() {
@@ -111,5 +141,70 @@ describe("TemperatureRadialWidget", function () {
       formatter: "formatTemperature",
       formatterParameters: ["celsius"]
     })).toEqual({ num: NaN, text: "---" });
+  });
+
+  it("normalizes shared placeholder formatter output before parsing", function () {
+    let captured;
+    let seenText = "";
+    const renderCanvas = vi.fn();
+
+    const mod = loadFresh("widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js");
+    mod.create({}, {
+      applyFormatter() {
+        return "NO DATA";
+      },
+      getModule(id) {
+        if (id === "PlaceholderNormalize") {
+          return {
+            create() {
+              return {
+                normalize(text, defaultText) {
+                  if (text == null) {
+                    return defaultText == null ? "---" : defaultText;
+                  }
+                  const value = String(text).trim();
+                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+                }
+              };
+            }
+          };
+        }
+        if (id === "RadialValueMath") {
+          return {
+            create() {
+              return {
+                extractNumberText(text) {
+                  seenText = String(text);
+                  return "";
+                },
+                buildHighEndSectors() {
+                  return [];
+                },
+                resolveTemperatureSemicircleTickSteps() {
+                  return { major: 10, minor: 2 };
+                }
+              };
+            }
+          };
+        }
+        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
+        return {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return renderCanvas;
+              }
+            };
+          }
+        };
+      }
+    });
+
+    expect(captured.formatDisplay(300, {
+      formatter: "formatTemperature",
+      formatterParameters: ["celsius"]
+    })).toEqual({ num: NaN, text: "---" });
+    expect(seenText).toBe("---");
   });
 });

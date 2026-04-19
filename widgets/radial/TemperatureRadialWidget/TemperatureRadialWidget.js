@@ -1,7 +1,7 @@
 /**
  * Module: TemperatureRadialWidget - Semicircle temperature gauge with high-end sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleRadialEngine, RadialValueMath
+ * Depends: SemicircleRadialEngine, RadialValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,15 +14,15 @@
   function create(def, Helpers) {
     const renderer = Helpers.getModule("SemicircleRadialEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
     function resolveDefaultText(props) {
       if (props && hasOwn.call(props, "default")) {
         return props.default;
       }
-      // dyni-lint-disable-next-line hardcoded-runtime-default -- Standalone formatter helpers still need the shared missing-value placeholder when no default prop is supplied.
-      return "---";
+      return placeholderNormalize.normalize(undefined, undefined);
     }
 
-    function toCelsiusNumber(raw, props) {
+    function toCelsiusNumber(raw, props, defaultText) {
       const p = props || {};
       const n = Number(raw);
       if (!isFinite(n)) {
@@ -34,11 +34,11 @@
         ? p.formatterParameters
         : ["celsius"];
 
-      const formatted = String(Helpers.applyFormatter(n, {
+      const formatted = placeholderNormalize.normalize(String(Helpers.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
         default: p.default
-      }));
+      })), defaultText);
       const numberText = valueMath.extractNumberText(formatted);
       const parsed = numberText ? Number(numberText) : NaN;
 
@@ -47,7 +47,7 @@
 
     function displayTempFromRaw(raw, decimals, props) {
       const defaultText = resolveDefaultText(props);
-      const celsius = toCelsiusNumber(raw, props);
+      const celsius = toCelsiusNumber(raw, props, defaultText);
       if (!isFinite(celsius)) {
         return { num: NaN, text: defaultText };
       }

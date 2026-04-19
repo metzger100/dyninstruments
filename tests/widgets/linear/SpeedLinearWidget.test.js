@@ -16,6 +16,21 @@ describe("SpeedLinearWidget", function () {
     const spec = mod.create({}, {
       applyFormatter,
       getModule(id) {
+        if (id === "PlaceholderNormalize") {
+          return {
+            create() {
+              return {
+                normalize(text, defaultText) {
+                  if (text == null) {
+                    return defaultText == null ? "---" : defaultText;
+                  }
+                  const value = String(text).trim();
+                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+                }
+              };
+            }
+          };
+        }
         if (id === "RadialValueMath") {
           return {
             create() {
@@ -93,6 +108,21 @@ describe("SpeedLinearWidget", function () {
         return String(value);
       },
       getModule(id) {
+        if (id === "PlaceholderNormalize") {
+          return {
+            create() {
+              return {
+                normalize(text, defaultText) {
+                  if (text == null) {
+                    return defaultText == null ? "---" : defaultText;
+                  }
+                  const value = String(text).trim();
+                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+                }
+              };
+            }
+          };
+        }
         if (id === "RadialValueMath") {
           return {
             create() {

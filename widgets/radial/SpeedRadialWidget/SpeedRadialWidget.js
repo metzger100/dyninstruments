@@ -1,7 +1,7 @@
 /**
  * Module: SpeedRadialWidget - Semicircle speedometer with high-end warning/alarm sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleRadialEngine, RadialValueMath
+ * Depends: SemicircleRadialEngine, RadialValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,10 +13,13 @@
   function create(def, Helpers) {
     const renderer = Helpers.getModule("SemicircleRadialEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
     function formatSpeedString(raw, props, unit) {
       const p = props || {};
-      const defaultText = p.default;
+      const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
+        ? p.default
+        : placeholderNormalize.normalize(undefined, undefined);
       const n = Number(raw);
       if (!isFinite(n)) {
         return defaultText;
@@ -27,11 +30,11 @@
         ? p.formatterParameters
         : [unit || "kn"];
 
-      const formatted = String(Helpers.applyFormatter(n, {
+      const formatted = placeholderNormalize.normalize(String(Helpers.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
         default: defaultText
-      }));
+      })), defaultText);
 
       return formatted;
     }

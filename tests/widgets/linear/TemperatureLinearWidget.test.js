@@ -15,6 +15,21 @@ describe("TemperatureLinearWidget", function () {
     const spec = mod.create({}, {
       applyFormatter,
       getModule(id) {
+        if (id === "PlaceholderNormalize") {
+          return {
+            create() {
+              return {
+                normalize(text, defaultText) {
+                  if (text == null) {
+                    return defaultText == null ? "---" : defaultText;
+                  }
+                  const value = String(text).trim();
+                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+                }
+              };
+            }
+          };
+        }
         if (id === "RadialValueMath") {
           return {
             create() {
@@ -83,6 +98,21 @@ describe("TemperatureLinearWidget", function () {
         return "n/a";
       },
       getModule(id) {
+        if (id === "PlaceholderNormalize") {
+          return {
+            create() {
+              return {
+                normalize(text, defaultText) {
+                  if (text == null) {
+                    return defaultText == null ? "---" : defaultText;
+                  }
+                  const value = String(text).trim();
+                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+                }
+              };
+            }
+          };
+        }
         if (id === "RadialValueMath") {
           return {
             create() {
@@ -119,5 +149,69 @@ describe("TemperatureLinearWidget", function () {
       formatter: "formatTemperature",
       formatterParameters: ["celsius"]
     })).toEqual({ num: NaN, text: "---" });
+  });
+
+  it("normalizes shared placeholder formatter output before parsing", function () {
+    let captured;
+    let seenText = "";
+
+    const mod = loadFresh("widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js");
+    mod.create({}, {
+      applyFormatter() {
+        return "NO DATA";
+      },
+      getModule(id) {
+        if (id === "PlaceholderNormalize") {
+          return {
+            create() {
+              return {
+                normalize(text, defaultText) {
+                  if (text == null) {
+                    return defaultText == null ? "---" : defaultText;
+                  }
+                  const value = String(text).trim();
+                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+                }
+              };
+            }
+          };
+        }
+        if (id === "RadialValueMath") {
+          return {
+            create() {
+              return {
+                extractNumberText(text) {
+                  seenText = String(text);
+                  return "";
+                },
+                clamp(v, lo, hi) {
+                  return Math.max(lo, Math.min(hi, Number(v)));
+                },
+                resolveTemperatureSemicircleTickSteps() {
+                  return { major: 10, minor: 2 };
+                }
+              };
+            }
+          };
+        }
+        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
+        return {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return function () {};
+              }
+            };
+          }
+        };
+      }
+    });
+
+    expect(captured.formatDisplay(23.4, {
+      formatter: "formatTemperature",
+      formatterParameters: ["celsius"]
+    })).toEqual({ num: NaN, text: "---" });
+    expect(seenText).toBe("---");
   });
 });
