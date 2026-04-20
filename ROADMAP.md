@@ -14,11 +14,12 @@ It tracks pre-release priorities and AvNav widget coverage status.
 ### Core widgets to implement
 
 - Page-shell-owned widget: `Alarm`
+- A new cluster dyni_Default_Instruments with "empty" widgets of every type (radialGauge, linearGauge, threeElements) with extensive customizability to be available for "selfconfigurable" Instruments for external values of other Plugins oder Apps that are not covered by the Plugin
 
 ### Fixes for existing widgets and architecture
 
-- Add option to hide additional Metrics in XTE
-- Add 180° option to the linear compasses
+- Add option to hide textual Metrics in graphical Widgets like (radial, linear, compass, XTE etc.). Note: some widgets also need to center aligned (e.g.: XTE and linear) or stretched (e.g.: XTE and linear), when the textual metrics are hidden, while others just hide the text (e.g.: compass radial, radial gauges) (default: off)
+- Add 180° option to the linear compasses (default: off)
 
 ### Additional non-core concepts
 
