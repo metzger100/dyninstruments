@@ -31,6 +31,9 @@ describe("ClusterSurfacePolicy", function () {
       },
       ais: {
         showInfo: opts.showInfo || vi.fn(() => true)
+      },
+      alarm: {
+        stopAll: opts.stopAll || vi.fn(() => true)
       }
     };
   }
@@ -166,5 +169,80 @@ describe("ClusterSurfacePolicy", function () {
     expect(thirdMode).toBe("passive");
     expect(getCapabilities).toHaveBeenCalledTimes(3);
     expect(normalizationGetterReads).toBe(2);
+  });
+
+  it("dispatches alarm only when active, dispatch-capable, and not editing", function () {
+    const policy = createPolicy();
+    const stopAll = vi.fn(() => true);
+    const routeState = makeRouteState("AlarmTextHtmlWidget", {
+      cluster: "vessel",
+      kind: "alarm",
+      domain: {
+        state: "active"
+      }
+    });
+    const hostContext = {
+      hostActions: makeHostActions({
+        capabilities: {
+          pageId: "navpage",
+          alarm: { stopAll: "dispatch" }
+        },
+        stopAll: stopAll
+      })
+    };
+
+    const routed = policy.resolveRouteStateWithPolicy(routeState, hostContext);
+
+    expect(routed.props.surfacePolicy.interaction.mode).toBe("dispatch");
+    expect(routed.props.surfacePolicy.actions.alarm.stopAll()).toBe(true);
+    expect(stopAll).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps active alarm passive when stop-all is unsupported", function () {
+    const policy = createPolicy();
+    const routeState = makeRouteState("AlarmTextHtmlWidget", {
+      cluster: "vessel",
+      kind: "alarm",
+      domain: {
+        state: "active"
+      }
+    });
+    const hostContext = {
+      hostActions: makeHostActions({
+        capabilities: {
+          pageId: "navpage",
+          alarm: { stopAll: "unsupported" }
+        }
+      })
+    };
+
+    const routed = policy.resolveRouteStateWithPolicy(routeState, hostContext);
+
+    expect(routed.props.surfacePolicy.interaction.mode).toBe("passive");
+  });
+
+  it("forces alarm passive when idle or layout editing is active", function () {
+    const policy = createPolicy();
+    const routeState = makeRouteState("AlarmTextHtmlWidget", {
+      cluster: "vessel",
+      kind: "alarm",
+      editing: true,
+      domain: {
+        state: "idle"
+      }
+    });
+    const hostContext = {
+      hostActions: makeHostActions({
+        capabilities: {
+          pageId: "navpage",
+          alarm: { stopAll: "dispatch" }
+        }
+      })
+    };
+
+    const routed = policy.resolveRouteStateWithPolicy(routeState, hostContext);
+
+    expect(routed.props.surfacePolicy.interaction.mode).toBe("passive");
+    expect(routed.props.surfacePolicy.actions.alarm.stopAll()).toBe(true);
   });
 });

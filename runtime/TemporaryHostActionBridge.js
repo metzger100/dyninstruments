@@ -1,14 +1,13 @@
 /**
  * Module: DyniPlugin TemporaryHostActionBridge - Temporary runtime facade for host-owned workflow dispatch
  * Documentation: documentation/avnav-api/plugin-lifecycle.md
- * Depends: avnav.api, DOM page roots
+ * Depends: avnav.api, DOM page roots, TemporaryHostActionBridgeDiscovery
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
-  const PAGE_IDS = ["editroutepage", "gpspage", "navpage"];
 
   function createBridgeError(message) {
     const error = new Error("TemporaryHostActionBridge: " + message);
@@ -16,118 +15,9 @@
     return error;
   }
 
-  function hasOwn(obj, key) {
-    return !!obj && Object.prototype.hasOwnProperty.call(obj, key);
-  }
-
   function toFiniteNumber(value) {
     const n = Number(value);
     return Number.isFinite(n) ? n : undefined;
-  }
-
-  function getPageRoot(pageId, doc) {
-    if (!doc || typeof doc.getElementById !== "function" || pageId === "other") {
-      return null;
-    }
-    return doc.getElementById(pageId);
-  }
-
-  function detectPageId(doc) {
-    for (let i = 0; i < PAGE_IDS.length; i++) {
-      if (getPageRoot(PAGE_IDS[i], doc)) {
-        return PAGE_IDS[i];
-      }
-    }
-    return "other";
-  }
-
-  function getOwnPropertyNamesSafe(obj) {
-    if (!obj || (typeof obj !== "object" && typeof obj !== "function")) {
-      return [];
-    }
-    try {
-      return Object.getOwnPropertyNames(obj);
-    }
-    // dyni-lint-disable-next-line catch-fallback-without-suppression -- DOM host objects can reject property enumeration; bridge discovery treats that as a non-match and keeps scanning.
-    catch (err) {
-      return [];
-    }
-  }
-
-  function findObjectKeyByPrefix(obj, prefix) {
-    const keys = getOwnPropertyNamesSafe(obj);
-    for (let i = 0; i < keys.length; i++) {
-      if (keys[i].indexOf(prefix) === 0) {
-        return keys[i];
-      }
-    }
-    return null;
-  }
-
-  function getReactFiber(element) {
-    if (!element) {
-      return null;
-    }
-    const fiberKey = findObjectKeyByPrefix(element, "__reactFiber$");
-    if (fiberKey && element[fiberKey]) {
-      return element[fiberKey];
-    }
-    const containerKey = findObjectKeyByPrefix(element, "__reactContainer$");
-    return containerKey ? element[containerKey] : null;
-  }
-
-  function findFiberProp(element, propName) {
-    let currentElement = element;
-    while (currentElement) {
-      let fiber = getReactFiber(currentElement);
-      while (fiber) {
-        const props = fiber.memoizedProps || fiber.pendingProps;
-        if (props && hasOwn(props, propName) && typeof props[propName] === "function") {
-          return props[propName];
-        }
-        fiber = fiber.return;
-      }
-      currentElement = currentElement.parentElement || null;
-    }
-    return null;
-  }
-
-  function collectDispatchTargets(pageRoot) {
-    const targets = [];
-    if (pageRoot) {
-      targets.push(pageRoot);
-      if (typeof pageRoot.querySelectorAll === "function") {
-        const descendants = pageRoot.querySelectorAll(".widgetContainer, .listContainer");
-        for (let i = 0; i < descendants.length; i++) {
-          targets.push(descendants[i]);
-        }
-      }
-    }
-    return targets;
-  }
-
-  function findPageDispatchHandler(pageId, doc, propNames) {
-    const pageRoot = getPageRoot(pageId, doc);
-    const targets = collectDispatchTargets(pageRoot);
-    const names = Array.isArray(propNames) && propNames.length > 0 ? propNames : ["onItemClick"];
-    for (let i = 0; i < targets.length; i++) {
-      for (let j = 0; j < names.length; j++) {
-        const handler = findFiberProp(targets[i], names[j]);
-        if (typeof handler === "function") {
-          return handler;
-        }
-      }
-    }
-    return null;
-  }
-
-  function createSyntheticEvent(avnavData) {
-    return {
-      type: "click",
-      avnav: avnavData || {},
-      stopPropagation: function () {},
-      preventDefault: function () {}
-    };
   }
 
   function normalizeRoutePointIndex(index) {
@@ -155,7 +45,7 @@
     if (!pointSnapshot || typeof pointSnapshot !== "object") {
       throw createBridgeError("routePoints.activate requires pointSnapshot on editroutepage");
     }
-    if (!hasOwn(pointSnapshot, "idx")) {
+    if (!Object.prototype.hasOwnProperty.call(pointSnapshot, "idx")) {
       throw createBridgeError("routePoints.activate requires pointSnapshot.idx on editroutepage");
     }
 
@@ -167,7 +57,7 @@
       throw createBridgeError("routePoints.activate requires finite pointSnapshot.lat/lon on editroutepage");
     }
 
-    if (!hasOwn(pointSnapshot, "routeName")) {
+    if (!Object.prototype.hasOwnProperty.call(pointSnapshot, "routeName")) {
       throw createBridgeError("routePoints.activate requires pointSnapshot.routeName on editroutepage");
     }
 
@@ -179,19 +69,19 @@
       routeName: pointSnapshot.routeName == null ? "" : String(pointSnapshot.routeName).trim()
     };
 
-    if (hasOwn(pointSnapshot, "course")) {
+    if (Object.prototype.hasOwnProperty.call(pointSnapshot, "course")) {
       const course = toFiniteNumber(pointSnapshot.course);
       if (typeof course === "number") {
         hostPoint.course = course;
       }
     }
-    if (hasOwn(pointSnapshot, "distance")) {
+    if (Object.prototype.hasOwnProperty.call(pointSnapshot, "distance")) {
       const distance = toFiniteNumber(pointSnapshot.distance);
       if (typeof distance === "number") {
         hostPoint.distance = distance;
       }
     }
-    if (hasOwn(pointSnapshot, "selected")) {
+    if (Object.prototype.hasOwnProperty.call(pointSnapshot, "selected")) {
       hostPoint.selected = pointSnapshot.selected === true;
     }
 
@@ -209,7 +99,7 @@
   }
 
   function create(rootRef) {
-    const doc = rootRef.document;
+    const discovery = runtime.createTemporaryHostActionBridgeDiscovery(rootRef, createBridgeError);
     let destroyed = false;
     let cachedFacade = null;
     let cachedCapabilitiesKey = null;
@@ -241,10 +131,13 @@
       if (snapshot.ais) {
         Object.freeze(snapshot.ais);
       }
+      if (snapshot.alarm) {
+        Object.freeze(snapshot.alarm);
+      }
       return Object.freeze(snapshot);
     }
 
-    function buildCapabilitiesSnapshot(pageId, hasRoutePointsRelay, hasEditRouteParityDispatch) {
+    function buildCapabilitiesSnapshot(pageId, hasRoutePointsRelay, hasEditRouteParityDispatch, hasAlarmDispatch) {
       return freezeCapabilitiesSnapshot({
         pageId: pageId,
         routePoints: {
@@ -263,19 +156,24 @@
         },
         ais: {
           showInfo: (pageId === "navpage" || pageId === "gpspage") ? "dispatch" : "unsupported"
+        },
+        alarm: {
+          stopAll: hasAlarmDispatch ? "dispatch" : "unsupported"
         }
       });
     }
 
     function resolveCapabilities() {
-      const pageId = detectPageId(doc);
+      const pageId = discovery.detectPageId();
       const routePointsApi = getRoutePointsApi();
       const hasRoutePointsRelay = !!(routePointsApi && typeof routePointsApi.activate === "function");
       const hasEditRouteParityDispatch = pageId === "editroutepage"
-        && typeof findPageDispatchHandler(pageId, doc, ["onItemClick", "widgetClick"]) === "function";
+        && typeof discovery.findPageDispatchHandler(pageId, ["onItemClick", "widgetClick"]) === "function";
+      const hasAlarmDispatch = discovery.hasAlarmDispatch();
       const cacheKey = pageId
         + "|" + (hasRoutePointsRelay ? "1" : "0")
-        + "|" + (hasEditRouteParityDispatch ? "1" : "0");
+        + "|" + (hasEditRouteParityDispatch ? "1" : "0")
+        + "|" + (hasAlarmDispatch ? "1" : "0");
       if (cacheKey === cachedCapabilitiesKey && cachedCapabilitiesSnapshot) {
         return cachedCapabilitiesSnapshot;
       }
@@ -283,18 +181,10 @@
       cachedCapabilitiesSnapshot = buildCapabilitiesSnapshot(
         pageId,
         hasRoutePointsRelay,
-        hasEditRouteParityDispatch
+        hasEditRouteParityDispatch,
+        hasAlarmDispatch
       );
       return cachedCapabilitiesSnapshot;
-    }
-
-    function dispatchViaPageHandler(actionName, pageId, avnavData, propNames, missingLabel) {
-      const handler = findPageDispatchHandler(pageId, doc, propNames);
-      if (typeof handler !== "function") {
-        throw createBridgeError(actionName + " missing host " + missingLabel + " handler on " + pageId);
-      }
-      handler(createSyntheticEvent(avnavData));
-      return true;
     }
 
     cachedFacade = {
@@ -316,7 +206,7 @@
           if (capabilities.pageId === "editroutepage") {
             const parityPoint = buildEditRoutePointPayload(activation.pointSnapshot);
             // dyni-workaround(avnav-plugin-actions) -- keep RoutePoints parity in EditRoutePage via host click wiring until core exposes a stable plugin host-action API.
-            return dispatchViaPageHandler(
+            return discovery.dispatchPageAction(
               "routePoints.activate",
               capabilities.pageId,
               {
@@ -347,7 +237,7 @@
             return false;
           }
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native Zoom dispatch until core exposes map actions.
-          return dispatchViaPageHandler("map.checkAutoZoom", capabilities.pageId, {
+          return discovery.dispatchPageAction("map.checkAutoZoom", capabilities.pageId, {
             item: { name: "Zoom" }
           }, ["onItemClick"], "onItemClick");
         }
@@ -360,7 +250,7 @@
             return false;
           }
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native ActiveRoute dispatch until core exposes routeEditor actions.
-          return dispatchViaPageHandler("routeEditor.openActiveRoute", capabilities.pageId, {
+          return discovery.dispatchPageAction("routeEditor.openActiveRoute", capabilities.pageId, {
             item: { name: "ActiveRoute" }
           }, ["onItemClick"], "onItemClick");
         },
@@ -371,7 +261,7 @@
             return false;
           }
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native EditRoute dialog dispatch until core exposes routeEditor actions.
-          return dispatchViaPageHandler("routeEditor.openEditRoute", capabilities.pageId, {
+          return discovery.dispatchPageAction("routeEditor.openEditRoute", capabilities.pageId, {
             item: { name: "EditRoute" }
           }, ["onItemClick"], "onItemClick");
         }
@@ -385,10 +275,28 @@
           }
           const normalizedMmsi = normalizeMmsi(mmsi);
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native AIS info dispatch until core exposes AIS actions.
-          return dispatchViaPageHandler("ais.showInfo", capabilities.pageId, {
+          return discovery.dispatchPageAction("ais.showInfo", capabilities.pageId, {
             item: { name: "AisTarget" },
             mmsi: normalizedMmsi
           }, ["onItemClick"], "onItemClick");
+        }
+      },
+      alarm: {
+        stopAll: function () {
+          ensureActive();
+          const previousCapabilities = cachedCapabilitiesSnapshot;
+          const capabilities = resolveCapabilities();
+          if (capabilities.alarm.stopAll !== "dispatch") {
+            if (
+              previousCapabilities &&
+              previousCapabilities.alarm &&
+              previousCapabilities.alarm.stopAll === "dispatch"
+            ) {
+              throw createBridgeError("alarm.stopAll missing native .alarmWidget click path");
+            }
+            return false;
+          }
+          return discovery.dispatchAlarmStopAll();
         }
       }
     };

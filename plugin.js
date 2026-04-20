@@ -74,6 +74,7 @@
     "runtime/widget-registrar.js",
     "runtime/HostCommitController.js",
     "runtime/SurfaceSessionController.js",
+    "runtime/TemporaryHostActionBridgeDiscovery.js",
     "runtime/TemporaryHostActionBridge.js",
     "runtime/theme-runtime.js",
     "runtime/init.js"

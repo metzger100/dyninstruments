@@ -1,3 +1,95 @@
-.alarmWidget {
+.dyni-alarm-root {
   display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.dyni-alarm-shell {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.dyni-alarm-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.dyni-alarm-mode-high .dyni-alarm-body,
+.dyni-alarm-mode-normal .dyni-alarm-body {
+  flex-direction: column;
+}
+
+.dyni-alarm-mode-flat .dyni-alarm-body {
+  flex-direction: row;
+  align-items: center;
+}
+
+.dyni-alarm-caption-row,
+.dyni-alarm-value-row,
+.dyni-alarm-inline-row {
+  display: flex;
+  min-width: 0;
+}
+
+.dyni-alarm-caption-row,
+.dyni-alarm-value-row {
+  width: 100%;
+}
+
+.dyni-alarm-inline-row {
+  align-items: baseline;
+  gap: 0.35em;
+  white-space: nowrap;
+}
+
+.dyni-alarm-caption,
+.dyni-alarm-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dyni-alarm-strip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0.42rem;
+  z-index: 2;
+}
+
+.dyni-alarm-hotspot {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+}
+
+.dyni-alarm-state-idle,
+.dyni-alarm-state-active {
+  background-clip: padding-box;
+}
+
+.dyni-alarm-cursor-passive {
+  cursor: default;
+}
+
+.dyni-alarm-cursor-dispatch {
+  cursor: pointer;
 }

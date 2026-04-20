@@ -51,7 +51,7 @@
       css: undefined,
       shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css"],
       globalKey: "DyniAlarmTextHtmlWidget",
-      deps: []
+      deps: ["AlarmHtmlFit", "HtmlWidgetUtils", "AlarmRenderModel", "AlarmMarkup"]
     },
     AlarmMarkup: {
       js: BASE + "shared/widget-kits/vessel/AlarmMarkup.js",

@@ -14,9 +14,25 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
   function createBridgeContext(options) {
     const opts = options || {};
     const pageRoots = opts.pageRoots || {};
+    const alarmWidgetRoots = opts.alarmWidgetRoots || [];
     const routePointsActivate = opts.routePointsActivate || vi.fn(() => true);
+    function hasClassName(root, className) {
+      const value = root && root.className;
+      if (typeof value !== "string") {
+        return true;
+      }
+      return value.split(/\s+/).indexOf(className) >= 0;
+    }
     const getElementById = vi.fn(function (id) {
       return Object.prototype.hasOwnProperty.call(pageRoots, id) ? pageRoots[id] : null;
+    });
+    const querySelectorAll = vi.fn(function (selector) {
+      if (selector === ".alarmWidget") {
+        return alarmWidgetRoots.filter(function (root) {
+          return hasClassName(root, "alarmWidget");
+        });
+      }
+      return [];
     });
     const context = createScriptContext({
       DyniPlugin: {
@@ -32,10 +48,12 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
         }
       },
       document: {
-        getElementById: getElementById
+        getElementById: getElementById,
+        querySelectorAll: querySelectorAll
       }
     });
 
+    runIifeScript("runtime/TemporaryHostActionBridgeDiscovery.js", context);
     runIifeScript("runtime/TemporaryHostActionBridge.js", context);
     return {
       context,
@@ -76,6 +94,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     expect(typeof first.routeEditor.openActiveRoute).toBe("function");
     expect(typeof first.routeEditor.openEditRoute).toBe("function");
     expect(typeof first.ais.showInfo).toBe("function");
+    expect(typeof first.alarm.stopAll).toBe("function");
   });
 
   it("reports page-aware capabilities for nav, gps, edit-route, and other pages", function () {
@@ -98,21 +117,24 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       routePoints: { activate: "unsupported" },
       map: { checkAutoZoom: "dispatch" },
       routeEditor: { openActiveRoute: "dispatch", openEditRoute: "unsupported" },
-      ais: { showInfo: "dispatch" }
+      ais: { showInfo: "dispatch" },
+      alarm: { stopAll: "unsupported" }
     });
     expect(gps).toEqual({
       pageId: "gpspage",
       routePoints: { activate: "dispatch" },
       map: { checkAutoZoom: "unsupported" },
       routeEditor: { openActiveRoute: "passive", openEditRoute: "unsupported" },
-      ais: { showInfo: "dispatch" }
+      ais: { showInfo: "dispatch" },
+      alarm: { stopAll: "unsupported" }
     });
     expect(editRoute).toEqual({
       pageId: "editroutepage",
       routePoints: { activate: "dispatch" },
       map: { checkAutoZoom: "unsupported" },
       routeEditor: { openActiveRoute: "unsupported", openEditRoute: "dispatch" },
-      ais: { showInfo: "unsupported" }
+      ais: { showInfo: "unsupported" },
+      alarm: { stopAll: "unsupported" }
     });
     expect(editRouteNoParity.routePoints.activate).toBe("unsupported");
     expect(other).toEqual({
@@ -120,7 +142,8 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       routePoints: { activate: "unsupported" },
       map: { checkAutoZoom: "unsupported" },
       routeEditor: { openActiveRoute: "unsupported", openEditRoute: "unsupported" },
-      ais: { showInfo: "unsupported" }
+      ais: { showInfo: "unsupported" },
+      alarm: { stopAll: "unsupported" }
     });
   });
 
@@ -174,6 +197,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     expect(gpsCapabilities.pageId).toBe("gpspage");
     expect(gpsCapabilities.map.checkAutoZoom).toBe("unsupported");
     expect(gpsCapabilities.ais.showInfo).toBe("dispatch");
+    expect(gpsCapabilities.alarm.stopAll).toBe("unsupported");
     expect(hostActions.map.checkAutoZoom()).toBe(false);
     expect(hostActions.ais.showInfo("123")).toBe(true);
     expect(gpsHandler).toHaveBeenCalledTimes(1);
@@ -267,6 +291,82 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       point: { idx: 7, name: "WP7", lat: 54.07, lon: 10.07, routeName: "Harbor Run", selected: true }
     });
     expect(editRelay).not.toHaveBeenCalled();
+  });
+
+  it("discovers alarm dispatch on any visible page with a mounted native alarm widget", function () {
+    const alarmClick = vi.fn();
+    const alarmWidget = makeElement({
+      className: "alarmWidget",
+      __reactFiber$alarm: { memoizedProps: { onClick: alarmClick }, return: null }
+    });
+    const { bridge } = createBridgeContext({
+      pageRoots: {},
+      alarmWidgetRoots: [alarmWidget]
+    });
+    const hostActions = bridge.getHostActions();
+
+    expect(hostActions.getCapabilities()).toEqual({
+      pageId: "other",
+      routePoints: { activate: "unsupported" },
+      map: { checkAutoZoom: "unsupported" },
+      routeEditor: { openActiveRoute: "unsupported", openEditRoute: "unsupported" },
+      ais: { showInfo: "unsupported" },
+      alarm: { stopAll: "dispatch" }
+    });
+    expect(hostActions.alarm.stopAll()).toBe(true);
+    expect(alarmClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores dyn alarm roots when discovering native alarm dispatch", function () {
+    const dynAlarmClick = vi.fn();
+    const dynAlarmRoot = makeElement({
+      className: "dyni-alarm-root",
+      __reactFiber$dynAlarm: { memoizedProps: { onClick: dynAlarmClick }, return: null }
+    });
+    const { bridge } = createBridgeContext({
+      pageRoots: {},
+      alarmWidgetRoots: [dynAlarmRoot]
+    });
+    const hostActions = bridge.getHostActions();
+
+    expect(hostActions.getCapabilities().alarm.stopAll).toBe("unsupported");
+    expect(hostActions.alarm.stopAll()).toBe(false);
+    expect(dynAlarmClick).toHaveBeenCalledTimes(0);
+  });
+
+  it("keeps alarm stop-all unsupported and non-throwing when no native alarm widget is mounted", function () {
+    const { bridge } = createBridgeContext({
+      pageRoots: {},
+      alarmWidgetRoots: []
+    });
+    const hostActions = bridge.getHostActions();
+    let result = null;
+
+    expect(hostActions.getCapabilities().alarm.stopAll).toBe("unsupported");
+    expect(function () {
+      result = hostActions.alarm.stopAll();
+    }).not.toThrow();
+    expect(result).toBe(false);
+  });
+
+  it("throws when alarm dispatch capability disappears before invocation", function () {
+    const alarmClick = vi.fn();
+    const alarmWidget = makeElement({
+      className: "alarmWidget",
+      __reactFiber$alarm: { memoizedProps: { onClick: alarmClick }, return: null }
+    });
+    const { bridge, context } = createBridgeContext({
+      pageRoots: {},
+      alarmWidgetRoots: [alarmWidget]
+    });
+    const hostActions = bridge.getHostActions();
+
+    expect(hostActions.getCapabilities().alarm.stopAll).toBe("dispatch");
+    context.document.querySelectorAll.mockReturnValue([]);
+
+    expect(function () {
+      hostActions.alarm.stopAll();
+    }).toThrow(/TemporaryHostActionBridge: alarm\.stopAll missing native \.alarmWidget click path/);
   });
 
   it("fails closed on editroutepage when parity dispatch was granted but handler disappears", function () {

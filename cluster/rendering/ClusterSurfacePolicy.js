@@ -13,7 +13,10 @@
   const GLOBAL_ROOT = (typeof globalThis !== "undefined")
     ? globalThis
     : (typeof self !== "undefined" ? self : {});
-  const DEFAULT_CAPABILITIES = Object.freeze({ pageId: "other" });
+  const DEFAULT_CAPABILITIES = Object.freeze({
+    pageId: "other",
+    alarm: Object.freeze({ stopAll: "unsupported" })
+  });
 
   function toFiniteNumber(value) {
     const n = Number(value);
@@ -39,10 +42,16 @@
     if (!capabilities || typeof capabilities !== "object") {
       return DEFAULT_CAPABILITIES;
     }
-    if (capabilities.pageId) {
+    const hasPageId = typeof capabilities.pageId === "string" && capabilities.pageId;
+    const hasAlarmGroup = capabilities.alarm && typeof capabilities.alarm === "object" && typeof capabilities.alarm.stopAll === "string";
+    if (hasPageId && hasAlarmGroup) {
       return capabilities;
     }
-    return Object.assign({}, capabilities, { pageId: "other" });
+    const out = hasPageId ? Object.assign({}, capabilities) : Object.assign({}, capabilities, { pageId: "other" });
+    if (!hasAlarmGroup) {
+      out.alarm = { stopAll: "unsupported" };
+    }
+    return out;
   }
 
   function createNormalizedActions(hostActions) {
@@ -74,6 +83,11 @@
       ais: {
         showInfo: function (mmsi) {
           return callAction("ais", "showInfo", [mmsi]);
+        }
+      },
+      alarm: {
+        stopAll: function () {
+          return callAction("alarm", "stopAll", []);
         }
       }
     };
@@ -173,6 +187,16 @@
         props &&
         props.domain &&
         props.domain.hasDispatchMmsi === true
+        ? "dispatch"
+        : "passive";
+    }
+    if (rendererId === "AlarmTextHtmlWidget") {
+      return capabilities &&
+        capabilities.alarm &&
+        capabilities.alarm.stopAll === "dispatch" &&
+        props &&
+        props.domain &&
+        props.domain.state === "active"
         ? "dispatch"
         : "passive";
     }

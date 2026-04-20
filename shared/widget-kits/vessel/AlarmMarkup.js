@@ -59,11 +59,16 @@
       const model = toObject(cfg.model);
       const fit = toObject(cfg.fit);
       const mode = fit.mode;
+      const interactionClass = model.interactionState === "dispatch"
+        ? "dyni-alarm-interaction-dispatch"
+        : "dyni-alarm-interaction-passive";
       const classes = [
+        "dyni-alarm-shell",
         "dyni-alarm-html",
         "dyni-alarm-mode-" + mode,
         "dyni-alarm-state-" + (model.state === "active" ? "active" : "idle"),
-        "dyni-alarm-interaction-" + (model.interactionState === "dispatch" ? "dispatch" : "passive")
+        interactionClass,
+        model.interactionState === "dispatch" ? "dyni-alarm-cursor-dispatch" : "dyni-alarm-cursor-passive"
       ];
       if (model.showStrip === true) {
         classes.push("dyni-alarm-show-strip");

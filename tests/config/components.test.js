@@ -414,7 +414,12 @@ describe("config/components.js", function () {
       SHARED_HTML_SHADOW_CSS,
       "http://host/plugins/dyninstruments/widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css"
     ]);
-    expect(components.AlarmTextHtmlWidget.deps).toEqual([]);
+    expect(components.AlarmTextHtmlWidget.deps).toEqual([
+      "AlarmHtmlFit",
+      "HtmlWidgetUtils",
+      "AlarmRenderModel",
+      "AlarmMarkup"
+    ]);
     expect(components.CanvasDomSurfaceAdapter.globalKey).toBe("DyniCanvasDomSurfaceAdapter");
     expect(components.CanvasDomSurfaceAdapter.js).toBe("http://host/plugins/dyninstruments/cluster/rendering/CanvasDomSurfaceAdapter.js");
     expect(components.CanvasDomSurfaceAdapter.deps).toEqual(["ThemeResolver", "PerfSpanHelper"]);
