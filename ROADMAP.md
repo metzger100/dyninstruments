@@ -13,7 +13,6 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ### Core widgets to implement
 
-- Page-shell-owned widget: `Alarm`
 - A new cluster dyni_Default_Instruments with "empty" widgets of every type (radialGauge, linearGauge, threeElements) with extensive customizability to be available for "selfconfigurable" Instruments for external values of other Plugins oder Apps that are not covered by the Plugin
 
 ### Fixes for existing widgets and architecture
@@ -34,7 +33,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | ---------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------- |
 | ActiveRoute                  | dyni_Nav_Instruments → `activeRoute`                                         | ✅ covered                                  |
 | AisTarget                    | dyni_Map_Instruments → `aisTarget`                                           | ✅ covered                                  |
-| Alarm                        | —                                                                            | ❌ not covered yet                          |
+| Alarm                        | dyni_Vessel_Instruments → `alarm`                                             | ✅ covered                                  |
 | AnchorBearing                | dyni_Anchor_Instruments → `bearing`                                          | ✅ covered                                  |
 | AnchorDistance               | dyni_Anchor_Instruments → `distance`                                         | ✅ covered                                  |
 | AnchorWatchDistance          | dyni_Anchor_Instruments → `watch`                                            | ✅ covered                                  |

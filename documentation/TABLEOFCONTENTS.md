@@ -63,6 +63,7 @@
 - **Map-zoom HTML renderer and click/hotspot ownership** → [widgets/map-zoom.md](widgets/map-zoom.md)
 - **Center display renderer (center position + row composition)** → [widgets/center-display.md](widgets/center-display.md)
 - **Position coordinate renderer and supported kinds** → [widgets/position-coordinates.md](widgets/position-coordinates.md)
+- **Alarm HTML renderer (native parity scope, token ownership, bridge boundary)** → [widgets/alarm.md](widgets/alarm.md)
 - **Wind dial renderer (draw flow, props)** → [widgets/wind-dial.md](widgets/wind-dial.md)
 - **Compass radial renderer (rotation model, props)** → [widgets/compass-gauge.md](widgets/compass-gauge.md)
 - **XTE display renderer (scale + layout modes)** → [widgets/xte-display.md](widgets/xte-display.md)

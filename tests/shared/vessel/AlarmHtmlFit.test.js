@@ -117,6 +117,28 @@ describe("AlarmHtmlFit", function () {
       hostContext: h.hostContext,
       shellRect: { width: 400, height: 100 }
     }).mode).toBe("flat");
+
+    expect(h.textLayoutApi.fitThreeRowBlock).toHaveBeenCalledTimes(1);
+    expect(h.textLayoutApi.fitValueUnitCaptionRows).toHaveBeenCalledTimes(1);
+    expect(h.textLayoutApi.fitInlineTriplet).toHaveBeenCalledTimes(1);
+  });
+
+  it("passes the summary text through unchanged so fit never re-decides the 3+ alarm rule", function () {
+    const h = createHarness();
+    const model = makeModel({
+      valueText: "firstAlarm, secondAlarm +1"
+    });
+
+    const result = h.fit.compute({
+      model: model,
+      targetEl: h.targetEl,
+      hostContext: h.hostContext,
+      shellRect: { width: 200, height: 100 }
+    });
+
+    expect(result.mode).toBe("normal");
+    expect(h.textLayoutApi.fitValueUnitCaptionRows).toHaveBeenCalledTimes(1);
+    expect(h.textLayoutApi.fitValueUnitCaptionRows.mock.calls[0][0].valueText).toBe("firstAlarm, secondAlarm +1");
   });
 
   it("sources active and idle token styles from ThemeResolver", function () {

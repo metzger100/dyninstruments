@@ -19,6 +19,9 @@ describe("ThemeModel", function () {
     const surfaceBg = model.getTokenDefinition("surface.bg");
     const fontFamily = model.getTokenDefinition("font.family");
     const fontFamilyMono = model.getTokenDefinition("font.familyMono");
+    const alarmWidgetBg = model.getTokenDefinition("colors.alarmWidget.bg");
+    const alarmWidgetFg = model.getTokenDefinition("colors.alarmWidget.fg");
+    const alarmWidgetStrip = model.getTokenDefinition("colors.alarmWidget.strip");
 
     expect(surfaceBorder.inputVar).toBe("--dyni-border");
     expect(surfaceBorder.outputVar).toBe("--dyni-theme-surface-border");
@@ -29,6 +32,12 @@ describe("ThemeModel", function () {
     expect(fontFamilyMono.inputVar).toBe("--dyni-font-mono");
     expect(fontFamilyMono.outputVar).toBe("--dyni-theme-font-family-mono");
     expect(fontFamilyMono.default).toBe('"Roboto Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace');
+    expect(alarmWidgetBg.inputVar).toBe("--dyni-alarm-widget-bg");
+    expect(alarmWidgetBg.default).toBe("#e04040");
+    expect(alarmWidgetFg.inputVar).toBe("--dyni-alarm-widget-fg");
+    expect(alarmWidgetFg.default).toBe("#ffffff");
+    expect(alarmWidgetStrip.inputVar).toBe("--dyni-alarm-widget-strip");
+    expect(alarmWidgetStrip.default).toBe("#4488cc");
     expect(model.getTokenDefinitions().some((tokenDef) => tokenDef.path === "font.familyMono")).toBe(true);
     expect(model.getOutputTokenDefinitions()).toHaveLength(7);
   });
@@ -39,6 +48,11 @@ describe("ThemeModel", function () {
     expect(model.getPresetBase("slim").radial.pointer.widthFactor).toBe(0.72);
     expect(model.getPresetBase("bold").linear.pointer.widthFactor).toBe(1.54);
     expect(model.getPresetBase("highcontrast").colors.warning).toBe("#ffcc00");
+    expect(model.getPresetBase("highcontrast").colors.alarmWidget).toEqual({
+      bg: "#ff2200",
+      fg: "#ffffff",
+      strip: "#3399ff"
+    });
     expect(model.getPresetMode("default", "night").surface.fg).toBe("rgba(252, 11, 11, 0.60)");
     expect(model.getPresetMode("slim", "night")).toEqual({});
   });
