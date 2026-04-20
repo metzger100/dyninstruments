@@ -13,7 +13,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ### Core widgets to implement
 
-- A new cluster dyni_Default_Instruments with "empty" widgets of every type (radialGauge, linearGauge, threeElements) with extensive customizability to be available for "selfconfigurable" Instruments for external values of other Plugins oder Apps that are not covered by the Plugin
+- A new cluster dyni_Default_Instruments with "empty" widgets of every type (radialGauge, linearGauge, threeElements) with extensive customizability to be available for "self configurable" Instruments for external values of other Plugins oder Apps that are not covered by the Plugin. For example to offer lower AND and higher end sectors, maybe with customizable colors for the sectors as well, since those are not customizable via user.css if using a default widget more than once. And many other extra settings that might be handy for the users.
 
 ### Fixes for existing widgets and architecture
 
