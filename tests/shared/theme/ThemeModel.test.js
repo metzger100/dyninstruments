@@ -37,7 +37,7 @@ describe("ThemeModel", function () {
     expect(alarmWidgetFg.inputVar).toBe("--dyni-alarm-widget-fg");
     expect(alarmWidgetFg.default).toBe("#ffffff");
     expect(alarmWidgetStrip.inputVar).toBe("--dyni-alarm-widget-strip");
-    expect(alarmWidgetStrip.default).toBe("#4488cc");
+    expect(alarmWidgetStrip.default).toBe("#66b8ff");
     expect(model.getTokenDefinitions().some((tokenDef) => tokenDef.path === "font.familyMono")).toBe(true);
     expect(model.getOutputTokenDefinitions()).toHaveLength(7);
   });
@@ -54,6 +54,7 @@ describe("ThemeModel", function () {
       strip: "#3399ff"
     });
     expect(model.getPresetMode("default", "night").surface.fg).toBe("rgba(252, 11, 11, 0.60)");
+    expect(model.getPresetMode("default", "night").colors.alarmWidget.strip).toBe("#66b8ff");
     expect(model.getPresetMode("slim", "night")).toEqual({});
   });
 

@@ -52,7 +52,7 @@
     defineToken("colors.alarm", "--dyni-alarm", "color", "#ff7a76", { night: "#992222" }),
     defineToken("colors.alarmWidget.bg", "--dyni-alarm-widget-bg", "color", "#e04040", { night: "#991111" }),
     defineToken("colors.alarmWidget.fg", "--dyni-alarm-widget-fg", "color", "#ffffff", { night: "#ffffff" }),
-    defineToken("colors.alarmWidget.strip", "--dyni-alarm-widget-strip", "color", "#4488cc", { night: "#224466" }),
+    defineToken("colors.alarmWidget.strip", "--dyni-alarm-widget-strip", "color", "#66b8ff", { night: "#66b8ff" }),
     defineToken("colors.laylineStb", "--dyni-layline-stb", "color", "#82b683", { night: "#3d6b3d" }),
     defineToken("colors.laylinePort", "--dyni-layline-port", "color", "#ff7a76", { night: "#8b3333" }),
     defineToken("colors.ais.warning", "--dyni-ais-warning", "color", "#f39b52"),
@@ -105,7 +105,7 @@
           alarmWidget: {
             bg: "#991111",
             fg: "#ffffff",
-            strip: "#224466"
+            strip: "#66b8ff"
           },
           laylineStb: "#3d6b3d",
           laylinePort: "#8b3333"

@@ -1,4 +1,4 @@
-.dyni-alarm-root {
+.dyni-html-root .dyni-alarm-root {
   display: block;
   width: 100%;
   height: 100%;
@@ -7,89 +7,124 @@
   box-sizing: border-box;
 }
 
-.dyni-alarm-shell {
+.dyni-html-root .dyni-alarm-html {
   position: relative;
-  display: flex;
   width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
   box-sizing: border-box;
-  overflow: hidden;
+  display: grid;
+  grid-template-areas: "main";
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0;
+  padding: 0;
+  --dyni-map-zoom-sec-scale: 0.8;
+  --dyni-map-zoom-value-size: 1.62em;
+  color: inherit;
 }
 
-.dyni-alarm-body {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex: 1 1 auto;
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  min-height: 0;
-  box-sizing: border-box;
+.dyni-html-root .dyni-alarm-html.dyni-alarm-mode-high {
+  --dyni-map-zoom-value-size: 1.62em;
 }
 
-.dyni-alarm-mode-high .dyni-alarm-body,
-.dyni-alarm-mode-normal .dyni-alarm-body {
-  flex-direction: column;
+.dyni-html-root .dyni-alarm-html.dyni-alarm-mode-normal {
+  --dyni-map-zoom-value-size: 1.56em;
 }
 
-.dyni-alarm-mode-flat .dyni-alarm-body {
-  flex-direction: row;
-  align-items: center;
+.dyni-html-root .dyni-alarm-html.dyni-alarm-mode-flat {
+  --dyni-map-zoom-value-size: 1.48em;
 }
 
-.dyni-alarm-caption-row,
-.dyni-alarm-value-row,
-.dyni-alarm-inline-row {
-  display: flex;
-  min-width: 0;
+.dyni-html-root .dyni-alarm-html.dyni-alarm-open-dispatch {
+  cursor: pointer;
 }
 
-.dyni-alarm-caption-row,
-.dyni-alarm-value-row {
-  width: 100%;
-}
-
-.dyni-alarm-inline-row {
-  align-items: baseline;
-  gap: 0.35em;
-  white-space: nowrap;
-}
-
-.dyni-alarm-caption,
-.dyni-alarm-value {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dyni-alarm-strip {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 0.42rem;
-  z-index: 2;
-}
-
-.dyni-alarm-hotspot {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-}
-
-.dyni-alarm-state-idle,
-.dyni-alarm-state-active {
-  background-clip: padding-box;
-}
-
-.dyni-alarm-cursor-passive {
+.dyni-html-root .dyni-alarm-html.dyni-alarm-open-passive {
   cursor: default;
 }
 
-.dyni-alarm-cursor-dispatch {
-  cursor: pointer;
+.dyni-html-root .dyni-alarm-state-accent {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0.34em;
+  border-radius: 0.34em;
+  z-index: 0;
+}
+
+.dyni-html-root .dyni-alarm-open-hotspot {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: transparent;
+}
+
+.dyni-html-root .dyni-alarm-main {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dyni-html-root .dyni-alarm-main-flat,
+.dyni-html-root .dyni-alarm-main-normal,
+.dyni-html-root .dyni-alarm-main-high {
+  gap: 0.06em;
+}
+
+.dyni-html-root .dyni-alarm-main-flat .dyni-alarm-inline-row {
+  justify-content: center;
+  gap: 0.16em;
+}
+
+.dyni-html-root .dyni-alarm-main-normal .dyni-alarm-value-row {
+  justify-content: center;
+  gap: 0.16em;
+}
+
+.dyni-html-root .dyni-alarm-main-normal .dyni-alarm-caption-row {
+  justify-content: flex-start;
+}
+
+.dyni-html-root .dyni-alarm-main-high .dyni-alarm-caption-row {
+  justify-content: flex-start;
+}
+
+.dyni-html-root .dyni-alarm-main-high .dyni-alarm-value-row {
+  justify-content: center;
+}
+
+.dyni-html-root .dyni-alarm-inline-row,
+.dyni-html-root .dyni-alarm-caption-row,
+.dyni-html-root .dyni-alarm-value-row {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: baseline;
+  line-height: 1;
+}
+
+.dyni-html-root .dyni-alarm-caption {
+  font-size: calc(var(--dyni-map-zoom-value-size) * var(--dyni-map-zoom-sec-scale));
+  font-weight: var(--dyni-theme-font-label-weight, 700);
+  color: inherit;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.dyni-html-root .dyni-alarm-value {
+  font-size: var(--dyni-map-zoom-value-size);
+  line-height: 1;
+  font-weight: var(--dyni-theme-font-weight, 700);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.dyni-html-root .dyni-alarm-state-idle,
+.dyni-html-root .dyni-alarm-state-active {
+  background-clip: padding-box;
 }

@@ -1,6 +1,6 @@
 /**
  * Module: AlarmTextHtmlWidget - Native HTML renderer for vessel alarm status/control tile
- * Documentation: documentation/guides/add-new-html-kind.md
+ * Documentation: documentation/widgets/alarm.md
  * Depends: AlarmHtmlFit, HtmlWidgetUtils, AlarmRenderModel, AlarmMarkup
  */
 
@@ -11,8 +11,6 @@
 }(this, function () {
   "use strict";
 
-  const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.0;
-  const DEFAULT_RATIO_THRESHOLD_FLAT = 3.0;
   const ROOT_CLASS_NAME = "dyni-alarm-root";
 
   function toObject(value) {
@@ -24,13 +22,23 @@
     return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
   }
 
-  function resolveMode(htmlUtils, model, shellRect) {
-    return htmlUtils.resolveRatioModeForRect({
-      ratioThresholdNormal: model.ratioThresholdNormal,
-      ratioThresholdFlat: model.ratioThresholdFlat,
-      defaultRatioThresholdNormal: DEFAULT_RATIO_THRESHOLD_NORMAL,
-      defaultRatioThresholdFlat: DEFAULT_RATIO_THRESHOLD_FLAT,
-      defaultMode: "normal",
+  function resolveLayoutBasisRect(layout, shellRect) {
+    const rect = layout && layout.contentRect ? layout.contentRect : shellRect;
+    if (!rect) {
+      return { width: 0, height: 0 };
+    }
+    return {
+      width: Math.max(1, Math.round(rect.width)),
+      height: Math.max(1, Math.round(rect.height))
+    };
+  }
+
+  function resolveLayout(htmlFit, model, shellRect) {
+    if (!shellRect || typeof htmlFit.resolveLayout !== "function") {
+      return null;
+    }
+    return htmlFit.resolveLayout({
+      model: model,
       shellRect: shellRect
     });
   }
@@ -42,6 +50,8 @@
       valuePx: 16,
       captionStyle: "",
       valueStyle: "",
+      shellStyle: "",
+      accentStyle: "",
       activeBackgroundStyle: "",
       activeForegroundStyle: "",
       idleStripStyle: "",
@@ -180,7 +190,9 @@
         const props = toObject(payload && payload.props);
         const shellRect = payload && payload.shellRect ? payload.shellRect : null;
         const model = buildModel(props, shellRect);
-        const mode = resolveMode(htmlUtils, model, shellRect);
+        const layout = resolveLayout(htmlFit, model, shellRect);
+        const basisRect = resolveLayoutBasisRect(layout, shellRect);
+        const mode = layout && layout.mode ? layout.mode : "normal";
         return [
           mode,
           model.state,
@@ -189,8 +201,8 @@
           model.valueText,
           model.ratioThresholdNormal,
           model.ratioThresholdFlat,
-          shellRect ? Math.round(shellRect.width) : 0,
-          shellRect ? Math.round(shellRect.height) : 0
+          basisRect.width,
+          basisRect.height
         ].join("|");
       }
 

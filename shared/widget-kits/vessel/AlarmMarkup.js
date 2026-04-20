@@ -1,6 +1,6 @@
 /**
  * Module: AlarmMarkup - Pure HTML assembly owner for vessel alarm renderer output
- * Documentation: documentation/guides/add-new-html-kind.md
+ * Documentation: documentation/widgets/alarm.md
  * Depends: HtmlWidgetUtils
  */
 (function (root, factory) {
@@ -14,6 +14,22 @@
     return value && typeof value === "object" ? value : {};
   }
 
+  function joinStyles() {
+    let text = "";
+    for (let i = 0; i < arguments.length; i += 1) {
+      const value = arguments[i];
+      if (typeof value !== "string") {
+        continue;
+      }
+      const trimmed = value.trim();
+      if (!trimmed) {
+        continue;
+      }
+      text += trimmed;
+    }
+    return text;
+  }
+
   function renderTextCell(className, text, style, htmlUtils) {
     return ""
       + '<span class="' + className + '"'
@@ -23,32 +39,81 @@
       + "</span>";
   }
 
-  function renderFlatBody(model, fit, htmlUtils) {
+  function renderRow(className, text, style, htmlUtils) {
     return ""
+      + '<div class="' + className + '"'
+      + htmlUtils.toStyleAttr(style)
+      + ">"
+      + text
+      + "</div>";
+  }
+
+  function renderFlatMain(model, fit, htmlUtils) {
+    return ""
+      + '<div class="dyni-alarm-main dyni-alarm-main-flat">'
       + '<div class="dyni-alarm-inline-row">'
       + renderTextCell("dyni-alarm-caption", model.captionText, fit.captionStyle, htmlUtils)
       + renderTextCell("dyni-alarm-value", model.valueText, fit.valueStyle, htmlUtils)
+      + "</div>"
       + "</div>";
   }
 
-  function renderHighBody(model, fit, htmlUtils) {
+  function renderNormalMain(model, fit, htmlUtils) {
     return ""
-      + '<div class="dyni-alarm-caption-row">'
-      + renderTextCell("dyni-alarm-caption", model.captionText, fit.captionStyle, htmlUtils)
-      + "</div>"
-      + '<div class="dyni-alarm-value-row">'
-      + renderTextCell("dyni-alarm-value", model.valueText, fit.valueStyle, htmlUtils)
+      + '<div class="dyni-alarm-main dyni-alarm-main-normal">'
+      + renderRow(
+        "dyni-alarm-value-row",
+        renderTextCell("dyni-alarm-value", model.valueText, fit.valueStyle, htmlUtils),
+        "",
+        htmlUtils
+      )
+      + renderRow(
+        "dyni-alarm-caption-row",
+        renderTextCell("dyni-alarm-caption", model.captionText, fit.captionStyle, htmlUtils),
+        "",
+        htmlUtils
+      )
       + "</div>";
   }
 
-  function renderNormalBody(model, fit, htmlUtils) {
+  function renderHighMain(model, fit, htmlUtils) {
     return ""
-      + '<div class="dyni-alarm-value-row">'
-      + renderTextCell("dyni-alarm-value", model.valueText, fit.valueStyle, htmlUtils)
-      + "</div>"
-      + '<div class="dyni-alarm-caption-row">'
-      + renderTextCell("dyni-alarm-caption", model.captionText, fit.captionStyle, htmlUtils)
+      + '<div class="dyni-alarm-main dyni-alarm-main-high">'
+      + renderRow(
+        "dyni-alarm-caption-row",
+        renderTextCell("dyni-alarm-caption", model.captionText, fit.captionStyle, htmlUtils),
+        "",
+        htmlUtils
+      )
+      + renderRow(
+        "dyni-alarm-value-row",
+        renderTextCell("dyni-alarm-value", model.valueText, fit.valueStyle, htmlUtils),
+        "",
+        htmlUtils
+      )
       + "</div>";
+  }
+
+  function renderMain(model, fit, htmlUtils) {
+    if (fit.mode === "flat") {
+      return renderFlatMain(model, fit, htmlUtils);
+    }
+    if (fit.mode === "high") {
+      return renderHighMain(model, fit, htmlUtils);
+    }
+    return renderNormalMain(model, fit, htmlUtils);
+  }
+
+  function renderStateAccent(model, fit, htmlUtils) {
+    return model.showStrip === true
+      ? '<div class="dyni-alarm-state-accent"' + htmlUtils.toStyleAttr(fit.accentStyle) + "></div>"
+      : "";
+  }
+
+  function renderHotspot(model) {
+    return model.interactionState === "dispatch"
+      ? '<div class="dyni-alarm-open-hotspot"></div>'
+      : "";
   }
 
   function create(def, Helpers) {
@@ -58,53 +123,28 @@
       const cfg = args || {};
       const model = toObject(cfg.model);
       const fit = toObject(cfg.fit);
-      const mode = fit.mode;
-      const interactionClass = model.interactionState === "dispatch"
-        ? "dyni-alarm-interaction-dispatch"
-        : "dyni-alarm-interaction-passive";
       const classes = [
-        "dyni-alarm-shell",
         "dyni-alarm-html",
-        "dyni-alarm-mode-" + mode,
+        "dyni-alarm-mode-" + fit.mode,
         "dyni-alarm-state-" + (model.state === "active" ? "active" : "idle"),
-        interactionClass,
-        model.interactionState === "dispatch" ? "dyni-alarm-cursor-dispatch" : "dyni-alarm-cursor-passive"
+        model.interactionState === "dispatch"
+          ? "dyni-alarm-open-dispatch"
+        : "dyni-alarm-open-passive"
       ];
-      if (model.showStrip === true) {
-        classes.push("dyni-alarm-show-strip");
-      }
-      if (model.showActiveBackground === true) {
-        classes.push("dyni-alarm-show-active-background");
-      }
 
-      let rootStyle = "";
-      if (fit.activeBackgroundStyle != null) {
-        rootStyle += String(fit.activeBackgroundStyle);
-      }
-      if (fit.activeForegroundStyle != null) {
-        rootStyle += String(fit.activeForegroundStyle);
-      }
-      const stripHtml = model.showStrip === true
-        ? '<div class="dyni-alarm-strip"' + htmlUtils.toStyleAttr(fit.idleStripStyle) + "></div>"
-        : "";
-      const hotspotHtml = model.interactionState === "dispatch"
-        ? '<div class="dyni-alarm-hotspot" data-dyni-action="alarm-stop-all"></div>'
-        : "";
-      const bodyHtml = mode === "flat"
-        ? renderFlatBody(model, fit, htmlUtils)
-        : (mode === "high"
-          ? renderHighBody(model, fit, htmlUtils)
-          : renderNormalBody(model, fit, htmlUtils));
+      const rootStyle = joinStyles(
+        fit.shellStyle,
+        fit.activeBackgroundStyle,
+        fit.activeForegroundStyle
+      );
 
       return ""
         + '<div class="' + classes.join(" ") + '"'
         + htmlUtils.toStyleAttr(rootStyle)
         + ">"
-        + stripHtml
-        + hotspotHtml
-        + '<div class="dyni-alarm-body">'
-        + bodyHtml
-        + "</div>"
+        + renderStateAccent(model, fit, htmlUtils)
+        + renderHotspot(model)
+        + renderMain(model, fit, htmlUtils)
         + "</div>";
     }
 

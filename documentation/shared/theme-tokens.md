@@ -43,7 +43,9 @@ The alarm widget reads these semantic paths through `ThemeResolver.resolveForRoo
 |---|---|---|---|---|
 | `colors.alarmWidget.bg` | `--dyni-alarm-widget-bg` | `#e04040` | `#991111` | `#ff2200` |
 | `colors.alarmWidget.fg` | `--dyni-alarm-widget-fg` | `#ffffff` | `#ffffff` | `#ffffff` |
-| `colors.alarmWidget.strip` | `--dyni-alarm-widget-strip` | `#4488cc` | `#224466` | `#3399ff` |
+| `colors.alarmWidget.strip` | `--dyni-alarm-widget-strip` | `#66b8ff` | `#66b8ff` | `#3399ff` |
+
+Alarm idle accents intentionally reuse the AIS nearest-blue family so the alarm tile reads like the rest of the committed HTML widgets instead of introducing a separate strip hue.
 
 Example `user.css` override:
 

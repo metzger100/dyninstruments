@@ -1,6 +1,6 @@
 /**
  * Module: AlarmRenderModel - Pure semantic display model for vessel alarm HTML
- * Documentation: documentation/guides/add-new-html-kind.md
+ * Documentation: documentation/widgets/alarm.md
  * Depends: HtmlWidgetUtils
  */
 (function (root, factory) {

@@ -43,44 +43,79 @@ describe("AlarmMarkup", function () {
       mode: "high",
       captionStyle: "font-size:10px;",
       valueStyle: "font-size:14px;",
-      activeBackgroundStyle: "background-color:#e04040;",
-      activeForegroundStyle: "color:#ffffff;",
-      idleStripStyle: "background-color:#4488cc;"
+      shellStyle: "padding:2px 2px 2px 13px;",
+      accentStyle: "left:2px;top:2px;bottom:2px;width:8px;border-radius:8px;background-color:#66b8ff;",
+      activeBackgroundStyle: "",
+      activeForegroundStyle: "",
+      idleStripStyle: "left:2px;top:2px;bottom:2px;width:8px;border-radius:8px;background-color:#66b8ff;"
     }, overrides || {});
   }
 
-  it("renders high mode with caption row above value row", function () {
+  it("renders high mode with caption above value inside the main content wrapper", function () {
     const markup = createMarkup();
     const html = markup.render({
       model: makeModel(),
-      fit: makeFit({ mode: "high" }),
+      fit: makeFit({
+        mode: "high",
+        activeBackgroundStyle: "background-color:#e04040;",
+        activeForegroundStyle: "color:#ffffff;"
+      }),
       htmlUtils: createHtmlUtils()
     });
+    const root = parseHtml(html).querySelector(".dyni-alarm-html");
 
-    expect(html.indexOf("dyni-alarm-caption-row")).toBeLessThan(html.indexOf("dyni-alarm-value-row"));
+    expect(html).toContain('style="padding:2px 2px 2px 13px;background-color:#e04040;color:#ffffff;"');
+    expect(html).toContain('class="dyni-alarm-state-accent" style="left:2px;top:2px;bottom:2px;width:8px;border-radius:8px;background-color:#66b8ff;"');
+    expect(html).not.toContain("dyni-alarm-shell");
+    expect(root.children).toHaveLength(3);
+    expect(root.children[0].className).toContain("dyni-alarm-state-accent");
+    expect(root.children[1].className).toContain("dyni-alarm-open-hotspot");
+    expect(root.children[2].className).toContain("dyni-alarm-main");
+    expect(root.children[2].className).toContain("dyni-alarm-main-high");
+    expect(root.children[2].querySelector(".dyni-alarm-caption-row")).toBeTruthy();
+    expect(root.children[2].querySelector(".dyni-alarm-value-row")).toBeTruthy();
+    expect(root.querySelector(".dyni-alarm-caption-block")).toBeFalsy();
+    expect(root.querySelector(".dyni-alarm-value-block")).toBeFalsy();
   });
 
-  it("renders normal mode with value row above caption row", function () {
+  it("renders normal mode with value row before caption row", function () {
     const markup = createMarkup();
     const html = markup.render({
-      model: makeModel(),
-      fit: makeFit({ mode: "normal" }),
+      model: makeModel({
+        interactionState: "passive",
+        showStrip: false
+      }),
+      fit: makeFit({ mode: "normal", shellStyle: "padding:2px;" }),
       htmlUtils: createHtmlUtils()
     });
+    const root = parseHtml(html).querySelector(".dyni-alarm-html");
 
-    expect(html.indexOf("dyni-alarm-value-row")).toBeLessThan(html.indexOf("dyni-alarm-caption-row"));
+    expect(html).toContain('style="padding:2px;"');
+    expect(root.children).toHaveLength(1);
+    expect(root.children[0].className).toContain("dyni-alarm-main");
+    expect(root.children[0].className).toContain("dyni-alarm-main-normal");
+    expect(root.children[0].children).toHaveLength(2);
+    expect(root.children[0].children[0].className).toContain("dyni-alarm-value-row");
+    expect(root.children[0].children[1].className).toContain("dyni-alarm-caption-row");
   });
 
-  it("renders flat mode as a single inline caption/value row", function () {
+  it("renders flat mode with a single inline row", function () {
     const markup = createMarkup();
     const html = markup.render({
-      model: makeModel(),
-      fit: makeFit({ mode: "flat" }),
+      model: makeModel({
+        interactionState: "passive",
+        showStrip: false
+      }),
+      fit: makeFit({ mode: "flat", shellStyle: "padding:2px;" }),
       htmlUtils: createHtmlUtils()
     });
-    const root = parseHtml(html);
+    const root = parseHtml(html).querySelector(".dyni-alarm-html");
 
-    expect(root.querySelector(".dyni-alarm-inline-row")).toBeTruthy();
+    expect(root.children).toHaveLength(1);
+    expect(root.children[0].className).toContain("dyni-alarm-main");
+    expect(root.children[0].className).toContain("dyni-alarm-main-flat");
+    expect(root.children[0].children).toHaveLength(1);
+    expect(root.children[0].children[0].className).toContain("dyni-alarm-inline-row");
     expect(root.querySelector(".dyni-alarm-caption")).toBeTruthy();
     expect(root.querySelector(".dyni-alarm-value")).toBeTruthy();
   });
@@ -97,9 +132,16 @@ describe("AlarmMarkup", function () {
       fit: makeFit(),
       htmlUtils: createHtmlUtils()
     });
+    const rootDispatch = parseHtml(htmlDispatch).querySelector(".dyni-alarm-html");
+    const rootPassive = parseHtml(htmlPassive).querySelector(".dyni-alarm-html");
 
-    expect(htmlDispatch).toContain('data-dyni-action="alarm-stop-all"');
-    expect(htmlPassive).not.toContain('data-dyni-action="alarm-stop-all"');
+    expect(htmlDispatch).not.toContain("dyni-alarm-strip");
+    expect(htmlDispatch).not.toContain("dyni-alarm-hotspot");
+    expect(htmlDispatch).not.toContain("dyni-alarm-body");
+    expect(rootDispatch.querySelector(".dyni-alarm-open-hotspot")).toBeTruthy();
+    expect(rootPassive.querySelector(".dyni-alarm-open-hotspot")).toBeFalsy();
+    expect(htmlDispatch).toContain("dyni-alarm-open-dispatch");
+    expect(htmlPassive).toContain("dyni-alarm-open-passive");
   });
 
   it("renders the strip only when requested", function () {
@@ -115,7 +157,7 @@ describe("AlarmMarkup", function () {
       htmlUtils: createHtmlUtils()
     });
 
-    expect(htmlStrip).toContain("dyni-alarm-strip");
-    expect(htmlNoStrip).not.toContain("dyni-alarm-strip");
+    expect(htmlStrip).toContain("dyni-alarm-state-accent");
+    expect(htmlNoStrip).not.toContain("dyni-alarm-state-accent");
   });
 });

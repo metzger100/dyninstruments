@@ -25,15 +25,26 @@
 - Idle state:
   - caption defaults to `ALARM`
   - value is `NONE`
-  - blue strip visible
+  - blue accent visible using the AIS nearest-blue family
   - passive interaction
   - standard dyn surface background
 - Active state:
   - caption is `ALARM`
   - value shows the sorted active alarm names
   - red alarm background is visible
-  - blue strip is hidden
+  - blue accent is hidden
   - whole-tile dispatch is only enabled when `surfacePolicy.interaction.mode === "dispatch"`
+
+## Visual Contract
+
+- Root shell uses the committed HTML wrapper shape with separate accent, hotspot, and inner main content siblings.
+- Inner content follows the MapZoom-style row contract:
+  - flat: one inline row with caption and value
+  - normal: value row then caption row
+  - high: caption row then value row
+- Caption/value text is owned by the fit layer and never uses CSS ellipsis.
+- Fit is computed against the inner content rect after shell padding and idle strip chrome are removed.
+- Idle accent styling follows the AIS nearest-blue family through `colors.alarmWidget.strip`.
 
 ## API / Interfaces
 

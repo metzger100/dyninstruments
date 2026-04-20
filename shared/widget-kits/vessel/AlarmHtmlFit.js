@@ -1,6 +1,6 @@
 /**
  * Module: AlarmHtmlFit - Text-fit and token-style owner for vessel alarm HTML
- * Documentation: documentation/guides/add-new-html-kind.md
+ * Documentation: documentation/widgets/alarm.md
  * Depends: ThemeResolver, TextLayoutEngine, HtmlWidgetUtils
  */
 (function (root, factory) {
@@ -15,6 +15,12 @@
   const SECONDARY_SCALE = 0.8;
   const MEASURE_CTX_KEY = "__dyniAlarmMeasureCtx";
   const FIT_CACHE_KEY = "__dyniAlarmHtmlFitCache";
+  const ALARM_SHELL_CHROME = Object.freeze({
+    padding: 2,
+    stripLeftPadding: 13,
+    stripWidth: 8,
+    stripRadius: 8
+  });
 
   function toObject(value) {
     return value && typeof value === "object" ? value : {};
@@ -86,9 +92,66 @@
     return color ? (colorKey + ":" + color + ";") : "";
   }
 
-  function resolveMode(htmlUtils, model, shellRect) {
+  function resolveShellChrome(model) {
+    if (model && model.showStrip === true) {
+      return {
+        left: ALARM_SHELL_CHROME.stripLeftPadding,
+        right: ALARM_SHELL_CHROME.padding,
+        top: ALARM_SHELL_CHROME.padding,
+        bottom: ALARM_SHELL_CHROME.padding
+      };
+    }
+    return {
+      left: ALARM_SHELL_CHROME.padding,
+      right: ALARM_SHELL_CHROME.padding,
+      top: ALARM_SHELL_CHROME.padding,
+      bottom: ALARM_SHELL_CHROME.padding
+    };
+  }
+
+  function buildShellStyle(model) {
+    const chrome = resolveShellChrome(model);
+    return "padding:" + chrome.top + "px " + chrome.right + "px " + chrome.bottom + "px " + chrome.left + "px;";
+  }
+
+  function buildAccentStyle(model, tokens) {
+    if (!model || model.showStrip !== true) {
+      return "";
+    }
+    return "left:" + ALARM_SHELL_CHROME.padding + "px;"
+      + "top:" + ALARM_SHELL_CHROME.padding + "px;"
+      + "bottom:" + ALARM_SHELL_CHROME.padding + "px;"
+      + "width:" + ALARM_SHELL_CHROME.stripWidth + "px;"
+      + "border-radius:" + ALARM_SHELL_CHROME.stripRadius + "px;"
+      + toStyleText("background-color", tokens.strip);
+  }
+
+  function resolveRoundedShellRect(shellRect, htmlUtils) {
     const width = htmlUtils.toFiniteNumber(shellRect && shellRect.width);
     const height = htmlUtils.toFiniteNumber(shellRect && shellRect.height);
+    if (!(width > 0) || !(height > 0)) {
+      return null;
+    }
+    return {
+      width: Math.round(width),
+      height: Math.round(height)
+    };
+  }
+
+  function resolveContentRect(shellRect, model) {
+    const chrome = resolveShellChrome(model);
+    const width = Math.max(1, Math.round(shellRect.width) - chrome.left - chrome.right);
+    const height = Math.max(1, Math.round(shellRect.height) - chrome.top - chrome.bottom);
+    return {
+      width: width,
+      height: height,
+      chrome: chrome
+    };
+  }
+
+  function resolveMode(htmlUtils, model, contentRect) {
+    const width = htmlUtils.toFiniteNumber(contentRect && contentRect.width);
+    const height = htmlUtils.toFiniteNumber(contentRect && contentRect.height);
     if (!(width > 0) || !(height > 0)) {
       return null;
     }
@@ -104,6 +167,25 @@
       return "flat";
     }
     return "normal";
+  }
+
+  function resolveLayout(args, htmlUtils) {
+    const cfg = args || {};
+    const model = toObject(cfg.model);
+    const roundedShellRect = resolveRoundedShellRect(cfg.shellRect, htmlUtils);
+    if (!roundedShellRect) {
+      return null;
+    }
+    const contentRect = resolveContentRect(roundedShellRect, model);
+    const mode = resolveMode(htmlUtils, model, contentRect);
+    if (!mode) {
+      return null;
+    }
+    return {
+      mode: mode,
+      shellRect: roundedShellRect,
+      contentRect: contentRect
+    };
   }
 
   function resolveThemeColors(theme) {
@@ -220,6 +302,8 @@
       model.valueText,
       model.ratioThresholdNormal,
       model.ratioThresholdFlat,
+      model.showStrip === true ? 1 : 0,
+      model.showActiveBackground === true ? 1 : 0,
       cfg.family,
       cfg.valueWeight,
       cfg.labelWeight,
@@ -246,10 +330,6 @@
       const rootEl = Helpers.requirePluginRoot(targetEl);
       const theme = themeResolver.resolveForRoot(rootEl);
       const tokens = resolveThemeColors(theme);
-      const mode = resolveMode(htmlUtils, model, shellRect);
-      if (!mode) {
-        return null;
-      }
       const measureCtx = resolveMeasureContext(cfg.hostContext, targetEl);
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
         return null;
@@ -260,20 +340,20 @@
       if (!font) {
         return null;
       }
-      const widthNumber = htmlUtils.toFiniteNumber(shellRect.width);
-      const heightNumber = htmlUtils.toFiniteNumber(shellRect.height);
-      if (!(widthNumber > 0) || !(heightNumber > 0)) {
+      const layout = resolveLayout({
+        model: model,
+        shellRect: shellRect
+      }, htmlUtils);
+      if (!layout) {
         return null;
       }
-      const width = Math.round(widthNumber);
-      const height = Math.round(heightNumber);
       const family = font.family;
       const valueWeight = font.weight;
       const labelWeight = font.labelWeight;
       const signature = buildSignature({
-        mode: mode,
-        width: width,
-        height: height,
+        mode: layout.mode,
+        width: layout.contentRect.width,
+        height: layout.contentRect.height,
         model: model,
         family: family,
         valueWeight: valueWeight,
@@ -287,10 +367,10 @@
       }
 
       const modeFit = computeModeFit({
-        mode: mode,
+        mode: layout.mode,
         model: model,
-        width: width,
-        height: height,
+        width: layout.contentRect.width,
+        height: layout.contentRect.height,
         ctx: measureCtx,
         family: family,
         valueWeight: valueWeight,
@@ -299,16 +379,19 @@
 
       const activeBackgroundStyle = model.showActiveBackground === true ? toStyleText("background-color", tokens.bg) : "";
       const activeForegroundStyle = model.state === "active" ? toStyleText("color", tokens.fg) : "";
-      const idleStripStyle = model.showStrip === true ? toStyleText("background-color", tokens.strip) : "";
+      const shellStyle = buildShellStyle(model);
+      const accentStyle = buildAccentStyle(model, tokens);
       const result = {
-        mode: mode,
+        mode: layout.mode,
         captionPx: modeFit.captionPx,
         valuePx: modeFit.valuePx,
         captionStyle: toFontStyle(modeFit.captionPx, htmlUtils),
         valueStyle: toFontStyle(modeFit.valuePx, htmlUtils),
+        shellStyle: shellStyle,
+        accentStyle: accentStyle,
         activeBackgroundStyle: activeBackgroundStyle,
         activeForegroundStyle: activeForegroundStyle,
-        idleStripStyle: idleStripStyle,
+        idleStripStyle: accentStyle,
         showStrip: model.showStrip === true,
         showActiveBackground: model.showActiveBackground === true,
         valueSingleLine: true,
@@ -325,7 +408,10 @@
 
     return {
       id: "AlarmHtmlFit",
-      compute: compute
+      compute: compute,
+      resolveLayout: function (args) {
+        return resolveLayout(args, htmlUtils);
+      }
     };
   }
 
