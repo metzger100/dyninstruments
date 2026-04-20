@@ -50,6 +50,9 @@
     defineToken("colors.pointer", "--dyni-pointer", "color", "#ff2b2b", { night: "#cc2222" }),
     defineToken("colors.warning", "--dyni-warning", "color", "#e7c66a", { night: "#8b6914" }),
     defineToken("colors.alarm", "--dyni-alarm", "color", "#ff7a76", { night: "#992222" }),
+    defineToken("colors.alarmWidget.bg", "--dyni-alarm-widget-bg", "color", "#e04040", { night: "#991111" }),
+    defineToken("colors.alarmWidget.fg", "--dyni-alarm-widget-fg", "color", "#ffffff", { night: "#ffffff" }),
+    defineToken("colors.alarmWidget.strip", "--dyni-alarm-widget-strip", "color", "#4488cc", { night: "#224466" }),
     defineToken("colors.laylineStb", "--dyni-layline-stb", "color", "#82b683", { night: "#3d6b3d" }),
     defineToken("colors.laylinePort", "--dyni-layline-port", "color", "#ff7a76", { night: "#8b3333" }),
     defineToken("colors.ais.warning", "--dyni-ais-warning", "color", "#f39b52"),
@@ -99,6 +102,11 @@
           pointer: "#cc2222",
           warning: "#8b6914",
           alarm: "#992222",
+          alarmWidget: {
+            bg: "#991111",
+            fg: "#ffffff",
+            strip: "#224466"
+          },
           laylineStb: "#3d6b3d",
           laylinePort: "#8b3333"
         }
@@ -140,7 +148,12 @@
         colors: {
           pointer: "#ff0000",
           warning: "#ffcc00",
-          alarm: "#ff3300"
+          alarm: "#ff3300",
+          alarmWidget: {
+            bg: "#ff2200",
+            fg: "#ffffff",
+            strip: "#3399ff"
+          }
         },
         radial: {
           ring: { arcLineWidth: 2 },

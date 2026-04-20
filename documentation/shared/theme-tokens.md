@@ -18,6 +18,9 @@ Both are registered with apiShape module and do not use create().
 - `font.familyMono`
 - `font.weight`
 - `font.labelWeight`
+- `colors.alarmWidget.bg`
+- `colors.alarmWidget.fg`
+- `colors.alarmWidget.strip`
 
 ## Public Input Variables (Migrated Shared Surface/Typography)
 
@@ -28,6 +31,29 @@ Both are registered with apiShape module and do not use create().
 - --dyni-font-mono
 - --dyni-font-weight
 - --dyni-label-weight
+- --dyni-alarm-widget-bg
+- --dyni-alarm-widget-fg
+- --dyni-alarm-widget-strip
+
+## Alarm Widget Surface Tokens
+
+The alarm widget reads these semantic paths through `ThemeResolver.resolveForRoot(rootEl)`. They are overrideable from `user.css`, and the active preset still supplies the fallback values when no root override is present.
+
+| Path | Input var | Default | Night | highcontrast |
+|---|---|---|---|---|
+| `colors.alarmWidget.bg` | `--dyni-alarm-widget-bg` | `#e04040` | `#991111` | `#ff2200` |
+| `colors.alarmWidget.fg` | `--dyni-alarm-widget-fg` | `#ffffff` | `#ffffff` | `#ffffff` |
+| `colors.alarmWidget.strip` | `--dyni-alarm-widget-strip` | `#4488cc` | `#224466` | `#3399ff` |
+
+Example `user.css` override:
+
+```css
+.widget.dyniplugin {
+  --dyni-alarm-widget-bg: #cc2222;
+  --dyni-alarm-widget-fg: #ffffff;
+  --dyni-alarm-widget-strip: #3388ff;
+}
+```
 
 ## Materialized Output Variables
 
