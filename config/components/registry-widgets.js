@@ -40,12 +40,24 @@
         "StateScreenInteraction"
       ]
     },
+    AlarmRenderModel: {
+      js: BASE + "shared/widget-kits/vessel/AlarmRenderModel.js",
+      css: undefined,
+      globalKey: "DyniAlarmRenderModel",
+      deps: ["HtmlWidgetUtils"]
+    },
     AlarmTextHtmlWidget: {
       js: BASE + "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js",
       css: undefined,
       shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css"],
       globalKey: "DyniAlarmTextHtmlWidget",
       deps: []
+    },
+    AlarmMarkup: {
+      js: BASE + "shared/widget-kits/vessel/AlarmMarkup.js",
+      css: undefined,
+      globalKey: "DyniAlarmMarkup",
+      deps: ["HtmlWidgetUtils"]
     },
     AisTargetMarkup: {
       js: BASE + "shared/widget-kits/nav/AisTargetMarkup.js",

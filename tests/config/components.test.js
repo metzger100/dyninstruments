@@ -108,6 +108,15 @@ describe("config/components.js", function () {
     expect(components.AlarmViewModel.globalKey).toBe("DyniAlarmViewModel");
     expect(components.AlarmViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/AlarmViewModel.js");
     expect(components.AlarmViewModel.deps).toBeUndefined();
+    expect(components.AlarmHtmlFit.globalKey).toBe("DyniAlarmHtmlFit");
+    expect(components.AlarmHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/vessel/AlarmHtmlFit.js");
+    expect(components.AlarmHtmlFit.deps).toEqual(["ThemeResolver", "TextLayoutEngine", "HtmlWidgetUtils"]);
+    expect(components.AlarmRenderModel.globalKey).toBe("DyniAlarmRenderModel");
+    expect(components.AlarmRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/vessel/AlarmRenderModel.js");
+    expect(components.AlarmRenderModel.deps).toEqual(["HtmlWidgetUtils"]);
+    expect(components.AlarmMarkup.globalKey).toBe("DyniAlarmMarkup");
+    expect(components.AlarmMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/vessel/AlarmMarkup.js");
+    expect(components.AlarmMarkup.deps).toEqual(["HtmlWidgetUtils"]);
     expect(components.ActiveRouteViewModel.globalKey).toBe("DyniActiveRouteViewModel");
     expect(components.ActiveRouteViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/ActiveRouteViewModel.js");
     expect(components.ActiveRouteViewModel.deps).toBeUndefined();

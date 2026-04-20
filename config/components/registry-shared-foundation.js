@@ -40,6 +40,12 @@
       globalKey: "DyniAisTargetHtmlFit",
       deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils", "TextFitMath"]
     },
+    AlarmHtmlFit: {
+      js: BASE + "shared/widget-kits/vessel/AlarmHtmlFit.js",
+      css: undefined,
+      globalKey: "DyniAlarmHtmlFit",
+      deps: ["ThemeResolver", "TextLayoutEngine", "HtmlWidgetUtils"]
+    },
     ActiveRouteHtmlFit: {
       js: BASE + "shared/widget-kits/nav/ActiveRouteHtmlFit.js",
       css: undefined,
