@@ -40,6 +40,13 @@
         "StateScreenInteraction"
       ]
     },
+    AlarmTextHtmlWidget: {
+      js: BASE + "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js",
+      css: undefined,
+      shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css"],
+      globalKey: "DyniAlarmTextHtmlWidget",
+      deps: []
+    },
     AisTargetMarkup: {
       js: BASE + "shared/widget-kits/nav/AisTargetMarkup.js",
       css: undefined,

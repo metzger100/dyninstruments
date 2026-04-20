@@ -23,6 +23,11 @@
       css: undefined,
       globalKey: "DyniAisTargetViewModel"
     },
+    AlarmViewModel: {
+      js: BASE + "cluster/viewmodels/AlarmViewModel.js",
+      css: undefined,
+      globalKey: "DyniAlarmViewModel"
+    },
     ActiveRouteViewModel: {
       js: BASE + "cluster/viewmodels/ActiveRouteViewModel.js",
       css: undefined,
@@ -103,6 +108,7 @@
         "RoutePointsTextHtmlWidget",
         "MapZoomTextHtmlWidget",
         "AisTargetTextHtmlWidget",
+        "AlarmTextHtmlWidget",
         "CenterDisplayTextWidget",
         "RendererPropsWidget",
         "PerfSpanHelper"
@@ -155,7 +161,8 @@
     VesselMapper: {
       js: BASE + "cluster/mappers/VesselMapper.js",
       css: undefined,
-      globalKey: "DyniVesselMapper"
+      globalKey: "DyniVesselMapper",
+      deps: ["AlarmViewModel"]
     },
     WindMapper: {
       js: BASE + "cluster/mappers/WindMapper.js",

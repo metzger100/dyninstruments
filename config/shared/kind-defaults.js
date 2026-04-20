@@ -227,6 +227,7 @@
       voltage: { cap: "VOLT", unit: "V" },
       voltageLinear: { cap: "VOLT", unit: "V" },
       voltageRadial: { cap: "VOLT", unit: "V" },
+      alarm: { cap: "ALARM", unit: "" },
       clock: { cap: "TIME", unit: "" },
       dateTime: { cap: "", unit: "" },
       timeStatus: { cap: "", unit: "" },

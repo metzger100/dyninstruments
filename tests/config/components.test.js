@@ -105,6 +105,9 @@ describe("config/components.js", function () {
     expect(components.AisTargetViewModel.globalKey).toBe("DyniAisTargetViewModel");
     expect(components.AisTargetViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/AisTargetViewModel.js");
     expect(components.AisTargetViewModel.deps).toBeUndefined();
+    expect(components.AlarmViewModel.globalKey).toBe("DyniAlarmViewModel");
+    expect(components.AlarmViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/AlarmViewModel.js");
+    expect(components.AlarmViewModel.deps).toBeUndefined();
     expect(components.ActiveRouteViewModel.globalKey).toBe("DyniActiveRouteViewModel");
     expect(components.ActiveRouteViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/ActiveRouteViewModel.js");
     expect(components.ActiveRouteViewModel.deps).toBeUndefined();
@@ -395,6 +398,14 @@ describe("config/components.js", function () {
       "http://host/plugins/dyninstruments/widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"
     ]);
     expect(components.AisTargetTextHtmlWidget.deps).toEqual(["AisTargetHtmlFit", "HtmlWidgetUtils", "AisTargetRenderModel", "AisTargetMarkup", "ThemeResolver"]);
+    expect(components.AlarmTextHtmlWidget.globalKey).toBe("DyniAlarmTextHtmlWidget");
+    expect(components.AlarmTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js");
+    expect(components.AlarmTextHtmlWidget.css).toBeUndefined();
+    expect(components.AlarmTextHtmlWidget.shadowCss).toEqual([
+      SHARED_HTML_SHADOW_CSS,
+      "http://host/plugins/dyninstruments/widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css"
+    ]);
+    expect(components.AlarmTextHtmlWidget.deps).toEqual([]);
     expect(components.CanvasDomSurfaceAdapter.globalKey).toBe("DyniCanvasDomSurfaceAdapter");
     expect(components.CanvasDomSurfaceAdapter.js).toBe("http://host/plugins/dyninstruments/cluster/rendering/CanvasDomSurfaceAdapter.js");
     expect(components.CanvasDomSurfaceAdapter.deps).toEqual(["ThemeResolver", "PerfSpanHelper"]);
@@ -430,6 +441,7 @@ describe("config/components.js", function () {
     expect(components.ClusterRendererRouter.deps).toContain("RoutePointsTextHtmlWidget");
     expect(components.ClusterRendererRouter.deps).toContain("MapZoomTextHtmlWidget");
     expect(components.ClusterRendererRouter.deps).toContain("AisTargetTextHtmlWidget");
+    expect(components.ClusterRendererRouter.deps).toContain("AlarmTextHtmlWidget");
     expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).toContain("PerfSpanHelper");
     expect(components.ClusterRendererRouter.deps).not.toContain("WindRadialWidget");
@@ -438,6 +450,7 @@ describe("config/components.js", function () {
     expect(components.NavMapper.deps).toEqual(["ActiveRouteViewModel", "EditRouteViewModel", "RoutePointsViewModel"]);
     expect(components.MapMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/MapMapper.js");
     expect(components.MapMapper.deps).toEqual(["AisTargetViewModel"]);
+    expect(components.VesselMapper.deps).toEqual(["AlarmViewModel"]);
     expect(components.ClusterMapperRegistry.deps).toContain("NavMapper");
     expect(components.ClusterMapperRegistry.deps).toContain("MapMapper");
     expect(components.WindMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/WindMapper.js");

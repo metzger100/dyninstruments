@@ -1,5 +1,5 @@
 /**
- * Module: DyniPlugin Vessel Cluster - Vessel metrics widget config (voltage + clock/time)
+ * Module: DyniPlugin Vessel Cluster - Vessel metrics widget config (voltage + alarm + clock/time)
  * Documentation: documentation/guides/add-new-cluster.md
  * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js
  */
@@ -20,10 +20,11 @@
     widget: "ClusterWidget",
     def: {
       name: "dyni_Vessel_Instruments",
-      description: "Vessel metrics (voltage, time/date, GPS status, SignalK attitude)",
+      description: "Vessel metrics (voltage, alarm, time/date, GPS status, SignalK attitude)",
       caption: "", unit: "", default: "---",
       cluster: "vessel",
       storeKeys: {
+        alarmInfo: "nav.alarms.all",
         clock: "nav.gps.rtime",
         gpsValid: "nav.gps.valid",
         pitch: DEFAULT_PITCH_KEY,
@@ -37,6 +38,7 @@
             opt("Voltage (SignalK)", "voltage"),
             opt("Voltage gauge (linear)", "voltageLinear"),
             opt("Voltage gauge (radial)", "voltageRadial"),
+            opt("Alarm", "alarm"),
             opt("Clock (local time)", "clock"),
             opt("Date and time", "dateTime"),
             opt("Time with GPS status", "timeStatus"),
@@ -234,6 +236,18 @@
             { kind: "dateTime" },
             { kind: "timeStatus" }
           ]
+        },
+        alarmRatioThresholdNormal: {
+          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+          internal: true,
+          name: "Alarm: Normal Threshold",
+          condition: { kind: "alarm" }
+        },
+        alarmRatioThresholdFlat: {
+          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
+          internal: true,
+          name: "Alarm: Flat Threshold",
+          condition: { kind: "alarm" }
         },
 
         caption: false,

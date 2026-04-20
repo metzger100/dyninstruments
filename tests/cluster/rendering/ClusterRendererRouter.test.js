@@ -9,6 +9,7 @@ describe("ClusterRendererRouter", function () {
     "RoutePointsTextHtmlWidget",
     "MapZoomTextHtmlWidget",
     "AisTargetTextHtmlWidget",
+    "AlarmTextHtmlWidget",
     "CenterDisplayTextWidget",
     "WindRadialWidget",
     "CompassRadialWidget",
@@ -127,6 +128,10 @@ describe("ClusterRendererRouter", function () {
       renderCanvas: false,
       createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
     });
+    rendererSpecs.AlarmTextHtmlWidget = makeRendererSpec("AlarmTextHtmlWidget", {
+      renderCanvas: false,
+      createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
+    });
     Object.assign(rendererSpecs, opts.rendererSpecs || {});
 
     const canvasAdapter = {
@@ -164,6 +169,7 @@ describe("ClusterRendererRouter", function () {
       RoutePointsTextHtmlWidget: { create: () => rendererSpecs.RoutePointsTextHtmlWidget },
       MapZoomTextHtmlWidget: { create: () => rendererSpecs.MapZoomTextHtmlWidget },
       AisTargetTextHtmlWidget: { create: () => rendererSpecs.AisTargetTextHtmlWidget },
+      AlarmTextHtmlWidget: { create: () => rendererSpecs.AlarmTextHtmlWidget },
       CenterDisplayTextWidget: { create: () => rendererSpecs.CenterDisplayTextWidget },
       RendererPropsWidget: {
         create: function (def, Helpers, targetRendererId) {
@@ -194,7 +200,7 @@ describe("ClusterRendererRouter", function () {
     const h = createHarness();
     const routes = h.router.listRoutes();
 
-    expect(routes).toHaveLength(55);
+    expect(routes).toHaveLength(56);
     routes.forEach(function (route) {
       const resolved = h.router.resolveRouteSpec({
         cluster: route.cluster,
@@ -208,6 +214,14 @@ describe("ClusterRendererRouter", function () {
     expect(activeRoute.viewModelId).toBe("ActiveRouteViewModel");
     expect(activeRoute.rendererId).toBe("ActiveRouteTextHtmlWidget");
     expect(activeRoute.surface).toBe("html");
+
+    expect(h.router.resolveRouteSpec({ cluster: "vessel", kind: "alarm" })).toEqual({
+      cluster: "vessel",
+      kind: "alarm",
+      viewModelId: "AlarmViewModel",
+      rendererId: "AlarmTextHtmlWidget",
+      surface: "html"
+    });
   });
 
   it("renders shell-first HTML with instance/surface markers and canvas-dom shell content", function () {

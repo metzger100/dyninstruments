@@ -20,6 +20,7 @@ describe("config/clusters/vessel.js", function () {
   it("registers vessel cluster definition", function () {
     const def = loadVesselDef();
     expect(def.name).toBe("dyni_Vessel_Instruments");
+    expect(def.storeKeys.alarmInfo).toBe("nav.alarms.all");
     expect(def.storeKeys.clock).toBe("nav.gps.rtime");
     expect(def.storeKeys.gpsValid).toBe("nav.gps.valid");
     expect(def.storeKeys.pitch).toBe("nav.gps.signalk.navigation.attitude.pitch");
@@ -31,6 +32,7 @@ describe("config/clusters/vessel.js", function () {
       "voltage",
       "voltageLinear",
       "voltageRadial",
+      "alarm",
       "clock",
       "dateTime",
       "timeStatus",
@@ -68,6 +70,12 @@ describe("config/clusters/vessel.js", function () {
       { kind: "dateTime" },
       { kind: "timeStatus" }
     ]);
+    expect(def.editableParameters.alarmRatioThresholdNormal.default).toBe(1.0);
+    expect(def.editableParameters.alarmRatioThresholdFlat.default).toBe(3.0);
+    expect(def.editableParameters.alarmRatioThresholdNormal.condition).toEqual({ kind: "alarm" });
+    expect(def.editableParameters.alarmRatioThresholdFlat.condition).toEqual({ kind: "alarm" });
+    expect(def.editableParameters.alarmRatioThresholdNormal.internal).toBe(true);
+    expect(def.editableParameters.alarmRatioThresholdFlat.internal).toBe(true);
 
     expect(def.editableParameters.voltageRadialMinValue).toBeTruthy();
     expect(def.editableParameters.voltageRadialMaxValue).toBeTruthy();

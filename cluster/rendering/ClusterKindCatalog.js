@@ -84,6 +84,7 @@
     { cluster: "vessel", kind: "voltage", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
     { cluster: "vessel", kind: "voltageLinear", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "VoltageLinearWidget", surface: "canvas-dom" },
     { cluster: "vessel", kind: "voltageRadial", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "VoltageRadialWidget", surface: "canvas-dom" },
+    { cluster: "vessel", kind: "alarm", viewModelId: "AlarmViewModel", rendererId: "AlarmTextHtmlWidget", surface: "html" },
     { cluster: "vessel", kind: "clock", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
     { cluster: "vessel", kind: "dateTime", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "PositionCoordinateWidget", surface: "canvas-dom" },
     { cluster: "vessel", kind: "timeStatus", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "PositionCoordinateWidget", surface: "canvas-dom" },

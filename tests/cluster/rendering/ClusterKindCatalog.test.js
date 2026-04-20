@@ -10,7 +10,7 @@ describe("ClusterKindCatalog", function () {
     const catalog = catalogFactory.createDefaultCatalog();
 
     const routes = catalog.listRoutes();
-    expect(routes).toHaveLength(55);
+    expect(routes).toHaveLength(56);
 
     const activeRoute = catalog.resolveRoute("nav", "activeRoute");
     expect(activeRoute).toEqual({
@@ -36,6 +36,15 @@ describe("ClusterKindCatalog", function () {
       kind: "aisTarget",
       viewModelId: "AisTargetViewModel",
       rendererId: "AisTargetTextHtmlWidget",
+      surface: "html"
+    });
+
+    const vesselAlarm = catalog.resolveRoute("vessel", "alarm");
+    expect(vesselAlarm).toEqual({
+      cluster: "vessel",
+      kind: "alarm",
+      viewModelId: "AlarmViewModel",
+      rendererId: "AlarmTextHtmlWidget",
       surface: "html"
     });
 
