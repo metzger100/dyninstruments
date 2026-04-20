@@ -1,7 +1,7 @@
 /**
- * Module: VesselMapper - Cluster translation for vessel voltage/time/attitude kinds
+ * Module: VesselMapper - Cluster translation for vessel voltage/time/attitude/alarm kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ClusterMapperToolkit
+ * Depends: ClusterMapperToolkit, AlarmViewModel
  */
 
 (function (root, factory) {
@@ -11,7 +11,9 @@
 }(this, function () {
   "use strict";
 
-  function create() {
+  function create(def, Helpers) {
+    let alarmViewModel = null;
+
     function translate(props, toolkit) {
       const p = props || {};
       const cap = toolkit.cap;
@@ -127,6 +129,24 @@
           unit: unit("roll"),
           formatter: "formatDirection",
           formatterParameters: [true, true, false]
+        };
+      }
+      if (req === "alarm") {
+        if (!alarmViewModel) {
+          if (!Helpers || typeof Helpers.getModule !== "function") {
+            throw new Error("VesselMapper: AlarmViewModel helper is required for alarm kind");
+          }
+          alarmViewModel = Helpers.getModule("AlarmViewModel").create(def, Helpers);
+        }
+        const alarmDomain = alarmViewModel.build(p);
+        return {
+          renderer: "AlarmTextHtmlWidget",
+          caption: cap("alarm"),
+          unit: unit("alarm"),
+          default: "NONE",
+          domain: alarmDomain,
+          ratioThresholdNormal: num(p.alarmRatioThresholdNormal),
+          ratioThresholdFlat: num(p.alarmRatioThresholdFlat)
         };
       }
 

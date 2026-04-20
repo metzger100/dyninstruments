@@ -16,8 +16,23 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   caption_pitch: "PITCH",
   unit_pitch: "°",
   caption_roll: "ROLL",
-  unit_roll: "°"
+  unit_roll: "°",
+  caption_alarm: "ALARM",
+  unit_alarm: ""
 });
+
+function createAlarmMapper() {
+  const Helpers = {
+    getModule(id) {
+      if (id === "AlarmViewModel") {
+        return loadFresh("cluster/viewmodels/AlarmViewModel.js");
+      }
+      throw new Error("unexpected module: " + id);
+    }
+  };
+
+  return loadFresh("cluster/mappers/VesselMapper.js").create({}, Helpers);
+}
 
 describe("VesselMapper", function () {
   it("maps voltageLinear with explicit linear keys and respects sector toggles", function () {
@@ -260,5 +275,98 @@ describe("VesselMapper", function () {
     expect(out.rendererProps.voltageRadialTickMajor).toBe(1);
     expect(out.rendererProps.voltageRadialTickMinor).toBe(0.2);
     expect(mapper.translate({ kind: "unknownKind" }, toolkitWithoutNum)).toEqual({});
+  });
+
+  it("maps alarm to AlarmTextHtmlWidget with normalized domain payload and thresholds", function () {
+    const mapper = createAlarmMapper();
+    const out = mapper.translate({
+      kind: "alarm",
+      alarmInfo: {
+        secondAlarm: {
+          running: true,
+          category: "info",
+          repeat: false
+        },
+        firstAlarm: {
+          running: true,
+          category: "critical",
+          repeat: true
+        },
+        ignoredAlarm: {
+          running: false,
+          category: "critical",
+          repeat: true
+        }
+      },
+      alarmRatioThresholdNormal: "1.25",
+      alarmRatioThresholdFlat: "3.75"
+    }, toolkit);
+
+    expect(out).toEqual({
+      renderer: "AlarmTextHtmlWidget",
+      caption: "ALARM",
+      unit: "",
+      default: "NONE",
+      domain: {
+        activeAlarms: [
+          { name: "firstAlarm", category: "critical", repeat: true },
+          { name: "secondAlarm", category: "info", repeat: false }
+        ],
+        hasActiveAlarms: true,
+        activeCount: 2,
+        alarmNames: ["firstAlarm", "secondAlarm"],
+        alarmText: "firstAlarm, secondAlarm",
+        state: "active"
+      },
+      ratioThresholdNormal: 1.25,
+      ratioThresholdFlat: 3.75
+    });
+  });
+
+  it("preserves defined-before-undefined alarm ordering through mapper delegation", function () {
+    const mapper = createAlarmMapper();
+    const out = mapper.translate({
+      kind: "alarm",
+      alarmInfo: {
+        earlyUndefined: { running: true, repeat: false },
+        laterCritical: { running: true, category: "critical", repeat: true },
+        laterInfo: { running: true, category: "info", repeat: false }
+      }
+    }, toolkit);
+
+    expect(out.domain).toEqual({
+      activeAlarms: [
+        { name: "laterCritical", category: "critical", repeat: true },
+        { name: "laterInfo", category: "info", repeat: false },
+        { name: "earlyUndefined", category: undefined, repeat: false }
+      ],
+      hasActiveAlarms: true,
+      activeCount: 3,
+      alarmNames: ["laterCritical", "laterInfo", "earlyUndefined"],
+      alarmText: "laterCritical, laterInfo +1",
+      state: "active"
+    });
+  });
+
+  it("keeps alarm passive defaults available when there are no active alarms", function () {
+    const mapper = createAlarmMapper();
+    const out = mapper.translate({
+      kind: "alarm",
+      alarmInfo: null
+    }, toolkit);
+
+    expect(out.caption).toBe("ALARM");
+    expect(out.unit).toBe("");
+    expect(out.default).toBe("NONE");
+    expect(out.domain).toEqual({
+      activeAlarms: [],
+      hasActiveAlarms: false,
+      activeCount: 0,
+      alarmNames: [],
+      alarmText: "NONE",
+      state: "idle"
+    });
+    expect(out.ratioThresholdNormal).toBeUndefined();
+    expect(out.ratioThresholdFlat).toBeUndefined();
   });
 });
