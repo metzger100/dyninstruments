@@ -82,9 +82,14 @@
     };
   }
 
+  function createPreparedPayloadCache(buildModel) {
+    return createPreparedModelCache({ buildModel: buildModel });
+  }
+
   function create() {
     return {
-      createPreparedModelCache: createPreparedModelCache
+      createPreparedModelCache: createPreparedModelCache,
+      createPreparedPayloadCache: createPreparedPayloadCache
     };
   }
 

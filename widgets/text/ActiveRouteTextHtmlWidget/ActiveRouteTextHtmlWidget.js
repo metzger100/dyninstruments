@@ -286,9 +286,10 @@
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
-    const stateScreenMarkup = Helpers.getModule("StateScreenMarkup").create(def, Helpers); const themeResolver = Helpers.getModule("ThemeResolver");
+    const stateScreenMarkup = Helpers.getModule("StateScreenMarkup").create(def, Helpers);
+    const themeResolver = Helpers.getModule("ThemeResolver");
 
-    function createCommittedRenderer(rendererContext) {
+    function translateFunction(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
       const hostContext = context.hostContext || {};
 
@@ -298,21 +299,21 @@
       let clickHandler = null;
       let lastFit = EMPTY_FIT;
       let lastProps = null;
-      const preparedPayload = preparedPayloadModelCache.createPreparedModelCache({
-        buildModel: function (props, shellRect) {
-          return buildRenderModel(
-            props,
-            shellRect,
-            Helpers,
-            htmlUtils,
-            placeholderNormalize,
-            stableDigits,
-            stateScreenLabels,
-            stateScreenPrecedence,
-            stateScreenInteraction
-          );
-        }
-      });
+      const translate = function (props, shellRect) {
+        return buildRenderModel(
+          props,
+          shellRect,
+          Helpers,
+          htmlUtils,
+          placeholderNormalize,
+          stableDigits,
+          stateScreenLabels,
+          stateScreenPrecedence,
+          stateScreenInteraction
+        );
+      };
+
+      const preparedPayload = preparedPayloadModelCache.createPreparedPayloadCache(translate);
 
       function bindDispatchListener(model) {
         if (wrapperEl && clickHandler) {
@@ -334,7 +335,8 @@
 
       function patchDom(payload) {
         const prepared = preparedPayload.getPreparedPayload(payload);
-        const shellRect = payload.shellRect || null; const theme = themeResolver.resolveForRoot(payload.rootEl);
+        const shellRect = payload.shellRect || null;
+        const theme = themeResolver.resolveForRoot(payload.rootEl);
         const model = prepared.model;
         const fit = shellRect
           ? (htmlFit.compute({
@@ -418,7 +420,7 @@
       };
     }
 
-    function translateFunction() {
+    function translateWidget() {
       return {};
     }
 
@@ -429,9 +431,9 @@
     return {
       id: "ActiveRouteTextHtmlWidget",
       wantsHideNativeHead: true,
-      createCommittedRenderer: createCommittedRenderer,
+      createCommittedRenderer: translateFunction,
       getVerticalShellSizing: getVerticalShellSizing,
-      translateFunction: translateFunction
+      translateFunction: translateWidget
     };
   }
 
