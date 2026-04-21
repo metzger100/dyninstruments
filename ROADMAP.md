@@ -21,7 +21,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 - Add 180° option to the linear compasses (default: off)
 - Add a plugin loader compliant export tool to create a code only zip of the plugin for the users
 
-### Additional non-core concepts
+### Additional non-core concepts (post release)
 
 - OBP60-style instruments: graphical Roll/Pitch, analog Clock, Rudder, Keel
 - C-net 2000 style multi instruments: history graphs, anchor nav plot
