@@ -18,7 +18,6 @@ It tracks pre-release priorities and AvNav widget coverage status.
 ### Fixes for existing widgets and architecture
 
 - Add option to hide textual Metrics in graphical Widgets like (radial, linear, compass, XTE etc.). Note: some widgets also need to center aligned (e.g.: XTE and linear) or stretched (e.g.: XTE and linear), when the textual metrics are hidden, while others just hide the text (e.g.: compass radial, radial gauges) (default: off)
-- Add 180° option to the linear compasses (default: off)
 - Add a plugin loader compliant export tool to create a code only zip of the plugin for the users
 
 ### Additional non-core concepts (post release)
@@ -34,7 +33,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | ---------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------- |
 | ActiveRoute                  | dyni_Nav_Instruments → `activeRoute`                                         | ✅ covered                                  |
 | AisTarget                    | dyni_Map_Instruments → `aisTarget`                                           | ✅ covered                                  |
-| Alarm                        | dyni_Vessel_Instruments → `alarm`                                             | ✅ covered                                  |
+| Alarm                        | dyni_Vessel_Instruments → `alarm`                                            | ✅ covered                                  |
 | AnchorBearing                | dyni_Anchor_Instruments → `bearing`                                          | ✅ covered                                  |
 | AnchorDistance               | dyni_Anchor_Instruments → `distance`                                         | ✅ covered                                  |
 | AnchorWatchDistance          | dyni_Anchor_Instruments → `watch`                                            | ✅ covered                                  |
@@ -52,7 +51,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | HDT                          | dyni_CourseHeading_Instruments → `hdt`                                       | ✅ covered                                  |
 | LargeTime                    | dyni_Vessel_Instruments → `clock`                                            | ✅ covered                                  |
 | linGauge_Compass             | dyni_CourseHeading_Instruments → `hdtLinear`/`hdmLinear`                     | ✅ covered                                  |
-| linGauge_Compass180          | —                                                                            | ❌ not covered yet                          |
+| linGauge_Compass180          | dyni_CourseHeading_Instruments → `hdtLinear`/`hdmLinear`                     | ✅ covered                                  |
 | linGauge_Temperature         | dyni_Environment_Instruments → `tempLinear`                                  | ✅ covered                                  |
 | linGauge_Voltage             | dyni_Vessel_Instruments → `voltageLinear`                                    | ✅ covered                                  |
 | Position                     | dyni_Nav_Instruments → `positionBoat`                                        | ✅ covered                                  |
