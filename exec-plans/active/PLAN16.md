@@ -9,7 +9,9 @@ This plan lands **after PLAN15** and therefore assumes:
 - `DefaultLinearWidget`
 - `DefaultRadialWidget`
 
-exist under the PLAN15 contract.
+exist under the PLAN15 contract, including the corrected user-selected formatter pass-through behavior in `DefaultMapper`.
+
+No additional repository-grounded correction was required for PLAN16 in the cross-plan pass. Its implementation remains scoped to hide-textual-metrics plumbing and rendering behavior, and it remains safe to land before PLAN17.
 
 ## Goal
 

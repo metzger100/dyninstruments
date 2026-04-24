@@ -45,6 +45,8 @@ Repo-grounded corrections folded into this final plan:
 - `hint_basis` is top-level in `SUMMARY_JSON`; `semver_hints` contains booleans only
 - `release:create` creates lightweight local tags, and the GitHub workflow resolves the tagged commit defensively before validation
 - the GitHub Releases workflow declares `contents: write` and publishes committed artifacts through GitHub API tooling without installing project dependencies
+- Phase 2 implementation paths use the actual repository locations: `cluster/ClusterWidget.js`, `cluster/rendering/ClusterRendererRouter.js`, and `cluster/rendering/RendererPropsWidget.js`
+- runtime packaging builds a single deduplicated file set before sorting paths and writing zip entries, so bootstrap files and component-closure files cannot be emitted twice
 
 ---
 
@@ -765,6 +767,10 @@ Fail closed when:
 
 Also:
 
+- derive the runtime package as one deduplicated set of repository-relative file paths before sorting or writing
+  
+- treat files discovered from both bootstrap order and component closure as the same file, not as duplicate zip entries
+  
 - sort file paths before writing the zip for deterministic output order
   
 - sort zip entries in stable order; byte-for-byte reproducibility across reruns is not required
@@ -1529,10 +1535,10 @@ Modify:
 - `runtime/helpers.js`
 - `runtime/init.js`
 - `runtime/widget-registrar.js` if needed to preserve the registrar contract
-- `widgets/ClusterWidget.js`
-- `cluster/ClusterRendererRouter.js`
+- `cluster/ClusterWidget.js`
+- `cluster/rendering/ClusterRendererRouter.js`
 - `cluster/mappers/ClusterMapperRegistry.js`
-- `widgets/RendererPropsWidget.js`
+- `cluster/rendering/RendererPropsWidget.js`
 - `tools/check-dependencies.mjs`
 - shipped-source lint/check helpers
 - runtime, helper, cluster, mapper, renderer, and widget tests
@@ -1614,8 +1620,8 @@ Work:
 - include `plugin.js`, `plugin.css`, extracted bootstrap scripts, reachable component `js`, `css`, `shadowCss`, and reachable registry-owned `assets`
 - include mandatory redistribution notices such as `assets/fonts/LICENSE.txt` whenever bundled fonts are packaged
 - write the plugin-loader-compliant zip rooted at `dyninstruments/`
-- sort file paths and zip entries deterministically
-- fail hard on missing runtime files, unsupported file shapes, out-of-root resolution, unexpected release-directory contents, or an already existing target zip path
+- build one deduplicated runtime file set before sorting file paths and zip entries deterministically
+- fail hard on duplicate final zip entry names, missing runtime files, unsupported file shapes, out-of-root resolution, unexpected release-directory contents, or an already existing target zip path
 - exclude tests, docs, tools, coverage, artifacts, perf, node modules, Git metadata, AI/process folders, and root developer docs
 - do not depend on the host `zip` binary
 

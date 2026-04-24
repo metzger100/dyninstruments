@@ -12,6 +12,7 @@ Repo-grounded corrections folded into this final plan:
 - update `tests/config/components.test.js`
 - update `documentation/TABLEOFCONTENTS.md`
 - for gauges, always go through `Helpers.applyFormatter(...)`; do not special-case “no formatter selected”
+- user-selected `formatter` and `formatterParameters` must pass through `DefaultMapper`; the mapper must not hard-code, override, or default-inject formatter metadata
 - `text` can render any normal store value/formatter output; `linearGauge` and `radialGauge` are explicitly numeric gauges and only support raw values / formatter outputs that still yield a parseable numeric substring for pointer positioning
 - no new validation/autocorrection layer for awkward threshold ordering or tick relationships; keep existing repo behavior and document that sensible config is the user’s responsibility
 - approved initial default preset added for new gauge instances
@@ -97,6 +98,8 @@ Provide per-kind caption/unit editables via `makePerKindTextParams(DEFAULT_KIND)
 Formatter contract:
 
 - mapper does not force formatter selection
+- mapper passes user-provided `formatter` and array-valued `formatterParameters` through to renderer payloads for all three kinds
+- absence of a user formatter remains absence; do not synthesize a fallback formatter in `DefaultMapper`
 - `text` may use any normal formatter output
 - `linearGauge` / `radialGauge`:
   - always call `Helpers.applyFormatter(raw, { formatter, formatterParameters, default })`
@@ -243,22 +246,26 @@ Add:
 Implement a thin pass-through mapper.
 
 - `text`:
-  - `toolkit.out(p.value, cap("text"), unit("text"))`
+  - `toolkit.out(p.value, cap("text"), unit("text"), p.formatter, p.formatterParameters)`
 - `linearGauge`:
   - `renderer: "DefaultLinearWidget"`
   - `value: p.value`
   - `caption`, `unit`
+  - pass through `formatter: p.formatter` only when defined
+  - pass through `formatterParameters: p.formatterParameters` only when it is an array
   - `rendererProps` for all prefixed linear gauge settings
 - `radialGauge`:
   - same pattern with prefixed radial props
+  - same formatter pass-through behavior as `linearGauge`
 
 Use:
 
 - `toolkit.num()` for numeric props
 - `!!` for booleans
 - pass color strings as-is
+- pass formatter metadata through unchanged when the user selected it
 
-Do **not** set `formatter` or `formatterParameters`.
+Do **not** hard-code, override, or default-inject `formatter` or `formatterParameters`.
 
 #### `cluster/mappers/ClusterMapperRegistry.js`
 
@@ -412,6 +419,8 @@ Verify:
 - booleans through `!!`
 - colors remain strings
 - unknown kind returns `{}`
+- user-selected `formatter` and array-valued `formatterParameters` pass through for `text`, `linearGauge`, and `radialGauge`
+- missing formatter fields remain absent; the mapper does not synthesize fallback formatter metadata
 
 `tests/widgets/radial/DefaultRadialWidget.test.js`
 
