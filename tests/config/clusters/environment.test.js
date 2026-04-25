@@ -12,6 +12,7 @@ describe("config/clusters/environment.js", function () {
 
     runIifeScript("config/shared/kind-defaults.js", context);
     runIifeScript("config/shared/editable-param-utils.js", context);
+    runIifeScript("config/shared/environment-editables.js", context);
     runIifeScript("config/clusters/environment.js", context);
 
     return context.DyniPlugin.config.clusters.find((c) => c.def && c.def.cluster === "environment").def;
@@ -37,6 +38,14 @@ describe("config/clusters/environment.js", function () {
     expect(def.editableParameters.tempLinearWarningFrom.name).toBe("Warning at or above");
     expect(def.editableParameters.tempRadialAlarmFrom.name).toBe("Alarm at or above");
     expect(def.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
+    expect(def.editableParameters.depthLinearHideTextualMetrics.condition).toEqual({ kind: "depthLinear" });
+    expect(def.editableParameters.depthLinearHideTextualMetrics.default).toBe(false);
+    expect(def.editableParameters.depthRadialHideTextualMetrics.condition).toEqual({ kind: "depthRadial" });
+    expect(def.editableParameters.depthRadialHideTextualMetrics.default).toBe(false);
+    expect(def.editableParameters.tempLinearHideTextualMetrics.condition).toEqual({ kind: "tempLinear" });
+    expect(def.editableParameters.tempLinearHideTextualMetrics.default).toBe(false);
+    expect(def.editableParameters.tempRadialHideTextualMetrics.condition).toEqual({ kind: "tempRadial" });
+    expect(def.editableParameters.tempRadialHideTextualMetrics.default).toBe(false);
     expect(def.editableParameters.stableDigits.default).toBe(false);
     expect(def.editableParameters.stableDigits.condition).toEqual([
       { kind: "depth" },

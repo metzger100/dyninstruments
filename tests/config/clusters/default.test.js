@@ -84,6 +84,12 @@ describe("config/clusters/default.js", function () {
       { kind: "linearGauge" },
       { kind: "radialGauge" }
     ]);
+    expect(def.editableParameters.defaultLinearHideTextualMetrics.default).toBe(false);
+    expect(def.editableParameters.defaultLinearHideTextualMetrics.name).toBe("Hide textual metrics");
+    expect(def.editableParameters.defaultLinearHideTextualMetrics.condition).toEqual({ kind: "linearGauge" });
+    expect(def.editableParameters.defaultRadialHideTextualMetrics.default).toBe(false);
+    expect(def.editableParameters.defaultRadialHideTextualMetrics.name).toBe("Hide textual metrics");
+    expect(def.editableParameters.defaultRadialHideTextualMetrics.condition).toEqual({ kind: "radialGauge" });
 
     expect(def.editableParameters.defaultLinearRatioThresholdNormal.default).toBe(1.1);
     expect(def.editableParameters.defaultLinearRatioThresholdFlat.default).toBe(3.5);

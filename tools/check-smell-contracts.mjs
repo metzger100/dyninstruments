@@ -229,6 +229,7 @@ function runDynamicStorekeyClearsRule() {
   const required = [
     "config/shared/kind-defaults.js",
     "config/shared/editable-param-utils.js",
+    "config/shared/environment-editables.js",
     "config/clusters/environment.js",
     "config/clusters/vessel.js"
   ];
@@ -243,6 +244,7 @@ function runDynamicStorekeyClearsRule() {
   try {
     runIife("config/shared/kind-defaults.js", ctx);
     runIife("config/shared/editable-param-utils.js", ctx);
+    runIife("config/shared/environment-editables.js", ctx);
     runIife("config/clusters/environment.js", ctx);
     runIife("config/clusters/vessel.js", ctx);
   } catch (e) {

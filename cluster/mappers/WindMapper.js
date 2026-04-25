@@ -47,7 +47,8 @@
             windRadialRatioThresholdNormal: num(p.windRadialRatioThresholdNormal),
             windRadialRatioThresholdFlat: num(p.windRadialRatioThresholdFlat),
             captionUnitScale: num(p.captionUnitScale),
-            leadingZero: !!p.leadingZero
+            leadingZero: !!p.leadingZero,
+            windRadialHideTextualMetrics: !!p.windRadialHideTextualMetrics
           }
         };
       }
@@ -77,7 +78,8 @@
             windLinearLayMin: num(p.windLinearLayMin),
             windLinearLayMax: num(p.windLinearLayMax),
             captionUnitScale: num(p.captionUnitScale),
-            leadingZero: !!p.leadingZero
+            leadingZero: !!p.leadingZero,
+            windLinearHideTextualMetrics: !!p.windLinearHideTextualMetrics
           }
         };
       }

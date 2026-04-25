@@ -43,7 +43,8 @@
             depthLinearWarningFrom: depthWarnOn ? num(p.depthLinearWarningFrom) : undefined,
             depthLinearRatioThresholdNormal: num(p.depthLinearRatioThresholdNormal),
             depthLinearRatioThresholdFlat: num(p.depthLinearRatioThresholdFlat),
-            captionUnitScale: num(p.captionUnitScale)
+            captionUnitScale: num(p.captionUnitScale),
+            depthLinearHideTextualMetrics: !!p.depthLinearHideTextualMetrics
           }
         };
       }
@@ -67,7 +68,8 @@
             depthRadialWarningFrom: depthWarnOn ? num(p.depthRadialWarningFrom) : undefined,
             depthRadialRatioThresholdNormal: num(p.depthRadialRatioThresholdNormal),
             depthRadialRatioThresholdFlat: num(p.depthRadialRatioThresholdFlat),
-            captionUnitScale: num(p.captionUnitScale)
+            captionUnitScale: num(p.captionUnitScale),
+            depthRadialHideTextualMetrics: !!p.depthRadialHideTextualMetrics
           }
         };
       }
@@ -92,7 +94,8 @@
             tempRadialAlarmFrom: tempAlarmOn ? num(p.tempRadialAlarmFrom) : undefined,
             tempRadialRatioThresholdNormal: num(p.tempRadialRatioThresholdNormal),
             tempRadialRatioThresholdFlat: num(p.tempRadialRatioThresholdFlat),
-            captionUnitScale: num(p.captionUnitScale)
+            captionUnitScale: num(p.captionUnitScale),
+            tempRadialHideTextualMetrics: !!p.tempRadialHideTextualMetrics
           }
         };
       }
@@ -117,7 +120,8 @@
             tempLinearAlarmFrom: tempAlarmOn ? num(p.tempLinearAlarmFrom) : undefined,
             tempLinearRatioThresholdNormal: num(p.tempLinearRatioThresholdNormal),
             tempLinearRatioThresholdFlat: num(p.tempLinearRatioThresholdFlat),
-            captionUnitScale: num(p.captionUnitScale)
+            captionUnitScale: num(p.captionUnitScale),
+            tempLinearHideTextualMetrics: !!p.tempLinearHideTextualMetrics
           }
         };
       }

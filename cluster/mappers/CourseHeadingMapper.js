@@ -36,7 +36,8 @@
             leadingZero: !!p.leadingZero,
             captionUnitScale: num(p.captionUnitScale),
             compassRadialRatioThresholdNormal: num(p.compassRadialRatioThresholdNormal),
-            compassRadialRatioThresholdFlat: num(p.compassRadialRatioThresholdFlat)
+            compassRadialRatioThresholdFlat: num(p.compassRadialRatioThresholdFlat),
+            compassRadialHideTextualMetrics: !!p.compassRadialHideTextualMetrics
           }
         };
       }
@@ -57,7 +58,8 @@
             compassLinearTickMajor: num(p.compassLinearTickMajor),
             compassLinearTickMinor: num(p.compassLinearTickMinor),
             compassLinearShowEndLabels: !!p.compassLinearShowEndLabels,
-            compassLinearRange: num(p.compassLinearRange)
+            compassLinearRange: num(p.compassLinearRange),
+            compassLinearHideTextualMetrics: !!p.compassLinearHideTextualMetrics
           }
         };
       }

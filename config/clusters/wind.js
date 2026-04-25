@@ -208,6 +208,24 @@
             { kind: "angleApparentLinear" }
           ]
         },
+        windRadialHideTextualMetrics: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide textual metrics",
+          condition: [
+            { kind: "angleTrueRadial" },
+            { kind: "angleApparentRadial" }
+          ]
+        },
+        windLinearHideTextualMetrics: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide textual metrics",
+          condition: [
+            { kind: "angleTrueLinear" },
+            { kind: "angleApparentLinear" }
+          ]
+        },
 
         caption: false,
         unit: false,

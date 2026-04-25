@@ -52,6 +52,10 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.dateTimeRatioThresholdFlat.internal).toBe(true);
     expect(def.editableParameters.captionUnitScale.internal).not.toBe(true);
     expect(def.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
+    expect(def.editableParameters.voltageLinearHideTextualMetrics.condition).toEqual({ kind: "voltageLinear" });
+    expect(def.editableParameters.voltageLinearHideTextualMetrics.default).toBe(false);
+    expect(def.editableParameters.voltageRadialHideTextualMetrics.condition).toEqual({ kind: "voltageRadial" });
+    expect(def.editableParameters.voltageRadialHideTextualMetrics.default).toBe(false);
     expect(Object.prototype.hasOwnProperty.call(def.editableParameters.stableDigits, "default")).toBe(false);
     expect(def.editableParameters.stableDigits.condition).toEqual([
       { kind: "voltage" },

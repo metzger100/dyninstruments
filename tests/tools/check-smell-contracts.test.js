@@ -98,6 +98,11 @@ describe("tools/check-smell-contracts.mjs", function () {
   root.DyniPlugin.config.shared.opt = function (name, value) { return { name: name, value: value }; };
 }(this));
 `,
+      "config/shared/environment-editables.js": `
+(function (root) {
+  root.DyniPlugin.config.shared.buildEnvironmentEditableParameters = function () { return {}; };
+}(this));
+`,
       "config/clusters/environment.js": `
 (function (root) {
   root.DyniPlugin.config.clusters.push({

@@ -46,7 +46,8 @@
           defaultLinearAlarmHighColor: p.defaultLinearAlarmHighColor,
           captionUnitScale: num(p.captionUnitScale),
           stableDigits: !!p.stableDigits,
-          easing: !!p.easing
+          easing: !!p.easing,
+          defaultLinearHideTextualMetrics: !!p.defaultLinearHideTextualMetrics
         };
         const translated = {
           renderer: "DefaultLinearWidget",
@@ -87,7 +88,8 @@
           defaultRadialAlarmHighColor: p.defaultRadialAlarmHighColor,
           captionUnitScale: num(p.captionUnitScale),
           stableDigits: !!p.stableDigits,
-          easing: !!p.easing
+          easing: !!p.easing,
+          defaultRadialHideTextualMetrics: !!p.defaultRadialHideTextualMetrics
         };
         const translated = {
           renderer: "DefaultRadialWidget",

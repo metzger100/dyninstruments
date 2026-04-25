@@ -13,6 +13,7 @@ describe("static cluster configs", function () {
     runIifeScript("config/shared/kind-defaults.js", context);
     runIifeScript("config/shared/editable-param-utils.js", context);
     runIifeScript("config/shared/common-editables.js", context);
+    runIifeScript("config/shared/environment-editables.js", context);
 
     runIifeScript("config/clusters/course-heading.js", context);
     runIifeScript("config/clusters/default.js", context);
@@ -98,6 +99,10 @@ describe("static cluster configs", function () {
       { kind: "linearGauge" },
       { kind: "radialGauge" }
     ]);
+    expect(byCluster.default.editableParameters.defaultLinearHideTextualMetrics.default).toBe(false);
+    expect(byCluster.default.editableParameters.defaultLinearHideTextualMetrics.condition).toEqual({ kind: "linearGauge" });
+    expect(byCluster.default.editableParameters.defaultRadialHideTextualMetrics.default).toBe(false);
+    expect(byCluster.default.editableParameters.defaultRadialHideTextualMetrics.condition).toEqual({ kind: "radialGauge" });
     expect(byCluster.default.editableParameters.captionUnitScale.default).toBe(0.8);
     expect(byCluster.default.editableParameters.value.type).toBe("KEY");
     expect(byCluster.default.editableParameters.defaultLinearRatioThresholdNormal.default).toBe(1.1);
@@ -183,6 +188,16 @@ describe("static cluster configs", function () {
     expect(byCluster.speed.editableParameters.speedRadialAlarmEnabled.name).toBe("Show alarm sector");
     expect(byCluster.speed.editableParameters.speedLinearWarningFrom.name).toBe("Warning at or above");
     expect(byCluster.speed.editableParameters.speedRadialAlarmFrom.name).toBe("Alarm at or above");
+    expect(byCluster.speed.editableParameters.speedLinearHideTextualMetrics.default).toBe(false);
+    expect(byCluster.speed.editableParameters.speedLinearHideTextualMetrics.condition).toEqual([
+      { kind: "sogLinear" },
+      { kind: "stwLinear" }
+    ]);
+    expect(byCluster.speed.editableParameters.speedRadialHideTextualMetrics.default).toBe(false);
+    expect(byCluster.speed.editableParameters.speedRadialHideTextualMetrics.condition).toEqual([
+      { kind: "sogRadial" },
+      { kind: "stwRadial" }
+    ]);
     expect(byCluster.speed.editableParameters.speedLinearWarningFrom.condition).toEqual([
       { kind: "sogLinear", speedLinearWarningEnabled: true },
       { kind: "stwLinear", speedLinearWarningEnabled: true }
@@ -224,11 +239,31 @@ describe("static cluster configs", function () {
       { kind: "hdtLinear" },
       { kind: "hdmLinear" }
     ]);
+    expect(byCluster.courseHeading.editableParameters.compassRadialHideTextualMetrics.default).toBe(false);
+    expect(byCluster.courseHeading.editableParameters.compassRadialHideTextualMetrics.condition).toEqual([
+      { kind: "hdtRadial" },
+      { kind: "hdmRadial" }
+    ]);
+    expect(byCluster.courseHeading.editableParameters.compassLinearHideTextualMetrics.default).toBe(false);
+    expect(byCluster.courseHeading.editableParameters.compassLinearHideTextualMetrics.condition).toEqual([
+      { kind: "hdtLinear" },
+      { kind: "hdmLinear" }
+    ]);
     expect(byCluster.wind.editableParameters.windLinearRatioThresholdNormal.condition).toEqual([
       { kind: "angleTrueLinear" },
       { kind: "angleApparentLinear" }
     ]);
     expect(byCluster.wind.editableParameters.windLinearRatioThresholdNormal.internal).toBe(true);
+    expect(byCluster.wind.editableParameters.windRadialHideTextualMetrics.default).toBe(false);
+    expect(byCluster.wind.editableParameters.windRadialHideTextualMetrics.condition).toEqual([
+      { kind: "angleTrueRadial" },
+      { kind: "angleApparentRadial" }
+    ]);
+    expect(byCluster.wind.editableParameters.windLinearHideTextualMetrics.default).toBe(false);
+    expect(byCluster.wind.editableParameters.windLinearHideTextualMetrics.condition).toEqual([
+      { kind: "angleTrueLinear" },
+      { kind: "angleApparentLinear" }
+    ]);
     expect(byCluster.wind.editableParameters.captionUnitScale.internal).not.toBe(true);
     expect(byCluster.wind.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
     expect(byCluster.speed.editableParameters.stableDigits.condition).toEqual([
@@ -258,6 +293,14 @@ describe("static cluster configs", function () {
       { kind: "tempRadial" },
       { kind: "pressure" }
     ]);
+    expect(byCluster.environment.editableParameters.depthLinearHideTextualMetrics.default).toBe(false);
+    expect(byCluster.environment.editableParameters.depthLinearHideTextualMetrics.condition).toEqual({ kind: "depthLinear" });
+    expect(byCluster.environment.editableParameters.depthRadialHideTextualMetrics.default).toBe(false);
+    expect(byCluster.environment.editableParameters.depthRadialHideTextualMetrics.condition).toEqual({ kind: "depthRadial" });
+    expect(byCluster.environment.editableParameters.tempLinearHideTextualMetrics.default).toBe(false);
+    expect(byCluster.environment.editableParameters.tempLinearHideTextualMetrics.condition).toEqual({ kind: "tempLinear" });
+    expect(byCluster.environment.editableParameters.tempRadialHideTextualMetrics.default).toBe(false);
+    expect(byCluster.environment.editableParameters.tempRadialHideTextualMetrics.condition).toEqual({ kind: "tempRadial" });
     expect(byCluster.wind.editableParameters.stableDigits.condition).toEqual([
       { kind: "angleTrue" },
       { kind: "angleApparent" },
@@ -290,6 +333,10 @@ describe("static cluster configs", function () {
       { kind: "pitch" },
       { kind: "roll" }
     ]);
+    expect(byCluster.vessel.editableParameters.voltageLinearHideTextualMetrics.default).toBe(false);
+    expect(byCluster.vessel.editableParameters.voltageLinearHideTextualMetrics.condition).toEqual({ kind: "voltageLinear" });
+    expect(byCluster.vessel.editableParameters.voltageRadialHideTextualMetrics.default).toBe(false);
+    expect(byCluster.vessel.editableParameters.voltageRadialHideTextualMetrics.condition).toEqual({ kind: "voltageRadial" });
     expect(Object.prototype.hasOwnProperty.call(byCluster.vessel.editableParameters.stableDigits, "default")).toBe(false);
     expect(byCluster.anchor.editableParameters.stableDigits.default).toBe(false);
     expect(byCluster.anchor.editableParameters.stableDigits.condition).toEqual([
@@ -302,6 +349,8 @@ describe("static cluster configs", function () {
     expect(byCluster.wind.editableParameters.windLinearShowEndLabels.name).toBe("Show min/max labels");
     expect(byCluster.wind.editableParameters.windRadialLayMin.name).toBe("Min layline angle");
     expect(byCluster.wind.editableParameters.windLinearLayMax.name).toBe("Max layline angle");
+    expect(byCluster.nav.editableParameters.xteHideTextualMetrics.default).toBe(false);
+    expect(byCluster.nav.editableParameters.xteHideTextualMetrics.condition).toEqual({ kind: "xteDisplay" });
   });
 
   it("updates default cluster storeKeys.value from the KEY editable", function () {

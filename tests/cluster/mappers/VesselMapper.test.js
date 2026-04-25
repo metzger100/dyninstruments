@@ -50,7 +50,8 @@ describe("VesselMapper", function () {
       voltageLinearTickMinor: "0.2",
       voltageLinearRatioThresholdNormal: "1.1",
       voltageLinearRatioThresholdFlat: "3.5",
-      captionUnitScale: "0.8"
+      captionUnitScale: "0.8",
+      voltageLinearHideTextualMetrics: "yes"
     }, toolkit);
 
     expect(out.renderer).toBe("VoltageLinearWidget");
@@ -59,6 +60,7 @@ describe("VesselMapper", function () {
     expect(out.formatterParameters).toEqual([3, 1, true]);
     expect(out.rendererProps.voltageLinearWarningFrom).toBeUndefined();
     expect(out.rendererProps.voltageLinearAlarmFrom).toBe(11.6);
+    expect(out.rendererProps.voltageLinearHideTextualMetrics).toBe(true);
   });
 
   it("treats missing voltageLinear sector toggles as enabled by default", function () {
@@ -89,7 +91,8 @@ describe("VesselMapper", function () {
       voltageRadialTickMinor: "0.2",
       voltageRadialRatioThresholdNormal: "1.1",
       voltageRadialRatioThresholdFlat: "3.5",
-      captionUnitScale: "0.8"
+      captionUnitScale: "0.8",
+      voltageRadialHideTextualMetrics: 0
     }, toolkit);
 
     expect(out.renderer).toBe("VoltageRadialWidget");
@@ -98,6 +101,7 @@ describe("VesselMapper", function () {
     expect(out.formatterParameters).toEqual([3, 1, true]);
     expect(out.rendererProps.voltageRadialWarningFrom).toBeUndefined();
     expect(out.rendererProps.voltageRadialAlarmFrom).toBe(11.6);
+    expect(out.rendererProps.voltageRadialHideTextualMetrics).toBe(false);
   });
 
   it("treats missing voltage sector toggles as enabled by default", function () {

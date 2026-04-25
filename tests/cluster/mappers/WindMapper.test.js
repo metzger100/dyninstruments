@@ -40,7 +40,8 @@ describe("WindMapper", function () {
       windRadialRatioThresholdNormal: "0.7",
       windRadialRatioThresholdFlat: "2.1",
       captionUnitScale: "0.8",
-      leadingZero: true
+      leadingZero: true,
+      windRadialHideTextualMetrics: "yes"
     }, makeToolkit());
 
     expect(out.renderer).toBe("WindRadialWidget");
@@ -56,6 +57,7 @@ describe("WindMapper", function () {
     expect(out.rendererProps.windRadialLayMin).toBe(20);
     expect(out.rendererProps.windRadialLayMax).toBe(42);
     expect(out.rendererProps.leadingZero).toBe(true);
+    expect(out.rendererProps.windRadialHideTextualMetrics).toBe(true);
   });
 
   it("maps numeric true angle via angle formatter function", function () {
@@ -105,7 +107,8 @@ describe("WindMapper", function () {
       windLinearLayMin: "25",
       windLinearLayMax: "45",
       captionUnitScale: "0.8",
-      leadingZero: true
+      leadingZero: true,
+      windLinearHideTextualMetrics: 0
     }, makeToolkit());
 
     expect(out.renderer).toBe("WindLinearWidget");
@@ -126,6 +129,7 @@ describe("WindMapper", function () {
     expect(out.rendererProps.windLinearLayMin).toBe(25);
     expect(out.rendererProps.windLinearLayMax).toBe(45);
     expect(out.rendererProps.leadingZero).toBe(true);
+    expect(out.rendererProps.windLinearHideTextualMetrics).toBe(false);
   });
 
   it("maps numeric speed to formatSpeed with unit parameter", function () {

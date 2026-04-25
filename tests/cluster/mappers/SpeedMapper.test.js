@@ -27,7 +27,8 @@ describe("SpeedMapper", function () {
       speedRadialAlarmFrom: "25",
       captionUnitScale: "0.8",
       speedRadialRatioThresholdNormal: "1.1",
-      speedRadialRatioThresholdFlat: "3.5"
+      speedRadialRatioThresholdFlat: "3.5",
+      speedRadialHideTextualMetrics: 1
     }, toolkit);
 
     expect(out.renderer).toBe("SpeedRadialWidget");
@@ -36,6 +37,7 @@ describe("SpeedMapper", function () {
     expect(out.formatterParameters).toEqual(["kn"]);
     expect(out.rendererProps.speedRadialWarningFrom).toBe(20);
     expect(out.rendererProps.speedRadialAlarmFrom).toBe(25);
+    expect(out.rendererProps.speedRadialHideTextualMetrics).toBe(true);
     expect(out.rendererProps.startAngleDeg).toBeUndefined();
     expect(out.rendererProps.endAngleDeg).toBeUndefined();
   });
@@ -81,7 +83,8 @@ describe("SpeedMapper", function () {
       speedLinearTickMinor: "1",
       speedLinearShowEndLabels: true,
       speedLinearWarningFrom: "20",
-      speedLinearAlarmFrom: "25"
+      speedLinearAlarmFrom: "25",
+      speedLinearHideTextualMetrics: 0
     }, toolkit);
 
     expect(out.renderer).toBe("SpeedLinearWidget");
@@ -92,6 +95,7 @@ describe("SpeedMapper", function () {
     expect(out.rendererProps.speedLinearMaxValue).toBe(30);
     expect(out.rendererProps.speedLinearWarningFrom).toBe(20);
     expect(out.rendererProps.speedLinearAlarmFrom).toBe(25);
+    expect(out.rendererProps.speedLinearHideTextualMetrics).toBe(false);
   });
 
   it("maps stwLinear to SpeedLinearWidget using STW source with shared linear settings", function () {
@@ -128,11 +132,13 @@ describe("SpeedMapper", function () {
       speedLinearWarningEnabled: false,
       speedLinearAlarmEnabled: false,
       speedLinearWarningFrom: "20",
-      speedLinearAlarmFrom: "25"
+      speedLinearAlarmFrom: "25",
+      speedLinearHideTextualMetrics: true
     }, toolkit);
 
     expect(out.rendererProps.speedLinearWarningFrom).toBeUndefined();
     expect(out.rendererProps.speedLinearAlarmFrom).toBeUndefined();
+    expect(out.rendererProps.speedLinearHideTextualMetrics).toBe(true);
   });
 
   it("rejects legacy graphic kind names", function () {

@@ -227,6 +227,18 @@
             { kind: "voltageRadial" }
           ]
         },
+        voltageLinearHideTextualMetrics: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide textual metrics",
+          condition: { kind: "voltageLinear" }
+        },
+        voltageRadialHideTextualMetrics: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide textual metrics",
+          condition: { kind: "voltageRadial" }
+        },
         hideSeconds: {
           type: "BOOLEAN",
           default: false,

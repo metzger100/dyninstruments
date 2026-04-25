@@ -31,12 +31,14 @@ describe("EnvironmentMapper", function () {
       depthLinearWarningFrom: "5",
       depthLinearRatioThresholdNormal: "1.1",
       depthLinearRatioThresholdFlat: "3.5",
-      captionUnitScale: "0.8"
+      captionUnitScale: "0.8",
+      depthLinearHideTextualMetrics: 1
     }, toolkit);
 
     expect(out.renderer).toBe("DepthLinearWidget");
     expect(out.rendererProps.depthLinearAlarmFrom).toBe(2);
     expect(out.rendererProps.depthLinearWarningFrom).toBe(5);
+    expect(out.rendererProps.depthLinearHideTextualMetrics).toBe(true);
   });
 
   it("maps depthRadial with warning/alarm enabled by default", function () {
@@ -52,12 +54,14 @@ describe("EnvironmentMapper", function () {
       depthRadialWarningFrom: "5",
       depthRadialRatioThresholdNormal: "1.1",
       depthRadialRatioThresholdFlat: "3.5",
-      captionUnitScale: "0.8"
+      captionUnitScale: "0.8",
+      depthRadialHideTextualMetrics: 0
     }, toolkit);
 
     expect(out.renderer).toBe("DepthRadialWidget");
     expect(out.rendererProps.depthRadialAlarmFrom).toBe(2);
     expect(out.rendererProps.depthRadialWarningFrom).toBe(5);
+    expect(out.rendererProps.depthRadialHideTextualMetrics).toBe(false);
   });
 
   it("maps tempRadial and only enables sectors when toggles are true", function () {
@@ -75,7 +79,8 @@ describe("EnvironmentMapper", function () {
       tempRadialTickMinor: "1",
       tempRadialRatioThresholdNormal: "1.1",
       tempRadialRatioThresholdFlat: "3.5",
-      captionUnitScale: "0.8"
+      captionUnitScale: "0.8",
+      tempRadialHideTextualMetrics: true
     }, toolkit);
 
     expect(out.renderer).toBe("TemperatureRadialWidget");
@@ -83,6 +88,7 @@ describe("EnvironmentMapper", function () {
     expect(out.formatterParameters).toEqual(["celsius"]);
     expect(out.rendererProps.tempRadialWarningFrom).toBeUndefined();
     expect(out.rendererProps.tempRadialAlarmFrom).toBe(32);
+    expect(out.rendererProps.tempRadialHideTextualMetrics).toBe(true);
   });
 
   it("maps tempLinear and only enables sectors when toggles are true", function () {
@@ -100,7 +106,8 @@ describe("EnvironmentMapper", function () {
       tempLinearTickMinor: "1",
       tempLinearRatioThresholdNormal: "1.1",
       tempLinearRatioThresholdFlat: "3.5",
-      captionUnitScale: "0.8"
+      captionUnitScale: "0.8",
+      tempLinearHideTextualMetrics: 0
     }, toolkit);
 
     expect(out.renderer).toBe("TemperatureLinearWidget");
@@ -108,6 +115,7 @@ describe("EnvironmentMapper", function () {
     expect(out.formatterParameters).toEqual(["celsius"]);
     expect(out.rendererProps.tempLinearWarningFrom).toBeUndefined();
     expect(out.rendererProps.tempLinearAlarmFrom).toBe(32);
+    expect(out.rendererProps.tempLinearHideTextualMetrics).toBe(false);
   });
 
   it("maps numeric kinds with expected formatters", function () {

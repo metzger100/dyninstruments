@@ -148,6 +148,24 @@
             { kind: "hdmLinear" }
           ]
         },
+        compassRadialHideTextualMetrics: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide textual metrics",
+          condition: [
+            { kind: "hdtRadial" },
+            { kind: "hdmRadial" }
+          ]
+        },
+        compassLinearHideTextualMetrics: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide textual metrics",
+          condition: [
+            { kind: "hdtLinear" },
+            { kind: "hdmLinear" }
+          ]
+        },
 
         // hide low-levels
         caption: false,

@@ -152,6 +152,7 @@
             headingUnit: headingUnit,
             leadingZero: p.leadingZero !== false,
             showWpName: p.showWpNameXteDisplay === true,
+            hideTextualMetrics: !!p.xteHideTextualMetrics,
             xteRatioThresholdNormal: num(p.xteRatioThresholdNormal),
             xteRatioThresholdFlat: num(p.xteRatioThresholdFlat)
           }

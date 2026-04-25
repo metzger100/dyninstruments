@@ -223,6 +223,24 @@
             { kind: "stwRadial" }
           ]
         },
+        speedLinearHideTextualMetrics: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide textual metrics",
+          condition: [
+            { kind: "sogLinear" },
+            { kind: "stwLinear" }
+          ]
+        },
+        speedRadialHideTextualMetrics: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide textual metrics",
+          condition: [
+            { kind: "sogRadial" },
+            { kind: "stwRadial" }
+          ]
+        },
 
         caption: false,
         unit: false,

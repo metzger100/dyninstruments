@@ -52,7 +52,8 @@ describe("DefaultMapper", function () {
       defaultLinearAlarmHighColor: "#ff7a76",
       captionUnitScale: 0.8,
       stableDigits: false,
-      easing: true
+      easing: true,
+      defaultLinearHideTextualMetrics: 0
     }, toolkit);
 
     expect(linear).toMatchObject({
@@ -84,7 +85,8 @@ describe("DefaultMapper", function () {
         defaultLinearAlarmHighColor: "#ff7a76",
         captionUnitScale: 0.8,
         stableDigits: false,
-        easing: true
+        easing: true,
+        defaultLinearHideTextualMetrics: false
       }
     });
 
@@ -114,7 +116,8 @@ describe("DefaultMapper", function () {
       defaultRadialAlarmHighColor: "#ff7a76",
       captionUnitScale: 0.8,
       stableDigits: true,
-      easing: false
+      easing: false,
+      defaultRadialHideTextualMetrics: 1
     }, toolkit);
 
     expect(radial).toMatchObject({
@@ -146,7 +149,8 @@ describe("DefaultMapper", function () {
         defaultRadialAlarmHighColor: "#ff7a76",
         captionUnitScale: 0.8,
         stableDigits: true,
-        easing: false
+        easing: false,
+        defaultRadialHideTextualMetrics: true
       }
     });
 
@@ -230,7 +234,8 @@ describe("DefaultMapper", function () {
       defaultLinearAlarmHighColor: "#ff7a76",
       captionUnitScale: "0.8",
       stableDigits: 0,
-      easing: 1
+      easing: 1,
+      defaultLinearHideTextualMetrics: "yes"
     }, toolkitSpy);
 
     expect(num).toHaveBeenCalledWith("1.1");
@@ -257,7 +262,8 @@ describe("DefaultMapper", function () {
       defaultLinearAlarmHighEnabled: false,
       captionUnitScale: 0.8,
       stableDigits: false,
-      easing: true
+      easing: true,
+      defaultLinearHideTextualMetrics: true
     });
 
     const radial = mapper.translate({
@@ -284,7 +290,8 @@ describe("DefaultMapper", function () {
       defaultRadialAlarmHighColor: "#ff7a76",
       captionUnitScale: "0.8",
       stableDigits: 1,
-      easing: 0
+      easing: 0,
+      defaultRadialHideTextualMetrics: "yes"
     }, toolkitSpy);
 
     expect(radial.rendererProps).toMatchObject({
@@ -301,7 +308,8 @@ describe("DefaultMapper", function () {
       defaultRadialAlarmHighEnabled: false,
       captionUnitScale: 0.8,
       stableDigits: true,
-      easing: false
+      easing: false,
+      defaultRadialHideTextualMetrics: true
     });
   });
 });

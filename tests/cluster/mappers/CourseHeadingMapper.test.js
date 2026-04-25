@@ -19,13 +19,15 @@ describe("CourseHeadingMapper", function () {
       leadingZero: true,
       captionUnitScale: "0.8",
       compassRadialRatioThresholdNormal: "0.8",
-      compassRadialRatioThresholdFlat: "2.2"
+      compassRadialRatioThresholdFlat: "2.2",
+      compassRadialHideTextualMetrics: "yes"
     }, toolkit);
 
     expect(out.renderer).toBe("CompassRadialWidget");
     expect(out.heading).toBe(123);
     expect(out.markerCourse).toBe(230);
     expect(out.rendererProps.leadingZero).toBe(true);
+    expect(out.rendererProps.compassRadialHideTextualMetrics).toBe(true);
   });
 
   it("maps numeric kinds to formatDirection360", function () {
@@ -54,7 +56,8 @@ describe("CourseHeadingMapper", function () {
       compassLinearTickMajor: "30",
       compassLinearTickMinor: "10",
       compassLinearShowEndLabels: false,
-      compassLinearRange: "180"
+      compassLinearRange: "180",
+      compassLinearHideTextualMetrics: 0
     }, toolkit);
 
     expect(out.renderer).toBe("CompassLinearWidget");
@@ -70,7 +73,8 @@ describe("CourseHeadingMapper", function () {
       compassLinearTickMajor: 30,
       compassLinearTickMinor: 10,
       compassLinearShowEndLabels: false,
-      compassLinearRange: 180
+      compassLinearRange: 180,
+      compassLinearHideTextualMetrics: false
     });
   });
 

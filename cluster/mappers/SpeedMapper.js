@@ -47,7 +47,8 @@
             speedLinearTickMinor: num(p.speedLinearTickMinor),
             speedLinearShowEndLabels: !!p.speedLinearShowEndLabels,
             speedLinearWarningFrom: warnOn ? num(p.speedLinearWarningFrom) : undefined,
-            speedLinearAlarmFrom: alarmOn ? num(p.speedLinearAlarmFrom) : undefined
+            speedLinearAlarmFrom: alarmOn ? num(p.speedLinearAlarmFrom) : undefined,
+            speedLinearHideTextualMetrics: !!p.speedLinearHideTextualMetrics
           }
         };
       }
@@ -77,7 +78,8 @@
             speedRadialTickMinor: num(p.speedRadialTickMinor),
             speedRadialShowEndLabels: !!p.speedRadialShowEndLabels,
             speedRadialWarningFrom: warnOn ? num(p.speedRadialWarningFrom) : undefined,
-            speedRadialAlarmFrom: alarmOn ? num(p.speedRadialAlarmFrom) : undefined
+            speedRadialAlarmFrom: alarmOn ? num(p.speedRadialAlarmFrom) : undefined,
+            speedRadialHideTextualMetrics: !!p.speedRadialHideTextualMetrics
           }
         };
       }

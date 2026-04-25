@@ -46,7 +46,8 @@
             voltageLinearAlarmFrom: alarmEnabled ? num(p.voltageLinearAlarmFrom) : undefined,
             voltageLinearRatioThresholdNormal: num(p.voltageLinearRatioThresholdNormal),
             voltageLinearRatioThresholdFlat: num(p.voltageLinearRatioThresholdFlat),
-            captionUnitScale: num(p.captionUnitScale)
+            captionUnitScale: num(p.captionUnitScale),
+            voltageLinearHideTextualMetrics: !!p.voltageLinearHideTextualMetrics
           }
         };
       }
@@ -71,7 +72,8 @@
             voltageRadialAlarmFrom: alarmEnabled ? num(p.voltageRadialAlarmFrom) : undefined,
             voltageRadialRatioThresholdNormal: num(p.voltageRadialRatioThresholdNormal),
             voltageRadialRatioThresholdFlat: num(p.voltageRadialRatioThresholdFlat),
-            captionUnitScale: num(p.captionUnitScale)
+            captionUnitScale: num(p.captionUnitScale),
+            voltageRadialHideTextualMetrics: !!p.voltageRadialHideTextualMetrics
           }
         };
       }

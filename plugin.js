@@ -61,6 +61,7 @@
     "config/shared/editable-param-utils.js",
     "config/shared/kind-defaults.js",
     "config/shared/common-editables.js",
+    "config/shared/environment-editables.js",
     "config/clusters/course-heading.js",
     "config/clusters/speed.js",
     "config/clusters/environment.js",

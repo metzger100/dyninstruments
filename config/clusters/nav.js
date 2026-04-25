@@ -227,6 +227,12 @@
           name: "Smooth motion",
           condition: { kind: "xteDisplay" }
         },
+        xteHideTextualMetrics: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide textual metrics",
+          condition: { kind: "xteDisplay" }
+        },
         hideSeconds: {
           type: "BOOLEAN",
           default: false,

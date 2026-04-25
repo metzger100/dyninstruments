@@ -77,6 +77,18 @@
             { kind: "radialGauge" }
           ]
         },
+        defaultLinearHideTextualMetrics: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide textual metrics",
+          condition: { kind: "linearGauge" }
+        },
+        defaultRadialHideTextualMetrics: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide textual metrics",
+          condition: { kind: "radialGauge" }
+        },
 
         caption: false,
         unit: false,

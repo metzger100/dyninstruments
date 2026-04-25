@@ -207,6 +207,7 @@ describe("NavMapper", function () {
       disconnect: true,
       leadingZero: false,
       showWpNameXteDisplay: false,
+      xteHideTextualMetrics: true,
       xteRatioThresholdNormal: "0.8",
       xteRatioThresholdFlat: "2.4"
     }, toolkit);
@@ -230,6 +231,7 @@ describe("NavMapper", function () {
       headingUnit: "degT",
       leadingZero: false,
       showWpName: false,
+      hideTextualMetrics: true,
       xteRatioThresholdNormal: 0.8,
       xteRatioThresholdFlat: 2.4
     });
@@ -239,6 +241,7 @@ describe("NavMapper", function () {
     const mapper = createMapper();
     const out = mapper.translate({ kind: "xteDisplay", xte: 0.2, cog: 90, dtw: 1.1, btw: 95 }, toolkit);
     expect(out.rendererProps.showWpName).toBe(false);
+    expect(out.rendererProps.hideTextualMetrics).toBe(false);
   });
 
   it("maps routePoints to grouped renderer payload", function () {

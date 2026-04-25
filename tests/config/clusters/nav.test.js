@@ -94,6 +94,8 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.waypointsText.default).toBe("waypoints");
     expect(def.editableParameters.showWpNameXteDisplay.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.showWpNameXteDisplay.default).toBe(false);
+    expect(def.editableParameters.xteHideTextualMetrics.condition).toEqual({ kind: "xteDisplay" });
+    expect(def.editableParameters.xteHideTextualMetrics.default).toBe(false);
     expect(def.editableParameters.coordinatesTabular.default).toBe(true);
     expect(def.editableParameters.coordinatesTabular.name).toBe("Tabular coordinates");
     expect(def.editableParameters.coordinatesTabular.condition).toEqual([
