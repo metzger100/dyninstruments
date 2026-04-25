@@ -20,6 +20,8 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 - Compass linear uses `springTarget: "axis"` and `springWrap: 360` so the scale eases around a fixed center pointer on the shortest wrapped arc, and `compassLinearRange` selects a 360° or 180° visible window.
 - Wind linear (`angleTrueLinear`, `angleApparentLinear`) renders angle+speed together and supports mirrored layline sectors.
 - Wind linear overrides the generic `normal` / `high` text geometry: `normal` uses the stacked dual block below the gauge, and `high` uses inline top metric + middle gauge + inline bottom metric.
+- `hideTextualMetrics` is the public `Hide textual metrics` toggle, defaults to `false`, and applies to Speed, Depth, Temperature, Voltage, Compass, Wind, and Default linear gauges.
+- When `hideTextualMetrics` is enabled, linear gauges keep tick labels, end labels, scale labels, pointers, sectors, and state screens visible while removing the live caption/value/unit text.
 - Canvas state-screen behavior is engine-owned: `p.disconnect === true` resolves to `disconnected`, clears the canvas, and renders shared `StateScreenCanvasOverlay` (`GPS Lost`) before any gauge drawing.
 
 ## Supported Profiles
@@ -81,6 +83,13 @@ Wind linear override:
 - `high`: top inline angle metric, middle gauge, bottom inline speed metric
 - `normal`: top gauge + stacked dual angle/speed block below
 - `flat`: unchanged from the generic flat layout
+
+Graphics-only layout:
+
+- `flat`: the gauge uses the full width and centers vertically.
+- `normal`: the inline text band is removed and the gauge grows into the reclaimed height.
+- `high`: stacked or split text bands are removed and the gauge centers without dead strips.
+- `WindLinearWidget` custom text disappears in this branch because the target layout boxes are null.
 
 ## Extension Readiness Checklist
 

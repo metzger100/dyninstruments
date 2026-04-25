@@ -1,6 +1,6 @@
 # Linear Shared API
 
-**Status:** ✅ Implemented | `LinearGaugeEngine` contracts for range/centered180/fixed360 wrappers, including hook extensions used by Wind/Compass linear widgets
+**Status:** ✅ Implemented | `LinearGaugeEngine` contracts for range/centered180/fixed360 wrappers, including hook extensions used by Wind/Compass linear widgets and the hide-textual-metrics graphics-only layout
 
 ## Overview
 
@@ -36,13 +36,14 @@ New linear widgets should delegate rendering to `LinearGaugeEngine.createRendere
 - `computeMode(W, H, thresholdNormal, thresholdFlat)`
 - `computeInsets(W, H)`
 - `createContentRect(W, H, insets)`
-- `computeLayout({ W, H, mode, theme, contentRect?, responsive?, layoutConfig? })`
+- `computeLayout({ W, H, mode, theme, contentRect?, responsive?, layoutConfig?, hideTextualMetrics? })`
 - `splitCaptionValueRows(captionBox, valueBox, secScale)`
 
 Ownership:
 
 - `ResponsiveScaleProfile` owns the shared `minDim -> textFillScale` curve.
 - `LinearGaugeLayout` owns linear-family ratio mode selection, insets/gaps, track/text rectangles, and row splitting.
+- `hideTextualMetrics` is a layout-owned switch. When true, `computeLayout(...)` removes the live caption/value/unit text boxes and returns reclaimed graphics-only geometry for `flat`, `normal`, and `high`.
 - Optional `layoutConfig` lets wrappers remap `normal` / `high` geometry without reimplementing the shared gauge pipeline.
 - `LinearGaugeEngine` and `LinearGaugeTextLayout` are consumers of that layout state; they do not own a second compact curve.
 
@@ -78,6 +79,7 @@ Common `spec` fields:
 - `rangeDefaults`: optional `{ min, max }` engine-level safety fallback; config-backed plugin wrappers should omit it
 - `tickProps`: `{ major, minor, showEndLabels }`
 - `ratioProps`: `{ normal, flat }` for config-owned editable threshold bindings
+- `hideTextualMetricsProp`: optional prop name for the graphics-only text toggle
 - `ratioDefaults`: optional `{ normal, flat }` engine-level safety fallback; config-backed plugin wrappers should omit it
 - `tickSteps(range)`
 - `formatDisplay(raw, props, unit, Helpers) -> { num, text }`
@@ -99,6 +101,8 @@ Hook `api` surface:
 - `drawDefaultPointer(opts)`, `drawPointerAtValue(value, opts)`, `drawMarkerAtValue(value, opts)` (frame hooks)
 - `drawMarkerAtValue(value, opts)` uses layout-based defaults when `opts.len`/`opts.lineWidth` are omitted, keeps the marker at or below the scale line, and renders it with flat rectangular ends.
 
+The public UI label for `hideTextualMetricsProp` is `Hide textual metrics`. The default is `false`, and shipped linear wrappers apply it to Speed, Depth, Temperature, Voltage, Compass, Wind, and Default linear gauges.
+
 Hook `state` additions:
 
 - `state.responsive`
@@ -107,6 +111,7 @@ Hook `state` additions:
 
 Wrappers should consume these layout-owned state fields instead of recomputing compact geometry locally.
 `WindLinearWidget` now reads `state.layout.dualRowGap`, uses `spec.layout` to remap `normal` / `high`, and consumes split-high `state.layout.textTopBox` / `state.layout.textBottomBox` for inline top and bottom metric rows while `LinearGaugeTextLayout` trusts the layout-owned `labelFontPx` without adding a second readable-floor policy.
+When `hideTextualMetrics` is enabled, those Wind-specific text target boxes are null, so the custom angle/speed text disappears with the rest of the live metric text.
 
 ### Axis Profile Matrix
 
@@ -194,13 +199,17 @@ const renderCanvas = engine.createRenderer({
 ## Runtime Behavior
 
 - Static cached layer: track, sectors, ticks, labels.
-- Dynamic per frame: pointer plus caption/value/unit text.
+- Dynamic per frame: pointer plus caption/value/unit text when textual metrics are shown.
 - `disconnect === true` short-circuits normal drawing and renders the shared canvas state-screen (`GPS Lost`) on a cleared canvas.
 - Cache key excludes live values and includes geometry/theme/tick/sector signatures.
 - `showEndLabels` defaults to false unless mapper sets it true.
 - Compact tiles now get smaller insets/gaps from `LinearGaugeLayout`, slimmer default track/pointer/marker geometry, and larger fitted text ceilings via `state.textFillScale`.
 - Default row rendering still uses `display.rowBoxes.captionBox` / `valueBox` for stacked layouts and `state.layout.inlineBox` for inline layouts.
 - Split-high layouts expose `display.rowBoxes.top` and `display.rowBoxes.bottom`, each pre-split into caption/value boxes using the shared `captionUnitScale` logic.
+- When `hideTextualMetrics` is true, the engine keeps tick labels, end labels, scale labels, pointers, sectors, and state screens visible while omitting the live caption/value/unit text.
+- In `flat`, the gauge uses the full width and centers vertically.
+- In `normal`, the inline text band is removed and the gauge grows into the reclaimed height.
+- In `high`, stacked or split text bands are removed and the gauge centers without dead strips.
 
 ## Theme Contract
 

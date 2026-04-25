@@ -20,7 +20,7 @@ Renderer now resolves canvas state-screens before highway drawing:
 - `noTarget` when `typeof p.wpName === "string" && p.wpName.trim() === ""` and textual metrics are visible (label: `No Waypoint`)
 - `data` otherwise
 
-In `data`, the highway frame stays visible when guidance fields are missing; missing metrics still normalize to `---` and the moving XTE indicator is suppressed until guidance inputs are valid.
+In `data`, the static highway frame is always visible; the dynamic XTE overlay renders iff `xte` is finite. `cog`, `dtw`, and `btw` no longer gate the dynamic overlay and only affect their textual placeholder rows when textual metrics are visible.
 
 Layout ownership:
 

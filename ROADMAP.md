@@ -13,7 +13,6 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ### Fixes for existing widgets and architecture
 
-- Add option to hide textual Metrics in graphical Widgets like (radial, linear, compass, XTE etc.). Note: some widgets also need to center aligned (e.g.: XTE and linear) or stretched (e.g.: XTE and linear), when the textual metrics are hidden, while others just hide the text (e.g.: compass radial, radial gauges) (default: off)
 - Add a plugin loader compliant export tool to create a code only zip of the plugin for the users and completely revise the README.md to be completely user focused
 
 ### Additional non-core concepts (post release)

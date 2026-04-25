@@ -1,10 +1,10 @@
 # Gauge Style Guide
 
-**Status:** ✅ Implemented | SpeedRadialWidget, DepthRadialWidget, TemperatureRadialWidget, VoltageRadialWidget
+**Status:** ✅ Implemented | SpeedRadialWidget, DepthRadialWidget, TemperatureRadialWidget, VoltageRadialWidget, DefaultRadialWidget
 
 ## Overview
 
-Visual specification for semicircle gauge widgets. All four semicircle gauges share visual proportions and layout logic; data source/formatting/sector strategy differs per gauge.
+Visual specification for semicircle gauge widgets. All semicircle radial gauges in this family share visual proportions and layout logic; data source/formatting/sector strategy differs per gauge.
 
 ## Arc Configuration
 
@@ -181,6 +181,15 @@ Text fit contract for semicircle gauges:
 - Caption, value, and unit must stay inside their assigned layout boxes in `flat`, `normal`, and `high` modes.
 - Compact canvases are allowed to downscale text aggressively to preserve containment; overlap into ring/tick/pointer geometry is not allowed.
 - Final draw-time clamping remains active even after cached fit selection to absorb measurement/rounding drift.
+
+## Hide Textual Metrics
+
+- Public UI label: `Hide textual metrics`
+- Default: `false`
+- Applies to `SpeedRadialWidget`, `DepthRadialWidget`, `TemperatureRadialWidget`, `VoltageRadialWidget`, and `DefaultRadialWidget`
+- This semicircle family is hide-only: `hideTextualMetrics` suppresses the live caption/value/unit metric readouts while preserving the existing geometry, responsive mode, arc/ring, pointer, sectors, ticks, scale/end labels, and state screens
+- `SemicircleRadialEngine` skips the live text draw path when the relevant `hideTextualMetrics` prop is `true`
+- No layout space is reclaimed for semicircle radial gauges in hide mode
 
 ## Tick Rendering
 
