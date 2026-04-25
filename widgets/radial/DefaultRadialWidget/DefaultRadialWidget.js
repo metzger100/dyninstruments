@@ -111,6 +111,7 @@
         normal: "defaultRadialRatioThresholdNormal",
         flat: "defaultRadialRatioThresholdFlat"
       },
+      hideTextualMetricsProp: "defaultRadialHideTextualMetrics",
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
       formatDisplay: function (raw, props) {
         return valueMath.formatGaugeDisplay(raw, props, Helpers.applyFormatter, placeholderNormalize.normalize);

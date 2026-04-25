@@ -73,6 +73,7 @@
         normal: "tempRadialRatioThresholdNormal",
         flat: "tempRadialRatioThresholdFlat"
       },
+      hideTextualMetricsProp: "tempRadialHideTextualMetrics",
       tickSteps: valueMath.resolveTemperatureSemicircleTickSteps,
       formatDisplay: function (raw, props) {
         return displayTempFromRaw(raw, 1, props);

@@ -109,6 +109,9 @@
       const rangeProps = hasOwn.call(cfg, "rangeProps") ? cfg.rangeProps : DEFAULT_RANGE_PROPS;
       const tickProps = hasOwn.call(cfg, "tickProps") ? cfg.tickProps : DEFAULT_TICK_PROPS;
       const ratioProps = hasOwn.call(cfg, "ratioProps") ? cfg.ratioProps : DEFAULT_RATIO_PROPS;
+      const hideTextualMetricsProp = typeof cfg.hideTextualMetricsProp === "string" && cfg.hideTextualMetricsProp
+        ? cfg.hideTextualMetricsProp
+        : null;
       const unitDefault = hasOwn.call(cfg, "unitDefault") ? cfg.unitDefault : "";
       const formatDisplay = typeof cfg.formatDisplay === "function"
         ? function (rawValue, props, unitText) {
@@ -188,6 +191,7 @@
         const sectorList = buildSectors(p, range.min, range.max, arc, value, theme);
         const ticks = value.buildValueTickAngles(range.min, range.max, tickMajor, tickMinor, arc);
         const showEndLabels = !!p[tickProps.showEndLabels];
+        const hideTextualMetrics = hideTextualMetricsProp ? p[hideTextualMetricsProp] === true : false;
         const numericDisplay = Number(display.num);
         const clampedValue = Number.isFinite(numericDisplay) ? value.clamp(numericDisplay, range.min, range.max) : NaN;
         const angleNow = Number.isFinite(clampedValue)
@@ -240,27 +244,30 @@
           labelWeight
         );
 
-        textLayout.drawModeText({
-          ctx: ctx,
-          W: W,
-          H: H,
-          family: family,
-          color: color,
-          theme: theme,
-          valueWeight: valueWeight,
-          labelWeight: labelWeight,
-          text: text,
-          value: value,
-          layout: layout,
-          geom: layout.geom,
-          responsive: layout.responsive,
-          textFillScale: layout.textFillScale
-          }, {
-          caption: caption,
-          valueText: valueText,
-          unit: unit,
-          secScale: value.clamp(p.captionUnitScale, 0.3, 3.0)
-        }, fitCache);
+        if (!hideTextualMetrics) {
+          textLayout.drawModeText({
+            ctx: ctx,
+            W: W,
+            H: H,
+            family: family,
+            color: color,
+            theme: theme,
+            valueWeight: valueWeight,
+            labelWeight: labelWeight,
+            text: text,
+            value: value,
+            layout: layout,
+            geom: layout.geom,
+            responsive: layout.responsive,
+            textFillScale: layout.textFillScale
+            }, {
+            caption: caption,
+            valueText: valueText,
+            unit: unit,
+            secScale: value.clamp(p.captionUnitScale, 0.3, 3.0),
+            hideTextualMetrics: hideTextualMetrics
+          }, fitCache);
+        }
 
         if (springMotion.isActive(canvas)) {
           return { wantsFollowUpFrame: true };

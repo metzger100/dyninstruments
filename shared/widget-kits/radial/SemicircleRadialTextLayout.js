@@ -321,6 +321,9 @@
 
   function create() {
     function drawModeText(state, display, fitCache) {
+      if (display && display.hideTextualMetrics === true) {
+        return;
+      }
       const layoutMode = state && state.layout ? state.layout.mode : "normal";
       if (layoutMode === "flat") {
         drawFlatText(state, display, fitCache);

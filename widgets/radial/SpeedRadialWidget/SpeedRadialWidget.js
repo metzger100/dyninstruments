@@ -66,6 +66,7 @@
         normal: "speedRadialRatioThresholdNormal",
         flat: "speedRadialRatioThresholdFlat"
       },
+      hideTextualMetricsProp: "speedRadialHideTextualMetrics",
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
       formatDisplay: function (raw, props, unit) {
         return displaySpeedFromRaw(raw, props, unit);

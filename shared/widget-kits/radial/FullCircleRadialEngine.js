@@ -78,6 +78,9 @@
       const cfg = spec || {};
       const ratioProps = hasOwn.call(cfg, "ratioProps") ? cfg.ratioProps : DEFAULT_RATIO_PROPS;
       const ratioDefaults = hasOwn.call(cfg, "ratioDefaults") ? cfg.ratioDefaults : DEFAULT_RATIO_DEFAULTS;
+      const hideTextualMetricsProp = typeof cfg.hideTextualMetricsProp === "string" && cfg.hideTextualMetricsProp
+        ? cfg.hideTextualMetricsProp
+        : null;
       const layers = fullCircleNormalizeLayers(cfg.cacheLayers);
       const layerCache = layerCacheApi.createLayerCache({ layers: layers });
       const layerCanvases = Object.create(null);
@@ -102,6 +105,7 @@
           ? (theme.font.familyMono || theme.font.family)
           : theme.font.family;
         const color = theme.surface.fg;
+        const hideTextualMetrics = hideTextualMetricsProp ? p[hideTextualMetricsProp] === true : false;
         const stateKind = stateScreenPrecedence.pickFirst([{ kind: "disconnected", when: p.disconnect === true }, { kind: "data", when: true }]);
 
         ctx.clearRect(0, 0, W, H);
@@ -288,7 +292,7 @@
         const drawMode = hasOwn.call(cfg, "drawMode") ? cfg.drawMode : null;
         const modeRenderer = drawMode && drawMode[state.mode];
         let modeResult = null;
-        if (typeof modeRenderer === "function") {
+        if (!hideTextualMetrics && typeof modeRenderer === "function") {
           modeResult = modeRenderer(state, p, api);
         }
         if ((drawResult && drawResult.wantsFollowUpFrame === true) || (modeResult && modeResult.wantsFollowUpFrame === true)) {

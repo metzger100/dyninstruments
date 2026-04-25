@@ -88,6 +88,7 @@
         normal: "windRadialRatioThresholdNormal",
         flat: "windRadialRatioThresholdFlat"
       },
+      hideTextualMetricsProp: "windRadialHideTextualMetrics",
       cacheLayers: ["back", "front"],
       buildStaticKey: function (state, props) {
         const display = windDisplay(state, props);

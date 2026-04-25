@@ -66,6 +66,7 @@ describe("TemperatureRadialWidget", function () {
       normal: "tempRadialRatioThresholdNormal",
       flat: "tempRadialRatioThresholdFlat"
     });
+    expect(captured.hideTextualMetricsProp).toBe("tempRadialHideTextualMetrics");
     expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(8)).toEqual({ major: 1, minor: 0.5 });
     expect(captured.tickSteps(100)).toEqual({ major: 10, minor: 2 });

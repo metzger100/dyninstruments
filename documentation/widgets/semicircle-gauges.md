@@ -57,6 +57,7 @@ Responsive ownership:
 - `ResponsiveScaleProfile` owns the compact curve (`textFillScale`)
 - `SemicircleRadialLayout` maps that curve into semicircle-family spacing, label metrics, and text boxes
 - `SemicircleRadialTextLayout` consumes layout-owned boxes and `textFillScale`; it does not create a second compaction curve
+- `hideTextualMetrics` suppresses the live value readout while preserving semicircle geometry, ticks, pointer, and state screens
 - Text fitting is fail-safe: caption/value/unit rendering is clamped to stay inside mode-owned boxes, and compact layouts may downscale text further instead of clipping into gauge geometry
 
 ## Gauge-Specific Responsibilities

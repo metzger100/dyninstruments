@@ -98,6 +98,7 @@
         normal: "compassRadialRatioThresholdNormal",
         flat: "compassRadialRatioThresholdFlat"
       },
+      hideTextualMetricsProp: "compassRadialHideTextualMetrics",
       cacheLayers: ["face"],
       layout: { highTopFactor: 0.9, highBottomFactor: 0.9 },
       buildStaticKey: function (state) {

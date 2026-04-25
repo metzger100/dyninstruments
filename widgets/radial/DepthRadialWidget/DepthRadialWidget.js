@@ -55,6 +55,7 @@
         normal: "depthRadialRatioThresholdNormal",
         flat: "depthRadialRatioThresholdFlat"
       },
+      hideTextualMetricsProp: "depthRadialHideTextualMetrics",
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
       formatDisplay: function (raw, props) {
         return displayDepthFromRaw(raw, 1, props.default);

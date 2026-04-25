@@ -114,6 +114,8 @@ Mode text layout:
 | `normal` | centered 3-row block inside dial | two centered inner columns (left/right) |
 | `high` | inline row in top slot | top row for left value, bottom row for right value |
 
+When `hideTextualMetrics` is true, `FullCircleRadialEngine` skips `drawMode` entirely so the dial face, labels, and pointer remain while the live metric readout disappears.
+
 High-mode slot factors (`FullCircleRadialLayout.computeLayout()`):
 - Engine defaults: `highTopFactor=0.85`, `highBottomFactor=0.85`
 - Compass override: `highTopFactor=0.9`, `highBottomFactor=0.9`

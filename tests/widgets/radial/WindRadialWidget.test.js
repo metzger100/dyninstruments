@@ -40,6 +40,7 @@ describe("WindRadialWidget", function () {
       normal: "windRadialRatioThresholdNormal",
       flat: "windRadialRatioThresholdFlat"
     });
+    expect(captured.hideTextualMetricsProp).toBe("windRadialHideTextualMetrics");
     expect(captured).not.toHaveProperty("ratioDefaults");
   });
 

@@ -37,6 +37,7 @@ describe("CompassRadialWidget", function () {
       normal: "compassRadialRatioThresholdNormal",
       flat: "compassRadialRatioThresholdFlat"
     });
+    expect(captured.hideTextualMetricsProp).toBe("compassRadialHideTextualMetrics");
     expect(captured).not.toHaveProperty("ratioDefaults");
   });
 

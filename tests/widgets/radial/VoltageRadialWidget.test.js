@@ -73,6 +73,7 @@ describe("VoltageRadialWidget", function () {
       normal: "voltageRadialRatioThresholdNormal",
       flat: "voltageRadialRatioThresholdFlat"
     });
+    expect(captured.hideTextualMetricsProp).toBe("voltageRadialHideTextualMetrics");
     expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(3)).toEqual({ major: 0.5, minor: 0.1 });
     expect(captured.tickSteps(12)).toEqual({ major: 2, minor: 0.5 });

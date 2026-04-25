@@ -102,6 +102,7 @@ describe("DefaultRadialWidget", function () {
       normal: "defaultRadialRatioThresholdNormal",
       flat: "defaultRadialRatioThresholdFlat"
     });
+    expect(h.captured.hideTextualMetricsProp).toBe("defaultRadialHideTextualMetrics");
     expect(h.captured.tickSteps).toBe(h.resolveStandardSemicircleTickSteps);
     expect(h.captured.tickSteps(10)).toEqual({ major: 10, minor: 2 });
     expect(h.resolveStandardSemicircleTickSteps).toHaveBeenCalledWith(10);

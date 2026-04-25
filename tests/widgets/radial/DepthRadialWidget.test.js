@@ -54,6 +54,7 @@ describe("DepthRadialWidget", function () {
       normal: "depthRadialRatioThresholdNormal",
       flat: "depthRadialRatioThresholdFlat"
     });
+    expect(captured.hideTextualMetricsProp).toBe("depthRadialHideTextualMetrics");
     expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(6)).toEqual({ major: 1, minor: 0.5 });
     expect(captured.tickSteps(30)).toEqual({ major: 5, minor: 1 });

@@ -280,6 +280,25 @@ describe("FullCircleRadialEngine", function () {
     expect(harness.calls.mode).toEqual(["high", "normal", "flat"]);
   });
 
+  it("skips drawMode when hideTextualMetrics is enabled", function () {
+    const harness = createHarness();
+    const calls = [];
+    const renderer = harness.engine.createRenderer({
+      hideTextualMetricsProp: "compassRadialHideTextualMetrics",
+      drawMode: {
+        flat(state) { calls.push(state.mode); },
+        high(state) { calls.push(state.mode); },
+        normal(state) { calls.push(state.mode); }
+      }
+    });
+
+    renderer(createMockCanvas({ rectWidth: 320, rectHeight: 160, ctx: createMockContext2D() }), {
+      compassRadialHideTextualMetrics: true
+    });
+
+    expect(calls).toHaveLength(0);
+  });
+
   it("falls back to engine-owned ratio defaults when wind threshold props are absent", function () {
     function captureMode(props) {
       const harness = createHarness();

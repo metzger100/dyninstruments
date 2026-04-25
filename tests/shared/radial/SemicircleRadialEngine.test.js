@@ -37,6 +37,7 @@ describe("SemicircleRadialEngine", function () {
         normal: "speedRadialRatioThresholdNormal",
         flat: "speedRadialRatioThresholdFlat"
       },
+      hideTextualMetricsProp: "speedRadialHideTextualMetrics",
       ratioDefaults: { normal: 1.1, flat: 3.5 },
       tickSteps() {
         return { major: 10, minor: 2 };
@@ -388,6 +389,25 @@ describe("SemicircleRadialEngine", function () {
     expect(labelCalls[0].weight).toBe(themeDefaults.font.labelWeight);
     expect(textLayoutCalls).toHaveLength(1);
     expect(textLayoutCalls[0].state.layout.mode).toBe("flat");
+  });
+
+  it("skips the semicircle text draw step when hideTextualMetrics is enabled", function () {
+    const harness = createRenderOrderHarness([]);
+    const canvas = createMockCanvas({
+      rectWidth: 480,
+      rectHeight: 110,
+      ctx: createMockContext2D()
+    });
+
+    harness.renderer(canvas, {
+      value: 12.3,
+      caption: "SPD",
+      unit: "kn",
+      speedRadialHideTextualMetrics: true
+    });
+
+    expect(harness.textLayoutCalls).toHaveLength(0);
+    expect(harness.sequence).toEqual(["ring", "pointer", "ticks", "labels"]);
   });
 
   it("draws sectors before the arc ring and keeps the ring ahead of pointer, ticks, and labels", function () {
@@ -996,7 +1016,8 @@ describe("SemicircleRadialEngine", function () {
       caption: "0",
       valueText: "12.3",
       unit: "",
-      secScale: 0.3
+      secScale: 0.3,
+      hideTextualMetrics: false
     });
   });
 
