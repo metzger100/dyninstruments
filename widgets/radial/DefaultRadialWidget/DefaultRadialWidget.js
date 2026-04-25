@@ -15,29 +15,6 @@
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
-    function resolveDefaultText(props) {
-      if (props && Object.prototype.hasOwnProperty.call(props, "default")) {
-        return props.default;
-      }
-      return placeholderNormalize.normalize(undefined, undefined);
-    }
-
-    function formatDisplay(raw, props) {
-      const p = props || {};
-      const defaultText = resolveDefaultText(p);
-      const formatted = placeholderNormalize.normalize(Helpers.applyFormatter(raw, {
-        formatter: p.formatter,
-        formatterParameters: p.formatterParameters,
-        default: defaultText
-      }), defaultText);
-      const numberText = valueMath.extractNumberText(formatted);
-      const num = numberText ? Number(numberText) : NaN;
-      if (isFinite(num)) {
-        return { num: num, text: numberText };
-      }
-      return { num: NaN, text: defaultText };
-    }
-
     function resolveThreshold(value) {
       const n = Number(value);
       return isFinite(n) ? n : NaN;
@@ -135,7 +112,9 @@
         flat: "defaultRadialRatioThresholdFlat"
       },
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
-      formatDisplay: formatDisplay,
+      formatDisplay: function (raw, props) {
+        return valueMath.formatGaugeDisplay(raw, props, Helpers.applyFormatter, placeholderNormalize.normalize);
+      },
       buildSectors: buildSectors
     });
 

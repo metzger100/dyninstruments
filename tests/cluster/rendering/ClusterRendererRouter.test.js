@@ -20,6 +20,7 @@ describe("ClusterRendererRouter", function () {
     "DepthRadialWidget",
     "DepthLinearWidget",
     "DefaultRadialWidget",
+    "DefaultLinearWidget",
     "TemperatureRadialWidget",
     "TemperatureLinearWidget",
     "VoltageRadialWidget",
@@ -172,6 +173,7 @@ describe("ClusterRendererRouter", function () {
       AisTargetTextHtmlWidget: { create: () => rendererSpecs.AisTargetTextHtmlWidget },
       AlarmTextHtmlWidget: { create: () => rendererSpecs.AlarmTextHtmlWidget },
       CenterDisplayTextWidget: { create: () => rendererSpecs.CenterDisplayTextWidget },
+      DefaultLinearWidget: { create: () => rendererSpecs.DefaultLinearWidget },
       RendererPropsWidget: {
         create: function (def, Helpers, targetRendererId) {
           return rendererSpecs[targetRendererId];
@@ -361,12 +363,12 @@ describe("ClusterRendererRouter", function () {
             cluster: "default",
             kind: "linearGauge",
             viewModelId: "MapperOutputViewModel",
-            rendererId: "DefaultLinearWidget",
+            rendererId: "MissingRendererWidget",
             surface: "canvas-dom"
           }
         ])
       });
-    }).toThrow("unknown renderer 'DefaultLinearWidget'");
+    }).toThrow("unknown renderer 'MissingRendererWidget'");
   });
 
   it("provides surface controller factory and recreates controller on same-surface renderer switches", function () {

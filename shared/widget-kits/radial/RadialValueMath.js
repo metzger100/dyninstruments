@@ -27,6 +27,15 @@
       return match ? match[0] : "";
     }
 
+    function formatGaugeDisplay(raw, props, applyFormatter, normalize) {
+      const p = props || {};
+      const defaultText = Object.prototype.hasOwnProperty.call(p, "default") ? p.default : normalize(undefined, undefined);
+      const formatted = normalize(applyFormatter(raw, { formatter: p.formatter, formatterParameters: p.formatterParameters, default: defaultText }), defaultText);
+      const numberText = extractNumberText(formatted);
+      const num = numberText ? Number(numberText) : NaN;
+      return isFinite(num) ? { num: num, text: numberText } : { num: NaN, text: defaultText };
+    }
+
     function clamp(value, lo, hi) {
       const n = Number(value);
       if (!isFinite(n)) {
@@ -362,6 +371,7 @@
       version: "0.1.0",
       isFiniteNumber,
       extractNumberText,
+      formatGaugeDisplay,
       clamp,
       almostInt,
       isApprox,

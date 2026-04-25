@@ -117,6 +117,7 @@
         "AlarmTextHtmlWidget",
         "CenterDisplayTextWidget",
         "DefaultRadialWidget",
+        "DefaultLinearWidget",
         "RendererPropsWidget",
         "PerfSpanHelper"
       ]

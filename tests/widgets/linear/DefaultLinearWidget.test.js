@@ -1,6 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
-describe("DefaultRadialWidget", function () {
+describe("DefaultLinearWidget", function () {
   function createHarness(options) {
     const opts = options || {};
     let captured;
@@ -37,10 +37,8 @@ describe("DefaultRadialWidget", function () {
         }
         return { num: Number(raw), text: String(raw) };
       }),
-      sectorAngles(from, to) {
-        const f = Number(from);
-        const t = Number(to);
-        return isFinite(f) && isFinite(t) && t > f ? { a0: f, a1: t } : null;
+      clamp(v, lo, hi) {
+        return Math.max(lo, Math.min(hi, Number(v)));
       },
       resolveStandardSemicircleTickSteps
     };
@@ -50,11 +48,11 @@ describe("DefaultRadialWidget", function () {
         return renderer;
       }
     };
-    const mod = loadFresh("widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js");
+    const mod = loadFresh("widgets/linear/DefaultLinearWidget/DefaultLinearWidget.js");
     const spec = mod.create({}, {
       applyFormatter,
       getModule(id) {
-        if (id === "SemicircleRadialEngine") {
+        if (id === "LinearGaugeEngine") {
           return { create: () => engine };
         }
         if (id === "RadialValueMath") {
@@ -62,9 +60,6 @@ describe("DefaultRadialWidget", function () {
         }
         if (id === "PlaceholderNormalize") {
           return { create: () => placeholderNormalize };
-        }
-        if (id === "DefaultGaugeDisplay") {
-          throw new Error("DefaultGaugeDisplay must not be requested");
         }
         throw new Error("unexpected module: " + id);
       }
@@ -80,27 +75,27 @@ describe("DefaultRadialWidget", function () {
     };
   }
 
-  it("wires the semicircle engine with default instrument props and always uses applyFormatter", function () {
+  it("wires the linear engine with default instrument props and delegates formatting", function () {
     const h = createHarness();
 
-    expect(h.spec.id).toBe("DefaultRadialWidget");
+    expect(h.spec.id).toBe("DefaultLinearWidget");
     expect(h.spec.wantsHideNativeHead).toBe(true);
-    expect(h.spec.getVerticalShellSizing()).toEqual({ kind: "ratio", aspectRatio: 1 });
+    expect(h.spec.getVerticalShellSizing()).toEqual({ kind: "ratio", aspectRatio: 2 });
     expect(h.spec.renderCanvas).toBe(h.renderer);
     expect(h.captured.rawValueKey).toBe("value");
     expect(h.captured.unitDefault).toBe("");
     expect(h.captured.rangeProps).toEqual({
-      min: "defaultRadialMinValue",
-      max: "defaultRadialMaxValue"
+      min: "defaultLinearMinValue",
+      max: "defaultLinearMaxValue"
     });
     expect(h.captured.tickProps).toEqual({
-      major: "defaultRadialTickMajor",
-      minor: "defaultRadialTickMinor",
-      showEndLabels: "defaultRadialShowEndLabels"
+      major: "defaultLinearTickMajor",
+      minor: "defaultLinearTickMinor",
+      showEndLabels: "defaultLinearShowEndLabels"
     });
     expect(h.captured.ratioProps).toEqual({
-      normal: "defaultRadialRatioThresholdNormal",
-      flat: "defaultRadialRatioThresholdFlat"
+      normal: "defaultLinearRatioThresholdNormal",
+      flat: "defaultLinearRatioThresholdFlat"
     });
     expect(h.captured.tickSteps).toBe(h.resolveStandardSemicircleTickSteps);
     expect(h.captured.tickSteps(10)).toEqual({ major: 10, minor: 2 });
@@ -108,7 +103,7 @@ describe("DefaultRadialWidget", function () {
 
     expect(h.captured.formatDisplay(12.5, {
       default: "---"
-    }, "")).toEqual({ num: 12.5, text: "12.5" });
+    })).toEqual({ num: 12.5, text: "12.5" });
     expect(h.valueMath.formatGaugeDisplay).toHaveBeenCalledWith(12.5, {
       default: "---"
     }, h.applyFormatter, h.placeholderNormalize.normalize);
@@ -117,7 +112,7 @@ describe("DefaultRadialWidget", function () {
       formatter: "formatDecimal",
       formatterParameters: ["m"],
       default: "---"
-    }, "")).toEqual({ num: 12.5, text: "12.5" });
+    })).toEqual({ num: 12.5, text: "12.5" });
     expect(h.valueMath.formatGaugeDisplay).toHaveBeenCalledWith(12.5, {
       formatter: "formatDecimal",
       formatterParameters: ["m"],
@@ -126,16 +121,13 @@ describe("DefaultRadialWidget", function () {
 
     expect(h.captured.formatDisplay("bad", {
       default: "ALT"
-    }, "")).toEqual({ num: NaN, text: "ALT" });
+    })).toEqual({ num: NaN, text: "ALT" });
     expect(h.valueMath.formatGaugeDisplay).toHaveBeenCalledWith("bad", {
       default: "ALT"
     }, h.applyFormatter, h.placeholderNormalize.normalize);
-
-    expect(h.captured.formatDisplay("bad", {}, "")).toEqual({ num: NaN, text: "---" });
-    expect(h.valueMath.formatGaugeDisplay).toHaveBeenCalledWith("bad", {}, h.applyFormatter, h.placeholderNormalize.normalize);
   });
 
-  it("builds deterministic sectors, falls back to theme colors, and omits degenerate spans", function () {
+  it("builds ordered sectors and omits degenerate spans", function () {
     const h = createHarness();
     const theme = {
       colors: {
@@ -145,49 +137,49 @@ describe("DefaultRadialWidget", function () {
     };
 
     expect(h.captured.buildSectors({
-      defaultRadialAlarmLowEnabled: false,
-      defaultRadialWarningLowEnabled: false,
-      defaultRadialWarningHighEnabled: false,
-      defaultRadialAlarmHighEnabled: false
-    }, 0, 100, {}, h.valueMath, theme)).toEqual([]);
+      defaultLinearAlarmLowEnabled: false,
+      defaultLinearWarningLowEnabled: false,
+      defaultLinearWarningHighEnabled: false,
+      defaultLinearAlarmHighEnabled: false
+    }, 0, 100, { min: 0, max: 100 }, h.valueMath, theme)).toEqual([]);
 
     const sectors = h.captured.buildSectors({
-      defaultRadialAlarmLowEnabled: true,
-      defaultRadialAlarmLowAt: 10,
-      defaultRadialAlarmLowColor: "#aa0000",
-      defaultRadialWarningLowEnabled: true,
-      defaultRadialWarningLowAt: 25,
-      defaultRadialWarningLowColor: "#bb0000",
-      defaultRadialWarningHighEnabled: true,
-      defaultRadialWarningHighAt: 75,
-      defaultRadialWarningHighColor: "#00bb00",
-      defaultRadialAlarmHighEnabled: true,
-      defaultRadialAlarmHighAt: 90,
-      defaultRadialAlarmHighColor: "#0000bb"
-    }, 0, 100, {}, h.valueMath, theme);
+      defaultLinearAlarmLowEnabled: true,
+      defaultLinearAlarmLowAt: 10,
+      defaultLinearAlarmLowColor: "#aa0000",
+      defaultLinearWarningLowEnabled: true,
+      defaultLinearWarningLowAt: 25,
+      defaultLinearWarningLowColor: "#bb0000",
+      defaultLinearWarningHighEnabled: true,
+      defaultLinearWarningHighAt: 75,
+      defaultLinearWarningHighColor: "#00bb00",
+      defaultLinearAlarmHighEnabled: true,
+      defaultLinearAlarmHighAt: 90,
+      defaultLinearAlarmHighColor: "#0000bb"
+    }, 0, 100, { min: 0, max: 100 }, h.valueMath, theme);
 
     expect(sectors).toEqual([
-      { a0: 0, a1: 10, color: "#aa0000" },
-      { a0: 10, a1: 25, color: "#bb0000" },
-      { a0: 75, a1: 90, color: "#00bb00" },
-      { a0: 90, a1: 100, color: "#0000bb" }
+      { from: 0, to: 10, color: "#aa0000" },
+      { from: 10, to: 25, color: "#bb0000" },
+      { from: 75, to: 90, color: "#00bb00" },
+      { from: 90, to: 100, color: "#0000bb" }
     ]);
 
     const fallbackSectors = h.captured.buildSectors({
-      defaultRadialAlarmLowEnabled: true,
-      defaultRadialAlarmLowAt: 10,
-      defaultRadialWarningLowEnabled: true,
-      defaultRadialWarningLowAt: 10,
-      defaultRadialWarningHighEnabled: true,
-      defaultRadialWarningHighAt: 75,
-      defaultRadialAlarmHighEnabled: true,
-      defaultRadialAlarmHighAt: 90
-    }, 0, 100, {}, h.valueMath, theme);
+      defaultLinearAlarmLowEnabled: true,
+      defaultLinearAlarmLowAt: 10,
+      defaultLinearWarningLowEnabled: true,
+      defaultLinearWarningLowAt: 10,
+      defaultLinearWarningHighEnabled: true,
+      defaultLinearWarningHighAt: 75,
+      defaultLinearAlarmHighEnabled: true,
+      defaultLinearAlarmHighAt: 90
+    }, 0, 100, { min: 0, max: 100 }, h.valueMath, theme);
 
     expect(fallbackSectors).toEqual([
-      { a0: 0, a1: 10, color: "#ff7a76" },
-      { a0: 75, a1: 90, color: "#e7c66a" },
-      { a0: 90, a1: 100, color: "#ff7a76" }
+      { from: 0, to: 10, color: "#ff7a76" },
+      { from: 75, to: 90, color: "#e7c66a" },
+      { from: 90, to: 100, color: "#ff7a76" }
     ]);
   });
 });

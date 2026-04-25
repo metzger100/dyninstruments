@@ -98,6 +98,29 @@ describe("RadialValueMath", function () {
     ]);
   });
 
+  it("formats gauge display text with shared formatter and placeholder normalization", function () {
+    const v = create();
+    const applyFormatter = vi.fn((value) => String(value) + " kn");
+    const normalize = vi.fn((text, defaultText) => {
+      if (text == null) {
+        return defaultText;
+      }
+      return String(text);
+    });
+
+    expect(v.formatGaugeDisplay(12.3, {
+      formatter: "formatSpeed",
+      formatterParameters: ["kn"]
+    }, applyFormatter, normalize)).toEqual({
+      num: 12.3,
+      text: "12.3"
+    });
+    expect(applyFormatter).toHaveBeenCalledWith(12.3, expect.objectContaining({
+      formatter: "formatSpeed",
+      formatterParameters: ["kn"]
+    }));
+  });
+
   it("supports undefined sector colors when no overrides are passed", function () {
     const v = create();
     const arc = { startDeg: 270, endDeg: 450 };

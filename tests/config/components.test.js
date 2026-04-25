@@ -255,6 +255,9 @@ describe("config/components.js", function () {
     expect(components.DefaultRadialWidget.globalKey).toBe("DyniDefaultRadialWidget");
     expect(components.DefaultRadialWidget.js).toBe("http://host/plugins/dyninstruments/widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js");
     expect(components.DefaultRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]);
+    expect(components.DefaultLinearWidget.globalKey).toBe("DyniDefaultLinearWidget");
+    expect(components.DefaultLinearWidget.js).toBe("http://host/plugins/dyninstruments/widgets/linear/DefaultLinearWidget/DefaultLinearWidget.js");
+    expect(components.DefaultLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
     expect(components.TemperatureLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
     expect(components.TemperatureRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]);
     expect(components.VoltageLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
@@ -442,6 +445,7 @@ describe("config/components.js", function () {
       "DepthRadialWidget",
       "DepthLinearWidget",
       "DefaultRadialWidget",
+      "DefaultLinearWidget",
       "TemperatureRadialWidget",
       "TemperatureLinearWidget",
       "VoltageRadialWidget",
@@ -463,7 +467,7 @@ describe("config/components.js", function () {
     expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).toContain("PerfSpanHelper");
     expect(components.ClusterRendererRouter.deps).not.toContain("WindRadialWidget");
-    expect(components.ClusterRendererRouter.deps).not.toContain("DefaultLinearWidget");
+    expect(components.ClusterRendererRouter.deps).toContain("DefaultLinearWidget");
     expect(components.PositionCoordinateWidget.deps).not.toContain("ThreeValueTextWidget");
     expect(components.NavMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/NavMapper.js");
     expect(components.NavMapper.deps).toEqual(["ActiveRouteViewModel", "EditRouteViewModel", "RoutePointsViewModel"]);
