@@ -1,7 +1,7 @@
 /**
  * Module: ClusterMapperRegistry - Cluster to mapper module registry and dispatcher
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: CourseHeadingMapper, SpeedMapper, EnvironmentMapper, WindMapper, NavMapper, MapMapper, AnchorMapper, VesselMapper
+ * Depends: CourseHeadingMapper, SpeedMapper, EnvironmentMapper, WindMapper, NavMapper, MapMapper, AnchorMapper, VesselMapper, DefaultMapper
  */
 
 (function (root, factory) {
@@ -19,7 +19,8 @@
     nav: "NavMapper",
     map: "MapMapper",
     anchor: "AnchorMapper",
-    vessel: "VesselMapper"
+    vessel: "VesselMapper",
+    default: "DefaultMapper"
   };
 
   function create(def, Helpers) {

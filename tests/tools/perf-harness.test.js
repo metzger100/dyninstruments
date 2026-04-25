@@ -6,7 +6,7 @@ const { pathToFileURL } = require("node:url");
 describe("tools/perf/harness.mjs", function () {
   const harnessPath = path.resolve(__dirname, "../../tools/perf/harness.mjs");
   const tempDirs = [];
-
+  let fixtureRoot = null;
   let runPerfScenarioSuite;
   let DEFAULT_SCENARIO_ORDER;
 
@@ -14,6 +14,13 @@ describe("tools/perf/harness.mjs", function () {
     const mod = await import(pathToFileURL(harnessPath).href);
     runPerfScenarioSuite = mod.runPerfScenarioSuite;
     DEFAULT_SCENARIO_ORDER = mod.DEFAULT_SCENARIO_ORDER;
+    fixtureRoot = createPerfFixtureRoot();
+  });
+
+  afterAll(function () {
+    if (fixtureRoot) {
+      fs.rmSync(fixtureRoot, { recursive: true, force: true });
+    }
   });
 
   afterEach(function () {
@@ -28,12 +35,117 @@ describe("tools/perf/harness.mjs", function () {
     return dir;
   }
 
+  function createPerfFixtureRoot() {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-perf-fixture-"));
+    const sourceRoot = process.cwd();
+
+    fs.cpSync(sourceRoot, root, {
+      recursive: true,
+      filter: function (src) {
+        const rel = path.relative(sourceRoot, src);
+        if (!rel) {
+          return true;
+        }
+        const top = rel.split(path.sep)[0];
+        return top !== "artifacts" && top !== "coverage" && top !== ".git" && top !== "node_modules";
+      }
+    });
+
+    writeFixtureFile(
+      path.join(root, "widgets/linear/DefaultLinearWidget/DefaultLinearWidget.js"),
+      makeDefaultLinearWidgetStub()
+    );
+
+    patchFixtureFile(
+      path.join(root, "config/components/registry-widgets.js"),
+      '    DefaultRadialWidget: {\n      js: BASE + "widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js",\n      css: undefined,\n      globalKey: "DyniDefaultRadialWidget",\n      deps: ["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]\n    },\n    PositionCoordinateWidget: {',
+      '    DefaultRadialWidget: {\n      js: BASE + "widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js",\n      css: undefined,\n      globalKey: "DyniDefaultRadialWidget",\n      deps: ["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]\n    },\n    DefaultLinearWidget: {\n      js: BASE + "widgets/linear/DefaultLinearWidget/DefaultLinearWidget.js",\n      css: undefined,\n      globalKey: "DyniDefaultLinearWidget",\n      deps: ["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]\n    },\n    PositionCoordinateWidget: {'
+    );
+
+    patchFixtureFile(
+      path.join(root, "config/components/registry-widgets.js"),
+      '"DefaultRadialWidget",\n        "TemperatureRadialWidget"',
+      '"DefaultRadialWidget",\n        "DefaultLinearWidget",\n        "TemperatureRadialWidget"'
+    );
+
+    patchFixtureFile(
+      path.join(root, "config/components/registry-cluster.js"),
+      '"DefaultRadialWidget",\n        "RendererPropsWidget"',
+      '"DefaultRadialWidget",\n        "DefaultLinearWidget",\n        "RendererPropsWidget"'
+    );
+
+    patchFixtureFile(
+      path.join(root, "cluster/rendering/ClusterRendererRouter.js"),
+      ' * Depends: PerfSpanHelper, ClusterKindCatalog, ClusterSurfacePolicy, CanvasDomSurfaceAdapter, HtmlSurfaceController, SurfaceControllerFactory, RendererPropsWidget, ActiveRouteTextHtmlWidget, EditRouteTextHtmlWidget, RoutePointsTextHtmlWidget, MapZoomTextHtmlWidget, AisTargetTextHtmlWidget, AlarmTextHtmlWidget, DefaultRadialWidget',
+      ' * Depends: PerfSpanHelper, ClusterKindCatalog, ClusterSurfacePolicy, CanvasDomSurfaceAdapter, HtmlSurfaceController, SurfaceControllerFactory, RendererPropsWidget, ActiveRouteTextHtmlWidget, EditRouteTextHtmlWidget, RoutePointsTextHtmlWidget, MapZoomTextHtmlWidget, AisTargetTextHtmlWidget, AlarmTextHtmlWidget, DefaultRadialWidget, DefaultLinearWidget'
+    );
+
+    patchFixtureFile(
+      path.join(root, "cluster/rendering/ClusterRendererRouter.js"),
+      '      DefaultRadialWidget: rendererPropsWidget.create(def, Helpers, "DefaultRadialWidget"),\n      XteDisplayWidget: rendererPropsWidget.create(def, Helpers, "XteDisplayWidget")',
+      '      DefaultRadialWidget: rendererPropsWidget.create(def, Helpers, "DefaultRadialWidget"),\n      DefaultLinearWidget: rendererPropsWidget.create(def, Helpers, "DefaultLinearWidget"),\n      XteDisplayWidget: rendererPropsWidget.create(def, Helpers, "XteDisplayWidget")'
+    );
+
+    return root;
+  }
+
+  function patchFixtureFile(filePath, searchText, replaceText) {
+    const input = fs.readFileSync(filePath, "utf8");
+    const output = input.replace(searchText, replaceText);
+    if (output === input) {
+      throw new Error("failed to patch fixture file: " + filePath);
+    }
+    fs.writeFileSync(filePath, output);
+  }
+
+  function writeFixtureFile(filePath, contents) {
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, contents);
+  }
+
+  function makeDefaultLinearWidgetStub() {
+    return [
+      "/**",
+      " * Module: DefaultLinearWidget - Test-only linear gauge stub for perf harness fixture",
+      " * Documentation: documentation/widgets/linear-gauges.md",
+      " * Depends: LinearGaugeEngine, RadialValueMath, PlaceholderNormalize",
+      " */",
+      "(function (root, factory) {",
+      '  if (typeof define === "function" && define.amd) define([], factory);',
+      '  else if (typeof module === "object" && module.exports) module.exports = factory();',
+      '  else { (root.DyniComponents = root.DyniComponents || {}).DyniDefaultLinearWidget = factory(); }',
+      "}(this, function () {",
+      '  "use strict";',
+      "",
+      "  function create() {",
+      "    function renderCanvas() {}",
+      "    function translateFunction() {",
+      "      return {};",
+      "    }",
+      "",
+      "    return {",
+      '      id: "DefaultLinearWidget",',
+      "      wantsHideNativeHead: true,",
+      "      renderCanvas: renderCanvas,",
+      "      translateFunction: translateFunction,",
+      "      getVerticalShellSizing: function () {",
+      '        return { kind: "ratio", aspectRatio: 2 };',
+      "      }",
+      "    };",
+      "  }",
+      "",
+      '  return { id: "DefaultLinearWidget", create };',
+      "}));",
+      ""
+    ].join("\n");
+  }
+
   it("keeps scenario order stable across repeated runs", async function () {
     const outA = createTempOutputDir();
     const outB = createTempOutputDir();
 
     const first = await runPerfScenarioSuite({
-      rootDir: process.cwd(),
+      rootDir: fixtureRoot,
       outputDir: outA,
       warmupIterations: 1,
       measuredIterations: 2,
@@ -43,7 +155,7 @@ describe("tools/perf/harness.mjs", function () {
     });
 
     const second = await runPerfScenarioSuite({
-      rootDir: process.cwd(),
+      rootDir: fixtureRoot,
       outputDir: outB,
       warmupIterations: 1,
       measuredIterations: 2,
@@ -61,7 +173,7 @@ describe("tools/perf/harness.mjs", function () {
     const outDir = createTempOutputDir();
 
     const result = await runPerfScenarioSuite({
-      rootDir: process.cwd(),
+      rootDir: fixtureRoot,
       outputDir: outDir,
       warmupIterations: 1,
       measuredIterations: 2,

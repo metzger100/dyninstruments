@@ -252,6 +252,9 @@ describe("config/components.js", function () {
     expect(components.SpeedLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
     expect(components.DepthLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
     expect(components.DepthRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
+    expect(components.DefaultRadialWidget.globalKey).toBe("DyniDefaultRadialWidget");
+    expect(components.DefaultRadialWidget.js).toBe("http://host/plugins/dyninstruments/widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js");
+    expect(components.DefaultRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]);
     expect(components.TemperatureLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
     expect(components.TemperatureRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]);
     expect(components.VoltageLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
@@ -438,6 +441,7 @@ describe("config/components.js", function () {
       "SpeedLinearWidget",
       "DepthRadialWidget",
       "DepthLinearWidget",
+      "DefaultRadialWidget",
       "TemperatureRadialWidget",
       "TemperatureLinearWidget",
       "VoltageRadialWidget",
@@ -459,14 +463,19 @@ describe("config/components.js", function () {
     expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).toContain("PerfSpanHelper");
     expect(components.ClusterRendererRouter.deps).not.toContain("WindRadialWidget");
+    expect(components.ClusterRendererRouter.deps).not.toContain("DefaultLinearWidget");
     expect(components.PositionCoordinateWidget.deps).not.toContain("ThreeValueTextWidget");
     expect(components.NavMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/NavMapper.js");
     expect(components.NavMapper.deps).toEqual(["ActiveRouteViewModel", "EditRouteViewModel", "RoutePointsViewModel"]);
     expect(components.MapMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/MapMapper.js");
     expect(components.MapMapper.deps).toEqual(["AisTargetViewModel"]);
+    expect(components.DefaultMapper.globalKey).toBe("DyniDefaultMapper");
+    expect(components.DefaultMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/DefaultMapper.js");
+    expect(components.DefaultMapper.deps).toBeUndefined();
     expect(components.VesselMapper.deps).toEqual(["AlarmViewModel"]);
     expect(components.ClusterMapperRegistry.deps).toContain("NavMapper");
     expect(components.ClusterMapperRegistry.deps).toContain("MapMapper");
+    expect(components.ClusterMapperRegistry.deps).toContain("DefaultMapper");
     expect(components.WindMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/WindMapper.js");
   });
 

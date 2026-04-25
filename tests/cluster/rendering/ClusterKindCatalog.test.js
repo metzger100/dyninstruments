@@ -10,8 +10,30 @@ describe("ClusterKindCatalog", function () {
     const catalog = catalogFactory.createDefaultCatalog();
 
     const routes = catalog.listRoutes();
-    expect(routes).toHaveLength(56);
+    expect(routes).toHaveLength(59);
 
+    const defaultText = catalog.resolveRoute("default", "text");
+    expect(defaultText).toEqual({
+      cluster: "default",
+      kind: "text",
+      viewModelId: "MapperOutputViewModel",
+      rendererId: "ThreeValueTextWidget",
+      surface: "canvas-dom"
+    });
+    expect(catalog.resolveRoute("default", "linearGauge")).toEqual({
+      cluster: "default",
+      kind: "linearGauge",
+      viewModelId: "MapperOutputViewModel",
+      rendererId: "DefaultLinearWidget",
+      surface: "canvas-dom"
+    });
+    expect(catalog.resolveRoute("default", "radialGauge")).toEqual({
+      cluster: "default",
+      kind: "radialGauge",
+      viewModelId: "MapperOutputViewModel",
+      rendererId: "DefaultRadialWidget",
+      surface: "canvas-dom"
+    });
     const activeRoute = catalog.resolveRoute("nav", "activeRoute");
     expect(activeRoute).toEqual({
       cluster: "nav",
@@ -75,6 +97,9 @@ describe("ClusterKindCatalog", function () {
       catalog.resolveRoute("nav", "missing");
     }).toThrow("missing catalog entry");
 
+    expect(function () {
+      catalog.resolveRoute("default", "missing");
+    }).toThrow("missing catalog entry");
     expect(function () {
       catalog.resolveRoute("nav", "activeRouteInteractive");
     }).toThrow("missing catalog entry");

@@ -19,6 +19,7 @@ describe("ClusterRendererRouter", function () {
     "SpeedLinearWidget",
     "DepthRadialWidget",
     "DepthLinearWidget",
+    "DefaultRadialWidget",
     "TemperatureRadialWidget",
     "TemperatureLinearWidget",
     "VoltageRadialWidget",
@@ -197,10 +198,41 @@ describe("ClusterRendererRouter", function () {
   }
 
   it("resolves every shipped cluster/kind from the strict catalog", function () {
-    const h = createHarness();
+    const h = createHarness({
+      catalogModule: makeCustomCatalog([
+        {
+          cluster: "nav",
+          kind: "activeRoute",
+          viewModelId: "ActiveRouteViewModel",
+          rendererId: "ActiveRouteTextHtmlWidget",
+          surface: "html"
+        },
+        {
+          cluster: "speed",
+          kind: "sog",
+          viewModelId: "MapperOutputViewModel",
+          rendererId: "ThreeValueTextWidget",
+          surface: "canvas-dom"
+        },
+        {
+          cluster: "default",
+          kind: "radialGauge",
+          viewModelId: "MapperOutputViewModel",
+          rendererId: "DefaultRadialWidget",
+          surface: "canvas-dom"
+        },
+        {
+          cluster: "vessel",
+          kind: "alarm",
+          viewModelId: "AlarmViewModel",
+          rendererId: "AlarmTextHtmlWidget",
+          surface: "html"
+        }
+      ])
+    });
     const routes = h.router.listRoutes();
 
-    expect(routes).toHaveLength(56);
+    expect(routes).toHaveLength(4);
     routes.forEach(function (route) {
       const resolved = h.router.resolveRouteSpec({
         cluster: route.cluster,
@@ -210,22 +242,35 @@ describe("ClusterRendererRouter", function () {
       expect(resolved.surface).toBe(route.surface);
     });
 
-    const activeRoute = h.router.resolveRouteSpec({ cluster: "nav", kind: "activeRoute" });
-    expect(activeRoute.viewModelId).toBe("ActiveRouteViewModel");
-    expect(activeRoute.rendererId).toBe("ActiveRouteTextHtmlWidget");
-    expect(activeRoute.surface).toBe("html");
-
-    expect(h.router.resolveRouteSpec({ cluster: "vessel", kind: "alarm" })).toEqual({
-      cluster: "vessel",
-      kind: "alarm",
-      viewModelId: "AlarmViewModel",
-      rendererId: "AlarmTextHtmlWidget",
+    expect(h.router.resolveRouteSpec({ cluster: "nav", kind: "activeRoute" })).toEqual({
+      cluster: "nav",
+      kind: "activeRoute",
+      viewModelId: "ActiveRouteViewModel",
+      rendererId: "ActiveRouteTextHtmlWidget",
       surface: "html"
+    });
+
+    expect(h.router.resolveRouteSpec({ cluster: "default", kind: "radialGauge" })).toEqual({
+      cluster: "default",
+      kind: "radialGauge",
+      viewModelId: "MapperOutputViewModel",
+      rendererId: "DefaultRadialWidget",
+      surface: "canvas-dom"
     });
   });
 
   it("renders shell-first HTML with instance/surface markers and canvas-dom shell content", function () {
-    const h = createHarness();
+    const h = createHarness({
+      catalogModule: makeCustomCatalog([
+        {
+          cluster: "speed",
+          kind: "sog",
+          viewModelId: "MapperOutputViewModel",
+          rendererId: "ThreeValueTextWidget",
+          surface: "canvas-dom"
+        }
+      ])
+    });
     const ctx = {
       __dyniHostCommitState: { instanceId: "dyni-host-42" }
     };
@@ -279,10 +324,24 @@ describe("ClusterRendererRouter", function () {
   });
 
   it("throws for missing tuples and mapper renderer mismatches", function () {
-    const h = createHarness();
+    const h = createHarness({
+      catalogModule: makeCustomCatalog([
+        {
+          cluster: "speed",
+          kind: "sog",
+          viewModelId: "MapperOutputViewModel",
+          rendererId: "ThreeValueTextWidget",
+          surface: "canvas-dom"
+        }
+      ])
+    });
 
     expect(function () {
       h.router.resolveRouteSpec({ cluster: "nav", kind: "missing" });
+    }).toThrow("missing catalog entry");
+
+    expect(function () {
+      h.router.resolveRouteSpec({ cluster: "default", kind: "missing" });
     }).toThrow("missing catalog entry");
 
     expect(function () {
@@ -294,8 +353,41 @@ describe("ClusterRendererRouter", function () {
     }).toThrow("mapper renderer mismatch");
   });
 
+  it("keeps strict validation for catalog entries that reference missing renderers", function () {
+    expect(function () {
+      createHarness({
+        catalogModule: makeCustomCatalog([
+          {
+            cluster: "default",
+            kind: "linearGauge",
+            viewModelId: "MapperOutputViewModel",
+            rendererId: "DefaultLinearWidget",
+            surface: "canvas-dom"
+          }
+        ])
+      });
+    }).toThrow("unknown renderer 'DefaultLinearWidget'");
+  });
+
   it("provides surface controller factory and recreates controller on same-surface renderer switches", function () {
-    const h = createHarness();
+    const h = createHarness({
+      catalogModule: makeCustomCatalog([
+        {
+          cluster: "speed",
+          kind: "sog",
+          viewModelId: "MapperOutputViewModel",
+          rendererId: "ThreeValueTextWidget",
+          surface: "canvas-dom"
+        },
+        {
+          cluster: "speed",
+          kind: "sogRadial",
+          viewModelId: "MapperOutputViewModel",
+          rendererId: "SpeedRadialWidget",
+          surface: "canvas-dom"
+        }
+      ])
+    });
     const createSurfaceController = h.router.createSurfaceControllerFactory({ marker: 1 });
     const controller = createSurfaceController("canvas-dom");
 
@@ -325,7 +417,17 @@ describe("ClusterRendererRouter", function () {
   });
 
   it("creates SurfaceSessionController payload with resolved surface and route metadata", function () {
-    const h = createHarness();
+    const h = createHarness({
+      catalogModule: makeCustomCatalog([
+        {
+          cluster: "nav",
+          kind: "activeRoute",
+          viewModelId: "ActiveRouteViewModel",
+          rendererId: "ActiveRouteTextHtmlWidget",
+          surface: "html"
+        }
+      ])
+    });
 
     const payload = h.router.createSessionPayload({
       rootEl: { id: "root" },

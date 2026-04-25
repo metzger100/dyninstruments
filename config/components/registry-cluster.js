@@ -49,6 +49,11 @@
       css: undefined,
       globalKey: "DyniAnchorMapper"
     },
+    DefaultMapper: {
+      js: BASE + "cluster/mappers/DefaultMapper.js",
+      css: undefined,
+      globalKey: "DyniDefaultMapper"
+    },
     CanvasDomSurfaceAdapter: {
       js: BASE + "cluster/rendering/CanvasDomSurfaceAdapter.js",
       css: undefined,
@@ -72,7 +77,8 @@
         "NavMapper",
         "MapMapper",
         "AnchorMapper",
-        "VesselMapper"
+        "VesselMapper",
+        "DefaultMapper"
       ]
     },
     ClusterMapperToolkit: {
@@ -110,6 +116,7 @@
         "AisTargetTextHtmlWidget",
         "AlarmTextHtmlWidget",
         "CenterDisplayTextWidget",
+        "DefaultRadialWidget",
         "RendererPropsWidget",
         "PerfSpanHelper"
       ]

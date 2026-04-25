@@ -69,6 +69,7 @@
     "config/clusters/map.js",
     "config/clusters/anchor.js",
     "config/clusters/vessel.js",
+    "config/clusters/default.js",
     "config/widget-definitions.js",
     "runtime/component-loader.js",
     "runtime/widget-registrar.js",

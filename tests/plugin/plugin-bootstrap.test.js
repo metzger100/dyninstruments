@@ -31,6 +31,8 @@ describe("plugin.js bootstrap", function () {
     const registryWidgetsIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-widgets.js");
     const registryClusterIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-cluster.js");
     const componentsConfigIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components.js");
+    const defaultClusterIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/clusters/default.js");
+    const widgetDefinitionsIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/widget-definitions.js");
     const hostCommitIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/HostCommitController.js");
     const surfaceSessionIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/SurfaceSessionController.js");
     const themeRuntimeIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/theme-runtime.js");
@@ -48,6 +50,8 @@ describe("plugin.js bootstrap", function () {
     expect(registryWidgetsIndex).toBeLessThan(registryClusterIndex);
     expect(registryClusterIndex).toBeLessThan(componentsConfigIndex);
     expect(componentsConfigIndex).toBeLessThan(hostCommitIndex);
+    expect(defaultClusterIndex).toBeGreaterThan(componentsConfigIndex);
+    expect(defaultClusterIndex).toBeLessThan(widgetDefinitionsIndex);
     expect(hostCommitIndex).toBeGreaterThan(-1);
     expect(surfaceSessionIndex).toBeGreaterThan(-1);
     expect(hostCommitIndex).toBeLessThan(themeRuntimeIndex);

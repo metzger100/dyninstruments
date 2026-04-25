@@ -1,7 +1,7 @@
 /**
  * Module: ClusterRendererRouter - Strict kind/surface router with shell rendering and surface-controller helpers
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: PerfSpanHelper, ClusterKindCatalog, ClusterSurfacePolicy, CanvasDomSurfaceAdapter, HtmlSurfaceController, SurfaceControllerFactory, RendererPropsWidget, ActiveRouteTextHtmlWidget, EditRouteTextHtmlWidget, RoutePointsTextHtmlWidget, MapZoomTextHtmlWidget, AisTargetTextHtmlWidget, AlarmTextHtmlWidget
+ * Depends: PerfSpanHelper, ClusterKindCatalog, ClusterSurfacePolicy, CanvasDomSurfaceAdapter, HtmlSurfaceController, SurfaceControllerFactory, RendererPropsWidget, ActiveRouteTextHtmlWidget, EditRouteTextHtmlWidget, RoutePointsTextHtmlWidget, MapZoomTextHtmlWidget, AisTargetTextHtmlWidget, AlarmTextHtmlWidget, DefaultRadialWidget
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -79,6 +79,7 @@
       TemperatureLinearWidget: rendererPropsWidget.create(def, Helpers, "TemperatureLinearWidget"),
       VoltageRadialWidget: rendererPropsWidget.create(def, Helpers, "VoltageRadialWidget"),
       VoltageLinearWidget: rendererPropsWidget.create(def, Helpers, "VoltageLinearWidget"),
+      DefaultRadialWidget: rendererPropsWidget.create(def, Helpers, "DefaultRadialWidget"),
       XteDisplayWidget: rendererPropsWidget.create(def, Helpers, "XteDisplayWidget")
     };
     const catalogRoutes = kindCatalog.listRoutes();

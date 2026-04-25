@@ -217,6 +217,12 @@
       globalKey: "DyniDepthRadialWidget",
       deps: ["SemicircleRadialEngine", "RadialValueMath"]
     },
+    DefaultRadialWidget: {
+      js: BASE + "widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js",
+      css: undefined,
+      globalKey: "DyniDefaultRadialWidget",
+      deps: ["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]
+    },
     PositionCoordinateWidget: {
       js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
       css: undefined,
@@ -236,6 +242,7 @@
         "SpeedLinearWidget",
         "DepthRadialWidget",
         "DepthLinearWidget",
+        "DefaultRadialWidget",
         "TemperatureRadialWidget",
         "TemperatureLinearWidget",
         "VoltageRadialWidget",

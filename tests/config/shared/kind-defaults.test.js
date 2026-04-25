@@ -13,6 +13,12 @@ describe("config/shared/kind-defaults.js", function () {
     runIifeScript("config/shared/kind-defaults.js", context);
 
     const maps = context.DyniPlugin.config.shared.kindMaps;
+    expect(maps.DEFAULT_KIND.text.cap).toBe("VALUE");
+    expect(maps.DEFAULT_KIND.text.unit).toBe("");
+    expect(maps.DEFAULT_KIND.linearGauge.cap).toBe("VALUE");
+    expect(maps.DEFAULT_KIND.linearGauge.unit).toBe("");
+    expect(maps.DEFAULT_KIND.radialGauge.cap).toBe("VALUE");
+    expect(maps.DEFAULT_KIND.radialGauge.unit).toBe("");
     expect(maps.COURSE_KIND.hdt.cap).toBe("HDT");
     expect(maps.COURSE_KIND.hdtLinear.cap).toBe("HDT");
     expect(maps.COURSE_KIND.hdmLinear.unit).toBe("°");

@@ -11,6 +11,11 @@
   const shared = config.shared;
 
   shared.kindMaps = {
+    DEFAULT_KIND: {
+      text: { cap: "VALUE", unit: "" },
+      linearGauge: { cap: "VALUE", unit: "" },
+      radialGauge: { cap: "VALUE", unit: "" }
+    },
     COURSE_KIND: {
       cog: { cap: "COG", unit: "\u00b0" },
       hdt: { cap: "HDT", unit: "\u00b0" },

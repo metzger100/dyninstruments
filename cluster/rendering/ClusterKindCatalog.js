@@ -29,6 +29,11 @@
     { cluster: "courseHeading", kind: "hdtLinear", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "CompassLinearWidget", surface: "canvas-dom" },
     { cluster: "courseHeading", kind: "hdmLinear", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "CompassLinearWidget", surface: "canvas-dom" },
 
+    // default
+    { cluster: "default", kind: "text", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
+    { cluster: "default", kind: "linearGauge", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "DefaultLinearWidget", surface: "canvas-dom" },
+    { cluster: "default", kind: "radialGauge", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "DefaultRadialWidget", surface: "canvas-dom" },
+
     // speed
     { cluster: "speed", kind: "sog", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
     { cluster: "speed", kind: "stw", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
