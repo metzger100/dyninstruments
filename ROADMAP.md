@@ -11,10 +11,6 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ## Roadmap
 
-### Core widgets to implement
-
-- A new cluster dyni_Default_Instruments with "empty" widgets of every type (radialGauge, linearGauge, threeElements) with extensive customizability to be available for "self configurable" Instruments for external values of other Plugins oder Apps that are not covered by the Plugin. For example to offer lower AND and higher end sectors, maybe with customizable colors for the sectors as well, since those are not customizable via user.css if using a default widget more than once. And many other extra settings that might be handy for the users.
-
 ### Fixes for existing widgets and architecture
 
 - Add option to hide textual Metrics in graphical Widgets like (radial, linear, compass, XTE etc.). Note: some widgets also need to center aligned (e.g.: XTE and linear) or stretched (e.g.: XTE and linear), when the textual metrics are hidden, while others just hide the text (e.g.: compass radial, radial gauges) (default: off)
@@ -42,7 +38,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | COG                          | dyni_CourseHeading_Instruments → `cog`                                       | ✅ covered                                  |
 | CombinedWidget               | —                                                                            | ❌ not covered yet                          |
 | DateTime                     | dyni_Vessel_Instruments → `dateTime`                                         | ✅ covered                                  |
-| Default                      | —                                                                            | ❌ not covered yet                          |
+| Default                      | dyni_Default_Instruments → `text`                                            | ✅ covered                                  |
 | DepthDisplay                 | dyni_Environment_Instruments → `depth` / `depthLinear`                       | ✅ covered                                  |
 | DST                          | dyni_Nav_Instruments → `dst`                                                 | ✅ covered                                  |
 | EditRoute                    | dyni_Nav_Instruments → `editRoute`                                           | ✅ covered                                  |
@@ -59,7 +55,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 | radGauge_Speed               | dyni_Speed_Instruments → `sogRadial`/`stwRadial`                             | ✅ covered                                  |
 | radGauge_Temperature         | dyni_Environment_Instruments → `tempRadial`                                  | ✅ covered                                  |
 | radGauge_Voltage             | dyni_Vessel_Instruments → `voltageRadial`                                    | ✅ covered                                  |
-| RadialGauge                  | —                                                                            | ❌ not covered yet                          |
+| RadialGauge                  | dyni_Default_Instruments → `radialGauge`                                     | ✅ covered                                  |
 | RoutePoints                  | dyni_Nav_Instruments → `routePoints`                                         | ✅ covered                                  |
 | RteDistance                  | dyni_Nav_Instruments → `rteDistance`                                         | ✅ covered                                  |
 | RteEta                       | dyni_Nav_Instruments → `rteEta`                                              | ✅ covered                                  |

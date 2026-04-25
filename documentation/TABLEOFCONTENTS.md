@@ -56,6 +56,7 @@
 ## Module Reference (Renderers)
 
 - **Three-value text renderer (layout modes, props)** → [widgets/three-elements.md](widgets/three-elements.md)
+- **Default instruments cluster (kinds, value contract, sector model)** → [widgets/default-instruments.md](widgets/default-instruments.md)
 - **Active-route HTML renderer (visual contract, layout/fit constants)** → [widgets/active-route.md](widgets/active-route.md)
 - **Edit-route HTML renderer (summary parity, layout modes, interaction gating)** → [widgets/edit-route.md](widgets/edit-route.md)
 - **Route-points HTML renderer (layout modes, fit contract, interaction gating)** → [widgets/route-points.md](widgets/route-points.md)

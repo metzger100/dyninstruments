@@ -467,6 +467,7 @@ describe("config/components.js", function () {
     expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");
     expect(components.ClusterRendererRouter.deps).toContain("PerfSpanHelper");
     expect(components.ClusterRendererRouter.deps).not.toContain("WindRadialWidget");
+    expect(components.ClusterRendererRouter.deps).toContain("DefaultRadialWidget");
     expect(components.ClusterRendererRouter.deps).toContain("DefaultLinearWidget");
     expect(components.PositionCoordinateWidget.deps).not.toContain("ThreeValueTextWidget");
     expect(components.NavMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/NavMapper.js");

@@ -218,6 +218,13 @@ describe("ClusterRendererRouter", function () {
         },
         {
           cluster: "default",
+          kind: "linearGauge",
+          viewModelId: "MapperOutputViewModel",
+          rendererId: "DefaultLinearWidget",
+          surface: "canvas-dom"
+        },
+        {
+          cluster: "default",
           kind: "radialGauge",
           viewModelId: "MapperOutputViewModel",
           rendererId: "DefaultRadialWidget",
@@ -234,7 +241,7 @@ describe("ClusterRendererRouter", function () {
     });
     const routes = h.router.listRoutes();
 
-    expect(routes).toHaveLength(4);
+    expect(routes).toHaveLength(5);
     routes.forEach(function (route) {
       const resolved = h.router.resolveRouteSpec({
         cluster: route.cluster,
@@ -257,6 +264,14 @@ describe("ClusterRendererRouter", function () {
       kind: "radialGauge",
       viewModelId: "MapperOutputViewModel",
       rendererId: "DefaultRadialWidget",
+      surface: "canvas-dom"
+    });
+
+    expect(h.router.resolveRouteSpec({ cluster: "default", kind: "linearGauge" })).toEqual({
+      cluster: "default",
+      kind: "linearGauge",
+      viewModelId: "MapperOutputViewModel",
+      rendererId: "DefaultLinearWidget",
       surface: "canvas-dom"
     });
   });

@@ -72,6 +72,7 @@ describe("ClusterMapperRegistry", function () {
         defaultRadialMaxValue: 100
       }
     });
+    expect(reg.mapCluster({ cluster: "default", kind: "unknown" }, () => defaultToolkit)).toEqual({});
     expect(reg.mapCluster({ kind: "sog" }, () => ({}))).toEqual({ s: "sog" });
   });
 
