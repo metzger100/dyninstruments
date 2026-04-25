@@ -23,7 +23,8 @@ describe("XteHighwayLayout", function () {
     expect(inner.y + inner.h).toBeLessThanOrEqual(outer.y + outer.h);
   }
 
-  function buildSnapshot(layout, width, height, mode, reserveNameSpace) {
+  function buildSnapshot(layout, width, height, mode, options) {
+    const cfg = options || {};
     const insets = layout.computeInsets(width, height);
     const contentRect = layout.createContentRect(width, height, insets);
     return {
@@ -33,7 +34,9 @@ describe("XteHighwayLayout", function () {
         contentRect: contentRect,
         gap: insets.gap,
         mode: mode,
-        reserveNameSpace: reserveNameSpace,
+        hideTextualMetrics: cfg.hideTextualMetrics === true,
+        showWpName: cfg.showWpName !== false,
+        hasWaypointName: cfg.hasWaypointName !== false,
         responsive: insets.responsive
       })
     };
@@ -50,13 +53,13 @@ describe("XteHighwayLayout", function () {
   it("keeps flat, normal, and high geometry inside the content rect", function () {
     const layout = createLayout();
     const cases = [
-      { width: 480, height: 120, mode: "flat", reserveNameSpace: true },
-      { width: 220, height: 220, mode: "normal", reserveNameSpace: true },
-      { width: 120, height: 300, mode: "high", reserveNameSpace: true }
+      { width: 480, height: 120, mode: "flat" },
+      { width: 220, height: 220, mode: "normal" },
+      { width: 120, height: 300, mode: "high" }
     ];
 
     cases.forEach((testCase) => {
-      const snapshot = buildSnapshot(layout, testCase.width, testCase.height, testCase.mode, testCase.reserveNameSpace);
+      const snapshot = buildSnapshot(layout, testCase.width, testCase.height, testCase.mode);
       expectRectInside(snapshot.out.highway, snapshot.contentRect);
       expectRectInside(snapshot.out.nameRect, snapshot.contentRect);
       Object.keys(snapshot.out.metricRects).forEach((key) => {
@@ -67,8 +70,14 @@ describe("XteHighwayLayout", function () {
 
   it("reclaims flat header space for metric rows when waypoint name is disabled", function () {
     const layout = createLayout();
-    const withName = buildSnapshot(layout, 480, 120, "flat", true).out;
-    const withoutName = buildSnapshot(layout, 480, 120, "flat", false).out;
+    const withName = buildSnapshot(layout, 480, 120, "flat", {
+      showWpName: true,
+      hasWaypointName: true
+    }).out;
+    const withoutName = buildSnapshot(layout, 480, 120, "flat", {
+      showWpName: false,
+      hasWaypointName: true
+    }).out;
 
     expect(withName.mode).toBe("flat");
     expect(withoutName.mode).toBe("flat");
@@ -78,12 +87,30 @@ describe("XteHighwayLayout", function () {
 
   it("compacts flat highway share and normal name height monotonically across compact, medium, and large widgets", function () {
     const layout = createLayout();
-    const compactFlat = buildSnapshot(layout, 220, 80, "flat", true);
-    const mediumFlat = buildSnapshot(layout, 320, 120, "flat", true);
-    const largeFlat = buildSnapshot(layout, 520, 180, "flat", true);
-    const compactNormal = buildSnapshot(layout, 161, 80, "normal", true);
-    const mediumNormal = buildSnapshot(layout, 220, 120, "normal", true);
-    const largeNormal = buildSnapshot(layout, 800, 400, "normal", true);
+    const compactFlat = buildSnapshot(layout, 220, 80, "flat", {
+      showWpName: true,
+      hasWaypointName: true
+    });
+    const mediumFlat = buildSnapshot(layout, 320, 120, "flat", {
+      showWpName: true,
+      hasWaypointName: true
+    });
+    const largeFlat = buildSnapshot(layout, 520, 180, "flat", {
+      showWpName: true,
+      hasWaypointName: true
+    });
+    const compactNormal = buildSnapshot(layout, 161, 80, "normal", {
+      showWpName: true,
+      hasWaypointName: true
+    });
+    const mediumNormal = buildSnapshot(layout, 220, 120, "normal", {
+      showWpName: true,
+      hasWaypointName: true
+    });
+    const largeNormal = buildSnapshot(layout, 800, 400, "normal", {
+      showWpName: true,
+      hasWaypointName: true
+    });
 
     expect(compactFlat.out.highway.w / compactFlat.contentRect.w).toBeLessThan(
       mediumFlat.out.highway.w / mediumFlat.contentRect.w
@@ -107,7 +134,10 @@ describe("XteHighwayLayout", function () {
 
   it("keeps high-mode metric columns balanced", function () {
     const layout = createLayout();
-    const snapshot = buildSnapshot(layout, 120, 300, "high", true).out;
+    const snapshot = buildSnapshot(layout, 120, 300, "high", {
+      showWpName: true,
+      hasWaypointName: true
+    }).out;
 
     expect(snapshot.metricRects.cog.w).toBe(snapshot.metricRects.btw.w);
     expect(snapshot.metricRects.xte.w).toBe(snapshot.metricRects.dtw.w);
@@ -116,12 +146,30 @@ describe("XteHighwayLayout", function () {
 
   it("derives metric-tile spacing from compact layout-owned responsive state", function () {
     const layout = createLayout();
-    const compact = buildSnapshot(layout, 161, 80, "normal", true).out;
-    const large = buildSnapshot(layout, 520, 180, "flat", true).out;
+    const compact = buildSnapshot(layout, 161, 80, "normal", {
+      showWpName: true,
+      hasWaypointName: true
+    }).out;
+    const large = buildSnapshot(layout, 520, 180, "flat", {
+      showWpName: true,
+      hasWaypointName: true
+    }).out;
     const compactSpacing = layout.computeMetricTileSpacing(compact.metricRects.cog, compact.responsive);
     const largeSpacing = layout.computeMetricTileSpacing(large.metricRects.cog, large.responsive);
 
     expect(compactSpacing.padX).toBeLessThan(largeSpacing.padX);
     expect(compactSpacing.captionHeightPx).toBeLessThan(largeSpacing.captionHeightPx);
+  });
+
+  it("returns graphics-only geometry with no text rects when textual metrics are hidden", function () {
+    const layout = createLayout();
+    const snapshot = buildSnapshot(layout, 480, 120, "flat", {
+      hideTextualMetrics: true
+    }).out;
+
+    expect(snapshot.nameRect).toBeNull();
+    expect(snapshot.metricRects).toBeNull();
+    expect(snapshot.highway.w).toBe(snapshot.contentRect.w);
+    expect(snapshot.highway.h).toBe(snapshot.contentRect.h);
   });
 });

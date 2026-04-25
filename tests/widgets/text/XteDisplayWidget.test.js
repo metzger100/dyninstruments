@@ -266,6 +266,7 @@ describe("XteDisplayWidget", function () {
       headingUnit: "°",
       leadingZero: true,
       showWpName: true,
+      hideTextualMetrics: false,
       xteRatioThresholdNormal: 0.85,
       xteRatioThresholdFlat: 2.3
     }, overrides || {});
@@ -537,6 +538,23 @@ describe("XteDisplayWidget", function () {
     expect(fillTextValues(canvas.__ctx)).toContain("GPS Lost");
   });
 
+  it("draws the highway indicator when xte is finite even if other guidance values are missing", function () {
+    const harness = createHarness();
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeProps({
+      cog: undefined,
+      dtw: undefined,
+      btw: undefined
+    }));
+
+    expect(harness.calls.staticDraws).toHaveLength(1);
+    expect(harness.calls.dynamicDraws).toHaveLength(1);
+    expect(harness.calls.valueRows[0].value).toBe("---");
+    expect(harness.calls.valueRows[2].value).toBe("---");
+    expect(harness.calls.valueRows[3].value).toBe("---");
+  });
+
   it("renders noTarget state-screen when wpName is an empty string", function () {
     const harness = createHarness();
     const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
@@ -547,6 +565,41 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.dynamicDraws).toHaveLength(0);
     expect(harness.calls.valueRows).toHaveLength(0);
     expect(fillTextValues(canvas.__ctx)).toContain("No Waypoint");
+  });
+
+  it("does not derive noTarget from wpName when textual metrics are hidden", function () {
+    const harness = createHarness();
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeProps({
+      wpName: "",
+      hideTextualMetrics: true
+    }));
+
+    expect(harness.calls.staticDraws).toHaveLength(1);
+    expect(harness.calls.dynamicDraws).toHaveLength(1);
+    expect(harness.calls.valueRows).toHaveLength(0);
+    expect(harness.calls.waypointChecks).toHaveLength(0);
+    expect(fillTextValues(canvas.__ctx)).not.toContain("No Waypoint");
+  });
+
+  it("renders graphics-only highway layout and skips text fitting when textual metrics are hidden", function () {
+    const harness = createHarness();
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeProps({
+      hideTextualMetrics: true,
+      wpName: "Fairway Buoy",
+      showWpName: true
+    }));
+
+    expect(harness.calls.layoutHistory[0].nameRect).toBeNull();
+    expect(harness.calls.layoutHistory[0].metricRects).toBeNull();
+    expect(harness.calls.waypointTextFillScales).toHaveLength(0);
+    expect(harness.calls.metricTextFillScales).toHaveLength(0);
+    expect(harness.calls.valueRows).toHaveLength(0);
+    expect(harness.calls.staticDraws).toHaveLength(1);
+    expect(harness.calls.dynamicDraws).toHaveLength(1);
   });
 
   it("normalizes known formatter fallback tokens to --- across all metric rows", function () {

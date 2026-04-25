@@ -124,7 +124,22 @@
         profileApi.computeInsetPx(responsive, GAP_RATIO, 1)
       )));
       const mode = cfg.mode === "flat" || cfg.mode === "high" ? cfg.mode : "normal";
-      const reserveNameSpace = cfg.reserveNameSpace !== false;
+      const hideTextualMetrics = cfg.hideTextualMetrics === true;
+      const showWpName = cfg.showWpName !== false;
+      const hasWaypointName = cfg.hasWaypointName !== false;
+      const reserveWaypointSpace = showWpName && hasWaypointName;
+
+      if (hideTextualMetrics) {
+        return {
+          mode: mode,
+          gap: gap,
+          responsive: responsive,
+          contentRect: contentRect,
+          highway: makeRect(contentRect.x, contentRect.y, contentRect.w, contentRect.h),
+          nameRect: null,
+          metricRects: null
+        };
+      }
 
       if (mode === "flat") {
         const highwayShare = profileApi.scaleShare(
@@ -133,7 +148,7 @@
           FLAT_HIGHWAY_MIN_RATIO,
           FLAT_HIGHWAY_MAX_RATIO
         );
-        const headerShare = reserveNameSpace
+        const headerShare = reserveWaypointSpace
           ? profileApi.scaleShare(
             clampNumber(cfg.flatHeaderRatio, FLAT_HEADER_MIN_RATIO, FLAT_HEADER_MAX_RATIO, FLAT_HEADER_RATIO),
             responsive.flatHeaderShareScale,
@@ -149,11 +164,11 @@
           Math.max(1, contentRect.w - highwayWidth - gap),
           contentRect.h
         );
-        const nameHeight = reserveNameSpace ? Math.max(1, Math.floor(contentRect.h * headerShare)) : 0;
-        const topHeight = Math.max(1, Math.floor((Math.max(1, dataRect.h - (reserveNameSpace ? nameHeight + gap : 0)) - gap) / 2));
+        const nameHeight = reserveWaypointSpace ? Math.max(1, Math.floor(contentRect.h * headerShare)) : 0;
+        const topHeight = Math.max(1, Math.floor((Math.max(1, dataRect.h - (reserveWaypointSpace ? nameHeight + gap : 0)) - gap) / 2));
         const topRect = makeRect(
           dataRect.x,
-          dataRect.y + (reserveNameSpace ? nameHeight + gap : 0),
+          dataRect.y + (reserveWaypointSpace ? nameHeight + gap : 0),
           dataRect.w,
           topHeight
         );

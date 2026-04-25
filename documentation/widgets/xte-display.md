@@ -17,7 +17,7 @@ The highway frame follows the same solid-line visual language as the radial and 
 Renderer now resolves canvas state-screens before highway drawing:
 
 - `disconnected` when `p.disconnect === true` (label: `GPS Lost`)
-- `noTarget` when `typeof p.wpName === "string" && p.wpName.trim() === ""` (label: `No Waypoint`)
+- `noTarget` when `typeof p.wpName === "string" && p.wpName.trim() === ""` and textual metrics are visible (label: `No Waypoint`)
 - `data` otherwise
 
 In `data`, the highway frame stays visible when guidance fields are missing; missing metrics still normalize to `---` and the moving XTE indicator is suppressed until guidance inputs are valid.
@@ -71,6 +71,7 @@ XteDisplayWidget: {
 | `headingUnit` | string | `"°"` | Compatibility prop retained in mapper output; renderer uses `trackUnit` and `btwUnit` directly |
 | `leadingZero` | boolean | `true` | Heading zero-padding (e.g. `093`) |
 | `showWpName` | boolean | `false` | Enable waypoint name if space allows |
+| `hideTextualMetrics` | boolean | `false` | Hide live metric readouts and waypoint name while keeping the highway visible |
 | `xteRatioThresholdNormal` | number | `0.85` | Ratio below -> `high` |
 | `xteRatioThresholdFlat` | number | `2.3` | Ratio above -> `flat` |
 
@@ -78,14 +79,9 @@ XteDisplayWidget: {
 
 In `data` state, the widget always renders the static highway frame.
 
-The moving XTE indicator renders only if all are valid:
+The moving XTE indicator renders only if `xte` is finite.
 
-- finite `xte`
-- finite `cog`
-- finite `dtw`
-- finite `btw`
-
-Otherwise (while still in `data`) the widget shows placeholder text for missing values and skips the dynamic highway indicator.
+When textual metrics are visible, the widget still shows placeholder text for missing non-XTE values.
 
 ## Theme Token Usage
 
@@ -114,6 +110,13 @@ otherwise -> normal
 
 When waypoint name display is disabled (or no waypoint name is available), the highway perspective starts higher in all modes to reduce unused whitespace above the road.
 Compact widgets also reduce waypoint/header shares, increase text fill, and tighten metric-tile inner spacing through `XteHighwayLayout`.
+
+When `hideTextualMetrics === true`, the layout switches to a graphics-only branch:
+
+- no metric tiles
+- no waypoint-name rect
+- enlarged highway rect
+- no waypoint-name fit work in the renderer
 
 ### flat
 

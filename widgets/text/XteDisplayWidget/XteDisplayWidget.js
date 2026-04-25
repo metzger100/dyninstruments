@@ -66,9 +66,10 @@
 
     function resolveStateKind(props) {
       const p = props || {};
+      const hideTextualMetrics = p.hideTextualMetrics === true;
       return stateScreenPrecedence.pickFirst([
         { kind: "disconnected", when: p.disconnect === true },
-        { kind: "noTarget", when: typeof p.wpName === "string" && p.wpName.trim() === "" },
+        { kind: "noTarget", when: !hideTextualMetrics && typeof p.wpName === "string" && p.wpName.trim() === "" },
         { kind: "data", when: true }
       ]);
     }
@@ -126,12 +127,8 @@
         boatSizeFactor: boatSizeFactor
       };
       const easingEnabled = p.easing !== false;
-
-      const guidanceAvailable =
-        finiteNumber(p.xte) &&
-        finiteNumber(p.cog) &&
-        finiteNumber(p.dtw) &&
-        finiteNumber(p.btw);
+      const hideTextualMetrics = p.hideTextualMetrics === true;
+      const xteAvailable = finiteNumber(p.xte);
 
       const normalThreshold = p.xteRatioThresholdNormal;
       const flatThreshold = p.xteRatioThresholdFlat;
@@ -139,16 +136,18 @@
       const insets = layoutApi.computeInsets(W, H);
       const contentRect = layoutApi.createContentRect(W, H, insets);
       const wpName = trimWaypointName(p.wpName);
-      const reserveNameSpace = (p.showWpName !== false) && !!wpName;
+      const showWpName = p.showWpName !== false;
       const layout = layoutApi.computeLayout({
         contentRect: contentRect,
         gap: insets.gap,
         mode: mode,
         responsive: insets.responsive,
-        reserveNameSpace: reserveNameSpace
+        hideTextualMetrics: hideTextualMetrics,
+        showWpName: showWpName,
+        hasWaypointName: !!wpName
       });
       const geom = primitives.highwayGeometry(layout.highway, mode, {
-        compactTop: !reserveNameSpace
+        compactTop: hideTextualMetrics || !(showWpName && !!wpName)
       });
 
       const staticKey = {
@@ -194,7 +193,7 @@
 
       const xteDistanceMissing = placeholderNormalize.isPlaceholder(xteDistanceRaw);
       const xteSide = (!xteDistanceMissing && finiteNumber(xteRaw)) ? (xteRaw > 0 ? "R" : (xteRaw < 0 ? "L" : "")) : "";
-      if (guidanceAvailable) {
+      if (xteAvailable) {
         const xteDisplayAbs = parseNumericText(xteDistance, Math.abs(xteRaw));
         const signedDisplayXte = xteRaw < 0 ? -xteDisplayAbs : xteDisplayAbs;
         const overflow = Math.abs(xteDisplayAbs) > FIXED_XTE_SCALE;
@@ -202,6 +201,13 @@
         const xteEased = springMotion.resolve(canvas, xteTarget, easingEnabled, Date.now());
         const xteNormalized = finiteNumber(xteEased) ? xteEased : (signedDisplayXte / FIXED_XTE_SCALE);
         primitives.drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, xteDynamicStyle);
+      }
+
+      if (hideTextualMetrics) {
+        if (xteAvailable && springMotion.isActive(canvas)) {
+          return { wantsFollowUpFrame: true };
+        }
+        return;
       }
 
       const trackValueRaw = String(Helpers.applyFormatter(cogRaw, {
@@ -262,7 +268,7 @@
         btw: { caption: p.btwCaption, value: bearingValue, unit: p.btwUnit }
       };
 
-      const waypointFit = reserveNameSpace ? tileLayout.measureFittedLine({
+      const waypointFit = showWpName && !!wpName ? tileLayout.measureFittedLine({
         textApi: toolkit.text,
         ctx: ctx,
         text: wpName,
@@ -274,7 +280,7 @@
         weight: labelWeight
       }) : null;
 
-      if (primitives.shouldShowWaypoint(mode, layout, p.showWpName !== false, wpName, waypointFit)) {
+      if (primitives.shouldShowWaypoint(mode, layout, showWpName, wpName, waypointFit)) {
         tileLayout.drawFittedLine({
           textApi: toolkit.text,
           ctx: ctx,
@@ -346,7 +352,7 @@
         captionHeightPx: metricSpacing.btw.captionHeightPx
       });
 
-      if (guidanceAvailable && springMotion.isActive(canvas)) {
+      if (xteAvailable && springMotion.isActive(canvas)) {
         return { wantsFollowUpFrame: true };
       }
     }
