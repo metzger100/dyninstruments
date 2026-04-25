@@ -77,6 +77,7 @@
       rawValueKey: "speed",
       unitDefault: "kn",
       axisMode: "range",
+      hideTextualMetricsProp: "speedLinearHideTextualMetrics",
       rangeProps: {
         min: "speedLinearMinValue",
         max: "speedLinearMaxValue"

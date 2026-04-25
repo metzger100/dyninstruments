@@ -132,6 +132,57 @@
     };
   }
 
+  function computeGraphicsOnlyFlatLayout(contentRect) {
+    return {
+      scaleX0: contentRect.x,
+      scaleX1: contentRect.x + contentRect.w,
+      trackY: contentRect.y + Math.floor(contentRect.h / 2),
+      trackBox: makeRect(contentRect.x, contentRect.y, contentRect.w, contentRect.h),
+      captionBox: null,
+      valueBox: null,
+      inlineBox: null,
+      dualRowGap: 0,
+      inlineDualGap: 0,
+      textTopBox: null,
+      textBottomBox: null
+    };
+  }
+
+  function computeGraphicsOnlyNormalLayout(contentRect, right) {
+    const inset = Math.max(1, Math.floor(contentRect.w * NORMAL_INSET_RATIO));
+    const scaleX0 = contentRect.x + inset;
+    const scaleX1 = Math.max(scaleX0 + 1, right - inset);
+    return {
+      scaleX0: scaleX0,
+      scaleX1: scaleX1,
+      trackY: contentRect.y + Math.floor(contentRect.h / 2),
+      trackBox: makeRect(scaleX0, contentRect.y, Math.max(1, scaleX1 - scaleX0), contentRect.h),
+      captionBox: null,
+      valueBox: null,
+      inlineBox: null,
+      dualRowGap: 0,
+      inlineDualGap: 0,
+      textTopBox: null,
+      textBottomBox: null
+    };
+  }
+
+  function computeGraphicsOnlyHighLayout(contentRect) {
+    return {
+      scaleX0: contentRect.x,
+      scaleX1: contentRect.x + contentRect.w,
+      trackY: contentRect.y + Math.floor(contentRect.h / 2),
+      trackBox: makeRect(contentRect.x, contentRect.y, contentRect.w, contentRect.h),
+      captionBox: null,
+      valueBox: null,
+      inlineBox: null,
+      dualRowGap: 0,
+      inlineDualGap: 0,
+      textTopBox: null,
+      textBottomBox: null
+    };
+  }
+
   function computeInlineLayout(contentRect, right, bottom, gap, responsive, profileApi) {
     const inset = Math.max(1, Math.floor(contentRect.w * NORMAL_INSET_RATIO));
     const topMargin = Math.max(1, Math.floor(contentRect.h * NORMAL_TOP_MARGIN_RATIO));
@@ -258,15 +309,22 @@
       const mode = cfg.mode === "flat" || cfg.mode === "high" ? cfg.mode : "normal";
       const normalVariant = resolveNormalVariant(cfg.layoutConfig);
       const highVariant = resolveHighVariant(cfg.layoutConfig);
-      const modeLayout = mode === "flat"
-        ? computeFlatLayout(contentRect, right, gap, responsive, profileApi)
-        : (mode === "high"
-          ? (highVariant === "split"
-            ? computeSplitHighLayout(contentRect, gap)
-            : computeStackedLayout(contentRect, bottom, gap, responsive, profileApi))
-          : (normalVariant === "stacked"
-            ? computeStackedLayout(contentRect, bottom, gap, responsive, profileApi)
-            : computeInlineLayout(contentRect, right, bottom, gap, responsive, profileApi)));
+      const hideTextualMetrics = cfg.hideTextualMetrics === true;
+      const modeLayout = hideTextualMetrics
+        ? (mode === "flat"
+          ? computeGraphicsOnlyFlatLayout(contentRect)
+          : (mode === "high"
+            ? computeGraphicsOnlyHighLayout(contentRect)
+            : computeGraphicsOnlyNormalLayout(contentRect, right)))
+        : (mode === "flat"
+          ? computeFlatLayout(contentRect, right, gap, responsive, profileApi)
+          : (mode === "high"
+            ? (highVariant === "split"
+              ? computeSplitHighLayout(contentRect, gap)
+              : computeStackedLayout(contentRect, bottom, gap, responsive, profileApi))
+            : (normalVariant === "stacked"
+              ? computeStackedLayout(contentRect, bottom, gap, responsive, profileApi)
+              : computeInlineLayout(contentRect, right, bottom, gap, responsive, profileApi))));
 
       return {
         mode: mode,

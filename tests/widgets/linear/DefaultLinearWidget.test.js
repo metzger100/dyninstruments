@@ -84,6 +84,7 @@ describe("DefaultLinearWidget", function () {
     expect(h.spec.renderCanvas).toBe(h.renderer);
     expect(h.captured.rawValueKey).toBe("value");
     expect(h.captured.unitDefault).toBe("");
+    expect(h.captured.hideTextualMetricsProp).toBe("defaultLinearHideTextualMetrics");
     expect(h.captured.rangeProps).toEqual({
       min: "defaultLinearMinValue",
       max: "defaultLinearMaxValue"

@@ -61,6 +61,7 @@ describe("VoltageLinearWidget", function () {
     });
 
     expect(spec.renderCanvas).toBe(renderCanvas);
+    expect(captured.hideTextualMetricsProp).toBe("voltageLinearHideTextualMetrics");
     expect(captured).not.toHaveProperty("rangeDefaults");
     expect(captured.ratioProps).toEqual({
       normal: "voltageLinearRatioThresholdNormal",

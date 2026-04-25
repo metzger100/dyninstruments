@@ -39,6 +39,7 @@ describe("CompassLinearWidget", function () {
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.axisMode).toBe("fixed360");
+    expect(captured.hideTextualMetricsProp).toBe("compassLinearHideTextualMetrics");
     expect(captured.tickProps).toEqual({
       major: "compassLinearTickMajor",
       minor: "compassLinearTickMinor",

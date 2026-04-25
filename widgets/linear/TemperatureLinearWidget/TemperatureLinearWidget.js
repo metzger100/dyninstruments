@@ -82,6 +82,7 @@
       rawValueKey: "temp",
       unitDefault: "°C",
       axisMode: "range",
+      hideTextualMetricsProp: "tempLinearHideTextualMetrics",
       rangeProps: {
         min: "tempLinearMinValue",
         max: "tempLinearMaxValue"

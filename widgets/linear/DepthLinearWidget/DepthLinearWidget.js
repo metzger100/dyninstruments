@@ -54,6 +54,7 @@
       rawValueKey: "depth",
       unitDefault: "m",
       axisMode: "range",
+      hideTextualMetricsProp: "depthLinearHideTextualMetrics",
       rangeProps: {
         min: "depthLinearMinValue",
         max: "depthLinearMaxValue"

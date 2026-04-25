@@ -93,6 +93,7 @@
       rawValueKey: "voltage",
       unitDefault: "V",
       axisMode: "range",
+      hideTextualMetricsProp: "voltageLinearHideTextualMetrics",
       rangeProps: {
         min: "voltageLinearMinValue",
         max: "voltageLinearMaxValue"

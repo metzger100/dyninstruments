@@ -61,6 +61,7 @@ describe("SpeedLinearWidget", function () {
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.axisMode).toBe("range");
     expect(captured.unitDefault).toBe("kn");
+    expect(captured.hideTextualMetricsProp).toBe("speedLinearHideTextualMetrics");
     expect(captured).not.toHaveProperty("rangeDefaults");
     expect(captured.ratioProps).toEqual({
       normal: "speedLinearRatioThresholdNormal",

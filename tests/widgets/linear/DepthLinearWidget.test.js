@@ -66,6 +66,7 @@ describe("DepthLinearWidget", function () {
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.axisMode).toBe("range");
     expect(captured.unitDefault).toBe("m");
+    expect(captured.hideTextualMetricsProp).toBe("depthLinearHideTextualMetrics");
     expect(captured).not.toHaveProperty("rangeDefaults");
     expect(captured.ratioProps).toEqual({
       normal: "depthLinearRatioThresholdNormal",

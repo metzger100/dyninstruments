@@ -62,6 +62,7 @@ describe("TemperatureLinearWidget", function () {
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.unitDefault).toBe("°C");
+    expect(captured.hideTextualMetricsProp).toBe("tempLinearHideTextualMetrics");
     expect(captured).not.toHaveProperty("rangeDefaults");
     expect(captured.ratioProps).toEqual({
       normal: "tempLinearRatioThresholdNormal",

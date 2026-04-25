@@ -23,13 +23,13 @@ describe("LinearGaugeLayout", function () {
     expect(inner.y + inner.h).toBeLessThanOrEqual(outer.y + outer.h);
   }
 
-  function buildSnapshot(layout, width, height, mode, layoutConfig) {
+  function buildSnapshot(layout, width, height, mode, layoutConfig, extraArgs) {
     const insets = layout.computeInsets(width, height);
     const contentRect = layout.createContentRect(width, height, insets);
     return {
       insets: insets,
       contentRect: contentRect,
-      out: layout.computeLayout({
+      out: layout.computeLayout(Object.assign({
         W: width,
         H: height,
         mode: mode,
@@ -37,7 +37,7 @@ describe("LinearGaugeLayout", function () {
         contentRect: contentRect,
         responsive: insets.responsive,
         layoutConfig: layoutConfig
-      })
+      }, extraArgs || {}))
     };
   }
 
@@ -90,6 +90,39 @@ describe("LinearGaugeLayout", function () {
     expect(high.valueBox).toBeTruthy();
     expect(high.textTopBox).toBeNull();
     expect(high.textBottomBox).toBeNull();
+  });
+
+  it("removes every metric box and reclaims the layout when hideTextualMetrics is true", function () {
+    const layout = createLayout();
+    const flat = buildSnapshot(layout, 520, 140, "flat", null, { hideTextualMetrics: true }).out;
+    const normal = buildSnapshot(layout, 280, 220, "normal", null, { hideTextualMetrics: true }).out;
+    const high = buildSnapshot(layout, 120, 320, "high", null, { hideTextualMetrics: true }).out;
+
+    [flat, normal, high].forEach(function (out) {
+      expect(out.captionBox).toBeNull();
+      expect(out.valueBox).toBeNull();
+      expect(out.inlineBox).toBeNull();
+      expect(out.textTopBox).toBeNull();
+      expect(out.textBottomBox).toBeNull();
+      expect(out.trackY).toBeGreaterThan(out.contentRect.y);
+      expect(out.trackY).toBeLessThan(out.contentRect.y + out.contentRect.h);
+      expect(out.trackY).toBe(out.contentRect.y + Math.floor(out.contentRect.h / 2));
+    });
+
+    expect(flat.scaleX0).toBe(flat.contentRect.x);
+    expect(flat.scaleX1).toBe(flat.contentRect.x + flat.contentRect.w);
+    expect(flat.trackBox.w).toBe(flat.contentRect.w);
+    expect(flat.trackBox.h).toBe(flat.contentRect.h);
+
+    expect(normal.scaleX0).toBeGreaterThan(normal.contentRect.x);
+    expect(normal.scaleX1).toBeLessThan(normal.contentRect.x + normal.contentRect.w);
+    expect(normal.trackBox.w).toBe(normal.scaleX1 - normal.scaleX0);
+    expect(normal.trackBox.h).toBe(normal.contentRect.h);
+
+    expect(high.scaleX0).toBe(high.contentRect.x);
+    expect(high.scaleX1).toBe(high.contentRect.x + high.contentRect.w);
+    expect(high.trackBox.w).toBe(high.contentRect.w);
+    expect(high.trackBox.h).toBe(high.contentRect.h);
   });
 
   it("supports a stacked normal variant without an inline row", function () {

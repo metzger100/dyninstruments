@@ -128,6 +128,9 @@
         : function () {
           return DEFAULT_TICK_PRESET;
         };
+      const hideTextualMetricsProp = typeof cfg.hideTextualMetricsProp === "string" && cfg.hideTextualMetricsProp
+        ? cfg.hideTextualMetricsProp
+        : "";
       const formatDisplay = typeof cfg.formatDisplay === "function"
         ? function (rawValue, props, unitText) {
           return cfg.formatDisplay(rawValue, props, unitText, Helpers);
@@ -161,6 +164,8 @@
           stateScreenCanvasOverlay.drawStateScreen({ ctx: ctx, W: W, H: H, family: family, color: color, labelWeight: labelWeight, kind: stateKind });
           return;
         }
+        const hideTextualMetrics = p.hideTextualMetrics === true
+          || (hideTextualMetricsProp && p[hideTextualMetricsProp] === true);
         const mode = layoutApi.computeMode(
           W,
           H,
@@ -174,6 +179,7 @@
           theme: theme,
           mode: mode,
           gap: insets.gap,
+          hideTextualMetrics: hideTextualMetrics,
           contentRect: layoutApi.createContentRect(W, H, insets),
           responsive: insets.responsive,
           layoutConfig: layoutCfg

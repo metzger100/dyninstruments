@@ -99,6 +99,7 @@
       axisMode: "fixed360",
       springTarget: "axis",
       springWrap: 360,
+      hideTextualMetricsProp: "compassLinearHideTextualMetrics",
       tickProps: {
         major: "compassLinearTickMajor",
         minor: "compassLinearTickMinor",

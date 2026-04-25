@@ -73,6 +73,7 @@
       rawValueKey: "value",
       unitDefault: "",
       axisMode: "range",
+      hideTextualMetricsProp: "defaultLinearHideTextualMetrics",
       rangeProps: {
         min: "defaultLinearMinValue",
         max: "defaultLinearMaxValue"
