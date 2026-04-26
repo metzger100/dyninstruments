@@ -15,7 +15,6 @@
     function translate(props, toolkit) {
       const p = props || {};
       const cap = toolkit.cap;
-      const unit = toolkit.unit;
       const out = toolkit.out;
       const num = toolkit.num || function (value) {
         const n = Number(value);
@@ -25,6 +24,8 @@
       const req = p.kind;
 
       if (req === "depthLinear") {
+        const token = toolkit.formatUnit("depthLinear", "distance", "m");
+        const displayUnit = toolkit.unitText("depthLinear", "distance", token);
         const depthWarnOn = (p.depthLinearWarningEnabled !== false);
         const depthAlarmOn = (p.depthLinearAlarmEnabled !== false);
 
@@ -32,15 +33,17 @@
           renderer: "DepthLinearWidget",
           value: p.depth,
           caption: cap("depthLinear"),
-          unit: unit("depthLinear"),
+          unit: displayUnit,
+          formatter: "formatDistance",
+          formatterParameters: [token],
           rendererProps: {
-            depthLinearMinValue: num(p.depthLinearMinValue),
-            depthLinearMaxValue: num(p.depthLinearMaxValue),
-            depthLinearTickMajor: num(p.depthLinearTickMajor),
-            depthLinearTickMinor: num(p.depthLinearTickMinor),
+            depthLinearMinValue: toolkit.unitNumber("depthLinearMinValue", token),
+            depthLinearMaxValue: toolkit.unitNumber("depthLinearMaxValue", token),
+            depthLinearTickMajor: toolkit.unitNumber("depthLinearTickMajor", token),
+            depthLinearTickMinor: toolkit.unitNumber("depthLinearTickMinor", token),
             depthLinearShowEndLabels: !!p.depthLinearShowEndLabels,
-            depthLinearAlarmFrom: depthAlarmOn ? num(p.depthLinearAlarmFrom) : undefined,
-            depthLinearWarningFrom: depthWarnOn ? num(p.depthLinearWarningFrom) : undefined,
+            depthLinearAlarmFrom: depthAlarmOn ? toolkit.unitNumber("depthLinearAlarmFrom", token) : undefined,
+            depthLinearWarningFrom: depthWarnOn ? toolkit.unitNumber("depthLinearWarningFrom", token) : undefined,
             depthLinearRatioThresholdNormal: num(p.depthLinearRatioThresholdNormal),
             depthLinearRatioThresholdFlat: num(p.depthLinearRatioThresholdFlat),
             captionUnitScale: num(p.captionUnitScale),
@@ -50,6 +53,8 @@
       }
 
       if (req === "depthRadial") {
+        const token = toolkit.formatUnit("depthRadial", "distance", "m");
+        const displayUnit = toolkit.unitText("depthRadial", "distance", token);
         const depthWarnOn = (p.depthRadialWarningEnabled !== false);
         const depthAlarmOn = (p.depthRadialAlarmEnabled !== false);
 
@@ -57,15 +62,17 @@
           renderer: "DepthRadialWidget",
           value: p.depth,
           caption: cap("depthRadial"),
-          unit: unit("depthRadial"),
+          unit: displayUnit,
+          formatter: "formatDistance",
+          formatterParameters: [token],
           rendererProps: {
-            depthRadialMinValue: num(p.depthRadialMinValue),
-            depthRadialMaxValue: num(p.depthRadialMaxValue),
-            depthRadialTickMajor: num(p.depthRadialTickMajor),
-            depthRadialTickMinor: num(p.depthRadialTickMinor),
+            depthRadialMinValue: toolkit.unitNumber("depthRadialMinValue", token),
+            depthRadialMaxValue: toolkit.unitNumber("depthRadialMaxValue", token),
+            depthRadialTickMajor: toolkit.unitNumber("depthRadialTickMajor", token),
+            depthRadialTickMinor: toolkit.unitNumber("depthRadialTickMinor", token),
             depthRadialShowEndLabels: !!p.depthRadialShowEndLabels,
-            depthRadialAlarmFrom: depthAlarmOn ? num(p.depthRadialAlarmFrom) : undefined,
-            depthRadialWarningFrom: depthWarnOn ? num(p.depthRadialWarningFrom) : undefined,
+            depthRadialAlarmFrom: depthAlarmOn ? toolkit.unitNumber("depthRadialAlarmFrom", token) : undefined,
+            depthRadialWarningFrom: depthWarnOn ? toolkit.unitNumber("depthRadialWarningFrom", token) : undefined,
             depthRadialRatioThresholdNormal: num(p.depthRadialRatioThresholdNormal),
             depthRadialRatioThresholdFlat: num(p.depthRadialRatioThresholdFlat),
             captionUnitScale: num(p.captionUnitScale),
@@ -75,23 +82,25 @@
       }
 
       if (req === "tempRadial") {
+        const token = toolkit.formatUnit("tempRadial", "temperature", "celsius");
+        const displayUnit = toolkit.unitText("tempRadial", "temperature", token);
         const tempWarnOn = (p.tempRadialWarningEnabled === true);
         const tempAlarmOn = (p.tempRadialAlarmEnabled === true);
         return {
           renderer: "TemperatureRadialWidget",
           value: p.temp,
           caption: cap("tempRadial"),
-          unit: unit("tempRadial"),
+          unit: displayUnit,
           formatter: "formatTemperature",
-          formatterParameters: ["celsius"],
+          formatterParameters: [token],
           rendererProps: {
-            tempRadialMinValue: num(p.tempRadialMinValue),
-            tempRadialMaxValue: num(p.tempRadialMaxValue),
-            tempRadialTickMajor: num(p.tempRadialTickMajor),
-            tempRadialTickMinor: num(p.tempRadialTickMinor),
+            tempRadialMinValue: toolkit.unitNumber("tempRadialMinValue", token),
+            tempRadialMaxValue: toolkit.unitNumber("tempRadialMaxValue", token),
+            tempRadialTickMajor: toolkit.unitNumber("tempRadialTickMajor", token),
+            tempRadialTickMinor: toolkit.unitNumber("tempRadialTickMinor", token),
             tempRadialShowEndLabels: !!p.tempRadialShowEndLabels,
-            tempRadialWarningFrom: tempWarnOn ? num(p.tempRadialWarningFrom) : undefined,
-            tempRadialAlarmFrom: tempAlarmOn ? num(p.tempRadialAlarmFrom) : undefined,
+            tempRadialWarningFrom: tempWarnOn ? toolkit.unitNumber("tempRadialWarningFrom", token) : undefined,
+            tempRadialAlarmFrom: tempAlarmOn ? toolkit.unitNumber("tempRadialAlarmFrom", token) : undefined,
             tempRadialRatioThresholdNormal: num(p.tempRadialRatioThresholdNormal),
             tempRadialRatioThresholdFlat: num(p.tempRadialRatioThresholdFlat),
             captionUnitScale: num(p.captionUnitScale),
@@ -101,23 +110,25 @@
       }
 
       if (req === "tempLinear") {
+        const token = toolkit.formatUnit("tempLinear", "temperature", "celsius");
+        const displayUnit = toolkit.unitText("tempLinear", "temperature", token);
         const tempWarnOn = (p.tempLinearWarningEnabled === true);
         const tempAlarmOn = (p.tempLinearAlarmEnabled === true);
         return {
           renderer: "TemperatureLinearWidget",
           value: p.temp,
           caption: cap("tempLinear"),
-          unit: unit("tempLinear"),
+          unit: displayUnit,
           formatter: "formatTemperature",
-          formatterParameters: ["celsius"],
+          formatterParameters: [token],
           rendererProps: {
-            tempLinearMinValue: num(p.tempLinearMinValue),
-            tempLinearMaxValue: num(p.tempLinearMaxValue),
-            tempLinearTickMajor: num(p.tempLinearTickMajor),
-            tempLinearTickMinor: num(p.tempLinearTickMinor),
+            tempLinearMinValue: toolkit.unitNumber("tempLinearMinValue", token),
+            tempLinearMaxValue: toolkit.unitNumber("tempLinearMaxValue", token),
+            tempLinearTickMajor: toolkit.unitNumber("tempLinearTickMajor", token),
+            tempLinearTickMinor: toolkit.unitNumber("tempLinearTickMinor", token),
             tempLinearShowEndLabels: !!p.tempLinearShowEndLabels,
-            tempLinearWarningFrom: tempWarnOn ? num(p.tempLinearWarningFrom) : undefined,
-            tempLinearAlarmFrom: tempAlarmOn ? num(p.tempLinearAlarmFrom) : undefined,
+            tempLinearWarningFrom: tempWarnOn ? toolkit.unitNumber("tempLinearWarningFrom", token) : undefined,
+            tempLinearAlarmFrom: tempAlarmOn ? toolkit.unitNumber("tempLinearAlarmFrom", token) : undefined,
             tempLinearRatioThresholdNormal: num(p.tempLinearRatioThresholdNormal),
             tempLinearRatioThresholdFlat: num(p.tempLinearRatioThresholdFlat),
             captionUnitScale: num(p.captionUnitScale),
@@ -127,13 +138,16 @@
       }
 
       if (req === "temp") {
-        return out(p.temp, cap("temp"), unit("temp"), "formatTemperature", ["celsius"]);
+        const token = toolkit.formatUnit("temp", "temperature", "celsius");
+        return out(p.temp, cap("temp"), toolkit.unitText("temp", "temperature", token), "formatTemperature", [token]);
       }
       if (req === "pressure") {
-        return out(p.value, cap("pressure"), unit("pressure"), "skPressure", ["hPa"]);
+        const token = toolkit.formatUnit("pressure", "pressure", "hpa");
+        return out(p.value, cap("pressure"), toolkit.unitText("pressure", "pressure", token), "formatPressure", [token]);
       }
       if (req === "depth") {
-        return out(p.depth, cap("depth"), unit("depth"), "formatDecimal", [3, 1, true]);
+        const token = toolkit.formatUnit("depth", "distance", "m");
+        return out(p.depth, cap("depth"), toolkit.unitText("depth", "distance", token), "formatDistance", [token]);
       }
       return {};
     }

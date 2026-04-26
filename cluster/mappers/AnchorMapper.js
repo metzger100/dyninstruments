@@ -15,22 +15,21 @@
     function translate(props, toolkit) {
       const p = props || {};
       const cap = toolkit.cap;
-      const unit = toolkit.unit;
       const out = toolkit.out;
 
       const req = p.kind;
 
-      if (req === "distance") {
-        const u = unit("distance");
-        return out(p.distance, cap("distance"), u, "formatDistance", [u]);
+      if (req === "anchorDistance") {
+        const token = toolkit.formatUnit("anchorDistance", "distance", "m");
+        return out(p.distance, cap("anchorDistance"), toolkit.unitText("anchorDistance", "distance", token), "formatDistance", [token]);
       }
-      if (req === "watch") {
-        const u = unit("watch");
-        return out(p.watch, cap("watch"), u, "formatDistance", [u]);
+      if (req === "anchorWatch") {
+        const token = toolkit.formatUnit("anchorWatch", "distance", "m");
+        return out(p.watch, cap("anchorWatch"), toolkit.unitText("anchorWatch", "distance", token), "formatDistance", [token]);
       }
-      if (req === "bearing") {
+      if (req === "anchorBearing") {
         const leadingZero = !!p.leadingZero;
-        return out(p.bearing, cap("bearing"), unit("bearing"), "formatDirection360", [leadingZero]);
+        return out(p.bearing, cap("anchorBearing"), toolkit.unit("anchorBearing"), "formatDirection360", [leadingZero]);
       }
       return {};
     }

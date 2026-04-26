@@ -297,12 +297,12 @@ describe("Phase 9 acceptance coverage", function () {
         isApproaching: true,
         remain: 12.3,
         eta: new Date("2026-03-06T11:45:00Z"),
-        nextCourse: 93
+        nextCourse: 93,
+        routeName: "Harbor Run",
+        disconnect: true
       },
       captions: { remain: "RTE", eta: "ETA", nextCourse: "NEXT" },
       units: { remain: "nm", eta: "", nextCourse: "deg" },
-      routeName: "Harbor Run",
-      disconnect: true,
       default: "---",
       surfacePolicy: {
         interaction: { mode: "dispatch" },
@@ -386,12 +386,12 @@ describe("Phase 9 acceptance coverage", function () {
         isApproaching: true,
         remain: undefined,
         eta: undefined,
-        nextCourse: undefined
+        nextCourse: undefined,
+        routeName: "Harbor Run",
+        disconnect: false
       },
       captions: { remain: "RTE", eta: "ETA", nextCourse: "NEXT" },
       units: { remain: "nm", eta: "", nextCourse: "deg" },
-      routeName: "Harbor Run",
-      disconnect: false,
       stableDigits: false,
       default: "---",
       surfacePolicy: {
@@ -433,7 +433,9 @@ describe("Phase 9 acceptance coverage", function () {
           routeName: "Harbor Run"
         },
         layout: { showHeader: true },
-        formatting: { courseUnit: "kt", distanceUnit: "nm", waypointsText: "waypoints" },
+        formatting: { courseUnit: "kt", waypointsText: "waypoints" },
+        units: { distance: "nm" },
+        formatUnits: { distance: "nm" },
         default: "---"
       },
       shellRect: { width: 320, height: 180 }
@@ -458,12 +460,12 @@ describe("Phase 9 acceptance coverage", function () {
         isApproaching: true,
         remain: 12.3,
         eta: new Date("2026-03-06T11:45:00Z"),
-        nextCourse: 93
+        nextCourse: 93,
+        routeName: "Harbor Run",
+        disconnect: false
       },
       captions: { remain: "RTE", eta: "ETA", nextCourse: "NEXT" },
       units: { remain: "nm", eta: "", nextCourse: "deg" },
-      routeName: "Harbor Run",
-      disconnect: false,
       stableDigits: true,
       default: "---",
       surfacePolicy: {

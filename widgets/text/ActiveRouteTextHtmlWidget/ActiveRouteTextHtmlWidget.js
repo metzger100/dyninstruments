@@ -43,10 +43,11 @@
 
   function resolveStateKind(props, htmlUtils, stateScreenPrecedence) {
     const p = props || {};
+    const display = p.display && typeof p.display === "object" ? p.display : {};
     return stateScreenPrecedence.pickFirst([
-      { kind: "disconnected", when: p.disconnect === true },
+      { kind: "disconnected", when: display.disconnect === true },
       { kind: "noRoute", when: p.wpServer === false },
-      { kind: "noRoute", when: htmlUtils.trimText(p.routeName) === "" },
+      { kind: "noRoute", when: htmlUtils.trimText(display.routeName) === "" },
       { kind: "data", when: true }
     ]);
   }
@@ -67,10 +68,11 @@
     const display = p.display;
     const captions = p.captions;
     const units = p.units;
+    const formatUnits = p.formatUnits && typeof p.formatUnits === "object" ? p.formatUnits : {};
     const isApproaching = display.isApproaching === true;
     const kind = resolveStateKind(p, htmlUtils, stateScreenPrecedence);
     const defaultText = String(p.default);
-    const etaFormatter = p.hideSeconds === true ? "formatClock" : "formatTime";
+    const etaFormatter = display.hideSeconds === true ? "formatClock" : "formatTime";
     const stableDigitsEnabled = p.stableDigits === true;
     const mode = htmlFit.resolveDisplayMode(p, shellRect, htmlUtils);
     const isEditing = htmlUtils.isEditingMode(p);
@@ -89,17 +91,18 @@
       };
     }
 
-    const routeNameText = htmlUtils.trimText(p.routeName) || defaultText;
+    const routeNameText = htmlUtils.trimText(display.routeName) || defaultText;
     const remainCaption = htmlUtils.trimText(captions.remain);
     const etaCaption = htmlUtils.trimText(captions.eta);
     const nextCourseCaption = htmlUtils.trimText(captions.nextCourse);
     const remainUnit = htmlUtils.trimText(units.remain);
     const etaUnit = htmlUtils.trimText(units.eta);
     const nextCourseUnit = htmlUtils.trimText(units.nextCourse);
+    const remainFormatUnit = formatUnits.remain;
     const remainRawText = htmlFit.formatMetric(
       display.remain,
       "formatDistance",
-      [remainUnit],
+      [remainFormatUnit],
       defaultText,
       Helpers,
       placeholderNormalize

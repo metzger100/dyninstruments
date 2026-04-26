@@ -99,6 +99,10 @@ describe("AisTargetRenderModel", function () {
         tcpa: "min",
         brg: "°"
       },
+      formatUnits: {
+        dst: "nm",
+        cpa: "nm"
+      },
       default: "---"
     };
     const out = Object.assign({}, base, patch);

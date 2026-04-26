@@ -1,5 +1,7 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
+loadFresh("shared/unit-format-families.js");
+
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
   caption_sog: "SOG",
   unit_sog: "kn",
@@ -8,7 +10,19 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   caption_stwLinear: "STW",
   unit_stwLinear: "kn",
   caption_sogRadial: "SOG",
-  unit_sogRadial: "kn"
+  unit_sogRadial: "kn",
+  speedLinearMinValue_kn: 0,
+  speedLinearMaxValue_kn: 30,
+  speedLinearTickMajor_kn: 5,
+  speedLinearTickMinor_kn: 1,
+  speedLinearWarningFrom_kn: 20,
+  speedLinearAlarmFrom_kn: 25,
+  speedRadialMinValue_kn: 0,
+  speedRadialMaxValue_kn: 30,
+  speedRadialTickMajor_kn: 5,
+  speedRadialTickMinor_kn: 1,
+  speedRadialWarningFrom_kn: 20,
+  speedRadialAlarmFrom_kn: 25
 });
 
 describe("SpeedMapper", function () {

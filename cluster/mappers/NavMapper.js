@@ -35,31 +35,43 @@
         return out(p.rteEta, cap("rteEta"), unit("rteEta"), p.hideSeconds === true ? "formatClock" : "formatTime", []);
       }
       if (req === "dst") {
-        return out(p.dst, cap("dst"), unit("dst"), "formatDistance", []);
+        const token = toolkit.formatUnit("dst", "distance", "nm");
+        return out(p.dst, cap("dst"), toolkit.unitText("dst", "distance", token), "formatDistance", [token]);
       }
       if (req === "rteDistance") {
-        return out(p.rteDistance, cap("rteDistance"), unit("rteDistance"), "formatDistance", []);
+        const token = toolkit.formatUnit("rteDistance", "distance", "nm");
+        return out(p.rteDistance, cap("rteDistance"), toolkit.unitText("rteDistance", "distance", token), "formatDistance", [token]);
       }
       if (req === "vmg") {
-        const u = unit("vmg");
-        return out(p.vmg, cap("vmg"), u, "formatSpeed", [u]);
+        const token = toolkit.formatUnit("vmg", "speed", "kn");
+        return out(p.vmg, cap("vmg"), toolkit.unitText("vmg", "speed", token), "formatSpeed", [token]);
       }
       if (req === "activeRoute") {
         const activeRouteDomain = activeRouteViewModel.build(p, toolkit);
+        const remainToken = toolkit.formatUnit("activeRouteRemain", "distance", "nm");
+        activeRouteDomain.units.remain = toolkit.unitText("activeRouteRemain", "distance", remainToken);
+        activeRouteDomain.formatUnits = { remain: remainToken };
         return {
           renderer: "ActiveRouteTextHtmlWidget",
-          routeName: activeRouteDomain.routeName,
-          disconnect: p.disconnect === true,
-          hideSeconds: activeRouteDomain.hideSeconds,
-          display: activeRouteDomain.display,
+          display: {
+            remain: activeRouteDomain.display.remain,
+            eta: activeRouteDomain.display.eta,
+            nextCourse: activeRouteDomain.display.nextCourse,
+            isApproaching: activeRouteDomain.display.isApproaching,
+            routeName: activeRouteDomain.routeName,
+            disconnect: p.disconnect === true,
+            hideSeconds: activeRouteDomain.hideSeconds
+          },
           captions: activeRouteDomain.captions,
           units: activeRouteDomain.units,
+          formatUnits: activeRouteDomain.formatUnits,
           ratioThresholdNormal: num(p.activeRouteRatioThresholdNormal),
           ratioThresholdFlat: num(p.activeRouteRatioThresholdFlat)
         };
       }
       if (req === "routePoints") {
         const routePointsDomain = routePointsViewModel.build(p, toolkit);
+        const distanceToken = toolkit.formatUnit("routePointsDistance", "distance", "nm");
         return {
           renderer: "RoutePointsTextHtmlWidget",
           domain: {
@@ -77,9 +89,14 @@
             showHeader: p.showHeader
           },
           formatting: {
-            distanceUnit: p.distanceUnit,
             courseUnit: p.courseUnit,
             waypointsText: p.waypointsText
+          },
+          units: {
+            distance: toolkit.unitText("routePointsDistance", "distance", distanceToken)
+          },
+          formatUnits: {
+            distance: distanceToken
           }
         };
       }
@@ -111,8 +128,12 @@
             eta: cap("editRouteEta")
           },
           units: {
-            dst: unit("editRouteDst"),
-            rte: unit("editRouteRte")
+            dst: toolkit.unitText("editRouteDst", "distance", toolkit.formatUnit("editRouteDst", "distance", "nm")),
+            rte: toolkit.unitText("editRouteRte", "distance", toolkit.formatUnit("editRouteRte", "distance", "nm"))
+          },
+          formatUnits: {
+            dst: toolkit.formatUnit("editRouteDst", "distance", "nm"),
+            rte: toolkit.formatUnit("editRouteRte", "distance", "nm")
           }
         };
       }
@@ -131,31 +152,45 @@
         return o;
       }
       if (req === "xteDisplay") {
+        const xteToken = toolkit.formatUnit("xteDisplayXte", "distance", "nm");
+        const dtwToken = toolkit.formatUnit("xteDisplayDst", "distance", "nm");
         const headingUnit = unit("xteDisplayCog");
         return {
           renderer: "XteDisplayWidget",
-          xte: num(p.xte),
-          cog: num(p.cog),
-          dtw: num(p.dtw),
-          btw: num(p.btw),
-          wpName: typeof p.wpName === "string" ? p.wpName : "",
-          disconnect: p.disconnect === true,
-          rendererProps: {
-            xteCaption: cap("xteDisplayXte"),
-            trackCaption: cap("xteDisplayCog"),
-            dtwCaption: cap("xteDisplayDst"),
-            btwCaption: cap("xteDisplayBrg"),
-            xteUnit: unit("xteDisplayXte"),
-            trackUnit: headingUnit,
-            dtwUnit: unit("xteDisplayDst"),
-            btwUnit: unit("xteDisplayBrg"),
-            headingUnit: headingUnit,
+          display: {
+            xte: num(p.xte),
+            cog: num(p.cog),
+            dtw: num(p.dtw),
+            btw: num(p.btw),
+            wpName: typeof p.wpName === "string" ? p.wpName : "",
+            disconnect: p.disconnect === true
+          },
+          captions: {
+            xte: cap("xteDisplayXte"),
+            track: cap("xteDisplayCog"),
+            dtw: cap("xteDisplayDst"),
+            brg: cap("xteDisplayBrg")
+          },
+          units: {
+            xte: toolkit.unitText("xteDisplayXte", "distance", xteToken),
+            track: headingUnit,
+            dtw: toolkit.unitText("xteDisplayDst", "distance", dtwToken),
+            brg: unit("xteDisplayBrg")
+          },
+          formatUnits: {
+            xte: xteToken,
+            dtw: dtwToken
+          },
+          xteScale: toolkit.unitNumber("xteDisplayScale", xteToken),
+          layout: {
             leadingZero: p.leadingZero !== false,
             showWpName: p.showWpNameXteDisplay === true,
             hideTextualMetrics: !!p.xteHideTextualMetrics,
             xteRatioThresholdNormal: num(p.xteRatioThresholdNormal),
-            xteRatioThresholdFlat: num(p.xteRatioThresholdFlat)
-          }
+            xteRatioThresholdFlat: num(p.xteRatioThresholdFlat),
+            easing: p.easing !== false
+          },
+          stableDigits: p.stableDigits === true
         };
       }
       return {};

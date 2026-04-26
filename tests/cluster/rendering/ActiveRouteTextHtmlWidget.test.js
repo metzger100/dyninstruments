@@ -136,15 +136,16 @@ describe("ActiveRouteTextHtmlWidget", function () {
   });
 
   function makeProps(overrides) {
-    return Object.assign({
-      routeName: "Harbor Run",
-      disconnect: false,
-      wpServer: true,
+    const opts = overrides || {};
+    const base = {
       display: {
         remain: 12.4,
         eta: "2026-03-06T11:45:00Z",
         nextCourse: 93,
-        isApproaching: true
+        isApproaching: true,
+        routeName: "Harbor Run",
+        disconnect: false,
+        hideSeconds: false
       },
       captions: {
         remain: "RTE",
@@ -156,8 +157,20 @@ describe("ActiveRouteTextHtmlWidget", function () {
         eta: "",
         nextCourse: "deg"
       },
+      formatUnits: {
+        remain: "nm"
+      },
       default: "---"
-    }, overrides || {});
+    };
+    const out = Object.assign({}, base, opts);
+    out.display = Object.assign({}, base.display, opts.display || {});
+    out.captions = Object.assign({}, base.captions, opts.captions || {});
+    out.units = Object.assign({}, base.units, opts.units || {});
+    out.formatUnits = Object.assign({}, base.formatUnits, opts.formatUnits || {});
+    if (Object.prototype.hasOwnProperty.call(opts, "routeName")) out.display.routeName = opts.routeName;
+    if (Object.prototype.hasOwnProperty.call(opts, "disconnect")) out.display.disconnect = opts.disconnect;
+    if (Object.prototype.hasOwnProperty.call(opts, "hideSeconds")) out.display.hideSeconds = opts.hideSeconds;
+    return out;
   }
 
   function withSurfacePolicy(props, options) {

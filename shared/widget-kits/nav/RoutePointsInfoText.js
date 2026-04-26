@@ -26,6 +26,7 @@
     const currentPoint = cfg.currentPoint;
     const courseUnit = cfg.courseUnit;
     const distanceUnit = cfg.distanceUnit;
+    const formatDistanceUnit = cfg.formatDistanceUnit;
     if (!previousPoint || !currentPoint) {
       return { valueText: placeholder, fallbackValueText: placeholder };
     }
@@ -42,7 +43,7 @@
     }));
     const distanceTextRaw = String(cfg.Helpers.applyFormatter(leg.distance, {
       formatter: "formatDistance",
-      formatterParameters: [distanceUnit],
+      formatterParameters: [formatDistanceUnit],
       default: cfg.defaultText
     }));
     const courseText = cfg.placeholderNormalize.normalize(courseTextRaw, cfg.defaultText);

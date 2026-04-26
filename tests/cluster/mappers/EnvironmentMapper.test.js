@@ -1,5 +1,7 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
+loadFresh("shared/unit-format-families.js");
+
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
   caption_depthLinear: "DPT",
   unit_depthLinear: "m",
@@ -14,7 +16,31 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   caption_pressure: "PRES",
   unit_pressure: "hPa",
   caption_depth: "DPT",
-  unit_depth: "m"
+  unit_depth: "m",
+  depthLinearMinValue_m: 0,
+  depthLinearMaxValue_m: 30,
+  depthLinearTickMajor_m: 5,
+  depthLinearTickMinor_m: 1,
+  depthLinearAlarmFrom_m: 2,
+  depthLinearWarningFrom_m: 5,
+  depthRadialMinValue_m: 0,
+  depthRadialMaxValue_m: 30,
+  depthRadialTickMajor_m: 5,
+  depthRadialTickMinor_m: 1,
+  depthRadialAlarmFrom_m: 2,
+  depthRadialWarningFrom_m: 5,
+  tempRadialMinValue_celsius: 0,
+  tempRadialMaxValue_celsius: 35,
+  tempRadialTickMajor_celsius: 5,
+  tempRadialTickMinor_celsius: 1,
+  tempRadialAlarmFrom_celsius: 32,
+  tempRadialWarningFrom_celsius: 28,
+  tempLinearMinValue_celsius: 0,
+  tempLinearMaxValue_celsius: 35,
+  tempLinearTickMajor_celsius: 5,
+  tempLinearTickMinor_celsius: 1,
+  tempLinearAlarmFrom_celsius: 32,
+  tempLinearWarningFrom_celsius: 28
 });
 
 describe("EnvironmentMapper", function () {
@@ -122,8 +148,8 @@ describe("EnvironmentMapper", function () {
     const mapper = loadFresh("cluster/mappers/EnvironmentMapper.js").create();
 
     expect(mapper.translate({ kind: "temp", temp: 20 }, toolkit).formatter).toBe("formatTemperature");
-    expect(mapper.translate({ kind: "pressure", value: 1013 }, toolkit).formatter).toBe("skPressure");
-    expect(mapper.translate({ kind: "depth", depth: 3 }, toolkit).formatter).toBe("formatDecimal");
+    expect(mapper.translate({ kind: "pressure", value: 1013 }, toolkit).formatter).toBe("formatPressure");
+    expect(mapper.translate({ kind: "depth", depth: 3 }, toolkit).formatter).toBe("formatDistance");
   });
 
   it("rejects legacy graphic kind names", function () {

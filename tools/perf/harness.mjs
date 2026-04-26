@@ -757,6 +757,9 @@ function renderPerfMarkdown(report) {
 }
 
 function createComponentResolver(rootDir) {
+  const unitFamiliesPath = require.resolve("../../shared/unit-format-families.js");
+  delete require.cache[unitFamiliesPath];
+  require(unitFamiliesPath);
   const registry = loadComponentsRegistry(rootDir);
   const byId = new Map();
   for (const [componentId, entry] of Object.entries(registry || {})) {

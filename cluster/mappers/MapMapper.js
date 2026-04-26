@@ -49,9 +49,14 @@
             measure: cap("centerDisplayMeasure")
           },
           units: {
-            marker: unit("centerDisplayMarker"),
-            boat: unit("centerDisplayBoat"),
-            measure: unit("centerDisplayMeasure")
+            marker: toolkit.unitText("centerDisplayMarker", "distance", toolkit.formatUnit("centerDisplayMarker", "distance", "nm")),
+            boat: toolkit.unitText("centerDisplayBoat", "distance", toolkit.formatUnit("centerDisplayBoat", "distance", "nm")),
+            measure: toolkit.unitText("centerDisplayMeasure", "distance", toolkit.formatUnit("centerDisplayMeasure", "distance", "nm"))
+          },
+          formatUnits: {
+            marker: toolkit.formatUnit("centerDisplayMarker", "distance", "nm"),
+            boat: toolkit.formatUnit("centerDisplayBoat", "distance", "nm"),
+            measure: toolkit.formatUnit("centerDisplayMeasure", "distance", "nm")
           },
           ratioThresholdNormal: num(p.centerDisplayRatioThresholdNormal),
           ratioThresholdFlat: num(p.centerDisplayRatioThresholdFlat)
@@ -83,10 +88,14 @@
             brg: cap("aisTargetBrg")
           },
           units: {
-            dst: unit("aisTargetDst"),
-            cpa: unit("aisTargetCpa"),
-            tcpa: unit("aisTargetTcpa"),
-            brg: unit("aisTargetBrg")
+            dst: toolkit.unitText("aisTargetDst", "distance", toolkit.formatUnit("aisTargetDst", "distance", "nm")),
+            cpa: toolkit.unitText("aisTargetCpa", "distance", toolkit.formatUnit("aisTargetCpa", "distance", "nm")),
+            tcpa: toolkit.unit("aisTargetTcpa"),
+            brg: toolkit.unit("aisTargetBrg")
+          },
+          formatUnits: {
+            dst: toolkit.formatUnit("aisTargetDst", "distance", "nm"),
+            cpa: toolkit.formatUnit("aisTargetCpa", "distance", "nm")
           },
           default: p.default
         };

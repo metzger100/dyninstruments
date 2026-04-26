@@ -133,6 +133,11 @@ describe("CenterDisplayTextWidget", function () {
         boat: "nm",
         measure: "nm"
       },
+      formatUnits: {
+        marker: "nm",
+        boat: "nm",
+        measure: "nm"
+      },
       ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal") ? opts.ratioThresholdNormal : 1.1,
       ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat") ? opts.ratioThresholdFlat : 2.4,
       coordinatesTabular: opts.coordinatesTabular,

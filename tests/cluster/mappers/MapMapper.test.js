@@ -1,12 +1,16 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
+loadFresh("shared/unit-format-families.js");
+
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
   caption_zoom: "ZOOM CAP",
   unit_zoom: "",
   caption_aisTargetDst: "DST CAP",
-  unit_aisTargetDst: "nmD",
+  formatUnit_aisTargetDst: "nm",
+  unit_aisTargetDst_nm: "nmD",
   caption_aisTargetCpa: "DCPA CAP",
-  unit_aisTargetCpa: "nmC",
+  formatUnit_aisTargetCpa: "nm",
+  unit_aisTargetCpa_nm: "nmC",
   caption_aisTargetTcpa: "TCPA CAP",
   unit_aisTargetTcpa: "minT",
   caption_aisTargetBrg: "BRG CAP",
@@ -14,11 +18,14 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   caption_centerDisplayPosition: "CENTER CAP",
   unit_centerDisplayPosition: "",
   caption_centerDisplayMarker: "WP CAP",
-  unit_centerDisplayMarker: "nmC",
+  formatUnit_centerDisplayMarker: "nm",
+  unit_centerDisplayMarker_nm: "nmC",
   caption_centerDisplayBoat: "BOAT CAP",
-  unit_centerDisplayBoat: "nmB",
+  formatUnit_centerDisplayBoat: "nm",
+  unit_centerDisplayBoat_nm: "nmB",
   caption_centerDisplayMeasure: "MEAS CAP",
-  unit_centerDisplayMeasure: "nmM"
+  formatUnit_centerDisplayMeasure: "nm",
+  unit_centerDisplayMeasure_nm: "nmM"
 });
 
 describe("MapMapper", function () {
@@ -69,6 +76,11 @@ describe("MapMapper", function () {
         marker: "nmC",
         boat: "nmB",
         measure: "nmM"
+      },
+      formatUnits: {
+        marker: "nm",
+        boat: "nm",
+        measure: "nm"
       },
       ratioThresholdNormal: 1.1,
       ratioThresholdFlat: 2.4
@@ -156,6 +168,10 @@ describe("MapMapper", function () {
         tcpa: "minT",
         brg: "degB"
       },
+      formatUnits: {
+        dst: "nm",
+        cpa: "nm"
+      },
       default: "---"
     });
   });
@@ -183,6 +199,10 @@ describe("MapMapper", function () {
       cpa: "nmC",
       tcpa: "minT",
       brg: "degB"
+    });
+    expect(out.formatUnits).toEqual({
+      dst: "nm",
+      cpa: "nm"
     });
   });
 

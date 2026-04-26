@@ -139,6 +139,7 @@
       const layoutConfig = toObject(props.layout);
       const captionsConfig = toObject(props.captions);
       const unitsConfig = toObject(props.units);
+      const formatTokens = toObject(props.formatUnits);
       const shellSize = toShellSize(cfg.shellRect);
       const kind = resolveStateKind(props, domain);
       const hasRoute = kind === "data" && domain.hasRoute === true;
@@ -217,7 +218,7 @@
             formatMetric(
               domain.totalDistance,
               "formatDistance",
-              [metricUnits.dst],
+              [formatTokens.dst],
               defaultText,
               Helpers,
               placeholderNormalize
@@ -234,7 +235,7 @@
             formatMetric(
               isActiveRoute ? domain.remainingDistance : undefined,
               "formatDistance",
-              [metricUnits.rte],
+              [formatTokens.rte],
               defaultText,
               Helpers,
               placeholderNormalize

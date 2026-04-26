@@ -27,27 +27,28 @@
       if (effKind === "sogLinear" || effKind === "stwLinear") {
         const baseKind = (effKind === "sogLinear") ? "sog" : "stw";
         const val = p[baseKind];
-        const uni = unit(effKind);
+        const formatToken = toolkit.formatUnit(effKind, "speed", "kn");
+        const displayUnit = toolkit.unitText(effKind, "speed", formatToken);
         const warnOn = (p.speedLinearWarningEnabled !== false);
         const alarmOn = (p.speedLinearAlarmEnabled !== false);
         return {
           renderer: "SpeedLinearWidget",
           value: val,
           caption: cap(effKind),
-          unit: uni,
+          unit: displayUnit,
           formatter: "formatSpeed",
-          formatterParameters: [uni],
+          formatterParameters: [formatToken],
           rendererProps: {
             speedLinearRatioThresholdNormal: num(p.speedLinearRatioThresholdNormal),
             speedLinearRatioThresholdFlat: num(p.speedLinearRatioThresholdFlat),
             captionUnitScale: num(p.captionUnitScale),
-            speedLinearMinValue: num(p.speedLinearMinValue),
-            speedLinearMaxValue: num(p.speedLinearMaxValue),
-            speedLinearTickMajor: num(p.speedLinearTickMajor),
-            speedLinearTickMinor: num(p.speedLinearTickMinor),
+            speedLinearMinValue: toolkit.unitNumber("speedLinearMinValue", formatToken),
+            speedLinearMaxValue: toolkit.unitNumber("speedLinearMaxValue", formatToken),
+            speedLinearTickMajor: toolkit.unitNumber("speedLinearTickMajor", formatToken),
+            speedLinearTickMinor: toolkit.unitNumber("speedLinearTickMinor", formatToken),
             speedLinearShowEndLabels: !!p.speedLinearShowEndLabels,
-            speedLinearWarningFrom: warnOn ? num(p.speedLinearWarningFrom) : undefined,
-            speedLinearAlarmFrom: alarmOn ? num(p.speedLinearAlarmFrom) : undefined,
+            speedLinearWarningFrom: warnOn ? toolkit.unitNumber("speedLinearWarningFrom", formatToken) : undefined,
+            speedLinearAlarmFrom: alarmOn ? toolkit.unitNumber("speedLinearAlarmFrom", formatToken) : undefined,
             speedLinearHideTextualMetrics: !!p.speedLinearHideTextualMetrics
           }
         };
@@ -56,7 +57,8 @@
       if (effKind === "sogRadial" || effKind === "stwRadial") {
         const baseKind = (effKind === "sogRadial") ? "sog" : "stw";
         const val = p[baseKind];
-        const uni = unit(effKind);
+        const formatToken = toolkit.formatUnit(effKind, "speed", "kn");
+        const displayUnit = toolkit.unitText(effKind, "speed", formatToken);
 
         const warnOn = (p.speedRadialWarningEnabled !== false);
         const alarmOn = (p.speedRadialAlarmEnabled !== false);
@@ -65,20 +67,20 @@
           renderer: "SpeedRadialWidget",
           value: val,
           caption: cap(effKind),
-          unit: uni,
+          unit: displayUnit,
           formatter: "formatSpeed",
-          formatterParameters: [uni],
+          formatterParameters: [formatToken],
           rendererProps: {
             speedRadialRatioThresholdNormal: num(p.speedRadialRatioThresholdNormal),
             speedRadialRatioThresholdFlat: num(p.speedRadialRatioThresholdFlat),
             captionUnitScale: num(p.captionUnitScale),
-            speedRadialMinValue: num(p.speedRadialMinValue),
-            speedRadialMaxValue: num(p.speedRadialMaxValue),
-            speedRadialTickMajor: num(p.speedRadialTickMajor),
-            speedRadialTickMinor: num(p.speedRadialTickMinor),
+            speedRadialMinValue: toolkit.unitNumber("speedRadialMinValue", formatToken),
+            speedRadialMaxValue: toolkit.unitNumber("speedRadialMaxValue", formatToken),
+            speedRadialTickMajor: toolkit.unitNumber("speedRadialTickMajor", formatToken),
+            speedRadialTickMinor: toolkit.unitNumber("speedRadialTickMinor", formatToken),
             speedRadialShowEndLabels: !!p.speedRadialShowEndLabels,
-            speedRadialWarningFrom: warnOn ? num(p.speedRadialWarningFrom) : undefined,
-            speedRadialAlarmFrom: alarmOn ? num(p.speedRadialAlarmFrom) : undefined,
+            speedRadialWarningFrom: warnOn ? toolkit.unitNumber("speedRadialWarningFrom", formatToken) : undefined,
+            speedRadialAlarmFrom: alarmOn ? toolkit.unitNumber("speedRadialAlarmFrom", formatToken) : undefined,
             speedRadialHideTextualMetrics: !!p.speedRadialHideTextualMetrics
           }
         };
@@ -86,8 +88,8 @@
 
       if (effKind === "sog" || effKind === "stw") {
         const val = p[effKind];
-        const uni = unit(effKind);
-        return out(val, cap(effKind), uni, "formatSpeed", [uni]);
+        const formatToken = toolkit.formatUnit(effKind, "speed", "kn");
+        return out(val, cap(effKind), toolkit.unitText(effKind, "speed", formatToken), "formatSpeed", [formatToken]);
       }
 
       return {};

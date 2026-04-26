@@ -57,7 +57,6 @@ describe("ActiveRouteViewModel", function () {
         nextCourse: "NEXT CAP"
       },
       units: {
-        remain: "nmA",
         eta: "",
         nextCourse: "degN"
       },

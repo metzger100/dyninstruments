@@ -148,6 +148,10 @@ describe("AisTargetTextHtmlWidget", function () {
         tcpa: "min",
         brg: "°"
       },
+      formatUnits: {
+        dst: "nm",
+        cpa: "nm"
+      },
       default: "---"
     };
 

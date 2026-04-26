@@ -158,6 +158,7 @@
       const layoutConfig = toObject(props.layout);
       const captions = toObject(props.captions);
       const units = toObject(props.units);
+      const formatTokens = toObject(props.formatUnits);
       const shellSize = toSafeSizeRect(cfg.shellRect, htmlUtils);
       const defaultText = resolveDefaultText(props);
       const isEditingMode = htmlUtils.isEditingMode(props);
@@ -212,7 +213,7 @@
           ...normalizeStableMetricValue(formatWithFormatter({
             value: distance,
             formatter: "formatDistance",
-            formatterParameters: [units.dst],
+            formatterParameters: [formatTokens.dst],
             defaultText: defaultText
           }, Helpers, placeholderNormalize), 2, stableDigitsEnabled)
         },
@@ -223,7 +224,7 @@
           ...normalizeStableMetricValue(formatWithFormatter({
             value: cpa,
             formatter: "formatDistance",
-            formatterParameters: [units.cpa],
+            formatterParameters: [formatTokens.cpa],
             defaultText: defaultText
           }, Helpers, placeholderNormalize), 2, stableDigitsEnabled)
         },

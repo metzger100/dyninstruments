@@ -1,5 +1,7 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
+loadFresh("shared/unit-format-families.js");
+
 function makeToolkit() {
   return loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
     caption_angleTrue: "TWA",
@@ -11,19 +13,19 @@ function makeToolkit() {
     caption_angleTrueRadialAngle: "TWA G",
     unit_angleTrueRadialAngle: "°T",
     caption_angleTrueRadialSpeed: "TWS G",
-    unit_angleTrueRadialSpeed: "knT",
+    unit_angleTrueRadialSpeed_kn: "knT",
     caption_angleApparentRadialAngle: "AWA G",
     unit_angleApparentRadialAngle: "°A",
     caption_angleApparentRadialSpeed: "AWS G",
-    unit_angleApparentRadialSpeed: "knA",
+    unit_angleApparentRadialSpeed_kn: "knA",
     caption_angleTrueLinearAngle: "TWA L",
     unit_angleTrueLinearAngle: "°LT",
     caption_angleTrueLinearSpeed: "TWS L",
-    unit_angleTrueLinearSpeed: "knLT",
+    unit_angleTrueLinearSpeed_kn: "knLT",
     caption_angleApparentLinearAngle: "AWA L",
     unit_angleApparentLinearAngle: "°LA",
     caption_angleApparentLinearSpeed: "AWS L",
-    unit_angleApparentLinearSpeed: "knLA"
+    unit_angleApparentLinearSpeed_kn: "knLA"
   });
 }
 
@@ -52,7 +54,7 @@ describe("WindMapper", function () {
     expect(out.rendererProps.angleUnit).toBe("°T");
     expect(out.rendererProps.speedUnit).toBe("knT");
     expect(out.rendererProps.formatter).toBe("formatSpeed");
-    expect(out.rendererProps.formatterParameters).toEqual(["knT"]);
+    expect(out.rendererProps.formatterParameters).toEqual(["kn"]);
     expect(out.rendererProps.layEnabled).toBe(true);
     expect(out.rendererProps.windRadialLayMin).toBe(20);
     expect(out.rendererProps.windRadialLayMax).toBe(42);
@@ -89,7 +91,7 @@ describe("WindMapper", function () {
     expect(out.rendererProps.speedCaption).toBe("AWS G");
     expect(out.rendererProps.angleUnit).toBe("°A");
     expect(out.rendererProps.speedUnit).toBe("knA");
-    expect(out.rendererProps.formatterParameters).toEqual(["knA"]);
+    expect(out.rendererProps.formatterParameters).toEqual(["kn"]);
   });
 
   it("maps linear true wind to WindLinearWidget props", function () {
@@ -119,7 +121,7 @@ describe("WindMapper", function () {
     expect(out.rendererProps.angleUnit).toBe("°LT");
     expect(out.rendererProps.speedUnit).toBe("knLT");
     expect(out.rendererProps.formatter).toBe("formatSpeed");
-    expect(out.rendererProps.formatterParameters).toEqual(["knLT"]);
+    expect(out.rendererProps.formatterParameters).toEqual(["kn"]);
     expect(out.rendererProps.windLinearRatioThresholdNormal).toBe(2);
     expect(out.rendererProps.windLinearRatioThresholdFlat).toBe(3);
     expect(out.rendererProps.windLinearTickMajor).toBe(30);

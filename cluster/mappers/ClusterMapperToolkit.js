@@ -11,6 +11,16 @@
 }(this, function () {
   "use strict";
 
+  function getGlobalRoot() {
+    if (typeof globalThis !== "undefined") {
+      return globalThis;
+    }
+    if (typeof window !== "undefined") {
+      return window;
+    }
+    return this;
+  }
+
   function makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath) {
     const norm360 = (angleMath && typeof angleMath.norm360 === "function")
       ? angleMath.norm360
@@ -70,14 +80,82 @@
     return Number.isFinite(n) ? n : undefined;
   }
 
-  function createToolkit(props, angleMath) {
+  function getSharedCatalog() {
+    const root = getGlobalRoot();
+    const shared = root && root.DyniPlugin && root.DyniPlugin.config && root.DyniPlugin.config.shared;
+    const catalog = shared && shared.unitFormatFamilies;
+    if (!catalog || typeof catalog !== "object" || !catalog.families || !catalog.metricBindings) {
+      return null;
+    }
+    return catalog;
+  }
+
+  function createToolkit(props, angleMath, catalog) {
     const p = props || {};
+    function resolveBinding(metricKey) {
+      if (!catalog) {
+        throw new Error("dyninstruments: shared/unit-format-families.js must load before unit-aware mapper resolution");
+      }
+      const binding = catalog.metricBindings[metricKey];
+      if (!binding) {
+        throw new Error("dyninstruments: missing unit binding for metric '" + metricKey + "'");
+      }
+      const family = catalog.families[binding.family];
+      if (!family) {
+        throw new Error("dyninstruments: missing unit family '" + binding.family + "' for metric '" + metricKey + "'");
+      }
+      return { binding: binding, family: family };
+    }
+
+    function resolveToken(metricKey, familyId, fallbackToken) {
+      const resolved = resolveBinding(metricKey);
+      if (resolved.binding.family !== familyId) {
+        throw new Error("dyninstruments: metric '" + metricKey + "' does not belong to family '" + familyId + "'");
+      }
+      const selectorKey = "formatUnit_" + metricKey;
+      const selected = Object.prototype.hasOwnProperty.call(p, selectorKey) ? p[selectorKey] : undefined;
+      if (typeof selected === "string" && resolved.family.tokens.indexOf(selected) !== -1) {
+        return selected;
+      }
+      if (resolved.family.tokens.indexOf(fallbackToken) !== -1) {
+        return fallbackToken;
+      }
+      return resolved.binding.defaultToken;
+    }
+
     return {
       cap: function (k) {
         return p["caption_" + k];
       },
       unit: function (k) {
         return p["unit_" + k];
+      },
+      formatUnit: function (metricKey, familyId, fallbackToken) {
+        return resolveToken(metricKey, familyId, fallbackToken);
+      },
+      unitText: function (metricKey, familyId, selectedUnitToken) {
+        const resolved = resolveBinding(metricKey);
+        if (resolved.binding.family !== familyId) {
+          throw new Error("dyninstruments: metric '" + metricKey + "' does not belong to family '" + familyId + "'");
+        }
+        const token = resolved.family.tokens.indexOf(selectedUnitToken) !== -1
+          ? selectedUnitToken
+          : resolved.binding.defaultToken;
+        const key = "unit_" + metricKey + "_" + token;
+        if (Object.prototype.hasOwnProperty.call(p, key)) {
+          const value = p[key];
+          if (typeof value !== "undefined") {
+            return value == null ? "" : String(value);
+          }
+        }
+        return resolved.family.labels[token] || token;
+      },
+      unitNumber: function (baseKey, selectedUnitToken) {
+        const key = baseKey + "_" + selectedUnitToken;
+        if (!Object.prototype.hasOwnProperty.call(p, key)) {
+          return undefined;
+        }
+        return toFiniteNumber(p[key]);
       },
       out: out,
       num: toFiniteNumber,
@@ -91,6 +169,7 @@
     const angleMath = (Helpers && typeof Helpers.getModule === "function")
       ? Helpers.getModule("RadialAngleMath").create(def, Helpers)
       : null;
+    const catalog = getSharedCatalog();
 
     return {
       out: out,
@@ -99,7 +178,7 @@
         return makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath);
       },
       createToolkit: function (props) {
-        return createToolkit(props, angleMath);
+        return createToolkit(props, angleMath, catalog);
       }
     };
   }

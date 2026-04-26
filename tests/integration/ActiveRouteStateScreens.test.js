@@ -1,6 +1,7 @@
 const { loadFresh } = require("../helpers/load-umd");
 
 function createToolkit() {
+  loadFresh("shared/unit-format-families.js");
   return loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
     caption_activeRouteRemain: "RTE CAP",
     unit_activeRouteRemain: "nm",

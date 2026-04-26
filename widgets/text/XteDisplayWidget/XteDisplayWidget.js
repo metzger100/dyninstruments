@@ -10,7 +10,6 @@
 }(this, function () {
   "use strict";
 
-  const FIXED_XTE_SCALE = 1;
   const DEFAULT_XTE_THEME = { lineWidthFactor: 1, boatSizeFactor: 1 };
 
   function create(def, Helpers) {
@@ -66,10 +65,12 @@
 
     function resolveStateKind(props) {
       const p = props || {};
-      const hideTextualMetrics = p.hideTextualMetrics === true;
+      const display = p.display && typeof p.display === "object" ? p.display : null;
+      const layoutConfig = p.layout && typeof p.layout === "object" ? p.layout : null;
+      const hideTextualMetrics = !!(layoutConfig && layoutConfig.hideTextualMetrics === true);
       return stateScreenPrecedence.pickFirst([
-        { kind: "disconnected", when: p.disconnect === true },
-        { kind: "noTarget", when: !hideTextualMetrics && typeof p.wpName === "string" && p.wpName.trim() === "" },
+        { kind: "disconnected", when: display && display.disconnect === true },
+        { kind: "noTarget", when: !hideTextualMetrics && typeof (display && display.wpName) === "string" && display.wpName.trim() === "" },
         { kind: "data", when: true }
       ]);
     }
@@ -126,17 +127,23 @@
         lineWidthFactor: lineWidthFactor,
         boatSizeFactor: boatSizeFactor
       };
-      const easingEnabled = p.easing !== false;
-      const hideTextualMetrics = p.hideTextualMetrics === true;
-      const xteAvailable = finiteNumber(p.xte);
+      const display = p.display && typeof p.display === "object" ? p.display : null;
+      const captions = p.captions && typeof p.captions === "object" ? p.captions : null;
+      const units = p.units && typeof p.units === "object" ? p.units : null;
+      const formatUnits = p.formatUnits && typeof p.formatUnits === "object" ? p.formatUnits : null;
+      const layoutConfig = p.layout && typeof p.layout === "object" ? p.layout : null;
+      const easingEnabled = !layoutConfig || layoutConfig.easing !== false;
+      const hideTextualMetrics = !!(layoutConfig && layoutConfig.hideTextualMetrics === true);
+      const xteScale = finiteNumber(p.xteScale) && p.xteScale > 0 ? p.xteScale : 1;
+      const xteAvailable = finiteNumber(display && display.xte);
 
-      const normalThreshold = p.xteRatioThresholdNormal;
-      const flatThreshold = p.xteRatioThresholdFlat;
+      const normalThreshold = layoutConfig ? layoutConfig.xteRatioThresholdNormal : undefined;
+      const flatThreshold = layoutConfig ? layoutConfig.xteRatioThresholdFlat : undefined;
       const mode = layoutApi.computeMode(W, H, normalThreshold, flatThreshold);
       const insets = layoutApi.computeInsets(W, H);
       const contentRect = layoutApi.createContentRect(W, H, insets);
-      const wpName = trimWaypointName(p.wpName);
-      const showWpName = p.showWpName !== false;
+      const wpName = trimWaypointName(display && display.wpName);
+      const showWpName = !layoutConfig || layoutConfig.showWpName !== false;
       const layout = layoutApi.computeLayout({
         contentRect: contentRect,
         gap: insets.gap,
@@ -167,26 +174,26 @@
       });
       staticLayer.blit(ctx);
 
-      const xteRaw = p.xte;
-      const cogRaw = p.cog;
-      const dtwRaw = p.dtw;
-      const btwRaw = p.btw;
-      const headingParams = [p.leadingZero !== false];
+      const xteRaw = display ? display.xte : undefined;
+      const cogRaw = display ? display.cog : undefined;
+      const dtwRaw = display ? display.dtw : undefined;
+      const btwRaw = display ? display.btw : undefined;
+      const headingParams = [!layoutConfig || layoutConfig.leadingZero !== false];
       const defaultText = placeholderNormalize.normalize(undefined, p.default);
 
       const xteDistanceRaw = String(Helpers.applyFormatter(
         finiteNumber(xteRaw) ? Math.abs(xteRaw) : undefined,
         {
-        formatter: "formatDistance",
-        formatterParameters: [p.xteUnit],
-        default: defaultText
+          formatter: "formatDistance",
+          formatterParameters: [formatUnits && formatUnits.xte],
+          default: defaultText
         }
       ));
       const xteDistance = placeholderNormalize.normalize(xteDistanceRaw, defaultText);
 
       const dtwDistanceRaw = String(Helpers.applyFormatter(dtwRaw, {
         formatter: "formatDistance",
-        formatterParameters: [p.dtwUnit],
+        formatterParameters: [formatUnits && formatUnits.dtw],
         default: defaultText
       }));
       const dtwDistance = placeholderNormalize.normalize(dtwDistanceRaw, defaultText);
@@ -196,10 +203,10 @@
       if (xteAvailable) {
         const xteDisplayAbs = parseNumericText(xteDistance, Math.abs(xteRaw));
         const signedDisplayXte = xteRaw < 0 ? -xteDisplayAbs : xteDisplayAbs;
-        const overflow = Math.abs(xteDisplayAbs) > FIXED_XTE_SCALE;
-        const xteTarget = signedDisplayXte / FIXED_XTE_SCALE;
+        const overflow = Math.abs(xteDisplayAbs) > xteScale;
+        const xteTarget = signedDisplayXte / xteScale;
         const xteEased = springMotion.resolve(canvas, xteTarget, easingEnabled, Date.now());
-        const xteNormalized = finiteNumber(xteEased) ? xteEased : (signedDisplayXte / FIXED_XTE_SCALE);
+        const xteNormalized = finiteNumber(xteEased) ? xteEased : (signedDisplayXte / xteScale);
         primitives.drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, xteDynamicStyle);
       }
 
@@ -243,7 +250,7 @@
           const probe = tileLayout.measureMetricTile({
             textApi: toolkit.text,
             ctx: ctx,
-            metric: { caption: p.xteCaption, value: xteStable.padded, unit: "" },
+            metric: { caption: captions && captions.xte, value: xteStable.padded, unit: units && units.xte },
             rect: layout.metricRects.xte,
             family: family,
             valueWeight: valueWeight,
@@ -262,10 +269,10 @@
       }
 
       const metrics = {
-        cog: { caption: p.trackCaption, value: trackValue, unit: p.trackUnit },
-        xte: { caption: p.xteCaption, value: xteValueText, unit: "" },
-        dtw: { caption: p.dtwCaption, value: dtwDistance, unit: p.dtwUnit },
-        btw: { caption: p.btwCaption, value: bearingValue, unit: p.btwUnit }
+        cog: { caption: captions && captions.track, value: trackValue, unit: units && units.track },
+        xte: { caption: captions && captions.xte, value: xteValueText, unit: units && units.xte },
+        dtw: { caption: captions && captions.dtw, value: dtwDistance, unit: units && units.dtw },
+        btw: { caption: captions && captions.brg, value: bearingValue, unit: units && units.brg }
       };
 
       const waypointFit = showWpName && !!wpName ? tileLayout.measureFittedLine({

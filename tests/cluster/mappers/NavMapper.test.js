@@ -1,5 +1,7 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
+loadFresh("shared/unit-format-families.js");
+
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
   caption_eta: "ETA",
   unit_eta: "",
@@ -8,7 +10,8 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   caption_vmg: "VMG",
   unit_vmg: "kn",
   caption_activeRouteRemain: "RTE CAP",
-  unit_activeRouteRemain: "nmA",
+  formatUnit_activeRouteRemain: "nm",
+  unit_activeRouteRemain_nm: "nmA",
   caption_activeRouteEta: "ETA CAP",
   unit_activeRouteEta: "",
   caption_activeRouteNextCourse: "NEXT CAP",
@@ -16,18 +19,23 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   caption_positionBoat: "POS",
   unit_positionBoat: "",
   caption_xteDisplayXte: "XTE CAP",
-  unit_xteDisplayXte: "nmX",
+  formatUnit_xteDisplayXte: "nm",
+  unit_xteDisplayXte_nm: "nmX",
   caption_xteDisplayCog: "COG CAP",
   unit_xteDisplayCog: "degT",
   caption_xteDisplayDst: "DST CAP",
-  unit_xteDisplayDst: "nmD",
+  formatUnit_xteDisplayDst: "nm",
+  unit_xteDisplayDst_nm: "nmD",
   caption_xteDisplayBrg: "BRG CAP",
   unit_xteDisplayBrg: "degM",
+  xteDisplayScale_nm: "0.8",
   caption_editRoutePts: "PTS CAP",
   caption_editRouteDst: "DST CAP",
-  unit_editRouteDst: "nmE",
+  formatUnit_editRouteDst: "nm",
+  unit_editRouteDst_nm: "nmE",
   caption_editRouteRte: "RTE CAP",
-  unit_editRouteRte: "kmR",
+  formatUnit_editRouteRte: "km",
+  unit_editRouteRte_km: "kmR",
   caption_editRouteEta: "ETA CAP"
 });
 
@@ -74,7 +82,7 @@ describe("NavMapper", function () {
       caption: "RTE",
       unit: "nm",
       formatter: "formatDistance",
-      formatterParameters: []
+      formatterParameters: ["nm"]
     });
   });
 
@@ -110,13 +118,14 @@ describe("NavMapper", function () {
 
     expect(out).toEqual({
       renderer: "ActiveRouteTextHtmlWidget",
-      routeName: "Harbor Run",
-      disconnect: true,
       display: {
         remain: 18.2,
         eta: rawEta,
         nextCourse: 93,
-        isApproaching: true
+        isApproaching: true,
+        routeName: "Harbor Run",
+        disconnect: true,
+        hideSeconds: true
       },
       captions: {
         remain: "RTE CAP",
@@ -128,7 +137,9 @@ describe("NavMapper", function () {
         eta: "",
         nextCourse: "degN"
       },
-      hideSeconds: true,
+      formatUnits: {
+        remain: "nm"
+      },
       ratioThresholdNormal: 1.25,
       ratioThresholdFlat: 4.4
     });
@@ -160,14 +171,14 @@ describe("NavMapper", function () {
       activeRouteName: "Harbor Run",
       wpServer: false
     }, toolkit);
-    expect(wpServerDown.disconnect).toBe(false);
+    expect(wpServerDown.display.disconnect).toBe(false);
 
     const emptyName = mapper.translate({
       kind: "activeRoute",
       activeRouteName: "   ",
       wpServer: true
     }, toolkit);
-    expect(emptyName.disconnect).toBe(false);
+    expect(emptyName.display.disconnect).toBe(false);
 
     const disconnected = mapper.translate({
       kind: "activeRoute",
@@ -175,7 +186,7 @@ describe("NavMapper", function () {
       wpServer: true,
       disconnect: true
     }, toolkit);
-    expect(disconnected.disconnect).toBe(true);
+    expect(disconnected.display.disconnect).toBe(true);
   });
 
   it("maps positions with lon/lat formatter", function () {
@@ -213,35 +224,47 @@ describe("NavMapper", function () {
     }, toolkit);
 
     expect(out.renderer).toBe("XteDisplayWidget");
-    expect(out.xte).toBe(0.25);
-    expect(out.cog).toBe(93);
-    expect(out.dtw).toBe(1.2);
-    expect(out.btw).toBe(91);
-    expect(out.wpName).toBe("Fairway Buoy");
-    expect(out.disconnect).toBe(true);
-    expect(out.rendererProps).toEqual({
-      xteCaption: "XTE CAP",
-      trackCaption: "COG CAP",
-      dtwCaption: "DST CAP",
-      btwCaption: "BRG CAP",
-      xteUnit: "nmX",
-      trackUnit: "degT",
-      dtwUnit: "nmD",
-      btwUnit: "degM",
-      headingUnit: "degT",
+    expect(out.display).toEqual({
+      xte: 0.25,
+      cog: 93,
+      dtw: 1.2,
+      btw: 91,
+      wpName: "Fairway Buoy",
+      disconnect: true
+    });
+    expect(out.captions).toEqual({
+      xte: "XTE CAP",
+      track: "COG CAP",
+      dtw: "DST CAP",
+      brg: "BRG CAP"
+    });
+    expect(out.units).toEqual({
+      xte: "nmX",
+      track: "degT",
+      dtw: "nmD",
+      brg: "degM"
+    });
+    expect(out.formatUnits).toEqual({
+      xte: "nm",
+      dtw: "nm"
+    });
+    expect(out.xteScale).toBe(0.8);
+    expect(out.layout).toEqual({
       leadingZero: false,
       showWpName: false,
       hideTextualMetrics: true,
       xteRatioThresholdNormal: 0.8,
-      xteRatioThresholdFlat: 2.4
+      xteRatioThresholdFlat: 2.4,
+      easing: true
     });
+    expect(out.stableDigits).toBe(false);
   });
 
   it("defaults xteDisplay waypoint-name toggle to false when setting is absent", function () {
     const mapper = createMapper();
     const out = mapper.translate({ kind: "xteDisplay", xte: 0.2, cog: 90, dtw: 1.1, btw: 95 }, toolkit);
-    expect(out.rendererProps.showWpName).toBe(false);
-    expect(out.rendererProps.hideTextualMetrics).toBe(false);
+    expect(out.layout.showWpName).toBe(false);
+    expect(out.layout.hideTextualMetrics).toBe(false);
   });
 
   it("maps routePoints to grouped renderer payload", function () {
@@ -263,7 +286,6 @@ describe("NavMapper", function () {
       routePointsRatioThresholdNormal: "1.1",
       routePointsRatioThresholdFlat: "3.7",
       showHeader: true,
-      distanceUnit: "nm",
       courseUnit: "°",
       waypointsText: "wps"
     }, toolkit);
@@ -292,9 +314,14 @@ describe("NavMapper", function () {
         showHeader: true
       },
       formatting: {
-        distanceUnit: "nm",
         courseUnit: "°",
         waypointsText: "wps"
+      },
+      units: {
+        distance: "nm"
+      },
+      formatUnits: {
+        distance: "nm"
       }
     });
   });
@@ -305,7 +332,6 @@ describe("NavMapper", function () {
       kind: "routePoints",
       editingRoute: null,
       showHeader: false,
-      distanceUnit: "km",
       courseUnit: "deg",
       waypointsText: "points"
     }, toolkit);
@@ -315,9 +341,14 @@ describe("NavMapper", function () {
     expect(out.domain.pointCount).toBe(0);
     expect(out.layout.showHeader).toBe(false);
     expect(out.formatting).toEqual({
-      distanceUnit: "km",
       courseUnit: "deg",
       waypointsText: "points"
+    });
+    expect(out.units).toEqual({
+      distance: "nm"
+    });
+    expect(out.formatUnits).toEqual({
+      distance: "nm"
     });
   });
 
@@ -328,7 +359,6 @@ describe("NavMapper", function () {
       kind: "routePoints",
       editingRoute: editingRoute,
       showHeader: true,
-      distanceUnit: "nm",
       courseUnit: "°",
       waypointsText: "waypoints"
     }, toolkit);
@@ -392,12 +422,17 @@ describe("NavMapper", function () {
       units: {
         dst: "nmE",
         rte: "kmR"
+      },
+      formatUnits: {
+        dst: "nm",
+        rte: "km"
       }
     });
   });
 
   it("maps editRoute with default RTE caption (not RTG) when configured defaults are used", function () {
     const mapper = createMapper();
+    loadFresh("shared/unit-format-families.js");
     const defaultToolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
       caption_editRoutePts: "PTS",
       caption_editRouteDst: "DST",
@@ -451,6 +486,10 @@ describe("NavMapper", function () {
       units: {
         dst: "nmE",
         rte: "kmR"
+      },
+      formatUnits: {
+        dst: "nm",
+        rte: "km"
       }
     });
   });

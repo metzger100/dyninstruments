@@ -396,6 +396,15 @@ function runMapperOutputNoNaNRule() {
   const toolkit = {
     cap(name) { return "cap:" + name; },
     unit(name) { return "unit:" + name; },
+    formatUnit(metricKey, familyId, fallbackToken) {
+      return fallbackToken;
+    },
+    unitText(metricKey, familyId, selectedUnitToken) {
+      return "unit:" + metricKey + ":" + String(selectedUnitToken || "");
+    },
+    unitNumber() {
+      return undefined;
+    },
     out(v, cap, unit, formatter, formatterParameters) {
       const o = {};
       if (typeof v !== "undefined") o.value = v;

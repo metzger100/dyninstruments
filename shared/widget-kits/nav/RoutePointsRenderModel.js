@@ -224,7 +224,10 @@
       const defaultText = Object.prototype.hasOwnProperty.call(props, "default")
         ? String(props.default)
         : placeholderNormalize.normalize(undefined, undefined);
-      const distanceUnit = toText(formatting.distanceUnit, htmlUtils);
+      const formatUnits = toObject(props.formatUnits);
+      const displayUnits = toObject(props.units);
+      const distanceUnit = toText(displayUnits.distance, htmlUtils);
+      const formatDistanceUnit = toText(formatUnits.distance, htmlUtils);
       const courseUnit = toText(formatting.courseUnit, htmlUtils);
       const waypointsText = toText(formatting.waypointsText, htmlUtils);
       const routeNameText = hasRoute
@@ -295,6 +298,7 @@
           previousValid: previousValid,
           currentValid: currentValid,
           useRhumbLine: useRhumbLine,
+          formatDistanceUnit: formatDistanceUnit,
           distanceUnit: distanceUnit,
           courseUnit: courseUnit,
           defaultText: defaultText,
@@ -335,8 +339,13 @@
           ? String(pointCount) + " " + waypointsText
           : (hasRoute ? String(pointCount) : ""),
         waypointsText: waypointsText,
-        distanceUnit: distanceUnit,
         courseUnit: courseUnit,
+        units: {
+          distance: distanceUnit
+        },
+        formatUnits: {
+          distance: formatDistanceUnit
+        },
         showLatLon: showLatLon,
         useRhumbLine: useRhumbLine,
         isVerticalContainer: isVerticalContainer,

@@ -130,10 +130,10 @@
       return placeholderNormalize.normalize(out, defaultText);
     }
 
-    function formatDistance(value, unit, defaultText) {
+    function formatDistance(value, formatUnit, defaultText) {
       const out = String(Helpers.applyFormatter(value, {
         formatter: "formatDistance",
-        formatterParameters: [unit],
+        formatterParameters: [formatUnit],
         default: defaultText
       }));
       return placeholderNormalize.normalize(out, defaultText);
@@ -145,6 +145,7 @@
       const display = (p.display && typeof p.display === "object") ? p.display : {};
       const captions = (p.captions && typeof p.captions === "object") ? p.captions : {};
       const units = (p.units && typeof p.units === "object") ? p.units : {};
+      const formatTokens = (p.formatUnits && typeof p.formatUnits === "object") ? p.formatUnits : {};
       const position = math.normalizePoint(display.position);
       const measureInfo = (display.measure && typeof display.measure === "object") ? display.measure : {};
       const measureStart = math.extractMeasureStart(measureInfo.activeMeasure);
@@ -158,6 +159,7 @@
           id: "measure",
           caption: trimString(captions.measure),
           unit: trimString(units.measure),
+          formatUnit: trimString(formatTokens.measure),
           course: measureRelation.course,
           distance: measureRelation.distance
         });
@@ -166,6 +168,7 @@
         id: "marker",
         caption: trimString(captions.marker),
         unit: trimString(units.marker),
+        formatUnit: trimString(formatTokens.marker),
         course: display.marker ? display.marker.course : undefined,
         distance: display.marker ? display.marker.distance : undefined
       });
@@ -173,6 +176,7 @@
         id: "boat",
         caption: trimString(captions.boat),
         unit: trimString(units.boat),
+        formatUnit: trimString(formatTokens.boat),
         course: display.boat ? display.boat.course : undefined,
         distance: display.boat ? display.boat.distance : undefined
       });
@@ -183,7 +187,7 @@
         lonText: formatCoordinate(position, "lon", defaultText),
         rows: rows.map(function (row) {
           const courseRawText = appendUnit(formatCourse(row.course, defaultText), DEGREE_UNIT, defaultText);
-          const distanceRawText = appendUnit(formatDistance(row.distance, row.unit, defaultText), row.unit, defaultText);
+          const distanceRawText = appendUnit(formatDistance(row.distance, row.formatUnit, defaultText), row.unit, defaultText);
           const courseStable = stableDigitsEnabled
             ? stableDigits.normalize(courseRawText, {
               integerWidth: stableDigits.resolveIntegerWidth(courseRawText, 3),

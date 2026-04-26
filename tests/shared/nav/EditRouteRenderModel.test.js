@@ -118,6 +118,10 @@ describe("EditRouteRenderModel", function () {
       units: {
         dst: "nm",
         rte: "nm"
+      },
+      formatUnits: {
+        dst: "nm",
+        rte: "nm"
       }
     }, overrides || {});
   }
@@ -542,6 +546,10 @@ describe("EditRouteRenderModel", function () {
           eta: "ARRIVE"
         },
         units: {
+          dst: "km",
+          rte: "mi"
+        },
+        formatUnits: {
           dst: "km",
           rte: "mi"
         }

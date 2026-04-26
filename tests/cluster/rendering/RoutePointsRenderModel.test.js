@@ -173,9 +173,14 @@ describe("RoutePointsRenderModel", function () {
         showHeader: true
       },
       formatting: {
-        distanceUnit: "nm",
         courseUnit: "°",
         waypointsText: "waypoints"
+      },
+      units: {
+        distance: "nm"
+      },
+      formatUnits: {
+        distance: "nm"
       }
     }, overrides || {});
   }

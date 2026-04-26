@@ -29,7 +29,8 @@
         const isTrue = (req === "angleTrueRadial");
         const angleKind = isTrue ? "angleTrueRadialAngle" : "angleApparentRadialAngle";
         const speedKind = isTrue ? "angleTrueRadialSpeed" : "angleApparentRadialSpeed";
-        const speedUnit = unit(speedKind);
+        const speedToken = toolkit.formatUnit(speedKind, "speed", "kn");
+        const speedUnit = toolkit.unitText(speedKind, "speed", speedToken);
         return {
           renderer: "WindRadialWidget",
           angle: isTrue ? p.twa : p.awa,
@@ -40,7 +41,7 @@
             angleUnit: unit(angleKind),
             speedUnit: speedUnit,
             formatter: "formatSpeed",
-            formatterParameters: [speedUnit],
+            formatterParameters: [speedToken],
             layEnabled: !!p.windRadialLayEnabled,
             windRadialLayMin: num(p.windRadialLayMin),
             windRadialLayMax: num(p.windRadialLayMax),
@@ -57,7 +58,8 @@
         const isTrue = (req === "angleTrueLinear");
         const angleKind = isTrue ? "angleTrueLinearAngle" : "angleApparentLinearAngle";
         const speedKind = isTrue ? "angleTrueLinearSpeed" : "angleApparentLinearSpeed";
-        const speedUnit = unit(speedKind);
+        const speedToken = toolkit.formatUnit(speedKind, "speed", "kn");
+        const speedUnit = toolkit.unitText(speedKind, "speed", speedToken);
         return {
           renderer: "WindLinearWidget",
           angle: isTrue ? p.twa : p.awa,
@@ -68,7 +70,7 @@
             angleUnit: unit(angleKind),
             speedUnit: speedUnit,
             formatter: "formatSpeed",
-            formatterParameters: [speedUnit],
+            formatterParameters: [speedToken],
             windLinearRatioThresholdNormal: num(p.windLinearRatioThresholdNormal),
             windLinearRatioThresholdFlat: num(p.windLinearRatioThresholdFlat),
             windLinearTickMajor: num(p.windLinearTickMajor),
@@ -96,12 +98,12 @@
         return out(p.twd, cap("angleTrueDirection"), unit("angleTrueDirection"), makeAngleFormatter(true, leadingZero, p.default), []);
       }
       if (req === "speedTrue") {
-        const u = unit("speedTrue");
-        return out(p.tws, cap("speedTrue"), u, "formatSpeed", [u]);
+        const token = toolkit.formatUnit("speedTrue", "speed", "kn");
+        return out(p.tws, cap("speedTrue"), toolkit.unitText("speedTrue", "speed", token), "formatSpeed", [token]);
       }
       if (req === "speedApparent") {
-        const u = unit("speedApparent");
-        return out(p.aws, cap("speedApparent"), u, "formatSpeed", [u]);
+        const token = toolkit.formatUnit("speedApparent", "speed", "kn");
+        return out(p.aws, cap("speedApparent"), toolkit.unitText("speedApparent", "speed", token), "formatSpeed", [token]);
       }
       return {};
     }
