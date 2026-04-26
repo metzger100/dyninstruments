@@ -53,6 +53,7 @@
         activeRouteDomain.formatUnits = { remain: remainToken };
         return {
           renderer: "ActiveRouteTextHtmlWidget",
+          wpServer: p.wpServer,
           display: {
             remain: activeRouteDomain.display.remain,
             eta: activeRouteDomain.display.eta,

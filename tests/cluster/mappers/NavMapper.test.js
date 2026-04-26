@@ -167,6 +167,7 @@ describe("NavMapper", function () {
 
     expect(out).toEqual({
       renderer: "ActiveRouteTextHtmlWidget",
+      wpServer: true,
       display: {
         remain: 18.2,
         eta: rawEta,
@@ -220,6 +221,7 @@ describe("NavMapper", function () {
       activeRouteName: "Harbor Run",
       wpServer: false
     }, toolkit);
+    expect(wpServerDown.wpServer).toBe(false);
     expect(wpServerDown.display.disconnect).toBe(false);
 
     const emptyName = mapper.translate({
