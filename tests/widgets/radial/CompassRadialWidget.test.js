@@ -41,7 +41,117 @@ describe("CompassRadialWidget", function () {
     expect(captured).not.toHaveProperty("ratioDefaults");
   });
 
-  function createCompassCachingHarness() {
+  it("eases markerCourse independently from heading and keeps follow-up frames alive while either motion is active", function () {
+    const headingMotion = {
+      active: false,
+      resolves: [],
+      resolve(canvas, target, easingEnabled, nowMs) {
+        this.resolves.push({ canvas, target, easingEnabled, nowMs });
+        this.active = false;
+        return Number(target);
+      },
+      isActive() {
+        return this.active;
+      }
+    };
+    const markerMotion = {
+      active: false,
+      resolves: [],
+      resolve(canvas, target, easingEnabled, nowMs) {
+        this.resolves.push({ canvas, target, easingEnabled, nowMs });
+        this.active = easingEnabled === true;
+        return Number(target) + 100;
+      },
+      isActive() {
+        return this.active;
+      }
+    };
+    const springEasingModule = {
+      create() {
+        let motionIndex = 0;
+        return {
+          createMotion(spec) {
+            expect(spec).toEqual({ wrap: 360 });
+            const motion = motionIndex === 0 ? headingMotion : markerMotion;
+            motionIndex += 1;
+            return motion;
+          }
+        };
+      }
+    };
+    const harness = createCompassCachingHarness({ springEasingModule: springEasingModule });
+    const canvas = createMockCanvas({ rectWidth: 480, rectHeight: 110, ctx: createMockContext2D() });
+    const layout = harness.computeLayout(480, 110);
+
+    expect(harness.spec.renderCanvas(canvas, makeCompassProps({ heading: 20, markerCourse: 10 }))).toEqual({ wantsFollowUpFrame: true });
+    expect(harness.spec.renderCanvas(canvas, makeCompassProps({ heading: 20, markerCourse: 300 }))).toEqual({ wantsFollowUpFrame: true });
+    expect(headingMotion.resolves).toHaveLength(2);
+    expect(markerMotion.resolves).toHaveLength(2);
+    expect(headingMotion.resolves[0]).toEqual(expect.objectContaining({ canvas, target: 20, easingEnabled: true }));
+    expect(markerMotion.resolves[0]).toEqual(expect.objectContaining({ canvas, target: 10, easingEnabled: true }));
+    expect(markerMotion.resolves[1]).toEqual(expect.objectContaining({ canvas, target: 300, easingEnabled: true }));
+    expect(harness.calls.rimMarker).toHaveLength(2);
+    expect(harness.calls.rimMarker[0]).toEqual({
+      angle: 90,
+      opts: {
+        len: layout.geom.markerLen,
+        width: layout.geom.markerWidth,
+        strokeStyle: harness.theme.colors.pointer
+      }
+    });
+    expect(harness.calls.rimMarker[1]).toEqual({
+      angle: 380,
+      opts: {
+        len: layout.geom.markerLen,
+        width: layout.geom.markerWidth,
+        strokeStyle: harness.theme.colors.pointer
+      }
+    });
+  });
+
+  it("skips drawing a stale marker when markerCourse is invalid", function () {
+    const markerMotion = {
+      active: false,
+      resolve: vi.fn(),
+      isActive() {
+        return false;
+      }
+    };
+    const springEasingModule = {
+      create() {
+        let motionIndex = 0;
+        return {
+          createMotion() {
+            motionIndex += 1;
+            return motionIndex === 1
+              ? {
+                active: false,
+                resolve: vi.fn(function (canvas, target, easingEnabled, nowMs) {
+                  void canvas;
+                  void target;
+                  void easingEnabled;
+                  void nowMs;
+                  return 20;
+                }),
+                isActive() {
+                  return false;
+                }
+              }
+              : markerMotion;
+          }
+        };
+      }
+    };
+    const harness = createCompassCachingHarness({ springEasingModule: springEasingModule });
+    const canvas = createMockCanvas({ rectWidth: 480, rectHeight: 110, ctx: createMockContext2D() });
+
+    expect(harness.spec.renderCanvas(canvas, makeCompassProps({ heading: 20, markerCourse: undefined }))).toBeUndefined();
+    expect(markerMotion.resolve).not.toHaveBeenCalled();
+    expect(harness.calls.rimMarker).toHaveLength(0);
+  });
+
+  function createCompassCachingHarness(options) {
+    const opts = options || {};
     const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
     const fullCircleLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
     const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
@@ -121,7 +231,7 @@ describe("CompassRadialWidget", function () {
           if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
           if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
           if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-          if (id === "SpringEasing") return loadFresh("shared/widget-kits/anim/SpringEasing.js");
+          if (id === "SpringEasing") return opts.springEasingModule || loadFresh("shared/widget-kits/anim/SpringEasing.js");
           if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
           return {
             create() {
@@ -137,7 +247,7 @@ describe("CompassRadialWidget", function () {
                     calls.pointer.push(opts);
                   },
                   drawRimMarker(ctx, cx, cy, rOuter, angle, opts) {
-                    calls.rimMarker.push(opts);
+                    calls.rimMarker.push({ angle, opts });
                   }
                 },
                 angle: {
@@ -250,7 +360,7 @@ describe("CompassRadialWidget", function () {
     expect(harness.calls.pointer[0].widthFactor).toBe(harness.theme.radial.pointer.widthFactor);
     expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.radial.pointer.lengthFactor);
     expect(harness.calls.pointer[0].depth).toBe(layout.geom.fixedPointerDepth);
-    expect(harness.calls.rimMarker[0]).toEqual({
+    expect(harness.calls.rimMarker[0].opts).toEqual({
       len: layout.geom.markerLen,
       width: layout.geom.markerWidth,
       strokeStyle: harness.theme.colors.pointer

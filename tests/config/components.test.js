@@ -286,7 +286,7 @@ describe("config/components.js", function () {
     expect(components.WindRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout", "SpringEasing", "StableDigits"]);
     expect(components.CompassRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout", "SpringEasing", "StableDigits"]);
     expect(components.WindLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "StableDigits"]);
-    expect(components.CompassLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath"]);
+    expect(components.CompassLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "SpringEasing"]);
     expect(components.RadialToolkit.deps).toContain("ThemeResolver");
     expect(components.ThreeValueTextWidget.deps).toEqual([
       "ThemeResolver",

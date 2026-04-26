@@ -1,7 +1,7 @@
 /**
  * Module: CompassLinearWidget - Linear compass with fixed center pointer and moving heading scale
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, RadialValueMath
+ * Depends: LinearGaugeEngine, RadialValueMath, SpringEasing
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,6 +14,8 @@
   function create(def, Helpers) {
     const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
+    const springEasing = Helpers.getModule("SpringEasing").create(def, Helpers);
+    const markerMotion = springEasing.createMotion({ wrap: 360 });
 
     function norm180(delta) {
       let out = ((Number(delta) + 180) % 360 + 360) % 360 - 180;
@@ -83,14 +85,27 @@
       api.drawDefaultPointer();
 
       const heading = Number(display && display.easedNum);
-      const marker = Number(props && props.markerCourse);
-      if (!isFinite(heading) || !isFinite(marker)) {
+      const marker = props && props.markerCourse;
+      const markerFinite = Number.isFinite(Number(marker));
+      const easingEnabled = props.easing !== false;
+      const nowMs = Number(state && state.nowMs);
+      const easedMarker = markerFinite
+        ? markerMotion.resolve(state.canvas, marker, easingEnabled, nowMs)
+        : NaN;
+
+      if (!isFinite(heading) || !isFinite(easedMarker)) {
+        if (markerFinite && markerMotion.isActive(state.canvas)) {
+          return { wantsFollowUpFrame: true };
+        }
         return;
       }
-      const markerWrapped = heading + norm180(marker - heading);
+      const markerWrapped = heading + norm180(easedMarker - heading);
       api.drawMarkerAtValue(markerWrapped, {
         strokeStyle: state.theme.colors.pointer
       });
+      if (markerFinite && markerMotion.isActive(state.canvas)) {
+        return { wantsFollowUpFrame: true };
+      }
     }
 
     const renderCanvas = engine.createRenderer({

@@ -105,11 +105,14 @@ The public UI label for `hideTextualMetricsProp` is `Hide textual metrics`. The 
 
 Hook `state` additions:
 
+- `state.canvas`
+- `state.nowMs`
 - `state.responsive`
 - `state.textFillScale`
 - `state.layout.responsive`
 
 Wrappers should consume these layout-owned state fields instead of recomputing compact geometry locally.
+`state.canvas` and `state.nowMs` let wrappers keep canvas-keyed spring motion aligned with the engine's per-frame timestamp.
 `WindLinearWidget` now reads `state.layout.dualRowGap`, uses `spec.layout` to remap `normal` / `high`, and consumes split-high `state.layout.textTopBox` / `state.layout.textBottomBox` for inline top and bottom metric rows while `LinearGaugeTextLayout` trusts the layout-owned `labelFontPx` without adding a second readable-floor policy.
 When `hideTextualMetrics` is enabled, those Wind-specific text target boxes are null, so the custom angle/speed text disappears with the rest of the live metric text.
 

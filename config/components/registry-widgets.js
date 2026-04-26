@@ -199,7 +199,7 @@
       js: BASE + "widgets/linear/CompassLinearWidget/CompassLinearWidget.js",
       css: undefined,
       globalKey: "DyniCompassLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath"]
+      deps: ["LinearGaugeEngine", "RadialValueMath", "SpringEasing"]
     },
     CompassRadialWidget: {
       js: BASE + "widgets/radial/CompassRadialWidget/CompassRadialWidget.js",

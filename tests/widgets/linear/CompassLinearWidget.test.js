@@ -4,6 +4,23 @@ describe("CompassLinearWidget", function () {
   it("configures fixed360 moving-scale compass behavior and waypoint marker wrapping", function () {
     let captured;
     const renderCanvas = vi.fn();
+    const markerMotion = {
+      active: false,
+      resolves: [],
+      resolve(canvas, target, easingEnabled, nowMs) {
+        this.resolves.push({ canvas, target, easingEnabled, nowMs });
+        if (!easingEnabled) {
+          this.active = false;
+          return target;
+        }
+        this.active = true;
+        return Number(target) + 100;
+      },
+      isActive(canvas) {
+        void canvas;
+        return this.active;
+      }
+    };
 
     const mod = loadFresh("widgets/linear/CompassLinearWidget/CompassLinearWidget.js");
     const spec = mod.create({}, {
@@ -18,6 +35,18 @@ describe("CompassLinearWidget", function () {
                   const norm = ((Math.round(n) % 360) + 360) % 360;
                   const out = String(norm);
                   return leadingZero ? out.padStart(3, "0") : out;
+                }
+              };
+            }
+          };
+        }
+        if (id === "SpringEasing") {
+          return {
+            create() {
+              return {
+                createMotion(spec) {
+                  expect(spec).toEqual({ wrap: 360 });
+                  return markerMotion;
                 }
               };
             }
@@ -79,21 +108,107 @@ describe("CompassLinearWidget", function () {
       drawMarkerAtValue: vi.fn()
     };
     const state = {
+      canvas: {},
+      nowMs: 16,
       theme: {
         colors: { pointer: "#ff2b2b" }
       }
     };
 
-    captured.drawFrame(state, { markerCourse: 10 }, { num: 350, easedNum: 350 }, api);
+    const firstResult = captured.drawFrame(state, { markerCourse: 10 }, { num: 350, easedNum: 350 }, api);
     expect(api.drawDefaultPointer).toHaveBeenCalledTimes(1);
-    expect(api.drawMarkerAtValue).toHaveBeenNthCalledWith(1, 370, {
+    expect(markerMotion.resolves[0]).toEqual({
+      canvas: state.canvas,
+      target: 10,
+      easingEnabled: true,
+      nowMs: 16
+    });
+    expect(api.drawMarkerAtValue).toHaveBeenNthCalledWith(1, 470, {
       strokeStyle: "#ff2b2b"
     });
+    expect(firstResult).toEqual({ wantsFollowUpFrame: true });
 
-    captured.drawFrame(state, { markerCourse: 300 }, { num: 350, easedNum: 10 }, api);
+    state.nowMs = 32;
+    const secondResult = captured.drawFrame(state, { markerCourse: 300, easing: false }, { num: 350, easedNum: 10 }, api);
+    expect(markerMotion.resolves[1]).toEqual({
+      canvas: state.canvas,
+      target: 300,
+      easingEnabled: false,
+      nowMs: 32
+    });
     expect(api.drawMarkerAtValue).toHaveBeenNthCalledWith(2, -60, {
       strokeStyle: "#ff2b2b"
     });
+    expect(secondResult).toBeUndefined();
+  });
+
+  it("skips drawing stale markers when markerCourse is invalid", function () {
+    let captured;
+    const markerMotion = {
+      active: true,
+      resolve: vi.fn(),
+      isActive: vi.fn(() => true)
+    };
+
+    loadFresh("widgets/linear/CompassLinearWidget/CompassLinearWidget.js").create({}, {
+      getModule(id) {
+        if (id === "RadialValueMath") {
+          return {
+            create() {
+              return {
+                formatDirection360(value, leadingZero) {
+                  const n = Number(value);
+                  if (!isFinite(n)) return "---";
+                  const norm = ((Math.round(n) % 360) + 360) % 360;
+                  const out = String(norm);
+                  return leadingZero ? out.padStart(3, "0") : out;
+                }
+              };
+            }
+          };
+        }
+        if (id === "SpringEasing") {
+          return {
+            create() {
+              return {
+                createMotion() {
+                  return markerMotion;
+                }
+              };
+            }
+          };
+        }
+        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
+        return {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return function () {};
+              }
+            };
+          }
+        };
+      }
+    });
+
+    const api = {
+      drawDefaultPointer: vi.fn(),
+      drawMarkerAtValue: vi.fn()
+    };
+    const state = {
+      canvas: {},
+      nowMs: 48,
+      theme: {
+        colors: { pointer: "#ff2b2b" }
+      }
+    };
+
+    const result = captured.drawFrame(state, { markerCourse: undefined }, { num: 350, easedNum: 350 }, api);
+    expect(markerMotion.resolve).not.toHaveBeenCalled();
+    expect(markerMotion.isActive).not.toHaveBeenCalled();
+    expect(api.drawMarkerAtValue).not.toHaveBeenCalled();
+    expect(result).toBeUndefined();
   });
 
   it("returns fallback text for invalid heading values", function () {
@@ -106,6 +221,25 @@ describe("CompassLinearWidget", function () {
               return {
                 formatDirection360() {
                   return "---";
+                }
+              };
+            }
+          };
+        }
+        if (id === "SpringEasing") {
+          return {
+            create() {
+              return {
+                createMotion() {
+                  return {
+                    resolve(canvas, target) {
+                      void canvas;
+                      return target;
+                    },
+                    isActive() {
+                      return false;
+                    }
+                  };
                 }
               };
             }

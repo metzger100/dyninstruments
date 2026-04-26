@@ -191,7 +191,8 @@
         const unit = String(hasOwn.call(p, "unit") ? p.unit : unitDefault).trim();
         const display = formatDisplay(raw, p, unit);
         const easingEnabled = p.easing !== false;
-        const easedDisplayNum = springMotion.resolve(canvas, display.num, easingEnabled, Date.now());
+        const nowMs = Date.now();
+        const easedDisplayNum = springMotion.resolve(canvas, display.num, easingEnabled, nowMs);
         const axisProps = springTarget === "axis"
           ? Object.assign({}, p)
           : p;
@@ -256,7 +257,7 @@
         ctx.strokeStyle = color;
 
         const state = {
-          ctx: ctx,
+          ctx: ctx, canvas: canvas, nowMs: nowMs,
           mode: layout.mode,
           layout: layout,
           responsive: layout.responsive,
