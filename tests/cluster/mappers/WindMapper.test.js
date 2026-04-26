@@ -1,8 +1,8 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
 
-loadFresh("shared/unit-format-families.js");
-
-function makeToolkit(overrides) {
+function makeToolkit(overrides, bindingOverrides) {
+  installUnitFormatFamilies(bindingOverrides);
   return loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit(Object.assign({
     caption_angleTrue: "TWA",
     unit_angleTrue: "°",
@@ -145,18 +145,25 @@ describe("WindMapper", function () {
   it("resolves alternate speed tokens for numeric and composite wind speeds", function () {
     const mapper = loadFresh("cluster/mappers/WindMapper.js").create();
     const customToolkit = makeToolkit({
-      formatUnit_speedTrue: "ms",
+      formatUnit_speedTrue: undefined,
       unit_speedTrue_ms: "m/s true",
-      formatUnit_speedApparent: "kmh",
+      formatUnit_speedApparent: undefined,
       unit_speedApparent_kmh: "km/h apparent",
-      formatUnit_angleTrueRadialSpeed: "ms",
+      formatUnit_angleTrueRadialSpeed: undefined,
       unit_angleTrueRadialSpeed_ms: "m/s TWS G",
-      formatUnit_angleApparentRadialSpeed: "kmh",
+      formatUnit_angleApparentRadialSpeed: undefined,
       unit_angleApparentRadialSpeed_kmh: "km/h AWS G",
-      formatUnit_angleTrueLinearSpeed: "ms",
+      formatUnit_angleTrueLinearSpeed: undefined,
       unit_angleTrueLinearSpeed_ms: "m/s TWS L",
-      formatUnit_angleApparentLinearSpeed: "kmh",
+      formatUnit_angleApparentLinearSpeed: undefined,
       unit_angleApparentLinearSpeed_kmh: "km/h AWS L"
+    }, {
+      speedTrue: { defaultToken: "ms" },
+      speedApparent: { defaultToken: "kmh" },
+      angleTrueRadialSpeed: { defaultToken: "ms" },
+      angleApparentRadialSpeed: { defaultToken: "kmh" },
+      angleTrueLinearSpeed: { defaultToken: "ms" },
+      angleApparentLinearSpeed: { defaultToken: "kmh" }
     });
 
     expect(mapper.translate({ kind: "speedTrue", tws: 7.2 }, customToolkit)).toEqual({

@@ -1,45 +1,49 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
 
-loadFresh("shared/unit-format-families.js");
+function makeToolkit(overrides, bindingOverrides) {
+  installUnitFormatFamilies(bindingOverrides);
+  return loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit(Object.assign({
+    caption_eta: "ETA",
+    unit_eta: "",
+    caption_rteDistance: "RTE",
+    formatUnit_rteDistance: "nm",
+    unit_rteDistance_nm: "nm",
+    caption_vmg: "VMG",
+    formatUnit_vmg: "kn",
+    unit_vmg_kn: "kn",
+    caption_activeRouteRemain: "RTE CAP",
+    formatUnit_activeRouteRemain: "nm",
+    unit_activeRouteRemain_nm: "nmA",
+    caption_activeRouteEta: "ETA CAP",
+    unit_activeRouteEta: "",
+    caption_activeRouteNextCourse: "NEXT CAP",
+    unit_activeRouteNextCourse: "degN",
+    caption_positionBoat: "POS",
+    unit_positionBoat: "",
+    caption_xteDisplayXte: "XTE CAP",
+    formatUnit_xteDisplayXte: "nm",
+    unit_xteDisplayXte_nm: "nmX",
+    caption_xteDisplayCog: "COG CAP",
+    unit_xteDisplayCog: "degT",
+    caption_xteDisplayDst: "DST CAP",
+    formatUnit_xteDisplayDst: "nm",
+    unit_xteDisplayDst_nm: "nmD",
+    caption_xteDisplayBrg: "BRG CAP",
+    unit_xteDisplayBrg: "degM",
+    xteDisplayScale_nm: "0.8",
+    caption_editRoutePts: "PTS CAP",
+    caption_editRouteDst: "DST CAP",
+    formatUnit_editRouteDst: "nm",
+    unit_editRouteDst_nm: "nmE",
+    caption_editRouteRte: "RTE CAP",
+    formatUnit_editRouteRte: "km",
+    unit_editRouteRte_km: "kmR",
+    caption_editRouteEta: "ETA CAP"
+  }, overrides || {}));
+}
 
-const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
-  caption_eta: "ETA",
-  unit_eta: "",
-  caption_rteDistance: "RTE",
-  formatUnit_rteDistance: "nm",
-  unit_rteDistance_nm: "nm",
-  caption_vmg: "VMG",
-  formatUnit_vmg: "kn",
-  unit_vmg_kn: "kn",
-  caption_activeRouteRemain: "RTE CAP",
-  formatUnit_activeRouteRemain: "nm",
-  unit_activeRouteRemain_nm: "nmA",
-  caption_activeRouteEta: "ETA CAP",
-  unit_activeRouteEta: "",
-  caption_activeRouteNextCourse: "NEXT CAP",
-  unit_activeRouteNextCourse: "degN",
-  caption_positionBoat: "POS",
-  unit_positionBoat: "",
-  caption_xteDisplayXte: "XTE CAP",
-  formatUnit_xteDisplayXte: "nm",
-  unit_xteDisplayXte_nm: "nmX",
-  caption_xteDisplayCog: "COG CAP",
-  unit_xteDisplayCog: "degT",
-  caption_xteDisplayDst: "DST CAP",
-  formatUnit_xteDisplayDst: "nm",
-  unit_xteDisplayDst_nm: "nmD",
-  caption_xteDisplayBrg: "BRG CAP",
-  unit_xteDisplayBrg: "degM",
-  xteDisplayScale_nm: "0.8",
-  caption_editRoutePts: "PTS CAP",
-  caption_editRouteDst: "DST CAP",
-  formatUnit_editRouteDst: "nm",
-  unit_editRouteDst_nm: "nmE",
-  caption_editRouteRte: "RTE CAP",
-  formatUnit_editRouteRte: "km",
-  unit_editRouteRte_km: "kmR",
-  caption_editRouteEta: "ETA CAP"
-});
+const toolkit = makeToolkit();
 
 function createMapper() {
   const Helpers = {
@@ -90,16 +94,20 @@ describe("NavMapper", function () {
 
   it("keeps plain nav distance and speed formatter tokens separate from display labels", function () {
     const mapper = createMapper();
-    const customToolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
+    const customToolkit = makeToolkit({
       caption_dst: "DST",
-      formatUnit_dst: "km",
+      formatUnit_dst: undefined,
       unit_dst_km: "kilometers custom",
       caption_rteDistance: "RTE",
-      formatUnit_rteDistance: "ft",
+      formatUnit_rteDistance: undefined,
       unit_rteDistance_ft: "feet custom",
       caption_vmg: "VMG",
-      formatUnit_vmg: "ms",
+      formatUnit_vmg: undefined,
       unit_vmg_ms: "m/s custom"
+    }, {
+      dst: { defaultToken: "km" },
+      rteDistance: { defaultToken: "ft" },
+      vmg: { defaultToken: "ms" }
     });
 
     expect(mapper.translate({ kind: "dst", dst: 3.4 }, customToolkit)).toEqual({
@@ -473,16 +481,22 @@ describe("NavMapper", function () {
 
   it("maps editRoute with default RTE caption (not RTG) when configured defaults are used", function () {
     const mapper = createMapper();
-    loadFresh("shared/unit-format-families.js");
-    const defaultToolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
+    const defaultToolkit = makeToolkit({
       caption_editRoutePts: "PTS",
       caption_editRouteDst: "DST",
-      formatUnit_editRouteDst: "nm",
+      formatUnit_editRouteDst: undefined,
       unit_editRouteDst_nm: "nm",
       caption_editRouteRte: "RTE",
-      formatUnit_editRouteRte: "nm",
+      formatUnit_editRouteRte: undefined,
       unit_editRouteRte_nm: "nm",
       caption_editRouteEta: "ETA"
+    }, {
+      editRouteDst: { defaultToken: "nm" },
+      editRouteRte: { defaultToken: "nm" },
+      activeRouteRemain: { defaultToken: "nm" },
+      xteDisplayXte: { defaultToken: "nm" },
+      xteDisplayDst: { defaultToken: "nm" },
+      routePointsDistance: { defaultToken: "nm" }
     });
     const out = mapper.translate({
       kind: "editRoute",

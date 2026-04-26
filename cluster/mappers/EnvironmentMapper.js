@@ -24,7 +24,7 @@
       const req = p.kind;
 
       if (req === "depthLinear") {
-        const token = toolkit.formatUnit("depthLinear", "distance", "m");
+        const token = toolkit.formatUnit("depthLinear", "distance");
         const displayUnit = toolkit.unitText("depthLinear", "distance", token);
         const depthWarnOn = (p.depthLinearWarningEnabled !== false);
         const depthAlarmOn = (p.depthLinearAlarmEnabled !== false);
@@ -53,7 +53,7 @@
       }
 
       if (req === "depthRadial") {
-        const token = toolkit.formatUnit("depthRadial", "distance", "m");
+        const token = toolkit.formatUnit("depthRadial", "distance");
         const displayUnit = toolkit.unitText("depthRadial", "distance", token);
         const depthWarnOn = (p.depthRadialWarningEnabled !== false);
         const depthAlarmOn = (p.depthRadialAlarmEnabled !== false);
@@ -82,7 +82,7 @@
       }
 
       if (req === "tempRadial") {
-        const token = toolkit.formatUnit("tempRadial", "temperature", "celsius");
+        const token = toolkit.formatUnit("tempRadial", "temperature");
         const displayUnit = toolkit.unitText("tempRadial", "temperature", token);
         const tempWarnOn = (p.tempRadialWarningEnabled === true);
         const tempAlarmOn = (p.tempRadialAlarmEnabled === true);
@@ -110,7 +110,7 @@
       }
 
       if (req === "tempLinear") {
-        const token = toolkit.formatUnit("tempLinear", "temperature", "celsius");
+        const token = toolkit.formatUnit("tempLinear", "temperature");
         const displayUnit = toolkit.unitText("tempLinear", "temperature", token);
         const tempWarnOn = (p.tempLinearWarningEnabled === true);
         const tempAlarmOn = (p.tempLinearAlarmEnabled === true);
@@ -138,15 +138,15 @@
       }
 
       if (req === "temp") {
-        const token = toolkit.formatUnit("temp", "temperature", "celsius");
+        const token = toolkit.formatUnit("temp", "temperature");
         return out(p.temp, cap("temp"), toolkit.unitText("temp", "temperature", token), "formatTemperature", [token]);
       }
       if (req === "pressure") {
-        const token = toolkit.formatUnit("pressure", "pressure", "hpa");
+        const token = toolkit.formatUnit("pressure", "pressure");
         return out(p.value, cap("pressure"), toolkit.unitText("pressure", "pressure", token), "formatPressure", [token]);
       }
       if (req === "depth") {
-        const token = toolkit.formatUnit("depth", "distance", "m");
+        const token = toolkit.formatUnit("depth", "distance");
         return out(p.depth, cap("depth"), toolkit.unitText("depth", "distance", token), "formatDistance", [token]);
       }
       return {};

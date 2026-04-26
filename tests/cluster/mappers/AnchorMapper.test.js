@@ -1,13 +1,17 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
 
-loadFresh("shared/unit-format-families.js");
+function makeToolkit(overrides, bindingOverrides) {
+  installUnitFormatFamilies(bindingOverrides);
+  return loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit(Object.assign({
+    caption_anchorDistance: "ANCHOR",
+    caption_anchorWatch: "AWATCH",
+    caption_anchorBearing: "ABRG",
+    unit_anchorBearing: "°"
+  }, overrides || {}));
+}
 
-const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
-  caption_anchorDistance: "ANCHOR",
-  caption_anchorWatch: "AWATCH",
-  caption_anchorBearing: "ABRG",
-  unit_anchorBearing: "°"
-});
+const toolkit = makeToolkit();
 
 describe("AnchorMapper", function () {
   it("maps distance/watch to formatDistance with per-kind units", function () {
@@ -22,6 +26,32 @@ describe("AnchorMapper", function () {
     });
 
     expect(mapper.translate({ kind: "anchorWatch", watch: 20 }, toolkit).formatterParameters).toEqual(["m"]);
+  });
+
+  it("uses the shared binding default token when distance selectors are missing", function () {
+    const mapper = loadFresh("cluster/mappers/AnchorMapper.js").create();
+    const customToolkit = makeToolkit({
+      unit_anchorDistance_yd: "yd custom",
+      unit_anchorWatch_yd: "yd custom"
+    }, {
+      anchorDistance: { defaultToken: "yd" },
+      anchorWatch: { defaultToken: "yd" }
+    });
+
+    expect(mapper.translate({ kind: "anchorDistance", distance: 10 }, customToolkit)).toEqual({
+      value: 10,
+      caption: "ANCHOR",
+      unit: "yd custom",
+      formatter: "formatDistance",
+      formatterParameters: ["yd"]
+    });
+    expect(mapper.translate({ kind: "anchorWatch", watch: 20 }, customToolkit)).toEqual({
+      value: 20,
+      caption: "AWATCH",
+      unit: "yd custom",
+      formatter: "formatDistance",
+      formatterParameters: ["yd"]
+    });
   });
 
   it("maps bearing to direction formatter", function () {

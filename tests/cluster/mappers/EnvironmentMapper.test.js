@@ -1,8 +1,8 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
 
-loadFresh("shared/unit-format-families.js");
-
-function makeToolkit(overrides) {
+function makeToolkit(overrides, bindingOverrides) {
+  installUnitFormatFamilies(bindingOverrides);
   return loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit(Object.assign({
     caption_depthLinear: "DPT",
     formatUnit_depthLinear: "m",
@@ -156,7 +156,7 @@ describe("EnvironmentMapper", function () {
   it("resolves alternate distance, temperature, and pressure tokens from the shared catalog", function () {
     const mapper = loadFresh("cluster/mappers/EnvironmentMapper.js").create();
     const customToolkit = makeToolkit({
-      formatUnit_depthLinear: "ft",
+      formatUnit_depthLinear: undefined,
       unit_depthLinear_ft: "ft custom",
       depthLinearMinValue_ft: 0,
       depthLinearMaxValue_ft: 100,
@@ -164,7 +164,7 @@ describe("EnvironmentMapper", function () {
       depthLinearTickMinor_ft: 5,
       depthLinearWarningFrom_ft: 16,
       depthLinearAlarmFrom_ft: 6,
-      formatUnit_depthRadial: "nm",
+      formatUnit_depthRadial: undefined,
       unit_depthRadial_nm: "nm custom",
       depthRadialMinValue_nm: 0,
       depthRadialMaxValue_nm: 0.016,
@@ -172,7 +172,7 @@ describe("EnvironmentMapper", function () {
       depthRadialTickMinor_nm: 0.0005,
       depthRadialWarningFrom_nm: 0.003,
       depthRadialAlarmFrom_nm: 0.001,
-      formatUnit_tempLinear: "kelvin",
+      formatUnit_tempLinear: undefined,
       unit_tempLinear_kelvin: "K custom",
       tempLinearMinValue_kelvin: 273.15,
       tempLinearMaxValue_kelvin: 308.15,
@@ -180,7 +180,7 @@ describe("EnvironmentMapper", function () {
       tempLinearTickMinor_kelvin: 1,
       tempLinearWarningFrom_kelvin: 301.15,
       tempLinearAlarmFrom_kelvin: 305.15,
-      formatUnit_tempRadial: "kelvin",
+      formatUnit_tempRadial: undefined,
       unit_tempRadial_kelvin: "K custom",
       tempRadialMinValue_kelvin: 273.15,
       tempRadialMaxValue_kelvin: 308.15,
@@ -188,12 +188,20 @@ describe("EnvironmentMapper", function () {
       tempRadialTickMinor_kelvin: 1,
       tempRadialWarningFrom_kelvin: 301.15,
       tempRadialAlarmFrom_kelvin: 305.15,
-      formatUnit_temp: "kelvin",
+      formatUnit_temp: undefined,
       unit_temp_kelvin: "K custom",
-      formatUnit_pressure: "bar",
+      formatUnit_pressure: undefined,
       unit_pressure_bar: "bar custom",
-      formatUnit_depth: "ft",
+      formatUnit_depth: undefined,
       unit_depth_ft: "ft custom"
+    }, {
+      depthLinear: { defaultToken: "ft" },
+      depthRadial: { defaultToken: "nm" },
+      tempLinear: { defaultToken: "kelvin" },
+      tempRadial: { defaultToken: "kelvin" },
+      temp: { defaultToken: "kelvin" },
+      pressure: { defaultToken: "bar" },
+      depth: { defaultToken: "ft" }
     });
 
     const depthLinear = mapper.translate({

@@ -1,32 +1,36 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
 
-loadFresh("shared/unit-format-families.js");
+function makeToolkit(overrides, bindingOverrides) {
+  installUnitFormatFamilies(bindingOverrides);
+  return loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit(Object.assign({
+    caption_zoom: "ZOOM CAP",
+    unit_zoom: "",
+    caption_aisTargetDst: "DST CAP",
+    formatUnit_aisTargetDst: "nm",
+    unit_aisTargetDst_nm: "nmD",
+    caption_aisTargetCpa: "DCPA CAP",
+    formatUnit_aisTargetCpa: "nm",
+    unit_aisTargetCpa_nm: "nmC",
+    caption_aisTargetTcpa: "TCPA CAP",
+    unit_aisTargetTcpa: "minT",
+    caption_aisTargetBrg: "BRG CAP",
+    unit_aisTargetBrg: "degB",
+    caption_centerDisplayPosition: "CENTER CAP",
+    unit_centerDisplayPosition: "",
+    caption_centerDisplayMarker: "WP CAP",
+    formatUnit_centerDisplayMarker: "nm",
+    unit_centerDisplayMarker_nm: "nmC",
+    caption_centerDisplayBoat: "BOAT CAP",
+    formatUnit_centerDisplayBoat: "nm",
+    unit_centerDisplayBoat_nm: "nmB",
+    caption_centerDisplayMeasure: "MEAS CAP",
+    formatUnit_centerDisplayMeasure: "nm",
+    unit_centerDisplayMeasure_nm: "nmM"
+  }, overrides || {}));
+}
 
-const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
-  caption_zoom: "ZOOM CAP",
-  unit_zoom: "",
-  caption_aisTargetDst: "DST CAP",
-  formatUnit_aisTargetDst: "nm",
-  unit_aisTargetDst_nm: "nmD",
-  caption_aisTargetCpa: "DCPA CAP",
-  formatUnit_aisTargetCpa: "nm",
-  unit_aisTargetCpa_nm: "nmC",
-  caption_aisTargetTcpa: "TCPA CAP",
-  unit_aisTargetTcpa: "minT",
-  caption_aisTargetBrg: "BRG CAP",
-  unit_aisTargetBrg: "degB",
-  caption_centerDisplayPosition: "CENTER CAP",
-  unit_centerDisplayPosition: "",
-  caption_centerDisplayMarker: "WP CAP",
-  formatUnit_centerDisplayMarker: "nm",
-  unit_centerDisplayMarker_nm: "nmC",
-  caption_centerDisplayBoat: "BOAT CAP",
-  formatUnit_centerDisplayBoat: "nm",
-  unit_centerDisplayBoat_nm: "nmB",
-  caption_centerDisplayMeasure: "MEAS CAP",
-  formatUnit_centerDisplayMeasure: "nm",
-  unit_centerDisplayMeasure_nm: "nmM"
-});
+const toolkit = makeToolkit();
 
 describe("MapMapper", function () {
   function createMapper() {
@@ -84,6 +88,71 @@ describe("MapMapper", function () {
       },
       ratioThresholdNormal: 1.1,
       ratioThresholdFlat: 2.4
+    });
+  });
+
+  it("uses shared binding defaults when formatter selectors are missing", function () {
+    const mapper = createMapper();
+    const customToolkit = makeToolkit({
+      formatUnit_centerDisplayMarker: undefined,
+      unit_centerDisplayMarker_m: "meter marker",
+      formatUnit_centerDisplayBoat: undefined,
+      unit_centerDisplayBoat_m: "meter boat",
+      formatUnit_centerDisplayMeasure: undefined,
+      unit_centerDisplayMeasure_m: "meter measure",
+      formatUnit_aisTargetDst: undefined,
+      unit_aisTargetDst_m: "meter dst",
+      formatUnit_aisTargetCpa: undefined,
+      unit_aisTargetCpa_m: "meter cpa"
+    }, {
+      centerDisplayMarker: { defaultToken: "m" },
+      centerDisplayBoat: { defaultToken: "m" },
+      centerDisplayMeasure: { defaultToken: "m" },
+      aisTargetDst: { defaultToken: "m" },
+      aisTargetCpa: { defaultToken: "m" }
+    });
+
+    expect(mapper.translate({
+      kind: "centerDisplay",
+      centerPosition: { lat: 54.2, lon: 10.3 }
+    }, customToolkit)).toEqual({
+      renderer: "CenterDisplayTextWidget",
+      display: {
+        position: { lat: 54.2, lon: 10.3 },
+        marker: { course: undefined, distance: undefined },
+        boat: { course: undefined, distance: undefined },
+        measure: { activeMeasure: undefined, useRhumbLine: false }
+      },
+      captions: {
+        position: "CENTER CAP",
+        marker: "WP CAP",
+        boat: "BOAT CAP",
+        measure: "MEAS CAP"
+      },
+      units: {
+        marker: "meter marker",
+        boat: "meter boat",
+        measure: "meter measure"
+      },
+      formatUnits: {
+        marker: "m",
+        boat: "m",
+        measure: "m"
+      },
+      ratioThresholdNormal: undefined,
+      ratioThresholdFlat: undefined
+    });
+
+    const aisTarget = mapper.translate({
+      kind: "aisTarget",
+      target: {},
+      default: "---"
+    }, customToolkit);
+    expect(aisTarget.units.dst).toBe("meter dst");
+    expect(aisTarget.units.cpa).toBe("meter cpa");
+    expect(aisTarget.formatUnits).toEqual({
+      dst: "m",
+      cpa: "m"
     });
   });
 

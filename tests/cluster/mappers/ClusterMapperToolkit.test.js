@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
 
 describe("ClusterMapperToolkit", function () {
   it("builds angle formatters with expected normalization behavior", function () {
@@ -35,7 +36,7 @@ describe("ClusterMapperToolkit", function () {
 
   it("createToolkit resolves cap/unit accessors from props", function () {
     const mod = loadFresh("cluster/mappers/ClusterMapperToolkit.js");
-    loadFresh("shared/unit-format-families.js");
+    installUnitFormatFamilies();
     const toolkit = mod.create().createToolkit({ caption_eta: "ETA", unit_eta: "" });
 
     expect(toolkit.cap("eta")).toBe("ETA");
@@ -47,7 +48,7 @@ describe("ClusterMapperToolkit", function () {
 
   it("resolves format units and display units from the shared catalog", function () {
     const mod = loadFresh("cluster/mappers/ClusterMapperToolkit.js");
-    loadFresh("shared/unit-format-families.js");
+    installUnitFormatFamilies();
     const toolkit = mod.create().createToolkit({
       formatUnit_sog: "ms",
       unit_sog_ms: "m/s",
@@ -57,13 +58,32 @@ describe("ClusterMapperToolkit", function () {
       anchorDistance_nm: 1852
     });
 
-    expect(toolkit.formatUnit("sog", "speed", "kn")).toBe("ms");
+    expect(toolkit.formatUnit("sog", "speed")).toBe("ms");
     expect(toolkit.unitText("sog", "speed", "ms")).toBe("m/s");
     expect(toolkit.unitText("sog", "speed", "kmh")).toBe("km/h");
     expect(toolkit.unitNumber("rteDistance", "nm")).toBe(1);
     expect(toolkit.unitNumber("anchorDistance", "m")).toBeUndefined();
     expect(toolkit.unitNumber("anchorDistance", "nm")).toBe(1852);
-    expect(toolkit.formatUnit("rteDistance", "distance", "nm")).toBe("nm");
+    expect(toolkit.formatUnit("rteDistance", "distance")).toBe("nm");
+  });
+
+  it("uses the shared metric binding default token when the selected token is missing or invalid", function () {
+    const mod = loadFresh("cluster/mappers/ClusterMapperToolkit.js");
+    installUnitFormatFamilies({
+      sog: { defaultToken: "kmh" }
+    });
+
+    const missingTokenToolkit = mod.create().createToolkit({
+      unit_sog_kmh: "km/h custom"
+    });
+    expect(missingTokenToolkit.formatUnit("sog", "speed")).toBe("kmh");
+    expect(missingTokenToolkit.unitText("sog", "speed", missingTokenToolkit.formatUnit("sog", "speed"))).toBe("km/h custom");
+
+    const invalidTokenToolkit = mod.create().createToolkit({
+      formatUnit_sog: "bogus",
+      unit_sog_kmh: "km/h custom"
+    });
+    expect(invalidTokenToolkit.formatUnit("sog", "speed")).toBe("kmh");
   });
 
   it("uses injected RadialAngleMath helpers when provided", function () {

@@ -87,6 +87,30 @@ describe("ClusterKindCatalog", function () {
       rendererId: "EditRouteTextHtmlWidget",
       surface: "html"
     });
+
+    expect(catalog.resolveRoute("anchor", "anchorDistance")).toEqual({
+      cluster: "anchor",
+      kind: "anchorDistance",
+      viewModelId: "MapperOutputViewModel",
+      rendererId: "ThreeValueTextWidget",
+      surface: "canvas-dom"
+    });
+
+    expect(catalog.resolveRoute("anchor", "anchorWatch")).toEqual({
+      cluster: "anchor",
+      kind: "anchorWatch",
+      viewModelId: "MapperOutputViewModel",
+      rendererId: "ThreeValueTextWidget",
+      surface: "canvas-dom"
+    });
+
+    expect(catalog.resolveRoute("anchor", "anchorBearing")).toEqual({
+      cluster: "anchor",
+      kind: "anchorBearing",
+      viewModelId: "MapperOutputViewModel",
+      rendererId: "ThreeValueTextWidget",
+      surface: "canvas-dom"
+    });
   });
 
   it("throws for missing catalog tuples", function () {
@@ -103,6 +127,12 @@ describe("ClusterKindCatalog", function () {
     expect(function () {
       catalog.resolveRoute("nav", "activeRouteInteractive");
     }).toThrow("missing catalog entry");
+
+    ["distance", "watch", "bearing"].forEach(function (kind) {
+      expect(function () {
+        catalog.resolveRoute("anchor", kind);
+      }).toThrow("missing catalog entry");
+    });
   });
 
   it("enforces strict validation for duplicates, unsupported surfaces, and missing fields", function () {

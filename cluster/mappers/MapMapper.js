@@ -49,14 +49,14 @@
             measure: cap("centerDisplayMeasure")
           },
           units: {
-            marker: toolkit.unitText("centerDisplayMarker", "distance", toolkit.formatUnit("centerDisplayMarker", "distance", "nm")),
-            boat: toolkit.unitText("centerDisplayBoat", "distance", toolkit.formatUnit("centerDisplayBoat", "distance", "nm")),
-            measure: toolkit.unitText("centerDisplayMeasure", "distance", toolkit.formatUnit("centerDisplayMeasure", "distance", "nm"))
+            marker: toolkit.unitText("centerDisplayMarker", "distance", toolkit.formatUnit("centerDisplayMarker", "distance")),
+            boat: toolkit.unitText("centerDisplayBoat", "distance", toolkit.formatUnit("centerDisplayBoat", "distance")),
+            measure: toolkit.unitText("centerDisplayMeasure", "distance", toolkit.formatUnit("centerDisplayMeasure", "distance"))
           },
           formatUnits: {
-            marker: toolkit.formatUnit("centerDisplayMarker", "distance", "nm"),
-            boat: toolkit.formatUnit("centerDisplayBoat", "distance", "nm"),
-            measure: toolkit.formatUnit("centerDisplayMeasure", "distance", "nm")
+            marker: toolkit.formatUnit("centerDisplayMarker", "distance"),
+            boat: toolkit.formatUnit("centerDisplayBoat", "distance"),
+            measure: toolkit.formatUnit("centerDisplayMeasure", "distance")
           },
           ratioThresholdNormal: num(p.centerDisplayRatioThresholdNormal),
           ratioThresholdFlat: num(p.centerDisplayRatioThresholdFlat)
@@ -88,14 +88,14 @@
             brg: cap("aisTargetBrg")
           },
           units: {
-            dst: toolkit.unitText("aisTargetDst", "distance", toolkit.formatUnit("aisTargetDst", "distance", "nm")),
-            cpa: toolkit.unitText("aisTargetCpa", "distance", toolkit.formatUnit("aisTargetCpa", "distance", "nm")),
+            dst: toolkit.unitText("aisTargetDst", "distance", toolkit.formatUnit("aisTargetDst", "distance")),
+            cpa: toolkit.unitText("aisTargetCpa", "distance", toolkit.formatUnit("aisTargetCpa", "distance")),
             tcpa: toolkit.unit("aisTargetTcpa"),
             brg: toolkit.unit("aisTargetBrg")
           },
           formatUnits: {
-            dst: toolkit.formatUnit("aisTargetDst", "distance", "nm"),
-            cpa: toolkit.formatUnit("aisTargetCpa", "distance", "nm")
+            dst: toolkit.formatUnit("aisTargetDst", "distance"),
+            cpa: toolkit.formatUnit("aisTargetCpa", "distance")
           },
           default: p.default
         };

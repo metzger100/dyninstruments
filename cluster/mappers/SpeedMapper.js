@@ -27,7 +27,7 @@
       if (effKind === "sogLinear" || effKind === "stwLinear") {
         const baseKind = (effKind === "sogLinear") ? "sog" : "stw";
         const val = p[baseKind];
-        const formatToken = toolkit.formatUnit(effKind, "speed", "kn");
+        const formatToken = toolkit.formatUnit(effKind, "speed");
         const displayUnit = toolkit.unitText(effKind, "speed", formatToken);
         const warnOn = (p.speedLinearWarningEnabled !== false);
         const alarmOn = (p.speedLinearAlarmEnabled !== false);
@@ -57,7 +57,7 @@
       if (effKind === "sogRadial" || effKind === "stwRadial") {
         const baseKind = (effKind === "sogRadial") ? "sog" : "stw";
         const val = p[baseKind];
-        const formatToken = toolkit.formatUnit(effKind, "speed", "kn");
+        const formatToken = toolkit.formatUnit(effKind, "speed");
         const displayUnit = toolkit.unitText(effKind, "speed", formatToken);
 
         const warnOn = (p.speedRadialWarningEnabled !== false);
@@ -88,7 +88,7 @@
 
       if (effKind === "sog" || effKind === "stw") {
         const val = p[effKind];
-        const formatToken = toolkit.formatUnit(effKind, "speed", "kn");
+        const formatToken = toolkit.formatUnit(effKind, "speed");
         return out(val, cap(effKind), toolkit.unitText(effKind, "speed", formatToken), "formatSpeed", [formatToken]);
       }
 

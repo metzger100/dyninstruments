@@ -75,6 +75,10 @@ describe("config/clusters/environment.js", function () {
     expect(keys.slice(0, 3)).toEqual(["kind", "tempKey", "value"]);
     expect(keys).toContain("depthLinearMinValue_nm");
     expect(keys).toContain("depthRadialAlarmFrom_ft");
+    expect(def.editableParameters.depthLinearMaxValue_nm.default).toBe(0.016);
+    expect(def.editableParameters.depthLinearMaxValue_nm.max).toBe(0.016);
+    expect(def.editableParameters.depthRadialMaxValue_nm.default).toBe(0.016);
+    expect(def.editableParameters.depthRadialMaxValue_nm.max).toBe(0.016);
     expect(keys).toContain("tempLinearWarningFrom_kelvin");
     expect(keys).toContain("tempRadialAlarmFrom_celsius");
     expect(keys).toContain("caption_depth");
@@ -87,6 +91,10 @@ describe("config/clusters/environment.js", function () {
     expect(keys).toContain("unit_pressure_bar");
     expect(keys).toContain("caption");
     expect(keys).toContain("formatterParameters");
+    expect(keys.indexOf("depthLinearWarningEnabled")).toBeLessThan(keys.indexOf("depthLinearAlarmEnabled"));
+    expect(keys.indexOf("depthLinearWarningFrom_nm")).toBeLessThan(keys.indexOf("depthLinearAlarmFrom_nm"));
+    expect(keys.indexOf("depthRadialWarningEnabled")).toBeLessThan(keys.indexOf("depthRadialAlarmEnabled"));
+    expect(keys.indexOf("depthRadialWarningFrom_nm")).toBeLessThan(keys.indexOf("depthRadialAlarmFrom_nm"));
   });
 
   it("injects pressure store key from value when pressure kind is active", function () {

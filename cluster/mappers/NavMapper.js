@@ -35,20 +35,20 @@
         return out(p.rteEta, cap("rteEta"), unit("rteEta"), p.hideSeconds === true ? "formatClock" : "formatTime", []);
       }
       if (req === "dst") {
-        const token = toolkit.formatUnit("dst", "distance", "nm");
+        const token = toolkit.formatUnit("dst", "distance");
         return out(p.dst, cap("dst"), toolkit.unitText("dst", "distance", token), "formatDistance", [token]);
       }
       if (req === "rteDistance") {
-        const token = toolkit.formatUnit("rteDistance", "distance", "nm");
+        const token = toolkit.formatUnit("rteDistance", "distance");
         return out(p.rteDistance, cap("rteDistance"), toolkit.unitText("rteDistance", "distance", token), "formatDistance", [token]);
       }
       if (req === "vmg") {
-        const token = toolkit.formatUnit("vmg", "speed", "kn");
+        const token = toolkit.formatUnit("vmg", "speed");
         return out(p.vmg, cap("vmg"), toolkit.unitText("vmg", "speed", token), "formatSpeed", [token]);
       }
       if (req === "activeRoute") {
         const activeRouteDomain = activeRouteViewModel.build(p, toolkit);
-        const remainToken = toolkit.formatUnit("activeRouteRemain", "distance", "nm");
+        const remainToken = toolkit.formatUnit("activeRouteRemain", "distance");
         activeRouteDomain.units.remain = toolkit.unitText("activeRouteRemain", "distance", remainToken);
         activeRouteDomain.formatUnits = { remain: remainToken };
         return {
@@ -71,7 +71,7 @@
       }
       if (req === "routePoints") {
         const routePointsDomain = routePointsViewModel.build(p, toolkit);
-        const distanceToken = toolkit.formatUnit("routePointsDistance", "distance", "nm");
+        const distanceToken = toolkit.formatUnit("routePointsDistance", "distance");
         return {
           renderer: "RoutePointsTextHtmlWidget",
           domain: {
@@ -128,12 +128,12 @@
             eta: cap("editRouteEta")
           },
           units: {
-            dst: toolkit.unitText("editRouteDst", "distance", toolkit.formatUnit("editRouteDst", "distance", "nm")),
-            rte: toolkit.unitText("editRouteRte", "distance", toolkit.formatUnit("editRouteRte", "distance", "nm"))
+            dst: toolkit.unitText("editRouteDst", "distance", toolkit.formatUnit("editRouteDst", "distance")),
+            rte: toolkit.unitText("editRouteRte", "distance", toolkit.formatUnit("editRouteRte", "distance"))
           },
           formatUnits: {
-            dst: toolkit.formatUnit("editRouteDst", "distance", "nm"),
-            rte: toolkit.formatUnit("editRouteRte", "distance", "nm")
+            dst: toolkit.formatUnit("editRouteDst", "distance"),
+            rte: toolkit.formatUnit("editRouteRte", "distance")
           }
         };
       }
@@ -152,8 +152,8 @@
         return o;
       }
       if (req === "xteDisplay") {
-        const xteToken = toolkit.formatUnit("xteDisplayXte", "distance", "nm");
-        const dtwToken = toolkit.formatUnit("xteDisplayDst", "distance", "nm");
+        const xteToken = toolkit.formatUnit("xteDisplayXte", "distance");
+        const dtwToken = toolkit.formatUnit("xteDisplayDst", "distance");
         const headingUnit = unit("xteDisplayCog");
         return {
           renderer: "XteDisplayWidget",

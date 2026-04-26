@@ -1,8 +1,8 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
 
-loadFresh("shared/unit-format-families.js");
-
-function makeToolkit(overrides) {
+function makeToolkit(overrides, bindingOverrides) {
+  installUnitFormatFamilies(bindingOverrides);
   return loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit(Object.assign({
     caption_sog: "SOG",
     formatUnit_sog: "kn",
@@ -153,24 +153,31 @@ describe("SpeedMapper", function () {
   it("resolves alternate formatter tokens and per-unit gauge scales from the shared catalog", function () {
     const mapper = loadFresh("cluster/mappers/SpeedMapper.js").create();
     const customToolkit = makeToolkit({
-      formatUnit_sog: "ms",
+      formatUnit_sog: undefined,
       unit_sog_ms: "m/s custom",
-      formatUnit_stw: "kmh",
+      formatUnit_stw: undefined,
       unit_stw_kmh: "km/h custom",
-      formatUnit_sogLinear: "ms",
+      formatUnit_sogLinear: undefined,
       unit_sogLinear_ms: "m/s linear",
       speedLinearMaxValue_ms: 15,
       speedLinearTickMajor_ms: 2.5,
       speedLinearTickMinor_ms: 0.5,
       speedLinearWarningFrom_ms: 10,
       speedLinearAlarmFrom_ms: 12.5,
-      formatUnit_stwRadial: "kmh",
+      formatUnit_stwRadial: undefined,
       unit_stwRadial_kmh: "km/h radial",
       speedRadialMaxValue_kmh: 60,
       speedRadialTickMajor_kmh: 10,
       speedRadialTickMinor_kmh: 2,
       speedRadialWarningFrom_kmh: 40,
       speedRadialAlarmFrom_kmh: 50
+    }, {
+      sog: { defaultToken: "ms" },
+      stw: { defaultToken: "kmh" },
+      sogLinear: { defaultToken: "ms" },
+      stwLinear: { defaultToken: "kmh" },
+      sogRadial: { defaultToken: "ms" },
+      stwRadial: { defaultToken: "kmh" }
     });
 
     expect(mapper.translate({ kind: "sog", sog: 5.3 }, customToolkit)).toEqual({

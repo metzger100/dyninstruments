@@ -29,7 +29,7 @@
         const isTrue = (req === "angleTrueRadial");
         const angleKind = isTrue ? "angleTrueRadialAngle" : "angleApparentRadialAngle";
         const speedKind = isTrue ? "angleTrueRadialSpeed" : "angleApparentRadialSpeed";
-        const speedToken = toolkit.formatUnit(speedKind, "speed", "kn");
+        const speedToken = toolkit.formatUnit(speedKind, "speed");
         const speedUnit = toolkit.unitText(speedKind, "speed", speedToken);
         return {
           renderer: "WindRadialWidget",
@@ -58,7 +58,7 @@
         const isTrue = (req === "angleTrueLinear");
         const angleKind = isTrue ? "angleTrueLinearAngle" : "angleApparentLinearAngle";
         const speedKind = isTrue ? "angleTrueLinearSpeed" : "angleApparentLinearSpeed";
-        const speedToken = toolkit.formatUnit(speedKind, "speed", "kn");
+        const speedToken = toolkit.formatUnit(speedKind, "speed");
         const speedUnit = toolkit.unitText(speedKind, "speed", speedToken);
         return {
           renderer: "WindLinearWidget",
@@ -98,11 +98,11 @@
         return out(p.twd, cap("angleTrueDirection"), unit("angleTrueDirection"), makeAngleFormatter(true, leadingZero, p.default), []);
       }
       if (req === "speedTrue") {
-        const token = toolkit.formatUnit("speedTrue", "speed", "kn");
+        const token = toolkit.formatUnit("speedTrue", "speed");
         return out(p.tws, cap("speedTrue"), toolkit.unitText("speedTrue", "speed", token), "formatSpeed", [token]);
       }
       if (req === "speedApparent") {
-        const token = toolkit.formatUnit("speedApparent", "speed", "kn");
+        const token = toolkit.formatUnit("speedApparent", "speed");
         return out(p.aws, cap("speedApparent"), toolkit.unitText("speedApparent", "speed", token), "formatSpeed", [token]);
       }
       return {};

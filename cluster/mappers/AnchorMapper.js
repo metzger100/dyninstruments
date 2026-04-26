@@ -20,11 +20,11 @@
       const req = p.kind;
 
       if (req === "anchorDistance") {
-        const token = toolkit.formatUnit("anchorDistance", "distance", "m");
+        const token = toolkit.formatUnit("anchorDistance", "distance");
         return out(p.distance, cap("anchorDistance"), toolkit.unitText("anchorDistance", "distance", token), "formatDistance", [token]);
       }
       if (req === "anchorWatch") {
-        const token = toolkit.formatUnit("anchorWatch", "distance", "m");
+        const token = toolkit.formatUnit("anchorWatch", "distance");
         return out(p.watch, cap("anchorWatch"), toolkit.unitText("anchorWatch", "distance", token), "formatDistance", [token]);
       }
       if (req === "anchorBearing") {

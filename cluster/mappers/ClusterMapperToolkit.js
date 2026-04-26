@@ -107,7 +107,7 @@
       return { binding: binding, family: family };
     }
 
-    function resolveToken(metricKey, familyId, fallbackToken) {
+    function resolveToken(metricKey, familyId) {
       const resolved = resolveBinding(metricKey);
       if (resolved.binding.family !== familyId) {
         throw new Error("dyninstruments: metric '" + metricKey + "' does not belong to family '" + familyId + "'");
@@ -117,10 +117,10 @@
       if (typeof selected === "string" && resolved.family.tokens.indexOf(selected) !== -1) {
         return selected;
       }
-      if (resolved.family.tokens.indexOf(fallbackToken) !== -1) {
-        return fallbackToken;
+      if (resolved.family.tokens.indexOf(resolved.binding.defaultToken) !== -1) {
+        return resolved.binding.defaultToken;
       }
-      return resolved.binding.defaultToken;
+      throw new Error("dyninstruments: invalid default token '" + resolved.binding.defaultToken + "' for metric '" + metricKey + "'");
     }
 
     return {
@@ -130,8 +130,8 @@
       unit: function (k) {
         return p["unit_" + k];
       },
-      formatUnit: function (metricKey, familyId, fallbackToken) {
-        return resolveToken(metricKey, familyId, fallbackToken);
+      formatUnit: function (metricKey, familyId) {
+        return resolveToken(metricKey, familyId);
       },
       unitText: function (metricKey, familyId, selectedUnitToken) {
         const resolved = resolveBinding(metricKey);

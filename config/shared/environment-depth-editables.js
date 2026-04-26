@@ -14,7 +14,7 @@
   const DEPTH_LINEAR_KIND = { kind: "depthLinear" };
   const DEPTH_RADIAL_KIND = { kind: "depthRadial" };
   const DEPTH_UNIT_RANGES = {
-    nm: { min: 0, max: 0.05, step: 0.001 },
+    nm: { min: 0, max: 0.016, step: 0.001 },
     m: { min: 0, max: 200, step: 0.5 },
     km: { min: 0, max: 0.03, step: 0.001 },
     ft: { min: 0, max: 600, step: 1 },
@@ -45,7 +45,7 @@
       baseKey: "depthLinearMaxValue",
       displayName: "Max depth",
       tokens: buildTokenSpecs({
-        nm: 0.05,
+        nm: 0.016,
         m: 30,
         km: 0.03,
         ft: 100,
@@ -113,7 +113,7 @@
       baseKey: "depthRadialMaxValue",
       displayName: "Max depth",
       tokens: buildTokenSpecs({
-        nm: 0.05,
+        nm: 0.016,
         m: 30,
         km: 0.03,
         ft: 100,
@@ -189,8 +189,8 @@
         name: "Show alarm sector",
         condition: { kind: "depthLinear" }
       },
-      ...linearAlarm,
       ...linearWarning,
+      ...linearAlarm,
       depthLinearRatioThresholdNormal: {
         type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
         internal: true,
@@ -224,8 +224,8 @@
         name: "Show alarm sector",
         condition: { kind: "depthRadial" }
       },
-      ...radialAlarm,
       ...radialWarning,
+      ...radialAlarm,
       depthRadialRatioThresholdNormal: {
         type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
         internal: true,
