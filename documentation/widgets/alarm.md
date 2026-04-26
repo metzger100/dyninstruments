@@ -42,6 +42,7 @@
   - flat: one inline row with caption and value
   - normal: value row then caption row
   - high: caption row then value row
+- Inner text fit applies a small proportional horizontal inset so captions and values do not touch the shell edges in any mode.
 - Caption/value text is owned by the fit layer and never uses CSS ellipsis.
 - Fit is computed against the inner content rect after shell padding and idle strip chrome are removed.
 - Idle accent styling follows the AIS nearest-blue family through `colors.alarmWidget.strip`.

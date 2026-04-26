@@ -13,6 +13,7 @@
   const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.0;
   const DEFAULT_RATIO_THRESHOLD_FLAT = 3.0;
   const SECONDARY_SCALE = 0.8;
+  const CONTENT_PAD_X_RATIO = 0.03;
   const MEASURE_CTX_KEY = "__dyniAlarmMeasureCtx";
   const FIT_CACHE_KEY = "__dyniAlarmHtmlFitCache";
   const ALARM_SHELL_CHROME = Object.freeze({
@@ -188,6 +189,10 @@
     };
   }
 
+  function computeContentPadX(width, height) {
+    return Math.max(2, Math.floor(Math.min(width, height) * CONTENT_PAD_X_RATIO));
+  }
+
   function resolveThemeColors(theme) {
     const colors = theme && theme.colors && typeof theme.colors === "object" ? theme.colors : null;
     const alarmWidget = colors && colors.alarmWidget && typeof colors.alarmWidget === "object"
@@ -206,6 +211,8 @@
     const model = cfg.model;
     const width = Math.max(1, Math.round(cfg.width));
     const height = Math.max(1, Math.round(cfg.height));
+    const padX = computeContentPadX(width, height);
+    const maxW = Math.max(1, width - padX * 2);
     const ctx = cfg.ctx;
     const family = cfg.family;
     const valueWeight = cfg.valueWeight;
@@ -223,7 +230,7 @@
         unitText: "",
         secScale: secScale,
         gap: gapBase,
-        maxW: width,
+        maxW: maxW,
         maxH: height,
         family: family,
         valueWeight: valueWeight,
@@ -242,7 +249,7 @@
     if (mode === "high") {
       const fit = textLayout.fitThreeRowBlock({
         ctx: ctx,
-        W: width,
+        W: maxW,
         H: height,
         padX: 0,
         innerY: innerY,
@@ -266,7 +273,7 @@
 
     const fit = textLayout.fitValueUnitCaptionRows({
       ctx: ctx,
-      W: width,
+      W: maxW,
       H: height,
       padX: 0,
       innerY: innerY,
@@ -304,6 +311,7 @@
       model.ratioThresholdFlat,
       model.showStrip === true ? 1 : 0,
       model.showActiveBackground === true ? 1 : 0,
+      cfg.padX,
       cfg.family,
       cfg.valueWeight,
       cfg.labelWeight,
@@ -347,6 +355,7 @@
       if (!layout) {
         return null;
       }
+      const padX = computeContentPadX(layout.contentRect.width, layout.contentRect.height);
       const family = font.family;
       const valueWeight = font.weight;
       const labelWeight = font.labelWeight;
@@ -354,6 +363,7 @@
         mode: layout.mode,
         width: layout.contentRect.width,
         height: layout.contentRect.height,
+        padX: padX,
         model: model,
         family: family,
         valueWeight: valueWeight,

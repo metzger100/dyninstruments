@@ -74,6 +74,7 @@
 .dyni-html-root .dyni-alarm-main-normal,
 .dyni-html-root .dyni-alarm-main-high {
   gap: 0.06em;
+  padding: 0 0.12em;
 }
 
 .dyni-html-root .dyni-alarm-main-flat .dyni-alarm-inline-row {

@@ -447,21 +447,25 @@ describe("AlarmTextHtmlWidget", function () {
   it("keeps MapZoom inner layout parity for main/rows and typography", function () {
     const alarmCss = readCss("widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css");
     const mapZoomCss = readCss("widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css");
-
-    expect(readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-main")).toBe(
-      readRuleBody(mapZoomCss, ".dyni-html-root .dyni-map-zoom-main")
-    );
-    expect(readCombinedRuleBody(alarmCss, [
+    const alarmMain = readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-main");
+    const mapZoomMain = readRuleBody(mapZoomCss, ".dyni-html-root .dyni-map-zoom-main");
+    const alarmMainModes = readCombinedRuleBody(alarmCss, [
       ".dyni-html-root .dyni-alarm-main-flat",
       ".dyni-html-root .dyni-alarm-main-normal",
       ".dyni-html-root .dyni-alarm-main-high"
-    ])).toBe(
-      readCombinedRuleBody(mapZoomCss, [
-        ".dyni-html-root .dyni-map-zoom-main-flat",
-        ".dyni-html-root .dyni-map-zoom-main-normal",
-        ".dyni-html-root .dyni-map-zoom-main-high"
-      ])
-    );
+    ]);
+    const mapZoomMainModes = readCombinedRuleBody(mapZoomCss, [
+      ".dyni-html-root .dyni-map-zoom-main-flat",
+      ".dyni-html-root .dyni-map-zoom-main-normal",
+      ".dyni-html-root .dyni-map-zoom-main-high"
+    ]);
+    const alarmMainModesWithoutPadding = alarmMainModes
+      .split(";")
+      .filter((entry) => entry !== "padding: 0 0.12em")
+      .join(";");
+
+    expect(alarmMainModes).toContain("padding: 0 0.12em");
+    expect(alarmMainModesWithoutPadding).toBe(mapZoomMainModes);
     expect(readCombinedRuleBody(alarmCss, [
       ".dyni-html-root .dyni-alarm-inline-row",
       ".dyni-html-root .dyni-alarm-caption-row",

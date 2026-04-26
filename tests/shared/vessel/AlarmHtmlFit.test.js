@@ -14,14 +14,86 @@ describe("AlarmHtmlFit", function () {
     };
   }
 
-  function createHarness() {
+  function createMeasuredTextLayoutApi() {
+    return {
+      fitThreeRowBlock: vi.fn((args) => {
+        return { cPx: 11, vPx: 19 };
+      }),
+      fitValueUnitCaptionRows: vi.fn((args) => {
+        return { cPx: 10, vPx: 17 };
+      }),
+      fitInlineTriplet: vi.fn((args) => {
+        const cfg = args || {};
+        const ctx = cfg.ctx;
+        const captionText = String(cfg.captionText || "");
+        const valueText = String(cfg.valueText || "");
+        const family = cfg.family || "sans-serif";
+        const valueWeight = cfg.valueWeight || 700;
+        const labelWeight = cfg.labelWeight || 700;
+        const secScale = Number(cfg.secScale);
+        const scale = Number.isFinite(secScale) ? secScale : 0.8;
+        const maxW = Math.max(1, Number(cfg.maxW) || 0);
+        const maxH = Math.max(1, Number(cfg.maxH) || 0);
+        const gap = Math.max(0, Number(cfg.gap) || 0);
+        const safeMaxH = Math.max(1, Math.floor(maxH * 0.85));
+
+        let lo = 1;
+        let hi = safeMaxH;
+        let best = null;
+
+        while (lo <= hi) {
+          const valuePx = Math.max(1, Math.floor((lo + hi) / 2));
+          const captionPx = Math.max(1, Math.floor(valuePx * scale));
+          ctx.font = valueWeight + " " + valuePx + "px " + family;
+          const valueWidth = ctx.measureText(valueText).width;
+          ctx.font = labelWeight + " " + captionPx + "px " + family;
+          const captionWidth = captionText ? ctx.measureText(captionText).width : 0;
+          const totalWidth = captionWidth + (captionText ? gap : 0) + valueWidth;
+          const fits = totalWidth <= maxW + 0.01 && valuePx <= safeMaxH && captionPx <= safeMaxH;
+          if (fits) {
+            best = {
+              sPx: captionPx,
+              vPx: valuePx,
+              cW: captionWidth,
+              vW: valueWidth,
+              total: totalWidth,
+              gap: gap
+            };
+            lo = valuePx + 1;
+          } else {
+            hi = valuePx - 1;
+          }
+        }
+
+        if (!best) {
+          ctx.font = valueWeight + " 1px " + family;
+          const valueWidth = ctx.measureText(valueText).width;
+          ctx.font = labelWeight + " 1px " + family;
+          const captionWidth = captionText ? ctx.measureText(captionText).width : 0;
+          best = {
+            sPx: 1,
+            vPx: 1,
+            cW: captionWidth,
+            vW: valueWidth,
+            total: captionWidth + (captionText ? gap : 0) + valueWidth,
+            gap: gap
+          };
+        }
+
+        return best;
+      })
+    };
+  }
+
+  function createHarness(options) {
+    const cfg = options || {};
     const htmlUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
     const fitCalls = {
       high: [],
       normal: [],
       flat: []
     };
-    const textLayoutApi = {
+    const textLayoutApi = cfg.textLayoutApi || {
       fitThreeRowBlock: vi.fn((args) => {
         fitCalls.high.push(args);
         return { cPx: 11, vPx: 19 };
@@ -92,6 +164,10 @@ describe("AlarmHtmlFit", function () {
       ratioThresholdNormal: 1.0,
       ratioThresholdFlat: 3.0
     }, overrides || {});
+  }
+
+  function computePadX(width, height) {
+    return Math.max(2, Math.floor(Math.min(width, height) * 0.03));
   }
 
   it("resolves ratio mode from thresholds", function () {
@@ -167,6 +243,7 @@ describe("AlarmHtmlFit", function () {
   it("fits against the inner content rect when the idle strip is present", function () {
     const h = createHarness();
     const shellRect = { width: 220, height: 100 };
+    const padX = computePadX(205, 96);
 
     const result = h.fit.compute({
       model: makeModel({
@@ -181,7 +258,7 @@ describe("AlarmHtmlFit", function () {
     });
 
     const fitArgs = h.textLayoutApi.fitValueUnitCaptionRows.mock.calls[0][0];
-    expect(fitArgs.W).toBe(205);
+    expect(fitArgs.W).toBe(205 - (padX * 2));
     expect(fitArgs.H).toBe(96);
     expect(result.valuePx).toBe(17);
   });
@@ -218,7 +295,8 @@ describe("AlarmHtmlFit", function () {
     });
 
     const fitArgs = h.textLayoutApi.fitValueUnitCaptionRows.mock.calls[0][0];
-    expect(fitArgs.W).toBe(layout.contentRect.width);
+    const padX = computePadX(layout.contentRect.width, layout.contentRect.height);
+    expect(fitArgs.W).toBe(layout.contentRect.width - (padX * 2));
     expect(fitArgs.H).toBe(layout.contentRect.height);
   });
 
@@ -239,10 +317,44 @@ describe("AlarmHtmlFit", function () {
     });
 
     const fitArgs = h.textLayoutApi.fitValueUnitCaptionRows.mock.calls[0][0];
-    expect(fitArgs.W).toBe(216);
+    expect(fitArgs.W).toBe(216 - (computePadX(216, 96) * 2));
     expect(fitArgs.H).toBe(96);
     expect(fitArgs.W).not.toBe(shellRect.width);
     expect(fitArgs.H).not.toBe(shellRect.height);
+  });
+
+  it("leaves padX space on both sides in flat mode by fitting against reduced width", function () {
+    const textLayoutApi = createMeasuredTextLayoutApi();
+    const h = createHarness({ textLayoutApi: textLayoutApi });
+    const shellRect = { width: 800, height: 200 };
+    const contentWidth = shellRect.width - 4;
+    const contentHeight = shellRect.height - 4;
+    const padX = computePadX(contentWidth, contentHeight);
+
+    const result = h.fit.compute({
+      model: makeModel({
+        showStrip: false,
+        captionText: "ALARM",
+        valueText: "NONE"
+      }),
+      targetEl: h.targetEl,
+      hostContext: h.hostContext,
+      shellRect: shellRect
+    });
+
+    const fitArgs = textLayoutApi.fitInlineTriplet.mock.calls[0][0];
+    const measureCtx = h.hostContext.__dyniAlarmMeasureCtx;
+    measureCtx.font = "600 " + result.captionPx + "px sans-serif";
+    const captionWidth = measureCtx.measureText("ALARM").width;
+    measureCtx.font = "700 " + result.valuePx + "px sans-serif";
+    const valueWidth = measureCtx.measureText("NONE").width;
+    const totalWidth = captionWidth + fitArgs.gap + valueWidth;
+    const contentEdgeGap = (contentWidth - totalWidth) / 2;
+
+    expect(result.mode).toBe("flat");
+    expect(fitArgs.maxW).toBe(contentWidth - (padX * 2));
+    expect(totalWidth).toBeLessThanOrEqual(fitArgs.maxW + 0.01);
+    expect(contentEdgeGap).toBeGreaterThanOrEqual(padX - 0.01);
   });
 
   it("caches identical results on hostContext", function () {
