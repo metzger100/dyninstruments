@@ -9,6 +9,9 @@ const CONVENTIONS_PATH = "documentation/conventions/coding-standards.md";
 const COMPONENTS_CONFIG_REL = "config/components.js";
 const CLUSTERS_DIR_REL = "config/clusters";
 const COMPONENT_SCAN_DIRS = ["cluster", "shared", "widgets"];
+const BOOTSTRAP_ONLY_COMPONENT_SCAN_FILES = new Set([
+  "shared/unit-format-families.js"
+]);
 
 const violations = [];
 const byType = Object.create(null);
@@ -143,6 +146,10 @@ function validateComponentFiles(componentFiles, registryData) {
   const componentFileSet = new Set(componentFiles);
 
   for (const file of componentFiles) {
+    if (BOOTSTRAP_ONLY_COMPONENT_SCAN_FILES.has(file)) {
+      continue;
+    }
+
     const registeredItems = registryData.byJsPath.get(file);
     const inferredId = path.basename(file, ".js");
     const inferredGlobalKey = `Dyni${inferredId}`;

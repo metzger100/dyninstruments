@@ -14,7 +14,8 @@ const DYNI_COMPONENTS_RE = /root\.DyniComponents\s*=\s*root\.DyniComponents\s*\|
 const CREATE_EXPORT_RE = /return\s*{\s*id\s*:\s*["'][^"']+["']\s*,\s*create(?:\s*:\s*create)?\s*,?\s*};?/m;
 const MODULE_EXPORT_ALLOWLIST = new Set([
   "shared/theme/ThemeModel.js",
-  "shared/theme/ThemeResolver.js"
+  "shared/theme/ThemeResolver.js",
+  "shared/unit-format-families.js"
 ]);
 
 const violations = [];

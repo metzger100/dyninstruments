@@ -153,6 +153,12 @@
       css: undefined,
       globalKey: "DyniPlaceholderNormalize"
     },
+    UnitAwareFormatter: {
+      js: BASE + "shared/widget-kits/format/UnitAwareFormatter.js",
+      css: undefined,
+      globalKey: "DyniUnitAwareFormatter",
+      deps: ["PlaceholderNormalize"]
+    },
     StableDigits: {
       js: BASE + "shared/widget-kits/format/StableDigits.js",
       css: undefined,

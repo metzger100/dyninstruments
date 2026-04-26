@@ -1,25 +1,25 @@
-# PLAN17 — Stable release tooling, canonical in-repo artifacts, registry-owned runtime assets, and user-focused docs
+# PLAN18 — Stable release tooling, canonical in-repo artifacts, registry-owned runtime assets, and user-focused docs
 
 ## Status
 
 Approved after repository review and issue resolution.
 
-PLAN17 is **blocked until PLAN15 and PLAN16 are merged**.
+PLAN18 is **blocked until PLAN15 and PLAN16 are merged**.
 
 This plan lands **after PLAN15 and PLAN16** and must be implemented only on a repository state that already contains their runtime changes.
 
-PLAN17 also bootstraps the first stable release, but **bootstrap is manual**:
+PLAN18 also bootstraps the first stable release, but **bootstrap is manual**:
 
 - the first stable version is **`1.0.0`**
-- bootstrap `1.0.0` is created manually as the **last phase of PLAN17**
+- bootstrap `1.0.0` is created manually as the **last phase of PLAN18**
 - `release:prepare` is **not** used before the first tag exists
 - after `v1.0.0` exists locally, future release sessions use the normal documented release process
 
 Repo-grounded corrections folded into this final plan:
 
 - `plugin.js` remains the authoritative live-code source for bootstrap script order; release tooling derives that order through a narrowly scoped extractor rather than through a second shared manifest
-- `runtime/component-loader.js` already defines the authoritative runtime dependency expansion rules for `config.components`; PLAN17 reuses that graph model for release packaging
-- `config.components` entries currently carry `js`, `css`, and optionally `shadowCss`; PLAN17 adds a **mandatory keyed `assets` object** to every component entry
+- `runtime/component-loader.js` already defines the authoritative runtime dependency expansion rules for `config.components`; PLAN18 reuses that graph model for release packaging
+- `config.components` entries currently carry `js`, `css`, and optionally `shadowCss`; PLAN18 adds a **mandatory keyed `assets` object** to every component entry
 - all runtime assets become **registry-owned**
 - runtime CSS must no longer own repo-local runtime assets through `url(...)`; current bundled fonts in `plugin.css` must therefore be migrated in **Phase 1**
 - `tools/components-registry-loader.mjs` remains the authority for loading `config.components`
@@ -32,9 +32,9 @@ Repo-grounded corrections folded into this final plan:
 - widget/component asset access stays on `Helpers`, while runtime-only module calls use `loader.getResolvedAssets(componentId)`
 - `FontAssets` is a runtime-layer registry component declared through a dedicated `runtime` registry group, and its font-face descriptors live inside `runtime/FontAssets.js` rather than in the generic component schema
 - the runtime dependency closure reused by release packaging is produced by one shared pure helper consumed by both runtime init and tooling
-- the current `package.json` version is `0.0.0-test`; PLAN17 updates version metadata to `1.0.0` for the first stable release
-- the repo currently has **no git tags** and **no release scripts**; PLAN17 adds those
-- the current root `README.md` still mixes user and developer content; PLAN17 makes it fully user focused
+- the current `package.json` version is `0.0.0-test`; PLAN18 updates version metadata to `1.0.0` for the first stable release
+- the repo currently has **no git tags** and **no release scripts**; PLAN18 adds those
+- the current root `README.md` still mixes user and developer content; PLAN18 makes it fully user focused
 - `runtime/component-closure.js` loads immediately before `runtime/component-loader.js`, so the loader can reuse the shared closure helper without late-binding ambiguity
 - the bootstrap extractor targets the single `const internalScripts = [...]` declaration in the outer bootstrap IIFE body of `plugin.js`
 - the bootstrap config loader derives its config-relevant execution subset from extracted bootstrap order rather than from a second manual script chain
@@ -96,7 +96,7 @@ Example:
 
 ### Stable baseline
 
-The project exits pre-release with PLAN17. Remove the “pre-release / compatibility may change” wording from user-facing docs.
+The project exits pre-release with PLAN18. Remove the “pre-release / compatibility may change” wording from user-facing docs.
 
 ### Version shape
 
@@ -139,8 +139,8 @@ The authoritative internal bootstrap script order remains in `plugin.js`.
 Rules:
 
 - `plugin.js` remains the bootstrap entrypoint and the sole live-code authority for bootstrap script order
-- changes to `plugin.js` under PLAN17 are allowed only when they establish cleaner runtime module loading needed by the plugin itself
-- PLAN17 must **not** introduce a shared runtime manifest whose only purpose is to feed release tooling
+- changes to `plugin.js` under PLAN18 are allowed only when they establish cleaner runtime module loading needed by the plugin itself
+- PLAN18 must **not** introduce a shared runtime manifest whose only purpose is to feed release tooling
 - release tooling may extract the ordered bootstrap script list from `plugin.js` only through a narrowly scoped, syntactically stable extractor rule
 - `plugin.js` must keep exactly one authoritative bootstrap array declaration
 - that declaration is the single `const internalScripts = [...]` declaration in the outer bootstrap IIFE body of `plugin.js`
@@ -239,7 +239,7 @@ Manual recovery is documented instead.
 
 ### Single-writer version rule
 
-During PLAN17 implementation, normal development changes to `package.json` and `package-lock.json` are allowed when they are required to add release scripts, dependencies, or other non-version release infrastructure.
+During PLAN18 implementation, normal development changes to `package.json` and `package-lock.json` are allowed when they are required to add release scripts, dependencies, or other non-version release infrastructure.
 
 Within an actual release session, `release:create` is the **only** command that may update the release version fields in `package.json` and `package-lock.json`.
 
@@ -269,7 +269,7 @@ Before the session starts:
 - no partial release artifacts
   
 
-For PLAN17 release tooling, 
+For PLAN18 release tooling, 
 repository cleanliness is defined in git terms: tracked modifications 
 and non-ignored untracked files are forbidden, but ignored generated 
 outputs from checks may remain.
@@ -311,11 +311,11 @@ If the repository is dirty under that rule, the release flow fails hard.
 
 ### Manual bootstrap flow for `1.0.0`
 
-PLAN17 implementation happens in normal committed phases. Creating `1.0.0` is the **last phase**.
+PLAN18 implementation happens in normal committed phases. Creating `1.0.0` is the **last phase**.
 
-1. implement PLAN17 tooling, docs, and runtime changes in normal development commits
+1. implement PLAN18 tooling, docs, and runtime changes in normal development commits
   
-2. commit those PLAN17 implementation phases
+2. commit those PLAN18 implementation phases
   
 3. start a fresh clean release session from that committed state
   
@@ -369,7 +369,7 @@ No other tracked modifications or non-ignored untracked files are allowed. Ignor
 
 It must:
 
-- verify the repository is clean under the PLAN17 git-based clean-start rule before doing release evidence gathering
+- verify the repository is clean under the PLAN18 git-based clean-start rule before doing release evidence gathering
   
 - fail hard if no reachable SemVer tag exists and instruct the human/Codex to use the manual bootstrap `1.0.0` flow
   
@@ -678,7 +678,7 @@ Everything else must live under `dyninstruments/`.
 
 ### Required runtime inclusion sources
 
-PLAN17 must derive the release file set from live code, not from a stale manual list.
+PLAN18 must derive the release file set from live code, not from a stale manual list.
 
 Include:
 
@@ -707,7 +707,7 @@ Package the runtime-reachable closure the repository actually initializes.
 
 ### Packaging authorities
 
-PLAN17 must reuse existing live-code authorities:
+PLAN18 must reuse existing live-code authorities:
 
 - `plugin.js` remains authoritative for ordered bootstrap script loading, and release tooling extracts that ordered list through a narrowly scoped extractor rather than through a second manifest
   
@@ -928,7 +928,7 @@ Rules:
 
 ### Component access to assets
 
-PLAN17 adds a runtime helper boundary for component asset access based on the registry-owned manifest.
+PLAN18 adds a runtime helper boundary for component asset access based on the registry-owned manifest.
 
 Asset access must run through `Helpers`, not through direct registry or global access.
 
@@ -1036,7 +1036,7 @@ For CSS processing:
 
 ### Phase 1 migration requirement
 
-Because `plugin.css` currently owns bundled fonts via `url(...)`, PLAN17 Phase 1 must migrate those fonts to the registry-owned asset model.
+Because `plugin.css` currently owns bundled fonts via `url(...)`, PLAN18 Phase 1 must migrate those fonts to the registry-owned asset model.
 
 That phase must:
 
@@ -1051,7 +1051,7 @@ That phase must:
 - add lint and tests that forbid future repo-local runtime asset ownership through CSS `url(...)`
   
 
-This asset-system migration is **Phase 1** of PLAN17.
+This asset-system migration is **Phase 1** of PLAN18.
 
 ### Explicit font-installation contract
 
@@ -1351,7 +1351,7 @@ This keeps:
 
 ---
 
-## Documentation changes required by PLAN17
+## Documentation changes required by PLAN18
 
 ### README rewrite
 
@@ -1449,7 +1449,7 @@ It must describe:
   
 - `CLAUDE.md` is synced from `AGENTS.md`
   
-- PLAN17 must explicitly use:
+- PLAN18 must explicitly use:
   
   - `npm run ai:sync:agents`
     
@@ -1475,7 +1475,7 @@ Update `documentation/TABLEOFCONTENTS.md` to link the release guide.
 
 ## Implementation
 
-PLAN17 should be implemented in **six normal development phases**, followed by a separate clean manual bootstrap release step for `1.0.0`.
+PLAN18 should be implemented in **six normal development phases**, followed by a separate clean manual bootstrap release step for `1.0.0`.
 
 Each development phase must be committed normally before the bootstrap release session begins. The bootstrap release step must start from a clean committed repository and must not be mixed with ordinary code, test, or documentation edits.
 
@@ -1788,7 +1788,7 @@ Commit Phase 6 normally. The repository must be clean after this commit before t
 
 ## Bootstrap stable release step
 
-PLAN17 ends with a dedicated manual bootstrap step for **`1.0.0`**.
+PLAN18 ends with a dedicated manual bootstrap step for **`1.0.0`**.
 
 This step begins only after Phases 1–6 have been implemented, validated, and committed. It must start from a clean committed repository. It must not include ordinary development edits.
 
@@ -1823,7 +1823,7 @@ After that, future release sessions are baseline-driven from tags and docs.
 
 ## Validation and test strategy
 
-PLAN17 is not complete until these pass:
+PLAN18 is not complete until these pass:
 
 - `npm run check:all`
   
@@ -1937,7 +1937,7 @@ Add tests that verify at least:
 
 ## Completion criteria
 
-PLAN17 is complete when all of the following are true:
+PLAN18 is complete when all of the following are true:
 
 - a release Codex session can gather structured release evidence with `npm run release:prepare`
   
@@ -1979,6 +1979,6 @@ PLAN17 is complete when all of the following are true:
   
 - `releases/**` Markdown files are treated as release artifacts rather than documentation-tree pages
   
-- the first stable bootstrap release `v1.0.0` exists locally as a lightweight tag as part of PLAN17 completion
+- the first stable bootstrap release `v1.0.0` exists locally as a lightweight tag as part of PLAN18 completion
   
 - GitHub Releases publishes only the committed canonical artifacts from `releases/{semver}/` when the exact SemVer tag, resolved tagged commit, release note, and release commit are exactly consistent

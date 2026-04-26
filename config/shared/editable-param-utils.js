@@ -48,5 +48,6 @@
   }
 
   shared.makePerKindTextParams = makePerKindTextParams;
+  shared.makeKindCondition = makeKindCondition;
   shared.opt = opt;
 }(this));
