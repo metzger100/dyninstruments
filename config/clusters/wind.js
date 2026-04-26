@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Wind Cluster - Wind numeric and dial widget config
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js
+ * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/unit-editable-utils.js
  */
 (function (root) {
   "use strict";
@@ -10,9 +10,13 @@
   const config = ns.config;
   const shared = config.shared;
 
+  const makePerKindCaptionParams = shared.makePerKindCaptionParams;
   const makePerKindTextParams = shared.makePerKindTextParams;
+  const makeUnitAwareTextParams = shared.makeUnitAwareTextParams;
   const opt = shared.opt;
-  const WIND_KIND = shared.kindMaps.WIND_KIND;
+  const WIND_ANGLE_KIND = shared.kindMaps.WIND_ANGLE_KIND;
+  const WIND_SPEED_KIND = shared.kindMaps.WIND_SPEED_KIND;
+  const windBindings = shared.unitFormatFamilies.metricBindings;
 
   config.clusters.push({
     widget: "ClusterWidget",
@@ -233,7 +237,9 @@
         formatterParameters: false,
         className: true,
 
-        ...makePerKindTextParams(WIND_KIND)
+        ...makePerKindCaptionParams(WIND_SPEED_KIND),
+        ...makeUnitAwareTextParams(WIND_SPEED_KIND, windBindings),
+        ...makePerKindTextParams(WIND_ANGLE_KIND)
       }
     }
   });

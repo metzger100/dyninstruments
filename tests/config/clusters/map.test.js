@@ -12,6 +12,8 @@ describe("config/clusters/map.js", function () {
 
     runIifeScript("config/shared/kind-defaults.js", context);
     runIifeScript("config/shared/editable-param-utils.js", context);
+    runIifeScript("shared/unit-format-families.js", context);
+    runIifeScript("config/shared/unit-editable-utils.js", context);
     runIifeScript("config/clusters/map.js", context);
 
     return context.DyniPlugin.config.clusters.find((c) => c.def && c.def.cluster === "map").def;
@@ -68,9 +70,11 @@ describe("config/clusters/map.js", function () {
     expect(def.editableParameters.caption_zoom.default).toBe("ZOOM");
     expect(def.editableParameters.unit_zoom.default).toBe("");
     expect(def.editableParameters.caption_aisTargetDst.default).toBe("DST");
-    expect(def.editableParameters.unit_aisTargetDst.default).toBe("nm");
+    expect(def.editableParameters.formatUnit_aisTargetDst.default).toBe("nm");
+    expect(def.editableParameters.unit_aisTargetDst_nm.default).toBe("nm");
     expect(def.editableParameters.caption_aisTargetCpa.default).toBe("DCPA");
-    expect(def.editableParameters.unit_aisTargetCpa.default).toBe("nm");
+    expect(def.editableParameters.formatUnit_aisTargetCpa.default).toBe("nm");
+    expect(def.editableParameters.unit_aisTargetCpa_nm.default).toBe("nm");
     expect(def.editableParameters.caption_aisTargetTcpa.default).toBe("TCPA");
     expect(def.editableParameters.unit_aisTargetTcpa.default).toBe("min");
     expect(def.editableParameters.caption_aisTargetBrg.default).toBe("BRG");
@@ -80,7 +84,11 @@ describe("config/clusters/map.js", function () {
     expect(def.editableParameters.caption_centerDisplayPosition.condition).toEqual({ kind: "centerDisplay" });
     expect(def.editableParameters.unit_centerDisplayPosition.condition).toEqual({ kind: "centerDisplay" });
     expect(def.editableParameters.caption_centerDisplayMeasure.displayName).toBe("Measure caption");
-    expect(def.editableParameters.unit_centerDisplayMeasure.displayName).toBe("Measure distance unit");
+    expect(def.editableParameters.unit_centerDisplayMeasure_nm.displayName).toBe("nm unit");
+    expect(def.editableParameters.formatUnit_centerDisplayMarker.default).toBe("nm");
+    expect(def.editableParameters.unit_centerDisplayMeasure_nm.default).toBe("nm");
+    expect(def.editableParameters.unit_aisTargetDst).toBeUndefined();
+    expect(def.editableParameters.unit_aisTargetCpa).toBeUndefined();
   });
 
   it("applies center-display visibility semantics and clears stale visible state for zoom", function () {

@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Environment Base Editables - Shared environment editable fragments
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js
+ * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/unit-editable-utils.js
  */
 (function (root) {
   "use strict";
@@ -10,6 +10,8 @@
   const config = ns.config;
   const shared = config.shared;
   const opt = shared.opt;
+  const ENV_KIND = shared.kindMaps.ENV_KIND;
+  const envBindings = shared.unitFormatFamilies.metricBindings;
 
   shared.buildEnvironmentBaseEditableParameters = function () {
     return {
@@ -116,7 +118,11 @@
   };
 
   shared.buildEnvironmentPerKindEditableParameters = function () {
-    return shared.makePerKindTextParams(shared.kindMaps.ENV_KIND);
+    return Object.assign(
+      {},
+      shared.makePerKindCaptionParams(ENV_KIND),
+      shared.makeUnitAwareTextParams(ENV_KIND, envBindings)
+    );
   };
 
   shared.buildEnvironmentThresholdEditableParameters = function () {

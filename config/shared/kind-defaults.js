@@ -27,41 +27,32 @@
       hdmLinear: { cap: "HDM", unit: "\u00b0" }
     },
     SPEED_KIND: {
-      sog: { cap: "SOG", unit: "kn" },
-      stw: { cap: "STW", unit: "kn" },
-      sogLinear: { cap: "SOG", unit: "kn" },
-      stwLinear: { cap: "STW", unit: "kn" },
-      sogRadial: { cap: "SOG", unit: "kn" },
-      stwRadial: { cap: "STW", unit: "kn" }
+      sog: { cap: "SOG" },
+      stw: { cap: "STW" },
+      sogLinear: { cap: "SOG" },
+      stwLinear: { cap: "STW" },
+      sogRadial: { cap: "SOG" },
+      stwRadial: { cap: "STW" }
     },
     ENV_KIND: {
-      depth: { cap: "DPT", unit: "m" },
-      depthLinear: { cap: "DPT", unit: "m" },
-      depthRadial: { cap: "DPT", unit: "m" },
-      temp: { cap: "TEMP", unit: "\u00b0C" },
-      tempLinear: { cap: "TEMP", unit: "\u00b0C" },
-      tempRadial: { cap: "TEMP", unit: "\u00b0C" },
-      pressure: { cap: "PRES", unit: "hPa" }
+      depth: { cap: "DPT" },
+      depthLinear: { cap: "DPT" },
+      depthRadial: { cap: "DPT" },
+      temp: { cap: "TEMP" },
+      tempLinear: { cap: "TEMP" },
+      tempRadial: { cap: "TEMP" },
+      pressure: { cap: "PRES" }
     },
-    WIND_KIND: {
+    WIND_ANGLE_KIND: {
       angleTrue: { cap: "TWA", unit: "\u00b0" },
       angleApparent: { cap: "AWA", unit: "\u00b0" },
       angleTrueDirection: { cap: "TWD", unit: "\u00b0" },
-      speedTrue: { cap: "TWS", unit: "kn" },
-      speedApparent: { cap: "AWS", unit: "kn" },
       angleTrueRadialAngle: {
         cap: "TWA",
         unit: "\u00b0",
         kind: "angleTrueRadial",
         captionName: "Angle caption",
         unitName: "Angle unit"
-      },
-      angleTrueRadialSpeed: {
-        cap: "TWS",
-        unit: "kn",
-        kind: "angleTrueRadial",
-        captionName: "Speed caption",
-        unitName: "Speed unit"
       },
       angleApparentRadialAngle: {
         cap: "AWA",
@@ -70,13 +61,6 @@
         captionName: "Angle caption",
         unitName: "Angle unit"
       },
-      angleApparentRadialSpeed: {
-        cap: "AWS",
-        unit: "kn",
-        kind: "angleApparentRadial",
-        captionName: "Speed caption",
-        unitName: "Speed unit"
-      },
       angleTrueLinearAngle: {
         cap: "TWA",
         unit: "\u00b0",
@@ -84,43 +68,47 @@
         captionName: "Angle caption",
         unitName: "Angle unit"
       },
-      angleTrueLinearSpeed: {
-        cap: "TWS",
-        unit: "kn",
-        kind: "angleTrueLinear",
-        captionName: "Speed caption",
-        unitName: "Speed unit"
-      },
       angleApparentLinearAngle: {
         cap: "AWA",
         unit: "\u00b0",
         kind: "angleApparentLinear",
         captionName: "Angle caption",
         unitName: "Angle unit"
+      }
+    },
+    WIND_SPEED_KIND: {
+      speedTrue: { cap: "TWS" },
+      speedApparent: { cap: "AWS" },
+      angleTrueRadialSpeed: {
+        cap: "TWS",
+        kind: "angleTrueRadial",
+        captionName: "Speed caption",
+        unitName: "Speed unit"
+      },
+      angleApparentRadialSpeed: {
+        cap: "AWS",
+        kind: "angleApparentRadial",
+        captionName: "Speed caption",
+        unitName: "Speed unit"
+      },
+      angleTrueLinearSpeed: {
+        cap: "TWS",
+        kind: "angleTrueLinear",
+        captionName: "Speed caption",
+        unitName: "Speed unit"
       },
       angleApparentLinearSpeed: {
         cap: "AWS",
-        unit: "kn",
         kind: "angleApparentLinear",
         captionName: "Speed caption",
         unitName: "Speed unit"
       }
     },
-    NAV_KIND: {
+    NAV_TEXT_KIND: {
       eta: { cap: "ETA", unit: "" },
       rteEta: { cap: "RTE ETA", unit: "" },
-      dst: { cap: "DST", unit: "nm" },
-      rteDistance: { cap: "RTE", unit: "nm" },
-      vmg: { cap: "VMG", unit: "kn" },
       positionBoat: { cap: "POS", unit: "" },
       positionWp: { cap: "WP", unit: "" },
-      activeRouteRemain: {
-        cap: "RTE",
-        unit: "nm",
-        kind: "activeRoute",
-        captionName: "Route distance caption",
-        unitName: "Route distance unit"
-      },
       activeRouteEta: {
         cap: "ETA",
         unit: "",
@@ -135,26 +123,12 @@
         captionName: "Next course caption",
         unitName: "Next course unit"
       },
-      xteDisplayXte: {
-        cap: "XTE",
-        unit: "nm",
-        kind: "xteDisplay",
-        captionName: "XTE caption",
-        unitName: "XTE unit"
-      },
       xteDisplayCog: {
         cap: "COG",
         unit: "\u00b0",
         kind: "xteDisplay",
         captionName: "Track caption",
         unitName: "Track unit"
-      },
-      xteDisplayDst: {
-        cap: "DST",
-        unit: "nm",
-        kind: "xteDisplay",
-        captionName: "DST caption",
-        unitName: "DST unit"
       },
       xteDisplayBrg: {
         cap: "BRG",
@@ -164,22 +138,31 @@
         unitName: "BRG unit"
       }
     },
-    MAP_KIND: {
-      zoom: { cap: "ZOOM", unit: "" },
-      aisTargetDst: {
+    NAV_UNIT_AWARE_KIND: {
+      dst: { cap: "DST" },
+      rteDistance: { cap: "RTE" },
+      vmg: { cap: "VMG" },
+      activeRouteRemain: {
+        cap: "RTE",
+        kind: "activeRoute",
+        captionName: "Route distance caption",
+        unitName: "Route distance unit"
+      },
+      xteDisplayXte: {
+        cap: "XTE",
+        kind: "xteDisplay",
+        captionName: "XTE caption",
+        unitName: "XTE unit"
+      },
+      xteDisplayDst: {
         cap: "DST",
-        unit: "nm",
-        kind: "aisTarget",
-        captionName: "Distance caption",
-        unitName: "Distance unit"
-      },
-      aisTargetCpa: {
-        cap: "DCPA",
-        unit: "nm",
-        kind: "aisTarget",
-        captionName: "DCPA caption",
-        unitName: "DCPA unit"
-      },
+        kind: "xteDisplay",
+        captionName: "DST caption",
+        unitName: "DST unit"
+      }
+    },
+    MAP_TEXT_KIND: {
+      zoom: { cap: "ZOOM", unit: "" },
       aisTargetTcpa: {
         cap: "TCPA",
         unit: "min",
@@ -200,33 +183,46 @@
         kind: "centerDisplay",
         captionName: "Center caption",
         unitName: "Center unit"
+      }
+    },
+    MAP_UNIT_AWARE_KIND: {
+      aisTargetDst: {
+        cap: "DST",
+        kind: "aisTarget",
+        captionName: "Distance caption",
+        unitName: "Distance unit"
+      },
+      aisTargetCpa: {
+        cap: "DCPA",
+        kind: "aisTarget",
+        captionName: "DCPA caption",
+        unitName: "DCPA unit"
       },
       centerDisplayMarker: {
         cap: "WP",
-        unit: "nm",
         kind: "centerDisplay",
         captionName: "Waypoint caption",
         unitName: "Waypoint distance unit"
       },
       centerDisplayBoat: {
         cap: "POS",
-        unit: "nm",
         kind: "centerDisplay",
         captionName: "Boat caption",
         unitName: "Boat distance unit"
       },
       centerDisplayMeasure: {
         cap: "MEAS",
-        unit: "nm",
         kind: "centerDisplay",
         captionName: "Measure caption",
         unitName: "Measure distance unit"
       }
     },
-    ANCHOR_KIND: {
-      distance: { cap: "ANCHOR", unit: "m" },
-      watch: { cap: "AWATCH", unit: "m" },
-      bearing: { cap: "ABRG", unit: "\u00b0" }
+    ANCHOR_TEXT_KIND: {
+      anchorBearing: { cap: "ABRG", unit: "\u00b0" }
+    },
+    ANCHOR_UNIT_AWARE_KIND: {
+      anchorDistance: { cap: "ANCHOR" },
+      anchorWatch: { cap: "AWATCH" }
     },
     VESSEL_KIND: {
       voltage: { cap: "VOLT", unit: "V" },

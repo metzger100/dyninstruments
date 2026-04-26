@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Map Cluster - Map-focused instruments (center display, zoom action, AIS target summary)
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js
+ * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/unit-editable-utils.js
  */
 (function (root) {
   "use strict";
@@ -10,9 +10,13 @@
   const config = ns.config;
   const shared = config.shared;
 
+  const makePerKindCaptionParams = shared.makePerKindCaptionParams;
   const makePerKindTextParams = shared.makePerKindTextParams;
+  const makeUnitAwareTextParams = shared.makeUnitAwareTextParams;
   const opt = shared.opt;
-  const MAP_KIND = shared.kindMaps.MAP_KIND;
+  const MAP_TEXT_KIND = shared.kindMaps.MAP_TEXT_KIND;
+  const MAP_UNIT_AWARE_KIND = shared.kindMaps.MAP_UNIT_AWARE_KIND;
+  const mapBindings = shared.unitFormatFamilies.metricBindings;
   const CENTER_DISPLAY_CONDITION = { kind: "centerDisplay" };
   const AIS_TARGET_CONDITION = { kind: "aisTarget" };
 
@@ -94,7 +98,9 @@
         formatter: false,
         formatterParameters: false,
         className: true,
-        ...makePerKindTextParams(MAP_KIND)
+        ...makePerKindCaptionParams(MAP_UNIT_AWARE_KIND),
+        ...makeUnitAwareTextParams(MAP_UNIT_AWARE_KIND, mapBindings),
+        ...makePerKindTextParams(MAP_TEXT_KIND)
       },
       updateFunction: function (values) {
         const out = values ? { ...values } : {};

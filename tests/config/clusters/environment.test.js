@@ -12,6 +12,8 @@ describe("config/clusters/environment.js", function () {
 
     runIifeScript("config/shared/kind-defaults.js", context);
     runIifeScript("config/shared/editable-param-utils.js", context);
+    runIifeScript("shared/unit-format-families.js", context);
+    runIifeScript("config/shared/unit-editable-utils.js", context);
     runIifeScript("config/shared/environment-base-editables.js", context);
     runIifeScript("config/shared/environment-depth-editables.js", context);
     runIifeScript("config/shared/environment-temperature-editables.js", context);
@@ -34,13 +36,19 @@ describe("config/clusters/environment.js", function () {
     expect(def.editableParameters.captionUnitScale.internal).not.toBe(true);
     expect(def.editableParameters.tempKey.name).toBe("Temperature store path");
     expect(def.editableParameters.value.name).toBe("Pressure store path");
-    expect(def.editableParameters.depthLinearTickMajor.name).toBe("Major tick step");
+    expect(def.editableParameters.depthLinearTickMajor_m.displayName).toBe("Major tick step (m)");
     expect(def.editableParameters.depthLinearShowEndLabels.name).toBe("Show min/max labels");
     expect(def.editableParameters.depthRadialWarningEnabled.name).toBe("Show warning sector");
-    expect(def.editableParameters.depthLinearAlarmFrom.name).toBe("Alarm at or below");
-    expect(def.editableParameters.tempLinearWarningFrom.name).toBe("Warning at or above");
-    expect(def.editableParameters.tempRadialAlarmFrom.name).toBe("Alarm at or above");
+    expect(def.editableParameters.depthLinearAlarmFrom_m.displayName).toBe("Alarm at or below (m)");
+    expect(def.editableParameters.tempLinearWarningFrom_celsius.displayName).toBe("Warning at or above (\u00b0C)");
+    expect(def.editableParameters.tempRadialAlarmFrom_kelvin.displayName).toBe("Alarm at or above (K)");
     expect(def.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
+    expect(def.editableParameters.formatUnit_depth.default).toBe("m");
+    expect(def.editableParameters.unit_depth_m.default).toBe("m");
+    expect(def.editableParameters.formatUnit_temp.default).toBe("celsius");
+    expect(def.editableParameters.unit_temp_celsius.default).toBe("\u00b0C");
+    expect(def.editableParameters.formatUnit_pressure.default).toBe("hpa");
+    expect(def.editableParameters.unit_pressure_hpa.default).toBe("hPa");
     expect(def.editableParameters.depthLinearHideTextualMetrics.condition).toEqual({ kind: "depthLinear" });
     expect(def.editableParameters.depthLinearHideTextualMetrics.default).toBe(false);
     expect(def.editableParameters.depthRadialHideTextualMetrics.condition).toEqual({ kind: "depthRadial" });
@@ -61,85 +69,24 @@ describe("config/clusters/environment.js", function () {
     ]);
   });
 
-  it("keeps editable parameter key order aligned with the original environment config", function () {
+  it("exposes the generated environment editable schema", function () {
     const def = loadEnvDef();
-    expect(Object.keys(def.editableParameters)).toEqual([
-      "kind",
-      "tempKey",
-      "value",
-      "depthLinearMinValue",
-      "depthLinearMaxValue",
-      "depthLinearTickMajor",
-      "depthLinearTickMinor",
-      "depthLinearShowEndLabels",
-      "depthLinearWarningEnabled",
-      "depthLinearAlarmEnabled",
-      "depthLinearAlarmFrom",
-      "depthLinearWarningFrom",
-      "depthLinearRatioThresholdNormal",
-      "depthLinearRatioThresholdFlat",
-      "depthRadialMinValue",
-      "depthRadialMaxValue",
-      "depthRadialTickMajor",
-      "depthRadialTickMinor",
-      "depthRadialShowEndLabels",
-      "depthRadialWarningEnabled",
-      "depthRadialAlarmEnabled",
-      "depthRadialAlarmFrom",
-      "depthRadialWarningFrom",
-      "depthRadialRatioThresholdNormal",
-      "depthRadialRatioThresholdFlat",
-      "easing",
-      "depthLinearHideTextualMetrics",
-      "depthRadialHideTextualMetrics",
-      "tempLinearHideTextualMetrics",
-      "tempRadialHideTextualMetrics",
-      "tempLinearMinValue",
-      "tempLinearMaxValue",
-      "tempLinearTickMajor",
-      "tempLinearTickMinor",
-      "tempLinearShowEndLabels",
-      "tempLinearWarningEnabled",
-      "tempLinearAlarmEnabled",
-      "tempLinearWarningFrom",
-      "tempLinearAlarmFrom",
-      "tempLinearRatioThresholdNormal",
-      "tempLinearRatioThresholdFlat",
-      "tempRadialMinValue",
-      "tempRadialMaxValue",
-      "tempRadialTickMajor",
-      "tempRadialTickMinor",
-      "tempRadialShowEndLabels",
-      "tempRadialWarningEnabled",
-      "tempRadialAlarmEnabled",
-      "tempRadialWarningFrom",
-      "tempRadialAlarmFrom",
-      "tempRadialRatioThresholdNormal",
-      "tempRadialRatioThresholdFlat",
-      "captionUnitScale",
-      "stableDigits",
-      "caption",
-      "unit",
-      "formatter",
-      "formatterParameters",
-      "className",
-      "caption_depth",
-      "unit_depth",
-      "caption_depthLinear",
-      "unit_depthLinear",
-      "caption_depthRadial",
-      "unit_depthRadial",
-      "caption_temp",
-      "unit_temp",
-      "caption_tempLinear",
-      "unit_tempLinear",
-      "caption_tempRadial",
-      "unit_tempRadial",
-      "caption_pressure",
-      "unit_pressure",
-      "ratioThresholdNormal",
-      "ratioThresholdFlat"
-    ]);
+    const keys = Object.keys(def.editableParameters);
+    expect(keys.slice(0, 3)).toEqual(["kind", "tempKey", "value"]);
+    expect(keys).toContain("depthLinearMinValue_nm");
+    expect(keys).toContain("depthRadialAlarmFrom_ft");
+    expect(keys).toContain("tempLinearWarningFrom_kelvin");
+    expect(keys).toContain("tempRadialAlarmFrom_celsius");
+    expect(keys).toContain("caption_depth");
+    expect(keys).toContain("formatUnit_depth");
+    expect(keys).toContain("unit_depth_nm");
+    expect(keys).toContain("caption_tempLinear");
+    expect(keys).toContain("formatUnit_tempLinear");
+    expect(keys).toContain("unit_tempLinear_kelvin");
+    expect(keys).toContain("caption_pressure");
+    expect(keys).toContain("unit_pressure_bar");
+    expect(keys).toContain("caption");
+    expect(keys).toContain("formatterParameters");
   });
 
   it("injects pressure store key from value when pressure kind is active", function () {

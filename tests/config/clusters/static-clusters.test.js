@@ -11,7 +11,9 @@ describe("static cluster configs", function () {
     });
 
     runIifeScript("config/shared/kind-defaults.js", context);
+    runIifeScript("shared/unit-format-families.js", context);
     runIifeScript("config/shared/editable-param-utils.js", context);
+    runIifeScript("config/shared/unit-editable-utils.js", context);
     runIifeScript("config/shared/common-editables.js", context);
     runIifeScript("config/shared/environment-base-editables.js", context);
     runIifeScript("config/shared/environment-depth-editables.js", context);
@@ -52,7 +54,7 @@ describe("static cluster configs", function () {
     expect(byCluster.speed.editableParameters.kind.default).toBe("sog");
     expect(byCluster.wind.editableParameters.kind.default).toBe("angleTrue");
     expect(byCluster.map.editableParameters.kind.default).toBe("centerDisplay");
-    expect(byCluster.anchor.editableParameters.kind.default).toBe("distance");
+    expect(byCluster.anchor.editableParameters.kind.default).toBe("anchorDistance");
     expect(byCluster.courseHeading.editableParameters.kind.name).toBe("Instrument");
     expect(byCluster.default.editableParameters.kind.list.map((entry) => entry.value)).toEqual([
       "text",
@@ -184,13 +186,14 @@ describe("static cluster configs", function () {
       { kind: "sogLinear" },
       { kind: "stwLinear" }
     ]);
-    expect(byCluster.speed.editableParameters.speedLinearTickMajor.name).toBe("Major tick step");
-    expect(byCluster.speed.editableParameters.speedLinearTickMinor.name).toBe("Minor tick step");
+    expect(byCluster.speed.editableParameters.speedLinearTickMajor_kn.displayName).toBe("Major tick step (kn)");
+    expect(byCluster.speed.editableParameters.speedLinearTickMajor_ms.displayName).toBe("Major tick step (m/s)");
+    expect(byCluster.speed.editableParameters.speedLinearTickMinor_kmh.displayName).toBe("Minor tick step (km/h)");
     expect(byCluster.speed.editableParameters.speedLinearShowEndLabels.name).toBe("Show min/max labels");
     expect(byCluster.speed.editableParameters.speedLinearWarningEnabled.name).toBe("Show warning sector");
     expect(byCluster.speed.editableParameters.speedRadialAlarmEnabled.name).toBe("Show alarm sector");
-    expect(byCluster.speed.editableParameters.speedLinearWarningFrom.name).toBe("Warning at or above");
-    expect(byCluster.speed.editableParameters.speedRadialAlarmFrom.name).toBe("Alarm at or above");
+    expect(byCluster.speed.editableParameters.speedLinearWarningFrom_ms.displayName).toBe("Warning at or above (m/s)");
+    expect(byCluster.speed.editableParameters.speedRadialAlarmFrom_kmh.displayName).toBe("Alarm at or above (km/h)");
     expect(byCluster.speed.editableParameters.speedLinearHideTextualMetrics.default).toBe(false);
     expect(byCluster.speed.editableParameters.speedLinearHideTextualMetrics.condition).toEqual([
       { kind: "sogLinear" },
@@ -201,13 +204,21 @@ describe("static cluster configs", function () {
       { kind: "sogRadial" },
       { kind: "stwRadial" }
     ]);
-    expect(byCluster.speed.editableParameters.speedLinearWarningFrom.condition).toEqual([
-      { kind: "sogLinear", speedLinearWarningEnabled: true },
-      { kind: "stwLinear", speedLinearWarningEnabled: true }
+    expect(byCluster.speed.editableParameters.speedLinearWarningFrom_ms.condition).toEqual([
+      { kind: "sogLinear", speedLinearWarningEnabled: true, formatUnit_sogLinear: "ms" },
+      { kind: "stwLinear", speedLinearWarningEnabled: true, formatUnit_stwLinear: "ms" }
     ]);
-    expect(byCluster.speed.editableParameters.speedLinearAlarmFrom.condition).toEqual([
-      { kind: "sogLinear", speedLinearAlarmEnabled: true },
-      { kind: "stwLinear", speedLinearAlarmEnabled: true }
+    expect(byCluster.speed.editableParameters.speedLinearAlarmFrom_kn.condition).toEqual([
+      { kind: "sogLinear", speedLinearAlarmEnabled: true, formatUnit_sogLinear: "kn" },
+      { kind: "stwLinear", speedLinearAlarmEnabled: true, formatUnit_stwLinear: "kn" }
+    ]);
+    expect(byCluster.speed.editableParameters.speedRadialWarningFrom_ms.condition).toEqual([
+      { kind: "sogRadial", speedRadialWarningEnabled: true, formatUnit_sogRadial: "ms" },
+      { kind: "stwRadial", speedRadialWarningEnabled: true, formatUnit_stwRadial: "ms" }
+    ]);
+    expect(byCluster.speed.editableParameters.speedRadialAlarmFrom_kmh.condition).toEqual([
+      { kind: "sogRadial", speedRadialAlarmEnabled: true, formatUnit_sogRadial: "kmh" },
+      { kind: "stwRadial", speedRadialAlarmEnabled: true, formatUnit_stwRadial: "kmh" }
     ]);
     expect(byCluster.wind.editableParameters.angleCaption_TWA).toBeUndefined();
     expect(byCluster.wind.editableParameters.speedCaption_TWS).toBeUndefined();
@@ -216,19 +227,35 @@ describe("static cluster configs", function () {
     expect(byCluster.wind.editableParameters.caption_angleTrueRadialAngle.condition).toEqual({ kind: "angleTrueRadial" });
     expect(byCluster.wind.editableParameters.unit_angleTrueRadialAngle.condition).toEqual({ kind: "angleTrueRadial" });
     expect(byCluster.wind.editableParameters.caption_angleTrueRadialSpeed.condition).toEqual({ kind: "angleTrueRadial" });
-    expect(byCluster.wind.editableParameters.unit_angleTrueRadialSpeed.condition).toEqual({ kind: "angleTrueRadial" });
+    expect(byCluster.wind.editableParameters.formatUnit_angleTrueRadialSpeed.default).toBe("kn");
+    expect(byCluster.wind.editableParameters.unit_angleTrueRadialSpeed_kn.condition).toEqual({
+      kind: "angleTrueRadial",
+      formatUnit_angleTrueRadialSpeed: "kn"
+    });
     expect(byCluster.wind.editableParameters.caption_angleApparentRadialAngle.condition).toEqual({ kind: "angleApparentRadial" });
     expect(byCluster.wind.editableParameters.unit_angleApparentRadialAngle.condition).toEqual({ kind: "angleApparentRadial" });
     expect(byCluster.wind.editableParameters.caption_angleApparentRadialSpeed.condition).toEqual({ kind: "angleApparentRadial" });
-    expect(byCluster.wind.editableParameters.unit_angleApparentRadialSpeed.condition).toEqual({ kind: "angleApparentRadial" });
+    expect(byCluster.wind.editableParameters.formatUnit_angleApparentRadialSpeed.default).toBe("kn");
+    expect(byCluster.wind.editableParameters.unit_angleApparentRadialSpeed_ms.condition).toEqual({
+      kind: "angleApparentRadial",
+      formatUnit_angleApparentRadialSpeed: "ms"
+    });
     expect(byCluster.wind.editableParameters.caption_angleTrueLinearAngle.condition).toEqual({ kind: "angleTrueLinear" });
     expect(byCluster.wind.editableParameters.unit_angleTrueLinearAngle.condition).toEqual({ kind: "angleTrueLinear" });
     expect(byCluster.wind.editableParameters.caption_angleTrueLinearSpeed.condition).toEqual({ kind: "angleTrueLinear" });
-    expect(byCluster.wind.editableParameters.unit_angleTrueLinearSpeed.condition).toEqual({ kind: "angleTrueLinear" });
+    expect(byCluster.wind.editableParameters.formatUnit_angleTrueLinearSpeed.default).toBe("kn");
+    expect(byCluster.wind.editableParameters.unit_angleTrueLinearSpeed_kn.condition).toEqual({
+      kind: "angleTrueLinear",
+      formatUnit_angleTrueLinearSpeed: "kn"
+    });
     expect(byCluster.wind.editableParameters.caption_angleApparentLinearAngle.condition).toEqual({ kind: "angleApparentLinear" });
     expect(byCluster.wind.editableParameters.unit_angleApparentLinearAngle.condition).toEqual({ kind: "angleApparentLinear" });
     expect(byCluster.wind.editableParameters.caption_angleApparentLinearSpeed.condition).toEqual({ kind: "angleApparentLinear" });
-    expect(byCluster.wind.editableParameters.unit_angleApparentLinearSpeed.condition).toEqual({ kind: "angleApparentLinear" });
+    expect(byCluster.wind.editableParameters.formatUnit_angleApparentLinearSpeed.default).toBe("kn");
+    expect(byCluster.wind.editableParameters.unit_angleApparentLinearSpeed_ms.condition).toEqual({
+      kind: "angleApparentLinear",
+      formatUnit_angleApparentLinearSpeed: "ms"
+    });
     expect(byCluster.courseHeading.editableParameters.compassLinearRatioThresholdNormal.condition).toEqual([
       { kind: "hdtLinear" },
       { kind: "hdmLinear" }
@@ -343,9 +370,9 @@ describe("static cluster configs", function () {
     expect(Object.prototype.hasOwnProperty.call(byCluster.vessel.editableParameters.stableDigits, "default")).toBe(false);
     expect(byCluster.anchor.editableParameters.stableDigits.default).toBe(false);
     expect(byCluster.anchor.editableParameters.stableDigits.condition).toEqual([
-      { kind: "distance" },
-      { kind: "watch" },
-      { kind: "bearing" }
+      { kind: "anchorDistance" },
+      { kind: "anchorWatch" },
+      { kind: "anchorBearing" }
     ]);
     expect(byCluster.wind.editableParameters.windLinearTickMajor.name).toBe("Major tick step");
     expect(byCluster.wind.editableParameters.windLinearTickMinor.name).toBe("Minor tick step");
@@ -354,6 +381,31 @@ describe("static cluster configs", function () {
     expect(byCluster.wind.editableParameters.windLinearLayMax.name).toBe("Max layline angle");
     expect(byCluster.nav.editableParameters.xteHideTextualMetrics.default).toBe(false);
     expect(byCluster.nav.editableParameters.xteHideTextualMetrics.condition).toEqual({ kind: "xteDisplay" });
+    expect(byCluster.nav.editableParameters.xteDisplayScale_nm).toEqual(expect.objectContaining({
+      default: 1,
+      step: 0.1,
+      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "nm" }
+    }));
+    expect(byCluster.nav.editableParameters.xteDisplayScale_m).toEqual(expect.objectContaining({
+      default: 1852,
+      step: 10,
+      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "m" }
+    }));
+    expect(byCluster.nav.editableParameters.xteDisplayScale_km).toEqual(expect.objectContaining({
+      default: 1.852,
+      step: 0.01,
+      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "km" }
+    }));
+    expect(byCluster.nav.editableParameters.xteDisplayScale_ft).toEqual(expect.objectContaining({
+      default: 6076,
+      step: 10,
+      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "ft" }
+    }));
+    expect(byCluster.nav.editableParameters.xteDisplayScale_yd).toEqual(expect.objectContaining({
+      default: 2025,
+      step: 1,
+      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "yd" }
+    }));
   });
 
   it("updates default cluster storeKeys.value from the KEY editable", function () {

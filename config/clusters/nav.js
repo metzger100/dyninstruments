@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Nav Cluster - Canonical navigation widget config (ETA, distances, positions, route points)
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/common-editables.js
+ * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/common-editables.js, config/shared/unit-editable-utils.js
  */
 (function (root) {
   "use strict";
@@ -10,10 +10,16 @@
   const config = ns.config;
   const shared = config.shared;
 
+  const makePerKindCaptionParams = shared.makePerKindCaptionParams;
   const makePerKindTextParams = shared.makePerKindTextParams;
+  const makeUnitAwareTextParams = shared.makeUnitAwareTextParams;
+  const makeFormatUnitSelectParam = shared.makeFormatUnitSelectParam;
+  const makePerUnitStringParams = shared.makePerUnitStringParams;
   const opt = shared.opt;
-  const NAV_KIND = shared.kindMaps.NAV_KIND;
+  const NAV_TEXT_KIND = shared.kindMaps.NAV_TEXT_KIND;
+  const NAV_UNIT_AWARE_KIND = shared.kindMaps.NAV_UNIT_AWARE_KIND;
   const commonThreeElementsEditables = shared.commonThreeElementsEditables;
+  const navBindings = shared.unitFormatFamilies.metricBindings;
   const NAV_TEXT_KIND_CONDITION = [
     { kind: "eta" },
     { kind: "rteEta" },
@@ -23,6 +29,33 @@
     { kind: "positionBoat" },
     { kind: "positionWp" }
   ];
+  const XTE_DISPLAY_SCALE_FIELDS = {
+    nm: { default: 1, min: 0, max: 20, step: 0.1 },
+    m: { default: 1852, min: 0, max: 20000, step: 10 },
+    km: { default: 1.852, min: 0, max: 20, step: 0.01 },
+    ft: { default: 6076, min: 0, max: 40000, step: 10 },
+    yd: { default: 2025, min: 0, max: 40000, step: 1 }
+  };
+
+  function makeXteDisplayScaleParams() {
+    const out = {};
+    Object.keys(XTE_DISPLAY_SCALE_FIELDS).forEach(function (token) {
+      const spec = XTE_DISPLAY_SCALE_FIELDS[token];
+      out["xteDisplayScale_" + token] = {
+        type: "FLOAT",
+        min: spec.min,
+        max: spec.max,
+        step: spec.step,
+        default: spec.default,
+        name: "XTE highway scale",
+        condition: {
+          kind: "xteDisplay",
+          formatUnit_xteDisplayXte: token
+        }
+      };
+    });
+    return out;
+  }
 
   config.clusters.push({
     widget: "ClusterWidget",
@@ -129,24 +162,16 @@
           name: "DST caption",
           condition: { kind: "editRoute" }
         },
-        unit_editRouteDst: {
-          type: "STRING",
-          default: "nm",
-          name: "DST unit",
-          condition: { kind: "editRoute" }
-        },
+        ...makeFormatUnitSelectParam("editRouteDst", navBindings.editRouteDst, { kind: "editRoute" }),
+        ...makePerUnitStringParams("editRouteDst", navBindings.editRouteDst, { kind: "editRoute" }),
         caption_editRouteRte: {
           type: "STRING",
           default: "RTE",
           name: "RTE caption",
           condition: { kind: "editRoute" }
         },
-        unit_editRouteRte: {
-          type: "STRING",
-          default: "nm",
-          name: "RTE unit",
-          condition: { kind: "editRoute" }
-        },
+        ...makeFormatUnitSelectParam("editRouteRte", navBindings.editRouteRte, { kind: "editRoute" }),
+        ...makePerUnitStringParams("editRouteRte", navBindings.editRouteRte, { kind: "editRoute" }),
         caption_editRouteEta: {
           type: "STRING",
           default: "ETA",
@@ -171,12 +196,8 @@
           name: "Show header",
           condition: { kind: "routePoints" }
         },
-        distanceUnit: {
-          type: "STRING",
-          default: "nm",
-          name: "Distance unit",
-          condition: { kind: "routePoints" }
-        },
+        ...makeFormatUnitSelectParam("routePointsDistance", navBindings.routePointsDistance, { kind: "routePoints" }),
+        ...makePerUnitStringParams("routePointsDistance", navBindings.routePointsDistance, { kind: "routePoints" }),
         courseUnit: {
           type: "STRING",
           default: "°",
@@ -233,6 +254,7 @@
           name: "Hide textual metrics",
           condition: { kind: "xteDisplay" }
         },
+        ...makeXteDisplayScaleParams(),
         hideSeconds: {
           type: "BOOLEAN",
           default: false,
@@ -249,7 +271,9 @@
         formatter: false,
         formatterParameters: false,
         className: true,
-        ...makePerKindTextParams(NAV_KIND),
+        ...makePerKindCaptionParams(NAV_UNIT_AWARE_KIND),
+        ...makeUnitAwareTextParams(NAV_UNIT_AWARE_KIND, navBindings),
+        ...makePerKindTextParams(NAV_TEXT_KIND),
         ratioThresholdNormal: {
           ...commonThreeElementsEditables.ratioThresholdNormal,
           internal: true,

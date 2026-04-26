@@ -12,6 +12,8 @@ describe("config/clusters/nav.js", function () {
 
     runIifeScript("config/shared/kind-defaults.js", context);
     runIifeScript("config/shared/editable-param-utils.js", context);
+    runIifeScript("shared/unit-format-families.js", context);
+    runIifeScript("config/shared/unit-editable-utils.js", context);
     runIifeScript("config/shared/common-editables.js", context);
     runIifeScript("config/clusters/nav.js", context);
 
@@ -68,16 +70,85 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.caption_editRoutePts.default).toBe("PTS");
     expect(def.editableParameters.caption_editRouteDst.condition).toEqual({ kind: "editRoute" });
     expect(def.editableParameters.caption_editRouteDst.default).toBe("DST");
-    expect(def.editableParameters.unit_editRouteDst.condition).toEqual({ kind: "editRoute" });
-    expect(def.editableParameters.unit_editRouteDst.default).toBe("nm");
+    expect(def.editableParameters.formatUnit_editRouteDst.condition).toEqual({ kind: "editRoute" });
+    expect(def.editableParameters.formatUnit_editRouteDst.default).toBe("nm");
+    expect(def.editableParameters.unit_editRouteDst_nm.condition).toEqual({
+      kind: "editRoute",
+      formatUnit_editRouteDst: "nm"
+    });
+    expect(def.editableParameters.unit_editRouteDst_nm.default).toBe("nm");
     expect(def.editableParameters.caption_editRouteRte.condition).toEqual({ kind: "editRoute" });
     expect(def.editableParameters.caption_editRouteRte.default).toBe("RTE");
-    expect(def.editableParameters.unit_editRouteRte.condition).toEqual({ kind: "editRoute" });
-    expect(def.editableParameters.unit_editRouteRte.default).toBe("nm");
+    expect(def.editableParameters.formatUnit_editRouteRte.condition).toEqual({ kind: "editRoute" });
+    expect(def.editableParameters.formatUnit_editRouteRte.default).toBe("nm");
+    expect(def.editableParameters.unit_editRouteRte_nm.condition).toEqual({
+      kind: "editRoute",
+      formatUnit_editRouteRte: "nm"
+    });
+    expect(def.editableParameters.unit_editRouteRte_nm.default).toBe("nm");
     expect(def.editableParameters.caption_editRouteEta.condition).toEqual({ kind: "editRoute" });
     expect(def.editableParameters.caption_editRouteEta.default).toBe("ETA");
     expect(def.editableParameters.unit_editRoutePts).toBeUndefined();
     expect(def.editableParameters.unit_editRouteEta).toBeUndefined();
+    expect(def.editableParameters.caption_activeRouteRemain.condition).toEqual({ kind: "activeRoute" });
+    expect(def.editableParameters.formatUnit_activeRouteRemain.condition).toEqual({ kind: "activeRoute" });
+    expect(def.editableParameters.formatUnit_activeRouteRemain.default).toBe("nm");
+    expect(def.editableParameters.unit_activeRouteRemain_nm.condition).toEqual({
+      kind: "activeRoute",
+      formatUnit_activeRouteRemain: "nm"
+    });
+    expect(def.editableParameters.unit_activeRouteRemain_nm.default).toBe("nm");
+    expect(def.editableParameters.caption_xteDisplayXte.condition).toEqual({ kind: "xteDisplay" });
+    expect(def.editableParameters.formatUnit_xteDisplayXte.condition).toEqual({ kind: "xteDisplay" });
+    expect(def.editableParameters.unit_xteDisplayXte_nm.condition).toEqual({
+      kind: "xteDisplay",
+      formatUnit_xteDisplayXte: "nm"
+    });
+    expect(def.editableParameters.xteDisplayScale_nm).toEqual({
+      type: "FLOAT",
+      min: 0,
+      max: 20,
+      step: 0.1,
+      default: 1,
+      name: "XTE highway scale",
+      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "nm" }
+    });
+    expect(def.editableParameters.xteDisplayScale_m).toEqual({
+      type: "FLOAT",
+      min: 0,
+      max: 20000,
+      step: 10,
+      default: 1852,
+      name: "XTE highway scale",
+      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "m" }
+    });
+    expect(def.editableParameters.xteDisplayScale_km).toEqual({
+      type: "FLOAT",
+      min: 0,
+      max: 20,
+      step: 0.01,
+      default: 1.852,
+      name: "XTE highway scale",
+      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "km" }
+    });
+    expect(def.editableParameters.xteDisplayScale_ft).toEqual({
+      type: "FLOAT",
+      min: 0,
+      max: 40000,
+      step: 10,
+      default: 6076,
+      name: "XTE highway scale",
+      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "ft" }
+    });
+    expect(def.editableParameters.xteDisplayScale_yd).toEqual({
+      type: "FLOAT",
+      min: 0,
+      max: 40000,
+      step: 1,
+      default: 2025,
+      name: "XTE highway scale",
+      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "yd" }
+    });
     expect(def.editableParameters.routePointsRatioThresholdNormal.condition).toEqual({ kind: "routePoints" });
     expect(def.editableParameters.routePointsRatioThresholdFlat.condition).toEqual({ kind: "routePoints" });
     expect(def.editableParameters.routePointsRatioThresholdNormal.internal).toBe(true);
@@ -86,8 +157,13 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.routePointsRatioThresholdFlat.default).toBe(3.5);
     expect(def.editableParameters.showHeader.condition).toEqual({ kind: "routePoints" });
     expect(def.editableParameters.showHeader.default).toBe(true);
-    expect(def.editableParameters.distanceUnit.condition).toEqual({ kind: "routePoints" });
-    expect(def.editableParameters.distanceUnit.default).toBe("nm");
+    expect(def.editableParameters.formatUnit_routePointsDistance.condition).toEqual({ kind: "routePoints" });
+    expect(def.editableParameters.formatUnit_routePointsDistance.default).toBe("nm");
+    expect(def.editableParameters.unit_routePointsDistance_nm.condition).toEqual({
+      kind: "routePoints",
+      formatUnit_routePointsDistance: "nm"
+    });
+    expect(def.editableParameters.unit_routePointsDistance_nm.default).toBe("nm");
     expect(def.editableParameters.courseUnit.condition).toEqual({ kind: "routePoints" });
     expect(def.editableParameters.courseUnit.default).toBe("°");
     expect(def.editableParameters.waypointsText.condition).toEqual({ kind: "routePoints" });
@@ -157,15 +233,13 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.caption_centerDisplayPosition).toBeUndefined();
     expect(def.editableParameters.unit_centerDisplayPosition).toBeUndefined();
     expect(def.editableParameters.caption_activeRouteRemain.condition).toEqual({ kind: "activeRoute" });
-    expect(def.editableParameters.unit_activeRouteRemain.condition).toEqual({ kind: "activeRoute" });
     expect(def.editableParameters.caption_activeRouteEta.condition).toEqual({ kind: "activeRoute" });
     expect(def.editableParameters.unit_activeRouteEta.condition).toEqual({ kind: "activeRoute" });
     expect(def.editableParameters.caption_activeRouteNextCourse.condition).toEqual({ kind: "activeRoute" });
     expect(def.editableParameters.unit_activeRouteNextCourse.condition).toEqual({ kind: "activeRoute" });
-    expect(def.editableParameters.caption_xteDisplayXte.condition).toEqual({ kind: "xteDisplay" });
-    expect(def.editableParameters.unit_xteDisplayXte.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.caption_activeRouteRemain.displayName).toBe("Route distance caption");
-    expect(def.editableParameters.unit_activeRouteRemain.displayName).toBe("Route distance unit");
+    expect(def.editableParameters.formatUnit_activeRouteRemain.displayName).toBe("Formatter unit");
+    expect(def.editableParameters.unit_activeRouteRemain_nm.displayName).toBe("nm unit");
     expect(def.editableParameters.caption_activeRouteEta.displayName).toBe("ETA caption");
     expect(def.editableParameters.unit_activeRouteEta.displayName).toBe("ETA unit");
     expect(def.editableParameters.caption_activeRouteNextCourse.displayName).toBe("Next course caption");
@@ -173,9 +247,12 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.caption_xteDisplayCog.displayName).toBe("Track caption");
     expect(def.editableParameters.unit_xteDisplayCog.displayName).toBe("Track unit");
     expect(def.editableParameters.caption_xteDisplayDst.displayName).toBe("DST caption");
-    expect(def.editableParameters.unit_xteDisplayDst.displayName).toBe("DST unit");
+    expect(def.editableParameters.unit_xteDisplayDst_nm.displayName).toBe("nm unit");
     expect(def.editableParameters.caption_xteDisplayBrg.displayName).toBe("BRG caption");
     expect(def.editableParameters.unit_xteDisplayBrg.displayName).toBe("BRG unit");
+    expect(def.editableParameters.unit_editRouteDst).toBeUndefined();
+    expect(def.editableParameters.unit_editRouteRte).toBeUndefined();
+    expect(def.editableParameters.distanceUnit).toBeUndefined();
   });
 
   it("sets disconnect for waypoint-dependent kinds when wpServer is false", function () {

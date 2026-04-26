@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Anchor Cluster - Anchor distance/watch/bearing widget config
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/common-editables.js
+ * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/common-editables.js, config/shared/unit-editable-utils.js
  */
 (function (root) {
   "use strict";
@@ -10,10 +10,14 @@
   const config = ns.config;
   const shared = config.shared;
 
+  const makePerKindCaptionParams = shared.makePerKindCaptionParams;
   const makePerKindTextParams = shared.makePerKindTextParams;
+  const makeUnitAwareTextParams = shared.makeUnitAwareTextParams;
   const opt = shared.opt;
-  const ANCHOR_KIND = shared.kindMaps.ANCHOR_KIND;
+  const ANCHOR_TEXT_KIND = shared.kindMaps.ANCHOR_TEXT_KIND;
+  const ANCHOR_UNIT_AWARE_KIND = shared.kindMaps.ANCHOR_UNIT_AWARE_KIND;
   const commonThreeElementsEditables = shared.commonThreeElementsEditables;
+  const anchorBindings = shared.unitFormatFamilies.metricBindings;
 
   config.clusters.push({
     widget: "ClusterWidget",
@@ -31,34 +35,36 @@
         kind: {
           type: "SELECT",
           list: [
-            opt("Distance from anchor", "distance"),
-            opt("Anchor watch radius", "watch"),
-            opt("Bearing from anchor", "bearing")
+            opt("Distance from anchor", "anchorDistance"),
+            opt("Anchor watch radius", "anchorWatch"),
+            opt("Bearing from anchor", "anchorBearing")
           ],
-          default: "distance",
+          default: "anchorDistance",
           name: "Instrument"
         },
         leadingZero: {
           type: "BOOLEAN",
           default: true,
           name: "Leading zero for bearing (e.g., 005°)",
-          condition: { kind: "bearing" }
+          condition: { kind: "anchorBearing" }
         },
         caption: false,
         unit: false,
         formatter: false,
         formatterParameters: false,
         className: true,
-        ...makePerKindTextParams(ANCHOR_KIND),
+        ...makePerKindCaptionParams(ANCHOR_UNIT_AWARE_KIND),
+        ...makeUnitAwareTextParams(ANCHOR_UNIT_AWARE_KIND, anchorBindings),
+        ...makePerKindTextParams(ANCHOR_TEXT_KIND),
         ...commonThreeElementsEditables,
         stableDigits: {
           type: "BOOLEAN",
           default: false,
           name: "Stable digits",
           condition: [
-            { kind: "distance" },
-            { kind: "watch" },
-            { kind: "bearing" }
+            { kind: "anchorDistance" },
+            { kind: "anchorWatch" },
+            { kind: "anchorBearing" }
           ]
         }
       }

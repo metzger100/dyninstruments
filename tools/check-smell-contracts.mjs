@@ -229,6 +229,8 @@ function runDynamicStorekeyClearsRule() {
   const required = [
     "config/shared/kind-defaults.js",
     "config/shared/editable-param-utils.js",
+    "shared/unit-format-families.js",
+    "config/shared/unit-editable-utils.js",
     "config/shared/environment-base-editables.js",
     "config/shared/environment-depth-editables.js",
     "config/shared/environment-temperature-editables.js",
@@ -247,6 +249,8 @@ function runDynamicStorekeyClearsRule() {
   try {
     runIife("config/shared/kind-defaults.js", ctx);
     runIife("config/shared/editable-param-utils.js", ctx);
+    runIife("shared/unit-format-families.js", ctx);
+    runIife("config/shared/unit-editable-utils.js", ctx);
     runIife("config/shared/environment-base-editables.js", ctx);
     runIife("config/shared/environment-depth-editables.js", ctx);
     runIife("config/shared/environment-temperature-editables.js", ctx);

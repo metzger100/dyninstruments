@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Speed Cluster - Speed numeric and gauge widget config
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js
+ * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/unit-editable-utils.js
  */
 (function (root) {
   "use strict";
@@ -10,9 +10,70 @@
   const config = ns.config;
   const shared = config.shared;
 
-  const makePerKindTextParams = shared.makePerKindTextParams;
+  const makePerKindCaptionParams = shared.makePerKindCaptionParams;
+  const makeUnitAwareTextParams = shared.makeUnitAwareTextParams;
   const opt = shared.opt;
   const SPEED_KIND = shared.kindMaps.SPEED_KIND;
+  const speedBindings = shared.unitFormatFamilies.metricBindings;
+  const SPEED_LINEAR_KIND_KEYS = ["sogLinear", "stwLinear"];
+  const SPEED_RADIAL_KIND_KEYS = ["sogRadial", "stwRadial"];
+  const SPEED_UNIT_RANGES = {
+    kn: { min: 0, max: 200, step: 0.5 },
+    ms: { min: 0, max: 100, step: 0.1 },
+    kmh: { min: 0, max: 400, step: 1 }
+  };
+  const SPEED_UNIT_LABELS = {
+    kn: "kn",
+    ms: "m/s",
+    kmh: "km/h"
+  };
+
+  function buildTokenSpecs(defaults) {
+    const out = {};
+    Object.keys(SPEED_UNIT_RANGES).forEach(function (token) {
+      out[token] = Object.assign({
+        default: defaults[token],
+        label: SPEED_UNIT_LABELS[token] || token
+      }, SPEED_UNIT_RANGES[token]);
+    });
+    return out;
+  }
+
+  function buildPerUnitFloatParams(kindKeys, baseKey, displayName, defaults, fieldSpec) {
+    const spec = fieldSpec && typeof fieldSpec === "object" ? fieldSpec : {};
+    const out = {};
+    const tokenSpecs = buildTokenSpecs(defaults);
+
+    Object.keys(tokenSpecs).forEach(function (token) {
+      const tokenSpec = tokenSpecs[token];
+      const field = {
+        type: "FLOAT",
+        min: tokenSpec.min,
+        max: tokenSpec.max,
+        step: tokenSpec.step,
+        default: tokenSpec.default,
+        displayName: displayName + " (" + tokenSpec.label + ")",
+        condition: kindKeys.map(function (kindKey) {
+          const condition = {
+            kind: kindKey,
+            ["formatUnit_" + kindKey]: token
+          };
+          if (spec.condition && typeof spec.condition === "object" && !Array.isArray(spec.condition)) {
+            Object.assign(condition, spec.condition);
+          }
+          return condition;
+        })
+      };
+
+      if (spec.internal === true || tokenSpec.internal === true) {
+        field.internal = true;
+      }
+
+      out[baseKey + "_" + token] = field;
+    });
+
+    return out;
+  }
 
   config.clusters.push({
     widget: "ClusterWidget",
@@ -65,26 +126,26 @@
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
 
-        speedLinearMinValue: {
-          type: "FLOAT", min: 0, max: 200, step: 0.5, default: 0,
-          name: "Min speed",
-          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
-        },
-        speedLinearMaxValue: {
-          type: "FLOAT", min: 1, max: 200, step: 0.5, default: 30,
-          name: "Max speed",
-          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
-        },
-        speedLinearTickMajor: {
-          type: "FLOAT", min: 0.5, max: 100, step: 0.5, default: 5,
-          name: "Major tick step",
-          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
-        },
-        speedLinearTickMinor: {
-          type: "FLOAT", min: 0.1, max: 50, step: 0.1, default: 1,
-          name: "Minor tick step",
-          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
-        },
+        ...buildPerUnitFloatParams(SPEED_LINEAR_KIND_KEYS, "speedLinearMinValue", "Min speed", {
+          kn: 0,
+          ms: 0,
+          kmh: 0
+        }),
+        ...buildPerUnitFloatParams(SPEED_LINEAR_KIND_KEYS, "speedLinearMaxValue", "Max speed", {
+          kn: 30,
+          ms: 15,
+          kmh: 60
+        }),
+        ...buildPerUnitFloatParams(SPEED_LINEAR_KIND_KEYS, "speedLinearTickMajor", "Major tick step", {
+          kn: 5,
+          ms: 2.5,
+          kmh: 10
+        }),
+        ...buildPerUnitFloatParams(SPEED_LINEAR_KIND_KEYS, "speedLinearTickMinor", "Minor tick step", {
+          kn: 1,
+          ms: 0.5,
+          kmh: 2
+        }),
         speedLinearShowEndLabels: {
           type: "BOOLEAN", default: false,
           name: "Show min/max labels",
@@ -102,22 +163,20 @@
           name: "Show alarm sector",
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
-        speedLinearWarningFrom: {
-          type: "FLOAT", min: 0, max: 200, step: 0.5, default: 20,
-          name: "Warning at or above",
-          condition: [
-            { kind: "sogLinear", speedLinearWarningEnabled: true },
-            { kind: "stwLinear", speedLinearWarningEnabled: true }
-          ]
-        },
-        speedLinearAlarmFrom: {
-          type: "FLOAT", min: 0, max: 200, step: 0.5, default: 25,
-          name: "Alarm at or above",
-          condition: [
-            { kind: "sogLinear", speedLinearAlarmEnabled: true },
-            { kind: "stwLinear", speedLinearAlarmEnabled: true }
-          ]
-        },
+        ...buildPerUnitFloatParams(SPEED_LINEAR_KIND_KEYS, "speedLinearWarningFrom", "Warning at or above", {
+          kn: 20,
+          ms: 10,
+          kmh: 40
+        }, {
+          condition: { speedLinearWarningEnabled: true }
+        }),
+        ...buildPerUnitFloatParams(SPEED_LINEAR_KIND_KEYS, "speedLinearAlarmFrom", "Alarm at or above", {
+          kn: 25,
+          ms: 12.5,
+          kmh: 50
+        }, {
+          condition: { speedLinearAlarmEnabled: true }
+        }),
 
         // SpeedRadialWidget thresholds — only radial kinds
         speedRadialRatioThresholdNormal: {
@@ -134,28 +193,28 @@
         },
 
         // SpeedRadialWidget range (arc is fixed in SpeedRadialWidget.js: 270..450)
-        speedRadialMinValue: {
-          type: "FLOAT", min: 0, max: 200, step: 0.5, default: 0,
-          name: "Min speed",
-          condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
-        },
-        speedRadialMaxValue: {
-          type: "FLOAT", min: 1, max: 200, step: 0.5, default: 30,
-          name: "Max speed",
-          condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
-        },
+        ...buildPerUnitFloatParams(SPEED_RADIAL_KIND_KEYS, "speedRadialMinValue", "Min speed", {
+          kn: 0,
+          ms: 0,
+          kmh: 0
+        }),
+        ...buildPerUnitFloatParams(SPEED_RADIAL_KIND_KEYS, "speedRadialMaxValue", "Max speed", {
+          kn: 30,
+          ms: 15,
+          kmh: 60
+        }),
 
         // SpeedRadialWidget ticks (value-units)
-        speedRadialTickMajor: {
-          type: "FLOAT", min: 0.5, max: 100, step: 0.5, default: 5,
-          name: "Major tick step",
-          condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
-        },
-        speedRadialTickMinor: {
-          type: "FLOAT", min: 0.1, max: 50, step: 0.1, default: 1,
-          name: "Minor tick step",
-          condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
-        },
+        ...buildPerUnitFloatParams(SPEED_RADIAL_KIND_KEYS, "speedRadialTickMajor", "Major tick step", {
+          kn: 5,
+          ms: 2.5,
+          kmh: 10
+        }),
+        ...buildPerUnitFloatParams(SPEED_RADIAL_KIND_KEYS, "speedRadialTickMinor", "Minor tick step", {
+          kn: 1,
+          ms: 0.5,
+          kmh: 2
+        }),
         speedRadialShowEndLabels: {
           type: "BOOLEAN", default: false,
           name: "Show min/max labels",
@@ -177,22 +236,20 @@
         },
 
         // SpeedRadialWidget sectors (only show when enabled)
-        speedRadialWarningFrom: {
-          type: "FLOAT", min: 0, max: 200, step: 0.5, default: 20,
-          name: "Warning at or above",
-          condition: [
-            { kind: "sogRadial", speedRadialWarningEnabled: true },
-            { kind: "stwRadial", speedRadialWarningEnabled: true }
-          ]
-        },
-        speedRadialAlarmFrom: {
-          type: "FLOAT", min: 0, max: 200, step: 0.5, default: 25,
-          name: "Alarm at or above",
-          condition: [
-            { kind: "sogRadial", speedRadialAlarmEnabled: true },
-            { kind: "stwRadial", speedRadialAlarmEnabled: true }
-          ]
-        },
+        ...buildPerUnitFloatParams(SPEED_RADIAL_KIND_KEYS, "speedRadialWarningFrom", "Warning at or above", {
+          kn: 20,
+          ms: 10,
+          kmh: 40
+        }, {
+          condition: { speedRadialWarningEnabled: true }
+        }),
+        ...buildPerUnitFloatParams(SPEED_RADIAL_KIND_KEYS, "speedRadialAlarmFrom", "Alarm at or above", {
+          kn: 25,
+          ms: 12.5,
+          kmh: 50
+        }, {
+          condition: { speedRadialAlarmEnabled: true }
+        }),
 
         // Shared caption/unit-to-value scale (used by SpeedRadialWidget + also fine for numeric)
         captionUnitScale: {
@@ -248,7 +305,8 @@
         formatterParameters: false,
         className: true,
 
-        ...makePerKindTextParams(SPEED_KIND)
+        ...makePerKindCaptionParams(SPEED_KIND),
+        ...makeUnitAwareTextParams(SPEED_KIND, speedBindings)
       }
     }
   });
