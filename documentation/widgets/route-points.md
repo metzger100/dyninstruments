@@ -10,6 +10,7 @@ RoutePointsTextHtmlWidget is the committed HTML renderer for nav route points.
 - committed DOM owner: mount/update/postPatch/detach/destroy
 - interaction callbacks: surfacePolicy.actions.routePoints.activate({ index, pointSnapshot })
 - host parity bridge: TemporaryHostActionBridge runtime boundary
+- Mapper payloads split formatter tokens from display labels: `formatUnits.distance` feeds the distance formatter and `units.distance` remains display-only while `courseUnit` stays in `formatting`.
 
 ## State Screens
 

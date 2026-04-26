@@ -15,6 +15,7 @@ It keeps core data parity with AvNav `CenterDisplay` while using a readability-f
 - compact tiles linearly tighten mode-specific panel shares and increase fitted text fill from `minDim <= 80` to `minDim >= 180`
 - compact tiles also increase fitted text fill linearly so captions, coordinates, and relation values occupy more of each row without changing the normal-mode panel split
 - core visibility semantics handled in map-cluster `updateFunction`: visible only when `!lockPosition || editing`
+- Mapper payloads split formatter tokens from display labels: `formatUnits.marker` / `formatUnits.boat` / `formatUnits.measure` carry the formatter tokens while `units.*` stay display-only.
 
 This is a dedicated renderer, not a `PositionCoordinateWidget` variant, because it owns a different top-panel + relation-row contract across aspect ratios.
 
@@ -102,9 +103,12 @@ CenterDisplayTextWidget: {
 | `captions.marker` | string | `"WP"` | Waypoint row label |
 | `captions.boat` | string | `"POS"` | Boat row label |
 | `captions.measure` | string | `"MEAS"` | Measure row label |
-| `units.marker` | string | `"nm"` | Waypoint distance unit for `formatDistance` |
-| `units.boat` | string | `"nm"` | Boat distance unit for `formatDistance` |
-| `units.measure` | string | `"nm"` | Measure distance unit for `formatDistance` |
+| `units.marker` | string | `"nm"` | Waypoint distance display label only |
+| `units.boat` | string | `"nm"` | Boat distance display label only |
+| `units.measure` | string | `"nm"` | Measure distance display label only |
+| `formatUnits.marker` | string | `"nm"` | Formatter token for waypoint distance |
+| `formatUnits.boat` | string | `"nm"` | Formatter token for boat distance |
+| `formatUnits.measure` | string | `"nm"` | Formatter token for measure distance |
 | `ratioThresholdNormal` | number | `1.1` | Ratio below this -> `high` |
 | `ratioThresholdFlat` | number | `2.4` | Ratio above this -> `flat` |
 | `disconnect` | boolean | `false` | Render `disconnected` state-screen (`GPS Lost`) and suppress center/relation rows |
@@ -145,7 +149,8 @@ otherwise -> normal
 
 - center coordinates -> `formatLonLatsDecimal(value, axis)`
 - relation courses -> `formatDirection(course)`
-- relation distances -> `formatDistance(distance, unit)`
+- relation distances -> `formatDistance(distance, formatUnit)`
+- `units.*` values are appended and rendered as display text only
 - all formatter outputs are normalized through `PlaceholderNormalize`; missing metric/coordinate values render as `---`
 - relation rows render as adaptive centered caption/value groups: `label | course / distance`, so captions stay visually attached to their values while the pair stays balanced within the row when width is available
 

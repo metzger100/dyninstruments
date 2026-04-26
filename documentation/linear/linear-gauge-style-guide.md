@@ -22,15 +22,16 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 - Wind linear overrides the generic `normal` / `high` text geometry: `normal` uses the stacked dual block below the gauge, and `high` uses inline top metric + middle gauge + inline bottom metric.
 - `hideTextualMetrics` is the public `Hide textual metrics` toggle, defaults to `false`, and applies to Speed, Depth, Temperature, Voltage, Compass, Wind, and Default linear gauges.
 - When `hideTextualMetrics` is enabled, linear gauges keep tick labels, end labels, scale labels, pointers, sectors, and state screens visible while removing the live caption/value/unit text.
+- Migrated linear gauges resolve formatter tokens separately from display labels; the token selects conversion and the display label stays editable per token.
 - Canvas state-screen behavior is engine-owned: `p.disconnect === true` resolves to `disconnected`, clears the canvas, and renders shared `StateScreenCanvasOverlay` (`GPS Lost`) before any gauge drawing.
 
 ## Supported Profiles
 
 | Profile | Typical kinds | `axisMode` | Domain source | Formatter baseline | Sector model |
 |---|---|---|---|---|---|
-| Speed linear | `sogLinear`, `stwLinear` | `range` | Editable `min/max` | `formatSpeed` | High-end warning/alarm |
-| Depth linear | `depthLinear` | `range` | Editable `min/max` | `formatDecimal` | Low-end warning/alarm |
-| Temperature linear | `tempLinear` | `range` | Editable `min/max` | `formatTemperature` | Optional high-end warning/alarm |
+| Speed linear | `sogLinear`, `stwLinear` | `range` | Editable `min/max` | `formatSpeed` | High-end warning/alarm; selector token drives speed conversion |
+| Depth linear | `depthLinear` | `range` | Editable `min/max` | `formatDistance` | Low-end warning/alarm; selector token drives distance conversion |
+| Temperature linear | `tempLinear` | `range` | Editable `min/max` | `formatTemperature` | Optional high-end warning/alarm; selector token drives temperature conversion |
 | Voltage linear | `voltageLinear` | `range` | Editable `min/max` | `formatDecimal` | Low-end warning/alarm |
 | Wind angle linear | `angleTrueLinear`, `angleApparentLinear` | `centered180` | Fixed `-180..180` | Angle formatter contract | Mirrored layline sectors (optional) |
 | Compass linear | `hdtLinear`, `hdmLinear`, `cogLinear` | `fixed360` | Fixed `0..360` visible window, optionally 180° | `formatDirection360` | Usually none |
@@ -69,6 +70,9 @@ Use gauge-prefixed keys to avoid cross-kind collisions.
 - High-end sectors: `{gauge}LinearWarningEnabled`, `{gauge}LinearAlarmEnabled`, `{gauge}LinearWarningFrom`, `{gauge}LinearAlarmFrom`
 - Low-end sectors: `{gauge}LinearWarningEnabled`, `{gauge}LinearAlarmEnabled`, `{gauge}LinearWarningFrom`, `{gauge}LinearAlarmFrom`
 - Mirrored sectors: `{gauge}LinearLayEnabled`, `{gauge}LinearLayMin`, `{gauge}LinearLayMax`
+- Unit selectors: `formatUnit_{metricKey}`
+- Unit display labels: `unit_{metricKey}_{token}`
+- Per-unit scale fields: `<scaleBaseKey>_{token}`
 
 ## Layout Modes
 
@@ -93,7 +97,7 @@ Graphics-only layout:
 
 ## Extension Readiness Checklist
 
-- Define kind defaults (`caption_*`, `unit_*`) before mapper wiring.
+- Define kind defaults (`caption_*`) and unit-aware selector/display fields (`formatUnit_*`, `unit_*_<token>`) before mapper wiring.
 - Keep mapper output declarative; numeric normalization stays at mapper boundary.
 - Use `LinearGaugeEngine` axis profile matching the kind semantics.
 - Add widget and mapper tests for new renderer contracts.

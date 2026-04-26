@@ -82,8 +82,13 @@ Example:
 - Gauge ratio threshold props: `{gauge}RatioThresholdNormal`, `{gauge}RatioThresholdFlat`
 - Sector props: `{gauge}WarningFrom`, `{gauge}AlarmFrom`
 - Per-kind caption/unit props: `caption_{kindName}`, `unit_{kindName}`
+- Unit-selector props: `formatUnit_{metricKey}`
+- Unit display-label props: `unit_{metricKey}_{token}`
+- Unit-specific numeric props: `<scaleBaseKey>_{token}`
 - `editableParameter` conditions: `{ kind: "xxxRadial" }` or `[{ kind: "a" }, { kind: "b" }]`
 - Components under `cluster/rendering/` must use role-based IDs, not cluster-prefixed IDs, and must not be per-kind mapper-to-widget forwarding shims.
+- Shared unit-binding tables may define an optional `rendererKey` alias for renderer-domain payload names.
+- Mixed migrated/non-migrated cluster maps should be split so migrated kinds do not flow through `makePerKindTextParams(...)`.
 
 ## Mapper Boundary Rules
 
@@ -98,6 +103,8 @@ Example:
 - After that boundary, trust internal `props/state/theme/display/cfg` contracts instead of re-sanitizing them.
 - Do not create `normalize*` helpers or fallback wrappers for internal hook/spec results unless an external boundary contract requires them.
 - Do not mirror `plugin.css`, theme token, or editable-parameter defaults in widget/shared runtime code.
+- Renderer-side helpers may format with mapper-resolved formatter tokens, but they must not repeat mapper fallback or token-validation logic.
+- Do not pass display labels such as `m/s`, `°C`, or `hPa` into formatter parameters.
 - If an exception must keep a fallback path, annotate it with a rule-specific suppression:
   - `// dyni-lint-disable-next-line <rule-name> -- <reason>`
   - `/* dyni-lint-disable-line <rule-name> -- <reason> */`
@@ -146,6 +153,13 @@ Rule: Before creating any new widget, check this table. If your widget matches a
 - For a new shared utility facade: `shared/widget-kits/radial/RadialToolkit.js` - facade pattern and dependency composition across shared gauge modules.
 - For a new cluster mapper: `cluster/mappers/SpeedMapper.js` - `translate(props, toolkit)` mapping pattern and renderer routing output shape.
 
+## Bootstrap-Loaded Shared Catalogs
+
+- `shared/unit-format-families.js` is the bootstrap-loaded shared catalog for migrated formatter families.
+- It self-initializes `DyniPlugin.config.shared` before assigning `DyniPlugin.config.shared.unitFormatFamilies`.
+- The file is also registered on `window.DyniComponents.DyniUnitFormatFamilies`.
+- `tools/check-umd.mjs` keeps this bootstrap-only file on `MODULE_EXPORT_ALLOWLIST` so it is not forced to expose the normal `{ id, create }` runtime component shape.
+
 ## Shared Utilities
 
 Reusable logic MUST go in `shared/widget-kits/`. Never duplicate functions across widgets.
@@ -176,6 +190,10 @@ Current shared utilities include:
 - `RadialTextLayout.measureTextWidth()`
 - `RadialTextLayout.fitSingleTextPx()`
 - `StateScreenCanvasOverlay.drawStateScreen()`
+- `UnitAwareFormatter.formatWithToken()`
+- `UnitAwareFormatter.formatDistance()`
+- `UnitAwareFormatter.appendUnit()`
+- `UnitAwareFormatter.extractNumericDisplay()`
 - `Helpers.applyFormatter()`
 - `Helpers.getNightModeState()`
 

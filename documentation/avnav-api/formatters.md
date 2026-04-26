@@ -68,6 +68,17 @@ For strict integration contracts (including roll/pitch tuple requirements), use:
 `formatTime`, `formatDate`, and `formatDateTime` should receive the raw store value (Date/time object/value) from AvNav.  
 Do not pre-coerce these inputs with `Number(...)` in mapper/widget boundaries, or formatter behavior can diverge from core AvNav widgets.
 
+### Dyninstruments Unit Selectors
+
+Migrated dyninstruments metrics split formatter tokens from display labels:
+
+- `formatUnit_<metricKey>` stores the formatter-conversion token
+- `unit_<metricKey>_<token>` stores the editable display label for that token
+- blank display labels are intentional and must be preserved
+- formatter parameters must receive tokens such as `ms`, `celsius`, or `hpa`, not display labels such as `m/s`, `°C`, or `hPa`
+
+Use the selector token for conversion and the matching display label for rendered unit text.
+
 ---
 
 ## dyninstruments Formatter Usage
@@ -99,15 +110,16 @@ Used by text and graphic widgets (`runtime/helpers.js`):
 | Course/bearing | `formatDirection360` |
 | Vessel roll/pitch | `formatDirection` with `[true, true, false]` (radian input, signed `±180`) |
 | Temperature | `formatTemperature` |
-| Depth/voltage numeric formatting | `formatDecimal` |
+| Depth text/gauge formatting | `formatDistance` with the selected distance token |
+| Voltage numeric/gauge formatting | `formatDecimal` |
 | ETA/clock display | `formatTime` |
 | Position display | `formatLonLats`, `formatLonLatsDecimal` |
-| Environment pressure mapper | `skPressure` |
+| Environment pressure mapper | `formatPressure` |
 
 ### Compatibility Note: Pressure Formatter Name
 
-Current dyninstruments runtime mapping still uses `skPressure` in `cluster/mappers/EnvironmentMapper.js`.  
-See canonical alias mapping in [core-formatter-catalog.md](core-formatter-catalog.md#legacy-aliases-present-in-core).
+Dyninstruments uses the canonical `formatPressure` formatter name and lowercase pressure tokens (`pa`, `hpa`, `bar`).
+The legacy `skPressure` alias remains in AvNav core only for compatibility with older contracts.
 
 ### Custom Angle Formatter (dyninstruments-internal)
 
@@ -131,6 +143,8 @@ Graphic gauges use mapper-provided formatter metadata and resolve formatter call
 - `displayTemperatureFromRaw(raw, props)` -> `{ num, text }` via `formatTemperature`
 - `displayVoltageFromRaw(raw, props)` -> `{ num, text }` via `formatDecimal`
 - `PositionCoordinateWidget` stacked mode formats per-line lat/lon via `Helpers.applyFormatter(raw, { formatter: "formatLonLatsDecimal", formatterParameters: [axis] })`
+
+When a renderer helper receives mapper-resolved tokens, it must trust those resolved tokens and must not repeat mapper fallback or token-validation logic.
 
 ## Related
 

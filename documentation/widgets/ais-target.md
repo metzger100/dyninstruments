@@ -10,6 +10,7 @@ AisTargetTextHtmlWidget renders AIS target summary state on the committed HTML s
 - policy source: runtime surfacePolicy
 - style scope: shadow-local CSS
 - formatter fallback outputs are normalized through `PlaceholderNormalize`; missing metric values render as `---`
+- Mapper payloads split formatter tokens from display labels: `formatUnits.dst` / `formatUnits.cpa` carry the distance tokens while `units.dst` / `units.cpa` stay display-only.
 
 ## State Screens
 

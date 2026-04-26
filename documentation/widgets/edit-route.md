@@ -11,6 +11,7 @@ EditRouteTextHtmlWidget is a committed HTML renderer for the nav editRoute kind.
 - style scope: shadow-local CSS
 - policy source: runtime-injected surfacePolicy
 - formatter fallback outputs are normalized through `PlaceholderNormalize`; missing metric values render as `---`
+- Mapper payloads split formatter tokens from display labels: `formatUnits.dst` / `formatUnits.rte` carry the distance tokens while `units.dst` / `units.rte` stay display-only.
 
 ## State Screens
 

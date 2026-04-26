@@ -29,10 +29,10 @@ WindRadialWidget: {
 | `speed` | number | — | Wind speed raw value |
 | `angleCaption` | string | `""` | Angle caption (`AWA`/`TWA`) |
 | `speedCaption` | string | `""` | Speed caption (`AWS`/`TWS`) |
-| `angleUnit` | string | `"°"` | Angle unit |
-| `speedUnit` | string | `"kn"` | Speed unit |
+| `angleUnit` | string | `"°"` | Angle display unit |
+| `speedUnit` | string | `"kn"` | Speed display unit only |
 | `formatter` | string/function | `"formatSpeed"` | Speed formatter passed to `Helpers.applyFormatter` |
-| `formatterParameters` | array/string | `[speedUnit]` | Speed formatter parameters |
+| `formatterParameters` | array/string | `[resolved token]` | Speed formatter token from the mapper (`kn`, `ms`, `kmh`) |
 | `leadingZero` | boolean | `false` | Angle pad to 3 digits |
 | `layEnabled` | boolean | `true` | Enable layline sectors |
 | `windRadialLayMin` | number | `0` | Layline inner bound (0..180) |
@@ -114,7 +114,7 @@ Responsive ownership:
 | Function | Input | Output |
 |---|---|---|
 | `RadialValueMath.formatAngle180(v, leadingZero)` | angle deg | `-180..180` string |
-| `Helpers.applyFormatter(v, { formatter, formatterParameters })` | speed value | formatted speed string |
+| `Helpers.applyFormatter(v, { formatter, formatterParameters })` | speed value | formatted speed string; formatter parameters must carry the selected token, not the display label |
 
 ## Phase 6 Options
 

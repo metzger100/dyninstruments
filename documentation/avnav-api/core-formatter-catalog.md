@@ -13,6 +13,15 @@ Source of truth: AvNav `viewer/util/formatter.js` snapshot verified on 2026-02-2
 - Mapper code should reference formatter names and parameters, not re-implement conversions.
 - Roll/pitch contract is normative: `formatDirection` with `[true, true, false]`.
 
+## Token Rules and Fallbacks
+
+- `formatSpeed` uses exact token comparison. Unrecognized tokens fall through to knots.
+- `formatDistance` uses exact token comparison. Reviewed core tokens are `nm`, `m`, `km`, `ft`, and `yd`; unrecognized tokens fall through to meters.
+- `formatTemperature` lowercases its token and accepts any token that starts with `c` or `k`.
+- `formatPressure` lowercases its token and uses exact comparison against `pa`, `hpa`, and `bar`.
+- All four formatters silently fall through to their default unit when the token is missing or unrecognized.
+- Public AvNav docs may lag the reviewed distance-unit contract; dyninstruments documents the reviewed core snapshot directly rather than branching on the older docs.
+
 ## API/Interfaces
 
 ### Canonical Formatter Signatures
@@ -24,7 +33,7 @@ Source of truth: AvNav `viewer/util/formatter.js` snapshot verified on 2026-02-2
 | `formatDecimal` | `(number, fix, fract, addSpace, prefixZero)` | core numeric formatter |
 | `formatDecimalOpt` | `(number, fix, fract, addSpace, prefixZero)` | fractional digits shown only when needed |
 | `formatFloat` | `(number, digits, maxPlaces, leadingZeroes)` | variable decimal placement |
-| `formatDistance` | `(distance, unit, numDigits, fillRight)` | distance conversion and formatting |
+| `formatDistance` | `(distance, unit, numDigits, fillRight)` | distance conversion and formatting; reviewed tokens include `ft` and `yd` |
 | `formatSpeed` | `(speed, unit)` | speed conversion and formatting |
 | `formatDirection` | `(dir, inputRadian, range180, leadingZero)` | direction conversion and range formatting |
 | `formatDirection360` | `(dir, leadingZero)` | direct `0..360` formatting |

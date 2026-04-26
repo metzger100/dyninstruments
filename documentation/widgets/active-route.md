@@ -11,6 +11,7 @@ ActiveRouteTextHtmlWidget is a committed HTML renderer routed by ClusterRenderer
 - semantic DOM: committed renderer mount/update lifecycle in shadow root
 - interaction: runtime surface policy dispatch/passive mode
 - formatter fallback outputs are normalized through `PlaceholderNormalize`; missing metric values render as `---`
+- Mapper payloads split formatter tokens from display labels: `formatUnits.remain` feeds the remain formatter and `units.remain` stays display-only.
 
 ## State Screens
 
@@ -47,6 +48,7 @@ ActiveRouteTextHtmlWidget is a committed HTML renderer routed by ClusterRenderer
   - `metrics.<id>.captionStyle`
   - `metrics.<id>.valueStyle`
   - `metrics.<id>.unitStyle`
+- `formatUnits.remain` is the mapper-resolved formatter token for the remain metric; `metrics.<id>.unitStyle` only controls the display label.
 - `ActiveRouteTextHtmlWidget.renderMetricTile()` applies all metric fit styles, including caption fit on `.dyni-active-route-metric-caption`.
 - Missing fit inputs fail closed (`compute()` returns `null`), and renderer output stays valid without extra relayout loops.
 - `ActiveRouteTextHtmlWidget` reuses semantic model work via `PreparedPayloadModelCache` across `layoutSignature` and `patchDom`.

@@ -181,6 +181,32 @@ const WIND_KIND = {
 
 ClusterWidget resolves via `p['caption_' + kindName]` and `p['unit_' + kindName]`.
 
+### Per-Unit Selector Pattern (dyninstruments-internal)
+
+Migrated metrics use generated selector/display pairs instead of a single `unit_<kind>` field:
+
+- `formatUnit_<metricKey>` is a `SELECT` parameter for the formatter token
+- `unit_<metricKey>_<token>` is a `STRING` parameter for the editable display label
+- blank display labels are preserved intentionally
+- `makePerKindTextParams(...)` remains for non-migrated kind maps
+
+Example:
+
+```javascript
+formatUnit_sog: {
+  type: "SELECT",
+  list: [
+    { name: "kn", value: "kn" },
+    { name: "m/s", value: "ms" },
+    { name: "km/h", value: "kmh" }
+  ],
+  default: "kn"
+}
+unit_sog_kn: { type: "STRING", default: "kn", condition: { kind: "sog", formatUnit_sog: "kn" } }
+unit_sog_ms: { type: "STRING", default: "m/s", condition: { kind: "sog", formatUnit_sog: "ms" } }
+unit_sog_kmh: { type: "STRING", default: "km/h", condition: { kind: "sog", formatUnit_sog: "kmh" } }
+```
+
 ### Common ThreeValueTextWidget Editables (dyninstruments-internal)
 
 Shared layout thresholds for numeric (ThreeValueTextWidget) kinds:

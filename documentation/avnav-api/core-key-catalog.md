@@ -12,6 +12,8 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 - This catalog covers all current cluster definitions in `config/clusters/*.js`.
 - Not all dynamic SignalK paths are listed in core `viewer/util/keys.jsx`; plugin-maintained contracts are required.
 - `nav.gps.signalk.*` paths are raw SignalK passthrough values in plugin runtime flow.
+- Migrated metrics use `formatUnit_<metricKey>` selectors for formatter tokens and `unit_<metricKey>_<token>` for editable display labels.
+- Renderer-facing aliases such as `formatUnits.remain` are documented in the renderer module docs, not in the store-key inventory.
 
 ## API/Interfaces
 
@@ -63,9 +65,9 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `map` | `target` | `nav.ais.nearest` | `aisTarget` |
 | `map` | `trackedMmsi` | `nav.ais.trackedMmsi` | `aisTarget` |
 | `map` | `aisMarkAllWarning` | `properties.aisMarkAllWarning` | `aisTarget` |
-| `anchor` | `distance` | `nav.anchor.distance` | `distance` |
-| `anchor` | `watch` | `nav.anchor.watchDistance` | `watch` |
-| `anchor` | `bearing` | `nav.anchor.direction` | `bearing` |
+| `anchor` | `distance` | `nav.anchor.distance` | `anchorDistance` |
+| `anchor` | `watch` | `nav.anchor.watchDistance` | `anchorWatch` |
+| `anchor` | `bearing` | `nav.anchor.direction` | `anchorBearing` |
 | `vessel` | `clock` | `nav.gps.rtime` | `clock`, `dateTime`, `timeStatus` |
 | `vessel` | `gpsValid` | `nav.gps.valid` | `timeStatus` |
 | `vessel` | `pitch` | `nav.gps.signalk.navigation.attitude.pitch` | `pitch` |
@@ -81,32 +83,49 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `vessel` | `pitchKey` | `pitch` | `pitch` | non-empty override is used; empty falls back to default pitch key |
 | `vessel` | `rollKey` | `roll` | `roll` | non-empty override is used; empty falls back to default roll key |
 
+### XTE Highway Scale Contract
+
+| Editable key | Meaning | Visible when |
+|---|---|---|
+| `xteDisplayScale_nm` | Full-scale XTE highway range in nautical miles | `formatUnit_xteDisplayXte = nm` |
+| `xteDisplayScale_m` | Full-scale XTE highway range in meters | `formatUnit_xteDisplayXte = m` |
+| `xteDisplayScale_km` | Full-scale XTE highway range in kilometers | `formatUnit_xteDisplayXte = km` |
+| `xteDisplayScale_ft` | Full-scale XTE highway range in feet | `formatUnit_xteDisplayXte = ft` |
+| `xteDisplayScale_yd` | Full-scale XTE highway range in yards | `formatUnit_xteDisplayXte = yd` |
+
 ### Kind -> Formatter -> Key Contracts (Numeric/Text Paths)
+
+Migrated metrics use formatter-token selectors, not display labels:
+
+- `formatUnit_<metricKey>` resolves the formatter token
+- `unit_<metricKey>_<token>` resolves the display label for that token
+- renderer-facing aliases like `formatUnits.remain` and `units.remain` are documented in the renderer module docs
 
 | Kind | Primary store field(s) | Formatter contract | Unit/typing note |
 |---|---|---|---|
-| `sog`, `stw` | `sog` / `stw` | `formatSpeed` + `[unit]` | speed values expected in core speed units |
-| `sogLinear`, `stwLinear` | `sog` / `stw` | `formatSpeed` + `[unit]` | linear speed gauge kinds |
+| `sog`, `stw` | `sog` / `stw` | `formatSpeed` + `[formatUnit_sog]` / `[formatUnit_stw]` | display label comes from `unit_sog_<token>` / `unit_stw_<token>` |
+| `sogLinear`, `stwLinear` | `sog` / `stw` | `formatSpeed` + `[formatUnit_sogLinear]` / `[formatUnit_stwLinear]` | linear speed gauge kinds use the same token/display split |
+| `sogRadial`, `stwRadial` | `sog` / `stw` | `formatSpeed` + `[formatUnit_sogRadial]` / `[formatUnit_stwRadial]` | radial speed gauge kinds use the same token/display split |
 | `angleTrue`, `angleApparent` | `twa` / `awa` | `makeAngleFormatter(false, leadingZero, default)` | signed angle formatting in mapper toolkit |
 | `angleTrueDirection` | `twd` | `makeAngleFormatter(true, leadingZero, default)` | direction formatting in mapper toolkit |
-| `speedTrue`, `speedApparent` | `tws` / `aws` | `formatSpeed` + `[unit]` | speed values expected in core speed units |
-| `depth` | `depth` | `formatDecimal` + `[3, 1, true]` | numeric depth text |
-| `depthLinear` | `depth` | renderer wrapper (`DepthLinearWidget`) | low-end linear depth sectors |
-| `temp` | `temp` | `formatTemperature` + `["celsius"]` | input source is water temperature key |
-| `tempLinear` | `temp` | `formatTemperature` + `["celsius"]` | linear temperature gauge kind |
-| `pressure` | `value` (dynamic) | `skPressure` + `["hPa"]` | alias of core pressure formatter |
+| `speedTrue`, `speedApparent` | `tws` / `aws` | `formatSpeed` + `[formatUnit_speedTrue]` / `[formatUnit_speedApparent]` | display label comes from `unit_speedTrue_<token>` / `unit_speedApparent_<token>` |
+| `depth` | `depth` | `formatDistance` + `[formatUnit_depth]` | depth text uses distance tokens, not raw meters |
+| `depthLinear`, `depthRadial` | `depth` | `formatDistance` + `[formatUnit_depthLinear]` / `[formatUnit_depthRadial]` | axis defaults and warning/alarm values resolve per selected unit token |
+| `temp` | `temp` | `formatTemperature` + `[formatUnit_temp]` | input source is water temperature key |
+| `tempLinear`, `tempRadial` | `temp` | `formatTemperature` + `[formatUnit_tempLinear]` / `[formatUnit_tempRadial]` | temperature gauges use the same token/display split |
+| `pressure` | `value` (dynamic) | `formatPressure` + `[formatUnit_pressure]` | canonical pressure formatter with lowercase tokens |
 | `cog`, `hdt`, `hdm`, `brg` | `cog`/`hdt`/`hdm`/`brg` | `formatDirection360` + `[leadingZero]` | heading/course/bearing text |
 | `eta`, `rteEta` | `eta` / `rteEta` | `formatTime` + `[]` | Date/time value path |
-| `dst`, `rteDistance` | `dst` / `rteDistance` | `formatDistance` + `[]` | distance text |
-| `activeRoute` | `activeRouteName`, `activeRouteRemain`, `activeRouteEta`, `activeRouteNextCourse`, `activeRouteApproaching` | renderer wrapper (`ActiveRouteTextHtmlWidget`, html surface) using `formatDistance` (`activeRouteRemain`) + `[remainUnit]`, `formatTime` (`activeRouteEta`) + `[]`, `formatDirection` (`activeRouteNextCourse`) + `[]` | next course is degree-based; `NEXT` tile only renders while approaching |
+| `dst`, `rteDistance` | `dst` / `rteDistance` | `formatDistance` + `[formatUnit_dst]` / `[formatUnit_rteDistance]` | distance text uses selector tokens, not display labels |
+| `activeRoute` | `activeRouteName`, `activeRouteRemain`, `activeRouteEta`, `activeRouteNextCourse`, `activeRouteApproaching` | renderer wrapper (`ActiveRouteTextHtmlWidget`, html surface) using `formatDistance` (`activeRouteRemain`) + `formatUnits.remain`, `formatTime` (`activeRouteEta`) + `[]`, `formatDirection` (`activeRouteNextCourse`) + `[]` | next course is degree-based; `units.remain` stays display-only and the selector token comes from `formatUnit_activeRouteRemain` |
 | `zoom` | `zoom`, `requiredZoom` | renderer wrapper (`MapZoomTextHtmlWidget`, html surface) using `formatDecimalOpt` (`zoom`, `requiredZoom`) + `[2, 1]` | `requiredZoom` is shown as parenthesized secondary text only when different from `zoom` |
-| `centerDisplay` | `centerPosition`, `centerMarkerCourse`, `centerMarkerDistance`, `centerCourse`, `centerDistance`, `activeMeasure`, `measureRhumbLine`, `lockPosition` | renderer wrapper (`CenterDisplayTextWidget`) using `formatLonLatsDecimal` (center coordinates) + `formatDirection` (relation courses) + `formatDistance` (relation distances) | map-cluster kind; measure row is computed client-side from `activeMeasure.getPointAtIndex(0)` and omitted when unavailable; widget visibility follows `!lockPosition \|\| editing` |
-| `aisTarget` | `target`, `trackedMmsi`, `aisMarkAllWarning` | renderer wrapper (`AisTargetTextHtmlWidget`, html surface) using `formatDistance` (`distance`, `cpa`) + `[metricUnit]`, `formatDecimal` (`tcpa / 60`) + `[3, Math.abs(tcpa) > 60 ? 0 : 2]`, `formatDirection` (`headingTo`) + `[]` | branch rule is `tcpa > 0` (`DST + DCPA + TCPA`) else `DST + BRG`; `trackedMmsi` raw equality is used for tracking role while dispatch uses normalized MMSI |
-| `xteDisplay` | `xte`, `cog`, `dtw`, `btw`, `wpName` | renderer wrapper (`XteDisplayWidget`) using `formatDistance` (`xte`, `dtw`) + `formatDirection360` (`cog`, `btw`) | fail-closed if required numeric inputs are missing |
-| `vmg` | `vmg` | `formatSpeed` + `[unit]` | speed text |
+| `centerDisplay` | `centerPosition`, `centerMarkerCourse`, `centerMarkerDistance`, `centerCourse`, `centerDistance`, `activeMeasure`, `measureRhumbLine`, `lockPosition` | renderer wrapper (`CenterDisplayTextWidget`) using `formatLonLatsDecimal` (center coordinates) + `formatDirection` (relation courses) + `formatDistance` (relation distances) | map-cluster kind; `formatUnits.marker` / `formatUnits.boat` / `formatUnits.measure` carry the formatter tokens while `units.*` stay display-only |
+| `aisTarget` | `target`, `trackedMmsi`, `aisMarkAllWarning` | renderer wrapper (`AisTargetTextHtmlWidget`, html surface) using `formatDistance` (`distance`, `cpa`) + `formatUnits.dst` / `formatUnits.cpa`, `formatDecimal` (`tcpa / 60`) + `[3, Math.abs(tcpa) > 60 ? 0 : 2]`, `formatDirection` (`headingTo`) + `[]` | branch rule is `tcpa > 0` (`DST + DCPA + TCPA`) else `DST + BRG`; `trackedMmsi` raw equality is used for tracking role while dispatch uses normalized MMSI |
+| `xteDisplay` | `xte`, `cog`, `dtw`, `btw`, `wpName` | renderer wrapper (`XteDisplayWidget`) using `formatDistance` (`xte`, `dtw`) + `formatUnits.xte` / `formatUnits.dtw`, `formatDirection360` (`cog`, `btw`) | In data state, the static highway frame renders. The moving XTE indicator renders only when `display.xte` is finite. Missing `cog`, `dtw`, or `btw` values affect only their textual placeholder rows when textual metrics are visible. `xteDisplayScale_<token>` resolves the highway scale prop |
+| `vmg` | `vmg` | `formatSpeed` + `[formatUnit_vmg]` | speed text uses selector tokens, not display labels |
 | `positionBoat`, `positionWp` | `positionBoat` / `positionWp` | `formatLonLats` + coordinate formatter `formatLonLatsDecimal` | position object expected |
-| `distance`, `watch` | `distance` / `watch` | `formatDistance` + `[unit]` | anchor distances |
-| `bearing` | `bearing` | `formatDirection360` + `[leadingZero]` | anchor bearing |
+| `anchorDistance`, `anchorWatch` | `distance` / `watch` | `formatDistance` + `[formatUnit_anchorDistance]` / `[formatUnit_anchorWatch]` | anchor distances use prefixed editable keys and selector tokens |
+| `anchorBearing` | `bearing` | `formatDirection360` + `[leadingZero]` | anchor bearing |
 | `voltage` | `value` (dynamic) | `formatDecimal` + `[3, 1, true]` | numeric voltage |
 | `voltageLinear` | `value` (dynamic) | `formatDecimal` + `[3, 1, true]` | linear voltage gauge kind |
 | `clock` | `clock` | `formatTime` + `[]` | Date/time value |

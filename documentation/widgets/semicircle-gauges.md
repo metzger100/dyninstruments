@@ -68,30 +68,31 @@ Each wrapper defines:
 - Tick profile selection via shared `RadialValueMath` resolver methods
 - Sector placement strategy (high-end or low-end), with theme colors forwarded as scalar sector colors
 - Wrapper-owned unit/ratio bindings plus config-backed range ownership
+- Migrated wrappers receive formatter tokens separately from display labels; the token drives conversion and the display label stays editable per token.
 
 ### SpeedRadialWidget
 
 - High-end sectors
 - Tick profile: `resolveStandardSemicircleTickSteps`
-- Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatSpeed", formatterParameters: [unit] })`
+- Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatSpeed", formatterParameters: [formatUnit] })`
 - Config-backed range defaults: `0..30`
-- Wrapper defaults/bindings: unit `kn`, speed ratio props
+- Wrapper defaults/bindings: display unit `kn`, speed ratio props
 
 ### DepthRadialWidget
 
 - Low-end sectors
 - Tick profile: `resolveStandardSemicircleTickSteps`
-- Formatter path: fixed decimal (1)
+- Formatter path: `formatDistance` with a mapper-resolved distance token
 - Config-backed range defaults: `0..30`
-- Wrapper defaults/bindings: unit `m`, depth ratio props
+- Wrapper defaults/bindings: display unit `m`, depth ratio props
 
 ### TemperatureRadialWidget
 
 - High-end sectors
 - Tick profile: `resolveTemperatureSemicircleTickSteps`
-- Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatTemperature", formatterParameters: ["celsius"] })`
+- Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatTemperature", formatterParameters: [formatUnit] })`
 - Config-backed range defaults: `0..35`
-- Wrapper defaults/bindings: unit `°C`, temperature ratio props
+- Wrapper defaults/bindings: display unit `°C`, temperature ratio props
 
 ### VoltageRadialWidget
 
