@@ -1,7 +1,7 @@
 /**
  * Module: DepthRadialWidget - Semicircle depth gauge with low-end warning/alarm sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleRadialEngine, RadialValueMath
+ * Depends: SemicircleRadialEngine, RadialValueMath, DepthDisplayFormatter, PlaceholderNormalize, UnitAwareFormatter
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,31 +13,10 @@
   function create(def, Helpers) {
     const renderer = Helpers.getModule("SemicircleRadialEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
-
-    function formatDepthString(raw, decimals, defaultText) {
-      const n = Number(raw);
-      if (!isFinite(n)) {
-        return defaultText;
-      }
-      const d = (typeof decimals === "number" && isFinite(decimals))
-        ? Math.max(0, Math.min(6, Math.floor(decimals)))
-        : 1;
-      return n.toFixed(d);
-    }
-
-    function displayDepthFromRaw(raw, decimals, defaultText) {
-      const formatted = formatDepthString(raw, decimals, defaultText);
-      const numberText = valueMath.extractNumberText(formatted);
-      const num = numberText ? Number(numberText) : NaN;
-      if (isFinite(num)) {
-        return { num: num, text: numberText };
-      }
-      const rawNumber = Number(raw);
-      if (isFinite(rawNumber)) {
-        return { num: rawNumber, text: String(rawNumber) };
-      }
-      return { num: NaN, text: defaultText };
-    }
+    const depthDisplayFormatter = Helpers.getModule("DepthDisplayFormatter").create(def, Helpers);
+    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+    const unitFormatter = Helpers.getModule("UnitAwareFormatter").create(def, Helpers);
+    const formatDisplay = depthDisplayFormatter.createFormatDisplay(unitFormatter, placeholderNormalize);
 
     const renderCanvas = renderer.createRenderer({
       rawValueKey: "depth",
@@ -57,9 +36,7 @@
       },
       hideTextualMetricsProp: "depthRadialHideTextualMetrics",
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
-      formatDisplay: function (raw, props) {
-        return displayDepthFromRaw(raw, 1, props.default);
-      },
+      formatDisplay: formatDisplay,
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
         const radialProps = {
           warningFrom: props && props.depthRadialWarningFrom,

@@ -4,24 +4,46 @@ describe("DepthRadialWidget", function () {
   it("builds low-end sectors with alarm and warning order", function () {
     let captured;
     let receivedOptions;
+    const requestedModules = [];
     const resolveStandardSemicircleTickSteps = vi.fn((range) => {
       if (range <= 6) return { major: 1, minor: 0.5 };
       if (range <= 30) return { major: 5, minor: 1 };
       return { major: 50, minor: 10 };
     });
+    const unitFormatter = {
+      formatWithToken: vi.fn(function (value, formatter, token, defaultText) {
+        return String(value);
+      }),
+      extractNumericDisplay: vi.fn(function (text, fallback) {
+        const parsed = Number(text);
+        return Number.isFinite(parsed) ? parsed : fallback;
+      })
+    };
     const renderCanvas = vi.fn();
 
     const mod = loadFresh("widgets/radial/DepthRadialWidget/DepthRadialWidget.js");
     const spec = mod.create({}, {
       getModule(id) {
+        requestedModules.push(id);
+        if (id === "PlaceholderNormalize") {
+          return {
+            create() {
+              return {
+                normalize(text, defaultText) {
+                  if (text == null) {
+                    return defaultText == null ? "---" : defaultText;
+                  }
+                  const value = String(text).trim();
+                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+                }
+              };
+            }
+          };
+        }
         if (id === "RadialValueMath") {
           return {
             create() {
               return {
-                extractNumberText(text) {
-                  const match = String(text).match(/-?\d+(?:\.\d+)?/);
-                  return match ? match[0] : "";
-                },
                 buildLowEndSectors(props, minV, maxV, arc, options) {
                   receivedOptions = options;
                   return [
@@ -31,6 +53,16 @@ describe("DepthRadialWidget", function () {
                 },
                 resolveStandardSemicircleTickSteps
               };
+            }
+          };
+        }
+        if (id === "DepthDisplayFormatter") {
+          return loadFresh("shared/widget-kits/format/DepthDisplayFormatter.js");
+        }
+        if (id === "UnitAwareFormatter") {
+          return {
+            create() {
+              return unitFormatter;
             }
           };
         }
@@ -59,6 +91,23 @@ describe("DepthRadialWidget", function () {
     expect(captured.tickSteps(6)).toEqual({ major: 1, minor: 0.5 });
     expect(captured.tickSteps(30)).toEqual({ major: 5, minor: 1 });
     expect(resolveStandardSemicircleTickSteps).toHaveBeenCalledTimes(2);
+    expect(requestedModules).toEqual([
+      "SemicircleRadialEngine",
+      "RadialValueMath",
+      "DepthDisplayFormatter",
+      "PlaceholderNormalize",
+      "UnitAwareFormatter"
+    ]);
+
+    const display = captured.formatDisplay(3.24, {
+      formatter: "formatDistance",
+      formatterParameters: ["ft"],
+      default: "---"
+    });
+
+    expect(display).toEqual({ num: 3.24, text: "3.24" });
+    expect(unitFormatter.formatWithToken).toHaveBeenCalledWith(3.24, "formatDistance", "ft", "---");
+    expect(unitFormatter.extractNumericDisplay).toHaveBeenCalledWith("3.24", NaN);
 
     const theme = {
       colors: {

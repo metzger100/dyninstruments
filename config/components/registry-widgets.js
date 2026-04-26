@@ -209,13 +209,13 @@
       js: BASE + "widgets/linear/DepthLinearWidget/DepthLinearWidget.js",
       css: undefined,
       globalKey: "DyniDepthLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]
+      deps: ["LinearGaugeEngine", "RadialValueMath", "DepthDisplayFormatter", "PlaceholderNormalize", "UnitAwareFormatter"]
     },
     DepthRadialWidget: {
       js: BASE + "widgets/radial/DepthRadialWidget/DepthRadialWidget.js",
       css: undefined,
       globalKey: "DyniDepthRadialWidget",
-      deps: ["SemicircleRadialEngine", "RadialValueMath"]
+      deps: ["SemicircleRadialEngine", "RadialValueMath", "DepthDisplayFormatter", "PlaceholderNormalize", "UnitAwareFormatter"]
     },
     DefaultRadialWidget: {
       js: BASE + "widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js",

@@ -229,6 +229,9 @@ describe("config/components.js", function () {
     expect(components.PlaceholderNormalize.globalKey).toBe("DyniPlaceholderNormalize");
     expect(components.PlaceholderNormalize.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/format/PlaceholderNormalize.js");
     expect(components.PlaceholderNormalize.deps).toBeUndefined();
+    expect(components.DepthDisplayFormatter.globalKey).toBe("DyniDepthDisplayFormatter");
+    expect(components.DepthDisplayFormatter.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/format/DepthDisplayFormatter.js");
+    expect(components.DepthDisplayFormatter.deps).toBeUndefined();
     expect(components.PreparedPayloadModelCache.globalKey).toBe("DyniPreparedPayloadModelCache");
     expect(components.PreparedPayloadModelCache.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/html/PreparedPayloadModelCache.js");
     expect(components.PreparedPayloadModelCache.deps).toBeUndefined();
@@ -253,8 +256,8 @@ describe("config/components.js", function () {
     ]);
     expect(components.SpeedRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]);
     expect(components.SpeedLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
-    expect(components.DepthLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
-    expect(components.DepthRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath"]);
+    expect(components.DepthLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "DepthDisplayFormatter", "PlaceholderNormalize", "UnitAwareFormatter"]);
+    expect(components.DepthRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "DepthDisplayFormatter", "PlaceholderNormalize", "UnitAwareFormatter"]);
     expect(components.DefaultRadialWidget.globalKey).toBe("DyniDefaultRadialWidget");
     expect(components.DefaultRadialWidget.js).toBe("http://host/plugins/dyninstruments/widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js");
     expect(components.DefaultRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]);

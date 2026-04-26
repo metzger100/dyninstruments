@@ -1,7 +1,7 @@
 /**
  * Module: DepthLinearWidget - Linear depth gauge with low-end warning/alarm sectors
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, RadialValueMath, PlaceholderNormalize
+ * Depends: LinearGaugeEngine, RadialValueMath, DepthDisplayFormatter, PlaceholderNormalize, UnitAwareFormatter
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -9,27 +9,14 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniDepthLinearWidget = factory(); }
 }(this, function () {
   "use strict";
-  const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
     const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
+    const depthDisplayFormatter = Helpers.getModule("DepthDisplayFormatter").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
-    function resolveDefaultText(props) {
-      if (props && hasOwn.call(props, "default")) {
-        return props.default;
-      }
-      return placeholderNormalize.normalize(undefined, undefined);
-    }
-
-    function formatDisplay(raw, props) {
-      const defaultText = resolveDefaultText(props);
-      const n = Number(raw);
-      if (!isFinite(n)) {
-        return { num: NaN, text: defaultText };
-      }
-      return { num: n, text: n.toFixed(1) };
-    }
+    const unitFormatter = Helpers.getModule("UnitAwareFormatter").create(def, Helpers);
+    const formatDisplay = depthDisplayFormatter.createFormatDisplay(unitFormatter, placeholderNormalize);
 
     function buildSectors(props, minV, maxV, axis, theme) {
       const linearArc = { startDeg: 0, endDeg: 1000 };

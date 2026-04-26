@@ -158,6 +158,11 @@
       css: undefined,
       globalKey: "DyniPlaceholderNormalize"
     },
+    DepthDisplayFormatter: {
+      js: BASE + "shared/widget-kits/format/DepthDisplayFormatter.js",
+      css: undefined,
+      globalKey: "DyniDepthDisplayFormatter"
+    },
     UnitAwareFormatter: {
       js: BASE + "shared/widget-kits/format/UnitAwareFormatter.js",
       css: undefined,
