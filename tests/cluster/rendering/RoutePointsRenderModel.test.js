@@ -56,6 +56,15 @@ describe("RoutePointsRenderModel", function () {
           if (id === "CenterDisplayMath") {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/CenterDisplayMath.js");
           }
+          else if (id === "RadialTextFitting") {
+            moduleCache[id] = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
+          }
+          else if (id === "RadialTextLayout") {
+            moduleCache[id] = loadFresh("shared/widget-kits/radial/RadialTextLayout.js");
+          }
+          else if (id === "TextTileLayout") {
+            moduleCache[id] = loadFresh("shared/widget-kits/text/TextTileLayout.js");
+          }
           else if (id === "RoutePointsLayout") {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsLayout.js");
           }
@@ -77,6 +86,9 @@ describe("RoutePointsRenderModel", function () {
           else if (id === "RoutePointsRowGeometry") {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js");
           }
+          else if (id === "RoutePointsInfoText") {
+            moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js");
+          }
           else if (id === "RoutePointsHtmlFit") {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js");
           }
@@ -94,6 +106,20 @@ describe("RoutePointsRenderModel", function () {
           }
           else if (id === "StateScreenInteraction") {
             moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
+          }
+          else if (id === "ThemeResolver") {
+            moduleCache[id] = {
+              resolveForRoot() {
+                return {
+                  font: {
+                    family: "sans-serif",
+                    familyMono: "monospace",
+                    weight: 720,
+                    labelWeight: 610
+                  }
+                };
+              }
+            };
           }
           else {
             throw new Error("unexpected module: " + id);

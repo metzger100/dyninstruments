@@ -12,6 +12,9 @@ describe("config/clusters/environment.js", function () {
 
     runIifeScript("config/shared/kind-defaults.js", context);
     runIifeScript("config/shared/editable-param-utils.js", context);
+    runIifeScript("config/shared/environment-base-editables.js", context);
+    runIifeScript("config/shared/environment-depth-editables.js", context);
+    runIifeScript("config/shared/environment-temperature-editables.js", context);
     runIifeScript("config/shared/environment-editables.js", context);
     runIifeScript("config/clusters/environment.js", context);
 
@@ -55,6 +58,87 @@ describe("config/clusters/environment.js", function () {
       { kind: "tempLinear" },
       { kind: "tempRadial" },
       { kind: "pressure" }
+    ]);
+  });
+
+  it("keeps editable parameter key order aligned with the original environment config", function () {
+    const def = loadEnvDef();
+    expect(Object.keys(def.editableParameters)).toEqual([
+      "kind",
+      "tempKey",
+      "value",
+      "depthLinearMinValue",
+      "depthLinearMaxValue",
+      "depthLinearTickMajor",
+      "depthLinearTickMinor",
+      "depthLinearShowEndLabels",
+      "depthLinearWarningEnabled",
+      "depthLinearAlarmEnabled",
+      "depthLinearAlarmFrom",
+      "depthLinearWarningFrom",
+      "depthLinearRatioThresholdNormal",
+      "depthLinearRatioThresholdFlat",
+      "depthRadialMinValue",
+      "depthRadialMaxValue",
+      "depthRadialTickMajor",
+      "depthRadialTickMinor",
+      "depthRadialShowEndLabels",
+      "depthRadialWarningEnabled",
+      "depthRadialAlarmEnabled",
+      "depthRadialAlarmFrom",
+      "depthRadialWarningFrom",
+      "depthRadialRatioThresholdNormal",
+      "depthRadialRatioThresholdFlat",
+      "easing",
+      "depthLinearHideTextualMetrics",
+      "depthRadialHideTextualMetrics",
+      "tempLinearHideTextualMetrics",
+      "tempRadialHideTextualMetrics",
+      "tempLinearMinValue",
+      "tempLinearMaxValue",
+      "tempLinearTickMajor",
+      "tempLinearTickMinor",
+      "tempLinearShowEndLabels",
+      "tempLinearWarningEnabled",
+      "tempLinearAlarmEnabled",
+      "tempLinearWarningFrom",
+      "tempLinearAlarmFrom",
+      "tempLinearRatioThresholdNormal",
+      "tempLinearRatioThresholdFlat",
+      "tempRadialMinValue",
+      "tempRadialMaxValue",
+      "tempRadialTickMajor",
+      "tempRadialTickMinor",
+      "tempRadialShowEndLabels",
+      "tempRadialWarningEnabled",
+      "tempRadialAlarmEnabled",
+      "tempRadialWarningFrom",
+      "tempRadialAlarmFrom",
+      "tempRadialRatioThresholdNormal",
+      "tempRadialRatioThresholdFlat",
+      "captionUnitScale",
+      "stableDigits",
+      "caption",
+      "unit",
+      "formatter",
+      "formatterParameters",
+      "className",
+      "caption_depth",
+      "unit_depth",
+      "caption_depthLinear",
+      "unit_depthLinear",
+      "caption_depthRadial",
+      "unit_depthRadial",
+      "caption_temp",
+      "unit_temp",
+      "caption_tempLinear",
+      "unit_tempLinear",
+      "caption_tempRadial",
+      "unit_tempRadial",
+      "caption_pressure",
+      "unit_pressure",
+      "ratioThresholdNormal",
+      "ratioThresholdFlat"
     ]);
   });
 

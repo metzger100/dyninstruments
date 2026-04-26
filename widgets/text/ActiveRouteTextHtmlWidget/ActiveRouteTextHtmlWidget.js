@@ -11,41 +11,10 @@
 }(this, function () {
   "use strict";
 
-  const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.2;
-  const DEFAULT_RATIO_THRESHOLD_FLAT = 3.8;
   const EMPTY_FIT = {
     routeNameStyle: "",
     metrics: Object.create(null)
   };
-
-  function resolveDisplayMode(props, shellRect, htmlUtils) {
-    const p = props || {};
-    return htmlUtils.resolveRatioModeForRect({
-      ratioThresholdNormal: p.ratioThresholdNormal,
-      ratioThresholdFlat: p.ratioThresholdFlat,
-      defaultRatioThresholdNormal: DEFAULT_RATIO_THRESHOLD_NORMAL,
-      defaultRatioThresholdFlat: DEFAULT_RATIO_THRESHOLD_FLAT,
-      defaultMode: "normal",
-      shellRect: shellRect
-    });
-  }
-
-  function ensureDisplayProps(props) {
-    const p = props || {};
-    if (!p.display || typeof p.display !== "object") {
-      throw new Error("ActiveRouteTextHtmlWidget: props.display is required");
-    }
-    if (!p.captions || typeof p.captions !== "object") {
-      throw new Error("ActiveRouteTextHtmlWidget: props.captions is required");
-    }
-    if (!p.units || typeof p.units !== "object") {
-      throw new Error("ActiveRouteTextHtmlWidget: props.units is required");
-    }
-    if (!Object.prototype.hasOwnProperty.call(p, "default")) {
-      throw new Error("ActiveRouteTextHtmlWidget: props.default is required");
-    }
-    return p;
-  }
 
   function getSurfacePolicy(props) {
     const p = props && typeof props === "object" ? props : null;
@@ -72,22 +41,6 @@
     return policy.actions.routeEditor.openActiveRoute() !== false;
   }
 
-  function formatMetric(rawValue, formatter, formatterParameters, defaultText, Helpers, placeholderNormalize) {
-    const out = String(Helpers.applyFormatter(rawValue, {
-      formatter: formatter,
-      formatterParameters: formatterParameters,
-      default: defaultText
-    }));
-    return placeholderNormalize.normalize(out, defaultText);
-  }
-
-  function textLength(value) {
-    if (value == null) {
-      return 0;
-    }
-    return String(value).length;
-  }
-
   function resolveStateKind(props, htmlUtils, stateScreenPrecedence) {
     const p = props || {};
     return stateScreenPrecedence.pickFirst([
@@ -98,28 +51,19 @@
     ]);
   }
 
-  function normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
-    if (!stableDigitsEnabled) {
-      return { padded: rawText, fallback: rawText };
-    }
-    return stableDigits.normalize(rawText, {
-      integerWidth: stableDigits.resolveIntegerWidth(rawText, minWidth),
-      reserveSignSlot: true
-    });
-  }
-
   function buildRenderModel(
     props,
     shellRect,
     Helpers,
     htmlUtils,
+    htmlFit,
     placeholderNormalize,
     stableDigits,
     stateScreenLabels,
     stateScreenPrecedence,
     stateScreenInteraction
   ) {
-    const p = ensureDisplayProps(props);
+    const p = htmlFit.ensureDisplayProps(props);
     const display = p.display;
     const captions = p.captions;
     const units = p.units;
@@ -128,7 +72,7 @@
     const defaultText = String(p.default);
     const etaFormatter = p.hideSeconds === true ? "formatClock" : "formatTime";
     const stableDigitsEnabled = p.stableDigits === true;
-    const mode = resolveDisplayMode(p, shellRect, htmlUtils);
+    const mode = htmlFit.resolveDisplayMode(p, shellRect, htmlUtils);
     const isEditing = htmlUtils.isEditingMode(p);
     const canOpenRoute = !isEditing && canDispatchOpenRoute(p);
     const interactionState = stateScreenInteraction.resolveInteraction({
@@ -152,7 +96,7 @@
     const remainUnit = htmlUtils.trimText(units.remain);
     const etaUnit = htmlUtils.trimText(units.eta);
     const nextCourseUnit = htmlUtils.trimText(units.nextCourse);
-    const remainRawText = formatMetric(
+    const remainRawText = htmlFit.formatMetric(
       display.remain,
       "formatDistance",
       [remainUnit],
@@ -160,7 +104,7 @@
       Helpers,
       placeholderNormalize
     );
-    const etaRawText = formatMetric(
+    const etaRawText = htmlFit.formatMetric(
       display.eta,
       etaFormatter,
       [],
@@ -169,7 +113,7 @@
       placeholderNormalize
     );
     const nextCourseRawText = isApproaching
-      ? formatMetric(
+      ? htmlFit.formatMetric(
         display.nextCourse,
         "formatDirection",
         [],
@@ -178,9 +122,9 @@
         placeholderNormalize
       )
       : "";
-    const remainStable = normalizeStableValue(remainRawText, stableDigitsEnabled, stableDigits, 2);
-    const etaStable = normalizeStableValue(etaRawText, stableDigitsEnabled, stableDigits, 2);
-    const nextStable = normalizeStableValue(nextCourseRawText, stableDigitsEnabled, stableDigits, 3);
+    const remainStable = htmlFit.normalizeStableValue(remainRawText, stableDigitsEnabled, stableDigits, 2);
+    const etaStable = htmlFit.normalizeStableValue(etaRawText, stableDigitsEnabled, stableDigits, 2);
+    const nextStable = htmlFit.normalizeStableValue(nextCourseRawText, stableDigitsEnabled, stableDigits, 3);
 
     return {
       kind: kind,
@@ -301,13 +245,14 @@
       let lastProps = null;
       const translate = function (props, shellRect) {
         return buildRenderModel(
-          props,
-          shellRect,
-          Helpers,
-          htmlUtils,
-          placeholderNormalize,
-          stableDigits,
-          stateScreenLabels,
+        props,
+        shellRect,
+        Helpers,
+        htmlUtils,
+        htmlFit,
+        placeholderNormalize,
+        stableDigits,
+        stateScreenLabels,
           stateScreenPrecedence,
           stateScreenInteraction
         );
@@ -397,14 +342,14 @@
         const shellRect = payload && payload.shellRect ? payload.shellRect : null;
         return [
           model.kind,
-          textLength(model.routeNameText),
-          textLength(model.remainText),
-          textLength(model.etaText),
-          model.isApproaching ? textLength(model.nextCourseText) : 0,
+          htmlFit.textLength(model.routeNameText),
+          htmlFit.textLength(model.remainText),
+          htmlFit.textLength(model.etaText),
+          model.isApproaching ? htmlFit.textLength(model.nextCourseText) : 0,
           model.mode,
           model.isApproaching ? 1 : 0,
           model.interactionState === "dispatch" ? 1 : 0,
-          textLength(model.stateLabel),
+          htmlFit.textLength(model.stateLabel),
           shellRect ? Math.round(shellRect.width) : 0,
           shellRect ? Math.round(shellRect.height) : 0
         ].join("|");

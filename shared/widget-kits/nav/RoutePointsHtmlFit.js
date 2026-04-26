@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsHtmlFit - Per-cell text-fit owner for route-points HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ThemeResolver, RadialTextLayout, TextTileLayout, RoutePointsLayout, HtmlWidgetUtils
+ * Depends: ThemeResolver, RadialTextLayout, TextTileLayout, RoutePointsLayout, HtmlWidgetUtils, RoutePointsInfoText
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -55,75 +55,6 @@
 
   function toText(value) {
     return value == null ? "" : String(value);
-  }
-
-  function formatLatLonInfo(point, defaultText, Helpers, placeholderNormalize) {
-    const text = String(Helpers.applyFormatter({ lat: point.lat, lon: point.lon }, {
-      formatter: "formatLonLats",
-      formatterParameters: [],
-      default: defaultText
-    }));
-    return placeholderNormalize.normalize(text, defaultText);
-  }
-
-  function formatCourseDistanceInfo(args, stableDigitsEnabled, stableDigits) {
-    const cfg = args || {};
-    const placeholder = cfg.placeholderValue + cfg.courseUnit + "/" + cfg.placeholderValue + cfg.distanceUnit;
-    const previousPoint = cfg.previousPoint;
-    const currentPoint = cfg.currentPoint;
-    const courseUnit = cfg.courseUnit;
-    const distanceUnit = cfg.distanceUnit;
-    if (!previousPoint || !currentPoint) {
-      return { valueText: placeholder, fallbackValueText: placeholder };
-    }
-
-    const leg = cfg.centerMath.computeCourseDistance(previousPoint, currentPoint, cfg.useRhumbLine === true);
-    if (!leg) {
-      return { valueText: placeholder, fallbackValueText: placeholder };
-    }
-
-    const courseTextRaw = String(cfg.Helpers.applyFormatter(leg.course, {
-      formatter: "formatDirection",
-      formatterParameters: [],
-      default: cfg.defaultText
-    }));
-    const distanceTextRaw = String(cfg.Helpers.applyFormatter(leg.distance, {
-      formatter: "formatDistance",
-      formatterParameters: [distanceUnit],
-      default: cfg.defaultText
-    }));
-    const courseText = cfg.placeholderNormalize.normalize(courseTextRaw, cfg.defaultText);
-    const distanceText = cfg.placeholderNormalize.normalize(distanceTextRaw, cfg.defaultText);
-    const courseStable = stableDigitsEnabled === true
-      ? stableDigits.normalize(courseText, {
-        integerWidth: stableDigits.resolveIntegerWidth(courseText, 3),
-        reserveSignSlot: false
-      })
-      : { padded: courseText, fallback: courseText };
-    const distanceStable = stableDigitsEnabled === true
-      ? stableDigits.normalize(distanceText, {
-        integerWidth: stableDigits.resolveIntegerWidth(distanceText, 2),
-        reserveSignSlot: false
-      })
-      : { padded: distanceText, fallback: distanceText };
-
-    return {
-      valueText: courseStable.padded + courseUnit + "/" + distanceStable.padded + distanceUnit,
-      fallbackValueText: courseStable.fallback + courseUnit + "/" + distanceStable.fallback + distanceUnit
-    };
-  }
-
-  function buildRowInfoText(args) {
-    const cfg = args || {};
-    const placeholder = cfg.placeholderValue + cfg.courseUnit + "/" + cfg.placeholderValue + cfg.distanceUnit;
-    if (cfg.showLatLon === true) {
-      const text = formatLatLonInfo(cfg.currentPoint, cfg.defaultText, cfg.Helpers, cfg.placeholderNormalize);
-      return { valueText: text, fallbackValueText: text };
-    }
-    if (cfg.index <= 0 || !cfg.previousValid || !cfg.currentValid) {
-      return { valueText: placeholder, fallbackValueText: placeholder };
-    }
-    return formatCourseDistanceInfo(cfg, cfg.stableDigitsEnabled, cfg.stableDigits);
   }
 
   function measurePx(args, htmlUtils, tileLayout) {
@@ -248,6 +179,7 @@
     const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
     const layoutApi = Helpers.getModule("RoutePointsLayout").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+    const routePointsInfoText = Helpers.getModule("RoutePointsInfoText").create(def, Helpers);
 
     function measureStyle(args) {
       const cfg = args || {};
@@ -415,13 +347,13 @@
       return { headerFit: headerFit, rowFits: rowFits, emptyStyle: emptyStyle };
     }
 
-    return {
+    const spec = {
       id: "RoutePointsHtmlFit",
       compute: compute
     };
+    spec.buildRowInfoText = routePointsInfoText.buildRowInfoText;
+    return spec;
   }
-
-  create.buildRowInfoText = buildRowInfoText;
 
   return { id: "RoutePointsHtmlFit", create: create };
 }));

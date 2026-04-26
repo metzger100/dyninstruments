@@ -80,6 +80,9 @@ describe("RoutePointsHtmlFit", function () {
         if (id === "RoutePointsLayout") {
           return routePointsLayoutModule;
         }
+        if (id === "RoutePointsInfoText") {
+          return loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js");
+        }
         if (id === "HtmlWidgetUtils") {
           return htmlUtilsModule;
         }

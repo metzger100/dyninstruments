@@ -17,6 +17,61 @@
   const MEASURE_CTX_KEY = "__dyniActiveRouteTextMeasureCtx";
   const FIT_CACHE_KEY = "__dyniActiveRouteHtmlFitCache";
 
+  function ensureDisplayProps(props) {
+    const p = props || {};
+    if (!p.display || typeof p.display !== "object") {
+      throw new Error("ActiveRouteTextHtmlWidget: props.display is required");
+    }
+    if (!p.captions || typeof p.captions !== "object") {
+      throw new Error("ActiveRouteTextHtmlWidget: props.captions is required");
+    }
+    if (!p.units || typeof p.units !== "object") {
+      throw new Error("ActiveRouteTextHtmlWidget: props.units is required");
+    }
+    if (!Object.prototype.hasOwnProperty.call(p, "default")) {
+      throw new Error("ActiveRouteTextHtmlWidget: props.default is required");
+    }
+    return p;
+  }
+
+  function resolveDisplayMode(props, shellRect, htmlUtils) {
+    const p = props || {};
+    return htmlUtils.resolveRatioModeForRect({
+      ratioThresholdNormal: p.ratioThresholdNormal,
+      ratioThresholdFlat: p.ratioThresholdFlat,
+      defaultRatioThresholdNormal: 1.2,
+      defaultRatioThresholdFlat: 3.8,
+      defaultMode: "normal",
+      shellRect: shellRect
+    });
+  }
+
+  function formatMetric(rawValue, formatter, formatterParameters, defaultText, Helpers, placeholderNormalize) {
+    const out = String(Helpers.applyFormatter(rawValue, {
+      formatter: formatter,
+      formatterParameters: formatterParameters,
+      default: defaultText
+    }));
+    return placeholderNormalize.normalize(out, defaultText);
+  }
+
+  function textLength(value) {
+    if (value == null) {
+      return 0;
+    }
+    return String(value).length;
+  }
+
+  function normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
+    if (!stableDigitsEnabled) {
+      return { padded: rawText, fallback: rawText };
+    }
+    return stableDigits.normalize(rawText, {
+      integerWidth: stableDigits.resolveIntegerWidth(rawText, minWidth),
+      reserveSignSlot: true
+    });
+  }
+
   function parseFontPx(font) {
     const source = String(font || "");
     const match = source.match(/(\d+(?:\.\d+)?)px/);
@@ -338,9 +393,17 @@
 
     return {
       id: "ActiveRouteHtmlFit",
-      compute: compute
+      compute: compute,
+      ensureDisplayProps: ensureDisplayProps,
+      resolveDisplayMode: resolveDisplayMode,
+      formatMetric: formatMetric,
+      textLength: textLength,
+      normalizeStableValue: normalizeStableValue
     };
   }
 
-  return { id: "ActiveRouteHtmlFit", create: create };
+  return {
+    id: "ActiveRouteHtmlFit",
+    create: create
+  };
 }));

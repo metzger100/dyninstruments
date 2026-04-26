@@ -175,7 +175,7 @@
   }
 
   function create(def, Helpers) {
-    const routePointsHtmlFit = Helpers.getModule("RoutePointsHtmlFit").create;
+    const routePointsHtmlFit = Helpers.getModule("RoutePointsHtmlFit").create(def, Helpers);
     const centerMath = Helpers.getModule("CenterDisplayMath").create(def, Helpers);
     const layoutApi = Helpers.getModule("RoutePointsLayout").create(def, Helpers);
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);

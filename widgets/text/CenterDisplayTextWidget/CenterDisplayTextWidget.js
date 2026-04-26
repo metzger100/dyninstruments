@@ -43,86 +43,6 @@
     }
     return Math.max(minShare, Math.min(maxShare, n));
   }
-  function computeMeasurementHints(args) {
-    const cfg = args || {};
-    const rows = cfg.rows;
-    const baseCaptionPx = Math.max(1, Math.floor(cfg.contentRect.h * 0.15));
-    const baseCoordPx = Math.max(1, Math.floor(cfg.contentRect.h * 0.17));
-    const baseRowLabelPx = Math.max(1, Math.floor(cfg.contentRect.h / Math.max(3, rows.length + 1)));
-    const baseRowValuePx = Math.max(1, Math.floor(baseRowLabelPx * 1.18));
-    const positionCaptionWidth = cfg.positionCaption
-      ? measureTextWidth(
-        cfg.ctx,
-        cfg.textApi,
-        cfg.positionCaption,
-        cfg.labelFamily,
-        cfg.labelWeight,
-        baseCaptionPx,
-        cfg.frameWidthCache
-      )
-      : 0;
-    const coordWidth = Math.max(measureTextWidth(cfg.ctx, cfg.textApi, cfg.latText, cfg.coordFamily, cfg.valueWeight, baseCoordPx, cfg.frameWidthCache),
-      measureTextWidth(cfg.ctx, cfg.textApi, cfg.lonText, cfg.coordFamily, cfg.valueWeight, baseCoordPx, cfg.frameWidthCache));
-    let rowBlockWidth = 0;
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      const labelWidth = row.caption
-        ? measureTextWidth(
-          cfg.ctx,
-          cfg.textApi,
-          row.caption,
-          cfg.labelFamily,
-          cfg.labelWeight,
-          baseRowLabelPx,
-          cfg.frameWidthCache
-        )
-        : 0;
-      const valueWidth = Math.min(
-        measureTextWidth(
-          cfg.ctx,
-          cfg.textApi,
-          row.fullValueText,
-          cfg.relationValueFamily,
-          cfg.valueWeight,
-          baseRowValuePx,
-          cfg.frameWidthCache
-        ),
-        measureTextWidth(
-          cfg.ctx,
-          cfg.textApi,
-          row.compactValueText,
-          cfg.relationValueFamily,
-          cfg.valueWeight,
-          baseRowValuePx,
-          cfg.frameWidthCache
-        )
-      );
-      rowBlockWidth = Math.max(rowBlockWidth, labelWidth + cfg.gap + valueWidth);
-    }
-    const normalCaptionShare = positionCaptionWidth > 0
-      ? clampShare(
-        (positionCaptionWidth + cfg.gap) / Math.max(1, positionCaptionWidth + coordWidth + cfg.gap * 2),
-        0.16,
-        0.42
-      )
-      : undefined;
-    const flatCenterShare = clampShare(
-      Math.max(positionCaptionWidth, coordWidth) / Math.max(1, Math.max(positionCaptionWidth, coordWidth) + rowBlockWidth),
-      0.28,
-      0.56
-    );
-    const stackedCaptionRatio = clampShare(
-      positionCaptionWidth > 0
-        ? 0.16 + ((positionCaptionWidth / Math.max(1, positionCaptionWidth + coordWidth)) * 0.18)
-        : 0.24,
-      0.16,
-      0.34
-    );
-    return {
-      normalCaptionShare: normalCaptionShare, flatCenterShare: flatCenterShare,
-      highCaptionRatio: stackedCaptionRatio, flatCaptionRatio: clampShare((stackedCaptionRatio || 0.24) * 0.92, 0.16, 0.34)
-    };
-  }
   function drawCenterPanel(layout, state, displayState, labelFamily, valueFamily, valueWeight, labelWeight, color) {
     const textFillScale = layout.responsive.textFillScale;
     const relationValueMaxPx = computeRelationValueMaxPx(layout, textFillScale);
@@ -337,7 +257,7 @@
       const contentRect = layoutApi.createContentRect(W, H, insets);
       const displayState = centerDisplayRenderModel.buildDisplayState(p, math, defaultText);
       const frameWidthCache = Object.create(null);
-      const hints = computeMeasurementHints({
+      const hints = centerDisplayRenderModel.computeMeasurementHints({
         ctx: ctx,
         textApi: radialText,
         rows: displayState.rows,
@@ -351,7 +271,10 @@
         relationValueFamily: relationValueFamily,
         valueWeight: valueWeight,
         labelWeight: labelWeight,
-        frameWidthCache: frameWidthCache
+        frameWidthCache: frameWidthCache,
+        measureTextWidth: measureTextWidth,
+        computeResponsiveLineMaxPx: computeResponsiveLineMaxPx,
+        clampShare: clampShare
       });
       const layout = layoutApi.computeLayout({
         contentRect: contentRect,

@@ -13,6 +13,9 @@ describe("static cluster configs", function () {
     runIifeScript("config/shared/kind-defaults.js", context);
     runIifeScript("config/shared/editable-param-utils.js", context);
     runIifeScript("config/shared/common-editables.js", context);
+    runIifeScript("config/shared/environment-base-editables.js", context);
+    runIifeScript("config/shared/environment-depth-editables.js", context);
+    runIifeScript("config/shared/environment-temperature-editables.js", context);
     runIifeScript("config/shared/environment-editables.js", context);
 
     runIifeScript("config/clusters/course-heading.js", context);

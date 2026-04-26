@@ -12,6 +12,41 @@ function createActiveRouteWidget() {
       }
     };
   });
+  const htmlFitStub = {
+    ensureDisplayProps(props) {
+      return props;
+    },
+    resolveDisplayMode(props, shellRect, htmlUtils) {
+      return htmlUtils.resolveRatioModeForRect({
+        shellRect: shellRect,
+        ratioThresholdNormal: props.ratioThresholdNormal,
+        ratioThresholdFlat: props.ratioThresholdFlat,
+        defaultRatioThresholdNormal: 1.2,
+        defaultRatioThresholdFlat: 3.8,
+        defaultMode: "normal"
+      });
+    },
+    formatMetric(rawValue, formatter, formatterParameters, defaultText, Helpers, placeholderNormalize) {
+      const out = String(Helpers.applyFormatter(rawValue, {
+        formatter: formatter,
+        formatterParameters: formatterParameters,
+        default: defaultText
+      }));
+      return placeholderNormalize.normalize(out, defaultText);
+    },
+    textLength(value) {
+      return value == null ? 0 : String(value).length;
+    },
+    normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
+      if (!stableDigitsEnabled) {
+        return { padded: rawText, fallback: rawText };
+      }
+      return stableDigits.normalize(rawText, {
+        integerWidth: stableDigits.resolveIntegerWidth(rawText, minWidth),
+        reserveSignSlot: true
+      });
+    }
+  };
   const Helpers = {
     applyFormatter(value, formatterOptions) {
       const cfg = formatterOptions || {};
@@ -19,7 +54,7 @@ function createActiveRouteWidget() {
     },
     getModule(id) {
       if (id === "ActiveRouteHtmlFit") {
-        return { create: () => ({ compute: fitCompute }) };
+        return { create: () => Object.assign({ compute: fitCompute }, htmlFitStub) };
       }
       if (id === "HtmlWidgetUtils") {
         return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
@@ -139,6 +174,18 @@ function createRenderModelHelpers() {
         else if (id === "RoutePointsLayout") {
           moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsLayout.js");
         }
+        else if (id === "RadialTextFitting") {
+          moduleCache[id] = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
+        }
+        else if (id === "RadialTextLayout") {
+          moduleCache[id] = loadFresh("shared/widget-kits/radial/RadialTextLayout.js");
+        }
+        else if (id === "TextTileLayout") {
+          moduleCache[id] = loadFresh("shared/widget-kits/text/TextTileLayout.js");
+        }
+        else if (id === "RoutePointsInfoText") {
+          moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js");
+        }
         else if (id === "RoutePointsHtmlFit") {
           moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js");
         }
@@ -180,6 +227,20 @@ function createRenderModelHelpers() {
         }
         else if (id === "StateScreenInteraction") {
           moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
+        }
+        else if (id === "ThemeResolver") {
+          moduleCache[id] = {
+            resolveForRoot() {
+              return {
+                font: {
+                  family: "sans-serif",
+                  familyMono: "monospace",
+                  weight: 720,
+                  labelWeight: 610
+                }
+              };
+            }
+          };
         }
         else {
           throw new Error("unexpected module: " + id);

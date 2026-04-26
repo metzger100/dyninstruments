@@ -103,11 +103,16 @@
       globalKey: "DyniRoutePointsLayout",
       deps: ["ResponsiveScaleProfile", "LayoutRectMath", "RoutePointsLayoutSizing", "RoutePointsRowGeometry"]
     },
+    RoutePointsInfoText: {
+      js: BASE + "shared/widget-kits/nav/RoutePointsInfoText.js",
+      css: undefined,
+      globalKey: "DyniRoutePointsInfoText"
+    },
     RoutePointsHtmlFit: {
       js: BASE + "shared/widget-kits/nav/RoutePointsHtmlFit.js",
       css: undefined,
       globalKey: "DyniRoutePointsHtmlFit",
-      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "RoutePointsLayout", "HtmlWidgetUtils"]
+      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "RoutePointsLayout", "HtmlWidgetUtils", "RoutePointsInfoText"]
     },
     MapZoomHtmlFit: {
       js: BASE + "shared/widget-kits/nav/MapZoomHtmlFit.js",
