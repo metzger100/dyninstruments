@@ -1,13 +1,24 @@
 /**
  * Module: plugin.js - DyniPlugin bootstrap entrypoint
  * Documentation: documentation/architecture/component-system.md
- * Depends: avnav.api, AVNAV_BASE_URL, internal DyniPlugin scripts
+ * Depends: AVNAV_BASE_URL, internal DyniPlugin scripts
  */
 /* global avnav */
 (function () {
   "use strict";
 
-  if (!window.avnav || !avnav.api) {
+  function resolveHostApi() {
+    if (typeof avnav !== "undefined" && avnav && avnav.api) {
+      return avnav.api;
+    }
+    if (window.avnav && window.avnav.api) {
+      return window.avnav.api;
+    }
+    return null;
+  }
+
+  const hostApi = resolveHostApi();
+  if (!hostApi) {
     console && console.error && console.error("dyninstruments: avnav.api missing");
     return;
   }
@@ -44,6 +55,7 @@
   const BASE = getBaseUrl();
   const ns = window.DyniPlugin = window.DyniPlugin || {};
   ns.baseUrl = BASE;
+  ns.avnavApi = hostApi;
   ns.runtime = ns.runtime || {};
   ns.runtime.loadScriptOnce = loadScriptOnce;
 

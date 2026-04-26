@@ -16,6 +16,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     const pageRoots = opts.pageRoots || {};
     const alarmWidgetRoots = opts.alarmWidgetRoots || [];
     const routePointsActivate = opts.routePointsActivate || vi.fn(() => true);
+    const includeGlobalApi = opts.includeGlobalApi !== false;
     function hasClassName(root, className) {
       const value = root && root.className;
       if (typeof value !== "string") {
@@ -38,21 +39,23 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       DyniPlugin: {
         runtime: {},
         state: {},
-        config: { shared: {}, clusters: [] }
+        config: { shared: {}, clusters: [] },
+        ...(opts.hostApi ? { avnavApi: opts.hostApi } : {})
       },
-      avnav: {
+      avnav: includeGlobalApi ? {
         api: {
           routePoints: {
             activate: routePointsActivate
           }
         }
-      },
+      } : {},
       document: {
         getElementById: getElementById,
         querySelectorAll: querySelectorAll
       }
     });
 
+    runIifeScript("runtime/namespace.js", context);
     runIifeScript("runtime/TemporaryHostActionBridgeDiscovery.js", context);
     runIifeScript("runtime/TemporaryHostActionBridge.js", context);
     return {
@@ -235,6 +238,22 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       pageRoots: { navpage: makeElement() }
     }).bridge;
     expect(unsupported.getHostActions().routePoints.activate(makeRoutePointPayload(1))).toBe(false);
+  });
+
+  it("resolves routePoints from the captured DyniPlugin.avnavApi when the wrapper global is absent", function () {
+    const routePointsActivate = vi.fn(() => true);
+    const { bridge } = createBridgeContext({
+      includeGlobalApi: false,
+      hostApi: {
+        routePoints: {
+          activate: routePointsActivate
+        }
+      },
+      pageRoots: { gpspage: makeElement() }
+    });
+
+    expect(bridge.getHostActions().routePoints.activate(makeRoutePointPayload(4))).toBe(true);
+    expect(routePointsActivate).toHaveBeenCalledWith(4);
   });
 
   it("throws explicit errors when a dispatch-capable gps routePoints relay path fails", function () {

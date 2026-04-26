@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Helpers - Shared helper functions for modules
  * Documentation: documentation/shared/helpers.md
- * Depends: avnav.api.formatter, window.DyniComponents
+ * Depends: runtime.getAvnavApi().formatter, window.DyniComponents
  */
 (function (root) {
   "use strict";
@@ -24,18 +24,18 @@
     const fpRaw = p.formatterParameters;
     const fp = Array.isArray(fpRaw) ? fpRaw
       : (typeof fpRaw === "string" ? fpRaw.split(",") : []);
+    const avnavApi = runtime.getAvnavApi(root);
     try {
       if (typeof p.formatter === "function") {
         return p.formatter.apply(null, [raw].concat(fp));
       }
       if (
         typeof p.formatter === "string" &&
-        root.avnav &&
-        root.avnav.api &&
-        root.avnav.api.formatter &&
-        typeof root.avnav.api.formatter[p.formatter] === "function"
+        avnavApi &&
+        avnavApi.formatter &&
+        typeof avnavApi.formatter[p.formatter] === "function"
       ) {
-        return root.avnav.api.formatter[p.formatter].apply(root.avnav.api.formatter, [raw].concat(fp));
+        return avnavApi.formatter[p.formatter].apply(avnavApi.formatter, [raw].concat(fp));
       }
     }
     // dyni-lint-disable-next-line catch-fallback-without-suppression -- Formatter dispatch is an external AvNav/custom boundary; documented fallback behavior must remain centralized here.

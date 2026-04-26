@@ -660,6 +660,17 @@ function createScriptContext(extra = {}) {
     },
     avnav: { api: { formatter: {}, registerWidget() {} } }
   };
+  base.DyniPlugin.runtime.getAvnavApi = function (rootRef) {
+    const ns = rootRef && rootRef.DyniPlugin;
+    if (ns && ns.avnavApi) {
+      return ns.avnavApi;
+    }
+    const fallbackRoot = rootRef || this;
+    if (fallbackRoot && fallbackRoot.avnav && fallbackRoot.avnav.api) {
+      return fallbackRoot.avnav.api;
+    }
+    return null;
+  };
   const ctx = deepMerge(base, extra);
   ctx.globalThis = ctx;
   return ctx;

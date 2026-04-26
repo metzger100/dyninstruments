@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin TemporaryHostActionBridge - Temporary runtime facade for host-owned workflow dispatch
  * Documentation: documentation/avnav-api/plugin-lifecycle.md
- * Depends: avnav.api, DOM page roots, TemporaryHostActionBridgeDiscovery
+ * Depends: runtime.getAvnavApi(), DOM page roots, TemporaryHostActionBridgeDiscovery
  */
 (function (root) {
   "use strict";
@@ -112,7 +112,8 @@
     }
 
     function getRoutePointsApi() {
-      return rootRef.avnav && rootRef.avnav.api && rootRef.avnav.api.routePoints;
+      const avnavApi = runtime.getAvnavApi(rootRef);
+      return avnavApi && avnavApi.routePoints;
     }
 
     function freezeCapabilitiesSnapshot(snapshot) {

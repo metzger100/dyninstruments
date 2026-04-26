@@ -63,6 +63,33 @@ describe("plugin.js bootstrap", function () {
     expect(runInit).toHaveBeenCalledOnce();
   });
 
+  it("captures the wrapper-local AvNav API for internal runtime scripts", async function () {
+    const dom = createDomHarness();
+    const runInit = vi.fn(() => Promise.resolve());
+    const hostApi = { log: vi.fn(), registerWidget: vi.fn() };
+
+    const context = createScriptContext({
+      document: dom.document,
+      AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
+      avnav: { api: hostApi },
+      window: {
+        avnav: {},
+        DyniPlugin: {
+          runtime: { runInit }
+        }
+      }
+    });
+
+    runIifeScript("plugin.js", context);
+    await flushPromises(50);
+
+    expect(context.window.DyniPlugin.avnavApi).toBe(hostApi);
+    expect(dom.appendedScripts.length).toBeGreaterThan(0);
+    expect(dom.appendedScripts[dom.appendedScripts.length - 1].src)
+      .toBe("http://host/plugins/dyninstruments/runtime/init.js");
+    expect(runInit).toHaveBeenCalledOnce();
+  });
+
   it("fails fast when AVNAV_BASE_URL is missing", function () {
     const dom = createDomHarness();
     const context = createScriptContext({
@@ -84,7 +111,7 @@ describe("plugin.js bootstrap", function () {
       document: dom.document,
       console: { error: err },
       AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
-      window: {},
+      window: { avnav: {} },
       avnav: undefined
     });
 

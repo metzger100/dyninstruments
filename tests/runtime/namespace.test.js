@@ -6,9 +6,28 @@ describe("runtime/namespace.js", function () {
     runIifeScript("runtime/namespace.js", context);
 
     expect(context.DyniPlugin).toBeTruthy();
-    expect(context.DyniPlugin.runtime).toEqual({});
+    expect(typeof context.DyniPlugin.runtime.getAvnavApi).toBe("function");
     expect(context.DyniPlugin.state).toEqual({});
     expect(Array.isArray(context.DyniPlugin.config.clusters)).toBe(true);
     expect(context.DyniPlugin.config.shared).toEqual({});
+  });
+
+  it("resolves the captured AvNav API before falling back to the global wrapper API", function () {
+    const capturedApi = { name: "captured" };
+    const fallbackApi = { name: "fallback" };
+    const context = createScriptContext({
+      avnav: {
+        api: fallbackApi
+      },
+      DyniPlugin: {
+        avnavApi: capturedApi
+      }
+    });
+
+    runIifeScript("runtime/namespace.js", context);
+
+    expect(context.DyniPlugin.runtime.getAvnavApi(context)).toBe(capturedApi);
+    context.DyniPlugin.avnavApi = null;
+    expect(context.DyniPlugin.runtime.getAvnavApi(context)).toBe(fallbackApi);
   });
 });

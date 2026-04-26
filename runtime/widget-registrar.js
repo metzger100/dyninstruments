@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Widget Registrar - Widget definition composition and registration
  * Documentation: documentation/avnav-api/plugin-lifecycle.md
- * Depends: runtime/editable-defaults.js, avnav.api.registerWidget
+ * Depends: runtime/editable-defaults.js, runtime.getAvnavApi().registerWidget
  */
 (function (root) {
   "use strict";
@@ -107,7 +107,8 @@
     const editable = typeof editableFn === "function"
       ? editableFn(widgetDef.def.editableParameters)
       : (widgetDef.def.editableParameters || {});
-    root.avnav.api.registerWidget(baseDef, editable);
+    const avnavApi = runtime.getAvnavApi(root);
+    avnavApi.registerWidget(baseDef, editable);
   }
 
   runtime.registerWidget = registerWidget;

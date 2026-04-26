@@ -77,6 +77,7 @@ describe("runtime/helpers.js", function () {
       devicePixelRatio: 2
     }, extra || {}));
 
+    runIifeScript("runtime/namespace.js", context);
     runIifeScript("runtime/helpers.js", context);
     return context.DyniPlugin.runtime;
   }
@@ -174,6 +175,31 @@ describe("runtime/helpers.js", function () {
     });
 
     expect(out).toBe("5");
+  });
+
+  it("uses the captured DyniPlugin.avnavApi formatter when the wrapper global is absent", function () {
+    const formatter = vi.fn(function (value, suffix) {
+      return String(value) + ":" + suffix;
+    });
+    const runtime = loadRuntimeHelpers({
+      avnav: {},
+      DyniPlugin: {
+        runtime: {},
+        state: {},
+        config: { shared: {}, clusters: [] },
+        avnavApi: {
+          formatter: {
+            formatSpeed: formatter
+          }
+        }
+      }
+    });
+
+    expect(runtime.applyFormatter(6, {
+      formatter: "formatSpeed",
+      formatterParameters: ["kn"]
+    })).toBe("6:kn");
+    expect(formatter).toHaveBeenCalledWith(6, "kn");
   });
 
   it("setupCanvas applies dpr transform and returns CSS pixel dimensions", function () {

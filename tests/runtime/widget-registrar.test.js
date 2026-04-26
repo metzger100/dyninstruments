@@ -3,10 +3,12 @@ const { createMockCanvas, createMockContext2D } = require("../helpers/mock-canva
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
 describe("runtime/widget-registrar.js", function () {
-  function setupContext() {
-    const registerWidget = vi.fn();
+  function setupContext(options) {
+    const opts = options || {};
+    const registerWidget = opts.registerWidget || vi.fn();
     const applyThemePresetToContainer = vi.fn();
     const hostActions = { getCapabilities: vi.fn(), routePoints: {}, routeEditor: {}, ais: {} };
+    const includeGlobalApi = opts.includeGlobalApi !== false;
 
     const context = createScriptContext({
       DyniPlugin: {
@@ -17,15 +19,17 @@ describe("runtime/widget-registrar.js", function () {
           }
         },
         state: {},
-        config: { shared: {}, clusters: [] }
+        config: { shared: {}, clusters: [] },
+        ...(opts.hostApi ? { avnavApi: opts.hostApi } : {})
       },
-      avnav: {
+      avnav: includeGlobalApi ? {
         api: {
           registerWidget
         }
-      }
+      } : {}
     });
 
+    runIifeScript("runtime/namespace.js", context);
     runIifeScript("runtime/editable-defaults.js", context);
     runIifeScript("runtime/widget-registrar.js", context);
 
@@ -211,6 +215,33 @@ describe("runtime/widget-registrar.js", function () {
     const updatedNotEditing = registeredDef.updateFunction({ a: 1, editing: false });
     expect(updatedNotEditing).toEqual({ a: 1, editing: false, fromSpec: true, fromDef: true, dyniLayoutEditing: false });
     expect(registeredDef.renderCanvas).toBeUndefined();
+  });
+
+  it("registers through the captured DyniPlugin.avnavApi when the wrapper global is absent", function () {
+    const registerWidget = vi.fn();
+    const { context } = setupContext({
+      includeGlobalApi: false,
+      hostApi: {
+        registerWidget
+      }
+    });
+
+    const component = { create: () => ({}) };
+    const widgetDef = {
+      def: {
+        name: "dyni_Captured",
+        editableParameters: {}
+      }
+    };
+
+    context.DyniPlugin.runtime.registerWidget(component, widgetDef, {
+      getHostActions() {
+        return { getCapabilities: vi.fn(), routePoints: {}, routeEditor: {}, ais: {} };
+      }
+    });
+
+    expect(registerWidget).toHaveBeenCalledTimes(1);
+    expect(registerWidget.mock.calls[0][0].name).toBe("dyni_Captured");
   });
 
   it("falls back to storeKey when storeKeys absent", function () {

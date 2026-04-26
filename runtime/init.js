@@ -85,7 +85,8 @@
       return state.initPromise;
     }
 
-    if (!root.avnav || !root.avnav.api) {
+    const avnavApi = runtime.getAvnavApi(root);
+    if (!avnavApi) {
       console && console.error && console.error("dyninstruments: avnav.api missing");
       return Promise.resolve();
     }
@@ -139,7 +140,7 @@
           runtime.registerWidget(component, widgetDef, Helpers);
         });
 
-        root.avnav.api.log("dyninstruments component init ok (clustered): " + widgetDefinitions.length + " widgets");
+        avnavApi.log("dyninstruments component init ok (clustered): " + widgetDefinitions.length + " widgets");
       })
       .catch(function (e) {
         state.initStarted = false;
