@@ -154,6 +154,7 @@ describe("ActiveRouteHtmlFit", function () {
       expectStyleFormat(out.metrics[metricId].captionStyle);
       expectStyleFormat(out.metrics[metricId].valueStyle);
       expectStyleFormat(out.metrics[metricId].unitStyle);
+      expect(out.metrics[metricId].gapStyle).toMatch(/^gap:\d+px;$/);
     });
   });
 
@@ -356,7 +357,7 @@ describe("ActiveRouteHtmlFit", function () {
         etaText: " 0012:34",
         etaFallbackText: "12:34"
       }),
-      shellRect: { width: 20, height: 36 },
+      shellRect: { width: 12, height: 36 },
       targetEl: targetEl,
       hostContext: hostContext
     });

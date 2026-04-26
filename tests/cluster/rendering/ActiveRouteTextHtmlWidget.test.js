@@ -11,9 +11,9 @@ describe("ActiveRouteTextHtmlWidget", function () {
       return {
         routeNameStyle: "font-size:14px;",
         metrics: {
-          remain: { captionStyle: "font-size:12px;", valueStyle: "font-size:18px;", unitStyle: "font-size:11px;" },
-          eta: { captionStyle: "font-size:11px;", valueStyle: "font-size:17px;", unitStyle: "font-size:10px;" },
-          next: { captionStyle: "font-size:10px;", valueStyle: "font-size:16px;", unitStyle: "font-size:9px;" }
+          remain: { captionStyle: "font-size:12px;", valueStyle: "font-size:18px;", unitStyle: "font-size:11px;", gapStyle: "gap:4px;" },
+          eta: { captionStyle: "font-size:11px;", valueStyle: "font-size:17px;", unitStyle: "font-size:10px;", gapStyle: "gap:4px;" },
+          next: { captionStyle: "font-size:10px;", valueStyle: "font-size:16px;", unitStyle: "font-size:9px;", gapStyle: "gap:4px;" }
         }
       };
     });
@@ -295,6 +295,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     expect(html).toContain('data-dyni-action="active-route-open"');
     expect(html).toContain("dyni-active-route-open-hotspot");
     expect(html).toContain("DIST:12.4");
+    expect(mounted.mountEl.querySelector(".dyni-active-route-metric-value-row").getAttribute("style")).toBe("gap:4px;");
     expect(setup.fitCompute).toHaveBeenCalledTimes(1);
     expect(mounted.mountEl.querySelector(".dyni-active-route-metric-caption").getAttribute("style")).toBe("font-size:12px;");
 

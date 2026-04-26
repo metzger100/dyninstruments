@@ -385,7 +385,10 @@
         metricStyles[metric.id] = {
           captionStyle: toFontSizeStyle(captionFit && captionFit.px, htmlUtils),
           valueStyle: toFontSizeStyle(fit && fit.vPx, htmlUtils),
-          unitStyle: toFontSizeStyle(fit && fit.uPx, htmlUtils)
+          unitStyle: toFontSizeStyle(fit && fit.uPx, htmlUtils),
+          gapStyle: fit && fit.gap > 0
+            ? "gap:" + Math.max(1, Math.floor(fit.gap)) + "px;"
+            : ""
         };
       }
 

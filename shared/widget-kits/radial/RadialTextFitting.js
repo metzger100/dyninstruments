@@ -92,7 +92,8 @@
       }
 
       const maxH = clampPositive(h, MIN_FONT_PX);
-      const maxW = Math.max(0, Number(w) || 0);
+      const rawMaxW = Math.max(0, Number(w) || 0);
+      const maxW = Math.max(0, rawMaxW * 0.97);
       const hasUnit = !!unit;
       const ratio = Number(secScale);
       const scale = isFinite(ratio) ? ratio : 0.8;

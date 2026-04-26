@@ -156,6 +156,7 @@
     const captionStyle = style && typeof style.captionStyle === "string" ? style.captionStyle : "";
     const valueStyle = style && typeof style.valueStyle === "string" ? style.valueStyle : "";
     const unitStyle = style && typeof style.unitStyle === "string" ? style.unitStyle : "";
+    const gapStyle = style && typeof style.gapStyle === "string" ? style.gapStyle : "";
     const valueClasses = ["dyni-active-route-metric-value"];
     if (tabular) {
       valueClasses.push("dyni-tabular");
@@ -163,7 +164,7 @@
     return ""
       + '<div class="dyni-active-route-metric dyni-active-route-metric-' + metricId + '">'
       + '<div class="dyni-active-route-metric-caption"' + htmlUtils.toStyleAttr(captionStyle) + ">" + htmlUtils.escapeHtml(caption) + "</div>"
-      + '<div class="dyni-active-route-metric-value-row">'
+      + '<div class="dyni-active-route-metric-value-row"' + htmlUtils.toStyleAttr(gapStyle) + ">"
       + '<span class="' + valueClasses.join(" ") + '"' + htmlUtils.toStyleAttr(valueStyle) + ">" + htmlUtils.escapeHtml(value) + "</span>"
       + '<span class="dyni-active-route-metric-unit"' + htmlUtils.toStyleAttr(unitStyle) + ">" + htmlUtils.escapeHtml(unit) + "</span>"
       + "</div>"
