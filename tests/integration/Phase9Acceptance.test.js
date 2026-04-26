@@ -210,6 +210,9 @@ function createRenderModelHelpers() {
         else if (id === "HtmlWidgetUtils") {
           moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
         }
+        else if (id === "UnitAwareFormatter") {
+          moduleCache[id] = loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
+        }
         else if (id === "NavInteractionPolicy") {
           moduleCache[id] = loadFresh("shared/widget-kits/nav/NavInteractionPolicy.js");
         }

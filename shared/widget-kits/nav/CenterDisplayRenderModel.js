@@ -1,7 +1,7 @@
 /**
  * Module: CenterDisplayRenderModel - Display-state builder for center-display canvas renderer
  * Documentation: documentation/widgets/center-display.md
- * Depends: PlaceholderNormalize, StableDigits
+ * Depends: StableDigits, UnitAwareFormatter
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -108,35 +108,20 @@
   }
 
   function create(def, Helpers) {
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
     const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
+    const unitFormatter = Helpers.getModule("UnitAwareFormatter").create(def, Helpers);
 
     function formatCoordinate(point, axis, defaultText) {
       const raw = point && axis === "lat" ? point.lat : point && point.lon;
-      const out = String(Helpers.applyFormatter(raw, {
-        formatter: "formatLonLatsDecimal",
-        formatterParameters: [axis],
-        default: defaultText
-      }));
-      return placeholderNormalize.normalize(out, defaultText);
+      return unitFormatter.formatWithToken(raw, "formatLonLatsDecimal", axis, defaultText);
     }
 
     function formatCourse(value, defaultText) {
-      const out = String(Helpers.applyFormatter(value, {
-        formatter: "formatDirection",
-        formatterParameters: [],
-        default: defaultText
-      }));
-      return placeholderNormalize.normalize(out, defaultText);
+      return unitFormatter.formatWithToken(value, "formatDirection", undefined, defaultText);
     }
 
     function formatDistance(value, formatUnit, defaultText) {
-      const out = String(Helpers.applyFormatter(value, {
-        formatter: "formatDistance",
-        formatterParameters: [formatUnit],
-        default: defaultText
-      }));
-      return placeholderNormalize.normalize(out, defaultText);
+      return unitFormatter.formatDistance(value, formatUnit, defaultText);
     }
 
     function buildDisplayState(props, math, defaultText) {

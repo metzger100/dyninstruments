@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetRenderModel - Pure normalization and display-model owner for AIS target HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: AisTargetLayout, HtmlWidgetUtils, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction
+ * Depends: AisTargetLayout, HtmlWidgetUtils, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, UnitAwareFormatter
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -130,6 +130,7 @@
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
     const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
+    const unitFormatter = Helpers.getModule("UnitAwareFormatter").create(def, Helpers);
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
@@ -210,23 +211,21 @@
           id: "dst",
           captionText: normalizeText(captions.dst),
           unitText: normalizeText(units.dst),
-          ...normalizeStableMetricValue(formatWithFormatter({
-            value: distance,
-            formatter: "formatDistance",
-            formatterParameters: [formatTokens.dst],
-            defaultText: defaultText
-          }, Helpers, placeholderNormalize), 2, stableDigitsEnabled)
+          ...normalizeStableMetricValue(
+            unitFormatter.formatDistance(distance, formatTokens.dst, defaultText),
+            2,
+            stableDigitsEnabled
+          )
         },
         cpa: {
           id: "cpa",
           captionText: normalizeText(captions.cpa),
           unitText: normalizeText(units.cpa),
-          ...normalizeStableMetricValue(formatWithFormatter({
-            value: cpa,
-            formatter: "formatDistance",
-            formatterParameters: [formatTokens.cpa],
-            defaultText: defaultText
-          }, Helpers, placeholderNormalize), 2, stableDigitsEnabled)
+          ...normalizeStableMetricValue(
+            unitFormatter.formatDistance(cpa, formatTokens.cpa, defaultText),
+            2,
+            stableDigitsEnabled
+          )
         },
         tcpa: {
           id: "tcpa",

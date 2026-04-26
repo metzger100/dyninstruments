@@ -31,6 +31,8 @@ describe("AisTargetRenderModel", function () {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
           } else if (id === "PlaceholderNormalize") {
             moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
+          } else if (id === "UnitAwareFormatter") {
+            moduleCache[id] = loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
           } else if (id === "StateScreenLabels") {
             moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
           } else if (id === "StateScreenPrecedence") {

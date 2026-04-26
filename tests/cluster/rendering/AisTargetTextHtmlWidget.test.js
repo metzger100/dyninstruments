@@ -53,6 +53,9 @@ describe("AisTargetTextHtmlWidget", function () {
         if (id === "AisTargetRenderModel") {
           return loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js");
         }
+        if (id === "UnitAwareFormatter") {
+          return loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
+        }
         if (id === "AisTargetMarkup") {
           return loadFresh("shared/widget-kits/nav/AisTargetMarkup.js");
         }

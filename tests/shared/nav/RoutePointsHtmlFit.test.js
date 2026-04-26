@@ -83,6 +83,12 @@ describe("RoutePointsHtmlFit", function () {
         if (id === "RoutePointsInfoText") {
           return loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js");
         }
+        if (id === "UnitAwareFormatter") {
+          return loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
+        }
+        if (id === "PlaceholderNormalize") {
+          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
+        }
         if (id === "HtmlWidgetUtils") {
           return htmlUtilsModule;
         }

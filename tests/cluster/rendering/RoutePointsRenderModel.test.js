@@ -89,6 +89,9 @@ describe("RoutePointsRenderModel", function () {
           else if (id === "RoutePointsInfoText") {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js");
           }
+          else if (id === "UnitAwareFormatter") {
+            moduleCache[id] = loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
+          }
           else if (id === "RoutePointsHtmlFit") {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js");
           }

@@ -37,7 +37,8 @@
         "StableDigits",
         "StateScreenLabels",
         "StateScreenPrecedence",
-        "StateScreenInteraction"
+        "StateScreenInteraction",
+        "UnitAwareFormatter"
       ]
     },
     AlarmRenderModel: {
@@ -95,7 +96,8 @@
         "StableDigits",
         "StateScreenLabels",
         "StateScreenPrecedence",
-        "StateScreenInteraction"
+        "StateScreenInteraction",
+        "UnitAwareFormatter"
       ]
     },
     EditRouteMarkup: {
@@ -324,6 +326,7 @@
         "SpringEasing",
         "PlaceholderNormalize",
         "StableDigits",
+        "UnitAwareFormatter",
         "StateScreenLabels",
         "StateScreenPrecedence",
         "StateScreenCanvasOverlay"

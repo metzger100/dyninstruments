@@ -91,6 +91,9 @@ function createActiveRouteWidget() {
       if (id === "HtmlWidgetUtils") {
         return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
       }
+      if (id === "UnitAwareFormatter") {
+        return loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
+      }
       if (id === "PreparedPayloadModelCache") {
         return loadFresh("shared/widget-kits/html/PreparedPayloadModelCache.js");
       }

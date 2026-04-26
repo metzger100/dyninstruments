@@ -50,7 +50,7 @@
       js: BASE + "shared/widget-kits/nav/ActiveRouteHtmlFit.js",
       css: undefined,
       globalKey: "DyniActiveRouteHtmlFit",
-      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils"]
+      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils", "UnitAwareFormatter"]
     },
     ActiveRouteLayout: {
       js: BASE + "shared/widget-kits/nav/ActiveRouteLayout.js",
@@ -106,7 +106,8 @@
     RoutePointsInfoText: {
       js: BASE + "shared/widget-kits/nav/RoutePointsInfoText.js",
       css: undefined,
-      globalKey: "DyniRoutePointsInfoText"
+      globalKey: "DyniRoutePointsInfoText",
+      deps: ["UnitAwareFormatter"]
     },
     RoutePointsHtmlFit: {
       js: BASE + "shared/widget-kits/nav/RoutePointsHtmlFit.js",
@@ -146,7 +147,7 @@
       js: BASE + "shared/widget-kits/nav/CenterDisplayRenderModel.js",
       css: undefined,
       globalKey: "DyniCenterDisplayRenderModel",
-      deps: ["PlaceholderNormalize", "StableDigits"]
+      deps: ["StableDigits", "UnitAwareFormatter"]
     },
     HtmlWidgetUtils: {
       js: BASE + "shared/widget-kits/html/HtmlWidgetUtils.js",

@@ -188,7 +188,8 @@ describe("config/components.js", function () {
       "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
-      "StateScreenInteraction"
+      "StateScreenInteraction",
+      "UnitAwareFormatter"
     ]);
     expect(components.EditRouteMarkup.globalKey).toBe("DyniEditRouteMarkup");
     expect(components.EditRouteMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteMarkup.js");
@@ -210,10 +211,10 @@ describe("config/components.js", function () {
     ]);
     expect(components.RoutePointsInfoText.globalKey).toBe("DyniRoutePointsInfoText");
     expect(components.RoutePointsInfoText.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsInfoText.js");
-    expect(components.RoutePointsInfoText.deps).toBeUndefined();
+    expect(components.RoutePointsInfoText.deps).toEqual(["UnitAwareFormatter"]);
     expect(components.ActiveRouteHtmlFit.globalKey).toBe("DyniActiveRouteHtmlFit");
     expect(components.ActiveRouteHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/ActiveRouteHtmlFit.js");
-    expect(components.ActiveRouteHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils"]);
+    expect(components.ActiveRouteHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils", "UnitAwareFormatter"]);
     expect(components.AisTargetHtmlFit.globalKey).toBe("DyniAisTargetHtmlFit");
     expect(components.AisTargetHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetHtmlFit.js");
     expect(components.AisTargetHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils", "TextFitMath"]);
@@ -277,6 +278,7 @@ describe("config/components.js", function () {
       "SpringEasing",
       "PlaceholderNormalize",
       "StableDigits",
+      "UnitAwareFormatter",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenCanvasOverlay"
@@ -405,7 +407,8 @@ describe("config/components.js", function () {
       "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
-      "StateScreenInteraction"
+      "StateScreenInteraction",
+      "UnitAwareFormatter"
     ]);
     expect(components.AisTargetMarkup.globalKey).toBe("DyniAisTargetMarkup");
     expect(components.AisTargetMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetMarkup.js");

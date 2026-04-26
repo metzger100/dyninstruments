@@ -85,6 +85,9 @@ describe("CenterDisplayTextWidget", function () {
         if (id === "PlaceholderNormalize") {
           return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
         }
+        if (id === "UnitAwareFormatter") {
+          return loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
+        }
         if (id === "StableDigits") {
           return loadFresh("shared/widget-kits/format/StableDigits.js");
         }

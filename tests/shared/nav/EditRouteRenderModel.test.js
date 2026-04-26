@@ -57,6 +57,9 @@ describe("EditRouteRenderModel", function () {
           else if (id === "PlaceholderNormalize") {
             moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
           }
+          else if (id === "UnitAwareFormatter") {
+            moduleCache[id] = loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
+          }
           else if (id === "StableDigits") {
             moduleCache[id] = loadFresh("shared/widget-kits/format/StableDigits.js");
           }

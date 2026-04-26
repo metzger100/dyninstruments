@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteRenderModel - Pure normalization and display model owner for edit-route HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: EditRouteLayout, HtmlWidgetUtils, NavInteractionPolicy, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction
+ * Depends: EditRouteLayout, HtmlWidgetUtils, NavInteractionPolicy, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, UnitAwareFormatter
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -120,6 +120,7 @@
     const navInteractionPolicy = Helpers.getModule("NavInteractionPolicy").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
     const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
+    const unitFormatter = Helpers.getModule("UnitAwareFormatter").create(def, Helpers);
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
@@ -215,14 +216,7 @@
           id: "dst",
           labelText: metricCaptions.dst,
           ...buildMetricValueText(
-            formatMetric(
-              domain.totalDistance,
-              "formatDistance",
-              [formatTokens.dst],
-              defaultText,
-              Helpers,
-              placeholderNormalize
-            ),
+            unitFormatter.formatDistance(domain.totalDistance, formatTokens.dst, defaultText),
             2
           ),
           unitText: metricUnits.dst,
@@ -232,14 +226,7 @@
           id: "rte",
           labelText: metricCaptions.rte,
           ...buildMetricValueText(
-            formatMetric(
-              isActiveRoute ? domain.remainingDistance : undefined,
-              "formatDistance",
-              [formatTokens.rte],
-              defaultText,
-              Helpers,
-              placeholderNormalize
-            ),
+            unitFormatter.formatDistance(isActiveRoute ? domain.remainingDistance : undefined, formatTokens.rte, defaultText),
             2
           ),
           unitText: metricUnits.rte,

@@ -1,7 +1,7 @@
 /**
  * Module: XteDisplayWidget - Responsive XTE highway renderer with integrated nav metrics
  * Documentation: documentation/widgets/xte-display.md
- * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives, XteHighwayLayout, TextTileLayout, SpringEasing, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives, XteHighwayLayout, TextTileLayout, SpringEasing, PlaceholderNormalize, StableDigits, UnitAwareFormatter, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -21,6 +21,7 @@
     const springMotion = Helpers.getModule("SpringEasing").create(def, Helpers).createMotion();
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
     const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
+    const unitFormatter = Helpers.getModule("UnitAwareFormatter").create(def, Helpers);
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
     const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
@@ -32,28 +33,6 @@
         return checker(value);
       }
       return typeof value === "number" && isFinite(value);
-    }
-
-    function textOrDefault(value, defaultText) {
-      if (typeof value === "string") {
-        return value;
-      }
-      if (value == null) {
-        return defaultText;
-      }
-      return String(value);
-    }
-
-    function parseNumericText(text, defaultNumber) {
-      const raw = textOrDefault(text, "");
-      const extract = toolkit.value && toolkit.value.extractNumberText;
-      const token = typeof extract === "function" ? extract(raw) : String(raw).match(/-?\d+(?:\.\d+)?/)?.[0];
-      if (!token) {
-        return defaultNumber;
-      }
-      const normalized = String(token).replace(",", ".");
-      const parsed = Number(normalized);
-      return Number.isFinite(parsed) ? parsed : defaultNumber;
     }
 
     function trimWaypointName(raw) {
@@ -181,27 +160,17 @@
       const headingParams = [!layoutConfig || layoutConfig.leadingZero !== false];
       const defaultText = placeholderNormalize.normalize(undefined, p.default);
 
-      const xteDistanceRaw = String(Helpers.applyFormatter(
+      const xteDistance = unitFormatter.formatDistance(
         finiteNumber(xteRaw) ? Math.abs(xteRaw) : undefined,
-        {
-          formatter: "formatDistance",
-          formatterParameters: [formatUnits && formatUnits.xte],
-          default: defaultText
-        }
-      ));
-      const xteDistance = placeholderNormalize.normalize(xteDistanceRaw, defaultText);
+        formatUnits && formatUnits.xte,
+        defaultText
+      );
+      const dtwDistance = unitFormatter.formatDistance(dtwRaw, formatUnits && formatUnits.dtw, defaultText);
 
-      const dtwDistanceRaw = String(Helpers.applyFormatter(dtwRaw, {
-        formatter: "formatDistance",
-        formatterParameters: [formatUnits && formatUnits.dtw],
-        default: defaultText
-      }));
-      const dtwDistance = placeholderNormalize.normalize(dtwDistanceRaw, defaultText);
-
-      const xteDistanceMissing = placeholderNormalize.isPlaceholder(xteDistanceRaw);
+      const xteDistanceMissing = placeholderNormalize.isPlaceholder(xteDistance);
       const xteSide = (!xteDistanceMissing && finiteNumber(xteRaw)) ? (xteRaw > 0 ? "R" : (xteRaw < 0 ? "L" : "")) : "";
       if (xteAvailable) {
-        const xteDisplayAbs = parseNumericText(xteDistance, Math.abs(xteRaw));
+        const xteDisplayAbs = unitFormatter.extractNumericDisplay(xteDistance, Math.abs(xteRaw));
         const signedDisplayXte = xteRaw < 0 ? -xteDisplayAbs : xteDisplayAbs;
         const overflow = Math.abs(xteDisplayAbs) > xteScale;
         const xteTarget = signedDisplayXte / xteScale;
@@ -217,19 +186,8 @@
         return;
       }
 
-      const trackValueRaw = String(Helpers.applyFormatter(cogRaw, {
-        formatter: "formatDirection360",
-        formatterParameters: headingParams,
-        default: defaultText
-      }));
-      const trackValue = placeholderNormalize.normalize(trackValueRaw, defaultText);
-
-      const bearingValueRaw = String(Helpers.applyFormatter(btwRaw, {
-        formatter: "formatDirection360",
-        formatterParameters: headingParams,
-        default: defaultText
-      }));
-      const bearingValue = placeholderNormalize.normalize(bearingValueRaw, defaultText);
+      const trackValue = unitFormatter.formatWithToken(cogRaw, "formatDirection360", headingParams[0], defaultText);
+      const bearingValue = unitFormatter.formatWithToken(btwRaw, "formatDirection360", headingParams[0], defaultText);
 
       const metricSpacing = {
         cog: layoutApi.computeMetricTileSpacing(layout.metricRects.cog, layout.responsive),
