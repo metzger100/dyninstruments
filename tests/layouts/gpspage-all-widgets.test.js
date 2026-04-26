@@ -110,37 +110,88 @@ describe("tests/layouts/gpspage-all-widgets.json", function () {
 
     expect(findWidget(page2, "sogRadial")).toMatchObject({
       caption_sogRadial: "Speed Over Ground — Radial Gauge",
-      unit_sogRadial: "knots through GPS",
-      speedRadialMaxValue: 16,
+      formatUnit_sogRadial: "kn",
+      unit_sogRadial_kn: "knots through GPS",
+      speedRadialMaxValue_kn: 16,
+      speedRadialTickMajor_kn: 2,
+      speedRadialTickMinor_kn: 0.5,
       speedRadialShowEndLabels: true,
-      speedRadialWarningFrom: 12,
-      speedRadialAlarmFrom: 14
+      speedRadialWarningFrom_kn: 12,
+      speedRadialAlarmFrom_kn: 14
+    });
+
+    expect(findWidget(page2, "sogLinear")).toMatchObject({
+      caption_sogLinear: "Speed Over Ground — Linear Gauge",
+      formatUnit_sogLinear: "kn",
+      unit_sogLinear_kn: "knots through GPS",
+      speedLinearMaxValue_kn: 16,
+      speedLinearTickMajor_kn: 2,
+      speedLinearTickMinor_kn: 0.5,
+      speedLinearShowEndLabels: true,
+      speedLinearWarningFrom_kn: 12,
+      speedLinearAlarmFrom_kn: 14
+    });
+
+    expect(findWidget(page2, "depthRadial")).toMatchObject({
+      caption_depthRadial: "Depth Below Transducer — Radial Gauge",
+      formatUnit_depthRadial: "m",
+      unit_depthRadial_m: "meters below transducer",
+      depthRadialMaxValue_m: 12,
+      depthRadialTickMajor_m: 2,
+      depthRadialTickMinor_m: 0.5,
+      depthRadialShowEndLabels: true,
+      depthRadialWarningFrom_m: 4,
+      depthRadialAlarmFrom_m: 2
     });
 
     expect(findWidget(page2, "depthLinear")).toMatchObject({
       caption_depthLinear: "Depth Below Transducer — Linear Gauge",
-      unit_depthLinear: "meters below transducer",
-      depthLinearMaxValue: 12,
+      formatUnit_depthLinear: "m",
+      unit_depthLinear_m: "meters below transducer",
+      depthLinearMaxValue_m: 12,
+      depthLinearTickMajor_m: 2,
+      depthLinearTickMinor_m: 0.5,
       depthLinearShowEndLabels: true,
-      depthLinearWarningFrom: 4,
-      depthLinearAlarmFrom: 2
+      depthLinearWarningFrom_m: 4,
+      depthLinearAlarmFrom_m: 2
     });
 
     expect(findWidget(page2, "tempLinear")).toMatchObject({
       caption_tempLinear: "Water Temperature — Linear Gauge",
-      unit_tempLinear: "degrees Celsius",
-      tempLinearMinValue: -5,
-      tempLinearMaxValue: 45,
+      formatUnit_tempLinear: "celsius",
+      unit_tempLinear_celsius: "degrees Celsius",
+      tempLinearMinValue_celsius: -5,
+      tempLinearMaxValue_celsius: 45,
+      tempLinearTickMajor_celsius: 5,
+      tempLinearTickMinor_celsius: 1,
       tempLinearShowEndLabels: true,
       tempLinearWarningEnabled: true,
-      tempLinearAlarmEnabled: true
+      tempLinearAlarmEnabled: true,
+      tempLinearWarningFrom_celsius: 28,
+      tempLinearAlarmFrom_celsius: 34
+    });
+
+    expect(findWidget(page2, "tempRadial")).toMatchObject({
+      caption_tempRadial: "Water Temperature — Radial Gauge",
+      formatUnit_tempRadial: "celsius",
+      unit_tempRadial_celsius: "degrees Celsius",
+      tempRadialMinValue_celsius: -5,
+      tempRadialMaxValue_celsius: 45,
+      tempRadialTickMajor_celsius: 5,
+      tempRadialTickMinor_celsius: 1,
+      tempRadialShowEndLabels: true,
+      tempRadialWarningEnabled: true,
+      tempRadialAlarmEnabled: true,
+      tempRadialWarningFrom_celsius: 28,
+      tempRadialAlarmFrom_celsius: 34
     });
 
     expect(findWidget(page2, "angleTrueLinear")).toMatchObject({
       caption_angleTrueLinearAngle: "True Wind Angle — Linear",
       unit_angleTrueLinearAngle: "degrees relative",
       caption_angleTrueLinearSpeed: "True Wind Speed — Linear",
-      unit_angleTrueLinearSpeed: "knots apparent-to-true",
+      formatUnit_angleTrueLinearSpeed: "kn",
+      unit_angleTrueLinearSpeed_kn: "knots apparent-to-true",
       windLinearTickMajor: 45,
       windLinearShowEndLabels: true,
       windLinearLayMin: 30,
@@ -170,7 +221,8 @@ describe("tests/layouts/gpspage-all-widgets.json", function () {
 
     expect(findWidget(page2, "activeRoute")).toMatchObject({
       caption_activeRouteRemain: "Remaining Route Distance",
-      unit_activeRouteRemain: "nautical miles",
+      formatUnit_activeRouteRemain: "nm",
+      unit_activeRouteRemain_nm: "nautical miles",
       caption_activeRouteEta: "Estimated Time of Arrival",
       caption_activeRouteNextCourse: "Upcoming Course Change"
     });
@@ -178,7 +230,11 @@ describe("tests/layouts/gpspage-all-widgets.json", function () {
     expect(findWidget(page2, "centerDisplay")).toMatchObject({
       caption_centerDisplayPosition: "Center Coordinates",
       caption_centerDisplayMarker: "Waypoint Distance From Center",
+      formatUnit_centerDisplayMarker: "nm",
+      unit_centerDisplayMarker_nm: "nautical miles",
       caption_centerDisplayBoat: "Boat Distance From Center",
+      formatUnit_centerDisplayBoat: "nm",
+      unit_centerDisplayBoat_nm: "nautical miles",
       caption_centerDisplayMeasure: "Measured Segment Distance"
     });
 
@@ -197,7 +253,11 @@ describe("tests/layouts/gpspage-all-widgets.json", function () {
 
     expect(findWidget(page2, "aisTarget")).toMatchObject({
       caption_aisTargetDst: "Target Distance",
+      formatUnit_aisTargetDst: "nm",
+      unit_aisTargetDst_nm: "nautical miles",
       caption_aisTargetCpa: "Closest Point of Approach",
+      formatUnit_aisTargetCpa: "nm",
+      unit_aisTargetCpa_nm: "nautical miles",
       caption_aisTargetTcpa: "Time To Closest Point",
       caption_aisTargetBrg: "Target Bearing"
     });
@@ -205,18 +265,29 @@ describe("tests/layouts/gpspage-all-widgets.json", function () {
     expect(findWidget(page2, "editRoute")).toMatchObject({
       caption_editRoutePts: "Planned Waypoints",
       caption_editRouteDst: "Leg Distance Remaining",
-      unit_editRouteDst: "nautical miles",
+      formatUnit_editRouteDst: "nm",
+      unit_editRouteDst_nm: "nautical miles",
       caption_editRouteRte: "Route Distance Remaining",
-      unit_editRouteRte: "nautical miles",
+      formatUnit_editRouteRte: "nm",
+      unit_editRouteRte_nm: "nautical miles",
       caption_editRouteEta: "Estimated Route Arrival"
     });
 
     expect(findWidget(page2, "routePoints")).toMatchObject({
       showHeader: false,
-      distanceUnit: "nautical miles",
+      formatUnit_routePointsDistance: "nm",
+      unit_routePointsDistance_nm: "nautical miles",
       courseUnit: "degrees true",
       waypointsText: "planned waypoints"
     });
+
+    expect(findWidget(page2, "sogRadial").speedRadialMaxValue).toBeUndefined();
+    expect(findWidget(page2, "sogLinear").speedLinearMaxValue).toBeUndefined();
+    expect(findWidget(page2, "depthRadial").depthRadialMaxValue).toBeUndefined();
+    expect(findWidget(page2, "depthLinear").depthLinearMaxValue).toBeUndefined();
+    expect(findWidget(page2, "tempLinear").tempLinearMaxValue).toBeUndefined();
+    expect(findWidget(page2, "tempRadial").tempRadialMaxValue).toBeUndefined();
+    expect(findWidget(page2, "editRoute").unit_dst).toBeUndefined();
   });
 
   it("uses gpspage3 and gpspage4 as four-column dyni-vs-AvNav comparison pages", function () {

@@ -6,9 +6,11 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   caption_eta: "ETA",
   unit_eta: "",
   caption_rteDistance: "RTE",
-  unit_rteDistance: "nm",
+  formatUnit_rteDistance: "nm",
+  unit_rteDistance_nm: "nm",
   caption_vmg: "VMG",
-  unit_vmg: "kn",
+  formatUnit_vmg: "kn",
+  unit_vmg_kn: "kn",
   caption_activeRouteRemain: "RTE CAP",
   formatUnit_activeRouteRemain: "nm",
   unit_activeRouteRemain_nm: "nmA",
@@ -83,6 +85,45 @@ describe("NavMapper", function () {
       unit: "nm",
       formatter: "formatDistance",
       formatterParameters: ["nm"]
+    });
+  });
+
+  it("keeps plain nav distance and speed formatter tokens separate from display labels", function () {
+    const mapper = createMapper();
+    const customToolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
+      caption_dst: "DST",
+      formatUnit_dst: "km",
+      unit_dst_km: "kilometers custom",
+      caption_rteDistance: "RTE",
+      formatUnit_rteDistance: "ft",
+      unit_rteDistance_ft: "feet custom",
+      caption_vmg: "VMG",
+      formatUnit_vmg: "ms",
+      unit_vmg_ms: "m/s custom"
+    });
+
+    expect(mapper.translate({ kind: "dst", dst: 3.4 }, customToolkit)).toEqual({
+      value: 3.4,
+      caption: "DST",
+      unit: "kilometers custom",
+      formatter: "formatDistance",
+      formatterParameters: ["km"]
+    });
+
+    expect(mapper.translate({ kind: "rteDistance", rteDistance: 12.3 }, customToolkit)).toEqual({
+      value: 12.3,
+      caption: "RTE",
+      unit: "feet custom",
+      formatter: "formatDistance",
+      formatterParameters: ["ft"]
+    });
+
+    expect(mapper.translate({ kind: "vmg", vmg: 4.2 }, customToolkit)).toEqual({
+      value: 4.2,
+      caption: "VMG",
+      unit: "m/s custom",
+      formatter: "formatSpeed",
+      formatterParameters: ["ms"]
     });
   });
 
@@ -436,9 +477,11 @@ describe("NavMapper", function () {
     const defaultToolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
       caption_editRoutePts: "PTS",
       caption_editRouteDst: "DST",
-      unit_editRouteDst: "nm",
+      formatUnit_editRouteDst: "nm",
+      unit_editRouteDst_nm: "nm",
       caption_editRouteRte: "RTE",
-      unit_editRouteRte: "nm",
+      formatUnit_editRouteRte: "nm",
+      unit_editRouteRte_nm: "nm",
       caption_editRouteEta: "ETA"
     });
     const out = mapper.translate({

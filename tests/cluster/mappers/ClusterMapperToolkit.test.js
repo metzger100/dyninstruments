@@ -36,10 +36,10 @@ describe("ClusterMapperToolkit", function () {
   it("createToolkit resolves cap/unit accessors from props", function () {
     const mod = loadFresh("cluster/mappers/ClusterMapperToolkit.js");
     loadFresh("shared/unit-format-families.js");
-    const toolkit = mod.create().createToolkit({ caption_sog: "SOG", unit_sog: "kn" });
+    const toolkit = mod.create().createToolkit({ caption_eta: "ETA", unit_eta: "" });
 
-    expect(toolkit.cap("sog")).toBe("SOG");
-    expect(toolkit.unit("sog")).toBe("kn");
+    expect(toolkit.cap("eta")).toBe("ETA");
+    expect(toolkit.unit("eta")).toBe("");
     expect(toolkit.cap("stw")).toBeUndefined();
     expect(toolkit.num("12.5")).toBe(12.5);
     expect(toolkit.num("x")).toBeUndefined();
@@ -50,19 +50,20 @@ describe("ClusterMapperToolkit", function () {
     loadFresh("shared/unit-format-families.js");
     const toolkit = mod.create().createToolkit({
       formatUnit_sog: "ms",
-      unit_sog: "kn",
       unit_sog_ms: "m/s",
-      unit_rteDistance: "nm",
+      unit_sog_kmh: "km/h",
+      formatUnit_rteDistance: "nm",
       rteDistance_nm: 1,
-      unit_anchorDistance: "m",
       anchorDistance_nm: 1852
     });
 
     expect(toolkit.formatUnit("sog", "speed", "kn")).toBe("ms");
     expect(toolkit.unitText("sog", "speed", "ms")).toBe("m/s");
+    expect(toolkit.unitText("sog", "speed", "kmh")).toBe("km/h");
     expect(toolkit.unitNumber("rteDistance", "nm")).toBe(1);
     expect(toolkit.unitNumber("anchorDistance", "m")).toBeUndefined();
     expect(toolkit.unitNumber("anchorDistance", "nm")).toBe(1852);
+    expect(toolkit.formatUnit("rteDistance", "distance", "nm")).toBe("nm");
   });
 
   it("uses injected RadialAngleMath helpers when provided", function () {

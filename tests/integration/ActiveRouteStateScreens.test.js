@@ -4,7 +4,8 @@ function createToolkit() {
   loadFresh("shared/unit-format-families.js");
   return loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
     caption_activeRouteRemain: "RTE CAP",
-    unit_activeRouteRemain: "nm",
+    formatUnit_activeRouteRemain: "nm",
+    unit_activeRouteRemain_nm: "nm",
     caption_activeRouteEta: "ETA CAP",
     unit_activeRouteEta: "",
     caption_activeRouteNextCourse: "NEXT CAP",

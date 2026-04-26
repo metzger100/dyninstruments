@@ -2,31 +2,39 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 loadFresh("shared/unit-format-families.js");
 
-function makeToolkit() {
-  return loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
+function makeToolkit(overrides) {
+  return loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit(Object.assign({
     caption_angleTrue: "TWA",
     unit_angleTrue: "°",
     caption_speedTrue: "TWS",
-    unit_speedTrue: "kn",
+    formatUnit_speedTrue: "kn",
+    unit_speedTrue_kn: "kn",
+    caption_speedApparent: "AWS",
+    formatUnit_speedApparent: "kn",
+    unit_speedApparent_kn: "kn",
     caption_angleApparent: "AWA",
     unit_angleApparent: "°",
     caption_angleTrueRadialAngle: "TWA G",
     unit_angleTrueRadialAngle: "°T",
     caption_angleTrueRadialSpeed: "TWS G",
+    formatUnit_angleTrueRadialSpeed: "kn",
     unit_angleTrueRadialSpeed_kn: "knT",
     caption_angleApparentRadialAngle: "AWA G",
     unit_angleApparentRadialAngle: "°A",
     caption_angleApparentRadialSpeed: "AWS G",
+    formatUnit_angleApparentRadialSpeed: "kn",
     unit_angleApparentRadialSpeed_kn: "knA",
     caption_angleTrueLinearAngle: "TWA L",
     unit_angleTrueLinearAngle: "°LT",
     caption_angleTrueLinearSpeed: "TWS L",
+    formatUnit_angleTrueLinearSpeed: "kn",
     unit_angleTrueLinearSpeed_kn: "knLT",
     caption_angleApparentLinearAngle: "AWA L",
     unit_angleApparentLinearAngle: "°LA",
     caption_angleApparentLinearSpeed: "AWS L",
+    formatUnit_angleApparentLinearSpeed: "kn",
     unit_angleApparentLinearSpeed_kn: "knLA"
-  });
+  }, overrides || {}));
 }
 
 describe("WindMapper", function () {
@@ -132,6 +140,72 @@ describe("WindMapper", function () {
     expect(out.rendererProps.windLinearLayMax).toBe(45);
     expect(out.rendererProps.leadingZero).toBe(true);
     expect(out.rendererProps.windLinearHideTextualMetrics).toBe(false);
+  });
+
+  it("resolves alternate speed tokens for numeric and composite wind speeds", function () {
+    const mapper = loadFresh("cluster/mappers/WindMapper.js").create();
+    const customToolkit = makeToolkit({
+      formatUnit_speedTrue: "ms",
+      unit_speedTrue_ms: "m/s true",
+      formatUnit_speedApparent: "kmh",
+      unit_speedApparent_kmh: "km/h apparent",
+      formatUnit_angleTrueRadialSpeed: "ms",
+      unit_angleTrueRadialSpeed_ms: "m/s TWS G",
+      formatUnit_angleApparentRadialSpeed: "kmh",
+      unit_angleApparentRadialSpeed_kmh: "km/h AWS G",
+      formatUnit_angleTrueLinearSpeed: "ms",
+      unit_angleTrueLinearSpeed_ms: "m/s TWS L",
+      formatUnit_angleApparentLinearSpeed: "kmh",
+      unit_angleApparentLinearSpeed_kmh: "km/h AWS L"
+    });
+
+    expect(mapper.translate({ kind: "speedTrue", tws: 7.2 }, customToolkit)).toEqual({
+      value: 7.2,
+      caption: "TWS",
+      unit: "m/s true",
+      formatter: "formatSpeed",
+      formatterParameters: ["ms"]
+    });
+
+    expect(mapper.translate({ kind: "speedApparent", aws: 8.4 }, customToolkit)).toEqual({
+      value: 8.4,
+      caption: "AWS",
+      unit: "km/h apparent",
+      formatter: "formatSpeed",
+      formatterParameters: ["kmh"]
+    });
+
+    const radialTrue = mapper.translate({
+      kind: "angleTrueRadial",
+      twa: -32,
+      tws: 6.1
+    }, customToolkit);
+    expect(radialTrue.rendererProps.speedUnit).toBe("m/s TWS G");
+    expect(radialTrue.rendererProps.formatterParameters).toEqual(["ms"]);
+
+    const radialApp = mapper.translate({
+      kind: "angleApparentRadial",
+      awa: 18,
+      aws: 8.5
+    }, customToolkit);
+    expect(radialApp.rendererProps.speedUnit).toBe("km/h AWS G");
+    expect(radialApp.rendererProps.formatterParameters).toEqual(["kmh"]);
+
+    const linearTrue = mapper.translate({
+      kind: "angleTrueLinear",
+      twa: -28,
+      tws: 5.4
+    }, customToolkit);
+    expect(linearTrue.rendererProps.speedUnit).toBe("m/s TWS L");
+    expect(linearTrue.rendererProps.formatterParameters).toEqual(["ms"]);
+
+    const linearApp = mapper.translate({
+      kind: "angleApparentLinear",
+      awa: 21,
+      aws: 5.8
+    }, customToolkit);
+    expect(linearApp.rendererProps.speedUnit).toBe("km/h AWS L");
+    expect(linearApp.rendererProps.formatterParameters).toEqual(["kmh"]);
   });
 
   it("maps numeric speed to formatSpeed with unit parameter", function () {

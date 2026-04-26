@@ -336,7 +336,9 @@ describe("Phase 9 acceptance coverage", function () {
           routeName: "Harbor Run"
         },
         layout: { showHeader: true },
-        formatting: { courseUnit: "kt", distanceUnit: "nm", waypointsText: "waypoints" },
+        formatting: { courseUnit: "kt", waypointsText: "waypoints" },
+        units: { distance: "nm" },
+        formatUnits: { distance: "nm" },
         default: "---"
       },
       shellRect: { width: 320, height: 180 }
