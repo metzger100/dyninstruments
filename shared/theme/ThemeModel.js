@@ -60,13 +60,17 @@
     defineToken("colors.ais.tracking", "--dyni-ais-tracking", "color", "#89d38f"),
     defineToken("colors.ais.normal", "--dyni-ais-normal", "color", "#8da0b3"),
 
-    defineToken("radial.ticks.majorLen", "--dyni-radial-tick-major-len", "number", 12),
-    defineToken("radial.ticks.majorWidth", "--dyni-radial-tick-major-width", "number", 3),
-    defineToken("radial.ticks.minorLen", "--dyni-radial-tick-minor-len", "number", 7),
-    defineToken("radial.ticks.minorWidth", "--dyni-radial-tick-minor-width", "number", 1.5),
-    defineToken("radial.pointer.widthFactor", "--dyni-radial-pointer-width", "number", 1),
-    defineToken("radial.pointer.lengthFactor", "--dyni-radial-pointer-length", "number", 2),
-    defineToken("radial.ring.arcLineWidth", "--dyni-radial-arc-linewidth", "number", 2),
+    defineToken("strokeWeight", "--dyni-stroke-weight", "number", 1.0),
+    defineToken("pointerDepthWeight", "--dyni-pointer-depth-weight", "number", 1.0),
+    defineToken("pointerSideWeight", "--dyni-pointer-side-weight", "number", 1.0),
+
+    defineToken("radial.ticks.majorLenFactor", "--dyni-radial-tick-major-len-factor", "number", 0.08),
+    defineToken("radial.ticks.majorWidthFactor", "--dyni-radial-tick-major-width-factor", "number", 0.02),
+    defineToken("radial.ticks.minorLenFactor", "--dyni-radial-tick-minor-len-factor", "number", 0.047),
+    defineToken("radial.ticks.minorWidthFactor", "--dyni-radial-tick-minor-width-factor", "number", 0.01),
+    defineToken("radial.pointer.sideFactor", "--dyni-radial-pointer-side-factor", "number", 0.11),
+    defineToken("radial.pointer.depthFactor", "--dyni-radial-pointer-depth-factor", "number", 0.22),
+    defineToken("radial.ring.arcLineWidthFactor", "--dyni-radial-arc-linewidth-factor", "number", 0.013),
     defineToken("radial.ring.widthFactor", "--dyni-radial-ring-width", "number", 0.16),
     defineToken("radial.labels.insetFactor", "--dyni-radial-label-inset", "number", 1.8),
     defineToken("radial.labels.fontFactor", "--dyni-radial-label-font", "number", 0.14),
@@ -75,18 +79,15 @@
     defineToken("radial.fullCircle.normal.dualGapFactor", "--dyni-radial-fullcircle-normal-dual-gap", "number", 0.05),
 
     defineToken("linear.track.widthFactor", "--dyni-linear-track-width", "number", 0.16),
-    defineToken("linear.track.lineWidth", "--dyni-linear-track-linewidth", "number", 2),
-    defineToken("linear.ticks.majorLen", "--dyni-linear-tick-major-len", "number", 12),
-    defineToken("linear.ticks.majorWidth", "--dyni-linear-tick-major-width", "number", 3),
-    defineToken("linear.ticks.minorLen", "--dyni-linear-tick-minor-len", "number", 7),
-    defineToken("linear.ticks.minorWidth", "--dyni-linear-tick-minor-width", "number", 1.5),
-    defineToken("linear.pointer.widthFactor", "--dyni-linear-pointer-width", "number", 1),
-    defineToken("linear.pointer.lengthFactor", "--dyni-linear-pointer-length", "number", 2),
+    defineToken("linear.track.lineWidthFactor", "--dyni-linear-track-linewidth-factor", "number", 0.018),
+    defineToken("linear.ticks.majorLenFactor", "--dyni-linear-tick-major-len-factor", "number", 0.109),
+    defineToken("linear.ticks.majorWidthFactor", "--dyni-linear-tick-major-width-factor", "number", 0.027),
+    defineToken("linear.ticks.minorLenFactor", "--dyni-linear-tick-minor-len-factor", "number", 0.064),
+    defineToken("linear.ticks.minorWidthFactor", "--dyni-linear-tick-minor-width-factor", "number", 0.014),
+    defineToken("linear.pointer.sideFactor", "--dyni-linear-pointer-side-factor", "number", 0.12),
+    defineToken("linear.pointer.depthFactor", "--dyni-linear-pointer-depth-factor", "number", 0.24),
     defineToken("linear.labels.insetFactor", "--dyni-linear-label-inset", "number", 1.8),
-    defineToken("linear.labels.fontFactor", "--dyni-linear-label-font", "number", 0.14),
-
-    defineToken("xte.lineWidthFactor", "--dyni-xte-line-width-factor", "number", 1.5),
-    defineToken("xte.boatSizeFactor", "--dyni-xte-boat-size-factor", "number", 1)
+    defineToken("linear.labels.fontFactor", "--dyni-linear-label-font", "number", 0.14)
   ]);
 
   const PRESETS = Object.freeze({
@@ -114,37 +115,24 @@
     },
     slim: {
       base: {
-        radial: {
-          ring: { arcLineWidth: 1 },
-          ticks: { majorWidth: 2, minorWidth: 1 },
-          pointer: { widthFactor: 0.72 }
-        },
-        linear: {
-          track: { lineWidth: 1 },
-          ticks: { majorWidth: 2, minorWidth: 1 },
-          pointer: { widthFactor: 0.72 }
-        },
-        font: { labelWeight: 400 },
-        xte: { lineWidthFactor: 1 }
+        strokeWeight: 0.67,
+        pointerDepthWeight: 1.0,
+        pointerSideWeight: 0.72,
+        font: { labelWeight: 400 }
       }
     },
     bold: {
       base: {
-        radial: {
-          ring: { arcLineWidth: 2.5 },
-          ticks: { majorWidth: 4, minorWidth: 2 },
-          pointer: { widthFactor: 1.54 }
-        },
-        linear: {
-          track: { lineWidth: 2.5 },
-          ticks: { majorWidth: 4, minorWidth: 2 },
-          pointer: { widthFactor: 1.54 }
-        },
-        xte: { lineWidthFactor: 2 }
+        strokeWeight: 1.4,
+        pointerDepthWeight: 1.0,
+        pointerSideWeight: 1.54
       }
     },
     highcontrast: {
       base: {
+        strokeWeight: 1.35,
+        pointerDepthWeight: 1.0,
+        pointerSideWeight: 1.4,
         colors: {
           pointer: "#ff0000",
           warning: "#ffcc00",
@@ -154,18 +142,7 @@
             fg: "#ffffff",
             strip: "#3399ff"
           }
-        },
-        radial: {
-          ring: { arcLineWidth: 2 },
-          ticks: { majorWidth: 3, minorWidth: 2 },
-          pointer: { widthFactor: 1.4 }
-        },
-        linear: {
-          track: { lineWidth: 2 },
-          ticks: { majorWidth: 3, minorWidth: 2 },
-          pointer: { widthFactor: 1.4 }
-        },
-        xte: { lineWidthFactor: 1.3 }
+        }
       }
     }
   });

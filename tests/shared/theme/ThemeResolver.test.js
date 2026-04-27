@@ -120,10 +120,13 @@ describe("ThemeResolver", function () {
     const { resolver, themeModel } = createResolver();
     const out = resolver.resolveForRoot(rootEl);
 
-    expect(Object.keys(out).sort()).toEqual(["colors", "font", "linear", "radial", "surface", "xte"]);
+    expect(Object.keys(out).sort()).toEqual(["colors", "font", "linear", "pointerDepthWeight", "pointerSideWeight", "radial", "strokeWeight", "surface"]);
     expect(out.surface.border).toBe(themeModel.BASE_DEFAULTS.surface.border);
     expect(out.surface.bg).toBe("white");
     expect(out.font.weight).toBe(700);
+    expect(out.strokeWeight).toBe(1);
+    expect(out.pointerDepthWeight).toBe(1);
+    expect(out.pointerSideWeight).toBe(1);
   });
 
   it("applies preset overrides from configured getActivePresetName", function () {
@@ -136,9 +139,9 @@ describe("ThemeResolver", function () {
     });
     const out = resolver.resolveForRoot(rootEl);
 
-    expect(out.radial.ring.arcLineWidth).toBe(2.5);
-    expect(out.linear.pointer.widthFactor).toBe(1.54);
-    expect(out.xte.lineWidthFactor).toBe(2);
+    expect(out.strokeWeight).toBe(1.4);
+    expect(out.pointerDepthWeight).toBe(1);
+    expect(out.pointerSideWeight).toBe(1.54);
   });
 
   it("defaults to default preset when getActivePresetName is not configured", function () {
@@ -151,8 +154,8 @@ describe("ThemeResolver", function () {
     const { resolver } = createResolver();
     const out = resolver.resolveForRoot(rootEl);
 
-    expect(out.radial.pointer.widthFactor).toBe(1);
-    expect(out.linear.track.lineWidth).toBe(2);
+    expect(out.radial.pointer.sideFactor).toBe(0.11);
+    expect(out.linear.track.lineWidthFactor).toBe(0.018);
     expect(out.font.labelWeight).toBe(700);
   });
 
@@ -180,7 +183,7 @@ describe("ThemeResolver", function () {
     installComputedStyle(new Map([
       [rootEl, {
         "--dyni-pointer": " #123456 ",
-        "--dyni-linear-track-linewidth": " 9 ",
+        "--dyni-linear-track-linewidth-factor": " 9 ",
         "--dyni-font-weight": " 600 "
       }]
     ]));
@@ -193,7 +196,7 @@ describe("ThemeResolver", function () {
     const out = resolver.resolveForRoot(rootEl);
 
     expect(out.colors.pointer).toBe("#123456");
-    expect(out.linear.track.lineWidth).toBe(9);
+    expect(out.linear.track.lineWidthFactor).toBe(9);
     expect(out.font.weight).toBe(600);
   });
 

@@ -18,13 +18,16 @@
   --dyni-ais-normal: #6b4f2a;
 
   /* Radial */
-  --dyni-radial-tick-major-len: 22;
-  --dyni-radial-tick-major-width: 6;
-  --dyni-radial-tick-minor-len: 3;
-  --dyni-radial-tick-minor-width: 0.8;
-  --dyni-radial-pointer-width: 1.9;
-  --dyni-radial-pointer-length: 0.95;
-  --dyni-radial-arc-linewidth: 4.5;
+  --dyni-stroke-weight: 1.25;
+  --dyni-pointer-depth-weight: 1.1;
+  --dyni-pointer-side-weight: 0.9;
+  --dyni-radial-tick-major-len-factor: 0.22;
+  --dyni-radial-tick-major-width-factor: 0.06;
+  --dyni-radial-tick-minor-len-factor: 0.03;
+  --dyni-radial-tick-minor-width-factor: 0.008;
+  --dyni-radial-pointer-side-factor: 0.19;
+  --dyni-radial-pointer-depth-factor: 0.095;
+  --dyni-radial-arc-linewidth-factor: 0.045;
   --dyni-radial-ring-width: 0.28;
   --dyni-radial-label-inset: 1.1;
   --dyni-radial-label-font: 0.2;
@@ -36,13 +39,13 @@
 
   /* Linear */
   --dyni-linear-track-width: 0.28;
-  --dyni-linear-track-linewidth: 4;
-  --dyni-linear-tick-major-len: 20;
-  --dyni-linear-tick-major-width: 5;
-  --dyni-linear-tick-minor-len: 4;
-  --dyni-linear-tick-minor-width: 0.9;
-  --dyni-linear-pointer-width: 1.9;
-  --dyni-linear-pointer-length: 0.95;
+  --dyni-linear-track-linewidth-factor: 0.04;
+  --dyni-linear-tick-major-len-factor: 0.2;
+  --dyni-linear-tick-major-width-factor: 0.05;
+  --dyni-linear-tick-minor-len-factor: 0.04;
+  --dyni-linear-tick-minor-width-factor: 0.009;
+  --dyni-linear-pointer-side-factor: 0.19;
+  --dyni-linear-pointer-depth-factor: 0.095;
   --dyni-linear-label-inset: 1.1;
   --dyni-linear-label-font: 0.2;
 
@@ -51,8 +54,4 @@
   --dyni-font-mono: "JetBrains Mono", "SF Mono", "Menlo", monospace;
   --dyni-font-weight: 900;
   --dyni-label-weight: 300;
-
-  /* XTE */
-  --dyni-xte-line-width-factor: 2.8;
-  --dyni-xte-boat-size-factor: 1.8;
 }

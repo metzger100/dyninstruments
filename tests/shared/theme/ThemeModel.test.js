@@ -19,6 +19,11 @@ describe("ThemeModel", function () {
     const surfaceBg = model.getTokenDefinition("surface.bg");
     const fontFamily = model.getTokenDefinition("font.family");
     const fontFamilyMono = model.getTokenDefinition("font.familyMono");
+    const strokeWeight = model.getTokenDefinition("strokeWeight");
+    const pointerDepthWeight = model.getTokenDefinition("pointerDepthWeight");
+    const pointerSideWeight = model.getTokenDefinition("pointerSideWeight");
+    const radialMajorLen = model.getTokenDefinition("radial.ticks.majorLenFactor");
+    const linearPointerDepth = model.getTokenDefinition("linear.pointer.depthFactor");
     const alarmWidgetBg = model.getTokenDefinition("colors.alarmWidget.bg");
     const alarmWidgetFg = model.getTokenDefinition("colors.alarmWidget.fg");
     const alarmWidgetStrip = model.getTokenDefinition("colors.alarmWidget.strip");
@@ -32,6 +37,18 @@ describe("ThemeModel", function () {
     expect(fontFamilyMono.inputVar).toBe("--dyni-font-mono");
     expect(fontFamilyMono.outputVar).toBe("--dyni-theme-font-family-mono");
     expect(fontFamilyMono.default).toBe('"Roboto Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace');
+    expect(strokeWeight.inputVar).toBe("--dyni-stroke-weight");
+    expect(strokeWeight.default).toBe(1);
+    expect(pointerDepthWeight.inputVar).toBe("--dyni-pointer-depth-weight");
+    expect(pointerDepthWeight.default).toBe(1);
+    expect(pointerSideWeight.inputVar).toBe("--dyni-pointer-side-weight");
+    expect(pointerSideWeight.default).toBe(1);
+    expect(radialMajorLen.inputVar).toBe("--dyni-radial-tick-major-len-factor");
+    expect(radialMajorLen.default).toBe(0.08);
+    expect(linearPointerDepth.inputVar).toBe("--dyni-linear-pointer-depth-factor");
+    expect(linearPointerDepth.default).toBe(0.24);
+    expect(model.getTokenDefinition("xte.lineWidthFactor")).toBe(null);
+    expect(model.getTokenDefinition("xte.boatSizeFactor")).toBe(null);
     expect(alarmWidgetBg.inputVar).toBe("--dyni-alarm-widget-bg");
     expect(alarmWidgetBg.default).toBe("#e04040");
     expect(alarmWidgetFg.inputVar).toBe("--dyni-alarm-widget-fg");
@@ -45,8 +62,16 @@ describe("ThemeModel", function () {
   it("contains expected preset override spot values", function () {
     const model = loadFresh("shared/theme/ThemeModel.js");
 
-    expect(model.getPresetBase("slim").radial.pointer.widthFactor).toBe(0.72);
-    expect(model.getPresetBase("bold").linear.pointer.widthFactor).toBe(1.54);
+    expect(model.getPresetBase("slim").strokeWeight).toBe(0.67);
+    expect(model.getPresetBase("slim").pointerDepthWeight).toBe(1);
+    expect(model.getPresetBase("slim").pointerSideWeight).toBe(0.72);
+    expect(model.getPresetBase("slim").font.labelWeight).toBe(400);
+    expect(model.getPresetBase("bold").strokeWeight).toBe(1.4);
+    expect(model.getPresetBase("bold").pointerDepthWeight).toBe(1);
+    expect(model.getPresetBase("bold").pointerSideWeight).toBe(1.54);
+    expect(model.getPresetBase("highcontrast").strokeWeight).toBe(1.35);
+    expect(model.getPresetBase("highcontrast").pointerDepthWeight).toBe(1);
+    expect(model.getPresetBase("highcontrast").pointerSideWeight).toBe(1.4);
     expect(model.getPresetBase("highcontrast").colors.warning).toBe("#ffcc00");
     expect(model.getPresetBase("highcontrast").colors.alarmWidget).toEqual({
       bg: "#ff2200",
@@ -71,5 +96,8 @@ describe("ThemeModel", function () {
     ]);
     expect(model.MODE_DEFAULTS.night.surface.border).toBe("rgba(252, 11, 11, 0.18)");
     expect(model.BASE_DEFAULTS.surface.bg).toBe("white");
+    expect(model.BASE_DEFAULTS.strokeWeight).toBe(1);
+    expect(model.BASE_DEFAULTS.pointerDepthWeight).toBe(1);
+    expect(model.BASE_DEFAULTS.pointerSideWeight).toBe(1);
   });
 });
