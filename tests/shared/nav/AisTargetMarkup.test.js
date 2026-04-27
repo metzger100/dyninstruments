@@ -57,10 +57,10 @@ describe("AisTargetMarkup", function () {
         "dyni-ais-target-color-warning"
       ],
       inlineGeometry: {
-        wrapperStyle: "padding:4px 4px 4px 8px;",
+        wrapperStyle: "padding:4px 4px 4px 21px;",
         identityStyle: "grid-template-rows:minmax(0,12px) minmax(0,10px);",
         metricsStyle: "grid-template-columns:minmax(0,100px) minmax(0,100px);",
-        accentStyle: "left:4px;top:4px;bottom:4px;width:3px;",
+        accentStyle: "left:4px;top:4px;bottom:4px;width:14px;",
         metricStyles: {
           dst: { metricStyle: "grid-template-columns:minmax(0,30px) minmax(0,70px);", valueRowStyle: "grid-template-columns:minmax(0,50px) minmax(0,20px);" },
           cpa: { metricStyle: "grid-template-columns:minmax(0,30px) minmax(0,70px);", valueRowStyle: "grid-template-columns:minmax(0,50px) minmax(0,20px);" },
@@ -136,7 +136,7 @@ describe("AisTargetMarkup", function () {
     expect(html).toContain('class="dyni-ais-target-html dyni-ais-target-mode-normal dyni-ais-target-data dyni-ais-target-open-dispatch dyni-ais-target-branch-tcpa dyni-ais-target-color-warning"');
     expect(html).toContain('data-dyni-action="ais-target-open"');
     expect(html).toContain('class="dyni-ais-target-open-hotspot"');
-    expect(html).toContain('class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:3px;background-color:#f39b52;"');
+    expect(html).toContain('class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:14px;background-color:#f39b52;"');
     expect(root.querySelector(".dyni-ais-target-name")).toBeTruthy();
     expect(root.querySelector(".dyni-ais-target-front")).toBeTruthy();
 
@@ -278,7 +278,7 @@ describe("AisTargetMarkup", function () {
       htmlUtils: createHtmlUtils()
     });
 
-    expect(html).toContain('style="height:auto;aspect-ratio:7/8;min-height:8em;padding:4px 4px 4px 8px;"');
+    expect(html).toContain('style="height:auto;aspect-ratio:7/8;min-height:8em;padding:4px 4px 4px 21px;"');
     expect(html).toContain('class="dyni-ais-target-name" style="font-size:13px;"');
     expect(html).toContain('class="dyni-ais-target-front" style="font-size:11px;"');
     expect(html).toContain('class="dyni-ais-target-metric-caption" style="font-size:8px;"');
@@ -301,8 +301,8 @@ describe("AisTargetMarkup", function () {
       htmlUtils: createHtmlUtils()
     });
 
-    expect(html).toContain('style="height:auto;aspect-ratio:7/8;min-height:8em;padding:4px 4px 4px 8px;"');
-    expect(html).toContain('class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:3px;background-color:#f39b52;"');
+    expect(html).toContain('style="height:auto;aspect-ratio:7/8;min-height:8em;padding:4px 4px 4px 21px;"');
+    expect(html).toContain('class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:14px;background-color:#f39b52;"');
     expect(html).toContain('class="dyni-ais-target-identity" style="grid-template-rows:minmax(0,12px) minmax(0,10px);"');
     expect(html).toContain('class="dyni-ais-target-metrics" style="grid-template-columns:minmax(0,100px) minmax(0,100px);"');
     expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-cpa" style="grid-template-columns:minmax(0,30px) minmax(0,70px);"');

@@ -48,8 +48,8 @@
 .dyni-html-root .dyni-alarm-state-accent {
   position: absolute;
   inset: 0 auto 0 0;
-  width: 0.34em;
-  border-radius: 0.34em;
+  width: 0.68em;
+  border-radius: 0.68em;
   z-index: 0;
 }
 

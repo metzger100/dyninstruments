@@ -155,7 +155,8 @@
       shellRect: measureShellRect(state.mountEl),
       hostContext: state.hostContext,
       layoutChanged: layoutChanged === true,
-      relayoutPass: relayoutPass || 0
+      relayoutPass: relayoutPass || 0,
+      fontMetricsEpoch: state.fontMetricsEpoch
     };
   }
 
@@ -238,7 +239,10 @@
         shellEl: null,
         mountEl: null,
         shadowRoot: null,
-        renderer: null
+        renderer: null,
+        latestPayload: null,
+        fontMetricsEpoch: 0,
+        fontMetricsRefreshToken: 0
       };
 
       function runPostPatch(payload, rendererPayload) {
@@ -253,6 +257,33 @@
         const relayoutPayload = createRendererPayload(state, payload, true, 1);
         state.renderer.update(relayoutPayload);
         state.renderer.postPatch(relayoutPayload);
+      }
+
+      function scheduleFontMetricsRefresh() {
+        if (!state.mountEl || !state.renderer || !state.latestPayload) {
+          return;
+        }
+        const ownerDocument = state.mountEl.ownerDocument || null;
+        const fonts = ownerDocument && ownerDocument.fonts ? ownerDocument.fonts : null;
+        if (!fonts || fonts.status === "loaded" || !fonts.ready || typeof fonts.ready.then !== "function") {
+          return;
+        }
+
+        const refreshToken = state.fontMetricsRefreshToken + 1;
+        state.fontMetricsRefreshToken = refreshToken;
+        fonts.ready.then(function () {
+          if (destroyed || !attached || refreshToken !== state.fontMetricsRefreshToken) {
+            return;
+          }
+          if (!state.renderer || !state.mountEl || !state.latestPayload) {
+            return;
+          }
+          state.fontMetricsEpoch += 1;
+          const latestPayload = state.latestPayload;
+          const rendererPayload = createRendererPayload(state, latestPayload, false, 0);
+          state.renderer.update(rendererPayload);
+          runPostPatch(latestPayload, rendererPayload);
+        }, function () {});
       }
 
       function attach(payload) {
@@ -278,11 +309,13 @@
           });
           ensureRendererInstance("attach", rendererInstance);
           state.renderer = rendererInstance;
+          state.latestPayload = payload;
 
           const rendererPayload = createRendererPayload(state, payload, true, 0);
           lastLayoutSignature = resolveLayoutSignature(rendererInstance, rendererPayload, "attach");
           rendererInstance.mount(state.shadowRoot, rendererPayload);
           runPostPatch(payload, rendererPayload);
+          scheduleFontMetricsRefresh();
 
           attached = true;
         }
@@ -313,6 +346,7 @@
           lastLayoutSignature = nextLayoutSignature;
 
           const rendererPayload = createRendererPayload(state, payload, layoutChanged, 0);
+          state.latestPayload = payload;
           state.renderer.update(rendererPayload);
           runPostPatch(payload, rendererPayload);
 
@@ -335,6 +369,7 @@
           attached = false;
           return;
         }
+        state.fontMetricsRefreshToken += 1;
         state.renderer.detach(reason || "detach");
         if (state.shadowRoot && state.shadowRoot.textContent !== undefined) {
           state.shadowRoot.textContent = "";
@@ -343,6 +378,7 @@
         state.shellEl = null;
         state.mountEl = null;
         state.shadowRoot = null;
+        state.latestPayload = null;
         lastLayoutSignature = "none";
         attached = false;
       }

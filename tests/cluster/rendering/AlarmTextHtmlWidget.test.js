@@ -74,11 +74,11 @@ describe("AlarmTextHtmlWidget", function () {
           valuePx: 18,
           captionStyle: "font-size:12px;",
           valueStyle: "font-size:18px;",
-          shellStyle: model.showStrip === true ? "padding:2px 2px 2px 13px;" : "padding:2px;",
-          accentStyle: model.showStrip === true ? "left:2px;top:2px;bottom:2px;width:8px;border-radius:8px;background-color:#66b8ff;" : "",
+          shellStyle: model.showStrip === true ? "padding:2px 2px 2px 21px;" : "padding:2px;",
+          accentStyle: model.showStrip === true ? "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#66b8ff;" : "",
           activeBackgroundStyle: model.showActiveBackground === true ? "background-color:#e04040;" : "",
           activeForegroundStyle: model.state === "active" ? "color:#ffffff;" : "",
-          idleStripStyle: model.showStrip === true ? "left:2px;top:2px;bottom:2px;width:8px;border-radius:8px;background-color:#66b8ff;" : "",
+          idleStripStyle: model.showStrip === true ? "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#66b8ff;" : "",
           showStrip: model.showStrip === true,
           showActiveBackground: model.showActiveBackground === true,
           valueSingleLine: true,
@@ -93,7 +93,7 @@ describe("AlarmTextHtmlWidget", function () {
           return null;
         }
         const chrome = model.showStrip === true
-          ? { left: 13, right: 2, top: 2, bottom: 2 }
+          ? { left: 21, right: 2, top: 2, bottom: 2 }
           : { left: 2, right: 2, top: 2, bottom: 2 };
         const width = Math.max(1, Math.round(shellRect.width) - chrome.left - chrome.right);
         const height = Math.max(1, Math.round(shellRect.height) - chrome.top - chrome.bottom);
@@ -216,6 +216,20 @@ describe("AlarmTextHtmlWidget", function () {
     );
 
     expect(payload.props.surfacePolicy.actions.alarm.stopAll).toHaveBeenCalledTimes(1);
+  });
+
+  it("forwards fontMetricsEpoch into AlarmHtmlFit.compute", function () {
+    const h = createHelpers();
+    const committed = h.rendererSpec.createCommittedRenderer({ hostContext: {} });
+    const mountHost = document.createElement("div");
+    const payload = makePayload({ fontMetricsEpoch: 7 });
+
+    committed.mount(mountHost, payload);
+
+    expect(h.fit.compute).toHaveBeenCalledTimes(1);
+    expect(h.fit.compute.mock.calls[0][0]).toEqual(expect.objectContaining({
+      fontMetricsEpoch: 7
+    }));
   });
 
   it("removes dispatch handling when the widget becomes passive or editing is active", function () {
@@ -363,7 +377,7 @@ describe("AlarmTextHtmlWidget", function () {
       model: expect.objectContaining({ showStrip: true }),
       shellRect: payload.shellRect
     });
-    expect(parts[parts.length - 2]).toBe("205");
+    expect(parts[parts.length - 2]).toBe("197");
     expect(parts[parts.length - 1]).toBe("96");
     expect(signature).not.toContain("|220|100");
   });
@@ -385,8 +399,8 @@ describe("AlarmTextHtmlWidget", function () {
     expect(css).toContain(".dyni-html-root .dyni-alarm-value-row");
     expect(css).toContain("font-weight: var(--dyni-theme-font-label-weight, 700);");
     expect(css).toContain("font-weight: var(--dyni-theme-font-weight, 700);");
-    expect(css).toContain("width: 0.34em;");
-    expect(css).toContain("border-radius: 0.34em;");
+    expect(css).toContain("width: 0.68em;");
+    expect(css).toContain("border-radius: 0.68em;");
     expect(css).toContain("inset: 0 auto 0 0;");
     expect(css).toContain("z-index: 0;");
     expect(css).toContain("gap: 0.16em;");
@@ -431,8 +445,8 @@ describe("AlarmTextHtmlWidget", function () {
     expect(alarmAccent).toBe(aisAccent);
     expect(alarmHotspot).toBe(aisHotspot);
     expectDeclaration(alarmAccent, "inset: 0 auto 0 0");
-    expectDeclaration(alarmAccent, "width: 0.34em");
-    expectDeclaration(alarmAccent, "border-radius: 0.34em");
+    expectDeclaration(alarmAccent, "width: 0.68em");
+    expectDeclaration(alarmAccent, "border-radius: 0.68em");
 
     const alarmMain = readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-main");
     const aisIdentity = readRuleBody(aisCss, ".dyni-html-root .dyni-ais-target-identity");

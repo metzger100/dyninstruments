@@ -143,7 +143,8 @@
           model: model,
           hostContext: hostContext,
           targetEl: payload.rootEl,
-          shellRect: shellRect
+          shellRect: shellRect,
+          fontMetricsEpoch: payload.fontMetricsEpoch || 0
         }) || lastFit || fallbackFit;
 
         htmlUtils.applyMirroredContext(rootEl, props);

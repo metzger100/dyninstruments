@@ -18,11 +18,11 @@
   const FIT_CACHE_KEY = "__dyniAlarmHtmlFitCache";
   const ALARM_SHELL_CHROME = Object.freeze({
     padding: 2,
-    stripLeftPadding: 13,
-    stripWidth: 8,
-    stripRadius: 8
+    stripGap: 3,
+    stripWidth: 16,
+    stripRadius: 16
   });
-
+  const ALARM_STRIP_LEFT_PADDING = ALARM_SHELL_CHROME.padding + ALARM_SHELL_CHROME.stripWidth + ALARM_SHELL_CHROME.stripGap;
   function toObject(value) {
     return value && typeof value === "object" ? value : {};
   }
@@ -96,7 +96,7 @@
   function resolveShellChrome(model) {
     if (model && model.showStrip === true) {
       return {
-        left: ALARM_SHELL_CHROME.stripLeftPadding,
+        left: ALARM_STRIP_LEFT_PADDING,
         right: ALARM_SHELL_CHROME.padding,
         top: ALARM_SHELL_CHROME.padding,
         bottom: ALARM_SHELL_CHROME.padding
@@ -317,7 +317,8 @@
       cfg.labelWeight,
       cfg.themeBg,
       cfg.themeFg,
-      cfg.themeStrip
+      cfg.themeStrip,
+      cfg.fontMetricsEpoch
     ]);
   }
 
@@ -370,7 +371,8 @@
         labelWeight: labelWeight,
         themeBg: tokens.bg,
         themeFg: tokens.fg,
-        themeStrip: tokens.strip
+        themeStrip: tokens.strip,
+        fontMetricsEpoch: cfg.fontMetricsEpoch
       });
       if (fitCache && fitCache.signature === signature && fitCache.result) {
         return fitCache.result;

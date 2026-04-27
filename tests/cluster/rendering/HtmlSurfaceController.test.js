@@ -2,6 +2,7 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 describe("HtmlSurfaceController", function () {
   const originalDyniPlugin = globalThis.DyniPlugin;
+  const originalDocumentFonts = document.fonts;
 
   function createModule() {
     return loadFresh("cluster/rendering/HtmlSurfaceController.js").create({}, {
@@ -39,11 +40,48 @@ describe("HtmlSurfaceController", function () {
     };
   }
 
+  function flushMicrotasks() {
+    return Promise.resolve().then(function () {
+      return Promise.resolve();
+    });
+  }
+
+  function setDocumentFonts(fonts) {
+    try {
+      document.fonts = fonts;
+    }
+    catch (err) {
+      Object.defineProperty(document, "fonts", {
+        configurable: true,
+        value: fonts
+      });
+    }
+  }
+
+  function createDeferredFonts(status) {
+    let resolveReady = null;
+    const ready = new Promise(function (resolve) {
+      resolveReady = resolve;
+    });
+    return {
+      fonts: {
+        status: status || "loading",
+        ready: ready
+      },
+      resolveReady: resolveReady
+    };
+  }
+
   afterEach(function () {
     if (typeof originalDyniPlugin === "undefined") {
       delete globalThis.DyniPlugin;
     } else {
       globalThis.DyniPlugin = originalDyniPlugin;
+    }
+    if (typeof originalDocumentFonts === "undefined") {
+      delete document.fonts;
+    } else {
+      setDocumentFonts(originalDocumentFonts);
     }
   });
 
@@ -208,6 +246,104 @@ describe("HtmlSurfaceController", function () {
     expect(shadowRoot.querySelectorAll('style[data-dyni-shadow-css="/css/a.css"]')).toHaveLength(1);
     expect(shadowRoot.querySelectorAll('style[data-dyni-shadow-css="/css/b.css"]')).toHaveLength(1);
     expect(getShadowCssText).toHaveBeenCalledTimes(4);
+  });
+
+  it("refreshes once from document.fonts.ready using the latest payload and increments the font metrics epoch", async function () {
+    const deferredFonts = createDeferredFonts("loading");
+    setDocumentFonts(deferredFonts.fonts);
+
+    const module = createModule();
+    const surfaceDom = createSurfaceDom();
+    const rendererInstance = {
+      mount: vi.fn(),
+      update: vi.fn(),
+      postPatch: vi.fn(() => false),
+      detach: vi.fn(),
+      destroy: vi.fn()
+    };
+    const controller = module.createSurfaceController({
+      rendererSpec: {
+        createCommittedRenderer: vi.fn(() => rendererInstance)
+      },
+      hostContext: {}
+    });
+
+    controller.attach(makePayload(surfaceDom, { sig: "a" }, 1));
+    expect(rendererInstance.mount.mock.calls[0][1]).toEqual(expect.objectContaining({
+      props: { sig: "a" },
+      fontMetricsEpoch: 0
+    }));
+
+    controller.update(makePayload(surfaceDom, { sig: "b" }, 2));
+    expect(rendererInstance.update).toHaveBeenCalledTimes(1);
+    expect(rendererInstance.update.mock.calls[0][0]).toEqual(expect.objectContaining({
+      props: { sig: "b" },
+      fontMetricsEpoch: 0
+    }));
+
+    deferredFonts.resolveReady();
+    await deferredFonts.fonts.ready;
+    await flushMicrotasks();
+
+    expect(rendererInstance.update).toHaveBeenCalledTimes(2);
+    expect(rendererInstance.update.mock.calls[1][0]).toEqual(expect.objectContaining({
+      props: { sig: "b" },
+      fontMetricsEpoch: 1
+    }));
+  });
+
+  it("ignores document.fonts.ready after detach and destroy", async function () {
+    const detachedFonts = createDeferredFonts("loading");
+    setDocumentFonts(detachedFonts.fonts);
+
+    const module = createModule();
+    const surfaceDom = createSurfaceDom();
+    const rendererInstance = {
+      mount: vi.fn(),
+      update: vi.fn(),
+      postPatch: vi.fn(() => false),
+      detach: vi.fn(),
+      destroy: vi.fn()
+    };
+    const controller = module.createSurfaceController({
+      rendererSpec: {
+        createCommittedRenderer: vi.fn(() => rendererInstance)
+      },
+      hostContext: {}
+    });
+
+    controller.attach(makePayload(surfaceDom, { sig: "detach" }, 1));
+    controller.detach("detach");
+    detachedFonts.resolveReady();
+    await detachedFonts.fonts.ready;
+    await flushMicrotasks();
+    expect(rendererInstance.update).not.toHaveBeenCalled();
+
+    const destroyedFonts = createDeferredFonts("loading");
+    setDocumentFonts(destroyedFonts.fonts);
+
+    const surfaceDom2 = createSurfaceDom();
+    const rendererInstance2 = {
+      mount: vi.fn(),
+      update: vi.fn(),
+      postPatch: vi.fn(() => false),
+      detach: vi.fn(),
+      destroy: vi.fn()
+    };
+    const controller2 = module.createSurfaceController({
+      rendererSpec: {
+        createCommittedRenderer: vi.fn(() => rendererInstance2)
+      },
+      hostContext: {}
+    });
+
+    controller2.attach(makePayload(surfaceDom2, { sig: "destroy" }, 1));
+    controller2.destroy();
+    destroyedFonts.resolveReady();
+    await destroyedFonts.fonts.ready;
+    await flushMicrotasks();
+    expect(rendererInstance2.update).not.toHaveBeenCalled();
+    expect(rendererInstance2.destroy).toHaveBeenCalledTimes(1);
   });
 
   it("throws for strict renderer contracts and invalid payload", function () {

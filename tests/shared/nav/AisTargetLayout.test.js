@@ -202,7 +202,7 @@ describe("AisTargetLayout", function () {
     expect(withAccent.contentRect.x).toBeGreaterThan(withoutAccent.contentRect.x);
     expect(withAccent.contentRect.w).toBeLessThan(withoutAccent.contentRect.w);
     expect(withAccent.accentRect).toBeTruthy();
-    expect(withAccent.accentRect.w).toBeGreaterThanOrEqual(6);
+    expect(withAccent.accentRect.w).toBeGreaterThanOrEqual(14);
     expect(withAccent.insets.accentGap).toBeGreaterThanOrEqual(3);
     expect(withAccent.insets.accentReserve).toBeGreaterThan(withoutAccent.insets.accentReserve);
   });

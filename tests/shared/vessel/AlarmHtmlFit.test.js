@@ -235,15 +235,15 @@ describe("AlarmHtmlFit", function () {
     expect(h.themeApi.resolveForRoot).toHaveBeenCalledWith(h.targetEl);
     expect(active.activeBackgroundStyle).toBe("background-color:#e04040;");
     expect(active.activeForegroundStyle).toBe("color:#ffffff;");
-    expect(idle.shellStyle).toBe("padding:2px 2px 2px 13px;");
-    expect(idle.accentStyle).toBe("left:2px;top:2px;bottom:2px;width:8px;border-radius:8px;background-color:#66b8ff;");
-    expect(idle.idleStripStyle).toBe("left:2px;top:2px;bottom:2px;width:8px;border-radius:8px;background-color:#66b8ff;");
+    expect(idle.shellStyle).toBe("padding:2px 2px 2px 21px;");
+    expect(idle.accentStyle).toBe("left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#66b8ff;");
+    expect(idle.idleStripStyle).toBe("left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#66b8ff;");
   });
 
   it("fits against the inner content rect when the idle strip is present", function () {
     const h = createHarness();
     const shellRect = { width: 220, height: 100 };
-    const padX = computePadX(205, 96);
+    const padX = computePadX(197, 96);
 
     const result = h.fit.compute({
       model: makeModel({
@@ -258,7 +258,7 @@ describe("AlarmHtmlFit", function () {
     });
 
     const fitArgs = h.textLayoutApi.fitValueUnitCaptionRows.mock.calls[0][0];
-    expect(fitArgs.W).toBe(205 - (padX * 2));
+    expect(fitArgs.W).toBe(197 - (padX * 2));
     expect(fitArgs.H).toBe(96);
     expect(result.valuePx).toBe(17);
   });
@@ -281,9 +281,9 @@ describe("AlarmHtmlFit", function () {
       mode: "normal",
       shellRect: { width: 220, height: 100 },
       contentRect: {
-        width: 205,
+        width: 197,
         height: 96,
-        chrome: { left: 13, right: 2, top: 2, bottom: 2 }
+        chrome: { left: 21, right: 2, top: 2, bottom: 2 }
       }
     });
 
@@ -376,5 +376,36 @@ describe("AlarmHtmlFit", function () {
 
     expect(second).toBe(first);
     expect(h.hostContext.__dyniAlarmHtmlFitCache.result).toBe(first);
+  });
+
+  it("recomputes when fontMetricsEpoch changes so cold-load font metrics do not reuse stale fit cache", function () {
+    const h = createHarness();
+    const model = makeModel();
+    const shellRect = { width: 240, height: 100 };
+    const first = h.fit.compute({
+      model: model,
+      targetEl: h.targetEl,
+      hostContext: h.hostContext,
+      shellRect: shellRect,
+      fontMetricsEpoch: 0
+    });
+    const second = h.fit.compute({
+      model: model,
+      targetEl: h.targetEl,
+      hostContext: h.hostContext,
+      shellRect: shellRect,
+      fontMetricsEpoch: 0
+    });
+    const third = h.fit.compute({
+      model: model,
+      targetEl: h.targetEl,
+      hostContext: h.hostContext,
+      shellRect: shellRect,
+      fontMetricsEpoch: 1
+    });
+
+    expect(second).toBe(first);
+    expect(third).not.toBe(first);
+    expect(h.textLayoutApi.fitValueUnitCaptionRows).toHaveBeenCalledTimes(2);
   });
 });
