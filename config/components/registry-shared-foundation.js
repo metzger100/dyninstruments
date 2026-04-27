@@ -223,6 +223,11 @@
       css: undefined,
       globalKey: "DyniLayoutRectMath"
     },
+    GeometryScale: {
+      js: BASE + "shared/widget-kits/layout/GeometryScale.js",
+      css: undefined,
+      globalKey: "DyniGeometryScale"
+    },
     LinearCanvasPrimitives: {
       js: BASE + "shared/widget-kits/linear/LinearCanvasPrimitives.js",
       css: undefined,
