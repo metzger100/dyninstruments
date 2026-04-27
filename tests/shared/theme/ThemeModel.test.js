@@ -45,8 +45,41 @@ describe("ThemeModel", function () {
     expect(pointerSideWeight.default).toBe(1);
     expect(radialMajorLen.inputVar).toBe("--dyni-radial-tick-major-len-factor");
     expect(radialMajorLen.default).toBe(0.08);
+    [
+      "radial.ticks.majorLen",
+      "radial.ticks.majorWidth",
+      "radial.ticks.minorLen",
+      "radial.ticks.minorWidth",
+      "radial.ring.arcLineWidth",
+      "radial.pointer.widthFactor",
+      "radial.pointer.lengthFactor",
+      "linear.track.lineWidth",
+      "linear.ticks.majorLen",
+      "linear.ticks.majorWidth",
+      "linear.ticks.minorLen",
+      "linear.ticks.minorWidth",
+      "linear.pointer.widthFactor",
+      "linear.pointer.lengthFactor",
+      "xte.lineWidthFactor",
+      "xte.boatSizeFactor"
+    ].forEach(function (path) {
+      expect(model.getTokenDefinition(path)).toBe(null);
+    });
+    expect(model.getTokenDefinition("radial.ticks.majorWidthFactor").inputVar).toBe("--dyni-radial-tick-major-width-factor");
+    expect(model.getTokenDefinition("radial.ticks.minorLenFactor").inputVar).toBe("--dyni-radial-tick-minor-len-factor");
+    expect(model.getTokenDefinition("radial.ticks.minorWidthFactor").inputVar).toBe("--dyni-radial-tick-minor-width-factor");
+    expect(model.getTokenDefinition("radial.pointer.sideFactor").inputVar).toBe("--dyni-radial-pointer-side-factor");
+    expect(model.getTokenDefinition("radial.pointer.depthFactor").inputVar).toBe("--dyni-radial-pointer-depth-factor");
+    expect(model.getTokenDefinition("radial.ring.arcLineWidthFactor").inputVar).toBe("--dyni-radial-arc-linewidth-factor");
+    expect(model.getTokenDefinition("linear.track.widthFactor").inputVar).toBe("--dyni-linear-track-width");
+    expect(model.getTokenDefinition("linear.track.lineWidthFactor").inputVar).toBe("--dyni-linear-track-linewidth-factor");
     expect(linearPointerDepth.inputVar).toBe("--dyni-linear-pointer-depth-factor");
     expect(linearPointerDepth.default).toBe(0.24);
+    expect(model.getTokenDefinition("linear.ticks.majorLenFactor").inputVar).toBe("--dyni-linear-tick-major-len-factor");
+    expect(model.getTokenDefinition("linear.ticks.majorWidthFactor").inputVar).toBe("--dyni-linear-tick-major-width-factor");
+    expect(model.getTokenDefinition("linear.ticks.minorLenFactor").inputVar).toBe("--dyni-linear-tick-minor-len-factor");
+    expect(model.getTokenDefinition("linear.ticks.minorWidthFactor").inputVar).toBe("--dyni-linear-tick-minor-width-factor");
+    expect(model.getTokenDefinition("linear.pointer.sideFactor").inputVar).toBe("--dyni-linear-pointer-side-factor");
     expect(model.getTokenDefinition("xte.lineWidthFactor")).toBe(null);
     expect(model.getTokenDefinition("xte.boatSizeFactor")).toBe(null);
     expect(alarmWidgetBg.inputVar).toBe("--dyni-alarm-widget-bg");
@@ -62,13 +95,20 @@ describe("ThemeModel", function () {
   it("contains expected preset override spot values", function () {
     const model = loadFresh("shared/theme/ThemeModel.js");
 
+    expect(Object.keys(model.getPresetBase("slim")).sort()).toEqual(["font", "pointerDepthWeight", "pointerSideWeight", "strokeWeight"]);
+    expect(Object.keys(model.getPresetBase("bold")).sort()).toEqual(["pointerDepthWeight", "pointerSideWeight", "strokeWeight"]);
+    expect(Object.keys(model.getPresetBase("highcontrast")).sort()).toEqual(["colors", "pointerDepthWeight", "pointerSideWeight", "strokeWeight"]);
     expect(model.getPresetBase("slim").strokeWeight).toBe(0.67);
     expect(model.getPresetBase("slim").pointerDepthWeight).toBe(1);
     expect(model.getPresetBase("slim").pointerSideWeight).toBe(0.72);
     expect(model.getPresetBase("slim").font.labelWeight).toBe(400);
+    expect(model.getPresetBase("slim").radial).toBeUndefined();
+    expect(model.getPresetBase("slim").linear).toBeUndefined();
     expect(model.getPresetBase("bold").strokeWeight).toBe(1.4);
     expect(model.getPresetBase("bold").pointerDepthWeight).toBe(1);
     expect(model.getPresetBase("bold").pointerSideWeight).toBe(1.54);
+    expect(model.getPresetBase("bold").radial).toBeUndefined();
+    expect(model.getPresetBase("bold").linear).toBeUndefined();
     expect(model.getPresetBase("highcontrast").strokeWeight).toBe(1.35);
     expect(model.getPresetBase("highcontrast").pointerDepthWeight).toBe(1);
     expect(model.getPresetBase("highcontrast").pointerSideWeight).toBe(1.4);

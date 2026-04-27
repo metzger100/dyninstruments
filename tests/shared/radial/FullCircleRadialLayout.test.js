@@ -136,4 +136,37 @@ describe("FullCircleRadialLayout", function () {
       Math.max(1, Math.floor(out.geom.R * 0.18 * out.compactGeometryScale))
     );
   });
+
+  it("applies compactGeometryScale directly to full-circle label spacing and keeps course markers ahead of ticks", function () {
+    const layout = createLayout();
+    [150, 100].forEach(function (size) {
+      const out = layout.computeLayout({
+        W: size,
+        H: size,
+        mode: "normal",
+        theme: themeDefaults,
+        insets: {
+          pad: 0,
+          gap: 0,
+          responsive: {
+            textFillScale: 1.4
+          }
+        },
+        responsive: {
+          textFillScale: 1.4
+        }
+      });
+
+      expect(out.compactGeometryScale).toBeLessThan(1);
+      expect(out.labels.radiusOffset).toBe(
+        Math.max(1, Math.floor(out.geom.ringW * 2.1 * out.compactGeometryScale))
+      );
+      expect(out.geom.labelRadius).toBe(
+        Math.max(0, out.geom.R - Math.max(1, Math.floor(out.geom.ringW * 2.2 * out.compactGeometryScale)))
+      );
+      expect(out.geom.majorTickLen).toBeLessThanOrEqual(out.labels.radiusOffset);
+      expect(out.geom.minorTickLen).toBeLessThanOrEqual(out.labels.radiusOffset);
+      expect(out.geom.markerLen).toBeGreaterThan(out.geom.majorTickLen);
+    });
+  });
 });

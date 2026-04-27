@@ -38,6 +38,24 @@ describe("XteHighwayPrimitives", function () {
     return Math.max.apply(null, values) - Math.min.apply(null, values);
   }
 
+  function boatLengthFromPoints(points) {
+    return span(points, "y") / 1.18;
+  }
+
+  function lineSegments(ctx) {
+    const segments = [];
+    const calls = ctx.calls;
+    for (let i = 0; i < calls.length - 1; i += 1) {
+      if (calls[i].name === "moveTo" && calls[i + 1].name === "lineTo") {
+        segments.push({
+          from: { x: calls[i].args[0], y: calls[i].args[1] },
+          to: { x: calls[i + 1].args[0], y: calls[i + 1].args[1] }
+        });
+      }
+    }
+    return segments;
+  }
+
   function createLineWidthTrackerContext() {
     const ctx = createMockContext2D();
     const widths = [];
@@ -184,5 +202,49 @@ describe("XteHighwayPrimitives", function () {
 
     expect(Math.max.apply(null, staticScaled.widths)).toBeGreaterThan(Math.max.apply(null, staticBase.widths));
     expect(Math.max.apply(null, dynamicScaled.widths)).toBeGreaterThan(Math.max.apply(null, dynamicBase.widths));
+  });
+
+  it("scales the highway and boat marker from the primary dimension and respects the lane-depth clamp", function () {
+    const draw = create();
+    const colors = { pointer: "#f00", alarm: "#f00", roadLine: "#fff", stripeLine: "#ccc" };
+    const staticTracker = createLineWidthTrackerContext();
+
+    draw.drawStaticHighway(staticTracker.ctx, {
+      cx: 140,
+      horizonY: 0,
+      baseY: 170,
+      nearHalf: 120,
+      farHalf: 40
+    }, colors, "normal", 170, 1);
+
+    expect(staticTracker.widths[0]).toBe(2);
+    expect(Math.max.apply(null, staticTracker.widths)).toBeGreaterThanOrEqual(2);
+
+    [
+      { primaryDim: 170, laneDepth: 170, geom: { cx: 140, horizonY: 0, baseY: 170, nearHalf: 120, farHalf: 40 }, expectedLength: 13 },
+      { primaryDim: 40, laneDepth: 40, geom: { cx: 80, horizonY: 0, baseY: 40, nearHalf: 40, farHalf: 10 }, expectedLength: 3 }
+    ].forEach(function (testCase) {
+      const ctx = createMockContext2D();
+      draw.drawDynamicHighway(ctx, testCase.geom, colors, 0.2, false, testCase.primaryDim, 1, 1);
+      const markerLength = boatLengthFromPoints(extractBoatPoints(ctx));
+
+      expect(markerLength).toBeCloseTo(testCase.expectedLength, 6);
+      expect(markerLength).toBeLessThanOrEqual(testCase.laneDepth * 0.24);
+    });
+
+    const tinyStatic = createMockContext2D();
+    draw.drawStaticHighway(tinyStatic, {
+      cx: 20,
+      horizonY: 0,
+      baseY: 10,
+      nearHalf: 8,
+      farHalf: 3
+    }, colors, "normal", 10, 1);
+
+    const seamLengths = lineSegments(tinyStatic)
+      .filter(function (segment) { return segment.from.x === segment.to.x; })
+      .map(function (segment) { return Math.abs(segment.to.y - segment.from.y); });
+
+    expect(Math.min.apply(null, seamLengths)).toBe(1);
   });
 });

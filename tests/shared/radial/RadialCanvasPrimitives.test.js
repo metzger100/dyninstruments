@@ -233,4 +233,26 @@ describe("RadialCanvasPrimitives", function () {
 
     expect(ctx.calls).toHaveLength(0);
   });
+
+  it("keeps drawArrow floors at one for tiny positive dimensions", function () {
+    const draw = create();
+    const ctx = createMockContext2D();
+
+    draw.drawArrow(ctx, 100, 100, 50, 0, {
+      tail: 0.4,
+      head: 0.2,
+      width: 0.3,
+      strokeStyle: "#123456"
+    });
+
+    const pathPoints = ctx.calls
+      .filter(function (call) { return call.name === "moveTo" || call.name === "lineTo"; })
+      .map(function (call) {
+        return { x: call.args[0], y: call.args[1] };
+      });
+
+    expect(ctx.lineWidth).toBe(1);
+    expect(pointDistance(pathPoints[2], pathPoints[3])).toBeCloseTo(1, 6);
+    expect(pointDistance(pathPoints[4], pathPoints[5])).toBeCloseTo(1, 6);
+  });
 });

@@ -172,4 +172,22 @@ describe("XteHighwayLayout", function () {
     expect(snapshot.highway.w).toBe(snapshot.contentRect.w);
     expect(snapshot.highway.h).toBe(snapshot.contentRect.h);
   });
+
+  it("uses the highway height as the constraining axis in flat mode", function () {
+    const layout = createLayout();
+    const primitives = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js").create({}, {
+      getModule(id) {
+        if (id === "GeometryScale") {
+          return loadFresh("shared/widget-kits/layout/GeometryScale.js");
+        }
+        throw new Error("unexpected module: " + id);
+      }
+    });
+    const snapshot = buildSnapshot(layout, 600, 150, "flat").out;
+    const geometry = primitives.highwayGeometry(snapshot.highway, "flat", snapshot.highway.h);
+
+    expect(snapshot.highway.h).toBeGreaterThan(0);
+    expect(snapshot.highway.h).toBeLessThan(snapshot.highway.w);
+    expect(geometry.primaryDim).toBe(snapshot.highway.h);
+  });
 });

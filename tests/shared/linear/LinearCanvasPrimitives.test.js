@@ -119,4 +119,18 @@ describe("LinearCanvasPrimitives", function () {
     expect(callsNamed(ctx, "lineTo")[0].args).toEqual([34, 21]);
     expect(callsNamed(ctx, "lineTo")[1].args).toEqual([46, 21]);
   });
+
+  it("keeps pointer floors at one for tiny positive dimensions", function () {
+    const draw = create();
+    const ctx = createMockContext2D();
+
+    draw.drawPointer(ctx, 40, 30, {
+      depth: 0.2,
+      side: 0.3,
+      fillStyle: "#abcdef"
+    });
+
+    expect(callsNamed(ctx, "lineTo")[0].args).toEqual([39, 29]);
+    expect(callsNamed(ctx, "lineTo")[1].args).toEqual([41, 29]);
+  });
 });

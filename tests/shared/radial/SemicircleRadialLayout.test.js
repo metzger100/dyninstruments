@@ -26,6 +26,35 @@ describe("SemicircleRadialLayout", function () {
 
   const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
 
+  function createTheme(overrides) {
+    const extra = overrides || {};
+    return {
+      radial: {
+        ticks: Object.assign({
+          majorLenFactor: 0.08,
+          majorWidthFactor: 0.02,
+          minorLenFactor: 0.047,
+          minorWidthFactor: 0.01
+        }, extra.radial && extra.radial.ticks ? extra.radial.ticks : {}),
+        pointer: Object.assign({
+          depthFactor: 0.22,
+          sideFactor: 0.11
+        }, extra.radial && extra.radial.pointer ? extra.radial.pointer : {}),
+        ring: Object.assign({
+          widthFactor: 0.18,
+          arcLineWidthFactor: 0.013
+        }, extra.radial && extra.radial.ring ? extra.radial.ring : {}),
+        labels: Object.assign({
+          insetFactor: 2.2,
+          fontFactor: 0.2
+        }, extra.radial && extra.radial.labels ? extra.radial.labels : {})
+      },
+      strokeWeight: Object.prototype.hasOwnProperty.call(extra, "strokeWeight") ? extra.strokeWeight : 1,
+      pointerDepthWeight: Object.prototype.hasOwnProperty.call(extra, "pointerDepthWeight") ? extra.pointerDepthWeight : 1,
+      pointerSideWeight: Object.prototype.hasOwnProperty.call(extra, "pointerSideWeight") ? extra.pointerSideWeight : 1
+    };
+  }
+
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     return loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js").create({}, {
@@ -134,5 +163,122 @@ describe("SemicircleRadialLayout", function () {
     expect(geom.pointerDepth).toBe(gs.scalePointer(geom.R, themeDefaults.radial.pointer.depthFactor, themeDefaults.pointerDepthWeight));
     expect(geom.pointerSide).toBe(gs.scalePointer(geom.R, themeDefaults.radial.pointer.sideFactor, themeDefaults.pointerSideWeight));
     expect(geom).not.toHaveProperty("needleDepth");
+  });
+
+  it("keeps radial geometry proportional to the radius and preset weights", function () {
+    const layout = createLayout();
+    const sizes = [300, 600, 150, 100];
+    const geoms = sizes.map(function (size) {
+      return layout.computeLayout({
+        W: size,
+        H: size,
+        mode: "normal",
+        theme: createTheme(),
+        insets: {
+          pad: 0,
+          gap: 0,
+          responsive: {
+            textFillScale: 1
+          }
+        },
+        responsive: {
+          textFillScale: 1
+        }
+      }).geom;
+    });
+
+    expect(geoms[0].R).toBe(150);
+    expect(geoms[0].majorTickLen).toBe(12);
+    expect(geoms[0].majorTickWidth).toBe(3);
+    expect(geoms[0].minorTickLen).toBe(7);
+    expect(geoms[0].minorTickWidth).toBe(1);
+    expect(geoms[1].R).toBe(300);
+    expect(geoms[1].majorTickLen).toBe(24);
+    expect(geoms[1].majorTickWidth).toBe(6);
+    expect(geoms[2].R).toBe(75);
+    expect(geoms[2].majorTickLen).toBe(6);
+    expect(geoms[2].majorTickWidth).toBe(1);
+    expect(geoms[3].R).toBe(50);
+    expect(geoms[3].majorTickLen).toBeGreaterThanOrEqual(1);
+    expect(geoms[3].majorTickWidth).toBeGreaterThanOrEqual(1);
+    expect(geoms[3].minorTickLen).toBeGreaterThanOrEqual(1);
+    expect(geoms[3].minorTickWidth).toBeGreaterThanOrEqual(1);
+
+    sizes.forEach(function (_size, idx) {
+      expect(geoms[idx].majorTickLen / geoms[idx].R).toBeCloseTo(0.08, 6);
+    });
+    expect(geoms[0].majorTickLen / geoms[0].R).toBeCloseTo(geoms[1].majorTickLen / geoms[1].R, 6);
+    expect(geoms[1].majorTickLen / geoms[1].R).toBeCloseTo(geoms[2].majorTickLen / geoms[2].R, 6);
+    expect(geoms[2].majorTickLen / geoms[2].R).toBeCloseTo(geoms[3].majorTickLen / geoms[3].R, 6);
+
+    const bold = layout.computeLayout({
+      W: 300,
+      H: 300,
+      mode: "normal",
+      theme: createTheme({
+        strokeWeight: 1.4,
+        pointerDepthWeight: 1,
+        pointerSideWeight: 1.54
+      }),
+      insets: {
+        pad: 0,
+        gap: 0,
+        responsive: {
+          textFillScale: 1
+        }
+      },
+      responsive: {
+        textFillScale: 1
+      }
+    }).geom;
+    const slim = layout.computeLayout({
+      W: 300,
+      H: 300,
+      mode: "normal",
+      theme: createTheme({
+        strokeWeight: 0.67,
+        pointerDepthWeight: 1,
+        pointerSideWeight: 0.72
+      }),
+      insets: {
+        pad: 0,
+        gap: 0,
+        responsive: {
+          textFillScale: 1
+        }
+      },
+      responsive: {
+        textFillScale: 1
+      }
+    }).geom;
+    const highcontrast = layout.computeLayout({
+      W: 300,
+      H: 300,
+      mode: "normal",
+      theme: createTheme({
+        strokeWeight: 1.35,
+        pointerDepthWeight: 1,
+        pointerSideWeight: 1.4
+      }),
+      insets: {
+        pad: 0,
+        gap: 0,
+        responsive: {
+          textFillScale: 1
+        }
+      },
+      responsive: {
+        textFillScale: 1
+      }
+    }).geom;
+
+    expect(bold.majorTickWidth).toBe(4);
+    expect(slim.majorTickWidth).toBe(2);
+    expect(highcontrast.minorTickWidth).toBe(2);
+    expect(geoms[0].pointerDepth).toBe(bold.pointerDepth);
+    expect(geoms[0].pointerDepth).toBe(slim.pointerDepth);
+    expect(geoms[0].pointerDepth).toBe(highcontrast.pointerDepth);
+    expect(bold.pointerSide).toBeGreaterThan(geoms[0].pointerSide);
+    expect(geoms[0].pointerSide).toBeGreaterThan(slim.pointerSide);
   });
 });

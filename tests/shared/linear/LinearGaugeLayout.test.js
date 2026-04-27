@@ -19,30 +19,31 @@ describe("LinearGaugeLayout", function () {
     });
   }
 
-  function createTheme() {
+  function createTheme(overrides) {
+    const extra = overrides || {};
     return {
-      strokeWeight: 1,
-      pointerDepthWeight: 1,
-      pointerSideWeight: 1,
+      strokeWeight: Object.prototype.hasOwnProperty.call(extra, "strokeWeight") ? extra.strokeWeight : 1,
+      pointerDepthWeight: Object.prototype.hasOwnProperty.call(extra, "pointerDepthWeight") ? extra.pointerDepthWeight : 1,
+      pointerSideWeight: Object.prototype.hasOwnProperty.call(extra, "pointerSideWeight") ? extra.pointerSideWeight : 1,
       linear: {
-        track: {
+        track: Object.assign({
           widthFactor: 0.16,
           lineWidthFactor: 0.018
-        },
-        ticks: {
+        }, extra.linear && extra.linear.track ? extra.linear.track : {}),
+        ticks: Object.assign({
           majorLenFactor: 0.109,
           majorWidthFactor: 0.027,
           minorLenFactor: 0.064,
           minorWidthFactor: 0.014
-        },
-        pointer: {
+        }, extra.linear && extra.linear.ticks ? extra.linear.ticks : {}),
+        pointer: Object.assign({
           sideFactor: 0.12,
           depthFactor: 0.24
-        },
-        labels: {
+        }, extra.linear && extra.linear.pointer ? extra.linear.pointer : {}),
+        labels: Object.assign({
           insetFactor: 1.8,
           fontFactor: 0.14
-        }
+        }, extra.linear && extra.linear.labels ? extra.linear.labels : {})
       }
     };
   }
@@ -248,5 +249,83 @@ describe("LinearGaugeLayout", function () {
     expect(snapshot.trackThickness).toBeGreaterThanOrEqual(1);
     expect(snapshot.labelFontPx).toBeGreaterThanOrEqual(1);
     expect(snapshot.labelInsetPx).toBeGreaterThanOrEqual(1);
+  });
+
+  it("scales linear geometry from a reference primary dimension and respects preset weights", function () {
+    const layout = createLayout();
+    const gs = loadFresh("shared/widget-kits/layout/GeometryScale.js").create();
+    const contentRect = { x: 34, y: 34, w: 232, h: 232 };
+
+    const reference = layout.computeLayout({
+      W: 300,
+      H: 300,
+      mode: "normal",
+      theme: createTheme(),
+      gap: 0,
+      contentRect: contentRect,
+      responsive: { textFillScale: 1 }
+    });
+
+    expect(reference.trackBox.h).toBe(110);
+    expect(reference.primaryDim).toBe(110);
+    expect(reference.majorTickLen).toBe(gs.scale(reference.primaryDim, 0.109));
+    expect(reference.majorTickWidth).toBe(gs.scaleStroke(reference.primaryDim, 0.027, 1));
+    expect(reference.minorTickLen).toBe(gs.scale(reference.primaryDim, 0.064));
+    expect(reference.minorTickWidth).toBe(gs.scaleStroke(reference.primaryDim, 0.014, 1));
+    expect(reference.trackLineWidth).toBe(gs.scaleStroke(reference.primaryDim, 0.018, 1));
+    expect(reference.pointerDepth).toBe(26);
+    expect(reference.pointerSide).toBe(13);
+
+    const bold = layout.computeLayout({
+      W: 300,
+      H: 300,
+      mode: "normal",
+      theme: createTheme({
+        strokeWeight: 1.4,
+        pointerDepthWeight: 1,
+        pointerSideWeight: 1.54
+      }),
+      gap: 0,
+      contentRect: contentRect,
+      responsive: { textFillScale: 1 }
+    });
+    const slim = layout.computeLayout({
+      W: 300,
+      H: 300,
+      mode: "normal",
+      theme: createTheme({
+        strokeWeight: 0.67,
+        pointerDepthWeight: 1,
+        pointerSideWeight: 0.72
+      }),
+      gap: 0,
+      contentRect: contentRect,
+      responsive: { textFillScale: 1 }
+    });
+
+    expect(bold.trackLineWidth).toBe(2);
+    expect(bold.majorTickWidth).toBe(4);
+    expect(bold.pointerDepth).toBe(reference.pointerDepth);
+    expect(bold.pointerSide).toBe(20);
+    expect(slim.trackLineWidth).toBe(1);
+    expect(slim.majorTickWidth).toBe(1);
+    expect(slim.pointerDepth).toBe(reference.pointerDepth);
+    expect(slim.pointerSide).toBe(9);
+    expect(bold.pointerSide).toBeGreaterThan(reference.pointerSide);
+    expect(reference.pointerSide).toBeGreaterThan(slim.pointerSide);
+
+    const flatSmall = layout.computeLayout({
+      W: 150,
+      H: 80,
+      mode: "flat",
+      theme: createTheme(),
+      gap: 0,
+      contentRect: { x: 0, y: 0, w: 150, h: 80 },
+      responsive: { textFillScale: 1 }
+    });
+
+    expect(flatSmall.primaryDim).toBe(80);
+    expect(flatSmall.primaryDim).toBe(flatSmall.trackBox.h);
+    expect(flatSmall.primaryDim).toBe(Math.min(flatSmall.trackBox.w, flatSmall.trackBox.h));
   });
 });
