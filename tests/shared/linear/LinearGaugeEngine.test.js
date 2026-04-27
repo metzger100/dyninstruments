@@ -98,10 +98,12 @@ describe("LinearGaugeEngine", function () {
     };
 
     const engineMod = loadFresh("shared/widget-kits/linear/LinearGaugeEngine.js");
+    const engineSupportMod = loadFresh("shared/widget-kits/linear/LinearGaugeEngineSupport.js");
     const responsiveScaleProfileMod = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMathMod = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
     const layoutMod = loadFresh("shared/widget-kits/linear/LinearGaugeLayout.js");
     const mathMod = loadFresh("shared/widget-kits/linear/LinearGaugeMath.js");
+    const labelFitMod = loadFresh("shared/widget-kits/linear/LinearGaugeLabelFit.js");
     const textLayoutMod = loadFresh("shared/widget-kits/linear/LinearGaugeTextLayout.js");
     const engine = engineMod.create({}, {
       setupCanvas(canvas) {
@@ -136,6 +138,8 @@ describe("LinearGaugeEngine", function () {
         if (id === "LinearGaugeMath") return mathMod;
         if (id === "LinearGaugeLayout") return layoutMod;
         if (id === "LinearGaugeTextLayout") return textLayoutMod;
+        if (id === "LinearGaugeLabelFit") return labelFitMod;
+        if (id === "LinearGaugeEngineSupport") return engineSupportMod;
         if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
         return {
           create() {

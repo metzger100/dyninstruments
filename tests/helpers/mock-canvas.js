@@ -22,6 +22,8 @@ function createMockContext2D(options) {
     restore() { rec("restore", arguments); },
     beginPath() { rec("beginPath", arguments); },
     closePath() { rec("closePath", arguments); },
+    rect() { rec("rect", arguments); },
+    clip() { rec("clip", arguments); },
     arc() { rec("arc", arguments); },
     stroke() { rec("stroke", arguments); },
     fill() { rec("fill", arguments); },

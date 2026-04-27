@@ -114,6 +114,7 @@
       axisMode: "fixed360",
       springTarget: "axis",
       springWrap: 360,
+      labelEdgePolicy: "sliding",
       hideTextualMetricsProp: "compassLinearHideTextualMetrics",
       tickProps: {
         major: "compassLinearTickMajor",

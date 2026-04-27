@@ -54,6 +54,7 @@
         "LinearGaugeMath",
         "LinearGaugeLayout",
         "LinearGaugeTextLayout",
+        "LinearGaugeEngineSupport",
         "SpringEasing",
         "StableDigits",
         "StateScreenLabels",

@@ -1,7 +1,7 @@
 /**
  * Module: LinearGaugeEngine - Shared renderer pipeline for linear gauge widgets
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: RadialToolkit, CanvasLayerCache, LinearCanvasPrimitives, LinearGaugeMath, LinearGaugeLayout, LinearGaugeTextLayout, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: RadialToolkit, CanvasLayerCache, LinearCanvasPrimitives, LinearGaugeMath, LinearGaugeLayout, LinearGaugeTextLayout, LinearGaugeEngineSupport, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -26,6 +26,7 @@
     const math = Helpers.getModule("LinearGaugeMath").create(def, Helpers);
     const layoutApi = Helpers.getModule("LinearGaugeLayout").create(def, Helpers);
     const textLayout = Helpers.getModule("LinearGaugeTextLayout").create(def, Helpers);
+    const engineSupport = Helpers.getModule("LinearGaugeEngineSupport").create(def, Helpers);
     const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
     const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
     const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
@@ -131,6 +132,7 @@
       const hideTextualMetricsProp = typeof cfg.hideTextualMetricsProp === "string" && cfg.hideTextualMetricsProp
         ? cfg.hideTextualMetricsProp
         : "";
+      const labelEdgePolicy = engineSupport.resolveLabelEdgePolicy(cfg);
       const formatDisplay = typeof cfg.formatDisplay === "function"
         ? function (rawValue, props, unitText) {
           return cfg.formatDisplay(rawValue, props, unitText, Helpers);
@@ -257,8 +259,13 @@
         ctx.strokeStyle = color;
 
         const state = {
-          ctx: ctx, canvas: canvas, nowMs: nowMs,
+          ctx: ctx,
+          canvas: canvas,
+          nowMs: nowMs,
+          W: W,
+          H: H,
           mode: layout.mode,
+          axisMode: axisMode,
           layout: layout,
           responsive: layout.responsive,
           textFillScale: textFillScale,
@@ -270,8 +277,10 @@
           axis: axis,
           trackThickness: trackThickness,
           sectorBandY: sectorBandY,
+          labelBoost: labelBoost,
           labelFontPx: labelFontPx,
           labelInsetPx: labelInsetPx,
+          labelEdgePolicy: labelEdgePolicy,
           mapValueToX: function (valueNum, doClamp) {
             return math.mapValueToX(valueNum, axis.min, axis.max, layout.scaleX0, layout.scaleX1, doClamp);
           }
@@ -302,36 +311,11 @@
         const tickLabelFormatter = typeof cfg.formatTickLabel === "function"
           ? function (tickValue, tickState) { return cfg.formatTickLabel(tickValue, tickState || state, p, hookApi); }
           : null;
-        const staticKey = math.keyToText({
-          engine: {
-            W: W,
-            H: H,
-            mode: state.mode,
-            textFillScale: textFillScale,
-            axisMode: axisMode,
-            axisMin: axis.min,
-            axisMax: axis.max,
-            scaleX0: layout.scaleX0,
-            scaleX1: layout.scaleX1,
-            trackY: layout.trackY,
-            trackThickness: trackThickness,
-            labelFontPx: labelFontPx,
-            labelBoost: labelBoost,
-            linearLabelInsetFactor: theme.linear.labels.insetFactor,
-            labelInsetPx: labelInsetPx,
-            linearTrackWidth: theme.linear.track.widthFactor,
-            linearTrackLineWidth: theme.linear.track.lineWidth,
-            linearMajorLen: theme.linear.ticks.majorLen,
-            linearMajorWidth: theme.linear.ticks.majorWidth,
-            linearMinorLen: theme.linear.ticks.minorLen,
-            linearMinorWidth: theme.linear.ticks.minorWidth,
-            family: family,
-            color: color,
-            labelWeight: theme.font.labelWeight,
-            tickMajor: tickMajor,
-            tickMinor: tickMinor,
-            showEndLabels: showEndLabels
-          },
+        const staticKey = engineSupport.buildStaticKey(math, state, {
+          tickMajor: tickMajor,
+          tickMinor: tickMinor,
+          showEndLabels: showEndLabels,
+          labelEdgePolicy: labelEdgePolicy,
           sectors: sectors,
           widget: typeof cfg.buildStaticKey === "function" ? cfg.buildStaticKey(state, p) : null
         });

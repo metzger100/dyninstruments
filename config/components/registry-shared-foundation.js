@@ -239,10 +239,21 @@
       css: undefined,
       globalKey: "DyniLinearGaugeMath"
     },
+    LinearGaugeEngineSupport: {
+      js: BASE + "shared/widget-kits/linear/LinearGaugeEngineSupport.js",
+      css: undefined,
+      globalKey: "DyniLinearGaugeEngineSupport"
+    },
+    LinearGaugeLabelFit: {
+      js: BASE + "shared/widget-kits/linear/LinearGaugeLabelFit.js",
+      css: undefined,
+      globalKey: "DyniLinearGaugeLabelFit"
+    },
     LinearGaugeTextLayout: {
       js: BASE + "shared/widget-kits/linear/LinearGaugeTextLayout.js",
       css: undefined,
-      globalKey: "DyniLinearGaugeTextLayout"
+      globalKey: "DyniLinearGaugeTextLayout",
+      deps: ["LinearGaugeLabelFit"]
     },
     PerfSpanHelper: {
       js: BASE + "shared/widget-kits/perf/PerfSpanHelper.js",

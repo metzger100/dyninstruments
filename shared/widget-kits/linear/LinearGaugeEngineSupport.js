@@ -1,0 +1,65 @@
+/**
+ * Module: LinearGaugeEngineSupport - Shared normalization helpers for linear gauge engine state
+ * Documentation: documentation/linear/linear-shared-api.md
+ * Depends: none
+ */
+(function (root, factory) {
+  if (typeof define === "function" && define.amd) define([], factory);
+  else if (typeof module === "object" && module.exports) module.exports = factory();
+  else { (root.DyniComponents = root.DyniComponents || {}).DyniLinearGaugeEngineSupport = factory(); }
+}(this, function () {
+  "use strict";
+
+  function resolveLabelEdgePolicy(cfg) {
+    return cfg && cfg.labelEdgePolicy === "sliding" ? "sliding" : "inset";
+  }
+
+  function buildStaticKey(math, state, options) {
+    const opts = options || {};
+    return math.keyToText({
+      engine: {
+        W: state.W,
+        H: state.H,
+        mode: state.mode,
+        textFillScale: state.textFillScale,
+        axisMode: state.axisMode,
+        axisMin: state.axis.min,
+        axisMax: state.axis.max,
+        scaleX0: state.layout.scaleX0,
+        scaleX1: state.layout.scaleX1,
+        trackY: state.layout.trackY,
+        trackThickness: state.trackThickness,
+        labelFontPx: state.labelFontPx,
+        labelBoost: state.labelBoost,
+        linearLabelInsetFactor: state.theme.linear.labels.insetFactor,
+        labelInsetPx: state.labelInsetPx,
+        linearTrackWidth: state.theme.linear.track.widthFactor,
+        linearTrackLineWidth: state.theme.linear.track.lineWidth,
+        linearMajorLen: state.theme.linear.ticks.majorLen,
+        linearMajorWidth: state.theme.linear.ticks.majorWidth,
+        linearMinorLen: state.theme.linear.ticks.minorLen,
+        linearMinorWidth: state.theme.linear.ticks.minorWidth,
+        family: state.family,
+        color: state.color,
+        labelWeight: state.labelWeight,
+        tickMajor: opts.tickMajor,
+        tickMinor: opts.tickMinor,
+        showEndLabels: opts.showEndLabels,
+        labelEdgePolicy: state.labelEdgePolicy
+      },
+      sectors: opts.sectors,
+      widget: opts.widget
+    });
+  }
+
+  function create() {
+    return {
+      id: "LinearGaugeEngineSupport",
+      version: "0.1.0",
+      resolveLabelEdgePolicy: resolveLabelEdgePolicy,
+      buildStaticKey: buildStaticKey
+    };
+  }
+
+  return { id: "LinearGaugeEngineSupport", create: create };
+}));

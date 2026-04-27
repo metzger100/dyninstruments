@@ -1,7 +1,7 @@
 /**
  * Module: LinearGaugeTextLayout - Shared tick-label and text-row helpers for linear gauges
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: RadialToolkit text helpers
+ * Depends: RadialToolkit text helpers, LinearGaugeLabelFit
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -110,115 +110,6 @@
     return 1.0;
   }
 
-  function resolveEdgePlacement(x, width, isStart, isEnd, state, fontPx) {
-    const scaleLeft = Math.min(
-      Number(state.layout.scaleX0) || 0,
-      Number(state.layout.scaleX1) || 0
-    );
-    const scaleRight = Math.max(
-      Number(state.layout.scaleX0) || 0,
-      Number(state.layout.scaleX1) || 0
-    );
-    const edgePad = Math.max(1, Math.floor(fontPx * 0.08));
-
-    if (isStart && isEnd) {
-      return {
-        textAlign: "center",
-        drawX: Math.round(x),
-        left: x - width / 2,
-        right: x + width / 2
-      };
-    }
-    if (isStart) {
-      const drawX = Math.round(scaleLeft + edgePad);
-      return {
-        textAlign: "left",
-        drawX: drawX,
-        left: drawX,
-        right: drawX + width
-      };
-    }
-    if (isEnd) {
-      const drawX = Math.round(scaleRight - edgePad);
-      return {
-        textAlign: "right",
-        drawX: drawX,
-        left: drawX - width,
-        right: drawX
-      };
-    }
-    return {
-      textAlign: "center",
-      drawX: Math.round(x),
-      left: x - width / 2,
-      right: x + width / 2
-    };
-  }
-
-  function drawTickLabels(layerCtx, state, ticks, showEndLabels, math, labelFormatter) {
-    if (!math || !state || !state.labelFontPx || !ticks || !ticks.major || !ticks.major.length) {
-      return;
-    }
-    const fontPx = Math.max(1, Math.floor(state.labelFontPx));
-    layerCtx.font = state.labelWeight + " " + fontPx + "px " + state.family;
-    layerCtx.textAlign = "center";
-    layerCtx.textBaseline = "top";
-
-    const tickReach = Math.max(
-      Number(state.theme.linear.ticks.majorLen) || 0,
-      Number(state.theme.linear.ticks.minorLen) || 0
-    );
-    const labelInsetPx = Math.max(2, Math.floor(Number(state.labelInsetPx) || 2));
-    const trackBottomLimit = Math.round(state.layout.trackBox.y + state.layout.trackBox.h - fontPx - 1);
-    const inlineTopLimit = state.layout.inlineBox
-      ? Math.round(state.layout.inlineBox.y - fontPx - 2)
-      : trackBottomLimit;
-    const labelY = Math.min(
-      Math.round(state.layout.trackY + tickReach + labelInsetPx),
-      Math.min(trackBottomLimit, inlineTopLimit)
-    );
-    const minGap = Math.max(2, Math.floor(fontPx * 0.2));
-    let lastRight = -Infinity;
-
-    for (let i = 0; i < ticks.major.length; i++) {
-      const tickV = ticks.major[i];
-      const isStart = Math.abs(tickV - state.axis.min) <= 1e-6;
-      const isEnd = Math.abs(tickV - state.axis.max) <= 1e-6;
-      if (!showEndLabels && (isStart || isEnd)) {
-        continue;
-      }
-
-      const x = math.mapValueToX(
-        tickV,
-        state.axis.min,
-        state.axis.max,
-        state.layout.scaleX0,
-        state.layout.scaleX1,
-        true
-      );
-      if (!isFinite(x)) {
-        continue;
-      }
-
-      const labelRaw = (typeof labelFormatter === "function")
-        ? labelFormatter(tickV, state)
-        : math.formatTickLabel(tickV);
-      const label = String(labelRaw);
-      if (!label) {
-        continue;
-      }
-      const width = layerCtx.measureText(label).width;
-      const placement = resolveEdgePlacement(x, width, isStart, isEnd, state, fontPx);
-      if (placement.left <= lastRight + minGap) {
-        continue;
-      }
-      layerCtx.textAlign = placement.textAlign;
-      layerCtx.fillText(label, placement.drawX, labelY);
-      lastRight = placement.right;
-    }
-    layerCtx.textAlign = "center";
-  }
-
   function drawCaptionRow(state, textApi, caption, box, secScale, align) {
     if (!caption || !box || box.w <= 0 || box.h <= 0 || !textApi) {
       return;
@@ -315,7 +206,55 @@
     );
   }
 
-  function create() {
+  function create(def, Helpers) {
+    const labelFit = Helpers.getModule("LinearGaugeLabelFit").create(def, Helpers);
+
+    function drawTickLabels(layerCtx, state, ticks, showEndLabels, math, labelFormatter) {
+      if (!math || !state || !state.labelFontPx || !ticks || !ticks.major || !ticks.major.length) {
+        return;
+      }
+      const labels = labelFit.collectLabels(state, ticks, showEndLabels, math, labelFormatter);
+      if (!labels.length) {
+        return;
+      }
+      const fontPx = labelFit.resolveLabelFontPx(layerCtx, state, labels);
+      const labelY = labelFit.resolveLabelY(state, fontPx);
+      const sliding = labelFit.resolveLabelEdgePolicy(state) === "sliding";
+
+      labelFit.setCanvasFont(layerCtx, fontPx, state.labelWeight, state.family);
+      layerCtx.textAlign = "center";
+      layerCtx.textBaseline = "top";
+
+      if (sliding) {
+        const clipRect = labelFit.resolveLabelClipRect(state, labelY, fontPx);
+        layerCtx.save();
+        layerCtx.beginPath();
+        layerCtx.rect(clipRect.left, clipRect.top, clipRect.width, clipRect.height);
+        layerCtx.clip();
+      }
+
+      for (let i = 0; i < labels.length; i++) {
+        const entry = labels[i];
+        const width = layerCtx.measureText(entry.label).width;
+        const placement = labelFit.resolveLabelPlacement(
+          entry,
+          width,
+          entry.isStart,
+          entry.isEnd,
+          i === 0,
+          i === labels.length - 1,
+          state,
+          fontPx
+        );
+        layerCtx.textAlign = placement.textAlign;
+        layerCtx.fillText(entry.label, placement.drawX, labelY);
+      }
+      if (sliding) {
+        layerCtx.restore();
+      }
+      layerCtx.textAlign = "center";
+    }
+
     return {
       id: "LinearGaugeTextLayout",
       version: "0.2.0",

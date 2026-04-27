@@ -81,6 +81,7 @@ Common `spec` fields:
 - `ratioProps`: `{ normal, flat }` for config-owned editable threshold bindings
 - `hideTextualMetricsProp`: optional prop name for the graphics-only text toggle
 - `ratioDefaults`: optional `{ normal, flat }` engine-level safety fallback; config-backed plugin wrappers should omit it
+- `labelEdgePolicy`: optional `"inset" | "sliding"` label placement mode; compass wrappers use `"sliding"`
 - `tickSteps(range)`
 - `formatDisplay(raw, props, unit, Helpers) -> { num, text }`
 - `buildSectors(props, minV, maxV, axis, valueApi, theme) -> [{ from, to, color }]`
@@ -114,6 +115,7 @@ Hook `state` additions:
 Wrappers should consume these layout-owned state fields instead of recomputing compact geometry locally.
 `state.canvas` and `state.nowMs` let wrappers keep canvas-keyed spring motion aligned with the engine's per-frame timestamp.
 `WindLinearWidget` now reads `state.layout.dualRowGap`, uses `spec.layout` to remap `normal` / `high`, and consumes split-high `state.layout.textTopBox` / `state.layout.textBottomBox` for inline top and bottom metric rows while `LinearGaugeTextLayout` trusts the layout-owned `labelFontPx` without adding a second readable-floor policy.
+`LinearGaugeTextLayout` also resolves a shared fitted label font for the full major-label set, using the layout-owned `labelFontPx` as the ceiling and shrinking in compact graphics-only cases before drawing.
 When `hideTextualMetrics` is enabled, those Wind-specific text target boxes are null, so the custom angle/speed text disappears with the rest of the live metric text.
 
 ### Axis Profile Matrix
@@ -206,6 +208,8 @@ const renderCanvas = engine.createRenderer({
 - `disconnect === true` short-circuits normal drawing and renders the shared canvas state-screen (`GPS Lost`) on a cleared canvas.
 - Cache key excludes live values and includes geometry/theme/tick/sector signatures.
 - `showEndLabels` defaults to false unless mapper sets it true.
+- `drawTickLabels()` keeps the full major-label set visible after fitting, including graphics-only layouts that need a smaller shared font to stay inside the scale bounds.
+- `drawTickLabels()` uses the shared `labelEdgePolicy`: the default inset mode edge-protects static labels, while sliding mode keeps compass labels centered on their natural moving positions and clips the label row instead of pushing edge labels inward.
 - Compact tiles now get smaller insets/gaps from `LinearGaugeLayout`, slimmer default track/pointer/marker geometry, and larger fitted text ceilings via `state.textFillScale`.
 - Default row rendering still uses `display.rowBoxes.captionBox` / `valueBox` for stacked layouts and `state.layout.inlineBox` for inline layouts.
 - Split-high layouts expose `display.rowBoxes.top` and `display.rowBoxes.bottom`, each pre-split into caption/value boxes using the shared `captionUnitScale` logic.

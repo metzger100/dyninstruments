@@ -48,8 +48,11 @@ describe("config/components.js", function () {
     expect(components.LinearCanvasPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearCanvasPrimitives.js");
     expect(components.LinearGaugeMath.globalKey).toBe("DyniLinearGaugeMath");
     expect(components.LinearGaugeMath.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeMath.js");
+    expect(components.LinearGaugeLabelFit.globalKey).toBe("DyniLinearGaugeLabelFit");
+    expect(components.LinearGaugeLabelFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeLabelFit.js");
     expect(components.LinearGaugeTextLayout.globalKey).toBe("DyniLinearGaugeTextLayout");
     expect(components.LinearGaugeTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeTextLayout.js");
+    expect(components.LinearGaugeTextLayout.deps).toEqual(["LinearGaugeLabelFit"]);
     expect(components.LinearGaugeLayout.globalKey).toBe("DyniLinearGaugeLayout");
     expect(components.LinearGaugeLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeLayout.js");
     expect(components.LinearGaugeLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
@@ -84,12 +87,15 @@ describe("config/components.js", function () {
       "LinearGaugeMath",
       "LinearGaugeLayout",
       "LinearGaugeTextLayout",
+      "LinearGaugeEngineSupport",
       "SpringEasing",
       "StableDigits",
       "StateScreenLabels",
       "StateScreenPrecedence",
       "StateScreenCanvasOverlay"
     ]);
+    expect(components.LinearGaugeEngineSupport.globalKey).toBe("DyniLinearGaugeEngineSupport");
+    expect(components.LinearGaugeEngineSupport.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeEngineSupport.js");
     expect(components.ThemeModel.globalKey).toBe("DyniThemeModel");
     expect(components.ThemeModel.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemeModel.js");
     expect(components.ThemeModel.deps).toBeUndefined();

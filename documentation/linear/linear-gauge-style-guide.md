@@ -18,6 +18,7 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 - Compass linear (`hdtLinear`, `hdmLinear`) keeps the pointer fixed at center and scrolls the `0..360` scale under it.
 - Compass linear supports waypoint marker display (`markerCourse`) relative to current heading.
 - Compass linear uses `springTarget: "axis"` and `springWrap: 360` so the scale eases around a fixed center pointer on the shortest wrapped arc, and `compassLinearRange` selects a 360° or 180° visible window.
+- Compass linear sets `labelEdgePolicy: "sliding"` so tick labels behave like a moving tape: they stay centered on their natural positions, clip at the viewport, and do not force the row to shrink when edge labels drift in or out.
 - Wind linear (`angleTrueLinear`, `angleApparentLinear`) renders angle+speed together and supports mirrored layline sectors.
 - Wind linear overrides the generic `normal` / `high` text geometry: `normal` uses the stacked dual block below the gauge, and `high` uses inline top metric + middle gauge + inline bottom metric.
 - `hideTextualMetrics` is the public `Hide textual metrics` toggle, defaults to `false`, and applies to Speed, Depth, Temperature, Voltage, Compass, Wind, and Default linear gauges.
@@ -44,6 +45,8 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 - Pointer triangle uses `theme.linear.pointer.*` and `theme.colors.pointer`.
 - Waypoint/course markers use layout-based default sizing independent from rendered track thickness, end at the scale line, and render as flat rectangular bars instead of rounded caps.
 - Tick labels use `theme.linear.labels.insetFactor` and `theme.linear.labels.fontFactor`.
+- In graphics-only and compact linear layouts, major tick labels are dynamically fitted to the usable scale width before drawing, so narrow tall widgets shrink labels instead of clipping them.
+- Major labels are not removed just because they overlap at the base font size; the engine keeps drawing the full major-label set after fitting.
 - Caption/value rows use `captionUnitScale` in `high` and `flat`.
 
 ## Colors
