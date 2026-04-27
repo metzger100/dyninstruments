@@ -158,6 +158,7 @@ describe("CompassRadialWidget", function () {
     const textLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js");
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     const calls = {
       ring: [],
       ticks: [],
@@ -174,17 +175,17 @@ describe("CompassRadialWidget", function () {
       },
       radial: {
         ticks: {
-          majorLen: 11,
-          majorWidth: 3,
-          minorLen: 4,
-          minorWidth: 1.5
+          majorLenFactor: 0.08,
+          majorWidthFactor: 0.02,
+          minorLenFactor: 0.047,
+          minorWidthFactor: 0.01
         },
         pointer: {
-          widthFactor: 0.896,
-          lengthFactor: 1.6
+          depthFactor: 0.22,
+          sideFactor: 0.11
         },
         ring: {
-          arcLineWidth: 2.2,
+          arcLineWidthFactor: 0.013,
           widthFactor: 0.35
         },
         labels: {
@@ -192,6 +193,9 @@ describe("CompassRadialWidget", function () {
           fontFactor: 0.35
         }
       },
+      strokeWeight: 1,
+      pointerDepthWeight: 1,
+      pointerSideWeight: 1,
       font: {
         family: "sans-serif",
         weight: 705,
@@ -226,6 +230,7 @@ describe("CompassRadialWidget", function () {
           if (id === "CanvasLayerCache") return layerCache;
           if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
           if (id === "LayoutRectMath") return layoutRectMath;
+          if (id === "GeometryScale") return geometryScale;
           if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
           if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
           if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
@@ -317,6 +322,7 @@ describe("CompassRadialWidget", function () {
           getModule(id) {
             if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
             if (id === "LayoutRectMath") return layoutRectMath;
+            if (id === "GeometryScale") return geometryScale;
             throw new Error("unexpected layout module: " + id);
           }
         });
@@ -357,29 +363,21 @@ describe("CompassRadialWidget", function () {
     const layout = harness.computeLayout(480, 110);
 
     expect(harness.calls.pointer[0].fillStyle).toBe(harness.theme.colors.pointer);
-    expect(harness.calls.pointer[0].widthFactor).toBe(harness.theme.radial.pointer.widthFactor);
-    expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.radial.pointer.lengthFactor);
     expect(harness.calls.pointer[0].depth).toBe(layout.geom.fixedPointerDepth);
+    expect(harness.calls.pointer[0].halfWidth).toBe(Math.max(1, Math.floor(layout.geom.pointerSide / 2)));
     expect(harness.calls.rimMarker[0].opts).toEqual({
       len: layout.geom.markerLen,
       width: layout.geom.markerWidth,
       strokeStyle: harness.theme.colors.pointer
     });
-    expect(harness.calls.ring[0].lineWidth).toBe(harness.theme.radial.ring.arcLineWidth);
-    const expectedTickCap = Math.max(1, Math.floor(layout.labels.radiusOffset - 2));
+    expect(harness.calls.ring[0].lineWidth).toBe(layout.geom.arcLineWidth);
     expect(harness.calls.ticks[0].major).toEqual({
-      len: Math.min(
-        Math.max(1, Math.round(harness.theme.radial.ticks.majorLen * layout.compactGeometryScale)),
-        expectedTickCap
-      ),
-      width: harness.theme.radial.ticks.majorWidth
+      len: layout.geom.majorTickLen,
+      width: layout.geom.majorTickWidth
     });
     expect(harness.calls.ticks[0].minor).toEqual({
-      len: Math.min(
-        Math.max(1, Math.round(harness.theme.radial.ticks.minorLen * layout.compactGeometryScale)),
-        expectedTickCap
-      ),
-      width: harness.theme.radial.ticks.minorWidth
+      len: layout.geom.minorTickLen,
+      width: layout.geom.minorTickWidth
     });
   });
 
@@ -409,7 +407,7 @@ describe("CompassRadialWidget", function () {
     harness.spec.renderCanvas(canvasB, props);
     expect(harness.calls.ring).toHaveLength(2);
 
-    harness.theme.radial.ring.arcLineWidth = 3.2;
+    harness.theme.radial.ring.arcLineWidthFactor = 0.04;
     harness.spec.renderCanvas(canvasB, props);
     expect(harness.calls.ring).toHaveLength(3);
   });

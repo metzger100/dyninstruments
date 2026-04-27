@@ -48,10 +48,12 @@ describe("WindRadialWidget", function () {
     const fullCircleLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     return fullCircleLayout.create({}, {
       getModule(id) {
         if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
         if (id === "LayoutRectMath") return layoutRectMath;
+        if (id === "GeometryScale") return geometryScale;
         throw new Error("unexpected layout module: " + id);
       }
     });
@@ -78,6 +80,7 @@ describe("WindRadialWidget", function () {
     const textLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js");
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     const calls = {
       ring: 0,
       layline: 0,
@@ -98,17 +101,17 @@ describe("WindRadialWidget", function () {
       },
       radial: {
         ticks: {
-          majorLen: 12,
-          majorWidth: 3,
-          minorLen: 6,
-          minorWidth: 2
+          majorLenFactor: 0.08,
+          majorWidthFactor: 0.02,
+          minorLenFactor: 0.047,
+          minorWidthFactor: 0.01
         },
         pointer: {
-          widthFactor: 1.216,
-          lengthFactor: 1.9
+          depthFactor: 0.22,
+          sideFactor: 0.11
         },
         ring: {
-          arcLineWidth: 2,
+          arcLineWidthFactor: 0.013,
           widthFactor: 0.35
         },
         labels: {
@@ -116,6 +119,9 @@ describe("WindRadialWidget", function () {
           fontFactor: 0.35
         }
       },
+      strokeWeight: 1,
+      pointerDepthWeight: 1,
+      pointerSideWeight: 1,
       font: {
         family: "sans-serif",
         weight: 700,
@@ -153,6 +159,7 @@ describe("WindRadialWidget", function () {
           if (id === "CanvasLayerCache") return layerCache;
           if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
           if (id === "LayoutRectMath") return layoutRectMath;
+          if (id === "GeometryScale") return geometryScale;
           if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
           if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
           if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
@@ -254,6 +261,7 @@ describe("WindRadialWidget", function () {
     const textLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js");
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     const valueDrawCalls = [];
     const laylineCalls = [];
     const pointerCalls = [];
@@ -271,17 +279,17 @@ describe("WindRadialWidget", function () {
       },
       radial: {
         ticks: {
-          majorLen: 12,
-          majorWidth: 3,
-          minorLen: 6,
-          minorWidth: 2
+          majorLenFactor: 0.08,
+          majorWidthFactor: 0.02,
+          minorLenFactor: 0.047,
+          minorWidthFactor: 0.01
         },
         pointer: {
-          widthFactor: 1.216,
-          lengthFactor: 1.9
+          depthFactor: 0.22,
+          sideFactor: 0.11
         },
         ring: {
-          arcLineWidth: 2,
+          arcLineWidthFactor: 0.013,
           widthFactor: 0.35
         },
         labels: {
@@ -289,6 +297,9 @@ describe("WindRadialWidget", function () {
           fontFactor: 0.35
         }
       },
+      strokeWeight: 1,
+      pointerDepthWeight: 1,
+      pointerSideWeight: 1,
       font: {
         family: "sans-serif",
         weight: 720,
@@ -327,6 +338,7 @@ describe("WindRadialWidget", function () {
           if (id === "CanvasLayerCache") return layerCache;
           if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
           if (id === "LayoutRectMath") return layoutRectMath;
+          if (id === "GeometryScale") return geometryScale;
           if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
           if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
           if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
@@ -423,24 +435,16 @@ describe("WindRadialWidget", function () {
     expect(laylineCalls[0].thickness).toBe(layout.geom.ringW);
     expect(laylineCalls[1].thickness).toBe(layout.geom.ringW);
     expect(pointerCalls[0].fillStyle).toBe(themeDefaults.colors.pointer);
-    expect(pointerCalls[0].widthFactor).toBe(themeDefaults.radial.pointer.widthFactor);
-    expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.radial.pointer.lengthFactor);
-    expect(pointerCalls[0].depth).toBe(layout.geom.needleDepth);
-    expect(ringCalls[0].lineWidth).toBe(themeDefaults.radial.ring.arcLineWidth);
-    const expectedTickCap = Math.max(1, Math.floor(layout.labels.radiusOffset - 2));
+    expect(pointerCalls[0].depth).toBe(layout.geom.pointerDepth);
+    expect(pointerCalls[0].halfWidth).toBe(Math.max(1, Math.floor(layout.geom.pointerSide / 2)));
+    expect(ringCalls[0].lineWidth).toBe(layout.geom.arcLineWidth);
     expect(tickCalls[0].major).toEqual({
-      len: Math.min(
-        Math.max(1, Math.round(themeDefaults.radial.ticks.majorLen * layout.compactGeometryScale)),
-        expectedTickCap
-      ),
-      width: themeDefaults.radial.ticks.majorWidth
+      len: layout.geom.majorTickLen,
+      width: layout.geom.majorTickWidth
     });
     expect(tickCalls[0].minor).toEqual({
-      len: Math.min(
-        Math.max(1, Math.round(themeDefaults.radial.ticks.minorLen * layout.compactGeometryScale)),
-        expectedTickCap
-      ),
-      width: themeDefaults.radial.ticks.minorWidth
+      len: layout.geom.minorTickLen,
+      width: layout.geom.minorTickWidth
     });
     expect(labelCalls[0].radiusOffset).toBe(layout.labels.radiusOffset);
     expect(labelCalls[0].fontPx).toBe(layout.labels.fontPx);
@@ -469,6 +473,7 @@ describe("WindRadialWidget", function () {
     const textLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js");
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     const valueDrawCalls = [];
 
     const spec = loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js")
@@ -501,6 +506,7 @@ describe("WindRadialWidget", function () {
           if (id === "CanvasLayerCache") return layerCache;
           if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
           if (id === "LayoutRectMath") return layoutRectMath;
+          if (id === "GeometryScale") return geometryScale;
           if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
           if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
           if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
@@ -527,21 +533,21 @@ describe("WindRadialWidget", function () {
                       colors: {
                         pointer: "#ff2b2b",
                         laylineStb: "#82b683",
-                        laylinePort: "#ff7a76"
-                      },
-                      radial: {
-                        ticks: {
-                          majorLen: 12,
-                          majorWidth: 3,
-                          minorLen: 6,
-                          minorWidth: 2
+                      laylinePort: "#ff7a76"
+                    },
+                    radial: {
+                      ticks: {
+                          majorLenFactor: 0.08,
+                          majorWidthFactor: 0.02,
+                          minorLenFactor: 0.047,
+                          minorWidthFactor: 0.01
                         },
                         pointer: {
-                          widthFactor: 1.216,
-                          lengthFactor: 1.9
+                          depthFactor: 0.22,
+                          sideFactor: 0.11
                         },
                         ring: {
-                          arcLineWidth: 2,
+                          arcLineWidthFactor: 0.013,
                           widthFactor: 0.35
                         },
                         labels: {
@@ -549,6 +555,9 @@ describe("WindRadialWidget", function () {
                           fontFactor: 0.35
                         }
                       },
+                      strokeWeight: 1,
+                      pointerDepthWeight: 1,
+                      pointerSideWeight: 1,
                       font: {
                         family: "sans-serif",
                         weight: 700,
@@ -651,7 +660,7 @@ describe("WindRadialWidget", function () {
     harness.spec.renderCanvas(canvas, makeWindProps());
     expect(harness.calls.ring).toBe(1);
 
-    harness.theme.radial.ring.arcLineWidth = 3;
+    harness.theme.radial.ring.arcLineWidthFactor = 0.04;
     harness.spec.renderCanvas(canvas, makeWindProps());
     expect(harness.calls.ring).toBe(2);
 

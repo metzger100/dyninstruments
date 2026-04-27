@@ -8,6 +8,7 @@ describe("FullCircleRadialEngine", function () {
     const fullCircleLayoutMod = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
     const responsiveScaleProfileMod = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMathMod = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const geometryScaleMod = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     const calls = {
       ring: [],
       ticks: [],
@@ -27,17 +28,17 @@ describe("FullCircleRadialEngine", function () {
       },
       radial: {
         ticks: {
-          majorLen: 12,
-          majorWidth: 3,
-          minorLen: 5,
-          minorWidth: 1.5
+          majorLenFactor: 0.08,
+          majorWidthFactor: 0.02,
+          minorLenFactor: 0.047,
+          minorWidthFactor: 0.01
         },
         pointer: {
-          widthFactor: 1.216,
-          lengthFactor: 1.9
+          depthFactor: 0.22,
+          sideFactor: 0.11
         },
         ring: {
-          arcLineWidth: 2.4,
+          arcLineWidthFactor: 0.013,
           widthFactor: 0.35
         },
         labels: {
@@ -45,6 +46,9 @@ describe("FullCircleRadialEngine", function () {
           fontFactor: 0.35
         }
       },
+      strokeWeight: 1,
+      pointerDepthWeight: 1,
+      pointerSideWeight: 1,
       font: {
         family: "sans-serif",
         weight: 700,
@@ -55,6 +59,7 @@ describe("FullCircleRadialEngine", function () {
       getModule(id) {
         if (id === "ResponsiveScaleProfile") return responsiveScaleProfileMod;
         if (id === "LayoutRectMath") return layoutRectMathMod;
+        if (id === "GeometryScale") return geometryScaleMod;
         throw new Error("unexpected layout module: " + id);
       }
     });
@@ -93,6 +98,9 @@ describe("FullCircleRadialEngine", function () {
         }
         if (id === "LayoutRectMath") {
           return layoutRectMathMod;
+        }
+        if (id === "GeometryScale") {
+          return geometryScaleMod;
         }
         if (id !== "RadialToolkit") {
           throw new Error("unexpected module: " + id);
@@ -178,19 +186,18 @@ describe("FullCircleRadialEngine", function () {
       responsive: insets.responsive
     });
 
-    expect(harness.calls.ring[0].lineWidth).toBe(harness.theme.radial.ring.arcLineWidth);
+    expect(harness.calls.ring[0].lineWidth).toBe(layout.geom.arcLineWidth);
     expect(harness.calls.ticks[0].major).toEqual({
-      len: harness.theme.radial.ticks.majorLen,
-      width: harness.theme.radial.ticks.majorWidth
+      len: layout.geom.majorTickLen,
+      width: layout.geom.majorTickWidth
     });
     expect(harness.calls.ticks[0].minor).toEqual({
-      len: harness.theme.radial.ticks.minorLen,
-      width: harness.theme.radial.ticks.minorWidth
+      len: layout.geom.minorTickLen,
+      width: layout.geom.minorTickWidth
     });
     expect(harness.calls.pointer[0].fillStyle).toBe(harness.theme.colors.pointer);
-    expect(harness.calls.pointer[0].depth).toBe(layout.geom.needleDepth);
-    expect(harness.calls.pointer[0].widthFactor).toBe(harness.theme.radial.pointer.widthFactor);
-    expect(harness.calls.pointer[0].lengthFactor).toBe(harness.theme.radial.pointer.lengthFactor);
+    expect(harness.calls.pointer[0].depth).toBe(layout.geom.fixedPointerDepth);
+    expect(harness.calls.pointer[0].halfWidth).toBe(Math.max(1, Math.floor(layout.geom.pointerSide / 2)));
   });
 
   it("scales tick lengths with compact geometry and keeps the cache key aligned", function () {
@@ -214,21 +221,15 @@ describe("FullCircleRadialEngine", function () {
 
     renderer(createMockCanvas({ rectWidth: 120, rectHeight: 80, ctx: createMockContext2D() }), {});
 
-    const expectedMajorLen = Math.min(
-      Math.max(1, Math.round(harness.theme.radial.ticks.majorLen * capturedState.compactGeometryScale)),
-      Math.max(1, Math.floor(capturedState.labels.radiusOffset - 2))
-    );
-    const expectedMinorLen = Math.min(
-      Math.max(1, Math.round(harness.theme.radial.ticks.minorLen * capturedState.compactGeometryScale)),
-      Math.max(1, Math.floor(capturedState.labels.radiusOffset - 2))
-    );
+    const expectedMajorLen = capturedState.geom.majorTickLen;
+    const expectedMinorLen = capturedState.geom.minorTickLen;
 
     expect(harness.calls.ticks[0].major.len).toBe(expectedMajorLen);
     expect(harness.calls.ticks[0].minor.len).toBe(expectedMinorLen);
 
     const parsedStaticKey = JSON.parse(capturedState.staticKey);
-    expect(parsedStaticKey.engine.ticksMajorLen).toBe(expectedMajorLen);
-    expect(parsedStaticKey.engine.ticksMinorLen).toBe(expectedMinorLen);
+    expect(parsedStaticKey.engine.majorTickLen).toBe(expectedMajorLen);
+    expect(parsedStaticKey.engine.minorTickLen).toBe(expectedMinorLen);
   });
 
   it("matches callback-visible layout state with or without wrapper-owned ratioDefaults when config thresholds are present", function () {
@@ -243,7 +244,7 @@ describe("FullCircleRadialEngine", function () {
             labelFontPx: state.labels.fontPx,
             fixedPointerDepth: state.geom.fixedPointerDepth,
             textFillScale: state.textFillScale,
-            compactGeometryScale: state.compactGeometryScale
+            compactGeometryScale: state.layout.compactGeometryScale
           };
         }
       }, specOverrides || {}));
@@ -332,7 +333,7 @@ describe("FullCircleRadialEngine", function () {
           hasLayout: !!state.layout,
           hasResponsive: !!state.responsive,
           textFillScale: state.textFillScale,
-          compactGeometryScale: state.compactGeometryScale,
+          compactGeometryScale: state.layout.compactGeometryScale,
           labelRadiusOffset: state.labels.radiusOffset,
           labelFontPx: state.labels.fontPx,
           fixedPointerDepth: state.geom.fixedPointerDepth,

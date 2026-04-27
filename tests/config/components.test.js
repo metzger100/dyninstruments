@@ -61,7 +61,7 @@ describe("config/components.js", function () {
     expect(components.LinearGaugeLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
     expect(components.FullCircleRadialLayout.globalKey).toBe("DyniFullCircleRadialLayout");
     expect(components.FullCircleRadialLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialLayout.js");
-    expect(components.FullCircleRadialLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
+    expect(components.FullCircleRadialLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale"]);
     expect(components.FullCircleRadialEngine.globalKey).toBe("DyniFullCircleRadialEngine");
     expect(components.FullCircleRadialEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialEngine.js");
     expect(components.FullCircleRadialEngine.deps).toEqual([

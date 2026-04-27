@@ -36,7 +36,7 @@
       js: BASE + "shared/widget-kits/radial/FullCircleRadialLayout.js",
       css: undefined,
       globalKey: "DyniFullCircleRadialLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale"]
     },
     FullCircleRadialTextLayout: {
       js: BASE + "shared/widget-kits/radial/FullCircleRadialTextLayout.js",

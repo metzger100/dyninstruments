@@ -13,6 +13,7 @@ describe("FullCircleRadialLayout", function () {
 
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     return loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js").create({}, {
       getModule(id) {
         if (id === "ResponsiveScaleProfile") {
@@ -20,6 +21,9 @@ describe("FullCircleRadialLayout", function () {
         }
         if (id === "LayoutRectMath") {
           return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+        }
+        if (id === "GeometryScale") {
+          return geometryScale;
         }
         throw new Error("unexpected module: " + id);
       }

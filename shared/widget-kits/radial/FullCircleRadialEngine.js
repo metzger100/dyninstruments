@@ -25,25 +25,6 @@
     const n = Number(value);
     return isFinite(n) ? n : defaultValue;
   }
-  function resolveResponsiveTickLen(rawLen, state) {
-    const base = Number(rawLen);
-    if (!isFinite(base)) {
-      return 1;
-    }
-
-    const scale = Number(state.compactGeometryScale);
-    const responsiveScale = isFinite(scale) && scale > 0 ? scale : 1;
-    const scaled = Math.max(1, Math.round(base * responsiveScale));
-
-    const labelInset = Number(state.labels.radiusOffset);
-    if (!isFinite(labelInset) || labelInset <= 0) {
-      return scaled;
-    }
-
-    // Soft cap keeps inward ticks clear of the label lane on compact dials.
-    const cap = Math.max(1, Math.floor(labelInset - 2));
-    return Math.min(scaled, cap);
-  }
   function fullCircleNormalizeLayers(raw) {
     const source = Array.isArray(raw) ? raw : null;
     if (!source || !source.length) {
@@ -153,7 +134,6 @@
           layout: layout,
           responsive: layout.responsive,
           textFillScale: layout.textFillScale,
-          compactGeometryScale: layout.compactGeometryScale,
           geom: geom,
           labels: layout.labels,
           slots: slots,
@@ -177,15 +157,18 @@
             cy: geom.cy,
             rOuter: geom.rOuter,
             ringW: geom.ringW,
+            majorTickLen: geom.majorTickLen,
+            majorTickWidth: geom.majorTickWidth,
+            minorTickLen: geom.minorTickLen,
+            minorTickWidth: geom.minorTickWidth,
+            arcLineWidth: geom.arcLineWidth,
+            pointerDepth: geom.pointerDepth,
+            pointerSide: geom.pointerSide,
+            fixedPointerDepth: geom.fixedPointerDepth,
+            markerLen: geom.markerLen,
+            markerWidth: geom.markerWidth,
             labelInsetVal: layout.labels.radiusOffset,
             labelPx: layout.labels.fontPx,
-            ringLineWidth: theme.radial.ring.arcLineWidth,
-            ticksMajorLen: resolveResponsiveTickLen(theme.radial.ticks.majorLen, state),
-            ticksMajorWidth: theme.radial.ticks.majorWidth,
-            ticksMinorLen: resolveResponsiveTickLen(theme.radial.ticks.minorLen, state),
-            ticksMinorWidth: theme.radial.ticks.minorWidth,
-            pointerWidth: theme.radial.pointer.widthFactor,
-            pointerLength: theme.radial.pointer.lengthFactor,
             family: family,
             labelWeight: labelWeight,
             color: color
@@ -195,13 +178,10 @@
         state.staticKey = fullCircleKeyToText(staticKey);
 
         const api = {
-          drawFullCircleRing(targetCtx, opts) {
+          drawFullCircleRing(targetCtx) {
             const target = targetCtx || state.ctx;
-            const options = opts || {};
             draw.drawRing(target, state.geom.cx, state.geom.cy, state.geom.rOuter, {
-              lineWidth: value.isFiniteNumber(options.lineWidth)
-                ? options.lineWidth
-                : state.theme.radial.ring.arcLineWidth
+              lineWidth: state.geom.arcLineWidth
             });
           },
           drawFullCircleTicks(targetCtx, opts) {
@@ -215,30 +195,21 @@
               stepMinor: pickFinite(options.stepMinor, 10),
               includeEnd: !!options.includeEnd,
               major: {
-                len: resolveResponsiveTickLen(
-                  value.isFiniteNumber(options.majorLen) ? options.majorLen : state.theme.radial.ticks.majorLen,
-                  state
-                ),
-                width: value.isFiniteNumber(options.majorWidth) ? options.majorWidth : state.theme.radial.ticks.majorWidth
+                len: state.geom.majorTickLen,
+                width: state.geom.majorTickWidth
               },
               minor: {
-                len: resolveResponsiveTickLen(
-                  value.isFiniteNumber(options.minorLen) ? options.minorLen : state.theme.radial.ticks.minorLen,
-                  state
-                ),
-                width: value.isFiniteNumber(options.minorWidth) ? options.minorWidth : state.theme.radial.ticks.minorWidth
+                len: state.geom.minorTickLen,
+                width: state.geom.minorTickWidth
               }
             });
           },
           drawFixedPointer(targetCtx, angleDeg, opts) {
             const target = targetCtx || state.ctx;
-            const options = opts || {};
             draw.drawPointerAtRim(target, state.geom.cx, state.geom.cy, state.geom.rOuter, pickFinite(angleDeg, 0), {
-              depth: value.isFiniteNumber(options.depth) ? options.depth : state.geom.needleDepth,
-              fillStyle: options.fillStyle || state.theme.colors.pointer,
-              variant: options.variant || "long",
-              widthFactor: value.isFiniteNumber(options.widthFactor) ? options.widthFactor : state.theme.radial.pointer.widthFactor,
-              lengthFactor: value.isFiniteNumber(options.lengthFactor) ? options.lengthFactor : state.theme.radial.pointer.lengthFactor
+              depth: state.geom.fixedPointerDepth,
+              halfWidth: Math.max(1, Math.floor(state.geom.pointerSide / 2)),
+              fillStyle: (opts && opts.fillStyle) || state.theme.colors.pointer
             });
           },
           drawCachedLayer(layerName, opts) {

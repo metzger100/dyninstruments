@@ -138,7 +138,7 @@
         }
 
         api.drawCachedLayer("face", { rotationDeg: rotationDeg });
-        api.drawFixedPointer(state.ctx, 0, { depth: state.geom.fixedPointerDepth });
+        api.drawFixedPointer(state.ctx, 0);
 
         if (Number.isFinite(easedHeading) && Number.isFinite(easedMarker)) {
           state.draw.drawRimMarker(state.ctx, state.geom.cx, state.geom.cy, state.geom.rOuter, easedMarker - easedHeading, {

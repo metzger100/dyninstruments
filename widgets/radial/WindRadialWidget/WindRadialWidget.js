@@ -155,8 +155,10 @@
         const easedAngle = springMotion.resolve(state.canvas, display.angle, easingEnabled, Date.now());
         api.drawCachedLayer("back");
         if (state.value.isFiniteNumber(easedAngle)) {
-          api.drawFixedPointer(state.ctx, easedAngle, {
-            depth: state.geom.needleDepth
+          state.draw.drawPointerAtRim(state.ctx, state.geom.cx, state.geom.cy, state.geom.rOuter, easedAngle, {
+            depth: state.geom.pointerDepth,
+            halfWidth: Math.max(1, Math.floor(state.geom.pointerSide / 2)),
+            fillStyle: state.theme.colors.pointer
           });
         }
         api.drawCachedLayer("front");

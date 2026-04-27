@@ -1,7 +1,7 @@
 /**
  * Module: FullCircleRadialLayout - Responsive geometry owner for full-circle radial dials
  * Documentation: documentation/radial/full-circle-dial-engine.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, GeometryScale
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,7 +14,6 @@
   const STRUCTURAL_RATIO_THRESHOLD_FLAT = 2.0;
   const PAD_RATIO = 0.04;
   const GAP_RATIO = 0.03;
-  const POINTER_DEPTH_FACTOR = 0.11;
   const MARKER_LENGTH_FACTOR = 0.75;
   const MARKER_WIDTH_FACTOR = 0.20;
   const LABEL_SPRITE_RADIUS_FACTOR = 2.2;
@@ -45,28 +44,39 @@
     return Math.max(0.5, 1 - Math.max(0, textFillScale - 1));
   }
 
-  function computeModeGeometry(contentRect, pad, theme, compactGeometryScale) {
+  function computeModeGeometry(contentRect, theme, compactGeometryScale, gs) {
     const width = Math.max(1, contentRect.w);
     const height = Math.max(1, contentRect.h);
     const radial = theme && theme.radial ? theme.radial : {};
     const ring = radial.ring || {};
     const labels = radial.labels || {};
+    const ticks = radial.ticks || {};
+    const pointer = radial.pointer || {};
     const radius = Math.max(1, Math.floor(Math.min(width, height) / 2));
     const cx = contentRect.x + Math.floor(width / 2);
     const cy = contentRect.y + Math.floor(height / 2);
     const ringWidthFactor = clampNumber(ring.widthFactor, 0, Number.MAX_SAFE_INTEGER, 0.12);
-    const ringW = Math.max(1, Math.floor(radius * ringWidthFactor * compactGeometryScale));
+    const strokeWeight = clampNumber(theme && theme.strokeWeight, 0, Number.MAX_SAFE_INTEGER, 1);
+    const pointerDepthWeight = clampNumber(theme && theme.pointerDepthWeight, 0, Number.MAX_SAFE_INTEGER, 1);
+    const pointerSideWeight = clampNumber(theme && theme.pointerSideWeight, 0, Number.MAX_SAFE_INTEGER, 1);
+    const ringW = gs.scale(radius, ringWidthFactor);
+    const majorTickLen = gs.scale(radius, clampNumber(ticks.majorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.08));
+    const majorTickWidth = gs.scaleStroke(radius, clampNumber(ticks.majorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.02), strokeWeight);
+    const minorTickLen = gs.scale(radius, clampNumber(ticks.minorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.047));
+    const minorTickWidth = gs.scaleStroke(radius, clampNumber(ticks.minorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.01), strokeWeight);
+    const arcLineWidth = gs.scaleStroke(radius, clampNumber(ring.arcLineWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.013), strokeWeight);
+    const pointerDepth = gs.scalePointer(radius, clampNumber(pointer.depthFactor, 0, Number.MAX_SAFE_INTEGER, 0.22), pointerDepthWeight);
+    const pointerSide = gs.scalePointer(radius, clampNumber(pointer.sideFactor, 0, Number.MAX_SAFE_INTEGER, 0.11), pointerSideWeight);
     const labelInsetFactor = clampNumber(labels.insetFactor, 0, Number.MAX_SAFE_INTEGER, 1.8);
-    const labelRadiusOffset = Math.max(1, Math.floor(ringW * labelInsetFactor));
+    const labelRadiusOffset = Math.max(1, Math.floor(ringW * labelInsetFactor * compactGeometryScale));
     const labelFontFactor = clampNumber(labels.fontFactor, 0.18, Number.MAX_SAFE_INTEGER, 0.18);
     const labelFontPx = Math.max(1, Math.floor(radius * labelFontFactor * compactGeometryScale));
-    const pointerDepth = Math.max(1, Math.floor(radius * POINTER_DEPTH_FACTOR * compactGeometryScale));
     const fixedPointerDepth = Math.max(pointerDepth, Math.floor(ringW * 0.6));
-    const markerLen = Math.max(1, Math.floor(ringW * MARKER_LENGTH_FACTOR));
-    const markerWidth = Math.max(1, Math.floor(ringW * MARKER_WIDTH_FACTOR));
+    const markerLen = gs.scale(radius, MARKER_LENGTH_FACTOR * ringWidthFactor);
+    const markerWidth = gs.scalePointer(radius, MARKER_WIDTH_FACTOR * ringWidthFactor, pointerSideWeight);
     const leftStrip = Math.max(0, Math.floor((width - radius * 2) / 2));
     const topStrip = Math.max(0, Math.floor((height - radius * 2) / 2));
-    const labelRadius = Math.max(0, radius - Math.max(1, Math.floor(ringW * LABEL_SPRITE_RADIUS_FACTOR)));
+    const labelRadius = Math.max(0, radius - Math.max(1, Math.floor(ringW * LABEL_SPRITE_RADIUS_FACTOR * compactGeometryScale)));
 
     return {
       D: radius * 2,
@@ -75,7 +85,13 @@
       cy: cy,
       rOuter: radius,
       ringW: ringW,
-      needleDepth: pointerDepth,
+      majorTickLen: majorTickLen,
+      majorTickWidth: majorTickWidth,
+      minorTickLen: minorTickLen,
+      minorTickWidth: minorTickWidth,
+      arcLineWidth: arcLineWidth,
+      pointerDepth: pointerDepth,
+      pointerSide: pointerSide,
       fixedPointerDepth: fixedPointerDepth,
       markerLen: markerLen,
       markerWidth: markerWidth,
@@ -152,6 +168,7 @@
   function create(def, Helpers) {
     const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
     const rectApi = Helpers.getModule("LayoutRectMath").create(def, Helpers);
+    const gs = Helpers.getModule("GeometryScale").create(def, Helpers);
     makeRect = rectApi.makeRect;
 
     function computeMode(W, H, thresholdNormal, thresholdFlat) {
@@ -202,7 +219,7 @@
         Math.max(1, W - insets.pad * 2),
         Math.max(1, H - insets.pad * 2)
       );
-      const geom = computeModeGeometry(contentRect, insets.pad, cfg.theme, compactGeometryScale);
+      const geom = computeModeGeometry(contentRect, cfg.theme, compactGeometryScale, gs);
       const labels = {
         radiusOffset: geom.labelInsetVal,
         fontPx: geom.labelPx,
