@@ -88,7 +88,7 @@
       js: BASE + "shared/widget-kits/radial/SemicircleRadialLayout.js",
       css: undefined,
       globalKey: "DyniSemicircleRadialLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale"]
     },
     SemicircleRadialTextLayout: {
       js: BASE + "shared/widget-kits/radial/SemicircleRadialTextLayout.js",

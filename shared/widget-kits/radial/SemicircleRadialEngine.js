@@ -213,22 +213,21 @@
         }
 
         draw.drawArcRing(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, arc.startDeg, arc.endDeg, {
-          lineWidth: theme.radial.ring.arcLineWidth
+          lineWidth: layout.geom.arcLineWidth
         });
 
         if (value.isFiniteNumber(easedAngle)) {
           draw.drawPointerAtRim(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, easedAngle, {
-            depth: layout.geom.needleDepth,
+            depth: layout.geom.pointerDepth,
+            halfWidth: Math.max(1, Math.floor(layout.geom.pointerSide / 2)),
             fillStyle: theme.colors.pointer,
-            variant: "long",
-            widthFactor: theme.radial.pointer.widthFactor,
-            lengthFactor: theme.radial.pointer.lengthFactor
+            variant: "long"
           });
         }
 
         draw.drawTicksFromAngles(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, ticks, {
-          major: { len: theme.radial.ticks.majorLen, width: theme.radial.ticks.majorWidth },
-          minor: { len: theme.radial.ticks.minorLen, width: theme.radial.ticks.minorWidth }
+          major: { len: layout.geom.majorTickLen, width: layout.geom.majorTickWidth },
+          minor: { len: layout.geom.minorTickLen, width: layout.geom.minorTickWidth }
         });
 
         drawMajorValueLabels(

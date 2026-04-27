@@ -2,6 +2,8 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("SemicircleRadialEngine", function () {
+  const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
+
   function createValueMath() {
     const valueMod = loadFresh("shared/widget-kits/radial/RadialValueMath.js");
     const angleMod = loadFresh("shared/widget-kits/radial/RadialAngleMath.js");
@@ -22,6 +24,9 @@ describe("SemicircleRadialEngine", function () {
         }
         if (id === "LayoutRectMath") {
           return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+        }
+        if (id === "GeometryScale") {
+          return geometryScale;
         }
         throw new Error("unexpected module: " + id);
       }
@@ -48,6 +53,49 @@ describe("SemicircleRadialEngine", function () {
       },
       buildSectors() {
         return [];
+      }
+    };
+  }
+
+  function makeThemeDefaults(overrides) {
+    const extra = overrides || {};
+    const radial = extra.radial || {};
+    return {
+      surface: Object.assign({ fg: "#fff" }, extra.surface || {}),
+      colors: Object.assign({
+        pointer: "#ff2b2b",
+        warning: "#e7c66a",
+        alarm: "#ff7a76",
+        laylineStb: "#82b683",
+        laylinePort: "#ff7a76"
+      }, extra.colors || {}),
+      font: Object.assign({
+        family: "sans-serif",
+        weight: 710,
+        labelWeight: 680
+      }, extra.font || {}),
+      strokeWeight: extra.strokeWeight != null ? extra.strokeWeight : 1,
+      pointerDepthWeight: extra.pointerDepthWeight != null ? extra.pointerDepthWeight : 1,
+      pointerSideWeight: extra.pointerSideWeight != null ? extra.pointerSideWeight : 1,
+      radial: {
+        ticks: Object.assign({
+          majorLenFactor: 0.08,
+          majorWidthFactor: 0.02,
+          minorLenFactor: 0.047,
+          minorWidthFactor: 0.01
+        }, radial.ticks || {}),
+        pointer: Object.assign({
+          depthFactor: 0.22,
+          sideFactor: 0.11
+        }, radial.pointer || {}),
+        ring: Object.assign({
+          arcLineWidthFactor: 0.013,
+          widthFactor: 0.18
+        }, radial.ring || {}),
+        labels: Object.assign({
+          insetFactor: 2.2,
+          fontFactor: 0.2
+        }, radial.labels || {})
       }
     };
   }
@@ -127,43 +175,7 @@ describe("SemicircleRadialEngine", function () {
     const tickCalls = [];
     const labelCalls = [];
     const buildSectorsCalls = [];
-    const themeDefaults = {
-      surface: {
-        fg: "#fff"
-      },
-      colors: {
-        pointer: "#ff2b2b",
-        warning: "#e7c66a",
-        alarm: "#ff7a76",
-        laylineStb: "#82b683",
-        laylinePort: "#ff7a76"
-      },
-      radial: {
-        ticks: {
-          majorLen: 13,
-          majorWidth: 4,
-          minorLen: 7,
-          minorWidth: 2
-        },
-        pointer: {
-          widthFactor: 1.02,
-          lengthFactor: 1.7
-        },
-        ring: {
-          arcLineWidth: 2.5,
-          widthFactor: 0.18
-        },
-        labels: {
-          insetFactor: 2.2,
-          fontFactor: 0.2
-        }
-      },
-      font: {
-        family: "sans-serif",
-        weight: 710,
-        labelWeight: 680
-      }
-    };
+    const themeDefaults = makeThemeDefaults();
     const resolveTheme = vi.fn(function () {
       return themeDefaults;
     });
@@ -217,7 +229,8 @@ describe("SemicircleRadialEngine", function () {
         }
       },
       ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
-      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
+      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+      GeometryScale: geometryScale
     };
     const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
       .create({}, makeHelpers(modules))
@@ -249,43 +262,7 @@ describe("SemicircleRadialEngine", function () {
     const labelCalls = [];
     const arcRingCalls = [];
     const buildSectorsCalls = [];
-    const themeDefaults = {
-      surface: {
-        fg: "#fff"
-      },
-      colors: {
-        pointer: "#ff2b2b",
-        warning: "#e7c66a",
-        alarm: "#ff7a76",
-        laylineStb: "#82b683",
-        laylinePort: "#ff7a76"
-      },
-      radial: {
-        ticks: {
-          majorLen: 13,
-          majorWidth: 4,
-          minorLen: 7,
-          minorWidth: 2
-        },
-        pointer: {
-          widthFactor: 1.02,
-          lengthFactor: 1.7
-        },
-        ring: {
-          arcLineWidth: 2.5,
-          widthFactor: 0.18
-        },
-        labels: {
-          insetFactor: 2.2,
-          fontFactor: 0.2
-        }
-      },
-      font: {
-        family: "sans-serif",
-        weight: 710,
-        labelWeight: 680
-      }
-    };
+    const themeDefaults = makeThemeDefaults();
     const resolveTheme = vi.fn(function () {
       return themeDefaults;
     });
@@ -333,7 +310,8 @@ describe("SemicircleRadialEngine", function () {
         }
       },
       ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
-      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
+      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+      GeometryScale: geometryScale
     };
     const helpers = makeHelpers(modules);
     const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
@@ -373,16 +351,16 @@ describe("SemicircleRadialEngine", function () {
     expect(resolveTheme).toHaveBeenCalledWith(canvas);
     expect(buildSectorsCalls[0].theme).toBe(themeDefaults);
     expect(pointerCalls[0].fillStyle).toBe(themeDefaults.colors.pointer);
-    expect(pointerCalls[0].widthFactor).toBe(themeDefaults.radial.pointer.widthFactor);
-    expect(pointerCalls[0].lengthFactor).toBe(themeDefaults.radial.pointer.lengthFactor);
-    expect(arcRingCalls[0].lineWidth).toBe(themeDefaults.radial.ring.arcLineWidth);
+    expect(pointerCalls[0].depth).toBe(expectedLayout.geom.pointerDepth);
+    expect(pointerCalls[0].halfWidth).toBe(Math.max(1, Math.floor(expectedLayout.geom.pointerSide / 2)));
+    expect(arcRingCalls[0].lineWidth).toBe(expectedLayout.geom.arcLineWidth);
     expect(tickCalls[0].major).toEqual({
-      len: themeDefaults.radial.ticks.majorLen,
-      width: themeDefaults.radial.ticks.majorWidth
+      len: expectedLayout.geom.majorTickLen,
+      width: expectedLayout.geom.majorTickWidth
     });
     expect(tickCalls[0].minor).toEqual({
-      len: themeDefaults.radial.ticks.minorLen,
-      width: themeDefaults.radial.ticks.minorWidth
+      len: expectedLayout.geom.minorTickLen,
+      width: expectedLayout.geom.minorTickWidth
     });
     expect(labelCalls[0].radiusOffset).toBe(expectedLayout.labels.radiusOffset);
     expect(labelCalls[0].fontPx).toBe(expectedLayout.labels.fontPx);
@@ -471,39 +449,7 @@ describe("SemicircleRadialEngine", function () {
   it("matches callback-visible layout state with or without wrapper-owned ratioDefaults when config thresholds are present", function () {
     function captureState(specOverrides) {
       let capturedState = null;
-      const themeDefaults = {
-        colors: {
-          pointer: "#ff2b2b",
-          warning: "#e7c66a",
-          alarm: "#ff7a76",
-          laylineStb: "#82b683",
-          laylinePort: "#ff7a76"
-        },
-        radial: {
-          ticks: {
-            majorLen: 13,
-            majorWidth: 4,
-            minorLen: 7,
-            minorWidth: 2
-          },
-          pointer: {
-            widthFactor: 1.02,
-            lengthFactor: 1.7
-          },
-          ring: {
-            arcLineWidth: 2.5,
-            widthFactor: 0.18
-          },
-          labels: {
-            insetFactor: 2.2,
-            fontFactor: 0.2
-          }
-        },
-        font: {
-          weight: 710,
-          labelWeight: 680
-        }
-      };
+      const themeDefaults = makeThemeDefaults();
       const modules = {
         RadialToolkit: {
           create() {
@@ -539,7 +485,8 @@ describe("SemicircleRadialEngine", function () {
                   mode: state.layout.mode,
                   labelFontPx: state.layout.labels.fontPx,
                   ringW: state.geom.ringW,
-                  needleDepth: state.geom.needleDepth,
+                  pointerDepth: state.geom.pointerDepth,
+                  pointerSide: state.geom.pointerSide,
                   textFillScale: state.textFillScale
                 };
               }
@@ -547,7 +494,8 @@ describe("SemicircleRadialEngine", function () {
           }
         },
         ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
-        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+        GeometryScale: geometryScale
       };
       const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
         .create({}, makeHelpers(modules))
@@ -577,39 +525,7 @@ describe("SemicircleRadialEngine", function () {
     function captureState(includeRangeDefaults) {
       let capturedState = null;
       let capturedRange = null;
-      const themeDefaults = {
-        colors: {
-          pointer: "#ff2b2b",
-          warning: "#e7c66a",
-          alarm: "#ff7a76",
-          laylineStb: "#82b683",
-          laylinePort: "#ff7a76"
-        },
-        radial: {
-          ticks: {
-            majorLen: 13,
-            majorWidth: 4,
-            minorLen: 7,
-            minorWidth: 2
-          },
-          pointer: {
-            widthFactor: 1.02,
-            lengthFactor: 1.7
-          },
-          ring: {
-            arcLineWidth: 2.5,
-            widthFactor: 0.18
-          },
-          labels: {
-            insetFactor: 2.2,
-            fontFactor: 0.2
-          }
-        },
-        font: {
-          weight: 710,
-          labelWeight: 680
-        }
-      };
+      const themeDefaults = makeThemeDefaults();
       const modules = {
         RadialToolkit: {
           create() {
@@ -645,7 +561,8 @@ describe("SemicircleRadialEngine", function () {
                   mode: state.layout.mode,
                   labelFontPx: state.layout.labels.fontPx,
                   ringW: state.geom.ringW,
-                  needleDepth: state.geom.needleDepth,
+                  pointerDepth: state.geom.pointerDepth,
+                  pointerSide: state.geom.pointerSide,
                   textFillScale: state.textFillScale
                 };
               }
@@ -653,7 +570,8 @@ describe("SemicircleRadialEngine", function () {
           }
         },
         ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
-        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+        GeometryScale: geometryScale
       };
       const spec = makeBaseSpec();
       if (!includeRangeDefaults) {
@@ -698,39 +616,7 @@ describe("SemicircleRadialEngine", function () {
           return {
             theme: {
               resolveForRoot() {
-                return {
-                  colors: {
-                    pointer: "#ff2b2b",
-                    warning: "#e7c66a",
-                    alarm: "#ff7a76",
-                    laylineStb: "#82b683",
-                    laylinePort: "#ff7a76"
-                  },
-                  radial: {
-                    ticks: {
-                      majorLen: 13,
-                      majorWidth: 4,
-                      minorLen: 7,
-                      minorWidth: 2
-                    },
-                    pointer: {
-                      widthFactor: 1.02,
-                      lengthFactor: 1.7
-                    },
-                    ring: {
-                      arcLineWidth: 2.5,
-                      widthFactor: 0.18
-                    },
-                    labels: {
-                      insetFactor: 2.2,
-                      fontFactor: 0.2
-                    }
-                  },
-                  font: {
-                    weight: 710,
-                    labelWeight: 680
-                  }
-                };
+                return makeThemeDefaults();
               }
             },
             text: {
@@ -759,7 +645,8 @@ describe("SemicircleRadialEngine", function () {
         }
       },
       ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
-      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
+      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+      GeometryScale: geometryScale
     };
     const spec = makeBaseSpec();
     delete spec.rangeDefaults;
@@ -790,45 +677,15 @@ describe("SemicircleRadialEngine", function () {
     function renderPointer(ringWidthFactor) {
       const pointerCalls = [];
       const gaugeValueMath = createValueMath();
+      const themeDefaults = makeThemeDefaults();
+      themeDefaults.radial.ring.widthFactor = ringWidthFactor;
       const modules = {
         RadialToolkit: {
           create() {
             return {
               theme: {
                 resolveForRoot() {
-                  return {
-                    colors: {
-                      pointer: "#ff2b2b",
-                      warning: "#e7c66a",
-                      alarm: "#ff7a76",
-                      laylineStb: "#82b683",
-                      laylinePort: "#ff7a76"
-                    },
-                    radial: {
-                      ticks: {
-                        majorLen: 13,
-                        majorWidth: 4,
-                        minorLen: 7,
-                        minorWidth: 2
-                      },
-                      pointer: {
-                        widthFactor: 1.02,
-                        lengthFactor: 1.7
-                      },
-                      ring: {
-                        arcLineWidth: 2.5,
-                        widthFactor: ringWidthFactor
-                      },
-                      labels: {
-                        insetFactor: 2.2,
-                        fontFactor: 0.2
-                      }
-                    },
-                    font: {
-                      weight: 710,
-                      labelWeight: 680
-                    }
-                  };
+                  return themeDefaults;
                 }
               },
               text: {
@@ -859,7 +716,8 @@ describe("SemicircleRadialEngine", function () {
           }
         },
         ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
-        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+        GeometryScale: geometryScale
       };
       const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
         .create({}, makeHelpers(modules))
@@ -882,8 +740,8 @@ describe("SemicircleRadialEngine", function () {
     const thickPointer = renderPointer(0.24);
 
     expect(thinPointer.depth).toBe(thickPointer.depth);
-    expect(thinPointer.widthFactor).toBe(thickPointer.widthFactor);
-    expect(thinPointer.lengthFactor).toBe(thickPointer.lengthFactor);
+    expect(thinPointer.halfWidth).toBe(thickPointer.halfWidth);
+    expect(thinPointer.fillStyle).toBe(thickPointer.fillStyle);
   });
 
   it("delegates text rendering through SemicircleRadialTextLayout and preserves explicit falsy text props", function () {
@@ -902,7 +760,13 @@ describe("SemicircleRadialEngine", function () {
         cy: 60,
         rOuter: 50,
         ringW: 12,
-        needleDepth: 10
+        majorTickLen: 4,
+        majorTickWidth: 1,
+        minorTickLen: 2,
+        minorTickWidth: 1,
+        arcLineWidth: 1,
+        pointerDepth: 10,
+        pointerSide: 5
       },
       labels: {
         radiusOffset: 20,
@@ -918,35 +782,11 @@ describe("SemicircleRadialEngine", function () {
           return {
             theme: {
               resolveForRoot() {
-                return {
+                return makeThemeDefaults({
                   colors: {
                     pointer: "#ff2b2b"
-                  },
-                  radial: {
-                    ticks: {
-                      majorLen: 13,
-                      majorWidth: 4,
-                      minorLen: 7,
-                      minorWidth: 2
-                    },
-                    pointer: {
-                      widthFactor: 1.02,
-                      lengthFactor: 1.7
-                    },
-                    ring: {
-                      arcLineWidth: 2.5,
-                      widthFactor: 0.18
-                    },
-                    labels: {
-                      insetFactor: 2.2,
-                      fontFactor: 0.2
-                    }
-                  },
-                  font: {
-                    weight: 710,
-                    labelWeight: 680
                   }
-                };
+                });
               }
             },
             text: {
@@ -1030,16 +870,10 @@ describe("SemicircleRadialEngine", function () {
           return {
             theme: {
               resolveForRoot() {
-                return {
-                  surface: { fg: "#fff" },
+                return makeThemeDefaults({
                   colors: { pointer: "#ff2b2b" },
-                  radial: {
-                    ticks: { majorLen: 10, majorWidth: 2, minorLen: 5, minorWidth: 1 },
-                    pointer: { widthFactor: 1, lengthFactor: 1.4 },
-                    ring: { arcLineWidth: 2 }
-                  },
-                  font: { family: "sans-serif", weight: 700, labelWeight: 650 }
-                };
+                  font: { labelWeight: 650 }
+                });
               }
             },
             text: {},

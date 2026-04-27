@@ -1,7 +1,7 @@
 /**
  * Module: SemicircleRadialLayout - Responsive geometry owner for semicircle radial gauges
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, GeometryScale
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -40,36 +40,52 @@
     return Math.max(0.5, 1 - Math.max(0, textFillScale - 1));
   }
 
-  function computeGeometry(width, height, pad, ringWidthFactor) {
+  function computeGeometry(width, height, pad, theme, gs) {
     const availableWidth = Math.max(1, width - pad * 2);
     const availableHeight = Math.max(1, height - pad * 2);
-    // dyni-lint-disable-next-line responsive-layout-hard-floor -- minimum semicircle radius keeps geometry drawable on extremely small canvases
-    const radius = Math.max(14, Math.min(Math.floor(availableWidth * 0.5), Math.floor(availableHeight)));
-    const gaugeLeft = pad + Math.floor((availableWidth - radius * 2) * 0.5);
-    const gaugeTop = pad + Math.floor((availableHeight - radius) * 0.5);
-    const ringFactor = Number.isFinite(ringWidthFactor) ? ringWidthFactor : 0.12;
-    // dyni-lint-disable-next-line responsive-layout-hard-floor -- ring width needs a minimum stroke to remain drawable once radius collapses
-    const ringW = Math.max(6, Math.floor(radius * ringFactor));
-    // dyni-lint-disable-next-line responsive-layout-hard-floor -- pointer base depth needs a minimum shape for canvas viability
-    const needleDepth = Math.max(8, Math.floor(radius * 0.11));
+    const primaryDim = Math.max(1, Math.floor(Math.min(availableWidth * 0.5, availableHeight)));
+    const gaugeLeft = pad + Math.floor((availableWidth - primaryDim * 2) * 0.5);
+    const gaugeTop = pad + Math.floor((availableHeight - primaryDim) * 0.5);
+    const radialTheme = theme.radial;
+    const ringTheme = radialTheme.ring;
+    const ticksTheme = radialTheme.ticks;
+    const pointerTheme = radialTheme.pointer;
+    const strokeWeight = clampNumber(theme.strokeWeight, 0, Number.MAX_SAFE_INTEGER, 1);
+    const pointerDepthWeight = clampNumber(theme.pointerDepthWeight, 0, Number.MAX_SAFE_INTEGER, 1);
+    const pointerSideWeight = clampNumber(theme.pointerSideWeight, 0, Number.MAX_SAFE_INTEGER, 1);
+    const ringW = gs.scale(primaryDim, clampNumber(ringTheme.widthFactor, 0, Number.MAX_SAFE_INTEGER, 0.12));
+    const majorTickLen = gs.scale(primaryDim, clampNumber(ticksTheme.majorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.08));
+    const majorTickWidth = gs.scaleStroke(primaryDim, clampNumber(ticksTheme.majorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.02), strokeWeight);
+    const minorTickLen = gs.scale(primaryDim, clampNumber(ticksTheme.minorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.047));
+    const minorTickWidth = gs.scaleStroke(primaryDim, clampNumber(ticksTheme.minorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.01), strokeWeight);
+    const arcLineWidth = gs.scaleStroke(primaryDim, clampNumber(ringTheme.arcLineWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.013), strokeWeight);
+    const pointerDepth = gs.scalePointer(primaryDim, clampNumber(pointerTheme.depthFactor, 0, Number.MAX_SAFE_INTEGER, 0.22), pointerDepthWeight);
+    const pointerSide = gs.scalePointer(primaryDim, clampNumber(pointerTheme.sideFactor, 0, Number.MAX_SAFE_INTEGER, 0.11), pointerSideWeight);
 
     return {
       availW: availableWidth,
       availH: availableHeight,
-      R: radius,
+      R: primaryDim,
       gaugeLeft: gaugeLeft,
       gaugeTop: gaugeTop,
-      cx: gaugeLeft + radius,
-      cy: gaugeTop + radius,
-      rOuter: radius,
+      cx: gaugeLeft + primaryDim,
+      cy: gaugeTop + primaryDim,
+      rOuter: primaryDim,
       ringW: ringW,
-      needleDepth: needleDepth
+      majorTickLen: majorTickLen,
+      majorTickWidth: majorTickWidth,
+      minorTickLen: minorTickLen,
+      minorTickWidth: minorTickWidth,
+      arcLineWidth: arcLineWidth,
+      pointerDepth: pointerDepth,
+      pointerSide: pointerSide
     };
   }
 
   function create(def, Helpers) {
     const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
     const rectApi = Helpers.getModule("LayoutRectMath").create(def, Helpers);
+    const gs = Helpers.getModule("GeometryScale").create(def, Helpers);
     makeRect = rectApi.makeRect;
 
     function computeMode(W, H, thresholdNormal, thresholdFlat) {
@@ -113,10 +129,10 @@
       const responsive = cfg.responsive || insets.responsive || profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
       const textFillScale = resolveTextFillScale(responsive);
       const compactGeometryScale = resolveCompactGeometryScale(textFillScale);
-      const radialTheme = cfg.theme.radial;
-      const ringTheme = radialTheme.ring;
+      const theme = cfg.theme;
+      const radialTheme = theme.radial;
       const labelTheme = radialTheme.labels;
-      const geom = computeGeometry(W, H, insets.pad, Number(ringTheme.widthFactor));
+      const geom = computeGeometry(W, H, insets.pad, theme, gs);
       const labelInset = Math.max(1, Math.floor(geom.ringW * clampNumber(
         labelTheme.insetFactor,
         0,

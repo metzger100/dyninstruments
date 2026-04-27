@@ -3,13 +3,28 @@ const { loadFresh } = require("../../helpers/load-umd");
 describe("SemicircleRadialLayout", function () {
   const themeDefaults = {
     radial: {
-      ring: { widthFactor: 0.18 },
+      ticks: {
+        majorLenFactor: 0.08,
+        majorWidthFactor: 0.02,
+        minorLenFactor: 0.047,
+        minorWidthFactor: 0.01
+      },
+      pointer: {
+        depthFactor: 0.22,
+        sideFactor: 0.11
+      },
+      ring: { widthFactor: 0.18, arcLineWidthFactor: 0.013 },
       labels: {
         insetFactor: 2.2,
         fontFactor: 0.2
       }
-    }
+    },
+    strokeWeight: 1,
+    pointerDepthWeight: 1,
+    pointerSideWeight: 1
   };
+
+  const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
 
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
@@ -20,6 +35,9 @@ describe("SemicircleRadialLayout", function () {
         }
         if (id === "LayoutRectMath") {
           return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+        }
+        if (id === "GeometryScale") {
+          return geometryScale;
         }
         throw new Error("unexpected module: " + id);
       }
@@ -100,5 +118,21 @@ describe("SemicircleRadialLayout", function () {
     expect(compact.normal.rSafe).toBeGreaterThan(0);
     expect(compact.normal.yBottom).toBeGreaterThanOrEqual(compact.contentRect.y);
     expect(compact.normal.yBottom).toBeLessThanOrEqual(compact.contentRect.y + compact.contentRect.h);
+  });
+
+  it("scales semicircle graphical geometry through GeometryScale and exposes the precomputed dimensions", function () {
+    const layout = createLayout();
+    const gs = geometryScale.create();
+    const snapshot = buildSnapshot(layout, 300, 180, "normal").out;
+    const geom = snapshot.geom;
+
+    expect(geom.majorTickLen).toBe(gs.scale(geom.R, themeDefaults.radial.ticks.majorLenFactor));
+    expect(geom.majorTickWidth).toBe(gs.scaleStroke(geom.R, themeDefaults.radial.ticks.majorWidthFactor, themeDefaults.strokeWeight));
+    expect(geom.minorTickLen).toBe(gs.scale(geom.R, themeDefaults.radial.ticks.minorLenFactor));
+    expect(geom.minorTickWidth).toBe(gs.scaleStroke(geom.R, themeDefaults.radial.ticks.minorWidthFactor, themeDefaults.strokeWeight));
+    expect(geom.arcLineWidth).toBe(gs.scaleStroke(geom.R, themeDefaults.radial.ring.arcLineWidthFactor, themeDefaults.strokeWeight));
+    expect(geom.pointerDepth).toBe(gs.scalePointer(geom.R, themeDefaults.radial.pointer.depthFactor, themeDefaults.pointerDepthWeight));
+    expect(geom.pointerSide).toBe(gs.scalePointer(geom.R, themeDefaults.radial.pointer.sideFactor, themeDefaults.pointerSideWeight));
+    expect(geom).not.toHaveProperty("needleDepth");
   });
 });

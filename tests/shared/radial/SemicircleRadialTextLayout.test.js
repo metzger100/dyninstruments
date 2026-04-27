@@ -4,17 +4,32 @@ const { createMockContext2D } = require("../../helpers/mock-canvas");
 describe("SemicircleRadialTextLayout", function () {
   const themeDefaults = {
     radial: {
-      ring: { widthFactor: 0.18 },
+      ticks: {
+        majorLenFactor: 0.08,
+        majorWidthFactor: 0.02,
+        minorLenFactor: 0.047,
+        minorWidthFactor: 0.01
+      },
+      pointer: {
+        depthFactor: 0.22,
+        sideFactor: 0.11
+      },
+      ring: { widthFactor: 0.18, arcLineWidthFactor: 0.013 },
       labels: {
         insetFactor: 2.2,
         fontFactor: 0.2
       }
     },
+    strokeWeight: 1,
+    pointerDepthWeight: 1,
+    pointerSideWeight: 1,
     font: {
       weight: 710,
       labelWeight: 680
     }
   };
+
+  const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
 
   function createLayoutApi() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
@@ -25,6 +40,9 @@ describe("SemicircleRadialTextLayout", function () {
         }
         if (id === "LayoutRectMath") {
           return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+        }
+        if (id === "GeometryScale") {
+          return geometryScale;
         }
         throw new Error("unexpected module: " + id);
       }

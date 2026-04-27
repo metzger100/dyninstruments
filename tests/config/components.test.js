@@ -77,7 +77,7 @@ describe("config/components.js", function () {
     expect(components.FullCircleRadialTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialTextLayout.js");
     expect(components.SemicircleRadialLayout.globalKey).toBe("DyniSemicircleRadialLayout");
     expect(components.SemicircleRadialLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/SemicircleRadialLayout.js");
-    expect(components.SemicircleRadialLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
+    expect(components.SemicircleRadialLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale"]);
     expect(components.SemicircleRadialTextLayout.globalKey).toBe("DyniSemicircleRadialTextLayout");
     expect(components.SemicircleRadialTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/SemicircleRadialTextLayout.js");
     expect(components.SemicircleRadialTextLayout.deps).toBeUndefined();
