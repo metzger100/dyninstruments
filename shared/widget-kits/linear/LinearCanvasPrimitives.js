@@ -97,8 +97,8 @@
 
   function drawPointer(ctx, x, y, opts) {
     const p = opts || {};
-    const depth = Math.max(4, Math.floor(Number(p.depth) || 8));
-    const side = Math.max(4, Math.floor(Number(p.side) || 5));
+    const depth = Math.max(1, Math.floor(Number(p.depth) || 8));
+    const side = Math.max(1, Math.floor(Number(p.side) || 5));
     ctx.save();
     applyStyle(ctx, {
       fillStyle: p.fillStyle || p.color,
