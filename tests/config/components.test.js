@@ -44,6 +44,7 @@ describe("config/components.js", function () {
     expect(components.CanvasLayerCache.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/canvas/CanvasLayerCache.js");
     expect(components.XteHighwayPrimitives.globalKey).toBe("DyniXteHighwayPrimitives");
     expect(components.XteHighwayPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/xte/XteHighwayPrimitives.js");
+    expect(components.XteHighwayPrimitives.deps).toEqual(["GeometryScale"]);
     expect(components.LinearCanvasPrimitives.globalKey).toBe("DyniLinearCanvasPrimitives");
     expect(components.LinearCanvasPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearCanvasPrimitives.js");
     expect(components.LinearGaugeEngineDrawing.globalKey).toBe("DyniLinearGaugeEngineDrawing");

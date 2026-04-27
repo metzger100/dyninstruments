@@ -33,21 +33,34 @@ describe("XteDisplayWidget", function () {
         family: "sans-serif",
         weight: 720,
         labelWeight: 640
-      }
+      },
+      strokeWeight: 1,
+      pointerDepthWeight: 1
     };
     const themeOverrides = opts.theme || {};
     const theme = {
       surface: Object.assign({}, defaultTheme.surface, themeOverrides.surface || {}),
       colors: Object.assign({}, defaultTheme.colors, themeOverrides.colors || {}),
-      font: Object.assign({}, defaultTheme.font, themeOverrides.font || {})
+      font: Object.assign({}, defaultTheme.font, themeOverrides.font || {}),
+      strokeWeight: Object.prototype.hasOwnProperty.call(themeOverrides, "strokeWeight")
+        ? themeOverrides.strokeWeight
+        : defaultTheme.strokeWeight,
+      pointerDepthWeight: Object.prototype.hasOwnProperty.call(themeOverrides, "pointerDepthWeight")
+        ? themeOverrides.pointerDepthWeight
+        : defaultTheme.pointerDepthWeight
     };
-    if (themeOverrides.xte) {
-      theme.xte = Object.assign({}, themeOverrides.xte);
-    }
 
     const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-    const realPrimitives = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js").create();
+    const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
+    const realPrimitives = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js").create({}, {
+      getModule(id) {
+        if (id === "GeometryScale") {
+          return geometryScale;
+        }
+        throw new Error("Unexpected primitive dependency: " + id);
+      }
+    });
     const realLayout = loadFresh("shared/widget-kits/xte/XteHighwayLayout.js").create({}, {
       getModule(id) {
         if (id === "ResponsiveScaleProfile") {
@@ -162,11 +175,11 @@ describe("XteDisplayWidget", function () {
             create() {
               return {
                 highwayGeometry: realPrimitives.highwayGeometry,
-                drawStaticHighway(ctx, geom, colors, mode, style) {
-                  calls.staticDraws.push({ colors, mode, geom, style });
+                drawStaticHighway(ctx, geom, colors, mode, primaryDim, strokeWeight) {
+                  calls.staticDraws.push({ colors, mode, geom, primaryDim, strokeWeight });
                 },
-                drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, style) {
-                  calls.dynamicDraws.push({ colors, xteNormalized, overflow, geom, style });
+                drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, primaryDim, strokeWeight, pointerDepthWeight) {
+                  calls.dynamicDraws.push({ colors, xteNormalized, overflow, geom, primaryDim, strokeWeight, pointerDepthWeight });
                 },
                 shouldShowWaypoint(mode, layout, showWpName, name, fit) {
                   const result = realPrimitives.shouldShowWaypoint(mode, layout, showWpName, name, fit);
@@ -327,30 +340,32 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.modeHistory[2]).toBe("high");
   });
 
-  it("uses theme token colors in static and dynamic highway calls", function () {
+  it("passes shared theme weights and colors into static and dynamic highway calls", function () {
     const harness = createHarness();
     const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
 
     harness.spec.renderCanvas(canvas, makeProps());
+    const layout = harness.calls.layoutHistory[0];
+    const expectedPrimaryDim = Math.max(1, Math.min(layout.highway.w, layout.highway.h));
 
     expect(harness.calls.staticDraws[0].colors.pointer).toBe(harness.theme.colors.pointer);
     expect(harness.calls.staticDraws[0].colors.alarm).toBe(harness.theme.colors.alarm);
     expect(harness.calls.staticDraws[0].colors.roadLine).toBe("#ffffff");
     expect(harness.calls.staticDraws[0].colors.stripeLine).toBe("#ffffff");
-    expect(harness.calls.staticDraws[0].style.lineWidthFactor).toBe(1);
+    expect(harness.calls.staticDraws[0].primaryDim).toBe(expectedPrimaryDim);
+    expect(harness.calls.staticDraws[0].strokeWeight).toBe(1);
     expect(harness.calls.dynamicDraws[0].colors.pointer).toBe(harness.theme.colors.pointer);
     expect(harness.calls.dynamicDraws[0].colors.alarm).toBe(harness.theme.colors.alarm);
-    expect(harness.calls.dynamicDraws[0].style.lineWidthFactor).toBe(1);
-    expect(harness.calls.dynamicDraws[0].style.boatSizeFactor).toBe(1);
+    expect(harness.calls.dynamicDraws[0].primaryDim).toBe(expectedPrimaryDim);
+    expect(harness.calls.dynamicDraws[0].strokeWeight).toBe(1);
+    expect(harness.calls.dynamicDraws[0].pointerDepthWeight).toBe(1);
   });
 
-  it("applies xte line-width override while keeping shared theme colors", function () {
+  it("applies shared stroke and pointer weights while keeping theme colors", function () {
     const harness = createHarness({
       theme: {
-        xte: {
-          lineWidthFactor: 1.7,
-          boatSizeFactor: 1.35
-        }
+        strokeWeight: 1.7,
+        pointerDepthWeight: 1.35
       }
     });
     const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
@@ -360,17 +375,16 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.staticDraws[0].colors.pointer).toBe(harness.theme.colors.pointer);
     expect(harness.calls.staticDraws[0].colors.roadLine).toBe("#ffffff");
     expect(harness.calls.staticDraws[0].colors.stripeLine).toBe("#ffffff");
-    expect(harness.calls.dynamicDraws[0].style.lineWidthFactor).toBe(1.7);
-    expect(harness.calls.dynamicDraws[0].style.boatSizeFactor).toBe(1.35);
+    expect(harness.calls.staticDraws[0].strokeWeight).toBe(1.7);
+    expect(harness.calls.dynamicDraws[0].strokeWeight).toBe(1.7);
+    expect(harness.calls.dynamicDraws[0].pointerDepthWeight).toBe(1.35);
   });
 
-  it("falls back to default xte style factors when xte theme values are invalid", function () {
+  it("forwards invalid shared weights directly to primitives", function () {
     const harness = createHarness({
       theme: {
-        xte: {
-          lineWidthFactor: 0,
-          boatSizeFactor: -2
-        }
+        strokeWeight: 0,
+        pointerDepthWeight: -2
       }
     });
     const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
@@ -380,8 +394,9 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.staticDraws[0].colors.pointer).toBe(harness.theme.colors.pointer);
     expect(harness.calls.staticDraws[0].colors.roadLine).toBe("#ffffff");
     expect(harness.calls.staticDraws[0].colors.stripeLine).toBe("#ffffff");
-    expect(harness.calls.dynamicDraws[0].style.lineWidthFactor).toBe(1);
-    expect(harness.calls.dynamicDraws[0].style.boatSizeFactor).toBe(1);
+    expect(harness.calls.staticDraws[0].strokeWeight).toBe(0);
+    expect(harness.calls.dynamicDraws[0].strokeWeight).toBe(0);
+    expect(harness.calls.dynamicDraws[0].pointerDepthWeight).toBe(-2);
   });
 
   it("hides waypoint name before core metrics in constrained layouts", function () {
@@ -499,12 +514,10 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.staticDraws).toHaveLength(2);
   });
 
-  it("invalidates static cache when xte style tokens change", function () {
+  it("invalidates static cache when strokeWeight changes", function () {
     const harness = createHarness({
       theme: {
-        xte: {
-          lineWidthFactor: 1
-        }
+        strokeWeight: 1
       }
     });
     const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
@@ -512,31 +525,29 @@ describe("XteDisplayWidget", function () {
     harness.spec.renderCanvas(canvas, makeProps());
     expect(harness.calls.staticDraws).toHaveLength(1);
 
-    harness.theme.xte.lineWidthFactor = 1.8;
+    harness.theme.strokeWeight = 1.8;
     harness.spec.renderCanvas(canvas, makeProps());
     expect(harness.calls.staticDraws).toHaveLength(2);
   });
 
-  it("keeps the static cache when only xte boat size changes", function () {
+  it("keeps the static cache when only pointerDepthWeight changes", function () {
     const harness = createHarness({
       theme: {
-        xte: {
-          boatSizeFactor: 1
-        }
+        pointerDepthWeight: 1
       }
     });
     const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
 
     harness.spec.renderCanvas(canvas, makeProps());
     expect(harness.calls.staticDraws).toHaveLength(1);
-    expect(harness.calls.dynamicDraws[0].style.boatSizeFactor).toBe(1);
+    expect(harness.calls.dynamicDraws[0].pointerDepthWeight).toBe(1);
 
-    harness.theme.xte.boatSizeFactor = 1.6;
+    harness.theme.pointerDepthWeight = 1.6;
     harness.spec.renderCanvas(canvas, makeProps());
 
     expect(harness.calls.staticDraws).toHaveLength(1);
     expect(harness.calls.dynamicDraws).toHaveLength(2);
-    expect(harness.calls.dynamicDraws[1].style.boatSizeFactor).toBe(1.6);
+    expect(harness.calls.dynamicDraws[1].pointerDepthWeight).toBe(1.6);
   });
 
   it("keeps the static cache when only dynamic pointer/alarm colors change", function () {

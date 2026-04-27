@@ -3,8 +3,16 @@ const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("XteHighwayPrimitives", function () {
   function create() {
+    const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     const mod = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js");
-    return mod.create();
+    return mod.create({}, {
+      getModule(id) {
+        if (id === "GeometryScale") {
+          return geometryScale;
+        }
+        throw new Error("Unexpected dependency: " + id);
+      }
+    });
   }
 
   function extractBoatPoints(ctx) {
@@ -47,6 +55,18 @@ describe("XteHighwayPrimitives", function () {
     return { ctx, widths };
   }
 
+  it("stores the provided primary dimension in highway geometry", function () {
+    const draw = create();
+    const geom = draw.highwayGeometry({
+      x: 0,
+      y: 0,
+      w: 280,
+      h: 170
+    }, "normal", 170);
+
+    expect(geom.primaryDim).toBe(170);
+  });
+
   it("draws boat marker as multi-point hull instead of triangle", function () {
     const draw = create();
     const ctx = createMockContext2D();
@@ -59,7 +79,7 @@ describe("XteHighwayPrimitives", function () {
     }, {
       pointer: "#f00",
       alarm: "#f00"
-    }, 0.2, false);
+    }, 0.2, false, 120, 1, 1);
 
     const points = extractBoatPoints(ctx);
     const lineSegments = points.length - 1;
@@ -77,14 +97,14 @@ describe("XteHighwayPrimitives", function () {
       horizonY: 40,
       baseY: 120,
       nearHalf: 40
-    }, colors, 1.2, true);
+    }, colors, 1.2, true, 40, 1, 1);
 
     draw.drawDynamicHighway(largeCtx, {
       cx: 220,
       horizonY: 40,
       baseY: 230,
       nearHalf: 140
-    }, colors, 1.2, true);
+    }, colors, 1.2, true, 140, 1, 1);
 
     const smallBoat = extractBoatPoints(smallCtx);
     const largeBoat = extractBoatPoints(largeCtx);
@@ -96,7 +116,7 @@ describe("XteHighwayPrimitives", function () {
     expect(largeArc.args[2]).toBeGreaterThan(smallArc.args[2]);
   });
 
-  it("scales the boat marker with configured boatSizeFactor", function () {
+  it("scales the boat marker with configured pointerDepthWeight", function () {
     const draw = create();
     const colors = { pointer: "#f00", alarm: "#f00" };
     const baseCtx = createMockContext2D();
@@ -108,8 +128,8 @@ describe("XteHighwayPrimitives", function () {
       nearHalf: 120
     };
 
-    draw.drawDynamicHighway(baseCtx, geom, colors, 0.2, false, { boatSizeFactor: 1 });
-    draw.drawDynamicHighway(scaledCtx, geom, colors, 0.2, false, { boatSizeFactor: 1.5 });
+    draw.drawDynamicHighway(baseCtx, geom, colors, 0.2, false, 120, 1, 1);
+    draw.drawDynamicHighway(scaledCtx, geom, colors, 0.2, false, 120, 1, 1.5);
 
     const baseBoat = extractBoatPoints(baseCtx);
     const scaledBoat = extractBoatPoints(scaledCtx);
@@ -131,7 +151,7 @@ describe("XteHighwayPrimitives", function () {
     }, {
       roadLine: "#fff",
       stripeLine: "#ccc"
-    }, "normal", { lineWidthFactor: 1 });
+    }, "normal", 120, 1);
 
     const fillCalls = ctx.calls.filter(function (call) { return call.name === "fill"; });
     const strokeCalls = ctx.calls.filter(function (call) { return call.name === "stroke"; });
@@ -142,7 +162,7 @@ describe("XteHighwayPrimitives", function () {
     expect(ctx.lineJoin).toBe("miter");
   });
 
-  it("scales static and dynamic line widths with configured lineWidthFactor", function () {
+  it("scales static and dynamic line widths with configured strokeWeight", function () {
     const draw = create();
     const geom = { cx: 150, horizonY: 40, baseY: 170, nearHalf: 120, farHalf: 30 };
     const colors = {
@@ -154,13 +174,13 @@ describe("XteHighwayPrimitives", function () {
 
     const staticBase = createLineWidthTrackerContext();
     const staticScaled = createLineWidthTrackerContext();
-    draw.drawStaticHighway(staticBase.ctx, geom, colors, "normal", { lineWidthFactor: 1 });
-    draw.drawStaticHighway(staticScaled.ctx, geom, colors, "normal", { lineWidthFactor: 2 });
+    draw.drawStaticHighway(staticBase.ctx, geom, colors, "normal", 120, 1);
+    draw.drawStaticHighway(staticScaled.ctx, geom, colors, "normal", 120, 2);
 
     const dynamicBase = createLineWidthTrackerContext();
     const dynamicScaled = createLineWidthTrackerContext();
-    draw.drawDynamicHighway(dynamicBase.ctx, geom, colors, 0.1, false, { lineWidthFactor: 1 });
-    draw.drawDynamicHighway(dynamicScaled.ctx, geom, colors, 0.1, false, { lineWidthFactor: 2 });
+    draw.drawDynamicHighway(dynamicBase.ctx, geom, colors, 0.1, false, 120, 1, 1);
+    draw.drawDynamicHighway(dynamicScaled.ctx, geom, colors, 0.1, false, 120, 2, 1);
 
     expect(Math.max.apply(null, staticScaled.widths)).toBeGreaterThan(Math.max.apply(null, staticBase.widths));
     expect(Math.max.apply(null, dynamicScaled.widths)).toBeGreaterThan(Math.max.apply(null, dynamicBase.widths));

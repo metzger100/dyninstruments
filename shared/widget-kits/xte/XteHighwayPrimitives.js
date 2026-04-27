@@ -1,7 +1,7 @@
 /**
  * Module: XteHighwayPrimitives - Shared geometry and drawing helpers for XTE highway visuals
  * Documentation: documentation/widgets/xte-display.md
- * Depends: CanvasRenderingContext2D
+ * Depends: CanvasRenderingContext2D, GeometryScale
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -9,9 +9,18 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniXteHighwayPrimitives = factory(); }
 }(this, function () {
   "use strict";
-  const DEFAULT_STYLE = { lineWidthFactor: 1, boatSizeFactor: 1 };
+  const RAIL_WIDTH_FACTOR = 0.013;
+  const CROSSBAR_WIDTH_FACTOR = 0.010;
+  const SEAM_WIDTH_FACTOR = 0.007;
+  const HORIZON_WIDTH_FACTOR = 0.012;
+  const CENTERLINE_WIDTH_FACTOR = 0.017;
+  const BOAT_LENGTH_FACTOR = 0.078;
+  const BOAT_BEAM_RATIO = 0.62;
+  const BOAT_LANE_DEPTH_LIMIT = 0.24;
 
-  function create() {
+  function create(def, Helpers) {
+    const gs = Helpers.getModule("GeometryScale").create(def, Helpers);
+
     function clamp(value, lo, hi) {
       return Math.max(lo, Math.min(hi, value));
     }
@@ -25,7 +34,7 @@
       return Math.round(value) + (width % 2 ? 0.5 : 0);
     }
 
-    function highwayGeometry(rect, mode, options) {
+    function highwayGeometry(rect, mode, primaryDim, options) {
       const opts = options || {};
       const cx = rect.x + rect.w * 0.5;
       let topFactor = mode === "high" ? 0.18 : 0.3;
@@ -47,20 +56,9 @@
         horizonY: horizonY,
         baseY: baseY,
         nearHalf: nearHalf,
-        farHalf: farHalf
+        farHalf: farHalf,
+        primaryDim: Math.max(1, Math.floor(Number(primaryDim) || 0))
       };
-    }
-
-    function resolveLineWidthFactor(style) {
-      const source = style || DEFAULT_STYLE;
-      const factor = source.lineWidthFactor;
-      return factor > 0 ? factor : 1;
-    }
-
-    function resolveBoatSizeFactor(style) {
-      const source = style || DEFAULT_STYLE;
-      const factor = source.boatSizeFactor;
-      return factor > 0 ? factor : 1;
     }
 
     function strokeSegment(ctx, x1, y1, x2, y2, lineWidth) {
@@ -75,18 +73,19 @@
       strokeSegment(ctx, cx - half, y, cx + half, y, lineWidth);
     }
 
-    function drawStaticHighway(ctx, geom, colors, mode, style) {
+    function drawStaticHighway(ctx, geom, colors, mode, primaryDim, strokeWeight) {
       const cx = geom.cx;
       const horizonY = geom.horizonY;
       const baseY = geom.baseY;
       const nearHalf = geom.nearHalf;
       const farHalf = geom.farHalf;
+      const pd = Math.max(1, Math.floor(Number(primaryDim) || 0));
+      const sw = strokeWeight;
       const laneDepth = Math.max(1, baseY - horizonY);
-      const lineWidthFactor = resolveLineWidthFactor(style);
-      const railWidth = Math.max(1.2, nearHalf * 0.012) * lineWidthFactor;
-      const crossbarWidth = Math.max(1, nearHalf * 0.009) * lineWidthFactor;
-      const seamWidth = Math.max(1, crossbarWidth * 0.7);
-      const horizonWidth = Math.max(1, railWidth * 0.9);
+      const railWidth = gs.scaleStroke(pd, RAIL_WIDTH_FACTOR, sw);
+      const crossbarWidth = gs.scaleStroke(pd, CROSSBAR_WIDTH_FACTOR, sw);
+      const seamWidth = gs.scaleStroke(pd, SEAM_WIDTH_FACTOR, sw);
+      const horizonWidth = gs.scaleStroke(pd, HORIZON_WIDTH_FACTOR, sw);
       const stripeCount = mode === "high" ? 8 : (mode === "flat" ? 6 : 7);
 
       ctx.save();
@@ -109,7 +108,7 @@
           const nextP = Math.pow((i + 1) / (stripeCount + 1), 1.65);
           const nextY = lerp(horizonY, baseY, nextP);
           const gapMid = (y + nextY) * 0.5;
-          const seamLen = clamp((nextY - y) * 0.42, 3, laneDepth * 0.08);
+          const seamLen = clamp((nextY - y) * 0.42, 1, laneDepth * 0.08);
           strokeSegment(ctx, cx, gapMid - seamLen * 0.5, cx, gapMid + seamLen * 0.5, seamWidth);
         }
       }
@@ -141,21 +140,22 @@
       ctx.fill();
     }
 
-    function drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, style) {
+    function drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, primaryDim, strokeWeight, pointerDepthWeight) {
       const cx = geom.cx;
       const horizonY = geom.horizonY;
       const baseY = geom.baseY;
       const nearHalf = geom.nearHalf;
-      const lineWidthFactor = resolveLineWidthFactor(style);
-      const boatSizeFactor = resolveBoatSizeFactor(style);
+      const pd = Math.max(1, Math.floor(Number(primaryDim) || 0));
+      const sw = strokeWeight;
+      const pdw = pointerDepthWeight;
       const safeNorm = clamp(xteNormalized, -1.1, 1.1);
       const markerX = cx + safeNorm * nearHalf * 0.82;
       const markerY = baseY - (baseY - horizonY) * 0.12;
       const laneDepth = Math.max(1, baseY - horizonY);
-      const markerBaseLength = clamp(nearHalf * 0.11, 4, laneDepth * 0.24);
-      const markerLength = Math.max(4, markerBaseLength * boatSizeFactor);
-      const markerBeam = Math.max(3, markerLength * 0.62);
-      const centerlineWidth = Math.max(1.4, nearHalf * 0.016) * lineWidthFactor;
+      const rawLength = gs.scalePointer(pd, BOAT_LENGTH_FACTOR, pdw);
+      const markerLength = Math.min(rawLength, Math.max(1, Math.floor(laneDepth * BOAT_LANE_DEPTH_LIMIT)));
+      const markerBeam = Math.max(1, Math.floor(markerLength * BOAT_BEAM_RATIO));
+      const centerlineWidth = gs.scaleStroke(pd, CENTERLINE_WIDTH_FACTOR, sw);
 
       ctx.save();
       ctx.lineCap = "butt";
@@ -169,7 +169,7 @@
       if (overflow) {
         ctx.fillStyle = colors.alarm;
         const edgeX = cx + (safeNorm >= 0 ? 1 : -1) * nearHalf * 0.93;
-        const edgeR = Math.max(2.6, markerLength * 0.3);
+        const edgeR = Math.max(1, Math.floor(markerLength * 0.3));
         ctx.beginPath();
         ctx.arc(edgeX, markerY - markerLength * 0.12, edgeR, 0, Math.PI * 2);
         ctx.fill();

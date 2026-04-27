@@ -10,8 +10,6 @@
 }(this, function () {
   "use strict";
 
-  const DEFAULT_XTE_THEME = { lineWidthFactor: 1, boatSizeFactor: 1 };
-
   function create(def, Helpers) {
     const toolkit = Helpers.getModule("RadialToolkit").create(def, Helpers);
     const cacheFactory = Helpers.getModule("CanvasLayerCache").create(def, Helpers);
@@ -68,7 +66,6 @@
       ctx.clearRect(0, 0, W, H);
       const rootEl = Helpers.requirePluginRoot(canvas);
       const theme = toolkit.theme.resolveForRoot(rootEl);
-      const xteTheme = theme.xte || DEFAULT_XTE_THEME;
       const textColor = theme.surface.fg;
       const stableDigitsEnabled = p.stableDigits === true;
       const family = stableDigitsEnabled
@@ -89,8 +86,6 @@
         });
         return;
       }
-      const lineWidthFactor = xteTheme.lineWidthFactor > 0 ? xteTheme.lineWidthFactor : 1;
-      const boatSizeFactor = xteTheme.boatSizeFactor > 0 ? xteTheme.boatSizeFactor : 1;
 
       const colors = {
         pointer: theme.colors.pointer,
@@ -99,13 +94,6 @@
         stripeLine: textColor
       };
 
-      const xteStaticStyle = {
-        lineWidthFactor: lineWidthFactor
-      };
-      const xteDynamicStyle = {
-        lineWidthFactor: lineWidthFactor,
-        boatSizeFactor: boatSizeFactor
-      };
       const display = p.display && typeof p.display === "object" ? p.display : null;
       const captions = p.captions && typeof p.captions === "object" ? p.captions : null;
       const units = p.units && typeof p.units === "object" ? p.units : null;
@@ -132,14 +120,15 @@
         showWpName: showWpName,
         hasWaypointName: !!wpName
       });
-      const geom = primitives.highwayGeometry(layout.highway, mode, {
+      const primaryDim = Math.max(1, Math.min(layout.highway.w, layout.highway.h));
+      const geom = primitives.highwayGeometry(layout.highway, mode, primaryDim, {
         compactTop: hideTextualMetrics || !(showWpName && !!wpName)
       });
 
       const staticKey = {
         mode: mode,
         geom: geom,
-        lineWidthFactor: xteStaticStyle.lineWidthFactor,
+        strokeWeight: theme.strokeWeight,
         roadLine: colors.roadLine,
         stripeLine: colors.stripeLine
       };
@@ -149,7 +138,7 @@
           return;
         }
         layerCtx.clearRect(0, 0, layerCanvas.width, layerCanvas.height);
-        primitives.drawStaticHighway(layerCtx, geom, colors, mode, xteStaticStyle);
+        primitives.drawStaticHighway(layerCtx, geom, colors, mode, primaryDim, theme.strokeWeight);
       });
       staticLayer.blit(ctx);
 
@@ -176,7 +165,7 @@
         const xteTarget = signedDisplayXte / xteScale;
         const xteEased = springMotion.resolve(canvas, xteTarget, easingEnabled, Date.now());
         const xteNormalized = finiteNumber(xteEased) ? xteEased : (signedDisplayXte / xteScale);
-        primitives.drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, xteDynamicStyle);
+        primitives.drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, primaryDim, theme.strokeWeight, theme.pointerDepthWeight);
       }
 
       if (hideTextualMetrics) {

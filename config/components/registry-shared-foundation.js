@@ -366,7 +366,8 @@
     XteHighwayPrimitives: {
       js: BASE + "shared/widget-kits/xte/XteHighwayPrimitives.js",
       css: undefined,
-      globalKey: "DyniXteHighwayPrimitives"
+      globalKey: "DyniXteHighwayPrimitives",
+      deps: ["GeometryScale"]
     }
   };
 }(this));
