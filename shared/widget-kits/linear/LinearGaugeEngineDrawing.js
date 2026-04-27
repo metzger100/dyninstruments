@@ -13,16 +13,17 @@
 
   function create() {
     function drawStaticLayer(layerCtx, state, ticks, showEndLabels, sectors, labelFormatter) {
+      const layout = state.layout;
       const theme = state.theme;
       const primitives = state.primitives;
       const textLayout = state.textLayout;
       const math = state.math;
       const mapValueToX = state.mapValueToX;
-      const majorStyle = { lineWidth: theme.linear.ticks.majorWidth, strokeStyle: state.color };
-      const minorStyle = { lineWidth: theme.linear.ticks.minorWidth, strokeStyle: state.color };
+      const majorStyle = { lineWidth: layout.majorTickWidth, strokeStyle: state.color };
+      const minorStyle = { lineWidth: layout.minorTickWidth, strokeStyle: state.color };
 
       primitives.drawTrack(layerCtx, state.layout.scaleX0, state.layout.scaleX1, state.layout.trackY, {
-        lineWidth: theme.linear.track.lineWidth,
+        lineWidth: layout.trackLineWidth,
         strokeStyle: state.color
       });
 
@@ -40,11 +41,11 @@
 
       for (let i = 0; i < ticks.minor.length; i++) {
         const x = mapValueToX(ticks.minor[i], true);
-        if (isFinite(x)) primitives.drawTick(layerCtx, Math.round(x), state.layout.trackY, theme.linear.ticks.minorLen, minorStyle);
+        if (isFinite(x)) primitives.drawTick(layerCtx, Math.round(x), state.layout.trackY, layout.minorTickLen, minorStyle);
       }
       for (let i = 0; i < ticks.major.length; i++) {
         const x = mapValueToX(ticks.major[i], true);
-        if (isFinite(x)) primitives.drawTick(layerCtx, Math.round(x), state.layout.trackY, theme.linear.ticks.majorLen, majorStyle);
+        if (isFinite(x)) primitives.drawTick(layerCtx, Math.round(x), state.layout.trackY, layout.majorTickLen, majorStyle);
       }
 
       textLayout.drawTickLabels(layerCtx, state, ticks, showEndLabels, math, labelFormatter);
@@ -60,11 +61,13 @@
         return;
       }
       const markerOpts = opts || {};
-      const basePointerSize = Number.isFinite(Number(markerOpts.depth)) ? Math.max(1, Math.floor(markerOpts.depth)) : pointerDepthBase;
-      const pointerWidth = Math.max(1, Math.floor(basePointerSize * theme.linear.pointer.widthFactor));
+      const basePointerSize = Number.isFinite(Number(markerOpts.depth)) ? Math.max(1, Math.floor(markerOpts.depth)) : Math.max(1, Math.floor(pointerDepthBase));
+      const defaultSide = Number.isFinite(Number(layout.pointerSide))
+        ? Math.max(1, Math.floor(layout.pointerSide / 2))
+        : Math.max(1, Math.floor(basePointerSize / 2));
       primitives.drawPointer(ctx, Math.round(pointerX), layout.trackY - Math.floor(state.trackThickness / 2) - 1, {
-        depth: Number.isFinite(Number(markerOpts.depth)) ? basePointerSize : Math.max(1, Math.floor(pointerDepthBase * theme.linear.pointer.lengthFactor)),
-        side: Number.isFinite(Number(markerOpts.side)) ? Math.max(1, Math.floor(markerOpts.side)) : Math.max(1, Math.floor(pointerWidth / 2)),
+        depth: basePointerSize,
+        side: Number.isFinite(Number(markerOpts.side)) ? Math.max(1, Math.floor(markerOpts.side)) : defaultSide,
         fillStyle: hasOwn.call(markerOpts, "fillStyle") ? markerOpts.fillStyle : theme.colors.pointer
       });
     }

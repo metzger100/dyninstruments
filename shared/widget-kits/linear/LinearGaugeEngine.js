@@ -45,10 +45,6 @@
       return Number.isFinite(scale) && scale > 0 ? scale : 1;
     }
 
-    function resolveCompactGeometryScale(textFillScale) {
-      return Math.max(0.5, 1 - Math.max(0, textFillScale - 1));
-    }
-
     function resolveIntegerWidth(textValue, axisMax, minWidth) {
       const match = String(textValue).match(/^\s*[+-]?(\d+)/);
       const textDigits = match ? match[1].length : 0;
@@ -153,7 +149,6 @@
           layoutConfig: layoutCfg
         });
         const textFillScale = resolveTextFillScale(layout.responsive);
-        const compactGeometryScale = resolveCompactGeometryScale(textFillScale);
         const range = value.normalizeRange(p[rangeProps.min], p[rangeProps.max], rangeDefaults.min, rangeDefaults.max);
         const raw = (typeof p.value !== "undefined") ? p.value : p[cfg.rawValueKey];
         const unit = String(hasOwn.call(p, "unit") ? p.unit : unitDefault).trim();
@@ -206,20 +201,12 @@
           ? buildTicksFn(axis, tickMajor, tickMinor, p, hookApiBase)
           : math.buildTicks(axis.min, axis.max, tickMajor, tickMinor);
         const sectors = buildSectorsFn(p, range.min, range.max, axis, value, theme);
-        const trackThickness = math.clamp(
-          Math.max(1, Math.floor(layout.trackBox.h * theme.linear.track.widthFactor * compactGeometryScale)),
-          1,
-          Math.max(1, Math.floor(theme.linear.ticks.majorLen * 1.6))
-        );
-        const pointerDepthBase = Math.max(1, Math.floor(layout.trackBox.h * 0.12 * compactGeometryScale));
-        const markerSizeBase = Math.max(1, Math.floor(layout.trackBox.h * 0.12 * compactGeometryScale));
-        const sectorBandY = layout.trackY - (trackThickness / 2) - Math.max(1, Math.ceil(theme.linear.track.lineWidth / 2));
-        const labelBoost = textLayout.resolveLabelBoost(layout.mode);
-        const labelFontPx = Math.max(1, Math.min(
-          layout.trackBox.h,
-          Math.floor(layout.trackBox.h * theme.linear.labels.fontFactor * labelBoost * textFillScale)
-        ));
-        const labelInsetPx = Math.max(1, Math.floor((labelFontPx * theme.linear.labels.insetFactor * 0.2) / textFillScale));
+        const trackThickness = layout.trackThickness;
+        const pointerDepthBase = layout.pointerDepth;
+        const markerSizeBase = layout.pointerDepth;
+        const sectorBandY = layout.trackY - (trackThickness / 2) - Math.max(1, Math.ceil(layout.trackLineWidth / 2));
+        const labelFontPx = layout.labelFontPx;
+        const labelInsetPx = layout.labelInsetPx;
 
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
@@ -246,7 +233,6 @@
           textLayout: textLayout,
           trackThickness: trackThickness,
           sectorBandY: sectorBandY,
-          labelBoost: labelBoost,
           labelFontPx: labelFontPx,
           labelInsetPx: labelInsetPx,
           labelEdgePolicy: labelEdgePolicy,

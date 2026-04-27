@@ -223,8 +223,8 @@
 
   function resolveLabelY(state, fontPx) {
     const tickReach = Math.max(
-      Number(state.theme.linear.ticks.majorLen) || 0,
-      Number(state.theme.linear.ticks.minorLen) || 0
+      Number(state.layout.majorTickLen) || 0,
+      Number(state.layout.minorTickLen) || 0
     );
     const baseFontPx = Math.max(1, Math.floor(Number(state.labelFontPx) || 0));
     const insetScale = fontPx / Math.max(1, baseFontPx);

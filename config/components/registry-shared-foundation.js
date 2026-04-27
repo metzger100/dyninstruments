@@ -243,7 +243,7 @@
       js: BASE + "shared/widget-kits/linear/LinearGaugeLayout.js",
       css: undefined,
       globalKey: "DyniLinearGaugeLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale"]
     },
     LinearGaugeMath: {
       js: BASE + "shared/widget-kits/linear/LinearGaugeMath.js",

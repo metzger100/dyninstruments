@@ -8,12 +8,43 @@ describe("LinearGaugeLayout", function () {
         if (id === "ResponsiveScaleProfile") {
           return responsiveScaleProfile;
         }
+        if (id === "GeometryScale") {
+          return loadFresh("shared/widget-kits/layout/GeometryScale.js");
+        }
         if (id === "LayoutRectMath") {
           return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
         }
         throw new Error("unexpected module: " + id);
       }
     });
+  }
+
+  function createTheme() {
+    return {
+      strokeWeight: 1,
+      pointerDepthWeight: 1,
+      pointerSideWeight: 1,
+      linear: {
+        track: {
+          widthFactor: 0.16,
+          lineWidthFactor: 0.018
+        },
+        ticks: {
+          majorLenFactor: 0.109,
+          majorWidthFactor: 0.027,
+          minorLenFactor: 0.064,
+          minorWidthFactor: 0.014
+        },
+        pointer: {
+          sideFactor: 0.12,
+          depthFactor: 0.24
+        },
+        labels: {
+          insetFactor: 1.8,
+          fontFactor: 0.14
+        }
+      }
+    };
   }
 
   function expectRectInside(inner, outer) {
@@ -32,6 +63,7 @@ describe("LinearGaugeLayout", function () {
       out: layout.computeLayout(Object.assign({
         W: width,
         H: height,
+        theme: createTheme(),
         mode: mode,
         gap: insets.gap,
         contentRect: contentRect,
@@ -199,5 +231,22 @@ describe("LinearGaugeLayout", function () {
     expect(compactNormal.inlineDualGap).toBeLessThan(largeNormal.inlineDualGap);
     expect(compactFlat.dualRowGap).toBeGreaterThanOrEqual(1);
     expect(compactNormal.inlineDualGap).toBeGreaterThanOrEqual(1);
+  });
+
+  it("exposes geometry values computed from the track-box primary dimension", function () {
+    const layout = createLayout();
+    const snapshot = buildSnapshot(layout, 280, 220, "normal").out;
+
+    expect(snapshot.primaryDim).toBe(Math.max(1, Math.min(snapshot.trackBox.w, snapshot.trackBox.h)));
+    expect(snapshot.trackLineWidth).toBeGreaterThanOrEqual(1);
+    expect(snapshot.majorTickLen).toBeGreaterThanOrEqual(1);
+    expect(snapshot.majorTickWidth).toBeGreaterThanOrEqual(1);
+    expect(snapshot.minorTickLen).toBeGreaterThanOrEqual(1);
+    expect(snapshot.minorTickWidth).toBeGreaterThanOrEqual(1);
+    expect(snapshot.pointerDepth).toBeGreaterThanOrEqual(1);
+    expect(snapshot.pointerSide).toBeGreaterThanOrEqual(1);
+    expect(snapshot.trackThickness).toBeGreaterThanOrEqual(1);
+    expect(snapshot.labelFontPx).toBeGreaterThanOrEqual(1);
+    expect(snapshot.labelInsetPx).toBeGreaterThanOrEqual(1);
   });
 });

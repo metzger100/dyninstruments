@@ -1,7 +1,7 @@
 /**
  * Module: LinearGaugeLayout - Responsive geometry owner for linear gauge widgets
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, GeometryScale
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -218,6 +218,7 @@
   function create(def, Helpers) {
     const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
     const rectApi = Helpers.getModule("LayoutRectMath").create(def, Helpers);
+    const gs = Helpers.getModule("GeometryScale").create(def, Helpers);
     makeRect = rectApi.makeRect;
 
     function computeMode(W, H, thresholdNormal, thresholdFlat) {
@@ -296,6 +297,7 @@
 
     function computeLayout(args) {
       const cfg = args || {};
+      const theme = cfg.theme;
       const contentRect = resolveContentRect(cfg, computeInsets, createContentRect);
       const responsive = cfg.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
       const gap = Math.max(1, Math.floor(clampNumber(
@@ -326,6 +328,29 @@
               ? computeStackedLayout(contentRect, bottom, gap, responsive, profileApi)
               : computeInlineLayout(contentRect, right, bottom, gap, responsive, profileApi))));
 
+      const trackBox = modeLayout.trackBox;
+      const primaryDim = Math.max(1, Math.min(trackBox.w, trackBox.h));
+      const linearTheme = theme.linear;
+      const strokeWeight = clampNumber(theme.strokeWeight, 0, Number.MAX_SAFE_INTEGER, 1);
+      const pointerDepthWeight = clampNumber(theme.pointerDepthWeight, 0, Number.MAX_SAFE_INTEGER, 1);
+      const pointerSideWeight = clampNumber(theme.pointerSideWeight, 0, Number.MAX_SAFE_INTEGER, 1);
+      const trackLineWidth = gs.scaleStroke(primaryDim, clampNumber(linearTheme.track.lineWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.018), strokeWeight);
+      const majorTickLen = gs.scale(primaryDim, clampNumber(linearTheme.ticks.majorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.109));
+      const majorTickWidth = gs.scaleStroke(primaryDim, clampNumber(linearTheme.ticks.majorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.027), strokeWeight);
+      const minorTickLen = gs.scale(primaryDim, clampNumber(linearTheme.ticks.minorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.064));
+      const minorTickWidth = gs.scaleStroke(primaryDim, clampNumber(linearTheme.ticks.minorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.014), strokeWeight);
+      const pointerDepth = gs.scalePointer(primaryDim, clampNumber(linearTheme.pointer.depthFactor, 0, Number.MAX_SAFE_INTEGER, 0.24), pointerDepthWeight);
+      const pointerSide = gs.scalePointer(primaryDim, clampNumber(linearTheme.pointer.sideFactor, 0, Number.MAX_SAFE_INTEGER, 0.12), pointerSideWeight);
+      const trackThickness = gs.scale(primaryDim, clampNumber(linearTheme.track.widthFactor, 0, Number.MAX_SAFE_INTEGER, 0.16));
+      const labelBoost = mode === "high" ? 1.2 : (mode === "normal" ? 1.26 : 1.0);
+      const labelFontPx = Math.max(1, Math.min(
+        trackBox.h,
+        Math.floor(trackBox.h * clampNumber(linearTheme.labels.fontFactor, 0, Number.MAX_SAFE_INTEGER, 0.14) * labelBoost * responsive.textFillScale)
+      ));
+      const labelInsetPx = Math.max(1, Math.floor(
+        (labelFontPx * clampNumber(linearTheme.labels.insetFactor, 0, Number.MAX_SAFE_INTEGER, 1.8) * 0.2) / responsive.textFillScale
+      ));
+
       return {
         mode: mode,
         gap: gap,
@@ -333,10 +358,21 @@
         contentRect: contentRect,
         normalVariant: normalVariant,
         highVariant: highVariant,
+        primaryDim: primaryDim,
         scaleX0: modeLayout.scaleX0,
         scaleX1: modeLayout.scaleX1,
         trackY: modeLayout.trackY,
-        trackBox: modeLayout.trackBox,
+        trackBox: trackBox,
+        trackLineWidth: trackLineWidth,
+        majorTickLen: majorTickLen,
+        majorTickWidth: majorTickWidth,
+        minorTickLen: minorTickLen,
+        minorTickWidth: minorTickWidth,
+        pointerDepth: pointerDepth,
+        pointerSide: pointerSide,
+        trackThickness: trackThickness,
+        labelFontPx: labelFontPx,
+        labelInsetPx: labelInsetPx,
         captionBox: modeLayout.captionBox,
         valueBox: modeLayout.valueBox,
         inlineBox: modeLayout.inlineBox,

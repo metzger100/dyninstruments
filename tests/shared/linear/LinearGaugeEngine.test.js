@@ -27,6 +27,9 @@ describe("LinearGaugeEngine", function () {
       surface: {
         fg: "#fff"
       },
+      strokeWeight: 1,
+      pointerDepthWeight: 1,
+      pointerSideWeight: 1,
       colors: {
         pointer: "#ff2b2b",
         warning: "#e7c66a",
@@ -34,17 +37,17 @@ describe("LinearGaugeEngine", function () {
       },
       radial: {
         ticks: {
-          majorLen: 9,
-          majorWidth: 2,
-          minorLen: 5,
-          minorWidth: 1
+          majorLenFactor: 0.08,
+          majorWidthFactor: 0.02,
+          minorLenFactor: 0.047,
+          minorWidthFactor: 0.01
         },
         pointer: {
-          widthFactor: 1,
-          lengthFactor: 2
+          sideFactor: 0.11,
+          depthFactor: 0.22
         },
         ring: {
-          arcLineWidth: 1,
+          arcLineWidthFactor: 0.013,
           widthFactor: 0.12
         },
         labels: {
@@ -53,9 +56,9 @@ describe("LinearGaugeEngine", function () {
         }
       },
       linear: {
-        track: { widthFactor: 0.2, lineWidth: 2.5 },
-        ticks: { majorLen: 12, majorWidth: 3, minorLen: 6, minorWidth: 2 },
-        pointer: { widthFactor: 0.9, lengthFactor: 1.5 },
+        track: { widthFactor: 0.2, lineWidthFactor: 0.018 },
+        ticks: { majorLenFactor: 0.109, majorWidthFactor: 0.027, minorLenFactor: 0.064, minorWidthFactor: 0.014 },
+        pointer: { sideFactor: 0.12, depthFactor: 0.24 },
         labels: { insetFactor: 1.2, fontFactor: 0.2 }
       },
       font: {
@@ -134,6 +137,7 @@ describe("LinearGaugeEngine", function () {
         if (id === "CanvasLayerCache") return cacheMod;
         if (id === "LinearCanvasPrimitives") return primitivesModule;
         if (id === "LinearGaugeEngineDrawing") return loadFresh("shared/widget-kits/linear/LinearGaugeEngineDrawing.js");
+        if (id === "GeometryScale") return loadFresh("shared/widget-kits/layout/GeometryScale.js");
         if (id === "ResponsiveScaleProfile") return responsiveScaleProfileMod;
         if (id === "LayoutRectMath") return layoutRectMathMod;
         if (id === "LinearGaugeMath") return mathMod;
@@ -203,8 +207,9 @@ describe("LinearGaugeEngine", function () {
     return { engine, calls, theme };
   }
 
-  it("uses linear theme tokens for static track and tick drawing", function () {
+  it("uses layout-computed linear geometry for static track and tick drawing", function () {
     const harness = createHarness();
+    let layoutSnapshot = null;
     const renderer = harness.engine.createRenderer({
       rawValueKey: "speed",
       hideTextualMetricsProp: "speedLinearHideTextualMetrics",
@@ -212,15 +217,19 @@ describe("LinearGaugeEngine", function () {
       rangeProps: { min: "min", max: "max" },
       tickProps: { major: "major", minor: "minor", showEndLabels: "showEndLabels" },
       ratioProps: { normal: "n", flat: "f" },
-      ratioDefaults: { normal: 1.1, flat: 3.5 }
+      ratioDefaults: { normal: 1.1, flat: 3.5 },
+      drawFrame(state) {
+        layoutSnapshot = state.layout;
+      }
     });
 
     const canvas = createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() });
     renderer(canvas, { speed: 12, major: 10, minor: 5, showEndLabels: true });
 
-    expect(harness.calls.track[0].opts.lineWidth).toBe(harness.theme.linear.track.lineWidth);
-    expect(harness.calls.ticks.some((entry) => entry.len === harness.theme.linear.ticks.majorLen)).toBe(true);
-    expect(harness.calls.ticks.some((entry) => entry.len === harness.theme.linear.ticks.minorLen)).toBe(true);
+    expect(layoutSnapshot).toBeTruthy();
+    expect(harness.calls.track[0].opts.lineWidth).toBe(layoutSnapshot.trackLineWidth);
+    expect(harness.calls.ticks.some((entry) => entry.len === layoutSnapshot.majorTickLen)).toBe(true);
+    expect(harness.calls.ticks.some((entry) => entry.len === layoutSnapshot.minorTickLen)).toBe(true);
   });
 
   it("propagates hideTextualMetrics into the shared layout and suppresses metric text draws", function () {
@@ -304,8 +313,7 @@ describe("LinearGaugeEngine", function () {
             mode: state.mode,
             trackY: state.layout.trackY,
             trackBox: state.layout.trackBox,
-            textFillScale: state.textFillScale,
-            compactGeometryScale: state.compactGeometryScale
+            textFillScale: state.textFillScale
           };
         }
       }, specOverrides || {}));
@@ -478,8 +486,7 @@ describe("LinearGaugeEngine", function () {
             axis: state.axis,
             trackY: state.layout.trackY,
             trackBox: state.layout.trackBox,
-            textFillScale: state.textFillScale,
-            compactGeometryScale: state.compactGeometryScale
+            textFillScale: state.textFillScale
           };
         }
       };
@@ -574,7 +581,7 @@ describe("LinearGaugeEngine", function () {
 
     const trackY = harness.calls.track[0].y;
     const band = harness.calls.bands[0];
-    const trackClearance = Math.max(1, Math.ceil(harness.theme.linear.track.lineWidth / 2));
+    const trackClearance = Math.max(1, Math.ceil(harness.calls.track[0].opts.lineWidth / 2));
 
     expect(band).toBeDefined();
     expect(band.y + band.thickness / 2).toBeLessThanOrEqual(trackY - trackClearance);
@@ -923,7 +930,7 @@ describe("LinearGaugeEngine", function () {
     let drawModeCalls = 0;
     let markerTrackThickness = NaN;
     let markerTrackY = NaN;
-    let markerTrackBoxHeight = NaN;
+    let markerTrackLayout = null;
 
     const layerContexts = [];
     const ownerDocument = {
@@ -978,7 +985,7 @@ describe("LinearGaugeEngine", function () {
         drawFrameCalls += 1;
         markerTrackThickness = state.trackThickness;
         markerTrackY = state.layout.trackY;
-        markerTrackBoxHeight = state.layout.trackBox.h;
+        markerTrackLayout = state.layout;
         api.drawDefaultPointer();
         api.drawMarkerAtValue(45, { lineWidth: 7, len: 9, strokeStyle: "#00ff00" });
         api.drawMarkerAtValue(75, { strokeStyle: "#ff2b2b" });
@@ -1028,15 +1035,15 @@ describe("LinearGaugeEngine", function () {
         strokeStyle: "#ff2b2b"
       })
     }));
-    const pointerDepthBase = Math.max(1, Math.floor(markerTrackBoxHeight * 0.12));
+    expect(markerTrackLayout).toBeTruthy();
     expect(harness.calls.pointer[0] && harness.calls.pointer[0].opts && harness.calls.pointer[0].opts.depth).toBe(
-      Math.max(1, Math.floor(pointerDepthBase * harness.theme.linear.pointer.lengthFactor))
+      markerTrackLayout.pointerDepth
     );
     expect(harness.calls.pointer[0] && harness.calls.pointer[0].opts && harness.calls.pointer[0].opts.side).toBe(
-      Math.max(1, Math.floor(Math.max(1, Math.floor(pointerDepthBase * harness.theme.linear.pointer.widthFactor)) / 2))
+      Math.max(1, Math.floor(markerTrackLayout.pointerSide / 2))
     );
-    expect(defaultMarker && defaultMarker.len).toBe(Math.max(1, Math.floor(pointerDepthBase * 0.9)));
-    expect(defaultMarker && defaultMarker.opts && defaultMarker.opts.lineWidth).toBe(Math.max(1, Math.floor(pointerDepthBase * 0.4)));
+    expect(defaultMarker && defaultMarker.len).toBe(Math.max(1, Math.floor(markerTrackLayout.pointerDepth * 0.9)));
+    expect(defaultMarker && defaultMarker.opts && defaultMarker.opts.lineWidth).toBe(Math.max(1, Math.floor(markerTrackLayout.pointerDepth * 0.4)));
     expect(defaultMarker && (defaultMarker.y - defaultMarker.len)).toBe(markerTrackY);
     expect(harness.calls.drawCaptionMax).toBe(0);
     expect(harness.calls.drawValueUnitWithFit).toBe(0);
@@ -1061,9 +1068,9 @@ describe("LinearGaugeEngine", function () {
           labels: { insetFactor: 1.8, fontFactor: 0.14 }
         },
         linear: {
-          track: { widthFactor: 0.08, lineWidth: 1 },
-          ticks: { majorLen: 12, majorWidth: 3, minorLen: 6, minorWidth: 2 },
-          pointer: { widthFactor: 0.9, lengthFactor: 1.5 },
+          track: { widthFactor: 0.08, lineWidthFactor: 0.018 },
+          ticks: { majorLenFactor: 0.109, majorWidthFactor: 0.027, minorLenFactor: 0.064, minorWidthFactor: 0.014 },
+          pointer: { sideFactor: 0.12, depthFactor: 0.24 },
           labels: { insetFactor: 1.2, fontFactor: 0.2 }
         },
         font: { weight: 700, labelWeight: 650 },
@@ -1080,9 +1087,9 @@ describe("LinearGaugeEngine", function () {
           labels: { insetFactor: 1.8, fontFactor: 0.14 }
         },
         linear: {
-          track: { widthFactor: 0.3, lineWidth: 4 },
-          ticks: { majorLen: 12, majorWidth: 3, minorLen: 6, minorWidth: 2 },
-          pointer: { widthFactor: 0.9, lengthFactor: 1.5 },
+          track: { widthFactor: 0.3, lineWidthFactor: 0.018 },
+          ticks: { majorLenFactor: 0.109, majorWidthFactor: 0.027, minorLenFactor: 0.064, minorWidthFactor: 0.014 },
+          pointer: { sideFactor: 0.12, depthFactor: 0.24 },
           labels: { insetFactor: 1.2, fontFactor: 0.2 }
         },
         font: { weight: 700, labelWeight: 650 },
@@ -1117,7 +1124,7 @@ describe("LinearGaugeEngine", function () {
     expect(thinMarker.opts.lineWidth).toBe(thickMarker.opts.lineWidth);
   });
 
-  it("keeps default pointer width independent from linear pointer lengthFactor", function () {
+  it("keeps default pointer width independent from linear pointer depthFactor", function () {
     const shortHarness = createHarness({
       theme: {
         colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#ff7a76" },
@@ -1128,9 +1135,9 @@ describe("LinearGaugeEngine", function () {
           labels: { insetFactor: 1.8, fontFactor: 0.14 }
         },
         linear: {
-          track: { widthFactor: 0.2, lineWidth: 2 },
-          ticks: { majorLen: 12, majorWidth: 3, minorLen: 6, minorWidth: 2 },
-          pointer: { widthFactor: 0.9, lengthFactor: 1.1 },
+          track: { widthFactor: 0.2, lineWidthFactor: 0.018 },
+          ticks: { majorLenFactor: 0.109, majorWidthFactor: 0.027, minorLenFactor: 0.064, minorWidthFactor: 0.014 },
+          pointer: { sideFactor: 0.12, depthFactor: 0.11 },
           labels: { insetFactor: 1.2, fontFactor: 0.2 }
         },
         font: { weight: 700, labelWeight: 650 },
@@ -1147,9 +1154,9 @@ describe("LinearGaugeEngine", function () {
           labels: { insetFactor: 1.8, fontFactor: 0.14 }
         },
         linear: {
-          track: { widthFactor: 0.2, lineWidth: 2 },
-          ticks: { majorLen: 12, majorWidth: 3, minorLen: 6, minorWidth: 2 },
-          pointer: { widthFactor: 0.9, lengthFactor: 2.4 },
+          track: { widthFactor: 0.2, lineWidthFactor: 0.018 },
+          ticks: { majorLenFactor: 0.109, majorWidthFactor: 0.027, minorLenFactor: 0.064, minorWidthFactor: 0.014 },
+          pointer: { sideFactor: 0.12, depthFactor: 0.24 },
           labels: { insetFactor: 1.2, fontFactor: 0.2 }
         },
         font: { weight: 700, labelWeight: 650 },

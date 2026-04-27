@@ -11,8 +11,8 @@ describe("LinearGaugeLabelFit edge policy", function () {
       theme: {
         linear: {
           ticks: {
-            majorLen: 8,
-            minorLen: 4
+            majorLenFactor: 0.08,
+            minorLenFactor: 0.04
           }
         }
       },
@@ -20,7 +20,9 @@ describe("LinearGaugeLabelFit edge policy", function () {
         trackY: 20,
         trackBox: { y: 0, h: 40 },
         scaleX0: 0,
-        scaleX1: 100
+        scaleX1: 100,
+        majorTickLen: 8,
+        minorTickLen: 4
       },
       axis: {
         min: 0,
