@@ -89,8 +89,8 @@ describe("RadialCanvasPrimitives", function () {
 
     draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {
       fillStyle: "#123456",
-      widthFactor: 1,
-      lengthFactor: 2
+      depth: 10,
+      halfWidth: 4
     });
     expect(ctx.fillStyle).toBe("#123456");
     expectBalancedSaveRestore(ctx);
@@ -102,14 +102,14 @@ describe("RadialCanvasPrimitives", function () {
 
     draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {
       color: "#abcdef",
-      widthFactor: 1,
-      lengthFactor: 2
+      depth: 10,
+      halfWidth: 4
     });
     expect(ctx.fillStyle).toBe("#abcdef");
     expectBalancedSaveRestore(ctx);
   });
 
-  it("does not alter pointer geometry by variant when factors are fixed", function () {
+  it("does not alter pointer geometry by variant when dimensions are fixed", function () {
     function pointerPath(ctx) {
       return ctx.calls
         .filter(function (call) { return call.name === "moveTo" || call.name === "lineTo"; })
@@ -121,8 +121,7 @@ describe("RadialCanvasPrimitives", function () {
     const longCtx = createMockContext2D();
     const pointerOptions = {
       depth: 10,
-      widthFactor: 1,
-      lengthFactor: 1,
+      halfWidth: 4,
       fillStyle: "#123456"
     };
 
@@ -132,21 +131,19 @@ describe("RadialCanvasPrimitives", function () {
     expect(pointerPath(longCtx)).toEqual(pointerPath(normalCtx));
   });
 
-  it("keeps rendered width fixed when only lengthFactor changes", function () {
+  it("keeps rendered width fixed when only depth changes", function () {
     const draw = create();
     const shortCtx = createMockContext2D();
     const longCtx = createMockContext2D();
 
     draw.drawPointerAtRim(shortCtx, 100, 100, 50, 0, {
       depth: 10,
-      widthFactor: 1.2,
-      lengthFactor: 1,
+      halfWidth: 4,
       fillStyle: "#123456"
     });
     draw.drawPointerAtRim(longCtx, 100, 100, 50, 0, {
-      depth: 10,
-      widthFactor: 1.2,
-      lengthFactor: 2,
+      depth: 18,
+      halfWidth: 4,
       fillStyle: "#123456"
     });
 
@@ -157,21 +154,19 @@ describe("RadialCanvasPrimitives", function () {
     expect(longMetrics.length).toBeGreaterThan(shortMetrics.length);
   });
 
-  it("keeps rendered length fixed when only widthFactor changes", function () {
+  it("keeps rendered length fixed when only halfWidth changes", function () {
     const draw = create();
     const narrowCtx = createMockContext2D();
     const wideCtx = createMockContext2D();
 
     draw.drawPointerAtRim(narrowCtx, 100, 100, 50, 0, {
       depth: 10,
-      widthFactor: 0.8,
-      lengthFactor: 1.5,
+      halfWidth: 3,
       fillStyle: "#123456"
     });
     draw.drawPointerAtRim(wideCtx, 100, 100, 50, 0, {
       depth: 10,
-      widthFactor: 1.6,
-      lengthFactor: 1.5,
+      halfWidth: 8,
       fillStyle: "#123456"
     });
 
@@ -180,5 +175,62 @@ describe("RadialCanvasPrimitives", function () {
 
     expect(wideMetrics.length).toBeCloseTo(narrowMetrics.length, 6);
     expect(wideMetrics.width).toBeGreaterThan(narrowMetrics.width);
+  });
+
+  it("uses supplied pointer dimensions directly, including fractional values", function () {
+    const draw = create();
+    const ctx = createMockContext2D();
+
+    draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {
+      depth: 10.7,
+      halfWidth: 4.3,
+      fillStyle: "#123456"
+    });
+
+    expect(pointerMetrics(ctx).length).toBeCloseTo(9.7, 6);
+    expect(pointerMetrics(ctx).width).toBeCloseTo(8.6, 6);
+  });
+
+  it("returns without drawing when pointer dimensions are invalid", function () {
+    const draw = create();
+    const ctx = createMockContext2D();
+
+    draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {
+      depth: 0,
+      halfWidth: 4.3,
+      fillStyle: "#123456"
+    });
+
+    expect(ctx.calls).toHaveLength(0);
+  });
+
+  it("uses supplied rim marker dimensions directly, including fractional values", function () {
+    const draw = create();
+    const ctx = createMockContext2D();
+
+    draw.drawRimMarker(ctx, 100, 100, 150, 0, {
+      len: 12.7,
+      width: 3.4,
+      strokeStyle: "#123456"
+    });
+
+    expect(ctx.lineWidth).toBeCloseTo(3.4, 6);
+    expect(pointDistance(
+      { x: callsNamed(ctx, "moveTo")[0].args[0], y: callsNamed(ctx, "moveTo")[0].args[1] },
+      { x: callsNamed(ctx, "lineTo")[0].args[0], y: callsNamed(ctx, "lineTo")[0].args[1] }
+    )).toBeCloseTo(12.7, 6);
+  });
+
+  it("returns without drawing when rim marker dimensions are invalid", function () {
+    const draw = create();
+    const ctx = createMockContext2D();
+
+    draw.drawRimMarker(ctx, 100, 100, 150, 0, {
+      len: 12.7,
+      width: 0,
+      strokeStyle: "#123456"
+    });
+
+    expect(ctx.calls).toHaveLength(0);
   });
 });

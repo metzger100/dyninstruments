@@ -104,7 +104,7 @@
       const cfg = opts.angleCfg;
 
       const tail = Math.max(0, Number(hasOwn.call(opts, "tail") ? opts.tail : 12));
-      const head = Math.max(2, Number(hasOwn.call(opts, "head") ? opts.head : 8));
+      const head = Math.max(1, Number(hasOwn.call(opts, "head") ? opts.head : 8));
       const width = Math.max(1, Number(hasOwn.call(opts, "width") ? opts.width : 2));
 
       const t = toCanvas(angleDeg, cfg, rot);
@@ -143,20 +143,14 @@
       const rot = hasOwn.call(opts, "rotationDeg") ? Number(opts.rotationDeg) : 0;
       const cfg = opts.angleCfg;
 
-      const baseDepth = Math.max(
-        2,
-        Math.floor(Number(hasOwn.call(opts, "depth") ? opts.depth : Math.max(8, Math.floor(rOuter * 0.10))))
-      );
-      let depth = baseDepth;
-      const lengthFactor = Number(opts.lengthFactor);
-      if (isFinite(lengthFactor)) depth = Math.floor(depth * lengthFactor);
-
-      const widthFactor = Number(opts.widthFactor);
-      const pointerWidth = Math.max(8, Math.floor(baseDepth * (isFinite(widthFactor) ? widthFactor : 1)));
-      const halfWidth = Math.max(4, Math.floor(pointerWidth / 2));
+      const depth = Number(opts.depth);
+      const halfWidth = Number(opts.halfWidth);
+      if (!isFinite(depth) || !isFinite(halfWidth) || depth <= 0 || halfWidth <= 0) {
+        return;
+      }
 
       const rBase = Math.max(1, rOuter - depth);
-      const rTip = Math.max(1, rOuter - 2);
+      const rTip = Math.max(1, rOuter - Math.max(1, Math.floor(rOuter * 0.013)));
       const a = toCanvas(angleDeg, cfg, rot);
 
       const tipX = cx + Math.cos(a) * rTip;
@@ -186,8 +180,11 @@
       const rot = hasOwn.call(opts, "rotationDeg") ? Number(opts.rotationDeg) : 0;
       const cfg = opts.angleCfg;
 
-      const len = Math.max(1, Number(hasOwn.call(opts, "len") ? opts.len : 12));
-      const width = Math.max(1, Number(hasOwn.call(opts, "width") ? opts.width : 3));
+      const len = Number(opts.len);
+      const width = Number(opts.width);
+      if (!isFinite(len) || !isFinite(width) || len <= 0 || width <= 0) {
+        return;
+      }
 
       const t = toCanvas(angleDeg, cfg, rot);
       const x1 = cx + Math.cos(t) * (rOuter - len);
