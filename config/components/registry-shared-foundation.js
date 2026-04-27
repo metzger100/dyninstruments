@@ -228,6 +228,12 @@
       css: undefined,
       globalKey: "DyniLinearCanvasPrimitives"
     },
+    LinearGaugeEngineDrawing: {
+      js: BASE + "shared/widget-kits/linear/LinearGaugeEngineDrawing.js",
+      css: undefined,
+      globalKey: "DyniLinearGaugeEngineDrawing",
+      deps: ["LinearCanvasPrimitives"]
+    },
     LinearGaugeLayout: {
       js: BASE + "shared/widget-kits/linear/LinearGaugeLayout.js",
       css: undefined,

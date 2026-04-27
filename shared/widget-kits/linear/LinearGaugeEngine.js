@@ -1,7 +1,7 @@
 /**
  * Module: LinearGaugeEngine - Shared renderer pipeline for linear gauge widgets
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: RadialToolkit, CanvasLayerCache, LinearCanvasPrimitives, LinearGaugeMath, LinearGaugeLayout, LinearGaugeTextLayout, LinearGaugeEngineSupport, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: RadialToolkit, CanvasLayerCache, LinearCanvasPrimitives, LinearGaugeEngineDrawing, LinearGaugeMath, LinearGaugeLayout, LinearGaugeTextLayout, LinearGaugeEngineSupport, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -23,6 +23,7 @@
     const GU = Helpers.getModule("RadialToolkit").create(def, Helpers);
     const layerCacheApi = Helpers.getModule("CanvasLayerCache").create(def, Helpers);
     const primitives = Helpers.getModule("LinearCanvasPrimitives").create(def, Helpers);
+    const drawing = Helpers.getModule("LinearGaugeEngineDrawing").create(def, Helpers);
     const math = Helpers.getModule("LinearGaugeMath").create(def, Helpers);
     const layoutApi = Helpers.getModule("LinearGaugeLayout").create(def, Helpers);
     const textLayout = Helpers.getModule("LinearGaugeTextLayout").create(def, Helpers);
@@ -53,41 +54,6 @@
       const textDigits = match ? match[1].length : 0;
       const axisDigits = Math.max(1, String(Math.floor(Math.abs(Number(axisMax) || 0))).length);
       return Math.max(minWidth, textDigits, axisDigits);
-    }
-
-    function drawStaticLayer(layerCtx, state, ticks, showEndLabels, sectors, labelFormatter) {
-      const theme = state.theme;
-      const mapValueToX = state.mapValueToX;
-      const majorStyle = { lineWidth: theme.linear.ticks.majorWidth, strokeStyle: state.color };
-      const minorStyle = { lineWidth: theme.linear.ticks.minorWidth, strokeStyle: state.color };
-
-      primitives.drawTrack(layerCtx, state.layout.scaleX0, state.layout.scaleX1, state.layout.trackY, {
-        lineWidth: theme.linear.track.lineWidth,
-        strokeStyle: state.color
-      });
-
-      for (let i = 0; i < sectors.length; i++) {
-        const sector = sectors[i];
-        if (!sector) continue;
-        const from = Number(sector.from);
-        const to = Number(sector.to);
-        if (!isFinite(from) || !isFinite(to) || to <= from) continue;
-        const x0 = mapValueToX(from, true);
-        const x1 = mapValueToX(to, true);
-        if (!isFinite(x0) || !isFinite(x1) || Math.abs(x1 - x0) <= 1) continue;
-        primitives.drawBand(layerCtx, x0, x1, state.sectorBandY, state.trackThickness, { fillStyle: sector.color });
-      }
-
-      for (let i = 0; i < ticks.minor.length; i++) {
-        const x = mapValueToX(ticks.minor[i], true);
-        if (isFinite(x)) primitives.drawTick(layerCtx, Math.round(x), state.layout.trackY, theme.linear.ticks.minorLen, minorStyle);
-      }
-      for (let i = 0; i < ticks.major.length; i++) {
-        const x = mapValueToX(ticks.major[i], true);
-        if (isFinite(x)) primitives.drawTick(layerCtx, Math.round(x), state.layout.trackY, theme.linear.ticks.majorLen, majorStyle);
-      }
-
-      textLayout.drawTickLabels(layerCtx, state, ticks, showEndLabels, math, labelFormatter);
     }
 
     function splitTextBoxRows(box, secScale) {
@@ -275,6 +241,9 @@
           valueWeight: theme.font.weight,
           labelWeight: theme.font.labelWeight,
           axis: axis,
+          primitives: primitives,
+          math: math,
+          textLayout: textLayout,
           trackThickness: trackThickness,
           sectorBandY: sectorBandY,
           labelBoost: labelBoost,
@@ -326,52 +295,52 @@
           layerCtx.setTransform(canvas.width / Math.max(1, W), 0, 0, canvas.height / Math.max(1, H), 0, 0);
           layerCtx.fillStyle = color;
           layerCtx.strokeStyle = color;
-          drawStaticLayer(layerCtx, state, ticks, showEndLabels, sectors, tickLabelFormatter);
+          drawing.drawStaticLayer(layerCtx, state, ticks, showEndLabels, sectors, tickLabelFormatter);
         });
         layerCache.blit(ctx);
 
-        function drawPointerAtValue(targetCtx, markerValue, markerOpts) {
-          const pointerNum = Number(markerValue);
-          if (!isFinite(pointerNum)) {
-            return;
-          }
-          const pointerX = state.mapValueToX(pointerNum, true);
-          if (!isFinite(pointerX)) {
-            return;
-          }
-          const opts = markerOpts || {};
-          const basePointerSize = Number.isFinite(Number(opts.depth)) ? Math.max(1, Math.floor(opts.depth)) : pointerDepthBase;
-          const pointerWidth = Math.max(1, Math.floor(basePointerSize * theme.linear.pointer.widthFactor));
-          primitives.drawPointer(targetCtx || ctx, Math.round(pointerX), layout.trackY - Math.floor(trackThickness / 2) - 1, {
-            depth: Number.isFinite(Number(opts.depth)) ? basePointerSize : Math.max(1, Math.floor(pointerDepthBase * theme.linear.pointer.lengthFactor)),
-            side: Number.isFinite(Number(opts.side)) ? Math.max(1, Math.floor(opts.side)) : Math.max(1, Math.floor(pointerWidth / 2)),
-            fillStyle: hasOwn.call(opts, "fillStyle") ? opts.fillStyle : theme.colors.pointer
-          });
-        }
-
-        function drawMarkerAtValue(targetCtx, markerValue, markerOpts) {
-          const markerNum = Number(markerValue);
-          if (!isFinite(markerNum)) {
-            return;
-          }
-          const markerX = state.mapValueToX(markerNum, true);
-          if (!isFinite(markerX)) {
-            return;
-          }
-          const opts = markerOpts || {};
-          const len = Number.isFinite(Number(opts.len)) ? Math.max(1, opts.len) : Math.max(1, Math.floor(markerSizeBase * 0.9));
-          const width = Number.isFinite(Number(opts.lineWidth)) ? Math.max(1, opts.lineWidth) : Math.max(1, Math.floor(markerSizeBase * 0.4));
-          primitives.drawTick(targetCtx || ctx, Math.round(markerX), layout.trackY + len, len, {
-            lineWidth: width,
-            lineCap: "butt",
-            strokeStyle: hasOwn.call(opts, "strokeStyle") ? opts.strokeStyle : theme.colors.pointer
-          });
-        }
-
         const drawApi = {
-          drawDefaultPointer: function (opts) { drawPointerAtValue(ctx, easedDisplayNum, opts); },
-          drawPointerAtValue: function (valueNum, opts) { drawPointerAtValue(ctx, valueNum, opts); },
-          drawMarkerAtValue: function (valueNum, opts) { drawMarkerAtValue(ctx, valueNum, opts); }
+          drawDefaultPointer: function (opts) {
+            drawing.drawPointerAtValue(
+              ctx,
+              state,
+              layout,
+              theme,
+              primitives,
+              state.mapValueToX,
+              easedDisplayNum,
+              pointerDepthBase,
+              markerSizeBase,
+              opts
+            );
+          },
+          drawPointerAtValue: function (valueNum, opts) {
+            drawing.drawPointerAtValue(
+              ctx,
+              state,
+              layout,
+              theme,
+              primitives,
+              state.mapValueToX,
+              valueNum,
+              pointerDepthBase,
+              markerSizeBase,
+              opts
+            );
+          },
+          drawMarkerAtValue: function (valueNum, opts) {
+            drawing.drawMarkerAtValue(
+              ctx,
+              state,
+              layout,
+              theme,
+              primitives,
+              state.mapValueToX,
+              valueNum,
+              markerSizeBase,
+              opts
+            );
+          }
         };
         let drawResult = null;
         if (typeof cfg.drawFrame === "function") drawResult = cfg.drawFrame(state, p, displayState, Object.assign({}, hookApi, drawApi));

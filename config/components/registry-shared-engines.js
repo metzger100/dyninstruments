@@ -51,6 +51,7 @@
         "RadialToolkit",
         "CanvasLayerCache",
         "LinearCanvasPrimitives",
+        "LinearGaugeEngineDrawing",
         "LinearGaugeMath",
         "LinearGaugeLayout",
         "LinearGaugeTextLayout",

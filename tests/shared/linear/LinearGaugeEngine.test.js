@@ -133,6 +133,7 @@ describe("LinearGaugeEngine", function () {
         if (id === "SpringEasing") return opts.springEasingModule || loadFresh("shared/widget-kits/anim/SpringEasing.js");
         if (id === "CanvasLayerCache") return cacheMod;
         if (id === "LinearCanvasPrimitives") return primitivesModule;
+        if (id === "LinearGaugeEngineDrawing") return loadFresh("shared/widget-kits/linear/LinearGaugeEngineDrawing.js");
         if (id === "ResponsiveScaleProfile") return responsiveScaleProfileMod;
         if (id === "LayoutRectMath") return layoutRectMathMod;
         if (id === "LinearGaugeMath") return mathMod;

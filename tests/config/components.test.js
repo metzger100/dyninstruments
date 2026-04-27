@@ -46,6 +46,9 @@ describe("config/components.js", function () {
     expect(components.XteHighwayPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/xte/XteHighwayPrimitives.js");
     expect(components.LinearCanvasPrimitives.globalKey).toBe("DyniLinearCanvasPrimitives");
     expect(components.LinearCanvasPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearCanvasPrimitives.js");
+    expect(components.LinearGaugeEngineDrawing.globalKey).toBe("DyniLinearGaugeEngineDrawing");
+    expect(components.LinearGaugeEngineDrawing.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeEngineDrawing.js");
+    expect(components.LinearGaugeEngineDrawing.deps).toEqual(["LinearCanvasPrimitives"]);
     expect(components.LinearGaugeMath.globalKey).toBe("DyniLinearGaugeMath");
     expect(components.LinearGaugeMath.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeMath.js");
     expect(components.LinearGaugeLabelFit.globalKey).toBe("DyniLinearGaugeLabelFit");
@@ -84,6 +87,7 @@ describe("config/components.js", function () {
       "RadialToolkit",
       "CanvasLayerCache",
       "LinearCanvasPrimitives",
+      "LinearGaugeEngineDrawing",
       "LinearGaugeMath",
       "LinearGaugeLayout",
       "LinearGaugeTextLayout",
