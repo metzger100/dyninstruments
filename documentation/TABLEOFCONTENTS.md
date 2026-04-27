@@ -38,7 +38,7 @@
 - **Smell catalog, enforcement matrix, suppression syntax** → [conventions/smell-prevention.md](conventions/smell-prevention.md)
 - **Smell remediation playbooks** → [conventions/smell-fix-playbooks.md](conventions/smell-fix-playbooks.md)
 - **Canvas layer caching conventions and shared cache facade** → [conventions/canvas-layer-caching.md](conventions/canvas-layer-caching.md), [shared/canvas-layer-cache.md](shared/canvas-layer-cache.md)
-- **Responsive compaction contract** → [shared/responsive-scale-profile.md](shared/responsive-scale-profile.md)
+- **Responsive compaction + GeometryScale factor scaling** → [shared/responsive-scale-profile.md](shared/responsive-scale-profile.md)
 - **Placeholder normalization contract (`---` fallback unification)** → [shared/placeholder-normalize.md](shared/placeholder-normalize.md)
 - **Stable-digits contract (padded/fallback numeric normalization)** → [shared/stable-digits.md](shared/stable-digits.md)
 - **Documentation format rules** → [conventions/documentation-format.md](conventions/documentation-format.md)
@@ -84,7 +84,7 @@
 ## Styling & Theming
 
 - **CSS theming contract (vars, day/night, font stack, borders)** → [shared/css-theming.md](shared/css-theming.md)
-- **Theme token resolver (preset system, runtime integration, testing hooks)** → [shared/theme-tokens.md](shared/theme-tokens.md)
+- **Theme token resolver (preset system, runtime integration, geometry weights, testing hooks)** → [shared/theme-tokens.md](shared/theme-tokens.md)
 - **Bundled Roboto/Roboto Mono assets and offline font-loading contract** → [shared/bundled-fonts.md](shared/bundled-fonts.md)
 - **HTML widget visual style contract** → [shared/html-widget-visual-style-guide.md](shared/html-widget-visual-style-guide.md)
 - **Hide seconds formatter swap contract** → [shared/hide-seconds.md](shared/hide-seconds.md)

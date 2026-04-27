@@ -35,6 +35,31 @@ Both are registered with apiShape module and do not use create().
 - --dyni-alarm-widget-fg
 - --dyni-alarm-widget-strip
 
+## Geometry Inputs
+
+`GeometryScale` turns these factors into pixels from each family primary dimension. `compactGeometryScale` is text/layout-only; it does not change the graphical factors below.
+
+| Path | Input var | Default | Use |
+|---|---|---|---|
+| `strokeWeight` | `--dyni-stroke-weight` | `1.0` | Shared multiplier for stroke widths |
+| `pointerDepthWeight` | `--dyni-pointer-depth-weight` | `1.0` | Shared multiplier for pointer and boat depth |
+| `pointerSideWeight` | `--dyni-pointer-side-weight` | `1.0` | Shared multiplier for pointer side thickness |
+| `radial.ticks.majorLenFactor` | `--dyni-radial-tick-major-len-factor` | `0.08` | Radial major tick length factor |
+| `radial.ticks.majorWidthFactor` | `--dyni-radial-tick-major-width-factor` | `0.02` | Radial major tick stroke-width factor |
+| `radial.ticks.minorLenFactor` | `--dyni-radial-tick-minor-len-factor` | `0.047` | Radial minor tick length factor |
+| `radial.ticks.minorWidthFactor` | `--dyni-radial-tick-minor-width-factor` | `0.01` | Radial minor tick stroke-width factor |
+| `radial.pointer.sideFactor` | `--dyni-radial-pointer-side-factor` | `0.11` | Radial pointer side-thickness factor |
+| `radial.pointer.depthFactor` | `--dyni-radial-pointer-depth-factor` | `0.22` | Radial pointer depth factor |
+| `radial.ring.arcLineWidthFactor` | `--dyni-radial-arc-linewidth-factor` | `0.013` | Radial arc stroke-width factor |
+| `linear.track.widthFactor` | `--dyni-linear-track-width` | `0.16` | Linear track thickness factor |
+| `linear.track.lineWidthFactor` | `--dyni-linear-track-linewidth-factor` | `0.018` | Linear track stroke-width factor |
+| `linear.ticks.majorLenFactor` | `--dyni-linear-tick-major-len-factor` | `0.109` | Linear major tick length factor |
+| `linear.ticks.majorWidthFactor` | `--dyni-linear-tick-major-width-factor` | `0.027` | Linear major tick stroke-width factor |
+| `linear.ticks.minorLenFactor` | `--dyni-linear-tick-minor-len-factor` | `0.064` | Linear minor tick length factor |
+| `linear.ticks.minorWidthFactor` | `--dyni-linear-tick-minor-width-factor` | `0.014` | Linear minor tick stroke-width factor |
+| `linear.pointer.sideFactor` | `--dyni-linear-pointer-side-factor` | `0.12` | Linear pointer side-thickness factor |
+| `linear.pointer.depthFactor` | `--dyni-linear-pointer-depth-factor` | `0.24` | Linear pointer depth factor |
+
 ## Alarm Widget Surface Tokens
 
 The alarm widget reads these semantic paths through `ThemeResolver.resolveForRoot(rootEl)`. They are overrideable from `user.css`, and the active preset still supplies the fallback values when no root override is present.

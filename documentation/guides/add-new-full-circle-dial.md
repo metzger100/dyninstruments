@@ -26,7 +26,8 @@ Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
    - `const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers)`
 3. Respect responsive ownership:
    - `FullCircleRadialLayout` already consumes `ResponsiveScaleProfile` and owns compact insets, dial geometry, slot bounds, and compact geometry scales.
-   - Wrapper callbacks consume `state.layout`, `state.responsive`, `state.textFillScale`, and `state.compactGeometryScale`.
+   - `GeometryScale` already handles the factor-to-pixel conversion from the dial radius.
+   - Wrapper callbacks consume `state.layout`, `state.responsive`, `state.textFillScale`, and `state.compactGeometryScale` for text/layout only.
    - Do not import `ResponsiveScaleProfile` directly and do not add widget-local user-visible responsive `Math.max(...)` / `clamp(...)` floors.
 4. Add widget-specific display strategy only:
    - single-value display object (compass-style), or
@@ -68,11 +69,7 @@ Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
         const display = buildDisplay(state, props);
         api.drawCachedLayer("back");
         api.drawFixedPointer(state.ctx, Number(props.pointerAngle) || 0, {
-          depth: state.geom.needleDepth,
-          variant: "long",
-          fillStyle: state.theme.colors.pointer,
-          widthFactor: state.theme.radial.pointer.widthFactor,
-          lengthFactor: state.theme.radial.pointer.lengthFactor
+          fillStyle: state.theme.colors.pointer
         });
         api.drawCachedLayer("front");
       },

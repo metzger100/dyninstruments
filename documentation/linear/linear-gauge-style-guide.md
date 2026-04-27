@@ -24,6 +24,7 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 - `hideTextualMetrics` is the public `Hide textual metrics` toggle, defaults to `false`, and applies to Speed, Depth, Temperature, Voltage, Compass, Wind, and Default linear gauges.
 - When `hideTextualMetrics` is enabled, linear gauges keep tick labels, end labels, scale labels, pointers, sectors, and state screens visible while removing the live caption/value/unit text.
 - Migrated linear gauges resolve formatter tokens separately from display labels; the token selects conversion and the display label stays editable per token.
+- Shared geometry weights come from `theme.strokeWeight`, `theme.pointerDepthWeight`, and `theme.pointerSideWeight`.
 - Canvas state-screen behavior is engine-owned: `p.disconnect === true` resolves to `disconnected`, clears the canvas, and renders shared `StateScreenCanvasOverlay` (`GPS Lost`) before any gauge drawing.
 
 ## Supported Profiles
@@ -41,13 +42,14 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 
 - Track stays centered in a dedicated scale box.
 - Sector bands render above the scale line so the track stroke remains visible.
-- Tick lengths/widths use `theme.linear.ticks.*`.
-- Pointer triangle uses `theme.linear.pointer.*` and `theme.colors.pointer`.
+- Tick lengths/widths use `theme.linear.ticks.*Factor` plus `theme.strokeWeight`.
+- Pointer triangle uses `theme.linear.pointer.sideFactor`, `theme.linear.pointer.depthFactor`, `theme.pointerSideWeight`, `theme.pointerDepthWeight`, and `theme.colors.pointer`.
 - Waypoint/course markers use layout-based default sizing independent from rendered track thickness, end at the scale line, and render as flat rectangular bars instead of rounded caps.
 - Tick labels use `theme.linear.labels.insetFactor` and `theme.linear.labels.fontFactor`.
 - In graphics-only and compact linear layouts, major tick labels are dynamically fitted to the usable scale width before drawing, so narrow tall widgets shrink labels instead of clipping them.
 - Major labels are not removed just because they overlap at the base font size; the engine keeps drawing the full major-label set after fitting.
 - Caption/value rows use `captionUnitScale` in `high` and `flat`.
+- `GeometryScale` converts the linear primary dimension (`min(trackBox.w, trackBox.h)`) into graphical pixels; `compactGeometryScale` only changes text/layout spacing.
 
 ## Colors
 

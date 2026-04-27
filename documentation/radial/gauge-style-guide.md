@@ -4,14 +4,15 @@
 
 ## Overview
 
-Visual specification for semicircle gauge widgets. All semicircle radial gauges in this family share visual proportions and layout logic; data source/formatting/sector strategy differs per gauge.
+Visual specification for semicircle gauge widgets. `GeometryScale` turns the semicircle radius into ring, tick, and pointer pixels while `compactGeometryScale` only tightens label and text spacing; data source/formatting/sector strategy still differs per gauge.
+Shared geometry weights come from `theme.strokeWeight`, `theme.pointerDepthWeight`, and `theme.pointerSideWeight`.
 
 ## Arc Configuration
 
 - Shape: N-shaped semicircle (opening downward)
 - Default arc: `startDeg = 270`, `endDeg = 450`
 - Angle convention: 0° at North, clockwise positive
-- Generic dial ring/arc stroke width: `theme.radial.ring.arcLineWidth` (default `1`)
+- Generic dial ring/arc stroke width: `GeometryScale.scaleStroke(R, theme.radial.ring.arcLineWidthFactor, strokeWeight)`
 
 Value-to-angle mapping:
 
@@ -26,8 +27,8 @@ angleDeg = startDeg + (endDeg - startDeg) * ((value - min) / (max - min))
 | `R` | `min(floor(availW/2), floor(availH))`, min 14 | 100 |
 | `pad` | `ResponsiveScaleProfile.computeInsetPx(responsive, 0.04, 1)` | ~4 |
 | `gap` | `ResponsiveScaleProfile.computeInsetPx(responsive, 0.03, 1)` | ~3 |
-| `ringW` | `max(6, floor(R * theme.radial.ring.widthFactor))` (default `0.16`) | 12 |
-| `needleDepth` | `max(8, floor(R * 0.11))` | 10 |
+| `ringW` | `GeometryScale.scale(R, theme.radial.ring.widthFactor)` | 12 |
+| `pointerDepth` | `GeometryScale.scalePointer(R, theme.radial.pointer.depthFactor, pointerDepthWeight)` | 10 |
 | `labelInset` | `max(1, floor(ringW * theme.radial.labels.insetFactor * compactGeometryScale))` | ~17 |
 | `labelFontPx` | `max(1, floor(R * theme.radial.labels.fontFactor * compactGeometryScale))` | ~16 |
 
@@ -46,6 +47,8 @@ Shared compact math:
 textFillScale = lerp(1.18, 1, t)
 compactGeometryScale = max(0.5, 1 - max(0, textFillScale - 1))
 ```
+
+`compactGeometryScale` applies only to label and text spacing, not ring, tick, or pointer geometry.
 
 Ownership:
 
@@ -72,20 +75,18 @@ All semicircle gauges use the same pointer call:
 
 ```javascript
 draw.drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, {
-  depth: needleDepth,
+  depth: pointerDepth,
   fillStyle: theme.colors.pointer,
-  variant: "long",
-  widthFactor: theme.radial.pointer.widthFactor,
-  lengthFactor: theme.radial.pointer.lengthFactor
+  variant: "long"
 });
 ```
 
 Pointer color is passed directly via `fillStyle` from `theme.colors.pointer`.
-Pointer length and full rendered width both scale from the same base `needleDepth`:
+Pointer depth and side thickness are scaled in the layout owner from the semicircle radius using shared weights:
 
 ```text
-pointerLengthPx = max(8, floor(needleDepth * theme.radial.pointer.lengthFactor))
-pointerWidthPx = max(8, floor(needleDepth * theme.radial.pointer.widthFactor))
+pointerDepthPx = GeometryScale.scalePointer(R, theme.radial.pointer.depthFactor, pointerDepthWeight)
+pointerSidePx = GeometryScale.scalePointer(R, theme.radial.pointer.sideFactor, pointerSideWeight)
 ```
 
 ## Sector Logic
@@ -193,8 +194,8 @@ Text fit contract for semicircle gauges:
 
 ## Tick Rendering
 
-- Major ticks: `len=theme.radial.ticks.majorLen`, `width=theme.radial.ticks.majorWidth`
-- Minor ticks: `len=theme.radial.ticks.minorLen`, `width=theme.radial.ticks.minorWidth`
+- Major ticks: `len=GeometryScale.scale(R, theme.radial.ticks.majorLenFactor)`, `width=GeometryScale.scaleStroke(R, theme.radial.ticks.majorWidthFactor, strokeWeight)`
+- Minor ticks: `len=GeometryScale.scale(R, theme.radial.ticks.minorLenFactor)`, `width=GeometryScale.scaleStroke(R, theme.radial.ticks.minorWidthFactor, strokeWeight)`
 - Labels: `weight=theme.font.labelWeight`, font family from `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).font.family`
 - End labels optional via `showEndLabels`
 

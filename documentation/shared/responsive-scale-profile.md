@@ -5,7 +5,8 @@
 ## Overview
 
 `shared/widget-kits/layout/ResponsiveScaleProfile.js` owns the repo-wide `minDim -> t` compact curve used by layout-owner modules.
-It also exposes the shared intrinsic-spacing helpers used by layout owners to derive compact inner padding, dual gaps, and metric caption bands without reintroducing widget-local spacing formulas.
+`shared/widget-kits/layout/GeometryScale.js` is the shared factor-to-pixel scaler for graphical dimensions.
+Together they let layout owners keep responsive text/layout compaction separate from graphical geometry scaling.
 
 ## Key Details
 
@@ -13,11 +14,25 @@ It also exposes the shared intrinsic-spacing helpers used by layout owners to de
 - Shared owner responsibility: base `minDim -> t` compaction math, named scale outputs, and intrinsic-spacing helpers used by multiple widget families
 - Layout-owner responsibility: map shared scale outputs into family-specific geometry, spacing, share, and text-ceiling rules
 - Non-owners: cluster mappers, renderer props, theme tokens, `plugin.css`, and editable parameters
+- Graphical factor-to-pixel scaling is handled by `GeometryScale.scale()`, `GeometryScale.scaleStroke()`, and `GeometryScale.scalePointer()`
+- Family primary dimensions:
+  - radial = radius
+  - linear = `min(trackBox.w, trackBox.h)`
+  - XTE = `min(highway.w, highway.h)`
+- `compactGeometryScale` only tightens text/layout spacing, label insets, and slot ceilings; it does not scale graphical dimensions
 - Base compaction constants stay JS-owned for now; they are not promoted to CSS/theme/runtime config
 - One repo-wide base curve is the contract; family-specific outputs may layer on top of it, but they must not replace it with independent widget-local curves
 - Local hard floors are allowed only for technical safety bounds (`0`, `1`, `2`, or equivalent non-visual guards)
 
 ## API/Interfaces
+
+GeometryScale API:
+
+```javascript
+scale(primaryDim, factor)
+scaleStroke(primaryDim, factor, strokeWeight)
+scalePointer(primaryDim, factor, weight)
+```
 
 Runtime API:
 

@@ -146,15 +146,15 @@ Available preset names:
   --dyni-pointer: #00aaff;
   --dyni-warning: #f5c542;
   --dyni-alarm: #ff5533;
-  --dyni-radial-arc-linewidth: 1.5;
-  --dyni-radial-tick-major-width: 2.5;
-  --dyni-radial-pointer-width: 1.2;
-  --dyni-xte-boat-size-factor: 1.2;
+  --dyni-radial-arc-linewidth-factor: 1.5;
+  --dyni-radial-tick-major-width-factor: 0.025;
+  --dyni-radial-pointer-side-factor: 0.12;
   --dyni-font-weight: 800;
 }
 ```
 
 Direct token overrides beat the active preset. They are resolved by `ThemeResolver`, so they no longer depend on `plugin.css` load order.
+`GeometryScale` turns the factor tokens into pixels from the family primary dimension: radius for radial dials, `min(trackBox.w, trackBox.h)` for linear gauges, and `min(highway.w, highway.h)` for XTE.
 
 ### 3) Full CSS token reference
 
@@ -184,13 +184,16 @@ Values below are valid `user.css` examples. For `ThemeResolver` tokens, the exam
 
 | Token | Example value | Description |
 |---|---|---|
-| `--dyni-radial-tick-major-len` | `12` | Major radial tick length in px-style factor units. |
-| `--dyni-radial-tick-major-width` | `3` | Major radial tick stroke width. |
-| `--dyni-radial-tick-minor-len` | `7` | Minor radial tick length. |
-| `--dyni-radial-tick-minor-width` | `1.5` | Minor radial tick stroke width. |
-| `--dyni-radial-pointer-width` | `1` | Full-width factor for radial pointers. |
-| `--dyni-radial-pointer-length` | `2` | Length factor for radial pointers. |
-| `--dyni-radial-arc-linewidth` | `2` | Arc stroke width. |
+| `--dyni-stroke-weight` | `1` | Shared multiplier for stroke widths. |
+| `--dyni-pointer-depth-weight` | `1` | Shared multiplier for pointer and boat depth. |
+| `--dyni-pointer-side-weight` | `1` | Shared multiplier for pointer side thickness. |
+| `--dyni-radial-tick-major-len-factor` | `0.08` | Major radial tick length factor. |
+| `--dyni-radial-tick-major-width-factor` | `0.02` | Major radial tick stroke-width factor. |
+| `--dyni-radial-tick-minor-len-factor` | `0.047` | Minor radial tick length factor. |
+| `--dyni-radial-tick-minor-width-factor` | `0.01` | Minor radial tick stroke-width factor. |
+| `--dyni-radial-pointer-side-factor` | `0.11` | Radial pointer side-thickness factor. |
+| `--dyni-radial-pointer-depth-factor` | `0.22` | Radial pointer depth factor. |
+| `--dyni-radial-arc-linewidth-factor` | `0.013` | Arc stroke-width factor. |
 | `--dyni-radial-ring-width` | `0.16` | Ring thickness factor. |
 | `--dyni-radial-label-inset` | `1.8` | Label inset factor from the ring edge. |
 | `--dyni-radial-label-font` | `0.14` | Radial label font-size factor. |
@@ -203,13 +206,13 @@ Values below are valid `user.css` examples. For `ThemeResolver` tokens, the exam
 | Token | Example value | Description |
 |---|---|---|
 | `--dyni-linear-track-width` | `0.16` | Linear track thickness factor. |
-| `--dyni-linear-track-linewidth` | `2` | Linear track stroke width. |
-| `--dyni-linear-tick-major-len` | `12` | Major linear tick length. |
-| `--dyni-linear-tick-major-width` | `3` | Major linear tick stroke width. |
-| `--dyni-linear-tick-minor-len` | `7` | Minor linear tick length. |
-| `--dyni-linear-tick-minor-width` | `1.5` | Minor linear tick stroke width. |
-| `--dyni-linear-pointer-width` | `1` | Full-width factor for linear pointers. |
-| `--dyni-linear-pointer-length` | `2` | Length factor for linear pointers. |
+| `--dyni-linear-track-linewidth-factor` | `0.018` | Linear track stroke-width factor. |
+| `--dyni-linear-tick-major-len-factor` | `0.109` | Major linear tick length factor. |
+| `--dyni-linear-tick-major-width-factor` | `0.027` | Major linear tick stroke-width factor. |
+| `--dyni-linear-tick-minor-len-factor` | `0.064` | Minor linear tick length factor. |
+| `--dyni-linear-tick-minor-width-factor` | `0.014` | Minor linear tick stroke-width factor. |
+| `--dyni-linear-pointer-side-factor` | `0.12` | Linear pointer side-thickness factor. |
+| `--dyni-linear-pointer-depth-factor` | `0.24` | Linear pointer depth factor. |
 | `--dyni-linear-label-inset` | `1.8` | Label inset factor for linear gauges. |
 | `--dyni-linear-label-font` | `0.14` | Linear label font-size factor. |
 
@@ -219,8 +222,8 @@ Values below are valid `user.css` examples. For `ThemeResolver` tokens, the exam
 |---|---|---|
 | `--dyni-font-weight` | `700` | Primary numeric/value text weight. |
 | `--dyni-label-weight` | `700` | Caption/unit/tick-label text weight. |
-| `--dyni-xte-line-width-factor` | `1.5` | Stroke width multiplier for the XTE highway renderer. |
-| `--dyni-xte-boat-size-factor` | `1` | Size multiplier for the XTE boat indicator glyph. |
+
+XTE geometry uses the shared `GeometryScale` helper plus internal highway factors and the shared `--dyni-stroke-weight` / `--dyni-pointer-depth-weight` inputs. There is no `--dyni-xte-*` geometry namespace.
 
 ### 4) Preset precedence
 

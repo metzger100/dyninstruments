@@ -4,7 +4,8 @@
 
 ## Overview
 
-Visual specification for full-circle dial widgets. Constants and formulas are implementation-derived from `FullCircleRadialLayout`, `FullCircleRadialEngine`, `FullCircleRadialTextLayout`, widget modules, and shared `CanvasLayerCache`.
+Visual specification for full-circle dial widgets. `GeometryScale` turns the dial radius into ring, tick, pointer, and marker pixels while `compactGeometryScale` only affects label and slot spacing; constants and formulas are implementation-derived from `FullCircleRadialLayout`, `FullCircleRadialEngine`, `FullCircleRadialTextLayout`, widget modules, and shared `CanvasLayerCache`.
+Shared geometry weights come from `theme.strokeWeight`, `theme.pointerDepthWeight`, and `theme.pointerSideWeight`.
 
 ## Key Details
 
@@ -35,11 +36,11 @@ Visual specification for full-circle dial widgets. Constants and formulas are im
 | `R` | `max(1, floor(min(contentRect.w, contentRect.h) / 2))` | `FullCircleRadialLayout.computeLayout()` |
 | `cx` | `contentRect.x + floor(contentRect.w / 2)` | `FullCircleRadialLayout.computeLayout()` |
 | `cy` | `contentRect.y + floor(contentRect.h / 2)` | `FullCircleRadialLayout.computeLayout()` |
-| `ringW` | `max(1, floor(R * theme.radial.ring.widthFactor * compactGeometryScale))` | `FullCircleRadialLayout.computeLayout()` |
-| `needleDepth` | `max(1, floor(R * 0.11 * compactGeometryScale))` | `FullCircleRadialLayout.computeLayout()` |
+| `ringW` | `GeometryScale.scale(R, theme.radial.ring.widthFactor)` | `FullCircleRadialLayout.computeLayout()` |
+| `needleDepth` | `GeometryScale.scalePointer(R, theme.radial.pointer.depthFactor, pointerDepthWeight)` | `FullCircleRadialLayout.computeLayout()` |
 | `fixedPointerDepth` | `max(needleDepth, floor(ringW * 0.6))` | `FullCircleRadialLayout.computeLayout()` |
-| `markerLen` | `max(1, floor(ringW * 0.75))` | `FullCircleRadialLayout.computeLayout()` |
-| `markerWidth` | `max(1, floor(ringW * 0.20))` | `FullCircleRadialLayout.computeLayout()` |
+| `markerLen` | `GeometryScale.scale(R, theme.radial.ring.widthFactor * 0.75)` | `FullCircleRadialLayout.computeLayout()` |
+| `markerWidth` | `GeometryScale.scalePointer(R, theme.radial.ring.widthFactor * 0.20, pointerSideWeight)` | `FullCircleRadialLayout.computeLayout()` |
 | `labelInsetVal` | `max(1, floor(ringW * theme.radial.labels.insetFactor))` | `FullCircleRadialLayout.computeLayout()` |
 | `labelPx` | `max(1, floor(R * max(theme.radial.labels.fontFactor, 0.18) * compactGeometryScale))` | `FullCircleRadialLayout.computeLayout()` |
 | `labelRadius` | `max(0, R - max(1, floor(ringW * 2.2)))` | `FullCircleRadialLayout.computeLayout()` |
@@ -48,10 +49,10 @@ Visual specification for full-circle dial widgets. Constants and formulas are im
 | `topStrip` | `max(0, floor((contentRect.h - 2*R) / 2))` | `FullCircleRadialLayout.computeLayout()` |
 | `bottomStrip` | `topStrip` | `computeGeometry()` |
 
-Tick lengths are token-defined pixel values that the engine scales with `compactGeometryScale` before drawing:
-- Major: `max(1, round(theme.radial.ticks.majorLen * compactGeometryScale))`
-- Minor: `max(1, round(theme.radial.ticks.minorLen * compactGeometryScale))`
-- The engine applies a soft cap of `labelInset - 2` on compact dials to keep inward ticks out of the label lane.
+Tick lengths come from the layout owner via `GeometryScale` and shared weights:
+- Major: `GeometryScale.scale(R, theme.radial.ticks.majorLenFactor)` with `strokeWeight`
+- Minor: `GeometryScale.scale(R, theme.radial.ticks.minorLenFactor)` with `strokeWeight`
+- There is no `resolveResponsiveTickLen` helper or tick soft cap; `compactGeometryScale` only affects label and slot spacing.
 
 ## Colors
 
@@ -64,7 +65,7 @@ Tick lengths are token-defined pixel values that the engine scales with `compact
 | Tick stroke | resolved text color | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` | runtime CSS-derived |
 | Label text | resolved text color | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` | runtime CSS-derived |
 
-Ring stroke width: `theme.radial.ring.arcLineWidth` (default `1`).
+Ring stroke width: `GeometryScale.scaleStroke(R, theme.radial.ring.arcLineWidthFactor, strokeWeight)`.
 
 ## Pointer Variants
 
@@ -74,9 +75,9 @@ Ring stroke width: `theme.radial.ring.arcLineWidth` (default `1`).
 | Value pointer (dynamic) | `WindRadialWidget` | `display.angle` | `needleDepth` | `variant="long"`, `fillStyle=theme.colors.pointer` |
 
 Shared pointer shape controls:
-- `theme.radial.pointer.widthFactor` (`--dyni-radial-pointer-width`, default `1`)
-- `theme.radial.pointer.lengthFactor` (`--dyni-radial-pointer-length`, default `2`)
-- Both factors scale from the same unscaled `needleDepth`; width is the full rendered pointer width.
+- `theme.radial.pointer.sideFactor` (`--dyni-radial-pointer-side-factor`, default `0.11`)
+- `theme.radial.pointer.depthFactor` (`--dyni-radial-pointer-depth-factor`, default `0.22`)
+- Both factors scale from the radius via `GeometryScale` and the shared `pointerSideWeight` / `pointerDepthWeight` inputs.
 
 ## Tick Rendering
 

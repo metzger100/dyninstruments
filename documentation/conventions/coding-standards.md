@@ -185,7 +185,6 @@ Current shared utilities include:
 - `RadialValueMath.formatAngle180()`
 - `RadialValueMath.formatDirection360()`
 - `RadialValueMath.computeMode()`
-- `RadialValueMath.computeSemicircleGeometry()`
 - `RadialTextLayout.setFont()`
 - `RadialTextLayout.measureTextWidth()`
 - `RadialTextLayout.fitSingleTextPx()`
@@ -196,6 +195,9 @@ Current shared utilities include:
 - `UnitAwareFormatter.extractNumericDisplay()`
 - `Helpers.applyFormatter()`
 - `Helpers.getNightModeState()`
+- `GeometryScale.scale()`
+- `GeometryScale.scaleStroke()`
+- `GeometryScale.scalePointer()`
 
 Check these before writing any helper function. For shared gauge utility APIs, see [../radial/gauge-shared-api.md](../radial/gauge-shared-api.md).
 

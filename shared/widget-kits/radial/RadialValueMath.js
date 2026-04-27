@@ -1,5 +1,5 @@
 /**
- * Module: RadialValueMath - Shared numeric, range, angle and semicircle geometry helpers
+ * Module: RadialValueMath - Shared numeric, range and angle helpers
  * Documentation: documentation/radial/gauge-shared-api.md
  * Depends: RadialAngleMath
  */
@@ -336,36 +336,6 @@
       return String(rounded);
     }
 
-    function computeSemicircleGeometry(W, H, pad, overrides) {
-      const availW = Math.max(1, W - 2 * pad);
-      const availH = Math.max(1, H - 2 * pad);
-      const opts = overrides || {};
-
-      const R = Math.max(14, Math.min(Math.floor(availW / 2), Math.floor(availH)));
-      const gaugeLeft = pad + Math.floor((availW - 2 * R) / 2);
-      const gaugeTop = pad + Math.floor((availH - R) / 2);
-
-      const ringWidthFactor = Number(opts.ringWidthFactor);
-      const ringW = Math.max(6, Math.floor(R * (isFinite(ringWidthFactor) ? ringWidthFactor : 0.12)));
-      const needleDepthFactor = Number(opts.needleDepthFactor);
-      const needleDepth = isFinite(needleDepthFactor)
-        ? Math.max(8, Math.floor(ringW * needleDepthFactor))
-        : Math.max(8, Math.floor(R * 0.11));
-
-      return {
-        availW,
-        availH,
-        R,
-        gaugeLeft,
-        gaugeTop,
-        cx: gaugeLeft + R,
-        cy: gaugeTop + R,
-        rOuter: R,
-        ringW,
-        needleDepth
-      };
-    }
-
     return {
       id: "RadialValueMath",
       version: "0.1.0",
@@ -391,8 +361,7 @@
       buildLowEndSectors,
       formatAngle180,
       formatDirection360,
-      formatMajorLabel,
-      computeSemicircleGeometry
+      formatMajorLabel
     };
   }
 

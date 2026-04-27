@@ -11,43 +11,12 @@ describe("RadialValueMath", function () {
     });
   }
 
-  it("normalizes ranges and keeps semicircle geometry backward compatible without overrides", function () {
+  it("normalizes ranges and does not expose legacy semicircle geometry helpers", function () {
     const v = create();
 
     expect(v.normalizeRange(undefined, undefined, 0, 10)).toEqual({ min: 0, max: 10, range: 10 });
     expect(v.normalizeRange(5, 4, 0, 10)).toEqual({ min: 5, max: 6, range: 1 });
-
-    expect(v.computeSemicircleGeometry(320, 180, 8)).toEqual({
-      availW: 304,
-      availH: 164,
-      R: 152,
-      gaugeLeft: 8,
-      gaugeTop: 14,
-      cx: 160,
-      cy: 166,
-      rOuter: 152,
-      ringW: 18,
-      needleDepth: 16
-    });
-  });
-
-  it("applies ringWidthFactor override without changing default pointer depth", function () {
-    const v = create();
-    expect(v.computeSemicircleGeometry(320, 180, 8, { ringWidthFactor: 0.2 })).toMatchObject({
-      ringW: 30,
-      needleDepth: 16
-    });
-  });
-
-  it("applies optional needleDepthFactor override when provided", function () {
-    const v = create();
-    expect(v.computeSemicircleGeometry(320, 180, 8, {
-      ringWidthFactor: 0.2,
-      needleDepthFactor: 0.5
-    })).toMatchObject({
-      ringW: 30,
-      needleDepth: 15
-    });
+    expect(v.computeSemicircleGeometry).toBeUndefined();
   });
 
   it("builds tick angles and includes arc boundaries as major ticks", function () {

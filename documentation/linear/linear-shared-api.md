@@ -13,6 +13,7 @@ Linear instruments use a shared engine pipeline:
 - `shared/widget-kits/linear/LinearGaugeEngine.js`
 
 New linear widgets should delegate rendering to `LinearGaugeEngine.createRenderer(spec)`.
+`GeometryScale` turns the linear primary dimension (`min(trackBox.w, trackBox.h)`) into graphical pixels.
 
 ## Components
 
@@ -42,10 +43,12 @@ New linear widgets should delegate rendering to `LinearGaugeEngine.createRendere
 Ownership:
 
 - `ResponsiveScaleProfile` owns the shared `minDim -> textFillScale` curve.
-- `LinearGaugeLayout` owns linear-family ratio mode selection, insets/gaps, track/text rectangles, and row splitting.
+- `LinearGaugeLayout` owns linear-family ratio mode selection, insets/gaps, track/text rectangles, row splitting, and the family primary dimension.
+- `GeometryScale` converts the linear primary dimension into track, tick, and pointer pixels from the layout-owned factors.
 - `hideTextualMetrics` is a layout-owned switch. When true, `computeLayout(...)` removes the live caption/value/unit text boxes and returns reclaimed graphics-only geometry for `flat`, `normal`, and `high`.
 - Optional `layoutConfig` lets wrappers remap `normal` / `high` geometry without reimplementing the shared gauge pipeline.
 - `LinearGaugeEngine` and `LinearGaugeTextLayout` are consumers of that layout state; they do not own a second compact curve.
+- `compactGeometryScale` only affects text/layout spacing and fitted text ceilings, not graphical geometry.
 
 ## Responsive Ownership Contract
 
@@ -223,17 +226,17 @@ const renderCanvas = engine.createRenderer({
 Reads `ThemeResolver` tokens:
 
 - `theme.linear.track.widthFactor`
-- `theme.linear.track.lineWidth`
-- `theme.linear.ticks.majorLen`, `majorWidth`, `minorLen`, `minorWidth`
-- `theme.linear.pointer.widthFactor`, `lengthFactor`
+- `theme.linear.track.lineWidthFactor`
+- `theme.linear.ticks.majorLenFactor`, `majorWidthFactor`, `minorLenFactor`, `minorWidthFactor`
+- `theme.linear.pointer.sideFactor`, `depthFactor`
 - `theme.linear.labels.insetFactor`, `fontFactor`
 - `theme.colors.pointer`, `theme.colors.warning`, `theme.colors.alarm`
 
 Default linear pointer and marker sizing stays geometry-driven:
-- base pointer/marker size is derived from `layout.trackBox.h`
-- pointer length uses `theme.linear.pointer.lengthFactor`
-- pointer width uses `theme.linear.pointer.widthFactor`
-- compact tiles reduce those defaults via the shared compact profile instead of fixed pixel floors
+- base pointer/marker size is derived from `primaryDim = min(layout.trackBox.w, layout.trackBox.h)`
+- pointer depth uses `theme.pointerDepthWeight` with `theme.linear.pointer.depthFactor`
+- pointer side uses `theme.pointerSideWeight` with `theme.linear.pointer.sideFactor`
+- compact tiles reduce text/layout spacing via the shared compact profile instead of fixed pixel floors
 
 ## Testing Contract for New Linear Wrappers
 

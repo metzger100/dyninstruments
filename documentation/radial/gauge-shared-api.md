@@ -23,12 +23,15 @@ Shared gauge logic is split into focused core modules:
 - `FullCircleRadialLayout` as shared responsive layout owner for Compass/Wind dials
 - `FullCircleRadialEngine` as shared render flow for Compass/Wind dials
 - `FullCircleRadialTextLayout` as shared mode text helper for full-circle wrappers
+- `GeometryScale` as the shared factor-to-pixel scaler for radial graphical geometry
 
 ## Responsive Ownership Contract
 
 - `ResponsiveScaleProfile` owns the shared `minDim -> t -> textFillScale` compaction curve.
-- `SemicircleRadialLayout` and `FullCircleRadialLayout` map that curve into family-specific insets, geometry, label metrics, slot bounds, and geometry scales.
+- `SemicircleRadialLayout` and `FullCircleRadialLayout` map that curve into family-specific insets, slot bounds, label metrics, and text/layout spacing.
+- `GeometryScale` turns the family primary dimension into ring, tick, and pointer pixels; radial primary dimension is radius.
 - `SemicircleRadialEngine`, `SemicircleRadialTextLayout`, `FullCircleRadialEngine`, `FullCircleRadialTextLayout`, and wrapper callbacks consume layout-owned `responsive`, `textFillScale`, and `compactGeometryScale`.
+- `compactGeometryScale` only affects text/layout spacing and label sizing; it does not resize ring, tick, or pointer geometry.
 - Wrapper widgets must not import `ResponsiveScaleProfile` or add widget-local user-visible responsive floors; compact policy stays in the layout owners.
 
 ## Module Registration
@@ -184,7 +187,7 @@ Key signatures:
 ## RadialValueMath API
 
 `RadialValueMath.create(def, Helpers)` returns shared numeric helpers:
-`isFiniteNumber`, `extractNumberText`, `clamp`, `almostInt`, `isApprox`, `computePad`, `computeGap`, `computeMode`, `resolveSemicircleTickSteps`, `resolveStandardSemicircleTickSteps`, `resolveTemperatureSemicircleTickSteps`, `resolveVoltageSemicircleTickSteps`, `normalizeRange`, `valueToAngle`, `angleToValue`, `buildValueTickAngles`, `sectorAngles`, `buildHighEndSectors`, `buildLowEndSectors`, `formatAngle180`, `formatDirection360`, `formatMajorLabel`, `computeSemicircleGeometry`.
+`isFiniteNumber`, `extractNumberText`, `clamp`, `almostInt`, `isApprox`, `computePad`, `computeGap`, `computeMode`, `resolveSemicircleTickSteps`, `resolveStandardSemicircleTickSteps`, `resolveTemperatureSemicircleTickSteps`, `resolveVoltageSemicircleTickSteps`, `normalizeRange`, `valueToAngle`, `angleToValue`, `buildValueTickAngles`, `sectorAngles`, `buildHighEndSectors`, `buildLowEndSectors`, `formatAngle180`, `formatDirection360`, `formatMajorLabel`.
 
 ### Semicircle Tick-Step Resolvers
 
@@ -197,19 +200,7 @@ Key signatures:
 
 All resolvers return `{ major, minor }` and preserve explicit profile defaults for invalid/non-positive ranges.
 
-### `computeSemicircleGeometry(W, H, pad, overrides?)`
-
-Computes centered semicircle geometry metrics:
-
-- Returns: `{ availW, availH, R, gaugeLeft, gaugeTop, cx, cy, rOuter, ringW, needleDepth }`
-- Backward compatible: existing 3-argument calls are unchanged
-
-Optional `overrides` fields:
-
-| Field | Type | Default | Behavior |
-|---|---|---|---|
-| `ringWidthFactor` | number | `0.12` | Computes `ringW = max(6, floor(R * ringWidthFactor))` |
-| `needleDepthFactor` | number | derived | If provided: `needleDepth = max(8, floor(ringW * needleDepthFactor))`; if omitted, default pointer depth is decoupled from ring thickness via `max(8, floor(R * 0.11))` |
+Semicircle geometry is owned by `SemicircleRadialLayout.computeLayout(...)`; `RadialValueMath` no longer exports a geometry helper.
 
 ## TextLayoutEngine API
 
@@ -239,7 +230,7 @@ Responsive ownership for the semicircle family:
 
 `computeLayout(...)` returns layout-owned geometry:
 
-- `geom` (`R`, `cx`, `cy`, `rOuter`, `ringW`, `needleDepth`, placement)
+- `geom` (`R`, `cx`, `cy`, `rOuter`, `ringW`, `pointerDepth`, `pointerSide`, placement)
 - `labels` (`radiusOffset`, `fontPx`)
 - `flat` boxes (`box`, `topBox`, `bottomBox`)
 - `high.bandBox`

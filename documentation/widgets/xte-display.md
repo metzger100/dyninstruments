@@ -30,6 +30,7 @@ Layout ownership:
 - `shared/widget-kits/xte/XteHighwayLayout.js` also owns metric-tile padding and caption-band compaction for `TextTileLayout`
 - `shared/widget-kits/xte/XteHighwayPrimitives.js` owns highway geometry drawing, dynamic marker drawing, and waypoint visibility heuristics
 - `shared/widget-kits/layout/ResponsiveScaleProfile.js` owns the shared compact curve consumed by `XteHighwayLayout`
+- `shared/widget-kits/layout/GeometryScale.js` scales the highway graphics from the primary dimension `min(highway.w, highway.h)`
 
 ## Module Registration
 
@@ -101,10 +102,12 @@ Theme is resolved once per frame via `RadialToolkit.theme.resolveForRoot(Helpers
 | Out-of-scale clamp marker | `theme.colors.alarm` |
 | Road edge + horizon strokes | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` |
 | Perspective bars + center seam markers | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` |
-| Highway stroke thickness | `theme.xte.lineWidthFactor` (fallback `1` when invalid or `<=0`) |
-| Boat indicator size | `theme.xte.boatSizeFactor` (fallback `1` when invalid or `<=0`) |
+| Highway line widths | internal factors via `GeometryScale.scaleStroke(..., strokeWeight)` |
+| Boat marker size | internal factors via `GeometryScale.scalePointer(..., pointerDepthWeight)` |
 | Value text weight | `theme.font.weight` |
 | Label text weight | `theme.font.labelWeight` |
+
+XTE geometry does not read `theme.xte.*`. Line widths and boat size are derived from internal highway factors plus the shared `strokeWeight` and `pointerDepthWeight` inputs.
 
 ## Layout Modes
 
@@ -175,7 +178,7 @@ Static key includes:
 - mode
 - highway geometry
 - resolved foreground colors used in static draw
-- style inputs affecting static layer (`xte.lineWidthFactor`)
+- style inputs affecting static layer (`strokeWeight`)
 
 Dynamic elements are never cached:
 
@@ -183,6 +186,8 @@ Dynamic elements are never cached:
 - active centerline overlay
 - overflow alarm cue
 - live metric text
+
+The boat marker size is dynamic and comes from the shared `pointerDepthWeight` input plus internal marker factors; it is not cached as a `theme.xte.*` token.
 
 ## Phase 6 Options
 

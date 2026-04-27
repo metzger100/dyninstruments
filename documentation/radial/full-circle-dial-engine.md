@@ -24,7 +24,8 @@
 ## Ownership Contract
 
 - `ResponsiveScaleProfile` owns the base compact curve.
-- `FullCircleRadialLayout` maps that curve into full-circle insets, dial geometry, slot bounds, and compact geometry scales.
+- `FullCircleRadialLayout` maps that curve into full-circle insets, slot bounds, label metrics, and compact geometry spacing.
+- `GeometryScale` turns the radius primary dimension into ring, tick, and pointer pixels.
 - `FullCircleRadialEngine`, `FullCircleRadialTextLayout`, and wrapper `drawFrame` / `drawMode` callbacks consume `state.layout`, `state.responsive`, `state.textFillScale`, and `state.compactGeometryScale`.
 - Wrapper widgets must not import `ResponsiveScaleProfile` directly or add a second compact curve via widget-local responsive hard floors.
 
@@ -62,7 +63,7 @@ const renderCanvas = engine.createRenderer(spec);
 - `slots` (`leftTop`, `leftBottom`, `rightTop`, `rightBottom`, `top`, `bottom`)
 - `bufferW`, `bufferH`, `dpr`, `staticKey`
 - Shared toolkit handles: `draw`, `text`, `value`, `angle`
-- Full-circle tick lengths are resolved responsively from theme tokens using `state.compactGeometryScale` and a small label-lane cap before `drawFullCircleTicks()` runs.
+- Full-circle tick lengths are precomputed by `FullCircleRadialLayout` from the radius primary dimension and the shared geometry factors; `compactGeometryScale` only affects label and slot spacing, and there is no responsive tick soft cap or `resolveResponsiveTickLen` path.
 
 ### Callback API (`api`)
 

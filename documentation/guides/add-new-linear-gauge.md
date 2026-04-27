@@ -21,6 +21,7 @@ Select a profile first, then keep the wrapper focused on formatter, ticks, axis 
 Responsive ownership:
 
 - `ResponsiveScaleProfile` is consumed by `LinearGaugeLayout`, not by wrapper widgets.
+- `GeometryScale` converts the linear primary dimension into graphical pixels; wrapper widgets do not scale linework directly.
 - `LinearGaugeEngine` exposes layout-owned `state.responsive`, `state.textFillScale`, and `state.compactGeometryScale` to hooks and shared text helpers.
 - Do not add wrapper-local user-visible responsive `Math.max(...)` / `clamp(...)` floors or import `ResponsiveScaleProfile` directly in linear wrappers.
 
