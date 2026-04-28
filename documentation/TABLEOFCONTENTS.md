@@ -79,6 +79,7 @@
 - **Full-circle tick rendering + layout modes** → [radial/full-circle-dial-style-guide.md#tick-rendering](radial/full-circle-dial-style-guide.md#tick-rendering), [radial/full-circle-dial-style-guide.md#layout-modes](radial/full-circle-dial-style-guide.md#layout-modes)
 - **Linear gauge style guide (profiles, key patterns, shipped gauge behavior)** → [linear/linear-gauge-style-guide.md](linear/linear-gauge-style-guide.md)
 - **Linear shared API and profile templates** → [linear/linear-shared-api.md](linear/linear-shared-api.md)
+- **LinearGaugeEngineDrawing** (static-layer drawing + pointer/marker helpers) → [linear/linear-shared-api.md](linear/linear-shared-api.md)
 - **Shared text layout engine contract** → [shared/text-layout-engine.md](shared/text-layout-engine.md)
 
 ## Styling & Theming
