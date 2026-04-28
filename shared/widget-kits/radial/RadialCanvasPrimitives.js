@@ -10,6 +10,7 @@
 }(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
+  const POINTER_TIP_INSET_FACTOR = 0.013;
 
   function create(def, Helpers) {
     const angle = Helpers.getModule("RadialAngleMath").create(def, Helpers);
@@ -150,7 +151,7 @@
       }
 
       const rBase = Math.max(1, rOuter - depth);
-      const rTip = Math.max(1, rOuter - Math.max(1, Math.floor(rOuter * 0.013)));
+      const rTip = Math.max(1, rOuter - Math.max(1, Math.floor(rOuter * POINTER_TIP_INSET_FACTOR)));
       const a = toCanvas(angleDeg, cfg, rot);
 
       const tipX = cx + Math.cos(a) * rTip;
