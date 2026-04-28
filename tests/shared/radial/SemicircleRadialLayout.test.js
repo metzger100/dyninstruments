@@ -154,14 +154,16 @@ describe("SemicircleRadialLayout", function () {
     const gs = geometryScale.create();
     const snapshot = buildSnapshot(layout, 300, 180, "normal").out;
     const geom = snapshot.geom;
+    const sFloor = gs.strokeFloor(themeDefaults.strokeWeight);
+    const eFloor = gs.extentFloor(themeDefaults.strokeWeight);
 
-    expect(geom.majorTickLen).toBe(gs.scale(geom.R, themeDefaults.radial.ticks.majorLenFactor));
-    expect(geom.majorTickWidth).toBe(gs.scaleStroke(geom.R, themeDefaults.radial.ticks.majorWidthFactor, themeDefaults.strokeWeight));
-    expect(geom.minorTickLen).toBe(gs.scale(geom.R, themeDefaults.radial.ticks.minorLenFactor));
-    expect(geom.minorTickWidth).toBe(gs.scaleStroke(geom.R, themeDefaults.radial.ticks.minorWidthFactor, themeDefaults.strokeWeight));
-    expect(geom.arcLineWidth).toBe(gs.scaleStroke(geom.R, themeDefaults.radial.ring.arcLineWidthFactor, themeDefaults.strokeWeight));
-    expect(geom.pointerDepth).toBe(gs.scalePointer(geom.R, themeDefaults.radial.pointer.depthFactor, themeDefaults.pointerDepthWeight));
-    expect(geom.pointerSide).toBe(gs.scalePointer(geom.R, themeDefaults.radial.pointer.sideFactor, themeDefaults.pointerSideWeight));
+    expect(geom.majorTickLen).toBe(gs.scale(geom.R, themeDefaults.radial.ticks.majorLenFactor, eFloor));
+    expect(geom.majorTickWidth).toBe(gs.scaleStroke(geom.R, themeDefaults.radial.ticks.majorWidthFactor, themeDefaults.strokeWeight, sFloor));
+    expect(geom.minorTickLen).toBe(gs.scale(geom.R, themeDefaults.radial.ticks.minorLenFactor, eFloor));
+    expect(geom.minorTickWidth).toBe(gs.scaleStroke(geom.R, themeDefaults.radial.ticks.minorWidthFactor, themeDefaults.strokeWeight, sFloor));
+    expect(geom.arcLineWidth).toBe(gs.scaleStroke(geom.R, themeDefaults.radial.ring.arcLineWidthFactor, themeDefaults.strokeWeight, sFloor));
+    expect(geom.pointerDepth).toBe(gs.scalePointer(geom.R, themeDefaults.radial.pointer.depthFactor, themeDefaults.pointerDepthWeight, eFloor));
+    expect(geom.pointerSide).toBe(gs.scalePointer(geom.R, themeDefaults.radial.pointer.sideFactor, themeDefaults.pointerSideWeight, eFloor));
     expect(geom).not.toHaveProperty("needleDepth");
   });
 
@@ -191,18 +193,18 @@ describe("SemicircleRadialLayout", function () {
     expect(geoms[0].majorTickLen).toBe(12);
     expect(geoms[0].majorTickWidth).toBe(3);
     expect(geoms[0].minorTickLen).toBe(7);
-    expect(geoms[0].minorTickWidth).toBe(1);
+    expect(geoms[0].minorTickWidth).toBe(2);
     expect(geoms[1].R).toBe(300);
     expect(geoms[1].majorTickLen).toBe(24);
     expect(geoms[1].majorTickWidth).toBe(6);
     expect(geoms[2].R).toBe(75);
     expect(geoms[2].majorTickLen).toBe(6);
-    expect(geoms[2].majorTickWidth).toBe(1);
+    expect(geoms[2].majorTickWidth).toBe(2);
     expect(geoms[3].R).toBe(50);
-    expect(geoms[3].majorTickLen).toBeGreaterThanOrEqual(1);
-    expect(geoms[3].majorTickWidth).toBeGreaterThanOrEqual(1);
-    expect(geoms[3].minorTickLen).toBeGreaterThanOrEqual(1);
-    expect(geoms[3].minorTickWidth).toBeGreaterThanOrEqual(1);
+    expect(geoms[3].majorTickLen).toBeGreaterThanOrEqual(3);
+    expect(geoms[3].majorTickWidth).toBeGreaterThanOrEqual(2);
+    expect(geoms[3].minorTickLen).toBeGreaterThanOrEqual(3);
+    expect(geoms[3].minorTickWidth).toBeGreaterThanOrEqual(2);
 
     sizes.forEach(function (_size, idx) {
       expect(geoms[idx].majorTickLen / geoms[idx].R).toBeCloseTo(0.08, 6);
@@ -274,7 +276,7 @@ describe("SemicircleRadialLayout", function () {
 
     expect(bold.majorTickWidth).toBe(4);
     expect(slim.majorTickWidth).toBe(2);
-    expect(highcontrast.minorTickWidth).toBe(2);
+    expect(highcontrast.minorTickWidth).toBe(3);
     expect(geoms[0].pointerDepth).toBe(bold.pointerDepth);
     expect(geoms[0].pointerDepth).toBe(slim.pointerDepth);
     expect(geoms[0].pointerDepth).toBe(highcontrast.pointerDepth);

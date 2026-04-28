@@ -660,7 +660,7 @@ describe("WindRadialWidget", function () {
     harness.spec.renderCanvas(canvas, makeWindProps());
     expect(harness.calls.ring).toBe(1);
 
-    harness.theme.radial.ring.arcLineWidthFactor = 0.04;
+    harness.theme.radial.ring.arcLineWidthFactor = 0.08;
     harness.spec.renderCanvas(canvas, makeWindProps());
     expect(harness.calls.ring).toBe(2);
 

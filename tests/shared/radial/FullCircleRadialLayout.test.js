@@ -112,6 +112,32 @@ describe("FullCircleRadialLayout", function () {
     expect(compact.normal.dualCompactInset).toBeGreaterThan(0);
   });
 
+  it("keeps default-preset tick widths and lengths above adaptive small-size floors", function () {
+    const layout = createLayout();
+    const out = layout.computeLayout({
+      W: 100,
+      H: 100,
+      mode: "normal",
+      theme: themeDefaults,
+      insets: {
+        pad: 0,
+        gap: 0,
+        responsive: {
+          textFillScale: 1
+        }
+      },
+      responsive: {
+        textFillScale: 1
+      }
+    });
+
+    expect(out.geom.R).toBe(50);
+    expect(out.geom.majorTickWidth).toBeGreaterThanOrEqual(2);
+    expect(out.geom.minorTickWidth).toBeGreaterThanOrEqual(2);
+    expect(out.geom.majorTickLen).toBeGreaterThanOrEqual(3);
+    expect(out.geom.minorTickLen).toBeGreaterThanOrEqual(3);
+  });
+
   it("uses the updated full-circle label defaults when the theme omits a font factor", function () {
     const layout = createLayout();
     const insets = layout.computeInsets(220, 220);

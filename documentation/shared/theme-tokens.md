@@ -38,6 +38,7 @@ Both are registered with apiShape module and do not use create().
 ## Geometry Inputs
 
 `GeometryScale` turns these factors into pixels from each family primary dimension. `compactGeometryScale` is text/layout-only; it does not change the graphical factors below.
+`strokeWeight`, `pointerDepthWeight`, and `pointerSideWeight` also participate in adaptive minimum geometry floors through `GeometryScale.strokeFloor(strokeWeight)` and `GeometryScale.extentFloor(strokeWeight)` (derived from existing weights, no extra tokens).
 
 | Path | Input var | Default | Use |
 |---|---|---|---|

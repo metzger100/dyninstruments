@@ -15,6 +15,7 @@ Together they let layout owners keep responsive text/layout compaction separate 
 - Layout-owner responsibility: map shared scale outputs into family-specific geometry, spacing, share, and text-ceiling rules
 - Non-owners: cluster mappers, renderer props, theme tokens, `plugin.css`, and editable parameters
 - Graphical factor-to-pixel scaling is handled by `GeometryScale.scale()`, `GeometryScale.scaleStroke()`, and `GeometryScale.scalePointer()`
+- Adaptive geometry floors are derived from stroke-weight presets via `GeometryScale.strokeFloor(strokeWeight)` and `GeometryScale.extentFloor(strokeWeight)`
 - Family primary dimensions:
   - radial = radius
   - linear = `min(trackBox.w, trackBox.h)`
@@ -29,10 +30,28 @@ Together they let layout owners keep responsive text/layout compaction separate 
 GeometryScale API:
 
 ```javascript
-scale(primaryDim, factor)
-scaleStroke(primaryDim, factor, strokeWeight)
-scalePointer(primaryDim, factor, weight)
+scale(primaryDim, factor, floor)
+scaleStroke(primaryDim, factor, strokeWeight, floor)
+scalePointer(primaryDim, factor, weight, floor)
+strokeFloor(strokeWeight)
+extentFloor(strokeWeight)
 ```
+
+Adaptive floor derivation:
+
+```text
+strokeFloor = max(1, round(strokeWeight * 2))
+extentFloor = strokeFloor + 1
+```
+
+Expected preset floors (derived from existing weights, no new theme tokens):
+
+| Preset | strokeWeight | strokeFloor | extentFloor |
+|---|---:|---:|---:|
+| slim | 0.67 | 1 | 2 |
+| default | 1.0 | 2 | 3 |
+| bold | 1.4 | 3 | 4 |
+| highcontrast | 1.35 | 3 | 4 |
 
 Runtime API:
 

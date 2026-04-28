@@ -81,11 +81,13 @@
       const farHalf = geom.farHalf;
       const pd = Math.max(1, Math.floor(Number(primaryDim) || 0));
       const sw = strokeWeight;
+      const sFloor = gs.strokeFloor(sw);
+      const eFloor = gs.extentFloor(sw);
       const laneDepth = Math.max(1, baseY - horizonY);
-      const railWidth = gs.scaleStroke(pd, RAIL_WIDTH_FACTOR, sw);
-      const crossbarWidth = gs.scaleStroke(pd, CROSSBAR_WIDTH_FACTOR, sw);
-      const seamWidth = gs.scaleStroke(pd, SEAM_WIDTH_FACTOR, sw);
-      const horizonWidth = gs.scaleStroke(pd, HORIZON_WIDTH_FACTOR, sw);
+      const railWidth = gs.scaleStroke(pd, RAIL_WIDTH_FACTOR, sw, sFloor);
+      const crossbarWidth = gs.scaleStroke(pd, CROSSBAR_WIDTH_FACTOR, sw, sFloor);
+      const seamWidth = gs.scaleStroke(pd, SEAM_WIDTH_FACTOR, sw, sFloor);
+      const horizonWidth = gs.scaleStroke(pd, HORIZON_WIDTH_FACTOR, sw, sFloor);
       const stripeCount = mode === "high" ? 8 : (mode === "flat" ? 6 : 7);
 
       ctx.save();
@@ -148,14 +150,16 @@
       const pd = Math.max(1, Math.floor(Number(primaryDim) || 0));
       const sw = strokeWeight;
       const pdw = pointerDepthWeight;
+      const sFloor = gs.strokeFloor(sw);
+      const eFloor = gs.extentFloor(sw);
       const safeNorm = clamp(xteNormalized, -1.1, 1.1);
       const markerX = cx + safeNorm * nearHalf * 0.82;
       const markerY = baseY - (baseY - horizonY) * 0.12;
       const laneDepth = Math.max(1, baseY - horizonY);
-      const rawLength = gs.scalePointer(pd, BOAT_LENGTH_FACTOR, pdw);
-      const markerLength = Math.min(rawLength, Math.max(1, Math.floor(laneDepth * BOAT_LANE_DEPTH_LIMIT)));
-      const markerBeam = Math.max(1, Math.floor(markerLength * BOAT_BEAM_RATIO));
-      const centerlineWidth = gs.scaleStroke(pd, CENTERLINE_WIDTH_FACTOR, sw);
+      const rawLength = gs.scalePointer(pd, BOAT_LENGTH_FACTOR, pdw, eFloor);
+      const markerLength = Math.min(rawLength, Math.max(eFloor, Math.floor(laneDepth * BOAT_LANE_DEPTH_LIMIT)));
+      const markerBeam = Math.max(eFloor, Math.floor(markerLength * BOAT_BEAM_RATIO));
+      const centerlineWidth = gs.scaleStroke(pd, CENTERLINE_WIDTH_FACTOR, sw, sFloor);
 
       ctx.save();
       ctx.lineCap = "butt";

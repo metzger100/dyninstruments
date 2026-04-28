@@ -334,14 +334,16 @@
       const strokeWeight = clampNumber(theme.strokeWeight, 0, Number.MAX_SAFE_INTEGER, 1);
       const pointerDepthWeight = clampNumber(theme.pointerDepthWeight, 0, Number.MAX_SAFE_INTEGER, 1);
       const pointerSideWeight = clampNumber(theme.pointerSideWeight, 0, Number.MAX_SAFE_INTEGER, 1);
-      const trackLineWidth = gs.scaleStroke(primaryDim, clampNumber(linearTheme.track.lineWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.018), strokeWeight);
-      const majorTickLen = gs.scale(primaryDim, clampNumber(linearTheme.ticks.majorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.109));
-      const majorTickWidth = gs.scaleStroke(primaryDim, clampNumber(linearTheme.ticks.majorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.027), strokeWeight);
-      const minorTickLen = gs.scale(primaryDim, clampNumber(linearTheme.ticks.minorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.064));
-      const minorTickWidth = gs.scaleStroke(primaryDim, clampNumber(linearTheme.ticks.minorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.014), strokeWeight);
-      const pointerDepth = gs.scalePointer(primaryDim, clampNumber(linearTheme.pointer.depthFactor, 0, Number.MAX_SAFE_INTEGER, 0.24), pointerDepthWeight);
-      const pointerSide = gs.scalePointer(primaryDim, clampNumber(linearTheme.pointer.sideFactor, 0, Number.MAX_SAFE_INTEGER, 0.12), pointerSideWeight);
-      const trackThickness = gs.scale(primaryDim, clampNumber(linearTheme.track.widthFactor, 0, Number.MAX_SAFE_INTEGER, 0.16));
+      const sFloor = gs.strokeFloor(strokeWeight);
+      const eFloor = gs.extentFloor(strokeWeight);
+      const trackLineWidth = gs.scaleStroke(primaryDim, clampNumber(linearTheme.track.lineWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.018), strokeWeight, sFloor);
+      const majorTickLen = gs.scale(primaryDim, clampNumber(linearTheme.ticks.majorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.109), eFloor);
+      const majorTickWidth = gs.scaleStroke(primaryDim, clampNumber(linearTheme.ticks.majorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.027), strokeWeight, sFloor);
+      const minorTickLen = gs.scale(primaryDim, clampNumber(linearTheme.ticks.minorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.064), eFloor);
+      const minorTickWidth = gs.scaleStroke(primaryDim, clampNumber(linearTheme.ticks.minorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.014), strokeWeight, sFloor);
+      const pointerDepth = gs.scalePointer(primaryDim, clampNumber(linearTheme.pointer.depthFactor, 0, Number.MAX_SAFE_INTEGER, 0.24), pointerDepthWeight, eFloor);
+      const pointerSide = gs.scalePointer(primaryDim, clampNumber(linearTheme.pointer.sideFactor, 0, Number.MAX_SAFE_INTEGER, 0.12), pointerSideWeight, eFloor);
+      const trackThickness = gs.scale(primaryDim, clampNumber(linearTheme.track.widthFactor, 0, Number.MAX_SAFE_INTEGER, 0.16), eFloor);
       const labelBoost = mode === "high" ? 1.2 : (mode === "normal" ? 1.26 : 1.0);
       const labelFontPx = Math.max(1, Math.min(
         trackBox.h,

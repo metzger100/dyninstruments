@@ -407,7 +407,7 @@ describe("CompassRadialWidget", function () {
     harness.spec.renderCanvas(canvasB, props);
     expect(harness.calls.ring).toHaveLength(2);
 
-    harness.theme.radial.ring.arcLineWidthFactor = 0.04;
+    harness.theme.radial.ring.arcLineWidthFactor = 0.08;
     harness.spec.renderCanvas(canvasB, props);
     expect(harness.calls.ring).toHaveLength(3);
   });

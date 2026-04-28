@@ -15,28 +15,45 @@
     return Number.isFinite(n) ? n : 0;
   }
 
-  function scalePx(primaryDim, factor, weight) {
-    return Math.max(1, Math.floor(toFiniteNumber(primaryDim) * toFiniteNumber(factor) * toFiniteNumber(weight)));
+  function resolveFloor(floor) {
+    return Math.max(1, Math.floor(toFiniteNumber(floor) || 1));
+  }
+
+  function strokeFloor(strokeWeight) {
+    return Math.max(1, Math.round(toFiniteNumber(strokeWeight) * 2));
+  }
+
+  function extentFloor(strokeWeight) {
+    return strokeFloor(strokeWeight) + 1;
+  }
+
+  function scalePx(primaryDim, factor, weight, floor) {
+    return Math.max(
+      resolveFloor(floor),
+      Math.floor(toFiniteNumber(primaryDim) * toFiniteNumber(factor) * toFiniteNumber(weight))
+    );
   }
 
   function create() {
-    function scale(primaryDim, factor) {
-      return scalePx(primaryDim, factor, 1);
+    function scale(primaryDim, factor, floor) {
+      return scalePx(primaryDim, factor, 1, floor);
     }
 
-    function scaleStroke(primaryDim, factor, strokeWeight) {
-      return scalePx(primaryDim, factor, strokeWeight);
+    function scaleStroke(primaryDim, factor, strokeWeight, floor) {
+      return scalePx(primaryDim, factor, strokeWeight, floor);
     }
 
-    function scalePointer(primaryDim, factor, weight) {
-      return scalePx(primaryDim, factor, weight);
+    function scalePointer(primaryDim, factor, weight, floor) {
+      return scalePx(primaryDim, factor, weight, floor);
     }
 
     return {
       id: "GeometryScale",
       scale: scale,
       scaleStroke: scaleStroke,
-      scalePointer: scalePointer
+      scalePointer: scalePointer,
+      strokeFloor: strokeFloor,
+      extentFloor: extentFloor
     };
   }
 

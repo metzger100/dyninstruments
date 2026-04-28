@@ -5,9 +5,11 @@ describe("GeometryScale", function () {
     return loadFresh("shared/widget-kits/layout/GeometryScale.js").create();
   }
 
-  it("scales factors to whole pixels with a hard floor of one", function () {
+  it("scales factors to whole pixels and supports explicit extent floors", function () {
     const api = createScaleApi();
 
+    expect(api.scale(150, 0.08, 3)).toBe(12);
+    expect(api.scale(10, 0.08, 3)).toBe(3);
     expect(api.scale(150, 0.08)).toBe(12);
     expect(api.scale(50, 0.08)).toBe(4);
     expect(api.scale(10, 0.08)).toBe(1);
@@ -19,9 +21,22 @@ describe("GeometryScale", function () {
     expect(api.scaleStroke(150, 0.02, 1.4)).toBe(4);
     expect(api.scaleStroke(150, 0.02, 0.67)).toBe(2);
     expect(api.scaleStroke(150, 0.01, 1.35)).toBe(2);
+    expect(api.scaleStroke(10, 0.02, 1.0, 2)).toBe(2);
+    expect(api.scaleStroke(150, 0.02, 0.67, 1)).toBe(2);
     expect(api.scalePointer(150, 0.22, 1)).toBe(33);
     expect(api.scalePointer(150, 0.11, 1.54)).toBe(25);
     expect(api.scalePointer(150, 0.11, 0.72)).toBe(11);
+  });
+
+  it("derives stroke and extent floors from stroke weight presets", function () {
+    const api = createScaleApi();
+
+    expect(api.strokeFloor(0.67)).toBe(1);
+    expect(api.strokeFloor(1.0)).toBe(2);
+    expect(api.strokeFloor(1.4)).toBe(3);
+    expect(api.strokeFloor(1.35)).toBe(3);
+    expect(api.extentFloor(1.0)).toBe(3);
+    expect(api.extentFloor(0.67)).toBe(2);
   });
 
   it("returns one for zero or negative primary dimensions and keeps positive results at or above one", function () {

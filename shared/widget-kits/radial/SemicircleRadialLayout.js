@@ -53,14 +53,16 @@
     const strokeWeight = clampNumber(theme.strokeWeight, 0, Number.MAX_SAFE_INTEGER, 1);
     const pointerDepthWeight = clampNumber(theme.pointerDepthWeight, 0, Number.MAX_SAFE_INTEGER, 1);
     const pointerSideWeight = clampNumber(theme.pointerSideWeight, 0, Number.MAX_SAFE_INTEGER, 1);
-    const ringW = gs.scale(primaryDim, clampNumber(ringTheme.widthFactor, 0, Number.MAX_SAFE_INTEGER, 0.12));
-    const majorTickLen = gs.scale(primaryDim, clampNumber(ticksTheme.majorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.08));
-    const majorTickWidth = gs.scaleStroke(primaryDim, clampNumber(ticksTheme.majorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.02), strokeWeight);
-    const minorTickLen = gs.scale(primaryDim, clampNumber(ticksTheme.minorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.047));
-    const minorTickWidth = gs.scaleStroke(primaryDim, clampNumber(ticksTheme.minorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.01), strokeWeight);
-    const arcLineWidth = gs.scaleStroke(primaryDim, clampNumber(ringTheme.arcLineWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.013), strokeWeight);
-    const pointerDepth = gs.scalePointer(primaryDim, clampNumber(pointerTheme.depthFactor, 0, Number.MAX_SAFE_INTEGER, 0.22), pointerDepthWeight);
-    const pointerSide = gs.scalePointer(primaryDim, clampNumber(pointerTheme.sideFactor, 0, Number.MAX_SAFE_INTEGER, 0.11), pointerSideWeight);
+    const sFloor = gs.strokeFloor(strokeWeight);
+    const eFloor = gs.extentFloor(strokeWeight);
+    const ringW = gs.scale(primaryDim, clampNumber(ringTheme.widthFactor, 0, Number.MAX_SAFE_INTEGER, 0.12), eFloor);
+    const majorTickLen = gs.scale(primaryDim, clampNumber(ticksTheme.majorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.08), eFloor);
+    const majorTickWidth = gs.scaleStroke(primaryDim, clampNumber(ticksTheme.majorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.02), strokeWeight, sFloor);
+    const minorTickLen = gs.scale(primaryDim, clampNumber(ticksTheme.minorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.047), eFloor);
+    const minorTickWidth = gs.scaleStroke(primaryDim, clampNumber(ticksTheme.minorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.01), strokeWeight, sFloor);
+    const arcLineWidth = gs.scaleStroke(primaryDim, clampNumber(ringTheme.arcLineWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.013), strokeWeight, sFloor);
+    const pointerDepth = gs.scalePointer(primaryDim, clampNumber(pointerTheme.depthFactor, 0, Number.MAX_SAFE_INTEGER, 0.22), pointerDepthWeight, eFloor);
+    const pointerSide = gs.scalePointer(primaryDim, clampNumber(pointerTheme.sideFactor, 0, Number.MAX_SAFE_INTEGER, 0.11), pointerSideWeight, eFloor);
 
     return {
       availW: availableWidth,

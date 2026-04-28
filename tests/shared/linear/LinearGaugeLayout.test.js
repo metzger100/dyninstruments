@@ -268,11 +268,11 @@ describe("LinearGaugeLayout", function () {
 
     expect(reference.trackBox.h).toBe(110);
     expect(reference.primaryDim).toBe(110);
-    expect(reference.majorTickLen).toBe(gs.scale(reference.primaryDim, 0.109));
-    expect(reference.majorTickWidth).toBe(gs.scaleStroke(reference.primaryDim, 0.027, 1));
-    expect(reference.minorTickLen).toBe(gs.scale(reference.primaryDim, 0.064));
-    expect(reference.minorTickWidth).toBe(gs.scaleStroke(reference.primaryDim, 0.014, 1));
-    expect(reference.trackLineWidth).toBe(gs.scaleStroke(reference.primaryDim, 0.018, 1));
+    expect(reference.majorTickLen).toBe(gs.scale(reference.primaryDim, 0.109, gs.extentFloor(1)));
+    expect(reference.majorTickWidth).toBe(gs.scaleStroke(reference.primaryDim, 0.027, 1, gs.strokeFloor(1)));
+    expect(reference.minorTickLen).toBe(gs.scale(reference.primaryDim, 0.064, gs.extentFloor(1)));
+    expect(reference.minorTickWidth).toBe(gs.scaleStroke(reference.primaryDim, 0.014, 1, gs.strokeFloor(1)));
+    expect(reference.trackLineWidth).toBe(gs.scaleStroke(reference.primaryDim, 0.018, 1, gs.strokeFloor(1)));
     expect(reference.pointerDepth).toBe(26);
     expect(reference.pointerSide).toBe(13);
 
@@ -303,7 +303,7 @@ describe("LinearGaugeLayout", function () {
       responsive: { textFillScale: 1 }
     });
 
-    expect(bold.trackLineWidth).toBe(2);
+    expect(bold.trackLineWidth).toBe(3);
     expect(bold.majorTickWidth).toBe(4);
     expect(bold.pointerDepth).toBe(reference.pointerDepth);
     expect(bold.pointerSide).toBe(20);
