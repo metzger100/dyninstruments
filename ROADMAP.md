@@ -14,7 +14,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 ### Fixes for existing widgets and architecture
 
 - Add a plugin loader compliant export tool to create a code only zip of the plugin for the users and completely revise the README.md to be completely user focused
-- Keep the README and docs aligned with the PLAN18 uniform geometry scaling contract (`GeometryScale`, factor tokens, and XTE internal geometry).
+- ~~Uniform geometry scaling~~ — Completed (PLAN18). All graphical dimensions use `GeometryScale` factor-based scaling. Keep docs aligned with the contract.
 
 ### Additional non-core concepts (post release)
 
