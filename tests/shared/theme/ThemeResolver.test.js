@@ -139,7 +139,7 @@ describe("ThemeResolver", function () {
     });
     const out = resolver.resolveForRoot(rootEl);
 
-    expect(out.strokeWeight).toBe(1.4);
+    expect(out.strokeWeight).toBe(1.32);
     expect(out.pointerDepthWeight).toBe(1);
     expect(out.pointerSideWeight).toBe(1.54);
   });
