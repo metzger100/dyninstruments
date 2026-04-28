@@ -115,7 +115,7 @@
     },
     slim: {
       base: {
-        strokeWeight: 0.67,
+        strokeWeight: 0.66,
         pointerDepthWeight: 1.0,
         pointerSideWeight: 0.72,
         font: { labelWeight: 400 }
@@ -123,14 +123,14 @@
     },
     bold: {
       base: {
-        strokeWeight: 1.4,
+        strokeWeight: 1.32,
         pointerDepthWeight: 1.0,
         pointerSideWeight: 1.54
       }
     },
     highcontrast: {
       base: {
-        strokeWeight: 1.35,
+        strokeWeight: 1.32,
         pointerDepthWeight: 1.0,
         pointerSideWeight: 1.4,
         colors: {
