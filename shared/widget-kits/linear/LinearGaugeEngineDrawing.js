@@ -82,8 +82,8 @@
         return;
       }
       const markerOpts = opts || {};
-      const len = Number.isFinite(Number(markerOpts.len)) ? Math.max(1, markerOpts.len) : Math.max(1, Math.floor(markerSizeBase * 0.9));
-      const width = Number.isFinite(Number(markerOpts.lineWidth)) ? Math.max(1, markerOpts.lineWidth) : Math.max(1, Math.floor(markerSizeBase * 0.4));
+      const len = Number.isFinite(Number(markerOpts.len)) ? Math.max(1, markerOpts.len) : Math.max(1, Math.floor(markerSizeBase * 0.45));
+      const width = Number.isFinite(Number(markerOpts.lineWidth)) ? Math.max(1, markerOpts.lineWidth) : Math.max(1, Math.floor(markerSizeBase * 0.2));
       primitives.drawTick(ctx, Math.round(markerX), layout.trackY + len, len, {
         lineWidth: width,
         lineCap: "butt",

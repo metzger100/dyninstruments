@@ -44,7 +44,7 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 - Sector bands render above the scale line so the track stroke remains visible.
 - Tick lengths/widths use `theme.linear.ticks.*Factor` plus `theme.strokeWeight`.
 - Pointer triangle uses `theme.linear.pointer.sideFactor`, `theme.linear.pointer.depthFactor`, `theme.pointerSideWeight`, `theme.pointerDepthWeight`, and `theme.colors.pointer`.
-- Waypoint/course markers use layout-based default sizing independent from rendered track thickness, end at the scale line, and render as flat rectangular bars instead of rounded caps.
+- Waypoint/course markers use layout-based default sizing independent from rendered track thickness, end at the scale line, render as flat rectangular bars instead of rounded caps, and default to `floor(markerSizeBase * 0.45)` long by `floor(markerSizeBase * 0.2)` wide when no explicit override is supplied.
 - Tick labels use `theme.linear.labels.insetFactor` and `theme.linear.labels.fontFactor`.
 - In graphics-only and compact linear layouts, major tick labels are dynamically fitted to the usable scale width before drawing, so narrow tall widgets shrink labels instead of clipping them.
 - Major labels are not removed just because they overlap at the base font size; the engine keeps drawing the full major-label set after fitting.

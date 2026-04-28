@@ -236,6 +236,7 @@ Default linear pointer and marker sizing stays geometry-driven:
 - base pointer/marker size is derived from `primaryDim = min(layout.trackBox.w, layout.trackBox.h)`
 - pointer depth uses `theme.pointerDepthWeight` with `theme.linear.pointer.depthFactor`
 - pointer side uses `theme.pointerSideWeight` with `theme.linear.pointer.sideFactor`
+- default marker length is `floor(markerSizeBase * 0.45)` and default marker line width is `floor(markerSizeBase * 0.2)` when explicit overrides are absent
 - compact tiles reduce text/layout spacing via the shared compact profile instead of fixed pixel floors
 
 ## Testing Contract for New Linear Wrappers

@@ -1042,9 +1042,11 @@ describe("LinearGaugeEngine", function () {
     expect(harness.calls.pointer[0] && harness.calls.pointer[0].opts && harness.calls.pointer[0].opts.side).toBe(
       Math.max(1, Math.floor(markerTrackLayout.pointerSide / 2))
     );
-    expect(defaultMarker && defaultMarker.len).toBe(Math.max(1, Math.floor(markerTrackLayout.pointerDepth * 0.9)));
-    expect(defaultMarker && defaultMarker.opts && defaultMarker.opts.lineWidth).toBe(Math.max(1, Math.floor(markerTrackLayout.pointerDepth * 0.4)));
+    expect(defaultMarker && defaultMarker.len).toBe(Math.max(1, Math.floor(markerTrackLayout.pointerDepth * 0.45)));
+    expect(defaultMarker && defaultMarker.opts && defaultMarker.opts.lineWidth).toBe(Math.max(1, Math.floor(markerTrackLayout.pointerDepth * 0.2)));
     expect(defaultMarker && (defaultMarker.y - defaultMarker.len)).toBe(markerTrackY);
+    expect(explicitMarker && explicitMarker.len).toBe(9);
+    expect(explicitMarker && explicitMarker.opts && explicitMarker.opts.lineWidth).toBe(7);
     expect(harness.calls.drawCaptionMax).toBe(0);
     expect(harness.calls.drawValueUnitWithFit).toBe(0);
     expect(harness.calls.drawInlineCapValUnit).toBe(0);
