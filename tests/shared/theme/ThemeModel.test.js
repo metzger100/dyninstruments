@@ -44,7 +44,7 @@ describe("ThemeModel", function () {
     expect(pointerSideWeight.inputVar).toBe("--dyni-pointer-side-weight");
     expect(pointerSideWeight.default).toBe(1);
     expect(radialMajorLen.inputVar).toBe("--dyni-radial-tick-major-len-factor");
-    expect(radialMajorLen.default).toBe(0.08);
+    expect(radialMajorLen.default).toBe(0.087);
     [
       "radial.ticks.majorLen",
       "radial.ticks.majorWidth",
