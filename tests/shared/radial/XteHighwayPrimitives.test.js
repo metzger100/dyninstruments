@@ -42,6 +42,10 @@ describe("XteHighwayPrimitives", function () {
     return span(points, "y") / 1.18;
   }
 
+  function boatBeamFromPoints(points) {
+    return span(points, "x") / 1.12;
+  }
+
   function lineSegments(ctx) {
     const segments = [];
     const calls = ctx.calls;
@@ -221,16 +225,35 @@ describe("XteHighwayPrimitives", function () {
     expect(Math.max.apply(null, staticTracker.widths)).toBeGreaterThanOrEqual(2);
 
     [
-      { primaryDim: 170, laneDepth: 170, geom: { cx: 140, horizonY: 0, baseY: 170, nearHalf: 120, farHalf: 40 }, expectedLength: 13 },
-      { primaryDim: 40, laneDepth: 40, geom: { cx: 80, horizonY: 0, baseY: 40, nearHalf: 40, farHalf: 10 }, expectedLength: 3 }
+      { primaryDim: 170, laneDepth: 170, geom: { cx: 140, horizonY: 0, baseY: 170, nearHalf: 120, farHalf: 40 }, expectedLength: 19 },
+      { primaryDim: 40, laneDepth: 40, geom: { cx: 80, horizonY: 0, baseY: 40, nearHalf: 40, farHalf: 10 }, expectedLength: 4 }
     ].forEach(function (testCase) {
       const ctx = createMockContext2D();
       draw.drawDynamicHighway(ctx, testCase.geom, colors, 0.2, false, testCase.primaryDim, 1, 1);
       const markerLength = boatLengthFromPoints(extractBoatPoints(ctx));
 
       expect(markerLength).toBeCloseTo(testCase.expectedLength, 6);
-      expect(markerLength).toBeLessThanOrEqual(testCase.laneDepth * 0.24);
+      expect(markerLength).toBeLessThanOrEqual(testCase.laneDepth * 0.48);
     });
+
+    const baseBoatCtx = createMockContext2D();
+    const doubledBoatCtx = createMockContext2D();
+    const baseGeom = { cx: 1400, horizonY: 0, baseY: 1700, nearHalf: 1200, farHalf: 400 };
+    const doubledGeom = { cx: 2800, horizonY: 0, baseY: 3400, nearHalf: 2400, farHalf: 800 };
+
+    draw.drawDynamicHighway(baseBoatCtx, baseGeom, colors, 0.2, false, 1700, 1, 1);
+    draw.drawDynamicHighway(doubledBoatCtx, doubledGeom, colors, 0.2, false, 3400, 1, 1);
+
+    const baseBoatPoints = extractBoatPoints(baseBoatCtx);
+    const doubledBoatPoints = extractBoatPoints(doubledBoatCtx);
+    const baseLength = boatLengthFromPoints(baseBoatPoints);
+    const doubledLength = boatLengthFromPoints(doubledBoatPoints);
+    const baseBeam = boatBeamFromPoints(baseBoatPoints);
+    const doubledBeam = boatBeamFromPoints(doubledBoatPoints);
+
+    expect(doubledLength).toBeGreaterThan(baseLength * 1.9);
+    expect(doubledBeam).toBeGreaterThan(baseBeam * 1.9);
+    expect(baseBeam / baseLength).toBeCloseTo(doubledBeam / doubledLength, 2);
 
     const tinyStatic = createMockContext2D();
     draw.drawStaticHighway(tinyStatic, {

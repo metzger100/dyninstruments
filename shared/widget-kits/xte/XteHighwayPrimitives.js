@@ -14,9 +14,9 @@
   const SEAM_WIDTH_FACTOR = 0.007;
   const HORIZON_WIDTH_FACTOR = 0.011;
   const CENTERLINE_WIDTH_FACTOR = 0.017;
-  const BOAT_LENGTH_FACTOR = 0.077;
+  const BOAT_LENGTH_FACTOR = 0.1155;
   const BOAT_BEAM_RATIO = 0.62;
-  const BOAT_LANE_DEPTH_LIMIT = 0.24;
+  const BOAT_LANE_DEPTH_LIMIT = 0.48;
 
   function create(def, Helpers) {
     const gs = Helpers.getModule("GeometryScale").create(def, Helpers);
