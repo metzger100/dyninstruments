@@ -174,7 +174,6 @@
 
     return {
       id: "CompassRadialWidget",
-      version: "1.3.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
       getVerticalShellSizing: getVerticalShellSizing,

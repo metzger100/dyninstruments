@@ -29,6 +29,12 @@
     return model.normalizePresetName(presetName);
   }
 
+  function resolveStartupPresetName(docElement, modelOverride) {
+    const model = modelOverride || themeModel;
+    const rootPreset = readThemePresetCssVarFromElement(docElement);
+    return normalizePresetName(model, rootPreset);
+  }
+
   function resolveByPath(source, path) {
     if (!source || typeof source !== "object" || !isNonEmptyString(path)) {
       return undefined;
@@ -160,6 +166,7 @@
     if (!style || typeof style.getPropertyValue !== "function") {
       return null;
     }
+    // dyni-lint-disable-next-line css-js-default-duplication -- Theme preset selection is intentionally read from the documented CSS boundary.
     const raw = style.getPropertyValue("--dyni-theme-preset");
     const value = (typeof raw === "string") ? raw.trim() : "";
     return value || null;
@@ -172,9 +179,7 @@
       throw new Error("dyninstruments: runtime._theme.applyToRoot() requires root element with style.setProperty()");
     }
 
-    const resolvedTheme = (typeof themeResolver.resolveOutputsForRoot === "function")
-      ? themeResolver.resolveOutputsForRoot(rootEl)
-      : themeResolver.resolveForRoot(rootEl);
+    const resolvedTheme = themeResolver.resolveOutputsForRoot(rootEl);
     const outputDefs = themeModel.getOutputTokenDefinitions();
     for (let i = 0; i < outputDefs.length; i += 1) {
       const outputDef = outputDefs[i];
@@ -195,6 +200,7 @@
   runtime._theme = Object.freeze({
     configure: configure,
     applyToRoot: applyToRoot,
+    resolveStartupPresetName: resolveStartupPresetName,
     fetchShadowCssText: fetchShadowCssText,
     preloadShadowCssUrls: preloadShadowCssUrls,
     getShadowCssText(url) {

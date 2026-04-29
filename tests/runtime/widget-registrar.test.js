@@ -9,6 +9,9 @@ describe("runtime/widget-registrar.js", function () {
     const applyThemePresetToContainer = vi.fn();
     const hostActions = { getCapabilities: vi.fn(), routePoints: {}, routeEditor: {}, ais: {} };
     const includeGlobalApi = opts.includeGlobalApi !== false;
+    const capturedApi = opts.hostApi || (includeGlobalApi ? {
+      registerWidget: registerWidget
+    } : null);
 
     const context = createScriptContext({
       DyniPlugin: {
@@ -20,7 +23,7 @@ describe("runtime/widget-registrar.js", function () {
         },
         state: {},
         config: { shared: {}, clusters: [] },
-        ...(opts.hostApi ? { avnavApi: opts.hostApi } : {})
+        ...(capturedApi ? { avnavApi: capturedApi } : {})
       },
       avnav: includeGlobalApi ? {
         api: {

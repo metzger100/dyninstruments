@@ -16,6 +16,7 @@
 
   const DEFAULT_PRESET_NAME = "default";
   const SUPPORTED_MODES = ["day", "night"];
+  // dyni-lint-disable-next-line css-js-default-duplication -- ThemeModel owns the canonical default font stack for both CSS and JS token resolution.
   const DEFAULT_FONT_STACK = '"Roboto","Inter","SF Pro Text",-apple-system,"Segoe UI","Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
   const DEFAULT_MONO_STACK = '"Roboto Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace';
 
@@ -42,6 +43,7 @@
     defineToken("surface.fg", "--dyni-fg", "color", "black", { night: "rgba(252, 11, 11, 0.60)" }, "--dyni-theme-surface-fg"),
     defineToken("surface.bg", "--dyni-bg", "color", "white", { night: "black" }, "--dyni-theme-surface-bg"),
     defineToken("surface.border", "--dyni-border", "color", "rgba(0, 0, 0, 0.30)", { night: "rgba(252, 11, 11, 0.18)" }, "--dyni-theme-surface-border"),
+    // dyni-lint-disable-next-line css-js-default-duplication -- ThemeModel owns the canonical font-family default token mapping.
     defineToken("font.family", "--dyni-font", "string", DEFAULT_FONT_STACK, undefined, "--dyni-theme-font-family"),
     defineToken("font.familyMono", "--dyni-font-mono", "string", DEFAULT_MONO_STACK, undefined, "--dyni-theme-font-family-mono"),
     defineToken("font.weight", "--dyni-font-weight", "number", 700, undefined, "--dyni-theme-font-weight"),

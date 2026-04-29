@@ -19,7 +19,7 @@
 
   const hostApi = resolveHostApi();
   if (!hostApi) {
-    console && console.error && console.error("dyninstruments: avnav.api missing");
+    console.error("dyninstruments: avnav.api missing");
     return;
   }
 

@@ -14,12 +14,12 @@
     const angle = Helpers.getModule("RadialAngleMath").create(def, Helpers);
 
     function isFiniteNumber(n) {
-      return typeof n === "number" && isFinite(n);
+      return typeof n === "number" && Number.isFinite(n);
     }
 
     function toNumber(value) {
       const n = Number(value);
-      return isFinite(n) ? n : NaN;
+      return Number.isFinite(n) ? n : NaN;
     }
 
     function extractNumberText(text) {
@@ -27,30 +27,37 @@
       return match ? match[0] : "";
     }
 
-    function formatGaugeDisplay(raw, props, applyFormatter, normalize) {
+    function formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultFormatterParameters) {
       const p = props || {};
       const defaultText = Object.prototype.hasOwnProperty.call(p, "default") ? p.default : normalize(undefined, undefined);
-      const formatted = normalize(applyFormatter(raw, { formatter: p.formatter, formatterParameters: p.formatterParameters, default: defaultText }), defaultText);
+      const n = Number(raw);
+      if (!Number.isFinite(n)) {
+        return { num: NaN, text: defaultText };
+      }
+
+      const formatter = Object.prototype.hasOwnProperty.call(p, "formatter") ? p.formatter : defaultFormatter;
+      const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters") ? p.formatterParameters : defaultFormatterParameters;
+      const formatted = normalize(String(applyFormatter(n, { formatter: formatter, formatterParameters: formatterParameters, default: defaultText })), defaultText);
       const numberText = extractNumberText(formatted);
       const num = numberText ? Number(numberText) : NaN;
-      return isFinite(num) ? { num: num, text: numberText } : { num: NaN, text: defaultText };
+      return Number.isFinite(num) ? { num: num, text: numberText } : { num: NaN, text: defaultText };
     }
 
     function clamp(value, lo, hi) {
       const n = Number(value);
-      if (!isFinite(n)) {
+      if (!Number.isFinite(n)) {
         return Number(lo);
       }
       return Math.max(Number(lo), Math.min(Number(hi), n));
     }
 
     function almostInt(value, eps) {
-      const epsilon = isFinite(Number(eps)) ? Number(eps) : 1e-6;
+      const epsilon = Number.isFinite(Number(eps)) ? Number(eps) : 1e-6;
       return Math.abs(value - Math.round(value)) <= epsilon;
     }
 
     function isApprox(a, b, eps) {
-      const epsilon = isFinite(Number(eps)) ? Number(eps) : 1e-6;
+      const epsilon = Number.isFinite(Number(eps)) ? Number(eps) : 1e-6;
       return Math.abs(Number(a) - Number(b)) <= epsilon;
     }
 
@@ -112,7 +119,7 @@
     function resolveSemicircleTickSteps(range, profileName) {
       const profile = semicircleTickProfiles[profileName] || semicircleTickProfiles.standard;
       const n = Number(range);
-      if (!isFinite(n) || n <= 0) {
+      if (!Number.isFinite(n) || n <= 0) {
         return { major: profile.default.major, minor: profile.default.minor };
       }
       for (let i = 0; i < profile.ranges.length; i += 1) {
@@ -140,11 +147,11 @@
       let minV = toNumber(minRaw);
       let maxV = toNumber(maxRaw);
 
-      if (!isFinite(minV)) minV = toNumber(defaultMin);
-      if (!isFinite(minV)) minV = 0;
+      if (!Number.isFinite(minV)) minV = toNumber(defaultMin);
+      if (!Number.isFinite(minV)) minV = 0;
 
-      if (!isFinite(maxV)) maxV = toNumber(defaultMax);
-      if (!isFinite(maxV)) maxV = minV + 1;
+      if (!Number.isFinite(maxV)) maxV = toNumber(defaultMax);
+      if (!Number.isFinite(maxV)) maxV = minV + 1;
 
       if (maxV <= minV) maxV = minV + 1;
       return { min: minV, max: maxV, range: maxV - minV };
@@ -175,14 +182,14 @@
     function buildValueTickAngles(minV, maxV, majorStep, minorStep, arc) {
       const majors = [];
       const minors = [];
-      if (!isFinite(minV) || !isFinite(maxV) || maxV <= minV) {
+      if (!Number.isFinite(minV) || !Number.isFinite(maxV) || maxV <= minV) {
         return { majors, minors };
       }
 
       let minor = Math.abs(Number(minorStep));
       let major = Math.abs(Number(majorStep));
-      if (!isFinite(minor) || minor <= 0) minor = (maxV - minV) / 20;
-      if (!isFinite(major) || major <= 0) major = minor * 5;
+      if (!Number.isFinite(minor) || minor <= 0) minor = (maxV - minV) / 20;
+      if (!Number.isFinite(major) || major <= 0) major = minor * 5;
 
       const steps = Math.max(1, Math.round((maxV - minV) / minor));
       for (let i = 0; i <= steps; i++) {
@@ -207,7 +214,7 @@
     function sectorAngles(from, to, minV, maxV, arc) {
       const f = toNumber(from);
       const t = toNumber(to);
-      if (!isFinite(f) || !isFinite(t)) {
+      if (!Number.isFinite(f) || !Number.isFinite(t)) {
         return null;
       }
 
@@ -239,15 +246,15 @@
       const warningFrom = Number(p.warningFrom);
       const alarmFrom = Number(p.alarmFrom);
 
-      const warningTo = (isFinite(alarmFrom) && isFinite(warningFrom) && alarmFrom > warningFrom)
+      const warningTo = (Number.isFinite(alarmFrom) && Number.isFinite(warningFrom) && alarmFrom > warningFrom)
         ? alarmFrom
         : maxV;
 
-      const warning = isFinite(warningFrom)
+      const warning = Number.isFinite(warningFrom)
         ? sectorAngles(warningFrom, warningTo, minV, maxV, arc)
         : null;
 
-      const alarm = isFinite(alarmFrom)
+      const alarm = Number.isFinite(alarmFrom)
         ? sectorAngles(alarmFrom, maxV, minV, maxV, arc)
         : null;
 
@@ -270,23 +277,23 @@
         ? p.alarmFrom
         : opts.defaultAlarmFrom);
 
-      const alarmTo = isFinite(alarmFrom)
+      const alarmTo = Number.isFinite(alarmFrom)
         ? clamp(alarmFrom, minV, maxV)
         : NaN;
 
-      const warningTo = isFinite(warningFrom)
+      const warningTo = Number.isFinite(warningFrom)
         ? clamp(warningFrom, minV, maxV)
         : NaN;
 
-      const alarm = (isFinite(alarmTo) && alarmTo > minV)
+      const alarm = (Number.isFinite(alarmTo) && alarmTo > minV)
         ? sectorAngles(minV, alarmTo, minV, maxV, arc)
         : null;
 
-      const warning = (isFinite(alarmTo) && isFinite(warningTo) && warningTo > alarmTo)
+      const warning = (Number.isFinite(alarmTo) && Number.isFinite(warningTo) && warningTo > alarmTo)
         ? sectorAngles(alarmTo, warningTo, minV, maxV, arc)
         : null;
 
-      const warningOnly = (!alarm && isFinite(warningTo) && warningTo > minV)
+      const warningOnly = (!alarm && Number.isFinite(warningTo) && warningTo > minV)
         ? sectorAngles(minV, warningTo, minV, maxV, arc)
         : null;
 
@@ -299,7 +306,7 @@
 
     function formatAngle180(value, leadingZero) {
       const n = Number(value);
-      if (!isFinite(n)) {
+      if (!Number.isFinite(n)) {
         return "";
       }
       let a = ((n + 180) % 360 + 360) % 360 - 180;
@@ -313,7 +320,7 @@
 
     function formatDirection360(value, leadingZero) {
       const n = Number(value);
-      if (!isFinite(n)) {
+      if (!Number.isFinite(n)) {
         return "";
       }
       let a = n % 360;
@@ -326,7 +333,7 @@
 
     function formatMajorLabel(value) {
       const n = Number(value);
-      if (!isFinite(n)) {
+      if (!Number.isFinite(n)) {
         return "";
       }
       if (almostInt(n, 1e-6)) {
@@ -338,7 +345,6 @@
 
     return {
       id: "RadialValueMath",
-      version: "0.1.0",
       isFiniteNumber,
       extractNumberText,
       formatGaugeDisplay,

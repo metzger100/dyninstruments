@@ -17,10 +17,6 @@
     if (ns.avnavApi) {
       return ns.avnavApi;
     }
-    const fallbackRoot = rootRef || root;
-    if (fallbackRoot && fallbackRoot.avnav && fallbackRoot.avnav.api) {
-      return fallbackRoot.avnav.api;
-    }
     return null;
   };
 }(this));

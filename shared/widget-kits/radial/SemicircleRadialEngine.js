@@ -54,11 +54,11 @@
     }
 
     function drawMajorValueLabels(ctx, family, geom, labels, minV, maxV, majorStep, arc, showEndLabels, labelWeight) {
-      if (!isFinite(minV) || !isFinite(maxV) || maxV <= minV) {
+      if (!Number.isFinite(minV) || !Number.isFinite(maxV) || maxV <= minV) {
         return;
       }
       const step = Math.abs(Number(majorStep));
-      if (!isFinite(step) || step <= 0) {
+      if (!Number.isFinite(step) || step <= 0) {
         return;
       }
 
@@ -277,7 +277,6 @@
 
     return {
       id: "SemicircleRadialEngine",
-      version: "0.1.0",
       createRenderer: createRenderer
     };
   }

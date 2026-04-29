@@ -256,13 +256,39 @@ describe("VesselMapper", function () {
     expect(rollZero.formatterParameters).toEqual([true, true, false]);
   });
 
-  it("supports toolkit fallback number conversion and returns empty object for unknown kind", function () {
+  it("requires toolkit.num for numeric conversion and still returns empty object for unknown kind", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const toolkitWithoutNum = {
       cap(name) { return "C:" + name; },
       unit(name) { return "U:" + name; },
       out: toolkit.out,
       makeAngleFormatter: toolkit.makeAngleFormatter
+    };
+
+    expect(function () {
+      mapper.translate({
+        kind: "voltageRadial",
+        value: 12.4,
+        voltageRadialMinValue: "7",
+        voltageRadialMaxValue: "15",
+        voltageRadialTickMajor: "1",
+        voltageRadialTickMinor: "0.2"
+      }, toolkitWithoutNum);
+    }).toThrow(/num is not a function/);
+
+    expect(mapper.translate({ kind: "unknownKind" }, toolkitWithoutNum)).toEqual({});
+  });
+
+  it("uses toolkit.num directly when it is available", function () {
+    const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
+    const toolkitWithNum = {
+      cap(name) { return "C:" + name; },
+      unit(name) { return "U:" + name; },
+      out: toolkit.out,
+      makeAngleFormatter: toolkit.makeAngleFormatter,
+      num(value) {
+        return Number(value);
+      }
     };
 
     const out = mapper.translate({
@@ -272,13 +298,12 @@ describe("VesselMapper", function () {
       voltageRadialMaxValue: "15",
       voltageRadialTickMajor: "1",
       voltageRadialTickMinor: "0.2"
-    }, toolkitWithoutNum);
+    }, toolkitWithNum);
 
     expect(out.rendererProps.voltageRadialMinValue).toBe(7);
     expect(out.rendererProps.voltageRadialMaxValue).toBe(15);
     expect(out.rendererProps.voltageRadialTickMajor).toBe(1);
     expect(out.rendererProps.voltageRadialTickMinor).toBe(0.2);
-    expect(mapper.translate({ kind: "unknownKind" }, toolkitWithoutNum)).toEqual({});
   });
 
   it("maps alarm to AlarmTextHtmlWidget with normalized domain payload and thresholds", function () {

@@ -25,7 +25,7 @@
 
     function buildSeries(minValue, maxValue, stepValue) {
       const step = Math.abs(Number(stepValue));
-      if (!isFinite(minValue) || !isFinite(maxValue) || maxValue <= minValue || !isFinite(step) || step <= 0) {
+      if (!Number.isFinite(minValue) || !Number.isFinite(maxValue) || maxValue <= minValue || !Number.isFinite(step) || step <= 0) {
         return [];
       }
       const out = [];
@@ -46,7 +46,7 @@
       const major = buildSeries(axis.min, axis.max, tickMajor);
       const minorRaw = buildSeries(axis.min, axis.max, tickMinor);
       const minor = minorRaw.filter(function (valueEntry) {
-        if (!isFinite(tickMajor) || tickMajor <= 0) {
+        if (!Number.isFinite(tickMajor) || tickMajor <= 0) {
           return true;
         }
         const ratio = valueEntry / tickMajor;
@@ -58,7 +58,7 @@
     function formatDisplay(raw, props) {
       const p = props || {};
       const heading = Number(raw);
-      if (!isFinite(heading)) {
+      if (!Number.isFinite(heading)) {
         return { num: NaN, text: p.default };
       }
       return {
@@ -70,7 +70,7 @@
     function resolveAxis(props, range, defaultAxis) {
       const p = props || {};
       const heading = Number((typeof p.value !== "undefined") ? p.value : p.heading);
-      if (!isFinite(heading)) {
+      if (!Number.isFinite(heading)) {
         return defaultAxis;
       }
       const compassRange = (p.compassLinearRange === 180) ? 180 : 360;
@@ -93,7 +93,7 @@
         ? markerMotion.resolve(state.canvas, marker, easingEnabled, nowMs)
         : NaN;
 
-      if (!isFinite(heading) || !isFinite(easedMarker)) {
+      if (!Number.isFinite(heading) || !Number.isFinite(easedMarker)) {
         if (markerFinite && markerMotion.isActive(state.canvas)) {
           return { wantsFollowUpFrame: true };
         }
@@ -152,7 +152,6 @@
 
     return {
       id: "CompassLinearWidget",
-      version: "0.1.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
       getVerticalShellSizing: getVerticalShellSizing,

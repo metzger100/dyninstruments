@@ -112,7 +112,7 @@ describe("DefaultRadialWidget", function () {
     }, "")).toEqual({ num: 12.5, text: "12.5" });
     expect(h.valueMath.formatGaugeDisplay).toHaveBeenCalledWith(12.5, {
       default: "---"
-    }, h.applyFormatter, h.placeholderNormalize.normalize);
+    }, h.applyFormatter, h.placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
 
     expect(h.captured.formatDisplay(12.5, {
       formatter: "formatDecimal",
@@ -123,17 +123,17 @@ describe("DefaultRadialWidget", function () {
       formatter: "formatDecimal",
       formatterParameters: ["m"],
       default: "---"
-    }, h.applyFormatter, h.placeholderNormalize.normalize);
+    }, h.applyFormatter, h.placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
 
     expect(h.captured.formatDisplay("bad", {
       default: "ALT"
     }, "")).toEqual({ num: NaN, text: "ALT" });
     expect(h.valueMath.formatGaugeDisplay).toHaveBeenCalledWith("bad", {
       default: "ALT"
-    }, h.applyFormatter, h.placeholderNormalize.normalize);
+    }, h.applyFormatter, h.placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
 
     expect(h.captured.formatDisplay("bad", {}, "")).toEqual({ num: NaN, text: "---" });
-    expect(h.valueMath.formatGaugeDisplay).toHaveBeenCalledWith("bad", {}, h.applyFormatter, h.placeholderNormalize.normalize);
+    expect(h.valueMath.formatGaugeDisplay).toHaveBeenCalledWith("bad", {}, h.applyFormatter, h.placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
   });
 
   it("builds deterministic sectors, falls back to theme colors, and omits degenerate spans", function () {

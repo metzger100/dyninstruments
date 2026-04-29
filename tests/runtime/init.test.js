@@ -45,6 +45,13 @@ describe("runtime/init.js", function () {
     return {
       configure: vi.fn(),
       applyToRoot: vi.fn(),
+      resolveStartupPresetName: vi.fn((docElement, themeModel) => {
+        const preset = docElement && docElement.__dyniThemePreset;
+        if (!themeModel || typeof themeModel.normalizePresetName !== "function") {
+          return "default";
+        }
+        return themeModel.normalizePresetName(preset);
+      }),
       preloadShadowCssUrls: vi.fn(() => Promise.resolve([]))
     };
   }
@@ -73,6 +80,10 @@ describe("runtime/init.js", function () {
         }
       },
       DyniPlugin: {
+        avnavApi: {
+          registerWidget,
+          log: vi.fn()
+        },
         runtime: {
           _theme: themeRuntime,
           createTemporaryHostActionBridge,
@@ -118,7 +129,7 @@ describe("runtime/init.js", function () {
     expect(createTemporaryHostActionBridge.mock.invocationCallOrder[0]).toBeLessThan(
       context.DyniPlugin.runtime.registerWidget.mock.invocationCallOrder[0]
     );
-    expect(context.avnav.api.log).toHaveBeenCalled();
+    expect(context.DyniPlugin.avnavApi.log).toHaveBeenCalled();
   });
 
   it("uses the captured DyniPlugin.avnavApi when the real global avnav.api is absent", async function () {
@@ -189,20 +200,9 @@ describe("runtime/init.js", function () {
         : (id === "ThemeResolver" ? resolver : { id: "ActiveRouteTextHtmlWidget", create: () => ({}) }
         )));
     const documentRoot = {};
-    const cssReads = [];
+    documentRoot.__dyniThemePreset = " bold ";
 
     const context = createScriptContext({
-      getComputedStyle(el) {
-        cssReads.push(el);
-        return {
-          getPropertyValue(name) {
-            if (el === documentRoot && name === "--dyni-theme-preset") {
-              return " bold ";
-            }
-            return "";
-          }
-        };
-      },
       document: {
         documentElement: documentRoot
       },
@@ -213,6 +213,10 @@ describe("runtime/init.js", function () {
         }
       },
       DyniPlugin: {
+        avnavApi: {
+          registerWidget: vi.fn(),
+          log: vi.fn()
+        },
         theme: "slim",
         runtime: {
           _theme: themeRuntime,
@@ -243,9 +247,9 @@ describe("runtime/init.js", function () {
     await flushPromises();
 
     expect(themeRuntime.preloadShadowCssUrls).toHaveBeenCalledWith(["/shadow-active-route.css"]);
+    expect(themeRuntime.resolveStartupPresetName).toHaveBeenCalledWith(documentRoot, expect.any(Object));
     const configureArgs = themeRuntime.configure.mock.calls[0][0];
     expect(configureArgs.activePresetName).toBe("bold");
-    expect(cssReads).toEqual([documentRoot]);
     expect(typeof context.DyniPlugin.runtime.applyThemePresetToContainer).toBe("undefined");
     expect(typeof context.DyniPlugin.runtime.applyThemePresetToRegisteredWidgets).toBe("undefined");
   });
@@ -262,18 +266,9 @@ describe("runtime/init.js", function () {
       }
     }) : (id === "ThemeResolver" ? resolver : { id: "A", create: () => ({}) })));
     const documentRoot = {};
+    documentRoot.__dyniThemePreset = "invalidPreset";
 
     const context = createScriptContext({
-      getComputedStyle(el) {
-        return {
-          getPropertyValue(name) {
-            if (name === "--dyni-theme-preset" && el === documentRoot) {
-              return "invalidPreset";
-            }
-            return "";
-          }
-        };
-      },
       document: {
         documentElement: documentRoot
       },
@@ -284,6 +279,10 @@ describe("runtime/init.js", function () {
         }
       },
       DyniPlugin: {
+        avnavApi: {
+          registerWidget: vi.fn(),
+          log: vi.fn()
+        },
         runtime: {
           _theme: themeRuntime,
           createTemporaryHostActionBridge,
@@ -311,6 +310,7 @@ describe("runtime/init.js", function () {
 
     const configureArgs = themeRuntime.configure.mock.calls[0][0];
     expect(configureArgs.activePresetName).toBe("default");
+    expect(themeRuntime.resolveStartupPresetName).toHaveBeenCalledWith(documentRoot, expect.any(Object));
   });
 
   it("resets init state and logs when component loading fails", async function () {
@@ -328,6 +328,10 @@ describe("runtime/init.js", function () {
         }
       },
       DyniPlugin: {
+        avnavApi: {
+          registerWidget: vi.fn(),
+          log: vi.fn()
+        },
         runtime: {
           _theme: themeRuntime,
           createTemporaryHostActionBridge,

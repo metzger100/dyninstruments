@@ -173,10 +173,7 @@
         disconnect: props.disconnect === true
       }, stateScreenPrecedence);
       const stableDigitsEnabled = props.stableDigits === true;
-      const canDispatch = !!(
-        domain.hasDispatchMmsi === true &&
-        surfacePolicy && surfacePolicy.interaction && surfacePolicy.interaction.mode === "dispatch"
-      );
+      const canDispatch = domain.hasDispatchMmsi === true && htmlUtils.canDispatchSurfaceInteraction(props);
       const interactionState = resolveInteractionState({
         kind: kind,
         canDispatch: canDispatch,

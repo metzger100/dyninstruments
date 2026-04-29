@@ -11,7 +11,7 @@ It describes how to prompt, when to use planning mode, what the AI will do, and 
 
 ## 2) Local Setup (AvNav + Plugin)
 
-### 2.1 Clone AvNav and plugin (remeber to change the paths)
+### 2.1 Clone AvNav and plugin (remember to change the paths)
 
 ```bash
 git clone https://github.com/wellenvogel/avnav.git ~/avnav-master

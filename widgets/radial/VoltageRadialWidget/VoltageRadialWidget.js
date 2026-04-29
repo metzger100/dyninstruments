@@ -15,40 +15,6 @@
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
-    function formatVoltageString(raw, props) {
-      const p = props || {};
-      const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
-        ? p.default
-        : placeholderNormalize.normalize(undefined, undefined);
-      const n = Number(raw);
-      if (!isFinite(n)) {
-        return defaultText;
-      }
-
-      const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatDecimal";
-      const formatterParameters = (typeof p.formatterParameters !== "undefined")
-        ? p.formatterParameters
-        : [3, 1, true];
-      const formatted = placeholderNormalize.normalize(String(Helpers.applyFormatter(n, {
-        formatter: formatter,
-        formatterParameters: formatterParameters,
-        default: defaultText
-      })), defaultText);
-
-      return formatted;
-    }
-
-    function displayVoltageFromRaw(raw, props) {
-      const defaultText = props.default;
-      const formatted = formatVoltageString(raw, props);
-      const numberText = valueMath.extractNumberText(formatted);
-      const num = numberText ? Number(numberText) : NaN;
-      if (isFinite(num)) {
-        return { num: num, text: numberText };
-      }
-      return { num: NaN, text: defaultText };
-    }
-
     const renderCanvas = renderer.createRenderer({
       rawValueKey: "voltage",
       unitDefault: "V",
@@ -68,7 +34,7 @@
       hideTextualMetricsProp: "voltageRadialHideTextualMetrics",
       tickSteps: valueMath.resolveVoltageSemicircleTickSteps,
       formatDisplay: function (raw, props) {
-        return displayVoltageFromRaw(raw, props);
+        return valueMath.formatGaugeDisplay(raw, props, Helpers.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
         const p = props || {};
@@ -105,7 +71,6 @@
 
     return {
       id: "VoltageRadialWidget",
-      version: "0.2.0",
       wantsHideNativeHead: true,
       renderCanvas,
       getVerticalShellSizing,

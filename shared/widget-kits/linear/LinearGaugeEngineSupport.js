@@ -52,7 +52,6 @@
   function create() {
     return {
       id: "LinearGaugeEngineSupport",
-      version: "0.1.0",
       resolveLabelEdgePolicy: resolveLabelEdgePolicy,
       buildStaticKey: buildStaticKey
     };

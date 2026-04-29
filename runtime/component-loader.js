@@ -30,28 +30,8 @@
     });
   }
 
-  function loadScriptOnce(id, src) {
-    if (document.getElementById(id)) {
-      return Promise.resolve();
-    }
-
-    return new Promise(function (res, rej) {
-      const s = document.createElement("script");
-      s.id = id;
-      s.async = true;
-      s.src = src;
-      s.onload = function () {
-        res();
-      };
-      s.onerror = rej;
-      document.head.appendChild(s);
-    });
-  }
-
   function createComponentLoader(components) {
-    const runtimeLoadScriptOnce = runtime && typeof runtime.loadScriptOnce === "function"
-      ? runtime.loadScriptOnce
-      : loadScriptOnce;
+    const runtimeLoadScriptOnce = runtime.loadScriptOnce;
 
     // Invariant: components is the fully assembled registry from config/components.js.
     const registry = components;
@@ -131,8 +111,5 @@
   }
 
   runtime.loadCssOnce = loadCssOnce;
-  runtime.loadScriptOnce = runtime && typeof runtime.loadScriptOnce === "function"
-    ? runtime.loadScriptOnce
-    : loadScriptOnce;
   runtime.createComponentLoader = createComponentLoader;
 }(this));

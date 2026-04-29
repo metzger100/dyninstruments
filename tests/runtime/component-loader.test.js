@@ -5,10 +5,29 @@ const { flushPromises } = require("../helpers/async");
 describe("runtime/component-loader.js", function () {
   function setup(options) {
     const dom = createDomHarness(options);
+    const runtimeLoadScriptOnce = vi.fn((id, src) => {
+      if (dom.document.getElementById(id)) {
+        return Promise.resolve();
+      }
+
+      return new Promise(function (resolve, reject) {
+        const script = dom.document.createElement("script");
+        script.id = id;
+        script.async = true;
+        script.src = src;
+        script.onload = function () {
+          resolve();
+        };
+        script.onerror = reject;
+        dom.document.head.appendChild(script);
+      });
+    });
     const context = createScriptContext({
       document: dom.document,
       DyniPlugin: {
-        runtime: {},
+        runtime: {
+          loadScriptOnce: runtimeLoadScriptOnce
+        },
         state: {},
         config: { shared: {}, clusters: [] }
       },
@@ -23,7 +42,8 @@ describe("runtime/component-loader.js", function () {
     return {
       dom,
       runtime: context.DyniPlugin.runtime,
-      context
+      context,
+      runtimeLoadScriptOnce
     };
   }
 

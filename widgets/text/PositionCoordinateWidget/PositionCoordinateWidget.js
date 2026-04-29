@@ -38,7 +38,7 @@
     }
     const lat = Number(latRaw);
     const lon = Number(lonRaw);
-    return isFinite(lat) && isFinite(lon) ? { lat: lat, lon: lon } : null;
+    return Number.isFinite(lat) && Number.isFinite(lon) ? { lat: lat, lon: lon } : null;
   }
 
   function isGpsValid(value) {
@@ -118,7 +118,7 @@
       }
     } else {
       const n = Number(rawValue);
-      if (!isFinite(n)) {
+      if (!Number.isFinite(n)) {
         return defaultText;
       }
       rawValue = n;

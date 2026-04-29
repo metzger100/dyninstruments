@@ -304,6 +304,7 @@
       trimText: trimText,
       escapeHtml: escapeHtml,
       toStyleAttr: toStyleAttr,
+      resolveHostCommitTarget: resolveHostCommitTarget,
       resolveShellRect: resolveShellRect,
       resolveRatioMode: resolveRatioMode,
       resolveRatioModeForRect: resolveRatioModeForRect,

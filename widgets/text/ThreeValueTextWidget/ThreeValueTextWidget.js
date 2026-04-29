@@ -202,7 +202,6 @@
 
     return {
       id: "ThreeValueTextWidget",
-      version: "4.3.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
       getVerticalShellSizing: getVerticalShellSizing,

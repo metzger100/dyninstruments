@@ -32,20 +32,20 @@
         if (!sector) continue;
         const from = Number(sector.from);
         const to = Number(sector.to);
-        if (!isFinite(from) || !isFinite(to) || to <= from) continue;
+        if (!Number.isFinite(from) || !Number.isFinite(to) || to <= from) continue;
         const x0 = mapValueToX(from, true);
         const x1 = mapValueToX(to, true);
-        if (!isFinite(x0) || !isFinite(x1) || Math.abs(x1 - x0) <= 1) continue;
+        if (!Number.isFinite(x0) || !Number.isFinite(x1) || Math.abs(x1 - x0) <= 1) continue;
         primitives.drawBand(layerCtx, x0, x1, state.sectorBandY, state.trackThickness, { fillStyle: sector.color });
       }
 
       for (let i = 0; i < ticks.minor.length; i++) {
         const x = mapValueToX(ticks.minor[i], true);
-        if (isFinite(x)) primitives.drawTick(layerCtx, Math.round(x), state.layout.trackY, layout.minorTickLen, minorStyle);
+        if (Number.isFinite(x)) primitives.drawTick(layerCtx, Math.round(x), state.layout.trackY, layout.minorTickLen, minorStyle);
       }
       for (let i = 0; i < ticks.major.length; i++) {
         const x = mapValueToX(ticks.major[i], true);
-        if (isFinite(x)) primitives.drawTick(layerCtx, Math.round(x), state.layout.trackY, layout.majorTickLen, majorStyle);
+        if (Number.isFinite(x)) primitives.drawTick(layerCtx, Math.round(x), state.layout.trackY, layout.majorTickLen, majorStyle);
       }
 
       textLayout.drawTickLabels(layerCtx, state, ticks, showEndLabels, math, labelFormatter);
@@ -53,11 +53,11 @@
 
     function drawPointerAtValue(ctx, state, layout, theme, primitives, mapValueToX, markerValue, pointerDepthBase, markerSizeBase, opts) {
       const pointerNum = Number(markerValue);
-      if (!isFinite(pointerNum)) {
+      if (!Number.isFinite(pointerNum)) {
         return;
       }
       const pointerX = mapValueToX(pointerNum, true);
-      if (!isFinite(pointerX)) {
+      if (!Number.isFinite(pointerX)) {
         return;
       }
       const markerOpts = opts || {};
@@ -74,11 +74,11 @@
 
     function drawMarkerAtValue(ctx, state, layout, theme, primitives, mapValueToX, markerValue, markerSizeBase, opts) {
       const markerNum = Number(markerValue);
-      if (!isFinite(markerNum)) {
+      if (!Number.isFinite(markerNum)) {
         return;
       }
       const markerX = mapValueToX(markerNum, true);
-      if (!isFinite(markerX)) {
+      if (!Number.isFinite(markerX)) {
         return;
       }
       const markerOpts = opts || {};
@@ -93,7 +93,6 @@
 
     return {
       id: "LinearGaugeEngineDrawing",
-      version: "0.1.0",
       drawStaticLayer: drawStaticLayer,
       drawPointerAtValue: drawPointerAtValue,
       drawMarkerAtValue: drawMarkerAtValue

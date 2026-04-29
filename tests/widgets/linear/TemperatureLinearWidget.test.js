@@ -34,6 +34,28 @@ describe("TemperatureLinearWidget", function () {
           return {
             create() {
               return {
+                formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
+                  const p = props || {};
+                  const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
+                    ? p.default
+                    : normalize(undefined, undefined);
+                  const n = Number(raw);
+                  if (!Number.isFinite(n)) {
+                    return { num: NaN, text: defaultText };
+                  }
+                  const formatter = Object.prototype.hasOwnProperty.call(p, "formatter") ? p.formatter : defaultFormatter;
+                  const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters")
+                    ? p.formatterParameters
+                    : defaultParameters;
+                  const formatted = normalize(String(applyFormatter(n, {
+                    formatter: formatter,
+                    formatterParameters: formatterParameters,
+                    default: defaultText
+                  })), defaultText);
+                  const match = String(formatted).match(/-?\d+(?:\.\d+)?/);
+                  const num = match ? Number(match[0]) : NaN;
+                  return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+                },
                 extractNumberText(text) {
                   const match = String(text).match(/-?\d+(?:\.\d+)?/);
                   return match ? match[0] : "";
@@ -118,6 +140,28 @@ describe("TemperatureLinearWidget", function () {
           return {
             create() {
               return {
+                formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
+                  const p = props || {};
+                  const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
+                    ? p.default
+                    : normalize(undefined, undefined);
+                  const n = Number(raw);
+                  if (!Number.isFinite(n)) {
+                    return { num: NaN, text: defaultText };
+                  }
+                  const formatter = Object.prototype.hasOwnProperty.call(p, "formatter") ? p.formatter : defaultFormatter;
+                  const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters")
+                    ? p.formatterParameters
+                    : defaultParameters;
+                  const formatted = normalize(String(applyFormatter(n, {
+                    formatter: formatter,
+                    formatterParameters: formatterParameters,
+                    default: defaultText
+                  })), defaultText);
+                  const match = String(formatted).match(/-?\d+(?:\.\d+)?/);
+                  const num = match ? Number(match[0]) : NaN;
+                  return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+                },
                 extractNumberText(text) {
                   const match = String(text).match(/-?\d+(?:\.\d+)?/);
                   return match ? match[0] : "";
@@ -181,6 +225,28 @@ describe("TemperatureLinearWidget", function () {
           return {
             create() {
               return {
+                formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
+                  const p = props || {};
+                  const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
+                    ? p.default
+                    : normalize(undefined, undefined);
+                  const n = Number(raw);
+                  if (!Number.isFinite(n)) {
+                    return { num: NaN, text: defaultText };
+                  }
+                  const formatter = Object.prototype.hasOwnProperty.call(p, "formatter") ? p.formatter : defaultFormatter;
+                  const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters")
+                    ? p.formatterParameters
+                    : defaultParameters;
+                  const formatted = normalize(String(applyFormatter(n, {
+                    formatter: formatter,
+                    formatterParameters: formatterParameters,
+                    default: defaultText
+                  })), defaultText);
+                  const numberText = this.extractNumberText(formatted);
+                  const num = numberText ? Number(numberText) : NaN;
+                  return Number.isFinite(num) ? { num: num, text: numberText } : { num: NaN, text: defaultText };
+                },
                 extractNumberText(text) {
                   seenText = String(text);
                   return "";

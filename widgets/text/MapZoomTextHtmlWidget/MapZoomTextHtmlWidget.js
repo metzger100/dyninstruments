@@ -51,11 +51,6 @@
     return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
   }
 
-  function canDispatchCheckAutoZoom(props) {
-    const policy = getSurfacePolicy(props);
-    return !!(policy && policy.interaction && policy.interaction.mode === "dispatch");
-  }
-
   function dispatchCheckAutoZoom(props, htmlUtils) {
     const p = props || {};
     if (htmlUtils.isEditingMode(p)) {
@@ -65,7 +60,7 @@
     if (!policy || !policy.actions || !policy.actions.map || typeof policy.actions.map.checkAutoZoom !== "function") {
       return false;
     }
-    if (!canDispatchCheckAutoZoom(p)) {
+    if (!htmlUtils.canDispatchSurfaceInteraction(p)) {
       return false;
     }
     return policy.actions.map.checkAutoZoom() !== false;
@@ -139,7 +134,7 @@
       : { padded: requiredRawText, fallback: requiredRawText };
     const showRequired = typeof requiredZoomNumber === "number" && requiredZoomNumber !== zoomNumber;
     const isEditing = htmlUtils.isEditingMode(p);
-    const canDispatch = !isEditing && canDispatchCheckAutoZoom(p);
+    const canDispatch = !isEditing && htmlUtils.canDispatchSurfaceInteraction(p);
     const interactionState = stateScreenInteraction.resolveInteraction({
       kind: kind,
       baseInteraction: canDispatch ? "dispatch" : "passive"

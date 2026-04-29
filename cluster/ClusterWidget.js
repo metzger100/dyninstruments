@@ -145,7 +145,6 @@
 
     return {
       id: "ClusterWidget",
-      version: "1.16.0",
       wantsHideNativeHead: !!rendererRouter.wantsHideNativeHead,
       translateFunction: translateFunction,
       initFunction: initFunction,

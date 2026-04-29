@@ -17,6 +17,11 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     const alarmWidgetRoots = opts.alarmWidgetRoots || [];
     const routePointsActivate = opts.routePointsActivate || vi.fn(() => true);
     const includeGlobalApi = opts.includeGlobalApi !== false;
+    const capturedApi = opts.hostApi || (includeGlobalApi ? {
+      routePoints: {
+        activate: routePointsActivate
+      }
+    } : null);
     function hasClassName(root, className) {
       const value = root && root.className;
       if (typeof value !== "string") {
@@ -40,7 +45,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
         runtime: {},
         state: {},
         config: { shared: {}, clusters: [] },
-        ...(opts.hostApi ? { avnavApi: opts.hostApi } : {})
+        ...(capturedApi ? { avnavApi: capturedApi } : {})
       },
       avnav: includeGlobalApi ? {
         api: {
@@ -164,7 +169,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     expect(first.pageId).toBe("gpspage");
     expect(first.routePoints.activate).toBe("dispatch");
 
-    context.avnav.api.routePoints = {};
+    context.DyniPlugin.avnavApi.routePoints = {};
     const relayChanged = hostActions.getCapabilities();
     expect(relayChanged).not.toBe(first);
     expect(relayChanged.routePoints.activate).toBe("unsupported");

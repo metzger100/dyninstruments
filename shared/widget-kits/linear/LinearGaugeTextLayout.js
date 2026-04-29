@@ -257,7 +257,6 @@
 
     return {
       id: "LinearGaugeTextLayout",
-      version: "0.2.0",
       resolveLabelBoost: resolveLabelBoost,
       drawTickLabels: drawTickLabels,
       drawCaptionRow: drawCaptionRow,

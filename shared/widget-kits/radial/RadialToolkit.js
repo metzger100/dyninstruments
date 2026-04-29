@@ -34,7 +34,6 @@
 
     return {
       id: "RadialToolkit",
-      version: "0.2.0",
       theme,
       text,
       value,

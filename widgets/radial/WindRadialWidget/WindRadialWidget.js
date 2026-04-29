@@ -20,7 +20,7 @@
     function windFormatSpeedText(raw, props, speedUnit) {
       const p = props || {};
       const n = Number(raw);
-      if (!isFinite(n)) {
+      if (!Number.isFinite(n)) {
         return Object.prototype.hasOwnProperty.call(p, "default")
           ? p.default
           : placeholderNormalize.normalize(undefined, undefined);
@@ -194,7 +194,6 @@
 
     return {
       id: "WindRadialWidget",
-      version: "1.9.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
       getVerticalShellSizing: getVerticalShellSizing,

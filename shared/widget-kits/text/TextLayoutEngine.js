@@ -134,7 +134,6 @@
 
     return {
       id: "TextLayoutEngine",
-      version: "0.3.0",
       setFont: primitive.setFont,
       createFitCache: createFitCache,
       clearFitCache: clearFitCache,

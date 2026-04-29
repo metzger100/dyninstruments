@@ -53,15 +53,15 @@
     function resolveDrawSize(canvas, defaultWidth, defaultHeight) {
       let W = Number(canvas && canvas.clientWidth);
       let H = Number(canvas && canvas.clientHeight);
-      if ((!isFinite(W) || W <= 0 || !isFinite(H) || H <= 0) && canvas && typeof canvas.getBoundingClientRect === "function") {
+      if ((!Number.isFinite(W) || W <= 0 || !Number.isFinite(H) || H <= 0) && canvas && typeof canvas.getBoundingClientRect === "function") {
         const rect = canvas.getBoundingClientRect();
         W = Number(rect && rect.width);
         H = Number(rect && rect.height);
       }
-      if (!isFinite(W) || W <= 0) {
+      if (!Number.isFinite(W) || W <= 0) {
         W = defaultWidth;
       }
-      if (!isFinite(H) || H <= 0) {
+      if (!Number.isFinite(H) || H <= 0) {
         H = defaultHeight;
       }
       return { W: Math.max(1, Math.round(W)), H: Math.max(1, Math.round(H)) };

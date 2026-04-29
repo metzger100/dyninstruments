@@ -17,10 +17,7 @@
       const cap = toolkit.cap;
       const unit = toolkit.unit;
       const out = toolkit.out;
-      const num = toolkit.num || function (value) {
-        const n = Number(value);
-        return Number.isFinite(n) ? n : undefined;
-      };
+      const num = toolkit.num;
 
       const effKind = p.kind;
 

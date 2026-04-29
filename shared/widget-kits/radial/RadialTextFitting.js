@@ -18,7 +18,7 @@
 
   function clampPositive(value, defaultValue) {
     const n = Number(value);
-    if (!isFinite(n) || n <= 0) {
+    if (!Number.isFinite(n) || n <= 0) {
       return defaultValue;
     }
     return n;
@@ -37,7 +37,7 @@
 
     function setFont(ctx, px, weight, family) {
       const size = Math.max(MIN_FONT_PX, Number(px) || 0);
-      const fontWeight = isFinite(Number(weight)) ? Math.floor(Number(weight)) : 400;
+      const fontWeight = Number.isFinite(Number(weight)) ? Math.floor(Number(weight)) : 400;
       const fontValue = fontWeight + " " + size + "px " + (family || "sans-serif");
       if (ctx[FONT_STATE_KEY] !== fontValue || ctx.font !== fontValue) {
         ctx.font = fontValue;
@@ -96,7 +96,7 @@
       const maxW = Math.max(0, rawMaxW * 0.97);
       const hasUnit = !!unit;
       const ratio = Number(secScale);
-      const scale = isFinite(ratio) ? ratio : 0.8;
+      const scale = Number.isFinite(ratio) ? ratio : 0.8;
       const opts = textOptions && typeof textOptions === "object" ? textOptions : null;
       const valueFamily = opts && opts.useMono === true
         ? (opts.monoFamily || family)
@@ -150,7 +150,7 @@
       const hasCaption = !!caption;
       const hasUnit = !!unit;
       const ratio = Number(secScale);
-      const scale = isFinite(ratio) ? ratio : 0.8;
+      const scale = Number.isFinite(ratio) ? ratio : 0.8;
 
       if (widthLimit <= 0) {
         return {

@@ -18,14 +18,14 @@
     function mod(n, m) { return ((n % m) + m) % m; }
 
     function norm360(deg) {
-      if (!isFinite(deg)) {
+      if (!Number.isFinite(deg)) {
         return deg;
       }
       return mod(deg, 360);
     }
 
     function norm180(deg) {
-      if (!isFinite(deg)) {
+      if (!Number.isFinite(deg)) {
         return deg;
       }
       let r = mod(deg + 180, 360) - 180;
@@ -39,7 +39,7 @@
       const clockwise = (cfg.clockwise !== false);
 
       let d = Number(deg);
-      if (!isFinite(d)) d = 0;
+      if (!Number.isFinite(d)) d = 0;
       d = d + (Number(rotationDeg) || 0);
 
       const shift = (zeroDegAt === "east") ? 0 : -90;
@@ -54,12 +54,12 @@
       const startDeg = Number(opts.startDeg);
       const endDeg = Number(opts.endDeg);
 
-      if (!isFinite(min) || !isFinite(max) || !isFinite(startDeg) || !isFinite(endDeg)) {
+      if (!Number.isFinite(min) || !Number.isFinite(max) || !Number.isFinite(startDeg) || !Number.isFinite(endDeg)) {
         return NaN;
       }
 
       let v = Number(value);
-      if (!isFinite(v)) {
+      if (!Number.isFinite(v)) {
         return NaN;
       }
 
@@ -77,12 +77,12 @@
       const startDeg = Number(opts.startDeg);
       const endDeg = Number(opts.endDeg);
 
-      if (!isFinite(min) || !isFinite(max) || !isFinite(startDeg) || !isFinite(endDeg)) {
+      if (!Number.isFinite(min) || !Number.isFinite(max) || !Number.isFinite(startDeg) || !Number.isFinite(endDeg)) {
         return NaN;
       }
 
       let a = Number(angleDeg);
-      if (!isFinite(a)) {
+      if (!Number.isFinite(a)) {
         return NaN;
       }
 
@@ -104,7 +104,6 @@
 
     return {
       id: "RadialAngleMath",
-      version: "0.1.0",
       mod,
       degToRad,
       radToDeg,

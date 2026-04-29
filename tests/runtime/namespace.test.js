@@ -14,11 +14,7 @@ describe("runtime/namespace.js", function () {
 
   it("resolves the captured AvNav API before falling back to the global wrapper API", function () {
     const capturedApi = { name: "captured" };
-    const fallbackApi = { name: "fallback" };
     const context = createScriptContext({
-      avnav: {
-        api: fallbackApi
-      },
       DyniPlugin: {
         avnavApi: capturedApi
       }
@@ -28,6 +24,6 @@ describe("runtime/namespace.js", function () {
 
     expect(context.DyniPlugin.runtime.getAvnavApi(context)).toBe(capturedApi);
     context.DyniPlugin.avnavApi = null;
-    expect(context.DyniPlugin.runtime.getAvnavApi(context)).toBe(fallbackApi);
+    expect(context.DyniPlugin.runtime.getAvnavApi(context)).toBe(null);
   });
 });

@@ -331,7 +331,7 @@ tiny();
 (function () {
   "use strict";
   const fallbackValue = Number(7);
-  const num = isFinite(fallbackValue) ? fallbackValue : 0;
+  const num = Number.isFinite(fallbackValue) ? fallbackValue : 0;
   const render = function fallbackStackTrace() {
     return num;
   };
@@ -343,6 +343,26 @@ tiny();
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
     expect(result.summary.ok).toBe(true);
     expect(result.findings).toHaveLength(0);
+  });
+
+  it("blocks bare global isFinite in source files but allows Number.isFinite", function () {
+    const cwd = createWorkspace({
+      "widgets/example.js": `
+(function () {
+  "use strict";
+  const a = isFinite(12);
+  const b = Number.isFinite(12);
+  return a && b;
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(out).toContain("[global-isfinite]");
+    expect(result.summary.byRule["global-isfinite"]).toBe(1);
   });
 
   it("blocks truthy fallback on .default properties", function () {

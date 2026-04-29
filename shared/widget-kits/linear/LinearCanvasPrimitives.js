@@ -57,7 +57,7 @@
     const p = opts || {};
     const left = Math.min(x0, x1);
     const width = Math.max(0, Math.abs(x1 - x0));
-    if (!isFinite(left) || !isFinite(width) || width <= 0) {
+    if (!Number.isFinite(left) || !Number.isFinite(width) || width <= 0) {
       return;
     }
     const t = Math.max(1, Math.floor(Number(thickness) || 1));
@@ -116,7 +116,6 @@
   function create() {
     return {
       id: "LinearCanvasPrimitives",
-      version: "0.1.0",
       drawTrack: drawTrack,
       drawBand: drawBand,
       drawTick: drawTick,

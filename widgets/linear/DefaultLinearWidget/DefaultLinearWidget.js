@@ -17,7 +17,7 @@
 
     function resolveThreshold(value) {
       const n = Number(value);
-      return isFinite(n) ? n : NaN;
+      return Number.isFinite(n) ? n : NaN;
     }
 
     function buildSectors(props, minV, maxV, axis, valueApi, theme) {
@@ -90,7 +90,7 @@
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
       formatDisplay: function (raw, props) {
         const applyFormatter = Helpers.applyFormatter;
-        return valueMath.formatGaugeDisplay(raw, props, applyFormatter, placeholderNormalize.normalize);
+        return valueMath.formatGaugeDisplay(raw, props, applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
       },
       buildSectors: buildSectors
     });
@@ -105,7 +105,6 @@
 
     return {
       id: "DefaultLinearWidget",
-      version: "0.1.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
       getVerticalShellSizing: getVerticalShellSizing,

@@ -45,7 +45,7 @@
   }
 
   function pickNameOrMmsi(target, mmsiRaw) {
-    const isAton = target.type == 21;
+    const isAton = target.type === 21 || target.type === "21";
     if (isAton && hasText(target.name)) {
       return target.name.trim();
     }

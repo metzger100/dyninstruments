@@ -69,7 +69,7 @@
       const endDeg = Number(opts.endDeg);
       const thickness = Math.max(1, Math.floor(Number(hasOwn.call(opts, "thickness") ? opts.thickness : 10)));
 
-      if (!isFinite(startDeg) || !isFinite(endDeg) || !isFinite(rOuter)) {
+      if (!Number.isFinite(startDeg) || !Number.isFinite(endDeg) || !Number.isFinite(rOuter)) {
         return;
       }
 
@@ -146,7 +146,7 @@
 
       const depth = Number(opts.depth);
       const halfWidth = Number(opts.halfWidth);
-      if (!isFinite(depth) || !isFinite(halfWidth) || depth <= 0 || halfWidth <= 0) {
+      if (!Number.isFinite(depth) || !Number.isFinite(halfWidth) || depth <= 0 || halfWidth <= 0) {
         return;
       }
 
@@ -183,7 +183,7 @@
 
       const len = Number(opts.len);
       const width = Number(opts.width);
-      if (!isFinite(len) || !isFinite(width) || len <= 0 || width <= 0) {
+      if (!Number.isFinite(len) || !Number.isFinite(width) || len <= 0 || width <= 0) {
         return;
       }
 
@@ -207,7 +207,6 @@
 
     return {
       id: "RadialCanvasPrimitives",
-      version: "0.1.0",
       withCtx,
       drawRing,
       drawArcRing,

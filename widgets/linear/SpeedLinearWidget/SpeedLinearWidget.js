@@ -9,7 +9,6 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniSpeedLinearWidget = factory(); }
 }(this, function () {
   "use strict";
-  const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
     const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
@@ -17,51 +16,26 @@
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
     function formatDisplay(raw, props, unit) {
-      const p = props || {};
-      const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
-        ? p.default
-        : placeholderNormalize.normalize(undefined, undefined);
-      const n = Number(raw);
-      if (!isFinite(n)) {
-        return { num: NaN, text: defaultText };
-      }
-
-      const formatter = hasOwn.call(p, "formatter") ? p.formatter : "formatSpeed";
-      const formatterParameters = hasOwn.call(p, "formatterParameters")
-        ? p.formatterParameters
-        : [unit || "kn"];
-
-      const out = placeholderNormalize.normalize(String(Helpers.applyFormatter(n, {
-        formatter: formatter,
-        formatterParameters: formatterParameters,
-        default: defaultText
-      })), defaultText);
-      const numberText = valueMath.extractNumberText(out);
-      const numeric = Number(numberText);
-
-      if (!isFinite(numeric)) {
-        return { num: NaN, text: defaultText };
-      }
-      return { num: numeric, text: numberText };
+      return valueMath.formatGaugeDisplay(raw, props, Helpers.applyFormatter, placeholderNormalize.normalize, "formatSpeed", [unit || "kn"]);
     }
 
     function buildSectors(props, minV, maxV, axis, valueApi, theme) {
       const p = props || {};
       const warningFrom = Number(p.speedLinearWarningFrom);
       const alarmFrom = Number(p.speedLinearAlarmFrom);
-      const warningTo = (isFinite(alarmFrom) && isFinite(warningFrom) && alarmFrom > warningFrom)
+      const warningTo = (Number.isFinite(alarmFrom) && Number.isFinite(warningFrom) && alarmFrom > warningFrom)
         ? alarmFrom
         : maxV;
 
       const sectors = [];
-      if (isFinite(warningFrom)) {
+      if (Number.isFinite(warningFrom)) {
         sectors.push({
           from: valueApi.clamp(warningFrom, axis.min, axis.max),
           to: valueApi.clamp(warningTo, axis.min, axis.max),
           color: theme.colors.warning
         });
       }
-      if (isFinite(alarmFrom)) {
+      if (Number.isFinite(alarmFrom)) {
         sectors.push({
           from: valueApi.clamp(alarmFrom, axis.min, axis.max),
           to: valueApi.clamp(maxV, axis.min, axis.max),
@@ -105,7 +79,6 @@
 
     return {
       id: "SpeedLinearWidget",
-      version: "0.1.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
       getVerticalShellSizing: getVerticalShellSizing,

@@ -92,6 +92,16 @@ export const RULES = [
     message: ({ file, line, match }) => `[absolute-user-home-path] ${file}:${line}\nAbsolute user-home path detected (${match[0]}). Use project-relative or redacted placeholders instead (for example '/path/to/...', '/home/<user>/...').`
   },
   {
+    name: "global-isfinite",
+    severity: "block",
+    scope: {
+      include: ["plugin.js", "runtime/**/*.js", "shared/**/*.js", "cluster/**/*.js", "widgets/**/*.js", "config/**/*.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    detect: /(?<!Number\.)\bisFinite\s*\(/g,
+    message: ({ file, line }) => `[global-isfinite] ${file}:${line}\nUse Number.isFinite(...) instead of bare isFinite(...).`
+  },
+  {
     name: "duplicate-functions",
     scope: {
       include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js"],

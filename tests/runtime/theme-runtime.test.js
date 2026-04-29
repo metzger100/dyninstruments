@@ -60,6 +60,12 @@ describe("runtime/theme-runtime.js", function () {
           fg: "black",
           bg: "white"
         }
+      })),
+      resolveOutputsForRoot: vi.fn(() => ({
+        surface: {
+          fg: "black",
+          bg: "white"
+        }
       }))
     };
     const rootEl = {
@@ -77,7 +83,7 @@ describe("runtime/theme-runtime.js", function () {
     context.DyniPlugin.runtime._theme.applyToRoot(rootEl);
     context.DyniPlugin.runtime._theme.applyToRoot(rootEl);
 
-    expect(themeResolver.resolveForRoot).toHaveBeenCalledTimes(2);
+    expect(themeResolver.resolveOutputsForRoot).toHaveBeenCalledTimes(2);
     expect(rootEl.style.setProperty).toHaveBeenCalledTimes(4);
     expect(rootEl.style.setProperty.mock.calls).toEqual([
       ["--dyni-theme-surface-fg", "black"],
@@ -85,6 +91,91 @@ describe("runtime/theme-runtime.js", function () {
       ["--dyni-theme-surface-fg", "black"],
       ["--dyni-theme-surface-bg", "white"]
     ]);
+  });
+
+  it("keeps startup preset resolution bound to the root CSS preset only", function () {
+    const context = setupContext();
+    const themeModel = {
+      normalizePresetName: vi.fn((presetName) => {
+        const normalized = typeof presetName === "string" ? presetName.trim().toLowerCase() : "";
+        return normalized === "bold" || normalized === "slim" ? normalized : "default";
+      }),
+      getOutputTokenDefinitions: vi.fn(() => [])
+    };
+    const themeResolver = {
+      configure: vi.fn(),
+      resolveForRoot: vi.fn(() => ({}))
+    };
+    const rootEl = {};
+
+    context.DyniPlugin.runtime._theme.configure({
+      ThemeModel: themeModel,
+      ThemeResolver: themeResolver,
+      activePresetName: "bold"
+    });
+
+    expect(context.DyniPlugin.runtime._theme.resolveStartupPresetName(rootEl, themeModel)).toBe("default");
+    expect(themeModel.normalizePresetName).toHaveBeenNthCalledWith(2, null);
+  });
+
+  it("falls back to the active preset when the ThemeResolver callback sees no CSS preset", function () {
+    const context = setupContext();
+    const themeModel = {
+      normalizePresetName: vi.fn((presetName) => {
+        const normalized = typeof presetName === "string" ? presetName.trim().toLowerCase() : "";
+        return normalized === "bold" || normalized === "slim" ? normalized : "default";
+      }),
+      getOutputTokenDefinitions: vi.fn(() => [])
+    };
+    const themeResolver = {
+      configure: vi.fn(),
+      resolveForRoot: vi.fn(() => ({}))
+    };
+    const rootEl = {};
+
+    context.DyniPlugin.runtime._theme.configure({
+      ThemeModel: themeModel,
+      ThemeResolver: themeResolver,
+      activePresetName: "bold"
+    });
+
+    const args = themeResolver.configure.mock.calls[0][0];
+    expect(args.getActivePresetName(rootEl)).toBe("bold");
+  });
+
+  it("lets the root CSS preset override the active preset in ThemeResolver callbacks", function () {
+    const rootEl = {};
+    const context = setupContext({
+      getComputedStyle(el) {
+        return {
+          getPropertyValue(name) {
+            return el === rootEl && name === "--dyni-theme-preset" ? " slim " : "";
+          }
+        };
+      }
+    });
+    const themeModel = {
+      normalizePresetName: vi.fn((presetName) => {
+        const normalized = typeof presetName === "string" ? presetName.trim().toLowerCase() : "";
+        return normalized === "bold" || normalized === "slim" ? normalized : "default";
+      }),
+      getOutputTokenDefinitions: vi.fn(() => [])
+    };
+    const themeResolver = {
+      configure: vi.fn(),
+      resolveForRoot: vi.fn(() => ({}))
+    };
+
+    context.DyniPlugin.runtime._theme.configure({
+      ThemeModel: themeModel,
+      ThemeResolver: themeResolver,
+      activePresetName: "bold"
+    });
+    rootEl.__dyniThemePreset = " slim ";
+
+    const args = themeResolver.configure.mock.calls[0][0];
+    expect(args.getActivePresetName(rootEl)).toBe("slim");
+    expect(context.DyniPlugin.runtime._theme.resolveStartupPresetName(rootEl, themeModel)).toBe("slim");
   });
 
   it("preloads shadow css text via fetch and reuses cache", async function () {
@@ -113,5 +204,28 @@ describe("runtime/theme-runtime.js", function () {
     expect(function () {
       context.DyniPlugin.runtime._theme.applyToRoot({ style: { setProperty() {} } });
     }).toThrow("requires prior configure");
+  });
+
+  it("resolves startup preset names from the document root CSS boundary", function () {
+    const rootEl = {};
+    const context = setupContext({
+      getComputedStyle(el) {
+        return {
+          getPropertyValue(name) {
+            return el === rootEl && name === "--dyni-theme-preset" ? " bold " : "";
+          }
+        };
+      }
+    });
+    const themeModel = {
+      normalizePresetName: vi.fn((presetName) => {
+        const normalized = typeof presetName === "string" ? presetName.trim().toLowerCase() : "";
+        return normalized === "bold" ? "bold" : "default";
+      }),
+      getOutputTokenDefinitions: vi.fn(() => [])
+    };
+
+    expect(context.DyniPlugin.runtime._theme.resolveStartupPresetName(rootEl, themeModel)).toBe("bold");
+    expect(themeModel.normalizePresetName).toHaveBeenCalledWith("bold");
   });
 });

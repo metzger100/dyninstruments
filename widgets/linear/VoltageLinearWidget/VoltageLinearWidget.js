@@ -16,31 +16,7 @@
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
     function formatDisplay(raw, props) {
-      const p = props || {};
-      const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
-        ? p.default
-        : placeholderNormalize.normalize(undefined, undefined);
-      const n = Number(raw);
-      if (!isFinite(n)) {
-        return { num: NaN, text: defaultText };
-      }
-
-      const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatDecimal";
-      const formatterParameters = (typeof p.formatterParameters !== "undefined")
-        ? p.formatterParameters
-        : [3, 1, true];
-      const formatted = placeholderNormalize.normalize(String(Helpers.applyFormatter(n, {
-        formatter: formatter,
-        formatterParameters: formatterParameters,
-        default: defaultText
-      })), defaultText);
-
-      const numberText = valueMath.extractNumberText(formatted);
-      const parsed = numberText ? Number(numberText) : NaN;
-      if (!isFinite(parsed)) {
-        return { num: NaN, text: defaultText };
-      }
-      return { num: parsed, text: numberText };
+      return valueMath.formatGaugeDisplay(raw, props, Helpers.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
     }
 
     function buildSectors(props, minV, maxV, axis, theme) {
@@ -57,11 +33,11 @@
       const alarmFrom = alarmEnabled
         ? Number(p.voltageLinearAlarmFrom)
         : NaN;
-      const alarmTo = isFinite(alarmFrom) ? valueMath.clamp(alarmFrom, axis.min, axis.max) : NaN;
-      const warningTo = isFinite(warningFrom) ? valueMath.clamp(warningFrom, axis.min, axis.max) : NaN;
+      const alarmTo = Number.isFinite(alarmFrom) ? valueMath.clamp(alarmFrom, axis.min, axis.max) : NaN;
+      const warningTo = Number.isFinite(warningFrom) ? valueMath.clamp(warningFrom, axis.min, axis.max) : NaN;
       const sectors = [];
 
-      if (isFinite(alarmTo) && alarmTo > minV) {
+      if (Number.isFinite(alarmTo) && alarmTo > minV) {
         sectors.push({
           from: valueMath.clamp(minV, axis.min, axis.max),
           to: alarmTo,
@@ -69,14 +45,14 @@
         });
       }
 
-      if (isFinite(alarmTo) && isFinite(warningTo) && warningTo > alarmTo) {
+      if (Number.isFinite(alarmTo) && Number.isFinite(warningTo) && warningTo > alarmTo) {
         sectors.push({
           from: alarmTo,
           to: warningTo,
           color: theme.colors.warning
         });
       }
-      else if (!isFinite(alarmTo) && isFinite(warningTo) && warningTo > minV) {
+      else if (!Number.isFinite(alarmTo) && Number.isFinite(warningTo) && warningTo > minV) {
         sectors.push({
           from: valueMath.clamp(minV, axis.min, axis.max),
           to: warningTo,
@@ -123,7 +99,6 @@
 
     return {
       id: "VoltageLinearWidget",
-      version: "0.1.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
       getVerticalShellSizing: getVerticalShellSizing,

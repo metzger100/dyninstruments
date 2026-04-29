@@ -80,7 +80,64 @@ describe("RadialValueMath", function () {
     expect(v.formatGaugeDisplay(12.3, {
       formatter: "formatSpeed",
       formatterParameters: ["kn"]
-    }, applyFormatter, normalize)).toEqual({
+    }, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
+      num: 12.3,
+      text: "12.3"
+    });
+    expect(applyFormatter).toHaveBeenCalledWith(12.3, expect.objectContaining({
+      formatter: "formatSpeed",
+      formatterParameters: ["kn"]
+    }));
+  });
+
+  it("returns default text for invalid raw values without calling applyFormatter", function () {
+    const v = create();
+    const applyFormatter = vi.fn();
+    const normalize = vi.fn((text, defaultText) => {
+      if (text == null) {
+        return defaultText;
+      }
+      return String(text);
+    });
+
+    expect(v.formatGaugeDisplay("abc", {
+      default: "NO DATA"
+    }, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
+      num: NaN,
+      text: "NO DATA"
+    });
+    expect(applyFormatter).not.toHaveBeenCalled();
+  });
+
+  it("converts numeric string raw values before calling applyFormatter", function () {
+    const v = create();
+    const applyFormatter = vi.fn((value) => String(value));
+    const normalize = vi.fn((text, defaultText) => {
+      if (text == null) {
+        return defaultText;
+      }
+      return String(text);
+    });
+
+    v.formatGaugeDisplay("12.3", {}, applyFormatter, normalize, "formatSpeed", ["kn"]);
+
+    expect(applyFormatter).toHaveBeenCalledWith(12.3, expect.objectContaining({
+      formatter: "formatSpeed",
+      formatterParameters: ["kn"]
+    }));
+  });
+
+  it("uses the default formatter and default parameters when props omit overrides", function () {
+    const v = create();
+    const applyFormatter = vi.fn((value, options) => `fmt:${value}:${options.formatter}:${options.formatterParameters.join(",")}`);
+    const normalize = vi.fn((text, defaultText) => {
+      if (text == null) {
+        return defaultText;
+      }
+      return String(text);
+    });
+
+    expect(v.formatGaugeDisplay(12.3, {}, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
       num: 12.3,
       text: "12.3"
     });

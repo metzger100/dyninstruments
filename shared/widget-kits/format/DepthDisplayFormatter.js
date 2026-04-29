@@ -22,7 +22,7 @@
     const p = props || {};
     const defaultText = resolveDefaultText(p, placeholderNormalize);
     const n = Number(raw);
-    if (!isFinite(n)) {
+    if (!Number.isFinite(n)) {
       return { num: NaN, text: defaultText };
     }
 
@@ -36,7 +36,7 @@
     const formatted = unitFormatter.formatWithToken(n, formatter, token, defaultText);
     const parsed = unitFormatter.extractNumericDisplay(formatted, NaN);
 
-    if (!isFinite(parsed)) {
+    if (!Number.isFinite(parsed)) {
       return { num: NaN, text: defaultText };
     }
     return { num: parsed, text: String(formatted).trim() };

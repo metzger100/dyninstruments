@@ -58,7 +58,6 @@
 
     return {
       id: "DepthRadialWidget",
-      version: "0.2.0",
       wantsHideNativeHead: true,
       renderCanvas,
       getVerticalShellSizing,

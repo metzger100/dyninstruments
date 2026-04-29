@@ -25,19 +25,14 @@
     return defaultValue;
   }
 
-  function resolveSurfacePolicy(props) {
-    const p = props && typeof props === "object" ? props : null;
-    return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
-  }
-
-  function resolveInteractionState(props, state, surfacePolicy, htmlUtils) {
+  function resolveInteractionState(props, state, htmlUtils) {
     if (htmlUtils.isEditingMode(props)) {
       return "passive";
     }
     if (state !== "active") {
       return "passive";
     }
-    return surfacePolicy && surfacePolicy.interaction && surfacePolicy.interaction.mode === "dispatch"
+    return htmlUtils.canDispatchSurfaceInteraction(props)
       ? "dispatch"
       : "passive";
   }
@@ -49,13 +44,12 @@
       const cfg = args || {};
       const props = toObject(cfg.props);
       const domain = toObject(cfg.domain || props.domain);
-      const surfacePolicy = resolveSurfacePolicy(props);
       const state = domain.state === "active" ? "active" : "idle";
       const captionText = readText(props, "caption", DEFAULT_CAPTION);
       const idleValueText = DEFAULT_IDLE_VALUE;
       const activeValueText = readText(domain, "alarmText", "");
       const valueText = state === "active" ? activeValueText : idleValueText;
-      const interactionState = resolveInteractionState(props, state, surfacePolicy, htmlUtils);
+      const interactionState = resolveInteractionState(props, state, htmlUtils);
 
       return {
         state: state,

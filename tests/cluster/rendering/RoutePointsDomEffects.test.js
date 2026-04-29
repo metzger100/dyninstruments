@@ -2,7 +2,15 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 describe("RoutePointsDomEffects", function () {
   function createDomEffects() {
-    return loadFresh("shared/widget-kits/nav/RoutePointsDomEffects.js").create();
+    const htmlWidgetUtils = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
+    return loadFresh("shared/widget-kits/nav/RoutePointsDomEffects.js").create({}, {
+      getModule(id) {
+        if (id !== "HtmlWidgetUtils") {
+          throw new Error("unexpected module: " + id);
+        }
+        return htmlWidgetUtils;
+      }
+    });
   }
 
   function defineFixedMetric(target, key, value) {

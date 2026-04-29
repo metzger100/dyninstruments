@@ -357,7 +357,7 @@
       };
     }
 
-    return { id: "LinearGaugeEngine", version: "0.2.0", createRenderer: createRenderer };
+    return { id: "LinearGaugeEngine", createRenderer: createRenderer };
   }
 
   return { id: "LinearGaugeEngine", create: create };

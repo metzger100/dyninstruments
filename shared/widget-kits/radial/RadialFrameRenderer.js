@@ -212,7 +212,6 @@
 
     return {
       id: "RadialFrameRenderer",
-      version: "0.1.0",
       drawTicksFromAngles,
       drawTicks,
       drawLabels,

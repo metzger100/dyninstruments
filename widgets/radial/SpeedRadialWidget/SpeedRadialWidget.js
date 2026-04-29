@@ -15,41 +15,6 @@
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
 
-    function formatSpeedString(raw, props, unit) {
-      const p = props || {};
-      const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
-        ? p.default
-        : placeholderNormalize.normalize(undefined, undefined);
-      const n = Number(raw);
-      if (!isFinite(n)) {
-        return defaultText;
-      }
-
-      const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatSpeed";
-      const formatterParameters = (typeof p.formatterParameters !== "undefined")
-        ? p.formatterParameters
-        : [unit || "kn"];
-
-      const formatted = placeholderNormalize.normalize(String(Helpers.applyFormatter(n, {
-        formatter: formatter,
-        formatterParameters: formatterParameters,
-        default: defaultText
-      })), defaultText);
-
-      return formatted;
-    }
-
-    function displaySpeedFromRaw(raw, props, unit) {
-      const defaultText = props.default;
-      const formatted = formatSpeedString(raw, props, unit);
-      const numberText = valueMath.extractNumberText(formatted);
-      const num = numberText ? Number(numberText) : NaN;
-      if (isFinite(num)) {
-        return { num: num, text: numberText };
-      }
-      return { num: NaN, text: defaultText };
-    }
-
     const renderCanvas = renderer.createRenderer({
       rawValueKey: "speed",
       unitDefault: "kn",
@@ -69,7 +34,7 @@
       hideTextualMetricsProp: "speedRadialHideTextualMetrics",
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
       formatDisplay: function (raw, props, unit) {
-        return displaySpeedFromRaw(raw, props, unit);
+        return valueMath.formatGaugeDisplay(raw, props, Helpers.applyFormatter, placeholderNormalize.normalize, "formatSpeed", [unit || "kn"]);
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
         const radialProps = {
@@ -92,7 +57,6 @@
 
     return {
       id: "SpeedRadialWidget",
-      version: "0.5.0",
       wantsHideNativeHead: true,
       renderCanvas,
       getVerticalShellSizing,

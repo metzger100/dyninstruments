@@ -29,7 +29,7 @@
 
     function resolveSpeedText(rawSpeed, props, speedUnit, defaultText) {
       const n = Number(rawSpeed);
-      if (!isFinite(n)) {
+      if (!Number.isFinite(n)) {
         return defaultText;
       }
       const p = props || {};
@@ -52,7 +52,7 @@
         ? p.default
         : placeholderNormalize.normalize(undefined, undefined);
       const angle = Number(rawAngle);
-      const angleText = isFinite(angle)
+      const angleText = Number.isFinite(angle)
         ? valueMath.formatAngle180(angle, !!p.leadingZero)
         : defaultText;
       const angleNum = Number(angleText);
@@ -75,7 +75,7 @@
         : speedRawText;
 
       return {
-        num: isFinite(angleNum) ? angleNum : NaN,
+        num: Number.isFinite(angleNum) ? angleNum : NaN,
         text: angleValueText,
         secScale: secScale,
         left: {
@@ -118,7 +118,7 @@
       }
       const layMin = valueApi.clamp(p.windLinearLayMin, 0, 180);
       const layMax = valueApi.clamp(p.windLinearLayMax, 0, 180);
-      if (!isFinite(layMin) || !isFinite(layMax) || layMax <= layMin) {
+      if (!Number.isFinite(layMin) || !Number.isFinite(layMax) || layMax <= layMin) {
         return [];
       }
       return [
@@ -222,7 +222,6 @@
 
     return {
       id: "WindLinearWidget",
-      version: "0.1.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
       getVerticalShellSizing: getVerticalShellSizing,

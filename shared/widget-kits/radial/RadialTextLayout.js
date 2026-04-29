@@ -69,7 +69,7 @@
       }
 
       let cPx = fitTextPx(ctx, caption, w, h, family, labelWeight);
-      if (isFinite(Number(capMaxPx))) {
+      if (Number.isFinite(Number(capMaxPx))) {
         cPx = Math.min(cPx, clampPositive(capMaxPx, MIN_FONT_PX));
       }
 
@@ -176,7 +176,7 @@
         hVal = sizes.hVal;
       } else {
         const ratio = Number(secScale);
-        const scale = isFinite(ratio) ? ratio : 0.8;
+        const scale = Number.isFinite(ratio) ? ratio : 0.8;
         hVal = Math.max(MIN_FONT_PX, h / (1 + 2 * scale));
         hCap = Math.max(MIN_FONT_PX, hVal * scale);
         const hUnit = Math.max(MIN_FONT_PX, hVal * scale);
@@ -207,7 +207,6 @@
 
     return {
       id: "RadialTextLayout",
-      version: "0.1.0",
       setFont: setFont,
       measureTextWidth: measureTextWidth,
       fitTextPx: fitTextPx,

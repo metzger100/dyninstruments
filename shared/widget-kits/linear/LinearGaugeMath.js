@@ -18,7 +18,7 @@
   }
 
   function clamp(value, lo, hi) {
-    if (!isFinite(value)) {
+    if (!Number.isFinite(value)) {
       return lo;
     }
     return Math.max(lo, Math.min(hi, value));
@@ -26,7 +26,14 @@
 
   function mapValueToX(value, minV, maxV, x0, x1, doClamp) {
     const denom = maxV - minV;
-    if (!isFinite(value) || !isFinite(minV) || !isFinite(maxV) || !isFinite(x0) || !isFinite(x1) || denom <= 0) {
+    if (
+      !Number.isFinite(value) ||
+      !Number.isFinite(minV) ||
+      !Number.isFinite(maxV) ||
+      !Number.isFinite(x0) ||
+      !Number.isFinite(x1) ||
+      denom <= 0
+    ) {
       return NaN;
     }
     let ratio = (value - minV) / denom;
@@ -51,11 +58,11 @@
     const minorStep = Math.abs(Number(minorStepRaw));
     const majorTicks = [];
     const minorTicks = [];
-    if (!isFinite(minV) || !isFinite(maxV) || maxV <= minV || !isFinite(majorStep) || majorStep <= 0) {
+    if (!Number.isFinite(minV) || !Number.isFinite(maxV) || maxV <= minV || !Number.isFinite(majorStep) || majorStep <= 0) {
       return { major: majorTicks, minor: minorTicks };
     }
 
-    const minor = (isFinite(minorStep) && minorStep > 0) ? minorStep : majorStep / 2;
+    const minor = (Number.isFinite(minorStep) && minorStep > 0) ? minorStep : majorStep / 2;
     const eps = 1e-6;
     const majorCount = Math.max(1, Math.round((maxV - minV) / majorStep));
     const minorCount = Math.max(1, Math.round((maxV - minV) / minor));
@@ -93,7 +100,7 @@
   }
 
   function formatTickLabel(v) {
-    if (!isFinite(v)) {
+    if (!Number.isFinite(v)) {
       return "";
     }
     if (Math.abs(v - Math.round(v)) <= 1e-6) {
@@ -105,7 +112,6 @@
   function create() {
     return {
       id: "LinearGaugeMath",
-      version: "0.2.0",
       keyToText: keyToText,
       clamp: clamp,
       mapValueToX: mapValueToX,

@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsDomEffects - Committed-DOM side effects owner for route-points renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: none
+ * Depends: HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -15,6 +15,7 @@
     mount: true,
     "active-change": true
   };
+  let htmlUtils = null;
 
   function toSafeInteger(value, fallback) {
     const n = Number(value);
@@ -32,15 +33,6 @@
       return node.isConnected;
     }
     return true;
-  }
-
-  function resolveHostCommitTarget(hostContext) {
-    const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
-    const commitState = ctx && ctx.__dyniHostCommitState ? ctx.__dyniHostCommitState : null;
-    if (!commitState || typeof commitState !== "object") {
-      return null;
-    }
-    return commitState.shellEl || commitState.rootEl || null;
   }
 
   function getEffectState(hostContext) {
@@ -254,7 +246,7 @@
     const token = state.token;
     clearPending(state);
 
-    const scheduledRoot = cfg.rootEl || resolveHostCommitTarget(hostContext);
+    const scheduledRoot = cfg.rootEl || htmlUtils.resolveHostCommitTarget(hostContext);
     state.timerHandle = setTimeout(function () {
       state.timerHandle = null;
 
@@ -262,7 +254,7 @@
         return;
       }
 
-      const currentRoot = cfg.rootEl || resolveHostCommitTarget(hostContext) || null;
+      const currentRoot = cfg.rootEl || htmlUtils.resolveHostCommitTarget(hostContext) || null;
       if (!isConnectedNode(currentRoot)) {
         return;
       }
@@ -289,7 +281,7 @@
 
   function applyCommittedEffects(args) {
     const cfg = args || {};
-    const targetEl = cfg.targetEl || resolveHostCommitTarget(cfg.hostContext);
+    const targetEl = cfg.targetEl || htmlUtils.resolveHostCommitTarget(cfg.hostContext);
     if (!targetEl || !isConnectedNode(targetEl)) {
       return {
         targetEl: null,
@@ -305,7 +297,9 @@
     };
   }
 
-  function create() {
+  function create(def, Helpers) {
+    htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+
     return {
       id: "RoutePointsDomEffects",
       isVerticalContainer: isVerticalContainer,

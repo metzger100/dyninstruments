@@ -139,7 +139,8 @@
     RoutePointsDomEffects: {
       js: BASE + "shared/widget-kits/nav/RoutePointsDomEffects.js",
       css: undefined,
-      globalKey: "DyniRoutePointsDomEffects"
+      globalKey: "DyniRoutePointsDomEffects",
+      deps: ["HtmlWidgetUtils"]
     },
     RoutePointsTextHtmlWidget: {
       js: BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js",

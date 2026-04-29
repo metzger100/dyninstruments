@@ -146,7 +146,7 @@
       const baseValuePx = Math.max(1, Math.floor(Number(cfg.baseValuePx) || maxH));
       const gap = Math.max(0, Number(cfg.gap) || 0);
       const secScale = Number(cfg.secScale);
-      const scale = isFinite(secScale) ? secScale : 0.8;
+      const scale = Number.isFinite(secScale) ? secScale : 0.8;
       const family = cfg.family;
       const valueWeight = cfg.valueWeight;
       const labelWeight = cfg.labelWeight;
@@ -192,7 +192,7 @@
       const labelWeight = cfg.labelWeight;
       const gap = Math.max(0, Number(cfg.gap) || 0);
       const secScale = Number(cfg.secScale);
-      const scale = isFinite(secScale) ? secScale : 0.8;
+      const scale = Number.isFinite(secScale) ? secScale : 0.8;
       const steps = Math.max(1, Math.floor(Number(cfg.steps) || 14));
       const minPx = Math.max(1, Math.floor(Number(cfg.minPx) || 1));
       const safeMaxH = Math.max(1, Math.floor(maxH * ROW_SAFE_RATIO));

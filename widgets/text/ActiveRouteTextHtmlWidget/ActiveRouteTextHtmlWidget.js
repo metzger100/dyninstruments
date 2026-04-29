@@ -21,11 +21,6 @@
     return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
   }
 
-  function canDispatchOpenRoute(props) {
-    const policy = getSurfacePolicy(props);
-    return !!(policy && policy.interaction && policy.interaction.mode === "dispatch");
-  }
-
   function openActiveRoute(props, htmlUtils) {
     const p = props && typeof props === "object" ? props : null;
     if (htmlUtils.isEditingMode(p)) {
@@ -35,7 +30,7 @@
     if (!policy || !policy.actions || !policy.actions.routeEditor || typeof policy.actions.routeEditor.openActiveRoute !== "function") {
       return false;
     }
-    if (!canDispatchOpenRoute(p)) {
+    if (!htmlUtils.canDispatchSurfaceInteraction(p)) {
       return false;
     }
     return policy.actions.routeEditor.openActiveRoute() !== false;
@@ -76,7 +71,7 @@
     const stableDigitsEnabled = p.stableDigits === true;
     const mode = htmlFit.resolveDisplayMode(p, shellRect, htmlUtils);
     const isEditing = htmlUtils.isEditingMode(p);
-    const canOpenRoute = !isEditing && canDispatchOpenRoute(p);
+    const canOpenRoute = !isEditing && htmlUtils.canDispatchSurfaceInteraction(p);
     const interactionState = stateScreenInteraction.resolveInteraction({
       kind: kind,
       baseInteraction: canOpenRoute ? "dispatch" : "passive"

@@ -53,6 +53,13 @@ describe("runtime/helpers.js", function () {
   function loadRuntimeHelpers(extra) {
     const context = createScriptContext(Object.assign({
       DyniPlugin: {
+        avnavApi: {
+          formatter: {
+            formatSpeed(value, unit) {
+              return `spd:${value}:${unit}`;
+            }
+          }
+        },
         runtime: {},
         state: {},
         config: { shared: {}, clusters: [] }

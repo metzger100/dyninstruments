@@ -30,7 +30,7 @@
       if (typeof checker === "function") {
         return checker(value);
       }
-      return typeof value === "number" && isFinite(value);
+      return typeof value === "number" && Number.isFinite(value);
     }
 
     function trimWaypointName(raw) {
@@ -325,7 +325,6 @@
 
     return {
       id: "XteDisplayWidget",
-      version: "1.0.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
       getVerticalShellSizing: getVerticalShellSizing,

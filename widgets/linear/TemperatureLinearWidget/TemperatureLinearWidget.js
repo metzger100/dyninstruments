@@ -9,55 +9,28 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniTemperatureLinearWidget = factory(); }
 }(this, function () {
   "use strict";
-  const hasOwn = Object.prototype.hasOwnProperty;
 
   function create(def, Helpers) {
     const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
     const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
     const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
-    function resolveDefaultText(props) {
-      if (props && hasOwn.call(props, "default")) {
-        return props.default;
-      }
-      return placeholderNormalize.normalize(undefined, undefined);
-    }
 
     function formatDisplay(raw, props) {
-      const p = props || {};
-      const defaultText = resolveDefaultText(p);
-      const n = Number(raw);
-      if (!isFinite(n)) {
-        return { num: NaN, text: defaultText };
-      }
-
-      const formatter = (typeof p.formatter !== "undefined") ? p.formatter : "formatTemperature";
-      const formatterParameters = (typeof p.formatterParameters !== "undefined")
-        ? p.formatterParameters
-        : ["celsius"];
-
-      const formatted = placeholderNormalize.normalize(String(Helpers.applyFormatter(n, {
-        formatter: formatter,
-        formatterParameters: formatterParameters,
-        default: defaultText
-      })), defaultText);
-      const numberText = valueMath.extractNumberText(formatted);
-      const parsed = numberText ? Number(numberText) : NaN;
-
-      if (!isFinite(parsed)) {
-        return { num: NaN, text: defaultText };
-      }
-      return { num: parsed, text: parsed.toFixed(1) };
+      const formatted = valueMath.formatGaugeDisplay(raw, props, Helpers.applyFormatter, placeholderNormalize.normalize, "formatTemperature", ["celsius"]);
+      return Number.isFinite(formatted.num)
+        ? { num: formatted.num, text: formatted.num.toFixed(1) }
+        : formatted;
     }
 
     function buildSectors(props, minV, maxV, axis, theme) {
       const warningFrom = Number(props && props.tempLinearWarningFrom);
       const alarmFrom = Number(props && props.tempLinearAlarmFrom);
-      const warningTo = (isFinite(alarmFrom) && isFinite(warningFrom) && alarmFrom > warningFrom)
+      const warningTo = (Number.isFinite(alarmFrom) && Number.isFinite(warningFrom) && alarmFrom > warningFrom)
         ? alarmFrom
         : maxV;
       const sectors = [];
 
-      if (isFinite(warningFrom)) {
+      if (Number.isFinite(warningFrom)) {
         sectors.push({
           from: valueMath.clamp(warningFrom, axis.min, axis.max),
           to: valueMath.clamp(warningTo, axis.min, axis.max),
@@ -65,7 +38,7 @@
         });
       }
 
-      if (isFinite(alarmFrom)) {
+      if (Number.isFinite(alarmFrom)) {
         sectors.push({
           from: valueMath.clamp(alarmFrom, axis.min, axis.max),
           to: valueMath.clamp(maxV, axis.min, axis.max),
@@ -112,7 +85,6 @@
 
     return {
       id: "TemperatureLinearWidget",
-      version: "0.1.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
       getVerticalShellSizing: getVerticalShellSizing,

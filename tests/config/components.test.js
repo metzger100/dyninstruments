@@ -369,7 +369,7 @@ describe("config/components.js", function () {
     expect(components.RoutePointsDomEffects.globalKey).toBe("DyniRoutePointsDomEffects");
     expect(components.RoutePointsDomEffects.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsDomEffects.js");
     expect(components.RoutePointsDomEffects.css).toBeUndefined();
-    expect(components.RoutePointsDomEffects.deps).toBeUndefined();
+    expect(components.RoutePointsDomEffects.deps).toEqual(["HtmlWidgetUtils"]);
     expect(components.RoutePointsTextHtmlWidget.globalKey).toBe("DyniRoutePointsTextHtmlWidget");
     expect(components.RoutePointsTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js");
     expect(components.RoutePointsTextHtmlWidget.css).toBeUndefined();

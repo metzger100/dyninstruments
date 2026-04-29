@@ -18,36 +18,6 @@
     };
   }
 
-  function readThemePresetCssVarFromElement(el) {
-    if (!el || typeof root.getComputedStyle !== "function") {
-      return null;
-    }
-    const style = root.getComputedStyle(el);
-    if (!style || typeof style.getPropertyValue !== "function") {
-      return null;
-    }
-    // dyni-lint-disable-next-line css-js-default-duplication -- Theme preset selection is intentionally read from the documented CSS boundary.
-    const raw = style.getPropertyValue("--dyni-theme-preset");
-    const value = (typeof raw === "string") ? raw.trim() : "";
-    return value || null;
-  }
-
-  function normalizePresetName(themeModel, presetName) {
-    if (!themeModel || typeof themeModel.normalizePresetName !== "function") {
-      return "default";
-    }
-    return themeModel.normalizePresetName(presetName);
-  }
-
-  function resolveStartupThemePresetName(themeModel) {
-    const doc = root.document;
-    if (!doc) {
-      return "default";
-    }
-    const cssPreset = readThemePresetCssVarFromElement(doc.documentElement);
-    return normalizePresetName(themeModel, cssPreset);
-  }
-
   function requireThemeRuntimeBoundary() {
     if (!runtime._theme || typeof runtime._theme.configure !== "function" || typeof runtime._theme.applyToRoot !== "function") {
       throw new Error("dyninstruments: runtime._theme boundary is required");
@@ -87,7 +57,7 @@
 
     const avnavApi = runtime.getAvnavApi(root);
     if (!avnavApi) {
-      console && console.error && console.error("dyninstruments: avnav.api missing");
+      console.error("dyninstruments: avnav.api missing");
       return Promise.resolve();
     }
 
@@ -127,7 +97,10 @@
           (hasOwn.call(components, "ThemeResolver")
             ? Helpers.getModule("ThemeResolver")
             : null);
-        const startupPresetName = resolveStartupThemePresetName(themeModel);
+        const startupPresetName = themeRuntime.resolveStartupPresetName(
+          root.document && root.document.documentElement,
+          themeModel
+        );
 
         themeRuntime.configure({
           ThemeModel: themeModel,

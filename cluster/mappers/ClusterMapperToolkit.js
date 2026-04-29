@@ -25,7 +25,7 @@
     const norm360 = (angleMath && typeof angleMath.norm360 === "function")
       ? angleMath.norm360
       : ((deg) => {
-        if (!isFinite(deg)) {
+        if (!Number.isFinite(deg)) {
           return deg;
         }
         let r = deg % 360;
@@ -35,7 +35,7 @@
     const norm180 = (angleMath && typeof angleMath.norm180 === "function")
       ? angleMath.norm180
       : ((deg) => {
-        if (!isFinite(deg)) {
+        if (!Number.isFinite(deg)) {
           return deg;
         }
         let r = ((deg + 180) % 360 + 360) % 360 - 180;
@@ -45,7 +45,7 @@
 
     return function (raw) {
       const n = Number(raw);
-      if (!isFinite(n)) {
+      if (!Number.isFinite(n)) {
         return defaultText;
       }
       let a = isDirection ? norm360(n) : norm180(n);

@@ -36,7 +36,7 @@
     function fitThreeRowBlock(args) {
       const cfg = args || {};
       const secScale = Number(cfg.secScale);
-      const scale = isFinite(secScale) ? secScale : 0.8;
+      const scale = Number.isFinite(secScale) ? secScale : 0.8;
       const textFillScale = clampTextFillScale(cfg.textFillScale);
       const W = Math.max(1, Number(cfg.W) || 0);
       const H = Math.max(1, Number(cfg.H) || 0);
@@ -117,7 +117,7 @@
     function fitValueUnitCaptionRows(args) {
       const cfg = args || {};
       const secScale = Number(cfg.secScale);
-      const scale = isFinite(secScale) ? secScale : 0.8;
+      const scale = Number.isFinite(secScale) ? secScale : 0.8;
       const textFillScale = clampTextFillScale(cfg.textFillScale);
       const W = Math.max(1, Number(cfg.W) || 0);
       const H = Math.max(1, Number(cfg.H) || 0);
@@ -211,7 +211,7 @@
       const padX = Math.max(0, Number(cfg.padX) || 0);
       const innerY = Math.max(0, Number(cfg.innerY) || 0);
       const secScale = Number(cfg.secScale);
-      const scale = isFinite(secScale) ? secScale : 0.8;
+      const scale = Number.isFinite(secScale) ? secScale : 0.8;
       const textFillScale = clampTextFillScale(cfg.textFillScale);
       const topRowExtraCheck = typeof cfg.topRowExtraCheck === "function"
         ? cfg.topRowExtraCheck

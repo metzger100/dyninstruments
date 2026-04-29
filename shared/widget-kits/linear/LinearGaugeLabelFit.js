@@ -141,7 +141,7 @@
         state.layout.scaleX1,
         false
       );
-      if (!isFinite(x) || !isFinite(naturalX)) {
+      if (!Number.isFinite(x) || !Number.isFinite(naturalX)) {
         continue;
       }
       const labelRaw = (typeof labelFormatter === "function")
@@ -245,7 +245,6 @@
   function create() {
     return {
       id: "LinearGaugeLabelFit",
-      version: "0.2.0",
       setCanvasFont: setCanvasFont,
       resolveScaleBounds: resolveScaleBounds,
       resolveEdgePlacement: resolveEdgePlacement,

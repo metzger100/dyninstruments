@@ -107,7 +107,7 @@ describe("DefaultLinearWidget", function () {
     })).toEqual({ num: 12.5, text: "12.5" });
     expect(h.valueMath.formatGaugeDisplay).toHaveBeenCalledWith(12.5, {
       default: "---"
-    }, h.applyFormatter, h.placeholderNormalize.normalize);
+    }, h.applyFormatter, h.placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
 
     expect(h.captured.formatDisplay(12.5, {
       formatter: "formatDecimal",
@@ -118,14 +118,14 @@ describe("DefaultLinearWidget", function () {
       formatter: "formatDecimal",
       formatterParameters: ["m"],
       default: "---"
-    }, h.applyFormatter, h.placeholderNormalize.normalize);
+    }, h.applyFormatter, h.placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
 
     expect(h.captured.formatDisplay("bad", {
       default: "ALT"
     })).toEqual({ num: NaN, text: "ALT" });
     expect(h.valueMath.formatGaugeDisplay).toHaveBeenCalledWith("bad", {
       default: "ALT"
-    }, h.applyFormatter, h.placeholderNormalize.normalize);
+    }, h.applyFormatter, h.placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
   });
 
   it("builds ordered sectors and omits degenerate spans", function () {

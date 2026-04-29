@@ -23,7 +23,7 @@
   }
   function pickFinite(value, defaultValue) {
     const n = Number(value);
-    return isFinite(n) ? n : defaultValue;
+    return Number.isFinite(n) ? n : defaultValue;
   }
   function fullCircleNormalizeLayers(raw) {
     const source = Array.isArray(raw) ? raw : null;
@@ -221,7 +221,7 @@
             const options = opts || {};
             const target = options.ctx || state.ctx;
             const rotationDeg = Number(options.rotationDeg);
-            if (isFinite(rotationDeg) && rotationDeg !== 0) {
+            if (Number.isFinite(rotationDeg) && rotationDeg !== 0) {
               target.save();
               target.translate(state.geom.cx, state.geom.cy);
               target.rotate((rotationDeg * Math.PI) / 180);
@@ -275,7 +275,6 @@
 
     return {
       id: "FullCircleRadialEngine",
-      version: "0.1.0",
       createRenderer: fullCircleCreateRenderer
     };
   }

@@ -18,7 +18,7 @@
     function computeSweep(startDeg, endDeg) {
       let s = Number(startDeg);
       let e = Number(endDeg);
-      if (!isFinite(s) || !isFinite(e)) {
+      if (!Number.isFinite(s) || !Number.isFinite(e)) {
         return { s: 0, e: 0, sweep: 0, dir: 1 };
       }
 
@@ -81,7 +81,6 @@
 
     return {
       id: "RadialTickMath",
-      version: "0.1.0",
       computeSweep,
       isBeyondEnd,
       buildTickAngles

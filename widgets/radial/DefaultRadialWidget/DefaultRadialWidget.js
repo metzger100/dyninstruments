@@ -17,7 +17,7 @@
 
     function resolveThreshold(value) {
       const n = Number(value);
-      return isFinite(n) ? n : NaN;
+      return Number.isFinite(n) ? n : NaN;
     }
 
     function pushSector(sectors, from, to, color, valueApi, minV, maxV, arc) {
@@ -114,7 +114,7 @@
       hideTextualMetricsProp: "defaultRadialHideTextualMetrics",
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
       formatDisplay: function (raw, props) {
-        return valueMath.formatGaugeDisplay(raw, props, Helpers.applyFormatter, placeholderNormalize.normalize);
+        return valueMath.formatGaugeDisplay(raw, props, Helpers.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
       },
       buildSectors: buildSectors
     });
@@ -129,7 +129,6 @@
 
     return {
       id: "DefaultRadialWidget",
-      version: "0.1.0",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
       getVerticalShellSizing: getVerticalShellSizing,
