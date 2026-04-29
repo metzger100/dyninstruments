@@ -114,7 +114,7 @@
   function selectMetricValueFit(args, htmlUtils, tileLayout) {
     const cfg = args || {};
     const valueText = toText(cfg.valueText);
-    const fallbackText = cfg.fallbackText == null ? valueText : toText(cfg.fallbackText);
+    const plainText = cfg.plainText == null ? valueText : toText(cfg.plainText);
     const valueFit = measurePx({
       rect: cfg.rect,
       text: valueText,
@@ -126,12 +126,12 @@
       weight: cfg.weight,
       textFillScale: cfg.textFillScale
     }, htmlUtils, tileLayout);
-    if (!valueFit || !fallbackText || fallbackText === valueText || valueFit.width <= Math.max(1, Math.floor(cfg.rect.w)) + 0.01) {
+    if (!valueFit || !plainText || plainText === valueText || valueFit.width <= Math.max(1, Math.floor(cfg.rect.w)) + 0.01) {
       return { valueText: valueText, valuePx: valueFit && valueFit.px ? valueFit.px : 0 };
     }
-    const fallbackFit = measurePx({
+    const plainFit = measurePx({
       rect: cfg.rect,
-      text: fallbackText,
+      text: plainText,
       maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
       textApi: cfg.textApi,
       tileLayout: tileLayout,
@@ -140,7 +140,7 @@
       weight: cfg.weight,
       textFillScale: cfg.textFillScale
     }, htmlUtils, tileLayout);
-    return { valueText: fallbackText, valuePx: fallbackFit && fallbackFit.px ? fallbackFit.px : 0 };
+    return { valueText: plainText, valuePx: plainFit && plainFit.px ? plainFit.px : 0 };
   }
   function resolveAccentStyle(model, tokens) {
     if (!model || model.hasAccent !== true) {
@@ -281,7 +281,7 @@
           const flatValueFit = selectMetricValueFit({
             rect: flatRects.valueRect,
             valueText: metric.valueText,
-            fallbackText: metric.fallbackValueText,
+            plainText: metric.plainValueText,
             textApi: textApi,
             ctx: measureCtx,
             family: metricFamily,
@@ -336,7 +336,7 @@
         const inlineValueFit = selectMetricValueFit({
           rect: inlineValueRect,
           valueText: metric.valueText,
-          fallbackText: metric.fallbackValueText,
+          plainText: metric.plainValueText,
           textApi: textApi,
           ctx: measureCtx,
           family: metricFamily,

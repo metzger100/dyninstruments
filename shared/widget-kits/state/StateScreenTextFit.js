@@ -21,9 +21,9 @@
     return Number.isFinite(n) ? n : undefined;
   }
 
-  function clampPositive(value, fallback) {
+  function clampPositive(value, defaultValue) {
     const n = toFiniteNumber(value);
-    return n > 0 ? n : fallback;
+    return n > 0 ? n : defaultValue;
   }
 
   function parseFontPx(fontValue) {

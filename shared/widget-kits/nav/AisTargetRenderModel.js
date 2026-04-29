@@ -139,7 +139,7 @@
       if (stableDigitsEnabled !== true) {
         return {
           valueText: rawText,
-          fallbackValueText: rawText
+          plainValueText: rawText
         };
       }
       const stable = stableDigits.normalize(rawText, {
@@ -148,7 +148,7 @@
       });
       return {
         valueText: stable.padded,
-        fallbackValueText: stable.fallback
+        plainValueText: stable.plain
       };
     }
 

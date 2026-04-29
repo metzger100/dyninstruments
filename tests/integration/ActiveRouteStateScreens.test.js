@@ -72,7 +72,7 @@ function createActiveRouteWidget() {
     },
     normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
       if (!stableDigitsEnabled) {
-        return { padded: rawText, fallback: rawText };
+        return { padded: rawText, plain: rawText };
       }
       return stableDigits.normalize(rawText, {
         integerWidth: stableDigits.resolveIntegerWidth(rawText, minWidth),

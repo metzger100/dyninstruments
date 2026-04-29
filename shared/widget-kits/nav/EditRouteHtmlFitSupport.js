@@ -119,19 +119,19 @@
     return "";
   }
 
-  function resolveMetricFallbackValue(model, id) {
+  function resolveMetricPlainValue(model, id) {
     const entry = toMetricEntry(model, id);
-    if (entry.fallbackValueText != null) {
-      return toText(entry.fallbackValueText);
+    if (entry.plainValueText != null) {
+      return toText(entry.plainValueText);
     }
-    if (entry.fallbackValue != null) {
-      return toText(entry.fallbackValue);
+    if (entry.plainValue != null) {
+      return toText(entry.plainValue);
     }
-    if (model && model[id + "FallbackValueText"] != null) {
-      return toText(model[id + "FallbackValueText"]);
+    if (model && model[id + "PlainValueText"] != null) {
+      return toText(model[id + "PlainValueText"]);
     }
-    if (model && model[id + "FallbackValue"] != null) {
-      return toText(model[id + "FallbackValue"]);
+    if (model && model[id + "PlainValue"] != null) {
+      return toText(model[id + "PlainValue"]);
     }
     return resolveMetricValue(model, id);
   }
@@ -206,7 +206,7 @@
   function selectMetricValue(args) {
     const cfg = args || {};
     const primaryText = toText(cfg.primaryText);
-    const fallbackText = toText(cfg.fallbackText);
+    const plainText = toText(cfg.plainText);
     const primaryFit = measureLineFit({
       rect: cfg.rect,
       text: primaryText,
@@ -219,21 +219,21 @@
       textFillScale: cfg.textFillScale,
       htmlUtils: cfg.htmlUtils
     });
-    const useFallback = cfg.stableDigitsEnabled === true &&
-      fallbackText &&
-      fallbackText !== primaryText &&
+    const usePlain = cfg.stableDigitsEnabled === true &&
+      plainText &&
+      plainText !== primaryText &&
       isLineTrimmed(primaryFit, primaryText);
-    if (!useFallback) {
+    if (!usePlain) {
       return {
         text: primaryText,
         fit: primaryFit
       };
     }
     return {
-      text: fallbackText,
+      text: plainText,
       fit: measureLineFit({
         rect: cfg.rect,
-        text: fallbackText,
+        text: plainText,
         maxPxRatio: cfg.maxPxRatio,
         textApi: cfg.textApi,
         tileLayout: cfg.tileLayout,
@@ -273,7 +273,7 @@
       toText: toText,
       resolveMetricLabel: resolveMetricLabel,
       resolveMetricValue: resolveMetricValue,
-      resolveMetricFallbackValue: resolveMetricFallbackValue,
+      resolveMetricPlainValue: resolveMetricPlainValue,
       resolveMetricUnit: resolveMetricUnit,
       measureLineFit: measureLineFit,
       measurePx: measurePx,

@@ -15,10 +15,10 @@
     return Number.isFinite(n) ? n : undefined;
   }
 
-  function toSafeInteger(value, fallback) {
+  function toSafeInteger(value, defaultValue) {
     const n = toFiniteNumber(value);
     if (!Number.isFinite(n)) {
-      return fallback;
+      return defaultValue;
     }
     return Math.floor(n);
   }
@@ -314,8 +314,8 @@
           index: i,
           ordinalText: String(i + 1),
           nameText: nameText,
-          infoText: infoText.valueText,
-          infoFallbackText: infoText.fallbackValueText,
+      infoText: infoText.valueText,
+      infoPlainText: infoText.plainValueText,
           selected: i === selectedIndex,
           pointSnapshot: buildPointSnapshot(
             currentPoint,

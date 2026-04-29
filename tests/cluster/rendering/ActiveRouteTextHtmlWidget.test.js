@@ -42,10 +42,10 @@ describe("ActiveRouteTextHtmlWidget", function () {
       textLength(value) {
         return value == null ? 0 : String(value).length;
       },
-      normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
-        if (!stableDigitsEnabled) {
-          return { padded: rawText, fallback: rawText };
-        }
+    normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
+      if (!stableDigitsEnabled) {
+        return { padded: rawText, plain: rawText };
+      }
         return stableDigits.normalize(rawText, {
           integerWidth: stableDigits.resolveIntegerWidth(rawText, minWidth),
           reserveSignSlot: true

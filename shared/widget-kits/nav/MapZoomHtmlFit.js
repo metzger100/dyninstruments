@@ -257,10 +257,10 @@
       model.stableDigitsEnabled ? 1 : 0,
       model.caption,
       model.zoomText,
-      model.zoomFallbackText,
+      model.zoomPlainText,
       model.unit,
       model.requiredText,
-      model.requiredFallbackText
+      model.requiredPlainText
     ]);
   }
 
@@ -352,9 +352,9 @@
         maxH: contentH,
         family: valueFamily,
         weight: valueWeight
-      }) || !hasText(model.zoomFallbackText) || model.zoomFallbackText === model.zoomText
+      }) || !hasText(model.zoomPlainText) || model.zoomPlainText === model.zoomText
         ? mainFit
-        : toMainFitState(Object.assign({ valueText: model.zoomFallbackText }, mainFitArgs));
+        : toMainFitState(Object.assign({ valueText: model.zoomPlainText }, mainFitArgs));
       const requiredFitArgs = {
         textApi: textApi,
         mode: mode,
@@ -378,17 +378,17 @@
         maxH: contentH,
         family: valueFamily,
         weight: labelWeight
-      }) || !hasText(model.requiredFallbackText) || model.requiredFallbackText === model.requiredText
+      }) || !hasText(model.requiredPlainText) || model.requiredPlainText === model.requiredText
         ? requiredPrimary
-        : fitRequiredPx(Object.assign({ requiredText: model.requiredFallbackText }, requiredFitArgs), htmlUtils);
+        : fitRequiredPx(Object.assign({ requiredText: model.requiredPlainText }, requiredFitArgs), htmlUtils);
 
       const out = {
         captionStyle: toFontStyle(mainCandidate.captionPx, htmlUtils),
         valueStyle: toFontStyle(mainCandidate.valuePx, htmlUtils),
         unitStyle: toFontStyle(mainCandidate.unitPx, htmlUtils),
         requiredStyle: toFontStyle(requiredCandidate.px, htmlUtils),
-        zoomText: mainCandidate === mainFit ? model.zoomText : model.zoomFallbackText,
-        requiredText: requiredCandidate === requiredPrimary ? model.requiredText : model.requiredFallbackText
+        zoomText: mainCandidate === mainFit ? model.zoomText : model.zoomPlainText,
+        requiredText: requiredCandidate === requiredPrimary ? model.requiredText : model.requiredPlainText
       };
       if (fitCache) {
         fitCache.signature = fitSignature;

@@ -33,14 +33,14 @@
     return unit ? text + unit : text;
   }
 
-  function extractNumericDisplay(valueText, fallback) {
+  function extractNumericDisplay(valueText, defaultValue) {
     const text = toText(valueText).trim();
     const match = text.match(/^([+-]?(?:\d+(?:[.,]\d+)?|\.\d+))/);
     if (!match) {
-      return fallback;
+      return defaultValue;
     }
     const parsed = Number(match[1].replace(",", "."));
-    return Number.isFinite(parsed) ? parsed : fallback;
+    return Number.isFinite(parsed) ? parsed : defaultValue;
   }
 
   function create(def, Helpers) {

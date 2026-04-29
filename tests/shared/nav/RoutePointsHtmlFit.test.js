@@ -397,14 +397,14 @@ describe("RoutePointsHtmlFit", function () {
     expect(infoCall[5]).toBe("monospace");
   });
 
-  it("falls back to infoFallbackText for narrow stableDigits course-distance rows", function () {
+  it("falls back to infoPlainText for narrow stableDigits course-distance rows", function () {
     const h = createHarness();
     const shellRect = { width: 40, height: 120 };
     const model = buildModel({
       stableDigitsEnabled: true,
       points: [
-        { ordinalText: "1", nameText: "Start", infoText: "000°/000.0nm", infoFallbackText: "0°/0.0nm" },
-        { ordinalText: "2", nameText: "Finish", infoText: "00360°/00012.3nm", infoFallbackText: "360°/12.3nm" }
+        { ordinalText: "1", nameText: "Start", infoText: "000°/000.0nm", infoPlainText: "0°/0.0nm" },
+        { ordinalText: "2", nameText: "Finish", infoText: "00360°/00012.3nm", infoPlainText: "360°/12.3nm" }
       ]
     });
 

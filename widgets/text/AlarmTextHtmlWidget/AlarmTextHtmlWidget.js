@@ -43,7 +43,7 @@
     });
   }
 
-  function buildFallbackFit() {
+  function buildBaselineFit() {
     return {
       mode: "normal",
       captionPx: 12,
@@ -80,12 +80,12 @@
     function createCommittedRenderer(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
       const hostContext = context.hostContext || {};
-      const fallbackFit = buildFallbackFit();
+      const baselineFit = buildBaselineFit();
 
       let rootEl = null;
       let clickHandler = null;
       let lastProps = null;
-      let lastFit = fallbackFit;
+      let lastFit = baselineFit;
 
       function removeClickHandler() {
         if (rootEl && clickHandler) {
@@ -101,7 +101,7 @@
         }
         rootEl = null;
         lastProps = null;
-        lastFit = fallbackFit;
+        lastFit = baselineFit;
       }
 
       function ensureRootClass() {
@@ -145,7 +145,7 @@
           targetEl: payload.rootEl,
           shellRect: shellRect,
           fontMetricsEpoch: payload.fontMetricsEpoch || 0
-        }) || lastFit || fallbackFit;
+        }) || lastFit || baselineFit;
 
         htmlUtils.applyMirroredContext(rootEl, props);
         ensureRootClass();

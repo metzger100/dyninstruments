@@ -5,9 +5,9 @@ describe("EditRouteRenderModel", function () {
     const opts = options || {};
     const applyFormatter = opts.applyFormatter || function (value, formatterOptions) {
       const cfg = formatterOptions || {};
-      const fallback = Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
+      const defaultText = Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
       if (value == null || Number.isNaN(value)) {
-        return fallback;
+        return defaultText;
       }
 
       if (cfg.formatter === "formatDecimal") {
@@ -387,13 +387,13 @@ describe("EditRouteRenderModel", function () {
 
     expect(model.stableDigitsEnabled).toBe(true);
     expect(model.metrics.pts.valueText).toBe(" 007.0");
-    expect(model.metrics.pts.fallbackValueText).toBe("7.0");
+    expect(model.metrics.pts.plainValueText).toBe("7.0");
     expect(model.metrics.dst.valueText).toBe(" 03.4");
-    expect(model.metrics.dst.fallbackValueText).toBe("3.4");
+    expect(model.metrics.dst.plainValueText).toBe("3.4");
     expect(model.metrics.rte.valueText).toBe(" 03.4");
-    expect(model.metrics.rte.fallbackValueText).toBe("3.4");
+    expect(model.metrics.rte.plainValueText).toBe("3.4");
     expect(model.metrics.eta.valueText).toBe(" 12:34");
-    expect(model.metrics.eta.fallbackValueText).toBe("12:34");
+    expect(model.metrics.eta.plainValueText).toBe("12:34");
   });
 
   it("keeps stable-digits padding intact in compact normal mode", function () {
@@ -424,13 +424,13 @@ describe("EditRouteRenderModel", function () {
     expect(model.mode).toBe("normal");
     expect(model.stableDigitsEnabled).toBe(true);
     expect(model.metrics.pts.valueText).toBe(" 007.0");
-    expect(model.metrics.pts.fallbackValueText).toBe("7.0");
+    expect(model.metrics.pts.plainValueText).toBe("7.0");
     expect(model.metrics.dst.valueText).toBe(" 03.4");
-    expect(model.metrics.dst.fallbackValueText).toBe("3.4");
+    expect(model.metrics.dst.plainValueText).toBe("3.4");
     expect(model.metrics.rte.valueText).toBe(" 03.4");
-    expect(model.metrics.rte.fallbackValueText).toBe("3.4");
+    expect(model.metrics.rte.plainValueText).toBe("3.4");
     expect(model.metrics.eta.valueText).toBe(" 12:34");
-    expect(model.metrics.eta.fallbackValueText).toBe("12:34");
+    expect(model.metrics.eta.plainValueText).toBe("12:34");
   });
 
   it("uses formatClock for ETA when hideSeconds is enabled", function () {
@@ -473,7 +473,7 @@ describe("EditRouteRenderModel", function () {
     });
 
     expect(model.metrics.eta.valueText).toBe("CLOCK:" + String(eta));
-    expect(model.metrics.eta.fallbackValueText).toBe("CLOCK:" + String(eta));
+    expect(model.metrics.eta.plainValueText).toBe("CLOCK:" + String(eta));
   });
 
   it("forces high mode and applies width-driven vertical shell geometry", function () {

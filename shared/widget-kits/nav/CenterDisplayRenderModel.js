@@ -178,18 +178,18 @@
               integerWidth: stableDigits.resolveIntegerWidth(courseRawText, 3),
               reserveSignSlot: true
             })
-            : { padded: courseRawText, fallback: courseRawText };
+            : { padded: courseRawText, plain: courseRawText };
           const distanceStable = stableDigitsEnabled
             ? stableDigits.normalize(distanceRawText, {
               integerWidth: stableDigits.resolveIntegerWidth(distanceRawText, 2),
               reserveSignSlot: true
             })
-            : { padded: distanceRawText, fallback: distanceRawText };
+            : { padded: distanceRawText, plain: distanceRawText };
           return {
             id: row.id,
             caption: row.caption,
             fullValueText: courseStable.padded + " / " + distanceStable.padded,
-            compactValueText: courseStable.fallback + "/" + distanceStable.fallback
+            compactValueText: courseStable.plain + "/" + distanceStable.plain
           };
         })
       };

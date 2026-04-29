@@ -89,7 +89,7 @@
           { max: 60, major: 10, minor: 2 },
           { max: 120, major: 20, minor: 5 }
         ],
-        fallback: { major: 50, minor: 10 }
+        plain: { major: 50, minor: 10 }
       },
       temperature: {
         default: { major: 10, minor: 2 },
@@ -100,7 +100,7 @@
           { max: 100, major: 10, minor: 2 },
           { max: 200, major: 20, minor: 5 }
         ],
-        fallback: { major: 50, minor: 10 }
+        plain: { major: 50, minor: 10 }
       },
       voltage: {
         default: { major: 1, minor: 0.2 },
@@ -112,7 +112,7 @@
           { max: 60, major: 10, minor: 2 },
           { max: 120, major: 20, minor: 5 }
         ],
-        fallback: { major: 50, minor: 10 }
+        plain: { major: 50, minor: 10 }
       }
     };
 
@@ -128,7 +128,7 @@
           return { major: step.major, minor: step.minor };
         }
       }
-      return { major: profile.fallback.major, minor: profile.fallback.minor };
+      return { major: profile.plain.major, minor: profile.plain.minor };
     }
 
     function resolveStandardSemicircleTickSteps(range) {

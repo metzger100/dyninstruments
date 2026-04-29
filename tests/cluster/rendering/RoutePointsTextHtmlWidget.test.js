@@ -366,7 +366,7 @@ describe("RoutePointsTextHtmlWidget", function () {
     expect(mounted.html()).toContain("dyni-route-points-info-text dyni-tabular");
   });
 
-  it("renders fallback stableDigits info text through the widget path", function () {
+  it("renders plain stableDigits info text through the widget path", function () {
     const setup = createRenderer({
       fitCompute: vi.fn(function () {
         return {
@@ -394,7 +394,7 @@ describe("RoutePointsTextHtmlWidget", function () {
             ordinalText: "1",
             nameText: "Finish",
             infoText: "00360°/00012.3nm",
-            infoFallbackText: "360°/12.3nm",
+            infoPlainText: "360°/12.3nm",
             selected: true
           }
         ]

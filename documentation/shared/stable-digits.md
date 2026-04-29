@@ -13,14 +13,14 @@
 It produces a two-output pair for a formatted numeric text:
 
 - `padded`: alignment-friendly value (optional sign slot, zero-padded integer, optional reserved side slot)
-- `fallback`: accuracy-preserving unpadded value
+- `plain`: accuracy-preserving unpadded value
 
 ## Contract
 
 `normalize(rawFormattedText, options)` accepts formatter output text and returns:
 
 ```js
-{ padded: string, fallback: string }
+{ padded: string, plain: string }
 ```
 
 Supported options:
@@ -35,21 +35,21 @@ Supported options:
 
 - Integer overflow is never truncated. If integer digits exceed `integerWidth`, all digits are kept.
 - Fractional digits are never truncated.
-- `fallback` keeps the raw numeric value semantics (no synthetic sign slot, no synthetic side slot).
+- `plain` keeps the raw numeric value semantics (no synthetic sign slot, no synthetic side slot).
 
 ## Placeholder Short-Circuit
 
 If `PlaceholderNormalize.isPlaceholder(rawFormattedText)` is true, both outputs are returned unchanged:
 
 ```js
-{ padded: rawFormattedText, fallback: rawFormattedText }
+{ padded: rawFormattedText, plain: rawFormattedText }
 ```
 
 Placeholders are never padded.
 
 ## Two-Pass Fit Usage
 
-Callers use `padded` first in the existing fit pipeline. If the result is clipped, callers rerun the fit with `fallback`.
+Callers use `padded` first in the existing fit pipeline. If the result is clipped, callers rerun the fit with `plain`.
 
 This keeps alignment when possible and preserves full numeric readability when width is constrained.
 

@@ -64,7 +64,7 @@
 
   function normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
     if (!stableDigitsEnabled) {
-      return { padded: rawText, fallback: rawText };
+      return { padded: rawText, plain: rawText };
     }
     return stableDigits.normalize(rawText, {
       integerWidth: stableDigits.resolveIntegerWidth(rawText, minWidth),
@@ -163,14 +163,14 @@
         id: "remain",
         caption: model.remainCaption,
         value: model.remainText,
-        fallbackValue: model.remainFallbackText,
+        plainValue: model.remainPlainText,
         unit: model.remainUnit
       },
       {
         id: "eta",
         caption: model.etaCaption,
         value: model.etaText,
-        fallbackValue: model.etaFallbackText,
+        plainValue: model.etaPlainText,
         unit: model.etaUnit
       }
     ];
@@ -179,7 +179,7 @@
         id: "next",
         caption: model.nextCourseCaption,
         value: model.nextCourseText,
-        fallbackValue: model.nextCourseFallbackText,
+        plainValue: model.nextCoursePlainText,
         unit: model.nextCourseUnit
       });
     }
@@ -206,15 +206,15 @@
       model.routeNameText,
       model.remainCaption,
       model.remainText,
-      model.remainFallbackText,
+      model.remainPlainText,
       model.remainUnit,
       model.etaCaption,
       model.etaText,
-      model.etaFallbackText,
+      model.etaPlainText,
       model.etaUnit,
       model.nextCourseCaption,
       model.nextCourseText,
-      model.nextCourseFallbackText,
+      model.nextCoursePlainText,
       model.nextCourseUnit
     ]);
   }
@@ -337,20 +337,20 @@
         });
         const primaryFit = primaryMeasurement && primaryMeasurement.fit ? primaryMeasurement.fit : null;
         const primaryClipped = !!(primaryMeasurement && primaryFit && primaryFit.total > primaryMeasurement.textW + 0.01);
-        const useFallback = model.stableDigitsEnabled === true &&
+        const usePlain = model.stableDigitsEnabled === true &&
           primaryClipped &&
-          typeof metric.fallbackValue === "string" &&
-          metric.fallbackValue !== metric.value;
-        const metricForFit = useFallback
+          typeof metric.plainValue === "string" &&
+          metric.plainValue !== metric.value;
+        const metricForFit = usePlain
           ? {
             id: metric.id,
             caption: metric.caption,
-            value: metric.fallbackValue,
-            fallbackValue: metric.fallbackValue,
+            value: metric.plainValue,
+            plainValue: metric.plainValue,
             unit: metric.unit
           }
           : metric;
-        const measurement = useFallback
+        const measurement = usePlain
           ? tileLayout.measureMetricTile({
             textApi: radialText,
             ctx: measureCtx,

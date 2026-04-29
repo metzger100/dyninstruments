@@ -14,13 +14,13 @@
     const makeRect = Helpers.getModule("LayoutRectMath").create(def, Helpers).makeRect;
     const mathApi = Helpers.getModule("EditRouteLayoutMath").create(def, Helpers);
 
-    function resolveInsetValue(insets, key, fallback) {
+    function resolveInsetValue(insets, key, defaultValue) {
       const source = insets && typeof insets === "object" ? insets : null;
       return Math.max(0, Math.floor(mathApi.clampNumber(
         source && Object.prototype.hasOwnProperty.call(source, key) ? source[key] : undefined,
         0,
         Number.MAX_SAFE_INTEGER,
-        fallback
+        defaultValue
       )));
     }
 

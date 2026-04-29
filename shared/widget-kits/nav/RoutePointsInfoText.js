@@ -23,32 +23,32 @@
     const distanceUnit = cfg.distanceUnit;
     const formatDistanceUnit = cfg.formatDistanceUnit;
     if (!previousPoint || !currentPoint) {
-      return { valueText: placeholder, fallbackValueText: placeholder };
+      return { valueText: placeholder, plainValueText: placeholder };
     }
 
     const leg = cfg.centerMath.computeCourseDistance(previousPoint, currentPoint, cfg.useRhumbLine === true);
     if (!leg) {
-      return { valueText: placeholder, fallbackValueText: placeholder };
+      return { valueText: placeholder, plainValueText: placeholder };
     }
 
     const courseText = unitFormatter.formatWithToken(leg.course, "formatDirection", undefined, cfg.defaultText);
     const distanceText = unitFormatter.formatDistance(leg.distance, formatDistanceUnit, cfg.defaultText);
-    const courseStable = stableDigitsEnabled === true
-      ? stableDigits.normalize(courseText, {
-        integerWidth: stableDigits.resolveIntegerWidth(courseText, 3),
-        reserveSignSlot: false
-      })
-      : { padded: courseText, fallback: courseText };
+      const courseStable = stableDigitsEnabled === true
+        ? stableDigits.normalize(courseText, {
+          integerWidth: stableDigits.resolveIntegerWidth(courseText, 3),
+          reserveSignSlot: false
+        })
+      : { padded: courseText, plain: courseText };
     const distanceStable = stableDigitsEnabled === true
       ? stableDigits.normalize(distanceText, {
         integerWidth: stableDigits.resolveIntegerWidth(distanceText, 2),
         reserveSignSlot: false
       })
-      : { padded: distanceText, fallback: distanceText };
+      : { padded: distanceText, plain: distanceText };
 
     return {
       valueText: courseStable.padded + courseUnit + "/" + distanceStable.padded + distanceUnit,
-      fallbackValueText: courseStable.fallback + courseUnit + "/" + distanceStable.fallback + distanceUnit
+      plainValueText: courseStable.plain + courseUnit + "/" + distanceStable.plain + distanceUnit
     };
   }
 
@@ -57,10 +57,10 @@
     const placeholder = cfg.placeholderValue + cfg.courseUnit + "/" + cfg.placeholderValue + cfg.distanceUnit;
     if (cfg.showLatLon === true) {
       const text = formatLatLonInfo(cfg.currentPoint, cfg.defaultText, unitFormatter);
-      return { valueText: text, fallbackValueText: text };
+      return { valueText: text, plainValueText: text };
     }
     if (cfg.index <= 0 || !cfg.previousValid || !cfg.currentValid) {
-      return { valueText: placeholder, fallbackValueText: placeholder };
+      return { valueText: placeholder, plainValueText: placeholder };
     }
     return formatCourseDistanceInfo(cfg, cfg.stableDigitsEnabled, cfg.stableDigits, unitFormatter);
   }

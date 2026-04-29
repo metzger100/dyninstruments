@@ -92,7 +92,7 @@
   function selectInfoText(args, htmlUtils, tileLayout) {
     const cfg = args || {};
     const valueText = toText(cfg.valueText);
-    const fallbackText = cfg.fallbackText == null ? valueText : toText(cfg.fallbackText);
+    const plainText = cfg.plainText == null ? valueText : toText(cfg.plainText);
     const valueFit = measurePx({
       rect: cfg.rect,
       text: valueText,
@@ -103,12 +103,12 @@
       family: cfg.family,
       weight: cfg.weight
     }, htmlUtils, tileLayout);
-    if (!valueFit || !fallbackText || fallbackText === valueText || valueFit.width <= Math.max(1, Math.floor(cfg.rect.w)) + 0.01) {
+    if (!valueFit || !plainText || plainText === valueText || valueFit.width <= Math.max(1, Math.floor(cfg.rect.w)) + 0.01) {
       return { text: valueText, px: valueFit && valueFit.px ? valueFit.px : 0 };
     }
-    const fallbackFit = measurePx({
+    const plainFit = measurePx({
       rect: cfg.rect,
-      text: fallbackText,
+      text: plainText,
       maxPxRatio: cfg.maxPxRatio,
       textApi: cfg.textApi,
       ctx: cfg.ctx,
@@ -116,7 +116,7 @@
       family: cfg.family,
       weight: cfg.weight
     }, htmlUtils, tileLayout);
-    return { text: fallbackText, px: fallbackFit && fallbackFit.px ? fallbackFit.px : 0 };
+    return { text: plainText, px: plainFit && plainFit.px ? plainFit.px : 0 };
   }
 
   function toPointCount(model, htmlUtils) {
@@ -149,7 +149,7 @@
       ordinalText: toText(point.ordinalText != null ? point.ordinalText : (index + 1)),
       nameText: toText(point.nameText != null ? point.nameText : point.name),
       infoText: toText(point.infoText != null ? point.infoText : point.info),
-      infoFallbackText: toText(point.infoFallbackText != null ? point.infoFallbackText : (point.infoText != null ? point.infoText : point.info))
+      infoPlainText: toText(point.infoPlainText != null ? point.infoPlainText : (point.infoText != null ? point.infoText : point.info))
     };
   }
 
@@ -293,7 +293,7 @@
           : selectInfoText({
             rect: row.infoRect,
             valueText: rowTexts.infoText,
-            fallbackText: rowTexts.infoFallbackText,
+            plainText: rowTexts.infoPlainText,
             textApi: radialText,
             ctx: env.measureCtx,
             textFillScale: textFillScale,

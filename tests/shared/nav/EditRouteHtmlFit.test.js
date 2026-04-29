@@ -96,10 +96,10 @@ describe("EditRouteHtmlFit", function () {
       nameText: "Harbor Loop",
       sourceBadgeText: "LOCAL",
       metrics: {
-        pts: { labelText: "PTS:", valueText: "005", fallbackValueText: "005", unitText: "" },
-        dst: { labelText: "DST:", valueText: "12.3", fallbackValueText: "12.3", unitText: "nm" },
-        rte: { labelText: "RTE:", valueText: "4.9", fallbackValueText: "4.9", unitText: "nm" },
-        eta: { labelText: "ETA:", valueText: "12:34", fallbackValueText: "12:34", unitText: "" }
+        pts: { labelText: "PTS:", valueText: "005", plainValueText: "005", unitText: "" },
+        dst: { labelText: "DST:", valueText: "12.3", plainValueText: "12.3", unitText: "nm" },
+        rte: { labelText: "RTE:", valueText: "4.9", plainValueText: "4.9", unitText: "nm" },
+        eta: { labelText: "ETA:", valueText: "12:34", plainValueText: "12:34", unitText: "" }
       }
     };
 
@@ -367,7 +367,7 @@ describe("EditRouteHtmlFit", function () {
           dst: {
             labelText: "DST:",
             valueText: " " + "0".repeat(120) + ".4",
-            fallbackValueText: "12.4",
+            plainValueText: "12.4",
             unitText: "nm"
           }
         }
@@ -441,7 +441,7 @@ describe("EditRouteHtmlFit", function () {
           dst: {
             labelText: "DST:",
             valueText: " " + "0".repeat(400) + ".0",
-            fallbackValueText: "123.4",
+            plainValueText: "123.4",
             unitText: "nm"
           }
         }

@@ -124,14 +124,14 @@
         integerWidth: stableDigits.resolveIntegerWidth(zoomRawText, 2),
         reserveSignSlot: false
       })
-      : { padded: zoomRawText, fallback: zoomRawText };
+      : { padded: zoomRawText, plain: zoomRawText };
     const requiredRawText = formatZoom(requiredZoomNumber, defaultText, Helpers, placeholderNormalize);
     const requiredStable = stableDigitsEnabled && typeof requiredZoomNumber === "number"
       ? stableDigits.normalize(requiredRawText, {
         integerWidth: stableDigits.resolveIntegerWidth(requiredRawText, 2),
         reserveSignSlot: false
       })
-      : { padded: requiredRawText, fallback: requiredRawText };
+      : { padded: requiredRawText, plain: requiredRawText };
     const showRequired = typeof requiredZoomNumber === "number" && requiredZoomNumber !== zoomNumber;
     const isEditing = htmlUtils.isEditingMode(p);
     const canDispatch = !isEditing && htmlUtils.canDispatchSurfaceInteraction(p);
@@ -157,9 +157,9 @@
       caption: caption,
       unit: unit,
       zoomText: zoomStable.padded,
-      zoomFallbackText: zoomStable.fallback,
+      zoomPlainText: zoomStable.plain,
       requiredText: showRequired ? "(" + requiredStable.padded + ")" : "",
-      requiredFallbackText: showRequired ? "(" + requiredStable.fallback + ")" : "",
+      requiredPlainText: showRequired ? "(" + requiredStable.plain + ")" : "",
       showRequired: showRequired,
       interactionState: interactionState,
       captionUnitScale: clampCaptionUnitScale(p.captionUnitScale, htmlUtils),
@@ -382,11 +382,11 @@
           model.kind,
           textLength(model.caption),
           textLength(model.zoomText),
-          textLength(model.zoomFallbackText),
+          textLength(model.zoomPlainText),
           model.stableDigitsEnabled === true ? 1 : 0,
           textLength(model.unit),
           textLength(model.requiredText),
-          textLength(model.requiredFallbackText),
+          textLength(model.requiredPlainText),
           model.mode,
           model.captionUnitScale,
           model.showRequired ? 1 : 0,

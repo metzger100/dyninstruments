@@ -246,8 +246,8 @@ describe("tools/check-smell-contracts.mjs", function () {
   it("fails coordinate-formatter-no-raw-equality-fallback when heuristic exists", function () {
     const cwd = createWorkspace({
       "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js": `
-function format(out, n, fallbackText) {
-  if (out.trim() === String(n)) return fallbackText;
+function format(out, n, plainText) {
+  if (out.trim() === String(n)) return plainText;
   return out;
 }
 `

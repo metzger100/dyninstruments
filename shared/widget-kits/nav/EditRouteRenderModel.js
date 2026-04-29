@@ -100,7 +100,7 @@
       const metric = m.metrics && m.metrics[id] ? m.metrics[id] : {};
       parts.push("L" + toSignatureToken(metric.labelText));
       parts.push("V" + toSignatureToken(metric.valueText));
-      parts.push("F" + toSignatureToken(metric.fallbackValueText));
+      parts.push("F" + toSignatureToken(metric.plainValueText));
       parts.push("U" + toSignatureToken(metric.unitText));
     }
 
@@ -149,7 +149,7 @@
         if (!stableDigitsEnabled) {
           return {
             valueText: rawText,
-            fallbackValueText: rawText
+            plainValueText: rawText
           };
         }
         const stable = stableDigits.normalize(rawText, {
@@ -158,7 +158,7 @@
         });
         return {
           valueText: stable.padded,
-          fallbackValueText: stable.fallback
+          plainValueText: stable.plain
         };
       }
 

@@ -138,11 +138,11 @@
       nextCourseUnit: nextCourseUnit,
       stableDigitsEnabled: stableDigitsEnabled,
       remainText: remainStable.padded,
-      remainFallbackText: remainStable.fallback,
+      remainPlainText: remainStable.plain,
       etaText: etaStable.padded,
-      etaFallbackText: etaStable.fallback,
+      etaPlainText: etaStable.plain,
       nextCourseText: nextStable.padded,
-      nextCourseFallbackText: nextStable.fallback,
+      nextCoursePlainText: nextStable.plain,
       interactionState: interactionState
     };
   }

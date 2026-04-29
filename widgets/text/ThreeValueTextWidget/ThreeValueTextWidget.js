@@ -70,7 +70,7 @@
           integerWidth: stableDigits.resolveIntegerWidth(normalizedValueText, 2),
           reserveSignSlot: true
         })
-        : { padded: normalizedValueText, fallback: normalizedValueText };
+        : { padded: normalizedValueText, plain: normalizedValueText };
       const valueText = stableValue.padded;
       const modeData = text.computeModeLayout({
         W: W,

@@ -152,7 +152,7 @@ describe("AisTargetRenderModel", function () {
     }));
   });
 
-  it("pads metric values and exposes fallback values when stableDigits is enabled", function () {
+  it("pads metric values and exposes plain values when stableDigits is enabled", function () {
     const setup = createRenderModel({
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
@@ -171,11 +171,11 @@ describe("AisTargetRenderModel", function () {
 
     expect(model.stableDigitsEnabled).toBe(true);
     expect(model.metrics.dst.valueText).toBe("04.2");
-    expect(model.metrics.dst.fallbackValueText).toBe("4.2");
+    expect(model.metrics.dst.plainValueText).toBe("4.2");
     expect(model.metrics.cpa.valueText).toBe("00.7");
-    expect(model.metrics.cpa.fallbackValueText).toBe("0.7");
+    expect(model.metrics.cpa.plainValueText).toBe("0.7");
     expect(model.metrics.brg.valueText).toBe("112");
-    expect(model.metrics.brg.fallbackValueText).toBe("112");
+    expect(model.metrics.brg.plainValueText).toBe("112");
   });
 
   it("keeps full identity text and all four metrics in flat BRG branch mode", function () {

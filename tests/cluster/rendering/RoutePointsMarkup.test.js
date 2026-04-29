@@ -145,7 +145,7 @@ describe("RoutePointsMarkup", function () {
     expect(html).toContain("dyni-route-points-info-text dyni-tabular");
   });
 
-  it("renders fit-selected fallback text for stableDigits course-distance rows", function () {
+  it("renders fit-selected plain text for stableDigits course-distance rows", function () {
     const markup = createMarkup();
     const model = makeModel({
       showLatLon: false,
@@ -156,7 +156,7 @@ describe("RoutePointsMarkup", function () {
           ordinalText: "1",
           nameText: "Finish",
           infoText: "00360°/00012.3nm",
-          infoFallbackText: "360°/12.3nm",
+          infoPlainText: "360°/12.3nm",
           selected: true
         }
       ],

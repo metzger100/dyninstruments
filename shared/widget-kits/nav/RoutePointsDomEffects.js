@@ -17,10 +17,10 @@
   };
   let htmlUtils = null;
 
-  function toSafeInteger(value, fallback) {
+  function toSafeInteger(value, defaultValue) {
     const n = Number(value);
     if (!Number.isFinite(n)) {
-      return fallback;
+      return defaultValue;
     }
     return Math.floor(n);
   }
@@ -60,9 +60,9 @@
     state.timerHandle = null;
   }
 
-  function toElementHeight(element, fallback) {
+  function toElementHeight(element, defaultValue) {
     if (!element) {
-      return fallback;
+      return defaultValue;
     }
     const clientHeight = Number(element.clientHeight);
     if (Number.isFinite(clientHeight) && clientHeight > 0) {
@@ -79,7 +79,7 @@
         return rectHeight;
       }
     }
-    return fallback;
+    return defaultValue;
   }
 
   function toOffsetTop(element, listEl) {

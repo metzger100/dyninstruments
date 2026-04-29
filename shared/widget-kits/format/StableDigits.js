@@ -35,9 +35,9 @@
     return Math.max(min, digits);
   }
 
-  function resolveSuffix(rawSuffix, fallbackSuffix) {
+  function resolveSuffix(rawSuffix, defaultSuffix) {
     const text = toText(rawSuffix);
-    return text ? text : toText(fallbackSuffix);
+    return text ? text : toText(defaultSuffix);
   }
 
   function resolveSideSuffix(options) {
@@ -48,7 +48,7 @@
     return raw ? raw.charAt(0) : "";
   }
 
-  function buildFallback(parts, suffix) {
+  function buildPlain(parts, suffix) {
     return parts.signActual + parts.integer + parts.dot + parts.fraction + suffix;
   }
 
@@ -85,7 +85,7 @@
       if (placeholderNormalize.isPlaceholder(rawText)) {
         return {
           padded: rawText,
-          fallback: rawText
+          plain: rawText
         };
       }
 
@@ -93,7 +93,7 @@
       if (!parts) {
         return {
           padded: rawText,
-          fallback: rawText
+          plain: rawText
         };
       }
 
@@ -106,12 +106,12 @@
       const paddedSuffix = reserveSideSuffixSlot
         ? (sideSuffix || " ")
         : suffix;
-      const fallback = buildFallback(parts, suffix);
+      const plain = buildPlain(parts, suffix);
       const padded = buildPadded(parts, paddedSuffix, reserveSignSlot, integerWidth);
 
       return {
         padded: padded,
-        fallback: fallback
+        plain: plain
       };
     }
 

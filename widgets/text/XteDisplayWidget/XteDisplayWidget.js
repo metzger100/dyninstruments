@@ -193,7 +193,7 @@
           reserveSideSuffixSlot: true
         });
         xteValueText = xteStable.padded;
-        if (xteStable.padded !== xteStable.fallback) {
+        if (xteStable.padded !== xteStable.plain) {
           const probe = tileLayout.measureMetricTile({
             textApi: toolkit.text,
             ctx: ctx,
@@ -210,7 +210,7 @@
           const fit = probe && probe.fit ? probe.fit : null;
           const clipped = !!(probe && fit && fit.total > probe.textW + 0.01);
           if (clipped) {
-            xteValueText = xteStable.fallback;
+            xteValueText = xteStable.plain;
           }
         }
       }

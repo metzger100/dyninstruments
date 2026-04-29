@@ -151,8 +151,8 @@ describe("MapZoomHtmlFit", function () {
     const stableRect = { width: 220, height: 110 };
     const baseModel = Object.assign(createModel("normal", true), {
       stableDigitsEnabled: false,
-      zoomFallbackText: "12.2",
-      requiredFallbackText: "(10.8)"
+      zoomPlainText: "12.2",
+      requiredPlainText: "(10.8)"
     });
 
     const first = h.fit.compute({
@@ -199,9 +199,9 @@ describe("MapZoomHtmlFit", function () {
       model: Object.assign(createModel("normal", true), {
         stableDigitsEnabled: true,
         zoomText: "07.2",
-        zoomFallbackText: "7.2",
+        zoomPlainText: "7.2",
         requiredText: "(06.5)",
-        requiredFallbackText: "(6.5)"
+        requiredPlainText: "(6.5)"
       }),
       hostContext: h.hostContext,
       shellRect: { width: 180, height: 100 }
@@ -212,6 +212,7 @@ describe("MapZoomHtmlFit", function () {
     expect(h.calls.normal).toHaveLength(2);
     expect(h.calls.normal[0].valueText).toBe("07.2");
     expect(h.calls.normal[1].valueText).toBe("7.2");
+    expect(h.calls.singleLine[0].text).toBe("07.2");
     expect(h.calls.singleLine.some((call) => call.text === "07.2")).toBe(true);
     expect(h.calls.singleLine.some((call) => call.text === "(06.5)")).toBe(true);
     expect(h.calls.singleLine.some((call) => call.text === "(6.5)")).toBe(true);

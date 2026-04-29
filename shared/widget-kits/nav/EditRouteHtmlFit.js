@@ -117,7 +117,7 @@
         const spacing = layoutApi.computeMetricTileSpacing(metricRect, layout.responsive);
         const labelText = fitSupport.resolveMetricLabel(model, id);
         const valueText = fitSupport.resolveMetricValue(model, id);
-        const fallbackValueText = fitSupport.resolveMetricFallbackValue(model, id);
+        const plainValueText = fitSupport.resolveMetricPlainValue(model, id);
         const unitText = fitSupport.resolveMetricUnit(model, id);
 
         if (layout.mode === "high") {
@@ -125,7 +125,7 @@
           const selectedValue = fitSupport.selectMetricValue({
             stableDigitsEnabled: model.stableDigitsEnabled === true,
             primaryText: valueText,
-            fallbackText: fallbackValueText,
+            plainText: plainValueText,
             rect: valueRect,
             maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
             textApi: textApi,
@@ -185,7 +185,7 @@
             id: id,
             caption: labelText,
             value: valueText,
-            fallbackValue: fallbackValueText,
+            plainValue: plainValueText,
             unit: unitText
           },
           rect: metricRect,
@@ -199,26 +199,26 @@
           valueTextOptions: valueTextOptions
         });
         const primaryClipped = !!(primaryMeasurement && primaryMeasurement.fit && primaryMeasurement.fit.total > primaryMeasurement.textW + 0.01);
-        const useFallback = model.stableDigitsEnabled === true &&
+        const usePlain = model.stableDigitsEnabled === true &&
           primaryClipped &&
-          typeof fallbackValueText === "string" &&
-          fallbackValueText !== valueText;
-        const activeMetric = useFallback
+          typeof plainValueText === "string" &&
+          plainValueText !== valueText;
+        const activeMetric = usePlain
           ? {
             id: id,
             caption: labelText,
-            value: fallbackValueText,
-            fallbackValue: fallbackValueText,
+            value: plainValueText,
+            plainValue: plainValueText,
             unit: unitText
           }
           : {
             id: id,
             caption: labelText,
             value: valueText,
-            fallbackValue: fallbackValueText,
+            plainValue: plainValueText,
             unit: unitText
           };
-        const measurement = useFallback
+        const measurement = usePlain
           ? tileLayout.measureMetricTile({
             textApi: textApi,
             ctx: measureCtx,
@@ -255,7 +255,7 @@
           valueStyle: fitSupport.toStyle(measurement && measurement.fit ? measurement.fit.vPx : 0, htmlUtils),
           unitStyle: unitText ? fitSupport.toStyle(measurement && measurement.fit ? measurement.fit.uPx : 0, htmlUtils) : ""
         };
-        fitOut.metricValues[id] = useFallback ? fallbackValueText : valueText;
+        fitOut.metricValues[id] = usePlain ? plainValueText : valueText;
       }
 
       return fitOut;

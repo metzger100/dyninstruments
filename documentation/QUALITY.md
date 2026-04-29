@@ -1,35 +1,33 @@
 # Quality Scorecard
 
-**Last updated:** 2026-04-19
+**Last updated:** 2026-04-29
 
 ## Layer Health
 
 | Layer | Files | Headers | Size OK | Tests | Duplicates | Grade |
 |---|---:|---|---|---|---|---|
-| runtime/ | 6 | all | all | ✅ (6/6) | none | A |
-| config/ | 12 | all | check (2 warns, 0 violations) | ✅ (9 suites incl. static cluster coverage) | none | B |
-| cluster/ | 12 | all | all | ✅ (12/12) | none | A |
-| shared/ | 32 | all | check (5 warns, 0 violations) | broad (25 suites) | none | B |
-| widgets/radial/ | 6 | all | all | ✅ (6/6) | none | A |
-| widgets/text/ | 5 | all | check (2 warns, 0 violations) | ✅ (5/5) | none | B |
-| widgets/linear/ | 6 | all | all | ✅ (6/6) | none | A |
+| runtime/ | 12 | all | check (1 warn, 0 violations) | core + coverage | none | B |
+| config/ | 23 | all | check (5 warns, 0 violations) | core + coverage | none | B |
+| cluster/ | 24 | all | check (3 warns, 0 violations) | core + coverage | none | B |
+| shared/ | 82 | all | check (19 warns, 0 violations) | core + coverage | none | B |
+| widgets/radial/ | 7 | all | all | core + coverage | none | A |
+| widgets/text/ | 10 | all | check (5 warns, 0 violations) | core + coverage | none | B |
+| widgets/linear/ | 7 | all | all | core + coverage | none | A |
 
 Notes:
 - `Size OK = check` means no `>400` violations but at least one `>=300` warning.
 - Strict grading is applied: unresolved medium/high drift prevents an `A`.
 - Smell prevention gate is fail-closed (see `documentation/conventions/smell-prevention.md`).
-- Validation run (`2026-04-19`): `npm run check:core` passed with `131/131` test files and `892/892` tests green; `npm run test:coverage:check` also passed. `perf:check` was intentionally skipped for this session.
-- `check:patterns` summary (`2026-04-19`): `checkedFiles=384`, `failures=0`, `warnings=16` (`css-js-default-duplication=3`, `premature-legacy-support=12`, `mapper-output-complexity=1`). Promoted fail-fast/atomicity rules (`internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `widget-renderer-default-duplication`, `engine-layout-default-drift`, `canvas-api-typeof-guard`, `try-finally-canvas-drawing`, `framework-method-typeof-guard`, `inline-config-default-duplication`) remain at `0`, and responsive block rules remain at `0`.
-- `check:filesize` summary (`2026-04-19`): `warnings=29`, `violations=0`, `onelinerWarnings=0`.
-- Coverage summary (`coverage/coverage-summary.json`, `2026-04-19`): lines/statements `93.54%`, functions `91.34%`, branches `72.64%`.
+- Validation run (`2026-04-29`): `npm run check:core` passed; `npm run test:coverage:check` also passed. `perf:check` was intentionally skipped for this session.
+- `check:patterns` summary (`2026-04-29`): `checkedFiles=439`, `failures=0`, `warnings=0`. `premature-legacy-support`, `css-js-default-duplication`, and `mapper-output-complexity` are all at `0`.
+- `check:filesize` summary (`2026-04-29`): `warnings=33`, `violations=0`, `onelinerWarnings=0`.
+- Coverage summary (`coverage/coverage-summary.json`, `2026-04-29`): lines/statements `94.2%`, functions `93.21%`, branches `74.63%`.
 
 ## Known Drift Patterns
 
 | Pattern | Severity | Files | Status |
 |---|---|---|---|
-| File-size hotspot growth near threshold | MED | Current warning-tier files include `cluster/rendering/CanvasDomSurfaceAdapter.js`, `cluster/rendering/ClusterRendererRouter.js`, `cluster/rendering/HtmlSurfaceController.js`, `config/clusters/environment.js`, `config/clusters/vessel.js`, `config/components/registry-shared-foundation.js`, `runtime/TemporaryHostActionBridge.js`, `shared/theme/ThemeResolver.js`, `shared/widget-kits/linear/LinearGaugeEngine.js`, `shared/widget-kits/linear/LinearGaugeTextLayout.js`, `shared/widget-kits/nav/ActiveRouteHtmlFit.js`, `shared/widget-kits/nav/AisTargetHtmlFit.js`, `shared/widget-kits/nav/AisTargetLayout.js`, `shared/widget-kits/nav/AisTargetLayoutGeometry.js`, `shared/widget-kits/nav/EditRouteHtmlFit.js`, `shared/widget-kits/nav/EditRouteLayout.js`, `shared/widget-kits/nav/EditRouteRenderModel.js`, `shared/widget-kits/nav/MapZoomHtmlFit.js`, `shared/widget-kits/nav/RoutePointsLayout.js`, `shared/widget-kits/nav/RoutePointsRenderModel.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialTextLayout.js`, `shared/widget-kits/text/TextLayoutComposite.js`, `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js`, `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js`, `widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js`, `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js`, and `widgets/text/XteDisplayWidget/XteDisplayWidget.js` | ⚠ Active (`check:filesize` warnings: 29, violations: 0) |
-| Warn-tier fallback/legacy backlog | MED | `shared/widget-kits/nav/RoutePointsDomEffects.js` (2), `shared/widget-kits/nav/RoutePointsRenderModel.js` (1) | ⚠ Active (`premature-legacy-support` warnings: 12 on 2026-04-19) |
-| Mapper output complexity drift | LOW | `cluster/mappers/NavMapper.js` | ⚠ Active (`mapper-output-complexity` warnings: 1 on 2026-04-19) |
+| File-size hotspot growth near threshold | MED | Current warning-tier files include `cluster/rendering/CanvasDomSurfaceAdapter.js`, `cluster/rendering/ClusterSurfacePolicy.js`, `cluster/rendering/HtmlSurfaceController.js`, `config/clusters/default.js`, `config/clusters/nav.js`, `config/clusters/vessel.js`, `config/components/registry-shared-foundation.js`, `config/components/registry-widgets.js`, `runtime/TemporaryHostActionBridge.js`, `shared/theme/ThemeResolver.js`, `shared/widget-kits/linear/LinearGaugeEngine.js`, `shared/widget-kits/linear/LinearGaugeLayout.js`, `shared/widget-kits/nav/ActiveRouteHtmlFit.js`, `shared/widget-kits/nav/AisTargetHtmlFit.js`, `shared/widget-kits/nav/AisTargetLayout.js`, `shared/widget-kits/nav/AisTargetLayoutGeometry.js`, `shared/widget-kits/nav/EditRouteLayout.js`, `shared/widget-kits/nav/EditRouteRenderModel.js`, `shared/widget-kits/nav/MapZoomHtmlFit.js`, `shared/widget-kits/nav/RoutePointsHtmlFit.js`, `shared/widget-kits/nav/RoutePointsLayout.js`, `shared/widget-kits/nav/RoutePointsRenderModel.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialTextLayout.js`, `shared/widget-kits/text/TextLayoutComposite.js`, `shared/widget-kits/text/TextTileLayout.js`, `shared/widget-kits/vessel/AlarmHtmlFit.js`, `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js`, `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js`, `widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js`, `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js`, and `widgets/text/XteDisplayWidget/XteDisplayWidget.js` | ⚠ Active (`check:filesize` warnings: 33, violations: 0) |
 
 ## Model Selection Log
 
@@ -52,6 +50,7 @@ Notes:
 | Runtime lifecycle documentation closeout | GPT-5 Codex | Good | Added `documentation/architecture/runtime-lifecycle.md`, resynced runtime/theme architecture docs to the live bootstrap + fallback behavior, updated debt/index references, and revalidated the March 27, 2026 full gate state with `check:all`. |
 | RoutePoints Phase 5 documentation closeout | GPT-5 Codex | Good | Added `documentation/widgets/route-points.md`, updated architecture/index/guide touchpoints plus debt/roadmap tracking, and revalidated April 2, 2026 with `docs:check` + full `check:all`. |
 | EditRoute Phase 5 documentation closeout | GPT-5 Codex | Good | Added `documentation/widgets/edit-route.md`, updated architecture/index/roadmap coverage docs, refreshed quality/debt tracking, and revalidated April 3, 2026 with full `check:all`. |
+| Phase 2 vocabulary cleanup and scorecard resync | GPT-5 Codex | Good | Renamed the StableDigits plain-text vocabulary across source, tests, and widgets; cleared the premature legacy-support backlog; and resynced the live quality/debt/roadmap docs to the zero-warning state. |
 
 Append new rows when model choice materially affects outcome.
 
