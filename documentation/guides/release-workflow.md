@@ -4,7 +4,7 @@
 
 ## Overview
 
-Releases are created locally and committed into the repository first. GitHub Releases is a secondary copy target that publishes the already-created zip and notes.
+Releases are created locally and committed into the repository first. GitHub Releases is a secondary copy target that publishes the already-created zip and notes. But don't push the release.
 
 ## Key Details
 
@@ -38,12 +38,6 @@ npm run release:create -- --version=X.Y.Z --notes=path/to/notes.md
 ```
 
 `release:create` runs required gates (`check:core`, `test:coverage:check`), runs `perf:check` as advisory-only, builds the zip, copies notes into `releases/`, commits both artifacts, and creates an annotated `vX.Y.Z` tag.
-
-5. Push branch and tag.
-
-```bash
-git push origin main && git push origin vX.Y.Z
-```
 
 ## SemVer Decision Guide
 
