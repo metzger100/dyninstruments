@@ -109,6 +109,7 @@ Task: Add new BarometerGauge
 - Root structural orientation map: [ARCHITECTURE.md](ARCHITECTURE.md)
 - HTML renderer lifecycle patterns: [documentation/architecture/html-renderer-lifecycle.md](documentation/architecture/html-renderer-lifecycle.md)
 - Step-by-step implementation workflows: [documentation/guides/](documentation/guides/)
+- New release requests: start with [documentation/guides/release-workflow.md](documentation/guides/release-workflow.md) and follow `npm run release:prepare` -> `npm run release:create`
 - Multi-session active execution plans: [exec-plans/active/](exec-plans/active/)
 
 ---
