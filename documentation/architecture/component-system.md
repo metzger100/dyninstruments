@@ -18,9 +18,14 @@ Ownership split:
 
 config.components is assembled from:
 
-- registry-shared-foundation.js
+- registry-shared-foundation-format.js
+- registry-shared-foundation-geometry.js
+- registry-shared-foundation-layout.js
+- registry-shared-foundation-state.js
 - registry-shared-engines.js
-- registry-widgets.js
+- registry-widgets-nav.js
+- registry-widgets-vessel.js
+- registry-widgets-gauge.js
 - registry-cluster.js
 
 Assembly fail-closes when:
@@ -30,7 +35,7 @@ Assembly fail-closes when:
 
 Recent shared-foundation/runtime registrations:
 
-- `PreparedPayloadModelCache` is registered in `registry-shared-foundation.js`
+- `PreparedPayloadModelCache` is registered in `registry-shared-foundation-state.js`
 - `ActiveRouteTextHtmlWidget` and `MapZoomTextHtmlWidget` include `PreparedPayloadModelCache` in `deps`
 
 ## API Shape Contract

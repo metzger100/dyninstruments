@@ -7,7 +7,7 @@
 | Layer | Files | Headers | Size OK | Tests | Duplicates | Grade |
 |---|---:|---|---|---|---|---|
 | runtime/ | 12 | all | check (1 warn, 0 violations) | core + coverage | none | B |
-| config/ | 23 | all | check (5 warns, 0 violations) | core + coverage | none | B |
+| config/ | 28 | all | check (3 warns, 0 violations) | core + coverage | none | B |
 | cluster/ | 24 | all | check (3 warns, 0 violations) | core + coverage | none | B |
 | shared/ | 82 | all | check (19 warns, 0 violations) | core + coverage | none | B |
 | widgets/radial/ | 7 | all | all | core + coverage | none | A |
@@ -20,14 +20,14 @@ Notes:
 - Smell prevention gate is fail-closed (see `documentation/conventions/smell-prevention.md`).
 - Validation run (`2026-04-29`): `npm run check:core` passed; `npm run test:coverage:check` also passed. `perf:check` was intentionally skipped for this session.
 - `check:patterns` summary (`2026-04-29`): `checkedFiles=439`, `failures=0`, `warnings=0`. `premature-legacy-support`, `css-js-default-duplication`, and `mapper-output-complexity` are all at `0`.
-- `check:filesize` summary (`2026-04-29`): `warnings=33`, `violations=0`, `onelinerWarnings=0`.
+- `check:filesize` summary (`2026-04-29`): `warnings=31`, `violations=0`, `onelinerWarnings=0`.
 - Coverage summary (`coverage/coverage-summary.json`, `2026-04-29`): lines/statements `94.2%`, functions `93.21%`, branches `74.63%`.
 
 ## Known Drift Patterns
 
 | Pattern | Severity | Files | Status |
 |---|---|---|---|
-| File-size hotspot growth near threshold | MED | Current warning-tier files include `cluster/rendering/CanvasDomSurfaceAdapter.js`, `cluster/rendering/ClusterSurfacePolicy.js`, `cluster/rendering/HtmlSurfaceController.js`, `config/clusters/default.js`, `config/clusters/nav.js`, `config/clusters/vessel.js`, `config/components/registry-shared-foundation.js`, `config/components/registry-widgets.js`, `runtime/TemporaryHostActionBridge.js`, `shared/theme/ThemeResolver.js`, `shared/widget-kits/linear/LinearGaugeEngine.js`, `shared/widget-kits/linear/LinearGaugeLayout.js`, `shared/widget-kits/nav/ActiveRouteHtmlFit.js`, `shared/widget-kits/nav/AisTargetHtmlFit.js`, `shared/widget-kits/nav/AisTargetLayout.js`, `shared/widget-kits/nav/AisTargetLayoutGeometry.js`, `shared/widget-kits/nav/EditRouteLayout.js`, `shared/widget-kits/nav/EditRouteRenderModel.js`, `shared/widget-kits/nav/MapZoomHtmlFit.js`, `shared/widget-kits/nav/RoutePointsHtmlFit.js`, `shared/widget-kits/nav/RoutePointsLayout.js`, `shared/widget-kits/nav/RoutePointsRenderModel.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialTextLayout.js`, `shared/widget-kits/text/TextLayoutComposite.js`, `shared/widget-kits/text/TextTileLayout.js`, `shared/widget-kits/vessel/AlarmHtmlFit.js`, `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js`, `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js`, `widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js`, `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js`, and `widgets/text/XteDisplayWidget/XteDisplayWidget.js` | ⚠ Active (`check:filesize` warnings: 33, violations: 0) |
+| File-size hotspot growth near threshold | MED | Current warning-tier files include `cluster/rendering/CanvasDomSurfaceAdapter.js`, `cluster/rendering/ClusterSurfacePolicy.js`, `cluster/rendering/HtmlSurfaceController.js`, `config/clusters/default.js`, `config/clusters/nav.js`, `config/clusters/vessel.js`, `runtime/TemporaryHostActionBridge.js`, `shared/theme/ThemeResolver.js`, `shared/widget-kits/linear/LinearGaugeEngine.js`, `shared/widget-kits/linear/LinearGaugeLayout.js`, `shared/widget-kits/nav/ActiveRouteHtmlFit.js`, `shared/widget-kits/nav/AisTargetHtmlFit.js`, `shared/widget-kits/nav/AisTargetLayout.js`, `shared/widget-kits/nav/AisTargetLayoutGeometry.js`, `shared/widget-kits/nav/EditRouteLayout.js`, `shared/widget-kits/nav/EditRouteRenderModel.js`, `shared/widget-kits/nav/MapZoomHtmlFit.js`, `shared/widget-kits/nav/RoutePointsHtmlFit.js`, `shared/widget-kits/nav/RoutePointsLayout.js`, `shared/widget-kits/nav/RoutePointsRenderModel.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialTextLayout.js`, `shared/widget-kits/text/TextLayoutComposite.js`, `shared/widget-kits/text/TextTileLayout.js`, `shared/widget-kits/vessel/AlarmHtmlFit.js`, `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js`, `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js`, `widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js`, `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js`, and `widgets/text/XteDisplayWidget/XteDisplayWidget.js` | ⚠ Active (`check:filesize` warnings: 31, violations: 0) |
 
 ## Model Selection Log
 

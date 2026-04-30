@@ -119,7 +119,9 @@ For every `renderer: "SomeName"` in the mapper output, verify:
 # Quick verification
 grep -n "SomeName" cluster/rendering/ClusterKindCatalog.js
 grep -n "SomeName" cluster/rendering/ClusterRendererRouter.js
-grep -n "SomeName" config/components/registry-widgets.js
+grep -n "SomeName" config/components/registry-widgets-nav.js
+grep -n "SomeName" config/components/registry-widgets-vessel.js
+grep -n "SomeName" config/components/registry-widgets-gauge.js
 ```
 
 ### Check 5: No Formatter Calls

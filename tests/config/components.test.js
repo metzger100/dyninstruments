@@ -1,9 +1,14 @@
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
 const COMPONENT_REGISTRY_FRAGMENT_SCRIPTS = [
-  "config/components/registry-shared-foundation.js",
+  "config/components/registry-shared-foundation-format.js",
+  "config/components/registry-shared-foundation-geometry.js",
+  "config/components/registry-shared-foundation-layout.js",
+  "config/components/registry-shared-foundation-state.js",
   "config/components/registry-shared-engines.js",
-  "config/components/registry-widgets.js",
+  "config/components/registry-widgets-nav.js",
+  "config/components/registry-widgets-vessel.js",
+  "config/components/registry-widgets-gauge.js",
   "config/components/registry-cluster.js"
 ];
 const SHARED_HTML_SHADOW_CSS = "http://host/plugins/dyninstruments/shared/html/HtmlShadowCommon.css";
@@ -12,6 +17,24 @@ function runScripts(context, scripts) {
   scripts.forEach(function (scriptPath) {
     runIifeScript(scriptPath, context);
   });
+}
+
+function normalizeBaseUrl(value, fromBase, toBase) {
+  if (typeof value === "string") {
+    return value.startsWith(fromBase) ? toBase + value.slice(fromBase.length) : value;
+  }
+  if (Array.isArray(value)) {
+    return value.map(function (item) {
+      return normalizeBaseUrl(item, fromBase, toBase);
+    });
+  }
+  if (value && typeof value === "object") {
+    return Object.keys(value).reduce(function (acc, key) {
+      acc[key] = normalizeBaseUrl(value[key], fromBase, toBase);
+      return acc;
+    }, {});
+  }
+  return value;
 }
 
 function loadFullComponentRegistry(context) {
@@ -504,6 +527,25 @@ describe("config/components.js", function () {
     expect(components.WindMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/WindMapper.js");
   });
 
+  it("merges the split registry fragments into the same registry as the loader", async function () {
+    const context = createScriptContext({
+      DyniPlugin: {
+        baseUrl: "http://host/plugins/dyninstruments/",
+        runtime: {},
+        state: {},
+        config: { shared: {}, clusters: [] }
+      }
+    });
+
+    runScripts(context, ["runtime/namespace.js"].concat(COMPONENT_REGISTRY_FRAGMENT_SCRIPTS, ["config/components.js"]));
+
+    const { loadComponentsRegistry, SENTINEL_BASE } = await import("../../tools/components-registry-loader.mjs");
+    const loadedComponents = loadComponentsRegistry(process.cwd());
+
+    expect(normalizeBaseUrl(context.DyniPlugin.config.components, "http://host/plugins/dyninstruments/", SENTINEL_BASE))
+      .toEqual(loadedComponents);
+  });
+
   it("throws when baseUrl is missing", function () {
     const context = createScriptContext({
       DyniPlugin: {
@@ -530,9 +572,14 @@ describe("config/components.js", function () {
 
     runScripts(context, [
       "runtime/namespace.js",
-      "config/components/registry-shared-foundation.js",
+      "config/components/registry-shared-foundation-format.js",
+      "config/components/registry-shared-foundation-geometry.js",
+      "config/components/registry-shared-foundation-layout.js",
+      "config/components/registry-shared-foundation-state.js",
       "config/components/registry-shared-engines.js",
-      "config/components/registry-widgets.js"
+      "config/components/registry-widgets-nav.js",
+      "config/components/registry-widgets-vessel.js",
+      "config/components/registry-widgets-gauge.js"
     ]);
 
     expect(function () {

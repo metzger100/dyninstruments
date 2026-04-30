@@ -16,7 +16,7 @@ This renderer uses the shared text compaction contract from `TextLayoutEngine.co
 ## Module Registration
 
 ```javascript
-// In config/components/registry-widgets.js (assembled by config/components.js)
+// In config/components/registry-widgets-vessel.js (assembled by config/components.js)
 ThreeValueTextWidget: {
   js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
   css: undefined,

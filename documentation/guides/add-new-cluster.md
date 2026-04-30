@@ -152,8 +152,8 @@ Update both config-time and runtime mapper lists:
 
 If mapper returns `renderer: "NewGauge"`:
 
-1. Register `NewGauge` in `config/components/registry-widgets.js`
-2. Add `NewGauge` to `RendererPropsWidget.deps` in `config/components/registry-widgets.js`
+1. Register `NewGauge` in `config/components/registry-widgets-gauge.js`
+2. Add `NewGauge` to `RendererPropsWidget.deps` in `config/components/registry-widgets-nav.js`
 3. Wire runtime selection in `cluster/rendering/ClusterRendererRouter.js`:
 - add `NewGauge: Helpers.getModule("NewGauge").create(def, Helpers)` to `rendererSpecs`
 4. Add or update the route tuple in `cluster/rendering/ClusterKindCatalog.js` with explicit `surface`:

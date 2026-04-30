@@ -6,9 +6,14 @@ export const SENTINEL_BASE = "__CHECK_BASE__/";
 
 const REGISTRY_SCRIPT_CHAIN = [
   "runtime/namespace.js",
-  "config/components/registry-shared-foundation.js",
+  "config/components/registry-shared-foundation-format.js",
+  "config/components/registry-shared-foundation-geometry.js",
+  "config/components/registry-shared-foundation-layout.js",
+  "config/components/registry-shared-foundation-state.js",
   "config/components/registry-shared-engines.js",
-  "config/components/registry-widgets.js",
+  "config/components/registry-widgets-nav.js",
+  "config/components/registry-widgets-vessel.js",
+  "config/components/registry-widgets-gauge.js",
   "config/components/registry-cluster.js",
   "config/components.js"
 ];

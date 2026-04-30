@@ -36,7 +36,7 @@ Core rules:
 - presentation/layout behavior stays in renderer module
 
 5. Register component and route usage
-- add component entry in config/components/registry-widgets.js
+- add component entry in the appropriate fragment: `config/components/registry-widgets-nav.js` for nav/route renderers or `config/components/registry-widgets-vessel.js` for vessel/text renderers
 - wire dependencies in registry
 - update relevant mapper branch to emit renderer id and payload
 

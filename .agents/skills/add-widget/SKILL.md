@@ -98,7 +98,7 @@ Create the widget file with the mandatory UMD wrapper and header:
 
 ### Step 4: Register the Component
 
-Add entry to `config/components/registry-widgets.js`:
+Add entry to the appropriate `config/components/registry-widgets-*.js` fragment:
 
 ```javascript
 {ComponentId}: {
@@ -110,7 +110,7 @@ Add entry to `config/components/registry-widgets.js`:
 ```
 
 If cluster-routed, also:
-- Add `"{ComponentId}"` to `RendererPropsWidget.deps` in `config/components/registry-widgets.js`
+- Add `"{ComponentId}"` to `RendererPropsWidget.deps` in `config/components/registry-widgets-nav.js`
 - `ClusterRendererRouter` already depends on `RendererPropsWidget`; no direct edit needed there
 
 ### Step 5: Wire ClusterRendererRouter
@@ -251,8 +251,8 @@ Print this checklist and verify every item:
 - [ ] Widget module created at `widgets/{type}/{ComponentId}/{ComponentId}.js`
 - [ ] UMD wrapper with correct `globalKey` on `window.DyniComponents`
 - [ ] Mandatory header: `Module`, `Documentation`, `Depends`
-- [ ] Component registered in `config/components/registry-widgets.js`
-- [ ] Added to `RendererPropsWidget.deps` (if cluster-routed)
+- [ ] Component registered in the appropriate `config/components/registry-widgets-*.js` fragment
+- [ ] Added to `RendererPropsWidget.deps` in `config/components/registry-widgets-nav.js` (if cluster-routed)
 - [ ] Renderer wired in `cluster/rendering/ClusterRendererRouter.js`
 - [ ] Kind catalog tuple added in `cluster/rendering/ClusterKindCatalog.js`
 - [ ] `surface` type correct (`canvas-dom` or `html`)

@@ -64,7 +64,7 @@ return {
 };
 ```
 
-## Step 2: Register Module in `config/components/registry-widgets.js`
+## Step 2: Register Module in `config/components/registry-widgets-gauge.js`
 
 Add module entry:
 
@@ -81,7 +81,7 @@ NewGaugeWidget: {
 
 If `ClusterWidget` should render this gauge, update both declaration and runtime selection:
 
-1. `config/components/registry-widgets.js`: add `"NewGaugeWidget"` to `RendererPropsWidget.deps`
+1. `config/components/registry-widgets-nav.js`: add `"NewGaugeWidget"` to `RendererPropsWidget.deps`
 2. `config/components/registry-cluster.js`: `ClusterRendererRouter` already depends on `RendererPropsWidget`; no direct per-widget edit is needed there
 3. `cluster/rendering/ClusterRendererRouter.js`:
 - instantiate the new renderer spec in `rendererSpecs`
@@ -116,8 +116,8 @@ Do not move layout, compact-geometry, or responsive-floor logic into mapper file
 ## Checklist
 
 - [ ] Gauge wrapper created in `widgets/radial/NewGaugeWidget/NewGaugeWidget.js`
-- [ ] Module registered in `config/components/registry-widgets.js`
-- [ ] Added to `RendererPropsWidget.deps` in `config/components/registry-widgets.js` (if ClusterWidget-rendered)
+- [ ] Module registered in `config/components/registry-widgets-gauge.js`
+- [ ] Added to `RendererPropsWidget.deps` in `config/components/registry-widgets-nav.js` (if ClusterWidget-rendered)
 - [ ] Renderer wired in `cluster/rendering/ClusterRendererRouter.js`
 - [ ] Kind catalog tuple added with `surface: "canvas-dom"` in `cluster/rendering/ClusterKindCatalog.js`
 - [ ] Mapper module emits `renderer: "NewGaugeWidget"` and expected props

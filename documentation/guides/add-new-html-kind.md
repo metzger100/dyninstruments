@@ -21,7 +21,7 @@ Core rules:
 - point tuple rendererId to your renderer component
 
 2. Register component
-- add renderer entry in config/components/registry-widgets.js
+- add renderer entry in the appropriate fragment: `config/components/registry-widgets-nav.js` for nav/route HTML kinds or `config/components/registry-widgets-vessel.js` for vessel HTML kinds
 - declare shadowCss bundle via shadowCss array
 - include renderer in ClusterRendererRouter dependencies
 
