@@ -39,6 +39,8 @@ npm run release:create -- --version=X.Y.Z --notes=path/to/notes.md
 
 `release:create` runs required gates (`check:core`, `test:coverage:check`), runs `perf:check` as advisory-only, builds the zip, copies notes into `releases/`, commits both artifacts, and creates an annotated `vX.Y.Z` tag.
 
+5. Delete the tmp/ folder
+
 ## SemVer Decision Guide
 
 | Bump | Use when |
