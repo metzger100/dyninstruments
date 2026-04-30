@@ -1,7 +1,7 @@
 /**
  * Module: plugin.js - DyniPlugin bootstrap entrypoint
  * Documentation: documentation/architecture/component-system.md
- * Depends: AVNAV_BASE_URL, internal DyniPlugin scripts
+ * Depends: AVNAV_BASE_URL, config/bootstrap-manifest.js
  */
 /* global avnav */
 (function () {
@@ -56,61 +56,34 @@
   const ns = window.DyniPlugin = window.DyniPlugin || {};
   ns.baseUrl = BASE;
   ns.avnavApi = hostApi;
+  ns.config = ns.config || {};
   ns.runtime = ns.runtime || {};
   ns.runtime.loadScriptOnce = loadScriptOnce;
 
-  // Invariant: this load order is authoritative for all internal namespace/config/runtime setup.
-  const internalScripts = [
-    "runtime/namespace.js",
-    "runtime/PerfSpanHelper.js",
-    "runtime/helpers.js",
-    "runtime/editable-defaults.js",
-    "config/components/registry-shared-foundation-format.js",
-    "config/components/registry-shared-foundation-geometry.js",
-    "config/components/registry-shared-foundation-layout.js",
-    "config/components/registry-shared-foundation-state.js",
-    "config/components/registry-shared-engines.js",
-    "config/components/registry-widgets-nav.js",
-    "config/components/registry-widgets-vessel.js",
-    "config/components/registry-widgets-gauge.js",
-    "config/components/registry-cluster.js",
-    "shared/unit-format-families.js",
-    "config/components.js",
-    "config/shared/editable-param-utils.js",
-    "config/shared/kind-defaults.js",
-    "config/shared/unit-editable-utils.js",
-    "config/shared/common-editables.js",
-    "config/shared/environment-base-editables.js",
-    "config/shared/environment-depth-editables.js",
-    "config/shared/environment-temperature-editables.js",
-    "config/shared/environment-editables.js",
-    "config/clusters/course-heading.js",
-    "config/clusters/speed.js",
-    "config/clusters/environment.js",
-    "config/clusters/wind.js",
-    "config/clusters/nav.js",
-    "config/clusters/map.js",
-    "config/clusters/anchor.js",
-    "config/clusters/vessel.js",
-    "config/clusters/default.js",
-    "config/widget-definitions.js",
-    "runtime/asset-preloader.js",
-    "runtime/component-loader.js",
-    "runtime/widget-registrar.js",
-    "runtime/HostCommitController.js",
-    "runtime/SurfaceSessionController.js",
-    "runtime/TemporaryHostActionBridgeDiscovery.js",
-    "runtime/TemporaryHostActionBridge.js",
-    "runtime/theme-runtime.js",
-    "runtime/init.js"
-  ];
+  const bootstrapManifestPath = "config/bootstrap-manifest.js";
 
-  internalScripts
-    .reduce(function (chain, path) {
-      return chain.then(function () {
-        return loadScriptOnce(makeScriptId(path), BASE + path);
+  function loadBootstrapManifest() {
+    return loadScriptOnce(makeScriptId(bootstrapManifestPath), BASE + bootstrapManifestPath)
+      .catch(function (err) {
+        console.error("dyninstruments: failed to load bootstrap manifest at config/bootstrap-manifest.js");
+        throw err;
+      })
+      .then(function () {
+        const manifest = ns.config && ns.config.bootstrapManifest;
+
+        if (!Array.isArray(manifest)) {
+          throw new Error("dyninstruments: bootstrap manifest missing or invalid");
+        }
+
+        return manifest.reduce(function (chain, path) {
+          return chain.then(function () {
+            return loadScriptOnce(makeScriptId(path), BASE + path);
+          });
+        }, Promise.resolve());
       });
-    }, Promise.resolve())
+  }
+
+  loadBootstrapManifest()
     .then(function () {
       return window.DyniPlugin.runtime.runInit();
     })

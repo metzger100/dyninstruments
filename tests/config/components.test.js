@@ -546,6 +546,55 @@ describe("config/components.js", function () {
       .toEqual(loadedComponents);
   });
 
+  it("loads the bootstrap manifest with the expected bootstrap script order", async function () {
+    const { loadBootstrapManifest } = await import("../../tools/components-registry-loader.mjs");
+
+    expect(loadBootstrapManifest(process.cwd())).toEqual([
+      "runtime/namespace.js",
+      "runtime/PerfSpanHelper.js",
+      "runtime/helpers.js",
+      "runtime/editable-defaults.js",
+      "config/components/registry-shared-foundation-format.js",
+      "config/components/registry-shared-foundation-geometry.js",
+      "config/components/registry-shared-foundation-layout.js",
+      "config/components/registry-shared-foundation-state.js",
+      "config/components/registry-shared-engines.js",
+      "config/components/registry-widgets-nav.js",
+      "config/components/registry-widgets-vessel.js",
+      "config/components/registry-widgets-gauge.js",
+      "config/components/registry-cluster.js",
+      "shared/unit-format-families.js",
+      "config/components.js",
+      "config/shared/editable-param-utils.js",
+      "config/shared/kind-defaults.js",
+      "config/shared/unit-editable-utils.js",
+      "config/shared/common-editables.js",
+      "config/shared/environment-base-editables.js",
+      "config/shared/environment-depth-editables.js",
+      "config/shared/environment-temperature-editables.js",
+      "config/shared/environment-editables.js",
+      "config/clusters/course-heading.js",
+      "config/clusters/speed.js",
+      "config/clusters/environment.js",
+      "config/clusters/wind.js",
+      "config/clusters/nav.js",
+      "config/clusters/map.js",
+      "config/clusters/anchor.js",
+      "config/clusters/vessel.js",
+      "config/clusters/default.js",
+      "config/widget-definitions.js",
+      "runtime/asset-preloader.js",
+      "runtime/component-loader.js",
+      "runtime/widget-registrar.js",
+      "runtime/HostCommitController.js",
+      "runtime/SurfaceSessionController.js",
+      "runtime/TemporaryHostActionBridgeDiscovery.js",
+      "runtime/TemporaryHostActionBridge.js",
+      "runtime/theme-runtime.js",
+      "runtime/init.js"
+    ]);
+  });
+
   it("throws when baseUrl is missing", function () {
     const context = createScriptContext({
       DyniPlugin: {

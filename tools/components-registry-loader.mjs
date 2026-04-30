@@ -18,6 +18,34 @@ const REGISTRY_SCRIPT_CHAIN = [
   "config/components.js"
 ];
 
+const BOOTSTRAP_MANIFEST_SCRIPT_CHAIN = [
+  "runtime/namespace.js",
+  "config/bootstrap-manifest.js"
+];
+
+function runScriptChain(rootDir, scriptPaths, sandbox) {
+  for (const relPath of scriptPaths) {
+    const absPath = path.join(rootDir, relPath);
+    const source = fs.readFileSync(absPath, "utf8");
+    vm.runInNewContext(source, sandbox, { filename: relPath });
+  }
+}
+
+export function loadBootstrapManifest(rootDir) {
+  const sandbox = {
+    DyniPlugin: {
+      baseUrl: SENTINEL_BASE,
+      config: {}
+    }
+  };
+
+  runScriptChain(rootDir, BOOTSTRAP_MANIFEST_SCRIPT_CHAIN, sandbox);
+
+  return sandbox.DyniPlugin && sandbox.DyniPlugin.config
+    ? sandbox.DyniPlugin.config.bootstrapManifest
+    : null;
+}
+
 export function loadComponentsRegistry(rootDir) {
   const sandbox = {
     DyniPlugin: {
@@ -26,11 +54,7 @@ export function loadComponentsRegistry(rootDir) {
     }
   };
 
-  for (const relPath of REGISTRY_SCRIPT_CHAIN) {
-    const absPath = path.join(rootDir, relPath);
-    const source = fs.readFileSync(absPath, "utf8");
-    vm.runInNewContext(source, sandbox, { filename: relPath });
-  }
+  runScriptChain(rootDir, REGISTRY_SCRIPT_CHAIN, sandbox);
 
   const components = sandbox.DyniPlugin && sandbox.DyniPlugin.config
     ? sandbox.DyniPlugin.config.components

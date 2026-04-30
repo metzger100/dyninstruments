@@ -6,6 +6,7 @@ import path from "node:path";
 const ROOT = process.cwd();
 const SCAN_ROOTS = [
   "plugin.js",
+  "config/bootstrap-manifest.js",
   "runtime",
   "cluster",
   "config/components.js",

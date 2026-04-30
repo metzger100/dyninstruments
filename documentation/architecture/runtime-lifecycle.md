@@ -16,7 +16,7 @@ Authoritative owners:
 
 ## Startup Sequence
 
-1. plugin.js bootstraps internal scripts in fixed order and loads runtime/theme-runtime.js before runtime/init.js.
+1. plugin.js loads config/bootstrap-manifest.js, then loads the manifest-listed scripts in order and reaches runtime/theme-runtime.js before runtime/init.js.
 2. plugin.js calls window.DyniPlugin.runtime.runInit() exactly once.
 3. runtime/init.js creates the host-action bridge singleton.
 4. runtime/init.js resolves required components via runtime/component-loader.js.
