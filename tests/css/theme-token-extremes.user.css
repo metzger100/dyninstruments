@@ -1,57 +1,67 @@
 /* Copy this whole block into AvNav user.css for manual testing.
    Fixture only, not production styling.
-   Uses all available theme tokens with deliberately non-default values.
+   Uses every current raw ThemeModel input token with non-default but usable values.
 */
 
 .widget.dyniplugin {
   --dyni-theme-preset: default;
 
-  /* Colors */
-  --dyni-pointer: #00f5ff;
-  --dyni-warning: #ff00e6;
-  --dyni-alarm: #2bff00;
-  --dyni-layline-stb: #0047ff;
-  --dyni-layline-port: #ff6a00;
-  --dyni-ais-warning: #7a00ff;
-  --dyni-ais-nearest: #ff2e88;
-  --dyni-ais-tracking: #ffd400;
-  --dyni-ais-normal: #6b4f2a;
-
-  /* Radial */
-  --dyni-stroke-weight: 1.25;
-  --dyni-pointer-depth-weight: 1.1;
-  --dyni-pointer-side-weight: 0.9;
-  --dyni-radial-tick-major-len-factor: 0.22;
-  --dyni-radial-tick-major-width-factor: 0.06;
-  --dyni-radial-tick-minor-len-factor: 0.03;
-  --dyni-radial-tick-minor-width-factor: 0.008;
-  --dyni-radial-pointer-side-factor: 0.19;
-  --dyni-radial-pointer-depth-factor: 0.095;
-  --dyni-radial-arc-linewidth-factor: 0.045;
-  --dyni-radial-ring-width: 0.28;
-  --dyni-radial-label-inset: 1.1;
-  --dyni-radial-label-font: 0.2;
-
-  /* Full-circle (normal mode) */
-  --dyni-radial-fullcircle-normal-inner-margin: 0.12;
-  --dyni-radial-fullcircle-normal-min-height: 0.62;
-  --dyni-radial-fullcircle-normal-dual-gap: 0.12;
-
-  /* Linear */
-  --dyni-linear-track-width: 0.28;
-  --dyni-linear-track-linewidth-factor: 0.04;
-  --dyni-linear-tick-major-len-factor: 0.2;
-  --dyni-linear-tick-major-width-factor: 0.05;
-  --dyni-linear-tick-minor-len-factor: 0.04;
-  --dyni-linear-tick-minor-width-factor: 0.009;
-  --dyni-linear-pointer-side-factor: 0.19;
-  --dyni-linear-pointer-depth-factor: 0.095;
-  --dyni-linear-label-inset: 1.1;
-  --dyni-linear-label-font: 0.2;
+  /* Surface */
+  --dyni-fg: #233044;
+  --dyni-bg: #f4efe4;
+  --dyni-border: rgba(35, 48, 68, 0.46);
 
   /* Font */
   --dyni-font: "Atkinson Hyperlegible", "Segoe UI", sans-serif;
-  --dyni-font-mono: "JetBrains Mono", "SF Mono", "Menlo", monospace;
-  --dyni-font-weight: 900;
-  --dyni-label-weight: 300;
+  --dyni-font-mono: "IBM Plex Mono", "SF Mono", monospace;
+  --dyni-font-weight: 600;
+  --dyni-label-weight: 500;
+
+  /* Colors */
+  --dyni-pointer: #00a8ff;
+  --dyni-warning: #f2b134;
+  --dyni-alarm: #ff4d6d;
+  --dyni-alarm-widget-bg: #c91f2f;
+  --dyni-alarm-widget-fg: #fff7f2;
+  --dyni-alarm-widget-strip: #32c8ff;
+  --dyni-layline-stb: #27c97b;
+  --dyni-layline-port: #ff8a1f;
+  --dyni-ais-warning: #f06d00;
+  --dyni-ais-nearest: #0086ff;
+  --dyni-ais-tracking: #53c16d;
+  --dyni-ais-normal: #607b95;
+
+  /* Shared geometry */
+  --dyni-stroke-weight: 1.28;
+  --dyni-pointer-depth-weight: 1.15;
+  --dyni-pointer-side-weight: 0.82;
+
+  /* Radial geometry */
+  --dyni-radial-tick-major-len-factor: 0.16;
+  --dyni-radial-tick-major-width-factor: 0.045;
+  --dyni-radial-tick-minor-len-factor: 0.032;
+  --dyni-radial-tick-minor-width-factor: 0.009;
+  --dyni-radial-pointer-side-factor: 0.18;
+  --dyni-radial-pointer-depth-factor: 0.12;
+  --dyni-radial-arc-linewidth-factor: 0.03;
+  --dyni-radial-ring-width: 0.24;
+  --dyni-radial-label-inset: 1.25;
+  --dyni-radial-label-font: 0.19;
+
+  /* Full-circle geometry */
+  --dyni-radial-fullcircle-normal-inner-margin: 0.09;
+  --dyni-radial-fullcircle-normal-min-height: 0.58;
+  --dyni-radial-fullcircle-normal-dual-gap: 0.1;
+
+  /* Linear geometry */
+  --dyni-linear-track-width: 0.24;
+  --dyni-linear-track-linewidth-factor: 0.032;
+  --dyni-linear-tick-major-len-factor: 0.16;
+  --dyni-linear-tick-major-width-factor: 0.042;
+  --dyni-linear-tick-minor-len-factor: 0.038;
+  --dyni-linear-tick-minor-width-factor: 0.01;
+  --dyni-linear-pointer-side-factor: 0.18;
+  --dyni-linear-pointer-depth-factor: 0.13;
+  --dyni-linear-label-inset: 1.25;
+  --dyni-linear-label-font: 0.19;
 }

@@ -1,22 +1,25 @@
 /* Copy this whole block into AvNav user.css for manual testing.
    Fixture only, not production styling.
 
-   Preset cycle by widget order:
-   1 = default (no preset override)
+   Widget order:
+   1 = default/no override control
    2 = slim
    3 = bold
-   4 = night
-   5 = highcontrast
+   4 = highcontrast
 */
 
-.widget.dyniplugin {
+.widget.dyniplugin:nth-of-type(1) {
+  /* Leave the preset unset so this widget shows the base default theme. */
+}
+
+.widget.dyniplugin:nth-of-type(2) {
   --dyni-theme-preset: slim;
 }
 
-.widget.dyniplugin {
+.widget.dyniplugin:nth-of-type(3) {
   --dyni-theme-preset: bold;
 }
 
-.widget.dyniplugin {
+.widget.dyniplugin:nth-of-type(4) {
   --dyni-theme-preset: highcontrast;
 }
