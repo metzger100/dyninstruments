@@ -21,6 +21,7 @@
 - **Root architecture orientation** → [../ARCHITECTURE.md](../ARCHITECTURE.md)
 - **Runtime bootstrap/init/render lifecycle** → [architecture/runtime-lifecycle.md](architecture/runtime-lifecycle.md)
 - **Component loading and dependency graph (UMD)** → [architecture/component-system.md](architecture/component-system.md)
+- **Runtime asset registry and preload contract** → [architecture/asset-system.md](architecture/asset-system.md)
 - **Cluster routing, mapper flow, viewmodel ownership, strict kind catalog, surface router** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
 - **HTML renderer lifecycle (two-phase render, corrective rerender, committed host facts)** → [architecture/html-renderer-lifecycle.md](architecture/html-renderer-lifecycle.md)
 - **Vertical container contract (`.widgetContainer.vertical`, intrinsic sizing workflow)** → [architecture/vertical-container-contract.md](architecture/vertical-container-contract.md)

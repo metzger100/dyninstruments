@@ -1,13 +1,18 @@
 /**
  * Module: DyniPlugin Component Loader - Dynamic JS/CSS loading with dependency resolution
  * Documentation: documentation/architecture/component-system.md
- * Depends: window.DyniComponents
+ * Depends: window.DyniComponents, runtime/asset-preloader.js
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
+  const createAssetPreloader = runtime.createAssetPreloader;
+
+  if (typeof createAssetPreloader !== "function") {
+    throw new Error("dyninstruments: runtime.createAssetPreloader missing before runtime/component-loader.js load");
+  }
 
   function loadCssOnce(id, href) {
     if (!href) {
@@ -30,10 +35,14 @@
     });
   }
 
+  const assetPreloader = createAssetPreloader(ns.baseUrl);
+  runtime.assetUrl = function (relativePath) {
+    return ns.baseUrl + relativePath;
+  };
+  runtime.getAsset = assetPreloader.getAsset;
+
   function createComponentLoader(components) {
     const runtimeLoadScriptOnce = runtime.loadScriptOnce;
-
-    // Invariant: components is the fully assembled registry from config/components.js.
     const registry = components;
     const loadCache = new Map();
 
@@ -75,6 +84,13 @@
             loadCssOnce("dyni-css-" + id, m.css),
             runtimeLoadScriptOnce("dyni-js-" + id, m.js)
           ]);
+        })
+        .then(function () {
+          const assetDecls = m.assets || [];
+          if (assetDecls.length === 0) {
+            return null;
+          }
+          return assetPreloader.preloadAssets(assetDecls);
         })
         .then(function () {
           const mod = root.DyniComponents[m.globalKey];

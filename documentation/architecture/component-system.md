@@ -12,6 +12,7 @@ Ownership split:
 - config/components/registry-*.js defines registry fragments
 - config/components.js assembles fragments into config.components
 - runtime/component-loader.js resolves dependencies and loads JS/CSS
+- runtime/asset-preloader.js preloads declared assets and exposes runtime asset lookup
 - runtime/init.js requests required components and registers widgets
 
 ## Registry Assembly
@@ -37,6 +38,7 @@ Recent shared-foundation/runtime registrations:
 
 - `PreparedPayloadModelCache` is registered in `registry-shared-foundation-state.js`
 - `ActiveRouteTextHtmlWidget` and `MapZoomTextHtmlWidget` include `PreparedPayloadModelCache` in `deps`
+- component entries may include optional `assets` arrays with relative paths and explicit asset types
 
 ## API Shape Contract
 
@@ -64,13 +66,21 @@ Committed HTML CSS:
 - shadowCss is not globally linked in document head
 - HtmlSurfaceController injects only the active renderer bundle into that renderer shadow root
 
+Runtime assets:
+
+- component loader preloads declared assets after JS/CSS load completion
+- `runtime.getAsset(key)` returns the preloaded asset value or null for a known-but-failed asset
+- `runtime.assetUrl(relativePath)` resolves a plugin-relative asset path to a full URL
+- plugin-wide bundled fonts remain in `plugin.css` and are not registered as component assets
+
 ## Loader Flow
 
 1. resolve dependencies recursively
 2. load CSS when component declares css
 3. load JS script once
-4. validate API shape
-5. cache resolved component promise
+4. preload declared assets, if any
+5. validate API shape
+6. cache resolved component promise
 
 ## Runtime Init Notes
 
@@ -87,3 +97,4 @@ runtime/init.js:
 - runtime-lifecycle.md
 - cluster-widget-system.md
 - ../shared/theme-tokens.md
+- asset-system.md

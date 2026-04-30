@@ -25,6 +25,7 @@ describe("runtime/component-loader.js", function () {
     const context = createScriptContext({
       document: dom.document,
       DyniPlugin: {
+        baseUrl: "http://host/plugins/dyninstruments/",
         runtime: {
           loadScriptOnce: runtimeLoadScriptOnce
         },
@@ -37,6 +38,7 @@ describe("runtime/component-loader.js", function () {
       }
     });
 
+    runIifeScript("runtime/asset-preloader.js", context);
     runIifeScript("runtime/component-loader.js", context);
 
     return {
@@ -123,6 +125,7 @@ describe("runtime/component-loader.js", function () {
     const context = createScriptContext({
       document: dom.document,
       DyniPlugin: {
+        baseUrl: "http://host/plugins/dyninstruments/",
         runtime: {
           loadScriptOnce: runtimeLoadScriptOnce
         },
@@ -134,6 +137,7 @@ describe("runtime/component-loader.js", function () {
       }
     });
 
+    runIifeScript("runtime/asset-preloader.js", context);
     runIifeScript("runtime/component-loader.js", context);
     const loader = context.DyniPlugin.runtime.createComponentLoader({
       A: { js: "/a.js", css: undefined, globalKey: "DyniA" }
@@ -144,5 +148,101 @@ describe("runtime/component-loader.js", function () {
 
     expect(runtimeLoadScriptOnce).toHaveBeenCalledWith("dyni-js-A", "/a.js");
     expect(dom.appendedScripts).toHaveLength(0);
+  });
+
+  it("preloads declared assets and exposes runtime asset helpers", async function () {
+    const svgUrl = "http://host/plugins/dyninstruments/assets/icon.svg";
+    const imageUrl = "http://host/plugins/dyninstruments/assets/photo.png";
+    const svgResponse = {
+      ok: true,
+      status: 200,
+      text: vi.fn(() => Promise.resolve("<svg></svg>")),
+      json: vi.fn(() => Promise.resolve({})),
+      arrayBuffer: vi.fn(() => Promise.resolve(new ArrayBuffer(1)))
+    };
+    const imageLoadCalls = [];
+    class FakeImage {
+      constructor() {
+        this.onload = null;
+        this.onerror = null;
+        this.srcValue = "";
+      }
+
+      set src(value) {
+        this.srcValue = value;
+        imageLoadCalls.push(value);
+        Promise.resolve().then(() => {
+          if (typeof this.onload === "function") {
+            this.onload();
+          }
+        });
+      }
+    }
+    const contextFetch = vi.fn((url) => {
+      if (url === svgUrl) {
+        return Promise.resolve(svgResponse);
+      }
+      return Promise.reject(new Error("unexpected fetch: " + url));
+    });
+
+    const dom = createDomHarness();
+    const runtimeLoadScriptOnce = vi.fn((id, src) => {
+      if (dom.document.getElementById(id)) {
+        return Promise.resolve();
+      }
+      return Promise.resolve();
+    });
+    const context = createScriptContext({
+      document: {
+        ...dom.document,
+        fonts: {
+          add: vi.fn()
+        }
+      },
+      fetch: contextFetch,
+      Image: FakeImage,
+      FontFace: class FakeFontFace {
+        constructor(family, source) {
+          this.family = family;
+          this.source = source;
+        }
+      },
+      DyniPlugin: {
+        runtime: {
+          loadScriptOnce: runtimeLoadScriptOnce
+        },
+        state: {},
+        config: { shared: {}, clusters: [] },
+        baseUrl: "http://host/plugins/dyninstruments/"
+      },
+      DyniComponents: {
+        DyniA: { id: "A", create() {} }
+      }
+    });
+
+    runIifeScript("runtime/asset-preloader.js", context);
+    runIifeScript("runtime/component-loader.js", context);
+
+    const loader = context.DyniPlugin.runtime.createComponentLoader({
+      A: {
+        js: "/a.js",
+        css: undefined,
+        globalKey: "DyniA",
+        assets: [
+          { key: "svg-icon", path: "assets/icon.svg", type: "svg" },
+          { key: "photo", path: "assets/photo.png", type: "image" }
+        ]
+      }
+    });
+
+    await loader.loadComponent("A");
+    await flushPromises();
+
+    expect(context.DyniPlugin.runtime.assetUrl("assets/icon.svg"))
+      .toBe("http://host/plugins/dyninstruments/assets/icon.svg");
+    expect(context.DyniPlugin.runtime.getAsset("svg-icon")).toBe("<svg></svg>");
+    expect(context.DyniPlugin.runtime.getAsset("photo").srcValue).toBe(imageUrl);
+    expect(imageLoadCalls).toEqual([imageUrl]);
+    expect(contextFetch).toHaveBeenCalledWith(svgUrl);
   });
 });

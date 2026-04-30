@@ -94,6 +94,7 @@
     "config/clusters/vessel.js",
     "config/clusters/default.js",
     "config/widget-definitions.js",
+    "runtime/asset-preloader.js",
     "runtime/component-loader.js",
     "runtime/widget-registrar.js",
     "runtime/HostCommitController.js",

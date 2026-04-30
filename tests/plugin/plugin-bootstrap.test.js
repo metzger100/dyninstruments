@@ -36,6 +36,8 @@ describe("plugin.js bootstrap", function () {
     const registryWidgetsGaugeIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-widgets-gauge.js");
     const registryClusterIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-cluster.js");
     const componentsConfigIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components.js");
+    const assetPreloaderIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/asset-preloader.js");
+    const componentLoaderIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/component-loader.js");
     const defaultClusterIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/clusters/default.js");
     const widgetDefinitionsIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/widget-definitions.js");
     const hostCommitIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/HostCommitController.js");
@@ -55,6 +57,8 @@ describe("plugin.js bootstrap", function () {
     expect(registryWidgetsGaugeIndex).toBeGreaterThan(-1);
     expect(registryClusterIndex).toBeGreaterThan(-1);
     expect(componentsConfigIndex).toBeGreaterThan(-1);
+    expect(assetPreloaderIndex).toBeGreaterThan(-1);
+    expect(componentLoaderIndex).toBeGreaterThan(-1);
     expect(registrySharedFoundationFormatIndex).toBeLessThan(registrySharedFoundationGeometryIndex);
     expect(registrySharedFoundationGeometryIndex).toBeLessThan(registrySharedFoundationLayoutIndex);
     expect(registrySharedFoundationLayoutIndex).toBeLessThan(registrySharedFoundationStateIndex);
@@ -64,6 +68,9 @@ describe("plugin.js bootstrap", function () {
     expect(registryWidgetsVesselIndex).toBeLessThan(registryWidgetsGaugeIndex);
     expect(registryWidgetsGaugeIndex).toBeLessThan(registryClusterIndex);
     expect(registryClusterIndex).toBeLessThan(componentsConfigIndex);
+    expect(componentsConfigIndex).toBeLessThan(assetPreloaderIndex);
+    expect(assetPreloaderIndex).toBeLessThan(componentLoaderIndex);
+    expect(widgetDefinitionsIndex).toBeLessThan(componentLoaderIndex);
     expect(componentsConfigIndex).toBeLessThan(hostCommitIndex);
     expect(defaultClusterIndex).toBeGreaterThan(componentsConfigIndex);
     expect(defaultClusterIndex).toBeLessThan(widgetDefinitionsIndex);
