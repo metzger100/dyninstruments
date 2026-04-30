@@ -179,7 +179,7 @@ Use the dedicated release guide for the full local-first workflow, SemVer decisi
 
 - [documentation/guides/release-workflow.md](documentation/guides/release-workflow.md)
 
-In short: run `npm run release:prepare`, choose `X.Y.Z`, write notes, then run `npm run release:create -- --version=X.Y.Z --notes=...`.
+In short: run `npm run release:prepare`, choose `X.Y.Z`, write notes in `releases/dyninstruments-X.Y.Z.md`, then run `npm run release:create -- --version=X.Y.Z`.
 
 ## 10) Pre-Merge Checklist
 

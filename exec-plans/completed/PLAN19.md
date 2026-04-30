@@ -566,15 +566,15 @@ Split into two files because the orchestrator (check gate + file I/O + git taggi
 **Arguments:**
 
 ```
-node tools/release-create.mjs --version=1.0.0 --notes=path/to/release-notes.md
+node tools/release-create.mjs --version=1.0.0
 ```
 
 - `--version` (required): The SemVer version string, without `v` prefix. The tool prepends `v` for the git tag.
-- `--notes` (required): Path to a markdown file containing the AI-written release notes.
+- The release notes live at `releases/dyninstruments-{version}.md`.
 
 **What it does, in order:**
 
-1. **Validate inputs:** Version matches SemVer regex, notes file exists and is non-empty, version is not already tagged.
+1. **Validate inputs:** Version matches SemVer regex, canonical release notes file exists and is non-empty, version is not already tagged.
 2. **Run `npm run check:core` and `npm run test:coverage:check`** (fail-closed gate). If either check fails, the tool exits with a non-zero code and a clear error message. No release artifacts are created.
 3. **Run `npm run perf:check`** (advisory). If perf check fails, the tool prints a warning with the failing benchmarks but does **not** block the release. The developer or AI agent can decide whether to investigate or proceed.
 4. **Build the runtime file manifest:**
@@ -591,8 +591,8 @@ node tools/release-create.mjs --version=1.0.0 --notes=path/to/release-notes.md
    - All runtime files are placed under `dyninstruments/` preserving their relative paths.
    - Uses shell `zip` command (see implementation note below).
    - Output: `releases/dyninstruments-{version}.zip`
-7. **Copy the release notes:**
-   - Output: `releases/dyninstruments-{version}.md`
+7. **Use the release notes in place:**
+   - Input/output: `releases/dyninstruments-{version}.md`
 8. **Commit and tag:**
    - `git add releases/dyninstruments-{version}.zip releases/dyninstruments-{version}.md`
    - `git commit -m "release: v{version}"`
@@ -725,11 +725,11 @@ Current license statement.
 
 Contents:
 
-1. **Overview:** The release flow is local-first. AI agent runs `release:prepare`, decides SemVer, writes notes, runs `release:create`. GitHub Releases is a secondary copy target.
+1. **Overview:** The release flow is local-first. AI agent runs `release:prepare`, decides SemVer, writes notes in `releases/dyninstruments-X.Y.Z.md`, runs `release:create`. GitHub Releases is a secondary copy target.
 2. **Prerequisite:** `npm install`, `zip` command available.
 3. **Step-by-step release flow:**
-   - `npm run release:prepare` → review JSON output → decide version and write release notes markdown.
-   - `npm run release:create -- --version=X.Y.Z --notes=path/to/notes.md` → tool runs checks (core + coverage as gate, perf as advisory), builds zip, commits artifacts to `releases/`, creates annotated git tag.
+   - `npm run release:prepare` → review JSON output → decide version and write release notes markdown in `releases/dyninstruments-X.Y.Z.md`.
+   - `npm run release:create -- --version=X.Y.Z` → tool runs checks (core + coverage as gate, perf as advisory), builds zip, commits artifacts in `releases/`, creates annotated git tag.
    - `git push origin main && git push origin vX.Y.Z` → triggers GitHub Actions.
 4. **SemVer decision guide:** When to bump major/minor/patch. What the `semverHint` means and when to override it.
 5. **Release notes writing guide:** What to include, tone (user-facing, not developer jargon), example structure.

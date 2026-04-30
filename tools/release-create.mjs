@@ -8,15 +8,11 @@ import { buildReleaseManifest, validateManifest } from "./release-zip-builder.mj
 const VERSION_REGEX = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
 export function parseReleaseCreateArgs(argv) {
-  const out = { version: "", notesPath: "" };
+  const out = { version: "" };
 
   for (const arg of argv) {
     if (arg.startsWith("--version=")) {
       out.version = arg.slice("--version=".length).trim();
-      continue;
-    }
-    if (arg.startsWith("--notes=")) {
-      out.notesPath = arg.slice("--notes=".length).trim();
     }
   }
 
@@ -26,7 +22,6 @@ export function parseReleaseCreateArgs(argv) {
 export function createRelease(options) {
   const rootDir = options.rootDir || process.cwd();
   const version = String(options.version || "").trim();
-  const notesPathInput = String(options.notesPath || "").trim();
 
   const runCommand = options.runCommand || defaultRunCommand;
   const manifestBuilder = options.manifestBuilder || buildReleaseManifest;
@@ -36,11 +31,9 @@ export function createRelease(options) {
     warn: (message) => console.warn(message)
   };
 
-  validateInputs({ rootDir, version, notesPathInput, runCommand });
+  const notesAbs = validateInputs({ rootDir, version, runCommand });
   ensureZipBinaryAvailable(runCommand, rootDir);
-  const notesAbs = path.resolve(rootDir, notesPathInput);
-  const worktreeAllowlist = buildWorktreeAllowlist(rootDir, notesAbs);
-  ensureCleanWorktreeOutsideReleases(runCommand, rootDir, worktreeAllowlist);
+  ensureCleanWorktreeOutsideReleases(runCommand, rootDir);
 
   runRequiredCheck(runCommand, rootDir, ["run", "check:core"], "npm run check:core");
   runRequiredCheck(runCommand, rootDir, ["run", "test:coverage:check"], "npm run test:coverage:check");
@@ -60,9 +53,8 @@ export function createRelease(options) {
   fs.mkdirSync(releasesDir, { recursive: true });
 
   const zipName = `dyninstruments-${version}.zip`;
-  const notesName = `dyninstruments-${version}.md`;
   const zipAbs = path.join(releasesDir, zipName);
-  const releaseNotesAbs = path.join(releasesDir, notesName);
+  const releaseNotesAbs = notesAbs;
 
   createReleaseZip({
     rootDir,
@@ -71,11 +63,8 @@ export function createRelease(options) {
     runCommand
   });
 
-  const notesText = fs.readFileSync(notesAbs, "utf8");
-  fs.writeFileSync(releaseNotesAbs, notesText);
-
   const tag = `v${version}`;
-  runGit(runCommand, rootDir, ["add", `releases/${zipName}`, `releases/${notesName}`]);
+  runGit(runCommand, rootDir, ["add", `releases/${zipName}`, path.relative(rootDir, releaseNotesAbs).replace(/\\/g, "/")]);
   runGit(runCommand, rootDir, ["commit", "-m", `release: ${tag}`]);
   runGit(runCommand, rootDir, ["tag", "-a", tag, "-m", `Release ${tag}`]);
 
@@ -96,7 +85,7 @@ export function createRelease(options) {
     version,
     tag,
     zipPath: zipAbs,
-    notesPath: releaseNotesAbs,
+    notesFile: releaseNotesAbs,
     filesIncluded: manifestFiles.length,
     totalSizeBytes
   };
@@ -105,30 +94,26 @@ export function createRelease(options) {
 export function main(argv = process.argv.slice(2)) {
   try {
     const args = parseReleaseCreateArgs(argv);
-    createRelease({ version: args.version, notesPath: args.notesPath });
+    createRelease({ version: args.version });
   } catch (error) {
     console.error(error.message || String(error));
     process.exit(1);
   }
 }
 
-function validateInputs({ rootDir, version, notesPathInput, runCommand }) {
+function validateInputs({ rootDir, version, runCommand }) {
   if (!VERSION_REGEX.test(version)) {
     throw new Error("release:create aborted: --version must be a valid SemVer string without 'v' prefix");
   }
 
-  if (!notesPathInput) {
-    throw new Error("release:create aborted: --notes=path/to/release-notes.md is required");
-  }
-
-  const notesAbs = path.resolve(rootDir, notesPathInput);
+  const notesAbs = getCanonicalReleaseNotesPath(rootDir, version);
   if (!fs.existsSync(notesAbs)) {
-    throw new Error(`release:create aborted: notes file not found: ${notesPathInput}`);
+    throw new Error(`release:create aborted: notes file not found: ${path.relative(rootDir, notesAbs).replace(/\\/g, "/")}`);
   }
 
   const notesText = fs.readFileSync(notesAbs, "utf8");
   if (!notesText.trim()) {
-    throw new Error(`release:create aborted: notes file is empty: ${notesPathInput}`);
+    throw new Error(`release:create aborted: notes file is empty: ${path.relative(rootDir, notesAbs).replace(/\\/g, "/")}`);
   }
 
   const tag = `v${version}`;
@@ -136,6 +121,8 @@ function validateInputs({ rootDir, version, notesPathInput, runCommand }) {
   if (existingTag) {
     throw new Error(`release:create aborted: git tag already exists: ${tag}`);
   }
+
+  return notesAbs;
 }
 
 function ensureZipBinaryAvailable(runCommand, rootDir) {
@@ -147,17 +134,8 @@ function ensureZipBinaryAvailable(runCommand, rootDir) {
   }
 }
 
-function buildWorktreeAllowlist(rootDir, notesAbs) {
-  const relPath = path.relative(rootDir, notesAbs);
-  if (!relPath || relPath.startsWith("..") || path.isAbsolute(relPath)) {
-    return [];
-  }
-  return [normalizeRepoRelativePath(relPath)];
-}
-
-function ensureCleanWorktreeOutsideReleases(runCommand, rootDir, allowlistPaths = []) {
+function ensureCleanWorktreeOutsideReleases(runCommand, rootDir) {
   const statusOutput = runGit(runCommand, rootDir, ["status", "--porcelain", "--untracked-files=all"]);
-  const allowlist = new Set((allowlistPaths || []).map(normalizeRepoRelativePath));
   const dirtyOutsideReleases = statusOutput
     .split(/\r?\n/)
     .filter(Boolean)
@@ -165,9 +143,6 @@ function ensureCleanWorktreeOutsideReleases(runCommand, rootDir, allowlistPaths 
       const pathText = line.slice(3);
       const targetPath = pathText.includes(" -> ") ? pathText.split(" -> ").pop() : pathText;
       const normalized = normalizeRepoRelativePath(targetPath);
-      if (allowlist.has(normalized)) {
-        return false;
-      }
       return !normalized.startsWith("releases/");
     });
 
@@ -238,6 +213,10 @@ function normalizeRepoRelativePath(rawPath) {
     .replace(/\\/g, "/")
     .replace(/^\.\//, "")
     .trim();
+}
+
+function getCanonicalReleaseNotesPath(rootDir, version) {
+  return path.join(rootDir, "releases", `dyninstruments-${version}.md`);
 }
 
 export function defaultRunCommand(command, args, options = {}) {

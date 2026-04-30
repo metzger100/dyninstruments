@@ -30,16 +30,14 @@ npm run release:prepare
 ```
 
 2. Review the JSON output and decide the next SemVer version.
-3. Write release notes markdown (for example: `tmp/release-notes-v1.4.0.md`).
+3. Write the release notes markdown directly in the canonical release notes file: `releases/dyninstruments-X.Y.Z.md`.
 4. Create the release artifacts, commit, and annotated tag.
 
 ```bash
-npm run release:create -- --version=X.Y.Z --notes=path/to/notes.md
+npm run release:create -- --version=X.Y.Z
 ```
 
-`release:create` runs required gates (`check:core`, `test:coverage:check`), runs `perf:check` as advisory-only, builds the zip, copies notes into `releases/`, commits both artifacts, and creates an annotated `vX.Y.Z` tag.
-
-5. Delete the tmp/ folder
+`release:create` runs required gates (`check:core`, `test:coverage:check`), runs `perf:check` as advisory-only, builds the zip, reads `releases/dyninstruments-X.Y.Z.md` directly, commits both artifacts, and creates an annotated `vX.Y.Z` tag.
 
 ## SemVer Decision Guide
 
@@ -77,7 +75,7 @@ Suggested structure:
 | Symptom | Likely Cause | Fix |
 |---|---|---|
 | `release:create` fails on `check:core` | Lint/docs/contracts gate failure | Run `npm run check:core`, fix all failures, rerun release |
-| `release:create` fails on notes path | Missing or empty `--notes` file | Create/populate the markdown file and rerun |
+| `release:create` fails on notes file | Missing or empty `releases/dyninstruments-X.Y.Z.md` file | Create/populate the markdown file in `releases/` and rerun |
 | `release:create` fails with duplicate tag | `vX.Y.Z` already exists | Choose next version or delete/retarget tag intentionally |
 | Release zip/notes missing after run | Release command aborted before artifact stage | Fix earlier error and rerun full command |
 

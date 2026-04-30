@@ -42,7 +42,7 @@ describe("release-create", function () {
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-create-"));
     const version = "1.2.3";
     const tag = `v${version}`;
-    const notesRel = "notes/release-notes.md";
+    const notesRel = `releases/dyninstruments-${version}.md`;
 
     try {
       writeFile(tempRoot, "plugin.js", "console.log('plugin');\n");
@@ -73,7 +73,6 @@ describe("release-create", function () {
       const result = createRelease({
         rootDir: tempRoot,
         version,
-        notesPath: notesRel,
         runCommand(command, args, options = {}) {
           if (command === "npm") {
             if (args[0] === "run" && (args[1] === "check:core" || args[1] === "test:coverage:check")) {
@@ -132,12 +131,11 @@ describe("release-create", function () {
       });
 
       const releaseZipRel = `releases/dyninstruments-${version}.zip`;
-      const releaseNotesRel = `releases/dyninstruments-${version}.md`;
 
       expect(result.tag).toBe(tag);
       expect(fs.existsSync(path.join(tempRoot, releaseZipRel))).toBe(true);
-      expect(fs.existsSync(path.join(tempRoot, releaseNotesRel))).toBe(true);
-      expect(fs.readFileSync(path.join(tempRoot, releaseNotesRel), "utf8")).toContain("# Release 1.2.3");
+      expect(fs.existsSync(path.join(tempRoot, notesRel))).toBe(true);
+      expect(fs.readFileSync(path.join(tempRoot, notesRel), "utf8")).toContain("# Release 1.2.3");
 
       expect(zippedEntries).toEqual([
         "assets/fonts/Roboto-Regular.woff2",
@@ -157,10 +155,10 @@ describe("release-create", function () {
       expect(taggedObject).toContain("Release v1.2.3");
 
       const statusOutput = runReal("git", ["status", "--porcelain", "--untracked-files=all"], tempRoot).trim();
-      expect(statusOutput).toBe(`?? ${notesRel}`);
-      expect(function () {
+      expect(statusOutput).toBe("");
+      expect(() => {
         runReal("git", ["ls-files", "--error-unmatch", notesRel], tempRoot);
-      }).toThrow();
+      }).not.toThrow();
 
       expect(warnings.some((line) => line.includes("perf:check failed"))).toBe(true);
     } finally {

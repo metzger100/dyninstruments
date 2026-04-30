@@ -3,17 +3,7 @@
 This file is human-facing roadmap planning for `dyninstruments`.
 It tracks pre-release priorities and AvNav widget coverage status.
 
-## Status and Scope
-
-- Project stage: pre-release
-- Backward compatibility is not guaranteed during pre-release evolution
-- Scope: planned integration order and current coverage map
-
 ## Roadmap
-
-### Fixes for existing widgets and architecture
-
-- Add a plugin loader compliant export tool to create a code only zip of the plugin for the users and completely revise the README.md to be completely user focused (in progress, PLAN19)
 
 ### Additional non-core concepts (post release)
 
