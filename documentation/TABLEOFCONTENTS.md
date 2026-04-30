@@ -96,6 +96,7 @@
 - **Docs sync workflow, validation, and quality/regression commands** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md)
 - **How do I write an effective execution plan?** → [guides/exec-plan-authoring.md](guides/exec-plan-authoring.md)
 - **Performance gate baseline contract** → [guides/performance-gate.md](guides/performance-gate.md)
+- **Local release workflow (`release:prepare` + `release:create`)** → [guides/release-workflow.md](guides/release-workflow.md)
 - **Garbage collection workflow and anti-patterns** → [guides/garbage-collection.md](guides/garbage-collection.md)
 - **Quality tracking and model selection log** → [QUALITY.md](QUALITY.md)
 - **Known issues and tech debt tracker** → [TECH-DEBT.md](TECH-DEBT.md)

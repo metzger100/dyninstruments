@@ -173,7 +173,15 @@ npm test
 
 Do not merge with failing checks.
 
-## 9) Pre-Merge Checklist
+## 9) Releasing
+
+Use the dedicated release guide for the full local-first workflow, SemVer decision rules, and release notes expectations:
+
+- [documentation/guides/release-workflow.md](documentation/guides/release-workflow.md)
+
+In short: run `npm run release:prepare`, choose `X.Y.Z`, write notes, then run `npm run release:create -- --version=X.Y.Z --notes=...`.
+
+## 10) Pre-Merge Checklist
 
 - [ ] Prompt had explicit scope, constraints, and required checks.
 - [ ] Planning mode was chosen deliberately by the human.
