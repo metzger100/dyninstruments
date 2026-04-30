@@ -14,6 +14,8 @@
 | Anchor | Anchor watch circle |
 | Vessel | Alarms, position coordinates, center display, three-value text |
 
+<img width="1919" height="933" alt="image" src="https://github.com/user-attachments/assets/074ad2b6-b9c0-4e1f-8d22-d8a48d5b1f99" />
+
 ## Installation
 
 1. Download the latest release zip from GitHub Releases (or from `releases/` in this repository).
