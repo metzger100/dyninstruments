@@ -699,7 +699,7 @@ How to use the AvNav editor to:
 
 ## Theming
 
-Brief note that the plugin respects AvNav day/night mode and supports user CSS overrides via theme tokens.
+Brief note that the plugin respects AvNav day/night mode and supports user CSS overrides via theme tokens including a complete list with the defaults.
 
 ## Requirements
 

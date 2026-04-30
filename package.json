@@ -26,6 +26,8 @@
     "check:core": "npm run check:smells && node tools/check-docs.mjs && node tools/check-doc-format.mjs --warn && node tools/check-doc-reachability.mjs && npm run ai:check && npm run check:filesize && node tools/check-headers.mjs && node tools/check-dependencies.mjs && node tools/check-umd.mjs && node tools/check-naming.mjs",
     "perf:run": "node tools/perf-run.mjs",
     "perf:check": "node tools/perf-check.mjs",
+    "release:prepare": "node tools/release-prepare.mjs",
+    "release:create": "node tools/release-create.mjs",
     "check:all": "npm run check:core && npm run test:coverage:check && npm run perf:check",
     "check:strict": "npm run check:all",
     "test": "vitest run",
