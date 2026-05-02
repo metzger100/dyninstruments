@@ -175,6 +175,61 @@
       );
     }
 
+    function resolveVisualChrome(args) {
+      const cfg = args || {};
+      const shellWidth = Math.max(1, Math.floor(clampNumber(cfg.W, 1, Number.MAX_SAFE_INTEGER, 1)));
+      const shellHeight = Math.max(1, Math.floor(clampNumber(cfg.H, 1, Number.MAX_SAFE_INTEGER, 1)));
+      const verticalShell = computeVerticalShellProfile({
+        W: shellWidth,
+        H: shellHeight,
+        isVerticalCommitted: cfg.isVerticalCommitted === true,
+        effectiveLayoutHeight: cfg.effectiveLayoutHeight
+      });
+      const mode = resolveMode({
+        mode: cfg.mode,
+        W: shellWidth,
+        H: verticalShell.effectiveLayoutHeight,
+        ratioThresholdNormal: cfg.ratioThresholdNormal,
+        ratioThresholdFlat: cfg.ratioThresholdFlat,
+        isVerticalCommitted: verticalShell.isVerticalCommitted
+      });
+      const hasAccent = cfg.hasAccent === true;
+      const insets = computeInsets(
+        shellWidth,
+        verticalShell.effectiveLayoutHeight,
+        verticalShell.isVerticalCommitted,
+        mode,
+        hasAccent
+      );
+      const accentReserve = hasAccent ? Math.max(0, insets.accentReserve) : 0;
+      const contentLeft = insets.padX + accentReserve;
+      const contentRight = insets.padX;
+      const contentTop = insets.padY;
+      const contentBottom = insets.padY;
+      const stripWidth = hasAccent ? Math.max(0, insets.accentWidth) : 0;
+      return {
+        mode: mode,
+        shellWidth: shellWidth,
+        shellHeight: shellHeight,
+        effectiveLayoutHeight: verticalShell.effectiveLayoutHeight,
+        isVerticalCommitted: verticalShell.isVerticalCommitted,
+        padX: insets.padX,
+        padY: insets.padY,
+        accentWidth: insets.accentWidth,
+        accentGap: insets.accentGap,
+        accentReserve: insets.accentReserve,
+        stripLeft: insets.padX,
+        stripTop: insets.padY,
+        stripBottom: insets.padY,
+        stripWidth: stripWidth,
+        stripRadius: stripWidth,
+        contentLeft: contentLeft,
+        contentRight: contentRight,
+        contentTop: contentTop,
+        contentBottom: contentBottom
+      };
+    }
+
     function resolveMetricVisibility(renderState) {
       if (renderState !== "data") {
         return { dst: false, cpa: false, tcpa: false, brg: false };
@@ -192,6 +247,7 @@
       resolveMode: resolveMode,
       computeInsets: computeInsets,
       createContentRect: createContentRect,
+      resolveVisualChrome: resolveVisualChrome,
       resolveMetricVisibility: resolveMetricVisibility,
       resolveMetricOrder: resolveMetricOrder,
       constants: {

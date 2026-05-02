@@ -147,7 +147,7 @@ describe("config/components.js", function () {
     expect(components.AlarmHtmlFit.deps).toEqual(["AlarmHtmlFitChrome", "ThemeResolver", "TextLayoutEngine", "HtmlWidgetUtils"]);
     expect(components.AlarmHtmlFitChrome.globalKey).toBe("DyniAlarmHtmlFitChrome");
     expect(components.AlarmHtmlFitChrome.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/vessel/AlarmHtmlFitChrome.js");
-    expect(components.AlarmHtmlFitChrome.deps).toEqual(["HtmlWidgetUtils"]);
+    expect(components.AlarmHtmlFitChrome.deps).toEqual(["HtmlWidgetUtils", "AisTargetLayoutSizing"]);
     expect(components.AlarmRenderModel.globalKey).toBe("DyniAlarmRenderModel");
     expect(components.AlarmRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/vessel/AlarmRenderModel.js");
     expect(components.AlarmRenderModel.deps).toEqual(["HtmlWidgetUtils"]);

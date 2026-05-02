@@ -200,6 +200,236 @@ describe("AlarmTextHtmlWidget", function () {
     }, overrides || {});
   }
 
+  function createRealAlarmRenderer() {
+    const htmlWidgetUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
+    const alarmRenderModelModule = loadFresh("shared/widget-kits/vessel/AlarmRenderModel.js");
+    const alarmMarkupModule = loadFresh("shared/widget-kits/vessel/AlarmMarkup.js");
+    const alarmFitModule = loadFresh("shared/widget-kits/vessel/AlarmHtmlFit.js");
+    const alarmFitChromeModule = loadFresh("shared/widget-kits/vessel/AlarmHtmlFitChrome.js");
+    const aisLayoutSizingModule = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
+    const responsiveScaleProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMathModule = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const aisLayoutMathModule = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
+
+    const textLayoutApi = {
+      fitThreeRowBlock: () => ({ cPx: 11, vPx: 18 }),
+      fitValueUnitCaptionRows: () => ({ cPx: 10, vPx: 16 }),
+      fitInlineTriplet: () => ({ sPx: 9, vPx: 15 })
+    };
+    const themeResolver = {
+      resolveForRoot: vi.fn(() => ({
+        colors: {
+          alarmWidget: {
+            bg: "#e04040",
+            fg: "#ffffff",
+            strip: "#66b8ff"
+          }
+        },
+        font: {
+          family: "sans-serif",
+          weight: 700,
+          labelWeight: 600
+        }
+      }))
+    };
+
+    const Helpers = {
+      requirePluginRoot(target) {
+        return target || null;
+      },
+      getModule(id) {
+        if (id === "AlarmHtmlFit") {
+          return alarmFitModule;
+        }
+        if (id === "AlarmHtmlFitChrome") {
+          return alarmFitChromeModule;
+        }
+        if (id === "AisTargetLayoutSizing") {
+          return aisLayoutSizingModule;
+        }
+        if (id === "ResponsiveScaleProfile") {
+          return responsiveScaleProfileModule;
+        }
+        if (id === "LayoutRectMath") {
+          return layoutRectMathModule;
+        }
+        if (id === "AisTargetLayoutMath") {
+          return aisLayoutMathModule;
+        }
+        if (id === "TextLayoutEngine") {
+          return { create: () => textLayoutApi };
+        }
+        if (id === "ThemeResolver") {
+          return themeResolver;
+        }
+        if (id === "HtmlWidgetUtils") {
+          return htmlWidgetUtilsModule;
+        }
+        if (id === "AlarmRenderModel") {
+          return alarmRenderModelModule;
+        }
+        if (id === "AlarmMarkup") {
+          return alarmMarkupModule;
+        }
+        throw new Error("unexpected module: " + id);
+      }
+    };
+
+    return loadFresh("widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js").create({}, Helpers);
+  }
+
+  function createAisRendererWithRealLayout() {
+    const Helpers = {
+      applyFormatter(value, formatterOptions) {
+        const cfg = formatterOptions || {};
+        const formatter = cfg.formatter;
+        const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
+        if (value == null) {
+          return cfg.default;
+        }
+        if (formatter === "formatDistance") {
+          return "DIST:" + String(value) + ":" + String(params[0] || "");
+        }
+        if (formatter === "formatDirection") {
+          return "DIR:" + String(value);
+        }
+        if (formatter === "formatDecimal") {
+          return "DEC:" + String(value) + ":" + params.join(",");
+        }
+        return String(value);
+      },
+      requirePluginRoot(target) {
+        return target || null;
+      },
+      getModule(id) {
+        if (id === "AisTargetHtmlFit") {
+          return {
+            create() {
+              return {
+                compute() {
+                  return {
+                    nameStyle: "font-size:12px;",
+                    frontStyle: "font-size:10px;",
+                    placeholderStyle: "font-size:11px;",
+                    metrics: {
+                      dst: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+                      cpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+                      tcpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+                      brg: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" }
+                    },
+                    accentStyle: "background-color:#c33;"
+                  };
+                }
+              };
+            }
+          };
+        }
+        if (id === "HtmlWidgetUtils") {
+          return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
+        }
+        if (id === "AisTargetRenderModel") {
+          return loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js");
+        }
+        if (id === "UnitAwareFormatter") {
+          return loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
+        }
+        if (id === "AisTargetMarkup") {
+          return loadFresh("shared/widget-kits/nav/AisTargetMarkup.js");
+        }
+        if (id === "AisTargetLayout") {
+          return loadFresh("shared/widget-kits/nav/AisTargetLayout.js");
+        }
+        if (id === "AisTargetLayoutSizing") {
+          return loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
+        }
+        if (id === "ResponsiveScaleProfile") {
+          return loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+        }
+        if (id === "LayoutRectMath") {
+          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+        }
+        if (id === "AisTargetLayoutGeometry") {
+          return loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
+        }
+        if (id === "AisTargetLayoutMath") {
+          return loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
+        }
+        if (id === "PlaceholderNormalize") {
+          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
+        }
+        if (id === "StableDigits") {
+          return loadFresh("shared/widget-kits/format/StableDigits.js");
+        }
+        if (id === "StateScreenLabels") {
+          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+        }
+        if (id === "StateScreenPrecedence") {
+          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+        }
+        if (id === "StateScreenInteraction") {
+          return loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
+        }
+        if (id === "StateScreenMarkup") {
+          return loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
+        }
+        if (id === "StateScreenTextFit") {
+          return loadFresh("shared/widget-kits/state/StateScreenTextFit.js");
+        }
+        if (id === "ThemeResolver") {
+          return {
+            resolveForRoot() {
+              return {
+                font: {
+                  family: "sans-serif",
+                  familyMono: "monospace",
+                  weight: 720,
+                  labelWeight: 610
+                }
+              };
+            }
+          };
+        }
+        throw new Error("unexpected module: " + id);
+      }
+    };
+
+    return loadFresh("widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js").create({}, Helpers);
+  }
+
+  function mountRenderer(rendererSpec, payload) {
+    const mountHost = document.createElement("div");
+    const committed = rendererSpec.createCommittedRenderer({ hostContext: payload.hostContext || {} });
+    committed.mount(mountHost, payload);
+    return {
+      mountHost: mountHost,
+      committed: committed
+    };
+  }
+
+  function readStyleFields(node) {
+    const style = node && node.style ? node.style : null;
+    return {
+      left: style ? style.left : "",
+      top: style ? style.top : "",
+      bottom: style ? style.bottom : "",
+      width: style ? style.width : "",
+      borderRadius: style ? style.borderRadius : ""
+    };
+  }
+
+  function createAlarmMeasureContext() {
+    return {
+      font: "700 12px sans-serif",
+      measureText(text) {
+        const source = String(this.font || "");
+        const match = source.match(/(\d+(?:\.\d+)?)px/);
+        const px = match ? Number(match[1]) : 12;
+        const safePx = Number.isFinite(px) ? px : 12;
+        return { width: String(text).length * safePx * 0.56 };
+      }
+    };
+  }
+
   it("mounts a committed alarm root and dispatches only when active", function () {
     const h = createHelpers();
     const committed = h.rendererSpec.createCommittedRenderer({ hostContext: {} });
@@ -355,6 +585,107 @@ describe("AlarmTextHtmlWidget", function () {
     expect(h.rendererSpec.getVerticalShellSizing()).toEqual({
       kind: "ratio",
       aspectRatio: 2
+    });
+  });
+
+  it("emits the same accent inline geometry as AIS at identical shell sizes", function () {
+    const alarmRenderer = createRealAlarmRenderer();
+    const aisRenderer = createAisRendererWithRealLayout();
+    const sizes = [
+      { width: 120, height: 100 },
+      { width: 180, height: 100 },
+      { width: 220, height: 100 },
+      { width: 320, height: 100 },
+      { width: 220, height: 300 }
+    ];
+
+    sizes.forEach((size) => {
+      const aisNormalThreshold = size.width === 120 && size.height === 100 ? 1.21 : 1.2;
+      const alarmMount = mountRenderer(alarmRenderer, {
+        rootEl: document.createElement("div"),
+        shellEl: document.createElement("div"),
+        shellRect: { width: size.width, height: size.height },
+        revision: 1,
+        props: {
+          caption: "ALARM",
+          ratioThresholdNormal: 1.0,
+          ratioThresholdFlat: 3.0,
+          surfacePolicy: {
+            interaction: { mode: "passive" },
+            actions: { alarm: { stopAll: vi.fn(() => true) } }
+          },
+          domain: {
+            state: "idle",
+            alarmText: "NONE",
+            hasActiveAlarms: false,
+            activeCount: 0,
+            alarmNames: []
+          }
+        },
+        hostContext: {
+          __dyniAlarmMeasureCtx: createAlarmMeasureContext()
+        }
+      });
+      const aisMount = mountRenderer(aisRenderer, {
+        rootEl: document.createElement("div"),
+        shellEl: document.createElement("div"),
+        shellRect: { width: size.width, height: size.height },
+        revision: 1,
+        props: {
+          domain: {
+            hasTargetIdentity: true,
+            hasDispatchMmsi: true,
+            mmsiNormalized: "211234560",
+            showTcpaBranch: true,
+            hasColorRole: true,
+            colorRole: "warning",
+            nameOrMmsi: "Poseidon",
+            frontText: "Front",
+            distance: 4.2,
+            cpa: 0.7,
+            tcpa: 42,
+            headingTo: 112
+          },
+          layout: {
+            ratioThresholdNormal: aisNormalThreshold,
+            ratioThresholdFlat: 3.8
+          },
+          captions: {
+            dst: "DST",
+            cpa: "DCPA",
+            tcpa: "TCPA",
+            brg: "BRG"
+          },
+          units: {
+            dst: "nm",
+            cpa: "nm",
+            tcpa: "min",
+            brg: "°"
+          },
+          formatUnits: {
+            dst: "nm",
+            cpa: "nm"
+          },
+          default: "---",
+          surfacePolicy: {
+            pageId: "navpage",
+            containerOrientation: "default",
+            interaction: { mode: "dispatch" },
+            actions: {
+              ais: {
+                showInfo: vi.fn(() => true)
+              }
+            }
+          }
+        },
+        hostContext: {}
+      });
+
+      const alarmAccent = alarmMount.mountHost.querySelector(".dyni-alarm-state-accent");
+      const aisAccent = aisMount.mountHost.querySelector(".dyni-ais-target-state-accent");
+      expect(alarmAccent).toBeTruthy();
+      expect(aisAccent).toBeTruthy();
+      expect(readStyleFields(alarmAccent)).toEqual(readStyleFields(aisAccent));
     });
   });
 

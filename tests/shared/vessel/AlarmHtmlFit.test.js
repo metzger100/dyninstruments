@@ -1,6 +1,34 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("AlarmHtmlFit", function () {
+  function createAisLayout() {
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const aisSizing = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
+    const aisGeometry = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
+    const aisMath = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
+    return loadFresh("shared/widget-kits/nav/AisTargetLayout.js").create({}, {
+      getModule(id) {
+        if (id === "ResponsiveScaleProfile") {
+          return responsiveScaleProfile;
+        }
+        if (id === "LayoutRectMath") {
+          return layoutRectMath;
+        }
+        if (id === "AisTargetLayoutSizing") {
+          return aisSizing;
+        }
+        if (id === "AisTargetLayoutGeometry") {
+          return aisGeometry;
+        }
+        if (id === "AisTargetLayoutMath") {
+          return aisMath;
+        }
+        throw new Error("unexpected module: " + id);
+      }
+    });
+  }
+
   function createMeasureContext() {
     return {
       font: "700 12px sans-serif",
@@ -88,6 +116,10 @@ describe("AlarmHtmlFit", function () {
   function createHarness(options) {
     const cfg = options || {};
     const htmlUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const aisLayoutMath = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
+    const aisLayoutSizing = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
     const fitCalls = {
       high: [],
       normal: [],
@@ -134,6 +166,18 @@ describe("AlarmHtmlFit", function () {
         }
         if (id === "AlarmHtmlFitChrome") {
           return loadFresh("shared/widget-kits/vessel/AlarmHtmlFitChrome.js");
+        }
+        if (id === "AisTargetLayoutSizing") {
+          return aisLayoutSizing;
+        }
+        if (id === "ResponsiveScaleProfile") {
+          return responsiveScaleProfile;
+        }
+        if (id === "LayoutRectMath") {
+          return layoutRectMath;
+        }
+        if (id === "AisTargetLayoutMath") {
+          return aisLayoutMath;
         }
         if (id === "TextLayoutEngine") {
           return { create: () => textLayoutApi };
@@ -485,6 +529,127 @@ describe("AlarmHtmlFit", function () {
     expect(narrowLayout.contentRect.chrome.left).toBe(narrowLeft);
     expect(wideLayout.contentRect.chrome.left).toBe(wideLeft);
     expect(wideLayout.contentRect.width).toBeLessThan(wideRect.width - wideRight * 2);
+  });
+
+  it("matches AIS visual chrome geometry for representative shell sizes", function () {
+    const h = createHarness();
+    const aisLayout = createAisLayout();
+    const model = makeModel({
+      state: "idle",
+      interactionState: "passive",
+      showStrip: true,
+      showActiveBackground: false
+    });
+    const sizes = [
+      { width: 180, height: 100 },
+      { width: 220, height: 100 },
+      { width: 320, height: 100 },
+      { width: 220, height: 300 }
+    ];
+
+    sizes.forEach((size) => {
+      const alarmFit = h.fit.compute({
+        model: model,
+        targetEl: h.targetEl,
+        hostContext: {
+          __dyniAlarmMeasureCtx: createMeasureContext()
+        },
+        shellRect: size
+      });
+      const alarmLayout = h.fit.resolveLayout({
+        model: model,
+        shellRect: size
+      });
+      const ais = aisLayout.computeLayout({
+        W: size.width,
+        H: size.height,
+        renderState: "data",
+        showTcpaBranch: true,
+        hasAccent: true
+      });
+
+      const alarmAccent = parseStyleText(alarmFit.accentStyle);
+      const alarmShell = parseStyleText(alarmFit.shellStyle);
+      const shellPadding = String(alarmShell.padding || "").split(/\s+/);
+      const alarmTopPad = shellPadding.length === 4 ? readPx({ value: shellPadding[0] }, "value") : NaN;
+      const alarmRightPad = shellPadding.length === 4 ? readPx({ value: shellPadding[1] }, "value") : NaN;
+      const alarmBottomPad = shellPadding.length === 4 ? readPx({ value: shellPadding[2] }, "value") : NaN;
+      const alarmLeftPad = shellPadding.length === 4 ? readPx({ value: shellPadding[3] }, "value") : NaN;
+      const aisBottom = ais.effectiveLayoutHeight - ais.accentRect.y - ais.accentRect.h;
+      const aisContentRight = ais.shellWidth - ais.contentRect.x - ais.contentRect.w;
+      const aisContentBottom = ais.effectiveLayoutHeight - ais.contentRect.y - ais.contentRect.h;
+
+      expect(readPx(alarmAccent, "left")).toBe(ais.accentRect.x);
+      expect(readPx(alarmAccent, "top")).toBe(ais.accentRect.y);
+      expect(readPx(alarmAccent, "bottom")).toBe(aisBottom);
+      expect(readPx(alarmAccent, "width")).toBe(ais.accentRect.w);
+      expect(readPx(alarmAccent, "border-radius")).toBe(ais.accentRect.w);
+      expect(alarmLeftPad).toBe(ais.contentRect.x);
+      expect(alarmRightPad).toBe(aisContentRight);
+      expect(alarmTopPad).toBe(ais.contentRect.y);
+      expect(alarmBottomPad).toBe(aisContentBottom);
+      expect(alarmLayout.contentRect.chrome.left).toBe(alarmLeftPad);
+      expect(alarmLayout.contentRect.chrome.right).toBe(alarmRightPad);
+      expect(alarmLayout.contentRect.chrome.top).toBe(alarmTopPad);
+      expect(alarmLayout.contentRect.chrome.bottom).toBe(alarmBottomPad);
+    });
+  });
+
+  it("keeps AIS chrome parity at 120x100 where Alarm and AIS mode thresholds diverge", function () {
+    const h = createHarness();
+    const aisLayout = createAisLayout();
+    const model = makeModel({
+      state: "idle",
+      interactionState: "passive",
+      showStrip: true,
+      showActiveBackground: false,
+      ratioThresholdNormal: 1.0,
+      ratioThresholdFlat: 3.0
+    });
+    const shell = { width: 120, height: 100 };
+    const alarmFit = h.fit.compute({
+      model: model,
+      targetEl: h.targetEl,
+      hostContext: {
+        __dyniAlarmMeasureCtx: createMeasureContext()
+      },
+      shellRect: shell
+    });
+    const alarmLayout = h.fit.resolveLayout({
+      model: model,
+      shellRect: shell
+    });
+    const ais = aisLayout.computeLayout({
+      W: shell.width,
+      H: shell.height,
+      renderState: "data",
+      showTcpaBranch: true,
+      hasAccent: true
+    });
+
+    expect(ais.mode).toBe("high");
+    expect(alarmLayout.mode).toBe("normal");
+
+    const alarmAccent = parseStyleText(alarmFit.accentStyle);
+    const alarmShell = parseStyleText(alarmFit.shellStyle);
+    const shellPadding = String(alarmShell.padding || "").split(/\s+/);
+    const alarmTopPad = shellPadding.length === 4 ? readPx({ value: shellPadding[0] }, "value") : NaN;
+    const alarmRightPad = shellPadding.length === 4 ? readPx({ value: shellPadding[1] }, "value") : NaN;
+    const alarmBottomPad = shellPadding.length === 4 ? readPx({ value: shellPadding[2] }, "value") : NaN;
+    const alarmLeftPad = shellPadding.length === 4 ? readPx({ value: shellPadding[3] }, "value") : NaN;
+    const aisBottom = ais.effectiveLayoutHeight - ais.accentRect.y - ais.accentRect.h;
+    const aisContentRight = ais.shellWidth - ais.contentRect.x - ais.contentRect.w;
+    const aisContentBottom = ais.effectiveLayoutHeight - ais.contentRect.y - ais.contentRect.h;
+
+    expect(readPx(alarmAccent, "left")).toBe(ais.accentRect.x);
+    expect(readPx(alarmAccent, "top")).toBe(ais.accentRect.y);
+    expect(readPx(alarmAccent, "bottom")).toBe(aisBottom);
+    expect(readPx(alarmAccent, "width")).toBe(ais.accentRect.w);
+    expect(readPx(alarmAccent, "border-radius")).toBe(ais.accentRect.w);
+    expect(alarmLeftPad).toBe(ais.contentRect.x);
+    expect(alarmRightPad).toBe(aisContentRight);
+    expect(alarmTopPad).toBe(ais.contentRect.y);
+    expect(alarmBottomPad).toBe(aisContentBottom);
   });
 
   it("invalidates cache when shell width changes strip chrome while content width stays the same", function () {

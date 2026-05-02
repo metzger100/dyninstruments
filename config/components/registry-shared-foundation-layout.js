@@ -48,7 +48,7 @@
       js: BASE + "shared/widget-kits/vessel/AlarmHtmlFitChrome.js",
       css: undefined,
       globalKey: "DyniAlarmHtmlFitChrome",
-      deps: ["HtmlWidgetUtils"]
+      deps: ["HtmlWidgetUtils", "AisTargetLayoutSizing"]
   };
 
   sf.AisTargetHtmlFit = {

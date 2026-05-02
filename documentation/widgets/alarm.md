@@ -45,6 +45,7 @@
 - Inner text fit applies a small proportional horizontal inset so captions and values do not touch the shell edges in any mode.
 - Caption/value text is owned by the fit layer and never uses CSS ellipsis.
 - Fit is computed against the inner content rect after shell padding and idle strip chrome are removed.
+- Idle strip chrome geometry (left/top/bottom/width/radius and content reservation) is sourced from AIS layout sizing (`AisTargetLayoutSizing.resolveVisualChrome(...)`) from shell dimensions only, independent of Alarm text-fit mode, so Alarm and AIS stay pixel-aligned at the same shell size.
 - Idle accent styling follows the AIS nearest-blue family through `colors.alarmWidget.strip`.
 
 ## API / Interfaces

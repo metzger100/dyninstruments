@@ -264,8 +264,9 @@
 
       const activeBackgroundStyle = model.showActiveBackground === true ? toStyleText("background-color", tokens.bg) : "";
       const activeForegroundStyle = model.state === "active" ? toStyleText("color", tokens.fg) : "";
-      const shellStyle = chromeApi.buildShellStyle(model, layout.shellRect);
-      const accentStyle = chromeApi.buildAccentStyle(model, layout.shellRect, tokens);
+      const chrome = layout.contentRect.chrome;
+      const shellStyle = chromeApi.buildShellStyle(chrome);
+      const accentStyle = chromeApi.buildAccentStyle(model, chrome, tokens);
       const result = {
         mode: layout.mode,
         captionPx: modeFit.captionPx,

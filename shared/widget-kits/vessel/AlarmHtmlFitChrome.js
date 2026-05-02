@@ -1,7 +1,7 @@
 /**
  * Module: AlarmHtmlFitChrome - Shell chrome and cache-signature helpers for vessel alarm HTML
  * Documentation: documentation/widgets/alarm.md
- * Depends: HtmlWidgetUtils
+ * Depends: HtmlWidgetUtils, AisTargetLayoutSizing
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -9,12 +9,6 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniAlarmHtmlFitChrome = factory(); }
 }(this, function () {
   "use strict";
-
-  const ALARM_STRIP_WIDTH_RATIO = 0.072;
-  const ALARM_STRIP_WIDTH_MIN_PX = 8;
-  const ALARM_STRIP_WIDTH_MAX_RATIO = 0.19;
-  const ALARM_STRIP_GAP_TO_WIDTH_RATIO = 0.1875;
-  const ALARM_STRIP_PADDING_TO_WIDTH_RATIO = 0.125;
 
   function toObject(value) {
     return value && typeof value === "object" ? value : {};
@@ -25,38 +19,34 @@
     return color ? (colorKey + ":" + color + ";") : "";
   }
 
-  function resolveStripWidthPx(shellWidth, htmlUtils) {
-    const rawWidth = htmlUtils.toFiniteNumber(shellWidth);
-    const width = rawWidth > 0 ? Math.floor(rawWidth) : 1;
-    const preferred = Math.round(width * ALARM_STRIP_WIDTH_RATIO);
-    const maxWidth = Math.max(ALARM_STRIP_WIDTH_MIN_PX, Math.floor(width * ALARM_STRIP_WIDTH_MAX_RATIO));
-    return Math.max(ALARM_STRIP_WIDTH_MIN_PX, Math.min(maxWidth, preferred));
-  }
-
-  function resolveShellChrome(model, shellRect, htmlUtils) {
-    const stripWidth = resolveStripWidthPx(shellRect && shellRect.width, htmlUtils);
-    const padding = Math.max(1, Math.round(stripWidth * ALARM_STRIP_PADDING_TO_WIDTH_RATIO));
-    const stripGap = Math.max(1, Math.round(stripWidth * ALARM_STRIP_GAP_TO_WIDTH_RATIO));
-    if (model && model.showStrip === true) {
-      return {
-        left: padding + stripWidth + stripGap,
-        right: padding,
-        top: padding,
-        bottom: padding,
-        stripWidth: stripWidth,
-        stripGap: stripGap,
-        padding: padding,
-        stripRadius: stripWidth
-      };
-    }
+  function resolveShellChrome(model, shellRect, chromeApi) {
+    const aisChrome = chromeApi.resolveVisualChrome({
+      W: shellRect.width,
+      H: shellRect.height,
+      hasAccent: model && model.showStrip === true
+    });
+    const stripWidth = Math.max(0, Math.round(aisChrome.stripWidth || 0));
+    const stripLeft = Math.max(0, Math.round(aisChrome.stripLeft || 0));
+    const stripTop = Math.max(0, Math.round(aisChrome.stripTop || 0));
+    const stripBottom = Math.max(0, Math.round(aisChrome.stripBottom || 0));
+    const contentLeft = Math.max(0, Math.round(aisChrome.contentLeft || 0));
+    const contentRight = Math.max(0, Math.round(aisChrome.contentRight || 0));
+    const contentTop = Math.max(0, Math.round(aisChrome.contentTop || 0));
+    const contentBottom = Math.max(0, Math.round(aisChrome.contentBottom || 0));
+    const stripGap = Math.max(0, Math.round(aisChrome.accentGap || 0));
     return {
-      left: padding,
-      right: padding,
-      top: padding,
-      bottom: padding,
+      left: contentLeft,
+      right: contentRight,
+      top: contentTop,
+      bottom: contentBottom,
       stripWidth: stripWidth,
       stripGap: stripGap,
-      padding: padding,
+      stripLeft: stripLeft,
+      stripTop: stripTop,
+      stripBottom: stripBottom,
+      padX: Math.max(0, Math.round(aisChrome.padX || 0)),
+      padY: Math.max(0, Math.round(aisChrome.padY || 0)),
+      accentReserve: Math.max(0, Math.round(aisChrome.accentReserve || 0)),
       stripRadius: stripWidth
     };
   }
@@ -73,8 +63,7 @@
     };
   }
 
-  function resolveContentRect(shellRect, model, htmlUtils) {
-    const chrome = resolveShellChrome(model, shellRect, htmlUtils);
+  function resolveContentRect(shellRect, chrome) {
     const width = Math.max(1, Math.round(shellRect.width) - chrome.left - chrome.right);
     const height = Math.max(1, Math.round(shellRect.height) - chrome.top - chrome.bottom);
     return {
@@ -104,14 +93,15 @@
     return "normal";
   }
 
-  function resolveLayout(args, htmlUtils) {
+  function resolveLayout(args, htmlUtils, chromeApi) {
     const cfg = args || {};
     const model = toObject(cfg.model);
     const roundedShellRect = resolveRoundedShellRect(cfg.shellRect, htmlUtils);
     if (!roundedShellRect) {
       return null;
     }
-    const contentRect = resolveContentRect(roundedShellRect, model, htmlUtils);
+    const chrome = resolveShellChrome(model, roundedShellRect, chromeApi);
+    const contentRect = resolveContentRect(roundedShellRect, chrome);
     const mode = resolveMode(htmlUtils, model, contentRect);
     if (!mode) {
       return null;
@@ -123,19 +113,17 @@
     };
   }
 
-  function buildShellStyle(model, shellRect, htmlUtils) {
-    const chrome = resolveShellChrome(model, shellRect, htmlUtils);
+  function buildShellStyle(chrome) {
     return "padding:" + chrome.top + "px " + chrome.right + "px " + chrome.bottom + "px " + chrome.left + "px;";
   }
 
-  function buildAccentStyle(model, shellRect, tokens, htmlUtils) {
+  function buildAccentStyle(model, chrome, tokens) {
     if (!model || model.showStrip !== true) {
       return "";
     }
-    const chrome = resolveShellChrome(model, shellRect, htmlUtils);
-    return "left:" + chrome.padding + "px;"
-      + "top:" + chrome.padding + "px;"
-      + "bottom:" + chrome.padding + "px;"
+    return "left:" + chrome.stripLeft + "px;"
+      + "top:" + chrome.stripTop + "px;"
+      + "bottom:" + chrome.stripBottom + "px;"
       + "width:" + chrome.stripWidth + "px;"
       + "border-radius:" + chrome.stripRadius + "px;"
       + toStyleText("background-color", tokens.strip);
@@ -157,7 +145,12 @@
       chrome.bottom,
       chrome.stripWidth,
       chrome.stripGap,
-      chrome.padding,
+      chrome.stripLeft,
+      chrome.stripTop,
+      chrome.stripBottom,
+      chrome.padX,
+      chrome.padY,
+      chrome.accentReserve,
       chrome.stripRadius,
       model.state,
       model.interactionState,
@@ -180,16 +173,17 @@
 
   function create(def, Helpers) {
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+    const aisSizingApi = Helpers.getModule("AisTargetLayoutSizing").create(def, Helpers);
 
     return {
       resolveLayout: function (args) {
-        return resolveLayout(args, htmlUtils);
+        return resolveLayout(args, htmlUtils, aisSizingApi);
       },
-      buildShellStyle: function (model, shellRect) {
-        return buildShellStyle(model, shellRect, htmlUtils);
+      buildShellStyle: function (chrome) {
+        return buildShellStyle(chrome);
       },
-      buildAccentStyle: function (model, shellRect, tokens) {
-        return buildAccentStyle(model, shellRect, tokens, htmlUtils);
+      buildAccentStyle: function (model, chrome, tokens) {
+        return buildAccentStyle(model, chrome, tokens);
       },
       buildSignature: buildSignature
     };
