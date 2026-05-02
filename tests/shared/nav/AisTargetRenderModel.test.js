@@ -295,6 +295,26 @@ describe("AisTargetRenderModel", function () {
     expect(model.stateLabel).toBe("");
   });
 
+  it("renders noAis state for vertical containers outside gpspage when identity is missing", function () {
+    const setup = createRenderModel();
+    const model = setup.renderModel.buildModel({
+      props: withSurfacePolicy(makeProps({
+        domain: {
+          hasTargetIdentity: false,
+          hasDispatchMmsi: false
+        }
+      }), { pageId: "navpage", mode: "dispatch", orientation: "vertical" }),
+      shellRect: { width: 220, height: 300 },
+      mode: "normal",
+      isVerticalCommitted: true
+    });
+
+    expect(model.kind).toBe("noAis");
+    expect(model.stateLabel).toBe("No AIS");
+    expect(model.wrapperClasses).toContain("dyni-ais-target-html");
+    expect(model.wrapperClasses).not.toContain("dyni-state-hidden");
+  });
+
   it("keeps hidden before disconnected outside gpspage and shows disconnected on gpspage", function () {
     const setup = createRenderModel();
     const hidden = setup.renderModel.buildModel({

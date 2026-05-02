@@ -69,6 +69,7 @@
         when: domain.hasTargetIdentity === false
           && cfg.isEditingMode !== true
           && cfg.pageId !== "gpspage"
+          && cfg.isVerticalContainer !== true
       },
       { kind: "disconnected", when: cfg.disconnect === true },
       { kind: "noAis", when: domain.hasTargetIdentity === false },
@@ -169,6 +170,7 @@
       const kind = resolveStateKind({
         domain: domain,
         pageId: surfacePolicy && typeof surfacePolicy.pageId === "string" ? surfacePolicy.pageId : "other",
+        isVerticalContainer: surfacePolicy && surfacePolicy.containerOrientation === "vertical",
         isEditingMode: isEditingMode,
         disconnect: props.disconnect === true
       }, stateScreenPrecedence);

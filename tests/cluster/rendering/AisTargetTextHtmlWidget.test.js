@@ -348,6 +348,27 @@ describe("AisTargetTextHtmlWidget", function () {
     expect(placeholderMounted.html()).toContain("No AIS");
   });
 
+  it("renders noAis state for vertical containers outside gpspage when identity is missing", function () {
+    const mounted = mountCommitted(
+      createRenderer().renderer,
+      withSurfacePolicy(makeProps({
+        domain: {
+          hasTargetIdentity: false,
+          hasDispatchMmsi: false
+        }
+      }), {
+        pageId: "other",
+        containerOrientation: "vertical",
+        interactionMode: "passive"
+      }),
+      { shellSize: { width: 220, height: 300 } }
+    );
+
+    expect(mounted.html()).toContain("dyni-state-no-ais");
+    expect(mounted.html()).toContain("No AIS");
+    expect(mounted.html()).not.toContain("dyni-state-hidden");
+  });
+
   it("renders stableDigits metric values with tabular classes", function () {
     const renderer = createRenderer({
       applyFormatter(value, formatterOptions) {
