@@ -399,8 +399,6 @@ describe("AlarmTextHtmlWidget", function () {
     expect(css).toContain(".dyni-html-root .dyni-alarm-value-row");
     expect(css).toContain("font-weight: var(--dyni-theme-font-label-weight, 700);");
     expect(css).toContain("font-weight: var(--dyni-theme-font-weight, 700);");
-    expect(css).toContain("width: 0.68em;");
-    expect(css).toContain("border-radius: 0.68em;");
     expect(css).toContain("inset: 0 auto 0 0;");
     expect(css).toContain("z-index: 0;");
     expect(css).toContain("gap: 0.16em;");
@@ -445,8 +443,6 @@ describe("AlarmTextHtmlWidget", function () {
     expect(alarmAccent).toBe(aisAccent);
     expect(alarmHotspot).toBe(aisHotspot);
     expectDeclaration(alarmAccent, "inset: 0 auto 0 0");
-    expectDeclaration(alarmAccent, "width: 0.68em");
-    expectDeclaration(alarmAccent, "border-radius: 0.68em");
 
     const alarmMain = readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-main");
     const aisIdentity = readRuleBody(aisCss, ".dyni-html-root .dyni-ais-target-identity");

@@ -170,6 +170,29 @@ describe("AlarmHtmlFit", function () {
     return Math.max(2, Math.floor(Math.min(width, height) * 0.03));
   }
 
+  function parseStyleText(styleText) {
+    return String(styleText || "")
+      .split(";")
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .reduce((acc, entry) => {
+        const parts = entry.split(":");
+        if (parts.length < 2) {
+          return acc;
+        }
+        const key = parts[0].trim();
+        const value = parts.slice(1).join(":").trim();
+        acc[key] = value;
+        return acc;
+      }, Object.create(null));
+  }
+
+  function readPx(styleMap, key) {
+    const raw = styleMap && styleMap[key] ? styleMap[key] : "";
+    const match = String(raw).match(/^(-?\d+(?:\.\d+)?)px$/);
+    return match ? Number(match[1]) : NaN;
+  }
+
   it("resolves ratio mode from thresholds", function () {
     const h = createHarness();
 
@@ -235,31 +258,36 @@ describe("AlarmHtmlFit", function () {
     expect(h.themeApi.resolveForRoot).toHaveBeenCalledWith(h.targetEl);
     expect(active.activeBackgroundStyle).toBe("background-color:#e04040;");
     expect(active.activeForegroundStyle).toBe("color:#ffffff;");
-    expect(idle.shellStyle).toBe("padding:2px 2px 2px 21px;");
-    expect(idle.accentStyle).toBe("left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#66b8ff;");
-    expect(idle.idleStripStyle).toBe("left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#66b8ff;");
+    expect(idle.shellStyle).toContain("padding:");
+    expect(idle.accentStyle).toContain("background-color:#66b8ff;");
+    expect(idle.idleStripStyle).toBe(idle.accentStyle);
   });
 
   it("fits against the inner content rect when the idle strip is present", function () {
     const h = createHarness();
     const shellRect = { width: 220, height: 100 };
-    const padX = computePadX(197, 96);
+    const model = makeModel({
+      state: "idle",
+      interactionState: "passive",
+      showStrip: true,
+      showActiveBackground: false
+    });
+    const layout = h.fit.resolveLayout({
+      model: model,
+      shellRect: shellRect
+    });
+    const padX = computePadX(layout.contentRect.width, layout.contentRect.height);
 
     const result = h.fit.compute({
-      model: makeModel({
-        state: "idle",
-        interactionState: "passive",
-        showStrip: true,
-        showActiveBackground: false
-      }),
+      model: model,
       targetEl: h.targetEl,
       hostContext: h.hostContext,
       shellRect: shellRect
     });
 
     const fitArgs = h.textLayoutApi.fitValueUnitCaptionRows.mock.calls[0][0];
-    expect(fitArgs.W).toBe(197 - (padX * 2));
-    expect(fitArgs.H).toBe(96);
+    expect(fitArgs.W).toBe(layout.contentRect.width - (padX * 2));
+    expect(fitArgs.H).toBe(layout.contentRect.height);
     expect(result.valuePx).toBe(17);
   });
 
@@ -277,22 +305,36 @@ describe("AlarmHtmlFit", function () {
       shellRect: shellRect
     });
 
-    expect(layout).toEqual({
-      mode: "normal",
-      shellRect: { width: 220, height: 100 },
-      contentRect: {
-        width: 197,
-        height: 96,
-        chrome: { left: 21, right: 2, top: 2, bottom: 2 }
-      }
-    });
+    expect(layout).toBeTruthy();
+    expect(layout.mode).toBe("normal");
+    expect(layout.shellRect).toEqual({ width: 220, height: 100 });
+    expect(layout.contentRect.width).toBeGreaterThan(0);
+    expect(layout.contentRect.height).toBeGreaterThan(0);
+    expect(layout.contentRect.chrome.left).toBeGreaterThan(layout.contentRect.chrome.right);
 
-    h.fit.compute({
+    const fit = h.fit.compute({
       model: model,
       targetEl: h.targetEl,
       hostContext: h.hostContext,
       shellRect: shellRect
     });
+
+    const accentStyle = parseStyleText(fit.accentStyle);
+    const shellStyle = parseStyleText(fit.shellStyle);
+    const stripWidth = readPx(accentStyle, "width");
+    const stripRadius = readPx(accentStyle, "border-radius");
+    const stripPadding = readPx(accentStyle, "left");
+    const shellPadding = String(shellStyle.padding || "").split(/\s+/);
+    const shellLeft = shellPadding.length === 4 ? readPx({ value: shellPadding[3] }, "value") : NaN;
+    const shellRight = shellPadding.length === 4 ? readPx({ value: shellPadding[1] }, "value") : NaN;
+    const stripGap = shellLeft - shellRight - stripWidth;
+
+    expect(stripWidth).toBeGreaterThan(0);
+    expect(stripRadius).toBe(stripWidth);
+    expect(stripPadding).toBe(shellRight);
+    expect(stripGap).toBeGreaterThanOrEqual(1);
+    expect(layout.contentRect.chrome.left).toBe(shellLeft);
+    expect(layout.contentRect.chrome.right).toBe(shellRight);
 
     const fitArgs = h.textLayoutApi.fitValueUnitCaptionRows.mock.calls[0][0];
     const padX = computePadX(layout.contentRect.width, layout.contentRect.height);
@@ -316,9 +358,18 @@ describe("AlarmHtmlFit", function () {
       shellRect: shellRect
     });
 
+    const layout = h.fit.resolveLayout({
+      model: makeModel({
+        state: "active",
+        interactionState: "dispatch",
+        showStrip: false,
+        showActiveBackground: true
+      }),
+      shellRect: shellRect
+    });
     const fitArgs = h.textLayoutApi.fitValueUnitCaptionRows.mock.calls[0][0];
-    expect(fitArgs.W).toBe(216 - (computePadX(216, 96) * 2));
-    expect(fitArgs.H).toBe(96);
+    expect(fitArgs.W).toBe(layout.contentRect.width - (computePadX(layout.contentRect.width, layout.contentRect.height) * 2));
+    expect(fitArgs.H).toBe(layout.contentRect.height);
     expect(fitArgs.W).not.toBe(shellRect.width);
     expect(fitArgs.H).not.toBe(shellRect.height);
   });
@@ -327,8 +378,16 @@ describe("AlarmHtmlFit", function () {
     const textLayoutApi = createMeasuredTextLayoutApi();
     const h = createHarness({ textLayoutApi: textLayoutApi });
     const shellRect = { width: 800, height: 200 };
-    const contentWidth = shellRect.width - 4;
-    const contentHeight = shellRect.height - 4;
+    const layout = h.fit.resolveLayout({
+      model: makeModel({
+        showStrip: false,
+        captionText: "ALARM",
+        valueText: "NONE"
+      }),
+      shellRect: shellRect
+    });
+    const contentWidth = layout.contentRect.width;
+    const contentHeight = layout.contentRect.height;
     const padX = computePadX(contentWidth, contentHeight);
 
     const result = h.fit.compute({
@@ -376,6 +435,103 @@ describe("AlarmHtmlFit", function () {
 
     expect(second).toBe(first);
     expect(h.hostContext.__dyniAlarmHtmlFitCache.result).toBe(first);
+  });
+
+  it("derives idle strip chrome from shell width so accent and content reservation stay aligned", function () {
+    const h = createHarness();
+    const model = makeModel({
+      state: "idle",
+      interactionState: "passive",
+      showStrip: true,
+      showActiveBackground: false
+    });
+    const narrowRect = { width: 180, height: 100 };
+    const wideRect = { width: 320, height: 100 };
+    const narrow = h.fit.compute({
+      model: model,
+      targetEl: h.targetEl,
+      hostContext: h.hostContext,
+      shellRect: narrowRect
+    });
+    const wide = h.fit.compute({
+      model: model,
+      targetEl: h.targetEl,
+      hostContext: h.hostContext,
+      shellRect: wideRect
+    });
+    const narrowLayout = h.fit.resolveLayout({ model: model, shellRect: narrowRect });
+    const wideLayout = h.fit.resolveLayout({ model: model, shellRect: wideRect });
+
+    const narrowAccent = parseStyleText(narrow.accentStyle);
+    const wideAccent = parseStyleText(wide.accentStyle);
+    const narrowShell = parseStyleText(narrow.shellStyle);
+    const wideShell = parseStyleText(wide.shellStyle);
+    const narrowShellPadding = String(narrowShell.padding || "").split(/\s+/);
+    const wideShellPadding = String(wideShell.padding || "").split(/\s+/);
+    const narrowLeft = readPx({ value: narrowShellPadding[3] }, "value");
+    const narrowRight = readPx({ value: narrowShellPadding[1] }, "value");
+    const wideLeft = readPx({ value: wideShellPadding[3] }, "value");
+    const wideRight = readPx({ value: wideShellPadding[1] }, "value");
+    const narrowWidth = readPx(narrowAccent, "width");
+    const wideWidth = readPx(wideAccent, "width");
+
+    expect(wideWidth).toBeGreaterThan(narrowWidth);
+    expect(wideLeft).toBeGreaterThan(narrowLeft);
+    expect(narrowLeft - narrowRight).toBeGreaterThan(narrowWidth);
+    expect(wideLeft - wideRight).toBeGreaterThan(wideWidth);
+    expect(narrowLayout.contentRect.chrome.left).toBe(narrowLeft);
+    expect(wideLayout.contentRect.chrome.left).toBe(wideLeft);
+    expect(wideLayout.contentRect.width).toBeLessThan(wideRect.width - wideRight * 2);
+  });
+
+  it("invalidates cache when shell width changes strip chrome while content width stays the same", function () {
+    const h = createHarness();
+    const model = makeModel({
+      state: "idle",
+      interactionState: "passive",
+      showStrip: true,
+      showActiveBackground: false
+    });
+    const firstRect = { width: 118, height: 100 };
+    const secondRect = { width: 119, height: 100 };
+    const first = h.fit.compute({
+      model: model,
+      targetEl: h.targetEl,
+      hostContext: h.hostContext,
+      shellRect: firstRect
+    });
+    const second = h.fit.compute({
+      model: model,
+      targetEl: h.targetEl,
+      hostContext: h.hostContext,
+      shellRect: secondRect
+    });
+    const firstLayout = h.fit.resolveLayout({ model: model, shellRect: firstRect });
+    const secondLayout = h.fit.resolveLayout({ model: model, shellRect: secondRect });
+
+    expect(firstLayout.contentRect.width).toBe(secondLayout.contentRect.width);
+
+    const firstAccent = parseStyleText(first.accentStyle);
+    const secondAccent = parseStyleText(second.accentStyle);
+    const firstShell = parseStyleText(first.shellStyle);
+    const secondShell = parseStyleText(second.shellStyle);
+    const firstPadding = String(firstShell.padding || "").split(/\s+/);
+    const secondPadding = String(secondShell.padding || "").split(/\s+/);
+    const firstLeft = firstPadding.length === 4 ? readPx({ value: firstPadding[3] }, "value") : NaN;
+    const firstRight = firstPadding.length === 4 ? readPx({ value: firstPadding[1] }, "value") : NaN;
+    const secondLeft = secondPadding.length === 4 ? readPx({ value: secondPadding[3] }, "value") : NaN;
+    const secondRight = secondPadding.length === 4 ? readPx({ value: secondPadding[1] }, "value") : NaN;
+    const firstStripWidth = readPx(firstAccent, "width");
+    const secondStripWidth = readPx(secondAccent, "width");
+    const firstStripGap = firstLeft - firstRight - firstStripWidth;
+    const secondStripGap = secondLeft - secondRight - secondStripWidth;
+
+    expect(secondStripWidth).not.toBe(firstStripWidth);
+    expect(secondStripWidth).toBe(secondLayout.contentRect.chrome.stripWidth);
+    expect(secondLeft).toBe(secondLayout.contentRect.chrome.left);
+    expect(secondRight).toBe(secondLayout.contentRect.chrome.right);
+    expect(firstStripGap).toBe(firstLayout.contentRect.chrome.stripGap);
+    expect(secondStripGap).toBe(secondLayout.contentRect.chrome.stripGap);
   });
 
   it("recomputes when fontMetricsEpoch changes so cold-load font metrics do not reuse stale fit cache", function () {

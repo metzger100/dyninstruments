@@ -16,13 +16,11 @@
   const CONTENT_PAD_X_RATIO = 0.03;
   const MEASURE_CTX_KEY = "__dyniAlarmMeasureCtx";
   const FIT_CACHE_KEY = "__dyniAlarmHtmlFitCache";
-  const ALARM_SHELL_CHROME = Object.freeze({
-    padding: 2,
-    stripGap: 3,
-    stripWidth: 16,
-    stripRadius: 16
-  });
-  const ALARM_STRIP_LEFT_PADDING = ALARM_SHELL_CHROME.padding + ALARM_SHELL_CHROME.stripWidth + ALARM_SHELL_CHROME.stripGap;
+  const ALARM_STRIP_WIDTH_RATIO = 0.072;
+  const ALARM_STRIP_WIDTH_MIN_PX = 8;
+  const ALARM_STRIP_WIDTH_MAX_RATIO = 0.19;
+  const ALARM_STRIP_GAP_TO_WIDTH_RATIO = 0.1875;
+  const ALARM_STRIP_PADDING_TO_WIDTH_RATIO = 0.125;
   function toObject(value) {
     return value && typeof value === "object" ? value : {};
   }
@@ -93,37 +91,57 @@
     return color ? (colorKey + ":" + color + ";") : "";
   }
 
-  function resolveShellChrome(model) {
+  function resolveStripWidthPx(shellWidth, htmlUtils) {
+    const rawWidth = htmlUtils.toFiniteNumber(shellWidth);
+    const width = rawWidth > 0 ? Math.floor(rawWidth) : 1;
+    const preferred = Math.round(width * ALARM_STRIP_WIDTH_RATIO);
+    const maxWidth = Math.max(ALARM_STRIP_WIDTH_MIN_PX, Math.floor(width * ALARM_STRIP_WIDTH_MAX_RATIO));
+    return Math.max(ALARM_STRIP_WIDTH_MIN_PX, Math.min(maxWidth, preferred));
+  }
+
+  function resolveShellChrome(model, shellRect, htmlUtils) {
+    const stripWidth = resolveStripWidthPx(shellRect && shellRect.width, htmlUtils);
+    const padding = Math.max(1, Math.round(stripWidth * ALARM_STRIP_PADDING_TO_WIDTH_RATIO));
+    const stripGap = Math.max(1, Math.round(stripWidth * ALARM_STRIP_GAP_TO_WIDTH_RATIO));
     if (model && model.showStrip === true) {
       return {
-        left: ALARM_STRIP_LEFT_PADDING,
-        right: ALARM_SHELL_CHROME.padding,
-        top: ALARM_SHELL_CHROME.padding,
-        bottom: ALARM_SHELL_CHROME.padding
+        left: padding + stripWidth + stripGap,
+        right: padding,
+        top: padding,
+        bottom: padding,
+        stripWidth: stripWidth,
+        stripGap: stripGap,
+        padding: padding,
+        stripRadius: stripWidth
       };
     }
     return {
-      left: ALARM_SHELL_CHROME.padding,
-      right: ALARM_SHELL_CHROME.padding,
-      top: ALARM_SHELL_CHROME.padding,
-      bottom: ALARM_SHELL_CHROME.padding
+      left: padding,
+      right: padding,
+      top: padding,
+      bottom: padding,
+      stripWidth: stripWidth,
+      stripGap: stripGap,
+      padding: padding,
+      stripRadius: stripWidth
     };
   }
 
-  function buildShellStyle(model) {
-    const chrome = resolveShellChrome(model);
+  function buildShellStyle(model, shellRect, htmlUtils) {
+    const chrome = resolveShellChrome(model, shellRect, htmlUtils);
     return "padding:" + chrome.top + "px " + chrome.right + "px " + chrome.bottom + "px " + chrome.left + "px;";
   }
 
-  function buildAccentStyle(model, tokens) {
+  function buildAccentStyle(model, shellRect, tokens, htmlUtils) {
     if (!model || model.showStrip !== true) {
       return "";
     }
-    return "left:" + ALARM_SHELL_CHROME.padding + "px;"
-      + "top:" + ALARM_SHELL_CHROME.padding + "px;"
-      + "bottom:" + ALARM_SHELL_CHROME.padding + "px;"
-      + "width:" + ALARM_SHELL_CHROME.stripWidth + "px;"
-      + "border-radius:" + ALARM_SHELL_CHROME.stripRadius + "px;"
+    const chrome = resolveShellChrome(model, shellRect, htmlUtils);
+    return "left:" + chrome.padding + "px;"
+      + "top:" + chrome.padding + "px;"
+      + "bottom:" + chrome.padding + "px;"
+      + "width:" + chrome.stripWidth + "px;"
+      + "border-radius:" + chrome.stripRadius + "px;"
       + toStyleText("background-color", tokens.strip);
   }
 
@@ -139,8 +157,8 @@
     };
   }
 
-  function resolveContentRect(shellRect, model) {
-    const chrome = resolveShellChrome(model);
+  function resolveContentRect(shellRect, model, htmlUtils) {
+    const chrome = resolveShellChrome(model, shellRect, htmlUtils);
     const width = Math.max(1, Math.round(shellRect.width) - chrome.left - chrome.right);
     const height = Math.max(1, Math.round(shellRect.height) - chrome.top - chrome.bottom);
     return {
@@ -177,7 +195,7 @@
     if (!roundedShellRect) {
       return null;
     }
-    const contentRect = resolveContentRect(roundedShellRect, model);
+    const contentRect = resolveContentRect(roundedShellRect, model, htmlUtils);
     const mode = resolveMode(htmlUtils, model, contentRect);
     if (!mode) {
       return null;
@@ -299,10 +317,21 @@
   function buildSignature(args) {
     const cfg = args || {};
     const model = toObject(cfg.model);
+    const chrome = cfg.chrome && typeof cfg.chrome === "object" ? cfg.chrome : {};
     return JSON.stringify([
       cfg.mode,
       cfg.width,
       cfg.height,
+      cfg.shellWidth,
+      cfg.shellHeight,
+      chrome.left,
+      chrome.right,
+      chrome.top,
+      chrome.bottom,
+      chrome.stripWidth,
+      chrome.stripGap,
+      chrome.padding,
+      chrome.stripRadius,
       model.state,
       model.interactionState,
       model.captionText,
@@ -364,6 +393,9 @@
         mode: layout.mode,
         width: layout.contentRect.width,
         height: layout.contentRect.height,
+        shellWidth: layout.shellRect.width,
+        shellHeight: layout.shellRect.height,
+        chrome: layout.contentRect.chrome,
         padX: padX,
         model: model,
         family: family,
@@ -391,8 +423,8 @@
 
       const activeBackgroundStyle = model.showActiveBackground === true ? toStyleText("background-color", tokens.bg) : "";
       const activeForegroundStyle = model.state === "active" ? toStyleText("color", tokens.fg) : "";
-      const shellStyle = buildShellStyle(model);
-      const accentStyle = buildAccentStyle(model, tokens);
+      const shellStyle = buildShellStyle(model, layout.shellRect, htmlUtils);
+      const accentStyle = buildAccentStyle(model, layout.shellRect, tokens, htmlUtils);
       const result = {
         mode: layout.mode,
         captionPx: modeFit.captionPx,

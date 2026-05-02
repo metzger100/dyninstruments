@@ -40,6 +40,17 @@ describe("AisTargetLayout", function () {
     expect(box.unitRect.x).toBeGreaterThanOrEqual(box.valueTextRect.x + box.valueTextRect.w);
   }
 
+  function readPxFromStyle(styleText, key) {
+    const match = String(styleText || "").match(new RegExp(key + ":(\\d+)px;"));
+    return match ? Number(match[1]) : NaN;
+  }
+
+  function expectedAlarmStripWidth(shellWidth) {
+    const preferred = Math.round(shellWidth * 0.072);
+    const maxWidth = Math.max(8, Math.floor(shellWidth * 0.19));
+    return Math.max(8, Math.min(maxWidth, preferred));
+  }
+
   it("resolves high/normal/flat mode by ratio thresholds", function () {
     const layout = createLayout();
 
@@ -205,6 +216,101 @@ describe("AisTargetLayout", function () {
     expect(withAccent.accentRect.w).toBeGreaterThanOrEqual(14);
     expect(withAccent.insets.accentGap).toBeGreaterThanOrEqual(3);
     expect(withAccent.insets.accentReserve).toBeGreaterThan(withoutAccent.insets.accentReserve);
+  });
+
+  it("scales accent strip chrome from shell width in non-vertical data layouts", function () {
+    const layout = createLayout();
+    const narrow = layout.computeLayout({
+      W: 180,
+      H: 100,
+      renderState: "data",
+      showTcpaBranch: true,
+      hasAccent: true
+    });
+    const wide = layout.computeLayout({
+      W: 320,
+      H: 100,
+      renderState: "data",
+      showTcpaBranch: true,
+      hasAccent: true
+    });
+    const narrowWidth = readPxFromStyle(narrow.inlineGeometry.accentStyle, "width");
+    const wideWidth = readPxFromStyle(wide.inlineGeometry.accentStyle, "width");
+
+    expect(wide.accentRect.w).toBeGreaterThan(narrow.accentRect.w);
+    expect(wide.insets.accentReserve).toBeGreaterThan(narrow.insets.accentReserve);
+    expect(narrowWidth).toBe(narrow.accentRect.w);
+    expect(wideWidth).toBe(wide.accentRect.w);
+    expect(wide.contentRect.x).toBeGreaterThan(narrow.contentRect.x);
+    expect(wide.contentRect.x - wide.insets.padX).toBe(wide.insets.accentReserve);
+    expect(narrow.contentRect.x - narrow.insets.padX).toBe(narrow.insets.accentReserve);
+  });
+
+  it("matches Alarm strip width formula across representative shell widths", function () {
+    const layout = createLayout();
+    const widths = [118, 180, 220, 320];
+
+    widths.forEach((width) => {
+      const out = layout.computeLayout({
+        W: width,
+        H: 100,
+        renderState: "data",
+        showTcpaBranch: true,
+        hasAccent: true
+      });
+      const expected = expectedAlarmStripWidth(width);
+      const inlineWidth = readPxFromStyle(out.inlineGeometry.accentStyle, "width");
+      const inlineRadius = readPxFromStyle(out.inlineGeometry.accentStyle, "border-radius");
+
+      expect(out.accentRect.w).toBe(expected);
+      expect(inlineWidth).toBe(expected);
+      expect(inlineRadius).toBe(expected);
+    });
+  });
+
+  it("uses Alarm-equivalent width 16px at shell width 220 (old AIS formula would be 19px)", function () {
+    const layout = createLayout();
+    const out = layout.computeLayout({
+      W: 220,
+      H: 100,
+      renderState: "data",
+      showTcpaBranch: true,
+      hasAccent: true
+    });
+
+    expect(expectedAlarmStripWidth(220)).toBe(16);
+    expect(out.accentRect.w).toBe(16);
+    expect(readPxFromStyle(out.inlineGeometry.accentStyle, "width")).toBe(16);
+    expect(readPxFromStyle(out.inlineGeometry.accentStyle, "border-radius")).toBe(16);
+  });
+
+  it("scales accent geometry with committed vertical shell width", function () {
+    const layout = createLayout();
+    const narrow = layout.computeLayout({
+      W: 180,
+      H: 120,
+      renderState: "data",
+      showTcpaBranch: true,
+      hasAccent: true,
+      isVerticalCommitted: true
+    });
+    const wide = layout.computeLayout({
+      W: 260,
+      H: 120,
+      renderState: "data",
+      showTcpaBranch: true,
+      hasAccent: true,
+      isVerticalCommitted: true
+    });
+    const narrowAccentWidth = readPxFromStyle(narrow.inlineGeometry.accentStyle, "width");
+    const wideAccentWidth = readPxFromStyle(wide.inlineGeometry.accentStyle, "width");
+
+    expect(narrow.mode).toBe("high");
+    expect(wide.mode).toBe("high");
+    expect(wide.accentRect.w).toBeGreaterThan(narrow.accentRect.w);
+    expect(wideAccentWidth).toBeGreaterThan(narrowAccentWidth);
+    expect(narrowAccentWidth).toBe(narrow.accentRect.w);
+    expect(wideAccentWidth).toBe(wide.accentRect.w);
   });
 
   it("keeps identity spacing independent from denser metric grid spacing", function () {

@@ -25,9 +25,10 @@
   const VERTICAL_IDENTITY_GAP_RATIO = 0.008;
   const VERTICAL_IDENTITY_METRICS_GAP_RATIO = 0.008;
   const VERTICAL_METRIC_GRID_GAP_RATIO = 0.007;
-  const ACCENT_WIDTH_RATIO = 0.156;
-  const ACCENT_GAP_RATIO = 0.019;
-  const ACCENT_WIDTH_FLOOR_PX = 14;
+  const ACCENT_WIDTH_FROM_SHELL_WIDTH_RATIO = 0.072;
+  const ACCENT_WIDTH_MAX_RATIO = 0.19;
+  const ACCENT_GAP_TO_WIDTH_RATIO = 0.122;
+  const ACCENT_WIDTH_FLOOR_PX = 8;
   const ACCENT_GAP_FLOOR_PX = 3;
   const FLAT_IDENTITY_SHARE = 0.26;
   const NORMAL_IDENTITY_BLOCK_SHARE = 0.5;
@@ -113,6 +114,22 @@
       return "normal";
     }
 
+    function resolveAccentChrome(shellWidth, hasAccent) {
+      if (hasAccent !== true) {
+        return { accentWidth: 0, accentGap: 0, accentReserve: 0 };
+      }
+      const safeShellWidth = Math.max(1, Math.floor(clampNumber(shellWidth, 1, Number.MAX_SAFE_INTEGER, 1)));
+      const preferredWidth = Math.round(safeShellWidth * ACCENT_WIDTH_FROM_SHELL_WIDTH_RATIO);
+      const maxWidth = Math.max(ACCENT_WIDTH_FLOOR_PX, Math.floor(safeShellWidth * ACCENT_WIDTH_MAX_RATIO));
+      const accentWidth = Math.max(ACCENT_WIDTH_FLOOR_PX, Math.min(maxWidth, preferredWidth));
+      const accentGap = Math.max(ACCENT_GAP_FLOOR_PX, Math.round(accentWidth * ACCENT_GAP_TO_WIDTH_RATIO));
+      return {
+        accentWidth: accentWidth,
+        accentGap: accentGap,
+        accentReserve: accentWidth + accentGap
+      };
+    }
+
     function computeInsets(W, H, isVerticalCommitted, mode, hasAccent) {
       const safeW = Math.max(1, Math.floor(clampNumber(W, 1, Number.MAX_SAFE_INTEGER, 1)));
       const safeH = Math.max(1, Math.floor(clampNumber(H, 1, Number.MAX_SAFE_INTEGER, 1)));
@@ -135,17 +152,16 @@
       const metricGridGapRatio = isVertical
         ? VERTICAL_METRIC_GRID_GAP_RATIO
         : (isHigh ? HIGH_METRIC_GRID_GAP_RATIO : DEFAULT_METRIC_GRID_GAP_RATIO);
-      const accentWidth = hasAccent === true ? profileApi.computeInsetPx(responsive, ACCENT_WIDTH_RATIO, ACCENT_WIDTH_FLOOR_PX) : 0;
-      const accentGap = hasAccent === true ? profileApi.computeInsetPx(responsive, ACCENT_GAP_RATIO, ACCENT_GAP_FLOOR_PX) : 0;
+      const accentChrome = resolveAccentChrome(safeW, hasAccent);
       return {
         padX: profileApi.computeInsetPx(responsive, shellPadXRatio, 1),
         padY: profileApi.computeInsetPx(responsive, shellPadYRatio, 1),
         identityGap: profileApi.computeInsetPx(responsive, identityGapRatio, 1),
         identityMetricsGap: profileApi.computeInsetPx(responsive, identityMetricsGapRatio, 1),
         metricGridGap: profileApi.computeInsetPx(responsive, metricGridGapRatio, 1),
-        accentWidth: accentWidth,
-        accentGap: accentGap,
-        accentReserve: accentWidth + accentGap,
+        accentWidth: accentChrome.accentWidth,
+        accentGap: accentChrome.accentGap,
+        accentReserve: accentChrome.accentReserve,
         responsive: responsive
       };
     }
