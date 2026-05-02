@@ -238,6 +238,7 @@ describe("CenterDisplayTextWidget", function () {
 
     expect(spec.id).toBe("CenterDisplayTextWidget");
     expect(spec.wantsHideNativeHead).toBe(true);
+    expect(spec.getVerticalShellSizing()).toEqual({ kind: "ratio", aspectRatio: 1 });
   });
 
   it("renders high mode with stacked coordinates and ordered relation rows", function () {

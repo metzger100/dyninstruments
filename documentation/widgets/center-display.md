@@ -26,6 +26,10 @@ This is a dedicated renderer, not a `PositionCoordinateWidget` variant, because 
 - `CenterDisplayLayout` keeps nav-owned geometry, panel bounds, and row splitting; it no longer owns a private responsive-profile implementation.
 - `CenterDisplayTextWidget` keeps a frame-local width-measure cache (`ctx.font + text`) to reuse repeated fit-width lookups during one render pass.
 
+## Vertical Contract
+
+- `getVerticalShellSizing()` returns ratio sizing with aspect ratio `1` in vertical mode.
+
 ## Ownership Contract
 
 - `ResponsiveScaleProfile` owns the base compact curve plus the named scale outputs used by `CenterDisplayLayout`.
