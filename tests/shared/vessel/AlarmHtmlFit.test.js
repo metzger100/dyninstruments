@@ -132,6 +132,9 @@ describe("AlarmHtmlFit", function () {
         if (id === "HtmlWidgetUtils") {
           return htmlUtilsModule;
         }
+        if (id === "AlarmHtmlFitChrome") {
+          return loadFresh("shared/widget-kits/vessel/AlarmHtmlFitChrome.js");
+        }
         if (id === "TextLayoutEngine") {
           return { create: () => textLayoutApi };
         }

@@ -144,7 +144,10 @@ describe("config/components.js", function () {
     expect(components.AlarmViewModel.deps).toBeUndefined();
     expect(components.AlarmHtmlFit.globalKey).toBe("DyniAlarmHtmlFit");
     expect(components.AlarmHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/vessel/AlarmHtmlFit.js");
-    expect(components.AlarmHtmlFit.deps).toEqual(["ThemeResolver", "TextLayoutEngine", "HtmlWidgetUtils"]);
+    expect(components.AlarmHtmlFit.deps).toEqual(["AlarmHtmlFitChrome", "ThemeResolver", "TextLayoutEngine", "HtmlWidgetUtils"]);
+    expect(components.AlarmHtmlFitChrome.globalKey).toBe("DyniAlarmHtmlFitChrome");
+    expect(components.AlarmHtmlFitChrome.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/vessel/AlarmHtmlFitChrome.js");
+    expect(components.AlarmHtmlFitChrome.deps).toEqual(["HtmlWidgetUtils"]);
     expect(components.AlarmRenderModel.globalKey).toBe("DyniAlarmRenderModel");
     expect(components.AlarmRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/vessel/AlarmRenderModel.js");
     expect(components.AlarmRenderModel.deps).toEqual(["HtmlWidgetUtils"]);
@@ -182,9 +185,17 @@ describe("config/components.js", function () {
     expect(components.ActiveRouteLayout.globalKey).toBe("DyniActiveRouteLayout");
     expect(components.ActiveRouteLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/ActiveRouteLayout.js");
     expect(components.ActiveRouteLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
+    expect(components.AisTargetLayoutSizing.globalKey).toBe("DyniAisTargetLayoutSizing");
+    expect(components.AisTargetLayoutSizing.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetLayoutSizing.js");
+    expect(components.AisTargetLayoutSizing.deps).toEqual([
+      "ResponsiveScaleProfile",
+      "LayoutRectMath",
+      "AisTargetLayoutMath"
+    ]);
     expect(components.AisTargetLayout.globalKey).toBe("DyniAisTargetLayout");
     expect(components.AisTargetLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetLayout.js");
     expect(components.AisTargetLayout.deps).toEqual([
+      "AisTargetLayoutSizing",
       "ResponsiveScaleProfile",
       "LayoutRectMath",
       "AisTargetLayoutGeometry",

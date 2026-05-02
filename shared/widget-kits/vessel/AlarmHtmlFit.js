@@ -1,7 +1,7 @@
 /**
  * Module: AlarmHtmlFit - Text-fit and token-style owner for vessel alarm HTML
  * Documentation: documentation/widgets/alarm.md
- * Depends: ThemeResolver, TextLayoutEngine, HtmlWidgetUtils
+ * Depends: ThemeResolver, TextLayoutEngine, AlarmHtmlFitChrome, HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,17 +10,10 @@
 }(this, function () {
   "use strict";
 
-  const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.0;
-  const DEFAULT_RATIO_THRESHOLD_FLAT = 3.0;
   const SECONDARY_SCALE = 0.8;
   const CONTENT_PAD_X_RATIO = 0.03;
   const MEASURE_CTX_KEY = "__dyniAlarmMeasureCtx";
   const FIT_CACHE_KEY = "__dyniAlarmHtmlFitCache";
-  const ALARM_STRIP_WIDTH_RATIO = 0.072;
-  const ALARM_STRIP_WIDTH_MIN_PX = 8;
-  const ALARM_STRIP_WIDTH_MAX_RATIO = 0.19;
-  const ALARM_STRIP_GAP_TO_WIDTH_RATIO = 0.1875;
-  const ALARM_STRIP_PADDING_TO_WIDTH_RATIO = 0.125;
   function toObject(value) {
     return value && typeof value === "object" ? value : {};
   }
@@ -89,122 +82,6 @@
   function toStyleText(colorKey, value) {
     const color = toText(value).trim();
     return color ? (colorKey + ":" + color + ";") : "";
-  }
-
-  function resolveStripWidthPx(shellWidth, htmlUtils) {
-    const rawWidth = htmlUtils.toFiniteNumber(shellWidth);
-    const width = rawWidth > 0 ? Math.floor(rawWidth) : 1;
-    const preferred = Math.round(width * ALARM_STRIP_WIDTH_RATIO);
-    const maxWidth = Math.max(ALARM_STRIP_WIDTH_MIN_PX, Math.floor(width * ALARM_STRIP_WIDTH_MAX_RATIO));
-    return Math.max(ALARM_STRIP_WIDTH_MIN_PX, Math.min(maxWidth, preferred));
-  }
-
-  function resolveShellChrome(model, shellRect, htmlUtils) {
-    const stripWidth = resolveStripWidthPx(shellRect && shellRect.width, htmlUtils);
-    const padding = Math.max(1, Math.round(stripWidth * ALARM_STRIP_PADDING_TO_WIDTH_RATIO));
-    const stripGap = Math.max(1, Math.round(stripWidth * ALARM_STRIP_GAP_TO_WIDTH_RATIO));
-    if (model && model.showStrip === true) {
-      return {
-        left: padding + stripWidth + stripGap,
-        right: padding,
-        top: padding,
-        bottom: padding,
-        stripWidth: stripWidth,
-        stripGap: stripGap,
-        padding: padding,
-        stripRadius: stripWidth
-      };
-    }
-    return {
-      left: padding,
-      right: padding,
-      top: padding,
-      bottom: padding,
-      stripWidth: stripWidth,
-      stripGap: stripGap,
-      padding: padding,
-      stripRadius: stripWidth
-    };
-  }
-
-  function buildShellStyle(model, shellRect, htmlUtils) {
-    const chrome = resolveShellChrome(model, shellRect, htmlUtils);
-    return "padding:" + chrome.top + "px " + chrome.right + "px " + chrome.bottom + "px " + chrome.left + "px;";
-  }
-
-  function buildAccentStyle(model, shellRect, tokens, htmlUtils) {
-    if (!model || model.showStrip !== true) {
-      return "";
-    }
-    const chrome = resolveShellChrome(model, shellRect, htmlUtils);
-    return "left:" + chrome.padding + "px;"
-      + "top:" + chrome.padding + "px;"
-      + "bottom:" + chrome.padding + "px;"
-      + "width:" + chrome.stripWidth + "px;"
-      + "border-radius:" + chrome.stripRadius + "px;"
-      + toStyleText("background-color", tokens.strip);
-  }
-
-  function resolveRoundedShellRect(shellRect, htmlUtils) {
-    const width = htmlUtils.toFiniteNumber(shellRect && shellRect.width);
-    const height = htmlUtils.toFiniteNumber(shellRect && shellRect.height);
-    if (!(width > 0) || !(height > 0)) {
-      return null;
-    }
-    return {
-      width: Math.round(width),
-      height: Math.round(height)
-    };
-  }
-
-  function resolveContentRect(shellRect, model, htmlUtils) {
-    const chrome = resolveShellChrome(model, shellRect, htmlUtils);
-    const width = Math.max(1, Math.round(shellRect.width) - chrome.left - chrome.right);
-    const height = Math.max(1, Math.round(shellRect.height) - chrome.top - chrome.bottom);
-    return {
-      width: width,
-      height: height,
-      chrome: chrome
-    };
-  }
-
-  function resolveMode(htmlUtils, model, contentRect) {
-    const width = htmlUtils.toFiniteNumber(contentRect && contentRect.width);
-    const height = htmlUtils.toFiniteNumber(contentRect && contentRect.height);
-    if (!(width > 0) || !(height > 0)) {
-      return null;
-    }
-    const ratio = width / height;
-    const normalThreshold = htmlUtils.toFiniteNumber(model.ratioThresholdNormal);
-    const flatThreshold = htmlUtils.toFiniteNumber(model.ratioThresholdFlat);
-    const resolvedNormalThreshold = normalThreshold > 0 ? normalThreshold : DEFAULT_RATIO_THRESHOLD_NORMAL;
-    const resolvedFlatThreshold = flatThreshold > 0 ? flatThreshold : DEFAULT_RATIO_THRESHOLD_FLAT;
-    if (ratio < resolvedNormalThreshold) {
-      return "high";
-    }
-    if (ratio > resolvedFlatThreshold) {
-      return "flat";
-    }
-    return "normal";
-  }
-
-  function resolveLayout(args, htmlUtils) {
-    const cfg = args || {};
-    const model = toObject(cfg.model);
-    const roundedShellRect = resolveRoundedShellRect(cfg.shellRect, htmlUtils);
-    if (!roundedShellRect) {
-      return null;
-    }
-    const contentRect = resolveContentRect(roundedShellRect, model, htmlUtils);
-    const mode = resolveMode(htmlUtils, model, contentRect);
-    if (!mode) {
-      return null;
-    }
-    return {
-      mode: mode,
-      shellRect: roundedShellRect,
-      contentRect: contentRect
-    };
   }
 
   function computeContentPadX(width, height) {
@@ -314,47 +191,11 @@
     };
   }
 
-  function buildSignature(args) {
-    const cfg = args || {};
-    const model = toObject(cfg.model);
-    const chrome = cfg.chrome && typeof cfg.chrome === "object" ? cfg.chrome : {};
-    return JSON.stringify([
-      cfg.mode,
-      cfg.width,
-      cfg.height,
-      cfg.shellWidth,
-      cfg.shellHeight,
-      chrome.left,
-      chrome.right,
-      chrome.top,
-      chrome.bottom,
-      chrome.stripWidth,
-      chrome.stripGap,
-      chrome.padding,
-      chrome.stripRadius,
-      model.state,
-      model.interactionState,
-      model.captionText,
-      model.valueText,
-      model.ratioThresholdNormal,
-      model.ratioThresholdFlat,
-      model.showStrip === true ? 1 : 0,
-      model.showActiveBackground === true ? 1 : 0,
-      cfg.padX,
-      cfg.family,
-      cfg.valueWeight,
-      cfg.labelWeight,
-      cfg.themeBg,
-      cfg.themeFg,
-      cfg.themeStrip,
-      cfg.fontMetricsEpoch
-    ]);
-  }
-
   function create(def, Helpers) {
     const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
     const textLayout = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
     const themeResolver = Helpers.getModule("ThemeResolver");
+    const chromeApi = Helpers.getModule("AlarmHtmlFitChrome").create(def, Helpers);
 
     function compute(args) {
       const cfg = args || {};
@@ -378,10 +219,10 @@
       if (!font) {
         return null;
       }
-      const layout = resolveLayout({
+      const layout = chromeApi.resolveLayout({
         model: model,
         shellRect: shellRect
-      }, htmlUtils);
+      });
       if (!layout) {
         return null;
       }
@@ -389,7 +230,7 @@
       const family = font.family;
       const valueWeight = font.weight;
       const labelWeight = font.labelWeight;
-      const signature = buildSignature({
+      const signature = chromeApi.buildSignature({
         mode: layout.mode,
         width: layout.contentRect.width,
         height: layout.contentRect.height,
@@ -423,8 +264,8 @@
 
       const activeBackgroundStyle = model.showActiveBackground === true ? toStyleText("background-color", tokens.bg) : "";
       const activeForegroundStyle = model.state === "active" ? toStyleText("color", tokens.fg) : "";
-      const shellStyle = buildShellStyle(model, layout.shellRect, htmlUtils);
-      const accentStyle = buildAccentStyle(model, layout.shellRect, tokens, htmlUtils);
+      const shellStyle = chromeApi.buildShellStyle(model, layout.shellRect);
+      const accentStyle = chromeApi.buildAccentStyle(model, layout.shellRect, tokens);
       const result = {
         mode: layout.mode,
         captionPx: modeFit.captionPx,
@@ -454,7 +295,7 @@
       id: "AlarmHtmlFit",
       compute: compute,
       resolveLayout: function (args) {
-        return resolveLayout(args, htmlUtils);
+        return chromeApi.resolveLayout(args);
       }
     };
   }

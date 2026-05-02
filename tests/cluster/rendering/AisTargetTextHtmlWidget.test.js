@@ -62,6 +62,9 @@ describe("AisTargetTextHtmlWidget", function () {
         if (id === "AisTargetLayout") {
           return loadFresh("shared/widget-kits/nav/AisTargetLayout.js");
         }
+        if (id === "AisTargetLayoutSizing") {
+          return loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
+        }
         if (id === "ResponsiveScaleProfile") {
           return loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
         }

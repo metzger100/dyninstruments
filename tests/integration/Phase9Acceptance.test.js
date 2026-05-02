@@ -201,6 +201,9 @@ function createRenderModelHelpers() {
         else if (id === "AisTargetLayout") {
           moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayout.js");
         }
+        else if (id === "AisTargetLayoutSizing") {
+          moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
+        }
         else if (id === "AisTargetLayoutGeometry") {
           moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
         }

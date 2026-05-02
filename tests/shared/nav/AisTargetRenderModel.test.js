@@ -19,6 +19,8 @@ describe("AisTargetRenderModel", function () {
         if (!moduleCache[id]) {
           if (id === "AisTargetLayout") {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayout.js");
+          } else if (id === "AisTargetLayoutSizing") {
+            moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
           } else if (id === "HtmlWidgetUtils") {
             moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
           } else if (id === "ResponsiveScaleProfile") {

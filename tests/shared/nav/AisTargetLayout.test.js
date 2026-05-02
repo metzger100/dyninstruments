@@ -12,6 +12,9 @@ describe("AisTargetLayout", function () {
         if (id === "LayoutRectMath") {
           return layoutRectMath;
         }
+        if (id === "AisTargetLayoutSizing") {
+          return loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
+        }
         if (id === "AisTargetLayoutGeometry") {
           return loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
         }

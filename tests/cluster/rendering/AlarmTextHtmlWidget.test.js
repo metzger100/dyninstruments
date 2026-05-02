@@ -139,6 +139,9 @@ describe("AlarmTextHtmlWidget", function () {
         if (id === "AlarmHtmlFit") {
           return { create: () => fit };
         }
+        if (id === "AlarmHtmlFitChrome") {
+          return loadFresh("shared/widget-kits/vessel/AlarmHtmlFitChrome.js");
+        }
         if (id === "HtmlWidgetUtils") {
           return htmlWidgetUtilsModule;
         }

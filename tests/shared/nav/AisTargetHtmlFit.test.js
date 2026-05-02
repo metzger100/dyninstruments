@@ -83,6 +83,9 @@ describe("AisTargetHtmlFit", function () {
         if (id === "AisTargetLayout") {
           return aisTargetLayoutModule;
         }
+        if (id === "AisTargetLayoutSizing") {
+          return loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
+        }
         if (id === "HtmlWidgetUtils") {
           return htmlUtilsModule;
         }

@@ -18,11 +18,18 @@
   const groups = shared.componentRegistryGroups = shared.componentRegistryGroups || {};
   var sf = groups.sharedFoundation = groups.sharedFoundation || {};
 
+  sf.AisTargetLayoutSizing = {
+      js: BASE + "shared/widget-kits/nav/AisTargetLayoutSizing.js",
+      css: undefined,
+      globalKey: "DyniAisTargetLayoutSizing",
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "AisTargetLayoutMath"]
+  };
+
   sf.AisTargetLayout = {
       js: BASE + "shared/widget-kits/nav/AisTargetLayout.js",
       css: undefined,
       globalKey: "DyniAisTargetLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "AisTargetLayoutGeometry", "AisTargetLayoutMath"]
+      deps: ["AisTargetLayoutSizing", "ResponsiveScaleProfile", "LayoutRectMath", "AisTargetLayoutGeometry", "AisTargetLayoutMath"]
   };
 
   sf.AisTargetLayoutMath = {
@@ -37,6 +44,13 @@
       globalKey: "DyniAisTargetLayoutGeometry"
   };
 
+  sf.AlarmHtmlFitChrome = {
+      js: BASE + "shared/widget-kits/vessel/AlarmHtmlFitChrome.js",
+      css: undefined,
+      globalKey: "DyniAlarmHtmlFitChrome",
+      deps: ["HtmlWidgetUtils"]
+  };
+
   sf.AisTargetHtmlFit = {
       js: BASE + "shared/widget-kits/nav/AisTargetHtmlFit.js",
       css: undefined,
@@ -48,7 +62,7 @@
       js: BASE + "shared/widget-kits/vessel/AlarmHtmlFit.js",
       css: undefined,
       globalKey: "DyniAlarmHtmlFit",
-      deps: ["ThemeResolver", "TextLayoutEngine", "HtmlWidgetUtils"]
+      deps: ["AlarmHtmlFitChrome", "ThemeResolver", "TextLayoutEngine", "HtmlWidgetUtils"]
   };
 
   sf.ActiveRouteHtmlFit = {
