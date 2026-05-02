@@ -259,8 +259,6 @@ Add `overflow: hidden` on the value container as a safety net:
 ```css
 .dyni-html-root .dyni-edit-route-metric-label {
   font-weight: var(--dyni-theme-font-label-weight, 700);
-  opacity: 0.8;
-  overflow: hidden;
 }
 ```
 

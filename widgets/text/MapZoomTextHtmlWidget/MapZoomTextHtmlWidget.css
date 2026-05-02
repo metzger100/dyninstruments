@@ -122,7 +122,6 @@
 .dyni-html-root .dyni-map-zoom-unit {
   font-size: calc(var(--dyni-map-zoom-value-size) * var(--dyni-map-zoom-sec-scale));
   font-weight: var(--dyni-theme-font-label-weight, 700);
-  opacity: 0.88;
   line-height: 1;
   white-space: nowrap;
 }
@@ -138,6 +137,5 @@
   line-height: 1;
   font-weight: var(--dyni-theme-font-label-weight, 700);
   text-align: center;
-  opacity: 0.8;
   white-space: nowrap;
 }

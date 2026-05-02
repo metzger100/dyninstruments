@@ -71,7 +71,6 @@
 .dyni-html-root .dyni-route-points-header-meta {
   justify-content: flex-end;
   font-weight: var(--dyni-theme-font-label-weight, 700);
-  opacity: 0.84;
 }
 
 .dyni-html-root .dyni-route-points-list {
@@ -123,12 +122,10 @@
 
 .dyni-html-root .dyni-route-points-info {
   justify-content: flex-end;
-  opacity: 0.84;
 }
 
 .dyni-html-root .dyni-route-points-ordinal {
   font-weight: var(--dyni-theme-font-label-weight, 700);
-  opacity: 0.88;
 }
 
 .dyni-html-root .dyni-route-points-marker {
@@ -137,11 +134,9 @@
   height: var(--dyni-route-points-marker-size, 0.62em);
   border-radius: 999px;
   border: 1px solid currentColor;
-  opacity: 0.45;
 }
 
 .dyni-html-root .dyni-route-points-marker-selected {
-  opacity: 0.95;
   background: currentColor;
 }
 

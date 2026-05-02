@@ -43,13 +43,11 @@
 
 .dyni-html-root .dyni-active-route-html.dyni-active-route-mode-normal .dyni-active-route-route-name {
   font-weight: var(--dyni-theme-font-weight, 700);
-  opacity: 0.92;
 }
 
 .dyni-html-root .dyni-active-route-html.dyni-active-route-mode-high .dyni-active-route-route-name,
 .dyni-html-root .dyni-active-route-html.dyni-active-route-mode-flat .dyni-active-route-route-name {
   font-weight: var(--dyni-theme-font-label-weight, 700);
-  opacity: 0.78;
 }
 
 .dyni-html-root .dyni-active-route-html.dyni-active-route-open-dispatch {
@@ -115,7 +113,6 @@
 
 .dyni-html-root .dyni-active-route-metric-caption {
   font-weight: var(--dyni-theme-font-label-weight, 700);
-  opacity: 0.78;
   line-height: 1;
 }
 
@@ -139,7 +136,6 @@
 .dyni-html-root .dyni-active-route-metric-unit {
   flex: 0 0 auto;
   font-weight: var(--dyni-theme-font-label-weight, 700);
-  opacity: 0.78;
   white-space: nowrap;
 }
 
