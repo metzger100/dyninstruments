@@ -350,6 +350,17 @@ function createHarnessEnvironment(options) {
 
   delete globalThis.DyniPlugin;
   runIifeScript(rootDir, "runtime/namespace.js");
+  runIifeScript(rootDir, "config/cluster-routes.js");
+  runIifeScript(rootDir, "config/cluster-routes/course-heading.js");
+  runIifeScript(rootDir, "config/cluster-routes/speed.js");
+  runIifeScript(rootDir, "config/cluster-routes/environment.js");
+  runIifeScript(rootDir, "config/cluster-routes/wind.js");
+  runIifeScript(rootDir, "config/cluster-routes/nav.js");
+  runIifeScript(rootDir, "config/cluster-routes/map.js");
+  runIifeScript(rootDir, "config/cluster-routes/anchor.js");
+  runIifeScript(rootDir, "config/cluster-routes/vessel.js");
+  runIifeScript(rootDir, "config/cluster-routes/default.js");
+  runIifeScript(rootDir, "config/cluster-routes/finalize.js");
   runIifeScript(rootDir, "runtime/helpers.js");
   runIifeScript(rootDir, "runtime/HostCommitController.js");
   runIifeScript(rootDir, "runtime/SurfaceSessionController.js");

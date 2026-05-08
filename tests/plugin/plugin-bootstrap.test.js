@@ -36,6 +36,17 @@ describe("plugin.js bootstrap", function () {
     "config/clusters/anchor.js",
     "config/clusters/vessel.js",
     "config/clusters/default.js",
+    "config/cluster-routes.js",
+    "config/cluster-routes/course-heading.js",
+    "config/cluster-routes/speed.js",
+    "config/cluster-routes/environment.js",
+    "config/cluster-routes/wind.js",
+    "config/cluster-routes/nav.js",
+    "config/cluster-routes/map.js",
+    "config/cluster-routes/anchor.js",
+    "config/cluster-routes/vessel.js",
+    "config/cluster-routes/default.js",
+    "config/cluster-routes/finalize.js",
     "config/widget-definitions.js",
     "runtime/asset-preloader.js",
     "runtime/component-loader.js",
@@ -66,7 +77,7 @@ describe("plugin.js bootstrap", function () {
     });
 
     runIifeScript("plugin.js", context);
-    await flushPromises(50);
+    await flushPromises(120);
 
     expect(dom.appendedScripts.length).toBeGreaterThan(10);
     expect(dom.appendedScripts[0].src).toBe("http://host/plugins/dyninstruments/config/bootstrap-manifest.js");
@@ -87,6 +98,8 @@ describe("plugin.js bootstrap", function () {
     const assetPreloaderIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/asset-preloader.js");
     const componentLoaderIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/component-loader.js");
     const defaultClusterIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/clusters/default.js");
+    const clusterRoutesIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/cluster-routes.js");
+    const clusterRoutesFinalizeIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/cluster-routes/finalize.js");
     const widgetDefinitionsIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/widget-definitions.js");
     const hostCommitIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/HostCommitController.js");
     const surfaceSessionIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/SurfaceSessionController.js");
@@ -124,6 +137,9 @@ describe("plugin.js bootstrap", function () {
     expect(widgetDefinitionsIndex).toBeLessThan(componentLoaderIndex);
     expect(componentsConfigIndex).toBeLessThan(hostCommitIndex);
     expect(defaultClusterIndex).toBeGreaterThan(componentsConfigIndex);
+    expect(clusterRoutesIndex).toBeGreaterThan(defaultClusterIndex);
+    expect(clusterRoutesFinalizeIndex).toBeGreaterThan(clusterRoutesIndex);
+    expect(clusterRoutesFinalizeIndex).toBeLessThan(widgetDefinitionsIndex);
     expect(defaultClusterIndex).toBeLessThan(widgetDefinitionsIndex);
     expect(hostCommitIndex).toBeGreaterThan(-1);
     expect(surfaceSessionIndex).toBeGreaterThan(-1);
@@ -155,7 +171,7 @@ describe("plugin.js bootstrap", function () {
     });
 
     runIifeScript("plugin.js", context);
-    await flushPromises(50);
+    await flushPromises(120);
 
     expect(context.window.DyniPlugin.avnavApi).toBe(hostApi);
     expect(dom.appendedScripts.length).toBeGreaterThan(0);

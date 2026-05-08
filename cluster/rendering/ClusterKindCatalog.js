@@ -1,7 +1,7 @@
 /**
- * Module: ClusterKindCatalog - Strict cluster+kind to renderer/surface catalog for router ownership
+ * Module: ClusterKindCatalog - Thin adapter over config.clusterRoutes metadata
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: none
+ * Depends: config/cluster-routes/finalize.js
  */
 
 (function (root, factory) {
@@ -11,100 +11,30 @@
 }(this, function () {
   "use strict";
 
-  const SUPPORTED_SURFACES = {
+  var SUPPORTED_SURFACES = {
     html: true,
     "canvas-dom": true
   };
-
-  const DEFAULT_VIEW_MODEL_ID = "MapperOutputViewModel";
-
-  const CATALOG_ENTRIES = [
-    // courseHeading
-    { cluster: "courseHeading", kind: "cog", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "courseHeading", kind: "hdt", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "courseHeading", kind: "hdm", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "courseHeading", kind: "brg", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "courseHeading", kind: "hdtRadial", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "CompassRadialWidget", surface: "canvas-dom" },
-    { cluster: "courseHeading", kind: "hdmRadial", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "CompassRadialWidget", surface: "canvas-dom" },
-    { cluster: "courseHeading", kind: "hdtLinear", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "CompassLinearWidget", surface: "canvas-dom" },
-    { cluster: "courseHeading", kind: "hdmLinear", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "CompassLinearWidget", surface: "canvas-dom" },
-
-    // default
-    { cluster: "default", kind: "text", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "default", kind: "linearGauge", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "DefaultLinearWidget", surface: "canvas-dom" },
-    { cluster: "default", kind: "radialGauge", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "DefaultRadialWidget", surface: "canvas-dom" },
-
-    // speed
-    { cluster: "speed", kind: "sog", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "speed", kind: "stw", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "speed", kind: "sogLinear", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "SpeedLinearWidget", surface: "canvas-dom" },
-    { cluster: "speed", kind: "stwLinear", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "SpeedLinearWidget", surface: "canvas-dom" },
-    { cluster: "speed", kind: "sogRadial", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "SpeedRadialWidget", surface: "canvas-dom" },
-    { cluster: "speed", kind: "stwRadial", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "SpeedRadialWidget", surface: "canvas-dom" },
-
-    // environment
-    { cluster: "environment", kind: "depth", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "environment", kind: "depthLinear", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "DepthLinearWidget", surface: "canvas-dom" },
-    { cluster: "environment", kind: "depthRadial", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "DepthRadialWidget", surface: "canvas-dom" },
-    { cluster: "environment", kind: "temp", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "environment", kind: "tempLinear", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "TemperatureLinearWidget", surface: "canvas-dom" },
-    { cluster: "environment", kind: "tempRadial", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "TemperatureRadialWidget", surface: "canvas-dom" },
-    { cluster: "environment", kind: "pressure", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-
-    // wind
-    { cluster: "wind", kind: "angleTrue", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "wind", kind: "angleApparent", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "wind", kind: "angleTrueDirection", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "wind", kind: "speedTrue", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "wind", kind: "speedApparent", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "wind", kind: "angleTrueRadial", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "WindRadialWidget", surface: "canvas-dom" },
-    { cluster: "wind", kind: "angleApparentRadial", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "WindRadialWidget", surface: "canvas-dom" },
-    { cluster: "wind", kind: "angleTrueLinear", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "WindLinearWidget", surface: "canvas-dom" },
-    { cluster: "wind", kind: "angleApparentLinear", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "WindLinearWidget", surface: "canvas-dom" },
-
-    // nav
-    { cluster: "nav", kind: "eta", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "nav", kind: "rteEta", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "nav", kind: "dst", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "nav", kind: "rteDistance", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "nav", kind: "vmg", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "nav", kind: "activeRoute", viewModelId: "ActiveRouteViewModel", rendererId: "ActiveRouteTextHtmlWidget", surface: "html" },
-    { cluster: "nav", kind: "editRoute", viewModelId: "EditRouteViewModel", rendererId: "EditRouteTextHtmlWidget", surface: "html" },
-    { cluster: "nav", kind: "routePoints", viewModelId: "RoutePointsViewModel", rendererId: "RoutePointsTextHtmlWidget", surface: "html" },
-    { cluster: "nav", kind: "positionBoat", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "PositionCoordinateWidget", surface: "canvas-dom" },
-    { cluster: "nav", kind: "positionWp", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "PositionCoordinateWidget", surface: "canvas-dom" },
-    { cluster: "nav", kind: "xteDisplay", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "XteDisplayWidget", surface: "canvas-dom" },
-
-    // map
-    { cluster: "map", kind: "centerDisplay", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "CenterDisplayTextWidget", surface: "canvas-dom" },
-    { cluster: "map", kind: "zoom", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "MapZoomTextHtmlWidget", surface: "html" },
-    { cluster: "map", kind: "aisTarget", viewModelId: "AisTargetViewModel", rendererId: "AisTargetTextHtmlWidget", surface: "html" },
-
-    // anchor
-    { cluster: "anchor", kind: "anchorDistance", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "anchor", kind: "anchorWatch", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "anchor", kind: "anchorBearing", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-
-    // vessel
-    { cluster: "vessel", kind: "voltage", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "vessel", kind: "voltageLinear", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "VoltageLinearWidget", surface: "canvas-dom" },
-    { cluster: "vessel", kind: "voltageRadial", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "VoltageRadialWidget", surface: "canvas-dom" },
-    { cluster: "vessel", kind: "alarm", viewModelId: "AlarmViewModel", rendererId: "AlarmTextHtmlWidget", surface: "html" },
-    { cluster: "vessel", kind: "clock", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "vessel", kind: "dateTime", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "PositionCoordinateWidget", surface: "canvas-dom" },
-    { cluster: "vessel", kind: "timeStatus", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "PositionCoordinateWidget", surface: "canvas-dom" },
-    { cluster: "vessel", kind: "pitch", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" },
-    { cluster: "vessel", kind: "roll", viewModelId: DEFAULT_VIEW_MODEL_ID, rendererId: "ThreeValueTextWidget", surface: "canvas-dom" }
-  ];
-
-  function entryKey(cluster, kind) {
-    return String(cluster) + "::" + String(kind);
-  }
 
   function ensureNonEmptyString(value, fieldName) {
     if (typeof value !== "string" || !value.trim()) {
       throw new Error("ClusterKindCatalog: entry." + fieldName + " must be a non-empty string");
     }
+  }
+
+  function resolveRoutesConfig() {
+    var globalRoot = (typeof globalThis !== "undefined")
+      ? globalThis
+      : (typeof self !== "undefined" ? self : {});
+    var ns = globalRoot.DyniPlugin;
+    var config = ns && ns.config;
+    var clusterRoutes = config && config.clusterRoutes;
+
+    if (!clusterRoutes || !Array.isArray(clusterRoutes.routes)) {
+      throw new Error("ClusterKindCatalog: config.clusterRoutes.routes must be an array");
+    }
+
+    return clusterRoutes.routes;
   }
 
   function normalizeEntry(entry) {
@@ -114,71 +44,72 @@
 
     ensureNonEmptyString(entry.cluster, "cluster");
     ensureNonEmptyString(entry.kind, "kind");
-    ensureNonEmptyString(entry.viewModelId, "viewModelId");
     ensureNonEmptyString(entry.rendererId, "rendererId");
     ensureNonEmptyString(entry.surface, "surface");
+
+    if (typeof entry.viewModelId !== "undefined") {
+      ensureNonEmptyString(entry.viewModelId, "viewModelId");
+    }
 
     if (!SUPPORTED_SURFACES[entry.surface]) {
       throw new Error("ClusterKindCatalog: unsupported surface '" + entry.surface + "' for " + entry.cluster + "/" + entry.kind);
     }
 
-    return {
+    var normalized = {
       cluster: entry.cluster,
       kind: entry.kind,
-      viewModelId: entry.viewModelId,
       rendererId: entry.rendererId,
       surface: entry.surface
     };
+
+    if (typeof entry.viewModelId !== "undefined") {
+      normalized.viewModelId = entry.viewModelId;
+    }
+
+    return normalized;
   }
 
-  function create(def, Helpers) {
-    function createCatalog(entries) {
-      if (typeof entries !== "undefined" && !Array.isArray(entries)) {
-        throw new Error("ClusterKindCatalog: createCatalog(entries) expects an array when provided");
+  function createCatalogFromClusterRoutes() {
+    var sourceEntries = resolveRoutesConfig();
+    var byKey = Object.create(null);
+    var list = [];
+
+    for (var i = 0; i < sourceEntries.length; i += 1) {
+      var normalized = normalizeEntry(sourceEntries[i]);
+      var routeKey = normalized.cluster + "::" + normalized.kind;
+      if (byKey[routeKey]) {
+        throw new Error("ClusterKindCatalog: duplicate entry for cluster '" + normalized.cluster + "' kind '" + normalized.kind + "'");
       }
+      var frozenEntry = Object.freeze(normalized);
+      byKey[routeKey] = frozenEntry;
+      list.push(frozenEntry);
+    }
 
-      const sourceEntries = Array.isArray(entries) ? entries : CATALOG_ENTRIES;
-      const byKey = Object.create(null);
-      const list = [];
+    function resolveRoute(cluster, kind) {
+      ensureNonEmptyString(cluster, "cluster");
+      ensureNonEmptyString(kind, "kind");
 
-      for (let i = 0; i < sourceEntries.length; i += 1) {
-        const normalized = normalizeEntry(sourceEntries[i]);
-        const key = entryKey(normalized.cluster, normalized.kind);
-        if (byKey[key]) {
-          throw new Error("ClusterKindCatalog: duplicate entry for cluster '" + normalized.cluster + "' kind '" + normalized.kind + "'");
-        }
-        const frozenEntry = Object.freeze(normalized);
-        byKey[key] = frozenEntry;
-        list.push(frozenEntry);
+      var route = byKey[cluster + "::" + kind];
+      if (!route) {
+        throw new Error("ClusterKindCatalog: missing catalog entry for cluster '" + cluster + "' kind '" + kind + "'");
       }
+      return route;
+    }
 
-      function resolveRoute(cluster, kind) {
-        ensureNonEmptyString(cluster, "cluster");
-        ensureNonEmptyString(kind, "kind");
-
-        const route = byKey[entryKey(cluster, kind)];
-        if (!route) {
-          throw new Error("ClusterKindCatalog: missing catalog entry for cluster '" + cluster + "' kind '" + kind + "'");
-        }
-        return route;
-      }
-
-      function listRoutes() {
-        return list.slice();
-      }
-
-      return {
-        resolveRoute: resolveRoute,
-        listRoutes: listRoutes
-      };
+    function listRoutes() {
+      return list.slice();
     }
 
     return {
+      resolveRoute: resolveRoute,
+      listRoutes: listRoutes
+    };
+  }
+
+  function create() {
+    return {
       id: "ClusterKindCatalog",
-      createCatalog: createCatalog,
-      createDefaultCatalog: function () {
-        return createCatalog();
-      }
+      createDefaultCatalog: createCatalogFromClusterRoutes
     };
   }
 
