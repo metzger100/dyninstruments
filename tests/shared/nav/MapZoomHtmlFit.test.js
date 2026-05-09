@@ -49,10 +49,11 @@ describe("MapZoomHtmlFit", function () {
       })
     };
 
+    const themeTokens = {
+      font: { family: "sans-serif", familyMono: "monospace", weight: 730, labelWeight: 610 }
+    };
     const themeApi = {
-      resolveForRoot: vi.fn(() => ({
-        font: { family: "sans-serif", familyMono: "monospace", weight: 730, labelWeight: 610 }
-      }))
+      resolveForRoot: vi.fn(() => themeTokens)
     };
 
     const shellEl = { id: "shell-el", nodeType: 1 };
@@ -73,10 +74,12 @@ describe("MapZoomHtmlFit", function () {
     const componentContext = createComponentContextMock({
       modules: {
         TextLayoutEngine: { create: () => textApi },
-        HtmlWidgetUtils: htmlUtilsModule,
-        ThemeResolver: themeApi
+        HtmlWidgetUtils: htmlUtilsModule
       },
       services: {
+        themeTokens: {
+          resolveForRoot: themeApi.resolveForRoot
+        },
         dom: {
           requirePluginRoot(target) {
             return target || null;
@@ -219,7 +222,6 @@ describe("MapZoomHtmlFit", function () {
   it("shrinks fitted text under tighter geometry and keeps non-trivial output", function () {
     const MODULE_PATH_BY_ID = {
       HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
-      ThemeResolver: "shared/theme/ThemeResolver.js",
       TextLayoutEngine: "shared/widget-kits/text/TextLayoutEngine.js",
       RadialValueMath: "shared/widget-kits/radial/RadialValueMath.js",
       RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
@@ -238,9 +240,18 @@ describe("MapZoomHtmlFit", function () {
       }
       modules[id] = moduleCache[id];
     });
+    const themeTokens = {
+      font: { family: "sans-serif", familyMono: "monospace", weight: 730, labelWeight: 610 }
+    };
+    const themeApi = {
+      resolveForRoot: vi.fn(() => themeTokens)
+    };
     const componentContext = createComponentContextMock({
       modules: modules,
       services: {
+        themeTokens: {
+          resolveForRoot: themeApi.resolveForRoot
+        },
         format: {
           applyFormatter(value) { return String(value); }
         },
@@ -272,6 +283,7 @@ describe("MapZoomHtmlFit", function () {
       hostContext: hostContext,
       shellRect: { width: 320, height: 180 }
     });
+    expect(themeApi.resolveForRoot).toHaveBeenCalledWith(rootEl);
     const spaciousValuePx = parseInt(spaciousResult.valueStyle.match(/(\d+)/)[1], 10);
 
     // Tight geometry (same aspect ratio, smaller)
@@ -292,7 +304,6 @@ describe("MapZoomHtmlFit", function () {
   it("produces fitted text under tight flat-mode geometry", function () {
     const MODULE_PATH_BY_ID = {
       HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
-      ThemeResolver: "shared/theme/ThemeResolver.js",
       TextLayoutEngine: "shared/widget-kits/text/TextLayoutEngine.js",
       RadialValueMath: "shared/widget-kits/radial/RadialValueMath.js",
       RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
@@ -311,9 +322,18 @@ describe("MapZoomHtmlFit", function () {
       }
       modules[id] = moduleCache[id];
     });
+    const themeTokens = {
+      font: { family: "sans-serif", familyMono: "monospace", weight: 730, labelWeight: 610 }
+    };
+    const themeApi = {
+      resolveForRoot: vi.fn(() => themeTokens)
+    };
     const componentContext = createComponentContextMock({
       modules: modules,
       services: {
+        themeTokens: {
+          resolveForRoot: themeApi.resolveForRoot
+        },
         format: {
           applyFormatter(value) { return String(value); }
         },
@@ -345,6 +365,7 @@ describe("MapZoomHtmlFit", function () {
       hostContext: hostContext,
       shellRect: { width: 220, height: 40 }
     });
+    expect(themeApi.resolveForRoot).toHaveBeenCalledWith(rootEl);
 
     // Fit output should exist with a non-empty value style
     expect(tightFlatResult.valueStyle).toBeTruthy();

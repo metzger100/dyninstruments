@@ -66,6 +66,30 @@ describe("XteDisplayWidget", function () {
       }
     }));
     const realTileLayout = loadFresh("shared/widget-kits/text/TextTileLayout.js").create();
+    const textTileLayout = {
+      id: "TextTileLayout",
+      measureMetricTile(args) {
+        if (typeof (args && args.textFillScale) === "number" && isFinite(args.textFillScale)) {
+          calls.metricTextFillScales.push(args.textFillScale);
+        }
+        return realTileLayout.measureMetricTile(args);
+      },
+      drawMetricTile(args) {
+        if (typeof (args && args.textFillScale) === "number" && isFinite(args.textFillScale)) {
+          calls.metricTextFillScales.push(args.textFillScale);
+        }
+        return realTileLayout.drawMetricTile(args);
+      },
+      measureFittedLine(args) {
+        if (typeof (args && args.textFillScale) === "number" && isFinite(args.textFillScale)) {
+          calls.waypointTextFillScales.push(args.textFillScale);
+        }
+        return realTileLayout.measureFittedLine(args);
+      },
+      drawFittedLine(args) {
+        return realTileLayout.drawFittedLine(args);
+      }
+    };
 
     const applyFormatter = typeof opts.applyFormatter === "function"
       ? opts.applyFormatter
@@ -178,6 +202,7 @@ describe("XteDisplayWidget", function () {
             };
           }
         },
+        TextTileLayout: textTileLayout,
         PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
         UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
         StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),

@@ -127,13 +127,14 @@ describe("EditRouteHtmlFit", function () {
       measureMetricTile: vi.fn(textTileLayout.measureMetricTile)
     });
     const radialTextApi = createRadialTextApi();
+    const themeTokens = {
+      font: {
+        weight: 720,
+        labelWeight: 610
+      }
+    };
     const themeApi = {
-      resolveForRoot: vi.fn(() => ({
-        font: {
-          weight: 720,
-          labelWeight: 610
-        }
-      }))
+      resolveForRoot: vi.fn(() => themeTokens)
     };
     const targetEl = document.createElement("div");
     const hostContext = {
@@ -142,7 +143,6 @@ describe("EditRouteHtmlFit", function () {
 
     const componentContext = createComponentContextMock({
       modules: {
-        ThemeResolver: themeApi,
         RadialTextLayout: { create: () => radialTextApi },
         TextTileLayout: { create() { return textTileLayoutSpy; } },
         EditRouteLayout: editRouteLayoutModule,
@@ -155,6 +155,9 @@ describe("EditRouteHtmlFit", function () {
         TextFitMath: loadFresh("shared/widget-kits/text/TextFitMath.js")
       },
       services: {
+        themeTokens: {
+          resolveForRoot: themeApi.resolveForRoot
+        },
         dom: {
           requirePluginRoot(target) {
             return target || null;

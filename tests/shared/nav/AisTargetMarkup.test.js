@@ -3,11 +3,17 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 
 describe("AisTargetMarkup", function () {
   function createMarkup() {
-    const moduleCache = Object.create(null);
+    const stateScreenMarkup = loadFresh("shared/widget-kits/state/StateScreenMarkup.js").create({}, createComponentContextMock({
+      modules: {
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js")
+      }
+    }));
     const componentContext = createComponentContextMock({
       modules: {
-        StateScreenMarkup: { create() { if (!moduleCache.StateScreenMarkup) moduleCache.StateScreenMarkup = loadFresh("shared/widget-kits/state/StateScreenMarkup.js").create(); return moduleCache.StateScreenMarkup; } },
-        StateScreenTextFit: { create() { if (!moduleCache.StateScreenTextFit) moduleCache.StateScreenTextFit = loadFresh("shared/widget-kits/state/StateScreenTextFit.js").create(); return moduleCache.StateScreenTextFit; } },
+        StateScreenMarkup: stateScreenMarkup,
+        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js"),
         StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
         HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js")
       }

@@ -8,7 +8,6 @@ describe("MapZoomTextHtmlWidget", function () {
     HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
     MapZoomHtmlFit: "shared/widget-kits/nav/MapZoomHtmlFit.js",
     StableDigits: "shared/widget-kits/format/StableDigits.js",
-    ThemeResolver: "shared/theme/ThemeResolver.js",
     TextLayoutEngine: "shared/widget-kits/text/TextLayoutEngine.js",
     RadialValueMath: "shared/widget-kits/radial/RadialValueMath.js",
     RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
@@ -60,11 +59,7 @@ describe("MapZoomTextHtmlWidget", function () {
       };
     const modules = Object.create(null);
     Object.keys(MODULE_PATH_BY_ID).forEach(function (id) {
-      modules[id] = {
-        create() {
-          return loadDep(id);
-        }
-      };
+      modules[id] = loadDep(id);
     });
     const componentContext = createComponentContextMock({
       modules,

@@ -46,15 +46,16 @@ describe("RoutePointsHtmlFit", function () {
     const routePointsLayoutModule = loadFresh("shared/widget-kits/nav/RoutePointsLayout.js");
     const textTileLayoutModule = loadFresh("shared/widget-kits/text/TextTileLayout.js");
     const radialTextApi = createRadialTextApi();
+    const themeTokens = {
+      font: {
+        family: "sans-serif",
+        familyMono: "monospace",
+        weight: 720,
+        labelWeight: 610
+      }
+    };
     const themeApi = {
-      resolveForRoot: vi.fn(() => ({
-        font: {
-          family: "sans-serif",
-          familyMono: "monospace",
-          weight: 720,
-          labelWeight: 610
-        }
-      }))
+      resolveForRoot: vi.fn(() => themeTokens)
     };
     const targetEl = document.createElement("div");
     const hostContext = {
@@ -63,7 +64,6 @@ describe("RoutePointsHtmlFit", function () {
 
     const componentContext = createComponentContextMock({
       modules: {
-        ThemeResolver: themeApi,
         RadialTextLayout: { create: () => radialTextApi },
         TextTileLayout: textTileLayoutModule,
         RoutePointsLayout: routePointsLayoutModule,
@@ -77,6 +77,9 @@ describe("RoutePointsHtmlFit", function () {
         RoutePointsRowGeometry: loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js")
       },
       services: {
+        themeTokens: {
+          resolveForRoot: themeApi.resolveForRoot
+        },
         dom: {
           requirePluginRoot(target) {
             return target || null;

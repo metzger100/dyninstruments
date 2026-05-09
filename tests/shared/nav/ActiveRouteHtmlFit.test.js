@@ -58,14 +58,11 @@ describe("ActiveRouteHtmlFit", function () {
       };
     }
     const themeApi = {
-      resolveForRoot: vi.fn(() => ({
-        font: themeTokens.font
-      }))
+      resolveForRoot: vi.fn(() => themeTokens)
     };
 
     const componentContext = createComponentContextMock({
       modules: {
-        ThemeResolver: themeApi,
         HtmlWidgetUtils: htmlUtilsModule,
         PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
         UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
@@ -77,6 +74,9 @@ describe("ActiveRouteHtmlFit", function () {
         LayoutRectMath: layoutRectMathModule
       },
       services: {
+        themeTokens: {
+          resolveForRoot: themeApi.resolveForRoot
+        },
         dom: {
           requirePluginRoot(target) {
             return target || null;

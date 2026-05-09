@@ -129,21 +129,22 @@ describe("AlarmHtmlFit", function () {
         return { sPx: 9, vPx: 15 };
       })
     };
-    const themeApi = {
-      resolveForRoot: vi.fn(() => ({
-        colors: {
-          alarmWidget: {
-            bg: "#e04040",
-            fg: "#ffffff",
-            strip: "#66b8ff"
-          }
-        },
-        font: {
-          family: "sans-serif",
-          weight: 700,
-          labelWeight: 600
+    const themeTokens = {
+      colors: {
+        alarmWidget: {
+          bg: "#e04040",
+          fg: "#ffffff",
+          strip: "#66b8ff"
         }
-      }))
+      },
+      font: {
+        family: "sans-serif",
+        weight: 700,
+        labelWeight: 600
+      }
+    };
+    const themeApi = {
+      resolveForRoot: vi.fn(() => themeTokens)
     };
     const targetEl = document.createElement("div");
     const componentContext = createComponentContextMock({
@@ -154,10 +155,12 @@ describe("AlarmHtmlFit", function () {
         ResponsiveScaleProfile: responsiveScaleProfile,
         LayoutRectMath: layoutRectMath,
         AisTargetLayoutMath: aisLayoutMath,
-        TextLayoutEngine: { create: () => textLayoutApi },
-        ThemeResolver: themeApi
+        TextLayoutEngine: { create: () => textLayoutApi }
       },
       services: {
+        themeTokens: {
+          resolveForRoot: themeApi.resolveForRoot
+        },
         dom: {
           requirePluginRoot(target) {
             return target || null;
@@ -267,7 +270,7 @@ describe("AlarmHtmlFit", function () {
     expect(h.textLayoutApi.fitValueUnitCaptionRows.mock.calls[0][0].valueText).toBe("firstAlarm, secondAlarm +1");
   });
 
-  it("sources active and idle token styles from ThemeResolver", function () {
+  it("sources active and idle token styles from theme tokens", function () {
     const h = createHarness();
     const active = h.fit.compute({
       model: makeModel({ showActiveBackground: true }),

@@ -45,28 +45,28 @@ describe("AisTargetHtmlFit", function () {
     const aisTargetLayoutModule = loadFresh("shared/widget-kits/nav/AisTargetLayout.js");
     const textTileLayoutModule = loadFresh("shared/widget-kits/text/TextTileLayout.js");
     const radialTextApi = createRadialTextApi();
-    const themeApi = {
-      resolveForRoot: vi.fn(() => ({
-        colors: {
-          ais: {
-            warning: "#f39b52",
-            nearest: "#66b8ff",
-            tracking: "#89d38f",
-            normal: "#8da0b3"
-          }
-        },
-        font: {
-          family: "sans-serif",
-          familyMono: "monospace",
-          weight: 720,
-          labelWeight: 610
+    const themeTokens = {
+      colors: {
+        ais: {
+          warning: "#f39b52",
+          nearest: "#66b8ff",
+          tracking: "#89d38f",
+          normal: "#8da0b3"
         }
-      }))
+      },
+      font: {
+        family: "sans-serif",
+        familyMono: "monospace",
+        weight: 720,
+        labelWeight: 610
+      }
+    };
+    const themeApi = {
+      resolveForRoot: vi.fn(() => themeTokens)
     };
 
     const componentContext = createComponentContextMock({
       modules: {
-        ThemeResolver: themeApi,
         RadialTextLayout: { create: () => radialTextApi },
         TextTileLayout: textTileLayoutModule,
         AisTargetLayout: aisTargetLayoutModule,
@@ -79,6 +79,9 @@ describe("AisTargetHtmlFit", function () {
         AisTargetLayoutMath: loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js")
       },
       services: {
+        themeTokens: {
+          resolveForRoot: themeApi.resolveForRoot
+        },
         dom: {
           requirePluginRoot(target) {
             return target || null;
