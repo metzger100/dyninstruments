@@ -66,51 +66,45 @@ export function runSmellContractsCli(argv = process.argv.slice(2)) {
 
 function runThemeCacheInvalidationRule() {
   const out = [];
-  const resolverRel = "shared/theme/ThemeResolver.js";
-  const modelRel = "shared/theme/ThemeModel.js";
-  if (!exists(resolverRel)) {
-    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver module is missing."));
-    return out;
-  }
+  const modelRel = "runtime/theme/model.js";
+  const resolverRel = "runtime/theme/resolver.js";
   if (!exists(modelRel)) {
-    out.push(makeFinding(modelRel, 1, "theme-cache-invalidation", "ThemeModel module is missing."));
+    out.push(makeFinding(modelRel, 1, "theme-cache-invalidation", "Theme model runtime module is missing."));
+    return out;
+  }
+  if (!exists(resolverRel)) {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Theme resolver runtime module is missing."));
     return out;
   }
 
-  let loadedResolver;
-  let loadedModel;
+  const sandbox = createScriptContext();
   try {
-    loadedResolver = loadUmdModule(resolverRel, {});
-    loadedModel = loadUmdModule(modelRel, {});
+    runIife("runtime/namespace.js", sandbox);
+    runIife(modelRel, sandbox);
+    runIife(resolverRel, sandbox);
   } catch (e) {
-    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Failed to load theme modules: " + e.message));
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Failed to load runtime theme modules: " + e.message));
     return out;
   }
 
-  const resolverMod = loadedResolver.mod;
-  const resolverSandbox = loadedResolver.sandbox;
-  const modelMod = loadedModel.mod;
-
-  if (!resolverMod || typeof resolverMod.resolveForRoot !== "function") {
-    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must expose resolveForRoot(rootEl)."));
+  const runtime = sandbox.DyniPlugin && sandbox.DyniPlugin.runtime;
+  if (!runtime || typeof runtime.createThemeModel !== "function") {
+    out.push(makeFinding(modelRel, 1, "theme-cache-invalidation", "runtime.createThemeModel() is missing."));
     return out;
   }
-  if (typeof resolverMod.configure !== "function") {
-    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must expose configure({...})."));
+  if (typeof runtime.createThemeResolver !== "function") {
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "runtime.createThemeResolver() is missing."));
     return out;
   }
-  if (typeof resolverMod.create === "function") {
-    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must not export create()."));
-    return out;
-  }
-  if (typeof resolverMod.invalidateRoot === "function" || typeof resolverMod.invalidateAll === "function") {
-    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must not expose invalidateRoot()/invalidateAll()."));
-    return out;
-  }
-  if (!modelMod || typeof modelMod.normalizePresetName !== "function" || typeof modelMod.getTokenDefinitions !== "function") {
-    out.push(makeFinding(modelRel, 1, "theme-cache-invalidation", "ThemeModel direct module API is invalid."));
-    return out;
-  }
+  const model = runtime.createThemeModel();
+  const resolver = runtime.createThemeResolver(model, {
+    getNightModeState() {
+      return false;
+    },
+    getActivePresetName() {
+      return "default";
+    }
+  });
 
   const inlineValues = Object.create(null);
   const inlineStyleApi = {
@@ -124,7 +118,7 @@ function runThemeCacheInvalidationRule() {
   inlineStyleApi.setProperty("--dyni-pointer", "#111111");
 
   let computedStyleCalls = 0;
-  resolverSandbox.getComputedStyle = function () {
+  sandbox.getComputedStyle = function () {
     computedStyleCalls += 1;
     return {
       getPropertyValue(name) {
@@ -153,30 +147,23 @@ function runThemeCacheInvalidationRule() {
     }
   };
 
-  resolverMod.configure({
-    ThemeModel: modelMod,
-    getNightModeState() {
-      return false;
-    }
-  });
-
-  const first = resolverMod.resolveForRoot(rootEl);
-  const second = resolverMod.resolveForRoot(rootEl);
+  const first = resolver.resolveForRoot(rootEl);
+  const second = resolver.resolveForRoot(rootEl);
   if (first !== second) {
-    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must return the same snapshot object for identical canonical root state."));
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Theme resolver must return the same snapshot object for identical canonical root state."));
   }
   if (!first || !first.colors || first.colors.pointer !== "#111111") {
     out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "resolveForRoot(rootEl) should return initial pointer token value."));
   }
   if (!Object.isFrozen(first) || !Object.isFrozen(first.colors)) {
-    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver cached snapshots must be immutable."));
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Theme resolver cached snapshots must be immutable."));
   }
   if (computedStyleCalls !== 1) {
     out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Identical snapshot cache hits must not reread getComputedStyle(rootEl)."));
   }
 
-  const outputFirst = resolverMod.resolveOutputsForRoot(rootEl);
-  const outputSecond = resolverMod.resolveOutputsForRoot(rootEl);
+  const outputFirst = resolver.resolveOutputsForRoot(rootEl);
+  const outputSecond = resolver.resolveOutputsForRoot(rootEl);
   if (outputFirst !== outputSecond) {
     out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "resolveOutputsForRoot(rootEl) must reuse cached snapshots for identical canonical root state."));
   }
@@ -185,39 +172,31 @@ function runThemeCacheInvalidationRule() {
   }
 
   rootEl.style.setProperty("--dyni-pointer", "#222222");
-  const changed = resolverMod.resolveForRoot(rootEl);
+  const changed = resolver.resolveForRoot(rootEl);
   if (changed === second) {
-    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Inline ThemeModel input var changes must invalidate ThemeResolver snapshot cache."));
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Inline theme input var changes must invalidate resolver snapshot cache."));
   }
   if (!changed || !changed.colors || changed.colors.pointer !== "#222222") {
-    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "ThemeResolver must resolve updated canonical input values after cache invalidation."));
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Theme resolver must resolve updated canonical input values after cache invalidation."));
   }
 
   rootEl.style.setProperty("--dyni-theme-surface-fg", "#00ff00");
-  const outputVarChanged = resolverMod.resolveForRoot(rootEl);
+  const outputVarChanged = resolver.resolveForRoot(rootEl);
   if (outputVarChanged !== changed) {
     out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "Resolver-owned --dyni-theme-* outputs must be excluded from snapshot identity."));
   }
 
-  resolverMod.configure({
-    ThemeModel: modelMod,
+  const secondResolver = runtime.createThemeResolver(model, {
     getNightModeState() {
       return false;
+    },
+    getActivePresetName() {
+      return "default";
     }
   });
-  const afterConfigure = resolverMod.resolveForRoot(rootEl);
+  const afterConfigure = secondResolver.resolveForRoot(rootEl);
   if (afterConfigure === changed) {
-    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "configure(...) must clear ThemeResolver metadata and root snapshot caches."));
-  }
-
-  const initRel = "runtime/init.js";
-  if (!exists(initRel)) {
-    out.push(makeFinding(initRel, 1, "theme-cache-invalidation", "runtime/init.js is missing."));
-    return out;
-  }
-  const initText = readFile(initRel);
-  if (/invalidateThemeResolverCache/.test(initText) || /themeResolverModule/.test(initText)) {
-    out.push(makeFinding(initRel, 1, "theme-cache-invalidation", "runtime/init.js must not keep ThemeResolver cache invalidation wiring."));
+    out.push(makeFinding(resolverRel, 1, "theme-cache-invalidation", "New resolver instances must not reuse stale snapshot objects."));
   }
 
   return out;
@@ -291,8 +270,8 @@ function runDynamicStorekeyClearsRule() {
 function runFalsyDefaultPreservationRule() {
   const out = [];
 
-  if (!exists("runtime/helpers.js")) {
-    out.push(makeFinding("runtime/helpers.js", 1, "falsy-default-preservation", "Missing runtime/helpers.js"));
+  if (!exists("runtime/format-runtime.js")) {
+    out.push(makeFinding("runtime/format-runtime.js", 1, "falsy-default-preservation", "Missing runtime/format-runtime.js"));
     return out;
   }
   if (!exists("runtime/widget-registrar.js")) {
@@ -300,35 +279,37 @@ function runFalsyDefaultPreservationRule() {
     return out;
   }
 
-  const helpersCtx = createScriptContext({
+  const formatCtx = createScriptContext({
     avnav: { api: { formatter: {} } }
   });
   try {
-    runIife("runtime/helpers.js", helpersCtx);
+    runIife("runtime/namespace.js", formatCtx);
+    runIife("runtime/format-runtime.js", formatCtx);
   } catch (e) {
-    out.push(makeFinding("runtime/helpers.js", 1, "falsy-default-preservation", "Failed to execute runtime/helpers.js: " + e.message));
+    out.push(makeFinding("runtime/format-runtime.js", 1, "falsy-default-preservation", "Failed to execute runtime/format-runtime.js: " + e.message));
     return out;
   }
 
-  const applyFormatter = ((helpersCtx.DyniPlugin || {}).runtime || {}).applyFormatter;
+  const applyFormatter = ((formatCtx.DyniPlugin || {}).runtime || {}).format &&
+    ((formatCtx.DyniPlugin || {}).runtime || {}).format.applyFormatter;
   if (typeof applyFormatter !== "function") {
-    out.push(makeFinding("runtime/helpers.js", 1, "falsy-default-preservation", "Helpers.applyFormatter is missing."));
+    out.push(makeFinding("runtime/format-runtime.js", 1, "falsy-default-preservation", "runtime.format.applyFormatter is missing."));
     return out;
   }
 
   const emptyDefault = applyFormatter(null, { default: "" });
   if (emptyDefault !== "") {
-    out.push(makeFinding("runtime/helpers.js", 1, "falsy-default-preservation", "applyFormatter(null, {default: \"\"}) must return \"\"."));
+    out.push(makeFinding("runtime/format-runtime.js", 1, "falsy-default-preservation", "applyFormatter(null, {default: \"\"}) must return \"\"."));
   }
 
   const zeroDefault = applyFormatter(null, { default: 0 });
   if (zeroDefault !== 0) {
-    out.push(makeFinding("runtime/helpers.js", 1, "falsy-default-preservation", "applyFormatter(null, {default: 0}) must return 0."));
+    out.push(makeFinding("runtime/format-runtime.js", 1, "falsy-default-preservation", "applyFormatter(null, {default: 0}) must return 0."));
   }
 
   const falseDefault = applyFormatter(null, { default: false });
   if (falseDefault !== false) {
-    out.push(makeFinding("runtime/helpers.js", 1, "falsy-default-preservation", "applyFormatter(null, {default: false}) must return false."));
+    out.push(makeFinding("runtime/format-runtime.js", 1, "falsy-default-preservation", "applyFormatter(null, {default: false}) must return false."));
   }
 
   const calls = [];
@@ -342,7 +323,7 @@ function runFalsyDefaultPreservationRule() {
     },
     DyniPlugin: {
       runtime: {
-        applyThemePresetToContainer() {},
+        hostActions: {},
         defaultsFromEditableParams() {
           return {};
         }
@@ -353,6 +334,7 @@ function runFalsyDefaultPreservationRule() {
   });
 
   try {
+    runIife("runtime/namespace.js", registrarCtx);
     runIife("runtime/widget-registrar.js", registrarCtx);
   } catch (e) {
     out.push(makeFinding("runtime/widget-registrar.js", 1, "falsy-default-preservation", "Failed to execute runtime/widget-registrar.js: " + e.message));
@@ -365,10 +347,10 @@ function runFalsyDefaultPreservationRule() {
     return out;
   }
 
-  const component = { create() { return {}; } };
-  register(component, { def: { name: "x", default: 0, editableParameters: {} } }, {});
-  register(component, { def: { name: "y", default: "", editableParameters: {} } }, {});
-  register(component, { def: { name: "z", default: false, editableParameters: {} } }, {});
+  const componentSpec = {};
+  register(componentSpec, { def: { name: "x", default: 0, editableParameters: {} } });
+  register(componentSpec, { def: { name: "y", default: "", editableParameters: {} } });
+  register(componentSpec, { def: { name: "z", default: false, editableParameters: {} } });
 
   if (!calls.length) {
     out.push(makeFinding("runtime/widget-registrar.js", 1, "falsy-default-preservation", "registerWidget did not register any widget."));
@@ -507,14 +489,14 @@ function runPlaceholderContractRule() {
     if (rel === "shared/widget-kits/nav/RoutePointsRenderModel.js") continue;
 
     const text = readFile(rel);
-    const applyMatches = findLineMatches(text, /Helpers\.applyFormatter\s*\(/g);
+    const applyMatches = findLineMatches(text, /componentContext\.format\.applyFormatter\s*\(/g);
     if (!applyMatches.length) continue;
 
     const normalizeMatches = findLineMatches(text, /(?:PlaceholderNormalize|placeholderNormalize)\.normalize\s*\(/g);
     for (const applyLine of applyMatches) {
       const close = normalizeMatches.some((line) => Math.abs(line - applyLine) <= 12);
       if (!close) {
-        out.push(makeFinding(rel, applyLine, "placeholder-contract", "Every Helpers.applyFormatter call site must stay paired with a nearby PlaceholderNormalize.normalize call."));
+        out.push(makeFinding(rel, applyLine, "placeholder-contract", "Every componentContext.format.applyFormatter call site must stay paired with a nearby PlaceholderNormalize.normalize call."));
       }
     }
   }

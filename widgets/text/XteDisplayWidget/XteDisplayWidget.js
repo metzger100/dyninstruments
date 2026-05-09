@@ -10,19 +10,19 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const toolkit = Helpers.getModule("RadialToolkit").create(def, Helpers);
-    const cacheFactory = Helpers.getModule("CanvasLayerCache").create(def, Helpers);
-    const primitives = Helpers.getModule("XteHighwayPrimitives").create(def, Helpers);
-    const layoutApi = Helpers.getModule("XteHighwayLayout").create(def, Helpers);
-    const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
-    const springMotion = Helpers.getModule("SpringEasing").create(def, Helpers).createMotion();
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
-    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
-    const unitFormatter = Helpers.getModule("UnitAwareFormatter").create(def, Helpers);
-    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
-    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
-    const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
+  function create(def, componentContext) {
+    const toolkit = componentContext.components.require("RadialToolkit");
+    const cacheFactory = componentContext.components.require("CanvasLayerCache");
+    const primitives = componentContext.components.require("XteHighwayPrimitives");
+    const layoutApi = componentContext.components.require("XteHighwayLayout");
+    const tileLayout = componentContext.components.require("TextTileLayout");
+    const springMotion = componentContext.components.require("SpringEasing").createMotion();
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    const stableDigits = componentContext.components.require("StableDigits");
+    const unitFormatter = componentContext.components.require("UnitAwareFormatter");
+    const stateScreenLabels = componentContext.components.require("StateScreenLabels");
+    const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
+    const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
     const staticLayer = cacheFactory.createLayerCache({ layers: ["back"] });
 
     function finiteNumber(value) {
@@ -54,7 +54,7 @@
 
     function renderCanvas(canvas, props) {
       const p = props || {};
-      const setup = Helpers.setupCanvas(canvas);
+      const setup = componentContext.canvas.setupCanvas(canvas);
       const ctx = setup.ctx;
       const W = setup.W;
       const H = setup.H;
@@ -64,7 +64,7 @@
       }
 
       ctx.clearRect(0, 0, W, H);
-      const rootEl = Helpers.requirePluginRoot(canvas);
+      const rootEl = componentContext.dom.requirePluginRoot(canvas);
       const theme = toolkit.theme.resolveForRoot(rootEl);
       const textColor = theme.surface.fg;
       const stableDigitsEnabled = p.stableDigits === true;

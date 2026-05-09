@@ -1,7 +1,7 @@
 /**
  * Module: MapZoomHtmlFit - Per-element text fitting for map zoom HTML renderer
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: Helpers.requirePluginRoot, TextLayoutEngine, HtmlWidgetUtils, ThemeResolver
+ * Depends: componentContext.dom.requirePluginRoot, TextLayoutEngine, HtmlWidgetUtils, componentContext.theme.tokens
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -264,10 +264,10 @@
     ]);
   }
 
-  function create(def, Helpers) {
-    const textApi = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const themeApi = Helpers.getModule("ThemeResolver");
+  function create(def, componentContext) {
+    const textApi = componentContext.components.require("TextLayoutEngine");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const themeApi = componentContext.theme.tokens;
 
     function compute(args) {
       const cfg = args || {};
@@ -286,7 +286,7 @@
         return EMPTY_STYLES;
       }
       const target = getMeasureTarget(hostContext);
-      const themeRoot = Helpers.requirePluginRoot(target || cfg.targetEl);
+      const themeRoot = componentContext.dom.requirePluginRoot(target || cfg.targetEl);
       const tokens = themeApi.resolveForRoot(themeRoot);
       const family = tokens.font.family;
       const valueFamily = model.stableDigitsEnabled === true && tokens.font.familyMono

@@ -11,7 +11,7 @@
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
-  function create(def, Helpers) {
+  function create(def, componentContext) {
     const DEFAULT_AXIS_MODE = "range";
     const DEFAULT_RATIO_PROPS = { normal: "ratioThresholdNormal", flat: "ratioThresholdFlat" };
     // Engine-owned last-resort fallback for callers that omit threshold props.
@@ -20,23 +20,23 @@
     const DEFAULT_RANGE_PROPS = { min: "minValue", max: "maxValue" };
     const DEFAULT_TICK_PROPS = { major: "tickMajor", minor: "tickMinor", showEndLabels: "showEndLabels" };
     const DEFAULT_TICK_PRESET = { major: 10, minor: 2 };
-    const GU = Helpers.getModule("RadialToolkit").create(def, Helpers);
-    const layerCacheApi = Helpers.getModule("CanvasLayerCache").create(def, Helpers);
-    const primitives = Helpers.getModule("LinearCanvasPrimitives").create(def, Helpers);
-    const drawing = Helpers.getModule("LinearGaugeEngineDrawing").create(def, Helpers);
-    const math = Helpers.getModule("LinearGaugeMath").create(def, Helpers);
-    const layoutApi = Helpers.getModule("LinearGaugeLayout").create(def, Helpers);
-    const textLayout = Helpers.getModule("LinearGaugeTextLayout").create(def, Helpers);
-    const engineSupport = Helpers.getModule("LinearGaugeEngineSupport").create(def, Helpers);
-    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
-    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
-    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
-    const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
+    const GU = componentContext.components.require("RadialToolkit");
+    const layerCacheApi = componentContext.components.require("CanvasLayerCache");
+    const primitives = componentContext.components.require("LinearCanvasPrimitives");
+    const drawing = componentContext.components.require("LinearGaugeEngineDrawing");
+    const math = componentContext.components.require("LinearGaugeMath");
+    const layoutApi = componentContext.components.require("LinearGaugeLayout");
+    const textLayout = componentContext.components.require("LinearGaugeTextLayout");
+    const engineSupport = componentContext.components.require("LinearGaugeEngineSupport");
+    const stableDigits = componentContext.components.require("StableDigits");
+    const stateScreenLabels = componentContext.components.require("StateScreenLabels");
+    const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
+    const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
     const text = GU.text;
     const value = GU.value;
 
     function resolveSurface(canvas) {
-      const setup = Helpers.setupCanvas(canvas);
+      const setup = componentContext.canvas.setupCanvas(canvas);
       return setup && setup.W && setup.H && setup.ctx ? setup : null;
     }
 
@@ -75,8 +75,7 @@
       const unitDefault = hasOwn.call(cfg, "unitDefault") ? cfg.unitDefault : "";
       const springTarget = cfg.springTarget === "axis" ? "axis" : "pointer";
       const springWrap = Number(cfg.springWrap);
-      const springMotion = Helpers.getModule("SpringEasing")
-        .create(def, Helpers)
+      const springMotion = componentContext.components.require("SpringEasing")
         .createMotion(Number.isFinite(springWrap) ? { wrap: springWrap } : {});
       const layoutCfg = hasOwn.call(cfg, "layout") ? cfg.layout : null;
       const resolveAxisFn = typeof cfg.resolveAxis === "function" ? cfg.resolveAxis : null;
@@ -97,7 +96,7 @@
       const labelEdgePolicy = engineSupport.resolveLabelEdgePolicy(cfg);
       const formatDisplay = typeof cfg.formatDisplay === "function"
         ? function (rawValue, props, unitText) {
-          return cfg.formatDisplay(rawValue, props, unitText, Helpers);
+          return cfg.formatDisplay(rawValue, props, unitText, componentContext);
         }
         : function (rawValue) {
           return { num: Number(rawValue), text: String(rawValue) };
@@ -114,7 +113,7 @@
         const ctx = surface.ctx;
         const W = surface.W;
         const H = surface.H;
-        const rootEl = Helpers.requirePluginRoot(canvas);
+        const rootEl = componentContext.dom.requirePluginRoot(canvas);
         const theme = GU.theme.resolveForRoot(rootEl);
         const stableDigitsEnabled = p.stableDigits === true;
         const family = stableDigitsEnabled

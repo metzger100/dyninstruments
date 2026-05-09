@@ -1,10 +1,11 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("CanvasLayerCache", function () {
   function createCache(spec) {
     const mod = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
-    return mod.create({}, {}).createLayerCache(spec);
+    return mod.create({}, createComponentContextMock()).createLayerCache(spec);
   }
 
   function createSizedCanvas(bufferW, bufferH, rectW, rectH) {

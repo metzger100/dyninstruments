@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RoutePointsRowGeometry", function () {
   function createSizing() {
@@ -7,17 +8,12 @@ describe("RoutePointsRowGeometry", function () {
 
   function createRowGeometry() {
     const routePointsLayoutSizing = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
-    return loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js").create({}, {
-      getModule(id) {
-        if (id === "LayoutRectMath") {
-          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-        }
-        if (id === "RoutePointsLayoutSizing") {
-          return routePointsLayoutSizing;
-        }
-        throw new Error("unexpected module: " + id);
+    return loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js").create({}, createComponentContextMock({
+      modules: {
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+        RoutePointsLayoutSizing: routePointsLayoutSizing
       }
-    });
+    }));
   }
 
   function buildRow(rowGeometry, mode, showOrdinal, rowRect) {

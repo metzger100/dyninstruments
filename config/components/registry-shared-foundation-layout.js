@@ -55,21 +55,21 @@
       js: BASE + "shared/widget-kits/nav/AisTargetHtmlFit.js",
       css: undefined,
       globalKey: "DyniAisTargetHtmlFit",
-      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils", "TextFitMath"]
+      deps: ["RadialTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils", "TextFitMath"]
   };
 
   sf.AlarmHtmlFit = {
       js: BASE + "shared/widget-kits/vessel/AlarmHtmlFit.js",
       css: undefined,
       globalKey: "DyniAlarmHtmlFit",
-      deps: ["AlarmHtmlFitChrome", "ThemeResolver", "TextLayoutEngine", "HtmlWidgetUtils"]
+      deps: ["AlarmHtmlFitChrome", "TextLayoutEngine", "HtmlWidgetUtils"]
   };
 
   sf.ActiveRouteHtmlFit = {
       js: BASE + "shared/widget-kits/nav/ActiveRouteHtmlFit.js",
       css: undefined,
       globalKey: "DyniActiveRouteHtmlFit",
-      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils", "UnitAwareFormatter"]
+      deps: ["RadialTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils", "UnitAwareFormatter"]
   };
 
   sf.ActiveRouteLayout = {
@@ -109,7 +109,7 @@
       js: BASE + "shared/widget-kits/nav/EditRouteHtmlFit.js",
       css: undefined,
       globalKey: "DyniEditRouteHtmlFit",
-      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "EditRouteLayout", "HtmlWidgetUtils", "TextFitMath", "EditRouteHtmlFitSupport"]
+      deps: ["RadialTextLayout", "TextTileLayout", "EditRouteLayout", "HtmlWidgetUtils", "TextFitMath", "EditRouteHtmlFitSupport"]
   };
 
   sf.RoutePointsLayoutSizing = {
@@ -143,14 +143,14 @@
       js: BASE + "shared/widget-kits/nav/RoutePointsHtmlFit.js",
       css: undefined,
       globalKey: "DyniRoutePointsHtmlFit",
-      deps: ["ThemeResolver", "RadialTextLayout", "TextTileLayout", "RoutePointsLayout", "HtmlWidgetUtils", "RoutePointsInfoText"]
+      deps: ["RadialTextLayout", "TextTileLayout", "RoutePointsLayout", "HtmlWidgetUtils", "RoutePointsInfoText"]
   };
 
   sf.MapZoomHtmlFit = {
       js: BASE + "shared/widget-kits/nav/MapZoomHtmlFit.js",
       css: undefined,
       globalKey: "DyniMapZoomHtmlFit",
-      deps: ["TextLayoutEngine", "HtmlWidgetUtils", "ThemeResolver"]
+      deps: ["TextLayoutEngine", "HtmlWidgetUtils"]
   };
 
   sf.CenterDisplayLayout = {

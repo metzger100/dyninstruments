@@ -141,8 +141,8 @@
       + "</div>";
   }
 
-  function create(def, Helpers) {
-    const stateScreenMarkup = Helpers.getModule("StateScreenMarkup").create(def, Helpers);
+  function create(def, componentContext) {
+    const stateScreenMarkup = componentContext.components.require("StateScreenMarkup");
 
     function render(args) {
       const cfg = args || {};

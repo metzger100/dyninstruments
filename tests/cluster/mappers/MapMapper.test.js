@@ -1,5 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 function makeToolkit(overrides, bindingOverrides) {
   installUnitFormatFamilies(bindingOverrides);
@@ -34,16 +35,13 @@ const toolkit = makeToolkit();
 
 describe("MapMapper", function () {
   function createMapper() {
-    const Helpers = {
-      getModule(id) {
-        if (id === "AisTargetViewModel") {
-          return loadFresh("cluster/viewmodels/AisTargetViewModel.js");
-        }
-        throw new Error("unexpected module: " + id);
+    const componentContext = createComponentContextMock({
+      modules: {
+        AisTargetViewModel: loadFresh("cluster/viewmodels/AisTargetViewModel.js")
       }
-    };
+    });
 
-    return loadFresh("cluster/mappers/MapMapper.js").create({}, Helpers);
+    return loadFresh("cluster/mappers/MapMapper.js").create({}, componentContext);
   }
 
   it("maps centerDisplay to CenterDisplayTextWidget with renderer-owned fields", function () {

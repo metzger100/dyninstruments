@@ -10,7 +10,7 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
+  function create(def, componentContext) {
     function normalizeLayers(spec) {
       const source = spec && Array.isArray(spec.layers) ? spec.layers : null;
       if (!source || !source.length) {

@@ -1,466 +1,408 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("ClusterRendererRouter", function () {
-  const ALL_RENDERER_IDS = [
-    "ThreeValueTextWidget",
-    "PositionCoordinateWidget",
-    "ActiveRouteTextHtmlWidget",
-    "EditRouteTextHtmlWidget",
-    "RoutePointsTextHtmlWidget",
-    "MapZoomTextHtmlWidget",
-    "AisTargetTextHtmlWidget",
-    "AlarmTextHtmlWidget",
-    "CenterDisplayTextWidget",
-    "WindRadialWidget",
-    "CompassRadialWidget",
-    "WindLinearWidget",
-    "CompassLinearWidget",
-    "SpeedRadialWidget",
-    "SpeedLinearWidget",
-    "DepthRadialWidget",
-    "DepthLinearWidget",
-    "DefaultRadialWidget",
-    "DefaultLinearWidget",
-    "TemperatureRadialWidget",
-    "TemperatureLinearWidget",
-    "VoltageRadialWidget",
-    "VoltageLinearWidget",
-    "XteDisplayWidget"
-  ];
+  const ORIGINAL_DYNI_PLUGIN = globalThis.DyniPlugin;
 
-  function makeRendererSpec(id, opts) {
-    const options = opts || {};
-    const spec = {
-      id: id,
-      wantsHideNativeHead: !!options.hide,
-      renderCanvas: options.renderCanvas === false ? undefined : vi.fn()
-    };
-
-    if (typeof options.createCommittedRenderer === "function") {
-      spec.createCommittedRenderer = options.createCommittedRenderer;
-    }
-
-    return spec;
+  function makeRoute(cluster, kind, rendererId, surface, viewModelId) {
+    return Object.freeze({
+      cluster: cluster,
+      kind: kind,
+      rendererId: rendererId,
+      surface: surface,
+      viewModelId: viewModelId
+    });
   }
 
-  function makeCommittedRenderer() {
+  function makeCommittedRenderer(id) {
     return {
+      id: id,
       mount: vi.fn(),
       update: vi.fn(),
       postPatch: vi.fn(() => false),
-      detach: vi.fn(),
-      destroy: vi.fn(),
-      layoutSignature: vi.fn(() => "sig")
-    };
-  }
-
-  function makeControllerMock(id) {
-    return {
-      id: id,
-      attach: vi.fn(),
-      update: vi.fn(() => ({ updated: true, changed: true })),
       detach: vi.fn(),
       destroy: vi.fn()
     };
   }
 
-  function makeCustomCatalog(entries) {
-    const routeEntries = entries.map(function (entry) {
-      return Object.freeze({
-        cluster: entry.cluster,
-        kind: entry.kind,
-        viewModelId: entry.viewModelId,
-        rendererId: entry.rendererId,
-        surface: entry.surface
+  function makeRendererSpec(id, surface, options) {
+    const opts = options || {};
+    const spec = {
+      id: id,
+      wantsHideNativeHead: !!opts.wantsHideNativeHead
+    };
+
+    if (surface === "canvas-dom" || opts.renderCanvas !== false) {
+      spec.renderCanvas = vi.fn();
+    }
+    if (surface === "html" || opts.createCommittedRenderer !== false) {
+      spec.createCommittedRenderer = vi.fn(function () {
+        return makeCommittedRenderer(id);
       });
+    }
+
+    return spec;
+  }
+
+  function createCatalogModule(routes) {
+    const list = routes.slice();
+    const byKey = Object.create(null);
+    list.forEach(function (route) {
+      byKey[route.cluster + "::" + route.kind] = route;
     });
 
     return {
-      create: function () {
+      createDefaultCatalog() {
         return {
-          createDefaultCatalog: function () {
-            return {
-              resolveRoute: function (cluster, kind) {
-                const found = routeEntries.find(function (item) {
-                  return item.cluster === cluster && item.kind === kind;
-                });
-                if (!found) {
-                  throw new Error("ClusterKindCatalog: missing catalog entry for cluster '" + cluster + "' kind '" + kind + "'");
-                }
-                return found;
-              },
-              listRoutes: function () {
-                return routeEntries.slice();
-              }
-            };
+          resolveRoute(cluster, kind) {
+            const route = byKey[cluster + "::" + kind];
+            if (!route) {
+              throw new Error("ClusterKindCatalog: missing catalog entry for cluster '" + cluster + "' kind '" + kind + "'");
+            }
+            return route;
+          },
+          listRoutes() {
+            return list.slice();
           }
         };
       }
     };
   }
 
-  function createHarness(options) {
-    const opts = options || {};
-    const handles = {
-      canvasControllers: [],
-      htmlControllers: []
-    };
-
-    const rendererSpecs = {};
-    ALL_RENDERER_IDS.forEach(function (id) {
-      rendererSpecs[id] = makeRendererSpec(id);
-    });
-    rendererSpecs.ActiveRouteTextHtmlWidget = makeRendererSpec("ActiveRouteTextHtmlWidget", {
-      renderCanvas: false,
-      createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
-    });
-    rendererSpecs.MapZoomTextHtmlWidget = makeRendererSpec("MapZoomTextHtmlWidget", {
-      renderCanvas: false,
-      createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
-    });
-    rendererSpecs.RoutePointsTextHtmlWidget = makeRendererSpec("RoutePointsTextHtmlWidget", {
-      renderCanvas: false,
-      createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
-    });
-    rendererSpecs.EditRouteTextHtmlWidget = makeRendererSpec("EditRouteTextHtmlWidget", {
-      renderCanvas: false,
-      createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
-    });
-    rendererSpecs.AisTargetTextHtmlWidget = makeRendererSpec("AisTargetTextHtmlWidget", {
-      renderCanvas: false,
-      createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
-    });
-    rendererSpecs.AlarmTextHtmlWidget = makeRendererSpec("AlarmTextHtmlWidget", {
-      renderCanvas: false,
-      createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
-    });
-    Object.assign(rendererSpecs, opts.rendererSpecs || {});
-
-    const canvasAdapter = {
-      renderSurfaceShell: vi.fn(() => '<div class="dyni-surface-canvas"><div class="dyni-surface-canvas-mount"></div></div>'),
-      createSurfaceController: vi.fn(function () {
-        const next = makeControllerMock("canvas-" + handles.canvasControllers.length);
-        handles.canvasControllers.push(next);
-        return next;
+  function createRuntimeSurfaceMocks(createdControllers) {
+    const policy = {
+      buildShellSizingStyle: vi.fn(function () {
+        return "width:100%;height:100%;";
+      }),
+      resolveRouteStateWithPolicy: vi.fn(function (routeState, hostContext, options) {
+        return {
+          route: routeState.route,
+          props: routeState.props,
+          shellSizing: {
+            width: 100,
+            height: 100
+          },
+          hostContext: hostContext,
+          options: options
+        };
+      }),
+      resolveShellWidth: vi.fn(function (shellEl) {
+        const rect = shellEl && typeof shellEl.getBoundingClientRect === "function"
+          ? shellEl.getBoundingClientRect()
+          : { width: 0 };
+        return rect.width;
       })
     };
-
-    const htmlOwner = {
-      renderSurfaceShell: vi.fn(() => '<div class="dyni-surface-html"><div class="dyni-surface-html-mount" data-dyni-html-mount="1"></div></div>'),
-      createSurfaceController: vi.fn(function () {
-        const next = makeControllerMock("html-" + handles.htmlControllers.length);
-        handles.htmlControllers.push(next);
-        return next;
-      })
-    };
-
-    handles.canvasAdapter = canvasAdapter;
-    handles.htmlOwner = htmlOwner;
-
-    const modules = {
-      PerfSpanHelper: loadFresh("shared/widget-kits/perf/PerfSpanHelper.js"),
-      ClusterKindCatalog: opts.catalogModule || loadFresh("cluster/rendering/ClusterKindCatalog.js"),
-      ClusterSurfacePolicy: loadFresh("cluster/rendering/ClusterSurfacePolicy.js"),
-      CanvasDomSurfaceAdapter: { create: () => canvasAdapter },
-      HtmlSurfaceController: { create: () => htmlOwner },
-      SurfaceControllerFactory: loadFresh("cluster/rendering/SurfaceControllerFactory.js"),
-      ThreeValueTextWidget: { create: () => rendererSpecs.ThreeValueTextWidget },
-      PositionCoordinateWidget: { create: () => rendererSpecs.PositionCoordinateWidget },
-      ActiveRouteTextHtmlWidget: { create: () => rendererSpecs.ActiveRouteTextHtmlWidget },
-      EditRouteTextHtmlWidget: { create: () => rendererSpecs.EditRouteTextHtmlWidget },
-      RoutePointsTextHtmlWidget: { create: () => rendererSpecs.RoutePointsTextHtmlWidget },
-      MapZoomTextHtmlWidget: { create: () => rendererSpecs.MapZoomTextHtmlWidget },
-      AisTargetTextHtmlWidget: { create: () => rendererSpecs.AisTargetTextHtmlWidget },
-      AlarmTextHtmlWidget: { create: () => rendererSpecs.AlarmTextHtmlWidget },
-      CenterDisplayTextWidget: { create: () => rendererSpecs.CenterDisplayTextWidget },
-      DefaultLinearWidget: { create: () => rendererSpecs.DefaultLinearWidget },
-      RendererPropsWidget: {
-        create: function (def, Helpers, targetRendererId) {
-          return rendererSpecs[targetRendererId];
-        }
-      }
-    };
-
-    const Helpers = {
-      getModule(id) {
-        const mod = modules[id];
-        if (!mod) {
-          throw new Error("unexpected module: " + id);
-        }
-        return mod;
-      }
-    };
-
-    const router = loadFresh("cluster/rendering/ClusterRendererRouter.js").create({}, Helpers);
 
     return {
-      router,
-      handles
+      policy: policy,
+      createController: vi.fn(function (options) {
+        const controller = {
+          surface: options.surface,
+          rendererSpec: options.rendererSpec,
+          hostContext: options.hostContext,
+          shadowCssUrls: options.shadowCssUrls,
+          attach: vi.fn(),
+          update: vi.fn(function () {
+            return { updated: true, changed: true };
+          }),
+          detach: vi.fn(),
+          destroy: vi.fn()
+        };
+        createdControllers.push(controller);
+        return controller;
+      })
     };
   }
 
-  it("resolves every shipped cluster/kind from the strict catalog", function () {
-    const h = createHarness({
-      catalogModule: makeCustomCatalog([
-        {
-          cluster: "nav",
-          kind: "activeRoute",
-          viewModelId: "ActiveRouteViewModel",
-          rendererId: "ActiveRouteTextHtmlWidget",
-          surface: "html"
-        },
-        {
-          cluster: "speed",
-          kind: "sog",
-          viewModelId: "MapperOutputViewModel",
-          rendererId: "ThreeValueTextWidget",
-          surface: "canvas-dom"
-        },
-        {
-          cluster: "default",
-          kind: "linearGauge",
-          viewModelId: "MapperOutputViewModel",
-          rendererId: "DefaultLinearWidget",
-          surface: "canvas-dom"
-        },
-        {
-          cluster: "default",
-          kind: "radialGauge",
-          viewModelId: "MapperOutputViewModel",
-          rendererId: "DefaultRadialWidget",
-          surface: "canvas-dom"
-        },
-        {
-          cluster: "vessel",
-          kind: "alarm",
-          viewModelId: "AlarmViewModel",
-          rendererId: "AlarmTextHtmlWidget",
-          surface: "html"
-        }
-      ])
-    });
-    const routes = h.router.listRoutes();
-
-    expect(routes).toHaveLength(5);
-    routes.forEach(function (route) {
-      const resolved = h.router.resolveRouteSpec({
-        cluster: route.cluster,
-        kind: route.kind
-      });
-      expect(resolved).toEqual(route);
-      expect(resolved.surface).toBe(route.surface);
-    });
-
-    expect(h.router.resolveRouteSpec({ cluster: "nav", kind: "activeRoute" })).toEqual({
-      cluster: "nav",
-      kind: "activeRoute",
-      viewModelId: "ActiveRouteViewModel",
-      rendererId: "ActiveRouteTextHtmlWidget",
-      surface: "html"
-    });
-
-    expect(h.router.resolveRouteSpec({ cluster: "default", kind: "radialGauge" })).toEqual({
-      cluster: "default",
-      kind: "radialGauge",
-      viewModelId: "MapperOutputViewModel",
-      rendererId: "DefaultRadialWidget",
-      surface: "canvas-dom"
-    });
-
-    expect(h.router.resolveRouteSpec({ cluster: "default", kind: "linearGauge" })).toEqual({
-      cluster: "default",
-      kind: "linearGauge",
-      viewModelId: "MapperOutputViewModel",
-      rendererId: "DefaultLinearWidget",
-      surface: "canvas-dom"
-    });
-  });
-
-  it("renders shell-first HTML with instance/surface markers and canvas-dom shell content", function () {
-    const h = createHarness({
-      catalogModule: makeCustomCatalog([
-        {
-          cluster: "speed",
-          kind: "sog",
-          viewModelId: "MapperOutputViewModel",
-          rendererId: "ThreeValueTextWidget",
-          surface: "canvas-dom"
-        }
-      ])
-    });
-    const ctx = {
-      __dyniHostCommitState: { instanceId: "dyni-host-42" }
+  function createHarness() {
+    const createdControllers = [];
+    const runtimeSurfaces = createRuntimeSurfaceMocks(createdControllers);
+    const routes = [
+      makeRoute("speed", "sog", "ThreeValueTextWidget", "canvas-dom", "MapperOutputViewModel"),
+      makeRoute("speed", "sogRadial", "SpeedRadialWidget", "canvas-dom", "MapperOutputViewModel"),
+      makeRoute("nav", "activeRoute", "ActiveRouteTextHtmlWidget", "html", "ActiveRouteViewModel")
+    ];
+    const rendererSpecs = {
+      ThreeValueTextWidget: makeRendererSpec("ThreeValueTextWidget", "canvas-dom", {
+        createCommittedRenderer: false
+      }),
+      PositionCoordinateWidget: makeRendererSpec("PositionCoordinateWidget", "canvas-dom"),
+      EditRouteTextHtmlWidget: makeRendererSpec("EditRouteTextHtmlWidget", "html"),
+      RoutePointsTextHtmlWidget: makeRendererSpec("RoutePointsTextHtmlWidget", "html"),
+      MapZoomTextHtmlWidget: makeRendererSpec("MapZoomTextHtmlWidget", "html"),
+      AisTargetTextHtmlWidget: makeRendererSpec("AisTargetTextHtmlWidget", "html"),
+      AlarmTextHtmlWidget: makeRendererSpec("AlarmTextHtmlWidget", "html"),
+      CenterDisplayTextWidget: makeRendererSpec("CenterDisplayTextWidget", "canvas-dom"),
+      SpeedRadialWidget: makeRendererSpec("SpeedRadialWidget", "canvas-dom", {
+        createCommittedRenderer: false
+      }),
+      ActiveRouteTextHtmlWidget: makeRendererSpec("ActiveRouteTextHtmlWidget", "html", {
+        renderCanvas: false
+      })
+    };
+    const rendererPropsWidget = {
+      wrap(targetRendererId) {
+        return rendererSpecs[targetRendererId] || makeRendererSpec(targetRendererId, "canvas-dom");
+      }
     };
 
-    const out = h.router.renderHtml.call(ctx, {
-      cluster: "speed",
-      kind: "sog",
-      value: 5.1
+    const componentContext = createComponentContextMock({
+      modules: {
+        ClusterKindCatalog: createCatalogModule(routes),
+        RendererPropsWidget: rendererPropsWidget,
+        ThreeValueTextWidget: rendererSpecs.ThreeValueTextWidget,
+        PositionCoordinateWidget: rendererSpecs.PositionCoordinateWidget,
+        EditRouteTextHtmlWidget: rendererSpecs.EditRouteTextHtmlWidget,
+        RoutePointsTextHtmlWidget: rendererSpecs.RoutePointsTextHtmlWidget,
+        MapZoomTextHtmlWidget: rendererSpecs.MapZoomTextHtmlWidget,
+        AisTargetTextHtmlWidget: rendererSpecs.AisTargetTextHtmlWidget,
+        AlarmTextHtmlWidget: rendererSpecs.AlarmTextHtmlWidget,
+        CenterDisplayTextWidget: rendererSpecs.CenterDisplayTextWidget,
+        SpeedRadialWidget: rendererSpecs.SpeedRadialWidget,
+        ActiveRouteTextHtmlWidget: rendererSpecs.ActiveRouteTextHtmlWidget
+      }
     });
 
-    expect(h.handles.canvasAdapter.renderSurfaceShell).toHaveBeenCalledTimes(1);
-    expect(out).toContain('class="widgetData dyni-shell dyni-surface-canvas dyni-kind-sog"');
-    expect(out).toContain('data-dyni-instance="dyni-host-42"');
-    expect(out).toContain('data-dyni-surface="canvas-dom"');
-    expect(out).toContain("dyni-surface-canvas-mount");
-    expect(h.router.renderCanvas).toBeUndefined();
+    globalThis.DyniPlugin = {
+      runtime: {
+        surfaces: runtimeSurfaces
+      },
+      config: {
+        components: {}
+      }
+    };
+
+    const router = loadFresh("cluster/rendering/ClusterRendererRouter.js").create({}, componentContext);
+
+    return {
+      router: router,
+      routes: routes,
+      createdControllers: createdControllers,
+      runtimeSurfaces: runtimeSurfaces
+    };
+  }
+
+  afterEach(function () {
+    if (typeof ORIGINAL_DYNI_PLUGIN === "undefined") {
+      delete globalThis.DyniPlugin;
+    } else {
+      globalThis.DyniPlugin = ORIGINAL_DYNI_PLUGIN;
+    }
   });
 
-  it("routes html surfaces through HtmlSurfaceController shell owner", function () {
-    const htmlCatalog = makeCustomCatalog([
-      {
-        cluster: "nav",
-        kind: "activeRoute",
-        viewModelId: "ActiveRouteViewModel",
-        rendererId: "ActiveRouteTextHtmlWidget",
-        surface: "html"
-      }
-    ]);
+  it("resolves routes through ClusterKindCatalog and keeps the shipped route list stable", function () {
+    const harness = createHarness();
+    const routes = harness.router.listRoutes();
 
-    const htmlRenderer = makeRendererSpec("ActiveRouteTextHtmlWidget", {
-      renderCanvas: false,
-      createCommittedRenderer: vi.fn(() => makeCommittedRenderer())
+    expect(routes).toEqual(harness.routes);
+    routes.forEach(function (route) {
+      expect(harness.router.resolveRouteSpec({
+        cluster: route.cluster,
+        kind: route.kind
+      })).toEqual(route);
     });
+  });
 
-    const h = createHarness({
-      catalogModule: htmlCatalog,
-      rendererSpecs: {
-        ActiveRouteTextHtmlWidget: htmlRenderer
+  it("renders canvas-dom and html shells with the same shell and mount contract", function () {
+    const harness = createHarness();
+    const hostContext = {
+      __dyniHostCommitState: {
+        instanceId: "dyni-host-42"
       }
-    });
+    };
 
-    const out = h.router.renderHtml({
+    const canvasHtml = harness.router.renderHtml.call(hostContext, {
+      cluster: "speed",
+      kind: "sog"
+    });
+    const htmlHtml = harness.router.renderHtml.call(hostContext, {
       cluster: "nav",
       kind: "activeRoute"
     });
 
-    expect(h.handles.htmlOwner.renderSurfaceShell).toHaveBeenCalledTimes(1);
-    expect(out).toContain('data-dyni-surface="html"');
-    expect(out).toContain("dyni-surface-html");
-    expect(out).toContain("dyni-surface-html-mount");
+    expect(harness.runtimeSurfaces.policy.resolveRouteStateWithPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        route: expect.objectContaining({
+          surface: "canvas-dom"
+        })
+      }),
+      hostContext,
+      { allowNatural: false }
+    );
+    expect(harness.runtimeSurfaces.policy.resolveRouteStateWithPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        route: expect.objectContaining({
+          surface: "html"
+        })
+      }),
+      hostContext,
+      { allowNatural: false }
+    );
+    expect(harness.runtimeSurfaces.policy.buildShellSizingStyle).toHaveBeenCalledTimes(2);
+
+    expect(canvasHtml).toContain('class="widgetData dyni-shell dyni-surface-canvas dyni-kind-sog"');
+    expect(canvasHtml).toContain('data-dyni-instance="dyni-host-42"');
+    expect(canvasHtml).toContain('data-dyni-surface="canvas-dom"');
+    expect(canvasHtml).toContain('<div class="dyni-surface-canvas"><div class="dyni-surface-canvas-mount"></div></div>');
+
+    expect(htmlHtml).toContain('class="widgetData dyni-shell dyni-surface-html dyni-kind-activeRoute"');
+    expect(htmlHtml).toContain('data-dyni-instance="dyni-host-42"');
+    expect(htmlHtml).toContain('data-dyni-surface="html"');
+    expect(htmlHtml).toContain('<div class="dyni-surface-html"><div class="dyni-surface-html-mount" data-dyni-html-mount="1"></div></div>');
   });
 
-  it("throws for missing tuples and mapper renderer mismatches", function () {
-    const h = createHarness({
-      catalogModule: makeCustomCatalog([
-        {
-          cluster: "speed",
-          kind: "sog",
-          viewModelId: "MapperOutputViewModel",
-          rendererId: "ThreeValueTextWidget",
-          surface: "canvas-dom"
-        }
-      ])
+  it("creates session payloads with surface, root/shell elements, props, revision, and route metadata", function () {
+    const harness = createHarness();
+    const rootEl = document.createElement("div");
+    const shellEl = document.createElement("div");
+    shellEl.getBoundingClientRect = vi.fn(function () {
+      return { width: 320, height: 180 };
     });
 
-    expect(function () {
-      h.router.resolveRouteSpec({ cluster: "nav", kind: "missing" });
-    }).toThrow("missing catalog entry");
-
-    expect(function () {
-      h.router.resolveRouteSpec({ cluster: "default", kind: "missing" });
-    }).toThrow("missing catalog entry");
-
-    expect(function () {
-      h.router.resolveRouteSpec({
-        cluster: "speed",
-        kind: "sog",
-        renderer: "SpeedRadialWidget"
-      });
-    }).toThrow("mapper renderer mismatch");
-  });
-
-  it("keeps strict validation for catalog entries that reference missing renderers", function () {
-    expect(function () {
-      createHarness({
-        catalogModule: makeCustomCatalog([
-          {
-            cluster: "default",
-            kind: "linearGauge",
-            viewModelId: "MapperOutputViewModel",
-            rendererId: "MissingRendererWidget",
-            surface: "canvas-dom"
-          }
-        ])
-      });
-    }).toThrow("unknown renderer 'MissingRendererWidget'");
-  });
-
-  it("provides surface controller factory and recreates controller on same-surface renderer switches", function () {
-    const h = createHarness({
-      catalogModule: makeCustomCatalog([
-        {
-          cluster: "speed",
-          kind: "sog",
-          viewModelId: "MapperOutputViewModel",
-          rendererId: "ThreeValueTextWidget",
-          surface: "canvas-dom"
-        },
-        {
-          cluster: "speed",
-          kind: "sogRadial",
-          viewModelId: "MapperOutputViewModel",
-          rendererId: "SpeedRadialWidget",
-          surface: "canvas-dom"
-        }
-      ])
+    const payload = harness.router.createSessionPayload({
+      rootEl: rootEl,
+      shellEl: shellEl,
+      revision: 7,
+      props: {
+        cluster: "nav",
+        kind: "activeRoute"
+      }
+    }, {
+      hostContext: true
     });
-    const createSurfaceController = h.router.createSurfaceControllerFactory({ marker: 1 });
-    const controller = createSurfaceController("canvas-dom");
 
-    const basePayload = {
-      rootEl: { id: "root" },
-      shellEl: { id: "shell" },
-      revision: 1
-    };
-
-    controller.attach(Object.assign({}, basePayload, {
-      props: { cluster: "speed", kind: "sog", value: 5 }
-    }));
-
-    expect(h.handles.canvasAdapter.createSurfaceController).toHaveBeenCalledTimes(1);
-    expect(h.handles.canvasControllers[0].attach).toHaveBeenCalledTimes(1);
-
-    const updateResult = controller.update(Object.assign({}, basePayload, {
-      revision: 2,
-      props: { cluster: "speed", kind: "sogRadial", value: 6, renderer: "SpeedRadialWidget" }
-    }));
-
-    expect(updateResult.remounted).toBe(true);
-    expect(h.handles.canvasAdapter.createSurfaceController).toHaveBeenCalledTimes(2);
-    expect(h.handles.canvasControllers[0].detach).toHaveBeenCalledWith("renderer-switch");
-    expect(h.handles.canvasControllers[0].destroy).toHaveBeenCalledTimes(1);
-    expect(h.handles.canvasControllers[1].attach).toHaveBeenCalledTimes(1);
-  });
-
-  it("creates SurfaceSessionController payload with resolved surface and route metadata", function () {
-    const h = createHarness({
-      catalogModule: makeCustomCatalog([
-        {
+    expect(harness.runtimeSurfaces.policy.resolveShellWidth).toHaveBeenCalledWith(shellEl);
+    expect(harness.runtimeSurfaces.policy.resolveRouteStateWithPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        route: expect.objectContaining({
           cluster: "nav",
           kind: "activeRoute",
-          viewModelId: "ActiveRouteViewModel",
-          rendererId: "ActiveRouteTextHtmlWidget",
-          surface: "html"
-        }
-      ])
-    });
-
-    const payload = h.router.createSessionPayload({
-      rootEl: { id: "root" },
-      shellEl: { id: "shell" },
-      revision: 7,
-      props: { cluster: "nav", kind: "activeRoute" }
-    });
-
-    expect(payload).toMatchObject({
+          rendererId: "ActiveRouteTextHtmlWidget"
+        })
+      }),
+      { hostContext: true },
+      {
+        allowNatural: true,
+        shellWidth: 320
+      }
+    );
+    expect(payload).toEqual(expect.objectContaining({
       surface: "html",
+      rootEl: rootEl,
+      shellEl: shellEl,
       revision: 7,
-      route: {
+      props: expect.objectContaining({
+        cluster: "nav",
+        kind: "activeRoute"
+      }),
+      route: expect.objectContaining({
         cluster: "nav",
         kind: "activeRoute",
-        rendererId: "ActiveRouteTextHtmlWidget"
+        rendererId: "ActiveRouteTextHtmlWidget",
+        surface: "html"
+      })
+    }));
+  });
+
+  it("switches controllers when the renderer changes on the same surface", function () {
+    const harness = createHarness();
+    const factory = harness.router.createSurfaceControllerFactory({
+      marker: 1
+    });
+    const controller = factory("canvas-dom");
+    const rootEl = document.createElement("div");
+    const shellEl = document.createElement("div");
+
+    controller.attach({
+      rootEl: rootEl,
+      shellEl: shellEl,
+      revision: 1,
+      props: {
+        cluster: "speed",
+        kind: "sog"
       }
     });
+
+    expect(harness.runtimeSurfaces.createController).toHaveBeenCalledTimes(1);
+    expect(harness.createdControllers[0].attach).toHaveBeenCalledWith(expect.objectContaining({
+      surface: "canvas-dom",
+      revision: 1,
+      props: expect.objectContaining({
+        cluster: "speed",
+        kind: "sog"
+      })
+    }));
+
+    const updateResult = controller.update({
+      rootEl: rootEl,
+      shellEl: shellEl,
+      revision: 2,
+      props: {
+        cluster: "speed",
+        kind: "sogRadial"
+      }
+    });
+
+    expect(updateResult).toEqual(expect.objectContaining({
+      updated: true,
+      changed: true,
+      remounted: true
+    }));
+    expect(harness.runtimeSurfaces.createController).toHaveBeenCalledTimes(2);
+    expect(harness.createdControllers[0].detach).toHaveBeenCalledWith("renderer-switch");
+    expect(harness.createdControllers[0].destroy).toHaveBeenCalledTimes(1);
+    expect(harness.createdControllers[1].attach).toHaveBeenCalledTimes(1);
+    expect(harness.createdControllers[1].attach).toHaveBeenCalledWith(expect.objectContaining({
+      surface: "canvas-dom",
+      revision: 2,
+      props: expect.objectContaining({
+        cluster: "speed",
+        kind: "sogRadial"
+      })
+    }));
+  });
+
+  it("throws clear errors for invalid payloads and unsupported route/surface usage", function () {
+    const harness = createHarness();
+    const controller = harness.router.createSurfaceControllerFactory({})("canvas-dom");
+
+    expect(function () {
+      harness.router.renderHtml({});
+    }).toThrow("props.cluster must be a non-empty string");
+
+    expect(function () {
+      harness.router.resolveRouteSpec({
+        cluster: "",
+        kind: "sog"
+      });
+    }).toThrow("props.cluster must be a non-empty string");
+
+    expect(function () {
+      harness.router.createSessionPayload(null);
+    }).toThrow("requires a payload object");
+
+    expect(function () {
+      harness.router.createSessionPayload({
+        rootEl: document.createElement("div"),
+        revision: 1,
+        props: {
+          cluster: "nav",
+          kind: "activeRoute"
+        }
+      });
+    }).toThrow("requires payload.shellEl");
+
+    expect(function () {
+      controller.attach({
+        rootEl: document.createElement("div"),
+        shellEl: document.createElement("div"),
+        revision: 1,
+        props: {
+          cluster: "nav",
+          kind: "activeRoute"
+        }
+      });
+    }).toThrow("attach() expected canvas-dom route");
   });
 });

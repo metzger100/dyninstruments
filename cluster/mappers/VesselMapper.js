@@ -11,7 +11,7 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
+  function create(def, componentContext) {
     let alarmViewModel = null;
 
     function translate(props, toolkit) {
@@ -132,10 +132,7 @@
       }
       if (req === "alarm") {
         if (!alarmViewModel) {
-          if (!Helpers || typeof Helpers.getModule !== "function") {
-            throw new Error("VesselMapper: AlarmViewModel helper is required for alarm kind");
-          }
-          alarmViewModel = Helpers.getModule("AlarmViewModel").create(def, Helpers);
+          alarmViewModel = componentContext.components.require("AlarmViewModel");
         }
         const alarmDomain = alarmViewModel.build(p);
         return {

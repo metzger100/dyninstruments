@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteHtmlFit - Per-box text-fit owner for edit-route HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ThemeResolver, RadialTextLayout, TextTileLayout, EditRouteLayout, HtmlWidgetUtils, TextFitMath, EditRouteHtmlFitSupport
+ * Depends: componentContext.theme.tokens, RadialTextLayout, TextTileLayout, EditRouteLayout, HtmlWidgetUtils, TextFitMath, EditRouteHtmlFitSupport
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -15,14 +15,14 @@
   const METRIC_SECONDARY_TO_VALUE_RATIO = 0.8;
   const METRIC_IDS = ["pts", "dst", "rte", "eta"];
 
-  function create(def, Helpers) {
-    const theme = Helpers.getModule("ThemeResolver");
-    const textApi = Helpers.getModule("RadialTextLayout").create(def, Helpers);
-    const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
-    const layoutApi = Helpers.getModule("EditRouteLayout").create(def, Helpers);
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const fitMath = Helpers.getModule("TextFitMath").create(def, Helpers);
-    const fitSupport = Helpers.getModule("EditRouteHtmlFitSupport").create(def, Helpers);
+  function create(def, componentContext) {
+    const theme = componentContext.theme.tokens;
+    const textApi = componentContext.components.require("RadialTextLayout");
+    const tileLayout = componentContext.components.require("TextTileLayout");
+    const layoutApi = componentContext.components.require("EditRouteLayout");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const fitMath = componentContext.components.require("TextFitMath");
+    const fitSupport = componentContext.components.require("EditRouteHtmlFitSupport");
 
     function compute(args) {
       const cfg = args || {};
@@ -33,7 +33,7 @@
         return null;
       }
 
-      const rootEl = Helpers.requirePluginRoot(targetEl);
+      const rootEl = componentContext.dom.requirePluginRoot(targetEl);
       const tokens = theme.resolveForRoot(rootEl);
       const family = tokens.font.family;
       const valueFamily = fitSupport.resolveMetricValueFamily(model, tokens);

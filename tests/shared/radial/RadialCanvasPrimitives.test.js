@@ -1,15 +1,15 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("RadialCanvasPrimitives", function () {
   function create() {
     const mod = loadFresh("shared/widget-kits/radial/RadialCanvasPrimitives.js");
-    return mod.create({}, {
-      getModule(id) {
-        if (id !== "RadialAngleMath") throw new Error("unexpected module: " + id);
-        return loadFresh("shared/widget-kits/radial/RadialAngleMath.js");
+    return mod.create({}, createComponentContextMock({
+      modules: {
+        RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js")
       }
-    });
+    }));
   }
 
   function callsNamed(ctx, name) {

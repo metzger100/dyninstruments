@@ -1,16 +1,14 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RoutePointsDomEffects", function () {
   function createDomEffects() {
     const htmlWidgetUtils = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-    return loadFresh("shared/widget-kits/nav/RoutePointsDomEffects.js").create({}, {
-      getModule(id) {
-        if (id !== "HtmlWidgetUtils") {
-          throw new Error("unexpected module: " + id);
-        }
-        return htmlWidgetUtils;
+    return loadFresh("shared/widget-kits/nav/RoutePointsDomEffects.js").create({}, createComponentContextMock({
+      modules: {
+        HtmlWidgetUtils: htmlWidgetUtils
       }
-    });
+    }));
   }
 
   function defineFixedMetric(target, key, value) {

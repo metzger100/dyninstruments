@@ -1,7 +1,7 @@
 /**
  * Module: PositionCoordinateWidget - Stacked latitude/longitude renderer for nav position kinds
  * Documentation: documentation/widgets/position-coordinates.md
- * Depends: ThemeResolver, TextLayoutEngine, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay, Helpers.applyFormatter, Helpers.setupCanvas, Helpers.requirePluginRoot
+ * Depends: componentContext.theme.tokens, TextLayoutEngine, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay, componentContext.format.applyFormatter, componentContext.canvas.setupCanvas, componentContext.dom.requirePluginRoot
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -110,7 +110,7 @@
       appendAxisParam: !hasOverride
     };
   }
-  function formatAxisValue(rawValue, axis, defaultText, props, Helpers, placeholderNormalize) {
+  function formatAxisValue(rawValue, axis, defaultText, props, componentContext, placeholderNormalize) {
     const rawMode = props && props.coordinateRawValues === true;
     if (rawMode) {
       if (rawValue == null || (typeof rawValue === "number" && Number.isNaN(rawValue))) {
@@ -125,7 +125,7 @@
     }
     const cfg = pickAxisFormatter(props, axis);
     if (cfg.appendAxisParam) cfg.params.push(axis);
-    const out = String(Helpers.applyFormatter(rawValue, {
+    const out = String(componentContext.format.applyFormatter(rawValue, {
       formatter: cfg.formatter,
       formatterParameters: cfg.params,
       default: defaultText
@@ -145,17 +145,17 @@
     }
     return total;
   }
-  function create(def, Helpers) {
-    const theme = Helpers.getModule("ThemeResolver");
-    const text = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
-    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
-    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
-    const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
+  function create(def, componentContext) {
+    const theme = componentContext.theme.tokens;
+    const text = componentContext.components.require("TextLayoutEngine");
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    const stateScreenLabels = componentContext.components.require("StateScreenLabels");
+    const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
+    const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
     const fitCache = text.createFitCache(["flat", "stacked"]);
     function renderCanvas(canvas, props) {
       const p = resolveVariantProps(props);
-      const setup = Helpers.setupCanvas(canvas);
+      const setup = componentContext.canvas.setupCanvas(canvas);
       const ctx = setup && setup.ctx;
       const W = setup && setup.W;
       const H = setup && setup.H;
@@ -164,7 +164,7 @@
       }
       ctx.clearRect(0, 0, W, H);
       ctx.textBaseline = "middle";
-      const rootEl = Helpers.requirePluginRoot(canvas);
+      const rootEl = componentContext.dom.requirePluginRoot(canvas);
       const tokens = theme.resolveForRoot(rootEl);
       const displayVariant = normalizeDisplayVariant(p.displayVariant);
       const isCoordinateVariant = displayVariant === DISPLAY_VARIANT_POSITION;
@@ -210,14 +210,14 @@
         const pairRaw = readCoordinatePair(p.value, true);
         const useAxisFlat = !!p.coordinateFlatFromAxes;
         const topText = useAxisFlat
-          ? formatAxisValue(pairRaw ? pairRaw.lat : null, "lat", defaultText, p, Helpers, placeholderNormalize)
+          ? formatAxisValue(pairRaw ? pairRaw.lat : null, "lat", defaultText, p, componentContext, placeholderNormalize)
           : "";
         const bottomText = useAxisFlat
-          ? formatAxisValue(pairRaw ? pairRaw.lon : null, "lon", defaultText, p, Helpers, placeholderNormalize)
+          ? formatAxisValue(pairRaw ? pairRaw.lon : null, "lon", defaultText, p, componentContext, placeholderNormalize)
           : "";
         const valueText = useAxisFlat
           ? ((topText + " " + bottomText).trim() || defaultText)
-          : placeholderNormalize.normalize(String(Helpers.applyFormatter(p.value, p)), defaultText);
+          : placeholderNormalize.normalize(String(componentContext.format.applyFormatter(p.value, p)), defaultText);
         const statusEmoji = useAxisFlat && isTimeStatusMarker(topText);
         const key = text.makeFitCacheKey({
           mode: "flat",
@@ -267,10 +267,10 @@
       } else {
         const parsed = readCoordinatePair(p.value, p.coordinateRawValues === true);
         const latText = parsed
-          ? formatAxisValue(parsed.lat, "lat", defaultText, p, Helpers, placeholderNormalize)
+          ? formatAxisValue(parsed.lat, "lat", defaultText, p, componentContext, placeholderNormalize)
           : defaultText;
         const lonText = parsed
-          ? formatAxisValue(parsed.lon, "lon", defaultText, p, Helpers, placeholderNormalize)
+          ? formatAxisValue(parsed.lon, "lon", defaultText, p, componentContext, placeholderNormalize)
           : defaultText;
         const topStatusEmoji = isTimeStatusMarker(latText);
         const key = text.makeFitCacheKey({

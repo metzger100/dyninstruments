@@ -30,8 +30,8 @@
     );
   }
 
-  function create(def, Helpers) {
-    const primitive = Helpers.getModule("TextLayoutPrimitives").create(def, Helpers);
+  function create(def, componentContext) {
+    const primitive = componentContext.components.require("TextLayoutPrimitives");
 
     function fitThreeRowBlock(args) {
       const cfg = args || {};

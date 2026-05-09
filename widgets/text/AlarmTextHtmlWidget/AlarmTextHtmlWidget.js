@@ -63,11 +63,11 @@
     };
   }
 
-  function create(def, Helpers) {
-    const htmlFit = Helpers.getModule("AlarmHtmlFit").create(def, Helpers);
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const renderModel = Helpers.getModule("AlarmRenderModel").create(def, Helpers);
-    const markup = Helpers.getModule("AlarmMarkup").create(def, Helpers);
+  function create(def, componentContext) {
+    const htmlFit = componentContext.components.require("AlarmHtmlFit");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const renderModel = componentContext.components.require("AlarmRenderModel");
+    const markup = componentContext.components.require("AlarmMarkup");
 
     function buildModel(props, shellRect) {
       return renderModel.buildModel({

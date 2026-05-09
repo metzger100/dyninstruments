@@ -171,9 +171,9 @@
     ]);
   }
 
-  function create(def, Helpers) {
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const aisSizingApi = Helpers.getModule("AisTargetLayoutSizing").create(def, Helpers);
+  function create(def, componentContext) {
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const aisSizingApi = componentContext.components.require("AisTargetLayoutSizing");
 
     return {
       resolveLayout: function (args) {

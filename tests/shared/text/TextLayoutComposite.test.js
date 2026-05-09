@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("TextLayoutComposite", function () {
   function createHarness() {
@@ -37,18 +38,15 @@ describe("TextLayoutComposite", function () {
     };
 
     const compositeModule = loadFresh("shared/widget-kits/text/TextLayoutComposite.js");
-    const composite = compositeModule.create({}, {
-      getModule(id) {
-        if (id === "TextLayoutPrimitives") {
-          return {
-            create() {
-              return primitive;
-            }
-          };
+    const composite = compositeModule.create({}, createComponentContextMock({
+      modules: {
+        TextLayoutPrimitives: {
+          create() {
+            return primitive;
+          }
         }
-        throw new Error("unexpected module: " + id);
       }
-    });
+    }));
 
     return {
       composite,

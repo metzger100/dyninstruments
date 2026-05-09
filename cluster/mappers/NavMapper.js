@@ -11,10 +11,10 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const activeRouteViewModel = Helpers.getModule("ActiveRouteViewModel").create(def, Helpers);
-    const editRouteViewModel = Helpers.getModule("EditRouteViewModel").create(def, Helpers);
-    const routePointsViewModel = Helpers.getModule("RoutePointsViewModel").create(def, Helpers);
+  function create(def, componentContext) {
+    const activeRouteViewModel = componentContext.components.require("ActiveRouteViewModel");
+    const editRouteViewModel = componentContext.components.require("EditRouteViewModel");
+    const routePointsViewModel = componentContext.components.require("RoutePointsViewModel");
 
     function translate(props, toolkit) {
       const p = props || {};

@@ -53,7 +53,7 @@
     return encodeURIComponent(String(value));
   }
 
-  function callFormatter(value, formatter, formatterParameters, defaultText, Helpers) {
+  function callFormatter(value, formatter, formatterParameters, defaultText, componentContext) {
     const opts = {
       formatter: formatter,
       formatterParameters: formatterParameters
@@ -61,11 +61,11 @@
     if (typeof defaultText !== "undefined") {
       opts.default = defaultText;
     }
-    return Helpers.applyFormatter(value, opts);
+    return componentContext.format.applyFormatter(value, opts);
   }
 
-  function formatMetric(value, formatter, formatterParameters, defaultText, Helpers, placeholderNormalize) {
-    const text = String(callFormatter(value, formatter, formatterParameters, defaultText, Helpers));
+  function formatMetric(value, formatter, formatterParameters, defaultText, componentContext, placeholderNormalize) {
+    const text = String(callFormatter(value, formatter, formatterParameters, defaultText, componentContext));
     return placeholderNormalize.normalize(text, defaultText);
   }
 
@@ -114,16 +114,16 @@
     return parts;
   }
 
-  function create(def, Helpers) {
-    const layoutApi = Helpers.getModule("EditRouteLayout").create(def, Helpers);
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const navInteractionPolicy = Helpers.getModule("NavInteractionPolicy").create(def, Helpers);
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
-    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
-    const unitFormatter = Helpers.getModule("UnitAwareFormatter").create(def, Helpers);
-    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
-    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
-    const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
+  function create(def, componentContext) {
+    const layoutApi = componentContext.components.require("EditRouteLayout");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const navInteractionPolicy = componentContext.components.require("NavInteractionPolicy");
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    const stableDigits = componentContext.components.require("StableDigits");
+    const unitFormatter = componentContext.components.require("UnitAwareFormatter");
+    const stateScreenLabels = componentContext.components.require("StateScreenLabels");
+    const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
+    const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");
 
     function resolveStateKind(props, domain) {
       return stateScreenPrecedence.pickFirst([
@@ -206,7 +206,7 @@
           id: "pts",
           labelText: metricCaptions.pts,
           ...buildMetricValueText(
-            formatMetric(domain.pointCount, "formatDecimal", [3], defaultText, Helpers, placeholderNormalize),
+            formatMetric(domain.pointCount, "formatDecimal", [3], defaultText, componentContext, placeholderNormalize),
             3
           ),
           unitText: "",
@@ -241,7 +241,7 @@
               etaFormatter,
               [],
               defaultText,
-              Helpers,
+              componentContext,
               placeholderNormalize
             ),
             2

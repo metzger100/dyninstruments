@@ -1,17 +1,15 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("AlarmRenderModel", function () {
   function createRenderModel() {
-    const Helpers = {
-      getModule(id) {
-        if (id === "HtmlWidgetUtils") {
-          return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-        }
-        throw new Error("unexpected module: " + id);
+    const componentContext = createComponentContextMock({
+      modules: {
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js")
       }
-    };
+    });
 
-    return loadFresh("shared/widget-kits/vessel/AlarmRenderModel.js").create({}, Helpers);
+    return loadFresh("shared/widget-kits/vessel/AlarmRenderModel.js").create({}, componentContext);
   }
 
   function withSurfacePolicy(props, mode) {

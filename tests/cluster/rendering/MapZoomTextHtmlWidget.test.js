@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("MapZoomTextHtmlWidget", function () {
   const MODULE_PATH_BY_ID = {
@@ -28,8 +29,7 @@ describe("MapZoomTextHtmlWidget", function () {
   function createRenderer(options) {
     const opts = options || {};
     const moduleCache = Object.create(null);
-    const Helpers = {
-      applyFormatter: opts.applyFormatter || function (value, formatterOptions) {
+    const applyFormatter = opts.applyFormatter || function (value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (value == null) {
           return cfg.default;
@@ -38,20 +38,17 @@ describe("MapZoomTextHtmlWidget", function () {
           return "Z:" + String(value);
         }
         return String(value);
-      },
-      resolveFontFamily: opts.resolveFontFamily || function () {
-        return "sans-serif";
-      },
-      requirePluginRoot: opts.requirePluginRoot || function () {
+      };
+    const requirePluginRoot = opts.requirePluginRoot || function () {
         if (!arguments[0] || typeof arguments[0].closest !== "function") {
           return null;
         }
         return arguments[0].closest(".widget, .DirectWidget");
-      },
-      getNightModeState: opts.getNightModeState || function () {
+      };
+    const getNightModeState = opts.getNightModeState || function () {
         return false;
-      },
-      getModule: opts.getModule || function (id) {
+      };
+    const loadDep = opts.loadDep || function (id) {
         const relPath = MODULE_PATH_BY_ID[id];
         if (!relPath) {
           throw new Error("unexpected module lookup: " + id);
@@ -60,10 +57,32 @@ describe("MapZoomTextHtmlWidget", function () {
           moduleCache[id] = loadFresh(relPath);
         }
         return moduleCache[id];
+      };
+    const modules = Object.create(null);
+    Object.keys(MODULE_PATH_BY_ID).forEach(function (id) {
+      modules[id] = {
+        create() {
+          return loadDep(id);
+        }
+      };
+    });
+    const componentContext = createComponentContextMock({
+      modules,
+      services: {
+        format: { applyFormatter },
+        dom: { requirePluginRoot, getNightModeState },
+        themeTokens: {
+          resolveForRoot() {
+            return {
+              surface: { fg: "#fff", bg: "#000", border: "#666" },
+              font: { family: "sans-serif", familyMono: "monospace", weight: 700, labelWeight: 700 },
+              colors: {}
+            };
+          }
+        }
       }
-    };
-
-    return loadFresh("widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js").create({}, Helpers);
+    });
+    return loadFresh("widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js").create({}, componentContext);
   }
 
   function makeProps(overrides) {
@@ -267,7 +286,7 @@ describe("MapZoomTextHtmlWidget", function () {
     });
     const moduleCache = Object.create(null);
     const renderer = createRenderer({
-      getModule(id) {
+      loadDep(id) {
         if (id === "MapZoomHtmlFit") {
           return { create: () => ({ compute: fitCompute }) };
         }

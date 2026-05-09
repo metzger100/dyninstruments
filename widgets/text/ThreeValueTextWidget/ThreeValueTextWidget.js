@@ -1,7 +1,7 @@
 /**
  * Module: ThreeValueTextWidget - Responsive caption/value/unit numeric canvas renderer
  * Documentation: documentation/widgets/three-elements.md
- * Depends: Helpers.applyFormatter, ThemeResolver, TextLayoutEngine, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: componentContext.format.applyFormatter, componentContext.theme.tokens, TextLayoutEngine, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,18 +10,18 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const theme = Helpers.getModule("ThemeResolver");
-    const text = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
-    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
-    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
-    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
-    const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
+  function create(def, componentContext) {
+    const theme = componentContext.theme.tokens;
+    const text = componentContext.components.require("TextLayoutEngine");
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    const stableDigits = componentContext.components.require("StableDigits");
+    const stateScreenLabels = componentContext.components.require("StateScreenLabels");
+    const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
+    const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
     const fitCache = text.createFitCache(["high", "normal", "flat"]);
 
     function renderCanvas(canvas, props) {
-      const setup = Helpers.setupCanvas(canvas);
+      const setup = componentContext.canvas.setupCanvas(canvas);
       const ctx = setup.ctx;
       const W = setup.W;
       const H = setup.H;
@@ -31,7 +31,7 @@
 
       ctx.clearRect(0, 0, W, H);
       ctx.textBaseline = "middle";
-      const rootEl = Helpers.requirePluginRoot(canvas);
+      const rootEl = componentContext.dom.requirePluginRoot(canvas);
       const tokens = theme.resolveForRoot(rootEl);
       const stableDigitsEnabled = props.stableDigits === true;
       const family = stableDigitsEnabled
@@ -62,7 +62,7 @@
         ? String(props.default)
         : undefined;
       const normalizedValueText = placeholderNormalize.normalize(
-        String(Helpers.applyFormatter(props.value, props)),
+        String(componentContext.format.applyFormatter(props.value, props)),
         defaultText
       );
       const stableValue = stableDigitsEnabled

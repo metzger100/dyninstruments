@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("DefaultRadialWidget", function () {
   function createHarness(options) {
@@ -51,24 +52,21 @@ describe("DefaultRadialWidget", function () {
       }
     };
     const mod = loadFresh("widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js");
-    const spec = mod.create({}, {
-      applyFormatter,
-      getModule(id) {
-        if (id === "SemicircleRadialEngine") {
-          return { create: () => engine };
+    const spec = mod.create({}, createComponentContextMock({
+      modules: {
+        SemicircleRadialEngine: { create: () => engine },
+        RadialValueMath: { create: () => valueMath },
+        PlaceholderNormalize: { create: () => placeholderNormalize },
+        DefaultGaugeDisplay: {
+          create() {
+            throw new Error("DefaultGaugeDisplay must not be requested");
+          }
         }
-        if (id === "RadialValueMath") {
-          return { create: () => valueMath };
-        }
-        if (id === "PlaceholderNormalize") {
-          return { create: () => placeholderNormalize };
-        }
-        if (id === "DefaultGaugeDisplay") {
-          throw new Error("DefaultGaugeDisplay must not be requested");
-        }
-        throw new Error("unexpected module: " + id);
+      },
+      services: {
+        format: { applyFormatter }
       }
-    });
+    }));
     return {
       spec,
       captured,

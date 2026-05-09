@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("CompassLinearWidget", function () {
   it("configures fixed360 moving-scale compass behavior and waypoint marker wrapping", function () {
@@ -23,12 +24,9 @@ describe("CompassLinearWidget", function () {
     };
 
     const mod = loadFresh("widgets/linear/CompassLinearWidget/CompassLinearWidget.js");
-    const spec = mod.create({}, {
-      getModule(id) {
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+    const spec = mod.create({}, createComponentContextMock({
+      modules: {
+        RadialValueMath: { create() { return {
                 formatDirection360(value, leadingZero) {
                   const n = Number(value);
                   if (!isFinite(n)) return "---";
@@ -36,35 +34,16 @@ describe("CompassLinearWidget", function () {
                   const out = String(norm);
                   return leadingZero ? out.padStart(3, "0") : out;
                 }
-              };
-            }
-          };
-        }
-        if (id === "SpringEasing") {
-          return {
-            create() {
-              return {
+              }; } },
+        SpringEasing: { create() { return {
                 createMotion(spec) {
                   expect(spec).toEqual({ wrap: 360 });
                   return markerMotion;
                 }
-              };
-            }
-          };
-        }
-        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
-        return {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return renderCanvas;
-              }
-            };
-          }
-        };
+              }; } },
+        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return renderCanvas; } }; } }
       }
-    });
+    }));
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.axisMode).toBe("fixed360");
@@ -151,12 +130,9 @@ describe("CompassLinearWidget", function () {
       isActive: vi.fn(() => true)
     };
 
-    loadFresh("widgets/linear/CompassLinearWidget/CompassLinearWidget.js").create({}, {
-      getModule(id) {
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+    loadFresh("widgets/linear/CompassLinearWidget/CompassLinearWidget.js").create({}, createComponentContextMock({
+      modules: {
+        RadialValueMath: { create() { return {
                 formatDirection360(value, leadingZero) {
                   const n = Number(value);
                   if (!isFinite(n)) return "---";
@@ -164,34 +140,15 @@ describe("CompassLinearWidget", function () {
                   const out = String(norm);
                   return leadingZero ? out.padStart(3, "0") : out;
                 }
-              };
-            }
-          };
-        }
-        if (id === "SpringEasing") {
-          return {
-            create() {
-              return {
+              }; } },
+        SpringEasing: { create() { return {
                 createMotion() {
                   return markerMotion;
                 }
-              };
-            }
-          };
-        }
-        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
-        return {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return function () {};
-              }
-            };
-          }
-        };
+              }; } },
+        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
       }
-    });
+    }));
 
     const api = {
       drawDefaultPointer: vi.fn(),
@@ -214,23 +171,14 @@ describe("CompassLinearWidget", function () {
 
   it("returns fallback text for invalid heading values", function () {
     let captured;
-    loadFresh("widgets/linear/CompassLinearWidget/CompassLinearWidget.js").create({}, {
-      getModule(id) {
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+    loadFresh("widgets/linear/CompassLinearWidget/CompassLinearWidget.js").create({}, createComponentContextMock({
+      modules: {
+        RadialValueMath: { create() { return {
                 formatDirection360() {
                   return "---";
                 }
-              };
-            }
-          };
-        }
-        if (id === "SpringEasing") {
-          return {
-            create() {
-              return {
+              }; } },
+        SpringEasing: { create() { return {
                 createMotion() {
                   return {
                     resolve(canvas, target) {
@@ -242,23 +190,10 @@ describe("CompassLinearWidget", function () {
                     }
                   };
                 }
-              };
-            }
-          };
-        }
-        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
-        return {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return function () {};
-              }
-            };
-          }
-        };
+              }; } },
+        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
       }
-    });
+    }));
 
     expect(captured.formatDisplay(undefined, { default: "N/A" })).toEqual({ num: NaN, text: "N/A" });
     expect(captured.resolveAxis({ heading: undefined }, {}, { min: 0, max: 360 })).toEqual({ min: 0, max: 360 });

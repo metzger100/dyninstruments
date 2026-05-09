@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("AlarmTextHtmlWidget", function () {
   function readCss(relativePath) {
@@ -131,37 +132,29 @@ describe("AlarmTextHtmlWidget", function () {
       })
     };
 
-    const Helpers = {
-      requirePluginRoot(target) {
-        return target;
+    const componentContext = createComponentContextMock({
+      modules: {
+        AlarmHtmlFit: { create: () => fit },
+        AlarmHtmlFitChrome: loadFresh("shared/widget-kits/vessel/AlarmHtmlFitChrome.js"),
+        HtmlWidgetUtils: htmlWidgetUtilsModule,
+        AlarmRenderModel: renderModelModule,
+        AlarmMarkup: markupModule
       },
-      getModule(id) {
-        if (id === "AlarmHtmlFit") {
-          return { create: () => fit };
+      services: {
+        dom: {
+          requirePluginRoot(target) { return target; },
+          getNightModeState() { return false; }
+        },
+        themeTokens: {
+          resolveForRoot: themeResolver.resolveForRoot
         }
-        if (id === "AlarmHtmlFitChrome") {
-          return loadFresh("shared/widget-kits/vessel/AlarmHtmlFitChrome.js");
-        }
-        if (id === "HtmlWidgetUtils") {
-          return htmlWidgetUtilsModule;
-        }
-        if (id === "AlarmRenderModel") {
-          return renderModelModule;
-        }
-        if (id === "AlarmMarkup") {
-          return markupModule;
-        }
-        if (id === "ThemeResolver") {
-          return themeResolver;
-        }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
 
     return {
       htmlUtils: htmlUtils,
       fit: fit,
-      rendererSpec: loadFresh("widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js").create({}, Helpers)
+      rendererSpec: loadFresh("widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js").create({}, componentContext)
     };
   }
 
@@ -233,167 +226,115 @@ describe("AlarmTextHtmlWidget", function () {
       }))
     };
 
-    const Helpers = {
-      requirePluginRoot(target) {
-        return target || null;
+    const componentContext = createComponentContextMock({
+      modules: {
+        AlarmHtmlFit: alarmFitModule,
+        AlarmHtmlFitChrome: alarmFitChromeModule,
+        AisTargetLayoutSizing: aisLayoutSizingModule,
+        ResponsiveScaleProfile: responsiveScaleProfileModule,
+        LayoutRectMath: layoutRectMathModule,
+        AisTargetLayoutMath: aisLayoutMathModule,
+        TextLayoutEngine: { create: () => textLayoutApi },
+        HtmlWidgetUtils: htmlWidgetUtilsModule,
+        AlarmRenderModel: alarmRenderModelModule,
+        AlarmMarkup: alarmMarkupModule
       },
-      getModule(id) {
-        if (id === "AlarmHtmlFit") {
-          return alarmFitModule;
+      services: {
+        dom: {
+          requirePluginRoot(target) { return target || null; },
+          getNightModeState() { return false; }
+        },
+        themeTokens: {
+          resolveForRoot: themeResolver.resolveForRoot
         }
-        if (id === "AlarmHtmlFitChrome") {
-          return alarmFitChromeModule;
-        }
-        if (id === "AisTargetLayoutSizing") {
-          return aisLayoutSizingModule;
-        }
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfileModule;
-        }
-        if (id === "LayoutRectMath") {
-          return layoutRectMathModule;
-        }
-        if (id === "AisTargetLayoutMath") {
-          return aisLayoutMathModule;
-        }
-        if (id === "TextLayoutEngine") {
-          return { create: () => textLayoutApi };
-        }
-        if (id === "ThemeResolver") {
-          return themeResolver;
-        }
-        if (id === "HtmlWidgetUtils") {
-          return htmlWidgetUtilsModule;
-        }
-        if (id === "AlarmRenderModel") {
-          return alarmRenderModelModule;
-        }
-        if (id === "AlarmMarkup") {
-          return alarmMarkupModule;
-        }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
 
-    return loadFresh("widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js").create({}, Helpers);
+    return loadFresh("widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js").create({}, componentContext);
   }
 
   function createAisRendererWithRealLayout() {
-    const Helpers = {
-      applyFormatter(value, formatterOptions) {
-        const cfg = formatterOptions || {};
-        const formatter = cfg.formatter;
-        const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
-        if (value == null) {
-          return cfg.default;
-        }
-        if (formatter === "formatDistance") {
-          return "DIST:" + String(value) + ":" + String(params[0] || "");
-        }
-        if (formatter === "formatDirection") {
-          return "DIR:" + String(value);
-        }
-        if (formatter === "formatDecimal") {
-          return "DEC:" + String(value) + ":" + params.join(",");
-        }
-        return String(value);
+    const componentContext = createComponentContextMock({
+      modules: {
+        AisTargetHtmlFit: {
+          create() {
+            return {
+              compute() {
+                return {
+                  nameStyle: "font-size:12px;",
+                  frontStyle: "font-size:10px;",
+                  placeholderStyle: "font-size:11px;",
+                  metrics: {
+                    dst: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+                    cpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+                    tcpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
+                    brg: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" }
+                  },
+                  accentStyle: "background-color:#c33;"
+                };
+              }
+            };
+          }
+        },
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+        AisTargetRenderModel: loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js"),
+        UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
+        AisTargetMarkup: loadFresh("shared/widget-kits/nav/AisTargetMarkup.js"),
+        AisTargetLayout: loadFresh("shared/widget-kits/nav/AisTargetLayout.js"),
+        AisTargetLayoutSizing: loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js"),
+        ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+        AisTargetLayoutGeometry: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js"),
+        AisTargetLayoutMath: loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js"),
+        StateScreenMarkup: loadFresh("shared/widget-kits/state/StateScreenMarkup.js"),
+        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js")
       },
-      requirePluginRoot(target) {
-        return target || null;
-      },
-      getModule(id) {
-        if (id === "AisTargetHtmlFit") {
-          return {
-            create() {
-              return {
-                compute() {
-                  return {
-                    nameStyle: "font-size:12px;",
-                    frontStyle: "font-size:10px;",
-                    placeholderStyle: "font-size:11px;",
-                    metrics: {
-                      dst: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-                      cpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-                      tcpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-                      brg: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" }
-                    },
-                    accentStyle: "background-color:#c33;"
-                  };
-                }
-              };
+      services: {
+        format: {
+          applyFormatter(value, formatterOptions) {
+            const cfg = formatterOptions || {};
+            const formatter = cfg.formatter;
+            const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
+            if (value == null) {
+              return cfg.default;
             }
-          };
-        }
-        if (id === "HtmlWidgetUtils") {
-          return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-        }
-        if (id === "AisTargetRenderModel") {
-          return loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js");
-        }
-        if (id === "UnitAwareFormatter") {
-          return loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
-        }
-        if (id === "AisTargetMarkup") {
-          return loadFresh("shared/widget-kits/nav/AisTargetMarkup.js");
-        }
-        if (id === "AisTargetLayout") {
-          return loadFresh("shared/widget-kits/nav/AisTargetLayout.js");
-        }
-        if (id === "AisTargetLayoutSizing") {
-          return loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
-        }
-        if (id === "ResponsiveScaleProfile") {
-          return loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-        }
-        if (id === "LayoutRectMath") {
-          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-        }
-        if (id === "AisTargetLayoutGeometry") {
-          return loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
-        }
-        if (id === "AisTargetLayoutMath") {
-          return loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
-        }
-        if (id === "PlaceholderNormalize") {
-          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        }
-        if (id === "StableDigits") {
-          return loadFresh("shared/widget-kits/format/StableDigits.js");
-        }
-        if (id === "StateScreenLabels") {
-          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        }
-        if (id === "StateScreenPrecedence") {
-          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-        }
-        if (id === "StateScreenInteraction") {
-          return loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
-        }
-        if (id === "StateScreenMarkup") {
-          return loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
-        }
-        if (id === "StateScreenTextFit") {
-          return loadFresh("shared/widget-kits/state/StateScreenTextFit.js");
-        }
-        if (id === "ThemeResolver") {
-          return {
-            resolveForRoot() {
-              return {
-                font: {
-                  family: "sans-serif",
-                  familyMono: "monospace",
-                  weight: 720,
-                  labelWeight: 610
-                }
-              };
+            if (formatter === "formatDistance") {
+              return "DIST:" + String(value) + ":" + String(params[0] || "");
             }
-          };
+            if (formatter === "formatDirection") {
+              return "DIR:" + String(value);
+            }
+            if (formatter === "formatDecimal") {
+              return "DEC:" + String(value) + ":" + params.join(",");
+            }
+            return String(value);
+          }
+        },
+        dom: {
+          requirePluginRoot(target) { return target || null; },
+          getNightModeState() { return false; }
+        },
+        themeTokens: {
+          resolveForRoot() {
+            return {
+              font: {
+                family: "sans-serif",
+                familyMono: "monospace",
+                weight: 720,
+                labelWeight: 610
+              }
+            };
+          }
         }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
 
-    return loadFresh("widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js").create({}, Helpers);
+    return loadFresh("widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js").create({}, componentContext);
   }
 
   function mountRenderer(rendererSpec, payload) {

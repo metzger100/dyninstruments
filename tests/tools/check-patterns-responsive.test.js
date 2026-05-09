@@ -134,8 +134,8 @@ function create(def, Helpers) {
   it("fails when an owner resolves ResponsiveScaleProfile but never uses required helpers", function () {
     const cwd = createWorkspace({
       "shared/widget-kits/linear/LinearGaugeLayout.js": `
-function create(def, Helpers) {
-  const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
+function create(def, componentContext) {
+  const profileApi = componentContext.components.require("ResponsiveScaleProfile");
   return {
     profileApi
   };
@@ -154,8 +154,8 @@ function create(def, Helpers) {
   it("fails when a consumer resolves ResponsiveScaleProfile directly", function () {
     const cwd = createWorkspace({
       "widgets/text/XteDisplayWidget/XteDisplayWidget.js": `
-function create(def, Helpers) {
-  return Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
+function create(def, componentContext) {
+  return componentContext.components.require("ResponsiveScaleProfile");
 }
 `
     });
@@ -170,8 +170,8 @@ function create(def, Helpers) {
   it("passes for a correct owner and consumer ownership split", function () {
     const cwd = createWorkspace({
       "shared/widget-kits/text/TextLayoutEngine.js": `
-function create(def, Helpers) {
-  const responsiveProfile = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
+function create(def, componentContext) {
+  const responsiveProfile = componentContext.components.require("ResponsiveScaleProfile");
   function computeResponsiveInsets(W, H) {
     const responsive = responsiveProfile.computeProfile(W, H, { scales: { textFillScale: 1.18 } });
     return { padX: responsiveProfile.computeInsetPx(responsive, 0.04, 1) };

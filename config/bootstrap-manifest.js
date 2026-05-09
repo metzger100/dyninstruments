@@ -12,8 +12,13 @@
   config.bootstrapManifest = [
     "runtime/namespace.js",
     "runtime/PerfSpanHelper.js",
-    "runtime/helpers.js",
+    "runtime/format-runtime.js",
+    "runtime/canvas-runtime.js",
+    "runtime/dom-runtime.js",
     "runtime/editable-defaults.js",
+    "runtime/theme/model.js",
+    "runtime/theme/resolver.js",
+    "runtime/theme-runtime.js",
     "config/components/registry-shared-foundation-format.js",
     "config/components/registry-shared-foundation-geometry.js",
     "config/components/registry-shared-foundation-layout.js",
@@ -61,7 +66,10 @@
     "runtime/SurfaceSessionController.js",
     "runtime/TemporaryHostActionBridgeDiscovery.js",
     "runtime/TemporaryHostActionBridge.js",
-    "runtime/theme-runtime.js",
+    "runtime/surface/ClusterSurfacePolicy.js",
+    "runtime/surface/CanvasDomSurfaceAdapter.js",
+    "runtime/surface/HtmlSurfaceController.js",
+    "runtime/surface/index.js",
     "runtime/init.js"
   ];
 }(this));

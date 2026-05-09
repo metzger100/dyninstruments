@@ -18,8 +18,8 @@
   const BOAT_BEAM_RATIO = 0.62;
   const BOAT_LANE_DEPTH_LIMIT = 0.48;
 
-  function create(def, Helpers) {
-    const gs = Helpers.getModule("GeometryScale").create(def, Helpers);
+  function create(def, componentContext) {
+    const gs = componentContext.components.require("GeometryScale");
 
     function clamp(value, lo, hi) {
       return Math.max(lo, Math.min(hi, value));

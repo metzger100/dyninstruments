@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetHtmlFit - Text-fit and accent-style owner for AIS target HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ThemeResolver, RadialTextLayout, TextTileLayout, AisTargetLayout, HtmlWidgetUtils, TextFitMath
+ * Depends: componentContext.theme.tokens, RadialTextLayout, TextTileLayout, AisTargetLayout, HtmlWidgetUtils, TextFitMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -60,8 +60,8 @@
     }
     return resolved;
   }
-  function resolveThemeTypography(Helpers, themeApi, targetEl) {
-    const rootEl = Helpers.requirePluginRoot(targetEl);
+  function resolveThemeTypography(componentContext, themeApi, targetEl) {
+    const rootEl = componentContext.dom.requirePluginRoot(targetEl);
     const tokens = themeApi.resolveForRoot(rootEl);
     return {
       tokens: tokens,
@@ -197,13 +197,13 @@
       unitRect: tile.unitRect
     };
   }
-  function create(def, Helpers) {
-    const theme = Helpers.getModule("ThemeResolver");
-    const textApi = Helpers.getModule("RadialTextLayout").create(def, Helpers);
-    const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
-    const layoutApi = Helpers.getModule("AisTargetLayout").create(def, Helpers);
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const fitMath = Helpers.getModule("TextFitMath").create(def, Helpers);
+  function create(def, componentContext) {
+    const theme = componentContext.theme.tokens;
+    const textApi = componentContext.components.require("RadialTextLayout");
+    const tileLayout = componentContext.components.require("TextTileLayout");
+    const layoutApi = componentContext.components.require("AisTargetLayout");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const fitMath = componentContext.components.require("TextFitMath");
     function compute(args) {
       const cfg = args || {};
       const model = cfg.model || null;
@@ -212,7 +212,7 @@
       if (!model || !shellRect || !targetEl) {
         return null;
       }
-      const typography = resolveThemeTypography(Helpers, theme, targetEl);
+      const typography = resolveThemeTypography(componentContext, theme, targetEl);
       const measureCtx = resolveMeasureContext(cfg.hostContext, targetEl);
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
         return null;

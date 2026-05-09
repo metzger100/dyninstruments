@@ -1,20 +1,17 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("EditRouteViewModel", function () {
   function createViewModel(centerMathFactory) {
-    const Helpers = {
-      getModule(id) {
-        if (id === "CenterDisplayMath") {
-          if (typeof centerMathFactory === "function") {
-            return { create: centerMathFactory };
-          }
-          return loadFresh("shared/widget-kits/nav/CenterDisplayMath.js");
-        }
-        throw new Error("unexpected module: " + id);
+    const componentContext = createComponentContextMock({
+      modules: {
+        CenterDisplayMath: typeof centerMathFactory === "function"
+          ? { create: centerMathFactory }
+          : loadFresh("shared/widget-kits/nav/CenterDisplayMath.js")
       }
-    };
+    });
 
-    return loadFresh("cluster/viewmodels/EditRouteViewModel.js").create({}, Helpers);
+    return loadFresh("cluster/viewmodels/EditRouteViewModel.js").create({}, componentContext);
   }
 
   it("returns route null for missing or invalid editingRoute inputs", function () {

@@ -1,19 +1,15 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("XteHighwayLayout", function () {
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-    return loadFresh("shared/widget-kits/xte/XteHighwayLayout.js").create({}, {
-      getModule(id) {
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfile;
-        }
-        if (id === "LayoutRectMath") {
-          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-        }
-        throw new Error("unexpected module: " + id);
+    return loadFresh("shared/widget-kits/xte/XteHighwayLayout.js").create({}, createComponentContextMock({
+      modules: {
+        ResponsiveScaleProfile: responsiveScaleProfile,
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
       }
-    });
+    }));
   }
 
   function expectRectInside(inner, outer) {
@@ -175,14 +171,11 @@ describe("XteHighwayLayout", function () {
 
   it("uses the highway height as the constraining axis in flat mode", function () {
     const layout = createLayout();
-    const primitives = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js").create({}, {
-      getModule(id) {
-        if (id === "GeometryScale") {
-          return loadFresh("shared/widget-kits/layout/GeometryScale.js");
-        }
-        throw new Error("unexpected module: " + id);
+    const primitives = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js").create({}, createComponentContextMock({
+      modules: {
+        GeometryScale: loadFresh("shared/widget-kits/layout/GeometryScale.js")
       }
-    });
+    }));
     const snapshot = buildSnapshot(layout, 600, 150, "flat").out;
     const geometry = primitives.highwayGeometry(snapshot.highway, "flat", snapshot.highway.h);
 

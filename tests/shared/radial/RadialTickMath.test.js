@@ -1,13 +1,13 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RadialTickMath", function () {
   function create() {
-    return loadFresh("shared/widget-kits/radial/RadialTickMath.js").create({}, {
-      getModule(id) {
-        if (id !== "RadialAngleMath") throw new Error("unexpected module: " + id);
-        return loadFresh("shared/widget-kits/radial/RadialAngleMath.js");
+    return loadFresh("shared/widget-kits/radial/RadialTickMath.js").create({}, createComponentContextMock({
+      modules: {
+        RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js")
       }
-    });
+    }));
   }
 
   it("computes sweep direction and handles zero sweep as full circle", function () {

@@ -107,9 +107,9 @@
     };
   }
 
-  function create(def, Helpers) {
-    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
-    const unitFormatter = Helpers.getModule("UnitAwareFormatter").create(def, Helpers);
+  function create(def, componentContext) {
+    const stableDigits = componentContext.components.require("StableDigits");
+    const unitFormatter = componentContext.components.require("UnitAwareFormatter");
 
     function formatCoordinate(point, axis, defaultText) {
       const raw = point && axis === "lat" ? point.lat : point && point.lon;

@@ -135,14 +135,14 @@ export const RULES = [
     },
     detect: /(?:window\.avnav|(?<!\w)avnav\.api)/g,
     allowlist: [],
-    message: ({ file, line }) => `[forbidden-global] ${file}:${line}\nDirect access to 'avnav.api' in widget code. Widgets must use\nHelpers.applyFormatter() instead. The centralized formatter in\nruntime/helpers.js already handles availability checks, try/catch,\nand fallback. See ARCHITECTURE.md boundary rule and core-principles.md #9.`
+    message: ({ file, line }) => `[forbidden-global] ${file}:${line}\nDirect access to 'avnav.api' in widget code. Widgets must use\ncomponentContext.format.applyFormatter() instead. The centralized formatter in\nruntime/format-runtime.js (runtime.format service) already handles availability checks, try/catch,\nand fallback. See ARCHITECTURE.md boundary rule and core-principles.md #9.`
   },
   {
     name: "empty-catch",
     scope: { include: ["**/*.js"], exclude: ["tests/**", "tools/**"] },
     detect: /catch\s*\([^)]*\)\s*\{\s*\}/g,
     allowlist: [],
-    message: ({ file, line }) => `[empty-catch] ${file}:${line}\nEmpty catch block swallows errors silently. Either:\n1. Add a comment explaining why: catch(e) { /* intentional: avnav may be absent */ }\n2. Log the error: catch(e) { console.warn('...', e); }\n3. Use Helpers.applyFormatter() which handles this centrally.\nSee core-principles.md #11.`
+    message: ({ file, line }) => `[empty-catch] ${file}:${line}\nEmpty catch block swallows errors silently. Either:\n1. Add a comment explaining why: catch(e) { /* intentional: avnav may be absent */ }\n2. Log the error: catch(e) { console.warn('...', e); }\n3. Use componentContext.format.applyFormatter() which handles this centrally via runtime.format.\nSee core-principles.md #11.`
   },
   {
     name: "catch-fallback-without-suppression",
@@ -212,7 +212,7 @@ export const RULES = [
     run: runRedundantInternalFallbackRule,
     message: ({ file, line, expression, propName, rendererId, sourceType }) => {
       if (sourceType === "applyFormatter-default") {
-        return `[redundant-internal-fallback] ${file}:${line}\nRedundant fallback (${expression}). Helpers.applyFormatter() already applies the same default; remove the outer fallback wrapper.`;
+        return `[redundant-internal-fallback] ${file}:${line}\nRedundant fallback (${expression}). componentContext.format.applyFormatter() already applies the same default; remove the outer fallback wrapper.`;
       }
       return `[redundant-internal-fallback] ${file}:${line}\nRedundant fallback (${expression}) for prop '${propName}'. Renderer '${rendererId}' guarantees this prop via mapper kind-default contracts.`;
     }

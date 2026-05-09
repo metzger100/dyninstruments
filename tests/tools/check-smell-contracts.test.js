@@ -43,37 +43,38 @@ describe("tools/check-smell-contracts.mjs", function () {
 
   it("fails theme-cache-invalidation when legacy resolver API is present", function () {
     const cwd = createWorkspace({
-      "shared/theme/ThemeModel.js": `
-(function (root, factory) {
-  if (typeof module === "object" && module.exports) module.exports = factory();
-}(this, function () {
-  return {
-    id: "ThemeModel",
-    normalizePresetName(name) { return String(name || "").trim() || "default"; },
-    getTokenDefinitions() { return [{ path: "colors.pointer", inputVar: "--dyni-pointer", type: "color", default: "#111111" }]; },
-    getOutputTokenDefinitions() { return []; },
-    getPresetMode() { return {}; },
-    getPresetBase() { return {}; }
-  };
-}));
+      "runtime/namespace.js": `
+(function (root) {
+  root.DyniPlugin = root.DyniPlugin || {};
+  root.DyniPlugin.runtime = root.DyniPlugin.runtime || {};
+  root.DyniPlugin.state = root.DyniPlugin.state || {};
+  root.DyniPlugin.config = root.DyniPlugin.config || { shared: {}, clusters: [] };
+}(this));
 `,
-      "shared/theme/ThemeResolver.js": `
-(function (root, factory) {
-  if (typeof module === "object" && module.exports) module.exports = factory();
-}(this, function () {
-  return {
-    id: "ThemeResolver",
-    create: function () { return {}; },
-    resolveForRoot: function () { return { colors: { pointer: "#111111" } }; },
-    configure: function () {}
+      "runtime/theme/model.js": `
+(function (root) {
+  root.DyniPlugin.runtime.createThemeModel = function () {
+    return {
+      normalizePresetName() { return "default"; },
+      getTokenDefinitions() { return [{ path: "colors.pointer", inputVar: "--dyni-pointer", type: "color", default: "#111111" }]; },
+      getOutputTokenDefinitions() { return []; },
+      getPresetMode() { return {}; },
+      getPresetBase() { return {}; }
+    };
   };
-}));
+}(this));
 `,
-      "runtime/init.js": `
-(function () {
-  function invalidateThemeResolverCache() {}
-}));
-`
+      "runtime/theme/resolver.js": `
+(function (root) {
+  root.DyniPlugin.runtime.createThemeResolver = function () {
+    return {
+      resolveForRoot: function () { return Object.freeze({ colors: Object.freeze({ pointer: "#111111" }) }); },
+      resolveOutputsForRoot: function () { return Object.freeze({}); }
+    };
+  };
+}(this));
+`,
+      "runtime/init.js": "(function () {}(this));\n"
     });
 
     const result = runSmellContracts({
@@ -165,19 +166,25 @@ describe("tools/check-smell-contracts.mjs", function () {
 
   it("fails falsy-default-preservation when truthy fallback is used", function () {
     const cwd = createWorkspace({
-      "runtime/helpers.js": `
+      "runtime/namespace.js": `
 (function (root) {
   const runtime = root.DyniPlugin.runtime;
-  runtime.applyFormatter = function (raw, props) {
+  runtime.getAvnavApi = function () { return root.avnav.api; };
+}(this));
+`,
+      "runtime/format-runtime.js": `
+(function (root) {
+  const runtime = root.DyniPlugin.runtime;
+  runtime.format = { applyFormatter: function (raw, props) {
     if (raw == null || Number.isNaN(raw)) return (props && props.default) || "---";
     return String(raw);
-  };
+  } };
 }(this));
 `,
       "runtime/widget-registrar.js": `
 (function (root) {
   const runtime = root.DyniPlugin.runtime;
-  runtime.registerWidget = function (component, widgetDef) {
+  runtime.registerWidget = function (componentSpec, widgetDef) {
     root.avnav.api.registerWidget({
       name: widgetDef.def.name,
       default: widgetDef.def.default || "---"
@@ -265,8 +272,8 @@ function format(out, n, plainText) {
   it("fails placeholder-contract when formatter output is not normalized nearby", function () {
     const cwd = createWorkspace({
       "shared/widget-kits/nav/EditRouteRenderModel.js": `
-function render(Helpers) {
-  const text = Helpers.applyFormatter(10, { formatter: "formatDistance", default: "---" });
+function render(componentContext) {
+  const text = componentContext.format.applyFormatter(10, { formatter: "formatDistance", default: "---" });
   return text;
 }
 `

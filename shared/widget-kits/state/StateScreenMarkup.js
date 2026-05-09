@@ -80,11 +80,11 @@
     return attrs;
   }
 
-  function create(def, Helpers) {
-    const labelsApi = Helpers.getModule("StateScreenLabels");
-    const labels = labelsApi.create(def, Helpers);
-    const defaultHtmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const stateScreenTextFit = Helpers.getModule("StateScreenTextFit").create(def, Helpers);
+  function create(def, componentContext) {
+    const labelsApi = componentContext.components.require("StateScreenLabels");
+    const labels = labelsApi;
+    const defaultHtmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const stateScreenTextFit = componentContext.components.require("StateScreenTextFit");
 
     function resolveLabelStyle(cfg, labelText) {
       const explicit = typeof cfg.labelStyle === "string" ? cfg.labelStyle : cfg.fitStyle;

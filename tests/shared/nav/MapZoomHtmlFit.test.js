@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("MapZoomHtmlFit", function () {
   function createHarness(options) {
@@ -69,28 +70,25 @@ describe("MapZoomHtmlFit", function () {
     };
 
     const htmlUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-    const Helpers = {
-      resolveFontFamily() {
-        return "sans-serif";
+    const componentContext = createComponentContextMock({
+      modules: {
+        TextLayoutEngine: { create: () => textApi },
+        HtmlWidgetUtils: htmlUtilsModule,
+        ThemeResolver: themeApi
       },
-      requirePluginRoot(target) {
-        return target || null;
-      },
-      getModule(id) {
-        if (id === "TextLayoutEngine") {
-          return { create: () => textApi };
+      services: {
+        dom: {
+          requirePluginRoot(target) {
+            return target || null;
+          },
+          getNightModeState() {
+            return false;
+          }
         }
-        if (id === "HtmlWidgetUtils") {
-          return htmlUtilsModule;
-        }
-        if (id === "ThemeResolver") {
-          return themeApi;
-        }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
 
-    const fit = loadFresh("shared/widget-kits/nav/MapZoomHtmlFit.js").create({}, Helpers);
+    const fit = loadFresh("shared/widget-kits/nav/MapZoomHtmlFit.js").create({}, componentContext);
     return { fit, calls, themeApi, hostContext, shellEl };
   }
 
@@ -232,20 +230,28 @@ describe("MapZoomHtmlFit", function () {
       RadialTextFitting: "shared/widget-kits/radial/RadialTextFitting.js"
     };
     const moduleCache = Object.create(null);
-    const Helpers = {
-      applyFormatter(value) { return String(value); },
-      resolveFontFamily() { return "sans-serif"; },
-      requirePluginRoot(target) { return target; },
-      getNightModeState() { return false; },
-      getModule(id) {
-        const relPath = MODULE_PATH_BY_ID[id];
-        if (!relPath) throw new Error("unexpected module: " + id);
-        if (!moduleCache[id]) moduleCache[id] = loadFresh(relPath);
-        return moduleCache[id];
+    const modules = Object.create(null);
+    Object.keys(MODULE_PATH_BY_ID).forEach((id) => {
+      const relPath = MODULE_PATH_BY_ID[id];
+      if (!moduleCache[id]) {
+        moduleCache[id] = loadFresh(relPath);
       }
-    };
+      modules[id] = moduleCache[id];
+    });
+    const componentContext = createComponentContextMock({
+      modules: modules,
+      services: {
+        format: {
+          applyFormatter(value) { return String(value); }
+        },
+        dom: {
+          requirePluginRoot(target) { return target; },
+          getNightModeState() { return false; }
+        }
+      }
+    });
 
-    const fit = loadFresh("shared/widget-kits/nav/MapZoomHtmlFit.js").create({}, Helpers);
+    const fit = loadFresh("shared/widget-kits/nav/MapZoomHtmlFit.js").create({}, componentContext);
     const model = {
       mode: "normal",
       caption: "ZOOM",
@@ -297,20 +303,28 @@ describe("MapZoomHtmlFit", function () {
       RadialTextFitting: "shared/widget-kits/radial/RadialTextFitting.js"
     };
     const moduleCache = Object.create(null);
-    const Helpers = {
-      applyFormatter(value) { return String(value); },
-      resolveFontFamily() { return "sans-serif"; },
-      requirePluginRoot(target) { return target; },
-      getNightModeState() { return false; },
-      getModule(id) {
-        const relPath = MODULE_PATH_BY_ID[id];
-        if (!relPath) throw new Error("unexpected module: " + id);
-        if (!moduleCache[id]) moduleCache[id] = loadFresh(relPath);
-        return moduleCache[id];
+    const modules = Object.create(null);
+    Object.keys(MODULE_PATH_BY_ID).forEach((id) => {
+      const relPath = MODULE_PATH_BY_ID[id];
+      if (!moduleCache[id]) {
+        moduleCache[id] = loadFresh(relPath);
       }
-    };
+      modules[id] = moduleCache[id];
+    });
+    const componentContext = createComponentContextMock({
+      modules: modules,
+      services: {
+        format: {
+          applyFormatter(value) { return String(value); }
+        },
+        dom: {
+          requirePluginRoot(target) { return target; },
+          getNightModeState() { return false; }
+        }
+      }
+    });
 
-    const fit = loadFresh("shared/widget-kits/nav/MapZoomHtmlFit.js").create({}, Helpers);
+    const fit = loadFresh("shared/widget-kits/nav/MapZoomHtmlFit.js").create({}, componentContext);
     const model = {
       mode: "flat",
       caption: "ZOOM",

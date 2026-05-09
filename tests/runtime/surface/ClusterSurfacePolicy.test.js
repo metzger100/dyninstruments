@@ -1,10 +1,21 @@
-const { loadFresh } = require("../../helpers/load-umd");
+const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 
-describe("ClusterSurfacePolicy", function () {
+describe("runtime/surface/ClusterSurfacePolicy.js", function () {
   let originalInnerHeight;
 
-  function createPolicy() {
-    return loadFresh("cluster/rendering/ClusterSurfacePolicy.js").create({}, {});
+  function createPolicy(innerHeight) {
+    const context = createScriptContext({
+      innerHeight: typeof innerHeight === "number" ? innerHeight : 0,
+      DyniPlugin: {
+        runtime: {},
+        state: {},
+        config: { shared: {}, clusters: [] }
+      }
+    });
+    runIifeScript("runtime/namespace.js", context);
+    runIifeScript("runtime/surface/ClusterSurfacePolicy.js", context);
+    context.globalThis = context;
+    return context.DyniPlugin.runtime._createClusterSurfacePolicy();
   }
 
   function makeRouteState(rendererId, props, rendererSpec) {
@@ -53,7 +64,7 @@ describe("ClusterSurfacePolicy", function () {
 
   it("preserves props identity and materializes runtime fields as non-enumerable", function () {
     globalThis.innerHeight = 812;
-    const policy = createPolicy();
+    const policy = createPolicy(812);
     const props = { cluster: "nav", kind: "activeRoute", mode: "vertical" };
     const routeState = makeRouteState("ActiveRouteTextHtmlWidget", props);
     const hostContext = {

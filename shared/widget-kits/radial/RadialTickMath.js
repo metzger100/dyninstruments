@@ -11,8 +11,8 @@
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
-  function create(def, Helpers) {
-    const angleMath = Helpers.getModule("RadialAngleMath").create(def, Helpers);
+  function create(def, componentContext) {
+    const angleMath = componentContext.components.require("RadialAngleMath");
     const mod = angleMath.mod;
 
     function computeSweep(startDeg, endDeg) {

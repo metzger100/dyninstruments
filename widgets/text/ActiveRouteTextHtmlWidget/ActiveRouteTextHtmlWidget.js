@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteTextHtmlWidget - Interactive HTML renderer for nav active-route kind
  * Documentation: documentation/widgets/active-route.md
- * Depends: ActiveRouteHtmlFit, HtmlWidgetUtils, PreparedPayloadModelCache, PlaceholderNormalize, StableDigits, ThemeResolver, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
+ * Depends: ActiveRouteHtmlFit, HtmlWidgetUtils, PreparedPayloadModelCache, PlaceholderNormalize, StableDigits, componentContext.theme.tokens, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
  */
 
 (function (root, factory) {
@@ -50,7 +50,7 @@
   function buildRenderModel(
     props,
     shellRect,
-    Helpers,
+    componentContext,
     htmlUtils,
     htmlFit,
     placeholderNormalize,
@@ -99,7 +99,7 @@
       "formatDistance",
       [remainFormatUnit],
       defaultText,
-      Helpers,
+      componentContext,
       placeholderNormalize
     );
     const etaRawText = htmlFit.formatMetric(
@@ -107,7 +107,7 @@
       etaFormatter,
       [],
       defaultText,
-      Helpers,
+      componentContext,
       placeholderNormalize
     );
     const nextCourseRawText = isApproaching
@@ -116,7 +116,7 @@
         "formatDirection",
         [],
         defaultText,
-        Helpers,
+        componentContext,
         placeholderNormalize
       )
       : "";
@@ -220,17 +220,17 @@
       + "</div>";
   }
 
-  function create(def, Helpers) {
-    const htmlFit = Helpers.getModule("ActiveRouteHtmlFit").create(def, Helpers);
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const preparedPayloadModelCache = Helpers.getModule("PreparedPayloadModelCache").create(def, Helpers);
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
-    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
-    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
-    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
-    const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
-    const stateScreenMarkup = Helpers.getModule("StateScreenMarkup").create(def, Helpers);
-    const themeResolver = Helpers.getModule("ThemeResolver");
+  function create(def, componentContext) {
+    const htmlFit = componentContext.components.require("ActiveRouteHtmlFit");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const preparedPayloadModelCache = componentContext.components.require("PreparedPayloadModelCache");
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    const stableDigits = componentContext.components.require("StableDigits");
+    const stateScreenLabels = componentContext.components.require("StateScreenLabels");
+    const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
+    const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");
+    const stateScreenMarkup = componentContext.components.require("StateScreenMarkup");
+    const themeResolver = componentContext.theme.tokens;
 
     function translateFunction(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
@@ -246,7 +246,7 @@
         return buildRenderModel(
         props,
         shellRect,
-        Helpers,
+        componentContext,
         htmlUtils,
         htmlFit,
         placeholderNormalize,

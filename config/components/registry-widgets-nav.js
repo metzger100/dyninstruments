@@ -55,7 +55,7 @@
       css: undefined,
       shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"],
       globalKey: "DyniAisTargetTextHtmlWidget",
-      deps: ["AisTargetHtmlFit", "HtmlWidgetUtils", "AisTargetRenderModel", "AisTargetMarkup", "ThemeResolver"]
+      deps: ["AisTargetHtmlFit", "HtmlWidgetUtils", "AisTargetRenderModel", "AisTargetMarkup"]
   };
 
   w.ActiveRouteTextHtmlWidget = {
@@ -69,7 +69,6 @@
         "PreparedPayloadModelCache",
         "PlaceholderNormalize",
         "StableDigits",
-        "ThemeResolver",
         "StateScreenLabels",
         "StateScreenPrecedence",
         "StateScreenInteraction",
@@ -106,7 +105,7 @@
       css: undefined,
       shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"],
       globalKey: "DyniEditRouteTextHtmlWidget",
-      deps: ["EditRouteHtmlFit", "HtmlWidgetUtils", "EditRouteRenderModel", "EditRouteMarkup", "ThemeResolver"]
+      deps: ["EditRouteHtmlFit", "HtmlWidgetUtils", "EditRouteRenderModel", "EditRouteMarkup"]
   };
 
   w.RoutePointsRenderModel = {
@@ -150,9 +149,9 @@
         "RoutePointsHtmlFit",
         "HtmlWidgetUtils",
         "RoutePointsRenderModel",
+        "RoutePointsLayout",
         "RoutePointsMarkup",
-        "RoutePointsDomEffects",
-        "ThemeResolver"
+        "RoutePointsDomEffects"
       ]
   };
 
@@ -167,7 +166,6 @@
         "PlaceholderNormalize",
         "PreparedPayloadModelCache",
         "StableDigits",
-        "ThemeResolver",
         "StateScreenLabels",
         "StateScreenPrecedence",
         "StateScreenInteraction",
@@ -180,7 +178,6 @@
       css: undefined,
       globalKey: "DyniCenterDisplayTextWidget",
       deps: [
-        "ThemeResolver",
         "TextLayoutEngine",
         "RadialTextLayout",
         "TextTileLayout",

@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RendererPropsWidget", function () {
   it("merges rendererProps into delegated canvas and html props", function () {
@@ -8,18 +9,14 @@ describe("RendererPropsWidget", function () {
       renderHtml: vi.fn(() => "<div>ok</div>")
     };
 
-    const spec = loadFresh("cluster/rendering/RendererPropsWidget.js").create({}, {
-      getModule(id) {
-        if (id === "SpeedRadialWidget") {
-          return {
-            create() {
-              return delegated;
-            }
-          };
-        }
-        throw new Error("unexpected module: " + id);
+    const componentContext = createComponentContextMock({
+      modules: {
+        SpeedRadialWidget: delegated
       }
-    }, "SpeedRadialWidget");
+    });
+    const spec = loadFresh("cluster/rendering/RendererPropsWidget.js")
+      .create({}, componentContext)
+      .wrap("SpeedRadialWidget");
 
     const canvas = { id: "c" };
     spec.renderCanvas(canvas, {
@@ -69,18 +66,14 @@ describe("RendererPropsWidget", function () {
       finalizeFunction: vi.fn()
     };
 
-    const spec = loadFresh("cluster/rendering/RendererPropsWidget.js").create({}, {
-      getModule(id) {
-        if (id === "SpeedRadialWidget") {
-          return {
-            create() {
-              return delegated;
-            }
-          };
-        }
-        throw new Error("unexpected module: " + id);
+    const componentContext = createComponentContextMock({
+      modules: {
+        SpeedRadialWidget: delegated
       }
-    }, "SpeedRadialWidget");
+    });
+    const spec = loadFresh("cluster/rendering/RendererPropsWidget.js")
+      .create({}, componentContext)
+      .wrap("SpeedRadialWidget");
 
     spec.initFunction("ctx", {
       renderer: "SpeedRadialWidget",

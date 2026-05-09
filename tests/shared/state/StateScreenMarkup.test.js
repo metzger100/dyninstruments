@@ -1,23 +1,21 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("StateScreenMarkup", function () {
   function createMarkup(options) {
     const opts = options || {};
     const textFitCompute = opts.textFitCompute || vi.fn(() => "font-size:18px;");
-    return loadFresh("shared/widget-kits/state/StateScreenMarkup.js").create({}, {
-      getModule(id) {
-        if (id === "StateScreenLabels") {
-          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+    return loadFresh("shared/widget-kits/state/StateScreenMarkup.js").create({}, createComponentContextMock({
+      modules: {
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+        StateScreenTextFit: {
+          create() {
+            return { compute: textFitCompute };
+          }
         }
-        if (id === "HtmlWidgetUtils") {
-          return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-        }
-        if (id === "StateScreenTextFit") {
-          return { create: () => ({ compute: textFitCompute }) };
-        }
-        throw new Error("unexpected module: " + id);
       }
-    });
+    }));
   }
 
   function parseHtml(html) {

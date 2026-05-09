@@ -1,26 +1,18 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RoutePointsLayout", function () {
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const routePointsLayoutSizing = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
-    return loadFresh("shared/widget-kits/nav/RoutePointsLayout.js").create({}, {
-      getModule(id) {
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfile;
-        }
-        if (id === "LayoutRectMath") {
-          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-        }
-        if (id === "RoutePointsLayoutSizing") {
-          return routePointsLayoutSizing;
-        }
-        if (id === "RoutePointsRowGeometry") {
-          return loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js");
-        }
-        throw new Error("unexpected module: " + id);
+    return loadFresh("shared/widget-kits/nav/RoutePointsLayout.js").create({}, createComponentContextMock({
+      modules: {
+        ResponsiveScaleProfile: responsiveScaleProfile,
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+        RoutePointsLayoutSizing: routePointsLayoutSizing,
+        RoutePointsRowGeometry: loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js")
       }
-    });
+    }));
   }
 
   function buildContentRect(layout, width, height) {

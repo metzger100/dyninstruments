@@ -1,6 +1,22 @@
-const { loadFresh } = require("../../helpers/load-umd");
+const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 
-describe("CanvasDomSurfaceAdapter", function () {
+describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
+  function createRuntime(extra) {
+    const context = createScriptContext(Object.assign({
+      DyniPlugin: {
+        runtime: {},
+        state: {},
+        config: { shared: {}, clusters: [] }
+      },
+      devicePixelRatio: 2
+    }, extra || {}));
+
+    runIifeScript("runtime/namespace.js", context);
+    runIifeScript("runtime/PerfSpanHelper.js", context);
+    runIifeScript("runtime/surface/CanvasDomSurfaceAdapter.js", context);
+    return context;
+  }
+
   function createClassList(el) {
     function list() {
       return String(el.className || "")
@@ -119,17 +135,10 @@ describe("CanvasDomSurfaceAdapter", function () {
     if (opts.shellHasSurfaceClass) {
       dom.shellEl.classList.add("dyni-surface-canvas");
     }
+    const context = createRuntime();
     const rootEl = createElement(dom.doc, "div", "widget dyniplugin dyni-host-html");
-    const rendererSpec = {
+    const rendererSpec = opts.rendererSpec || {
       renderCanvas: vi.fn()
-    };
-    const helpers = {
-      getModule(id) {
-        if (id === "PerfSpanHelper") {
-          return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
-        }
-        throw new Error("unexpected module: " + id);
-      }
     };
 
     const frameQueue = [];
@@ -165,9 +174,9 @@ describe("CanvasDomSurfaceAdapter", function () {
       observerInstances.push(this);
     }
 
-    const adapter = loadFresh("cluster/rendering/CanvasDomSurfaceAdapter.js").create({}, helpers);
+    const adapter = context.DyniPlugin.runtime._createCanvasDomSurfaceAdapter();
     const controller = adapter.createSurfaceController({
-      rendererSpec: opts.rendererSpec || rendererSpec,
+      rendererSpec: rendererSpec,
       requestAnimationFrame: requestAnimationFrameStub,
       cancelAnimationFrame: cancelAnimationFrameStub,
       ResizeObserver: opts.ResizeObserver || ResizeObserverStub,
@@ -185,35 +194,19 @@ describe("CanvasDomSurfaceAdapter", function () {
     }
 
     return {
+      context,
       adapter,
       controller,
       dom,
       rootEl,
       payload,
-      rendererSpec: opts.rendererSpec || rendererSpec,
+      rendererSpec,
       observerInstances,
       frameQueue,
       canceledFrames,
       runNextFrame
     };
   }
-
-  it("renders a structurally stable shell markup", function () {
-    const adapter = loadFresh("cluster/rendering/CanvasDomSurfaceAdapter.js").create({}, {
-      getModule(id) {
-        if (id === "PerfSpanHelper") {
-          return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
-        }
-        throw new Error("unexpected module: " + id);
-      }
-    });
-
-    const first = adapter.renderSurfaceShell();
-    const second = adapter.renderSurfaceShell();
-
-    expect(first).toBe('<div class="dyni-surface-canvas"><div class="dyni-surface-canvas-mount"></div></div>');
-    expect(second).toBe(first);
-  });
 
   it("attach creates an internal canvas, binds ResizeObserver, and schedules first paint", function () {
     const h = createHarness({ hostContext: { marker: 1 } });
@@ -267,8 +260,9 @@ describe("CanvasDomSurfaceAdapter", function () {
 
   it("emits schedulePaint and renderer spans when perf hooks are active", function () {
     const spans = [];
-    const previousHooks = globalThis.__DYNI_PERF_HOOKS__;
-    globalThis.__DYNI_PERF_HOOKS__ = {
+    const h = createHarness();
+    const previousHooks = h.context.__DYNI_PERF_HOOKS__;
+    h.context.__DYNI_PERF_HOOKS__ = {
       startSpan(name, tags) {
         return { name, tags: tags || null };
       },
@@ -284,7 +278,6 @@ describe("CanvasDomSurfaceAdapter", function () {
     };
 
     try {
-      const h = createHarness();
       h.controller.attach(h.payload({ value: 5, cluster: "speed", kind: "sogRadial" }, 1));
       h.runNextFrame();
 
@@ -292,7 +285,7 @@ describe("CanvasDomSurfaceAdapter", function () {
       expect(spans.some((entry) => entry.name === "Renderer.renderCanvas")).toBe(true);
     }
     finally {
-      globalThis.__DYNI_PERF_HOOKS__ = previousHooks;
+      h.context.__DYNI_PERF_HOOKS__ = previousHooks;
     }
   });
 
@@ -350,14 +343,8 @@ describe("CanvasDomSurfaceAdapter", function () {
   });
 
   it("throws for strict non-compat contracts", function () {
-    const adapter = loadFresh("cluster/rendering/CanvasDomSurfaceAdapter.js").create({}, {
-      getModule(id) {
-        if (id === "PerfSpanHelper") {
-          return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
-        }
-        throw new Error("unexpected module: " + id);
-      }
-    });
+    const context = createRuntime();
+    const adapter = context.DyniPlugin.runtime._createCanvasDomSurfaceAdapter();
 
     expect(function () {
       adapter.createSurfaceController({

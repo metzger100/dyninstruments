@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsTextHtmlWidget - HTML renderer shell for nav route-points kind
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: RoutePointsHtmlFit, HtmlWidgetUtils, RoutePointsRenderModel, RoutePointsMarkup, RoutePointsDomEffects, ThemeResolver
+ * Depends: RoutePointsHtmlFit, HtmlWidgetUtils, RoutePointsRenderModel, RoutePointsLayout, RoutePointsMarkup, RoutePointsDomEffects, componentContext.theme.tokens
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -42,14 +42,14 @@
     return null;
   }
 
-  function create(def, Helpers) {
-    const htmlFit = Helpers.getModule("RoutePointsHtmlFit").create(def, Helpers);
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const renderModel = Helpers.getModule("RoutePointsRenderModel").create(def, Helpers);
-    const layoutApi = Helpers.getModule("RoutePointsLayout").create(def, Helpers);
-    const markup = Helpers.getModule("RoutePointsMarkup").create(def, Helpers);
-    const domEffects = Helpers.getModule("RoutePointsDomEffects").create(def, Helpers);
-    const themeResolver = Helpers.getModule("ThemeResolver");
+  function create(def, componentContext) {
+    const htmlFit = componentContext.components.require("RoutePointsHtmlFit");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const renderModel = componentContext.components.require("RoutePointsRenderModel");
+    const layoutApi = componentContext.components.require("RoutePointsLayout");
+    const markup = componentContext.components.require("RoutePointsMarkup");
+    const domEffects = componentContext.components.require("RoutePointsDomEffects");
+    const themeResolver = componentContext.theme.tokens;
 
     function buildModel(props, shellRect, scrollbarGutterPx) {
       const surfacePolicy = resolveSurfacePolicy(props);

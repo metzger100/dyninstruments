@@ -1,5 +1,5 @@
 /**
- * Module: DyniPlugin PerfSpanHelper - Shared runtime perf-span helper for IIFE modules
+ * Module: DyniPlugin Perf Runtime - Shared runtime perf-span service
  * Documentation: documentation/architecture/component-system.md
  * Depends: runtime/namespace.js
  */
@@ -36,12 +36,8 @@
     span.hooks.endSpan(span.token, tags || null);
   }
 
-  const api = {
+  runtime.perf = Object.freeze({
     startSpan: startSpan,
     endSpan: endSpan
-  };
-
-  runtime.getPerfSpanApi = function getPerfSpanApi() {
-    return api;
-  };
+  });
 }(this));

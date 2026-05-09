@@ -1,22 +1,17 @@
 /**
- * Module: ThemeModel - Canonical semantic owner for theme token/preset metadata
+ * Module: DyniPlugin Theme Model Runtime - Canonical semantic owner for theme token/preset metadata
  * Documentation: documentation/shared/theme-tokens.md
- * Depends: none
+ * Depends: runtime/namespace.js
  */
-(function (root, factory) {
-  if (typeof define === "function" && define.amd) {
-    define([], factory);
-  } else if (typeof module === "object" && module.exports) {
-    module.exports = factory();
-  } else {
-    (root.DyniComponents = root.DyniComponents || {}).DyniThemeModel = factory();
-  }
-}(this, function () {
+(function (root) {
   "use strict";
+
+  const ns = root.DyniPlugin;
+  const runtime = ns.runtime;
 
   const DEFAULT_PRESET_NAME = "default";
   const SUPPORTED_MODES = ["day", "night"];
-  // dyni-lint-disable-next-line css-js-default-duplication -- ThemeModel owns the canonical default font stack for both CSS and JS token resolution.
+  // dyni-lint-disable-next-line css-js-default-duplication -- Theme model owns the canonical default font stack for both CSS and JS token resolution.
   const DEFAULT_FONT_STACK = '"Roboto","Inter","SF Pro Text",-apple-system,"Segoe UI","Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
   const DEFAULT_MONO_STACK = '"Roboto Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace';
 
@@ -43,7 +38,7 @@
     defineToken("surface.fg", "--dyni-fg", "color", "black", { night: "rgba(252, 11, 11, 0.60)" }, "--dyni-theme-surface-fg"),
     defineToken("surface.bg", "--dyni-bg", "color", "white", { night: "black" }, "--dyni-theme-surface-bg"),
     defineToken("surface.border", "--dyni-border", "color", "rgba(0, 0, 0, 0.30)", { night: "rgba(252, 11, 11, 0.18)" }, "--dyni-theme-surface-border"),
-    // dyni-lint-disable-next-line css-js-default-duplication -- ThemeModel owns the canonical font-family default token mapping.
+    // dyni-lint-disable-next-line css-js-default-duplication -- Theme model owns the canonical font-family default token mapping.
     defineToken("font.family", "--dyni-font", "string", DEFAULT_FONT_STACK, undefined, "--dyni-theme-font-family"),
     defineToken("font.familyMono", "--dyni-font-mono", "string", DEFAULT_MONO_STACK, undefined, "--dyni-theme-font-family-mono"),
     defineToken("font.weight", "--dyni-font-weight", "number", 700, undefined, "--dyni-theme-font-weight"),
@@ -208,14 +203,6 @@
       : DEFAULT_PRESET_NAME;
   }
 
-  function getSupportedPresetNames() {
-    return Object.keys(PRESETS);
-  }
-
-  function getSupportedModes() {
-    return SUPPORTED_MODES.slice();
-  }
-
   function getPresetDefinition(presetName) {
     return PRESETS[normalizePresetName(presetName)];
   }
@@ -251,21 +238,22 @@
     return MERGE_ORDER.slice();
   }
 
-  return {
-    id: "ThemeModel",
-    DEFAULT_PRESET_NAME: DEFAULT_PRESET_NAME,
-    PRESETS: PRESETS,
-    BASE_DEFAULTS: BASE_DEFAULTS,
-    MODE_DEFAULTS: MODE_DEFAULTS,
-    normalizePresetName: normalizePresetName,
-    getSupportedPresetNames: getSupportedPresetNames,
-    getSupportedModes: getSupportedModes,
-    getPresetDefinition: getPresetDefinition,
-    getPresetBase: getPresetBase,
-    getPresetMode: getPresetMode,
-    getTokenDefinition: getTokenDefinition,
-    getTokenDefinitions: getTokenDefinitions,
-    getOutputTokenDefinitions: getOutputTokenDefinitions,
-    getMergeOrder: getMergeOrder
+  runtime.createThemeModel = function createThemeModel() {
+    return {
+      DEFAULT_PRESET_NAME: DEFAULT_PRESET_NAME,
+      PRESETS: PRESETS,
+      BASE_DEFAULTS: BASE_DEFAULTS,
+      MODE_DEFAULTS: MODE_DEFAULTS,
+      normalizePresetName: normalizePresetName,
+      getSupportedPresetNames: function () { return Object.keys(PRESETS); },
+      getSupportedModes: function () { return SUPPORTED_MODES.slice(); },
+      getPresetDefinition: getPresetDefinition,
+      getPresetBase: getPresetBase,
+      getPresetMode: getPresetMode,
+      getTokenDefinition: getTokenDefinition,
+      getTokenDefinitions: getTokenDefinitions,
+      getOutputTokenDefinitions: getOutputTokenDefinitions,
+      getMergeOrder: getMergeOrder
+    };
   };
-}));
+}(this));

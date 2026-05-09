@@ -37,8 +37,8 @@
       : "passive";
   }
 
-  function create(def, Helpers) {
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+  function create(def, componentContext) {
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
 
     function buildModel(args) {
       const cfg = args || {};

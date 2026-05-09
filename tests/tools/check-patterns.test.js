@@ -683,7 +683,7 @@ tiny();
     expect(out).toContain("p.unit ?? \"°\"");
   });
 
-  it("blocks fallbackText wrappers that duplicate Helpers.applyFormatter defaults", function () {
+  it("blocks fallbackText wrappers that duplicate componentContext.format.applyFormatter defaults", function () {
     const cwd = createWorkspace({
       "widgets/SampleWidget.js": `
 (function () {
@@ -691,16 +691,16 @@ tiny();
   function fallbackText(value, fallback) {
     return value == null ? fallback : value;
   }
-  function renderCanvas(canvas, props, Helpers) {
+  function renderCanvas(canvas, props, componentContext) {
     const p = props || {};
-    const out = fallbackText(Helpers.applyFormatter(p.value, {
+    const out = fallbackText(componentContext.format.applyFormatter(p.value, {
       formatter: "formatDistance",
       formatterParameters: [p.unit],
       default: "---"
     }), "---");
     return out + String(canvas);
   }
-  renderCanvas({}, {}, { applyFormatter: function () { return "---"; } });
+  renderCanvas({}, {}, { format: { applyFormatter: function () { return "---"; } } });
 }());
 `
     });
@@ -711,7 +711,7 @@ tiny();
     expect(result.summary.ok).toBe(false);
     expect(result.summary.byRuleFailures["redundant-internal-fallback"]).toBeGreaterThan(0);
     expect(out).toContain("[redundant-internal-fallback]");
-    expect(out).toContain("Helpers.applyFormatter");
+    expect(out).toContain("componentContext.format.applyFormatter");
   });
 
   it("allows fallbacks tied to external runtime factors", function () {

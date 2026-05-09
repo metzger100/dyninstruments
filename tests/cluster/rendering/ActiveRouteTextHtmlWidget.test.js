@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("ActiveRouteTextHtmlWidget", function () {
   const ORIGINAL_DYNI_PLUGIN = globalThis.DyniPlugin;
@@ -31,8 +32,8 @@ describe("ActiveRouteTextHtmlWidget", function () {
           defaultMode: "normal"
         });
       },
-      formatMetric(rawValue, formatter, formatterParameters, defaultText, Helpers, placeholderNormalize) {
-        const out = String(Helpers.applyFormatter(rawValue, {
+      formatMetric(rawValue, formatter, formatterParameters, defaultText, componentContext, placeholderNormalize) {
+        const out = String(componentContext.format.applyFormatter(rawValue, {
           formatter: formatter,
           formatterParameters: formatterParameters,
           default: defaultText
@@ -52,8 +53,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
         });
       }
     };
-    const Helpers = {
-      applyFormatter: opts.applyFormatter || function (value, formatterOptions) {
+    const applyFormatter = opts.applyFormatter || function (value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (value == null) {
           return cfg.default;
@@ -71,58 +71,39 @@ describe("ActiveRouteTextHtmlWidget", function () {
           return "DIR:" + String(value);
         }
         return String(value);
+      };
+    const componentContext = createComponentContextMock({
+      modules: {
+        ActiveRouteHtmlFit: { create: () => Object.assign({ compute: fitCompute }, htmlFitStub) },
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+        PreparedPayloadModelCache: loadFresh("shared/widget-kits/html/PreparedPayloadModelCache.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js"),
+        StateScreenMarkup: loadFresh("shared/widget-kits/state/StateScreenMarkup.js"),
+        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js")
       },
-      getModule(id) {
-        if (id === "ActiveRouteHtmlFit") {
-          return { create: () => Object.assign({ compute: fitCompute }, htmlFitStub) };
+      services: {
+        format: { applyFormatter },
+        themeTokens: {
+          resolveForRoot() {
+            return {
+              font: {
+                family: "sans-serif",
+                familyMono: "monospace",
+                weight: 720,
+                labelWeight: 610
+              }
+            };
+          }
         }
-        if (id === "HtmlWidgetUtils") {
-          return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-        }
-        if (id === "PreparedPayloadModelCache") {
-          return loadFresh("shared/widget-kits/html/PreparedPayloadModelCache.js");
-        }
-        if (id === "PlaceholderNormalize") {
-          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        }
-        if (id === "StableDigits") {
-          return loadFresh("shared/widget-kits/format/StableDigits.js");
-        }
-        if (id === "StateScreenLabels") {
-          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        }
-        if (id === "StateScreenPrecedence") {
-          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-        }
-        if (id === "StateScreenInteraction") {
-          return loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
-        }
-        if (id === "StateScreenMarkup") {
-          return loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
-        }
-        if (id === "StateScreenTextFit") {
-          return loadFresh("shared/widget-kits/state/StateScreenTextFit.js");
-        }
-        if (id === "ThemeResolver") {
-          return {
-            resolveForRoot() {
-              return {
-                font: {
-                  family: "sans-serif",
-                  familyMono: "monospace",
-                  weight: 720,
-                  labelWeight: 610
-                }
-              };
-            }
-          };
-        }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
 
     return {
-      renderer: loadFresh("widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js").create({}, Helpers),
+      renderer: loadFresh("widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js").create({}, componentContext),
       fitCompute
     };
   }
@@ -417,131 +398,6 @@ describe("ActiveRouteTextHtmlWidget", function () {
     valueEls.forEach((el) => {
       expect(el.classList.contains("dyni-tabular")).toBe(true);
     });
-  });
-
-  it("injects shared shadow css for stable digits into the committed shadow root", function () {
-    const setup = createRenderer();
-    const surfaceDom = createSurfaceDom();
-    const sharedShadowCssUrl = "http://host/plugins/dyninstruments/shared/html/HtmlShadowCommon.css";
-    const widgetShadowCssUrl = "http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css";
-    const sharedShadowCssPath = path.join(process.cwd(), "shared/html/HtmlShadowCommon.css");
-    const widgetShadowCssPath = path.join(process.cwd(), "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css");
-    const getShadowCssText = vi.fn(function (url) {
-      if (url === sharedShadowCssUrl) {
-        return fs.readFileSync(sharedShadowCssPath, "utf8");
-      }
-      if (url === widgetShadowCssUrl) {
-        return fs.readFileSync(widgetShadowCssPath, "utf8");
-      }
-      return "";
-    });
-
-    globalThis.DyniPlugin = {
-      runtime: {
-        _theme: {
-          getShadowCssText
-        }
-      }
-    };
-
-    const htmlSurfaceController = loadFresh("cluster/rendering/HtmlSurfaceController.js").create({}, {
-      getModule(id) {
-        if (id === "PerfSpanHelper") {
-          return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
-        }
-        throw new Error("unexpected module: " + id);
-      }
-    });
-    const controller = htmlSurfaceController.createSurfaceController({
-      rendererSpec: setup.renderer,
-      hostContext: {},
-      shadowCssUrls: [sharedShadowCssUrl, widgetShadowCssUrl]
-    });
-
-    controller.attach({
-      surface: "html",
-      rootEl: surfaceDom.rootEl,
-      shellEl: surfaceDom.shellEl,
-      props: withSurfacePolicy(makeProps({ stableDigits: true }), { mode: "dispatch" }),
-      revision: 1
-    });
-
-    const shadowRoot = surfaceDom.mountEl.shadowRoot;
-    const styles = Array.from(shadowRoot.querySelectorAll("style[data-dyni-shadow-css]"));
-    expect(styles.map((styleEl) => styleEl.getAttribute("data-dyni-shadow-css"))).toEqual([
-      sharedShadowCssUrl,
-      widgetShadowCssUrl
-    ]);
-    expect(styles[0].textContent).toContain(".dyni-tabular");
-    expect(styles[0].textContent).toContain(".dyni-state-screen-body");
-    expect(styles[0].textContent).toContain(".dyni-state-screen-label");
-    expect(styles[0].textContent).toContain("font-weight: var(--dyni-theme-font-label-weight, 700);");
-    expect(styles[0].textContent).not.toContain("font-weight: var(--dyni-theme-font-label-weight, 650);");
-    expect(shadowRoot.querySelector(".dyni-active-route-metric-value.dyni-tabular")).toBeTruthy();
-    expect(getShadowCssText).toHaveBeenCalledWith(sharedShadowCssUrl);
-    expect(getShadowCssText).toHaveBeenCalledWith(widgetShadowCssUrl);
-  });
-
-  it("renders no-route state screens in the committed shadow root with shared shadow css", function () {
-    const setup = createRenderer();
-    const surfaceDom = createSurfaceDom();
-    const sharedShadowCssUrl = "http://host/plugins/dyninstruments/shared/html/HtmlShadowCommon.css";
-    const widgetShadowCssUrl = "http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css";
-    const sharedShadowCssPath = path.join(process.cwd(), "shared/html/HtmlShadowCommon.css");
-    const widgetShadowCssPath = path.join(process.cwd(), "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css");
-    const getShadowCssText = vi.fn(function (url) {
-      if (url === sharedShadowCssUrl) {
-        return fs.readFileSync(sharedShadowCssPath, "utf8");
-      }
-      if (url === widgetShadowCssUrl) {
-        return fs.readFileSync(widgetShadowCssPath, "utf8");
-      }
-      return "";
-    });
-
-    globalThis.DyniPlugin = {
-      runtime: {
-        _theme: {
-          getShadowCssText
-        }
-      }
-    };
-
-    const htmlSurfaceController = loadFresh("cluster/rendering/HtmlSurfaceController.js").create({}, {
-      getModule(id) {
-        if (id === "PerfSpanHelper") {
-          return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
-        }
-        throw new Error("unexpected module: " + id);
-      }
-    });
-    const controller = htmlSurfaceController.createSurfaceController({
-      rendererSpec: setup.renderer,
-      hostContext: {},
-      shadowCssUrls: [sharedShadowCssUrl, widgetShadowCssUrl]
-    });
-
-    controller.attach({
-      surface: "html",
-      rootEl: surfaceDom.rootEl,
-      shellEl: surfaceDom.shellEl,
-      props: withSurfacePolicy(makeProps({ disconnect: false, wpServer: false, routeName: "Harbor Run" }), { mode: "dispatch" }),
-      revision: 1
-    });
-
-    const shadowRoot = surfaceDom.mountEl.shadowRoot;
-    expect(shadowRoot.querySelector(".dyni-state-no-route")).toBeTruthy();
-    expect(shadowRoot.querySelector(".dyni-state-screen-body")).toBeTruthy();
-    const labelEl = shadowRoot.querySelector(".dyni-state-screen-label");
-    expect(labelEl.textContent).toBe("No Route");
-    expect(labelEl.getAttribute("style")).toMatch(/font-size:\d+px;/);
-
-    const styles = Array.from(shadowRoot.querySelectorAll("style[data-dyni-shadow-css]"));
-    expect(styles[0].textContent).toContain(".dyni-state-screen-body");
-    expect(styles[0].textContent).toContain(".dyni-state-screen-label");
-    expect(styles[0].textContent).toContain("font-weight: var(--dyni-theme-font-label-weight, 700);");
-    expect(getShadowCssText).toHaveBeenCalledWith(sharedShadowCssUrl);
-    expect(getShadowCssText).toHaveBeenCalledWith(widgetShadowCssUrl);
   });
 
   it("always consults ActiveRouteHtmlFit when a shell rect exists", function () {

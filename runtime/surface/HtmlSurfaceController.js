@@ -1,18 +1,15 @@
 /**
- * Module: HtmlSurfaceController - Committed html-surface lifecycle owner for shell rendering and shadow DOM mount/update/detach/destroy
+ * Module: DyniPlugin Html Surface Runtime - Committed html-surface lifecycle owner
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: PerfSpanHelper
+ * Depends: runtime.perf, runtime.theme
  */
-
-(function (root, factory) {
-  if (typeof define === "function" && define.amd) define([], factory);
-  else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniHtmlSurfaceController = factory(); }
-}(this, function () {
+(function (root) {
   "use strict";
 
+  const ns = root.DyniPlugin;
+  const runtime = ns.runtime;
+
   const SURFACE_ID = "html";
-  const SURFACE_CLASS = "dyni-surface-html";
   const MOUNT_CLASS = "dyni-surface-html-mount";
   const BASE_SHADOW_STYLE_ATTR = "data-dyni-shadow-base";
   const BASE_SHADOW_STYLE_ID = "html-surface-box-contract";
@@ -34,14 +31,6 @@
     "  box-sizing: border-box;",
     "}"
   ].join("\n");
-
-  function resolveRuntimeApi() {
-    const globalRoot = (typeof globalThis !== "undefined")
-      ? globalThis
-      : (typeof self !== "undefined" ? self : {});
-    const ns = globalRoot.DyniPlugin;
-    return ns && ns.runtime ? ns.runtime : null;
-  }
 
   function ensurePayload(methodName, payload) {
     if (!payload || typeof payload !== "object") {
@@ -169,7 +158,7 @@
 
   function ensureShadowCssCached(themeRuntime, url) {
     if (!themeRuntime || typeof themeRuntime.getShadowCssText !== "function") {
-      throw new Error("HtmlSurfaceController: runtime._theme.getShadowCssText() is required for shadow CSS injection");
+      throw new Error("HtmlSurfaceController: runtime.theme.getShadowCssText() is required for shadow CSS injection");
     }
     const cssText = themeRuntime.getShadowCssText(url);
     if (typeof cssText !== "string") {
@@ -210,16 +199,10 @@
     }
   }
 
-  function create(def, Helpers) {
-    const perf = Helpers.getModule("PerfSpanHelper").create(def, Helpers);
-    const runtimeApi = resolveRuntimeApi();
-    const themeRuntime = runtimeApi && runtimeApi._theme ? runtimeApi._theme : null;
-
-    function renderSurfaceShell(options) {
-      const opts = options || {};
-      ensureRendererSpec("renderSurfaceShell", opts.rendererSpec);
-      return '<div class="' + SURFACE_CLASS + '"><div class="' + MOUNT_CLASS + '" data-dyni-html-mount="1"></div></div>';
-    }
+  function createHtmlSurfaceController() {
+    const perf = runtime.perf;
+    const runtimeApi = runtime;
+    const themeRuntime = runtimeApi && runtimeApi.theme ? runtimeApi.theme : null;
 
     function createSurfaceController(options) {
       const opts = options || {};
@@ -403,11 +386,9 @@
     }
 
     return {
-      id: "HtmlSurfaceController",
-      renderSurfaceShell: renderSurfaceShell,
       createSurfaceController: createSurfaceController
     };
   }
 
-  return { id: "HtmlSurfaceController", create: create };
-}));
+  runtime._createHtmlSurfaceController = createHtmlSurfaceController;
+}(this));

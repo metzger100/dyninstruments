@@ -28,8 +28,8 @@
     return opts.monoFamily || family;
   }
 
-  function create(def, Helpers) {
-    const fitting = Helpers.getModule("RadialTextFitting").create(def, Helpers);
+  function create(def, componentContext) {
+    const fitting = componentContext.components.require("RadialTextFitting");
     const MIN_FONT_PX = fitting.MIN_FONT_PX;
     const WIDTH_EPSILON = fitting.WIDTH_EPSILON;
     const clampPositive = fitting.clampPositive;

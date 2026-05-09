@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("EditRouteRenderModel", function () {
   function createRenderModel(options) {
@@ -28,59 +29,30 @@ describe("EditRouteRenderModel", function () {
       return String(value);
     };
 
-    const moduleCache = Object.create(null);
-    const Helpers = {
-      applyFormatter: applyFormatter,
-      getModule(id) {
-        if (!moduleCache[id]) {
-          if (id === "EditRouteLayout") {
-            moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayout.js");
-          }
-          else if (id === "EditRouteLayoutMath") {
-            moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayoutMath.js");
-          }
-          else if (id === "EditRouteLayoutGeometry") {
-            moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayoutGeometry.js");
-          }
-          else if (id === "HtmlWidgetUtils") {
-            moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-          }
-          else if (id === "NavInteractionPolicy") {
-            moduleCache[id] = loadFresh("shared/widget-kits/nav/NavInteractionPolicy.js");
-          }
-          else if (id === "ResponsiveScaleProfile") {
-            moduleCache[id] = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-          }
-          else if (id === "LayoutRectMath") {
-            moduleCache[id] = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-          }
-          else if (id === "PlaceholderNormalize") {
-            moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-          }
-          else if (id === "UnitAwareFormatter") {
-            moduleCache[id] = loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
-          }
-          else if (id === "StableDigits") {
-            moduleCache[id] = loadFresh("shared/widget-kits/format/StableDigits.js");
-          }
-          else if (id === "StateScreenLabels") {
-            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-          }
-          else if (id === "StateScreenPrecedence") {
-            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-          }
-          else if (id === "StateScreenInteraction") {
-            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
-          }
-          else {
-            throw new Error("unexpected module: " + id);
-          }
+    const componentContext = createComponentContextMock({
+      modules: {
+        EditRouteLayout: loadFresh("shared/widget-kits/nav/EditRouteLayout.js"),
+        EditRouteLayoutMath: loadFresh("shared/widget-kits/nav/EditRouteLayoutMath.js"),
+        EditRouteLayoutGeometry: loadFresh("shared/widget-kits/nav/EditRouteLayoutGeometry.js"),
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+        NavInteractionPolicy: loadFresh("shared/widget-kits/nav/NavInteractionPolicy.js"),
+        ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js")
+      },
+      services: {
+        format: {
+          applyFormatter: applyFormatter
         }
-        return moduleCache[id];
       }
-    };
+    });
 
-    return loadFresh("shared/widget-kits/nav/EditRouteRenderModel.js").create({}, Helpers);
+    return loadFresh("shared/widget-kits/nav/EditRouteRenderModel.js").create({}, componentContext);
   }
 
   function withSurfacePolicy(props, options) {

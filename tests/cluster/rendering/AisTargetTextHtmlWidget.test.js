@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("AisTargetTextHtmlWidget", function () {
   function createRenderer(options) {
@@ -20,8 +21,7 @@ describe("AisTargetTextHtmlWidget", function () {
       };
     });
 
-    const Helpers = {
-      applyFormatter: opts.applyFormatter || function (value, formatterOptions) {
+    const applyFormatter = opts.applyFormatter || function (value, formatterOptions) {
         const cfg = formatterOptions || {};
         const formatter = cfg.formatter;
         const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
@@ -38,86 +38,47 @@ describe("AisTargetTextHtmlWidget", function () {
           return "DEC:" + String(value) + ":" + params.join(",");
         }
         return String(value);
+      };
+    const componentContext = createComponentContextMock({
+      modules: {
+        AisTargetHtmlFit: { create() { return { compute: fitCompute }; } },
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+        AisTargetRenderModel: loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js"),
+        UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
+        AisTargetMarkup: loadFresh("shared/widget-kits/nav/AisTargetMarkup.js"),
+        AisTargetLayout: loadFresh("shared/widget-kits/nav/AisTargetLayout.js"),
+        AisTargetLayoutSizing: loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js"),
+        ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+        AisTargetLayoutGeometry: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js"),
+        AisTargetLayoutMath: loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js"),
+        StateScreenMarkup: loadFresh("shared/widget-kits/state/StateScreenMarkup.js"),
+        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js")
       },
-      getModule(id) {
-        if (id === "AisTargetHtmlFit") {
-          return {
-            create() {
-              return { compute: fitCompute };
-            }
-          };
+      services: {
+        format: { applyFormatter },
+        themeTokens: {
+          resolveForRoot() {
+            return {
+              font: {
+                family: "sans-serif",
+                familyMono: "monospace",
+                weight: 720,
+                labelWeight: 610
+              }
+            };
+          }
         }
-        if (id === "HtmlWidgetUtils") {
-          return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-        }
-        if (id === "AisTargetRenderModel") {
-          return loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js");
-        }
-        if (id === "UnitAwareFormatter") {
-          return loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
-        }
-        if (id === "AisTargetMarkup") {
-          return loadFresh("shared/widget-kits/nav/AisTargetMarkup.js");
-        }
-        if (id === "AisTargetLayout") {
-          return loadFresh("shared/widget-kits/nav/AisTargetLayout.js");
-        }
-        if (id === "AisTargetLayoutSizing") {
-          return loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
-        }
-        if (id === "ResponsiveScaleProfile") {
-          return loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-        }
-        if (id === "LayoutRectMath") {
-          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-        }
-        if (id === "AisTargetLayoutGeometry") {
-          return loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
-        }
-        if (id === "AisTargetLayoutMath") {
-          return loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
-        }
-        if (id === "PlaceholderNormalize") {
-          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        }
-        if (id === "StableDigits") {
-          return loadFresh("shared/widget-kits/format/StableDigits.js");
-        }
-        if (id === "StateScreenLabels") {
-          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        }
-        if (id === "StateScreenPrecedence") {
-          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-        }
-        if (id === "StateScreenInteraction") {
-          return loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
-        }
-        if (id === "StateScreenMarkup") {
-          return loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
-        }
-        if (id === "StateScreenTextFit") {
-          return loadFresh("shared/widget-kits/state/StateScreenTextFit.js");
-        }
-        if (id === "ThemeResolver") {
-          return {
-            resolveForRoot() {
-              return {
-                font: {
-                  family: "sans-serif",
-                  familyMono: "monospace",
-                  weight: 720,
-                  labelWeight: 610
-                }
-              };
-            }
-          };
-        }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
 
     return {
-      renderer: loadFresh("widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js").create({}, Helpers),
+      renderer: loadFresh("widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js").create({}, componentContext),
       fitCompute
     };
   }

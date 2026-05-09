@@ -1,17 +1,15 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("RadialTextLayout", function () {
   function createTextApi() {
     const fitting = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
-    return loadFresh("shared/widget-kits/radial/RadialTextLayout.js").create({}, {
-      getModule(id) {
-        if (id === "RadialTextFitting") {
-          return fitting;
-        }
-        throw new Error("unexpected module: " + id);
+    return loadFresh("shared/widget-kits/radial/RadialTextLayout.js").create({}, createComponentContextMock({
+      modules: {
+        RadialTextFitting: fitting
       }
-    });
+    }));
   }
 
   function createScalingContext() {

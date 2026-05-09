@@ -64,7 +64,7 @@ const RESPONSIVE_CONSUMER_FILES = new Set([
   "widgets/text/XteDisplayWidget/XteDisplayWidget.js"
 ]);
 
-const DIRECT_PROFILE_GETMODULE_RE = /Helpers\.getModule\(\s*["'`]ResponsiveScaleProfile["'`]\s*\)/;
+const DIRECT_PROFILE_REQUIRE_RE = /componentContext\.components\.require\(\s*["'`]ResponsiveScaleProfile["'`]\s*\)/;
 const FLOOR_LITERAL_RE = /^(?:[3-9]|[1-9]\d+)(?:\.0+)?$/;
 const LAYOUT_CONTEXT_RE = /(?:Math\.(?:floor|ceil|round)|\.(?:h|w)\b|\b(?:rect|box|layout|contentRect|content|track|slot|band|label|caption|value|unit|font|gap|pad|width|height|radius|minDim|safeVp|px|Px|availableWidth|availableHeight|line|fit)\b)/;
 
@@ -77,7 +77,7 @@ function buildAliasRegex(alias, method) {
 }
 
 function findResponsiveAlias(text) {
-  const match = /\bconst\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*Helpers\.getModule\(\s*["'`]ResponsiveScaleProfile["'`]\s*\)\.create\s*\(/.exec(text);
+  const match = /\bconst\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*componentContext\.components\.require\(\s*["'`]ResponsiveScaleProfile["'`]\s*\)/.exec(text);
   return match ? { alias: match[1], index: match.index } : null;
 }
 
@@ -219,7 +219,7 @@ export function runResponsiveProfileOwnershipRule(rule, files) {
           message: rule.message({
             file,
             line: 1,
-            detail: `${spec.label} must resolve ResponsiveScaleProfile directly via Helpers.getModule(...).create(...).`
+            detail: `${spec.label} must resolve ResponsiveScaleProfile directly via componentContext.components.require(...).`
           })
         });
         continue;
@@ -247,7 +247,7 @@ export function runResponsiveProfileOwnershipRule(rule, files) {
       continue;
     }
 
-    const match = DIRECT_PROFILE_GETMODULE_RE.exec(data.text);
+    const match = DIRECT_PROFILE_REQUIRE_RE.exec(data.text);
     if (!match) {
       continue;
     }

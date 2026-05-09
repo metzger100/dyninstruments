@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("LinearGaugeEngine", function () {
@@ -108,45 +109,26 @@ describe("LinearGaugeEngine", function () {
     const mathMod = loadFresh("shared/widget-kits/linear/LinearGaugeMath.js");
     const labelFitMod = loadFresh("shared/widget-kits/linear/LinearGaugeLabelFit.js");
     const textLayoutMod = loadFresh("shared/widget-kits/linear/LinearGaugeTextLayout.js");
-    const engine = engineMod.create({}, {
-      setupCanvas(canvas) {
-        const ctx = canvas.getContext("2d");
-        const rect = canvas.getBoundingClientRect();
-        return {
-          ctx,
-          W: Math.round(rect.width),
-          H: Math.round(rect.height)
-        };
-      },
-      resolveFontFamily() {
-        return "sans-serif";
-      },
-      resolveTextColor() {
-        return "#fff";
-      },
-      requirePluginRoot(target) {
-        return target;
-      },
-      getModule(id) {
-        if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
-        if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-        if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
-        if (id === "SpringEasing") return opts.springEasingModule || loadFresh("shared/widget-kits/anim/SpringEasing.js");
-        if (id === "CanvasLayerCache") return cacheMod;
-        if (id === "LinearCanvasPrimitives") return primitivesModule;
-        if (id === "LinearGaugeEngineDrawing") return loadFresh("shared/widget-kits/linear/LinearGaugeEngineDrawing.js");
-        if (id === "GeometryScale") return loadFresh("shared/widget-kits/layout/GeometryScale.js");
-        if (id === "ResponsiveScaleProfile") return responsiveScaleProfileMod;
-        if (id === "LayoutRectMath") return layoutRectMathMod;
-        if (id === "LinearGaugeMath") return mathMod;
-        if (id === "LinearGaugeLayout") return layoutMod;
-        if (id === "LinearGaugeTextLayout") return textLayoutMod;
-        if (id === "LinearGaugeLabelFit") return labelFitMod;
-        if (id === "LinearGaugeEngineSupport") return engineSupportMod;
-        if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
-        return {
+    const engine = engineMod.create({}, createComponentContextMock({
+      modules: {
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
+        SpringEasing: opts.springEasingModule || loadFresh("shared/widget-kits/anim/SpringEasing.js"),
+        CanvasLayerCache: cacheMod,
+        LinearCanvasPrimitives: primitivesModule,
+        LinearGaugeEngineDrawing: loadFresh("shared/widget-kits/linear/LinearGaugeEngineDrawing.js"),
+        GeometryScale: loadFresh("shared/widget-kits/layout/GeometryScale.js"),
+        ResponsiveScaleProfile: responsiveScaleProfileMod,
+        LayoutRectMath: layoutRectMathMod,
+        LinearGaugeMath: mathMod,
+        LinearGaugeLayout: layoutMod,
+        LinearGaugeTextLayout: textLayoutMod,
+        LinearGaugeLabelFit: labelFitMod,
+        LinearGaugeEngineSupport: engineSupportMod,
+        RadialToolkit: {
           create() {
             return {
               theme: {
@@ -200,9 +182,27 @@ describe("LinearGaugeEngine", function () {
               }
             };
           }
-        };
+        }
+      },
+      services: {
+        canvas: {
+          setupCanvas(canvas) {
+            const ctx = canvas.getContext("2d");
+            const rect = canvas.getBoundingClientRect();
+            return {
+              ctx,
+              W: Math.round(rect.width),
+              H: Math.round(rect.height)
+            };
+          }
+        },
+        dom: {
+          requirePluginRoot(target) {
+            return target;
+          }
+        }
       }
-    });
+    }));
 
     return { engine, calls, theme };
   }

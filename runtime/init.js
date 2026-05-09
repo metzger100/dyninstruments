@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Init - Runtime initialization and widget registration
  * Documentation: documentation/architecture/component-system.md
- * Depends: runtime/theme-runtime.js, runtime/helpers.js, runtime/component-loader.js, runtime/widget-registrar.js, config/widget-definitions.js
+ * Depends: runtime/theme-runtime.js, runtime/component-loader.js, runtime/widget-registrar.js, config/widget-definitions.js
  */
 (function (root) {
   "use strict";
@@ -9,20 +9,12 @@
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
   const state = ns.state;
-  const hasOwn = Object.prototype.hasOwnProperty;
-
-  function createGetComponent(components) {
-    return function getComponent(id) {
-      const c = components[id];
-      return root.DyniComponents[c.globalKey];
-    };
-  }
 
   function requireThemeRuntimeBoundary() {
-    if (!runtime._theme || typeof runtime._theme.configure !== "function" || typeof runtime._theme.applyToRoot !== "function") {
-      throw new Error("dyninstruments: runtime._theme boundary is required");
+    if (!runtime.theme || typeof runtime.theme.configure !== "function" || typeof runtime.theme.applyToRoot !== "function") {
+      throw new Error("dyninstruments: runtime.theme boundary is required");
     }
-    return runtime._theme;
+    return runtime.theme;
   }
 
   function collectShadowCssUrls(components, componentIds) {
@@ -62,8 +54,8 @@
     }
 
     state.hostActionBridge = runtime.createTemporaryHostActionBridge();
+    runtime.hostActions = state.hostActionBridge.getHostActions();
 
-    // Invariants: namespace/config/runtime are bootstrapped in fixed order by plugin.js.
     const config = ns.config;
     const components = config.components;
     const widgetDefinitions = config.widgetDefinitions;
@@ -71,56 +63,40 @@
 
     state.initStarted = true;
 
-    const Helpers = runtime.createHelpers(createGetComponent(components));
     const loader = runtime.createComponentLoader(components);
+    runtime.componentLoader = loader;
+
     const needed = loader.uniqueComponents(widgetDefinitions).slice();
-    if (!needed.includes("ThemeModel")) needed.push("ThemeModel");
-    if (!needed.includes("ThemeResolver")) needed.push("ThemeResolver");
     const shadowCssUrls = collectShadowCssUrls(components, needed);
+    const startupPresetName = themeRuntime.resolveStartupPresetName(
+      root.document && root.document.documentElement
+    );
 
     state.initPromise = Promise.all([
       Promise.all(needed.map(loader.loadComponent)),
       themeRuntime.preloadShadowCssUrls(shadowCssUrls)
     ])
-      .then(function (startupResults) {
-        const componentsLoaded = startupResults[0];
-        const byId = {};
-        componentsLoaded.forEach(function (component) {
-          byId[component.id] = component;
-        });
-
-        const themeModel = byId.ThemeModel ||
-          (hasOwn.call(components, "ThemeModel")
-            ? Helpers.getModule("ThemeModel")
-            : null);
-        const themeResolver = byId.ThemeResolver ||
-          (hasOwn.call(components, "ThemeResolver")
-            ? Helpers.getModule("ThemeResolver")
-            : null);
-        const startupPresetName = themeRuntime.resolveStartupPresetName(
-          root.document && root.document.documentElement,
-          themeModel
-        );
-
+      .then(function () {
         themeRuntime.configure({
-          ThemeModel: themeModel,
-          ThemeResolver: themeResolver,
           activePresetName: startupPresetName
         });
 
         widgetDefinitions.forEach(function (widgetDef) {
-          const component = byId[widgetDef.widget];
-          runtime.registerWidget(component, widgetDef, Helpers);
+          const componentSpec = loader.createInstance(widgetDef.widget, widgetDef.def);
+          runtime.registerWidget(componentSpec, widgetDef);
         });
 
         avnavApi.log("dyninstruments component init ok (clustered): " + widgetDefinitions.length + " widgets");
       })
-      .catch(function (e) {
+      .catch(function (error) {
         state.initStarted = false;
-        state.hostActionBridge.destroy();
+        if (state.hostActionBridge) {
+          state.hostActionBridge.destroy();
+        }
         state.hostActionBridge = null;
-        console.error("dyninstruments init failed:", e);
-        throw e;
+        runtime.hostActions = null;
+        console.error("dyninstruments init failed:", error);
+        throw error;
       });
 
     return state.initPromise;

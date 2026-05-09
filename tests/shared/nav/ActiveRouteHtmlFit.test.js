@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("ActiveRouteHtmlFit", function () {
   function createMeasureContext() {
@@ -62,47 +63,33 @@ describe("ActiveRouteHtmlFit", function () {
       }))
     };
 
-    const Helpers = {
-      requirePluginRoot(target) {
-        return target || null;
+    const componentContext = createComponentContextMock({
+      modules: {
+        ThemeResolver: themeApi,
+        HtmlWidgetUtils: htmlUtilsModule,
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
+        TextTileLayout: textTileLayoutModule,
+        ActiveRouteLayout: activeRouteLayoutModule,
+        RadialTextLayout: radialTextLayoutModule,
+        RadialTextFitting: radialTextFittingModule,
+        ResponsiveScaleProfile: responsiveScaleProfileModule,
+        LayoutRectMath: layoutRectMathModule
       },
-      getModule(id) {
-        if (id === "ThemeResolver") {
-          return themeApi;
+      services: {
+        dom: {
+          requirePluginRoot(target) {
+            return target || null;
+          },
+          getNightModeState() {
+            return false;
+          }
         }
-        if (id === "HtmlWidgetUtils") {
-          return htmlUtilsModule;
-        }
-        if (id === "PlaceholderNormalize") {
-          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        }
-        if (id === "UnitAwareFormatter") {
-          return loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
-        }
-        if (id === "TextTileLayout") {
-          return textTileLayoutModule;
-        }
-        if (id === "ActiveRouteLayout") {
-          return activeRouteLayoutModule;
-        }
-        if (id === "RadialTextLayout") {
-          return radialTextLayoutModule;
-        }
-        if (id === "RadialTextFitting") {
-          return radialTextFittingModule;
-        }
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfileModule;
-        }
-        if (id === "LayoutRectMath") {
-          return layoutRectMathModule;
-        }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
 
     return {
-      fit: loadFresh("shared/widget-kits/nav/ActiveRouteHtmlFit.js").create({}, Helpers),
+      fit: loadFresh("shared/widget-kits/nav/ActiveRouteHtmlFit.js").create({}, componentContext),
       themeTokens: themeTokens
     };
   }

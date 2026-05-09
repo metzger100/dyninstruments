@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("FullCircleRadialLayout", function () {
   const themeDefaults = {
@@ -14,20 +15,13 @@ describe("FullCircleRadialLayout", function () {
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
-    return loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js").create({}, {
-      getModule(id) {
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfile;
-        }
-        if (id === "LayoutRectMath") {
-          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-        }
-        if (id === "GeometryScale") {
-          return geometryScale;
-        }
-        throw new Error("unexpected module: " + id);
+    return loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js").create({}, createComponentContextMock({
+      modules: {
+        ResponsiveScaleProfile: responsiveScaleProfile,
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+        GeometryScale: geometryScale
       }
-    });
+    }));
   }
 
   function buildSnapshot(layout, width, height, mode, layoutConfig) {

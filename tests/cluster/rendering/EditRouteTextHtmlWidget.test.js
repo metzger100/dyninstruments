@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("EditRouteTextHtmlWidget", function () {
   function createRenderer(options) {
@@ -41,54 +42,31 @@ describe("EditRouteTextHtmlWidget", function () {
         + "</div>";
     });
 
-    const Helpers = {
-      getModule(id) {
-        if (id === "EditRouteHtmlFit") {
-          return {
-            create() {
-              return { compute: fitCompute };
-            }
-          };
+    const componentContext = createComponentContextMock({
+      modules: {
+        EditRouteHtmlFit: { create() { return { compute: fitCompute }; } },
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+        EditRouteRenderModel: { create() { return { buildModel }; } },
+        EditRouteMarkup: { create() { return { render: markupRender }; } }
+      },
+      services: {
+        themeTokens: {
+          resolveForRoot() {
+            return {
+              font: {
+                family: "sans-serif",
+                familyMono: "monospace",
+                weight: 720,
+                labelWeight: 610
+              }
+            };
+          }
         }
-        if (id === "HtmlWidgetUtils") {
-          return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-        }
-        if (id === "ThemeResolver") {
-          return {
-            resolveForRoot() {
-              return {
-                font: {
-                  family: "sans-serif",
-                  familyMono: "monospace",
-                  weight: 720,
-                  labelWeight: 610
-                }
-              };
-            }
-          };
-        }
-        if (id === "EditRouteRenderModel") {
-          return {
-            create() {
-              return {
-                buildModel
-              };
-            }
-          };
-        }
-        if (id === "EditRouteMarkup") {
-          return {
-            create() {
-              return { render: markupRender };
-            }
-          };
-        }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
 
     return {
-      renderer: loadFresh("widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js").create({}, Helpers),
+      renderer: loadFresh("widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js").create({}, componentContext),
       buildModel,
       fitCompute,
       markupRender

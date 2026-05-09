@@ -10,9 +10,9 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const rectApi = Helpers.getModule("LayoutRectMath").create(def, Helpers);
-    const sizingApi = Helpers.getModule("RoutePointsLayoutSizing").create(def, Helpers);
+  function create(def, componentContext) {
+    const rectApi = componentContext.components.require("LayoutRectMath");
+    const sizingApi = componentContext.components.require("RoutePointsLayoutSizing");
     const makeRect = rectApi.makeRect;
     const clampNumber = sizingApi.clampNumber;
     const computeMarkerDiameter = sizingApi.computeMarkerDiameter;

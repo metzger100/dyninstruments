@@ -135,7 +135,7 @@ export function runRedundantInternalFallbackRule(rule, files) {
 
 function collectApplyFormatterDefaultFindings(data) {
   const out = [];
-  const detect = /\bfallbackText\s*\(/g;
+  const detect = /\bfallbackText\s*\(\s*componentContext\.format\.applyFormatter\s*\(/g;
   let match;
 
   while ((match = detect.exec(data.maskedText))) {
@@ -153,7 +153,7 @@ function collectApplyFormatterDefaultFindings(data) {
     }
 
     const firstArg = data.text.slice(openParen + 1, splitComma).trim();
-    if (!/^Helpers\.applyFormatter\s*\(/.test(firstArg)) {
+    if (!/^componentContext\.format\.applyFormatter\s*\(/.test(firstArg)) {
       continue;
     }
     const secondArg = data.text.slice(splitComma + 1, closeParen).trim();

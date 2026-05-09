@@ -1,18 +1,16 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("XteHighwayPrimitives", function () {
   function create() {
     const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     const mod = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js");
-    return mod.create({}, {
-      getModule(id) {
-        if (id === "GeometryScale") {
-          return geometryScale;
-        }
-        throw new Error("Unexpected dependency: " + id);
+    return mod.create({}, createComponentContextMock({
+      modules: {
+        GeometryScale: geometryScale
       }
-    });
+    }));
   }
 
   function extractBoatPoints(ctx) {

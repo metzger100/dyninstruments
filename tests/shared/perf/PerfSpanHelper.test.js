@@ -1,83 +1,54 @@
-const { loadFresh } = require("../../helpers/load-umd");
+const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 
-describe("PerfSpanHelper", function () {
-  const previousHooks = globalThis.__DYNI_PERF_HOOKS__;
+describe("runtime/PerfSpanHelper.js", function () {
+  function loadPerfRuntime(extra) {
+    const context = createScriptContext(Object.assign({
+      DyniPlugin: {
+        runtime: {},
+        state: {},
+        config: { shared: {}, clusters: [] }
+      }
+    }, extra || {}));
 
-  afterEach(function () {
-    globalThis.__DYNI_PERF_HOOKS__ = previousHooks;
-  });
-
-  function createHelper() {
-    return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js").create();
+    runIifeScript("runtime/namespace.js", context);
+    runIifeScript("runtime/PerfSpanHelper.js", context);
+    return context;
   }
 
   it("is a no-op when perf hooks are absent", function () {
-    globalThis.__DYNI_PERF_HOOKS__ = undefined;
-    const helper = createHelper();
+    const context = loadPerfRuntime();
+    const span = context.DyniPlugin.runtime.perf.startSpan("test");
 
-    const span = helper.startSpan("test.span", { a: 1 });
-    expect(span).toBe(null);
-    expect(function () {
-      helper.endSpan(span, { status: "done" });
-    }).not.toThrow();
+    expect(span).toBeNull();
+    expect(() => context.DyniPlugin.runtime.perf.endSpan(span)).not.toThrow();
   });
 
   it("starts and ends spans when hooks are present", function () {
-    const events = [];
-    globalThis.__DYNI_PERF_HOOKS__ = {
-      startSpan(name, tags) {
-        events.push({ type: "start", name, tags: tags || null });
-        return { id: "tok-1" };
-      },
-      endSpan(token, tags) {
-        events.push({ type: "end", token, tags: tags || null });
+    const startSpan = vi.fn(() => ({ id: 123 }));
+    const endSpan = vi.fn();
+    const context = loadPerfRuntime({
+      __DYNI_PERF_HOOKS__: {
+        startSpan,
+        endSpan
       }
-    };
+    });
 
-    const helper = createHelper();
-    const span = helper.startSpan("render", { cluster: "speed" });
-    helper.endSpan(span, { status: "ok" });
+    const span = context.DyniPlugin.runtime.perf.startSpan("name", { a: 1 });
+    context.DyniPlugin.runtime.perf.endSpan(span, { b: 2 });
 
-    expect(events[0]).toEqual({ type: "start", name: "render", tags: { cluster: "speed" } });
-    expect(events[1]).toEqual({ type: "end", token: { id: "tok-1" }, tags: { status: "ok" } });
+    expect(startSpan).toHaveBeenCalledWith("name", { a: 1 });
+    expect(endSpan).toHaveBeenCalledWith({ id: 123 }, { b: 2 });
   });
 
-  it("passes tags through without rewriting", function () {
-    const startTags = { a: 1, b: "x" };
-    const endTags = { b: "y", c: true };
-    const captured = { start: null, end: null };
-
-    globalThis.__DYNI_PERF_HOOKS__ = {
-      startSpan(name, tags) {
-        captured.start = tags;
-        return { id: name };
-      },
-      endSpan(token, tags) {
-        captured.end = tags;
+  it("keeps endSpan safe for hooks without endSpan", function () {
+    const startSpan = vi.fn(() => ({ id: 1 }));
+    const context = loadPerfRuntime({
+      __DYNI_PERF_HOOKS__: {
+        startSpan
       }
-    };
+    });
 
-    const helper = createHelper();
-    const span = helper.startSpan("tag.pass", startTags);
-    helper.endSpan(span, endTags);
-
-    expect(captured.start).toBe(startTags);
-    expect(captured.end).toBe(endTags);
-  });
-
-  it("keeps endSpan safe for null spans and hooks without endSpan", function () {
-    globalThis.__DYNI_PERF_HOOKS__ = {
-      startSpan() {
-        return { id: "token" };
-      }
-    };
-
-    const helper = createHelper();
-    expect(function () {
-      helper.endSpan(null, { status: "noop" });
-    }).not.toThrow();
-    expect(function () {
-      helper.endSpan({ hooks: { startSpan() {} }, token: { id: "x" } }, { status: "noop" });
-    }).not.toThrow();
+    const span = context.DyniPlugin.runtime.perf.startSpan("name");
+    expect(() => context.DyniPlugin.runtime.perf.endSpan(span)).not.toThrow();
   });
 });

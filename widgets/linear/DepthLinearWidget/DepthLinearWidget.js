@@ -10,12 +10,12 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
-    const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
-    const depthDisplayFormatter = Helpers.getModule("DepthDisplayFormatter").create(def, Helpers);
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
-    const unitFormatter = Helpers.getModule("UnitAwareFormatter").create(def, Helpers);
+  function create(def, componentContext) {
+    const engine = componentContext.components.require("LinearGaugeEngine");
+    const valueMath = componentContext.components.require("RadialValueMath");
+    const depthDisplayFormatter = componentContext.components.require("DepthDisplayFormatter");
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    const unitFormatter = componentContext.components.require("UnitAwareFormatter");
     const formatDisplay = depthDisplayFormatter.createFormatDisplay(unitFormatter, placeholderNormalize);
 
     function buildSectors(props, minV, maxV, axis, theme) {

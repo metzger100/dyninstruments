@@ -43,13 +43,13 @@
     return out.length ? out : ["layer"];
   }
 
-  function create(def, Helpers) {
-    const GU = Helpers.getModule("RadialToolkit").create(def, Helpers);
-    const layerCacheApi = Helpers.getModule("CanvasLayerCache").create(def, Helpers);
-    const layoutApi = Helpers.getModule("FullCircleRadialLayout").create(def, Helpers);
-    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
-    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
-    const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
+  function create(def, componentContext) {
+    const GU = componentContext.components.require("RadialToolkit");
+    const layerCacheApi = componentContext.components.require("CanvasLayerCache");
+    const layoutApi = componentContext.components.require("FullCircleRadialLayout");
+    const stateScreenLabels = componentContext.components.require("StateScreenLabels");
+    const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
+    const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
     const draw = GU.draw;
     const text = GU.text;
     const value = GU.value;
@@ -70,7 +70,7 @@
 
       return function renderCanvas(canvas, props) {
         const p = props || {};
-        const setup = Helpers.setupCanvas(canvas);
+        const setup = componentContext.canvas.setupCanvas(canvas);
         const ctx = setup.ctx;
         const W = setup.W;
         const H = setup.H;
@@ -78,7 +78,7 @@
           return;
         }
 
-        const rootEl = Helpers.requirePluginRoot(canvas);
+        const rootEl = componentContext.dom.requirePluginRoot(canvas);
         const theme = GU.theme.resolveForRoot(rootEl);
         const valueWeight = theme.font.weight;
         const labelWeight = theme.font.labelWeight;

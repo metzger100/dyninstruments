@@ -37,9 +37,7 @@
 
   function createHostCommitController(options) {
     const opts = options || {};
-    const perf = (runtime && typeof runtime.getPerfSpanApi === "function")
-      ? runtime.getPerfSpanApi()
-      : null;
+    const perf = runtime && runtime.perf ? runtime.perf : null;
     const instancePrefix = (typeof opts.instancePrefix === "string" && opts.instancePrefix)
       ? opts.instancePrefix
       : "dyni-host-";

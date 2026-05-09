@@ -167,10 +167,10 @@
     };
   }
 
-  function create(def, Helpers) {
-    const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
-    const rectApi = Helpers.getModule("LayoutRectMath").create(def, Helpers);
-    const gs = Helpers.getModule("GeometryScale").create(def, Helpers);
+  function create(def, componentContext) {
+    const profileApi = componentContext.components.require("ResponsiveScaleProfile");
+    const rectApi = componentContext.components.require("LayoutRectMath");
+    const gs = componentContext.components.require("GeometryScale");
     makeRect = rectApi.makeRect;
 
     function computeMode(W, H, thresholdNormal, thresholdFlat) {

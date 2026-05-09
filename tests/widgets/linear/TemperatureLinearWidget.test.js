@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("TemperatureLinearWidget", function () {
   it("passes LinearGaugeEngine config with temperature tick profile and high-end sectors", function () {
@@ -12,28 +13,10 @@ describe("TemperatureLinearWidget", function () {
     });
 
     const mod = loadFresh("widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js");
-    const spec = mod.create({}, {
-      applyFormatter,
-      getModule(id) {
-        if (id === "PlaceholderNormalize") {
-          return {
-            create() {
-              return {
-                normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
-                  }
-                  const value = String(text).trim();
-                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
-                }
-              };
-            }
-          };
-        }
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+    const spec = mod.create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: { create() { return { normalize(text, defaultText) { if (text == null) return defaultText == null ? "---" : defaultText; const value = String(text).trim(); return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text); } }; } },
+        RadialValueMath: { create() { return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -64,23 +47,11 @@ describe("TemperatureLinearWidget", function () {
                   return Math.max(lo, Math.min(hi, Number(v)));
                 },
                 resolveTemperatureSemicircleTickSteps
-              };
-            }
-          };
-        }
-        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
-        return {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return renderCanvas;
-              }
-            };
-          }
-        };
-      }
-    });
+              }; } },
+        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return renderCanvas; } }; } }
+      },
+      services: { format: { applyFormatter } }
+    }));
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.unitDefault).toBe("°C");
@@ -116,30 +87,10 @@ describe("TemperatureLinearWidget", function () {
     let captured;
 
     const mod = loadFresh("widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js");
-    mod.create({}, {
-      applyFormatter() {
-        return "n/a";
-      },
-      getModule(id) {
-        if (id === "PlaceholderNormalize") {
-          return {
-            create() {
-              return {
-                normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
-                  }
-                  const value = String(text).trim();
-                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
-                }
-              };
-            }
-          };
-        }
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+    mod.create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: { create() { return { normalize(text, defaultText) { if (text == null) return defaultText == null ? "---" : defaultText; const value = String(text).trim(); return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text); } }; } },
+        RadialValueMath: { create() { return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -172,23 +123,11 @@ describe("TemperatureLinearWidget", function () {
                 resolveTemperatureSemicircleTickSteps() {
                   return { major: 10, minor: 2 };
                 }
-              };
-            }
-          };
-        }
-        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
-        return {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return function () {};
-              }
-            };
-          }
-        };
-      }
-    });
+              }; } },
+        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
+      },
+      services: { format: { applyFormatter() { return "n/a"; } } }
+    }));
 
     expect(captured.formatDisplay(23.4, {
       formatter: "formatTemperature",
@@ -201,30 +140,10 @@ describe("TemperatureLinearWidget", function () {
     let seenText = "";
 
     const mod = loadFresh("widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js");
-    mod.create({}, {
-      applyFormatter() {
-        return "NO DATA";
-      },
-      getModule(id) {
-        if (id === "PlaceholderNormalize") {
-          return {
-            create() {
-              return {
-                normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
-                  }
-                  const value = String(text).trim();
-                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
-                }
-              };
-            }
-          };
-        }
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+    mod.create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: { create() { return { normalize(text, defaultText) { if (text == null) return defaultText == null ? "---" : defaultText; const value = String(text).trim(); return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text); } }; } },
+        RadialValueMath: { create() { return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -257,23 +176,11 @@ describe("TemperatureLinearWidget", function () {
                 resolveTemperatureSemicircleTickSteps() {
                   return { major: 10, minor: 2 };
                 }
-              };
-            }
-          };
-        }
-        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
-        return {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return function () {};
-              }
-            };
-          }
-        };
-      }
-    });
+              }; } },
+        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
+      },
+      services: { format: { applyFormatter() { return "NO DATA"; } } }
+    }));
 
     expect(captured.formatDisplay(23.4, {
       formatter: "formatTemperature",

@@ -14,8 +14,8 @@
     return value && typeof value === "object" ? value : {};
   }
 
-  function create(def, Helpers) {
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+  function create(def, componentContext) {
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
 
     function canDispatchWhenNotEditing(props) {
       const safeProps = toObject(props);

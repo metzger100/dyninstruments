@@ -23,16 +23,12 @@
     default: "DefaultMapper"
   };
 
-  function create(def, Helpers) {
+  function create(def, componentContext) {
     const mappers = {};
 
     Object.keys(MAPPER_MODULE_IDS).forEach(function (clusterId) {
       const id = MAPPER_MODULE_IDS[clusterId];
-      const mod = Helpers.getModule(id);
-      if (!mod || typeof mod.create !== "function") {
-        return;
-      }
-      const spec = mod.create(def, Helpers);
+      const spec = componentContext.components.require(id);
       if (!spec || typeof spec.translate !== "function") {
         return;
       }

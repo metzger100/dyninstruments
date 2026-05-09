@@ -1,19 +1,15 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("CenterDisplayLayout", function () {
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-    return loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create({}, {
-      getModule(id) {
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfile;
-        }
-        if (id === "LayoutRectMath") {
-          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-        }
-        throw new Error("unexpected module: " + id);
+    return loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create({}, createComponentContextMock({
+      modules: {
+        ResponsiveScaleProfile: responsiveScaleProfile,
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
       }
-    });
+    }));
   }
 
   function expectRectInside(inner, outer) {

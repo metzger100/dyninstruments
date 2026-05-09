@@ -1,5 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("XteDisplayWidget", function () {
   function createHarness(options) {
@@ -53,25 +54,17 @@ describe("XteDisplayWidget", function () {
     const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
-    const realPrimitives = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js").create({}, {
-      getModule(id) {
-        if (id === "GeometryScale") {
-          return geometryScale;
-        }
-        throw new Error("Unexpected primitive dependency: " + id);
+    const realPrimitives = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js").create({}, createComponentContextMock({
+      modules: {
+        GeometryScale: geometryScale
       }
-    });
-    const realLayout = loadFresh("shared/widget-kits/xte/XteHighwayLayout.js").create({}, {
-      getModule(id) {
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfile;
-        }
-        if (id === "LayoutRectMath") {
-          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-        }
-        throw new Error("Unexpected layout dependency: " + id);
+    }));
+    const realLayout = loadFresh("shared/widget-kits/xte/XteHighwayLayout.js").create({}, createComponentContextMock({
+      modules: {
+        ResponsiveScaleProfile: responsiveScaleProfile,
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
       }
-    });
+    }));
     const realTileLayout = loadFresh("shared/widget-kits/text/TextTileLayout.js").create();
 
     const applyFormatter = typeof opts.applyFormatter === "function"
@@ -94,172 +87,121 @@ describe("XteDisplayWidget", function () {
         return String(value);
       };
 
-    const spec = loadFresh("widgets/text/XteDisplayWidget/XteDisplayWidget.js").create({}, {
-      applyFormatter: applyFormatter,
-      setupCanvas(canvas) {
-        const ctx = canvas.getContext("2d");
-        const rect = canvas.getBoundingClientRect();
-        return {
-          ctx,
-          W: Math.round(rect.width),
-          H: Math.round(rect.height)
-        };
-      },
-      resolveTextColor() {
-        return "#ffffff";
-      },
-      resolveFontFamily() {
-        return "sans-serif";
-      },
-      requirePluginRoot(target) {
-        return target;
-      },
-      getModule(id) {
-        if (id === "CanvasLayerCache") {
-          return layerCache;
-        }
-        if (id === "RadialToolkit") {
-          return {
-            create() {
-              return {
-                theme: {
-                  resolveForRoot() {
-                    return theme;
-                  }
-                },
-                value: {
-                  isFiniteNumber(value) {
-                    return typeof value === "number" && isFinite(value);
-                  },
-                  computePad(W, H) {
-                    return Math.max(6, Math.floor(Math.min(W, H) * 0.04));
-                  },
-                  computeGap(W, H) {
-                    return Math.max(6, Math.floor(Math.min(W, H) * 0.03));
-                  },
-                  computeMode(ratio, thresholdNormal, thresholdFlat) {
-                    if (ratio < thresholdNormal) return "high";
-                    if (ratio > thresholdFlat) return "flat";
-                    return "normal";
-                  }
-                },
-                text: {
-                  drawDisconnectOverlay() {
-                    calls.overlays += 1;
-                  },
-                  fitSingleTextPx() {
-                    return 12;
-                  },
-                  setFont(ctx, px, weight, family) {
-                    ctx.font = weight + " " + px + "px " + family;
-                  },
-                  measureTextWidth(ctx, text) {
-                    return ctx.measureText(String(text || "")).width;
-                  },
-                  drawCaptionMax(ctx, family, x, y, w, h, caption) {
-                    calls.captionRows.push({ caption: String(caption), w, h });
-                  },
-                  measureValueUnitFit() {
-                    return { vPx: 12, uPx: 10, gap: 6, total: 0 };
-                  },
-                  drawValueUnitWithFit(ctx, family, x, y, w, h, value, unit) {
-                    calls.valueRows.push({ value: String(value), unit: String(unit || ""), w, h });
-                  }
+    const spec = loadFresh("widgets/text/XteDisplayWidget/XteDisplayWidget.js").create({}, createComponentContextMock({
+      modules: {
+        CanvasLayerCache: layerCache,
+        RadialToolkit: {
+          create() {
+            return {
+              theme: {
+                resolveForRoot() {
+                  return theme;
                 }
-              };
-            }
-          };
-        }
-        if (id === "XteHighwayPrimitives") {
-          return {
-            create() {
-              return {
-                highwayGeometry: realPrimitives.highwayGeometry,
-                drawStaticHighway(ctx, geom, colors, mode, primaryDim, strokeWeight) {
-                  calls.staticDraws.push({ colors, mode, geom, primaryDim, strokeWeight });
+              },
+              value: {
+                isFiniteNumber(value) {
+                  return typeof value === "number" && isFinite(value);
                 },
-                drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, primaryDim, strokeWeight, pointerDepthWeight) {
-                  calls.dynamicDraws.push({ colors, xteNormalized, overflow, geom, primaryDim, strokeWeight, pointerDepthWeight });
+                computePad(W, H) {
+                  return Math.max(6, Math.floor(Math.min(W, H) * 0.04));
                 },
-                shouldShowWaypoint(mode, layout, showWpName, name, fit) {
-                  const result = realPrimitives.shouldShowWaypoint(mode, layout, showWpName, name, fit);
-                  calls.waypointChecks.push({ mode, showWpName, name, result, rect: layout && layout.nameRect, fit });
-                  return result;
+                computeGap(W, H) {
+                  return Math.max(6, Math.floor(Math.min(W, H) * 0.03));
+                },
+                computeMode(ratio, thresholdNormal, thresholdFlat) {
+                  if (ratio < thresholdNormal) return "high";
+                  if (ratio > thresholdFlat) return "flat";
+                  return "normal";
                 }
-              };
-            }
-          };
-        }
-        if (id === "XteHighwayLayout") {
-          return {
-            create() {
-              return {
-                id: "XteHighwayLayout",
-                computeMode(W, H, thresholdNormal, thresholdFlat) {
-                  const mode = realLayout.computeMode(W, H, thresholdNormal, thresholdFlat);
-                  calls.modeHistory.push(mode);
-                  return mode;
+              },
+              text: {
+                drawDisconnectOverlay() {
+                  calls.overlays += 1;
                 },
-                computeInsets: realLayout.computeInsets,
-                createContentRect: realLayout.createContentRect,
-                computeLayout(args) {
-                  const layout = realLayout.computeLayout(args);
-                  calls.layoutHistory.push(layout);
-                  return layout;
+                fitSingleTextPx() {
+                  return 12;
                 },
-                computeMetricTileSpacing: realLayout.computeMetricTileSpacing
-              };
-            }
-          };
-        }
-        if (id === "TextTileLayout") {
-          return {
-            create() {
-              return {
-                id: "TextTileLayout",
-                measureMetricTile(args) {
-                  calls.metricTextFillScales.push(args.textFillScale);
-                  return realTileLayout.measureMetricTile(args);
+                setFont(ctx, px, weight, family) {
+                  ctx.font = weight + " " + px + "px " + family;
                 },
-                drawMetricTile(args) {
-                  calls.metricTextFillScales.push(args.textFillScale);
-                  return realTileLayout.drawMetricTile(args);
+                measureTextWidth(ctx, text) {
+                  return ctx.measureText(String(text || "")).width;
                 },
-                measureFittedLine(args) {
-                  calls.waypointTextFillScales.push(args.textFillScale);
-                  return realTileLayout.measureFittedLine(args);
+                drawCaptionMax(ctx, family, x, y, w, h, caption) {
+                  calls.captionRows.push({ caption: String(caption), w, h });
                 },
-                drawFittedLine(args) {
-                  return realTileLayout.drawFittedLine(args);
+                measureValueUnitFit() {
+                  return { vPx: 12, uPx: 10, gap: 6, total: 0 };
+                },
+                drawValueUnitWithFit(ctx, family, x, y, w, h, value, unit) {
+                  calls.valueRows.push({ value: String(value), unit: String(unit || ""), w, h });
                 }
-              };
-            }
-          };
+              }
+            };
+          }
+        },
+        XteHighwayPrimitives: {
+          create() {
+            return {
+              highwayGeometry: realPrimitives.highwayGeometry,
+              drawStaticHighway(ctx, geom, colors, mode, primaryDim, strokeWeight) {
+                calls.staticDraws.push({ colors, mode, geom, primaryDim, strokeWeight });
+              },
+              drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, primaryDim, strokeWeight, pointerDepthWeight) {
+                calls.dynamicDraws.push({ colors, xteNormalized, overflow, geom, primaryDim, strokeWeight, pointerDepthWeight });
+              },
+              shouldShowWaypoint(mode, layout, showWpName, name, fit) {
+                const result = realPrimitives.shouldShowWaypoint(mode, layout, showWpName, name, fit);
+                calls.waypointChecks.push({ mode, showWpName, name, result, rect: layout && layout.nameRect, fit });
+                return result;
+              }
+            };
+          }
+        },
+        XteHighwayLayout: {
+          create() {
+            return {
+              id: "XteHighwayLayout",
+              computeMode(W, H, thresholdNormal, thresholdFlat) {
+                const mode = realLayout.computeMode(W, H, thresholdNormal, thresholdFlat);
+                calls.modeHistory.push(mode);
+                return mode;
+              },
+              computeInsets: realLayout.computeInsets,
+              createContentRect: realLayout.createContentRect,
+              computeLayout(args) {
+                const layout = realLayout.computeLayout(args);
+                calls.layoutHistory.push(layout);
+                return layout;
+              },
+              computeMetricTileSpacing: realLayout.computeMetricTileSpacing
+            };
+          }
+        },
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        SpringEasing: loadFresh("shared/widget-kits/anim/SpringEasing.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js")
+      },
+      services: {
+        format: { applyFormatter },
+        canvas: {
+          setupCanvas(canvas) {
+            const ctx = canvas.getContext("2d");
+            const rect = canvas.getBoundingClientRect();
+            return { ctx, W: Math.round(rect.width), H: Math.round(rect.height) };
+          }
+        },
+        dom: {
+          requirePluginRoot(target) {
+            return target;
+          }
         }
-        if (id === "PlaceholderNormalize") {
-          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        }
-        if (id === "UnitAwareFormatter") {
-          return loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
-        }
-        if (id === "StableDigits") {
-          return loadFresh("shared/widget-kits/format/StableDigits.js");
-        }
-        if (id === "SpringEasing") {
-          return loadFresh("shared/widget-kits/anim/SpringEasing.js");
-        }
-        if (id === "StateScreenLabels") {
-          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        }
-        if (id === "StateScreenPrecedence") {
-          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-        }
-        if (id === "StateScreenCanvasOverlay") {
-          return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
-        }
-        throw new Error("Unexpected module: " + id);
       }
-    });
+    }));
 
     return { spec, calls, theme };
   }

@@ -53,11 +53,11 @@ const SPAN_FILE_BY_NAME = Object.freeze({
   "ClusterRendererRouter.renderHtml": "cluster/rendering/ClusterRendererRouter.js",
   "HostCommitController.scheduleCommit->onCommit": "runtime/HostCommitController.js",
   "SurfaceSessionController.reconcileSession": "runtime/SurfaceSessionController.js",
-  "HtmlSurfaceController.attach": "cluster/rendering/HtmlSurfaceController.js",
-  "HtmlSurfaceController.update": "cluster/rendering/HtmlSurfaceController.js",
-  "CanvasDomSurfaceAdapter.schedulePaint->paintNow": "cluster/rendering/CanvasDomSurfaceAdapter.js",
-  "Renderer.renderHtml": "cluster/rendering/HtmlSurfaceController.js",
-  "Renderer.renderCanvas": "cluster/rendering/CanvasDomSurfaceAdapter.js"
+  "HtmlSurfaceController.attach": "runtime/surface/HtmlSurfaceController.js",
+  "HtmlSurfaceController.update": "runtime/surface/HtmlSurfaceController.js",
+  "CanvasDomSurfaceAdapter.schedulePaint->paintNow": "runtime/surface/CanvasDomSurfaceAdapter.js",
+  "Renderer.renderHtml": "runtime/surface/HtmlSurfaceController.js",
+  "Renderer.renderCanvas": "runtime/surface/CanvasDomSurfaceAdapter.js"
 });
 
 const FIXTURE_WIDGET_CLUSTER_BY_NAME = Object.freeze({
@@ -361,19 +361,27 @@ function createHarnessEnvironment(options) {
   runIifeScript(rootDir, "config/cluster-routes/vessel.js");
   runIifeScript(rootDir, "config/cluster-routes/default.js");
   runIifeScript(rootDir, "config/cluster-routes/finalize.js");
-  runIifeScript(rootDir, "runtime/helpers.js");
+  runIifeScript(rootDir, "runtime/PerfSpanHelper.js");
+  runIifeScript(rootDir, "runtime/format-runtime.js");
+  runIifeScript(rootDir, "runtime/canvas-runtime.js");
+  runIifeScript(rootDir, "runtime/dom-runtime.js");
+  runIifeScript(rootDir, "runtime/theme/model.js");
+  runIifeScript(rootDir, "runtime/theme/resolver.js");
+  runIifeScript(rootDir, "runtime/theme-runtime.js");
   runIifeScript(rootDir, "runtime/HostCommitController.js");
   runIifeScript(rootDir, "runtime/SurfaceSessionController.js");
-  globalThis.DyniPlugin.runtime._theme = {
-    applyToRoot() {}
-  };
+  runIifeScript(rootDir, "runtime/surface/ClusterSurfacePolicy.js");
+  runIifeScript(rootDir, "runtime/surface/CanvasDomSurfaceAdapter.js");
+  runIifeScript(rootDir, "runtime/surface/HtmlSurfaceController.js");
+  runIifeScript(rootDir, "runtime/surface/index.js");
+  globalThis.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+  globalThis.DyniPlugin.runtime.hostActions = createHostActions();
 
   globalThis.DyniPlugin.state.hostActionBridge = {
     getHostActions: createHostActions
   };
 
-  const moduleResolver = createComponentResolver(rootDir);
-  const helpers = globalThis.DyniPlugin.runtime.createHelpers(moduleResolver.getModule);
+  const moduleResolver = createComponentResolver(rootDir, globalThis.DyniPlugin.runtime);
 
   return {
     rootDir,
@@ -381,7 +389,6 @@ function createHarnessEnvironment(options) {
     scheduler,
     collector,
     moduleResolver,
-    helpers,
     restore() {
       restoreGlobals(originalGlobals);
       dom.window.close();
@@ -466,7 +473,7 @@ function createAggregateRunner(env, fixture) {
 }
 
 function createClusterSession(env, cluster, width, height) {
-  const clusterWidget = env.moduleResolver.getModule("ClusterWidget").create({ cluster }, env.helpers);
+  const clusterWidget = env.moduleResolver.createInstance("ClusterWidget", { cluster });
   const context = {
     eventHandler: [],
     triggerResize() {},
@@ -767,7 +774,7 @@ function renderPerfMarkdown(report) {
   return `${lines.join("\n")}\n`;
 }
 
-function createComponentResolver(rootDir) {
+function createComponentResolver(rootDir, runtimeServices) {
   const unitFamiliesPath = require.resolve("../../shared/unit-format-families.js");
   delete require.cache[unitFamiliesPath];
   require(unitFamiliesPath);
@@ -799,8 +806,66 @@ function createComponentResolver(rootDir) {
     return loaded;
   }
 
+  function createInstance(rootId, def) {
+    const instanceCache = new Map();
+    const building = new Set();
+
+    function instantiate(componentId) {
+      if (instanceCache.has(componentId)) {
+        return instanceCache.get(componentId);
+      }
+      if (building.has(componentId)) {
+        throw new Error(`Dependency cycle while creating '${rootId}' at '${componentId}'`);
+      }
+
+      const componentDef = registry[componentId];
+      if (!componentDef) {
+        throw new Error(`Missing component '${componentId}' in registry`);
+      }
+
+      const deps = Array.isArray(componentDef.deps) ? componentDef.deps : [];
+      building.add(componentId);
+      const depInstances = Object.create(null);
+      for (const depId of deps) {
+        depInstances[depId] = instantiate(depId);
+      }
+
+      const componentContext = {
+        components: {
+          require(depId) {
+            if (!Object.prototype.hasOwnProperty.call(depInstances, depId)) {
+              throw new Error(`componentContext.components.require: '${componentId}' requested undeclared dependency '${depId}'`);
+            }
+            return depInstances[depId];
+          }
+        },
+        theme: {
+          tokens: {
+            resolveForRoot(rootEl) {
+              return runtimeServices.theme.resolveForRoot(rootEl);
+            }
+          }
+        },
+        perf: runtimeServices.perf,
+        format: runtimeServices.format,
+        canvas: runtimeServices.canvas,
+        dom: runtimeServices.dom,
+        hostActions: runtimeServices.hostActions
+      };
+
+      const moduleApi = getModule(componentId);
+      const apiShape = componentDef.apiShape || "factory";
+      const instance = apiShape === "module" ? moduleApi : moduleApi.create(def, componentContext);
+      instanceCache.set(componentId, instance);
+      building.delete(componentId);
+      return instance;
+    }
+
+    return instantiate(rootId);
+  }
+
   return {
-    getModule,
+    createInstance,
     getComponentPath(componentId) {
       return byId.get(componentId) || null;
     }

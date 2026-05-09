@@ -61,10 +61,10 @@
     };
   }
 
-  function create(def, Helpers) {
-    const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
-    const makeRect = Helpers.getModule("LayoutRectMath").create(def, Helpers).makeRect;
-    const layoutMath = Helpers.getModule("AisTargetLayoutMath").create(def, Helpers);
+  function create(def, componentContext) {
+    const profileApi = componentContext.components.require("ResponsiveScaleProfile");
+    const makeRect = componentContext.components.require("LayoutRectMath").makeRect;
+    const layoutMath = componentContext.components.require("AisTargetLayoutMath");
     const clampNumber = layoutMath.clampNumber;
 
     function computeVerticalShellProfile(args) {

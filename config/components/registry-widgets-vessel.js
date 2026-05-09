@@ -46,14 +46,14 @@
       js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
       css: undefined,
       globalKey: "DyniPositionCoordinateWidget",
-      deps: ["ThemeResolver", "TextLayoutEngine", "PlaceholderNormalize", "StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
+      deps: ["TextLayoutEngine", "PlaceholderNormalize", "StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
   };
 
   w.ThreeValueTextWidget = {
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
       css: undefined,
       globalKey: "DyniThreeValueTextWidget",
-      deps: ["ThemeResolver", "TextLayoutEngine", "PlaceholderNormalize", "StableDigits", "StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
+      deps: ["TextLayoutEngine", "PlaceholderNormalize", "StableDigits", "StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
   };
 
   w.XteDisplayWidget = {

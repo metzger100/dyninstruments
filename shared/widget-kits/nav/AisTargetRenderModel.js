@@ -47,7 +47,7 @@
     return value == null ? "" : String(value);
   }
 
-  function formatWithFormatter(args, Helpers, placeholderNormalize) {
+  function formatWithFormatter(args, componentContext, placeholderNormalize) {
     const cfg = args || {};
     const options = {
       formatter: cfg.formatter,
@@ -56,7 +56,7 @@
     if (typeof cfg.defaultText !== "undefined") {
       options.default = cfg.defaultText;
     }
-    const text = String(Helpers.applyFormatter(cfg.value, options));
+    const text = String(componentContext.format.applyFormatter(cfg.value, options));
     return placeholderNormalize.normalize(text, cfg.defaultText);
   }
 
@@ -126,15 +126,15 @@
     return parts;
   }
 
-  function create(def, Helpers) {
-    const layoutApi = Helpers.getModule("AisTargetLayout").create(def, Helpers);
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
-    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
-    const unitFormatter = Helpers.getModule("UnitAwareFormatter").create(def, Helpers);
-    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
-    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
-    const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
+  function create(def, componentContext) {
+    const layoutApi = componentContext.components.require("AisTargetLayout");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    const stableDigits = componentContext.components.require("StableDigits");
+    const unitFormatter = componentContext.components.require("UnitAwareFormatter");
+    const stateScreenLabels = componentContext.components.require("StateScreenLabels");
+    const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
+    const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");
 
     function normalizeStableMetricValue(rawText, minWidth, stableDigitsEnabled) {
       if (stableDigitsEnabled !== true) {
@@ -235,7 +235,7 @@
             formatter: "formatDecimal",
             formatterParameters: [3, (typeof tcpaSeconds === "number" && Math.abs(tcpaSeconds) > 60) ? 0 : 2],
             defaultText: defaultText
-          }, Helpers, placeholderNormalize), 2, stableDigitsEnabled)
+          }, componentContext, placeholderNormalize), 2, stableDigitsEnabled)
         },
         brg: {
           id: "brg",
@@ -246,7 +246,7 @@
             formatter: "formatDirection",
             formatterParameters: [],
             defaultText: defaultText
-          }, Helpers, placeholderNormalize), 3, stableDigitsEnabled)
+          }, componentContext, placeholderNormalize), 3, stableDigitsEnabled)
         }
       };
 

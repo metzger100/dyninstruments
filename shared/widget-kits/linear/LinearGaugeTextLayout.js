@@ -206,8 +206,8 @@
     );
   }
 
-  function create(def, Helpers) {
-    const labelFit = Helpers.getModule("LinearGaugeLabelFit").create(def, Helpers);
+  function create(def, componentContext) {
+    const labelFit = componentContext.components.require("LinearGaugeLabelFit");
 
     function drawTickLabels(layerCtx, state, ticks, showEndLabels, math, labelFormatter) {
       if (!math || !state || !state.labelFontPx || !ticks || !ticks.major || !ticks.major.length) {

@@ -35,7 +35,7 @@
     return out;
   }
 
-  function create(def, Helpers) {
+  function create(def, componentContext) {
     function createSpring(spec) {
       const cfg = spec && typeof spec === "object" ? spec : {};
       const stiffness = Math.max(1e-6, resolveFiniteNumber(cfg.stiffness, DEFAULT_STIFFNESS));

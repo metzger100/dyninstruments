@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("TextLayoutEngine", function () {
@@ -44,17 +45,16 @@ describe("TextLayoutEngine", function () {
       }
     };
 
-    return engineModule.create({}, {
-      getModule(id) {
-        if (id === "RadialValueMath") return valueMathModule;
-        if (id === "RadialTextLayout") return textLayoutModule;
-        if (id === "RadialTextFitting") return textFittingModule;
-        if (id === "TextLayoutPrimitives") return primitiveModule;
-        if (id === "TextLayoutComposite") return compositeModule;
-        if (id === "ResponsiveScaleProfile") return responsiveProfileModule;
-        throw new Error("unexpected module: " + id);
+    return engineModule.create({}, createComponentContextMock({
+      modules: {
+        RadialValueMath: valueMathModule,
+        RadialTextLayout: textLayoutModule,
+        RadialTextFitting: textFittingModule,
+        TextLayoutPrimitives: primitiveModule,
+        TextLayoutComposite: compositeModule,
+        ResponsiveScaleProfile: responsiveProfileModule
       }
-    });
+    }));
   }
 
   it("computes mode routing and collapse flags", function () {

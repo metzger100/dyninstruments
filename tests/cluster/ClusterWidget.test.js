@@ -1,4 +1,5 @@
 const { loadFresh } = require("../helpers/load-umd");
+const { createComponentContextMock } = require("../helpers/component-context-mock");
 
 describe("ClusterWidget", function () {
   const originalDyniPlugin = globalThis.DyniPlugin;
@@ -98,7 +99,7 @@ describe("ClusterWidget", function () {
     };
     const hostCommitController = createHostCommitControllerMock();
     const runtime = {
-      _theme: themeRuntime,
+      theme: themeRuntime,
       createHostCommitController: vi.fn(function () {
         return hostCommitController;
       }),
@@ -134,26 +135,22 @@ describe("ClusterWidget", function () {
     const renderHtml = vi.fn(() => "<div>ok</div>");
     const createSessionPayload = vi.fn((payload) => Object.assign({ surface: "canvas-dom" }, payload));
 
-    const Helpers = {
-      getModule(id) {
-        if (id === "PerfSpanHelper") return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
-        if (id === "ClusterMapperToolkit") return { create: () => ({ createToolkit }) };
-        if (id === "ClusterMapperRegistry") return { create: () => ({ mapCluster }) };
-        if (id === "ClusterRendererRouter") {
-          return {
-            create: () => ({
-              wantsHideNativeHead: true,
-              renderHtml,
-              createSurfaceControllerFactory: routeSurfaceFactory,
-              createSessionPayload
-            })
-          };
+    const componentContext = createComponentContextMock({
+      modules: {
+        ClusterMapperToolkit: { create: () => ({ createToolkit }) },
+        ClusterMapperRegistry: { create: () => ({ mapCluster }) },
+        ClusterRendererRouter: {
+          create: () => ({
+            wantsHideNativeHead: true,
+            renderHtml,
+            createSurfaceControllerFactory: routeSurfaceFactory,
+            createSessionPayload
+          })
         }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
 
-    const widget = loadFresh("cluster/ClusterWidget.js").create({ cluster: "speed" }, Helpers);
+    const widget = loadFresh("cluster/ClusterWidget.js").create({ cluster: "speed" }, componentContext);
 
     expect(widget.id).toBe("ClusterWidget");
     expect(widget.wantsHideNativeHead).toBe(true);
@@ -228,26 +225,22 @@ describe("ClusterWidget", function () {
       return Object.assign({ surface: surface }, payload);
     });
 
-    const Helpers = {
-      getModule(id) {
-        if (id === "PerfSpanHelper") return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
-        if (id === "ClusterMapperToolkit") return { create: () => ({ createToolkit: vi.fn() }) };
-        if (id === "ClusterMapperRegistry") return { create: () => ({ mapCluster: vi.fn(() => ({})) }) };
-        if (id === "ClusterRendererRouter") {
-          return {
-            create: () => ({
-              wantsHideNativeHead: true,
-              renderHtml,
-              createSurfaceControllerFactory: vi.fn(() => surfaceFactory),
-              createSessionPayload
-            })
-          };
+    const componentContext = createComponentContextMock({
+      modules: {
+        ClusterMapperToolkit: { create: () => ({ createToolkit: vi.fn() }) },
+        ClusterMapperRegistry: { create: () => ({ mapCluster: vi.fn(() => ({})) }) },
+        ClusterRendererRouter: {
+          create: () => ({
+            wantsHideNativeHead: true,
+            renderHtml,
+            createSurfaceControllerFactory: vi.fn(() => surfaceFactory),
+            createSessionPayload
+          })
         }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
 
-    const widget = loadFresh("cluster/ClusterWidget.js").create({ cluster: "nav" }, Helpers);
+    const widget = loadFresh("cluster/ClusterWidget.js").create({ cluster: "nav" }, componentContext);
     const widgetContext = { eventHandler: [] };
 
     widget.initFunction.call(widgetContext);

@@ -14,8 +14,8 @@
     return value == null ? "" : String(value);
   }
 
-  function formatWithToken(value, formatter, token, defaultText, Helpers, placeholderNormalize) {
-    const formatted = Helpers.applyFormatter(value, {
+  function formatWithToken(value, formatter, token, defaultText, componentContext, placeholderNormalize) {
+    const formatted = componentContext.format.applyFormatter(value, {
       formatter: formatter,
       formatterParameters: [token],
       default: defaultText
@@ -23,8 +23,8 @@
     return placeholderNormalize.normalize(formatted == null ? defaultText : String(formatted).trim(), defaultText);
   }
 
-  function formatDistance(value, token, defaultText, Helpers, placeholderNormalize) {
-    return formatWithToken(value, "formatDistance", token, defaultText, Helpers, placeholderNormalize);
+  function formatDistance(value, token, defaultText, componentContext, placeholderNormalize) {
+    return formatWithToken(value, "formatDistance", token, defaultText, componentContext, placeholderNormalize);
   }
 
   function appendUnit(valueText, displayUnit, defaultText) {
@@ -43,16 +43,16 @@
     return Number.isFinite(parsed) ? parsed : defaultValue;
   }
 
-  function create(def, Helpers) {
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+  function create(def, componentContext) {
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     return {
       id: "UnitAwareFormatter",
       formatWithToken: function (value, formatter, token, defaultText) {
-        return formatWithToken(value, formatter, token, defaultText, Helpers, placeholderNormalize);
+        return formatWithToken(value, formatter, token, defaultText, componentContext, placeholderNormalize);
       },
       formatDistance: function (value, token, defaultText) {
-        return formatDistance(value, token, defaultText, Helpers, placeholderNormalize);
+        return formatDistance(value, token, defaultText, componentContext, placeholderNormalize);
       },
       appendUnit: appendUnit,
       extractNumericDisplay: extractNumericDisplay

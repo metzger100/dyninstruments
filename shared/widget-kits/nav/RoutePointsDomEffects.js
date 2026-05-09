@@ -297,8 +297,8 @@
     };
   }
 
-  function create(def, Helpers) {
-    htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
+  function create(def, componentContext) {
+    htmlUtils = componentContext.components.require("HtmlWidgetUtils");
 
     return {
       id: "RoutePointsDomEffects",

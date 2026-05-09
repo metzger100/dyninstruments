@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsHtmlFit - Per-cell text-fit owner for route-points HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ThemeResolver, RadialTextLayout, TextTileLayout, RoutePointsLayout, HtmlWidgetUtils, RoutePointsInfoText
+ * Depends: componentContext.theme.tokens, RadialTextLayout, TextTileLayout, RoutePointsLayout, HtmlWidgetUtils, RoutePointsInfoText
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -155,11 +155,11 @@
 
   function resolveEnvironment(args) {
     const cfg = args || {};
-    const Helpers = cfg.Helpers;
+    const componentContext = cfg.componentContext;
     const theme = cfg.theme;
     const targetEl = cfg.targetEl;
     const hostContext = cfg.hostContext;
-    const tokenSet = theme.resolveForRoot(Helpers.requirePluginRoot(targetEl));
+    const tokenSet = theme.resolveForRoot(componentContext.dom.requirePluginRoot(targetEl));
     const measureCtx = resolveMeasureContext(hostContext, targetEl);
     if (!measureCtx || typeof measureCtx.measureText !== "function") {
       return null;
@@ -173,13 +173,13 @@
     };
   }
 
-  function create(def, Helpers) {
-    const theme = Helpers.getModule("ThemeResolver");
-    const radialText = Helpers.getModule("RadialTextLayout").create(def, Helpers);
-    const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
-    const layoutApi = Helpers.getModule("RoutePointsLayout").create(def, Helpers);
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const routePointsInfoText = Helpers.getModule("RoutePointsInfoText").create(def, Helpers);
+  function create(def, componentContext) {
+    const theme = componentContext.theme.tokens;
+    const radialText = componentContext.components.require("RadialTextLayout");
+    const tileLayout = componentContext.components.require("TextTileLayout");
+    const layoutApi = componentContext.components.require("RoutePointsLayout");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const routePointsInfoText = componentContext.components.require("RoutePointsInfoText");
 
     function measureStyle(args) {
       const cfg = args || {};
@@ -216,7 +216,7 @@
       }
 
       const env = resolveEnvironment({
-        Helpers: Helpers,
+        componentContext: componentContext,
         theme: theme,
         hostContext: hostContext,
         targetEl: targetEl

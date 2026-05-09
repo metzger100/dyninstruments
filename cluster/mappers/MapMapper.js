@@ -11,8 +11,8 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const aisTargetViewModel = Helpers.getModule("AisTargetViewModel").create(def, Helpers);
+  function create(def, componentContext) {
+    const aisTargetViewModel = componentContext.components.require("AisTargetViewModel");
 
     function translate(props, toolkit) {
       const p = props || {};

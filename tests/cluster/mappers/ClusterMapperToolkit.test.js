@@ -1,5 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("ClusterMapperToolkit", function () {
   it("builds angle formatters with expected normalization behavior", function () {
@@ -88,19 +89,18 @@ describe("ClusterMapperToolkit", function () {
 
   it("uses injected RadialAngleMath helpers when provided", function () {
     const mod = loadFresh("cluster/mappers/ClusterMapperToolkit.js");
-    const toolkit = mod.create({}, {
-      getModule(id) {
-        if (id !== "RadialAngleMath") throw new Error("unexpected module: " + id);
-        return {
+    const toolkit = mod.create({}, createComponentContextMock({
+      modules: {
+        RadialAngleMath: {
           create() {
             return {
               norm360() { return 42; },
               norm180() { return -7; }
             };
           }
-        };
+        }
       }
-    });
+    }));
 
     const direction = toolkit.makeAngleFormatter(true, true, "NA");
     const relative = toolkit.makeAngleFormatter(false, true, "NA");

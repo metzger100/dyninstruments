@@ -11,7 +11,7 @@
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
-  function create(def, Helpers) {
+  function create(def, componentContext) {
     const DEFAULT_ARC = { startDeg: 270, endDeg: 450 };
     // Engine-owned last-resort fallback for callers that omit threshold props.
     const DEFAULT_RATIO_DEFAULTS = { normal: 1.1, flat: 3.5 };
@@ -20,20 +20,20 @@
     const DEFAULT_TICK_PROPS = { major: "tickMajor", minor: "tickMinor", showEndLabels: "showEndLabels" };
     const DEFAULT_RATIO_PROPS = { normal: "ratioThresholdNormal", flat: "ratioThresholdFlat" };
     const DEFAULT_TICK_PRESET = { major: 10, minor: 2 };
-    const GU = Helpers.getModule("RadialToolkit").create(def, Helpers);
-    const layoutApi = Helpers.getModule("SemicircleRadialLayout").create(def, Helpers);
-    const textLayout = Helpers.getModule("SemicircleRadialTextLayout").create(def, Helpers);
-    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
-    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
-    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
-    const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
-    const springMotion = Helpers.getModule("SpringEasing").create(def, Helpers).createMotion();
+    const GU = componentContext.components.require("RadialToolkit");
+    const layoutApi = componentContext.components.require("SemicircleRadialLayout");
+    const textLayout = componentContext.components.require("SemicircleRadialTextLayout");
+    const stableDigits = componentContext.components.require("StableDigits");
+    const stateScreenLabels = componentContext.components.require("StateScreenLabels");
+    const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
+    const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
+    const springMotion = componentContext.components.require("SpringEasing").createMotion();
     const text = GU.text;
     const value = GU.value;
     const draw = GU.draw;
 
     function resolveSurface(canvas) {
-      const setup = Helpers.setupCanvas(canvas);
+      const setup = componentContext.canvas.setupCanvas(canvas);
       return setup && setup.W && setup.H && setup.ctx ? setup : null;
     }
 
@@ -115,7 +115,7 @@
       const unitDefault = hasOwn.call(cfg, "unitDefault") ? cfg.unitDefault : "";
       const formatDisplay = typeof cfg.formatDisplay === "function"
         ? function (rawValue, props, unitText) {
-          return cfg.formatDisplay(rawValue, props, unitText, Helpers);
+          return cfg.formatDisplay(rawValue, props, unitText, componentContext);
         }
         : function (rawValue) {
           return { num: Number(rawValue), text: String(rawValue) };
@@ -142,7 +142,7 @@
         const ctx = surface.ctx;
         const W = surface.W;
         const H = surface.H;
-        const rootEl = Helpers.requirePluginRoot(canvas);
+        const rootEl = componentContext.dom.requirePluginRoot(canvas);
         const theme = GU.theme.resolveForRoot(rootEl);
         const paint = setupTextPaint(theme, ctx);
         const labelWeight = theme.font.labelWeight;

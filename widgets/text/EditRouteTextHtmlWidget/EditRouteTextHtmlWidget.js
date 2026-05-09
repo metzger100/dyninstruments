@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteTextHtmlWidget - HTML renderer shell for nav edit-route summary kind
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: EditRouteHtmlFit, HtmlWidgetUtils, EditRouteRenderModel, EditRouteMarkup, ThemeResolver
+ * Depends: EditRouteHtmlFit, HtmlWidgetUtils, EditRouteRenderModel, EditRouteMarkup, componentContext.theme.tokens
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -15,12 +15,12 @@
     return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
   }
 
-  function create(def, Helpers) {
-    const htmlFit = Helpers.getModule("EditRouteHtmlFit").create(def, Helpers);
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const renderModel = Helpers.getModule("EditRouteRenderModel").create(def, Helpers);
-    const markup = Helpers.getModule("EditRouteMarkup").create(def, Helpers);
-    const themeResolver = Helpers.getModule("ThemeResolver");
+  function create(def, componentContext) {
+    const htmlFit = componentContext.components.require("EditRouteHtmlFit");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const renderModel = componentContext.components.require("EditRouteRenderModel");
+    const markup = componentContext.components.require("EditRouteMarkup");
+    const themeResolver = componentContext.theme.tokens;
 
     function buildModel(props, shellRect) {
       const surfacePolicy = resolveSurfacePolicy(props);

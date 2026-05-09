@@ -34,11 +34,11 @@
     flatHeadPanelScale: 0.84
   };
 
-  function create(def, Helpers) {
-    const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
-    const rectApi = Helpers.getModule("LayoutRectMath").create(def, Helpers);
-    const sizingApi = Helpers.getModule("RoutePointsLayoutSizing").create(def, Helpers);
-    const rowGeometryApi = Helpers.getModule("RoutePointsRowGeometry").create(def, Helpers);
+  function create(def, componentContext) {
+    const profileApi = componentContext.components.require("ResponsiveScaleProfile");
+    const rectApi = componentContext.components.require("LayoutRectMath");
+    const sizingApi = componentContext.components.require("RoutePointsLayoutSizing");
+    const rowGeometryApi = componentContext.components.require("RoutePointsRowGeometry");
     const makeRect = rectApi.makeRect;
     const clampNumber = sizingApi.clampNumber;
     const toCount = sizingApi.toCount;

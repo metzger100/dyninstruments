@@ -10,10 +10,10 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
-    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
-    const stateScreenCanvasOverlay = Helpers.getModule("StateScreenCanvasOverlay").create(def, Helpers);
+  function create(def, componentContext) {
+    const stateScreenLabels = componentContext.components.require("StateScreenLabels");
+    const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
+    const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
 
     function renderStateScreenIfNeeded(args) {
       const cfg = args && typeof args === "object" ? args : {};

@@ -1,31 +1,17 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RoutePointsMarkup", function () {
   function createMarkup() {
-    const moduleCache = Object.create(null);
-    const Helpers = {
-      getModule(id) {
-        if (!moduleCache[id]) {
-          if (id === "StateScreenMarkup") {
-            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
-          }
-          else if (id === "StateScreenTextFit") {
-            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenTextFit.js");
-          }
-          else if (id === "StateScreenLabels") {
-            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-          }
-          else if (id === "HtmlWidgetUtils") {
-            moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-          }
-          else {
-            throw new Error("unexpected module: " + id);
-          }
-        }
-        return moduleCache[id];
+    const componentContext = createComponentContextMock({
+      modules: {
+        StateScreenMarkup: loadFresh("shared/widget-kits/state/StateScreenMarkup.js"),
+        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js")
       }
-    };
-    return loadFresh("shared/widget-kits/nav/RoutePointsMarkup.js").create({}, Helpers);
+    });
+    return loadFresh("shared/widget-kits/nav/RoutePointsMarkup.js").create({}, componentContext);
   }
 
   function createHtmlUtils() {

@@ -10,12 +10,12 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const layoutSizingApi = Helpers.getModule("AisTargetLayoutSizing").create(def, Helpers);
-    const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
-    const makeRect = Helpers.getModule("LayoutRectMath").create(def, Helpers).makeRect;
-    const geometryApi = Helpers.getModule("AisTargetLayoutGeometry").create(def, Helpers);
-    const layoutMath = Helpers.getModule("AisTargetLayoutMath").create(def, Helpers);
+  function create(def, componentContext) {
+    const layoutSizingApi = componentContext.components.require("AisTargetLayoutSizing");
+    const profileApi = componentContext.components.require("ResponsiveScaleProfile");
+    const makeRect = componentContext.components.require("LayoutRectMath").makeRect;
+    const geometryApi = componentContext.components.require("AisTargetLayoutGeometry");
+    const layoutMath = componentContext.components.require("AisTargetLayoutMath");
     const clampNumber = layoutMath.clampNumber;
     const splitStack = layoutMath.splitStack;
     const splitRow = layoutMath.splitRow;

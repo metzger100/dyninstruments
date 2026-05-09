@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("VoltageLinearWidget", function () {
   it("passes LinearGaugeEngine config with voltage tick profile and low-end sectors", function () {
@@ -12,28 +13,24 @@ describe("VoltageLinearWidget", function () {
     });
 
     const mod = loadFresh("widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js");
-    const spec = mod.create({}, {
-      applyFormatter,
-      getModule(id) {
-        if (id === "PlaceholderNormalize") {
-          return {
-            create() {
-              return {
-                normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
-                  }
-                  const value = String(text).trim();
-                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+    const spec = mod.create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
                 }
-              };
-            }
-          };
-        }
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+                const value = String(text).trim();
+                return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+              }
+            };
+          }
+        },
+        RadialValueMath: {
+          create() {
+            return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -65,11 +62,9 @@ describe("VoltageLinearWidget", function () {
                 },
                 resolveVoltageSemicircleTickSteps
               };
-            }
-          };
-        }
-        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
-        return {
+          }
+        },
+        LinearGaugeEngine: {
           create() {
             return {
               createRenderer(cfg) {
@@ -78,9 +73,12 @@ describe("VoltageLinearWidget", function () {
               }
             };
           }
-        };
+        }
+      },
+      services: {
+        format: { applyFormatter }
       }
-    });
+    }));
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.hideTextualMetricsProp).toBe("voltageLinearHideTextualMetrics");
@@ -118,30 +116,24 @@ describe("VoltageLinearWidget", function () {
     let captured;
 
     const mod = loadFresh("widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js");
-    mod.create({}, {
-      applyFormatter(value) {
-        return String(value);
-      },
-      getModule(id) {
-        if (id === "PlaceholderNormalize") {
-          return {
-            create() {
-              return {
-                normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
-                  }
-                  const value = String(text).trim();
-                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+    mod.create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
                 }
-              };
-            }
-          };
-        }
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+                const value = String(text).trim();
+                return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+              }
+            };
+          }
+        },
+        RadialValueMath: {
+          create() {
+            return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -175,11 +167,9 @@ describe("VoltageLinearWidget", function () {
                   return { major: 1, minor: 0.2 };
                 }
               };
-            }
-          };
-        }
-        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
-        return {
+          }
+        },
+        LinearGaugeEngine: {
           create() {
             return {
               createRenderer(cfg) {
@@ -188,9 +178,16 @@ describe("VoltageLinearWidget", function () {
               }
             };
           }
-        };
+        }
+      },
+      services: {
+        format: {
+          applyFormatter(value) {
+            return String(value);
+          }
+        }
       }
-    });
+    }));
 
     expect(captured.buildSectors({
       voltageLinearWarningEnabled: false,

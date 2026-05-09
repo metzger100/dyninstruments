@@ -1,14 +1,14 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RadialValueMath", function () {
   function create() {
     const mod = loadFresh("shared/widget-kits/radial/RadialValueMath.js");
-    return mod.create({}, {
-      getModule(id) {
-        if (id !== "RadialAngleMath") throw new Error("unexpected module: " + id);
-        return loadFresh("shared/widget-kits/radial/RadialAngleMath.js");
+    return mod.create({}, createComponentContextMock({
+      modules: {
+        RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js")
       }
-    });
+    }));
   }
 
   it("normalizes ranges and does not expose legacy semicircle geometry helpers", function () {

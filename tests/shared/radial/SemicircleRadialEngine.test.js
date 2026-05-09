@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("SemicircleRadialEngine", function () {
@@ -7,30 +8,22 @@ describe("SemicircleRadialEngine", function () {
   function createValueMath() {
     const valueMod = loadFresh("shared/widget-kits/radial/RadialValueMath.js");
     const angleMod = loadFresh("shared/widget-kits/radial/RadialAngleMath.js");
-    return valueMod.create({}, {
-      getModule(id) {
-        if (id !== "RadialAngleMath") throw new Error("unexpected module: " + id);
-        return angleMod;
+    return valueMod.create({}, createComponentContextMock({
+      modules: {
+        RadialAngleMath: angleMod
       }
-    });
+    }));
   }
 
   function createLayoutModule() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-    return loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js").create({}, {
-      getModule(id) {
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfile;
-        }
-        if (id === "LayoutRectMath") {
-          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-        }
-        if (id === "GeometryScale") {
-          return geometryScale;
-        }
-        throw new Error("unexpected module: " + id);
+    return loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js").create({}, createComponentContextMock({
+      modules: {
+        ResponsiveScaleProfile: responsiveScaleProfile,
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+        GeometryScale: geometryScale
       }
-    });
+    }));
   }
 
   function makeBaseSpec() {
@@ -100,14 +93,14 @@ describe("SemicircleRadialEngine", function () {
     };
   }
 
-  function makeHelpers(modules) {
+  function makeComponentContext(modules) {
     function withCanonicalThemeTokens(toolkit) {
       if (!toolkit || typeof toolkit.create !== "function") {
         return toolkit;
       }
       return {
-        create(def, Helpers) {
-          const created = toolkit.create(def, Helpers);
+        create(def, componentContext) {
+          const created = toolkit.create(def, componentContext);
           if (!created || !created.theme || typeof created.theme.resolveForRoot !== "function") {
             return created;
           }
@@ -131,41 +124,35 @@ describe("SemicircleRadialEngine", function () {
       };
     }
 
-    return {
-      setupCanvas(canvas) {
-        const ctx = canvas.getContext("2d");
-        const rect = canvas.getBoundingClientRect();
-        return {
-          ctx,
-          W: Math.round(rect.width),
-          H: Math.round(rect.height)
-        };
-      },
-      resolveFontFamily() {
-        return "sans-serif";
-      },
-      resolveTextColor() {
-        return "#fff";
-      },
-      requirePluginRoot(target) {
-        return target;
-      },
-      getModule(id) {
-        if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
-        if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-        if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
-        if (id === "SpringEasing") return loadFresh("shared/widget-kits/anim/SpringEasing.js");
-        if (modules[id]) {
-          if (id === "RadialToolkit") {
-            return withCanonicalThemeTokens(modules[id]);
+    return createComponentContextMock({
+      modules: Object.assign({}, modules, {
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
+        SpringEasing: loadFresh("shared/widget-kits/anim/SpringEasing.js"),
+        RadialToolkit: withCanonicalThemeTokens(modules.RadialToolkit)
+      }),
+      services: {
+        canvas: {
+          setupCanvas(canvas) {
+            const ctx = canvas.getContext("2d");
+            const rect = canvas.getBoundingClientRect();
+            return {
+              ctx,
+              W: Math.round(rect.width),
+              H: Math.round(rect.height)
+            };
           }
-          return modules[id];
+        },
+        dom: {
+          requirePluginRoot(target) {
+            return target;
+          }
         }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
   }
 
   function createRenderOrderHarness(sectorList) {
@@ -233,7 +220,7 @@ describe("SemicircleRadialEngine", function () {
       GeometryScale: geometryScale
     };
     const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
-      .create({}, makeHelpers(modules))
+      .create({}, makeComponentContext(modules))
       .createRenderer({
         ...makeBaseSpec(),
         buildSectors(props, minV, maxV, arc, valueUtils, theme) {
@@ -313,7 +300,7 @@ describe("SemicircleRadialEngine", function () {
       LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
       GeometryScale: geometryScale
     };
-    const helpers = makeHelpers(modules);
+    const helpers = makeComponentContext(modules);
     const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
       .create({}, helpers)
       .createRenderer({
@@ -498,7 +485,7 @@ describe("SemicircleRadialEngine", function () {
         GeometryScale: geometryScale
       };
       const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
-        .create({}, makeHelpers(modules))
+        .create({}, makeComponentContext(modules))
         .createRenderer(Object.assign({}, makeBaseSpec(), specOverrides || {}));
 
       renderer(createMockCanvas({
@@ -582,7 +569,7 @@ describe("SemicircleRadialEngine", function () {
         return [];
       };
       const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
-        .create({}, makeHelpers(modules))
+        .create({}, makeComponentContext(modules))
         .createRenderer(spec);
 
       renderer(createMockCanvas({
@@ -655,7 +642,7 @@ describe("SemicircleRadialEngine", function () {
       return [];
     };
     const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
-      .create({}, makeHelpers(modules))
+      .create({}, makeComponentContext(modules))
       .createRenderer(spec);
 
     renderer(createMockCanvas({
@@ -720,7 +707,7 @@ describe("SemicircleRadialEngine", function () {
         GeometryScale: geometryScale
       };
       const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
-        .create({}, makeHelpers(modules))
+        .create({}, makeComponentContext(modules))
         .createRenderer(makeBaseSpec());
 
       renderer(createMockCanvas({
@@ -833,7 +820,7 @@ describe("SemicircleRadialEngine", function () {
       }
     };
     const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
-      .create({}, makeHelpers(modules))
+      .create({}, makeComponentContext(modules))
       .createRenderer(makeBaseSpec());
 
     renderer(createMockCanvas({
@@ -907,7 +894,7 @@ describe("SemicircleRadialEngine", function () {
       }
     };
     const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
-      .create({}, makeHelpers(modules))
+      .create({}, makeComponentContext(modules))
       .createRenderer(makeBaseSpec());
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({ rectWidth: 220, rectHeight: 140, ctx: ctx });

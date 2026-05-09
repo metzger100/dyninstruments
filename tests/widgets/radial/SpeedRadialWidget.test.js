@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("SpeedRadialWidget", function () {
   it("passes SemicircleRadialEngine config with high-end sectors", function () {
@@ -15,28 +16,24 @@ describe("SpeedRadialWidget", function () {
     });
 
     const mod = loadFresh("widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js");
-    const spec = mod.create({}, {
-      applyFormatter,
-      getModule(id) {
-        if (id === "PlaceholderNormalize") {
-          return {
-            create() {
-              return {
-                normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
-                  }
-                  const value = String(text).trim();
-                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+    const spec = mod.create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
                 }
-              };
-            }
-          };
-        }
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+                const value = String(text).trim();
+                return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+              }
+            };
+          }
+        },
+        RadialValueMath: {
+          create() {
+            return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -72,11 +69,9 @@ describe("SpeedRadialWidget", function () {
                 },
                 resolveStandardSemicircleTickSteps
               };
-            }
-          };
-        }
-        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
-        return {
+          }
+        },
+        SemicircleRadialEngine: {
           create() {
             return {
               createRenderer(cfg) {
@@ -85,9 +80,12 @@ describe("SpeedRadialWidget", function () {
               }
             };
           }
-        };
+        }
+      },
+      services: {
+        format: { applyFormatter }
       }
-    });
+    }));
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.unitDefault).toBe("kn");
@@ -126,30 +124,24 @@ describe("SpeedRadialWidget", function () {
   it("does not fall back to fixed-decimal text when formatter returns raw passthrough", function () {
     let captured;
     const mod = loadFresh("widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js");
-    mod.create({}, {
-      applyFormatter(value) {
-        return String(value);
-      },
-      getModule(id) {
-        if (id === "PlaceholderNormalize") {
-          return {
-            create() {
-              return {
-                normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
-                  }
-                  const value = String(text).trim();
-                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+    mod.create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
                 }
-              };
-            }
-          };
-        }
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+                const value = String(text).trim();
+                return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+              }
+            };
+          }
+        },
+        RadialValueMath: {
+          create() {
+            return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -180,11 +172,9 @@ describe("SpeedRadialWidget", function () {
                   return [];
                 }
               };
-            }
-          };
-        }
-        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
-        return {
+          }
+        },
+        SemicircleRadialEngine: {
           create() {
             return {
               createRenderer(cfg) {
@@ -193,9 +183,16 @@ describe("SpeedRadialWidget", function () {
               }
             };
           }
-        };
+        }
+      },
+      services: {
+        format: {
+          applyFormatter(value) {
+            return String(value);
+          }
+        }
       }
-    });
+    }));
 
     expect(captured.formatDisplay(6.44, {}, "kn")).toEqual({ num: 6.44, text: "6.44" });
   });

@@ -1,7 +1,7 @@
 /**
  * Module: CenterDisplayTextWidget - Responsive center-position renderer for the nav cluster
  * Documentation: documentation/widgets/center-display.md
- * Depends: ThemeResolver, TextLayoutEngine, RadialTextLayout, TextTileLayout, CenterDisplayLayout, CenterDisplayMath, CenterDisplayStateAdapter, CenterDisplayRenderModel
+ * Depends: componentContext.theme.tokens, TextLayoutEngine, RadialTextLayout, TextTileLayout, CenterDisplayLayout, CenterDisplayMath, CenterDisplayStateAdapter, CenterDisplayRenderModel
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -202,18 +202,18 @@
       });
     }
   }
-  function create(def, Helpers) {
-    const theme = Helpers.getModule("ThemeResolver");
-    const text = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
-    const radialText = Helpers.getModule("RadialTextLayout").create(def, Helpers);
-    const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
-    const layoutApi = Helpers.getModule("CenterDisplayLayout").create(def, Helpers);
-    const math = Helpers.getModule("CenterDisplayMath").create(def, Helpers);
-    const centerDisplayStateAdapter = Helpers.getModule("CenterDisplayStateAdapter").create(def, Helpers);
-    const centerDisplayRenderModel = Helpers.getModule("CenterDisplayRenderModel").create(def, Helpers);
+  function create(def, componentContext) {
+    const theme = componentContext.theme.tokens;
+    const text = componentContext.components.require("TextLayoutEngine");
+    const radialText = componentContext.components.require("RadialTextLayout");
+    const tileLayout = componentContext.components.require("TextTileLayout");
+    const layoutApi = componentContext.components.require("CenterDisplayLayout");
+    const math = componentContext.components.require("CenterDisplayMath");
+    const centerDisplayStateAdapter = componentContext.components.require("CenterDisplayStateAdapter");
+    const centerDisplayRenderModel = componentContext.components.require("CenterDisplayRenderModel");
     function renderCanvas(canvas, props) {
       const p = props || {};
-      const setup = Helpers.setupCanvas(canvas);
+      const setup = componentContext.canvas.setupCanvas(canvas);
       const ctx = setup && setup.ctx;
       const W = setup && setup.W;
       const H = setup && setup.H;
@@ -222,7 +222,7 @@
       }
       ctx.clearRect(0, 0, W, H);
       ctx.textBaseline = "middle";
-      const rootEl = Helpers.requirePluginRoot(canvas);
+      const rootEl = componentContext.dom.requirePluginRoot(canvas);
       const tokens = theme.resolveForRoot(rootEl);
       const family = tokens.font.family;
       const monoFamily = tokens.font.familyMono || family;

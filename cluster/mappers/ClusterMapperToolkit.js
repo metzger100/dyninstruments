@@ -165,9 +165,11 @@
     };
   }
 
-  function create(def, Helpers) {
-    const angleMath = (Helpers && typeof Helpers.getModule === "function")
-      ? Helpers.getModule("RadialAngleMath").create(def, Helpers)
+  function create(def, componentContext) {
+    const angleMath = componentContext &&
+      componentContext.components &&
+      typeof componentContext.components.require === "function"
+      ? componentContext.components.require("RadialAngleMath")
       : null;
     const catalog = getSharedCatalog();
 

@@ -1,16 +1,14 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("StateScreenCanvasOverlay", function () {
   function createOverlay() {
-    return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js").create({}, {
-      getModule(id) {
-        if (id === "StateScreenLabels") {
-          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        }
-        throw new Error("unexpected module: " + id);
+    return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js").create({}, createComponentContextMock({
+      modules: {
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js")
       }
-    });
+    }));
   }
 
   it("draws dimmed fill and canonical labels for each valid kind", function () {

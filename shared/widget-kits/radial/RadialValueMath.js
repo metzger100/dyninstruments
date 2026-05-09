@@ -10,8 +10,8 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const angle = Helpers.getModule("RadialAngleMath").create(def, Helpers);
+  function create(def, componentContext) {
+    const angle = componentContext.components.require("RadialAngleMath");
 
     function isFiniteNumber(n) {
       return typeof n === "number" && Number.isFinite(n);

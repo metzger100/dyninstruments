@@ -1,12 +1,12 @@
 const { loadFresh } = require("../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../helpers/mock-canvas");
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
+const { createComponentContextMock } = require("../helpers/component-context-mock");
 
 describe("runtime/widget-registrar.js", function () {
   function setupContext(options) {
     const opts = options || {};
     const registerWidget = opts.registerWidget || vi.fn();
-    const applyThemePresetToContainer = vi.fn();
     const hostActions = { getCapabilities: vi.fn(), routePoints: {}, routeEditor: {}, ais: {} };
     const includeGlobalApi = opts.includeGlobalApi !== false;
     const capturedApi = opts.hostApi || (includeGlobalApi ? {
@@ -16,10 +16,7 @@ describe("runtime/widget-registrar.js", function () {
     const context = createScriptContext({
       DyniPlugin: {
         runtime: {
-          applyThemePresetToContainer,
-          getHostActions() {
-            return hostActions;
-          }
+          hostActions: hostActions
         },
         state: {},
         config: { shared: {}, clusters: [] },
@@ -36,7 +33,7 @@ describe("runtime/widget-registrar.js", function () {
     runIifeScript("runtime/editable-defaults.js", context);
     runIifeScript("runtime/widget-registrar.js", context);
 
-    return { context, registerWidget, applyThemePresetToContainer, hostActions };
+    return { context, registerWidget, hostActions };
   }
 
   function loadVesselDef() {
@@ -55,86 +52,69 @@ describe("runtime/widget-registrar.js", function () {
     return context.DyniPlugin.config.clusters.find((c) => c.def && c.def.cluster === "vessel").def;
   }
 
-  function makePositionHelpers() {
+  function makePositionComponentContext() {
     const themeTokens = {
       surface: { fg: "#fff" },
       font: { family: "sans-serif", familyMono: "monospace", weight: 730, labelWeight: 610 }
     };
     const textLayoutEngineModule = loadFresh("shared/widget-kits/text/TextLayoutEngine.js");
-    const modules = {
+    return createComponentContextMock({
+      modules: {
       RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js"),
       RadialTextFitting: loadFresh("shared/widget-kits/radial/RadialTextFitting.js"),
       RadialTextLayout: loadFresh("shared/widget-kits/radial/RadialTextLayout.js"),
       RadialValueMath: loadFresh("shared/widget-kits/radial/RadialValueMath.js"),
       TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
       TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
-      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js")
-    };
-
-    return {
-      setupCanvas(canvas) {
-        const ctx = canvas.getContext("2d");
-        const rect = canvas.getBoundingClientRect();
-        return { ctx, W: Math.round(rect.width), H: Math.round(rect.height) };
+        ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+        TextLayoutEngine: textLayoutEngineModule,
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js")
       },
-      resolveFontFamily() {
-        return "sans-serif";
-      },
-      resolveTextColor() {
-        return "#fff";
-      },
-      requirePluginRoot(target) {
-        return target;
-      },
-      getModule(id) {
-        if (id === "ThemeResolver") {
-          return {
-            resolveForRoot() {
-              return themeTokens;
+      services: {
+        format: {
+          applyFormatter(raw, props) {
+            const cfg = props || {};
+            const fpRaw = cfg.formatterParameters;
+            const fp = Array.isArray(fpRaw) ? fpRaw : (typeof fpRaw === "string" ? fpRaw.split(",") : []);
+            if (cfg && typeof cfg.formatter === "function") {
+              return cfg.formatter.apply(null, [raw].concat(fp));
             }
-          };
+            if (
+              cfg &&
+              typeof cfg.formatter === "string" &&
+              globalThis.avnav &&
+              globalThis.avnav.api &&
+              globalThis.avnav.api.formatter &&
+              typeof globalThis.avnav.api.formatter[cfg.formatter] === "function"
+            ) {
+              return globalThis.avnav.api.formatter[cfg.formatter].apply(globalThis.avnav.api.formatter, [raw].concat(fp));
+            }
+            if (raw == null || Number.isNaN(raw)) return cfg.default || "---";
+            return String(raw);
+          }
+        },
+        canvas: {
+          setupCanvas(canvas) {
+            const ctx = canvas.getContext("2d");
+            const rect = canvas.getBoundingClientRect();
+            return { ctx, W: Math.round(rect.width), H: Math.round(rect.height) };
+          }
+        },
+        dom: {
+          requirePluginRoot(target) {
+            return target;
+          }
+        },
+        themeTokens: {
+          resolveForRoot() {
+            return themeTokens;
+          }
         }
-        if (id === "TextLayoutEngine") {
-          return textLayoutEngineModule;
-        }
-        if (id === "PlaceholderNormalize") {
-          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        }
-        if (id === "StateScreenLabels") {
-          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        }
-        if (id === "StateScreenPrecedence") {
-          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-        }
-        if (id === "StateScreenCanvasOverlay") {
-          return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
-        }
-        if (modules[id]) {
-          return modules[id];
-        }
-        throw new Error("unexpected module: " + id);
-      },
-      applyFormatter(raw, props) {
-        const cfg = props || {};
-        const fpRaw = cfg.formatterParameters;
-        const fp = Array.isArray(fpRaw) ? fpRaw : (typeof fpRaw === "string" ? fpRaw.split(",") : []);
-        if (cfg && typeof cfg.formatter === "function") {
-          return cfg.formatter.apply(null, [raw].concat(fp));
-        }
-        if (
-          cfg &&
-          typeof cfg.formatter === "string" &&
-          globalThis.avnav &&
-          globalThis.avnav.api &&
-          globalThis.avnav.api.formatter &&
-          typeof globalThis.avnav.api.formatter[cfg.formatter] === "function"
-        ) {
-          return globalThis.avnav.api.formatter[cfg.formatter].apply(globalThis.avnav.api.formatter, [raw].concat(fp));
-        }
-        if (raw == null || Number.isNaN(raw)) return cfg.default || "---";
-        return String(raw);
       }
-    };
+    });
   }
 
   function fillTextValues(ctx) {
@@ -157,17 +137,13 @@ describe("runtime/widget-registrar.js", function () {
   it("merges component/widget def and composes update functions", function () {
     const { context, registerWidget, hostActions } = setupContext();
 
-    const component = {
-      create() {
-        return {
-          className: "componentClass",
-          storeKeys: { x: "nav.x" },
-          wantsHideNativeHead: true,
-          renderCanvas: vi.fn(),
-          updateFunction(values) {
-            return Object.assign({}, values, { fromSpec: true });
-          }
-        };
+    const componentSpec = {
+      className: "componentClass",
+      storeKeys: { x: "nav.x" },
+      wantsHideNativeHead: true,
+      renderCanvas: vi.fn(),
+      updateFunction(values) {
+        return Object.assign({}, values, { fromSpec: true });
       }
     };
 
@@ -190,11 +166,7 @@ describe("runtime/widget-registrar.js", function () {
       }
     };
 
-    context.DyniPlugin.runtime.registerWidget(component, widgetDef, {
-      getHostActions() {
-        return hostActions;
-      }
-    });
+    context.DyniPlugin.runtime.registerWidget(componentSpec, widgetDef);
     expect(registerWidget).toHaveBeenCalledOnce();
 
     const [registeredDef, registeredEditable] = registerWidget.mock.calls[0];
@@ -229,7 +201,7 @@ describe("runtime/widget-registrar.js", function () {
       }
     });
 
-    const component = { create: () => ({}) };
+    const componentSpec = {};
     const widgetDef = {
       def: {
         name: "dyni_Captured",
@@ -237,11 +209,7 @@ describe("runtime/widget-registrar.js", function () {
       }
     };
 
-    context.DyniPlugin.runtime.registerWidget(component, widgetDef, {
-      getHostActions() {
-        return { getCapabilities: vi.fn(), routePoints: {}, routeEditor: {}, ais: {} };
-      }
-    });
+    context.DyniPlugin.runtime.registerWidget(componentSpec, widgetDef);
 
     expect(registerWidget).toHaveBeenCalledTimes(1);
     expect(registerWidget.mock.calls[0][0].name).toBe("dyni_Captured");
@@ -250,7 +218,7 @@ describe("runtime/widget-registrar.js", function () {
   it("falls back to storeKey when storeKeys absent", function () {
     const { context, registerWidget, hostActions } = setupContext();
 
-    const component = { create: () => ({}) };
+    const componentSpec = {};
     const widgetDef = {
       def: {
         name: "dyni_Fallback",
@@ -260,11 +228,7 @@ describe("runtime/widget-registrar.js", function () {
       }
     };
 
-    context.DyniPlugin.runtime.registerWidget(component, widgetDef, {
-      getHostActions() {
-        return hostActions;
-      }
-    });
+    context.DyniPlugin.runtime.registerWidget(componentSpec, widgetDef);
     const [registeredDef] = registerWidget.mock.calls[0];
 
     expect(registeredDef.storeKeys).toEqual({ value: "nav.gps.speed" });
@@ -273,28 +237,16 @@ describe("runtime/widget-registrar.js", function () {
   it("preserves explicit falsy default values from widget definitions", function () {
     const { context, registerWidget, hostActions } = setupContext();
 
-    const component = { create: () => ({}) };
+    const componentSpec = {};
 
-    context.DyniPlugin.runtime.registerWidget(component, {
+    context.DyniPlugin.runtime.registerWidget(componentSpec, {
       def: { name: "dyni_DefaultZero", default: 0, editableParameters: {} }
-    }, {
-      getHostActions() {
-        return hostActions;
-      }
     });
-    context.DyniPlugin.runtime.registerWidget(component, {
+    context.DyniPlugin.runtime.registerWidget(componentSpec, {
       def: { name: "dyni_DefaultEmpty", default: "", editableParameters: {} }
-    }, {
-      getHostActions() {
-        return hostActions;
-      }
     });
-    context.DyniPlugin.runtime.registerWidget(component, {
+    context.DyniPlugin.runtime.registerWidget(componentSpec, {
       def: { name: "dyni_DefaultFalse", default: false, editableParameters: {} }
-    }, {
-      getHostActions() {
-        return hostActions;
-      }
     });
 
     expect(registerWidget.mock.calls[0][0].default).toBe(0);
@@ -305,15 +257,11 @@ describe("runtime/widget-registrar.js", function () {
   it("keeps vessel stableDigits absent at registration so dateTime/timeStatus default at render time", function () {
     const { context, registerWidget, hostActions } = setupContext();
     const vesselDef = loadVesselDef();
-    const component = { create: () => ({}) };
+    const componentSpec = {};
     const previousAvnav = globalThis.avnav;
 
     try {
-      context.DyniPlugin.runtime.registerWidget(component, { def: vesselDef }, {
-        getHostActions() {
-          return hostActions;
-        }
-      });
+      context.DyniPlugin.runtime.registerWidget(componentSpec, { def: vesselDef });
 
       const [registeredDef] = registerWidget.mock.calls[0];
       expect(Object.prototype.hasOwnProperty.call(registeredDef, "stableDigits")).toBe(false);
@@ -329,7 +277,7 @@ describe("runtime/widget-registrar.js", function () {
       };
 
       const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
-        .create({}, makePositionHelpers());
+        .create({}, makePositionComponentContext());
 
       const registeredProps = Object.assign({}, registeredDef, {
         displayVariant: "dateTime",
@@ -376,27 +324,19 @@ describe("runtime/widget-registrar.js", function () {
   it("applies static host classes even when the component has no renderCanvas", function () {
     const { context, registerWidget, hostActions } = setupContext();
     const seen = [];
-    const component = {
-      create() {
-        return {
-          wantsHideNativeHead: true,
-          renderHtml() {
-            seen.push(this.hostActions);
-            return "<div>ok</div>";
-          }
-        };
+    const componentSpec = {
+      wantsHideNativeHead: true,
+      renderHtml() {
+        seen.push(this.hostActions);
+        return "<div>ok</div>";
       }
     };
 
-    context.DyniPlugin.runtime.registerWidget(component, {
+    context.DyniPlugin.runtime.registerWidget(componentSpec, {
       def: {
         name: "dyni_HtmlOnly",
         className: "customClass",
         editableParameters: {}
-      }
-    }, {
-      getHostActions() {
-        return hostActions;
       }
     });
 
@@ -418,31 +358,23 @@ describe("runtime/widget-registrar.js", function () {
       html: [],
       finalize: []
     };
-    const component = {
-      create() {
-        return {
-          initFunction() {
-            seen.init.push(this.hostActions);
-          },
-          renderHtml() {
-            seen.html.push(this.hostActions);
-            return "<div>ok</div>";
-          },
-          finalizeFunction() {
-            seen.finalize.push(this.hostActions);
-          }
-        };
+    const componentSpec = {
+      initFunction() {
+        seen.init.push(this.hostActions);
+      },
+      renderHtml() {
+        seen.html.push(this.hostActions);
+        return "<div>ok</div>";
+      },
+      finalizeFunction() {
+        seen.finalize.push(this.hostActions);
       }
     };
 
-    context.DyniPlugin.runtime.registerWidget(component, {
+    context.DyniPlugin.runtime.registerWidget(componentSpec, {
       def: {
         name: "dyni_HostActions",
         editableParameters: {}
-      }
-    }, {
-      getHostActions() {
-        return hostActions;
       }
     });
 

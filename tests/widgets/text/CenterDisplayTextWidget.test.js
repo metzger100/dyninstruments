@@ -1,8 +1,9 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("CenterDisplayTextWidget", function () {
-  function makeHelpers(options) {
+  function makeComponentContext(options) {
     const opts = options || {};
     const themeTokens = {
       surface: {
@@ -30,85 +31,75 @@ describe("CenterDisplayTextWidget", function () {
       CenterDisplayMath: loadFresh("shared/widget-kits/nav/CenterDisplayMath.js"),
       CenterDisplayRenderModel: loadFresh("shared/widget-kits/nav/CenterDisplayRenderModel.js")
     };
-
-    return {
-      applyFormatter(value, formatterOptions) {
-        if (typeof opts.applyFormatter === "function") {
-          return opts.applyFormatter(value, formatterOptions);
-        }
-        if (formatterOptions.formatter === "formatLonLatsDecimal") {
-          if (typeof value !== "number" || !isFinite(value)) {
-            return formatterOptions.default;
+    return createComponentContextMock({
+      modules: {
+        ThemeResolver: {
+          resolveForRoot() {
+            return themeTokens;
           }
-          return (formatterOptions.formatterParameters[0] === "lat" ? "LAT:" : "LON:") + value.toFixed(3);
-        }
-        if (formatterOptions.formatter === "formatDirection") {
-          if (typeof value !== "number" || !isFinite(value)) {
-            return formatterOptions.default;
-          }
-          return String(Math.round(value));
-        }
-        if (formatterOptions.formatter === "formatDistance") {
-          if (typeof value !== "number" || !isFinite(value)) {
-            return formatterOptions.default;
-          }
-          return value.toFixed(1);
-        }
-        return value == null ? formatterOptions.default : String(value);
+        },
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        CenterDisplayStateAdapter: loadFresh("shared/widget-kits/text/CenterDisplayStateAdapter.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
+        RadialAngleMath: modules.RadialAngleMath,
+        RadialValueMath: modules.RadialValueMath,
+        RadialTextFitting: modules.RadialTextFitting,
+        RadialTextLayout: modules.RadialTextLayout,
+        TextLayoutEngine: modules.TextLayoutEngine,
+        TextLayoutPrimitives: modules.TextLayoutPrimitives,
+        TextLayoutComposite: modules.TextLayoutComposite,
+        TextTileLayout: modules.TextTileLayout,
+        LayoutRectMath: modules.LayoutRectMath,
+        ResponsiveScaleProfile: modules.ResponsiveScaleProfile,
+        CenterDisplayLayout: modules.CenterDisplayLayout,
+        CenterDisplayMath: modules.CenterDisplayMath,
+        CenterDisplayRenderModel: modules.CenterDisplayRenderModel
       },
-      setupCanvas(canvas) {
-        const ctx = canvas.getContext("2d");
-        const rect = canvas.getBoundingClientRect();
-        return {
-          ctx,
-          W: Math.round(rect.width),
-          H: Math.round(rect.height)
-        };
-      },
-      resolveFontFamily() {
-        return "sans-serif";
-      },
-      resolveTextColor() {
-        return "#ffffff";
-      },
-      requirePluginRoot(target) {
-        return target;
-      },
-      getModule(id) {
-        if (id === "ThemeResolver") {
-          return {
-            resolveForRoot() {
-              return themeTokens;
+      services: {
+        format: {
+          applyFormatter(value, formatterOptions) {
+            if (typeof opts.applyFormatter === "function") {
+              return opts.applyFormatter(value, formatterOptions);
             }
-          };
+            if (formatterOptions.formatter === "formatLonLatsDecimal") {
+              if (typeof value !== "number" || !isFinite(value)) {
+                return formatterOptions.default;
+              }
+              return (formatterOptions.formatterParameters[0] === "lat" ? "LAT:" : "LON:") + value.toFixed(3);
+            }
+            if (formatterOptions.formatter === "formatDirection") {
+              if (typeof value !== "number" || !isFinite(value)) {
+                return formatterOptions.default;
+              }
+              return String(Math.round(value));
+            }
+            if (formatterOptions.formatter === "formatDistance") {
+              if (typeof value !== "number" || !isFinite(value)) {
+                return formatterOptions.default;
+              }
+              return value.toFixed(1);
+            }
+            return value == null ? formatterOptions.default : String(value);
+          }
+        },
+        canvas: {
+          setupCanvas(canvas) {
+            const ctx = canvas.getContext("2d");
+            const rect = canvas.getBoundingClientRect();
+            return { ctx, W: Math.round(rect.width), H: Math.round(rect.height) };
+          }
+        },
+        dom: {
+          requirePluginRoot(target) {
+            return target;
+          }
         }
-        if (id === "PlaceholderNormalize") {
-          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        }
-        if (id === "UnitAwareFormatter") {
-          return loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
-        }
-        if (id === "StableDigits") {
-          return loadFresh("shared/widget-kits/format/StableDigits.js");
-        }
-        if (id === "CenterDisplayStateAdapter") {
-          return loadFresh("shared/widget-kits/text/CenterDisplayStateAdapter.js");
-        }
-        if (id === "StateScreenLabels") {
-          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        }
-        if (id === "StateScreenPrecedence") {
-          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-        }
-        if (id === "StateScreenCanvasOverlay") {
-          return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
-        }
-        if (modules[id]) {
-          return modules[id];
-        }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
   }
 
   function makeProps(overrides) {
@@ -206,7 +197,7 @@ describe("CenterDisplayTextWidget", function () {
   }
 
   function computeLayoutSnapshot(width, height, mode, relationCount) {
-    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create({}, makeHelpers());
+    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create({}, makeComponentContext());
     const insets = layout.computeInsets(width, height);
     const contentRect = layout.createContentRect(width, height, insets);
     return layout.computeLayout({
@@ -232,7 +223,7 @@ describe("CenterDisplayTextWidget", function () {
   }
 
   it("exposes the center-display renderer contract", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
 
@@ -242,7 +233,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("renders high mode with stacked coordinates and ordered relation rows", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const ctx = createMockContext2D();
@@ -272,7 +263,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("renders normal mode with caption left and right-aligned tabular coordinates", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const ctx = createMockContext2D();
@@ -304,7 +295,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("keeps non-tabular center coordinates center-aligned in normal and high modes", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const cases = [
@@ -333,7 +324,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("renders flat mode with the center panel on the left and rows on the right", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const ctx = createMockContext2D();
@@ -353,7 +344,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("centers relation rows while keeping the WP and POS captions attached to their values", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const cases = [
@@ -390,7 +381,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("omits the measure row when no active measure is available", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const ctx = createMockContext2D();
@@ -405,7 +396,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("renders placeholders for missing coordinates and relation values", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const ctx = createMockContext2D();
@@ -424,7 +415,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("normalizes known formatter fallback tokens for coordinates and relation rows", function () {
-    const helpers = makeHelpers({
+    const helpers = makeComponentContext({
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (cfg.formatter === "formatLonLatsDecimal") {
@@ -459,7 +450,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("keeps compact nav-page-like sizes inside the canvas while preserving waypoint and boat rows", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const sizes = [
@@ -483,7 +474,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("keeps compact measured layouts inside the canvas when the measure row is present", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const ctx = createMockContext2D();
@@ -499,7 +490,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("keeps compact flat and high layouts inside the canvas while preserving waypoint and boat rows", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const sizes = [
@@ -523,7 +514,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("keeps coordinate font sizes coupled in normal and flat modes", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const sizes = [
@@ -552,7 +543,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("keeps coordinate font sizes coupled in high mode", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const ctx = createMockContext2D();
@@ -570,7 +561,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("increases compact text fill on smaller normal widgets without changing the layout mode", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const sizes = {
@@ -608,7 +599,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("uses mono family for tabular coordinates and stable-digit relation rows", function () {
-    const helpersMono = makeHelpers();
+    const helpersMono = makeComponentContext();
     const specMono = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpersMono);
     const monoCtx = createMockContext2D();
@@ -620,7 +611,7 @@ describe("CenterDisplayTextWidget", function () {
       stableDigits: true
     }));
 
-    const helpersPlain = makeHelpers();
+    const helpersPlain = makeComponentContext();
     const specPlain = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpersPlain);
     const plainCtx = createMockContext2D();
@@ -648,7 +639,7 @@ describe("CenterDisplayTextWidget", function () {
   });
 
   it("renders disconnected state-screen instead of center and relation rows", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
       .create({}, helpers);
     const ctx = createMockContext2D();

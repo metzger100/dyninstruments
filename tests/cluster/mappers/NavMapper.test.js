@@ -1,5 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 function makeToolkit(overrides, bindingOverrides) {
   installUnitFormatFamilies(bindingOverrides);
@@ -46,24 +47,15 @@ function makeToolkit(overrides, bindingOverrides) {
 const toolkit = makeToolkit();
 
 function createMapper() {
-  const Helpers = {
-    getModule(id) {
-      if (id === "ActiveRouteViewModel") {
-        return loadFresh("cluster/viewmodels/ActiveRouteViewModel.js");
-      }
-      if (id === "EditRouteViewModel") {
-        return loadFresh("cluster/viewmodels/EditRouteViewModel.js");
-      }
-      if (id === "RoutePointsViewModel") {
-        return loadFresh("cluster/viewmodels/RoutePointsViewModel.js");
-      }
-      if (id === "CenterDisplayMath") {
-        return loadFresh("shared/widget-kits/nav/CenterDisplayMath.js");
-      }
-      throw new Error("unexpected module: " + id);
+  const componentContext = createComponentContextMock({
+    modules: {
+      ActiveRouteViewModel: loadFresh("cluster/viewmodels/ActiveRouteViewModel.js"),
+      EditRouteViewModel: loadFresh("cluster/viewmodels/EditRouteViewModel.js"),
+      RoutePointsViewModel: loadFresh("cluster/viewmodels/RoutePointsViewModel.js"),
+      CenterDisplayMath: loadFresh("shared/widget-kits/nav/CenterDisplayMath.js")
     }
-  };
-  return loadFresh("cluster/mappers/NavMapper.js").create({}, Helpers);
+  });
+  return loadFresh("cluster/mappers/NavMapper.js").create({}, componentContext);
 }
 
 describe("NavMapper", function () {

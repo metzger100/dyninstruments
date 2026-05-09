@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("WindLinearWidget", function () {
   it("configures centered180 dual wind display and mirrored layline sectors", function () {
@@ -6,15 +7,11 @@ describe("WindLinearWidget", function () {
     const applyFormatter = vi.fn((value, spec) => "spd:" + String(value) + ":" + spec.formatterParameters[0]);
 
     const mod = loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js");
-    mod.create({}, {
-      applyFormatter,
-      getModule(id) {
-        if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
-        if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+    mod.create({}, createComponentContextMock({
+      modules: {
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        RadialValueMath: { create() { return {
                 clamp(value, lo, hi) {
                   const n = Number(value);
                   if (!isFinite(n)) return lo;
@@ -29,23 +26,11 @@ describe("WindLinearWidget", function () {
                   const base = leadingZero ? String(abs).padStart(3, "0") : String(abs);
                   return wrapped < 0 ? "-" + base : base;
                 }
-              };
-            }
-          };
-        }
-        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
-        return {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return function () {};
-              }
-            };
-          }
-        };
-      }
-    });
+              }; } },
+        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
+      },
+      services: { format: { applyFormatter } }
+    }));
 
     expect(captured.axisMode).toBe("centered180");
     expect(captured.hideTextualMetricsProp).toBe("windLinearHideTextualMetrics");
@@ -132,17 +117,11 @@ describe("WindLinearWidget", function () {
 
   it("renders dual-value text across flat, normal, and high modes", function () {
     let captured;
-    loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create({}, {
-      applyFormatter(value) {
-        return String(value);
-      },
-      getModule(id) {
-        if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
-        if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+    loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create({}, createComponentContextMock({
+      modules: {
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        RadialValueMath: { create() { return {
                 clamp(value, lo, hi) {
                   const n = Number(value);
                   if (!isFinite(n)) return lo;
@@ -152,23 +131,11 @@ describe("WindLinearWidget", function () {
                   const n = Number(value);
                   return isFinite(n) ? String(Math.round(n)) : "---";
                 }
-              };
-            }
-          };
-        }
-        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
-        return {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return function () {};
-              }
-            };
-          }
-        };
-      }
-    });
+              }; } },
+        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
+      },
+      services: { format: { applyFormatter(value) { return String(value); } } }
+    }));
 
     expect(captured.layout).toEqual({
       normalVariant: "stacked",
@@ -226,17 +193,11 @@ describe("WindLinearWidget", function () {
 
   it("uses layout-owned dual gaps for flat/normal and full-width rows for split high", function () {
     let captured;
-    loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create({}, {
-      applyFormatter(value) {
-        return String(value);
-      },
-      getModule(id) {
-        if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
-        if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+    loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create({}, createComponentContextMock({
+      modules: {
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        RadialValueMath: { create() { return {
                 clamp(value, lo, hi) {
                   const n = Number(value);
                   if (!isFinite(n)) return lo;
@@ -246,23 +207,11 @@ describe("WindLinearWidget", function () {
                   const n = Number(value);
                   return isFinite(n) ? String(Math.round(n)) : "---";
                 }
-              };
-            }
-          };
-        }
-        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
-        return {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return function () {};
-              }
-            };
-          }
-        };
-      }
-    });
+              }; } },
+        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
+      },
+      services: { format: { applyFormatter(value) { return String(value); } } }
+    }));
 
     const state = {
       textFillScale: 1.18,

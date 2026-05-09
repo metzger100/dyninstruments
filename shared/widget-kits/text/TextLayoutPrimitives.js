@@ -10,8 +10,8 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const text = Helpers.getModule("RadialTextLayout").create(def, Helpers);
+  function create(def, componentContext) {
+    const text = componentContext.components.require("RadialTextLayout");
 
     function resolveFamily(family, options) {
       const opts = options && typeof options === "object" ? options : null;

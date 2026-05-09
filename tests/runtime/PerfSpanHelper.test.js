@@ -11,21 +11,22 @@ describe("runtime/PerfSpanHelper.js", function () {
       }
     });
 
+    runIifeScript("runtime/namespace.js", context);
     runIifeScript("runtime/PerfSpanHelper.js", context);
     return context;
   }
 
-  it("registers runtime.getPerfSpanApi", function () {
+  it("registers runtime.perf", function () {
     const context = loadRuntime();
-    expect(typeof context.DyniPlugin.runtime.getPerfSpanApi).toBe("function");
-    const api = context.DyniPlugin.runtime.getPerfSpanApi();
+    expect(typeof context.DyniPlugin.runtime.perf).toBe("object");
+    const api = context.DyniPlugin.runtime.perf;
     expect(typeof api.startSpan).toBe("function");
     expect(typeof api.endSpan).toBe("function");
   });
 
   it("returns null start spans when hooks are missing and keeps end no-op", function () {
     const context = loadRuntime();
-    const api = context.DyniPlugin.runtime.getPerfSpanApi();
+    const api = context.DyniPlugin.runtime.perf;
 
     const span = api.startSpan("runtime.span", { a: 1 });
     expect(span).toBe(null);
@@ -48,7 +49,7 @@ describe("runtime/PerfSpanHelper.js", function () {
       }
     });
 
-    const api = context.DyniPlugin.runtime.getPerfSpanApi();
+    const api = context.DyniPlugin.runtime.perf;
     const span = api.startSpan("runtime.span", { stage: "begin" });
     api.endSpan(span, { status: "done" });
 

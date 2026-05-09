@@ -1,31 +1,18 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("AisTargetMarkup", function () {
   function createMarkup() {
     const moduleCache = Object.create(null);
-    const Helpers = {
-      getModule(id) {
-        if (!moduleCache[id]) {
-          if (id === "StateScreenMarkup") {
-            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
-          }
-          else if (id === "StateScreenTextFit") {
-            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenTextFit.js");
-          }
-          else if (id === "StateScreenLabels") {
-            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-          }
-          else if (id === "HtmlWidgetUtils") {
-            moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-          }
-          else {
-            throw new Error("unexpected module: " + id);
-          }
-        }
-        return moduleCache[id];
+    const componentContext = createComponentContextMock({
+      modules: {
+        StateScreenMarkup: { create() { if (!moduleCache.StateScreenMarkup) moduleCache.StateScreenMarkup = loadFresh("shared/widget-kits/state/StateScreenMarkup.js").create(); return moduleCache.StateScreenMarkup; } },
+        StateScreenTextFit: { create() { if (!moduleCache.StateScreenTextFit) moduleCache.StateScreenTextFit = loadFresh("shared/widget-kits/state/StateScreenTextFit.js").create(); return moduleCache.StateScreenTextFit; } },
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js")
       }
-    };
-    return loadFresh("shared/widget-kits/nav/AisTargetMarkup.js").create({}, Helpers);
+    });
+    return loadFresh("shared/widget-kits/nav/AisTargetMarkup.js").create({}, componentContext);
   }
 
   function createHtmlUtils() {

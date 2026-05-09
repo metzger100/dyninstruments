@@ -43,9 +43,9 @@
     return Math.max(minValue, Math.min(maxValue, n));
   }
 
-  function create(def, Helpers) {
-    const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
-    const rectApi = Helpers.getModule("LayoutRectMath").create(def, Helpers);
+  function create(def, componentContext) {
+    const profileApi = componentContext.components.require("ResponsiveScaleProfile");
+    const rectApi = componentContext.components.require("LayoutRectMath");
     makeRect = rectApi.makeRect;
 
     function computeInsets(W, H) {

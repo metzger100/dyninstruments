@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("AisTargetRenderModel", function () {
   function createRenderModel(options) {
@@ -12,47 +13,32 @@ describe("AisTargetRenderModel", function () {
       return String(cfg.formatter) + "|" + String(value) + "|" + params.join(",");
     });
 
-    const moduleCache = Object.create(null);
-    const Helpers = {
-      applyFormatter: applyFormatter,
-      getModule(id) {
-        if (!moduleCache[id]) {
-          if (id === "AisTargetLayout") {
-            moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayout.js");
-          } else if (id === "AisTargetLayoutSizing") {
-            moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
-          } else if (id === "HtmlWidgetUtils") {
-            moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-          } else if (id === "ResponsiveScaleProfile") {
-            moduleCache[id] = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-          } else if (id === "LayoutRectMath") {
-            moduleCache[id] = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-          } else if (id === "AisTargetLayoutGeometry") {
-            moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
-          } else if (id === "AisTargetLayoutMath") {
-            moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
-          } else if (id === "PlaceholderNormalize") {
-            moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-          } else if (id === "UnitAwareFormatter") {
-            moduleCache[id] = loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
-          } else if (id === "StateScreenLabels") {
-            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-          } else if (id === "StateScreenPrecedence") {
-            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-          } else if (id === "StateScreenInteraction") {
-            moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
-          } else if (id === "StableDigits") {
-            moduleCache[id] = loadFresh("shared/widget-kits/format/StableDigits.js");
-          } else {
-            throw new Error("unexpected module: " + id);
-          }
-        }
-        return moduleCache[id];
-      }
+    const modules = {
+      AisTargetLayout: loadFresh("shared/widget-kits/nav/AisTargetLayout.js"),
+      AisTargetLayoutSizing: loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js"),
+      HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+      AisTargetLayoutGeometry: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js"),
+      AisTargetLayoutMath: loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js"),
+      PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+      UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
+      StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+      StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+      StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js"),
+      StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js")
     };
+    const componentContext = createComponentContextMock({
+      modules: modules,
+      services: {
+        format: {
+          applyFormatter: applyFormatter
+        }
+      }
+    });
 
     return {
-      renderModel: loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js").create({}, Helpers),
+      renderModel: loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js").create({}, componentContext),
       applyFormatter: applyFormatter
     };
   }

@@ -67,11 +67,13 @@ describe("runtime/component-loader.js", function () {
     expect(dom.appendedLinks.map((l) => l.id)).toEqual(["dyni-css-A"]);
   });
 
-  it("returns rejected promise for unknown component", async function () {
+  it("throws for unknown component", function () {
     const { runtime } = setup();
     const loader = runtime.createComponentLoader({});
 
-    await expect(loader.loadComponent("missing")).rejects.toThrow("Unknown component");
+    expect(function () {
+      loader.loadComponent("missing");
+    }).toThrow("unknown component");
   });
 
   it("rejects if loaded global component has no create function", async function () {
@@ -244,5 +246,120 @@ describe("runtime/component-loader.js", function () {
     expect(context.DyniPlugin.runtime.getAsset("photo").srcValue).toBe(imageUrl);
     expect(imageLoadCalls).toEqual([imageUrl]);
     expect(contextFetch).toHaveBeenCalledWith(svgUrl);
+  });
+
+  it("createInstance fails before component closure is loaded", function () {
+    const { runtime } = setup();
+    runtime.theme = { resolveForRoot: vi.fn(() => ({})) };
+    runtime.perf = { startSpan: vi.fn(), endSpan: vi.fn() };
+    runtime.format = { applyFormatter: vi.fn() };
+    runtime.canvas = { setupCanvas: vi.fn() };
+    runtime.dom = { requirePluginRoot: vi.fn(), getNightModeState: vi.fn() };
+    runtime.hostActions = {};
+
+    const loader = runtime.createComponentLoader({
+      A: { js: "/a.js", css: undefined, globalKey: "DyniA" }
+    });
+
+    expect(function () {
+      loader.createInstance("A", { name: "x" });
+    }).toThrow("is not loaded");
+  });
+
+  it("createInstance builds deterministic dependency instances and fresh trees per call", async function () {
+    const { runtime, context } = setup();
+    runtime.theme = { resolveForRoot: vi.fn(() => ({ token: true })) };
+    runtime.perf = { startSpan: vi.fn(() => null), endSpan: vi.fn() };
+    runtime.format = { applyFormatter: vi.fn((v) => String(v)) };
+    runtime.canvas = { setupCanvas: vi.fn() };
+    runtime.dom = { requirePluginRoot: vi.fn(), getNightModeState: vi.fn(() => false) };
+    runtime.hostActions = { routePoints: {} };
+
+    context.DyniComponents.DyniDep = {
+      create: vi.fn(() => ({ dep: true }))
+    };
+    context.DyniComponents.DyniA = {
+      create: vi.fn((def, componentContext) => ({
+        defName: def.name,
+        dep: componentContext.components.require("Dep"),
+        theme: componentContext.theme.tokens.resolveForRoot({}),
+        perf: componentContext.perf,
+        format: componentContext.format,
+        canvas: componentContext.canvas,
+        dom: componentContext.dom,
+        hostActions: componentContext.hostActions
+      }))
+    };
+
+    const loader = runtime.createComponentLoader({
+      A: { js: "/a.js", css: undefined, globalKey: "DyniA", deps: ["Dep"] },
+      Dep: { js: "/dep.js", css: undefined, globalKey: "DyniDep" }
+    });
+
+    await loader.loadComponent("A");
+    const first = loader.createInstance("A", { name: "one" });
+    const second = loader.createInstance("A", { name: "two" });
+
+    expect(first.defName).toBe("one");
+    expect(second.defName).toBe("two");
+    expect(first).not.toBe(second);
+    expect(first.dep).not.toBe(second.dep);
+    expect(first.theme).toEqual({ token: true });
+    expect(first.perf).toBe(runtime.perf);
+    expect(first.format).toBe(runtime.format);
+    expect(first.canvas).toBe(runtime.canvas);
+    expect(first.dom).toBe(runtime.dom);
+    expect(first.hostActions).toBe(runtime.hostActions);
+  });
+
+  it("denies undeclared dependency access through componentContext.components.require", async function () {
+    const { runtime, context } = setup();
+    runtime.theme = { resolveForRoot: vi.fn(() => ({})) };
+    runtime.perf = { startSpan: vi.fn(() => null), endSpan: vi.fn() };
+    runtime.format = { applyFormatter: vi.fn((v) => String(v)) };
+    runtime.canvas = { setupCanvas: vi.fn() };
+    runtime.dom = { requirePluginRoot: vi.fn(), getNightModeState: vi.fn(() => false) };
+    runtime.hostActions = {};
+
+    context.DyniComponents.DyniA = {
+      create: vi.fn((def, componentContext) => {
+        componentContext.components.require("MissingDep");
+        return {};
+      })
+    };
+
+    const loader = runtime.createComponentLoader({
+      A: { js: "/a.js", css: undefined, globalKey: "DyniA" }
+    });
+    await loader.loadComponent("A");
+
+    expect(function () {
+      loader.createInstance("A", {});
+    }).toThrow("requested undeclared dependency 'MissingDep'");
+  });
+
+  it("reports dependency cycles on load and create paths", async function () {
+    const { runtime, context } = setup();
+    runtime.theme = { resolveForRoot: vi.fn(() => ({})) };
+    runtime.perf = { startSpan: vi.fn(() => null), endSpan: vi.fn() };
+    runtime.format = { applyFormatter: vi.fn((v) => String(v)) };
+    runtime.canvas = { setupCanvas: vi.fn() };
+    runtime.dom = { requirePluginRoot: vi.fn(), getNightModeState: vi.fn(() => false) };
+    runtime.hostActions = {};
+
+    context.DyniComponents.DyniA = { create: vi.fn(() => ({})) };
+    context.DyniComponents.DyniB = { create: vi.fn(() => ({})) };
+
+    const loader = runtime.createComponentLoader({
+      A: { js: "/a.js", css: undefined, globalKey: "DyniA", deps: ["B"] },
+      B: { js: "/b.js", css: undefined, globalKey: "DyniB", deps: ["A"] }
+    });
+
+    expect(function () {
+      loader.loadComponent("A");
+    }).toThrow("dependency cycle detected (A -> B -> A)");
+    expect(function () {
+      loader.createInstance("A", {});
+    }).toThrow("dependency cycle detected (A -> B -> A)");
   });
 });

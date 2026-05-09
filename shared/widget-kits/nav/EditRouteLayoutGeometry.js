@@ -10,9 +10,9 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const makeRect = Helpers.getModule("LayoutRectMath").create(def, Helpers).makeRect;
-    const mathApi = Helpers.getModule("EditRouteLayoutMath").create(def, Helpers);
+  function create(def, componentContext) {
+    const makeRect = componentContext.components.require("LayoutRectMath").makeRect;
+    const mathApi = componentContext.components.require("EditRouteLayoutMath");
 
     function resolveInsetValue(insets, key, defaultValue) {
       const source = insets && typeof insets === "object" ? insets : null;

@@ -77,8 +77,8 @@
     };
   }
 
-  function create(def, Helpers) {
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+  function create(def, componentContext) {
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     function normalize(rawFormattedText, options) {
       const rawText = toText(rawFormattedText);

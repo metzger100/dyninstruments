@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("DefaultLinearWidget", function () {
   function createHarness(options) {
@@ -49,21 +50,16 @@ describe("DefaultLinearWidget", function () {
       }
     };
     const mod = loadFresh("widgets/linear/DefaultLinearWidget/DefaultLinearWidget.js");
-    const spec = mod.create({}, {
-      applyFormatter,
-      getModule(id) {
-        if (id === "LinearGaugeEngine") {
-          return { create: () => engine };
-        }
-        if (id === "RadialValueMath") {
-          return { create: () => valueMath };
-        }
-        if (id === "PlaceholderNormalize") {
-          return { create: () => placeholderNormalize };
-        }
-        throw new Error("unexpected module: " + id);
+    const spec = mod.create({}, createComponentContextMock({
+      modules: {
+        LinearGaugeEngine: { create: () => engine },
+        RadialValueMath: { create: () => valueMath },
+        PlaceholderNormalize: { create: () => placeholderNormalize }
+      },
+      services: {
+        format: { applyFormatter }
       }
-    });
+    }));
     return {
       spec,
       captured,

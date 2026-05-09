@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("EditRouteHtmlFit", function () {
   function createMeasureContext() {
@@ -139,55 +140,32 @@ describe("EditRouteHtmlFit", function () {
       __dyniEditRouteTextMeasureCtx: createMeasureContext()
     };
 
-    const Helpers = {
-      resolveFontFamily() {
-        return "sans-serif";
+    const componentContext = createComponentContextMock({
+      modules: {
+        ThemeResolver: themeApi,
+        RadialTextLayout: { create: () => radialTextApi },
+        TextTileLayout: { create() { return textTileLayoutSpy; } },
+        EditRouteLayout: editRouteLayoutModule,
+        EditRouteHtmlFitSupport: editRouteHtmlFitSupportModule,
+        EditRouteLayoutMath: editRouteLayoutMathModule,
+        EditRouteLayoutGeometry: editRouteLayoutGeometryModule,
+        HtmlWidgetUtils: htmlUtilsModule,
+        ResponsiveScaleProfile: responsiveScaleProfileModule,
+        LayoutRectMath: layoutRectMathModule,
+        TextFitMath: loadFresh("shared/widget-kits/text/TextFitMath.js")
       },
-      requirePluginRoot(target) {
-        return target || null;
-      },
-      getModule(id) {
-        if (id === "ThemeResolver") {
-          return themeApi;
+      services: {
+        dom: {
+          requirePluginRoot(target) {
+            return target || null;
+          },
+          getNightModeState() {
+            return false;
+          }
         }
-        if (id === "RadialTextLayout") {
-          return { create: () => radialTextApi };
-        }
-        if (id === "TextTileLayout") {
-          return {
-            create() {
-              return textTileLayoutSpy;
-            }
-          };
-        }
-        if (id === "EditRouteLayout") {
-          return editRouteLayoutModule;
-        }
-        if (id === "EditRouteHtmlFitSupport") {
-          return editRouteHtmlFitSupportModule;
-        }
-        if (id === "EditRouteLayoutMath") {
-          return editRouteLayoutMathModule;
-        }
-        if (id === "EditRouteLayoutGeometry") {
-          return editRouteLayoutGeometryModule;
-        }
-        if (id === "HtmlWidgetUtils") {
-          return htmlUtilsModule;
-        }
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfileModule;
-        }
-        if (id === "LayoutRectMath") {
-          return layoutRectMathModule;
-        }
-        if (id === "TextFitMath") {
-          return loadFresh("shared/widget-kits/text/TextFitMath.js");
-        }
-        throw new Error("unexpected module: " + id);
       }
-    };
-    const fit = loadFresh("shared/widget-kits/nav/EditRouteHtmlFit.js").create({}, Helpers);
+    });
+    const fit = loadFresh("shared/widget-kits/nav/EditRouteHtmlFit.js").create({}, componentContext);
     return { fit, targetEl, hostContext, themeApi, textTileLayoutSpy };
   }
 

@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("EditRouteLayout", function () {
   function createLayout() {
@@ -6,23 +7,14 @@ describe("EditRouteLayout", function () {
     const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
     const editRouteLayoutMath = loadFresh("shared/widget-kits/nav/EditRouteLayoutMath.js");
     const editRouteLayoutGeometry = loadFresh("shared/widget-kits/nav/EditRouteLayoutGeometry.js");
-    return loadFresh("shared/widget-kits/nav/EditRouteLayout.js").create({}, {
-      getModule(id) {
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfile;
-        }
-        if (id === "LayoutRectMath") {
-          return layoutRectMath;
-        }
-        if (id === "EditRouteLayoutMath") {
-          return editRouteLayoutMath;
-        }
-        if (id === "EditRouteLayoutGeometry") {
-          return editRouteLayoutGeometry;
-        }
-        throw new Error("unexpected module: " + id);
+    return loadFresh("shared/widget-kits/nav/EditRouteLayout.js").create({}, createComponentContextMock({
+      modules: {
+        ResponsiveScaleProfile: responsiveScaleProfile,
+        LayoutRectMath: layoutRectMath,
+        EditRouteLayoutMath: editRouteLayoutMath,
+        EditRouteLayoutGeometry: editRouteLayoutGeometry
       }
-    });
+    }));
   }
 
   it("returns flat boxes for name, PTS, DST, RTE, and ETA", function () {

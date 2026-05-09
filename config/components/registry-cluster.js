@@ -54,12 +54,6 @@
       css: undefined,
       globalKey: "DyniDefaultMapper"
     },
-    CanvasDomSurfaceAdapter: {
-      js: BASE + "cluster/rendering/CanvasDomSurfaceAdapter.js",
-      css: undefined,
-      globalKey: "DyniCanvasDomSurfaceAdapter",
-      deps: ["ThemeResolver", "PerfSpanHelper"]
-    },
     ClusterKindCatalog: {
       js: BASE + "cluster/rendering/ClusterKindCatalog.js",
       css: undefined,
@@ -87,26 +81,12 @@
       globalKey: "DyniClusterMapperToolkit",
       deps: ["RadialAngleMath"]
     },
-    ClusterSurfacePolicy: {
-      js: BASE + "cluster/rendering/ClusterSurfacePolicy.js",
-      css: undefined,
-      globalKey: "DyniClusterSurfacePolicy"
-    },
-    SurfaceControllerFactory: {
-      js: BASE + "cluster/rendering/SurfaceControllerFactory.js",
-      css: undefined,
-      globalKey: "DyniSurfaceControllerFactory"
-    },
     ClusterRendererRouter: {
       js: BASE + "cluster/rendering/ClusterRendererRouter.js",
       css: undefined,
       globalKey: "DyniClusterRendererRouter",
       deps: [
         "ClusterKindCatalog",
-        "ClusterSurfacePolicy",
-        "CanvasDomSurfaceAdapter",
-        "HtmlSurfaceController",
-        "SurfaceControllerFactory",
         "ThreeValueTextWidget",
         "PositionCoordinateWidget",
         "ActiveRouteTextHtmlWidget",
@@ -118,8 +98,7 @@
         "CenterDisplayTextWidget",
         "DefaultRadialWidget",
         "DefaultLinearWidget",
-        "RendererPropsWidget",
-        "PerfSpanHelper"
+        "RendererPropsWidget"
       ]
     },
     ClusterWidget: {
@@ -129,25 +108,13 @@
       deps: [
         "ClusterMapperToolkit",
         "ClusterRendererRouter",
-        "ClusterMapperRegistry",
-        "PerfSpanHelper"
+        "ClusterMapperRegistry"
       ]
     },
     CourseHeadingMapper: {
       js: BASE + "cluster/mappers/CourseHeadingMapper.js",
       css: undefined,
       globalKey: "DyniCourseHeadingMapper"
-    },
-    EnvironmentMapper: {
-      js: BASE + "cluster/mappers/EnvironmentMapper.js",
-      css: undefined,
-      globalKey: "DyniEnvironmentMapper"
-    },
-    HtmlSurfaceController: {
-      js: BASE + "cluster/rendering/HtmlSurfaceController.js",
-      css: undefined,
-      globalKey: "DyniHtmlSurfaceController",
-      deps: ["PerfSpanHelper"]
     },
     NavMapper: {
       js: BASE + "cluster/mappers/NavMapper.js",
@@ -171,6 +138,11 @@
       css: undefined,
       globalKey: "DyniVesselMapper",
       deps: ["AlarmViewModel"]
+    },
+    EnvironmentMapper: {
+      js: BASE + "cluster/mappers/EnvironmentMapper.js",
+      css: undefined,
+      globalKey: "DyniEnvironmentMapper"
     },
     WindMapper: {
       js: BASE + "cluster/mappers/WindMapper.js",

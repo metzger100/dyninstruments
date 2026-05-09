@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetTextHtmlWidget - Native HTML AIS target summary renderer shell
  * Documentation: documentation/guides/add-new-html-kind.md
- * Depends: AisTargetHtmlFit, HtmlWidgetUtils, AisTargetRenderModel, AisTargetMarkup, ThemeResolver
+ * Depends: AisTargetHtmlFit, HtmlWidgetUtils, AisTargetRenderModel, AisTargetMarkup, componentContext.theme.tokens
  */
 
 (function (root, factory) {
@@ -23,12 +23,12 @@
     return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
   }
 
-  function create(def, Helpers) {
-    const htmlFit = Helpers.getModule("AisTargetHtmlFit").create(def, Helpers);
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const renderModel = Helpers.getModule("AisTargetRenderModel").create(def, Helpers);
-    const markup = Helpers.getModule("AisTargetMarkup").create(def, Helpers);
-    const themeResolver = Helpers.getModule("ThemeResolver");
+  function create(def, componentContext) {
+    const htmlFit = componentContext.components.require("AisTargetHtmlFit");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const renderModel = componentContext.components.require("AisTargetRenderModel");
+    const markup = componentContext.components.require("AisTargetMarkup");
+    const themeResolver = componentContext.theme.tokens;
 
     function buildModel(props, shellRect) {
       const p = props || {};

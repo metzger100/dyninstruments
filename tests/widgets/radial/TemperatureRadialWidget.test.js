@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("TemperatureRadialWidget", function () {
   it("does not apply Kelvin fallback on raw formatter passthrough", function () {
@@ -12,28 +13,24 @@ describe("TemperatureRadialWidget", function () {
     });
 
     const mod = loadFresh("widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js");
-    const spec = mod.create({}, {
-      applyFormatter,
-      getModule(id) {
-        if (id === "PlaceholderNormalize") {
-          return {
-            create() {
-              return {
-                normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
-                  }
-                  const value = String(text).trim();
-                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+    const spec = mod.create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
                 }
-              };
-            }
-          };
-        }
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+                const value = String(text).trim();
+                return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+              }
+            };
+          }
+        },
+        RadialValueMath: {
+          create() {
+            return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -65,11 +62,9 @@ describe("TemperatureRadialWidget", function () {
                 },
                 resolveTemperatureSemicircleTickSteps
               };
-            }
-          };
-        }
-        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
-        return {
+          }
+        },
+        SemicircleRadialEngine: {
           create() {
             return {
               createRenderer(cfg) {
@@ -78,9 +73,12 @@ describe("TemperatureRadialWidget", function () {
               }
             };
           }
-        };
+        }
+      },
+      services: {
+        format: { applyFormatter }
       }
-    });
+    }));
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured).not.toHaveProperty("rangeDefaults");
@@ -108,30 +106,24 @@ describe("TemperatureRadialWidget", function () {
     const renderCanvas = vi.fn();
 
     const mod = loadFresh("widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js");
-    mod.create({}, {
-      applyFormatter() {
-        return "not-a-number";
-      },
-      getModule(id) {
-        if (id === "PlaceholderNormalize") {
-          return {
-            create() {
-              return {
-                normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
-                  }
-                  const value = String(text).trim();
-                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+    mod.create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
                 }
-              };
-            }
-          };
-        }
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+                const value = String(text).trim();
+                return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+              }
+            };
+          }
+        },
+        RadialValueMath: {
+          create() {
+            return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -165,11 +157,9 @@ describe("TemperatureRadialWidget", function () {
                   return { major: 10, minor: 2 };
                 }
               };
-            }
-          };
-        }
-        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
-        return {
+          }
+        },
+        SemicircleRadialEngine: {
           create() {
             return {
               createRenderer(cfg) {
@@ -178,9 +168,16 @@ describe("TemperatureRadialWidget", function () {
               }
             };
           }
-        };
+        }
+      },
+      services: {
+        format: {
+          applyFormatter() {
+            return "not-a-number";
+          }
+        }
       }
-    });
+    }));
 
     expect(captured.formatDisplay(300, {
       formatter: "formatTemperature",
@@ -194,30 +191,24 @@ describe("TemperatureRadialWidget", function () {
     const renderCanvas = vi.fn();
 
     const mod = loadFresh("widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js");
-    mod.create({}, {
-      applyFormatter() {
-        return "NO DATA";
-      },
-      getModule(id) {
-        if (id === "PlaceholderNormalize") {
-          return {
-            create() {
-              return {
-                normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
-                  }
-                  const value = String(text).trim();
-                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+    mod.create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
                 }
-              };
-            }
-          };
-        }
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+                const value = String(text).trim();
+                return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+              }
+            };
+          }
+        },
+        RadialValueMath: {
+          create() {
+            return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -251,11 +242,9 @@ describe("TemperatureRadialWidget", function () {
                   return { major: 10, minor: 2 };
                 }
               };
-            }
-          };
-        }
-        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
-        return {
+          }
+        },
+        SemicircleRadialEngine: {
           create() {
             return {
               createRenderer(cfg) {
@@ -264,9 +253,16 @@ describe("TemperatureRadialWidget", function () {
               }
             };
           }
-        };
+        }
+      },
+      services: {
+        format: {
+          applyFormatter() {
+            return "NO DATA";
+          }
+        }
       }
-    });
+    }));
 
     expect(captured.formatDisplay(300, {
       formatter: "formatTemperature",

@@ -1,8 +1,9 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("StateScreenTextFit", function () {
   function createFit() {
-    return loadFresh("shared/widget-kits/state/StateScreenTextFit.js").create({}, {});
+    return loadFresh("shared/widget-kits/state/StateScreenTextFit.js").create({}, createComponentContextMock());
   }
 
   function extractPx(styleText) {

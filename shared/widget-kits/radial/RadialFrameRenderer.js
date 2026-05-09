@@ -11,10 +11,10 @@
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
-  function create(def, Helpers) {
-    const angle = Helpers.getModule("RadialAngleMath").create(def, Helpers);
-    const tick = Helpers.getModule("RadialTickMath").create(def, Helpers);
-    const primitive = Helpers.getModule("RadialCanvasPrimitives").create(def, Helpers);
+  function create(def, componentContext) {
+    const angle = componentContext.components.require("RadialAngleMath");
+    const tick = componentContext.components.require("RadialTickMath");
+    const primitive = componentContext.components.require("RadialCanvasPrimitives");
 
     const toCanvas = angle.degToCanvasRad;
     const computeSweep = tick.computeSweep;

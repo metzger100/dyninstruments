@@ -13,11 +13,11 @@
   const COMPASS_LABELS = { 0: "N", 45: "NE", 90: "E", 135: "SE", 180: "S", 225: "SW", 270: "W", 315: "NW" };
   const COMPASS_LABEL_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
-  function create(def, Helpers) {
-    const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers);
-    const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers);
-    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
-    const springEasing = Helpers.getModule("SpringEasing").create(def, Helpers);
+  function create(def, componentContext) {
+    const engine = componentContext.components.require("FullCircleRadialEngine");
+    const textLayout = componentContext.components.require("FullCircleRadialTextLayout");
+    const stableDigits = componentContext.components.require("StableDigits");
+    const springEasing = componentContext.components.require("SpringEasing");
     const headingMotion = springEasing.createMotion({ wrap: 360 });
     const markerMotion = springEasing.createMotion({ wrap: 360 });
 

@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("AlarmHtmlFit", function () {
   function createAisLayout() {
@@ -7,26 +8,15 @@ describe("AlarmHtmlFit", function () {
     const aisSizing = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
     const aisGeometry = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
     const aisMath = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
-    return loadFresh("shared/widget-kits/nav/AisTargetLayout.js").create({}, {
-      getModule(id) {
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfile;
-        }
-        if (id === "LayoutRectMath") {
-          return layoutRectMath;
-        }
-        if (id === "AisTargetLayoutSizing") {
-          return aisSizing;
-        }
-        if (id === "AisTargetLayoutGeometry") {
-          return aisGeometry;
-        }
-        if (id === "AisTargetLayoutMath") {
-          return aisMath;
-        }
-        throw new Error("unexpected module: " + id);
+    return loadFresh("shared/widget-kits/nav/AisTargetLayout.js").create({}, createComponentContextMock({
+      modules: {
+        ResponsiveScaleProfile: responsiveScaleProfile,
+        LayoutRectMath: layoutRectMath,
+        AisTargetLayoutSizing: aisSizing,
+        AisTargetLayoutGeometry: aisGeometry,
+        AisTargetLayoutMath: aisMath
       }
-    });
+    }));
   }
 
   function createMeasureContext() {
@@ -156,41 +146,31 @@ describe("AlarmHtmlFit", function () {
       }))
     };
     const targetEl = document.createElement("div");
-    const Helpers = {
-      requirePluginRoot(target) {
-        return target || null;
+    const componentContext = createComponentContextMock({
+      modules: {
+        HtmlWidgetUtils: htmlUtilsModule,
+        AlarmHtmlFitChrome: loadFresh("shared/widget-kits/vessel/AlarmHtmlFitChrome.js"),
+        AisTargetLayoutSizing: aisLayoutSizing,
+        ResponsiveScaleProfile: responsiveScaleProfile,
+        LayoutRectMath: layoutRectMath,
+        AisTargetLayoutMath: aisLayoutMath,
+        TextLayoutEngine: { create: () => textLayoutApi },
+        ThemeResolver: themeApi
       },
-      getModule(id) {
-        if (id === "HtmlWidgetUtils") {
-          return htmlUtilsModule;
+      services: {
+        dom: {
+          requirePluginRoot(target) {
+            return target || null;
+          },
+          getNightModeState() {
+            return false;
+          }
         }
-        if (id === "AlarmHtmlFitChrome") {
-          return loadFresh("shared/widget-kits/vessel/AlarmHtmlFitChrome.js");
-        }
-        if (id === "AisTargetLayoutSizing") {
-          return aisLayoutSizing;
-        }
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfile;
-        }
-        if (id === "LayoutRectMath") {
-          return layoutRectMath;
-        }
-        if (id === "AisTargetLayoutMath") {
-          return aisLayoutMath;
-        }
-        if (id === "TextLayoutEngine") {
-          return { create: () => textLayoutApi };
-        }
-        if (id === "ThemeResolver") {
-          return themeApi;
-        }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
 
     return {
-      fit: loadFresh("shared/widget-kits/vessel/AlarmHtmlFit.js").create({}, Helpers),
+      fit: loadFresh("shared/widget-kits/vessel/AlarmHtmlFit.js").create({}, componentContext),
       textLayoutApi: textLayoutApi,
       themeApi: themeApi,
       targetEl: targetEl,

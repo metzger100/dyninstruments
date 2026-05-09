@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("FullCircleRadialEngine", function () {
@@ -55,57 +56,25 @@ describe("FullCircleRadialEngine", function () {
         labelWeight: 650
       }
     };
-    const layoutApi = fullCircleLayoutMod.create({}, {
-      getModule(id) {
-        if (id === "ResponsiveScaleProfile") return responsiveScaleProfileMod;
-        if (id === "LayoutRectMath") return layoutRectMathMod;
-        if (id === "GeometryScale") return geometryScaleMod;
-        throw new Error("unexpected layout module: " + id);
+    const layoutApi = fullCircleLayoutMod.create({}, createComponentContextMock({
+      modules: {
+        ResponsiveScaleProfile: responsiveScaleProfileMod,
+        LayoutRectMath: layoutRectMathMod,
+        GeometryScale: geometryScaleMod
       }
-    });
+    }));
 
-    const engine = engineMod.create({}, {
-      setupCanvas(canvas) {
-        const ctx = canvas.getContext("2d");
-        const rect = canvas.getBoundingClientRect();
-        return {
-          ctx,
-          W: Math.round(rect.width),
-          H: Math.round(rect.height)
-        };
-      },
-      resolveFontFamily() {
-        return "sans-serif";
-      },
-      resolveTextColor() {
-        return "#fff";
-      },
-      requirePluginRoot(target) {
-        return target;
-      },
-      getModule(id) {
-        if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-        if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
-        if (id === "CanvasLayerCache") {
-          return cacheMod;
-        }
-        if (id === "FullCircleRadialLayout") {
-          return fullCircleLayoutMod;
-        }
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfileMod;
-        }
-        if (id === "LayoutRectMath") {
-          return layoutRectMathMod;
-        }
-        if (id === "GeometryScale") {
-          return geometryScaleMod;
-        }
-        if (id !== "RadialToolkit") {
-          throw new Error("unexpected module: " + id);
-        }
-        return {
+    const engine = engineMod.create({}, createComponentContextMock({
+      modules: {
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
+        CanvasLayerCache: cacheMod,
+        FullCircleRadialLayout: fullCircleLayoutMod,
+        ResponsiveScaleProfile: responsiveScaleProfileMod,
+        LayoutRectMath: layoutRectMathMod,
+        GeometryScale: geometryScaleMod,
+        RadialToolkit: {
           create() {
             return {
               draw: {
@@ -144,9 +113,27 @@ describe("FullCircleRadialEngine", function () {
               }
             };
           }
-        };
+        }
+      },
+      services: {
+        canvas: {
+          setupCanvas(canvas) {
+            const ctx = canvas.getContext("2d");
+            const rect = canvas.getBoundingClientRect();
+            return {
+              ctx,
+              W: Math.round(rect.width),
+              H: Math.round(rect.height)
+            };
+          }
+        },
+        dom: {
+          requirePluginRoot(target) {
+            return target;
+          }
+        }
       }
-    });
+    }));
 
     return { engine, calls, theme, layoutApi };
   }

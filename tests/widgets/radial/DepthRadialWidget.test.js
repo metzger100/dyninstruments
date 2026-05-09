@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("DepthRadialWidget", function () {
   it("builds low-end sectors with alarm and warning order", function () {
@@ -22,63 +23,16 @@ describe("DepthRadialWidget", function () {
     const renderCanvas = vi.fn();
 
     const mod = loadFresh("widgets/radial/DepthRadialWidget/DepthRadialWidget.js");
-    const spec = mod.create({}, {
-      getModule(id) {
-        requestedModules.push(id);
-        if (id === "PlaceholderNormalize") {
-          return {
-            create() {
-              return {
-                normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
-                  }
-                  const value = String(text).trim();
-                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
-                }
-              };
-            }
-          };
-        }
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
-                buildLowEndSectors(props, minV, maxV, arc, options) {
-                  receivedOptions = options;
-                  return [
-                    { a0: 0, a1: 2, color: options.alarmColor },
-                    { a0: 2, a1: 5, color: options.warningColor }
-                  ];
-                },
-                resolveStandardSemicircleTickSteps
-              };
-            }
-          };
-        }
-        if (id === "DepthDisplayFormatter") {
-          return loadFresh("shared/widget-kits/format/DepthDisplayFormatter.js");
-        }
-        if (id === "UnitAwareFormatter") {
-          return {
-            create() {
-              return unitFormatter;
-            }
-          };
-        }
-        if (id !== "SemicircleRadialEngine") throw new Error("unexpected module: " + id);
-        return {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return renderCanvas;
-              }
-            };
-          }
-        };
+    const componentContext = createComponentContextMock({
+      modules: {
+        SemicircleRadialEngine: { create() { requestedModules.push("SemicircleRadialEngine"); return { createRenderer(cfg) { captured = cfg; return renderCanvas; } }; } },
+        RadialValueMath: { create() { requestedModules.push("RadialValueMath"); return { buildLowEndSectors(props, minV, maxV, arc, options) { receivedOptions = options; return [{ a0: 0, a1: 2, color: options.alarmColor }, { a0: 2, a1: 5, color: options.warningColor }]; }, resolveStandardSemicircleTickSteps }; } },
+        DepthDisplayFormatter: { create() { requestedModules.push("DepthDisplayFormatter"); return loadFresh("shared/widget-kits/format/DepthDisplayFormatter.js").create({}, componentContext); } },
+        PlaceholderNormalize: { create() { requestedModules.push("PlaceholderNormalize"); return { normalize(text, defaultText) { if (text == null) return defaultText == null ? "---" : defaultText; const value = String(text).trim(); return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text); } }; } },
+        UnitAwareFormatter: { create() { requestedModules.push("UnitAwareFormatter"); return unitFormatter; } }
       }
     });
+    const spec = mod.create({}, componentContext);
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured).not.toHaveProperty("rangeDefaults");

@@ -67,7 +67,7 @@
       js: BASE + "shared/widget-kits/radial/RadialToolkit.js",
       css: undefined,
       globalKey: "DyniRadialToolkit",
-      deps: ["ThemeResolver", "RadialTextLayout", "RadialValueMath", "RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives", "RadialFrameRenderer"]
+      deps: ["RadialTextLayout", "RadialValueMath", "RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives", "RadialFrameRenderer"]
     },
     SemicircleRadialEngine: {
       js: BASE + "shared/widget-kits/radial/SemicircleRadialEngine.js",

@@ -1,16 +1,14 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("StableDigits", function () {
   function createApi() {
     const placeholderNormalize = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-    return loadFresh("shared/widget-kits/format/StableDigits.js").create({}, {
-      getModule(id) {
-        if (id === "PlaceholderNormalize") {
-          return placeholderNormalize;
-        }
-        throw new Error("unexpected module: " + id);
+    return loadFresh("shared/widget-kits/format/StableDigits.js").create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: placeholderNormalize
       }
-    });
+    }));
   }
 
   it("returns padded and plain text pair for finite numeric values", function () {

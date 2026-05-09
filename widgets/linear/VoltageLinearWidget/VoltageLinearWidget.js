@@ -10,13 +10,13 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
-    const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+  function create(def, componentContext) {
+    const engine = componentContext.components.require("LinearGaugeEngine");
+    const valueMath = componentContext.components.require("RadialValueMath");
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     function formatDisplay(raw, props) {
-      return valueMath.formatGaugeDisplay(raw, props, Helpers.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
+      return valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
     }
 
     function buildSectors(props, minV, maxV, axis, theme) {

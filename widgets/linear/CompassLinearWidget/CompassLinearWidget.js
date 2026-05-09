@@ -11,10 +11,10 @@
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
-  function create(def, Helpers) {
-    const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
-    const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
-    const springEasing = Helpers.getModule("SpringEasing").create(def, Helpers);
+  function create(def, componentContext) {
+    const engine = componentContext.components.require("LinearGaugeEngine");
+    const valueMath = componentContext.components.require("RadialValueMath");
+    const springEasing = componentContext.components.require("SpringEasing");
     const markerMotion = springEasing.createMotion({ wrap: 360 });
 
     function norm180(delta) {

@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RoutePointsHtmlFit", function () {
   function createMeasureContext() {
@@ -60,55 +61,34 @@ describe("RoutePointsHtmlFit", function () {
       __dyniRoutePointsTextMeasureCtx: createMeasureContext()
     };
 
-    const Helpers = {
-      resolveFontFamily() {
-        return "sans-serif";
+    const componentContext = createComponentContextMock({
+      modules: {
+        ThemeResolver: themeApi,
+        RadialTextLayout: { create: () => radialTextApi },
+        TextTileLayout: textTileLayoutModule,
+        RoutePointsLayout: routePointsLayoutModule,
+        RoutePointsInfoText: loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js"),
+        UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        HtmlWidgetUtils: htmlUtilsModule,
+        ResponsiveScaleProfile: responsiveScaleProfileModule,
+        LayoutRectMath: layoutRectMathModule,
+        RoutePointsLayoutSizing: routePointsLayoutSizingModule,
+        RoutePointsRowGeometry: loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js")
       },
-      requirePluginRoot(target) {
-        return target || null;
-      },
-      getModule(id) {
-        if (id === "ThemeResolver") {
-          return themeApi;
+      services: {
+        dom: {
+          requirePluginRoot(target) {
+            return target || null;
+          },
+          getNightModeState() {
+            return false;
+          }
         }
-        if (id === "RadialTextLayout") {
-          return { create: () => radialTextApi };
-        }
-        if (id === "TextTileLayout") {
-          return textTileLayoutModule;
-        }
-        if (id === "RoutePointsLayout") {
-          return routePointsLayoutModule;
-        }
-        if (id === "RoutePointsInfoText") {
-          return loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js");
-        }
-        if (id === "UnitAwareFormatter") {
-          return loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
-        }
-        if (id === "PlaceholderNormalize") {
-          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        }
-        if (id === "HtmlWidgetUtils") {
-          return htmlUtilsModule;
-        }
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfileModule;
-        }
-        if (id === "LayoutRectMath") {
-          return layoutRectMathModule;
-        }
-        if (id === "RoutePointsLayoutSizing") {
-          return routePointsLayoutSizingModule;
-        }
-        if (id === "RoutePointsRowGeometry") {
-          return loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js");
-        }
-        throw new Error("unexpected module: " + id);
       }
-    };
-    const fit = loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js").create({}, Helpers);
-    const layout = routePointsLayoutModule.create({}, Helpers);
+    });
+    const fit = loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js").create({}, componentContext);
+    const layout = routePointsLayoutModule.create({}, componentContext);
     return { fit, layout, targetEl, hostContext, themeApi, radialTextApi };
   }
 

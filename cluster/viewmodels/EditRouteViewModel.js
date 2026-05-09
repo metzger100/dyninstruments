@@ -109,8 +109,8 @@
     return !!route && typeof activeName === "string" && activeName !== "" && route.rawName === activeName;
   }
 
-  function create(def, Helpers) {
-    const centerMath = Helpers.getModule("CenterDisplayMath").create(def, Helpers);
+  function create(def, componentContext) {
+    const centerMath = componentContext.components.require("CenterDisplayMath");
 
     function build(props) {
       const p = props || {};

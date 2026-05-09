@@ -10,10 +10,10 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
-    const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+  function create(def, componentContext) {
+    const engine = componentContext.components.require("LinearGaugeEngine");
+    const valueMath = componentContext.components.require("RadialValueMath");
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     function resolveThreshold(value) {
       const n = Number(value);
@@ -89,7 +89,7 @@
       },
       tickSteps: valueMath.resolveStandardSemicircleTickSteps,
       formatDisplay: function (raw, props) {
-        const applyFormatter = Helpers.applyFormatter;
+        const applyFormatter = componentContext.format.applyFormatter;
         return valueMath.formatGaugeDisplay(raw, props, applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
       },
       buildSectors: buildSectors

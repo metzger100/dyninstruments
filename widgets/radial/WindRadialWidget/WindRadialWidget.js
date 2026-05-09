@@ -10,12 +10,12 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers);
-    const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers);
-    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
-    const springMotion = Helpers.getModule("SpringEasing").create(def, Helpers).createMotion({ wrap: 360 });
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+  function create(def, componentContext) {
+    const engine = componentContext.components.require("FullCircleRadialEngine");
+    const textLayout = componentContext.components.require("FullCircleRadialTextLayout");
+    const stableDigits = componentContext.components.require("StableDigits");
+    const springMotion = componentContext.components.require("SpringEasing").createMotion({ wrap: 360 });
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     function windFormatSpeedText(raw, props, speedUnit) {
       const p = props || {};
@@ -29,7 +29,7 @@
       const formatter = p.formatter;
       const formatterParameters = p.formatterParameters;
 
-      return placeholderNormalize.normalize(String(Helpers.applyFormatter(n, {
+      return placeholderNormalize.normalize(String(componentContext.format.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
         default: p.default

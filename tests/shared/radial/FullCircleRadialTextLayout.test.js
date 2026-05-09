@@ -1,16 +1,14 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("FullCircleRadialTextLayout", function () {
   function createRadialTextApi() {
     const fitting = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
-    return loadFresh("shared/widget-kits/radial/RadialTextLayout.js").create({}, {
-      getModule(id) {
-        if (id === "RadialTextFitting") {
-          return fitting;
-        }
-        throw new Error("unexpected module: " + id);
+    return loadFresh("shared/widget-kits/radial/RadialTextLayout.js").create({}, createComponentContextMock({
+      modules: {
+        RadialTextFitting: fitting
       }
-    });
+    }));
   }
 
   function createHarness(overrides) {
@@ -158,7 +156,7 @@ describe("FullCircleRadialTextLayout", function () {
   }
 
   it("packs single normal text inside the layout-owned safe radius and centers the block", function () {
-    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, {});
+    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, createComponentContextMock());
     const harness = createHarness();
 
     layout.drawSingleModeText(harness.state, "normal", makeSingleDisplay());
@@ -172,7 +170,7 @@ describe("FullCircleRadialTextLayout", function () {
   });
 
   it("packs dual normal text with a theme-driven column gap and mirrored alignment", function () {
-    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, {});
+    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, createComponentContextMock());
     const harness = createHarness();
     const display = makeDualDisplay();
 
@@ -189,7 +187,7 @@ describe("FullCircleRadialTextLayout", function () {
   });
 
   it("boosts compact text occupancy while keeping layout geometry fixed", function () {
-    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, {});
+    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, createComponentContextMock());
     const large = createHarness({ textFillScale: 1 });
     const compact = createHarness({ textFillScale: 1.18 });
     const display = makeSingleDisplay();
@@ -204,7 +202,7 @@ describe("FullCircleRadialTextLayout", function () {
   });
 
   it("applies full-circle normal layout token overrides deterministically", function () {
-    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, {});
+    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, createComponentContextMock());
     const base = createHarness();
     const override = createHarness({
       theme: {
@@ -236,7 +234,7 @@ describe("FullCircleRadialTextLayout", function () {
   });
 
   it("applies flat-mode clamp for long dual labels so side-slot rows do not overflow", function () {
-    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, {});
+    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, createComponentContextMock());
     const harness = createRealTextHarness();
     const display = {
       left: { caption: "True Wind Angle - Radial", value: "-101", unit: "Degree Celsius", secScale: 0.8 },
@@ -259,7 +257,7 @@ describe("FullCircleRadialTextLayout", function () {
   });
 
   it("applies normal-mode clamp for long dual labels while keeping mirrored placement", function () {
-    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, {});
+    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create({}, createComponentContextMock());
     const harness = createRealTextHarness();
     const display = {
       left: { caption: "True Wind Angle - Radial", value: "-101", unit: "Degree Celsius", secScale: 0.8 },

@@ -1,18 +1,30 @@
-const { loadFresh } = require("../../helpers/load-umd");
+const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 
-describe("HtmlSurfaceController", function () {
+describe("runtime/surface/HtmlSurfaceController.js", function () {
   const originalDyniPlugin = globalThis.DyniPlugin;
   const originalDocumentFonts = document.fonts;
 
-  function createModule() {
-    return loadFresh("cluster/rendering/HtmlSurfaceController.js").create({}, {
-      getModule(id) {
-        if (id === "PerfSpanHelper") {
-          return loadFresh("shared/widget-kits/perf/PerfSpanHelper.js");
-        }
-        throw new Error("unexpected module: " + id);
+  function createModule(options) {
+    const opts = options || {};
+    const context = createScriptContext({
+      DyniPlugin: {
+        runtime: {},
+        state: {},
+        config: { shared: {}, clusters: [] }
       }
     });
+
+    runIifeScript("runtime/namespace.js", context);
+    runIifeScript("runtime/PerfSpanHelper.js", context);
+    context.DyniPlugin.runtime.theme = {
+      getShadowCssText: opts.getShadowCssText || vi.fn(() => "")
+    };
+    runIifeScript("runtime/surface/HtmlSurfaceController.js", context);
+    return {
+      context,
+      module: context.DyniPlugin.runtime._createHtmlSurfaceController(),
+      theme: context.DyniPlugin.runtime.theme
+    };
   }
 
   function createSurfaceDom() {
@@ -75,34 +87,20 @@ describe("HtmlSurfaceController", function () {
   afterEach(function () {
     if (typeof originalDyniPlugin === "undefined") {
       delete globalThis.DyniPlugin;
-    } else {
+    }
+    else {
       globalThis.DyniPlugin = originalDyniPlugin;
     }
     if (typeof originalDocumentFonts === "undefined") {
       delete document.fonts;
-    } else {
+    }
+    else {
       setDocumentFonts(originalDocumentFonts);
     }
   });
 
-  it("renders html shell with mount host", function () {
-    const module = createModule();
-    const rendererSpec = {
-      createCommittedRenderer: vi.fn()
-    };
-
-    const html = module.renderSurfaceShell({
-      rendererSpec,
-      props: { kind: "activeRoute" },
-      hostContext: {}
-    });
-
-    expect(html).toBe('<div class="dyni-surface-html"><div class="dyni-surface-html-mount" data-dyni-html-mount="1"></div></div>');
-    expect(rendererSpec.createCommittedRenderer).not.toHaveBeenCalled();
-  });
-
   it("implements committed renderer lifecycle including relayout update", function () {
-    const module = createModule();
+    const runtime = createModule();
     const hostContext = {};
     const surfaceDom = createSurfaceDom();
 
@@ -131,7 +129,7 @@ describe("HtmlSurfaceController", function () {
       })
     };
 
-    const controller = module.createSurfaceController({
+    const controller = runtime.module.createSurfaceController({
       rendererSpec,
       hostContext
     });
@@ -196,15 +194,7 @@ describe("HtmlSurfaceController", function () {
       }
       return "";
     });
-    globalThis.DyniPlugin = {
-      runtime: {
-        _theme: {
-          getShadowCssText
-        }
-      }
-    };
-
-    const module = createModule();
+    const runtime = createModule({ getShadowCssText });
     const surfaceDom = createSurfaceDom();
     const rendererInstance = {
       mount: vi.fn(),
@@ -213,7 +203,7 @@ describe("HtmlSurfaceController", function () {
       detach: vi.fn(),
       destroy: vi.fn()
     };
-    const controller = module.createSurfaceController({
+    const controller = runtime.module.createSurfaceController({
       rendererSpec: {
         createCommittedRenderer: vi.fn(() => rendererInstance)
       },
@@ -252,7 +242,7 @@ describe("HtmlSurfaceController", function () {
     const deferredFonts = createDeferredFonts("loading");
     setDocumentFonts(deferredFonts.fonts);
 
-    const module = createModule();
+    const runtime = createModule();
     const surfaceDom = createSurfaceDom();
     const rendererInstance = {
       mount: vi.fn(),
@@ -261,7 +251,7 @@ describe("HtmlSurfaceController", function () {
       detach: vi.fn(),
       destroy: vi.fn()
     };
-    const controller = module.createSurfaceController({
+    const controller = runtime.module.createSurfaceController({
       rendererSpec: {
         createCommittedRenderer: vi.fn(() => rendererInstance)
       },
@@ -296,7 +286,7 @@ describe("HtmlSurfaceController", function () {
     const detachedFonts = createDeferredFonts("loading");
     setDocumentFonts(detachedFonts.fonts);
 
-    const module = createModule();
+    const runtime = createModule();
     const surfaceDom = createSurfaceDom();
     const rendererInstance = {
       mount: vi.fn(),
@@ -305,7 +295,7 @@ describe("HtmlSurfaceController", function () {
       detach: vi.fn(),
       destroy: vi.fn()
     };
-    const controller = module.createSurfaceController({
+    const controller = runtime.module.createSurfaceController({
       rendererSpec: {
         createCommittedRenderer: vi.fn(() => rendererInstance)
       },
@@ -330,7 +320,7 @@ describe("HtmlSurfaceController", function () {
       detach: vi.fn(),
       destroy: vi.fn()
     };
-    const controller2 = module.createSurfaceController({
+    const controller2 = runtime.module.createSurfaceController({
       rendererSpec: {
         createCommittedRenderer: vi.fn(() => rendererInstance2)
       },
@@ -347,21 +337,17 @@ describe("HtmlSurfaceController", function () {
   });
 
   it("throws for strict renderer contracts and invalid payload", function () {
-    const module = createModule();
+    const runtime = createModule();
     const surfaceDom = createSurfaceDom();
 
     expect(function () {
-      module.renderSurfaceShell({ rendererSpec: {}, props: {}, hostContext: {} });
-    }).toThrow("rendererSpec.createCommittedRenderer()");
-
-    expect(function () {
-      module.createSurfaceController({
+      runtime.module.createSurfaceController({
         rendererSpec: { createCommittedRenderer: vi.fn() },
         hostContext: null
       });
     }).toThrow("requires hostContext object");
 
-    const invalidController = module.createSurfaceController({
+    const invalidController = runtime.module.createSurfaceController({
       rendererSpec: {
         createCommittedRenderer: vi.fn(() => ({
           mount: vi.fn(),
@@ -385,7 +371,7 @@ describe("HtmlSurfaceController", function () {
       destroy: vi.fn(),
       layoutSignature: vi.fn(() => "sig")
     };
-    const controller = module.createSurfaceController({
+    const controller = runtime.module.createSurfaceController({
       rendererSpec: {
         createCommittedRenderer: vi.fn(() => rendererInstance)
       },

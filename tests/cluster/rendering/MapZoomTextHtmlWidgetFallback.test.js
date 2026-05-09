@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("MapZoomTextHtmlWidget fallback rendering", function () {
   function createRenderer() {
@@ -11,48 +12,40 @@ describe("MapZoomTextHtmlWidget fallback rendering", function () {
       requiredText: "(6.5)"
     }));
 
-    const moduleCache = Object.create(null);
-    const Helpers = {
-      applyFormatter(value, formatterOptions) {
+    const componentContext = createComponentContextMock({
+      modules: {
+        MapZoomHtmlFit: { create: () => ({ compute: fitCompute }) },
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        PreparedPayloadModelCache: loadFresh("shared/widget-kits/html/PreparedPayloadModelCache.js"),
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js"),
+        StateScreenMarkup: loadFresh("shared/widget-kits/state/StateScreenMarkup.js"),
+        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js")
+      },
+      services: {
+        format: {
+          applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (value == null) return cfg.default;
         return String(value);
-      },
-      resolveFontFamily() {
-        return "sans-serif";
-      },
-      requirePluginRoot(target) {
-        return target || null;
-      },
-      getNightModeState() {
-        return false;
-      },
-      getModule(id) {
-        if (id === "MapZoomHtmlFit") return { create: () => ({ compute: fitCompute }) };
-        if (id === "HtmlWidgetUtils") return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-        if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        if (id === "PreparedPayloadModelCache") return loadFresh("shared/widget-kits/html/PreparedPayloadModelCache.js");
-        if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
-        if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-        if (id === "StateScreenInteraction") return loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
-        if (id === "StateScreenMarkup") return loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
-        if (id === "StateScreenTextFit") return loadFresh("shared/widget-kits/state/StateScreenTextFit.js");
-        if (id === "ThemeResolver") {
-          if (!moduleCache[id]) {
-            moduleCache[id] = {
-              resolveForRoot() {
-                return { font: { family: "sans-serif", familyMono: "monospace", weight: 720, labelWeight: 610 } };
-              }
-            };
           }
-          return moduleCache[id];
+        },
+        dom: {
+          requirePluginRoot(target) { return target || null; },
+          getNightModeState() { return false; }
+        },
+        themeTokens: {
+          resolveForRoot() {
+            return { font: { family: "sans-serif", familyMono: "monospace", weight: 720, labelWeight: 610 } };
+          }
         }
-        throw new Error("unexpected module lookup: " + id);
       }
-    };
+    });
 
-    return loadFresh("widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js").create({}, Helpers);
+    return loadFresh("widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js").create({}, componentContext);
   }
 
   function withSurfacePolicy(props) {

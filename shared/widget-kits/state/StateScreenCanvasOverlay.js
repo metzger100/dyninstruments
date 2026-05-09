@@ -26,8 +26,8 @@
     );
   }
 
-  function create(def, Helpers) {
-    const labels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
+  function create(def, componentContext) {
+    const labels = componentContext.components.require("StateScreenLabels");
 
     function drawStateScreen(args) {
       const cfg = args || {};

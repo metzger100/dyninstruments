@@ -20,11 +20,11 @@
     textFillScale: 1.18
   };
 
-  function create(def, Helpers) {
-    const value = Helpers.getModule("RadialValueMath").create(def, Helpers);
-    const primitive = Helpers.getModule("TextLayoutPrimitives").create(def, Helpers);
-    const composite = Helpers.getModule("TextLayoutComposite").create(def, Helpers);
-    const responsiveProfile = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
+  function create(def, componentContext) {
+    const value = componentContext.components.require("RadialValueMath");
+    const primitive = componentContext.components.require("TextLayoutPrimitives");
+    const composite = componentContext.components.require("TextLayoutComposite");
+    const responsiveProfile = componentContext.components.require("ResponsiveScaleProfile");
 
     function createFitCache(modeList) {
       const modes = Array.isArray(modeList) && modeList.length

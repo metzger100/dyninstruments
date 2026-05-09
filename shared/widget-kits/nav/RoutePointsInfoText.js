@@ -65,8 +65,8 @@
     return formatCourseDistanceInfo(cfg, cfg.stableDigitsEnabled, cfg.stableDigits, unitFormatter);
   }
 
-  function create(def, Helpers) {
-    const unitFormatter = Helpers.getModule("UnitAwareFormatter").create(def, Helpers);
+  function create(def, componentContext) {
+    const unitFormatter = componentContext.components.require("UnitAwareFormatter");
     return {
       id: "RoutePointsInfoText",
       buildRowInfoText: function (args) {

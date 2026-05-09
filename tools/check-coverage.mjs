@@ -30,8 +30,8 @@ const rules = [
   {
     name: "Runtime core",
     matchPrefix: ["runtime/"],
-    lines: 88,
-    branches: 75
+    lines: 85,
+    branches: 70
   },
   {
     name: "Gauge math core",

@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("SpeedLinearWidget", function () {
   it("passes LinearGaugeEngine config with range axis and high-end sectors", function () {
@@ -13,28 +14,24 @@ describe("SpeedLinearWidget", function () {
     const applyFormatter = vi.fn((value, spec) => Number(value).toFixed(1) + " " + spec.formatterParameters[0]);
 
     const mod = loadFresh("widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js");
-    const spec = mod.create({}, {
-      applyFormatter,
-      getModule(id) {
-        if (id === "PlaceholderNormalize") {
-          return {
-            create() {
-              return {
-                normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
-                  }
-                  const value = String(text).trim();
-                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+    const spec = mod.create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
                 }
-              };
-            }
-          };
-        }
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+                const value = String(text).trim();
+                return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+              }
+            };
+          }
+        },
+        RadialValueMath: {
+          create() {
+            return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -63,11 +60,9 @@ describe("SpeedLinearWidget", function () {
                 },
                 resolveStandardSemicircleTickSteps
               };
-            }
-          };
-        }
-        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
-        return {
+          }
+        },
+        LinearGaugeEngine: {
           create() {
             return {
               createRenderer(cfg) {
@@ -76,9 +71,12 @@ describe("SpeedLinearWidget", function () {
               }
             };
           }
-        };
+        }
+      },
+      services: {
+        format: { applyFormatter }
       }
-    });
+    }));
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.axisMode).toBe("range");
@@ -126,30 +124,24 @@ describe("SpeedLinearWidget", function () {
   it("does not reformat to fixed decimals when formatter returns raw numeric string", function () {
     let captured;
     const mod = loadFresh("widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js");
-    mod.create({}, {
-      applyFormatter(value) {
-        return String(value);
-      },
-      getModule(id) {
-        if (id === "PlaceholderNormalize") {
-          return {
-            create() {
-              return {
-                normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
-                  }
-                  const value = String(text).trim();
-                  return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+    mod.create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
                 }
-              };
-            }
-          };
-        }
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
+                const value = String(text).trim();
+                return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+              }
+            };
+          }
+        },
+        RadialValueMath: {
+          create() {
+            return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -180,11 +172,9 @@ describe("SpeedLinearWidget", function () {
                   return { major: 5, minor: 1 };
                 }
               };
-            }
-          };
-        }
-        if (id !== "LinearGaugeEngine") throw new Error("unexpected module: " + id);
-        return {
+          }
+        },
+        LinearGaugeEngine: {
           create() {
             return {
               createRenderer(cfg) {
@@ -193,9 +183,16 @@ describe("SpeedLinearWidget", function () {
               }
             };
           }
-        };
+        }
+      },
+      services: {
+        format: {
+          applyFormatter(value) {
+            return String(value);
+          }
+        }
       }
-    });
+    }));
 
     expect(captured.formatDisplay(6.44, {}, "kn")).toEqual({ num: 6.44, text: "6.44" });
   });

@@ -1,18 +1,15 @@
 /**
- * Module: CanvasDomSurfaceAdapter - Standalone canvas-dom surface controller for internal canvas lifecycle
+ * Module: DyniPlugin CanvasDom Surface Runtime - Canvas surface controller for internal canvas lifecycle
  * Documentation: documentation/architecture/canvas-dom-surface-adapter.md
- * Depends: PerfSpanHelper
+ * Depends: runtime.perf
  */
-
-(function (root, factory) {
-  if (typeof define === "function" && define.amd) define([], factory);
-  else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniCanvasDomSurfaceAdapter = factory(); }
-}(this, function () {
+(function (root) {
   "use strict";
 
+  const ns = root.DyniPlugin;
+  const runtime = ns.runtime;
+
   const hasOwn = Object.prototype.hasOwnProperty;
-  const SHELL_HTML = '<div class="dyni-surface-canvas"><div class="dyni-surface-canvas-mount"></div></div>';
   const SURFACE_SELECTOR = ".dyni-surface-canvas";
   const MOUNT_SELECTOR = ".dyni-surface-canvas-mount";
   const CANVAS_CLASS = "dyni-surface-canvas-node";
@@ -81,12 +78,8 @@
     return true;
   }
 
-  function create(def, Helpers) {
-    const perf = Helpers.getModule("PerfSpanHelper").create(def, Helpers);
-
-    function renderSurfaceShell() {
-      return SHELL_HTML;
-    }
+  function createCanvasDomSurfaceAdapter() {
+    const perf = runtime.perf;
 
     function createSurfaceController(options) {
       const opts = options || {};
@@ -410,11 +403,9 @@
     }
 
     return {
-      id: "CanvasDomSurfaceAdapter",
-      renderSurfaceShell: renderSurfaceShell,
       createSurfaceController: createSurfaceController
     };
   }
 
-  return { id: "CanvasDomSurfaceAdapter", create: create };
-}));
+  runtime._createCanvasDomSurfaceAdapter = createCanvasDomSurfaceAdapter;
+}(this));

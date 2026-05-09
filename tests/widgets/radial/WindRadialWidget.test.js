@@ -1,39 +1,22 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("WindRadialWidget", function () {
   it("passes full-circle ratio props without wrapper-owned ratioDefaults", function () {
     let captured;
     const renderCanvas = vi.fn();
 
-    const spec = loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js").create({}, {
-      applyFormatter(value) {
-        return String(value);
+    const spec = loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js").create({}, createComponentContextMock({
+      modules: {
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        SpringEasing: loadFresh("shared/widget-kits/anim/SpringEasing.js"),
+        FullCircleRadialTextLayout: { create() { return {}; } },
+        FullCircleRadialEngine: { create() { return { createRenderer(cfg) { captured = cfg; return renderCanvas; } }; } }
       },
-      getModule(id) {
-        if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
-        if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        if (id === "SpringEasing") return loadFresh("shared/widget-kits/anim/SpringEasing.js");
-        if (id === "FullCircleRadialTextLayout") {
-          return {
-            create() {
-              return {};
-            }
-          };
-        }
-        if (id !== "FullCircleRadialEngine") throw new Error("unexpected module: " + id);
-        return {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return renderCanvas;
-              }
-            };
-          }
-        };
-      }
-    });
+      services: { format: { applyFormatter(value) { return String(value); } } }
+    }));
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.ratioProps).toEqual({
@@ -49,14 +32,13 @@ describe("WindRadialWidget", function () {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
     const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
-    return fullCircleLayout.create({}, {
-      getModule(id) {
-        if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
-        if (id === "LayoutRectMath") return layoutRectMath;
-        if (id === "GeometryScale") return geometryScale;
-        throw new Error("unexpected layout module: " + id);
+    return fullCircleLayout.create({}, createComponentContextMock({
+      modules: {
+        ResponsiveScaleProfile: responsiveScaleProfile,
+        LayoutRectMath: layoutRectMath,
+        GeometryScale: geometryScale
       }
-    });
+    }));
   }
 
   function computeWindLayout(theme, width, height) {
@@ -130,44 +112,22 @@ describe("WindRadialWidget", function () {
     };
 
     const spec = loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js")
-      .create({}, {
-        applyFormatter(value) {
-          return String(value);
-        },
-        setupCanvas(canvas) {
-          const ctx = canvas.getContext("2d");
-          const rect = canvas.getBoundingClientRect();
-          return {
-            ctx,
-            W: Math.round(rect.width),
-            H: Math.round(rect.height)
-          };
-        },
-        resolveFontFamily() {
-          return "sans-serif";
-        },
-        resolveTextColor() {
-          return "#fff";
-        },
-        requirePluginRoot(target) {
-          return target;
-        },
-        getModule(id) {
-          if (id === "FullCircleRadialEngine") return fullCircleEngine;
-          if (id === "FullCircleRadialLayout") return fullCircleLayout;
-          if (id === "FullCircleRadialTextLayout") return textLayout;
-          if (id === "CanvasLayerCache") return layerCache;
-          if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
-          if (id === "LayoutRectMath") return layoutRectMath;
-          if (id === "GeometryScale") return geometryScale;
-          if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-          if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-          if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
-          if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
-          if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-          if (id === "SpringEasing") return loadFresh("shared/widget-kits/anim/SpringEasing.js");
-          if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
-          return {
+      .create({}, createComponentContextMock({
+        modules: {
+          FullCircleRadialEngine: fullCircleEngine,
+          FullCircleRadialLayout: fullCircleLayout,
+          FullCircleRadialTextLayout: textLayout,
+          CanvasLayerCache: layerCache,
+          ResponsiveScaleProfile: responsiveScaleProfile,
+          LayoutRectMath: layoutRectMath,
+          GeometryScale: geometryScale,
+          StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+          StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+          StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
+          StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+          PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+          SpringEasing: loadFresh("shared/widget-kits/anim/SpringEasing.js"),
+          RadialToolkit: {
             create() {
               return {
                 draw: {
@@ -234,9 +194,24 @@ describe("WindRadialWidget", function () {
                 angle: {}
               };
             }
-          };
+          }
+      },
+      services: {
+        format: { applyFormatter(value) { return String(value); } },
+        canvas: {
+          setupCanvas(canvas) {
+            const ctx = canvas.getContext("2d");
+            const rect = canvas.getBoundingClientRect();
+            return { ctx, W: Math.round(rect.width), H: Math.round(rect.height) };
+          }
+        },
+        dom: {
+          requirePluginRoot(target) {
+            return target;
+          }
         }
-      });
+      }
+      }));
 
     return { spec, calls, theme };
   }
@@ -254,7 +229,7 @@ describe("WindRadialWidget", function () {
     }, overrides || {});
   }
 
-  it("formats speed via Helpers.applyFormatter in graphic mode", function () {
+  it("formats speed via componentContext.format.applyFormatter in graphic mode", function () {
     const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
     const fullCircleLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
     const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
@@ -311,42 +286,22 @@ describe("WindRadialWidget", function () {
     });
 
     const spec = loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js")
-      .create({}, {
-        applyFormatter,
-        setupCanvas(canvas) {
-          const ctx = canvas.getContext("2d");
-          const rect = canvas.getBoundingClientRect();
-          return {
-            ctx,
-            W: Math.round(rect.width),
-            H: Math.round(rect.height)
-          };
-        },
-        resolveFontFamily() {
-          return "sans-serif";
-        },
-        resolveTextColor() {
-          return "#fff";
-        },
-        requirePluginRoot(target) {
-          return target;
-        },
-        getModule(id) {
-          if (id === "FullCircleRadialEngine") return fullCircleEngine;
-          if (id === "FullCircleRadialLayout") return fullCircleLayout;
-          if (id === "FullCircleRadialTextLayout") return textLayout;
-          if (id === "CanvasLayerCache") return layerCache;
-          if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
-          if (id === "LayoutRectMath") return layoutRectMath;
-          if (id === "GeometryScale") return geometryScale;
-          if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-          if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-          if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
-          if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
-          if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-          if (id === "SpringEasing") return loadFresh("shared/widget-kits/anim/SpringEasing.js");
-          if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
-          return {
+      .create({}, createComponentContextMock({
+        modules: {
+          FullCircleRadialEngine: fullCircleEngine,
+          FullCircleRadialLayout: fullCircleLayout,
+          FullCircleRadialTextLayout: textLayout,
+          CanvasLayerCache: layerCache,
+          ResponsiveScaleProfile: responsiveScaleProfile,
+          LayoutRectMath: layoutRectMath,
+          GeometryScale: geometryScale,
+          StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+          StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+          StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
+          StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+          PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+          SpringEasing: loadFresh("shared/widget-kits/anim/SpringEasing.js"),
+          RadialToolkit: {
             create() {
               return {
                 draw: {
@@ -406,9 +361,28 @@ describe("WindRadialWidget", function () {
                 angle: {}
               };
             }
+          }
+        },
+        services: {
+          format: { applyFormatter },
+          canvas: {
+            setupCanvas(canvas) {
+          const ctx = canvas.getContext("2d");
+          const rect = canvas.getBoundingClientRect();
+          return {
+            ctx,
+            W: Math.round(rect.width),
+            H: Math.round(rect.height)
           };
+            }
+          },
+          dom: {
+            requirePluginRoot(target) {
+              return target;
+            }
+          }
         }
-      });
+      }));
 
     const canvas = createMockCanvas({ rectWidth: 480, rectHeight: 110, ctx: createMockContext2D() });
     spec.renderCanvas(canvas, {
@@ -477,44 +451,22 @@ describe("WindRadialWidget", function () {
     const valueDrawCalls = [];
 
     const spec = loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js")
-      .create({}, {
-        applyFormatter(value) {
-          return String(value);
-        },
-        setupCanvas(canvas) {
-          const ctx = canvas.getContext("2d");
-          const rect = canvas.getBoundingClientRect();
-          return {
-            ctx,
-            W: Math.round(rect.width),
-            H: Math.round(rect.height)
-          };
-        },
-        resolveFontFamily() {
-          return "sans-serif";
-        },
-        resolveTextColor() {
-          return "#fff";
-        },
-        requirePluginRoot(target) {
-          return target;
-        },
-        getModule(id) {
-          if (id === "FullCircleRadialEngine") return fullCircleEngine;
-          if (id === "FullCircleRadialLayout") return fullCircleLayout;
-          if (id === "FullCircleRadialTextLayout") return textLayout;
-          if (id === "CanvasLayerCache") return layerCache;
-          if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
-          if (id === "LayoutRectMath") return layoutRectMath;
-          if (id === "GeometryScale") return geometryScale;
-          if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-          if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-          if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
-          if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
-          if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-          if (id === "SpringEasing") return loadFresh("shared/widget-kits/anim/SpringEasing.js");
-          if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
-          return {
+      .create({}, createComponentContextMock({
+        modules: {
+          FullCircleRadialEngine: fullCircleEngine,
+          FullCircleRadialLayout: fullCircleLayout,
+          FullCircleRadialTextLayout: textLayout,
+          CanvasLayerCache: layerCache,
+          ResponsiveScaleProfile: responsiveScaleProfile,
+          LayoutRectMath: layoutRectMath,
+          GeometryScale: geometryScale,
+          StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+          StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+          StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
+          StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+          PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+          SpringEasing: loadFresh("shared/widget-kits/anim/SpringEasing.js"),
+          RadialToolkit: {
             create() {
               return {
                 draw: {
@@ -601,9 +553,28 @@ describe("WindRadialWidget", function () {
                 angle: {}
               };
             }
-          };
+          }
+      },
+      services: {
+        format: { applyFormatter(value) { return String(value); } },
+        canvas: {
+          setupCanvas(canvas) {
+            const ctx = canvas.getContext("2d");
+            const rect = canvas.getBoundingClientRect();
+            return {
+              ctx,
+              W: Math.round(rect.width),
+              H: Math.round(rect.height)
+            };
+          }
+        },
+        dom: {
+          requirePluginRoot(target) {
+            return target;
+          }
         }
-      });
+      }
+      }));
 
     const canvas = createMockCanvas({ rectWidth: 480, rectHeight: 110, ctx: createMockContext2D() });
     spec.renderCanvas(canvas, {

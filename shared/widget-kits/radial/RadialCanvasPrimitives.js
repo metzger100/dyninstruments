@@ -12,8 +12,8 @@
   const hasOwn = Object.prototype.hasOwnProperty;
   const POINTER_TIP_INSET_FACTOR = 0.013;
 
-  function create(def, Helpers) {
-    const angle = Helpers.getModule("RadialAngleMath").create(def, Helpers);
+  function create(def, componentContext) {
+    const angle = componentContext.components.require("RadialAngleMath");
     const toCanvas = angle.degToCanvasRad;
 
     function withCtx(ctx, fn, style) {

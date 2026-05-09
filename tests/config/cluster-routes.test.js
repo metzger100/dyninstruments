@@ -1,4 +1,5 @@
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
+const { createComponentContextMock } = require("../helpers/component-context-mock");
 const { loadFresh } = require("../helpers/load-umd");
 
 const COMPONENT_REGISTRY_FRAGMENT_SCRIPTS = [
@@ -238,7 +239,7 @@ describe("config/cluster-routes metadata", function () {
     globalThis.DyniPlugin = context.DyniPlugin;
 
     try {
-      const catalogFactory = loadFresh("cluster/rendering/ClusterKindCatalog.js").create({}, {});
+      const catalogFactory = loadFresh("cluster/rendering/ClusterKindCatalog.js").create({}, createComponentContextMock());
       const catalog = catalogFactory.createDefaultCatalog();
       const catalogRoutes = catalog.listRoutes();
 

@@ -1,14 +1,13 @@
 /**
- * Module: ClusterSurfacePolicy - Surface policy and vertical shell sizing resolver for cluster routing
+ * Module: DyniPlugin Cluster Surface Policy Runtime - Surface policy resolver for cluster routing
  * Documentation: documentation/architecture/cluster-widget-system.md
  * Depends: none
  */
-(function (root, factory) {
-  if (typeof define === "function" && define.amd) define([], factory);
-  else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniClusterSurfacePolicy = factory(); }
-}(this, function () {
+(function (root) {
   "use strict";
+
+  const ns = root.DyniPlugin;
+  const runtime = ns.runtime;
 
   const GLOBAL_ROOT = (typeof globalThis !== "undefined")
     ? globalThis
@@ -337,37 +336,16 @@
     const width = toFiniteNumber(shellEl.getBoundingClientRect().width);
     return width > 0 ? Math.round(width) : undefined;
   }
-
-  function applyShellSizingToElement(shellEl, shellSizing) {
-    if (!shellEl || !shellEl.style || typeof shellEl.style.setProperty !== "function") {
-      return;
-    }
-    shellEl.style.removeProperty("aspect-ratio");
-    shellEl.style.removeProperty("height");
-    if (!shellSizing) {
-      return;
-    }
-    if (shellSizing.kind === "ratio") {
-      shellEl.style.setProperty("aspect-ratio", String(shellSizing.aspectRatio));
-      return;
-    }
-    if (shellSizing.kind === "natural") {
-      shellEl.style.setProperty("height", shellSizing.height);
-    }
-  }
-
-  function create() {
+  function createClusterSurfacePolicy() {
     const cacheByHostContext = new WeakMap();
     return {
-      id: "ClusterSurfacePolicy",
       resolveRouteStateWithPolicy: function (routeState, hostContext, sizingOptions) {
         return resolveRouteStateWithPolicy(routeState, hostContext, sizingOptions, cacheByHostContext);
       },
       buildShellSizingStyle: buildShellSizingStyle,
-      resolveShellWidth: resolveShellWidth,
-      applyShellSizingToElement: applyShellSizingToElement
+      resolveShellWidth: resolveShellWidth
     };
   }
 
-  return { id: "ClusterSurfacePolicy", create: create };
-}));
+  runtime._createClusterSurfacePolicy = createClusterSurfacePolicy;
+}(this));

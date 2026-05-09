@@ -1,5 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("PositionCoordinateWidget phase 4", function () {
   let previousAvnav;
@@ -14,7 +15,7 @@ describe("PositionCoordinateWidget phase 4", function () {
     else globalThis.avnav = previousAvnav;
   });
 
-  function makeHelpers() {
+  function makeComponentContext() {
     const themeTokens = {
       surface: { fg: "#fff" },
       font: { family: "sans-serif", familyMono: "monospace", weight: 730, labelWeight: 610 }
@@ -51,55 +52,47 @@ describe("PositionCoordinateWidget phase 4", function () {
       return String(raw);
     });
 
-    return {
-      applyFormatter,
-      setupCanvas(canvas) {
-        const ctx = canvas.getContext("2d");
-        const rect = canvas.getBoundingClientRect();
-        return {
-          ctx,
-          W: Math.round(rect.width),
-          H: Math.round(rect.height)
-        };
+    return createComponentContextMock({
+      modules: {
+        ThemeResolver: {
+          resolveForRoot() {
+            return themeTokens;
+          }
+        },
+        TextLayoutEngine: textLayoutEngineModule,
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
+        RadialAngleMath: modules.RadialAngleMath,
+        RadialTextFitting: modules.RadialTextFitting,
+        RadialTextLayout: modules.RadialTextLayout,
+        RadialValueMath: modules.RadialValueMath,
+        TextLayoutPrimitives: modules.TextLayoutPrimitives,
+        TextLayoutComposite: modules.TextLayoutComposite,
+        ResponsiveScaleProfile: modules.ResponsiveScaleProfile
       },
-      resolveFontFamily() {
-        return "sans-serif";
-      },
-      resolveTextColor() {
-        return "#fff";
-      },
-      requirePluginRoot(target) {
-        return target;
-      },
-      getModule(id) {
-        if (id === "ThemeResolver") {
-          return {
-            resolveForRoot() {
-              return themeTokens;
-            }
-          };
+      services: {
+        format: { applyFormatter },
+        canvas: {
+          setupCanvas(canvas) {
+            const ctx = canvas.getContext("2d");
+            const rect = canvas.getBoundingClientRect();
+            return { ctx, W: Math.round(rect.width), H: Math.round(rect.height) };
+          }
+        },
+        dom: {
+          requirePluginRoot(target) {
+            return target;
+          }
+        },
+        themeTokens: {
+          resolveForRoot() {
+            return themeTokens;
+          }
         }
-        if (id === "TextLayoutEngine") {
-          return textLayoutEngineModule;
-        }
-        if (id === "PlaceholderNormalize") {
-          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        }
-        if (id === "StateScreenLabels") {
-          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        }
-        if (id === "StateScreenPrecedence") {
-          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-        }
-        if (id === "StateScreenCanvasOverlay") {
-          return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
-        }
-        if (modules[id]) {
-          return modules[id];
-        }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
   }
 
   function fillTextValues(ctx) {
@@ -139,7 +132,7 @@ describe("PositionCoordinateWidget phase 4", function () {
     };
 
     const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
-      .create({}, makeHelpers());
+      .create({}, makeComponentContext());
 
     [
       {
@@ -187,7 +180,7 @@ describe("PositionCoordinateWidget phase 4", function () {
     };
 
     const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
-      .create({}, makeHelpers());
+      .create({}, makeComponentContext());
 
     const ctx = createMockContext2D();
     const captured = captureTextCalls(ctx);

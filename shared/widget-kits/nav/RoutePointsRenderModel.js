@@ -174,17 +174,17 @@
     return snapshot;
   }
 
-  function create(def, Helpers) {
-    const routePointsHtmlFit = Helpers.getModule("RoutePointsHtmlFit").create(def, Helpers);
-    const centerMath = Helpers.getModule("CenterDisplayMath").create(def, Helpers);
-    const layoutApi = Helpers.getModule("RoutePointsLayout").create(def, Helpers);
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const navInteractionPolicy = Helpers.getModule("NavInteractionPolicy").create(def, Helpers);
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
-    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
-    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
-    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
-    const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
+  function create(def, componentContext) {
+    const routePointsHtmlFit = componentContext.components.require("RoutePointsHtmlFit");
+    const centerMath = componentContext.components.require("CenterDisplayMath");
+    const layoutApi = componentContext.components.require("RoutePointsLayout");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const navInteractionPolicy = componentContext.components.require("NavInteractionPolicy");
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    const stableDigits = componentContext.components.require("StableDigits");
+    const stateScreenLabels = componentContext.components.require("StateScreenLabels");
+    const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
+    const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");
 
     function resolveStateKind(props, route) {
       return stateScreenPrecedence.pickFirst([
@@ -302,7 +302,7 @@
           distanceUnit: distanceUnit,
           courseUnit: courseUnit,
           defaultText: defaultText,
-          Helpers: Helpers,
+          componentContext: componentContext,
           centerMath: centerMath,
           placeholderNormalize: placeholderNormalize,
           stableDigitsEnabled: stableDigitsEnabled,

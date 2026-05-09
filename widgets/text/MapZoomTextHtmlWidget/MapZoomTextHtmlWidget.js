@@ -1,7 +1,7 @@
 /**
  * Module: MapZoomTextHtmlWidget - Interactive HTML renderer for map zoom kind
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: Helpers.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, PlaceholderNormalize, PreparedPayloadModelCache, StableDigits, ThemeResolver, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
+ * Depends: componentContext.format.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, PlaceholderNormalize, PreparedPayloadModelCache, StableDigits, componentContext.theme.tokens, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
  */
 
 (function (root, factory) {
@@ -74,8 +74,8 @@
     return Math.max(MIN_CAPTION_UNIT_SCALE, Math.min(MAX_CAPTION_UNIT_SCALE, scale));
   }
 
-  function formatZoom(value, defaultText, Helpers, placeholderNormalize) {
-    const out = placeholderNormalize.normalize(String(Helpers.applyFormatter(value, {
+  function formatZoom(value, defaultText, componentContext, placeholderNormalize) {
+    const out = placeholderNormalize.normalize(String(componentContext.format.applyFormatter(value, {
       formatter: "formatDecimalOpt",
       formatterParameters: [2, 1],
       default: defaultText
@@ -106,7 +106,7 @@
     ]);
   }
 
-  function buildModel(props, shellRect, Helpers, htmlUtils, stateScreenLabels, stateScreenPrecedence, stateScreenInteraction, stableDigits) {
+  function buildModel(props, shellRect, componentContext, htmlUtils, stateScreenLabels, stateScreenPrecedence, stateScreenInteraction, stableDigits) {
     const p = ensureProps(props);
     const defaultText = String(p.default);
     const caption = htmlUtils.trimText(p.caption);
@@ -116,16 +116,16 @@
     const kind = resolveStateKind(p, stateScreenPrecedence);
     const zoomNumber = htmlUtils.toFiniteNumber(p.zoom);
     const requiredZoomNumber = htmlUtils.toFiniteNumber(p.requiredZoom);
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(null, Helpers);
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     const stableDigitsEnabled = p.stableDigits === true;
-    const zoomRawText = formatZoom(zoomNumber, defaultText, Helpers, placeholderNormalize);
+    const zoomRawText = formatZoom(zoomNumber, defaultText, componentContext, placeholderNormalize);
     const zoomStable = stableDigitsEnabled
       ? stableDigits.normalize(zoomRawText, {
         integerWidth: stableDigits.resolveIntegerWidth(zoomRawText, 2),
         reserveSignSlot: false
       })
       : { padded: zoomRawText, plain: zoomRawText };
-    const requiredRawText = formatZoom(requiredZoomNumber, defaultText, Helpers, placeholderNormalize);
+    const requiredRawText = formatZoom(requiredZoomNumber, defaultText, componentContext, placeholderNormalize);
     const requiredStable = stableDigitsEnabled && typeof requiredZoomNumber === "number"
       ? stableDigits.normalize(requiredRawText, {
         integerWidth: stableDigits.resolveIntegerWidth(requiredRawText, 2),
@@ -247,16 +247,16 @@
       + "</div>";
   }
 
-  function create(def, Helpers) {
-    const htmlFit = Helpers.getModule("MapZoomHtmlFit").create(def, Helpers);
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
-    const preparedPayloadModelCache = Helpers.getModule("PreparedPayloadModelCache").create(def, Helpers);
-    const stateScreenLabels = Helpers.getModule("StateScreenLabels").create(def, Helpers);
-    const stateScreenPrecedence = Helpers.getModule("StateScreenPrecedence").create(def, Helpers);
-    const stateScreenInteraction = Helpers.getModule("StateScreenInteraction").create(def, Helpers);
-    const stateScreenMarkup = Helpers.getModule("StateScreenMarkup").create(def, Helpers);
-    const themeResolver = Helpers.getModule("ThemeResolver");
+  function create(def, componentContext) {
+    const htmlFit = componentContext.components.require("MapZoomHtmlFit");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const stableDigits = componentContext.components.require("StableDigits");
+    const preparedPayloadModelCache = componentContext.components.require("PreparedPayloadModelCache");
+    const stateScreenLabels = componentContext.components.require("StateScreenLabels");
+    const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
+    const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");
+    const stateScreenMarkup = componentContext.components.require("StateScreenMarkup");
+    const themeResolver = componentContext.theme.tokens;
 
     function translateFunction(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
@@ -269,7 +269,7 @@
       let lastProps = null;
       let lastFit = EMPTY_FIT;
       const translate = function (props, shellRect) {
-        return buildModel(props, shellRect, Helpers, htmlUtils, stateScreenLabels, stateScreenPrecedence, stateScreenInteraction, stableDigits);
+        return buildModel(props, shellRect, componentContext, htmlUtils, stateScreenLabels, stateScreenPrecedence, stateScreenInteraction, stableDigits);
       };
 
       const preparedPayload = preparedPayloadModelCache.createPreparedPayloadCache(translate);

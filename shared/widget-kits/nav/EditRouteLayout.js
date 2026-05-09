@@ -52,11 +52,11 @@
   };
   const DEFAULT_METRIC_HAS_UNIT = { pts: false, dst: true, rte: true, eta: false };
 
-  function create(def, Helpers) {
-    const profileApi = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
-    const makeRect = Helpers.getModule("LayoutRectMath").create(def, Helpers).makeRect;
-    const mathApi = Helpers.getModule("EditRouteLayoutMath").create(def, Helpers);
-    const geometryApi = Helpers.getModule("EditRouteLayoutGeometry").create(def, Helpers);
+  function create(def, componentContext) {
+    const profileApi = componentContext.components.require("ResponsiveScaleProfile");
+    const makeRect = componentContext.components.require("LayoutRectMath").makeRect;
+    const mathApi = componentContext.components.require("EditRouteLayoutMath");
+    const geometryApi = componentContext.components.require("EditRouteLayoutGeometry");
 
     function computeVerticalShellProfile(args) {
       const cfg = args || {};

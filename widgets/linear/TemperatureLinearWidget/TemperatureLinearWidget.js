@@ -10,13 +10,20 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
-    const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+  function create(def, componentContext) {
+    const engine = componentContext.components.require("LinearGaugeEngine");
+    const valueMath = componentContext.components.require("RadialValueMath");
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     function formatDisplay(raw, props) {
-      const formatted = valueMath.formatGaugeDisplay(raw, props, Helpers.applyFormatter, placeholderNormalize.normalize, "formatTemperature", ["celsius"]);
+      const formatted = valueMath.formatGaugeDisplay(
+        raw,
+        props,
+        componentContext.format.applyFormatter,
+        placeholderNormalize.normalize,
+        "formatTemperature",
+        ["celsius"]
+      );
       return Number.isFinite(formatted.num)
         ? { num: formatted.num, text: formatted.num.toFixed(1) }
         : formatted;

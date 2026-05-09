@@ -11,11 +11,11 @@
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
-  function create(def, Helpers) {
-    const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
-    const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
-    const stableDigits = Helpers.getModule("StableDigits").create(def, Helpers);
-    const placeholderNormalize = Helpers.getModule("PlaceholderNormalize").create(def, Helpers);
+  function create(def, componentContext) {
+    const engine = componentContext.components.require("LinearGaugeEngine");
+    const valueMath = componentContext.components.require("RadialValueMath");
+    const stableDigits = componentContext.components.require("StableDigits");
+    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     function splitHorizontal(box, gapPx) {
       const gap = Math.max(0, Math.floor(gapPx));
@@ -37,7 +37,7 @@
       const formatterParameters = hasOwn.call(p, "formatterParameters")
         ? p.formatterParameters
         : [speedUnit];
-      const out = placeholderNormalize.normalize(String(Helpers.applyFormatter(n, {
+      const out = placeholderNormalize.normalize(String(componentContext.format.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
         default: defaultText

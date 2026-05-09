@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteHtmlFit - Shared text-fit model for ActiveRoute interactive HTML renderer
  * Documentation: documentation/widgets/active-route.md
- * Depends: ThemeResolver, RadialTextLayout, TextTileLayout, ActiveRouteLayout, HtmlWidgetUtils, UnitAwareFormatter
+ * Depends: componentContext.theme.tokens, RadialTextLayout, TextTileLayout, ActiveRouteLayout, HtmlWidgetUtils, UnitAwareFormatter
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -227,13 +227,13 @@
     return baseFamily || font.family || "";
   }
 
-  function create(def, Helpers) {
-    const theme = Helpers.getModule("ThemeResolver");
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const unitFormatter = Helpers.getModule("UnitAwareFormatter").create(def, Helpers);
-    const radialText = Helpers.getModule("RadialTextLayout").create(def, Helpers);
-    const tileLayout = Helpers.getModule("TextTileLayout").create(def, Helpers);
-    const layoutApi = Helpers.getModule("ActiveRouteLayout").create(def, Helpers);
+  function create(def, componentContext) {
+    const theme = componentContext.theme.tokens;
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const unitFormatter = componentContext.components.require("UnitAwareFormatter");
+    const radialText = componentContext.components.require("RadialTextLayout");
+    const tileLayout = componentContext.components.require("TextTileLayout");
+    const layoutApi = componentContext.components.require("ActiveRouteLayout");
 
     function formatMetric(rawValue, formatter, formatterParameters, defaultText) {
       return unitFormatter.formatWithToken(
@@ -254,7 +254,7 @@
         return null;
       }
 
-      const rootEl = Helpers.requirePluginRoot(targetEl);
+      const rootEl = componentContext.dom.requirePluginRoot(targetEl);
       const tokens = theme.resolveForRoot(rootEl);
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;

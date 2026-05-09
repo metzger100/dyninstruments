@@ -106,14 +106,14 @@
       js: BASE + "widgets/linear/WindLinearWidget/WindLinearWidget.js",
       css: undefined,
       globalKey: "DyniWindLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath", "StableDigits"]
+      deps: ["LinearGaugeEngine", "RadialValueMath", "StableDigits", "PlaceholderNormalize"]
   };
 
   w.WindRadialWidget = {
       js: BASE + "widgets/radial/WindRadialWidget/WindRadialWidget.js",
       css: undefined,
       globalKey: "DyniWindRadialWidget",
-      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "SpringEasing", "StableDigits"]
+      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "SpringEasing", "StableDigits", "PlaceholderNormalize"]
   };
 
 }(this));

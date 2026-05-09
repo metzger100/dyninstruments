@@ -1,7 +1,7 @@
 /**
  * Module: ClusterWidget - Cluster lifecycle orchestrator with deferred host commit and surface sessions
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: PerfSpanHelper, ClusterMapperToolkit, ClusterRendererRouter, ClusterMapperRegistry, HostCommitController, SurfaceSessionController
+ * Depends: ClusterMapperToolkit, ClusterRendererRouter, ClusterMapperRegistry, componentContext.perf
  */
 
 (function (root, factory) {
@@ -26,21 +26,21 @@
   }
 
   function ensureThemeRuntime(runtimeApi) {
-    if (!runtimeApi || !runtimeApi._theme || typeof runtimeApi._theme.applyToRoot !== "function") {
-      throw new Error("ClusterWidget: runtime._theme.applyToRoot must be available");
+    if (!runtimeApi || !runtimeApi.theme || typeof runtimeApi.theme.applyToRoot !== "function") {
+      throw new Error("ClusterWidget: runtime.theme.applyToRoot must be available");
     }
   }
 
-  function create(def, Helpers) {
+  function create(def, componentContext) {
     const runtimeApi = resolveRuntimeApi();
-    const perf = Helpers.getModule("PerfSpanHelper").create(def, Helpers);
+    const perf = componentContext.perf;
     ensureFactory(runtimeApi, "createHostCommitController");
     ensureFactory(runtimeApi, "createSurfaceSessionController");
     ensureThemeRuntime(runtimeApi);
 
-    const mapperToolkit = Helpers.getModule("ClusterMapperToolkit").create(def, Helpers);
-    const rendererRouter = Helpers.getModule("ClusterRendererRouter").create(def, Helpers);
-    const mapperRegistry = Helpers.getModule("ClusterMapperRegistry").create(def, Helpers);
+    const mapperToolkit = componentContext.components.require("ClusterMapperToolkit");
+    const rendererRouter = componentContext.components.require("ClusterRendererRouter");
+    const mapperRegistry = componentContext.components.require("ClusterMapperRegistry");
 
     function initRuntimeState(ctx) {
       const previous = ctx.__dyniClusterState;
@@ -113,7 +113,7 @@
             ctx.__dyniHostCommitState = commitPayload && commitPayload.state
               ? commitPayload.state
               : state.hostCommitController.getState();
-            runtimeApi._theme.applyToRoot(commitPayload.rootEl);
+            runtimeApi.theme.applyToRoot(commitPayload.rootEl);
             const sessionPayload = rendererRouter.createSessionPayload(commitPayload, ctx);
             state.surfaceSessionController.reconcileSession(sessionPayload);
           }

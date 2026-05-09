@@ -1,26 +1,18 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RoutePointsRenderModel", function () {
   function createLayoutApi() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const routePointsLayoutSizing = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
-    return loadFresh("shared/widget-kits/nav/RoutePointsLayout.js").create({}, {
-      getModule(id) {
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfile;
-        }
-        if (id === "LayoutRectMath") {
-          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-        }
-        if (id === "RoutePointsLayoutSizing") {
-          return routePointsLayoutSizing;
-        }
-        if (id === "RoutePointsRowGeometry") {
-          return loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js");
-        }
-        throw new Error("unexpected module: " + id);
+    return loadFresh("shared/widget-kits/nav/RoutePointsLayout.js").create({}, createComponentContextMock({
+      modules: {
+        ResponsiveScaleProfile: responsiveScaleProfile,
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+        RoutePointsLayoutSizing: routePointsLayoutSizing,
+        RoutePointsRowGeometry: loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js")
       }
-    });
+    }));
   }
 
   function createRenderModel(options) {
@@ -49,10 +41,8 @@ describe("RoutePointsRenderModel", function () {
       return String(value);
     };
 
-    const Helpers = {
-      applyFormatter: applyFormatter,
-      getModule(id) {
-        if (!moduleCache[id]) {
+    function loadModule(id) {
+      if (!moduleCache[id]) {
           if (id === "CenterDisplayMath") {
             moduleCache[id] = loadFresh("shared/widget-kits/nav/CenterDisplayMath.js");
           }
@@ -110,29 +100,56 @@ describe("RoutePointsRenderModel", function () {
           else if (id === "StateScreenInteraction") {
             moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
           }
-          else if (id === "ThemeResolver") {
-            moduleCache[id] = {
-              resolveForRoot() {
-                return {
-                  font: {
-                    family: "sans-serif",
-                    familyMono: "monospace",
-                    weight: 720,
-                    labelWeight: 610
-                  }
-                };
-              }
-            };
-          }
           else {
             throw new Error("unexpected module: " + id);
           }
-        }
-        return moduleCache[id];
       }
-    };
+      return moduleCache[id];
+    }
+    const modules = Object.create(null);
+    [
+      "CenterDisplayMath",
+      "RadialTextFitting",
+      "RadialTextLayout",
+      "TextTileLayout",
+      "RoutePointsLayout",
+      "HtmlWidgetUtils",
+      "NavInteractionPolicy",
+      "ResponsiveScaleProfile",
+      "LayoutRectMath",
+      "RoutePointsLayoutSizing",
+      "RoutePointsRowGeometry",
+      "RoutePointsInfoText",
+      "UnitAwareFormatter",
+      "RoutePointsHtmlFit",
+      "PlaceholderNormalize",
+      "StableDigits",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenInteraction"
+    ].forEach(function (id) {
+      modules[id] = { create() { return loadModule(id); } };
+    });
+    const componentContext = createComponentContextMock({
+      modules,
+      services: {
+        format: { applyFormatter },
+        themeTokens: {
+          resolveForRoot() {
+            return {
+              font: {
+                family: "sans-serif",
+                familyMono: "monospace",
+                weight: 720,
+                labelWeight: 610
+              }
+            };
+          }
+        }
+      }
+    });
 
-    return loadFresh("shared/widget-kits/nav/RoutePointsRenderModel.js").create({}, Helpers);
+    return loadFresh("shared/widget-kits/nav/RoutePointsRenderModel.js").create({}, componentContext);
   }
 
   function withSurfacePolicy(props, options) {

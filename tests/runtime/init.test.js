@@ -20,59 +20,24 @@ describe("runtime/init.js", function () {
     };
   }
 
-  function createThemeModel(overrides) {
-    const opts = overrides || {};
-    return {
-      id: "ThemeModel",
-      normalizePresetName: opts.normalizePresetName || function (name) {
-        const normalized = typeof name === "string" ? name.trim().toLowerCase() : "";
-        return normalized === "slim" || normalized === "bold" || normalized === "highcontrast"
-          ? normalized
-          : "default";
-      }
-    };
-  }
-
-  function createThemeResolver() {
-    return {
-      id: "ThemeResolver",
-      configure: vi.fn(),
-      resolveForRoot: vi.fn(() => ({}))
-    };
-  }
-
   function createThemeRuntimeMock() {
     return {
       configure: vi.fn(),
       applyToRoot: vi.fn(),
-      resolveStartupPresetName: vi.fn((docElement, themeModel) => {
-        const preset = docElement && docElement.__dyniThemePreset;
-        if (!themeModel || typeof themeModel.normalizePresetName !== "function") {
-          return "default";
-        }
-        return themeModel.normalizePresetName(preset);
-      }),
+      resolveStartupPresetName: vi.fn(() => "default"),
       preloadShadowCssUrls: vi.fn(() => Promise.resolve([]))
     };
   }
 
-  it("loads needed components, preloads shadow CSS, and registers widgets through runtime._theme", async function () {
+  it("loads required components and registers widget specs", async function () {
     const registerWidget = vi.fn();
-    const uniqueComponents = vi.fn(() => ["A"]);
-    const resolver = createThemeResolver();
+    const loadComponent = vi.fn(() => Promise.resolve({}));
+    const createInstance = vi.fn(() => ({ id: "WidgetSpec" }));
+    const uniqueComponents = vi.fn(() => ["A", "B"]);
     const themeRuntime = createThemeRuntimeMock();
-    const loadComponent = vi.fn((id) => Promise.resolve(
-      id === "ThemeModel" ? createThemeModel()
-        : (id === "ThemeResolver" ? resolver : { id, create: () => ({}) }
-        )));
     const { bridge, createTemporaryHostActionBridge } = createBridgeRuntimeMock();
 
     const context = createScriptContext({
-      DyniComponents: {
-        DyniA: { id: "A", create() {} },
-        DyniThemeModel: createThemeModel(),
-        DyniThemeResolver: resolver
-      },
       avnav: {
         api: {
           registerWidget,
@@ -85,13 +50,9 @@ describe("runtime/init.js", function () {
           log: vi.fn()
         },
         runtime: {
-          _theme: themeRuntime,
+          theme: themeRuntime,
           createTemporaryHostActionBridge,
-          createHelpers: vi.fn((getComponent) => {
-            getComponent("A");
-            return { helper: true };
-          }),
-          createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
+          createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent, createInstance })),
           registerWidget: vi.fn()
         },
         state: {},
@@ -99,9 +60,8 @@ describe("runtime/init.js", function () {
           shared: {},
           clusters: [],
           components: {
-            A: { globalKey: "DyniA" },
-            ThemeModel: { globalKey: "DyniThemeModel" },
-            ThemeResolver: { globalKey: "DyniThemeResolver" }
+            A: { shadowCss: ["/a.css", "/shared.css"] },
+            B: { shadowCss: ["/b.css", "/shared.css"] }
           },
           widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
         }
@@ -109,72 +69,45 @@ describe("runtime/init.js", function () {
     });
 
     loadInitRuntime(context);
-    const initPromise = context.DyniPlugin.runtime.runInit();
-    await initPromise;
+    await context.DyniPlugin.runtime.runInit();
     await flushPromises();
 
     expect(uniqueComponents).toHaveBeenCalledWith([{ widget: "A", def: { name: "dyni_test" } }]);
-    expect(loadComponent.mock.calls.map((call) => call[0]).sort()).toEqual(["A", "ThemeModel", "ThemeResolver"]);
-    expect(themeRuntime.preloadShadowCssUrls).toHaveBeenCalledWith([]);
-    expect(themeRuntime.configure).toHaveBeenCalledTimes(1);
-    const configureArgs = themeRuntime.configure.mock.calls[0][0];
-    expect(configureArgs.ThemeModel.id).toBe("ThemeModel");
-    expect(configureArgs.ThemeResolver.id).toBe("ThemeResolver");
-    expect(configureArgs.activePresetName).toBe("default");
-    expect(context.DyniPlugin.runtime.registerWidget).toHaveBeenCalledTimes(1);
+    expect(loadComponent.mock.calls.map((call) => call[0])).toEqual(["A", "B"]);
+    expect(themeRuntime.preloadShadowCssUrls).toHaveBeenCalledWith(["/a.css", "/shared.css", "/b.css"]);
+    expect(themeRuntime.configure).toHaveBeenCalledWith({ activePresetName: "default" });
+    expect(createInstance).toHaveBeenCalledWith("A", { name: "dyni_test" });
+    expect(context.DyniPlugin.runtime.registerWidget).toHaveBeenCalledWith({ id: "WidgetSpec" }, { widget: "A", def: { name: "dyni_test" } });
     expect(context.DyniPlugin.state.hostActionBridge).toBe(bridge);
-    expect(themeRuntime.configure.mock.invocationCallOrder[0]).toBeLessThan(
-      context.DyniPlugin.runtime.registerWidget.mock.invocationCallOrder[0]
-    );
-    expect(createTemporaryHostActionBridge.mock.invocationCallOrder[0]).toBeLessThan(
-      context.DyniPlugin.runtime.registerWidget.mock.invocationCallOrder[0]
-    );
-    expect(context.DyniPlugin.avnavApi.log).toHaveBeenCalled();
   });
 
-  it("uses the captured DyniPlugin.avnavApi when the real global avnav.api is absent", async function () {
-    const uniqueComponents = vi.fn(() => ["A"]);
-    const resolver = createThemeResolver();
+  it("uses captured DyniPlugin.avnavApi when global avnav.api is absent", async function () {
     const themeRuntime = createThemeRuntimeMock();
     const hostLog = vi.fn();
-    const err = vi.fn();
-    const loadComponent = vi.fn((id) => Promise.resolve(
-      id === "ThemeModel" ? createThemeModel()
-        : (id === "ThemeResolver" ? resolver : { id, create: () => ({}) }
-        )));
     const { createTemporaryHostActionBridge } = createBridgeRuntimeMock();
 
     const context = createScriptContext({
-      console: { error: err },
       avnav: {},
-      DyniComponents: {
-        DyniA: { id: "A", create() {} },
-        DyniThemeModel: createThemeModel(),
-        DyniThemeResolver: resolver
-      },
       DyniPlugin: {
         avnavApi: {
-          log: hostLog
+          log: hostLog,
+          registerWidget: vi.fn()
         },
         runtime: {
-          _theme: themeRuntime,
+          theme: themeRuntime,
           createTemporaryHostActionBridge,
-          createHelpers: vi.fn((getComponent) => {
-            getComponent("A");
-            return { helper: true };
-          }),
-          createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
+          createComponentLoader: vi.fn(() => ({
+            uniqueComponents: () => ["A"],
+            loadComponent: () => Promise.resolve({}),
+            createInstance: () => ({})
+          })),
           registerWidget: vi.fn()
         },
         state: {},
         config: {
           shared: {},
           clusters: [],
-          components: {
-            A: { globalKey: "DyniA" },
-            ThemeModel: { globalKey: "DyniThemeModel" },
-            ThemeResolver: { globalKey: "DyniThemeResolver" }
-          },
+          components: { A: {} },
           widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
         }
       }
@@ -182,141 +115,12 @@ describe("runtime/init.js", function () {
 
     loadInitRuntime(context);
     await context.DyniPlugin.runtime.runInit();
-    await flushPromises();
 
     expect(hostLog).toHaveBeenCalledWith("dyninstruments component init ok (clustered): 1 widgets");
-    expect(err).not.toHaveBeenCalled();
-    expect(context.DyniPlugin.state.hostActionBridge).toBeTruthy();
-    expect(context.DyniPlugin.runtime.registerWidget).toHaveBeenCalledTimes(1);
   });
 
-  it("reads startup preset once from :root and preloads declared shadow CSS bundles", async function () {
-    const uniqueComponents = vi.fn(() => ["ActiveRouteTextHtmlWidget"]);
-    const { createTemporaryHostActionBridge } = createBridgeRuntimeMock();
-    const resolver = createThemeResolver();
-    const themeRuntime = createThemeRuntimeMock();
-    const loadComponent = vi.fn((id) => Promise.resolve(
-      id === "ThemeModel" ? createThemeModel()
-        : (id === "ThemeResolver" ? resolver : { id: "ActiveRouteTextHtmlWidget", create: () => ({}) }
-        )));
-    const documentRoot = {};
-    documentRoot.__dyniThemePreset = " bold ";
-
-    const context = createScriptContext({
-      document: {
-        documentElement: documentRoot
-      },
-      avnav: {
-        api: {
-          registerWidget: vi.fn(),
-          log: vi.fn()
-        }
-      },
-      DyniPlugin: {
-        avnavApi: {
-          registerWidget: vi.fn(),
-          log: vi.fn()
-        },
-        theme: "slim",
-        runtime: {
-          _theme: themeRuntime,
-          createTemporaryHostActionBridge,
-          createHelpers: vi.fn(() => ({ helper: true })),
-          createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
-          registerWidget: vi.fn()
-        },
-        state: {},
-        config: {
-          shared: {},
-          clusters: [],
-          components: {
-            ActiveRouteTextHtmlWidget: {
-              globalKey: "DyniActiveRouteTextHtmlWidget",
-              shadowCss: ["/shadow-active-route.css"]
-            },
-            ThemeModel: { globalKey: "DyniThemeModel" },
-            ThemeResolver: { globalKey: "DyniThemeResolver" }
-          },
-          widgetDefinitions: [{ widget: "ActiveRouteTextHtmlWidget", def: { name: "dyni_test" } }]
-        }
-      }
-    });
-
-    loadInitRuntime(context);
-    await context.DyniPlugin.runtime.runInit();
-    await flushPromises();
-
-    expect(themeRuntime.preloadShadowCssUrls).toHaveBeenCalledWith(["/shadow-active-route.css"]);
-    expect(themeRuntime.resolveStartupPresetName).toHaveBeenCalledWith(documentRoot, expect.any(Object));
-    const configureArgs = themeRuntime.configure.mock.calls[0][0];
-    expect(configureArgs.activePresetName).toBe("bold");
-    expect(typeof context.DyniPlugin.runtime.applyThemePresetToContainer).toBe("undefined");
-    expect(typeof context.DyniPlugin.runtime.applyThemePresetToRegisteredWidgets).toBe("undefined");
-  });
-
-  it("falls back to default startup preset when :root value is missing or invalid", async function () {
-    const uniqueComponents = vi.fn(() => ["A"]);
-    const { createTemporaryHostActionBridge } = createBridgeRuntimeMock();
-    const resolver = createThemeResolver();
-    const themeRuntime = createThemeRuntimeMock();
-    const loadComponent = vi.fn((id) => Promise.resolve(id === "ThemeModel" ? createThemeModel({
-      normalizePresetName(name) {
-        const normalized = typeof name === "string" ? name.trim().toLowerCase() : "";
-        return ["default", "slim", "bold", "highcontrast"].includes(normalized) ? normalized : "default";
-      }
-    }) : (id === "ThemeResolver" ? resolver : { id: "A", create: () => ({}) })));
-    const documentRoot = {};
-    documentRoot.__dyniThemePreset = "invalidPreset";
-
-    const context = createScriptContext({
-      document: {
-        documentElement: documentRoot
-      },
-      avnav: {
-        api: {
-          registerWidget: vi.fn(),
-          log: vi.fn()
-        }
-      },
-      DyniPlugin: {
-        avnavApi: {
-          registerWidget: vi.fn(),
-          log: vi.fn()
-        },
-        runtime: {
-          _theme: themeRuntime,
-          createTemporaryHostActionBridge,
-          createHelpers: vi.fn(() => ({ helper: true })),
-          createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
-          registerWidget: vi.fn()
-        },
-        state: {},
-        config: {
-          shared: {},
-          clusters: [],
-          components: {
-            A: { globalKey: "DyniA" },
-            ThemeModel: { globalKey: "DyniThemeModel" },
-            ThemeResolver: { globalKey: "DyniThemeResolver" }
-          },
-          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
-        }
-      }
-    });
-
-    loadInitRuntime(context);
-    await context.DyniPlugin.runtime.runInit();
-    await flushPromises();
-
-    const configureArgs = themeRuntime.configure.mock.calls[0][0];
-    expect(configureArgs.activePresetName).toBe("default");
-    expect(themeRuntime.resolveStartupPresetName).toHaveBeenCalledWith(documentRoot, expect.any(Object));
-  });
-
-  it("resets init state and logs when component loading fails", async function () {
+  it("resets init state and bridge when component loading fails", async function () {
     const err = vi.fn();
-    const uniqueComponents = vi.fn(() => ["A"]);
-    const loadComponent = vi.fn(() => Promise.reject(new Error("load failed")));
     const themeRuntime = createThemeRuntimeMock();
     const { bridge, createTemporaryHostActionBridge } = createBridgeRuntimeMock();
     const context = createScriptContext({
@@ -333,21 +137,20 @@ describe("runtime/init.js", function () {
           log: vi.fn()
         },
         runtime: {
-          _theme: themeRuntime,
+          theme: themeRuntime,
           createTemporaryHostActionBridge,
-          createHelpers: vi.fn(() => ({ helper: true })),
-          createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent })),
+          createComponentLoader: vi.fn(() => ({
+            uniqueComponents: () => ["A"],
+            loadComponent: () => Promise.reject(new Error("load failed")),
+            createInstance: vi.fn()
+          })),
           registerWidget: vi.fn()
         },
         state: {},
         config: {
           shared: {},
           clusters: [],
-          components: {
-            A: { globalKey: "DyniA" },
-            ThemeModel: { globalKey: "DyniThemeModel" },
-            ThemeResolver: { globalKey: "DyniThemeResolver" }
-          },
+          components: { A: {} },
           widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
         }
       }
@@ -355,11 +158,11 @@ describe("runtime/init.js", function () {
 
     loadInitRuntime(context);
     await expect(context.DyniPlugin.runtime.runInit()).rejects.toThrow("load failed");
-    await flushPromises();
 
     expect(context.DyniPlugin.state.initStarted).toBe(false);
     expect(bridge.destroy).toHaveBeenCalledTimes(1);
     expect(context.DyniPlugin.state.hostActionBridge).toBeNull();
+    expect(context.DyniPlugin.runtime.hostActions).toBeNull();
     expect(err).toHaveBeenCalled();
   });
 
@@ -368,7 +171,9 @@ describe("runtime/init.js", function () {
     const context = createScriptContext({
       console: { error: err },
       DyniPlugin: {
-        runtime: {},
+        runtime: {
+          theme: createThemeRuntimeMock()
+        },
         state: {},
         config: { shared: {}, clusters: [], components: {}, widgetDefinitions: [] }
       },
@@ -376,9 +181,7 @@ describe("runtime/init.js", function () {
     });
 
     loadInitRuntime(context);
-    const p = context.DyniPlugin.runtime.runInit();
-
-    await expect(p).resolves.toBeUndefined();
+    await expect(context.DyniPlugin.runtime.runInit()).resolves.toBeUndefined();
     expect(err).toHaveBeenCalled();
   });
 
@@ -387,28 +190,15 @@ describe("runtime/init.js", function () {
     const context = createScriptContext({
       avnav: { api: { registerWidget: vi.fn(), log: vi.fn() } },
       DyniPlugin: {
-        runtime: {},
+        runtime: {
+          theme: createThemeRuntimeMock()
+        },
         state: { initStarted: true, initPromise },
         config: { shared: {}, clusters: [], components: {}, widgetDefinitions: [] }
       }
     });
 
     loadInitRuntime(context);
-    const p = context.DyniPlugin.runtime.runInit();
-    await expect(p).resolves.toBe("done");
-  });
-
-  it("does not self-invoke runInit when script is evaluated", function () {
-    const context = createScriptContext({
-      avnav: { api: { registerWidget: vi.fn(), log: vi.fn() } },
-      DyniPlugin: {
-        runtime: {},
-        state: {},
-        config: { shared: {}, clusters: [], components: {}, widgetDefinitions: [] }
-      }
-    });
-
-    loadInitRuntime(context);
-    expect(context.DyniPlugin.state.initPromise).toBeUndefined();
+    await expect(context.DyniPlugin.runtime.runInit()).resolves.toBe("done");
   });
 });

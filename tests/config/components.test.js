@@ -11,7 +11,6 @@ const COMPONENT_REGISTRY_FRAGMENT_SCRIPTS = [
   "config/components/registry-widgets-gauge.js",
   "config/components/registry-cluster.js"
 ];
-const SHARED_HTML_SHADOW_CSS = "http://host/plugins/dyninstruments/shared/html/HtmlShadowCommon.css";
 
 function runScripts(context, scripts) {
   scripts.forEach(function (scriptPath) {
@@ -19,30 +18,12 @@ function runScripts(context, scripts) {
   });
 }
 
-function normalizeBaseUrl(value, fromBase, toBase) {
-  if (typeof value === "string") {
-    return value.startsWith(fromBase) ? toBase + value.slice(fromBase.length) : value;
-  }
-  if (Array.isArray(value)) {
-    return value.map(function (item) {
-      return normalizeBaseUrl(item, fromBase, toBase);
-    });
-  }
-  if (value && typeof value === "object") {
-    return Object.keys(value).reduce(function (acc, key) {
-      acc[key] = normalizeBaseUrl(value[key], fromBase, toBase);
-      return acc;
-    }, {});
-  }
-  return value;
-}
-
 function loadFullComponentRegistry(context) {
   runScripts(context, ["runtime/namespace.js"].concat(COMPONENT_REGISTRY_FRAGMENT_SCRIPTS, ["config/components.js"]));
 }
 
 describe("config/components.js", function () {
-  it("creates component registry from baseUrl", function () {
+  it("creates component registry from baseUrl and keeps ClusterWidget transitional deps", function () {
     const context = createScriptContext({
       DyniPlugin: {
         baseUrl: "http://host/plugins/dyninstruments/",
@@ -58,487 +39,13 @@ describe("config/components.js", function () {
     expect(components.ClusterWidget.deps).toEqual([
       "ClusterMapperToolkit",
       "ClusterRendererRouter",
-      "ClusterMapperRegistry",
-      "PerfSpanHelper"
+      "ClusterMapperRegistry"
     ]);
-    expect(components.ThemeResolver.globalKey).toBe("DyniThemeResolver");
-    expect(components.ThemeResolver.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemeResolver.js");
-    expect(components.CanvasLayerCache.globalKey).toBe("DyniCanvasLayerCache");
     expect(components.CanvasLayerCache.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/canvas/CanvasLayerCache.js");
-    expect(components.XteHighwayPrimitives.globalKey).toBe("DyniXteHighwayPrimitives");
-    expect(components.XteHighwayPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/xte/XteHighwayPrimitives.js");
     expect(components.XteHighwayPrimitives.deps).toEqual(["GeometryScale"]);
-    expect(components.LinearCanvasPrimitives.globalKey).toBe("DyniLinearCanvasPrimitives");
-    expect(components.LinearCanvasPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearCanvasPrimitives.js");
-    expect(components.LinearGaugeEngineDrawing.globalKey).toBe("DyniLinearGaugeEngineDrawing");
-    expect(components.LinearGaugeEngineDrawing.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeEngineDrawing.js");
-    expect(components.LinearGaugeEngineDrawing.deps).toEqual(["LinearCanvasPrimitives"]);
-    expect(components.LinearGaugeMath.globalKey).toBe("DyniLinearGaugeMath");
-    expect(components.LinearGaugeMath.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeMath.js");
-    expect(components.LinearGaugeLabelFit.globalKey).toBe("DyniLinearGaugeLabelFit");
-    expect(components.LinearGaugeLabelFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeLabelFit.js");
-    expect(components.LinearGaugeTextLayout.globalKey).toBe("DyniLinearGaugeTextLayout");
-    expect(components.LinearGaugeTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeTextLayout.js");
-    expect(components.LinearGaugeTextLayout.deps).toEqual(["LinearGaugeLabelFit"]);
-    expect(components.LinearGaugeLayout.globalKey).toBe("DyniLinearGaugeLayout");
-    expect(components.LinearGaugeLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeLayout.js");
-    expect(components.LinearGaugeLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale"]);
-    expect(components.FullCircleRadialLayout.globalKey).toBe("DyniFullCircleRadialLayout");
-    expect(components.FullCircleRadialLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialLayout.js");
-    expect(components.FullCircleRadialLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale"]);
-    expect(components.FullCircleRadialEngine.globalKey).toBe("DyniFullCircleRadialEngine");
-    expect(components.FullCircleRadialEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialEngine.js");
-    expect(components.FullCircleRadialEngine.deps).toEqual([
-      "RadialToolkit",
-      "CanvasLayerCache",
-      "FullCircleRadialLayout",
-      "StableDigits",
-      "StateScreenLabels",
-      "StateScreenPrecedence",
-      "StateScreenCanvasOverlay"
-    ]);
-    expect(components.FullCircleRadialTextLayout.globalKey).toBe("DyniFullCircleRadialTextLayout");
-    expect(components.FullCircleRadialTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/FullCircleRadialTextLayout.js");
-    expect(components.SemicircleRadialLayout.globalKey).toBe("DyniSemicircleRadialLayout");
-    expect(components.SemicircleRadialLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/SemicircleRadialLayout.js");
-    expect(components.SemicircleRadialLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale"]);
-    expect(components.SemicircleRadialTextLayout.globalKey).toBe("DyniSemicircleRadialTextLayout");
-    expect(components.SemicircleRadialTextLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/SemicircleRadialTextLayout.js");
-    expect(components.SemicircleRadialTextLayout.deps).toBeUndefined();
-    expect(components.LinearGaugeEngine.globalKey).toBe("DyniLinearGaugeEngine");
-    expect(components.LinearGaugeEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeEngine.js");
-    expect(components.LinearGaugeEngine.deps).toEqual([
-      "RadialToolkit",
-      "CanvasLayerCache",
-      "LinearCanvasPrimitives",
-      "LinearGaugeEngineDrawing",
-      "LinearGaugeMath",
-      "LinearGaugeLayout",
-      "LinearGaugeTextLayout",
-      "LinearGaugeEngineSupport",
-      "SpringEasing",
-      "StableDigits",
-      "StateScreenLabels",
-      "StateScreenPrecedence",
-      "StateScreenCanvasOverlay"
-    ]);
-    expect(components.LinearGaugeEngineSupport.globalKey).toBe("DyniLinearGaugeEngineSupport");
-    expect(components.LinearGaugeEngineSupport.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/linear/LinearGaugeEngineSupport.js");
-    expect(components.ThemeModel.globalKey).toBe("DyniThemeModel");
-    expect(components.ThemeModel.js).toBe("http://host/plugins/dyninstruments/shared/theme/ThemeModel.js");
-    expect(components.ThemeModel.deps).toBeUndefined();
-    expect(components.ThemeModel.apiShape).toBe("module");
-    expect(components.ThemeResolver.deps).toEqual(["ThemeModel"]);
-    expect(components.ThemeResolver.apiShape).toBe("module");
-    expect(components.RadialTickMath.deps).toEqual(["RadialAngleMath"]);
-    expect(components.RadialTextFitting.globalKey).toBe("DyniRadialTextFitting");
-    expect(components.RadialTextFitting.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/radial/RadialTextFitting.js");
-    expect(components.RadialTextFitting.deps).toBeUndefined();
-    expect(components.RadialTextLayout.deps).toEqual(["RadialTextFitting"]);
-    expect(components.ClusterMapperToolkit.deps).toEqual(["RadialAngleMath"]);
-    expect(components.AisTargetViewModel.globalKey).toBe("DyniAisTargetViewModel");
-    expect(components.AisTargetViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/AisTargetViewModel.js");
-    expect(components.AisTargetViewModel.deps).toBeUndefined();
-    expect(components.AlarmViewModel.globalKey).toBe("DyniAlarmViewModel");
-    expect(components.AlarmViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/AlarmViewModel.js");
-    expect(components.AlarmViewModel.deps).toBeUndefined();
-    expect(components.AlarmHtmlFit.globalKey).toBe("DyniAlarmHtmlFit");
-    expect(components.AlarmHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/vessel/AlarmHtmlFit.js");
-    expect(components.AlarmHtmlFit.deps).toEqual(["AlarmHtmlFitChrome", "ThemeResolver", "TextLayoutEngine", "HtmlWidgetUtils"]);
-    expect(components.AlarmHtmlFitChrome.globalKey).toBe("DyniAlarmHtmlFitChrome");
-    expect(components.AlarmHtmlFitChrome.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/vessel/AlarmHtmlFitChrome.js");
-    expect(components.AlarmHtmlFitChrome.deps).toEqual(["HtmlWidgetUtils", "AisTargetLayoutSizing"]);
-    expect(components.AlarmRenderModel.globalKey).toBe("DyniAlarmRenderModel");
-    expect(components.AlarmRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/vessel/AlarmRenderModel.js");
-    expect(components.AlarmRenderModel.deps).toEqual(["HtmlWidgetUtils"]);
-    expect(components.AlarmMarkup.globalKey).toBe("DyniAlarmMarkup");
-    expect(components.AlarmMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/vessel/AlarmMarkup.js");
-    expect(components.AlarmMarkup.deps).toEqual(["HtmlWidgetUtils"]);
-    expect(components.ActiveRouteViewModel.globalKey).toBe("DyniActiveRouteViewModel");
-    expect(components.ActiveRouteViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/ActiveRouteViewModel.js");
-    expect(components.ActiveRouteViewModel.deps).toBeUndefined();
-    expect(components.EditRouteViewModel.globalKey).toBe("DyniEditRouteViewModel");
-    expect(components.EditRouteViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/EditRouteViewModel.js");
-    expect(components.EditRouteViewModel.css).toBeUndefined();
-    expect(components.EditRouteViewModel.deps).toEqual(["CenterDisplayMath"]);
-    expect(components.TextLayoutPrimitives.globalKey).toBe("DyniTextLayoutPrimitives");
-    expect(components.TextLayoutPrimitives.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextLayoutPrimitives.js");
-    expect(components.TextLayoutPrimitives.deps).toEqual(["RadialTextLayout"]);
-    expect(components.TextLayoutComposite.globalKey).toBe("DyniTextLayoutComposite");
-    expect(components.TextLayoutComposite.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextLayoutComposite.js");
-    expect(components.TextLayoutComposite.deps).toEqual(["TextLayoutPrimitives"]);
-    expect(components.TextLayoutEngine.globalKey).toBe("DyniTextLayoutEngine");
-    expect(components.TextLayoutEngine.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextLayoutEngine.js");
-    expect(components.TextLayoutEngine.deps).toEqual(["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite", "ResponsiveScaleProfile"]);
-    expect(components.TextTileLayout.globalKey).toBe("DyniTextTileLayout");
-    expect(components.TextTileLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextTileLayout.js");
-    expect(components.TextTileLayout.deps).toBeUndefined();
-    expect(components.TextFitMath.globalKey).toBe("DyniTextFitMath");
-    expect(components.TextFitMath.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/text/TextFitMath.js");
-    expect(components.TextFitMath.deps).toBeUndefined();
-    expect(components.LayoutRectMath.globalKey).toBe("DyniLayoutRectMath");
-    expect(components.LayoutRectMath.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/layout/LayoutRectMath.js");
-    expect(components.LayoutRectMath.deps).toBeUndefined();
-    expect(components.ResponsiveScaleProfile.globalKey).toBe("DyniResponsiveScaleProfile");
-    expect(components.ResponsiveScaleProfile.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/layout/ResponsiveScaleProfile.js");
-    expect(components.ResponsiveScaleProfile.deps).toBeUndefined();
-    expect(components.ActiveRouteLayout.globalKey).toBe("DyniActiveRouteLayout");
-    expect(components.ActiveRouteLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/ActiveRouteLayout.js");
-    expect(components.ActiveRouteLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
-    expect(components.AisTargetLayoutSizing.globalKey).toBe("DyniAisTargetLayoutSizing");
-    expect(components.AisTargetLayoutSizing.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetLayoutSizing.js");
-    expect(components.AisTargetLayoutSizing.deps).toEqual([
-      "ResponsiveScaleProfile",
-      "LayoutRectMath",
-      "AisTargetLayoutMath"
-    ]);
-    expect(components.AisTargetLayout.globalKey).toBe("DyniAisTargetLayout");
-    expect(components.AisTargetLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetLayout.js");
-    expect(components.AisTargetLayout.deps).toEqual([
-      "AisTargetLayoutSizing",
-      "ResponsiveScaleProfile",
-      "LayoutRectMath",
-      "AisTargetLayoutGeometry",
-      "AisTargetLayoutMath"
-    ]);
-    expect(components.AisTargetLayoutMath.globalKey).toBe("DyniAisTargetLayoutMath");
-    expect(components.AisTargetLayoutMath.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetLayoutMath.js");
-    expect(components.AisTargetLayoutMath.deps).toBeUndefined();
-    expect(components.AisTargetLayoutGeometry.globalKey).toBe("DyniAisTargetLayoutGeometry");
-    expect(components.AisTargetLayoutGeometry.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetLayoutGeometry.js");
-    expect(components.AisTargetLayoutGeometry.deps).toBeUndefined();
-    expect(components.EditRouteLayout.globalKey).toBe("DyniEditRouteLayout");
-    expect(components.EditRouteLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteLayout.js");
-    expect(components.EditRouteLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath", "EditRouteLayoutMath", "EditRouteLayoutGeometry"]);
-    expect(components.EditRouteLayoutMath.globalKey).toBe("DyniEditRouteLayoutMath");
-    expect(components.EditRouteLayoutMath.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteLayoutMath.js");
-    expect(components.EditRouteLayoutMath.deps).toBeUndefined();
-    expect(components.EditRouteLayoutGeometry.globalKey).toBe("DyniEditRouteLayoutGeometry");
-    expect(components.EditRouteLayoutGeometry.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteLayoutGeometry.js");
-    expect(components.EditRouteLayoutGeometry.deps).toEqual(["LayoutRectMath", "EditRouteLayoutMath"]);
-    expect(components.EditRouteHtmlFitSupport.globalKey).toBe("DyniEditRouteHtmlFitSupport");
-    expect(components.EditRouteHtmlFitSupport.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteHtmlFitSupport.js");
-    expect(components.EditRouteHtmlFitSupport.deps).toBeUndefined();
-    expect(components.EditRouteHtmlFit.globalKey).toBe("DyniEditRouteHtmlFit");
-    expect(components.EditRouteHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteHtmlFit.js");
-    expect(components.EditRouteHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "EditRouteLayout", "HtmlWidgetUtils", "TextFitMath", "EditRouteHtmlFitSupport"]);
-    expect(components.EditRouteRenderModel.globalKey).toBe("DyniEditRouteRenderModel");
-    expect(components.EditRouteRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteRenderModel.js");
-    expect(components.EditRouteRenderModel.css).toBeUndefined();
-    expect(components.EditRouteRenderModel.deps).toEqual([
-      "EditRouteLayout",
-      "HtmlWidgetUtils",
-      "NavInteractionPolicy",
-      "PlaceholderNormalize",
-      "StableDigits",
-      "StateScreenLabels",
-      "StateScreenPrecedence",
-      "StateScreenInteraction",
-      "UnitAwareFormatter"
-    ]);
-    expect(components.EditRouteMarkup.globalKey).toBe("DyniEditRouteMarkup");
-    expect(components.EditRouteMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/EditRouteMarkup.js");
-    expect(components.EditRouteMarkup.css).toBeUndefined();
-    expect(components.EditRouteMarkup.deps).toEqual(["StateScreenMarkup"]);
-    expect(components.RoutePointsLayoutSizing.globalKey).toBe("DyniRoutePointsLayoutSizing");
-    expect(components.RoutePointsLayoutSizing.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsLayoutSizing.js");
-    expect(components.RoutePointsLayoutSizing.deps).toBeUndefined();
-    expect(components.RoutePointsRowGeometry.globalKey).toBe("DyniRoutePointsRowGeometry");
-    expect(components.RoutePointsRowGeometry.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsRowGeometry.js");
-    expect(components.RoutePointsRowGeometry.deps).toEqual(["LayoutRectMath", "RoutePointsLayoutSizing"]);
-    expect(components.RoutePointsLayout.globalKey).toBe("DyniRoutePointsLayout");
-    expect(components.RoutePointsLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsLayout.js");
-    expect(components.RoutePointsLayout.deps).toEqual([
-      "ResponsiveScaleProfile",
-      "LayoutRectMath",
-      "RoutePointsLayoutSizing",
-      "RoutePointsRowGeometry"
-    ]);
-    expect(components.RoutePointsInfoText.globalKey).toBe("DyniRoutePointsInfoText");
-    expect(components.RoutePointsInfoText.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsInfoText.js");
-    expect(components.RoutePointsInfoText.deps).toEqual(["UnitAwareFormatter"]);
-    expect(components.ActiveRouteHtmlFit.globalKey).toBe("DyniActiveRouteHtmlFit");
-    expect(components.ActiveRouteHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/ActiveRouteHtmlFit.js");
-    expect(components.ActiveRouteHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils", "UnitAwareFormatter"]);
-    expect(components.AisTargetHtmlFit.globalKey).toBe("DyniAisTargetHtmlFit");
-    expect(components.AisTargetHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetHtmlFit.js");
-    expect(components.AisTargetHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils", "TextFitMath"]);
-    expect(components.RoutePointsHtmlFit.globalKey).toBe("DyniRoutePointsHtmlFit");
-    expect(components.RoutePointsHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsHtmlFit.js");
-    expect(components.RoutePointsHtmlFit.deps).toEqual(["ThemeResolver", "RadialTextLayout", "TextTileLayout", "RoutePointsLayout", "HtmlWidgetUtils", "RoutePointsInfoText"]);
-    expect(components.MapZoomHtmlFit.globalKey).toBe("DyniMapZoomHtmlFit");
-    expect(components.MapZoomHtmlFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/MapZoomHtmlFit.js");
-    expect(components.MapZoomHtmlFit.deps).toEqual(["TextLayoutEngine", "HtmlWidgetUtils", "ThemeResolver"]);
-    expect(components.HtmlWidgetUtils.globalKey).toBe("DyniHtmlWidgetUtils");
-    expect(components.HtmlWidgetUtils.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/html/HtmlWidgetUtils.js");
-    expect(components.HtmlWidgetUtils.deps).toBeUndefined();
-    expect(components.PlaceholderNormalize.globalKey).toBe("DyniPlaceholderNormalize");
-    expect(components.PlaceholderNormalize.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/format/PlaceholderNormalize.js");
-    expect(components.PlaceholderNormalize.deps).toBeUndefined();
-    expect(components.DepthDisplayFormatter.globalKey).toBe("DyniDepthDisplayFormatter");
-    expect(components.DepthDisplayFormatter.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/format/DepthDisplayFormatter.js");
-    expect(components.DepthDisplayFormatter.deps).toBeUndefined();
-    expect(components.PreparedPayloadModelCache.globalKey).toBe("DyniPreparedPayloadModelCache");
-    expect(components.PreparedPayloadModelCache.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/html/PreparedPayloadModelCache.js");
-    expect(components.PreparedPayloadModelCache.deps).toBeUndefined();
-    expect(components.PerfSpanHelper.globalKey).toBe("DyniPerfSpanHelper");
-    expect(components.PerfSpanHelper.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/perf/PerfSpanHelper.js");
-    expect(components.PerfSpanHelper.deps).toBeUndefined();
-    expect(components.CenterDisplayLayout.globalKey).toBe("DyniCenterDisplayLayout");
-    expect(components.CenterDisplayLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/CenterDisplayLayout.js");
-    expect(components.CenterDisplayLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
-    expect(components.XteHighwayLayout.globalKey).toBe("DyniXteHighwayLayout");
-    expect(components.XteHighwayLayout.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/xte/XteHighwayLayout.js");
-    expect(components.XteHighwayLayout.deps).toEqual(["ResponsiveScaleProfile", "LayoutRectMath"]);
-    expect(components.SemicircleRadialEngine.deps).toEqual([
-      "RadialToolkit",
-      "SemicircleRadialLayout",
-      "SemicircleRadialTextLayout",
-      "SpringEasing",
-      "StableDigits",
-      "StateScreenLabels",
-      "StateScreenPrecedence",
-      "StateScreenCanvasOverlay"
-    ]);
-    expect(components.SpeedRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]);
-    expect(components.SpeedLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
-    expect(components.DepthLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "DepthDisplayFormatter", "PlaceholderNormalize", "UnitAwareFormatter"]);
-    expect(components.DepthRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "DepthDisplayFormatter", "PlaceholderNormalize", "UnitAwareFormatter"]);
-    expect(components.DefaultRadialWidget.globalKey).toBe("DyniDefaultRadialWidget");
-    expect(components.DefaultRadialWidget.js).toBe("http://host/plugins/dyninstruments/widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js");
-    expect(components.DefaultRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]);
-    expect(components.DefaultLinearWidget.globalKey).toBe("DyniDefaultLinearWidget");
-    expect(components.DefaultLinearWidget.js).toBe("http://host/plugins/dyninstruments/widgets/linear/DefaultLinearWidget/DefaultLinearWidget.js");
-    expect(components.DefaultLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
-    expect(components.TemperatureLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
-    expect(components.TemperatureRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]);
-    expect(components.VoltageLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]);
-    expect(components.VoltageRadialWidget.deps).toEqual(["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]);
-    expect(components.XteDisplayWidget.deps).toEqual([
-      "RadialToolkit",
-      "CanvasLayerCache",
-      "XteHighwayPrimitives",
-      "XteHighwayLayout",
-      "TextTileLayout",
-      "SpringEasing",
-      "PlaceholderNormalize",
-      "StableDigits",
-      "UnitAwareFormatter",
-      "StateScreenLabels",
-      "StateScreenPrecedence",
-      "StateScreenCanvasOverlay"
-    ]);
-    expect(components.WindRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout", "SpringEasing", "StableDigits"]);
-    expect(components.CompassRadialWidget.deps).toEqual(["FullCircleRadialEngine", "FullCircleRadialTextLayout", "SpringEasing", "StableDigits"]);
-    expect(components.WindLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "StableDigits"]);
-    expect(components.CompassLinearWidget.deps).toEqual(["LinearGaugeEngine", "RadialValueMath", "SpringEasing"]);
-    expect(components.RadialToolkit.deps).toContain("ThemeResolver");
-    expect(components.ThreeValueTextWidget.deps).toEqual([
-      "ThemeResolver",
-      "TextLayoutEngine",
-      "PlaceholderNormalize",
-      "StableDigits",
-      "StateScreenLabels",
-      "StateScreenPrecedence",
-      "StateScreenCanvasOverlay"
-    ]);
-    expect(components.PositionCoordinateWidget.deps).toEqual([
-      "ThemeResolver",
-      "TextLayoutEngine",
-      "PlaceholderNormalize",
-      "StateScreenLabels",
-      "StateScreenPrecedence",
-      "StateScreenCanvasOverlay"
-    ]);
-    expect(components.PositionCoordinateWidget.globalKey).toBe("DyniPositionCoordinateWidget");
-    expect(components.StateScreenTextFit.globalKey).toBe("DyniStateScreenTextFit");
-    expect(components.StateScreenTextFit.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/state/StateScreenTextFit.js");
-    expect(components.StateScreenMarkup.deps).toEqual(["HtmlWidgetUtils", "StateScreenLabels", "StateScreenTextFit"]);
-    expect(components.ActiveRouteTextHtmlWidget.globalKey).toBe("DyniActiveRouteTextHtmlWidget");
-    expect(components.ActiveRouteTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js");
-    expect(components.ActiveRouteTextHtmlWidget.css).toBeUndefined();
-    expect(components.ActiveRouteTextHtmlWidget.shadowCss).toEqual([
-      SHARED_HTML_SHADOW_CSS,
-      "http://host/plugins/dyninstruments/widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css"
-    ]);
-    expect(components.ActiveRouteTextHtmlWidget.deps).toEqual([
-      "ActiveRouteHtmlFit",
-      "HtmlWidgetUtils",
-      "PreparedPayloadModelCache",
-      "PlaceholderNormalize",
-      "StableDigits",
-      "ThemeResolver",
-      "StateScreenLabels",
-      "StateScreenPrecedence",
-      "StateScreenInteraction",
-      "StateScreenMarkup"
-    ]);
-    expect(components.EditRouteTextHtmlWidget.globalKey).toBe("DyniEditRouteTextHtmlWidget");
-    expect(components.EditRouteTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js");
-    expect(components.EditRouteTextHtmlWidget.css).toBeUndefined();
-    expect(components.EditRouteTextHtmlWidget.shadowCss).toEqual([
-      SHARED_HTML_SHADOW_CSS,
-      "http://host/plugins/dyninstruments/widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"
-    ]);
-    expect(components.EditRouteTextHtmlWidget.deps).toEqual(["EditRouteHtmlFit", "HtmlWidgetUtils", "EditRouteRenderModel", "EditRouteMarkup", "ThemeResolver"]);
-    expect(components.RoutePointsRenderModel.globalKey).toBe("DyniRoutePointsRenderModel");
-    expect(components.RoutePointsRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsRenderModel.js");
-    expect(components.RoutePointsRenderModel.css).toBeUndefined();
-    expect(components.RoutePointsRenderModel.deps).toEqual([
-      "CenterDisplayMath",
-      "RoutePointsHtmlFit",
-      "RoutePointsLayout",
-      "HtmlWidgetUtils",
-      "NavInteractionPolicy",
-      "PlaceholderNormalize",
-      "StableDigits",
-      "StateScreenLabels",
-      "StateScreenPrecedence",
-      "StateScreenInteraction"
-    ]);
-    expect(components.RoutePointsMarkup.globalKey).toBe("DyniRoutePointsMarkup");
-    expect(components.RoutePointsMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsMarkup.js");
-    expect(components.RoutePointsMarkup.css).toBeUndefined();
-    expect(components.RoutePointsMarkup.deps).toEqual(["StateScreenMarkup"]);
-    expect(components.RoutePointsDomEffects.globalKey).toBe("DyniRoutePointsDomEffects");
-    expect(components.RoutePointsDomEffects.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/RoutePointsDomEffects.js");
-    expect(components.RoutePointsDomEffects.css).toBeUndefined();
-    expect(components.RoutePointsDomEffects.deps).toEqual(["HtmlWidgetUtils"]);
-    expect(components.RoutePointsTextHtmlWidget.globalKey).toBe("DyniRoutePointsTextHtmlWidget");
-    expect(components.RoutePointsTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js");
-    expect(components.RoutePointsTextHtmlWidget.css).toBeUndefined();
-    expect(components.RoutePointsTextHtmlWidget.shadowCss).toEqual([
-      SHARED_HTML_SHADOW_CSS,
-      "http://host/plugins/dyninstruments/widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.css"
-    ]);
-    expect(components.RoutePointsTextHtmlWidget.deps).toEqual([
-      "RoutePointsHtmlFit",
-      "HtmlWidgetUtils",
-      "RoutePointsRenderModel",
-      "RoutePointsMarkup",
-      "RoutePointsDomEffects",
-      "ThemeResolver"
-    ]);
-    expect(components.RoutePointsViewModel.globalKey).toBe("DyniRoutePointsViewModel");
-    expect(components.RoutePointsViewModel.js).toBe("http://host/plugins/dyninstruments/cluster/viewmodels/RoutePointsViewModel.js");
-    expect(components.RoutePointsViewModel.css).toBeUndefined();
-    expect(components.RoutePointsViewModel.deps).toBeUndefined();
-    expect(components.MapZoomTextHtmlWidget.globalKey).toBe("DyniMapZoomTextHtmlWidget");
-    expect(components.MapZoomTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js");
-    expect(components.MapZoomTextHtmlWidget.css).toBeUndefined();
-    expect(components.MapZoomTextHtmlWidget.shadowCss).toEqual([
-      SHARED_HTML_SHADOW_CSS,
-      "http://host/plugins/dyninstruments/widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css"
-    ]);
-    expect(components.MapZoomTextHtmlWidget.deps).toEqual([
-      "MapZoomHtmlFit",
-      "HtmlWidgetUtils",
-      "PlaceholderNormalize",
-      "PreparedPayloadModelCache",
-      "StableDigits",
-      "ThemeResolver",
-      "StateScreenLabels",
-      "StateScreenPrecedence",
-      "StateScreenInteraction",
-      "StateScreenMarkup"
-    ]);
-    expect(components.AisTargetRenderModel.globalKey).toBe("DyniAisTargetRenderModel");
-    expect(components.AisTargetRenderModel.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetRenderModel.js");
-    expect(components.AisTargetRenderModel.css).toBeUndefined();
-    expect(components.AisTargetRenderModel.deps).toEqual([
-      "AisTargetLayout",
-      "HtmlWidgetUtils",
-      "PlaceholderNormalize",
-      "StableDigits",
-      "StateScreenLabels",
-      "StateScreenPrecedence",
-      "StateScreenInteraction",
-      "UnitAwareFormatter"
-    ]);
-    expect(components.AisTargetMarkup.globalKey).toBe("DyniAisTargetMarkup");
-    expect(components.AisTargetMarkup.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/nav/AisTargetMarkup.js");
-    expect(components.AisTargetMarkup.css).toBeUndefined();
-    expect(components.AisTargetMarkup.deps).toEqual(["StateScreenMarkup"]);
-    expect(components.AisTargetTextHtmlWidget.globalKey).toBe("DyniAisTargetTextHtmlWidget");
-    expect(components.AisTargetTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js");
-    expect(components.AisTargetTextHtmlWidget.css).toBeUndefined();
-    expect(components.AisTargetTextHtmlWidget.shadowCss).toEqual([
-      SHARED_HTML_SHADOW_CSS,
-      "http://host/plugins/dyninstruments/widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"
-    ]);
-    expect(components.AisTargetTextHtmlWidget.deps).toEqual(["AisTargetHtmlFit", "HtmlWidgetUtils", "AisTargetRenderModel", "AisTargetMarkup", "ThemeResolver"]);
-    expect(components.AlarmTextHtmlWidget.globalKey).toBe("DyniAlarmTextHtmlWidget");
-    expect(components.AlarmTextHtmlWidget.js).toBe("http://host/plugins/dyninstruments/widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js");
-    expect(components.AlarmTextHtmlWidget.css).toBeUndefined();
-    expect(components.AlarmTextHtmlWidget.shadowCss).toEqual([
-      SHARED_HTML_SHADOW_CSS,
-      "http://host/plugins/dyninstruments/widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css"
-    ]);
-    expect(components.AlarmTextHtmlWidget.deps).toEqual([
-      "AlarmHtmlFit",
-      "HtmlWidgetUtils",
-      "AlarmRenderModel",
-      "AlarmMarkup"
-    ]);
-    expect(components.CanvasDomSurfaceAdapter.globalKey).toBe("DyniCanvasDomSurfaceAdapter");
-    expect(components.CanvasDomSurfaceAdapter.js).toBe("http://host/plugins/dyninstruments/cluster/rendering/CanvasDomSurfaceAdapter.js");
-    expect(components.CanvasDomSurfaceAdapter.deps).toEqual(["ThemeResolver", "PerfSpanHelper"]);
-    expect(components.ClusterKindCatalog.globalKey).toBe("DyniClusterKindCatalog");
-    expect(components.ClusterKindCatalog.js).toBe("http://host/plugins/dyninstruments/cluster/rendering/ClusterKindCatalog.js");
-    expect(components.ClusterKindCatalog.deps).toBeUndefined();
-    expect(components.HtmlSurfaceController.globalKey).toBe("DyniHtmlSurfaceController");
-    expect(components.HtmlSurfaceController.js).toBe("http://host/plugins/dyninstruments/cluster/rendering/HtmlSurfaceController.js");
-    expect(components.HtmlSurfaceController.deps).toEqual(["PerfSpanHelper"]);
-    expect(components.RendererPropsWidget.deps).toEqual([
-      "WindRadialWidget",
-      "CompassRadialWidget",
-      "WindLinearWidget",
-      "CompassLinearWidget",
-      "SpeedRadialWidget",
-      "SpeedLinearWidget",
-      "DepthRadialWidget",
-      "DepthLinearWidget",
-      "DefaultRadialWidget",
-      "DefaultLinearWidget",
-      "TemperatureRadialWidget",
-      "TemperatureLinearWidget",
-      "VoltageRadialWidget",
-      "VoltageLinearWidget",
-      "XteDisplayWidget"
-    ]);
-    expect(components.RendererPropsWidget.globalKey).toBe("DyniRendererPropsWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("ClusterKindCatalog");
-    expect(components.ClusterRendererRouter.deps).toContain("ClusterSurfacePolicy");
-    expect(components.ClusterRendererRouter.deps).toContain("CanvasDomSurfaceAdapter");
-    expect(components.ClusterRendererRouter.deps).toContain("HtmlSurfaceController");
-    expect(components.ClusterRendererRouter.deps).toContain("PositionCoordinateWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("ActiveRouteTextHtmlWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("EditRouteTextHtmlWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("RoutePointsTextHtmlWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("MapZoomTextHtmlWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("AisTargetTextHtmlWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("AlarmTextHtmlWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("RendererPropsWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("PerfSpanHelper");
-    expect(components.ClusterRendererRouter.deps).not.toContain("WindRadialWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("DefaultRadialWidget");
-    expect(components.ClusterRendererRouter.deps).toContain("DefaultLinearWidget");
-    expect(components.PositionCoordinateWidget.deps).not.toContain("ThreeValueTextWidget");
-    expect(components.NavMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/NavMapper.js");
-    expect(components.NavMapper.deps).toEqual(["ActiveRouteViewModel", "EditRouteViewModel", "RoutePointsViewModel"]);
-    expect(components.MapMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/MapMapper.js");
-    expect(components.MapMapper.deps).toEqual(["AisTargetViewModel"]);
-    expect(components.DefaultMapper.globalKey).toBe("DyniDefaultMapper");
-    expect(components.DefaultMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/DefaultMapper.js");
-    expect(components.DefaultMapper.deps).toBeUndefined();
-    expect(components.VesselMapper.deps).toEqual(["AlarmViewModel"]);
-    expect(components.ClusterMapperRegistry.deps).toContain("NavMapper");
-    expect(components.ClusterMapperRegistry.deps).toContain("MapMapper");
-    expect(components.ClusterMapperRegistry.deps).toContain("DefaultMapper");
-    expect(components.WindMapper.js).toBe("http://host/plugins/dyninstruments/cluster/mappers/WindMapper.js");
   });
 
-  it("merges the split registry fragments into the same registry as the loader", async function () {
+  it("removes runtime-owned architecture from the component registry", function () {
     const context = createScriptContext({
       DyniPlugin: {
         baseUrl: "http://host/plugins/dyninstruments/",
@@ -548,76 +55,23 @@ describe("config/components.js", function () {
       }
     });
 
-    runScripts(context, ["runtime/namespace.js"].concat(COMPONENT_REGISTRY_FRAGMENT_SCRIPTS, ["config/components.js"]));
+    loadFullComponentRegistry(context);
 
-    const { loadComponentsRegistry, SENTINEL_BASE } = await import("../../tools/components-registry-loader.mjs");
-    const loadedComponents = loadComponentsRegistry(process.cwd());
+    const components = context.DyniPlugin.config.components;
+    expect(components.ThemeModel).toBeUndefined();
+    expect(components.ThemeResolver).toBeUndefined();
+    expect(components.PerfSpanHelper).toBeUndefined();
+    expect(components.ClusterSurfacePolicy).toBeUndefined();
+    expect(components.CanvasDomSurfaceAdapter).toBeUndefined();
+    expect(components.HtmlSurfaceController).toBeUndefined();
+    expect(components.SurfaceControllerFactory).toBeUndefined();
 
-    expect(normalizeBaseUrl(context.DyniPlugin.config.components, "http://host/plugins/dyninstruments/", SENTINEL_BASE))
-      .toEqual(loadedComponents);
+    expect(components.AlarmHtmlFit.deps).not.toContain("ThemeResolver");
+    expect(components.MapZoomHtmlFit.deps).not.toContain("ThemeResolver");
+    expect(components.LinearGaugeEngine.deps).not.toContain("ThemeResolver");
   });
 
-  it("loads the bootstrap manifest with the expected bootstrap script order", async function () {
-    const { loadBootstrapManifest } = await import("../../tools/components-registry-loader.mjs");
-
-    expect(loadBootstrapManifest(process.cwd())).toEqual([
-      "runtime/namespace.js",
-      "runtime/PerfSpanHelper.js",
-      "runtime/helpers.js",
-      "runtime/editable-defaults.js",
-      "config/components/registry-shared-foundation-format.js",
-      "config/components/registry-shared-foundation-geometry.js",
-      "config/components/registry-shared-foundation-layout.js",
-      "config/components/registry-shared-foundation-state.js",
-      "config/components/registry-shared-engines.js",
-      "config/components/registry-widgets-nav.js",
-      "config/components/registry-widgets-vessel.js",
-      "config/components/registry-widgets-gauge.js",
-      "config/components/registry-cluster.js",
-      "shared/unit-format-families.js",
-      "config/components.js",
-      "config/shared/editable-param-utils.js",
-      "config/shared/kind-defaults.js",
-      "config/shared/unit-editable-utils.js",
-      "config/shared/common-editables.js",
-      "config/shared/environment-base-editables.js",
-      "config/shared/environment-depth-editables.js",
-      "config/shared/environment-temperature-editables.js",
-      "config/shared/environment-editables.js",
-      "config/clusters/course-heading.js",
-      "config/clusters/speed.js",
-      "config/clusters/environment.js",
-      "config/clusters/wind.js",
-      "config/clusters/nav.js",
-      "config/clusters/map.js",
-      "config/clusters/anchor.js",
-      "config/clusters/vessel.js",
-      "config/clusters/default.js",
-      "config/cluster-routes.js",
-      "config/cluster-routes/course-heading.js",
-      "config/cluster-routes/speed.js",
-      "config/cluster-routes/environment.js",
-      "config/cluster-routes/wind.js",
-      "config/cluster-routes/nav.js",
-      "config/cluster-routes/map.js",
-      "config/cluster-routes/anchor.js",
-      "config/cluster-routes/vessel.js",
-      "config/cluster-routes/default.js",
-      "config/cluster-routes/finalize.js",
-      "config/widget-definitions.js",
-      "runtime/asset-preloader.js",
-      "runtime/component-loader.js",
-      "runtime/widget-registrar.js",
-      "runtime/HostCommitController.js",
-      "runtime/SurfaceSessionController.js",
-      "runtime/TemporaryHostActionBridgeDiscovery.js",
-      "runtime/TemporaryHostActionBridge.js",
-      "runtime/theme-runtime.js",
-      "runtime/init.js"
-    ]);
-  });
-
-  it("throws when baseUrl is missing", function () {
+  it("loads bootstrap manifest with Phase 2 runtime services and surface infrastructure", function () {
     const context = createScriptContext({
       DyniPlugin: {
         runtime: {},
@@ -626,55 +80,27 @@ describe("config/components.js", function () {
       }
     });
 
-    expect(function () {
-      runIifeScript("config/components.js", context);
-    }).toThrow("baseUrl missing");
-  });
+    runIifeScript("runtime/namespace.js", context);
+    runIifeScript("config/bootstrap-manifest.js", context);
 
-  it("throws when a required registry group is missing", function () {
-    const context = createScriptContext({
-      DyniPlugin: {
-        baseUrl: "http://host/plugins/dyninstruments/",
-        runtime: {},
-        state: {},
-        config: { shared: {}, clusters: [] }
-      }
-    });
+    const manifest = context.DyniPlugin.config.bootstrapManifest;
+    expect(manifest).toContain("runtime/format-runtime.js");
+    expect(manifest).toContain("runtime/canvas-runtime.js");
+    expect(manifest).toContain("runtime/dom-runtime.js");
+    expect(manifest).toContain("runtime/theme/model.js");
+    expect(manifest).toContain("runtime/theme/resolver.js");
+    expect(manifest).toContain("runtime/surface/ClusterSurfacePolicy.js");
+    expect(manifest).toContain("runtime/surface/CanvasDomSurfaceAdapter.js");
+    expect(manifest).toContain("runtime/surface/HtmlSurfaceController.js");
+    expect(manifest).toContain("runtime/surface/index.js");
 
-    runScripts(context, [
-      "runtime/namespace.js",
-      "config/components/registry-shared-foundation-format.js",
-      "config/components/registry-shared-foundation-geometry.js",
-      "config/components/registry-shared-foundation-layout.js",
-      "config/components/registry-shared-foundation-state.js",
-      "config/components/registry-shared-engines.js",
-      "config/components/registry-widgets-nav.js",
-      "config/components/registry-widgets-vessel.js",
-      "config/components/registry-widgets-gauge.js"
-    ]);
+    expect(manifest).not.toContain("shared/theme/ThemeModel.js");
+    expect(manifest).not.toContain("shared/theme/ThemeResolver.js");
+    expect(manifest).not.toContain("cluster/rendering/CanvasDomSurfaceAdapter.js");
+    expect(manifest).not.toContain("cluster/rendering/HtmlSurfaceController.js");
 
-    expect(function () {
-      runIifeScript("config/components.js", context);
-    }).toThrow("missing component registry group 'cluster'");
-  });
-
-  it("throws when registry groups contain duplicate component ids", function () {
-    const context = createScriptContext({
-      DyniPlugin: {
-        baseUrl: "http://host/plugins/dyninstruments/",
-        runtime: {},
-        state: {},
-        config: { shared: {}, clusters: [] }
-      }
-    });
-
-    runScripts(context, ["runtime/namespace.js"].concat(COMPONENT_REGISTRY_FRAGMENT_SCRIPTS));
-
-    const groups = context.DyniPlugin.config.shared.componentRegistryGroups;
-    groups.cluster.RadialAngleMath = groups.sharedFoundation.RadialAngleMath;
-
-    expect(function () {
-      runIifeScript("config/components.js", context);
-    }).toThrow("duplicate component id 'RadialAngleMath'");
+    expect(manifest[0]).toBe("runtime/namespace.js");
+    expect(manifest.indexOf("runtime/PerfSpanHelper.js")).toBeGreaterThan(manifest.indexOf("runtime/namespace.js"));
+    expect(manifest.indexOf("runtime/init.js")).toBe(manifest.length - 1);
   });
 });

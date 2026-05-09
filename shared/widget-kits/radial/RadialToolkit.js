@@ -1,7 +1,7 @@
 /**
  * Module: RadialToolkit - Facade that composes shared gauge utility modules
  * Documentation: documentation/radial/gauge-shared-api.md
- * Depends: ThemeResolver, RadialTextLayout, RadialValueMath, RadialAngleMath, RadialTickMath, RadialCanvasPrimitives, RadialFrameRenderer
+ * Depends: componentContext.theme.tokens, RadialTextLayout, RadialValueMath, RadialAngleMath, RadialTickMath, RadialCanvasPrimitives, RadialFrameRenderer
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,14 +10,14 @@
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const theme = Helpers.getModule("ThemeResolver");
-    const text = Helpers.getModule("RadialTextLayout").create(def, Helpers);
-    const value = Helpers.getModule("RadialValueMath").create(def, Helpers);
-    const angle = Helpers.getModule("RadialAngleMath").create(def, Helpers);
-    const tick = Helpers.getModule("RadialTickMath").create(def, Helpers);
-    const primitive = Helpers.getModule("RadialCanvasPrimitives").create(def, Helpers);
-    const dial = Helpers.getModule("RadialFrameRenderer").create(def, Helpers);
+  function create(def, componentContext) {
+    const theme = componentContext.theme.tokens;
+    const text = componentContext.components.require("RadialTextLayout");
+    const value = componentContext.components.require("RadialValueMath");
+    const angle = componentContext.components.require("RadialAngleMath");
+    const tick = componentContext.components.require("RadialTickMath");
+    const primitive = componentContext.components.require("RadialCanvasPrimitives");
+    const dial = componentContext.components.require("RadialFrameRenderer");
 
     const draw = {
       drawRing: primitive.drawRing,

@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
   caption_voltageLinear: "VOLT",
@@ -22,16 +23,13 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
 });
 
 function createAlarmMapper() {
-  const Helpers = {
-    getModule(id) {
-      if (id === "AlarmViewModel") {
-        return loadFresh("cluster/viewmodels/AlarmViewModel.js");
-      }
-      throw new Error("unexpected module: " + id);
+  const componentContext = createComponentContextMock({
+    modules: {
+      AlarmViewModel: loadFresh("cluster/viewmodels/AlarmViewModel.js")
     }
-  };
+  });
 
-  return loadFresh("cluster/mappers/VesselMapper.js").create({}, Helpers);
+  return loadFresh("cluster/mappers/VesselMapper.js").create({}, componentContext);
 }
 
 describe("VesselMapper", function () {

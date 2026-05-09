@@ -1,8 +1,9 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("ThreeValueTextWidget", function () {
-  function makeHelpers(options) {
+  function makeComponentContext(options) {
     const opts = options || {};
     const defaultApplyFormatter = (raw, props) => {
       const fallback = (props && Object.prototype.hasOwnProperty.call(props, "default"))
@@ -16,96 +17,70 @@ describe("ThreeValueTextWidget", function () {
       TextLayoutEngine: loadFresh("shared/widget-kits/text/TextLayoutEngine.js"),
       TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
       TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
-      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js")
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+      ThemeResolver: {
+        resolveForRoot() {
+          return {
+            surface: { fg: "#fff" },
+            font: { family: "sans-serif", familyMono: "monospace", weight: 730, labelWeight: 610 }
+          };
+        }
+      },
+      RadialTextLayout: {
+        create() {
+          return {
+            setFont(ctx, px, weight, family) {
+              const size = Math.max(1, Math.floor(Number(px) || 0));
+              const fontWeight = Math.floor(Number(weight));
+              ctx.font = String(fontWeight) + " " + size + "px " + (family || "sans-serif");
+            },
+            drawDisconnectOverlay() {}
+          };
+        }
+      },
+      RadialValueMath: {
+        create() {
+          return {
+            isFiniteNumber(value) {
+              return typeof value === "number" && isFinite(value);
+            },
+            clamp(value, lo, hi) {
+              const n = Number(value);
+              if (!isFinite(n)) return Number(lo);
+              return Math.max(Number(lo), Math.min(Number(hi), n));
+            },
+            computeMode(ratio, thresholdNormal, thresholdFlat) {
+              if (ratio < thresholdNormal) return "high";
+              if (ratio > thresholdFlat) return "flat";
+              return "normal";
+            }
+          };
+        }
+      },
+      PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+      StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+      StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+      StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+      StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js")
     };
-
-    return {
-      applyFormatter,
-      setupCanvas(canvas) {
-        const ctx = canvas.getContext("2d");
-        const rect = canvas.getBoundingClientRect();
-        return {
-          ctx,
-          W: Math.round(rect.width),
-          H: Math.round(rect.height)
-        };
-      },
-      resolveFontFamily() {
-        return "sans-serif";
-      },
-      resolveTextColor() {
-        return "#fff";
-      },
-      requirePluginRoot(target) {
-        return target;
-      },
-      getModule(id) {
-        if (id === "ThemeResolver") {
-          return {
-            resolveForRoot() {
-              return {
-                surface: { fg: "#fff" },
-                font: { family: "sans-serif", familyMono: "monospace", weight: 730, labelWeight: 610 }
-              };
-            }
-          };
+    return createComponentContextMock({
+      modules,
+      services: {
+        format: { applyFormatter },
+        canvas: {
+          setupCanvas(canvas) {
+            const ctx = canvas.getContext("2d");
+            const rect = canvas.getBoundingClientRect();
+            return { ctx, W: Math.round(rect.width), H: Math.round(rect.height) };
+          }
+        },
+        dom: {
+          requirePluginRoot(target) {
+            return target;
+          }
         }
-        if (id === "RadialTextLayout") {
-          return {
-            create() {
-              return {
-                setFont(ctx, px, weight, family) {
-                  const size = Math.max(1, Math.floor(Number(px) || 0));
-                  const fontWeight = Math.floor(Number(weight));
-                  ctx.font = String(fontWeight) + " " + size + "px " + (family || "sans-serif");
-                },
-                drawDisconnectOverlay() {}
-              };
-            }
-          };
-        }
-        if (id === "RadialValueMath") {
-          return {
-            create() {
-              return {
-                isFiniteNumber(value) {
-                  return typeof value === "number" && isFinite(value);
-                },
-                clamp(value, lo, hi) {
-                  const n = Number(value);
-                  if (!isFinite(n)) return Number(lo);
-                  return Math.max(Number(lo), Math.min(Number(hi), n));
-                },
-                computeMode(ratio, thresholdNormal, thresholdFlat) {
-                  if (ratio < thresholdNormal) return "high";
-                  if (ratio > thresholdFlat) return "flat";
-                  return "normal";
-                }
-              };
-            }
-          };
-        }
-        if (id === "PlaceholderNormalize") {
-          return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        }
-        if (id === "StableDigits") {
-          return loadFresh("shared/widget-kits/format/StableDigits.js");
-        }
-        if (id === "StateScreenLabels") {
-          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        }
-        if (id === "StateScreenPrecedence") {
-          return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-        }
-        if (id === "StateScreenCanvasOverlay") {
-          return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
-        }
-        if (modules[id]) {
-          return modules[id];
-        }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
   }
 
   function countByName(calls, name) {
@@ -189,7 +164,7 @@ describe("ThreeValueTextWidget", function () {
     ];
 
     cases.forEach(function (item) {
-      const helpers = makeHelpers();
+      const helpers = makeComponentContext();
       const spec = loadFresh("widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js").create({}, helpers);
       const canvas = createMockCanvas({
         rectWidth: item.rectWidth,
@@ -207,7 +182,7 @@ describe("ThreeValueTextWidget", function () {
   });
 
   it("misses cache when text content changes", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js").create({}, helpers);
     const canvas = createMockCanvas({
       rectWidth: 220,
@@ -226,7 +201,7 @@ describe("ThreeValueTextWidget", function () {
   });
 
   it("misses cache when dimensions change", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js").create({}, helpers);
     const props = { value: "12.3", caption: "SPD", unit: "kn" };
     const canvasWide = createMockCanvas({
@@ -250,7 +225,7 @@ describe("ThreeValueTextWidget", function () {
   });
 
   it("keeps draw output semantics unchanged on cache hits", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js").create({}, helpers);
     const canvas = createMockCanvas({
       rectWidth: 220,
@@ -303,9 +278,9 @@ describe("ThreeValueTextWidget", function () {
     ];
 
     cases.forEach(function (item) {
-      const compactHelpers = makeHelpers();
+      const compactHelpers = makeComponentContext();
       const compactSpec = loadFresh("widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js").create({}, compactHelpers);
-      const compactEngine = compactHelpers.getModule("TextLayoutEngine").create({}, compactHelpers);
+      const compactEngine = compactHelpers.components.require("TextLayoutEngine");
       const compactMode = compactEngine.computeModeLayout({
         W: item.compact.width,
         H: item.compact.height,
@@ -318,9 +293,9 @@ describe("ThreeValueTextWidget", function () {
       const compactCalls = renderCaptured(compactSpec, item.compact.width, item.compact.height, props);
       const compactTarget = findTextCall(compactCalls, item.targetText);
 
-      const largeHelpers = makeHelpers();
+      const largeHelpers = makeComponentContext();
       const largeSpec = loadFresh("widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js").create({}, largeHelpers);
-      const largeEngine = largeHelpers.getModule("TextLayoutEngine").create({}, largeHelpers);
+      const largeEngine = largeHelpers.components.require("TextLayoutEngine");
       const largeMode = largeEngine.computeModeLayout({
         W: item.large.width,
         H: item.large.height,
@@ -348,7 +323,7 @@ describe("ThreeValueTextWidget", function () {
   });
 
   it("normalizes formatter fallback tokens to --- for rendered values", function () {
-    const helpers = makeHelpers({
+    const helpers = makeComponentContext({
       applyFormatter() {
         return "--:--:--";
       }
@@ -367,7 +342,7 @@ describe("ThreeValueTextWidget", function () {
   });
 
   it("renders disconnected state-screen instead of numeric content", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js").create({}, helpers);
     const captured = renderCaptured(spec, 220, 140, {
       value: 12.3,
@@ -383,7 +358,7 @@ describe("ThreeValueTextWidget", function () {
   });
 
   it("uses padded mono value text when stableDigits is enabled", function () {
-    const helpers = makeHelpers();
+    const helpers = makeComponentContext();
     const spec = loadFresh("widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js").create({}, helpers);
     const captured = renderCaptured(spec, 220, 140, {
       value: 7.5,

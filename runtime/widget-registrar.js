@@ -42,8 +42,8 @@
     };
   }
 
-  function registerWidget(component, widgetDef, Helpers) {
-    const spec = component.create(widgetDef.def, Helpers) || {};
+  function registerWidget(componentSpec, widgetDef) {
+    const spec = componentSpec || {};
 
     const defaultClass = "dyniplugin";
     const wantsHide = !!spec.wantsHideNativeHead;
@@ -66,7 +66,7 @@
     const updateFunction = composeUpdates(spec.updateFunction, widgetDef.def.updateFunction);
 
     function attachHostActions(ctx) {
-      ctx.hostActions = Helpers.getHostActions();
+      ctx.hostActions = runtime.hostActions;
     }
 
     function wrapWidgetContext(fn) {

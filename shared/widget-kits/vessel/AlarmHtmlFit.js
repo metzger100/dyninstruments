@@ -1,7 +1,7 @@
 /**
  * Module: AlarmHtmlFit - Text-fit and token-style owner for vessel alarm HTML
  * Documentation: documentation/widgets/alarm.md
- * Depends: ThemeResolver, TextLayoutEngine, AlarmHtmlFitChrome, HtmlWidgetUtils
+ * Depends: componentContext.theme.tokens, TextLayoutEngine, AlarmHtmlFitChrome, HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -191,11 +191,11 @@
     };
   }
 
-  function create(def, Helpers) {
-    const htmlUtils = Helpers.getModule("HtmlWidgetUtils").create(def, Helpers);
-    const textLayout = Helpers.getModule("TextLayoutEngine").create(def, Helpers);
-    const themeResolver = Helpers.getModule("ThemeResolver");
-    const chromeApi = Helpers.getModule("AlarmHtmlFitChrome").create(def, Helpers);
+  function create(def, componentContext) {
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const textLayout = componentContext.components.require("TextLayoutEngine");
+    const themeResolver = componentContext.theme.tokens;
+    const chromeApi = componentContext.components.require("AlarmHtmlFitChrome");
 
     function compute(args) {
       const cfg = args || {};
@@ -206,7 +206,7 @@
         return null;
       }
 
-      const rootEl = Helpers.requirePluginRoot(targetEl);
+      const rootEl = componentContext.dom.requirePluginRoot(targetEl);
       const theme = themeResolver.resolveForRoot(rootEl);
       const tokens = resolveThemeColors(theme);
       const measureCtx = resolveMeasureContext(cfg.hostContext, targetEl);

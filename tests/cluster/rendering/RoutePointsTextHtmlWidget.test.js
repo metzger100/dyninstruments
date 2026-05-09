@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RoutePointsTextHtmlWidget", function () {
   function createRenderer(options) {
@@ -62,79 +63,44 @@ describe("RoutePointsTextHtmlWidget", function () {
     const measureListScrollbarGutter = opts.measureListScrollbarGutter || vi.fn(() => 0);
     const computeNaturalHeight = opts.computeNaturalHeight || vi.fn(() => ({ cappedHeight: 240 }));
 
-    const Helpers = {
-      getModule(id) {
-        if (id === "RoutePointsHtmlFit") {
-          return {
-            create() {
-              return { compute: fitCompute };
-            }
-          };
+    const componentContext = createComponentContextMock({
+      modules: {
+        RoutePointsHtmlFit: { create() { return { compute: fitCompute }; } },
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+        RoutePointsRenderModel: { create() { return { buildModel }; } },
+        RoutePointsMarkup: loadFresh("shared/widget-kits/nav/RoutePointsMarkup.js"),
+        RoutePointsDomEffects: {
+          create() {
+            return {
+              measureListScrollbarGutter,
+              maybeRevealActiveRow: maybeReveal,
+              scheduleSelectedRowVisibility: maybeReveal
+            };
+          }
+        },
+        RoutePointsLayout: { create() { return { computeNaturalHeight }; } },
+        StateScreenMarkup: loadFresh("shared/widget-kits/state/StateScreenMarkup.js"),
+        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js")
+      },
+      services: {
+        themeTokens: {
+          resolveForRoot() {
+            return {
+              font: {
+                family: "sans-serif",
+                familyMono: "monospace",
+                weight: 720,
+                labelWeight: 610
+              }
+            };
+          }
         }
-        if (id === "HtmlWidgetUtils") {
-          return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-        }
-        if (id === "ThemeResolver") {
-          return {
-            resolveForRoot() {
-              return {
-                font: {
-                  family: "sans-serif",
-                  familyMono: "monospace",
-                  weight: 720,
-                  labelWeight: 610
-                }
-              };
-            }
-          };
-        }
-        if (id === "RoutePointsRenderModel") {
-          return {
-            create() {
-              return {
-                buildModel
-              };
-            }
-          };
-        }
-        if (id === "RoutePointsMarkup") {
-          return loadFresh("shared/widget-kits/nav/RoutePointsMarkup.js");
-        }
-        if (id === "RoutePointsDomEffects") {
-          return {
-            create() {
-              return {
-                measureListScrollbarGutter,
-                maybeRevealActiveRow: maybeReveal,
-                scheduleSelectedRowVisibility: maybeReveal
-              };
-            }
-          };
-        }
-        if (id === "RoutePointsLayout") {
-          return {
-            create() {
-              return {
-                computeNaturalHeight
-              };
-            }
-          };
-        }
-        if (id === "StateScreenMarkup") {
-          return loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
-        }
-        if (id === "StateScreenTextFit") {
-          return loadFresh("shared/widget-kits/state/StateScreenTextFit.js");
-        }
-        if (id === "StateScreenLabels") {
-          return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        }
-        throw new Error("unexpected module: " + id);
       }
-    };
+    });
 
     return {
-      renderer: loadFresh("widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js").create({}, Helpers),
+      renderer: loadFresh("widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js").create({}, componentContext),
       buildModel,
       fitCompute,
       maybeReveal,

@@ -1,0 +1,80 @@
+function createComponentContextMock(options) {
+  const opts = options || {};
+  const def = opts.def || {};
+  const modules = opts.modules || {};
+  const services = opts.services || {};
+  const instanceCache = Object.create(null);
+
+  const perf = services.perf || {
+    startSpan() { return null; },
+    endSpan() {}
+  };
+
+  const format = services.format || {
+    applyFormatter(value, cfg) {
+      if (value == null || Number.isNaN(value)) {
+        if (cfg && Object.prototype.hasOwnProperty.call(cfg, "default")) {
+          return cfg.default;
+        }
+        return "---";
+      }
+      return String(value);
+    }
+  };
+
+  const canvas = services.canvas || {
+    setupCanvas() { return null; }
+  };
+
+  const dom = services.dom || {
+    requirePluginRoot() { return null; },
+    getNightModeState() { return false; }
+  };
+
+  const hostActions = Object.prototype.hasOwnProperty.call(services, "hostActions")
+    ? services.hostActions
+    : {};
+
+  const themeTokens = services.themeTokens || {
+    resolveForRoot() {
+      return {
+        surface: { fg: "#000", bg: "#fff", border: "#000" },
+        font: { family: "sans-serif", familyMono: "monospace", weight: 700, labelWeight: 700 },
+        colors: {}
+      };
+    }
+  };
+
+  const context = {
+    components: {
+      require(id) {
+        if (Object.prototype.hasOwnProperty.call(instanceCache, id)) {
+          return instanceCache[id];
+        }
+        if (!Object.prototype.hasOwnProperty.call(modules, id)) {
+          throw new Error("component-context-mock: missing module '" + id + "'");
+        }
+        const entry = modules[id];
+        const value = entry && typeof entry.create === "function"
+          ? entry.create(def, context)
+          : entry;
+        instanceCache[id] = value;
+        return value;
+      }
+    },
+    theme: {
+      tokens: themeTokens
+    },
+    perf: perf,
+    format: format,
+    canvas: canvas,
+    dom: dom,
+    hostActions: hostActions
+  };
+
+  return context;
+}
+
+module.exports = {
+  createComponentContextMock
+};

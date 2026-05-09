@@ -1,5 +1,6 @@
 const { loadFresh } = require("../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../helpers/mock-canvas");
+const { createComponentContextMock } = require("../helpers/component-context-mock");
 
 function createActiveRouteWidget() {
   const fitCompute = vi.fn(function () {
@@ -26,8 +27,8 @@ function createActiveRouteWidget() {
         defaultMode: "normal"
       });
     },
-    formatMetric(rawValue, formatter, formatterParameters, defaultText, Helpers, placeholderNormalize) {
-      const out = String(Helpers.applyFormatter(rawValue, {
+    formatMetric(rawValue, formatter, formatterParameters, defaultText, _context, placeholderNormalize) {
+      const out = String(componentContext.format.applyFormatter(rawValue, {
         formatter: formatter,
         formatterParameters: formatterParameters,
         default: defaultText
@@ -47,60 +48,41 @@ function createActiveRouteWidget() {
       });
     }
   };
-  const Helpers = {
-    applyFormatter(value, formatterOptions) {
-      const cfg = formatterOptions || {};
-      return value == null ? cfg.default : String(value);
+  const componentContext = createComponentContextMock({
+    modules: {
+      ActiveRouteHtmlFit: { create: () => Object.assign({ compute: fitCompute }, htmlFitStub) },
+      HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+      PreparedPayloadModelCache: loadFresh("shared/widget-kits/html/PreparedPayloadModelCache.js"),
+      PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+      StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+      StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+      StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+      StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js"),
+      StateScreenMarkup: loadFresh("shared/widget-kits/state/StateScreenMarkup.js"),
+      StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js")
     },
-    getModule(id) {
-      if (id === "ActiveRouteHtmlFit") {
-        return { create: () => Object.assign({ compute: fitCompute }, htmlFitStub) };
+    services: {
+      format: {
+        applyFormatter(value, formatterOptions) {
+          const cfg = formatterOptions || {};
+          return value == null ? cfg.default : String(value);
+        }
+      },
+      themeTokens: {
+        resolveForRoot() {
+          return {
+            font: {
+              family: "sans-serif",
+              familyMono: "monospace",
+              weight: 720,
+              labelWeight: 610
+            }
+          };
+        }
       }
-      if (id === "HtmlWidgetUtils") {
-        return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-      }
-      if (id === "PreparedPayloadModelCache") {
-        return loadFresh("shared/widget-kits/html/PreparedPayloadModelCache.js");
-      }
-      if (id === "PlaceholderNormalize") {
-        return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-      }
-      if (id === "StableDigits") {
-        return loadFresh("shared/widget-kits/format/StableDigits.js");
-      }
-      if (id === "StateScreenLabels") {
-        return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-      }
-      if (id === "StateScreenPrecedence") {
-        return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-      }
-      if (id === "StateScreenInteraction") {
-        return loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
-      }
-      if (id === "StateScreenMarkup") {
-        return loadFresh("shared/widget-kits/state/StateScreenMarkup.js");
-      }
-      if (id === "StateScreenTextFit") {
-        return loadFresh("shared/widget-kits/state/StateScreenTextFit.js");
-      }
-      if (id === "ThemeResolver") {
-        return {
-          resolveForRoot() {
-            return {
-              font: {
-                family: "sans-serif",
-                familyMono: "monospace",
-                weight: 720,
-                labelWeight: 610
-              }
-            };
-          }
-        };
-      }
-      throw new Error("unexpected module: " + id);
     }
-  };
-  return loadFresh("widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js").create({}, Helpers);
+  });
+  return loadFresh("widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js").create({}, componentContext);
 }
 
 function mountHtml(rendererSpec, props) {
@@ -130,10 +112,131 @@ function mountHtml(rendererSpec, props) {
   return mountEl;
 }
 
-function createRenderModelHelpers() {
+function createRenderModelContext() {
   const moduleCache = Object.create(null);
-  return {
-    applyFormatter(value, formatterOptions) {
+  function loadModuleById(id) {
+    if (!moduleCache[id]) {
+      if (id === "EditRouteLayout") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayout.js");
+      }
+      else if (id === "EditRouteLayoutMath") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayoutMath.js");
+      }
+      else if (id === "EditRouteLayoutGeometry") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayoutGeometry.js");
+      }
+      else if (id === "ResponsiveScaleProfile") {
+        moduleCache[id] = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+      }
+      else if (id === "LayoutRectMath") {
+        moduleCache[id] = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+      }
+      else if (id === "RoutePointsLayout") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsLayout.js");
+      }
+      else if (id === "RadialTextFitting") {
+        moduleCache[id] = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
+      }
+      else if (id === "RadialTextLayout") {
+        moduleCache[id] = loadFresh("shared/widget-kits/radial/RadialTextLayout.js");
+      }
+      else if (id === "TextTileLayout") {
+        moduleCache[id] = loadFresh("shared/widget-kits/text/TextTileLayout.js");
+      }
+      else if (id === "RoutePointsInfoText") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js");
+      }
+      else if (id === "RoutePointsHtmlFit") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js");
+      }
+      else if (id === "RoutePointsLayoutSizing") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
+      }
+      else if (id === "RoutePointsRowGeometry") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js");
+      }
+      else if (id === "CenterDisplayMath") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/CenterDisplayMath.js");
+      }
+      else if (id === "AisTargetLayout") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayout.js");
+      }
+      else if (id === "AisTargetLayoutSizing") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
+      }
+      else if (id === "AisTargetLayoutGeometry") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
+      }
+      else if (id === "AisTargetLayoutMath") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
+      }
+      else if (id === "HtmlWidgetUtils") {
+        moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
+      }
+      else if (id === "UnitAwareFormatter") {
+        moduleCache[id] = loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
+      }
+      else if (id === "NavInteractionPolicy") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/NavInteractionPolicy.js");
+      }
+      else if (id === "PlaceholderNormalize") {
+        moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
+      }
+      else if (id === "StableDigits") {
+        moduleCache[id] = loadFresh("shared/widget-kits/format/StableDigits.js");
+      }
+      else if (id === "StateScreenLabels") {
+        moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
+      }
+      else if (id === "StateScreenPrecedence") {
+        moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
+      }
+      else if (id === "StateScreenInteraction") {
+        moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
+      }
+      else {
+        throw new Error("unexpected module: " + id);
+      }
+    }
+    return moduleCache[id];
+  }
+  const moduleIds = [
+    "EditRouteLayout",
+    "EditRouteLayoutMath",
+    "EditRouteLayoutGeometry",
+    "ResponsiveScaleProfile",
+    "LayoutRectMath",
+    "RoutePointsLayout",
+    "RadialTextFitting",
+    "RadialTextLayout",
+    "TextTileLayout",
+    "RoutePointsInfoText",
+    "RoutePointsHtmlFit",
+    "RoutePointsLayoutSizing",
+    "RoutePointsRowGeometry",
+    "CenterDisplayMath",
+    "AisTargetLayout",
+    "AisTargetLayoutSizing",
+    "AisTargetLayoutGeometry",
+    "AisTargetLayoutMath",
+    "HtmlWidgetUtils",
+    "UnitAwareFormatter",
+    "NavInteractionPolicy",
+    "PlaceholderNormalize",
+    "StableDigits",
+    "StateScreenLabels",
+    "StateScreenPrecedence",
+    "StateScreenInteraction"
+  ];
+  const modules = Object.create(null);
+  moduleIds.forEach(function (id) {
+    modules[id] = loadModuleById(id);
+  });
+  return createComponentContextMock({
+    modules,
+    services: {
+      format: {
+        applyFormatter(value, formatterOptions) {
       const cfg = formatterOptions || {};
       if (value == null || Number.isNaN(value)) {
         return Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
@@ -153,135 +256,46 @@ function createRenderModelHelpers() {
         return "CLOCK:" + String(value);
       }
       return String(value);
-    },
-    getModule(id) {
-      if (!moduleCache[id]) {
-        if (id === "EditRouteLayout") {
-          moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayout.js");
         }
-        else if (id === "EditRouteLayoutMath") {
-          moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayoutMath.js");
-        }
-        else if (id === "EditRouteLayoutGeometry") {
-          moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayoutGeometry.js");
-        }
-        else if (id === "ResponsiveScaleProfile") {
-          moduleCache[id] = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-        }
-        else if (id === "LayoutRectMath") {
-          moduleCache[id] = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-        }
-        else if (id === "RoutePointsLayout") {
-          moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsLayout.js");
-        }
-        else if (id === "RadialTextFitting") {
-          moduleCache[id] = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
-        }
-        else if (id === "RadialTextLayout") {
-          moduleCache[id] = loadFresh("shared/widget-kits/radial/RadialTextLayout.js");
-        }
-        else if (id === "TextTileLayout") {
-          moduleCache[id] = loadFresh("shared/widget-kits/text/TextTileLayout.js");
-        }
-        else if (id === "RoutePointsInfoText") {
-          moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js");
-        }
-        else if (id === "RoutePointsHtmlFit") {
-          moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js");
-        }
-        else if (id === "RoutePointsLayoutSizing") {
-          moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
-        }
-        else if (id === "RoutePointsRowGeometry") {
-          moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js");
-        }
-        else if (id === "CenterDisplayMath") {
-          moduleCache[id] = loadFresh("shared/widget-kits/nav/CenterDisplayMath.js");
-        }
-        else if (id === "AisTargetLayout") {
-          moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayout.js");
-        }
-        else if (id === "AisTargetLayoutSizing") {
-          moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
-        }
-        else if (id === "AisTargetLayoutGeometry") {
-          moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
-        }
-        else if (id === "AisTargetLayoutMath") {
-          moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
-        }
-        else if (id === "HtmlWidgetUtils") {
-          moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-        }
-        else if (id === "UnitAwareFormatter") {
-          moduleCache[id] = loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
-        }
-        else if (id === "NavInteractionPolicy") {
-          moduleCache[id] = loadFresh("shared/widget-kits/nav/NavInteractionPolicy.js");
-        }
-        else if (id === "PlaceholderNormalize") {
-          moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        }
-        else if (id === "StableDigits") {
-          moduleCache[id] = loadFresh("shared/widget-kits/format/StableDigits.js");
-        }
-        else if (id === "StateScreenLabels") {
-          moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-        }
-        else if (id === "StateScreenPrecedence") {
-          moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-        }
-        else if (id === "StateScreenInteraction") {
-          moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
-        }
-        else if (id === "ThemeResolver") {
-          moduleCache[id] = {
-            resolveForRoot() {
-              return {
-                font: {
-                  family: "sans-serif",
-                  familyMono: "monospace",
-                  weight: 720,
-                  labelWeight: 610
-                }
-              };
+      },
+      themeTokens: {
+        resolveForRoot() {
+          return {
+            font: {
+              family: "sans-serif",
+              familyMono: "monospace",
+              weight: 720,
+              labelWeight: 610
             }
           };
         }
-        else {
-          throw new Error("unexpected module: " + id);
-        }
       }
-      return moduleCache[id];
-    }
-  };
-}
-
-function createEditRouteRenderModel() {
-  return loadFresh("shared/widget-kits/nav/EditRouteRenderModel.js").create({}, createRenderModelHelpers());
-}
-
-function createRoutePointsRenderModel() {
-  return loadFresh("shared/widget-kits/nav/RoutePointsRenderModel.js").create({}, createRenderModelHelpers());
-}
-
-function createAisTargetRenderModel() {
-  return loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js").create({}, createRenderModelHelpers());
-}
-
-function createStateOverlay() {
-  return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js").create({}, {
-    getModule(id) {
-      if (id === "StateScreenLabels") {
-        return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-      }
-      throw new Error("unexpected module: " + id);
     }
   });
 }
 
+function createEditRouteRenderModel() {
+  return loadFresh("shared/widget-kits/nav/EditRouteRenderModel.js").create({}, createRenderModelContext());
+}
+
+function createRoutePointsRenderModel() {
+  return loadFresh("shared/widget-kits/nav/RoutePointsRenderModel.js").create({}, createRenderModelContext());
+}
+
+function createAisTargetRenderModel() {
+  return loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js").create({}, createRenderModelContext());
+}
+
+function createStateOverlay() {
+  return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js").create({}, createComponentContextMock({
+    modules: {
+      StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js")
+    }
+  }));
+}
+
 function createSpringMotion() {
-  return loadFresh("shared/widget-kits/anim/SpringEasing.js").create({}, {}).createMotion();
+  return loadFresh("shared/widget-kits/anim/SpringEasing.js").create({}, createComponentContextMock({})).createMotion();
 }
 
 function readTextContent(root, selector) {

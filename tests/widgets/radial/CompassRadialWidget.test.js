@@ -1,36 +1,21 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("CompassRadialWidget", function () {
   it("passes full-circle ratio props without wrapper-owned ratioDefaults", function () {
     let captured;
     const renderCanvas = vi.fn();
 
-    const spec = loadFresh("widgets/radial/CompassRadialWidget/CompassRadialWidget.js").create({}, {
-      getModule(id) {
-        if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
-        if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-        if (id === "SpringEasing") return loadFresh("shared/widget-kits/anim/SpringEasing.js");
-        if (id === "FullCircleRadialTextLayout") {
-          return {
-            create() {
-              return {};
-            }
-          };
-        }
-        if (id !== "FullCircleRadialEngine") throw new Error("unexpected module: " + id);
-        return {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return renderCanvas;
-              }
-            };
-          }
-        };
+    const spec = loadFresh("widgets/radial/CompassRadialWidget/CompassRadialWidget.js").create({}, createComponentContextMock({
+      modules: {
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        SpringEasing: loadFresh("shared/widget-kits/anim/SpringEasing.js"),
+        FullCircleRadialTextLayout: { create() { return {}; } },
+        FullCircleRadialEngine: { create() { return { createRenderer(cfg) { captured = cfg; return renderCanvas; } }; } }
       }
-    });
+    }));
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.ratioProps).toEqual({
@@ -204,41 +189,22 @@ describe("CompassRadialWidget", function () {
     };
 
     const spec = loadFresh("widgets/radial/CompassRadialWidget/CompassRadialWidget.js")
-      .create({}, {
-        setupCanvas(canvas) {
-          const ctx = canvas.getContext("2d");
-          const rect = canvas.getBoundingClientRect();
-          return {
-            ctx,
-            W: Math.round(rect.width),
-            H: Math.round(rect.height)
-          };
-        },
-        resolveFontFamily() {
-          return "sans-serif";
-        },
-        resolveTextColor() {
-          return "#fff";
-        },
-        requirePluginRoot(target) {
-          return target;
-        },
-        getModule(id) {
-          if (id === "FullCircleRadialEngine") return fullCircleEngine;
-          if (id === "FullCircleRadialLayout") return fullCircleLayout;
-          if (id === "FullCircleRadialTextLayout") return textLayout;
-          if (id === "CanvasLayerCache") return layerCache;
-          if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
-          if (id === "LayoutRectMath") return layoutRectMath;
-          if (id === "GeometryScale") return geometryScale;
-          if (id === "StateScreenLabels") return loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-          if (id === "StateScreenPrecedence") return loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-          if (id === "StateScreenCanvasOverlay") return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js");
-          if (id === "StableDigits") return loadFresh("shared/widget-kits/format/StableDigits.js");
-          if (id === "PlaceholderNormalize") return loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-          if (id === "SpringEasing") return opts.springEasingModule || loadFresh("shared/widget-kits/anim/SpringEasing.js");
-          if (id !== "RadialToolkit") throw new Error("unexpected module: " + id);
-          return {
+      .create({}, createComponentContextMock({
+        modules: {
+          FullCircleRadialEngine: fullCircleEngine,
+          FullCircleRadialLayout: fullCircleLayout,
+          FullCircleRadialTextLayout: textLayout,
+          CanvasLayerCache: layerCache,
+          ResponsiveScaleProfile: responsiveScaleProfile,
+          LayoutRectMath: layoutRectMath,
+          GeometryScale: geometryScale,
+          StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+          StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+          StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
+          StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+          PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+          SpringEasing: opts.springEasingModule || loadFresh("shared/widget-kits/anim/SpringEasing.js"),
+          RadialToolkit: {
             create() {
               return {
                 draw: {
@@ -309,23 +275,40 @@ describe("CompassRadialWidget", function () {
                 }
               };
             }
+          }
+        },
+        services: {
+          canvas: {
+            setupCanvas(canvas) {
+          const ctx = canvas.getContext("2d");
+          const rect = canvas.getBoundingClientRect();
+          return {
+            ctx,
+            W: Math.round(rect.width),
+            H: Math.round(rect.height)
           };
+            }
+          },
+          dom: {
+            requirePluginRoot(target) {
+              return target;
+            }
+          }
         }
-      });
+      }));
 
     return {
       spec,
       calls,
       theme,
       computeLayout(width, height) {
-        const api = fullCircleLayout.create({}, {
-          getModule(id) {
-            if (id === "ResponsiveScaleProfile") return responsiveScaleProfile;
-            if (id === "LayoutRectMath") return layoutRectMath;
-            if (id === "GeometryScale") return geometryScale;
-            throw new Error("unexpected layout module: " + id);
+        const api = fullCircleLayout.create({}, createComponentContextMock({
+          modules: {
+            ResponsiveScaleProfile: responsiveScaleProfile,
+            LayoutRectMath: layoutRectMath,
+            GeometryScale: geometryScale
           }
-        });
+        }));
         const mode = api.computeMode(width, height, 0.8, 2.2);
         const insets = api.computeInsets(width, height);
         return api.computeLayout({

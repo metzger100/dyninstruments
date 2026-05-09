@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("SemicircleRadialLayout", function () {
   const themeDefaults = {
@@ -57,20 +58,13 @@ describe("SemicircleRadialLayout", function () {
 
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-    return loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js").create({}, {
-      getModule(id) {
-        if (id === "ResponsiveScaleProfile") {
-          return responsiveScaleProfile;
-        }
-        if (id === "LayoutRectMath") {
-          return loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-        }
-        if (id === "GeometryScale") {
-          return geometryScale;
-        }
-        throw new Error("unexpected module: " + id);
+    return loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js").create({}, createComponentContextMock({
+      modules: {
+        ResponsiveScaleProfile: responsiveScaleProfile,
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+        GeometryScale: geometryScale
       }
-    });
+    }));
   }
 
   function expectRectInside(inner, outer) {

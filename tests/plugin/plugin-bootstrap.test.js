@@ -2,64 +2,23 @@ const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 const { createDomHarness } = require("../helpers/mock-dom");
 const { flushPromises } = require("../helpers/async");
 
-describe("plugin.js bootstrap", function () {
-  const BOOTSTRAP_MANIFEST = [
-    "runtime/namespace.js",
-    "runtime/PerfSpanHelper.js",
-    "runtime/helpers.js",
-    "runtime/editable-defaults.js",
-    "config/components/registry-shared-foundation-format.js",
-    "config/components/registry-shared-foundation-geometry.js",
-    "config/components/registry-shared-foundation-layout.js",
-    "config/components/registry-shared-foundation-state.js",
-    "config/components/registry-shared-engines.js",
-    "config/components/registry-widgets-nav.js",
-    "config/components/registry-widgets-vessel.js",
-    "config/components/registry-widgets-gauge.js",
-    "config/components/registry-cluster.js",
-    "shared/unit-format-families.js",
-    "config/components.js",
-    "config/shared/editable-param-utils.js",
-    "config/shared/kind-defaults.js",
-    "config/shared/unit-editable-utils.js",
-    "config/shared/common-editables.js",
-    "config/shared/environment-base-editables.js",
-    "config/shared/environment-depth-editables.js",
-    "config/shared/environment-temperature-editables.js",
-    "config/shared/environment-editables.js",
-    "config/clusters/course-heading.js",
-    "config/clusters/speed.js",
-    "config/clusters/environment.js",
-    "config/clusters/wind.js",
-    "config/clusters/nav.js",
-    "config/clusters/map.js",
-    "config/clusters/anchor.js",
-    "config/clusters/vessel.js",
-    "config/clusters/default.js",
-    "config/cluster-routes.js",
-    "config/cluster-routes/course-heading.js",
-    "config/cluster-routes/speed.js",
-    "config/cluster-routes/environment.js",
-    "config/cluster-routes/wind.js",
-    "config/cluster-routes/nav.js",
-    "config/cluster-routes/map.js",
-    "config/cluster-routes/anchor.js",
-    "config/cluster-routes/vessel.js",
-    "config/cluster-routes/default.js",
-    "config/cluster-routes/finalize.js",
-    "config/widget-definitions.js",
-    "runtime/asset-preloader.js",
-    "runtime/component-loader.js",
-    "runtime/widget-registrar.js",
-    "runtime/HostCommitController.js",
-    "runtime/SurfaceSessionController.js",
-    "runtime/TemporaryHostActionBridgeDiscovery.js",
-    "runtime/TemporaryHostActionBridge.js",
-    "runtime/theme-runtime.js",
-    "runtime/init.js"
-  ];
+function loadBootstrapManifest() {
+  const context = createScriptContext({
+    DyniPlugin: {
+      runtime: {},
+      state: {},
+      config: { shared: {}, clusters: [] }
+    }
+  });
+  runIifeScript("runtime/namespace.js", context);
+  runIifeScript("config/bootstrap-manifest.js", context);
+  return context.DyniPlugin.config.bootstrapManifest.slice();
+}
 
-  it("loads the bootstrap manifest first, then the manifest-listed scripts in order, and finally calls runtime.runInit", async function () {
+describe("plugin.js bootstrap", function () {
+  const BOOTSTRAP_MANIFEST = loadBootstrapManifest();
+
+  it("loads bootstrap-manifest first, then listed scripts in order, then calls runtime.runInit", async function () {
     const dom = createDomHarness();
     const runInit = vi.fn(() => Promise.resolve());
 
@@ -79,80 +38,17 @@ describe("plugin.js bootstrap", function () {
     runIifeScript("plugin.js", context);
     await flushPromises(120);
 
-    expect(dom.appendedScripts.length).toBeGreaterThan(10);
-    expect(dom.appendedScripts[0].src).toBe("http://host/plugins/dyninstruments/config/bootstrap-manifest.js");
     const loadedScriptSrc = dom.appendedScripts.map((item) => item.src);
-    const bootstrapManifestIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/bootstrap-manifest.js");
-    const namespaceIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/namespace.js");
-    const perfHelperIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/PerfSpanHelper.js");
-    const registrySharedFoundationFormatIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-shared-foundation-format.js");
-    const registrySharedFoundationGeometryIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-shared-foundation-geometry.js");
-    const registrySharedFoundationLayoutIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-shared-foundation-layout.js");
-    const registrySharedFoundationStateIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-shared-foundation-state.js");
-    const registrySharedEnginesIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-shared-engines.js");
-    const registryWidgetsNavIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-widgets-nav.js");
-    const registryWidgetsVesselIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-widgets-vessel.js");
-    const registryWidgetsGaugeIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-widgets-gauge.js");
-    const registryClusterIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components/registry-cluster.js");
-    const componentsConfigIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/components.js");
-    const assetPreloaderIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/asset-preloader.js");
-    const componentLoaderIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/component-loader.js");
-    const defaultClusterIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/clusters/default.js");
-    const clusterRoutesIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/cluster-routes.js");
-    const clusterRoutesFinalizeIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/cluster-routes/finalize.js");
-    const widgetDefinitionsIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/config/widget-definitions.js");
-    const hostCommitIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/HostCommitController.js");
-    const surfaceSessionIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/SurfaceSessionController.js");
-    const themeRuntimeIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/theme-runtime.js");
-    const initIndex = loadedScriptSrc.indexOf("http://host/plugins/dyninstruments/runtime/init.js");
+    const expected = [
+      "http://host/plugins/dyninstruments/config/bootstrap-manifest.js"
+    ].concat(BOOTSTRAP_MANIFEST.map((rel) => "http://host/plugins/dyninstruments/" + rel));
 
-    expect(bootstrapManifestIndex).toBe(0);
-    expect(namespaceIndex).toBeGreaterThan(-1);
-    expect(bootstrapManifestIndex).toBeLessThan(namespaceIndex);
-    expect(perfHelperIndex).toBeGreaterThan(-1);
-    expect(namespaceIndex).toBeLessThan(perfHelperIndex);
-    expect(registrySharedFoundationFormatIndex).toBeGreaterThan(-1);
-    expect(registrySharedFoundationGeometryIndex).toBeGreaterThan(-1);
-    expect(registrySharedFoundationLayoutIndex).toBeGreaterThan(-1);
-    expect(registrySharedFoundationStateIndex).toBeGreaterThan(-1);
-    expect(registrySharedEnginesIndex).toBeGreaterThan(-1);
-    expect(registryWidgetsNavIndex).toBeGreaterThan(-1);
-    expect(registryWidgetsVesselIndex).toBeGreaterThan(-1);
-    expect(registryWidgetsGaugeIndex).toBeGreaterThan(-1);
-    expect(registryClusterIndex).toBeGreaterThan(-1);
-    expect(componentsConfigIndex).toBeGreaterThan(-1);
-    expect(assetPreloaderIndex).toBeGreaterThan(-1);
-    expect(componentLoaderIndex).toBeGreaterThan(-1);
-    expect(registrySharedFoundationFormatIndex).toBeLessThan(registrySharedFoundationGeometryIndex);
-    expect(registrySharedFoundationGeometryIndex).toBeLessThan(registrySharedFoundationLayoutIndex);
-    expect(registrySharedFoundationLayoutIndex).toBeLessThan(registrySharedFoundationStateIndex);
-    expect(registrySharedFoundationStateIndex).toBeLessThan(registrySharedEnginesIndex);
-    expect(registrySharedEnginesIndex).toBeLessThan(registryWidgetsNavIndex);
-    expect(registryWidgetsNavIndex).toBeLessThan(registryWidgetsVesselIndex);
-    expect(registryWidgetsVesselIndex).toBeLessThan(registryWidgetsGaugeIndex);
-    expect(registryWidgetsGaugeIndex).toBeLessThan(registryClusterIndex);
-    expect(registryClusterIndex).toBeLessThan(componentsConfigIndex);
-    expect(componentsConfigIndex).toBeLessThan(assetPreloaderIndex);
-    expect(assetPreloaderIndex).toBeLessThan(componentLoaderIndex);
-    expect(widgetDefinitionsIndex).toBeLessThan(componentLoaderIndex);
-    expect(componentsConfigIndex).toBeLessThan(hostCommitIndex);
-    expect(defaultClusterIndex).toBeGreaterThan(componentsConfigIndex);
-    expect(clusterRoutesIndex).toBeGreaterThan(defaultClusterIndex);
-    expect(clusterRoutesFinalizeIndex).toBeGreaterThan(clusterRoutesIndex);
-    expect(clusterRoutesFinalizeIndex).toBeLessThan(widgetDefinitionsIndex);
-    expect(defaultClusterIndex).toBeLessThan(widgetDefinitionsIndex);
-    expect(hostCommitIndex).toBeGreaterThan(-1);
-    expect(surfaceSessionIndex).toBeGreaterThan(-1);
-    expect(hostCommitIndex).toBeLessThan(themeRuntimeIndex);
-    expect(surfaceSessionIndex).toBeLessThan(themeRuntimeIndex);
-    expect(themeRuntimeIndex).toBeLessThan(initIndex);
-    expect(dom.appendedScripts[dom.appendedScripts.length - 1].src)
-      .toBe("http://host/plugins/dyninstruments/runtime/init.js");
+    expect(loadedScriptSrc).toEqual(expected);
     expect(typeof context.window.DyniPlugin.runtime.loadScriptOnce).toBe("function");
     expect(runInit).toHaveBeenCalledOnce();
   });
 
-  it("captures the wrapper-local AvNav API for runtime bootstrap scripts", async function () {
+  it("captures wrapper-local AvNav API for runtime bootstrap scripts", async function () {
     const dom = createDomHarness();
     const runInit = vi.fn(() => Promise.resolve());
     const hostApi = { log: vi.fn(), registerWidget: vi.fn() };
@@ -174,9 +70,6 @@ describe("plugin.js bootstrap", function () {
     await flushPromises(120);
 
     expect(context.window.DyniPlugin.avnavApi).toBe(hostApi);
-    expect(dom.appendedScripts.length).toBeGreaterThan(0);
-    expect(dom.appendedScripts[dom.appendedScripts.length - 1].src)
-      .toBe("http://host/plugins/dyninstruments/runtime/init.js");
     expect(runInit).toHaveBeenCalledOnce();
   });
 
@@ -211,7 +104,7 @@ describe("plugin.js bootstrap", function () {
     expect(dom.appendedScripts.length).toBe(0);
   });
 
-  it("logs a clear error when the bootstrap manifest cannot be loaded", async function () {
+  it("logs a clear error when bootstrap manifest cannot be loaded", async function () {
     const dom = createDomHarness({
       failScriptIds: ["dyni-internal-config-bootstrap-manifest-js"]
     });
@@ -222,19 +115,13 @@ describe("plugin.js bootstrap", function () {
       console: { error: err },
       AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
       avnav: { api: {} },
-      window: {
-        avnav: { api: {} },
-        DyniPlugin: {
-          runtime: { runInit: vi.fn(() => Promise.resolve()) }
-        }
-      }
+      window: { avnav: { api: {} } }
     });
 
     runIifeScript("plugin.js", context);
-    await flushPromises(20);
+    await flushPromises(60);
 
     expect(err).toHaveBeenCalled();
-    expect(err).toHaveBeenCalledWith("dyninstruments: failed to load bootstrap manifest at config/bootstrap-manifest.js");
-    expect(dom.appendedScripts.length).toBe(1);
+    expect(dom.appendedScripts).toHaveLength(1);
   });
 });

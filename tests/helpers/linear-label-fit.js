@@ -1,4 +1,5 @@
 const { loadFresh } = require("./load-umd");
+const { createComponentContextMock } = require("./component-context-mock");
 
 function createFontAwareContext(calls, options) {
   const opts = options || {};
@@ -77,14 +78,11 @@ function createFontAwareContext(calls, options) {
 function createTextLayout() {
   const textLayoutMod = loadFresh("shared/widget-kits/linear/LinearGaugeTextLayout.js");
   const labelFitMod = loadFresh("shared/widget-kits/linear/LinearGaugeLabelFit.js");
-  return textLayoutMod.create({}, {
-    getModule(id) {
-      if (id === "LinearGaugeLabelFit") {
-        return labelFitMod;
-      }
-      throw new Error("unexpected module: " + id);
+  return textLayoutMod.create({}, createComponentContextMock({
+    modules: {
+      LinearGaugeLabelFit: labelFitMod
     }
-  });
+  }));
 }
 
 module.exports = {

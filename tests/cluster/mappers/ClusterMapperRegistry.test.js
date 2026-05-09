@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 const defaultToolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
   caption_text: "VALUE",
@@ -10,7 +11,7 @@ const defaultToolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").crea
 });
 
 describe("ClusterMapperRegistry", function () {
-  function makeHelpers() {
+  function makeComponentContext() {
     const modules = {
       CourseHeadingMapper: { create: () => ({ cluster: "courseHeading", translate: (p) => ({ c: p.kind }) }) },
       SpeedMapper: { create: () => ({ cluster: "speed", translate: (p) => ({ s: p.kind }) }) },
@@ -22,16 +23,13 @@ describe("ClusterMapperRegistry", function () {
       VesselMapper: { create: () => ({ cluster: "vessel", translate: () => ({}) }) },
       DefaultMapper: loadFresh("cluster/mappers/DefaultMapper.js")
     };
-
-    return {
-      getModule(id) {
-        return modules[id];
-      }
-    };
+    const componentContext = createComponentContextMock({ modules });
+    componentContext.__modules = modules;
+    return componentContext;
   }
 
   it("maps by props.cluster first, then def.cluster", function () {
-    const reg = loadFresh("cluster/mappers/ClusterMapperRegistry.js").create({ cluster: "speed" }, makeHelpers());
+    const reg = loadFresh("cluster/mappers/ClusterMapperRegistry.js").create({ cluster: "speed" }, makeComponentContext());
 
     expect(reg.mapCluster({ cluster: "nav", kind: "eta" }, () => ({}))).toEqual({ n: "eta" });
     expect(reg.mapCluster({ cluster: "map", kind: "zoom" }, () => ({}))).toEqual({ m: "zoom" });
@@ -77,29 +75,21 @@ describe("ClusterMapperRegistry", function () {
   });
 
   it("returns empty object for unknown clusters", function () {
-    const reg = loadFresh("cluster/mappers/ClusterMapperRegistry.js").create({ cluster: "x" }, makeHelpers());
+    const reg = loadFresh("cluster/mappers/ClusterMapperRegistry.js").create({ cluster: "x" }, makeComponentContext());
     expect(reg.mapCluster({ kind: "y" }, () => ({}))).toEqual({});
   });
 
   it("passes toolkit created from createToolkit callback", function () {
     const mod = loadFresh("cluster/mappers/ClusterMapperRegistry.js");
-    const helpers = makeHelpers();
-
-    helpers.getModule = function (id) {
-      if (id === "SpeedMapper") {
-        return {
-          create: () => ({
-            cluster: "speed",
-            translate: (props, toolkit) => ({ got: toolkit.flag, kind: props.kind })
-          })
-        };
-      }
-      return {
-        create: () => ({ cluster: id, translate: () => ({}) })
-      };
+    const componentContext = makeComponentContext();
+    componentContext.__modules.SpeedMapper = {
+      create: () => ({
+        cluster: "speed",
+        translate: (props, toolkit) => ({ got: toolkit.flag, kind: props.kind })
+      })
     };
 
-    const reg = mod.create({ cluster: "speed" }, helpers);
+    const reg = mod.create({ cluster: "speed" }, componentContext);
     const createToolkit = vi.fn(() => ({ flag: "ok" }));
 
     expect(reg.mapCluster({ kind: "sog" }, createToolkit)).toEqual({ got: "ok", kind: "sog" });

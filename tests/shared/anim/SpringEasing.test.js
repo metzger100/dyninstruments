@@ -1,8 +1,9 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("SpringEasing", function () {
   function createSpring(options) {
-    const mod = loadFresh("shared/widget-kits/anim/SpringEasing.js").create({}, {});
+    const mod = loadFresh("shared/widget-kits/anim/SpringEasing.js").create({}, createComponentContextMock());
     return mod.create(options || {});
   }
 
