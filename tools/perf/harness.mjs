@@ -374,6 +374,7 @@ function createHarnessEnvironment(options) {
   runIifeScript(rootDir, "runtime/surface/CanvasDomSurfaceAdapter.js");
   runIifeScript(rootDir, "runtime/surface/HtmlSurfaceController.js");
   runIifeScript(rootDir, "runtime/surface/index.js");
+  runIifeScript(rootDir, "runtime/cluster/ClusterShellRenderer.js");
   globalThis.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
   globalThis.DyniPlugin.runtime.hostActions = createHostActions();
 

@@ -70,6 +70,7 @@
     "runtime/surface/CanvasDomSurfaceAdapter.js",
     "runtime/surface/HtmlSurfaceController.js",
     "runtime/surface/index.js",
+    "runtime/cluster/ClusterShellRenderer.js",
     "runtime/init.js"
   ];
 }(this));

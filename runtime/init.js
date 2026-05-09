@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Init - Runtime initialization and widget registration
  * Documentation: documentation/architecture/component-system.md
- * Depends: runtime/theme-runtime.js, runtime/component-loader.js, runtime/widget-registrar.js, config/widget-definitions.js
+ * Depends: runtime/theme-runtime.js, runtime/component-loader.js, runtime/widget-registrar.js, config/widget-definitions.js, runtime/cluster/ClusterShellRenderer.js
  */
 (function (root) {
   "use strict";
@@ -15,6 +15,15 @@
       throw new Error("dyninstruments: runtime.theme boundary is required");
     }
     return runtime.theme;
+  }
+
+  function requireClusterShellRenderer() {
+    if (!runtime.clusterShellRenderer ||
+      typeof runtime.clusterShellRenderer.normalizeRouteFrame !== "function" ||
+      typeof runtime.clusterShellRenderer.renderRouteShell !== "function") {
+      throw new Error("dyninstruments: runtime.clusterShellRenderer boundary is required");
+    }
+    return runtime.clusterShellRenderer;
   }
 
   function collectShadowCssUrls(components, componentIds) {
@@ -60,6 +69,7 @@
     const components = config.components;
     const widgetDefinitions = config.widgetDefinitions;
     const themeRuntime = requireThemeRuntimeBoundary();
+    requireClusterShellRenderer();
 
     state.initStarted = true;
 

@@ -1,0 +1,143 @@
+/**
+ * Module: DyniPlugin Cluster Shell Renderer - Startup-safe route-frame normalization and shell markup
+ * Documentation: documentation/architecture/cluster-widget-system.md
+ * Depends: none
+ */
+(function (root) {
+  "use strict";
+
+  const ns = root.DyniPlugin;
+  const runtime = ns.runtime;
+  const CANVAS_INNER_HTML = '<div class="dyni-surface-canvas"><div class="dyni-surface-canvas-mount"></div></div>';
+  const HTML_INNER_HTML = '<div class="dyni-surface-html"><div class="dyni-surface-html-mount" data-dyni-html-mount="1"></div></div>';
+
+  function trimText(value) {
+    return value == null ? "" : String(value).trim();
+  }
+
+  function resolveCluster(rawProps, def) {
+    const props = rawProps && typeof rawProps === "object" ? rawProps : {};
+    const cluster = trimText(props.cluster);
+    if (cluster) {
+      return cluster;
+    }
+    return trimText(def && def.cluster);
+  }
+
+  function resolveKind(rawProps) {
+    const props = rawProps && typeof rawProps === "object" ? rawProps : {};
+    return trimText(props.kind);
+  }
+
+  function isVerticalShell(routeFrame) {
+    return !!(routeFrame &&
+      routeFrame.__dyniRawProps &&
+      routeFrame.__dyniRawProps.mode === "vertical");
+  }
+
+  function resolveInstanceId(instanceId, hostContext) {
+    const direct = trimText(instanceId);
+    if (direct) {
+      return direct;
+    }
+    if (hostContext && typeof hostContext === "object" && hostContext.__dyniHostCommitState) {
+      return trimText(hostContext.__dyniHostCommitState.instanceId);
+    }
+    return "";
+  }
+
+  function resolveInnerHtml(surface) {
+    if (surface === "canvas-dom") {
+      return CANVAS_INNER_HTML;
+    }
+    if (surface === "html") {
+      return HTML_INNER_HTML;
+    }
+    return '<div class="dyni-shell-mount" data-dyni-shell-mount="1"></div>';
+  }
+
+  function resolveShellStyle(routeMeta, routeFrame) {
+    if (!routeMeta || !routeMeta.shellSizing || !isVerticalShell(routeFrame)) {
+      return "";
+    }
+    if (routeMeta.shellSizing.kind === "ratio") {
+      return ' style="aspect-ratio:' + String(routeMeta.shellSizing.aspectRatio) + ';"';
+    }
+    return "";
+  }
+
+  runtime.clusterShellRenderer = {
+    normalizeRouteFrame: function (rawProps, def, clusterRoutes) {
+      const source = rawProps && typeof rawProps === "object" ? rawProps : {};
+      const routeFrame = Object.assign({}, source);
+      const cluster = resolveCluster(source, def, clusterRoutes);
+      const kind = resolveKind(source);
+
+      routeFrame.cluster = cluster;
+      routeFrame.kind = kind;
+      routeFrame.__dyniRouteId = cluster + "/" + kind;
+      routeFrame.__dyniRawProps = source;
+
+      return routeFrame;
+    },
+    renderRouteShell: function (routeFrame, routeMeta, instanceId, hostContext) {
+      const frame = routeFrame && typeof routeFrame === "object" ? routeFrame : {};
+      const routeId = trimText(frame.__dyniRouteId);
+      const surface = routeMeta && typeof routeMeta.surface === "string" ? routeMeta.surface : "unknown";
+      const clusterToken = trimText(frame.cluster)
+        .replace(/[^a-zA-Z0-9_-]/g, "-")
+        .replace(/-{2,}/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const kindToken = trimText(frame.kind)
+        .replace(/[^a-zA-Z0-9_-]/g, "-")
+        .replace(/-{2,}/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const surfaceToken = surface === "canvas-dom"
+        ? "canvas"
+        : (surface === "html"
+          ? "html"
+          : trimText(surface)
+            .replace(/[^a-zA-Z0-9_-]/g, "-")
+            .replace(/-{2,}/g, "-")
+            .replace(/^-+|-+$/g, "") || "unknown");
+      const shellClasses = [
+        "widgetData",
+        "dyni-shell",
+        "dyni-surface-" + surfaceToken,
+        "dyni-kind-" + (kindToken || "unknown")
+      ];
+      const shellStyle = resolveShellStyle(routeMeta, frame);
+      const shellInner = resolveInnerHtml(surface);
+      const resolvedInstanceId = resolveInstanceId(instanceId, hostContext);
+
+      if (!routeMeta) {
+        shellClasses.push("dyni-shell-unknown");
+      } else if (clusterToken) {
+        shellClasses.push("dyni-cluster-" + clusterToken);
+      }
+
+      const instanceIdAttr = String(resolvedInstanceId)
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      const routeIdAttr = String(routeId)
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      const surfaceAttr = String(surface)
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+      return '<div class="' + shellClasses.join(" ") + '"'
+        + ' data-dyni-instance="' + instanceIdAttr + '"'
+        + ' data-dyni-route="' + routeIdAttr + '"'
+        + ' data-dyni-surface="' + surfaceAttr + '"'
+        + shellStyle
+        + '>' + shellInner + "</div>";
+    }
+  };
+}(this));

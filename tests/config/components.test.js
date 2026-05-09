@@ -93,6 +93,7 @@ describe("config/components.js", function () {
     expect(manifest).toContain("runtime/surface/CanvasDomSurfaceAdapter.js");
     expect(manifest).toContain("runtime/surface/HtmlSurfaceController.js");
     expect(manifest).toContain("runtime/surface/index.js");
+    expect(manifest).toContain("runtime/cluster/ClusterShellRenderer.js");
 
     expect(manifest).not.toContain("shared/theme/ThemeModel.js");
     expect(manifest).not.toContain("shared/theme/ThemeResolver.js");
@@ -101,6 +102,7 @@ describe("config/components.js", function () {
 
     expect(manifest[0]).toBe("runtime/namespace.js");
     expect(manifest.indexOf("runtime/PerfSpanHelper.js")).toBeGreaterThan(manifest.indexOf("runtime/namespace.js"));
+    expect(manifest.indexOf("runtime/cluster/ClusterShellRenderer.js")).toBeGreaterThan(manifest.indexOf("runtime/surface/index.js"));
     expect(manifest.indexOf("runtime/init.js")).toBe(manifest.length - 1);
   });
 });
