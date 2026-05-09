@@ -68,6 +68,24 @@ function loadPhase7StartupEnvironment(context) {
   runScripts(context, ["config/widget-definitions.js", "runtime/asset-preloader.js", "runtime/component-loader.js"]);
 }
 
+function getCommonShadowCssUrl(baseUrl) {
+  const context = createScriptContext({
+    DyniPlugin: {
+      baseUrl: baseUrl,
+      runtime: {},
+      state: {},
+      config: { shared: {}, clusters: [] }
+    }
+  });
+
+  runIifeScript("runtime/namespace.js", context);
+  runIifeScript("runtime/surface/ClusterSurfacePolicy.js", context);
+  runIifeScript("runtime/surface/CanvasDomSurfaceAdapter.js", context);
+  runIifeScript("runtime/surface/HtmlSurfaceController.js", context);
+  runIifeScript("runtime/surface/index.js", context);
+  return context.DyniPlugin.runtime.surfaces.getCommonShadowCssUrl();
+}
+
 function collectShadowCssUrls(components, componentIds) {
   const seen = Object.create(null);
   const urls = [];
@@ -154,6 +172,7 @@ describe("config/components.js", function () {
     });
 
     loadPhase7StartupEnvironment(context);
+    const commonShadowCssUrl = getCommonShadowCssUrl("http://host/plugins/dyninstruments/");
 
     const components = context.DyniPlugin.config.components;
     const widgetDefinitions = context.DyniPlugin.config.widgetDefinitions;
@@ -213,7 +232,7 @@ describe("config/components.js", function () {
     expect(needed).not.toContain("AisTargetTextHtmlWidget");
     expect(needed).not.toContain("AlarmTextHtmlWidget");
     expect(routeRendererShadowCssUrls).toContain(
-      "http://host/plugins/dyninstruments/shared/html/HtmlShadowCommon.css"
+      commonShadowCssUrl
     );
     expect(routeRendererShadowCssUrls.some(function (url) { return needed.indexOf(url) >= 0; })).toBe(false);
     expect(mapperIds).toEqual(expect.arrayContaining(["DefaultMapper", "NavMapper", "MapMapper"]));

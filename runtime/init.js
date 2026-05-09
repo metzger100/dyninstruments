@@ -26,31 +26,6 @@
     return runtime.clusterShellRenderer;
   }
 
-  function collectShadowCssUrls(components, componentIds) {
-    if (!Array.isArray(componentIds) || !componentIds.length) {
-      return [];
-    }
-
-    const seen = Object.create(null);
-    const urls = [];
-    for (let i = 0; i < componentIds.length; i += 1) {
-      const componentId = componentIds[i];
-      const componentDef = components[componentId];
-      if (!componentDef || !Array.isArray(componentDef.shadowCss)) {
-        continue;
-      }
-      for (let j = 0; j < componentDef.shadowCss.length; j += 1) {
-        const url = componentDef.shadowCss[j];
-        if (typeof url !== "string" || !url || seen[url]) {
-          continue;
-        }
-        seen[url] = true;
-        urls.push(url);
-      }
-    }
-    return urls;
-  }
-
   function runInit() {
     if (state.initStarted) {
       return state.initPromise;
@@ -77,15 +52,11 @@
     runtime.componentLoader = loader;
 
     const needed = loader.uniqueComponents(widgetDefinitions).slice();
-    const shadowCssUrls = collectShadowCssUrls(components, needed);
     const startupPresetName = themeRuntime.resolveStartupPresetName(
       root.document && root.document.documentElement
     );
 
-    state.initPromise = Promise.all([
-      Promise.all(needed.map(loader.loadComponent)),
-      themeRuntime.preloadShadowCssUrls(shadowCssUrls)
-    ])
+    state.initPromise = Promise.all(needed.map(loader.loadComponent))
       .then(function () {
         themeRuntime.configure({
           activePresetName: startupPresetName

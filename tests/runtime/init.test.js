@@ -83,7 +83,7 @@ describe("runtime/init.js", function () {
 
     expect(uniqueComponents).toHaveBeenCalledWith([{ widget: "A", def: { name: "dyni_test" } }]);
     expect(loadComponent.mock.calls.map((call) => call[0])).toEqual(["A", "B"]);
-    expect(themeRuntime.preloadShadowCssUrls).toHaveBeenCalledWith(["/a.css", "/shared.css", "/b.css"]);
+    expect(themeRuntime.preloadShadowCssUrls).not.toHaveBeenCalled();
     expect(themeRuntime.configure).toHaveBeenCalledWith({ activePresetName: "default" });
     expect(context.DyniPlugin.runtime.clusterShellRenderer).toBe(shellRenderer);
     expect(createInstance).toHaveBeenCalledWith("A", { name: "dyni_test" });

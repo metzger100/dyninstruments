@@ -1,6 +1,24 @@
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
 describe("runtime/SurfaceSessionController.js", function () {
+  function getCommonShadowCssUrl() {
+    const context = createScriptContext({
+      DyniPlugin: {
+        baseUrl: "http://host/plugins/dyninstruments/",
+        runtime: {},
+        state: {},
+        config: { shared: {}, clusters: [] }
+      }
+    });
+
+    runIifeScript("runtime/namespace.js", context);
+    runIifeScript("runtime/surface/ClusterSurfacePolicy.js", context);
+    runIifeScript("runtime/surface/CanvasDomSurfaceAdapter.js", context);
+    runIifeScript("runtime/surface/HtmlSurfaceController.js", context);
+    runIifeScript("runtime/surface/index.js", context);
+    return context.DyniPlugin.runtime.surfaces.getCommonShadowCssUrl();
+  }
+
   function loadFactory(overrides) {
     const context = createScriptContext({
       ...(overrides || {}),
@@ -106,7 +124,7 @@ describe("runtime/SurfaceSessionController.js", function () {
       routeId: "nav/activeRoute",
       rendererId: "ActiveRouteTextHtmlWidget",
       surface: "html",
-      shadowCssUrls: ["shared/html/HtmlShadowCommon.css"],
+      shadowCssUrls: [getCommonShadowCssUrl()],
       props: { kind: "activeRoute" }
     });
 

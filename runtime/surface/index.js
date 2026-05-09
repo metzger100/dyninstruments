@@ -54,11 +54,19 @@
     return policy.resolveRouteStateWithPolicy(routeState, hostContext).props;
   }
 
+  function getCommonShadowCssUrl() {
+    if (typeof ns.baseUrl !== "string" || !ns.baseUrl) {
+      throw new Error("runtime.surfaces.getCommonShadowCssUrl: baseUrl is required");
+    }
+    return ns.baseUrl + "shared/html/HtmlShadowCommon.css";
+  }
+
   runtime.surfaces = Object.freeze({
     policy: policy,
     canvasDom: canvasDom,
     html: html,
     createController: createController,
-    materializeSurfacePolicyProps: materializeSurfacePolicyProps
+    materializeSurfacePolicyProps: materializeSurfacePolicyProps,
+    getCommonShadowCssUrl: getCommonShadowCssUrl
   });
 }(this));

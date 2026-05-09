@@ -54,6 +54,8 @@ Error contract:
 
 The component loader preloads declared assets after JS/CSS load completion and before component API validation.
 
+Route-specific assets are component-owned: they are loaded during route activation, not startup, and the loaded results stay cached for the plugin session.
+
 ## Plugin-Wide Fonts
 
 The bundled Roboto and Roboto Mono fonts are a plugin-wide concern, not a component asset concern.
