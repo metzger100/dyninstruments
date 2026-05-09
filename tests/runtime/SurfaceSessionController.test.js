@@ -106,6 +106,7 @@ describe("runtime/SurfaceSessionController.js", function () {
       mountedRendererId: null,
       mountedSurface: null,
       mountedRevision: 0,
+      committedRevisionFloor: 0,
       activeController: null,
       shellEl: null
     });
@@ -147,6 +148,7 @@ describe("runtime/SurfaceSessionController.js", function () {
       mountedRendererId: "ActiveRouteTextHtmlWidget",
       mountedSurface: "html",
       mountedRevision: 1,
+      committedRevisionFloor: 0,
       activeController: htmlController,
       shellEl: payload.shellEl
     });
@@ -186,6 +188,7 @@ describe("runtime/SurfaceSessionController.js", function () {
       mountedRendererId: "ActiveRouteTextHtmlWidget",
       mountedSurface: "html",
       mountedRevision: 2,
+      committedRevisionFloor: 0,
       shellEl: shell
     });
   });
@@ -218,6 +221,7 @@ describe("runtime/SurfaceSessionController.js", function () {
       mountedRendererId: "ActiveRouteTextHtmlWidget",
       mountedSurface: "html",
       mountedRevision: 1,
+      committedRevisionFloor: 0,
       activeController: htmlController,
       shellEl: null
     });
@@ -286,6 +290,7 @@ describe("runtime/SurfaceSessionController.js", function () {
       mountedRendererId: "EditRouteTextHtmlWidget",
       mountedSurface: "html",
       mountedRevision: 2,
+      committedRevisionFloor: 0,
       activeController: secondController,
       shellEl: secondPayload.shellEl
     });
@@ -340,8 +345,39 @@ describe("runtime/SurfaceSessionController.js", function () {
       mountedRendererId: "ThreeValueTextWidget",
       mountedSurface: "canvas-dom",
       mountedRevision: 2,
+      committedRevisionFloor: 0,
       activeController: canvasController,
       shellEl: secondPayload.shellEl
+    });
+  });
+
+  it("rejects payloads older than the recorded committed revision floor without surface DOM work", function () {
+    const createSurfaceSessionController = loadFactory();
+    const htmlController = createControllerMock("html");
+    const surfaces = createSurfacesMock({
+      html: htmlController
+    });
+    const session = createSurfaceSessionController({
+      surfaces: surfaces
+    });
+    const stalePayload = createPayload({
+      revision: 4,
+      props: { value: 4 }
+    });
+
+    session.recordCommittedRevision(5);
+
+    expect(session.reconcileSession(stalePayload)).toBe(false);
+
+    expect(surfaces.createController).not.toHaveBeenCalled();
+    expect(htmlController.attach).not.toHaveBeenCalled();
+    expect(htmlController.update).not.toHaveBeenCalled();
+    expect(htmlController.detach).not.toHaveBeenCalled();
+    expect(htmlController.destroy).not.toHaveBeenCalled();
+    expect(session.getState()).toMatchObject({
+      committedRevisionFloor: 5,
+      mountedRevision: 0,
+      activeController: null
     });
   });
 
@@ -465,7 +501,8 @@ describe("runtime/SurfaceSessionController.js", function () {
       mountedSurface: null,
       activeController: null,
       shellEl: null,
-      mountedRevision: 0
+      mountedRevision: 0,
+      committedRevisionFloor: 0
     });
   });
 

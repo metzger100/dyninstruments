@@ -78,6 +78,7 @@
       mountedRendererId: null,
       mountedSurface: null,
       mountedRevision: 0,
+      committedRevisionFloor: 0,
       activeController: null,
       shellEl: null
     };
@@ -97,6 +98,7 @@
         mountedRendererId: state.mountedRendererId,
         mountedSurface: state.mountedSurface,
         mountedRevision: state.mountedRevision,
+        committedRevisionFloor: state.committedRevisionFloor,
         activeController: state.activeController,
         shellEl: state.shellEl
       };
@@ -109,6 +111,16 @@
 
     function isCurrentRevision(revision) {
       return Number.isFinite(revision) && revision === state.mountedRevision;
+    }
+
+    function recordCommittedRevision(revision) {
+      if (!Number.isFinite(revision)) {
+        throw new Error("SurfaceSessionController: recordCommittedRevision requires a finite revision");
+      }
+      if (revision > state.committedRevisionFloor) {
+        state.committedRevisionFloor = revision;
+      }
+      return state.committedRevisionFloor;
     }
 
     function createControllerForPayload(payload) {
@@ -146,11 +158,12 @@
         })
         : null;
       ensurePayload(payload);
-      ensureSurface(payload.surface);
       try {
-        if (payload.revision < state.mountedRevision) {
+        if (payload.revision < state.committedRevisionFloor || payload.revision < state.mountedRevision) {
           return false;
         }
+
+        ensureSurface(payload.surface);
 
         const mountedController = state.activeController;
         const sameSurface = !!mountedController && state.mountedSurface === payload.surface;
@@ -218,6 +231,7 @@
 
     return {
       initState: initState,
+      recordCommittedRevision: recordCommittedRevision,
       reconcileSession: reconcileSession,
       detachForShellReplacement: detachForShellReplacement,
       isCurrentRevision: isCurrentRevision,

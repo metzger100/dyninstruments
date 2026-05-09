@@ -11,7 +11,7 @@ Authoritative owners:
 - plugin.js: sole automatic startup owner
 - runtime/init.js: startup wiring only (runInit), no self-invocation
 - runtime/theme-runtime.js: internal theme lifecycle owner (`runtime.theme`)
-- cluster/ClusterWidget.js: commit ordering owner (theme apply before surface reconcile)
+- cluster/ClusterWidget.js: commit ordering owner (theme apply, committed revision floor record, then surface reconcile)
 - config/cluster-routes/*.js: route metadata source for `config.clusterRoutes.byRouteId`
 - runtime/cluster/ClusterShellRenderer.js: route-frame normalization and pre-activation shell sizing owner
 - runtime/cluster/RouteActivationController.js: lazy route activation owner
@@ -38,9 +38,10 @@ For every host commit, ClusterWidget enforces this order:
 
 1. host commit resolves committed root and shell elements
 2. runtime.theme.applyToRoot(rootEl) overwrites required --dyni-theme-* outputs
-3. ClusterWidget uses `runtime.routeActivation.createWidgetController(def)` to create the route activation widget controller, then calls that controller's `activateCommittedRoute(...)` to resolve route metadata from `config.clusterRoutes.byRouteId`
-4. RouteActivationPayloadBuilder merges mapper `rendererProps`, strips renderer identity fields, and materializes the activated payload
-5. SurfaceSessionController.reconcileSession(...) attaches or updates html/canvas-dom surfaces
+3. ClusterWidget records the committed revision floor on SurfaceSessionController
+4. ClusterWidget uses `runtime.routeActivation.createWidgetController(def)` to create the route activation widget controller, then calls that controller's `activateCommittedRoute(...)` to resolve route metadata from `config.clusterRoutes.byRouteId`
+5. RouteActivationPayloadBuilder merges mapper `rendererProps`, strips renderer identity fields, and materializes the activated payload
+6. SurfaceSessionController.reconcileSession(...) attaches or updates html/canvas-dom surfaces
 
 There is no theme-change gate before apply. Outputs are applied on every commit.
 

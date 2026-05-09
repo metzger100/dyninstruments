@@ -4,7 +4,7 @@
 
 ## Overview
 
-`runtime/SurfaceSessionController.js` coordinates per-instance surface lifecycle transitions after host commit resolution. `cluster/ClusterWidget.js` uses it to reconcile attach/update/remount/surface-switch transitions against the mounted shell through the runtime surfaces service. The mounted route and renderer identities come from `config.clusterRoutes.byRouteId`.
+`runtime/SurfaceSessionController.js` coordinates per-instance surface lifecycle transitions after host commit resolution. `cluster/ClusterWidget.js` records the latest committed revision floor there, then uses it to reconcile attach/update/remount/surface-switch transitions against the mounted shell through the runtime surfaces service. The mounted route and renderer identities come from `config.clusterRoutes.byRouteId`.
 
 ## Key Details
 
@@ -18,9 +18,9 @@
   - throws for unsupported surface IDs
   - throws when the surfaces service is missing or does not expose `createController`
   - throws when returned controllers do not implement `attach`/`update`/`detach`/`destroy`
-- Stale guard: `reconcileSession(payload)` returns `false` when `payload.revision < mountedRevision`
+- Committed-revision floor guard: `recordCommittedRevision(revision)` stores the latest committed shell revision floor and `reconcileSession(payload)` returns `false` when `payload.revision < committedRevisionFloor`
 - Return value: `reconcileSession(payload)` returns `true` when the session is accepted and processed
-- Called from the Phase 6 live flow (`HostCommitController.onCommit` -> `ClusterWidget` applies `runtime.theme` -> `SurfaceSessionController.detachForShellReplacement()` -> `RouteActivationController` builds an activated payload -> `SurfaceSessionController.reconcileSession(payload)`)
+- Called from the Phase 6 live flow (`HostCommitController.onCommit` -> `ClusterWidget` applies `runtime.theme` -> `SurfaceSessionController.recordCommittedRevision(revision)` -> `SurfaceSessionController.detachForShellReplacement()` -> `RouteActivationController` builds an activated payload -> `SurfaceSessionController.reconcileSession(payload)`)
 - Same-surface transitions:
   - no active controller: create controller and attach
   - same route + same renderer + same surface + same shell: `update(payload)`
@@ -45,6 +45,7 @@ const session = runtime.createSurfaceSessionController({
 });
 
 session.initState();
+session.recordCommittedRevision(revision);
 session.reconcileSession({
   routeId,
   rendererId,
@@ -62,6 +63,12 @@ session.detachForShellReplacement();
 session.destroy();
 session.getState();
 ```
+
+### `recordCommittedRevision(revision)` Input
+
+| Key | Type | Required | Notes |
+|---|---|---|---|
+| `revision` | `number` | yes | Finite host-commit revision that becomes the stale floor for async activation payloads |
 
 ### `reconcileSession(payload)` Input
 
@@ -89,7 +96,7 @@ session.getState();
 
 ### State Shape (`getState`)
 
-`mountedRouteId`, `mountedRendererId`, `mountedSurface`, `mountedRevision`, `activeController`, `shellEl`
+`mountedRouteId`, `mountedRendererId`, `mountedSurface`, `mountedRevision`, `committedRevisionFloor`, `activeController`, `shellEl`
 
 ## Related
 

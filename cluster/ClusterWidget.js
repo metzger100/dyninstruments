@@ -184,10 +184,6 @@
         if (payload === runtimeApi.routeActivation.DISCARDED_ACTIVATION) {
           return;
         }
-        const hostCommitState = state.hostCommitController.getState();
-        if (!hostCommitState || payload.revision !== hostCommitState.renderRevision) {
-          return;
-        }
         state.surfaceSessionController.reconcileSession(payload);
       }
 
@@ -232,6 +228,7 @@
             ctx.__dyniHostCommitState = commitState;
 
             runtimeApi.theme.applyToRoot(commitPayload.rootEl);
+            state.surfaceSessionController.recordCommittedRevision(commitPayload.revision);
             state.surfaceSessionController.detachForShellReplacement();
 
             if (routeMeta) {

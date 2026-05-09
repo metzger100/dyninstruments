@@ -55,6 +55,7 @@ function createHostCommitControllerMock(instanceId) {
 function createSurfaceSessionControllerMock() {
   return {
     initState: vi.fn(),
+    recordCommittedRevision: vi.fn(),
     detachForShellReplacement: vi.fn(),
     reconcileSession: vi.fn(function () {
       return true;
@@ -236,6 +237,7 @@ describe("ClusterWidget", function () {
       widgetContext
     );
     expect(harness.runtime.theme.applyToRoot).toHaveBeenCalledWith({ id: "root-1" });
+    expect(harness.surfaceSessionController.recordCommittedRevision).toHaveBeenCalledWith(1);
     expect(harness.surfaceSessionController.detachForShellReplacement).toHaveBeenCalledTimes(1);
     expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledTimes(1);
     expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledWith({
@@ -253,6 +255,9 @@ describe("ClusterWidget", function () {
       revision: 1
     }));
     expect(harness.runtime.theme.applyToRoot.mock.invocationCallOrder[0]).toBeLessThan(
+      harness.surfaceSessionController.recordCommittedRevision.mock.invocationCallOrder[0]
+    );
+    expect(harness.surfaceSessionController.recordCommittedRevision.mock.invocationCallOrder[0]).toBeLessThan(
       harness.surfaceSessionController.detachForShellReplacement.mock.invocationCallOrder[0]
     );
     expect(harness.surfaceSessionController.detachForShellReplacement.mock.invocationCallOrder[0]).toBeLessThan(
@@ -352,6 +357,7 @@ describe("ClusterWidget", function () {
       widgetContext
     );
     expect(harness.runtime.theme.applyToRoot).toHaveBeenCalledWith({ id: "root-1" });
+    expect(harness.surfaceSessionController.recordCommittedRevision).toHaveBeenCalledWith(1);
     expect(harness.surfaceSessionController.detachForShellReplacement).toHaveBeenCalledTimes(1);
     expect(harness.activationController.activateCommittedRoute).not.toHaveBeenCalled();
     expect(harness.surfaceSessionController.reconcileSession).not.toHaveBeenCalled();
@@ -406,6 +412,7 @@ describe("ClusterWidget", function () {
     const firstHtml = widget.renderHtml.call(widgetContext, activeRouteFrame);
     expect(firstHtml).toBe("<div class=\"dyni-shell\">shell</div>");
     expect(harness.runtime.theme.applyToRoot).toHaveBeenNthCalledWith(1, { id: "root-1" });
+    expect(harness.surfaceSessionController.recordCommittedRevision).toHaveBeenNthCalledWith(1, 1);
     expect(harness.surfaceSessionController.detachForShellReplacement.mock.calls[0]).toEqual([]);
     expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledTimes(1);
 
@@ -419,16 +426,21 @@ describe("ClusterWidget", function () {
       widgetContext
     );
     expect(harness.runtime.theme.applyToRoot).toHaveBeenNthCalledWith(2, { id: "root-2" });
+    expect(harness.surfaceSessionController.recordCommittedRevision).toHaveBeenNthCalledWith(2, 2);
     expect(harness.surfaceSessionController.detachForShellReplacement.mock.calls[1]).toEqual([]);
     expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledTimes(1);
 
     deferred.resolve();
     await flushPromises();
 
-    expect(harness.surfaceSessionController.reconcileSession).toHaveBeenCalledTimes(0);
+    expect(harness.surfaceSessionController.reconcileSession).toHaveBeenCalledTimes(1);
+    expect(harness.surfaceSessionController.reconcileSession.mock.calls[0][0]).toEqual(expect.objectContaining({
+      revision: 1,
+      routeId: routeMeta.routeId,
+      surface: routeMeta.surface
+    }));
     expect(harness.runtime.theme.applyToRoot).toHaveBeenCalledTimes(2);
     expect(harness.surfaceSessionController.detachForShellReplacement).toHaveBeenCalledTimes(2);
-    expect(harness.surfaceSessionController.reconcileSession).not.toHaveBeenCalled();
   });
 
   it("reports synchronous activation failures through the route activation boundary", function () {
