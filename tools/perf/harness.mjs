@@ -34,7 +34,6 @@ export const DEFAULT_OPTIONS = Object.freeze({
 const COMPUTE_SPAN_NAMES = new Set([
   "ClusterWidget.translateFunction",
   "ClusterWidget.renderHtml",
-  "ClusterRendererRouter.renderHtml",
   "HtmlSurfaceController.attach",
   "HtmlSurfaceController.update",
   "Renderer.renderHtml",
@@ -50,7 +49,6 @@ const WAIT_SPAN_TO_METRIC = Object.freeze({
 const SPAN_FILE_BY_NAME = Object.freeze({
   "ClusterWidget.translateFunction": "cluster/ClusterWidget.js",
   "ClusterWidget.renderHtml": "cluster/ClusterWidget.js",
-  "ClusterRendererRouter.renderHtml": "cluster/rendering/ClusterRendererRouter.js",
   "HostCommitController.scheduleCommit->onCommit": "runtime/HostCommitController.js",
   "SurfaceSessionController.reconcileSession": "runtime/SurfaceSessionController.js",
   "HtmlSurfaceController.attach": "runtime/surface/HtmlSurfaceController.js",
@@ -244,6 +242,10 @@ export async function runPerfScenarioSuite(options = {}) {
   const env = createHarnessEnvironment({ rootDir });
   try {
     const layoutFixture = readLayoutFixture(rootDir);
+    const widgetDefinitions = globalThis.DyniPlugin && globalThis.DyniPlugin.config
+      ? globalThis.DyniPlugin.config.widgetDefinitions
+      : [];
+    const startupComponentIds = env.moduleResolver.uniqueComponents(widgetDefinitions);
     const report = {
       schema_version: 1,
       suite_id: "dyninstruments-perf-core-v1",
@@ -259,6 +261,12 @@ export async function runPerfScenarioSuite(options = {}) {
         platform: process.platform,
         arch: process.arch
       },
+      startup: {
+        component_ids: startupComponentIds,
+        component_count: startupComponentIds.length
+      },
+      startup_component_ids: startupComponentIds,
+      startup_component_count: startupComponentIds.length,
       scenario_order: scenarioOrder,
       scenarios: {}
     };
@@ -273,21 +281,40 @@ export async function runPerfScenarioSuite(options = {}) {
       const rng = createRng(seed);
 
       for (let warmup = 0; warmup < cfg.warmupIterations; warmup += 1) {
-        runScenarioIteration(scenario, warmup, cfg.cpuSlowdownFactor, rng, env.collector);
+        await runScenarioIteration(
+          scenario.runWarmupStep,
+          warmup,
+          cfg.cpuSlowdownFactor,
+          rng,
+          env.collector,
+          env
+        );
       }
 
       env.collector.clear();
+      env.shadowCssPreloadEvents.length = 0;
+      const coldActivationSample = await measureColdActivationSample({
+        scenario,
+        iteration: 0,
+        cpuSlowdownFactor: cfg.cpuSlowdownFactor,
+        rng,
+        env
+      });
+
+      env.collector.clear();
+      env.shadowCssPreloadEvents.length = 0;
       const measuredSamples = [];
       const scenarioSpanEvents = [];
 
-      const runMeasured = () => {
+      const runMeasured = async () => {
         for (let iteration = 0; iteration < cfg.measuredIterations; iteration += 1) {
-          measuredSamples.push(runScenarioIteration(
-            scenario,
+          measuredSamples.push(await runScenarioIteration(
+            scenario.runWarmUpdateStep,
             iteration,
             cfg.cpuSlowdownFactor,
             rng,
             env.collector,
+            env,
             scenarioSpanEvents
           ));
         }
@@ -297,15 +324,21 @@ export async function runPerfScenarioSuite(options = {}) {
       if (cfg.captureCpuProfile) {
         profile = await captureCpuProfile(runMeasured);
       } else {
-        runMeasured();
+        await runMeasured();
       }
 
-      report.scenarios[scenarioId] = buildScenarioSummary({
+      const warmSummary = buildScenarioSummary({
         samples: measuredSamples,
         profile,
         rootDir,
         fallbackEvents: scenarioSpanEvents,
         resolveComponentPath: env.moduleResolver.getComponentPath
+      });
+      report.scenarios[scenarioId] = buildScenarioReport({
+        coldActivationSample,
+        warmSummary,
+        coldShadowCssPreloads: env.shadowCssPreloadEvents,
+        scenarioId
       });
       scenario.destroy();
     }
@@ -326,6 +359,7 @@ function createHarnessEnvironment(options) {
   const rootDir = options.rootDir;
   const scheduler = createVirtualScheduler();
   const collector = createPerfHooksCollector();
+  const shadowCssPreloadEvents = [];
 
   const dom = new JSDOM("<!doctype html><html><body></body></html>", {
     pretendToBeVisual: true
@@ -345,12 +379,42 @@ function createHarnessEnvironment(options) {
   globalThis.ResizeObserver = scheduler.ResizeObserver;
   globalThis.__DYNI_PERF_HOOKS__ = collector.hooks;
   globalThis.avnav = avnav;
+  globalThis.fetch = createDeterministicFetch(rootDir);
 
   patchCanvasPrototypes(dom.window);
 
   delete globalThis.DyniPlugin;
   runIifeScript(rootDir, "runtime/namespace.js");
+  globalThis.DyniPlugin.baseUrl = SENTINEL_BASE;
   runIifeScript(rootDir, "shared/unit-format-families.js");
+  runIifeScript(rootDir, "config/shared/editable-param-utils.js");
+  runIifeScript(rootDir, "config/shared/kind-defaults.js");
+  runIifeScript(rootDir, "config/shared/common-editables.js");
+  runIifeScript(rootDir, "config/shared/unit-editable-utils.js");
+  runIifeScript(rootDir, "config/shared/environment-base-editables.js");
+  runIifeScript(rootDir, "config/shared/environment-depth-editables.js");
+  runIifeScript(rootDir, "config/shared/environment-temperature-editables.js");
+  runIifeScript(rootDir, "config/shared/environment-editables.js");
+  runIifeScript(rootDir, "config/clusters/course-heading.js");
+  runIifeScript(rootDir, "config/clusters/speed.js");
+  runIifeScript(rootDir, "config/clusters/environment.js");
+  runIifeScript(rootDir, "config/clusters/wind.js");
+  runIifeScript(rootDir, "config/clusters/nav.js");
+  runIifeScript(rootDir, "config/clusters/map.js");
+  runIifeScript(rootDir, "config/clusters/anchor.js");
+  runIifeScript(rootDir, "config/clusters/vessel.js");
+  runIifeScript(rootDir, "config/clusters/default.js");
+  runIifeScript(rootDir, "config/widget-definitions.js");
+  runIifeScript(rootDir, "config/components/registry-shared-foundation-format.js");
+  runIifeScript(rootDir, "config/components/registry-shared-foundation-geometry.js");
+  runIifeScript(rootDir, "config/components/registry-shared-foundation-layout.js");
+  runIifeScript(rootDir, "config/components/registry-shared-foundation-state.js");
+  runIifeScript(rootDir, "config/components/registry-shared-engines.js");
+  runIifeScript(rootDir, "config/components/registry-widgets-nav.js");
+  runIifeScript(rootDir, "config/components/registry-widgets-vessel.js");
+  runIifeScript(rootDir, "config/components/registry-widgets-gauge.js");
+  runIifeScript(rootDir, "config/components/registry-cluster.js");
+  runIifeScript(rootDir, "config/components.js");
   runIifeScript(rootDir, "config/cluster-routes.js");
   runIifeScript(rootDir, "config/cluster-routes/course-heading.js");
   runIifeScript(rootDir, "config/cluster-routes/speed.js");
@@ -379,6 +443,55 @@ function createHarnessEnvironment(options) {
   runIifeScript(rootDir, "runtime/cluster/RouteActivationPayloadBuilder.js");
   runIifeScript(rootDir, "runtime/cluster/RouteActivationLatestWins.js");
   runIifeScript(rootDir, "runtime/cluster/RouteActivationController.js");
+  const baseThemeRuntime = globalThis.DyniPlugin.runtime.theme;
+  const baseRouteActivationRuntime = globalThis.DyniPlugin.runtime.routeActivation;
+
+  globalThis.DyniPlugin.runtime.theme = Object.freeze({
+    configure: baseThemeRuntime.configure,
+    applyToRoot: baseThemeRuntime.applyToRoot,
+    resolveStartupPresetName: baseThemeRuntime.resolveStartupPresetName,
+    fetchShadowCssText: baseThemeRuntime.fetchShadowCssText,
+    preloadShadowCssUrls(urls) {
+      const startMs = performance.now();
+      const normalizedUrls = normalizeShadowCssUrlList(urls);
+      return Promise.resolve(baseThemeRuntime.preloadShadowCssUrls(urls))
+        .then(function (result) {
+          shadowCssPreloadEvents.push({
+            url_count: normalizedUrls.length,
+            duration_ms: Math.max(0, performance.now() - startMs)
+          });
+          return result;
+        });
+    },
+    resolveForRoot: baseThemeRuntime.resolveForRoot,
+    getShadowCssText: baseThemeRuntime.getShadowCssText,
+    hasShadowCssText: baseThemeRuntime.hasShadowCssText
+  });
+
+  globalThis.DyniPlugin.runtime.routeActivation = Object.freeze({
+    DISCARDED_ACTIVATION: baseRouteActivationRuntime.DISCARDED_ACTIVATION,
+    createWidgetController(def) {
+      const controller = baseRouteActivationRuntime.createWidgetController(def);
+      let lastActivationPromise = null;
+
+      return Object.freeze({
+        activateCommittedRoute(options) {
+          const activation = controller.activateCommittedRoute(options);
+          lastActivationPromise = activation && typeof activation.then === "function" ? activation : null;
+          return activation;
+        },
+        destroy() {
+          lastActivationPromise = null;
+          return controller.destroy();
+        },
+        get lastActivationPromise() {
+          return lastActivationPromise;
+        }
+      });
+    },
+    reportActivationError: baseRouteActivationRuntime.reportActivationError
+  });
+
   globalThis.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
   globalThis.DyniPlugin.runtime.hostActions = createHostActions();
 
@@ -394,6 +507,7 @@ function createHarnessEnvironment(options) {
     document: dom.window.document,
     scheduler,
     collector,
+    shadowCssPreloadEvents,
     moduleResolver,
     restore() {
       restoreGlobals(originalGlobals);
@@ -461,9 +575,17 @@ function createScenarioRunner(args) {
 
   const session = createClusterSession(env, spec.cluster, spec.width, spec.height);
   return {
-    runStep(iteration, subStep, rng) {
-      const props = buildRawProps(spec.cluster, spec.kind, iteration, subStep, rng);
+    runWarmupStep(iteration, rng) {
+      const props = buildRawProps(spec.cluster, "__perfWarmup__", iteration, 0, rng);
       session.render(props);
+    },
+    runColdActivationStep(iteration, rng) {
+      const props = buildRawProps(spec.cluster, spec.kind, iteration, 0, rng);
+      return session.render(props);
+    },
+    runWarmUpdateStep(iteration, rng) {
+      const props = buildRawProps(spec.cluster, spec.kind, iteration, 0, rng);
+      return session.render(props);
     },
     destroy() {
       session.destroy();
@@ -494,9 +616,26 @@ function createAggregateRunner(env, fixture) {
   }
 
   return {
-    runStep(iteration, subStep, rng) {
+    runWarmupStep(iteration, rng) {
       for (const entry of entries) {
-        const props = buildRawProps(entry.cluster, entry.kind, iteration, subStep, rng);
+        const props = buildRawProps(entry.cluster, "__perfWarmup__", iteration, 0, rng);
+        entry.session.render(props);
+      }
+    },
+    runColdActivationStep(iteration, rng) {
+      const activationPromises = [];
+      for (const entry of entries) {
+        const props = buildRawProps(entry.cluster, entry.kind, iteration, 0, rng);
+        const result = entry.session.render(props);
+        if (result && result.activationPromise && typeof result.activationPromise.then === "function") {
+          activationPromises.push(result.activationPromise);
+        }
+      }
+      return activationPromises.length ? { activationPromise: Promise.all(activationPromises) } : null;
+    },
+    runWarmUpdateStep(iteration, rng) {
+      for (const entry of entries) {
+        const props = buildRawProps(entry.cluster, entry.kind, iteration, 0, rng);
         entry.session.render(props);
       }
     },
@@ -538,6 +677,16 @@ function createClusterSession(env, cluster, width, height) {
         setElementRect(shell, width, height);
       }
       env.scheduler.flushAll();
+      const activationController = context.__dyniClusterState && context.__dyniClusterState.activationController
+        ? context.__dyniClusterState.activationController
+        : null;
+
+      return {
+        html,
+        activationPromise: activationController && activationController.lastActivationPromise
+          ? activationController.lastActivationPromise
+          : null
+      };
     },
     destroy() {
       clusterWidget.finalizeFunction.call(context);
@@ -548,12 +697,25 @@ function createClusterSession(env, cluster, width, height) {
   };
 }
 
-function runScenarioIteration(scenario, iteration, cpuSlowdownFactor, rng, collector, eventSink) {
+async function runScenarioIteration(stepFn, iteration, cpuSlowdownFactor, rng, collector, env, eventSink) {
   const loopFactor = Math.max(1, Number(cpuSlowdownFactor) || 1);
   const iterationStart = performance.now();
   const fromIndex = collector.events.length;
 
-  scenario.runStep(iteration, 0, rng);
+  const stepResult = stepFn(iteration, rng);
+  const activationPromise = stepResult && typeof stepResult === "object" && stepResult.activationPromise
+    ? stepResult.activationPromise
+    : null;
+
+  if (stepResult && typeof stepResult.then === "function") {
+    await stepResult;
+  }
+  if (activationPromise && typeof activationPromise.then === "function") {
+    await activationPromise;
+    await Promise.resolve();
+    env.scheduler.flushAll();
+  }
+
   applyCpuSlowdown(loopFactor);
 
   const totalMs = Math.max(0, performance.now() - iterationStart);
@@ -564,6 +726,27 @@ function runScenarioIteration(scenario, iteration, cpuSlowdownFactor, rng, colle
     }
   }
   return aggregateIterationMetrics(totalMs, events);
+}
+
+async function measureColdActivationSample(options) {
+  const scenario = options.scenario;
+  const iteration = Number.isFinite(options.iteration) ? options.iteration : 0;
+  const cpuSlowdownFactor = options.cpuSlowdownFactor;
+  const rng = options.rng;
+  const env = options.env;
+  const fromIndex = env.shadowCssPreloadEvents.length;
+
+  const sample = await runScenarioIteration(
+    scenario.runColdActivationStep,
+    iteration,
+    cpuSlowdownFactor,
+    rng,
+    env.collector,
+    env
+  );
+
+  const shadowCssPreloads = env.shadowCssPreloadEvents.slice(fromIndex);
+  return buildColdActivationSummary(sample, shadowCssPreloads);
 }
 
 let slowdownSink = 0;
@@ -654,6 +837,67 @@ function buildScenarioSummary(args) {
       max_ms: toFixedNumber(longTasks.length ? Math.max(...longTasks) : 0)
     },
     hotspots: hotspotSummary
+  };
+}
+
+function buildColdActivationSummary(sample, shadowCssPreloads) {
+  const preloadSamples = Array.isArray(shadowCssPreloads) ? shadowCssPreloads : [];
+  const preloadCounts = preloadSamples.map((entry) => entry.url_count);
+  const preloadTimes = preloadSamples.map((entry) => entry.duration_ms);
+  const coldSample = sample || {};
+
+  return {
+    sample_count: 1,
+    compute_ms: normalizeSummary(summarizeSamples([coldSample.compute_ms])),
+    wait_ms: normalizeSummary(summarizeSamples([coldSample.wait_ms])),
+    total_ms: normalizeSummary(summarizeSamples([coldSample.total_ms])),
+    wait_ratio: normalizeSummary(summarizeSamples([coldSample.wait_ratio])),
+    wait_breakdown_ms: {
+      host_commit_wait_ms: normalizeSummary(summarizeSamples([coldSample.host_commit_wait_ms])),
+      surface_reconcile_wait_ms: normalizeSummary(summarizeSamples([coldSample.surface_reconcile_wait_ms])),
+      canvas_paint_queue_wait_ms: normalizeSummary(summarizeSamples([coldSample.canvas_paint_queue_wait_ms]))
+    },
+    long_tasks: {
+      count_50ms: Number(coldSample.total_ms) >= 50 ? 1 : 0,
+      max_ms: toFixedNumber(coldSample.total_ms || 0)
+    },
+    shadow_css_preload: {
+      sample_count: preloadSamples.length,
+      url_count: normalizeSummary(summarizeSamples(preloadCounts)),
+      time_ms: normalizeSummary(summarizeSamples(preloadTimes))
+    }
+  };
+}
+
+function buildScenarioReport(args) {
+  const warmSummary = args.warmSummary || {};
+  const emptySummary = normalizeSummary(summarizeSamples([]));
+  const emptyWaitBreakdown = {
+    host_commit_wait_ms: emptySummary,
+    surface_reconcile_wait_ms: emptySummary,
+    canvas_paint_queue_wait_ms: emptySummary
+  };
+
+  return {
+    sample_count: warmSummary.sample_count || 0,
+    cold_activation: args.coldActivationSample || null,
+    warm_update: warmSummary,
+    compute_ms: warmSummary.compute_ms || emptySummary,
+    wait_ms: warmSummary.wait_ms || emptySummary,
+    total_ms: warmSummary.total_ms || emptySummary,
+    wait_ratio: warmSummary.wait_ratio || emptySummary,
+    wait_breakdown_ms: warmSummary.wait_breakdown_ms || emptyWaitBreakdown,
+    long_tasks: warmSummary.long_tasks || {
+      count_50ms: 0,
+      max_ms: 0
+    },
+    hotspots: warmSummary.hotspots || {
+      top_by_self: [],
+      top_by_total: [],
+      hottest_self_share_pct: 0,
+      top5_self_share_pct: 0,
+      total_profiled_ms: 0
+    }
   };
 }
 
@@ -785,6 +1029,35 @@ function renderPerfMarkdown(report) {
   lines.push(`CPU Slowdown Factor: ${report.environment.cpu_slowdown_factor}`);
   lines.push(`Iterations: warmup=${report.environment.warmup_iterations}, measured=${report.environment.measured_iterations}`);
   lines.push("");
+  const startup = report.startup || {
+    component_count: report.startup_component_count || 0,
+    component_ids: report.startup_component_ids || []
+  };
+  lines.push("## Startup");
+  lines.push("");
+  lines.push(`- Component count: ${startup.component_count || 0}`);
+  lines.push(`- Component ids: ${(startup.component_ids || []).join(", ") || "(none)"}`);
+  lines.push("");
+  lines.push("## Cold Activation");
+  lines.push("");
+  lines.push("| Scenario | Cold Compute p95 (ms) | Cold Wait p95 (ms) | Cold Total p95 (ms) | Shadow CSS URLs p95 | Shadow CSS Preload p95 (ms) |");
+  lines.push("|---|---:|---:|---:|---:|---:|");
+
+  for (const scenarioId of report.scenario_order) {
+    const scenario = report.scenarios[scenarioId];
+    if (!scenario || !scenario.cold_activation) {
+      continue;
+    }
+    const cold = scenario.cold_activation;
+    const shadow = cold.shadow_css_preload || {};
+    lines.push(
+      `| ${scenarioId} | ${cold.compute_ms.p95} | ${cold.wait_ms.p95} | ${cold.total_ms.p95} | ${(shadow.url_count && shadow.url_count.p95) || 0} | ${(shadow.time_ms && shadow.time_ms.p95) || 0} |`
+    );
+  }
+
+  lines.push("");
+  lines.push("## Warm Same-Route Update");
+  lines.push("");
   lines.push("| Scenario | Compute p95 (ms) | Wait p95 (ms) | Total p95 (ms) | Wait Ratio p95 | Long Tasks >=50ms |");
   lines.push("|---|---:|---:|---:|---:|---:|");
 
@@ -904,6 +1177,30 @@ function createComponentResolver(rootDir, runtimeServices) {
     createInstance,
     getComponentPath(componentId) {
       return byId.get(componentId) || null;
+    },
+    uniqueComponents(list) {
+      const result = new Set();
+
+      function addWithDeps(id) {
+        if (!registry[id] || result.has(id)) {
+          return;
+        }
+        result.add(id);
+        const deps = Array.isArray(registry[id].deps) ? registry[id].deps : [];
+        for (let i = 0; i < deps.length; i += 1) {
+          addWithDeps(deps[i]);
+        }
+      }
+
+      const items = Array.isArray(list) ? list : [];
+      for (let i = 0; i < items.length; i += 1) {
+        const widgetId = items[i] && items[i].widget;
+        if (typeof widgetId === "string" && widgetId) {
+          addWithDeps(widgetId);
+        }
+      }
+
+      return Array.from(result);
     }
   };
 }
@@ -913,6 +1210,63 @@ function stripSentinel(filePath) {
     return filePath.slice(SENTINEL_BASE.length);
   }
   return filePath;
+}
+
+function createDeterministicFetch(rootDir) {
+  return function fetchStub(input) {
+    const url = typeof input === "string"
+      ? input
+      : (input && typeof input.url === "string" ? input.url : String(input || ""));
+    const relativePath = resolvePerfAssetRelativePath(url);
+    const absPath = path.resolve(rootDir, relativePath);
+    const status = fs.existsSync(absPath) ? 200 : 404;
+    const text = status === 200
+      ? fs.readFileSync(absPath, "utf8")
+      : "";
+
+    return Promise.resolve({
+      ok: status === 200,
+      status: status,
+      text() {
+        return Promise.resolve(text);
+      }
+    });
+  };
+}
+
+function resolvePerfAssetRelativePath(url) {
+  if (!url) {
+    return "";
+  }
+  if (url.startsWith(SENTINEL_BASE)) {
+    return stripSentinel(url);
+  }
+
+  try {
+    const parsed = new URL(url);
+    const pathname = parsed.pathname.replace(/^\/+/, "");
+    return pathname;
+  }
+  catch (error) {
+    return String(url).replace(/^\/+/, "");
+  }
+}
+
+function normalizeShadowCssUrlList(urls) {
+  if (!Array.isArray(urls) || !urls.length) {
+    return [];
+  }
+  const result = [];
+  const seen = new Set();
+  for (let i = 0; i < urls.length; i += 1) {
+    const url = urls[i];
+    if (typeof url !== "string" || !url || seen.has(url)) {
+      continue;
+    }
+    seen.add(url);
+    result.push(url);
+  }
+  return result;
 }
 
 function createVirtualScheduler() {

@@ -4,7 +4,7 @@
 
 ## Overview
 
-ActiveRouteTextHtmlWidget is a committed HTML renderer routed by ClusterRendererRouter.
+ActiveRouteTextHtmlWidget is a committed HTML renderer routed by route metadata and `ClusterWidget`.
 
 - surface: html
 - shell: inert pre-commit markup only
@@ -35,7 +35,7 @@ ActiveRouteTextHtmlWidget is a committed HTML renderer routed by ClusterRenderer
 
 ## Vertical Contract
 
-- getVerticalShellSizing returns ratio sizing with aspect ratio 2 in vertical mode.
+- route metadata `shellSizing` returns ratio sizing with aspect ratio 2 in vertical mode.
 - The committed surface box (`shellRect` / `.dyni-html-root`) owns the authoritative geometry.
 - Inner widget wrappers (`.dyni-active-route-html`) must not self-expand beyond the surface box.
 - Vertical-mode CSS no longer uses `height: auto`, `aspect-ratio`, or `min-height` overrides on the inner wrapper.

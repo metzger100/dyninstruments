@@ -14,6 +14,7 @@ Read first:
 
 A cluster is one AvNav widget with multiple `kind` choices (numeric and optionally radial). All cluster widgets use `widget: "ClusterWidget"`.
 Cluster host registration is `renderHtml`; per-kind render behavior is selected by route metadata in `config.clusterRoutes.byRouteId`, which supplies `mapperId`, `rendererId`, `surface`, optional `viewModelId`, and `shellSizing`.
+Route metadata stays data-only: transitive dependencies remain in `config.components`, and renderer shadowCss stays on the component registry entry.
 
 Translation logic lives in one mapper module per cluster.
 
@@ -158,7 +159,8 @@ Set:
 
 If the route needs a new renderer component, register that renderer in the appropriate `config/components/registry-*.js` fragment and keep its shadow CSS declaration with the component.
 
-Do not add `ClusterRendererRouter`, `ClusterKindCatalog`, or `RendererPropsWidget` wiring here; route metadata owns the live route selection.
+Do not add ad hoc router, catalog, or renderer-props wiring here; route metadata plus `ClusterWidget`, `RouteActivationController`, and `RouteActivationPayloadBuilder` own the live route selection.
+Do not add dependency buckets, preload hints, or any other transitive-dependency data to the route entry.
 
 ## Renderer Decision Rule
 

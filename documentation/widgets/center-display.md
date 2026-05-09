@@ -25,10 +25,11 @@ This is a dedicated renderer, not a `PositionCoordinateWidget` variant, because 
 - `shared/widget-kits/layout/ResponsiveScaleProfile.js` owns the shared `minDim -> t` compaction curve plus named scale outputs.
 - `CenterDisplayLayout` keeps nav-owned geometry, panel bounds, and row splitting; it no longer owns a private responsive-profile implementation.
 - `CenterDisplayTextWidget` keeps a frame-local width-measure cache (`ctx.font + text`) to reuse repeated fit-width lookups during one render pass.
+- Theme consumers resolve the immutable token snapshot once per render via `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`.
 
 ## Vertical Contract
 
-- `getVerticalShellSizing()` returns ratio sizing with aspect ratio `1` in vertical mode.
+- route metadata `shellSizing` returns ratio sizing with aspect ratio `1` in vertical mode.
 
 ## Ownership Contract
 
@@ -81,7 +82,7 @@ CenterDisplayTextWidget: {
   css: undefined,
   globalKey: "DyniCenterDisplayTextWidget",
   deps: [
-    "ThemeResolver",
+    "runtime.theme",
     "TextLayoutEngine",
     "RadialTextLayout",
     "TextTileLayout",
@@ -166,17 +167,17 @@ Measure row behavior:
 
 ## Visual State
 
-- text color comes from `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg`
-- coordinate/value groups use `theme.font.weight`
-- captions/row labels use `theme.font.labelWeight`
-- disconnected state-screen label uses shared `StateScreenCanvasOverlay` with `theme.font.labelWeight`
+- text color comes from `tokens.surface.fg`
+- coordinate/value groups use `tokens.font.weight`
+- captions/row labels use `tokens.font.labelWeight`
+- disconnected state-screen label uses shared `StateScreenCanvasOverlay` with `tokens.font.labelWeight`
 - compact layouts also raise fitted line-height ceilings linearly, making smaller widgets read denser while larger widgets retain the existing text rhythm
 - no icon sprites, no new theme tokens, no CSS defaults beyond normal dyninstruments widget styling
 
 ## Phase 6 Options
 
-- `coordinatesTabular` (default `true`) routes center-position coordinate rows to `theme.font.familyMono` and right-aligns them so digits line up vertically.
-- `stableDigits` (default `false`) enables stable-digit normalization on relation values (`course / distance`) and routes those value rows to `theme.font.familyMono`.
+- `coordinatesTabular` (default `true`) routes center-position coordinate rows to `tokens.font.familyMono` and right-aligns them so digits line up vertically.
+- `stableDigits` (default `false`) enables stable-digit normalization on relation values (`course / distance`) and routes those value rows to `tokens.font.familyMono`.
 - Relation rows keep two text variants (`fullValueText` and compact fallback) and select the compact variant when row width is constrained.
 
 ## Related

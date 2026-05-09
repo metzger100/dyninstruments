@@ -31,7 +31,7 @@ WindRadialWidget: {
 | `speedCaption` | string | `""` | Speed caption (`AWS`/`TWS`) |
 | `angleUnit` | string | `"°"` | Angle display unit |
 | `speedUnit` | string | `"kn"` | Speed display unit only |
-| `formatter` | string/function | `"formatSpeed"` | Speed formatter passed to `Helpers.applyFormatter` |
+| `formatter` | string/function | `"formatSpeed"` | Speed formatter passed to `componentContext.format.applyFormatter` |
 | `formatterParameters` | array/string | `[resolved token]` | Speed formatter token from the mapper (`kn`, `ms`, `kmh`) |
 | `leadingZero` | boolean | `false` | Angle pad to 3 digits |
 | `layEnabled` | boolean | `true` | Enable layline sectors |
@@ -46,9 +46,9 @@ WindRadialWidget: {
 | Element | Draw Function | Parameters |
 |---|---|---|
 | Ring | `draw.drawRing` | full circle |
-| Layline starboard | `draw.drawAnnularSector` | `windRadialLayMin..windRadialLayMax`, `theme.colors.laylineStb` (default `#82b683`) |
-| Layline port | `draw.drawAnnularSector` | `-windRadialLayMax..-windRadialLayMin`, `theme.colors.laylinePort` (default `#ff7a76`) |
-| Wind pointer | `draw.drawPointerAtRim` | long pointer at `angle`, with layout-owned `needleDepth` and `fillStyle: theme.colors.pointer` (default `#ff2b2b`) |
+| Layline starboard | `draw.drawAnnularSector` | `windRadialLayMin..windRadialLayMax`, `tokens.colors.laylineStb` (default `#82b683`) |
+| Layline port | `draw.drawAnnularSector` | `-windRadialLayMax..-windRadialLayMin`, `tokens.colors.laylinePort` (default `#ff7a76`) |
+| Wind pointer | `draw.drawPointerAtRim` | long pointer at `angle`, with layout-owned `needleDepth` and `fillStyle: tokens.colors.pointer` (default `#ff2b2b`) |
 | Ticks | `draw.drawTicks` | `-180..180`, major 30, minor 10 |
 | Labels | `draw.drawLabels` | `-180..180`, step 30, endpoints filtered, with layout-owned `radiusOffset` / `fontPx` |
 
@@ -108,18 +108,19 @@ Responsive ownership:
 - `FullCircleRadialLayout` owns mode routing, compact insets, dial geometry, label metrics, and slot bounds.
 - `FullCircleRadialEngine` owns cache lifecycle and shared callback state.
 - `WindRadialWidget` only owns wind-specific layline, pointer, and formatter behavior.
+- Theme tokens are resolved once per render via `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`.
 
 ## Internal Value Formatting
 
 | Function | Input | Output |
 |---|---|---|
 | `RadialValueMath.formatAngle180(v, leadingZero)` | angle deg | `-180..180` string |
-| `Helpers.applyFormatter(v, { formatter, formatterParameters })` | speed value | formatted speed string; formatter parameters must carry the selected token, not the display label |
+| `componentContext.format.applyFormatter(v, { formatter, formatterParameters })` | speed value | formatted speed string; formatter parameters must carry the selected token, not the display label |
 
 ## Phase 6 Options
 
 - `stableDigits` (default `false`) applies `StableDigits.normalize(...)` to angle and speed display strings.
-- When enabled, dial value text uses `theme.font.familyMono`.
+- When enabled, dial value text uses `tokens.font.familyMono`.
 
 ## Exports
 

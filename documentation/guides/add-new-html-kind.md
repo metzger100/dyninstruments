@@ -13,7 +13,7 @@ Core rules:
 - interaction is direct DOM listener ownership under dispatch/passive policy
 - layout uses shellRect from mount host
 - pre-activation shell sizing comes from route metadata in `config.clusterRoutes.byRouteId`
-- there is no `getVerticalShellSizing()` renderer-spec hook
+- route metadata `shellSizing` owns pre-activation sizing; committed renderer shadow CSS owns post-activation sizing
 
 ## Steps
 
@@ -21,10 +21,12 @@ Core rules:
 - map normalized payload in cluster mapper
 - add route entry in `config/cluster-routes/<cluster>.js` with `mapperId`, `rendererId`, `surface: "html"`, optional `viewModelId`, and `shellSizing`
 - point `rendererId` at your renderer component
+- keep transitive dependencies in `config/components`; the route entry stays data-only
 
 2. Register component
 - add renderer entry in the appropriate fragment: `config/components/registry-widgets-nav.js` for nav/route HTML kinds or `config/components/registry-widgets-vessel.js` for vessel HTML kinds
 - declare shadowCss bundle via shadowCss array
+- do not move route-specific shadowCss into route metadata
 
 3. Implement renderer component
 - expose createCommittedRenderer(rendererContext)
@@ -52,7 +54,7 @@ Core rules:
 - use payload.shellRect as authoritative committed layout source
 - use layoutSignature + bounded postPatch relayout for layout-sensitive updates
 - avoid observer loops and triggerResize-style rerender shims
-- do not add a `getVerticalShellSizing()` renderer-spec implementation
+- do not add a renderer-spec vertical-sizing hook
 
 ## Step 7: Required HTML Kind Test Matrix
 

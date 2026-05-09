@@ -35,7 +35,7 @@ The engine is split into small shared modules to stay under hotspot/file-size li
 
 ## API/Interfaces
 
-`TextLayoutEngine.create(def, Helpers)` returns:
+`TextLayoutEngine.create(def, componentContext)` returns:
 
 - Cache: `createFitCache`, `clearFitCache`, `makeFitCacheKey`, `readFitCache`, `writeFitCache`, `resolveFitCache`
 - Mode/insets: `computeModeLayout`, `computeInsets`, `computeResponsiveInsets`

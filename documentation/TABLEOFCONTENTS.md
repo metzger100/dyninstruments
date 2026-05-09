@@ -22,7 +22,7 @@
 - **Runtime bootstrap/init/render lifecycle** → [architecture/runtime-lifecycle.md](architecture/runtime-lifecycle.md)
 - **Component loading and dependency graph (UMD)** → [architecture/component-system.md](architecture/component-system.md)
 - **Runtime asset registry and preload contract** → [architecture/asset-system.md](architecture/asset-system.md)
-- **Cluster routing, mapper flow, viewmodel ownership, strict kind catalog, surface router** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
+- **Cluster routing, mapper flow, viewmodel ownership, route metadata, route activation, surface session ownership** → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
 - **HTML renderer lifecycle (two-phase render, corrective rerender, committed host facts)** → [architecture/html-renderer-lifecycle.md](architecture/html-renderer-lifecycle.md)
 - **Vertical container contract (`.widgetContainer.vertical`, intrinsic sizing workflow)** → [architecture/vertical-container-contract.md](architecture/vertical-container-contract.md)
 - **Host deferred commit state and scheduling** → [architecture/host-commit-controller.md](architecture/host-commit-controller.md)
@@ -30,7 +30,7 @@
 - **`canvas-dom` adapter integration contract** → [architecture/canvas-dom-surface-adapter.md](architecture/canvas-dom-surface-adapter.md)
 - **Plugin↔core tuple contracts** → [architecture/plugin-core-contracts.md](architecture/plugin-core-contracts.md)
 - **State-screen shared vocabulary, precedence, and render primitives** → [shared/state-screens.md](shared/state-screens.md)
-- **Helpers contract (`setupCanvas`, theme/night lookups, formatter dispatch)** → [shared/helpers.md](shared/helpers.md)
+- **Component-context services (`canvas.setupCanvas`, theme/night lookups, formatter dispatch)** → [shared/helpers.md](shared/helpers.md)
 - **Spring easing integrator and canvas motion controller** → [shared/spring-easing.md](shared/spring-easing.md)
 
 ## Conventions

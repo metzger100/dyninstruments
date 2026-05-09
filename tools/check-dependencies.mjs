@@ -1,35 +1,95 @@
 #!/usr/bin/env node
 
+import fs from "node:fs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { loadComponentsRegistry as loadComponentsRegistryFromScripts, SENTINEL_BASE } from "./components-registry-loader.mjs";
 
-const ROOT = process.cwd();
 const COMPONENTS_CONFIG_REL = "config/components.js";
 const ARCHITECTURE_PATH = "ARCHITECTURE.md";
+const FORBIDDEN_COMPONENT_IDS = new Set([
+  "ThemeModel",
+  "ThemeResolver",
+  "PerfSpanHelper",
+  "ClusterSurfacePolicy",
+  "CanvasDomSurfaceAdapter",
+  "HtmlSurfaceController",
+  "ClusterShellRenderer",
+  "RouteActivationController",
+  "RouteActivationPayloadBuilder",
+  "RouteActivationLatestWins",
+  "HostCommitController",
+  "SurfaceSessionController",
+  "TemporaryHostActionBridge",
+  "ClusterRendererRouter",
+  "SurfaceControllerFactory",
+  "ClusterMapperRegistry",
+  "ClusterKindCatalog",
+  "RendererPropsWidget"
+]);
+const FORBIDDEN_OWNER_MODULE_PATHS = [
+  "cluster/rendering/ClusterRendererRouter.js",
+  "cluster/rendering/ClusterKindCatalog.js",
+  "cluster/rendering/SurfaceControllerFactory.js",
+  "cluster/rendering/RendererPropsWidget.js",
+  "cluster/mappers/ClusterMapperRegistry.js",
+  "runtime/helpers.js",
+  "shared/theme/ThemeModel.js",
+  "shared/theme/ThemeResolver.js",
+  "shared/widget-kits/perf/PerfSpanHelper.js",
+  "cluster/rendering/ClusterSurfacePolicy.js",
+  "cluster/rendering/CanvasDomSurfaceAdapter.js",
+  "cluster/rendering/HtmlSurfaceController.js"
+];
 
-const violations = [];
-const byType = Object.create(null);
+let ROOT = process.cwd();
+let violations = [];
+let byType = Object.create(null);
 let checkedDependencies = 0;
 
-const registry = loadComponentsRegistry();
-validateDependencyDirections(registry);
+export function runDependencyCheck(options = {}) {
+  ROOT = path.resolve(options.root || process.cwd());
+  violations = [];
+  byType = Object.create(null);
+  checkedDependencies = 0;
 
-const summary = {
-  ok: violations.length === 0,
-  checkedComponents: registry.items.length,
-  checkedDependencies,
-  violations: violations.length,
-  byType
-};
+  validateForbiddenOwnerModulePaths();
 
-if (violations.length > 0) {
-  for (const line of violations) {
-    console.error(line);
+  const registry = loadComponentsRegistry();
+  validateForbiddenComponents(registry);
+  validateDependencyDirections(registry);
+
+  const summary = {
+    ok: violations.length === 0,
+    checkedComponents: registry.items.length,
+    checkedDependencies,
+    checkedForbiddenPaths: FORBIDDEN_OWNER_MODULE_PATHS.length,
+    violations: violations.length,
+    byType
+  };
+
+  if (options.print !== false) {
+    if (violations.length > 0) {
+      for (const line of violations) {
+        console.error(line);
+      }
+      console.error("SUMMARY_JSON=" + JSON.stringify(summary));
+    } else {
+      console.log("SUMMARY_JSON=" + JSON.stringify(summary));
+    }
   }
-  console.error("SUMMARY_JSON=" + JSON.stringify(summary));
-  process.exit(1);
+
+  return { summary, violations };
 }
 
-console.log("SUMMARY_JSON=" + JSON.stringify(summary));
+export function runDependencyCheckCli() {
+  const result = runDependencyCheck({ root: process.cwd(), print: true });
+  process.exit(result.summary.ok ? 0 : 1);
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  runDependencyCheckCli();
+}
 
 function loadComponentsRegistry() {
   let components = null;
@@ -67,6 +127,19 @@ function loadComponentsRegistry() {
   }
 
   return { items, byId };
+}
+
+function validateForbiddenOwnerModulePaths() {
+  for (const relPath of FORBIDDEN_OWNER_MODULE_PATHS) {
+    if (!fs.existsSync(path.join(ROOT, relPath))) {
+      continue;
+    }
+
+    addViolation(
+      "forbidden-owner-module-path",
+      `[dependency] ${relPath}: deleted PLAN20 owner module file must not exist on disk. Keep it removed from the repository.`
+    );
+  }
 }
 
 function parseDeps(componentId, rawDeps) {
@@ -127,6 +200,27 @@ function validateDependencyDirections(registryData) {
       if (!isAllowedDependency(source.layer, target.layer)) {
         addViolation("dependency-direction", buildDirectionViolation(source, target));
       }
+    }
+  }
+}
+
+function validateForbiddenComponents(registryData) {
+  for (const source of registryData.items) {
+    if (FORBIDDEN_COMPONENT_IDS.has(source.componentId)) {
+      addViolation(
+        "forbidden-component-id",
+        `[dependency] ${COMPONENTS_CONFIG_REL}: component '${source.componentId}' must not be registered in config.components. It belongs to runtime-owned service/bootstrap code, not the component registry.`
+      );
+    }
+
+    for (const depId of source.deps) {
+      if (!FORBIDDEN_COMPONENT_IDS.has(depId)) {
+        continue;
+      }
+      addViolation(
+        "forbidden-component-dep",
+        `[dependency] ${COMPONENTS_CONFIG_REL}: component '${source.componentId}' must not depend on runtime-owned '${depId}'. Keep runtime services out of component deps.`
+      );
     }
   }
 }

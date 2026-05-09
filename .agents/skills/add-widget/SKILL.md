@@ -37,7 +37,6 @@ File basename: {ComponentId}.js (e.g., "BarometerRadialWidget.js")
 Folder: widgets/{type}/{ComponentId}/ (e.g., "widgets/radial/BarometerRadialWidget/")
 Cluster widget name: dyni_{Cluster}_Instruments (e.g., "dyni_Environment_Instruments")
 Kind name: {kindName} (e.g., "barometerRadial")
-Mapper renderer value: "{ComponentId}" (must match ClusterKindCatalog rendererId)
 ```
 
 For cluster kinds, also derive:
@@ -67,7 +66,7 @@ Create the widget file with the mandatory UMD wrapper and header:
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
+  function create(def, componentContext) {
     // Get shared engine
     // Provide gauge-specific functions only
     // Build renderer with createRenderer(spec)
@@ -93,7 +92,7 @@ Create the widget file with the mandatory UMD wrapper and header:
 - Do NOT import `ResponsiveScaleProfile` — the shared engine/layout already owns it.
 - Do NOT add `Math.max(N, ...)` responsive floors — use shared profile.
 - Do NOT add `typeof ctx.method === "function"` guards — trust Canvas 2D.
-- Do NOT add `typeof Helpers.method === "function"` guards — trust module loader.
+- Do NOT add internal `typeof ... === "function"` guards for runtime service methods — trust module loader and service contracts once inside the component boundary.
 - Keep the file under 400 lines. Gauge-specific code only.
 
 ### Step 4: Register the Component
@@ -110,27 +109,28 @@ Add entry to the appropriate `config/components/registry-widgets-*.js` fragment:
 ```
 
 If cluster-routed, also:
-- Add `"{ComponentId}"` to `RendererPropsWidget.deps` in `config/components/registry-widgets-nav.js`
-- `ClusterRendererRouter` already depends on `RendererPropsWidget`; no direct edit needed there
+- Add `"{ComponentId}"` to the relevant component registry fragment in `config/components/registry-widgets-*.js`
+- Add the route metadata tuple in `config/cluster-routes/<cluster>.js` with `rendererId: "{ComponentId}"`
+- Keep the mapper branch declarative and free of renderer identity
 
-### Step 5: Wire ClusterRendererRouter
+### Step 5: Cluster-Routed Renderer Checklist
 
-In `cluster/rendering/ClusterRendererRouter.js`, add the renderer spec to `rendererSpecs`:
+A cluster-routed renderer requires:
 
-```javascript
-// Inside the rendererSpecs map, instantiate the new widget
-```
+1. Component registration in `config/components/registry-widgets-*.js`
+2. Route metadata tuple in `config/cluster-routes/<cluster>.js` with `rendererId`
+3. Mapper branch returning only mapped payload and/or `rendererProps`, not renderer identity
 
-### Step 6: Add Kind Catalog Tuple
+### Step 6: Add Route Metadata Tuple
 
-In `cluster/rendering/ClusterKindCatalog.js`, add the strict routing tuple:
+In `config/cluster-routes/<cluster>.js`, add the strict routing tuple:
 
 ```javascript
 { cluster: "{cluster}", kind: "{kindName}", viewModelId: "{ViewModel}", rendererId: "{ComponentId}", surface: "{surface}" }
 ```
 
 - `surface` must be `"canvas-dom"` for gauges/dials/text-canvas, `"html"` for HTML kinds
-- `rendererId` MUST match what the mapper returns as `renderer`
+- `rendererId` must match the component registration entry
 - Unknown/mismatched tuples fail closed
 
 ### Step 7: Add Mapper Branch
@@ -140,7 +140,6 @@ In the relevant `cluster/mappers/{Cluster}Mapper.js`, add a branch in `translate
 ```javascript
 if (req === "{kindName}") {
   return {
-    renderer: "{ComponentId}",
     value: p.{storeKey},
     caption: cap("{kindName}"),
     unit: unit("{kindName}"),
@@ -150,7 +149,7 @@ if (req === "{kindName}") {
 ```
 
 **Mapper rules:**
-- Keep declarative: select renderer, map values, normalize numbers, pass-through formatter keys
+- Keep declarative: map values, normalize numbers, pass-through formatter keys
 - No formatter logic, no status-symbol conversion, no rendering fallbacks
 - Keep under 9 top-level props per return (group into `domain`/`layout`/`formatting` if needed)
 - Only `create()` and `translate()` function declarations allowed
@@ -252,11 +251,9 @@ Print this checklist and verify every item:
 - [ ] UMD wrapper with correct `globalKey` on `window.DyniComponents`
 - [ ] Mandatory header: `Module`, `Documentation`, `Depends`
 - [ ] Component registered in the appropriate `config/components/registry-widgets-*.js` fragment
-- [ ] Added to `RendererPropsWidget.deps` in `config/components/registry-widgets-nav.js` (if cluster-routed)
-- [ ] Renderer wired in `cluster/rendering/ClusterRendererRouter.js`
-- [ ] Kind catalog tuple added in `cluster/rendering/ClusterKindCatalog.js`
+- [ ] Added to the relevant `config/cluster-routes.js` tuple(s) if cluster-routed
+- [ ] Route metadata tuple added in `config/cluster-routes/<cluster>.js`
 - [ ] `surface` type correct (`canvas-dom` or `html`)
-- [ ] `rendererId` matches mapper `renderer` value
 - [ ] Mapper branch added, declarative, under 9 top-level props
 - [ ] Store keys added to cluster config
 - [ ] Editable parameters added with correct `condition`

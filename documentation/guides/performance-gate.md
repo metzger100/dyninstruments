@@ -22,21 +22,38 @@ Use this guide for perf harness execution and strict gate evaluation against com
   - `map_zoom_html`
   - `center_display_text`
   - `gpspage_all_widgets`
+- Report startup section:
+  - `startup.component_ids`
+  - `startup.component_count`
 - Lifecycle span instrumentation owners:
   - `ClusterWidget.translateFunction`
   - `ClusterWidget.renderHtml`
-  - `ClusterRendererRouter.renderHtml`
   - `HostCommitController.scheduleCommit->onCommit` (`waitStage`: `raf-1`, `raf-2`, `raf-3`, `raf-4`, `mutation-observer`, `observer-timeout`, `timeout`)
   - `SurfaceSessionController.reconcileSession`
   - `HtmlSurfaceController.attach`
   - `HtmlSurfaceController.update`
   - `CanvasDomSurfaceAdapter.schedulePaint->paintNow`
   - renderer entrypoints: `Renderer.renderHtml`, `Renderer.renderCanvas`
-- Wait metrics emitted per scenario:
+- Cold activation metrics emitted per scenario:
+  - `cold_activation.compute_ms`
+  - `cold_activation.wait_ms`
+  - `cold_activation.total_ms`
+  - `cold_activation.shadow_css_preload.url_count`
+  - `cold_activation.shadow_css_preload.time_ms`
+- Warm same-route update metrics emitted per scenario:
   - `host_commit_wait_ms`
   - `surface_reconcile_wait_ms`
   - `canvas_paint_queue_wait_ms`
   - `wait_ratio = wait_ms / (compute_ms + wait_ms)`
+- Cold activation samples are awaited before collection, and HTML routes preload shadow CSS through the harness's deterministic local-file fetch stub.
+- Top-level warm-update aliases remain available for gate compatibility:
+  - `compute_ms`
+  - `wait_ms`
+  - `total_ms`
+  - `wait_ratio`
+  - `wait_breakdown_ms`
+  - `long_tasks`
+  - `hotspots`
 - Hotspot summary per scenario includes top-15 by `self_ms` and `total_ms` with module/file attribution.
 
 ## API/Interfaces
@@ -62,9 +79,25 @@ Baseline contract keys:
   "baseline_schema_version": 1,
   "baseline_id": "core-lab-v1",
   "environment": { "cpu_slowdown_factor": 6, "warmup_iterations": 5, "measured_iterations": 200 },
+  "startup": { "component_ids": ["ClusterWidget"], "component_count": 1 },
   "scenario_order": ["speed_radial", "wind_radial", "xte_text", "active_route_html", "map_zoom_html", "center_display_text", "gpspage_all_widgets"],
   "scenarios": {
     "speed_radial": {
+      "cold_activation": {
+        "compute_ms": { "p50": 0, "p95": 0, "p99": 0 },
+        "wait_ms": { "p95": 0 },
+        "total_ms": { "p95": 0 },
+        "shadow_css_preload": {
+          "sample_count": 0,
+          "url_count": { "p95": 0 },
+          "time_ms": { "p95": 0 }
+        }
+      },
+      "warm_update": {
+        "compute_ms": { "p50": 0, "p95": 0, "p99": 0 },
+        "wait_ms": { "p95": 0 },
+        "total_ms": { "p95": 0 }
+      },
       "compute_ms": { "p50": 0, "p95": 0, "p99": 0 },
       "wait_ms": { "p95": 0 },
       "total_ms": { "p95": 0 },

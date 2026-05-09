@@ -38,7 +38,7 @@ Responsive ownership:
 
 ## Step 1: Create Wrapper Module
 
-Create `widgets/linear/NewLinearWidget/NewLinearWidget.js` with UMD + `create(def, Helpers)`.
+Create `widgets/linear/NewLinearWidget/NewLinearWidget.js` with UMD + `create(def, componentContext)`.
 
 Use `SpeedLinearWidget` as reference and delegate to `LinearGaugeEngine`.
 
@@ -53,13 +53,13 @@ Responsive ownership rule:
 - Keep wrapper hooks on display formatting, tick policy, sector policy, and any truly widget-specific draw callbacks.
 
 ```javascript
-const engine = Helpers.getModule("LinearGaugeEngine").create(def, Helpers);
-const valueMath = Helpers.getModule("RadialValueMath").create(def, Helpers);
+const engine = componentContext.components.require("LinearGaugeEngine");
+const valueMath = componentContext.components.require("RadialValueMath");
 
 function formatDisplay(raw, props, unit) {
   const n = Number(raw);
   if (!isFinite(n)) return { num: NaN, text: "---" };
-  const out = String(Helpers.applyFormatter(n, {
+  const out = String(componentContext.format.applyFormatter(n, {
     formatter: "formatDecimal",
     formatterParameters: [3, 1, true],
     default: "---"
@@ -174,7 +174,7 @@ Set:
 - optional `viewModelId`
 - `shellSizing`
 
-Do not add `ClusterRendererRouter`, `ClusterKindCatalog`, or `RendererPropsWidget` wiring here; route metadata owns the live route selection.
+Do not add ad hoc router, catalog, or renderer-props wiring here; route metadata plus `ClusterWidget`, `RouteActivationController`, and `RouteActivationPayloadBuilder` own the live route selection.
 
 ## Step 6: Mapper Wiring
 

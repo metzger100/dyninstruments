@@ -15,7 +15,7 @@ Shared gauge logic is split into focused core modules:
 - `TextLayoutPrimitives` for binary-fit and inline draw primitives
 - `TextLayoutComposite` for reusable multi-row text layouts
 - `TextLayoutEngine` as text-layout facade (mode routing + cache + composed helpers)
-- `ThemeResolver` for plugin-wide CSS theme token resolution
+- `runtime.theme` for plugin-wide CSS theme token resolution; components resolve snapshots via `componentContext.theme.tokens.resolveForRoot(rootEl)`
 - `RadialToolkit` as composed facade
 - `SemicircleRadialLayout` as shared responsive layout owner for Speed/Depth/Temperature/Voltage
 - `SemicircleRadialTextLayout` as shared mode text helper for Speed/Depth/Temperature/Voltage
@@ -72,11 +72,10 @@ TextLayoutEngine: {
   globalKey: "DyniTextLayoutEngine",
   deps: ["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite", "ResponsiveScaleProfile"]
 },
-ThemeResolver: { js: BASE + "shared/theme/ThemeResolver.js", globalKey: "DyniThemeResolver" },
 RadialToolkit: {
   js: BASE + "shared/widget-kits/radial/RadialToolkit.js",
   globalKey: "DyniRadialToolkit",
-  deps: ["ThemeResolver", "RadialTextLayout", "RadialValueMath", "RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives", "RadialFrameRenderer"]
+  deps: ["RadialTextLayout", "RadialValueMath", "RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives", "RadialFrameRenderer"]
 },
 SemicircleRadialLayout: {
   js: BASE + "shared/widget-kits/radial/SemicircleRadialLayout.js",
@@ -111,18 +110,18 @@ FullCircleRadialTextLayout: {
 ## Access Pattern
 
 ```javascript
-const gaugeUtils = Helpers.getModule("RadialToolkit") && Helpers.getModule("RadialToolkit").create(def, Helpers);
-const renderer = Helpers.getModule("SemicircleRadialEngine") && Helpers.getModule("SemicircleRadialEngine").create(def, Helpers);
-const fullCircle = Helpers.getModule("FullCircleRadialEngine") && Helpers.getModule("FullCircleRadialEngine").create(def, Helpers);
+const gaugeUtils = componentContext.components.require("RadialToolkit");
+const renderer = componentContext.components.require("SemicircleRadialEngine");
+const fullCircle = componentContext.components.require("FullCircleRadialEngine");
 ```
 
 ## RadialToolkit (Facade)
 
-`RadialToolkit.create(def, Helpers)` returns:
+`RadialToolkit.create(def, componentContext)` returns:
 
 | Field | Type | Description |
 |---|---|---|
-| `theme` | object | `ThemeResolver` API (`resolveForRoot(rootEl)`) |
+| `theme` | object | `componentContext.theme.tokens.resolveForRoot(rootEl)` snapshot API |
 | `text` | object | `RadialTextLayout` API |
 | `value` | object | `RadialValueMath` API |
 | `angle` | object | `RadialAngleMath` API |
@@ -130,7 +129,7 @@ const fullCircle = Helpers.getModule("FullCircleRadialEngine") && Helpers.getMod
 | `draw` | object | merged API from `RadialCanvasPrimitives` + `RadialFrameRenderer` |
 
 Color-token flow:
-- Resolve once per render path with `theme.resolveForRoot(Helpers.requirePluginRoot(canvas))`.
+- Resolve once per render path with `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`.
 - Pass resolved token object down to sector builders and draw helpers where needed.
 
 ## Draw API (`RadialToolkit.draw`)
@@ -186,7 +185,7 @@ Key signatures:
 
 ## RadialValueMath API
 
-`RadialValueMath.create(def, Helpers)` returns shared numeric helpers:
+`RadialValueMath.create(def, componentContext)` returns shared numeric helpers:
 `isFiniteNumber`, `extractNumberText`, `clamp`, `almostInt`, `isApprox`, `computePad`, `computeGap`, `computeMode`, `resolveSemicircleTickSteps`, `resolveStandardSemicircleTickSteps`, `resolveTemperatureSemicircleTickSteps`, `resolveVoltageSemicircleTickSteps`, `normalizeRange`, `valueToAngle`, `angleToValue`, `buildValueTickAngles`, `sectorAngles`, `buildHighEndSectors`, `buildLowEndSectors`, `formatAngle180`, `formatDirection360`, `formatMajorLabel`.
 
 ### Semicircle Tick-Step Resolvers
@@ -204,7 +203,7 @@ Semicircle geometry is owned by `SemicircleRadialLayout.computeLayout(...)`; `Ra
 
 ## TextLayoutEngine API
 
-`TextLayoutEngine.create(def, Helpers)` returns:
+`TextLayoutEngine.create(def, componentContext)` returns:
 
 - Cache/mode helpers: `createFitCache`, `clearFitCache`, `makeFitCacheKey`, `readFitCache`, `writeFitCache`, `resolveFitCache`, `computeModeLayout`, `computeInsets`
 - Primitive text helpers: `setFont`, `fitSingleLineBinary`, `fitMultiRowBinary`, `fitValueUnitRow`, `fitInlineTriplet`, `drawInlineTriplet`
@@ -212,7 +211,7 @@ Semicircle geometry is owned by `SemicircleRadialLayout.computeLayout(...)`; `Ra
 
 ## SemicircleRadialEngine API
 
-`SemicircleRadialEngine.create(def, Helpers).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
+`SemicircleRadialEngine.create(def, componentContext).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
 
 Responsive ownership for the semicircle family:
 
@@ -222,7 +221,7 @@ Responsive ownership for the semicircle family:
 
 ## SemicircleRadialLayout API
 
-`SemicircleRadialLayout.create(def, Helpers)` returns:
+`SemicircleRadialLayout.create(def, componentContext)` returns:
 
 - `computeMode(W, H, thresholdNormal, thresholdFlat)`
 - `computeInsets(W, H)` -> `{ pad, gap, responsive }`
@@ -239,7 +238,7 @@ Responsive ownership for the semicircle family:
 
 ## SemicircleRadialTextLayout API
 
-`SemicircleRadialTextLayout.create(def, Helpers)` returns:
+`SemicircleRadialTextLayout.create(def, componentContext)` returns:
 
 - `createFitCache()`
 - `drawModeText(state, display, fitCache)`
@@ -257,7 +256,7 @@ Responsive ownership for the semicircle family:
 | `ratioDefaults` | `{normal,flat}` | no | Engine-level safety fallback for missing threshold props; config-backed wrappers should omit it |
 | `tickSteps` | `(range) => {major,minor}` | yes | Gauge-specific tick strategy (wrappers should delegate to shared `RadialValueMath` resolver methods) |
 | `formatDisplay` | `(raw, props, unit, Helpers) => {num,text}` | yes | Gauge-specific value formatter |
-| `buildSectors` | `(props, minV, maxV, arc, valueUtils, theme) => Sector[]` | yes | Gauge-specific warning/alarm sectors (wrappers typically pass `theme.colors.warning/alarm` into shared builders) |
+| `buildSectors` | `(props, minV, maxV, arc, valueUtils, theme) => Sector[]` | yes | Gauge-specific warning/alarm sectors (wrappers typically pass `tokens.colors.warning/alarm` into shared builders) |
 | `arc` | `{startDeg,endDeg}` | no | Optional override (default `270..450`) |
 
 Config-backed plugin wrappers should pass `rangeProps` / `ratioProps` and trust the editable/default pipeline to populate live min/max and threshold values. `rangeDefaults` and `ratioDefaults` remain available only for non-config consumers.
@@ -268,11 +267,11 @@ Config-backed plugin wrappers should pass `rangeProps` / `ratioProps` and trust 
 { a0: number, a1: number, color: "#rrggbb" }
 ```
 
-`color` should come from wrapper-selected tokens (typically `theme.colors.warning`/`theme.colors.alarm`).
+`color` should come from wrapper-selected tokens (typically `tokens.colors.warning`/`tokens.colors.alarm`).
 
 ## FullCircleRadialEngine API
 
-`FullCircleRadialEngine.create(def, Helpers).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
+`FullCircleRadialEngine.create(def, componentContext).createRenderer(spec)` returns `renderCanvas(canvas, props)`.
 
 Responsive ownership for the full-circle family:
 
@@ -282,7 +281,7 @@ Responsive ownership for the full-circle family:
 
 ## FullCircleRadialLayout API
 
-`FullCircleRadialLayout.create(def, Helpers)` returns:
+`FullCircleRadialLayout.create(def, componentContext)` returns:
 
 - `computeMode(W, H, thresholdNormal, thresholdFlat)`
 - `computeInsets(W, H)` -> `{ pad, gap, responsive }`
@@ -319,7 +318,7 @@ Responsive ownership for the full-circle family:
 
 ## FullCircleRadialTextLayout API
 
-`FullCircleRadialTextLayout.create(def, Helpers)` returns:
+`FullCircleRadialTextLayout.create(def, componentContext)` returns:
 
 - `drawSingleModeText(state, mode, display, opts?)`
 - `drawDualModeText(state, mode, left, right, opts?)`

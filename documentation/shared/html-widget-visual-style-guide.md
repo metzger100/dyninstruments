@@ -20,12 +20,12 @@ It defines visual ownership, CSS/state contracts, responsive-mode documentation 
 | Area | Owner | Non-owner rule |
 |---|---|---|
 | Root widget and shell sizing (`.widget.dyniplugin`, `.widgetData.dyni-shell`, `.dyni-surface-html`) | `plugin.css` and host lifecycle modules | Widget-local CSS must not override shell/root fill contracts |
-| Committed shadow box contract (`:host`, `.dyni-html-root`) | `cluster/rendering/HtmlSurfaceController.js` | Widget-local CSS/docs must not re-own the base fill contract |
-| HTML surface lifecycle (`attach`/`update`/`detach`/`destroy`) | `cluster/rendering/HtmlSurfaceController.js` | Widget docs must not claim lifecycle ownership |
+| Committed shadow box contract (`:host`, `.dyni-html-root`) | `runtime/surface/HtmlSurfaceController.js` | Widget-local CSS/docs must not re-own the base fill contract |
+| HTML surface lifecycle (`attach`/`update`/`detach`/`destroy`) | `runtime/surface/HtmlSurfaceController.js` | Widget docs must not claim lifecycle ownership |
 | Domain normalization (`display`, `captions`, `units`, disconnect derivation) | mapper + viewmodel modules | HTML renderer docs must consume normalized payload contract |
 | Responsive geometry (`rects`, shares, insets, mode-specific splits) | shared layout-owner module | Renderer must not define a second compact curve |
 | Text fitting (`font-size` ceilings, measurement) | shared fit module | Renderer applies styles; it does not own fit math |
-| Visual tokens (font/color weights) | `ThemeResolver` + `Helpers` | No duplicated token defaults in widget code/docs |
+| Visual tokens (font/color weights) | `runtime.theme` + `componentContext.theme.tokens.resolveForRoot(rootEl)` | No duplicated token defaults in widget code/docs |
 
 ## CSS Class and State Contract
 
@@ -69,9 +69,9 @@ Fail-closed expectation:
 
 HTML renderer docs must state the visual token boundary:
 
-- Font family and foreground color come from the strict theme boundary (`ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(target))`).
-- Font weight and label weight come from theme token contract (`tokens.font.weight`, `tokens.font.labelWeight`) when fit/layout logic depends on weights.
-- Do not duplicate `plugin.css` or `ThemeResolver` defaults in widget-local docs/code unless boundary ownership requires it.
+- Font family and foreground color come from the strict theme boundary (`const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`).
+- Font weight and label weight come from the resolved token contract (`tokens.font.weight`, `tokens.font.labelWeight`) when fit/layout logic depends on weights.
+- Do not duplicate `plugin.css` or `runtime.theme` defaults in widget-local docs/code unless boundary ownership requires it.
 
 ## Committed Surface Box Contract
 

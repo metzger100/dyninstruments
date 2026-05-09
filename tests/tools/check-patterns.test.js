@@ -260,6 +260,35 @@ tiny();
     expect(result.summary.byRule["duplicate-block-clones"]).toBe(0);
   });
 
+  it("blocks legacy component-loader helpers and direct runtime service reach-throughs", function () {
+    const cwd = createWorkspace({
+      "widgets/example.js": `
+(function () {
+  "use strict";
+  function create(def, Helpers, componentContext) {
+    const runtime = DyniPlugin.runtime;
+    const theme = runtime.theme;
+    const legacy = Helpers.getModule("ThemeModel");
+    const loader = runtime.createHelpers();
+    const ctx = runtime.createComponentContext();
+    const dep = componentContext.components.get("Other");
+    return theme + legacy + loader + ctx + dep;
+  }
+  create({}, {}, { components: { get() {} } });
+}());
+`
+    });
+
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(result.summary.ok).toBe(false);
+    expect(out).toContain("[legacy-component-loader-api]");
+    expect(out).toContain("[runtime-service-reach-through]");
+    expect(result.summary.byRuleFailures["legacy-component-loader-api"]).toBeGreaterThan(0);
+    expect(result.summary.byRuleFailures["runtime-service-reach-through"]).toBeGreaterThan(0);
+  });
+
   it("blocks dead unused helper functions", function () {
     const cwd = createWorkspace({
       "widgets/example.js": `

@@ -1,6 +1,6 @@
 # Add New Text Renderer
 
-**Status:** ✅ Reference | Canvas text renderer workflow on TextLayoutEngine + ThemeResolver
+**Status:** ✅ Reference | Canvas text renderer workflow on TextLayoutEngine + `componentContext.theme.tokens.resolveForRoot(rootEl)`
 
 ## Overview
 
@@ -10,14 +10,14 @@ Core rules:
 
 - renderer remains canvas-based
 - mapper stays declarative
-- theme uses strict root resolution + ThemeResolver
-- formatter dispatch goes through Helpers.applyFormatter
+- theme uses the component-context token resolver
+- formatter dispatch goes through `componentContext.format.applyFormatter`
 
 ## Steps
 
 1. Create renderer module
 - add widget module under widgets/text/<RendererName>/<RendererName>.js
-- register UMD component with id and create(def, Helpers)
+- register UMD component with id and `create(def, componentContext)`
 - keep rendering in renderCanvas(canvas, props)
 
 2. Use shared engines
@@ -26,8 +26,8 @@ Core rules:
 - avoid widget-local clones of shared logic
 
 3. Resolve theme correctly
-- rootEl = Helpers.requirePluginRoot(canvas)
-- tokens = ThemeResolver.resolveForRoot(rootEl)
+- rootEl = componentContext.dom.requirePluginRoot(canvas)
+- const tokens = componentContext.theme.tokens.resolveForRoot(rootEl)
 - consume tokens.surface.fg, tokens.font.family, tokens.font.weight, tokens.font.labelWeight as needed
 
 4. Keep mapper declarative

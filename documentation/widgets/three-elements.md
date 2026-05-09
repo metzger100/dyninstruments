@@ -22,7 +22,7 @@ ThreeValueTextWidget: {
   css: undefined,
   globalKey: "DyniThreeValueTextWidget",
   deps: [
-    "ThemeResolver",
+    "runtime.theme",
     "TextLayoutEngine",
     "PlaceholderNormalize",
     "StateScreenLabels",
@@ -38,7 +38,7 @@ Used by `ClusterWidget` as default renderer.
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `value` | any | — | Raw value (formatted via `Helpers.applyFormatter`) |
+| `value` | any | — | Raw value (formatted via `componentContext.format.applyFormatter`) |
 | `caption` | string | `""` | Caption text |
 | `unit` | string | `""` | Unit text |
 | `formatter` | string/function | — | Formatter name/function |
@@ -96,10 +96,10 @@ otherwise -> normal
 
 ## Themeable Typography
 
-- Theme tokens are resolved per render via `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas))`.
-- Primary numeric value text uses `theme.font.weight`.
-- Caption and unit text uses `theme.font.labelWeight`.
-- State-screen label text uses `theme.font.labelWeight`.
+- Theme tokens are read per render via `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`.
+- Primary numeric value text uses `tokens.font.weight`.
+- Caption and unit text uses `tokens.font.labelWeight`.
+- State-screen label text uses `tokens.font.labelWeight`.
 
 ## Performance
 
@@ -123,7 +123,7 @@ return {
 ## Phase 6 Options
 
 - `stableDigits` (default `false`) enables `StableDigits.normalize(...)` for the primary value text.
-- When enabled, value rendering switches to `theme.font.familyMono` and keeps sign-slot alignment where available.
+- When enabled, value rendering switches to `tokens.font.familyMono` and keeps sign-slot alignment where available.
 - Placeholders are short-circuited unchanged (`---` remains `---`).
 
 ## Related

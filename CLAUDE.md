@@ -36,7 +36,7 @@ If guidance conflicts, precedence is:
 - **Internal dual-surface model** - `surface: "html"` for native HTML kinds, `surface: "canvas-dom"` for internal canvas kinds
 - **Canvas 2D remains internal** - Existing gauges/text canvas renderers run through `CanvasDomSurfaceAdapter` and `renderCanvas(canvas, props)` callbacks
 - **No ES modules, no import/export** - Must use IIFE or UMD wrappers
-- **HiDPI** - `Helpers.setupCanvas()` handles devicePixelRatio scaling
+- **HiDPI** - `componentContext.canvas.setupCanvas()` handles devicePixelRatio scaling
 - **Plugin runtime is browser-only** - No server-side runtime code
 - **Testing stack available** - Vitest + jsdom for regression and coverage checks
 
@@ -61,9 +61,9 @@ documentation/
 │   ├── gauge-style-guide.md        # Proportions, colors, pointer, layout modes
 │   └── gauge-shared-api.md         # Shared RadialToolkit API documentation
 ├── shared/
-│   ├── helpers.md                  # Helpers object (setupCanvas, resolveTextColor)
+│   ├── helpers.md                  # Component context services (canvas setup, resolveTextColor)
 │   ├── css-theming.md              # CSS vars, day/night, font stack
-│   └── theme-tokens.md             # ThemeResolver token schema + cache behavior
+│   └── theme-tokens.md             # runtime.theme token snapshot + cache behavior
 ├── widgets/
 │   ├── semicircle-gauges.md        # Speed/Depth/Temperature/Voltage shared 
 │   ├── three-elements.md           # ThreeValueTextWidget numeric renderer

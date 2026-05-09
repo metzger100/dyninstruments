@@ -34,7 +34,7 @@
 ### Factory
 
 ```javascript
-const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers);
+const engine = componentContext.components.require("FullCircleRadialEngine");
 const renderCanvas = engine.createRenderer(spec);
 ```
 

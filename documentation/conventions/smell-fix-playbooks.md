@@ -41,7 +41,7 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 ### Redundant internal fallback
 
 1. Remove fallback wrappers on renderer props that are guaranteed by mapper contracts (`cap/unit` defaults or explicit mapper literals).
-2. Remove outer `fallbackText(...)` wrappers when `Helpers.applyFormatter(..., { default: X })` already uses the same fallback `X`.
+2. Remove outer `fallbackText(...)` wrappers when `componentContext.format.applyFormatter(..., { default: X })` already uses the same fallback `X`.
 3. Keep defensive fallbacks only where values depend on external runtime uncertainty (for example AvNav/browser APIs).
 4. Add/adjust `check-patterns` tests for both block cases and allowed external-factor cases.
 
@@ -95,7 +95,7 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 
 ### Framework method typeof guard
 
-1. Remove `typeof Helpers.* === "function"` and module-alias method guards after internal resolution.
+1. Remove internal `typeof ... === "function"` and module-alias method guards after internal resolution.
 2. Keep runtime/theme invalidation call paths on direct contract calls (`resolver.invalidateRoot(...)`) once module ownership is established.
 3. Keep bootstrap- or DOM-boundary exceptions explicit with rule-specific suppressions.
 4. Extend alias detection coverage when a new internal resolver pattern is introduced.
@@ -120,7 +120,7 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 
 ### CSS/JS default duplication
 
-1. Keep style/token defaults in `plugin.css` or `ThemeResolver`.
+1. Keep style/token defaults in `plugin.css` or `runtime.theme`.
 2. Remove duplicated JS defaults around `getComputedStyle`, `defaultValue`, and `--dyni-*` lookups when a single boundary can own them.
 3. Suppress only temporary boundary bridges and document why the duplication still exists.
 
@@ -140,7 +140,7 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 
 1. Keep mapper logic limited to kind routing, field mapping, and numeric normalization.
 2. Remove mapper-local helper functions (other than `create`/`translate`).
-3. Move formatter/status/display logic to `cluster/rendering/`, `widgets/`, or `ClusterMapperToolkit`.
+3. Move formatter/status/display logic to `widgets/`, shared widget kits, or `ClusterMapperToolkit`.
 4. Apply the renderer decision rule before adding renderer-specific prop sets to mapper branches: [../guides/add-new-cluster.md#renderer-decision-rule](../guides/add-new-cluster.md#renderer-decision-rule).
 
 ### Mapper output complexity
@@ -150,11 +150,11 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 3. Use the renderer decision rule as the default architecture gate: [../guides/add-new-cluster.md#renderer-decision-rule](../guides/add-new-cluster.md#renderer-decision-rule).
 4. Treat `>12` as fail-closed and refactor immediately; treat `9..12` as warning debt and track planned cleanup/promotion in `TECH-DEBT.md`.
 
-### Cluster renderer naming drift
+### Renderer naming drift
 
-1. Rename cluster-rendering components to role-based IDs (remove cluster prefixes).
+1. Use role-based IDs for renderer components (remove cluster prefixes).
 2. Keep `componentId`, UMD `globalKey`, returned `id`, and file basename aligned.
-3. Update mapper `renderer` values and component registry registrations together (`config/components/registry-*.js`, assembled by `config/components.js`).
+3. Keep route identity in `config/cluster-routes/` and update the renderer registry together (`config/components/registry-*.js`, assembled by `config/components.js`).
 
 ### Hotspot growth
 

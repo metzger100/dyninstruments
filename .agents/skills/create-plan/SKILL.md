@@ -73,8 +73,8 @@ The following points were rechecked against the repository before this plan:
 
 1. {Reference implementation}: {What it does and how it's structured}
 2. {Lifecycle owner}: {What it owns and its contract}
-3. {Kind catalog}: {Current state, where new tuples must go}
-4. {Renderer router}: {Current inventory, where new renderers must go}
+3. {Route metadata}: {Current state, where new tuples must go}
+4. {Route metadata}: {Current inventory, where new renderers must go}
 5. {Mapper}: {Current branches, how new kinds are added}
 6. {Shared utilities}: {Available helpers relevant to this feature}
 7. {Config}: {Current store keys, editables, kind list}
@@ -86,13 +86,11 @@ The following points were rechecked against the repository before this plan:
 ```
 
 **Verification checklist — read these files:**
-- `cluster/rendering/ClusterKindCatalog.js` — current tuples
-- `cluster/rendering/ClusterRendererRouter.js` — current renderer inventory
+- `config/cluster-routes.js` and `config/cluster-routes/*.js` — current route tuples
 - `cluster/mappers/{Cluster}Mapper.js` — current branches
 - `config/components/registry-widgets-nav.js`, `config/components/registry-widgets-vessel.js`, `config/components/registry-widgets-gauge.js` — current widget registrations
-- `config/components/registry-cluster.js` — current cluster registrations
 - `config/clusters/{cluster}.js` — current store keys and editables
-- `cluster/rendering/HtmlSurfaceController.js` — lifecycle contract (for HTML kinds)
+- `runtime/surface/HtmlSurfaceController.js` — lifecycle contract (for HTML kinds)
 - `shared/widget-kits/` — available shared utilities
 - `runtime/TemporaryHostActionBridge.js` — if interactive, available host actions
 - The reference implementation file for the chosen archetype

@@ -19,7 +19,7 @@ Before committing any code change. Run this mental checklist against every file 
 
 **Fail-fast / keep-it-simple:** Defaults and validation belong at boundaries. Internal code trusts normalized contracts. If you're adding a guard, fallback, or normalization inside a renderer, shared module, or widget — you're almost certainly in the wrong place.
 
-Boundaries are: mappers, config files, `runtime/helpers.js`, `ThemeResolver`, editable-parameter defaults, `plugin.css`.
+Boundaries are: mappers, config files, runtime service boundaries, `componentContext.format.applyFormatter`, `runtime.theme` internals, `componentContext.theme.tokens.resolveForRoot(rootEl)`, editable-parameter defaults, `plugin.css`.
 
 Interior code is: renderers, shared engines, widget-kits, layout modules, fit modules, canvas draw functions.
 
@@ -135,12 +135,12 @@ ctx.setLineDash([5, 3]);
 
 ```javascript
 // ❌ SMELL: Module was already resolved by the loader
-if (typeof Helpers.applyFormatter === "function") {
-  return Helpers.applyFormatter(value, opts);
+if (typeof componentContext.format.applyFormatter === "function") {
+  return componentContext.format.applyFormatter(value, opts);
 }
 
 // ✅ FIX: Trust module-loader/helper contracts
-return Helpers.applyFormatter(value, opts);
+return componentContext.format.applyFormatter(value, opts);
 ```
 
 **`try-finally-canvas-drawing`** — Internal draw path wraps save/restore in try/finally without an external throwing boundary.
@@ -176,7 +176,8 @@ function normalizeThemeColors(colors) {
   };
 }
 
-// ✅ FIX: Keep defaults at the boundary (ThemeResolver) and trust internal contracts
+// ✅ FIX: Keep defaults at the boundary (`runtime.theme` + `componentContext.theme.tokens`) and trust internal contracts
+const theme = componentContext.theme.tokens.resolveForRoot(rootEl);
 const { warning, alarm } = theme.colors;
 ```
 
@@ -246,12 +247,12 @@ const profile = ResponsiveScaleProfile.computeProfile(w, h, spec);
 **`redundant-internal-fallback`** — Renderer re-applies fallback for props already guaranteed by mapper.
 
 ```javascript
-// ❌ SMELL: Wrapping Helpers.applyFormatter default with the same fallback again
-const result = Helpers.applyFormatter(v, opts) || props.default;
+// ❌ SMELL: Wrapping componentContext.format.applyFormatter default with the same fallback again
+const result = componentContext.format.applyFormatter(v, opts) || props.default;
 // applyFormatter already handles the default
 
-// ✅ FIX: Trust Helpers.applyFormatter's contract
-const result = Helpers.applyFormatter(v, opts);
+// ✅ FIX: Trust componentContext.format.applyFormatter's contract
+const result = componentContext.format.applyFormatter(v, opts);
 ```
 
 **`catch-fallback-without-suppression`** (WARN) — Non-rethrow catch silently degrades behavior.

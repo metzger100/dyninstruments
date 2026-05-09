@@ -51,7 +51,7 @@ config.clusters.push({ def: { editableParameters: {
 `,
       "widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js": `
 function create(def, Helpers) {
-  return Helpers.getModule("LinearGaugeEngine").create(def, Helpers).createRenderer({
+  return Helpers.getModule("LinearGaugeEngine").create(def, Helpers).createRenderer({ // dyni-lint-disable-line legacy-component-loader-api -- fixture exercises widget-renderer-default-duplication
     ratioProps: { normal: "speedLinearRatioThresholdNormal", flat: "speedLinearRatioThresholdFlat" },
     ratioDefaults: { normal: 1.1, flat: 3.5 },
     rangeProps: { min: "speedLinearMinValue", max: "speedLinearMaxValue" },
@@ -77,7 +77,7 @@ config.clusters.push({ def: { editableParameters: {
 `,
       "widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js": `
 function create(def, Helpers) {
-  return Helpers.getModule("LinearGaugeEngine").create(def, Helpers).createRenderer({
+  return Helpers.getModule("LinearGaugeEngine").create(def, Helpers).createRenderer({ // dyni-lint-disable-line legacy-component-loader-api -- fixture exercises widget-renderer-default-duplication
     ratioProps: { normal: "speedLinearRatioThresholdNormal", flat: "speedLinearRatioThresholdFlat" },
     ratioDefaults: { normal: 1.1, flat: 3.50 },
     rangeProps: { min: "speedLinearMinValue", max: "speedLinearMaxValue" },
@@ -97,7 +97,7 @@ const DEFAULT_RATIO_DEFAULTS = { normal: 1.1, flat: 3.5 };
 `,
       "shared/widget-kits/linear/LinearGaugeLayout.js": `
 function create(def, Helpers) {
-  const responsiveProfile = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
+  const responsiveProfile = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers); // dyni-lint-disable-line legacy-component-loader-api -- fixture exercises engine-layout-default-drift
   function computeLayout(W, H) {
     const responsive = responsiveProfile.computeProfile(W, H, {});
     return responsiveProfile.computeInsetPx(responsive, 0.04, 1);
@@ -120,7 +120,7 @@ const DEFAULT_RATIO_DEFAULTS = { normal: 0.8, flat: 2.2 };
 `,
       "shared/widget-kits/radial/FullCircleRadialLayout.js": `
 function create(def, Helpers) {
-  const responsiveProfile = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers);
+  const responsiveProfile = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers); // dyni-lint-disable-line legacy-component-loader-api -- fixture exercises engine-layout-default-drift
   function computeLayout(W, H) {
     const responsive = responsiveProfile.computeProfile(W, H, {});
     return responsiveProfile.computeInsetPx(responsive, 0.04, 1);
@@ -203,9 +203,9 @@ draw({ beginPath() {}, restore() {} });
     const result = run({
       "shared/widget-kits/radial/RadialTickMath.js": `
 function create(def, Helpers) {
-  const angleMath = Helpers.getModule("RadialAngleMath").create(def, Helpers);
+  const angleMath = Helpers.getModule("RadialAngleMath").create(def, Helpers); // dyni-lint-disable-line legacy-component-loader-api -- fixture exercises framework-method-typeof-guard
   const mod = (angleMath && typeof angleMath.mod === "function") ? angleMath.mod : null;
-  const api = (Helpers && typeof Helpers.getModule === "function") ? Helpers.getModule("X") : null;
+  const api = (Helpers && typeof Helpers.getModule === "function") ? Helpers.getModule("X") : null; // dyni-lint-disable-line legacy-component-loader-api -- fixture exercises framework-method-typeof-guard
   return { mod, api };
 }
 `
@@ -290,9 +290,7 @@ draw({ strokeRect() {} });
       "shared/theme/ThemeResolver.js": `
 function resolvePresetDefs(Helpers) {
   // dyni-lint-disable-next-line framework-method-typeof-guard -- ThemeResolver bootstrap fixture validates helper-method guard suppression.
-  const presetsMod = Helpers && typeof Helpers.getModule === "function"
-    ? Helpers.getModule("ThemeModel")
-    : null;
+  const presetsMod = (Helpers && typeof Helpers.getModule === "function") ? Helpers.getModule("ThemeModel") : null; // dyni-lint-disable-line legacy-component-loader-api -- ThemeResolver bootstrap fixture validates helper-method guard suppression.
   return presetsMod;
 }
 resolvePresetDefs({ getModule() { return null; } });

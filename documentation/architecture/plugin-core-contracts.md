@@ -10,7 +10,7 @@ It exists to prevent formatter/key/unit regressions like the roll/pitch incident
 ## Key Details
 
 - Canonical upstream sources are read from `avnav-master.zip` snapshot and mapped to plugin behavior.
-- Mapper output must remain declarative; formatter semantics come from core formatter contracts.
+- Mapper output must remain declarative; formatter semantics come from core formatter contracts and `componentContext.format.applyFormatter`.
 - Contract changes are fail-closed at review time: mapper formatter changes require doc updates in the same PR.
 - The contract tuple below is the required format for each formatter-bearing kind.
 
@@ -27,8 +27,8 @@ It exists to prevent formatter/key/unit regressions like the roll/pitch incident
 | Layer | Must do | Must not do |
 |---|---|---|
 | Cluster mapper (`cluster/mappers/*`) | Route kind, normalize value presence, choose formatter key and parameters | Re-implement formatter math or unit conversion logic |
-| Renderer (`cluster/rendering/*`, `widgets/*`) | Render layout and display text from mapper/runtime contracts | Invent new formatter semantics that contradict core catalog |
-| Runtime helper (`runtime/helpers.js`) | Resolve formatter calls and fallback behavior centrally | Use truthy fallback that clobbers explicit falsy defaults |
+| Renderer (`widgets/*`, `runtime/surface/*`) | Render layout and display text from mapper/runtime contracts | Invent new formatter semantics that contradict core catalog |
+| Component-context formatter boundary (`componentContext.format.applyFormatter`) | Resolve formatter calls and fallback behavior centrally | Use truthy fallback that clobbers explicit falsy defaults |
 
 ## Contract Tuple Schema
 

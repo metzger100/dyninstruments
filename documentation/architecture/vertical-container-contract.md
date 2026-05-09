@@ -26,7 +26,7 @@ Committed DOM ancestry checks are not canonical for pre-commit policy.
 
 - route metadata is read by `ClusterShellRenderer`
 - route metadata is applied to the inert shell before activation
-- the committed renderer does not expose a `getVerticalShellSizing()` hook
+- the committed renderer does not expose a renderer-spec vertical-sizing hook
 
 Supported route metadata forms:
 

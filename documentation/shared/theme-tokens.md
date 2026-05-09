@@ -1,16 +1,22 @@
 # Theme Tokens
 
-**Status:** ✅ Implemented | ThemeModel semantic ownership + ThemeResolver strict root resolution and snapshot reuse
+**Status:** ✅ Implemented | `runtime.theme` semantic ownership + `componentContext.theme.tokens.resolveForRoot(rootEl)` snapshot reuse
 
 ## Overview
 
-Theme ownership is split into two module-shaped components:
+Theme ownership is internal to `runtime.theme`.
 
-- ThemeModel: semantic owner of token metadata, preset metadata, defaults, mode overrides, normalization, and output metadata
-- ThemeResolver: strict root-only resolver that consumes ThemeModel metadata and root CSS input overrides
-- ThemeResolver returns immutable snapshot objects and reuses object identity for identical committed-root snapshots
+- `runtime.theme` owns token metadata, preset metadata, defaults, mode overrides, normalization, and output metadata
+- `componentContext.theme.tokens` is the resolver API exposed to components
+- `componentContext.theme.tokens.resolveForRoot(rootEl)` returns the committed-root immutable snapshot
+- snapshots are immutable and reused when the committed-root inputs are identical
 
-Both are registered with apiShape module and do not use create().
+Example:
+
+```javascript
+const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);
+const fg = tokens.surface.fg;
+```
 
 ## Exposed Semantic Token Paths
 
@@ -63,7 +69,7 @@ Both are registered with apiShape module and do not use create().
 
 ## Alarm Widget Surface Tokens
 
-The alarm widget reads these semantic paths through `ThemeResolver.resolveForRoot(rootEl)`. They are overrideable from `user.css`, and the active preset still supplies the fallback values when no root override is present.
+The alarm widget reads these semantic paths from the resolved snapshot returned by `componentContext.theme.tokens.resolveForRoot(rootEl)`. They are overrideable from `user.css`, and the active preset still supplies the fallback values when no root override is present.
 
 | Path | Input var | Default | Night | highcontrast |
 |---|---|---|---|---|
@@ -109,7 +115,7 @@ Mode axis:
 
 Preset normalization:
 
-- night is not a legal preset family; normalizePresetName maps it to default
+- night is not a legal preset family; `runtime.theme` maps it to default
 
 ## Resolution Order
 
@@ -123,14 +129,14 @@ Per token path:
 
 ## Strict Root Contract
 
-ThemeResolver.resolveForRoot(rootEl) requires committed .widget.dyniplugin root and throws on invalid input.
+`componentContext.dom.requirePluginRoot(rootEl)` requires a committed `.widget.dyniplugin` root and throws on invalid input.
 
-ThemeResolver caches immutable snapshots per committed root using canonical snapshot inputs:
+`runtime.theme` caches immutable snapshots per committed root using canonical snapshot inputs:
 
 - mode
 - normalized preset name
 - committed root class string
-- inline signature of ThemeModel input vars only
+- inline signature of `runtime.theme` input vars only
 
 Resolver-owned `--dyni-theme-*` output vars are excluded from snapshot identity.
 
@@ -141,11 +147,11 @@ configure(...) clears resolver metadata and per-root snapshot caches.
 runtime/init.js:
 
 - reads --dyni-theme-preset once from document.documentElement
-- configures runtime._theme
-- runtime._theme configures ThemeResolver with ThemeModel + runtime-owned preset getter + canonical night-mode getter
+- configures `runtime.theme`
+- components resolve normalized tokens through `componentContext.theme.tokens.resolveForRoot(rootEl)`
 - runtime-owned preset is fallback; committed-root `--dyni-theme-preset` overrides are read per root and normalized before resolve
 
-runtime._theme.applyToRoot(rootEl):
+`runtime.theme.applyToRoot(rootEl)`:
 
 - resolves canonical theme outputs
 - overwrites all required output vars on every commit

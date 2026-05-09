@@ -4,15 +4,12 @@
 
 ## Overview
 
-cluster/rendering/CanvasDomSurfaceAdapter.js owns committed canvas lifecycle on the renderHtml host path.
-
-Router responsibilities:
-
-- render inert canvas shell markup
-- create committed canvas surface controllers
+`runtime/surface/CanvasDomSurfaceAdapter.js` owns committed canvas lifecycle on the renderHtml host path.
 
 Adapter responsibilities:
 
+- render inert canvas shell markup
+- create committed canvas surface controllers
 - mount/update/detach/destroy canvas lifecycle
 - resize observation and repaint scheduling
 - renderCanvas(canvas, props) dispatch to routed renderer

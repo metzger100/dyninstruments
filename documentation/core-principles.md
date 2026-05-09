@@ -14,7 +14,7 @@ These rules are mandatory for all contributors and AI agents in this repository.
 6. Rule: Documentation must be updated in the same task as code/architecture changes.
 7. Rule: Every JS component file must include `Module`, `Documentation`, and `Depends` headers. → [conventions/coding-standards.md](conventions/coding-standards.md#mandatory-file-headers)
 8. Rule: Reusable logic goes in `shared/widget-kits/`, not duplicated widget-local helpers. → [conventions/coding-standards.md](conventions/coding-standards.md#shared-utilities)
-9. Rule: Widgets and cluster code must not access `window.avnav` directly; use runtime/helpers (`Helpers.applyFormatter()`). → [conventions/coding-standards.md](conventions/coding-standards.md#key-details)
+9. Rule: Widgets and cluster code must not access `window.avnav` directly; use the component-context boundaries (`componentContext.format.applyFormatter()` and `componentContext.dom.requirePluginRoot()`). → [conventions/coding-standards.md](conventions/coding-standards.md#key-details)
 10. Rule: Validate/default props at translate boundaries; interior code should trust validated inputs.
 11. Rule: Do not swallow errors silently; handle, rethrow, or comment intentional silence.
 12. Rule: Never fake green tests; fix root causes instead of weakening assertions/macros.

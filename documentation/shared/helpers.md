@@ -1,25 +1,27 @@
-# Helpers Object
+# Component Context
 
-**Status:** ✅ Implemented | Defined in runtime/helpers.js and passed to component factory modules
+**Status:** ✅ Implemented | Defined by runtime services and passed through `componentContext`
 
 ## Overview
 
-Helpers is passed as the second argument to component create(def, Helpers).
+`componentContext` is passed as the second argument to component `create(def, componentContext)`.
+It is the explicit boundary between runtime-owned services and component code.
 
-Current helper API includes:
+Current context surfaces include:
 
-- setupCanvas
-- requirePluginRoot
-- getNightModeState
-- applyFormatter
-- getHostActions
-- getModule
+- `componentContext.components.require(name)`
+- `componentContext.canvas.setupCanvas()`
+- `componentContext.format.applyFormatter(...)`
+- `componentContext.dom.requirePluginRoot(...)`
+- `componentContext.theme.tokens.resolveForRoot(rootEl)`
+- `componentContext.dom.getNightModeState(rootEl)`
+- `componentContext.hostActions`
 
 Legacy helper theme fallbacks (resolveTextColor, resolveFontFamily, resolveWidgetRoot) are not part of the production contract.
 
 ## API Reference
 
-### setupCanvas
+### componentContext.canvas.setupCanvas
 
 Prepares a HiDPI-safe canvas and returns drawing context plus CSS-pixel dimensions.
 
@@ -29,7 +31,7 @@ Returns object with:
 - W
 - H
 
-### requirePluginRoot
+### componentContext.dom.requirePluginRoot
 
 Strict committed-root discovery helper for theme consumers.
 
@@ -47,9 +49,9 @@ Behavior:
 - returns nearest committed .widget.dyniplugin root
 - throws if no committed plugin root exists
 
-### getNightModeState
+### componentContext.dom.getNightModeState(rootEl)
 
-Returns true when the committed plugin root is inside a .nightMode ancestor.
+Returns true when the committed plugin root is inside a `.nightMode` ancestor.
 
 Canonical check:
 
@@ -57,7 +59,7 @@ Canonical check:
 
 No canonical fallback to documentElement/body.
 
-### applyFormatter
+### componentContext.format.applyFormatter
 
 Centralized formatter dispatch boundary.
 
@@ -66,7 +68,7 @@ Centralized formatter dispatch boundary.
 - catches formatter exceptions at this external boundary
 - falls back to String(raw) when formatter dispatch is unavailable/fails
 
-### getHostActions
+### componentContext.hostActions
 
 Returns the runtime-owned host action facade created by TemporaryHostActionBridge.
 
@@ -81,16 +83,16 @@ Bridge facade includes:
 
 Renderers should consume normalized callbacks through runtime surface policy.
 
-### getModule
+### componentContext.components.require
 
-Returns loaded module by config.components ID.
+Returns the already-created declared dependency instance for the current component, loaded by `runtime.componentLoader` from the matching `config.components` ID.
 
 ## Theme Consumer Pattern
 
-Theme consumers use strict root resolution + ThemeResolver:
+Theme consumers use the resolved theme snapshot on the component context:
 
-1. rootEl = Helpers.requirePluginRoot(target)
-2. theme = ThemeResolver.resolveForRoot(rootEl)
+1. rootEl = componentContext.dom.requirePluginRoot(target)
+2. theme = componentContext.theme.tokens.resolveForRoot(rootEl)
 
 ## Related
 

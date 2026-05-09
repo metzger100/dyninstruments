@@ -56,7 +56,7 @@ Rule references:
 
 6. Enforce the AvNav boundary.
 - Only `runtime/` and `plugin.js` should access `window.avnav` / `avnav.api` directly.
-- Widgets/cluster/shared code should call runtime-safe helpers such as `Helpers.applyFormatter()`.
+- Widgets/cluster/shared code should call runtime-safe boundaries such as `componentContext.format.applyFormatter()`.
 
 7. Remove refactor leftovers.
 - Delete fallback declarations that are no longer referenced.
@@ -117,7 +117,7 @@ Required per-commit audit checks:
 | Pattern | Example from This Project | Detection | Fix |
 |---|---|---|---|
 | Helper duplication | Historical: `extractNumberText` duplicated in 4 gauge widgets before TD-001 (`DepthRadialWidget`, `SpeedRadialWidget`, `TemperatureRadialWidget`, `VoltageRadialWidget`) | `check-patterns.mjs` (`duplicate-functions` / `[duplicate-fn-body]`) | Extract shared helper to `shared/widget-kits/` (done via `RadialValueMath.extractNumberText`) |
-| AvNav boundary bypass | Historical: direct `avnav.api` access in `SpeedRadialWidget`, `TemperatureRadialWidget`, `VoltageRadialWidget`, `WindRadialWidget`, `PositionCoordinateWidget` (TD-008) | `check-patterns.mjs` (`forbidden-global`) | Route through `Helpers.applyFormatter()` |
+| AvNav boundary bypass | Historical: direct `avnav.api` access in `SpeedRadialWidget`, `TemperatureRadialWidget`, `VoltageRadialWidget`, `WindRadialWidget`, `PositionCoordinateWidget` (TD-008) | `check-patterns.mjs` (`forbidden-global`) | Route through `componentContext.format.applyFormatter()` |
 | Empty catch blocks | Historical: silent `catch(e){}` fallback paths in renderer/helper/widget code before TD-009 | `check-patterns.mjs` (`empty-catch`) | Add explicit comment/logging or use centralized boundary handling |
 | Growing files | Current `>=300` warnings: `config/clusters/environment.js`, `config/components.js`, `shared/widget-kits/linear/LinearGaugeEngine.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialTextLayout.js`, `shared/widget-kits/text/TextLayoutComposite.js`, `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js`, `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js` | `check-file-size.mjs` (warning at `>=300`) | Split before exceeding 400 non-empty lines |
 | Oneliner size-limit bypass | Backlog resolved (`onelinerDenseWarnings: 0`, `onelinerLongWarnings: 0`, `onelinerWarnings: 0`) and fail-closed enforcement active (TD-012 completed) | `npm run check:filesize` (`--oneliner=block`) | Keep multiline formatting; use `npm run check:filesize:warn` only for exploratory passes |

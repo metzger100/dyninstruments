@@ -61,7 +61,7 @@ Questions to resolve:
 
 #### Branch 4: Surface and Rendering
 
-**Explore first:** Read `cluster/rendering/ClusterKindCatalog.js` for existing surface assignments.
+**Explore first:** Read `config/cluster-routes.js` for existing surface assignments.
 
 Questions to resolve:
 - Surface type: `canvas-dom` or `html`?

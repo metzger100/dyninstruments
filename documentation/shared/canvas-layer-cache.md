@@ -11,7 +11,7 @@
 - Component ID: `CanvasLayerCache`
 - Global key: `DyniCanvasLayerCache`
 - File: `shared/widget-kits/canvas/CanvasLayerCache.js`
-- Factory: `create(def, Helpers)`
+- Factory: `create(def, componentContext)`
 - Main API: `createLayerCache(spec)`
 - Layer config: `spec.layers` array (default: `["layer"]`)
 - Key behavior:
@@ -29,8 +29,7 @@
 ## API/Interfaces
 
 ```javascript
-const cacheMod = Helpers.getModule("CanvasLayerCache");
-const cacheApi = cacheMod.create(def, Helpers);
+const cacheApi = componentContext.components.require("CanvasLayerCache");
 const cache = cacheApi.createLayerCache({ layers: ["back", "front"] });
 
 cache.ensureLayer(canvas, key, function (layerCtx, layerName, layerCanvas) {

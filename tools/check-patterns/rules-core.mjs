@@ -233,3 +233,65 @@ export function runRendererNumericCoercionRule(rule, files) {
 
   return out;
 }
+
+export function runLegacyComponentLoaderApiRule(rule, files) {
+  const out = [];
+  const detect = /\b(?:runtime\.createHelpers|runtime\.createComponentContext|Helpers\.getModule|componentContext\.components\.get)\b/g;
+
+  for (const file of files) {
+    const data = getFileData(file);
+    const seen = new Set();
+    let match;
+
+    while ((match = detect.exec(data.maskedText))) {
+      const line = lineAt(match.index, data.lineStarts);
+      const key = `${file}:${line}:${match[0]}`;
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      out.push({
+        file,
+        line,
+        message: rule.message({
+          file,
+          line,
+          expression: match[0]
+        })
+      });
+    }
+  }
+
+  return out;
+}
+
+export function runRuntimeReachThroughRule(rule, files) {
+  const out = [];
+  const detect = /\bruntime\.(?:theme|format|canvas|dom|perf|hostActions|surfaces|componentLoader|clusterShellRenderer|routeActivation)\b/g;
+
+  for (const file of files) {
+    const data = getFileData(file);
+    const seen = new Set();
+    let match;
+
+    while ((match = detect.exec(data.maskedText))) {
+      const line = lineAt(match.index, data.lineStarts);
+      const key = `${file}:${line}:${match[0]}`;
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      out.push({
+        file,
+        line,
+        message: rule.message({
+          file,
+          line,
+          expression: match[0]
+        })
+      });
+    }
+  }
+
+  return out;
+}

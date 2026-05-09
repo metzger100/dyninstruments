@@ -68,7 +68,7 @@ Ownership:
 ### LinearGaugeEngine
 
 - Component ID: `LinearGaugeEngine`
-- Factory: `create(def, Helpers)`
+- Factory: `create(def, componentContext)`
 - Main API: `createRenderer(spec) -> renderCanvas(canvas, props)`
 
 ## `createRenderer(spec)` Contract
@@ -223,19 +223,19 @@ const renderCanvas = engine.createRenderer({
 
 ## Theme Contract
 
-Reads `ThemeResolver` tokens:
+Reads `componentContext.theme.tokens.resolveForRoot(rootEl)`:
 
-- `theme.linear.track.widthFactor`
-- `theme.linear.track.lineWidthFactor`
-- `theme.linear.ticks.majorLenFactor`, `majorWidthFactor`, `minorLenFactor`, `minorWidthFactor`
-- `theme.linear.pointer.sideFactor`, `depthFactor`
-- `theme.linear.labels.insetFactor`, `fontFactor`
-- `theme.colors.pointer`, `theme.colors.warning`, `theme.colors.alarm`
+- `tokens.linear.track.widthFactor`
+- `tokens.linear.track.lineWidthFactor`
+- `tokens.linear.ticks.majorLenFactor`, `majorWidthFactor`, `minorLenFactor`, `minorWidthFactor`
+- `tokens.linear.pointer.sideFactor`, `depthFactor`
+- `tokens.linear.labels.insetFactor`, `fontFactor`
+- `tokens.colors.pointer`, `tokens.colors.warning`, `tokens.colors.alarm`
 
 Default linear pointer and marker sizing stays geometry-driven:
 - base pointer/marker size is derived from `primaryDim = min(layout.trackBox.w, layout.trackBox.h)`
-- pointer depth uses `theme.pointerDepthWeight` with `theme.linear.pointer.depthFactor`
-- pointer side uses `theme.pointerSideWeight` with `theme.linear.pointer.sideFactor`
+- pointer depth uses `tokens.pointerDepthWeight` with `tokens.linear.pointer.depthFactor`
+- pointer side uses `tokens.pointerSideWeight` with `tokens.linear.pointer.sideFactor`
 - default marker length is `floor(markerSizeBase * 0.45)` and default marker line width is `floor(markerSizeBase * 0.2)` when explicit overrides are absent
 - compact tiles reduce text/layout spacing via the shared compact profile instead of fixed pixel floors
 

@@ -54,7 +54,7 @@ Validation behavior:
 - factory requires create()
 - module requires a direct module object API
 
-In this plan, only ThemeModel and ThemeResolver use module shape.
+In the runtime service lane, theme internals stay inside `runtime.theme`; component factories resolve immutable snapshots through `componentContext.theme.tokens.resolveForRoot(rootEl)`.
 
 ## CSS Loading Contract
 
@@ -88,13 +88,12 @@ Runtime assets:
 
 runtime/init.js:
 
-- computes needed components from widget definitions
-- startup deps are now runtime-bound, and ClusterWidget.deps is intentionally []
+- computes startup-needed components from widget definitions
+- startup deps are runtime-bound, and ClusterWidget.deps is intentionally []
 - route roots are loaded lazily by RouteActivationController
-- appends ThemeModel and ThemeResolver
-- preloads the declared shadowCss URLs for the needed components in the current boot path
-- configures runtime._theme
+- configures `runtime.theme`
 - registers widgets
+- does not preload renderer shadowCss during startup; RouteActivationController owns active-route shadowCss preload
 
 RouteActivationController is introduced in Phase 4, and the Phase 6 cutover is now live:
 

@@ -19,8 +19,11 @@ Whenever a file in `cluster/mappers/` is created or modified. Also useful as a p
 
 Mappers have exactly two functions: `create()` and `translate()`. No other function declarations are allowed in a mapper file.
 
-- `create(def, Helpers)` — instantiates dependencies (viewmodels, toolkit)
-- `translate(props, toolkit)` — reads kind from props, returns a declarative renderer output
+- `create()` — use this when the mapper does not need `componentContext`
+- `create(def, componentContext)` — use this only when the mapper needs `componentContext`
+- `translate(props, routeContext)` — reads kind from props, returns declarative route output
+- `routeContext.toolkit` — mapper helper surface
+- `routeContext.viewModel` — optional route-scoped view-model surface
 
 ### Check 1: No Extra Function Declarations
 
@@ -33,12 +36,11 @@ function computeDisplayValue(raw) { ... }
 function resolveLayoutMode(ratio) { ... }
 
 // ✅ OK: Only create and translate
-function create(def, Helpers) { ... }
-function translate(props, toolkit) { ... }
+function create(def, componentContext) { ... }
+function translate(props, routeContext) { ... }
 ```
 
 If you find extra functions, move them to:
-- `cluster/rendering/` — for renderer-specific logic
 - `widgets/` — for widget-specific logic
 - `shared/widget-kits/` — for reusable logic
 - `cluster/mappers/ClusterMapperToolkit.js` — for mapper-shared utilities
@@ -46,7 +48,6 @@ If you find extra functions, move them to:
 ### Check 2: Declarative Output Only
 
 Each `translate()` return object must contain only:
-- `renderer` — string matching a `rendererId` in `ClusterKindCatalog`
 - Mapped values — direct prop reads or simple normalization (`Number()`, `String()`, `toolkit.cap()`, `toolkit.unit()`)
 - ViewModel outputs — results from `viewModel.build(p, toolkit)`
 - Pass-through keys — formatter names, unit strings, boolean flags
@@ -54,7 +55,6 @@ Each `translate()` return object must contain only:
 ```javascript
 // ❌ SMELL: Presentation logic in mapper
 return {
-  renderer: "Widget",
   displayText: value > 100 ? "HIGH" : "OK",  // presentation logic
   color: isAlarm ? "#ff0000" : "#00ff00",     // rendering decision
   formattedValue: formatSpeed(raw, unit),      // formatter call
@@ -63,7 +63,6 @@ return {
 
 // ✅ OK: Declarative output
 return {
-  renderer: "Widget",
   value: num(p.rawValue),      // numeric normalization
   caption: cap("kindName"),    // per-kind text param
   unit: unit("kindName"),      // per-kind text param
@@ -86,7 +85,6 @@ Grouping pattern for complex outputs:
 
 ```javascript
 return {
-  renderer: "Widget",
   domain: {
     route: rpDomain.route,
     routeName: rpDomain.route ? rpDomain.route.name : "",
@@ -106,22 +104,20 @@ return {
 };
 ```
 
-### Check 4: Renderer Value Alignment
+### Check 4: Route Metadata Alignment
 
-For every `renderer: "SomeName"` in the mapper output, verify:
+For every cluster/kind branch, verify the route metadata contract instead of mapper-owned renderer identity:
 
-1. `SomeName` exists as a `rendererId` in `cluster/rendering/ClusterKindCatalog.js`
-2. The catalog tuple's `surface` matches the renderer's type (canvas-dom vs html)
-3. `SomeName` is registered in `cluster/rendering/ClusterRendererRouter.js` rendererSpecs
-4. `SomeName` is in the deps of `ClusterRendererRouter` (via registry)
+1. `config/cluster-routes/<cluster>.js` contains the route tuple for that cluster/kind branch
+2. `mapperId` points at the mapper under review
+3. `rendererId` exists in `config.components`
+4. `surface` matches the renderer type (`canvas-dom` vs `html`)
 
 ```bash
 # Quick verification
-grep -n "SomeName" cluster/rendering/ClusterKindCatalog.js
-grep -n "SomeName" cluster/rendering/ClusterRendererRouter.js
-grep -n "SomeName" config/components/registry-widgets-nav.js
-grep -n "SomeName" config/components/registry-widgets-vessel.js
-grep -n "SomeName" config/components/registry-widgets-gauge.js
+grep -n "kindName" config/cluster-routes/*.js
+grep -n "mapperId.*MapperName" config/cluster-routes/*.js
+grep -n "rendererId.*RendererName" config/components/registry-*.js
 ```
 
 ### Check 5: No Formatter Calls
@@ -130,11 +126,15 @@ Mappers must not call formatters. They pass formatter keys through for renderers
 
 ```javascript
 // ❌ SMELL: Formatter call in mapper
-const formatted = Helpers.applyFormatter(raw, { formatter: "formatSpeed" });
-return { renderer: "Widget", displayValue: formatted };
+const formatted = formatSpeed(raw, unit);
+return { displayValue: formatted };
 
 // ✅ OK: Pass formatter key through
-return { renderer: "Widget", value: num(raw), formatter: "formatSpeed" };
+return {
+  value: num(raw),
+  formatter: "formatSpeed",
+  formatterParameters: [unit]
+};
 ```
 
 ### Check 6: No Layout/Responsive Logic
@@ -144,19 +144,18 @@ Mappers must not compute layout modes, responsive floors, or geometry.
 ```javascript
 // ❌ SMELL: Layout logic in mapper
 const mode = ratio < 1.0 ? "high" : ratio > 3.5 ? "flat" : "normal";
-return { renderer: "Widget", mode };
+return { mode };
 
 // ✅ OK: Pass ratio threshold props for the renderer/layout owner to resolve
 return {
-  renderer: "Widget",
   ratioThresholdNormal: num(p.ratioNormal),
   ratioThresholdFlat: num(p.ratioFlat)
 };
 ```
 
-### Check 7: Cluster Renderer Naming
+### Check 7: Renderer Naming
 
-Components under `cluster/rendering/` must use role-based IDs, not cluster-prefixed IDs.
+Renderer components must use role-based IDs, not cluster-prefixed IDs. Keep route identity in `config/cluster-routes/` and renderer registration in `config/components/`.
 
 ```javascript
 // ❌ SMELL: Cluster-prefixed renderer
@@ -164,7 +163,6 @@ rendererId: "VesselPropsWidget"    // cluster-prefixed
 rendererId: "NavTextWidget"        // cluster-prefixed
 
 // ✅ OK: Role-based renderer
-rendererId: "RendererPropsWidget"  // role-based
 rendererId: "ActiveRouteTextHtmlWidget"  // feature-based
 ```
 

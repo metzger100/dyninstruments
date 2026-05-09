@@ -135,7 +135,7 @@ Check for newly introduced duplicate logic:
 
 Verify:
 - Only `runtime/` and `plugin.js` access `window.avnav` / `avnav.api` directly
-- Widgets/cluster/shared code calls `Helpers.applyFormatter()` and other runtime-safe helpers
+- Widgets/cluster/shared code calls `componentContext.format.applyFormatter()` and other runtime-safe services
 
 ### Step 9: Re-Run Checks
 

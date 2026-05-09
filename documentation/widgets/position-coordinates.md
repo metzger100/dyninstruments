@@ -17,7 +17,7 @@ This renderer uses the shared text compaction contract from `TextLayoutEngine.co
 - Registered as `PositionCoordinateWidget` in `config/components/registry-widgets-vessel.js` (assembled by `config/components.js`)
 - Routed from `NavMapper` for `kind: "positionBoat"` and `kind: "positionWp"`
 - Routed directly from `VesselMapper` for `kind: "dateTime"` and `kind: "timeStatus"` via `displayVariant`
-- Depends on shared utilities: `ThemeResolver`, `TextLayoutEngine`, `StateScreenPrecedence`, `StateScreenCanvasOverlay`
+- Depends on shared utilities: `runtime.theme`, `TextLayoutEngine`, `StateScreenPrecedence`, `StateScreenCanvasOverlay`
 - No widget-to-widget dependency on `ThreeValueTextWidget`
 - `flat` mode renders one-line `caption/value/unit` directly in this widget
 - `normal`/`high` modes render stacked coordinates:
@@ -26,7 +26,8 @@ This renderer uses the shared text compaction contract from `TextLayoutEngine.co
 - Body row 2: longitude
 - When `coordinatesTabular` is `true`, stacked latitude/longitude rows are right-aligned so digits line up vertically on the `position` variant
 - `dateTime` and `timeStatus` ignore `coordinatesTabular`, center-align their text, and default to mono font via `stableDigits`
-- Typography is theme-driven per render: coordinate/value text uses `theme.font.weight`, header caption/unit and state-screen labels use `theme.font.labelWeight`
+- Theme tokens are resolved once per render via `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`.
+- Typography is theme-driven per render: coordinate/value text uses `tokens.font.weight`, header caption/unit and state-screen labels use `tokens.font.labelWeight`
 - Uses layout editables: `ratioThresholdNormal`, `ratioThresholdFlat`, `captionUnitScale`
 
 ## Props
@@ -53,12 +54,12 @@ This renderer uses the shared text compaction contract from `TextLayoutEngine.co
 
 ## Coordinate Formatting
 
-- `flat` mode uses `Helpers.applyFormatter(value, props)` (normally `formatLonLats`)
+- `flat` mode uses `componentContext.format.applyFormatter(value, props)` (normally `formatLonLats`)
 - When `coordinateFlatFromAxes` is true, flat mode formats both axes (`lat` + `lon`) and joins them into one line
 - `displayVariant: "dateTime"` enables renderer-owned raw-value formatting with `formatDate` (top) and `formatTime` (bottom), and joins both outputs in flat mode; when `hideSeconds` is true, the bottom axis uses `formatClock`
 - `displayVariant: "timeStatus"` enables renderer-owned status-circle formatting (top) plus `formatTime` (bottom), and joins both outputs in flat mode; when `hideSeconds` is true, the bottom axis uses `formatClock`
 - For vessel `timeStatus`, emoji status markers (`🟢`/`🔴`) use an extra vertical fit guard in flat and stacked layouts to prevent border clipping
-- `normal`/`high` modes use `Helpers.applyFormatter(value, { formatter: coordinateFormatter, formatterParameters: [...coordinateFormatterParameters, axis] })`
+- `normal`/`high` modes use `componentContext.format.applyFormatter(value, { formatter: coordinateFormatter, formatterParameters: [...coordinateFormatterParameters, axis] })`
 - Axis mapping is fixed: `lat` -> first (top) line, `lon` -> second (bottom) line
 - Axis-specific formatter overrides use `coordinateFormatterLat` / `coordinateFormatterLon` (and corresponding parameter overrides) before generic `coordinateFormatter`
 - Axis formatter outputs are normalized through `PlaceholderNormalize`; known formatter fallback tokens render as `---`
@@ -80,9 +81,9 @@ return {
 
 ## Phase 6 Options
 
-- `coordinatesTabular` (default `true`) switches `position` coordinate rendering to `theme.font.familyMono`.
+- `coordinatesTabular` (default `true`) switches `position` coordinate rendering to `tokens.font.familyMono`.
 - Applies in stacked and flat `position` variants only.
-- `coordinatesTabular: false` keeps `position` coordinate rendering on `theme.font.family`.
+- `coordinatesTabular: false` keeps `position` coordinate rendering on `tokens.font.family`.
 
 ## Phase 7 Options
 

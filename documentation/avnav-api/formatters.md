@@ -83,9 +83,9 @@ Use the selector token for conversion and the matching display label for rendere
 
 ## dyninstruments Formatter Usage
 
-### Formatter Resolution in Helpers.applyFormatter (dyninstruments-internal)
+### Formatter Resolution in `componentContext.format.applyFormatter` (dyninstruments-internal)
 
-Used by text and graphic widgets (`runtime/helpers.js`):
+Used by text and graphic widgets via `componentContext.format.applyFormatter(...)`:
 
 1. Reads `props.formatterParameters`
 2. If `raw == null` or `Number.isNaN(raw)`:
@@ -136,13 +136,13 @@ function makeAngleFormatter(isDirection, leadingZero, fallback) {
 
 ### Gauge-Internal Formatting (dyninstruments-internal)
 
-Graphic gauges use mapper-provided formatter metadata and resolve formatter calls via `Helpers.applyFormatter(...)`. This keeps formatter guards/try-catch/fallback logic centralized in runtime helpers while still returning numeric + display outputs needed for pointer positioning:
+Graphic gauges use mapper-provided formatter metadata and resolve formatter calls via `componentContext.format.applyFormatter(...)`. This keeps formatter guards/try-catch/fallback logic centralized in the component-context boundary while still returning numeric + display outputs needed for pointer positioning:
 
 - `displaySpeedFromRaw(raw, props, unit)` -> `{ num, text }` via `formatSpeed`
 - `displayDepthFromRaw(raw, decimals)` -> `{ num, text }` via local fixed-decimal formatting (`toFixed`)
 - `displayTemperatureFromRaw(raw, props)` -> `{ num, text }` via `formatTemperature`
 - `displayVoltageFromRaw(raw, props)` -> `{ num, text }` via `formatDecimal`
-- `PositionCoordinateWidget` stacked mode formats per-line lat/lon via `Helpers.applyFormatter(raw, { formatter: "formatLonLatsDecimal", formatterParameters: [axis] })`
+- `PositionCoordinateWidget` stacked mode formats per-line lat/lon via `componentContext.format.applyFormatter(raw, { formatter: "formatLonLatsDecimal", formatterParameters: [axis] })`
 
 When a renderer helper receives mapper-resolved tokens, it must trust those resolved tokens and must not repeat mapper fallback or token-validation logic.
 
@@ -153,5 +153,5 @@ When a renderer helper receives mapper-resolved tokens, it must trust those reso
 - [core-key-catalog.md](core-key-catalog.md) — Key/unit contracts used for formatter selection
 - [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md) — Contract tuple schema and roll/pitch incident notes
 - [editable-parameters.md](editable-parameters.md) — formatterParameters in Layout Editor
-- [../shared/helpers.md](../shared/helpers.md) — runtime `Helpers.applyFormatter` behavior
+- [../shared/helpers.md](../shared/helpers.md) — `componentContext.format.applyFormatter` behavior
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md) — Which formatter per kind

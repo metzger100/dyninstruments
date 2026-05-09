@@ -5,7 +5,7 @@
 ## Overview
 
 Visual specification for full-circle dial widgets. `GeometryScale` turns the dial radius into ring, tick, pointer, and marker pixels while `compactGeometryScale` only affects label and slot spacing; constants and formulas are implementation-derived from `FullCircleRadialLayout`, `FullCircleRadialEngine`, `FullCircleRadialTextLayout`, widget modules, and shared `CanvasLayerCache`.
-Shared geometry weights come from `theme.strokeWeight`, `theme.pointerDepthWeight`, and `theme.pointerSideWeight`.
+Shared geometry weights come from `tokens.strokeWeight`, `tokens.pointerDepthWeight`, and `tokens.pointerSideWeight`.
 
 ## Key Details
 
@@ -13,7 +13,7 @@ Shared geometry weights come from `theme.strokeWeight`, `theme.pointerDepthWeigh
 - Shared responsive owner: `FullCircleRadialLayout.computeMode()` / `computeInsets()` / `computeLayout()`.
 - Angle conversion uses `RadialAngleMath.degToCanvasRad()` defaults: `zeroDegAt="north"`, clockwise positive.
 - Geometry and mode slots are computed once per frame in engine state and reused by widget callbacks.
-- Theme/token sources come from `ThemeResolver` via `RadialToolkit.theme.resolveForRoot(Helpers.requirePluginRoot(canvas))`.
+- Theme/token sources come from `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);` via `RadialToolkit`.
 
 ## Arc Configuration
 
@@ -58,12 +58,12 @@ Tick lengths come from the layout owner via `GeometryScale` and shared weights:
 
 | Element | Theme token | CSS variable | Default |
 |---|---|---|---|
-| Pointer fill | `theme.colors.pointer` | `--dyni-pointer` | `#ff2b2b` |
-| Layline starboard | `theme.colors.laylineStb` | `--dyni-layline-stb` | `#82b683` |
-| Layline port | `theme.colors.laylinePort` | `--dyni-layline-port` | `#ff7a76` |
-| Ring stroke | resolved text color | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` | runtime CSS-derived |
-| Tick stroke | resolved text color | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` | runtime CSS-derived |
-| Label text | resolved text color | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` | runtime CSS-derived |
+| Pointer fill | `tokens.colors.pointer` | `--dyni-pointer` | `#ff2b2b` |
+| Layline starboard | `tokens.colors.laylineStb` | `--dyni-layline-stb` | `#82b683` |
+| Layline port | `tokens.colors.laylinePort` | `--dyni-layline-port` | `#ff7a76` |
+| Ring stroke | resolved text color | `tokens.surface.fg` | runtime CSS-derived |
+| Tick stroke | resolved text color | `tokens.surface.fg` | runtime CSS-derived |
+| Label text | resolved text color | `tokens.surface.fg` | runtime CSS-derived |
 
 Ring stroke width: `GeometryScale.scaleStroke(R, theme.radial.ring.arcLineWidthFactor, strokeWeight)`.
 
@@ -71,8 +71,8 @@ Ring stroke width: `GeometryScale.scaleStroke(R, theme.radial.ring.arcLineWidthF
 
 | Variant | Widget | Angle input | Depth | Common options |
 |---|---|---|---|---|
-| Lubber pointer (fixed) | `CompassRadialWidget` | fixed `0°` | `fixedPointerDepth` | `variant="long"`, `fillStyle=theme.colors.pointer` |
-| Value pointer (dynamic) | `WindRadialWidget` | `display.angle` | `needleDepth` | `variant="long"`, `fillStyle=theme.colors.pointer` |
+| Lubber pointer (fixed) | `CompassRadialWidget` | fixed `0°` | `fixedPointerDepth` | `variant="long"`, `fillStyle=tokens.colors.pointer` |
+| Value pointer (dynamic) | `WindRadialWidget` | `display.angle` | `needleDepth` | `variant="long"`, `fillStyle=tokens.colors.pointer` |
 
 Shared pointer shape controls:
 - `theme.radial.pointer.sideFactor` (`--dyni-radial-pointer-side-factor`, default `0.11`)
@@ -87,8 +87,8 @@ Shared pointer shape controls:
 | Wind | `-180..180` | `30 / 10`, `includeEnd=true` | numeric labels `-180..180` step `30` | `String(deg)`; filter excludes `-180`, `180` |
 
 Label typography:
-- Weight: `theme.font.labelWeight`
-- Family: `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).font.family`
+- Weight: `tokens.font.labelWeight`
+- Family: `tokens.font.family`
 - Font size: `labelPx = max(1, floor(R * max(theme.radial.labels.fontFactor, 0.18) * compactGeometryScale))`
 
 ## Layout Modes
@@ -167,8 +167,8 @@ Rebuild triggers (`CanvasLayerCache`):
 
 Wind laylines (`WindRadialWidget`, back layer):
 - Draw only when `layEnabled !== false` and `windRadialLayMax > windRadialLayMin`
-- Starboard sector: `startDeg=windRadialLayMin`, `endDeg=windRadialLayMax`, `fillStyle=theme.colors.laylineStb`
-- Port sector: `startDeg=-windRadialLayMax`, `endDeg=-windRadialLayMin`, `fillStyle=theme.colors.laylinePort`
+- Starboard sector: `startDeg=windRadialLayMin`, `endDeg=windRadialLayMax`, `fillStyle=tokens.colors.laylineStb`
+- Port sector: `startDeg=-windRadialLayMax`, `endDeg=-windRadialLayMin`, `fillStyle=tokens.colors.laylinePort`
 - Sector thickness: `ringW`
 
 Compass target marker (`CompassRadialWidget`, per-frame):

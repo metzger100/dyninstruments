@@ -11,12 +11,14 @@
 │   ├── init.js                  # registration + theme-preset application
 │   ├── widget-registrar.js      # host widget definition composition
 │   ├── HostCommitController.js  # deferred renderHtml host commit
-│   └── SurfaceSessionController.js # per-instance surface lifecycle state
+│   ├── SurfaceSessionController.js # per-instance surface lifecycle state
+│   ├── cluster/                 # shell and route activation ownership
+│   └── surface/                 # surface controllers and session ownership
 ├── config/                      # declarations: components, widget defs, cluster configs
+│   └── cluster-routes/          # route metadata ownership and activation policy
 ├── cluster/                     # cluster routing and ownership boundaries
 │   ├── ClusterWidget.js         # host renderHtml lifecycle orchestrator
 │   ├── mappers/                 # declarative cluster translation
-│   ├── rendering/               # kind catalog + surface router + surface owners
 │   └── viewmodels/              # shared domain normalization contracts
 ├── shared/widget-kits/          # reusable rendering/layout engines
 ├── widgets/                     # renderer implementations (canvas + html)
@@ -32,6 +34,8 @@
 | `widgets/` | `widgets -> shared -> (no imports, UMD globals)` |
 | `cluster/` | `cluster -> cluster/widgets/shared -> (no imports, UMD globals)` |
 | `config/` | `config -> (pure data, no runtime imports)` |
+| `runtime/cluster/` | `runtime/cluster -> config/cluster-routes -> widgets/shared` |
+| `runtime/surface/` | `runtime/surface -> widgets/shared` |
 | `runtime/` | `runtime -> (framework, no widget/cluster imports)` |
 
 Widget feature code depends on shared code. Cluster orchestration code may depend on cluster/widgets/shared. Shared code depends only on shared. Config is pure data. Runtime is framework-only.
@@ -39,8 +43,8 @@ Widget feature code depends on shared code. Cluster orchestration code may depen
 ## Boundary Rule
 
 1. Only `runtime/` may access `window.avnav` directly.
-2. Widgets and cluster code must use `Helpers.applyFormatter()` for formatter dispatch/fallback behavior.
-3. Cluster host registration is `renderHtml` on AvNav host; internal visual surface selection is owned by kind catalog + surface router.
+2. Widgets and cluster code must use `componentContext.format.applyFormatter()` for formatter dispatch/fallback behavior.
+3. Cluster host registration is `renderHtml` on AvNav host; internal visual surface selection is owned by `config/cluster-routes`, `ClusterWidget`, `RouteActivationController`, and `RouteActivationPayloadBuilder`.
 4. Canvas rendering remains valid as an internal renderer contract via `CanvasDomSurfaceAdapter` (`renderCanvas(canvas, props)` callbacks).
 
 ## Component Registration Flow

@@ -1,6 +1,6 @@
 # CSS Theming
 
-**Status:** ✅ Implemented | Input vars resolved by ThemeResolver + commit-time output materialization by runtime._theme
+**Status:** ✅ Implemented | Input vars resolved by `runtime.theme` + commit-time output materialization by `runtime.theme`
 
 ## Overview
 
@@ -11,9 +11,8 @@ dyninstruments theme flow has two layers:
 
 Ownership:
 
-- ThemeModel: canonical semantic token/preset owner
-- ThemeResolver: strict root-only resolution boundary
-- runtime._theme: commit-time output writer on committed .widget.dyniplugin roots
+- `runtime.theme`: canonical semantic token/preset owner and strict root-only resolution boundary
+- `runtime.theme.applyToRoot(...)`: commit-time output writer on committed `.widget.dyniplugin` roots
 
 ## Input Variables
 

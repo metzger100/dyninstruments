@@ -11,8 +11,8 @@ duplicating animation state.
 
 ## API
 
-- `create(def, Helpers).create(spec)` creates a spring instance.
-- `create(def, Helpers).createMotion(spec)` creates a canvas-keyed motion controller.
+- `create(def, componentContext).create(spec)` creates a spring instance.
+- `create(def, componentContext).createMotion(spec)` creates a canvas-keyed motion controller.
 - Spring options:
   - `stiffness`
   - `maxDtMs`

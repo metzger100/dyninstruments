@@ -5,7 +5,8 @@
 ## Overview
 
 Visual specification for semicircle gauge widgets. `GeometryScale` turns the semicircle radius into ring, tick, and pointer pixels while `compactGeometryScale` only tightens label and text spacing; data source/formatting/sector strategy still differs per gauge.
-Shared geometry weights come from `theme.strokeWeight`, `theme.pointerDepthWeight`, and `theme.pointerSideWeight`.
+Shared geometry weights come from `tokens.strokeWeight`, `tokens.pointerDepthWeight`, and `tokens.pointerSideWeight`.
+- Theme tokens are resolved once per render via `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`.
 
 ## Arc Configuration
 
@@ -60,14 +61,14 @@ Ownership:
 
 | Element | Theme token | Default | Usage |
 |---|---|---|---|
-| Warning sector | `theme.colors.warning` | `#e7c66a` | Matte yellow |
-| Alarm sector | `theme.colors.alarm` | `#ff7a76` | Matte red |
-| Pointer | `theme.colors.pointer` | `#ff2b2b` | Red triangle |
-| Text/ticks/arc stroke | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` | CSS-resolved | Foreground |
-| Layline starboard (WindRadialWidget) | `theme.colors.laylineStb` | `#82b683` | Starboard tack |
-| Layline port (WindRadialWidget) | `theme.colors.laylinePort` | `#ff7a76` | Port tack |
+| Warning sector | `tokens.colors.warning` | `#e7c66a` | Matte yellow |
+| Alarm sector | `tokens.colors.alarm` | `#ff7a76` | Matte red |
+| Pointer | `tokens.colors.pointer` | `#ff2b2b` | Red triangle |
+| Text/ticks/arc stroke | `tokens.surface.fg` | CSS-resolved | Foreground |
+| Layline starboard (WindRadialWidget) | `tokens.colors.laylineStb` | `#82b683` | Starboard tack |
+| Layline port (WindRadialWidget) | `tokens.colors.laylinePort` | `#ff7a76` | Port tack |
 
-Theme defaults are provided by `ThemeResolver` and can be overridden via CSS variables.
+Theme defaults are provided by `runtime.theme` and can be overridden via CSS variables.
 
 ## Pointer Configuration
 
@@ -76,12 +77,12 @@ All semicircle gauges use the same pointer call:
 ```javascript
 draw.drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, {
   depth: pointerDepth,
-  fillStyle: theme.colors.pointer,
+  fillStyle: tokens.colors.pointer,
   variant: "long"
 });
 ```
 
-Pointer color is passed directly via `fillStyle` from `theme.colors.pointer`.
+Pointer color is passed directly via `fillStyle` from `tokens.colors.pointer`.
 Pointer depth and side thickness are scaled in the layout owner from the semicircle radius using shared weights:
 
 ```text
@@ -124,7 +125,7 @@ if (sector) {
     startDeg: sector.a0,
     endDeg: sector.a1,
     thickness: ringW,
-    fillStyle: theme.colors.warning
+    fillStyle: tokens.colors.warning
   });
 }
 ```
@@ -196,7 +197,7 @@ Text fit contract for semicircle gauges:
 
 - Major ticks: `len=GeometryScale.scale(R, theme.radial.ticks.majorLenFactor)`, `width=GeometryScale.scaleStroke(R, theme.radial.ticks.majorWidthFactor, strokeWeight)`
 - Minor ticks: `len=GeometryScale.scale(R, theme.radial.ticks.minorLenFactor)`, `width=GeometryScale.scaleStroke(R, theme.radial.ticks.minorWidthFactor, strokeWeight)`
-- Labels: `weight=theme.font.labelWeight`, font family from `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).font.family`
+- Labels: `weight=tokens.font.labelWeight`, font family from `tokens.font.family`
 - End labels optional via `showEndLabels`
 
 ## Background Cache Rules

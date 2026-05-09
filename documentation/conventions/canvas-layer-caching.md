@@ -49,8 +49,7 @@ Rule:
 Lifecycle pattern (`ensure -> rebuild -> blit`):
 
 ```javascript
-const cacheMod = Helpers.getModule("CanvasLayerCache");
-const cacheApi = cacheMod.create(def, Helpers);
+const cacheApi = componentContext.components.require("CanvasLayerCache");
 const cache = cacheApi.createLayerCache({ layers: ["back"] });
 
 cache.ensureLayer(canvas, staticKey, function (layerCtx, layerName, layerCanvas) {

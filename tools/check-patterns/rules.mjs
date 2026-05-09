@@ -2,8 +2,10 @@ import {
   runDeadCodeRule,
   runDefaultTruthyFallbackRule,
   runFormatterAvailabilityHeuristicRule,
+  runLegacyComponentLoaderApiRule,
   runRegexRule,
   runRendererNumericCoercionRule,
+  runRuntimeReachThroughRule,
   runTodoWithoutOwner,
   runUnusedFallbackRule
 } from "./rules-core.mjs";
@@ -136,6 +138,26 @@ export const RULES = [
     detect: /(?:window\.avnav|(?<!\w)avnav\.api)/g,
     allowlist: [],
     message: ({ file, line }) => `[forbidden-global] ${file}:${line}\nDirect access to 'avnav.api' in widget code. Widgets must use\ncomponentContext.format.applyFormatter() instead. The centralized formatter in\nruntime/format-runtime.js (runtime.format service) already handles availability checks, try/catch,\nand fallback. See ARCHITECTURE.md boundary rule and core-principles.md #9.`
+  },
+  {
+    name: "legacy-component-loader-api",
+    severity: "block",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "config/**/*.js", "plugin.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runLegacyComponentLoaderApiRule,
+    message: ({ file, line, expression }) => `[legacy-component-loader-api] ${file}:${line}\nRemoved loader API detected (${expression}). Final runtime/component code must use componentContext.components.require(...) and runtime-owned services only.`
+  },
+  {
+    name: "runtime-service-reach-through",
+    severity: "block",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "config/**/*.js"],
+      exclude: ["cluster/ClusterWidget.js", "tests/**", "tools/**"]
+    },
+    run: runRuntimeReachThroughRule,
+    message: ({ file, line, expression }) => `[runtime-service-reach-through] ${file}:${line}\nDirect runtime service reach-through detected (${expression}). Ordinary registered components must use componentContext.* service views instead.`
   },
   {
     name: "empty-catch",

@@ -6,7 +6,7 @@
 
 Full-circle rotating compass card with upright cardinal labels. The dial rotates by `-heading`; the lubber pointer stays fixed at North. Optional target marker (`markerCourse`) is supported.
 The target marker now eases independently from heading, then renders at the eased marker course relative to the eased heading so wrapped target changes take the shortest arc.
-Pointer color is resolved once per render via `FullCircleRadialEngine` (`RadialToolkit.theme.resolveForRoot(Helpers.requirePluginRoot(canvas))` internally).
+Pointer color is resolved once per render via `FullCircleRadialEngine` (`const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);` internally).
 Static dial rendering is cached via shared `CanvasLayerCache` managed by `FullCircleRadialEngine`.
 Responsive ring, label, marker, and pointer geometry come from `FullCircleRadialLayout` through the shared engine state.
 
@@ -45,7 +45,7 @@ The rotating dial face cache is built from static inputs. At render time, `headi
 |---|---|---|
 | Ring (cached face) | `draw.drawRing` | full circle |
 | Ticks (cached face) | `draw.drawTicks` | `0..360`, major 30, minor 10 |
-| Lubber pointer | `draw.drawPointerAtRim` | fixed at 0°, with `fillStyle: theme.colors.pointer` and layout-owned `fixedPointerDepth` |
+| Lubber pointer | `draw.drawPointerAtRim` | fixed at 0°, with `fillStyle: tokens.colors.pointer` and layout-owned `fixedPointerDepth` |
 | Target marker | `draw.drawRimMarker` | at `(easedMarker - easedHeading)` if both finite, with layout-owned `markerLen` / `markerWidth` |
 | Cardinal labels | cached label sprites | existing label set (`N/NE/E/SE/S/SW/W/NW`), rendered upright at heading-rotated positions |
 
@@ -122,7 +122,7 @@ Responsive ownership:
 ## Phase 6 Options
 
 - `stableDigits` (default `false`) enables `StableDigits.normalize(...)` for heading value text.
-- When enabled, heading value text uses `theme.font.familyMono`.
+- When enabled, heading value text uses `tokens.font.familyMono`.
 
 ## Exports
 

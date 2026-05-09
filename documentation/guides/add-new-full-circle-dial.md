@@ -21,10 +21,10 @@ Read first:
 
 Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
 
-1. Use UMD wrapper + `create(def, Helpers)`.
+1. Use UMD wrapper + `create(def, componentContext)`.
 2. Resolve shared modules:
-   - `const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers)`
-   - `const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers)`
+   - `const engine = componentContext.components.require("FullCircleRadialEngine")`
+   - `const textLayout = componentContext.components.require("FullCircleRadialTextLayout")`
 3. Respect responsive ownership:
    - `FullCircleRadialLayout` already consumes `ResponsiveScaleProfile` and owns compact insets, dial geometry, slot bounds, and compact geometry scales.
    - `GeometryScale` already handles the factor-to-pixel conversion from the dial radius.
@@ -47,9 +47,9 @@ Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
-    const engine = Helpers.getModule("FullCircleRadialEngine").create(def, Helpers);
-    const textLayout = Helpers.getModule("FullCircleRadialTextLayout").create(def, Helpers);
+  function create(def, componentContext) {
+    const engine = componentContext.components.require("FullCircleRadialEngine");
+    const textLayout = componentContext.components.require("FullCircleRadialTextLayout");
 
     function buildDisplay(state, props) {
       // Widget-specific captions/units/value strategy only.

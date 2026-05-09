@@ -11,7 +11,7 @@
 - Route tuple: `cluster: "vessel"`, `kind: "alarm"`, `viewModelId: "AlarmViewModel"`, `rendererId: "AlarmTextHtmlWidget"`, `surface: "html"`
 - Source of truth: `nav.alarms.all`
 - Active alarm names come from the alarm-map object keys, not from nested alarm labels
-- Theme ownership lives in `ThemeModel` via `colors.alarmWidget.bg`, `colors.alarmWidget.fg`, and `colors.alarmWidget.strip`
+- Theme ownership lives in `runtime.theme` via `colors.alarmWidget.bg`, `colors.alarmWidget.fg`, and `colors.alarmWidget.strip`
 - `user.css` can override the widget through `--dyni-alarm-widget-bg`, `--dyni-alarm-widget-fg`, and `--dyni-alarm-widget-strip`
 - Active summary rules:
   - `0` active alarms -> `NONE`
@@ -54,7 +54,7 @@
 |---|---|
 | `surfacePolicy.actions.alarm.stopAll()` | Dispatches the core stop-all workflow when capability is available |
 | `surfacePolicy.interaction.mode` | `dispatch` or `passive` |
-| `getVerticalShellSizing()` | `{ kind: "ratio", aspectRatio: 2 }` |
+| `shellSizing` route metadata | `{ kind: "ratio", aspectRatio: 2 }` |
 | `colors.alarmWidget.bg` | Alarm background token |
 | `colors.alarmWidget.fg` | Alarm foreground token |
 | `colors.alarmWidget.strip` | Idle strip token |

@@ -36,7 +36,7 @@ Committed renderer instances implement:
 - detach(reason)
 - destroy()
 - optional layoutSignature(payload)
-- there is no `getVerticalShellSizing()` renderer-spec contract
+- there is no renderer-spec vertical-sizing contract
 
 ## shellRect Contract
 

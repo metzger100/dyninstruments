@@ -16,8 +16,8 @@ Use this document for runtime-safe component structure and naming. It defines fi
 - Reusable logic belongs in shared kits, not in duplicated widget-local helpers.
 - Preserve explicit falsy defaults (`""`, `0`, `false`) via property-presence/nullish checks; never use truthy fallback for configured defaults.
 - Cache-owning modules must expose explicit invalidation APIs and mutation paths must call them.
-- Preset-name normalization is single-owner: use `ThemeModel.normalizePresetName`, do not duplicate in runtime/theme consumers.
-- Cluster mappers are declarative routing/normalization only; formatter and presentation behavior belongs in renderer modules.
+- Preset-name normalization is owned internally by `runtime.theme` during configure/apply/resolve flows. Do not duplicate preset normalization outside `runtime/theme` internals.
+- Cluster mappers are declarative routing/normalization only; route identity belongs in `config/cluster-routes/`, and formatter/presentation behavior belongs in `widgets/` or shared widget kits.
 - User-visible responsive floors must come from the shared responsive-profile contract; widget-local floors are allowed only for technical safety bounds.
 - Fail-fast / keep-it-simple: validate and default at boundaries, then trust the resulting internal contract.
 - Do not add speculative legacy/compat/fallback helpers or duplicate CSS/config defaults in runtime code.
@@ -66,7 +66,7 @@ Example:
 }(this, function () {
   "use strict";
 
-  function create(def, Helpers) {
+  function create(def, componentContext) {
     // Component code here
     return { id: "ComponentName" };
   }
@@ -86,16 +86,16 @@ Example:
 - Unit display-label props: `unit_{metricKey}_{token}`
 - Unit-specific numeric props: `<scaleBaseKey>_{token}`
 - `editableParameter` conditions: `{ kind: "xxxRadial" }` or `[{ kind: "a" }, { kind: "b" }]`
-- Components under `cluster/rendering/` must use role-based IDs, not cluster-prefixed IDs, and must not be per-kind mapper-to-widget forwarding shims.
+- Renderer components must use role-based IDs, not cluster-prefixed IDs, and must not be per-kind mapper-to-widget forwarding shims.
 - Shared unit-binding tables may define an optional `rendererKey` alias for renderer-domain payload names.
 - Mixed migrated/non-migrated cluster maps should be split so migrated kinds do not flow through `makePerKindTextParams(...)`.
 
 ## Mapper Boundary Rules
 
 - Keep mapper files (`cluster/mappers/*Mapper.js`) limited to `create()` and `translate()` function declarations.
-- Keep mapper output declarative: select `renderer`, map values, normalize numbers, and pass-through formatter keys only.
+- Keep mapper output declarative: map values, normalize numbers, and pass-through formatter keys only.
 - Do not implement formatter logic, status-symbol conversion, or rendering fallbacks inside mappers.
-- Move any non-trivial logic to renderer components (`cluster/rendering/`, `widgets/`) or `ClusterMapperToolkit`.
+- Move any non-trivial logic to renderer components (`widgets/`) or shared widget kits, or to `ClusterMapperToolkit` when it is mapper-shared logic.
 
 ## Fail-Fast / Keep It Simple
 
@@ -173,7 +173,6 @@ Current shared utilities include:
 - `HtmlWidgetUtils.resolveRatioMode()`
 - `HtmlWidgetUtils.isEditingMode()`
 - `PreparedPayloadModelCache.createPreparedModelCache()`
-- `ThemeModel.normalizePresetName()`
 - `PerfSpanHelper.startSpan()`
 - `PerfSpanHelper.endSpan()`
 - `RadialValueMath.clamp()`
@@ -193,8 +192,9 @@ Current shared utilities include:
 - `UnitAwareFormatter.formatDistance()`
 - `UnitAwareFormatter.appendUnit()`
 - `UnitAwareFormatter.extractNumericDisplay()`
-- `Helpers.applyFormatter()`
-- `Helpers.getNightModeState()`
+- `componentContext.format.applyFormatter()`
+- `componentContext.canvas.setupCanvas()`
+- `componentContext.dom.getNightModeState(rootEl)`
 - `GeometryScale.scale()`
 - `GeometryScale.scaleStroke()`
 - `GeometryScale.scalePointer()`

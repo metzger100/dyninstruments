@@ -9,7 +9,7 @@ The four semicircle gauges share one renderer implementation:
 - Shared responsive layout ownership in `shared/widget-kits/radial/SemicircleRadialLayout.js`
 - Shared mode-routed text fitting/draw in `shared/widget-kits/radial/SemicircleRadialTextLayout.js`
 - Shared rendering orchestration in `shared/widget-kits/radial/SemicircleRadialEngine.js`
-- Shared helper APIs via `RadialToolkit` (`ThemeResolver`, `RadialTextLayout`, `RadialValueMath`, `RadialAngleMath`, `RadialTickMath`, draw utils)
+- Shared helper APIs via `RadialToolkit` (`runtime.theme`, `RadialTextLayout`, `RadialValueMath`, `RadialAngleMath`, `RadialTickMath`, draw utils)
 - Gauge wrappers keep only formatting, tick-profile selection, and sector strategy
 
 ## File Locations
@@ -44,7 +44,7 @@ SpeedRadialWidget/DepthRadialWidget/TemperatureRadialWidget/VoltageRadialWidget
 `SemicircleRadialEngine.createRenderer(spec)` handles:
 
 1. Canvas setup + theme resolve + responsive mode detection (`flat`, `normal`, `high`)
-2. One-time theme token resolve (`theme = RadialToolkit.theme.resolveForRoot(Helpers.requirePluginRoot(canvas))`)
+2. One-time theme token read (`const tokens = componentContext.theme.tokens.resolveForRoot(rootEl)`)
 3. `SemicircleRadialLayout.computeInsets()` / `computeLayout()` for shared responsive geometry, label metrics, and mode boxes
 4. Arc ring + sectors + pointer + ticks + labels
 5. `SemicircleRadialTextLayout.drawModeText()` for flat/high/normal caption-value-unit layout
@@ -59,6 +59,7 @@ Responsive ownership:
 - `SemicircleRadialTextLayout` consumes layout-owned boxes and `textFillScale`; it does not create a second compaction curve
 - `hideTextualMetrics` suppresses the live value readout while preserving semicircle geometry, ticks, pointer, and state screens
 - Text fitting is fail-safe: caption/value/unit rendering is clamped to stay inside mode-owned boxes, and compact layouts may downscale text further instead of clipping into gauge geometry
+- Theme tokens are resolved once per render via `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`.
 
 ## Gauge-Specific Responsibilities
 
@@ -74,7 +75,7 @@ Each wrapper defines:
 
 - High-end sectors
 - Tick profile: `resolveStandardSemicircleTickSteps`
-- Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatSpeed", formatterParameters: [formatUnit] })`
+- Formatter path: `componentContext.format.applyFormatter(raw, { formatter: "formatSpeed", formatterParameters: [formatUnit] })`
 - Config-backed range defaults: `0..30`
 - Wrapper defaults/bindings: display unit `kn`, speed ratio props
 
@@ -90,7 +91,7 @@ Each wrapper defines:
 
 - High-end sectors
 - Tick profile: `resolveTemperatureSemicircleTickSteps`
-- Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatTemperature", formatterParameters: [formatUnit] })`
+- Formatter path: `componentContext.format.applyFormatter(raw, { formatter: "formatTemperature", formatterParameters: [formatUnit] })`
 - Config-backed range defaults: `0..35`
 - Wrapper defaults/bindings: display unit `°C`, temperature ratio props
 
@@ -98,7 +99,7 @@ Each wrapper defines:
 
 - Low-end sectors
 - Tick profile: `resolveVoltageSemicircleTickSteps`
-- Formatter path: `Helpers.applyFormatter(raw, { formatter: "formatDecimal", formatterParameters: [3, 1, true] })`
+- Formatter path: `componentContext.format.applyFormatter(raw, { formatter: "formatDecimal", formatterParameters: [3, 1, true] })`
 - Config-backed range defaults: `7..15`
 - Wrapper defaults/bindings: unit `V`, voltage ratio props
 - Toggle behavior: sectors default to enabled when toggle values are unset; explicit `voltageRadialWarningEnabled: false` and/or `voltageRadialAlarmEnabled: false` suppress corresponding sectors
@@ -130,7 +131,7 @@ Removed from wrappers:
 ## Phase 6 Options
 
 - `stableDigits` (default `false`) is available on speed/environment semicircle/linear gauge kinds.
-- When enabled, main gauge value text is normalized via `StableDigits` and rendered with `theme.font.familyMono`.
+- When enabled, main gauge value text is normalized via `StableDigits` and rendered with `tokens.font.familyMono`.
 - `stableDigits: false` preserves pre-phase rendering and typography behavior.
 
 ## Related

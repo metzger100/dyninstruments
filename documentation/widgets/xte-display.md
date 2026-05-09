@@ -94,18 +94,18 @@ When textual metrics are visible, the widget still shows placeholder text for mi
 
 ## Theme Token Usage
 
-Theme is resolved once per frame via `RadialToolkit.theme.resolveForRoot(Helpers.requirePluginRoot(canvas))`.
+Theme is resolved once per frame via `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`.
 
 | Visual element | Token |
 |---|---|
-| Boat marker + active centerline | `theme.colors.pointer` |
-| Out-of-scale clamp marker | `theme.colors.alarm` |
-| Road edge + horizon strokes | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` |
-| Perspective bars + center seam markers | `ThemeResolver.resolveForRoot(Helpers.requirePluginRoot(canvas)).surface.fg` |
+| Boat marker + active centerline | `tokens.colors.pointer` |
+| Out-of-scale clamp marker | `tokens.colors.alarm` |
+| Road edge + horizon strokes | `tokens.surface.fg` |
+| Perspective bars + center seam markers | `tokens.surface.fg` |
 | Highway line widths | internal factors via `GeometryScale.scaleStroke(..., strokeWeight)` |
 | Boat marker size | internal factors via `GeometryScale.scalePointer(..., pointerDepthWeight)` |
-| Value text weight | `theme.font.weight` |
-| Label text weight | `theme.font.labelWeight` |
+| Value text weight | `tokens.font.weight` |
+| Label text weight | `tokens.font.labelWeight` |
 
 XTE geometry does not read `theme.xte.*`. Line widths and boat size are derived from internal highway factors plus the shared `strokeWeight` and `pointerDepthWeight` inputs.
 
