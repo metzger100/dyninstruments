@@ -14,6 +14,7 @@ Ownership split:
 - config/components.js assembles fragments into config.components
 - runtime/component-loader.js resolves dependencies and loads JS/CSS
 - runtime/asset-preloader.js preloads declared assets and exposes runtime asset lookup
+- runtime/cluster/RouteActivationController.js builds activated route payloads on demand
 - runtime/init.js requests required components and registers widgets
 
 ## Registry Assembly
@@ -88,10 +89,16 @@ Runtime assets:
 runtime/init.js:
 
 - computes needed components from widget definitions
+- startup loads the required component set for the current surface mix, while route activation loads active route roots on demand
 - appends ThemeModel and ThemeResolver
-- preloads declared shadowCss URLs
+- preloads the declared shadowCss URLs for the needed components in the current boot path
 - configures runtime._theme
 - registers widgets
+
+RouteActivationController is introduced in Phase 4 for the upcoming activation path:
+
+- `runtime/cluster/RouteActivationController.js` builds activated route payloads on demand
+- ClusterWidget remains on the legacy ClusterRendererRouter path until the later cutover phase
 
 ## Related
 

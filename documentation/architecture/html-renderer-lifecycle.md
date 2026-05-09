@@ -14,6 +14,11 @@ ClusterRendererRouter.renderHtml(...):
 - includes a stable mount host (.dyni-surface-html-mount)
 - contains only stable route/surface metadata and shell sizing state
 
+RouteActivationController is the Phase 4 activation service for the upcoming route-activation path:
+
+- `runtime/cluster/RouteActivationController.js` builds activated route payloads on demand
+- it participates in the upcoming activation flow, but it is not the current live render owner
+
 HtmlSurfaceController.createSurfaceController(...) owns committed lifecycle:
 
 - attach(payload)
@@ -88,7 +93,7 @@ Committed renderers attach and remove direct DOM listeners under dispatch/passiv
 ## Styling Ownership
 
 - committed HTML styles are shadow-local
-- runtime preloads and injects per-renderer shadow CSS bundles
+- RouteActivationController preloads and caches per-renderer shadow CSS bundles for the upcoming activation path before hydration
 - required outer context (pageId, orientation, interaction mode) is mirrored into shadow-visible attributes/classes
 
 ## Related

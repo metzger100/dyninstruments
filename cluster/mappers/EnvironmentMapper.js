@@ -1,7 +1,7 @@
 /**
  * Module: EnvironmentMapper - Cluster translation for depth/temperature/pressure kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ClusterMapperToolkit
+ * Depends: routeContext.toolkit
  */
 
 (function (root, factory) {
@@ -12,8 +12,9 @@
   "use strict";
 
   function create() {
-    function translate(props, toolkit) {
+    function translate(props, routeContext) {
       const p = props || {};
+      const toolkit = routeContext.toolkit;
       const cap = toolkit.cap;
       const out = toolkit.out;
       const num = toolkit.num;

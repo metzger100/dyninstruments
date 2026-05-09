@@ -1,5 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
+const { makeRouteContext } = require("../../helpers/mapper-route-context");
 
 function makeToolkit(overrides, bindingOverrides) {
   installUnitFormatFamilies(bindingOverrides);
@@ -52,6 +53,15 @@ function makeToolkit(overrides, bindingOverrides) {
   }, overrides || {}));
 }
 
+function routeContext(kind, activeToolkit) {
+  return makeRouteContext({
+    routeId: "environment:" + kind,
+    cluster: "environment",
+    kind: kind,
+    toolkit: activeToolkit
+  });
+}
+
 describe("EnvironmentMapper", function () {
   it("maps depthLinear with warning/alarm enabled by default", function () {
     const mapper = loadFresh("cluster/mappers/EnvironmentMapper.js").create();
@@ -68,7 +78,7 @@ describe("EnvironmentMapper", function () {
       depthLinearRatioThresholdFlat: "3.5",
       captionUnitScale: "0.8",
       depthLinearHideTextualMetrics: 1
-    }, makeToolkit());
+    }, routeContext("depthLinear", makeToolkit()));
 
     expect(out.renderer).toBe("DepthLinearWidget");
     expect(out.rendererProps.depthLinearAlarmFrom).toBe(2);
@@ -91,7 +101,7 @@ describe("EnvironmentMapper", function () {
       depthRadialRatioThresholdFlat: "3.5",
       captionUnitScale: "0.8",
       depthRadialHideTextualMetrics: 0
-    }, makeToolkit());
+    }, routeContext("depthRadial", makeToolkit()));
 
     expect(out.renderer).toBe("DepthRadialWidget");
     expect(out.rendererProps.depthRadialAlarmFrom).toBe(2);
@@ -116,7 +126,7 @@ describe("EnvironmentMapper", function () {
       tempRadialRatioThresholdFlat: "3.5",
       captionUnitScale: "0.8",
       tempRadialHideTextualMetrics: true
-    }, makeToolkit());
+    }, routeContext("tempRadial", makeToolkit()));
 
     expect(out.renderer).toBe("TemperatureRadialWidget");
     expect(out.formatter).toBe("formatTemperature");
@@ -143,7 +153,7 @@ describe("EnvironmentMapper", function () {
       tempLinearRatioThresholdFlat: "3.5",
       captionUnitScale: "0.8",
       tempLinearHideTextualMetrics: 0
-    }, makeToolkit());
+    }, routeContext("tempLinear", makeToolkit()));
 
     expect(out.renderer).toBe("TemperatureLinearWidget");
     expect(out.formatter).toBe("formatTemperature");
@@ -213,7 +223,7 @@ describe("EnvironmentMapper", function () {
       depthLinearTickMinor: "5",
       depthLinearAlarmFrom: "6",
       depthLinearWarningFrom: "16"
-    }, customToolkit);
+    }, routeContext("depthLinear", customToolkit));
     expect(depthLinear.unit).toBe("ft custom");
     expect(depthLinear.formatterParameters).toEqual(["ft"]);
     expect(depthLinear.rendererProps.depthLinearMaxValue).toBe(100);
@@ -231,7 +241,7 @@ describe("EnvironmentMapper", function () {
       depthRadialTickMinor: "0.0005",
       depthRadialAlarmFrom: "0.001",
       depthRadialWarningFrom: "0.003"
-    }, customToolkit);
+    }, routeContext("depthRadial", customToolkit));
     expect(depthRadial.unit).toBe("nm custom");
     expect(depthRadial.formatterParameters).toEqual(["nm"]);
     expect(depthRadial.rendererProps.depthRadialMaxValue).toBe(0.016);
@@ -251,7 +261,7 @@ describe("EnvironmentMapper", function () {
       tempLinearTickMinor: "1",
       tempLinearWarningFrom: "301.15",
       tempLinearAlarmFrom: "305.15"
-    }, customToolkit);
+    }, routeContext("tempLinear", customToolkit));
     expect(tempLinear.unit).toBe("K custom");
     expect(tempLinear.formatterParameters).toEqual(["kelvin"]);
     expect(tempLinear.rendererProps.tempLinearMinValue).toBe(273.15);
@@ -259,11 +269,11 @@ describe("EnvironmentMapper", function () {
     expect(tempLinear.rendererProps.tempLinearWarningFrom).toBe(301.15);
     expect(tempLinear.rendererProps.tempLinearAlarmFrom).toBe(305.15);
 
-    const temp = mapper.translate({ kind: "temp", temp: 20 }, customToolkit);
+    const temp = mapper.translate({ kind: "temp", temp: 20 }, routeContext("temp", customToolkit));
     expect(temp.unit).toBe("K custom");
     expect(temp.formatterParameters).toEqual(["kelvin"]);
 
-    const pressure = mapper.translate({ kind: "pressure", value: 1013 }, customToolkit);
+    const pressure = mapper.translate({ kind: "pressure", value: 1013 }, routeContext("pressure", customToolkit));
     expect(pressure.unit).toBe("bar custom");
     expect(pressure.formatterParameters).toEqual(["bar"]);
   });
@@ -271,14 +281,14 @@ describe("EnvironmentMapper", function () {
   it("maps numeric kinds with expected formatters", function () {
     const mapper = loadFresh("cluster/mappers/EnvironmentMapper.js").create();
 
-    expect(mapper.translate({ kind: "temp", temp: 20 }, makeToolkit()).formatter).toBe("formatTemperature");
-    expect(mapper.translate({ kind: "pressure", value: 1013 }, makeToolkit()).formatter).toBe("formatPressure");
-    expect(mapper.translate({ kind: "depth", depth: 3 }, makeToolkit()).formatter).toBe("formatDistance");
+    expect(mapper.translate({ kind: "temp", temp: 20 }, routeContext("temp", makeToolkit())).formatter).toBe("formatTemperature");
+    expect(mapper.translate({ kind: "pressure", value: 1013 }, routeContext("pressure", makeToolkit())).formatter).toBe("formatPressure");
+    expect(mapper.translate({ kind: "depth", depth: 3 }, routeContext("depth", makeToolkit())).formatter).toBe("formatDistance");
   });
 
   it("rejects legacy graphic kind names", function () {
     const mapper = loadFresh("cluster/mappers/EnvironmentMapper.js").create();
-    expect(mapper.translate({ kind: "depthGraphic", depth: 3 }, makeToolkit())).toEqual({});
-    expect(mapper.translate({ kind: "tempGraphic", temp: 20 }, makeToolkit())).toEqual({});
+    expect(mapper.translate({ kind: "depthGraphic", depth: 3 }, routeContext("depthGraphic", makeToolkit()))).toEqual({});
+    expect(mapper.translate({ kind: "tempGraphic", temp: 20 }, routeContext("tempGraphic", makeToolkit()))).toEqual({});
   });
 });

@@ -1,7 +1,7 @@
 /**
  * Module: NavMapper - Cluster translation for navigation ETA/distance/position kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ClusterMapperToolkit, ActiveRouteViewModel, EditRouteViewModel, RoutePointsViewModel
+ * Depends: routeContext.toolkit, routeContext.viewModel
  */
 
 (function (root, factory) {
@@ -12,12 +12,10 @@
   "use strict";
 
   function create(def, componentContext) {
-    const activeRouteViewModel = componentContext.components.require("ActiveRouteViewModel");
-    const editRouteViewModel = componentContext.components.require("EditRouteViewModel");
-    const routePointsViewModel = componentContext.components.require("RoutePointsViewModel");
-
-    function translate(props, toolkit) {
+    function translate(props, routeContext) {
       const p = props || {};
+      const toolkit = routeContext.toolkit;
+      const viewModel = routeContext.viewModel;
       const cap = toolkit.cap;
       const unit = toolkit.unit;
       const out = toolkit.out;
@@ -44,7 +42,10 @@
         return out(p.vmg, cap("vmg"), toolkit.unitText("vmg", "speed", token), "formatSpeed", [token]);
       }
       if (req === "activeRoute") {
-        const activeRouteDomain = activeRouteViewModel.build(p, toolkit);
+        if (!viewModel || typeof viewModel.build !== "function") {
+          throw new Error("NavMapper: routeContext.viewModel is required for 'activeRoute'");
+        }
+        const activeRouteDomain = viewModel.build(p, toolkit);
         const remainToken = toolkit.formatUnit("activeRouteRemain", "distance");
         activeRouteDomain.units.remain = toolkit.unitText("activeRouteRemain", "distance", remainToken);
         activeRouteDomain.formatUnits = { remain: remainToken };
@@ -68,7 +69,10 @@
         };
       }
       if (req === "routePoints") {
-        const routePointsDomain = routePointsViewModel.build(p, toolkit);
+        if (!viewModel || typeof viewModel.build !== "function") {
+          throw new Error("NavMapper: routeContext.viewModel is required for 'routePoints'");
+        }
+        const routePointsDomain = viewModel.build(p, toolkit);
         const distanceToken = toolkit.formatUnit("routePointsDistance", "distance");
         return {
           renderer: "RoutePointsTextHtmlWidget",
@@ -99,7 +103,10 @@
         };
       }
       if (req === "editRoute") {
-        const editRouteDomain = editRouteViewModel.build(p, toolkit);
+        if (!viewModel || typeof viewModel.build !== "function") {
+          throw new Error("NavMapper: routeContext.viewModel is required for 'editRoute'");
+        }
+        const editRouteDomain = viewModel.build(p, toolkit);
         const route = editRouteDomain.route;
         return {
           renderer: "EditRouteTextHtmlWidget",

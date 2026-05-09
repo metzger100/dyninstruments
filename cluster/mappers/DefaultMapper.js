@@ -1,7 +1,7 @@
 /**
  * Module: DefaultMapper - Cluster translation for self-configurable default instrument kinds
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: ClusterMapperToolkit
+ * Depends: routeContext.toolkit
  */
 
 (function (root, factory) {
@@ -12,8 +12,9 @@
   "use strict";
 
   function create() {
-    function translate(props, toolkit) {
+    function translate(props, routeContext) {
       const p = props || {};
+      const toolkit = routeContext.toolkit;
       const cap = toolkit.cap;
       const unit = toolkit.unit;
       const out = toolkit.out;

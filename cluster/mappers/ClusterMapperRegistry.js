@@ -1,7 +1,7 @@
 /**
  * Module: ClusterMapperRegistry - Cluster to mapper module registry and dispatcher
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: CourseHeadingMapper, SpeedMapper, EnvironmentMapper, WindMapper, NavMapper, MapMapper, AnchorMapper, VesselMapper, DefaultMapper
+ * Depends: ActiveRouteViewModel, EditRouteViewModel, RoutePointsViewModel, AisTargetViewModel, AlarmViewModel, CourseHeadingMapper, SpeedMapper, EnvironmentMapper, WindMapper, NavMapper, MapMapper, AnchorMapper, VesselMapper, DefaultMapper
  */
 
 (function (root, factory) {
@@ -25,6 +25,19 @@
 
   function create(def, componentContext) {
     const mappers = {};
+    const viewModels = {
+      nav: {
+        activeRoute: componentContext.components.require("ActiveRouteViewModel"),
+        editRoute: componentContext.components.require("EditRouteViewModel"),
+        routePoints: componentContext.components.require("RoutePointsViewModel")
+      },
+      map: {
+        aisTarget: componentContext.components.require("AisTargetViewModel")
+      },
+      vessel: {
+        alarm: componentContext.components.require("AlarmViewModel")
+      }
+    };
 
     Object.keys(MAPPER_MODULE_IDS).forEach(function (clusterId) {
       const id = MAPPER_MODULE_IDS[clusterId];
@@ -39,13 +52,23 @@
     function mapCluster(props, createToolkit) {
       const p = props || {};
       const cluster = p.cluster || def.cluster || "";
+      const kind = typeof p.kind === "string" ? p.kind : "";
       const mapper = mappers[cluster];
       if (typeof mapper !== "function") {
         return {};
       }
 
       const toolkit = typeof createToolkit === "function" ? createToolkit(p) : {};
-      return mapper(p, toolkit) || {};
+      const routeViewModel = viewModels[cluster] && viewModels[cluster][kind]
+        ? viewModels[cluster][kind]
+        : null;
+      return mapper(p, {
+        routeId: cluster + "/" + kind,
+        cluster: cluster,
+        kind: kind,
+        viewModel: routeViewModel,
+        toolkit: toolkit
+      }) || {};
     }
 
     return {

@@ -432,7 +432,7 @@ function runMapperOutputNoNaNRule() {
       continue;
     }
 
-    const translated = spec.translate(item.props, toolkit) || {};
+    const translated = spec.translate(item.props, { toolkit }) || {};
     const invalids = [];
     collectInvalidNumbers(translated, "out", invalids);
     if (invalids.length) {

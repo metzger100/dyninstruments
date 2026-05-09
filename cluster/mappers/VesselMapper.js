@@ -1,7 +1,7 @@
 /**
  * Module: VesselMapper - Cluster translation for vessel voltage/time/attitude/alarm kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ClusterMapperToolkit, AlarmViewModel
+ * Depends: routeContext.toolkit, routeContext.viewModel
  */
 
 (function (root, factory) {
@@ -12,10 +12,10 @@
   "use strict";
 
   function create(def, componentContext) {
-    let alarmViewModel = null;
-
-    function translate(props, toolkit) {
+    function translate(props, routeContext) {
       const p = props || {};
+      const toolkit = routeContext.toolkit;
+      const alarmViewModel = routeContext.viewModel;
       const cap = toolkit.cap;
       const unit = toolkit.unit;
       const out = toolkit.out;
@@ -131,8 +131,8 @@
         };
       }
       if (req === "alarm") {
-        if (!alarmViewModel) {
-          alarmViewModel = componentContext.components.require("AlarmViewModel");
+        if (!alarmViewModel || typeof alarmViewModel.build !== "function") {
+          throw new Error("VesselMapper: routeContext.viewModel is required for 'alarm'");
         }
         const alarmDomain = alarmViewModel.build(p);
         return {

@@ -350,6 +350,7 @@ function createHarnessEnvironment(options) {
 
   delete globalThis.DyniPlugin;
   runIifeScript(rootDir, "runtime/namespace.js");
+  runIifeScript(rootDir, "shared/unit-format-families.js");
   runIifeScript(rootDir, "config/cluster-routes.js");
   runIifeScript(rootDir, "config/cluster-routes/course-heading.js");
   runIifeScript(rootDir, "config/cluster-routes/speed.js");
@@ -375,6 +376,9 @@ function createHarnessEnvironment(options) {
   runIifeScript(rootDir, "runtime/surface/HtmlSurfaceController.js");
   runIifeScript(rootDir, "runtime/surface/index.js");
   runIifeScript(rootDir, "runtime/cluster/ClusterShellRenderer.js");
+  runIifeScript(rootDir, "runtime/cluster/RouteActivationPayloadBuilder.js");
+  runIifeScript(rootDir, "runtime/cluster/RouteActivationLatestWins.js");
+  runIifeScript(rootDir, "runtime/cluster/RouteActivationController.js");
   globalThis.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
   globalThis.DyniPlugin.runtime.hostActions = createHostActions();
 
@@ -383,6 +387,7 @@ function createHarnessEnvironment(options) {
   };
 
   const moduleResolver = createComponentResolver(rootDir, globalThis.DyniPlugin.runtime);
+  globalThis.DyniPlugin.runtime.componentLoader = createPerfComponentLoader(moduleResolver);
 
   return {
     rootDir,
@@ -397,6 +402,36 @@ function createHarnessEnvironment(options) {
       delete globalThis.DyniComponents;
       delete globalThis.__DYNI_PERF_HOOKS__;
       delete globalThis.avnav;
+    }
+  };
+}
+
+function createPerfComponentLoader(moduleResolver) {
+  const loadedIds = new Set();
+
+  return {
+    loadComponent(id) {
+      const componentPath = moduleResolver.getComponentPath(id);
+      if (!componentPath) {
+        return Promise.reject(new Error(`Unknown component: ${id}`));
+      }
+      loadedIds.add(id);
+      return Promise.resolve();
+    },
+    areComponentsLoaded(ids) {
+      if (!Array.isArray(ids)) {
+        return false;
+      }
+      for (let i = 0; i < ids.length; i += 1) {
+        if (!loadedIds.has(ids[i])) {
+          return false;
+        }
+      }
+      return true;
+    },
+    createInstance(id, def) {
+      loadedIds.add(id);
+      return moduleResolver.createInstance(id, def);
     }
   };
 }

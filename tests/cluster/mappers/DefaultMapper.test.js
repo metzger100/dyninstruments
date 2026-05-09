@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { makeRouteContext } = require("../../helpers/mapper-route-context");
 
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
   caption_text: "VALUE",
@@ -9,6 +10,15 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   unit_radialGauge: ""
 });
 
+function routeContext(kind, activeToolkit) {
+  return makeRouteContext({
+    routeId: "default:" + kind,
+    cluster: "default",
+    kind: kind,
+    toolkit: activeToolkit
+  });
+}
+
 describe("DefaultMapper", function () {
   it("maps text, linearGauge, and radialGauge payloads without inventing formatter metadata", function () {
     const mapper = loadFresh("cluster/mappers/DefaultMapper.js").create();
@@ -18,7 +28,7 @@ describe("DefaultMapper", function () {
       value: "nav.gps.speed",
       formatter: "formatSpeed",
       formatterParameters: ["kn"]
-    }, toolkit)).toEqual({
+    }, routeContext("text", toolkit))).toEqual({
       value: "nav.gps.speed",
       caption: "VALUE",
       unit: "",
@@ -54,7 +64,7 @@ describe("DefaultMapper", function () {
       stableDigits: false,
       easing: true,
       defaultLinearHideTextualMetrics: 0
-    }, toolkit);
+    }, routeContext("linearGauge", toolkit));
 
     expect(linear).toMatchObject({
       renderer: "DefaultLinearWidget",
@@ -118,7 +128,7 @@ describe("DefaultMapper", function () {
       stableDigits: true,
       easing: false,
       defaultRadialHideTextualMetrics: 1
-    }, toolkit);
+    }, routeContext("radialGauge", toolkit));
 
     expect(radial).toMatchObject({
       renderer: "DefaultRadialWidget",
@@ -156,7 +166,7 @@ describe("DefaultMapper", function () {
 
     expect(mapper.translate({
       kind: "unknown"
-    }, toolkit)).toEqual({});
+    }, routeContext("unknown", toolkit))).toEqual({});
   });
 
   it("omits formatter metadata when it is not provided by the user", function () {
@@ -167,7 +177,7 @@ describe("DefaultMapper", function () {
       value: 4.2,
       defaultLinearMinValue: 0,
       defaultLinearMaxValue: 100
-    }, toolkit);
+    }, routeContext("linearGauge", toolkit));
     expect(Object.prototype.hasOwnProperty.call(linear, "formatter")).toBe(false);
     expect(Object.prototype.hasOwnProperty.call(linear, "formatterParameters")).toBe(false);
 
@@ -176,7 +186,7 @@ describe("DefaultMapper", function () {
       value: 4.2,
       defaultRadialMinValue: 0,
       defaultRadialMaxValue: 100
-    }, toolkit);
+    }, routeContext("radialGauge", toolkit));
     expect(Object.prototype.hasOwnProperty.call(radial, "formatter")).toBe(false);
     expect(Object.prototype.hasOwnProperty.call(radial, "formatterParameters")).toBe(false);
   });
@@ -236,7 +246,7 @@ describe("DefaultMapper", function () {
       stableDigits: 0,
       easing: 1,
       defaultLinearHideTextualMetrics: "yes"
-    }, toolkitSpy);
+    }, routeContext("linearGauge", toolkitSpy));
 
     expect(num).toHaveBeenCalledWith("1.1");
     expect(num).toHaveBeenCalledWith("3.5");
@@ -292,7 +302,7 @@ describe("DefaultMapper", function () {
       stableDigits: 1,
       easing: 0,
       defaultRadialHideTextualMetrics: "yes"
-    }, toolkitSpy);
+    }, routeContext("radialGauge", toolkitSpy));
 
     expect(radial.rendererProps).toMatchObject({
       defaultRadialRatioThresholdNormal: 1.1,

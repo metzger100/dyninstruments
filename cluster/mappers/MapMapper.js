@@ -1,7 +1,7 @@
 /**
  * Module: MapMapper - Cluster translation for map center-display, zoom, and AIS target kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ClusterMapperToolkit, AisTargetViewModel
+ * Depends: routeContext.toolkit, routeContext.viewModel
  */
 
 (function (root, factory) {
@@ -12,10 +12,10 @@
   "use strict";
 
   function create(def, componentContext) {
-    const aisTargetViewModel = componentContext.components.require("AisTargetViewModel");
-
-    function translate(props, toolkit) {
+    function translate(props, routeContext) {
       const p = props || {};
+      const toolkit = routeContext.toolkit;
+      const aisTargetViewModel = routeContext.viewModel;
       const cap = toolkit.cap;
       const unit = toolkit.unit;
       const num = toolkit.num;
@@ -71,6 +71,9 @@
       }
 
       if (req === "aisTarget") {
+        if (!aisTargetViewModel || typeof aisTargetViewModel.build !== "function") {
+          throw new Error("MapMapper: routeContext.viewModel is required for 'aisTarget'");
+        }
         return {
           renderer: "AisTargetTextHtmlWidget",
           domain: aisTargetViewModel.build(p),

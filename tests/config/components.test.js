@@ -94,6 +94,9 @@ describe("config/components.js", function () {
     expect(manifest).toContain("runtime/surface/HtmlSurfaceController.js");
     expect(manifest).toContain("runtime/surface/index.js");
     expect(manifest).toContain("runtime/cluster/ClusterShellRenderer.js");
+    expect(manifest).toContain("runtime/cluster/RouteActivationPayloadBuilder.js");
+    expect(manifest).toContain("runtime/cluster/RouteActivationLatestWins.js");
+    expect(manifest).toContain("runtime/cluster/RouteActivationController.js");
 
     expect(manifest).not.toContain("shared/theme/ThemeModel.js");
     expect(manifest).not.toContain("shared/theme/ThemeResolver.js");
@@ -103,6 +106,9 @@ describe("config/components.js", function () {
     expect(manifest[0]).toBe("runtime/namespace.js");
     expect(manifest.indexOf("runtime/PerfSpanHelper.js")).toBeGreaterThan(manifest.indexOf("runtime/namespace.js"));
     expect(manifest.indexOf("runtime/cluster/ClusterShellRenderer.js")).toBeGreaterThan(manifest.indexOf("runtime/surface/index.js"));
+    expect(manifest.indexOf("runtime/cluster/RouteActivationPayloadBuilder.js")).toBeGreaterThan(manifest.indexOf("runtime/cluster/ClusterShellRenderer.js"));
+    expect(manifest.indexOf("runtime/cluster/RouteActivationLatestWins.js")).toBeGreaterThan(manifest.indexOf("runtime/cluster/RouteActivationPayloadBuilder.js"));
+    expect(manifest.indexOf("runtime/cluster/RouteActivationController.js")).toBeGreaterThan(manifest.indexOf("runtime/cluster/RouteActivationLatestWins.js"));
     expect(manifest.indexOf("runtime/init.js")).toBe(manifest.length - 1);
   });
 });

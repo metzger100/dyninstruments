@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { makeRouteContext } = require("../../helpers/mapper-route-context");
 
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
   caption_hdtRadial: "HDT",
@@ -8,6 +9,15 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   caption_brg: "BRG",
   unit_brg: "°"
 });
+
+function routeContext(kind, activeToolkit) {
+  return makeRouteContext({
+    routeId: "courseHeading:" + kind,
+    cluster: "courseHeading",
+    kind: kind,
+    toolkit: activeToolkit
+  });
+}
 
 describe("CourseHeadingMapper", function () {
   it("maps radial heading kinds to CompassRadialWidget", function () {
@@ -21,7 +31,7 @@ describe("CourseHeadingMapper", function () {
       compassRadialRatioThresholdNormal: "0.8",
       compassRadialRatioThresholdFlat: "2.2",
       compassRadialHideTextualMetrics: "yes"
-    }, toolkit);
+    }, routeContext("hdtRadial", toolkit));
 
     expect(out.renderer).toBe("CompassRadialWidget");
     expect(out.heading).toBe(123);
@@ -32,7 +42,7 @@ describe("CourseHeadingMapper", function () {
 
   it("maps numeric kinds to formatDirection360", function () {
     const mapper = loadFresh("cluster/mappers/CourseHeadingMapper.js").create();
-    const out = mapper.translate({ kind: "brg", brg: 12, leadingZero: true }, toolkit);
+    const out = mapper.translate({ kind: "brg", brg: 12, leadingZero: true }, routeContext("brg", toolkit));
 
     expect(out).toEqual({
       value: 12,
@@ -58,7 +68,7 @@ describe("CourseHeadingMapper", function () {
       compassLinearShowEndLabels: false,
       compassLinearRange: "180",
       compassLinearHideTextualMetrics: 0
-    }, toolkit);
+    }, routeContext("hdtLinear", toolkit));
 
     expect(out.renderer).toBe("CompassLinearWidget");
     expect(out.heading).toBe(311);
@@ -80,7 +90,7 @@ describe("CourseHeadingMapper", function () {
 
   it("rejects legacy graphic kind names", function () {
     const mapper = loadFresh("cluster/mappers/CourseHeadingMapper.js").create();
-    expect(mapper.translate({ kind: "hdtGraphic", hdt: 123 }, toolkit)).toEqual({});
-    expect(mapper.translate({ kind: "hdmGraphic", hdm: 123 }, toolkit)).toEqual({});
+    expect(mapper.translate({ kind: "hdtGraphic", hdt: 123 }, routeContext("hdtGraphic", toolkit))).toEqual({});
+    expect(mapper.translate({ kind: "hdmGraphic", hdm: 123 }, routeContext("hdmGraphic", toolkit))).toEqual({});
   });
 });

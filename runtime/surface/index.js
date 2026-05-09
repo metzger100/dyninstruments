@@ -35,10 +35,30 @@
     throw new Error("runtime.surfaces.createController: unsupported surface '" + String(surface) + "'");
   }
 
+  function materializeSurfacePolicyProps(options) {
+    const opts = options || {};
+    const hostContext = Object.prototype.hasOwnProperty.call(opts, "hostContext") ? opts.hostContext : null;
+    const rendererId = typeof opts.rendererId === "string" ? opts.rendererId : "";
+    const props = opts.props;
+    if (!props || typeof props !== "object") {
+      throw new Error("runtime.surfaces.materializeSurfacePolicyProps: props object is required");
+    }
+
+    const routeState = {
+      route: {
+        rendererId: rendererId
+      },
+      props: props
+    };
+
+    return policy.resolveRouteStateWithPolicy(routeState, hostContext).props;
+  }
+
   runtime.surfaces = Object.freeze({
     policy: policy,
     canvasDom: canvasDom,
     html: html,
-    createController: createController
+    createController: createController,
+    materializeSurfacePolicyProps: materializeSurfacePolicyProps
   });
 }(this));

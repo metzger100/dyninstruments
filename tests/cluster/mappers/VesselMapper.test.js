@@ -1,5 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const { makeRouteContext } = require("../../helpers/mapper-route-context");
 
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
   caption_voltageLinear: "VOLT",
@@ -22,14 +22,86 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   unit_alarm: ""
 });
 
-function createAlarmMapper() {
-  const componentContext = createComponentContextMock({
-    modules: {
-      AlarmViewModel: loadFresh("cluster/viewmodels/AlarmViewModel.js")
-    }
+function routeContext(kind, activeToolkit, viewModel) {
+  return makeRouteContext({
+    routeId: "vessel:" + kind,
+    cluster: "vessel",
+    kind: kind,
+    toolkit: activeToolkit,
+    viewModel: viewModel
   });
+}
 
-  return loadFresh("cluster/mappers/VesselMapper.js").create({}, componentContext);
+function createMapper() {
+  return loadFresh("cluster/mappers/VesselMapper.js").create();
+}
+
+function createAlarmMapper() {
+  return createMapper();
+}
+
+function trimText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function toMaybeNumber(value) {
+  return typeof value === "undefined" || value === null || value === "" ? undefined : Number(value);
+}
+
+function makeAlarmViewModel() {
+  function priority(category) {
+    if (category === "critical") {
+      return 0;
+    }
+    if (category === "info") {
+      return 1;
+    }
+    return 2;
+  }
+
+  return {
+    build(props) {
+      const alarmInfo = props.alarmInfo || {};
+      const activeAlarms = Object.keys(alarmInfo)
+        .filter(function (name) {
+          return alarmInfo[name] && alarmInfo[name].running === true;
+        })
+        .map(function (name, index) {
+          const alarm = alarmInfo[name];
+          return {
+            name: name,
+            category: alarm.category,
+            repeat: alarm.repeat === true,
+            index: index
+          };
+        })
+        .sort(function (a, b) {
+          return priority(a.category) - priority(b.category) || a.index - b.index;
+        })
+        .map(function (alarm) {
+          return {
+            name: alarm.name,
+            category: alarm.category,
+            repeat: alarm.repeat
+          };
+        });
+      const alarmNames = activeAlarms.map(function (alarm) { return alarm.name; });
+      const activeCount = activeAlarms.length;
+
+      return {
+        activeAlarms: activeAlarms,
+        hasActiveAlarms: activeCount > 0,
+        activeCount: activeCount,
+        alarmNames: alarmNames,
+        alarmText: activeCount === 0
+          ? "NONE"
+          : activeCount > 2
+            ? alarmNames.slice(0, 2).join(", ") + " +" + (activeCount - 2)
+            : alarmNames.join(", "),
+        state: activeCount > 0 ? "active" : "idle"
+      };
+    }
+  };
 }
 
 describe("VesselMapper", function () {
@@ -50,7 +122,7 @@ describe("VesselMapper", function () {
       voltageLinearRatioThresholdFlat: "3.5",
       captionUnitScale: "0.8",
       voltageLinearHideTextualMetrics: "yes"
-    }, toolkit);
+    }, routeContext("voltageLinear", toolkit));
 
     expect(out.renderer).toBe("VoltageLinearWidget");
     expect(out.value).toBe(12.4);
@@ -68,7 +140,7 @@ describe("VesselMapper", function () {
       value: 12.4,
       voltageLinearWarningFrom: "12.2",
       voltageLinearAlarmFrom: "11.6"
-    }, toolkit);
+    }, routeContext("voltageLinear", toolkit));
 
     expect(out.rendererProps.voltageLinearWarningFrom).toBe(12.2);
     expect(out.rendererProps.voltageLinearAlarmFrom).toBe(11.6);
@@ -91,7 +163,7 @@ describe("VesselMapper", function () {
       voltageRadialRatioThresholdFlat: "3.5",
       captionUnitScale: "0.8",
       voltageRadialHideTextualMetrics: 0
-    }, toolkit);
+    }, routeContext("voltageRadial", toolkit));
 
     expect(out.renderer).toBe("VoltageRadialWidget");
     expect(out.value).toBe(12.4);
@@ -109,7 +181,7 @@ describe("VesselMapper", function () {
       value: 12.4,
       voltageRadialWarningFrom: "12.2",
       voltageRadialAlarmFrom: "11.6"
-    }, toolkit);
+    }, routeContext("voltageRadial", toolkit));
 
     expect(out.rendererProps.voltageRadialWarningFrom).toBe(12.2);
     expect(out.rendererProps.voltageRadialAlarmFrom).toBe(11.6);
@@ -120,7 +192,7 @@ describe("VesselMapper", function () {
     const out = mapper.translate({
       kind: "voltageRadial",
       voltage: 12.4
-    }, toolkit);
+    }, routeContext("voltageRadial", toolkit));
 
     expect(out.value).toBeUndefined();
   });
@@ -130,7 +202,7 @@ describe("VesselMapper", function () {
     const out = mapper.translate({
       kind: "voltageLinear",
       voltage: 12.4
-    }, toolkit);
+    }, routeContext("voltageLinear", toolkit));
 
     expect(out.value).toBeUndefined();
   });
@@ -139,8 +211,8 @@ describe("VesselMapper", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const rawClock = new Date("2026-02-22T14:30:00Z");
 
-    expect(mapper.translate({ kind: "voltage", value: 12.3 }, toolkit).formatter).toBe("formatDecimal");
-    const clockOut = mapper.translate({ kind: "clock", clock: rawClock }, toolkit);
+    expect(mapper.translate({ kind: "voltage", value: 12.3 }, routeContext("voltage", toolkit)).formatter).toBe("formatDecimal");
+    const clockOut = mapper.translate({ kind: "clock", clock: rawClock }, routeContext("clock", toolkit));
     expect(clockOut.formatter).toBe("formatTime");
     expect(clockOut.value).toBe(rawClock);
   });
@@ -148,7 +220,7 @@ describe("VesselMapper", function () {
   it("uses formatClock for clock when hideSeconds is enabled", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const rawClock = new Date("2026-02-22T14:30:00Z");
-    const clockOut = mapper.translate({ kind: "clock", clock: rawClock, hideSeconds: true }, toolkit);
+    const clockOut = mapper.translate({ kind: "clock", clock: rawClock, hideSeconds: true }, routeContext("clock", toolkit));
 
     expect(clockOut.formatter).toBe("formatClock");
     expect(clockOut.value).toBe(rawClock);
@@ -163,7 +235,7 @@ describe("VesselMapper", function () {
       dateTimeRatioThresholdNormal: "1.35",
       dateTimeRatioThresholdFlat: "4.55",
       default: "---"
-    }, toolkit);
+    }, routeContext("dateTime", toolkit));
     expect(out.renderer).toBe("PositionCoordinateWidget");
     expect(out.displayVariant).toBe("dateTime");
     expect(out.value).toEqual([rawClock, rawClock]);
@@ -177,7 +249,7 @@ describe("VesselMapper", function () {
   it("maps timeStatus to PositionCoordinateWidget with direct variant props", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
-    const out = mapper.translate({ kind: "timeStatus", clock: rawClock, gpsValid: true, default: "---" }, toolkit);
+    const out = mapper.translate({ kind: "timeStatus", clock: rawClock, gpsValid: true, default: "---" }, routeContext("timeStatus", toolkit));
     expect(out.renderer).toBe("PositionCoordinateWidget");
     expect(out.displayVariant).toBe("timeStatus");
     expect(out.value).toEqual([rawClock, true]);
@@ -195,7 +267,7 @@ describe("VesselMapper", function () {
       clock: rawClock,
       hideSeconds: true,
       default: "---"
-    }, toolkit);
+    }, routeContext("dateTime", toolkit));
     expect(dateTimeOut.hideSeconds).toBe(true);
 
     const timeStatusOut = mapper.translate({
@@ -204,19 +276,19 @@ describe("VesselMapper", function () {
       gpsValid: true,
       hideSeconds: true,
       default: "---"
-    }, toolkit);
+    }, routeContext("timeStatus", toolkit));
     expect(timeStatusOut.hideSeconds).toBe(true);
   });
 
   it("maps pitch and roll to formatDirection in signed-degree mode with radian input", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
 
-    const pitchOut = mapper.translate({ kind: "pitch", pitch: 45, default: "---" }, toolkit);
+    const pitchOut = mapper.translate({ kind: "pitch", pitch: 45, default: "---" }, routeContext("pitch", toolkit));
     expect(pitchOut.value).toBe(45);
     expect(pitchOut.formatter).toBe("formatDirection");
     expect(pitchOut.formatterParameters).toEqual([true, true, false]);
 
-    const rollOut = mapper.translate({ kind: "roll", roll: -90, default: "---" }, toolkit);
+    const rollOut = mapper.translate({ kind: "roll", roll: -90, default: "---" }, routeContext("roll", toolkit));
     expect(rollOut.value).toBe(-90);
     expect(rollOut.formatter).toBe("formatDirection");
     expect(rollOut.formatterParameters).toEqual([true, true, false]);
@@ -225,31 +297,31 @@ describe("VesselMapper", function () {
   it("normalizes missing attitude payloads while preserving explicit zero", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
 
-    const pitchNull = mapper.translate({ kind: "pitch", pitch: null, default: "---" }, toolkit);
+    const pitchNull = mapper.translate({ kind: "pitch", pitch: null, default: "---" }, routeContext("pitch", toolkit));
     expect(Object.prototype.hasOwnProperty.call(pitchNull, "value")).toBe(true);
     expect(pitchNull.value).toBeUndefined();
     expect(pitchNull.formatterParameters).toEqual([true, true, false]);
 
-    const rollNull = mapper.translate({ kind: "roll", roll: null, default: "---" }, toolkit);
+    const rollNull = mapper.translate({ kind: "roll", roll: null, default: "---" }, routeContext("roll", toolkit));
     expect(Object.prototype.hasOwnProperty.call(rollNull, "value")).toBe(true);
     expect(rollNull.value).toBeUndefined();
     expect(rollNull.formatterParameters).toEqual([true, true, false]);
 
-    const pitchBlank = mapper.translate({ kind: "pitch", pitch: "   ", default: "---" }, toolkit);
+    const pitchBlank = mapper.translate({ kind: "pitch", pitch: "   ", default: "---" }, routeContext("pitch", toolkit));
     expect(Object.prototype.hasOwnProperty.call(pitchBlank, "value")).toBe(true);
     expect(pitchBlank.value).toBeUndefined();
     expect(pitchBlank.formatterParameters).toEqual([true, true, false]);
 
-    const rollBlank = mapper.translate({ kind: "roll", roll: "", default: "---" }, toolkit);
+    const rollBlank = mapper.translate({ kind: "roll", roll: "", default: "---" }, routeContext("roll", toolkit));
     expect(Object.prototype.hasOwnProperty.call(rollBlank, "value")).toBe(true);
     expect(rollBlank.value).toBeUndefined();
     expect(rollBlank.formatterParameters).toEqual([true, true, false]);
 
-    const pitchZero = mapper.translate({ kind: "pitch", pitch: 0, default: "---" }, toolkit);
+    const pitchZero = mapper.translate({ kind: "pitch", pitch: 0, default: "---" }, routeContext("pitch", toolkit));
     expect(pitchZero.value).toBe(0);
     expect(pitchZero.formatterParameters).toEqual([true, true, false]);
 
-    const rollZero = mapper.translate({ kind: "roll", roll: 0, default: "---" }, toolkit);
+    const rollZero = mapper.translate({ kind: "roll", roll: 0, default: "---" }, routeContext("roll", toolkit));
     expect(rollZero.value).toBe(0);
     expect(rollZero.formatterParameters).toEqual([true, true, false]);
   });
@@ -271,10 +343,10 @@ describe("VesselMapper", function () {
         voltageRadialMaxValue: "15",
         voltageRadialTickMajor: "1",
         voltageRadialTickMinor: "0.2"
-      }, toolkitWithoutNum);
+      }, routeContext("voltageRadial", toolkitWithoutNum));
     }).toThrow(/num is not a function/);
 
-    expect(mapper.translate({ kind: "unknownKind" }, toolkitWithoutNum)).toEqual({});
+    expect(mapper.translate({ kind: "unknownKind" }, routeContext("unknownKind", toolkitWithoutNum))).toEqual({});
   });
 
   it("uses toolkit.num directly when it is available", function () {
@@ -296,7 +368,7 @@ describe("VesselMapper", function () {
       voltageRadialMaxValue: "15",
       voltageRadialTickMajor: "1",
       voltageRadialTickMinor: "0.2"
-    }, toolkitWithNum);
+    }, routeContext("voltageRadial", toolkitWithNum));
 
     expect(out.rendererProps.voltageRadialMinValue).toBe(7);
     expect(out.rendererProps.voltageRadialMaxValue).toBe(15);
@@ -327,7 +399,7 @@ describe("VesselMapper", function () {
       },
       alarmRatioThresholdNormal: "1.25",
       alarmRatioThresholdFlat: "3.75"
-    }, toolkit);
+    }, routeContext("alarm", toolkit, makeAlarmViewModel()));
 
     expect(out).toEqual({
       renderer: "AlarmTextHtmlWidget",
@@ -359,7 +431,7 @@ describe("VesselMapper", function () {
         laterCritical: { running: true, category: "critical", repeat: true },
         laterInfo: { running: true, category: "info", repeat: false }
       }
-    }, toolkit);
+    }, routeContext("alarm", toolkit, makeAlarmViewModel()));
 
     expect(out.domain).toEqual({
       activeAlarms: [
@@ -380,7 +452,7 @@ describe("VesselMapper", function () {
     const out = mapper.translate({
       kind: "alarm",
       alarmInfo: null
-    }, toolkit);
+    }, routeContext("alarm", toolkit, makeAlarmViewModel()));
 
     expect(out.caption).toBe("ALARM");
     expect(out.unit).toBe("");

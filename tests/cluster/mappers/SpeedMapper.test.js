@@ -1,5 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
+const { makeRouteContext } = require("../../helpers/mapper-route-context");
 
 function makeToolkit(overrides, bindingOverrides) {
   installUnitFormatFamilies(bindingOverrides);
@@ -37,6 +38,15 @@ function makeToolkit(overrides, bindingOverrides) {
   }, overrides || {}));
 }
 
+function routeContext(kind, activeToolkit) {
+  return makeRouteContext({
+    routeId: "speed:" + kind,
+    cluster: "speed",
+    kind: kind,
+    toolkit: activeToolkit
+  });
+}
+
 describe("SpeedMapper", function () {
   it("maps radial kinds to SpeedRadialWidget and keeps toggles enabled by default", function () {
     const mapper = loadFresh("cluster/mappers/SpeedMapper.js").create();
@@ -55,7 +65,7 @@ describe("SpeedMapper", function () {
       speedRadialRatioThresholdNormal: "1.1",
       speedRadialRatioThresholdFlat: "3.5",
       speedRadialHideTextualMetrics: 1
-    }, makeToolkit());
+    }, routeContext("sogRadial", makeToolkit()));
 
     expect(out.renderer).toBe("SpeedRadialWidget");
     expect(out.value).toBe(6.4);
@@ -77,7 +87,7 @@ describe("SpeedMapper", function () {
       speedRadialAlarmEnabled: false,
       speedRadialWarningFrom: "20",
       speedRadialAlarmFrom: "25"
-    }, makeToolkit());
+    }, routeContext("sogRadial", makeToolkit()));
 
     expect(out.rendererProps.speedRadialWarningFrom).toBeUndefined();
     expect(out.rendererProps.speedRadialAlarmFrom).toBeUndefined();
@@ -85,7 +95,7 @@ describe("SpeedMapper", function () {
 
   it("maps numeric kinds to formatSpeed", function () {
     const mapper = loadFresh("cluster/mappers/SpeedMapper.js").create();
-    const out = mapper.translate({ kind: "sog", sog: 5.3 }, makeToolkit());
+    const out = mapper.translate({ kind: "sog", sog: 5.3 }, routeContext("sog", makeToolkit()));
 
     expect(out).toEqual({
       value: 5.3,
@@ -111,7 +121,7 @@ describe("SpeedMapper", function () {
       speedLinearWarningFrom: "20",
       speedLinearAlarmFrom: "25",
       speedLinearHideTextualMetrics: 0
-    }, makeToolkit());
+    }, routeContext("sogLinear", makeToolkit()));
 
     expect(out.renderer).toBe("SpeedLinearWidget");
     expect(out.value).toBe(7.1);
@@ -138,7 +148,7 @@ describe("SpeedMapper", function () {
       speedLinearShowEndLabels: false,
       speedLinearWarningFrom: "20",
       speedLinearAlarmFrom: "25"
-    }, makeToolkit());
+    }, routeContext("stwLinear", makeToolkit()));
 
     expect(out.renderer).toBe("SpeedLinearWidget");
     expect(out.value).toBe(6.8);
@@ -180,7 +190,7 @@ describe("SpeedMapper", function () {
       stwRadial: { defaultToken: "kmh" }
     });
 
-    expect(mapper.translate({ kind: "sog", sog: 5.3 }, customToolkit)).toEqual({
+    expect(mapper.translate({ kind: "sog", sog: 5.3 }, routeContext("sog", customToolkit))).toEqual({
       value: 5.3,
       caption: "SOG",
       unit: "m/s custom",
@@ -188,7 +198,7 @@ describe("SpeedMapper", function () {
       formatterParameters: ["ms"]
     });
 
-    expect(mapper.translate({ kind: "stw", stw: 6.2 }, customToolkit)).toEqual({
+    expect(mapper.translate({ kind: "stw", stw: 6.2 }, routeContext("stw", customToolkit))).toEqual({
       value: 6.2,
       caption: "STW",
       unit: "km/h custom",
@@ -201,7 +211,7 @@ describe("SpeedMapper", function () {
       sog: 7.1,
       speedLinearRatioThresholdNormal: "1.1",
       speedLinearRatioThresholdFlat: "3.5"
-    }, customToolkit);
+    }, routeContext("sogLinear", customToolkit));
     expect(linear.unit).toBe("m/s linear");
     expect(linear.formatterParameters).toEqual(["ms"]);
     expect(linear.rendererProps.speedLinearMaxValue).toBe(15);
@@ -215,7 +225,7 @@ describe("SpeedMapper", function () {
       stw: 6.4,
       speedRadialRatioThresholdNormal: "1.1",
       speedRadialRatioThresholdFlat: "3.5"
-    }, customToolkit);
+    }, routeContext("stwRadial", customToolkit));
     expect(radial.unit).toBe("km/h radial");
     expect(radial.formatterParameters).toEqual(["kmh"]);
     expect(radial.rendererProps.speedRadialMaxValue).toBe(60);
@@ -227,6 +237,6 @@ describe("SpeedMapper", function () {
 
   it("rejects legacy graphic kind names", function () {
     const mapper = loadFresh("cluster/mappers/SpeedMapper.js").create();
-    expect(mapper.translate({ kind: "sogGraphic", sog: 5.3 }, makeToolkit())).toEqual({});
+    expect(mapper.translate({ kind: "sogGraphic", sog: 5.3 }, routeContext("sogGraphic", makeToolkit()))).toEqual({});
   });
 });

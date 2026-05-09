@@ -1,6 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const { makeRouteContext } = require("../../helpers/mapper-route-context");
 
 function makeToolkit(overrides, bindingOverrides) {
   installUnitFormatFamilies(bindingOverrides);
@@ -47,33 +47,136 @@ function makeToolkit(overrides, bindingOverrides) {
 const toolkit = makeToolkit();
 
 function createMapper() {
-  const componentContext = createComponentContextMock({
-    modules: {
-      ActiveRouteViewModel: loadFresh("cluster/viewmodels/ActiveRouteViewModel.js"),
-      EditRouteViewModel: loadFresh("cluster/viewmodels/EditRouteViewModel.js"),
-      RoutePointsViewModel: loadFresh("cluster/viewmodels/RoutePointsViewModel.js"),
-      CenterDisplayMath: loadFresh("shared/widget-kits/nav/CenterDisplayMath.js")
-    }
+  return loadFresh("cluster/mappers/NavMapper.js").create();
+}
+
+function routeContext(kind, activeToolkit, viewModel) {
+  return makeRouteContext({
+    routeId: "nav:" + kind,
+    cluster: "nav",
+    kind: kind,
+    toolkit: activeToolkit,
+    viewModel: viewModel
   });
-  return loadFresh("cluster/mappers/NavMapper.js").create({}, componentContext);
+}
+
+function trimText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function toMaybeNumber(value) {
+  if (typeof value === "undefined" || value === null || value === "") {
+    return undefined;
+  }
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : undefined;
+}
+
+function makeActiveRouteViewModel() {
+  return {
+    build(props) {
+      return {
+        display: {
+          remain: toMaybeNumber(props.activeRouteRemain),
+          eta: props.activeRouteEta,
+          nextCourse: toMaybeNumber(props.activeRouteNextCourse),
+          isApproaching: props.activeRouteApproaching === true
+        },
+        routeName: trimText(props.activeRouteName),
+        captions: {
+          remain: "RTE CAP",
+          eta: "ETA CAP",
+          nextCourse: "NEXT CAP"
+        },
+        units: {
+          remain: "nmA",
+          eta: "",
+          nextCourse: "degN"
+        },
+        formatUnits: {
+          remain: "nm"
+        },
+        hideSeconds: props.hideSeconds === true
+      };
+    }
+  };
+}
+
+function makeRoutePointsViewModel() {
+  return {
+    build(props) {
+      const editingRoute = props.editingRoute;
+      const routeName = editingRoute ? trimText(editingRoute.name) : "";
+      const points = editingRoute && Array.isArray(editingRoute.points)
+        ? editingRoute.points.map(function (point, index) {
+          return {
+            name: trimText(point.name) || String(index),
+            lat: toMaybeNumber(point.lat),
+            lon: toMaybeNumber(point.lon)
+          };
+        })
+        : [];
+
+      return {
+        route: editingRoute ? {
+          name: routeName,
+          points: points,
+          sourceRoute: editingRoute
+        } : null,
+        selectedIndex: typeof props.editingIndex === "undefined" ? undefined : Number(props.editingIndex),
+        isActiveRoute: trimText(props.activeName) === routeName,
+        showLatLon: props.routeShowLL === true,
+        useRhumbLine: props.useRhumbLine === true
+      };
+    }
+  };
+}
+
+function makeEditRouteViewModel() {
+  return {
+    build(props) {
+      const editingRoute = props.editingRoute;
+      const routeName = editingRoute ? trimText(editingRoute.name).replace(/^local@/, "") : "";
+      const pointCount = editingRoute && Array.isArray(editingRoute.points) ? editingRoute.points.length : 0;
+      const isLocalRoute = !!(editingRoute && /^local@/.test(editingRoute.name));
+      const isServerRoute = !!(editingRoute && /^server@/.test(editingRoute.name));
+
+      return {
+        hasRoute: !!editingRoute,
+        route: editingRoute ? {
+          displayName: routeName,
+          pointCount: pointCount,
+          totalDistance: editingRoute && typeof editingRoute.computeLength === "function" ? editingRoute.computeLength() : undefined,
+          isLocalRoute: isLocalRoute,
+          isServerRoute: isServerRoute
+        } : null,
+        remainingDistance: toMaybeNumber(props.rteDistance),
+        eta: props.rteEta,
+        hideSeconds: props.hideSeconds === true,
+        isActiveRoute: !!editingRoute && trimText(props.activeName) === trimText(editingRoute.name),
+        isLocalRoute: isLocalRoute,
+        isServerRoute: isServerRoute
+      };
+    }
+  };
 }
 
 describe("NavMapper", function () {
   it("maps ETA kinds with formatTime", function () {
     const mapper = createMapper();
-    expect(mapper.translate({ kind: "eta", eta: 1700000000 }, toolkit).formatter).toBe("formatTime");
-    expect(mapper.translate({ kind: "rteEta", rteEta: 1700000100 }, toolkit).formatter).toBe("formatTime");
+    expect(mapper.translate({ kind: "eta", eta: 1700000000 }, routeContext("eta", toolkit)).formatter).toBe("formatTime");
+    expect(mapper.translate({ kind: "rteEta", rteEta: 1700000100 }, routeContext("rteEta", toolkit)).formatter).toBe("formatTime");
   });
 
   it("maps ETA kinds with formatClock when hideSeconds is enabled", function () {
     const mapper = createMapper();
-    expect(mapper.translate({ kind: "eta", eta: 1700000000, hideSeconds: true }, toolkit).formatter).toBe("formatClock");
-    expect(mapper.translate({ kind: "rteEta", rteEta: 1700000100, hideSeconds: true }, toolkit).formatter).toBe("formatClock");
+    expect(mapper.translate({ kind: "eta", eta: 1700000000, hideSeconds: true }, routeContext("eta", toolkit)).formatter).toBe("formatClock");
+    expect(mapper.translate({ kind: "rteEta", rteEta: 1700000100, hideSeconds: true }, routeContext("rteEta", toolkit)).formatter).toBe("formatClock");
   });
 
   it("maps distance kinds with formatDistance", function () {
     const mapper = createMapper();
-    const out = mapper.translate({ kind: "rteDistance", rteDistance: 12.3 }, toolkit);
+    const out = mapper.translate({ kind: "rteDistance", rteDistance: 12.3 }, routeContext("rteDistance", toolkit));
 
     expect(out).toEqual({
       value: 12.3,
@@ -102,7 +205,7 @@ describe("NavMapper", function () {
       vmg: { defaultToken: "ms" }
     });
 
-    expect(mapper.translate({ kind: "dst", dst: 3.4 }, customToolkit)).toEqual({
+    expect(mapper.translate({ kind: "dst", dst: 3.4 }, routeContext("dst", customToolkit))).toEqual({
       value: 3.4,
       caption: "DST",
       unit: "kilometers custom",
@@ -110,7 +213,7 @@ describe("NavMapper", function () {
       formatterParameters: ["km"]
     });
 
-    expect(mapper.translate({ kind: "rteDistance", rteDistance: 12.3 }, customToolkit)).toEqual({
+    expect(mapper.translate({ kind: "rteDistance", rteDistance: 12.3 }, routeContext("rteDistance", customToolkit))).toEqual({
       value: 12.3,
       caption: "RTE",
       unit: "feet custom",
@@ -118,7 +221,7 @@ describe("NavMapper", function () {
       formatterParameters: ["ft"]
     });
 
-    expect(mapper.translate({ kind: "vmg", vmg: 4.2 }, customToolkit)).toEqual({
+    expect(mapper.translate({ kind: "vmg", vmg: 4.2 }, routeContext("vmg", customToolkit))).toEqual({
       value: 4.2,
       caption: "VMG",
       unit: "m/s custom",
@@ -129,7 +232,7 @@ describe("NavMapper", function () {
 
   it("maps VMG using speed formatter and unit parameter", function () {
     const mapper = createMapper();
-    const out = mapper.translate({ kind: "vmg", vmg: 4.2 }, toolkit);
+    const out = mapper.translate({ kind: "vmg", vmg: 4.2 }, routeContext("vmg", toolkit));
 
     expect(out).toEqual({
       value: 4.2,
@@ -143,6 +246,7 @@ describe("NavMapper", function () {
   it("maps activeRoute to ActiveRouteTextHtmlWidget with renderer-owned field props", function () {
     const mapper = createMapper();
     const rawEta = new Date("2026-03-06T11:45:00Z");
+    const activeRouteViewModel = makeActiveRouteViewModel();
     const out = mapper.translate({
       kind: "activeRoute",
       activeRouteName: "  Harbor Run  ",
@@ -155,7 +259,7 @@ describe("NavMapper", function () {
       wpServer: true,
       disconnect: true,
       hideSeconds: true
-    }, toolkit);
+    }, routeContext("activeRoute", toolkit, activeRouteViewModel));
 
     expect(out).toEqual({
       renderer: "ActiveRouteTextHtmlWidget",
@@ -189,6 +293,7 @@ describe("NavMapper", function () {
 
   it("keeps next-course props available even when approach state is false", function () {
     const mapper = createMapper();
+    const activeRouteViewModel = makeActiveRouteViewModel();
     const out = mapper.translate({
       kind: "activeRoute",
       activeRouteName: "Harbor Run",
@@ -196,7 +301,7 @@ describe("NavMapper", function () {
       activeRouteEta: new Date("2026-03-06T11:45:00Z"),
       activeRouteNextCourse: 91,
       activeRouteApproaching: false
-    }, toolkit);
+    }, routeContext("activeRoute", toolkit, activeRouteViewModel));
 
     expect(out.renderer).toBe("ActiveRouteTextHtmlWidget");
     expect(out.display.isApproaching).toBe(false);
@@ -207,12 +312,13 @@ describe("NavMapper", function () {
 
   it("maps activeRoute disconnect from raw connectionLost signal only", function () {
     const mapper = createMapper();
+    const activeRouteViewModel = makeActiveRouteViewModel();
 
     const wpServerDown = mapper.translate({
       kind: "activeRoute",
       activeRouteName: "Harbor Run",
       wpServer: false
-    }, toolkit);
+    }, routeContext("activeRoute", toolkit, activeRouteViewModel));
     expect(wpServerDown.wpServer).toBe(false);
     expect(wpServerDown.display.disconnect).toBe(false);
 
@@ -220,7 +326,7 @@ describe("NavMapper", function () {
       kind: "activeRoute",
       activeRouteName: "   ",
       wpServer: true
-    }, toolkit);
+    }, routeContext("activeRoute", toolkit, activeRouteViewModel));
     expect(emptyName.display.disconnect).toBe(false);
 
     const disconnected = mapper.translate({
@@ -228,13 +334,13 @@ describe("NavMapper", function () {
       activeRouteName: "Harbor Run",
       wpServer: true,
       disconnect: true
-    }, toolkit);
+    }, routeContext("activeRoute", toolkit, activeRouteViewModel));
     expect(disconnected.display.disconnect).toBe(true);
   });
 
   it("maps positions with lon/lat formatter", function () {
     const mapper = createMapper();
-    const out = mapper.translate({ kind: "positionBoat", positionBoat: [1, 2] }, toolkit);
+    const out = mapper.translate({ kind: "positionBoat", positionBoat: [1, 2] }, routeContext("positionBoat", toolkit));
 
     expect(out.formatter).toBe("formatLonLats");
     expect(out.value).toEqual([1, 2]);
@@ -242,7 +348,7 @@ describe("NavMapper", function () {
     expect(out.coordinateFormatter).toBe("formatLonLatsDecimal");
     expect(out.coordinateFormatterParameters).toEqual([]);
 
-    const wp = mapper.translate({ kind: "positionWp", positionWp: { lon: 3, lat: 4 } }, toolkit);
+    const wp = mapper.translate({ kind: "positionWp", positionWp: { lon: 3, lat: 4 } }, routeContext("positionWp", toolkit));
     expect(wp.formatter).toBe("formatLonLats");
     expect(wp.renderer).toBe("PositionCoordinateWidget");
     expect(wp.coordinateFormatter).toBe("formatLonLatsDecimal");
@@ -264,7 +370,7 @@ describe("NavMapper", function () {
       xteHideTextualMetrics: true,
       xteRatioThresholdNormal: "0.8",
       xteRatioThresholdFlat: "2.4"
-    }, toolkit);
+    }, routeContext("xteDisplay", toolkit));
 
     expect(out.renderer).toBe("XteDisplayWidget");
     expect(out.display).toEqual({
@@ -305,13 +411,14 @@ describe("NavMapper", function () {
 
   it("defaults xteDisplay waypoint-name toggle to false when setting is absent", function () {
     const mapper = createMapper();
-    const out = mapper.translate({ kind: "xteDisplay", xte: 0.2, cog: 90, dtw: 1.1, btw: 95 }, toolkit);
+    const out = mapper.translate({ kind: "xteDisplay", xte: 0.2, cog: 90, dtw: 1.1, btw: 95 }, routeContext("xteDisplay", toolkit));
     expect(out.layout.showWpName).toBe(false);
     expect(out.layout.hideTextualMetrics).toBe(false);
   });
 
   it("maps routePoints to grouped renderer payload", function () {
     const mapper = createMapper();
+    const routePointsViewModel = makeRoutePointsViewModel();
     const editingRoute = {
       name: "  Harbor Run  ",
       points: [
@@ -331,7 +438,7 @@ describe("NavMapper", function () {
       showHeader: true,
       courseUnit: "°",
       waypointsText: "wps"
-    }, toolkit);
+    }, routeContext("routePoints", toolkit, routePointsViewModel));
 
     expect(out).toEqual({
       renderer: "RoutePointsTextHtmlWidget",
@@ -371,13 +478,14 @@ describe("NavMapper", function () {
 
   it("maps routePoints with null route when editingRoute is missing", function () {
     const mapper = createMapper();
+    const routePointsViewModel = makeRoutePointsViewModel();
     const out = mapper.translate({
       kind: "routePoints",
       editingRoute: null,
       showHeader: false,
       courseUnit: "deg",
       waypointsText: "points"
-    }, toolkit);
+    }, routeContext("routePoints", toolkit, routePointsViewModel));
 
     expect(out.domain.route).toBeNull();
     expect(out.domain.routeName).toBe("");
@@ -397,6 +505,7 @@ describe("NavMapper", function () {
 
   it("maps routePoints with empty points as a valid empty route payload", function () {
     const mapper = createMapper();
+    const routePointsViewModel = makeRoutePointsViewModel();
     const editingRoute = { name: "Empty", points: [] };
     const out = mapper.translate({
       kind: "routePoints",
@@ -404,7 +513,7 @@ describe("NavMapper", function () {
       showHeader: true,
       courseUnit: "°",
       waypointsText: "waypoints"
-    }, toolkit);
+    }, routeContext("routePoints", toolkit, routePointsViewModel));
 
     expect(out.domain.route).toEqual({
       name: "Empty",
@@ -417,6 +526,7 @@ describe("NavMapper", function () {
   it("maps editRoute to grouped renderer payload", function () {
     const mapper = createMapper();
     const eta = new Date("2026-03-06T11:45:00Z");
+    const editRouteViewModel = makeEditRouteViewModel();
     const editingRoute = {
       name: "local@Harbor Run",
       points: [
@@ -436,7 +546,7 @@ describe("NavMapper", function () {
       hideSeconds: true,
       editRouteRatioThresholdNormal: "1.23",
       editRouteRatioThresholdFlat: "3.95"
-    }, toolkit);
+    }, routeContext("editRoute", toolkit, editRouteViewModel));
 
     expect(out).toEqual({
       renderer: "EditRouteTextHtmlWidget",
@@ -492,10 +602,11 @@ describe("NavMapper", function () {
       xteDisplayDst: { defaultToken: "nm" },
       routePointsDistance: { defaultToken: "nm" }
     });
+    const editRouteViewModel = makeEditRouteViewModel();
     const out = mapper.translate({
       kind: "editRoute",
       editingRoute: { name: "Harbor Run", points: [] }
-    }, defaultToolkit);
+    }, routeContext("editRoute", defaultToolkit, editRouteViewModel));
 
     expect(out.captions.rte).toBe("RTE");
     expect(out.captions.rte).not.toBe("RTG");
@@ -503,12 +614,13 @@ describe("NavMapper", function () {
 
   it("maps editRoute safely when editingRoute is missing", function () {
     const mapper = createMapper();
+    const editRouteViewModel = makeEditRouteViewModel();
     const out = mapper.translate({
       kind: "editRoute",
       editingRoute: null,
       editRouteRatioThresholdNormal: "1.2",
       editRouteRatioThresholdFlat: "3.8"
-    }, toolkit);
+    }, routeContext("editRoute", toolkit, editRouteViewModel));
 
     expect(out).toEqual({
       renderer: "EditRouteTextHtmlWidget",

@@ -64,6 +64,11 @@
       css: undefined,
       globalKey: "DyniClusterMapperRegistry",
       deps: [
+        "ActiveRouteViewModel",
+        "EditRouteViewModel",
+        "RoutePointsViewModel",
+        "AisTargetViewModel",
+        "AlarmViewModel",
         "CourseHeadingMapper",
         "SpeedMapper",
         "EnvironmentMapper",
@@ -119,14 +124,12 @@
     NavMapper: {
       js: BASE + "cluster/mappers/NavMapper.js",
       css: undefined,
-      globalKey: "DyniNavMapper",
-      deps: ["ActiveRouteViewModel", "EditRouteViewModel", "RoutePointsViewModel"]
+      globalKey: "DyniNavMapper"
     },
     MapMapper: {
       js: BASE + "cluster/mappers/MapMapper.js",
       css: undefined,
-      globalKey: "DyniMapMapper",
-      deps: ["AisTargetViewModel"]
+      globalKey: "DyniMapMapper"
     },
     SpeedMapper: {
       js: BASE + "cluster/mappers/SpeedMapper.js",
@@ -136,8 +139,7 @@
     VesselMapper: {
       js: BASE + "cluster/mappers/VesselMapper.js",
       css: undefined,
-      globalKey: "DyniVesselMapper",
-      deps: ["AlarmViewModel"]
+      globalKey: "DyniVesselMapper"
     },
     EnvironmentMapper: {
       js: BASE + "cluster/mappers/EnvironmentMapper.js",

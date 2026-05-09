@@ -71,6 +71,9 @@
     "runtime/surface/HtmlSurfaceController.js",
     "runtime/surface/index.js",
     "runtime/cluster/ClusterShellRenderer.js",
+    "runtime/cluster/RouteActivationPayloadBuilder.js",
+    "runtime/cluster/RouteActivationLatestWins.js",
+    "runtime/cluster/RouteActivationController.js",
     "runtime/init.js"
   ];
 }(this));

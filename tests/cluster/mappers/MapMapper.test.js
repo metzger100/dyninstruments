@@ -1,6 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const { makeRouteContext } = require("../../helpers/mapper-route-context");
 
 function makeToolkit(overrides, bindingOverrides) {
   installUnitFormatFamilies(bindingOverrides);
@@ -33,17 +33,66 @@ function makeToolkit(overrides, bindingOverrides) {
 
 const toolkit = makeToolkit();
 
+function routeContext(kind, activeToolkit, viewModel) {
+  return makeRouteContext({
+    routeId: "map:" + kind,
+    cluster: "map",
+    kind: kind,
+    toolkit: activeToolkit,
+    viewModel: viewModel
+  });
+}
+
+function createMapper() {
+  return loadFresh("cluster/mappers/MapMapper.js").create();
+}
+
+function trimText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function toMaybeNumber(value) {
+  return typeof value === "undefined" || value === null || value === "" ? undefined : Number(value);
+}
+
+function makeAisTargetViewModel() {
+  return {
+    build(props) {
+      const target = props.target || {};
+      const mmsiRaw = target.mmsi;
+      const mmsiNormalized = typeof mmsiRaw === "undefined" || mmsiRaw === null ? "" : String(mmsiRaw);
+      const trackedMmsiRaw = props.trackedMmsi;
+      const trackedMmsiNormalized = typeof trackedMmsiRaw === "undefined" || trackedMmsiRaw === null ? "" : String(trackedMmsiRaw);
+      const hasTargetIdentity = mmsiNormalized !== "";
+      const warning = target.warning === true;
+
+      return {
+        mmsiRaw: mmsiRaw,
+        mmsiNormalized: mmsiNormalized,
+        trackedMmsiRaw: trackedMmsiRaw,
+        hasTargetIdentity: hasTargetIdentity,
+        hasDispatchMmsi: hasTargetIdentity,
+        hasColorMmsi: hasTargetIdentity,
+        distance: toMaybeNumber(target.distance),
+        cpa: toMaybeNumber(target.cpa),
+        tcpa: toMaybeNumber(target.tcpa),
+        headingTo: toMaybeNumber(target.headingTo),
+        nameOrMmsi: trimText(target.name) || mmsiNormalized,
+        frontText: "Front",
+        frontInitial: "F",
+        showTcpaBranch: typeof target.tcpa !== "undefined",
+        warning: warning,
+        nextWarning: target.nextWarning === true,
+        nearest: target.nearest === true,
+        trackedMatch: false,
+        colorRole: warning ? "warning" : undefined,
+        hasColorRole: warning
+      };
+    }
+  };
+}
+
 describe("MapMapper", function () {
-  function createMapper() {
-    const componentContext = createComponentContextMock({
-      modules: {
-        AisTargetViewModel: loadFresh("cluster/viewmodels/AisTargetViewModel.js")
-      }
-    });
-
-    return loadFresh("cluster/mappers/MapMapper.js").create({}, componentContext);
-  }
-
   it("maps centerDisplay to CenterDisplayTextWidget with renderer-owned fields", function () {
     const mapper = createMapper();
     const activeMeasure = { getPointAtIndex: vi.fn(() => ({ lat: 54.1, lon: 10.2 })) };
@@ -58,7 +107,7 @@ describe("MapMapper", function () {
       measureRhumbLine: true,
       centerDisplayRatioThresholdNormal: "1.1",
       centerDisplayRatioThresholdFlat: "2.4"
-    }, toolkit);
+    }, routeContext("centerDisplay", toolkit));
 
     expect(out).toEqual({
       renderer: "CenterDisplayTextWidget",
@@ -113,7 +162,7 @@ describe("MapMapper", function () {
     expect(mapper.translate({
       kind: "centerDisplay",
       centerPosition: { lat: 54.2, lon: 10.3 }
-    }, customToolkit)).toEqual({
+    }, routeContext("centerDisplay", customToolkit))).toEqual({
       renderer: "CenterDisplayTextWidget",
       display: {
         position: { lat: 54.2, lon: 10.3 },
@@ -145,7 +194,7 @@ describe("MapMapper", function () {
       kind: "aisTarget",
       target: {},
       default: "---"
-    }, customToolkit);
+    }, routeContext("aisTarget", customToolkit, makeAisTargetViewModel()));
     expect(aisTarget.units.dst).toBe("meter dst");
     expect(aisTarget.units.cpa).toBe("meter cpa");
     expect(aisTarget.formatUnits).toEqual({
@@ -160,7 +209,7 @@ describe("MapMapper", function () {
       kind: "zoom",
       zoom: "12.3",
       requiredZoom: "11.5"
-    }, toolkit);
+    }, routeContext("zoom", toolkit));
 
     expect(out).toEqual({
       renderer: "MapZoomTextHtmlWidget",
@@ -193,7 +242,7 @@ describe("MapMapper", function () {
       aisTargetRatioThresholdNormal: "1.2",
       aisTargetRatioThresholdFlat: "3.8",
       default: "---"
-    }, toolkit);
+    }, routeContext("aisTarget", toolkit, makeAisTargetViewModel()));
 
     expect(out).toEqual({
       renderer: "AisTargetTextHtmlWidget",
@@ -249,7 +298,7 @@ describe("MapMapper", function () {
       kind: "aisTarget",
       target: {},
       aisTargetRatioThresholdNormal: "bad"
-    }, toolkit);
+    }, routeContext("aisTarget", toolkit, makeAisTargetViewModel()));
 
     expect(out.layout).toEqual({
       ratioThresholdNormal: undefined,
@@ -275,12 +324,12 @@ describe("MapMapper", function () {
 
   it("keeps centerDisplay measure toggle false unless explicitly enabled", function () {
     const mapper = createMapper();
-    const out = mapper.translate({ kind: "centerDisplay" }, toolkit);
+    const out = mapper.translate({ kind: "centerDisplay" }, routeContext("centerDisplay", toolkit));
     expect(out.display.measure.useRhumbLine).toBe(false);
   });
 
   it("returns empty object for unknown kinds", function () {
     const mapper = createMapper();
-    expect(mapper.translate({ kind: "x" }, toolkit)).toEqual({});
+    expect(mapper.translate({ kind: "x" }, routeContext("x", toolkit))).toEqual({});
   });
 });

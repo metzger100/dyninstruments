@@ -1,5 +1,6 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
+const { makeRouteContext } = require("../../helpers/mapper-route-context");
 
 function makeToolkit(overrides, bindingOverrides) {
   installUnitFormatFamilies(bindingOverrides);
@@ -13,11 +14,20 @@ function makeToolkit(overrides, bindingOverrides) {
 
 const toolkit = makeToolkit();
 
+function routeContext(kind, activeToolkit) {
+  return makeRouteContext({
+    routeId: "anchor:" + kind,
+    cluster: "anchor",
+    kind: kind,
+    toolkit: activeToolkit
+  });
+}
+
 describe("AnchorMapper", function () {
   it("maps distance/watch to formatDistance with per-kind units", function () {
     const mapper = loadFresh("cluster/mappers/AnchorMapper.js").create();
 
-    expect(mapper.translate({ kind: "anchorDistance", distance: 10 }, toolkit)).toEqual({
+    expect(mapper.translate({ kind: "anchorDistance", distance: 10 }, routeContext("anchorDistance", toolkit))).toEqual({
       value: 10,
       caption: "ANCHOR",
       unit: "m",
@@ -25,7 +35,7 @@ describe("AnchorMapper", function () {
       formatterParameters: ["m"]
     });
 
-    expect(mapper.translate({ kind: "anchorWatch", watch: 20 }, toolkit).formatterParameters).toEqual(["m"]);
+    expect(mapper.translate({ kind: "anchorWatch", watch: 20 }, routeContext("anchorWatch", toolkit)).formatterParameters).toEqual(["m"]);
   });
 
   it("uses the shared binding default token when distance selectors are missing", function () {
@@ -38,14 +48,14 @@ describe("AnchorMapper", function () {
       anchorWatch: { defaultToken: "yd" }
     });
 
-    expect(mapper.translate({ kind: "anchorDistance", distance: 10 }, customToolkit)).toEqual({
+    expect(mapper.translate({ kind: "anchorDistance", distance: 10 }, routeContext("anchorDistance", customToolkit))).toEqual({
       value: 10,
       caption: "ANCHOR",
       unit: "yd custom",
       formatter: "formatDistance",
       formatterParameters: ["yd"]
     });
-    expect(mapper.translate({ kind: "anchorWatch", watch: 20 }, customToolkit)).toEqual({
+    expect(mapper.translate({ kind: "anchorWatch", watch: 20 }, routeContext("anchorWatch", customToolkit))).toEqual({
       value: 20,
       caption: "AWATCH",
       unit: "yd custom",
@@ -56,7 +66,7 @@ describe("AnchorMapper", function () {
 
   it("maps bearing to direction formatter", function () {
     const mapper = loadFresh("cluster/mappers/AnchorMapper.js").create();
-    const out = mapper.translate({ kind: "anchorBearing", bearing: 5, leadingZero: true }, toolkit);
+    const out = mapper.translate({ kind: "anchorBearing", bearing: 5, leadingZero: true }, routeContext("anchorBearing", toolkit));
 
     expect(out).toEqual({
       value: 5,

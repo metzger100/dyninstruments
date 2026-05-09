@@ -13,6 +13,11 @@ const defaultToolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").crea
 describe("ClusterMapperRegistry", function () {
   function makeComponentContext() {
     const modules = {
+      ActiveRouteViewModel: { create: () => ({ build: () => ({}) }) },
+      EditRouteViewModel: { create: () => ({ build: () => ({}) }) },
+      RoutePointsViewModel: { create: () => ({ build: () => ({}) }) },
+      AisTargetViewModel: { create: () => ({ build: () => ({}) }) },
+      AlarmViewModel: { create: () => ({ build: () => ({}) }) },
       CourseHeadingMapper: { create: () => ({ cluster: "courseHeading", translate: (p) => ({ c: p.kind }) }) },
       SpeedMapper: { create: () => ({ cluster: "speed", translate: (p) => ({ s: p.kind }) }) },
       EnvironmentMapper: { create: () => ({ cluster: "environment", translate: () => ({}) }) },
@@ -85,7 +90,7 @@ describe("ClusterMapperRegistry", function () {
     componentContext.__modules.SpeedMapper = {
       create: () => ({
         cluster: "speed",
-        translate: (props, toolkit) => ({ got: toolkit.flag, kind: props.kind })
+        translate: (props, routeContext) => ({ got: routeContext.toolkit.flag, kind: props.kind })
       })
     };
 
