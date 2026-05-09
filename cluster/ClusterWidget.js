@@ -51,7 +51,7 @@
 
       const hostCommitController = runtimeApi.createHostCommitController();
       const surfaceSessionController = runtimeApi.createSurfaceSessionController({
-        createSurfaceController: rendererRouter.createSurfaceControllerFactory(ctx)
+        surfaces: runtimeApi.surfaces
       });
 
       const state = {

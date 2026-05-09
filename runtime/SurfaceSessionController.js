@@ -13,9 +13,12 @@
     "canvas-dom": true
   };
 
-  function ensureFactory(createSurfaceController) {
-    if (typeof createSurfaceController !== "function") {
-      throw new Error("SurfaceSessionController: createSurfaceController must be a function");
+  function ensureSurfacesService(surfaces) {
+    if (!surfaces || typeof surfaces !== "object") {
+      throw new Error("SurfaceSessionController: surfaces service must be an object");
+    }
+    if (typeof surfaces.createController !== "function") {
+      throw new Error("SurfaceSessionController: surfaces.createController must be a function");
     }
   }
 
@@ -38,11 +41,26 @@
     if (!payload.shellEl) {
       throw new Error("SurfaceSessionController: reconcileSession payload requires shellEl");
     }
+    if (typeof payload.routeId !== "string" || !payload.routeId) {
+      throw new Error("SurfaceSessionController: reconcileSession payload requires routeId");
+    }
+    if (typeof payload.rendererId !== "string" || !payload.rendererId) {
+      throw new Error("SurfaceSessionController: reconcileSession payload requires rendererId");
+    }
+    if (!payload.rendererSpec || typeof payload.rendererSpec !== "object") {
+      throw new Error("SurfaceSessionController: reconcileSession payload requires rendererSpec");
+    }
+    if (!payload.hostContext || typeof payload.hostContext !== "object") {
+      throw new Error("SurfaceSessionController: reconcileSession payload requires hostContext");
+    }
+    if (!payload.props || typeof payload.props !== "object") {
+      throw new Error("SurfaceSessionController: reconcileSession payload requires props object");
+    }
   }
 
   function ensureController(controller, surface) {
     if (!controller || typeof controller !== "object") {
-      throw new Error("SurfaceSessionController: createSurfaceController('" + surface + "') returned an invalid controller");
+      throw new Error("SurfaceSessionController: runtime.surfaces.createController('" + surface + "') returned an invalid controller");
     }
 
     const requiredMethods = ["attach", "update", "detach", "destroy"];
@@ -56,35 +74,31 @@
 
   function createInitialState() {
     return {
-      desiredSurface: null,
+      mountedRouteId: null,
+      mountedRendererId: null,
       mountedSurface: null,
-      surfaceRevision: 0,
+      mountedRevision: 0,
       activeController: null,
-      lastProps: undefined,
-      rootEl: null,
-      shellEl: null,
-      mountedRevision: 0
+      shellEl: null
     };
   }
 
   function createSurfaceSessionController(options) {
     const opts = options || {};
     const perf = runtime && runtime.perf ? runtime.perf : null;
-    const createSurfaceController = opts.createSurfaceController;
-    ensureFactory(createSurfaceController);
+    const surfaces = opts.surfaces;
+    ensureSurfacesService(surfaces);
 
     let state = createInitialState();
 
     function getState() {
       return {
-        desiredSurface: state.desiredSurface,
+        mountedRouteId: state.mountedRouteId,
+        mountedRendererId: state.mountedRendererId,
         mountedSurface: state.mountedSurface,
-        surfaceRevision: state.surfaceRevision,
+        mountedRevision: state.mountedRevision,
         activeController: state.activeController,
-        lastProps: state.lastProps,
-        rootEl: state.rootEl,
-        shellEl: state.shellEl,
-        mountedRevision: state.mountedRevision
+        shellEl: state.shellEl
       };
     }
 
@@ -94,23 +108,34 @@
     }
 
     function isCurrentRevision(revision) {
-      return Number.isFinite(revision) && revision === state.surfaceRevision;
+      return Number.isFinite(revision) && revision === state.mountedRevision;
     }
 
-    function createControllerForSurface(surface) {
-      const controller = createSurfaceController(surface);
-      ensureController(controller, surface);
+    function createControllerForPayload(payload) {
+      const controller = surfaces.createController({
+        surface: payload.surface,
+        rendererSpec: payload.rendererSpec,
+        hostContext: payload.hostContext,
+        shadowCssUrls: payload.shadowCssUrls
+      });
+      ensureController(controller, payload.surface);
       return controller;
     }
 
     function applyMountedState(payload) {
-      state.desiredSurface = payload.surface;
+      state.mountedRouteId = payload.routeId;
+      state.mountedRendererId = payload.rendererId;
       state.mountedSurface = payload.surface;
-      state.surfaceRevision = payload.revision;
       state.mountedRevision = payload.revision;
-      state.lastProps = payload.props;
-      state.rootEl = payload.rootEl;
       state.shellEl = payload.shellEl;
+    }
+
+    function detachForShellReplacement() {
+      if (!state.activeController) {
+        return;
+      }
+      state.activeController.detach("shell-replacement");
+      state.shellEl = null;
     }
 
     function reconcileSession(payload) {
@@ -127,28 +152,39 @@
           return false;
         }
 
-        const mountedSurface = state.mountedSurface;
         const mountedController = state.activeController;
-        const sameSurface = mountedSurface === payload.surface && !!mountedController;
+        const sameSurface = !!mountedController && state.mountedSurface === payload.surface;
+        const sameRoute = sameSurface && state.mountedRouteId === payload.routeId;
+        const sameRenderer = sameSurface && state.mountedRendererId === payload.rendererId;
         const sameShell = sameSurface && state.shellEl === payload.shellEl;
 
         if (!mountedController) {
-          const firstController = createControllerForSurface(payload.surface);
+          const firstController = createControllerForPayload(payload);
           firstController.attach(payload);
           state.activeController = firstController;
           applyMountedState(payload);
           return true;
         }
 
-        if (sameSurface && sameShell) {
+        if (sameSurface && sameRoute && sameRenderer && sameShell) {
           mountedController.update(payload);
           applyMountedState(payload);
           return true;
         }
 
-        if (sameSurface) {
+        if (sameSurface && sameRoute && sameRenderer) {
           mountedController.detach("remount");
           mountedController.attach(payload);
+          applyMountedState(payload);
+          return true;
+        }
+
+        if (sameSurface) {
+          mountedController.destroy();
+
+          const nextController = createControllerForPayload(payload);
+          nextController.attach(payload);
+          state.activeController = nextController;
           applyMountedState(payload);
           return true;
         }
@@ -156,7 +192,7 @@
         mountedController.detach("surface-switch");
         mountedController.destroy();
 
-        const nextController = createControllerForSurface(payload.surface);
+        const nextController = createControllerForPayload(payload);
         nextController.attach(payload);
         state.activeController = nextController;
         applyMountedState(payload);
@@ -183,6 +219,7 @@
     return {
       initState: initState,
       reconcileSession: reconcileSession,
+      detachForShellReplacement: detachForShellReplacement,
       isCurrentRevision: isCurrentRevision,
       destroy: destroy,
       getState: getState

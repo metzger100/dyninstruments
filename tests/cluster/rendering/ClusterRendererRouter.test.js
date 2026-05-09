@@ -6,6 +6,7 @@ describe("ClusterRendererRouter", function () {
 
   function makeRoute(cluster, kind, rendererId, surface, viewModelId) {
     return Object.freeze({
+      routeId: cluster + "/" + kind,
       cluster: cluster,
       kind: kind,
       rendererId: rendererId,
@@ -118,6 +119,10 @@ describe("ClusterRendererRouter", function () {
   function createHarness() {
     const createdControllers = [];
     const runtimeSurfaces = createRuntimeSurfaceMocks(createdControllers);
+    const activeRouteShadowCss = [
+      "shared/html/HtmlShadowCommon.css",
+      "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css"
+    ];
     const routes = [
       makeRoute("speed", "sog", "ThreeValueTextWidget", "canvas-dom", "MapperOutputViewModel"),
       makeRoute("speed", "sogRadial", "SpeedRadialWidget", "canvas-dom", "MapperOutputViewModel"),
@@ -169,7 +174,11 @@ describe("ClusterRendererRouter", function () {
         surfaces: runtimeSurfaces
       },
       config: {
-        components: {}
+        components: {
+          ActiveRouteTextHtmlWidget: {
+            shadowCss: activeRouteShadowCss
+          }
+        }
       }
     };
 
@@ -179,7 +188,9 @@ describe("ClusterRendererRouter", function () {
       router: router,
       routes: routes,
       createdControllers: createdControllers,
-      runtimeSurfaces: runtimeSurfaces
+      runtimeSurfaces: runtimeSurfaces,
+      rendererSpecs: rendererSpecs,
+      activeRouteShadowCss: activeRouteShadowCss
     };
   }
 
@@ -252,7 +263,7 @@ describe("ClusterRendererRouter", function () {
     expect(htmlHtml).toContain('<div class="dyni-surface-html"><div class="dyni-surface-html-mount" data-dyni-html-mount="1"></div></div>');
   });
 
-  it("creates session payloads with surface, root/shell elements, props, revision, and route metadata", function () {
+  it("creates session payloads with surface, route identity, renderer metadata, and shadow CSS URLs", function () {
     const harness = createHarness();
     const rootEl = document.createElement("div");
     const shellEl = document.createElement("div");
@@ -288,6 +299,11 @@ describe("ClusterRendererRouter", function () {
       }
     );
     expect(payload).toEqual(expect.objectContaining({
+      routeId: "nav/activeRoute",
+      rendererId: "ActiveRouteTextHtmlWidget",
+      rendererSpec: harness.rendererSpecs.ActiveRouteTextHtmlWidget,
+      hostContext: { hostContext: true },
+      shadowCssUrls: harness.activeRouteShadowCss,
       surface: "html",
       rootEl: rootEl,
       shellEl: shellEl,
@@ -297,11 +313,32 @@ describe("ClusterRendererRouter", function () {
         kind: "activeRoute"
       }),
       route: expect.objectContaining({
+        routeId: "nav/activeRoute",
         cluster: "nav",
         kind: "activeRoute",
         rendererId: "ActiveRouteTextHtmlWidget",
         surface: "html"
       })
+    }));
+
+    const canvasPayload = harness.router.createSessionPayload({
+      rootEl: document.createElement("div"),
+      shellEl: document.createElement("div"),
+      revision: 8,
+      props: {
+        cluster: "speed",
+        kind: "sog"
+      }
+    }, {
+      hostContext: true
+    });
+
+    expect(canvasPayload).toEqual(expect.objectContaining({
+      routeId: "speed/sog",
+      rendererId: "ThreeValueTextWidget",
+      rendererSpec: harness.rendererSpecs.ThreeValueTextWidget,
+      shadowCssUrls: [],
+      surface: "canvas-dom"
     }));
   });
 

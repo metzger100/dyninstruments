@@ -352,7 +352,16 @@
         allowNatural: true,
         shellWidth: surfacePolicy.resolveShellWidth(commitPayload.shellEl)
       });
+      const routeId = routedState.route.routeId || (routedState.route.cluster + "/" + routedState.route.kind);
+      const shadowCssUrls = routedState.route.surface === "html"
+        ? resolveRendererShadowCss(routedState.route.rendererId)
+        : [];
       return {
+        routeId: routeId,
+        rendererId: routedState.route.rendererId,
+        rendererSpec: routeState.rendererSpec,
+        hostContext: hostContext,
+        shadowCssUrls: shadowCssUrls,
         surface: routedState.route.surface,
         rootEl: commitPayload.rootEl,
         shellEl: commitPayload.shellEl,
