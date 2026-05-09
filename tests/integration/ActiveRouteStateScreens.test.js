@@ -1,5 +1,6 @@
 const { loadFresh } = require("../helpers/load-umd");
 const { createComponentContextMock } = require("../helpers/component-context-mock");
+const { makeRouteContext } = require("../helpers/mapper-route-context");
 
 function createToolkit() {
   loadFresh("shared/unit-format-families.js");
@@ -24,6 +25,10 @@ function createNavMapper() {
     }
   });
   return loadFresh("cluster/mappers/NavMapper.js").create({}, componentContext);
+}
+
+function createActiveRouteViewModel() {
+  return loadFresh("cluster/viewmodels/ActiveRouteViewModel.js").create();
 }
 
 function createActiveRouteWidget() {
@@ -170,10 +175,17 @@ describe("ActiveRoute state-screen integration", function () {
   it("classifies data/disconnected/noRoute from raw mapper + widget signals", function () {
     const mapper = createNavMapper();
     const toolkit = createToolkit();
+    const activeRouteViewModel = createActiveRouteViewModel();
     const widget = createActiveRouteWidget();
 
     function renderFromRaw(rawProps) {
-      const mapped = mapper.translate(rawProps, toolkit);
+      const mapped = mapper.translate(rawProps, makeRouteContext({
+        routeId: "nav/activeRoute",
+        cluster: "nav",
+        kind: "activeRoute",
+        toolkit: toolkit,
+        viewModel: activeRouteViewModel
+      }));
       const merged = withSurfacePolicy(Object.assign({}, rawProps, mapped));
       return mountHtml(widget, merged);
     }
