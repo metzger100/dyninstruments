@@ -115,7 +115,7 @@
 - **How does RoutePoints row click interaction work (page-aware dispatch)?** → [widgets/route-points.md#interaction-contract](widgets/route-points.md#interaction-contract)
 - **HTML widget classes/states contract and required HTML-kind tests** → [shared/html-widget-visual-style-guide.md](shared/html-widget-visual-style-guide.md), [guides/add-new-html-kind.md#step-7-required-html-kind-test-matrix](guides/add-new-html-kind.md#step-7-required-html-kind-test-matrix)
 - **Theme preset resolution, runtime switching, and day/night ownership** → [shared/theme-tokens.md](shared/theme-tokens.md), [shared/css-theming.md](shared/css-theming.md)
-- **HiDPI canvas scaling** → [shared/helpers.md#setupcanvas](shared/helpers.md#setupcanvas)
+- **HiDPI canvas scaling** → [shared/helpers.md#componentcontextcanvassetupcanvas](shared/helpers.md#componentcontextcanvassetupcanvas)
 - **SignalK key selector contract in editor forms** → [avnav-api/editable-parameters.md#key-details](avnav-api/editable-parameters.md#key-details)
 - **Roll/pitch formatter tuple contract** → [architecture/plugin-core-contracts.md](architecture/plugin-core-contracts.md), [avnav-api/core-formatter-catalog.md](avnav-api/core-formatter-catalog.md), [avnav-api/core-key-catalog.md](avnav-api/core-key-catalog.md)
 - **Interactive dashboard button/toggle behavior on `GpsPage`** → [avnav-api/interactive-widgets.md](avnav-api/interactive-widgets.md)
