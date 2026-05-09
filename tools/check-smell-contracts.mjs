@@ -323,7 +323,9 @@ function runFalsyDefaultPreservationRule() {
     },
     DyniPlugin: {
       runtime: {
-        hostActions: {},
+        hostActions() {
+          return {};
+        },
         defaultsFromEditableParams() {
           return {};
         }

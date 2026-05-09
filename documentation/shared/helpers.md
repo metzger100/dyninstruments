@@ -15,7 +15,7 @@ Current context surfaces include:
 - `componentContext.dom.requirePluginRoot(...)`
 - `componentContext.theme.tokens.resolveForRoot(rootEl)`
 - `componentContext.dom.getNightModeState(rootEl)`
-- `componentContext.hostActions`
+- `componentContext.hostActions()` function reference
 
 Legacy helper theme fallbacks (resolveTextColor, resolveFontFamily, resolveWidgetRoot) are not part of the production contract.
 
@@ -70,9 +70,15 @@ Centralized formatter dispatch boundary.
 
 ### componentContext.hostActions
 
-Returns the runtime-owned host action facade created by TemporaryHostActionBridge.
+Same function reference as `runtime.hostActions`.
 
-Bridge facade includes:
+Rules:
+
+- The function re-reads the current runtime-owned host action facade on every call.
+- Components that need host actions call `componentContext.hostActions()` and use the returned snapshot object.
+- When the widget registrar wraps lifecycle methods, it snapshots the current actions onto the AvNav widget context via `ctx.hostActions = runtime.hostActions()`.
+
+Returned facade includes:
 
 - getCapabilities()
 - routePoints.activate({ index, pointSnapshot })

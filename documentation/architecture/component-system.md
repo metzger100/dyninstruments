@@ -55,6 +55,7 @@ Validation behavior:
 - module requires a direct module object API
 
 In the runtime service lane, theme internals stay inside `runtime.theme`; component factories resolve immutable snapshots through `componentContext.theme.tokens.resolveForRoot(rootEl)`.
+`componentContext.hostActions` is the same function reference as `runtime.hostActions`, so components can snapshot the current bridge state on demand.
 
 ## CSS Loading Contract
 
@@ -92,6 +93,7 @@ runtime/init.js:
 - startup deps are runtime-bound, and ClusterWidget.deps is intentionally []
 - route roots are loaded lazily by RouteActivationController
 - configures `runtime.theme`
+- installs `runtime.hostActions` as a function that re-reads the current host action bridge on every call
 - registers widgets
 - does not preload renderer shadowCss during startup; RouteActivationController owns active-route shadowCss preload
 

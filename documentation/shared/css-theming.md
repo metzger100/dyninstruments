@@ -73,9 +73,9 @@ Committed HTML renderer CSS is shadow-local and consumes migrated output vars.
 
 ## Vertical Shell Rule
 
-Shared shell CSS must not override runtime-owned vertical reserved shell height on .widgetData.dyni-shell.
+Shared shell CSS must not override runtime-owned vertical reserved shell height on .widgetData.dyni-shell for ratio shell sizing only.
 
-Inner mount/surface descendants may still fill inside the reserved shell.
+Natural shell sizing must not be forced by shared shell CSS. Inner mount/surface descendants may still fill inside the reserved shell.
 
 ## Preset Ingestion Rule
 

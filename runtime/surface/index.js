@@ -62,9 +62,6 @@
   }
 
   runtime.surfaces = Object.freeze({
-    policy: policy,
-    canvasDom: canvasDom,
-    html: html,
     createController: createController,
     materializeSurfacePolicyProps: materializeSurfacePolicyProps,
     getCommonShadowCssUrl: getCommonShadowCssUrl

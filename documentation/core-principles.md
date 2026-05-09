@@ -8,7 +8,7 @@ These rules are mandatory for all contributors and AI agents in this repository.
 
 1. Rule: Runtime code must be plain JavaScript loaded via `<script>` tags; no bundler and no runtime build step. → [conventions/coding-standards.md](conventions/coding-standards.md#overview)
 2. Rule: Every component must use the UMD/IIFE wrapper and register on `window.DyniComponents.{globalKey}`. → [conventions/coding-standards.md](conventions/coding-standards.md#umd-component-template)
-3. Rule: Cluster widgets register `renderHtml(props)` on the host path; surface selection is internal via strict kind-catalog routing (`surface: "html"` or `surface: "canvas-dom"`). → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
+3. Rule: Cluster widgets register `renderHtml(props)` on the host path; surface selection is driven by route metadata in `config.clusterRoutes` and runtime route activation. → [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
 4. Rule: Dependency direction is one-way by layer: `widgets -> shared`; `cluster -> cluster/widgets/shared`; `shared -> shared`; `config` is pure data; `runtime` must not depend on `widgets/cluster/shared`.
 5. Rule: Keep JavaScript files at or below 400 lines; split before crossing the limit. → [conventions/coding-standards.md](conventions/coding-standards.md#file-size-limits)
 6. Rule: Documentation must be updated in the same task as code/architecture changes.

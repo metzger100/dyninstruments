@@ -57,7 +57,7 @@
 
   function fetchShadowCssText(url) {
     if (!isNonEmptyString(url)) {
-      return Promise.reject(new Error("dyninstruments: runtime.theme.fetchShadowCssText() requires non-empty url"));
+      return Promise.reject(new Error("dyninstruments: shadow CSS preload requires non-empty url"));
     }
 
     if (shadowCssTextCache.has(url)) {
@@ -203,9 +203,10 @@
     configure: configure,
     applyToRoot: applyToRoot,
     resolveStartupPresetName: resolveStartupPresetName,
-    fetchShadowCssText: fetchShadowCssText,
     preloadShadowCssUrls: preloadShadowCssUrls,
-    resolveForRoot: resolveForRoot,
+    tokens: Object.freeze({
+      resolveForRoot: resolveForRoot
+    }),
     getShadowCssText: function (url) {
       return shadowCssTextCache.has(url) ? shadowCssTextCache.get(url) : null;
     },

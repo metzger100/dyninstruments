@@ -12,7 +12,8 @@ Use this document for runtime-safe component structure and naming. It defines fi
 - No ES module `import`/`export` in plugin runtime files.
 - Cluster host registration uses `renderHtml`; host `renderCanvas` is not the cluster path.
 - Internal canvas rendering remains valid through `CanvasDomSurfaceAdapter` and renderer `renderCanvas(canvas, props)` callbacks.
-- Runtime IIFE modules must consume perf spans through `runtime.getPerfSpanApi()` (`runtime/PerfSpanHelper.js`) instead of duplicating hook-probe wiring.
+- Runtime IIFE modules must consume perf spans through `runtime.perf.startSpan()` / `runtime.perf.endSpan()` instead of duplicating hook-probe wiring.
+- Registered components must consume perf spans through `componentContext.perf.startSpan()` / `componentContext.perf.endSpan()`.
 - Reusable logic belongs in shared kits, not in duplicated widget-local helpers.
 - Preserve explicit falsy defaults (`""`, `0`, `false`) via property-presence/nullish checks; never use truthy fallback for configured defaults.
 - Cache-owning modules must expose explicit invalidation APIs and mutation paths must call them.
@@ -173,8 +174,10 @@ Current shared utilities include:
 - `HtmlWidgetUtils.resolveRatioMode()`
 - `HtmlWidgetUtils.isEditingMode()`
 - `PreparedPayloadModelCache.createPreparedModelCache()`
-- `PerfSpanHelper.startSpan()`
-- `PerfSpanHelper.endSpan()`
+- `runtime.perf.startSpan()`
+- `runtime.perf.endSpan()`
+- `componentContext.perf.startSpan()`
+- `componentContext.perf.endSpan()`
 - `RadialValueMath.clamp()`
 - `RadialValueMath.isFiniteNumber()`
 - `RadialValueMath.extractNumberText()`

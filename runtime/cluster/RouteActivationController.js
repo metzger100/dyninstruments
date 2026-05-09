@@ -52,14 +52,14 @@
       discardedActivation: DISCARDED_ACTIVATION
     });
 
-    function ensureToolkit(routeMeta) {
+    function ensureToolkit() {
       if (toolkitSpec) {
         return toolkitSpec;
       }
       if (!loader.areComponentsLoaded(["ClusterMapperToolkit"])) {
         throw new Error("RouteActivationError: ClusterMapperToolkit is not loaded");
       }
-      toolkitSpec = loader.createInstance("ClusterMapperToolkit", routeMeta || widgetDef);
+      toolkitSpec = loader.createInstance("ClusterMapperToolkit", widgetDef);
       return toolkitSpec;
     }
 
@@ -78,9 +78,9 @@
         return cache;
       }
 
-      cache.mapper = loader.createInstance(routeMeta.mapperId, routeMeta);
-      cache.viewModel = routeMeta.viewModelId ? loader.createInstance(routeMeta.viewModelId, routeMeta) : null;
-      cache.rendererSpec = loader.createInstance(routeMeta.rendererId, routeMeta);
+      cache.mapper = loader.createInstance(routeMeta.mapperId, widgetDef);
+      cache.viewModel = routeMeta.viewModelId ? loader.createInstance(routeMeta.viewModelId, widgetDef) : null;
+      cache.rendererSpec = loader.createInstance(routeMeta.rendererId, widgetDef);
 
       if (!cache.mapper || typeof cache.mapper.translate !== "function") {
         throw new Error("RouteActivationController: mapper '" + routeMeta.mapperId + "' must implement translate()");
@@ -100,7 +100,7 @@
 
     function buildPayload(snapshot, routeMeta) {
       const routeCache = ensureRouteInstance(routeMeta);
-      const toolkit = ensureToolkit(routeMeta);
+      const toolkit = ensureToolkit();
       return payloadBuilder.buildActivatedPayload({
         snapshot: snapshot,
         routeMeta: routeMeta,

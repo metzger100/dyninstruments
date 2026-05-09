@@ -450,7 +450,6 @@ function createHarnessEnvironment(options) {
     configure: baseThemeRuntime.configure,
     applyToRoot: baseThemeRuntime.applyToRoot,
     resolveStartupPresetName: baseThemeRuntime.resolveStartupPresetName,
-    fetchShadowCssText: baseThemeRuntime.fetchShadowCssText,
     preloadShadowCssUrls(urls) {
       const startMs = performance.now();
       const normalizedUrls = normalizeShadowCssUrlList(urls);
@@ -463,7 +462,9 @@ function createHarnessEnvironment(options) {
           return result;
         });
     },
-    resolveForRoot: baseThemeRuntime.resolveForRoot,
+    tokens: Object.freeze({
+      resolveForRoot: baseThemeRuntime.tokens.resolveForRoot
+    }),
     getShadowCssText: baseThemeRuntime.getShadowCssText,
     hasShadowCssText: baseThemeRuntime.hasShadowCssText
   });
@@ -493,7 +494,9 @@ function createHarnessEnvironment(options) {
   });
 
   globalThis.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
-  globalThis.DyniPlugin.runtime.hostActions = createHostActions();
+  globalThis.DyniPlugin.runtime.hostActions = function () {
+    return globalThis.DyniPlugin.state.hostActionBridge.getHostActions();
+  };
 
   globalThis.DyniPlugin.state.hostActionBridge = {
     getHostActions: createHostActions
@@ -652,7 +655,7 @@ function createClusterSession(env, cluster, width, height) {
   const context = {
     eventHandler: [],
     triggerResize() {},
-    hostActions: createHostActions()
+    hostActions: globalThis.DyniPlugin.runtime.hostActions()
   };
 
   const rootEl = env.document.createElement("div");
@@ -1151,7 +1154,7 @@ function createComponentResolver(rootDir, runtimeServices) {
         theme: {
           tokens: {
             resolveForRoot(rootEl) {
-              return runtimeServices.theme.resolveForRoot(rootEl);
+              return runtimeServices.theme.tokens.resolveForRoot(rootEl);
             }
           }
         },

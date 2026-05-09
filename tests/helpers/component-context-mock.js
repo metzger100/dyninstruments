@@ -31,9 +31,20 @@ function createComponentContextMock(options) {
     getNightModeState() { return false; }
   };
 
-  const hostActions = Object.prototype.hasOwnProperty.call(services, "hostActions")
+  const hostActionsSnapshot = Object.prototype.hasOwnProperty.call(services, "hostActions")
     ? services.hostActions
     : {};
+  const hostActions = typeof hostActionsSnapshot === "function"
+    ? hostActionsSnapshot
+    : function () {
+      return hostActionsSnapshot;
+    };
+
+  if (hostActionsSnapshot && typeof hostActionsSnapshot === "object") {
+    Object.keys(hostActionsSnapshot).forEach(function (key) {
+      hostActions[key] = hostActionsSnapshot[key];
+    });
+  }
 
   const themeTokens = services.themeTokens || {
     resolveForRoot() {

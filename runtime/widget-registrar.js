@@ -66,7 +66,8 @@
     const updateFunction = composeUpdates(spec.updateFunction, widgetDef.def.updateFunction);
 
     function attachHostActions(ctx) {
-      ctx.hostActions = runtime.hostActions;
+      // Snapshot the current host action facade for this wrapped lifecycle call.
+      ctx.hostActions = typeof runtime.hostActions === "function" ? runtime.hostActions() : null;
     }
 
     function wrapWidgetContext(fn) {

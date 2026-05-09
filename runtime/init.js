@@ -38,7 +38,9 @@
     }
 
     state.hostActionBridge = runtime.createTemporaryHostActionBridge();
-    runtime.hostActions = state.hostActionBridge.getHostActions();
+    runtime.hostActions = function () {
+      return state.hostActionBridge.getHostActions();
+    };
 
     const config = ns.config;
     const components = config.components;

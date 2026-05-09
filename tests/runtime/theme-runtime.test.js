@@ -31,6 +31,10 @@ describe("runtime/theme-runtime.js", function () {
 
   it("configures runtime.theme and applies output vars", function () {
     const context = setupContext();
+    expect(context.DyniPlugin.runtime.theme.tokens).toBeTruthy();
+    expect(typeof context.DyniPlugin.runtime.theme.tokens.resolveForRoot).toBe("function");
+    expect(context.DyniPlugin.runtime.theme.resolveForRoot).toBeUndefined();
+    expect(context.DyniPlugin.runtime.theme.fetchShadowCssText).toBeUndefined();
     const rootEl = {
       nodeType: 1,
       className: "widget dyniplugin",

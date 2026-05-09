@@ -78,6 +78,7 @@ Route-prop materialization contract:
 Host-context cache contract:
 
 - normalized action wrappers are cached per hostContext and refreshed when hostActions owner changes
+- `hostContext.hostActions` is the snapshot object attached by `runtime/widget-registrar.js` on each wrapped lifecycle call
 - normalized capabilities are cached per hostContext and recomputed only when raw capability object identity changes
 
 Renderers do not call host capability APIs directly.
@@ -88,12 +89,12 @@ In vertical mode:
 
 - host owns width
 - pre-activation shell sizing is route metadata owned by ClusterShellRenderer
-- ClusterShellRenderer materializes routeMeta.shellSizing onto the inert shell
+- ClusterShellRenderer materializes ratio shellSizing onto the inert shell
 - post-activation sizing is renderer shadow CSS owned inside the committed renderer
 - there is no renderer-spec vertical-sizing hook
 - route-specific natural-height behavior is finalized after activation inside the committed renderer, not by the shell
 
-RoutePoints is the only width-derived natural-height exception finalized at first commit before surface attach.
+RoutePoints is the only width-derived natural-height exception, and its committed renderer shadow CSS owns the final size after activation.
 
 ## HTML Route Contract
 

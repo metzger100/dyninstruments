@@ -27,12 +27,15 @@ describe("runtime/surface/HtmlSurfaceController.js", function () {
     };
   }
 
-  function createSurfaceDom() {
+  function createSurfaceDom(options) {
+    const opts = options || {};
+    const width = Object.prototype.hasOwnProperty.call(opts, "width") ? opts.width : 320;
+    const height = Object.prototype.hasOwnProperty.call(opts, "height") ? opts.height : 180;
     const rootEl = document.createElement("div");
     const shellEl = document.createElement("div");
     const mountEl = document.createElement("div");
     mountEl.className = "dyni-surface-html-mount";
-    mountEl.getBoundingClientRect = vi.fn(() => ({ width: 320, height: 180 }));
+    mountEl.getBoundingClientRect = vi.fn(() => ({ width, height }));
     shellEl.appendChild(mountEl);
     rootEl.appendChild(shellEl);
     return { rootEl, shellEl, mountEl };
@@ -182,6 +185,47 @@ describe("runtime/surface/HtmlSurfaceController.js", function () {
     expect(function () {
       controller.attach(makePayload(surfaceDom, { sig: "e" }, 6));
     }).toThrow("attach() after destroy()");
+  });
+
+  it("preserves width-only shellRect for natural shells with zero committed height", function () {
+    const runtime = createModule();
+    const hostContext = {};
+    const surfaceDom = createSurfaceDom({ width: 320, height: 0 });
+
+    const rendererInstance = {
+      mount: vi.fn(),
+      update: vi.fn(),
+      postPatch: vi.fn(() => false),
+      detach: vi.fn(),
+      destroy: vi.fn()
+    };
+
+    const controller = runtime.module.createSurfaceController({
+      rendererSpec: {
+        id: "RoutePointsTextHtmlWidget",
+        createCommittedRenderer: vi.fn(() => rendererInstance)
+      },
+      hostContext
+    });
+
+    controller.attach({
+      surface: "html",
+      rootEl: surfaceDom.rootEl,
+      shellEl: surfaceDom.shellEl,
+      props: {},
+      revision: 1,
+      route: {
+        shellSizing: {
+          kind: "natural"
+        }
+      }
+    });
+
+    expect(rendererInstance.mount).toHaveBeenCalledTimes(1);
+    expect(rendererInstance.mount.mock.calls[0][1].shellRect).toEqual({
+      width: 320,
+      height: 0
+    });
   });
 
   it("injects base surface box contract once per attach and keeps widget shadow css injection", function () {

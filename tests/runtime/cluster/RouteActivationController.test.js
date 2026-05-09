@@ -203,6 +203,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       })
     };
 
+    const widgetDef = { cluster: "nav" };
     const context = createBaseContext({
       runtime: {
         componentLoader: loader,
@@ -238,8 +239,9 @@ describe("runtime/cluster/RouteActivationController.js", function () {
         }
       }
     });
+    const routeMeta = context.DyniPlugin.config.clusterRoutes.byRouteId["nav/activeRoute"];
     const routeActivation = loadController(context);
-    const controller = routeActivation.createWidgetController({ cluster: "nav" });
+    const controller = routeActivation.createWidgetController(widgetDef);
     const routeFrame = {
       cluster: "nav",
       kind: "activeRoute",
@@ -301,6 +303,12 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       "ActiveRouteTextHtmlWidget",
       "ClusterMapperToolkit"
     ]);
+    expect(loader.createRecords.every(function (entry) {
+      return entry.def === widgetDef;
+    })).toBe(true);
+    expect(loader.createRecords.every(function (entry) {
+      return entry.def !== routeMeta;
+    })).toBe(true);
 
     const payload = await result;
     expect(payload).toMatchObject({
@@ -377,6 +385,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       preloadShadowCssUrls: vi.fn(),
       hasShadowCssText: vi.fn(() => true)
     };
+    const widgetDef = { cluster: "speed" };
     const context = createBaseContext({
       runtime: {
         componentLoader: loader,
@@ -408,7 +417,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       }
     });
     const routeActivation = loadController(context);
-    const controller = routeActivation.createWidgetController({ cluster: "speed" });
+    const controller = routeActivation.createWidgetController(widgetDef);
     const routeFrame = {
       cluster: "speed",
       kind: "sog",
@@ -442,6 +451,9 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       "SpeedRadialWidget",
       "ClusterMapperToolkit"
     ]);
+    expect(loader.createRecords.every(function (entry) {
+      return entry.def === widgetDef;
+    })).toBe(true);
     expect(loader.loadRecords).toEqual([]);
     expect(toolkitCreate).toHaveBeenCalledWith({
       cluster: "speed",
@@ -531,6 +543,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       }),
       hasShadowCssText: vi.fn(() => false)
     };
+    const widgetDef = { cluster: "nav" };
     const context = createBaseContext({
       runtime: {
         componentLoader: loader,
@@ -569,8 +582,9 @@ describe("runtime/cluster/RouteActivationController.js", function () {
         }
       }
     });
+    const routeMeta = context.DyniPlugin.config.clusterRoutes.byRouteId["nav/activeRoute"];
     const routeActivation = loadController(context);
-    const controller = routeActivation.createWidgetController({ cluster: "nav" });
+    const controller = routeActivation.createWidgetController(widgetDef);
     const firstRouteFrame = {
       cluster: "nav",
       kind: "activeRoute",
@@ -609,6 +623,12 @@ describe("runtime/cluster/RouteActivationController.js", function () {
     deferredLoads.ClusterMapperToolkit.resolve();
 
     const payload = await first;
+    expect(loader.createRecords.every(function (entry) {
+      return entry.def === widgetDef;
+    })).toBe(true);
+    expect(loader.createRecords.every(function (entry) {
+      return entry.def !== routeMeta;
+    })).toBe(true);
     expect(payload.revision).toBe(2);
     expect(payload.rootEl).toEqual({ id: "root-b" });
     expect(payload.shellEl).toEqual({ id: "shell-b" });
@@ -760,6 +780,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       }),
       hasShadowCssText: vi.fn(() => false)
     };
+    const widgetDef = { cluster: "nav" };
     const context = createBaseContext({
       runtime: {
         componentLoader: loader,
@@ -812,7 +833,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       }
     });
     const routeActivation = loadController(context);
-    const controller = routeActivation.createWidgetController({ cluster: "nav" });
+    const controller = routeActivation.createWidgetController(widgetDef);
     const firstRouteFrame = {
       cluster: "nav",
       kind: "activeRoute",
@@ -873,6 +894,9 @@ describe("runtime/cluster/RouteActivationController.js", function () {
     await flushPromises();
 
     const payload = await second;
+    expect(loader.createRecords.every(function (entry) {
+      return entry.def === widgetDef;
+    })).toBe(true);
     expect(payload).toMatchObject({
       routeId: "nav/secondaryRoute",
       revision: 2,

@@ -79,7 +79,7 @@
   function buildComponentContext(runtimeRef, def, dependencyInstancesById, declaredDepsByOwner, ownerId) {
     const themeTokens = Object.freeze({
       resolveForRoot: function (rootEl) {
-        return runtimeRef.theme.resolveForRoot(rootEl);
+        return runtimeRef.theme.tokens.resolveForRoot(rootEl);
       }
     });
 
@@ -101,6 +101,7 @@
       format: runtimeRef.format,
       canvas: runtimeRef.canvas,
       dom: runtimeRef.dom,
+      // Pass the runtime.hostActions function reference through unchanged so components can snapshot on demand.
       hostActions: runtimeRef.hostActions
     };
   }

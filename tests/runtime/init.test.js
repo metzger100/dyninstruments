@@ -43,7 +43,7 @@ describe("runtime/init.js", function () {
     const uniqueComponents = vi.fn(() => ["A", "B"]);
     const themeRuntime = createThemeRuntimeMock();
     const shellRenderer = createShellRendererMock();
-    const { bridge, createTemporaryHostActionBridge } = createBridgeRuntimeMock();
+    const { bridge, hostActions, createTemporaryHostActionBridge } = createBridgeRuntimeMock();
 
     const context = createScriptContext({
       avnav: {
@@ -89,6 +89,59 @@ describe("runtime/init.js", function () {
     expect(createInstance).toHaveBeenCalledWith("A", { name: "dyni_test" });
     expect(context.DyniPlugin.runtime.registerWidget).toHaveBeenCalledWith({ id: "WidgetSpec" }, { widget: "A", def: { name: "dyni_test" } });
     expect(context.DyniPlugin.state.hostActionBridge).toBe(bridge);
+    expect(typeof context.DyniPlugin.runtime.hostActions).toBe("function");
+    expect(context.DyniPlugin.runtime.hostActions()).toBe(hostActions);
+  });
+
+  it("re-reads the current host action facade on every runtime.hostActions call", async function () {
+    const themeRuntime = createThemeRuntimeMock();
+    const shellRenderer = createShellRendererMock();
+    const firstHostActions = { getCapabilities: vi.fn(), routePoints: {}, routeEditor: {}, ais: {} };
+    const secondHostActions = { getCapabilities: vi.fn(), routePoints: {}, routeEditor: {}, ais: {} };
+    const bridge = {
+      getHostActions: vi.fn(() => firstHostActions),
+      destroy: vi.fn()
+    };
+
+    const context = createScriptContext({
+      avnav: {
+        api: {
+          registerWidget: vi.fn(),
+          log: vi.fn()
+        }
+      },
+      DyniPlugin: {
+        avnavApi: {
+          registerWidget: vi.fn(),
+          log: vi.fn()
+        },
+        runtime: {
+          theme: themeRuntime,
+          createTemporaryHostActionBridge: vi.fn(() => bridge),
+          clusterShellRenderer: shellRenderer,
+          createComponentLoader: vi.fn(() => ({
+            uniqueComponents: () => ["A"],
+            loadComponent: () => Promise.resolve({}),
+            createInstance: () => ({})
+          })),
+          registerWidget: vi.fn()
+        },
+        state: {},
+        config: {
+          shared: {},
+          clusters: [],
+          components: { A: {} },
+          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
+        }
+      }
+    });
+
+    loadInitRuntime(context);
+    await context.DyniPlugin.runtime.runInit();
+
+    expect(context.DyniPlugin.runtime.hostActions()).toBe(firstHostActions);
+    bridge.getHostActions.mockImplementation(() => secondHostActions);
+    expect(context.DyniPlugin.runtime.hostActions()).toBe(secondHostActions);
   });
 
   it("uses captured DyniPlugin.avnavApi when global avnav.api is absent", async function () {

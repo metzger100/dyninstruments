@@ -33,18 +33,18 @@ RoutePointsTextHtmlWidget is the committed HTML renderer for nav route points.
 
 RoutePoints is the only width-derived natural-height widget.
 
-- route metadata `shellSizing` owns the pre-activation size; committed renderer shadow CSS owns the post-activation natural-height behavior in vertical mode
-- runtime materializes natural height on shell via CSS height
-- exact width-derived height may be finalized at first commit before surface attach
+- route metadata `shellSizing.kind === "natural"` emits no inline height or aspect-ratio and reserves no cold-load height
+- committed renderer shadow CSS owns the final natural height after activation in vertical mode
 - viewport cap remains widget-owned (60vh policy)
 
 ## widgetContainer.vertical Behavior
 
-In .widgetContainer.vertical, runtime requests widget-owned sizing and materializes shell height on the inert shell.
+In .widgetContainer.vertical, RoutePoints natural sizing remains unresolved until the committed renderer activates.
 
 - width remains host-owned
 - RoutePoints height remains widget-owned and width-derived
-- final width-derived natural height may be corrected on first committed host pass
+- final width-derived natural height is owned by the committed renderer shadow CSS after activation
+- the 60vh cap remains in force
 
 ## Layout Contract
 

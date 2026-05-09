@@ -8,6 +8,7 @@ describe("runtime/widget-registrar.js", function () {
     const opts = options || {};
     const registerWidget = opts.registerWidget || vi.fn();
     const hostActions = { getCapabilities: vi.fn(), routePoints: {}, routeEditor: {}, ais: {} };
+    const runtimeHostActions = opts.runtimeHostActions || vi.fn(() => hostActions);
     const includeGlobalApi = opts.includeGlobalApi !== false;
     const capturedApi = opts.hostApi || (includeGlobalApi ? {
       registerWidget: registerWidget
@@ -16,7 +17,7 @@ describe("runtime/widget-registrar.js", function () {
     const context = createScriptContext({
       DyniPlugin: {
         runtime: {
-          hostActions: hostActions
+          hostActions: runtimeHostActions
         },
         state: {},
         config: { shared: {}, clusters: [] },
@@ -33,7 +34,7 @@ describe("runtime/widget-registrar.js", function () {
     runIifeScript("runtime/editable-defaults.js", context);
     runIifeScript("runtime/widget-registrar.js", context);
 
-    return { context, registerWidget, hostActions };
+    return { context, registerWidget, hostActions, runtimeHostActions };
   }
 
   function loadVesselDef() {
@@ -322,7 +323,7 @@ describe("runtime/widget-registrar.js", function () {
   });
 
   it("applies static host classes even when the component has no renderCanvas", function () {
-    const { context, registerWidget, hostActions } = setupContext();
+    const { context, registerWidget, hostActions, runtimeHostActions } = setupContext();
     const seen = [];
     const componentSpec = {
       wantsHideNativeHead: true,
@@ -349,10 +350,17 @@ describe("runtime/widget-registrar.js", function () {
 
     registeredDef.renderHtml.call({}, {});
     expect(seen).toEqual([hostActions]);
+    expect(runtimeHostActions).toHaveBeenCalledTimes(1);
   });
 
   it("injects hostActions into init, html, and finalize widget contexts", function () {
-    const { context, registerWidget, hostActions } = setupContext();
+    const snapshots = [];
+    const runtimeHostActions = vi.fn(() => {
+      const snapshot = { getCapabilities: vi.fn(), routePoints: {}, routeEditor: {}, ais: {} };
+      snapshots.push(snapshot);
+      return snapshot;
+    });
+    const { context, registerWidget, runtimeHostActions: hostActionsFn } = setupContext({ runtimeHostActions });
     const seen = {
       init: [],
       html: [],
@@ -385,10 +393,11 @@ describe("runtime/widget-registrar.js", function () {
     registeredDef.renderHtml.call(widgetContext, {});
     registeredDef.finalizeFunction.call(widgetContext, {});
 
-    expect(seen.init).toEqual([hostActions]);
-    expect(seen.html).toEqual([hostActions]);
-    expect(seen.finalize).toEqual([hostActions]);
+    expect(seen.init).toEqual([snapshots[0]]);
+    expect(seen.html).toEqual([snapshots[1]]);
+    expect(seen.finalize).toEqual([snapshots[2]]);
+    expect(hostActionsFn).toHaveBeenCalledTimes(3);
     expect(registeredDef.renderCanvas).toBeUndefined();
-    expect(widgetContext.hostActions).toBe(hostActions);
+    expect(widgetContext.hostActions).toBe(snapshots[2]);
   });
 });

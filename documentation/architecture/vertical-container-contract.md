@@ -31,19 +31,20 @@ Committed DOM ancestry checks are not canonical for pre-commit policy.
 Supported route metadata forms:
 
 - ratio sizing: `{ kind: "ratio", aspectRatio: number }`
-- route-specific natural sizing: finalized after activation inside the committed renderer shadow CSS
+- natural sizing: `{ kind: "natural" }`
+- `shellSizing.kind === "natural"` emits no inline height or aspect-ratio and reserves no cold-load height; the committed renderer shadow CSS owns the final size after activation
 
 ## RoutePoints Exception
 
 RoutePoints is the only width-derived natural-height widget.
 
 - first pass may not have authoritative width pre-commit
-- exact width-derived natural height is finalized on first commit before surface attach
+- exact width-derived natural height is owned by the committed renderer shadow CSS after activation
 - viewport cap policy is widget-owned (currently 60vh)
 
 ## CSS Ownership Rule
 
-Vertical shell reserved height is runtime-owned on the inert shell.
+Vertical shell reserved height for ratio sizing is runtime-owned on the inert shell.
 
 - shell CSS must not override reserved shell height with unconditional fill rules on .widgetData.dyni-shell
 - inner surface descendants may still fill within the reserved shell

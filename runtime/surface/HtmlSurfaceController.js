@@ -117,13 +117,25 @@
     return mountEl.attachShadow({ mode: "open" });
   }
 
-  function measureShellRect(mountEl) {
+  function measureShellRect(mountEl, route) {
     if (!mountEl || typeof mountEl.getBoundingClientRect !== "function") {
       return null;
     }
     const rect = mountEl.getBoundingClientRect();
     const width = Number(rect && rect.width);
     const height = Number(rect && rect.height);
+    const shellSizingKind = route && route.shellSizing ? route.shellSizing.kind : null;
+
+    if (shellSizingKind === "natural") {
+      if (!(width > 0)) {
+        return null;
+      }
+      return {
+        width: width,
+        height: height > 0 ? height : 0
+      };
+    }
+
     if (!(width > 0) || !(height > 0)) {
       return null;
     }
@@ -141,7 +153,8 @@
       shellEl: payload.shellEl,
       mountEl: state.mountEl,
       shadowRoot: state.shadowRoot,
-      shellRect: measureShellRect(state.mountEl),
+      route: payload.route || null,
+      shellRect: measureShellRect(state.mountEl, payload.route),
       hostContext: state.hostContext,
       layoutChanged: layoutChanged === true,
       relayoutPass: relayoutPass || 0,

@@ -250,12 +250,16 @@ describe("runtime/component-loader.js", function () {
 
   it("createInstance fails before component closure is loaded", function () {
     const { runtime } = setup();
-    runtime.theme = { resolveForRoot: vi.fn(() => ({})) };
+    runtime.theme = {
+      tokens: {
+        resolveForRoot: vi.fn(() => ({}))
+      }
+    };
     runtime.perf = { startSpan: vi.fn(), endSpan: vi.fn() };
     runtime.format = { applyFormatter: vi.fn() };
     runtime.canvas = { setupCanvas: vi.fn() };
     runtime.dom = { requirePluginRoot: vi.fn(), getNightModeState: vi.fn() };
-    runtime.hostActions = {};
+    runtime.hostActions = vi.fn(() => ({}));
 
     const loader = runtime.createComponentLoader({
       A: { js: "/a.js", css: undefined, globalKey: "DyniA" }
@@ -268,12 +272,17 @@ describe("runtime/component-loader.js", function () {
 
   it("createInstance builds deterministic dependency instances and fresh trees per call", async function () {
     const { runtime, context } = setup();
-    runtime.theme = { resolveForRoot: vi.fn(() => ({ token: true })) };
+    runtime.theme = {
+      tokens: {
+        resolveForRoot: vi.fn(() => ({ token: true }))
+      }
+    };
     runtime.perf = { startSpan: vi.fn(() => null), endSpan: vi.fn() };
     runtime.format = { applyFormatter: vi.fn((v) => String(v)) };
     runtime.canvas = { setupCanvas: vi.fn() };
     runtime.dom = { requirePluginRoot: vi.fn(), getNightModeState: vi.fn(() => false) };
-    runtime.hostActions = { routePoints: {} };
+    const hostActions = { routePoints: {} };
+    runtime.hostActions = vi.fn(() => hostActions);
 
     context.DyniComponents.DyniDep = {
       create: vi.fn(() => ({ dep: true }))
@@ -310,16 +319,21 @@ describe("runtime/component-loader.js", function () {
     expect(first.canvas).toBe(runtime.canvas);
     expect(first.dom).toBe(runtime.dom);
     expect(first.hostActions).toBe(runtime.hostActions);
+    expect(first.hostActions()).toBe(hostActions);
   });
 
   it("denies undeclared dependency access through componentContext.components.require", async function () {
     const { runtime, context } = setup();
-    runtime.theme = { resolveForRoot: vi.fn(() => ({})) };
+    runtime.theme = {
+      tokens: {
+        resolveForRoot: vi.fn(() => ({}))
+      }
+    };
     runtime.perf = { startSpan: vi.fn(() => null), endSpan: vi.fn() };
     runtime.format = { applyFormatter: vi.fn((v) => String(v)) };
     runtime.canvas = { setupCanvas: vi.fn() };
     runtime.dom = { requirePluginRoot: vi.fn(), getNightModeState: vi.fn(() => false) };
-    runtime.hostActions = {};
+    runtime.hostActions = vi.fn(() => ({}));
 
     context.DyniComponents.DyniA = {
       create: vi.fn((def, componentContext) => {
@@ -340,12 +354,16 @@ describe("runtime/component-loader.js", function () {
 
   it("reports dependency cycles on load and create paths", async function () {
     const { runtime, context } = setup();
-    runtime.theme = { resolveForRoot: vi.fn(() => ({})) };
+    runtime.theme = {
+      tokens: {
+        resolveForRoot: vi.fn(() => ({}))
+      }
+    };
     runtime.perf = { startSpan: vi.fn(() => null), endSpan: vi.fn() };
     runtime.format = { applyFormatter: vi.fn((v) => String(v)) };
     runtime.canvas = { setupCanvas: vi.fn() };
     runtime.dom = { requirePluginRoot: vi.fn(), getNightModeState: vi.fn(() => false) };
-    runtime.hostActions = {};
+    runtime.hostActions = vi.fn(() => ({}));
 
     context.DyniComponents.DyniA = { create: vi.fn(() => ({})) };
     context.DyniComponents.DyniB = { create: vi.fn(() => ({})) };
