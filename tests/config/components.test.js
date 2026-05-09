@@ -23,7 +23,7 @@ function loadFullComponentRegistry(context) {
 }
 
 describe("config/components.js", function () {
-  it("creates component registry from baseUrl and keeps ClusterWidget transitional deps", function () {
+  it("creates component registry from baseUrl and keeps ClusterWidget on the runtime boundary", function () {
     const context = createScriptContext({
       DyniPlugin: {
         baseUrl: "http://host/plugins/dyninstruments/",
@@ -36,11 +36,7 @@ describe("config/components.js", function () {
     loadFullComponentRegistry(context);
 
     const components = context.DyniPlugin.config.components;
-    expect(components.ClusterWidget.deps).toEqual([
-      "ClusterMapperToolkit",
-      "ClusterRendererRouter",
-      "ClusterMapperRegistry"
-    ]);
+    expect(components.ClusterWidget.deps).toEqual([]);
     expect(components.CanvasLayerCache.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/canvas/CanvasLayerCache.js");
     expect(components.XteHighwayPrimitives.deps).toEqual(["GeometryScale"]);
   });

@@ -4,33 +4,34 @@
 
 ## Overview
 
-ClusterWidget is the runtime orchestrator used by cluster-based widgets.
+ClusterWidget is the live shell/orchestrator boundary for cluster-based widgets.
 
 Primary owners:
 
 - cluster/ClusterWidget.js: lifecycle orchestration and commit ordering
 - cluster/mappers/ClusterMapperRegistry.js: cluster mapper resolution
 - cluster/rendering/ClusterKindCatalog.js: strict cluster/kind route tuples
-- cluster/rendering/ClusterRendererRouter.js: shell rendering and surface routing
 - cluster/rendering/ClusterSurfacePolicy.js: centralized surface policy + vertical shell sizing integration
 - cluster/rendering/HtmlSurfaceController.js: committed HTML lifecycle owner
 - cluster/rendering/CanvasDomSurfaceAdapter.js: committed canvas lifecycle owner
+- runtime/cluster/ClusterShellRenderer.js: route-frame normalization before shell rendering
 
 ## Runtime Flow
 
 1. host calls translateFunction(props)
-2. mapper registry resolves cluster mapper and returns normalized renderer payload
-3. renderHtml(props) returns inert shell markup only
-4. HostCommitController resolves committed root/shell for the latest render revision
-5. ClusterWidget commit callback applies runtime._theme outputs to root
-6. router creates session payload (including normalized surfacePolicy and shell sizing materialization)
-7. SurfaceSessionController reconciles html/canvas-dom surface session
+2. runtime.clusterShellRenderer normalizes the route frame
+3. ClusterWidget.renderHtml(routeFrame) returns inert shell markup
+4. HostCommitController resolves committed root/shell
+5. ClusterWidget applies runtime.theme to the committed root
+6. ClusterWidget calls SurfaceSessionController.detachForShellReplacement()
+7. runtime.routeActivation activates the committed route
+8. SurfaceSessionController reconciles the activated payload
 
 ## Theme and Commit Ordering
 
 Commit order is strict:
 
-- runtime._theme.applyToRoot(rootEl)
+- runtime.theme.applyToRoot(rootEl)
 - then surface session reconcile
 
 This ensures both HTML and canvas render against the same committed theme outputs.

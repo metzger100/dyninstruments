@@ -89,16 +89,17 @@ Runtime assets:
 runtime/init.js:
 
 - computes needed components from widget definitions
-- startup loads the required component set for the current surface mix, while route activation loads active route roots on demand
+- startup deps are now runtime-bound, and ClusterWidget.deps is intentionally []
+- route roots are loaded lazily by RouteActivationController
 - appends ThemeModel and ThemeResolver
 - preloads the declared shadowCss URLs for the needed components in the current boot path
 - configures runtime._theme
 - registers widgets
 
-RouteActivationController is introduced in Phase 4 for the upcoming activation path:
+RouteActivationController is introduced in Phase 4, and the Phase 6 cutover is now live:
 
 - `runtime/cluster/RouteActivationController.js` builds activated route payloads on demand
-- ClusterWidget remains on the legacy ClusterRendererRouter path until the later cutover phase
+- ClusterWidget now owns the live shell/orchestrator cutover path
 
 ## Related
 

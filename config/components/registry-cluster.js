@@ -110,11 +110,7 @@
       js: BASE + "cluster/ClusterWidget.js",
       css: undefined,
       globalKey: "DyniClusterWidget",
-      deps: [
-        "ClusterMapperToolkit",
-        "ClusterRendererRouter",
-        "ClusterMapperRegistry"
-      ]
+      deps: []
     },
     CourseHeadingMapper: {
       js: BASE + "cluster/mappers/CourseHeadingMapper.js",

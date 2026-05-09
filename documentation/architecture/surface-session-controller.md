@@ -20,7 +20,7 @@
   - throws when returned controllers do not implement `attach`/`update`/`detach`/`destroy`
 - Stale guard: `reconcileSession(payload)` returns `false` when `payload.revision < mountedRevision`
 - Return value: `reconcileSession(payload)` returns `true` when the session is accepted and processed
-- Called from `ClusterWidget` host-commit pipeline (`HostCommitController.onCommit` -> router `createSessionPayload` -> `reconcileSession`)
+- Called from the Phase 6 live flow (`HostCommitController.onCommit` -> `ClusterWidget` applies `runtime.theme` -> `SurfaceSessionController.detachForShellReplacement()` -> `RouteActivationController` builds an activated payload -> `SurfaceSessionController.reconcileSession(payload)`)
 - Same-surface transitions:
   - no active controller: create controller and attach
   - same route + same renderer + same surface + same shell: `update(payload)`

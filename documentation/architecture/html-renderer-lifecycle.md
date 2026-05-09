@@ -8,16 +8,16 @@ dyninstruments HTML kinds are commit-driven. Pre-commit shell output is inert; s
 
 ## Authoritative Contract
 
-ClusterRendererRouter.renderHtml(...):
+ClusterWidget.renderHtml(...):
 
 - returns inert shell markup only
 - includes a stable mount host (.dyni-surface-html-mount)
 - contains only stable route/surface metadata and shell sizing state
 
-RouteActivationController is the Phase 4 activation service for the upcoming route-activation path:
+RouteActivationController is the Phase 4 activation service for the live route-activation path:
 
 - `runtime/cluster/RouteActivationController.js` builds activated route payloads on demand
-- it participates in the upcoming activation flow, but it is not the current live render owner
+- it preloads and caches per-renderer shadow CSS for the live activation path
 
 HtmlSurfaceController.createSurfaceController(...) owns committed lifecycle:
 
@@ -93,7 +93,7 @@ Committed renderers attach and remove direct DOM listeners under dispatch/passiv
 ## Styling Ownership
 
 - committed HTML styles are shadow-local
-- RouteActivationController preloads and caches per-renderer shadow CSS bundles for the upcoming activation path before hydration
+- RouteActivationController preloads and caches per-renderer shadow CSS bundles for the live activation path before hydration
 - required outer context (pageId, orientation, interaction mode) is mirrored into shadow-visible attributes/classes
 
 ## Related
