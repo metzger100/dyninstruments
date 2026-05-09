@@ -50,7 +50,6 @@
         activeRouteDomain.units.remain = toolkit.unitText("activeRouteRemain", "distance", remainToken);
         activeRouteDomain.formatUnits = { remain: remainToken };
         return {
-          renderer: "ActiveRouteTextHtmlWidget",
           wpServer: p.wpServer,
           display: {
             remain: activeRouteDomain.display.remain,
@@ -75,7 +74,6 @@
         const routePointsDomain = viewModel.build(p, toolkit);
         const distanceToken = toolkit.formatUnit("routePointsDistance", "distance");
         return {
-          renderer: "RoutePointsTextHtmlWidget",
           domain: {
             route: routePointsDomain.route,
             routeName: routePointsDomain.route ? routePointsDomain.route.name : "",
@@ -109,7 +107,6 @@
         const editRouteDomain = viewModel.build(p, toolkit);
         const route = editRouteDomain.route;
         return {
-          renderer: "EditRouteTextHtmlWidget",
           domain: {
             hasRoute: editRouteDomain.hasRoute,
             routeName: route ? route.displayName : "",
@@ -144,14 +141,12 @@
       }
       if (req === "positionBoat") {
         const o = out(p.positionBoat, cap("positionBoat"), unit("positionBoat"), "formatLonLats", []);
-        o.renderer = "PositionCoordinateWidget";
         o.coordinateFormatter = "formatLonLatsDecimal";
         o.coordinateFormatterParameters = [];
         return o;
       }
       if (req === "positionWp") {
         const o = out(p.positionWp, cap("positionWp"), unit("positionWp"), "formatLonLats", []);
-        o.renderer = "PositionCoordinateWidget";
         o.coordinateFormatter = "formatLonLatsDecimal";
         o.coordinateFormatterParameters = [];
         return o;
@@ -161,7 +156,6 @@
         const dtwToken = toolkit.formatUnit("xteDisplayDst", "distance");
         const headingUnit = unit("xteDisplayCog");
         return {
-          renderer: "XteDisplayWidget",
           display: {
             xte: num(p.xte),
             cog: num(p.cog),

@@ -4,7 +4,7 @@
 
 ## Overview
 
-dyninstruments HTML kinds are commit-driven. Pre-commit shell output is inert; semantic rendering begins only after host commit inside HtmlSurfaceController.
+dyninstruments HTML kinds are commit-driven. Pre-commit shell output is inert; semantic rendering begins only after host commit inside HtmlSurfaceController. Route metadata owns the pre-activation shell contract, and committed renderers own post-activation shadow CSS sizing and layout.
 
 ## Authoritative Contract
 
@@ -12,12 +12,14 @@ ClusterWidget.renderHtml(...):
 
 - returns inert shell markup only
 - includes a stable mount host (.dyni-surface-html-mount)
-- contains only stable route/surface metadata and shell sizing state
+- contains only stable route/surface metadata and route-owned shell sizing state
+- does not carry renderer-spec layout hooks
 
 RouteActivationController is the Phase 4 activation service for the live route-activation path:
 
 - `runtime/cluster/RouteActivationController.js` builds activated route payloads on demand
 - it preloads and caches per-renderer shadow CSS for the live activation path
+- it resolves renderer identity from `config.clusterRoutes.byRouteId`
 
 HtmlSurfaceController.createSurfaceController(...) owns committed lifecycle:
 
@@ -34,6 +36,7 @@ Committed renderer instances implement:
 - detach(reason)
 - destroy()
 - optional layoutSignature(payload)
+- there is no `getVerticalShellSizing()` renderer-spec contract
 
 ## shellRect Contract
 
@@ -94,6 +97,7 @@ Committed renderers attach and remove direct DOM listeners under dispatch/passiv
 
 - committed HTML styles are shadow-local
 - RouteActivationController preloads and caches per-renderer shadow CSS bundles for the live activation path before hydration
+- route metadata supplies pre-activation shell sizing; committed renderer shadow CSS owns post-activation sizing behavior
 - required outer context (pageId, orientation, interaction mode) is mirrored into shadow-visible attributes/classes
 
 ## Related

@@ -196,15 +196,11 @@
     }
 
     function translateFunction() { return {}; }
-    function getVerticalShellSizing() {
-      return { kind: "ratio", aspectRatio: 2 };
-    }
 
     return {
       id: "ThreeValueTextWidget",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
-      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };
   }

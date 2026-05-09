@@ -190,15 +190,10 @@
       return {};
     }
 
-    function getVerticalShellSizing() {
-      return { kind: "ratio", aspectRatio: 7 / 8 };
-    }
-
     return {
       id: "AisTargetTextHtmlWidget",
       wantsHideNativeHead: true,
       createCommittedRenderer: createCommittedRenderer,
-      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };
   }

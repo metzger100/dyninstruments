@@ -33,7 +33,7 @@ describe("CourseHeadingMapper", function () {
       compassRadialHideTextualMetrics: "yes"
     }, routeContext("hdtRadial", toolkit));
 
-    expect(out.renderer).toBe("CompassRadialWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.heading).toBe(123);
     expect(out.markerCourse).toBe(230);
     expect(out.rendererProps.leadingZero).toBe(true);
@@ -70,7 +70,7 @@ describe("CourseHeadingMapper", function () {
       compassLinearHideTextualMetrics: 0
     }, routeContext("hdtLinear", toolkit));
 
-    expect(out.renderer).toBe("CompassLinearWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.heading).toBe(311);
     expect(out.markerCourse).toBe(12);
     expect(out.caption).toBe("HDT L");

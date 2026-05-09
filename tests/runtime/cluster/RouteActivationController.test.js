@@ -119,7 +119,6 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       expect(routeContext.viewModel).toBe(viewModelInstance);
       expect(routeContext.toolkit).toEqual(expect.objectContaining({ fromToolkit: "ok" }));
       return {
-        renderer: "ActiveRouteTextHtmlWidget",
         value: props.value,
         rendererProps: {
           mergedFromRendererProps: true

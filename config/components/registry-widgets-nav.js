@@ -188,27 +188,4 @@
       ]
   };
 
-  w.RendererPropsWidget = {
-      js: BASE + "cluster/rendering/RendererPropsWidget.js",
-      css: undefined,
-      globalKey: "DyniRendererPropsWidget",
-      deps: [
-        "WindRadialWidget",
-        "CompassRadialWidget",
-        "WindLinearWidget",
-        "CompassLinearWidget",
-        "SpeedRadialWidget",
-        "SpeedLinearWidget",
-        "DepthRadialWidget",
-        "DepthLinearWidget",
-        "DefaultRadialWidget",
-        "DefaultLinearWidget",
-        "TemperatureRadialWidget",
-        "TemperatureLinearWidget",
-        "VoltageRadialWidget",
-        "VoltageLinearWidget",
-        "XteDisplayWidget"
-      ]
-  };
-
 }(this));

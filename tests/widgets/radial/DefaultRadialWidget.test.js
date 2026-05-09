@@ -83,7 +83,6 @@ describe("DefaultRadialWidget", function () {
 
     expect(h.spec.id).toBe("DefaultRadialWidget");
     expect(h.spec.wantsHideNativeHead).toBe(true);
-    expect(h.spec.getVerticalShellSizing()).toEqual({ kind: "ratio", aspectRatio: 1 });
     expect(h.spec.renderCanvas).toBe(h.renderer);
     expect(h.captured.rawValueKey).toBe("value");
     expect(h.captured.unitDefault).toBe("");

@@ -54,57 +54,11 @@
       css: undefined,
       globalKey: "DyniDefaultMapper"
     },
-    ClusterKindCatalog: {
-      js: BASE + "cluster/rendering/ClusterKindCatalog.js",
-      css: undefined,
-      globalKey: "DyniClusterKindCatalog"
-    },
-    ClusterMapperRegistry: {
-      js: BASE + "cluster/mappers/ClusterMapperRegistry.js",
-      css: undefined,
-      globalKey: "DyniClusterMapperRegistry",
-      deps: [
-        "ActiveRouteViewModel",
-        "EditRouteViewModel",
-        "RoutePointsViewModel",
-        "AisTargetViewModel",
-        "AlarmViewModel",
-        "CourseHeadingMapper",
-        "SpeedMapper",
-        "EnvironmentMapper",
-        "WindMapper",
-        "NavMapper",
-        "MapMapper",
-        "AnchorMapper",
-        "VesselMapper",
-        "DefaultMapper"
-      ]
-    },
     ClusterMapperToolkit: {
       js: BASE + "cluster/mappers/ClusterMapperToolkit.js",
       css: undefined,
       globalKey: "DyniClusterMapperToolkit",
       deps: ["RadialAngleMath"]
-    },
-    ClusterRendererRouter: {
-      js: BASE + "cluster/rendering/ClusterRendererRouter.js",
-      css: undefined,
-      globalKey: "DyniClusterRendererRouter",
-      deps: [
-        "ClusterKindCatalog",
-        "ThreeValueTextWidget",
-        "PositionCoordinateWidget",
-        "ActiveRouteTextHtmlWidget",
-        "EditRouteTextHtmlWidget",
-        "RoutePointsTextHtmlWidget",
-        "MapZoomTextHtmlWidget",
-        "AisTargetTextHtmlWidget",
-        "AlarmTextHtmlWidget",
-        "CenterDisplayTextWidget",
-        "DefaultRadialWidget",
-        "DefaultLinearWidget",
-        "RendererPropsWidget"
-      ]
     },
     ClusterWidget: {
       js: BASE + "cluster/ClusterWidget.js",

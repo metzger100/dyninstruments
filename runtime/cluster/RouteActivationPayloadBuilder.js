@@ -90,6 +90,9 @@
       Object.assign(finalProps, mappedProps.rendererProps);
     }
 
+    if (Object.prototype.hasOwnProperty.call(finalProps, "renderer")) {
+      delete finalProps.renderer;
+    }
     if (Object.prototype.hasOwnProperty.call(finalProps, "rendererProps")) {
       delete finalProps.rendererProps;
     }

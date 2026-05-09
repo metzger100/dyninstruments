@@ -216,37 +216,10 @@
       return {};
     }
 
-    function getVerticalShellSizing(sizingContext, surfacePolicy) {
-      if (!surfacePolicy || surfacePolicy.containerOrientation !== "vertical") {
-        return undefined;
-      }
-      const ctx = sizingContext && typeof sizingContext === "object" ? sizingContext : {};
-      const payload = ctx.payload && typeof ctx.payload === "object" ? ctx.payload : {};
-      const domain = payload.domain && typeof payload.domain === "object" ? payload.domain : {};
-      const layout = payload.layout && typeof payload.layout === "object" ? payload.layout : {};
-      const shellWidth = htmlUtils.toFiniteNumber(ctx.shellWidth);
-      if (!(shellWidth > 0)) {
-        return undefined;
-      }
-      const pointCountRaw = htmlUtils.toFiniteNumber(domain.pointCount);
-      const pointCount = pointCountRaw >= 0 ? Math.floor(pointCountRaw) : 0;
-      const naturalHeight = layoutApi.computeNaturalHeight({
-        W: shellWidth,
-        pointCount: pointCount,
-        showHeader: layout.showHeader !== false,
-        viewportHeight: htmlUtils.toFiniteNumber(ctx.viewportHeight)
-      });
-      return {
-        kind: "natural",
-        height: String(Math.max(0, Math.floor(naturalHeight.cappedHeight))) + "px"
-      };
-    }
-
     return {
       id: "RoutePointsTextHtmlWidget",
       wantsHideNativeHead: true,
       createCommittedRenderer: createCommittedRenderer,
-      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };
   }

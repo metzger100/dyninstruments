@@ -259,7 +259,6 @@ describe("ActiveRouteTextHtmlWidget", function () {
 
     expect(renderer.id).toBe("ActiveRouteTextHtmlWidget");
     expect(typeof renderer.createCommittedRenderer).toBe("function");
-    expect(renderer.getVerticalShellSizing()).toEqual({ kind: "ratio", aspectRatio: 2 });
   });
 
   it("renders dispatch markup and dispatches route open on click", function () {

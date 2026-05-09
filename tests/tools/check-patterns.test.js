@@ -621,7 +621,7 @@ tiny();
   it("allows role-based ids in cluster/rendering", function () {
     const cwd = createWorkspace({
       "config/clusters/vessel.js": "\n",
-      "cluster/rendering/RendererPropsWidget.js": "\n"
+      "cluster/rendering/RoleBasedWidget.js": "\n"
     });
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });

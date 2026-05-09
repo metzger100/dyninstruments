@@ -93,15 +93,11 @@
     function translateFunction() {
       return {};
     }
-    function getVerticalShellSizing() {
-      return { kind: "ratio", aspectRatio: 2 };
-    }
 
     return {
       id: "VoltageLinearWidget",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
-      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };
   }

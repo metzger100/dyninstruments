@@ -220,10 +220,7 @@
     return {
       id: "AlarmTextHtmlWidget",
       wantsHideNativeHead: true,
-      createCommittedRenderer: createCommittedRenderer,
-      getVerticalShellSizing: function () {
-        return { kind: "ratio", aspectRatio: 2 };
-      }
+      createCommittedRenderer: createCommittedRenderer
     };
   }
 

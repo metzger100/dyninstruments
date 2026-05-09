@@ -28,7 +28,6 @@
         const depthAlarmOn = (p.depthLinearAlarmEnabled !== false);
 
         return {
-          renderer: "DepthLinearWidget",
           value: p.depth,
           caption: cap("depthLinear"),
           unit: displayUnit,
@@ -57,7 +56,6 @@
         const depthAlarmOn = (p.depthRadialAlarmEnabled !== false);
 
         return {
-          renderer: "DepthRadialWidget",
           value: p.depth,
           caption: cap("depthRadial"),
           unit: displayUnit,
@@ -85,7 +83,6 @@
         const tempWarnOn = (p.tempRadialWarningEnabled === true);
         const tempAlarmOn = (p.tempRadialAlarmEnabled === true);
         return {
-          renderer: "TemperatureRadialWidget",
           value: p.temp,
           caption: cap("tempRadial"),
           unit: displayUnit,
@@ -113,7 +110,6 @@
         const tempWarnOn = (p.tempLinearWarningEnabled === true);
         const tempAlarmOn = (p.tempLinearAlarmEnabled === true);
         return {
-          renderer: "TemperatureLinearWidget",
           value: p.temp,
           caption: cap("tempLinear"),
           unit: displayUnit,

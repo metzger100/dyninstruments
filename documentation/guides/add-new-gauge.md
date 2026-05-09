@@ -15,6 +15,7 @@ Read first:
 
 New semicircle gauges should be thin wrappers over `SemicircleRadialEngine`. Keep gauge modules focused on formatting, tick strategy, and sector strategy.
 Cluster host registration stays `renderHtml`; canvas gauge wrappers are mounted through the internal `canvas-dom` surface.
+Route selection lives in `config.clusterRoutes.byRouteId`; it owns `mapperId`, `rendererId`, `surface`, optional `viewModelId`, and `shellSizing`.
 
 For linear instruments, use [add-new-linear-gauge.md](add-new-linear-gauge.md) and `LinearGaugeEngine`.
 
@@ -77,16 +78,16 @@ NewGaugeWidget: {
 }
 ```
 
-## Step 3: Wire ClusterWidget Renderer Registry
+## Step 3: Add Route Metadata
 
-If `ClusterWidget` should render this gauge, update both declaration and runtime selection:
+If `ClusterWidget` should render this gauge, update the route entry in `config/cluster-routes/<cluster>.js`:
 
-1. `config/components/registry-widgets-nav.js`: add `"NewGaugeWidget"` to `RendererPropsWidget.deps`
-2. `config/components/registry-cluster.js`: `ClusterRendererRouter` already depends on `RendererPropsWidget`; no direct per-widget edit is needed there
-3. `cluster/rendering/ClusterRendererRouter.js`:
-- instantiate the new renderer spec in `rendererSpecs`
-4. `cluster/rendering/ClusterKindCatalog.js`:
-- add strict tuple with `rendererId: "NewGaugeWidget"` and `surface: "canvas-dom"`
+1. set `mapperId` to the cluster mapper
+2. set `rendererId` to `"NewGaugeWidget"`
+3. set `surface` to `"canvas-dom"`
+4. set `shellSizing` to the route's pre-activation shell contract
+
+If this gauge needs a new renderer component, register that component in the relevant `config/components/registry-*.js` fragment and keep its shadow CSS with the component.
 
 ## Step 4: Route Data via Mapper Module
 
@@ -94,7 +95,6 @@ Update the relevant cluster mapper module (`cluster/mappers/*.js`) so translatio
 
 ```javascript
 return {
-  renderer: "NewGaugeWidget",
   value: p.someValue,
   caption: cap("someRadialKind"),
   unit: unit("someRadialKind"),
@@ -117,10 +117,8 @@ Do not move layout, compact-geometry, or responsive-floor logic into mapper file
 
 - [ ] Gauge wrapper created in `widgets/radial/NewGaugeWidget/NewGaugeWidget.js`
 - [ ] Module registered in `config/components/registry-widgets-gauge.js`
-- [ ] Added to `RendererPropsWidget.deps` in `config/components/registry-widgets-nav.js` (if ClusterWidget-rendered)
-- [ ] Renderer wired in `cluster/rendering/ClusterRendererRouter.js`
-- [ ] Kind catalog tuple added with `surface: "canvas-dom"` in `cluster/rendering/ClusterKindCatalog.js`
-- [ ] Mapper module emits `renderer: "NewGaugeWidget"` and expected props
+- [ ] Route metadata updated in `config/cluster-routes/<cluster>.js`
+- [ ] Mapper module emits route props and expected values
 - [ ] Visual + resize behavior validated
 
 ## Related

@@ -1,31 +1,51 @@
 # Cluster Widget System
 
-**Status:** ✅ Implemented | Strict route catalog + commit-driven shell/surface orchestration
+**Status:** ✅ Implemented | Route-metadata-driven shell/surface orchestration
 
 ## Overview
 
-ClusterWidget is the live shell/orchestrator boundary for cluster-based widgets.
+ClusterWidget is the live shell/orchestrator boundary for cluster-based widgets. Route identity, renderer choice, and shell sizing come from `config.clusterRoutes.byRouteId`.
 
 Primary owners:
 
 - cluster/ClusterWidget.js: lifecycle orchestration and commit ordering
-- cluster/mappers/ClusterMapperRegistry.js: cluster mapper resolution
-- cluster/rendering/ClusterKindCatalog.js: strict cluster/kind route tuples
-- cluster/rendering/ClusterSurfacePolicy.js: centralized surface policy + vertical shell sizing integration
-- cluster/rendering/HtmlSurfaceController.js: committed HTML lifecycle owner
-- cluster/rendering/CanvasDomSurfaceAdapter.js: committed canvas lifecycle owner
-- runtime/cluster/ClusterShellRenderer.js: route-frame normalization before shell rendering
+- config/cluster-routes/*.js: route metadata assembly into `config.clusterRoutes.byRouteId` (`routeId`, `mapperId`, `rendererId`, `surface`, optional `viewModelId`, `shellSizing`)
+- cluster/mappers/*Mapper.js: declarative route-props mapping only; no renderer identity
+- runtime/cluster/ClusterShellRenderer.js: route-frame normalization and pre-activation shell sizing materialization
+- runtime/cluster/RouteActivationController.js: lazy route activation service composition
+- runtime/cluster/RouteActivationPayloadBuilder.js: mapper/view-model/renderer loading plus `rendererProps` merge/strip
+- runtime/surface/HtmlSurfaceController.js: committed HTML lifecycle owner
+- runtime/surface/CanvasDomSurfaceAdapter.js: committed canvas lifecycle owner
+
+## Route Metadata Contract
+
+`config.clusterRoutes.byRouteId[routeId]` is the source of route identity and route policy.
+
+It owns:
+
+- `routeId`
+- `mapperId`
+- `rendererId`
+- `surface`
+- optional `viewModelId`
+- `shellSizing`
+
+Mapper output is route props only.
+
+- mappers do not emit renderer identity
+- `rendererProps` is merged into the activated props during route activation
+- `renderer` and `rendererProps` are stripped from the activated payload after merge
 
 ## Runtime Flow
 
 1. host calls translateFunction(props)
-2. runtime.clusterShellRenderer normalizes the route frame
+2. runtime.clusterShellRenderer normalizes the route frame and reads route metadata
 3. ClusterWidget.renderHtml(routeFrame) returns inert shell markup
 4. HostCommitController resolves committed root/shell
 5. ClusterWidget applies runtime.theme to the committed root
 6. ClusterWidget calls SurfaceSessionController.detachForShellReplacement()
-7. runtime.routeActivation activates the committed route
-8. SurfaceSessionController reconciles the activated payload
+7. runtime.routeActivation activates the committed route from `config.clusterRoutes.byRouteId`
+8. RouteActivationPayloadBuilder merges `rendererProps` into route props, strips renderer identity fields, and SurfaceSessionController reconciles the activated payload
 
 ## Theme and Commit Ordering
 
@@ -67,8 +87,11 @@ Renderers do not call host capability APIs directly.
 In vertical mode:
 
 - host owns width
-- widget owns height through getVerticalShellSizing(...)
-- runtime/router materializes ratio sizing via aspect-ratio and natural sizing via height on the inert shell
+- pre-activation shell sizing is route metadata owned by ClusterShellRenderer
+- ClusterShellRenderer materializes routeMeta.shellSizing onto the inert shell
+- post-activation sizing is renderer shadow CSS owned inside the committed renderer
+- there is no renderer-spec `getVerticalShellSizing(...)` hook
+- route-specific natural-height behavior is finalized after activation inside the committed renderer, not by the shell
 
 RoutePoints is the only width-derived natural-height exception finalized at first commit before surface attach.
 

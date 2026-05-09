@@ -262,7 +262,6 @@ describe("NavMapper", function () {
     }, routeContext("activeRoute", toolkit, activeRouteViewModel));
 
     expect(out).toEqual({
-      renderer: "ActiveRouteTextHtmlWidget",
       wpServer: true,
       display: {
         remain: 18.2,
@@ -303,7 +302,7 @@ describe("NavMapper", function () {
       activeRouteApproaching: false
     }, routeContext("activeRoute", toolkit, activeRouteViewModel));
 
-    expect(out.renderer).toBe("ActiveRouteTextHtmlWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.display.isApproaching).toBe(false);
     expect(out.display.nextCourse).toBe(91);
     expect(out.captions.nextCourse).toBe("NEXT CAP");
@@ -344,13 +343,13 @@ describe("NavMapper", function () {
 
     expect(out.formatter).toBe("formatLonLats");
     expect(out.value).toEqual([1, 2]);
-    expect(out.renderer).toBe("PositionCoordinateWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.coordinateFormatter).toBe("formatLonLatsDecimal");
     expect(out.coordinateFormatterParameters).toEqual([]);
 
     const wp = mapper.translate({ kind: "positionWp", positionWp: { lon: 3, lat: 4 } }, routeContext("positionWp", toolkit));
     expect(wp.formatter).toBe("formatLonLats");
-    expect(wp.renderer).toBe("PositionCoordinateWidget");
+    expect(wp).not.toHaveProperty("renderer");
     expect(wp.coordinateFormatter).toBe("formatLonLatsDecimal");
     expect(wp.coordinateFormatterParameters).toEqual([]);
   });
@@ -372,7 +371,7 @@ describe("NavMapper", function () {
       xteRatioThresholdFlat: "2.4"
     }, routeContext("xteDisplay", toolkit));
 
-    expect(out.renderer).toBe("XteDisplayWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.display).toEqual({
       xte: 0.25,
       cog: 93,
@@ -441,7 +440,6 @@ describe("NavMapper", function () {
     }, routeContext("routePoints", toolkit, routePointsViewModel));
 
     expect(out).toEqual({
-      renderer: "RoutePointsTextHtmlWidget",
       domain: {
         route: {
           name: "Harbor Run",
@@ -549,7 +547,6 @@ describe("NavMapper", function () {
     }, routeContext("editRoute", toolkit, editRouteViewModel));
 
     expect(out).toEqual({
-      renderer: "EditRouteTextHtmlWidget",
       domain: {
         hasRoute: true,
         routeName: "Harbor Run",
@@ -623,7 +620,6 @@ describe("NavMapper", function () {
     }, routeContext("editRoute", toolkit, editRouteViewModel));
 
     expect(out).toEqual({
-      renderer: "EditRouteTextHtmlWidget",
       domain: {
         hasRoute: false,
         routeName: "",

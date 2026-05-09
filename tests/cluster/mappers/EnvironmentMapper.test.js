@@ -80,7 +80,7 @@ describe("EnvironmentMapper", function () {
       depthLinearHideTextualMetrics: 1
     }, routeContext("depthLinear", makeToolkit()));
 
-    expect(out.renderer).toBe("DepthLinearWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.rendererProps.depthLinearAlarmFrom).toBe(2);
     expect(out.rendererProps.depthLinearWarningFrom).toBe(5);
     expect(out.rendererProps.depthLinearHideTextualMetrics).toBe(true);
@@ -103,7 +103,7 @@ describe("EnvironmentMapper", function () {
       depthRadialHideTextualMetrics: 0
     }, routeContext("depthRadial", makeToolkit()));
 
-    expect(out.renderer).toBe("DepthRadialWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.rendererProps.depthRadialAlarmFrom).toBe(2);
     expect(out.rendererProps.depthRadialWarningFrom).toBe(5);
     expect(out.rendererProps.depthRadialHideTextualMetrics).toBe(false);
@@ -128,7 +128,7 @@ describe("EnvironmentMapper", function () {
       tempRadialHideTextualMetrics: true
     }, routeContext("tempRadial", makeToolkit()));
 
-    expect(out.renderer).toBe("TemperatureRadialWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.formatter).toBe("formatTemperature");
     expect(out.formatterParameters).toEqual(["celsius"]);
     expect(out.rendererProps.tempRadialWarningFrom).toBeUndefined();
@@ -155,7 +155,7 @@ describe("EnvironmentMapper", function () {
       tempLinearHideTextualMetrics: 0
     }, routeContext("tempLinear", makeToolkit()));
 
-    expect(out.renderer).toBe("TemperatureLinearWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.formatter).toBe("formatTemperature");
     expect(out.formatterParameters).toEqual(["celsius"]);
     expect(out.rendererProps.tempLinearWarningFrom).toBeUndefined();

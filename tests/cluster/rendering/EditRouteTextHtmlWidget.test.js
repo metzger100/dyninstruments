@@ -159,7 +159,6 @@ describe("EditRouteTextHtmlWidget", function () {
 
     expect(renderer.id).toBe("EditRouteTextHtmlWidget");
     expect(typeof renderer.createCommittedRenderer).toBe("function");
-    expect(renderer.getVerticalShellSizing()).toEqual({ kind: "ratio", aspectRatio: 7 / 8 });
   });
 
   it("dispatches route-editor open action only in dispatch state", function () {

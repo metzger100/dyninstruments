@@ -13,13 +13,15 @@ Read first:
 ## Overview
 
 A cluster is one AvNav widget with multiple `kind` choices (numeric and optionally radial). All cluster widgets use `widget: "ClusterWidget"`.
-Cluster host registration is `renderHtml`; per-kind render behavior is selected by strict kind-catalog tuples with explicit `surface` (`canvas-dom` or `html`).
+Cluster host registration is `renderHtml`; per-kind render behavior is selected by route metadata in `config.clusterRoutes.byRouteId`, which supplies `mapperId`, `rendererId`, `surface`, optional `viewModelId`, and `shellSizing`.
 
 Translation logic lives in one mapper module per cluster.
 
 Mapper contract:
 - Keep mappers declarative only (`create` + `translate`, kind routing, value normalization).
 - Put formatter/status/display logic in renderer modules or shared toolkit helpers.
+- Do not emit renderer identity from the mapper; activation resolves it from route metadata.
+- If a mapper needs renderer-specific values, put them under `rendererProps`; activation merges that object and strips it from the final payload.
 - For each formatter-bearing kind, define/update a contract tuple in docs:
   - [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md)
   - [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md)
@@ -113,7 +115,6 @@ Create `cluster/mappers/NewClusterMapper.js`:
 
       if (p.kind === "value1Radial") {
         return {
-          renderer: "NewGauge",
           value: p.value1,
           caption: cap("value1Radial"),
           unit: unit("value1Radial")
@@ -140,30 +141,24 @@ Create `cluster/mappers/NewClusterMapper.js`:
 
 ## Step 4: Register Mapper Module
 
-Update both config-time and runtime mapper lists:
-
 1. `config/components/registry-cluster.js`
 - Add module entry for `NewClusterMapper`
-- Add to `ClusterMapperRegistry.deps`
-2. `cluster/mappers/ClusterMapperRegistry.js`
-- Add `"newcluster": "NewClusterMapper"` to `MAPPER_MODULE_IDS`
 
-## Step 5: Optional Radial Renderer Wiring
+## Step 5: Add Route Metadata
 
-If mapper returns `renderer: "NewGauge"`:
+Create or update the route entry in `config/cluster-routes/<cluster>.js` so `config.clusterRoutes.byRouteId[routeId]` points at the new route.
 
-1. Register `NewGauge` in `config/components/registry-widgets-gauge.js`
-2. Add `NewGauge` to `RendererPropsWidget.deps` in `config/components/registry-widgets-nav.js`
-3. Wire runtime selection in `cluster/rendering/ClusterRendererRouter.js`:
-- add `NewGauge: Helpers.getModule("NewGauge").create(def, Helpers)` to `rendererSpecs`
-4. Add or update the route tuple in `cluster/rendering/ClusterKindCatalog.js` with explicit `surface`:
-- `surface: "canvas-dom"` for canvas wrappers
-- `surface: "html"` for native HTML renderers
+Set:
 
-Naming rule for `cluster/rendering/` components:
-- Use role-based IDs (example: `ClusterRendererRouter`, `RendererPropsWidget`), not cluster-prefixed IDs.
-- Keep file basename, component ID, returned `id`, and `globalKey` aligned.
-- Do not add per-kind mapper-to-widget forwarding shims there.
+- `mapperId: "NewClusterMapper"`
+- `rendererId: "NewGauge"` or an existing renderer component
+- `surface: "canvas-dom"` or `"html"`
+- optional `viewModelId`
+- `shellSizing`
+
+If the route needs a new renderer component, register that renderer in the appropriate `config/components/registry-*.js` fragment and keep its shadow CSS declaration with the component.
+
+Do not add `ClusterRendererRouter`, `ClusterKindCatalog`, or `RendererPropsWidget` wiring here; route metadata owns the live route selection.
 
 ## Renderer Decision Rule
 
@@ -183,14 +178,14 @@ For a new `kind` in an existing cluster:
 3. Add any new `storeKeys` / `editableParameters`
    Mark runtime-only threshold/ratio editables with `internal: true`; keep real user controls visible.
 4. Update matching mapper module in `cluster/mappers/<Cluster>.js`
-5. If the kind is radial and uses a new renderer, also complete renderer wiring from Step 5
-6. Add or update the strict kind-catalog tuple (`cluster`, `kind`, `viewModelId`, `rendererId`, `surface`)
+5. Add or update the route entry in `config/cluster-routes/<cluster>.js` with `mapperId`, `rendererId`, `surface`, optional `viewModelId`, and `shellSizing`
+6. If the kind is radial and uses a new renderer, register that renderer component and its shadow CSS in the appropriate component fragment
 
 ## Validate
 
 - Ensure each `kind` translates to expected output
 - Ensure numeric kinds route to `ThreeValueTextWidget`
-- Ensure radial kinds set correct `renderer` and props
+- Ensure radial kinds set correct route metadata and props
 - Ensure unknown kinds return `{}`
 - Resize widget and verify layout behavior in AvNav
 
@@ -201,10 +196,8 @@ For a new `kind` in an existing cluster:
 - [ ] Cluster script included in `plugin.js` internal load order
 - [ ] Mapper module added/updated in `cluster/mappers/`
 - [ ] Module entry added in `config/components/registry-cluster.js`
-- [ ] Mapper added in `ClusterMapperRegistry.deps` (`config/components/registry-cluster.js`)
-- [ ] Mapper added in runtime `MAPPER_MODULE_IDS` (`cluster/mappers/ClusterMapperRegistry.js`)
-- [ ] Renderer wiring updated (if radial)
-- [ ] Kind catalog tuple added/updated with explicit `surface`
+- [ ] Route metadata added/updated in `config/cluster-routes/<cluster>.js`
+- [ ] Renderer component registered if the route needs a new renderer
 - [ ] Every formatter-bearing kind has documented tuple (`kind -> key -> raw unit/type -> formatter -> formatterParameters`) in core contract docs
 
 ## Related

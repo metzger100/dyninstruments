@@ -124,7 +124,7 @@ describe("VesselMapper", function () {
       voltageLinearHideTextualMetrics: "yes"
     }, routeContext("voltageLinear", toolkit));
 
-    expect(out.renderer).toBe("VoltageLinearWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.value).toBe(12.4);
     expect(out.formatter).toBe("formatDecimal");
     expect(out.formatterParameters).toEqual([3, 1, true]);
@@ -165,7 +165,7 @@ describe("VesselMapper", function () {
       voltageRadialHideTextualMetrics: 0
     }, routeContext("voltageRadial", toolkit));
 
-    expect(out.renderer).toBe("VoltageRadialWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.value).toBe(12.4);
     expect(out.formatter).toBe("formatDecimal");
     expect(out.formatterParameters).toEqual([3, 1, true]);
@@ -236,7 +236,7 @@ describe("VesselMapper", function () {
       dateTimeRatioThresholdFlat: "4.55",
       default: "---"
     }, routeContext("dateTime", toolkit));
-    expect(out.renderer).toBe("PositionCoordinateWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.displayVariant).toBe("dateTime");
     expect(out.value).toEqual([rawClock, rawClock]);
     expect(out.caption).toBe("");
@@ -250,7 +250,7 @@ describe("VesselMapper", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const out = mapper.translate({ kind: "timeStatus", clock: rawClock, gpsValid: true, default: "---" }, routeContext("timeStatus", toolkit));
-    expect(out.renderer).toBe("PositionCoordinateWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.displayVariant).toBe("timeStatus");
     expect(out.value).toEqual([rawClock, true]);
     expect(out.caption).toBe("");
@@ -402,7 +402,6 @@ describe("VesselMapper", function () {
     }, routeContext("alarm", toolkit, makeAlarmViewModel()));
 
     expect(out).toEqual({
-      renderer: "AlarmTextHtmlWidget",
       caption: "ALARM",
       unit: "",
       default: "NONE",

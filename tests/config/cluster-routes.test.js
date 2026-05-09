@@ -1,6 +1,4 @@
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
-const { createComponentContextMock } = require("../helpers/component-context-mock");
-const { loadFresh } = require("../helpers/load-umd");
 
 const COMPONENT_REGISTRY_FRAGMENT_SCRIPTS = [
   "config/components/registry-shared-foundation-format.js",
@@ -231,40 +229,4 @@ describe("config/cluster-routes metadata", function () {
     expect(routeMetadataJson.includes("Roboto")).toBe(false);
   });
 
-  it("rebased ClusterKindCatalog delegates to config.clusterRoutes without synthetic viewModel defaults", function () {
-    const context = loadClusterRouteEnvironment();
-    const routes = context.DyniPlugin.config.clusterRoutes.routes;
-    const originalPlugin = globalThis.DyniPlugin;
-
-    globalThis.DyniPlugin = context.DyniPlugin;
-
-    try {
-      const catalogFactory = loadFresh("cluster/rendering/ClusterKindCatalog.js").create({}, createComponentContextMock());
-      const catalog = catalogFactory.createDefaultCatalog();
-      const catalogRoutes = catalog.listRoutes();
-
-      expect(catalogRoutes).toHaveLength(59);
-
-      routes.forEach(function (route) {
-        const resolved = catalog.resolveRoute(route.cluster, route.kind);
-        expect(resolved.cluster).toBe(route.cluster);
-        expect(resolved.kind).toBe(route.kind);
-        expect(resolved.rendererId).toBe(route.rendererId);
-        expect(resolved.surface).toBe(route.surface);
-
-        if (Object.prototype.hasOwnProperty.call(route, "viewModelId")) {
-          expect(resolved.viewModelId).toBe(route.viewModelId);
-        } else {
-          expect(Object.prototype.hasOwnProperty.call(resolved, "viewModelId")).toBe(false);
-        }
-      });
-    }
-    finally {
-      if (typeof originalPlugin === "undefined") {
-        delete globalThis.DyniPlugin;
-      } else {
-        globalThis.DyniPlugin = originalPlugin;
-      }
-    }
-  });
 });

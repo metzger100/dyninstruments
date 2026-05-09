@@ -411,15 +411,10 @@
       return {};
     }
 
-    function getVerticalShellSizing() {
-      return { kind: "ratio", aspectRatio: 2 };
-    }
-
     return {
       id: "MapZoomTextHtmlWidget",
       wantsHideNativeHead: true,
       createCommittedRenderer: translateFunction,
-      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateWidget
     };
   }

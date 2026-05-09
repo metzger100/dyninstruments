@@ -168,15 +168,11 @@
     function translateFunction() {
       return {};
     }
-    function getVerticalShellSizing() {
-      return { kind: "ratio", aspectRatio: 1 };
-    }
 
     return {
       id: "CompassRadialWidget",
       wantsHideNativeHead: true,
       renderCanvas: renderCanvas,
-      getVerticalShellSizing: getVerticalShellSizing,
       translateFunction: translateFunction
     };
   }

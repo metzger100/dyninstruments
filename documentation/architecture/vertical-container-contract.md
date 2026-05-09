@@ -1,6 +1,6 @@
 # Vertical Container Contract
 
-**Status:** ✅ Implemented | Widget-owned vertical shell sizing with runtime materialization
+**Status:** ✅ Implemented | Route-owned vertical shell sizing with renderer shadow CSS
 
 ## Overview
 
@@ -9,7 +9,7 @@ Vertical sizing is a shell contract shared across HTML and canvas surfaces.
 - outside .widgetContainer.vertical: host owns dimensions
 - inside .widgetContainer.vertical: host owns width, widget owns height
 
-Runtime owns request/materialization timing; widgets own height policy.
+Runtime owns request/materialization timing; route metadata owns pre-activation shell sizing, and committed renderers own post-activation sizing in shadow CSS.
 
 ## Canonical Vertical Context
 
@@ -20,29 +20,18 @@ Pre-commit vertical context comes from props.mode.
 
 Committed DOM ancestry checks are not canonical for pre-commit policy.
 
-## Widget-Owned Sizing API
+## Route Metadata Sizing Contract
 
-Widgets that support vertical mode expose:
+`config.clusterRoutes.byRouteId[routeId].shellSizing` owns the pre-activation shell sizing contract.
 
-getVerticalShellSizing(sizingContext, surfacePolicy)
+- route metadata is read by `ClusterShellRenderer`
+- route metadata is applied to the inert shell before activation
+- the committed renderer does not expose a `getVerticalShellSizing()` hook
 
-sizingContext contains:
+Supported route metadata forms:
 
-- payload (normalized routed payload)
-- shellWidth (authoritative host width when available)
-- viewportHeight (runtime-owned host fact)
-
-Legal return shapes:
-
-- ratio sizing: { kind: ratio, aspectRatio }
-- natural sizing: { kind: natural, height }
-
-Materialization rules:
-
-- ratio -> shell aspect-ratio style
-- natural -> shell height style
-
-Runtime does not derive alternate formulas from returned height.
+- ratio sizing: `{ kind: "ratio", aspectRatio: number }`
+- route-specific natural sizing: finalized after activation inside the committed renderer shadow CSS
 
 ## RoutePoints Exception
 
@@ -63,4 +52,5 @@ Vertical shell reserved height is runtime-owned on the inert shell.
 
 - html-renderer-lifecycle.md
 - cluster-widget-system.md
+- runtime-lifecycle.md
 - ../shared/responsive-scale-profile.md

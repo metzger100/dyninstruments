@@ -110,7 +110,6 @@ describe("MapMapper", function () {
     }, routeContext("centerDisplay", toolkit));
 
     expect(out).toEqual({
-      renderer: "CenterDisplayTextWidget",
       display: {
         position: { lat: 54.2, lon: 10.3 },
         marker: { course: 91, distance: 1852 },
@@ -163,7 +162,6 @@ describe("MapMapper", function () {
       kind: "centerDisplay",
       centerPosition: { lat: 54.2, lon: 10.3 }
     }, routeContext("centerDisplay", customToolkit))).toEqual({
-      renderer: "CenterDisplayTextWidget",
       display: {
         position: { lat: 54.2, lon: 10.3 },
         marker: { course: undefined, distance: undefined },
@@ -212,7 +210,6 @@ describe("MapMapper", function () {
     }, routeContext("zoom", toolkit));
 
     expect(out).toEqual({
-      renderer: "MapZoomTextHtmlWidget",
       zoom: 12.3,
       requiredZoom: 11.5,
       caption: "ZOOM CAP",
@@ -245,7 +242,6 @@ describe("MapMapper", function () {
     }, routeContext("aisTarget", toolkit, makeAisTargetViewModel()));
 
     expect(out).toEqual({
-      renderer: "AisTargetTextHtmlWidget",
       domain: {
         mmsiRaw: 123456789,
         mmsiNormalized: "123456789",

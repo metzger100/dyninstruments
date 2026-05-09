@@ -174,6 +174,7 @@
           hostContext: hostContext
         });
       }
+      // dyni-lint-disable-next-line catch-fallback-without-suppression -- Activation failures are logged by the runtime boundary; the shell remains committed.
       catch (error) {
         runtimeApi.routeActivation.reportActivationError(error);
         return;

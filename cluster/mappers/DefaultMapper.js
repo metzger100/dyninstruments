@@ -51,7 +51,6 @@
           defaultLinearHideTextualMetrics: !!p.defaultLinearHideTextualMetrics
         };
         const translated = {
-          renderer: "DefaultLinearWidget",
           value: p.value,
           caption: cap("linearGauge"),
           unit: unit("linearGauge"),
@@ -93,7 +92,6 @@
           defaultRadialHideTextualMetrics: !!p.defaultRadialHideTextualMetrics
         };
         const translated = {
-          renderer: "DefaultRadialWidget",
           value: p.value,
           caption: cap("radialGauge"),
           unit: unit("radialGauge"),

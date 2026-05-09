@@ -25,7 +25,6 @@
       if (effKind === "hdtRadial" || effKind === "hdmRadial") {
         const heading = (effKind === "hdtRadial") ? p.hdt : p.hdm;
         return {
-          renderer: "CompassRadialWidget",
           heading: heading,
           markerCourse: p.brg,
           caption: cap(effKind),
@@ -43,7 +42,6 @@
       if (effKind === "hdtLinear" || effKind === "hdmLinear") {
         const heading = (effKind === "hdtLinear") ? p.hdt : p.hdm;
         return {
-          renderer: "CompassLinearWidget",
           heading: heading,
           markerCourse: p.brg,
           caption: cap(effKind),

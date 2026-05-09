@@ -64,7 +64,7 @@ describe("WindMapper", function () {
       windRadialHideTextualMetrics: "yes"
     }, routeContext("angleTrueRadial", makeToolkit()));
 
-    expect(out.renderer).toBe("WindRadialWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.angle).toBe(-32);
     expect(out.speed).toBe(6.1);
     expect(out.rendererProps.angleCaption).toBe("TWA G");
@@ -131,7 +131,7 @@ describe("WindMapper", function () {
       windLinearHideTextualMetrics: 0
     }, routeContext("angleTrueLinear", makeToolkit()));
 
-    expect(out.renderer).toBe("WindLinearWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.angle).toBe(-28);
     expect(out.speed).toBe(5.4);
     expect(out.rendererProps.angleCaption).toBe("TWA L");

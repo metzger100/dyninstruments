@@ -67,7 +67,6 @@ describe("DefaultMapper", function () {
     }, routeContext("linearGauge", toolkit));
 
     expect(linear).toMatchObject({
-      renderer: "DefaultLinearWidget",
       value: 12.3,
       caption: "VALUE",
       unit: "",
@@ -131,7 +130,6 @@ describe("DefaultMapper", function () {
     }, routeContext("radialGauge", toolkit));
 
     expect(radial).toMatchObject({
-      renderer: "DefaultRadialWidget",
       value: 12.3,
       caption: "VALUE",
       unit: "",

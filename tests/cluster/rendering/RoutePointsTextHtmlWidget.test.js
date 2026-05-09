@@ -191,20 +191,12 @@ describe("RoutePointsTextHtmlWidget", function () {
     };
   }
 
-  it("exposes committed renderer contract and vertical natural sizing", function () {
+  it("exposes committed renderer contract", function () {
     const setup = createRenderer();
     const renderer = setup.renderer;
 
     expect(renderer.id).toBe("RoutePointsTextHtmlWidget");
     expect(typeof renderer.createCommittedRenderer).toBe("function");
-
-    const verticalSizing = renderer.getVerticalShellSizing(
-      { shellWidth: 320, viewportHeight: 900, payload: { domain: { pointCount: 4 }, layout: { showHeader: true } } },
-      { containerOrientation: "vertical" }
-    );
-
-    expect(verticalSizing).toEqual({ kind: "natural", height: "240px" });
-    expect(setup.computeNaturalHeight).toHaveBeenCalledTimes(1);
   });
 
   it("dispatches route-point activation for valid row clicks", function () {

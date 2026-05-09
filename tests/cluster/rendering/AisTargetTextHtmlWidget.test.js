@@ -213,7 +213,6 @@ describe("AisTargetTextHtmlWidget", function () {
 
     expect(renderer.id).toBe("AisTargetTextHtmlWidget");
     expect(typeof renderer.createCommittedRenderer).toBe("function");
-    expect(renderer.getVerticalShellSizing()).toEqual({ kind: "ratio", aspectRatio: 7 / 8 });
   });
 
   it("renders dispatch state and dispatches showInfo on click", function () {

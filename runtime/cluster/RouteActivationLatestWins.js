@@ -122,15 +122,13 @@
           });
       }
 
-      runLoadCycle().catch(
-        // dyni-lint-disable-next-line catch-fallback-without-suppression -- Load failures reject the activation promise; destroy resolves through the sentinel path.
-        function (error) {
+      // dyni-lint-disable-next-line catch-fallback-without-suppression -- Load failures reject the activation promise; destroy resolves through the sentinel path.
+      runLoadCycle().catch(function (error) {
           if (entry.settled) {
             return;
           }
           entry.reject(error);
-        }
-      );
+        });
 
       return entry.promise;
     }

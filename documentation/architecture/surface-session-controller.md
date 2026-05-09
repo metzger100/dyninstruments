@@ -4,7 +4,7 @@
 
 ## Overview
 
-`runtime/SurfaceSessionController.js` coordinates per-instance surface lifecycle transitions after host commit resolution. `cluster/ClusterWidget.js` uses it to reconcile attach/update/remount/surface-switch transitions against the mounted shell through the runtime surfaces service.
+`runtime/SurfaceSessionController.js` coordinates per-instance surface lifecycle transitions after host commit resolution. `cluster/ClusterWidget.js` uses it to reconcile attach/update/remount/surface-switch transitions against the mounted shell through the runtime surfaces service. The mounted route and renderer identities come from `config.clusterRoutes.byRouteId`.
 
 ## Key Details
 
@@ -67,8 +67,8 @@ session.getState();
 
 | Key | Type | Required | Notes |
 |---|---|---|---|
-| `routeId` | `string` | yes | Mounted route identity used for route comparisons |
-| `rendererId` | `string` | yes | Mounted renderer identity used for renderer comparisons |
+| `routeId` | `string` | yes | Mounted route identity resolved from route metadata and used for route comparisons |
+| `rendererId` | `string` | yes | Mounted renderer identity copied from route metadata and used for renderer comparisons |
 | `surface` | `string` | yes | Must be `html` or `canvas-dom` |
 | `rootEl` | `Element` | yes | Host root for active session |
 | `shellEl` | `Element` | yes | Session shell element |
@@ -96,5 +96,6 @@ session.getState();
 - [host-commit-controller.md](host-commit-controller.md)
 - [runtime-lifecycle.md](runtime-lifecycle.md)
 - [cluster-widget-system.md](cluster-widget-system.md)
+- [vertical-container-contract.md](vertical-container-contract.md)
 - [component-system.md](component-system.md)
 - [html-renderer-lifecycle.md](html-renderer-lifecycle.md)

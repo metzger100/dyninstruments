@@ -6,6 +6,7 @@
 
 New full-circle dials should be thin wrappers over `FullCircleRadialEngine`. Keep widget modules focused on display strategy, static-layer callbacks, and pointer behavior.
 Cluster host registration remains `renderHtml`; full-circle canvas wrappers run through internal `surface: "canvas-dom"` routes.
+Route selection lives in `config.clusterRoutes.byRouteId`; it owns `mapperId`, `rendererId`, `surface`, optional `viewModelId`, and `shellSizing`.
 
 ## Prerequisites
 
@@ -113,20 +114,16 @@ NewDialWidget: {
 }
 ```
 
-## Step 3: Wire ClusterWidget Renderer Registry (If Cluster-Rendered)
+## Step 3: Add Route Metadata
 
-If `ClusterWidget` should render this dial, update both declaration and runtime selection:
+If `ClusterWidget` should render this dial, update the route entry in `config/cluster-routes/<cluster>.js`:
 
-1. In `config/components/registry-widgets-nav.js`, add `"NewDialWidget"` to `RendererPropsWidget.deps`.
-2. In `cluster/rendering/ClusterRendererRouter.js`, instantiate and expose the new renderer:
+1. set `mapperId` to the cluster mapper
+2. set `rendererId` to `"NewDialWidget"`
+3. set `surface` to `"canvas-dom"`
+4. set `shellSizing` to the route's pre-activation shell contract
 
-```javascript
-const rendererSpecs = {
-  // ...
-  NewDialWidget: Helpers.getModule("NewDialWidget").create(def, Helpers)
-};
-```
-3. In `cluster/rendering/ClusterKindCatalog.js`, add strict tuple with `rendererId: "NewDialWidget"` and `surface: "canvas-dom"`.
+If this dial needs a new renderer component, register that component in the relevant `config/components/registry-*.js` fragment and keep its shadow CSS with the component.
 
 ## Step 4: Route Data via Mapper Module
 
@@ -135,7 +132,6 @@ Update the relevant mapper (`cluster/mappers/*.js`) to emit declarative dial pro
 ```javascript
 if (p.kind === "newDialRadial") {
   return {
-    renderer: "NewDialWidget",
     pointerAngle: toolkit.num(p.someAngle),
     value: toolkit.num(p.someValue),
     caption: cap("newDialRadial"),
@@ -168,10 +164,8 @@ Decision guide:
 
 - [ ] Dial wrapper created in `widgets/radial/NewDialWidget/NewDialWidget.js`
 - [ ] Module registered in `config/components/registry-widgets-gauge.js` with `deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]`
-- [ ] Added to `RendererPropsWidget.deps` in `config/components/registry-widgets-nav.js` (if ClusterWidget-rendered)
-- [ ] Renderer wired in `cluster/rendering/ClusterRendererRouter.js` (if ClusterWidget-rendered)
-- [ ] Kind catalog tuple added in `cluster/rendering/ClusterKindCatalog.js` with `surface: "canvas-dom"`
-- [ ] Mapper returns `renderer: "NewDialWidget"` with declarative, normalized props
+- [ ] Route metadata updated in `config/cluster-routes/<cluster>.js`
+- [ ] Mapper returns declarative, normalized props
 - [ ] Layout behavior verified in `flat`, `normal`, `high`
 - [ ] Pointer tracking, theme colors, and disconnect state-screen behavior verified
 

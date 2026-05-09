@@ -67,7 +67,7 @@ describe("SpeedMapper", function () {
       speedRadialHideTextualMetrics: 1
     }, routeContext("sogRadial", makeToolkit()));
 
-    expect(out.renderer).toBe("SpeedRadialWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.value).toBe(6.4);
     expect(out.formatter).toBe("formatSpeed");
     expect(out.formatterParameters).toEqual(["kn"]);
@@ -123,7 +123,7 @@ describe("SpeedMapper", function () {
       speedLinearHideTextualMetrics: 0
     }, routeContext("sogLinear", makeToolkit()));
 
-    expect(out.renderer).toBe("SpeedLinearWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.value).toBe(7.1);
     expect(out.formatter).toBe("formatSpeed");
     expect(out.formatterParameters).toEqual(["kn"]);
@@ -150,7 +150,7 @@ describe("SpeedMapper", function () {
       speedLinearAlarmFrom: "25"
     }, routeContext("stwLinear", makeToolkit()));
 
-    expect(out.renderer).toBe("SpeedLinearWidget");
+    expect(out).not.toHaveProperty("renderer");
     expect(out.value).toBe(6.8);
     expect(out.caption).toBe("STW");
     expect(out.unit).toBe("kn");

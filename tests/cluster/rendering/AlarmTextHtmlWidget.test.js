@@ -520,15 +520,6 @@ describe("AlarmTextHtmlWidget", function () {
     expect(mountHost.querySelector(".dyni-alarm-html").classList.contains("dyni-alarm-open-passive")).toBe(true);
   });
 
-  it("returns the locked vertical shell sizing", function () {
-    const h = createHelpers();
-
-    expect(h.rendererSpec.getVerticalShellSizing()).toEqual({
-      kind: "ratio",
-      aspectRatio: 2
-    });
-  });
-
   it("emits the same accent inline geometry as AIS at identical shell sizes", function () {
     const alarmRenderer = createRealAlarmRenderer();
     const aisRenderer = createAisRendererWithRealLayout();

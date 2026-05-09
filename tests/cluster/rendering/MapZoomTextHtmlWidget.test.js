@@ -174,7 +174,6 @@ describe("MapZoomTextHtmlWidget", function () {
 
     expect(renderer.id).toBe("MapZoomTextHtmlWidget");
     expect(typeof renderer.createCommittedRenderer).toBe("function");
-    expect(renderer.getVerticalShellSizing()).toEqual({ kind: "ratio", aspectRatio: 2 });
   });
 
   it("renders dispatch markup and dispatches map check action on click", function () {

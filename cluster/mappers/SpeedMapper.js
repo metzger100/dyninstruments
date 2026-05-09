@@ -30,7 +30,6 @@
         const warnOn = (p.speedLinearWarningEnabled !== false);
         const alarmOn = (p.speedLinearAlarmEnabled !== false);
         return {
-          renderer: "SpeedLinearWidget",
           value: val,
           caption: cap(effKind),
           unit: displayUnit,
@@ -62,7 +61,6 @@
         const alarmOn = (p.speedRadialAlarmEnabled !== false);
 
         return {
-          renderer: "SpeedRadialWidget",
           value: val,
           caption: cap(effKind),
           unit: displayUnit,

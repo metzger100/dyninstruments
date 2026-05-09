@@ -15,6 +15,7 @@ Read first:
 
 Linear gauges should be thin wrappers over `LinearGaugeEngine`.
 Cluster host registration remains `renderHtml`; linear canvas wrappers run on internal `surface: "canvas-dom"` routes.
+Route selection lives in `config.clusterRoutes.byRouteId`; it owns `mapperId`, `rendererId`, `surface`, optional `viewModelId`, and `shellSizing`.
 
 Select a profile first, then keep the wrapper focused on formatter, ticks, axis mode, and sectors.
 
@@ -154,26 +155,34 @@ Use gauge-prefixed editable keys:
 
 Only expose keys relevant for the selected kind via `condition`.
 
-## Step 4: Register Component + Router
+## Step 4: Register Component
 
 1. `config/components/registry-widgets-gauge.js`
 - Add `NewLinearWidget` entry
-- Add it to `RendererPropsWidget.deps`
 
-2. `cluster/rendering/ClusterRendererRouter.js`
-- Instantiate renderer spec in `create()`
-- Add to `rendererSpecs`
-3. `cluster/rendering/ClusterKindCatalog.js`
-- Add strict tuple with `rendererId: "NewLinearWidget"` and `surface: "canvas-dom"`
+If the linear gauge needs a new renderer component, register that component in the relevant `config/components/registry-*.js` fragment and keep its shadow CSS with the component.
 
-## Step 5: Mapper Wiring
+## Step 5: Add Route Metadata
+
+Update `config/cluster-routes/<cluster>.js` so `config.clusterRoutes.byRouteId[routeId]` points at the route.
+
+Set:
+
+- `mapperId` to the cluster mapper
+- `rendererId` to `"NewLinearWidget"` or an existing renderer
+- `surface` to `"canvas-dom"`
+- optional `viewModelId`
+- `shellSizing`
+
+Do not add `ClusterRendererRouter`, `ClusterKindCatalog`, or `RendererPropsWidget` wiring here; route metadata owns the live route selection.
+
+## Step 6: Mapper Wiring
 
 Keep mapper declarative (`create` + `translate`).
 
 ```javascript
 if (p.kind === "depthLinear") {
   return {
-    renderer: "DepthLinearWidget",
     value: p.depth,
     caption: cap("depthLinear"),
     unit: unit("depthLinear"),
@@ -195,7 +204,7 @@ if (p.kind === "depthLinear") {
 
 For `centered180` and `fixed360` kinds, omit `*MinValue` / `*MaxValue` props from mapper output.
 
-## Step 6: Validate
+## Step 7: Validate
 
 Required checks:
 
@@ -219,9 +228,8 @@ Manual checks:
 - [ ] Editable parameter conditions added for new linear keys
 - [ ] Wrapper module added in `widgets/linear/`
 - [ ] Component registered in `config/components/registry-widgets-gauge.js`
-- [ ] Router wiring updated in `cluster/rendering/ClusterRendererRouter.js`
-- [ ] Kind catalog tuple added in `cluster/rendering/ClusterKindCatalog.js` with `surface: "canvas-dom"`
-- [ ] Mapper routes kind to new renderer with normalized props
+- [ ] Route metadata updated in `config/cluster-routes/<cluster>.js`
+- [ ] Mapper routes kind to expected props
 - [ ] Formatter tuple docs updated for formatter-bearing kinds:
   - [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md)
   - [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md)

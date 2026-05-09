@@ -27,7 +27,6 @@
         const warnEnabled = (p.voltageLinearWarningEnabled !== false);
         const alarmEnabled = (p.voltageLinearAlarmEnabled !== false);
         return {
-          renderer: "VoltageLinearWidget",
           value: p.value,
           caption: cap("voltageLinear"),
           unit: unit("voltageLinear"),
@@ -53,7 +52,6 @@
         const warnEnabled = (p.voltageRadialWarningEnabled !== false);
         const alarmEnabled = (p.voltageRadialAlarmEnabled !== false);
         return {
-          renderer: "VoltageRadialWidget",
           value: p.value,
           caption: cap("voltageRadial"),
           unit: unit("voltageRadial"),
@@ -84,7 +82,6 @@
       }
       if (req === "dateTime") {
         return {
-          renderer: "PositionCoordinateWidget",
           displayVariant: "dateTime",
           value: [p.clock, p.clock],
           caption: cap("dateTime"),
@@ -96,7 +93,6 @@
       }
       if (req === "timeStatus") {
         return {
-          renderer: "PositionCoordinateWidget",
           displayVariant: "timeStatus",
           value: [p.clock, p.gpsValid],
           caption: cap("timeStatus"),
@@ -136,7 +132,6 @@
         }
         const alarmDomain = alarmViewModel.build(p);
         return {
-          renderer: "AlarmTextHtmlWidget",
           caption: cap("alarm"),
           unit: unit("alarm"),
           default: "NONE",

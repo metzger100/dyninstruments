@@ -23,7 +23,6 @@
 
       if (req === "centerDisplay") {
         return {
-          renderer: "CenterDisplayTextWidget",
           display: {
             position: p.centerPosition,
             marker: {
@@ -62,7 +61,6 @@
 
       if (req === "zoom") {
         return {
-          renderer: "MapZoomTextHtmlWidget",
           zoom: num(p.zoom),
           requiredZoom: num(p.requiredZoom),
           caption: cap("zoom"),
@@ -75,7 +73,6 @@
           throw new Error("MapMapper: routeContext.viewModel is required for 'aisTarget'");
         }
         return {
-          renderer: "AisTargetTextHtmlWidget",
           domain: aisTargetViewModel.build(p),
           layout: {
             ratioThresholdNormal: num(p.aisTargetRatioThresholdNormal),

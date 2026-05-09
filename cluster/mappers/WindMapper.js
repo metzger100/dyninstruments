@@ -30,7 +30,6 @@
         const speedToken = toolkit.formatUnit(speedKind, "speed");
         const speedUnit = toolkit.unitText(speedKind, "speed", speedToken);
         return {
-          renderer: "WindRadialWidget",
           angle: isTrue ? p.twa : p.awa,
           speed: isTrue ? p.tws : p.aws,
           rendererProps: {
@@ -59,7 +58,6 @@
         const speedToken = toolkit.formatUnit(speedKind, "speed");
         const speedUnit = toolkit.unitText(speedKind, "speed", speedToken);
         return {
-          renderer: "WindLinearWidget",
           angle: isTrue ? p.twa : p.awa,
           speed: isTrue ? p.tws : p.aws,
           rendererProps: {

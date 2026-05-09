@@ -12,6 +12,10 @@ Authoritative owners:
 - runtime/init.js: startup wiring only (runInit), no self-invocation
 - runtime/theme-runtime.js: internal theme lifecycle owner (runtime._theme)
 - cluster/ClusterWidget.js: commit ordering owner (theme apply before surface reconcile)
+- config/cluster-routes/*.js: route metadata source for `config.clusterRoutes.byRouteId`
+- runtime/cluster/ClusterShellRenderer.js: route-frame normalization and pre-activation shell sizing owner
+- runtime/cluster/RouteActivationController.js: lazy route activation owner
+- runtime/cluster/RouteActivationPayloadBuilder.js: mapper/view-model/renderer loading and activated-payload assembly
 - runtime/TemporaryHostActionBridge.js: temporary host-action shim owner
 
 ## Startup Sequence
@@ -35,8 +39,9 @@ For every host commit, ClusterWidget enforces this order:
 
 1. host commit resolves committed root and shell elements
 2. runtime._theme.applyToRoot(rootEl) overwrites required --dyni-theme-* outputs
-3. ClusterRendererRouter.createSessionPayload(...) resolves route/surface policy and shell sizing materialization
-4. SurfaceSessionController.reconcileSession(...) attaches or updates html/canvas-dom surfaces
+3. runtime.routeActivation.activateCommittedRoute(...) resolves route metadata from `config.clusterRoutes.byRouteId`
+4. RouteActivationPayloadBuilder merges mapper `rendererProps`, strips renderer identity fields, and materializes the activated payload
+5. SurfaceSessionController.reconcileSession(...) attaches or updates html/canvas-dom surfaces
 
 There is no theme-change gate before apply. Outputs are applied on every commit.
 
@@ -59,6 +64,7 @@ Policy includes:
 - interaction.mode (dispatch or passive)
 - normalized callbacks under surfacePolicy.actions
 - host facts for rendering/sizing (for example viewport height)
+- route metadata fields from `config.clusterRoutes.byRouteId`: routeId, mapperId, rendererId, surface, optional viewModelId, and shellSizing
 
 Renderers do not probe host React/DOM internals directly. Host coupling stays in TemporaryHostActionBridge.
 

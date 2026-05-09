@@ -22,10 +22,6 @@
     return Number.isFinite(n) ? n : undefined;
   }
 
-  function trimText(value) {
-    return value == null ? "" : String(value).trim();
-  }
-
   function isEditingMode(props) {
     const p = props && typeof props === "object" ? props : {};
     return p.editing === true || p.dyniLayoutEditing === true;
@@ -255,78 +251,13 @@
     return routedProps;
   }
 
-  function isVerticalPolicy(surfacePolicy) {
-    return !!(surfacePolicy && surfacePolicy.containerOrientation === "vertical");
-  }
-
-  function parseVerticalSizing(sizing, allowNatural) {
-    if (!sizing || typeof sizing !== "object") {
-      return null;
-    }
-    if (sizing.kind === "ratio") {
-      const aspectRatio = toFiniteNumber(sizing.aspectRatio);
-      if (!(aspectRatio > 0)) {
-        throw new Error("ClusterRendererRouter: getVerticalShellSizing() ratio kind requires positive aspectRatio");
-      }
-      return { kind: "ratio", aspectRatio: aspectRatio };
-    }
-    if (sizing.kind === "natural") {
-      if (!allowNatural) {
-        return null;
-      }
-      const height = trimText(sizing.height);
-      if (!height) {
-        throw new Error("ClusterRendererRouter: getVerticalShellSizing() natural kind requires non-empty height");
-      }
-      return { kind: "natural", height: height };
-    }
-    throw new Error("ClusterRendererRouter: getVerticalShellSizing() kind must be 'ratio' or 'natural'");
-  }
-
-  function resolveVerticalShellSizing(routeState, routedProps, surfacePolicy, options) {
-    if (!isVerticalPolicy(surfacePolicy)) {
-      return null;
-    }
-    const rendererSpec = routeState.rendererSpec;
-    if (!rendererSpec || typeof rendererSpec.getVerticalShellSizing !== "function") {
-      return null;
-    }
-    const opts = options || {};
-    const sizing = rendererSpec.getVerticalShellSizing({
-      payload: routedProps,
-      shellWidth: opts.shellWidth,
-      viewportHeight: surfacePolicy.hostFacts && surfacePolicy.hostFacts.viewportHeight
-    }, surfacePolicy);
-    return parseVerticalSizing(sizing, opts.allowNatural === true);
-  }
-
-  function resolveRouteStateWithPolicy(routeState, hostContext, sizingOptions, cacheByHostContext) {
+  function resolveRouteStateWithPolicy(routeState, hostContext, cacheByHostContext) {
     const routedProps = withSurfacePolicyProps(routeState, hostContext, cacheByHostContext);
-    const shellSizing = resolveVerticalShellSizing(
-      routeState,
-      routedProps,
-      routedProps.surfacePolicy,
-      sizingOptions
-    );
     return {
       route: routeState.route,
       rendererSpec: routeState.rendererSpec,
-      props: routedProps,
-      shellSizing: shellSizing
+      props: routedProps
     };
-  }
-
-  function buildShellSizingStyle(shellSizing) {
-    if (!shellSizing) {
-      return "";
-    }
-    if (shellSizing.kind === "ratio") {
-      return "aspect-ratio:" + String(shellSizing.aspectRatio) + ";";
-    }
-    if (shellSizing.kind === "natural") {
-      return "height:" + shellSizing.height + ";";
-    }
-    return "";
   }
 
   function resolveShellWidth(shellEl) {
@@ -339,10 +270,9 @@
   function createClusterSurfacePolicy() {
     const cacheByHostContext = new WeakMap();
     return {
-      resolveRouteStateWithPolicy: function (routeState, hostContext, sizingOptions) {
-        return resolveRouteStateWithPolicy(routeState, hostContext, sizingOptions, cacheByHostContext);
+      resolveRouteStateWithPolicy: function (routeState, hostContext) {
+        return resolveRouteStateWithPolicy(routeState, hostContext, cacheByHostContext);
       },
-      buildShellSizingStyle: buildShellSizingStyle,
       resolveShellWidth: resolveShellWidth
     };
   }

@@ -1,5 +1,13 @@
 /* RoutePoints HTML renderer styles */
 
+:host {
+  height: auto;
+  max-height: calc(60vh);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .dyni-html-root .dyni-route-points-html {
   position: relative;
   width: 100%;
