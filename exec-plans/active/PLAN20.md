@@ -1124,7 +1124,7 @@ session.reconcileSession({
 - `npm run test` (full suite green; the activation-owned shadow CSS path and asset-policy edits must leave every existing test passing).
 - `npm run check:core`
 
-### Phase 9 — Documentation, gates, and performance baseline
+### Phase 9 — Documentation, gates, and performance
 
 **Intent:** Make the new runtime/API/lazy-activation architecture enforceable and documented.
 
@@ -1146,7 +1146,7 @@ session.reconcileSession({
    - ensure runtime service IDs are absent from `config.components` and component `deps`;
    - ensure deleted owner modules are not reintroduced;
    - block ordinary registered components from adding new direct runtime reach-throughs for normal services.
-4. Update perf harness/baseline:
+4. Update perf harness:
    - startup component count;
    - cold route activation;
    - warm same-route update;
@@ -1158,7 +1158,7 @@ session.reconcileSession({
 - All docs describe the new owners only.
 - No docs instruct adding routes to `ClusterRendererRouter`, `ClusterKindCatalog`, or `ClusterMapperRegistry`.
 - `npm run check:all` passes.
-- `npm run perf:check` passes or baseline is intentionally updated with a documented reason.
+- `npm run perf:check` passes or the failure is reported in and analysis.
 
 ---
 
@@ -1616,7 +1616,7 @@ Cold route activation is inherently async. Warm same-route updates must not pay 
 - Architecture docs describe new owners and no longer instruct use of removed router-era modules.
 - Add-new-kind/add-new-cluster guides mention route metadata entries and component registry deps.
 - `npm run check:all` passes.
-- `npm run perf:check` passes or is updated intentionally with documented baseline changes.
+- `npm run perf:check` passes.
 
 ---
 
