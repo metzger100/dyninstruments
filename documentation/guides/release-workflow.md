@@ -31,6 +31,10 @@ npm run release:prepare
 
 2. Review the JSON evidence and decide the next SemVer version from actual impact.
 3. Write the release notes markdown directly in the canonical release notes file: `releases/dyninstruments-X.Y.Z.md`.
+   - Each bullet must tell a user what changed in concrete terms.
+   - Prefer "what it does now" over "what was improved".
+   - If a bullet does not answer "what exactly changed?" or "why should I care?", rewrite it.
+   - Name the affected widget, flow, or behavior when that helps the reader understand the change.
 4. Create the release artifacts, commit, and annotated tag.
 
 ```bash
@@ -57,8 +61,15 @@ Required evidence for the decision:
 ## Release Notes Writing Guide
 
 - Write for end users first; avoid internal implementation jargon.
-- Summarize visible improvements and fixes.
-- Include upgrade notes only when users must take action.
+- Describe the visible change, the user impact, and the reason to update.
+- Prefer specific before/after wording:
+  - good: "Startup loads a single bootstrap bundle in release builds, reducing script requests."
+  - bad: "Improved startup performance."
+- Prefer concrete behavior over broad umbrella phrases:
+  - good: "Route Points now keeps natural height in vertical containers."
+  - bad: "Tightened shared layout behavior."
+- Mention user action only when the upgrade requires it.
+- Keep each bullet understandable without having to inspect the diff.
 
 Suggested structure:
 
@@ -74,6 +85,13 @@ Suggested structure:
 ## Notes
 - ...
 ```
+
+Practical checklist for each bullet:
+
+- What did the user gain or lose?
+- Where do they see the change?
+- Is there any required upgrade step?
+- Would the sentence still make sense without repo context?
 
 ## Troubleshooting
 
