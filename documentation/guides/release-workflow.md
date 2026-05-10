@@ -29,7 +29,7 @@ Releases are created locally and committed into the repository first. GitHub Rel
 npm run release:prepare
 ```
 
-2. Review the JSON output and decide the next SemVer version.
+2. Review the JSON evidence and decide the next SemVer version from actual impact.
 3. Write the release notes markdown directly in the canonical release notes file: `releases/dyninstruments-X.Y.Z.md`.
 4. Create the release artifacts, commit, and annotated tag.
 
@@ -43,11 +43,16 @@ npm run release:create -- --version=X.Y.Z
 
 | Bump | Use when |
 |---|---|
-| Major (`X+1.0.0`) | Breaking behavior or contract changes for users/configurations |
-| Minor (`X.Y+1.0`) | New user-facing features without breaking existing setups |
-| Patch (`X.Y.Z+1`) | Fixes, refactors, docs, and non-breaking maintenance |
+| Major (`X+1.0.0`) | Breaking user-facing behavior, incompatible widget/config/runtime contracts, or required migration |
+| Minor (`X.Y+1.0`) | New user-facing capability, new widget behavior or config, or non-breaking runtime work that exposes new behavior |
+| Patch (`X.Y.Z+1`) | Bug fixes, flicker/performance/stability fixes, documentation, tests, refactors, release tooling, and other non-breaking maintenance |
 
-`release:prepare` outputs `semverHint` from commit messages (`feat:` -> minor, `fix:` -> patch, `BREAKING:` or `!` -> major). Treat this as a suggestion; override it if the real user impact differs.
+`release:prepare` intentionally does not infer SemVer from Conventional Commit prefixes. This repository uses natural-language commits, so strings like `feat:`, `fix:`, `BREAKING:`, or `!` are not treated as release rules. Decide the next version by reviewing the commit messages, inspecting the diffs, and researching the affected runtime/config/widget/documentation code paths.
+
+Required evidence for the decision:
+- Commit messages as natural-language context.
+- Diff stat, name-status, and full diff views.
+- Codebase research in the touched runtime/config/widget/documentation areas.
 
 ## Release Notes Writing Guide
 

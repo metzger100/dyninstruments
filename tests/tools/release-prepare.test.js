@@ -1,5 +1,5 @@
 describe("release-prepare", function () {
-  it("builds JSON payload with commit/file summary and semver hint", async function () {
+  it("builds JSON payload with commit/file summary and semver review support", async function () {
     const { buildReleasePreparePayload } = await import("../../tools/release-prepare.mjs");
 
     const responses = new Map([
@@ -12,7 +12,7 @@ describe("release-prepare", function () {
         "2025-06-15\n"
       ],
       [
-        "log --oneline v0.3.0..HEAD",
+        "log --reverse --oneline v0.3.0..HEAD",
         [
           "abc1234 feat: add wind radial layline sectors",
           "def5678 fix: compass HDT wrap at 360°",
@@ -53,11 +53,28 @@ describe("release-prepare", function () {
       "shared/widget-kits/radial/FullCircleRadialEngine.js",
       "widgets/radial/WindRadialWidget/WindRadialWidget.js"
     ]);
-    expect(payload.semverHint).toEqual({
-      hasNewFeatures: true,
-      hasBugfixes: true,
-      hasBreakingChanges: false,
-      suggestion: "minor"
+    expect(payload.changedPaths).toEqual([
+      "documentation/guides/new-doc.md",
+      "shared/widget-kits/radial/FullCircleRadialEngine.js",
+      "tests/shared/old.test.js",
+      "widgets/radial/WindRadialWidget/WindRadialWidget.js"
+    ]);
+    expect(payload.semverReview).toEqual({
+      mode: "manual-codebase-review",
+      range: "v0.3.0..HEAD",
+      automaticSuggestion: null,
+      decisionInputs: [
+        "Read commit messages as natural-language descriptions, not Conventional Commit syntax.",
+        "Inspect changed files and relevant diffs.",
+        "Research touched runtime/config/widget/documentation areas in the codebase.",
+        "Classify SemVer from actual user-facing impact and compatibility."
+      ],
+      reviewCommands: [
+        "git log --reverse --oneline v0.3.0..HEAD",
+        "git diff --stat --find-renames v0.3.0..HEAD",
+        "git diff --name-status --find-renames v0.3.0..HEAD",
+        "git diff --find-renames v0.3.0..HEAD"
+      ]
     });
   });
 
@@ -70,7 +87,7 @@ describe("release-prepare", function () {
         if (key === "describe --tags --abbrev=0 --match v*") {
           throw new Error("no tag");
         }
-        if (key === "log --oneline") {
+        if (key === "log --reverse --oneline --root") {
           return "abc1234 fix: bootstrap\n";
         }
         if (key === "diff --name-status --find-renames --root HEAD") {
@@ -84,6 +101,58 @@ describe("release-prepare", function () {
     expect(payload.commitsSinceLastRelease).toEqual(["abc1234 fix: bootstrap"]);
     expect(payload.changeSummary.runtimeFilesChanged).toBe(1);
     expect(payload.changeSummary.devOnlyFilesChanged).toBe(0);
-    expect(payload.semverHint.suggestion).toBe("patch");
+    expect(payload.changedPaths).toEqual(["plugin.js"]);
+    expect(payload.semverReview).toEqual({
+      mode: "manual-codebase-review",
+      range: "repository history",
+      automaticSuggestion: null,
+      decisionInputs: [
+        "Read commit messages as natural-language descriptions, not Conventional Commit syntax.",
+        "Inspect changed files and relevant diffs.",
+        "Research touched runtime/config/widget/documentation areas in the codebase.",
+        "Classify SemVer from actual user-facing impact and compatibility."
+      ],
+      reviewCommands: [
+        "git log --reverse --oneline --root",
+        "git diff --stat --find-renames --root HEAD",
+        "git diff --name-status --find-renames --root HEAD",
+        "git diff --find-renames --root HEAD"
+      ]
+    });
+  });
+
+  it("does not treat Conventional Commit prefixes as semver signals", async function () {
+    const { buildReleasePreparePayload } = await import("../../tools/release-prepare.mjs");
+
+    const payload = buildReleasePreparePayload({
+      runGit(args) {
+        const key = args.join(" ");
+        if (key === "describe --tags --abbrev=0 --match v*") {
+          throw new Error("no tag");
+        }
+        if (key === "log --reverse --oneline --root") {
+          return [
+            "a1b2c3d feat: add route summary",
+            "d4e5f6a fix: clamp stale state",
+            "0f1e2d3 BREAKING: rename the runtime shell"
+          ].join("\n") + "\n";
+        }
+        if (key === "diff --name-status --find-renames --root HEAD") {
+          return "M\twidgets/example.js\n";
+        }
+        throw new Error(`unexpected git command: ${key}`);
+      }
+    });
+
+    expect(payload.commitsSinceLastRelease).toEqual([
+      "a1b2c3d feat: add route summary",
+      "d4e5f6a fix: clamp stale state",
+      "0f1e2d3 BREAKING: rename the runtime shell"
+    ]);
+    expect(payload.semverReview.automaticSuggestion).toBeNull();
+    expect(payload.semverReview).not.toHaveProperty("hasNewFeatures");
+    expect(payload.semverReview).not.toHaveProperty("hasBugfixes");
+    expect(payload.semverReview).not.toHaveProperty("hasBreakingChanges");
+    expect(payload.semverHint).toBeUndefined();
   });
 });

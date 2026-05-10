@@ -16,6 +16,7 @@ export function buildReleasePreparePayload(options = {}) {
   const changedFiles = readChangedFiles(runGit, lastTag);
 
   const runtimeChangedPaths = [];
+  const changedPaths = [];
   let runtimeFilesChanged = 0;
   let devOnlyFilesChanged = 0;
   let newFiles = 0;
@@ -23,6 +24,7 @@ export function buildReleasePreparePayload(options = {}) {
 
   for (const entry of changedFiles) {
     const normalizedPath = normalizeChangedPath(entry.path);
+    changedPaths.push(normalizedPath);
     const runtime = isRuntimePath(normalizedPath);
 
     if (runtime) {
@@ -37,6 +39,7 @@ export function buildReleasePreparePayload(options = {}) {
   }
 
   const uniqueRuntimePaths = Array.from(new Set(runtimeChangedPaths)).sort((a, b) => a.localeCompare(b));
+  const uniqueChangedPaths = Array.from(new Set(changedPaths)).sort((a, b) => a.localeCompare(b));
 
   return {
     plugin: pluginName,
@@ -49,7 +52,8 @@ export function buildReleasePreparePayload(options = {}) {
       deletedFiles
     },
     runtimeChangedPaths: uniqueRuntimePaths,
-    semverHint: buildSemverHint(commitLines)
+    changedPaths: uniqueChangedPaths,
+    semverReview: buildSemverReview(lastTag)
   };
 }
 
@@ -72,9 +76,11 @@ function readTagDate(runGit, tag) {
 }
 
 function readCommits(runGit, lastTag) {
-  const args = ["log", "--oneline"];
+  const args = ["log", "--reverse", "--oneline"];
   if (lastTag) {
     args.push(`${lastTag}..HEAD`);
+  } else {
+    args.push("--root");
   }
   const out = runGit(args).trim();
   if (!out) return [];
@@ -119,34 +125,33 @@ function parseNameStatusLine(line) {
   };
 }
 
-function buildSemverHint(commitLines) {
-  let hasNewFeatures = false;
-  let hasBugfixes = false;
-  let hasBreakingChanges = false;
-
-  for (const line of commitLines) {
-    const message = line.replace(/^[0-9a-f]+\s+/, "");
-    if (/\bBREAKING:/i.test(message) || /^[a-z]+(?:\([^)]+\))?!:/i.test(message)) {
-      hasBreakingChanges = true;
-    }
-    if (/^feat(?:\([^)]+\))?:/i.test(message)) {
-      hasNewFeatures = true;
-    }
-    if (/^fix(?:\([^)]+\))?:/i.test(message)) {
-      hasBugfixes = true;
-    }
-  }
-
-  let suggestion = "patch";
-  if (hasBreakingChanges) suggestion = "major";
-  else if (hasNewFeatures) suggestion = "minor";
-  else if (hasBugfixes) suggestion = "patch";
+function buildSemverReview(lastTag) {
+  const range = lastTag ? `${lastTag}..HEAD` : "repository history";
+  const reviewCommands = lastTag
+    ? [
+        `git log --reverse --oneline ${range}`,
+        `git diff --stat --find-renames ${range}`,
+        `git diff --name-status --find-renames ${range}`,
+        `git diff --find-renames ${range}`
+      ]
+    : [
+        "git log --reverse --oneline --root",
+        "git diff --stat --find-renames --root HEAD",
+        "git diff --name-status --find-renames --root HEAD",
+        "git diff --find-renames --root HEAD"
+      ];
 
   return {
-    hasNewFeatures,
-    hasBugfixes,
-    hasBreakingChanges,
-    suggestion
+    mode: "manual-codebase-review",
+    range,
+    automaticSuggestion: null,
+    decisionInputs: [
+      "Read commit messages as natural-language descriptions, not Conventional Commit syntax.",
+      "Inspect changed files and relevant diffs.",
+      "Research touched runtime/config/widget/documentation areas in the codebase.",
+      "Classify SemVer from actual user-facing impact and compatibility."
+    ],
+    reviewCommands
   };
 }
 
