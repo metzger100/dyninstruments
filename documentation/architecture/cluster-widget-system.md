@@ -44,7 +44,7 @@ Mapper output is route props only.
 4. HostCommitController resolves committed root/shell
 5. ClusterWidget applies runtime.theme to the committed root
 6. ClusterWidget records the committed revision floor on SurfaceSessionController
-7. ClusterWidget calls SurfaceSessionController.detachForShellReplacement()
+7. ClusterWidget calls SurfaceSessionController.detachForShellReplacement() only when the shell was actually replaced or the route is invalid/diagnostic and an active surface must be torn down
 8. runtime.routeActivation activates the committed route from `config.clusterRoutes.byRouteId`
 9. RouteActivationPayloadBuilder merges `rendererProps` into route props, strips renderer identity fields, and SurfaceSessionController reconciles the activated payload
 
@@ -54,7 +54,7 @@ Commit order is strict:
 
 - runtime.theme.applyToRoot(rootEl)
 - SurfaceSessionController.recordCommittedRevision(revision)
-- then surface session reconcile
+- then conditional shell-replacement detachment, followed by surface session reconcile
 - stale activation payload filtering belongs to SurfaceSessionController, not ClusterWidget
 
 This ensures both HTML and canvas render against the same committed theme outputs.

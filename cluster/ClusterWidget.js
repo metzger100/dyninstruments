@@ -98,6 +98,23 @@
       return routeId && clusterRoutes ? clusterRoutes[routeId] || null : null;
     }
 
+    function shouldDetachForShellReplacement(surfaceSessionController, nextShellEl, routeMeta) {
+      if (!surfaceSessionController || typeof surfaceSessionController.getState !== "function") {
+        return false;
+      }
+
+      const currentSession = surfaceSessionController.getState();
+      if (!currentSession || !currentSession.activeController) {
+        return false;
+      }
+
+      if (!routeMeta) {
+        return true;
+      }
+
+      return !!(currentSession.shellEl && currentSession.shellEl !== nextShellEl);
+    }
+
     function destroyRuntimeState(ctx) {
       const previous = ctx.__dyniClusterState;
       if (!previous) {
@@ -228,8 +245,16 @@
             ctx.__dyniHostCommitState = commitState;
 
             runtimeApi.theme.applyToRoot(commitPayload.rootEl);
+            const shellWasReplaced = shouldDetachForShellReplacement(
+              state.surfaceSessionController,
+              commitPayload.shellEl,
+              routeMeta
+            );
             state.surfaceSessionController.recordCommittedRevision(commitPayload.revision);
-            state.surfaceSessionController.detachForShellReplacement();
+
+            if (shellWasReplaced) {
+              state.surfaceSessionController.detachForShellReplacement();
+            }
 
             if (routeMeta) {
               startActivation(

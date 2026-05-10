@@ -53,14 +53,32 @@ function createHostCommitControllerMock(instanceId) {
 }
 
 function createSurfaceSessionControllerMock() {
+  const state = {
+    activeController: null,
+    shellEl: null
+  };
+
   return {
     initState: vi.fn(),
     recordCommittedRevision: vi.fn(),
-    detachForShellReplacement: vi.fn(),
-    reconcileSession: vi.fn(function () {
+    detachForShellReplacement: vi.fn(function () {
+      state.shellEl = null;
+    }),
+    reconcileSession: vi.fn(function (payload) {
+      state.activeController = state.activeController || { id: "surface-session-controller" };
+      state.shellEl = payload && Object.prototype.hasOwnProperty.call(payload, "shellEl")
+        ? payload.shellEl
+        : state.shellEl;
       return true;
     }),
-    destroy: vi.fn()
+    destroy: vi.fn(),
+    getState: vi.fn(function () {
+      return {
+        activeController: state.activeController,
+        shellEl: state.shellEl
+      };
+    }),
+    __state: state
   };
 }
 
@@ -238,7 +256,7 @@ describe("ClusterWidget", function () {
     );
     expect(harness.runtime.theme.applyToRoot).toHaveBeenCalledWith({ id: "root-1" });
     expect(harness.surfaceSessionController.recordCommittedRevision).toHaveBeenCalledWith(1);
-    expect(harness.surfaceSessionController.detachForShellReplacement).toHaveBeenCalledTimes(1);
+    expect(harness.surfaceSessionController.detachForShellReplacement).not.toHaveBeenCalled();
     expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledTimes(1);
     expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledWith({
       routeFrame: routeFrame,
@@ -258,9 +276,6 @@ describe("ClusterWidget", function () {
       harness.surfaceSessionController.recordCommittedRevision.mock.invocationCallOrder[0]
     );
     expect(harness.surfaceSessionController.recordCommittedRevision.mock.invocationCallOrder[0]).toBeLessThan(
-      harness.surfaceSessionController.detachForShellReplacement.mock.invocationCallOrder[0]
-    );
-    expect(harness.surfaceSessionController.detachForShellReplacement.mock.invocationCallOrder[0]).toBeLessThan(
       harness.activationController.activateCommittedRoute.mock.invocationCallOrder[0]
     );
     expect(harness.activationController.activateCommittedRoute.mock.invocationCallOrder[0]).toBeLessThan(
@@ -274,6 +289,127 @@ describe("ClusterWidget", function () {
     expect(harness.surfaceSessionController.destroy).toHaveBeenCalledTimes(1);
     expect(widgetContext.__dyniClusterState).toBeNull();
     expect(widgetContext.__dyniHostCommitState).toBeNull();
+  });
+
+  it("keeps the active surface attached when the committed shell stays stable", function () {
+    const routeMeta = {
+      routeId: "speed/sog",
+      cluster: "speed",
+      kind: "sog",
+      mapperId: "SpeedMapper",
+      rendererId: "SpeedLinearWidget",
+      surface: "canvas-dom",
+      shellSizing: {
+        kind: "ratio",
+        aspectRatio: 1.5
+      }
+    };
+    const stableShell = { id: "shell-stable" };
+    const activationController = createActivationControllerMock(function (payload) {
+      return {
+        routeId: routeMeta.routeId,
+        surface: routeMeta.surface,
+        rendererId: routeMeta.rendererId,
+        rendererSpec: { id: routeMeta.rendererId },
+        rootEl: payload.rootEl,
+        shellEl: payload.shellEl,
+        hostContext: payload.hostContext,
+        props: payload.routeFrame.__dyniRawProps,
+        rawProps: payload.routeFrame.__dyniRawProps,
+        revision: payload.revision,
+        shadowCssUrls: []
+      };
+    });
+    const hostCommitController = createHostCommitControllerMock("dyni-host-42");
+    hostCommitController.scheduleCommit.mockImplementation(function (callbacks) {
+      const state = hostCommitController.getState();
+      if (callbacks && typeof callbacks.onCommit === "function") {
+        callbacks.onCommit({
+          instanceId: state.instanceId,
+          revision: state.renderRevision,
+          props: state.lastProps,
+          rootEl: { id: "root-" + String(state.renderRevision) },
+          shellEl: stableShell,
+          state: Object.assign({}, state)
+        });
+      }
+      return true;
+    });
+    const harness = createRuntimeHarness({
+      routeMeta: routeMeta,
+      hostCommitController: hostCommitController,
+      activationController: activationController
+    });
+    const widget = loadFresh("cluster/ClusterWidget.js").create({ cluster: "speed" }, {});
+    const widgetContext = {};
+    const routeFrame = widget.translateFunction({ kind: "sog", mode: "vertical" });
+
+    widget.initFunction.call(widgetContext);
+    widget.renderHtml.call(widgetContext, routeFrame);
+    widget.renderHtml.call(widgetContext, routeFrame);
+
+    expect(harness.surfaceSessionController.detachForShellReplacement).not.toHaveBeenCalled();
+    expect(harness.surfaceSessionController.recordCommittedRevision).toHaveBeenNthCalledWith(1, 1);
+    expect(harness.surfaceSessionController.recordCommittedRevision).toHaveBeenNthCalledWith(2, 2);
+    expect(harness.surfaceSessionController.reconcileSession).toHaveBeenCalledTimes(2);
+    expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledTimes(2);
+  });
+
+  it("detaches the active surface when the committed shell is replaced", function () {
+    const routeMeta = {
+      routeId: "speed/sog",
+      cluster: "speed",
+      kind: "sog",
+      mapperId: "SpeedMapper",
+      rendererId: "SpeedLinearWidget",
+      surface: "canvas-dom",
+      shellSizing: {
+        kind: "ratio",
+        aspectRatio: 1.5
+      }
+    };
+    const activationController = createActivationControllerMock(function (payload) {
+      return {
+        routeId: routeMeta.routeId,
+        surface: routeMeta.surface,
+        rendererId: routeMeta.rendererId,
+        rendererSpec: { id: routeMeta.rendererId },
+        rootEl: payload.rootEl,
+        shellEl: payload.shellEl,
+        hostContext: payload.hostContext,
+        props: payload.routeFrame.__dyniRawProps,
+        rawProps: payload.routeFrame.__dyniRawProps,
+        revision: payload.revision,
+        shadowCssUrls: []
+      };
+    });
+    const harness = createRuntimeHarness({
+      routeMeta: routeMeta,
+      activationController: activationController
+    });
+    const widget = loadFresh("cluster/ClusterWidget.js").create({ cluster: "speed" }, {});
+    const widgetContext = {};
+    const routeFrame = widget.translateFunction({ kind: "sog", mode: "vertical" });
+
+    widget.initFunction.call(widgetContext);
+    widget.renderHtml.call(widgetContext, routeFrame);
+    widget.renderHtml.call(widgetContext, routeFrame);
+
+    expect(harness.surfaceSessionController.detachForShellReplacement).toHaveBeenCalledTimes(1);
+    expect(harness.surfaceSessionController.recordCommittedRevision).toHaveBeenNthCalledWith(1, 1);
+    expect(harness.surfaceSessionController.recordCommittedRevision).toHaveBeenNthCalledWith(2, 2);
+    expect(harness.surfaceSessionController.recordCommittedRevision.mock.invocationCallOrder[1]).toBeLessThan(
+      harness.surfaceSessionController.detachForShellReplacement.mock.invocationCallOrder[0]
+    );
+    expect(harness.surfaceSessionController.detachForShellReplacement.mock.invocationCallOrder[0]).toBeLessThan(
+      harness.activationController.activateCommittedRoute.mock.invocationCallOrder[1]
+    );
+    expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledTimes(2);
+    expect(harness.surfaceSessionController.reconcileSession).toHaveBeenCalledTimes(2);
+    expect(harness.surfaceSessionController.reconcileSession.mock.calls[1][0]).toEqual(expect.objectContaining({
+      revision: 2,
+      shellEl: { id: "shell-2" }
+    }));
   });
 
   it("destroys the previous controllers when AvNav reuses the widget context", function () {
@@ -358,7 +494,7 @@ describe("ClusterWidget", function () {
     );
     expect(harness.runtime.theme.applyToRoot).toHaveBeenCalledWith({ id: "root-1" });
     expect(harness.surfaceSessionController.recordCommittedRevision).toHaveBeenCalledWith(1);
-    expect(harness.surfaceSessionController.detachForShellReplacement).toHaveBeenCalledTimes(1);
+    expect(harness.surfaceSessionController.detachForShellReplacement).not.toHaveBeenCalled();
     expect(harness.activationController.activateCommittedRoute).not.toHaveBeenCalled();
     expect(harness.surfaceSessionController.reconcileSession).not.toHaveBeenCalled();
   });
@@ -413,7 +549,7 @@ describe("ClusterWidget", function () {
     expect(firstHtml).toBe("<div class=\"dyni-shell\">shell</div>");
     expect(harness.runtime.theme.applyToRoot).toHaveBeenNthCalledWith(1, { id: "root-1" });
     expect(harness.surfaceSessionController.recordCommittedRevision).toHaveBeenNthCalledWith(1, 1);
-    expect(harness.surfaceSessionController.detachForShellReplacement.mock.calls[0]).toEqual([]);
+    expect(harness.surfaceSessionController.detachForShellReplacement).not.toHaveBeenCalled();
     expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledTimes(1);
 
     const secondHtml = widget.renderHtml.call(widgetContext, diagnosticRouteFrame);
@@ -427,7 +563,7 @@ describe("ClusterWidget", function () {
     );
     expect(harness.runtime.theme.applyToRoot).toHaveBeenNthCalledWith(2, { id: "root-2" });
     expect(harness.surfaceSessionController.recordCommittedRevision).toHaveBeenNthCalledWith(2, 2);
-    expect(harness.surfaceSessionController.detachForShellReplacement.mock.calls[1]).toEqual([]);
+    expect(harness.surfaceSessionController.detachForShellReplacement).not.toHaveBeenCalled();
     expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledTimes(1);
 
     deferred.resolve();
@@ -440,7 +576,7 @@ describe("ClusterWidget", function () {
       surface: routeMeta.surface
     }));
     expect(harness.runtime.theme.applyToRoot).toHaveBeenCalledTimes(2);
-    expect(harness.surfaceSessionController.detachForShellReplacement).toHaveBeenCalledTimes(2);
+    expect(harness.surfaceSessionController.detachForShellReplacement).not.toHaveBeenCalled();
   });
 
   it("reports synchronous activation failures through the route activation boundary", function () {
@@ -472,7 +608,7 @@ describe("ClusterWidget", function () {
 
     expect(html).toBe("<div class=\"dyni-shell\">shell</div>");
     expect(harness.runtime.theme.applyToRoot).toHaveBeenCalledWith({ id: "root-1" });
-    expect(harness.surfaceSessionController.detachForShellReplacement).toHaveBeenCalledTimes(1);
+    expect(harness.surfaceSessionController.detachForShellReplacement).not.toHaveBeenCalled();
     expect(harness.runtime.routeActivation.reportActivationError).toHaveBeenCalledWith(activationError);
     expect(harness.surfaceSessionController.reconcileSession).not.toHaveBeenCalled();
   });

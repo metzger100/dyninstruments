@@ -20,7 +20,7 @@
   - throws when returned controllers do not implement `attach`/`update`/`detach`/`destroy`
 - Committed-revision floor guard: `recordCommittedRevision(revision)` stores the latest committed shell revision floor and `reconcileSession(payload)` returns `false` when `payload.revision < committedRevisionFloor`
 - Return value: `reconcileSession(payload)` returns `true` when the session is accepted and processed
-- Called from the Phase 6 live flow (`HostCommitController.onCommit` -> `ClusterWidget` applies `runtime.theme` -> `SurfaceSessionController.recordCommittedRevision(revision)` -> `SurfaceSessionController.detachForShellReplacement()` -> `RouteActivationController` builds an activated payload -> `SurfaceSessionController.reconcileSession(payload)`)
+- Called from the Phase 6 live flow (`HostCommitController.onCommit` -> `ClusterWidget` applies `runtime.theme` -> `SurfaceSessionController.recordCommittedRevision(revision)` -> conditional `SurfaceSessionController.detachForShellReplacement()` when the shell identity changed or the route became invalid -> `RouteActivationController` builds an activated payload -> `SurfaceSessionController.reconcileSession(payload)`)
 - Same-surface transitions:
   - no active controller: create controller and attach
   - same route + same renderer + same surface + same shell: `update(payload)`
@@ -33,6 +33,7 @@
   - active controller: `detach("shell-replacement")`
   - clears only `shellEl`
   - preserves `activeController` plus mounted route/renderer/surface/revision identity
+  - ClusterWidget should call it only when the committed shell was replaced or the route is invalid/diagnostic and a mounted controller exists
 - Shell sizing ownership:
   - `SurfaceSessionController` must not mutate shell sizing styles
   - shell sizing remains owned outside the session controller
