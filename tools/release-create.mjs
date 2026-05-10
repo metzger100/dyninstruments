@@ -133,7 +133,7 @@ function validateInputs({ rootDir, version, runCommand }) {
 
 function ensureZipBinaryAvailable(runCommand, rootDir) {
   const result = runCommand("zip", ["-h"], { cwd: rootDir });
-  if (result.error || result.status !== 0) {
+  if (result.status !== 0) {
     throw new Error(
       "release:create aborted: 'zip' command not found. Install it first (macOS: brew install zip; Debian/Ubuntu: apt install zip; Windows: use WSL or add zip to PATH)."
     );
@@ -159,14 +159,14 @@ function ensureCleanWorktreeOutsideReleases(runCommand, rootDir) {
 
 function runRequiredCheck(runCommand, rootDir, args, label) {
   const result = runCommand("npm", args, { cwd: rootDir });
-  if (result.error || result.status !== 0) {
+  if (result.status !== 0) {
     throw new Error(`release:create aborted: required gate failed (${label})`);
   }
 }
 
 function runAdvisoryPerfCheck(runCommand, rootDir, output) {
   const result = runCommand("npm", ["run", "perf:check"], { cwd: rootDir });
-  if (result.error || result.status !== 0) {
+  if (result.status !== 0) {
     const detail = [result.stdout, result.stderr]
       .filter((value) => typeof value === "string" && value.trim() !== "")
       .join("\n")
@@ -198,7 +198,7 @@ function createReleaseZip({ rootDir, manifestFiles, outputZipAbs, runCommand, bu
       cwd: stageParent
     });
 
-    if (zipResult.error || zipResult.status !== 0) {
+    if (zipResult.status !== 0) {
       throw new Error("release:create aborted: failed to create zip archive");
     }
   } finally {
@@ -208,7 +208,7 @@ function createReleaseZip({ rootDir, manifestFiles, outputZipAbs, runCommand, bu
 
 function runGit(runCommand, rootDir, args) {
   const result = runCommand("git", args, { cwd: rootDir });
-  if (result.error || result.status !== 0) {
+  if (result.status !== 0) {
     const detail = [result.stdout, result.stderr]
       .filter((value) => typeof value === "string" && value.trim() !== "")
       .join("\n")
