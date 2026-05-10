@@ -19,7 +19,9 @@ describe("plugin.js bootstrap", function () {
   const BOOTSTRAP_MANIFEST = loadBootstrapManifest();
 
   it("loads bootstrap-manifest first, then listed scripts in order, then calls runtime.runInit", async function () {
-    const dom = createDomHarness();
+    const dom = createDomHarness({
+      failScriptIds: ["dyni-internal-bootstrap-bundle-js"]
+    });
     const runInit = vi.fn(() => Promise.resolve());
 
     const context = createScriptContext({
@@ -40,6 +42,7 @@ describe("plugin.js bootstrap", function () {
 
     const loadedScriptSrc = dom.appendedScripts.map((item) => item.src);
     const expected = [
+      "http://host/plugins/dyninstruments/bootstrap-bundle.js",
       "http://host/plugins/dyninstruments/config/bootstrap-manifest.js"
     ].concat(BOOTSTRAP_MANIFEST.map((rel) => "http://host/plugins/dyninstruments/" + rel));
 
@@ -49,7 +52,9 @@ describe("plugin.js bootstrap", function () {
   });
 
   it("captures wrapper-local AvNav API for runtime bootstrap scripts", async function () {
-    const dom = createDomHarness();
+    const dom = createDomHarness({
+      failScriptIds: ["dyni-internal-bootstrap-bundle-js"]
+    });
     const runInit = vi.fn(() => Promise.resolve());
     const hostApi = { log: vi.fn(), registerWidget: vi.fn() };
 
@@ -70,6 +75,61 @@ describe("plugin.js bootstrap", function () {
     await flushPromises(120);
 
     expect(context.window.DyniPlugin.avnavApi).toBe(hostApi);
+    expect(runInit).toHaveBeenCalledOnce();
+  });
+
+  it("loads bootstrap-bundle.js first and skips manifest walk when bundle succeeds", async function () {
+    const dom = createDomHarness();
+    const runInit = vi.fn(() => Promise.resolve());
+
+    const context = createScriptContext({
+      document: dom.document,
+      AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
+      avnav: { api: {} },
+      window: {
+        avnav: { api: {} },
+        DyniPlugin: {
+          runtime: { runInit }
+        }
+      }
+    });
+
+    runIifeScript("plugin.js", context);
+    await flushPromises(120);
+
+    expect(dom.appendedScripts.map((item) => item.src)).toEqual([
+      "http://host/plugins/dyninstruments/bootstrap-bundle.js"
+    ]);
+    expect(dom.appendedScripts.some((item) => item.src.includes("config/bootstrap-manifest.js"))).toBe(false);
+    expect(runInit).toHaveBeenCalledOnce();
+  });
+
+  it("falls back to manifest loading when bootstrap-bundle.js fails", async function () {
+    const dom = createDomHarness({
+      failScriptIds: ["dyni-internal-bootstrap-bundle-js"]
+    });
+    const runInit = vi.fn(() => Promise.resolve());
+
+    const context = createScriptContext({
+      document: dom.document,
+      AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
+      avnav: { api: {} },
+      window: {
+        avnav: { api: {} },
+        DyniPlugin: {
+          config: { bootstrapManifest: BOOTSTRAP_MANIFEST },
+          runtime: { runInit }
+        }
+      }
+    });
+
+    runIifeScript("plugin.js", context);
+    await flushPromises(120);
+
+    expect(dom.appendedScripts.map((item) => item.src)).toEqual([
+      "http://host/plugins/dyninstruments/bootstrap-bundle.js",
+      "http://host/plugins/dyninstruments/config/bootstrap-manifest.js"
+    ].concat(BOOTSTRAP_MANIFEST.map((rel) => "http://host/plugins/dyninstruments/" + rel)));
     expect(runInit).toHaveBeenCalledOnce();
   });
 
@@ -106,7 +166,10 @@ describe("plugin.js bootstrap", function () {
 
   it("logs a clear error when bootstrap manifest cannot be loaded", async function () {
     const dom = createDomHarness({
-      failScriptIds: ["dyni-internal-config-bootstrap-manifest-js"]
+      failScriptIds: [
+        "dyni-internal-bootstrap-bundle-js",
+        "dyni-internal-config-bootstrap-manifest-js"
+      ]
     });
     const err = vi.fn();
 
@@ -122,6 +185,6 @@ describe("plugin.js bootstrap", function () {
     await flushPromises(60);
 
     expect(err).toHaveBeenCalled();
-    expect(dom.appendedScripts).toHaveLength(1);
+    expect(dom.appendedScripts).toHaveLength(2);
   });
 });

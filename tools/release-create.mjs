@@ -3,7 +3,11 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 
-import { buildReleaseManifest, validateManifest } from "./release-zip-builder.mjs";
+import {
+  buildBootstrapBundleContent,
+  buildReleaseManifest,
+  validateManifest
+} from "./release-zip-builder.mjs";
 
 const VERSION_REGEX = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
@@ -26,6 +30,7 @@ export function createRelease(options) {
   const runCommand = options.runCommand || defaultRunCommand;
   const manifestBuilder = options.manifestBuilder || buildReleaseManifest;
   const manifestValidator = options.manifestValidator || validateManifest;
+  const bundleBuilder = options.bundleBuilder || buildBootstrapBundleContent;
   const output = options.output || {
     log: (message) => console.log(message),
     warn: (message) => console.warn(message)
@@ -60,7 +65,8 @@ export function createRelease(options) {
     rootDir,
     manifestFiles,
     outputZipAbs: zipAbs,
-    runCommand
+    runCommand,
+    bundleBuilder
   });
 
   const tag = `v${version}`;
@@ -172,7 +178,7 @@ function runAdvisoryPerfCheck(runCommand, rootDir, output) {
   }
 }
 
-function createReleaseZip({ rootDir, manifestFiles, outputZipAbs, runCommand }) {
+function createReleaseZip({ rootDir, manifestFiles, outputZipAbs, runCommand, bundleBuilder }) {
   const stageParent = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-"));
   const stageRoot = path.join(stageParent, "dyninstruments");
 
@@ -183,6 +189,10 @@ function createReleaseZip({ rootDir, manifestFiles, outputZipAbs, runCommand }) 
       fs.mkdirSync(path.dirname(targetAbs), { recursive: true });
       fs.copyFileSync(sourceAbs, targetAbs);
     }
+
+    const bundleAbs = path.join(stageRoot, "bootstrap-bundle.js");
+    fs.mkdirSync(path.dirname(bundleAbs), { recursive: true });
+    fs.writeFileSync(bundleAbs, bundleBuilder(rootDir), "utf8");
 
     const zipResult = runCommand("zip", ["-q", "-r", outputZipAbs, "dyninstruments"], {
       cwd: stageParent

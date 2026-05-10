@@ -7,6 +7,7 @@
 dyninstruments can declare runtime assets on component registry entries. The component loader preloads those assets on demand and exposes them through `runtime.getAsset(key)`.
 
 This system is for widget-specific assets only. Plugin-wide fonts still live in `plugin.css` and are shipped from `assets/fonts/`.
+Release builds also include `bootstrap-bundle.js`, a concatenation of all bootstrap manifest scripts, which `plugin.js` loads as a single request when available.
 
 ## Registry Schema
 

@@ -122,6 +122,9 @@ describe("release-create", function () {
         manifestValidator() {
           return { valid: true, missing: [] };
         },
+        bundleBuilder() {
+          return "// mock bundle content\n";
+        },
         output: {
           log() {},
           warn(message) {
@@ -139,6 +142,7 @@ describe("release-create", function () {
 
       expect(zippedEntries).toEqual([
         "assets/fonts/Roboto-Regular.woff2",
+        "bootstrap-bundle.js",
         "config/bootstrap-manifest.js",
         "plugin.css",
         "plugin.js",

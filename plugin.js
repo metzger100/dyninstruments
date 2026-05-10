@@ -61,6 +61,8 @@
   ns.runtime.loadScriptOnce = loadScriptOnce;
 
   const bootstrapManifestPath = "config/bootstrap-manifest.js";
+  const bootstrapBundlePath = "bootstrap-bundle.js";
+  const bootstrapBundleId = makeScriptId(bootstrapBundlePath);
 
   function loadBootstrapManifest() {
     return loadScriptOnce(makeScriptId(bootstrapManifestPath), BASE + bootstrapManifestPath)
@@ -83,10 +85,18 @@
       });
   }
 
-  loadBootstrapManifest()
-    .then(function () {
-      return window.DyniPlugin.runtime.runInit();
-    })
+  loadScriptOnce(bootstrapBundleId, BASE + bootstrapBundlePath)
+    .then(
+      function () {
+        return window.DyniPlugin.runtime.runInit();
+      },
+      function () {
+        return loadBootstrapManifest()
+          .then(function () {
+            return window.DyniPlugin.runtime.runInit();
+          });
+      }
+    )
     // dyni-lint-disable-next-line catch-fallback-without-suppression -- Top-level bootstrap should log startup failures without turning them into unhandled browser promise rejections.
     .catch(function (e) {
       console.error("dyninstruments bootstrap failed:", e);

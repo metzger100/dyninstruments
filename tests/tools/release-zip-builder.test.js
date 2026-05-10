@@ -2,6 +2,12 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 
+function writeFile(rootDir, relPath, content) {
+  const absPath = path.join(rootDir, relPath);
+  fs.mkdirSync(path.dirname(absPath), { recursive: true });
+  fs.writeFileSync(absPath, content);
+}
+
 describe("release-zip-builder", function () {
   it("builds a sorted runtime-only manifest for the current repository", async function () {
     const { buildReleaseManifest, isRuntimePath } = await import("../../tools/release-zip-builder.mjs");
@@ -28,6 +34,62 @@ describe("release-zip-builder", function () {
     expect(isRuntimePath("runtime/init.js")).toBe(true);
     expect(isRuntimePath("tools/perf-run.mjs")).toBe(false);
     expect(isRuntimePath("tests/tools/release-zip-builder.test.js")).toBe(false);
+  });
+
+  describe("buildBootstrapBundleContent", function () {
+    it("concatenates manifest scripts in order with header comment", async function () {
+      const { buildBootstrapBundleContent } = await import("../../tools/release-zip-builder.mjs");
+
+      const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-bootstrap-bundle-"));
+      try {
+        writeFile(
+          tempRoot,
+          "runtime/namespace.js",
+          "(function (root) {\n  var ns = root.DyniPlugin = root.DyniPlugin || {};\n  ns.config = ns.config || {};\n}(this));\n"
+        );
+        writeFile(
+          tempRoot,
+          "config/bootstrap-manifest.js",
+          "(function (root) {\n  var config = root.DyniPlugin.config = root.DyniPlugin.config || {};\n  config.bootstrapManifest = [\"scripts/first.js\", \"scripts/second.js\"];\n}(this));\n"
+        );
+        writeFile(tempRoot, "scripts/first.js", "first-script();");
+        writeFile(tempRoot, "scripts/second.js", "second-script();");
+
+        const bundle = buildBootstrapBundleContent(tempRoot);
+
+        expect(bundle).toBe(
+          "// bootstrap-bundle.js — generated at release time, do not edit\n" +
+          "first-script();\n" +
+          "second-script();"
+        );
+      } finally {
+        fs.rmSync(tempRoot, { recursive: true, force: true });
+      }
+    });
+
+    it("throws when a manifest-listed file is missing", async function () {
+      const { buildBootstrapBundleContent } = await import("../../tools/release-zip-builder.mjs");
+
+      const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-bootstrap-bundle-missing-"));
+      try {
+        writeFile(
+          tempRoot,
+          "runtime/namespace.js",
+          "(function (root) {\n  var ns = root.DyniPlugin = root.DyniPlugin || {};\n  ns.config = ns.config || {};\n}(this));\n"
+        );
+        writeFile(
+          tempRoot,
+          "config/bootstrap-manifest.js",
+          "(function (root) {\n  var config = root.DyniPlugin.config = root.DyniPlugin.config || {};\n  config.bootstrapManifest = [\"scripts/missing.js\"];\n}(this));\n"
+        );
+
+        expect(function () {
+          buildBootstrapBundleContent(tempRoot);
+        }).toThrow("scripts/missing.js");
+      } finally {
+        fs.rmSync(tempRoot, { recursive: true, force: true });
+      }
+    });
   });
 
   it("reports missing files during manifest validation", async function () {

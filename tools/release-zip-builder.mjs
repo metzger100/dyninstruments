@@ -73,6 +73,25 @@ export function buildReleaseManifest(rootDir) {
   return Array.from(files).sort((a, b) => a.localeCompare(b));
 }
 
+export function buildBootstrapBundleContent(rootDir) {
+  const bootstrapManifest = loadBootstrapManifest(rootDir);
+
+  if (!Array.isArray(bootstrapManifest) || bootstrapManifest.length === 0) {
+    throw new Error("bootstrap bundle generation aborted: bootstrap manifest is missing or empty");
+  }
+
+  const scripts = bootstrapManifest.map((relPath) => {
+    const absPath = path.join(rootDir, relPath);
+    try {
+      return fs.readFileSync(absPath, "utf8");
+    } catch {
+      throw new Error(`bootstrap bundle generation aborted: failed to read ${relPath}`);
+    }
+  });
+
+  return "// bootstrap-bundle.js — generated at release time, do not edit\n" + scripts.join("\n");
+}
+
 export function validateManifest(rootDir, files) {
   const missing = [];
 
