@@ -2,7 +2,7 @@
 
 **Goal:** Rebuild the dyninstruments runtime around clean bootstrap, runtime-service, component-instantiation, and route-activation APIs; then use that runtime to remove eager clustered startup and activate only the mapper, optional view-model, renderer, shadow CSS, and route-specific assets required by the active widget route.
 
-**Status:** Plan — not yet implemented
+**Status:** ✅ Completed
 
 ---
 
