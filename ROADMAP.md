@@ -14,6 +14,7 @@ It tracks pre-release priorities and AvNav widget coverage status.
 ### Improvements for the existing widgets
 
 - add a theme token for opacity of captions and units
+- add linearXteDisplay optimized for small and flat widgets.
 
 ### Additional non-core concepts (post release)
 
