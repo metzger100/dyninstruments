@@ -8,7 +8,7 @@
 
 ## Status
 
-This plan is the implementation source of truth for four fixes from the ROADMAP. Three are bug fixes; the fourth is a documentation cleanup. Issues 1 and 3 are compatibility-breaking changes with no automatic migration. The fourth ROADMAP fix item ("Set the aspect ratio of Radial widgets in widgetContainer.vertical to 1") was already implemented and is removed from the roadmap as part of this plan.
+This plan is the implementation source of truth for four fixes from the ROADMAP. Three are bug fixes; the fourth is a documentation cleanup. Issues 1 and 3 are compatibility-breaking changes with no automatic migration. The fourth ROADMAP fix item ("Set the aspect ratio of Radial widgets in widgetContainer.vertical to 1") was already implemented and is removed from the roadmap as part of this plan or manually before that plan.
 
 ---
 
