@@ -7,10 +7,9 @@ It tracks pre-release priorities and AvNav widget coverage status.
 
 ### Fixes
 
-- activeRoute shows rteEta but the label says ETA which is wrong. Label and all other strings must make clear that it is RTE ETA.
+- activeRoute shows rteEta but the label says ETA which is wrong. Label and all other strings must make clear that it is RTE ETA. (compatibility change)
 - routePoints is limited in height on normal gpspages
 - Rename ETA to wpEta including the label and strings (compatibility change)
-- Set the aspect ratio of Radial widgets in widgetContainer.vertical to 1
 
 ### Improvements for the existing widgets
 
