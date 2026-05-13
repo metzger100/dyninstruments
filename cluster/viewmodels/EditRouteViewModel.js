@@ -122,7 +122,7 @@
         hasRoute: !!route,
         isActiveRoute: active,
         remainingDistance: active ? toFiniteNumber(p.rteDistance) : undefined,
-        eta: active ? p.rteEta : undefined,
+        rteEta: active ? p.rteEta : undefined,
         hideSeconds: p.hideSeconds === true
       };
     }

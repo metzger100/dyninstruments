@@ -88,10 +88,10 @@
 
     const routeNameText = htmlUtils.trimText(display.routeName) || defaultText;
     const remainCaption = htmlUtils.trimText(captions.remain);
-    const etaCaption = htmlUtils.trimText(captions.eta);
+    const etaCaption = htmlUtils.trimText(captions.rteEta);
     const nextCourseCaption = htmlUtils.trimText(captions.nextCourse);
     const remainUnit = htmlUtils.trimText(units.remain);
-    const etaUnit = htmlUtils.trimText(units.eta);
+    const etaUnit = htmlUtils.trimText(units.rteEta);
     const nextCourseUnit = htmlUtils.trimText(units.nextCourse);
     const remainFormatUnit = formatUnits.remain;
     const remainRawText = htmlFit.formatMetric(
@@ -103,7 +103,7 @@
       placeholderNormalize
     );
     const etaRawText = htmlFit.formatMetric(
-      display.eta,
+      display.rteEta,
       etaFormatter,
       [],
       defaultText,
@@ -196,7 +196,7 @@
     const metricValueOverrides = fitStyles && fitStyles.metricValues ? fitStyles.metricValues : Object.create(null);
     const metricSpecs = [
       { id: "remain", caption: model.remainCaption, value: model.remainText, unit: model.remainUnit },
-      { id: "eta", caption: model.etaCaption, value: model.etaText, unit: model.etaUnit }
+      { id: "rteEta", caption: model.etaCaption, value: model.etaText, unit: model.etaUnit }
     ];
     if (model.isApproaching) {
       metricSpecs.push({ id: "next", caption: model.nextCourseCaption, value: model.nextCourseText, unit: model.nextCourseUnit });

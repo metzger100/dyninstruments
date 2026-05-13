@@ -53,7 +53,7 @@
           wpServer: p.wpServer,
           display: {
             remain: activeRouteDomain.display.remain,
-            eta: activeRouteDomain.display.eta,
+            rteEta: activeRouteDomain.display.rteEta,
             nextCourse: activeRouteDomain.display.nextCourse,
             isApproaching: activeRouteDomain.display.isApproaching,
             routeName: activeRouteDomain.routeName,
@@ -113,7 +113,7 @@
             pointCount: route ? route.pointCount : 0,
             totalDistance: route ? route.totalDistance : undefined,
             remainingDistance: editRouteDomain.remainingDistance,
-            eta: editRouteDomain.eta,
+            rteEta: editRouteDomain.rteEta,
             hideSeconds: editRouteDomain.hideSeconds,
             isActiveRoute: editRouteDomain.isActiveRoute,
             isLocalRoute: route ? route.isLocalRoute : false,
@@ -127,7 +127,7 @@
             pts: cap("editRoutePts"),
             dst: cap("editRouteDst"),
             rte: cap("editRouteRte"),
-            eta: cap("editRouteEta")
+            rteEta: cap("editRouteEta")
           },
           units: {
             dst: toolkit.unitText("editRouteDst", "distance", toolkit.formatUnit("editRouteDst", "distance")),

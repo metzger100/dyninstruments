@@ -47,17 +47,17 @@ describe("ActiveRouteViewModel", function () {
       disconnect: false,
       display: {
         remain: 18.2,
-        eta: rawEta,
+        rteEta: rawEta,
         nextCourse: 93,
         isApproaching: true
       },
       captions: {
         remain: "RTE CAP",
-        eta: "ETA CAP",
+        rteEta: "ETA CAP",
         nextCourse: "NEXT CAP"
       },
       units: {
-        eta: "",
+        rteEta: "",
         nextCourse: "degN"
       },
       hideSeconds: false
@@ -114,7 +114,7 @@ describe("ActiveRouteViewModel", function () {
     expect(out.disconnect).toBe(true);
     expect(out.display).toEqual({
       remain: undefined,
-      eta: null,
+      rteEta: null,
       nextCourse: undefined,
       isApproaching: false
     });

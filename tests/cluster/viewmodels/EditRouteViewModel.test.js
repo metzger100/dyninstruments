@@ -41,7 +41,7 @@ describe("EditRouteViewModel", function () {
       hasRoute: true,
       isActiveRoute: false,
       remainingDistance: undefined,
-      eta: undefined,
+      rteEta: undefined,
       hideSeconds: false
     });
   });
@@ -74,29 +74,29 @@ describe("EditRouteViewModel", function () {
     expect(out.hideSeconds).toBe(true);
   });
 
-  it("derives active state from exact raw-name equality and gates remain/eta by active state", function () {
+  it("derives active state from exact raw-name equality and gates remain/rteEta by active state", function () {
     const vm = createViewModel();
-    const eta = new Date("2026-03-31T09:30:00Z");
+    const rteEta = new Date("2026-03-31T09:30:00Z");
 
     const active = vm.build({
       editingRoute: { name: "Harbor Run", points: [] },
       activeName: "Harbor Run",
       rteDistance: "12.4",
-      rteEta: eta
+      rteEta: rteEta
     });
     expect(active.isActiveRoute).toBe(true);
     expect(active.remainingDistance).toBe(12.4);
-    expect(active.eta).toBe(eta);
+    expect(active.rteEta).toBe(rteEta);
 
     const inactive = vm.build({
       editingRoute: { name: "Harbor Run", points: [] },
       activeName: "harbor run",
       rteDistance: 99,
-      rteEta: eta
+      rteEta: rteEta
     });
     expect(inactive.isActiveRoute).toBe(false);
     expect(inactive.remainingDistance).toBeUndefined();
-    expect(inactive.eta).toBeUndefined();
+    expect(inactive.rteEta).toBeUndefined();
   });
 
   it("uses computeLength fast path when available and finite", function () {

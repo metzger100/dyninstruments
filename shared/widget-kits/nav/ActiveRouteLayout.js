@@ -147,7 +147,7 @@
         const metricColumns = splitRow(metricsRect, gap, isApproaching ? 3 : 2);
         layout.nameRect = makeRect(contentRect.x, contentRect.y, nameWidth, contentRect.h);
         layout.metricRects.remain = metricColumns[0];
-        layout.metricRects.eta = metricColumns[1];
+        layout.metricRects.rteEta = metricColumns[1];
         if (isApproaching) {
           layout.metricRects.next = metricColumns[2];
         }
@@ -179,7 +179,7 @@
       if (mode === "high") {
         const metricRows = splitStack(metricsRect, gap, isApproaching ? 3 : 2);
         layout.metricRects.remain = metricRows[0];
-        layout.metricRects.eta = metricRows[1];
+        layout.metricRects.rteEta = metricRows[1];
         if (isApproaching) {
           layout.metricRects.next = metricRows[2];
         }
@@ -189,7 +189,7 @@
       if (!isApproaching) {
         const metricColumns = splitRow(metricsRect, gap, 2);
         layout.metricRects.remain = metricColumns[0];
-        layout.metricRects.eta = metricColumns[1];
+        layout.metricRects.rteEta = metricColumns[1];
         return layout;
       }
 
@@ -203,7 +203,7 @@
       );
       const topColumns = splitRow(topRect, gap, 2);
       layout.metricRects.remain = topColumns[0];
-      layout.metricRects.eta = topColumns[1];
+      layout.metricRects.rteEta = topColumns[1];
       layout.metricRects.next = bottomRect;
       return layout;
     }

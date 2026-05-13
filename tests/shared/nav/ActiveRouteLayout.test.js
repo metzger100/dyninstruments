@@ -72,7 +72,7 @@ describe("ActiveRouteLayout", function () {
     const layout = createLayout();
     const snapshot = buildSnapshot(layout, 280, 200, "normal", true).out;
 
-    expect(snapshot.metricRects.remain.y).toBe(snapshot.metricRects.eta.y);
+    expect(snapshot.metricRects.remain.y).toBe(snapshot.metricRects.rteEta.y);
     expect(snapshot.metricRects.next.y).toBeGreaterThan(snapshot.metricRects.remain.y);
     expect(snapshot.metricRects.next.w).toBeGreaterThan(snapshot.metricRects.remain.w);
   });

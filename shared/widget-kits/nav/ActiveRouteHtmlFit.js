@@ -167,7 +167,7 @@
         unit: model.remainUnit
       },
       {
-        id: "eta",
+        id: "rteEta",
         caption: model.etaCaption,
         value: model.etaText,
         plainValue: model.etaPlainText,

@@ -104,7 +104,7 @@ describe("ActiveRouteHtmlFit", function () {
       remainText: "12.4",
       remainPlainText: "12.4",
       remainUnit: "nm",
-      etaCaption: "ETA",
+      etaCaption: "RTE ETA",
       etaText: "14:25",
       etaPlainText: "14:25",
       etaUnit: "utc",
@@ -136,8 +136,8 @@ describe("ActiveRouteHtmlFit", function () {
     });
 
     expectStyleFormat(out.routeNameStyle);
-    expect(Object.keys(out.metrics)).toEqual(["remain", "eta", "next"]);
-    ["remain", "eta", "next"].forEach((metricId) => {
+    expect(Object.keys(out.metrics)).toEqual(["remain", "rteEta", "next"]);
+    ["remain", "rteEta", "next"].forEach((metricId) => {
       expectStyleFormat(out.metrics[metricId].captionStyle);
       expectStyleFormat(out.metrics[metricId].valueStyle);
       expectStyleFormat(out.metrics[metricId].unitStyle);
@@ -350,7 +350,7 @@ describe("ActiveRouteHtmlFit", function () {
     });
 
     expect(out.metricValues.remain).toBe("12345.6");
-    expect(out.metricValues.eta).toBe("12:34");
+    expect(out.metricValues.rteEta).toBe("12:34");
     expect(hostContext.__dyniActiveRouteTextMeasureCtx.calls.some((call) => call.text === " 00012345.6" && call.font.includes("mono-serif"))).toBe(true);
     expect(hostContext.__dyniActiveRouteTextMeasureCtx.calls.some((call) => call.text === "nm" && call.font.includes("sans-serif"))).toBe(true);
   });

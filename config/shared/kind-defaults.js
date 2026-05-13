@@ -110,11 +110,11 @@
       positionBoat: { cap: "POS", unit: "" },
       positionWp: { cap: "WP", unit: "" },
       activeRouteEta: {
-        cap: "ETA",
+        cap: "RTE ETA",
         unit: "",
         kind: "activeRoute",
-        captionName: "ETA caption",
-        unitName: "ETA unit"
+        captionName: "RTE ETA caption",
+        unitName: "RTE ETA unit"
       },
       activeRouteNextCourse: {
         cap: "NEXT",

@@ -50,7 +50,7 @@
     highNameBandScale: 0.88,
     normalNameBandScale: 0.9
   };
-  const DEFAULT_METRIC_HAS_UNIT = { pts: false, dst: true, rte: true, eta: false };
+  const DEFAULT_METRIC_HAS_UNIT = { pts: false, dst: true, rte: true, rteEta: false };
 
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
@@ -254,7 +254,7 @@
       out.metricBoxes.rte = createMetricTile(tiles[2], insets, responsive, {
         unitPlacement: metricHasUnit.rte ? "inline" : "none"
       });
-      out.metricBoxes.eta = createMetricTile(tiles[3], insets, responsive, {
+      out.metricBoxes.rteEta = createMetricTile(tiles[3], insets, responsive, {
         unitPlacement: "none"
       });
     }
@@ -282,7 +282,7 @@
       });
       const insets = computeInsets(W, effectiveH, { isVerticalCommitted: verticalShell.isVerticalCommitted });
       const contentRect = cfg.contentRect || createContentRect(W, effectiveH, insets);
-      const metricVisibility = { pts: hasRoute, dst: hasRoute, rte: hasRoute, eta: hasRoute };
+      const metricVisibility = { pts: hasRoute, dst: hasRoute, rte: hasRoute, rteEta: hasRoute };
       const metricHasUnitConfig = cfg.metricHasUnit && typeof cfg.metricHasUnit === "object"
         ? cfg.metricHasUnit
         : {};
@@ -294,7 +294,7 @@
         rte: Object.prototype.hasOwnProperty.call(metricHasUnitConfig, "rte")
           ? metricHasUnitConfig.rte === true
           : DEFAULT_METRIC_HAS_UNIT.rte,
-        eta: metricHasUnitConfig.eta === true
+        rteEta: metricHasUnitConfig.rteEta === true
       };
 
       const out = {
@@ -388,7 +388,7 @@
           out.metricBoxes.rte = createMetricTile(secondRow[0], insets, insets.responsive, {
             unitPlacement: metricHasUnit.rte ? "inline" : "none"
           });
-          out.metricBoxes.eta = createMetricTile(secondRow[1], insets, insets.responsive, {
+          out.metricBoxes.rteEta = createMetricTile(secondRow[1], insets, insets.responsive, {
             unitPlacement: "none"
           });
         } else {
@@ -396,7 +396,7 @@
           out.metricBoxes.pts = createHighMetricRow(rows[0], insets, false);
           out.metricBoxes.dst = createHighMetricRow(rows[1], insets, metricHasUnit.dst);
           out.metricBoxes.rte = createHighMetricRow(rows[2], insets, metricHasUnit.rte);
-          out.metricBoxes.eta = createHighMetricRow(rows[3], insets, false);
+          out.metricBoxes.rteEta = createHighMetricRow(rows[3], insets, false);
         }
       }
 

@@ -10,7 +10,7 @@
 }(this, function () {
   "use strict";
 
-  const METRIC_IDS = ["pts", "dst", "rte", "eta"];
+  const METRIC_IDS = ["pts", "dst", "rte", "rteEta"];
 
   function toObject(value) {
     return value && typeof value === "object" ? value : {};

@@ -39,13 +39,13 @@ describe("EditRouteMarkup", function () {
       nameText: "Harbor Run",
       sourceBadgeText: "LOCAL",
       wrapperStyle: "height:auto;aspect-ratio:7/8;min-height:8em;",
-      metricVisibility: { pts: true, dst: true, rte: true, eta: true },
-      visibleMetricIds: ["pts", "dst", "rte", "eta"],
+      metricVisibility: { pts: true, dst: true, rte: true, rteEta: true },
+      visibleMetricIds: ["pts", "dst", "rte", "rteEta"],
       metrics: {
         pts: { labelText: "PTS:", valueText: "005", unitText: "", hasUnit: false },
         dst: { labelText: "DST:", valueText: "12.3", unitText: "nm", hasUnit: true },
         rte: { labelText: "RTE:", valueText: "3.9", unitText: "nm", hasUnit: true },
-        eta: { labelText: "ETA:", valueText: "12:34", unitText: "", hasUnit: false }
+        rteEta: { labelText: "ETA:", valueText: "12:34", unitText: "", hasUnit: false }
       }
     }, overrides || {});
   }
@@ -58,7 +58,7 @@ describe("EditRouteMarkup", function () {
         pts: { labelStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:12px;", unitStyle: "" },
         dst: { labelStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
         rte: { labelStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
-        eta: { labelStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:12px;", unitStyle: "" }
+        rteEta: { labelStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:12px;", unitStyle: "" }
       }
     }, overrides || {});
   }
@@ -82,7 +82,7 @@ describe("EditRouteMarkup", function () {
     const ptsIndex = html.indexOf("dyni-edit-route-metric-pts");
     const dstIndex = html.indexOf("dyni-edit-route-metric-dst");
     const rteIndex = html.indexOf("dyni-edit-route-metric-rte");
-    const etaIndex = html.indexOf("dyni-edit-route-metric-eta");
+    const etaIndex = html.indexOf("dyni-edit-route-metric-rteEta");
     expect(ptsIndex).toBeGreaterThan(-1);
     expect(dstIndex).toBeGreaterThan(ptsIndex);
     expect(rteIndex).toBeGreaterThan(dstIndex);
@@ -93,7 +93,7 @@ describe("EditRouteMarkup", function () {
       html.indexOf("dyni-edit-route-metric-pts"),
       html.indexOf("dyni-edit-route-metric-dst")
     );
-    const etaSlice = html.slice(html.indexOf("dyni-edit-route-metric-eta"));
+    const etaSlice = html.slice(html.indexOf("dyni-edit-route-metric-rteEta"));
     expect(ptsSlice).not.toContain("dyni-edit-route-metric-unit");
     expect(etaSlice).not.toContain("dyni-edit-route-metric-unit");
   });
@@ -130,7 +130,7 @@ describe("EditRouteMarkup", function () {
         canOpenEditRoute: false,
         captureClicks: false,
         visibleMetricIds: [],
-        metricVisibility: { pts: false, dst: false, rte: false, eta: false }
+        metricVisibility: { pts: false, dst: false, rte: false, rteEta: false }
       }),
       fit: makeFit({ sourceBadgeStyle: "", metrics: {} }),
       htmlUtils: createHtmlUtils()
@@ -150,8 +150,8 @@ describe("EditRouteMarkup", function () {
         mode: "flat",
         flatMetricRows: 1,
         metricsStyle: "grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(1,minmax(0,1fr));gap:3px;",
-        visibleMetricIds: ["pts", "dst", "rte", "eta"],
-        metricVisibility: { pts: true, dst: true, rte: true, eta: true }
+        visibleMetricIds: ["pts", "dst", "rte", "rteEta"],
+        metricVisibility: { pts: true, dst: true, rte: true, rteEta: true }
       }),
       fit: makeFit(),
       htmlUtils: createHtmlUtils()
@@ -162,7 +162,7 @@ describe("EditRouteMarkup", function () {
     expect(html).toContain("dyni-edit-route-metric-pts");
     expect(html).toContain("dyni-edit-route-metric-dst");
     expect(html).toContain("dyni-edit-route-metric-rte");
-    expect(html).toContain("dyni-edit-route-metric-eta");
+    expect(html).toContain("dyni-edit-route-metric-rteEta");
     expect(html).toContain("dyni-edit-route-metric-dst");
     expect(html).not.toContain("dyni-edit-route-metric-value-stack");
     expect(html).toContain('class="dyni-edit-route-metrics" style="grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(1,minmax(0,1fr));gap:3px;"');
@@ -171,7 +171,7 @@ describe("EditRouteMarkup", function () {
       html.indexOf("dyni-edit-route-metric-pts"),
       html.indexOf("dyni-edit-route-metric-dst")
     );
-    const etaSlice = html.slice(html.indexOf("dyni-edit-route-metric-eta"));
+    const etaSlice = html.slice(html.indexOf("dyni-edit-route-metric-rteEta"));
     expect(ptsSlice).not.toContain("dyni-edit-route-metric-unit");
     expect(etaSlice).not.toContain("dyni-edit-route-metric-unit");
   });
@@ -188,7 +188,7 @@ describe("EditRouteMarkup", function () {
       html.indexOf("dyni-edit-route-metric-pts"),
       html.indexOf("dyni-edit-route-metric-dst")
     );
-    const etaSlice = html.slice(html.indexOf("dyni-edit-route-metric-eta"));
+    const etaSlice = html.slice(html.indexOf("dyni-edit-route-metric-rteEta"));
     expect(ptsSlice).not.toContain("dyni-edit-route-metric-unit");
     expect(etaSlice).not.toContain("dyni-edit-route-metric-unit");
     expect(html).toContain("dyni-edit-route-metric-dst");
@@ -207,7 +207,7 @@ describe("EditRouteMarkup", function () {
           pts: { labelText: "<PTS>", valueText: "<5>", unitText: "" },
           dst: { labelText: "<DST>", valueText: "<12>", unitText: "<nm>" },
           rte: { labelText: "<RTE>", valueText: "<3>", unitText: "<nm>" },
-          eta: { labelText: "<ETA>", valueText: "<1>", unitText: "" }
+          rteEta: { labelText: "<ETA>", valueText: "<1>", unitText: "" }
         }
       }),
       fit: makeFit(),
@@ -277,7 +277,7 @@ describe("EditRouteMarkup", function () {
           pts: { labelText: "POINTS:", valueText: "005", unitText: "" },
           dst: { labelText: "DIST:", valueText: "12.3", unitText: "km" },
           rte: { labelText: "LEFT:", valueText: "3.9", unitText: "mi" },
-          eta: { labelText: "ARRIVE:", valueText: "12:34", unitText: "" }
+          rteEta: { labelText: "ARRIVE:", valueText: "12:34", unitText: "" }
         }
       }),
       fit: makeFit(),

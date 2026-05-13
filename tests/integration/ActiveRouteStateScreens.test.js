@@ -37,7 +37,7 @@ function createActiveRouteWidget() {
       routeNameStyle: "",
       metrics: {
         remain: { captionStyle: "", valueStyle: "", unitStyle: "" },
-        eta: { captionStyle: "", valueStyle: "", unitStyle: "" },
+        rteEta: { captionStyle: "", valueStyle: "", unitStyle: "" },
         next: { captionStyle: "", valueStyle: "", unitStyle: "" }
       }
     };

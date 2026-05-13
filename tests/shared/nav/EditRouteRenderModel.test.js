@@ -75,7 +75,7 @@ describe("EditRouteRenderModel", function () {
         pointCount: 5,
         totalDistance: 1234.5,
         remainingDistance: 321.4,
-        eta: "2026-03-06T11:45:00Z",
+        rteEta: "2026-03-06T11:45:00Z",
         isActiveRoute: true,
         isLocalRoute: true,
         isServerRoute: false
@@ -88,7 +88,7 @@ describe("EditRouteRenderModel", function () {
         pts: "PTS",
         dst: "DST",
         rte: "RTE",
-        eta: "ETA"
+        rteEta: "ETA"
       },
       units: {
         dst: "nm",
@@ -111,7 +111,7 @@ describe("EditRouteRenderModel", function () {
           pointCount: 0,
           totalDistance: undefined,
           remainingDistance: undefined,
-          eta: undefined,
+          rteEta: undefined,
           isActiveRoute: false,
           isLocalRoute: false,
           isServerRoute: false
@@ -143,7 +143,7 @@ describe("EditRouteRenderModel", function () {
           pointCount: 5,
           totalDistance: 1234.5,
           remainingDistance: 321.4,
-          eta: "2026-03-06T11:45:00Z",
+          rteEta: "2026-03-06T11:45:00Z",
           isActiveRoute: true,
           isLocalRoute: false,
           isServerRoute: true
@@ -171,7 +171,7 @@ describe("EditRouteRenderModel", function () {
           pointCount: 0,
           totalDistance: undefined,
           remainingDistance: undefined,
-          eta: undefined,
+          rteEta: undefined,
           isActiveRoute: false,
           isLocalRoute: false,
           isServerRoute: false
@@ -202,16 +202,16 @@ describe("EditRouteRenderModel", function () {
     expect(model.metrics.pts.labelText).toBe("PTS:");
     expect(model.metrics.dst.labelText).toBe("DST:");
     expect(model.metrics.rte.labelText).toBe("RTE:");
-    expect(model.metrics.eta.labelText).toBe("ETA:");
+    expect(model.metrics.rteEta.labelText).toBe("ETA:");
     expect(model.metrics.dst.valueText).toBe("DST(nm):1234.5");
     expect(model.metrics.rte.valueText).toBe("DST(nm):321.4");
-    expect(model.metrics.eta.valueText).toBe("TIME:2026-03-06T11:45:00Z");
+    expect(model.metrics.rteEta.valueText).toBe("TIME:2026-03-06T11:45:00Z");
     expect(model.metrics.pts.unitText).toBe("");
-    expect(model.metrics.eta.unitText).toBe("");
+    expect(model.metrics.rteEta.unitText).toBe("");
     expect(model.metrics.dst.unitText).toBe("nm");
     expect(model.metrics.rte.unitText).toBe("nm");
     expect(model.metrics.pts.hasUnit).toBe(false);
-    expect(model.metrics.eta.hasUnit).toBe(false);
+    expect(model.metrics.rteEta.hasUnit).toBe(false);
     expect(model.metrics.dst.hasUnit).toBe(true);
     expect(model.metrics.rte.hasUnit).toBe(true);
   });
@@ -226,7 +226,7 @@ describe("EditRouteRenderModel", function () {
           pointCount: 5,
           totalDistance: 1234.5,
           remainingDistance: 321.4,
-          eta: "2026-03-06T11:45:00Z",
+          rteEta: "2026-03-06T11:45:00Z",
           isActiveRoute: false,
           isLocalRoute: false,
           isServerRoute: true
@@ -237,11 +237,11 @@ describe("EditRouteRenderModel", function () {
     });
 
     expect(model.mode).toBe("normal");
-    expect(model.visibleMetricIds).toEqual(["pts", "dst", "rte", "eta"]);
+    expect(model.visibleMetricIds).toEqual(["pts", "dst", "rte", "rteEta"]);
     expect(model.metrics.rte.valueText).toBe("---");
     expect(model.metrics.rte.unitText).toBe("nm");
-    expect(model.metrics.eta.valueText).toBe("---");
-    expect(model.metrics.eta.unitText).toBe("");
+    expect(model.metrics.rteEta.valueText).toBe("---");
+    expect(model.metrics.rteEta.unitText).toBe("");
   });
 
   it("keeps all 4 metrics visible in flat mode", function () {
@@ -253,7 +253,7 @@ describe("EditRouteRenderModel", function () {
     });
 
     expect(model.mode).toBe("flat");
-    expect(model.visibleMetricIds).toEqual(["pts", "dst", "rte", "eta"]);
+    expect(model.visibleMetricIds).toEqual(["pts", "dst", "rte", "rteEta"]);
     expect(model.flatMetricRows).toBeGreaterThanOrEqual(1);
     expect(model.flatMetricColumns).toBeGreaterThanOrEqual(2);
     expect(model.wrapperStyle).toContain("grid-template-rows:minmax(0,");
@@ -270,7 +270,7 @@ describe("EditRouteRenderModel", function () {
           pointCount: 5,
           totalDistance: 1234.5,
           remainingDistance: 321.4,
-          eta: "2026-03-06T11:45:00Z",
+          rteEta: "2026-03-06T11:45:00Z",
           isActiveRoute: false,
           isLocalRoute: false,
           isServerRoute: true
@@ -281,9 +281,9 @@ describe("EditRouteRenderModel", function () {
     });
 
     expect(model.mode).toBe("flat");
-    expect(model.visibleMetricIds).toEqual(["pts", "dst", "rte", "eta"]);
+    expect(model.visibleMetricIds).toEqual(["pts", "dst", "rte", "rteEta"]);
     expect(model.metrics.rte.valueText).toBe("---");
-    expect(model.metrics.eta.valueText).toBe("---");
+    expect(model.metrics.rteEta.valueText).toBe("---");
   });
 
   it("normalizes formatter fallback tokens to --- across edit-route metrics", function () {
@@ -316,7 +316,7 @@ describe("EditRouteRenderModel", function () {
           pointCount: undefined,
           totalDistance: undefined,
           remainingDistance: undefined,
-          eta: undefined,
+          rteEta: undefined,
           isActiveRoute: false,
           isLocalRoute: false,
           isServerRoute: true
@@ -329,7 +329,7 @@ describe("EditRouteRenderModel", function () {
     expect(model.metrics.pts.valueText).toBe("---");
     expect(model.metrics.dst.valueText).toBe("---");
     expect(model.metrics.rte.valueText).toBe("---");
-    expect(model.metrics.eta.valueText).toBe("---");
+    expect(model.metrics.rteEta.valueText).toBe("---");
   });
 
   it("enables stable-digits padding for numeric edit-route metrics when configured", function () {
@@ -364,8 +364,8 @@ describe("EditRouteRenderModel", function () {
     expect(model.metrics.dst.plainValueText).toBe("3.4");
     expect(model.metrics.rte.valueText).toBe(" 03.4");
     expect(model.metrics.rte.plainValueText).toBe("3.4");
-    expect(model.metrics.eta.valueText).toBe(" 12:34");
-    expect(model.metrics.eta.plainValueText).toBe("12:34");
+    expect(model.metrics.rteEta.valueText).toBe(" 12:34");
+    expect(model.metrics.rteEta.plainValueText).toBe("12:34");
   });
 
   it("keeps stable-digits padding intact in compact normal mode", function () {
@@ -401,8 +401,8 @@ describe("EditRouteRenderModel", function () {
     expect(model.metrics.dst.plainValueText).toBe("3.4");
     expect(model.metrics.rte.valueText).toBe(" 03.4");
     expect(model.metrics.rte.plainValueText).toBe("3.4");
-    expect(model.metrics.eta.valueText).toBe(" 12:34");
-    expect(model.metrics.eta.plainValueText).toBe("12:34");
+    expect(model.metrics.rteEta.valueText).toBe(" 12:34");
+    expect(model.metrics.rteEta.plainValueText).toBe("12:34");
   });
 
   it("uses formatClock for ETA when hideSeconds is enabled", function () {
@@ -424,7 +424,7 @@ describe("EditRouteRenderModel", function () {
         return value == null ? cfg.default : String(value);
       }
     });
-    const eta = new Date("2026-03-06T11:45:00Z");
+    const rteEta = new Date("2026-03-06T11:45:00Z");
     const model = renderModel.buildModel({
       props: withSurfacePolicy(makeProps({
         domain: {
@@ -433,7 +433,7 @@ describe("EditRouteRenderModel", function () {
           pointCount: 5,
           totalDistance: 1234.5,
           remainingDistance: 321.4,
-          eta: eta,
+          rteEta: rteEta,
           hideSeconds: true,
           isActiveRoute: true,
           isLocalRoute: false,
@@ -444,8 +444,8 @@ describe("EditRouteRenderModel", function () {
       isVerticalCommitted: false
     });
 
-    expect(model.metrics.eta.valueText).toBe("CLOCK:" + String(eta));
-    expect(model.metrics.eta.plainValueText).toBe("CLOCK:" + String(eta));
+    expect(model.metrics.rteEta.valueText).toBe("CLOCK:" + String(rteEta));
+    expect(model.metrics.rteEta.plainValueText).toBe("CLOCK:" + String(rteEta));
   });
 
   it("forces high mode and applies width-driven vertical shell geometry", function () {
@@ -518,7 +518,7 @@ describe("EditRouteRenderModel", function () {
           pts: "POINTS",
           dst: "DIST",
           rte: "LEFT",
-          eta: "ARRIVE"
+          rteEta: "ARRIVE"
         },
         units: {
           dst: "km",
@@ -536,13 +536,13 @@ describe("EditRouteRenderModel", function () {
     expect(model.metrics.pts.labelText).toBe("POINTS:");
     expect(model.metrics.dst.labelText).toBe("DIST:");
     expect(model.metrics.rte.labelText).toBe("LEFT:");
-    expect(model.metrics.eta.labelText).toBe("ARRIVE:");
+    expect(model.metrics.rteEta.labelText).toBe("ARRIVE:");
     expect(model.metrics.dst.valueText).toBe("DST(km):1234.5");
     expect(model.metrics.rte.valueText).toBe("DST(mi):321.4");
     expect(model.metrics.dst.unitText).toBe("km");
     expect(model.metrics.rte.unitText).toBe("mi");
     expect(model.metrics.pts.hasUnit).toBe(false);
-    expect(model.metrics.eta.hasUnit).toBe(false);
+    expect(model.metrics.rteEta.hasUnit).toBe(false);
   });
 
   it("does not expose units for ETA/PTS and drops unit slots when DST/RTE units are empty", function () {
@@ -559,7 +559,7 @@ describe("EditRouteRenderModel", function () {
     });
 
     expect(model.metrics.pts.hasUnit).toBe(false);
-    expect(model.metrics.eta.hasUnit).toBe(false);
+    expect(model.metrics.rteEta.hasUnit).toBe(false);
     expect(model.metrics.dst.hasUnit).toBe(false);
     expect(model.metrics.rte.hasUnit).toBe(false);
     expect(model.metrics.dst.unitText).toBe("");
@@ -579,7 +579,7 @@ describe("EditRouteRenderModel", function () {
           pts: "PTS",
           dst: "DISTANCE",
           rte: "RTE",
-          eta: "ETA"
+          rteEta: "ETA"
         }
       }), { mode: "dispatch" }),
       shellRect: { width: 320, height: 210 },

@@ -104,7 +104,7 @@ const CAPTION_BY_KEY = Object.freeze({
   positionBoat: "Boat Position",
   positionWp: "WP Position",
   activeRouteRemain: "Remain",
-  activeRouteEta: "ETA",
+  activeRouteEta: "RTE ETA",
   activeRouteNextCourse: "Next COG",
   centerDisplayPosition: "Center",
   centerDisplayMarker: "Marker",

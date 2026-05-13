@@ -231,7 +231,7 @@ describe("EditRouteTextHtmlWidget", function () {
           nameText: "Route",
           sourceBadgeText: "",
           metrics: Object.create(null),
-          visibleMetricIds: ["pts", "dst", "rte", "eta"],
+          visibleMetricIds: ["pts", "dst", "rte", "rteEta"],
           flatMetricRows: 1,
           metricsStyle: "",
           wrapperStyle: ""
@@ -280,7 +280,7 @@ describe("EditRouteTextHtmlWidget", function () {
           nameText: "Route",
           sourceBadgeText: "",
           metrics: Object.create(null),
-          visibleMetricIds: ["pts", "dst", "rte", "eta"],
+          visibleMetricIds: ["pts", "dst", "rte", "rteEta"],
           flatMetricRows: 1,
           metricsStyle: "",
           wrapperStyle: ""

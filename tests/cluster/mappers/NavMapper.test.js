@@ -78,19 +78,19 @@ function makeActiveRouteViewModel() {
       return {
         display: {
           remain: toMaybeNumber(props.activeRouteRemain),
-          eta: props.activeRouteEta,
+          rteEta: props.activeRouteEta,
           nextCourse: toMaybeNumber(props.activeRouteNextCourse),
           isApproaching: props.activeRouteApproaching === true
         },
         routeName: trimText(props.activeRouteName),
         captions: {
           remain: "RTE CAP",
-          eta: "ETA CAP",
+          rteEta: "ETA CAP",
           nextCourse: "NEXT CAP"
         },
         units: {
           remain: "nmA",
-          eta: "",
+          rteEta: "",
           nextCourse: "degN"
         },
         formatUnits: {
@@ -151,7 +151,7 @@ function makeEditRouteViewModel() {
           isServerRoute: isServerRoute
         } : null,
         remainingDistance: toMaybeNumber(props.rteDistance),
-        eta: props.rteEta,
+        rteEta: props.rteEta,
         hideSeconds: props.hideSeconds === true,
         isActiveRoute: !!editingRoute && trimText(props.activeName) === trimText(editingRoute.name),
         isLocalRoute: isLocalRoute,
@@ -265,7 +265,7 @@ describe("NavMapper", function () {
       wpServer: true,
       display: {
         remain: 18.2,
-        eta: rawEta,
+        rteEta: rawEta,
         nextCourse: 93,
         isApproaching: true,
         routeName: "Harbor Run",
@@ -274,12 +274,12 @@ describe("NavMapper", function () {
       },
       captions: {
         remain: "RTE CAP",
-        eta: "ETA CAP",
+        rteEta: "ETA CAP",
         nextCourse: "NEXT CAP"
       },
       units: {
         remain: "nmA",
-        eta: "",
+        rteEta: "",
         nextCourse: "degN"
       },
       formatUnits: {
@@ -523,7 +523,7 @@ describe("NavMapper", function () {
 
   it("maps editRoute to grouped renderer payload", function () {
     const mapper = createMapper();
-    const eta = new Date("2026-03-06T11:45:00Z");
+    const rteEta = new Date("2026-03-06T11:45:00Z");
     const editRouteViewModel = makeEditRouteViewModel();
     const editingRoute = {
       name: "local@Harbor Run",
@@ -540,7 +540,7 @@ describe("NavMapper", function () {
       editingRoute: editingRoute,
       activeName: "local@Harbor Run",
       rteDistance: "4.8",
-      rteEta: eta,
+      rteEta: rteEta,
       hideSeconds: true,
       editRouteRatioThresholdNormal: "1.23",
       editRouteRatioThresholdFlat: "3.95"
@@ -553,7 +553,7 @@ describe("NavMapper", function () {
         pointCount: 2,
         totalDistance: 1512.2,
         remainingDistance: 4.8,
-        eta: eta,
+        rteEta: rteEta,
         hideSeconds: true,
         isActiveRoute: true,
         isLocalRoute: true,
@@ -567,7 +567,7 @@ describe("NavMapper", function () {
         pts: "PTS CAP",
         dst: "DST CAP",
         rte: "RTE CAP",
-        eta: "ETA CAP"
+        rteEta: "ETA CAP"
       },
       units: {
         dst: "nmE",
@@ -626,7 +626,7 @@ describe("NavMapper", function () {
         pointCount: 0,
         totalDistance: undefined,
         remainingDistance: undefined,
-        eta: undefined,
+        rteEta: undefined,
         hideSeconds: false,
         isActiveRoute: false,
         isLocalRoute: false,
@@ -640,7 +640,7 @@ describe("NavMapper", function () {
         pts: "PTS CAP",
         dst: "DST CAP",
         rte: "RTE CAP",
-        eta: "ETA CAP"
+        rteEta: "ETA CAP"
       },
       units: {
         dst: "nmE",

@@ -100,7 +100,7 @@ describe("EditRouteHtmlFit", function () {
         pts: { labelText: "PTS:", valueText: "005", plainValueText: "005", unitText: "" },
         dst: { labelText: "DST:", valueText: "12.3", plainValueText: "12.3", unitText: "nm" },
         rte: { labelText: "RTE:", valueText: "4.9", plainValueText: "4.9", unitText: "nm" },
-        eta: { labelText: "ETA:", valueText: "12:34", plainValueText: "12:34", unitText: "" }
+        rteEta: { labelText: "ETA:", valueText: "12:34", plainValueText: "12:34", unitText: "" }
       }
     };
 
@@ -189,9 +189,9 @@ describe("EditRouteHtmlFit", function () {
   it("returns stable style payloads for all visible boxes per mode", function () {
     const h = createHarness();
     const expectedMetricsByMode = {
-      flat: ["pts", "dst", "rte", "eta"],
-      normal: ["pts", "dst", "rte", "eta"],
-      high: ["pts", "dst", "rte", "eta"]
+      flat: ["pts", "dst", "rte", "rteEta"],
+      normal: ["pts", "dst", "rte", "rteEta"],
+      high: ["pts", "dst", "rte", "rteEta"]
     };
 
     ["flat", "normal", "high"].forEach((mode) => {
@@ -378,7 +378,7 @@ describe("EditRouteHtmlFit", function () {
             pts: { labelText: "PTS:", valueText: "123456789012" },
             dst: { labelText: "DST:", valueText: "123456789012", unitText: "nm" },
             rte: { labelText: "RTE:", valueText: "123456789012", unitText: "nm" },
-            eta: { labelText: "ETA:", valueText: "123456789012" }
+            rteEta: { labelText: "ETA:", valueText: "123456789012" }
           }
         }),
         targetEl: h.targetEl,
@@ -386,9 +386,9 @@ describe("EditRouteHtmlFit", function () {
         shellRect: { width: 320, height: 210 }
       });
 
-      expect(extractPx(out.metrics.eta.valueStyle)).toBeGreaterThan(extractPx(out.metrics.dst.valueStyle));
+      expect(extractPx(out.metrics.rteEta.valueStyle)).toBeGreaterThan(extractPx(out.metrics.dst.valueStyle));
       expect(extractPx(out.metrics.pts.valueStyle)).toBeGreaterThan(extractPx(out.metrics.rte.valueStyle));
-      expect(out.metrics.eta.unitStyle).toBe("");
+      expect(out.metrics.rteEta.unitStyle).toBe("");
       expect(out.metrics.pts.unitStyle).toBe("");
     });
   });

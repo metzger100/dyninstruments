@@ -29,7 +29,7 @@ describe("EditRouteLayout", function () {
     });
 
     expect(out.mode).toBe("flat");
-    expect(out.metricVisibility).toEqual({ pts: true, dst: true, rte: true, eta: true });
+    expect(out.metricVisibility).toEqual({ pts: true, dst: true, rte: true, rteEta: true });
     expect(out.nameBarRect.w).toBe(out.contentRect.w);
     expect(out.flatMetricRows).toBeGreaterThanOrEqual(1);
     expect(out.flatMetricColumns).toBeGreaterThanOrEqual(2);
@@ -39,9 +39,9 @@ describe("EditRouteLayout", function () {
     expect(out.metricBoxes.pts).toBeTruthy();
     expect(out.metricBoxes.dst).toBeTruthy();
     expect(out.metricBoxes.rte).toBeTruthy();
-    expect(out.metricBoxes.eta).toBeTruthy();
+    expect(out.metricBoxes.rteEta).toBeTruthy();
     expect(out.metricBoxes.pts.unitRect).toBeNull();
-    expect(out.metricBoxes.eta.unitRect).toBeNull();
+    expect(out.metricBoxes.rteEta.unitRect).toBeNull();
     expect(out.metricBoxes.dst.valueTextRect).toEqual(out.metricBoxes.dst.valueRect);
     expect(out.metricBoxes.rte.valueTextRect).toEqual(out.metricBoxes.rte.valueRect);
     expect(out.metricBoxes.dst.unitRect).toBeNull();
@@ -60,15 +60,15 @@ describe("EditRouteLayout", function () {
     });
 
     expect(out.mode).toBe("normal");
-    expect(out.metricVisibility).toEqual({ pts: true, dst: true, rte: true, eta: true });
+    expect(out.metricVisibility).toEqual({ pts: true, dst: true, rte: true, rteEta: true });
     expect(out.metricBoxes.pts).toBeTruthy();
     expect(out.metricBoxes.dst).toBeTruthy();
     expect(out.metricBoxes.rte).toBeTruthy();
-    expect(out.metricBoxes.eta).toBeTruthy();
+    expect(out.metricBoxes.rteEta).toBeTruthy();
     expect(out.metricBoxes.pts.unitRect).toBeNull();
-    expect(out.metricBoxes.eta.unitRect).toBeNull();
+    expect(out.metricBoxes.rteEta.unitRect).toBeNull();
     expect(out.metricBoxes.pts.valueTextRect.w).toBe(out.metricBoxes.pts.valueRect.w);
-    expect(out.metricBoxes.eta.valueTextRect.w).toBe(out.metricBoxes.eta.valueRect.w);
+    expect(out.metricBoxes.rteEta.valueTextRect.w).toBe(out.metricBoxes.rteEta.valueRect.w);
     expect(out.metricBoxes.rte.valueTextRect.w).toBe(out.metricBoxes.rte.valueRect.w);
     expect(out.metricBoxes.rte.unitRect).toBeNull();
   });
@@ -88,9 +88,9 @@ describe("EditRouteLayout", function () {
     expect(out.metricBoxes.pts.labelRect.x).toBeLessThan(out.metricBoxes.pts.valueRect.x);
     expect(out.metricBoxes.dst.tileRect.y).toBeGreaterThan(out.metricBoxes.pts.tileRect.y);
     expect(out.metricBoxes.rte.tileRect.y).toBeGreaterThan(out.metricBoxes.dst.tileRect.y);
-    expect(out.metricBoxes.eta.tileRect.y).toBeGreaterThan(out.metricBoxes.rte.tileRect.y);
+    expect(out.metricBoxes.rteEta.tileRect.y).toBeGreaterThan(out.metricBoxes.rte.tileRect.y);
     expect(out.metricBoxes.pts.unitRect).toBeNull();
-    expect(out.metricBoxes.eta.unitRect).toBeNull();
+    expect(out.metricBoxes.rteEta.unitRect).toBeNull();
     expect(out.metricBoxes.rte.unitRect.x).toBeGreaterThan(out.metricBoxes.rte.valueTextRect.x);
   });
 
@@ -106,7 +106,7 @@ describe("EditRouteLayout", function () {
         pts: false,
         dst: true,
         rte: false,
-        eta: false
+        rteEta: false
       }
     });
 
@@ -127,7 +127,7 @@ describe("EditRouteLayout", function () {
         isLocalRoute: true
       });
 
-      expect(out.metricVisibility).toEqual({ pts: false, dst: false, rte: false, eta: false });
+      expect(out.metricVisibility).toEqual({ pts: false, dst: false, rte: false, rteEta: false });
       expect(Object.keys(out.metricBoxes)).toEqual([]);
       expect(out.sourceBadgeRect).toBeNull();
       if (mode === "flat") {

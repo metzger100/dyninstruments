@@ -174,8 +174,8 @@
         ...makePerUnitStringParams("editRouteRte", navBindings.editRouteRte, { kind: "editRoute" }),
         caption_editRouteEta: {
           type: "STRING",
-          default: "ETA",
-          name: "ETA caption",
+          default: "RTE ETA",
+          name: "RTE ETA caption",
           condition: { kind: "editRoute" }
         },
         routePointsRatioThresholdNormal: {

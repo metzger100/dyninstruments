@@ -10,7 +10,7 @@
 }(this, function () {
   "use strict";
 
-  const METRIC_IDS = ["pts", "dst", "rte", "eta"];
+  const METRIC_IDS = ["pts", "dst", "rte", "rteEta"];
   const SOURCE_BADGE_TEXT = "LOCAL";
 
   function toObject(value) {
@@ -179,7 +179,7 @@
         pts: false,
         dst: !!metricUnits.dst,
         rte: !!metricUnits.rte,
-        eta: false
+        rteEta: false
       };
 
       const layout = layoutApi.computeLayout({
@@ -199,7 +199,7 @@
           pts: normalizeMetricLabel(captionsConfig.pts, htmlUtils),
           dst: normalizeMetricLabel(captionsConfig.dst, htmlUtils),
           rte: normalizeMetricLabel(captionsConfig.rte, htmlUtils),
-          eta: normalizeMetricLabel(captionsConfig.eta, htmlUtils)
+          rteEta: normalizeMetricLabel(captionsConfig.rteEta, htmlUtils)
         };
 
         metrics.pts = {
@@ -232,12 +232,12 @@
           unitText: metricUnits.rte,
           hasUnit: metricHasUnit.rte
         };
-        metrics.eta = {
-          id: "eta",
-          labelText: metricCaptions.eta,
+        metrics.rteEta = {
+          id: "rteEta",
+          labelText: metricCaptions.rteEta,
           ...buildMetricValueText(
             formatMetric(
-              isActiveRoute ? domain.eta : undefined,
+              isActiveRoute ? domain.rteEta : undefined,
               etaFormatter,
               [],
               defaultText,

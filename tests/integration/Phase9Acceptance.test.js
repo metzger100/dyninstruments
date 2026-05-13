@@ -8,7 +8,7 @@ function createActiveRouteWidget() {
       routeNameStyle: "",
       metrics: {
         remain: { captionStyle: "", valueStyle: "", unitStyle: "" },
-        eta: { captionStyle: "", valueStyle: "", unitStyle: "" },
+        rteEta: { captionStyle: "", valueStyle: "", unitStyle: "" },
         next: { captionStyle: "", valueStyle: "", unitStyle: "" }
       }
     };
@@ -316,13 +316,13 @@ describe("Phase 9 acceptance coverage", function () {
       display: {
         isApproaching: true,
         remain: 12.3,
-        eta: new Date("2026-03-06T11:45:00Z"),
+        rteEta: new Date("2026-03-06T11:45:00Z"),
         nextCourse: 93,
         routeName: "Harbor Run",
         disconnect: true
       },
-      captions: { remain: "RTE", eta: "ETA", nextCourse: "NEXT" },
-      units: { remain: "nm", eta: "", nextCourse: "deg" },
+      captions: { remain: "RTE", rteEta: "ETA", nextCourse: "NEXT" },
+      units: { remain: "nm", rteEta: "", nextCourse: "deg" },
       default: "---",
       surfacePolicy: {
         interaction: { mode: "dispatch" },
@@ -337,7 +337,7 @@ describe("Phase 9 acceptance coverage", function () {
         disconnect: true,
         domain: { hasRoute: true, routeName: "Harbor Run", pointCount: 5 },
         layout: { ratioThresholdNormal: 1.2, ratioThresholdFlat: 3.8 },
-        captions: { pts: "PTS", dst: "DST", rte: "RTE", eta: "ETA" },
+        captions: { pts: "PTS", dst: "DST", rte: "RTE", rteEta: "ETA" },
         units: { dst: "nm", rte: "nm" },
         default: "---"
       },
@@ -407,13 +407,13 @@ describe("Phase 9 acceptance coverage", function () {
       display: {
         isApproaching: true,
         remain: undefined,
-        eta: undefined,
+        rteEta: undefined,
         nextCourse: undefined,
         routeName: "Harbor Run",
         disconnect: false
       },
-      captions: { remain: "RTE", eta: "ETA", nextCourse: "NEXT" },
-      units: { remain: "nm", eta: "", nextCourse: "deg" },
+      captions: { remain: "RTE", rteEta: "ETA", nextCourse: "NEXT" },
+      units: { remain: "nm", rteEta: "", nextCourse: "deg" },
       stableDigits: false,
       default: "---",
       surfacePolicy: {
@@ -433,13 +433,13 @@ describe("Phase 9 acceptance coverage", function () {
           pointCount: 5,
           totalDistance: undefined,
           remainingDistance: undefined,
-          eta: undefined,
+          rteEta: undefined,
           isActiveRoute: true,
           isLocalRoute: true,
           isServerRoute: false
         },
         layout: { ratioThresholdNormal: 1.2, ratioThresholdFlat: 3.8 },
-        captions: { pts: "PTS", dst: "DST", rte: "RTE", eta: "ETA" },
+        captions: { pts: "PTS", dst: "DST", rte: "RTE", rteEta: "ETA" },
         units: { dst: "nm", rte: "nm" },
         default: "---"
       },
@@ -481,13 +481,13 @@ describe("Phase 9 acceptance coverage", function () {
       display: {
         isApproaching: true,
         remain: 12.3,
-        eta: new Date("2026-03-06T11:45:00Z"),
+        rteEta: new Date("2026-03-06T11:45:00Z"),
         nextCourse: 93,
         routeName: "Harbor Run",
         disconnect: false
       },
-      captions: { remain: "RTE", eta: "ETA", nextCourse: "NEXT" },
-      units: { remain: "nm", eta: "", nextCourse: "deg" },
+      captions: { remain: "RTE", rteEta: "ETA", nextCourse: "NEXT" },
+      units: { remain: "nm", rteEta: "", nextCourse: "deg" },
       stableDigits: true,
       default: "---",
       surfacePolicy: {
@@ -508,13 +508,13 @@ describe("Phase 9 acceptance coverage", function () {
           pointCount: 5,
           totalDistance: 12.3,
           remainingDistance: 18.4,
-          eta: "2026-03-06T11:45:00Z",
+          rteEta: "2026-03-06T11:45:00Z",
           isActiveRoute: true,
           isLocalRoute: true,
           isServerRoute: false
         },
         layout: { ratioThresholdNormal: 1.2, ratioThresholdFlat: 3.8 },
-        captions: { pts: "PTS", dst: "DST", rte: "RTE", eta: "ETA" },
+        captions: { pts: "PTS", dst: "DST", rte: "RTE", rteEta: "ETA" },
         units: { dst: "nm", rte: "nm" },
         default: "---"
       },

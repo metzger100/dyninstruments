@@ -13,7 +13,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
         routeNameStyle: "font-size:14px;",
         metrics: {
           remain: { captionStyle: "font-size:12px;", valueStyle: "font-size:18px;", unitStyle: "font-size:11px;", gapStyle: "gap:4px;" },
-          eta: { captionStyle: "font-size:11px;", valueStyle: "font-size:17px;", unitStyle: "font-size:10px;", gapStyle: "gap:4px;" },
+          rteEta: { captionStyle: "font-size:11px;", valueStyle: "font-size:17px;", unitStyle: "font-size:10px;", gapStyle: "gap:4px;" },
           next: { captionStyle: "font-size:10px;", valueStyle: "font-size:16px;", unitStyle: "font-size:9px;", gapStyle: "gap:4px;" }
         }
       };
@@ -121,7 +121,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const base = {
       display: {
         remain: 12.4,
-        eta: "2026-03-06T11:45:00Z",
+        rteEta: "2026-03-06T11:45:00Z",
         nextCourse: 93,
         isApproaching: true,
         routeName: "Harbor Run",
@@ -130,12 +130,12 @@ describe("ActiveRouteTextHtmlWidget", function () {
       },
       captions: {
         remain: "RTE",
-        eta: "ETA",
+        rteEta: "ETA",
         nextCourse: "NEXT"
       },
       units: {
         remain: "nm",
-        eta: "",
+        rteEta: "",
         nextCourse: "deg"
       },
       formatUnits: {
@@ -405,7 +405,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
         routeNameStyle: "font-size:14px;",
         metrics: {
           remain: { captionStyle: "font-size:12px;", valueStyle: "font-size:18px;", unitStyle: "font-size:11px;" },
-          eta: { captionStyle: "font-size:11px;", valueStyle: "font-size:17px;", unitStyle: "font-size:10px;" },
+          rteEta: { captionStyle: "font-size:11px;", valueStyle: "font-size:17px;", unitStyle: "font-size:10px;" },
           next: { captionStyle: "font-size:10px;", valueStyle: "font-size:16px;", unitStyle: "font-size:9px;" }
         }
       };

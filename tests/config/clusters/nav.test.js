@@ -87,7 +87,7 @@ describe("config/clusters/nav.js", function () {
     });
     expect(def.editableParameters.unit_editRouteRte_nm.default).toBe("nm");
     expect(def.editableParameters.caption_editRouteEta.condition).toEqual({ kind: "editRoute" });
-    expect(def.editableParameters.caption_editRouteEta.default).toBe("ETA");
+    expect(def.editableParameters.caption_editRouteEta.default).toBe("RTE ETA");
     expect(def.editableParameters.unit_editRoutePts).toBeUndefined();
     expect(def.editableParameters.unit_editRouteEta).toBeUndefined();
     expect(def.editableParameters.caption_activeRouteRemain.condition).toEqual({ kind: "activeRoute" });
@@ -240,8 +240,8 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.caption_activeRouteRemain.displayName).toBe("Route distance caption");
     expect(def.editableParameters.formatUnit_activeRouteRemain.displayName).toBe("Formatter unit");
     expect(def.editableParameters.unit_activeRouteRemain_nm.displayName).toBe("nm unit");
-    expect(def.editableParameters.caption_activeRouteEta.displayName).toBe("ETA caption");
-    expect(def.editableParameters.unit_activeRouteEta.displayName).toBe("ETA unit");
+    expect(def.editableParameters.caption_activeRouteEta.displayName).toBe("RTE ETA caption");
+    expect(def.editableParameters.unit_activeRouteEta.displayName).toBe("RTE ETA unit");
     expect(def.editableParameters.caption_activeRouteNextCourse.displayName).toBe("Next course caption");
     expect(def.editableParameters.unit_activeRouteNextCourse.displayName).toBe("Next course unit");
     expect(def.editableParameters.caption_xteDisplayCog.displayName).toBe("Track caption");

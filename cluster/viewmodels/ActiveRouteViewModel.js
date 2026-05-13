@@ -33,17 +33,17 @@
         disconnect: p.disconnect === true || p.wpServer === false || routeName === "",
         display: {
           remain: num(p.activeRouteRemain),
-          eta: p.activeRouteEta,
+          rteEta: p.activeRouteEta,
           nextCourse: num(p.activeRouteNextCourse),
           isApproaching: p.activeRouteApproaching === true
         },
         captions: {
           remain: cap("activeRouteRemain"),
-          eta: cap("activeRouteEta"),
+          rteEta: cap("activeRouteEta"),
           nextCourse: cap("activeRouteNextCourse")
         },
         units: {
-          eta: unit("activeRouteEta"),
+          rteEta: unit("activeRouteEta"),
           nextCourse: unit("activeRouteNextCourse")
         },
         hideSeconds: p.hideSeconds === true

@@ -13,7 +13,7 @@
   const SOURCE_BADGE_MAX_PX_RATIO = 0.7;
   const METRIC_VALUE_MAX_PX_RATIO = 0.9;
   const METRIC_SECONDARY_TO_VALUE_RATIO = 0.8;
-  const METRIC_IDS = ["pts", "dst", "rte", "eta"];
+  const METRIC_IDS = ["pts", "dst", "rte", "rteEta"];
 
   function create(def, componentContext) {
     const theme = componentContext.theme.tokens;
