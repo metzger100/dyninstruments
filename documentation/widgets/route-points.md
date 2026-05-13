@@ -35,7 +35,7 @@ RoutePoints is the only width-derived natural-height widget.
 
 - route metadata `shellSizing.kind === "natural"` emits no inline height or aspect-ratio and reserves no cold-load height
 - committed renderer shadow CSS owns the final natural height after activation in vertical mode
-- viewport cap remains widget-owned (60vh policy)
+- viewport cap remains widget-owned (60vh policy) and applies only in vertical orientation (`data-dyni-orientation="vertical"`)
 
 ## widgetContainer.vertical Behavior
 
@@ -44,7 +44,7 @@ In .widgetContainer.vertical, RoutePoints natural sizing remains unresolved unti
 - width remains host-owned
 - RoutePoints height remains widget-owned and width-derived
 - final width-derived natural height is owned by the committed renderer shadow CSS after activation
-- the 60vh cap remains in force
+- the 60vh cap remains in force only for vertical containers
 
 ## Layout Contract
 

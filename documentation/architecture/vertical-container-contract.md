@@ -40,7 +40,7 @@ RoutePoints is the only width-derived natural-height widget.
 
 - first pass may not have authoritative width pre-commit
 - exact width-derived natural height is owned by the committed renderer shadow CSS after activation
-- viewport cap policy is widget-owned (currently 60vh)
+- viewport cap policy is widget-owned (currently 60vh) and applied only in vertical orientation
 
 ## CSS Ownership Rule
 
