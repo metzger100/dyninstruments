@@ -21,7 +21,15 @@
 1. Download the latest release zip from GitHub Releases (or from `releases/` in this repository).
 2. Extract it into your AvNav plugin directory so you get `.../plugins/dyninstruments/`.
 3. Restart AvNav.
-4. Open the AvNav layout editor. Widgets are listed under `dyninstruments` (`dyni_*_Instruments`).
+4. Optional: open AvNav's layout selector and choose one of the bundled layouts:
+   - `Dyni Motorboat`
+   - `Dyni Sailboat`
+5. Open the AvNav layout editor for further customization. Widgets are listed under `dyninstruments` (`dyni_*_Instruments`).
+
+Bundled layouts are stored in:
+- `layouts/dyni-motorboat.json`
+- `layouts/dyni-sailboat.json`
+- registered through root `plugin.json`
 
 ## Configuration
 

@@ -10,6 +10,7 @@ import {
 const FIXED_RUNTIME_FILES = [
   "plugin.js",
   "plugin.css",
+  "plugin.json",
   "config/bootstrap-manifest.js"
 ];
 
@@ -19,7 +20,8 @@ const RUNTIME_PREFIXES = [
   "config/",
   "shared/",
   "widgets/",
-  "assets/"
+  "assets/",
+  "layouts/"
 ];
 
 export function isRuntimePath(filePath) {
@@ -68,6 +70,9 @@ export function buildReleaseManifest(rootDir) {
 
   for (const fontPath of collectFontAssetPaths(rootDir)) {
     files.add(fontPath);
+  }
+  for (const layoutPath of collectLayoutAssetPaths(rootDir)) {
+    files.add(layoutPath);
   }
 
   return Array.from(files).sort((a, b) => a.localeCompare(b));
@@ -141,12 +146,21 @@ function normalizeRelativePath(rawPath) {
 
 function collectFontAssetPaths(rootDir) {
   const fontsDir = path.join(rootDir, "assets", "fonts");
-  if (!fs.existsSync(fontsDir)) {
+  return collectAssetPaths(rootDir, fontsDir);
+}
+
+function collectLayoutAssetPaths(rootDir) {
+  const layoutsDir = path.join(rootDir, "layouts");
+  return collectAssetPaths(rootDir, layoutsDir);
+}
+
+function collectAssetPaths(rootDir, absDirPath) {
+  if (!fs.existsSync(absDirPath)) {
     return [];
   }
 
   const out = [];
-  walkFiles(fontsDir, (absFile) => {
+  walkFiles(absDirPath, (absFile) => {
     const relPath = path.relative(rootDir, absFile).replace(/\\/g, "/");
     out.push(relPath);
   });

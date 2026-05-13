@@ -21,9 +21,12 @@ describe("release-zip-builder", function () {
 
     expect(manifest).toContain("plugin.js");
     expect(manifest).toContain("plugin.css");
+    expect(manifest).toContain("plugin.json");
     expect(manifest).toContain("config/bootstrap-manifest.js");
     expect(manifest).toContain("runtime/init.js");
     expect(manifest).toContain("runtime/component-loader.js");
+    expect(manifest).toContain("layouts/dyni-motorboat.json");
+    expect(manifest).toContain("layouts/dyni-sailboat.json");
     expect(manifest.some((filePath) => filePath.startsWith("assets/fonts/"))).toBe(true);
 
     expect(manifest.some((filePath) => filePath.startsWith("tests/"))).toBe(false);
@@ -32,6 +35,8 @@ describe("release-zip-builder", function () {
     expect(manifest.some((filePath) => filePath.startsWith("exec-plans/"))).toBe(false);
 
     expect(isRuntimePath("runtime/init.js")).toBe(true);
+    expect(isRuntimePath("plugin.json")).toBe(true);
+    expect(isRuntimePath("layouts/dyni-motorboat.json")).toBe(true);
     expect(isRuntimePath("tools/perf-run.mjs")).toBe(false);
     expect(isRuntimePath("tests/tools/release-zip-builder.test.js")).toBe(false);
   });

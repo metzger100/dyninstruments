@@ -1,0 +1,6 @@
+{
+  "layouts": [
+    { "name": "Dyni Motorboat", "file": "layouts/dyni-motorboat.json" },
+    { "name": "Dyni Sailboat", "file": "layouts/dyni-sailboat.json" }
+  ]
+}

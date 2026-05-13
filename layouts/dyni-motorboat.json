@@ -201,9 +201,9 @@
       "m1": [
         {
           "kind": "sogRadial",
-          "speedLinearShowEndLabels": true,
-          "speedLinearWarningFrom_kn": 25,
-          "speedLinearAlarmFrom_kn": 28,
+          "speedRadialShowEndLabels": true,
+          "speedRadialWarningFrom_kn": 25,
+          "speedRadialAlarmFrom_kn": 28,
           "name": "dyni_Speed_Instruments",
           "weight": 1
         },
