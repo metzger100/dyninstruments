@@ -5,8 +5,8 @@ const { makeRouteContext } = require("../../helpers/mapper-route-context");
 function makeToolkit(overrides, bindingOverrides) {
   installUnitFormatFamilies(bindingOverrides);
   return loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit(Object.assign({
-    caption_eta: "ETA",
-    unit_eta: "",
+    caption_wpEta: "WP ETA",
+    unit_wpEta: "",
     caption_rteDistance: "RTE",
     formatUnit_rteDistance: "nm",
     unit_rteDistance_nm: "nm",
@@ -164,13 +164,13 @@ function makeEditRouteViewModel() {
 describe("NavMapper", function () {
   it("maps ETA kinds with formatTime", function () {
     const mapper = createMapper();
-    expect(mapper.translate({ kind: "eta", eta: 1700000000 }, routeContext("eta", toolkit)).formatter).toBe("formatTime");
+    expect(mapper.translate({ kind: "wpEta", wpEta: 1700000000 }, routeContext("wpEta", toolkit)).formatter).toBe("formatTime");
     expect(mapper.translate({ kind: "rteEta", rteEta: 1700000100 }, routeContext("rteEta", toolkit)).formatter).toBe("formatTime");
   });
 
   it("maps ETA kinds with formatClock when hideSeconds is enabled", function () {
     const mapper = createMapper();
-    expect(mapper.translate({ kind: "eta", eta: 1700000000, hideSeconds: true }, routeContext("eta", toolkit)).formatter).toBe("formatClock");
+    expect(mapper.translate({ kind: "wpEta", wpEta: 1700000000, hideSeconds: true }, routeContext("wpEta", toolkit)).formatter).toBe("formatClock");
     expect(mapper.translate({ kind: "rteEta", rteEta: 1700000100, hideSeconds: true }, routeContext("rteEta", toolkit)).formatter).toBe("formatClock");
   });
 

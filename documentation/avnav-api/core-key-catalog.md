@@ -34,7 +34,7 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 | `courseHeading` | `hdt` | `nav.gps.headingTrue` | `hdt`, `hdtRadial` |
 | `courseHeading` | `hdm` | `nav.gps.headingMag` | `hdm`, `hdmRadial` |
 | `courseHeading` | `brg` | `nav.wp.course` | `brg`, compass marker in radial kinds |
-| `nav` | `eta` | `nav.wp.eta` | `eta` |
+| `nav` | `wpEta` | `nav.wp.eta` | `wpEta` |
 | `nav` | `rteEta` | `nav.route.eta` | `rteEta` |
 | `nav` | `dst` | `nav.wp.distance` | `dst` |
 | `nav` | `dtw` | `nav.wp.distance` | `xteDisplay` |
@@ -115,7 +115,7 @@ Migrated metrics use formatter-token selectors, not display labels:
 | `tempLinear`, `tempRadial` | `temp` | `formatTemperature` + `[formatUnit_tempLinear]` / `[formatUnit_tempRadial]` | temperature gauges use the same token/display split |
 | `pressure` | `value` (dynamic) | `formatPressure` + `[formatUnit_pressure]` | canonical pressure formatter with lowercase tokens |
 | `cog`, `hdt`, `hdm`, `brg` | `cog`/`hdt`/`hdm`/`brg` | `formatDirection360` + `[leadingZero]` | heading/course/bearing text |
-| `eta`, `rteEta` | `eta` / `rteEta` | `formatTime` + `[]` | Date/time value path |
+| `wpEta`, `rteEta` | `wpEta` / `rteEta` | `formatTime` + `[]` | Date/time value path |
 | `dst`, `rteDistance` | `dst` / `rteDistance` | `formatDistance` + `[formatUnit_dst]` / `[formatUnit_rteDistance]` | distance text uses selector tokens, not display labels |
 | `activeRoute` | `activeRouteName`, `activeRouteRemain`, `activeRouteEta`, `activeRouteNextCourse`, `activeRouteApproaching` | renderer wrapper (`ActiveRouteTextHtmlWidget`, html surface) using `formatDistance` (`activeRouteRemain`) + `formatUnits.remain`, `formatTime` (`activeRouteEta`) + `[]`, `formatDirection` (`activeRouteNextCourse`) + `[]` | next course is degree-based; `units.remain` stays display-only and the selector token comes from `formatUnit_activeRouteRemain` |
 | `zoom` | `zoom`, `requiredZoom` | renderer wrapper (`MapZoomTextHtmlWidget`, html surface) using `formatDecimalOpt` (`zoom`, `requiredZoom`) + `[2, 1]` | `requiredZoom` is shown as parenthesized secondary text only when different from `zoom` |

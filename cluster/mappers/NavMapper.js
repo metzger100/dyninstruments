@@ -23,8 +23,8 @@
 
       const req = p.kind;
 
-      if (req === "eta") {
-        return out(p.eta, cap("eta"), unit("eta"), p.hideSeconds === true ? "formatClock" : "formatTime", []);
+      if (req === "wpEta") {
+        return out(p.wpEta, cap("wpEta"), unit("wpEta"), p.hideSeconds === true ? "formatClock" : "formatTime", []);
       }
       if (req === "rteEta") {
         return out(p.rteEta, cap("rteEta"), unit("rteEta"), p.hideSeconds === true ? "formatClock" : "formatTime", []);

@@ -250,7 +250,7 @@ They are scoped per cluster via `condition` lists (no global shared editable):
 `hideSeconds` is a per-widget BOOLEAN toggle, default `false`, defined only in the clusters where time text is rendered.
 
 - `config/clusters/nav.js`
-  - `eta`
+  - `wpEta`
   - `rteEta`
   - `activeRoute`
   - `editRoute`

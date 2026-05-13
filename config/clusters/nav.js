@@ -21,7 +21,7 @@
   const commonThreeElementsEditables = shared.commonThreeElementsEditables;
   const navBindings = shared.unitFormatFamilies.metricBindings;
   const NAV_TEXT_KIND_CONDITION = [
-    { kind: "eta" },
+    { kind: "wpEta" },
     { kind: "rteEta" },
     { kind: "dst" },
     { kind: "rteDistance" },
@@ -65,7 +65,7 @@
       caption: "", unit: "", default: "---",
       cluster: "nav",
       storeKeys: {
-        eta: "nav.wp.eta",
+        wpEta: "nav.wp.eta",
         rteEta: "nav.route.eta",
         dst: "nav.wp.distance",
         dtw: "nav.wp.distance",
@@ -93,7 +93,7 @@
         kind: {
           type: "SELECT",
           list: [
-            opt("ETA to waypoint", "eta"),
+            opt("WP ETA to waypoint", "wpEta"),
             opt("ETA for route", "rteEta"),
             opt("Distance to waypoint (DST)", "dst"),
             opt("Remaining route distance", "rteDistance"),
@@ -105,7 +105,7 @@
             opt("Active waypoint position", "positionWp"),
             opt("XTE highway display", "xteDisplay")
           ],
-          default: "eta",
+          default: "wpEta",
           name: "Instrument"
         },
         leadingZero: {
@@ -231,7 +231,7 @@
           default: false,
           name: "Stable digits",
           condition: [
-            { kind: "eta" },
+            { kind: "wpEta" },
             { kind: "rteEta" },
             { kind: "dst" },
             { kind: "rteDistance" },
@@ -260,7 +260,7 @@
           default: false,
           name: "Hide seconds",
           condition: [
-            { kind: "eta" },
+            { kind: "wpEta" },
             { kind: "rteEta" },
             { kind: "activeRoute" },
             { kind: "editRoute" }
@@ -291,7 +291,7 @@
       },
       updateFunction: function (values) {
         const out = values ? { ...values } : {};
-        const kind = (values && values.kind) || "eta";
+        const kind = (values && values.kind) || "wpEta";
         const needsWp = (kind === "dst" || kind === "positionWp" || kind === "xteDisplay");
         if (needsWp && values && values.wpServer === false) out.disconnect = true;
         else if (Object.prototype.hasOwnProperty.call(out, "disconnect")) delete out.disconnect;

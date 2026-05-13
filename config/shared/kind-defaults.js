@@ -105,7 +105,7 @@
       }
     },
     NAV_TEXT_KIND: {
-      eta: { cap: "ETA", unit: "" },
+      wpEta: { cap: "WP ETA", unit: "" },
       rteEta: { cap: "RTE ETA", unit: "" },
       positionBoat: { cap: "POS", unit: "" },
       positionWp: { cap: "WP", unit: "" },

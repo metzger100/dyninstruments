@@ -343,7 +343,7 @@ describe("static cluster configs", function () {
       { kind: "angleApparentLinear" }
     ]);
     expect(byCluster.nav.editableParameters.stableDigits.condition).toEqual([
-      { kind: "eta" },
+      { kind: "wpEta" },
       { kind: "rteEta" },
       { kind: "dst" },
       { kind: "rteDistance" },

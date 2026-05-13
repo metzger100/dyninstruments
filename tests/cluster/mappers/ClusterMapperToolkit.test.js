@@ -38,10 +38,10 @@ describe("ClusterMapperToolkit", function () {
   it("createToolkit resolves cap/unit accessors from props", function () {
     const mod = loadFresh("cluster/mappers/ClusterMapperToolkit.js");
     installUnitFormatFamilies();
-    const toolkit = mod.create().createToolkit({ caption_eta: "ETA", unit_eta: "" });
+    const toolkit = mod.create().createToolkit({ caption_wpEta: "WP ETA", unit_wpEta: "" });
 
-    expect(toolkit.cap("eta")).toBe("ETA");
-    expect(toolkit.unit("eta")).toBe("");
+    expect(toolkit.cap("wpEta")).toBe("WP ETA");
+    expect(toolkit.unit("wpEta")).toBe("");
     expect(toolkit.cap("stw")).toBeUndefined();
     expect(toolkit.num("12.5")).toBe(12.5);
     expect(toolkit.num("x")).toBeUndefined();

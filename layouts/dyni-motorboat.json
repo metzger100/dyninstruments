@@ -293,7 +293,7 @@
       "right": [
         {
           "name": "dyni_Nav_Instruments",
-          "kind": "eta"
+          "kind": "wpEta"
         },
         {
           "name": "dyni_Nav_Instruments",
@@ -400,8 +400,8 @@
           "courseUnit": "°",
           "waypointsText": "waypoints",
           "showWpNameXteDisplay": false,
-          "caption_eta": "ETA",
-          "unit_eta": "",
+          "caption_wpEta": "ETA",
+          "unit_wpEta": "",
           "caption_rteEta": "RTE ETA",
           "unit_rteEta": "",
           "caption_dst": "DST",
@@ -468,7 +468,7 @@
         },
         {
           "name": "dyni_Nav_Instruments",
-          "kind": "eta"
+          "kind": "wpEta"
         },
         {
           "name": "dyni_Nav_Instruments",

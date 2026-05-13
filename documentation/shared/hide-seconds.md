@@ -17,7 +17,7 @@ It is defined per cluster in the relevant `config/clusters/*.js` file and does n
 
 ## Supported Paths
 
-- `NavMapper` eta and rteEta kinds
+- `NavMapper` wpEta and rteEta kinds
 - `VesselMapper` clock kind
 - `ActiveRouteTextHtmlWidget` ETA metric
 - `EditRouteRenderModel` ETA metric

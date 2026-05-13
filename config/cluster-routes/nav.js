@@ -11,7 +11,7 @@
   routes.push(
     {
       cluster: "nav",
-      kind: "eta",
+      kind: "wpEta",
       mapperId: "NavMapper",
       rendererId: "ThreeValueTextWidget",
       surface: "canvas-dom",

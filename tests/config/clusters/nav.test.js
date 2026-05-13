@@ -23,7 +23,7 @@ describe("config/clusters/nav.js", function () {
   it("registers nav cluster definition", function () {
     const def = loadNavDef();
     expect(def.name).toBe("dyni_Nav_Instruments");
-    expect(def.storeKeys.eta).toBe("nav.wp.eta");
+    expect(def.storeKeys.wpEta).toBe("nav.wp.eta");
     expect(def.storeKeys.xte).toBe("nav.wp.xte");
     expect(def.storeKeys.cog).toBe("nav.gps.course");
     expect(def.storeKeys.btw).toBe("nav.wp.course");
@@ -39,7 +39,7 @@ describe("config/clusters/nav.js", function () {
     expect(def.storeKeys.activeName).toBe("nav.routeHandler.activeName");
     expect(def.storeKeys.useRhumbLine).toBe("nav.routeHandler.useRhumbLine");
     expect(def.storeKeys.routeShowLL).toBe("properties.routeShowLL");
-    expect(def.editableParameters.kind.default).toBe("eta");
+    expect(def.editableParameters.kind.default).toBe("wpEta");
     expect(def.editableParameters.kind.name).toBe("Instrument");
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "activeRoute")).toBe(true);
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "editRoute")).toBe(true);
@@ -182,7 +182,7 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.stableDigits.default).toBe(false);
     expect(def.editableParameters.stableDigits.name).toBe("Stable digits");
     expect(def.editableParameters.stableDigits.condition).toEqual([
-      { kind: "eta" },
+      { kind: "wpEta" },
       { kind: "rteEta" },
       { kind: "dst" },
       { kind: "rteDistance" },
@@ -195,13 +195,13 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.hideSeconds.default).toBe(false);
     expect(def.editableParameters.hideSeconds.name).toBe("Hide seconds");
     expect(def.editableParameters.hideSeconds.condition).toEqual([
-      { kind: "eta" },
+      { kind: "wpEta" },
       { kind: "rteEta" },
       { kind: "activeRoute" },
       { kind: "editRoute" }
     ]);
     expect(def.editableParameters.ratioThresholdNormal.condition).toEqual([
-      { kind: "eta" },
+      { kind: "wpEta" },
       { kind: "rteEta" },
       { kind: "dst" },
       { kind: "rteDistance" },
@@ -210,7 +210,7 @@ describe("config/clusters/nav.js", function () {
       { kind: "positionWp" }
     ]);
     expect(def.editableParameters.ratioThresholdFlat.condition).toEqual([
-      { kind: "eta" },
+      { kind: "wpEta" },
       { kind: "rteEta" },
       { kind: "dst" },
       { kind: "rteDistance" },
@@ -267,7 +267,7 @@ describe("config/clusters/nav.js", function () {
     const x = def.updateFunction({ kind: "xteDisplay", wpServer: false });
     expect(x.disconnect).toBe(true);
 
-    const c = def.updateFunction({ kind: "eta", wpServer: false, disconnect: true });
+    const c = def.updateFunction({ kind: "wpEta", wpServer: false, disconnect: true });
     expect(c.disconnect).toBeUndefined();
   });
 
@@ -301,7 +301,7 @@ describe("config/clusters/nav.js", function () {
   it("clears stale visible state on nav kinds", function () {
     const def = loadNavDef();
 
-    const cleared = def.updateFunction({ kind: "eta", visible: true });
+    const cleared = def.updateFunction({ kind: "wpEta", visible: true });
     expect(cleared.visible).toBeUndefined();
   });
 });
