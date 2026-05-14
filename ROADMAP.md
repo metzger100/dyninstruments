@@ -5,6 +5,11 @@ It tracks development priorities and AvNav widget coverage status.
 
 ## Roadmap
 
+### Fixes
+
+- connect the border color to the --dyni-fg color token
+- xteDisplay no Waypoint display doesn't apply to navpage and visually doesn't align with other widgets like activeRoute, editRoute or Routepoints
+
 ### Improvements for the existing widgets
 
 - add a theme token for opacity of captions and units
