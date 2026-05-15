@@ -582,7 +582,7 @@ describe("XteDisplayWidget", function () {
     expect(fillTextValues(canvas.__ctx)).toContain("No Waypoint");
   });
 
-  it("does not derive noTarget from wpName when textual metrics are hidden", function () {
+  it("renders noTarget state-screen when wpName is empty even with hidden textual metrics", function () {
     const harness = createHarness();
     const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
 
@@ -591,10 +591,27 @@ describe("XteDisplayWidget", function () {
       hideTextualMetrics: true
     }));
 
-    expect(harness.calls.staticDraws).toHaveLength(1);
-    expect(harness.calls.dynamicDraws).toHaveLength(1);
+    expect(harness.calls.staticDraws).toHaveLength(0);
+    expect(harness.calls.dynamicDraws).toHaveLength(0);
     expect(harness.calls.valueRows).toHaveLength(0);
     expect(harness.calls.waypointChecks).toHaveLength(0);
+    expect(fillTextValues(canvas.__ctx)).toContain("No Waypoint");
+  });
+
+  it("keeps disconnected precedence over noTarget", function () {
+    const harness = createHarness();
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+
+    harness.spec.renderCanvas(canvas, makeProps({
+      disconnect: true,
+      wpName: "",
+      hideTextualMetrics: true
+    }));
+
+    expect(harness.calls.staticDraws).toHaveLength(0);
+    expect(harness.calls.dynamicDraws).toHaveLength(0);
+    expect(harness.calls.valueRows).toHaveLength(0);
+    expect(fillTextValues(canvas.__ctx)).toContain("GPS Lost");
     expect(fillTextValues(canvas.__ctx)).not.toContain("No Waypoint");
   });
 

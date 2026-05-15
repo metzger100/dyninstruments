@@ -43,11 +43,9 @@
     function resolveStateKind(props) {
       const p = props || {};
       const display = p.display && typeof p.display === "object" ? p.display : null;
-      const layoutConfig = p.layout && typeof p.layout === "object" ? p.layout : null;
-      const hideTextualMetrics = !!(layoutConfig && layoutConfig.hideTextualMetrics === true);
       return stateScreenPrecedence.pickFirst([
         { kind: "disconnected", when: display && display.disconnect === true },
-        { kind: "noTarget", when: !hideTextualMetrics && typeof (display && display.wpName) === "string" && display.wpName.trim() === "" },
+        { kind: "noTarget", when: typeof (display && display.wpName) === "string" && display.wpName.trim() === "" },
         { kind: "data", when: true }
       ]);
     }

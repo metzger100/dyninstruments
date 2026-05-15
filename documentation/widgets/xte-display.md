@@ -17,7 +17,7 @@ The highway frame follows the same solid-line visual language as the radial and 
 Renderer now resolves canvas state-screens before highway drawing:
 
 - `disconnected` when `p.display.disconnect === true` (label: `GPS Lost`)
-- `noTarget` when `typeof p.display.wpName === "string" && p.display.wpName.trim() === ""` and textual metrics are visible (label: `No Waypoint`)
+- `noTarget` when `typeof p.display.wpName === "string" && p.display.wpName.trim() === ""` (label: `No Waypoint`)
 - `data` otherwise
 
 In `data`, the static highway frame is always visible; the dynamic XTE overlay renders iff `xte` is finite. `cog`, `dtw`, and `btw` no longer gate the dynamic overlay and only affect their textual placeholder rows when textual metrics are visible.
@@ -77,7 +77,7 @@ The mapper passes nested payload objects to the renderer.
 | `formatUnits.dtw` | string | `"nm"` | Formatter token for distance-to-waypoint conversion |
 | `layout.leadingZero` | boolean | `true` | Heading zero-padding (e.g. `093`) |
 | `layout.showWpName` | boolean | `false` | Enable waypoint name if space allows |
-| `layout.hideTextualMetrics` | boolean | `false` | Hide live metric readouts and waypoint name while keeping the highway visible |
+| `layout.hideTextualMetrics` | boolean | `false` | Hide live metric readouts and waypoint name in `data` state while keeping the highway visible; state screens still render normally |
 | `layout.easing` | boolean | `true` | Spring animation toggle for the XTE marker |
 | `layout.xteRatioThresholdNormal` | number | `0.85` | Ratio below -> `high` |
 | `layout.xteRatioThresholdFlat` | number | `2.3` | Ratio above -> `flat` |
@@ -128,6 +128,8 @@ When `hideTextualMetrics === true`, the layout switches to a graphics-only branc
 - no waypoint-name rect
 - enlarged highway rect
 - no waypoint-name fit work in the renderer
+
+State-screen selection is independent of `hideTextualMetrics`; empty waypoint names still render `No Waypoint`, and `disconnected` still takes precedence.
 
 ### flat
 
