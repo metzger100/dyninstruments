@@ -149,6 +149,20 @@
     return value;
   }
 
+  function applyDerivedSurfaceBorder(tokens) {
+    if (!tokens || typeof tokens !== "object") {
+      return tokens;
+    }
+    if (!tokens.surface || typeof tokens.surface !== "object") {
+      return tokens;
+    }
+    if (typeof tokens.surface.border !== "undefined") {
+      return tokens;
+    }
+    tokens.surface.border = tokens.surface.fg;
+    return tokens;
+  }
+
   runtime.createThemeResolver = function createThemeResolver(themeModel, options) {
     const opts = toObject(options) || {};
     const model = themeModel;
@@ -256,7 +270,7 @@
         const entry = entries[i];
         setByPath(out, entry.pathSegments, resolveTokenValue(entry.tokenDef, entry.pathSegments, context));
       }
-      return out;
+      return applyDerivedSurfaceBorder(out);
     }
 
     function resolveWithCache(rootEl, kind) {

@@ -37,7 +37,7 @@
   const TOKEN_DEFS = Object.freeze([
     defineToken("surface.fg", "--dyni-fg", "color", "black", { night: "rgba(252, 11, 11, 0.60)" }, "--dyni-theme-surface-fg"),
     defineToken("surface.bg", "--dyni-bg", "color", "white", { night: "black" }, "--dyni-theme-surface-bg"),
-    defineToken("surface.border", "--dyni-border", "color", "rgba(0, 0, 0, 0.30)", { night: "rgba(252, 11, 11, 0.18)" }, "--dyni-theme-surface-border"),
+    defineToken("surface.border", "--dyni-border", "color", undefined, undefined, "--dyni-theme-surface-border"),
     // dyni-lint-disable-next-line css-js-default-duplication -- Theme model owns the canonical font-family default token mapping.
     defineToken("font.family", "--dyni-font", "string", DEFAULT_FONT_STACK, undefined, "--dyni-theme-font-family"),
     defineToken("font.familyMono", "--dyni-font-mono", "string", DEFAULT_MONO_STACK, undefined, "--dyni-theme-font-family-mono"),
@@ -93,8 +93,7 @@
       night: {
         surface: {
           fg: "rgba(252, 11, 11, 0.60)",
-          bg: "black",
-          border: "rgba(252, 11, 11, 0.18)"
+          bg: "black"
         },
         colors: {
           pointer: "#cc2222",

@@ -28,6 +28,12 @@ Canonical shared inputs for migrated surface/typography tokens:
 
 Raw --dyni-* inputs are input-only. They are not consumed by migrated renderer CSS directly.
 
+Border-specific rule:
+
+- `--dyni-border` is optional.
+- If it is not set, `runtime.theme` derives `--dyni-theme-surface-border` from the resolved foreground token (`surface.fg`).
+- If it is set, the explicit border value wins.
+
 ## Output Variables
 
 Mandatory materialized outputs:

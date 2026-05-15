@@ -1,5 +1,6 @@
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 const { flushPromises } = require("../helpers/async");
+const hasOwn = Object.prototype.hasOwnProperty;
 
 describe("runtime/theme-runtime.js", function () {
   function setupContext(overrides) {
@@ -29,13 +30,8 @@ describe("runtime/theme-runtime.js", function () {
     return context;
   }
 
-  it("configures runtime.theme and applies output vars", function () {
-    const context = setupContext();
-    expect(context.DyniPlugin.runtime.theme.tokens).toBeTruthy();
-    expect(typeof context.DyniPlugin.runtime.theme.tokens.resolveForRoot).toBe("function");
-    expect(context.DyniPlugin.runtime.theme.resolveForRoot).toBeUndefined();
-    expect(context.DyniPlugin.runtime.theme.fetchShadowCssText).toBeUndefined();
-    const rootEl = {
+  function createPluginRootElement() {
+    return {
       nodeType: 1,
       className: "widget dyniplugin",
       classList: {
@@ -53,6 +49,25 @@ describe("runtime/theme-runtime.js", function () {
         setProperty: vi.fn()
       }
     };
+  }
+
+  function getAppliedOutput(rootEl, outputVar) {
+    const calls = rootEl.style.setProperty.mock.calls;
+    for (let i = 0; i < calls.length; i += 1) {
+      if (calls[i][0] === outputVar) {
+        return calls[i][1];
+      }
+    }
+    return undefined;
+  }
+
+  it("configures runtime.theme and applies output vars", function () {
+    const context = setupContext();
+    expect(context.DyniPlugin.runtime.theme.tokens).toBeTruthy();
+    expect(typeof context.DyniPlugin.runtime.theme.tokens.resolveForRoot).toBe("function");
+    expect(context.DyniPlugin.runtime.theme.resolveForRoot).toBeUndefined();
+    expect(context.DyniPlugin.runtime.theme.fetchShadowCssText).toBeUndefined();
+    const rootEl = createPluginRootElement();
 
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
     const resolved = context.DyniPlugin.runtime.theme.applyToRoot(rootEl);
@@ -113,5 +128,95 @@ describe("runtime/theme-runtime.js", function () {
     expect(function () {
       context.DyniPlugin.runtime.theme.applyToRoot({ style: { setProperty() {} } });
     }).toThrow("requires prior configure");
+  });
+
+  it("derives day border from resolved foreground when border input is absent", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue() {
+            return "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.applyToRoot(rootEl);
+
+    expect(resolved.surface.fg).toBe("black");
+    expect(resolved.surface.border).toBe("black");
+    expect(getAppliedOutput(rootEl, "--dyni-theme-surface-border")).toBe("black");
+  });
+
+  it("derives night border from resolved foreground when border input is absent", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue() {
+            return "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.dom.getNightModeState = function () {
+      return true;
+    };
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.applyToRoot(rootEl);
+
+    expect(resolved.surface.fg).toBe("rgba(252, 11, 11, 0.60)");
+    expect(resolved.surface.border).toBe("rgba(252, 11, 11, 0.60)");
+    expect(getAppliedOutput(rootEl, "--dyni-theme-surface-border")).toBe("rgba(252, 11, 11, 0.60)");
+  });
+
+  it("inherits custom foreground into border when border input is absent", function () {
+    const cssVars = {
+      "--dyni-fg": "#123456"
+    };
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue(name) {
+            return hasOwn.call(cssVars, name) ? cssVars[name] : "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.applyToRoot(rootEl);
+
+    expect(resolved.surface.fg).toBe("#123456");
+    expect(resolved.surface.border).toBe("#123456");
+    expect(getAppliedOutput(rootEl, "--dyni-theme-surface-border")).toBe("#123456");
+  });
+
+  it("uses explicit border input instead of derived foreground border", function () {
+    const cssVars = {
+      "--dyni-fg": "#123456",
+      "--dyni-border": "rgba(1, 2, 3, 0.75)"
+    };
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue(name) {
+            return hasOwn.call(cssVars, name) ? cssVars[name] : "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.applyToRoot(rootEl);
+
+    expect(resolved.surface.fg).toBe("#123456");
+    expect(resolved.surface.border).toBe("rgba(1, 2, 3, 0.75)");
+    expect(getAppliedOutput(rootEl, "--dyni-theme-surface-border")).toBe("rgba(1, 2, 3, 0.75)");
   });
 });

@@ -41,6 +41,13 @@ const fg = tokens.surface.fg;
 - --dyni-alarm-widget-fg
 - --dyni-alarm-widget-strip
 
+### Surface Border Fallback Contract
+
+- `--dyni-border` is optional.
+- When `--dyni-border` is omitted, `surface.border` inherits from the fully resolved `surface.fg` token (after mode + preset resolution).
+- When `--dyni-border` is provided, it overrides the inherited fallback.
+- The materialized output token remains `--dyni-theme-surface-border`.
+
 ## Geometry Inputs
 
 `GeometryScale` turns these factors into pixels from each family primary dimension. `compactGeometryScale` is text/layout-only; it does not change the graphical factors below.

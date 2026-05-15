@@ -54,7 +54,7 @@ Complete token list with defaults:
 |---|---|
 | `--dyni-fg` | `black` |
 | `--dyni-bg` | `white` |
-| `--dyni-border` | `rgba(0, 0, 0, 0.30)` |
+| `--dyni-border` | Optional. If omitted, border follows resolved `surface.fg` (`--dyni-fg` after mode/preset resolution). If set, this explicit value overrides that fallback. |
 | `--dyni-font` | `"Roboto","Inter","SF Pro Text",-apple-system,"Segoe UI","Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"` |
 | `--dyni-font-mono` | `"Roboto Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace` |
 | `--dyni-font-weight` | `700` |
