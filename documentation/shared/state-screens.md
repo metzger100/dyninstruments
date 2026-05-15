@@ -22,7 +22,8 @@ Each widget owns resolver logic and uses shared helpers for labels, precedence, 
 - `StateScreenPrecedence.pickFirst([...])` returns the first truthy `when` candidate or `data` when none match.
 - `StateScreenInteraction.resolveInteraction({ kind, baseInteraction })` forces `passive` for any non-`data` kind.
 - `StateScreenMarkup.renderStateScreen(...)` emits wrapper markup with `dyni-state-<kind>` class and passive interaction class normalization.
-- `StateScreenCanvasOverlay.drawStateScreen(...)` draws dim-and-label overlay for non-`hidden` non-`data` kinds.
+- `StateScreenCanvasOverlay.drawStateScreen(...)` draws label-only canvas state screens for non-`hidden` non-`data` kinds, matching the HTML state-screen look (no dim background fill).
+- Canvas label sizing uses measured width fitting with an 80% height ceiling and 80% width cap.
 - `pickFirst([...])` call sites stay inline so the precedence contract can validate the candidate order mechanically.
 - Canonical order is enforced at the call site: `disconnected > noRoute > noTarget > noAis > hidden > data`, with AIS allowed to use `hidden > disconnected > noAis > data`.
 

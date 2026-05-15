@@ -1,5 +1,5 @@
 /**
- * Module: StateScreenCanvasOverlay - Shared canvas dim-and-label primitive for semantic state-screens
+ * Module: StateScreenCanvasOverlay - Shared canvas label primitive for semantic state-screens
  * Documentation: documentation/shared/state-screens.md
  * Depends: StateScreenLabels
  */
@@ -29,6 +29,22 @@
   function create(def, componentContext) {
     const labels = componentContext.components.require("StateScreenLabels");
 
+    function resolveFontPx(ctx, labelText, W, H, weight, family) {
+      const maxWidth = Math.max(1, Math.floor(W * 0.8));
+      const maxHeight = Math.max(1, Math.floor(Math.min(W, H) * 0.8));
+      let px = maxHeight;
+      let measuredWidth;
+
+      setFont(ctx, px, weight, family);
+      measuredWidth = Number(ctx.measureText(labelText).width) || 0;
+
+      if (measuredWidth > maxWidth) {
+        px = Math.max(1, Math.floor(px * (maxWidth / measuredWidth)));
+      }
+
+      return px;
+    }
+
     function drawStateScreen(args) {
       const cfg = args || {};
       const kind = cfg.kind;
@@ -51,13 +67,9 @@
         ? cfg.color
         : (typeof ctx.fillStyle === "string" && ctx.fillStyle ? ctx.fillStyle : "");
       const labelText = typeof cfg.label === "string" ? cfg.label : (labels.LABELS[kind] || "");
-      const px = Math.max(12, Math.floor(Math.min(W, H) * 0.18));
+      const px = resolveFontPx(ctx, labelText, W, H, cfg.labelWeight, cfg.family);
 
       ctx.save();
-      ctx.globalAlpha = 0.20;
-      ctx.fillStyle = color;
-      ctx.fillRect(0, 0, W, H);
-      ctx.globalAlpha = 1;
       ctx.fillStyle = color;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
