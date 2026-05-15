@@ -112,6 +112,10 @@
   height: auto;
 }
 
+.widgetContainer.horizontal .widget.dyniplugin.horizontal {
+  width: 7em;
+}
+
 /* Semantic state-screen wrappers for shared empty/disconnected states. */
 .widget.dyniplugin .dyni-state-disconnected,
 .widget.dyniplugin .dyni-state-no-route,
