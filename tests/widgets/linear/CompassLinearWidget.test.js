@@ -26,7 +26,14 @@ describe("CompassLinearWidget", function () {
     const mod = loadFresh("widgets/linear/CompassLinearWidget/CompassLinearWidget.js");
     const spec = mod.create({}, createComponentContextMock({
       modules: {
-        RadialValueMath: { create() { return {
+        ValueMath: { create() { return {
+                isFiniteNumber(value) {
+                  return typeof value === "number" && Number.isFinite(value);
+                },
+                toFiniteNumber(value) {
+                  const n = Number(value);
+                  return Number.isFinite(n) ? n : undefined;
+                },
                 formatDirection360(value, leadingZero) {
                   const n = Number(value);
                   if (!isFinite(n)) return "---";
@@ -132,7 +139,14 @@ describe("CompassLinearWidget", function () {
 
     loadFresh("widgets/linear/CompassLinearWidget/CompassLinearWidget.js").create({}, createComponentContextMock({
       modules: {
-        RadialValueMath: { create() { return {
+        ValueMath: { create() { return {
+                isFiniteNumber(value) {
+                  return typeof value === "number" && Number.isFinite(value);
+                },
+                toFiniteNumber(value) {
+                  const n = Number(value);
+                  return Number.isFinite(n) ? n : undefined;
+                },
                 formatDirection360(value, leadingZero) {
                   const n = Number(value);
                   if (!isFinite(n)) return "---";
@@ -169,11 +183,71 @@ describe("CompassLinearWidget", function () {
     expect(result).toBeUndefined();
   });
 
+  it("does not render a marker when markerCourse is null", function () {
+    let captured;
+    const markerMotion = {
+      resolve: vi.fn(),
+      isActive: vi.fn(() => false)
+    };
+
+    loadFresh("widgets/linear/CompassLinearWidget/CompassLinearWidget.js").create({}, createComponentContextMock({
+      modules: {
+        ValueMath: { create() { return {
+                isFiniteNumber(value) {
+                  return typeof value === "number" && Number.isFinite(value);
+                },
+                toFiniteNumber(value) {
+                  const n = Number(value);
+                  return Number.isFinite(n) ? n : undefined;
+                },
+                formatDirection360(value, leadingZero) {
+                  const n = Number(value);
+                  if (!isFinite(n)) return "---";
+                  const norm = ((Math.round(n) % 360) + 360) % 360;
+                  const out = String(norm);
+                  return leadingZero ? out.padStart(3, "0") : out;
+                }
+              }; } },
+        SpringEasing: { create() { return {
+                createMotion() {
+                  return markerMotion;
+                }
+              }; } },
+        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
+      }
+    }));
+
+    const api = {
+      drawDefaultPointer: vi.fn(),
+      drawMarkerAtValue: vi.fn()
+    };
+    const state = {
+      canvas: {},
+      nowMs: 48,
+      theme: {
+        colors: { pointer: "#ff2b2b" }
+      }
+    };
+
+    const result = captured.drawFrame(state, { markerCourse: null }, { num: 350, easedNum: 350 }, api);
+    expect(markerMotion.resolve).not.toHaveBeenCalled();
+    expect(markerMotion.isActive).not.toHaveBeenCalled();
+    expect(api.drawMarkerAtValue).not.toHaveBeenCalled();
+    expect(result).toBeUndefined();
+  });
+
   it("returns fallback text for invalid heading values", function () {
     let captured;
     loadFresh("widgets/linear/CompassLinearWidget/CompassLinearWidget.js").create({}, createComponentContextMock({
       modules: {
-        RadialValueMath: { create() { return {
+        ValueMath: { create() { return {
+                isFiniteNumber(value) {
+                  return typeof value === "number" && Number.isFinite(value);
+                },
+                toFiniteNumber(value) {
+                  const n = Number(value);
+                  return Number.isFinite(n) ? n : undefined;
+                },
                 formatDirection360() {
                   return "---";
                 }

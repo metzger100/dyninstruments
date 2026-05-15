@@ -39,7 +39,8 @@
         "StateScreenLabels",
         "StateScreenPrecedence",
         "StateScreenInteraction",
-        "UnitAwareFormatter"
+        "UnitAwareFormatter",
+        "ValueMath"
       ]
   };
 
@@ -89,7 +90,8 @@
         "StateScreenLabels",
         "StateScreenPrecedence",
         "StateScreenInteraction",
-        "UnitAwareFormatter"
+        "UnitAwareFormatter",
+        "ValueMath"
       ]
   };
 
@@ -122,7 +124,8 @@
         "StableDigits",
         "StateScreenLabels",
         "StateScreenPrecedence",
-        "StateScreenInteraction"
+        "StateScreenInteraction",
+        "ValueMath"
       ]
   };
 
@@ -179,7 +182,7 @@
       globalKey: "DyniCenterDisplayTextWidget",
       deps: [
         "TextLayoutEngine",
-        "RadialTextLayout",
+        "CanvasTextLayout",
         "TextTileLayout",
         "CenterDisplayLayout",
         "CenterDisplayMath",

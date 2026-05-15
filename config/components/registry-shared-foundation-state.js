@@ -39,7 +39,8 @@
   sf.StateScreenTextFit = {
     js: BASE + "shared/widget-kits/state/StateScreenTextFit.js",
     css: undefined,
-    globalKey: "DyniStateScreenTextFit"
+    globalKey: "DyniStateScreenTextFit",
+    deps: ["ValueMath"]
   };
 
   sf.StateScreenMarkup = {
@@ -59,7 +60,8 @@
   sf.HtmlWidgetUtils = {
     js: BASE + "shared/widget-kits/html/HtmlWidgetUtils.js",
     css: undefined,
-    globalKey: "DyniHtmlWidgetUtils"
+    globalKey: "DyniHtmlWidgetUtils",
+    deps: ["ValueMath"]
   };
 
   sf.PreparedPayloadModelCache = {

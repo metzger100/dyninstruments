@@ -1,7 +1,7 @@
 /**
  * Module: TextFitMath - Shared numeric fit helpers for HTML text-fit modules
  * Documentation: documentation/shared/text-layout-engine.md
- * Depends: none
+ * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,10 +10,7 @@
 }(this, function () {
   "use strict";
 
-  function toFiniteNumber(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
-  }
+  let toFiniteNumber;
 
   function resolveSecondaryMaxPx(args) {
     const cfg = args || {};
@@ -33,7 +30,10 @@
     return Math.max(1, Math.floor(baseValuePx * safeRatio));
   }
 
-  function create() {
+  function create(def, componentContext) {
+    const valueMath = componentContext.components.require("ValueMath");
+    toFiniteNumber = valueMath.toFiniteNumber;
+
     return {
       id: "TextFitMath",
       resolveSecondaryMaxPx: resolveSecondaryMaxPx

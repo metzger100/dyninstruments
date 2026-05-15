@@ -1,7 +1,7 @@
 /**
  * Module: HtmlWidgetUtils - Shared helper utilities for HTML widget renderers and fit modules
  * Documentation: documentation/architecture/component-system.md
- * Depends: none
+ * Depends: ValueMath
  */
 
 (function (root, factory) {
@@ -11,14 +11,8 @@
 }(this, function () {
   "use strict";
 
-  function toFiniteNumber(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
-  }
-
-  function trimText(value) {
-    return value == null ? "" : String(value).trim();
-  }
+  let toFiniteNumber;
+  let trimText;
 
   function escapeHtml(value) {
     return String(value)
@@ -297,7 +291,11 @@
     return !!(surfacePolicy && surfacePolicy.interaction && surfacePolicy.interaction.mode === "dispatch");
   }
 
-  function create() {
+  function create(def, componentContext) {
+    const valueMath = componentContext.components.require("ValueMath");
+    toFiniteNumber = valueMath.toFiniteNumber;
+    trimText = valueMath.trimText;
+
     return {
       id: "HtmlWidgetUtils",
       toFiniteNumber: toFiniteNumber,

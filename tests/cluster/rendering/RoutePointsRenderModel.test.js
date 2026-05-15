@@ -62,7 +62,7 @@ describe("RoutePointsRenderModel", function () {
       NavInteractionPolicy: loadFresh("shared/widget-kits/nav/NavInteractionPolicy.js"),
       PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
       RadialTextFitting: loadFresh("shared/widget-kits/radial/RadialTextFitting.js"),
-      RadialTextLayout: loadFresh("shared/widget-kits/radial/RadialTextLayout.js"),
+      CanvasTextLayout: loadFresh("shared/widget-kits/text/CanvasTextLayout.js"),
       ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
       RoutePointsHtmlFit: loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js"),
       RoutePointsInfoText: loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js"),

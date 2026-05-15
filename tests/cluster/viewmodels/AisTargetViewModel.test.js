@@ -95,6 +95,26 @@ describe("AisTargetViewModel", function () {
     expect(vm.build({ target: { tcpa: -5 } }).showTcpaBranch).toBe(false);
   });
 
+  it("keeps missing and blank numeric target fields undefined", function () {
+    const vm = createViewModel();
+    const out = vm.build({
+      target: {
+        distance: "",
+        cpa: "   ",
+        tcpa: undefined,
+        headingTo: null,
+        passFront: ""
+      }
+    });
+
+    expect(out.distance).toBeUndefined();
+    expect(out.cpa).toBeUndefined();
+    expect(out.tcpa).toBeUndefined();
+    expect(out.headingTo).toBeUndefined();
+    expect(out.showTcpaBranch).toBe(false);
+    expect(out.frontText).toBe("-");
+  });
+
   it("applies color precedence warning -> nearest -> tracking -> normal", function () {
     const vm = createViewModel();
 

@@ -63,8 +63,8 @@ describe("runtime/widget-registrar.js", function () {
       modules: {
       RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js"),
       RadialTextFitting: loadFresh("shared/widget-kits/radial/RadialTextFitting.js"),
-      RadialTextLayout: loadFresh("shared/widget-kits/radial/RadialTextLayout.js"),
-      RadialValueMath: loadFresh("shared/widget-kits/radial/RadialValueMath.js"),
+      CanvasTextLayout: loadFresh("shared/widget-kits/text/CanvasTextLayout.js"),
+      ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js"),
       TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
       TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
         ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),

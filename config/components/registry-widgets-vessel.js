@@ -61,7 +61,7 @@
       css: undefined,
       globalKey: "DyniXteDisplayWidget",
       deps: [
-        "RadialToolkit",
+        "GaugeToolkit",
         "CanvasLayerCache",
         "XteHighwayPrimitives",
         "XteHighwayLayout",

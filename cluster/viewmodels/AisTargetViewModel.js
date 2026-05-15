@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetViewModel - AIS target summary domain normalization contract owner
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: none
+ * Depends: ValueMath
  */
 
 (function (root, factory) {
@@ -15,20 +15,7 @@
     return !!value && typeof value === "object";
   }
 
-  function toFiniteNumber(value) {
-    if (typeof value === "number") {
-      return Number.isFinite(value) ? value : undefined;
-    }
-    if (typeof value !== "string") {
-      return undefined;
-    }
-    const trimmed = value.trim();
-    if (trimmed === "") {
-      return undefined;
-    }
-    const n = Number(trimmed);
-    return Number.isFinite(n) ? n : undefined;
-  }
+  let toFiniteNumber;
 
   function toDispatchMmsi(mmsi) {
     if (typeof mmsi === "number" && Number.isFinite(mmsi)) {
@@ -42,6 +29,16 @@
 
   function hasText(value) {
     return typeof value === "string" && value.trim() !== "";
+  }
+
+  function toOptionalFiniteNumber(rawValue) {
+    if (rawValue == null) {
+      return undefined;
+    }
+    if (typeof rawValue === "string" && rawValue.trim() === "") {
+      return undefined;
+    }
+    return toFiniteNumber(rawValue);
   }
 
   function pickNameOrMmsi(target, mmsiRaw) {
@@ -93,7 +90,9 @@
     return undefined;
   }
 
-  function create() {
+  function create(def, componentContext) {
+    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+
     function build(props) {
       const p = props || {};
       const target = isObject(p.target) ? p.target : {};
@@ -101,9 +100,9 @@
       const trackedMmsiRaw = p.trackedMmsi;
       const hasTargetIdentity = typeof mmsiRaw !== "undefined";
       const mmsiNormalized = toDispatchMmsi(mmsiRaw);
-      const cpa = toFiniteNumber(target.cpa);
-      const tcpa = toFiniteNumber(target.tcpa);
-      const passFront = toFiniteNumber(target.passFront);
+      const cpa = toOptionalFiniteNumber(target.cpa);
+      const tcpa = toOptionalFiniteNumber(target.tcpa);
+      const passFront = toOptionalFiniteNumber(target.passFront);
       const colorState = {
         warning: target.warning === true,
         nextWarning: target.nextWarning === true,
@@ -125,10 +124,10 @@
         hasTargetIdentity: hasTargetIdentity,
         hasDispatchMmsi: mmsiNormalized !== "",
         hasColorMmsi: colorState.hasColorMmsi,
-        distance: toFiniteNumber(target.distance),
+        distance: toOptionalFiniteNumber(target.distance),
         cpa: cpa,
         tcpa: tcpa,
-        headingTo: toFiniteNumber(target.headingTo),
+        headingTo: toOptionalFiniteNumber(target.headingTo),
         nameOrMmsi: pickNameOrMmsi(target, mmsiRaw),
         frontText: frontText,
         frontInitial: frontInitial,

@@ -1,7 +1,7 @@
 /**
  * Module: TemperatureRadialWidget - Semicircle temperature gauge with high-end sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleRadialEngine, RadialValueMath, PlaceholderNormalize
+ * Depends: SemicircleRadialEngine, ValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,7 +12,7 @@
 
   function create(def, componentContext) {
     const renderer = componentContext.components.require("SemicircleRadialEngine");
-    const valueMath = componentContext.components.require("RadialValueMath");
+    const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     const renderCanvas = renderer.createRenderer({
@@ -32,7 +32,7 @@
         flat: "tempRadialRatioThresholdFlat"
       },
       hideTextualMetricsProp: "tempRadialHideTextualMetrics",
-      tickSteps: valueMath.resolveTemperatureSemicircleTickSteps,
+      tickSteps: valueMath.resolveTemperatureTickSteps,
       formatDisplay: function (raw, props) {
         const formatted = valueMath.formatGaugeDisplay(
           raw,
@@ -51,7 +51,7 @@
           warningFrom: props && props.tempRadialWarningFrom,
           alarmFrom: props && props.tempRadialAlarmFrom
         };
-        return valueMath.buildHighEndSectors(radialProps, minV, maxV, arc, {
+        return valueUtils.buildHighEndSectors(radialProps, minV, maxV, arc, {
           warningColor: theme.colors.warning,
           alarmColor: theme.colors.alarm
         });

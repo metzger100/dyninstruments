@@ -21,7 +21,8 @@
     AisTargetViewModel: {
       js: BASE + "cluster/viewmodels/AisTargetViewModel.js",
       css: undefined,
-      globalKey: "DyniAisTargetViewModel"
+      globalKey: "DyniAisTargetViewModel",
+      deps: ["ValueMath"]
     },
     AlarmViewModel: {
       js: BASE + "cluster/viewmodels/AlarmViewModel.js",
@@ -31,18 +32,20 @@
     ActiveRouteViewModel: {
       js: BASE + "cluster/viewmodels/ActiveRouteViewModel.js",
       css: undefined,
-      globalKey: "DyniActiveRouteViewModel"
+      globalKey: "DyniActiveRouteViewModel",
+      deps: ["ValueMath"]
     },
     EditRouteViewModel: {
       js: BASE + "cluster/viewmodels/EditRouteViewModel.js",
       css: undefined,
       globalKey: "DyniEditRouteViewModel",
-      deps: ["CenterDisplayMath"]
+      deps: ["CenterDisplayMath", "ValueMath"]
     },
     RoutePointsViewModel: {
       js: BASE + "cluster/viewmodels/RoutePointsViewModel.js",
       css: undefined,
-      globalKey: "DyniRoutePointsViewModel"
+      globalKey: "DyniRoutePointsViewModel",
+      deps: ["ValueMath"]
     },
     AnchorMapper: {
       js: BASE + "cluster/mappers/AnchorMapper.js",
@@ -58,13 +61,13 @@
       js: BASE + "cluster/mappers/ClusterMapperToolkit.js",
       css: undefined,
       globalKey: "DyniClusterMapperToolkit",
-      deps: ["RadialAngleMath"]
+      deps: ["RadialAngleMath", "ValueMath"]
     },
     ClusterWidget: {
       js: BASE + "cluster/ClusterWidget.js",
       css: undefined,
       globalKey: "DyniClusterWidget",
-      deps: []
+      deps: ["ValueMath"]
     },
     CourseHeadingMapper: {
       js: BASE + "cluster/mappers/CourseHeadingMapper.js",

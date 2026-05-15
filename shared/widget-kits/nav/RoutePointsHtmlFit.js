@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsHtmlFit - Per-cell text-fit owner for route-points HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: componentContext.theme.tokens, RadialTextLayout, TextTileLayout, RoutePointsLayout, HtmlWidgetUtils, RoutePointsInfoText
+ * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, RoutePointsLayout, HtmlWidgetUtils, RoutePointsInfoText
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -175,7 +175,7 @@
 
   function create(def, componentContext) {
     const theme = componentContext.theme.tokens;
-    const radialText = componentContext.components.require("RadialTextLayout");
+    const radialText = componentContext.components.require("CanvasTextLayout");
     const tileLayout = componentContext.components.require("TextTileLayout");
     const layoutApi = componentContext.components.require("RoutePointsLayout");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");

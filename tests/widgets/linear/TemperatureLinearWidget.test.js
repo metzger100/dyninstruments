@@ -6,7 +6,7 @@ describe("TemperatureLinearWidget", function () {
     let captured;
     const renderCanvas = vi.fn();
     const applyFormatter = vi.fn((value) => Number(value).toFixed(1) + " C");
-    const resolveTemperatureSemicircleTickSteps = vi.fn((range) => {
+    const resolveTemperatureTickSteps = vi.fn((range) => {
       if (range <= 8) return { major: 1, minor: 0.5 };
       if (range <= 100) return { major: 10, minor: 2 };
       return { major: 50, minor: 10 };
@@ -16,7 +16,7 @@ describe("TemperatureLinearWidget", function () {
     const spec = mod.create({}, createComponentContextMock({
       modules: {
         PlaceholderNormalize: { create() { return { normalize(text, defaultText) { if (text == null) return defaultText == null ? "---" : defaultText; const value = String(text).trim(); return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text); } }; } },
-        RadialValueMath: { create() { return {
+        ValueMath: { create() { return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -46,7 +46,7 @@ describe("TemperatureLinearWidget", function () {
                 clamp(v, lo, hi) {
                   return Math.max(lo, Math.min(hi, Number(v)));
                 },
-                resolveTemperatureSemicircleTickSteps
+                resolveTemperatureTickSteps
               }; } },
         LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return renderCanvas; } }; } }
       },
@@ -64,7 +64,7 @@ describe("TemperatureLinearWidget", function () {
     expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(8)).toEqual({ major: 1, minor: 0.5 });
     expect(captured.tickSteps(100)).toEqual({ major: 10, minor: 2 });
-    expect(resolveTemperatureSemicircleTickSteps).toHaveBeenCalledTimes(2);
+    expect(resolveTemperatureTickSteps).toHaveBeenCalledTimes(2);
     expect(captured.formatDisplay(23.44, {
       formatter: "formatTemperature",
       formatterParameters: ["celsius"]
@@ -90,7 +90,7 @@ describe("TemperatureLinearWidget", function () {
     mod.create({}, createComponentContextMock({
       modules: {
         PlaceholderNormalize: { create() { return { normalize(text, defaultText) { if (text == null) return defaultText == null ? "---" : defaultText; const value = String(text).trim(); return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text); } }; } },
-        RadialValueMath: { create() { return {
+        ValueMath: { create() { return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -120,7 +120,7 @@ describe("TemperatureLinearWidget", function () {
                 clamp(v, lo, hi) {
                   return Math.max(lo, Math.min(hi, Number(v)));
                 },
-                resolveTemperatureSemicircleTickSteps() {
+                resolveTemperatureTickSteps() {
                   return { major: 10, minor: 2 };
                 }
               }; } },
@@ -143,7 +143,7 @@ describe("TemperatureLinearWidget", function () {
     mod.create({}, createComponentContextMock({
       modules: {
         PlaceholderNormalize: { create() { return { normalize(text, defaultText) { if (text == null) return defaultText == null ? "---" : defaultText; const value = String(text).trim(); return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text); } }; } },
-        RadialValueMath: { create() { return {
+        ValueMath: { create() { return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -173,7 +173,7 @@ describe("TemperatureLinearWidget", function () {
                 clamp(v, lo, hi) {
                   return Math.max(lo, Math.min(hi, Number(v)));
                 },
-                resolveTemperatureSemicircleTickSteps() {
+                resolveTemperatureTickSteps() {
                   return { major: 10, minor: 2 };
                 }
               }; } },
@@ -187,5 +187,80 @@ describe("TemperatureLinearWidget", function () {
       formatterParameters: ["celsius"]
     })).toEqual({ num: NaN, text: "---" });
     expect(seenText).toBe("---");
+  });
+
+  it("returns placeholder output for null temperature values", function () {
+    let captured;
+    const applyFormatter = vi.fn((value) => String(value));
+
+    loadFresh("widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js").create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
+                }
+                return String(text);
+              }
+            };
+          }
+        },
+        ValueMath: {
+          create() {
+            return {
+              formatGaugeDisplay(raw, props, apply, normalize, defaultFormatter, defaultParameters) {
+                const p = props || {};
+                const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
+                  ? p.default
+                  : normalize(undefined, undefined);
+                if (raw == null) {
+                  return { num: NaN, text: defaultText };
+                }
+                const n = Number(raw);
+                if (!Number.isFinite(n)) {
+                  return { num: NaN, text: defaultText };
+                }
+                const formatter = Object.prototype.hasOwnProperty.call(p, "formatter") ? p.formatter : defaultFormatter;
+                const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters")
+                  ? p.formatterParameters
+                  : defaultParameters;
+                const formatted = normalize(String(apply(n, {
+                  formatter: formatter,
+                  formatterParameters: formatterParameters,
+                  default: defaultText
+                })), defaultText);
+                const match = String(formatted).match(/-?\d+(?:\.\d+)?/);
+                const num = match ? Number(match[0]) : NaN;
+                return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+              },
+              clamp(v, lo, hi) {
+                return Math.max(lo, Math.min(hi, Number(v)));
+              },
+              resolveTemperatureTickSteps() {
+                return { major: 10, minor: 2 };
+              }
+            };
+          }
+        },
+        LinearGaugeEngine: {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return function () {};
+              }
+            };
+          }
+        }
+      },
+      services: {
+        format: { applyFormatter }
+      }
+    }));
+
+    expect(captured.formatDisplay(null, {})).toEqual({ num: NaN, text: "---" });
+    expect(applyFormatter).not.toHaveBeenCalled();
   });
 });

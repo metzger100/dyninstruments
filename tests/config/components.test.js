@@ -121,9 +121,31 @@ describe("config/components.js", function () {
     loadFullComponentRegistry(context);
 
     const components = context.DyniPlugin.config.components;
-    expect(components.ClusterWidget.deps).toEqual([]);
+    expect(components.ClusterWidget.deps).toEqual(["ValueMath"]);
     expect(components.CanvasLayerCache.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/canvas/CanvasLayerCache.js");
-    expect(components.XteHighwayPrimitives.deps).toEqual(["GeometryScale"]);
+    expect(components.XteHighwayPrimitives.deps).toEqual(["GeometryScale", "ValueMath"]);
+  });
+
+  it("keeps RadialValueMath as compatibility-only and removes it from internal gauge widget deps", function () {
+    const context = createScriptContext({
+      DyniPlugin: {
+        baseUrl: "http://host/plugins/dyninstruments/",
+        runtime: {},
+        state: {},
+        config: { shared: {}, clusters: [] }
+      }
+    });
+
+    loadFullComponentRegistry(context);
+
+    const components = context.DyniPlugin.config.components;
+    expect(components.RadialValueMath.deps).toEqual(["RadialAngleMath", "ValueMath", "RadialSectorMath"]);
+    expect(components.DepthLinearWidget.deps).not.toContain("RadialValueMath");
+    expect(components.DefaultRadialWidget.deps).not.toContain("RadialValueMath");
+    expect(components.DepthRadialWidget.deps).not.toContain("RadialValueMath");
+    expect(components.SpeedRadialWidget.deps).not.toContain("RadialValueMath");
+    expect(components.TemperatureRadialWidget.deps).not.toContain("RadialValueMath");
+    expect(components.VoltageRadialWidget.deps).not.toContain("RadialValueMath");
   });
 
   it("removes runtime-owned architecture from the component registry", function () {
@@ -194,8 +216,8 @@ describe("config/components.js", function () {
       })
     );
 
-    expect(components.ClusterWidget.deps).toEqual([]);
-    expect(needed).toEqual(["ClusterWidget"]);
+    expect(components.ClusterWidget.deps).toEqual(["ValueMath"]);
+    expect(needed).toEqual(["ClusterWidget", "ValueMath"]);
     expect(needed).not.toContain("ClusterMapperRegistry");
     expect(needed).not.toContain("ClusterKindCatalog");
     expect(needed).not.toContain("ClusterRendererRouter");

@@ -1,7 +1,7 @@
 /**
  * Module: ClusterWidget - Cluster shell/orchestrator boundary with deferred host commit and route activation
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: runtime/namespace.js
+ * Depends: runtime/namespace.js, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -23,13 +23,6 @@
       ? globalThis
       : (typeof self !== "undefined" ? self : {});
     return GLOBAL_ROOT.DyniPlugin || null;
-  }
-
-  function ensureObject(value, name) {
-    if (!value || typeof value !== "object") {
-      throw new Error("ClusterWidget: " + name + " must be an object");
-    }
-    return value;
   }
 
   function ensureService(owner, label) {
@@ -75,7 +68,8 @@
   }
 
   function create(def, componentContext) {
-    const widgetDef = ensureObject(def || {}, "def");
+    const ensureObject = componentContext.components.require("ValueMath").ensureObject;
+    const widgetDef = ensureObject(def || {}, "ClusterWidget: def");
     const runtimeApi = resolveRuntimeApi();
     const perf = runtimeApi && runtimeApi.perf;
     const namespace = resolveNamespace();

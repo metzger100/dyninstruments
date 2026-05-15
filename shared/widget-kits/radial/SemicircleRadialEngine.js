@@ -1,7 +1,7 @@
 /**
  * Module: SemicircleRadialEngine - Shared renderer for semicircle gauge widgets
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: RadialToolkit, SemicircleRadialLayout, SemicircleRadialTextLayout, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: RadialToolkit, SemicircleRadialLayout, SemicircleRadialTextLayout, RadialSectorMath, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -23,6 +23,7 @@
     const GU = componentContext.components.require("RadialToolkit");
     const layoutApi = componentContext.components.require("SemicircleRadialLayout");
     const textLayout = componentContext.components.require("SemicircleRadialTextLayout");
+    const sectorMath = componentContext.components.require("RadialSectorMath");
     const stableDigits = componentContext.components.require("StableDigits");
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
@@ -30,6 +31,7 @@
     const springMotion = componentContext.components.require("SpringEasing").createMotion();
     const text = GU.text;
     const value = GU.value;
+    const angle = GU.angle;
     const draw = GU.draw;
 
     function resolveSurface(canvas) {
@@ -51,6 +53,60 @@
       const maxAbs = Math.max(0, Math.abs(Number(rangeMax) || 0));
       const rangeDigits = Math.max(1, String(Math.floor(maxAbs)).length);
       return Math.max(minWidth, textDigits, rangeDigits);
+    }
+
+    function valueToArcAngle(rawValue, minV, maxV, arc, doClamp) {
+      return angle.valueToAngle(rawValue, {
+        min: Number(minV),
+        max: Number(maxV),
+        startDeg: Number(arc.startDeg),
+        endDeg: Number(arc.endDeg),
+        clamp: doClamp !== false
+      });
+    }
+
+    function buildValueTickAngles(minV, maxV, majorStep, minorStep, arc) {
+      const majors = [];
+      const minors = [];
+      if (!Number.isFinite(minV) || !Number.isFinite(maxV) || maxV <= minV) {
+        return { majors: majors, minors: minors };
+      }
+
+      let minor = Math.abs(Number(minorStep));
+      let major = Math.abs(Number(majorStep));
+      if (!Number.isFinite(minor) || minor <= 0) minor = (maxV - minV) / 20;
+      if (!Number.isFinite(major) || major <= 0) major = minor * 5;
+
+      const startDeg = Number(arc.startDeg);
+      const endDeg = Number(arc.endDeg);
+      if (!Number.isFinite(startDeg) || !Number.isFinite(endDeg)) {
+        return { majors: majors, minors: minors };
+      }
+
+      const steps = Math.max(1, Math.round((maxV - minV) / minor));
+      for (let i = 0; i <= steps; i += 1) {
+        let tickValue = minV + i * minor;
+        if (tickValue > maxV) {
+          tickValue = maxV;
+        }
+
+        const rel = (tickValue - minV) / major;
+        const tickAngle = valueToArcAngle(tickValue, minV, maxV, arc, true);
+        if (value.almostInt(rel, 1e-4)) {
+          majors.push(tickAngle);
+        } else {
+          minors.push(tickAngle);
+        }
+
+        if (tickValue === maxV) {
+          break;
+        }
+      }
+
+      if (!majors.length || !value.isApprox(majors[0], startDeg, 1e-6)) majors.unshift(startDeg);
+      if (!value.isApprox(majors[majors.length - 1], endDeg, 1e-6)) majors.push(endDeg);
+
+      return { majors: majors, minors: minors };
     }
 
     function drawMajorValueLabels(ctx, family, geom, labels, minV, maxV, majorStep, arc, showEndLabels, labelWeight) {
@@ -78,9 +134,9 @@
           continue;
         }
 
-        const angle = value.valueToAngle(tickValue, minV, maxV, arc, true);
-        angles.push(angle);
-        labelsMap[angle] = value.formatMajorLabel(tickValue);
+        const angleDeg = valueToArcAngle(tickValue, minV, maxV, arc, true);
+        angles.push(angleDeg);
+        labelsMap[angleDeg] = value.formatMajorLabel(tickValue);
 
         if (value.isApprox(tickValue, maxV, 1e-6)) {
           break;
@@ -118,6 +174,9 @@
           return cfg.formatDisplay(rawValue, props, unitText, componentContext);
         }
         : function (rawValue) {
+          if (rawValue == null) {
+            return { num: NaN, text: "" };
+          }
           return { num: Number(rawValue), text: String(rawValue) };
         };
       const tickSteps = typeof cfg.tickSteps === "function"
@@ -188,14 +247,18 @@
         const tickPreset = tickSteps(range.range);
         const tickMajor = value.isFiniteNumber(p[tickProps.major]) ? p[tickProps.major] : tickPreset.major;
         const tickMinor = value.isFiniteNumber(p[tickProps.minor]) ? p[tickProps.minor] : tickPreset.minor;
-        const sectorList = buildSectors(p, range.min, range.max, arc, value, theme);
-        const ticks = value.buildValueTickAngles(range.min, range.max, tickMajor, tickMinor, arc);
+        const sectorList = buildSectors(p, range.min, range.max, arc, {
+          sectorAngles: sectorMath.sectorAngles,
+          buildHighEndSectors: sectorMath.buildHighEndSectors,
+          buildLowEndSectors: sectorMath.buildLowEndSectors
+        }, theme);
+        const ticks = buildValueTickAngles(range.min, range.max, tickMajor, tickMinor, arc);
         const showEndLabels = !!p[tickProps.showEndLabels];
         const hideTextualMetrics = hideTextualMetricsProp ? p[hideTextualMetricsProp] === true : false;
         const numericDisplay = Number(display.num);
         const clampedValue = Number.isFinite(numericDisplay) ? value.clamp(numericDisplay, range.min, range.max) : NaN;
         const angleNow = Number.isFinite(clampedValue)
-          ? value.valueToAngle(clampedValue, range.min, range.max, arc, true)
+          ? valueToArcAngle(clampedValue, range.min, range.max, arc, true)
           : NaN;
         const easedAngle = springMotion.resolve(canvas, angleNow, p.easing !== false, Date.now());
 

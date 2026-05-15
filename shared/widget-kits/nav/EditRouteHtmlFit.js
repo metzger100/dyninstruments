@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteHtmlFit - Per-box text-fit owner for edit-route HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: componentContext.theme.tokens, RadialTextLayout, TextTileLayout, EditRouteLayout, HtmlWidgetUtils, TextFitMath, EditRouteHtmlFitSupport
+ * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, EditRouteLayout, HtmlWidgetUtils, TextFitMath, EditRouteHtmlFitSupport
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -17,7 +17,7 @@
 
   function create(def, componentContext) {
     const theme = componentContext.theme.tokens;
-    const textApi = componentContext.components.require("RadialTextLayout");
+    const textApi = componentContext.components.require("CanvasTextLayout");
     const tileLayout = componentContext.components.require("TextTileLayout");
     const layoutApi = componentContext.components.require("EditRouteLayout");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");

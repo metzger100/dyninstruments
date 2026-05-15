@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Route Activation Controller - Lazy route activation service composition
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: runtime/namespace.js, runtime/component-loader.js, runtime/theme-runtime.js, runtime/surface/index.js, runtime/cluster/RouteActivationPayloadBuilder.js, runtime/cluster/RouteActivationLatestWins.js
+ * Depends: runtime/namespace.js, runtime/component-loader.js, runtime/theme-runtime.js, runtime/surface/index.js, runtime/cluster/RouteActivationPayloadBuilder.js, runtime/cluster/RouteActivationLatestWins.js, ValueMath
  */
 (function (root) {
   "use strict";
@@ -9,13 +9,11 @@
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
   const DISCARDED_ACTIVATION = Object.freeze({ discarded: true });
+  const valueMath = root.DyniComponents.DyniValueMath.create();
 
-  function ensureObject(value, name) {
-    if (!value || typeof value !== "object") {
-      throw new Error("RouteActivationController: " + name + " must be an object");
-    }
-    return value;
-  }
+  const ensureObject = function (value, name) {
+    return valueMath.ensureObject(value, "RouteActivationController: " + name);
+  };
 
   function createWidgetController(def) {
     const widgetDef = ensureObject(def || {}, "def");

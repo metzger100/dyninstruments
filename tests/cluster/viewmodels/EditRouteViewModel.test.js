@@ -99,6 +99,19 @@ describe("EditRouteViewModel", function () {
     expect(inactive.rteEta).toBeUndefined();
   });
 
+  it("keeps missing and blank active remaining distance undefined", function () {
+    const vm = createViewModel();
+    const base = {
+      editingRoute: { name: "Harbor Run", points: [] },
+      activeName: "Harbor Run"
+    };
+
+    expect(vm.build({ ...base, rteDistance: null }).remainingDistance).toBeUndefined();
+    expect(vm.build({ ...base, rteDistance: undefined }).remainingDistance).toBeUndefined();
+    expect(vm.build({ ...base, rteDistance: "" }).remainingDistance).toBeUndefined();
+    expect(vm.build({ ...base, rteDistance: "   " }).remainingDistance).toBeUndefined();
+  });
+
   it("uses computeLength fast path when available and finite", function () {
     const vm = createViewModel(function () {
       return {
@@ -159,6 +172,18 @@ describe("EditRouteViewModel", function () {
     });
     expect(invalidComputeLength.route.totalDistance).toBe(40);
 
+    const blankComputeLength = vm.build({
+      editingRoute: {
+        name: "BlankMethod",
+        points: [{ lat: 1, lon: 1 }, { lat: 2, lon: 2 }, { lat: 3, lon: 3 }],
+        computeLength() {
+          return "   ";
+        }
+      },
+      useRhumbLine: true
+    });
+    expect(blankComputeLength.route.totalDistance).toBe(40);
+
     const throwingComputeLength = vm.build({
       editingRoute: {
         name: "ThrowingMethod",
@@ -171,7 +196,7 @@ describe("EditRouteViewModel", function () {
     });
     expect(throwingComputeLength.route.totalDistance).toBe(20);
 
-    expect(calls).toEqual([false, false, true, true, true, true]);
+    expect(calls).toEqual([false, false, true, true, true, true, true, true]);
   });
 
   it("returns zero total distance for one-point routes", function () {

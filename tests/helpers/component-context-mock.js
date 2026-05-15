@@ -1,3 +1,22 @@
+const { loadFresh } = require("./load-umd");
+
+const DEFAULT_MODULE_PATHS = {
+  ValueMath: "shared/widget-kits/value/ValueMath.js",
+  CanvasTextFitting: "shared/widget-kits/text/CanvasTextFitting.js",
+  CanvasTextLayout: "shared/widget-kits/text/CanvasTextLayout.js",
+  GaugeToolkit: "shared/widget-kits/gauge/GaugeToolkit.js",
+  RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
+  RadialSectorMath: "shared/widget-kits/radial/RadialSectorMath.js",
+  RadialValueMath: "shared/widget-kits/radial/RadialValueMath.js",
+  RadialTickMath: "shared/widget-kits/radial/RadialTickMath.js",
+  RadialCanvasPrimitives: "shared/widget-kits/radial/RadialCanvasPrimitives.js",
+  RadialFrameRenderer: "shared/widget-kits/radial/RadialFrameRenderer.js",
+  HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
+  StateScreenLabels: "shared/widget-kits/state/StateScreenLabels.js",
+  StateScreenTextFit: "shared/widget-kits/state/StateScreenTextFit.js",
+  StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js"
+};
+
 function createComponentContextMock(options) {
   const opts = options || {};
   const def = opts.def || {};
@@ -61,6 +80,9 @@ function createComponentContextMock(options) {
       require(id) {
         if (Object.prototype.hasOwnProperty.call(instanceCache, id)) {
           return instanceCache[id];
+        }
+        if (!Object.prototype.hasOwnProperty.call(modules, id) && Object.prototype.hasOwnProperty.call(DEFAULT_MODULE_PATHS, id)) {
+          modules[id] = loadFresh(DEFAULT_MODULE_PATHS[id]);
         }
         if (!Object.prototype.hasOwnProperty.call(modules, id)) {
           throw new Error("component-context-mock: missing module '" + id + "'");

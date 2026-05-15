@@ -42,6 +42,7 @@
 - **Responsive compaction + GeometryScale factor scaling** → [shared/responsive-scale-profile.md](shared/responsive-scale-profile.md)
 - **Placeholder normalization contract (`---` fallback unification)** → [shared/placeholder-normalize.md](shared/placeholder-normalize.md)
 - **Stable-digits contract (padded/plain numeric normalization)** → [shared/stable-digits.md](shared/stable-digits.md)
+- **Canonical shared helper ownership (`ValueMath`, canvas text helpers, `GaugeToolkit`)** → [conventions/shared-helpers.md](conventions/shared-helpers.md)
 - **Documentation format rules** → [conventions/documentation-format.md](conventions/documentation-format.md)
 - **Core non-negotiable rules** → [core-principles.md](core-principles.md)
 

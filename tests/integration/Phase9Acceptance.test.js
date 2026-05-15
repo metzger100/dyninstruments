@@ -137,8 +137,8 @@ function createRenderModelContext() {
       else if (id === "RadialTextFitting") {
         moduleCache[id] = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
       }
-      else if (id === "RadialTextLayout") {
-        moduleCache[id] = loadFresh("shared/widget-kits/radial/RadialTextLayout.js");
+      else if (id === "CanvasTextLayout") {
+        moduleCache[id] = loadFresh("shared/widget-kits/text/CanvasTextLayout.js");
       }
       else if (id === "TextTileLayout") {
         moduleCache[id] = loadFresh("shared/widget-kits/text/TextTileLayout.js");
@@ -208,7 +208,7 @@ function createRenderModelContext() {
     "LayoutRectMath",
     "RoutePointsLayout",
     "RadialTextFitting",
-    "RadialTextLayout",
+    "CanvasTextLayout",
     "TextTileLayout",
     "RoutePointsInfoText",
     "RoutePointsHtmlFit",

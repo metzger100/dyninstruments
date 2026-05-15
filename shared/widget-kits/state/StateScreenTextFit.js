@@ -1,7 +1,7 @@
 /**
  * Module: StateScreenTextFit - Shared measured single-line fit helper for state-screen labels
  * Documentation: documentation/shared/state-screens.md
- * Depends: none
+ * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -16,15 +16,8 @@
   const WIDTH_EPSILON = 0.01;
   const MEASURE_CTX_KEY = "__dyniStateScreenTextFitCtx";
 
-  function toFiniteNumber(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
-  }
-
-  function clampPositive(value, defaultValue) {
-    const n = toFiniteNumber(value);
-    return n > 0 ? n : defaultValue;
-  }
+  let toFiniteNumber;
+  let clampPositive;
 
   function parseFontPx(fontValue) {
     const source = String(fontValue || "");
@@ -132,7 +125,11 @@
     return "font-size:" + Math.max(1, Math.floor(resolved)) + "px;";
   }
 
-  function create() {
+  function create(def, componentContext) {
+    const valueMath = componentContext.components.require("ValueMath");
+    toFiniteNumber = valueMath.toFiniteNumber;
+    clampPositive = valueMath.clampPositive;
+
     function compute(args) {
       const cfg = args || {};
       const label = typeof cfg.label === "string" ? cfg.label.trim() : "";

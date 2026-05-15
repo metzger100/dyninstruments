@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsViewModel - Shared domain normalization for nav route-points kind
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: none
+ * Depends: ValueMath
  */
 
 (function (root, factory) {
@@ -19,15 +19,16 @@
     return typeof value === "string" ? value.trim() : "";
   }
 
-  function toFiniteNumber(value) {
-    if (typeof value !== "number" && typeof value !== "string") {
+  let toFiniteNumber;
+
+  function toOptionalFiniteNumber(rawValue) {
+    if (rawValue == null) {
       return undefined;
     }
-    if (typeof value === "string" && value.trim() === "") {
+    if (typeof rawValue === "string" && rawValue.trim() === "") {
       return undefined;
     }
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
+    return toFiniteNumber(rawValue);
   }
 
   function normalizePoint(rawPoint, index) {
@@ -36,8 +37,8 @@
 
     return {
       name: name === "" ? String(index) : name,
-      lat: toFiniteNumber(point.lat),
-      lon: toFiniteNumber(point.lon)
+      lat: toOptionalFiniteNumber(point.lat),
+      lon: toOptionalFiniteNumber(point.lon)
     };
   }
 
@@ -55,11 +56,17 @@
     };
   }
 
-  function create() {
+  function create(def, componentContext) {
+    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+
     function build(props, toolkit) {
       const p = props || {};
       const num = (toolkit && toolkit.num) || toFiniteNumber;
-      const selectedIndex = num(p.editingIndex);
+      const selectedIndex = (
+        p.editingIndex == null || (typeof p.editingIndex === "string" && p.editingIndex.trim() === "")
+      )
+        ? undefined
+        : num(p.editingIndex);
       const route = normalizeRoute(p.editingRoute);
       const activeName = p.activeName;
       const editingRoute = p.editingRoute;

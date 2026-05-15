@@ -19,7 +19,7 @@
 
     function windFormatSpeedText(raw, props, speedUnit) {
       const p = props || {};
-      const n = Number(raw);
+      const n = raw == null ? NaN : Number(raw);
       if (!Number.isFinite(n)) {
         return Object.prototype.hasOwnProperty.call(p, "default")
           ? p.default

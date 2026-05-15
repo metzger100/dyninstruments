@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteViewModel - Shared domain normalization for active-route kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: none
+ * Depends: ValueMath
  */
 
 (function (root, factory) {
@@ -15,12 +15,11 @@
     return (typeof value === "string") ? value.trim() : "";
   }
 
-  function toFiniteNumber(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
-  }
+  let toFiniteNumber;
 
-  function create() {
+  function create(def, componentContext) {
+    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+
     function build(props, toolkit) {
       const p = props || {};
       const cap = toolkit.cap;

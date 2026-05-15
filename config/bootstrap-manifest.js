@@ -64,6 +64,7 @@
     "runtime/widget-registrar.js",
     "runtime/HostCommitController.js",
     "runtime/SurfaceSessionController.js",
+    "shared/widget-kits/value/ValueMath.js",
     "runtime/TemporaryHostActionBridgeDiscovery.js",
     "runtime/TemporaryHostActionBridge.js",
     "runtime/surface/ClusterSurfacePolicy.js",

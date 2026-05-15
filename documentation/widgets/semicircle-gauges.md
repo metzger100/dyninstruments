@@ -9,7 +9,7 @@ The four semicircle gauges share one renderer implementation:
 - Shared responsive layout ownership in `shared/widget-kits/radial/SemicircleRadialLayout.js`
 - Shared mode-routed text fitting/draw in `shared/widget-kits/radial/SemicircleRadialTextLayout.js`
 - Shared rendering orchestration in `shared/widget-kits/radial/SemicircleRadialEngine.js`
-- Shared helper APIs via `RadialToolkit` (`runtime.theme`, `RadialTextLayout`, `RadialValueMath`, `RadialAngleMath`, `RadialTickMath`, draw utils)
+- Shared helper APIs via `RadialToolkit` (`componentContext.theme.tokens`, `CanvasTextLayout` and `ValueMath` through `GaugeToolkit`, `RadialAngleMath`, `RadialTickMath`, draw utils)
 - Gauge wrappers keep only formatting, tick-profile selection, and sector strategy
 
 ## File Locations
@@ -17,8 +17,9 @@ The four semicircle gauges share one renderer implementation:
 | Role | File |
 |---|---|
 | Shared facade | `shared/widget-kits/radial/RadialToolkit.js` |
-| Shared text helpers | `shared/widget-kits/radial/RadialTextLayout.js` |
-| Shared numeric/angle helpers | `shared/widget-kits/radial/RadialValueMath.js` |
+| Generic text helpers | `shared/widget-kits/text/CanvasTextLayout.js` |
+| Generic value helpers | `shared/widget-kits/value/ValueMath.js` |
+| Radial compatibility wrapper (external callers) | `shared/widget-kits/radial/RadialValueMath.js` |
 | Responsive layout owner | `shared/widget-kits/radial/SemicircleRadialLayout.js` |
 | Mode text helper | `shared/widget-kits/radial/SemicircleRadialTextLayout.js` |
 | Shared semicircle renderer | `shared/widget-kits/radial/SemicircleRadialEngine.js` |
@@ -29,13 +30,14 @@ The four semicircle gauges share one renderer implementation:
 
 ## Module Dependencies
 
-In `config/components/registry-widgets-gauge.js` (assembled by `config/components.js`), all four gauges depend on both `SemicircleRadialEngine` and `RadialValueMath`:
+In `config/components/registry-widgets-gauge.js` (assembled by `config/components.js`), all four gauges depend on `SemicircleRadialEngine` and `ValueMath`:
 
 ```text
 SpeedRadialWidget/DepthRadialWidget/TemperatureRadialWidget/VoltageRadialWidget
-  -> SemicircleRadialEngine + RadialValueMath
-  -> RadialToolkit + SemicircleRadialLayout + SemicircleRadialTextLayout
-  -> RadialTextLayout + RadialValueMath + RadialAngleMath + RadialTickMath + RadialCanvasPrimitives + RadialFrameRenderer
+  -> SemicircleRadialEngine + ValueMath
+  -> RadialToolkit + SemicircleRadialLayout + SemicircleRadialTextLayout + RadialSectorMath
+  -> GaugeToolkit + RadialAngleMath + RadialTickMath + RadialCanvasPrimitives + RadialFrameRenderer
+  -> CanvasTextLayout + ValueMath
   -> ResponsiveScaleProfile + LayoutRectMath
 ```
 
@@ -66,7 +68,7 @@ Responsive ownership:
 Each wrapper defines:
 
 - Value conversion to `{ num, text }`
-- Tick profile selection via shared `RadialValueMath` resolver methods
+- Tick profile selection via shared `ValueMath` resolver methods
 - Sector placement strategy (high-end or low-end), with theme colors forwarded as scalar sector colors
 - Wrapper-owned unit/ratio bindings plus config-backed range ownership
 - Migrated wrappers receive formatter tokens separately from display labels; the token drives conversion and the display label stays editable per token.

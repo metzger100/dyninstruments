@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteRenderModel - Pure normalization and display model owner for edit-route HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: EditRouteLayout, HtmlWidgetUtils, NavInteractionPolicy, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, UnitAwareFormatter
+ * Depends: EditRouteLayout, HtmlWidgetUtils, NavInteractionPolicy, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, UnitAwareFormatter, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -17,10 +17,7 @@
     return value && typeof value === "object" ? value : {};
   }
 
-  function toFiniteNumber(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
-  }
+  let toFiniteNumber;
 
   function toShellSize(shellRect) {
     const rect = shellRect && typeof shellRect === "object" ? shellRect : null;
@@ -121,6 +118,7 @@
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     const stableDigits = componentContext.components.require("StableDigits");
     const unitFormatter = componentContext.components.require("UnitAwareFormatter");
+    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
     const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");

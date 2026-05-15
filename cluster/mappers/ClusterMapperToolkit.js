@@ -1,7 +1,7 @@
 /**
  * Module: ClusterMapperToolkit - Shared caption/unit/output helpers for cluster mappers
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: RadialAngleMath
+ * Depends: RadialAngleMath, ValueMath
  */
 
 (function (root, factory) {
@@ -10,6 +10,7 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniClusterMapperToolkit = factory(); }
 }(this, function () {
   "use strict";
+  let toFiniteNumber;
 
   function getGlobalRoot() {
     if (typeof globalThis !== "undefined") {
@@ -22,33 +23,15 @@
   }
 
   function makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath) {
-    const norm360 = (angleMath && typeof angleMath.norm360 === "function")
-      ? angleMath.norm360
-      : ((deg) => {
-        if (!Number.isFinite(deg)) {
-          return deg;
-        }
-        let r = deg % 360;
-        if (r < 0) r += 360;
-        return r;
-      });
-    const norm180 = (angleMath && typeof angleMath.norm180 === "function")
-      ? angleMath.norm180
-      : ((deg) => {
-        if (!Number.isFinite(deg)) {
-          return deg;
-        }
-        let r = ((deg + 180) % 360 + 360) % 360 - 180;
-        if (r === 180) r = -180;
-        return r;
-      });
-
     return function (raw) {
+      if (raw == null) {
+        return defaultText;
+      }
       const n = Number(raw);
       if (!Number.isFinite(n)) {
         return defaultText;
       }
-      let a = isDirection ? norm360(n) : norm180(n);
+      let a = isDirection ? angleMath.norm360(n) : angleMath.norm180(n);
       let out;
       if (isDirection) {
         out = ((Math.round(a) % 360) + 360) % 360;
@@ -73,11 +56,6 @@
     if (typeof formatter !== "undefined") o.formatter = formatter;
     if (Array.isArray(formatterParameters)) o.formatterParameters = formatterParameters;
     return o;
-  }
-
-  function toFiniteNumber(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
   }
 
   function getSharedCatalog() {
@@ -166,11 +144,8 @@
   }
 
   function create(def, componentContext) {
-    const angleMath = componentContext &&
-      componentContext.components &&
-      typeof componentContext.components.require === "function"
-      ? componentContext.components.require("RadialAngleMath")
-      : null;
+    const angleMath = componentContext.components.require("RadialAngleMath");
+    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
     const catalog = getSharedCatalog();
 
     return {

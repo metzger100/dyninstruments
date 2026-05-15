@@ -151,7 +151,8 @@ Rule: Before creating any new widget, check this table. If your widget matches a
 
 - For a new semicircle gauge: `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js` - canonical UMD wrapper, header format, and `SemicircleRadialEngine` delegation.
 - For a new linear gauge: `widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js` - canonical UMD wrapper and `LinearGaugeEngine` delegation.
-- For a new shared utility facade: `shared/widget-kits/radial/RadialToolkit.js` - facade pattern and dependency composition across shared gauge modules.
+- For a new generic shared utility facade: `shared/widget-kits/gauge/GaugeToolkit.js` - facade pattern and dependency composition across non-radial shared gauge modules.
+- For radial-only draw orchestration: `shared/widget-kits/radial/RadialToolkit.js` - radial facade extending `GaugeToolkit`.
 - For a new cluster mapper: `cluster/mappers/SpeedMapper.js` - `translate(props, toolkit)` mapping pattern and renderer routing output shape.
 
 ## Bootstrap-Loaded Shared Catalogs
@@ -178,18 +179,23 @@ Current shared utilities include:
 - `runtime.perf.endSpan()`
 - `componentContext.perf.startSpan()`
 - `componentContext.perf.endSpan()`
-- `RadialValueMath.clamp()`
-- `RadialValueMath.isFiniteNumber()`
-- `RadialValueMath.extractNumberText()`
+- `ValueMath.clamp()`
+- `ValueMath.isFiniteNumber()`
+- `ValueMath.toFiniteNumber()`
+- `ValueMath.trimText()`
+- `ValueMath.extractNumberText()`
+- `ValueMath.formatAngle180()`
+- `ValueMath.formatDirection360()`
+- `ValueMath.computeMode()`
+- `RadialValueMath.sectorAngles()`
 - `RadialValueMath.buildHighEndSectors()`
 - `RadialValueMath.buildLowEndSectors()`
-- `RadialValueMath.formatSpeedString()`
-- `RadialValueMath.formatAngle180()`
-- `RadialValueMath.formatDirection360()`
-- `RadialValueMath.computeMode()`
-- `RadialTextLayout.setFont()`
-- `RadialTextLayout.measureTextWidth()`
-- `RadialTextLayout.fitSingleTextPx()`
+- `CanvasTextFitting.setFont()`
+- `CanvasTextFitting.measureTextWidth()`
+- `CanvasTextFitting.fitSingleTextPx()`
+- `CanvasTextLayout.drawValueUnitWithFit()`
+- `CanvasTextLayout.drawInlineCapValUnit()`
+- `GaugeToolkit` for generic gauge access to theme tokens, `CanvasTextLayout`, and `ValueMath`
 - `StateScreenCanvasOverlay.drawStateScreen()`
 - `UnitAwareFormatter.formatWithToken()`
 - `UnitAwareFormatter.formatDistance()`
@@ -202,7 +208,7 @@ Current shared utilities include:
 - `GeometryScale.scaleStroke()`
 - `GeometryScale.scalePointer()`
 
-Check these before writing any helper function. For shared gauge utility APIs, see [../radial/gauge-shared-api.md](../radial/gauge-shared-api.md).
+Check these before writing any helper function. For helper ownership, see [shared-helpers.md](shared-helpers.md). For radial gauge utility APIs, see [../radial/gauge-shared-api.md](../radial/gauge-shared-api.md).
 
 ## Related
 

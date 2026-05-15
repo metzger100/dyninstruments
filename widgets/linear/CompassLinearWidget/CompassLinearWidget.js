@@ -1,7 +1,7 @@
 /**
  * Module: CompassLinearWidget - Linear compass with fixed center pointer and moving heading scale
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, RadialValueMath, SpringEasing
+ * Depends: LinearGaugeEngine, ValueMath, SpringEasing
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,7 +13,7 @@
 
   function create(def, componentContext) {
     const engine = componentContext.components.require("LinearGaugeEngine");
-    const valueMath = componentContext.components.require("RadialValueMath");
+    const valueMath = componentContext.components.require("ValueMath");
     const springEasing = componentContext.components.require("SpringEasing");
     const markerMotion = springEasing.createMotion({ wrap: 360 });
 
@@ -57,8 +57,8 @@
 
     function formatDisplay(raw, props) {
       const p = props || {};
-      const heading = Number(raw);
-      if (!Number.isFinite(heading)) {
+      const heading = raw == null ? undefined : valueMath.toFiniteNumber(raw);
+      if (typeof heading !== "number") {
         return { num: NaN, text: p.default };
       }
       return {
@@ -86,7 +86,7 @@
 
       const heading = Number(display && display.easedNum);
       const marker = props && props.markerCourse;
-      const markerFinite = Number.isFinite(Number(marker));
+      const markerFinite = valueMath.isFiniteNumber(marker);
       const easingEnabled = props.easing !== false;
       const nowMs = Number(state && state.nowMs);
       const easedMarker = markerFinite

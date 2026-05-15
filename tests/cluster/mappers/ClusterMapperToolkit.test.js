@@ -10,6 +10,7 @@ describe("ClusterMapperToolkit", function () {
     const direction = toolkit.makeAngleFormatter(true, true, "NA");
     expect(direction(360)).toBe("000");
     expect(direction(-1)).toBe("359");
+    expect(direction(null)).toBe("NA");
 
     const relative = toolkit.makeAngleFormatter(false, true, "NA");
     expect(relative(181)).toBe("-179");

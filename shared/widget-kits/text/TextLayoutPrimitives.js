@@ -1,7 +1,7 @@
 /**
  * Module: TextLayoutPrimitives - Low-level text fit and inline draw helpers
  * Documentation: documentation/shared/text-layout-engine.md
- * Depends: RadialTextLayout
+ * Depends: CanvasTextLayout
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,7 +11,7 @@
   "use strict";
 
   function create(def, componentContext) {
-    const text = componentContext.components.require("RadialTextLayout");
+    const text = componentContext.components.require("CanvasTextLayout");
 
     function resolveFamily(family, options) {
       const opts = options && typeof options === "object" ? options : null;

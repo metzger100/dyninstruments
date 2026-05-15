@@ -37,7 +37,7 @@ describe("ActiveRouteHtmlFit", function () {
     const htmlUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
     const textTileLayoutModule = loadFresh("shared/widget-kits/text/TextTileLayout.js");
     const activeRouteLayoutModule = loadFresh("shared/widget-kits/nav/ActiveRouteLayout.js");
-    const radialTextLayoutModule = loadFresh("shared/widget-kits/radial/RadialTextLayout.js");
+    const radialTextLayoutModule = loadFresh("shared/widget-kits/text/CanvasTextLayout.js");
     const radialTextFittingModule = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
     const responsiveScaleProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMathModule = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
@@ -68,7 +68,7 @@ describe("ActiveRouteHtmlFit", function () {
         UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
         TextTileLayout: textTileLayoutModule,
         ActiveRouteLayout: activeRouteLayoutModule,
-        RadialTextLayout: radialTextLayoutModule,
+        CanvasTextLayout: radialTextLayoutModule,
         RadialTextFitting: radialTextFittingModule,
         ResponsiveScaleProfile: responsiveScaleProfileModule,
         LayoutRectMath: layoutRectMathModule

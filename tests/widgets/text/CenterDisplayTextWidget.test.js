@@ -18,9 +18,9 @@ describe("CenterDisplayTextWidget", function () {
     };
     const modules = {
       RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js"),
-      RadialValueMath: loadFresh("shared/widget-kits/radial/RadialValueMath.js"),
+      ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js"),
       RadialTextFitting: loadFresh("shared/widget-kits/radial/RadialTextFitting.js"),
-      RadialTextLayout: loadFresh("shared/widget-kits/radial/RadialTextLayout.js"),
+      CanvasTextLayout: loadFresh("shared/widget-kits/text/CanvasTextLayout.js"),
       TextLayoutEngine: loadFresh("shared/widget-kits/text/TextLayoutEngine.js"),
       TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
       TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
@@ -46,9 +46,9 @@ describe("CenterDisplayTextWidget", function () {
         StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
         StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
         RadialAngleMath: modules.RadialAngleMath,
-        RadialValueMath: modules.RadialValueMath,
+        ValueMath: modules.ValueMath,
         RadialTextFitting: modules.RadialTextFitting,
-        RadialTextLayout: modules.RadialTextLayout,
+        CanvasTextLayout: modules.CanvasTextLayout,
         TextLayoutEngine: modules.TextLayoutEngine,
         TextLayoutPrimitives: modules.TextLayoutPrimitives,
         TextLayoutComposite: modules.TextLayoutComposite,

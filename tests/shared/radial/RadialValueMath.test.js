@@ -6,7 +6,8 @@ describe("RadialValueMath", function () {
     const mod = loadFresh("shared/widget-kits/radial/RadialValueMath.js");
     return mod.create({}, createComponentContextMock({
       modules: {
-        RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js")
+        RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js"),
+        ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
       }
     }));
   }
@@ -27,6 +28,20 @@ describe("RadialValueMath", function () {
     expect(ticks.majors[0]).toBe(270);
     expect(ticks.majors[ticks.majors.length - 1]).toBe(450);
     expect(ticks.minors.length).toBeGreaterThan(0);
+
+    expect(v.buildValueTickAngles(30, 0, 10, 5, arc)).toEqual({ majors: [], minors: [] });
+    const fallbackTicks = v.buildValueTickAngles(0, 20, 0, 0, arc);
+    expect(fallbackTicks.majors[0]).toBe(270);
+    expect(fallbackTicks.majors[fallbackTicks.majors.length - 1]).toBe(450);
+  });
+
+  it("maps values and angles through the radial angle module", function () {
+    const v = create();
+    const arc = { startDeg: 270, endDeg: 450 };
+
+    expect(v.valueToAngle(15, 0, 30, arc, true)).toBe(360);
+    expect(v.angleToValue(360, 0, 30, arc, true)).toBe(15);
+    expect(v.angleToValue(540, 0, 30, arc, true)).toBe(30);
   });
 
   it("creates sector ranges and returns null for invalid ranges", function () {
@@ -107,6 +122,14 @@ describe("RadialValueMath", function () {
       text: "NO DATA"
     });
     expect(applyFormatter).not.toHaveBeenCalled();
+
+    expect(v.formatGaugeDisplay(null, {
+      default: "---"
+    }, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
+      num: NaN,
+      text: "---"
+    });
+    expect(applyFormatter).not.toHaveBeenCalled();
   });
 
   it("converts numeric string raw values before calling applyFormatter", function () {
@@ -168,23 +191,23 @@ describe("RadialValueMath", function () {
   it("resolves shared semicircle tick-step presets", function () {
     const v = create();
 
-    expect(v.resolveStandardSemicircleTickSteps(NaN)).toEqual({ major: 10, minor: 2 });
-    expect(v.resolveStandardSemicircleTickSteps(6)).toEqual({ major: 1, minor: 0.5 });
-    expect(v.resolveStandardSemicircleTickSteps(30)).toEqual({ major: 5, minor: 1 });
-    expect(v.resolveStandardSemicircleTickSteps(250)).toEqual({ major: 50, minor: 10 });
+    expect(v.resolveStandardTickSteps(NaN)).toEqual({ major: 10, minor: 2 });
+    expect(v.resolveStandardTickSteps(6)).toEqual({ major: 1, minor: 0.5 });
+    expect(v.resolveStandardTickSteps(30)).toEqual({ major: 5, minor: 1 });
+    expect(v.resolveStandardTickSteps(250)).toEqual({ major: 50, minor: 10 });
 
-    expect(v.resolveTemperatureSemicircleTickSteps(8)).toEqual({ major: 1, minor: 0.5 });
-    expect(v.resolveTemperatureSemicircleTickSteps(100)).toEqual({ major: 10, minor: 2 });
-    expect(v.resolveTemperatureSemicircleTickSteps(250)).toEqual({ major: 50, minor: 10 });
+    expect(v.resolveTemperatureTickSteps(8)).toEqual({ major: 1, minor: 0.5 });
+    expect(v.resolveTemperatureTickSteps(100)).toEqual({ major: 10, minor: 2 });
+    expect(v.resolveTemperatureTickSteps(250)).toEqual({ major: 50, minor: 10 });
 
-    expect(v.resolveVoltageSemicircleTickSteps(0)).toEqual({ major: 1, minor: 0.2 });
-    expect(v.resolveVoltageSemicircleTickSteps(3)).toEqual({ major: 0.5, minor: 0.1 });
-    expect(v.resolveVoltageSemicircleTickSteps(12)).toEqual({ major: 2, minor: 0.5 });
-    expect(v.resolveVoltageSemicircleTickSteps(500)).toEqual({ major: 50, minor: 10 });
+    expect(v.resolveVoltageTickSteps(0)).toEqual({ major: 1, minor: 0.2 });
+    expect(v.resolveVoltageTickSteps(3)).toEqual({ major: 0.5, minor: 0.1 });
+    expect(v.resolveVoltageTickSteps(12)).toEqual({ major: 2, minor: 0.5 });
+    expect(v.resolveVoltageTickSteps(500)).toEqual({ major: 50, minor: 10 });
 
-    expect(v.resolveSemicircleTickSteps(20, "standard")).toEqual({ major: 5, minor: 1 });
-    expect(v.resolveSemicircleTickSteps(20, "temperature")).toEqual({ major: 2, minor: 1 });
-    expect(v.resolveSemicircleTickSteps(20, "voltage")).toEqual({ major: 5, minor: 1 });
-    expect(v.resolveSemicircleTickSteps(20, "unknown")).toEqual({ major: 5, minor: 1 });
+    expect(v.resolveTickSteps(20, "standard")).toEqual({ major: 5, minor: 1 });
+    expect(v.resolveTickSteps(20, "temperature")).toEqual({ major: 2, minor: 1 });
+    expect(v.resolveTickSteps(20, "voltage")).toEqual({ major: 5, minor: 1 });
+    expect(v.resolveTickSteps(20, "unknown")).toEqual({ major: 5, minor: 1 });
   });
 });

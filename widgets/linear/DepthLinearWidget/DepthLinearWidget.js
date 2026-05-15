@@ -1,7 +1,7 @@
 /**
  * Module: DepthLinearWidget - Linear depth gauge with low-end warning/alarm sectors
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, RadialValueMath, DepthDisplayFormatter, PlaceholderNormalize, UnitAwareFormatter
+ * Depends: LinearGaugeEngine, ValueMath, DepthDisplayFormatter, PlaceholderNormalize, UnitAwareFormatter
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,24 +12,44 @@
 
   function create(def, componentContext) {
     const engine = componentContext.components.require("LinearGaugeEngine");
-    const valueMath = componentContext.components.require("RadialValueMath");
+    const valueMath = componentContext.components.require("ValueMath");
     const depthDisplayFormatter = componentContext.components.require("DepthDisplayFormatter");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     const unitFormatter = componentContext.components.require("UnitAwareFormatter");
     const formatDisplay = depthDisplayFormatter.createFormatDisplay(unitFormatter, placeholderNormalize);
 
+    function buildLowEndSectors(props, minV, maxV, options) {
+      const p = props || {};
+      const opts = options || {};
+      const warningFrom = Number(p.warningFrom);
+      const alarmFrom = Number(p.alarmFrom);
+      const alarmTo = Number.isFinite(alarmFrom) ? valueMath.clamp(alarmFrom, minV, maxV) : NaN;
+      const warningTo = Number.isFinite(warningFrom) ? valueMath.clamp(warningFrom, minV, maxV) : NaN;
+      const sectors = [];
+
+      if (Number.isFinite(alarmTo) && alarmTo > minV) {
+        sectors.push({ from: minV, to: alarmTo, color: opts.alarmColor });
+      }
+      if (Number.isFinite(alarmTo) && Number.isFinite(warningTo) && warningTo > alarmTo) {
+        sectors.push({ from: alarmTo, to: warningTo, color: opts.warningColor });
+      } else if (!Number.isFinite(alarmTo) && Number.isFinite(warningTo) && warningTo > minV) {
+        sectors.push({ from: minV, to: warningTo, color: opts.warningColor });
+      }
+
+      return sectors;
+    }
+
     function buildSectors(props, minV, maxV, axis, theme) {
-      const linearArc = { startDeg: 0, endDeg: 1000 };
-      return valueMath.buildLowEndSectors({
+      return buildLowEndSectors({
         warningFrom: props && props.depthLinearWarningFrom,
         alarmFrom: props && props.depthLinearAlarmFrom
-      }, minV, maxV, linearArc, {
+      }, minV, maxV, {
         warningColor: theme.colors.warning,
         alarmColor: theme.colors.alarm
       }).map(function (sector) {
         return {
-          from: valueMath.clamp(valueMath.angleToValue(sector.a0, minV, maxV, linearArc, true), axis.min, axis.max),
-          to: valueMath.clamp(valueMath.angleToValue(sector.a1, minV, maxV, linearArc, true), axis.min, axis.max),
+          from: valueMath.clamp(sector.from, axis.min, axis.max),
+          to: valueMath.clamp(sector.to, axis.min, axis.max),
           color: sector.color
         };
       }).filter(function (entry) {
@@ -55,7 +75,7 @@
         normal: "depthLinearRatioThresholdNormal",
         flat: "depthLinearRatioThresholdFlat"
       },
-      tickSteps: valueMath.resolveStandardSemicircleTickSteps,
+      tickSteps: valueMath.resolveStandardTickSteps,
       formatDisplay: formatDisplay,
       buildSectors: function (props, minV, maxV, axis, valueApi, theme) {
         return buildSectors(props, minV, maxV, axis, theme);

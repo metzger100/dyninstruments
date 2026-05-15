@@ -128,7 +128,7 @@ describe("LinearGaugeEngine", function () {
         LinearGaugeTextLayout: textLayoutMod,
         LinearGaugeLabelFit: labelFitMod,
         LinearGaugeEngineSupport: engineSupportMod,
-        RadialToolkit: {
+        GaugeToolkit: {
           create() {
             return {
               theme: {
@@ -854,6 +854,38 @@ describe("LinearGaugeEngine", function () {
 
     expect(receivedUnit).toBe("");
     expect(harness.calls.fitInlineCaptions).toEqual(["0"]);
+  });
+
+  it("uses placeholder text for null input on the default formatDisplay fallback", function () {
+    const harness = createHarness();
+    let displaySnapshot = null;
+    const renderer = harness.engine.createRenderer({
+      rawValueKey: "value",
+      ratioProps: { normal: "n", flat: "f" },
+      ratioDefaults: { normal: 1.1, flat: 3.5 },
+      rangeDefaults: { min: 0, max: 30 },
+      rangeProps: { min: "min", max: "max" },
+      tickProps: { major: "major", minor: "minor", showEndLabels: "showEndLabels" },
+      drawFrame(state, props, display, api) {
+        displaySnapshot = display;
+        api.drawDefaultPointer();
+      }
+    });
+
+    renderer(createMockCanvas({ rectWidth: 280, rectHeight: 220, ctx: createMockContext2D() }), {
+      value: null,
+      default: "---",
+      min: 0,
+      max: 30,
+      major: 10,
+      minor: 5,
+      n: 1.1,
+      f: 3.5
+    });
+
+    expect(displaySnapshot).toBeTruthy();
+    expect(Number.isNaN(displaySnapshot.num)).toBe(true);
+    expect(displaySnapshot.text).toBe("---");
   });
 
   it("uses linear.labels.insetFactor to position tick labels", function () {

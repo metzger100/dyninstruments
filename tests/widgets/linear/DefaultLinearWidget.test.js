@@ -14,7 +14,7 @@ describe("DefaultLinearWidget", function () {
         ? String(value) + " fmt"
         : String(value);
     });
-    const resolveStandardSemicircleTickSteps = opts.resolveStandardSemicircleTickSteps || vi.fn(() => ({ major: 10, minor: 2 }));
+    const resolveStandardTickSteps = opts.resolveStandardTickSteps || vi.fn(() => ({ major: 10, minor: 2 }));
     const placeholderNormalize = opts.placeholderNormalize || {
       normalize(text, defaultText) {
         if (text == null) {
@@ -41,7 +41,7 @@ describe("DefaultLinearWidget", function () {
       clamp(v, lo, hi) {
         return Math.max(lo, Math.min(hi, Number(v)));
       },
-      resolveStandardSemicircleTickSteps
+      resolveStandardTickSteps
     };
     const engine = {
       createRenderer(cfg) {
@@ -53,7 +53,7 @@ describe("DefaultLinearWidget", function () {
     const spec = mod.create({}, createComponentContextMock({
       modules: {
         LinearGaugeEngine: { create: () => engine },
-        RadialValueMath: { create: () => valueMath },
+        ValueMath: { create: () => valueMath },
         PlaceholderNormalize: { create: () => placeholderNormalize }
       },
       services: {
@@ -65,7 +65,7 @@ describe("DefaultLinearWidget", function () {
       captured,
       renderer,
       applyFormatter,
-      resolveStandardSemicircleTickSteps,
+      resolveStandardTickSteps,
       valueMath,
       placeholderNormalize
     };
@@ -93,9 +93,9 @@ describe("DefaultLinearWidget", function () {
       normal: "defaultLinearRatioThresholdNormal",
       flat: "defaultLinearRatioThresholdFlat"
     });
-    expect(h.captured.tickSteps).toBe(h.resolveStandardSemicircleTickSteps);
+    expect(h.captured.tickSteps).toBe(h.resolveStandardTickSteps);
     expect(h.captured.tickSteps(10)).toEqual({ major: 10, minor: 2 });
-    expect(h.resolveStandardSemicircleTickSteps).toHaveBeenCalledWith(10);
+    expect(h.resolveStandardTickSteps).toHaveBeenCalledWith(10);
 
     expect(h.captured.formatDisplay(12.5, {
       default: "---"

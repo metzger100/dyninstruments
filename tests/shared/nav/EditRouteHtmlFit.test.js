@@ -143,7 +143,7 @@ describe("EditRouteHtmlFit", function () {
 
     const componentContext = createComponentContextMock({
       modules: {
-        RadialTextLayout: { create: () => radialTextApi },
+        CanvasTextLayout: { create: () => radialTextApi },
         TextTileLayout: { create() { return textTileLayoutSpy; } },
         EditRouteLayout: editRouteLayoutModule,
         EditRouteHtmlFitSupport: editRouteHtmlFitSupportModule,

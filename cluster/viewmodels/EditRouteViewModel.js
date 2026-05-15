@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteViewModel - Shared domain normalization for nav edit-route summary kind
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: CenterDisplayMath
+ * Depends: CenterDisplayMath, ValueMath
  */
 
 (function (root, factory) {
@@ -17,18 +17,16 @@
     return !!value && typeof value === "object";
   }
 
-  function toFiniteNumber(value) {
-    if (typeof value === "number") {
-      return Number.isFinite(value) ? value : undefined;
-    }
-    if (typeof value !== "string") {
+  let toFiniteNumber;
+
+  function toOptionalFiniteNumber(rawValue) {
+    if (rawValue == null) {
       return undefined;
     }
-    if (value.trim() === "") {
+    if (typeof rawValue === "string" && rawValue.trim() === "") {
       return undefined;
     }
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
+    return toFiniteNumber(rawValue);
   }
 
   function toRawName(value) {
@@ -51,7 +49,7 @@
     if (!leg || typeof leg !== "object") {
       return 0;
     }
-    const distance = toFiniteNumber(leg.distance);
+    const distance = toOptionalFiniteNumber(leg.distance);
     return typeof distance === "number" ? distance : 0;
   }
 
@@ -70,7 +68,7 @@
   function computeTotalDistance(sourceRoute, points, useRhumbLine, centerMath) {
     if (isObject(sourceRoute) && typeof sourceRoute.computeLength === "function") {
       try {
-        const computed = toFiniteNumber(sourceRoute.computeLength(0, useRhumbLine === true));
+        const computed = toOptionalFiniteNumber(sourceRoute.computeLength(0, useRhumbLine === true));
         if (typeof computed === "number") {
           return computed;
         }
@@ -110,6 +108,7 @@
   }
 
   function create(def, componentContext) {
+    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
     const centerMath = componentContext.components.require("CenterDisplayMath");
 
     function build(props) {
@@ -121,7 +120,7 @@
         route: route,
         hasRoute: !!route,
         isActiveRoute: active,
-        remainingDistance: active ? toFiniteNumber(p.rteDistance) : undefined,
+        remainingDistance: active ? toOptionalFiniteNumber(p.rteDistance) : undefined,
         rteEta: active ? p.rteEta : undefined,
         hideSeconds: p.hideSeconds === true
       };

@@ -1,7 +1,7 @@
 /**
  * Module: WindLinearWidget - Linear wind gauge with angle pointer, layline sectors, and dual angle/speed text
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, RadialValueMath, StableDigits, PlaceholderNormalize
+ * Depends: LinearGaugeEngine, ValueMath, StableDigits, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,7 +13,7 @@
 
   function create(def, componentContext) {
     const engine = componentContext.components.require("LinearGaugeEngine");
-    const valueMath = componentContext.components.require("RadialValueMath");
+    const valueMath = componentContext.components.require("ValueMath");
     const stableDigits = componentContext.components.require("StableDigits");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
@@ -28,8 +28,8 @@
     }
 
     function resolveSpeedText(rawSpeed, props, speedUnit, defaultText) {
-      const n = Number(rawSpeed);
-      if (!Number.isFinite(n)) {
+      const n = rawSpeed == null ? undefined : valueMath.toFiniteNumber(rawSpeed);
+      if (typeof n !== "number") {
         return defaultText;
       }
       const p = props || {};
@@ -51,8 +51,8 @@
       const defaultText = hasOwn.call(p, "default")
         ? p.default
         : placeholderNormalize.normalize(undefined, undefined);
-      const angle = Number(rawAngle);
-      const angleText = Number.isFinite(angle)
+      const angle = rawAngle == null ? undefined : valueMath.toFiniteNumber(rawAngle);
+      const angleText = typeof angle === "number"
         ? valueMath.formatAngle180(angle, !!p.leadingZero)
         : defaultText;
       const angleNum = Number(angleText);

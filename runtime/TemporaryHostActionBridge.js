@@ -1,13 +1,14 @@
 /**
  * Module: DyniPlugin TemporaryHostActionBridge - Temporary runtime facade for host-owned workflow dispatch
  * Documentation: documentation/avnav-api/plugin-lifecycle.md
- * Depends: runtime.getAvnavApi(), DOM page roots, TemporaryHostActionBridgeDiscovery
+ * Depends: runtime.getAvnavApi(), DOM page roots, TemporaryHostActionBridgeDiscovery, ValueMath
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
+  const valueMath = root.DyniComponents.DyniValueMath.create();
 
   function createBridgeError(message) {
     const error = new Error("TemporaryHostActionBridge: " + message);
@@ -15,10 +16,7 @@
     return error;
   }
 
-  function toFiniteNumber(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
-  }
+  const toFiniteNumber = valueMath.toFiniteNumber;
 
   function normalizeRoutePointIndex(index) {
     const normalized = Number(index);

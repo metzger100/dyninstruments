@@ -1,4 +1,5 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RadialTextFitting", function () {
   function createMeasureContext() {
@@ -15,7 +16,12 @@ describe("RadialTextFitting", function () {
   }
 
   it("applies a small width safety margin before fitting value+unit text", function () {
-    const fitting = loadFresh("shared/widget-kits/radial/RadialTextFitting.js").create();
+    const fitting = loadFresh("shared/widget-kits/radial/RadialTextFitting.js").create({}, createComponentContextMock({
+      modules: {
+        CanvasTextFitting: loadFresh("shared/widget-kits/text/CanvasTextFitting.js"),
+        ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
+      }
+    }));
     const ctx = createMeasureContext();
 
     const safeFit = fitting.measureValueUnitFit(

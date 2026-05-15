@@ -22,7 +22,7 @@
       js: BASE + "widgets/linear/CompassLinearWidget/CompassLinearWidget.js",
       css: undefined,
       globalKey: "DyniCompassLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath", "SpringEasing"]
+      deps: ["LinearGaugeEngine", "ValueMath", "SpringEasing"]
   };
 
   w.CompassRadialWidget = {
@@ -36,77 +36,77 @@
       js: BASE + "widgets/linear/DepthLinearWidget/DepthLinearWidget.js",
       css: undefined,
       globalKey: "DyniDepthLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath", "DepthDisplayFormatter", "PlaceholderNormalize", "UnitAwareFormatter"]
+      deps: ["LinearGaugeEngine", "ValueMath", "DepthDisplayFormatter", "PlaceholderNormalize", "UnitAwareFormatter"]
   };
 
   w.DepthRadialWidget = {
       js: BASE + "widgets/radial/DepthRadialWidget/DepthRadialWidget.js",
       css: undefined,
       globalKey: "DyniDepthRadialWidget",
-      deps: ["SemicircleRadialEngine", "RadialValueMath", "DepthDisplayFormatter", "PlaceholderNormalize", "UnitAwareFormatter"]
+      deps: ["SemicircleRadialEngine", "ValueMath", "DepthDisplayFormatter", "PlaceholderNormalize", "UnitAwareFormatter"]
   };
 
   w.DefaultRadialWidget = {
       js: BASE + "widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js",
       css: undefined,
       globalKey: "DyniDefaultRadialWidget",
-      deps: ["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]
+      deps: ["SemicircleRadialEngine", "ValueMath", "PlaceholderNormalize"]
   };
 
   w.DefaultLinearWidget = {
       js: BASE + "widgets/linear/DefaultLinearWidget/DefaultLinearWidget.js",
       css: undefined,
       globalKey: "DyniDefaultLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]
+      deps: ["LinearGaugeEngine", "ValueMath", "PlaceholderNormalize"]
   };
 
   w.SpeedLinearWidget = {
       js: BASE + "widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js",
       css: undefined,
       globalKey: "DyniSpeedLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]
+      deps: ["LinearGaugeEngine", "ValueMath", "PlaceholderNormalize"]
   };
 
   w.SpeedRadialWidget = {
       js: BASE + "widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js",
       css: undefined,
       globalKey: "DyniSpeedRadialWidget",
-      deps: ["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]
+      deps: ["SemicircleRadialEngine", "ValueMath", "PlaceholderNormalize"]
   };
 
   w.TemperatureLinearWidget = {
       js: BASE + "widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js",
       css: undefined,
       globalKey: "DyniTemperatureLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]
+      deps: ["LinearGaugeEngine", "ValueMath", "PlaceholderNormalize"]
   };
 
   w.TemperatureRadialWidget = {
       js: BASE + "widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js",
       css: undefined,
       globalKey: "DyniTemperatureRadialWidget",
-      deps: ["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]
+      deps: ["SemicircleRadialEngine", "ValueMath", "PlaceholderNormalize"]
   };
 
   w.VoltageLinearWidget = {
       js: BASE + "widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js",
       css: undefined,
       globalKey: "DyniVoltageLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath", "PlaceholderNormalize"]
+      deps: ["LinearGaugeEngine", "ValueMath", "PlaceholderNormalize"]
   };
 
   w.VoltageRadialWidget = {
       js: BASE + "widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js",
       css: undefined,
       globalKey: "DyniVoltageRadialWidget",
-      deps: ["SemicircleRadialEngine", "RadialValueMath", "PlaceholderNormalize"]
+      deps: ["SemicircleRadialEngine", "ValueMath", "PlaceholderNormalize"]
   };
 
   w.WindLinearWidget = {
       js: BASE + "widgets/linear/WindLinearWidget/WindLinearWidget.js",
       css: undefined,
       globalKey: "DyniWindLinearWidget",
-      deps: ["LinearGaugeEngine", "RadialValueMath", "StableDigits", "PlaceholderNormalize"]
+      deps: ["LinearGaugeEngine", "ValueMath", "StableDigits", "PlaceholderNormalize"]
   };
 
   w.WindRadialWidget = {

@@ -54,10 +54,10 @@ Responsive ownership rule:
 
 ```javascript
 const engine = componentContext.components.require("LinearGaugeEngine");
-const valueMath = componentContext.components.require("RadialValueMath");
+const valueMath = componentContext.components.require("ValueMath");
 
 function formatDisplay(raw, props, unit) {
-  const n = Number(raw);
+  const n = raw == null ? NaN : Number(raw);
   if (!isFinite(n)) return { num: NaN, text: "---" };
   const out = String(componentContext.format.applyFormatter(n, {
     formatter: "formatDecimal",

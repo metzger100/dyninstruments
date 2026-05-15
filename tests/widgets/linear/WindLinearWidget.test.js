@@ -11,11 +11,15 @@ describe("WindLinearWidget", function () {
       modules: {
         StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
         PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
-        RadialValueMath: { create() { return {
+        ValueMath: { create() { return {
                 clamp(value, lo, hi) {
                   const n = Number(value);
                   if (!isFinite(n)) return lo;
                   return Math.max(lo, Math.min(hi, n));
+                },
+                toFiniteNumber(value) {
+                  const n = Number(value);
+                  return Number.isFinite(n) ? n : undefined;
                 },
                 formatAngle180(value, leadingZero) {
                   const n = Number(value);
@@ -121,11 +125,15 @@ describe("WindLinearWidget", function () {
       modules: {
         StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
         PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
-        RadialValueMath: { create() { return {
+        ValueMath: { create() { return {
                 clamp(value, lo, hi) {
                   const n = Number(value);
                   if (!isFinite(n)) return lo;
                   return Math.max(lo, Math.min(hi, n));
+                },
+                toFiniteNumber(value) {
+                  const n = Number(value);
+                  return Number.isFinite(n) ? n : undefined;
                 },
                 formatAngle180(value) {
                   const n = Number(value);
@@ -197,11 +205,15 @@ describe("WindLinearWidget", function () {
       modules: {
         StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
         PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
-        RadialValueMath: { create() { return {
+        ValueMath: { create() { return {
                 clamp(value, lo, hi) {
                   const n = Number(value);
                   if (!isFinite(n)) return lo;
                   return Math.max(lo, Math.min(hi, n));
+                },
+                toFiniteNumber(value) {
+                  const n = Number(value);
+                  return Number.isFinite(n) ? n : undefined;
                 },
                 formatAngle180(value) {
                   const n = Number(value);
@@ -276,5 +288,47 @@ describe("WindLinearWidget", function () {
     expect(flatCalls.some((entry) => entry.type === "inline")).toBe(false);
     expect(normalCalls.some((entry) => entry.type === "inline")).toBe(false);
     expect(highCalls.filter((entry) => entry.type === "inline")).toHaveLength(2);
+  });
+
+  it("keeps null speed on placeholder path instead of numeric zero formatting", function () {
+    let captured;
+    const applyFormatter = vi.fn((value) => "spd:" + String(value));
+
+    loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create({}, createComponentContextMock({
+      modules: {
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        ValueMath: { create() { return {
+                clamp(value, lo, hi) {
+                  const n = Number(value);
+                  if (!isFinite(n)) return lo;
+                  return Math.max(lo, Math.min(hi, n));
+                },
+                toFiniteNumber(value) {
+                  const n = Number(value);
+                  return Number.isFinite(n) ? n : undefined;
+                },
+                formatAngle180(value) {
+                  const n = Number(value);
+                  return isFinite(n) ? String(Math.round(n)) : "---";
+                }
+              }; } },
+        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
+      },
+      services: { format: { applyFormatter } }
+    }));
+
+    const display = captured.formatDisplay(15, {
+      speed: null,
+      default: "---",
+      angleCaption: "AWA",
+      speedCaption: "AWS",
+      angleUnit: "°",
+      speedUnit: "kn"
+    });
+
+    expect(display.num).toBe(15);
+    expect(display.right.value).toBe("---");
+    expect(applyFormatter).not.toHaveBeenCalled();
   });
 });

@@ -1,7 +1,7 @@
 /**
  * Module: XteDisplayWidget - Responsive XTE highway renderer with integrated nav metrics
  * Documentation: documentation/widgets/xte-display.md
- * Depends: RadialToolkit, CanvasLayerCache, XteHighwayPrimitives, XteHighwayLayout, TextTileLayout, SpringEasing, PlaceholderNormalize, StableDigits, UnitAwareFormatter, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: GaugeToolkit, CanvasLayerCache, XteHighwayPrimitives, XteHighwayLayout, TextTileLayout, SpringEasing, PlaceholderNormalize, StableDigits, UnitAwareFormatter, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,7 +11,7 @@
   "use strict";
 
   function create(def, componentContext) {
-    const toolkit = componentContext.components.require("RadialToolkit");
+    const toolkit = componentContext.components.require("GaugeToolkit");
     const cacheFactory = componentContext.components.require("CanvasLayerCache");
     const primitives = componentContext.components.require("XteHighwayPrimitives");
     const layoutApi = componentContext.components.require("XteHighwayLayout");
@@ -24,14 +24,6 @@
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
     const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
     const staticLayer = cacheFactory.createLayerCache({ layers: ["back"] });
-
-    function finiteNumber(value) {
-      const checker = toolkit.value && toolkit.value.isFiniteNumber;
-      if (typeof checker === "function") {
-        return checker(value);
-      }
-      return typeof value === "number" && Number.isFinite(value);
-    }
 
     function trimWaypointName(raw) {
       if (typeof raw !== "string") {
@@ -99,8 +91,8 @@
       const layoutConfig = p.layout && typeof p.layout === "object" ? p.layout : null;
       const easingEnabled = !layoutConfig || layoutConfig.easing !== false;
       const hideTextualMetrics = !!(layoutConfig && layoutConfig.hideTextualMetrics === true);
-      const xteScale = finiteNumber(p.xteScale) && p.xteScale > 0 ? p.xteScale : 1;
-      const xteAvailable = finiteNumber(display && display.xte);
+      const xteScale = toolkit.value.isFiniteNumber(p.xteScale) && p.xteScale > 0 ? p.xteScale : 1;
+      const xteAvailable = toolkit.value.isFiniteNumber(display && display.xte);
 
       const normalThreshold = layoutConfig ? layoutConfig.xteRatioThresholdNormal : undefined;
       const flatThreshold = layoutConfig ? layoutConfig.xteRatioThresholdFlat : undefined;
@@ -151,21 +143,21 @@
       const defaultText = placeholderNormalize.normalize(undefined, p.default);
 
       const xteDistance = unitFormatter.formatDistance(
-        finiteNumber(xteRaw) ? Math.abs(xteRaw) : undefined,
+        toolkit.value.isFiniteNumber(xteRaw) ? Math.abs(xteRaw) : undefined,
         formatUnits && formatUnits.xte,
         defaultText
       );
       const dtwDistance = unitFormatter.formatDistance(dtwRaw, formatUnits && formatUnits.dtw, defaultText);
 
       const xteDistanceMissing = placeholderNormalize.isPlaceholder(xteDistance);
-      const xteSide = (!xteDistanceMissing && finiteNumber(xteRaw)) ? (xteRaw > 0 ? "R" : (xteRaw < 0 ? "L" : "")) : "";
+      const xteSide = (!xteDistanceMissing && toolkit.value.isFiniteNumber(xteRaw)) ? (xteRaw > 0 ? "R" : (xteRaw < 0 ? "L" : "")) : "";
       if (xteAvailable) {
         const xteDisplayAbs = unitFormatter.extractNumericDisplay(xteDistance, Math.abs(xteRaw));
         const signedDisplayXte = xteRaw < 0 ? -xteDisplayAbs : xteDisplayAbs;
         const overflow = Math.abs(xteDisplayAbs) > xteScale;
         const xteTarget = signedDisplayXte / xteScale;
         const xteEased = springMotion.resolve(canvas, xteTarget, easingEnabled, Date.now());
-        const xteNormalized = finiteNumber(xteEased) ? xteEased : (signedDisplayXte / xteScale);
+        const xteNormalized = toolkit.value.isFiniteNumber(xteEased) ? xteEased : (signedDisplayXte / xteScale);
         primitives.drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, primaryDim, theme.strokeWeight, theme.pointerDepthWeight);
       }
 

@@ -223,12 +223,12 @@ describe("MapZoomHtmlFit", function () {
     const MODULE_PATH_BY_ID = {
       HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
       TextLayoutEngine: "shared/widget-kits/text/TextLayoutEngine.js",
-      RadialValueMath: "shared/widget-kits/radial/RadialValueMath.js",
+      ValueMath: "shared/widget-kits/value/ValueMath.js",
       RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
       TextLayoutPrimitives: "shared/widget-kits/text/TextLayoutPrimitives.js",
       TextLayoutComposite: "shared/widget-kits/text/TextLayoutComposite.js",
       ResponsiveScaleProfile: "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-      RadialTextLayout: "shared/widget-kits/radial/RadialTextLayout.js",
+      CanvasTextLayout: "shared/widget-kits/text/CanvasTextLayout.js",
       RadialTextFitting: "shared/widget-kits/radial/RadialTextFitting.js"
     };
     const moduleCache = Object.create(null);
@@ -305,12 +305,12 @@ describe("MapZoomHtmlFit", function () {
     const MODULE_PATH_BY_ID = {
       HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
       TextLayoutEngine: "shared/widget-kits/text/TextLayoutEngine.js",
-      RadialValueMath: "shared/widget-kits/radial/RadialValueMath.js",
+      ValueMath: "shared/widget-kits/value/ValueMath.js",
       RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
       TextLayoutPrimitives: "shared/widget-kits/text/TextLayoutPrimitives.js",
       TextLayoutComposite: "shared/widget-kits/text/TextLayoutComposite.js",
       ResponsiveScaleProfile: "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-      RadialTextLayout: "shared/widget-kits/radial/RadialTextLayout.js",
+      CanvasTextLayout: "shared/widget-kits/text/CanvasTextLayout.js",
       RadialTextFitting: "shared/widget-kits/radial/RadialTextFitting.js"
     };
     const moduleCache = Object.create(null);

@@ -1,8 +1,11 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
+const { loadFresh } = require("./load-umd");
 
 function createScriptContext(overrides) {
+  const options = overrides || {};
+  const skipDefaultDyniComponents = options.__skipDefaultDyniComponents === true;
   const base = {
     console,
     Promise,
@@ -25,7 +28,12 @@ function createScriptContext(overrides) {
     clearTimeout
   };
 
-  const ctx = Object.assign({}, base, overrides || {});
+  const ctx = Object.assign({}, base, options);
+  delete ctx.__skipDefaultDyniComponents;
+  if (!skipDefaultDyniComponents) {
+    ctx.DyniComponents = ctx.DyniComponents || {};
+    ctx.DyniComponents.DyniValueMath = ctx.DyniComponents.DyniValueMath || loadFresh("shared/widget-kits/value/ValueMath.js");
+  }
 
   if (!ctx.window) ctx.window = {};
   if (!ctx.document) ctx.document = ctx.window.document;

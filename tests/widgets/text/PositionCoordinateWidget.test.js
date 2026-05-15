@@ -76,7 +76,7 @@ describe("PositionCoordinateWidget", function () {
             return themeTokens;
           }
         },
-        RadialTextLayout: {
+        CanvasTextLayout: {
           create() {
             return {
                 setFont(ctx, px, weight, family) {
@@ -121,7 +121,7 @@ describe("PositionCoordinateWidget", function () {
             };
           }
         },
-        RadialValueMath: {
+        ValueMath: {
           create() {
             return {
                 isFiniteNumber(value) {

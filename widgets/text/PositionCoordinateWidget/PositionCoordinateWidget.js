@@ -117,6 +117,9 @@
         return defaultText;
       }
     } else {
+      if (rawValue == null) {
+        return defaultText;
+      }
       const n = Number(rawValue);
       if (!Number.isFinite(n)) {
         return defaultText;

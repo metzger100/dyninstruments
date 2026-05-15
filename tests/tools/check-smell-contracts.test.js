@@ -237,7 +237,7 @@ describe("tools/check-smell-contracts.mjs", function () {
   it("fails text-layout-hotspot-budget when hotspot file grows beyond budget", function () {
     const manyLines = Array.from({ length: 291 }, (_, i) => `const x${i} = ${i};`).join("\n");
     const cwd = createWorkspace({
-      "shared/widget-kits/radial/RadialTextLayout.js": manyLines,
+      "shared/widget-kits/text/CanvasTextLayout.js": manyLines,
       "widgets/radial/WindRadialWidget/WindRadialWidget.js": "const ok = true;\n"
     });
 

@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteHtmlFit - Shared text-fit model for ActiveRoute interactive HTML renderer
  * Documentation: documentation/widgets/active-route.md
- * Depends: componentContext.theme.tokens, RadialTextLayout, TextTileLayout, ActiveRouteLayout, HtmlWidgetUtils, UnitAwareFormatter
+ * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, ActiveRouteLayout, HtmlWidgetUtils, UnitAwareFormatter
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -231,7 +231,7 @@
     const theme = componentContext.theme.tokens;
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const unitFormatter = componentContext.components.require("UnitAwareFormatter");
-    const radialText = componentContext.components.require("RadialTextLayout");
+    const radialText = componentContext.components.require("CanvasTextLayout");
     const tileLayout = componentContext.components.require("TextTileLayout");
     const layoutApi = componentContext.components.require("ActiveRouteLayout");
 

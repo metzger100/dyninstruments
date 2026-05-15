@@ -128,7 +128,7 @@
         const easingEnabled = props.easing !== false;
         const nowMs = Date.now();
         const easedHeading = headingMotion.resolve(state.canvas, display.heading, easingEnabled, nowMs);
-        const markerFinite = Number.isFinite(Number(display.marker));
+        const markerFinite = state.value.isFiniteNumber(display.marker);
         const easedMarker = markerFinite
           ? markerMotion.resolve(state.canvas, display.marker, easingEnabled, nowMs)
           : NaN;

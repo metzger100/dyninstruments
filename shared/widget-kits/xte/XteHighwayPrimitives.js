@@ -1,7 +1,7 @@
 /**
  * Module: XteHighwayPrimitives - Shared geometry and drawing helpers for XTE highway visuals
  * Documentation: documentation/widgets/xte-display.md
- * Depends: CanvasRenderingContext2D, GeometryScale
+ * Depends: CanvasRenderingContext2D, GeometryScale, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -20,10 +20,7 @@
 
   function create(def, componentContext) {
     const gs = componentContext.components.require("GeometryScale");
-
-    function clamp(value, lo, hi) {
-      return Math.max(lo, Math.min(hi, value));
-    }
+    const clamp = componentContext.components.require("ValueMath").clamp;
 
     function lerp(from, to, t) {
       return from + (to - from) * t;

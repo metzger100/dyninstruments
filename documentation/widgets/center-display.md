@@ -84,7 +84,7 @@ CenterDisplayTextWidget: {
   deps: [
     "runtime.theme",
     "TextLayoutEngine",
-    "RadialTextLayout",
+    "CanvasTextLayout",
     "TextTileLayout",
     "CenterDisplayLayout",
     "CenterDisplayMath",

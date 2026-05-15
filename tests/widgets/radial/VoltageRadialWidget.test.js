@@ -8,7 +8,7 @@ describe("VoltageRadialWidget", function () {
     let receivedOptions;
     const renderCanvas = vi.fn();
     const applyFormatter = vi.fn((value) => Number(value).toFixed(1));
-    const resolveVoltageSemicircleTickSteps = vi.fn((range) => {
+    const resolveVoltageTickSteps = vi.fn((range) => {
       if (range <= 3) return { major: 0.5, minor: 0.1 };
       if (range <= 12) return { major: 2, minor: 0.5 };
       return { major: 50, minor: 10 };
@@ -30,7 +30,7 @@ describe("VoltageRadialWidget", function () {
             };
           }
         },
-        RadialValueMath: {
+        ValueMath: {
           create() {
             return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
@@ -59,15 +59,7 @@ describe("VoltageRadialWidget", function () {
                   const match = String(text).match(/-?\d+(?:\.\d+)?/);
                   return match ? match[0] : "";
                 },
-                buildLowEndSectors(props, minV, maxV, arc, options) {
-                  receivedProps = props;
-                  receivedOptions = options;
-                  return [
-                    { a0: minV, a1: props.alarmFrom, color: options.alarmColor },
-                    { a0: props.alarmFrom, a1: props.warningFrom, color: options.warningColor }
-                  ];
-                },
-                resolveVoltageSemicircleTickSteps
+                resolveVoltageTickSteps
               };
           }
         },
@@ -97,7 +89,7 @@ describe("VoltageRadialWidget", function () {
     expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(3)).toEqual({ major: 0.5, minor: 0.1 });
     expect(captured.tickSteps(12)).toEqual({ major: 2, minor: 0.5 });
-    expect(resolveVoltageSemicircleTickSteps).toHaveBeenCalledTimes(2);
+    expect(resolveVoltageTickSteps).toHaveBeenCalledTimes(2);
     expect(captured.formatDisplay(12.34, {
       formatter: "formatDecimal",
       formatterParameters: [3, 1, true]
@@ -112,10 +104,20 @@ describe("VoltageRadialWidget", function () {
         alarm: "#654321"
       }
     };
+    const valueUtils = {
+      buildLowEndSectors(props, minV, maxV, arc, options) {
+        receivedProps = props;
+        receivedOptions = options;
+        return [
+          { a0: minV, a1: props.alarmFrom, color: options.alarmColor },
+          { a0: props.alarmFrom, a1: props.warningFrom, color: options.warningColor }
+        ];
+      }
+    };
     const sectors = captured.buildSectors({
       voltageRadialWarningFrom: 12.2,
       voltageRadialAlarmFrom: 11.6
-    }, 10, 15, {}, {}, theme);
+    }, 10, 15, {}, valueUtils, theme);
 
     expect(sectors).toEqual([
       { a0: 10, a1: 11.6, color: "#654321" },
@@ -151,7 +153,7 @@ describe("VoltageRadialWidget", function () {
             };
           }
         },
-        RadialValueMath: {
+        ValueMath: {
           create() {
             return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
@@ -180,8 +182,7 @@ describe("VoltageRadialWidget", function () {
                   const match = String(text).match(/-?\d+(?:\.\d+)?/);
                   return match ? match[0] : "";
                 },
-                buildLowEndSectors,
-                resolveVoltageSemicircleTickSteps() {
+                resolveVoltageTickSteps() {
                   return { major: 1, minor: 0.2 };
                 }
               };
@@ -208,17 +209,18 @@ describe("VoltageRadialWidget", function () {
     }));
 
     const theme = { colors: { warning: "#123456", alarm: "#654321" } };
+    const valueUtils = { buildLowEndSectors };
     expect(captured.buildSectors({
       voltageRadialWarningEnabled: false,
       voltageRadialAlarmEnabled: false
-    }, 10, 15, {}, {}, theme)).toEqual([]);
+    }, 10, 15, {}, valueUtils, theme)).toEqual([]);
     expect(buildLowEndSectors).not.toHaveBeenCalled();
 
     captured.buildSectors({
       voltageRadialWarningEnabled: false,
       voltageRadialAlarmEnabled: true,
       voltageRadialAlarmFrom: 11.6
-    }, 10, 15, {}, {}, theme);
+    }, 10, 15, {}, valueUtils, theme);
     expect(buildLowEndSectors).toHaveBeenCalledTimes(1);
     expect(Number.isNaN(buildLowEndSectors.mock.calls[0][0].warningFrom)).toBe(true);
     expect(buildLowEndSectors.mock.calls[0][0].alarmFrom).toBe(11.6);
@@ -227,7 +229,7 @@ describe("VoltageRadialWidget", function () {
       voltageRadialWarningEnabled: true,
       voltageRadialAlarmEnabled: false,
       voltageRadialWarningFrom: 12.2
-    }, 10, 15, {}, {}, theme);
+    }, 10, 15, {}, valueUtils, theme);
     expect(buildLowEndSectors).toHaveBeenCalledTimes(2);
     expect(buildLowEndSectors.mock.calls[1][0].warningFrom).toBe(12.2);
     expect(Number.isNaN(buildLowEndSectors.mock.calls[1][0].alarmFrom)).toBe(true);
@@ -252,7 +254,7 @@ describe("VoltageRadialWidget", function () {
             };
           }
         },
-        RadialValueMath: {
+        ValueMath: {
           create() {
             return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
@@ -281,10 +283,7 @@ describe("VoltageRadialWidget", function () {
                   const match = String(text).match(/-?\d+(?:\.\d+)?/);
                   return match ? match[0] : "";
                 },
-                buildLowEndSectors() {
-                  return [];
-                },
-                resolveVoltageSemicircleTickSteps() {
+                resolveVoltageTickSteps() {
                   return { major: 1, minor: 0.2 };
                 }
               };
@@ -311,5 +310,78 @@ describe("VoltageRadialWidget", function () {
     }));
 
     expect(captured.formatDisplay(12.34, {})).toEqual({ num: 12.34, text: "12.34" });
+  });
+
+  it("returns placeholder output for null voltage values", function () {
+    let captured;
+    const applyFormatter = vi.fn((value) => String(value));
+
+    const mod = loadFresh("widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js");
+    mod.create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
+                }
+                return String(text);
+              }
+            };
+          }
+        },
+        ValueMath: {
+          create() {
+            return {
+              formatGaugeDisplay(raw, props, apply, normalize, defaultFormatter, defaultParameters) {
+                const p = props || {};
+                const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
+                  ? p.default
+                  : normalize(undefined, undefined);
+                if (raw == null) {
+                  return { num: NaN, text: defaultText };
+                }
+                const n = Number(raw);
+                if (!Number.isFinite(n)) {
+                  return { num: NaN, text: defaultText };
+                }
+                const formatter = Object.prototype.hasOwnProperty.call(p, "formatter") ? p.formatter : defaultFormatter;
+                const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters")
+                  ? p.formatterParameters
+                  : defaultParameters;
+                const formatted = normalize(String(apply(n, {
+                  formatter: formatter,
+                  formatterParameters: formatterParameters,
+                  default: defaultText
+                })), defaultText);
+                const match = String(formatted).match(/-?\d+(?:\.\d+)?/);
+                const num = match ? Number(match[0]) : NaN;
+                return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+              },
+              resolveVoltageTickSteps() {
+                return { major: 1, minor: 0.2 };
+              }
+            };
+          }
+        },
+        SemicircleRadialEngine: {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return function () {};
+              }
+            };
+          }
+        }
+      },
+      services: {
+        format: { applyFormatter }
+      }
+    }));
+
+    expect(captured.formatDisplay(null, {})).toEqual({ num: NaN, text: "---" });
+    expect(applyFormatter).not.toHaveBeenCalled();
   });
 });

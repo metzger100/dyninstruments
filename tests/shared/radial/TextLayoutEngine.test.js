@@ -22,7 +22,7 @@ describe("TextLayoutEngine", function () {
     const engineModule = loadFresh("shared/widget-kits/text/TextLayoutEngine.js");
     const primitiveModule = loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js");
     const compositeModule = loadFresh("shared/widget-kits/text/TextLayoutComposite.js");
-    const textLayoutModule = loadFresh("shared/widget-kits/radial/RadialTextLayout.js");
+    const textLayoutModule = loadFresh("shared/widget-kits/text/CanvasTextLayout.js");
     const textFittingModule = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
     const responsiveProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const valueMathModule = {
@@ -47,8 +47,8 @@ describe("TextLayoutEngine", function () {
 
     return engineModule.create({}, createComponentContextMock({
       modules: {
-        RadialValueMath: valueMathModule,
-        RadialTextLayout: textLayoutModule,
+        ValueMath: valueMathModule,
+        CanvasTextLayout: textLayoutModule,
         RadialTextFitting: textFittingModule,
         TextLayoutPrimitives: primitiveModule,
         TextLayoutComposite: compositeModule,

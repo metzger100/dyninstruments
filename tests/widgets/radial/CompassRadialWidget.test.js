@@ -131,6 +131,7 @@ describe("CompassRadialWidget", function () {
     const canvas = createMockCanvas({ rectWidth: 480, rectHeight: 110, ctx: createMockContext2D() });
 
     expect(harness.spec.renderCanvas(canvas, makeCompassProps({ heading: 20, markerCourse: undefined }))).toBeUndefined();
+    expect(harness.spec.renderCanvas(canvas, makeCompassProps({ heading: 20, markerCourse: null }))).toBeUndefined();
     expect(markerMotion.resolve).not.toHaveBeenCalled();
     expect(harness.calls.rimMarker).toHaveLength(0);
   });

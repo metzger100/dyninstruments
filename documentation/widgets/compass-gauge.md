@@ -117,7 +117,7 @@ Responsive ownership:
 
 | Function | Input | Output |
 |---|---|---|
-| `RadialValueMath.formatDirection360(v, leadingZero)` | heading deg | `0..359` string |
+| `ValueMath.formatDirection360(v, leadingZero)` | heading deg | `0..359` string |
 
 ## Phase 6 Options
 

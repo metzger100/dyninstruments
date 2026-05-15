@@ -14,7 +14,7 @@ describe("DefaultRadialWidget", function () {
         ? String(value) + " fmt"
         : String(value);
     });
-    const resolveStandardSemicircleTickSteps = opts.resolveStandardSemicircleTickSteps || vi.fn(() => ({ major: 10, minor: 2 }));
+    const resolveStandardTickSteps = opts.resolveStandardTickSteps || vi.fn(() => ({ major: 10, minor: 2 }));
     const placeholderNormalize = opts.placeholderNormalize || {
       normalize(text, defaultText) {
         if (text == null) {
@@ -38,12 +38,7 @@ describe("DefaultRadialWidget", function () {
         }
         return { num: Number(raw), text: String(raw) };
       }),
-      sectorAngles(from, to) {
-        const f = Number(from);
-        const t = Number(to);
-        return isFinite(f) && isFinite(t) && t > f ? { a0: f, a1: t } : null;
-      },
-      resolveStandardSemicircleTickSteps
+      resolveStandardTickSteps
     };
     const engine = {
       createRenderer(cfg) {
@@ -55,7 +50,7 @@ describe("DefaultRadialWidget", function () {
     const spec = mod.create({}, createComponentContextMock({
       modules: {
         SemicircleRadialEngine: { create: () => engine },
-        RadialValueMath: { create: () => valueMath },
+        ValueMath: { create: () => valueMath },
         PlaceholderNormalize: { create: () => placeholderNormalize },
         DefaultGaugeDisplay: {
           create() {
@@ -72,7 +67,7 @@ describe("DefaultRadialWidget", function () {
       captured,
       renderer,
       applyFormatter,
-      resolveStandardSemicircleTickSteps,
+      resolveStandardTickSteps,
       valueMath,
       placeholderNormalize
     };
@@ -100,9 +95,9 @@ describe("DefaultRadialWidget", function () {
       flat: "defaultRadialRatioThresholdFlat"
     });
     expect(h.captured.hideTextualMetricsProp).toBe("defaultRadialHideTextualMetrics");
-    expect(h.captured.tickSteps).toBe(h.resolveStandardSemicircleTickSteps);
+    expect(h.captured.tickSteps).toBe(h.resolveStandardTickSteps);
     expect(h.captured.tickSteps(10)).toEqual({ major: 10, minor: 2 });
-    expect(h.resolveStandardSemicircleTickSteps).toHaveBeenCalledWith(10);
+    expect(h.resolveStandardTickSteps).toHaveBeenCalledWith(10);
 
     expect(h.captured.formatDisplay(12.5, {
       default: "---"
@@ -135,6 +130,13 @@ describe("DefaultRadialWidget", function () {
 
   it("builds deterministic sectors, falls back to theme colors, and omits degenerate spans", function () {
     const h = createHarness();
+    const valueUtils = {
+      sectorAngles(from, to) {
+        const f = Number(from);
+        const t = Number(to);
+        return Number.isFinite(f) && Number.isFinite(t) && t > f ? { a0: f, a1: t } : null;
+      }
+    };
     const theme = {
       colors: {
         warning: "#e7c66a",
@@ -147,7 +149,7 @@ describe("DefaultRadialWidget", function () {
       defaultRadialWarningLowEnabled: false,
       defaultRadialWarningHighEnabled: false,
       defaultRadialAlarmHighEnabled: false
-    }, 0, 100, {}, h.valueMath, theme)).toEqual([]);
+    }, 0, 100, {}, valueUtils, theme)).toEqual([]);
 
     const sectors = h.captured.buildSectors({
       defaultRadialAlarmLowEnabled: true,
@@ -162,7 +164,7 @@ describe("DefaultRadialWidget", function () {
       defaultRadialAlarmHighEnabled: true,
       defaultRadialAlarmHighAt: 90,
       defaultRadialAlarmHighColor: "#0000bb"
-    }, 0, 100, {}, h.valueMath, theme);
+    }, 0, 100, {}, valueUtils, theme);
 
     expect(sectors).toEqual([
       { a0: 0, a1: 10, color: "#aa0000" },
@@ -180,7 +182,7 @@ describe("DefaultRadialWidget", function () {
       defaultRadialWarningHighAt: 75,
       defaultRadialAlarmHighEnabled: true,
       defaultRadialAlarmHighAt: 90
-    }, 0, 100, {}, h.valueMath, theme);
+    }, 0, 100, {}, valueUtils, theme);
 
     expect(fallbackSectors).toEqual([
       { a0: 0, a1: 10, color: "#ff7a76" },

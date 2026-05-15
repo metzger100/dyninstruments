@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsRenderModel - Pure normalization and display model owner for route-points HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: CenterDisplayMath, RoutePointsHtmlFit, RoutePointsLayout, HtmlWidgetUtils, NavInteractionPolicy, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction
+ * Depends: CenterDisplayMath, RoutePointsHtmlFit, RoutePointsLayout, HtmlWidgetUtils, NavInteractionPolicy, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,10 +10,7 @@
 }(this, function () {
   "use strict";
 
-  function toFiniteNumber(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
-  }
+  let toFiniteNumber;
 
   function toSafeInteger(value, defaultValue) {
     const n = toFiniteNumber(value);
@@ -185,6 +182,7 @@
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
     const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");
+    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
 
     function resolveStateKind(props, route) {
       return stateScreenPrecedence.pickFirst([

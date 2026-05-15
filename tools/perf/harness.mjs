@@ -386,6 +386,7 @@ function createHarnessEnvironment(options) {
   delete globalThis.DyniPlugin;
   runIifeScript(rootDir, "runtime/namespace.js");
   globalThis.DyniPlugin.baseUrl = SENTINEL_BASE;
+  runIifeScript(rootDir, "shared/widget-kits/value/ValueMath.js");
   runIifeScript(rootDir, "shared/unit-format-families.js");
   runIifeScript(rootDir, "config/shared/editable-param-utils.js");
   runIifeScript(rootDir, "config/shared/kind-defaults.js");

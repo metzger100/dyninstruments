@@ -24,8 +24,8 @@ describe("PositionCoordinateWidget phase 4", function () {
     const modules = {
       RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js"),
       RadialTextFitting: loadFresh("shared/widget-kits/radial/RadialTextFitting.js"),
-      RadialTextLayout: loadFresh("shared/widget-kits/radial/RadialTextLayout.js"),
-      RadialValueMath: loadFresh("shared/widget-kits/radial/RadialValueMath.js"),
+      CanvasTextLayout: loadFresh("shared/widget-kits/text/CanvasTextLayout.js"),
+      ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js"),
       TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
       TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
       ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js")
@@ -66,8 +66,8 @@ describe("PositionCoordinateWidget phase 4", function () {
         StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
         RadialAngleMath: modules.RadialAngleMath,
         RadialTextFitting: modules.RadialTextFitting,
-        RadialTextLayout: modules.RadialTextLayout,
-        RadialValueMath: modules.RadialValueMath,
+        CanvasTextLayout: modules.CanvasTextLayout,
+        ValueMath: modules.ValueMath,
         TextLayoutPrimitives: modules.TextLayoutPrimitives,
         TextLayoutComposite: modules.TextLayoutComposite,
         ResponsiveScaleProfile: modules.ResponsiveScaleProfile

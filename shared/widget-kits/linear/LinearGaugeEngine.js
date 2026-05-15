@@ -1,7 +1,7 @@
 /**
  * Module: LinearGaugeEngine - Shared renderer pipeline for linear gauge widgets
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: RadialToolkit, CanvasLayerCache, LinearCanvasPrimitives, LinearGaugeEngineDrawing, LinearGaugeMath, LinearGaugeLayout, LinearGaugeTextLayout, LinearGaugeEngineSupport, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: GaugeToolkit, CanvasLayerCache, LinearCanvasPrimitives, LinearGaugeEngineDrawing, LinearGaugeMath, LinearGaugeLayout, LinearGaugeTextLayout, LinearGaugeEngineSupport, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -20,7 +20,7 @@
     const DEFAULT_RANGE_PROPS = { min: "minValue", max: "maxValue" };
     const DEFAULT_TICK_PROPS = { major: "tickMajor", minor: "tickMinor", showEndLabels: "showEndLabels" };
     const DEFAULT_TICK_PRESET = { major: 10, minor: 2 };
-    const GU = componentContext.components.require("RadialToolkit");
+    const GU = componentContext.components.require("GaugeToolkit");
     const layerCacheApi = componentContext.components.require("CanvasLayerCache");
     const primitives = componentContext.components.require("LinearCanvasPrimitives");
     const drawing = componentContext.components.require("LinearGaugeEngineDrawing");
@@ -99,6 +99,9 @@
           return cfg.formatDisplay(rawValue, props, unitText, componentContext);
         }
         : function (rawValue) {
+          if (rawValue == null) {
+            return { num: NaN, text: "" };
+          }
           return { num: Number(rawValue), text: String(rawValue) };
         };
       const layerCache = layerCacheApi.createLayerCache({ layers: ["base"] });

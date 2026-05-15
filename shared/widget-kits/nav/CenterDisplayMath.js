@@ -1,7 +1,7 @@
 /**
  * Module: CenterDisplayMath - Position normalization and center-display leg math
  * Documentation: documentation/widgets/center-display.md
- * Depends: none
+ * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,10 +12,7 @@
 
   const EARTH_RADIUS_M = 6371000;
 
-  function toFiniteNumber(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
-  }
+  let toFiniteNumber;
 
   function toRadians(value) {
     return value * Math.PI / 180;
@@ -113,7 +110,9 @@
     return normalizePoint(activeMeasure.getPointAtIndex(0));
   }
 
-  function create() {
+  function create(def, componentContext) {
+    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+
     return {
       id: "CenterDisplayMath",
       normalizePoint: normalizePoint,

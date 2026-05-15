@@ -79,7 +79,25 @@ describe("RoutePointsViewModel", function () {
     expect(vm.build({ editingIndex: "5" }, createToolkit()).selectedIndex).toBe(5);
     expect(vm.build({ editingIndex: "-1" }, createToolkit()).selectedIndex).toBe(-1);
     expect(vm.build({ editingIndex: "bad" }, createToolkit()).selectedIndex).toBe(-1);
+    expect(vm.build({ editingIndex: "" }, createToolkit()).selectedIndex).toBe(-1);
+    expect(vm.build({ editingIndex: "   " }, createToolkit()).selectedIndex).toBe(-1);
     expect(vm.build({}, createToolkit()).selectedIndex).toBe(-1);
+  });
+
+  it("keeps missing and blank point coordinates undefined", function () {
+    const vm = createViewModel();
+    const out = vm.build({
+      editingRoute: {
+        name: "Route",
+        points: [
+          { name: "A", lat: null, lon: undefined },
+          { name: "B", lat: "", lon: "   " }
+        ]
+      }
+    }, createToolkit());
+
+    expect(out.route.points[0]).toEqual({ name: "A", lat: undefined, lon: undefined });
+    expect(out.route.points[1]).toEqual({ name: "B", lat: undefined, lon: undefined });
   });
 
   it("derives isActiveRoute only for exact non-empty activeName match", function () {

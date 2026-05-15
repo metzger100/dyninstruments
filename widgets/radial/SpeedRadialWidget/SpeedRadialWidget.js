@@ -1,7 +1,7 @@
 /**
  * Module: SpeedRadialWidget - Semicircle speedometer with high-end warning/alarm sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleRadialEngine, RadialValueMath, PlaceholderNormalize
+ * Depends: SemicircleRadialEngine, ValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,7 +12,7 @@
 
   function create(def, componentContext) {
     const renderer = componentContext.components.require("SemicircleRadialEngine");
-    const valueMath = componentContext.components.require("RadialValueMath");
+    const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     const renderCanvas = renderer.createRenderer({
@@ -32,7 +32,7 @@
         flat: "speedRadialRatioThresholdFlat"
       },
       hideTextualMetricsProp: "speedRadialHideTextualMetrics",
-      tickSteps: valueMath.resolveStandardSemicircleTickSteps,
+      tickSteps: valueMath.resolveStandardTickSteps,
       formatDisplay: function (raw, props, unit) {
         return valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatSpeed", [unit || "kn"]);
       },
@@ -41,7 +41,7 @@
           warningFrom: props && props.speedRadialWarningFrom,
           alarmFrom: props && props.speedRadialAlarmFrom
         };
-        return valueMath.buildHighEndSectors(radialProps, minV, maxV, arc, {
+        return valueUtils.buildHighEndSectors(radialProps, minV, maxV, arc, {
           warningColor: theme.colors.warning,
           alarmColor: theme.colors.alarm
         });

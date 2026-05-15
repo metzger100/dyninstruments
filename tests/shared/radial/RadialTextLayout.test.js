@@ -4,10 +4,11 @@ const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("RadialTextLayout", function () {
   function createTextApi() {
-    const fitting = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
     return loadFresh("shared/widget-kits/radial/RadialTextLayout.js").create({}, createComponentContextMock({
       modules: {
-        RadialTextFitting: fitting
+        CanvasTextLayout: loadFresh("shared/widget-kits/text/CanvasTextLayout.js"),
+        CanvasTextFitting: loadFresh("shared/widget-kits/text/CanvasTextFitting.js"),
+        ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
       }
     }));
   }

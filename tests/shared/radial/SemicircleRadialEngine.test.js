@@ -7,9 +7,11 @@ describe("SemicircleRadialEngine", function () {
 
   function createValueMath() {
     const valueMod = loadFresh("shared/widget-kits/radial/RadialValueMath.js");
+    const baseValueMod = loadFresh("shared/widget-kits/value/ValueMath.js");
     const angleMod = loadFresh("shared/widget-kits/radial/RadialAngleMath.js");
     return valueMod.create({}, createComponentContextMock({
       modules: {
+        ValueMath: baseValueMod,
         RadialAngleMath: angleMod
       }
     }));
@@ -94,6 +96,9 @@ describe("SemicircleRadialEngine", function () {
   }
 
   function makeComponentContext(modules) {
+    const fallbackAngleMath = loadFresh("shared/widget-kits/radial/RadialAngleMath.js")
+      .create({}, createComponentContextMock());
+
     function withCanonicalThemeTokens(toolkit) {
       if (!toolkit || typeof toolkit.create !== "function") {
         return toolkit;
@@ -119,6 +124,9 @@ describe("SemicircleRadialEngine", function () {
             }
             return resolved;
           };
+          if (!created.angle) {
+            created.angle = fallbackAngleMath;
+          }
           return created;
         }
       };
@@ -354,6 +362,151 @@ describe("SemicircleRadialEngine", function () {
     expect(labelCalls[0].weight).toBe(themeDefaults.font.labelWeight);
     expect(textLayoutCalls).toHaveLength(1);
     expect(textLayoutCalls[0].state.layout.mode).toBe("flat");
+  });
+
+  it("renders with ValueMath on RadialToolkit.value without requiring RadialValueMath methods", function () {
+    const pointerCalls = [];
+    const tickCalls = [];
+    const baseValueMath = loadFresh("shared/widget-kits/value/ValueMath.js")
+      .create({}, createComponentContextMock());
+    const angleMath = loadFresh("shared/widget-kits/radial/RadialAngleMath.js")
+      .create({}, createComponentContextMock());
+    const modules = {
+      RadialToolkit: {
+        create() {
+          return {
+            theme: {
+              resolveForRoot() {
+                return makeThemeDefaults();
+              }
+            },
+            text: {
+              drawDisconnectOverlay() {}
+            },
+            value: baseValueMath,
+            angle: angleMath,
+            draw: {
+              drawArcRing() {},
+              drawAnnularSector() {},
+              drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, opts) {
+                pointerCalls.push(opts);
+              },
+              drawTicksFromAngles(ctx, cx, cy, rOuter, ticks, opts) {
+                tickCalls.push(opts);
+              },
+              drawLabels() {}
+            }
+          };
+        }
+      },
+      SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
+      SemicircleRadialTextLayout: {
+        create() {
+          return {
+            createFitCache() {
+              return {};
+            },
+            drawModeText() {}
+          };
+        }
+      },
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+      GeometryScale: geometryScale
+    };
+    const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
+      .create({}, makeComponentContext(modules))
+      .createRenderer(makeBaseSpec());
+
+    renderer(createMockCanvas({
+      rectWidth: 480,
+      rectHeight: 110,
+      ctx: createMockContext2D()
+    }), {
+      value: 12.3,
+      caption: "SPD",
+      unit: "kn"
+    });
+
+    expect(pointerCalls).toHaveLength(1);
+    expect(tickCalls).toHaveLength(1);
+  });
+
+  it("uses placeholder text for null input on the default formatDisplay fallback", function () {
+    const textLayoutCalls = [];
+    const modules = {
+      RadialToolkit: {
+        create() {
+          return {
+            theme: {
+              resolveForRoot() {
+                return makeThemeDefaults();
+              }
+            },
+            text: {
+              drawDisconnectOverlay() {}
+            },
+            value: createValueMath(),
+            draw: {
+              drawArcRing() {},
+              drawAnnularSector() {},
+              drawPointerAtRim() {},
+              drawTicksFromAngles() {},
+              drawLabels() {}
+            }
+          };
+        }
+      },
+      SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
+      SemicircleRadialTextLayout: {
+        create() {
+          return {
+            createFitCache() {
+              return {};
+            },
+            drawModeText(state, display) {
+              textLayoutCalls.push({ state, display });
+            }
+          };
+        }
+      },
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+      GeometryScale: geometryScale
+    };
+    const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
+      .create({}, makeComponentContext(modules))
+      .createRenderer({
+        rawValueKey: "speed",
+        unitDefault: "kn",
+        rangeDefaults: { min: 0, max: 30 },
+        ratioProps: {
+          normal: "speedRadialRatioThresholdNormal",
+          flat: "speedRadialRatioThresholdFlat"
+        },
+        hideTextualMetricsProp: "speedRadialHideTextualMetrics",
+        ratioDefaults: { normal: 1.1, flat: 3.5 },
+        tickSteps() {
+          return { major: 10, minor: 2 };
+        },
+        buildSectors() {
+          return [];
+        }
+      });
+
+    renderer(createMockCanvas({
+      rectWidth: 480,
+      rectHeight: 110,
+      ctx: createMockContext2D()
+    }), {
+      speed: null,
+      default: "---",
+      caption: "SPD",
+      unit: "kn"
+    });
+
+    expect(textLayoutCalls).toHaveLength(1);
+    expect(textLayoutCalls[0].display.valueText).toBe("---");
   });
 
   it("skips the semicircle text draw step when hideTextualMetrics is enabled", function () {

@@ -3,6 +3,7 @@ const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 describe("shared/unit-format-families.js", function () {
   function loadCatalog() {
     const context = createScriptContext({
+      __skipDefaultDyniComponents: true,
       DyniPlugin: {
         runtime: {},
         state: {},

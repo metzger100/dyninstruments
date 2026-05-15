@@ -45,7 +45,7 @@ describe("SemicircleRadialTextLayout", function () {
 
   function createRadialTextApi() {
     const fitting = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
-    return loadFresh("shared/widget-kits/radial/RadialTextLayout.js").create({}, createComponentContextMock({
+    return loadFresh("shared/widget-kits/text/CanvasTextLayout.js").create({}, createComponentContextMock({
       modules: {
         RadialTextFitting: fitting
       }

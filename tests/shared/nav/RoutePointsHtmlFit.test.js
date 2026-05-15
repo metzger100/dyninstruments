@@ -64,7 +64,7 @@ describe("RoutePointsHtmlFit", function () {
 
     const componentContext = createComponentContextMock({
       modules: {
-        RadialTextLayout: { create: () => radialTextApi },
+        CanvasTextLayout: { create: () => radialTextApi },
         TextTileLayout: textTileLayoutModule,
         RoutePointsLayout: routePointsLayoutModule,
         RoutePointsInfoText: loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js"),

@@ -55,7 +55,7 @@
       js: BASE + "shared/widget-kits/nav/AisTargetHtmlFit.js",
       css: undefined,
       globalKey: "DyniAisTargetHtmlFit",
-      deps: ["RadialTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils", "TextFitMath"]
+      deps: ["CanvasTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils", "TextFitMath"]
   };
 
   sf.AlarmHtmlFit = {
@@ -69,7 +69,7 @@
       js: BASE + "shared/widget-kits/nav/ActiveRouteHtmlFit.js",
       css: undefined,
       globalKey: "DyniActiveRouteHtmlFit",
-      deps: ["RadialTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils", "UnitAwareFormatter"]
+      deps: ["CanvasTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils", "UnitAwareFormatter"]
   };
 
   sf.ActiveRouteLayout = {
@@ -89,7 +89,8 @@
   sf.EditRouteLayoutMath = {
       js: BASE + "shared/widget-kits/nav/EditRouteLayoutMath.js",
       css: undefined,
-      globalKey: "DyniEditRouteLayoutMath"
+      globalKey: "DyniEditRouteLayoutMath",
+      deps: ["ValueMath"]
   };
 
   sf.EditRouteLayoutGeometry = {
@@ -109,7 +110,7 @@
       js: BASE + "shared/widget-kits/nav/EditRouteHtmlFit.js",
       css: undefined,
       globalKey: "DyniEditRouteHtmlFit",
-      deps: ["RadialTextLayout", "TextTileLayout", "EditRouteLayout", "HtmlWidgetUtils", "TextFitMath", "EditRouteHtmlFitSupport"]
+      deps: ["CanvasTextLayout", "TextTileLayout", "EditRouteLayout", "HtmlWidgetUtils", "TextFitMath", "EditRouteHtmlFitSupport"]
   };
 
   sf.RoutePointsLayoutSizing = {
@@ -143,7 +144,7 @@
       js: BASE + "shared/widget-kits/nav/RoutePointsHtmlFit.js",
       css: undefined,
       globalKey: "DyniRoutePointsHtmlFit",
-      deps: ["RadialTextLayout", "TextTileLayout", "RoutePointsLayout", "HtmlWidgetUtils", "RoutePointsInfoText"]
+      deps: ["CanvasTextLayout", "TextTileLayout", "RoutePointsLayout", "HtmlWidgetUtils", "RoutePointsInfoText"]
   };
 
   sf.MapZoomHtmlFit = {
@@ -163,7 +164,8 @@
   sf.CenterDisplayMath = {
       js: BASE + "shared/widget-kits/nav/CenterDisplayMath.js",
       css: undefined,
-      globalKey: "DyniCenterDisplayMath"
+      globalKey: "DyniCenterDisplayMath",
+      deps: ["ValueMath"]
   };
 
   sf.CenterDisplayRenderModel = {
@@ -184,7 +186,7 @@
       js: BASE + "shared/widget-kits/xte/XteHighwayPrimitives.js",
       css: undefined,
       globalKey: "DyniXteHighwayPrimitives",
-      deps: ["GeometryScale"]
+      deps: ["GeometryScale", "ValueMath"]
   };
 
 }(this));

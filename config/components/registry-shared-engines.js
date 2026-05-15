@@ -48,7 +48,7 @@
       css: undefined,
       globalKey: "DyniLinearGaugeEngine",
       deps: [
-        "RadialToolkit",
+        "GaugeToolkit",
         "CanvasLayerCache",
         "LinearCanvasPrimitives",
         "LinearGaugeEngineDrawing",
@@ -63,11 +63,17 @@
         "StateScreenCanvasOverlay"
       ]
     },
+    GaugeToolkit: {
+      js: BASE + "shared/widget-kits/gauge/GaugeToolkit.js",
+      css: undefined,
+      globalKey: "DyniGaugeToolkit",
+      deps: ["CanvasTextLayout", "ValueMath"]
+    },
     RadialToolkit: {
       js: BASE + "shared/widget-kits/radial/RadialToolkit.js",
       css: undefined,
       globalKey: "DyniRadialToolkit",
-      deps: ["RadialTextLayout", "RadialValueMath", "RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives", "RadialFrameRenderer"]
+      deps: ["GaugeToolkit", "RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives", "RadialFrameRenderer"]
     },
     SemicircleRadialEngine: {
       js: BASE + "shared/widget-kits/radial/SemicircleRadialEngine.js",
@@ -77,6 +83,7 @@
         "RadialToolkit",
         "SemicircleRadialLayout",
         "SemicircleRadialTextLayout",
+        "RadialSectorMath",
         "SpringEasing",
         "StableDigits",
         "StateScreenLabels",

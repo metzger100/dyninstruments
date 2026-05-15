@@ -1,7 +1,7 @@
 /**
  * Module: GeometryScale - Shared factor-to-pixel scaler for graphical layout geometry
  * Documentation: documentation/shared/responsive-scale-profile.md
- * Depends: none
+ * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,17 +10,19 @@
 }(this, function () {
   "use strict";
 
-  function toFiniteNumber(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : 0;
+  let valueMath;
+
+  function finiteOrZero(value) {
+    const n = valueMath.toFiniteNumber(value);
+    return typeof n === "number" ? n : 0;
   }
 
   function resolveFloor(floor) {
-    return Math.max(1, Math.floor(toFiniteNumber(floor) || 1));
+    return Math.max(1, Math.floor(finiteOrZero(floor) || 1));
   }
 
   function strokeFloor(strokeWeight) {
-    return Math.max(1, Math.round(toFiniteNumber(strokeWeight) * 2));
+    return Math.max(1, Math.round(finiteOrZero(strokeWeight) * 2));
   }
 
   function extentFloor(strokeWeight) {
@@ -30,11 +32,13 @@
   function scalePx(primaryDim, factor, weight, floor) {
     return Math.max(
       resolveFloor(floor),
-      Math.floor(toFiniteNumber(primaryDim) * toFiniteNumber(factor) * toFiniteNumber(weight))
+      Math.floor(finiteOrZero(primaryDim) * finiteOrZero(factor) * finiteOrZero(weight))
     );
   }
 
-  function create() {
+  function create(def, componentContext) {
+    valueMath = componentContext.components.require("ValueMath");
+
     function scale(primaryDim, factor, floor) {
       return scalePx(primaryDim, factor, 1, floor);
     }

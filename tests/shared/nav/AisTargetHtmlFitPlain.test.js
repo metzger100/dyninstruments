@@ -44,7 +44,7 @@ describe("AisTargetHtmlFit plain selection", function () {
     const componentContext = createComponentContextMock({
       modules: {
         ThemeResolver: themeApi,
-        RadialTextLayout: { create: () => radialTextApi },
+        CanvasTextLayout: { create: () => radialTextApi },
         TextTileLayout: textTileLayout,
         AisTargetLayout: { create() { return {}; } },
         HtmlWidgetUtils: htmlUtils,

@@ -5,7 +5,7 @@ describe("SpeedLinearWidget", function () {
   it("passes LinearGaugeEngine config with range axis and high-end sectors", function () {
     let captured;
     let receivedSectorTheme;
-    const resolveStandardSemicircleTickSteps = vi.fn((range) => {
+    const resolveStandardTickSteps = vi.fn((range) => {
       if (range <= 6) return { major: 1, minor: 0.5 };
       if (range <= 30) return { major: 5, minor: 1 };
       return { major: 50, minor: 10 };
@@ -29,7 +29,7 @@ describe("SpeedLinearWidget", function () {
             };
           }
         },
-        RadialValueMath: {
+        ValueMath: {
           create() {
             return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
@@ -58,7 +58,7 @@ describe("SpeedLinearWidget", function () {
                   const match = String(text).match(/-?\d+(?:\.\d+)?/);
                   return match ? match[0] : "";
                 },
-                resolveStandardSemicircleTickSteps
+                resolveStandardTickSteps
               };
           }
         },
@@ -90,7 +90,7 @@ describe("SpeedLinearWidget", function () {
     expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(6)).toEqual({ major: 1, minor: 0.5 });
     expect(captured.tickSteps(30)).toEqual({ major: 5, minor: 1 });
-    expect(resolveStandardSemicircleTickSteps).toHaveBeenCalledTimes(2);
+    expect(resolveStandardTickSteps).toHaveBeenCalledTimes(2);
     expect(captured.formatDisplay(6.44, {
       formatter: "formatSpeed",
       formatterParameters: ["kn"]
@@ -139,7 +139,7 @@ describe("SpeedLinearWidget", function () {
             };
           }
         },
-        RadialValueMath: {
+        ValueMath: {
           create() {
             return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
@@ -168,7 +168,7 @@ describe("SpeedLinearWidget", function () {
                   const match = String(text).match(/-?\d+(?:\.\d+)?/);
                   return match ? match[0] : "";
                 },
-                resolveStandardSemicircleTickSteps() {
+                resolveStandardTickSteps() {
                   return { major: 5, minor: 1 };
                 }
               };
@@ -195,5 +195,77 @@ describe("SpeedLinearWidget", function () {
     }));
 
     expect(captured.formatDisplay(6.44, {}, "kn")).toEqual({ num: 6.44, text: "6.44" });
+  });
+
+  it("returns placeholder output for null speed values", function () {
+    let captured;
+    const applyFormatter = vi.fn((value) => String(value));
+
+    loadFresh("widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js").create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
+                }
+                return String(text);
+              }
+            };
+          }
+        },
+        ValueMath: {
+          create() {
+            return {
+              formatGaugeDisplay(raw, props, apply, normalize, defaultFormatter, defaultParameters) {
+                const p = props || {};
+                const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
+                  ? p.default
+                  : normalize(undefined, undefined);
+                if (raw == null) {
+                  return { num: NaN, text: defaultText };
+                }
+                const n = Number(raw);
+                if (!Number.isFinite(n)) {
+                  return { num: NaN, text: defaultText };
+                }
+                const formatter = Object.prototype.hasOwnProperty.call(p, "formatter") ? p.formatter : defaultFormatter;
+                const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters")
+                  ? p.formatterParameters
+                  : defaultParameters;
+                const formatted = normalize(String(apply(n, {
+                  formatter: formatter,
+                  formatterParameters: formatterParameters,
+                  default: defaultText
+                })), defaultText);
+                const match = String(formatted).match(/-?\d+(?:\.\d+)?/);
+                const num = match ? Number(match[0]) : NaN;
+                return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+              },
+              resolveStandardTickSteps() {
+                return { major: 5, minor: 1 };
+              }
+            };
+          }
+        },
+        LinearGaugeEngine: {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return function () {};
+              }
+            };
+          }
+        }
+      },
+      services: {
+        format: { applyFormatter }
+      }
+    }));
+
+    expect(captured.formatDisplay(null, {}, "kn")).toEqual({ num: NaN, text: "---" });
+    expect(applyFormatter).not.toHaveBeenCalled();
   });
 });

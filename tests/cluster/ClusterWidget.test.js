@@ -1,5 +1,6 @@
 const { loadFresh } = require("../helpers/load-umd");
 const { flushPromises } = require("../helpers/async");
+const { createComponentContextMock } = require("../helpers/component-context-mock");
 
 function createDeferred() {
   let resolve = null;
@@ -163,6 +164,10 @@ function createRuntimeHarness(options) {
   };
 }
 
+function createClusterWidget(def) {
+  return loadFresh("cluster/ClusterWidget.js").create(def, createComponentContextMock());
+}
+
 describe("ClusterWidget", function () {
   const originalDyniPlugin = globalThis.DyniPlugin;
 
@@ -206,7 +211,7 @@ describe("ClusterWidget", function () {
       routeMeta: routeMeta,
       activationController: activationController
     });
-    const widget = loadFresh("cluster/ClusterWidget.js").create({ cluster: "speed" }, {});
+    const widget = createClusterWidget({ cluster: "speed" });
     const widgetContext = { eventHandler: [] };
     const rawProps = { kind: "sog", mode: "vertical" };
     const routeFrame = widget.translateFunction(rawProps);
@@ -340,7 +345,7 @@ describe("ClusterWidget", function () {
       hostCommitController: hostCommitController,
       activationController: activationController
     });
-    const widget = loadFresh("cluster/ClusterWidget.js").create({ cluster: "speed" }, {});
+    const widget = createClusterWidget({ cluster: "speed" });
     const widgetContext = {};
     const routeFrame = widget.translateFunction({ kind: "sog", mode: "vertical" });
 
@@ -387,7 +392,7 @@ describe("ClusterWidget", function () {
       routeMeta: routeMeta,
       activationController: activationController
     });
-    const widget = loadFresh("cluster/ClusterWidget.js").create({ cluster: "speed" }, {});
+    const widget = createClusterWidget({ cluster: "speed" });
     const widgetContext = {};
     const routeFrame = widget.translateFunction({ kind: "sog", mode: "vertical" });
 
@@ -451,7 +456,7 @@ describe("ClusterWidget", function () {
         return secondActivationController;
       });
 
-    const widget = loadFresh("cluster/ClusterWidget.js").create({ cluster: "nav" }, {});
+    const widget = createClusterWidget({ cluster: "nav" });
     const widgetContext = {};
 
     widget.initFunction.call(widgetContext);
@@ -478,7 +483,7 @@ describe("ClusterWidget", function () {
       },
       shellHtml: "<div class=\"dyni-shell dyni-shell-unknown\">diagnostic</div>"
     });
-    const widget = loadFresh("cluster/ClusterWidget.js").create({ cluster: "nav" }, {});
+    const widget = createClusterWidget({ cluster: "nav" });
     const widgetContext = {};
     const routeFrame = widget.translateFunction({ kind: "missing", mode: "vertical" });
 
@@ -538,7 +543,7 @@ describe("ClusterWidget", function () {
       routeMeta: routeMeta,
       activationController: activationController
     });
-    const widget = loadFresh("cluster/ClusterWidget.js").create({ cluster: "speed" }, {});
+    const widget = createClusterWidget({ cluster: "speed" });
     const widgetContext = {};
     const activeRouteFrame = widget.translateFunction({ kind: "sog", mode: "vertical" });
     const diagnosticRouteFrame = widget.translateFunction({ kind: "missing", mode: "vertical" });
@@ -599,7 +604,7 @@ describe("ClusterWidget", function () {
         throw activationError;
       })
     });
-    const widget = loadFresh("cluster/ClusterWidget.js").create({ cluster: "speed" }, {});
+    const widget = createClusterWidget({ cluster: "speed" });
     const widgetContext = {};
     const routeFrame = widget.translateFunction({ kind: "sog", mode: "vertical" });
 

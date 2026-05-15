@@ -1,7 +1,7 @@
 /**
  * Module: SpeedLinearWidget - Linear speed gauge for SOG/STW with high-end warning/alarm sectors
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, RadialValueMath, PlaceholderNormalize
+ * Depends: LinearGaugeEngine, ValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,7 +12,7 @@
 
   function create(def, componentContext) {
     const engine = componentContext.components.require("LinearGaugeEngine");
-    const valueMath = componentContext.components.require("RadialValueMath");
+    const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     function formatDisplay(raw, props, unit) {
@@ -65,7 +65,7 @@
         normal: "speedLinearRatioThresholdNormal",
         flat: "speedLinearRatioThresholdFlat"
       },
-      tickSteps: valueMath.resolveStandardSemicircleTickSteps,
+      tickSteps: valueMath.resolveStandardTickSteps,
       formatDisplay: formatDisplay,
       buildSectors: buildSectors
     });

@@ -423,6 +423,23 @@ describe("WindRadialWidget", function () {
     expect(labelCalls[0].radiusOffset).toBe(layout.labels.radiusOffset);
     expect(labelCalls[0].fontPx).toBe(layout.labels.fontPx);
     expect(labelCalls[0].weight).toBe(themeDefaults.font.labelWeight);
+
+    const applyCallsBeforeNullSpeed = applyFormatter.mock.calls.length;
+    spec.renderCanvas(canvas, {
+      angle: 23,
+      speed: null,
+      angleCaption: "AWA",
+      speedCaption: "AWS",
+      angleUnit: "°",
+      speedUnit: "kn",
+      windRadialLayMin: 35,
+      windRadialLayMax: 45,
+      formatter: "formatSpeed",
+      formatterParameters: ["kn"]
+    });
+
+    expect(applyFormatter.mock.calls.length).toBe(applyCallsBeforeNullSpeed);
+    expect(valueDrawCalls.some((c) => c.valueText === "---" && c.unitText === "kn")).toBe(true);
   });
 
   it("draws laylines before the full-circle ring in the cached back layer", function () {

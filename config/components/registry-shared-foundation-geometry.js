@@ -38,17 +38,38 @@
       deps: ["RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives"]
   };
 
+  sf.ValueMath = {
+      js: BASE + "shared/widget-kits/value/ValueMath.js",
+      css: undefined,
+      globalKey: "DyniValueMath"
+  };
+
+  sf.CanvasTextFitting = {
+      js: BASE + "shared/widget-kits/text/CanvasTextFitting.js",
+      css: undefined,
+      globalKey: "DyniCanvasTextFitting",
+      deps: ["ValueMath"]
+  };
+
+  sf.CanvasTextLayout = {
+      js: BASE + "shared/widget-kits/text/CanvasTextLayout.js",
+      css: undefined,
+      globalKey: "DyniCanvasTextLayout",
+      deps: ["CanvasTextFitting"]
+  };
+
   sf.RadialTextFitting = {
       js: BASE + "shared/widget-kits/radial/RadialTextFitting.js",
       css: undefined,
-      globalKey: "DyniRadialTextFitting"
+      globalKey: "DyniRadialTextFitting",
+      deps: ["CanvasTextFitting"]
   };
 
   sf.RadialTextLayout = {
       js: BASE + "shared/widget-kits/radial/RadialTextLayout.js",
       css: undefined,
       globalKey: "DyniRadialTextLayout",
-      deps: ["RadialTextFitting"]
+      deps: ["CanvasTextLayout"]
   };
 
   sf.RadialTickMath = {
@@ -58,11 +79,18 @@
       deps: ["RadialAngleMath"]
   };
 
+  sf.RadialSectorMath = {
+      js: BASE + "shared/widget-kits/radial/RadialSectorMath.js",
+      css: undefined,
+      globalKey: "DyniRadialSectorMath",
+      deps: ["RadialAngleMath", "ValueMath"]
+  };
+
   sf.RadialValueMath = {
       js: BASE + "shared/widget-kits/radial/RadialValueMath.js",
       css: undefined,
       globalKey: "DyniRadialValueMath",
-      deps: ["RadialAngleMath"]
+      deps: ["RadialAngleMath", "ValueMath", "RadialSectorMath"]
   };
 
   sf.LinearCanvasPrimitives = {
@@ -88,7 +116,8 @@
   sf.LinearGaugeMath = {
       js: BASE + "shared/widget-kits/linear/LinearGaugeMath.js",
       css: undefined,
-      globalKey: "DyniLinearGaugeMath"
+      globalKey: "DyniLinearGaugeMath",
+      deps: ["ValueMath"]
   };
 
   sf.LinearGaugeEngineSupport = {
@@ -114,7 +143,7 @@
       js: BASE + "shared/widget-kits/text/TextLayoutPrimitives.js",
       css: undefined,
       globalKey: "DyniTextLayoutPrimitives",
-      deps: ["RadialTextLayout"]
+      deps: ["CanvasTextLayout"]
   };
 
   sf.TextTileLayout = {
@@ -126,14 +155,15 @@
   sf.TextFitMath = {
       js: BASE + "shared/widget-kits/text/TextFitMath.js",
       css: undefined,
-      globalKey: "DyniTextFitMath"
+      globalKey: "DyniTextFitMath",
+      deps: ["ValueMath"]
   };
 
   sf.TextLayoutEngine = {
       js: BASE + "shared/widget-kits/text/TextLayoutEngine.js",
       css: undefined,
       globalKey: "DyniTextLayoutEngine",
-      deps: ["RadialValueMath", "TextLayoutPrimitives", "TextLayoutComposite", "ResponsiveScaleProfile"]
+      deps: ["ValueMath", "TextLayoutPrimitives", "TextLayoutComposite", "ResponsiveScaleProfile"]
   };
 
   sf.TextLayoutComposite = {
@@ -146,7 +176,8 @@
   sf.GeometryScale = {
       js: BASE + "shared/widget-kits/layout/GeometryScale.js",
       css: undefined,
-      globalKey: "DyniGeometryScale"
+      globalKey: "DyniGeometryScale",
+      deps: ["ValueMath"]
   };
 
   sf.LayoutRectMath = {

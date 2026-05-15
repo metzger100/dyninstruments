@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetHtmlFit - Text-fit and accent-style owner for AIS target HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: componentContext.theme.tokens, RadialTextLayout, TextTileLayout, AisTargetLayout, HtmlWidgetUtils, TextFitMath
+ * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, AisTargetLayout, HtmlWidgetUtils, TextFitMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -199,7 +199,7 @@
   }
   function create(def, componentContext) {
     const theme = componentContext.theme.tokens;
-    const textApi = componentContext.components.require("RadialTextLayout");
+    const textApi = componentContext.components.require("CanvasTextLayout");
     const tileLayout = componentContext.components.require("TextTileLayout");
     const layoutApi = componentContext.components.require("AisTargetLayout");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");

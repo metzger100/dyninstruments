@@ -67,7 +67,7 @@ describe("AisTargetHtmlFit", function () {
 
     const componentContext = createComponentContextMock({
       modules: {
-        RadialTextLayout: { create: () => radialTextApi },
+        CanvasTextLayout: { create: () => radialTextApi },
         TextTileLayout: textTileLayoutModule,
         AisTargetLayout: aisTargetLayoutModule,
         AisTargetLayoutSizing: loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js"),

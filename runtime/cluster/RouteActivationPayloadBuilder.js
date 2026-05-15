@@ -1,24 +1,19 @@
 /**
  * Module: DyniPlugin Route Activation Payload Builder - Route metadata and payload assembly helpers
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: runtime/namespace.js, runtime/component-loader.js, runtime/theme-runtime.js, runtime/surface/index.js
+ * Depends: runtime/namespace.js, runtime/component-loader.js, runtime/theme-runtime.js, runtime/surface/index.js, ValueMath
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
+  const valueMath = root.DyniComponents.DyniValueMath.create();
 
-  function ensureObject(value, name) {
-    if (!value || typeof value !== "object") {
-      throw new Error("RouteActivationPayloadBuilder: " + name + " must be an object");
-    }
-    return value;
-  }
-
-  function trimText(value) {
-    return value == null ? "" : String(value).trim();
-  }
+  const ensureObject = function (value, name) {
+    return valueMath.ensureObject(value, "RouteActivationPayloadBuilder: " + name);
+  };
+  const trimText = valueMath.trimText;
 
   function ensureRouteMeta(routeMeta, routeId) {
     if (!routeMeta || typeof routeMeta !== "object") {

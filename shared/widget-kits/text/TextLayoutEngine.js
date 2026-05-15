@@ -1,7 +1,7 @@
 /**
  * Module: TextLayoutEngine - Shared mode routing, fit-cache helpers, and composed text layout API
  * Documentation: documentation/shared/text-layout-engine.md
- * Depends: RadialValueMath, TextLayoutPrimitives, TextLayoutComposite, ResponsiveScaleProfile
+ * Depends: ValueMath, TextLayoutPrimitives, TextLayoutComposite, ResponsiveScaleProfile
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -21,7 +21,7 @@
   };
 
   function create(def, componentContext) {
-    const value = componentContext.components.require("RadialValueMath");
+    const value = componentContext.components.require("ValueMath");
     const primitive = componentContext.components.require("TextLayoutPrimitives");
     const composite = componentContext.components.require("TextLayoutComposite");
     const responsiveProfile = componentContext.components.require("ResponsiveScaleProfile");

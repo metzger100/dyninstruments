@@ -1,7 +1,7 @@
 /**
  * Module: LinearGaugeMath - Shared value mapping and tick helpers for linear gauges
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: none
+ * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -17,14 +17,7 @@
     return JSON.stringify(value);
   }
 
-  function clamp(value, lo, hi) {
-    if (!Number.isFinite(value)) {
-      return lo;
-    }
-    return Math.max(lo, Math.min(hi, value));
-  }
-
-  function mapValueToX(value, minV, maxV, x0, x1, doClamp) {
+  function mapValueToX(value, minV, maxV, x0, x1, doClamp, clampFn) {
     const denom = maxV - minV;
     if (
       !Number.isFinite(value) ||
@@ -38,7 +31,7 @@
     }
     let ratio = (value - minV) / denom;
     if (doClamp !== false) {
-      ratio = clamp(ratio, 0, 1);
+      ratio = clampFn(ratio, 0, 1);
     }
     return x0 + (x1 - x0) * ratio;
   }
@@ -109,12 +102,16 @@
     return String(Math.round(v * 1000) / 1000);
   }
 
-  function create() {
+  function create(def, componentContext) {
+    const valueMath = componentContext.components.require("ValueMath");
+
     return {
       id: "LinearGaugeMath",
       keyToText: keyToText,
-      clamp: clamp,
-      mapValueToX: mapValueToX,
+      clamp: valueMath.clamp,
+      mapValueToX: function (value, minV, maxV, x0, x1, doClamp) {
+        return mapValueToX(value, minV, maxV, x0, x1, doClamp, valueMath.clamp);
+      },
       resolveAxisDomain: resolveAxisDomain,
       buildTicks: buildTicks,
       formatTickLabel: formatTickLabel

@@ -1,7 +1,7 @@
 /**
  * Module: VoltageLinearWidget - Linear voltage gauge with low-end warning/alarm sectors
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, RadialValueMath, PlaceholderNormalize
+ * Depends: LinearGaugeEngine, ValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,7 +12,7 @@
 
   function create(def, componentContext) {
     const engine = componentContext.components.require("LinearGaugeEngine");
-    const valueMath = componentContext.components.require("RadialValueMath");
+    const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     function formatDisplay(raw, props) {
@@ -83,7 +83,7 @@
         normal: "voltageLinearRatioThresholdNormal",
         flat: "voltageLinearRatioThresholdFlat"
       },
-      tickSteps: valueMath.resolveVoltageSemicircleTickSteps,
+      tickSteps: valueMath.resolveVoltageTickSteps,
       formatDisplay: formatDisplay,
       buildSectors: function (props, minV, maxV, axis, valueApi, theme) {
         return buildSectors(props, minV, maxV, axis, theme);

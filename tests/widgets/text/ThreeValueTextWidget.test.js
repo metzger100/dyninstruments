@@ -26,7 +26,7 @@ describe("ThreeValueTextWidget", function () {
           };
         }
       },
-      RadialTextLayout: {
+      CanvasTextLayout: {
         create() {
           return {
             setFont(ctx, px, weight, family) {
@@ -38,7 +38,7 @@ describe("ThreeValueTextWidget", function () {
           };
         }
       },
-      RadialValueMath: {
+      ValueMath: {
         create() {
           return {
             isFiniteNumber(value) {

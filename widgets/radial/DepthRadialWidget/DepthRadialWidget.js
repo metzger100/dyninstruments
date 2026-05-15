@@ -1,7 +1,7 @@
 /**
  * Module: DepthRadialWidget - Semicircle depth gauge with low-end warning/alarm sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleRadialEngine, RadialValueMath, DepthDisplayFormatter, PlaceholderNormalize, UnitAwareFormatter
+ * Depends: SemicircleRadialEngine, ValueMath, DepthDisplayFormatter, PlaceholderNormalize, UnitAwareFormatter
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,7 +12,7 @@
 
   function create(def, componentContext) {
     const renderer = componentContext.components.require("SemicircleRadialEngine");
-    const valueMath = componentContext.components.require("RadialValueMath");
+    const valueMath = componentContext.components.require("ValueMath");
     const depthDisplayFormatter = componentContext.components.require("DepthDisplayFormatter");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     const unitFormatter = componentContext.components.require("UnitAwareFormatter");
@@ -35,14 +35,14 @@
         flat: "depthRadialRatioThresholdFlat"
       },
       hideTextualMetricsProp: "depthRadialHideTextualMetrics",
-      tickSteps: valueMath.resolveStandardSemicircleTickSteps,
+      tickSteps: valueMath.resolveStandardTickSteps,
       formatDisplay: formatDisplay,
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
         const radialProps = {
           warningFrom: props && props.depthRadialWarningFrom,
           alarmFrom: props && props.depthRadialAlarmFrom
         };
-        return valueMath.buildLowEndSectors(radialProps, minV, maxV, arc, {
+        return valueUtils.buildLowEndSectors(radialProps, minV, maxV, arc, {
           warningColor: theme.colors.warning,
           alarmColor: theme.colors.alarm
         });

@@ -21,7 +21,7 @@
   function formatDisplay(raw, props, unitFormatter, placeholderNormalize) {
     const p = props || {};
     const defaultText = resolveDefaultText(p, placeholderNormalize);
-    const n = Number(raw);
+    const n = raw == null ? NaN : Number(raw);
     if (!Number.isFinite(n)) {
       return { num: NaN, text: defaultText };
     }

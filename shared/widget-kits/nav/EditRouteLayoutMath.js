@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteLayoutMath - Numeric guards and row/stack split helpers for edit-route layout
  * Documentation: documentation/widgets/edit-route.md
- * Depends: none
+ * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,10 +10,7 @@
 }(this, function () {
   "use strict";
 
-  function toFiniteNumber(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
-  }
+  let toFiniteNumber;
 
   function clampNumber(value, minValue, maxValue, defaultValue) {
     const n = toFiniteNumber(value);
@@ -65,7 +62,9 @@
     return out;
   }
 
-  function create() {
+  function create(def, componentContext) {
+    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+
     return {
       id: "EditRouteLayoutMath",
       toFiniteNumber: toFiniteNumber,

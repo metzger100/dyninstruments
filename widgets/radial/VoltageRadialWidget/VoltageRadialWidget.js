@@ -1,7 +1,7 @@
 /**
  * Module: VoltageRadialWidget - Semicircle voltage gauge with low-end warning/alarm sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleRadialEngine, RadialValueMath, PlaceholderNormalize
+ * Depends: SemicircleRadialEngine, ValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,7 +12,7 @@
 
   function create(def, componentContext) {
     const renderer = componentContext.components.require("SemicircleRadialEngine");
-    const valueMath = componentContext.components.require("RadialValueMath");
+    const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     const renderCanvas = renderer.createRenderer({
@@ -32,7 +32,7 @@
         flat: "voltageRadialRatioThresholdFlat"
       },
       hideTextualMetricsProp: "voltageRadialHideTextualMetrics",
-      tickSteps: valueMath.resolveVoltageSemicircleTickSteps,
+      tickSteps: valueMath.resolveVoltageTickSteps,
       formatDisplay: function (raw, props) {
         return valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
       },
@@ -55,7 +55,7 @@
           sectorProps.alarmFrom = NaN;
         }
 
-        return valueMath.buildLowEndSectors(sectorProps, minV, maxV, arc, {
+        return valueUtils.buildLowEndSectors(sectorProps, minV, maxV, arc, {
           warningColor: theme.colors.warning,
           alarmColor: theme.colors.alarm
         });

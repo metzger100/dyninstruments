@@ -114,7 +114,7 @@ describe("XteDisplayWidget", function () {
     const spec = loadFresh("widgets/text/XteDisplayWidget/XteDisplayWidget.js").create({}, createComponentContextMock({
       modules: {
         CanvasLayerCache: layerCache,
-        RadialToolkit: {
+        GaugeToolkit: {
           create() {
             return {
               theme: {

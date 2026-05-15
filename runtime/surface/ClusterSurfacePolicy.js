@@ -1,13 +1,14 @@
 /**
  * Module: DyniPlugin Cluster Surface Policy Runtime - Surface policy resolver for cluster routing
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: none
+ * Depends: ValueMath
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
+  const valueMath = root.DyniComponents.DyniValueMath.create();
 
   const GLOBAL_ROOT = (typeof globalThis !== "undefined")
     ? globalThis
@@ -17,10 +18,7 @@
     alarm: Object.freeze({ stopAll: "unsupported" })
   });
 
-  function toFiniteNumber(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
-  }
+  const toFiniteNumber = valueMath.toFiniteNumber;
 
   function isEditingMode(props) {
     const p = props && typeof props === "object" ? props : {};

@@ -6,7 +6,7 @@ describe("VoltageLinearWidget", function () {
     let captured;
     const renderCanvas = vi.fn();
     const applyFormatter = vi.fn((value) => Number(value).toFixed(1));
-    const resolveVoltageSemicircleTickSteps = vi.fn((range) => {
+    const resolveVoltageTickSteps = vi.fn((range) => {
       if (range <= 3) return { major: 0.5, minor: 0.1 };
       if (range <= 12) return { major: 2, minor: 0.5 };
       return { major: 50, minor: 10 };
@@ -28,7 +28,7 @@ describe("VoltageLinearWidget", function () {
             };
           }
         },
-        RadialValueMath: {
+        ValueMath: {
           create() {
             return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
@@ -60,7 +60,7 @@ describe("VoltageLinearWidget", function () {
                 clamp(v, lo, hi) {
                   return Math.max(lo, Math.min(hi, Number(v)));
                 },
-                resolveVoltageSemicircleTickSteps
+                resolveVoltageTickSteps
               };
           }
         },
@@ -90,7 +90,7 @@ describe("VoltageLinearWidget", function () {
     expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(3)).toEqual({ major: 0.5, minor: 0.1 });
     expect(captured.tickSteps(12)).toEqual({ major: 2, minor: 0.5 });
-    expect(resolveVoltageSemicircleTickSteps).toHaveBeenCalledTimes(2);
+    expect(resolveVoltageTickSteps).toHaveBeenCalledTimes(2);
     expect(captured.formatDisplay(12.34, {
       formatter: "formatDecimal",
       formatterParameters: [3, 1, true]
@@ -131,7 +131,7 @@ describe("VoltageLinearWidget", function () {
             };
           }
         },
-        RadialValueMath: {
+        ValueMath: {
           create() {
             return {
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
@@ -163,7 +163,7 @@ describe("VoltageLinearWidget", function () {
                 clamp(v, lo, hi) {
                   return Math.max(lo, Math.min(hi, Number(v)));
                 },
-                resolveVoltageSemicircleTickSteps() {
+                resolveVoltageTickSteps() {
                   return { major: 1, minor: 0.2 };
                 }
               };
@@ -203,5 +203,80 @@ describe("VoltageLinearWidget", function () {
     }, 10, 15, { min: 10, max: 15 }, {}, {
       colors: { warning: "#123456", alarm: "#654321" }
     })).toEqual([{ from: 10, to: 12.8, color: "#123456" }]);
+  });
+
+  it("returns placeholder output for null voltage values", function () {
+    let captured;
+    const applyFormatter = vi.fn((value) => String(value));
+
+    loadFresh("widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js").create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
+                }
+                return String(text);
+              }
+            };
+          }
+        },
+        ValueMath: {
+          create() {
+            return {
+              formatGaugeDisplay(raw, props, apply, normalize, defaultFormatter, defaultParameters) {
+                const p = props || {};
+                const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
+                  ? p.default
+                  : normalize(undefined, undefined);
+                if (raw == null) {
+                  return { num: NaN, text: defaultText };
+                }
+                const n = Number(raw);
+                if (!Number.isFinite(n)) {
+                  return { num: NaN, text: defaultText };
+                }
+                const formatter = Object.prototype.hasOwnProperty.call(p, "formatter") ? p.formatter : defaultFormatter;
+                const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters")
+                  ? p.formatterParameters
+                  : defaultParameters;
+                const formatted = normalize(String(apply(n, {
+                  formatter: formatter,
+                  formatterParameters: formatterParameters,
+                  default: defaultText
+                })), defaultText);
+                const match = String(formatted).match(/-?\d+(?:\.\d+)?/);
+                const num = match ? Number(match[0]) : NaN;
+                return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+              },
+              clamp(v, lo, hi) {
+                return Math.max(lo, Math.min(hi, Number(v)));
+              },
+              resolveVoltageTickSteps() {
+                return { major: 1, minor: 0.2 };
+              }
+            };
+          }
+        },
+        LinearGaugeEngine: {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return function () {};
+              }
+            };
+          }
+        }
+      },
+      services: {
+        format: { applyFormatter }
+      }
+    }));
+
+    expect(captured.formatDisplay(null, {})).toEqual({ num: NaN, text: "---" });
+    expect(applyFormatter).not.toHaveBeenCalled();
   });
 });

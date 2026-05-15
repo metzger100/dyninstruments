@@ -114,7 +114,7 @@ Responsive ownership:
 
 | Function | Input | Output |
 |---|---|---|
-| `RadialValueMath.formatAngle180(v, leadingZero)` | angle deg | `-180..180` string |
+| `ValueMath.formatAngle180(v, leadingZero)` | angle deg | `-180..180` string |
 | `componentContext.format.applyFormatter(v, { formatter, formatterParameters })` | speed value | formatted speed string; formatter parameters must carry the selected token, not the display label |
 
 ## Phase 6 Options

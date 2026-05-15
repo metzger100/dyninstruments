@@ -1,19 +1,17 @@
 /**
  * Module: DyniPlugin Cluster Shell Renderer - Startup-safe route-frame normalization and shell markup
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: none
+ * Depends: ValueMath
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
+  const valueMath = root.DyniComponents.DyniValueMath.create();
   const CANVAS_INNER_HTML = '<div class="dyni-surface-canvas"><div class="dyni-surface-canvas-mount"></div></div>';
   const HTML_INNER_HTML = '<div class="dyni-surface-html"><div class="dyni-surface-html-mount" data-dyni-html-mount="1"></div></div>';
-
-  function trimText(value) {
-    return value == null ? "" : String(value).trim();
-  }
+  const trimText = valueMath.trimText;
 
   function resolveCluster(rawProps, def) {
     const props = rawProps && typeof rawProps === "object" ? rawProps : {};

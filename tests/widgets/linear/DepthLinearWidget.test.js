@@ -5,7 +5,7 @@ describe("DepthLinearWidget", function () {
   it("passes LinearGaugeEngine config with range axis and low-end sectors", function () {
     let captured;
     const requestedModules = [];
-    const resolveStandardSemicircleTickSteps = vi.fn((range) => {
+    const resolveStandardTickSteps = vi.fn((range) => {
       if (range <= 6) return { major: 1, minor: 0.5 };
       if (range <= 30) return { major: 5, minor: 1 };
       return { major: 50, minor: 10 };
@@ -35,23 +35,14 @@ describe("DepthLinearWidget", function () {
             };
           }
         },
-        RadialValueMath: {
+        ValueMath: {
           create() {
-            requestedModules.push("RadialValueMath");
+            requestedModules.push("ValueMath");
             return {
               clamp(v, lo, hi) {
                 return Math.max(lo, Math.min(hi, Number(v)));
               },
-              angleToValue(angleDeg) {
-                return Number(angleDeg);
-              },
-              buildLowEndSectors(props, minV, maxV, arc, options) {
-                return [
-                  { a0: minV, a1: 2, color: options.alarmColor },
-                  { a0: 2, a1: 5, color: options.warningColor }
-                ];
-              },
-              resolveStandardSemicircleTickSteps
+              resolveStandardTickSteps
             };
           }
         },
@@ -97,10 +88,10 @@ describe("DepthLinearWidget", function () {
     expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(6)).toEqual({ major: 1, minor: 0.5 });
     expect(captured.tickSteps(30)).toEqual({ major: 5, minor: 1 });
-    expect(resolveStandardSemicircleTickSteps).toHaveBeenCalledTimes(2);
+    expect(resolveStandardTickSteps).toHaveBeenCalledTimes(2);
     expect(requestedModules).toEqual([
       "LinearGaugeEngine",
-      "RadialValueMath",
+      "ValueMath",
       "DepthDisplayFormatter",
       "PlaceholderNormalize",
       "UnitAwareFormatter"
@@ -153,19 +144,13 @@ describe("DepthLinearWidget", function () {
             };
           }
         },
-        RadialValueMath: {
+        ValueMath: {
           create() {
             return {
               clamp(v, lo, hi) {
                 return Math.max(lo, Math.min(hi, Number(v)));
               },
-              angleToValue(angleDeg) {
-                return Number(angleDeg);
-              },
-              buildLowEndSectors(props, minV, maxV, arc, options) {
-                return [{ a0: minV, a1: 5, color: options.warningColor }];
-              },
-              resolveStandardSemicircleTickSteps() {
+              resolveStandardTickSteps() {
                 return { major: 5, minor: 1 };
               }
             };
@@ -204,5 +189,73 @@ describe("DepthLinearWidget", function () {
 
     expect(sectors).toEqual([{ from: 0, to: 5, color: "#123456" }]);
     expect(captured.formatDisplay("nope")).toEqual({ num: NaN, text: "---" });
+  });
+
+  it("returns placeholder output for null depth values", function () {
+    let captured;
+    const unitFormatter = {
+      formatWithToken: vi.fn(function (value) {
+        return String(value);
+      }),
+      extractNumericDisplay: vi.fn(function (text, fallback) {
+        const parsed = Number(text);
+        return Number.isFinite(parsed) ? parsed : fallback;
+      })
+    };
+
+    const mod = loadFresh("widgets/linear/DepthLinearWidget/DepthLinearWidget.js");
+    const componentContext = createComponentContextMock({
+      modules: {
+        LinearGaugeEngine: {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return function () {};
+              }
+            };
+          }
+        },
+        ValueMath: {
+          create() {
+            return {
+              clamp(v, lo, hi) {
+                return Math.max(lo, Math.min(hi, Number(v)));
+              },
+              resolveStandardTickSteps() {
+                return { major: 5, minor: 1 };
+              }
+            };
+          }
+        },
+        DepthDisplayFormatter: {
+          create() {
+            return loadFresh("shared/widget-kits/format/DepthDisplayFormatter.js").create({}, componentContext);
+          }
+        },
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
+                }
+                return String(text);
+              }
+            };
+          }
+        },
+        UnitAwareFormatter: {
+          create() {
+            return unitFormatter;
+          }
+        }
+      }
+    });
+    mod.create({}, componentContext);
+
+    expect(captured.formatDisplay(null, {})).toEqual({ num: NaN, text: "---" });
+    expect(unitFormatter.formatWithToken).not.toHaveBeenCalled();
+    expect(unitFormatter.extractNumericDisplay).not.toHaveBeenCalled();
   });
 });

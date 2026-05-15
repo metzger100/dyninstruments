@@ -1,7 +1,7 @@
 /**
  * Module: DefaultRadialWidget - Default semicircle gauge wrapper for self-configurable instruments
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleRadialEngine, RadialValueMath, PlaceholderNormalize
+ * Depends: SemicircleRadialEngine, ValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,7 +12,7 @@
 
   function create(def, componentContext) {
     const renderer = componentContext.components.require("SemicircleRadialEngine");
-    const valueMath = componentContext.components.require("RadialValueMath");
+    const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     function resolveThreshold(value) {
@@ -20,8 +20,8 @@
       return Number.isFinite(n) ? n : NaN;
     }
 
-    function pushSector(sectors, from, to, color, valueApi, minV, maxV, arc) {
-      const sector = valueApi.sectorAngles(from, to, minV, maxV, arc);
+    function pushSector(sectors, from, to, color, minV, maxV, arc, valueUtils) {
+      const sector = valueUtils.sectorAngles(from, to, minV, maxV, arc);
       if (!sector) {
         return;
       }
@@ -50,10 +50,10 @@
           minV,
           alarmLowAt,
           p.defaultRadialAlarmLowColor || theme.colors.alarm,
-          valueApi,
           minV,
           maxV,
-          arc
+          arc,
+          valueApi
         );
       }
       if (warningLowEnabled) {
@@ -62,10 +62,10 @@
           alarmLowEnabled ? alarmLowAt : minV,
           warningLowAt,
           p.defaultRadialWarningLowColor || theme.colors.warning,
-          valueApi,
           minV,
           maxV,
-          arc
+          arc,
+          valueApi
         );
       }
       if (warningHighEnabled) {
@@ -74,10 +74,10 @@
           warningHighAt,
           alarmHighEnabled ? alarmHighAt : maxV,
           p.defaultRadialWarningHighColor || theme.colors.warning,
-          valueApi,
           minV,
           maxV,
-          arc
+          arc,
+          valueApi
         );
       }
       if (alarmHighEnabled) {
@@ -86,10 +86,10 @@
           alarmHighAt,
           maxV,
           p.defaultRadialAlarmHighColor || theme.colors.alarm,
-          valueApi,
           minV,
           maxV,
-          arc
+          arc,
+          valueApi
         );
       }
       return sectors;
@@ -112,7 +112,7 @@
         flat: "defaultRadialRatioThresholdFlat"
       },
       hideTextualMetricsProp: "defaultRadialHideTextualMetrics",
-      tickSteps: valueMath.resolveStandardSemicircleTickSteps,
+      tickSteps: valueMath.resolveStandardTickSteps,
       formatDisplay: function (raw, props) {
         return valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
       },

@@ -1,7 +1,7 @@
 /**
- * Module: RadialToolkit - Facade that composes shared gauge utility modules
+ * Module: RadialToolkit - Radial gauge facade extending generic GaugeToolkit
  * Documentation: documentation/radial/gauge-shared-api.md
- * Depends: componentContext.theme.tokens, RadialTextLayout, RadialValueMath, RadialAngleMath, RadialTickMath, RadialCanvasPrimitives, RadialFrameRenderer
+ * Depends: GaugeToolkit, RadialAngleMath, RadialTickMath, RadialCanvasPrimitives, RadialFrameRenderer
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,9 +11,7 @@
   "use strict";
 
   function create(def, componentContext) {
-    const theme = componentContext.theme.tokens;
-    const text = componentContext.components.require("RadialTextLayout");
-    const value = componentContext.components.require("RadialValueMath");
+    const gauge = componentContext.components.require("GaugeToolkit");
     const angle = componentContext.components.require("RadialAngleMath");
     const tick = componentContext.components.require("RadialTickMath");
     const primitive = componentContext.components.require("RadialCanvasPrimitives");
@@ -32,16 +30,13 @@
       drawDialFrame: dial.drawDialFrame
     };
 
-    return {
+    return Object.assign({}, gauge, {
       id: "RadialToolkit",
-      theme,
-      text,
-      value,
-      angle,
-      tick,
-      draw
-    };
+      angle: angle,
+      tick: tick,
+      draw: draw
+    });
   }
 
-  return { id: "RadialToolkit", create };
+  return { id: "RadialToolkit", create: create };
 }));

@@ -1,7 +1,13 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { makeRouteContext } = require("../../helpers/mapper-route-context");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
-const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit({
+const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create({}, createComponentContextMock({
+  modules: {
+    RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js"),
+    ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
+  }
+})).createToolkit({
   caption_voltageLinear: "VOLT",
   unit_voltageLinear: "V",
   caption_voltageRadial: "VOLT",
@@ -215,6 +221,24 @@ describe("VesselMapper", function () {
     const clockOut = mapper.translate({ kind: "clock", clock: rawClock }, routeContext("clock", toolkit));
     expect(clockOut.formatter).toBe("formatTime");
     expect(clockOut.value).toBe(rawClock);
+  });
+
+  it("keeps voltage missing-value sources null-safe across null/undefined/empty string", function () {
+    const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
+
+    const nullOut = mapper.translate({ kind: "voltage", value: null }, routeContext("voltage", toolkit));
+    expect(Object.prototype.hasOwnProperty.call(nullOut, "value")).toBe(true);
+    expect(nullOut.value).toBeNull();
+    expect(nullOut.formatter).toBe("formatDecimal");
+
+    const undefinedOut = mapper.translate({ kind: "voltage", value: undefined }, routeContext("voltage", toolkit));
+    expect(Object.prototype.hasOwnProperty.call(undefinedOut, "value")).toBe(false);
+    expect(undefinedOut.formatter).toBe("formatDecimal");
+
+    const blankOut = mapper.translate({ kind: "voltage", value: "" }, routeContext("voltage", toolkit));
+    expect(Object.prototype.hasOwnProperty.call(blankOut, "value")).toBe(true);
+    expect(blankOut.value).toBe("");
+    expect(blankOut.formatter).toBe("formatDecimal");
   });
 
   it("uses formatClock for clock when hideSeconds is enabled", function () {
