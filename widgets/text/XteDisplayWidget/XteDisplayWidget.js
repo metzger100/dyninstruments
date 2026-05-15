@@ -135,7 +135,10 @@
         if (layerName !== "back") {
           return;
         }
-        layerCtx.clearRect(0, 0, layerCanvas.width, layerCanvas.height);
+        const scaleX = layerCanvas.width / Math.max(1, W);
+        const scaleY = layerCanvas.height / Math.max(1, H);
+        layerCtx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
+        layerCtx.clearRect(0, 0, W, H);
         primitives.drawStaticHighway(layerCtx, geom, colors, mode, primaryDim, theme.strokeWeight);
       });
       staticLayer.blit(ctx);

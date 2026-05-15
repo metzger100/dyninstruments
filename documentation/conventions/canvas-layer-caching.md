@@ -53,7 +53,10 @@ const cacheApi = componentContext.components.require("CanvasLayerCache");
 const cache = cacheApi.createLayerCache({ layers: ["back"] });
 
 cache.ensureLayer(canvas, staticKey, function (layerCtx, layerName, layerCanvas) {
-  layerCtx.clearRect(0, 0, layerCanvas.width, layerCanvas.height);
+  const scaleX = layerCanvas.width / Math.max(1, W);
+  const scaleY = layerCanvas.height / Math.max(1, H);
+  layerCtx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
+  layerCtx.clearRect(0, 0, W, H);
   // draw static background content only
 });
 
@@ -67,6 +70,10 @@ cache.blit(targetCtx);
 - `cache.invalidate()` is called
 - layer buffer is missing/recreated
 - layer buffer size changes
+
+Transform ownership:
+- `CanvasLayerCache` does not apply DPR transforms automatically.
+- Rebuild callbacks own layer transform setup when drawing geometry in CSS-space coordinates.
 
 ## Invalidation Triggers
 

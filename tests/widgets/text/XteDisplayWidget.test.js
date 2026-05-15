@@ -481,6 +481,34 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.staticDraws).toHaveLength(2);
   });
 
+  it("applies a DPR-aware transform when rebuilding the static layer cache", function () {
+    const harness = createHarness();
+    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+    canvas.width = 640;
+    canvas.height = 360;
+
+    harness.spec.renderCanvas(canvas, makeProps({ xte: 0.25, easing: false }));
+    harness.spec.renderCanvas(canvas, makeProps({ xte: 0.4, easing: false }));
+
+    expect(harness.calls.staticDraws).toHaveLength(1);
+    expect(harness.calls.dynamicDraws).toHaveLength(2);
+
+    const drawImageCalls = canvas.__ctx.calls.filter((entry) => entry.name === "drawImage");
+    expect(drawImageCalls.length).toBeGreaterThan(0);
+    const layerCanvas = drawImageCalls[0].args[0];
+    const layerCalls = layerCanvas.__ctx.calls;
+    const layerSetTransform = layerCalls.find((entry) => entry.name === "setTransform");
+    const layerClearRect = layerCalls.find((entry) => entry.name === "clearRect");
+    const setTransformIndex = layerCalls.findIndex((entry) => entry.name === "setTransform");
+    const clearRectIndex = layerCalls.findIndex((entry) => entry.name === "clearRect");
+
+    expect(layerSetTransform.args).toEqual([2, 0, 0, 2, 0, 0]);
+    expect(layerClearRect.args).toEqual([0, 0, 320, 180]);
+    expect(setTransformIndex).toBeGreaterThanOrEqual(0);
+    expect(clearRectIndex).toBeGreaterThanOrEqual(0);
+    expect(setTransformIndex).toBeLessThan(clearRectIndex);
+  });
+
   it("invalidates static cache when strokeWeight changes", function () {
     const harness = createHarness({
       theme: {

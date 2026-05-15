@@ -189,6 +189,16 @@ Dynamic elements are never cached:
 - overflow alarm cue
 - live metric text
 
+Offscreen layer transform contract:
+
+- The static-layer rebuild callback maps CSS geometry to the layer backing buffer before clear/draw:
+  - `scaleX = layerCanvas.width / W`
+  - `scaleY = layerCanvas.height / H`
+  - `layerCtx.setTransform(scaleX, 0, 0, scaleY, 0, 0)`
+  - `layerCtx.clearRect(0, 0, W, H)`
+- `primitives.drawStaticHighway(...)` then draws in the same CSS-space geometry used by the widget.
+- This keeps cached static geometry aligned with the visible DPR-transformed canvas path.
+
 The boat marker size is dynamic and comes from the shared `pointerDepthWeight` input plus internal marker factors; it is not cached as a `theme.xte.*` token.
 
 ## Phase 6 Options
