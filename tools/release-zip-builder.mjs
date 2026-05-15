@@ -9,9 +9,11 @@ import {
 
 const FIXED_RUNTIME_FILES = [
   "plugin.js",
+  "plugin.mjs",
   "plugin.css",
   "plugin.json",
-  "config/bootstrap-manifest.js"
+  "config/bootstrap-manifest.js",
+  "runtime/plugin-bootstrap-core.js"
 ];
 
 const RUNTIME_PREFIXES = [

@@ -62,7 +62,7 @@ For each commit, check these four audit criteria:
 
 #### 3B: Smell Regressions and Boundary Violations
 
-- Was `window.avnav` or `avnav.api` used outside `runtime/` or `plugin.js`?
+- Was `window.avnav` or `avnav.api` used outside `runtime/`, `plugin.js`, or `plugin.mjs`?
 - Was a new `catch` block added without rethrowing or suppression comment?
 - Was a mapper given helper functions beyond `create`/`translate`?
 - Were redundant null/type guards, hardcoded defaults, or fallback wrappers introduced?
@@ -134,7 +134,7 @@ Check for newly introduced duplicate logic:
 ### Step 8: Enforce AvNav Boundary
 
 Verify:
-- Only `runtime/` and `plugin.js` access `window.avnav` / `avnav.api` directly
+- Only `runtime/`, `plugin.js`, and `plugin.mjs` access `window.avnav` / `avnav.api` directly
 - Widgets/cluster/shared code calls `componentContext.format.applyFormatter()` and other runtime-safe services
 
 ### Step 9: Re-Run Checks

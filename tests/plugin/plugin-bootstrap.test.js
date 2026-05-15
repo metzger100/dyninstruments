@@ -1,6 +1,7 @@
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 const { createDomHarness } = require("../helpers/mock-dom");
 const { flushPromises } = require("../helpers/async");
+const bootstrapCore = require("../../runtime/plugin-bootstrap-core.js");
 
 function loadBootstrapManifest() {
   const context = createScriptContext({
@@ -20,7 +21,7 @@ describe("plugin.js bootstrap", function () {
 
   it("loads bootstrap-manifest first, then listed scripts in order, then calls runtime.runInit", async function () {
     const dom = createDomHarness({
-      failScriptIds: ["dyni-internal-bootstrap-bundle-js"]
+      failScriptIds: ["dyni-internal-legacy-bootstrap-bundle-js"]
     });
     const runInit = vi.fn(() => Promise.resolve());
 
@@ -30,6 +31,7 @@ describe("plugin.js bootstrap", function () {
       avnav: { api: {} },
       window: {
         avnav: { api: {} },
+        DyniPluginBootstrapCore: bootstrapCore,
         DyniPlugin: {
           config: { bootstrapManifest: BOOTSTRAP_MANIFEST },
           runtime: { runInit }
@@ -53,7 +55,7 @@ describe("plugin.js bootstrap", function () {
 
   it("captures wrapper-local AvNav API for runtime bootstrap scripts", async function () {
     const dom = createDomHarness({
-      failScriptIds: ["dyni-internal-bootstrap-bundle-js"]
+      failScriptIds: ["dyni-internal-legacy-bootstrap-bundle-js"]
     });
     const runInit = vi.fn(() => Promise.resolve());
     const hostApi = { log: vi.fn(), registerWidget: vi.fn() };
@@ -64,6 +66,7 @@ describe("plugin.js bootstrap", function () {
       avnav: { api: hostApi },
       window: {
         avnav: {},
+        DyniPluginBootstrapCore: bootstrapCore,
         DyniPlugin: {
           config: { bootstrapManifest: BOOTSTRAP_MANIFEST },
           runtime: { runInit }
@@ -88,6 +91,7 @@ describe("plugin.js bootstrap", function () {
       avnav: { api: {} },
       window: {
         avnav: { api: {} },
+        DyniPluginBootstrapCore: bootstrapCore,
         DyniPlugin: {
           runtime: { runInit }
         }
@@ -106,7 +110,7 @@ describe("plugin.js bootstrap", function () {
 
   it("falls back to manifest loading when bootstrap-bundle.js fails", async function () {
     const dom = createDomHarness({
-      failScriptIds: ["dyni-internal-bootstrap-bundle-js"]
+      failScriptIds: ["dyni-internal-legacy-bootstrap-bundle-js"]
     });
     const runInit = vi.fn(() => Promise.resolve());
 
@@ -116,6 +120,7 @@ describe("plugin.js bootstrap", function () {
       avnav: { api: {} },
       window: {
         avnav: { api: {} },
+        DyniPluginBootstrapCore: bootstrapCore,
         DyniPlugin: {
           config: { bootstrapManifest: BOOTSTRAP_MANIFEST },
           runtime: { runInit }
@@ -167,8 +172,8 @@ describe("plugin.js bootstrap", function () {
   it("logs a clear error when bootstrap manifest cannot be loaded", async function () {
     const dom = createDomHarness({
       failScriptIds: [
-        "dyni-internal-bootstrap-bundle-js",
-        "dyni-internal-config-bootstrap-manifest-js"
+        "dyni-internal-legacy-bootstrap-bundle-js",
+        "dyni-internal-legacy-config-bootstrap-manifest-js"
       ]
     });
     const err = vi.fn();
@@ -178,7 +183,10 @@ describe("plugin.js bootstrap", function () {
       console: { error: err },
       AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
       avnav: { api: {} },
-      window: { avnav: { api: {} } }
+      window: {
+        avnav: { api: {} },
+        DyniPluginBootstrapCore: bootstrapCore
+      }
     });
 
     runIifeScript("plugin.js", context);
@@ -186,5 +194,41 @@ describe("plugin.js bootstrap", function () {
 
     expect(err).toHaveBeenCalled();
     expect(dom.appendedScripts).toHaveLength(2);
+  });
+
+  it("loads runtime/plugin-bootstrap-core.js when the shared core is not preloaded", async function () {
+    const runInit = vi.fn(() => Promise.resolve());
+    let context;
+    const dom = createDomHarness({
+      failScriptIds: ["dyni-internal-legacy-bootstrap-bundle-js"],
+      onScriptAppended(node) {
+        if (node.src === "http://host/plugins/dyninstruments/runtime/plugin-bootstrap-core.js") {
+          context.window.DyniPluginBootstrapCore = bootstrapCore;
+        }
+      }
+    });
+
+    context = createScriptContext({
+      document: dom.document,
+      AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
+      avnav: { api: {} },
+      window: {
+        avnav: { api: {} },
+        DyniPlugin: {
+          config: { bootstrapManifest: BOOTSTRAP_MANIFEST },
+          runtime: { runInit }
+        }
+      }
+    });
+
+    runIifeScript("plugin.js", context);
+    await flushPromises(120);
+
+    expect(dom.appendedScripts.map((item) => item.src)).toEqual([
+      "http://host/plugins/dyninstruments/runtime/plugin-bootstrap-core.js",
+      "http://host/plugins/dyninstruments/bootstrap-bundle.js",
+      "http://host/plugins/dyninstruments/config/bootstrap-manifest.js"
+    ].concat(BOOTSTRAP_MANIFEST.map((rel) => "http://host/plugins/dyninstruments/" + rel)));
+    expect(runInit).toHaveBeenCalledOnce();
   });
 });

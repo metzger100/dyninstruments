@@ -46,7 +46,9 @@ describe("release-create", function () {
 
     try {
       writeFile(tempRoot, "plugin.js", "console.log('plugin');\n");
+      writeFile(tempRoot, "plugin.mjs", "export default function () {}\n");
       writeFile(tempRoot, "plugin.css", "body {}\n");
+      writeFile(tempRoot, "runtime/plugin-bootstrap-core.js", "console.log('bootstrap core');\n");
       writeFile(tempRoot, "runtime/init.js", "console.log('init');\n");
       writeFile(tempRoot, "config/bootstrap-manifest.js", "(function(){})();\n");
       writeFile(tempRoot, "assets/fonts/Roboto-Regular.woff2", "fontdata\n");
@@ -61,7 +63,9 @@ describe("release-create", function () {
 
       const manifest = [
         "plugin.js",
+        "plugin.mjs",
         "plugin.css",
+        "runtime/plugin-bootstrap-core.js",
         "runtime/init.js",
         "config/bootstrap-manifest.js",
         "assets/fonts/Roboto-Regular.woff2"
@@ -146,7 +150,9 @@ describe("release-create", function () {
         "config/bootstrap-manifest.js",
         "plugin.css",
         "plugin.js",
-        "runtime/init.js"
+        "plugin.mjs",
+        "runtime/init.js",
+        "runtime/plugin-bootstrap-core.js"
       ]);
 
       const headMessage = runReal("git", ["log", "-1", "--pretty=%s"], tempRoot).trim();

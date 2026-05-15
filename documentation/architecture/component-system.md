@@ -9,7 +9,8 @@ dyninstruments uses a runtime component loader for UMD modules registered on win
 Ownership split:
 
 - config/bootstrap-manifest.js owns the bootstrap script list shared by browser runtime and Node tooling
-- plugin.js loads the bootstrap manifest first, then loads the manifest-listed scripts in order
+- runtime/plugin-bootstrap-core.js owns bundle-first startup and manifest fallback script loading
+- plugin.js (legacy) and plugin.mjs (modern module) are thin adapters that delegate to the shared bootstrap core
 - config/components/registry-*.js defines registry fragments
 - config/components.js assembles fragments into config.components
 - runtime/component-loader.js resolves dependencies and loads JS/CSS

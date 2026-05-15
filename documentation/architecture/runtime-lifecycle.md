@@ -1,6 +1,6 @@
 # Runtime Lifecycle
 
-**Status:** ✅ Implemented | plugin startup ownership + runtime theme commit materialization + commit-driven surface reconciliation
+**Status:** ✅ Implemented | dual-entrypoint plugin startup ownership + runtime theme commit materialization + commit-driven surface reconciliation
 
 ## Overview
 
@@ -8,7 +8,9 @@ This document describes the live runtime lifecycle after PLAN9.
 
 Authoritative owners:
 
-- plugin.js: sole automatic startup owner
+- runtime/plugin-bootstrap-core.js: shared automatic startup owner (bundle-first, manifest fallback, `runInit()`)
+- plugin.js: legacy AvNav adapter (`AVNAV_BASE_URL` + `avnav.api` discovery)
+- plugin.mjs: modern AvNav adapter (default export + `api.getBaseUrl()`)
 - runtime/init.js: startup wiring only (runInit), no self-invocation
 - runtime/theme-runtime.js: internal theme lifecycle owner (`runtime.theme`)
 - cluster/ClusterWidget.js: commit ordering owner (theme apply, committed revision floor record, then surface reconcile)
@@ -20,14 +22,17 @@ Authoritative owners:
 
 ## Startup Sequence
 
-1. plugin.js attempts to load bootstrap-bundle.js (a single concatenated file generated at release time). If it succeeds, all bootstrap scripts have executed; plugin.js skips the manifest walk. If it fails (dev mode), plugin.js loads config/bootstrap-manifest.js, then loads the manifest-listed scripts in order, reaching runtime/theme-runtime.js before runtime/init.js.
-2. plugin.js calls window.DyniPlugin.runtime.runInit() exactly once.
-3. runtime/init.js creates the host-action bridge singleton.
-4. runtime/init.js resolves required components via runtime/component-loader.js.
-5. runtime/init.js reads --dyni-theme-preset once from document.documentElement.
-6. runtime/init.js normalizes that preset through `runtime.theme` internals.
-7. runtime/init.js configures `runtime.theme`.
-8. runtime/init.js registers widgets.
+1. `plugin.js` (legacy path) or `plugin.mjs` (modern module path) resolves host API + plugin base URL, then delegates to `runtime/plugin-bootstrap-core.js`.
+2. The shared bootstrap core attempts to load `bootstrap-bundle.js` first. If it succeeds, all bootstrap scripts have executed and the manifest walk is skipped.
+3. If bundle load fails (for example dev mode), the shared core loads `config/bootstrap-manifest.js`, then manifest-listed scripts in order, reaching `runtime/theme-runtime.js` before `runtime/init.js`.
+4. The shared core calls `window.DyniPlugin.runtime.runInit()` exactly once per startup invocation.
+5. On the module path, script IDs are generation-aware (derived from module base URL) so timestamped AvNav reloads load updated classic scripts instead of reusing stale IDs from an older generation.
+6. runtime/init.js creates the host-action bridge singleton.
+7. runtime/init.js resolves required components via runtime/component-loader.js.
+8. runtime/init.js reads --dyni-theme-preset once from document.documentElement.
+9. runtime/init.js normalizes that preset through `runtime.theme` internals.
+10. runtime/init.js configures `runtime.theme`.
+11. runtime/init.js registers widgets.
 
 Startup does not scan plugin roots and does not apply per-root theme state.
 Startup does not preload renderer shadow CSS; route activation owns active-route shadow CSS preload.

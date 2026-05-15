@@ -20,9 +20,11 @@ describe("release-zip-builder", function () {
     expect(new Set(manifest).size).toBe(manifest.length);
 
     expect(manifest).toContain("plugin.js");
+    expect(manifest).toContain("plugin.mjs");
     expect(manifest).toContain("plugin.css");
     expect(manifest).toContain("plugin.json");
     expect(manifest).toContain("config/bootstrap-manifest.js");
+    expect(manifest).toContain("runtime/plugin-bootstrap-core.js");
     expect(manifest).toContain("runtime/init.js");
     expect(manifest).toContain("runtime/component-loader.js");
     expect(manifest).toContain("layouts/dyni-motorboat.json");

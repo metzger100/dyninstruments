@@ -6,8 +6,10 @@
 
 ```text
 .
-├── plugin.js                    # entry point + bootstrap
+├── plugin.js                    # legacy entrypoint adapter
+├── plugin.mjs                   # modern module entrypoint adapter
 ├── runtime/                     # bootstrap/runtime framework layer
+│   ├── plugin-bootstrap-core.js # shared startup owner for both entrypoints
 │   ├── init.js                  # registration + theme-preset application
 │   ├── widget-registrar.js      # host widget definition composition
 │   ├── HostCommitController.js  # deferred renderHtml host commit
@@ -42,17 +44,18 @@ Widget feature code depends on shared code. Cluster orchestration code may depen
 
 ## Boundary Rule
 
-1. Only `runtime/` may access `window.avnav` directly.
+1. Only `runtime/`, `plugin.js`, and `plugin.mjs` may access `window.avnav`/AvNav API objects directly.
 2. Widgets and cluster code must use `componentContext.format.applyFormatter()` for formatter dispatch/fallback behavior.
 3. Cluster host registration is `renderHtml` on AvNav host; internal visual surface selection is owned by `config/cluster-routes`, `ClusterWidget`, `RouteActivationController`, and `RouteActivationPayloadBuilder`.
 4. Canvas rendering remains valid as an internal renderer contract via `CanvasDomSurfaceAdapter` (`renderCanvas(canvas, props)` callbacks).
 
 ## Component Registration Flow
 
-1. `plugin.js` bootstraps internal scripts and starts `runtime.runInit()`.
-2. `runtime/component-loader.js` loads required components declared in `config/components.js`.
-3. `runtime/widget-registrar.js` composes widget definitions and registers via `avnav.api.registerWidget()`.
-4. `ClusterWidget` drives host `renderHtml` lifecycle; deferred commit/surface switching is owned by `HostCommitController` + `SurfaceSessionController`.
+1. `plugin.js` and `plugin.mjs` delegate startup to `runtime/plugin-bootstrap-core.js`.
+2. The shared bootstrap core loads `bootstrap-bundle.js` first, falls back to `config/bootstrap-manifest.js` when needed, then starts `runtime.runInit()`.
+3. `runtime/component-loader.js` loads required components declared in `config/components.js`.
+4. `runtime/widget-registrar.js` composes widget definitions and registers via `avnav.api.registerWidget()`.
+5. `ClusterWidget` drives host `renderHtml` lifecycle; deferred commit/surface switching is owned by `HostCommitController` + `SurfaceSessionController`.
 
 ## Cross-References
 

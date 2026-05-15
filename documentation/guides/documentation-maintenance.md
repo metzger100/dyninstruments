@@ -8,7 +8,7 @@ Use this workflow whenever code changes touch architecture, module wiring, or wi
 
 ## Workflow
 
-1. Identify touched code areas (`config/`, `runtime/`, `widgets/`, `plugin.js`)
+1. Identify touched code areas (`config/`, `runtime/`, `widgets/`, `plugin.js`, `plugin.mjs`)
 2. Update the mapped docs in `documentation/`
 3. Update root docs (`README.md`, `AGENTS.md`, `CLAUDE.md`) when architecture guidance changes
 4. Every new documentation file must be linked from at least one other doc that is itself reachable from AGENTS.md. The easiest way: add an entry to TABLEOFCONTENTS.md.

@@ -89,7 +89,7 @@ config.clusters.push({
 });
 ```
 
-Then include the config script in `plugin.js` internal load order.
+Then include the config script in `config/bootstrap-manifest.js` load order.
 
 Internal-only responsive layout knobs must be marked `internal: true` on the editable spec.
 Examples: `ratioThresholdNormal`, `ratioThresholdFlat`, and widget-specific `*RatioThreshold*` values.
@@ -195,7 +195,7 @@ For a new `kind` in an existing cluster:
 
 - [ ] Kind defaults added in `config/shared/kind-defaults.js`
 - [ ] Cluster config created/updated in `config/clusters/`
-- [ ] Cluster script included in `plugin.js` internal load order
+- [ ] Cluster script included in `config/bootstrap-manifest.js` load order
 - [ ] Mapper module added/updated in `cluster/mappers/`
 - [ ] Module entry added in `config/components/registry-cluster.js`
 - [ ] Route metadata added/updated in `config/cluster-routes/<cluster>.js`

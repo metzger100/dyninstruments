@@ -55,7 +55,7 @@ Rule references:
 - Keep widget files focused on widget-specific behavior, not shared math/layout/formatter logic.
 
 6. Enforce the AvNav boundary.
-- Only `runtime/` and `plugin.js` should access `window.avnav` / `avnav.api` directly.
+- Only `runtime/`, `plugin.js`, and `plugin.mjs` should access `window.avnav` / `avnav.api` directly.
 - Widgets/cluster/shared code should call runtime-safe boundaries such as `componentContext.format.applyFormatter()`.
 
 7. Remove refactor leftovers.

@@ -112,7 +112,7 @@ Example override:
 ## Requirements
 
 - AvNav server installation with plugin support (Raspberry Pi/Linux/Windows server setups).
-- Pure Android app usage (without AvNav server plugin loading) is not supported.
+- Android AvNav is supported through the modern module startup path (`plugin.mjs`) when plugin loading is enabled.
 - Browser with ES6 and Canvas 2D support (modern browsers).
 
 ## Development

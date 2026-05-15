@@ -2,6 +2,8 @@ function createDomHarness(options) {
   const opts = options || {};
   const failScriptIds = new Set(opts.failScriptIds || []);
   const failLinkIds = new Set(opts.failLinkIds || []);
+  const onScriptAppended = typeof opts.onScriptAppended === "function" ? opts.onScriptAppended : null;
+  const onLinkAppended = typeof opts.onLinkAppended === "function" ? opts.onLinkAppended : null;
 
   const elementsById = new Map();
   const appendedScripts = [];
@@ -48,6 +50,9 @@ function createDomHarness(options) {
 
       if (node && node.tagName === "SCRIPT") {
         appendedScripts.push(node);
+        if (onScriptAppended) {
+          onScriptAppended(node);
+        }
         schedule(function () {
           if (failScriptIds.has(node.id)) {
             if (typeof node.onerror === "function") node.onerror(new Error("script load failed: " + node.id));
@@ -59,6 +64,9 @@ function createDomHarness(options) {
 
       if (node && node.tagName === "LINK") {
         appendedLinks.push(node);
+        if (onLinkAppended) {
+          onLinkAppended(node);
+        }
         schedule(function () {
           if (failLinkIds.has(node.id)) {
             if (typeof node.onerror === "function") node.onerror(new Error("css load failed: " + node.id));
