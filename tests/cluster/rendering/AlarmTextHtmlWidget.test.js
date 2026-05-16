@@ -76,10 +76,10 @@ describe("AlarmTextHtmlWidget", function () {
           captionStyle: "font-size:12px;",
           valueStyle: "font-size:18px;",
           shellStyle: model.showStrip === true ? "padding:2px 2px 2px 21px;" : "padding:2px;",
-          accentStyle: model.showStrip === true ? "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#66b8ff;" : "",
-          activeBackgroundStyle: model.showActiveBackground === true ? "background-color:#e04040;" : "",
+          accentStyle: model.showStrip === true ? "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#70F3AF;" : "",
+          activeBackgroundStyle: model.showActiveBackground === true ? "background-color:#C73A32;" : "",
           activeForegroundStyle: model.state === "active" ? "color:#ffffff;" : "",
-          idleStripStyle: model.showStrip === true ? "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#66b8ff;" : "",
+          idleStripStyle: model.showStrip === true ? "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#70F3AF;" : "",
           showStrip: model.showStrip === true,
           showActiveBackground: model.showActiveBackground === true,
           valueSingleLine: true,
@@ -118,9 +118,9 @@ describe("AlarmTextHtmlWidget", function () {
         return {
           colors: {
             alarmWidget: {
-              bg: "#e04040",
+              bg: "#C73A32",
               fg: "#ffffff",
-              strip: "#66b8ff"
+              strip: "#70F3AF"
             }
           },
           font: {
@@ -213,9 +213,9 @@ describe("AlarmTextHtmlWidget", function () {
       resolveForRoot: vi.fn(() => ({
         colors: {
           alarmWidget: {
-            bg: "#e04040",
+            bg: "#C73A32",
             fg: "#ffffff",
-            strip: "#66b8ff"
+            strip: "#70F3AF"
           }
         },
         font: {

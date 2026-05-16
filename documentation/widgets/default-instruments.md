@@ -74,7 +74,7 @@ Sector defaults:
 - high warning threshold: `75`
 - high alarm threshold: `90`
 - warning color: `#e7c66a`
-- alarm color: `#ff7a76`
+- alarm color: `#FA584A`
 
 ## Sector Model
 

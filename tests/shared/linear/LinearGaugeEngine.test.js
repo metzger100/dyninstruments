@@ -34,7 +34,7 @@ describe("LinearGaugeEngine", function () {
       colors: {
         pointer: "#ff2b2b",
         warning: "#e7c66a",
-        alarm: "#ff7a76"
+        alarm: "#FA584A"
       },
       radial: {
         ticks: {
@@ -1117,7 +1117,7 @@ describe("LinearGaugeEngine", function () {
     let thickTrackThickness = NaN;
     const thinHarness = createHarness({
       theme: {
-        colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#ff7a76" },
+        colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#FA584A" },
         radial: {
           ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
           pointer: { widthFactor: 1, lengthFactor: 2 },
@@ -1136,7 +1136,7 @@ describe("LinearGaugeEngine", function () {
     });
     const thickHarness = createHarness({
       theme: {
-        colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#ff7a76" },
+        colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#FA584A" },
         radial: {
           ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
           pointer: { widthFactor: 1, lengthFactor: 2 },
@@ -1184,7 +1184,7 @@ describe("LinearGaugeEngine", function () {
   it("keeps default pointer width independent from linear pointer depthFactor", function () {
     const shortHarness = createHarness({
       theme: {
-        colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#ff7a76" },
+        colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#FA584A" },
         radial: {
           ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
           pointer: { widthFactor: 1, lengthFactor: 2 },
@@ -1203,7 +1203,7 @@ describe("LinearGaugeEngine", function () {
     });
     const longHarness = createHarness({
       theme: {
-        colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#ff7a76" },
+        colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#FA584A" },
         radial: {
           ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
           pointer: { widthFactor: 1, lengthFactor: 2 },

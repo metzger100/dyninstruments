@@ -147,7 +147,7 @@
         },
         defaultLinearAlarmLowColor: {
           type: "COLOR",
-          default: "#ff7a76",
+          default: "#FA584A",
           name: "Alarm color",
           condition: { kind: "linearGauge", defaultLinearAlarmLowEnabled: true }
         },
@@ -198,7 +198,7 @@
         },
         defaultLinearAlarmHighColor: {
           type: "COLOR",
-          default: "#ff7a76",
+          default: "#FA584A",
           name: "Alarm color",
           condition: { kind: "linearGauge", defaultLinearAlarmHighEnabled: true }
         },
@@ -254,7 +254,7 @@
         },
         defaultRadialAlarmLowColor: {
           type: "COLOR",
-          default: "#ff7a76",
+          default: "#FA584A",
           name: "Alarm color",
           condition: { kind: "radialGauge", defaultRadialAlarmLowEnabled: true }
         },
@@ -305,7 +305,7 @@
         },
         defaultRadialAlarmHighColor: {
           type: "COLOR",
-          default: "#ff7a76",
+          default: "#FA584A",
           name: "Alarm color",
           condition: { kind: "radialGauge", defaultRadialAlarmHighEnabled: true }
         },

@@ -25,14 +25,14 @@
 - Idle state:
   - caption defaults to `ALARM`
   - value is `NONE`
-  - blue accent visible using the AIS nearest-blue family
+  - green accent visible using the AIS nearest/okay family
   - passive interaction
   - standard dyn surface background
 - Active state:
   - caption is `ALARM`
   - value shows the sorted active alarm names
   - red alarm background is visible
-  - blue accent is hidden
+  - green accent is hidden
   - whole-tile dispatch is only enabled when `surfacePolicy.interaction.mode === "dispatch"`
 
 ## Visual Contract
@@ -46,7 +46,7 @@
 - Caption/value text is owned by the fit layer and never uses CSS ellipsis.
 - Fit is computed against the inner content rect after shell padding and idle strip chrome are removed.
 - Idle strip chrome geometry (left/top/bottom/width/radius and content reservation) is sourced from AIS layout sizing (`AisTargetLayoutSizing.resolveVisualChrome(...)`) from shell dimensions only, independent of Alarm text-fit mode, so Alarm and AIS stay pixel-aligned at the same shell size.
-- Idle accent styling follows the AIS nearest-blue family through `colors.alarmWidget.strip`.
+- Idle accent styling follows the AIS nearest/okay family through `colors.alarmWidget.strip`.
 
 ## API / Interfaces
 

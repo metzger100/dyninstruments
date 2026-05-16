@@ -46,10 +46,10 @@
 
     defineToken("colors.pointer", "--dyni-pointer", "color", "#ff2b2b", { night: "#cc2222" }),
     defineToken("colors.warning", "--dyni-warning", "color", "#e7c66a", { night: "#8b6914" }),
-    defineToken("colors.alarm", "--dyni-alarm", "color", "#ff7a76", { night: "#992222" }),
-    defineToken("colors.alarmWidget.bg", "--dyni-alarm-widget-bg", "color", "#e04040", { night: "#991111" }),
+    defineToken("colors.alarm", "--dyni-alarm", "color", "#FA584A", { night: "rgba(250, 88, 74, 0.60)" }),
+    defineToken("colors.alarmWidget.bg", "--dyni-alarm-widget-bg", "color", "#C73A32", { night: "rgba(199, 58, 50, 0.60)" }),
     defineToken("colors.alarmWidget.fg", "--dyni-alarm-widget-fg", "color", "#ffffff", { night: "#ffffff" }),
-    defineToken("colors.alarmWidget.strip", "--dyni-alarm-widget-strip", "color", "#66b8ff", { night: "#66b8ff" }),
+    defineToken("colors.alarmWidget.strip", "--dyni-alarm-widget-strip", "color", "#70F3AF", { night: "rgba(112, 243, 175, 0.60)" }),
     defineToken("colors.laylineStb", "--dyni-layline-stb", "color", "#82b683", { night: "#3d6b3d" }),
     defineToken("colors.laylinePort", "--dyni-layline-port", "color", "#ff7a76", { night: "#8b3333" }),
     defineToken("colors.ais.warning", "--dyni-ais-warning", "color", "#FA584A", { night: "rgba(250, 88, 74, 0.60)" }),
@@ -98,11 +98,11 @@
         colors: {
           pointer: "#cc2222",
           warning: "#8b6914",
-          alarm: "#992222",
+          alarm: "rgba(250, 88, 74, 0.60)",
           alarmWidget: {
-            bg: "#991111",
+            bg: "rgba(199, 58, 50, 0.60)",
             fg: "#ffffff",
-            strip: "#66b8ff"
+            strip: "rgba(112, 243, 175, 0.60)"
           },
           laylineStb: "#3d6b3d",
           laylinePort: "#8b3333",
@@ -140,11 +140,11 @@
         colors: {
           pointer: "#ff2b2b",
           warning: "#e7c66a",
-          alarm: "#ff7a76",
+          alarm: "#FA584A",
           alarmWidget: {
-            bg: "#b3261e",
+            bg: "#C73A32",
             fg: "#ffffff",
-            strip: "#66b8ff"
+            strip: "#70F3AF"
           },
           laylineStb: "#82b683",
           laylinePort: "#ff7a76",
@@ -165,11 +165,11 @@
         colors: {
           pointer: "#cc2222",
           warning: "#8b6914",
-          alarm: "#992222",
+          alarm: "rgba(250, 88, 74, 0.60)",
           alarmWidget: {
-            bg: "#991111",
+            bg: "rgba(199, 58, 50, 0.60)",
             fg: "#ffffff",
-            strip: "#66b8ff"
+            strip: "rgba(112, 243, 175, 0.60)"
           },
           laylineStb: "#3d6b3d",
           laylinePort: "#8b3333",
@@ -190,11 +190,11 @@
         colors: {
           pointer: "#ff0000",
           warning: "#ffcc00",
-          alarm: "#ff3300",
+          alarm: "#FF3300",
           alarmWidget: {
-            bg: "#ff2200",
+            bg: "#CC2A1F",
             fg: "#ffffff",
-            strip: "#3399ff"
+            strip: "#00AA66"
           },
           ais: {
             warning: "#FF3300",
@@ -208,11 +208,11 @@
         colors: {
           pointer: "#cc2222",
           warning: "#8b6914",
-          alarm: "#992222",
+          alarm: "rgba(250, 88, 74, 0.60)",
           alarmWidget: {
-            bg: "#991111",
+            bg: "rgba(199, 58, 50, 0.60)",
             fg: "#ffffff",
-            strip: "#66b8ff"
+            strip: "rgba(112, 243, 175, 0.60)"
           },
           ais: {
             warning: "rgba(250, 88, 74, 0.60)",

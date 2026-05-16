@@ -235,10 +235,36 @@ describe("runtime/theme-runtime.js", function () {
 
     const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
+    expect(resolved.colors.alarm).toBe("#FF3300");
+    expect(resolved.colors.alarmWidget.bg).toBe("#CC2A1F");
+    expect(resolved.colors.alarmWidget.fg).toBe("#ffffff");
+    expect(resolved.colors.alarmWidget.strip).toBe("#00AA66");
+
     expect(resolved.colors.ais.warning).toBe("#FF3300");
     expect(resolved.colors.ais.nearest).toBe("#00AA66");
     expect(resolved.colors.ais.tracking).toBe("#CC6600");
     expect(resolved.colors.ais.normal).toBe("#8A7300");
+  });
+
+  it("resolves default preset alarm and alarm widget colors in day mode", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue() {
+            return "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.colors.alarm).toBe("#FA584A");
+    expect(resolved.colors.alarmWidget.bg).toBe("#C73A32");
+    expect(resolved.colors.alarmWidget.fg).toBe("#ffffff");
+    expect(resolved.colors.alarmWidget.strip).toBe("#70F3AF");
   });
 
   it("resolves default preset AIS role colors in night mode", function () {
@@ -258,6 +284,11 @@ describe("runtime/theme-runtime.js", function () {
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
     const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.colors.alarm).toBe("rgba(250, 88, 74, 0.60)");
+    expect(resolved.colors.alarmWidget.bg).toBe("rgba(199, 58, 50, 0.60)");
+    expect(resolved.colors.alarmWidget.fg).toBe("#ffffff");
+    expect(resolved.colors.alarmWidget.strip).toBe("rgba(112, 243, 175, 0.60)");
 
     expect(resolved.colors.ais.warning).toBe("rgba(250, 88, 74, 0.60)");
     expect(resolved.colors.ais.nearest).toBe("rgba(112, 243, 175, 0.60)");
@@ -286,11 +317,11 @@ describe("runtime/theme-runtime.js", function () {
 
     expect(resolved.colors.pointer).toBe("#ff2b2b");
     expect(resolved.colors.warning).toBe("#e7c66a");
-    expect(resolved.colors.alarm).toBe("#ff7a76");
+    expect(resolved.colors.alarm).toBe("#FA584A");
 
-    expect(resolved.colors.alarmWidget.bg).toBe("#b3261e");
+    expect(resolved.colors.alarmWidget.bg).toBe("#C73A32");
     expect(resolved.colors.alarmWidget.fg).toBe("#ffffff");
-    expect(resolved.colors.alarmWidget.strip).toBe("#66b8ff");
+    expect(resolved.colors.alarmWidget.strip).toBe("#70F3AF");
 
     expect(resolved.colors.laylineStb).toBe("#82b683");
     expect(resolved.colors.laylinePort).toBe("#ff7a76");
@@ -323,6 +354,11 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.surface.bg).toBe("black");
     expect(resolved.surface.border).toBe("rgba(252, 11, 11, 0.60)");
 
+    expect(resolved.colors.alarm).toBe("rgba(250, 88, 74, 0.60)");
+    expect(resolved.colors.alarmWidget.bg).toBe("rgba(199, 58, 50, 0.60)");
+    expect(resolved.colors.alarmWidget.fg).toBe("#ffffff");
+    expect(resolved.colors.alarmWidget.strip).toBe("rgba(112, 243, 175, 0.60)");
+
     expect(resolved.colors.ais.warning).toBe("rgba(250, 88, 74, 0.60)");
     expect(resolved.colors.ais.nearest).toBe("rgba(112, 243, 175, 0.60)");
     expect(resolved.colors.ais.tracking).toBe("rgba(248, 166, 1, 0.60)");
@@ -349,10 +385,10 @@ describe("runtime/theme-runtime.js", function () {
 
     expect(resolved.colors.pointer).toBe("#cc2222");
     expect(resolved.colors.warning).toBe("#8b6914");
-    expect(resolved.colors.alarm).toBe("#992222");
-    expect(resolved.colors.alarmWidget.bg).toBe("#991111");
+    expect(resolved.colors.alarm).toBe("rgba(250, 88, 74, 0.60)");
+    expect(resolved.colors.alarmWidget.bg).toBe("rgba(199, 58, 50, 0.60)");
     expect(resolved.colors.alarmWidget.fg).toBe("#ffffff");
-    expect(resolved.colors.alarmWidget.strip).toBe("#66b8ff");
+    expect(resolved.colors.alarmWidget.strip).toBe("rgba(112, 243, 175, 0.60)");
 
     expect(resolved.colors.ais.warning).toBe("rgba(250, 88, 74, 0.60)");
     expect(resolved.colors.ais.nearest).toBe("rgba(112, 243, 175, 0.60)");

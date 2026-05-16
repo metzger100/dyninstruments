@@ -106,10 +106,10 @@ describe("config/clusters/default.js", function () {
     expect(def.editableParameters.defaultLinearWarningLowAt.default).toBe(25);
     expect(def.editableParameters.defaultLinearWarningHighAt.default).toBe(75);
     expect(def.editableParameters.defaultLinearAlarmHighAt.default).toBe(90);
-    expect(def.editableParameters.defaultLinearAlarmLowColor.default).toBe("#ff7a76");
+    expect(def.editableParameters.defaultLinearAlarmLowColor.default).toBe("#FA584A");
     expect(def.editableParameters.defaultLinearWarningLowColor.default).toBe("#e7c66a");
     expect(def.editableParameters.defaultLinearWarningHighColor.default).toBe("#e7c66a");
-    expect(def.editableParameters.defaultLinearAlarmHighColor.default).toBe("#ff7a76");
+    expect(def.editableParameters.defaultLinearAlarmHighColor.default).toBe("#FA584A");
     expect(def.editableParameters.defaultLinearAlarmLowAt.condition).toEqual({
       kind: "linearGauge",
       defaultLinearAlarmLowEnabled: true
@@ -138,10 +138,10 @@ describe("config/clusters/default.js", function () {
     expect(def.editableParameters.defaultRadialWarningLowAt.default).toBe(25);
     expect(def.editableParameters.defaultRadialWarningHighAt.default).toBe(75);
     expect(def.editableParameters.defaultRadialAlarmHighAt.default).toBe(90);
-    expect(def.editableParameters.defaultRadialAlarmLowColor.default).toBe("#ff7a76");
+    expect(def.editableParameters.defaultRadialAlarmLowColor.default).toBe("#FA584A");
     expect(def.editableParameters.defaultRadialWarningLowColor.default).toBe("#e7c66a");
     expect(def.editableParameters.defaultRadialWarningHighColor.default).toBe("#e7c66a");
-    expect(def.editableParameters.defaultRadialAlarmHighColor.default).toBe("#ff7a76");
+    expect(def.editableParameters.defaultRadialAlarmHighColor.default).toBe("#FA584A");
     expect(def.editableParameters.defaultRadialAlarmLowAt.condition).toEqual({
       kind: "radialGauge",
       defaultRadialAlarmLowEnabled: true

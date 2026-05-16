@@ -64,10 +64,10 @@ Complete token list with defaults:
 | `--dyni-label-weight` | `700` |
 | `--dyni-pointer` | `#ff2b2b` |
 | `--dyni-warning` | `#e7c66a` |
-| `--dyni-alarm` | `#ff7a76` |
-| `--dyni-alarm-widget-bg` | `#e04040` |
+| `--dyni-alarm` | `#FA584A` |
+| `--dyni-alarm-widget-bg` | `#C73A32` |
 | `--dyni-alarm-widget-fg` | `#ffffff` |
-| `--dyni-alarm-widget-strip` | `#66b8ff` |
+| `--dyni-alarm-widget-strip` | `#70F3AF` |
 | `--dyni-layline-stb` | `#82b683` |
 | `--dyni-layline-port` | `#ff7a76` |
 | `--dyni-ais-warning` | `#FA584A` |
@@ -100,8 +100,6 @@ Complete token list with defaults:
 | `--dyni-linear-pointer-depth-factor` | `0.24` |
 | `--dyni-linear-label-inset` | `1.8` |
 | `--dyni-linear-label-font` | `0.14` |
-
-`highcontrast` keeps the same AIS warning/nearest/tracking/normal semantics but applies stronger role colors for better separation on mixed light/dark surfaces.
 
 `user.css` input overrides always win over Dyni defaults. If you override colors only on `.widget.dyniplugin`, those values stay active in AvNav Night Mode too. Add matching `.nightMode .widget.dyniplugin` rules when you want separate night colors.
 

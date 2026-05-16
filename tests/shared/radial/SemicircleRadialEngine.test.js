@@ -60,7 +60,7 @@ describe("SemicircleRadialEngine", function () {
       colors: Object.assign({
         pointer: "#ff2b2b",
         warning: "#e7c66a",
-        alarm: "#ff7a76",
+        alarm: "#FA584A",
         laylineStb: "#82b683",
         laylinePort: "#ff7a76"
       }, extra.colors || {}),

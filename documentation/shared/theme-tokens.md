@@ -24,6 +24,7 @@ const fg = tokens.surface.fg;
 - `font.familyMono`
 - `font.weight`
 - `font.labelWeight`
+- `colors.alarm`
 - `colors.alarmWidget.bg`
 - `colors.alarmWidget.fg`
 - `colors.alarmWidget.strip`
@@ -41,6 +42,7 @@ const fg = tokens.surface.fg;
 - --dyni-font-mono
 - --dyni-font-weight
 - --dyni-label-weight
+- --dyni-alarm
 - --dyni-alarm-widget-bg
 - --dyni-alarm-widget-fg
 - --dyni-alarm-widget-strip
@@ -86,13 +88,20 @@ const fg = tokens.surface.fg;
 
 The alarm widget reads these semantic paths from the resolved snapshot returned by `componentContext.theme.tokens.resolveForRoot(rootEl)`. They are overrideable from `user.css`, and the active preset still supplies the fallback values when no root override is present.
 
+### Generic Alarm Token
+
+- `colors.alarm` / `--dyni-alarm`
+  - Default: `#FA584A`
+  - Night: `rgba(250, 88, 74, 0.60)`
+  - highcontrast: `#FF3300`
+
 | Path | Input var | Default | Night | highcontrast |
 |---|---|---|---|---|
-| `colors.alarmWidget.bg` | `--dyni-alarm-widget-bg` | `#e04040` | `#991111` | `#ff2200` |
+| `colors.alarmWidget.bg` | `--dyni-alarm-widget-bg` | `#C73A32` | `rgba(199, 58, 50, 0.60)` | `#CC2A1F` |
 | `colors.alarmWidget.fg` | `--dyni-alarm-widget-fg` | `#ffffff` | `#ffffff` | `#ffffff` |
-| `colors.alarmWidget.strip` | `--dyni-alarm-widget-strip` | `#66b8ff` | `#66b8ff` | `#3399ff` |
+| `colors.alarmWidget.strip` | `--dyni-alarm-widget-strip` | `#70F3AF` | `rgba(112, 243, 175, 0.60)` | `#00AA66` |
 
-Alarm idle accents intentionally stay on the blue strip family, independent from AIS nearest/normal semantics.
+Alarm widget accents: the active alarm tile stays in the red warning family, while the idle accent strip uses the green nearest/okay family.
 
 ## AIS Target Accent Tokens
 
@@ -111,7 +120,7 @@ Example `user.css` override:
 .widget.dyniplugin {
   --dyni-alarm-widget-bg: #cc2222;
   --dyni-alarm-widget-fg: #ffffff;
-  --dyni-alarm-widget-strip: #3388ff;
+  --dyni-alarm-widget-strip: #70F3AF;
 }
 ```
 

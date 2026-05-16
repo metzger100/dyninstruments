@@ -128,7 +128,7 @@ describe("DefaultLinearWidget", function () {
     const theme = {
       colors: {
         warning: "#e7c66a",
-        alarm: "#ff7a76"
+        alarm: "#FA584A"
       }
     };
 
@@ -173,9 +173,9 @@ describe("DefaultLinearWidget", function () {
     }, 0, 100, { min: 0, max: 100 }, h.valueMath, theme);
 
     expect(fallbackSectors).toEqual([
-      { from: 0, to: 10, color: "#ff7a76" },
+      { from: 0, to: 10, color: "#FA584A" },
       { from: 75, to: 90, color: "#e7c66a" },
-      { from: 90, to: 100, color: "#ff7a76" }
+      { from: 90, to: 100, color: "#FA584A" }
     ]);
   });
 
@@ -184,7 +184,7 @@ describe("DefaultLinearWidget", function () {
     const theme = {
       colors: {
         warning: "#e7c66a",
-        alarm: "#ff7a76"
+        alarm: "#FA584A"
       }
     };
     const missingValues = [null, undefined, "", "   "];

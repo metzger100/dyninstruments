@@ -62,7 +62,7 @@ Ownership:
 | Element | Theme token | Default | Usage |
 |---|---|---|---|
 | Warning sector | `tokens.colors.warning` | `#e7c66a` | Matte yellow |
-| Alarm sector | `tokens.colors.alarm` | `#ff7a76` | Matte red |
+| Alarm sector | `tokens.colors.alarm` | `#FA584A` | Matte red |
 | Pointer | `tokens.colors.pointer` | `#ff2b2b` | Red triangle |
 | Text/ticks/arc stroke | `tokens.surface.fg` | CSS-resolved | Foreground |
 | Layline starboard (WindRadialWidget) | `tokens.colors.laylineStb` | `#82b683` | Starboard tack |
