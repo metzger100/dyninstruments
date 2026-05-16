@@ -52,10 +52,10 @@
     defineToken("colors.alarmWidget.strip", "--dyni-alarm-widget-strip", "color", "#66b8ff", { night: "#66b8ff" }),
     defineToken("colors.laylineStb", "--dyni-layline-stb", "color", "#82b683", { night: "#3d6b3d" }),
     defineToken("colors.laylinePort", "--dyni-layline-port", "color", "#ff7a76", { night: "#8b3333" }),
-    defineToken("colors.ais.warning", "--dyni-ais-warning", "color", "#FA584A"),
-    defineToken("colors.ais.nearest", "--dyni-ais-nearest", "color", "#70F3AF"),
-    defineToken("colors.ais.tracking", "--dyni-ais-tracking", "color", "#f8a601"),
-    defineToken("colors.ais.normal", "--dyni-ais-normal", "color", "#EBEB55"),
+    defineToken("colors.ais.warning", "--dyni-ais-warning", "color", "#FA584A", { night: "rgba(250, 88, 74, 0.60)" }),
+    defineToken("colors.ais.nearest", "--dyni-ais-nearest", "color", "#70F3AF", { night: "rgba(112, 243, 175, 0.60)" }),
+    defineToken("colors.ais.tracking", "--dyni-ais-tracking", "color", "#f8a601", { night: "rgba(248, 166, 1, 0.60)" }),
+    defineToken("colors.ais.normal", "--dyni-ais-normal", "color", "#EBEB55", { night: "rgba(235, 235, 85, 0.60)" }),
 
     defineToken("strokeWeight", "--dyni-stroke-weight", "number", 1.0),
     defineToken("pointerDepthWeight", "--dyni-pointer-depth-weight", "number", 1.0),
@@ -105,7 +105,13 @@
             strip: "#66b8ff"
           },
           laylineStb: "#3d6b3d",
-          laylinePort: "#8b3333"
+          laylinePort: "#8b3333",
+          ais: {
+            warning: "rgba(250, 88, 74, 0.60)",
+            nearest: "rgba(112, 243, 175, 0.60)",
+            tracking: "rgba(248, 166, 1, 0.60)",
+            normal: "rgba(235, 235, 85, 0.60)"
+          }
         }
       }
     },
@@ -149,6 +155,31 @@
             normal: "#EBEB55"
           }
         }
+      },
+      night: {
+        surface: {
+          fg: "rgba(252, 11, 11, 0.60)",
+          bg: "black",
+          border: "rgba(252, 11, 11, 0.60)"
+        },
+        colors: {
+          pointer: "#cc2222",
+          warning: "#8b6914",
+          alarm: "#992222",
+          alarmWidget: {
+            bg: "#991111",
+            fg: "#ffffff",
+            strip: "#66b8ff"
+          },
+          laylineStb: "#3d6b3d",
+          laylinePort: "#8b3333",
+          ais: {
+            warning: "rgba(250, 88, 74, 0.60)",
+            nearest: "rgba(112, 243, 175, 0.60)",
+            tracking: "rgba(248, 166, 1, 0.60)",
+            normal: "rgba(235, 235, 85, 0.60)"
+          }
+        }
       }
     },
     highcontrast: {
@@ -170,6 +201,24 @@
             nearest: "#00AA66",
             tracking: "#CC6600",
             normal: "#8A7300"
+          }
+        }
+      },
+      night: {
+        colors: {
+          pointer: "#cc2222",
+          warning: "#8b6914",
+          alarm: "#992222",
+          alarmWidget: {
+            bg: "#991111",
+            fg: "#ffffff",
+            strip: "#66b8ff"
+          },
+          ais: {
+            warning: "rgba(250, 88, 74, 0.60)",
+            nearest: "rgba(112, 243, 175, 0.60)",
+            tracking: "rgba(248, 166, 1, 0.60)",
+            normal: "rgba(235, 235, 85, 0.60)"
           }
         }
       }

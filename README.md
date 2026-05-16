@@ -103,6 +103,24 @@ Complete token list with defaults:
 
 `highcontrast` keeps the same AIS warning/nearest/tracking/normal semantics but applies stronger role colors for better separation on mixed light/dark surfaces.
 
+`user.css` input overrides always win over Dyni defaults. If you override colors only on `.widget.dyniplugin`, those values stay active in AvNav Night Mode too. Add matching `.nightMode .widget.dyniplugin` rules when you want separate night colors.
+
+Example day + night override:
+
+```css
+.widget.dyniplugin {
+  --dyni-fg: white;
+  --dyni-bg: black;
+  --dyni-pointer: #ff2b2b;
+}
+
+.nightMode .widget.dyniplugin {
+  --dyni-fg: rgba(252, 11, 11, 0.60);
+  --dyni-bg: black;
+  --dyni-pointer: #cc2222;
+}
+```
+
 Example override:
 
 ```css

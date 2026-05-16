@@ -96,12 +96,12 @@ Alarm idle accents intentionally stay on the blue strip family, independent from
 
 ## AIS Target Accent Tokens
 
-| Path | Input var | Default | highcontrast |
-|---|---|---|---|
-| `colors.ais.warning` | `--dyni-ais-warning` | `#FA584A` | `#FF3300` |
-| `colors.ais.nearest` | `--dyni-ais-nearest` | `#70F3AF` | `#00AA66` |
-| `colors.ais.tracking` | `--dyni-ais-tracking` | `#f8a601` | `#CC6600` |
-| `colors.ais.normal` | `--dyni-ais-normal` | `#EBEB55` | `#8A7300` |
+| Path | Input var | Default | Night | highcontrast |
+|---|---|---|---|---|
+| `colors.ais.warning` | `--dyni-ais-warning` | `#FA584A` | `rgba(250, 88, 74, 0.60)` | `#FF3300` |
+| `colors.ais.nearest` | `--dyni-ais-nearest` | `#70F3AF` | `rgba(112, 243, 175, 0.60)` | `#00AA66` |
+| `colors.ais.tracking` | `--dyni-ais-tracking` | `#f8a601` | `rgba(248, 166, 1, 0.60)` | `#CC6600` |
+| `colors.ais.normal` | `--dyni-ais-normal` | `#EBEB55` | `rgba(235, 235, 85, 0.60)` | `#8A7300` |
 
 Dyni follows AvNav AIS role semantics. The nearest target state is the green state typically visible in the AvNav AIS target widget, while the generic normal role remains yellow.
 
@@ -157,6 +157,37 @@ Per token path:
 3. active preset base override
 4. global mode default
 5. global base default
+
+Root input overrides (`user.css`) are higher precedence than mode defaults. If you override surface or semantic color vars on `.widget.dyniplugin`, those values also remain active while AvNav Night Mode is on unless you add explicit night selectors.
+
+Applies to both surface vars and semantic vars, including:
+
+- `--dyni-fg`
+- `--dyni-bg`
+- `--dyni-border`
+- `--dyni-pointer`
+- `--dyni-warning`
+- `--dyni-alarm`
+- `--dyni-ais-warning`
+- `--dyni-ais-nearest`
+- `--dyni-ais-tracking`
+- `--dyni-ais-normal`
+
+Example:
+
+```css
+.widget.dyniplugin {
+  --dyni-fg: white;
+  --dyni-bg: black;
+  --dyni-pointer: #ff2b2b;
+}
+
+.nightMode .widget.dyniplugin {
+  --dyni-fg: rgba(252, 11, 11, 0.60);
+  --dyni-bg: black;
+  --dyni-pointer: #cc2222;
+}
+```
 
 ## Strict Root Contract
 
