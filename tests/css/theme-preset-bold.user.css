@@ -5,7 +5,8 @@
    1 = default/no override control
    2 = slim
    3 = bold
-   4 = highcontrast
+   4 = darkmode
+   5 = highcontrast
 */
 
 .widget.dyniplugin {
@@ -18,6 +19,10 @@
 
 .widget.dyniplugin {
   --dyni-theme-preset: bold;
+}
+
+.widget.dyniplugin {
+  --dyni-theme-preset: darkmode;
 }
 
 .widget.dyniplugin {
