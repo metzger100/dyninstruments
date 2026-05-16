@@ -46,7 +46,10 @@ dyninstruments follows AvNav day/night mode and supports `user.css` overrides vi
 
 Preset selector:
 
-- `--dyni-theme-preset`: `default` (supported presets: `default`, `slim`, `bold`, `highcontrast`; `night` is a mode, not a preset)
+- `--dyni-theme-preset`: `default` (supported presets: `default`, `slim`, `bold`, `darkmode`, `highcontrast`; `night` is a mode, not a preset)
+
+`darkmode` is a built-in black-surface preset with white foreground/borders and tuned semantic accents for warning/alarm, laylines, and AIS roles.
+`night` remains the dim red AvNav navigation mode, not a preset family.
 
 Complete token list with defaults:
 
@@ -67,10 +70,10 @@ Complete token list with defaults:
 | `--dyni-alarm-widget-strip` | `#66b8ff` |
 | `--dyni-layline-stb` | `#82b683` |
 | `--dyni-layline-port` | `#ff7a76` |
-| `--dyni-ais-warning` | `#f39b52` |
-| `--dyni-ais-nearest` | `#66b8ff` |
-| `--dyni-ais-tracking` | `#89d38f` |
-| `--dyni-ais-normal` | `#8da0b3` |
+| `--dyni-ais-warning` | `#FA584A` |
+| `--dyni-ais-nearest` | `#70F3AF` |
+| `--dyni-ais-tracking` | `#f8a601` |
+| `--dyni-ais-normal` | `#EBEB55` |
 | `--dyni-stroke-weight` | `1.0` |
 | `--dyni-pointer-depth-weight` | `1.0` |
 | `--dyni-pointer-side-weight` | `1.0` |
@@ -97,6 +100,8 @@ Complete token list with defaults:
 | `--dyni-linear-pointer-depth-factor` | `0.24` |
 | `--dyni-linear-label-inset` | `1.8` |
 | `--dyni-linear-label-font` | `0.14` |
+
+`highcontrast` keeps the same AIS warning/nearest/tracking/normal semantics but applies stronger role colors for better separation on mixed light/dark surfaces.
 
 Example override:
 

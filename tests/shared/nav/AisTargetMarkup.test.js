@@ -78,7 +78,7 @@ describe("AisTargetMarkup", function () {
       nameStyle: "font-size:13px;",
       frontStyle: "font-size:11px;",
       placeholderStyle: "font-size:12px;",
-      accentStyle: "background-color:#f39b52;",
+      accentStyle: "background-color:#FA584A;",
       metrics: {
         dst: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
         cpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:12px;", unitStyle: "font-size:9px;" },
@@ -129,7 +129,7 @@ describe("AisTargetMarkup", function () {
     expect(html).toContain('class="dyni-ais-target-html dyni-ais-target-mode-normal dyni-ais-target-data dyni-ais-target-open-dispatch dyni-ais-target-branch-tcpa dyni-ais-target-color-warning"');
     expect(html).toContain('data-dyni-action="ais-target-open"');
     expect(html).toContain('class="dyni-ais-target-open-hotspot"');
-    expect(html).toContain('class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:14px;background-color:#f39b52;"');
+    expect(html).toContain('class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:14px;background-color:#FA584A;"');
     expect(root.querySelector(".dyni-ais-target-name")).toBeTruthy();
     expect(root.querySelector(".dyni-ais-target-front")).toBeTruthy();
 
@@ -295,7 +295,7 @@ describe("AisTargetMarkup", function () {
     });
 
     expect(html).toContain('style="height:auto;aspect-ratio:7/8;min-height:8em;padding:4px 4px 4px 21px;"');
-    expect(html).toContain('class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:14px;background-color:#f39b52;"');
+    expect(html).toContain('class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:14px;background-color:#FA584A;"');
     expect(html).toContain('class="dyni-ais-target-identity" style="grid-template-rows:minmax(0,12px) minmax(0,10px);"');
     expect(html).toContain('class="dyni-ais-target-metrics" style="grid-template-columns:minmax(0,100px) minmax(0,100px);"');
     expect(html).toContain('class="dyni-ais-target-metric dyni-ais-target-metric-cpa" style="grid-template-columns:minmax(0,30px) minmax(0,70px);"');

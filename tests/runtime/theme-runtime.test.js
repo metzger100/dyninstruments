@@ -219,4 +219,61 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.surface.border).toBe("rgba(1, 2, 3, 0.75)");
     expect(getAppliedOutput(rootEl, "--dyni-theme-surface-border")).toBe("rgba(1, 2, 3, 0.75)");
   });
+
+  it("resolves highcontrast preset AIS role colors", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue() {
+            return "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "highcontrast" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.colors.ais.warning).toBe("#FF3300");
+    expect(resolved.colors.ais.nearest).toBe("#00AA66");
+    expect(resolved.colors.ais.tracking).toBe("#CC6600");
+    expect(resolved.colors.ais.normal).toBe("#8A7300");
+  });
+
+  it("resolves darkmode preset surface and semantic colors", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue() {
+            return "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "darkmode" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.surface.fg).toBe("#ffffff");
+    expect(resolved.surface.bg).toBe("#000000");
+    expect(resolved.surface.border).toBe("#ffffff");
+
+    expect(resolved.colors.pointer).toBe("#ff2b2b");
+    expect(resolved.colors.warning).toBe("#e7c66a");
+    expect(resolved.colors.alarm).toBe("#ff7a76");
+
+    expect(resolved.colors.alarmWidget.bg).toBe("#b3261e");
+    expect(resolved.colors.alarmWidget.fg).toBe("#ffffff");
+    expect(resolved.colors.alarmWidget.strip).toBe("#66b8ff");
+
+    expect(resolved.colors.laylineStb).toBe("#82b683");
+    expect(resolved.colors.laylinePort).toBe("#ff7a76");
+
+    expect(resolved.colors.ais.warning).toBe("#FA584A");
+    expect(resolved.colors.ais.nearest).toBe("#70F3AF");
+    expect(resolved.colors.ais.tracking).toBe("#f8a601");
+    expect(resolved.colors.ais.normal).toBe("#EBEB55");
+  });
 });

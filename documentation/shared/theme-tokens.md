@@ -27,6 +27,10 @@ const fg = tokens.surface.fg;
 - `colors.alarmWidget.bg`
 - `colors.alarmWidget.fg`
 - `colors.alarmWidget.strip`
+- `colors.ais.warning`
+- `colors.ais.nearest`
+- `colors.ais.tracking`
+- `colors.ais.normal`
 
 ## Public Input Variables (Migrated Shared Surface/Typography)
 
@@ -40,6 +44,10 @@ const fg = tokens.surface.fg;
 - --dyni-alarm-widget-bg
 - --dyni-alarm-widget-fg
 - --dyni-alarm-widget-strip
+- --dyni-ais-warning
+- --dyni-ais-nearest
+- --dyni-ais-tracking
+- --dyni-ais-normal
 
 ### Surface Border Fallback Contract
 
@@ -84,7 +92,18 @@ The alarm widget reads these semantic paths from the resolved snapshot returned 
 | `colors.alarmWidget.fg` | `--dyni-alarm-widget-fg` | `#ffffff` | `#ffffff` | `#ffffff` |
 | `colors.alarmWidget.strip` | `--dyni-alarm-widget-strip` | `#66b8ff` | `#66b8ff` | `#3399ff` |
 
-Alarm idle accents intentionally reuse the AIS nearest-blue family so the alarm tile reads like the rest of the committed HTML widgets instead of introducing a separate strip hue.
+Alarm idle accents intentionally stay on the blue strip family, independent from AIS nearest/normal semantics.
+
+## AIS Target Accent Tokens
+
+| Path | Input var | Default | highcontrast |
+|---|---|---|---|
+| `colors.ais.warning` | `--dyni-ais-warning` | `#FA584A` | `#FF3300` |
+| `colors.ais.nearest` | `--dyni-ais-nearest` | `#70F3AF` | `#00AA66` |
+| `colors.ais.tracking` | `--dyni-ais-tracking` | `#f8a601` | `#CC6600` |
+| `colors.ais.normal` | `--dyni-ais-normal` | `#EBEB55` | `#8A7300` |
+
+Dyni follows AvNav AIS role semantics. The nearest target state is the green state typically visible in the AvNav AIS target widget, while the generic normal role remains yellow.
 
 Example `user.css` override:
 
@@ -113,12 +132,17 @@ Supported preset families:
 - default
 - slim
 - bold
+- darkmode
 - highcontrast
+
+`darkmode` is the built-in high-readability black/white surface preset (`surface.bg=#000000`, `surface.fg=#ffffff`, `surface.border=#ffffff`) with tuned warning/alarm, layline, and AIS role accents for dark surfaces.
 
 Mode axis:
 
 - day
 - night
+
+`night` remains the dim red navigation mode and is not a preset family.
 
 Preset normalization:
 

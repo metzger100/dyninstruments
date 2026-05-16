@@ -52,10 +52,10 @@
     defineToken("colors.alarmWidget.strip", "--dyni-alarm-widget-strip", "color", "#66b8ff", { night: "#66b8ff" }),
     defineToken("colors.laylineStb", "--dyni-layline-stb", "color", "#82b683", { night: "#3d6b3d" }),
     defineToken("colors.laylinePort", "--dyni-layline-port", "color", "#ff7a76", { night: "#8b3333" }),
-    defineToken("colors.ais.warning", "--dyni-ais-warning", "color", "#f39b52"),
-    defineToken("colors.ais.nearest", "--dyni-ais-nearest", "color", "#66b8ff"),
-    defineToken("colors.ais.tracking", "--dyni-ais-tracking", "color", "#89d38f"),
-    defineToken("colors.ais.normal", "--dyni-ais-normal", "color", "#8da0b3"),
+    defineToken("colors.ais.warning", "--dyni-ais-warning", "color", "#FA584A"),
+    defineToken("colors.ais.nearest", "--dyni-ais-nearest", "color", "#70F3AF"),
+    defineToken("colors.ais.tracking", "--dyni-ais-tracking", "color", "#f8a601"),
+    defineToken("colors.ais.normal", "--dyni-ais-normal", "color", "#EBEB55"),
 
     defineToken("strokeWeight", "--dyni-stroke-weight", "number", 1.0),
     defineToken("pointerDepthWeight", "--dyni-pointer-depth-weight", "number", 1.0),
@@ -124,6 +124,33 @@
         pointerSideWeight: 1.54
       }
     },
+    darkmode: {
+      base: {
+        surface: {
+          fg: "#ffffff",
+          bg: "#000000",
+          border: "#ffffff"
+        },
+        colors: {
+          pointer: "#ff2b2b",
+          warning: "#e7c66a",
+          alarm: "#ff7a76",
+          alarmWidget: {
+            bg: "#b3261e",
+            fg: "#ffffff",
+            strip: "#66b8ff"
+          },
+          laylineStb: "#82b683",
+          laylinePort: "#ff7a76",
+          ais: {
+            warning: "#FA584A",
+            nearest: "#70F3AF",
+            tracking: "#f8a601",
+            normal: "#EBEB55"
+          }
+        }
+      }
+    },
     highcontrast: {
       base: {
         strokeWeight: 1.32,
@@ -137,6 +164,12 @@
             bg: "#ff2200",
             fg: "#ffffff",
             strip: "#3399ff"
+          },
+          ais: {
+            warning: "#FF3300",
+            nearest: "#00AA66",
+            tracking: "#CC6600",
+            normal: "#8A7300"
           }
         }
       }
