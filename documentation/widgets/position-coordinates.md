@@ -17,7 +17,7 @@ This renderer uses the shared text compaction contract from `TextLayoutEngine.co
 - Registered as `PositionCoordinateWidget` in `config/components/registry-widgets-vessel.js` (assembled by `config/components.js`)
 - Routed from `NavMapper` for `kind: "positionBoat"` and `kind: "positionWp"`
 - Routed directly from `VesselMapper` for `kind: "dateTime"` and `kind: "timeStatus"` via `displayVariant`
-- Depends on shared utilities: `runtime.theme`, `TextLayoutEngine`, `StateScreenPrecedence`, `StateScreenCanvasOverlay`
+- Depends on shared utilities: `runtime.theme`, `TextLayoutEngine`, `ValueMath`, `StateScreenPrecedence`, `StateScreenCanvasOverlay`
 - No widget-to-widget dependency on `ThreeValueTextWidget`
 - `flat` mode renders one-line `caption/value/unit` directly in this widget
 - `normal`/`high` modes render stacked coordinates:

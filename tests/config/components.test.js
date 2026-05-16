@@ -124,6 +124,7 @@ describe("config/components.js", function () {
     expect(components.ClusterWidget.deps).toEqual(["ValueMath"]);
     expect(components.CanvasLayerCache.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/canvas/CanvasLayerCache.js");
     expect(components.XteHighwayPrimitives.deps).toEqual(["GeometryScale", "ValueMath"]);
+    expect(components.PositionCoordinateWidget.deps).toContain("ValueMath");
   });
 
   it("keeps RadialValueMath as compatibility-only and removes it from internal gauge widget deps", function () {
