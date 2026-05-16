@@ -290,7 +290,7 @@ describe("WindLinearWidget", function () {
     expect(highCalls.filter((entry) => entry.type === "inline")).toHaveLength(2);
   });
 
-  it("keeps null speed on placeholder path instead of numeric zero formatting", function () {
+  it("keeps missing speed values on placeholder path instead of numeric zero formatting", function () {
     let captured;
     const applyFormatter = vi.fn((value) => "spd:" + String(value));
 
@@ -318,17 +318,86 @@ describe("WindLinearWidget", function () {
       services: { format: { applyFormatter } }
     }));
 
-    const display = captured.formatDisplay(15, {
-      speed: null,
+    [null, undefined, "", "   "].forEach(function (rawSpeed) {
+      const display = captured.formatDisplay(15, {
+        speed: rawSpeed,
+        default: "---",
+        angleCaption: "AWA",
+        speedCaption: "AWS",
+        angleUnit: "°",
+        speedUnit: "kn"
+      });
+
+      expect(display.num).toBe(15);
+      expect(display.right.value).toBe("---");
+    });
+    expect(applyFormatter).not.toHaveBeenCalled();
+
+    const valid = captured.formatDisplay(15, {
+      speed: "4.2",
       default: "---",
       angleCaption: "AWA",
       speedCaption: "AWS",
       angleUnit: "°",
       speedUnit: "kn"
     });
+    expect(valid.right.value).toBe("spd:4.2");
+    expect(applyFormatter).toHaveBeenCalledWith(4.2, expect.objectContaining({
+      default: "---"
+    }));
+  });
 
-    expect(display.num).toBe(15);
-    expect(display.right.value).toBe("---");
-    expect(applyFormatter).not.toHaveBeenCalled();
+  it("keeps missing angle values on placeholder path instead of numeric zero formatting", function () {
+    let captured;
+
+    loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create({}, createComponentContextMock({
+      modules: {
+        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        ValueMath: { create() { return {
+                clamp(value, lo, hi) {
+                  const n = Number(value);
+                  if (!isFinite(n)) return lo;
+                  return Math.max(lo, Math.min(hi, n));
+                },
+                toFiniteNumber(value) {
+                  const n = Number(value);
+                  return Number.isFinite(n) ? n : undefined;
+                },
+                formatAngle180(value) {
+                  const n = Number(value);
+                  return isFinite(n) ? String(Math.round(n)) : "---";
+                }
+              }; } },
+        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
+      },
+      services: { format: { applyFormatter(value) { return String(value); } } }
+    }));
+
+    [null, undefined, "", "   "].forEach(function (rawAngle) {
+      const display = captured.formatDisplay(rawAngle, {
+        default: "---",
+        angleCaption: "AWA",
+        speedCaption: "AWS",
+        angleUnit: "°",
+        speedUnit: "kn",
+        speed: 4.2
+      });
+
+      expect(Number.isNaN(display.num)).toBe(true);
+      expect(display.text).toBe("---");
+      expect(display.left.value).toBe("---");
+    });
+
+    const valid = captured.formatDisplay("4.2", {
+      default: "---",
+      angleCaption: "AWA",
+      speedCaption: "AWS",
+      angleUnit: "°",
+      speedUnit: "kn",
+      speed: 4.2
+    });
+    expect(valid.num).toBe(4);
+    expect(valid.text).toBe("4");
   });
 });

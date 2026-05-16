@@ -258,4 +258,86 @@ describe("DepthLinearWidget", function () {
     expect(unitFormatter.formatWithToken).not.toHaveBeenCalled();
     expect(unitFormatter.extractNumericDisplay).not.toHaveBeenCalled();
   });
+
+  it("treats blank and missing low-end thresholds as unset", function () {
+    let captured;
+    const unitFormatter = {
+      formatWithToken: vi.fn(function (value) {
+        return String(value);
+      }),
+      extractNumericDisplay: vi.fn(function (text, fallback) {
+        const parsed = Number(text);
+        return Number.isFinite(parsed) ? parsed : fallback;
+      })
+    };
+
+    const mod = loadFresh("widgets/linear/DepthLinearWidget/DepthLinearWidget.js");
+    const componentContext = createComponentContextMock({
+      modules: {
+        LinearGaugeEngine: {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return function () {};
+              }
+            };
+          }
+        },
+        ValueMath: {
+          create() {
+            return {
+              clamp(v, lo, hi) {
+                return Math.max(lo, Math.min(hi, Number(v)));
+              },
+              resolveStandardTickSteps() {
+                return { major: 5, minor: 1 };
+              }
+            };
+          }
+        },
+        DepthDisplayFormatter: {
+          create() {
+            return loadFresh("shared/widget-kits/format/DepthDisplayFormatter.js").create({}, componentContext);
+          }
+        },
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
+                }
+                return String(text);
+              }
+            };
+          }
+        },
+        UnitAwareFormatter: {
+          create() {
+            return unitFormatter;
+          }
+        }
+      }
+    });
+    mod.create({}, componentContext);
+
+    const theme = { colors: { warning: "#123456", alarm: "#654321" } };
+    const axis = { min: 0, max: 30 };
+
+    [null, undefined, "", "   "].forEach(function (rawThreshold) {
+      expect(captured.buildSectors({
+        depthLinearWarningFrom: rawThreshold,
+        depthLinearAlarmFrom: rawThreshold
+      }, 0, 30, axis, {}, theme)).toEqual([]);
+    });
+
+    expect(captured.buildSectors({
+      depthLinearWarningFrom: "5",
+      depthLinearAlarmFrom: "2"
+    }, 0, 30, axis, {}, theme)).toEqual([
+      { from: 0, to: 2, color: "#654321" },
+      { from: 2, to: 5, color: "#123456" }
+    ]);
+  });
 });

@@ -11,9 +11,10 @@
   "use strict";
 
   let toFiniteNumber;
+  let toOptionalFiniteNumber;
 
   function clampNumber(value, minValue, maxValue, defaultValue) {
-    const n = toFiniteNumber(value);
+    const n = toOptionalFiniteNumber(value);
     if (typeof n !== "number") {
       return defaultValue;
     }
@@ -63,11 +64,14 @@
   }
 
   function create(def, componentContext) {
-    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+    const valueMath = componentContext.components.require("ValueMath");
+    toFiniteNumber = valueMath.toFiniteNumber;
+    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
 
     return {
       id: "EditRouteLayoutMath",
       toFiniteNumber: toFiniteNumber,
+      toOptionalFiniteNumber: toOptionalFiniteNumber,
       clampNumber: clampNumber,
       splitRow: splitRow,
       splitStack: splitStack

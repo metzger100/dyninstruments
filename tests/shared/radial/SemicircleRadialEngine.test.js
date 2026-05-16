@@ -432,7 +432,7 @@ describe("SemicircleRadialEngine", function () {
     expect(tickCalls).toHaveLength(1);
   });
 
-  it("uses placeholder text for null input on the default formatDisplay fallback", function () {
+  it("uses placeholder text for missing input on the default formatDisplay fallback", function () {
     const textLayoutCalls = [];
     const modules = {
       RadialToolkit: {
@@ -494,19 +494,31 @@ describe("SemicircleRadialEngine", function () {
         }
       });
 
-    renderer(createMockCanvas({
+    const canvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
       ctx: createMockContext2D()
-    }), {
-      speed: null,
+    });
+    [null, undefined, "", "   "].forEach(function (rawSpeed) {
+      renderer(canvas, {
+        speed: rawSpeed,
+        default: "---",
+        caption: "SPD",
+        unit: "kn"
+      });
+
+      expect(textLayoutCalls.length).toBeGreaterThan(0);
+      expect(textLayoutCalls[textLayoutCalls.length - 1].display.valueText).toBe("---");
+    });
+
+    renderer(canvas, {
+      speed: "4.2",
       default: "---",
       caption: "SPD",
       unit: "kn"
     });
-
-    expect(textLayoutCalls).toHaveLength(1);
-    expect(textLayoutCalls[0].display.valueText).toBe("---");
+    expect(textLayoutCalls.length).toBeGreaterThan(0);
+    expect(textLayoutCalls[textLayoutCalls.length - 1].display.valueText).toBe("4.2");
   });
 
   it("skips the semicircle text draw step when hideTextualMetrics is enabled", function () {

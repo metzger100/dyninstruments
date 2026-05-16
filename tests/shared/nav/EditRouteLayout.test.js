@@ -73,6 +73,38 @@ describe("EditRouteLayout", function () {
     expect(out.metricBoxes.rte.unitRect).toBeNull();
   });
 
+  it("treats null/blank ratio thresholds as unset and keeps structural mode fallback", function () {
+    const layout = createLayout();
+    const baseline = layout.computeLayout({
+      W: 320,
+      H: 220,
+      hasRoute: true,
+      isLocalRoute: false,
+      ratioThresholdNormal: undefined,
+      ratioThresholdFlat: undefined
+    });
+    const nullThresholds = layout.computeLayout({
+      W: 320,
+      H: 220,
+      hasRoute: true,
+      isLocalRoute: false,
+      ratioThresholdNormal: null,
+      ratioThresholdFlat: null
+    });
+    const blankThresholds = layout.computeLayout({
+      W: 320,
+      H: 220,
+      hasRoute: true,
+      isLocalRoute: false,
+      ratioThresholdNormal: "   ",
+      ratioThresholdFlat: ""
+    });
+
+    expect(baseline.mode).toBe("normal");
+    expect(nullThresholds.mode).toBe(baseline.mode);
+    expect(blankThresholds.mode).toBe(baseline.mode);
+  });
+
   it("returns high mode as stacked metric rows", function () {
     const layout = createLayout();
     const out = layout.computeLayout({
@@ -219,5 +251,26 @@ describe("EditRouteLayout", function () {
     expect(vertical.aspectRatio).toBe("7/8");
     expect(vertical.minHeight).toBe("8em");
     expect(vertical.wrapperStyle).toBe("");
+  });
+
+  it("treats null and blank committed vertical heights as unset width-driven defaults", function () {
+    const layout = createLayout();
+    const width = 280;
+    const widthDrivenHeight = Math.floor((width * 8) / 7);
+    const nullHeight = layout.computeVerticalShellProfile({
+      W: width,
+      H: 100,
+      isVerticalCommitted: true,
+      effectiveLayoutHeight: null
+    });
+    const blankHeight = layout.computeVerticalShellProfile({
+      W: width,
+      H: 100,
+      isVerticalCommitted: true,
+      effectiveLayoutHeight: "   "
+    });
+
+    expect(nullHeight.effectiveLayoutHeight).toBe(widthDrivenHeight);
+    expect(blankHeight.effectiveLayoutHeight).toBe(widthDrivenHeight);
   });
 });

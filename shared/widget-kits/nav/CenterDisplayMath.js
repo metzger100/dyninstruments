@@ -12,7 +12,7 @@
 
   const EARTH_RADIUS_M = 6371000;
 
-  let toFiniteNumber;
+  let toOptionalFiniteNumber;
 
   function toRadians(value) {
     return value * Math.PI / 180;
@@ -41,8 +41,8 @@
     if (Array.isArray(value) && value.length < 2) {
       return null;
     }
-    const lat = toFiniteNumber(latRaw);
-    const lon = toFiniteNumber(lonRaw);
+    const lat = toOptionalFiniteNumber(latRaw);
+    const lon = toOptionalFiniteNumber(lonRaw);
     if (typeof lat === "undefined" || typeof lon === "undefined") {
       return null;
     }
@@ -111,7 +111,8 @@
   }
 
   function create(def, componentContext) {
-    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+    const valueMath = componentContext.components.require("ValueMath");
+    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
 
     return {
       id: "CenterDisplayMath",

@@ -1,7 +1,7 @@
 /**
  * Module: PositionCoordinateWidget - Stacked latitude/longitude renderer for nav position kinds
  * Documentation: documentation/widgets/position-coordinates.md
- * Depends: componentContext.theme.tokens, TextLayoutEngine, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay, componentContext.format.applyFormatter, componentContext.canvas.setupCanvas, componentContext.dom.requirePluginRoot
+ * Depends: componentContext.theme.tokens, TextLayoutEngine, ValueMath, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay, componentContext.format.applyFormatter, componentContext.canvas.setupCanvas, componentContext.dom.requirePluginRoot
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -24,7 +24,7 @@
     return DISPLAY_VARIANT_POSITION;
   }
 
-  function readCoordinatePair(value, rawMode) {
+  function readCoordinatePair(value, rawMode, toOptionalFiniteNumber) {
     if (!value || typeof value !== "object") {
       return null;
     }
@@ -36,8 +36,8 @@
     if (rawMode) {
       return { lat: latRaw, lon: lonRaw };
     }
-    const lat = Number(latRaw);
-    const lon = Number(lonRaw);
+    const lat = toOptionalFiniteNumber(latRaw);
+    const lon = toOptionalFiniteNumber(lonRaw);
     return Number.isFinite(lat) && Number.isFinite(lon) ? { lat: lat, lon: lon } : null;
   }
 
@@ -110,18 +110,15 @@
       appendAxisParam: !hasOverride
     };
   }
-  function formatAxisValue(rawValue, axis, defaultText, props, componentContext, placeholderNormalize) {
+  function formatAxisValue(rawValue, axis, defaultText, props, componentContext, placeholderNormalize, toOptionalFiniteNumber) {
     const rawMode = props && props.coordinateRawValues === true;
     if (rawMode) {
       if (rawValue == null || (typeof rawValue === "number" && Number.isNaN(rawValue))) {
         return defaultText;
       }
     } else {
-      if (rawValue == null) {
-        return defaultText;
-      }
-      const n = Number(rawValue);
-      if (!Number.isFinite(n)) {
+      const n = toOptionalFiniteNumber(rawValue);
+      if (typeof n !== "number") {
         return defaultText;
       }
       rawValue = n;
@@ -151,10 +148,12 @@
   function create(def, componentContext) {
     const theme = componentContext.theme.tokens;
     const text = componentContext.components.require("TextLayoutEngine");
+    const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
     const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
     const fitCache = text.createFitCache(["flat", "stacked"]);
     function renderCanvas(canvas, props) {
       const p = resolveVariantProps(props);
@@ -210,13 +209,13 @@
       const textFillScale = insets.responsive.textFillScale;
       const defaultText = String(p.default);
       if (modeData.mode === "flat") {
-        const pairRaw = readCoordinatePair(p.value, true);
+        const pairRaw = readCoordinatePair(p.value, true, toOptionalFiniteNumber);
         const useAxisFlat = !!p.coordinateFlatFromAxes;
         const topText = useAxisFlat
-          ? formatAxisValue(pairRaw ? pairRaw.lat : null, "lat", defaultText, p, componentContext, placeholderNormalize)
+          ? formatAxisValue(pairRaw ? pairRaw.lat : null, "lat", defaultText, p, componentContext, placeholderNormalize, toOptionalFiniteNumber)
           : "";
         const bottomText = useAxisFlat
-          ? formatAxisValue(pairRaw ? pairRaw.lon : null, "lon", defaultText, p, componentContext, placeholderNormalize)
+          ? formatAxisValue(pairRaw ? pairRaw.lon : null, "lon", defaultText, p, componentContext, placeholderNormalize, toOptionalFiniteNumber)
           : "";
         const valueText = useAxisFlat
           ? ((topText + " " + bottomText).trim() || defaultText)
@@ -268,12 +267,12 @@
           labelWeight: labelWeight
         });
       } else {
-        const parsed = readCoordinatePair(p.value, p.coordinateRawValues === true);
+        const parsed = readCoordinatePair(p.value, p.coordinateRawValues === true, toOptionalFiniteNumber);
         const latText = parsed
-          ? formatAxisValue(parsed.lat, "lat", defaultText, p, componentContext, placeholderNormalize)
+          ? formatAxisValue(parsed.lat, "lat", defaultText, p, componentContext, placeholderNormalize, toOptionalFiniteNumber)
           : defaultText;
         const lonText = parsed
-          ? formatAxisValue(parsed.lon, "lon", defaultText, p, componentContext, placeholderNormalize)
+          ? formatAxisValue(parsed.lon, "lon", defaultText, p, componentContext, placeholderNormalize, toOptionalFiniteNumber)
           : defaultText;
         const topStatusEmoji = isTimeStatusMarker(latText);
         const key = text.makeFitCacheKey({

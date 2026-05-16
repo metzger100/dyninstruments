@@ -17,12 +17,22 @@
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     const unitFormatter = componentContext.components.require("UnitAwareFormatter");
     const formatDisplay = depthDisplayFormatter.createFormatDisplay(unitFormatter, placeholderNormalize);
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || function (value) {
+      if (value == null) {
+        return undefined;
+      }
+      if (typeof value === "string" && value.trim() === "") {
+        return undefined;
+      }
+      const n = Number(value);
+      return Number.isFinite(n) ? n : undefined;
+    };
 
     function buildLowEndSectors(props, minV, maxV, options) {
       const p = props || {};
       const opts = options || {};
-      const warningFrom = Number(p.warningFrom);
-      const alarmFrom = Number(p.alarmFrom);
+      const warningFrom = toOptionalFiniteNumber(p.warningFrom);
+      const alarmFrom = toOptionalFiniteNumber(p.alarmFrom);
       const alarmTo = Number.isFinite(alarmFrom) ? valueMath.clamp(alarmFrom, minV, maxV) : NaN;
       const warningTo = Number.isFinite(warningFrom) ? valueMath.clamp(warningFrom, minV, maxV) : NaN;
       const sectors = [];

@@ -182,6 +182,7 @@ Current shared utilities include:
 - `ValueMath.clamp()`
 - `ValueMath.isFiniteNumber()`
 - `ValueMath.toFiniteNumber()`
+- `ValueMath.toOptionalFiniteNumber()`
 - `ValueMath.trimText()`
 - `ValueMath.extractNumberText()`
 - `ValueMath.formatAngle180()`

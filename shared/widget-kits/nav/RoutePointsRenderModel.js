@@ -11,9 +11,18 @@
   "use strict";
 
   let toFiniteNumber;
+  let toOptionalFiniteNumber;
 
   function toSafeInteger(value, defaultValue) {
     const n = toFiniteNumber(value);
+    if (!Number.isFinite(n)) {
+      return defaultValue;
+    }
+    return Math.floor(n);
+  }
+
+  function toSafeOptionalInteger(value, defaultValue) {
+    const n = toOptionalFiniteNumber(value);
     if (!Number.isFinite(n)) {
       return defaultValue;
     }
@@ -42,13 +51,13 @@
 
   const PLACEHOLDER_VALUE = "--"; /* dyni-lint-disable-line hardcoded-runtime-default -- RoutePoints segment info contract requires a fixed placeholder token. */
 
-  function hasFiniteCoordinates(point, htmlUtils) {
+  function hasFiniteCoordinates(point) {
     if (!point || typeof point !== "object") {
       return false;
     }
     return (
-      typeof htmlUtils.toFiniteNumber(point.lat) === "number" &&
-      typeof htmlUtils.toFiniteNumber(point.lon) === "number"
+      typeof toOptionalFiniteNumber(point.lat) === "number" &&
+      typeof toOptionalFiniteNumber(point.lon) === "number"
     );
   }
 
@@ -90,7 +99,7 @@
         m.showHeader ? 1 : 0,
         m.showLatLon ? 1 : 0,
         m.stableDigitsEnabled === true ? 1 : 0,
-        toSafeInteger(m.selectedIndex, -1),
+        toSafeOptionalInteger(m.selectedIndex, -1),
         m.canActivateRoutePoint ? 1 : 0,
         scrollbarGutterPx
       ];
@@ -102,7 +111,7 @@
       m.showHeader ? 1 : 0,
       m.showLatLon ? 1 : 0,
       m.stableDigitsEnabled === true ? 1 : 0,
-      toSafeInteger(m.selectedIndex, -1),
+      toSafeOptionalInteger(m.selectedIndex, -1),
       m.canActivateRoutePoint ? 1 : 0,
       shellWidth,
       shellHeight,
@@ -122,8 +131,8 @@
   }
 
   function appendCoordinatePart(parts, label, value) {
-    const n = Number(value);
-    if (!Number.isFinite(n)) {
+    const n = toOptionalFiniteNumber(value);
+    if (typeof n !== "number") {
       return;
     }
     parts.push(label + ":" + n.toFixed(6));
@@ -149,14 +158,14 @@
 
   function buildPointSnapshot(point, rowIndex, routeName, selected, htmlUtils) {
     const p = toPoint(point);
-    const idxRaw = toFiniteNumber(p.idx);
-    const courseRaw = toFiniteNumber(p.course);
-    const distanceRaw = toFiniteNumber(p.distance);
+    const idxRaw = toOptionalFiniteNumber(p.idx);
+    const courseRaw = toOptionalFiniteNumber(p.course);
+    const distanceRaw = toOptionalFiniteNumber(p.distance);
     const snapshot = {
       idx: Number.isInteger(idxRaw) && idxRaw >= 0 ? idxRaw : rowIndex,
       name: toText(p.name, htmlUtils),
-      lat: htmlUtils.toFiniteNumber(p.lat),
-      lon: htmlUtils.toFiniteNumber(p.lon),
+      lat: toOptionalFiniteNumber(p.lat),
+      lon: toOptionalFiniteNumber(p.lon),
       routeName: routeName,
       selected: selected === true
     };
@@ -182,7 +191,9 @@
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
     const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");
-    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+    const valueMath = componentContext.components.require("ValueMath");
+    toFiniteNumber = valueMath.toFiniteNumber;
+    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
 
     function resolveStateKind(props, route) {
       return stateScreenPrecedence.pickFirst([
@@ -214,7 +225,7 @@
       const showLatLon = domain.showLatLon === true;
       const useRhumbLine = domain.useRhumbLine === true;
       const stableDigitsEnabled = props.stableDigits === true;
-      const selectedIndex = toSafeInteger(domain.selectedIndex, -1);
+      const selectedIndex = toSafeOptionalInteger(domain.selectedIndex, -1);
       const hasValidSelection = selectedIndex >= 0 && selectedIndex < pointCount;
       const activeKey = hasValidSelection
         ? buildPointIdentityKey(points[selectedIndex], selectedIndex)
@@ -284,8 +295,8 @@
       for (let i = 0; i < pointCount; i += 1) {
         const currentPoint = toPoint(points[i]);
         const previousPoint = i > 0 ? toPoint(points[i - 1]) : null;
-        const currentValid = hasFiniteCoordinates(currentPoint, htmlUtils);
-        const previousValid = hasFiniteCoordinates(previousPoint, htmlUtils);
+        const currentValid = hasFiniteCoordinates(currentPoint);
+        const previousValid = hasFiniteCoordinates(previousPoint);
         const normalizedName = toText(currentPoint.name, htmlUtils);
         const nameText = normalizedName || String(i);
         const infoText = routePointsHtmlFit.buildRowInfoText({

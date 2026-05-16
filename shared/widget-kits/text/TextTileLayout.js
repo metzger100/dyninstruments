@@ -14,6 +14,9 @@
   const CONTEXT_CACHE_KEY = "__dyniTextTileLayoutCache";
 
   function clampNumber(value, defaultValue) {
+    if (value == null || (typeof value === "string" && value.trim() === "")) {
+      return defaultValue;
+    }
     const n = Number(value);
     return Number.isFinite(n) ? n : defaultValue;
   }

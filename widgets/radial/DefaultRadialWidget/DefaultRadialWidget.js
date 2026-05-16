@@ -14,10 +14,19 @@
     const renderer = componentContext.components.require("SemicircleRadialEngine");
     const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || function (value) {
+      if (value == null) {
+        return undefined;
+      }
+      if (typeof value === "string" && value.trim() === "") {
+        return undefined;
+      }
+      const n = Number(value);
+      return Number.isFinite(n) ? n : undefined;
+    };
 
     function resolveThreshold(value) {
-      const n = Number(value);
-      return Number.isFinite(n) ? n : NaN;
+      return toOptionalFiniteNumber(value);
     }
 
     function pushSector(sectors, from, to, color, minV, maxV, arc, valueUtils) {
@@ -44,7 +53,7 @@
       const warningHighAt = resolveThreshold(p.defaultRadialWarningHighAt);
       const alarmHighAt = resolveThreshold(p.defaultRadialAlarmHighAt);
 
-      if (alarmLowEnabled) {
+      if (alarmLowEnabled && Number.isFinite(alarmLowAt)) {
         pushSector(
           sectors,
           minV,
@@ -56,10 +65,10 @@
           valueApi
         );
       }
-      if (warningLowEnabled) {
+      if (warningLowEnabled && Number.isFinite(warningLowAt)) {
         pushSector(
           sectors,
-          alarmLowEnabled ? alarmLowAt : minV,
+          (alarmLowEnabled && Number.isFinite(alarmLowAt)) ? alarmLowAt : minV,
           warningLowAt,
           p.defaultRadialWarningLowColor || theme.colors.warning,
           minV,
@@ -68,11 +77,11 @@
           valueApi
         );
       }
-      if (warningHighEnabled) {
+      if (warningHighEnabled && Number.isFinite(warningHighAt)) {
         pushSector(
           sectors,
           warningHighAt,
-          alarmHighEnabled ? alarmHighAt : maxV,
+          (alarmHighEnabled && Number.isFinite(alarmHighAt)) ? alarmHighAt : maxV,
           p.defaultRadialWarningHighColor || theme.colors.warning,
           minV,
           maxV,
@@ -80,7 +89,7 @@
           valueApi
         );
       }
-      if (alarmHighEnabled) {
+      if (alarmHighEnabled && Number.isFinite(alarmHighAt)) {
         pushSector(
           sectors,
           alarmHighAt,

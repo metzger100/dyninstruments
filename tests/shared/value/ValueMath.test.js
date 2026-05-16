@@ -15,6 +15,14 @@ describe("ValueMath", function () {
     expect(value.toFiniteNumber(null)).toBe(0);
     expect(value.toFiniteNumber(undefined)).toBeUndefined();
     expect(value.toFiniteNumber("abc")).toBeUndefined();
+    expect(value.toOptionalFiniteNumber(null)).toBeUndefined();
+    expect(value.toOptionalFiniteNumber(undefined)).toBeUndefined();
+    expect(value.toOptionalFiniteNumber("")).toBeUndefined();
+    expect(value.toOptionalFiniteNumber("   ")).toBeUndefined();
+    expect(value.toOptionalFiniteNumber("12.5")).toBe(12.5);
+    expect(value.toOptionalFiniteNumber(7)).toBe(7);
+    expect(value.toOptionalFiniteNumber(NaN)).toBeUndefined();
+    expect(value.toOptionalFiniteNumber(Infinity)).toBeUndefined();
   });
 
   it("clamps through the null-safe canonical implementation", function () {
@@ -55,12 +63,33 @@ describe("ValueMath", function () {
       num: NaN,
       text: "---"
     });
+    expect(value.formatGaugeDisplay("", {}, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
+      num: NaN,
+      text: "---"
+    });
+    expect(value.formatGaugeDisplay("   ", {}, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
+      num: NaN,
+      text: "---"
+    });
     expect(applyFormatter).not.toHaveBeenCalled();
 
     expect(value.formatGaugeDisplay(4.2, {}, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
       num: 4.2,
       text: "4.2"
     });
+  });
+
+  it("treats blank inputs as missing in shared angle/label formatters", function () {
+    const value = createValueMath();
+
+    expect(value.formatAngle180(null, true)).toBe("");
+    expect(value.formatAngle180("", true)).toBe("");
+    expect(value.formatDirection360(undefined, true)).toBe("");
+    expect(value.formatDirection360("   ", false)).toBe("");
+    expect(value.formatMajorLabel("", false)).toBe("");
+    expect(value.formatMajorLabel("  ")).toBe("");
+    expect(value.formatDirection360("270", true)).toBe("270");
+    expect(value.formatAngle180("-15", false)).toBe("-15");
   });
 
   it("exposes renamed tick-step resolvers and compatibility aliases", function () {

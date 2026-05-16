@@ -1,7 +1,7 @@
 /**
  * Module: MapZoomTextHtmlWidget - Interactive HTML renderer for map zoom kind
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: componentContext.format.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, PlaceholderNormalize, PreparedPayloadModelCache, StableDigits, componentContext.theme.tokens, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
+ * Depends: componentContext.format.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, ValueMath, PlaceholderNormalize, PreparedPayloadModelCache, StableDigits, componentContext.theme.tokens, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
  */
 
 (function (root, factory) {
@@ -66,8 +66,8 @@
     return policy.actions.map.checkAutoZoom() !== false;
   }
 
-  function clampCaptionUnitScale(value, htmlUtils) {
-    const scale = htmlUtils.toFiniteNumber(value);
+  function clampCaptionUnitScale(value, toOptionalFiniteNumber) {
+    const scale = toOptionalFiniteNumber(value);
     if (typeof scale !== "number") {
       return DEFAULT_CAPTION_UNIT_SCALE;
     }
@@ -106,7 +106,8 @@
     ]);
   }
 
-  function buildModel(props, shellRect, componentContext, htmlUtils, stateScreenLabels, stateScreenPrecedence, stateScreenInteraction, stableDigits) {
+  function buildModel(props, shellRect, componentContext, htmlUtils, stateScreenLabels,
+    stateScreenPrecedence, stateScreenInteraction, stableDigits, toOptionalFiniteNumber) {
     const p = ensureProps(props);
     const defaultText = String(p.default);
     const caption = htmlUtils.trimText(p.caption);
@@ -114,8 +115,8 @@
     const ratioMode = resolveDisplayMode(p, shellRect, htmlUtils);
     const mode = resolveComposedMode(ratioMode, caption, unit);
     const kind = resolveStateKind(p, stateScreenPrecedence);
-    const zoomNumber = htmlUtils.toFiniteNumber(p.zoom);
-    const requiredZoomNumber = htmlUtils.toFiniteNumber(p.requiredZoom);
+    const zoomNumber = toOptionalFiniteNumber(p.zoom);
+    const requiredZoomNumber = toOptionalFiniteNumber(p.requiredZoom);
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     const stableDigitsEnabled = p.stableDigits === true;
     const zoomRawText = formatZoom(zoomNumber, defaultText, componentContext, placeholderNormalize);
@@ -145,7 +146,7 @@
         stateLabel: stateScreenLabels.LABELS[kind] || "",
         mode: mode,
         interactionState: interactionState,
-        captionUnitScale: clampCaptionUnitScale(p.captionUnitScale, htmlUtils),
+        captionUnitScale: clampCaptionUnitScale(p.captionUnitScale, toOptionalFiniteNumber),
         stableDigitsEnabled: stableDigitsEnabled
       };
     }
@@ -162,7 +163,7 @@
       requiredPlainText: showRequired ? "(" + requiredStable.plain + ")" : "",
       showRequired: showRequired,
       interactionState: interactionState,
-      captionUnitScale: clampCaptionUnitScale(p.captionUnitScale, htmlUtils),
+      captionUnitScale: clampCaptionUnitScale(p.captionUnitScale, toOptionalFiniteNumber),
       stableDigitsEnabled: stableDigitsEnabled
     };
   }
@@ -257,6 +258,17 @@
     const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");
     const stateScreenMarkup = componentContext.components.require("StateScreenMarkup");
     const themeResolver = componentContext.theme.tokens;
+    const valueMath = componentContext.components.require("ValueMath");
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || function (value) {
+      if (value == null) {
+        return undefined;
+      }
+      if (typeof value === "string" && value.trim() === "") {
+        return undefined;
+      }
+      const n = Number(value);
+      return Number.isFinite(n) ? n : undefined;
+    };
 
     function translateFunction(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
@@ -269,7 +281,8 @@
       let lastProps = null;
       let lastFit = EMPTY_FIT;
       const translate = function (props, shellRect) {
-        return buildModel(props, shellRect, componentContext, htmlUtils, stateScreenLabels, stateScreenPrecedence, stateScreenInteraction, stableDigits);
+        return buildModel(props, shellRect, componentContext, htmlUtils, stateScreenLabels,
+          stateScreenPrecedence, stateScreenInteraction, stableDigits, toOptionalFiniteNumber);
       };
 
       const preparedPayload = preparedPayloadModelCache.createPreparedPayloadCache(translate);

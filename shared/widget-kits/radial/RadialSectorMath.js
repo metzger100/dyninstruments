@@ -13,6 +13,15 @@
   function create(def, componentContext) {
     const angle = componentContext.components.require("RadialAngleMath");
     const value = componentContext.components.require("ValueMath");
+    const toOptionalFiniteNumber = value.toOptionalFiniteNumber || value.toFiniteNumber;
+
+    function readOptionalThreshold(rawValue, defaultValue) {
+      const parsed = toOptionalFiniteNumber(rawValue);
+      if (typeof parsed === "number") {
+        return parsed;
+      }
+      return toOptionalFiniteNumber(defaultValue);
+    }
 
     function valueToAngle(rawValue, minV, maxV, arc, doClamp) {
       return angle.valueToAngle(rawValue, {
@@ -51,8 +60,8 @@
     function buildHighEndSectors(props, minV, maxV, arc, options) {
       const p = props || {};
       const opts = options || {};
-      const warningFrom = Number(p.warningFrom);
-      const alarmFrom = Number(p.alarmFrom);
+      const warningFrom = readOptionalThreshold(p.warningFrom, undefined);
+      const alarmFrom = readOptionalThreshold(p.alarmFrom, undefined);
       const warningTo = (Number.isFinite(alarmFrom) && Number.isFinite(warningFrom) && alarmFrom > warningFrom)
         ? alarmFrom
         : maxV;
@@ -71,8 +80,8 @@
     function buildLowEndSectors(props, minV, maxV, arc, options) {
       const p = props || {};
       const opts = options || {};
-      const warningFrom = Number((typeof p.warningFrom !== "undefined") ? p.warningFrom : opts.defaultWarningFrom);
-      const alarmFrom = Number((typeof p.alarmFrom !== "undefined") ? p.alarmFrom : opts.defaultAlarmFrom);
+      const warningFrom = readOptionalThreshold(p.warningFrom, opts.defaultWarningFrom);
+      const alarmFrom = readOptionalThreshold(p.alarmFrom, opts.defaultAlarmFrom);
       const alarmTo = Number.isFinite(alarmFrom) ? value.clamp(alarmFrom, minV, maxV) : NaN;
       const warningTo = Number.isFinite(warningFrom) ? value.clamp(warningFrom, minV, maxV) : NaN;
       const alarm = (Number.isFinite(alarmTo) && alarmTo > minV)

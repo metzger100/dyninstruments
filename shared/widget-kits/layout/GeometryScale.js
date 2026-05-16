@@ -13,6 +13,7 @@
   let valueMath;
 
   function finiteOrZero(value) {
+    // Internal geometry math intentionally treats missing factors/dimensions as 0 extent.
     const n = valueMath.toFiniteNumber(value);
     return typeof n === "number" ? n : 0;
   }

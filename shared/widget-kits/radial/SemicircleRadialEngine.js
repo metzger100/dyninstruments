@@ -174,10 +174,11 @@
           return cfg.formatDisplay(rawValue, props, unitText, componentContext);
         }
         : function (rawValue) {
-          if (rawValue == null) {
+          const numericRaw = value.toOptionalFiniteNumber(rawValue);
+          if (typeof numericRaw !== "number") {
             return { num: NaN, text: "" };
           }
-          return { num: Number(rawValue), text: String(rawValue) };
+          return { num: numericRaw, text: String(rawValue) };
         };
       const tickSteps = typeof cfg.tickSteps === "function"
         ? cfg.tickSteps

@@ -81,6 +81,8 @@ describe("LinearGaugeLayout", function () {
 
     expect(layout.computeMode(260, 220, 1.2, 2.8)).toBe("high");
     expect(layout.computeMode(260, 220, undefined, undefined)).toBe("normal");
+    expect(layout.computeMode(260, 220, null, null)).toBe("normal");
+    expect(layout.computeMode(260, 220, "   ", "")).toBe("normal");
     expect(layout.computeMode(520, 160, undefined, undefined)).toBe("flat");
     expect(layout.computeMode(120, 320, undefined, undefined)).toBe("high");
   });

@@ -82,6 +82,44 @@ describe("HtmlWidgetUtils", function () {
     })).toBe("normal");
   });
 
+  it("treats null and blank ratio thresholds as unset in resolveRatioModeForRect", function () {
+    const utils = createUtils();
+    const rect = { width: 150, height: 100 };
+    const omitted = utils.resolveRatioModeForRect({ shellRect: rect });
+
+    expect(omitted).toBe("normal");
+    expect(utils.resolveRatioModeForRect({
+      shellRect: rect,
+      ratioThresholdNormal: null,
+      ratioThresholdFlat: null
+    })).toBe(omitted);
+    expect(utils.resolveRatioModeForRect({
+      shellRect: rect,
+      ratioThresholdNormal: "   ",
+      ratioThresholdFlat: ""
+    })).toBe(omitted);
+    expect(utils.resolveRatioModeForRect({
+      shellRect: { width: 50, height: 100 },
+      defaultRatioThresholdNormal: null,
+      defaultRatioThresholdFlat: ""
+    })).toBe("high");
+  });
+
+  it("accepts valid numeric-string ratio thresholds", function () {
+    const utils = createUtils();
+
+    expect(utils.resolveRatioModeForRect({
+      shellRect: { width: 200, height: 100 },
+      ratioThresholdNormal: "2.1",
+      ratioThresholdFlat: "3.0"
+    })).toBe("high");
+    expect(utils.resolveRatioModeForRect({
+      shellRect: { width: 200, height: 100 },
+      ratioThresholdNormal: "1.0",
+      ratioThresholdFlat: "1.6"
+    })).toBe("flat");
+  });
+
   it("detects editing mode from editing and dyniLayoutEditing flags", function () {
     const utils = createUtils();
 

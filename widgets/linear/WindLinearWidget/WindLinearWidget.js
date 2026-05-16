@@ -14,6 +14,16 @@
   function create(def, componentContext) {
     const engine = componentContext.components.require("LinearGaugeEngine");
     const valueMath = componentContext.components.require("ValueMath");
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || function (value) {
+      if (value == null) {
+        return undefined;
+      }
+      if (typeof value === "string" && value.trim() === "") {
+        return undefined;
+      }
+      const n = Number(value);
+      return Number.isFinite(n) ? n : undefined;
+    };
     const stableDigits = componentContext.components.require("StableDigits");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
@@ -28,7 +38,10 @@
     }
 
     function resolveSpeedText(rawSpeed, props, speedUnit, defaultText) {
-      const n = rawSpeed == null ? undefined : valueMath.toFiniteNumber(rawSpeed);
+      if (rawSpeed == null || (typeof rawSpeed === "string" && rawSpeed.trim() === "")) {
+        return defaultText;
+      }
+      const n = toOptionalFiniteNumber(rawSpeed);
       if (typeof n !== "number") {
         return defaultText;
       }
@@ -51,7 +64,7 @@
       const defaultText = hasOwn.call(p, "default")
         ? p.default
         : placeholderNormalize.normalize(undefined, undefined);
-      const angle = rawAngle == null ? undefined : valueMath.toFiniteNumber(rawAngle);
+      const angle = toOptionalFiniteNumber(rawAngle);
       const angleText = typeof angle === "number"
         ? valueMath.formatAngle180(angle, !!p.leadingZero)
         : defaultText;

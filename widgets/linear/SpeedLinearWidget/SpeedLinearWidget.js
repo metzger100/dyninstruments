@@ -14,6 +14,16 @@
     const engine = componentContext.components.require("LinearGaugeEngine");
     const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || function (value) {
+      if (value == null) {
+        return undefined;
+      }
+      if (typeof value === "string" && value.trim() === "") {
+        return undefined;
+      }
+      const n = Number(value);
+      return Number.isFinite(n) ? n : undefined;
+    };
 
     function formatDisplay(raw, props, unit) {
       return valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatSpeed", [unit || "kn"]);
@@ -21,8 +31,8 @@
 
     function buildSectors(props, minV, maxV, axis, valueApi, theme) {
       const p = props || {};
-      const warningFrom = Number(p.speedLinearWarningFrom);
-      const alarmFrom = Number(p.speedLinearAlarmFrom);
+      const warningFrom = toOptionalFiniteNumber(p.speedLinearWarningFrom);
+      const alarmFrom = toOptionalFiniteNumber(p.speedLinearAlarmFrom);
       const warningTo = (Number.isFinite(alarmFrom) && Number.isFinite(warningFrom) && alarmFrom > warningFrom)
         ? alarmFrom
         : maxV;

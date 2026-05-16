@@ -11,6 +11,7 @@
 }(this, function () {
   "use strict";
   let toFiniteNumber;
+  let toOptionalFiniteNumber;
 
   function getGlobalRoot() {
     if (typeof globalThis !== "undefined") {
@@ -22,13 +23,10 @@
     return this;
   }
 
-  function makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath) {
+  function makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath, parseNumber) {
     return function (raw) {
-      if (raw == null) {
-        return defaultText;
-      }
-      const n = Number(raw);
-      if (!Number.isFinite(n)) {
+      const n = parseNumber(raw);
+      if (typeof n !== "number") {
         return defaultText;
       }
       let a = isDirection ? angleMath.norm360(n) : angleMath.norm180(n);
@@ -136,23 +134,25 @@
         return toFiniteNumber(p[key]);
       },
       out: out,
-      num: toFiniteNumber,
+      num: toOptionalFiniteNumber,
       makeAngleFormatter: function (isDirection, leadingZero, defaultText) {
-        return makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath);
+        return makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath, toOptionalFiniteNumber);
       }
     };
   }
 
   function create(def, componentContext) {
     const angleMath = componentContext.components.require("RadialAngleMath");
-    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+    const valueMath = componentContext.components.require("ValueMath");
+    toFiniteNumber = valueMath.toFiniteNumber;
+    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
     const catalog = getSharedCatalog();
 
     return {
       out: out,
-      num: toFiniteNumber,
+      num: toOptionalFiniteNumber,
       makeAngleFormatter: function (isDirection, leadingZero, defaultText) {
-        return makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath);
+        return makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath, toOptionalFiniteNumber);
       },
       createToolkit: function (props) {
         return createToolkit(props, angleMath, catalog);

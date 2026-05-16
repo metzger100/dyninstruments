@@ -13,9 +13,10 @@
   const hasOwn = Object.prototype.hasOwnProperty;
   const NORMAL_DEFAULTS = { innerMarginFactor: 0.03, minHeightFactor: 0.45, dualGapFactor: 0.05 };
 
+  // dyni-lint-disable-next-line duplicate-functions -- Layout owners intentionally keep a tiny local clamp helper for geometry config normalization.
   function clampNumber(value, minValue, maxValue, defaultValue) {
     const n = Number(value);
-    if (!Number.isFinite(n)) {
+    if (!Number.isFinite(n) || value == null || (typeof value === "string" && value.trim() === "")) {
       return defaultValue;
     }
     return Math.max(minValue, Math.min(maxValue, n));

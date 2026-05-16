@@ -127,6 +127,12 @@ describe("PositionCoordinateWidget", function () {
                 isFiniteNumber(value) {
                   return typeof value === "number" && isFinite(value);
                 },
+                toOptionalFiniteNumber(value) {
+                  if (value == null) return undefined;
+                  if (typeof value === "string" && value.trim() === "") return undefined;
+                  const n = Number(value);
+                  return Number.isFinite(n) ? n : undefined;
+                },
                 clamp(n, lo, hi) {
                   const num = Number(n);
                   if (!isFinite(num)) return lo;
@@ -839,6 +845,40 @@ describe("PositionCoordinateWidget", function () {
 
     const naCount = fillTextValues(ctx).filter((t) => t === "NA").length;
     expect(naCount).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps stacked coordinates missing when lat/lon are null, blank, or one-sided", function () {
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
+      .create({}, makeComponentContext());
+    const scenarios = [
+      { lat: null, lon: null },
+      { lat: "", lon: "" },
+      { lat: "   ", lon: "   " },
+      { lat: null, lon: 10.9 },
+      { lat: 54.1, lon: null },
+      { lat: "", lon: 10.9 },
+      { lat: 54.1, lon: "" }
+    ];
+
+    scenarios.forEach(function (value) {
+      const ctx = createMockContext2D();
+      const canvas = createMockCanvas({
+        rectWidth: 220,
+        rectHeight: 140,
+        ctx
+      });
+
+      spec.renderCanvas(canvas, {
+        value: value,
+        default: "NA",
+        ratioThresholdNormal: 1.0,
+        ratioThresholdFlat: 3.0
+      });
+
+      const texts = fillTextValues(ctx);
+      expect(texts.filter((entry) => entry === "NA").length).toBeGreaterThanOrEqual(2);
+      expect(texts).not.toContain("0");
+    });
   });
 
   it("falls back to raw numeric string when formatter is unavailable", function () {

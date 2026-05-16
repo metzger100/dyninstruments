@@ -65,7 +65,10 @@ function trimText(value) {
 }
 
 function toMaybeNumber(value) {
-  if (typeof value === "undefined" || value === null || value === "") {
+  if (typeof value === "undefined" || value === null) {
+    return undefined;
+  }
+  if (typeof value === "string" && value.trim() === "") {
     return undefined;
   }
   const numeric = Number(value);
@@ -309,6 +312,21 @@ describe("NavMapper", function () {
     expect(out.units.nextCourse).toBe("degN");
   });
 
+  it("keeps activeRoute numeric fields missing when live values are null/blank", function () {
+    const mapper = createMapper();
+    const activeRouteViewModel = makeActiveRouteViewModel();
+    const out = mapper.translate({
+      kind: "activeRoute",
+      activeRouteName: "Harbor Run",
+      activeRouteRemain: null,
+      activeRouteEta: new Date("2026-03-06T11:45:00Z"),
+      activeRouteNextCourse: "   "
+    }, routeContext("activeRoute", toolkit, activeRouteViewModel));
+
+    expect(out.display.remain).toBeUndefined();
+    expect(out.display.nextCourse).toBeUndefined();
+  });
+
   it("maps activeRoute disconnect from raw connectionLost signal only", function () {
     const mapper = createMapper();
     const activeRouteViewModel = makeActiveRouteViewModel();
@@ -413,6 +431,22 @@ describe("NavMapper", function () {
     const out = mapper.translate({ kind: "xteDisplay", xte: 0.2, cog: 90, dtw: 1.1, btw: 95 }, routeContext("xteDisplay", toolkit));
     expect(out.layout.showWpName).toBe(false);
     expect(out.layout.hideTextualMetrics).toBe(false);
+  });
+
+  it("keeps xteDisplay missing values missing instead of coercing to zero", function () {
+    const mapper = createMapper();
+    const out = mapper.translate({
+      kind: "xteDisplay",
+      xte: null,
+      cog: "",
+      dtw: "   ",
+      btw: undefined
+    }, routeContext("xteDisplay", toolkit));
+
+    expect(out.display.xte).toBeUndefined();
+    expect(out.display.cog).toBeUndefined();
+    expect(out.display.dtw).toBeUndefined();
+    expect(out.display.btw).toBeUndefined();
   });
 
   it("maps routePoints to grouped renderer payload", function () {

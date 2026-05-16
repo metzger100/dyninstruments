@@ -12,6 +12,7 @@
   "use strict";
 
   let toFiniteNumber;
+  let toOptionalFiniteNumber;
   let trimText;
 
   function escapeHtml(value) {
@@ -62,10 +63,10 @@
 
   function resolveRatioModeForRect(options) {
     const opts = options || {};
-    const normalThresholdRaw = toFiniteNumber(opts.ratioThresholdNormal);
-    const flatThresholdRaw = toFiniteNumber(opts.ratioThresholdFlat);
-    const defaultNormalRaw = toFiniteNumber(opts.defaultRatioThresholdNormal);
-    const defaultFlatRaw = toFiniteNumber(opts.defaultRatioThresholdFlat);
+    const normalThresholdRaw = toOptionalFiniteNumber(opts.ratioThresholdNormal);
+    const flatThresholdRaw = toOptionalFiniteNumber(opts.ratioThresholdFlat);
+    const defaultNormalRaw = toOptionalFiniteNumber(opts.defaultRatioThresholdNormal);
+    const defaultFlatRaw = toOptionalFiniteNumber(opts.defaultRatioThresholdFlat);
     const normalThreshold = typeof normalThresholdRaw === "number"
       ? normalThresholdRaw
       : (typeof defaultNormalRaw === "number" ? defaultNormalRaw : 1);
@@ -294,6 +295,7 @@
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
     toFiniteNumber = valueMath.toFiniteNumber;
+    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
     trimText = valueMath.trimText;
 
     return {

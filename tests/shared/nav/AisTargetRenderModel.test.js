@@ -220,6 +220,32 @@ describe("AisTargetRenderModel", function () {
     expect(model.metrics.brg.valueText).toBe("---");
   });
 
+  it("keeps null and blank AIS metric payload values missing instead of coercing to zero", function () {
+    const setup = createRenderModel();
+    const model = setup.renderModel.buildModel({
+      props: withSurfacePolicy(makeProps({
+        domain: {
+          distance: null,
+          cpa: "   ",
+          tcpa: "",
+          headingTo: undefined
+        }
+      }), { pageId: "navpage", mode: "dispatch" }),
+      shellRect: { width: 320, height: 180 },
+      mode: "normal",
+      isVerticalCommitted: false
+    });
+
+    expect(model.metrics.dst.valueText).toBe("---");
+    expect(model.metrics.cpa.valueText).toBe("---");
+    expect(model.metrics.tcpa.valueText).toBe("---");
+    expect(model.metrics.brg.valueText).toBe("---");
+    expect(model.metrics.dst.valueText).not.toContain("0");
+    expect(model.metrics.cpa.valueText).not.toContain("0");
+    expect(model.metrics.tcpa.valueText).not.toContain("0");
+    expect(model.metrics.brg.valueText).not.toContain("0");
+  });
+
   it("keeps all four metrics visible for flat, normal, and high data modes without flat-row state classes", function () {
     const setup = createRenderModel();
     ["flat", "normal", "high"].forEach((mode) => {

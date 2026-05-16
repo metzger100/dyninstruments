@@ -20,6 +20,12 @@ describe("ActiveRouteViewModel", function () {
         return units[key];
       },
       num(value) {
+        if (value == null) {
+          return undefined;
+        }
+        if (typeof value === "string" && value.trim() === "") {
+          return undefined;
+        }
         const n = Number(value);
         return Number.isFinite(n) ? n : undefined;
       }
@@ -118,5 +124,17 @@ describe("ActiveRouteViewModel", function () {
       nextCourse: undefined,
       isApproaching: false
     });
+  });
+
+  it("keeps active-route numeric display fields missing for blank strings", function () {
+    const vm = createViewModel();
+    const out = vm.build({
+      activeRouteName: "Harbor Run",
+      activeRouteRemain: "   ",
+      activeRouteNextCourse: ""
+    }, createToolkit());
+
+    expect(out.display.remain).toBeUndefined();
+    expect(out.display.nextCourse).toBeUndefined();
   });
 });

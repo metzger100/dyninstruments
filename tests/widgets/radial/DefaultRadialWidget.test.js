@@ -190,4 +190,36 @@ describe("DefaultRadialWidget", function () {
       { a0: 90, a1: 100, color: "#ff7a76" }
     ]);
   });
+
+  it("treats blank and missing thresholds as unset instead of creating zero sectors", function () {
+    const h = createHarness();
+    const valueUtils = {
+      sectorAngles(from, to) {
+        const f = Number(from);
+        const t = Number(to);
+        return Number.isFinite(f) && Number.isFinite(t) && t > f ? { a0: f, a1: t } : null;
+      }
+    };
+    const theme = {
+      colors: {
+        warning: "#e7c66a",
+        alarm: "#ff7a76"
+      }
+    };
+    const missingValues = [null, undefined, "", "   "];
+
+    missingValues.forEach(function (rawThreshold) {
+      expect(h.captured.buildSectors({
+        defaultRadialWarningHighEnabled: true,
+        defaultRadialWarningHighAt: rawThreshold
+      }, 0, 100, {}, valueUtils, theme)).toEqual([]);
+    });
+
+    expect(h.captured.buildSectors({
+      defaultRadialWarningHighEnabled: true,
+      defaultRadialWarningHighAt: "75"
+    }, 0, 100, {}, valueUtils, theme)).toEqual([
+      { a0: 75, a1: 100, color: "#e7c66a" }
+    ]);
+  });
 });

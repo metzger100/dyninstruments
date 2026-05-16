@@ -57,6 +57,7 @@
     const makeRect = componentContext.components.require("LayoutRectMath").makeRect;
     const mathApi = componentContext.components.require("EditRouteLayoutMath");
     const geometryApi = componentContext.components.require("EditRouteLayoutGeometry");
+    const toOptionalFiniteNumber = mathApi.toOptionalFiniteNumber || mathApi.toFiniteNumber;
 
     function computeVerticalShellProfile(args) {
       const cfg = args || {};
@@ -74,7 +75,7 @@
         };
       }
 
-      const explicitHeight = mathApi.toFiniteNumber(cfg.effectiveLayoutHeight);
+      const explicitHeight = toOptionalFiniteNumber(cfg.effectiveLayoutHeight);
       const widthDrivenHeight = Math.max(
         1,
         Math.floor((width * VERTICAL_ASPECT_RATIO.height) / VERTICAL_ASPECT_RATIO.width)
@@ -131,8 +132,8 @@
       const W = Math.max(1, Math.floor(mathApi.clampNumber(cfg.W, 1, Number.MAX_SAFE_INTEGER, 1)));
       const H = Math.max(1, Math.floor(mathApi.clampNumber(cfg.H, 1, Number.MAX_SAFE_INTEGER, 1)));
       const ratio = W / H;
-      const ratioThresholdNormal = mathApi.toFiniteNumber(cfg.ratioThresholdNormal);
-      const ratioThresholdFlat = mathApi.toFiniteNumber(cfg.ratioThresholdFlat);
+      const ratioThresholdNormal = toOptionalFiniteNumber(cfg.ratioThresholdNormal);
+      const ratioThresholdFlat = toOptionalFiniteNumber(cfg.ratioThresholdFlat);
 
       if (typeof ratioThresholdNormal === "number" && ratio < ratioThresholdNormal) {
         return "high";

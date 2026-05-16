@@ -14,10 +14,19 @@
     const engine = componentContext.components.require("LinearGaugeEngine");
     const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || function (value) {
+      if (value == null) {
+        return undefined;
+      }
+      if (typeof value === "string" && value.trim() === "") {
+        return undefined;
+      }
+      const n = Number(value);
+      return Number.isFinite(n) ? n : undefined;
+    };
 
     function resolveThreshold(value) {
-      const n = Number(value);
-      return Number.isFinite(n) ? n : NaN;
+      return toOptionalFiniteNumber(value);
     }
 
     function buildSectors(props, minV, maxV, axis, valueApi, theme) {
@@ -32,7 +41,7 @@
       const warningHighAt = resolveThreshold(p.defaultLinearWarningHighAt);
       const alarmHighAt = resolveThreshold(p.defaultLinearAlarmHighAt);
 
-      if (alarmLowEnabled) {
+      if (alarmLowEnabled && Number.isFinite(alarmLowAt)) {
         sectors.push({
           from: valueApi.clamp(minV, axis.min, axis.max),
           to: valueApi.clamp(alarmLowAt, axis.min, axis.max),
@@ -40,23 +49,23 @@
         });
       }
 
-      if (warningLowEnabled) {
+      if (warningLowEnabled && Number.isFinite(warningLowAt)) {
         sectors.push({
-          from: valueApi.clamp(alarmLowEnabled ? alarmLowAt : minV, axis.min, axis.max),
+          from: valueApi.clamp((alarmLowEnabled && Number.isFinite(alarmLowAt)) ? alarmLowAt : minV, axis.min, axis.max),
           to: valueApi.clamp(warningLowAt, axis.min, axis.max),
           color: p.defaultLinearWarningLowColor || theme.colors.warning
         });
       }
 
-      if (warningHighEnabled) {
+      if (warningHighEnabled && Number.isFinite(warningHighAt)) {
         sectors.push({
           from: valueApi.clamp(warningHighAt, axis.min, axis.max),
-          to: valueApi.clamp(alarmHighEnabled ? alarmHighAt : maxV, axis.min, axis.max),
+          to: valueApi.clamp((alarmHighEnabled && Number.isFinite(alarmHighAt)) ? alarmHighAt : maxV, axis.min, axis.max),
           color: p.defaultLinearWarningHighColor || theme.colors.warning
         });
       }
 
-      if (alarmHighEnabled) {
+      if (alarmHighEnabled && Number.isFinite(alarmHighAt)) {
         sectors.push({
           from: valueApi.clamp(alarmHighAt, axis.min, axis.max),
           to: valueApi.clamp(maxV, axis.min, axis.max),

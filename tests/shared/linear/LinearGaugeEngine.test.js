@@ -140,6 +140,12 @@ describe("LinearGaugeEngine", function () {
                 isFiniteNumber(v) {
                   return typeof v === "number" && isFinite(v);
                 },
+                toOptionalFiniteNumber(v) {
+                  if (v == null) return undefined;
+                  if (typeof v === "string" && v.trim() === "") return undefined;
+                  const n = Number(v);
+                  return isFinite(n) ? n : undefined;
+                },
                 normalizeRange(minRaw, maxRaw, fallbackMin, fallbackMax) {
                   const min = Number(minRaw);
                   const max = Number(maxRaw);
@@ -856,7 +862,7 @@ describe("LinearGaugeEngine", function () {
     expect(harness.calls.fitInlineCaptions).toEqual(["0"]);
   });
 
-  it("uses placeholder text for null input on the default formatDisplay fallback", function () {
+  it("uses placeholder text for missing input on the default formatDisplay fallback", function () {
     const harness = createHarness();
     let displaySnapshot = null;
     const renderer = harness.engine.createRenderer({
@@ -872,8 +878,26 @@ describe("LinearGaugeEngine", function () {
       }
     });
 
-    renderer(createMockCanvas({ rectWidth: 280, rectHeight: 220, ctx: createMockContext2D() }), {
-      value: null,
+    const canvas = createMockCanvas({ rectWidth: 280, rectHeight: 220, ctx: createMockContext2D() });
+    [null, undefined, "", "   "].forEach(function (rawValue) {
+      renderer(canvas, {
+        value: rawValue,
+        default: "---",
+        min: 0,
+        max: 30,
+        major: 10,
+        minor: 5,
+        n: 1.1,
+        f: 3.5
+      });
+
+      expect(displaySnapshot).toBeTruthy();
+      expect(Number.isNaN(displaySnapshot.num)).toBe(true);
+      expect(displaySnapshot.text).toBe("---");
+    });
+
+    renderer(canvas, {
+      value: "4.2",
       default: "---",
       min: 0,
       max: 30,
@@ -882,10 +906,9 @@ describe("LinearGaugeEngine", function () {
       n: 1.1,
       f: 3.5
     });
-
     expect(displaySnapshot).toBeTruthy();
-    expect(Number.isNaN(displaySnapshot.num)).toBe(true);
-    expect(displaySnapshot.text).toBe("---");
+    expect(displaySnapshot.num).toBe(4.2);
+    expect(displaySnapshot.text).toBe("4.2");
   });
 
   it("uses linear.labels.insetFactor to position tick labels", function () {

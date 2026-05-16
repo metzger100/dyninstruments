@@ -166,6 +166,7 @@
       deps: [
         "MapZoomHtmlFit",
         "HtmlWidgetUtils",
+        "ValueMath",
         "PlaceholderNormalize",
         "PreparedPayloadModelCache",
         "StableDigits",

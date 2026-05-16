@@ -178,4 +178,29 @@ describe("DefaultLinearWidget", function () {
       { from: 90, to: 100, color: "#ff7a76" }
     ]);
   });
+
+  it("treats blank and missing thresholds as unset instead of creating zero sectors", function () {
+    const h = createHarness();
+    const theme = {
+      colors: {
+        warning: "#e7c66a",
+        alarm: "#ff7a76"
+      }
+    };
+    const missingValues = [null, undefined, "", "   "];
+
+    missingValues.forEach(function (rawThreshold) {
+      expect(h.captured.buildSectors({
+        defaultLinearWarningHighEnabled: true,
+        defaultLinearWarningHighAt: rawThreshold
+      }, 0, 100, { min: 0, max: 100 }, h.valueMath, theme)).toEqual([]);
+    });
+
+    expect(h.captured.buildSectors({
+      defaultLinearWarningHighEnabled: true,
+      defaultLinearWarningHighAt: "75"
+    }, 0, 100, { min: 0, max: 100 }, h.valueMath, theme)).toEqual([
+      { from: 75, to: 100, color: "#e7c66a" }
+    ]);
+  });
 });

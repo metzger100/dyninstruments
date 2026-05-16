@@ -21,6 +21,17 @@
     return Number.isFinite(n) ? n : undefined;
   }
 
+  function toOptionalFiniteNumber(value) {
+    if (value == null) {
+      return undefined;
+    }
+    if (typeof value === "string" && value.trim() === "") {
+      return undefined;
+    }
+    const n = Number(value);
+    return Number.isFinite(n) ? n : undefined;
+  }
+
   function toNumber(value) {
     const n = toFiniteNumber(value);
     return typeof n === "number" ? n : NaN;
@@ -110,17 +121,21 @@
   function formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultFormatterParameters) {
     const p = props || {};
     const defaultText = hasOwn.call(p, "default") ? p.default : normalize(undefined, undefined);
-    if (raw == null) {
-      return { num: NaN, text: defaultText };
-    }
-    const n = Number(raw);
-    if (!Number.isFinite(n)) {
+    const numericRaw = toOptionalFiniteNumber(raw);
+    if (typeof numericRaw !== "number") {
       return { num: NaN, text: defaultText };
     }
 
     const formatter = hasOwn.call(p, "formatter") ? p.formatter : defaultFormatter;
     const formatterParameters = hasOwn.call(p, "formatterParameters") ? p.formatterParameters : defaultFormatterParameters;
-    const formatted = normalize(String(applyFormatter(n, { formatter: formatter, formatterParameters: formatterParameters, default: defaultText })), defaultText);
+    const formatted = normalize(
+      String(applyFormatter(numericRaw, {
+        formatter: formatter,
+        formatterParameters: formatterParameters,
+        default: defaultText
+      })),
+      defaultText
+    );
     const numberText = extractNumberText(formatted);
     const num = numberText ? Number(numberText) : NaN;
     return Number.isFinite(num) ? { num: num, text: numberText } : { num: NaN, text: defaultText };
@@ -191,8 +206,8 @@
   }
 
   function formatAngle180(value, leadingZero) {
-    const n = Number(value);
-    if (!Number.isFinite(n)) {
+    const n = toOptionalFiniteNumber(value);
+    if (typeof n !== "number") {
       return "";
     }
     let a = ((n + 180) % 360 + 360) % 360 - 180;
@@ -205,8 +220,8 @@
   }
 
   function formatDirection360(value, leadingZero) {
-    const n = Number(value);
-    if (!Number.isFinite(n)) {
+    const n = toOptionalFiniteNumber(value);
+    if (typeof n !== "number") {
       return "";
     }
     let a = n % 360;
@@ -218,8 +233,8 @@
   }
 
   function formatMajorLabel(value) {
-    const n = Number(value);
-    if (!Number.isFinite(n)) {
+    const n = toOptionalFiniteNumber(value);
+    if (typeof n !== "number") {
       return "";
     }
     if (almostInt(n, 1e-6)) {
@@ -234,6 +249,7 @@
       id: "ValueMath",
       isFiniteNumber: isFiniteNumber,
       toFiniteNumber: toFiniteNumber,
+      toOptionalFiniteNumber: toOptionalFiniteNumber,
       clamp: clamp,
       clampPositive: clampPositive,
       ensureObject: ensureObject,

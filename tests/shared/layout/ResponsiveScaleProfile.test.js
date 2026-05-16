@@ -115,6 +115,25 @@ describe("ResponsiveScaleProfile", function () {
     expect(medium.flatCenterShareScale).toBeLessThan(large.flatCenterShareScale);
   });
 
+  it("treats null and blank scale overrides as missing defaults", function () {
+    const profileApi = createProfileApi();
+    const profile = profileApi.computeProfile(120, 80, {
+      scales: {
+        textFillScale: null,
+        normalCaptionShareScale: "   ",
+        flatCenterShareScale: "",
+        stackedCaptionScale: "0.76",
+        highCenterWeightScale: undefined
+      }
+    });
+
+    expect(profile.textFillScale).toBe(1);
+    expect(profile.normalCaptionShareScale).toBe(1);
+    expect(profile.flatCenterShareScale).toBe(1);
+    expect(profile.stackedCaptionScale).toBe(0.76);
+    expect(profile.highCenterWeightScale).toBe(1);
+  });
+
   it("computes inset pixels from minDim ratios with floor guards", function () {
     const profileApi = createProfileApi();
     const compact = profileApi.computeProfile(20, 50, { scales: CENTER_DISPLAY_SCALES });

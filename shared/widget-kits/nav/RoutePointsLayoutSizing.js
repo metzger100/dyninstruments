@@ -22,15 +22,17 @@
   const MARKER_CELL_PADDING_X_MIN_PX = 1;
   const MARKER_CELL_PADDING_X_MAX_PX = 8;
 
+  // dyni-lint-disable-next-line duplicate-functions -- Layout owners intentionally keep a tiny local clamp helper for geometry config normalization.
   function clampNumber(value, minValue, maxValue, defaultValue) {
     const n = Number(value);
-    if (!Number.isFinite(n)) {
+    if (!Number.isFinite(n) || value == null || (typeof value === "string" && value.trim() === "")) {
       return defaultValue;
     }
     return Math.max(minValue, Math.min(maxValue, n));
   }
 
   function toCount(value) {
+    // Internal row-count math intentionally collapses missing values to 0.
     const n = Number(value);
     if (!Number.isFinite(n)) {
       return 0;

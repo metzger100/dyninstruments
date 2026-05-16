@@ -245,6 +245,30 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     expect(unsupported.getHostActions().routePoints.activate(makeRoutePointPayload(1))).toBe(false);
   });
 
+  it("rejects missing or blank route-point indexes instead of coercing to zero", function () {
+    const routePointsActivate = vi.fn(() => true);
+    const { bridge } = createBridgeContext({
+      pageRoots: { gpspage: makeElement() },
+      routePointsActivate
+    });
+    const hostActions = bridge.getHostActions();
+
+    [null, undefined, "", "   "].forEach(function (value) {
+      expect(function () {
+        hostActions.routePoints.activate({
+          index: value,
+          pointSnapshot: {
+            idx: 1,
+            lat: 54.1,
+            lon: 10.1,
+            routeName: "Harbor Run"
+          }
+        });
+      }).toThrow(/TemporaryHostActionBridge: routePoints\.activate requires a non-negative integer index/);
+    });
+    expect(routePointsActivate).not.toHaveBeenCalled();
+  });
+
   it("resolves routePoints from the captured DyniPlugin.avnavApi when the wrapper global is absent", function () {
     const routePointsActivate = vi.fn(() => true);
     const { bridge } = createBridgeContext({
@@ -259,6 +283,47 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
 
     expect(bridge.getHostActions().routePoints.activate(makeRoutePointPayload(4))).toBe(true);
     expect(routePointsActivate).toHaveBeenCalledWith(4);
+  });
+
+  it("rejects null/blank route-point coordinates on editroutepage", function () {
+    const editHandler = vi.fn();
+    const editRoot = makeElement({
+      __reactFiber$edit: { memoizedProps: { onItemClick: editHandler }, return: null }
+    });
+    const { bridge } = createBridgeContext({ pageRoots: { editroutepage: editRoot } });
+    const hostActions = bridge.getHostActions();
+
+    expect(function () {
+      hostActions.routePoints.activate(makeRoutePointPayload(3, { lat: null }));
+    }).toThrow(/TemporaryHostActionBridge: routePoints\.activate requires finite pointSnapshot\.lat\/lon on editroutepage/);
+    expect(function () {
+      hostActions.routePoints.activate(makeRoutePointPayload(3, { lon: "   " }));
+    }).toThrow(/TemporaryHostActionBridge: routePoints\.activate requires finite pointSnapshot\.lat\/lon on editroutepage/);
+    expect(editHandler).not.toHaveBeenCalled();
+  });
+
+  it("does not coerce blank optional course/distance fields in editroute payloads", function () {
+    const editHandler = vi.fn();
+    const editRoot = makeElement({
+      __reactFiber$edit: { memoizedProps: { onItemClick: editHandler }, return: null }
+    });
+    const { bridge } = createBridgeContext({ pageRoots: { editroutepage: editRoot } });
+    const hostActions = bridge.getHostActions();
+
+    expect(hostActions.routePoints.activate(makeRoutePointPayload(5, {
+      course: "",
+      distance: "   "
+    }))).toBe(true);
+
+    expect(editHandler).toHaveBeenCalledTimes(1);
+    expect(editHandler.mock.calls[0][0].avnav.point).toEqual({
+      idx: 5,
+      name: "WP5",
+      lat: 54.05,
+      lon: 10.05,
+      routeName: "Harbor Run",
+      selected: false
+    });
   });
 
   it("throws explicit errors when a dispatch-capable gps routePoints relay path fails", function () {

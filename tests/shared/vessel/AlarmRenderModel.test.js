@@ -107,4 +107,41 @@ describe("AlarmRenderModel", function () {
     expect(model.interactionState).toBe("passive");
     expect(model.canDispatch).toBe(false);
   });
+
+  it("treats null and blank ratio thresholds like omitted thresholds", function () {
+    const renderModel = createRenderModel();
+    const omitted = renderModel.buildModel({
+      props: { caption: "ALARM" },
+      domain: { state: "idle" }
+    });
+
+    [null, undefined, "", "   "].forEach(function (rawThreshold) {
+      const model = renderModel.buildModel({
+        props: {
+          caption: "ALARM",
+          ratioThresholdNormal: rawThreshold,
+          ratioThresholdFlat: rawThreshold
+        },
+        domain: { state: "idle" }
+      });
+
+      expect(model.ratioThresholdNormal).toBe(omitted.ratioThresholdNormal);
+      expect(model.ratioThresholdFlat).toBe(omitted.ratioThresholdFlat);
+    });
+  });
+
+  it("keeps finite numeric-string ratio thresholds", function () {
+    const renderModel = createRenderModel();
+    const model = renderModel.buildModel({
+      props: {
+        caption: "ALARM",
+        ratioThresholdNormal: "1.2",
+        ratioThresholdFlat: "3"
+      },
+      domain: { state: "idle" }
+    });
+
+    expect(model.ratioThresholdNormal).toBe(1.2);
+    expect(model.ratioThresholdFlat).toBe(3);
+  });
 });

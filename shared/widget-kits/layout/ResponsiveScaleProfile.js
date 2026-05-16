@@ -13,9 +13,10 @@
   const RESPONSIVE_MIN_DIM = 80;
   const RESPONSIVE_DIM_RANGE = 100;
 
+  // dyni-lint-disable-next-line duplicate-functions -- Small local clamp keeps this zero-dependency profile module self-contained.
   function clampNumber(value, minValue, maxValue, defaultValue) {
     const n = Number(value);
-    if (!Number.isFinite(n)) {
+    if (!Number.isFinite(n) || value == null || (typeof value === "string" && value.trim() === "")) {
       return defaultValue;
     }
     return Math.max(minValue, Math.min(maxValue, n));

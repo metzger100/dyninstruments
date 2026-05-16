@@ -188,6 +188,26 @@ describe("RadialValueMath", function () {
     ]);
   });
 
+  it("treats null and blank sector thresholds as missing defaults", function () {
+    const v = create();
+    const arc = { startDeg: 270, endDeg: 450 };
+
+    expect(v.buildHighEndSectors({ warningFrom: null, alarmFrom: "   " }, 0, 30, arc, {
+      warningColor: "#aa5500",
+      alarmColor: "#bb0011"
+    })).toEqual([]);
+
+    expect(v.buildLowEndSectors({ warningFrom: null, alarmFrom: "" }, 10, 15, arc, {
+      defaultWarningFrom: 12.2,
+      defaultAlarmFrom: 11.6,
+      warningColor: "#aa5500",
+      alarmColor: "#bb0011"
+    })).toEqual([
+      { a0: 270, a1: 327.6, color: "#bb0011" },
+      { a0: 327.6, a1: 349.2, color: "#aa5500" }
+    ]);
+  });
+
   it("resolves shared semicircle tick-step presets", function () {
     const v = create();
 

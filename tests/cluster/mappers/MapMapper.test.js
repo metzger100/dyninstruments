@@ -52,7 +52,14 @@ function trimText(value) {
 }
 
 function toMaybeNumber(value) {
-  return typeof value === "undefined" || value === null || value === "" ? undefined : Number(value);
+  if (typeof value === "undefined" || value === null) {
+    return undefined;
+  }
+  if (typeof value === "string" && value.trim() === "") {
+    return undefined;
+  }
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : undefined;
 }
 
 function makeAisTargetViewModel() {
@@ -215,6 +222,18 @@ describe("MapMapper", function () {
       caption: "ZOOM CAP",
       unit: ""
     });
+  });
+
+  it("keeps zoom mapper values missing when live zoom inputs are null/blank", function () {
+    const mapper = createMapper();
+    const out = mapper.translate({
+      kind: "zoom",
+      zoom: null,
+      requiredZoom: "   "
+    }, routeContext("zoom", toolkit));
+
+    expect(out.zoom).toBeUndefined();
+    expect(out.requiredZoom).toBeUndefined();
   });
 
   it("maps aisTarget to grouped renderer payload with viewmodel domain output", function () {

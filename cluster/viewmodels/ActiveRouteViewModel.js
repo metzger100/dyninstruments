@@ -15,16 +15,17 @@
     return (typeof value === "string") ? value.trim() : "";
   }
 
-  let toFiniteNumber;
+  let toOptionalFiniteNumber;
 
   function create(def, componentContext) {
-    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+    const valueMath = componentContext.components.require("ValueMath");
+    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
 
     function build(props, toolkit) {
       const p = props || {};
       const cap = toolkit.cap;
       const unit = toolkit.unit;
-      const num = toolkit.num || toFiniteNumber;
+      const num = toolkit.num || toOptionalFiniteNumber;
       const routeName = trimString(p.activeRouteName);
 
       return {

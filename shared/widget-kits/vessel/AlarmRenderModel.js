@@ -37,6 +37,16 @@
       : "passive";
   }
 
+  function toOptionalFiniteNumber(value, htmlUtils) {
+    if (value == null) {
+      return undefined;
+    }
+    if (typeof value === "string" && value.trim() === "") {
+      return undefined;
+    }
+    return htmlUtils.toFiniteNumber(value);
+  }
+
   function create(def, componentContext) {
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
 
@@ -68,8 +78,8 @@
         showHotspot: interactionState === "dispatch",
         interactionState: interactionState,
         canDispatch: interactionState === "dispatch",
-        ratioThresholdNormal: htmlUtils.toFiniteNumber(props.ratioThresholdNormal),
-        ratioThresholdFlat: htmlUtils.toFiniteNumber(props.ratioThresholdFlat)
+        ratioThresholdNormal: toOptionalFiniteNumber(props.ratioThresholdNormal, htmlUtils),
+        ratioThresholdFlat: toOptionalFiniteNumber(props.ratioThresholdFlat, htmlUtils)
       };
     }
 

@@ -1,7 +1,7 @@
 /**
  * Module: WindRadialWidget - Full-circle wind dial for angle and speed pairs
  * Documentation: documentation/widgets/wind-dial.md
- * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout, SpringEasing, StableDigits, PlaceholderNormalize
+ * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout, ValueMath, SpringEasing, StableDigits, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,14 +13,21 @@
   function create(def, componentContext) {
     const engine = componentContext.components.require("FullCircleRadialEngine");
     const textLayout = componentContext.components.require("FullCircleRadialTextLayout");
+    const valueMath = componentContext.components.require("ValueMath");
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
     const stableDigits = componentContext.components.require("StableDigits");
     const springMotion = componentContext.components.require("SpringEasing").createMotion({ wrap: 360 });
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     function windFormatSpeedText(raw, props, speedUnit) {
       const p = props || {};
-      const n = raw == null ? NaN : Number(raw);
-      if (!Number.isFinite(n)) {
+      if (raw == null || (typeof raw === "string" && raw.trim() === "")) {
+        return Object.prototype.hasOwnProperty.call(p, "default")
+          ? p.default
+          : placeholderNormalize.normalize(undefined, undefined);
+      }
+      const n = toOptionalFiniteNumber(raw);
+      if (typeof n !== "number") {
         return Object.prototype.hasOwnProperty.call(p, "default")
           ? p.default
           : placeholderNormalize.normalize(undefined, undefined);

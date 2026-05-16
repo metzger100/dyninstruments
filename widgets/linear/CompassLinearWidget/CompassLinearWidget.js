@@ -16,6 +16,16 @@
     const valueMath = componentContext.components.require("ValueMath");
     const springEasing = componentContext.components.require("SpringEasing");
     const markerMotion = springEasing.createMotion({ wrap: 360 });
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || function (value) {
+      if (value == null) {
+        return undefined;
+      }
+      if (typeof value === "string" && value.trim() === "") {
+        return undefined;
+      }
+      const n = Number(value);
+      return Number.isFinite(n) ? n : undefined;
+    };
 
     function norm180(delta) {
       let out = ((Number(delta) + 180) % 360 + 360) % 360 - 180;
@@ -57,7 +67,7 @@
 
     function formatDisplay(raw, props) {
       const p = props || {};
-      const heading = raw == null ? undefined : valueMath.toFiniteNumber(raw);
+      const heading = toOptionalFiniteNumber(raw);
       if (typeof heading !== "number") {
         return { num: NaN, text: p.default };
       }
@@ -69,8 +79,9 @@
 
     function resolveAxis(props, range, defaultAxis) {
       const p = props || {};
-      const heading = Number((typeof p.value !== "undefined") ? p.value : p.heading);
-      if (!Number.isFinite(heading)) {
+      const headingRaw = (typeof p.value !== "undefined") ? p.value : p.heading;
+      const heading = toOptionalFiniteNumber(headingRaw);
+      if (typeof heading !== "number") {
         return defaultAxis;
       }
       const compassRange = (p.compassLinearRange === 180) ? 180 : 360;

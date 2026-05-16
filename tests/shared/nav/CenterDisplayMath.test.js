@@ -14,6 +14,17 @@ describe("CenterDisplayMath", function () {
     expect(math.extractMeasureStart({ points: [{ lat: 1, lon: 2 }] })).toBeNull();
   });
 
+  it("keeps null/blank/partial coordinates invalid during center-point normalization", function () {
+    const math = loadFresh("shared/widget-kits/nav/CenterDisplayMath.js").create();
+
+    expect(math.normalizePoint({ lat: null, lon: null })).toBeNull();
+    expect(math.normalizePoint({ lat: "", lon: "" })).toBeNull();
+    expect(math.normalizePoint({ lat: "   ", lon: "   " })).toBeNull();
+    expect(math.normalizePoint({ lat: 54.1, lon: null })).toBeNull();
+    expect(math.normalizePoint({ lat: null, lon: 10.2 })).toBeNull();
+    expect(math.computeCourseDistance({ lat: 54.1, lon: null }, { lat: 55.0, lon: 11.0 }, false)).toBeNull();
+  });
+
   it("computes finite center-display legs in degrees and meters for great-circle and rhumb-line modes", function () {
     const math = loadFresh("shared/widget-kits/nav/CenterDisplayMath.js").create();
     const src = { lat: 54.2, lon: 10.2 };

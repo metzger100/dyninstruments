@@ -18,11 +18,22 @@
     return placeholderNormalize.normalize(undefined, undefined);
   }
 
+  function toOptionalFiniteNumber(raw) {
+    if (raw == null) {
+      return undefined;
+    }
+    if (typeof raw === "string" && raw.trim() === "") {
+      return undefined;
+    }
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : undefined;
+  }
+
   function formatDisplay(raw, props, unitFormatter, placeholderNormalize) {
     const p = props || {};
     const defaultText = resolveDefaultText(p, placeholderNormalize);
-    const n = raw == null ? NaN : Number(raw);
-    if (!Number.isFinite(n)) {
+    const n = toOptionalFiniteNumber(raw);
+    if (typeof n !== "number") {
       return { num: NaN, text: defaultText };
     }
 

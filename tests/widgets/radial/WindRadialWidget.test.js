@@ -11,6 +11,7 @@ describe("WindRadialWidget", function () {
       modules: {
         StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
         PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js"),
         SpringEasing: loadFresh("shared/widget-kits/anim/SpringEasing.js"),
         FullCircleRadialTextLayout: { create() { return {}; } },
         FullCircleRadialEngine: { create() { return { createRenderer(cfg) { captured = cfg; return renderCanvas; } }; } }
@@ -126,6 +127,7 @@ describe("WindRadialWidget", function () {
           StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
           StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
           PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+          ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js"),
           SpringEasing: loadFresh("shared/widget-kits/anim/SpringEasing.js"),
           RadialToolkit: {
             create() {
@@ -300,6 +302,7 @@ describe("WindRadialWidget", function () {
           StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
           StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
           PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+          ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js"),
           SpringEasing: loadFresh("shared/widget-kits/anim/SpringEasing.js"),
           RadialToolkit: {
             create() {
@@ -424,10 +427,31 @@ describe("WindRadialWidget", function () {
     expect(labelCalls[0].fontPx).toBe(layout.labels.fontPx);
     expect(labelCalls[0].weight).toBe(themeDefaults.font.labelWeight);
 
-    const applyCallsBeforeNullSpeed = applyFormatter.mock.calls.length;
+    [null, undefined, "", "   "].forEach(function (speedRaw) {
+      const applyCallsBefore = applyFormatter.mock.calls.length;
+      const drawCallsBefore = valueDrawCalls.length;
+      spec.renderCanvas(canvas, {
+        angle: 23,
+        speed: speedRaw,
+        angleCaption: "AWA",
+        speedCaption: "AWS",
+        angleUnit: "°",
+        speedUnit: "kn",
+        windRadialLayMin: 35,
+        windRadialLayMax: 45,
+        formatter: "formatSpeed",
+        formatterParameters: ["kn"]
+      });
+
+      expect(applyFormatter.mock.calls.length).toBe(applyCallsBefore);
+      const newDraws = valueDrawCalls.slice(drawCallsBefore);
+      expect(newDraws.some((c) => c.valueText === "---" && c.unitText === "kn")).toBe(true);
+    });
+
+    const applyCallsBeforeValid = applyFormatter.mock.calls.length;
     spec.renderCanvas(canvas, {
       angle: 23,
-      speed: null,
+      speed: "4.2",
       angleCaption: "AWA",
       speedCaption: "AWS",
       angleUnit: "°",
@@ -437,9 +461,11 @@ describe("WindRadialWidget", function () {
       formatter: "formatSpeed",
       formatterParameters: ["kn"]
     });
-
-    expect(applyFormatter.mock.calls.length).toBe(applyCallsBeforeNullSpeed);
-    expect(valueDrawCalls.some((c) => c.valueText === "---" && c.unitText === "kn")).toBe(true);
+    expect(applyFormatter.mock.calls.length).toBeGreaterThan(applyCallsBeforeValid);
+    expect(applyFormatter).toHaveBeenLastCalledWith(4.2, expect.objectContaining({
+      formatter: "formatSpeed",
+      formatterParameters: ["kn"]
+    }));
   });
 
   it("draws laylines before the full-circle ring in the cached back layer", function () {
@@ -482,6 +508,7 @@ describe("WindRadialWidget", function () {
           StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
           StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
           PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+          ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js"),
           SpringEasing: loadFresh("shared/widget-kits/anim/SpringEasing.js"),
           RadialToolkit: {
             create() {

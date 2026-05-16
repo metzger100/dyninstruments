@@ -34,6 +34,12 @@ describe("CompassLinearWidget", function () {
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
+                toOptionalFiniteNumber(value) {
+                  if (value == null) return undefined;
+                  if (typeof value === "string" && value.trim() === "") return undefined;
+                  const n = Number(value);
+                  return Number.isFinite(n) ? n : undefined;
+                },
                 formatDirection360(value, leadingZero) {
                   const n = Number(value);
                   if (!isFinite(n)) return "---";
@@ -89,6 +95,7 @@ describe("CompassLinearWidget", function () {
 
     expect(captured.formatTickLabel(-30)).toBe("330");
     expect(captured.formatTickLabel(390)).toBe("30");
+    expect(captured.formatDisplay("12", { leadingZero: true })).toEqual({ num: 12, text: "012" });
 
     const api = {
       drawDefaultPointer: vi.fn(),
@@ -147,6 +154,12 @@ describe("CompassLinearWidget", function () {
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
+                toOptionalFiniteNumber(value) {
+                  if (value == null) return undefined;
+                  if (typeof value === "string" && value.trim() === "") return undefined;
+                  const n = Number(value);
+                  return Number.isFinite(n) ? n : undefined;
+                },
                 formatDirection360(value, leadingZero) {
                   const n = Number(value);
                   if (!isFinite(n)) return "---";
@@ -200,6 +213,12 @@ describe("CompassLinearWidget", function () {
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
+                toOptionalFiniteNumber(value) {
+                  if (value == null) return undefined;
+                  if (typeof value === "string" && value.trim() === "") return undefined;
+                  const n = Number(value);
+                  return Number.isFinite(n) ? n : undefined;
+                },
                 formatDirection360(value, leadingZero) {
                   const n = Number(value);
                   if (!isFinite(n)) return "---";
@@ -248,6 +267,12 @@ describe("CompassLinearWidget", function () {
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
+                toOptionalFiniteNumber(value) {
+                  if (value == null) return undefined;
+                  if (typeof value === "string" && value.trim() === "") return undefined;
+                  const n = Number(value);
+                  return Number.isFinite(n) ? n : undefined;
+                },
                 formatDirection360() {
                   return "---";
                 }
@@ -270,6 +295,11 @@ describe("CompassLinearWidget", function () {
     }));
 
     expect(captured.formatDisplay(undefined, { default: "N/A" })).toEqual({ num: NaN, text: "N/A" });
+    expect(captured.formatDisplay("", { default: "N/A" })).toEqual({ num: NaN, text: "N/A" });
+    expect(captured.formatDisplay("   ", { default: "N/A" })).toEqual({ num: NaN, text: "N/A" });
     expect(captured.resolveAxis({ heading: undefined }, {}, { min: 0, max: 360 })).toEqual({ min: 0, max: 360 });
+    expect(captured.resolveAxis({ heading: null }, {}, { min: 0, max: 360 })).toEqual({ min: 0, max: 360 });
+    expect(captured.resolveAxis({ heading: "" }, {}, { min: 0, max: 360 })).toEqual({ min: 0, max: 360 });
+    expect(captured.resolveAxis({ heading: "   " }, {}, { min: 0, max: 360 })).toEqual({ min: 0, max: 360 });
   });
 });

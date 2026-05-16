@@ -113,7 +113,7 @@
       js: BASE + "widgets/radial/WindRadialWidget/WindRadialWidget.js",
       css: undefined,
       globalKey: "DyniWindRadialWidget",
-      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "SpringEasing", "StableDigits", "PlaceholderNormalize"]
+      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "ValueMath", "SpringEasing", "StableDigits", "PlaceholderNormalize"]
   };
 
 }(this));

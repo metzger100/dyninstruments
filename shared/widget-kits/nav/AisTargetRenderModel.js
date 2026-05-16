@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetRenderModel - Pure normalization and display-model owner for AIS target HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: AisTargetLayout, HtmlWidgetUtils, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, UnitAwareFormatter
+ * Depends: AisTargetLayout, HtmlWidgetUtils, ValueMath, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, UnitAwareFormatter
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -135,6 +135,8 @@
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
     const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");
+    const valueMath = componentContext.components.require("ValueMath");
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
 
     function normalizeStableMetricValue(rawText, minWidth, stableDigitsEnabled) {
       if (stableDigitsEnabled !== true) {
@@ -200,10 +202,10 @@
         isVerticalCommitted: cfg.isVerticalCommitted === true,
         effectiveLayoutHeight: cfg.effectiveLayoutHeight
       });
-      const distance = hasData ? htmlUtils.toFiniteNumber(domain.distance) : undefined;
-      const cpa = hasData ? htmlUtils.toFiniteNumber(domain.cpa) : undefined;
-      const tcpaSeconds = hasData ? htmlUtils.toFiniteNumber(domain.tcpa) : undefined;
-      const headingTo = hasData ? htmlUtils.toFiniteNumber(domain.headingTo) : undefined;
+      const distance = hasData ? toOptionalFiniteNumber(domain.distance) : undefined;
+      const cpa = hasData ? toOptionalFiniteNumber(domain.cpa) : undefined;
+      const tcpaSeconds = hasData ? toOptionalFiniteNumber(domain.tcpa) : undefined;
+      const headingTo = hasData ? toOptionalFiniteNumber(domain.headingTo) : undefined;
 
       const metrics = {
         dst: {

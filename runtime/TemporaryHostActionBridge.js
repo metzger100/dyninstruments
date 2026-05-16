@@ -16,10 +16,10 @@
     return error;
   }
 
-  const toFiniteNumber = valueMath.toFiniteNumber;
+  const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
 
   function normalizeRoutePointIndex(index) {
-    const normalized = Number(index);
+    const normalized = toOptionalFiniteNumber(index);
     if (!Number.isInteger(normalized) || normalized < 0) {
       throw createBridgeError("routePoints.activate requires a non-negative integer index");
     }
@@ -48,8 +48,8 @@
     }
 
     const idx = normalizeRoutePointIndex(pointSnapshot.idx);
-    const lat = toFiniteNumber(pointSnapshot.lat);
-    const lon = toFiniteNumber(pointSnapshot.lon);
+    const lat = toOptionalFiniteNumber(pointSnapshot.lat);
+    const lon = toOptionalFiniteNumber(pointSnapshot.lon);
 
     if (typeof lat !== "number" || typeof lon !== "number") {
       throw createBridgeError("routePoints.activate requires finite pointSnapshot.lat/lon on editroutepage");
@@ -68,13 +68,13 @@
     };
 
     if (Object.prototype.hasOwnProperty.call(pointSnapshot, "course")) {
-      const course = toFiniteNumber(pointSnapshot.course);
+      const course = toOptionalFiniteNumber(pointSnapshot.course);
       if (typeof course === "number") {
         hostPoint.course = course;
       }
     }
     if (Object.prototype.hasOwnProperty.call(pointSnapshot, "distance")) {
-      const distance = toFiniteNumber(pointSnapshot.distance);
+      const distance = toOptionalFiniteNumber(pointSnapshot.distance);
       if (typeof distance === "number") {
         hostPoint.distance = distance;
       }

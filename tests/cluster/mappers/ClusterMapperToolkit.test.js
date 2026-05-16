@@ -11,6 +11,8 @@ describe("ClusterMapperToolkit", function () {
     expect(direction(360)).toBe("000");
     expect(direction(-1)).toBe("359");
     expect(direction(null)).toBe("NA");
+    expect(direction("")).toBe("NA");
+    expect(direction("   ")).toBe("NA");
 
     const relative = toolkit.makeAngleFormatter(false, true, "NA");
     expect(relative(181)).toBe("-179");
@@ -45,6 +47,9 @@ describe("ClusterMapperToolkit", function () {
     expect(toolkit.unit("wpEta")).toBe("");
     expect(toolkit.cap("stw")).toBeUndefined();
     expect(toolkit.num("12.5")).toBe(12.5);
+    expect(toolkit.num(null)).toBeUndefined();
+    expect(toolkit.num("")).toBeUndefined();
+    expect(toolkit.num("   ")).toBeUndefined();
     expect(toolkit.num("x")).toBeUndefined();
   });
 

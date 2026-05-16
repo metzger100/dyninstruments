@@ -269,6 +269,30 @@ describe("MapZoomTextHtmlWidget", function () {
     expect(mounted.html()).toContain("(06.5)");
   });
 
+  it("keeps default ratio-mode selection when ratio thresholds are null/blank", function () {
+    const renderer = createRenderer();
+    const baseProps = withSurfacePolicy(makeProps({
+      ratioThresholdNormal: undefined,
+      ratioThresholdFlat: undefined
+    }), { mode: "dispatch" });
+    const nullProps = withSurfacePolicy(makeProps({
+      ratioThresholdNormal: null,
+      ratioThresholdFlat: null
+    }), { mode: "dispatch" });
+    const blankProps = withSurfacePolicy(makeProps({
+      ratioThresholdNormal: "   ",
+      ratioThresholdFlat: ""
+    }), { mode: "dispatch" });
+
+    const baseline = mountCommitted(renderer, baseProps).html();
+    const nullHtml = mountCommitted(renderer, nullProps).html();
+    const blankHtml = mountCommitted(renderer, blankProps).html();
+
+    expect(baseline).toContain("dyni-map-zoom-mode-normal");
+    expect(nullHtml).toContain("dyni-map-zoom-mode-normal");
+    expect(blankHtml).toContain("dyni-map-zoom-mode-normal");
+  });
+
   it("always consults MapZoomHtmlFit when a shell rect exists", function () {
     const fitCompute = vi.fn(function () {
       return {
@@ -352,6 +376,53 @@ describe("MapZoomTextHtmlWidget", function () {
     expect(requiredMounted.html()).toContain('class="dyni-map-zoom-required"');
     expect(requiredMounted.html()).toContain("(Z:0)");
     expect(requiredMounted.html()).toContain("--dyni-map-zoom-sec-scale:1.1;");
+  });
+
+  it("keeps null and blank zoom inputs missing instead of coercing them to zero", function () {
+    const renderer = createRenderer();
+    const mounted = mountCommitted(
+      renderer,
+      withSurfacePolicy(makeProps({
+        zoom: null,
+        requiredZoom: "   "
+      }), { mode: "dispatch" })
+    );
+
+    expect(mounted.html()).toContain("---");
+    expect(mounted.html()).not.toContain("Z:0");
+    expect(mounted.html()).not.toContain("(Z:0)");
+  });
+
+  it("uses default caption-unit scale for null and blank values and keeps numeric-string clamping", function () {
+    const renderer = createRenderer();
+    const missingValues = [null, undefined, "", "   "];
+
+    missingValues.forEach(function (rawScale) {
+      const mounted = mountCommitted(
+        renderer,
+        withSurfacePolicy(makeProps({
+          captionUnitScale: rawScale
+        }), { mode: "dispatch" })
+      );
+      expect(mounted.html()).toContain("--dyni-map-zoom-sec-scale:0.8;");
+      expect(mounted.html()).not.toContain("--dyni-map-zoom-sec-scale:0.5;");
+    });
+
+    const numericStringMounted = mountCommitted(
+      renderer,
+      withSurfacePolicy(makeProps({
+        captionUnitScale: "1.2"
+      }), { mode: "dispatch" })
+    );
+    expect(numericStringMounted.html()).toContain("--dyni-map-zoom-sec-scale:1.2;");
+
+    const maxClampMounted = mountCommitted(
+      renderer,
+      withSurfacePolicy(makeProps({
+        captionUnitScale: "9"
+      }), { mode: "dispatch" })
+    );
+    expect(maxClampMounted.html()).toContain("--dyni-map-zoom-sec-scale:1.5;");
   });
 
   it("escapes content and fails closed without default", function () {

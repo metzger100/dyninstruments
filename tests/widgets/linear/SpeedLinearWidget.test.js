@@ -268,4 +268,74 @@ describe("SpeedLinearWidget", function () {
     expect(captured.formatDisplay(null, {}, "kn")).toEqual({ num: NaN, text: "---" });
     expect(applyFormatter).not.toHaveBeenCalled();
   });
+
+  it("treats blank and missing high-end thresholds as unset", function () {
+    let captured;
+
+    loadFresh("widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js").create({}, createComponentContextMock({
+      modules: {
+        PlaceholderNormalize: {
+          create() {
+            return {
+              normalize(text, defaultText) {
+                if (text == null) {
+                  return defaultText == null ? "---" : defaultText;
+                }
+                return String(text);
+              }
+            };
+          }
+        },
+        ValueMath: {
+          create() {
+            return {
+              formatGaugeDisplay(raw) {
+                const n = Number(raw);
+                return Number.isFinite(n) ? { num: n, text: String(n) } : { num: NaN, text: "---" };
+              },
+              resolveStandardTickSteps() {
+                return { major: 5, minor: 1 };
+              }
+            };
+          }
+        },
+        LinearGaugeEngine: {
+          create() {
+            return {
+              createRenderer(cfg) {
+                captured = cfg;
+                return function () {};
+              }
+            };
+          }
+        }
+      },
+      services: {
+        format: { applyFormatter(value) { return String(value); } }
+      }
+    }));
+
+    const theme = { colors: { warning: "#123456", alarm: "#654321" } };
+    const axis = { min: 0, max: 30 };
+    const valueApi = {
+      clamp(v, lo, hi) {
+        return Math.max(lo, Math.min(hi, Number(v)));
+      }
+    };
+
+    [null, undefined, "", "   "].forEach(function (rawThreshold) {
+      expect(captured.buildSectors({
+        speedLinearWarningFrom: rawThreshold,
+        speedLinearAlarmFrom: rawThreshold
+      }, 0, 30, axis, valueApi, theme)).toEqual([]);
+    });
+
+    expect(captured.buildSectors({
+      speedLinearWarningFrom: "20",
+      speedLinearAlarmFrom: "25"
+    }, 0, 30, axis, valueApi, theme)).toEqual([
+      { from: 20, to: 25, color: "#123456" },
+      { from: 25, to: 30, color: "#654321" }
+    ]);
+  });
 });

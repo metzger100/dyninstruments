@@ -27,9 +27,10 @@
   };
   let makeRect = null;
 
+  // dyni-lint-disable-next-line duplicate-functions -- Layout owners intentionally keep a tiny local clamp helper for geometry config normalization.
   function clampNumber(value, minValue, maxValue, defaultValue) {
     const n = Number(value);
-    if (!Number.isFinite(n)) {
+    if (!Number.isFinite(n) || value == null || (typeof value === "string" && value.trim() === "")) {
       return defaultValue;
     }
     return Math.max(minValue, Math.min(maxValue, n));
