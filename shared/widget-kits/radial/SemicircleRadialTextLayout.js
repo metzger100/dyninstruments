@@ -48,13 +48,27 @@
     return { flat: null, high: null, normal: null };
   }
 
-  function buildCommonFitKey(state, display) {
+  function measureWidthClass(ctx, text, fontPx, weight, family) {
+    if (!text) {
+      return 0;
+    }
+    const prevFont = ctx.font;
+    const size = Math.max(0.5, Number(fontPx) || 0);
+    const numericWeight = Number(weight);
+    const fontWeight = Number.isFinite(numericWeight) ? Math.floor(numericWeight) : 400;
+    ctx.font = fontWeight + " " + size + "px " + (family || "sans-serif");
+    const width = ctx.measureText(String(text)).width;
+    ctx.font = prevFont;
+    return Math.round(width);
+  }
+
+  function buildCommonFitKey(state, display, valueWidthClass) {
     return {
       W: state.W,
       H: state.H,
       mode: state.layout.mode,
       caption: display.caption,
-      valueText: display.valueText,
+      valueWidthClass: valueWidthClass,
       unit: display.unit,
       secScale: display.secScale,
       family: state.family,
@@ -140,9 +154,16 @@
     if (!boxes || boxes.box.w <= 0 || boxes.box.h <= 0) {
       return;
     }
+    const valueWidthClass = measureWidthClass(
+      state.ctx,
+      display.valueText,
+      boxes.bottomBox.h,
+      state.valueWeight,
+      state.family
+    );
 
     const key = makeFitCacheKey({
-      common: buildCommonFitKey(state, display),
+      common: buildCommonFitKey(state, display, valueWidthClass),
       boxW: boxes.box.w,
       boxH: boxes.box.h,
       topH: boxes.topBox.h,
@@ -206,9 +227,16 @@
     if (!box || box.w <= 0 || box.h <= 0) {
       return;
     }
+    const valueWidthClass = measureWidthClass(
+      state.ctx,
+      display.valueText,
+      box.h,
+      state.valueWeight,
+      state.family
+    );
 
     const key = makeFitCacheKey({
-      common: buildCommonFitKey(state, display),
+      common: buildCommonFitKey(state, display, valueWidthClass),
       boxW: box.w,
       boxH: box.h,
       bandY: box.y
@@ -254,9 +282,20 @@
     if (!normal || normal.rSafe <= 0) {
       return;
     }
+    const refHeight = Math.max(
+      1,
+      Math.floor(normal.mhMax / (1 + 2 * normalizeSecondaryScale(display.secScale)))
+    );
+    const valueWidthClass = measureWidthClass(
+      state.ctx,
+      display.valueText,
+      refHeight,
+      state.valueWeight,
+      state.family
+    );
 
     const key = makeFitCacheKey({
-      common: buildCommonFitKey(state, display),
+      common: buildCommonFitKey(state, display, valueWidthClass),
       rSafe: normal.rSafe,
       yBottom: normal.yBottom,
       mhMax: normal.mhMax,

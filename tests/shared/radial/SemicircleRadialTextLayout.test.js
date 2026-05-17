@@ -233,20 +233,26 @@ describe("SemicircleRadialTextLayout", function () {
     });
   });
 
-  it("reuses cached fitting for unchanged inputs and misses when content changes", function () {
+  it("reuses cached fitting for unchanged width classes and misses when width class changes", function () {
     const textLayout = loadFresh("shared/widget-kits/radial/SemicircleRadialTextLayout.js").create();
     const cases = [
       {
         harness: createHarness("flat", 240, 90),
-        fitKey: "measureValueUnitFit"
+        fitKey: "measureValueUnitFit",
+        sameWidthText: "13.7",
+        widerText: "100.0"
       },
       {
         harness: createHarness("high", 140, 220),
-        fitKey: "fitInlineCapValUnit"
+        fitKey: "fitInlineCapValUnit",
+        sameWidthText: "13.7",
+        widerText: "100.0"
       },
       {
         harness: createHarness("normal", 210, 130),
-        fitKey: "fitTextPx"
+        fitKey: "fitTextPx",
+        sameWidthText: "13.7",
+        widerText: "100.0"
       }
     ];
 
@@ -259,12 +265,15 @@ describe("SemicircleRadialTextLayout", function () {
       const afterFirst = item.harness.calls[item.fitKey];
       textLayout.drawModeText(item.harness.state, display, cache);
       const afterSecond = item.harness.calls[item.fitKey];
-      textLayout.drawModeText(item.harness.state, { ...display, valueText: "13.7" }, cache);
+      textLayout.drawModeText(item.harness.state, { ...display, valueText: item.sameWidthText }, cache);
       const afterThird = item.harness.calls[item.fitKey];
+      textLayout.drawModeText(item.harness.state, { ...display, valueText: item.widerText }, cache);
+      const afterFourth = item.harness.calls[item.fitKey];
 
       expect(afterFirst).toBeGreaterThan(firstCount);
       expect(afterSecond).toBe(afterFirst);
-      expect(afterThird).toBeGreaterThan(afterSecond);
+      expect(afterThird).toBe(afterSecond);
+      expect(afterFourth).toBeGreaterThan(afterThird);
     });
   });
 
