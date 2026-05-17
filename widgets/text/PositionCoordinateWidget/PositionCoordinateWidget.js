@@ -179,6 +179,8 @@
       const color = tokens.surface.fg;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
+      const captionOpacity = tokens.opacity && typeof tokens.opacity === "object" ? tokens.opacity.caption : undefined;
+      const unitOpacity = tokens.opacity && typeof tokens.opacity === "object" ? tokens.opacity.unit : undefined;
       const coordinateAlign = effectiveCoordinatesTabular ? "right" : "center";
       ctx.fillStyle = color;
       const stateKind = stateScreenPrecedence.pickFirst([
@@ -264,7 +266,9 @@
           W: W, H: H,
           family: family,
           valueWeight: valueWeight,
-          labelWeight: labelWeight
+          labelWeight: labelWeight,
+          captionOpacity: captionOpacity,
+          unitOpacity: unitOpacity
         });
       } else {
         const parsed = readCoordinatePair(p.value, p.coordinateRawValues === true, toOptionalFiniteNumber);
@@ -321,7 +325,9 @@
           topText: latText, bottomText: lonText,
           family: family,
           valueWeight: valueWeight,
-          labelWeight: labelWeight
+          labelWeight: labelWeight,
+          captionOpacity: captionOpacity,
+          unitOpacity: unitOpacity
         });
       }
     }

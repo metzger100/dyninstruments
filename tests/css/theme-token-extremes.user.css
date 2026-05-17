@@ -16,6 +16,8 @@
   --dyni-font-mono: "IBM Plex Mono", "SF Mono", monospace;
   --dyni-font-weight: 600;
   --dyni-label-weight: 500;
+  --dyni-caption-opacity: 0.7;
+  --dyni-unit-opacity: 0.7;
 
   /* Colors */
   --dyni-pointer: #00a8ff;

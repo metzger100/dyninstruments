@@ -24,6 +24,8 @@ const fg = tokens.surface.fg;
 - `font.familyMono`
 - `font.weight`
 - `font.labelWeight`
+- `opacity.caption`
+- `opacity.unit`
 - `colors.alarm`
 - `colors.alarmWidget.bg`
 - `colors.alarmWidget.fg`
@@ -42,6 +44,8 @@ const fg = tokens.surface.fg;
 - --dyni-font-mono
 - --dyni-font-weight
 - --dyni-label-weight
+- --dyni-caption-opacity
+- --dyni-unit-opacity
 - --dyni-alarm
 - --dyni-alarm-widget-bg
 - --dyni-alarm-widget-fg
@@ -83,6 +87,24 @@ const fg = tokens.surface.fg;
 | `linear.ticks.minorWidthFactor` | `--dyni-linear-tick-minor-width-factor` | `0.014` | Linear minor tick stroke-width factor |
 | `linear.pointer.sideFactor` | `--dyni-linear-pointer-side-factor` | `0.12` | Linear pointer side-thickness factor |
 | `linear.pointer.depthFactor` | `--dyni-linear-pointer-depth-factor` | `0.24` | Linear pointer depth factor |
+
+## Opacity Tokens
+
+| Path | Input var | Default | Use |
+|---|---|---|---|
+| `opacity.caption` | `--dyni-caption-opacity` | `1.0` | Opacity for caption text in all widget families |
+| `opacity.unit` | `--dyni-unit-opacity` | `1.0` | Opacity for unit text in all widget families |
+
+Both tokens default to `1.0` (fully opaque). Set values between `0` and `1` in `user.css` to de-emphasize secondary labels:
+
+```css
+.widget.dyniplugin {
+  --dyni-caption-opacity: 0.7;
+  --dyni-unit-opacity: 0.7;
+}
+```
+
+No preset or night-mode overrides are defined. These tokens are consumed by canvas widgets via the JS token snapshot (`theme.opacity.caption`, `theme.opacity.unit`) and by HTML widgets via CSS output vars (`var(--dyni-theme-opacity-caption, 1)`, `var(--dyni-theme-opacity-unit, 1)`).
 
 ## Alarm Widget Surface Tokens
 
@@ -133,6 +155,8 @@ Example `user.css` override:
 - --dyni-theme-font-family-mono
 - --dyni-theme-font-weight
 - --dyni-theme-font-label-weight
+- --dyni-theme-opacity-caption
+- --dyni-theme-opacity-unit
 
 ## Presets and Modes
 

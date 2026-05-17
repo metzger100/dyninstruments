@@ -78,6 +78,14 @@
     };
   }
 
+  function buildTextOptions(state) {
+    const opacity = state && state.theme && state.theme.opacity && typeof state.theme.opacity === "object" ? state.theme.opacity : {};
+    return {
+      captionOpacity: opacity.caption,
+      unitOpacity: opacity.unit
+    };
+  }
+
   function scaleValueUnitFit(state, valueText, unitText, fit, boxHeight) {
     if (!fit) {
       return fit;
@@ -203,7 +211,8 @@
       display.caption,
       captionMaxPx,
       "right",
-      state.labelWeight
+      state.labelWeight,
+      buildTextOptions(state)
     );
     text.drawValueUnitWithFit(
       state.ctx,
@@ -217,7 +226,8 @@
       scaledFit,
       "right",
       state.valueWeight,
-      state.labelWeight
+      state.labelWeight,
+      buildTextOptions(state)
     );
   }
 
@@ -272,7 +282,8 @@
       display.unit,
       scaledFit,
       state.valueWeight,
-      state.labelWeight
+      state.labelWeight,
+      buildTextOptions(state)
     );
   }
 
@@ -354,7 +365,8 @@
       "center",
       layout.sizes,
       state.valueWeight,
-      state.labelWeight
+      state.labelWeight,
+      buildTextOptions(state)
     );
   }
 

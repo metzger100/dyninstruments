@@ -30,6 +30,14 @@
     );
   }
 
+  function resolveOpacity(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) {
+      return 1;
+    }
+    return Math.max(0, Math.min(1, n));
+  }
+
   function create(def, componentContext) {
     const primitive = componentContext.components.require("TextLayoutPrimitives");
 
@@ -99,18 +107,34 @@
       const W = Math.max(1, Number(cfg.W) || 0);
       const padX = Math.max(0, Number(cfg.padX) || 0);
       const ctx = cfg.ctx;
+      const captionOpacity = resolveOpacity(cfg.captionOpacity);
+      const unitOpacity = resolveOpacity(cfg.unitOpacity);
       if (cfg.captionText) {
+        if (captionOpacity < 1) {
+          ctx.save();
+          ctx.globalAlpha = captionOpacity;
+        }
         primitive.setFont(ctx, fit.cPx, cfg.labelWeight, cfg.family);
         ctx.textAlign = "left";
         ctx.fillText(cfg.captionText, padX, Math.floor(hTop / 2));
+        if (captionOpacity < 1) {
+          ctx.restore();
+        }
       }
       primitive.setFont(ctx, fit.vPx, cfg.valueWeight, cfg.family);
       ctx.textAlign = "center";
       ctx.fillText(cfg.valueText, Math.floor(W / 2), Math.floor(hTop + hMid / 2));
       if (cfg.unitText) {
+        if (unitOpacity < 1) {
+          ctx.save();
+          ctx.globalAlpha = unitOpacity;
+        }
         primitive.setFont(ctx, fit.uPx, cfg.labelWeight, cfg.family);
         ctx.textAlign = "right";
         ctx.fillText(cfg.unitText, W - padX, Math.floor(hTop + hMid + hBot / 2));
+        if (unitOpacity < 1) {
+          ctx.restore();
+        }
       }
     }
 
@@ -192,13 +216,23 @@
         H: fit.hTop,
         family: cfg.family,
         valueWeight: cfg.valueWeight,
-        labelWeight: cfg.labelWeight
+        labelWeight: cfg.labelWeight,
+        captionOpacity: cfg.captionOpacity,
+        unitOpacity: cfg.unitOpacity
       });
       if (cfg.captionText) {
+        const captionOpacity = resolveOpacity(cfg.captionOpacity);
+        if (captionOpacity < 1) {
+          cfg.ctx.save();
+          cfg.ctx.globalAlpha = captionOpacity;
+        }
         primitive.setFont(cfg.ctx, fit.cPx, cfg.labelWeight, cfg.family);
         cfg.ctx.textAlign = "left";
         cfg.ctx.textBaseline = "middle";
         cfg.ctx.fillText(cfg.captionText, cfg.padX, fit.hTop + Math.floor(fit.hBot / 2));
+        if (captionOpacity < 1) {
+          cfg.ctx.restore();
+        }
       }
     }
 
@@ -299,17 +333,33 @@
       const fit = cfg.fit;
       const W = Math.max(1, Number(cfg.W) || 0);
       const ctx = cfg.ctx;
+      const captionOpacity = resolveOpacity(cfg.captionOpacity);
+      const unitOpacity = resolveOpacity(cfg.unitOpacity);
       if (fit.hasHeader) {
         const yHeader = Math.floor(fit.headerH / 2);
         if (cfg.captionText) {
+          if (captionOpacity < 1) {
+            ctx.save();
+            ctx.globalAlpha = captionOpacity;
+          }
           primitive.setFont(ctx, fit.capPx, cfg.labelWeight, cfg.family);
           ctx.textAlign = "left";
           ctx.fillText(cfg.captionText, cfg.padX, yHeader);
+          if (captionOpacity < 1) {
+            ctx.restore();
+          }
         }
         if (cfg.unitText) {
+          if (unitOpacity < 1) {
+            ctx.save();
+            ctx.globalAlpha = unitOpacity;
+          }
           primitive.setFont(ctx, fit.unitPx, cfg.labelWeight, cfg.family);
           ctx.textAlign = "right";
           ctx.fillText(cfg.unitText, W - cfg.padX, yHeader);
+          if (unitOpacity < 1) {
+            ctx.restore();
+          }
         }
       }
       const yTop = fit.headerH + Math.floor(fit.row1H / 2);

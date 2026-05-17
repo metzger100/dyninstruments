@@ -21,6 +21,14 @@
     return Number.isFinite(n) ? n : defaultValue;
   }
 
+  function resolveOpacity(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) {
+      return 1;
+    }
+    return Math.max(0, Math.min(1, n));
+  }
+
   function resolveScaledMaxPx(basePx, maxPx, textFillScale) {
     const safeBase = Math.max(1, Math.floor(clampNumber(basePx, 1)));
     const safeMax = Math.max(1, Math.floor(clampNumber(maxPx, safeBase)));
@@ -207,6 +215,10 @@
       if (!metric || !measurement) {
         return null;
       }
+      const textOptions = {
+        captionOpacity: resolveOpacity(cfg.captionOpacity),
+        unitOpacity: resolveOpacity(cfg.unitOpacity)
+      };
       cfg.ctx.fillStyle = cfg.color;
       textApi.drawCaptionMax(
         cfg.ctx,
@@ -218,7 +230,8 @@
         metric.caption,
         measurement.capMaxPx,
         cfg.align,
-        cfg.labelWeight
+        cfg.labelWeight,
+        textOptions
       );
       textApi.drawValueUnitWithFit(
         cfg.ctx,
@@ -232,7 +245,8 @@
         measurement.fit,
         cfg.align,
         cfg.valueWeight,
-        cfg.labelWeight
+        cfg.labelWeight,
+        textOptions
       );
       return measurement;
     }

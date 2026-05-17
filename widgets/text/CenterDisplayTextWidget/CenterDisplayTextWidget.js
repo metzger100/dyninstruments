@@ -43,6 +43,13 @@
     }
     return Math.max(minShare, Math.min(maxShare, n));
   }
+  function resolveOpacity(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) {
+      return 1;
+    }
+    return Math.max(0, Math.min(1, n));
+  }
   function drawCenterPanel(layout, state, displayState, labelFamily, valueFamily, valueWeight, labelWeight, color) {
     const textFillScale = layout.responsive.textFillScale;
     const relationValueMaxPx = computeRelationValueMaxPx(layout, textFillScale);
@@ -82,7 +89,8 @@
       weight: labelWeight,
       maxPx: computeResponsiveLineMaxPx(layout.center.captionRect, 0.76, textFillScale),
       padX: state.layoutApi.computeTextPadPx(layout.center.captionRect, layout.responsive),
-      color: color
+      color: color,
+      alpha: state.captionOpacity
     });
     state.tileLayout.drawFittedLine({
       textApi: state.radialText,
@@ -185,7 +193,8 @@
           weight: labelWeight,
           maxPx: rowLayout.labelMaxPx,
           padX: state.layoutApi.computeTextPadPx(rowLayout.labelRect, layout.responsive),
-          color: color
+          color: color,
+          alpha: state.captionOpacity
         });
       }
       state.tileLayout.drawFittedLine({
@@ -233,6 +242,7 @@
       const color = tokens.surface.fg;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
+      const captionOpacity = resolveOpacity(tokens.opacity && tokens.opacity.caption);
       if (centerDisplayStateAdapter.renderStateScreenIfNeeded({
         ctx: ctx,
         W: W,
@@ -293,6 +303,7 @@
         radialText: radialText,
         tileLayout: tileLayout,
         textFillScale: layout.responsive.textFillScale,
+        captionOpacity: captionOpacity,
         layoutApi: layoutApi,
         responsive: layout.responsive,
         frameWidthCache: frameWidthCache

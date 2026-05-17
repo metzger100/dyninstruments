@@ -12,7 +12,6 @@
 
   const hasOwn = Object.prototype.hasOwnProperty;
   const NORMAL_DEFAULTS = { innerMarginFactor: 0.03, minHeightFactor: 0.45, dualGapFactor: 0.05 };
-
   // dyni-lint-disable-next-line duplicate-functions -- Layout owners intentionally keep a tiny local clamp helper for geometry config normalization.
   function clampNumber(value, minValue, maxValue, defaultValue) {
     const n = Number(value);
@@ -21,15 +20,12 @@
     }
     return Math.max(minValue, Math.min(maxValue, n));
   }
-
   function resolveSecondaryScale(value) {
     return clampNumber(value, 0.3, 3.0, 0.8);
   }
-
   function resolveTextFillScale(state) {
     return clampNumber(state && state.textFillScale, 0.1, 10, 1);
   }
-
   function growSize(currentSize, ceilingSize, textFillScale) {
     const current = Math.max(1, Math.floor(Number(currentSize) || 0));
     const ceiling = Math.max(1, Math.floor(Number(ceilingSize) || 0));
@@ -39,14 +35,12 @@
     const fillGain = Math.max(0, clampNumber(textFillScale, 0.1, 10, 1) - 1);
     return Math.max(1, Math.min(ceiling, current + Math.floor((ceiling - current) * fillGain)));
   }
-
   function themeNumber(source, key, defaultValue, minValue, maxValue) {
     if (!source || !hasOwn.call(source, key)) {
       return defaultValue;
     }
     return clampNumber(source[key], minValue, maxValue, defaultValue);
   }
-
   function normalConfig(state) {
     const source = state && state.theme && state.theme.radial && state.theme.radial.fullCircle && state.theme.radial.fullCircle.normal;
     return {
@@ -55,7 +49,10 @@
       dualGapFactor: themeNumber(source, "dualGapFactor", NORMAL_DEFAULTS.dualGapFactor, 0, 0.25)
     };
   }
-
+  function buildTextOptions(state) {
+    const opacity = state && state.theme && state.theme.opacity && typeof state.theme.opacity === "object" ? state.theme.opacity : {};
+    return { captionOpacity: opacity.caption, unitOpacity: opacity.unit };
+  }
   function boostValueUnitFit(state, fit, unitText, boxHeight) {
     if (!fit) {
       return fit;
@@ -192,7 +189,7 @@
   function drawBlock(state, x, y, width, height, display, align, sizes) {
     state.text.drawThreeRowsBlock(
       state.ctx, state.family, x, y, width, height, display.caption, display.value, display.unit, display.secScale,
-      align, sizes, state.valueWeight, state.labelWeight
+      align, sizes, state.valueWeight, state.labelWeight, buildTextOptions(state)
     );
   }
 
@@ -212,7 +209,7 @@
     );
     state.text.drawValueUnitWithFit(
       state.ctx, state.family, box.x, box.y, box.w, box.h, display.value, display.unit, fit, "center",
-      state.valueWeight, state.labelWeight
+      state.valueWeight, state.labelWeight, buildTextOptions(state)
     );
   }
 
@@ -253,11 +250,11 @@
     );
     state.text.drawCaptionMax(
       state.ctx, state.family, top.x, top.y, top.w, top.h, display.caption,
-      growSize(Math.floor(fit.vPx * resolveSecondaryScale(display.secScale)), top.h, state.textFillScale), align, state.labelWeight
+      growSize(Math.floor(fit.vPx * resolveSecondaryScale(display.secScale)), top.h, state.textFillScale), align, state.labelWeight, buildTextOptions(state)
     );
     state.text.drawValueUnitWithFit(
       state.ctx, state.family, bottom.x, bottom.y, bottom.w, bottom.h, display.value, display.unit, fit, align,
-      state.valueWeight, state.labelWeight
+      state.valueWeight, state.labelWeight, buildTextOptions(state)
     );
   }
 
@@ -277,7 +274,7 @@
     );
     state.text.drawInlineCapValUnit(
       state.ctx, state.family, slot.x, slot.y, slot.w, slot.h, display.caption, display.value, display.unit, fit,
-      state.valueWeight, state.labelWeight
+      state.valueWeight, state.labelWeight, buildTextOptions(state)
     );
   }
 

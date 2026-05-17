@@ -40,6 +40,14 @@
     const measureValueUnitFit = fitting.measureValueUnitFit;
     const fitInlineCapValUnit = fitting.fitInlineCapValUnit;
 
+    function resolveOpacity(textOptions, key) {
+      if (!textOptions || typeof textOptions !== "object") {
+        return 1;
+      }
+      const raw = textOptions[key];
+      return typeof raw === "number" && raw >= 0 && raw <= 1 ? raw : 1;
+    }
+
     function drawClampedLine(ctx, text, anchorX, y, maxW, align) {
       const content = String(text || "");
       const widthLimit = Math.max(0, Number(maxW) || 0);
@@ -73,10 +81,20 @@
         cPx = Math.min(cPx, clampPositive(capMaxPx, MIN_FONT_PX));
       }
 
+      const captionOpacity = resolveOpacity(textOptions, "captionOpacity");
+      if (captionOpacity < 1) {
+        ctx.save();
+        ctx.globalAlpha = captionOpacity;
+      }
+
       setFont(ctx, cPx, labelWeight, resolveFamily(family, textOptions));
       ctx.textBaseline = "top";
       const mode = align || "left";
       drawClampedLine(ctx, caption, lineAnchor(x, w, mode), y, w, mode);
+
+      if (captionOpacity < 1) {
+        ctx.restore();
+      }
     }
 
     function drawValueUnitWithFit(ctx, family, x, y, w, h, value, unit, fit, align, valueWeight, labelWeight, textOptions) {
@@ -116,6 +134,10 @@
       setFont(ctx, vPx, valueWeight, valueFamily);
       ctx.fillText(String(value), xStart, yVal);
       if (unit) {
+        const unitOpacity = resolveOpacity(textOptions, "unitOpacity");
+        if (unitOpacity < 1) {
+          ctx.globalAlpha = unitOpacity;
+        }
         setFont(ctx, uPx, labelWeight, family);
         ctx.fillText(String(unit), xStart + valueW + gap, yVal + Math.max(0, Math.floor(vPx * 0.08)));
       }
@@ -132,6 +154,8 @@
       const rowScale = data.total > widthLimit + WIDTH_EPSILON
         ? Math.max(0.01, widthLimit / Math.max(WIDTH_EPSILON, data.total))
         : 1;
+      const capOpacity = resolveOpacity(textOptions, "captionOpacity");
+      const unitOpacity = resolveOpacity(textOptions, "unitOpacity");
       let xStart = -(data.total * 0.5);
       const yMid = y + Math.floor(h / 2);
 
@@ -142,8 +166,14 @@
       ctx.textAlign = "left";
 
       if (caption) {
+        if (capOpacity < 1) {
+          ctx.globalAlpha = capOpacity;
+        }
         setFont(ctx, data.cPx, labelWeight, family);
         ctx.fillText(String(caption), xStart, yMid);
+        if (capOpacity < 1) {
+          ctx.globalAlpha = 1;
+        }
         xStart += measureTextWidth(ctx, caption) + data.g1;
       }
 
@@ -153,6 +183,9 @@
 
       if (unit) {
         xStart += data.g2;
+        if (unitOpacity < 1) {
+          ctx.globalAlpha = unitOpacity;
+        }
         setFont(ctx, data.uPx, labelWeight, family);
         ctx.fillText(String(unit), xStart, yMid);
       }
@@ -189,19 +222,35 @@
       const yVal = y + hCap;
       const yUni = y + hCap + hVal;
       const anchor = lineAnchor(x, w, mode);
+      const capOpacity = resolveOpacity(textOptions, "captionOpacity");
+      const unitOpacity = resolveOpacity(textOptions, "unitOpacity");
       ctx.textBaseline = "top";
 
       if (caption) {
+        if (capOpacity < 1) {
+          ctx.save();
+          ctx.globalAlpha = capOpacity;
+        }
         setFont(ctx, cPx, labelWeight, family);
         drawClampedLine(ctx, caption, anchor, yCap, w, mode);
+        if (capOpacity < 1) {
+          ctx.restore();
+        }
       }
       if (value) {
         setFont(ctx, vPx, valueWeight, resolveFamily(family, textOptions));
         drawClampedLine(ctx, value, anchor, yVal, w, mode);
       }
       if (unit) {
+        if (unitOpacity < 1) {
+          ctx.save();
+          ctx.globalAlpha = unitOpacity;
+        }
         setFont(ctx, uPx, labelWeight, family);
         drawClampedLine(ctx, unit, anchor, yUni, w, mode);
+        if (unitOpacity < 1) {
+          ctx.restore();
+        }
       }
     }
 

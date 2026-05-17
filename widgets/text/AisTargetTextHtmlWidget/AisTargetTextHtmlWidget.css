@@ -148,6 +148,7 @@
 
 .dyni-html-root .dyni-ais-target-metric-caption {
   font-weight: var(--dyni-theme-font-label-weight, 700);
+  opacity: var(--dyni-theme-opacity-caption, 1);
 }
 
 .dyni-html-root .dyni-ais-target-mode-flat .dyni-ais-target-metric-caption {
@@ -192,6 +193,7 @@
 
 .dyni-html-root .dyni-ais-target-metric-unit {
   font-weight: var(--dyni-theme-font-label-weight, 700);
+  opacity: var(--dyni-theme-opacity-unit, 1);
   text-align: left;
 }
 

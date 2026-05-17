@@ -40,6 +40,8 @@
       const color = tokens.surface.fg;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
+      const captionOpacity = tokens.opacity && typeof tokens.opacity === "object" ? tokens.opacity.caption : undefined;
+      const unitOpacity = tokens.opacity && typeof tokens.opacity === "object" ? tokens.opacity.unit : undefined;
       ctx.fillStyle = color;
       const stateKind = stateScreenPrecedence.pickFirst([
         { kind: "disconnected", when: props.disconnect === true },
@@ -126,7 +128,9 @@
           unitText: modeData.unit,
           family: family,
           valueWeight: valueWeight,
-          labelWeight: labelWeight
+          labelWeight: labelWeight,
+          captionOpacity: captionOpacity,
+          unitOpacity: unitOpacity
         });
       } else if (modeData.mode === "normal") {
         const key = text.makeFitCacheKey({ mode: "normal", base: keyBase });
@@ -158,7 +162,9 @@
           unitText: modeData.unit,
           family: family,
           valueWeight: valueWeight,
-          labelWeight: labelWeight
+          labelWeight: labelWeight,
+          captionOpacity: captionOpacity,
+          unitOpacity: unitOpacity
         });
       } else {
         const key = text.makeFitCacheKey({ mode: "flat", base: keyBase });
@@ -189,7 +195,9 @@
           H: H,
           family: family,
           valueWeight: valueWeight,
-          labelWeight: labelWeight
+          labelWeight: labelWeight,
+          captionOpacity: captionOpacity,
+          unitOpacity: unitOpacity
         });
       }
 

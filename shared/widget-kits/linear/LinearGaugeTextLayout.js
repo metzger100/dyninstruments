@@ -110,6 +110,16 @@
     return 1.0;
   }
 
+  function buildTextOptions(state) {
+    const opacity = state && state.theme && state.theme.opacity && typeof state.theme.opacity === "object"
+      ? state.theme.opacity
+      : {};
+    return {
+      captionOpacity: opacity.caption,
+      unitOpacity: opacity.unit
+    };
+  }
+
   function drawCaptionRow(state, textApi, caption, box, secScale, align) {
     if (!caption || !box || box.w <= 0 || box.h <= 0 || !textApi) {
       return;
@@ -127,6 +137,7 @@
     );
     const captionBasePx = Math.max(1, Math.floor(fit.vPx * secScale));
     const captionMax = scaleTextCeiling(captionBasePx, box.h, state.textFillScale);
+    const textOptions = buildTextOptions(state);
     textApi.drawCaptionMax(
       state.ctx,
       state.family,
@@ -137,7 +148,8 @@
       caption,
       captionMax,
       align,
-      state.labelWeight
+      state.labelWeight,
+      textOptions
     );
   }
 
@@ -157,6 +169,7 @@
       state.labelWeight
     );
     const scaledFit = scaleValueUnitFit(state, valueText, unitText, fit, box.h);
+    const textOptions = buildTextOptions(state);
     textApi.drawValueUnitWithFit(
       state.ctx,
       state.family,
@@ -169,7 +182,8 @@
       scaledFit,
       align,
       state.valueWeight,
-      state.labelWeight
+      state.labelWeight,
+      textOptions
     );
   }
 
@@ -190,6 +204,7 @@
       state.labelWeight
     );
     const scaledFit = scaleInlineFit(state, caption, valueText, unitText, fit, box.h);
+    const textOptions = buildTextOptions(state);
     textApi.drawInlineCapValUnit(
       state.ctx,
       state.family,
@@ -202,7 +217,8 @@
       unitText,
       scaledFit,
       state.valueWeight,
-      state.labelWeight
+      state.labelWeight,
+      textOptions
     );
   }
 

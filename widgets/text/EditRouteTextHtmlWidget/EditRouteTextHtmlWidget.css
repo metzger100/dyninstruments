@@ -158,6 +158,7 @@
 .dyni-html-root .dyni-edit-route-metric-unit {
   flex: 0 0 auto;
   font-weight: var(--dyni-theme-font-label-weight, 700);
+  opacity: var(--dyni-theme-opacity-unit, 1);
 }
 
 .dyni-html-root .dyni-edit-route-metric-unit:empty {

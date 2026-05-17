@@ -395,4 +395,133 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.colors.ais.tracking).toBe("rgba(248, 166, 1, 0.60)");
     expect(resolved.colors.ais.normal).toBe("rgba(235, 235, 85, 0.60)");
   });
+
+  it("resolves opacity.caption to default 1.0", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return { getPropertyValue() { return ""; } };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.opacity.caption).toBe(1);
+  });
+
+  it("resolves opacity.unit to default 1.0", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return { getPropertyValue() { return ""; } };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.opacity.unit).toBe(1);
+  });
+
+  it("opacity.caption respects root CSS input override", function () {
+    const cssVars = { "--dyni-caption-opacity": "0.6" };
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue(name) {
+            return hasOwn.call(cssVars, name) ? cssVars[name] : "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.opacity.caption).toBe(0.6);
+  });
+
+  it("opacity.unit respects root CSS input override", function () {
+    const cssVars = { "--dyni-unit-opacity": "0.4" };
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue(name) {
+            return hasOwn.call(cssVars, name) ? cssVars[name] : "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.opacity.unit).toBe(0.4);
+  });
+
+  it("applyToRoot materializes --dyni-theme-opacity-caption", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return { getPropertyValue() { return ""; } };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    context.DyniPlugin.runtime.theme.applyToRoot(rootEl);
+
+    expect(getAppliedOutput(rootEl, "--dyni-theme-opacity-caption")).toBe("1");
+  });
+
+  it("applyToRoot materializes --dyni-theme-opacity-unit", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return { getPropertyValue() { return ""; } };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    context.DyniPlugin.runtime.theme.applyToRoot(rootEl);
+
+    expect(getAppliedOutput(rootEl, "--dyni-theme-opacity-unit")).toBe("1");
+  });
+
+  it("opacity tokens have no preset overrides", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return { getPropertyValue() { return ""; } };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    const presets = ["slim", "bold", "darkmode", "highcontrast"];
+
+    presets.forEach(function (preset) {
+      context.DyniPlugin.runtime.theme.configure({ activePresetName: preset });
+      const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+      expect(resolved.opacity.caption).toBe(1);
+      expect(resolved.opacity.unit).toBe(1);
+    });
+  });
+
+  it("opacity tokens have no night mode override", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return { getPropertyValue() { return ""; } };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.dom.getNightModeState = function () {
+      return true;
+    };
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.opacity.caption).toBe(1);
+    expect(resolved.opacity.unit).toBe(1);
+  });
 });

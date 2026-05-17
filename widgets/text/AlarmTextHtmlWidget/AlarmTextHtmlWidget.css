@@ -112,6 +112,7 @@
 .dyni-html-root .dyni-alarm-caption {
   font-size: calc(var(--dyni-map-zoom-value-size) * var(--dyni-map-zoom-sec-scale));
   font-weight: var(--dyni-theme-font-label-weight, 700);
+  opacity: var(--dyni-theme-opacity-caption, 1);
   color: inherit;
   line-height: 1;
   white-space: nowrap;

@@ -5,10 +5,6 @@ It tracks development priorities and AvNav widget coverage status.
 
 ## Roadmap
 
-### Improvements for the existing widgets
-
-- add a theme token for opacity of captions and units
-
 ### Additional non-core concepts (post release)
 
 - interactive regatta clock with clock, buttons to start and sync the clock with the regatta start and acoustic signals each minute and in the last 10 Seconds.

@@ -271,13 +271,25 @@
       const total = Math.max(0, Number(fit.total) || 0);
       const cW = Math.max(0, Number(fit.cW) || 0);
       const vW = Math.max(0, Number(fit.vW) || 0);
+      const capOpacity = typeof cfg.captionOpacity === "number" && cfg.captionOpacity >= 0 && cfg.captionOpacity <= 1
+        ? cfg.captionOpacity
+        : 1;
+      const unitOpacity = typeof cfg.unitOpacity === "number" && cfg.unitOpacity >= 0 && cfg.unitOpacity <= 1
+        ? cfg.unitOpacity
+        : 1;
       let xPos = x + Math.floor((W - total) / 2);
 
       ctx.textAlign = "left";
       ctx.textBaseline = "middle";
       if (captionText) {
+        if (capOpacity < 1) {
+          ctx.globalAlpha = capOpacity;
+        }
         primitiveSetFont(ctx, fit.sPx, labelWeight, family);
         ctx.fillText(captionText, xPos, yMid);
+        if (capOpacity < 1) {
+          ctx.globalAlpha = 1;
+        }
         xPos += cW + gap;
       }
       primitiveSetFont(ctx, fit.vPx, valueWeight, family, valueMonoOptions);
@@ -285,8 +297,14 @@
       xPos += vW;
       if (unitText) {
         xPos += gap;
+        if (unitOpacity < 1) {
+          ctx.globalAlpha = unitOpacity;
+        }
         primitiveSetFont(ctx, fit.sPx, labelWeight, family);
         ctx.fillText(unitText, xPos, yMid);
+        if (unitOpacity < 1) {
+          ctx.globalAlpha = 1;
+        }
       }
     }
 

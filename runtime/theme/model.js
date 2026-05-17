@@ -43,6 +43,8 @@
     defineToken("font.familyMono", "--dyni-font-mono", "string", DEFAULT_MONO_STACK, undefined, "--dyni-theme-font-family-mono"),
     defineToken("font.weight", "--dyni-font-weight", "number", 700, undefined, "--dyni-theme-font-weight"),
     defineToken("font.labelWeight", "--dyni-label-weight", "number", 700, undefined, "--dyni-theme-font-label-weight"),
+    defineToken("opacity.caption", "--dyni-caption-opacity", "number", 1.0, undefined, "--dyni-theme-opacity-caption"),
+    defineToken("opacity.unit", "--dyni-unit-opacity", "number", 1.0, undefined, "--dyni-theme-opacity-unit"),
 
     defineToken("colors.pointer", "--dyni-pointer", "color", "#ff2b2b", { night: "#cc2222" }),
     defineToken("colors.warning", "--dyni-warning", "color", "#e7c66a", { night: "#8b6914" }),

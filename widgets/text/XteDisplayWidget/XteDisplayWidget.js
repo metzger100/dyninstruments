@@ -63,6 +63,8 @@
         : theme.font.family;
       const valueWeight = theme.font.weight;
       const labelWeight = theme.font.labelWeight;
+      const captionOpacity = theme.opacity && typeof theme.opacity === "object" ? theme.opacity.caption : undefined;
+      const unitOpacity = theme.opacity && typeof theme.opacity === "object" ? theme.opacity.unit : undefined;
       const stateKind = resolveStateKind(p);
       if (stateKind !== stateScreenLabels.KINDS.DATA) {
         stateScreenCanvasOverlay.drawStateScreen({
@@ -254,7 +256,9 @@
         secScale: 0.75,
         textFillScale: layout.responsive.textFillScale,
         padX: metricSpacing.cog.padX,
-        captionHeightPx: metricSpacing.cog.captionHeightPx
+        captionHeightPx: metricSpacing.cog.captionHeightPx,
+        captionOpacity: captionOpacity,
+        unitOpacity: unitOpacity
       });
       tileLayout.drawMetricTile({
         textApi: toolkit.text,
@@ -268,7 +272,9 @@
         secScale: 0.7,
         textFillScale: layout.responsive.textFillScale,
         padX: metricSpacing.xte.padX,
-        captionHeightPx: metricSpacing.xte.captionHeightPx
+        captionHeightPx: metricSpacing.xte.captionHeightPx,
+        captionOpacity: captionOpacity,
+        unitOpacity: unitOpacity
       });
       tileLayout.drawMetricTile({
         textApi: toolkit.text,
@@ -282,7 +288,9 @@
         secScale: 0.7,
         textFillScale: layout.responsive.textFillScale,
         padX: metricSpacing.dtw.padX,
-        captionHeightPx: metricSpacing.dtw.captionHeightPx
+        captionHeightPx: metricSpacing.dtw.captionHeightPx,
+        captionOpacity: captionOpacity,
+        unitOpacity: unitOpacity
       });
       tileLayout.drawMetricTile({
         textApi: toolkit.text,
@@ -296,7 +304,9 @@
         secScale: 0.75,
         textFillScale: layout.responsive.textFillScale,
         padX: metricSpacing.btw.padX,
-        captionHeightPx: metricSpacing.btw.captionHeightPx
+        captionHeightPx: metricSpacing.btw.captionHeightPx,
+        captionOpacity: captionOpacity,
+        unitOpacity: unitOpacity
       });
 
       if (xteAvailable && springMotion.isActive(canvas)) {
