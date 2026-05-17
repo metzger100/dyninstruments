@@ -121,6 +121,10 @@
         toolkitSpec: toolkit
       });
 
+      if (payload.surface !== "canvas-dom") {
+        return payload;
+      }
+
       var memoKey = payload.__mappedSignature
         + "|" + (payload.props.nightMode ? "1" : "0")
         + "|" + (payload.props.editing ? "1" : "0");

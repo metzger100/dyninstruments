@@ -31,7 +31,9 @@
       }
       if (req === "dst") {
         const token = toolkit.formatUnit("dst", "distance");
-        return out(p.dst, cap("dst"), toolkit.unitText("dst", "distance", token), "formatDistance", [token]);
+        const o = out(p.dst, cap("dst"), toolkit.unitText("dst", "distance", token), "formatDistance", [token]);
+        o.disconnect = p.disconnect === true;
+        return o;
       }
       if (req === "rteDistance") {
         const token = toolkit.formatUnit("rteDistance", "distance");
@@ -149,6 +151,7 @@
         const o = out(p.positionWp, cap("positionWp"), unit("positionWp"), "formatLonLats", []);
         o.coordinateFormatter = "formatLonLatsDecimal";
         o.coordinateFormatterParameters = [];
+        o.disconnect = p.disconnect === true;
         return o;
       }
       if (req === "xteDisplay") {

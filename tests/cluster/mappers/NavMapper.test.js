@@ -213,7 +213,8 @@ describe("NavMapper", function () {
       caption: "DST",
       unit: "kilometers custom",
       formatter: "formatDistance",
-      formatterParameters: ["km"]
+      formatterParameters: ["km"],
+      disconnect: false
     });
 
     expect(mapper.translate({ kind: "rteDistance", rteDistance: 12.3 }, routeContext("rteDistance", customToolkit))).toEqual({
@@ -370,6 +371,31 @@ describe("NavMapper", function () {
     expect(wp).not.toHaveProperty("renderer");
     expect(wp.coordinateFormatter).toBe("formatLonLatsDecimal");
     expect(wp.coordinateFormatterParameters).toEqual([]);
+    expect(wp.disconnect).toBe(false);
+  });
+
+  it("maps disconnect for dst and positionWp so memo signatures can change on WP link loss", function () {
+    const mapper = createMapper();
+
+    const dstConnected = mapper.translate({ kind: "dst", dst: 1.2, disconnect: false }, routeContext("dst", toolkit));
+    const dstDisconnected = mapper.translate({ kind: "dst", dst: 1.2, disconnect: true }, routeContext("dst", toolkit));
+    expect(dstConnected.disconnect).toBe(false);
+    expect(dstDisconnected.disconnect).toBe(true);
+    expect(JSON.stringify(dstConnected)).not.toBe(JSON.stringify(dstDisconnected));
+
+    const positionConnected = mapper.translate({
+      kind: "positionWp",
+      positionWp: { lon: 3, lat: 4 },
+      disconnect: false
+    }, routeContext("positionWp", toolkit));
+    const positionDisconnected = mapper.translate({
+      kind: "positionWp",
+      positionWp: { lon: 3, lat: 4 },
+      disconnect: true
+    }, routeContext("positionWp", toolkit));
+    expect(positionConnected.disconnect).toBe(false);
+    expect(positionDisconnected.disconnect).toBe(true);
+    expect(JSON.stringify(positionConnected)).not.toBe(JSON.stringify(positionDisconnected));
   });
 
   it("maps xteDisplay to XteDisplayWidget with normalized renderer props", function () {
