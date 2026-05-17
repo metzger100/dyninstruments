@@ -88,6 +88,7 @@ function createActivationControllerMock(resultFactory) {
     activateCommittedRoute: vi.fn(resultFactory || function () {
       return {};
     }),
+    invalidateMemoState: vi.fn(),
     destroy: vi.fn()
   };
 }
@@ -502,6 +503,107 @@ describe("ClusterWidget", function () {
     expect(harness.surfaceSessionController.detachForShellReplacement).not.toHaveBeenCalled();
     expect(harness.activationController.activateCommittedRoute).not.toHaveBeenCalled();
     expect(harness.surfaceSessionController.reconcileSession).not.toHaveBeenCalled();
+  });
+
+  it("invalidates route-activation memo state when detaching for a diagnostic route so a same-signature return can remount", function () {
+    const routeMeta = {
+      routeId: "speed/sog",
+      cluster: "speed",
+      kind: "sog",
+      mapperId: "SpeedMapper",
+      rendererId: "SpeedLinearWidget",
+      surface: "canvas-dom",
+      shellSizing: {
+        kind: "ratio",
+        aspectRatio: 1.5
+      }
+    };
+    const hostCommitController = createHostCommitControllerMock("dyni-host-42");
+    const sharedRootEl = { id: "root-shared" };
+    const sharedShellEl = { id: "shell-shared" };
+    hostCommitController.scheduleCommit.mockImplementation(function (callbacks) {
+      const state = hostCommitController.getState();
+      if (callbacks && typeof callbacks.onCommit === "function") {
+        callbacks.onCommit({
+          instanceId: state.instanceId,
+          revision: state.renderRevision,
+          props: state.lastProps,
+          rootEl: sharedRootEl,
+          shellEl: sharedShellEl,
+          state: Object.assign({}, state)
+        });
+      }
+      return true;
+    });
+
+    let discardedActivation = null;
+    let lastMemoKey = null;
+    const activationController = {
+      activateCommittedRoute: vi.fn(function (payload) {
+        const raw = payload.routeFrame && payload.routeFrame.__dyniRawProps ? payload.routeFrame.__dyniRawProps : {};
+        const memoKey = String(raw.value)
+          + "|" + (raw.nightMode ? "1" : "0")
+          + "|" + (raw.editing ? "1" : "0")
+          + "|" + payload.rootEl.id
+          + "|" + payload.shellEl.id;
+        if (lastMemoKey === memoKey) {
+          return discardedActivation;
+        }
+        lastMemoKey = memoKey;
+        return {
+          routeId: routeMeta.routeId,
+          surface: routeMeta.surface,
+          rendererId: routeMeta.rendererId,
+          rendererSpec: { id: routeMeta.rendererId },
+          rootEl: payload.rootEl,
+          shellEl: payload.shellEl,
+          hostContext: payload.hostContext,
+          props: raw,
+          rawProps: raw,
+          revision: payload.revision,
+          shadowCssUrls: []
+        };
+      }),
+      invalidateMemoState: vi.fn(function () {
+        lastMemoKey = null;
+      }),
+      destroy: vi.fn()
+    };
+    const harness = createRuntimeHarness({
+      routeMeta: routeMeta,
+      hostCommitController: hostCommitController,
+      activationController: activationController
+    });
+    discardedActivation = harness.runtime.routeActivation.DISCARDED_ACTIVATION;
+
+    const widget = createClusterWidget({ cluster: "speed" });
+    const widgetContext = {};
+    const validRouteFrame = widget.translateFunction({
+      kind: "sog",
+      value: 12.3,
+      nightMode: false,
+      editing: false
+    });
+    const diagnosticRouteFrame = widget.translateFunction({
+      kind: "missing",
+      value: 12.3,
+      nightMode: false,
+      editing: false
+    });
+
+    widget.initFunction.call(widgetContext);
+    widget.renderHtml.call(widgetContext, validRouteFrame);
+    widget.renderHtml.call(widgetContext, diagnosticRouteFrame);
+    widget.renderHtml.call(widgetContext, validRouteFrame);
+
+    expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledTimes(2);
+    expect(harness.surfaceSessionController.detachForShellReplacement).toHaveBeenCalledTimes(1);
+    expect(harness.activationController.invalidateMemoState).toHaveBeenCalledTimes(1);
+    expect(harness.surfaceSessionController.reconcileSession).toHaveBeenCalledTimes(2);
+    expect(harness.surfaceSessionController.reconcileSession.mock.calls[1][0]).toEqual(expect.objectContaining({
+      revision: 3,
+      routeId: "speed/sog"
+    }));
   });
 
   it("drops a stale async activation after a newer shell commit", async function () {

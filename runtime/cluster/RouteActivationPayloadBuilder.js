@@ -105,6 +105,7 @@
     const mapperProps = cloneRouteProps(routeFrame);
     const routeContext = createRouteContext(routeMeta, routeCache, mapperProps, toolkitSpec);
     const mappedProps = routeCache.mapper.translate(mapperProps, routeContext) || {};
+    var mappedSignature = JSON.stringify(mappedProps);
     const finalProps = mergeRendererProps(Object.assign({}, mapperProps, mappedProps), mappedProps);
 
     if (routeMeta.surface === "html") {
@@ -127,7 +128,8 @@
       props: finalProps,
       rawProps: mapperProps,
       revision: snapshot.revision,
-      shadowCssUrls: routeMeta.surface === "html" ? resolveShadowCssUrls(routeMeta.rendererId) : []
+      shadowCssUrls: routeMeta.surface === "html" ? resolveShadowCssUrls(routeMeta.rendererId) : [],
+      __mappedSignature: mappedSignature
     };
   }
 

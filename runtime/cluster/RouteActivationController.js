@@ -68,7 +68,10 @@
         cache = {
           mapper: null,
           viewModel: null,
-          rendererSpec: null
+          rendererSpec: null,
+          lastMemoKey: null,
+          lastRootEl: null,
+          lastShellEl: null
         };
         routeCacheById[routeId] = cache;
       }
@@ -96,15 +99,40 @@
       return cache;
     }
 
+    function invalidateMemoState() {
+      Object.keys(routeCacheById).forEach(function (routeId) {
+        const routeCache = routeCacheById[routeId];
+        if (!routeCache) {
+          return;
+        }
+        routeCache.lastMemoKey = null;
+        routeCache.lastRootEl = null;
+        routeCache.lastShellEl = null;
+      });
+    }
+
     function buildPayload(snapshot, routeMeta) {
       const routeCache = ensureRouteInstance(routeMeta);
       const toolkit = ensureToolkit();
-      return payloadBuilder.buildActivatedPayload({
+      var payload = payloadBuilder.buildActivatedPayload({
         snapshot: snapshot,
         routeMeta: routeMeta,
         routeCache: routeCache,
         toolkitSpec: toolkit
       });
+
+      var memoKey = payload.__mappedSignature
+        + "|" + (payload.props.nightMode ? "1" : "0")
+        + "|" + (payload.props.editing ? "1" : "0");
+      var sameRootEl = routeCache.lastRootEl === payload.rootEl;
+      var sameShellEl = routeCache.lastShellEl === payload.shellEl;
+      if (routeCache.lastMemoKey === memoKey && sameRootEl && sameShellEl) {
+        return DISCARDED_ACTIVATION;
+      }
+      routeCache.lastMemoKey = memoKey;
+      routeCache.lastRootEl = payload.rootEl;
+      routeCache.lastShellEl = payload.shellEl;
+      return payload;
     }
 
     function activateCommittedRoute(options) {
@@ -165,6 +193,7 @@
 
     function destroy() {
       latestWins.destroy();
+      invalidateMemoState();
       toolkitSpec = null;
       Object.keys(routeCacheById).forEach(function (routeId) {
         delete routeCacheById[routeId];
@@ -173,6 +202,7 @@
 
     return {
       activateCommittedRoute: activateCommittedRoute,
+      invalidateMemoState: invalidateMemoState,
       destroy: destroy
     };
   }

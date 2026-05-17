@@ -35,6 +35,8 @@ Mapper output is route props only.
 - mappers do not emit renderer identity
 - `rendererProps` is merged into the activated props during route activation
 - `renderer` and `rendererProps` are stripped from the activated payload after merge
+- route activation memoization compares payload `__mappedSignature` plus `nightMode` and `editing`, and also requires unchanged committed `rootEl`/`shellEl` attachment targets before returning `DISCARDED_ACTIVATION`
+- ClusterWidget invalidates route-activation memo state when it detaches an active surface for an invalid/diagnostic route commit (no activation path for that commit)
 
 ## Runtime Flow
 
@@ -46,7 +48,10 @@ Mapper output is route props only.
 6. ClusterWidget records the committed revision floor on SurfaceSessionController
 7. ClusterWidget calls SurfaceSessionController.detachForShellReplacement() only when the shell was actually replaced or the route is invalid/diagnostic and an active surface must be torn down
 8. runtime.routeActivation activates the committed route from `config.clusterRoutes.byRouteId`
-9. RouteActivationPayloadBuilder merges `rendererProps` into route props, strips renderer identity fields, and SurfaceSessionController reconciles the activated payload
+9. RouteActivationPayloadBuilder merges `rendererProps` into route props, strips renderer identity fields, and emits payload `__mappedSignature`
+10. RouteActivationController memo-compares `__mappedSignature` + `nightMode` + `editing` and committed `rootEl`/`shellEl` identity; only unchanged data with unchanged attachment targets returns `DISCARDED_ACTIVATION` before surface reconcile
+11. ClusterWidget calls `activationController.invalidateMemoState()` when it detaches for invalid/diagnostic commits that skip activation
+12. SurfaceSessionController reconciles only non-discarded activated payloads
 
 ## Theme and Commit Ordering
 

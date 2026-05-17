@@ -338,8 +338,9 @@ describe("runtime/cluster/RouteActivationController.js", function () {
   });
 
   it("returns warm payloads synchronously and caches route root instances", function () {
-    const mapperTranslate = vi.fn(function () {
+    const mapperTranslate = vi.fn(function (props) {
       return {
+        mappedValue: props.extra,
         rendererProps: {
           warm: true
         }
@@ -418,23 +419,30 @@ describe("runtime/cluster/RouteActivationController.js", function () {
     });
     const routeActivation = loadController(context);
     const controller = routeActivation.createWidgetController(widgetDef);
-    const routeFrame = {
+    const firstRouteFrame = {
       cluster: "speed",
       kind: "sog",
-      extra: "warm",
+      extra: "warm-a",
       __dyniRouteId: "speed/sog",
-      __dyniRawProps: { cluster: "speed", kind: "sog", extra: "warm" }
+      __dyniRawProps: { cluster: "speed", kind: "sog", extra: "warm-a" }
+    };
+    const secondRouteFrame = {
+      cluster: "speed",
+      kind: "sog",
+      extra: "warm-b",
+      __dyniRouteId: "speed/sog",
+      __dyniRawProps: { cluster: "speed", kind: "sog", extra: "warm-b" }
     };
 
     const first = controller.activateCommittedRoute({
-      routeFrame: routeFrame,
+      routeFrame: firstRouteFrame,
       revision: 11,
       rootEl: { id: "root-a" },
       shellEl: { id: "shell-a" },
       hostContext: { marker: "a" }
     });
     const second = controller.activateCommittedRoute({
-      routeFrame: routeFrame,
+      routeFrame: secondRouteFrame,
       revision: 12,
       rootEl: { id: "root-b" },
       shellEl: { id: "shell-b" },
@@ -458,7 +466,12 @@ describe("runtime/cluster/RouteActivationController.js", function () {
     expect(toolkitCreate).toHaveBeenCalledWith({
       cluster: "speed",
       kind: "sog",
-      extra: "warm"
+      extra: "warm-a"
+    });
+    expect(toolkitCreate).toHaveBeenCalledWith({
+      cluster: "speed",
+      kind: "sog",
+      extra: "warm-b"
     });
     expect(toolkitCreate).toHaveBeenCalledTimes(2);
     expect(mapperTranslate).toHaveBeenCalledTimes(2);
@@ -469,6 +482,403 @@ describe("runtime/cluster/RouteActivationController.js", function () {
     expect(first.props).toMatchObject({
       warm: true
     });
+    expect(JSON.parse(first.__mappedSignature)).toEqual({
+      mappedValue: "warm-a",
+      rendererProps: {
+        warm: true
+      }
+    });
+  });
+
+  it("memoizes mapped activation output and discards spurious activations", function () {
+    const mapperTranslate = vi.fn(function (props) {
+      return {
+        value: props.sourceValue,
+        rendererProps: {
+          mappedKind: "sog"
+        }
+      };
+    });
+    const toolkitCreate = vi.fn(function () {
+      return {
+        fromToolkit: "memo"
+      };
+    });
+    const loader = createLoaderHarness({
+      initialLoadedIds: [
+        "ClusterMapperToolkit",
+        "SpeedMapper",
+        "SpeedRadialWidget"
+      ],
+      modules: {
+        ClusterMapperToolkit: {
+          create: function () {
+            return {
+              createToolkit: toolkitCreate
+            };
+          }
+        },
+        SpeedMapper: {
+          create: function () {
+            return {
+              translate: mapperTranslate
+            };
+          }
+        },
+        SpeedRadialWidget: {
+          create: function () {
+            return {
+              renderCanvas: vi.fn()
+            };
+          }
+        }
+      }
+    });
+    const themeRuntime = {
+      preloadShadowCssUrls: vi.fn(),
+      hasShadowCssText: vi.fn(() => true)
+    };
+    const widgetDef = { cluster: "speed" };
+    const context = createBaseContext({
+      runtime: {
+        componentLoader: loader,
+        theme: themeRuntime,
+        surfaces: {
+          materializeSurfacePolicyProps: vi.fn()
+        },
+        perf: {
+          startSpan: vi.fn(() => null),
+          endSpan: vi.fn()
+        }
+      },
+      config: {
+        shared: {},
+        components: {},
+        clusterRoutes: {
+          byRouteId: {
+            "speed/sog": {
+              routeId: "speed/sog",
+              cluster: "speed",
+              kind: "sog",
+              mapperId: "SpeedMapper",
+              rendererId: "SpeedRadialWidget",
+              surface: "canvas-dom",
+              shellSizing: { kind: "ratio", aspectRatio: 1 }
+            }
+          }
+        }
+      }
+    });
+    const routeActivation = loadController(context);
+    const controller = routeActivation.createWidgetController(widgetDef);
+    const steadyRootEl = { id: "root-steady" };
+    const steadyShellEl = { id: "shell-steady" };
+    const editingRootEl = { id: "root-editing" };
+    const editingShellEl = { id: "shell-editing" };
+
+    const first = controller.activateCommittedRoute({
+      routeFrame: {
+        cluster: "speed",
+        kind: "sog",
+        sourceValue: 12.3,
+        irrelevantStoreValue: 1,
+        nightMode: false,
+        editing: false
+      },
+      revision: 1,
+      rootEl: steadyRootEl,
+      shellEl: steadyShellEl,
+      hostContext: { marker: "a" }
+    });
+    const spurious = controller.activateCommittedRoute({
+      routeFrame: {
+        cluster: "speed",
+        kind: "sog",
+        sourceValue: 12.3,
+        irrelevantStoreValue: 2,
+        nightMode: false,
+        editing: false
+      },
+      revision: 2,
+      rootEl: steadyRootEl,
+      shellEl: steadyShellEl,
+      hostContext: { marker: "b" }
+    });
+    const nightToggle = controller.activateCommittedRoute({
+      routeFrame: {
+        cluster: "speed",
+        kind: "sog",
+        sourceValue: 12.3,
+        irrelevantStoreValue: 3,
+        nightMode: true,
+        editing: false
+      },
+      revision: 3,
+      rootEl: { id: "root-c" },
+      shellEl: { id: "shell-c" },
+      hostContext: { marker: "c" }
+    });
+    const editingToggle = controller.activateCommittedRoute({
+      routeFrame: {
+        cluster: "speed",
+        kind: "sog",
+        sourceValue: 12.3,
+        irrelevantStoreValue: 4,
+        nightMode: true,
+        editing: true
+      },
+      revision: 4,
+      rootEl: editingRootEl,
+      shellEl: editingShellEl,
+      hostContext: { marker: "d" }
+    });
+    const repeatedEditing = controller.activateCommittedRoute({
+      routeFrame: {
+        cluster: "speed",
+        kind: "sog",
+        sourceValue: 12.3,
+        irrelevantStoreValue: 5,
+        nightMode: true,
+        editing: true
+      },
+      revision: 5,
+      rootEl: editingRootEl,
+      shellEl: editingShellEl,
+      hostContext: { marker: "e" }
+    });
+
+    expect(first).not.toBe(routeActivation.DISCARDED_ACTIVATION);
+    expect(first.revision).toBe(1);
+    expect(spurious).toBe(routeActivation.DISCARDED_ACTIVATION);
+    expect(nightToggle).not.toBe(routeActivation.DISCARDED_ACTIVATION);
+    expect(nightToggle.revision).toBe(3);
+    expect(editingToggle).not.toBe(routeActivation.DISCARDED_ACTIVATION);
+    expect(editingToggle.revision).toBe(4);
+    expect(repeatedEditing).toBe(routeActivation.DISCARDED_ACTIVATION);
+    expect(mapperTranslate).toHaveBeenCalledTimes(5);
+  });
+
+  it("does not discard when mapped output is unchanged but committed host attachment target changed", function () {
+    const mapperTranslate = vi.fn(function () {
+      return {
+        value: 12.3,
+        rendererProps: {
+          mappedKind: "sog"
+        }
+      };
+    });
+    const loader = createLoaderHarness({
+      initialLoadedIds: [
+        "ClusterMapperToolkit",
+        "SpeedMapper",
+        "SpeedRadialWidget"
+      ],
+      modules: {
+        ClusterMapperToolkit: {
+          create: function () {
+            return {
+              createToolkit: function () {
+                return {};
+              }
+            };
+          }
+        },
+        SpeedMapper: {
+          create: function () {
+            return {
+              translate: mapperTranslate
+            };
+          }
+        },
+        SpeedRadialWidget: {
+          create: function () {
+            return {
+              renderCanvas: vi.fn()
+            };
+          }
+        }
+      }
+    });
+    const themeRuntime = {
+      preloadShadowCssUrls: vi.fn(),
+      hasShadowCssText: vi.fn(() => true)
+    };
+    const widgetDef = { cluster: "speed" };
+    const context = createBaseContext({
+      runtime: {
+        componentLoader: loader,
+        theme: themeRuntime,
+        surfaces: {
+          materializeSurfacePolicyProps: vi.fn()
+        },
+        perf: {
+          startSpan: vi.fn(() => null),
+          endSpan: vi.fn()
+        }
+      },
+      config: {
+        shared: {},
+        components: {},
+        clusterRoutes: {
+          byRouteId: {
+            "speed/sog": {
+              routeId: "speed/sog",
+              cluster: "speed",
+              kind: "sog",
+              mapperId: "SpeedMapper",
+              rendererId: "SpeedRadialWidget",
+              surface: "canvas-dom",
+              shellSizing: { kind: "ratio", aspectRatio: 1 }
+            }
+          }
+        }
+      }
+    });
+    const routeActivation = loadController(context);
+    const controller = routeActivation.createWidgetController(widgetDef);
+    const routeFrame = {
+      cluster: "speed",
+      kind: "sog",
+      nightMode: false,
+      editing: false
+    };
+
+    const first = controller.activateCommittedRoute({
+      routeFrame: routeFrame,
+      revision: 1,
+      rootEl: { id: "root-a" },
+      shellEl: { id: "shell-a" },
+      hostContext: { marker: "a" }
+    });
+    const second = controller.activateCommittedRoute({
+      routeFrame: routeFrame,
+      revision: 2,
+      rootEl: { id: "root-b" },
+      shellEl: { id: "shell-b" },
+      hostContext: { marker: "b" }
+    });
+
+    expect(first).not.toBe(routeActivation.DISCARDED_ACTIVATION);
+    expect(second).not.toBe(routeActivation.DISCARDED_ACTIVATION);
+    expect(second.revision).toBe(2);
+    expect(mapperTranslate).toHaveBeenCalledTimes(2);
+  });
+
+  it("clears memo discard state when invalidateMemoState() is called", function () {
+    const mapperTranslate = vi.fn(function () {
+      return {
+        value: 12.3,
+        rendererProps: {
+          mappedKind: "sog"
+        }
+      };
+    });
+    const loader = createLoaderHarness({
+      initialLoadedIds: [
+        "ClusterMapperToolkit",
+        "SpeedMapper",
+        "SpeedRadialWidget"
+      ],
+      modules: {
+        ClusterMapperToolkit: {
+          create: function () {
+            return {
+              createToolkit: function () {
+                return {};
+              }
+            };
+          }
+        },
+        SpeedMapper: {
+          create: function () {
+            return {
+              translate: mapperTranslate
+            };
+          }
+        },
+        SpeedRadialWidget: {
+          create: function () {
+            return {
+              renderCanvas: vi.fn()
+            };
+          }
+        }
+      }
+    });
+    const themeRuntime = {
+      preloadShadowCssUrls: vi.fn(),
+      hasShadowCssText: vi.fn(() => true)
+    };
+    const widgetDef = { cluster: "speed" };
+    const context = createBaseContext({
+      runtime: {
+        componentLoader: loader,
+        theme: themeRuntime,
+        surfaces: {
+          materializeSurfacePolicyProps: vi.fn()
+        },
+        perf: {
+          startSpan: vi.fn(() => null),
+          endSpan: vi.fn()
+        }
+      },
+      config: {
+        shared: {},
+        components: {},
+        clusterRoutes: {
+          byRouteId: {
+            "speed/sog": {
+              routeId: "speed/sog",
+              cluster: "speed",
+              kind: "sog",
+              mapperId: "SpeedMapper",
+              rendererId: "SpeedRadialWidget",
+              surface: "canvas-dom",
+              shellSizing: { kind: "ratio", aspectRatio: 1 }
+            }
+          }
+        }
+      }
+    });
+    const routeActivation = loadController(context);
+    const controller = routeActivation.createWidgetController(widgetDef);
+    const stableRootEl = { id: "root-stable" };
+    const stableShellEl = { id: "shell-stable" };
+    const routeFrame = {
+      cluster: "speed",
+      kind: "sog",
+      nightMode: false,
+      editing: false
+    };
+
+    const first = controller.activateCommittedRoute({
+      routeFrame: routeFrame,
+      revision: 1,
+      rootEl: stableRootEl,
+      shellEl: stableShellEl,
+      hostContext: { marker: "a" }
+    });
+    const second = controller.activateCommittedRoute({
+      routeFrame: routeFrame,
+      revision: 2,
+      rootEl: stableRootEl,
+      shellEl: stableShellEl,
+      hostContext: { marker: "b" }
+    });
+    controller.invalidateMemoState();
+    const third = controller.activateCommittedRoute({
+      routeFrame: routeFrame,
+      revision: 3,
+      rootEl: stableRootEl,
+      shellEl: stableShellEl,
+      hostContext: { marker: "c" }
+    });
+
+    expect(first).not.toBe(routeActivation.DISCARDED_ACTIVATION);
+    expect(second).toBe(routeActivation.DISCARDED_ACTIVATION);
+    expect(third).not.toBe(routeActivation.DISCARDED_ACTIVATION);
+    expect(third.revision).toBe(3);
+    expect(mapperTranslate).toHaveBeenCalledTimes(3);
   });
 
   it("reuses the same cold promise for a route and resolves with the latest snapshot, then discards cleanly on destroy", async function () {

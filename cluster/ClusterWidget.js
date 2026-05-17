@@ -109,6 +109,13 @@
       return !!(currentSession.shellEl && currentSession.shellEl !== nextShellEl);
     }
 
+    function invalidateActivationMemoState(activationController) {
+      if (!activationController || typeof activationController.invalidateMemoState !== "function") {
+        return;
+      }
+      activationController.invalidateMemoState();
+    }
+
     function destroyRuntimeState(ctx) {
       const previous = ctx.__dyniClusterState;
       if (!previous) {
@@ -248,6 +255,9 @@
 
             if (shellWasReplaced) {
               state.surfaceSessionController.detachForShellReplacement();
+              if (!routeMeta) {
+                invalidateActivationMemoState(state.activationController);
+              }
             }
 
             if (routeMeta) {
