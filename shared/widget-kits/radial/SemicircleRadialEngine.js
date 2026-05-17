@@ -193,6 +193,7 @@
         };
       const fitCache = textLayout.createFitCache();
       const layerCache = layerCacheApi.createLayerCache({ layers: ["base"] });
+      let memoLayout = null;
 
       return function renderCanvas(canvas, props) {
         const p = props || {};
@@ -215,21 +216,29 @@
           stateScreenCanvasOverlay.drawStateScreen({ ctx: ctx, W: W, H: H, family: paint.family, color: paint.color, labelWeight: labelWeight, kind: stateKind });
           return;
         }
-        const mode = layoutApi.computeMode(
-          W,
-          H,
-          value.isFiniteNumber(p[ratioProps.normal]) ? p[ratioProps.normal] : modeDefaults.normal,
-          value.isFiniteNumber(p[ratioProps.flat]) ? p[ratioProps.flat] : modeDefaults.flat
-        );
-        const insets = layoutApi.computeInsets(W, H);
-        const layout = layoutApi.computeLayout({
-          W: W,
-          H: H,
-          theme: theme,
-          mode: mode,
-          insets: insets,
-          responsive: insets.responsive
-        });
+        const ratioNormal = value.isFiniteNumber(p[ratioProps.normal]) ? p[ratioProps.normal] : modeDefaults.normal;
+        const ratioFlat = value.isFiniteNumber(p[ratioProps.flat]) ? p[ratioProps.flat] : modeDefaults.flat;
+        const memoKey = W + "," + H + "," + ratioNormal + "," + ratioFlat + "," + paint.family + "," + labelWeight + "," + paint.color;
+        let mode;
+        let insets;
+        let layout;
+        if (memoLayout && memoLayout.key === memoKey && memoLayout.themeRef === theme) {
+          mode = memoLayout.mode;
+          insets = memoLayout.insets;
+          layout = memoLayout.layout;
+        } else {
+          mode = layoutApi.computeMode(W, H, ratioNormal, ratioFlat);
+          insets = layoutApi.computeInsets(W, H);
+          layout = layoutApi.computeLayout({
+            W: W,
+            H: H,
+            theme: theme,
+            mode: mode,
+            insets: insets,
+            responsive: insets.responsive
+          });
+          memoLayout = { key: memoKey, themeRef: theme, mode: mode, insets: insets, layout: layout };
+        }
         const valueWeight = theme.font.weight;
         const family = stableDigitsEnabled
           ? (theme.font.familyMono || paint.family)
