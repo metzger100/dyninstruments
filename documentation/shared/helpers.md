@@ -46,6 +46,7 @@ Accepts:
 Behavior:
 
 - walks composed tree and crosses ShadowRoot host boundaries
+- memoizes the resolved root per target node via WeakMap for steady-state calls
 - returns nearest committed .widget.dyniplugin root
 - throws if no committed plugin root exists
 

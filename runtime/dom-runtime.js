@@ -44,16 +44,29 @@
     return null;
   }
 
+  const pluginRootCache = new WeakMap();
+
   function requirePluginRoot(target) {
-    let node = resolveTargetNode(target);
-    while (node) {
-      if (node.nodeType === 1 && typeof node.closest === "function") {
-        const rootEl = node.closest(".widget.dyniplugin");
+    var node = resolveTargetNode(target);
+    if (!node) {
+      throw new Error("dyninstruments: runtime.dom.requirePluginRoot() requires a committed .widget.dyniplugin root");
+    }
+
+    var cached = pluginRootCache.get(node);
+    if (cached) {
+      return cached;
+    }
+
+    var walker = node;
+    while (walker) {
+      if (walker.nodeType === 1 && typeof walker.closest === "function") {
+        var rootEl = walker.closest(".widget.dyniplugin");
         if (rootEl) {
+          pluginRootCache.set(node, rootEl);
           return rootEl;
         }
       }
-      node = resolveParentInComposedTree(node);
+      walker = resolveParentInComposedTree(walker);
     }
     throw new Error("dyninstruments: runtime.dom.requirePluginRoot() requires a committed .widget.dyniplugin root");
   }

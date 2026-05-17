@@ -73,4 +73,36 @@ describe("runtime/dom-runtime.js", function () {
     expect(runtime.dom.requirePluginRoot(child)).toBe(root);
     expect(runtime.dom.getNightModeState(createElementNode(["child"], createElementNode(["nightMode"])))).toBe(true);
   });
+
+  it("caches requirePluginRoot results per resolved target node", function () {
+    const runtime = loadRuntimeDom();
+    const root = createElementNode(["widget", "dyniplugin"]);
+    const child = createElementNode(["child"], root);
+    let closestCalls = 0;
+    const originalClosest = child.closest;
+    child.closest = function (selector) {
+      closestCalls += 1;
+      return originalClosest.call(child, selector);
+    };
+
+    expect(runtime.dom.requirePluginRoot(child)).toBe(root);
+    expect(runtime.dom.requirePluginRoot(child)).toBe(root);
+    expect(closestCalls).toBe(1);
+  });
+
+  it("reuses cache for event-like targets that resolve to the same node", function () {
+    const runtime = loadRuntimeDom();
+    const root = createElementNode(["widget", "dyniplugin"]);
+    const child = createElementNode(["child"], root);
+    let closestCalls = 0;
+    const originalClosest = child.closest;
+    child.closest = function (selector) {
+      closestCalls += 1;
+      return originalClosest.call(child, selector);
+    };
+
+    expect(runtime.dom.requirePluginRoot({ target: child })).toBe(root);
+    expect(runtime.dom.requirePluginRoot({ target: child })).toBe(root);
+    expect(closestCalls).toBe(1);
+  });
 });
