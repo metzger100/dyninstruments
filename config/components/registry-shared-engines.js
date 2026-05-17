@@ -81,6 +81,7 @@
       globalKey: "DyniSemicircleRadialEngine",
       deps: [
         "RadialToolkit",
+        "CanvasLayerCache",
         "SemicircleRadialLayout",
         "SemicircleRadialTextLayout",
         "RadialSectorMath",

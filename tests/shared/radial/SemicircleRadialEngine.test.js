@@ -134,6 +134,20 @@ describe("SemicircleRadialEngine", function () {
 
     return createComponentContextMock({
       modules: Object.assign({}, modules, {
+        CanvasLayerCache: {
+          create() {
+            return {
+              createLayerCache() {
+                return {
+                  ensureLayer(canvas, _key, rebuild) {
+                    rebuild(canvas.getContext("2d"), "base", canvas);
+                  },
+                  blit() {}
+                };
+              }
+            };
+          }
+        },
         StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
         PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
         StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
@@ -537,10 +551,10 @@ describe("SemicircleRadialEngine", function () {
     });
 
     expect(harness.textLayoutCalls).toHaveLength(0);
-    expect(harness.sequence).toEqual(["ring", "pointer", "ticks", "labels"]);
+    expect(harness.sequence).toEqual(["ring", "ticks", "labels", "pointer"]);
   });
 
-  it("draws sectors before the arc ring and keeps the ring ahead of pointer, ticks, and labels", function () {
+  it("draws sectors before the arc ring and keeps the pointer above ticks and labels", function () {
     const harness = createRenderOrderHarness([
       {
         a0: 20,
@@ -568,9 +582,10 @@ describe("SemicircleRadialEngine", function () {
 
     expect(sectorIndex).toBeGreaterThanOrEqual(0);
     expect(ringIndex).toBeGreaterThan(sectorIndex);
-    expect(pointerIndex).toBeGreaterThan(ringIndex);
     expect(ticksIndex).toBeGreaterThan(ringIndex);
     expect(labelsIndex).toBeGreaterThan(ringIndex);
+    expect(pointerIndex).toBeGreaterThan(ticksIndex);
+    expect(pointerIndex).toBeGreaterThan(labelsIndex);
     expect(harness.arcRingCalls).toHaveLength(1);
     expect(harness.pointerCalls).toHaveLength(1);
     expect(harness.tickCalls).toHaveLength(1);

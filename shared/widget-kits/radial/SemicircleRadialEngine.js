@@ -1,7 +1,7 @@
 /**
  * Module: SemicircleRadialEngine - Shared renderer for semicircle gauge widgets
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: RadialToolkit, SemicircleRadialLayout, SemicircleRadialTextLayout, RadialSectorMath, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: RadialToolkit, CanvasLayerCache, SemicircleRadialLayout, SemicircleRadialTextLayout, RadialSectorMath, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -21,6 +21,7 @@
     const DEFAULT_RATIO_PROPS = { normal: "ratioThresholdNormal", flat: "ratioThresholdFlat" };
     const DEFAULT_TICK_PRESET = { major: 10, minor: 2 };
     const GU = componentContext.components.require("RadialToolkit");
+    const layerCacheApi = componentContext.components.require("CanvasLayerCache");
     const layoutApi = componentContext.components.require("SemicircleRadialLayout");
     const textLayout = componentContext.components.require("SemicircleRadialTextLayout");
     const sectorMath = componentContext.components.require("RadialSectorMath");
@@ -191,6 +192,7 @@
           return [];
         };
       const fitCache = textLayout.createFitCache();
+      const layerCache = layerCacheApi.createLayerCache({ layers: ["base"] });
 
       return function renderCanvas(canvas, props) {
         const p = props || {};
@@ -255,6 +257,37 @@
         }, theme);
         const ticks = buildValueTickAngles(range.min, range.max, tickMajor, tickMinor, arc);
         const showEndLabels = !!p[tickProps.showEndLabels];
+        const staticKey = JSON.stringify({
+          W: W,
+          H: H,
+          bufferW: canvas.width,
+          bufferH: canvas.height,
+          cx: layout.geom.cx,
+          cy: layout.geom.cy,
+          rOuter: layout.geom.rOuter,
+          ringW: layout.geom.ringW,
+          arcLineWidth: layout.geom.arcLineWidth,
+          majorTickLen: layout.geom.majorTickLen,
+          majorTickWidth: layout.geom.majorTickWidth,
+          minorTickLen: layout.geom.minorTickLen,
+          minorTickWidth: layout.geom.minorTickWidth,
+          pointerDepth: layout.geom.pointerDepth,
+          pointerSide: layout.geom.pointerSide,
+          labelRadiusOffset: layout.labels.radiusOffset,
+          labelFontPx: layout.labels.fontPx,
+          labelWeight: labelWeight,
+          family: family,
+          color: paint.color,
+          arcStart: arc.startDeg,
+          arcEnd: arc.endDeg,
+          tickMajor: tickMajor,
+          tickMinor: tickMinor,
+          showEndLabels: showEndLabels,
+          rangeMin: range.min,
+          rangeMax: range.max,
+          sectorCount: sectorList.length,
+          sectors: sectorList
+        });
         const hideTextualMetrics = hideTextualMetricsProp ? p[hideTextualMetricsProp] === true : false;
         const numericDisplay = Number(display.num);
         const clampedValue = Number.isFinite(numericDisplay) ? value.clamp(numericDisplay, range.min, range.max) : NaN;
@@ -263,22 +296,49 @@
           : NaN;
         const easedAngle = springMotion.resolve(canvas, angleNow, p.easing !== false, Date.now());
 
-        for (let i = 0; i < sectorList.length; i += 1) {
-          const sector = sectorList[i];
-          if (!sector || !value.isFiniteNumber(sector.a0) || !value.isFiniteNumber(sector.a1)) {
-            continue;
-          }
-          draw.drawAnnularSector(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, {
-            startDeg: sector.a0,
-            endDeg: sector.a1,
-            thickness: layout.geom.ringW,
-            fillStyle: sector.color
-          });
-        }
+        layerCache.ensureLayer(canvas, staticKey, function (layerCtx) {
+          const dpr = Math.max(1, canvas.width / Math.max(1, W));
+          layerCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          layerCtx.clearRect(0, 0, W, H);
+          layerCtx.fillStyle = paint.color;
+          layerCtx.strokeStyle = paint.color;
 
-        draw.drawArcRing(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, arc.startDeg, arc.endDeg, {
-          lineWidth: layout.geom.arcLineWidth
+          for (let i = 0; i < sectorList.length; i += 1) {
+            const sector = sectorList[i];
+            if (!sector || !value.isFiniteNumber(sector.a0) || !value.isFiniteNumber(sector.a1)) {
+              continue;
+            }
+            draw.drawAnnularSector(layerCtx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, {
+              startDeg: sector.a0,
+              endDeg: sector.a1,
+              thickness: layout.geom.ringW,
+              fillStyle: sector.color
+            });
+          }
+
+          draw.drawArcRing(layerCtx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, arc.startDeg, arc.endDeg, {
+            lineWidth: layout.geom.arcLineWidth
+          });
+
+          draw.drawTicksFromAngles(layerCtx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, ticks, {
+            major: { len: layout.geom.majorTickLen, width: layout.geom.majorTickWidth },
+            minor: { len: layout.geom.minorTickLen, width: layout.geom.minorTickWidth }
+          });
+
+          drawMajorValueLabels(
+            layerCtx,
+            family,
+            layout.geom,
+            layout.labels,
+            range.min,
+            range.max,
+            tickMajor,
+            arc,
+            showEndLabels,
+            labelWeight
+          );
         });
+        layerCache.blit(ctx);
 
         if (value.isFiniteNumber(easedAngle)) {
           draw.drawPointerAtRim(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, easedAngle, {
@@ -288,24 +348,6 @@
             variant: "long"
           });
         }
-
-        draw.drawTicksFromAngles(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, ticks, {
-          major: { len: layout.geom.majorTickLen, width: layout.geom.majorTickWidth },
-          minor: { len: layout.geom.minorTickLen, width: layout.geom.minorTickWidth }
-        });
-
-        drawMajorValueLabels(
-          ctx,
-          family,
-          layout.geom,
-          layout.labels,
-          range.min,
-          range.max,
-          tickMajor,
-          arc,
-          showEndLabels,
-          labelWeight
-        );
 
         if (!hideTextualMetrics) {
           textLayout.drawModeText({

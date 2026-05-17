@@ -123,12 +123,13 @@ Removed from wrappers:
 ## Performance
 
 - Text-fit caching is still owned by the `SemicircleRadialEngine.createRenderer(spec)` closure state (`fitCache`), but the per-mode cache entries are consumed by `SemicircleRadialTextLayout`.
+- Static gauge art (sectors, arc ring, ticks, major labels) is cached via `CanvasLayerCache` and rebuilt only when the static key changes (resize, DPR/buffer, layout geometry, range/tick/sector/theme/font inputs).
 - Covered fitting paths: `flat` (compact), `high`, and `normal` layouts.
 - Cache keys include all fitting-relevant inputs:
   - shared inputs: `W`, `H`, active mode, `caption`, `valueText`, `unit`, effective `secScale` (`captionUnitScale` after clamp), resolved font family, and theme font weights.
   - geometry/layout inputs: mode-specific box dimensions and layout-owned geometry values (`R`, `ringW`, label metrics, placement boxes, and normal-mode `rSafe` / search bounds).
 - Invalidation is automatic by key mismatch when any text, typography, scale, or geometry input changes.
-- Draw calls still execute every frame; only intermediate fitting outputs (chosen sizes/layout fit results) are reused on cache hits.
+- Per-frame dynamic draws remain pointer + text/value rendering; pointer now draws after cached static-layer blit (in front of ticks/labels).
 
 ## Phase 6 Options
 

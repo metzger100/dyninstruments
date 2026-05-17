@@ -100,7 +100,7 @@ SemicircleRadialTextLayout: {
 SemicircleRadialEngine: {
   js: BASE + "shared/widget-kits/radial/SemicircleRadialEngine.js",
   globalKey: "DyniSemicircleRadialEngine",
-  deps: ["RadialToolkit", "SemicircleRadialLayout", "SemicircleRadialTextLayout"]
+  deps: ["RadialToolkit", "CanvasLayerCache", "SemicircleRadialLayout", "SemicircleRadialTextLayout"]
 },
 FullCircleRadialLayout: {
   js: BASE + "shared/widget-kits/radial/FullCircleRadialLayout.js",
