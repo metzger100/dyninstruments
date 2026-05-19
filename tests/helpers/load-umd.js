@@ -4,6 +4,7 @@ const DEFAULT_MODULE_PATHS = {
   ValueMath: "shared/widget-kits/value/ValueMath.js",
   CanvasTextFitting: "shared/widget-kits/text/CanvasTextFitting.js",
   CanvasTextLayout: "shared/widget-kits/text/CanvasTextLayout.js",
+  TextLayoutScaleHelpers: "shared/widget-kits/text/TextLayoutScaleHelpers.js",
   GaugeToolkit: "shared/widget-kits/gauge/GaugeToolkit.js",
   RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
   RadialTickMath: "shared/widget-kits/radial/RadialTickMath.js",

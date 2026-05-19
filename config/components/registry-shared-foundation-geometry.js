@@ -177,7 +177,14 @@
       js: BASE + "shared/widget-kits/text/TextLayoutComposite.js",
       css: undefined,
       globalKey: "DyniTextLayoutComposite",
-      deps: ["TextLayoutPrimitives"]
+      deps: ["TextLayoutPrimitives", "TextLayoutScaleHelpers"]
+  };
+
+  sf.TextLayoutScaleHelpers = {
+      js: BASE + "shared/widget-kits/text/TextLayoutScaleHelpers.js",
+      css: undefined,
+      globalKey: "DyniTextLayoutScaleHelpers",
+      deps: ["ValueMath"]
   };
 
   sf.GeometryScale = {

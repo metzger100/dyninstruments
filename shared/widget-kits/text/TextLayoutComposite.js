@@ -1,7 +1,7 @@
 /**
  * Module: TextLayoutComposite - Composite row layouts built on TextLayoutPrimitives
  * Documentation: documentation/shared/text-layout-engine.md
- * Depends: TextLayoutPrimitives
+ * Depends: TextLayoutPrimitives, TextLayoutScaleHelpers
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,65 +10,16 @@
 }(this, function () {
   "use strict";
   const ROW_SAFE_RATIO = 0.92;
-  function clampTextFillScale(value) {
-    const n = Number(value);
-    return Number.isFinite(n) && n > 0 ? n : 1;
-  }
-  function scaleTextCeiling(basePx, maxPx, textFillScale) {
-    const safeMax = Math.max(1, Math.floor(Number(maxPx) || 0));
-    const safeBase = Math.max(1, Math.floor(Number(basePx) || 0));
-    const compactBoost = Math.max(0, clampTextFillScale(textFillScale) - 1);
-    return Math.min(
-      safeMax,
-      Math.max(1, Math.floor(safeBase + ((safeMax - safeBase) * compactBoost)))
-    );
-  }
-  function resolveTextFillScale(source) {
-    const raw = source && source.textFillScale;
-    if (raw == null) {
-      return 1;
-    }
-    if (typeof raw === "string" && raw.trim() === "") {
-      return 1;
-    }
-    const n = Number(raw);
-    if (!Number.isFinite(n)) {
-      return 1;
-    }
-    return Math.max(0.1, Math.min(10, n));
-  }
-  function resolveCompactGeometryScale(textFillScale) {
-    return Math.max(0.5, 1 - Math.max(0, resolveTextFillScale({ textFillScale: textFillScale }) - 1));
-  }
-  function scaleValueUnitFit(state, valueText, unitText, fit, boxHeight) {
-    if (!fit)
-      return fit;
-    const maxPx = Math.max(1, Math.floor(Number(boxHeight) || 0));
-    return {
-      vPx: scaleTextCeiling(fit.vPx, maxPx, state.textFillScale),
-      uPx: unitText ? scaleTextCeiling(fit.uPx, maxPx, state.textFillScale) : 0,
-      gap: unitText ? scaleTextCeiling(fit.gap, Math.max(1, Math.floor(maxPx * 0.5)), state.textFillScale) : 0
-    };
-  }
-  function scaleInlineFit(state, captionText, valueText, unitText, fit, boxHeight) {
-    if (!fit)
-      return fit;
-    const maxPx = Math.max(1, Math.floor(Number(boxHeight) || 0));
-    const gapMaxPx = Math.max(1, Math.floor(maxPx * 0.5));
-    return {
-      cPx: captionText ? scaleTextCeiling(fit.cPx, maxPx, state.textFillScale) : 0,
-      vPx: scaleTextCeiling(fit.vPx, maxPx, state.textFillScale),
-      uPx: unitText ? scaleTextCeiling(fit.uPx, maxPx, state.textFillScale) : 0,
-      g1: captionText ? scaleTextCeiling(fit.g1, gapMaxPx, state.textFillScale) : 0,
-      g2: unitText ? scaleTextCeiling(fit.g2, gapMaxPx, state.textFillScale) : 0
-    };
-  }
-  function resolveOpacity(value) {
-    const n = Number(value);
-    return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 1;
-  }
   function create(def, componentContext) {
     const primitive = componentContext.components.require("TextLayoutPrimitives");
+    const scaleHelpers = componentContext.components.require("TextLayoutScaleHelpers");
+    const clampTextFillScale = scaleHelpers.clampTextFillScale;
+    const scaleTextCeiling = scaleHelpers.scaleTextCeiling;
+    const resolveTextFillScale = scaleHelpers.resolveTextFillScale;
+    const resolveCompactGeometryScale = scaleHelpers.resolveCompactGeometryScale;
+    const scaleValueUnitFit = scaleHelpers.scaleValueUnitFit;
+    const scaleInlineFit = scaleHelpers.scaleInlineFit;
+    const resolveOpacity = scaleHelpers.resolveOpacity;
     function fitThreeRowBlock(args) {
       const cfg = args || {};
       const secScale = Number(cfg.secScale);
