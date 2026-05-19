@@ -12,7 +12,8 @@ Use these modules before adding local helper functions or reaching through radia
 
 | Module | File | Owns |
 |---|---|---|
-| `ValueMath` | `shared/widget-kits/value/ValueMath.js` | finite number conversion (`toFiniteNumber`), presence-safe live-data conversion (`toOptionalFiniteNumber`), clamping, range normalization, mode thresholds, tick-step profiles, shared formatter text extraction, and angle/direction display formatting |
+| `ValueMath` | `shared/widget-kits/value/ValueMath.js` | finite number conversion (`toFiniteNumber`), presence-safe live-data conversion (`toOptionalFiniteNumber`), canonical object/text helpers (`toObject`, `toText`, `hasText`, `keyToText`), clamping (`clamp`, `clampNumber`), range normalization, mode thresholds, tick-step profiles, shared formatter text extraction, and angle/direction display formatting |
+| `HtmlMeasureUtils` | `shared/widget-kits/html/HtmlMeasureUtils.js` | canonical HTML text measurement helpers (`parseFontPx`, `createApproximateMeasureContext`, `resolveMeasureContext`, `measurePx`, `measureStyle`, `resolveOwnerDocument`, `resolveFitCache`) |
 | `CanvasTextFitting` | `shared/widget-kits/text/CanvasTextFitting.js` | canvas font assignment, width caching, text measurement, and fit calculations |
 | `CanvasTextLayout` | `shared/widget-kits/text/CanvasTextLayout.js` | generic canvas text drawing helpers built on `CanvasTextFitting` |
 | `GaugeToolkit` | `shared/widget-kits/gauge/GaugeToolkit.js` | generic gauge facade: theme tokens, `CanvasTextLayout`, and `ValueMath` |

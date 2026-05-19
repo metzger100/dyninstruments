@@ -52,6 +52,44 @@ describe("ValueMath", function () {
     expect(function () { value.ensureObject(null, "Thing"); }).toThrow("Thing must be an object");
   });
 
+  it("exposes canonical object/text/number helper utilities", function () {
+    const value = createValueMath();
+
+    expect(value.toObject(null)).toEqual({});
+    expect(value.toObject({ a: 1 })).toEqual({ a: 1 });
+    expect(value.toObject("string")).toEqual({});
+
+    expect(value.toText(null)).toBe("");
+    expect(value.toText(42)).toBe("42");
+    expect(value.toText("hello")).toBe("hello");
+
+    expect(value.clampNumber(null, 0, 100, 50)).toBe(50);
+    expect(value.clampNumber("", 0, 100, 50)).toBe(50);
+    expect(value.clampNumber(75, 0, 100, 50)).toBe(75);
+    expect(value.clampNumber(150, 0, 100, 50)).toBe(100);
+
+    expect(value.isObject({})).toBe(true);
+    expect(value.isObject(null)).toBe(false);
+    expect(value.isObject([])).toBe(true);
+
+    expect(value.toSafeInteger(2.7, 0)).toBe(3);
+    expect(value.toSafeInteger(null, 0)).toBe(0);
+
+    expect(value.hasText("")).toBe(false);
+    expect(value.hasText("hi")).toBe(true);
+    expect(value.hasText(null)).toBe(false);
+    expect(value.hasText(42)).toBe(true);
+
+    expect(value.keyToText("abc")).toBe("abc");
+    expect(value.keyToText(42)).toBe("42");
+    expect(value.keyToText({ a: 1 })).toBe("{\"a\":1}");
+    expect(value.keyToText(null)).toBe("null");
+
+    expect(value.appendUnit("12", " kn", "---")).toBe("12 kn");
+    expect(value.appendUnit("", " kn", "---")).toBe("--- kn");
+    expect(value.appendUnit("12", "", "---")).toBe("12");
+  });
+
   it("formats gauge display nulls as placeholders before numeric coercion", function () {
     const value = createValueMath();
     const applyFormatter = vi.fn(function (raw) { return String(raw) + " kn"; });

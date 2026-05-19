@@ -13,6 +13,7 @@
 
   let toFiniteNumber;
   let toOptionalFiniteNumber;
+  let toText;
   let trimText;
 
   function escapeHtml(value) {
@@ -99,6 +100,63 @@
   function resolveSurfacePolicy(props) {
     const p = props && typeof props === "object" ? props : null;
     return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
+  }
+
+  function toStyleText(colorKey, value) {
+    const color = toText(value).trim();
+    return color ? (colorKey + ":" + color + ";") : "";
+  }
+
+  // dyni-lint-disable-next-line duplicate-functions -- PLAN27 Phase 2 adds canonical helper exports before Phase 3 call-site migration removes file-local copies.
+  function resolveMetricValueFamily(model, tokens, baseFamily) {
+    const font = tokens && tokens.font ? tokens.font : {};
+    if (model && model.stableDigitsEnabled === true) {
+      return font.familyMono || baseFamily || font.family || "";
+    }
+    return baseFamily || font.family || "";
+  }
+
+  function resolveLabelEdgePolicy(cfg) {
+    return cfg && cfg.labelEdgePolicy === "sliding" ? "sliding" : "inset";
+  }
+
+  // dyni-lint-disable-next-line duplicate-functions -- PLAN27 Phase 2 adds canonical helper exports before Phase 3 call-site migration removes file-local copies.
+  function joinStyles() {
+    let text = "";
+    for (let i = 0; i < arguments.length; i += 1) {
+      const value = arguments[i];
+      if (typeof value !== "string") {
+        continue;
+      }
+      const trimmed = value.trim();
+      if (!trimmed) {
+        continue;
+      }
+      text += trimmed;
+    }
+    return text;
+  }
+
+  function buildTextOptions(state) {
+    const opacity = state && state.theme && state.theme.opacity && typeof state.theme.opacity === "object"
+      ? state.theme.opacity
+      : {};
+    return { captionOpacity: opacity.caption, unitOpacity: opacity.unit };
+  }
+
+  function toFontStyle(px) {
+    const n = toFiniteNumber(px);
+    if (!(n > 0)) {
+      return "";
+    }
+    return "font-size:" + Math.max(1, Math.floor(n)) + "px;";
+  }
+
+  function resolveDefaultText(props) {
+    if (Object.prototype.hasOwnProperty.call(props, "default")) {
+      return String(props.default);
+    }
+    return undefined;
   }
 
   function applyMirroredContext(rootEl, props) {
@@ -296,18 +354,28 @@
     const valueMath = componentContext.components.require("ValueMath");
     toFiniteNumber = valueMath.toFiniteNumber;
     toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
+    toText = valueMath.toText;
     trimText = valueMath.trimText;
 
     return {
       id: "HtmlWidgetUtils",
       toFiniteNumber: toFiniteNumber,
+      toText: toText,
       trimText: trimText,
       escapeHtml: escapeHtml,
       toStyleAttr: toStyleAttr,
+      toStyleText: toStyleText,
       resolveHostCommitTarget: resolveHostCommitTarget,
       resolveShellRect: resolveShellRect,
       resolveRatioMode: resolveRatioMode,
       resolveRatioModeForRect: resolveRatioModeForRect,
+      resolveMetricValueFamily: resolveMetricValueFamily,
+      resolveLabelEdgePolicy: resolveLabelEdgePolicy,
+      resolveSurfacePolicy: resolveSurfacePolicy,
+      joinStyles: joinStyles,
+      buildTextOptions: buildTextOptions,
+      toFontStyle: toFontStyle,
+      resolveDefaultText: resolveDefaultText,
       applyMirroredContext: applyMirroredContext,
       patchInnerHtml: patchInnerHtml,
       isEditingMode: isEditingMode,

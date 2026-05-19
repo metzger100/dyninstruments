@@ -27,4 +27,13 @@ describe("RadialAngleMath", function () {
     expect(Number.isFinite(b)).toBe(true);
     expect(a).not.toBe(b);
   });
+
+  it("supports flat-argument value-to-angle mapping", function () {
+    const arc = { startDeg: 0, endDeg: 180 };
+
+    expect(mod.valueToAngleFlat(50, 0, 100, arc, true)).toBe(90);
+    expect(mod.valueToAngleFlat(0, 0, 100, arc, true)).toBe(0);
+    expect(mod.valueToAngleFlat(150, 0, 100, arc, true)).toBe(180);
+    expect(mod.valueToAngleFlat(150, 0, 100, arc, false)).toBe(270);
+  });
 });

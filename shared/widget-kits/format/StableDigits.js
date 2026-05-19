@@ -28,11 +28,15 @@
     return Math.floor(n);
   }
 
-  function resolveIntegerWidth(textValue, minWidth) {
+  function resolveIntegerWidth(textValue, minWidth, rangeMax) {
     const match = toText(textValue).match(/^\s*[+-]?(\d+)/);
     const digits = match ? match[1].length : 0;
     const min = toIntegerWidth(minWidth);
-    return Math.max(min, digits);
+    const rangeNumber = Number(rangeMax);
+    const rangeDigits = Number.isFinite(rangeNumber)
+      ? Math.max(1, String(Math.floor(Math.abs(rangeNumber))).length)
+      : 0;
+    return Math.max(min, digits, rangeDigits);
   }
 
   function resolveSuffix(rawSuffix, defaultSuffix) {

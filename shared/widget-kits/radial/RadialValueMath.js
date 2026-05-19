@@ -40,7 +40,12 @@
     function buildValueTickAngles(minV, maxV, majorStep, minorStep, arc) {
       const majors = [];
       const minors = [];
+      const startDeg = Number(arc && arc.startDeg);
+      const endDeg = Number(arc && arc.endDeg);
       if (!Number.isFinite(minV) || !Number.isFinite(maxV) || maxV <= minV) {
+        return { majors: majors, minors: minors };
+      }
+      if (!Number.isFinite(startDeg) || !Number.isFinite(endDeg)) {
         return { majors: majors, minors: minors };
       }
 
@@ -63,8 +68,8 @@
         }
       }
 
-      if (!majors.length || !value.isApprox(majors[0], arc.startDeg, 1e-6)) majors.unshift(arc.startDeg);
-      if (!value.isApprox(majors[majors.length - 1], arc.endDeg, 1e-6)) majors.push(arc.endDeg);
+      if (!majors.length || !value.isApprox(majors[0], startDeg, 1e-6)) majors.unshift(startDeg);
+      if (!value.isApprox(majors[majors.length - 1], endDeg, 1e-6)) majors.push(endDeg);
 
       return { majors: majors, minors: minors };
     }

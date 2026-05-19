@@ -9,17 +9,11 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniTextLayoutComposite = factory(); }
 }(this, function () {
   "use strict";
-
-  // Vertical safety factor: fitted text must stay inside its allocated row band.
-  // Browser glyph paint can exceed nominal line-height at tight sizes; reserve ~8%
-  // of the row height as a safe visual margin.
   const ROW_SAFE_RATIO = 0.92;
-
   function clampTextFillScale(value) {
     const n = Number(value);
     return Number.isFinite(n) && n > 0 ? n : 1;
   }
-
   function scaleTextCeiling(basePx, maxPx, textFillScale) {
     const safeMax = Math.max(1, Math.floor(Number(maxPx) || 0));
     const safeBase = Math.max(1, Math.floor(Number(basePx) || 0));
@@ -29,18 +23,52 @@
       Math.max(1, Math.floor(safeBase + ((safeMax - safeBase) * compactBoost)))
     );
   }
-
-  function resolveOpacity(value) {
-    const n = Number(value);
+  function resolveTextFillScale(source) {
+    const raw = source && source.textFillScale;
+    if (raw == null) {
+      return 1;
+    }
+    if (typeof raw === "string" && raw.trim() === "") {
+      return 1;
+    }
+    const n = Number(raw);
     if (!Number.isFinite(n)) {
       return 1;
     }
-    return Math.max(0, Math.min(1, n));
+    return Math.max(0.1, Math.min(10, n));
   }
-
+  function resolveCompactGeometryScale(textFillScale) {
+    return Math.max(0.5, 1 - Math.max(0, resolveTextFillScale({ textFillScale: textFillScale }) - 1));
+  }
+  function scaleValueUnitFit(state, valueText, unitText, fit, boxHeight) {
+    if (!fit)
+      return fit;
+    const maxPx = Math.max(1, Math.floor(Number(boxHeight) || 0));
+    return {
+      vPx: scaleTextCeiling(fit.vPx, maxPx, state.textFillScale),
+      uPx: unitText ? scaleTextCeiling(fit.uPx, maxPx, state.textFillScale) : 0,
+      gap: unitText ? scaleTextCeiling(fit.gap, Math.max(1, Math.floor(maxPx * 0.5)), state.textFillScale) : 0
+    };
+  }
+  function scaleInlineFit(state, captionText, valueText, unitText, fit, boxHeight) {
+    if (!fit)
+      return fit;
+    const maxPx = Math.max(1, Math.floor(Number(boxHeight) || 0));
+    const gapMaxPx = Math.max(1, Math.floor(maxPx * 0.5));
+    return {
+      cPx: captionText ? scaleTextCeiling(fit.cPx, maxPx, state.textFillScale) : 0,
+      vPx: scaleTextCeiling(fit.vPx, maxPx, state.textFillScale),
+      uPx: unitText ? scaleTextCeiling(fit.uPx, maxPx, state.textFillScale) : 0,
+      g1: captionText ? scaleTextCeiling(fit.g1, gapMaxPx, state.textFillScale) : 0,
+      g2: unitText ? scaleTextCeiling(fit.g2, gapMaxPx, state.textFillScale) : 0
+    };
+  }
+  function resolveOpacity(value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 1;
+  }
   function create(def, componentContext) {
     const primitive = componentContext.components.require("TextLayoutPrimitives");
-
     function fitThreeRowBlock(args) {
       const cfg = args || {};
       const secScale = Number(cfg.secScale);
@@ -97,7 +125,6 @@
         : { px: 0 };
       return { hTop: hTop, hMid: hMid, hBot: hBot, cPx: cFit.px, vPx: vFit.px, uPx: uFit.px };
     }
-
     function drawThreeRowBlock(args) {
       const cfg = args || {};
       const fit = cfg.fit;
@@ -137,7 +164,6 @@
         }
       }
     }
-
     function fitValueUnitCaptionRows(args) {
       const cfg = args || {};
       const secScale = Number(cfg.secScale);
@@ -192,7 +218,6 @@
         gap: pair.gap
       };
     }
-
     function drawValueUnitCaptionRows(args) {
       const cfg = args || {};
       const fit = cfg.fit;
@@ -235,7 +260,6 @@
         }
       }
     }
-
     function fitTwoRowsWithHeader(args) {
       const cfg = args || {};
       const hasHeader = !!cfg.captionText || !!cfg.unitText;
@@ -274,7 +298,6 @@
           return meta.rowIndex !== 0 || !topRowExtraCheck || topRowExtraCheck(meta);
         }
       });
-
       let capPx = 0;
       let unitPx = 0;
       if (hasHeader) {
@@ -315,7 +338,6 @@
           }).px
           : 0;
       }
-
       return {
         hasHeader: hasHeader,
         headerH: headerH,
@@ -327,7 +349,6 @@
         unitPx: unitPx
       };
     }
-
     function drawTwoRowsWithHeader(args) {
       const cfg = args || {};
       const fit = cfg.fit;
@@ -371,7 +392,6 @@
       ctx.fillText(cfg.topText, x, yTop);
       ctx.fillText(cfg.bottomText, x, yBottom);
     }
-
     return {
       id: "TextLayoutComposite",
       fitThreeRowBlock: fitThreeRowBlock,
@@ -379,9 +399,14 @@
       fitValueUnitCaptionRows: fitValueUnitCaptionRows,
       drawValueUnitCaptionRows: drawValueUnitCaptionRows,
       fitTwoRowsWithHeader: fitTwoRowsWithHeader,
-      drawTwoRowsWithHeader: drawTwoRowsWithHeader
+      drawTwoRowsWithHeader: drawTwoRowsWithHeader,
+      clampTextFillScale: clampTextFillScale,
+      scaleTextCeiling: scaleTextCeiling,
+      resolveTextFillScale: resolveTextFillScale,
+      resolveCompactGeometryScale: resolveCompactGeometryScale,
+      scaleValueUnitFit: scaleValueUnitFit,
+      scaleInlineFit: scaleInlineFit
     };
   }
-
   return { id: "TextLayoutComposite", create: create };
 }));

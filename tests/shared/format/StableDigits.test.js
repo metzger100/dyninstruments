@@ -82,4 +82,12 @@ describe("StableDigits", function () {
     expect(out.padded).toBe("HH:MM");
     expect(out.plain).toBe("HH:MM");
   });
+
+  it("supports optional rangeMax in resolveIntegerWidth", function () {
+    const api = createApi();
+
+    expect(api.resolveIntegerWidth("42", 3)).toBe(3);
+    expect(api.resolveIntegerWidth("42", 1, 9999)).toBe(4);
+    expect(api.resolveIntegerWidth("42", 1, 5)).toBe(2);
+  });
 });

@@ -44,6 +44,13 @@
       globalKey: "DyniValueMath"
   };
 
+  sf.HtmlMeasureUtils = {
+      js: BASE + "shared/widget-kits/html/HtmlMeasureUtils.js",
+      css: undefined,
+      globalKey: "DyniHtmlMeasureUtils",
+      deps: ["ValueMath"]
+  };
+
   sf.CanvasTextFitting = {
       js: BASE + "shared/widget-kits/text/CanvasTextFitting.js",
       css: undefined,

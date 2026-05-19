@@ -70,6 +70,16 @@
       return startDeg + (endDeg - startDeg) * t;
     }
 
+    function valueToAngleFlat(rawValue, minV, maxV, arc, doClamp) {
+      return valueToAngle(rawValue, {
+        min: Number(minV),
+        max: Number(maxV),
+        startDeg: Number(arc && arc.startDeg),
+        endDeg: Number(arc && arc.endDeg),
+        clamp: doClamp !== false
+      });
+    }
+
     function angleToValue(angleDeg, opts) {
       opts = opts || {};
       const min = Number(opts.min);
@@ -111,6 +121,7 @@
       norm180,
       degToCanvasRad,
       valueToAngle,
+      valueToAngleFlat,
       angleToValue,
       valueRangeToAngleRange
     };

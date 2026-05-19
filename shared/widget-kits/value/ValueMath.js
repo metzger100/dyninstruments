@@ -67,8 +67,56 @@
     return value;
   }
 
+  function toObject(value) {
+    return value && typeof value === "object" ? value : {};
+  }
+
+  function toText(value) {
+    return value == null ? "" : String(value);
+  }
+
   function trimText(value) {
     return value == null ? "" : String(value).trim();
+  }
+
+  function clampNumber(value, min, max, defaultValue) {
+    if (value == null) {
+      return defaultValue;
+    }
+    if (typeof value === "string" && value.trim() === "") {
+      return defaultValue;
+    }
+    const n = Number(value);
+    if (!Number.isFinite(n)) {
+      return defaultValue;
+    }
+    return Math.max(min, Math.min(max, n));
+  }
+
+  function isObject(value) {
+    return !!value && typeof value === "object";
+  }
+
+  function toSafeInteger(value, defaultValue) {
+    const n = toFiniteNumber(value);
+    if (typeof n !== "number") {
+      return defaultValue;
+    }
+    return Math.round(n);
+  }
+
+  function hasText(value) {
+    return value != null && String(value).trim().length > 0;
+  }
+
+  function keyToText(value) {
+    return typeof value === "string" ? value : JSON.stringify(value);
+  }
+
+  function appendUnit(valueText, displayUnit, defaultText) {
+    const text = toText(valueText) || toText(defaultText);
+    const unit = displayUnit == null ? "" : String(displayUnit);
+    return unit ? text + unit : text;
   }
 
   function almostInt(value, eps) {
@@ -253,7 +301,15 @@
       clamp: clamp,
       clampPositive: clampPositive,
       ensureObject: ensureObject,
+      toObject: toObject,
+      toText: toText,
       trimText: trimText,
+      clampNumber: clampNumber,
+      isObject: isObject,
+      toSafeInteger: toSafeInteger,
+      hasText: hasText,
+      keyToText: keyToText,
+      appendUnit: appendUnit,
       almostInt: almostInt,
       isApprox: isApprox,
       extractNumberText: extractNumberText,
