@@ -271,6 +271,12 @@ function format(out, n, plainText) {
 
   it("fails placeholder-contract when formatter output is not normalized nearby", function () {
     const cwd = createWorkspace({
+      "shared/widget-kits/format/PlaceholderNormalize.js": `
+function isPlaceholder(text) {
+  const trimmed = String(text).trim();
+  return trimmed === "NaN" || trimmed === "undefined" || trimmed === "null" || trimmed === "Infinity" || trimmed === "-Infinity";
+}
+`,
       "shared/widget-kits/nav/EditRouteRenderModel.js": `
 function render(componentContext) {
   const text = componentContext.format.applyFormatter(10, { formatter: "formatDistance", default: "---" });
@@ -286,6 +292,67 @@ function render(componentContext) {
     });
     expect(result.summary.ok).toBe(false);
     expect(messages(result)).toContain("[placeholder-contract]");
+  });
+
+  it("fails formatter-boundary-empty-string when empty input is forwarded to formatter", function () {
+    const cwd = createWorkspace({
+      "runtime/namespace.js": `
+(function (root) {
+  root.DyniPlugin = root.DyniPlugin || {};
+  root.DyniPlugin.runtime = root.DyniPlugin.runtime || {};
+  root.DyniPlugin.state = root.DyniPlugin.state || {};
+  root.DyniPlugin.config = root.DyniPlugin.config || { shared: {}, clusters: [] };
+  root.DyniPlugin.runtime.getAvnavApi = function () {
+    return root.avnav.api;
+  };
+}(this));
+`,
+      "runtime/format-runtime.js": `
+(function (root) {
+  root.DyniPlugin.runtime.format = {
+    applyFormatter: function (raw, props) {
+      const p = props || {};
+      if (raw == null || Number.isNaN(raw)) return p.default || "---";
+      return root.avnav.api.formatter[p.formatter](raw);
+    }
+  };
+}(this));
+`
+    });
+
+    const result = runSmellContracts({
+      root: cwd,
+      enabledRules: ["formatter-boundary-empty-string"],
+      print: false
+    });
+    expect(result.summary.ok).toBe(false);
+    expect(messages(result)).toContain("[formatter-boundary-empty-string]");
+  });
+
+  it("fails placeholder-contract when PlaceholderNormalize sentinel coverage is missing", function () {
+    const cwd = createWorkspace({
+      "shared/widget-kits/format/PlaceholderNormalize.js": `
+function isPlaceholder(text) {
+  const trimmed = String(text).trim();
+  return trimmed === "---";
+}
+`,
+      "shared/widget-kits/nav/EditRouteRenderModel.js": `
+function render(componentContext, placeholderNormalize) {
+  const text = componentContext.format.applyFormatter(10, { formatter: "formatDistance", default: "---" });
+  return placeholderNormalize.normalize(text, "---");
+}
+`
+    });
+
+    const result = runSmellContracts({
+      root: cwd,
+      enabledRules: ["placeholder-contract"],
+      print: false
+    });
+    expect(result.summary.ok).toBe(false);
+    expect(messages(result)).toContain("[placeholder-contract]");
+    expect(messages(result)).toContain("missing NaN");
   });
 
   it("fails dash-literal-contract when a widget source keeps a banned placeholder literal", function () {

@@ -19,6 +19,13 @@
       // dyni-lint-disable-next-line hardcoded-runtime-default -- runtime.format.applyFormatter is the documented runtime owner of the generic missing-value placeholder.
       return "---";
     }
+    if (typeof raw === "string" && raw.trim() === "") {
+      if (hasOwn.call(p, "default")) {
+        return p.default;
+      }
+      // dyni-lint-disable-next-line hardcoded-runtime-default -- runtime.format.applyFormatter is the documented runtime owner of the generic missing-value placeholder.
+      return "---";
+    }
 
     const fpRaw = p.formatterParameters;
     const fp = Array.isArray(fpRaw) ? fpRaw

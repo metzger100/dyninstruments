@@ -42,6 +42,15 @@
     if (DASH_ONLY_RE.test(raw)) {
       return true;
     }
+    if (
+      trimmed === "NaN" ||
+      trimmed === "undefined" ||
+      trimmed === "null" ||
+      trimmed === "Infinity" ||
+      trimmed === "-Infinity"
+    ) {
+      return true;
+    }
     return PLACEHOLDER_PATTERNS.indexOf(trimmed) >= 0;
   }
 

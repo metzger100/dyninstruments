@@ -11,6 +11,7 @@ const RULES = [
   { name: "theme-cache-invalidation", run: runThemeCacheInvalidationRule },
   { name: "dynamic-storekey-clears-on-empty", run: runDynamicStorekeyClearsRule },
   { name: "falsy-default-preservation", run: runFalsyDefaultPreservationRule },
+  { name: "formatter-boundary-empty-string", run: runFormatterBoundaryEmptyStringRule },
   { name: "mapper-output-no-nan", run: runMapperOutputNoNaNRule },
   { name: "text-layout-hotspot-budget", run: runTextLayoutHotspotBudgetRule },
   { name: "coordinate-formatter-no-raw-equality-fallback", run: runCoordinateFormatterRule },
@@ -366,6 +367,65 @@ function runFalsyDefaultPreservationRule() {
   return out;
 }
 
+function runFormatterBoundaryEmptyStringRule() {
+  const out = [];
+  const rel = "runtime/format-runtime.js";
+
+  if (!exists(rel)) {
+    out.push(makeFinding(rel, 1, "formatter-boundary-empty-string", "Missing runtime/format-runtime.js"));
+    return out;
+  }
+  if (!exists("runtime/namespace.js")) {
+    out.push(makeFinding("runtime/namespace.js", 1, "formatter-boundary-empty-string", "Missing runtime/namespace.js"));
+    return out;
+  }
+
+  const ctx = createScriptContext({
+    avnav: {
+      api: {
+        formatter: {
+          formatDecimal(value) {
+            return String(value);
+          }
+        }
+      }
+    }
+  });
+
+  try {
+    runIife("runtime/namespace.js", ctx);
+    runIife(rel, ctx);
+  } catch (e) {
+    out.push(makeFinding(rel, 1, "formatter-boundary-empty-string", "Failed to execute runtime formatter modules: " + e.message));
+    return out;
+  }
+
+  const applyFormatter = ((ctx.DyniPlugin || {}).runtime || {}).format &&
+    ((ctx.DyniPlugin || {}).runtime || {}).format.applyFormatter;
+  if (typeof applyFormatter !== "function") {
+    out.push(makeFinding(rel, 1, "formatter-boundary-empty-string", "runtime.format.applyFormatter is missing."));
+    return out;
+  }
+
+  const formatterProps = {
+    formatter: "formatDecimal",
+    formatterParameters: [3, 1, true],
+    default: "---"
+  };
+
+  const empty = applyFormatter("", formatterProps);
+  if (empty !== "---") {
+    out.push(makeFinding(rel, 1, "formatter-boundary-empty-string", "applyFormatter('', ...) must return default placeholder."));
+  }
+
+  const whitespace = applyFormatter("  ", formatterProps);
+  if (whitespace !== "---") {
+    out.push(makeFinding(rel, 1, "formatter-boundary-empty-string", "applyFormatter('  ', ...) must return default placeholder."));
+  }
+
+  return out;
+}
+
 function runMapperOutputNoNaNRule() {
   const out = [];
   const modules = [
@@ -501,6 +561,33 @@ function runPlaceholderContractRule() {
         out.push(makeFinding(rel, applyLine, "placeholder-contract", "Every componentContext.format.applyFormatter call site must stay paired with a nearby PlaceholderNormalize.normalize call."));
       }
     }
+  }
+
+  const placeholderRel = "shared/widget-kits/format/PlaceholderNormalize.js";
+  if (!exists(placeholderRel)) {
+    out.push(makeFinding(placeholderRel, 1, "placeholder-contract", "PlaceholderNormalize.js is missing."));
+    return out;
+  }
+
+  const source = readFile(placeholderRel);
+  const sentinelPatterns = [
+    { label: "NaN", re: /["']NaN["']/ },
+    { label: "undefined", re: /["']undefined["']/ },
+    { label: "null", re: /["']null["']/ },
+    { label: "Infinity", re: /["']Infinity["']/ },
+    { label: "-Infinity", re: /["']-Infinity["']/ }
+  ];
+  const missing = sentinelPatterns
+    .filter((entry) => !entry.re.test(source))
+    .map((entry) => entry.label);
+
+  if (missing.length) {
+    out.push(makeFinding(
+      placeholderRel,
+      1,
+      "placeholder-contract",
+      "PlaceholderNormalize must detect JS sentinel strings: missing " + missing.join(", ") + "."
+    ));
   }
 
   return out;

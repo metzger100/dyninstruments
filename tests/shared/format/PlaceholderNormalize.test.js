@@ -51,6 +51,23 @@ describe("PlaceholderNormalize", function () {
     expect(api.isPlaceholder("12.4")).toBe(false);
   });
 
+  it("normalizes JavaScript sentinel strings to default text", function () {
+    const api = createApi();
+    const tokens = [
+      "NaN",
+      "NaN ",
+      "undefined",
+      "null",
+      "Infinity",
+      "-Infinity"
+    ];
+
+    tokens.forEach(function (token) {
+      expect(api.normalize(token, "---")).toBe("---");
+      expect(api.isPlaceholder(token)).toBe(true);
+    });
+  });
+
   it("exports placeholder patterns and dash-only regex for tests", function () {
     const api = createApi();
 

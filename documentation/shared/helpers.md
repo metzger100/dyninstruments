@@ -65,6 +65,7 @@ No canonical fallback to documentElement/body.
 Centralized formatter dispatch boundary.
 
 - preserves explicit falsy defaults via property-presence checks
+- treats empty and whitespace-only string inputs as missing values and returns the configured default placeholder
 - applies function formatter or avnav.api formatter by name
 - catches formatter exceptions at this external boundary
 - falls back to String(raw) when formatter dispatch is unavailable/fails

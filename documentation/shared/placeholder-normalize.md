@@ -28,6 +28,10 @@ By the end of PLAN11, every widget/render-model path uses this helper at the ren
 - `"--:--:--"` (`formatTime` fallback)
 - `"----/--/--"` (`formatDate` fallback)
 - `"NO DATA"` (legacy overlay label)
+- `"NaN"` / `"NaN "` (trimmed sentinel output from formatter failures)
+- `"undefined"` (stringified JS sentinel)
+- `"null"` (stringified JS sentinel)
+- `"Infinity"` / `"-Infinity"` (stringified JS numeric sentinels)
 
 ## Usage Contract
 
