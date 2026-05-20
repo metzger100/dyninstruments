@@ -1,7 +1,7 @@
 /**
  * Module: AlarmMarkup - Pure HTML assembly owner for vessel alarm renderer output
  * Documentation: documentation/widgets/alarm.md
- * Depends: HtmlWidgetUtils
+ * Depends: HtmlWidgetUtils, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,25 +10,7 @@
 }(this, function () {
   "use strict";
 
-  function toObject(value) {
-    return value && typeof value === "object" ? value : {};
-  }
-
-  function joinStyles() {
-    let text = "";
-    for (let i = 0; i < arguments.length; i += 1) {
-      const value = arguments[i];
-      if (typeof value !== "string") {
-        continue;
-      }
-      const trimmed = value.trim();
-      if (!trimmed) {
-        continue;
-      }
-      text += trimmed;
-    }
-    return text;
-  }
+  let toObject;
 
   function renderTextCell(className, text, style, htmlUtils) {
     return ""
@@ -118,6 +100,7 @@
 
   function create(def, componentContext) {
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    toObject = componentContext.components.require("ValueMath").toObject;
 
     function render(args) {
       const cfg = args || {};
@@ -132,7 +115,7 @@
         : "dyni-alarm-open-passive"
       ];
 
-      const rootStyle = joinStyles(
+      const rootStyle = htmlUtils.joinStyles(
         fit.shellStyle,
         fit.activeBackgroundStyle,
         fit.activeForegroundStyle

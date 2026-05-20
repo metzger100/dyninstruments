@@ -1,7 +1,7 @@
 /**
  * Module: AlarmHtmlFitChrome - Shell chrome and cache-signature helpers for vessel alarm HTML
  * Documentation: documentation/widgets/alarm.md
- * Depends: HtmlWidgetUtils, AisTargetLayoutSizing
+ * Depends: HtmlWidgetUtils, AisTargetLayoutSizing, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,14 +10,7 @@
 }(this, function () {
   "use strict";
 
-  function toObject(value) {
-    return value && typeof value === "object" ? value : {};
-  }
-
-  function toStyleText(colorKey, value) {
-    const color = value == null ? "" : String(value).trim();
-    return color ? (colorKey + ":" + color + ";") : "";
-  }
+  let toObject;
 
   function resolveShellChrome(model, shellRect, chromeApi) {
     const aisChrome = chromeApi.resolveVisualChrome({
@@ -117,7 +110,7 @@
     return "padding:" + chrome.top + "px " + chrome.right + "px " + chrome.bottom + "px " + chrome.left + "px;";
   }
 
-  function buildAccentStyle(model, chrome, tokens) {
+  function buildAccentStyle(model, chrome, tokens, htmlUtils) {
     if (!model || model.showStrip !== true) {
       return "";
     }
@@ -126,7 +119,7 @@
       + "bottom:" + chrome.stripBottom + "px;"
       + "width:" + chrome.stripWidth + "px;"
       + "border-radius:" + chrome.stripRadius + "px;"
-      + toStyleText("background-color", tokens.strip);
+      + htmlUtils.toStyleText("background-color", tokens.strip);
   }
 
   function buildSignature(args) {
@@ -174,6 +167,7 @@
   function create(def, componentContext) {
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const aisSizingApi = componentContext.components.require("AisTargetLayoutSizing");
+    toObject = componentContext.components.require("ValueMath").toObject;
 
     return {
       resolveLayout: function (args) {
@@ -183,7 +177,7 @@
         return buildShellStyle(chrome);
       },
       buildAccentStyle: function (model, chrome, tokens) {
-        return buildAccentStyle(model, chrome, tokens);
+        return buildAccentStyle(model, chrome, tokens, htmlUtils);
       },
       buildSignature: buildSignature
     };

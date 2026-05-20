@@ -11,11 +11,9 @@
 }(this, function () {
   "use strict";
 
-  function isObject(value) {
-    return !!value && typeof value === "object";
-  }
-
-  let toFiniteNumber;
+  let isObject;
+  let hasText;
+  let toOptionalFiniteNumber;
 
   function toDispatchMmsi(mmsi) {
     if (typeof mmsi === "number" && Number.isFinite(mmsi)) {
@@ -25,20 +23,6 @@
       return mmsi.trim();
     }
     return "";
-  }
-
-  function hasText(value) {
-    return typeof value === "string" && value.trim() !== "";
-  }
-
-  function toOptionalFiniteNumber(rawValue) {
-    if (rawValue == null) {
-      return undefined;
-    }
-    if (typeof rawValue === "string" && rawValue.trim() === "") {
-      return undefined;
-    }
-    return toFiniteNumber(rawValue);
   }
 
   function pickNameOrMmsi(target, mmsiRaw) {
@@ -91,7 +75,10 @@
   }
 
   function create(def, componentContext) {
-    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+    const valueMath = componentContext.components.require("ValueMath");
+    isObject = valueMath.isObject;
+    hasText = valueMath.hasText;
+    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
     function build(props) {
       const p = props || {};

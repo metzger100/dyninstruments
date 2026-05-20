@@ -15,17 +15,6 @@
     const value = componentContext.components.require("ValueMath");
     const sectorMath = componentContext.components.require("RadialSectorMath");
 
-    function valueToAngle(rawValue, minV, maxV, arc, doClamp) {
-      const opts = {
-        min: Number(minV),
-        max: Number(maxV),
-        startDeg: Number(arc.startDeg),
-        endDeg: Number(arc.endDeg),
-        clamp: doClamp !== false
-      };
-      return angle.valueToAngle(rawValue, opts);
-    }
-
     function angleToValue(angleDeg, minV, maxV, arc, doClamp) {
       const opts = {
         min: Number(minV),
@@ -60,7 +49,7 @@
         if (v > maxV) v = maxV;
 
         const rel = (v - minV) / major;
-        const tickAngle = valueToAngle(v, minV, maxV, arc, true);
+        const tickAngle = angle.valueToAngleFlat(v, minV, maxV, arc, true);
         (value.almostInt(rel, 1e-4) ? majors : minors).push(tickAngle);
 
         if (v === maxV) {
@@ -76,7 +65,7 @@
 
     return Object.assign({}, value, {
       id: "RadialValueMath",
-      valueToAngle: valueToAngle,
+      valueToAngle: angle.valueToAngleFlat,
       angleToValue: angleToValue,
       buildValueTickAngles: buildValueTickAngles,
       sectorAngles: sectorMath.sectorAngles,

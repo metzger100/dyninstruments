@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteLayout - Responsive layout rectangles for the ActiveRoute text renderer
  * Documentation: documentation/widgets/active-route.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -33,45 +33,12 @@
     highNameBandScale: 0.88,
     normalNameBandScale: 0.9
   };
-
-  // dyni-lint-disable-next-line duplicate-functions -- Layout owners intentionally keep a tiny local clamp helper for geometry config normalization.
-  function clampNumber(value, minValue, maxValue, defaultValue) {
-    const n = Number(value);
-    if (!Number.isFinite(n) || value == null || (typeof value === "string" && value.trim() === "")) {
-      return defaultValue;
-    }
-    return Math.max(minValue, Math.min(maxValue, n));
-  }
-
-  function splitRow(rect, gap, columns) {
-    const safeGap = Math.max(0, Math.floor(gap));
-    const count = Math.max(1, Math.floor(columns));
-    const cellW = Math.max(1, Math.floor((rect.w - safeGap * Math.max(0, count - 1)) / count));
-    const row = [];
-    for (let i = 0; i < count; i += 1) {
-      const x = rect.x + i * (cellW + safeGap);
-      const width = i === count - 1 ? Math.max(1, rect.x + rect.w - x) : cellW;
-      row.push(makeRect(x, rect.y, width, rect.h));
-    }
-    return row;
-  }
-
-  function splitStack(rect, gap, rows) {
-    const safeGap = Math.max(0, Math.floor(gap));
-    const count = Math.max(1, Math.floor(rows));
-    const cellH = Math.max(1, Math.floor((rect.h - safeGap * Math.max(0, count - 1)) / count));
-    const out = [];
-    for (let i = 0; i < count; i += 1) {
-      const y = rect.y + i * (cellH + safeGap);
-      const height = i === count - 1 ? Math.max(1, rect.y + rect.h - y) : cellH;
-      out.push(makeRect(rect.x, y, rect.w, height));
-    }
-    return out;
-  }
+  let clampNumber;
 
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
+    clampNumber = componentContext.components.require("ValueMath").clampNumber;
     makeRect = rectApi.makeRect;
 
     function computeInsets(W, H) {
@@ -145,7 +112,7 @@
           Math.max(1, contentRect.w - nameWidth - gap),
           contentRect.h
         );
-        const metricColumns = splitRow(metricsRect, gap, isApproaching ? 3 : 2);
+        const metricColumns = rectApi.splitRow(metricsRect, gap, isApproaching ? 3 : 2, rectApi.makeRect);
         layout.nameRect = makeRect(contentRect.x, contentRect.y, nameWidth, contentRect.h);
         layout.metricRects.remain = metricColumns[0];
         layout.metricRects.rteEta = metricColumns[1];
@@ -178,7 +145,7 @@
       layout.nameRect = makeRect(contentRect.x, contentRect.y, contentRect.w, nameHeight);
 
       if (mode === "high") {
-        const metricRows = splitStack(metricsRect, gap, isApproaching ? 3 : 2);
+        const metricRows = rectApi.splitStack(metricsRect, gap, isApproaching ? 3 : 2, rectApi.makeRect);
         layout.metricRects.remain = metricRows[0];
         layout.metricRects.rteEta = metricRows[1];
         if (isApproaching) {
@@ -188,7 +155,7 @@
       }
 
       if (!isApproaching) {
-        const metricColumns = splitRow(metricsRect, gap, 2);
+        const metricColumns = rectApi.splitRow(metricsRect, gap, 2, rectApi.makeRect);
         layout.metricRects.remain = metricColumns[0];
         layout.metricRects.rteEta = metricColumns[1];
         return layout;
@@ -202,7 +169,7 @@
         metricsRect.w,
         Math.max(1, metricsRect.h - topHeight - gap)
       );
-      const topColumns = splitRow(topRect, gap, 2);
+      const topColumns = rectApi.splitRow(topRect, gap, 2, rectApi.makeRect);
       layout.metricRects.remain = topColumns[0];
       layout.metricRects.rteEta = topColumns[1];
       layout.metricRects.next = bottomRect;

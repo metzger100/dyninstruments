@@ -1,7 +1,7 @@
 /**
  * Module: LinearGaugeTextLayout - Shared tick-label and text-row helpers for linear gauges
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: RadialToolkit text helpers, LinearGaugeLabelFit
+ * Depends: LinearGaugeLabelFit, TextLayoutScaleHelpers, CanvasTextFitting, HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,24 +10,7 @@
 }(this, function () {
   "use strict";
 
-  function clampTextFillScale(value) {
-    const n = Number(value);
-    return Number.isFinite(n) && n > 0 ? n : 1;
-  }
-
-  function scaleTextCeiling(basePx, maxPx, textFillScale) {
-    const safeMax = Math.max(1, Math.floor(Number(maxPx) || 0));
-    const safeBase = Math.max(1, Math.floor(Number(basePx) || 0));
-    const fillDelta = Math.max(0, clampTextFillScale(textFillScale) - 1);
-    const remaining = Math.max(0, safeMax - safeBase);
-    return Math.max(1, Math.min(safeMax, safeBase + Math.floor(remaining * fillDelta)));
-  }
-
-  function setCanvasFont(ctx, px, weight, family) {
-    ctx.font = Math.floor(Number(weight) || 0) + " " + Math.max(1, Math.floor(Number(px) || 0)) + "px " + (family || "sans-serif");
-  }
-
-  function measureFitTotal(ctx, family, valueText, unitText, fit, valueWeight, labelWeight) {
+  function measureFitTotal(ctx, setCanvasFont, family, valueText, unitText, fit, valueWeight, labelWeight) {
     setCanvasFont(ctx, fit.vPx, valueWeight, family);
     const valueWidth = ctx.measureText(String(valueText || "")).width;
     if (!unitText) {
@@ -37,7 +20,7 @@
     return valueWidth + fit.gap + ctx.measureText(String(unitText)).width;
   }
 
-  function measureInlineTotal(ctx, family, caption, valueText, unitText, fit, valueWeight, labelWeight) {
+  function measureInlineTotal(ctx, setCanvasFont, family, caption, valueText, unitText, fit, valueWeight, labelWeight) {
     let total = 0;
     if (caption) {
       setCanvasFont(ctx, fit.cPx, labelWeight, family);
@@ -52,54 +35,6 @@
     return total;
   }
 
-  function scaleValueUnitFit(state, valueText, unitText, fit, boxHeight) {
-    if (!fit) {
-      return fit;
-    }
-    const maxPx = Math.max(1, Math.floor(Number(boxHeight) || 0));
-    const scaledFit = {
-      vPx: scaleTextCeiling(fit.vPx, maxPx, state.textFillScale),
-      uPx: unitText ? scaleTextCeiling(fit.uPx, maxPx, state.textFillScale) : 0,
-      gap: unitText ? scaleTextCeiling(fit.gap, Math.max(1, Math.floor(maxPx * 0.5)), state.textFillScale) : 0
-    };
-    scaledFit.total = measureFitTotal(
-      state.ctx,
-      state.family,
-      valueText,
-      unitText,
-      scaledFit,
-      state.valueWeight,
-      state.labelWeight
-    );
-    return scaledFit;
-  }
-
-  function scaleInlineFit(state, caption, valueText, unitText, fit, boxHeight) {
-    if (!fit) {
-      return fit;
-    }
-    const maxPx = Math.max(1, Math.floor(Number(boxHeight) || 0));
-    const gapMaxPx = Math.max(1, Math.floor(maxPx * 0.5));
-    const scaledFit = {
-      cPx: caption ? scaleTextCeiling(fit.cPx, maxPx, state.textFillScale) : 0,
-      vPx: scaleTextCeiling(fit.vPx, maxPx, state.textFillScale),
-      uPx: unitText ? scaleTextCeiling(fit.uPx, maxPx, state.textFillScale) : 0,
-      g1: caption ? scaleTextCeiling(fit.g1, gapMaxPx, state.textFillScale) : 0,
-      g2: unitText ? scaleTextCeiling(fit.g2, gapMaxPx, state.textFillScale) : 0
-    };
-    scaledFit.total = measureInlineTotal(
-      state.ctx,
-      state.family,
-      caption,
-      valueText,
-      unitText,
-      scaledFit,
-      state.valueWeight,
-      state.labelWeight
-    );
-    return scaledFit;
-  }
-
   function resolveLabelBoost(mode) {
     if (mode === "high") {
       return 1.2;
@@ -110,17 +45,7 @@
     return 1.0;
   }
 
-  function buildTextOptions(state) {
-    const opacity = state && state.theme && state.theme.opacity && typeof state.theme.opacity === "object"
-      ? state.theme.opacity
-      : {};
-    return {
-      captionOpacity: opacity.caption,
-      unitOpacity: opacity.unit
-    };
-  }
-
-  function drawCaptionRow(state, textApi, caption, box, secScale, align) {
+  function drawCaptionRow(state, textApi, caption, box, secScale, align, scaleHelpers, htmlUtils) {
     if (!caption || !box || box.w <= 0 || box.h <= 0 || !textApi) {
       return;
     }
@@ -136,8 +61,8 @@
       state.labelWeight
     );
     const captionBasePx = Math.max(1, Math.floor(fit.vPx * secScale));
-    const captionMax = scaleTextCeiling(captionBasePx, box.h, state.textFillScale);
-    const textOptions = buildTextOptions(state);
+    const captionMax = scaleHelpers.scaleTextCeiling(captionBasePx, box.h, state.textFillScale);
+    const textOptions = htmlUtils.buildTextOptions(state);
     textApi.drawCaptionMax(
       state.ctx,
       state.family,
@@ -153,7 +78,7 @@
     );
   }
 
-  function drawValueUnitRow(state, textApi, valueText, unitText, box, secScale, align) {
+  function drawValueUnitRow(state, textApi, valueText, unitText, box, secScale, align, scaleHelpers, setCanvasFont, htmlUtils) {
     if (!box || box.w <= 0 || box.h <= 0 || !textApi) {
       return;
     }
@@ -168,8 +93,20 @@
       state.valueWeight,
       state.labelWeight
     );
-    const scaledFit = scaleValueUnitFit(state, valueText, unitText, fit, box.h);
-    const textOptions = buildTextOptions(state);
+    const scaledFit = fit ? scaleHelpers.scaleValueUnitFit(state, valueText, unitText, fit, box.h) : fit;
+    if (scaledFit) {
+      scaledFit.total = measureFitTotal(
+        state.ctx,
+        setCanvasFont,
+        state.family,
+        valueText,
+        unitText,
+        scaledFit,
+        state.valueWeight,
+        state.labelWeight
+      );
+    }
+    const textOptions = htmlUtils.buildTextOptions(state);
     textApi.drawValueUnitWithFit(
       state.ctx,
       state.family,
@@ -187,7 +124,7 @@
     );
   }
 
-  function drawInlineRow(state, textApi, caption, valueText, unitText, box, secScale) {
+  function drawInlineRow(state, textApi, caption, valueText, unitText, box, secScale, scaleHelpers, setCanvasFont, htmlUtils) {
     if (!box || box.w <= 0 || box.h <= 0 || !textApi) {
       return;
     }
@@ -203,8 +140,21 @@
       state.valueWeight,
       state.labelWeight
     );
-    const scaledFit = scaleInlineFit(state, caption, valueText, unitText, fit, box.h);
-    const textOptions = buildTextOptions(state);
+    const scaledFit = fit ? scaleHelpers.scaleInlineFit(state, caption, valueText, unitText, fit, box.h) : fit;
+    if (scaledFit) {
+      scaledFit.total = measureInlineTotal(
+        state.ctx,
+        setCanvasFont,
+        state.family,
+        caption,
+        valueText,
+        unitText,
+        scaledFit,
+        state.valueWeight,
+        state.labelWeight
+      );
+    }
+    const textOptions = htmlUtils.buildTextOptions(state);
     textApi.drawInlineCapValUnit(
       state.ctx,
       state.family,
@@ -224,6 +174,9 @@
 
   function create(def, componentContext) {
     const labelFit = componentContext.components.require("LinearGaugeLabelFit");
+    const scaleHelpers = componentContext.components.require("TextLayoutScaleHelpers");
+    const setCanvasFont = componentContext.components.require("CanvasTextFitting").setFont;
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
 
     function drawTickLabels(layerCtx, state, ticks, showEndLabels, math, labelFormatter) {
       if (!math || !state || !state.labelFontPx || !ticks || !ticks.major || !ticks.major.length) {
@@ -275,9 +228,15 @@
       id: "LinearGaugeTextLayout",
       resolveLabelBoost: resolveLabelBoost,
       drawTickLabels: drawTickLabels,
-      drawCaptionRow: drawCaptionRow,
-      drawValueUnitRow: drawValueUnitRow,
-      drawInlineRow: drawInlineRow
+      drawCaptionRow: function (state, textApi, caption, box, secScale, align) {
+        drawCaptionRow(state, textApi, caption, box, secScale, align, scaleHelpers, htmlUtils);
+      },
+      drawValueUnitRow: function (state, textApi, valueText, unitText, box, secScale, align) {
+        drawValueUnitRow(state, textApi, valueText, unitText, box, secScale, align, scaleHelpers, setCanvasFont, htmlUtils);
+      },
+      drawInlineRow: function (state, textApi, caption, valueText, unitText, box, secScale) {
+        drawInlineRow(state, textApi, caption, valueText, unitText, box, secScale, scaleHelpers, setCanvasFont, htmlUtils);
+      }
     };
   }
 

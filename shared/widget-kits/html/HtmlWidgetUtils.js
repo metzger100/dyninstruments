@@ -15,6 +15,7 @@
   let toOptionalFiniteNumber;
   let toText;
   let trimText;
+  let clampNumber;
 
   function escapeHtml(value) {
     return String(value)
@@ -150,6 +151,11 @@
       return "";
     }
     return "font-size:" + Math.max(1, Math.floor(n)) + "px;";
+  }
+
+  function toPx(value) {
+    const px = Math.max(0, Math.floor(clampNumber(value, 0, Number.MAX_SAFE_INTEGER, 0)));
+    return String(px) + "px";
   }
 
   function resolveDefaultText(props) {
@@ -356,6 +362,7 @@
     toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
     toText = valueMath.toText;
     trimText = valueMath.trimText;
+    clampNumber = valueMath.clampNumber;
 
     return {
       id: "HtmlWidgetUtils",
@@ -375,6 +382,7 @@
       joinStyles: joinStyles,
       buildTextOptions: buildTextOptions,
       toFontStyle: toFontStyle,
+      toPx: toPx,
       resolveDefaultText: resolveDefaultText,
       applyMirroredContext: applyMirroredContext,
       patchInnerHtml: patchInnerHtml,

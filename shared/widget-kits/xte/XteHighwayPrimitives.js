@@ -20,11 +20,9 @@
 
   function create(def, componentContext) {
     const gs = componentContext.components.require("GeometryScale");
-    const clamp = componentContext.components.require("ValueMath").clamp;
-
-    function lerp(from, to, t) {
-      return from + (to - from) * t;
-    }
+    const valueMath = componentContext.components.require("ValueMath");
+    const clamp = valueMath.clamp;
+    const lerp = valueMath.lerp;
 
     function snapCoord(value, lineWidth) {
       const width = Math.max(1, Math.round(Number.isFinite(lineWidth) ? lineWidth : 1));

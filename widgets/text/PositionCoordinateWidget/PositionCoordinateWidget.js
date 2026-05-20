@@ -153,7 +153,7 @@
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
     const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
-    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
     const fitCache = text.createFitCache(["flat", "stacked"]);
     function renderCanvas(canvas, props) {
       const p = resolveVariantProps(props);

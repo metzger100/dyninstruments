@@ -32,8 +32,8 @@ describe("ActiveRouteTextHtmlWidget", function () {
           defaultMode: "normal"
         });
       },
-      formatMetric(rawValue, formatter, formatterParameters, defaultText, componentContext, placeholderNormalize) {
-        const out = String(componentContext.format.applyFormatter(rawValue, {
+      formatActiveRouteMetric(rawValue, formatter, formatterParameters, defaultText, placeholderNormalize) {
+        const out = String(applyFormatter(rawValue, {
           formatter: formatter,
           formatterParameters: formatterParameters,
           default: defaultText

@@ -1,7 +1,7 @@
 /**
  * Module: LinearGaugeLabelFit - Shared label fitting and placement helpers for linear gauges
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: none
+ * Depends: CanvasTextFitting, HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,19 +10,11 @@
 }(this, function () {
   "use strict";
 
-  function setCanvasFont(ctx, px, weight, family) {
-    ctx.font = Math.floor(Number(weight) || 0) + " " + Math.max(1, Math.floor(Number(px) || 0)) + "px " + (family || "sans-serif");
-  }
-
   function resolveScaleBounds(state) {
     return {
       left: Math.min(Number(state.layout.scaleX0) || 0, Number(state.layout.scaleX1) || 0),
       right: Math.max(Number(state.layout.scaleX0) || 0, Number(state.layout.scaleX1) || 0)
     };
-  }
-
-  function resolveLabelEdgePolicy(state) {
-    return state && state.labelEdgePolicy === "sliding" ? "sliding" : "inset";
   }
 
   function resolveEdgePlacement(x, width, isStart, isEnd, isFirst, isLast, state, fontPx) {
@@ -81,7 +73,7 @@
     };
   }
 
-  function resolveLabelPlacement(entry, width, isStart, isEnd, isFirst, isLast, state, fontPx) {
+  function resolveLabelPlacement(entry, width, isStart, isEnd, isFirst, isLast, state, fontPx, resolveLabelEdgePolicy) {
     if (resolveLabelEdgePolicy(state) === "sliding") {
       const x = Number(entry && entry.naturalX);
       return {
@@ -166,7 +158,7 @@
     return labels;
   }
 
-  function labelPassFits(layerCtx, state, labels, fontPx) {
+  function labelPassFits(layerCtx, state, labels, fontPx, setCanvasFont, resolveLabelEdgePolicy) {
     if (!labels.length) {
       return true;
     }
@@ -188,7 +180,8 @@
         i === 0,
         i === labels.length - 1,
         state,
-        fontPx
+        fontPx,
+        resolveLabelEdgePolicy
       );
       if (!sliding && (placement.left < scaleBounds.left || placement.right > scaleBounds.right)) {
         return false;
@@ -201,7 +194,7 @@
     return true;
   }
 
-  function resolveLabelFontPx(layerCtx, state, labels) {
+  function resolveLabelFontPx(layerCtx, state, labels, setCanvasFont, resolveLabelEdgePolicy) {
     const ceilingPx = Math.max(1, Math.floor(Number(state.labelFontPx) || 0));
     let low = 1;
     let high = ceilingPx;
@@ -209,7 +202,7 @@
 
     while (low <= high) {
       const candidate = Math.floor((low + high) / 2);
-      if (labelPassFits(layerCtx, state, labels, candidate)) {
+      if (labelPassFits(layerCtx, state, labels, candidate, setCanvasFont, resolveLabelEdgePolicy)) {
         best = candidate;
         low = candidate + 1;
       }
@@ -242,17 +235,40 @@
     );
   }
 
-  function create() {
+  function create(def, componentContext) {
+    const fitting = componentContext.components.require("CanvasTextFitting");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const setCanvasFont = fitting.setFont;
+    const resolveLabelEdgePolicy = htmlUtils.resolveLabelEdgePolicy;
+
+    function resolveLabelPlacementWithPolicy(entry, width, isStart, isEnd, isFirst, isLast, state, fontPx) {
+      return resolveLabelPlacement(
+        entry,
+        width,
+        isStart,
+        isEnd,
+        isFirst,
+        isLast,
+        state,
+        fontPx,
+        resolveLabelEdgePolicy
+      );
+    }
+
+    function resolveLabelFontPxWithPolicy(layerCtx, state, labels) {
+      return resolveLabelFontPx(layerCtx, state, labels, setCanvasFont, resolveLabelEdgePolicy);
+    }
+
     return {
       id: "LinearGaugeLabelFit",
       setCanvasFont: setCanvasFont,
       resolveScaleBounds: resolveScaleBounds,
       resolveEdgePlacement: resolveEdgePlacement,
       resolveLabelEdgePolicy: resolveLabelEdgePolicy,
-      resolveLabelPlacement: resolveLabelPlacement,
+      resolveLabelPlacement: resolveLabelPlacementWithPolicy,
       resolveLabelClipRect: resolveLabelClipRect,
       collectLabels: collectLabels,
-      resolveLabelFontPx: resolveLabelFontPx,
+      resolveLabelFontPx: resolveLabelFontPxWithPolicy,
       resolveLabelY: resolveLabelY
     };
   }

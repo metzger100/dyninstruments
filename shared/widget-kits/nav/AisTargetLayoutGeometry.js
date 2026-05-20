@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetLayoutGeometry - Metric tile sub-rect builders for AIS target layout
  * Documentation: documentation/widgets/ais-target.md
- * Depends: none
+ * Depends: HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -54,6 +54,7 @@
   const STACKED_UNIT_MIN_RATIO = 0.14;
   const STACKED_UNIT_MAX_RATIO = 0.34;
   const STACKED_ROW_GAP_RATIO = 0.02;
+  let toPx;
 
   function toMetricBox(tileRect, details) {
     return {
@@ -203,10 +204,6 @@
       valueRect: valueRect,
       unitRect: unitRect
     });
-  }
-
-  function toPx(value) {
-    return String(Math.max(0, Math.floor(Number(value) || 0))) + "px";
   }
 
   function toTrackPx(value) {
@@ -414,7 +411,9 @@
     };
   }
 
-  function create() {
+  function create(def, componentContext) {
+    toPx = componentContext.components.require("HtmlWidgetUtils").toPx;
+
     return {
       id: "AisTargetLayoutGeometry",
       createInlineMetricBox: createInlineMetricBox,

@@ -27,21 +27,22 @@
   sf.DepthDisplayFormatter = {
       js: BASE + "shared/widget-kits/format/DepthDisplayFormatter.js",
       css: undefined,
-      globalKey: "DyniDepthDisplayFormatter"
+      globalKey: "DyniDepthDisplayFormatter",
+      deps: ["ValueMath"]
   };
 
   sf.UnitAwareFormatter = {
       js: BASE + "shared/widget-kits/format/UnitAwareFormatter.js",
       css: undefined,
       globalKey: "DyniUnitAwareFormatter",
-      deps: ["PlaceholderNormalize"]
+      deps: ["PlaceholderNormalize", "ValueMath"]
   };
 
   sf.StableDigits = {
       js: BASE + "shared/widget-kits/format/StableDigits.js",
       css: undefined,
       globalKey: "DyniStableDigits",
-      deps: ["PlaceholderNormalize"]
+      deps: ["PlaceholderNormalize", "ValueMath"]
   };
 
 }(this));

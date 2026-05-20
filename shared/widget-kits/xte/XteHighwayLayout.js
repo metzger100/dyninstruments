@@ -1,7 +1,7 @@
 /**
  * Module: XteHighwayLayout - Responsive layout rectangles for the XTE highway renderer
  * Documentation: documentation/widgets/xte-display.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -47,15 +47,7 @@
     highTopShareScale: 0.84,
     highHighwayShareScale: 0.97
   };
-
-  // dyni-lint-disable-next-line duplicate-functions -- Layout owners intentionally keep a tiny local clamp helper for geometry config normalization.
-  function clampNumber(value, minValue, maxValue, defaultValue) {
-    const n = Number(value);
-    if (!Number.isFinite(n) || value == null || (typeof value === "string" && value.trim() === "")) {
-      return defaultValue;
-    }
-    return Math.max(minValue, Math.min(maxValue, n));
-  }
+  let clampNumber;
 
   function splitColumns(rect, gap, columns) {
     const safeGap = Math.max(0, Math.floor(gap));
@@ -72,6 +64,7 @@
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
+    clampNumber = componentContext.components.require("ValueMath").clampNumber;
     makeRect = rectApi.makeRect;
 
     function computeMode(W, H, thresholdNormal, thresholdFlat) {

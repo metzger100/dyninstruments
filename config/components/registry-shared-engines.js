@@ -36,12 +36,13 @@
       js: BASE + "shared/widget-kits/radial/FullCircleRadialLayout.js",
       css: undefined,
       globalKey: "DyniFullCircleRadialLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale", "TextLayoutScaleHelpers", "ValueMath"]
     },
     FullCircleRadialTextLayout: {
       js: BASE + "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
       css: undefined,
-      globalKey: "DyniFullCircleRadialTextLayout"
+      globalKey: "DyniFullCircleRadialTextLayout",
+      deps: ["ValueMath", "TextLayoutScaleHelpers", "HtmlWidgetUtils"]
     },
     LinearGaugeEngine: {
       js: BASE + "shared/widget-kits/linear/LinearGaugeEngine.js",
@@ -56,6 +57,7 @@
         "LinearGaugeLayout",
         "LinearGaugeTextLayout",
         "LinearGaugeEngineSupport",
+        "TextLayoutScaleHelpers",
         "SpringEasing",
         "StableDigits",
         "StateScreenLabels",
@@ -85,6 +87,7 @@
         "SemicircleRadialLayout",
         "SemicircleRadialTextLayout",
         "RadialSectorMath",
+        "RadialValueMath",
         "SpringEasing",
         "StableDigits",
         "StateScreenLabels",
@@ -96,12 +99,13 @@
       js: BASE + "shared/widget-kits/radial/SemicircleRadialLayout.js",
       css: undefined,
       globalKey: "DyniSemicircleRadialLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale", "TextLayoutScaleHelpers", "ValueMath"]
     },
     SemicircleRadialTextLayout: {
       js: BASE + "shared/widget-kits/radial/SemicircleRadialTextLayout.js",
       css: undefined,
-      globalKey: "DyniSemicircleRadialTextLayout"
+      globalKey: "DyniSemicircleRadialTextLayout",
+      deps: ["TextLayoutScaleHelpers", "TextLayoutEngine", "HtmlWidgetUtils"]
     }
   };
 }(this));

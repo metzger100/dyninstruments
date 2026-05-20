@@ -46,17 +46,12 @@
     return baseMode;
   }
 
-  function getSurfacePolicy(props) {
-    const p = props && typeof props === "object" ? props : null;
-    return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
-  }
-
   function dispatchCheckAutoZoom(props, htmlUtils) {
     const p = props || {};
     if (htmlUtils.isEditingMode(p)) {
       return false;
     }
-    const policy = getSurfacePolicy(p);
+    const policy = htmlUtils.resolveSurfacePolicy(p);
     if (!policy || !policy.actions || !policy.actions.map || typeof policy.actions.map.checkAutoZoom !== "function") {
       return false;
     }
@@ -89,13 +84,6 @@
       throw new Error("MapZoomTextHtmlWidget: props.default is required");
     }
     return p;
-  }
-
-  function textLength(value) {
-    if (value == null) {
-      return 0;
-    }
-    return String(value).length;
   }
 
   function resolveStateKind(props, stateScreenPrecedence) {
@@ -259,16 +247,8 @@
     const stateScreenMarkup = componentContext.components.require("StateScreenMarkup");
     const themeResolver = componentContext.theme.tokens;
     const valueMath = componentContext.components.require("ValueMath");
-    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || function (value) {
-      if (value == null) {
-        return undefined;
-      }
-      if (typeof value === "string" && value.trim() === "") {
-        return undefined;
-      }
-      const n = Number(value);
-      return Number.isFinite(n) ? n : undefined;
-    };
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
+    const textLength = valueMath.textLength;
 
     function translateFunction(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};

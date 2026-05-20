@@ -1,7 +1,7 @@
 /**
  * Module: MapZoomHtmlFit - Per-element text fitting for map zoom HTML renderer
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: componentContext.dom.requirePluginRoot, TextLayoutEngine, HtmlWidgetUtils, componentContext.theme.tokens
+ * Depends: componentContext.dom.requirePluginRoot, TextLayoutEngine, HtmlWidgetUtils, HtmlMeasureUtils, ValueMath, componentContext.theme.tokens
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,7 +10,6 @@
 }(this, function () {
   "use strict";
 
-  const MEASURE_CTX_KEY = "__dyniMapZoomMeasureCtx";
   const FIT_CACHE_KEY = "__dyniMapZoomHtmlFitCache";
   const EMPTY_STYLES = Object.freeze({
     captionStyle: "",
@@ -19,75 +18,10 @@
     requiredStyle: ""
   });
   const SECONDARY_DEFAULT_SCALE = 0.8;
+  let hasText;
 
   function numberOr(value, defaultNumber) {
     return typeof value === "number" ? value : defaultNumber;
-  }
-
-  function buildApproximateMeasureContext() {
-    const context = {
-      font: "700 12px sans-serif",
-      approxFontPx: 12,
-      measureText: function (text) {
-        const source = String(this.font || "");
-        const match = source.match(/(\d+(?:\.\d+)?)px/);
-        const parsed = match ? Number(match[1]) : this.approxFontPx;
-        const resolvedPx = Number.isFinite(parsed) ? parsed : this.approxFontPx;
-        this.approxFontPx = Math.max(1, resolvedPx);
-        return { width: String(text).length * this.approxFontPx * 0.58 };
-      }
-    };
-    return context;
-  }
-
-  function getMeasureTarget(hostContext) {
-    const commit = hostContext && hostContext.__dyniHostCommitState;
-    return commit && (commit.shellEl || commit.rootEl);
-  }
-
-  function resolveMeasureContext(hostContext) {
-    if (hostContext && hostContext[MEASURE_CTX_KEY]) {
-      return hostContext[MEASURE_CTX_KEY];
-    }
-
-    const target = getMeasureTarget(hostContext);
-    const ownerDocument = target && target.ownerDocument ? target.ownerDocument : (typeof document !== "undefined" ? document : null);
-    const ownerView = ownerDocument && ownerDocument.defaultView;
-    const userAgent = ownerView && ownerView.navigator ? String(ownerView.navigator.userAgent || "") : "";
-    const isJsDom = /jsdom/i.test(userAgent);
-
-    let context2d = null;
-    if (!isJsDom && ownerDocument && typeof ownerDocument.createElement === "function") {
-      const canvas = ownerDocument.createElement("canvas");
-      if (canvas && typeof canvas.getContext === "function") {
-        context2d = canvas.getContext("2d");
-      }
-    }
-    const out = context2d || buildApproximateMeasureContext();
-    if (hostContext && typeof hostContext === "object") {
-      hostContext[MEASURE_CTX_KEY] = out;
-    }
-    return out;
-  }
-
-  function resolveFitCache(hostContext) {
-    const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
-    if (!ctx) {
-      return null;
-    }
-    const existing = ctx[FIT_CACHE_KEY];
-    if (existing && typeof existing === "object") {
-      return existing;
-    }
-    const cache = { signature: "", result: null };
-    ctx[FIT_CACHE_KEY] = cache;
-    return cache;
-  }
-
-  function toFontStyle(px, htmlUtils) {
-    const resolved = htmlUtils.toFiniteNumber(px);
-    const out = Math.floor(numberOr(resolved, 0));
-    return out > 0 ? ("font-size:" + out + "px;") : "";
   }
 
   function estimateMainUsedHeight(args, htmlUtils) {
@@ -117,10 +51,6 @@
       return topPx + bottomPx + (topPx > 0 && bottomPx > 0 ? gap : 0);
     }
     return Math.max(valueSafe, secondarySafe);
-  }
-
-  function hasText(value) {
-    return value != null && String(value).trim().length > 0;
   }
 
   function toMainFitState(args) {
@@ -267,7 +197,10 @@
   function create(def, componentContext) {
     const textApi = componentContext.components.require("TextLayoutEngine");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
+    const valueMath = componentContext.components.require("ValueMath");
     const themeApi = componentContext.theme.tokens;
+    hasText = valueMath.hasText;
 
     function compute(args) {
       const cfg = args || {};
@@ -281,11 +214,11 @@
         return EMPTY_STYLES;
       }
 
-      const measureCtx = resolveMeasureContext(hostContext);
+      const target = htmlUtils.resolveHostCommitTarget(hostContext, cfg.targetEl);
+      const measureCtx = htmlMeasureUtils.resolveMeasureContext(hostContext, target || cfg.targetEl);
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
         return EMPTY_STYLES;
       }
-      const target = getMeasureTarget(hostContext);
       const themeRoot = componentContext.dom.requirePluginRoot(target || cfg.targetEl);
       const tokens = themeApi.resolveForRoot(themeRoot);
       const family = tokens.font.family;
@@ -306,7 +239,7 @@
       const mode = typeof model.mode === "string" && model.mode.length
         ? model.mode
         : "normal";
-      const fitCache = resolveFitCache(hostContext);
+      const fitCache = htmlMeasureUtils.resolveFitCache(hostContext, FIT_CACHE_KEY);
       const fitSignature = buildFitSignature({
         width: shellW,
         height: shellH,
@@ -352,7 +285,7 @@
         maxH: contentH,
         family: valueFamily,
         weight: valueWeight
-      }) || !hasText(model.zoomPlainText) || model.zoomPlainText === model.zoomText
+      }) || !valueMath.hasText(model.zoomPlainText) || model.zoomPlainText === model.zoomText
         ? mainFit
         : toMainFitState(Object.assign({ valueText: model.zoomPlainText }, mainFitArgs));
       const requiredFitArgs = {
@@ -378,15 +311,15 @@
         maxH: contentH,
         family: valueFamily,
         weight: labelWeight
-      }) || !hasText(model.requiredPlainText) || model.requiredPlainText === model.requiredText
+      }) || !valueMath.hasText(model.requiredPlainText) || model.requiredPlainText === model.requiredText
         ? requiredPrimary
         : fitRequiredPx(Object.assign({ requiredText: model.requiredPlainText }, requiredFitArgs), htmlUtils);
 
       const out = {
-        captionStyle: toFontStyle(mainCandidate.captionPx, htmlUtils),
-        valueStyle: toFontStyle(mainCandidate.valuePx, htmlUtils),
-        unitStyle: toFontStyle(mainCandidate.unitPx, htmlUtils),
-        requiredStyle: toFontStyle(requiredCandidate.px, htmlUtils),
+        captionStyle: htmlUtils.toFontStyle(mainCandidate.captionPx),
+        valueStyle: htmlUtils.toFontStyle(mainCandidate.valuePx),
+        unitStyle: htmlUtils.toFontStyle(mainCandidate.unitPx),
+        requiredStyle: htmlUtils.toFontStyle(requiredCandidate.px),
         zoomText: mainCandidate === mainFit ? model.zoomText : model.zoomPlainText,
         requiredText: requiredCandidate === requiredPrimary ? model.requiredText : model.requiredPlainText
       };

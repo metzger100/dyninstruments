@@ -56,7 +56,7 @@ function createActiveRouteWidget() {
         defaultMode: "normal"
       });
     },
-    formatMetric(rawValue, formatter, formatterParameters, defaultText, _context, placeholderNormalize) {
+    formatActiveRouteMetric(rawValue, formatter, formatterParameters, defaultText, placeholderNormalize) {
       const out = String(componentContext.format.applyFormatter(rawValue, {
         formatter: formatter,
         formatterParameters: formatterParameters,

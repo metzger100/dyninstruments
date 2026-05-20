@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteHtmlFitSupport - Shared fit helpers for edit-route HTML metrics and labels
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: none
+ * Depends: HtmlMeasureUtils, HtmlWidgetUtils, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,64 +10,12 @@
 }(this, function () {
   "use strict";
 
-  const MEASURE_CTX_KEY = "__dyniEditRouteTextMeasureCtx";
   const NAME_MAX_PX_RATIO = {
     flat: 0.5,
     normal: 0.66,
     high: 0.56
   };
-
-  function parseFontPx(font) {
-    const source = String(font || "");
-    const match = source.match(/(\d+(?:\.\d+)?)px/);
-    return match ? Number(match[1]) : 12;
-  }
-
-  function createApproximateMeasureContext() {
-    return {
-      font: "700 12px sans-serif",
-      measureText: function (text) {
-        const px = Math.max(1, parseFontPx(this.font));
-        return { width: String(text).length * px * 0.56 };
-      }
-    };
-  }
-
-  function resolveMeasureContext(hostContext, targetEl) {
-    const ctxStore = hostContext && typeof hostContext === "object" ? hostContext : null;
-    if (ctxStore && ctxStore[MEASURE_CTX_KEY]) {
-      return ctxStore[MEASURE_CTX_KEY];
-    }
-
-    const ownerDocument = targetEl && targetEl.ownerDocument
-      ? targetEl.ownerDocument
-      : (typeof document !== "undefined" ? document : null);
-    let measureCtx = null;
-    if (ownerDocument && typeof ownerDocument.createElement === "function") {
-      const canvas = ownerDocument.createElement("canvas");
-      if (canvas && typeof canvas.getContext === "function") {
-        measureCtx = canvas.getContext("2d");
-      }
-    }
-
-    const resolved = measureCtx || createApproximateMeasureContext();
-    if (ctxStore) {
-      ctxStore[MEASURE_CTX_KEY] = resolved;
-    }
-    return resolved;
-  }
-
-  function toStyle(px, htmlUtils) {
-    const n = htmlUtils.toFiniteNumber(px);
-    if (!(n > 0)) {
-      return "";
-    }
-    return "font-size:" + Math.max(1, Math.floor(n)) + "px;";
-  }
-
-  function toText(value) {
-    return value == null ? "" : String(value);
-  }
+  let toText;
 
   function toMetricEntry(model, id) {
     const m = model && typeof model === "object" ? model : {};
@@ -179,12 +127,6 @@
     });
   }
 
-  function measurePx(args) {
-    const cfg = args || {};
-    const fit = measureLineFit(cfg);
-    return cfg.htmlUtils.toFiniteNumber(fit && fit.px) || 0;
-  }
-
   function isLineTrimmed(lineFit, sourceText) {
     if (!lineFit || typeof lineFit !== "object") {
       return false;
@@ -193,14 +135,6 @@
       return false;
     }
     return String(lineFit.text) !== toText(sourceText);
-  }
-
-  function resolveMetricValueFamily(model, tokens) {
-    const font = tokens && tokens.font ? tokens.font : {};
-    if (model && model.stableDigitsEnabled === true) {
-      return font.familyMono || font.family || "";
-    }
-    return font.family || "";
   }
 
   function selectMetricValue(args) {
@@ -250,9 +184,8 @@
     return htmlUtils.toFiniteNumber(lineFit && lineFit.px) || 0;
   }
 
-  function measureStyle(args) {
-    const px = measurePx(args);
-    return toStyle(px, args && args.htmlUtils);
+  function measureEditRouteStyle(args, htmlMeasureUtils, htmlUtils, tileLayout) {
+    return htmlMeasureUtils.measureStyle(args, htmlUtils, tileLayout);
   }
 
   function resolveNamePxRatio(mode) {
@@ -265,23 +198,31 @@
     return NAME_MAX_PX_RATIO.normal;
   }
 
-  function create() {
+  function create(def, componentContext) {
+    const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    toText = componentContext.components.require("ValueMath").toText;
+
+    function measureEditRoutePx(args) {
+      return htmlUtils.toFiniteNumber((measureLineFit(args) || {}).px) || 0;
+    }
+
+    function measureEditRouteStyleForArgs(args) {
+      return measureEditRouteStyle(args, htmlMeasureUtils, htmlUtils, args && args.tileLayout);
+    }
+
     return {
       id: "EditRouteHtmlFitSupport",
-      resolveMeasureContext: resolveMeasureContext,
-      toStyle: toStyle,
-      toText: toText,
       resolveMetricLabel: resolveMetricLabel,
       resolveMetricValue: resolveMetricValue,
       resolveMetricPlainValue: resolveMetricPlainValue,
       resolveMetricUnit: resolveMetricUnit,
       measureLineFit: measureLineFit,
-      measurePx: measurePx,
+      measureEditRoutePx: measureEditRoutePx,
       isLineTrimmed: isLineTrimmed,
-      resolveMetricValueFamily: resolveMetricValueFamily,
       selectMetricValue: selectMetricValue,
       resolveMetricPx: resolveMetricPx,
-      measureStyle: measureStyle,
+      measureEditRouteStyle: measureEditRouteStyleForArgs,
       resolveNamePxRatio: resolveNamePxRatio
     };
   }

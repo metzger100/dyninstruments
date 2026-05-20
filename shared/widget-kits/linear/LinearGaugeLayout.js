@@ -1,7 +1,7 @@
 /**
  * Module: LinearGaugeLayout - Responsive geometry owner for linear gauge widgets
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, GeometryScale
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, GeometryScale, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -34,15 +34,7 @@
     textFillScale: 1.18
   };
   let makeRect = null;
-
-  // dyni-lint-disable-next-line duplicate-functions -- Layout owners intentionally keep a tiny local clamp helper for geometry config normalization.
-  function clampNumber(value, minValue, maxValue, defaultValue) {
-    const n = Number(value);
-    if (!Number.isFinite(n) || value == null || (typeof value === "string" && value.trim() === "")) {
-      return defaultValue;
-    }
-    return Math.max(minValue, Math.min(maxValue, n));
-  }
+  let clampNumber;
 
   function resolveContentRect(cfg, computeInsets, createContentRect) {
     if (cfg && cfg.contentRect) {
@@ -220,6 +212,7 @@
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
     const gs = componentContext.components.require("GeometryScale");
+    clampNumber = componentContext.components.require("ValueMath").clampNumber;
     makeRect = rectApi.makeRect;
 
     function computeMode(W, H, thresholdNormal, thresholdFlat) {

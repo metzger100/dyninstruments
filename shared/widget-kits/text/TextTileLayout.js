@@ -1,7 +1,7 @@
 /**
  * Module: TextTileLayout - Shared fitted single-line and caption/value/unit tile helpers
  * Documentation: documentation/widgets/active-route.md
- * Depends: none
+ * Depends: ValueMath, TextLayoutScaleHelpers
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,27 +12,18 @@
 
   const hasOwn = Object.prototype.hasOwnProperty;
   const CONTEXT_CACHE_KEY = "__dyniTextTileLayoutCache";
+  let toFiniteNumber;
+  let resolveOpacity;
 
-  function clampNumber(value, defaultValue) {
-    if (value == null || (typeof value === "string" && value.trim() === "")) {
-      return defaultValue;
-    }
-    const n = Number(value);
-    return Number.isFinite(n) ? n : defaultValue;
-  }
-
-  function resolveOpacity(value) {
-    const n = Number(value);
-    if (!Number.isFinite(n)) {
-      return 1;
-    }
-    return Math.max(0, Math.min(1, n));
+  function toNumberOrDefault(value, defaultValue) {
+    const n = toFiniteNumber(value);
+    return typeof n === "number" ? n : defaultValue;
   }
 
   function resolveScaledMaxPx(basePx, maxPx, textFillScale) {
-    const safeBase = Math.max(1, Math.floor(clampNumber(basePx, 1)));
-    const safeMax = Math.max(1, Math.floor(clampNumber(maxPx, safeBase)));
-    const scale = Math.max(0.1, clampNumber(textFillScale, 1));
+    const safeBase = Math.max(1, Math.floor(toNumberOrDefault(basePx, 1)));
+    const safeMax = Math.max(1, Math.floor(toNumberOrDefault(maxPx, safeBase)));
+    const scale = Math.max(0.1, toNumberOrDefault(textFillScale, 1));
     return Math.min(safeMax, Math.max(1, Math.floor(safeBase * scale)));
   }
 
@@ -67,7 +58,7 @@
 
   function resolveMetricTextRect(rect, padX) {
     const safeRect = rect || {};
-    const safePad = Math.max(0, Math.floor(clampNumber(padX, 0)));
+    const safePad = Math.max(0, Math.floor(toNumberOrDefault(padX, 0)));
     const width = Math.max(1, (Number(safeRect.w) || 0) - safePad * 2);
     return {
       x: (Number(safeRect.x) || 0) + safePad,
@@ -121,12 +112,12 @@
       Number(rect.y) || 0,
       Number(rect.w) || 0,
       Number(rect.h) || 0,
-      clampNumber(cfg.padX, 0),
-      clampNumber(cfg.captionHeightRatio, 0.34),
+      toNumberOrDefault(cfg.padX, 0),
+      toNumberOrDefault(cfg.captionHeightRatio, 0.34),
       Number.isFinite(Number(cfg.captionHeightPx)) ? Math.floor(Number(cfg.captionHeightPx)) : "",
       Number.isFinite(captionMaxPx) ? captionMaxPx : "",
       Number.isFinite(valueMaxPx) ? valueMaxPx : "",
-      clampNumber(cfg.textFillScale, 1),
+      toNumberOrDefault(cfg.textFillScale, 1),
       String(family),
       useMono ? 1 : 0,
       useMono ? String(valueTextOptions.monoFamily || "") : "",
@@ -143,23 +134,25 @@
     const family = cfg && cfg.family;
     return JSON.stringify([
       String(cfg.text),
-      Math.max(1, clampNumber(cfg.maxW, 0)),
-      Math.max(1, clampNumber(cfg.maxH, 0)),
-      clampNumber(cfg.maxPx, 0),
-      clampNumber(cfg.textFillScale, 1),
+      Math.max(1, toNumberOrDefault(cfg.maxW, 0)),
+      Math.max(1, toNumberOrDefault(cfg.maxH, 0)),
+      toNumberOrDefault(cfg.maxPx, 0),
+      toNumberOrDefault(cfg.textFillScale, 1),
       String(family),
       Number(cfg.weight) || 0
     ]);
   }
 
-  function create() {
+  function create(def, componentContext) {
+    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+    resolveOpacity = componentContext.components.require("TextLayoutScaleHelpers").resolveOpacity;
     function measureMetricTile(args) {
       const cfg = args || {};
       const textApi = cfg.textApi;
       const metric = cfg.metric;
       const rect = cfg.rect;
-      const captionHeightRatio = clampNumber(cfg.captionHeightRatio, 0.34);
-      const textFillScale = clampNumber(cfg.textFillScale, 1);
+      const captionHeightRatio = toNumberOrDefault(cfg.captionHeightRatio, 0.34);
+      const textFillScale = toNumberOrDefault(cfg.textFillScale, 1);
       if (!metric || !rect) {
         return null;
       }
@@ -173,8 +166,8 @@
       const capH = heights.capH;
       const valueY = textRect.y + capH;
       const valueH = heights.valueH;
-      const capMaxPx = resolveScaledMaxPx(clampNumber(cfg.captionMaxPx, capH), capH, textFillScale);
-      const valueMaxPx = resolveScaledMaxPx(clampNumber(cfg.valueMaxPx, valueH), valueH, textFillScale);
+      const capMaxPx = resolveScaledMaxPx(toNumberOrDefault(cfg.captionMaxPx, capH), capH, textFillScale);
+      const valueMaxPx = resolveScaledMaxPx(toNumberOrDefault(cfg.valueMaxPx, valueH), valueH, textFillScale);
       const fit = textApi.measureValueUnitFit(
         cfg.ctx,
         cfg.family,
@@ -259,9 +252,9 @@
       if (contextCache && hasOwn.call(contextCache.fittedLines, fittedLineSignature)) {
         return contextCache.fittedLines[fittedLineSignature];
       }
-      const maxW = Math.max(1, clampNumber(cfg.maxW, 0));
-      const maxH = Math.max(1, clampNumber(cfg.maxH, 0));
-      const basePx = resolveScaledMaxPx(clampNumber(cfg.maxPx, maxH), maxH, cfg.textFillScale);
+      const maxW = Math.max(1, toNumberOrDefault(cfg.maxW, 0));
+      const maxH = Math.max(1, toNumberOrDefault(cfg.maxH, 0));
+      const basePx = resolveScaledMaxPx(toNumberOrDefault(cfg.maxPx, maxH), maxH, cfg.textFillScale);
       const source = String(cfg.text);
       const px = textApi.fitSingleTextPx(
         cfg.ctx,
@@ -311,7 +304,7 @@
       textApi.setFont(cfg.ctx, fit.px, cfg.weight, cfg.family);
       cfg.ctx.textBaseline = "middle";
       const align = cfg.align;
-      const padX = Math.max(0, Math.floor(clampNumber(cfg.padX, 0)));
+      const padX = Math.max(0, Math.floor(toNumberOrDefault(cfg.padX, 0)));
       if (align === "center") {
         cfg.ctx.textAlign = "center";
         cfg.ctx.fillText(fit.text, rect.x + Math.floor(rect.w / 2), rect.y + Math.floor(rect.h / 2));

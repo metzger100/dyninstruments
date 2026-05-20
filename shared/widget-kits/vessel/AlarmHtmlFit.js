@@ -1,7 +1,7 @@
 /**
  * Module: AlarmHtmlFit - Text-fit and token-style owner for vessel alarm HTML
  * Documentation: documentation/widgets/alarm.md
- * Depends: componentContext.theme.tokens, TextLayoutEngine, AlarmHtmlFitChrome, HtmlWidgetUtils
+ * Depends: componentContext.theme.tokens, TextLayoutEngine, AlarmHtmlFitChrome, HtmlWidgetUtils, HtmlMeasureUtils, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,77 +12,8 @@
 
   const SECONDARY_SCALE = 0.8;
   const CONTENT_PAD_X_RATIO = 0.03;
-  const MEASURE_CTX_KEY = "__dyniAlarmMeasureCtx";
   const FIT_CACHE_KEY = "__dyniAlarmHtmlFitCache";
-  function toObject(value) {
-    return value && typeof value === "object" ? value : {};
-  }
-
-  function toText(value) {
-    return value == null ? "" : String(value);
-  }
-
-  function parseFontPx(font) {
-    const source = String(font || "");
-    const match = source.match(/(\d+(?:\.\d+)?)px/);
-    return match ? Number(match[1]) : 12;
-  }
-
-  function createApproximateMeasureContext() {
-    return {
-      font: "700 12px sans-serif",
-      measureText: function (text) {
-        const px = Math.max(1, parseFontPx(this.font));
-        return { width: String(text).length * px * 0.56 };
-      }
-    };
-  }
-
-  function resolveMeasureContext(hostContext, targetEl) {
-    const store = hostContext && typeof hostContext === "object" ? hostContext : null;
-    if (store && store[MEASURE_CTX_KEY]) {
-      return store[MEASURE_CTX_KEY];
-    }
-
-    const ownerDocument = targetEl && targetEl.ownerDocument
-      ? targetEl.ownerDocument
-      : (typeof document !== "undefined" ? document : null);
-    let measureCtx = null;
-    if (ownerDocument && typeof ownerDocument.createElement === "function") {
-      const probe = ownerDocument.createElement("canvas");
-      if (probe && typeof probe.getContext === "function") {
-        measureCtx = probe.getContext("2d");
-      }
-    }
-    if (!measureCtx) {
-      measureCtx = createApproximateMeasureContext();
-    }
-    if (store) {
-      store[MEASURE_CTX_KEY] = measureCtx;
-    }
-    return measureCtx;
-  }
-
-  function resolveFitCache(hostContext) {
-    const store = hostContext && typeof hostContext === "object" ? hostContext : null;
-    if (!store) {
-      return null;
-    }
-    if (!store[FIT_CACHE_KEY] || typeof store[FIT_CACHE_KEY] !== "object") {
-      store[FIT_CACHE_KEY] = { signature: "", result: null };
-    }
-    return store[FIT_CACHE_KEY];
-  }
-
-  function toFontStyle(px, htmlUtils) {
-    const n = htmlUtils.toFiniteNumber(px);
-    return n > 0 ? ("font-size:" + Math.max(1, Math.floor(n)) + "px;") : "";
-  }
-
-  function toStyleText(colorKey, value) {
-    const color = toText(value).trim();
-    return color ? (colorKey + ":" + color + ";") : "";
-  }
+  let toObject;
 
   function computeContentPadX(width, height) {
     return Math.max(2, Math.floor(Math.min(width, height) * CONTENT_PAD_X_RATIO));
@@ -193,9 +124,11 @@
 
   function create(def, componentContext) {
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const textLayout = componentContext.components.require("TextLayoutEngine");
     const themeResolver = componentContext.theme.tokens;
     const chromeApi = componentContext.components.require("AlarmHtmlFitChrome");
+    toObject = componentContext.components.require("ValueMath").toObject;
 
     function compute(args) {
       const cfg = args || {};
@@ -209,12 +142,12 @@
       const rootEl = componentContext.dom.requirePluginRoot(targetEl);
       const theme = themeResolver.resolveForRoot(rootEl);
       const tokens = resolveThemeColors(theme);
-      const measureCtx = resolveMeasureContext(cfg.hostContext, targetEl);
+      const measureCtx = htmlMeasureUtils.resolveMeasureContext(cfg.hostContext, targetEl);
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
         return null;
       }
 
-      const fitCache = resolveFitCache(cfg.hostContext);
+      const fitCache = htmlMeasureUtils.resolveFitCache(cfg.hostContext, FIT_CACHE_KEY);
       const font = theme && theme.font && typeof theme.font === "object" ? theme.font : null;
       if (!font) {
         return null;
@@ -262,8 +195,8 @@
         labelWeight: labelWeight
       }, textLayout, htmlUtils);
 
-      const activeBackgroundStyle = model.showActiveBackground === true ? toStyleText("background-color", tokens.bg) : "";
-      const activeForegroundStyle = model.state === "active" ? toStyleText("color", tokens.fg) : "";
+      const activeBackgroundStyle = model.showActiveBackground === true ? htmlUtils.toStyleText("background-color", tokens.bg) : "";
+      const activeForegroundStyle = model.state === "active" ? htmlUtils.toStyleText("color", tokens.fg) : "";
       const chrome = layout.contentRect.chrome;
       const shellStyle = chromeApi.buildShellStyle(chrome);
       const accentStyle = chromeApi.buildAccentStyle(model, chrome, tokens);
@@ -271,8 +204,8 @@
         mode: layout.mode,
         captionPx: modeFit.captionPx,
         valuePx: modeFit.valuePx,
-        captionStyle: toFontStyle(modeFit.captionPx, htmlUtils),
-        valueStyle: toFontStyle(modeFit.valuePx, htmlUtils),
+        captionStyle: htmlUtils.toFontStyle(modeFit.captionPx),
+        valueStyle: htmlUtils.toFontStyle(modeFit.valuePx),
         shellStyle: shellStyle,
         accentStyle: accentStyle,
         activeBackgroundStyle: activeBackgroundStyle,

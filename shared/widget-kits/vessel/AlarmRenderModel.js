@@ -1,7 +1,7 @@
 /**
  * Module: AlarmRenderModel - Pure semantic display model for vessel alarm HTML
  * Documentation: documentation/widgets/alarm.md
- * Depends: HtmlWidgetUtils
+ * Depends: HtmlWidgetUtils, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,9 +13,8 @@
   const DEFAULT_CAPTION = "ALARM";
   const DEFAULT_IDLE_VALUE = "NONE";
 
-  function toObject(value) {
-    return value && typeof value === "object" ? value : {};
-  }
+  let toObject;
+  let toOptionalFiniteNumber;
 
   function readText(props, key, defaultValue) {
     if (Object.prototype.hasOwnProperty.call(props, key)) {
@@ -25,7 +24,7 @@
     return defaultValue;
   }
 
-  function resolveInteractionState(props, state, htmlUtils) {
+  function resolveAlarmInteractionState(props, state, htmlUtils) {
     if (htmlUtils.isEditingMode(props)) {
       return "passive";
     }
@@ -37,18 +36,11 @@
       : "passive";
   }
 
-  function toOptionalFiniteNumber(value, htmlUtils) {
-    if (value == null) {
-      return undefined;
-    }
-    if (typeof value === "string" && value.trim() === "") {
-      return undefined;
-    }
-    return htmlUtils.toFiniteNumber(value);
-  }
-
   function create(def, componentContext) {
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const valueMath = componentContext.components.require("ValueMath");
+    toObject = valueMath.toObject;
+    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
     function buildModel(args) {
       const cfg = args || {};
@@ -59,7 +51,7 @@
       const idleValueText = DEFAULT_IDLE_VALUE;
       const activeValueText = readText(domain, "alarmText", "");
       const valueText = state === "active" ? activeValueText : idleValueText;
-      const interactionState = resolveInteractionState(props, state, htmlUtils);
+      const interactionState = resolveAlarmInteractionState(props, state, htmlUtils);
 
       return {
         state: state,
@@ -78,8 +70,8 @@
         showHotspot: interactionState === "dispatch",
         interactionState: interactionState,
         canDispatch: interactionState === "dispatch",
-        ratioThresholdNormal: toOptionalFiniteNumber(props.ratioThresholdNormal, htmlUtils),
-        ratioThresholdFlat: toOptionalFiniteNumber(props.ratioThresholdFlat, htmlUtils)
+        ratioThresholdNormal: toOptionalFiniteNumber(props.ratioThresholdNormal),
+        ratioThresholdFlat: toOptionalFiniteNumber(props.ratioThresholdFlat)
       };
     }
 

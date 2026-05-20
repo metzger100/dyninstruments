@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetMarkup - Pure HTML assembly owner for AIS target renderer output
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: StateScreenMarkup
+ * Depends: StateScreenMarkup, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,29 +10,8 @@
 }(this, function () {
   "use strict";
 
-  function toObject(value) {
-    return value && typeof value === "object" ? value : {};
-  }
-
-  function toText(value) {
-    return value == null ? "" : String(value);
-  }
-
-  function joinStyles() {
-    const parts = [];
-    for (let i = 0; i < arguments.length; i += 1) {
-      const value = arguments[i];
-      if (value == null) {
-        continue;
-      }
-      const text = String(value).trim();
-      if (!text) {
-        continue;
-      }
-      parts.push(text);
-    }
-    return parts.join("");
-  }
+  let toObject;
+  let toText;
 
   function renderMetric(args) {
     const cfg = args || {};
@@ -79,7 +58,7 @@
       + htmlUtils.escapeHtml(toText(metric.captionText))
       + "</div>"
       + '<div class="dyni-ais-target-metric-value-row"'
-      + htmlUtils.toStyleAttr(joinStyles(metricGeometry.valueRowStyle, metricFit.valueRowStyle))
+      + htmlUtils.toStyleAttr(htmlUtils.joinStyles(metricGeometry.valueRowStyle, metricFit.valueRowStyle))
       + ">"
       + '<span class="dyni-ais-target-metric-value-text' + valueClass + '"'
       + htmlUtils.toStyleAttr(metricFit.valueStyle)
@@ -143,6 +122,9 @@
 
   function create(def, componentContext) {
     const stateScreenMarkup = componentContext.components.require("StateScreenMarkup");
+    const valueMath = componentContext.components.require("ValueMath");
+    toObject = valueMath.toObject;
+    toText = valueMath.toText;
 
     function render(args) {
       const cfg = args || {};
@@ -156,7 +138,7 @@
           kind: model.kind,
           label: toText(model.stateLabel),
           wrapperClasses: wrapperClasses,
-          extraAttrs: 'data-dyni-action="ais-target-open"' + htmlUtils.toStyleAttr(joinStyles(model.wrapperStyle, geometry.wrapperStyle)),
+          extraAttrs: 'data-dyni-action="ais-target-open"' + htmlUtils.toStyleAttr(htmlUtils.joinStyles(model.wrapperStyle, geometry.wrapperStyle)),
           htmlUtils: htmlUtils,
           shellRect: cfg.shellRect,
           fontFamily: cfg.fontFamily,
@@ -169,7 +151,7 @@
         : "";
       const accentHtml = model.hasAccent === true
         ? ('<div class="dyni-ais-target-state-accent"'
-          + htmlUtils.toStyleAttr(joinStyles(geometry.accentStyle, fit.accentStyle))
+          + htmlUtils.toStyleAttr(htmlUtils.joinStyles(geometry.accentStyle, fit.accentStyle))
           + "></div>")
         : "";
 
@@ -178,7 +160,7 @@
       return ""
         + '<div class="' + wrapperClasses.join(" ") + '"'
         + ' data-dyni-action="ais-target-open"'
-        + htmlUtils.toStyleAttr(joinStyles(model.wrapperStyle, geometry.wrapperStyle))
+        + htmlUtils.toStyleAttr(htmlUtils.joinStyles(model.wrapperStyle, geometry.wrapperStyle))
         + ">"
         + accentHtml
         + hotspotHtml

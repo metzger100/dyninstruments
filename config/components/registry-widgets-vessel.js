@@ -24,7 +24,7 @@
       js: BASE + "shared/widget-kits/vessel/AlarmRenderModel.js",
       css: undefined,
       globalKey: "DyniAlarmRenderModel",
-      deps: ["HtmlWidgetUtils"]
+      deps: ["HtmlWidgetUtils", "ValueMath"]
   };
 
   w.AlarmTextHtmlWidget = {
@@ -32,14 +32,14 @@
       css: undefined,
       shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css"],
       globalKey: "DyniAlarmTextHtmlWidget",
-      deps: ["AlarmHtmlFit", "HtmlWidgetUtils", "AlarmRenderModel", "AlarmMarkup"]
+      deps: ["AlarmHtmlFit", "HtmlWidgetUtils", "AlarmRenderModel", "AlarmMarkup", "ValueMath"]
   };
 
   w.AlarmMarkup = {
       js: BASE + "shared/widget-kits/vessel/AlarmMarkup.js",
       css: undefined,
       globalKey: "DyniAlarmMarkup",
-      deps: ["HtmlWidgetUtils"]
+      deps: ["HtmlWidgetUtils", "ValueMath"]
   };
 
   w.PositionCoordinateWidget = {

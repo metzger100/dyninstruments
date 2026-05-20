@@ -10,11 +10,6 @@
 }(this, function () {
   "use strict";
 
-  function resolveSurfacePolicy(props) {
-    const p = props && typeof props === "object" ? props : null;
-    return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
-  }
-
   function resolveEventIndex(ev) {
     const target = ev && ev.target;
     if (!target || typeof target.closest !== "function") {
@@ -52,7 +47,7 @@
     const themeResolver = componentContext.theme.tokens;
 
     function buildModel(props, shellRect, scrollbarGutterPx) {
-      const surfacePolicy = resolveSurfacePolicy(props);
+      const surfacePolicy = htmlUtils.resolveSurfacePolicy(props);
       const viewportHeight = props && props.viewportHeight;
       return renderModel.buildModel({
         props: props,
@@ -95,7 +90,7 @@
             return;
           }
 
-          const policy = resolveSurfacePolicy(lastProps);
+          const policy = htmlUtils.resolveSurfacePolicy(lastProps);
           const routePointActions = policy && policy.actions ? policy.actions.routePoints : null;
           if (!routePointActions || typeof routePointActions.activate !== "function") {
             return;

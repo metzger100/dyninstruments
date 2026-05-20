@@ -1,7 +1,7 @@
 /**
  * Module: LinearGaugeEngine - Shared renderer pipeline for linear gauge widgets
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: GaugeToolkit, CanvasLayerCache, LinearCanvasPrimitives, LinearGaugeEngineDrawing, LinearGaugeMath, LinearGaugeLayout, LinearGaugeTextLayout, LinearGaugeEngineSupport, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
+ * Depends: GaugeToolkit, CanvasLayerCache, LinearCanvasPrimitives, LinearGaugeEngineDrawing, LinearGaugeMath, LinearGaugeLayout, LinearGaugeTextLayout, LinearGaugeEngineSupport, TextLayoutScaleHelpers, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -28,6 +28,7 @@
     const layoutApi = componentContext.components.require("LinearGaugeLayout");
     const textLayout = componentContext.components.require("LinearGaugeTextLayout");
     const engineSupport = componentContext.components.require("LinearGaugeEngineSupport");
+    const scaleHelpers = componentContext.components.require("TextLayoutScaleHelpers");
     const stableDigits = componentContext.components.require("StableDigits");
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
@@ -38,18 +39,6 @@
     function resolveSurface(canvas) {
       const setup = componentContext.canvas.setupCanvas(canvas);
       return setup && setup.W && setup.H && setup.ctx ? setup : null;
-    }
-
-    function resolveTextFillScale(responsive) {
-      const scale = Number(responsive && responsive.textFillScale);
-      return Number.isFinite(scale) && scale > 0 ? scale : 1;
-    }
-
-    function resolveIntegerWidth(textValue, axisMax, minWidth) {
-      const match = String(textValue).match(/^\s*[+-]?(\d+)/);
-      const textDigits = match ? match[1].length : 0;
-      const axisDigits = Math.max(1, String(Math.floor(Math.abs(Number(axisMax) || 0))).length);
-      return Math.max(minWidth, textDigits, axisDigits);
     }
 
     function splitTextBoxRows(box, secScale) {
@@ -151,7 +140,7 @@
           responsive: insets.responsive,
           layoutConfig: layoutCfg
         });
-        const textFillScale = resolveTextFillScale(layout.responsive);
+        const textFillScale = scaleHelpers.resolveTextFillScale(layout.responsive);
         const range = value.normalizeRange(p[rangeProps.min], p[rangeProps.max], rangeDefaults.min, rangeDefaults.max);
         const raw = (typeof p.value !== "undefined") ? p.value : p[cfg.rawValueKey];
         const unit = String(hasOwn.call(p, "unit") ? p.unit : unitDefault).trim();
@@ -174,7 +163,7 @@
         const valueRawText = display.text.trim() || p.default;
         const valueText = stableDigitsEnabled
           ? stableDigits.normalize(valueRawText, {
-            integerWidth: resolveIntegerWidth(valueRawText, axis.max, 2),
+            integerWidth: stableDigits.resolveIntegerWidth(valueRawText, 2, axis.max),
             reserveSignSlot: true
           }).padded
           : valueRawText;

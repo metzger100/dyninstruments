@@ -40,7 +40,7 @@
     js: BASE + "shared/widget-kits/state/StateScreenTextFit.js",
     css: undefined,
     globalKey: "DyniStateScreenTextFit",
-    deps: ["ValueMath"]
+    deps: ["ValueMath", "HtmlWidgetUtils", "HtmlMeasureUtils", "CanvasTextFitting"]
   };
 
   sf.StateScreenMarkup = {
@@ -54,7 +54,7 @@
     js: BASE + "shared/widget-kits/state/StateScreenCanvasOverlay.js",
     css: undefined,
     globalKey: "DyniStateScreenCanvasOverlay",
-    deps: ["StateScreenLabels"]
+    deps: ["StateScreenLabels", "CanvasTextFitting"]
   };
 
   sf.HtmlWidgetUtils = {
@@ -73,7 +73,8 @@
   sf.CanvasLayerCache = {
     js: BASE + "shared/widget-kits/canvas/CanvasLayerCache.js",
     css: undefined,
-    globalKey: "DyniCanvasLayerCache"
+    globalKey: "DyniCanvasLayerCache",
+    deps: ["ValueMath"]
   };
 
   sf.SpringEasing = {

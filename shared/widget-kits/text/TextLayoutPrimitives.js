@@ -13,16 +13,8 @@
   function create(def, componentContext) {
     const text = componentContext.components.require("CanvasTextLayout");
 
-    function resolveFamily(family, options) {
-      const opts = options && typeof options === "object" ? options : null;
-      if (!opts || opts.useMono !== true) {
-        return family;
-      }
-      return opts.monoFamily || family;
-    }
-
     function primitiveSetFont(ctx, px, weight, family, options) {
-      text.setFont(ctx, px, weight, resolveFamily(family, options));
+      text.setFont(ctx, px, weight, text.resolveFamily(family, options));
     }
 
     function fitSingleLineBinary(args) {

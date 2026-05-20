@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Unit Editable Utils - Shared generators for formatter-token and unit-label editables
  * Documentation: documentation/architecture/component-system.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, shared/unit-format-families.js
+ * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, shared/unit-format-families.js, ValueMath
  */
 (function (root) {
   "use strict";
@@ -12,6 +12,15 @@
   const makeKindCondition = shared.makeKindCondition;
   const kindMaps = shared.kindMaps;
   const catalog = shared.unitFormatFamilies;
+  const valueMathModule = root.DyniComponents && root.DyniComponents.DyniValueMath;
+  if (!valueMathModule || typeof valueMathModule.create !== "function") {
+    throw new Error("dyninstruments: shared/widget-kits/value/ValueMath.js must load before config/shared/unit-editable-utils.js");
+  }
+  const valueMath = valueMathModule.create();
+  if (!valueMath || typeof valueMath.toText !== "function") {
+    throw new Error("dyninstruments: ValueMath.toText must exist before config/shared/unit-editable-utils.js");
+  }
+  const toText = valueMath.toText;
 
   if (!kindMaps || typeof kindMaps !== "object") {
     throw new Error("dyninstruments: kind-defaults.js must load before config/shared/unit-editable-utils.js");
@@ -19,10 +28,6 @@
 
   if (!catalog || typeof catalog !== "object" || !catalog.families || !catalog.metricBindings) {
     throw new Error("dyninstruments: shared/unit-format-families.js must load before config/shared/unit-editable-utils.js");
-  }
-
-  function toText(value) {
-    return value == null ? "" : String(value);
   }
 
   function toConditionList(condition) {

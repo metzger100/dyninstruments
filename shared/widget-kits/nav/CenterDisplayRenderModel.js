@@ -1,7 +1,7 @@
 /**
  * Module: CenterDisplayRenderModel - Display-state builder for center-display canvas renderer
  * Documentation: documentation/widgets/center-display.md
- * Depends: StableDigits, UnitAwareFormatter
+ * Depends: StableDigits, UnitAwareFormatter, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,13 +12,8 @@
 
   const DEGREE_UNIT = "\u00b0";
 
-  function trimString(value) {
-    return value == null ? "" : String(value).trim();
-  }
-
-  function appendUnit(text, unit, defaultText) {
-    return (!unit || text === defaultText) ? text : text + unit;
-  }
+  let trimText;
+  let appendUnit;
 
   function computeMeasurementHints(args) {
     const cfg = args || {};
@@ -110,6 +105,9 @@
   function create(def, componentContext) {
     const stableDigits = componentContext.components.require("StableDigits");
     const unitFormatter = componentContext.components.require("UnitAwareFormatter");
+    const valueMath = componentContext.components.require("ValueMath");
+    trimText = valueMath.trimText;
+    appendUnit = valueMath.appendUnit;
 
     function formatCoordinate(point, axis, defaultText) {
       const raw = point && axis === "lat" ? point.lat : point && point.lon;
@@ -142,37 +140,43 @@
       if (measureRelation) {
         rows.push({
           id: "measure",
-          caption: trimString(captions.measure),
-          unit: trimString(units.measure),
-          formatUnit: trimString(formatTokens.measure),
+          caption: trimText(captions.measure),
+          unit: trimText(units.measure),
+          formatUnit: trimText(formatTokens.measure),
           course: measureRelation.course,
           distance: measureRelation.distance
         });
       }
       rows.push({
         id: "marker",
-        caption: trimString(captions.marker),
-        unit: trimString(units.marker),
-        formatUnit: trimString(formatTokens.marker),
+        caption: trimText(captions.marker),
+        unit: trimText(units.marker),
+        formatUnit: trimText(formatTokens.marker),
         course: display.marker ? display.marker.course : undefined,
         distance: display.marker ? display.marker.distance : undefined
       });
       rows.push({
         id: "boat",
-        caption: trimString(captions.boat),
-        unit: trimString(units.boat),
-        formatUnit: trimString(formatTokens.boat),
+        caption: trimText(captions.boat),
+        unit: trimText(units.boat),
+        formatUnit: trimText(formatTokens.boat),
         course: display.boat ? display.boat.course : undefined,
         distance: display.boat ? display.boat.distance : undefined
       });
 
       return {
-        positionCaption: trimString(captions.position),
+        positionCaption: trimText(captions.position),
         latText: formatCoordinate(position, "lat", defaultText),
         lonText: formatCoordinate(position, "lon", defaultText),
         rows: rows.map(function (row) {
-          const courseRawText = appendUnit(formatCourse(row.course, defaultText), DEGREE_UNIT, defaultText);
-          const distanceRawText = appendUnit(formatDistance(row.distance, row.formatUnit, defaultText), row.unit, defaultText);
+          const courseBaseText = formatCourse(row.course, defaultText);
+          const distanceBaseText = formatDistance(row.distance, row.formatUnit, defaultText);
+          const courseRawText = courseBaseText === defaultText
+            ? courseBaseText
+            : appendUnit(courseBaseText, DEGREE_UNIT, defaultText);
+          const distanceRawText = distanceBaseText === defaultText
+            ? distanceBaseText
+            : appendUnit(distanceBaseText, row.unit, defaultText);
           const courseStable = stableDigitsEnabled
             ? stableDigits.normalize(courseRawText, {
               integerWidth: stableDigits.resolveIntegerWidth(courseRawText, 3),

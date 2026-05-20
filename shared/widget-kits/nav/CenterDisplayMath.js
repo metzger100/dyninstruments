@@ -112,7 +112,7 @@
 
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
-    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
+    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
     return {
       id: "CenterDisplayMath",

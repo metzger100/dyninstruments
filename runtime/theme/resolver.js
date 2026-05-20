@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Theme Resolver Runtime - Plugin-wide theme token resolver
  * Documentation: documentation/shared/theme-tokens.md
- * Depends: runtime/theme/model.js
+ * Depends: runtime/theme/model.js, ValueMath
  */
 (function (root) {
   "use strict";
@@ -9,9 +9,15 @@
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
 
-  function toObject(value) {
-    return value && typeof value === "object" ? value : null;
+  const valueMathModule = root.DyniComponents && root.DyniComponents.DyniValueMath;
+  if (!valueMathModule || typeof valueMathModule.create !== "function") {
+    throw new Error("ThemeResolver runtime: DyniValueMath module is required before resolver bootstrap");
   }
+  const valueMath = valueMathModule.create();
+  if (!valueMath || typeof valueMath.toObject !== "function") {
+    throw new Error("ThemeResolver runtime: ValueMath.toObject is required before resolver bootstrap");
+  }
+  const toObject = valueMath.toObject;
 
   function setByPath(target, pathSegments, value) {
     let cursor = target;
@@ -164,7 +170,7 @@
   }
 
   runtime.createThemeResolver = function createThemeResolver(themeModel, options) {
-    const opts = toObject(options) || {};
+    const opts = toObject(options);
     const model = themeModel;
     let themeMetadata = null;
     let rootResolutionCache = new WeakMap();

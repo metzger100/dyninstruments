@@ -1,7 +1,7 @@
 /**
  * Module: ResponsiveScaleProfile - Shared minDim-based compaction profile for layout owners
  * Documentation: documentation/shared/responsive-scale-profile.md
- * Depends: none
+ * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,18 +13,8 @@
   const RESPONSIVE_MIN_DIM = 80;
   const RESPONSIVE_DIM_RANGE = 100;
 
-  // dyni-lint-disable-next-line duplicate-functions -- Small local clamp keeps this zero-dependency profile module self-contained.
-  function clampNumber(value, minValue, maxValue, defaultValue) {
-    const n = Number(value);
-    if (!Number.isFinite(n) || value == null || (typeof value === "string" && value.trim() === "")) {
-      return defaultValue;
-    }
-    return Math.max(minValue, Math.min(maxValue, n));
-  }
-
-  function lerp(from, to, t) {
-    return from + ((to - from) * t);
-  }
+  let clampNumber;
+  let lerp;
 
   function createScaleMap(spec) {
     const cfg = (spec && typeof spec === "object") ? spec : {};
@@ -38,7 +28,10 @@
     return out;
   }
 
-  function create() {
+  function create(def, componentContext) {
+    const valueMath = componentContext.components.require("ValueMath");
+    clampNumber = valueMath.clampNumber;
+    lerp = valueMath.lerp;
     function computeProfile(W, H, spec) {
       const minDim = Math.max(1, Math.min(Number(W) || 0, Number(H) || 0));
       const t = clampNumber((minDim - RESPONSIVE_MIN_DIM) / RESPONSIVE_DIM_RANGE, 0, 1, 0);

@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteLayout - Responsive measurement geometry owner for the edit-route HTML renderer
  * Documentation: documentation/widgets/edit-route.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, EditRouteLayoutMath, EditRouteLayoutGeometry
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, EditRouteLayoutMath, EditRouteLayoutGeometry, HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -54,10 +54,12 @@
 
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
-    const makeRect = componentContext.components.require("LayoutRectMath").makeRect;
+    const rectApi = componentContext.components.require("LayoutRectMath");
+    const makeRect = rectApi.makeRect;
     const mathApi = componentContext.components.require("EditRouteLayoutMath");
     const geometryApi = componentContext.components.require("EditRouteLayoutGeometry");
-    const toOptionalFiniteNumber = mathApi.toOptionalFiniteNumber || mathApi.toFiniteNumber;
+    const toPx = componentContext.components.require("HtmlWidgetUtils").toPx;
+    const toOptionalFiniteNumber = mathApi.toOptionalFiniteNumber;
 
     function computeVerticalShellProfile(args) {
       const cfg = args || {};
@@ -164,11 +166,6 @@
       );
     }
 
-    function toPx(value) {
-      const px = Math.max(0, Math.floor(mathApi.clampNumber(value, 0, Number.MAX_SAFE_INTEGER, 0)));
-      return String(px) + "px";
-    }
-
     function createMetricTile(tileRect, insets, responsive, options) {
       const opts = options || {};
       const unitPlacement = Object.prototype.hasOwnProperty.call(opts, "unitPlacement")
@@ -228,16 +225,16 @@
     }
 
     function computeFlatMetricsLayout(metricsRect, insets, responsive, out, metricHasUnit) {
-      const singleRowTiles = mathApi.splitRow(metricsRect, insets.gap, 4, makeRect);
+      const singleRowTiles = rectApi.splitRow(metricsRect, insets.gap, 4, rectApi.makeRect);
       const minTileWidth = Math.max(1, FLAT_METRIC_MIN_TILE_WIDTH);
       const canUseTwoRows = metricsRect.h >= FLAT_TWO_ROW_MIN_METRICS_HEIGHT;
       const useTwoRows = canUseTwoRows && singleRowTiles[0].w < minTileWidth;
       let tiles;
 
       if (useTwoRows) {
-        const rows = mathApi.splitStack(metricsRect, insets.gap, 2, makeRect);
-        tiles = mathApi.splitRow(rows[0], insets.gap, 2, makeRect)
-          .concat(mathApi.splitRow(rows[1], insets.gap, 2, makeRect));
+        const rows = rectApi.splitStack(metricsRect, insets.gap, 2, rectApi.makeRect);
+        tiles = rectApi.splitRow(rows[0], insets.gap, 2, rectApi.makeRect)
+          .concat(rectApi.splitRow(rows[1], insets.gap, 2, rectApi.makeRect));
         out.flatMetricRows = 2;
         out.flatMetricColumns = 2;
       } else {
@@ -377,9 +374,9 @@
         out.nameBarRect = makeRect(contentRect.x, contentRect.y, contentRect.w, nameHeight);
 
         if (mode === "normal") {
-          const rows = mathApi.splitStack(metricsRect, insets.gap, 2, makeRect);
-          const firstRow = mathApi.splitRow(rows[0], insets.gap, 2, makeRect);
-          const secondRow = mathApi.splitRow(rows[1], insets.gap, 2, makeRect);
+          const rows = rectApi.splitStack(metricsRect, insets.gap, 2, rectApi.makeRect);
+          const firstRow = rectApi.splitRow(rows[0], insets.gap, 2, rectApi.makeRect);
+          const secondRow = rectApi.splitRow(rows[1], insets.gap, 2, rectApi.makeRect);
           out.metricBoxes.pts = createMetricTile(firstRow[0], insets, insets.responsive, {
             unitPlacement: "none"
           });
@@ -393,7 +390,7 @@
             unitPlacement: "none"
           });
         } else {
-          const rows = mathApi.splitStack(metricsRect, insets.gap, 4, makeRect);
+          const rows = rectApi.splitStack(metricsRect, insets.gap, 4, rectApi.makeRect);
           out.metricBoxes.pts = createHighMetricRow(rows[0], insets, false);
           out.metricBoxes.dst = createHighMetricRow(rows[1], insets, metricHasUnit.dst);
           out.metricBoxes.rte = createHighMetricRow(rows[2], insets, metricHasUnit.rte);

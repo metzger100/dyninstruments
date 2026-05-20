@@ -36,6 +36,13 @@ describe("TextLayoutEngine", function () {
             if (!isFinite(num)) return Number(lo);
             return Math.max(Number(lo), Math.min(Number(hi), num));
           },
+          clampNumber(value, lo, hi, fallbackValue) {
+            const n = Number(value);
+            if (!Number.isFinite(n)) {
+              return Number(fallbackValue);
+            }
+            return Math.max(Number(lo), Math.min(Number(hi), n));
+          },
           computeMode(ratio, normal, flat) {
             if (ratio < normal) return "high";
             if (ratio > flat) return "flat";

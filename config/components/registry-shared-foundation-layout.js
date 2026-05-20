@@ -35,62 +35,64 @@
   sf.AisTargetLayoutMath = {
       js: BASE + "shared/widget-kits/nav/AisTargetLayoutMath.js",
       css: undefined,
-      globalKey: "DyniAisTargetLayoutMath"
+      globalKey: "DyniAisTargetLayoutMath",
+      deps: ["ValueMath"]
   };
 
   sf.AisTargetLayoutGeometry = {
       js: BASE + "shared/widget-kits/nav/AisTargetLayoutGeometry.js",
       css: undefined,
-      globalKey: "DyniAisTargetLayoutGeometry"
+      globalKey: "DyniAisTargetLayoutGeometry",
+      deps: ["HtmlWidgetUtils"]
   };
 
   sf.AlarmHtmlFitChrome = {
       js: BASE + "shared/widget-kits/vessel/AlarmHtmlFitChrome.js",
       css: undefined,
       globalKey: "DyniAlarmHtmlFitChrome",
-      deps: ["HtmlWidgetUtils", "AisTargetLayoutSizing"]
+      deps: ["HtmlWidgetUtils", "AisTargetLayoutSizing", "ValueMath"]
   };
 
   sf.AisTargetHtmlFit = {
       js: BASE + "shared/widget-kits/nav/AisTargetHtmlFit.js",
       css: undefined,
       globalKey: "DyniAisTargetHtmlFit",
-      deps: ["CanvasTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils", "TextFitMath"]
+      deps: ["CanvasTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils", "HtmlMeasureUtils", "ValueMath", "TextFitMath"]
   };
 
   sf.AlarmHtmlFit = {
       js: BASE + "shared/widget-kits/vessel/AlarmHtmlFit.js",
       css: undefined,
       globalKey: "DyniAlarmHtmlFit",
-      deps: ["AlarmHtmlFitChrome", "TextLayoutEngine", "HtmlWidgetUtils"]
+      deps: ["AlarmHtmlFitChrome", "TextLayoutEngine", "HtmlWidgetUtils", "HtmlMeasureUtils", "ValueMath"]
   };
 
   sf.ActiveRouteHtmlFit = {
       js: BASE + "shared/widget-kits/nav/ActiveRouteHtmlFit.js",
       css: undefined,
       globalKey: "DyniActiveRouteHtmlFit",
-      deps: ["CanvasTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils", "UnitAwareFormatter"]
+      deps: ["CanvasTextLayout", "TextTileLayout", "ActiveRouteLayout", "HtmlWidgetUtils", "HtmlMeasureUtils", "UnitAwareFormatter", "ValueMath"]
   };
 
   sf.ActiveRouteLayout = {
       js: BASE + "shared/widget-kits/nav/ActiveRouteLayout.js",
       css: undefined,
       globalKey: "DyniActiveRouteLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "ValueMath"]
   };
 
   sf.EditRouteLayout = {
       js: BASE + "shared/widget-kits/nav/EditRouteLayout.js",
       css: undefined,
       globalKey: "DyniEditRouteLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "EditRouteLayoutMath", "EditRouteLayoutGeometry"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "EditRouteLayoutMath", "EditRouteLayoutGeometry", "HtmlWidgetUtils"]
   };
 
   sf.EditRouteLayoutMath = {
       js: BASE + "shared/widget-kits/nav/EditRouteLayoutMath.js",
       css: undefined,
       globalKey: "DyniEditRouteLayoutMath",
-      deps: ["ValueMath"]
+      deps: ["ValueMath", "LayoutRectMath"]
   };
 
   sf.EditRouteLayoutGeometry = {
@@ -103,20 +105,22 @@
   sf.EditRouteHtmlFitSupport = {
       js: BASE + "shared/widget-kits/nav/EditRouteHtmlFitSupport.js",
       css: undefined,
-      globalKey: "DyniEditRouteHtmlFitSupport"
+      globalKey: "DyniEditRouteHtmlFitSupport",
+      deps: ["HtmlMeasureUtils", "HtmlWidgetUtils", "ValueMath"]
   };
 
   sf.EditRouteHtmlFit = {
       js: BASE + "shared/widget-kits/nav/EditRouteHtmlFit.js",
       css: undefined,
       globalKey: "DyniEditRouteHtmlFit",
-      deps: ["CanvasTextLayout", "TextTileLayout", "EditRouteLayout", "HtmlWidgetUtils", "TextFitMath", "EditRouteHtmlFitSupport"]
+      deps: ["CanvasTextLayout", "TextTileLayout", "EditRouteLayout", "HtmlWidgetUtils", "HtmlMeasureUtils", "TextFitMath", "EditRouteHtmlFitSupport", "ValueMath"]
   };
 
   sf.RoutePointsLayoutSizing = {
       js: BASE + "shared/widget-kits/nav/RoutePointsLayoutSizing.js",
       css: undefined,
-      globalKey: "DyniRoutePointsLayoutSizing"
+      globalKey: "DyniRoutePointsLayoutSizing",
+      deps: ["ValueMath"]
   };
 
   sf.RoutePointsRowGeometry = {
@@ -144,21 +148,21 @@
       js: BASE + "shared/widget-kits/nav/RoutePointsHtmlFit.js",
       css: undefined,
       globalKey: "DyniRoutePointsHtmlFit",
-      deps: ["CanvasTextLayout", "TextTileLayout", "RoutePointsLayout", "HtmlWidgetUtils", "RoutePointsInfoText"]
+      deps: ["CanvasTextLayout", "TextTileLayout", "RoutePointsLayout", "HtmlWidgetUtils", "HtmlMeasureUtils", "RoutePointsInfoText", "ValueMath"]
   };
 
   sf.MapZoomHtmlFit = {
       js: BASE + "shared/widget-kits/nav/MapZoomHtmlFit.js",
       css: undefined,
       globalKey: "DyniMapZoomHtmlFit",
-      deps: ["TextLayoutEngine", "HtmlWidgetUtils"]
+      deps: ["TextLayoutEngine", "HtmlWidgetUtils", "HtmlMeasureUtils", "ValueMath"]
   };
 
   sf.CenterDisplayLayout = {
       js: BASE + "shared/widget-kits/nav/CenterDisplayLayout.js",
       css: undefined,
       globalKey: "DyniCenterDisplayLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "ValueMath"]
   };
 
   sf.CenterDisplayMath = {
@@ -172,14 +176,14 @@
       js: BASE + "shared/widget-kits/nav/CenterDisplayRenderModel.js",
       css: undefined,
       globalKey: "DyniCenterDisplayRenderModel",
-      deps: ["StableDigits", "UnitAwareFormatter"]
+      deps: ["StableDigits", "UnitAwareFormatter", "ValueMath"]
   };
 
   sf.XteHighwayLayout = {
       js: BASE + "shared/widget-kits/xte/XteHighwayLayout.js",
       css: undefined,
       globalKey: "DyniXteHighwayLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "ValueMath"]
   };
 
   sf.XteHighwayPrimitives = {

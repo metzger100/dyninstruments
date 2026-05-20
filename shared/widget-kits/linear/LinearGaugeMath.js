@@ -10,13 +10,6 @@
 }(this, function () {
   "use strict";
 
-  function keyToText(value) {
-    if (typeof value === "string") {
-      return value;
-    }
-    return JSON.stringify(value);
-  }
-
   function mapValueToX(value, minV, maxV, x0, x1, doClamp, clampFn) {
     const denom = maxV - minV;
     if (
@@ -107,7 +100,7 @@
 
     return {
       id: "LinearGaugeMath",
-      keyToText: keyToText,
+      keyToText: valueMath.keyToText,
       clamp: valueMath.clamp,
       mapValueToX: function (value, minV, maxV, x0, x1, doClamp) {
         return mapValueToX(value, minV, maxV, x0, x1, doClamp, valueMath.clamp);

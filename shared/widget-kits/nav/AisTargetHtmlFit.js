@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetHtmlFit - Text-fit and accent-style owner for AIS target HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, AisTargetLayout, HtmlWidgetUtils, TextFitMath
+ * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, AisTargetLayout, HtmlWidgetUtils, HtmlMeasureUtils, ValueMath, TextFitMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,56 +10,12 @@
 }(this, function () {
   "use strict";
 
-  const MEASURE_CTX_KEY = "__dyniAisTargetTextMeasureCtx";
   const NAME_MAX_PX_RATIO = { flat: 0.52, normal: 0.78, high: 0.72 };
   const FRONT_MAX_PX_RATIO = { flat: 0.52, normal: 0.78, high: 0.75 };
   const METRIC_VALUE_MAX_PX_RATIO = 0.9;
   const METRIC_SECONDARY_TO_VALUE_RATIO = 0.8;
-  function toObject(value) { return value && typeof value === "object" ? value : {}; }
-  function toText(value) { return value == null ? "" : String(value); }
-  function parseFontPx(font) {
-    const source = String(font || "");
-    const match = source.match(/(\d+(?:\.\d+)?)px/);
-    return match ? Number(match[1]) : 12;
-  }
-  function createApproximateMeasureContext() {
-    return {
-      font: "700 12px sans-serif",
-      measureText: function (text) {
-        const px = Math.max(1, parseFontPx(this.font));
-        return { width: String(text).length * px * 0.56 };
-      }
-    };
-  }
-  function resolveMeasureContext(hostContext, targetEl) {
-    const ctxStore = hostContext && typeof hostContext === "object"
-      ? hostContext
-      : null;
-    const cached = ctxStore ? ctxStore[MEASURE_CTX_KEY] : null;
-    if (cached) {
-      return cached;
-    }
-
-    let ownerDocument = null;
-    if (targetEl && targetEl.ownerDocument) {
-      ownerDocument = targetEl.ownerDocument;
-    } else if (typeof document !== "undefined") {
-      ownerDocument = document;
-    }
-
-    let canvasContext = null;
-    if (ownerDocument && typeof ownerDocument.createElement === "function") {
-      const probe = ownerDocument.createElement("canvas");
-      if (probe && typeof probe.getContext === "function") {
-        canvasContext = probe.getContext("2d");
-      }
-    }
-    const resolved = canvasContext || createApproximateMeasureContext();
-    if (ctxStore) {
-      ctxStore[MEASURE_CTX_KEY] = resolved;
-    }
-    return resolved;
-  }
+  let toObject;
+  let toText;
   function resolveThemeTypography(componentContext, themeApi, targetEl) {
     const rootEl = componentContext.dom.requirePluginRoot(targetEl);
     const tokens = themeApi.resolveForRoot(rootEl);
@@ -69,53 +25,11 @@
       monoFamily: tokens.font.familyMono || tokens.font.family
     };
   }
-  function toStyle(px, htmlUtils) {
-    const n = htmlUtils.toFiniteNumber(px);
-    if (!(n > 0)) {
-      return "";
-    }
-    return "font-size:" + Math.max(1, Math.floor(n)) + "px;";
-  }
-  function measurePx(args, htmlUtils, tileLayout) {
-    const cfg = args || {};
-    const rect = cfg.rect;
-    if (!rect || !(rect.w > 0) || !(rect.h > 0)) {
-      return 0;
-    }
-    if (!cfg.text) {
-      return 0;
-    }
-    const explicitMaxPx = htmlUtils.toFiniteNumber(cfg.maxPx);
-    const requestedMaxPx = explicitMaxPx > 0
-      ? explicitMaxPx
-      : Math.max(1, Math.floor(rect.h * cfg.maxPxRatio));
-    const fit = tileLayout.measureFittedLine({
-      textApi: cfg.textApi,
-      ctx: cfg.ctx,
-      text: cfg.text,
-      maxW: Math.max(1, Math.floor(rect.w)),
-      maxH: Math.max(1, Math.floor(rect.h)),
-      maxPx: Math.max(1, Math.floor(requestedMaxPx)),
-      textFillScale: cfg.textFillScale,
-      family: cfg.family,
-      weight: cfg.weight
-    });
-    if (!fit) {
-      return null;
-    }
-    cfg.textApi.setFont(cfg.ctx, fit.px, cfg.weight, cfg.family);
-    return {
-      px: fit.px,
-      text: fit.text,
-      width: cfg.ctx.measureText(toText(cfg.text)).width
-    };
-  }
-  function measureStyle(args, htmlUtils, tileLayout) { return toStyle((measurePx(args, htmlUtils, tileLayout) || {}).px, htmlUtils); }
-  function selectMetricValueFit(args, htmlUtils, tileLayout) {
+  function selectMetricValueFit(args, htmlUtils, tileLayout, htmlMeasureUtils) {
     const cfg = args || {};
     const valueText = toText(cfg.valueText);
     const plainText = cfg.plainText == null ? valueText : toText(cfg.plainText);
-    const valueFit = measurePx({
+    const valueFit = htmlMeasureUtils.measurePx({
       rect: cfg.rect,
       text: valueText,
       maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
@@ -129,7 +43,7 @@
     if (!valueFit || !plainText || plainText === valueText || valueFit.width <= Math.max(1, Math.floor(cfg.rect.w)) + 0.01) {
       return { valueText: valueText, valuePx: valueFit && valueFit.px ? valueFit.px : 0 };
     }
-    const plainFit = measurePx({
+    const plainFit = htmlMeasureUtils.measurePx({
       rect: cfg.rect,
       text: plainText,
       maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
@@ -203,7 +117,11 @@
     const tileLayout = componentContext.components.require("TextTileLayout");
     const layoutApi = componentContext.components.require("AisTargetLayout");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const fitMath = componentContext.components.require("TextFitMath");
+    const valueMath = componentContext.components.require("ValueMath");
+    toObject = valueMath.toObject;
+    toText = valueMath.toText;
     function compute(args) {
       const cfg = args || {};
       const model = cfg.model || null;
@@ -213,7 +131,7 @@
         return null;
       }
       const typography = resolveThemeTypography(componentContext, theme, targetEl);
-      const measureCtx = resolveMeasureContext(cfg.hostContext, targetEl);
+      const measureCtx = htmlMeasureUtils.resolveMeasureContext(cfg.hostContext, targetEl);
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
         return null;
       }
@@ -245,7 +163,7 @@
       if (kind !== "data") {
         return out;
       }
-      out.nameStyle = measureStyle({
+      out.nameStyle = htmlMeasureUtils.measureStyle({
         rect: layout.nameRect,
         text: toText(model.nameText),
         maxPxRatio: resolveNameRatio(layout.mode),
@@ -256,7 +174,7 @@
         weight: valueWeight,
         textFillScale: textFillScale
       }, htmlUtils, tileLayout);
-      out.frontStyle = measureStyle({
+      out.frontStyle = htmlMeasureUtils.measureStyle({
         rect: layout.frontRect,
         text: toText(model.frontText),
         maxPxRatio: resolveFrontRatio(layout.mode),
@@ -287,7 +205,7 @@
             family: metricFamily,
             weight: valueWeight,
             textFillScale: textFillScale
-          }, htmlUtils, tileLayout);
+          }, htmlUtils, tileLayout, htmlMeasureUtils);
           const flatSecondaryMaxPx = fitMath.resolveSecondaryMaxPx({
             valuePx: flatValueFit.valuePx,
             valueRect: flatRects.valueRect,
@@ -296,7 +214,7 @@
           });
 
           out.metrics[id] = {
-            captionStyle: measureStyle({
+            captionStyle: htmlMeasureUtils.measureStyle({
               rect: flatRects.captionRect,
               text: toText(metric.captionText),
               maxPx: flatSecondaryMaxPx,
@@ -309,9 +227,9 @@
               textFillScale: 1
             }, htmlUtils, tileLayout),
             valueRowStyle: "",
-            valueStyle: toStyle(flatValueFit.valuePx, htmlUtils),
+            valueStyle: htmlMeasureUtils.toStyle(flatValueFit.valuePx, htmlUtils),
             valueText: flatValueFit.valueText,
-            unitStyle: measureStyle({
+            unitStyle: htmlMeasureUtils.measureStyle({
               rect: flatRects.unitRect,
               text: toText(metric.unitText),
               maxPx: flatSecondaryMaxPx,
@@ -342,7 +260,7 @@
           family: metricFamily,
           weight: valueWeight,
           textFillScale: textFillScale
-        }, htmlUtils, tileLayout);
+        }, htmlUtils, tileLayout, htmlMeasureUtils);
         const inlineSecondaryMaxPx = fitMath.resolveSecondaryMaxPx({
           valuePx: inlineValueFit.valuePx,
           valueRect: inlineValueRect,
@@ -351,7 +269,7 @@
         });
 
         out.metrics[id] = {
-          captionStyle: measureStyle({
+          captionStyle: htmlMeasureUtils.measureStyle({
             rect: inlineRects.labelRect,
             text: toText(metric.captionText),
             maxPx: inlineSecondaryMaxPx,
@@ -364,9 +282,9 @@
             textFillScale: 1
           }, htmlUtils, tileLayout),
           valueRowStyle: "",
-          valueStyle: toStyle(inlineValueFit.valuePx, htmlUtils),
+          valueStyle: htmlMeasureUtils.toStyle(inlineValueFit.valuePx, htmlUtils),
           valueText: inlineValueFit.valueText,
-          unitStyle: measureStyle({
+          unitStyle: htmlMeasureUtils.measureStyle({
             rect: inlineRects.unitRect,
             text: toText(metric.unitText),
             maxPx: inlineSecondaryMaxPx,

@@ -1,7 +1,7 @@
 /**
  * Module: CenterDisplayTextWidget - Responsive center-position renderer for the nav cluster
  * Documentation: documentation/widgets/center-display.md
- * Depends: componentContext.theme.tokens, TextLayoutEngine, CanvasTextLayout, TextTileLayout, CenterDisplayLayout, CenterDisplayMath, CenterDisplayStateAdapter, CenterDisplayRenderModel
+ * Depends: componentContext.theme.tokens, TextLayoutEngine, CanvasTextLayout, TextTileLayout, TextLayoutScaleHelpers, CenterDisplayLayout, CenterDisplayMath, CenterDisplayStateAdapter, CenterDisplayRenderModel
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,7 +10,7 @@
 }(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
-  function measureTextWidth(ctx, textApi, text, family, weight, px, frameWidthCache) {
+  function measureCachedTextWidth(ctx, textApi, text, family, weight, px, frameWidthCache) {
     textApi.setFont(ctx, Math.max(1, Math.floor(Number(px) || 0)), weight, family);
     const content = String(text || "");
     const cacheKey = String(ctx.font || "") + "\n" + content;
@@ -42,13 +42,6 @@
       return undefined;
     }
     return Math.max(minShare, Math.min(maxShare, n));
-  }
-  function resolveOpacity(value) {
-    const n = Number(value);
-    if (!Number.isFinite(n)) {
-      return 1;
-    }
-    return Math.max(0, Math.min(1, n));
   }
   function drawCenterPanel(layout, state, displayState, labelFamily, valueFamily, valueWeight, labelWeight, color) {
     const textFillScale = layout.responsive.textFillScale;
@@ -123,7 +116,7 @@
     const labelMaxPx = computeResponsiveLineMaxPx(rect, 0.58, textFillScale);
     const valueMaxPx = computeResponsiveLineMaxPx(rect, 0.66, textFillScale);
     const desiredLabelWidth = row.caption
-      ? measureTextWidth(
+      ? measureCachedTextWidth(
         state.ctx,
         state.radialText,
         row.caption,
@@ -133,7 +126,7 @@
         state.frameWidthCache
       )
       : 0;
-    const fullValueWidth = measureTextWidth(
+    const fullValueWidth = measureCachedTextWidth(
       state.ctx,
       state.radialText,
       row.fullValueText,
@@ -142,7 +135,7 @@
       valueMaxPx,
       state.frameWidthCache
     );
-    const compactValueWidth = measureTextWidth(
+    const compactValueWidth = measureCachedTextWidth(
       state.ctx,
       state.radialText,
       row.compactValueText,
@@ -216,6 +209,7 @@
     const text = componentContext.components.require("TextLayoutEngine");
     const radialText = componentContext.components.require("CanvasTextLayout");
     const tileLayout = componentContext.components.require("TextTileLayout");
+    const resolveOpacity = componentContext.components.require("TextLayoutScaleHelpers").resolveOpacity;
     const layoutApi = componentContext.components.require("CenterDisplayLayout");
     const math = componentContext.components.require("CenterDisplayMath");
     const centerDisplayStateAdapter = componentContext.components.require("CenterDisplayStateAdapter");
@@ -282,7 +276,7 @@
         valueWeight: valueWeight,
         labelWeight: labelWeight,
         frameWidthCache: frameWidthCache,
-        measureTextWidth: measureTextWidth,
+        measureTextWidth: measureCachedTextWidth,
         computeResponsiveLineMaxPx: computeResponsiveLineMaxPx,
         clampShare: clampShare
       });

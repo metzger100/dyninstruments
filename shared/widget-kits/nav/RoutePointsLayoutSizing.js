@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsLayoutSizing - Shared numeric helpers and header/marker sizing policy for route-points layout
  * Documentation: documentation/widgets/route-points.md
- * Depends: none
+ * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -22,14 +22,7 @@
   const MARKER_CELL_PADDING_X_MIN_PX = 1;
   const MARKER_CELL_PADDING_X_MAX_PX = 8;
 
-  // dyni-lint-disable-next-line duplicate-functions -- Layout owners intentionally keep a tiny local clamp helper for geometry config normalization.
-  function clampNumber(value, minValue, maxValue, defaultValue) {
-    const n = Number(value);
-    if (!Number.isFinite(n) || value == null || (typeof value === "string" && value.trim() === "")) {
-      return defaultValue;
-    }
-    return Math.max(minValue, Math.min(maxValue, n));
-  }
+  let clampNumber;
 
   function toCount(value) {
     // Internal row-count math intentionally collapses missing values to 0.
@@ -151,7 +144,8 @@
     return Math.max(existingHeaderHeight, floorHeight);
   }
 
-  function create() {
+  function create(def, componentContext) {
+    clampNumber = componentContext.components.require("ValueMath").clampNumber;
     return {
       id: "RoutePointsLayoutSizing",
       constants: {

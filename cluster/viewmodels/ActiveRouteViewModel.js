@@ -11,14 +11,12 @@
 }(this, function () {
   "use strict";
 
-  function trimString(value) {
-    return (typeof value === "string") ? value.trim() : "";
-  }
-
+  let trimText;
   let toOptionalFiniteNumber;
 
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
+    trimText = valueMath.trimText;
     toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
 
     function build(props, toolkit) {
@@ -26,7 +24,7 @@
       const cap = toolkit.cap;
       const unit = toolkit.unit;
       const num = toolkit.num || toOptionalFiniteNumber;
-      const routeName = trimString(p.activeRouteName);
+      const routeName = trimText(p.activeRouteName);
 
       return {
         routeName: routeName,

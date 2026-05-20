@@ -13,12 +13,11 @@
   function create(def, componentContext) {
     const layoutSizingApi = componentContext.components.require("AisTargetLayoutSizing");
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
-    const makeRect = componentContext.components.require("LayoutRectMath").makeRect;
+    const rectApi = componentContext.components.require("LayoutRectMath");
+    const makeRect = rectApi.makeRect;
     const geometryApi = componentContext.components.require("AisTargetLayoutGeometry");
     const layoutMath = componentContext.components.require("AisTargetLayoutMath");
     const clampNumber = layoutMath.clampNumber;
-    const splitStack = layoutMath.splitStack;
-    const splitRow = layoutMath.splitRow;
     const METRIC_ORDER = layoutSizingApi.constants.METRIC_ORDER;
     const FLAT_IDENTITY_SHARE = 0.26;
     const NORMAL_IDENTITY_BLOCK_SHARE = 0.5;
@@ -67,7 +66,7 @@
       identityHeight = Math.max(minIdentityHeight, Math.min(maxIdentityHeight, identityHeight));
       const metricsHeight = Math.max(1, contentRect.h - identityHeight - identityMetricsGap);
       const identityRect = makeRect(contentRect.x, contentRect.y, contentRect.w, identityHeight);
-      const identityRows = splitStack(identityRect, identityGap, 2, makeRect);
+      const identityRows = rectApi.splitStack(identityRect, identityGap, 2, rectApi.makeRect);
       return {
         identityRect: identityRect,
         nameRect: identityRows[0],
@@ -187,7 +186,7 @@
         );
         out.metricsRect = metricsRect;
 
-        fillStackedMetricBoxes(out, splitRow(metricsRect, insets.metricGridGap, 4, makeRect), insets.responsive);
+        fillStackedMetricBoxes(out, rectApi.splitRow(metricsRect, insets.metricGridGap, 4, rectApi.makeRect), insets.responsive);
         return finalize(out);
       }
 
@@ -215,9 +214,9 @@
         out.frontRect = equalIdentityLayout.frontRect;
         out.metricsRect = equalIdentityLayout.metricsRect;
 
-        const metricRows = splitStack(out.metricsRect, insets.metricGridGap, 2, makeRect);
-        const rowA = splitRow(metricRows[0], insets.metricGridGap, 2, makeRect);
-        const rowB = splitRow(metricRows[1], insets.metricGridGap, 2, makeRect);
+        const metricRows = rectApi.splitStack(out.metricsRect, insets.metricGridGap, 2, rectApi.makeRect);
+        const rowA = rectApi.splitRow(metricRows[0], insets.metricGridGap, 2, rectApi.makeRect);
+        const rowB = rectApi.splitRow(metricRows[1], insets.metricGridGap, 2, rectApi.makeRect);
         fillInlineMetricBoxes(out, [rowA[0], rowA[1], rowB[0], rowB[1]], insets.responsive, mode);
         return finalize(out);
       }
@@ -245,7 +244,7 @@
       out.frontRect = equalIdentityLayout.frontRect;
       out.metricsRect = equalIdentityLayout.metricsRect;
 
-      fillInlineMetricBoxes(out, splitStack(out.metricsRect, insets.metricGridGap, 4, makeRect), insets.responsive, mode);
+      fillInlineMetricBoxes(out, rectApi.splitStack(out.metricsRect, insets.metricGridGap, 4, rectApi.makeRect), insets.responsive, mode);
       return finalize(out);
     }
 

@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteHtmlFit - Shared text-fit model for ActiveRoute interactive HTML renderer
  * Documentation: documentation/widgets/active-route.md
- * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, ActiveRouteLayout, HtmlWidgetUtils, UnitAwareFormatter
+ * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, ActiveRouteLayout, HtmlWidgetUtils, HtmlMeasureUtils, UnitAwareFormatter, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,7 +14,6 @@
   const ROUTE_NAME_MAX_PX_RATIO_FLAT = 0.46;
   const ROUTE_NAME_MAX_PX_RATIO_HIGH = 0.54;
   const ROUTE_NAME_MAX_PX_RATIO_NORMAL = 0.66;
-  const MEASURE_CTX_KEY = "__dyniActiveRouteTextMeasureCtx";
   const FIT_CACHE_KEY = "__dyniActiveRouteHtmlFitCache";
 
   function ensureDisplayProps(props) {
@@ -46,22 +45,6 @@
     });
   }
 
-  function formatMetric(rawValue, formatter, formatterParameters, defaultText, unitFormatter) {
-    return unitFormatter.formatWithToken(
-      rawValue,
-      formatter,
-      Array.isArray(formatterParameters) && formatterParameters.length > 0 ? formatterParameters[0] : undefined,
-      defaultText
-    );
-  }
-
-  function textLength(value) {
-    if (value == null) {
-      return 0;
-    }
-    return String(value).length;
-  }
-
   function normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
     if (!stableDigitsEnabled) {
       return { padded: rawText, plain: rawText };
@@ -70,81 +53,6 @@
       integerWidth: stableDigits.resolveIntegerWidth(rawText, minWidth),
       reserveSignSlot: true
     });
-  }
-
-  function parseFontPx(font) {
-    const source = String(font || "");
-    const match = source.match(/(\d+(?:\.\d+)?)px/);
-    return match ? Number(match[1]) : 0;
-  }
-
-  function createApproximateMeasureContext() {
-    return {
-      font: "700 12px sans-serif",
-      measureText: function (text) {
-        const px = Math.max(1, parseFontPx(this.font) || 12);
-        return { width: String(text).length * px * 0.56 };
-      }
-    };
-  }
-
-  function resolveOwnerDocument(targetEl) {
-    if (targetEl && targetEl.ownerDocument) {
-      return targetEl.ownerDocument;
-    }
-    if (typeof document !== "undefined") {
-      return document;
-    }
-    return null;
-  }
-
-  function tryCreateCanvasMeasureContext(ownerDocument) {
-    if (!ownerDocument || typeof ownerDocument.createElement !== "function") {
-      return null;
-    }
-    const canvas = ownerDocument.createElement("canvas");
-    if (!canvas || typeof canvas.getContext !== "function") {
-      return null;
-    }
-    try {
-      return canvas.getContext("2d");
-    }
-    // dyni-lint-disable-next-line catch-fallback-without-suppression -- Canvas measurement context is a browser/jsdom boundary and may be unavailable.
-    catch (error) {
-      return null;
-    }
-  }
-
-  function resolveMeasureContext(hostContext, ownerDocument) {
-    const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
-    if (ctx && ctx[MEASURE_CTX_KEY]) {
-      return ctx[MEASURE_CTX_KEY];
-    }
-    const canvasMeasureCtx = tryCreateCanvasMeasureContext(ownerDocument);
-    const measureCtx = canvasMeasureCtx || createApproximateMeasureContext();
-    if (ctx) {
-      ctx[MEASURE_CTX_KEY] = measureCtx;
-    }
-    return measureCtx;
-  }
-
-  function resolveFitCache(hostContext) {
-    const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
-    if (!ctx) {
-      return null;
-    }
-    if (!ctx[FIT_CACHE_KEY] || typeof ctx[FIT_CACHE_KEY] !== "object") {
-      ctx[FIT_CACHE_KEY] = { signature: "", result: null };
-    }
-    return ctx[FIT_CACHE_KEY];
-  }
-
-  function toFontSizeStyle(px, htmlUtils) {
-    const n = htmlUtils.toFiniteNumber(px);
-    if (!(n > 0)) {
-      return "";
-    }
-    return "font-size:" + Math.max(1, Math.floor(n)) + "px;";
   }
 
   function resolveRouteNameMaxPxRatio(mode) {
@@ -219,27 +127,23 @@
     ]);
   }
 
-  function resolveMetricValueFamily(model, tokens, baseFamily) {
-    const font = tokens && tokens.font ? tokens.font : {};
-    if (model && model.stableDigitsEnabled === true) {
-      return font.familyMono || baseFamily || font.family || "";
-    }
-    return baseFamily || font.family || "";
-  }
-
   function create(def, componentContext) {
     const theme = componentContext.theme.tokens;
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const unitFormatter = componentContext.components.require("UnitAwareFormatter");
     const radialText = componentContext.components.require("CanvasTextLayout");
     const tileLayout = componentContext.components.require("TextTileLayout");
     const layoutApi = componentContext.components.require("ActiveRouteLayout");
+    const valueMath = componentContext.components.require("ValueMath");
 
-    function formatMetric(rawValue, formatter, formatterParameters, defaultText) {
+    function formatActiveRouteMetric(rawValue, formatter, formatterParameters, defaultText, placeholderNormalize) {
       return unitFormatter.formatWithToken(
         rawValue,
         formatter,
-        Array.isArray(formatterParameters) && formatterParameters.length > 0 ? formatterParameters[0] : undefined,
+        Array.isArray(formatterParameters) && formatterParameters.length > 0
+          ? formatterParameters[0]
+          : undefined,
         defaultText
       );
     }
@@ -259,22 +163,22 @@
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       const family = tokens.font.family;
-      const valueFamily = resolveMetricValueFamily(model, tokens, family);
+      const valueFamily = htmlUtils.resolveMetricValueFamily(model, tokens, family);
       const valueTextOptions = model.stableDigitsEnabled === true
         ? {
           useMono: true,
           monoFamily: tokens.font.familyMono || family
         }
         : null;
-      const ownerDocument = resolveOwnerDocument(targetEl);
-      const measureCtx = resolveMeasureContext(hostContext, ownerDocument);
+      const ownerDocument = htmlMeasureUtils.resolveOwnerDocument(targetEl);
+      const measureCtx = htmlMeasureUtils.resolveMeasureContext(hostContext, ownerDocument);
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
         return null;
       }
 
       const W = Math.max(1, Math.round(shellRect.width));
       const H = Math.max(1, Math.round(shellRect.height));
-      const fitCache = resolveFitCache(hostContext);
+      const fitCache = htmlMeasureUtils.resolveFitCache(hostContext, FIT_CACHE_KEY);
       const fitSignature = buildFitSignature({
         width: W,
         height: H,
@@ -383,9 +287,9 @@
           : null;
         metricValues[metric.id] = metricForFit.value;
         metricStyles[metric.id] = {
-          captionStyle: toFontSizeStyle(captionFit && captionFit.px, htmlUtils),
-          valueStyle: toFontSizeStyle(fit && fit.vPx, htmlUtils),
-          unitStyle: toFontSizeStyle(fit && fit.uPx, htmlUtils),
+          captionStyle: htmlUtils.toFontStyle(captionFit && captionFit.px),
+          valueStyle: htmlUtils.toFontStyle(fit && fit.vPx),
+          unitStyle: htmlUtils.toFontStyle(fit && fit.uPx),
           gapStyle: fit && fit.gap > 0
             ? "gap:" + Math.max(1, Math.floor(fit.gap)) + "px;"
             : ""
@@ -393,7 +297,7 @@
       }
 
       const out = {
-        routeNameStyle: toFontSizeStyle(nameFit && nameFit.px, htmlUtils),
+        routeNameStyle: htmlUtils.toFontStyle(nameFit && nameFit.px),
         metrics: metricStyles,
         metricValues: metricValues
       };
@@ -409,8 +313,8 @@
       compute: compute,
       ensureDisplayProps: ensureDisplayProps,
       resolveDisplayMode: resolveDisplayMode,
-      formatMetric: formatMetric,
-      textLength: textLength,
+      formatActiveRouteMetric: formatActiveRouteMetric,
+      textLength: valueMath.textLength,
       normalizeStableValue: normalizeStableValue
     };
   }

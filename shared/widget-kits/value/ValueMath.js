@@ -119,6 +119,17 @@
     return unit ? text + unit : text;
   }
 
+  function textLength(value) {
+    if (value == null) {
+      return 0;
+    }
+    return String(value).length;
+  }
+
+  function lerp(from, to, t) {
+    return from + ((to - from) * t);
+  }
+
   function almostInt(value, eps) {
     const epsilon = Number.isFinite(Number(eps)) ? Number(eps) : 1e-6;
     return Math.abs(value - Math.round(value)) <= epsilon;
@@ -310,6 +321,8 @@
       hasText: hasText,
       keyToText: keyToText,
       appendUnit: appendUnit,
+      textLength: textLength,
+      lerp: lerp,
       almostInt: almostInt,
       isApprox: isApprox,
       extractNumberText: extractNumberText,

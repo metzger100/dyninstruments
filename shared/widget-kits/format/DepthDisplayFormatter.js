@@ -1,7 +1,7 @@
 /**
  * Module: DepthDisplayFormatter - Shared depth formatter helper for unit-aware numeric extraction
  * Documentation: documentation/architecture/component-system.md
- * Depends: none
+ * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -18,21 +18,10 @@
     return placeholderNormalize.normalize(undefined, undefined);
   }
 
-  function toOptionalFiniteNumber(raw) {
-    if (raw == null) {
-      return undefined;
-    }
-    if (typeof raw === "string" && raw.trim() === "") {
-      return undefined;
-    }
-    const n = Number(raw);
-    return Number.isFinite(n) ? n : undefined;
-  }
-
-  function formatDisplay(raw, props, unitFormatter, placeholderNormalize) {
+  function formatDisplay(raw, props, unitFormatter, placeholderNormalize, valueMath) {
     const p = props || {};
     const defaultText = resolveDefaultText(p, placeholderNormalize);
-    const n = toOptionalFiniteNumber(raw);
+    const n = valueMath.toOptionalFiniteNumber(raw);
     if (typeof n !== "number") {
       return { num: NaN, text: defaultText };
     }
@@ -53,13 +42,17 @@
     return { num: parsed, text: String(formatted).trim() };
   }
 
-  function create() {
+  function create(def, componentContext) {
+    const valueMath = componentContext.components.require("ValueMath");
+
     return {
       id: "DepthDisplayFormatter",
-      formatDisplay: formatDisplay,
+      formatDisplay: function (raw, props, unitFormatter, placeholderNormalize) {
+        return formatDisplay(raw, props, unitFormatter, placeholderNormalize, valueMath);
+      },
       createFormatDisplay: function (unitFormatter, placeholderNormalize) {
         return function (raw, props) {
-          return formatDisplay(raw, props, unitFormatter, placeholderNormalize);
+          return formatDisplay(raw, props, unitFormatter, placeholderNormalize, valueMath);
         };
       }
     };

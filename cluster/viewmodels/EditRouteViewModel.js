@@ -13,21 +13,8 @@
 
   const LOCAL_ROUTE_PREFIX = "local@";
 
-  function isObject(value) {
-    return !!value && typeof value === "object";
-  }
-
-  let toFiniteNumber;
-
-  function toOptionalFiniteNumber(rawValue) {
-    if (rawValue == null) {
-      return undefined;
-    }
-    if (typeof rawValue === "string" && rawValue.trim() === "") {
-      return undefined;
-    }
-    return toFiniteNumber(rawValue);
-  }
+  let isObject;
+  let toOptionalFiniteNumber;
 
   function toRawName(value) {
     return typeof value === "string" ? value : "";
@@ -108,7 +95,9 @@
   }
 
   function create(def, componentContext) {
-    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+    const valueMath = componentContext.components.require("ValueMath");
+    isObject = valueMath.isObject;
+    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
     const centerMath = componentContext.components.require("CenterDisplayMath");
 
     function build(props) {

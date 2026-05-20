@@ -1,7 +1,7 @@
 /**
  * Module: LinearGaugeEngineSupport - Shared normalization helpers for linear gauge engine state
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: none
+ * Depends: HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -9,10 +9,6 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniLinearGaugeEngineSupport = factory(); }
 }(this, function () {
   "use strict";
-
-  function resolveLabelEdgePolicy(cfg) {
-    return cfg && cfg.labelEdgePolicy === "sliding" ? "sliding" : "inset";
-  }
 
   function buildStaticKey(math, state, options) {
     const opts = options || {};
@@ -49,10 +45,12 @@
     });
   }
 
-  function create() {
+  function create(def, componentContext) {
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+
     return {
       id: "LinearGaugeEngineSupport",
-      resolveLabelEdgePolicy: resolveLabelEdgePolicy,
+      resolveLabelEdgePolicy: htmlUtils.resolveLabelEdgePolicy,
       buildStaticKey: buildStaticKey
     };
   }

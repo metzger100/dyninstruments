@@ -13,7 +13,7 @@
   function create(def, componentContext) {
     const angle = componentContext.components.require("RadialAngleMath");
     const value = componentContext.components.require("ValueMath");
-    const toOptionalFiniteNumber = value.toOptionalFiniteNumber || value.toFiniteNumber;
+    const toOptionalFiniteNumber = value.toOptionalFiniteNumber;
 
     function readOptionalThreshold(rawValue, defaultValue) {
       const parsed = toOptionalFiniteNumber(rawValue);
@@ -21,16 +21,6 @@
         return parsed;
       }
       return toOptionalFiniteNumber(defaultValue);
-    }
-
-    function valueToAngle(rawValue, minV, maxV, arc, doClamp) {
-      return angle.valueToAngle(rawValue, {
-        min: Number(minV),
-        max: Number(maxV),
-        startDeg: Number(arc.startDeg),
-        endDeg: Number(arc.endDeg),
-        clamp: doClamp !== false
-      });
     }
 
     function sectorAngles(from, to, minV, maxV, arc) {
@@ -44,8 +34,8 @@
       if (Math.abs(tt - ff) < 1e-9) {
         return null;
       }
-      let a0 = valueToAngle(ff, minV, maxV, arc, true);
-      let a1 = valueToAngle(tt, minV, maxV, arc, true);
+      let a0 = angle.valueToAngleFlat(ff, minV, maxV, arc, true);
+      let a1 = angle.valueToAngleFlat(tt, minV, maxV, arc, true);
       if (a1 < a0) {
         const tmp = a0;
         a0 = a1;

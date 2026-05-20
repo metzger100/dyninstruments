@@ -1,7 +1,7 @@
 /**
  * Module: UnitAwareFormatter - Shared formatter helpers for unit-token rendering
  * Documentation: documentation/architecture/component-system.md
- * Depends: PlaceholderNormalize
+ * Depends: PlaceholderNormalize, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -10,9 +10,8 @@
 }(this, function () {
   "use strict";
 
-  function toText(value) {
-    return value == null ? "" : String(value);
-  }
+  let toText;
+  let appendUnitValueMath;
 
   function formatWithToken(value, formatter, token, defaultText, componentContext, placeholderNormalize) {
     const formatted = componentContext.format.applyFormatter(value, {
@@ -27,12 +26,6 @@
     return formatWithToken(value, "formatDistance", token, defaultText, componentContext, placeholderNormalize);
   }
 
-  function appendUnit(valueText, displayUnit, defaultText) {
-    const text = toText(valueText) || toText(defaultText);
-    const unit = displayUnit == null ? "" : String(displayUnit);
-    return unit ? text + unit : text;
-  }
-
   function extractNumericDisplay(valueText, defaultValue) {
     const text = toText(valueText).trim();
     const match = text.match(/^([+-]?(?:\d+(?:[.,]\d+)?|\.\d+))/);
@@ -45,6 +38,9 @@
 
   function create(def, componentContext) {
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    const valueMath = componentContext.components.require("ValueMath");
+    toText = valueMath.toText;
+    appendUnitValueMath = valueMath.appendUnit;
 
     return {
       id: "UnitAwareFormatter",
@@ -54,7 +50,7 @@
       formatDistance: function (value, token, defaultText) {
         return formatDistance(value, token, defaultText, componentContext, placeholderNormalize);
       },
-      appendUnit: appendUnit,
+      appendUnit: appendUnitValueMath,
       extractNumericDisplay: extractNumericDisplay
     };
   }

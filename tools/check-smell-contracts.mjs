@@ -720,10 +720,35 @@ function collectInvalidNumbers(value, prefix, out) {
 }
 
 function createScriptContext(extra = {}) {
+  let valueMathModule = null;
+  if (exists("shared/widget-kits/value/ValueMath.js")) {
+    try {
+      valueMathModule = loadUmdModule("shared/widget-kits/value/ValueMath.js").mod;
+    } catch (_err) {
+      valueMathModule = null;
+    }
+  }
+  if (!valueMathModule || typeof valueMathModule.create !== "function") {
+    valueMathModule = {
+      create() {
+        return {
+          toText(value) {
+            return value == null ? "" : String(value);
+          },
+          toObject(value) {
+            return value && typeof value === "object" ? value : {};
+          }
+        };
+      }
+    };
+  }
   const base = {
     console,
     setTimeout,
     clearTimeout,
+    DyniComponents: {
+      DyniValueMath: valueMathModule
+    },
     DyniPlugin: {
       runtime: {},
       state: {},

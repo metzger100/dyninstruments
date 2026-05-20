@@ -49,6 +49,16 @@ describe("ThreeValueTextWidget", function () {
               if (!isFinite(n)) return Number(lo);
               return Math.max(Number(lo), Math.min(Number(hi), n));
             },
+            clampNumber(value, lo, hi, fallbackValue) {
+              const n = Number(value);
+              if (!Number.isFinite(n)) {
+                return Number(fallbackValue);
+              }
+              return Math.max(Number(lo), Math.min(Number(hi), n));
+            },
+            toText(value) {
+              return value == null ? "" : String(value).trim();
+            },
             computeMode(ratio, thresholdNormal, thresholdFlat) {
               if (ratio < thresholdNormal) return "high";
               if (ratio > thresholdFlat) return "flat";

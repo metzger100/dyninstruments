@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteHtmlFit - Per-box text-fit owner for edit-route HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, EditRouteLayout, HtmlWidgetUtils, TextFitMath, EditRouteHtmlFitSupport
+ * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, EditRouteLayout, HtmlWidgetUtils, HtmlMeasureUtils, TextFitMath, EditRouteHtmlFitSupport, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -21,8 +21,10 @@
     const tileLayout = componentContext.components.require("TextTileLayout");
     const layoutApi = componentContext.components.require("EditRouteLayout");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const fitMath = componentContext.components.require("TextFitMath");
     const fitSupport = componentContext.components.require("EditRouteHtmlFitSupport");
+    const toText = componentContext.components.require("ValueMath").toText;
 
     function compute(args) {
       const cfg = args || {};
@@ -36,8 +38,8 @@
       const rootEl = componentContext.dom.requirePluginRoot(targetEl);
       const tokens = theme.resolveForRoot(rootEl);
       const family = tokens.font.family;
-      const valueFamily = fitSupport.resolveMetricValueFamily(model, tokens);
-      const measureCtx = fitSupport.resolveMeasureContext(cfg.hostContext, targetEl);
+      const valueFamily = htmlUtils.resolveMetricValueFamily(model, tokens);
+      const measureCtx = htmlMeasureUtils.resolveMeasureContext(cfg.hostContext, targetEl);
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
         return null;
       }
@@ -72,9 +74,9 @@
         }
         : null;
       const fitOut = {
-        nameTextStyle: fitSupport.measureStyle({
+        nameTextStyle: fitSupport.measureEditRouteStyle({
           rect: layout.nameTextRect,
-          text: fitSupport.toText(model.nameText != null ? model.nameText : model.routeNameText),
+          text: toText(model.nameText != null ? model.nameText : model.routeNameText),
           maxPxRatio: fitSupport.resolveNamePxRatio(layout.mode),
           textApi: textApi,
           tileLayout: tileLayout,
@@ -90,9 +92,9 @@
       };
 
       if (layout.sourceBadgeRect) {
-        fitOut.sourceBadgeStyle = fitSupport.measureStyle({
+        fitOut.sourceBadgeStyle = fitSupport.measureEditRouteStyle({
           rect: layout.sourceBadgeRect,
-          text: fitSupport.toText(model.sourceBadgeText),
+          text: toText(model.sourceBadgeText),
           maxPxRatio: SOURCE_BADGE_MAX_PX_RATIO,
           textApi: textApi,
           tileLayout: tileLayout,
@@ -145,7 +147,7 @@
           });
 
           fitOut.metrics[id] = {
-            labelStyle: fitSupport.measureStyle({
+            labelStyle: fitSupport.measureEditRouteStyle({
               rect: box.labelRect,
               text: labelText,
               maxPx: secondaryMaxPx,
@@ -159,8 +161,8 @@
               htmlUtils: htmlUtils
             }),
             valueRowStyle: "",
-            valueStyle: fitSupport.toStyle(valuePx, htmlUtils),
-            unitStyle: box.unitRect ? fitSupport.measureStyle({
+            valueStyle: htmlMeasureUtils.toStyle(valuePx, htmlUtils),
+            unitStyle: box.unitRect ? fitSupport.measureEditRouteStyle({
               rect: box.unitRect,
               text: unitText,
               maxPx: secondaryMaxPx,
@@ -250,10 +252,10 @@
           : null;
 
         fitOut.metrics[id] = {
-          labelStyle: fitSupport.toStyle(captionFit && captionFit.px, htmlUtils),
+          labelStyle: htmlMeasureUtils.toStyle(captionFit && captionFit.px, htmlUtils),
           valueRowStyle: "",
-          valueStyle: fitSupport.toStyle(measurement && measurement.fit ? measurement.fit.vPx : 0, htmlUtils),
-          unitStyle: unitText ? fitSupport.toStyle(measurement && measurement.fit ? measurement.fit.uPx : 0, htmlUtils) : ""
+          valueStyle: htmlMeasureUtils.toStyle(measurement && measurement.fit ? measurement.fit.vPx : 0, htmlUtils),
+          unitStyle: unitText ? htmlMeasureUtils.toStyle(measurement && measurement.fit ? measurement.fit.uPx : 0, htmlUtils) : ""
         };
         fitOut.metricValues[id] = usePlain ? plainValueText : valueText;
       }

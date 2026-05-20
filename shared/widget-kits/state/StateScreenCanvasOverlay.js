@@ -1,7 +1,7 @@
 /**
  * Module: StateScreenCanvasOverlay - Shared canvas label primitive for semantic state-screens
  * Documentation: documentation/shared/state-screens.md
- * Depends: StateScreenLabels
+ * Depends: StateScreenLabels, CanvasTextFitting
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -9,13 +9,6 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniStateScreenCanvasOverlay = factory(); }
 }(this, function () {
   "use strict";
-
-  function setFont(ctx, px, weight, family) {
-    const fontPx = Math.max(1, Math.floor(Number(px) || 1));
-    const fontWeight = weight == null ? 700 : weight;
-    const fontFamily = family || "sans-serif";
-    ctx.font = String(fontWeight) + " " + String(fontPx) + "px " + String(fontFamily);
-  }
 
   function isDevMode() {
     return !!(
@@ -28,6 +21,8 @@
 
   function create(def, componentContext) {
     const labels = componentContext.components.require("StateScreenLabels");
+    const fitting = componentContext.components.require("CanvasTextFitting");
+    const setFont = fitting.setFont;
 
     function resolveFontPx(ctx, labelText, W, H, weight, family) {
       const maxWidth = Math.max(1, Math.floor(W * 0.8));

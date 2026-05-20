@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsDomEffects - Committed-DOM side effects owner for route-points renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: HtmlWidgetUtils
+ * Depends: HtmlWidgetUtils, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -16,14 +16,7 @@
     "active-change": true
   };
   let htmlUtils = null;
-
-  function toSafeInteger(value, defaultValue) {
-    const n = Number(value);
-    if (!Number.isFinite(n)) {
-      return defaultValue;
-    }
-    return Math.floor(n);
-  }
+  let toSafeInteger = null;
 
   function isConnectedNode(node) {
     if (!node || typeof node !== "object") {
@@ -299,6 +292,7 @@
 
   function create(def, componentContext) {
     htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    toSafeInteger = componentContext.components.require("ValueMath").toSafeInteger;
 
     return {
       id: "RoutePointsDomEffects",

@@ -13,10 +13,7 @@
   const METRIC_IDS = ["pts", "dst", "rte", "rteEta"];
   const SOURCE_BADGE_TEXT = "LOCAL";
 
-  function toObject(value) {
-    return value && typeof value === "object" ? value : {};
-  }
-
+  let toObject;
   let toFiniteNumber;
 
   function toShellSize(shellRect) {
@@ -25,13 +22,6 @@
       width: Math.max(1, Math.round(toFiniteNumber(rect && rect.width) || 1)),
       height: Math.max(1, Math.round(toFiniteNumber(rect && rect.height) || 1))
     };
-  }
-
-  function resolveDefaultText(props) {
-    if (Object.prototype.hasOwnProperty.call(props, "default")) {
-      return String(props.default);
-    }
-    return undefined;
   }
 
   function normalizeMetricLabel(value, htmlUtils) {
@@ -61,12 +51,12 @@
     return componentContext.format.applyFormatter(value, opts);
   }
 
-  function formatMetric(value, formatter, formatterParameters, defaultText, componentContext, placeholderNormalize) {
+  function formatRouteMetric(value, formatter, formatterParameters, defaultText, componentContext, placeholderNormalize) {
     const text = String(callFormatter(value, formatter, formatterParameters, defaultText, componentContext));
     return placeholderNormalize.normalize(text, defaultText);
   }
 
-  function buildResizeSignatureParts(model) {
+  function buildEditRouteSignatureParts(model) {
     const m = model || {};
     const parts = [
       m.kind || "data",
@@ -118,7 +108,9 @@
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     const stableDigits = componentContext.components.require("StableDigits");
     const unitFormatter = componentContext.components.require("UnitAwareFormatter");
-    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+    const valueMath = componentContext.components.require("ValueMath");
+    toObject = valueMath.toObject;
+    toFiniteNumber = valueMath.toFiniteNumber;
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
     const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");
@@ -163,7 +155,7 @@
       const isActiveRoute = hasRoute && domain.isActiveRoute === true;
       const isLocalRoute = hasRoute && domain.isLocalRoute === true;
       const isServerRoute = hasRoute && domain.isServerRoute === true;
-      const defaultText = resolveDefaultText(props);
+      const defaultText = htmlUtils.resolveDefaultText(props);
       const etaFormatter = domain.hideSeconds === true ? "formatClock" : "formatTime";
       const nameText = hasRoute
         ? htmlUtils.trimText(domain.routeName)
@@ -204,7 +196,7 @@
           id: "pts",
           labelText: metricCaptions.pts,
           ...buildMetricValueText(
-            formatMetric(domain.pointCount, "formatDecimal", [3], defaultText, componentContext, placeholderNormalize),
+            formatRouteMetric(domain.pointCount, "formatDecimal", [3], defaultText, componentContext, placeholderNormalize),
             3
           ),
           unitText: "",
@@ -234,7 +226,7 @@
           id: "rteEta",
           labelText: metricCaptions.rteEta,
           ...buildMetricValueText(
-            formatMetric(
+            formatRouteMetric(
               isActiveRoute ? domain.rteEta : undefined,
               etaFormatter,
               [],
@@ -301,14 +293,14 @@
         metricsStyle: layout.mode === "flat" ? (layout.flatMetricsLayoutStyle || "") : "",
         wrapperStyle: wrapperStyle
       };
-      model.resizeSignatureParts = buildResizeSignatureParts(model);
+      model.resizeSignatureParts = buildEditRouteSignatureParts(model);
       return model;
     }
 
     return {
       id: "EditRouteRenderModel",
       buildModel: buildModel,
-      buildResizeSignatureParts: buildResizeSignatureParts,
+      buildResizeSignatureParts: buildEditRouteSignatureParts,
       canOpenEditRoute: function (args) {
         const cfg = args || {};
         const props = toObject(cfg.props);

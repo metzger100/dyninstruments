@@ -117,7 +117,7 @@
       js: BASE + "shared/widget-kits/linear/LinearGaugeLayout.js",
       css: undefined,
       globalKey: "DyniLinearGaugeLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale", "ValueMath"]
   };
 
   sf.LinearGaugeMath = {
@@ -130,20 +130,22 @@
   sf.LinearGaugeEngineSupport = {
       js: BASE + "shared/widget-kits/linear/LinearGaugeEngineSupport.js",
       css: undefined,
-      globalKey: "DyniLinearGaugeEngineSupport"
+      globalKey: "DyniLinearGaugeEngineSupport",
+      deps: ["HtmlWidgetUtils"]
   };
 
   sf.LinearGaugeLabelFit = {
       js: BASE + "shared/widget-kits/linear/LinearGaugeLabelFit.js",
       css: undefined,
-      globalKey: "DyniLinearGaugeLabelFit"
+      globalKey: "DyniLinearGaugeLabelFit",
+      deps: ["CanvasTextFitting", "HtmlWidgetUtils"]
   };
 
   sf.LinearGaugeTextLayout = {
       js: BASE + "shared/widget-kits/linear/LinearGaugeTextLayout.js",
       css: undefined,
       globalKey: "DyniLinearGaugeTextLayout",
-      deps: ["LinearGaugeLabelFit"]
+      deps: ["LinearGaugeLabelFit", "TextLayoutScaleHelpers", "CanvasTextFitting", "HtmlWidgetUtils"]
   };
 
   sf.TextLayoutPrimitives = {
@@ -156,7 +158,8 @@
   sf.TextTileLayout = {
       js: BASE + "shared/widget-kits/text/TextTileLayout.js",
       css: undefined,
-      globalKey: "DyniTextTileLayout"
+      globalKey: "DyniTextTileLayout",
+      deps: ["ValueMath", "TextLayoutScaleHelpers"]
   };
 
   sf.TextFitMath = {
@@ -203,7 +206,8 @@
   sf.ResponsiveScaleProfile = {
       js: BASE + "shared/widget-kits/layout/ResponsiveScaleProfile.js",
       css: undefined,
-      globalKey: "DyniResponsiveScaleProfile"
+      globalKey: "DyniResponsiveScaleProfile",
+      deps: ["ValueMath"]
   };
 
 }(this));

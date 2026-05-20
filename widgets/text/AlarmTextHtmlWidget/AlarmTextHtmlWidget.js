@@ -1,7 +1,7 @@
 /**
  * Module: AlarmTextHtmlWidget - Native HTML renderer for vessel alarm status/control tile
  * Documentation: documentation/widgets/alarm.md
- * Depends: AlarmHtmlFit, HtmlWidgetUtils, AlarmRenderModel, AlarmMarkup
+ * Depends: AlarmHtmlFit, HtmlWidgetUtils, AlarmRenderModel, AlarmMarkup, ValueMath
  */
 
 (function (root, factory) {
@@ -13,14 +13,7 @@
 
   const ROOT_CLASS_NAME = "dyni-alarm-root";
 
-  function toObject(value) {
-    return value && typeof value === "object" ? value : {};
-  }
-
-  function resolveSurfacePolicy(props) {
-    const p = props && typeof props === "object" ? props : null;
-    return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
-  }
+  let toObject;
 
   function resolveLayoutBasisRect(layout, shellRect) {
     const rect = layout && layout.contentRect ? layout.contentRect : shellRect;
@@ -33,7 +26,7 @@
     };
   }
 
-  function resolveLayout(htmlFit, model, shellRect) {
+  function resolveAlarmLayout(htmlFit, model, shellRect) {
     if (!shellRect || typeof htmlFit.resolveLayout !== "function") {
       return null;
     }
@@ -68,6 +61,7 @@
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const renderModel = componentContext.components.require("AlarmRenderModel");
     const markup = componentContext.components.require("AlarmMarkup");
+    toObject = componentContext.components.require("ValueMath").toObject;
 
     function buildModel(props, shellRect) {
       return renderModel.buildModel({
@@ -122,7 +116,7 @@
         clickHandler = function onClick(ev) {
           ev.preventDefault();
           ev.stopPropagation();
-          const policy = resolveSurfacePolicy(lastProps);
+          const policy = htmlUtils.resolveSurfacePolicy(lastProps);
           const alarmActions = policy && policy.actions ? policy.actions.alarm : null;
           if (!alarmActions || typeof alarmActions.stopAll !== "function") {
             return;
@@ -191,7 +185,7 @@
         const props = toObject(payload && payload.props);
         const shellRect = payload && payload.shellRect ? payload.shellRect : null;
         const model = buildModel(props, shellRect);
-        const layout = resolveLayout(htmlFit, model, shellRect);
+        const layout = resolveAlarmLayout(htmlFit, model, shellRect);
         const basisRect = resolveLayoutBasisRect(layout, shellRect);
         const mode = layout && layout.mode ? layout.mode : "normal";
         return [

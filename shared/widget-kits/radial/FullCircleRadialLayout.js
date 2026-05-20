@@ -1,7 +1,7 @@
 /**
  * Module: FullCircleRadialLayout - Responsive geometry owner for full-circle radial dials
  * Documentation: documentation/radial/full-circle-dial-engine.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, GeometryScale
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, GeometryScale, TextLayoutScaleHelpers, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -26,24 +26,7 @@
     textFillScale: 1.18
   };
   let makeRect = null;
-
-  // dyni-lint-disable-next-line duplicate-functions -- Layout owners intentionally keep a tiny local clamp helper for geometry config normalization.
-  function clampNumber(value, minValue, maxValue, defaultValue) {
-    const n = Number(value);
-    if (!Number.isFinite(n) || value == null || (typeof value === "string" && value.trim() === "")) {
-      return defaultValue;
-    }
-    return Math.max(minValue, Math.min(maxValue, n));
-  }
-
-  function resolveTextFillScale(responsive) {
-    const scale = Number(responsive && responsive.textFillScale);
-    return Number.isFinite(scale) && scale > 0 ? scale : 1;
-  }
-
-  function resolveCompactGeometryScale(textFillScale) {
-    return Math.max(0.5, 1 - Math.max(0, textFillScale - 1));
-  }
+  let clampNumber;
 
   function computeModeGeometry(contentRect, theme, compactGeometryScale, gs) {
     const width = Math.max(1, contentRect.w);
@@ -172,6 +155,8 @@
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
     const gs = componentContext.components.require("GeometryScale");
+    const scaleHelpers = componentContext.components.require("TextLayoutScaleHelpers");
+    clampNumber = componentContext.components.require("ValueMath").clampNumber;
     makeRect = rectApi.makeRect;
 
     function computeMode(W, H, thresholdNormal, thresholdFlat) {
@@ -213,8 +198,8 @@
       const H = Math.max(1, Math.floor(Number(cfg.H) || 0));
       const insets = cfg.insets || computeInsets(W, H);
       const responsive = cfg.responsive || insets.responsive || profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
-      const textFillScale = resolveTextFillScale(responsive);
-      const compactGeometryScale = resolveCompactGeometryScale(textFillScale);
+      const textFillScale = scaleHelpers.resolveTextFillScale(responsive);
+      const compactGeometryScale = scaleHelpers.resolveCompactGeometryScale(textFillScale);
       const mode = cfg.mode === "flat" || cfg.mode === "high" ? cfg.mode : "normal";
       const contentRect = makeRect(
         insets.pad,

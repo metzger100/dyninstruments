@@ -16,17 +16,12 @@
     metrics: Object.create(null)
   };
 
-  function getSurfacePolicy(props) {
-    const p = props && typeof props === "object" ? props : null;
-    return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
-  }
-
   function openActiveRoute(props, htmlUtils) {
     const p = props && typeof props === "object" ? props : null;
     if (htmlUtils.isEditingMode(p)) {
       return false;
     }
-    const policy = getSurfacePolicy(p);
+    const policy = htmlUtils.resolveSurfacePolicy(p);
     if (!policy || !policy.actions || !policy.actions.routeEditor || typeof policy.actions.routeEditor.openActiveRoute !== "function") {
       return false;
     }
@@ -94,29 +89,26 @@
     const etaUnit = htmlUtils.trimText(units.rteEta);
     const nextCourseUnit = htmlUtils.trimText(units.nextCourse);
     const remainFormatUnit = formatUnits.remain;
-    const remainRawText = htmlFit.formatMetric(
+    const remainRawText = htmlFit.formatActiveRouteMetric(
       display.remain,
       "formatDistance",
       [remainFormatUnit],
       defaultText,
-      componentContext,
       placeholderNormalize
     );
-    const etaRawText = htmlFit.formatMetric(
+    const etaRawText = htmlFit.formatActiveRouteMetric(
       display.rteEta,
       etaFormatter,
       [],
       defaultText,
-      componentContext,
       placeholderNormalize
     );
     const nextCourseRawText = isApproaching
-      ? htmlFit.formatMetric(
+      ? htmlFit.formatActiveRouteMetric(
         display.nextCourse,
         "formatDirection",
         [],
         defaultText,
-        componentContext,
         placeholderNormalize
       )
       : "";

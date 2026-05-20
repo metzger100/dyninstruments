@@ -40,7 +40,7 @@
     const measureValueUnitFit = fitting.measureValueUnitFit;
     const fitInlineCapValUnit = fitting.fitInlineCapValUnit;
 
-    function resolveOpacity(textOptions, key) {
+    function resolveTextOptionOpacity(textOptions, key) {
       if (!textOptions || typeof textOptions !== "object") {
         return 1;
       }
@@ -81,7 +81,7 @@
         cPx = Math.min(cPx, clampPositive(capMaxPx, MIN_FONT_PX));
       }
 
-      const captionOpacity = resolveOpacity(textOptions, "captionOpacity");
+      const captionOpacity = resolveTextOptionOpacity(textOptions, "captionOpacity");
       if (captionOpacity < 1) {
         ctx.save();
         ctx.globalAlpha = captionOpacity;
@@ -134,7 +134,7 @@
       setFont(ctx, vPx, valueWeight, valueFamily);
       ctx.fillText(String(value), xStart, yVal);
       if (unit) {
-        const unitOpacity = resolveOpacity(textOptions, "unitOpacity");
+        const unitOpacity = resolveTextOptionOpacity(textOptions, "unitOpacity");
         if (unitOpacity < 1) {
           ctx.globalAlpha = unitOpacity;
         }
@@ -154,8 +154,8 @@
       const rowScale = data.total > widthLimit + WIDTH_EPSILON
         ? Math.max(0.01, widthLimit / Math.max(WIDTH_EPSILON, data.total))
         : 1;
-      const capOpacity = resolveOpacity(textOptions, "captionOpacity");
-      const unitOpacity = resolveOpacity(textOptions, "unitOpacity");
+      const capOpacity = resolveTextOptionOpacity(textOptions, "captionOpacity");
+      const unitOpacity = resolveTextOptionOpacity(textOptions, "unitOpacity");
       let xStart = -(data.total * 0.5);
       const yMid = y + Math.floor(h / 2);
 
@@ -222,8 +222,8 @@
       const yVal = y + hCap;
       const yUni = y + hCap + hVal;
       const anchor = lineAnchor(x, w, mode);
-      const capOpacity = resolveOpacity(textOptions, "captionOpacity");
-      const unitOpacity = resolveOpacity(textOptions, "unitOpacity");
+      const capOpacity = resolveTextOptionOpacity(textOptions, "captionOpacity");
+      const unitOpacity = resolveTextOptionOpacity(textOptions, "unitOpacity");
       ctx.textBaseline = "top";
 
       if (caption) {
@@ -256,6 +256,7 @@
 
     return {
       id: "CanvasTextLayout",
+      resolveFamily: resolveFamily,
       setFont: setFont,
       measureTextWidth: measureTextWidth,
       fitTextPx: fitTextPx,

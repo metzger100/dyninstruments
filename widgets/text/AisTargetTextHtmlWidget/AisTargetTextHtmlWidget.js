@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetTextHtmlWidget - Native HTML AIS target summary renderer shell
  * Documentation: documentation/guides/add-new-html-kind.md
- * Depends: AisTargetHtmlFit, HtmlWidgetUtils, AisTargetRenderModel, AisTargetMarkup, componentContext.theme.tokens
+ * Depends: AisTargetHtmlFit, HtmlWidgetUtils, AisTargetRenderModel, AisTargetMarkup, ValueMath, componentContext.theme.tokens
  */
 
 (function (root, factory) {
@@ -14,14 +14,7 @@
   const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.2;
   const DEFAULT_RATIO_THRESHOLD_FLAT = 3.8;
 
-  function toObject(value) {
-    return value && typeof value === "object" ? value : {};
-  }
-
-  function resolveSurfacePolicy(props) {
-    const p = props && typeof props === "object" ? props : null;
-    return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
-  }
+  let toObject;
 
   function create(def, componentContext) {
     const htmlFit = componentContext.components.require("AisTargetHtmlFit");
@@ -29,11 +22,12 @@
     const renderModel = componentContext.components.require("AisTargetRenderModel");
     const markup = componentContext.components.require("AisTargetMarkup");
     const themeResolver = componentContext.theme.tokens;
+    toObject = componentContext.components.require("ValueMath").toObject;
 
     function buildModel(props, shellRect) {
       const p = props || {};
       const layout = toObject(p.layout);
-      const surfacePolicy = resolveSurfacePolicy(p);
+      const surfacePolicy = htmlUtils.resolveSurfacePolicy(p);
       const mode = htmlUtils.resolveRatioModeForRect({
         ratioThresholdNormal: layout.ratioThresholdNormal,
         ratioThresholdFlat: layout.ratioThresholdFlat,
@@ -82,7 +76,7 @@
         clickHandler = function onDispatchClick(ev) {
           ev.preventDefault();
           ev.stopPropagation();
-          const policy = resolveSurfacePolicy(lastProps);
+          const policy = htmlUtils.resolveSurfacePolicy(lastProps);
           const aisActions = policy && policy.actions ? policy.actions.ais : null;
           if (!aisActions || typeof aisActions.showInfo !== "function") {
             return;

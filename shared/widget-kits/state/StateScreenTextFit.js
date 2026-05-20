@@ -1,7 +1,7 @@
 /**
  * Module: StateScreenTextFit - Shared measured single-line fit helper for state-screen labels
  * Documentation: documentation/shared/state-screens.md
- * Depends: ValueMath
+ * Depends: ValueMath, HtmlWidgetUtils, HtmlMeasureUtils, CanvasTextFitting
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,89 +14,10 @@
   const DEFAULT_FAMILY = "sans-serif";
   const DEFAULT_WEIGHT = 700;
   const WIDTH_EPSILON = 0.01;
-  const MEASURE_CTX_KEY = "__dyniStateScreenTextFitCtx";
 
   let toFiniteNumber;
   let clampPositive;
-
-  function parseFontPx(fontValue) {
-    const source = String(fontValue || "");
-    const match = source.match(/(\d+(?:\.\d+)?)px/);
-    return match ? Number(match[1]) : 0;
-  }
-
-  function createApproximateMeasureContext() {
-    return {
-      font: "700 12px sans-serif",
-      measureText: function (text) {
-        const px = Math.max(1, parseFontPx(this.font) || 12);
-        return { width: String(text || "").length * px * 0.56 };
-      }
-    };
-  }
-
-  function tryCreateCanvasContext(ownerDocument) {
-    if (!ownerDocument || typeof ownerDocument.createElement !== "function") {
-      return null;
-    }
-    const ownerView = ownerDocument.defaultView;
-    const userAgent = ownerView && ownerView.navigator ? String(ownerView.navigator.userAgent || "") : "";
-    if (/jsdom/i.test(userAgent)) {
-      return null;
-    }
-    const canvas = ownerDocument.createElement("canvas");
-    if (!canvas || typeof canvas.getContext !== "function") {
-      return null;
-    }
-    return canvas.getContext("2d");
-  }
-
-  function resolveOwnerDocument(args) {
-    const cfg = args || {};
-    if (cfg.ownerDocument) {
-      return cfg.ownerDocument;
-    }
-    if (cfg.targetEl && cfg.targetEl.ownerDocument) {
-      return cfg.targetEl.ownerDocument;
-    }
-    if (typeof document !== "undefined") {
-      return document;
-    }
-    return null;
-  }
-
-  function resolveMeasureContext(args) {
-    const cfg = args || {};
-    if (cfg.measureCtx && typeof cfg.measureCtx.measureText === "function") {
-      return cfg.measureCtx;
-    }
-
-    const hostContext = cfg.hostContext && typeof cfg.hostContext === "object"
-      ? cfg.hostContext
-      : null;
-    if (hostContext && hostContext[MEASURE_CTX_KEY]) {
-      return hostContext[MEASURE_CTX_KEY];
-    }
-
-    const ownerDocument = resolveOwnerDocument(cfg);
-    const readyContext = tryCreateCanvasContext(ownerDocument) || createApproximateMeasureContext();
-    if (hostContext) {
-      hostContext[MEASURE_CTX_KEY] = readyContext;
-    }
-    return readyContext;
-  }
-
-  function setFont(ctx, px, weight, family) {
-    const fontPx = Math.max(MIN_FONT_PX, clampPositive(px, MIN_FONT_PX));
-    const fontWeight = clampPositive(weight, DEFAULT_WEIGHT);
-    ctx.font = Math.floor(fontWeight) + " " + fontPx + "px " + (family || DEFAULT_FAMILY);
-  }
-
-  function measureTextWidth(ctx, text) {
-    return ctx.measureText(String(text || "")).width;
-  }
-
-  function fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, weight) {
+  function fitStateScreenTextPx(ctx, text, basePx, maxW, maxH, family, weight, fitting) {
     const ceilingPx = Math.min(clampPositive(basePx, MIN_FONT_PX), clampPositive(maxH, MIN_FONT_PX));
     const widthLimit = Math.max(0, Number(maxW) || 0);
     const content = String(text || "");
@@ -107,8 +28,8 @@
       return MIN_FONT_PX;
     }
 
-    setFont(ctx, ceilingPx, weight, family);
-    const measuredWidth = measureTextWidth(ctx, content);
+    fitting.setFont(ctx, ceilingPx, weight, family);
+    const measuredWidth = fitting.measureTextWidth(ctx, content);
     if (measuredWidth <= widthLimit + WIDTH_EPSILON) {
       return ceilingPx;
     }
@@ -117,16 +38,11 @@
     return Math.min(ceilingPx, Math.max(MIN_FONT_PX, ceilingPx * ratio));
   }
 
-  function toFontStyle(px) {
-    const resolved = toFiniteNumber(px);
-    if (!(resolved > 0)) {
-      return "";
-    }
-    return "font-size:" + Math.max(1, Math.floor(resolved)) + "px;";
-  }
-
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
+    const fitting = componentContext.components.require("CanvasTextFitting");
     toFiniteNumber = valueMath.toFiniteNumber;
     clampPositive = valueMath.clampPositive;
 
@@ -146,14 +62,23 @@
         return "";
       }
 
-      const measureCtx = resolveMeasureContext(cfg);
+      const measureCtx = cfg.measureCtx && typeof cfg.measureCtx.measureText === "function"
+        ? cfg.measureCtx
+        : htmlMeasureUtils.resolveMeasureContext(
+          cfg.hostContext,
+          cfg.targetEl || cfg.ownerDocument || null
+        );
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
         return "";
       }
 
       const textApi = cfg.textApi && typeof cfg.textApi.fitSingleTextPx === "function"
         ? cfg.textApi
-        : { fitSingleTextPx: fitSingleTextPx };
+        : {
+          fitSingleTextPx: function (ctx, text, basePx, maxW, maxH, family, weight) {
+            return fitStateScreenTextPx(ctx, text, basePx, maxW, maxH, family, weight, fitting);
+          }
+        };
       const family = String(cfg.family || DEFAULT_FAMILY);
       const weight = clampPositive(cfg.weight, DEFAULT_WEIGHT);
       const fittedPx = textApi.fitSingleTextPx(
@@ -166,7 +91,7 @@
         weight
       );
 
-      return toFontStyle(fittedPx);
+      return htmlUtils.toFontStyle(fittedPx);
     }
 
     return {

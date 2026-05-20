@@ -32,7 +32,7 @@
 
     function setFont(ctx, px, weight, family) {
       const size = Math.max(MIN_FONT_PX, Number(px) || 0);
-      const fontWeight = Number.isFinite(Number(weight)) ? Math.floor(Number(weight)) : 400;
+      const fontWeight = Number.isFinite(Number(weight)) ? Math.floor(Number(weight)) : 700;
       const fontValue = fontWeight + " " + size + "px " + (family || "sans-serif");
       if (ctx[FONT_STATE_KEY] !== fontValue || ctx.font !== fontValue) {
         ctx.font = fontValue;

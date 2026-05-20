@@ -11,29 +11,14 @@
 }(this, function () {
   "use strict";
 
-  function isObject(value) {
-    return !!value && typeof value === "object";
-  }
-
-  function trimString(value) {
-    return typeof value === "string" ? value.trim() : "";
-  }
-
+  let isObject;
+  let trimText;
   let toFiniteNumber;
-
-  function toOptionalFiniteNumber(rawValue) {
-    if (rawValue == null) {
-      return undefined;
-    }
-    if (typeof rawValue === "string" && rawValue.trim() === "") {
-      return undefined;
-    }
-    return toFiniteNumber(rawValue);
-  }
+  let toOptionalFiniteNumber;
 
   function normalizePoint(rawPoint, index) {
     const point = isObject(rawPoint) ? rawPoint : {};
-    const name = trimString(point.name);
+    const name = trimText(point.name);
 
     return {
       name: name === "" ? String(index) : name,
@@ -48,7 +33,7 @@
     }
 
     return {
-      name: trimString(rawRoute.name),
+      name: trimText(rawRoute.name),
       points: rawRoute.points.map(function (point, index) {
         return normalizePoint(point, index);
       }),
@@ -57,7 +42,11 @@
   }
 
   function create(def, componentContext) {
-    toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
+    const valueMath = componentContext.components.require("ValueMath");
+    isObject = valueMath.isObject;
+    trimText = valueMath.trimText;
+    toFiniteNumber = valueMath.toFiniteNumber;
+    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
     function build(props, toolkit) {
       const p = props || {};

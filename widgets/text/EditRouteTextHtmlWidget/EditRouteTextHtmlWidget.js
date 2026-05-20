@@ -10,11 +10,6 @@
 }(this, function () {
   "use strict";
 
-  function resolveSurfacePolicy(props) {
-    const p = props && typeof props === "object" ? props : null;
-    return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
-  }
-
   function create(def, componentContext) {
     const htmlFit = componentContext.components.require("EditRouteHtmlFit");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
@@ -23,7 +18,7 @@
     const themeResolver = componentContext.theme.tokens;
 
     function buildModel(props, shellRect) {
-      const surfacePolicy = resolveSurfacePolicy(props);
+      const surfacePolicy = htmlUtils.resolveSurfacePolicy(props);
       const vertical = !!(surfacePolicy && surfacePolicy.containerOrientation === "vertical");
       return renderModel.buildModel({
         props: props,
@@ -60,7 +55,7 @@
         clickHandler = function onDispatchClick(ev) {
           ev.preventDefault();
           ev.stopPropagation();
-          const policy = resolveSurfacePolicy(lastProps);
+          const policy = htmlUtils.resolveSurfacePolicy(lastProps);
           const routeEditorActions = policy && policy.actions ? policy.actions.routeEditor : null;
           if (!routeEditorActions || typeof routeEditorActions.openEditRoute !== "function") {
             return;

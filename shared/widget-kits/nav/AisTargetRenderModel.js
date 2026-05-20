@@ -13,9 +13,9 @@
   const METRIC_ORDER = ["dst", "cpa", "tcpa", "brg"];
   const DATA_METRIC_VISIBILITY = { dst: true, cpa: true, tcpa: true, brg: true };
 
-  function toObject(value) {
-    return value && typeof value === "object" ? value : {};
-  }
+  let toObject;
+  let toText;
+  let textLength;
 
   function toSafeSizeRect(shellRect, htmlUtils) {
     const rect = shellRect && typeof shellRect === "object" ? shellRect : null;
@@ -23,28 +23,6 @@
       width: Math.max(1, Math.round(htmlUtils.toFiniteNumber(rect && rect.width) || 1)),
       height: Math.max(1, Math.round(htmlUtils.toFiniteNumber(rect && rect.height) || 1))
     };
-  }
-
-  function resolveDefaultText(props) {
-    if (Object.prototype.hasOwnProperty.call(props, "default")) {
-      return String(props.default);
-    }
-    return undefined;
-  }
-
-  function toSignatureLength(value) {
-    if (value == null) {
-      return 0;
-    }
-    return String(value).length;
-  }
-
-  function toSignatureText(value) {
-    return value == null ? "" : String(value);
-  }
-
-  function normalizeText(value) {
-    return value == null ? "" : String(value);
   }
 
   function formatWithFormatter(args, componentContext, placeholderNormalize) {
@@ -77,7 +55,7 @@
     ]);
   }
 
-  function resolveInteractionState(args, stateScreenInteraction) {
+  function resolveAisInteractionState(args, stateScreenInteraction) {
     const cfg = args || {};
     const baseInteraction = cfg.isEditingMode === true
       ? "passive"
@@ -88,7 +66,7 @@
     });
   }
 
-  function buildResizeSignatureParts(model) {
+  function buildAisTargetSignatureParts(model) {
     const m = model || {};
     const parts = [
       m.mode || "normal",
@@ -107,20 +85,20 @@
     }
 
     if (m.kind !== "data") {
-      parts.push("S" + toSignatureLength(m.stateLabel));
+      parts.push("S" + textLength(m.stateLabel));
       return parts;
     }
 
-    parts.push("N:" + toSignatureText(m.nameText));
-    parts.push("R:" + toSignatureText(m.frontText));
+    parts.push("N:" + toText(m.nameText));
+    parts.push("R:" + toText(m.frontText));
 
     const metricIds = Array.isArray(m.visibleMetricIds) ? m.visibleMetricIds : METRIC_ORDER;
     const metrics = toObject(m.metrics);
     for (let i = 0; i < metricIds.length; i += 1) {
       const metric = toObject(metrics[metricIds[i]]);
-      parts.push("C:" + toSignatureText(metric.captionText));
-      parts.push("V:" + toSignatureText(metric.valueText));
-      parts.push("U:" + toSignatureText(metric.unitText));
+      parts.push("C:" + toText(metric.captionText));
+      parts.push("V:" + toText(metric.valueText));
+      parts.push("U:" + toText(metric.unitText));
     }
 
     return parts;
@@ -136,7 +114,10 @@
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
     const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");
     const valueMath = componentContext.components.require("ValueMath");
-    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
+    toObject = valueMath.toObject;
+    toText = valueMath.toText;
+    textLength = valueMath.textLength;
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
     function normalizeStableMetricValue(rawText, minWidth, stableDigitsEnabled) {
       if (stableDigitsEnabled !== true) {
@@ -164,7 +145,7 @@
       const units = toObject(props.units);
       const formatTokens = toObject(props.formatUnits);
       const shellSize = toSafeSizeRect(cfg.shellRect, htmlUtils);
-      const defaultText = resolveDefaultText(props);
+      const defaultText = htmlUtils.resolveDefaultText(props);
       const isEditingMode = htmlUtils.isEditingMode(props);
       const surfacePolicy = props.surfacePolicy && typeof props.surfacePolicy === "object"
         ? props.surfacePolicy
@@ -178,7 +159,7 @@
       }, stateScreenPrecedence);
       const stableDigitsEnabled = props.stableDigits === true;
       const canDispatch = domain.hasDispatchMmsi === true && htmlUtils.canDispatchSurfaceInteraction(props);
-      const interactionState = resolveInteractionState({
+      const interactionState = resolveAisInteractionState({
         kind: kind,
         canDispatch: canDispatch,
         isEditingMode: isEditingMode
@@ -187,7 +168,7 @@
       const showTcpaBranch = kind === "data" && domain.showTcpaBranch === true;
       const hasData = kind === "data";
       const colorRole = (hasData && domain.hasColorRole === true)
-        ? normalizeText(domain.colorRole)
+        ? toText(domain.colorRole)
         : "";
       const hasAccent = colorRole === "warning" || colorRole === "nearest" || colorRole === "tracking" || colorRole === "normal";
       const layout = layoutApi.computeLayout({
@@ -210,8 +191,8 @@
       const metrics = {
         dst: {
           id: "dst",
-          captionText: normalizeText(captions.dst),
-          unitText: normalizeText(units.dst),
+          captionText: toText(captions.dst),
+          unitText: toText(units.dst),
           ...normalizeStableMetricValue(
             unitFormatter.formatDistance(distance, formatTokens.dst, defaultText),
             2,
@@ -220,8 +201,8 @@
         },
         cpa: {
           id: "cpa",
-          captionText: normalizeText(captions.cpa),
-          unitText: normalizeText(units.cpa),
+          captionText: toText(captions.cpa),
+          unitText: toText(units.cpa),
           ...normalizeStableMetricValue(
             unitFormatter.formatDistance(cpa, formatTokens.cpa, defaultText),
             2,
@@ -230,8 +211,8 @@
         },
         tcpa: {
           id: "tcpa",
-          captionText: normalizeText(captions.tcpa),
-          unitText: normalizeText(units.tcpa),
+          captionText: toText(captions.tcpa),
+          unitText: toText(units.tcpa),
           ...normalizeStableMetricValue(formatWithFormatter({
             value: typeof tcpaSeconds === "number" ? (tcpaSeconds / 60) : undefined,
             formatter: "formatDecimal",
@@ -241,8 +222,8 @@
         },
         brg: {
           id: "brg",
-          captionText: normalizeText(captions.brg),
-          unitText: normalizeText(units.brg),
+          captionText: toText(captions.brg),
+          unitText: toText(units.brg),
           ...normalizeStableMetricValue(formatWithFormatter({
             value: headingTo,
             formatter: "formatDirection",
@@ -290,9 +271,9 @@
         captureClicks: interactionState === "dispatch",
         showHotspot: interactionState === "dispatch",
         stableDigitsEnabled: stableDigitsEnabled,
-        dispatchMmsi: normalizeText(domain.mmsiNormalized),
-        nameText: normalizeText(domain.nameOrMmsi),
-        frontText: normalizeText(domain.frontText),
+        dispatchMmsi: toText(domain.mmsiNormalized),
+        nameText: toText(domain.nameOrMmsi),
+        frontText: toText(domain.frontText),
         metrics: metrics,
         metricVisibility: metricVisibility,
         visibleMetricIds: visibleMetricIds,
@@ -301,14 +282,14 @@
         wrapperClasses: wrapperClasses
       };
 
-      model.resizeSignatureParts = buildResizeSignatureParts(model);
+      model.resizeSignatureParts = buildAisTargetSignatureParts(model);
       return model;
     }
 
     return {
       id: "AisTargetRenderModel",
       buildModel: buildModel,
-      buildResizeSignatureParts: buildResizeSignatureParts
+      buildResizeSignatureParts: buildAisTargetSignatureParts
     };
   }
 

@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteMarkup - Pure HTML assembly owner for edit-route renderer output
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: StateScreenMarkup
+ * Depends: StateScreenMarkup, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,14 +11,8 @@
   "use strict";
 
   const METRIC_IDS = ["pts", "dst", "rte", "rteEta"];
-
-  function toObject(value) {
-    return value && typeof value === "object" ? value : {};
-  }
-
-  function toText(value) {
-    return value == null ? "" : String(value);
-  }
+  let toObject;
+  let toText;
 
   function hasMetricUnit(metric, unitText) {
     if (metric && metric.hasUnit === true) {
@@ -105,6 +99,9 @@
 
   function create(def, componentContext) {
     const stateScreenMarkup = componentContext.components.require("StateScreenMarkup");
+    const valueMath = componentContext.components.require("ValueMath");
+    toObject = valueMath.toObject;
+    toText = valueMath.toText;
 
     function render(args) {
       const cfg = args || {};

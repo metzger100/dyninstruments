@@ -11,15 +11,9 @@
   "use strict";
 
   let toFiniteNumber;
+  let toObject;
+  let toSafeInteger;
   let toOptionalFiniteNumber;
-
-  function toSafeInteger(value, defaultValue) {
-    const n = toFiniteNumber(value);
-    if (!Number.isFinite(n)) {
-      return defaultValue;
-    }
-    return Math.floor(n);
-  }
 
   function toSafeOptionalInteger(value, defaultValue) {
     const n = toOptionalFiniteNumber(value);
@@ -27,14 +21,6 @@
       return defaultValue;
     }
     return Math.floor(n);
-  }
-
-  function toObject(value) {
-    return value && typeof value === "object" ? value : {};
-  }
-
-  function toText(value, htmlUtils) {
-    return htmlUtils.trimText(value);
   }
 
   function toRoute(routeValue) {
@@ -61,7 +47,7 @@
     );
   }
 
-  function buildResizeSignatureParts(model) {
+  function buildRoutePointsSignatureParts(model) {
     const m = model || {};
     const shellWidth = toSafeInteger(m.shellWidth, 0);
     const shellHeight = toSafeInteger(m.shellHeight, 0);
@@ -163,7 +149,7 @@
     const distanceRaw = toOptionalFiniteNumber(p.distance);
     const snapshot = {
       idx: Number.isInteger(idxRaw) && idxRaw >= 0 ? idxRaw : rowIndex,
-      name: toText(p.name, htmlUtils),
+      name: htmlUtils.trimText(p.name),
       lat: toOptionalFiniteNumber(p.lat),
       lon: toOptionalFiniteNumber(p.lon),
       routeName: routeName,
@@ -193,7 +179,9 @@
     const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");
     const valueMath = componentContext.components.require("ValueMath");
     toFiniteNumber = valueMath.toFiniteNumber;
-    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
+    toObject = valueMath.toObject;
+    toSafeInteger = valueMath.toSafeInteger;
+    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
     function resolveStateKind(props, route) {
       return stateScreenPrecedence.pickFirst([
@@ -235,12 +223,12 @@
         : placeholderNormalize.normalize(undefined, undefined);
       const formatUnits = toObject(props.formatUnits);
       const displayUnits = toObject(props.units);
-      const distanceUnit = toText(displayUnits.distance, htmlUtils);
-      const formatDistanceUnit = toText(formatUnits.distance, htmlUtils);
-      const courseUnit = toText(formatting.courseUnit, htmlUtils);
-      const waypointsText = toText(formatting.waypointsText, htmlUtils);
+      const distanceUnit = htmlUtils.trimText(displayUnits.distance);
+      const formatDistanceUnit = htmlUtils.trimText(formatUnits.distance);
+      const courseUnit = htmlUtils.trimText(formatting.courseUnit);
+      const waypointsText = htmlUtils.trimText(formatting.waypointsText);
       const routeNameText = hasRoute
-        ? toText(domain.routeName, htmlUtils)
+        ? htmlUtils.trimText(domain.routeName)
         : "";
       const stateLabel = kind === "data" ? "" : (stateScreenLabels.LABELS[kind] || "");
       const isActiveRoute = domain.isActiveRoute === true;
@@ -297,7 +285,7 @@
         const previousPoint = i > 0 ? toPoint(points[i - 1]) : null;
         const currentValid = hasFiniteCoordinates(currentPoint);
         const previousValid = hasFiniteCoordinates(previousPoint);
-        const normalizedName = toText(currentPoint.name, htmlUtils);
+        const normalizedName = htmlUtils.trimText(currentPoint.name);
         const nameText = normalizedName || String(i);
         const infoText = routePointsHtmlFit.buildRowInfoText({
           index: i,
@@ -377,14 +365,14 @@
         ratioThresholdFlat: layout.ratioThresholdFlat
       };
 
-      model.resizeSignatureParts = buildResizeSignatureParts(model);
+      model.resizeSignatureParts = buildRoutePointsSignatureParts(model);
       return model;
     }
 
     return {
       id: "RoutePointsRenderModel",
       buildModel: buildModel,
-      buildResizeSignatureParts: buildResizeSignatureParts,
+      buildResizeSignatureParts: buildRoutePointsSignatureParts,
       canActivateRoutePoint: function (args) {
         return navInteractionPolicy.canDispatchWhenNotEditing(args && args.props);
       }

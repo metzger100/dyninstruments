@@ -1,7 +1,7 @@
 /**
  * Module: FullCircleRadialTextLayout - Shared text layout helpers for full-circle dial widgets
  * Documentation: documentation/radial/full-circle-dial-engine.md
- * Depends: RadialTextLayout state API from FullCircleRadialEngine callbacks
+ * Depends: RadialTextLayout state API from FullCircleRadialEngine callbacks, TextLayoutScaleHelpers, HtmlWidgetUtils, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,19 +12,11 @@
 
   const hasOwn = Object.prototype.hasOwnProperty;
   const NORMAL_DEFAULTS = { innerMarginFactor: 0.03, minHeightFactor: 0.45, dualGapFactor: 0.05 };
-  // dyni-lint-disable-next-line duplicate-functions -- Layout owners intentionally keep a tiny local clamp helper for geometry config normalization.
-  function clampNumber(value, minValue, maxValue, defaultValue) {
-    const n = Number(value);
-    if (!Number.isFinite(n) || value == null || (typeof value === "string" && value.trim() === "")) {
-      return defaultValue;
-    }
-    return Math.max(minValue, Math.min(maxValue, n));
-  }
+  let clampNumber;
+  let resolveTextFillScale;
+  let buildTextOptions;
   function resolveSecondaryScale(value) {
     return clampNumber(value, 0.3, 3.0, 0.8);
-  }
-  function resolveTextFillScale(state) {
-    return clampNumber(state && state.textFillScale, 0.1, 10, 1);
   }
   function growSize(currentSize, ceilingSize, textFillScale) {
     const current = Math.max(1, Math.floor(Number(currentSize) || 0));
@@ -48,10 +40,6 @@
       minHeightFactor: themeNumber(source, "minHeightFactor", NORMAL_DEFAULTS.minHeightFactor, 0.25, 0.95),
       dualGapFactor: themeNumber(source, "dualGapFactor", NORMAL_DEFAULTS.dualGapFactor, 0, 0.25)
     };
-  }
-  function buildTextOptions(state) {
-    const opacity = state && state.theme && state.theme.opacity && typeof state.theme.opacity === "object" ? state.theme.opacity : {};
-    return { captionOpacity: opacity.caption, unitOpacity: opacity.unit };
   }
   function boostValueUnitFit(state, fit, unitText, boxHeight) {
     if (!fit) {
@@ -362,7 +350,10 @@
     drawBlock(state, xRight, yTop, halfWidth, blockHeight, right, "left", sizes);
   }
 
-  function create() {
+  function create(def, componentContext) {
+    clampNumber = componentContext.components.require("ValueMath").clampNumber;
+    resolveTextFillScale = componentContext.components.require("TextLayoutScaleHelpers").resolveTextFillScale;
+    buildTextOptions = componentContext.components.require("HtmlWidgetUtils").buildTextOptions;
     function drawSingleModeText(state, mode, display, opts) {
       if (mode === "flat") {
         drawSingleFlat(state, display, opts);

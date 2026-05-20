@@ -19,7 +19,7 @@
     return payload.props && typeof payload.props === "object" ? payload.props : {};
   }
 
-  function resolveShellRect(payload) {
+  function extractPayloadShellRect(payload) {
     return payload.shellRect || null;
   }
 
@@ -51,7 +51,7 @@
     function getPreparedPayload(payload) {
       const normalizedPayload = resolvePayload(payload);
       const props = resolveProps(normalizedPayload);
-      const shellRect = resolveShellRect(normalizedPayload);
+      const shellRect = extractPayloadShellRect(normalizedPayload);
       const revision = resolveRevision(normalizedPayload);
       const shellWidth = resolveShellDimension(shellRect, "width");
       const shellHeight = resolveShellDimension(shellRect, "height");

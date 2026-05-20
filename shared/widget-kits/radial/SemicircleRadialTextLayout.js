@@ -1,7 +1,7 @@
 /**
  * Module: SemicircleRadialTextLayout - Shared text layout helper for semicircle radial gauges
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: RadialTextLayout state API from SemicircleRadialEngine
+ * Depends: RadialTextLayout state API from SemicircleRadialEngine, TextLayoutScaleHelpers, TextLayoutEngine, HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -9,43 +9,18 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniSemicircleRadialTextLayout = factory(); }
 }(this, function () {
   "use strict";
-
-  function clampTextFillScale(value) {
-    const n = Number(value);
-    return Number.isFinite(n) && n > 0 ? n : 1;
-  }
+  const hasOwn = Object.prototype.hasOwnProperty;
+  let scaleHelpersApi;
+  let scaleTextCeilingFromHelpers;
+  let buildTextOptionsFromHtmlUtils;
+  let createFitCache;
+  let makeFitCacheKey;
+  let readFitCache;
+  let writeFitCache;
 
   function normalizeSecondaryScale(value) {
     const n = Number(value);
     return Number.isFinite(n) ? Math.max(0.3, Math.min(3.0, n)) : 0.8;
-  }
-
-  function scaleTextCeiling(basePx, maxPx, textFillScale) {
-    const ceilingPx = Math.max(1, Math.floor(Number(maxPx) || 0));
-    const fittedPx = Math.max(1, Math.floor(Number(basePx) || 0));
-    if (fittedPx >= ceilingPx) {
-      return ceilingPx;
-    }
-    const scaledFill = Math.max(0, clampTextFillScale(textFillScale) - 1);
-    const boostedPx = fittedPx + Math.floor((ceilingPx - fittedPx) * scaledFill);
-    return Math.max(1, Math.min(ceilingPx, boostedPx));
-  }
-
-  function makeFitCacheKey(data) {
-    return JSON.stringify(data);
-  }
-
-  function readFitCache(entry, key) {
-    return entry && entry.key === key ? entry.result : null;
-  }
-
-  function writeFitCache(cache, mode, key, result) {
-    cache[mode] = { key: key, result: result };
-    return result;
-  }
-
-  function createFitCache() {
-    return { flat: null, high: null, normal: null };
   }
 
   function measureWidthClass(ctx, text, fontPx, weight, family) {
@@ -78,42 +53,6 @@
     };
   }
 
-  function buildTextOptions(state) {
-    const opacity = state && state.theme && state.theme.opacity && typeof state.theme.opacity === "object" ? state.theme.opacity : {};
-    return {
-      captionOpacity: opacity.caption,
-      unitOpacity: opacity.unit
-    };
-  }
-
-  function scaleValueUnitFit(state, valueText, unitText, fit, boxHeight) {
-    if (!fit) {
-      return fit;
-    }
-    const maxPx = Math.max(1, Math.floor(Number(boxHeight) || 0));
-    return {
-      vPx: scaleTextCeiling(fit.vPx, maxPx, state.textFillScale),
-      uPx: unitText ? scaleTextCeiling(fit.uPx, maxPx, state.textFillScale) : 0,
-      gap: unitText ? scaleTextCeiling(fit.gap, Math.max(1, Math.floor(maxPx * 0.5)), state.textFillScale) : 0
-    };
-  }
-
-  function scaleInlineFit(state, caption, unitText, fit, boxHeight) {
-    if (!fit) {
-      return fit;
-    }
-    const maxPx = Math.max(1, Math.floor(Number(boxHeight) || 0));
-    const gapMaxPx = Math.max(1, Math.floor(maxPx * 0.5));
-    return {
-      cPx: caption ? scaleTextCeiling(fit.cPx, maxPx, state.textFillScale) : 0,
-      vPx: scaleTextCeiling(fit.vPx, maxPx, state.textFillScale),
-      uPx: unitText ? scaleTextCeiling(fit.uPx, maxPx, state.textFillScale) : 0,
-      g1: caption ? scaleTextCeiling(fit.g1, gapMaxPx, state.textFillScale) : 0,
-      g2: unitText ? scaleTextCeiling(fit.g2, gapMaxPx, state.textFillScale) : 0,
-      total: fit.total
-    };
-  }
-
   function computeThreeRowsSizes(state, display, boxW, blockH) {
     const text = state.text;
     const secScale = normalizeSecondaryScale(display.secScale);
@@ -122,17 +61,17 @@
     const unitHeight = Math.max(1, Math.floor(valueHeight * secScale));
 
     return {
-      cPx: scaleTextCeiling(
+      cPx: scaleTextCeilingFromHelpers(
         text.fitTextPx(state.ctx, display.caption, boxW, captionHeight, state.family, state.labelWeight),
         captionHeight,
         state.textFillScale
       ),
-      vPx: scaleTextCeiling(
+      vPx: scaleTextCeilingFromHelpers(
         text.fitTextPx(state.ctx, display.valueText, boxW, valueHeight, state.family, state.valueWeight),
         valueHeight,
         state.textFillScale
       ),
-      uPx: scaleTextCeiling(
+      uPx: scaleTextCeilingFromHelpers(
         text.fitTextPx(state.ctx, display.unit, boxW, unitHeight, state.family, state.labelWeight),
         unitHeight,
         state.textFillScale
@@ -181,7 +120,7 @@
       gaugeTop: state.geom.gaugeTop,
       radius: state.geom.R
     });
-    const fit = readFitCache(fitCache.flat, key) || writeFitCache(
+    const fit = readFitCache(fitCache, "flat", key) || writeFitCache(
       fitCache,
       "flat",
       key,
@@ -197,9 +136,11 @@
         state.labelWeight
       )
     );
-    const scaledFit = scaleValueUnitFit(state, display.valueText, display.unit, fit, boxes.bottomBox.h);
+    const scaledFit = fit
+      ? scaleHelpersApi.scaleValueUnitFit(state, display.valueText, display.unit, fit, boxes.bottomBox.h)
+      : fit;
     const captionBasePx = Math.max(1, Math.floor(scaledFit.vPx * normalizeSecondaryScale(display.secScale)));
-    const captionMaxPx = scaleTextCeiling(captionBasePx, boxes.topBox.h, state.textFillScale);
+    const captionMaxPx = scaleTextCeilingFromHelpers(captionBasePx, boxes.topBox.h, state.textFillScale);
 
     text.drawCaptionMax(
       state.ctx,
@@ -212,7 +153,7 @@
       captionMaxPx,
       "right",
       state.labelWeight,
-      buildTextOptions(state)
+      buildTextOptionsFromHtmlUtils(state)
     );
     text.drawValueUnitWithFit(
       state.ctx,
@@ -227,7 +168,7 @@
       "right",
       state.valueWeight,
       state.labelWeight,
-      buildTextOptions(state)
+      buildTextOptionsFromHtmlUtils(state)
     );
   }
 
@@ -251,7 +192,7 @@
       boxH: box.h,
       bandY: box.y
     });
-    const fit = readFitCache(fitCache.high, key) || writeFitCache(
+    const fit = readFitCache(fitCache, "high", key) || writeFitCache(
       fitCache,
       "high",
       key,
@@ -268,7 +209,12 @@
         state.labelWeight
       )
     );
-    const scaledFit = scaleInlineFit(state, display.caption, display.unit, fit, box.h);
+    const scaledFit = fit
+      ? scaleHelpersApi.scaleInlineFit(state, display.caption, display.valueText, display.unit, fit, box.h)
+      : fit;
+    if (scaledFit && fit && hasOwn.call(fit, "total")) {
+      scaledFit.total = fit.total;
+    }
 
     text.drawInlineCapValUnit(
       state.ctx,
@@ -283,7 +229,7 @@
       scaledFit,
       state.valueWeight,
       state.labelWeight,
-      buildTextOptions(state)
+      buildTextOptionsFromHtmlUtils(state)
     );
   }
 
@@ -314,7 +260,7 @@
       ringW: state.geom.ringW,
       radius: state.geom.R
     });
-    let layout = readFitCache(fitCache.normal, key);
+    let layout = readFitCache(fitCache, "normal", key);
     if (!layout) {
       let best = null;
       const secScale = normalizeSecondaryScale(display.secScale);
@@ -366,11 +312,21 @@
       layout.sizes,
       state.valueWeight,
       state.labelWeight,
-      buildTextOptions(state)
+      buildTextOptionsFromHtmlUtils(state)
     );
   }
 
-  function create() {
+  function create(def, componentContext) {
+    const scaleHelpers = componentContext.components.require("TextLayoutScaleHelpers");
+    const textLayoutEngine = componentContext.components.require("TextLayoutEngine");
+    const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    createFitCache = textLayoutEngine.createFitCache;
+    makeFitCacheKey = textLayoutEngine.makeFitCacheKey;
+    readFitCache = textLayoutEngine.readFitCache;
+    writeFitCache = textLayoutEngine.writeFitCache;
+    scaleHelpersApi = scaleHelpers;
+    scaleTextCeilingFromHelpers = scaleHelpers.scaleTextCeiling;
+    buildTextOptionsFromHtmlUtils = htmlUtils.buildTextOptions;
     function drawModeText(state, display, fitCache) {
       if (display && display.hideTextualMetrics === true) {
         return;

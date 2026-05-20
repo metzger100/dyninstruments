@@ -1,7 +1,7 @@
 /**
  * Module: StableDigits - Shared numeric decomposition for fixed-width digit rendering
  * Documentation: documentation/shared/stable-digits.md
- * Depends: PlaceholderNormalize
+ * Depends: PlaceholderNormalize, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,13 +12,7 @@
 
   const hasOwn = Object.prototype.hasOwnProperty;
   const NUMBER_PARTS_RE = /^\s*([+-]?)(\d+)(?:[.,](\d+))?\s*(.*?)\s*$/;
-
-  function toText(value) {
-    if (value == null) {
-      return "";
-    }
-    return String(value);
-  }
+  let toText;
 
   function toIntegerWidth(value) {
     const n = Number(value);
@@ -83,6 +77,7 @@
 
   function create(def, componentContext) {
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    toText = componentContext.components.require("ValueMath").toText;
 
     function normalize(rawFormattedText, options) {
       const rawText = toText(rawFormattedText);

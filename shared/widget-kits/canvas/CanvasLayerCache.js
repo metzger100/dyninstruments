@@ -1,7 +1,7 @@
 /**
  * Module: CanvasLayerCache - Shared offscreen canvas layer cache with explicit invalidation
  * Documentation: documentation/shared/canvas-layer-cache.md
- * Depends: Canvas ownerDocument.createElement("canvas"), CanvasRenderingContext2D
+ * Depends: Canvas ownerDocument.createElement("canvas"), CanvasRenderingContext2D, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,6 +11,8 @@
   "use strict";
 
   function create(def, componentContext) {
+    const keyToText = componentContext.components.require("ValueMath").keyToText;
+
     function normalizeLayers(spec) {
       const source = spec && Array.isArray(spec.layers) ? spec.layers : null;
       if (!source || !source.length) {
@@ -27,13 +29,6 @@
         out.push(name);
       }
       return out.length ? out : ["layer"];
-    }
-
-    function keyToText(key) {
-      if (typeof key === "string") {
-        return key;
-      }
-      return JSON.stringify(key);
     }
 
     function createLayer(canvas, width, height) {
