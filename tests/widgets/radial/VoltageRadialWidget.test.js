@@ -222,7 +222,7 @@ describe("VoltageRadialWidget", function () {
       voltageRadialAlarmFrom: 11.6
     }, 10, 15, {}, valueUtils, theme);
     expect(buildLowEndSectors).toHaveBeenCalledTimes(1);
-    expect(Number.isNaN(buildLowEndSectors.mock.calls[0][0].warningFrom)).toBe(true);
+    expect(buildLowEndSectors.mock.calls[0][0].warningFrom).toBe(undefined);
     expect(buildLowEndSectors.mock.calls[0][0].alarmFrom).toBe(11.6);
 
     captured.buildSectors({
@@ -232,7 +232,7 @@ describe("VoltageRadialWidget", function () {
     }, 10, 15, {}, valueUtils, theme);
     expect(buildLowEndSectors).toHaveBeenCalledTimes(2);
     expect(buildLowEndSectors.mock.calls[1][0].warningFrom).toBe(12.2);
-    expect(Number.isNaN(buildLowEndSectors.mock.calls[1][0].alarmFrom)).toBe(true);
+    expect(buildLowEndSectors.mock.calls[1][0].alarmFrom).toBe(undefined);
   });
 
   it("does not force fixed-decimal fallback text on raw formatter passthrough", function () {

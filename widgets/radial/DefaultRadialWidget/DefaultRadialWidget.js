@@ -14,11 +14,6 @@
     const renderer = componentContext.components.require("SemicircleRadialEngine");
     const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
-    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
-
-    function resolveThreshold(value) {
-      return toOptionalFiniteNumber(value);
-    }
 
     function pushSector(sectors, from, to, color, minV, maxV, arc, valueUtils) {
       const sector = valueUtils.sectorAngles(from, to, minV, maxV, arc);
@@ -39,10 +34,10 @@
       const warningLowEnabled = p.defaultRadialWarningLowEnabled === true;
       const warningHighEnabled = p.defaultRadialWarningHighEnabled === true;
       const alarmHighEnabled = p.defaultRadialAlarmHighEnabled === true;
-      const alarmLowAt = resolveThreshold(p.defaultRadialAlarmLowAt);
-      const warningLowAt = resolveThreshold(p.defaultRadialWarningLowAt);
-      const warningHighAt = resolveThreshold(p.defaultRadialWarningHighAt);
-      const alarmHighAt = resolveThreshold(p.defaultRadialAlarmHighAt);
+      const alarmLowAt = p.defaultRadialAlarmLowAt;
+      const warningLowAt = p.defaultRadialWarningLowAt;
+      const warningHighAt = p.defaultRadialWarningHighAt;
+      const alarmHighAt = p.defaultRadialAlarmHighAt;
 
       if (alarmLowEnabled && Number.isFinite(alarmLowAt)) {
         pushSector(

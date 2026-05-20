@@ -14,8 +14,6 @@
     const engine = componentContext.components.require("LinearGaugeEngine");
     const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
-    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
-
     function formatDisplay(raw, props) {
       const formatted = valueMath.formatGaugeDisplay(
         raw,
@@ -31,28 +29,29 @@
     }
 
     function buildSectors(props, minV, maxV, axis, theme) {
-      const warningFrom = toOptionalFiniteNumber(props && props.tempLinearWarningFrom);
-      const alarmFrom = toOptionalFiniteNumber(props && props.tempLinearAlarmFrom);
-      const warningTo = (Number.isFinite(alarmFrom) && Number.isFinite(warningFrom) && alarmFrom > warningFrom)
-        ? alarmFrom
-        : maxV;
+      const p = props || {};
+      const warningFrom = p.tempLinearWarningFrom;
+      const alarmFrom = p.tempLinearAlarmFrom;
       const sectors = [];
 
       if (Number.isFinite(warningFrom)) {
+        const warningCeiling = Number.isFinite(alarmFrom) && alarmFrom > warningFrom ? alarmFrom : maxV;
         sectors.push({
           from: valueMath.clamp(warningFrom, axis.min, axis.max),
-          to: valueMath.clamp(warningTo, axis.min, axis.max),
+          to: valueMath.clamp(warningCeiling, axis.min, axis.max),
           color: theme.colors.warning
         });
       }
-
-      if (Number.isFinite(alarmFrom)) {
-        sectors.push({
-          from: valueMath.clamp(alarmFrom, axis.min, axis.max),
-          to: valueMath.clamp(maxV, axis.min, axis.max),
-          color: theme.colors.alarm
+      if (!Number.isFinite(alarmFrom)) {
+        return sectors.filter(function (entry) {
+          return entry.to > entry.from;
         });
       }
+      sectors.push({
+        from: valueMath.clamp(alarmFrom, axis.min, axis.max),
+        to: valueMath.clamp(maxV, axis.min, axis.max),
+        color: theme.colors.alarm
+      });
 
       return sectors.filter(function (entry) {
         return entry.to > entry.from;

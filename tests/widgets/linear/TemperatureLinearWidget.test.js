@@ -324,8 +324,8 @@ describe("TemperatureLinearWidget", function () {
     });
 
     expect(captured.buildSectors({
-      tempLinearWarningFrom: "28",
-      tempLinearAlarmFrom: "32"
+      tempLinearWarningFrom: 28,
+      tempLinearAlarmFrom: 32
     }, 0, 35, axis, {}, theme)).toEqual([
       { from: 28, to: 32, color: "#123456" },
       { from: 32, to: 35, color: "#654321" }

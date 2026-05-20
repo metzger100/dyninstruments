@@ -17,7 +17,9 @@ describe("WindLinearWidget", function () {
                   if (!isFinite(n)) return lo;
                   return Math.max(lo, Math.min(hi, n));
                 },
-                toFiniteNumber(value) {
+                toOptionalFiniteNumber(value) {
+                  if (value == null) return undefined;
+                  if (typeof value === "string" && value.trim() === "") return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
@@ -131,7 +133,9 @@ describe("WindLinearWidget", function () {
                   if (!isFinite(n)) return lo;
                   return Math.max(lo, Math.min(hi, n));
                 },
-                toFiniteNumber(value) {
+                toOptionalFiniteNumber(value) {
+                  if (value == null) return undefined;
+                  if (typeof value === "string" && value.trim() === "") return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
@@ -211,7 +215,9 @@ describe("WindLinearWidget", function () {
                   if (!isFinite(n)) return lo;
                   return Math.max(lo, Math.min(hi, n));
                 },
-                toFiniteNumber(value) {
+                toOptionalFiniteNumber(value) {
+                  if (value == null) return undefined;
+                  if (typeof value === "string" && value.trim() === "") return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
@@ -304,7 +310,9 @@ describe("WindLinearWidget", function () {
                   if (!isFinite(n)) return lo;
                   return Math.max(lo, Math.min(hi, n));
                 },
-                toFiniteNumber(value) {
+                toOptionalFiniteNumber(value) {
+                  if (value == null) return undefined;
+                  if (typeof value === "string" && value.trim() === "") return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
@@ -360,7 +368,9 @@ describe("WindLinearWidget", function () {
                   if (!isFinite(n)) return lo;
                   return Math.max(lo, Math.min(hi, n));
                 },
-                toFiniteNumber(value) {
+                toOptionalFiniteNumber(value) {
+                  if (value == null) return undefined;
+                  if (typeof value === "string" && value.trim() === "") return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },

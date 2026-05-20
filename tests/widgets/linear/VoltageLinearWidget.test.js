@@ -344,8 +344,8 @@ describe("VoltageLinearWidget", function () {
     expect(captured.buildSectors({
       voltageLinearWarningEnabled: true,
       voltageLinearAlarmEnabled: true,
-      voltageLinearWarningFrom: "12.2",
-      voltageLinearAlarmFrom: "11.6"
+      voltageLinearWarningFrom: 12.2,
+      voltageLinearAlarmFrom: 11.6
     }, 10, 15, axis, {}, theme)).toEqual([
       { from: 10, to: 11.6, color: "#654321" },
       { from: 11.6, to: 12.2, color: "#123456" }

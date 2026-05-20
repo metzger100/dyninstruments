@@ -37,9 +37,10 @@
         return valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatSpeed", [unit || "kn"]);
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
+        const p = props || {};
         const radialProps = {
-          warningFrom: props && props.speedRadialWarningFrom,
-          alarmFrom: props && props.speedRadialAlarmFrom
+          warningFrom: p.speedRadialWarningFrom,
+          alarmFrom: p.speedRadialAlarmFrom
         };
         return valueUtils.buildHighEndSectors(radialProps, minV, maxV, arc, {
           warningColor: theme.colors.warning,

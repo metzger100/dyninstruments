@@ -859,7 +859,7 @@ describe("LinearGaugeEngine", function () {
     });
 
     expect(receivedUnit).toBe("");
-    expect(harness.calls.fitInlineCaptions).toEqual(["0"]);
+    expect(harness.calls.fitInlineCaptions).toEqual([0]);
   });
 
   it("uses placeholder text for missing input on the default formatDisplay fallback", function () {

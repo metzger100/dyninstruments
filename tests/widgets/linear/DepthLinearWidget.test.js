@@ -344,8 +344,8 @@ describe("DepthLinearWidget", function () {
     });
 
     expect(captured.buildSectors({
-      depthLinearWarningFrom: "5",
-      depthLinearAlarmFrom: "2"
+      depthLinearWarningFrom: 5,
+      depthLinearAlarmFrom: 2
     }, 0, 30, axis, {}, theme)).toEqual([
       { from: 0, to: 2, color: "#654321" },
       { from: 2, to: 5, color: "#123456" }

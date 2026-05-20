@@ -204,7 +204,7 @@ describe("DefaultLinearWidget", function () {
 
     expect(h.captured.buildSectors({
       defaultLinearWarningHighEnabled: true,
-      defaultLinearWarningHighAt: "75"
+      defaultLinearWarningHighAt: 75
     }, 0, 100, { min: 0, max: 100 }, h.valueMath, theme)).toEqual([
       { from: 75, to: 100, color: "#e7c66a" }
     ]);

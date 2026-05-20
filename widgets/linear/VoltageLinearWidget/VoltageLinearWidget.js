@@ -14,8 +14,6 @@
     const engine = componentContext.components.require("LinearGaugeEngine");
     const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
-    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
-
     function formatDisplay(raw, props) {
       return valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
     }
@@ -29,13 +27,13 @@
       }
 
       const warningFrom = warningEnabled
-        ? toOptionalFiniteNumber(p.voltageLinearWarningFrom)
-        : NaN;
+        ? p.voltageLinearWarningFrom
+        : undefined;
       const alarmFrom = alarmEnabled
-        ? toOptionalFiniteNumber(p.voltageLinearAlarmFrom)
-        : NaN;
-      const alarmTo = Number.isFinite(alarmFrom) ? valueMath.clamp(alarmFrom, axis.min, axis.max) : NaN;
-      const warningTo = Number.isFinite(warningFrom) ? valueMath.clamp(warningFrom, axis.min, axis.max) : NaN;
+        ? p.voltageLinearAlarmFrom
+        : undefined;
+      const alarmTo = Number.isFinite(alarmFrom) ? valueMath.clamp(alarmFrom, axis.min, axis.max) : undefined;
+      const warningTo = Number.isFinite(warningFrom) ? valueMath.clamp(warningFrom, axis.min, axis.max) : undefined;
       const sectors = [];
 
       if (Number.isFinite(alarmTo) && alarmTo > minV) {

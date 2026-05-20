@@ -84,12 +84,13 @@
     }
 
     function drawFrame(state, props, display, api) {
+      const p = props || {};
       api.drawDefaultPointer();
 
       const heading = Number(display && display.easedNum);
-      const marker = props && props.markerCourse;
+      const marker = p.markerCourse;
       const markerFinite = valueMath.isFiniteNumber(marker);
-      const easingEnabled = props.easing !== false;
+      const easingEnabled = p.easing !== false;
       const nowMs = Number(state && state.nowMs);
       const easedMarker = markerFinite
         ? markerMotion.resolve(state.canvas, marker, easingEnabled, nowMs)

@@ -183,8 +183,8 @@
           ? (theme.font.familyMono || paint.family)
           : paint.family;
         const color = paint.color;
-        const caption = String(p.caption).trim();
-        const unit = String(hasOwn.call(p, "unit") ? p.unit : unitDefault).trim();
+        const caption = p.caption;
+        const unit = hasOwn.call(p, "unit") ? p.unit : unitDefault;
         const raw = (typeof p.value !== "undefined") ? p.value : p[cfg.rawValueKey];
         const display = formatDisplay(raw, p, unit);
         const range = value.normalizeRange(p[rangeProps.min], p[rangeProps.max], rangeDefaults.min, rangeDefaults.max);

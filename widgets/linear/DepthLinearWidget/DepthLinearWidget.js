@@ -17,15 +17,13 @@
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     const unitFormatter = componentContext.components.require("UnitAwareFormatter");
     const formatDisplay = depthDisplayFormatter.createFormatDisplay(unitFormatter, placeholderNormalize);
-    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
-
     function buildLowEndSectors(props, minV, maxV, options) {
       const p = props || {};
       const opts = options || {};
-      const warningFrom = toOptionalFiniteNumber(p.warningFrom);
-      const alarmFrom = toOptionalFiniteNumber(p.alarmFrom);
-      const alarmTo = Number.isFinite(alarmFrom) ? valueMath.clamp(alarmFrom, minV, maxV) : NaN;
-      const warningTo = Number.isFinite(warningFrom) ? valueMath.clamp(warningFrom, minV, maxV) : NaN;
+      const warningFrom = p.warningFrom;
+      const alarmFrom = p.alarmFrom;
+      const alarmTo = Number.isFinite(alarmFrom) ? valueMath.clamp(alarmFrom, minV, maxV) : undefined;
+      const warningTo = Number.isFinite(warningFrom) ? valueMath.clamp(warningFrom, minV, maxV) : undefined;
       const sectors = [];
 
       if (Number.isFinite(alarmTo) && alarmTo > minV) {
@@ -41,9 +39,10 @@
     }
 
     function buildSectors(props, minV, maxV, axis, theme) {
+      const p = props || {};
       return buildLowEndSectors({
-        warningFrom: props && props.depthLinearWarningFrom,
-        alarmFrom: props && props.depthLinearAlarmFrom
+        warningFrom: p.depthLinearWarningFrom,
+        alarmFrom: p.depthLinearAlarmFrom
       }, minV, maxV, {
         warningColor: theme.colors.warning,
         alarmColor: theme.colors.alarm

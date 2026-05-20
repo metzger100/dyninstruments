@@ -38,9 +38,10 @@
       tickSteps: valueMath.resolveStandardTickSteps,
       formatDisplay: formatDisplay,
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
+        const p = props || {};
         const radialProps = {
-          warningFrom: props && props.depthRadialWarningFrom,
-          alarmFrom: props && props.depthRadialAlarmFrom
+          warningFrom: p.depthRadialWarningFrom,
+          alarmFrom: p.depthRadialAlarmFrom
         };
         return valueUtils.buildLowEndSectors(radialProps, minV, maxV, arc, {
           warningColor: theme.colors.warning,

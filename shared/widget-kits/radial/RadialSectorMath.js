@@ -72,8 +72,8 @@
       const opts = options || {};
       const warningFrom = readOptionalThreshold(p.warningFrom, opts.defaultWarningFrom);
       const alarmFrom = readOptionalThreshold(p.alarmFrom, opts.defaultAlarmFrom);
-      const alarmTo = Number.isFinite(alarmFrom) ? value.clamp(alarmFrom, minV, maxV) : NaN;
-      const warningTo = Number.isFinite(warningFrom) ? value.clamp(warningFrom, minV, maxV) : NaN;
+      const alarmTo = Number.isFinite(alarmFrom) ? value.clamp(alarmFrom, minV, maxV) : undefined;
+      const warningTo = Number.isFinite(warningFrom) ? value.clamp(warningFrom, minV, maxV) : undefined;
       const alarm = (Number.isFinite(alarmTo) && alarmTo > minV)
         ? sectorAngles(minV, alarmTo, minV, maxV, arc)
         : null;

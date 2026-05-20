@@ -331,8 +331,8 @@ describe("SpeedLinearWidget", function () {
     });
 
     expect(captured.buildSectors({
-      speedLinearWarningFrom: "20",
-      speedLinearAlarmFrom: "25"
+      speedLinearWarningFrom: 20,
+      speedLinearAlarmFrom: 25
     }, 0, 30, axis, valueApi, theme)).toEqual([
       { from: 20, to: 25, color: "#123456" },
       { from: 25, to: 30, color: "#654321" }

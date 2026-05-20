@@ -143,7 +143,7 @@
         const textFillScale = scaleHelpers.resolveTextFillScale(layout.responsive);
         const range = value.normalizeRange(p[rangeProps.min], p[rangeProps.max], rangeDefaults.min, rangeDefaults.max);
         const raw = (typeof p.value !== "undefined") ? p.value : p[cfg.rawValueKey];
-        const unit = String(hasOwn.call(p, "unit") ? p.unit : unitDefault).trim();
+        const unit = hasOwn.call(p, "unit") ? p.unit : unitDefault;
         const display = formatDisplay(raw, p, unit);
         const easingEnabled = p.easing !== false;
         const nowMs = Date.now();
@@ -250,7 +250,7 @@
           easedNum: easedDisplayNum,
           text: valueText,
           unit: unit,
-          caption: String(p.caption).trim(),
+          caption: p.caption,
           secScale: secScale,
           rowBoxes: rowBoxes,
           parsed: display

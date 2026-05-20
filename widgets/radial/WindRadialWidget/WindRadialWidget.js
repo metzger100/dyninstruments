@@ -48,8 +48,8 @@
       const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
         ? p.default
         : placeholderNormalize.normalize(undefined, undefined);
-      const angleUnit = String(p.angleUnit).trim();
-      const speedUnit = String(p.speedUnit).trim();
+      const angleUnit = p.angleUnit;
+      const speedUnit = p.speedUnit;
       const secScale = state.value.clamp(p.captionUnitScale, 0.3, 3.0);
       let angleText = defaultText;
       if (Number.isFinite(p.angle)) {
@@ -76,13 +76,13 @@
         windRadialLayMin: state.value.clamp(p.windRadialLayMin, 0, 180),
         windRadialLayMax: state.value.clamp(p.windRadialLayMax, 0, 180),
         left: {
-          caption: String(p.angleCaption).trim(),
+          caption: p.angleCaption,
           value: angleText,
           unit: angleUnit,
           secScale: secScale
         },
         right: {
-          caption: String(p.speedCaption).trim(),
+          caption: p.speedCaption,
           value: speedValueText,
           unit: speedUnit,
           secScale: secScale

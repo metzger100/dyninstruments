@@ -223,7 +223,7 @@ describe("DefaultRadialWidget", function () {
 
     expect(h.captured.buildSectors({
       defaultRadialWarningHighEnabled: true,
-      defaultRadialWarningHighAt: "75"
+      defaultRadialWarningHighAt: 75
     }, 0, 100, {}, valueUtils, theme)).toEqual([
       { a0: 75, a1: 100, color: "#e7c66a" }
     ]);

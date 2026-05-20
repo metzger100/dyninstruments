@@ -88,8 +88,8 @@
       return {
         heading: heading,
         marker: p.markerCourse,
-        caption: String(p.caption).trim(),
-        unit: String(p.unit).trim(),
+        caption: p.caption,
+        unit: p.unit,
         value: valueText,
         secScale: state.value.clamp(p.captionUnitScale, 0.3, 3.0)
       };

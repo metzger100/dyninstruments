@@ -14,11 +14,6 @@
     const engine = componentContext.components.require("LinearGaugeEngine");
     const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
-    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
-
-    function resolveThreshold(value) {
-      return toOptionalFiniteNumber(value);
-    }
 
     function buildSectors(props, minV, maxV, axis, valueApi, theme) {
       const p = props || {};
@@ -27,10 +22,10 @@
       const warningLowEnabled = p.defaultLinearWarningLowEnabled === true;
       const warningHighEnabled = p.defaultLinearWarningHighEnabled === true;
       const alarmHighEnabled = p.defaultLinearAlarmHighEnabled === true;
-      const alarmLowAt = resolveThreshold(p.defaultLinearAlarmLowAt);
-      const warningLowAt = resolveThreshold(p.defaultLinearWarningLowAt);
-      const warningHighAt = resolveThreshold(p.defaultLinearWarningHighAt);
-      const alarmHighAt = resolveThreshold(p.defaultLinearAlarmHighAt);
+      const alarmLowAt = p.defaultLinearAlarmLowAt;
+      const warningLowAt = p.defaultLinearWarningLowAt;
+      const warningHighAt = p.defaultLinearWarningHighAt;
+      const alarmHighAt = p.defaultLinearAlarmHighAt;
 
       if (alarmLowEnabled && Number.isFinite(alarmLowAt)) {
         sectors.push({

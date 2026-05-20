@@ -47,9 +47,10 @@
           : formatted;
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
+        const p = props || {};
         const radialProps = {
-          warningFrom: props && props.tempRadialWarningFrom,
-          alarmFrom: props && props.tempRadialAlarmFrom
+          warningFrom: p.tempRadialWarningFrom,
+          alarmFrom: p.tempRadialAlarmFrom
         };
         return valueUtils.buildHighEndSectors(radialProps, minV, maxV, arc, {
           warningColor: theme.colors.warning,

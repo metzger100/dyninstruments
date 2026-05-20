@@ -49,10 +49,10 @@
           alarmFrom: p.voltageRadialAlarmFrom
         };
         if (!warningEnabled) {
-          sectorProps.warningFrom = NaN;
+          sectorProps.warningFrom = undefined;
         }
         if (!alarmEnabled) {
-          sectorProps.alarmFrom = NaN;
+          sectorProps.alarmFrom = undefined;
         }
 
         return valueUtils.buildLowEndSectors(sectorProps, minV, maxV, arc, {

@@ -1020,7 +1020,7 @@ describe("SemicircleRadialEngine", function () {
     expect(drawModeText.mock.calls[0][0].layout).toBe(layoutSnapshot);
     expect(drawModeText.mock.calls[0][0].textFillScale).toBe(1.15);
     expect(drawModeText.mock.calls[0][1]).toEqual({
-      caption: "0",
+      caption: 0,
       valueText: "12.3",
       unit: "",
       secScale: 0.3,

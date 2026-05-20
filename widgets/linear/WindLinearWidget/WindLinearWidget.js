@@ -60,8 +60,8 @@
         ? valueMath.formatAngle180(angle, !!p.leadingZero)
         : defaultText;
       const angleNum = Number(angleText);
-      const angleUnit = String(p.angleUnit).trim();
-      const speedUnit = String(p.speedUnit).trim();
+      const angleUnit = p.angleUnit;
+      const speedUnit = p.speedUnit;
       const secScale = valueMath.clamp(p.captionUnitScale, 0.3, 3.0);
       const speedRawText = resolveSpeedText(p.speed, p, speedUnit, defaultText);
       const stableDigitsEnabled = p.stableDigits === true;
@@ -83,12 +83,12 @@
         text: angleValueText,
         secScale: secScale,
         left: {
-          caption: String(p.angleCaption).trim(),
+          caption: p.angleCaption,
           value: angleValueText,
           unit: angleUnit
         },
         right: {
-          caption: String(p.speedCaption).trim(),
+          caption: p.speedCaption,
           value: speedValueText,
           unit: speedUnit
         }
