@@ -17,7 +17,7 @@
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
     trimText = valueMath.trimText;
-    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
+    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
     function build(props, toolkit) {
       const p = props || {};

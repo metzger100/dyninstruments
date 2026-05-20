@@ -2,6 +2,13 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("DepthLinearWidget", function () {
+  function toOptionalFiniteNumber(value) {
+    if (value == null) return undefined;
+    if (typeof value === "string" && value.trim() === "") return undefined;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : undefined;
+  }
+
   it("passes LinearGaugeEngine config with range axis and low-end sectors", function () {
     let captured;
     const requestedModules = [];
@@ -39,6 +46,7 @@ describe("DepthLinearWidget", function () {
           create() {
             requestedModules.push("ValueMath");
             return {
+              toOptionalFiniteNumber,
               clamp(v, lo, hi) {
                 return Math.max(lo, Math.min(hi, Number(v)));
               },
@@ -147,6 +155,7 @@ describe("DepthLinearWidget", function () {
         ValueMath: {
           create() {
             return {
+              toOptionalFiniteNumber,
               clamp(v, lo, hi) {
                 return Math.max(lo, Math.min(hi, Number(v)));
               },
@@ -219,6 +228,7 @@ describe("DepthLinearWidget", function () {
         ValueMath: {
           create() {
             return {
+              toOptionalFiniteNumber,
               clamp(v, lo, hi) {
                 return Math.max(lo, Math.min(hi, Number(v)));
               },
@@ -287,6 +297,7 @@ describe("DepthLinearWidget", function () {
         ValueMath: {
           create() {
             return {
+              toOptionalFiniteNumber,
               clamp(v, lo, hi) {
                 return Math.max(lo, Math.min(hi, Number(v)));
               },

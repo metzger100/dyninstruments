@@ -28,6 +28,12 @@ describe("DefaultRadialWidget", function () {
       }
     };
     const valueMath = opts.valueMath || {
+      toOptionalFiniteNumber(value) {
+        if (value == null) return undefined;
+        if (typeof value === "string" && value.trim() === "") return undefined;
+        const n = Number(value);
+        return Number.isFinite(n) ? n : undefined;
+      },
       extractNumberText: vi.fn(function (text) {
         const match = String(text).match(/-?\d+(?:\.\d+)?/);
         return match ? match[0] : "";

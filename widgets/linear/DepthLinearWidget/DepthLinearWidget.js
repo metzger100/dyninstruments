@@ -17,16 +17,7 @@
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     const unitFormatter = componentContext.components.require("UnitAwareFormatter");
     const formatDisplay = depthDisplayFormatter.createFormatDisplay(unitFormatter, placeholderNormalize);
-    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || function (value) {
-      if (value == null) {
-        return undefined;
-      }
-      if (typeof value === "string" && value.trim() === "") {
-        return undefined;
-      }
-      const n = Number(value);
-      return Number.isFinite(n) ? n : undefined;
-    };
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
     function buildLowEndSectors(props, minV, maxV, options) {
       const p = props || {};

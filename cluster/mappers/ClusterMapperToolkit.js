@@ -145,7 +145,7 @@
     const angleMath = componentContext.components.require("RadialAngleMath");
     const valueMath = componentContext.components.require("ValueMath");
     toFiniteNumber = valueMath.toFiniteNumber;
-    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
+    toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
     const catalog = getSharedCatalog();
 
     return {

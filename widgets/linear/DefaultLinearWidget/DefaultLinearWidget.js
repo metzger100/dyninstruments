@@ -14,16 +14,7 @@
     const engine = componentContext.components.require("LinearGaugeEngine");
     const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
-    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || function (value) {
-      if (value == null) {
-        return undefined;
-      }
-      if (typeof value === "string" && value.trim() === "") {
-        return undefined;
-      }
-      const n = Number(value);
-      return Number.isFinite(n) ? n : undefined;
-    };
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
     function resolveThreshold(value) {
       return toOptionalFiniteNumber(value);

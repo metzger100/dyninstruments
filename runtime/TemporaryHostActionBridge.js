@@ -16,7 +16,7 @@
     return error;
   }
 
-  const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
+  const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
   function normalizeRoutePointIndex(index) {
     const normalized = toOptionalFiniteNumber(index);

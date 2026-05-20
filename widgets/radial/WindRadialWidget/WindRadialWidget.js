@@ -14,7 +14,7 @@
     const engine = componentContext.components.require("FullCircleRadialEngine");
     const textLayout = componentContext.components.require("FullCircleRadialTextLayout");
     const valueMath = componentContext.components.require("ValueMath");
-    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
     const stableDigits = componentContext.components.require("StableDigits");
     const springMotion = componentContext.components.require("SpringEasing").createMotion({ wrap: 360 });
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");

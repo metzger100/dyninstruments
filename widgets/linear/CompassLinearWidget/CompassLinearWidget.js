@@ -16,16 +16,7 @@
     const valueMath = componentContext.components.require("ValueMath");
     const springEasing = componentContext.components.require("SpringEasing");
     const markerMotion = springEasing.createMotion({ wrap: 360 });
-    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber || function (value) {
-      if (value == null) {
-        return undefined;
-      }
-      if (typeof value === "string" && value.trim() === "") {
-        return undefined;
-      }
-      const n = Number(value);
-      return Number.isFinite(n) ? n : undefined;
-    };
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
     function norm180(delta) {
       let out = ((Number(delta) + 180) % 360 + 360) % 360 - 180;

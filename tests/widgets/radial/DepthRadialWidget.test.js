@@ -2,6 +2,13 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("DepthRadialWidget", function () {
+  function toOptionalFiniteNumber(value) {
+    if (value == null) return undefined;
+    if (typeof value === "string" && value.trim() === "") return undefined;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : undefined;
+  }
+
   it("builds low-end sectors with alarm and warning order", function () {
     let captured;
     let receivedProps;
@@ -27,7 +34,7 @@ describe("DepthRadialWidget", function () {
     const componentContext = createComponentContextMock({
       modules: {
         SemicircleRadialEngine: { create() { requestedModules.push("SemicircleRadialEngine"); return { createRenderer(cfg) { captured = cfg; return renderCanvas; } }; } },
-        ValueMath: { create() { requestedModules.push("ValueMath"); return { resolveStandardTickSteps }; } },
+        ValueMath: { create() { requestedModules.push("ValueMath"); return { toOptionalFiniteNumber, resolveStandardTickSteps }; } },
         DepthDisplayFormatter: { create() { requestedModules.push("DepthDisplayFormatter"); return loadFresh("shared/widget-kits/format/DepthDisplayFormatter.js").create({}, componentContext); } },
         PlaceholderNormalize: { create() { requestedModules.push("PlaceholderNormalize"); return { normalize(text, defaultText) { if (text == null) return defaultText == null ? "---" : defaultText; const value = String(text).trim(); return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text); } }; } },
         UnitAwareFormatter: { create() { requestedModules.push("UnitAwareFormatter"); return unitFormatter; } }
@@ -115,6 +122,7 @@ describe("DepthRadialWidget", function () {
         ValueMath: {
           create() {
             return {
+              toOptionalFiniteNumber,
               resolveStandardTickSteps() {
                 return { major: 5, minor: 1 };
               }
