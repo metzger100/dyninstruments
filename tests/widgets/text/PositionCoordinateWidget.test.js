@@ -77,8 +77,14 @@ describe("PositionCoordinateWidget", function () {
           }
         },
         CanvasTextLayout: {
-          create() {
-            return {
+              create() {
+                return {
+                resolveFamily(family, options) {
+                  if (options && options.useMono === true) {
+                    return options.monoFamily || family;
+                  }
+                  return family;
+                },
                 setFont(ctx, px, weight, family) {
                   const size = Math.max(1, Math.floor(Number(px) || 0));
                   const weightNum = Math.floor(Number(weight));
@@ -144,6 +150,9 @@ describe("PositionCoordinateWidget", function () {
                     return Number(fallbackValue);
                   }
                   return Math.max(Number(lo), Math.min(Number(hi), n));
+                },
+                lerp(from, to, t) {
+                  return from + ((to - from) * t);
                 },
                 toText(value) {
                   return value == null ? "" : String(value).trim();

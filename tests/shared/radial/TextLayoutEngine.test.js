@@ -43,6 +43,9 @@ describe("TextLayoutEngine", function () {
             }
             return Math.max(Number(lo), Math.min(Number(hi), n));
           },
+          lerp(from, to, t) {
+            return from + ((to - from) * t);
+          },
           computeMode(ratio, normal, flat) {
             if (ratio < normal) return "high";
             if (ratio > flat) return "flat";

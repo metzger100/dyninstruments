@@ -4,6 +4,12 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 describe("TextLayoutPrimitives", function () {
   function createHarness() {
     const canvasTextLayout = {
+      resolveFamily(family, options) {
+        if (options && options.useMono === true) {
+          return options.monoFamily || family;
+        }
+        return family;
+      },
       setFont(ctx, px, weight, family) {
         ctx.font = Math.floor(Number(weight) || 0) + " " + Math.max(1, Math.floor(Number(px) || 0)) + "px " + (family || "sans-serif");
       }

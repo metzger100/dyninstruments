@@ -127,7 +127,7 @@ describe("ActiveRouteHtmlFit", function () {
 
   it("returns caption/value/unit style payload for all visible metrics", function () {
     const h = createHarness();
-    const hostContext = { __dyniActiveRouteTextMeasureCtx: createMeasureContext() };
+    const hostContext = { __dyniHtmlMeasureUtilsCtx: createMeasureContext() };
     const out = h.fit.compute({
       model: makeModel(),
       shellRect: { width: 320, height: 180 },
@@ -149,7 +149,7 @@ describe("ActiveRouteHtmlFit", function () {
     const h = createHarness();
     const model = makeModel({ isApproaching: false });
     const targetEl = document.createElement("div");
-    const hostContext = { __dyniActiveRouteTextMeasureCtx: createMeasureContext() };
+    const hostContext = { __dyniHtmlMeasureUtilsCtx: createMeasureContext() };
     const relaxedOut = h.fit.compute({
       model: model,
       shellRect: { width: 620, height: 220 },
@@ -195,7 +195,7 @@ describe("ActiveRouteHtmlFit", function () {
   it("reuses identical fit requests and misses when semantic or geometric inputs change", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
-    const hostContext = { __dyniActiveRouteTextMeasureCtx: createMeasureContext() };
+    const hostContext = { __dyniHtmlMeasureUtilsCtx: createMeasureContext() };
     const baseModel = makeModel({ routeNameText: "Coastal Route" });
     const stableRect = { width: 320, height: 180 };
 
@@ -235,7 +235,7 @@ describe("ActiveRouteHtmlFit", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
     const measureCtx = createMeasureContext();
-    const hostContext = { __dyniActiveRouteTextMeasureCtx: measureCtx };
+    const hostContext = { __dyniHtmlMeasureUtilsCtx: measureCtx };
     const shellRect = { width: 320, height: 180 };
 
     const proportional = h.fit.compute({
@@ -273,7 +273,7 @@ describe("ActiveRouteHtmlFit", function () {
       }
     });
     const targetEl = document.createElement("div");
-    const hostContext = { __dyniActiveRouteTextMeasureCtx: createMeasureContext() };
+    const hostContext = { __dyniHtmlMeasureUtilsCtx: createMeasureContext() };
     const shellRect = { width: 320, height: 180 };
     const model = makeModel({ stableDigitsEnabled: true });
 
@@ -297,7 +297,7 @@ describe("ActiveRouteHtmlFit", function () {
   it("avoids cache collisions when semantic text contains delimiter characters", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
-    const hostContext = { __dyniActiveRouteTextMeasureCtx: createMeasureContext() };
+    const hostContext = { __dyniHtmlMeasureUtilsCtx: createMeasureContext() };
     const shellRect = { width: 320, height: 180 };
     const modelA = makeModel({
       routeNameText: "A|B",
@@ -334,7 +334,7 @@ describe("ActiveRouteHtmlFit", function () {
   it("switches to plain metric value when padded stable-digits text clips", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
-    const hostContext = { __dyniActiveRouteTextMeasureCtx: createMeasureContext() };
+    const hostContext = { __dyniHtmlMeasureUtilsCtx: createMeasureContext() };
     const out = h.fit.compute({
       model: makeModel({
         stableDigitsEnabled: true,
@@ -351,7 +351,7 @@ describe("ActiveRouteHtmlFit", function () {
 
     expect(out.metricValues.remain).toBe("12345.6");
     expect(out.metricValues.rteEta).toBe("12:34");
-    expect(hostContext.__dyniActiveRouteTextMeasureCtx.calls.some((call) => call.text === " 00012345.6" && call.font.includes("mono-serif"))).toBe(true);
-    expect(hostContext.__dyniActiveRouteTextMeasureCtx.calls.some((call) => call.text === "nm" && call.font.includes("sans-serif"))).toBe(true);
+    expect(hostContext.__dyniHtmlMeasureUtilsCtx.calls.some((call) => call.text === " 00012345.6" && call.font.includes("mono-serif"))).toBe(true);
+    expect(hostContext.__dyniHtmlMeasureUtilsCtx.calls.some((call) => call.text === "nm" && call.font.includes("sans-serif"))).toBe(true);
   });
 });
