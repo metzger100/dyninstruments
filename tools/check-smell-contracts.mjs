@@ -16,6 +16,7 @@ const RULES = [
   { name: "text-layout-hotspot-budget", run: runTextLayoutHotspotBudgetRule },
   { name: "coordinate-formatter-no-raw-equality-fallback", run: runCoordinateFormatterRule },
   { name: "placeholder-contract", run: runPlaceholderContractRule },
+  { name: "canonical-helper-completeness", run: runCanonicalHelperCompletenessRule },
   { name: "dash-literal-contract", run: runDashLiteralContractRule },
   { name: "state-screen-precedence-contract", run: runStateScreenPrecedenceContractRule }
 ];
@@ -593,6 +594,152 @@ function runPlaceholderContractRule() {
   return out;
 }
 
+function runCanonicalHelperCompletenessRule() {
+  const out = [];
+  const ruleName = "canonical-helper-completeness";
+
+  const valueMathApi = loadComponentApi(out, ruleName, "shared/widget-kits/value/ValueMath.js", {});
+  assertApiFunctions(out, ruleName, "shared/widget-kits/value/ValueMath.js", valueMathApi, [
+    "toObject",
+    "toText",
+    "clampNumber",
+    "isObject",
+    "toSafeInteger",
+    "hasText",
+    "keyToText",
+    "textLength",
+    "lerp",
+    "appendUnit",
+    "toFiniteNumber",
+    "toOptionalFiniteNumber",
+    "isFiniteNumber",
+    "trimText",
+    "clamp",
+    "clampPositive",
+    "ensureObject"
+  ]);
+  if (!valueMathApi) {
+    return out;
+  }
+
+  const htmlMeasureUtilsApi = loadComponentApi(out, ruleName, "shared/widget-kits/html/HtmlMeasureUtils.js", {
+    ValueMath: valueMathApi
+  });
+  assertApiFunctions(out, ruleName, "shared/widget-kits/html/HtmlMeasureUtils.js", htmlMeasureUtilsApi, [
+    "parseFontPx",
+    "createApproximateMeasureContext",
+    "resolveMeasureContext",
+    "measurePx",
+    "measureStyle",
+    "toStyle",
+    "resolveOwnerDocument",
+    "resolveFitCache"
+  ]);
+
+  const htmlWidgetUtilsApi = loadComponentApi(out, ruleName, "shared/widget-kits/html/HtmlWidgetUtils.js", {
+    ValueMath: valueMathApi
+  });
+  assertApiFunctions(out, ruleName, "shared/widget-kits/html/HtmlWidgetUtils.js", htmlWidgetUtilsApi, [
+    "resolveDefaultText",
+    "toFontStyle",
+    "buildTextOptions",
+    "toStyleText",
+    "resolveMetricValueFamily",
+    "resolveLabelEdgePolicy",
+    "toPx",
+    "joinStyles"
+  ]);
+
+  const textLayoutCompositeApi = loadComponentApi(out, ruleName, "shared/widget-kits/text/TextLayoutComposite.js", {
+    TextLayoutPrimitives: createTextLayoutPrimitivesStub(),
+    TextLayoutScaleHelpers: createTextLayoutScaleHelpersStub()
+  });
+  assertApiFunctions(out, ruleName, "shared/widget-kits/text/TextLayoutComposite.js", textLayoutCompositeApi, [
+    "resolveTextFillScale",
+    "clampTextFillScale",
+    "scaleTextCeiling",
+    "resolveOpacity",
+    "resolveCompactGeometryScale",
+    "scaleValueUnitFit",
+    "scaleInlineFit"
+  ]);
+
+  const textLayoutEngineApi = loadComponentApi(out, ruleName, "shared/widget-kits/text/TextLayoutEngine.js", {
+    ValueMath: valueMathApi,
+    TextLayoutPrimitives: createTextLayoutPrimitivesStub(),
+    TextLayoutComposite: createTextLayoutCompositeStub(),
+    ResponsiveScaleProfile: createResponsiveScaleProfileStub()
+  });
+  assertApiFunctions(out, ruleName, "shared/widget-kits/text/TextLayoutEngine.js", textLayoutEngineApi, [
+    "makeFitCacheKey",
+    "writeFitCache",
+    "readFitCache",
+    "createFitCache"
+  ]);
+
+  const canvasTextFittingApi = loadComponentApi(out, ruleName, "shared/widget-kits/text/CanvasTextFitting.js", {
+    ValueMath: valueMathApi
+  });
+  assertApiFunctions(out, ruleName, "shared/widget-kits/text/CanvasTextFitting.js", canvasTextFittingApi, [
+    "setFont",
+    "measureTextWidth",
+    "fitSingleTextPx"
+  ]);
+
+  const canvasTextLayoutApi = loadComponentApi(out, ruleName, "shared/widget-kits/text/CanvasTextLayout.js", {
+    CanvasTextFitting: createCanvasTextFittingStub()
+  });
+  assertApiFunctions(out, ruleName, "shared/widget-kits/text/CanvasTextLayout.js", canvasTextLayoutApi, [
+    "resolveFamily"
+  ]);
+
+  const layoutRectMathApi = loadComponentApi(out, ruleName, "shared/widget-kits/layout/LayoutRectMath.js", {});
+  assertApiFunctions(out, ruleName, "shared/widget-kits/layout/LayoutRectMath.js", layoutRectMathApi, [
+    "makeRect",
+    "splitRow",
+    "splitStack"
+  ]);
+
+  const radialAngleMathApi = loadComponentApi(out, ruleName, "shared/widget-kits/radial/RadialAngleMath.js", {});
+  assertApiFunctions(out, ruleName, "shared/widget-kits/radial/RadialAngleMath.js", radialAngleMathApi, [
+    "valueToAngle",
+    "valueToAngleFlat"
+  ]);
+
+  const radialValueMathApi = loadComponentApi(out, ruleName, "shared/widget-kits/radial/RadialValueMath.js", {
+    RadialAngleMath: radialAngleMathApi,
+    ValueMath: valueMathApi,
+    RadialSectorMath: {
+      sectorAngles() { return null; },
+      buildHighEndSectors() { return []; },
+      buildLowEndSectors() { return []; }
+    }
+  });
+  assertApiFunctions(out, ruleName, "shared/widget-kits/radial/RadialValueMath.js", radialValueMathApi, [
+    "buildValueTickAngles"
+  ]);
+
+  const stableDigitsApi = loadComponentApi(out, ruleName, "shared/widget-kits/format/StableDigits.js", {
+    PlaceholderNormalize: {
+      isPlaceholder() { return false; }
+    },
+    ValueMath: valueMathApi
+  });
+  assertApiFunctions(out, ruleName, "shared/widget-kits/format/StableDigits.js", stableDigitsApi, [
+    "resolveIntegerWidth"
+  ]);
+  if (stableDigitsApi && typeof stableDigitsApi.resolveIntegerWidth === "function" && stableDigitsApi.resolveIntegerWidth.length < 3) {
+    out.push(makeFinding(
+      "shared/widget-kits/format/StableDigits.js",
+      1,
+      ruleName,
+      "StableDigits.resolveIntegerWidth must support the 3-argument signature (textValue, minWidth, rangeMax)."
+    ));
+  }
+
+  return out;
+}
+
 function runDashLiteralContractRule() {
   const out = [];
   const files = collectSourceFiles(["cluster", "shared/widget-kits", "widgets"]);
@@ -700,6 +847,108 @@ function runStateScreenPrecedenceContractRule() {
   }
 
   return out;
+}
+
+function loadComponentApi(out, ruleName, rel, deps) {
+  if (!exists(rel)) {
+    out.push(makeFinding(rel, 1, ruleName, "Missing canonical module."));
+    return null;
+  }
+  let mod;
+  try {
+    mod = loadUmdModule(rel, {}).mod;
+  } catch (e) {
+    out.push(makeFinding(rel, 1, ruleName, "Failed to load module: " + e.message));
+    return null;
+  }
+  if (!mod || typeof mod.create !== "function") {
+    out.push(makeFinding(rel, 1, ruleName, "Module must export create()."));
+    return null;
+  }
+
+  try {
+    return mod.create({}, {
+      components: {
+        require(name) {
+          if (deps && Object.prototype.hasOwnProperty.call(deps, name)) {
+            return deps[name];
+          }
+          return {};
+        }
+      }
+    });
+  } catch (e) {
+    out.push(makeFinding(rel, 1, ruleName, "Module create() failed: " + e.message));
+    return null;
+  }
+}
+
+function assertApiFunctions(out, ruleName, rel, api, functionNames) {
+  if (!api || typeof api !== "object") {
+    out.push(makeFinding(rel, 1, ruleName, "Module API missing or invalid."));
+    return;
+  }
+  for (const name of functionNames) {
+    if (typeof api[name] !== "function") {
+      out.push(makeFinding(rel, 1, ruleName, "Missing expected API function '" + name + "'."));
+    }
+  }
+}
+
+function createTextLayoutPrimitivesStub() {
+  return {
+    setFont() {},
+    fitSingleLineBinary() { return { px: 0 }; },
+    fitMultiRowBinary() { return { px: 0 }; },
+    fitValueUnitRow() { return { vPx: 0, uPx: 0, vW: 0, uW: 0, total: 0, gap: 0 }; },
+    fitInlineTriplet() { return { cPx: 0, vPx: 0, uPx: 0, g1: 0, g2: 0, total: 0 }; },
+    drawInlineTriplet() {}
+  };
+}
+
+function createTextLayoutScaleHelpersStub() {
+  return {
+    clampTextFillScale(value) { return value; },
+    scaleTextCeiling(basePx) { return basePx; },
+    resolveTextFillScale() { return 1; },
+    resolveCompactGeometryScale() { return 1; },
+    scaleValueUnitFit() { return { vPx: 0, uPx: 0, gap: 0 }; },
+    scaleInlineFit() { return { cPx: 0, vPx: 0, uPx: 0, g1: 0, g2: 0 }; },
+    resolveOpacity() { return 1; }
+  };
+}
+
+function createTextLayoutCompositeStub() {
+  return {
+    fitThreeRowBlock() { return { hTop: 1, hMid: 1, hBot: 1, cPx: 1, vPx: 1, uPx: 1 }; },
+    drawThreeRowBlock() {},
+    fitValueUnitCaptionRows() { return { hTop: 1, hBot: 1, vPx: 1, uPx: 1, cPx: 1, vW: 1, uW: 1, total: 1, gap: 1 }; },
+    drawValueUnitCaptionRows() {},
+    fitTwoRowsWithHeader() { return { topPx: 1, bottomPx: 1 }; },
+    drawTwoRowsWithHeader() {}
+  };
+}
+
+function createResponsiveScaleProfileStub() {
+  return {
+    computeProfile() { return {}; },
+    computeInsetPx() { return 1; },
+    scaleMaxTextPx(basePx) { return basePx; }
+  };
+}
+
+function createCanvasTextFittingStub() {
+  return {
+    MIN_FONT_PX: 0.5,
+    WIDTH_EPSILON: 0.01,
+    clampPositive(value, fallback) { return Number.isFinite(Number(value)) ? Number(value) : fallback; },
+    setFont() {},
+    measureTextWidth() { return 0; },
+    fitTextPx() { return 1; },
+    fitSingleTextPx() { return 1; },
+    measureValueUnitFit() { return { vPx: 1, uPx: 1, gap: 0, total: 0 }; },
+    fitInlineCapValUnit() { return { cPx: 1, vPx: 1, uPx: 1, g1: 0, g2: 0, total: 0 }; }
+  };
 }
 
 function collectInvalidNumbers(value, prefix, out) {

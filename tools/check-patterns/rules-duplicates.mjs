@@ -17,6 +17,7 @@ import {
 } from "./duplicate-utils.mjs";
 
 const DUPLICATE_FN_MIN_EXACT_TOKENS = 50;
+const DUPLICATE_FN_SMALL_MIN_EXACT_TOKENS = 8;
 const DUPLICATE_FN_MIN_SHAPE_TOKENS = 90;
 const DUPLICATE_FN_MIN_SHAPE_CONTROL = 2;
 const DUPLICATE_FN_MIN_SHAPE_STATEMENTS = 6;
@@ -26,6 +27,7 @@ const DUPLICATE_BLOCK_MIN_STATEMENTS = 6;
 
 export function runDuplicateFunctions(rule, files) {
   const groupsExact = new Map();
+  const groupsExactSmall = new Map();
   const groupsShape = new Map();
   const functions = extractFunctionsForDuplication(files, new Set(rule.allowlist || []));
 
@@ -40,6 +42,17 @@ export function runDuplicateFunctions(rule, files) {
         });
       }
       groupsExact.get(key).records.push(entry);
+    }
+    else if (entry.tokensExact.length >= DUPLICATE_FN_SMALL_MIN_EXACT_TOKENS) {
+      const key = entry.signatureExact;
+      if (!groupsExactSmall.has(key)) {
+        groupsExactSmall.set(key, {
+          mode: "exact-small",
+          tokenCount: entry.tokensExact.length,
+          records: []
+        });
+      }
+      groupsExactSmall.get(key).records.push(entry);
     }
     if (
       entry.tokensShape.length >= DUPLICATE_FN_MIN_SHAPE_TOKENS
@@ -72,6 +85,30 @@ export function runDuplicateFunctions(rule, files) {
     out.push({
       file: locations[0].file,
       line: locations[0].line,
+      message: rule.message({
+        mode: group.mode,
+        tokenCount: group.tokenCount,
+        fileCount: uniqueFiles.size,
+        locations
+      })
+    });
+  }
+
+  const smallGroups = [...groupsExactSmall.values()]
+    .sort(compareDuplicateGroups);
+  for (const group of smallGroups) {
+    const uniqueFiles = new Set(group.records.map((rec) => rec.file));
+    if (uniqueFiles.size < 2) continue;
+    const exactSignatures = new Set(group.records.map((rec) => rec.signatureExact));
+    if (exactSignatures.size === 1 && exactMarkedSignatures.has([...exactSignatures][0])) continue;
+
+    const locations = dedupeLocations(group.records.map(function (rec) {
+      return { file: rec.file, line: rec.line };
+    })).sort(compareFindings);
+    out.push({
+      file: locations[0].file,
+      line: locations[0].line,
+      severity: "warn",
       message: rule.message({
         mode: group.mode,
         tokenCount: group.tokenCount,

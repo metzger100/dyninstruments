@@ -19,6 +19,7 @@ import {
   runWidgetRendererDefaultDuplicationRule
 } from "./rules-atomicity.mjs";
 import {
+  runCanonicalHelperRedefinitionRule,
   runCatchFallbackWithoutSuppressionRule,
   runCssJsDefaultDuplicationRule,
   runEditableThresholdInternalRule,
@@ -348,6 +349,16 @@ export const RULES = [
     },
     run: runPrematureLegacySupportRule,
     message: ({ file, line, expression }) => `[premature-legacy-support] ${file}:${line}\nPremature legacy/compatibility support detected (${expression}). Remove speculative fallback/compat paths unless an active boundary contract requires them.`
+  },
+  {
+    name: "canonical-helper-redefinition",
+    severity: "block",
+    scope: {
+      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runCanonicalHelperRedefinitionRule,
+    message: ({ file, line, helperName, ownerModule, ownerPath }) => `[canonical-helper-redefinition] ${file}:${line}\nCanonical helper '${helperName}' is redefined outside its owner '${ownerModule}' (${ownerPath}). Use the shared module export instead of a private helper copy.`
   },
   {
     name: "editable-threshold-missing-internal",

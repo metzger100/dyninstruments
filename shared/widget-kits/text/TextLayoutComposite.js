@@ -355,6 +355,7 @@
       scaleTextCeiling: scaleTextCeiling,
       resolveTextFillScale: resolveTextFillScale,
       resolveCompactGeometryScale: resolveCompactGeometryScale,
+      resolveOpacity: resolveOpacity,
       scaleValueUnitFit: scaleValueUnitFit,
       scaleInlineFit: scaleInlineFit
     };
