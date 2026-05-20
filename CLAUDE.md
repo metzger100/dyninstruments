@@ -139,4 +139,31 @@ Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 - Required completion gate: `npm run check:all` (`check:core` + `test:coverage:check` + `perf:check`).
 - Full smell catalog, enforcement matrix, and suppression syntax: [documentation/conventions/smell-prevention.md](documentation/conventions/smell-prevention.md).
 - Fail-fast / keep-it-simple is mandatory. Details: [documentation/conventions/coding-standards.md](documentation/conventions/coding-standards.md#fail-fast-keep-it-simple).
+
+---
+
+## 8. Code Hygiene Rules for AI Agents
+
+### Before creating any helper function
+
+1. Read `documentation/conventions/shared-helpers.md` to check whether a canonical helper already exists.
+2. Search the codebase for the function name: `grep -rn "function <name>" --include="*.js"`.
+3. If a canonical version exists, require and use it. Do not create a local copy.
+4. If no canonical version exists but the helper is generic (not widget-specific), propose adding it to the appropriate canonical module.
+
+### Forbidden patterns
+
+- Never create `X.member || function(value) { ... }` fallback code. Internal module exports are contract-owned.
+- Never create `X.memberA || X.memberB` cross-member fallbacks.
+- Never re-normalize a value that was already normalized by the mapper (`rendererProps` are mapper-guaranteed).
+- Never use `NaN` as a sentinel for absent optionals. Use `undefined`.
+- Never wrap mapper-guaranteed string props in `String()` or `.trim()`.
+- Never use `props && props.X` after `const p = props || {}`.
+
+### Value boundary rules
+
+- `applyFormatter` is the formatter boundary and handles `null`, `undefined`, `NaN`, and empty strings.
+- Pair formatter output with `PlaceholderNormalize.normalize()` at the render boundary.
+- Use `ValueMath.toOptionalFiniteNumber(raw)` for live sensor data from the AvNav store.
+- Use `ValueMath.toFiniteNumber(raw)` only for config/default coercion where `null -> 0` is explicitly intended.
 <!-- END SHARED_INSTRUCTIONS -->

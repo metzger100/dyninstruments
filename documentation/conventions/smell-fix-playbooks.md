@@ -130,6 +130,21 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 2. Collapse multi-source compatibility branches down to the single supported input path.
 3. Reintroduce compatibility only when there is a documented boundary contract and coverage for it.
 
+### Canonical helper redefinition
+
+1. Identify the owning canonical module in `shared-helpers.md`.
+2. Add the module to the file `Depends:` header if it is missing.
+3. Require the canonical module in `create()` (or the runtime bootstrap owner where applicable).
+4. Replace local helper call sites with canonical module calls.
+5. Delete the private helper definition.
+6. Run `npm run check:patterns` and confirm `canonical-helper-redefinition` is clear.
+
+### Paranoid module-member fallback
+
+1. Remove `|| function (...) { ... }` and `|| X.memberB` fallback tails.
+2. Keep only direct member access (`X.member`).
+3. Run tests/checks to confirm the module contract is present and behavior is unchanged.
+
 ### Renderer coercion drift
 
 1. Normalize numeric props in mapper (`finite number` or `undefined`).
