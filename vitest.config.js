@@ -6,6 +6,7 @@ module.exports = {
   test: {
     environment: "jsdom",
     globals: true,
+    setupFiles: ["tests/setup/vitest.setup.js"],
     include: ["tests/**/*.test.js"],
     coverage: {
       enabled: false,
