@@ -42,6 +42,13 @@
       deps: ["HtmlWidgetUtils", "ValueMath"]
   };
 
+  w.RegattaTimerModel = {
+      js: BASE + "shared/widget-kits/vessel/RegattaTimerModel.js",
+      css: undefined,
+      globalKey: "DyniRegattaTimerModel",
+      deps: []
+  };
+
   w.PositionCoordinateWidget = {
       js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
       css: undefined,
