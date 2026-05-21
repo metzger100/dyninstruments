@@ -51,8 +51,8 @@ const CLUSTER_ROUTE_SCRIPTS = [
   "config/cluster-routes/finalize.js"
 ];
 
-const ROUTE_PHASE_EXCEPTIONS = {
-  vessel: ["regattaTimer"]
+const ROUTE_COMPONENT_PHASE_EXCEPTIONS = {
+  "vessel/regattaTimer": true
 };
 
 function runScripts(context, scripts) {
@@ -99,7 +99,7 @@ function collectKindsByCluster(widgetDefs) {
 }
 
 describe("config/cluster-routes metadata", function () {
-  it("defines the canonical 59-route catalog with schema, index, and validation invariants", function () {
+  it("defines the canonical 60-route catalog with schema, index, and validation invariants", function () {
     const context = loadClusterRouteEnvironment();
     const clusterRoutes = context.DyniPlugin.config.clusterRoutes;
     const routes = clusterRoutes.routes;
@@ -135,9 +135,9 @@ describe("config/cluster-routes metadata", function () {
 
     expect(clusterRoutes.schemaVersion).toBe(1);
     expect(Array.isArray(routes)).toBe(true);
-    expect(routes).toHaveLength(59);
+    expect(routes).toHaveLength(60);
     expect(byRouteId).toBeTruthy();
-    expect(Object.keys(byRouteId)).toHaveLength(59);
+    expect(Object.keys(byRouteId)).toHaveLength(60);
 
     const seenRouteIds = new Set();
     const seenClusterKinds = new Set();
@@ -181,7 +181,9 @@ describe("config/cluster-routes metadata", function () {
       seenClusterKinds.add(pair);
 
       expect(components[route.mapperId]).toBeTruthy();
-      expect(components[route.rendererId]).toBeTruthy();
+      if (!ROUTE_COMPONENT_PHASE_EXCEPTIONS[routeId]) {
+        expect(components[route.rendererId]).toBeTruthy();
+      }
 
       if (Object.prototype.hasOwnProperty.call(route, "viewModelId")) {
         expect(typeof route.viewModelId).toBe("string");
@@ -202,12 +204,14 @@ describe("config/cluster-routes metadata", function () {
 
       if (route.surface === "html") {
         htmlRoutes.push(route);
-        expect(Array.isArray(components[route.rendererId].shadowCss)).toBe(true);
-        expect(components[route.rendererId].shadowCss.length).toBeGreaterThan(0);
+        if (!ROUTE_COMPONENT_PHASE_EXCEPTIONS[routeId]) {
+          expect(Array.isArray(components[route.rendererId].shadowCss)).toBe(true);
+          expect(components[route.rendererId].shadowCss.length).toBeGreaterThan(0);
+        }
       }
     });
 
-    expect(htmlRoutes).toHaveLength(6);
+    expect(htmlRoutes).toHaveLength(7);
     expect(viewModelRouteIds.slice().sort()).toEqual([
       "map/aisTarget",
       "nav/activeRoute",
@@ -225,10 +229,7 @@ describe("config/cluster-routes metadata", function () {
     expect(clusterNamesFromRoutes).toEqual(clusterNamesFromDefs);
     clusterNamesFromDefs.forEach(function (cluster) {
       const routeKinds = routeKindsByCluster[cluster].slice().sort();
-      const pendingKinds = ROUTE_PHASE_EXCEPTIONS[cluster] || [];
-      const expectedKinds = kindsByCluster[cluster].filter(function (kind) {
-        return pendingKinds.indexOf(kind) === -1;
-      });
+      const expectedKinds = kindsByCluster[cluster];
       expect(routeKinds).toEqual(expectedKinds);
     });
 

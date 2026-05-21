@@ -20,6 +20,8 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create({}, 
   unit_dateTime: "",
   caption_timeStatus: "",
   unit_timeStatus: "",
+  caption_regattaTimer: "REGATTA",
+  unit_regattaTimer: "",
   caption_pitch: "PITCH",
   unit_pitch: "°",
   caption_roll: "ROLL",
@@ -302,6 +304,52 @@ describe("VesselMapper", function () {
       default: "---"
     }, routeContext("timeStatus", toolkit));
     expect(timeStatusOut.hideSeconds).toBe(true);
+  });
+
+  it("maps regattaTimer defaults with renderer props for the HTML route", function () {
+    const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
+    const out = mapper.translate({
+      kind: "regattaTimer"
+    }, routeContext("regattaTimer", toolkit));
+
+    expect(out).toEqual({
+      caption: "REGATTA",
+      unit: "",
+      rendererProps: {
+        regattaSoundEnabled: true,
+        regattaProgressBar: true,
+        regattaDuration: undefined,
+        regattaTimerRatioThresholdNormal: undefined,
+        regattaTimerRatioThresholdFlat: undefined,
+        captionUnitScale: undefined
+      }
+    });
+  });
+
+  it("maps regattaTimer custom duration and toggles", function () {
+    const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
+    const out = mapper.translate({
+      kind: "regattaTimer",
+      regattaSoundEnabled: false,
+      regattaProgressBar: false,
+      regattaDuration: 6,
+      regattaTimerRatioThresholdNormal: "1.05",
+      regattaTimerRatioThresholdFlat: "2.95",
+      captionUnitScale: "0.9"
+    }, routeContext("regattaTimer", toolkit));
+
+    expect(out).toEqual({
+      caption: "REGATTA",
+      unit: "",
+      rendererProps: {
+        regattaSoundEnabled: false,
+        regattaProgressBar: false,
+        regattaDuration: 6,
+        regattaTimerRatioThresholdNormal: 1.05,
+        regattaTimerRatioThresholdFlat: 2.95,
+        captionUnitScale: 0.9
+      }
+    });
   });
 
   it("maps pitch and roll to formatDirection in signed-degree mode with radian input", function () {

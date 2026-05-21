@@ -44,6 +44,14 @@
     },
     {
       cluster: "vessel",
+      kind: "regattaTimer",
+      mapperId: "VesselMapper",
+      rendererId: "RegattaTimerTextHtmlWidget",
+      surface: "html",
+      shellSizing: { kind: "ratio", aspectRatio: 2 }
+    },
+    {
+      cluster: "vessel",
       kind: "clock",
       mapperId: "VesselMapper",
       rendererId: "ThreeValueTextWidget",

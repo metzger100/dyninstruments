@@ -1,5 +1,5 @@
 /**
- * Module: VesselMapper - Cluster translation for vessel voltage/time/attitude/alarm kinds
+ * Module: VesselMapper - Cluster translation for vessel voltage/time/attitude/alarm/regatta kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
  * Depends: routeContext.toolkit, routeContext.viewModel
  */
@@ -98,6 +98,20 @@
           caption: cap("timeStatus"),
           unit: unit("timeStatus"),
           hideSeconds: p.hideSeconds === true
+        };
+      }
+      if (req === "regattaTimer") {
+        return {
+          caption: cap("regattaTimer"),
+          unit: unit("regattaTimer"),
+          rendererProps: {
+            regattaSoundEnabled: p.regattaSoundEnabled !== false,
+            regattaProgressBar: p.regattaProgressBar !== false,
+            regattaDuration: p.regattaDuration,
+            regattaTimerRatioThresholdNormal: num(p.regattaTimerRatioThresholdNormal),
+            regattaTimerRatioThresholdFlat: num(p.regattaTimerRatioThresholdFlat),
+            captionUnitScale: num(p.captionUnitScale)
+          }
         };
       }
       if (req === "pitch") {
