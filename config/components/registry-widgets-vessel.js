@@ -63,6 +63,14 @@
       deps: ["HtmlWidgetUtils"]
   };
 
+  w.RegattaTimerTextHtmlWidget = {
+      js: BASE + "widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.js",
+      css: undefined,
+      shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.css"],
+      globalKey: "DyniRegattaTimerTextHtmlWidget",
+      deps: ["RegattaTimerModel", "RegattaTimerAudio", "RegattaTimerMarkup", "RegattaTimerHtmlFit", "HtmlWidgetUtils", "ValueMath"]
+  };
+
   w.PositionCoordinateWidget = {
       js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
       css: undefined,

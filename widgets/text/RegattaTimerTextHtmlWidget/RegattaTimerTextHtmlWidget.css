@@ -1,0 +1,122 @@
+.dyni-html-root .dyni-regatta-root {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.dyni-html-root .dyni-regatta-html {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+  display: grid;
+  gap: 0.25em;
+  color: inherit;
+}
+
+.dyni-html-root .dyni-regatta-mode-high,
+.dyni-html-root .dyni-regatta-mode-normal {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-content: stretch;
+}
+
+.dyni-html-root .dyni-regatta-mode-flat {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.dyni-html-root .dyni-regatta-display {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: center;
+  justify-items: stretch;
+}
+
+.dyni-html-root .dyni-regatta-time {
+  min-width: 0;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: var(--dyni-theme-font-weight, 700);
+  color: inherit;
+}
+
+.dyni-html-root .dyni-regatta-controls {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+}
+
+.dyni-html-root .dyni-regatta-mode-flat .dyni-regatta-controls {
+  justify-items: stretch;
+  min-width: 7em;
+}
+
+.dyni-html-root .dyni-regatta-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 0.4em;
+  line-height: 1;
+  user-select: none;
+  font-weight: var(--dyni-theme-font-label-weight, 700);
+  border: 1px solid var(--dyni-theme-surface-border, currentColor);
+  color: inherit;
+}
+
+.dyni-html-root .dyni-regatta-open-dispatch .dyni-regatta-btn {
+  cursor: pointer;
+}
+
+.dyni-html-root .dyni-regatta-open-passive .dyni-regatta-btn {
+  cursor: default;
+}
+
+.dyni-html-root .dyni-regatta-phase-idle .dyni-regatta-btn-start {
+  display: flex;
+}
+
+.dyni-html-root .dyni-regatta-phase-countdown .dyni-regatta-btn-sync,
+.dyni-html-root .dyni-regatta-phase-countdown .dyni-regatta-btn-reset {
+  display: flex;
+}
+
+.dyni-html-root .dyni-regatta-phase-elapsed .dyni-regatta-btn-reset {
+  display: flex;
+}
+
+.dyni-html-root .dyni-regatta-bar {
+  height: 0.22em;
+  border-radius: 0.22em;
+  background: var(--dyni-theme-regatta-barDefault, #70B0F3);
+  transition: width 140ms linear;
+}
+
+.dyni-html-root .dyni-regatta-color-warning .dyni-regatta-time {
+  color: var(--dyni-theme-regatta-barWarning, #e7a834);
+}
+
+.dyni-html-root .dyni-regatta-color-critical .dyni-regatta-time {
+  color: var(--dyni-theme-regatta-barCritical, #FA584A);
+}
+
+.dyni-html-root .dyni-regatta-color-warning .dyni-regatta-bar {
+  background: var(--dyni-theme-regatta-barWarning, #e7a834);
+}
+
+.dyni-html-root .dyni-regatta-color-critical .dyni-regatta-bar {
+  background: var(--dyni-theme-regatta-barCritical, #FA584A);
+}
+
+.dyni-html-root .dyni-regatta-color-normal .dyni-regatta-bar {
+  background: var(--dyni-theme-regatta-barDefault, #70B0F3);
+}
