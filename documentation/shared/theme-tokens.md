@@ -34,6 +34,9 @@ const fg = tokens.surface.fg;
 - `colors.ais.nearest`
 - `colors.ais.tracking`
 - `colors.ais.normal`
+- `colors.regatta.barWarning`
+- `colors.regatta.barCritical`
+- `colors.regatta.barDefault`
 
 ## Public Input Variables (Migrated Shared Surface/Typography)
 
@@ -54,6 +57,9 @@ const fg = tokens.surface.fg;
 - --dyni-ais-nearest
 - --dyni-ais-tracking
 - --dyni-ais-normal
+- --dyni-regatta-barWarning
+- --dyni-regatta-barCritical
+- --dyni-regatta-barDefault
 
 ### Surface Border Fallback Contract
 
@@ -136,6 +142,16 @@ Alarm widget accents: the active alarm tile stays in the red warning family, whi
 
 Dyni follows AvNav AIS role semantics. The nearest target state is the green state typically visible in the AvNav AIS target widget, while the generic normal role remains yellow.
 
+## Regatta Timer Tokens
+
+| Path | Input var | Default | Night | darkmode (base) | highcontrast (base) |
+|---|---|---|---|---|---|
+| `colors.regatta.barWarning` | `--dyni-regatta-barWarning` | `#e7a834` | `rgba(231, 168, 52, 0.60)` | `#e7a834` | `#ffcc00` |
+| `colors.regatta.barCritical` | `--dyni-regatta-barCritical` | `#FA584A` | `rgba(250, 88, 74, 0.60)` | `#FA584A` | `#FF3300` |
+| `colors.regatta.barDefault` | `--dyni-regatta-barDefault` | `#70B0F3` | `rgba(112, 176, 243, 0.60)` | `#70B0F3` | `#00AAFF` |
+
+Regatta timer accents follow the same night-mode dimming vocabulary as existing semantic colors. `default.night`, `darkmode.night`, and `highcontrast.night` all use the listed 60% opacity night variants.
+
 Example `user.css` override:
 
 ```css
@@ -157,6 +173,9 @@ Example `user.css` override:
 - --dyni-theme-font-label-weight
 - --dyni-theme-opacity-caption
 - --dyni-theme-opacity-unit
+- --dyni-theme-regatta-barWarning
+- --dyni-theme-regatta-barCritical
+- --dyni-theme-regatta-barDefault
 
 ## Presets and Modes
 

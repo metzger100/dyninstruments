@@ -244,6 +244,9 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.colors.ais.nearest).toBe("#00AA66");
     expect(resolved.colors.ais.tracking).toBe("#CC6600");
     expect(resolved.colors.ais.normal).toBe("#8A7300");
+    expect(resolved.colors.regatta.barWarning).toBe("#ffcc00");
+    expect(resolved.colors.regatta.barCritical).toBe("#FF3300");
+    expect(resolved.colors.regatta.barDefault).toBe("#00AAFF");
   });
 
   it("resolves default preset alarm and alarm widget colors in day mode", function () {
@@ -265,6 +268,9 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.colors.alarmWidget.bg).toBe("#C73A32");
     expect(resolved.colors.alarmWidget.fg).toBe("#ffffff");
     expect(resolved.colors.alarmWidget.strip).toBe("#70F3AF");
+    expect(resolved.colors.regatta.barWarning).toBe("#e7a834");
+    expect(resolved.colors.regatta.barCritical).toBe("#FA584A");
+    expect(resolved.colors.regatta.barDefault).toBe("#70B0F3");
   });
 
   it("resolves default preset AIS role colors in night mode", function () {
@@ -294,6 +300,9 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.colors.ais.nearest).toBe("rgba(112, 243, 175, 0.60)");
     expect(resolved.colors.ais.tracking).toBe("rgba(248, 166, 1, 0.60)");
     expect(resolved.colors.ais.normal).toBe("rgba(235, 235, 85, 0.60)");
+    expect(resolved.colors.regatta.barWarning).toBe("rgba(231, 168, 52, 0.60)");
+    expect(resolved.colors.regatta.barCritical).toBe("rgba(250, 88, 74, 0.60)");
+    expect(resolved.colors.regatta.barDefault).toBe("rgba(112, 176, 243, 0.60)");
   });
 
   it("resolves darkmode preset surface and semantic colors", function () {
@@ -330,6 +339,9 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.colors.ais.nearest).toBe("#70F3AF");
     expect(resolved.colors.ais.tracking).toBe("#f8a601");
     expect(resolved.colors.ais.normal).toBe("#EBEB55");
+    expect(resolved.colors.regatta.barWarning).toBe("#e7a834");
+    expect(resolved.colors.regatta.barCritical).toBe("#FA584A");
+    expect(resolved.colors.regatta.barDefault).toBe("#70B0F3");
   });
 
   it("resolves darkmode preset to night-mode palette when AvNav night mode is active", function () {
@@ -363,6 +375,9 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.colors.ais.nearest).toBe("rgba(112, 243, 175, 0.60)");
     expect(resolved.colors.ais.tracking).toBe("rgba(248, 166, 1, 0.60)");
     expect(resolved.colors.ais.normal).toBe("rgba(235, 235, 85, 0.60)");
+    expect(resolved.colors.regatta.barWarning).toBe("rgba(231, 168, 52, 0.60)");
+    expect(resolved.colors.regatta.barCritical).toBe("rgba(250, 88, 74, 0.60)");
+    expect(resolved.colors.regatta.barDefault).toBe("rgba(112, 176, 243, 0.60)");
   });
 
   it("resolves highcontrast preset to night-mode semantic colors when AvNav night mode is active", function () {
@@ -394,6 +409,9 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.colors.ais.nearest).toBe("rgba(112, 243, 175, 0.60)");
     expect(resolved.colors.ais.tracking).toBe("rgba(248, 166, 1, 0.60)");
     expect(resolved.colors.ais.normal).toBe("rgba(235, 235, 85, 0.60)");
+    expect(resolved.colors.regatta.barWarning).toBe("rgba(231, 168, 52, 0.60)");
+    expect(resolved.colors.regatta.barCritical).toBe("rgba(250, 88, 74, 0.60)");
+    expect(resolved.colors.regatta.barDefault).toBe("rgba(112, 176, 243, 0.60)");
   });
 
   it("resolves opacity.caption to default 1.0", function () {
@@ -488,6 +506,22 @@ describe("runtime/theme-runtime.js", function () {
     context.DyniPlugin.runtime.theme.applyToRoot(rootEl);
 
     expect(getAppliedOutput(rootEl, "--dyni-theme-opacity-unit")).toBe("1");
+  });
+
+  it("applyToRoot materializes regatta output vars", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return { getPropertyValue() { return ""; } };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    context.DyniPlugin.runtime.theme.applyToRoot(rootEl);
+
+    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-barWarning")).toBe("#e7a834");
+    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-barCritical")).toBe("#FA584A");
+    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-barDefault")).toBe("#70B0F3");
   });
 
   it("opacity tokens have no preset overrides", function () {

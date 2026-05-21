@@ -58,6 +58,30 @@
     defineToken("colors.ais.nearest", "--dyni-ais-nearest", "color", "#70F3AF", { night: "rgba(112, 243, 175, 0.60)" }),
     defineToken("colors.ais.tracking", "--dyni-ais-tracking", "color", "#f8a601", { night: "rgba(248, 166, 1, 0.60)" }),
     defineToken("colors.ais.normal", "--dyni-ais-normal", "color", "#EBEB55", { night: "rgba(235, 235, 85, 0.60)" }),
+    defineToken(
+      "colors.regatta.barWarning",
+      "--dyni-regatta-barWarning",
+      "color",
+      "#e7a834",
+      { night: "rgba(231, 168, 52, 0.60)" },
+      "--dyni-theme-regatta-barWarning"
+    ),
+    defineToken(
+      "colors.regatta.barCritical",
+      "--dyni-regatta-barCritical",
+      "color",
+      "#FA584A",
+      { night: "rgba(250, 88, 74, 0.60)" },
+      "--dyni-theme-regatta-barCritical"
+    ),
+    defineToken(
+      "colors.regatta.barDefault",
+      "--dyni-regatta-barDefault",
+      "color",
+      "#70B0F3",
+      { night: "rgba(112, 176, 243, 0.60)" },
+      "--dyni-theme-regatta-barDefault"
+    ),
 
     defineToken("strokeWeight", "--dyni-stroke-weight", "number", 1.0),
     defineToken("pointerDepthWeight", "--dyni-pointer-depth-weight", "number", 1.0),
@@ -113,6 +137,11 @@
             nearest: "rgba(112, 243, 175, 0.60)",
             tracking: "rgba(248, 166, 1, 0.60)",
             normal: "rgba(235, 235, 85, 0.60)"
+          },
+          regatta: {
+            barWarning: "rgba(231, 168, 52, 0.60)",
+            barCritical: "rgba(250, 88, 74, 0.60)",
+            barDefault: "rgba(112, 176, 243, 0.60)"
           }
         }
       }
@@ -155,6 +184,11 @@
             nearest: "#70F3AF",
             tracking: "#f8a601",
             normal: "#EBEB55"
+          },
+          regatta: {
+            barWarning: "#e7a834",
+            barCritical: "#FA584A",
+            barDefault: "#70B0F3"
           }
         }
       },
@@ -180,6 +214,11 @@
             nearest: "rgba(112, 243, 175, 0.60)",
             tracking: "rgba(248, 166, 1, 0.60)",
             normal: "rgba(235, 235, 85, 0.60)"
+          },
+          regatta: {
+            barWarning: "rgba(231, 168, 52, 0.60)",
+            barCritical: "rgba(250, 88, 74, 0.60)",
+            barDefault: "rgba(112, 176, 243, 0.60)"
           }
         }
       }
@@ -203,6 +242,11 @@
             nearest: "#00AA66",
             tracking: "#CC6600",
             normal: "#8A7300"
+          },
+          regatta: {
+            barWarning: "#ffcc00",
+            barCritical: "#FF3300",
+            barDefault: "#00AAFF"
           }
         }
       },
@@ -221,6 +265,11 @@
             nearest: "rgba(112, 243, 175, 0.60)",
             tracking: "rgba(248, 166, 1, 0.60)",
             normal: "rgba(235, 235, 85, 0.60)"
+          },
+          regatta: {
+            barWarning: "rgba(231, 168, 52, 0.60)",
+            barCritical: "rgba(250, 88, 74, 0.60)",
+            barDefault: "rgba(112, 176, 243, 0.60)"
           }
         }
       }
