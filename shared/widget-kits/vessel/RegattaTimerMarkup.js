@@ -78,6 +78,7 @@
       const interactionState = normalizeInteractionState(options.interactionState);
       const displayText = model.displayTime == null ? "" : String(model.displayTime);
       const baseButtonStyle = typeof fit.buttonStyle === "string" ? fit.buttonStyle : "";
+      const stableDigitsEnabled = options.stableDigitsEnabled === true;
 
       const wrapperClasses = [
         "dyni-regatta-html",
@@ -104,15 +105,15 @@
         + '<div class="' + wrapperClasses.join(" ") + '"'
         + htmlUtils.toStyleAttr(fit.wrapperStyle)
         + ">"
+        + barHtml
         + '<div class="dyni-regatta-display"'
         + htmlUtils.toStyleAttr(fit.displayStyle)
         + ">"
-        + '<div class="dyni-regatta-time dyni-tabular"'
+        + '<div class="dyni-regatta-time' + (stableDigitsEnabled ? " dyni-tabular" : "") + '"'
         + htmlUtils.toStyleAttr(fit.timerStyle)
         + ">"
         + htmlUtils.escapeHtml(displayText)
         + "</div>"
-        + barHtml
         + "</div>"
         + '<div class="dyni-regatta-controls"'
         + htmlUtils.toStyleAttr(fit.controlsStyle)

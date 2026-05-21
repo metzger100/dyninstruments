@@ -234,7 +234,18 @@
         // Shared scale
         captionUnitScale: {
           type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
-          name: "Caption/Unit size"
+          name: "Caption/Unit size",
+          condition: [
+            { kind: "voltage" },
+            { kind: "voltageLinear" },
+            { kind: "voltageRadial" },
+            { kind: "alarm" },
+            { kind: "clock" },
+            { kind: "dateTime" },
+            { kind: "timeStatus" },
+            { kind: "pitch" },
+            { kind: "roll" }
+          ]
         },
         stableDigits: {
           type: "BOOLEAN",
@@ -243,6 +254,7 @@
             { kind: "voltage" },
             { kind: "voltageLinear" },
             { kind: "voltageRadial" },
+            { kind: "regattaTimer" },
             { kind: "clock" },
             { kind: "dateTime" },
             { kind: "timeStatus" },
@@ -301,6 +313,8 @@
         className: true,
 
         ...makePerKindTextParams(VESSEL_KIND),
+        caption_regattaTimer: false,
+        unit_regattaTimer: false,
 
         // ThreeValueTextWidget thresholds (numeric only)
         ratioThresholdNormal: {

@@ -108,6 +108,7 @@
             regattaSoundEnabled: p.regattaSoundEnabled !== false,
             regattaProgressBar: p.regattaProgressBar !== false,
             regattaDuration: p.regattaDuration,
+            stableDigits: p.stableDigits === true,
             regattaTimerRatioThresholdNormal: num(p.regattaTimerRatioThresholdNormal),
             regattaTimerRatioThresholdFlat: num(p.regattaTimerRatioThresholdFlat),
             captionUnitScale: num(p.captionUnitScale)

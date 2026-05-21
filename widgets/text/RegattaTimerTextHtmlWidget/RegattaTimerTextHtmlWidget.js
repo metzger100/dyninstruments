@@ -1,7 +1,7 @@
 /**
  * Module: RegattaTimerTextHtmlWidget - Interactive committed HTML renderer for regatta timer controls
  * Documentation: exec-plans/active/PLAN28.md
- * Depends: RegattaTimerModel, RegattaTimerAudio, RegattaTimerMarkup, RegattaTimerHtmlFit, HtmlWidgetUtils, ValueMath, componentContext.theme.tokens
+ * Depends: RegattaTimerModel, RegattaTimerAudio, RegattaTimerSessionStore, RegattaTimerMarkup, RegattaTimerHtmlFit, HtmlWidgetUtils, ValueMath, componentContext.theme.tokens
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -29,6 +29,7 @@
   function create(def, componentContext) {
     const timerModelFactory = componentContext.components.require("RegattaTimerModel");
     const audioFactory = componentContext.components.require("RegattaTimerAudio");
+    const sessionStoreFactory = componentContext.components.require("RegattaTimerSessionStore");
     const markup = componentContext.components.require("RegattaTimerMarkup");
     const htmlFit = componentContext.components.require("RegattaTimerHtmlFit");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
@@ -44,6 +45,14 @@
         return DEFAULT_DURATION_MINUTES;
       }
       return Math.max(1, Math.round(parsed));
+    }
+
+    function formatDurationDisplay(durationMinutes) {
+      const safeMinutes = Math.max(1, toDurationMinutes(durationMinutes));
+      if (safeMinutes >= 60) {
+        return String(Math.floor(safeMinutes / 60)) + ":" + String(safeMinutes % 60).padStart(2, "0") + ":00";
+      }
+      return String(safeMinutes).padStart(2, "0") + ":00";
     }
 
     function resolveMode(props, shellRect) {
@@ -67,6 +76,9 @@
     function createCommittedRenderer(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
       const hostContext = context.hostContext || {};
+      const sessionStore = sessionStoreFactory.createSessionStore({
+        hostContext: hostContext
+      });
 
       let rootEl = null;
       let wrapperEl = null;
@@ -90,7 +102,6 @@
         }
         rootEl.className = className ? (className + " " + ROOT_CLASS_NAME) : ROOT_CLASS_NAME;
       }
-
       function unbindClickHandler() {
         if (wrapperEl && clickHandler) {
           wrapperEl.removeEventListener("click", clickHandler);
@@ -98,23 +109,35 @@
         clickHandler = null;
       }
 
-      function clearOwnedResources() {
+      function clearOwnedResources(options) {
+        const cfg = options || {};
+        if (cfg.preserveSession === true && timerModel && typeof timerModel.getSnapshot === "function") {
+          sessionStore.persistSnapshot(timerModel.getSnapshot());
+        }
+
         unbindClickHandler();
+
         if (timerModel && typeof timerModel.destroy === "function") {
           timerModel.destroy();
         }
         if (audioEngine && typeof audioEngine.destroy === "function") {
           audioEngine.destroy();
         }
+
         timerModel = null;
         audioEngine = null;
+
+        if (cfg.clearSession === true) {
+          sessionStore.clearStoredSnapshot();
+        }
       }
 
       function resolveConfig(props) {
         return {
           soundEnabled: props.regattaSoundEnabled !== false,
           progressBarEnabled: props.regattaProgressBar !== false,
-          durationMinutes: toDurationMinutes(props.regattaDuration)
+          durationMinutes: toDurationMinutes(props.regattaDuration),
+          stableDigitsEnabled: props.stableDigits === true
         };
       }
 
@@ -123,8 +146,11 @@
           return;
         }
 
+        sessionStore.persistSnapshot(timerModel.getSnapshot());
+
         const mode = resolveMode(lastProps, lastShellRect);
         const interactionState = resolveInteractionState(lastProps);
+        const stableDigitsEnabled = config.stableDigitsEnabled === true;
 
         if (lastHostRootEl && themeResolver && typeof themeResolver.resolveForRoot === "function") {
           themeResolver.resolveForRoot(lastHostRootEl);
@@ -134,6 +160,7 @@
           model: modelState,
           shellRect: lastShellRect,
           mode: mode,
+          stableDigitsEnabled: stableDigitsEnabled,
           hostContext: hostContext
         }) || lastFit || BASELINE_FIT;
 
@@ -143,6 +170,7 @@
           config: config,
           mode: mode,
           interactionState: interactionState,
+          stableDigitsEnabled: stableDigitsEnabled,
           htmlUtils: htmlUtils
         });
 
@@ -174,6 +202,7 @@
               timerModel.start();
               return;
             }
+
             if (action === "regatta-sync") {
               timerModel.sync();
               return;
@@ -186,8 +215,29 @@
         }
       }
 
+      function createTimerModelInstance(durationMinutes) {
+        const session = sessionStore.readStoredSnapshot();
+        const hasActiveSession = session && (session.phase === "countdown" || session.phase === "elapsed");
+
+        timerModel = timerModelFactory.createTimerModel({
+          durationMinutes: hasActiveSession ? session.durationMinutes : durationMinutes,
+          snapshot: hasActiveSession ? session : null,
+          onTick: function onTick(state) {
+            patchDomFromState(state);
+          },
+          onSignal: function onSignal(type, frequency, durationMs) {
+            if (config.soundEnabled !== true || !audioEngine) {
+              return;
+            }
+            audioEngine.playTone(frequency, durationMs);
+          }
+        });
+
+        sessionStore.persistSnapshot(timerModel.getSnapshot());
+      }
+
       function mount(mountHostEl, payload) {
-        clearOwnedResources();
+        clearOwnedResources({ preserveSession: true });
 
         if (!mountHostEl || !mountHostEl.ownerDocument || typeof mountHostEl.appendChild !== "function") {
           return;
@@ -205,22 +255,11 @@
         lastProps = toObject(initialPayload.props);
         lastShellRect = initialPayload.shellRect || null;
         lastHostRootEl = initialPayload.rootEl || null;
+        sessionStore.syncIdentity(lastProps, initialPayload);
         config = resolveConfig(lastProps);
 
         audioEngine = audioFactory.createAudioEngine();
-        timerModel = timerModelFactory.createTimerModel({
-          durationMinutes: config.durationMinutes,
-          onTick: function onTick(state) {
-            patchDomFromState(state);
-          },
-          onSignal: function onSignal(type, frequency, durationMs) {
-            if (config.soundEnabled !== true || !audioEngine) {
-              return;
-            }
-            audioEngine.playTone(frequency, durationMs);
-          }
-        });
-
+        createTimerModelInstance(config.durationMinutes);
         patchDomFromState(timerModel.getState());
       }
 
@@ -233,22 +272,13 @@
         lastProps = nextProps;
         lastShellRect = nextPayload.shellRect || null;
         lastHostRootEl = nextPayload.rootEl || null;
+        sessionStore.syncIdentity(lastProps, nextPayload);
         config = nextConfig;
 
         if (timerModel && timerModel.getState().phase === "idle" && nextConfig.durationMinutes !== previousDurationMinutes) {
           timerModel.destroy();
-          timerModel = timerModelFactory.createTimerModel({
-            durationMinutes: nextConfig.durationMinutes,
-            onTick: function onTick(state) {
-              patchDomFromState(state);
-            },
-            onSignal: function onSignal(type, frequency, durationMs) {
-              if (config.soundEnabled !== true || !audioEngine) {
-                return;
-              }
-              audioEngine.playTone(frequency, durationMs);
-            }
-          });
+          timerModel = null;
+          createTimerModelInstance(nextConfig.durationMinutes);
         }
 
         if (timerModel) {
@@ -260,15 +290,24 @@
         return false;
       }
 
-      function detach() {
+      function detach(options) {
+        const cfg = options || {};
+
         unbindClickHandler();
+
         if (hostContext) {
           htmlFit.clearCache(hostContext);
         }
-        clearOwnedResources();
+
+        clearOwnedResources({
+          preserveSession: cfg.preserveSession !== false,
+          clearSession: cfg.clearSession === true
+        });
+
         if (rootEl && rootEl.parentNode) {
           rootEl.parentNode.removeChild(rootEl);
         }
+
         wrapperEl = null;
         rootEl = null;
         lastProps = {};
@@ -278,7 +317,7 @@
       }
 
       function destroy() {
-        detach();
+        detach({ preserveSession: true, clearSession: false });
       }
 
       function layoutSignature(payload) {
@@ -291,10 +330,11 @@
         const activeState = timerModel ? timerModel.getState() : {
           phase: "idle",
           colorPhase: "normal",
-          displayTime: String(durationMinutes < 10 ? "0" + durationMinutes : durationMinutes) + ":00"
+          displayTime: formatDurationDisplay(durationMinutes)
         };
         const soundEnabled = p.regattaSoundEnabled !== false;
         const progressBarEnabled = p.regattaProgressBar !== false;
+        const stableDigitsEnabled = p.stableDigits === true;
 
         return [
           width,
@@ -305,6 +345,7 @@
           activeState.displayTime,
           soundEnabled,
           progressBarEnabled,
+          stableDigitsEnabled,
           durationMinutes
         ].join("|");
       }

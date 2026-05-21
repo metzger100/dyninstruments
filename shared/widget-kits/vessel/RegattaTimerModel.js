@@ -18,6 +18,9 @@
   const MINUTE_BEEP_MS = 300;
   const SECOND_BEEP_MS = 150;
   const START_TONE_MS = 800;
+  const PHASE_IDLE = "idle";
+  const PHASE_COUNTDOWN = "countdown";
+  const PHASE_ELAPSED = "elapsed";
 
   function toDurationMinutes(rawMinutes) {
     const minutes = Number(rawMinutes);
@@ -29,10 +32,17 @@
 
   function formatTimeFromSeconds(totalSeconds) {
     const safe = Math.max(0, Math.floor(totalSeconds));
-    const minutes = Math.floor(safe / 60);
-    const seconds = safe % 60;
-    const minuteText = minutes < 10 ? "0" + minutes : String(minutes);
+    const hours = Math.floor(safe / 3600);
+    const remainder = safe % 3600;
+    const hourRemainderMinutes = Math.floor(remainder / 60);
+    const seconds = remainder % 60;
     const secondText = seconds < 10 ? "0" + seconds : String(seconds);
+    if (hours >= 1) {
+      const minuteText = hourRemainderMinutes < 10 ? "0" + hourRemainderMinutes : String(hourRemainderMinutes);
+      return String(hours) + ":" + minuteText + ":" + secondText;
+    }
+    const minutes = Math.floor(safe / 60);
+    const minuteText = minutes < 10 ? "0" + minutes : String(minutes);
     return minuteText + ":" + secondText;
   }
 
@@ -59,15 +69,40 @@
     return result;
   }
 
+  function normalizePhase(rawPhase) {
+    if (rawPhase === PHASE_COUNTDOWN || rawPhase === PHASE_ELAPSED) {
+      return rawPhase;
+    }
+    return PHASE_IDLE;
+  }
+
+  function toOptionalTimestamp(rawValue) {
+    const value = Number(rawValue);
+    if (!Number.isFinite(value) || value <= 0) {
+      return null;
+    }
+    return Math.floor(value);
+  }
+
+  function toOptionalCountdownSecond(rawValue) {
+    const value = Number(rawValue);
+    if (!Number.isFinite(value) || value < 0) {
+      return null;
+    }
+    return Math.floor(value);
+  }
+
   function create(def, componentContext) {
     function createTimerModel(options) {
       const opts = options || {};
-      const durationMinutes = toDurationMinutes(opts.durationMinutes);
+      const snapshot = opts.snapshot && typeof opts.snapshot === "object" ? opts.snapshot : null;
+      const snapshotDuration = snapshot ? toDurationMinutes(snapshot.durationMinutes) : null;
+      const durationMinutes = snapshotDuration || toDurationMinutes(opts.durationMinutes);
       const durationMs = durationMinutes * 60 * 1000;
       const syncPoints = toSyncSignalPoints(durationMinutes);
       let onTick = typeof opts.onTick === "function" ? opts.onTick : null;
       let onSignal = typeof opts.onSignal === "function" ? opts.onSignal : null;
-      let phase = "idle";
+      let phase = PHASE_IDLE;
       let endTimeMs = null;
       let elapsedStartMs = null;
       let timerId = null;
@@ -77,17 +112,17 @@
         const now = Number.isFinite(nowMs) ? nowMs : Date.now();
         let remainingMs = 0;
         let elapsedMs = 0;
-        if (phase === "countdown") {
+        if (phase === PHASE_COUNTDOWN) {
           remainingMs = Math.max(0, endTimeMs - now);
           elapsedMs = Math.max(0, durationMs - remainingMs);
-        } else if (phase === "elapsed") {
+        } else if (phase === PHASE_ELAPSED) {
           elapsedMs = Math.max(0, now - elapsedStartMs);
         } else {
           remainingMs = durationMs;
         }
 
         let colorPhase = "normal";
-        if (phase === "countdown") {
+        if (phase === PHASE_COUNTDOWN) {
           const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
           if (remainingSeconds <= 10) {
             colorPhase = "critical";
@@ -96,7 +131,7 @@
           }
         }
 
-        const displayTime = phase === "elapsed"
+        const displayTime = phase === PHASE_ELAPSED
           ? formatTimeFromSeconds(Math.floor(elapsedMs / 1000))
           : formatTimeFromSeconds(Math.ceil(remainingMs / 1000));
 
@@ -132,7 +167,7 @@
 
       function beginElapsed(nowMs, emitStartSignal) {
         const now = Number.isFinite(nowMs) ? nowMs : Date.now();
-        phase = "elapsed";
+        phase = PHASE_ELAPSED;
         elapsedStartMs = now;
         endTimeMs = null;
         lastCountdownSecond = null;
@@ -142,7 +177,7 @@
       }
 
       function handleCountdownTick(nowMs) {
-        if (phase !== "countdown") {
+        if (phase !== PHASE_COUNTDOWN) {
           return;
         }
         const remainingMs = Math.max(0, endTimeMs - nowMs);
@@ -181,7 +216,7 @@
 
       function resetCountdownCursor(nowMs) {
         const now = Number.isFinite(nowMs) ? nowMs : Date.now();
-        if (phase !== "countdown") {
+        if (phase !== PHASE_COUNTDOWN) {
           lastCountdownSecond = null;
           return;
         }
@@ -189,9 +224,39 @@
         lastCountdownSecond = Math.max(0, Math.ceil(remainingMs / 1000));
       }
 
+      function applySnapshot(rawSnapshot) {
+        const source = rawSnapshot && typeof rawSnapshot === "object" ? rawSnapshot : null;
+        if (!source) {
+          return;
+        }
+
+        const snapshotPhase = normalizePhase(source.phase);
+        if (snapshotPhase === PHASE_COUNTDOWN) {
+          const restoredEndTimeMs = toOptionalTimestamp(source.endTimeMs);
+          if (restoredEndTimeMs !== null) {
+            phase = PHASE_COUNTDOWN;
+            endTimeMs = restoredEndTimeMs;
+            elapsedStartMs = null;
+            lastCountdownSecond = toOptionalCountdownSecond(source.lastCountdownSecond);
+            return;
+          }
+        }
+
+        if (snapshotPhase === PHASE_ELAPSED) {
+          const restoredElapsedStartMs = toOptionalTimestamp(source.elapsedStartMs);
+          if (restoredElapsedStartMs !== null) {
+            phase = PHASE_ELAPSED;
+            elapsedStartMs = restoredElapsedStartMs;
+            endTimeMs = null;
+            lastCountdownSecond = null;
+            return;
+          }
+        }
+      }
+
       function start() {
         const now = Date.now();
-        phase = "countdown";
+        phase = PHASE_COUNTDOWN;
         endTimeMs = now + durationMs;
         elapsedStartMs = null;
         resetCountdownCursor(now);
@@ -200,7 +265,7 @@
       }
 
       function sync() {
-        if (phase !== "countdown") {
+        if (phase !== PHASE_COUNTDOWN) {
           return;
         }
         const now = Date.now();
@@ -229,7 +294,7 @@
 
       function reset() {
         stopTimer();
-        phase = "idle";
+        phase = PHASE_IDLE;
         endTimeMs = null;
         elapsedStartMs = null;
         lastCountdownSecond = null;
@@ -238,7 +303,7 @@
 
       function destroy() {
         stopTimer();
-        phase = "idle";
+        phase = PHASE_IDLE;
         endTimeMs = null;
         elapsedStartMs = null;
         lastCountdownSecond = null;
@@ -250,12 +315,31 @@
         return resolveState(Date.now());
       }
 
+      function getSnapshot() {
+        return {
+          phase: phase,
+          durationMinutes: durationMinutes,
+          endTimeMs: phase === PHASE_COUNTDOWN ? endTimeMs : null,
+          elapsedStartMs: phase === PHASE_ELAPSED ? elapsedStartMs : null,
+          lastCountdownSecond: phase === PHASE_COUNTDOWN ? lastCountdownSecond : null
+        };
+      }
+
+      applySnapshot(snapshot);
+      if (phase === PHASE_COUNTDOWN && endTimeMs != null && endTimeMs <= Date.now()) {
+        beginElapsed(Date.now(), false);
+      }
+      if (phase !== PHASE_IDLE) {
+        ensureTimer();
+      }
+
       return {
         start: start,
         sync: sync,
         reset: reset,
         destroy: destroy,
-        getState: getState
+        getState: getState,
+        getSnapshot: getSnapshot
       };
     }
 

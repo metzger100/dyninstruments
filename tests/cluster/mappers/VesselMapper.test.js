@@ -319,6 +319,7 @@ describe("VesselMapper", function () {
         regattaSoundEnabled: true,
         regattaProgressBar: true,
         regattaDuration: undefined,
+        stableDigits: false,
         regattaTimerRatioThresholdNormal: undefined,
         regattaTimerRatioThresholdFlat: undefined,
         captionUnitScale: undefined
@@ -333,6 +334,7 @@ describe("VesselMapper", function () {
       regattaSoundEnabled: false,
       regattaProgressBar: false,
       regattaDuration: 6,
+      stableDigits: true,
       regattaTimerRatioThresholdNormal: "1.05",
       regattaTimerRatioThresholdFlat: "2.95",
       captionUnitScale: "0.9"
@@ -345,6 +347,7 @@ describe("VesselMapper", function () {
         regattaSoundEnabled: false,
         regattaProgressBar: false,
         regattaDuration: 6,
+        stableDigits: true,
         regattaTimerRatioThresholdNormal: 1.05,
         regattaTimerRatioThresholdFlat: 2.95,
         captionUnitScale: 0.9

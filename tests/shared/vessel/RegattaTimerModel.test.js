@@ -60,6 +60,26 @@ describe("RegattaTimerModel", function () {
     expect(ticks[ticks.length - 1]).toBe("04:59");
   });
 
+  it("formats countdown display as MM:SS below one hour and H:MM:SS at one hour or more", function () {
+    const createTimerModel = createFactory();
+
+    const oneMinute = createTimerModel({ durationMinutes: 1 });
+    oneMinute.start();
+    vi.advanceTimersByTime(1000);
+    expect(oneMinute.getState().displayTime).toBe("00:59");
+
+    const oneHour = createTimerModel({ durationMinutes: 60 });
+    expect(oneHour.getState().displayTime).toBe("1:00:00");
+    oneHour.start();
+    vi.advanceTimersByTime(1000);
+    expect(oneHour.getState().displayTime).toBe("59:59");
+
+    const longCountdown = createTimerModel({ durationMinutes: 76 });
+    longCountdown.start();
+    vi.advanceTimersByTime(56000);
+    expect(longCountdown.getState().displayTime).toBe("1:15:04");
+  });
+
   it("sync snaps to the next supported signal point below current value", function () {
     const createTimerModel = createFactory();
     const timer = createTimerModel({ durationMinutes: 5 });
@@ -116,6 +136,17 @@ describe("RegattaTimerModel", function () {
 
     expect(timer.getState().phase).toBe("elapsed");
     expect(timer.getState().displayTime).toBe("00:03");
+  });
+
+  it("formats elapsed display as H:MM:SS after one hour", function () {
+    const createTimerModel = createFactory();
+    const timer = createTimerModel({ durationMinutes: 1 });
+
+    timer.start();
+    vi.advanceTimersByTime(7449000);
+
+    expect(timer.getState().phase).toBe("elapsed");
+    expect(timer.getState().displayTime).toBe("2:03:09");
   });
 
   it("reset returns idle state from countdown and elapsed phases", function () {

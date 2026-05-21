@@ -16,6 +16,7 @@
   display: grid;
   gap: 0.25em;
   color: inherit;
+  position: relative;
 }
 
 .dyni-html-root .dyni-regatta-mode-high,
@@ -26,7 +27,7 @@
 }
 
 .dyni-html-root .dyni-regatta-mode-flat {
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   align-items: stretch;
 }
@@ -35,13 +36,16 @@
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr);
   align-items: center;
   justify-items: stretch;
+  position: relative;
+  z-index: 2;
 }
 
 .dyni-html-root .dyni-regatta-time {
   min-width: 0;
+  min-height: 0;
   line-height: 1;
   text-align: center;
   white-space: nowrap;
@@ -51,13 +55,16 @@
 
 .dyni-html-root .dyni-regatta-controls {
   min-width: 0;
+  min-height: 0;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: center;
+  position: relative;
+  z-index: 2;
 }
 
 .dyni-html-root .dyni-regatta-mode-flat .dyni-regatta-controls {
   justify-items: stretch;
-  min-width: 7em;
 }
 
 .dyni-html-root .dyni-regatta-btn {
@@ -71,6 +78,12 @@
   font-weight: var(--dyni-theme-font-label-weight, 700);
   border: 1px solid var(--dyni-theme-surface-border, currentColor);
   color: inherit;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  white-space: nowrap;
 }
 
 .dyni-html-root .dyni-regatta-open-dispatch .dyni-regatta-btn {
@@ -95,10 +108,15 @@
 }
 
 .dyni-html-root .dyni-regatta-bar {
-  height: 0.22em;
-  border-radius: 0.22em;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 0;
+  border-radius: 0;
   background: var(--dyni-theme-regatta-barDefault, #70B0F3);
   transition: width 140ms linear;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .dyni-html-root .dyni-regatta-color-warning .dyni-regatta-time {

@@ -22,13 +22,13 @@ Bundled layout integration:
   - interaction: `.dyni-regatta-open-dispatch`, `.dyni-regatta-open-passive`
 - Layering and structure:
   - wrapper: `.dyni-regatta-html`
+  - optional strip: `.dyni-regatta-bar` (direct wrapper child, top edge overlay)
   - display block: `.dyni-regatta-display`
-  - digits: `.dyni-regatta-time.dyni-tabular`
+  - digits: `.dyni-regatta-time` (`.dyni-tabular` only when `stableDigits` is enabled)
   - controls: `.dyni-regatta-controls`
   - actions: `.dyni-regatta-btn-*` with `data-dyni-action` (`regatta-start`, `regatta-sync`, `regatta-reset`)
-  - optional strip: `.dyni-regatta-bar`
 - Core layout constants from fit owner (`shared/widget-kits/vessel/RegattaTimerHtmlFit.js`):
-  - `MIN_BUTTON_TAP_TARGET_PX = 32`
+  - `BAR_HEIGHT_FROM_WIDGET_HEIGHT_RATIO = 0.03`
   - high mode share: display `0.68`, controls `0.32`
   - normal mode share: display `0.62`, controls `0.38`
   - flat mode share: display `1.0`, controls `1.0`
@@ -88,8 +88,12 @@ Presets:
 | `regattaSoundEnabled` | `BOOLEAN` | `true` | `{ kind: "regattaTimer" }` |
 | `regattaProgressBar` | `BOOLEAN` | `true` | `{ kind: "regattaTimer" }` |
 | `regattaDuration` | `SELECT` (`3`, `5`, `6`) | `5` | `{ kind: "regattaTimer" }` |
+| `stableDigits` | `BOOLEAN` | `false` | `{ kind: "regattaTimer" }` |
 | `regattaTimerRatioThresholdNormal` | `FLOAT` (`0.5..2.0`) | `1.0` | `{ kind: "regattaTimer" }` |
 | `regattaTimerRatioThresholdFlat` | `FLOAT` (`1.5..6.0`) | `3.0` | `{ kind: "regattaTimer" }` |
+
+Notes:
+- `caption_regattaTimer` and `unit_regattaTimer` are hidden in editor UI (renderer does not display them).
 
 ## Responsive Mode Matrix
 

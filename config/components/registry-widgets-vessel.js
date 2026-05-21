@@ -56,6 +56,13 @@
       deps: []
   };
 
+  w.RegattaTimerSessionStore = {
+      js: BASE + "shared/widget-kits/vessel/RegattaTimerSessionStore.js",
+      css: undefined,
+      globalKey: "DyniRegattaTimerSessionStore",
+      deps: ["ValueMath"]
+  };
+
   w.RegattaTimerMarkup = {
       js: BASE + "shared/widget-kits/vessel/RegattaTimerMarkup.js",
       css: undefined,
@@ -68,7 +75,7 @@
       css: undefined,
       shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.css"],
       globalKey: "DyniRegattaTimerTextHtmlWidget",
-      deps: ["RegattaTimerModel", "RegattaTimerAudio", "RegattaTimerMarkup", "RegattaTimerHtmlFit", "HtmlWidgetUtils", "ValueMath"]
+      deps: ["RegattaTimerModel", "RegattaTimerAudio", "RegattaTimerSessionStore", "RegattaTimerMarkup", "RegattaTimerHtmlFit", "HtmlWidgetUtils", "ValueMath"]
   };
 
   w.PositionCoordinateWidget = {

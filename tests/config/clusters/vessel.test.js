@@ -53,6 +53,17 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.dateTimeRatioThresholdFlat.internal).toBe(true);
     expect(def.editableParameters.captionUnitScale.internal).not.toBe(true);
     expect(def.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
+    expect(def.editableParameters.captionUnitScale.condition).toEqual([
+      { kind: "voltage" },
+      { kind: "voltageLinear" },
+      { kind: "voltageRadial" },
+      { kind: "alarm" },
+      { kind: "clock" },
+      { kind: "dateTime" },
+      { kind: "timeStatus" },
+      { kind: "pitch" },
+      { kind: "roll" }
+    ]);
     expect(def.editableParameters.voltageLinearHideTextualMetrics.condition).toEqual({ kind: "voltageLinear" });
     expect(def.editableParameters.voltageLinearHideTextualMetrics.default).toBe(false);
     expect(def.editableParameters.voltageRadialHideTextualMetrics.condition).toEqual({ kind: "voltageRadial" });
@@ -62,6 +73,7 @@ describe("config/clusters/vessel.js", function () {
       { kind: "voltage" },
       { kind: "voltageLinear" },
       { kind: "voltageRadial" },
+      { kind: "regattaTimer" },
       { kind: "clock" },
       { kind: "dateTime" },
       { kind: "timeStatus" },
@@ -140,6 +152,8 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.regattaTimerRatioThresholdFlat.default).toBe(3.0);
     expect(def.editableParameters.regattaTimerRatioThresholdFlat.internal).toBe(true);
     expect(def.editableParameters.regattaTimerRatioThresholdFlat.condition).toEqual({ kind: "regattaTimer" });
+    expect(def.editableParameters.caption_regattaTimer).toBe(false);
+    expect(def.editableParameters.unit_regattaTimer).toBe(false);
   });
 
   it("injects selected voltage path into storeKeys.value for voltage kinds", function () {

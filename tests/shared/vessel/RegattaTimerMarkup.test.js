@@ -60,6 +60,7 @@ describe("RegattaTimerMarkup", function () {
       config: makeConfig(),
       mode: "flat",
       interactionState: "dispatch",
+      stableDigitsEnabled: false,
       htmlUtils: createHtmlUtils()
     });
     const root = parseHtml(html).querySelector(".dyni-regatta-html");
@@ -69,9 +70,26 @@ describe("RegattaTimerMarkup", function () {
     expect(html).toContain("dyni-regatta-color-normal");
     expect(html).toContain("dyni-regatta-open-dispatch");
     expect(root.querySelector(".dyni-regatta-time").innerHTML).toBe("&lt;05:00&gt;");
+    expect(root.querySelector(".dyni-regatta-time").classList.contains("dyni-tabular")).toBe(false);
     expect(root.querySelector('[data-dyni-action="regatta-start"]')).toBeTruthy();
     expect(root.querySelector('[data-dyni-action="regatta-sync"]')).toBeTruthy();
     expect(root.querySelector('[data-dyni-action="regatta-reset"]')).toBeTruthy();
+  });
+
+  it("adds dyni-tabular only when stable digits are enabled", function () {
+    const markup = createMarkup();
+    const html = markup.render({
+      model: makeModel(),
+      fit: makeFit(),
+      config: makeConfig(),
+      mode: "normal",
+      interactionState: "dispatch",
+      stableDigitsEnabled: true,
+      htmlUtils: createHtmlUtils()
+    });
+    const timeEl = parseHtml(html).querySelector(".dyni-regatta-time");
+
+    expect(timeEl.classList.contains("dyni-tabular")).toBe(true);
   });
 
   it("renders progress bar only when enabled in config", function () {
@@ -82,6 +100,7 @@ describe("RegattaTimerMarkup", function () {
       config: makeConfig({ progressBarEnabled: true }),
       mode: "normal",
       interactionState: "passive",
+      stableDigitsEnabled: false,
       htmlUtils: createHtmlUtils()
     });
     const withoutBar = markup.render({
@@ -90,6 +109,7 @@ describe("RegattaTimerMarkup", function () {
       config: makeConfig({ progressBarEnabled: false }),
       mode: "normal",
       interactionState: "passive",
+      stableDigitsEnabled: false,
       htmlUtils: createHtmlUtils()
     });
 
@@ -109,6 +129,7 @@ describe("RegattaTimerMarkup", function () {
       config: makeConfig({ durationMinutes: 5 }),
       mode: "high",
       interactionState: "dispatch",
+      stableDigitsEnabled: false,
       htmlUtils: createHtmlUtils()
     });
     const bar = parseHtml(html).querySelector(".dyni-regatta-bar");
@@ -130,11 +151,32 @@ describe("RegattaTimerMarkup", function () {
       config: makeConfig({ progressBarEnabled: true }),
       mode: "normal",
       interactionState: "passive",
+      stableDigitsEnabled: false,
       htmlUtils: createHtmlUtils()
     });
     const bar = parseHtml(html).querySelector(".dyni-regatta-bar");
 
     expect(bar.getAttribute("style")).toContain("width:0%");
     expect(html).toContain("dyni-regatta-phase-elapsed");
+  });
+
+  it("renders progress strip as a direct wrapper child and not inside display", function () {
+    const markup = createMarkup();
+    const html = markup.render({
+      model: makeModel({ phase: "countdown", remainingMs: 120000 }),
+      fit: makeFit(),
+      config: makeConfig({ progressBarEnabled: true }),
+      mode: "flat",
+      interactionState: "dispatch",
+      stableDigitsEnabled: false,
+      htmlUtils: createHtmlUtils()
+    });
+    const root = parseHtml(html).querySelector(".dyni-regatta-html");
+    const bar = root.querySelector(".dyni-regatta-bar");
+    const display = root.querySelector(".dyni-regatta-display");
+
+    expect(bar).toBeTruthy();
+    expect(bar.parentElement).toBe(root);
+    expect(display.querySelector(".dyni-regatta-bar")).toBeFalsy();
   });
 });

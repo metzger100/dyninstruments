@@ -12,7 +12,17 @@
 
   const FIT_CACHE_KEY = "__dyniRegattaTimerHtmlFitCache";
   const DEFAULT_MODE = "normal";
-  const MIN_BUTTON_TAP_TARGET_PX = 32;
+  const BAR_HEIGHT_FROM_WIDGET_HEIGHT_RATIO = 0.03;
+
+  function resolveVisibleLabels(phase) {
+    if (phase === "countdown") {
+      return ["SYNC", "RESET"];
+    }
+    if (phase === "elapsed") {
+      return ["RESET"];
+    }
+    return ["START"];
+  }
 
   function normalizeMode(mode) {
     if (mode === "high" || mode === "flat") {
@@ -56,13 +66,14 @@
     return { display: 0.62, controls: 0.38 };
   }
 
-  function buildSignature(width, height, mode, phase, displayTime) {
+  function buildSignature(width, height, mode, phase, displayTime, stableDigitsEnabled) {
     return JSON.stringify([
       width,
       height,
       mode,
       phase,
-      String(displayTime || "").length
+      String(displayTime || "").length,
+      stableDigitsEnabled === true
     ]);
   }
 
@@ -86,8 +97,9 @@
       const mode = normalizeMode(cfg.mode);
       const phase = phaseApi.normalize(model.phase);
       const displayTime = model.displayTime == null ? "00:00" : String(model.displayTime);
+      const stableDigitsEnabled = cfg.stableDigitsEnabled === true;
       const cache = resolveRegattaCacheEntry(cfg.hostContext);
-      const signature = buildSignature(width, height, mode, phase, displayTime);
+      const signature = buildSignature(width, height, mode, phase, displayTime, stableDigitsEnabled);
       if (cache && cache.signature === signature && cache.result) {
         return cache.result;
       }
@@ -95,39 +107,84 @@
       const minSide = Math.max(1, Math.min(width, height));
       const shares = computeModeShares(mode);
       const pad = scaledPx(0.045, minSide);
+      const sectionGap = scaledPx(0.02, minSide);
       const displayGap = scaledPx(0.02, minSide);
       const controlGap = scaledPx(0.03, minSide);
-      const barHeight = scaledPx(0.02, minSide);
-      const displayHeight = Math.max(1, Math.floor((height - (pad * 2)) * shares.display));
-      const controlsHeight = mode === "flat"
-        ? Math.max(1, height - (pad * 2))
-        : Math.max(1, Math.floor((height - (pad * 2)) * shares.controls));
-      const displayWidth = mode === "flat"
-        ? Math.max(1, Math.floor((width - (pad * 2)) * 0.6))
-        : Math.max(1, width - (pad * 2));
+      const barHeight = scaledPx(BAR_HEIGHT_FROM_WIDGET_HEIGHT_RATIO, height);
+      const contentWidth = Math.max(1, width - (pad * 2));
+      const contentHeight = Math.max(1, height - (pad * 2));
       const visibleButtons = phase === "countdown" ? 2 : 1;
-      const buttonHeight = Math.max(
-        MIN_BUTTON_TAP_TARGET_PX,
-        Math.floor((controlsHeight - (controlGap * Math.max(0, visibleButtons - 1))) / Math.max(1, visibleButtons))
-      );
-      const buttonFontPx = Math.max(1, Math.floor(buttonHeight * 0.38));
-      const timerHeightBudget = Math.max(1, displayHeight - barHeight - displayGap);
+      const isNormalCountdown = phase === "countdown" && mode === "normal";
+      const controlsColumns = isNormalCountdown ? 2 : 1;
+      const controlsRows = isNormalCountdown ? 1 : visibleButtons;
+      const modeSharesTotal = shares.display + shares.controls;
+      const modeDisplayShare = modeSharesTotal > 0 ? (shares.display / modeSharesTotal) : 0.5;
+      const modeControlsShare = modeSharesTotal > 0 ? (shares.controls / modeSharesTotal) : 0.5;
+      let displayHeight = contentHeight;
+      let controlsHeight = contentHeight;
+      let displayWidth = contentWidth;
+      let controlsWidth = contentWidth;
+
+      if (mode === "flat") {
+        const contentWidthWithoutGap = Math.max(1, contentWidth - sectionGap);
+        displayWidth = Math.max(1, Math.floor(contentWidthWithoutGap * modeDisplayShare));
+        controlsWidth = Math.max(1, contentWidthWithoutGap - displayWidth);
+      } else {
+        const contentHeightWithoutGap = Math.max(1, contentHeight - sectionGap);
+        controlsHeight = Math.max(1, Math.floor(contentHeightWithoutGap * modeControlsShare));
+        displayHeight = Math.max(1, contentHeightWithoutGap - controlsHeight);
+      }
+
+      const buttonsHeightBudget = Math.max(1, controlsHeight - (controlGap * Math.max(0, controlsRows - 1)));
+      const buttonsWidthBudget = Math.max(1, controlsWidth - (controlGap * Math.max(0, controlsColumns - 1)));
+      const buttonHeight = Math.max(1, Math.floor(buttonsHeightBudget / Math.max(1, controlsRows)));
+      const buttonWidth = Math.max(1, Math.floor(buttonsWidthBudget / Math.max(1, controlsColumns)));
+      const visibleLabels = resolveVisibleLabels(phase);
+      const longestVisibleLabelLength = visibleLabels.reduce(function (maxLen, label) {
+        const labelLength = String(label || "").length;
+        return labelLength > maxLen ? labelLength : maxLen;
+      }, 1);
+      const buttonPadY = Math.max(0, Math.floor(buttonHeight * 0.12));
+      const buttonPadX = Math.max(0, Math.floor(Math.min(buttonWidth * 0.08, buttonHeight * 0.35)));
+      const buttonInnerHeight = Math.max(1, buttonHeight - (buttonPadY * 2));
+      const buttonInnerWidth = Math.max(1, buttonWidth - (buttonPadX * 2));
+      const buttonFontByHeight = Math.max(1, Math.floor(buttonInnerHeight * 0.7));
+      const buttonFontByWidth = Math.max(1, Math.floor(buttonInnerWidth / Math.max(1.8, longestVisibleLabelLength * 0.66)));
+      const buttonFontPx = Math.max(1, Math.min(buttonFontByHeight, buttonFontByWidth));
+      const timerHeightBudget = Math.max(1, displayHeight - displayGap);
       const timerWidthBudget = Math.max(1, displayWidth);
       const glyphFactor = Math.max(1.5, displayTime.length * 0.62);
       const timerByHeight = Math.floor(timerHeightBudget * 0.78);
       const timerByWidth = Math.floor(timerWidthBudget / glyphFactor);
       const timerPx = Math.max(1, Math.min(timerByHeight, timerByWidth));
+      const flatColumnsStyle = mode === "flat"
+        ? "grid-template-columns:minmax(0," + displayWidth + "px) minmax(0," + controlsWidth + "px);"
+        : "";
+      const flatDisplayWidthStyle = mode === "flat"
+        ? "width:" + displayWidth + "px;max-width:100%;"
+        : "";
+      const flatControlsWidthStyle = mode === "flat"
+        ? "width:" + controlsWidth + "px;max-width:100%;"
+        : "";
+      const controlsGridStyle = isNormalCountdown
+        ? "grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:minmax(0,1fr);"
+        : (
+          "grid-template-columns:minmax(0,1fr);"
+          + "grid-template-rows:" + (visibleButtons > 1 ? "repeat(" + visibleButtons + ",minmax(0,1fr))" : "minmax(0,1fr)") + ";"
+        );
 
       const result = {
-        wrapperStyle: "padding:" + pad + "px;",
-        displayStyle: "row-gap:" + displayGap + "px;" + (mode === "flat" ? "min-width:0;" : ""),
+        wrapperStyle: "padding:" + pad + "px;gap:" + sectionGap + "px;" + flatColumnsStyle,
+        displayStyle: "row-gap:" + displayGap + "px;min-width:0;min-height:0;" + flatDisplayWidthStyle,
         timerStyle: htmlUtils.toFontStyle(timerPx),
-        controlsStyle: "gap:" + controlGap + "px;",
-        barStyle: "height:" + barHeight + "px;",
+        controlsStyle: "gap:" + controlGap + "px;min-width:0;min-height:0;" + controlsGridStyle + flatControlsWidthStyle,
+        barStyle: "height:" + barHeight + "px;border-radius:" + Math.max(1, Math.floor(barHeight * 0.5)) + "px;",
         buttonStyle: ""
-          + "min-height:" + buttonHeight + "px;"
+          + "height:" + buttonHeight + "px;"
+          + "max-height:" + buttonHeight + "px;"
+          + "min-height:0;"
           + "font-size:" + buttonFontPx + "px;"
-          + "padding:" + Math.max(1, Math.floor(buttonHeight * 0.24)) + "px " + Math.max(1, Math.floor(buttonHeight * 0.42)) + "px;",
+          + "padding:" + buttonPadY + "px " + buttonPadX + "px;",
         startButtonStyle: "",
         syncButtonStyle: "",
         resetButtonStyle: ""

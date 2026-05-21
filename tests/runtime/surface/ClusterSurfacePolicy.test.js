@@ -182,6 +182,46 @@ describe("runtime/surface/ClusterSurfacePolicy.js", function () {
     expect(normalizationGetterReads).toBe(2);
   });
 
+  it("dispatches regatta timer interaction without requiring host capabilities", function () {
+    const policy = createPolicy();
+    const routeState = makeRouteState("RegattaTimerTextHtmlWidget", {
+      cluster: "vessel",
+      kind: "regattaTimer"
+    });
+    const hostContext = {};
+
+    const routed = policy.resolveRouteStateWithPolicy(routeState, hostContext);
+
+    expect(routed.props.surfacePolicy.interaction.mode).toBe("dispatch");
+  });
+
+  it("keeps regatta timer passive when editing flags are active", function () {
+    const policy = createPolicy();
+    const hostContext = {
+      hostActions: makeHostActions({
+        capabilities: {
+          pageId: "regattapage"
+        }
+      })
+    };
+    const editingRouteState = makeRouteState("RegattaTimerTextHtmlWidget", {
+      cluster: "vessel",
+      kind: "regattaTimer",
+      editing: true
+    });
+    const layoutEditingRouteState = makeRouteState("RegattaTimerTextHtmlWidget", {
+      cluster: "vessel",
+      kind: "regattaTimer",
+      dyniLayoutEditing: true
+    });
+
+    const routedEditing = policy.resolveRouteStateWithPolicy(editingRouteState, hostContext);
+    const routedLayoutEditing = policy.resolveRouteStateWithPolicy(layoutEditingRouteState, hostContext);
+
+    expect(routedEditing.props.surfacePolicy.interaction.mode).toBe("passive");
+    expect(routedLayoutEditing.props.surfacePolicy.interaction.mode).toBe("passive");
+  });
+
   it("dispatches alarm only when active, dispatch-capable, and not editing", function () {
     const policy = createPolicy();
     const stopAll = vi.fn(() => true);

@@ -357,6 +357,7 @@ describe("static cluster configs", function () {
       { kind: "voltage" },
       { kind: "voltageLinear" },
       { kind: "voltageRadial" },
+      { kind: "regattaTimer" },
       { kind: "clock" },
       { kind: "dateTime" },
       { kind: "timeStatus" },
@@ -367,6 +368,19 @@ describe("static cluster configs", function () {
     expect(byCluster.vessel.editableParameters.voltageLinearHideTextualMetrics.condition).toEqual({ kind: "voltageLinear" });
     expect(byCluster.vessel.editableParameters.voltageRadialHideTextualMetrics.default).toBe(false);
     expect(byCluster.vessel.editableParameters.voltageRadialHideTextualMetrics.condition).toEqual({ kind: "voltageRadial" });
+    expect(byCluster.vessel.editableParameters.caption_regattaTimer).toBe(false);
+    expect(byCluster.vessel.editableParameters.unit_regattaTimer).toBe(false);
+    expect(byCluster.vessel.editableParameters.captionUnitScale.condition).toEqual([
+      { kind: "voltage" },
+      { kind: "voltageLinear" },
+      { kind: "voltageRadial" },
+      { kind: "alarm" },
+      { kind: "clock" },
+      { kind: "dateTime" },
+      { kind: "timeStatus" },
+      { kind: "pitch" },
+      { kind: "roll" }
+    ]);
     expect(Object.prototype.hasOwnProperty.call(byCluster.vessel.editableParameters.stableDigits, "default")).toBe(false);
     expect(byCluster.anchor.editableParameters.stableDigits.default).toBe(false);
     expect(byCluster.anchor.editableParameters.stableDigits.condition).toEqual([

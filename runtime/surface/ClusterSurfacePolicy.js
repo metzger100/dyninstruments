@@ -158,6 +158,9 @@
     if (isEditingMode(props)) {
       return "passive";
     }
+    if (rendererId === "RegattaTimerTextHtmlWidget") {
+      return "dispatch";
+    }
     if (rendererId === "ActiveRouteTextHtmlWidget") {
       return capabilities && capabilities.routeEditor && capabilities.routeEditor.openActiveRoute === "dispatch"
         ? "dispatch"
