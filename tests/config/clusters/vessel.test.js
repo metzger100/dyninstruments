@@ -32,6 +32,7 @@ describe("config/clusters/vessel.js", function () {
       "voltage",
       "voltageLinear",
       "voltageRadial",
+      "regattaTimer",
       "alarm",
       "clock",
       "dateTime",
@@ -119,6 +120,26 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.voltageRadialWarningEnabled.name).toBe("Show warning sector");
     expect(def.editableParameters.voltageLinearAlarmFrom.name).toBe("Alarm at or below");
     expect(def.editableParameters.voltageRadialWarningFrom.name).toBe("Warning at or below");
+    expect(def.editableParameters.regattaSoundEnabled.default).toBe(true);
+    expect(def.editableParameters.regattaSoundEnabled.name).toBe("Acoustic signals");
+    expect(def.editableParameters.regattaSoundEnabled.condition).toEqual({ kind: "regattaTimer" });
+    expect(def.editableParameters.regattaProgressBar.default).toBe(true);
+    expect(def.editableParameters.regattaProgressBar.name).toBe("Show progress bar");
+    expect(def.editableParameters.regattaProgressBar.condition).toEqual({ kind: "regattaTimer" });
+    expect(def.editableParameters.regattaDuration.default).toBe(5);
+    expect(def.editableParameters.regattaDuration.name).toBe("Countdown (minutes)");
+    expect(def.editableParameters.regattaDuration.condition).toEqual({ kind: "regattaTimer" });
+    expect(def.editableParameters.regattaDuration.list).toEqual([
+      { name: "5 Minutes", value: 5 },
+      { name: "6 Minutes", value: 6 },
+      { name: "3 Minutes", value: 3 }
+    ]);
+    expect(def.editableParameters.regattaTimerRatioThresholdNormal.default).toBe(1.0);
+    expect(def.editableParameters.regattaTimerRatioThresholdNormal.internal).toBe(true);
+    expect(def.editableParameters.regattaTimerRatioThresholdNormal.condition).toEqual({ kind: "regattaTimer" });
+    expect(def.editableParameters.regattaTimerRatioThresholdFlat.default).toBe(3.0);
+    expect(def.editableParameters.regattaTimerRatioThresholdFlat.internal).toBe(true);
+    expect(def.editableParameters.regattaTimerRatioThresholdFlat.condition).toEqual({ kind: "regattaTimer" });
   });
 
   it("injects selected voltage path into storeKeys.value for voltage kinds", function () {

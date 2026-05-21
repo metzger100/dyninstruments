@@ -60,6 +60,8 @@ describe("config/shared/kind-defaults.js", function () {
     expect(maps.VESSEL_KIND.alarm.cap).toBe("ALARM");
     expect(maps.VESSEL_KIND.alarm.unit).toBe("");
     expect(maps.VESSEL_KIND.voltageLinear.unit).toBe("V");
+    expect(maps.VESSEL_KIND.regattaTimer.cap).toBe("REGATTA");
+    expect(maps.VESSEL_KIND.regattaTimer.unit).toBe("");
     expect(maps.VESSEL_KIND.dateTime.cap).toBe("");
     expect(maps.VESSEL_KIND.timeStatus.unit).toBe("");
     expect(maps.VESSEL_KIND.pitch.unit).toBe("°");

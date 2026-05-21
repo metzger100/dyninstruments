@@ -38,6 +38,7 @@
             opt("Voltage (SignalK)", "voltage"),
             opt("Voltage gauge (linear)", "voltageLinear"),
             opt("Voltage gauge (radial)", "voltageRadial"),
+            opt("Regatta timer", "regattaTimer"),
             opt("Alarm", "alarm"),
             opt("Clock (local time)", "clock"),
             opt("Date and time", "dateTime"),
@@ -67,6 +68,37 @@
           default: DEFAULT_ROLL_KEY,
           name: "Roll store path",
           condition: { kind: "roll" }
+        },
+        regattaSoundEnabled: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Acoustic signals",
+          condition: { kind: "regattaTimer" }
+        },
+        regattaProgressBar: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Show progress bar",
+          condition: { kind: "regattaTimer" }
+        },
+        regattaDuration: {
+          type: "SELECT",
+          list: [opt("5 Minutes", 5), opt("6 Minutes", 6), opt("3 Minutes", 3)],
+          default: 5,
+          name: "Countdown (minutes)",
+          condition: { kind: "regattaTimer" }
+        },
+        regattaTimerRatioThresholdNormal: {
+          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+          internal: true,
+          name: "RegattaTimer: Normal Threshold",
+          condition: { kind: "regattaTimer" }
+        },
+        regattaTimerRatioThresholdFlat: {
+          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
+          internal: true,
+          name: "RegattaTimer: Flat Threshold",
+          condition: { kind: "regattaTimer" }
         },
 
         // ---------------- VoltageLinearWidget (linear) settings -------------------
