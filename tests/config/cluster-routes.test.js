@@ -51,10 +51,6 @@ const CLUSTER_ROUTE_SCRIPTS = [
   "config/cluster-routes/finalize.js"
 ];
 
-const ROUTE_COMPONENT_PHASE_EXCEPTIONS = {
-  "vessel/regattaTimer": true
-};
-
 function runScripts(context, scripts) {
   scripts.forEach(function (scriptPath) {
     runIifeScript(scriptPath, context);
@@ -181,9 +177,7 @@ describe("config/cluster-routes metadata", function () {
       seenClusterKinds.add(pair);
 
       expect(components[route.mapperId]).toBeTruthy();
-      if (!ROUTE_COMPONENT_PHASE_EXCEPTIONS[routeId]) {
-        expect(components[route.rendererId]).toBeTruthy();
-      }
+      expect(components[route.rendererId]).toBeTruthy();
 
       if (Object.prototype.hasOwnProperty.call(route, "viewModelId")) {
         expect(typeof route.viewModelId).toBe("string");
@@ -204,10 +198,8 @@ describe("config/cluster-routes metadata", function () {
 
       if (route.surface === "html") {
         htmlRoutes.push(route);
-        if (!ROUTE_COMPONENT_PHASE_EXCEPTIONS[routeId]) {
-          expect(Array.isArray(components[route.rendererId].shadowCss)).toBe(true);
-          expect(components[route.rendererId].shadowCss.length).toBeGreaterThan(0);
-        }
+        expect(Array.isArray(components[route.rendererId].shadowCss)).toBe(true);
+        expect(components[route.rendererId].shadowCss.length).toBeGreaterThan(0);
       }
     });
 
