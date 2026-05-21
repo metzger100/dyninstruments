@@ -56,6 +56,13 @@
       deps: []
   };
 
+  w.RegattaTimerMarkup = {
+      js: BASE + "shared/widget-kits/vessel/RegattaTimerMarkup.js",
+      css: undefined,
+      globalKey: "DyniRegattaTimerMarkup",
+      deps: ["HtmlWidgetUtils"]
+  };
+
   w.PositionCoordinateWidget = {
       js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
       css: undefined,
