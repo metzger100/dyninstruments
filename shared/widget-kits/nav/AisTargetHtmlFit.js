@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetHtmlFit - Text-fit and accent-style owner for AIS target HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, AisTargetLayout, HtmlWidgetUtils, HtmlMeasureUtils, ValueMath, TextFitMath
+ * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, AisTargetLayout, HtmlWidgetUtils, HtmlMeasureUtils, ValueMath, TextFitMath, NavModeRatio
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -70,15 +70,6 @@
     }
     return "background-color:" + color + ";";
   }
-  function resolveNameRatio(mode) {
-    if (mode === "flat") {
-      return NAME_MAX_PX_RATIO.flat;
-    }
-    if (mode === "high") {
-      return NAME_MAX_PX_RATIO.high;
-    }
-    return NAME_MAX_PX_RATIO.normal;
-  }
   function resolveFrontRatio(mode) {
     if (mode === "flat") {
       return FRONT_MAX_PX_RATIO.flat;
@@ -120,6 +111,7 @@
     const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const fitMath = componentContext.components.require("TextFitMath");
     const valueMath = componentContext.components.require("ValueMath");
+    const modeRatio = componentContext.components.require("NavModeRatio");
     toObject = valueMath.toObject;
     toText = valueMath.toText;
     function compute(args) {
@@ -166,7 +158,7 @@
       out.nameStyle = htmlMeasureUtils.measureStyle({
         rect: layout.nameRect,
         text: toText(model.nameText),
-        maxPxRatio: resolveNameRatio(layout.mode),
+        maxPxRatio: modeRatio.resolve(layout.mode, NAME_MAX_PX_RATIO),
         textApi: textApi,
         tileLayout: tileLayout,
         ctx: measureCtx,

@@ -187,6 +187,10 @@ describe("WindRadialWidget", function () {
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
                   },
+                  resolveFiniteNumber(value, defaultValue) {
+                    const n = Number(value);
+                    return isFinite(n) ? n : defaultValue;
+                  },
                   formatAngle180(value) {
                     const n = Number(value);
                     if (!isFinite(n)) return "---";
@@ -354,6 +358,10 @@ describe("WindRadialWidget", function () {
                   },
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
+                  },
+                  resolveFiniteNumber(value, defaultValue) {
+                    const n = Number(value);
+                    return isFinite(n) ? n : defaultValue;
                   },
                   formatAngle180(value) {
                     const n = Number(value);
@@ -587,6 +595,10 @@ describe("WindRadialWidget", function () {
                   },
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
+                  },
+                  resolveFiniteNumber(value, defaultValue) {
+                    const n = Number(value);
+                    return isFinite(n) ? n : defaultValue;
                   },
                   formatAngle180(value) {
                     const n = Number(value);

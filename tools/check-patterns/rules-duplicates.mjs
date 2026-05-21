@@ -108,7 +108,6 @@ export function runDuplicateFunctions(rule, files) {
     out.push({
       file: locations[0].file,
       line: locations[0].line,
-      severity: "warn",
       message: rule.message({
         mode: group.mode,
         tokenCount: group.tokenCount,

@@ -1,7 +1,7 @@
 /**
  * Module: CenterDisplayLayout - Responsive layout rectangles for the CenterDisplay renderer
  * Documentation: documentation/widgets/center-display.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, ValueMath
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, LayoutSizingHelpers, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -39,8 +39,10 @@
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
+    const sizingHelpers = componentContext.components.require("LayoutSizingHelpers");
     clampNumber = componentContext.components.require("ValueMath").clampNumber;
     makeRect = rectApi.makeRect;
+    const createContentRect = sizingHelpers.createInsetContentRectFactory(makeRect, "padX", "innerY");
 
     function computeInsets(W, H) {
       const responsive = profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
@@ -50,15 +52,6 @@
         gap: profileApi.computeInsetPx(responsive, GAP_RATIO, 1),
         responsive: responsive
       };
-    }
-
-    function createContentRect(W, H, insets) {
-      return makeRect(
-        insets.padX,
-        insets.innerY,
-        Math.max(1, W - insets.padX * 2),
-        Math.max(1, H - insets.innerY * 2)
-      );
     }
 
     function computeLayout(args) {

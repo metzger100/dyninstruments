@@ -1,7 +1,7 @@
 /**
  * Module: RegattaTimerHtmlFit - Responsive style-fit owner for regatta timer HTML layout
  * Documentation: exec-plans/active/PLAN28.md
- * Depends: HtmlWidgetUtils, ValueMath
+ * Depends: HtmlWidgetUtils, ValueMath, RegattaTimerPhase
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -19,13 +19,6 @@
       return mode;
     }
     return DEFAULT_MODE;
-  }
-
-  function normalizePhase(phase) {
-    if (phase === "countdown" || phase === "elapsed") {
-      return phase;
-    }
-    return "idle";
   }
 
   function resolveRegattaCacheEntry(hostContext) {
@@ -76,6 +69,7 @@
   function create(def, componentContext) {
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const valueMath = componentContext.components.require("ValueMath");
+    const phaseApi = componentContext.components.require("RegattaTimerPhase");
 
     function compute(options) {
       const cfg = options || {};
@@ -90,7 +84,7 @@
       const width = Math.max(1, Math.round(widthRaw));
       const height = Math.max(1, Math.round(heightRaw));
       const mode = normalizeMode(cfg.mode);
-      const phase = normalizePhase(model.phase);
+      const phase = phaseApi.normalize(model.phase);
       const displayTime = model.displayTime == null ? "00:00" : String(model.displayTime);
       const cache = resolveRegattaCacheEntry(cfg.hostContext);
       const signature = buildSignature(width, height, mode, phase, displayTime);

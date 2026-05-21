@@ -203,6 +203,12 @@
       globalKey: "DyniLayoutRectMath"
   };
 
+  sf.LayoutSizingHelpers = {
+      js: BASE + "shared/widget-kits/layout/LayoutSizingHelpers.js",
+      css: undefined,
+      globalKey: "DyniLayoutSizingHelpers"
+  };
+
   sf.ResponsiveScaleProfile = {
       js: BASE + "shared/widget-kits/layout/ResponsiveScaleProfile.js",
       css: undefined,

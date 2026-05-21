@@ -57,7 +57,7 @@
       js: BASE + "shared/widget-kits/nav/AisTargetHtmlFit.js",
       css: undefined,
       globalKey: "DyniAisTargetHtmlFit",
-      deps: ["CanvasTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils", "HtmlMeasureUtils", "ValueMath", "TextFitMath"]
+      deps: ["CanvasTextLayout", "TextTileLayout", "AisTargetLayout", "HtmlWidgetUtils", "HtmlMeasureUtils", "ValueMath", "TextFitMath", "NavModeRatio"]
   };
 
   sf.AlarmHtmlFit = {
@@ -78,14 +78,14 @@
       js: BASE + "shared/widget-kits/nav/ActiveRouteLayout.js",
       css: undefined,
       globalKey: "DyniActiveRouteLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "ValueMath"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "LayoutSizingHelpers", "ValueMath"]
   };
 
   sf.EditRouteLayout = {
       js: BASE + "shared/widget-kits/nav/EditRouteLayout.js",
       css: undefined,
       globalKey: "DyniEditRouteLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "EditRouteLayoutMath", "EditRouteLayoutGeometry", "HtmlWidgetUtils"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "LayoutSizingHelpers", "EditRouteLayoutMath", "EditRouteLayoutGeometry", "HtmlWidgetUtils"]
   };
 
   sf.EditRouteLayoutMath = {
@@ -106,7 +106,7 @@
       js: BASE + "shared/widget-kits/nav/EditRouteHtmlFitSupport.js",
       css: undefined,
       globalKey: "DyniEditRouteHtmlFitSupport",
-      deps: ["HtmlMeasureUtils", "HtmlWidgetUtils", "ValueMath"]
+      deps: ["HtmlMeasureUtils", "HtmlWidgetUtils", "ValueMath", "NavModeRatio"]
   };
 
   sf.EditRouteHtmlFit = {
@@ -162,14 +162,14 @@
       js: BASE + "shared/widget-kits/vessel/RegattaTimerHtmlFit.js",
       css: undefined,
       globalKey: "DyniRegattaTimerHtmlFit",
-      deps: ["HtmlWidgetUtils", "ValueMath"]
+      deps: ["HtmlWidgetUtils", "ValueMath", "RegattaTimerPhase"]
   };
 
   sf.CenterDisplayLayout = {
       js: BASE + "shared/widget-kits/nav/CenterDisplayLayout.js",
       css: undefined,
       globalKey: "DyniCenterDisplayLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "ValueMath"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "LayoutSizingHelpers", "ValueMath"]
   };
 
   sf.CenterDisplayMath = {
@@ -190,7 +190,19 @@
       js: BASE + "shared/widget-kits/xte/XteHighwayLayout.js",
       css: undefined,
       globalKey: "DyniXteHighwayLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "ValueMath"]
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "LayoutSizingHelpers", "ValueMath"]
+  };
+
+  sf.NavModeRatio = {
+      js: BASE + "shared/widget-kits/nav/NavModeRatio.js",
+      css: undefined,
+      globalKey: "DyniNavModeRatio"
+  };
+
+  sf.RegattaTimerPhase = {
+      js: BASE + "shared/widget-kits/vessel/RegattaTimerPhase.js",
+      css: undefined,
+      globalKey: "DyniRegattaTimerPhase"
   };
 
   sf.XteHighwayPrimitives = {

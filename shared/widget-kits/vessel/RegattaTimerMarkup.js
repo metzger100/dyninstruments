@@ -1,7 +1,7 @@
 /**
  * Module: RegattaTimerMarkup - Pure HTML assembly owner for regatta timer renderer output
  * Documentation: exec-plans/active/PLAN28.md
- * Depends: HtmlWidgetUtils
+ * Depends: HtmlWidgetUtils, RegattaTimerPhase
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -17,13 +17,6 @@
       return mode;
     }
     return "normal";
-  }
-
-  function normalizePhase(phase) {
-    if (phase === "countdown" || phase === "elapsed") {
-      return phase;
-    }
-    return "idle";
   }
 
   function normalizeColorPhase(colorPhase) {
@@ -45,8 +38,8 @@
     return Math.round(minutes * 60 * 1000);
   }
 
-  function toBarPercent(model, config) {
-    const phase = normalizePhase(model.phase);
+  function toBarPercent(model, config, phaseApi) {
+    const phase = phaseApi.normalize(model.phase);
     if (phase === "elapsed") {
       return "0";
     }
@@ -65,6 +58,8 @@
   }
 
   function create(def, componentContext) {
+    const phaseApi = componentContext.components.require("RegattaTimerPhase");
+
     function render(options) {
       if (!options || typeof options !== "object") {
         throw new Error("RegattaTimerMarkup.render requires options object");
@@ -78,7 +73,7 @@
       const config = options.config;
       const htmlUtils = options.htmlUtils;
       const mode = normalizeMode(options.mode);
-      const phase = normalizePhase(model.phase);
+      const phase = phaseApi.normalize(model.phase);
       const colorPhase = normalizeColorPhase(model.colorPhase);
       const interactionState = normalizeInteractionState(options.interactionState);
       const displayText = model.displayTime == null ? "" : String(model.displayTime);
@@ -97,7 +92,7 @@
           '<div class="dyni-regatta-bar"'
           + htmlUtils.toStyleAttr(
             htmlUtils.joinStyles(
-              "width:" + toBarPercent(model, config) + "%;",
+              "width:" + toBarPercent(model, config, phaseApi) + "%;",
               fit.barStyle
             )
           )

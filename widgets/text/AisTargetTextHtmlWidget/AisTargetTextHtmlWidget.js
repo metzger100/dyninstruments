@@ -1,7 +1,7 @@
 /**
  * Module: AisTargetTextHtmlWidget - Native HTML AIS target summary renderer shell
  * Documentation: documentation/guides/add-new-html-kind.md
- * Depends: AisTargetHtmlFit, HtmlWidgetUtils, AisTargetRenderModel, AisTargetMarkup, ValueMath, componentContext.theme.tokens
+ * Depends: AisTargetHtmlFit, HtmlWidgetUtils, HtmlWidgetLifecycle, AisTargetRenderModel, AisTargetMarkup, ValueMath, componentContext.theme.tokens
  */
 
 (function (root, factory) {
@@ -19,6 +19,7 @@
   function create(def, componentContext) {
     const htmlFit = componentContext.components.require("AisTargetHtmlFit");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const lifecycle = componentContext.components.require("HtmlWidgetLifecycle");
     const renderModel = componentContext.components.require("AisTargetRenderModel");
     const markup = componentContext.components.require("AisTargetMarkup");
     const themeResolver = componentContext.theme.tokens;
@@ -124,12 +125,13 @@
         bindDispatchListener(model);
       }
 
-      function mount(mountHostEl, payload) {
-        mountEl = mountHostEl;
-        rootEl = mountEl.ownerDocument.createElement("div");
-        mountEl.appendChild(rootEl);
-        patchDom(payload);
-      }
+      const mount = lifecycle.createMountHandler({
+        applyMounted(mounted) {
+          mountEl = mounted.mountEl;
+          rootEl = mounted.rootEl;
+        },
+        patchDom: patchDom
+      });
 
       function update(payload) {
         patchDom(payload);
@@ -165,10 +167,7 @@
         detach();
       }
 
-      function layoutSignature(payload) {
-        const model = buildModel(payload && payload.props ? payload.props : {}, payload && payload.shellRect ? payload.shellRect : null);
-        return model.resizeSignatureParts.join("|");
-      }
+      const layoutSignature = lifecycle.createResizeSignatureHandler(buildModel);
 
       return {
         mount: mount,

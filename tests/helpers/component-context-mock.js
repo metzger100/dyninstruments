@@ -14,6 +14,10 @@ const DEFAULT_MODULE_PATHS = {
   RadialFrameRenderer: "shared/widget-kits/radial/RadialFrameRenderer.js",
   HtmlMeasureUtils: "shared/widget-kits/html/HtmlMeasureUtils.js",
   HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
+  HtmlWidgetLifecycle: "shared/widget-kits/html/HtmlWidgetLifecycle.js",
+  LayoutSizingHelpers: "shared/widget-kits/layout/LayoutSizingHelpers.js",
+  NavModeRatio: "shared/widget-kits/nav/NavModeRatio.js",
+  RegattaTimerPhase: "shared/widget-kits/vessel/RegattaTimerPhase.js",
   StateScreenLabels: "shared/widget-kits/state/StateScreenLabels.js",
   StateScreenTextFit: "shared/widget-kits/state/StateScreenTextFit.js",
   StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js"

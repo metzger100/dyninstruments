@@ -1,7 +1,7 @@
 /**
  * Module: RoutePointsTextHtmlWidget - HTML renderer shell for nav route-points kind
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: RoutePointsHtmlFit, HtmlWidgetUtils, RoutePointsRenderModel, RoutePointsLayout, RoutePointsMarkup, RoutePointsDomEffects, componentContext.theme.tokens
+ * Depends: RoutePointsHtmlFit, HtmlWidgetUtils, HtmlWidgetLifecycle, RoutePointsRenderModel, RoutePointsLayout, RoutePointsMarkup, RoutePointsDomEffects, componentContext.theme.tokens
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -40,6 +40,7 @@
   function create(def, componentContext) {
     const htmlFit = componentContext.components.require("RoutePointsHtmlFit");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const lifecycle = componentContext.components.require("HtmlWidgetLifecycle");
     const renderModel = componentContext.components.require("RoutePointsRenderModel");
     const layoutApi = componentContext.components.require("RoutePointsLayout");
     const markup = componentContext.components.require("RoutePointsMarkup");
@@ -135,12 +136,13 @@
         bindDispatchListener(model);
       }
 
-      function mount(mountHostEl, payload) {
-        mountEl = mountHostEl;
-        rootEl = mountEl.ownerDocument.createElement("div");
-        mountEl.appendChild(rootEl);
-        patchDom(payload);
-      }
+      const mount = lifecycle.createMountHandler({
+        applyMounted(mounted) {
+          mountEl = mounted.mountEl;
+          rootEl = mounted.rootEl;
+        },
+        patchDom: patchDom
+      });
 
       function update(payload) {
         patchDom(payload);

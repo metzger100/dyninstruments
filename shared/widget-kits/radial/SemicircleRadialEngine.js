@@ -36,11 +36,6 @@
     const angle = GU.angle;
     const draw = GU.draw;
 
-    function resolveSurface(canvas) {
-      const setup = componentContext.canvas.setupCanvas(canvas);
-      return setup && setup.W && setup.H && setup.ctx ? setup : null;
-    }
-
     function setupTextPaint(theme, ctx) {
       const family = theme.font.family;
       const color = theme.surface.fg;
@@ -136,7 +131,7 @@
 
       return function renderCanvas(canvas, props) {
         const p = props || {};
-        const surface = resolveSurface(canvas);
+        const surface = GU.resolveSurface(canvas);
         if (!surface) {
           return;
         }

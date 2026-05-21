@@ -11,11 +11,17 @@
   "use strict";
 
   function create(def, componentContext) {
+    function resolveSurface(canvas) {
+      const setup = componentContext.canvas.setupCanvas(canvas);
+      return setup && setup.W && setup.H && setup.ctx ? setup : null;
+    }
+
     return {
       id: "GaugeToolkit",
       theme: componentContext.theme.tokens,
       text: componentContext.components.require("CanvasTextLayout"),
-      value: componentContext.components.require("ValueMath")
+      value: componentContext.components.require("ValueMath"),
+      resolveSurface: resolveSurface
     };
   }
 

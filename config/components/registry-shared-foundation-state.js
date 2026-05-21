@@ -80,7 +80,14 @@
   sf.SpringEasing = {
     js: BASE + "shared/widget-kits/anim/SpringEasing.js",
     css: undefined,
-    globalKey: "DyniSpringEasing"
+    globalKey: "DyniSpringEasing",
+    deps: ["ValueMath"]
+  };
+
+  sf.HtmlWidgetLifecycle = {
+    js: BASE + "shared/widget-kits/html/HtmlWidgetLifecycle.js",
+    css: undefined,
+    globalKey: "DyniHtmlWidgetLifecycle"
   };
 
   sf.CenterDisplayStateAdapter = {

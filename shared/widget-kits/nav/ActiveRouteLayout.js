@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteLayout - Responsive layout rectangles for the ActiveRoute text renderer
  * Documentation: documentation/widgets/active-route.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, ValueMath
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, LayoutSizingHelpers, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -38,8 +38,15 @@
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
+    const sizingHelpers = componentContext.components.require("LayoutSizingHelpers");
     clampNumber = componentContext.components.require("ValueMath").clampNumber;
     makeRect = rectApi.makeRect;
+    const createContentRect = sizingHelpers.createInsetContentRectFactory(makeRect, "padX", "innerY");
+    const computeMetricTileSpacing = sizingHelpers.createMetricTileSpacingFactory(
+      profileApi,
+      METRIC_TILE_PAD_RATIO,
+      METRIC_TILE_CAPTION_RATIO
+    );
 
     function computeInsets(W, H) {
       const responsive = profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
@@ -50,24 +57,6 @@
         namePadX: profileApi.computeInsetPx(responsive, NAME_PAD_X_RATIO, 1),
         responsive: responsive
       };
-    }
-
-    function createContentRect(W, H, insets) {
-      return makeRect(
-        insets.padX,
-        insets.innerY,
-        Math.max(1, W - insets.padX * 2),
-        Math.max(1, H - insets.innerY * 2)
-      );
-    }
-
-    function computeMetricTileSpacing(rect, responsive) {
-      return profileApi.computeIntrinsicTileSpacing(
-        responsive,
-        rect,
-        METRIC_TILE_PAD_RATIO,
-        METRIC_TILE_CAPTION_RATIO
-      );
     }
 
     function computeLayout(args) {

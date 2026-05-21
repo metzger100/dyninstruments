@@ -1,7 +1,7 @@
 /**
  * Module: ActiveRouteTextHtmlWidget - Interactive HTML renderer for nav active-route kind
  * Documentation: documentation/widgets/active-route.md
- * Depends: ActiveRouteHtmlFit, HtmlWidgetUtils, PreparedPayloadModelCache, PlaceholderNormalize, StableDigits, componentContext.theme.tokens, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
+ * Depends: ActiveRouteHtmlFit, HtmlWidgetUtils, HtmlWidgetLifecycle, PreparedPayloadModelCache, PlaceholderNormalize, StableDigits, componentContext.theme.tokens, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
  */
 
 (function (root, factory) {
@@ -215,6 +215,7 @@
   function create(def, componentContext) {
     const htmlFit = componentContext.components.require("ActiveRouteHtmlFit");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const lifecycle = componentContext.components.require("HtmlWidgetLifecycle");
     const preparedPayloadModelCache = componentContext.components.require("PreparedPayloadModelCache");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     const stableDigits = componentContext.components.require("StableDigits");
@@ -291,12 +292,13 @@
         bindDispatchListener(model);
       }
 
-      function mount(mountHostEl, payload) {
-        mountEl = mountHostEl;
-        rootEl = mountEl.ownerDocument.createElement("div");
-        mountEl.appendChild(rootEl);
-        patchDom(payload);
-      }
+      const mount = lifecycle.createMountHandler({
+        applyMounted(mounted) {
+          mountEl = mounted.mountEl;
+          rootEl = mounted.rootEl;
+        },
+        patchDom: patchDom
+      });
 
       function update(payload) {
         patchDom(payload);

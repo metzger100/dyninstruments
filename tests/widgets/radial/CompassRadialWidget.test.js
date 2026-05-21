@@ -267,6 +267,10 @@ describe("CompassRadialWidget", function () {
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
                   },
+                  resolveFiniteNumber(value, defaultValue) {
+                    const n = Number(value);
+                    return isFinite(n) ? n : defaultValue;
+                  },
                   formatDirection360(value) {
                     const n = Number(value);
                     if (!isFinite(n)) return "---";

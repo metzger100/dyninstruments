@@ -21,6 +21,11 @@
     return Number.isFinite(n) ? n : undefined;
   }
 
+  function resolveFiniteNumber(value, defaultValue) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : defaultValue;
+  }
+
   function toOptionalFiniteNumber(value) {
     if (value == null) {
       return undefined;
@@ -308,6 +313,7 @@
       id: "ValueMath",
       isFiniteNumber: isFiniteNumber,
       toFiniteNumber: toFiniteNumber,
+      resolveFiniteNumber: resolveFiniteNumber,
       toOptionalFiniteNumber: toOptionalFiniteNumber,
       clamp: clamp,
       clampPositive: clampPositive,

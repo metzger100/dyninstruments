@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteTextHtmlWidget - HTML renderer shell for nav edit-route summary kind
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: EditRouteHtmlFit, HtmlWidgetUtils, EditRouteRenderModel, EditRouteMarkup, componentContext.theme.tokens
+ * Depends: EditRouteHtmlFit, HtmlWidgetUtils, HtmlWidgetLifecycle, EditRouteRenderModel, EditRouteMarkup, componentContext.theme.tokens
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,6 +13,7 @@
   function create(def, componentContext) {
     const htmlFit = componentContext.components.require("EditRouteHtmlFit");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const lifecycle = componentContext.components.require("HtmlWidgetLifecycle");
     const renderModel = componentContext.components.require("EditRouteRenderModel");
     const markup = componentContext.components.require("EditRouteMarkup");
     const themeResolver = componentContext.theme.tokens;
@@ -98,12 +99,13 @@
         bindDispatchListener(model);
       }
 
-      function mount(mountHostEl, payload) {
-        mountEl = mountHostEl;
-        rootEl = mountEl.ownerDocument.createElement("div");
-        mountEl.appendChild(rootEl);
-        patchDom(payload);
-      }
+      const mount = lifecycle.createMountHandler({
+        applyMounted(mounted) {
+          mountEl = mounted.mountEl;
+          rootEl = mounted.rootEl;
+        },
+        patchDom: patchDom
+      });
 
       function update(payload) {
         patchDom(payload);
@@ -136,10 +138,7 @@
         detach();
       }
 
-      function layoutSignature(payload) {
-        const model = buildModel(payload && payload.props ? payload.props : {}, payload && payload.shellRect ? payload.shellRect : null);
-        return model.resizeSignatureParts.join("|");
-      }
+      const layoutSignature = lifecycle.createResizeSignatureHandler(buildModel);
 
       return {
         mount: mount,

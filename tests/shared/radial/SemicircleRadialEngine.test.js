@@ -127,6 +127,12 @@ describe("SemicircleRadialEngine", function () {
           if (!created.angle) {
             created.angle = fallbackAngleMath;
           }
+          if (typeof created.resolveSurface !== "function") {
+            created.resolveSurface = function resolveSurface(canvas) {
+              const setup = componentContext.canvas.setupCanvas(canvas);
+              return setup && setup.W && setup.H && setup.ctx ? setup : null;
+            };
+          }
           return created;
         }
       };

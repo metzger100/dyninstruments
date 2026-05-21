@@ -1,7 +1,7 @@
 /**
  * Module: MapZoomTextHtmlWidget - Interactive HTML renderer for map zoom kind
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: componentContext.format.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, ValueMath, PlaceholderNormalize, PreparedPayloadModelCache, StableDigits, componentContext.theme.tokens, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
+ * Depends: componentContext.format.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, HtmlWidgetLifecycle, ValueMath, PlaceholderNormalize, PreparedPayloadModelCache, StableDigits, componentContext.theme.tokens, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
  */
 
 (function (root, factory) {
@@ -239,6 +239,7 @@
   function create(def, componentContext) {
     const htmlFit = componentContext.components.require("MapZoomHtmlFit");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const lifecycle = componentContext.components.require("HtmlWidgetLifecycle");
     const stableDigits = componentContext.components.require("StableDigits");
     const preparedPayloadModelCache = componentContext.components.require("PreparedPayloadModelCache");
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
@@ -325,12 +326,13 @@
         bindDispatchListener(renderModel);
       }
 
-      function mount(mountHostEl, payload) {
-        mountEl = mountHostEl;
-        rootEl = mountEl.ownerDocument.createElement("div");
-        mountEl.appendChild(rootEl);
-        patchDom(payload);
-      }
+      const mount = lifecycle.createMountHandler({
+        applyMounted(mounted) {
+          mountEl = mounted.mountEl;
+          rootEl = mounted.rootEl;
+        },
+        patchDom: patchDom
+      });
 
       function update(payload) {
         patchDom(payload);

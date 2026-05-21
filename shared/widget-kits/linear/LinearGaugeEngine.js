@@ -36,11 +36,6 @@
     const text = GU.text;
     const value = GU.value;
 
-    function resolveSurface(canvas) {
-      const setup = componentContext.canvas.setupCanvas(canvas);
-      return setup && setup.W && setup.H && setup.ctx ? setup : null;
-    }
-
     function splitTextBoxRows(box, secScale) {
       if (!box) {
         return null;
@@ -98,7 +93,7 @@
 
       return function renderCanvas(canvas, props) {
         const p = props || {};
-        const surface = resolveSurface(canvas);
+        const surface = GU.resolveSurface(canvas);
         if (!surface) {
           return;
         }

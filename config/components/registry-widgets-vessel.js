@@ -60,7 +60,7 @@
       js: BASE + "shared/widget-kits/vessel/RegattaTimerMarkup.js",
       css: undefined,
       globalKey: "DyniRegattaTimerMarkup",
-      deps: ["HtmlWidgetUtils"]
+      deps: ["HtmlWidgetUtils", "RegattaTimerPhase"]
   };
 
   w.RegattaTimerTextHtmlWidget = {

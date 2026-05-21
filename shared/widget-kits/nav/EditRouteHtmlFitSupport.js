@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteHtmlFitSupport - Shared fit helpers for edit-route HTML metrics and labels
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: HtmlMeasureUtils, HtmlWidgetUtils, ValueMath
+ * Depends: HtmlMeasureUtils, HtmlWidgetUtils, ValueMath, NavModeRatio
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -188,19 +188,10 @@
     return htmlMeasureUtils.measureStyle(args, htmlUtils, tileLayout);
   }
 
-  function resolveNamePxRatio(mode) {
-    if (mode === "flat") {
-      return NAME_MAX_PX_RATIO.flat;
-    }
-    if (mode === "high") {
-      return NAME_MAX_PX_RATIO.high;
-    }
-    return NAME_MAX_PX_RATIO.normal;
-  }
-
   function create(def, componentContext) {
     const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const modeRatio = componentContext.components.require("NavModeRatio");
     toText = componentContext.components.require("ValueMath").toText;
 
     function measureEditRoutePx(args) {
@@ -223,7 +214,9 @@
       selectMetricValue: selectMetricValue,
       resolveMetricPx: resolveMetricPx,
       measureEditRouteStyle: measureEditRouteStyleForArgs,
-      resolveNamePxRatio: resolveNamePxRatio
+      resolveNamePxRatio: function resolveNamePxRatio(mode) {
+        return modeRatio.resolve(mode, NAME_MAX_PX_RATIO);
+      }
     };
   }
 

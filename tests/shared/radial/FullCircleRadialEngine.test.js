@@ -97,6 +97,10 @@ describe("FullCircleRadialEngine", function () {
               value: {
                 isFiniteNumber(n) {
                   return typeof n === "number" && isFinite(n);
+                },
+                resolveFiniteNumber(value, defaultValue) {
+                  const n = Number(value);
+                  return isFinite(n) ? n : defaultValue;
                 }
               },
               angle: {

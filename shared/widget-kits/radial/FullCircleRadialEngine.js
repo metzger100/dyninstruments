@@ -21,10 +21,6 @@
     }
     return JSON.stringify(value);
   }
-  function pickFinite(value, defaultValue) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : defaultValue;
-  }
   function fullCircleNormalizeLayers(raw) {
     const source = Array.isArray(raw) ? raw : null;
     if (!source || !source.length) {
@@ -188,11 +184,11 @@
             const target = targetCtx || state.ctx;
             const options = opts || {};
             draw.drawTicks(target, state.geom.cx, state.geom.cy, state.geom.rOuter, {
-              rotationDeg: pickFinite(options.rotationDeg, 0),
-              startDeg: pickFinite(options.startDeg, 0),
-              endDeg: pickFinite(options.endDeg, 360),
-              stepMajor: pickFinite(options.stepMajor, 30),
-              stepMinor: pickFinite(options.stepMinor, 10),
+              rotationDeg: value.resolveFiniteNumber(options.rotationDeg, 0),
+              startDeg: value.resolveFiniteNumber(options.startDeg, 0),
+              endDeg: value.resolveFiniteNumber(options.endDeg, 360),
+              stepMajor: value.resolveFiniteNumber(options.stepMajor, 30),
+              stepMinor: value.resolveFiniteNumber(options.stepMinor, 10),
               includeEnd: !!options.includeEnd,
               major: {
                 len: state.geom.majorTickLen,
@@ -206,7 +202,7 @@
           },
           drawFixedPointer(targetCtx, angleDeg, opts) {
             const target = targetCtx || state.ctx;
-            draw.drawPointerAtRim(target, state.geom.cx, state.geom.cy, state.geom.rOuter, pickFinite(angleDeg, 0), {
+            draw.drawPointerAtRim(target, state.geom.cx, state.geom.cy, state.geom.rOuter, value.resolveFiniteNumber(angleDeg, 0), {
               depth: state.geom.fixedPointerDepth,
               halfWidth: Math.max(1, Math.floor(state.geom.pointerSide / 2)),
               fillStyle: (opts && opts.fillStyle) || state.theme.colors.pointer

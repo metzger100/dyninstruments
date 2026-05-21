@@ -1,7 +1,7 @@
 /**
  * Module: SpringEasing - Critically damped per-instance spring smoother
  * Documentation: documentation/shared/spring-easing.md
- * Depends: none
+ * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,11 +14,6 @@
   const DEFAULT_MAX_DT_MS = 50;
   const DEFAULT_EPSILON = 1e-4;
   const DEFAULT_EPSILON_VELOCITY = 1e-4;
-
-  function resolveFiniteNumber(value, defaultValue) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : defaultValue;
-  }
 
   function shortestDelta(delta, wrap) {
     const span = Math.abs(wrap);
@@ -36,6 +31,8 @@
   }
 
   function create(def, componentContext) {
+    const resolveFiniteNumber = componentContext.components.require("ValueMath").resolveFiniteNumber;
+
     function createSpring(spec) {
       const cfg = spec && typeof spec === "object" ? spec : {};
       const stiffness = Math.max(1e-6, resolveFiniteNumber(cfg.stiffness, DEFAULT_STIFFNESS));

@@ -1,7 +1,7 @@
 /**
  * Module: EditRouteLayout - Responsive measurement geometry owner for the edit-route HTML renderer
  * Documentation: documentation/widgets/edit-route.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, EditRouteLayoutMath, EditRouteLayoutGeometry, HtmlWidgetUtils
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, LayoutSizingHelpers, EditRouteLayoutMath, EditRouteLayoutGeometry, HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -55,11 +55,17 @@
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
+    const sizingHelpers = componentContext.components.require("LayoutSizingHelpers");
     const makeRect = rectApi.makeRect;
     const mathApi = componentContext.components.require("EditRouteLayoutMath");
     const geometryApi = componentContext.components.require("EditRouteLayoutGeometry");
     const toPx = componentContext.components.require("HtmlWidgetUtils").toPx;
     const toOptionalFiniteNumber = mathApi.toOptionalFiniteNumber;
+    const computeMetricTileSpacing = sizingHelpers.createMetricTileSpacingFactory(
+      profileApi,
+      METRIC_TILE_PAD_RATIO,
+      METRIC_TILE_CAPTION_RATIO
+    );
 
     function computeVerticalShellProfile(args) {
       const cfg = args || {};
@@ -155,15 +161,6 @@
         sourceBadgeMinPx: SOURCE_BADGE_MIN_PX,
         sourceBadgeMaxRatio: SOURCE_BADGE_MAX_RATIO
       });
-    }
-
-    function computeMetricTileSpacing(rect, responsive) {
-      return profileApi.computeIntrinsicTileSpacing(
-        responsive,
-        rect,
-        METRIC_TILE_PAD_RATIO,
-        METRIC_TILE_CAPTION_RATIO
-      );
     }
 
     function createMetricTile(tileRect, insets, responsive, options) {

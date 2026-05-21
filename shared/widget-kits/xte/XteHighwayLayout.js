@@ -1,7 +1,7 @@
 /**
  * Module: XteHighwayLayout - Responsive layout rectangles for the XTE highway renderer
  * Documentation: documentation/widgets/xte-display.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, ValueMath
+ * Depends: ResponsiveScaleProfile, LayoutRectMath, LayoutSizingHelpers, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -64,8 +64,14 @@
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
+    const sizingHelpers = componentContext.components.require("LayoutSizingHelpers");
     clampNumber = componentContext.components.require("ValueMath").clampNumber;
     makeRect = rectApi.makeRect;
+    const computeMetricTileSpacing = sizingHelpers.createMetricTileSpacingFactory(
+      profileApi,
+      METRIC_TILE_PAD_RATIO,
+      METRIC_TILE_CAPTION_RATIO
+    );
 
     function computeMode(W, H, thresholdNormal, thresholdFlat) {
       const ratio = (Number(W) || 0) / Math.max(1, Number(H) || 0);
@@ -95,15 +101,6 @@
         insets.pad,
         Math.max(1, W - insets.pad * 2),
         Math.max(1, H - insets.pad * 2)
-      );
-    }
-
-    function computeMetricTileSpacing(rect, responsive) {
-      return profileApi.computeIntrinsicTileSpacing(
-        responsive,
-        rect,
-        METRIC_TILE_PAD_RATIO,
-        METRIC_TILE_CAPTION_RATIO
       );
     }
 
