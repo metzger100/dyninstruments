@@ -158,6 +158,13 @@
       deps: ["TextLayoutEngine", "HtmlWidgetUtils", "HtmlMeasureUtils", "ValueMath"]
   };
 
+  sf.RegattaTimerHtmlFit = {
+      js: BASE + "shared/widget-kits/vessel/RegattaTimerHtmlFit.js",
+      css: undefined,
+      globalKey: "DyniRegattaTimerHtmlFit",
+      deps: ["HtmlWidgetUtils", "ValueMath"]
+  };
+
   sf.CenterDisplayLayout = {
       js: BASE + "shared/widget-kits/nav/CenterDisplayLayout.js",
       css: undefined,
