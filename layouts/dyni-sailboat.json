@@ -533,6 +533,46 @@
         }
       ]
     },
+    "regattapage": {
+      "left": [
+        {
+          "name": "dyni_Vessel_Instruments",
+          "kind": "regattaTimer",
+          "weight": 2
+        },
+        {
+          "name": "dyni_Nav_Instruments",
+          "kind": "vmg",
+          "formatUnit_vmg": "kn",
+          "unit_vmg_kn": "kn"
+        }
+      ],
+      "m1": [
+        {
+          "name": "dyni_Wind_Instruments",
+          "kind": "angleTrue"
+        },
+        {
+          "name": "dyni_Wind_Instruments",
+          "kind": "speedTrue"
+        }
+      ],
+      "right": [
+        {
+          "name": "dyni_CourseHeading_Instruments",
+          "kind": "cog",
+          "leadingZero": true
+        },
+        {
+          "name": "dyni_Speed_Instruments",
+          "kind": "sog"
+        },
+        {
+          "name": "dyni_Environment_Instruments",
+          "kind": "depth"
+        }
+      ]
+    },
     "editroutepage": {
       "left": [
         {

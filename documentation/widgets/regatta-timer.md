@@ -6,6 +6,10 @@
 
 `RegattaTimerTextHtmlWidget` is the committed HTML renderer for the vessel `regattaTimer` kind. It provides Start/Sync/Reset controls, countdown-to-elapsed transition, optional progress strip, and Web Audio signal playback for regatta start sequences.
 
+Bundled layout integration:
+
+- `layouts/dyni-sailboat.json` includes a dedicated `regattapage` with a `dyni_Vessel_Instruments` entry using `kind: "regattaTimer"` plus race-start companion instruments.
+
 ## Visual Contract
 
 - Root and wrapper classes:
