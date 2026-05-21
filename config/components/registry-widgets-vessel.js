@@ -49,6 +49,13 @@
       deps: []
   };
 
+  w.RegattaTimerAudio = {
+      js: BASE + "shared/widget-kits/vessel/RegattaTimerAudio.js",
+      css: undefined,
+      globalKey: "DyniRegattaTimerAudio",
+      deps: []
+  };
+
   w.PositionCoordinateWidget = {
       js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
       css: undefined,
