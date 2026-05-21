@@ -7,7 +7,7 @@ It tracks development priorities and AvNav widget coverage status.
 
 ### Additional non-core concepts (post release)
 
-- interactive regatta clock with clock, buttons to start and sync the clock with the regatta start and acoustic signals each minute and in the last 10 Seconds.
+- interactive regatta clock with clock, buttons to start and sync the clock with the regatta start and acoustic signals each minute and in the last 10 Seconds. (Addressed by PLAN28)
 - add linearXteDisplay optimized for small and flat widgets based on the linear gauge widgets
 - OBP60-style instruments:
   - graphical Roll/Pitch
