@@ -1,6 +1,6 @@
 /**
  * Module: RegattaTimerHtmlFit - Responsive style-fit owner for regatta timer HTML layout
- * Documentation: exec-plans/active/PLAN28.md
+ * Documentation: documentation/widgets/regatta-timer.md
  * Depends: HtmlWidgetUtils, ValueMath, RegattaTimerPhase, HtmlMeasureUtils, TextLayoutEngine, componentContext.theme.tokens, componentContext.dom
  */
 (function (root, factory) {

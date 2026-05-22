@@ -1,6 +1,6 @@
 /**
  * Module: RegattaTimerAudio - Web Audio tone engine for regatta timer signals
- * Documentation: exec-plans/active/PLAN28.md
+ * Documentation: documentation/widgets/regatta-timer.md
  * Depends: none
  */
 (function (root, factory) {

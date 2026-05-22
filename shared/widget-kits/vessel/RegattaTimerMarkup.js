@@ -1,6 +1,6 @@
 /**
  * Module: RegattaTimerMarkup - Pure HTML assembly owner for regatta timer renderer output
- * Documentation: exec-plans/active/PLAN28.md
+ * Documentation: documentation/widgets/regatta-timer.md
  * Depends: HtmlWidgetUtils, RegattaTimerPhase
  */
 (function (root, factory) {

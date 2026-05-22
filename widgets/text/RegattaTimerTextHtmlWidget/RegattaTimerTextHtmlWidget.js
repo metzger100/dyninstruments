@@ -1,6 +1,6 @@
 /**
  * Module: RegattaTimerTextHtmlWidget - Interactive committed HTML renderer for regatta timer controls
- * Documentation: exec-plans/active/PLAN28.md
+ * Documentation: documentation/widgets/regatta-timer.md
  * Depends: RegattaTimerModel, RegattaTimerAudio, RegattaTimerSessionStore, RegattaTimerMarkup, RegattaTimerHtmlFit, HtmlWidgetUtils, ValueMath, componentContext.theme.tokens
  */
 (function (root, factory) {

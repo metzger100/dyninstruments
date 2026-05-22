@@ -1,6 +1,6 @@
 /**
  * Module: RegattaTimerModel - Countdown/elapsed regatta timer state machine
- * Documentation: exec-plans/active/PLAN28.md
+ * Documentation: documentation/widgets/regatta-timer.md
  * Depends: none
  */
 (function (root, factory) {
