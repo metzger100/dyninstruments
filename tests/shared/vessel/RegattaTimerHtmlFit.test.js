@@ -3,9 +3,52 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 
 describe("RegattaTimerHtmlFit", function () {
   function createFit() {
+    const measureCtx = {
+      font: "700 12px sans-serif",
+      measureText(text) {
+        const match = String(this.font || "").match(/(\d+(?:\.\d+)?)px/);
+        const px = match ? Number(match[1]) : 12;
+        return { width: String(text || "").length * px * 0.52 };
+      }
+    };
     const componentContext = createComponentContextMock({
       modules: {
-        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js")
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+        HtmlMeasureUtils: {
+          create() {
+            return {
+              id: "HtmlMeasureUtils",
+              resolveMeasureContext: vi.fn(function () {
+                return measureCtx;
+              })
+            };
+          }
+        },
+        TextLayoutEngine: {
+          create() {
+            return {
+              id: "TextLayoutEngine",
+              fitSingleLineBinary: vi.fn(function (args) {
+                return {
+                  px: Math.min(args.maxH, Math.floor(args.maxW / Math.max(1, args.text.length * 0.52))),
+                  width: 0
+                };
+              })
+            };
+          }
+        }
+      },
+      services: {
+        themeTokens: {
+          resolveForRoot: vi.fn(function () {
+            return { font: { family: "sans-serif", weight: 700, labelWeight: 700 } };
+          })
+        },
+        dom: {
+          requirePluginRoot(target) {
+            return target;
+          }
+        }
       }
     });
     return loadFresh("shared/widget-kits/vessel/RegattaTimerHtmlFit.js").create({}, componentContext);
@@ -40,9 +83,15 @@ describe("RegattaTimerHtmlFit", function () {
     }, overrides || {});
   }
 
+  function computeFit(fit, args) {
+    return fit.compute(Object.assign({}, args || {}, {
+      targetEl: document.createElement("div")
+    }));
+  }
+
   it("computes proportional fit styles for timer, buttons, and bar", function () {
     const fit = createFit();
-    const out = fit.compute({
+    const out = computeFit(fit, {
       model: makeModel({ phase: "countdown", displayTime: "04:25" }),
       shellRect: { width: 320, height: 160 },
       mode: "normal",
@@ -57,13 +106,13 @@ describe("RegattaTimerHtmlFit", function () {
 
   it("scales timer font down on tighter geometry", function () {
     const fit = createFit();
-    const large = fit.compute({
+    const large = computeFit(fit, {
       model: makeModel(),
       shellRect: { width: 320, height: 160 },
       mode: "normal",
       hostContext: {}
     });
-    const small = fit.compute({
+    const small = computeFit(fit, {
       model: makeModel(),
       shellRect: { width: 160, height: 90 },
       mode: "normal",
@@ -76,13 +125,13 @@ describe("RegattaTimerHtmlFit", function () {
   it("keeps high-mode countdown buttons vertically stacked with smaller height than idle", function () {
     const fit = createFit();
     const shellRect = { width: 320, height: 160 };
-    const idle = fit.compute({
+    const idle = computeFit(fit, {
       model: makeModel({ phase: "idle" }),
       shellRect: shellRect,
       mode: "high",
       hostContext: {}
     });
-    const countdown = fit.compute({
+    const countdown = computeFit(fit, {
       model: makeModel({ phase: "countdown" }),
       shellRect: shellRect,
       mode: "high",
@@ -97,13 +146,13 @@ describe("RegattaTimerHtmlFit", function () {
   it("uses two-column controls in normal countdown and keeps full controls-row button height", function () {
     const fit = createFit();
     const shellRect = { width: 320, height: 160 };
-    const idle = fit.compute({
+    const idle = computeFit(fit, {
       model: makeModel({ phase: "idle", displayTime: "05:00" }),
       shellRect: shellRect,
       mode: "normal",
       hostContext: {}
     });
-    const countdown = fit.compute({
+    const countdown = computeFit(fit, {
       model: makeModel({ phase: "countdown", displayTime: "04:25" }),
       shellRect: shellRect,
       mode: "normal",
@@ -114,7 +163,7 @@ describe("RegattaTimerHtmlFit", function () {
     const countdownHeight = readPx(countdown.buttonStyle, "height");
     const idleFont = readPx(idle.buttonStyle, "font-size");
     const countdownFont = readPx(countdown.buttonStyle, "font-size");
-    const narrowCountdown = fit.compute({
+    const narrowCountdown = computeFit(fit, {
       model: makeModel({ phase: "countdown", displayTime: "04:25" }),
       shellRect: { width: 150, height: 160 },
       mode: "normal",
@@ -138,8 +187,8 @@ describe("RegattaTimerHtmlFit", function () {
       mode: "normal",
       hostContext: hostContext
     };
-    const first = fit.compute(args);
-    const second = fit.compute(args);
+    const first = computeFit(fit, args);
+    const second = computeFit(fit, args);
 
     expect(first).toBe(second);
     expect(hostContext[fit.FIT_CACHE_KEY]).toBeTruthy();
@@ -147,7 +196,7 @@ describe("RegattaTimerHtmlFit", function () {
     fit.clearCache(hostContext);
     expect(hostContext[fit.FIT_CACHE_KEY]).toBeUndefined();
 
-    const third = fit.compute(args);
+    const third = computeFit(fit, args);
     expect(third).not.toBe(first);
   });
 
@@ -160,8 +209,8 @@ describe("RegattaTimerHtmlFit", function () {
       mode: "normal",
       hostContext: hostContext
     };
-    const plain = fit.compute(Object.assign({}, baseArgs, { stableDigitsEnabled: false }));
-    const tabular = fit.compute(Object.assign({}, baseArgs, { stableDigitsEnabled: true }));
+    const plain = computeFit(fit, Object.assign({}, baseArgs, { stableDigitsEnabled: false }));
+    const tabular = computeFit(fit, Object.assign({}, baseArgs, { stableDigitsEnabled: true }));
 
     expect(plain).not.toBe(tabular);
   });
@@ -169,12 +218,12 @@ describe("RegattaTimerHtmlFit", function () {
   it("returns null when shellRect is missing or invalid", function () {
     const fit = createFit();
 
-    expect(fit.compute({
+    expect(computeFit(fit, {
       model: makeModel(),
       mode: "normal",
       hostContext: {}
     })).toBeNull();
-    expect(fit.compute({
+    expect(computeFit(fit, {
       model: makeModel(),
       shellRect: { width: 0, height: 120 },
       mode: "normal",
@@ -184,7 +233,7 @@ describe("RegattaTimerHtmlFit", function () {
 
   it("scales countdown button height below 32px on tiny shells", function () {
     const fit = createFit();
-    const out = fit.compute({
+    const out = computeFit(fit, {
       model: makeModel({ phase: "countdown", displayTime: "00:09" }),
       shellRect: { width: 72, height: 36 },
       mode: "normal",
@@ -198,13 +247,13 @@ describe("RegattaTimerHtmlFit", function () {
   it("keeps flat narrow fit responsive without fixed control width assumptions", function () {
     const fit = createFit();
     const shellRect = { width: 92, height: 42 };
-    const idle = fit.compute({
+    const idle = computeFit(fit, {
       model: makeModel({ phase: "idle", displayTime: "05:00" }),
       shellRect: shellRect,
       mode: "flat",
       hostContext: {}
     });
-    const countdown = fit.compute({
+    const countdown = computeFit(fit, {
       model: makeModel({ phase: "countdown", displayTime: "00:09" }),
       shellRect: shellRect,
       mode: "flat",
@@ -227,7 +276,7 @@ describe("RegattaTimerHtmlFit", function () {
 
   it("keeps compact stacked geometry with positive separated display and control sizes", function () {
     const fit = createFit();
-    const compact = fit.compute({
+    const compact = computeFit(fit, {
       model: makeModel({ phase: "countdown", displayTime: "1:15:04" }),
       shellRect: { width: 116, height: 62 },
       mode: "normal",
@@ -248,13 +297,13 @@ describe("RegattaTimerHtmlFit", function () {
 
   it("uses width-constrained button label fitting for very narrow tall geometry", function () {
     const fit = createFit();
-    const narrow = fit.compute({
+    const narrow = computeFit(fit, {
       model: makeModel({ phase: "idle", displayTime: "05:00" }),
       shellRect: { width: 64, height: 220 },
       mode: "high",
       hostContext: {}
     });
-    const wide = fit.compute({
+    const wide = computeFit(fit, {
       model: makeModel({ phase: "idle", displayTime: "05:00" }),
       shellRect: { width: 180, height: 220 },
       mode: "high",
@@ -274,13 +323,13 @@ describe("RegattaTimerHtmlFit", function () {
 
   it("scales bar height from widget height for same-width shells", function () {
     const fit = createFit();
-    const shortShell = fit.compute({
+    const shortShell = computeFit(fit, {
       model: makeModel({ phase: "countdown", displayTime: "04:10" }),
       shellRect: { width: 220, height: 80 },
       mode: "normal",
       hostContext: {}
     });
-    const tallShell = fit.compute({
+    const tallShell = computeFit(fit, {
       model: makeModel({ phase: "countdown", displayTime: "04:10" }),
       shellRect: { width: 220, height: 200 },
       mode: "normal",
@@ -289,7 +338,7 @@ describe("RegattaTimerHtmlFit", function () {
 
     const shortBar = readPx(shortShell.barStyle, "height");
     const tallBar = readPx(tallShell.barStyle, "height");
-    const narrowTall = fit.compute({
+    const narrowTall = computeFit(fit, {
       model: makeModel({ phase: "countdown", displayTime: "04:10" }),
       shellRect: { width: 80, height: 220 },
       mode: "high",

@@ -161,7 +161,8 @@
           shellRect: lastShellRect,
           mode: mode,
           stableDigitsEnabled: stableDigitsEnabled,
-          hostContext: hostContext
+          hostContext: hostContext,
+          targetEl: lastHostRootEl
         }) || lastFit || BASELINE_FIT;
 
         const markupHtml = markup.render({

@@ -162,7 +162,7 @@
       js: BASE + "shared/widget-kits/vessel/RegattaTimerHtmlFit.js",
       css: undefined,
       globalKey: "DyniRegattaTimerHtmlFit",
-      deps: ["HtmlWidgetUtils", "ValueMath", "RegattaTimerPhase"]
+      deps: ["HtmlWidgetUtils", "ValueMath", "RegattaTimerPhase", "HtmlMeasureUtils", "TextLayoutEngine"]
   };
 
   sf.CenterDisplayLayout = {

@@ -1,7 +1,7 @@
 /**
  * Module: RegattaTimerHtmlFit - Responsive style-fit owner for regatta timer HTML layout
  * Documentation: exec-plans/active/PLAN28.md
- * Depends: HtmlWidgetUtils, ValueMath, RegattaTimerPhase
+ * Depends: HtmlWidgetUtils, ValueMath, RegattaTimerPhase, HtmlMeasureUtils, TextLayoutEngine, componentContext.theme.tokens, componentContext.dom
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -66,14 +66,17 @@
     return { display: 0.62, controls: 0.38 };
   }
 
-  function buildSignature(width, height, mode, phase, displayTime, stableDigitsEnabled) {
+  function buildSignature(width, height, mode, phase, displayTime, stableDigitsEnabled, family, valueWeight, labelWeight) {
     return JSON.stringify([
       width,
       height,
       mode,
       phase,
       String(displayTime || "").length,
-      stableDigitsEnabled === true
+      stableDigitsEnabled === true,
+      family || "",
+      valueWeight,
+      labelWeight
     ]);
   }
 
@@ -81,14 +84,36 @@
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const valueMath = componentContext.components.require("ValueMath");
     const phaseApi = componentContext.components.require("RegattaTimerPhase");
+    const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
+    const textLayout = componentContext.components.require("TextLayoutEngine");
+    const themeResolver = componentContext.theme.tokens;
+    const domApi = componentContext.dom;
 
     function compute(options) {
       const cfg = options || {};
       const model = valueMath.toObject(cfg.model);
+      const targetEl = cfg.targetEl || null;
+      if (!targetEl) {
+        return null;
+      }
       const shellRect = valueMath.toObject(cfg.shellRect);
       const widthRaw = valueMath.toOptionalFiniteNumber(shellRect.width);
       const heightRaw = valueMath.toOptionalFiniteNumber(shellRect.height);
       if (!(widthRaw > 0) || !(heightRaw > 0)) {
+        return null;
+      }
+
+      const rootEl = domApi.requirePluginRoot(targetEl);
+      const theme = themeResolver.resolveForRoot(rootEl);
+      const font = theme && theme.font && typeof theme.font === "object" ? theme.font : null;
+      if (!font) {
+        return null;
+      }
+      const family = font.family;
+      const valueWeight = font.weight;
+      const labelWeight = font.labelWeight;
+      const ctx = htmlMeasureUtils.resolveMeasureContext(cfg.hostContext, cfg.targetEl);
+      if (!ctx || typeof ctx.measureText !== "function") {
         return null;
       }
 
@@ -99,7 +124,7 @@
       const displayTime = model.displayTime == null ? "00:00" : String(model.displayTime);
       const stableDigitsEnabled = cfg.stableDigitsEnabled === true;
       const cache = resolveRegattaCacheEntry(cfg.hostContext);
-      const signature = buildSignature(width, height, mode, phase, displayTime, stableDigitsEnabled);
+      const signature = buildSignature(width, height, mode, phase, displayTime, stableDigitsEnabled, family, valueWeight, labelWeight);
       if (cache && cache.signature === signature && cache.result) {
         return cache.result;
       }
@@ -140,23 +165,33 @@
       const buttonHeight = Math.max(1, Math.floor(buttonsHeightBudget / Math.max(1, controlsRows)));
       const buttonWidth = Math.max(1, Math.floor(buttonsWidthBudget / Math.max(1, controlsColumns)));
       const visibleLabels = resolveVisibleLabels(phase);
-      const longestVisibleLabelLength = visibleLabels.reduce(function (maxLen, label) {
-        const labelLength = String(label || "").length;
-        return labelLength > maxLen ? labelLength : maxLen;
-      }, 1);
       const buttonPadY = Math.max(0, Math.floor(buttonHeight * 0.12));
       const buttonPadX = Math.max(0, Math.floor(Math.min(buttonWidth * 0.08, buttonHeight * 0.35)));
       const buttonInnerHeight = Math.max(1, buttonHeight - (buttonPadY * 2));
       const buttonInnerWidth = Math.max(1, buttonWidth - (buttonPadX * 2));
-      const buttonFontByHeight = Math.max(1, Math.floor(buttonInnerHeight * 0.7));
-      const buttonFontByWidth = Math.max(1, Math.floor(buttonInnerWidth / Math.max(1.8, longestVisibleLabelLength * 0.66)));
-      const buttonFontPx = Math.max(1, Math.min(buttonFontByHeight, buttonFontByWidth));
+      const longestLabel = visibleLabels.reduce(function (longest, label) {
+        return label.length > longest.length ? label : longest;
+      }, "");
+      const buttonFit = textLayout.fitSingleLineBinary({
+        ctx: ctx,
+        text: longestLabel,
+        maxW: buttonInnerWidth,
+        maxH: buttonInnerHeight,
+        family: family,
+        weight: labelWeight
+      });
+      const buttonFontPx = buttonFit.px;
       const timerHeightBudget = Math.max(1, displayHeight - displayGap);
       const timerWidthBudget = Math.max(1, displayWidth);
-      const glyphFactor = Math.max(1.5, displayTime.length * 0.62);
-      const timerByHeight = Math.floor(timerHeightBudget * 0.78);
-      const timerByWidth = Math.floor(timerWidthBudget / glyphFactor);
-      const timerPx = Math.max(1, Math.min(timerByHeight, timerByWidth));
+      const timerFit = textLayout.fitSingleLineBinary({
+        ctx: ctx,
+        text: displayTime,
+        maxW: timerWidthBudget,
+        maxH: timerHeightBudget,
+        family: family,
+        weight: valueWeight
+      });
+      const timerPx = timerFit.px;
       const flatColumnsStyle = mode === "flat"
         ? "grid-template-columns:minmax(0," + displayWidth + "px) minmax(0," + controlsWidth + "px);"
         : "";

@@ -37,6 +37,14 @@ describe("RegattaTimerTextHtmlWidget", function () {
   }
 
   function buildRenderer(options) {
+    const measureCtx = {
+      font: "700 12px sans-serif",
+      measureText(text) {
+        const match = String(this.font || "").match(/(\d+(?:\.\d+)?)px/);
+        const px = match ? Number(match[1]) : 12;
+        return { width: String(text || "").length * px * 0.52 };
+      }
+    };
     const audioEngine = {
       ensureContext: vi.fn(function () { return true; }),
       playTone: vi.fn(),
@@ -59,6 +67,29 @@ describe("RegattaTimerTextHtmlWidget", function () {
       RegattaTimerSessionStore: loadFresh("shared/widget-kits/vessel/RegattaTimerSessionStore.js"),
       RegattaTimerMarkup: loadFresh("shared/widget-kits/vessel/RegattaTimerMarkup.js"),
       RegattaTimerHtmlFit: loadFresh("shared/widget-kits/vessel/RegattaTimerHtmlFit.js"),
+      HtmlMeasureUtils: {
+        create() {
+          return {
+            id: "HtmlMeasureUtils",
+            resolveMeasureContext: vi.fn(function () {
+              return measureCtx;
+            })
+          };
+        }
+      },
+      TextLayoutEngine: {
+        create() {
+          return {
+            id: "TextLayoutEngine",
+            fitSingleLineBinary: vi.fn(function (args) {
+              return {
+                px: Math.min(args.maxH, Math.floor(args.maxW / Math.max(1, args.text.length * 0.52))),
+                width: 0
+              };
+            })
+          };
+        }
+      },
       HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
       ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
     };
