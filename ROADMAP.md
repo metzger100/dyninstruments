@@ -7,7 +7,7 @@ It tracks development priorities and AvNav widget coverage status.
 
 ### Additional non-core concepts (post release)
 
-- add linearXteDisplay optimized for small and flat widgets based on the linear gauge widgets
+- add XteDisplayLinear optimized for small and flat widgets based on the linear gauge widgets
 - OBP60-style instruments:
   - graphical Roll/Pitch
   - analog Clock
