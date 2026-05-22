@@ -89,6 +89,11 @@
       let lastShellRect = null;
       let lastHostRootEl = null;
       let lastFit = BASELINE_FIT;
+      let lastRenderedDisplayTime = "";
+      let lastRenderedColorPhase = "";
+      let lastRenderedPhase = "";
+      let lastRenderedShellRectWidth = 0;
+      let lastRenderedShellRectHeight = 0;
       let config = {
         soundEnabled: true,
         progressBarEnabled: true,
@@ -146,7 +151,26 @@
           return;
         }
 
-        sessionStore.persistSnapshot(timerModel.getSnapshot());
+        const nextDisplayTime = modelState.displayTime == null ? "" : String(modelState.displayTime);
+        const nextColorPhase = modelState.colorPhase || "normal";
+        const nextPhase = modelState.phase || "idle";
+        const nextShellRectWidth = lastShellRect && lastShellRect.width ? lastShellRect.width : 0;
+        const nextShellRectHeight = lastShellRect && lastShellRect.height ? lastShellRect.height : 0;
+
+        if (
+          nextDisplayTime === lastRenderedDisplayTime
+          && nextColorPhase === lastRenderedColorPhase
+          && nextPhase === lastRenderedPhase
+          && nextShellRectWidth === lastRenderedShellRectWidth
+          && nextShellRectHeight === lastRenderedShellRectHeight
+          && lastFit !== BASELINE_FIT
+        ) {
+          return;
+        }
+
+        if (nextPhase !== lastRenderedPhase) {
+          sessionStore.persistSnapshot(timerModel.getSnapshot());
+        }
 
         const mode = resolveMode(lastProps, lastShellRect);
         const interactionState = resolveInteractionState(lastProps);
@@ -177,43 +201,56 @@
 
         htmlUtils.applyMirroredContext(rootEl, lastProps);
         ensureRootClass();
-        unbindClickHandler();
+        const prevWrapperEl = wrapperEl;
         wrapperEl = htmlUtils.patchInnerHtml(rootEl, markupHtml);
         lastFit = fit;
+        const wrapperChanged = wrapperEl !== prevWrapperEl;
 
-        if (wrapperEl && interactionState === "dispatch") {
-          clickHandler = function onClick(ev) {
-            ev.preventDefault();
-            ev.stopPropagation();
+        if (wrapperChanged || !clickHandler) {
+          unbindClickHandler();
+          if (wrapperEl && interactionState === "dispatch") {
+            clickHandler = function onClick(ev) {
+              ev.preventDefault();
+              ev.stopPropagation();
 
-            const target = ev.target;
-            const actionEl = target && typeof target.closest === "function"
-              ? target.closest("[data-dyni-action]")
-              : null;
+              const target = ev.target;
+              const actionEl = target && typeof target.closest === "function"
+                ? target.closest("[data-dyni-action]")
+                : null;
 
-            if (!actionEl || !timerModel) {
-              return;
-            }
-
-            const action = actionEl.getAttribute("data-dyni-action");
-            if (action === "regatta-start") {
-              if (audioEngine) {
-                audioEngine.ensureContext();
+              if (!actionEl || !timerModel) {
+                return;
               }
-              timerModel.start();
-              return;
-            }
 
-            if (action === "regatta-sync") {
-              timerModel.sync();
-              return;
-            }
-            if (action === "regatta-reset") {
-              timerModel.reset();
-            }
-          };
-          wrapperEl.addEventListener("click", clickHandler);
+              const action = actionEl.getAttribute("data-dyni-action");
+              if (action === "regatta-start") {
+                if (audioEngine) {
+                  audioEngine.ensureContext();
+                }
+                timerModel.start();
+                sessionStore.persistSnapshot(timerModel.getSnapshot());
+                return;
+              }
+
+              if (action === "regatta-sync") {
+                timerModel.sync();
+                sessionStore.persistSnapshot(timerModel.getSnapshot());
+                return;
+              }
+              if (action === "regatta-reset") {
+                timerModel.reset();
+                sessionStore.persistSnapshot(timerModel.getSnapshot());
+              }
+            };
+            wrapperEl.addEventListener("click", clickHandler);
+          }
         }
+
+        lastRenderedDisplayTime = nextDisplayTime;
+        lastRenderedColorPhase = nextColorPhase;
+        lastRenderedPhase = nextPhase;
+        lastRenderedShellRectWidth = nextShellRectWidth;
+        lastRenderedShellRectHeight = nextShellRectHeight;
       }
 
       function createTimerModelInstance(durationMinutes) {
@@ -275,6 +312,7 @@
         lastHostRootEl = nextPayload.rootEl || null;
         sessionStore.syncIdentity(lastProps, nextPayload);
         config = nextConfig;
+        lastFit = BASELINE_FIT;
 
         if (timerModel && timerModel.getState().phase === "idle" && nextConfig.durationMinutes !== previousDurationMinutes) {
           timerModel.destroy();
@@ -315,6 +353,11 @@
         lastShellRect = null;
         lastHostRootEl = null;
         lastFit = BASELINE_FIT;
+        lastRenderedDisplayTime = "";
+        lastRenderedColorPhase = "";
+        lastRenderedPhase = "";
+        lastRenderedShellRectWidth = 0;
+        lastRenderedShellRectHeight = 0;
       }
 
       function destroy() {
