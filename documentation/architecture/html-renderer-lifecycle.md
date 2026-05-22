@@ -93,6 +93,42 @@ dyninstruments HTML surfaces do not rely on AvNav UserHtml event translation.
 
 Committed renderers attach and remove direct DOM listeners under dispatch/passive runtime policy.
 
+## Interactive State Persistence Across Remounts
+
+Committed HTML renderers can be detached and remounted during surface/session switching. The `detach()` -> `mount()` cycle recreates renderer instances and destroys in-memory instance state.
+
+For interactive widgets with user-driven state (running timers, toggles, form input), preserve state explicitly across remount cycles.
+
+Pattern 1: `hostContext` snapshot (same surface session)
+
+- `rendererContext.hostContext` survives detach/remount in the same surface session.
+- Persist a minimal snapshot into `hostContext[SESSION_KEY]` during `detach`.
+- Read and restore from `hostContext[SESSION_KEY]` during `mount`.
+
+Pattern 2: module-level session registry (cross-session continuity)
+
+- Keep a module-level registry (`Object.create(null)`) keyed by stable identity.
+- Recommended identity parts: `routeId + pageId + cluster + kind`.
+- Persist only active-state snapshots (for example active countdown phases).
+- Clear registry entries when the widget returns to idle/reset state.
+
+Snapshot contract
+
+- Snapshots must be plain serializable objects.
+- Store only minimum resume state (timestamps, phase, selected config).
+- Do not store DOM nodes, closures, audio nodes, or other runtime handles.
+
+Timer/model integration
+
+- If the model supports resume, expose `getSnapshot()` and accept `snapshot` input in the model factory.
+- Validate snapshots during restore (example: discard countdown snapshots whose `endTime` is already in the past).
+- Fall back to idle defaults when snapshots are invalid.
+
+Reference implementation
+
+- `shared/widget-kits/vessel/RegattaTimerSessionStore.js`
+- `widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.js`
+
 ## Styling Ownership
 
 - committed HTML styles are shadow-local

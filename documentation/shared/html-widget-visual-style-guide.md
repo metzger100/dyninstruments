@@ -91,6 +91,32 @@ Fitted text must stay visually inside its allocated row/inline band. Browser gly
 - This benefits all widgets that use `TextTileLayout`, `TextLayoutComposite`, and `TextLayoutPrimitives`.
 - Fit payload format remains unchanged; the safety factor is applied during height budget computation.
 
+## CSS Grid and Flexbox Patterns for Shadow DOM
+
+- Grid template columns/rows:
+  - Use `minmax(0, 1fr)` or `minmax(0, Npx)` track sizing.
+  - Do not use bare `auto` tracks in committed widget grid templates, because content can expand beyond the committed surface box.
+  - Example: `grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)` (not `minmax(0, 1fr) auto`).
+- Grid/flex child overflow prevention:
+  - Every direct child of grid/flex containers must set `min-width: 0; min-height: 0`.
+  - Default grid/flex item minimums (`auto`) can force track expansion when text is long.
+- Box sizing on interactive elements:
+  - Buttons/controls with padding or borders must set `box-sizing: border-box`.
+  - This keeps fit-module computed dimensions authoritative.
+- Overlay strips and accent bars:
+  - Place decorative overlays with `position: absolute` and explicit `z-index` layering.
+  - Use `pointer-events: none` for non-interactive overlays.
+  - Content layers should render above overlay bars/accents.
+  - Reference patterns: alarm accent strip and regatta timer progress bar.
+- No hardcoded min-size floors:
+  - Do not add hardcoded floors like `min-width: 7em` on interactive controls.
+  - Use fit-module sizing and overflow-safe rules: `width: 100%`, `max-width: 100%`, `white-space: nowrap`.
+  - This satisfies the `responsive-layout-hard-floor` smell rule.
+- Mode-variant grid templates:
+  - For mode-driven structure changes (`high`/`normal`/`flat`), switch templates via mode classes on the wrapper.
+  - Keep fit-module inline styles focused on computed text/control sizing within those tracks.
+  - Reference pattern: regatta timer mode classes.
+
 ## Anti-Patterns (Fail-Closed)
 
 | Anti-pattern | Required alternative | Related smell rule |
@@ -100,6 +126,9 @@ Fitted text must stay visually inside its allocated row/inline band. Browser gly
 | Runtime state encoded in ad hoc attributes | Use explicit contract classes and documented handler names | compatibility cleanup policy |
 | Renderer re-documents fallback literals owned by config/theme | Keep defaults at config/theme boundary and reference owner | `hardcoded-runtime-default`, `inline-config-default-duplication` |
 | Inner widget wrapper self-expands beyond committed surface box | Rely on `width:100%`/`height:100%` from base rule; no vertical-mode overrides | surface box contract |
+| Bare `auto` in grid template | Use `minmax(0, 1fr)` or `minmax(0, Npx)` | surface box contract |
+| Missing `min-width:0` on grid/flex children | Always set `min-width:0; min-height:0` on grid/flex children | surface box contract |
+| Hardcoded `min-width` floor on interactive elements | Scale with fit-module sizes, use `max-width:100%` | `responsive-layout-hard-floor` |
 
 ## Visual Contract Template
 

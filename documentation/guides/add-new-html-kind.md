@@ -2,6 +2,21 @@
 
 **Status:** ✅ Reference | Commit-driven HTML kind workflow
 
+## Prerequisites
+
+Read first:
+
+- [../avnav-api/editable-parameters.md](../avnav-api/editable-parameters.md)
+- [../architecture/html-renderer-lifecycle.md](../architecture/html-renderer-lifecycle.md)
+- [../shared/html-widget-visual-style-guide.md](../shared/html-widget-visual-style-guide.md)
+
+Read also:
+
+- [../shared/stable-digits.md](../shared/stable-digits.md)
+- [../avnav-api/editable-parameters.md](../avnav-api/editable-parameters.md)
+- [layout-file-conventions.md](layout-file-conventions.md)
+- [../conventions/testing-infrastructure.md](../conventions/testing-infrastructure.md)
+
 ## Overview
 
 This guide describes how to add a new native HTML kind under the commit-driven architecture.
@@ -58,14 +73,37 @@ Core rules:
 
 ## Step 7: Required HTML Kind Test Matrix
 
-- route resolves to html surface and committed renderer factory
-- inert shell contains mount host and no semantic content
-- committed renderer mount/update/detach/destroy behavior
-- shadow CSS preload/injection for this renderer
-- dispatch vs passive listener ownership
-- dispatch-mode blank-space click suppression
-- layoutSignature-driven relayout and bounded postPatch behavior
-- route metadata shellSizing and committed shadow CSS sizing behavior
+- [ ] route resolves to html surface and committed renderer factory
+- [ ] inert shell contains mount host and no semantic content
+- [ ] committed renderer mount/update/detach/destroy behavior
+- [ ] shadow CSS preload/injection for this renderer
+- [ ] dispatch vs passive listener ownership
+- [ ] dispatch-mode blank-space click suppression
+- [ ] layoutSignature-driven relayout and bounded postPatch behavior
+- [ ] route metadata shellSizing and committed shadow CSS sizing behavior
+
+## Step 8: Shared Editable Integration
+
+When adding a new kind to an existing cluster, audit all shared editables in that cluster config and scope each one for relevance.
+
+- `stableDigits`:
+  - If the kind displays numeric or time text, add the kind to the `stableDigits` condition array.
+  - `stableDigits` defaults to `false` and controls the `dyni-tabular` fixed-width digit class behavior.
+  - Contract reference: [../shared/stable-digits.md](../shared/stable-digits.md).
+  - Use existing cluster condition arrays as reference examples.
+- `captionUnitScale`:
+  - If the kind does not render caption/unit text (for example interactive controls, timers, map zoom), exclude it from `captionUnitScale`.
+  - If `captionUnitScale` is currently unconditional, add a condition list that includes only relevant kinds.
+  - Pattern reference: `NAV_TEXT_KIND_CONDITION` in `config/clusters/nav.js`.
+- `caption_{kind}` and `unit_{kind}` hiding:
+  - `...makePerKindTextParams(KIND_MAP)` auto-generates per-kind caption/unit editables for every map entry.
+  - For kinds that do not use caption/unit rendering, add explicit overrides after the spread:
+    - `caption_{yourKind}: false`
+    - `unit_{yourKind}: false`
+- Other shared editables:
+  - Audit shared `BOOLEAN`, `FLOAT`, and `SELECT` editables with broad or missing conditions.
+  - Add condition arrays when those controls are irrelevant to the new kind.
+- [ ] Shared editables audited and scoped (stableDigits, captionUnitScale, caption/unit hiding)
 
 ## Grouped Mapper Output for Complex Payloads
 
