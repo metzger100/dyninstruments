@@ -261,6 +261,7 @@
         elapsedStartMs = null;
         resetCountdownCursor(now);
         ensureTimer();
+        emitSignal("low", LOW_TONE_HZ, MINUTE_BEEP_MS);
         emitTick(now);
       }
 
