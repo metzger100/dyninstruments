@@ -112,6 +112,7 @@
       const family = font.family;
       const valueWeight = font.weight;
       const labelWeight = font.labelWeight;
+      const monoFamily = font.familyMono || family;
       const ctx = htmlMeasureUtils.resolveMeasureContext(cfg.hostContext, cfg.targetEl);
       if (!ctx || typeof ctx.measureText !== "function") {
         return null;
@@ -189,7 +190,9 @@
         maxW: timerWidthBudget,
         maxH: timerHeightBudget,
         family: family,
-        weight: valueWeight
+        weight: valueWeight,
+        useMono: stableDigitsEnabled,
+        monoFamily: monoFamily
       });
       const timerPx = timerFit.px;
       const flatColumnsStyle = mode === "flat"

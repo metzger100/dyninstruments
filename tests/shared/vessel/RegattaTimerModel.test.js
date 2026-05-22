@@ -186,7 +186,7 @@ describe("RegattaTimerModel", function () {
     expect(ticks.length).toBe(beforeDestroy);
   });
 
-  it("emits low-tone signals at whole-minute countdown boundaries", function () {
+  it("emits low-tone signals at countdown start and whole-minute boundaries", function () {
     const signals = [];
     const createTimerModel = createFactory();
     const timer = createTimerModel({
@@ -201,6 +201,7 @@ describe("RegattaTimerModel", function () {
 
     const lowSignals = signals.filter((entry) => entry.type === "low");
     expect(lowSignals).toEqual([
+      { type: "low", frequency: 440, durationMs: 300 },
       { type: "low", frequency: 440, durationMs: 300 },
       { type: "low", frequency: 440, durationMs: 300 }
     ]);
