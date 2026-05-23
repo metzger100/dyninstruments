@@ -136,6 +136,20 @@
         kind: "xteDisplay",
         captionName: "BRG caption",
         unitName: "BRG unit"
+      },
+      xteDisplayLinearCog: {
+        cap: "COG",
+        unit: "\u00b0",
+        kind: "xteDisplayLinear",
+        captionName: "Track caption",
+        unitName: "Track unit"
+      },
+      xteDisplayLinearBrg: {
+        cap: "BRG",
+        unit: "\u00b0",
+        kind: "xteDisplayLinear",
+        captionName: "BRG caption",
+        unitName: "BRG unit"
       }
     },
     NAV_UNIT_AWARE_KIND: {
@@ -157,6 +171,18 @@
       xteDisplayDst: {
         cap: "DST",
         kind: "xteDisplay",
+        captionName: "DST caption",
+        unitName: "DST unit"
+      },
+      xteDisplayLinearXte: {
+        cap: "XTE",
+        kind: "xteDisplayLinear",
+        captionName: "XTE caption",
+        unitName: "XTE unit"
+      },
+      xteDisplayLinearDst: {
+        cap: "DST",
+        kind: "xteDisplayLinear",
         captionName: "DST caption",
         unitName: "DST unit"
       }

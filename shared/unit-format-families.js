@@ -94,6 +94,8 @@
     activeRouteRemain: freezeBinding("distance", "nm", "remain"),
     xteDisplayXte: freezeBinding("distance", "nm", "xte"),
     xteDisplayDst: freezeBinding("distance", "nm", "dtw"),
+    xteDisplayLinearXte: freezeBinding("distance", "nm", "xte"),
+    xteDisplayLinearDst: freezeBinding("distance", "nm", "dtw"),
     editRouteDst: freezeBinding("distance", "nm", "dst"),
     editRouteRte: freezeBinding("distance", "nm", "rte"),
     routePointsDistance: freezeBinding("distance", "nm", "distance"),
