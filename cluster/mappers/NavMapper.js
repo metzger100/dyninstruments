@@ -195,6 +195,49 @@
           stableDigits: p.stableDigits === true
         };
       }
+      if (req === "xteDisplayLinear") {
+        const xteToken = toolkit.formatUnit("xteDisplayLinearXte", "distance");
+        const dtwToken = toolkit.formatUnit("xteDisplayLinearDst", "distance");
+        return {
+          display: {
+            xte: num(p.xte),
+            cog: num(p.cog),
+            dtw: num(p.dtw),
+            btw: num(p.btw),
+            wpName: typeof p.wpName === "string" ? p.wpName : "",
+            disconnect: p.disconnect === true
+          },
+          captions: {
+            xte: cap("xteDisplayLinearXte"),
+            track: cap("xteDisplayLinearCog"),
+            dtw: cap("xteDisplayLinearDst"),
+            brg: cap("xteDisplayLinearBrg")
+          },
+          units: {
+            xte: toolkit.unitText("xteDisplayLinearXte", "distance", xteToken),
+            track: unit("xteDisplayLinearCog"),
+            dtw: toolkit.unitText("xteDisplayLinearDst", "distance", dtwToken),
+            brg: unit("xteDisplayLinearBrg")
+          },
+          formatUnits: {
+            xte: xteToken,
+            dtw: dtwToken
+          },
+          xteScale: toolkit.unitNumber("xteLinearScale", xteToken),
+          layout: {
+            leadingZero: p.xteLinearLeadingZero !== false,
+            showWpName: p.xteLinearShowWpName === true,
+            hideTextualMetrics: !!p.xteLinearHideTextualMetrics,
+            easing: p.xteLinearEasing !== false,
+            ratioThresholdNormal: num(p.xteLinearRatioThresholdNormal),
+            ratioThresholdFlat: num(p.xteLinearRatioThresholdFlat),
+            tickMajor: num(p.xteLinearTickMajor),
+            tickMinor: num(p.xteLinearTickMinor),
+            showEndLabels: !!p.xteLinearShowEndLabels
+          },
+          stableDigits: p.stableDigits === true
+        };
+      }
       return {};
     }
 
