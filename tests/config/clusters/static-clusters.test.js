@@ -349,6 +349,7 @@ describe("static cluster configs", function () {
       { kind: "rteDistance" },
       { kind: "vmg" },
       { kind: "xteDisplay" },
+      { kind: "xteDisplayLinear" },
       { kind: "activeRoute" },
       { kind: "editRoute" },
       { kind: "routePoints" }
@@ -395,6 +396,8 @@ describe("static cluster configs", function () {
     expect(byCluster.wind.editableParameters.windLinearLayMax.name).toBe("Max layline angle");
     expect(byCluster.nav.editableParameters.xteHideTextualMetrics.default).toBe(false);
     expect(byCluster.nav.editableParameters.xteHideTextualMetrics.condition).toEqual({ kind: "xteDisplay" });
+    expect(byCluster.nav.editableParameters.xteLinearHideTextualMetrics.default).toBe(false);
+    expect(byCluster.nav.editableParameters.xteLinearHideTextualMetrics.condition).toEqual({ kind: "xteDisplayLinear" });
     expect(byCluster.nav.editableParameters.xteDisplayScale_nm).toEqual(expect.objectContaining({
       default: 1,
       step: 0.1,
@@ -419,6 +422,31 @@ describe("static cluster configs", function () {
       default: 2025,
       step: 1,
       condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "yd" }
+    }));
+    expect(byCluster.nav.editableParameters.xteLinearScale_nm).toEqual(expect.objectContaining({
+      default: 1,
+      step: 0.1,
+      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "nm" }
+    }));
+    expect(byCluster.nav.editableParameters.xteLinearScale_m).toEqual(expect.objectContaining({
+      default: 1852,
+      step: 10,
+      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "m" }
+    }));
+    expect(byCluster.nav.editableParameters.xteLinearScale_km).toEqual(expect.objectContaining({
+      default: 1.852,
+      step: 0.01,
+      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "km" }
+    }));
+    expect(byCluster.nav.editableParameters.xteLinearScale_ft).toEqual(expect.objectContaining({
+      default: 6076,
+      step: 10,
+      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "ft" }
+    }));
+    expect(byCluster.nav.editableParameters.xteLinearScale_yd).toEqual(expect.objectContaining({
+      default: 2025,
+      step: 1,
+      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "yd" }
     }));
   });
 

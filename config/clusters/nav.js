@@ -36,6 +36,13 @@
     ft: { default: 6076, min: 0, max: 40000, step: 10 },
     yd: { default: 2025, min: 0, max: 40000, step: 1 }
   };
+  const XTE_LINEAR_SCALE_FIELDS = {
+    nm: { default: 1, min: 0, max: 20, step: 0.1 },
+    m: { default: 1852, min: 0, max: 20000, step: 10 },
+    km: { default: 1.852, min: 0, max: 20, step: 0.01 },
+    ft: { default: 6076, min: 0, max: 40000, step: 10 },
+    yd: { default: 2025, min: 0, max: 40000, step: 1 }
+  };
 
   function makeXteDisplayScaleParams() {
     const out = {};
@@ -57,11 +64,31 @@
     return out;
   }
 
+  function makeXteLinearScaleParams() {
+    const out = {};
+    Object.keys(XTE_LINEAR_SCALE_FIELDS).forEach(function (token) {
+      const spec = XTE_LINEAR_SCALE_FIELDS[token];
+      out["xteLinearScale_" + token] = {
+        type: "FLOAT",
+        min: spec.min,
+        max: spec.max,
+        step: spec.step,
+        default: spec.default,
+        name: "XTE linear scale",
+        condition: {
+          kind: "xteDisplayLinear",
+          formatUnit_xteDisplayLinearXte: token
+        }
+      };
+    });
+    return out;
+  }
+
   config.clusters.push({
     widget: "ClusterWidget",
     def: {
       name: "dyni_Nav_Instruments",
-      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Active route / Edit route / Route points / Positions / XTE display)",
+      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Active route / Edit route / Route points / Positions / XTE display / XTE linear gauge)",
       caption: "", unit: "", default: "---",
       cluster: "nav",
       storeKeys: {
@@ -103,7 +130,8 @@
             opt("Route points list", "routePoints"),
             opt("Boat position (GPS)", "positionBoat"),
             opt("Active waypoint position", "positionWp"),
-            opt("XTE highway display", "xteDisplay")
+            opt("XTE highway display", "xteDisplay"),
+            opt("XTE linear gauge", "xteDisplayLinear")
           ],
           default: "wpEta",
           name: "Instrument"
@@ -113,6 +141,12 @@
           default: true,
           name: "Leading zero for headings (e.g., 005)",
           condition: { kind: "xteDisplay" }
+        },
+        xteLinearLeadingZero: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Leading zero for headings",
+          condition: { kind: "xteDisplayLinear" }
         },
         xteRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.85,
@@ -125,6 +159,18 @@
           internal: true,
           name: "XTE 1-Row Threshold",
           condition: { kind: "xteDisplay" }
+        },
+        xteLinearRatioThresholdNormal: {
+          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.85,
+          internal: true,
+          name: "XTE Linear 3-Rows Threshold",
+          condition: { kind: "xteDisplayLinear" }
+        },
+        xteLinearRatioThresholdFlat: {
+          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.3,
+          internal: true,
+          name: "XTE Linear 1-Row Threshold",
+          condition: { kind: "xteDisplayLinear" }
         },
         activeRouteRatioThresholdNormal: {
           type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.2,
@@ -216,6 +262,12 @@
           name: "Show waypoint name",
           condition: { kind: "xteDisplay" }
         },
+        xteLinearShowWpName: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Show waypoint name",
+          condition: { kind: "xteDisplayLinear" }
+        },
         coordinatesTabular: {
           type: "BOOLEAN",
           default: true,
@@ -237,6 +289,7 @@
             { kind: "rteDistance" },
             { kind: "vmg" },
             { kind: "xteDisplay" },
+            { kind: "xteDisplayLinear" },
             { kind: "activeRoute" },
             { kind: "editRoute" },
             { kind: "routePoints" }
@@ -248,13 +301,52 @@
           name: "Smooth motion",
           condition: { kind: "xteDisplay" }
         },
+        xteLinearEasing: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Smooth motion",
+          condition: { kind: "xteDisplayLinear" }
+        },
         xteHideTextualMetrics: {
           type: "BOOLEAN",
           default: false,
           name: "Hide textual metrics",
           condition: { kind: "xteDisplay" }
         },
+        xteLinearHideTextualMetrics: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide textual metrics",
+          condition: { kind: "xteDisplayLinear" }
+        },
+        xteLinearTickMajor: {
+          type: "FLOAT",
+          min: 0.1,
+          max: 20,
+          step: 0.1,
+          default: 1.0,
+          internal: true,
+          name: "Major tick step",
+          condition: { kind: "xteDisplayLinear" }
+        },
+        xteLinearTickMinor: {
+          type: "FLOAT",
+          min: 0.05,
+          max: 10,
+          step: 0.05,
+          default: 0.25,
+          internal: true,
+          name: "Minor tick step",
+          condition: { kind: "xteDisplayLinear" }
+        },
+        xteLinearShowEndLabels: {
+          type: "BOOLEAN",
+          default: true,
+          name: "Show min/max labels",
+          condition: { kind: "xteDisplayLinear" }
+        },
         ...makeXteDisplayScaleParams(),
+        ...makeXteLinearScaleParams(),
         hideSeconds: {
           type: "BOOLEAN",
           default: false,
@@ -292,7 +384,7 @@
       updateFunction: function (values) {
         const out = values ? { ...values } : {};
         const kind = (values && values.kind) || "wpEta";
-        const needsWp = (kind === "dst" || kind === "positionWp" || kind === "xteDisplay");
+        const needsWp = (kind === "dst" || kind === "positionWp" || kind === "xteDisplay" || kind === "xteDisplayLinear");
         if (needsWp && values && values.wpServer === false) out.disconnect = true;
         else if (Object.prototype.hasOwnProperty.call(out, "disconnect")) delete out.disconnect;
         if (Object.prototype.hasOwnProperty.call(out, "visible")) {

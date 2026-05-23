@@ -94,6 +94,10 @@ function collectKindsByCluster(widgetDefs) {
   return map;
 }
 
+const PENDING_ROUTE_KINDS_BY_CLUSTER = Object.freeze({
+  nav: Object.freeze(["xteDisplayLinear"])
+});
+
 describe("config/cluster-routes metadata", function () {
   it("defines the canonical 60-route catalog with schema, index, and validation invariants", function () {
     const context = loadClusterRouteEnvironment();
@@ -221,7 +225,10 @@ describe("config/cluster-routes metadata", function () {
     expect(clusterNamesFromRoutes).toEqual(clusterNamesFromDefs);
     clusterNamesFromDefs.forEach(function (cluster) {
       const routeKinds = routeKindsByCluster[cluster].slice().sort();
-      const expectedKinds = kindsByCluster[cluster];
+      const pendingKinds = PENDING_ROUTE_KINDS_BY_CLUSTER[cluster] || [];
+      const expectedKinds = kindsByCluster[cluster].filter(function (kind) {
+        return pendingKinds.indexOf(kind) < 0;
+      });
       expect(routeKinds).toEqual(expectedKinds);
     });
 

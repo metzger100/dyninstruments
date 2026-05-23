@@ -47,13 +47,19 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "activeRouteInteractive")).toBe(false);
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "centerDisplay")).toBe(false);
     expect(def.editableParameters.kind.list.some((entry) => entry.value === "xteDisplay")).toBe(true);
+    expect(def.editableParameters.kind.list.some((entry) => entry.value === "xteDisplayLinear")).toBe(true);
     expect(def.editableParameters.centerDisplayRatioThresholdNormal).toBeUndefined();
     expect(def.editableParameters.centerDisplayRatioThresholdFlat).toBeUndefined();
     expect(def.editableParameters.leadingZero.condition).toEqual({ kind: "xteDisplay" });
+    expect(def.editableParameters.xteLinearLeadingZero.condition).toEqual({ kind: "xteDisplayLinear" });
     expect(def.editableParameters.xteRatioThresholdNormal.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.xteRatioThresholdFlat.condition).toEqual({ kind: "xteDisplay" });
+    expect(def.editableParameters.xteLinearRatioThresholdNormal.condition).toEqual({ kind: "xteDisplayLinear" });
+    expect(def.editableParameters.xteLinearRatioThresholdFlat.condition).toEqual({ kind: "xteDisplayLinear" });
     expect(def.editableParameters.xteRatioThresholdNormal.internal).toBe(true);
     expect(def.editableParameters.xteRatioThresholdFlat.internal).toBe(true);
+    expect(def.editableParameters.xteLinearRatioThresholdNormal.internal).toBe(true);
+    expect(def.editableParameters.xteLinearRatioThresholdFlat.internal).toBe(true);
     expect(def.editableParameters.activeRouteRatioThresholdNormal.condition).toEqual({ kind: "activeRoute" });
     expect(def.editableParameters.activeRouteRatioThresholdFlat.condition).toEqual({ kind: "activeRoute" });
     expect(def.editableParameters.activeRouteRatioThresholdNormal.internal).toBe(true);
@@ -104,6 +110,12 @@ describe("config/clusters/nav.js", function () {
       kind: "xteDisplay",
       formatUnit_xteDisplayXte: "nm"
     });
+    expect(def.editableParameters.caption_xteDisplayLinearXte.condition).toEqual({ kind: "xteDisplayLinear" });
+    expect(def.editableParameters.formatUnit_xteDisplayLinearXte.condition).toEqual({ kind: "xteDisplayLinear" });
+    expect(def.editableParameters.unit_xteDisplayLinearXte_nm.condition).toEqual({
+      kind: "xteDisplayLinear",
+      formatUnit_xteDisplayLinearXte: "nm"
+    });
     expect(def.editableParameters.xteDisplayScale_nm).toEqual({
       type: "FLOAT",
       min: 0,
@@ -149,6 +161,51 @@ describe("config/clusters/nav.js", function () {
       name: "XTE highway scale",
       condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "yd" }
     });
+    expect(def.editableParameters.xteLinearScale_nm).toEqual({
+      type: "FLOAT",
+      min: 0,
+      max: 20,
+      step: 0.1,
+      default: 1,
+      name: "XTE linear scale",
+      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "nm" }
+    });
+    expect(def.editableParameters.xteLinearScale_m).toEqual({
+      type: "FLOAT",
+      min: 0,
+      max: 20000,
+      step: 10,
+      default: 1852,
+      name: "XTE linear scale",
+      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "m" }
+    });
+    expect(def.editableParameters.xteLinearScale_km).toEqual({
+      type: "FLOAT",
+      min: 0,
+      max: 20,
+      step: 0.01,
+      default: 1.852,
+      name: "XTE linear scale",
+      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "km" }
+    });
+    expect(def.editableParameters.xteLinearScale_ft).toEqual({
+      type: "FLOAT",
+      min: 0,
+      max: 40000,
+      step: 10,
+      default: 6076,
+      name: "XTE linear scale",
+      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "ft" }
+    });
+    expect(def.editableParameters.xteLinearScale_yd).toEqual({
+      type: "FLOAT",
+      min: 0,
+      max: 40000,
+      step: 1,
+      default: 2025,
+      name: "XTE linear scale",
+      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "yd" }
+    });
     expect(def.editableParameters.routePointsRatioThresholdNormal.condition).toEqual({ kind: "routePoints" });
     expect(def.editableParameters.routePointsRatioThresholdFlat.condition).toEqual({ kind: "routePoints" });
     expect(def.editableParameters.routePointsRatioThresholdNormal.internal).toBe(true);
@@ -170,8 +227,22 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.waypointsText.default).toBe("waypoints");
     expect(def.editableParameters.showWpNameXteDisplay.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.showWpNameXteDisplay.default).toBe(false);
+    expect(def.editableParameters.xteLinearShowWpName.condition).toEqual({ kind: "xteDisplayLinear" });
+    expect(def.editableParameters.xteLinearShowWpName.default).toBe(false);
     expect(def.editableParameters.xteHideTextualMetrics.condition).toEqual({ kind: "xteDisplay" });
     expect(def.editableParameters.xteHideTextualMetrics.default).toBe(false);
+    expect(def.editableParameters.xteLinearHideTextualMetrics.condition).toEqual({ kind: "xteDisplayLinear" });
+    expect(def.editableParameters.xteLinearHideTextualMetrics.default).toBe(false);
+    expect(def.editableParameters.xteLinearEasing.condition).toEqual({ kind: "xteDisplayLinear" });
+    expect(def.editableParameters.xteLinearEasing.default).toBe(true);
+    expect(def.editableParameters.xteLinearTickMajor.condition).toEqual({ kind: "xteDisplayLinear" });
+    expect(def.editableParameters.xteLinearTickMajor.default).toBe(1.0);
+    expect(def.editableParameters.xteLinearTickMajor.internal).toBe(true);
+    expect(def.editableParameters.xteLinearTickMinor.condition).toEqual({ kind: "xteDisplayLinear" });
+    expect(def.editableParameters.xteLinearTickMinor.default).toBe(0.25);
+    expect(def.editableParameters.xteLinearTickMinor.internal).toBe(true);
+    expect(def.editableParameters.xteLinearShowEndLabels.condition).toEqual({ kind: "xteDisplayLinear" });
+    expect(def.editableParameters.xteLinearShowEndLabels.default).toBe(true);
     expect(def.editableParameters.coordinatesTabular.default).toBe(true);
     expect(def.editableParameters.coordinatesTabular.name).toBe("Tabular coordinates");
     expect(def.editableParameters.coordinatesTabular.condition).toEqual([
@@ -188,6 +259,7 @@ describe("config/clusters/nav.js", function () {
       { kind: "rteDistance" },
       { kind: "vmg" },
       { kind: "xteDisplay" },
+      { kind: "xteDisplayLinear" },
       { kind: "activeRoute" },
       { kind: "editRoute" },
       { kind: "routePoints" }
@@ -250,6 +322,12 @@ describe("config/clusters/nav.js", function () {
     expect(def.editableParameters.unit_xteDisplayDst_nm.displayName).toBe("nm unit");
     expect(def.editableParameters.caption_xteDisplayBrg.displayName).toBe("BRG caption");
     expect(def.editableParameters.unit_xteDisplayBrg.displayName).toBe("BRG unit");
+    expect(def.editableParameters.caption_xteDisplayLinearCog.displayName).toBe("Track caption");
+    expect(def.editableParameters.unit_xteDisplayLinearCog.displayName).toBe("Track unit");
+    expect(def.editableParameters.caption_xteDisplayLinearDst.displayName).toBe("DST caption");
+    expect(def.editableParameters.unit_xteDisplayLinearDst_nm.displayName).toBe("nm unit");
+    expect(def.editableParameters.caption_xteDisplayLinearBrg.displayName).toBe("BRG caption");
+    expect(def.editableParameters.unit_xteDisplayLinearBrg.displayName).toBe("BRG unit");
     expect(def.editableParameters.unit_editRouteDst).toBeUndefined();
     expect(def.editableParameters.unit_editRouteRte).toBeUndefined();
     expect(def.editableParameters.distanceUnit).toBeUndefined();
@@ -266,6 +344,9 @@ describe("config/clusters/nav.js", function () {
 
     const x = def.updateFunction({ kind: "xteDisplay", wpServer: false });
     expect(x.disconnect).toBe(true);
+
+    const xl = def.updateFunction({ kind: "xteDisplayLinear", wpServer: false });
+    expect(xl.disconnect).toBe(true);
 
     const c = def.updateFunction({ kind: "wpEta", wpServer: false, disconnect: true });
     expect(c.disconnect).toBeUndefined();
