@@ -94,12 +94,13 @@ function collectKindsByCluster(widgetDefs) {
   return map;
 }
 
-const PENDING_ROUTE_KINDS_BY_CLUSTER = Object.freeze({
-  nav: Object.freeze(["xteDisplayLinear"])
+const PENDING_ROUTE_KINDS_BY_CLUSTER = Object.freeze({});
+const PENDING_ROUTE_RENDERER_IDS = Object.freeze({
+  "nav/xteDisplayLinear": "XteDisplayLinearWidget"
 });
 
 describe("config/cluster-routes metadata", function () {
-  it("defines the canonical 60-route catalog with schema, index, and validation invariants", function () {
+  it("defines the canonical 61-route catalog with schema, index, and validation invariants", function () {
     const context = loadClusterRouteEnvironment();
     const clusterRoutes = context.DyniPlugin.config.clusterRoutes;
     const routes = clusterRoutes.routes;
@@ -135,9 +136,9 @@ describe("config/cluster-routes metadata", function () {
 
     expect(clusterRoutes.schemaVersion).toBe(1);
     expect(Array.isArray(routes)).toBe(true);
-    expect(routes).toHaveLength(60);
+    expect(routes).toHaveLength(61);
     expect(byRouteId).toBeTruthy();
-    expect(Object.keys(byRouteId)).toHaveLength(60);
+    expect(Object.keys(byRouteId)).toHaveLength(61);
 
     const seenRouteIds = new Set();
     const seenClusterKinds = new Set();
@@ -181,7 +182,12 @@ describe("config/cluster-routes metadata", function () {
       seenClusterKinds.add(pair);
 
       expect(components[route.mapperId]).toBeTruthy();
-      expect(components[route.rendererId]).toBeTruthy();
+      if (Object.prototype.hasOwnProperty.call(PENDING_ROUTE_RENDERER_IDS, routeId)) {
+        expect(PENDING_ROUTE_RENDERER_IDS[routeId]).toBe(route.rendererId);
+        expect(components[route.rendererId]).toBeUndefined();
+      } else {
+        expect(components[route.rendererId]).toBeTruthy();
+      }
 
       if (Object.prototype.hasOwnProperty.call(route, "viewModelId")) {
         expect(typeof route.viewModelId).toBe("string");

@@ -99,6 +99,14 @@
       rendererId: "XteDisplayWidget",
       surface: "canvas-dom",
       shellSizing: { kind: "ratio", aspectRatio: 2 }
+    },
+    {
+      cluster: "nav",
+      kind: "xteDisplayLinear",
+      mapperId: "NavMapper",
+      rendererId: "XteDisplayLinearWidget",
+      surface: "canvas-dom",
+      shellSizing: { kind: "ratio", aspectRatio: 2 }
     }
   );
 }(this));
