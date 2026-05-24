@@ -23,6 +23,8 @@
   --dyni-pointer: #00a8ff;
   --dyni-warning: #f2b134;
   --dyni-alarm: #ff4d6d;
+  --dyni-ok: #3bd88f;
+  --dyni-info: #4d9fff;
   --dyni-alarm-widget-bg: #c91f2f;
   --dyni-alarm-widget-fg: #fff7f2;
   --dyni-alarm-widget-strip: #32c8ff;
@@ -32,6 +34,9 @@
   --dyni-ais-nearest: #0086ff;
   --dyni-ais-tracking: #53c16d;
   --dyni-ais-normal: #607b95;
+  --dyni-regatta-bar-warning: #f7b252;
+  --dyni-regatta-bar-critical: #ff4f60;
+  --dyni-regatta-bar-default: #4da8ff;
 
   /* Shared geometry */
   --dyni-stroke-weight: 1.28;
