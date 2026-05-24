@@ -26,6 +26,24 @@ Canonical shared inputs for migrated surface/typography tokens:
 - --dyni-font-weight
 - --dyni-label-weight
 
+Canonical semantic color inputs:
+
+- --dyni-pointer
+- --dyni-warning
+- --dyni-alarm
+- --dyni-ok
+- --dyni-info
+- --dyni-alarm-widget-bg
+- --dyni-alarm-widget-fg
+- --dyni-alarm-widget-strip
+- --dyni-ais-warning
+- --dyni-ais-nearest
+- --dyni-ais-tracking
+- --dyni-ais-normal
+- --dyni-regatta-bar-warning
+- --dyni-regatta-bar-critical
+- --dyni-regatta-bar-default
+
 Raw --dyni-* inputs are input-only. They are not consumed by migrated renderer CSS directly.
 
 Border-specific rule:
@@ -33,6 +51,12 @@ Border-specific rule:
 - `--dyni-border` is optional.
 - If it is not set, `runtime.theme` derives `--dyni-theme-surface-border` from the resolved foreground token (`surface.fg`).
 - If it is set, the explicit border value wins.
+
+Scoped cascade rule:
+
+- Scoped inputs can inherit from global semantic tokens when unset.
+- Example: `--dyni-ais-warning` cascades from `--dyni-alarm`, `--dyni-alarm-widget-strip` and `--dyni-ais-nearest` cascade from `--dyni-ok`, and `--dyni-regatta-bar-default` cascades from `--dyni-info`.
+- Scoped explicit inputs still win over the inherited cascade.
 
 ## Output Variables
 

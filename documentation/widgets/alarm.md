@@ -13,6 +13,7 @@
 - Active alarm names come from the alarm-map object keys, not from nested alarm labels
 - Theme ownership lives in `runtime.theme` via `colors.alarmWidget.bg`, `colors.alarmWidget.fg`, and `colors.alarmWidget.strip`
 - `user.css` can override the widget through `--dyni-alarm-widget-bg`, `--dyni-alarm-widget-fg`, and `--dyni-alarm-widget-strip`
+- `--dyni-alarm-widget-strip` cascades from global `--dyni-ok` when no explicit strip input is set
 - Active summary rules:
   - `0` active alarms -> `NONE`
   - `1` active alarm -> `name`

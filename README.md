@@ -51,60 +51,78 @@ Preset selector:
 `darkmode` is a built-in black-surface preset with white foreground/borders and tuned semantic accents for warning/alarm, laylines, and AIS roles.
 `night` remains the dim red AvNav navigation mode, not a preset family.
 
-Complete token list with defaults:
+Theming uses a two-level hierarchy:
 
-| Token | Default |
-|---|---|
-| `--dyni-fg` | `black` |
-| `--dyni-bg` | `white` |
-| `--dyni-border` | Optional. If omitted, border follows resolved `surface.fg` (`--dyni-fg` after mode/preset resolution). If set, this explicit value overrides that fallback. |
-| `--dyni-font` | `"Roboto","Inter","SF Pro Text",-apple-system,"Segoe UI","Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"` |
-| `--dyni-font-mono` | `"Roboto Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace` |
-| `--dyni-font-weight` | `700` |
-| `--dyni-label-weight` | `700` |
-| `--dyni-caption-opacity` | `1.0` |
-| `--dyni-unit-opacity` | `1.0` |
-| `--dyni-pointer` | `#ff2b2b` |
-| `--dyni-warning` | `#e7c66a` |
-| `--dyni-alarm` | `#FA584A` |
-| `--dyni-alarm-widget-bg` | `#C73A32` |
-| `--dyni-alarm-widget-fg` | `#ffffff` |
-| `--dyni-alarm-widget-strip` | `#70F3AF` |
-| `--dyni-layline-stb` | `#82b683` |
-| `--dyni-layline-port` | `#ff7a76` |
-| `--dyni-ais-warning` | `#FA584A` |
-| `--dyni-ais-nearest` | `#70F3AF` |
-| `--dyni-ais-tracking` | `#f8a601` |
-| `--dyni-ais-normal` | `#EBEB55` |
-| `--dyni-regatta-barWarning` | `#e7a834` |
-| `--dyni-regatta-barCritical` | `#FA584A` |
-| `--dyni-regatta-barDefault` | `#70B0F3` |
-| `--dyni-stroke-weight` | `1.0` |
-| `--dyni-pointer-depth-weight` | `1.0` |
-| `--dyni-pointer-side-weight` | `1.0` |
-| `--dyni-radial-tick-major-len-factor` | `0.087` |
-| `--dyni-radial-tick-major-width-factor` | `0.022` |
-| `--dyni-radial-tick-minor-len-factor` | `0.051` |
-| `--dyni-radial-tick-minor-width-factor` | `0.011` |
-| `--dyni-radial-pointer-side-factor` | `0.11` |
-| `--dyni-radial-pointer-depth-factor` | `0.22` |
-| `--dyni-radial-arc-linewidth-factor` | `0.0145` |
-| `--dyni-radial-ring-width` | `0.16` |
-| `--dyni-radial-label-inset` | `1.8` |
-| `--dyni-radial-label-font` | `0.14` |
-| `--dyni-radial-fullcircle-normal-inner-margin` | `0.03` |
-| `--dyni-radial-fullcircle-normal-min-height` | `0.45` |
-| `--dyni-radial-fullcircle-normal-dual-gap` | `0.05` |
-| `--dyni-linear-track-width` | `0.16` |
-| `--dyni-linear-track-linewidth-factor` | `0.018` |
-| `--dyni-linear-tick-major-len-factor` | `0.109` |
-| `--dyni-linear-tick-major-width-factor` | `0.027` |
-| `--dyni-linear-tick-minor-len-factor` | `0.064` |
-| `--dyni-linear-tick-minor-width-factor` | `0.014` |
-| `--dyni-linear-pointer-side-factor` | `0.12` |
-| `--dyni-linear-pointer-depth-factor` | `0.24` |
-| `--dyni-linear-label-inset` | `1.8` |
-| `--dyni-linear-label-font` | `0.14` |
+- Global tokens define shared visual semantics for surface, typography, opacity, and core colors.
+- Scoped tokens specialize widget families and can cascade from a global parent when no scoped override is set.
+
+Global tokens:
+
+| Category | Input var | Default |
+|---|---|---|
+| Surface | `--dyni-fg` | `black` |
+| Surface | `--dyni-bg` | `white` |
+| Surface | `--dyni-border` | Optional. If omitted, border follows resolved `surface.fg`; if set, explicit value wins. |
+| Typography | `--dyni-font` | `"Roboto","Inter","SF Pro Text",-apple-system,"Segoe UI","Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"` |
+| Typography | `--dyni-font-mono` | `"Roboto Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace` |
+| Typography | `--dyni-font-weight` | `700` |
+| Typography | `--dyni-label-weight` | `700` |
+| Opacity | `--dyni-caption-opacity` | `1.0` |
+| Opacity | `--dyni-unit-opacity` | `1.0` |
+| Semantic color | `--dyni-pointer` | `#ff2b2b` |
+| Semantic color | `--dyni-warning` | `#e7c66a` |
+| Semantic color | `--dyni-alarm` | `#FA584A` |
+| Semantic color | `--dyni-ok` | `#70F3AF` |
+| Semantic color | `--dyni-info` | `#70B0F3` |
+| Geometry weight | `--dyni-stroke-weight` | `1.0` |
+| Geometry weight | `--dyni-pointer-depth-weight` | `1.0` |
+| Geometry weight | `--dyni-pointer-side-weight` | `1.0` |
+
+Scoped tokens by family:
+
+| Family | Input var | Default | Cascades from |
+|---|---|---|---|
+| Alarm widget | `--dyni-alarm-widget-bg` | `#C73A32` | — |
+| Alarm widget | `--dyni-alarm-widget-fg` | `#ffffff` | — |
+| Alarm widget | `--dyni-alarm-widget-strip` | inherits global when unset | `--dyni-ok` |
+| AIS | `--dyni-ais-warning` | inherits global when unset | `--dyni-alarm` |
+| AIS | `--dyni-ais-nearest` | inherits global when unset | `--dyni-ok` |
+| AIS | `--dyni-ais-tracking` | `#f8a601` | — |
+| AIS | `--dyni-ais-normal` | `#EBEB55` | — |
+| Regatta | `--dyni-regatta-bar-warning` | `#e7a834` | — |
+| Regatta | `--dyni-regatta-bar-critical` | inherits global when unset | `--dyni-alarm` |
+| Regatta | `--dyni-regatta-bar-default` | inherits global when unset | `--dyni-info` |
+| Wind/layline | `--dyni-layline-stb` | `#82b683` | — |
+| Wind/layline | `--dyni-layline-port` | `#ff7a76` | — |
+
+Family geometry factors (advanced):
+
+| Family | Input var | Default |
+|---|---|---|
+| Radial | `--dyni-radial-tick-major-len-factor` | `0.087` |
+| Radial | `--dyni-radial-tick-major-width-factor` | `0.022` |
+| Radial | `--dyni-radial-tick-minor-len-factor` | `0.051` |
+| Radial | `--dyni-radial-tick-minor-width-factor` | `0.011` |
+| Radial | `--dyni-radial-pointer-side-factor` | `0.11` |
+| Radial | `--dyni-radial-pointer-depth-factor` | `0.22` |
+| Radial | `--dyni-radial-arc-linewidth-factor` | `0.0145` |
+| Radial | `--dyni-radial-ring-width` | `0.16` |
+| Radial | `--dyni-radial-label-inset` | `1.8` |
+| Radial | `--dyni-radial-label-font` | `0.14` |
+| Radial | `--dyni-radial-fullcircle-normal-inner-margin` | `0.03` |
+| Radial | `--dyni-radial-fullcircle-normal-min-height` | `0.45` |
+| Radial | `--dyni-radial-fullcircle-normal-dual-gap` | `0.05` |
+| Linear | `--dyni-linear-track-width` | `0.16` |
+| Linear | `--dyni-linear-track-linewidth-factor` | `0.018` |
+| Linear | `--dyni-linear-tick-major-len-factor` | `0.109` |
+| Linear | `--dyni-linear-tick-major-width-factor` | `0.027` |
+| Linear | `--dyni-linear-tick-minor-len-factor` | `0.064` |
+| Linear | `--dyni-linear-tick-minor-width-factor` | `0.014` |
+| Linear | `--dyni-linear-pointer-side-factor` | `0.12` |
+| Linear | `--dyni-linear-pointer-depth-factor` | `0.24` |
+| Linear | `--dyni-linear-label-inset` | `1.8` |
+| Linear | `--dyni-linear-label-font` | `0.14` |
+
 
 `user.css` input overrides always win over Dyni defaults. If you override colors only on `.widget.dyniplugin`, those values stay active in AvNav Night Mode too. Add matching `.nightMode .widget.dyniplugin` rules when you want separate night colors.
 
@@ -134,6 +152,16 @@ Example override:
   --dyni-alarm: #ff5533;
 }
 ```
+
+Cascade recipe example:
+
+```css
+.widget.dyniplugin {
+  --dyni-alarm: #ff5533;
+}
+```
+
+Setting `--dyni-alarm` updates every token cascading from alarm (for example AIS warning and regatta critical) unless those scoped tokens are explicitly overridden.
 
 ## Requirements
 
