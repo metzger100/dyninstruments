@@ -273,6 +273,25 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.colors.regatta.barDefault).toBe("#70B0F3");
   });
 
+  it("resolves colors.ok and colors.info in default day mode", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue() {
+            return "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.colors.ok).toBe("#70F3AF");
+    expect(resolved.colors.info).toBe("#70B0F3");
+  });
+
   it("resolves default preset AIS role colors in night mode", function () {
     const context = setupContext({
       getComputedStyle() {
@@ -303,6 +322,264 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.colors.regatta.barWarning).toBe("rgba(231, 168, 52, 0.60)");
     expect(resolved.colors.regatta.barCritical).toBe("rgba(250, 88, 74, 0.60)");
     expect(resolved.colors.regatta.barDefault).toBe("rgba(112, 176, 243, 0.60)");
+  });
+
+  it("resolves colors.ok and colors.info in default night mode", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue() {
+            return "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.dom.getNightModeState = function () {
+      return true;
+    };
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.colors.ok).toBe("rgba(112, 243, 175, 0.60)");
+    expect(resolved.colors.info).toBe("rgba(112, 176, 243, 0.60)");
+  });
+
+  it("resolves colors.ok and colors.info highcontrast base overrides", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue() {
+            return "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "highcontrast" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.colors.ok).toBe("#00AA66");
+    expect(resolved.colors.info).toBe("#00AAFF");
+  });
+
+  it("cascades scoped semantic tokens from global parents by default", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue() {
+            return "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const dayResolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    expect(dayResolved.colors.ais.warning).toBe(dayResolved.colors.alarm);
+    expect(dayResolved.colors.ais.nearest).toBe(dayResolved.colors.ok);
+    expect(dayResolved.colors.alarmWidget.strip).toBe(dayResolved.colors.ok);
+    expect(dayResolved.colors.regatta.barDefault).toBe(dayResolved.colors.info);
+    expect(dayResolved.colors.alarmWidget.bg).toBe("#C73A32");
+
+    context.DyniPlugin.runtime.dom.getNightModeState = function () {
+      return true;
+    };
+    const nightResolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    expect(nightResolved.colors.ais.warning).toBe(nightResolved.colors.alarm);
+    expect(nightResolved.colors.ais.nearest).toBe(nightResolved.colors.ok);
+    expect(nightResolved.colors.alarmWidget.strip).toBe(nightResolved.colors.ok);
+    expect(nightResolved.colors.regatta.barDefault).toBe(nightResolved.colors.info);
+  });
+
+  it("cascades scoped tokens in highcontrast base mode", function () {
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue() {
+            return "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "highcontrast" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.colors.alarm).toBe("#FF3300");
+    expect(resolved.colors.ais.warning).toBe("#FF3300");
+    expect(resolved.colors.ais.warning).toBe(resolved.colors.alarm);
+  });
+
+  it("applies global root overrides to all cascaded scoped tokens", function () {
+    const cssVars = {
+      "--dyni-alarm": "#00ff00",
+      "--dyni-ok": "#112233",
+      "--dyni-info": "#445566"
+    };
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue(name) {
+            return hasOwn.call(cssVars, name) ? cssVars[name] : "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.colors.ais.warning).toBe("#00ff00");
+    expect(resolved.colors.regatta.barCritical).toBe("#00ff00");
+    expect(resolved.colors.ais.nearest).toBe("#112233");
+    expect(resolved.colors.alarmWidget.strip).toBe("#112233");
+    expect(resolved.colors.regatta.barDefault).toBe("#445566");
+    expect(resolved.colors.alarmWidget.bg).toBe("#C73A32");
+    expect(resolved.colors.regatta.barWarning).toBe("#e7a834");
+  });
+
+  it("uses scoped override over parent cascade for ais.warning", function () {
+    const cssVars = {
+      "--dyni-alarm": "#00ff00",
+      "--dyni-ais-warning": "#0000ff"
+    };
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue(name) {
+            return hasOwn.call(cssVars, name) ? cssVars[name] : "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.colors.ais.warning).toBe("#0000ff");
+  });
+
+  it("uses kebab-case regatta input var override", function () {
+    const cssVars = {
+      "--dyni-regatta-bar-warning": "#123abc"
+    };
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue(name) {
+            return hasOwn.call(cssVars, name) ? cssVars[name] : "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.colors.regatta.barWarning).toBe("#123abc");
+  });
+
+  it("resolves deprecated regatta alias input var", function () {
+    const cssVars = {
+      "--dyni-regatta-barWarning": "#654321"
+    };
+    const context = setupContext({
+      console: { warn: vi.fn() },
+      getComputedStyle() {
+        return {
+          getPropertyValue(name) {
+            return hasOwn.call(cssVars, name) ? cssVars[name] : "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.colors.regatta.barWarning).toBe("#654321");
+  });
+
+  it("prefers kebab-case regatta input var over deprecated alias", function () {
+    const cssVars = {
+      "--dyni-regatta-bar-warning": "#aabbcc",
+      "--dyni-regatta-barWarning": "#ddeeff"
+    };
+    const context = setupContext({
+      console: { warn: vi.fn() },
+      getComputedStyle() {
+        return {
+          getPropertyValue(name) {
+            return hasOwn.call(cssVars, name) ? cssVars[name] : "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(resolved.colors.regatta.barWarning).toBe("#aabbcc");
+  });
+
+  it("warns when deprecated regatta alias input var is used", function () {
+    const cssVars = {
+      "--dyni-regatta-barWarning": "#654321"
+    };
+    const warn = vi.fn();
+    const context = setupContext({
+      console: { warn: warn },
+      getComputedStyle() {
+        return {
+          getPropertyValue(name) {
+            return hasOwn.call(cssVars, name) ? cssVars[name] : "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toContain("--dyni-regatta-barWarning");
+    expect(warn.mock.calls[0][0]).toContain("--dyni-regatta-bar-warning");
+  });
+
+  it("deduplicates deprecated regatta alias warning across resolve cycles", function () {
+    const cssVars = {
+      "--dyni-regatta-barWarning": "#654321"
+    };
+    const warn = vi.fn();
+    const context = setupContext({
+      console: { warn: warn },
+      getComputedStyle() {
+        return {
+          getPropertyValue(name) {
+            return hasOwn.call(cssVars, name) ? cssVars[name] : "";
+          }
+        };
+      }
+    });
+    const rootEl = createPluginRootElement();
+    const secondRootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    context.DyniPlugin.runtime.theme.tokens.resolveForRoot(secondRootEl);
+
+    expect(warn).toHaveBeenCalledTimes(1);
   });
 
   it("resolves darkmode preset surface and semantic colors", function () {
