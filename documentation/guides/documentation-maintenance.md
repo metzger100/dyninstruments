@@ -5,24 +5,26 @@
 ## Overview
 
 Use this workflow whenever code changes touch architecture, module wiring, or widget behavior.
+User-facing changes must also keep `README.md` current in the same task.
 
 ## Workflow
 
 1. Identify touched code areas (`config/`, `runtime/`, `widgets/`, `plugin.js`, `plugin.mjs`)
 2. Update the mapped docs in `documentation/`
 3. Update root docs (`README.md`, `AGENTS.md`, `CLAUDE.md`) when architecture guidance changes
-4. Every new documentation file must be linked from at least one other doc that is itself reachable from AGENTS.md. The easiest way: add an entry to TABLEOFCONTENTS.md.
-5. Run default validation gate:
+4. Fail-closed README sync: if a task changes theming, clusters/kinds, layouts, installation, configuration, requirements, or development workflow, update `README.md` in the same task.
+5. Every new documentation file must be linked from at least one other doc that is itself reachable from AGENTS.md. The easiest way: add an entry to TABLEOFCONTENTS.md.
+6. Run default validation gate:
 
 ```bash
 npm run check:all
 ```
 
-6. During iteration, optionally run targeted checks (`npm run check:core`, `npm test`) for faster feedback.
+7. During iteration, optionally run targeted checks (`npm run check:core`, `npm test`) for faster feedback.
    For perf-gate changes, include `npm run perf:run` and `npm run perf:check`.
 
-7. Fix all failures and review all warnings before finishing
-8. For warn-only smell rollouts, record the warning backlog and promotion criteria in `documentation/TECH-DEBT.md`
+8. Fix all failures and review all warnings before finishing
+9. For warn-only smell rollouts, record the warning backlog and promotion criteria in `documentation/TECH-DEBT.md`
 
 ## Quality and Regression Commands
 
@@ -92,12 +94,16 @@ For cleanup sessions tracked by garbage-collection baseline markers:
 | Change Type | Minimum Docs to Update |
 |---|---|
 | New/changed module in `config/components/registry-*.js` or `config/components.js` assembly | `documentation/architecture/component-system.md`, affected module doc in `documentation/widgets/` |
-| New cluster or new cluster kind | `documentation/guides/add-new-cluster.md`, `documentation/architecture/cluster-widget-system.md`, relevant module docs |
+| New cluster or new cluster kind | `documentation/guides/add-new-cluster.md`, `documentation/architecture/cluster-widget-system.md`, relevant module docs, `README.md` (`What you get` and configuration examples) |
 | New gauge renderer | `documentation/guides/add-new-gauge.md`, `documentation/widgets/semicircle-gauges.md` or dedicated module doc |
 | Changes in registration/lifecycle flow (`runtime/init.js`, `runtime/widget-registrar.js`) | `documentation/avnav-api/plugin-lifecycle.md`, `documentation/architecture/component-system.md` |
 | Changes in helper services or `componentContext.format.applyFormatter` contract | `documentation/shared/helpers.md` |
-| CSS/theming changes (`plugin.css`) | `documentation/shared/css-theming.md` |
-| Test setup or quality rule changes (`package.json`, `vitest.config.js`, `tools/check-file-size.mjs`, `tools/check-coverage.mjs`, `tools/check-dependencies.mjs`, `tools/check-umd.mjs`, `tools/check-naming.mjs`, `tools/check-patterns.mjs`, `tools/check-smell-contracts.mjs`, `tools/check-doc-format.mjs`, `tools/perf-run.mjs`, `tools/perf-check.mjs`, `tools/perf/*.mjs`, `tools/gc-baseline.mjs`, `tools/install-hooks.mjs`, `tools/check-hooks.mjs`, `.githooks/pre-push`) | `documentation/guides/documentation-maintenance.md`, `documentation/guides/garbage-collection.md`, `documentation/guides/performance-gate.md`, `README.md`, `AGENTS.md`, `CLAUDE.md` |
+| CSS/theming or theme-token changes (`plugin.css`, `runtime/theme/*`, theme token docs) | `documentation/shared/css-theming.md`, `documentation/shared/theme-tokens.md`, `README.md` (complete user token list + examples) |
+| Layout bundle changes (`layouts/*.json`, `plugin.json` layout registration) | `documentation/guides/layout-file-conventions.md`, `README.md` (bundled layouts and usage notes) |
+| Installation/packaging/release workflow changes (`plugin.json`, release scripts, install steps) | `documentation/guides/release-workflow.md`, `README.md` (installation/update instructions) |
+| User configuration surface changes (editable params, defaults, unit selectors, key selectors, cluster options) | relevant `documentation/avnav-api/*` and widget docs, `README.md` (Configuration section) |
+| Requirements/platform support changes | `documentation/core-principles.md` or relevant architecture docs, `README.md` (Requirements section) |
+| Development workflow changes (`package.json`, `vitest.config.js`, `tools/*`, `.githooks/*`) | `documentation/guides/documentation-maintenance.md`, `documentation/guides/garbage-collection.md`, `documentation/guides/performance-gate.md`, `README.md` (Development section), `AGENTS.md`, `CLAUDE.md` |
 | New documentation file | `documentation/TABLEOFCONTENTS.md` |
 
 ## Validation

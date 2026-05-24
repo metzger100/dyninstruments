@@ -107,6 +107,7 @@ Task: Add new BarometerGauge
 - Feature and API lookups: [documentation/TABLEOFCONTENTS.md](documentation/TABLEOFCONTENTS.md)
 - Non-negotiable project rules: [documentation/core-principles.md](documentation/core-principles.md)
 - Root structural orientation map: [ARCHITECTURE.md](ARCHITECTURE.md)
+- User-facing documentation: [README.md](README.md)
 - HTML renderer lifecycle patterns: [documentation/architecture/html-renderer-lifecycle.md](documentation/architecture/html-renderer-lifecycle.md)
 - Step-by-step implementation workflows: [documentation/guides/](documentation/guides/)
 - New release requests: start with [documentation/guides/release-workflow.md](documentation/guides/release-workflow.md) and follow `npm run release:prepare` -> `npm run release:create`
@@ -120,6 +121,7 @@ Task: Add new BarometerGauge
 - [ ] Read only necessary additional documentation beyond mandatory preflight.
 - [ ] Implementation complete.
 - [ ] Updated relevant documentation.
+- [ ] Updated user-facing `README.md` when changes touch theming, clusters/kinds, layouts, installation, configuration, requirements, or development workflow.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.
 - [ ] Ran `npm run check:all` — no failures; required final gate (`check:core` plus coverage threshold enforcement plus `perf:check`).
 - [ ] For cleanup sessions, ran `npm run gc:status` first and `npm run gc:update-baseline` last.
@@ -165,4 +167,22 @@ Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 - Pair formatter output with `PlaceholderNormalize.normalize()` at the render boundary.
 - Use `ValueMath.toOptionalFiniteNumber(raw)` for live sensor data from the AvNav store.
 - Use `ValueMath.toFiniteNumber(raw)` only for config/default coercion where `null -> 0` is explicitly intended.
+
+---
+
+## 9. User-Facing README Sync Rule (Fail-Closed)
+
+`README.md` is mandatory documentation when user-facing behavior changes. Do not treat it as optional.
+
+Update `README.md` in the same task whenever changes affect any of:
+
+1. Theming or configurable theme/token inputs
+2. Cluster/kind availability or user-selectable widget options
+3. Bundled layouts or layout usage guidance
+4. Installation steps, plugin packaging, or activation workflow
+5. Configuration keys/defaults users set in AvNav
+6. Requirements/platform support statements
+7. Development setup or contributor workflow visible to users/contributors
+
+For execution plans, include explicit README deliverables and exit conditions for these categories.
 <!-- END SHARED_INSTRUCTIONS -->

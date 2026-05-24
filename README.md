@@ -10,9 +10,9 @@
 | Speed | SOG and STW as radial, linear, or text |
 | Environment | Depth, temperature, voltage as radial, linear, or text |
 | Wind | AWA/AWS and TWA/TWS radial with optional layline sectors |
-| Navigation | Active route, route points, edit route, AIS target, map zoom, XTE |
+| Navigation | Active route, route points, edit route, AIS target, map zoom, XTE, XTE linear gauge |
 | Anchor | Anchor watch circle |
-| Vessel | Alarms, position coordinates, center display, three-value text |
+| Vessel | Alarms, regatta timer, position coordinates, center display, three-value text |
 
 <img width="1919" height="933" alt="image" src="https://github.com/user-attachments/assets/ac61d16d-027c-47f8-844b-b68103746221" />
 
@@ -62,6 +62,8 @@ Complete token list with defaults:
 | `--dyni-font-mono` | `"Roboto Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace` |
 | `--dyni-font-weight` | `700` |
 | `--dyni-label-weight` | `700` |
+| `--dyni-caption-opacity` | `1.0` |
+| `--dyni-unit-opacity` | `1.0` |
 | `--dyni-pointer` | `#ff2b2b` |
 | `--dyni-warning` | `#e7c66a` |
 | `--dyni-alarm` | `#FA584A` |
@@ -74,6 +76,9 @@ Complete token list with defaults:
 | `--dyni-ais-nearest` | `#70F3AF` |
 | `--dyni-ais-tracking` | `#f8a601` |
 | `--dyni-ais-normal` | `#EBEB55` |
+| `--dyni-regatta-barWarning` | `#e7a834` |
+| `--dyni-regatta-barCritical` | `#FA584A` |
+| `--dyni-regatta-barDefault` | `#70B0F3` |
 | `--dyni-stroke-weight` | `1.0` |
 | `--dyni-pointer-depth-weight` | `1.0` |
 | `--dyni-pointer-side-weight` | `1.0` |
