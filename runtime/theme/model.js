@@ -20,17 +20,20 @@
     "presetModeOverride",
     "presetBaseOverride",
     "globalModeDefault",
-    "globalBaseDefault"
+    "globalBaseDefault",
+    "parentCascade"
   ]);
 
-  function defineToken(path, inputVar, type, defaultValue, defaultByMode, outputVar) {
+  function defineToken(path, inputVar, type, defaultValue, defaultByMode, outputVar, defaultFrom, deprecatedInputVar) {
     return {
       path: path,
       inputVar: inputVar,
       type: type,
       default: defaultValue,
       defaultByMode: defaultByMode || undefined,
-      outputVar: outputVar || undefined
+      outputVar: outputVar || undefined,
+      defaultFrom: defaultFrom || undefined,
+      deprecatedInputVar: deprecatedInputVar || undefined
     };
   }
 
@@ -49,38 +52,46 @@
     defineToken("colors.pointer", "--dyni-pointer", "color", "#ff2b2b", { night: "#cc2222" }),
     defineToken("colors.warning", "--dyni-warning", "color", "#e7c66a", { night: "#8b6914" }),
     defineToken("colors.alarm", "--dyni-alarm", "color", "#FA584A", { night: "rgba(250, 88, 74, 0.60)" }),
+    defineToken("colors.ok", "--dyni-ok", "color", "#70F3AF", { night: "rgba(112, 243, 175, 0.60)" }),
+    defineToken("colors.info", "--dyni-info", "color", "#70B0F3", { night: "rgba(112, 176, 243, 0.60)" }),
     defineToken("colors.alarmWidget.bg", "--dyni-alarm-widget-bg", "color", "#C73A32", { night: "rgba(199, 58, 50, 0.60)" }),
     defineToken("colors.alarmWidget.fg", "--dyni-alarm-widget-fg", "color", "#ffffff", { night: "#ffffff" }),
-    defineToken("colors.alarmWidget.strip", "--dyni-alarm-widget-strip", "color", "#70F3AF", { night: "rgba(112, 243, 175, 0.60)" }),
+    defineToken("colors.alarmWidget.strip", "--dyni-alarm-widget-strip", "color", undefined, undefined, undefined, "colors.ok"),
     defineToken("colors.laylineStb", "--dyni-layline-stb", "color", "#82b683", { night: "#3d6b3d" }),
     defineToken("colors.laylinePort", "--dyni-layline-port", "color", "#ff7a76", { night: "#8b3333" }),
-    defineToken("colors.ais.warning", "--dyni-ais-warning", "color", "#FA584A", { night: "rgba(250, 88, 74, 0.60)" }),
-    defineToken("colors.ais.nearest", "--dyni-ais-nearest", "color", "#70F3AF", { night: "rgba(112, 243, 175, 0.60)" }),
+    defineToken("colors.ais.warning", "--dyni-ais-warning", "color", undefined, undefined, undefined, "colors.alarm"),
+    defineToken("colors.ais.nearest", "--dyni-ais-nearest", "color", undefined, undefined, undefined, "colors.ok"),
     defineToken("colors.ais.tracking", "--dyni-ais-tracking", "color", "#f8a601", { night: "rgba(248, 166, 1, 0.60)" }),
     defineToken("colors.ais.normal", "--dyni-ais-normal", "color", "#EBEB55", { night: "rgba(235, 235, 85, 0.60)" }),
     defineToken(
       "colors.regatta.barWarning",
-      "--dyni-regatta-barWarning",
+      "--dyni-regatta-bar-warning",
       "color",
       "#e7a834",
       { night: "rgba(231, 168, 52, 0.60)" },
-      "--dyni-theme-regatta-barWarning"
+      "--dyni-theme-regatta-bar-warning",
+      undefined,
+      "--dyni-regatta-barWarning"
     ),
     defineToken(
       "colors.regatta.barCritical",
-      "--dyni-regatta-barCritical",
+      "--dyni-regatta-bar-critical",
       "color",
-      "#FA584A",
-      { night: "rgba(250, 88, 74, 0.60)" },
-      "--dyni-theme-regatta-barCritical"
+      undefined,
+      undefined,
+      "--dyni-theme-regatta-bar-critical",
+      "colors.alarm",
+      "--dyni-regatta-barCritical"
     ),
     defineToken(
       "colors.regatta.barDefault",
-      "--dyni-regatta-barDefault",
+      "--dyni-regatta-bar-default",
       "color",
-      "#70B0F3",
-      { night: "rgba(112, 176, 243, 0.60)" },
-      "--dyni-theme-regatta-barDefault"
+      undefined,
+      undefined,
+      "--dyni-theme-regatta-bar-default",
+      "colors.info",
+      "--dyni-regatta-barDefault"
     ),
 
     defineToken("strokeWeight", "--dyni-stroke-weight", "number", 1.0),
@@ -125,23 +136,20 @@
           pointer: "#cc2222",
           warning: "#8b6914",
           alarm: "rgba(250, 88, 74, 0.60)",
+          ok: "rgba(112, 243, 175, 0.60)",
+          info: "rgba(112, 176, 243, 0.60)",
           alarmWidget: {
             bg: "rgba(199, 58, 50, 0.60)",
-            fg: "#ffffff",
-            strip: "rgba(112, 243, 175, 0.60)"
+            fg: "#ffffff"
           },
           laylineStb: "#3d6b3d",
           laylinePort: "#8b3333",
           ais: {
-            warning: "rgba(250, 88, 74, 0.60)",
-            nearest: "rgba(112, 243, 175, 0.60)",
             tracking: "rgba(248, 166, 1, 0.60)",
             normal: "rgba(235, 235, 85, 0.60)"
           },
           regatta: {
-            barWarning: "rgba(231, 168, 52, 0.60)",
-            barCritical: "rgba(250, 88, 74, 0.60)",
-            barDefault: "rgba(112, 176, 243, 0.60)"
+            barWarning: "rgba(231, 168, 52, 0.60)"
           }
         }
       }
@@ -172,23 +180,20 @@
           pointer: "#ff2b2b",
           warning: "#e7c66a",
           alarm: "#FA584A",
+          ok: "#70F3AF",
+          info: "#70B0F3",
           alarmWidget: {
             bg: "#C73A32",
-            fg: "#ffffff",
-            strip: "#70F3AF"
+            fg: "#ffffff"
           },
           laylineStb: "#82b683",
           laylinePort: "#ff7a76",
           ais: {
-            warning: "#FA584A",
-            nearest: "#70F3AF",
             tracking: "#f8a601",
             normal: "#EBEB55"
           },
           regatta: {
-            barWarning: "#e7a834",
-            barCritical: "#FA584A",
-            barDefault: "#70B0F3"
+            barWarning: "#e7a834"
           }
         }
       },
@@ -202,23 +207,20 @@
           pointer: "#cc2222",
           warning: "#8b6914",
           alarm: "rgba(250, 88, 74, 0.60)",
+          ok: "rgba(112, 243, 175, 0.60)",
+          info: "rgba(112, 176, 243, 0.60)",
           alarmWidget: {
             bg: "rgba(199, 58, 50, 0.60)",
-            fg: "#ffffff",
-            strip: "rgba(112, 243, 175, 0.60)"
+            fg: "#ffffff"
           },
           laylineStb: "#3d6b3d",
           laylinePort: "#8b3333",
           ais: {
-            warning: "rgba(250, 88, 74, 0.60)",
-            nearest: "rgba(112, 243, 175, 0.60)",
             tracking: "rgba(248, 166, 1, 0.60)",
             normal: "rgba(235, 235, 85, 0.60)"
           },
           regatta: {
-            barWarning: "rgba(231, 168, 52, 0.60)",
-            barCritical: "rgba(250, 88, 74, 0.60)",
-            barDefault: "rgba(112, 176, 243, 0.60)"
+            barWarning: "rgba(231, 168, 52, 0.60)"
           }
         }
       }
@@ -232,21 +234,18 @@
           pointer: "#ff0000",
           warning: "#ffcc00",
           alarm: "#FF3300",
+          ok: "#00AA66",
+          info: "#00AAFF",
           alarmWidget: {
             bg: "#CC2A1F",
-            fg: "#ffffff",
-            strip: "#00AA66"
+            fg: "#ffffff"
           },
           ais: {
-            warning: "#FF3300",
-            nearest: "#00AA66",
             tracking: "#CC6600",
             normal: "#8A7300"
           },
           regatta: {
-            barWarning: "#ffcc00",
-            barCritical: "#FF3300",
-            barDefault: "#00AAFF"
+            barWarning: "#ffcc00"
           }
         }
       },
@@ -255,21 +254,18 @@
           pointer: "#cc2222",
           warning: "#8b6914",
           alarm: "rgba(250, 88, 74, 0.60)",
+          ok: "rgba(112, 243, 175, 0.60)",
+          info: "rgba(112, 176, 243, 0.60)",
           alarmWidget: {
             bg: "rgba(199, 58, 50, 0.60)",
-            fg: "#ffffff",
-            strip: "rgba(112, 243, 175, 0.60)"
+            fg: "#ffffff"
           },
           ais: {
-            warning: "rgba(250, 88, 74, 0.60)",
-            nearest: "rgba(112, 243, 175, 0.60)",
             tracking: "rgba(248, 166, 1, 0.60)",
             normal: "rgba(235, 235, 85, 0.60)"
           },
           regatta: {
-            barWarning: "rgba(231, 168, 52, 0.60)",
-            barCritical: "rgba(250, 88, 74, 0.60)",
-            barDefault: "rgba(112, 176, 243, 0.60)"
+            barWarning: "rgba(231, 168, 52, 0.60)"
           }
         }
       }
@@ -291,6 +287,9 @@
   function buildBaseDefaults() {
     const out = {};
     TOKEN_DEFS.forEach(function (def) {
+      if (typeof def.default === "undefined") {
+        return;
+      }
       setByPath(out, def.path.split("."), def.default);
     });
     return out;
@@ -299,7 +298,7 @@
   function buildModeDefaults(mode) {
     const out = {};
     TOKEN_DEFS.forEach(function (def) {
-      if (!def.defaultByMode || !Object.prototype.hasOwnProperty.call(def.defaultByMode, mode)) {
+      if (!def.defaultByMode || typeof def.defaultByMode[mode] === "undefined") {
         return;
       }
       setByPath(out, def.path.split("."), def.defaultByMode[mode]);
