@@ -65,37 +65,45 @@
     return typeof raw === "string" ? raw.trim() : "";
   }
 
+  function addInputVar(inputVars, seenInputVars, inputVar) {
+    if (typeof inputVar !== "string" || inputVar.length === 0 || seenInputVars[inputVar]) {
+      return;
+    }
+    seenInputVars[inputVar] = true;
+    inputVars.push(inputVar);
+  }
+
   function createTokenMetadata(tokenDefs) {
     const entries = [];
     const inputVars = [];
     const seenInputVars = Object.create(null);
+    const pathSegmentsByPath = Object.create(null);
 
     for (let i = 0; i < tokenDefs.length; i += 1) {
       const tokenDef = tokenDefs[i];
       const pathSegments = Object.freeze(tokenDef.path.split("."));
+      pathSegmentsByPath[tokenDef.path] = pathSegments;
+      const parentPathSegments = typeof tokenDef.defaultFrom === "string" && tokenDef.defaultFrom.length > 0
+        ? (pathSegmentsByPath[tokenDef.defaultFrom] || Object.freeze(tokenDef.defaultFrom.split(".")))
+        : null;
       entries.push(Object.freeze({
         tokenDef: tokenDef,
-        pathSegments: pathSegments
+        pathSegments: pathSegments,
+        parentPathSegments: parentPathSegments
       }));
 
-      const inputVar = tokenDef && tokenDef.inputVar;
-      if (typeof inputVar === "string" && inputVar.length > 0 && !seenInputVars[inputVar]) {
-        seenInputVars[inputVar] = true;
-        inputVars.push(inputVar);
-      }
+      addInputVar(inputVars, seenInputVars, tokenDef && tokenDef.inputVar);
+      addInputVar(inputVars, seenInputVars, tokenDef && tokenDef.deprecatedInputVar);
     }
 
     return Object.freeze({
       entries: Object.freeze(entries),
-      inputVars: Object.freeze(inputVars)
+      inputVars: Object.freeze(inputVars),
+      pathSegmentsByPath: Object.freeze(pathSegmentsByPath)
     });
   }
 
-  function readTokenInputOverride(style, tokenDef, inputReader) {
-    const raw = inputReader(style, tokenDef.inputVar);
-    if (!raw) {
-      return { hasValue: false, value: tokenDef.default };
-    }
+  function parseOverride(raw, tokenDef) {
     if (tokenDef.type === "number") {
       const parsed = parseFloat(raw);
       return Number.isFinite(parsed)
@@ -103,6 +111,31 @@
         : { hasValue: false, value: tokenDef.default };
     }
     return { hasValue: true, value: raw };
+  }
+
+  function logDeprecationWarning(oldVar, newVar, warnedDeprecations) {
+    if (warnedDeprecations.has(oldVar)) {
+      return;
+    }
+    warnedDeprecations.add(oldVar);
+    if (root.console && typeof root.console.warn === "function") {
+      root.console.warn("DyniPlugin: CSS variable " + oldVar + " is deprecated. Use " + newVar + " instead.");
+    }
+  }
+
+  function readTokenInputOverride(style, tokenDef, inputReader, warnedDeprecations) {
+    const raw = inputReader(style, tokenDef.inputVar);
+    if (raw) {
+      return parseOverride(raw, tokenDef);
+    }
+    if (tokenDef.deprecatedInputVar) {
+      const deprecatedRaw = inputReader(style, tokenDef.deprecatedInputVar);
+      if (deprecatedRaw) {
+        logDeprecationWarning(tokenDef.deprecatedInputVar, tokenDef.inputVar, warnedDeprecations);
+        return parseOverride(deprecatedRaw, tokenDef);
+      }
+    }
+    return { hasValue: false, value: tokenDef.default };
   }
 
   function isCommittedPluginRoot(rootEl) {
@@ -172,6 +205,7 @@
   runtime.createThemeResolver = function createThemeResolver(themeModel, options) {
     const opts = toObject(options);
     const model = themeModel;
+    const warnedDeprecations = new Set();
     let themeMetadata = null;
     let rootResolutionCache = new WeakMap();
 
@@ -204,7 +238,8 @@
       themeMetadata = Object.freeze({
         tokenEntries: tokenMetadata.entries,
         outputTokenEntries: outputTokenMetadata.entries,
-        snapshotInputVars: tokenMetadata.inputVars
+        snapshotInputVars: tokenMetadata.inputVars,
+        tokenPathSegmentsByPath: tokenMetadata.pathSegmentsByPath
       });
       return themeMetadata;
     }
@@ -231,12 +266,13 @@
         style: style,
         mode: snapshot.mode,
         presetMode: model.getPresetMode(snapshot.presetName, snapshot.mode),
-        presetBase: model.getPresetBase(snapshot.presetName)
+        presetBase: model.getPresetBase(snapshot.presetName),
+        warnedDeprecations: warnedDeprecations
       };
     }
 
-    function resolveTokenValue(tokenDef, pathSegments, context) {
-      const rootOverride = readTokenInputOverride(context.style, tokenDef, context.inputReader);
+    function resolveTokenValue(tokenDef, pathSegments, parentPathSegments, context) {
+      const rootOverride = readTokenInputOverride(context.style, tokenDef, context.inputReader, context.warnedDeprecations);
       if (rootOverride.hasValue) {
         return rootOverride.value;
       }
@@ -258,7 +294,21 @@
         return modeDefault;
       }
 
-      return tokenDef.default;
+      if (typeof tokenDef.default !== "undefined") {
+        return tokenDef.default;
+      }
+
+      if (tokenDef.defaultFrom) {
+        const parentDef = model.getTokenDefinition(tokenDef.defaultFrom);
+        if (parentDef) {
+          const resolvedParentPathSegments = parentPathSegments ||
+            context.tokenPathSegmentsByPath[parentDef.path] ||
+            Object.freeze(parentDef.path.split("."));
+          return resolveTokenValue(parentDef, resolvedParentPathSegments, null, context);
+        }
+      }
+
+      return undefined;
     }
 
     function resolveRootCacheBucket(rootEl) {
@@ -274,7 +324,7 @@
       const out = {};
       for (let i = 0; i < entries.length; i += 1) {
         const entry = entries[i];
-        setByPath(out, entry.pathSegments, resolveTokenValue(entry.tokenDef, entry.pathSegments, context));
+        setByPath(out, entry.pathSegments, resolveTokenValue(entry.tokenDef, entry.pathSegments, entry.parentPathSegments, context));
       }
       return applyDerivedSurfaceBorder(out);
     }
@@ -291,6 +341,7 @@
       }
 
       const context = createResolutionContext(rootEl, snapshot);
+      context.tokenPathSegmentsByPath = metadata.tokenPathSegmentsByPath;
       const entries = kind === "output" ? metadata.outputTokenEntries : metadata.tokenEntries;
       const resolved = deepFreeze(resolveTokenEntries(entries, context));
       cache.set(snapshot.signature, resolved);

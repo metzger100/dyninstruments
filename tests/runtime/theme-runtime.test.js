@@ -519,9 +519,9 @@ describe("runtime/theme-runtime.js", function () {
 
     context.DyniPlugin.runtime.theme.applyToRoot(rootEl);
 
-    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-barWarning")).toBe("#e7a834");
-    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-barCritical")).toBe("#FA584A");
-    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-barDefault")).toBe("#70B0F3");
+    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-bar-warning")).toBe("#e7a834");
+    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-bar-critical")).toBe("#FA584A");
+    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-bar-default")).toBe("#70B0F3");
   });
 
   it("opacity tokens have no preset overrides", function () {
