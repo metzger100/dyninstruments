@@ -112,4 +112,26 @@
       ]
   };
 
+  w.XteDisplayLinearWidget = {
+      js: BASE + "widgets/text/XteDisplayLinearWidget/XteDisplayLinearWidget.js",
+      css: undefined,
+      globalKey: "DyniXteDisplayLinearWidget",
+      deps: [
+        "GaugeToolkit",
+        "CanvasLayerCache",
+        "LinearCanvasPrimitives",
+        "LinearGaugeMath",
+        "GeometryScale",
+        "XteLinearLayout",
+        "TextTileLayout",
+        "SpringEasing",
+        "PlaceholderNormalize",
+        "StableDigits",
+        "UnitAwareFormatter",
+        "StateScreenLabels",
+        "StateScreenPrecedence",
+        "StateScreenCanvasOverlay"
+      ]
+  };
+
 }(this));

@@ -95,9 +95,7 @@ function collectKindsByCluster(widgetDefs) {
 }
 
 const PENDING_ROUTE_KINDS_BY_CLUSTER = Object.freeze({});
-const PENDING_ROUTE_RENDERER_IDS = Object.freeze({
-  "nav/xteDisplayLinear": "XteDisplayLinearWidget"
-});
+const PENDING_ROUTE_RENDERER_IDS = Object.freeze({});
 
 describe("config/cluster-routes metadata", function () {
   it("defines the canonical 61-route catalog with schema, index, and validation invariants", function () {

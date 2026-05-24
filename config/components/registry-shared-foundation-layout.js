@@ -193,6 +193,13 @@
       deps: ["ResponsiveScaleProfile", "LayoutRectMath", "LayoutSizingHelpers", "ValueMath"]
   };
 
+  sf.XteLinearLayout = {
+      js: BASE + "shared/widget-kits/xte/XteLinearLayout.js",
+      css: undefined,
+      globalKey: "DyniXteLinearLayout",
+      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "LayoutSizingHelpers", "ValueMath"]
+  };
+
   sf.NavModeRatio = {
       js: BASE + "shared/widget-kits/nav/NavModeRatio.js",
       css: undefined,
