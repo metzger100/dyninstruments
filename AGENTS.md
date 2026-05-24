@@ -122,6 +122,8 @@ Task: Add new BarometerGauge
 - [ ] Implementation complete.
 - [ ] Updated relevant documentation.
 - [ ] Updated user-facing `README.md` when changes touch theming, clusters/kinds, layouts, installation, configuration, requirements, or development workflow.
+- [ ] Updated `tests/css/theme-token-extremes.user.css` when theme tokens/input vars/default theming behavior changes.
+- [ ] Updated `tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js` when adding or changing a kind with new user-visible visuals/layout behavior.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.
 - [ ] Ran `npm run check:all` — no failures; required final gate (`check:core` plus coverage threshold enforcement plus `perf:check`).
 - [ ] For cleanup sessions, ran `npm run gc:status` first and `npm run gc:update-baseline` last.
@@ -185,4 +187,11 @@ Update `README.md` in the same task whenever changes affect any of:
 7. Development setup or contributor workflow visible to users/contributors
 
 For execution plans, include explicit README deliverables and exit conditions for these categories.
+
+## 10. Fail-Closed Fixture/Test Sync Rules
+
+When changing user-facing theming or user-visible kind visuals, update the related fixtures/tests in the same task:
+
+1. Theme token/input var/default changes: update `tests/css/theme-token-extremes.user.css` (and related `tests/css` fixtures when relevant) so manual/theming fixture coverage stays current.
+2. New or visually changed kind (for example a new renderer variant such as `xteDisplayLinear`): update `tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js` so showcase coverage includes the new visual behavior.
 <!-- END SHARED_INSTRUCTIONS -->

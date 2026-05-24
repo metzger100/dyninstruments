@@ -190,6 +190,7 @@ For a new `kind` in an existing cluster:
 - Ensure radial kinds set correct route metadata and props
 - Ensure unknown kinds return `{}`
 - Resize widget and verify layout behavior in AvNav
+- If the new/changed kind has user-visible visual/layout differences, update the showcase fixture `tests/layouts/gpspage-all-widgets.json` and assertions in `tests/layouts/gpspage-all-widgets.test.js`
 
 ## Checklist
 
@@ -200,6 +201,7 @@ For a new `kind` in an existing cluster:
 - [ ] Module entry added in `config/components/registry-cluster.js`
 - [ ] Route metadata added/updated in `config/cluster-routes/<cluster>.js`
 - [ ] Renderer component registered if the route needs a new renderer
+- [ ] For new/visually changed kinds, `tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js` updated
 - [ ] Every formatter-bearing kind has documented tuple (`kind -> key -> raw unit/type -> formatter -> formatterParameters`) in core contract docs
 
 ## Related

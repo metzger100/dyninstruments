@@ -13,18 +13,21 @@ User-facing changes must also keep `README.md` current in the same task.
 2. Update the mapped docs in `documentation/`
 3. Update root docs (`README.md`, `AGENTS.md`, `CLAUDE.md`) when architecture guidance changes
 4. Fail-closed README sync: if a task changes theming, clusters/kinds, layouts, installation, configuration, requirements, or development workflow, update `README.md` in the same task.
-5. Every new documentation file must be linked from at least one other doc that is itself reachable from AGENTS.md. The easiest way: add an entry to TABLEOFCONTENTS.md.
-6. Run default validation gate:
+5. Fail-closed fixture sync:
+   - If theme tokens/input vars/default theming behavior changes, update `tests/css/theme-token-extremes.user.css` (and related `tests/css` fixtures when relevant).
+   - If a new kind or changed kind introduces user-visible visual/layout behavior, update `tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js`.
+6. Every new documentation file must be linked from at least one other doc that is itself reachable from AGENTS.md. The easiest way: add an entry to TABLEOFCONTENTS.md.
+7. Run default validation gate:
 
 ```bash
 npm run check:all
 ```
 
-7. During iteration, optionally run targeted checks (`npm run check:core`, `npm test`) for faster feedback.
+8. During iteration, optionally run targeted checks (`npm run check:core`, `npm test`) for faster feedback.
    For perf-gate changes, include `npm run perf:run` and `npm run perf:check`.
 
-8. Fix all failures and review all warnings before finishing
-9. For warn-only smell rollouts, record the warning backlog and promotion criteria in `documentation/TECH-DEBT.md`
+9. Fix all failures and review all warnings before finishing
+10. For warn-only smell rollouts, record the warning backlog and promotion criteria in `documentation/TECH-DEBT.md`
 
 ## Quality and Regression Commands
 
@@ -94,11 +97,11 @@ For cleanup sessions tracked by garbage-collection baseline markers:
 | Change Type | Minimum Docs to Update |
 |---|---|
 | New/changed module in `config/components/registry-*.js` or `config/components.js` assembly | `documentation/architecture/component-system.md`, affected module doc in `documentation/widgets/` |
-| New cluster or new cluster kind | `documentation/guides/add-new-cluster.md`, `documentation/architecture/cluster-widget-system.md`, relevant module docs, `README.md` (`What you get` and configuration examples) |
+| New cluster or new cluster kind | `documentation/guides/add-new-cluster.md`, `documentation/architecture/cluster-widget-system.md`, relevant module docs, `README.md` (`What you get` and configuration examples); if visuals/layout changed, also update `tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js` |
 | New gauge renderer | `documentation/guides/add-new-gauge.md`, `documentation/widgets/semicircle-gauges.md` or dedicated module doc |
 | Changes in registration/lifecycle flow (`runtime/init.js`, `runtime/widget-registrar.js`) | `documentation/avnav-api/plugin-lifecycle.md`, `documentation/architecture/component-system.md` |
 | Changes in helper services or `componentContext.format.applyFormatter` contract | `documentation/shared/helpers.md` |
-| CSS/theming or theme-token changes (`plugin.css`, `runtime/theme/*`, theme token docs) | `documentation/shared/css-theming.md`, `documentation/shared/theme-tokens.md`, `README.md` (complete user token list + examples) |
+| CSS/theming or theme-token changes (`plugin.css`, `runtime/theme/*`, theme token docs) | `documentation/shared/css-theming.md`, `documentation/shared/theme-tokens.md`, `README.md` (complete user token list + examples), and `tests/css/theme-token-extremes.user.css` (plus related `tests/css` fixtures when relevant) |
 | Layout bundle changes (`layouts/*.json`, `plugin.json` layout registration) | `documentation/guides/layout-file-conventions.md`, `README.md` (bundled layouts and usage notes) |
 | Installation/packaging/release workflow changes (`plugin.json`, release scripts, install steps) | `documentation/guides/release-workflow.md`, `README.md` (installation/update instructions) |
 | User configuration surface changes (editable params, defaults, unit selectors, key selectors, cluster options) | relevant `documentation/avnav-api/*` and widget docs, `README.md` (Configuration section) |
