@@ -688,6 +688,17 @@
       "left_small": [
         {
           "name": "ActiveRoute"
+        },
+        {
+          "kind": "xteDisplayLinear",
+          "name": "dyni_Nav_Instruments",
+          "formatUnit_xteDisplayLinearXte": "nm",
+          "unit_xteDisplayLinearXte_nm": "nm",
+          "unit_xteDisplayLinearCog": "°",
+          "formatUnit_xteDisplayLinearDst": "nm",
+          "unit_xteDisplayLinearDst_nm": "nm",
+          "unit_xteDisplayLinearBrg": "°",
+          "xteLinearLeadingZero": true
         }
       ],
       "top_small": [

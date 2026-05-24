@@ -33,6 +33,17 @@ function makeToolkit(overrides, bindingOverrides) {
     caption_xteDisplayBrg: "BRG CAP",
     unit_xteDisplayBrg: "degM",
     xteDisplayScale_nm: "0.8",
+    caption_xteDisplayLinearXte: "XTE LIN CAP",
+    formatUnit_xteDisplayLinearXte: "nm",
+    unit_xteDisplayLinearXte_nm: "nmXL",
+    caption_xteDisplayLinearCog: "COG LIN CAP",
+    unit_xteDisplayLinearCog: "degLT",
+    caption_xteDisplayLinearDst: "DST LIN CAP",
+    formatUnit_xteDisplayLinearDst: "nm",
+    unit_xteDisplayLinearDst_nm: "nmDL",
+    caption_xteDisplayLinearBrg: "BRG LIN CAP",
+    unit_xteDisplayLinearBrg: "degLM",
+    xteLinearScale_nm: "0.9",
     caption_editRoutePts: "PTS CAP",
     caption_editRouteDst: "DST CAP",
     formatUnit_editRouteDst: "nm",
@@ -473,6 +484,83 @@ describe("NavMapper", function () {
     expect(out.display.cog).toBeUndefined();
     expect(out.display.dtw).toBeUndefined();
     expect(out.display.btw).toBeUndefined();
+  });
+
+  it("maps xteDisplayLinear to XteDisplayLinearWidget payload with token-aware scale and disconnect propagation", function () {
+    const mapper = createMapper();
+    const customToolkit = makeToolkit({
+      caption_xteDisplayLinearXte: "XTE LIN",
+      formatUnit_xteDisplayLinearXte: "m",
+      unit_xteDisplayLinearXte_m: "mX",
+      caption_xteDisplayLinearCog: "COG LIN",
+      unit_xteDisplayLinearCog: "degT",
+      caption_xteDisplayLinearDst: "DST LIN",
+      formatUnit_xteDisplayLinearDst: "km",
+      unit_xteDisplayLinearDst_km: "kmD",
+      caption_xteDisplayLinearBrg: "BRG LIN",
+      unit_xteDisplayLinearBrg: "degM",
+      xteLinearScale_m: "250"
+    });
+    const out = mapper.translate({
+      kind: "xteDisplayLinear",
+      xte: "0.22",
+      cog: "96",
+      dtw: "2.4",
+      btw: "100",
+      wpName: "West Cardinal",
+      wpServer: false,
+      disconnect: true,
+      xteLinearLeadingZero: false,
+      xteLinearShowWpName: true,
+      xteLinearHideTextualMetrics: true,
+      xteLinearEasing: false,
+      xteLinearRatioThresholdNormal: "0.9",
+      xteLinearRatioThresholdFlat: "2.6",
+      xteLinearTickMajor: "2",
+      xteLinearTickMinor: "0.5",
+      xteLinearShowEndLabels: true,
+      stableDigits: true
+    }, routeContext("xteDisplayLinear", customToolkit));
+
+    expect(out).toEqual({
+      display: {
+        xte: 0.22,
+        cog: 96,
+        dtw: 2.4,
+        btw: 100,
+        wpName: "West Cardinal",
+        disconnect: true
+      },
+      captions: {
+        xte: "XTE LIN",
+        track: "COG LIN",
+        dtw: "DST LIN",
+        brg: "BRG LIN"
+      },
+      units: {
+        xte: "mX",
+        track: "degT",
+        dtw: "kmD",
+        brg: "degM"
+      },
+      formatUnits: {
+        xte: "m",
+        dtw: "km"
+      },
+      xteScale: 250,
+      layout: {
+        leadingZero: false,
+        showWpName: true,
+        hideTextualMetrics: true,
+        easing: false,
+        ratioThresholdNormal: 0.9,
+        ratioThresholdFlat: 2.6,
+        tickMajor: 2,
+        tickMinor: 0.5,
+        showEndLabels: true
+      },
+      stableDigits: true
+    });
   });
 
   it("maps routePoints to grouped renderer payload", function () {

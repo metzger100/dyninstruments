@@ -403,6 +403,15 @@ describe("tests/layouts/gpspage-all-widgets.json", function () {
 
     expect(layout.widgets.navpage.left[0].name).toBe("dyni_Map_Instruments");
     expect(layout.widgets.navpage.bottomRight[3].kind).toBe("positionBoat");
+    expect(findWidget(layout.widgets.navpage, "xteDisplayLinear")).toMatchObject({
+      kind: "xteDisplayLinear",
+      name: "dyni_Nav_Instruments",
+      formatUnit_xteDisplayLinearXte: "nm",
+      unit_xteDisplayLinearXte_nm: "nm",
+      formatUnit_xteDisplayLinearDst: "nm",
+      unit_xteDisplayLinearDst_nm: "nm",
+      xteLinearLeadingZero: true
+    });
 
     expect(layout.widgets.editroutepage.left[0]).toMatchObject({
       name: "dyni_Nav_Instruments",
