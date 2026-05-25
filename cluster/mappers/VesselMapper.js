@@ -158,15 +158,10 @@
       if (req === "clockRadial") {
         return {
           value: p.clock,
-          caption: cap("clockRadial"),
-          unit: unit("clockRadial"),
-          formatter: p.hideSeconds === true ? "formatClock" : "formatTime",
           formatterParameters: [],
           rendererProps: {
             clockRadialRatioThresholdNormal: num(p.clockRadialRatioThresholdNormal),
             clockRadialRatioThresholdFlat: num(p.clockRadialRatioThresholdFlat),
-            captionUnitScale: num(p.captionUnitScale),
-            clockRadialHideTextualMetrics: !!p.clockRadialHideTextualMetrics,
             hideSeconds: p.hideSeconds === true
           }
         };

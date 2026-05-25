@@ -61,7 +61,6 @@ describe("config/clusters/vessel.js", function () {
       { kind: "voltageRadial" },
       { kind: "alarm" },
       { kind: "clock" },
-      { kind: "clockRadial" },
       { kind: "dateTime" },
       { kind: "timeStatus" },
       { kind: "pitch" },

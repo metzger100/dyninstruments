@@ -22,7 +22,7 @@
       js: BASE + "widgets/radial/ClockRadialWidget/ClockRadialWidget.js",
       css: undefined,
       globalKey: "DyniClockRadialWidget",
-      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "GeometryScale", "PlaceholderNormalize"]
+      deps: ["FullCircleRadialEngine", "GeometryScale"]
   };
 
   w.CompassLinearWidget = {

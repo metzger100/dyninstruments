@@ -191,7 +191,6 @@
             { kind: "voltageRadial" },
             { kind: "alarm" },
             { kind: "clock" },
-            { kind: "clockRadial" },
             { kind: "dateTime" },
             { kind: "timeStatus" },
             { kind: "pitch" },
@@ -246,12 +245,6 @@
           name: "ClockRadial: Flat Threshold",
           condition: { kind: "clockRadial" }
         },
-        clockRadialHideTextualMetrics: {
-          type: "BOOLEAN",
-          default: false,
-          name: "Hide textual metrics",
-          condition: { kind: "clockRadial" }
-        },
         hideSeconds: {
           type: "BOOLEAN",
           default: false,
@@ -283,6 +276,8 @@
         className: true,
 
         ...makePerKindTextParams(VESSEL_KIND),
+        caption_clockRadial: false,
+        unit_clockRadial: false,
         caption_regattaTimer: false,
         unit_regattaTimer: false,
 

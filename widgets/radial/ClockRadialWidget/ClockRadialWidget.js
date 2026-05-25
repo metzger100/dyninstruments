@@ -1,7 +1,7 @@
 /**
  * Module: ClockRadialWidget - 12-hour analog clock with hour/minute/second hands
  * Documentation: documentation/widgets/clock-gauge.md
- * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout, GeometryScale, PlaceholderNormalize
+ * Depends: FullCircleRadialEngine, GeometryScale
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -9,15 +9,13 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniClockRadialWidget = factory(); }
 }(this, function () {
   "use strict";
-  const HOUR_HAND_WIDTH_FACTOR = 0.04;
-  const MINUTE_HAND_WIDTH_FACTOR = 0.025;
-  const SECOND_HAND_WIDTH_FACTOR = 0.015;
+  const HOUR_HAND_WIDTH_FACTOR = 0.05;
+  const MINUTE_HAND_WIDTH_FACTOR = 0.035;
+  const SECOND_HAND_WIDTH_FACTOR = 0.02;
 
   function create(def, componentContext) {
     const engine = componentContext.components.require("FullCircleRadialEngine");
-    const textLayout = componentContext.components.require("FullCircleRadialTextLayout");
     const gs = componentContext.components.require("GeometryScale");
-    const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
     function parseTime(rawValue) {
       if (rawValue == null || rawValue === "") {
@@ -54,26 +52,9 @@
       };
     }
 
-    function clockDisplay(state, props) {
-      var p = props || {};
-      var rawValue = p.value;
+    function resolveHands(rawValue) {
       var time = parseTime(rawValue);
-      var formatted = String(componentContext.format.applyFormatter(rawValue, {
-        formatter: p.formatter,
-        formatterParameters: p.formatterParameters,
-        default: p.default
-      }));
-      var displayText = placeholderNormalize.normalize(formatted);
-      var secScale = state.value.clamp(p.captionUnitScale, 0.3, 3.0);
-      var hands = time ? computeHandAngles(time) : null;
-      return {
-        caption: p.caption,
-        value: displayText,
-        unit: p.unit,
-        secScale: secScale,
-        time: time,
-        hands: hands
-      };
+      return time ? computeHandAngles(time) : null;
     }
 
     function drawHand(state, angleDeg, length, width, style) {
@@ -125,19 +106,19 @@
     }
 
     function drawFrame(state, props, api) {
-      var display = clockDisplay(state, props);
+      var hands = resolveHands(props.value);
       api.drawCachedLayer("face");
-      if (display.hands) {
+      if (hands) {
         var rOuter = state.geom.rOuter;
-        drawHand(state, display.hands.hourAngle, rOuter * 0.45,
-          gs.scaleStroke(rOuter, HOUR_HAND_WIDTH_FACTOR, state.valueWeight, 2),
+        drawHand(state, hands.hourAngle, rOuter * 0.45,
+          gs.scale(rOuter, HOUR_HAND_WIDTH_FACTOR, 2),
           state.color);
-        drawHand(state, display.hands.minuteAngle, rOuter * 0.65,
-          gs.scaleStroke(rOuter, MINUTE_HAND_WIDTH_FACTOR, state.valueWeight, 1),
+        drawHand(state, hands.minuteAngle, rOuter * 0.65,
+          gs.scale(rOuter, MINUTE_HAND_WIDTH_FACTOR, 1),
           state.color);
         if (!props.hideSeconds) {
-          drawHand(state, display.hands.secondAngle, rOuter * 0.80,
-            gs.scaleStroke(rOuter, SECOND_HAND_WIDTH_FACTOR, state.valueWeight, 1),
+          drawHand(state, hands.secondAngle, rOuter * 0.80,
+            gs.scale(rOuter, SECOND_HAND_WIDTH_FACTOR, 1),
             state.theme.colors.pointer);
         }
       }
@@ -155,22 +136,10 @@
         normal: "clockRadialRatioThresholdNormal",
         flat: "clockRadialRatioThresholdFlat"
       },
-      hideTextualMetricsProp: "clockRadialHideTextualMetrics",
       cacheLayers: ["face"],
       buildStaticKey: buildStaticKey,
       rebuildLayer: rebuildLayer,
-      drawFrame: drawFrame,
-      drawMode: {
-        flat: function (state, props) {
-          textLayout.drawSingleModeText(state, "flat", clockDisplay(state, props), { side: "left", align: "left" });
-        },
-        normal: function (state, props) {
-          textLayout.drawSingleModeText(state, "normal", clockDisplay(state, props));
-        },
-        high: function (state, props) {
-          textLayout.drawSingleModeText(state, "high", clockDisplay(state, props), { slot: "top" });
-        }
-      }
+      drawFrame: drawFrame
     });
 
     function translateFunction() {
