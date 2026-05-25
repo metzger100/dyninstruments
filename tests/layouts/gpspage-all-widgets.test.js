@@ -403,6 +403,10 @@ describe("tests/layouts/gpspage-all-widgets.json", function () {
 
     expect(layout.widgets.navpage.left[0].name).toBe("dyni_Map_Instruments");
     expect(layout.widgets.navpage.bottomRight[3].kind).toBe("positionBoat");
+    expect(findWidget(layout.widgets.navpage, "clockRadial")).toMatchObject({
+      kind: "clockRadial",
+      name: "dyni_Vessel_Instruments"
+    });
     expect(findWidget(layout.widgets.navpage, "xteDisplayLinear")).toMatchObject({
       kind: "xteDisplayLinear",
       name: "dyni_Nav_Instruments",

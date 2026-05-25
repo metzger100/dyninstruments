@@ -36,6 +36,7 @@ describe("config/clusters/vessel.js", function () {
       "regattaTimer",
       "alarm",
       "clock",
+      "clockRadial",
       "dateTime",
       "timeStatus",
       "pitch",

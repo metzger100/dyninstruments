@@ -683,6 +683,10 @@
         {
           "kind": "clock",
           "name": "dyni_Vessel_Instruments"
+        },
+        {
+          "kind": "clockRadial",
+          "name": "dyni_Vessel_Instruments"
         }
       ],
       "left_small": [
