@@ -9,7 +9,6 @@ It tracks development priorities and AvNav widget coverage status.
 
 - OBP60-style instruments:
   - graphical Roll/Pitch
-  - analog Clock
   - graphical Rudder
   - graphical Keel
 - C-net 2000 style multi instruments:
