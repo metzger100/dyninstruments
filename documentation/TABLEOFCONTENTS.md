@@ -72,6 +72,7 @@
 - **Regatta timer HTML renderer (countdown, sync, audio signals)** → [widgets/regatta-timer.md](widgets/regatta-timer.md)
 - **Wind dial renderer (draw flow, props)** → [widgets/wind-dial.md](widgets/wind-dial.md)
 - **Compass radial renderer (rotation model, props)** → [widgets/compass-gauge.md](widgets/compass-gauge.md)
+- **Analog clock radial renderer (draw flow, props, layout modes)** → [widgets/clock-gauge.md](widgets/clock-gauge.md)
 - **XTE display renderer (scale + layout modes)** → [widgets/xte-display.md](widgets/xte-display.md)
 - **XTE linear gauge renderer (bar gauge, text metrics)** → [widgets/xte-display-linear.md](widgets/xte-display-linear.md)
 - **Semicircle gauges (shared flow + gauge-specific defaults/sectors)** → [widgets/semicircle-gauges.md](widgets/semicircle-gauges.md)

@@ -18,6 +18,13 @@
   const groups = shared.componentRegistryGroups = shared.componentRegistryGroups || {};
   var w = groups.widgets = groups.widgets || {};
 
+  w.ClockRadialWidget = {
+      js: BASE + "widgets/radial/ClockRadialWidget/ClockRadialWidget.js",
+      css: undefined,
+      globalKey: "DyniClockRadialWidget",
+      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "GeometryScale", "PlaceholderNormalize"]
+  };
+
   w.CompassLinearWidget = {
       js: BASE + "widgets/linear/CompassLinearWidget/CompassLinearWidget.js",
       css: undefined,
