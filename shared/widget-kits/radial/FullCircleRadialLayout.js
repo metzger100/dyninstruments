@@ -34,7 +34,8 @@
     const radial = theme && theme.radial ? theme.radial : {};
     const ring = radial.ring || {};
     const labels = radial.labels || {};
-    const ticks = radial.ticks || {};
+    const fullCircle = radial.fullCircle || {};
+    const ticks = (fullCircle.ticks || radial.ticks || {});
     const pointer = radial.pointer || {};
     const radius = Math.max(1, Math.floor(Math.min(width, height) / 2));
     const cx = contentRect.x + Math.floor(width / 2);

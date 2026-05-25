@@ -48,6 +48,8 @@
   --dyni-radial-tick-major-width-factor: 0.045;
   --dyni-radial-tick-minor-len-factor: 0.032;
   --dyni-radial-tick-minor-width-factor: 0.009;
+  --dyni-radial-fullcircle-tick-major-len-factor: 0.24;
+  --dyni-radial-fullcircle-tick-minor-len-factor: 0.048;
   --dyni-radial-pointer-side-factor: 0.18;
   --dyni-radial-pointer-depth-factor: 0.12;
   --dyni-radial-arc-linewidth-factor: 0.03;

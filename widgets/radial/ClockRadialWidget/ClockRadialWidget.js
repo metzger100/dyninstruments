@@ -9,9 +9,9 @@
   else { (root.DyniComponents = root.DyniComponents || {}).DyniClockRadialWidget = factory(); }
 }(this, function () {
   "use strict";
-  const HOUR_HAND_WIDTH_FACTOR = 0.05;
-  const MINUTE_HAND_WIDTH_FACTOR = 0.035;
-  const SECOND_HAND_WIDTH_FACTOR = 0.02;
+  const HOUR_HAND_WIDTH_FACTOR = 0.075;
+  const MINUTE_HAND_WIDTH_FACTOR = 0.053;
+  const SECOND_HAND_WIDTH_FACTOR = 0.03;
 
   function create(def, componentContext) {
     const engine = componentContext.components.require("FullCircleRadialEngine");

@@ -111,6 +111,8 @@
     defineToken("radial.fullCircle.normal.innerMarginFactor", "--dyni-radial-fullcircle-normal-inner-margin", "number", 0.03),
     defineToken("radial.fullCircle.normal.minHeightFactor", "--dyni-radial-fullcircle-normal-min-height", "number", 0.45),
     defineToken("radial.fullCircle.normal.dualGapFactor", "--dyni-radial-fullcircle-normal-dual-gap", "number", 0.05),
+    defineToken("radial.fullCircle.ticks.majorLenFactor", "--dyni-radial-fullcircle-tick-major-len-factor", "number", 0.131),
+    defineToken("radial.fullCircle.ticks.minorLenFactor", "--dyni-radial-fullcircle-tick-minor-len-factor", "number", 0.077),
 
     defineToken("linear.track.widthFactor", "--dyni-linear-track-width", "number", 0.16),
     defineToken("linear.track.lineWidthFactor", "--dyni-linear-track-linewidth-factor", "number", 0.018),
