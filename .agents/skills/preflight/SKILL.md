@@ -113,7 +113,7 @@ REFERENCE IMPL: [file path if applicable, else "N/A"]
 KEY CONSTRAINTS:
 - No bundler, no ES modules, UMD/IIFE only
 - Host path is renderHtml-only
-- File size <=400 lines
+- ABSOLUTE 400-line limit on all JS and MD files (repo rules override exec-plans; split before crossing; no one-liner compression)
 - [task-specific constraints from docs read]
 RELEVANT SHARED UTILITIES: [list from coding-standards.md §Shared Utilities]
 ACTIVE SMELL RULES: [list rules most likely to trigger for this task type]
@@ -128,6 +128,16 @@ If any guidance conflicts during the task, apply this precedence:
 2. `documentation/conventions/coding-standards.md`
 3. `documentation/conventions/smell-prevention.md`
 4. Task-specific documentation
+
+### Step 5.5: File-Size Awareness Check
+
+Before starting implementation, check whether any file you will modify is already in the 300+ line range:
+
+```bash
+wc -l <file>
+```
+
+If a file is above 300 lines and your task will add significant code to it, plan the split upfront — do not defer it to "later" or assume the exec-plan will handle it. The 400-line limit is absolute and repo rules override exec-plans.
 
 ### Anti-Patterns
 

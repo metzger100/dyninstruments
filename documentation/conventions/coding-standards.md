@@ -25,7 +25,9 @@ Use this document for runtime-safe component structure and naming. It defines fi
 
 ## File Size Limits
 
-- Target: `<=400` lines per JS file.
+- **Hard limit: 400 non-empty lines per file.** This applies to all JS files (source and test) and all Markdown documentation files. There are no exceptions, no warning tier, and no workarounds. If a file approaches or reaches 400 lines, the agent must stop and split it before continuing — even if the current exec-plan does not mention splitting. Repo rules always override exec-plan assumptions.
+- Exempt file types: `.css`, `.json` layout files, exec-plan files (`exec-plans/`), agent skill files (`.agents/skills/`), tool scripts (`tools/`), and package config files.
+- One-liner compression (collapsing multiline code onto fewer lines to stay under the limit) is a blocking lint violation. The linter detects dense oneliners, long packed lines, chained ternaries, collapsed blocks, and other compression patterns. See `documentation/conventions/smell-prevention.md` §Oneliner line-limit bypass.
 - Shared drawing/layout logic must be split into `shared/widget-kits/radial/` modules:
   - `RadialAngleMath`
   - `RadialTickMath`
@@ -34,6 +36,10 @@ Use this document for runtime-safe component structure and naming. It defines fi
 - Gauge-specific behavior stays in individual gauge component files.
 - Cluster configs live under `config/clusters/`.
 - If a legacy file already exceeds 400 lines, isolate new logic and avoid increasing file size further.
+
+## Repo Rules Override Exec-Plans
+
+If an exec-plan's implementation phases would cause a file to exceed 400 lines, the agent must refactor and split the file as part of that phase. The plan does not need to mention splitting explicitly — the 400-line rule is always in effect. Do not wait for a later "cleanup" phase. Do not use one-liner compression to fit more logic into fewer lines.
 
 ## Mandatory File Headers
 

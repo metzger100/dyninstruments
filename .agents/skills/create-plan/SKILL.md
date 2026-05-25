@@ -154,6 +154,8 @@ These notes anchor the plan. They are descriptive, not prescriptive.
 - {ViewModel location}
 - {Layout/fit owner locations}
 - Each file must stay within the 400-line budget.
+- The 400-line limit is absolute and overrides all other plan guidance. If any phase would push a file over 400 lines, that phase must include a split step. Plans must not assume agents will use one-liner compression as a workaround.
+- For implementation phases that touch files already in the 300+ line range, include an explicit note: "Check file size before and after; split if approaching 400 lines."
 
 ### Behavioral
 - {Specific behavioral contracts that must be followed exactly}
