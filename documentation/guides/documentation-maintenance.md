@@ -49,7 +49,7 @@ npm run check:all
 - `node tools/check-doc-format.mjs --warn`
 - `node tools/check-doc-reachability.mjs`
 - `npm run ai:check`
-- `npm run check:filesize` (warns at `>=300`, fails at `>400`, and blocks on dense/packed oneliners via `--oneliner=block`)
+- `npm run check:filesize` (hard-fails at `>400` for all scanned files and blocks on oneliner findings via `--oneliner=block`; no warning tier)
 - `node tools/check-headers.mjs`
 - `node tools/check-dependencies.mjs`
 - `node tools/check-umd.mjs`
