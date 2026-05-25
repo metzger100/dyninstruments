@@ -112,6 +112,8 @@ Family geometry factors (advanced):
 | Radial | `--dyni-radial-fullcircle-normal-inner-margin` | `0.03` |
 | Radial | `--dyni-radial-fullcircle-normal-min-height` | `0.45` |
 | Radial | `--dyni-radial-fullcircle-normal-dual-gap` | `0.05` |
+| Radial | `--dyni-radial-fullcircle-tick-major-len-factor` | `0.131` |
+| Radial | `--dyni-radial-fullcircle-tick-minor-len-factor` | `0.077` |
 | Linear | `--dyni-linear-track-width` | `0.16` |
 | Linear | `--dyni-linear-track-linewidth-factor` | `0.018` |
 | Linear | `--dyni-linear-tick-major-len-factor` | `0.109` |
