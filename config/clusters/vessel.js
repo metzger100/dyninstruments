@@ -1,7 +1,7 @@
 /**
  * Module: DyniPlugin Vessel Cluster - Vessel metrics widget config (voltage + alarm + clock/time)
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js
+ * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/vessel-voltage-editables.js
  */
 (function (root) {
   "use strict";
@@ -41,6 +41,7 @@
             opt("Regatta timer", "regattaTimer"),
             opt("Alarm", "alarm"),
             opt("Clock (local time)", "clock"),
+            opt("Analog clock [Radial]", "clockRadial"),
             opt("Date and time", "dateTime"),
             opt("Time with GPS status", "timeStatus"),
             opt("SignalK pitch", "pitch"),
@@ -101,32 +102,8 @@
           condition: { kind: "regattaTimer" }
         },
 
-        // ---------------- VoltageLinearWidget (linear) settings -------------------
-        voltageLinearMinValue: {
-          type: "FLOAT", min: 0, max: 60, step: 0.1, default: 7.0,
-          name: "Min voltage",
-          condition: { kind: "voltageLinear" }
-        },
-        voltageLinearMaxValue: {
-          type: "FLOAT", min: 1, max: 80, step: 0.1, default: 15.0,
-          name: "Max voltage",
-          condition: { kind: "voltageLinear" }
-        },
-        voltageLinearTickMajor: {
-          type: "FLOAT", min: 0.1, max: 20, step: 0.1, default: 1.0,
-          name: "Major tick step",
-          condition: { kind: "voltageLinear" }
-        },
-        voltageLinearTickMinor: {
-          type: "FLOAT", min: 0.1, max: 10, step: 0.1, default: 0.2,
-          name: "Minor tick step",
-          condition: { kind: "voltageLinear" }
-        },
-        voltageLinearShowEndLabels: {
-          type: "BOOLEAN", default: false,
-          name: "Show min/max labels",
-          condition: { kind: "voltageLinear" }
-        },
+        // --- Voltage gauge params (linear + radial) ---
+        ...shared.buildVesselVoltageGaugeParams(),
 
         voltageLinearWarningEnabled: {
           type: "BOOLEAN",
@@ -165,34 +142,7 @@
           condition: { kind: "voltageLinear" }
         },
 
-        // ---------------- VoltageRadialWidget (radial) settings -------------------
-        voltageRadialMinValue: {
-          type: "FLOAT", min: 0, max: 60, step: 0.1, default: 7.0,
-          name: "Min voltage",
-          condition: { kind: "voltageRadial" }
-        },
-        voltageRadialMaxValue: {
-          type: "FLOAT", min: 1, max: 80, step: 0.1, default: 15.0,
-          name: "Max voltage",
-          condition: { kind: "voltageRadial" }
-        },
-        voltageRadialTickMajor: {
-          type: "FLOAT", min: 0.1, max: 20, step: 0.1, default: 1.0,
-          name: "Major tick step",
-          condition: { kind: "voltageRadial" }
-        },
-        voltageRadialTickMinor: {
-          type: "FLOAT", min: 0.1, max: 10, step: 0.1, default: 0.2,
-          name: "Minor tick step",
-          condition: { kind: "voltageRadial" }
-        },
-        voltageRadialShowEndLabels: {
-          type: "BOOLEAN", default: false,
-          name: "Show min/max labels",
-          condition: { kind: "voltageRadial" }
-        },
-
-        // --- VoltageSectors toggles (default enabled) -----------------------
+        // --- VoltageRadialWidget sector toggles and sectors ----------------
         voltageRadialWarningEnabled: {
           type: "BOOLEAN",
           default: true,
@@ -241,6 +191,7 @@
             { kind: "voltageRadial" },
             { kind: "alarm" },
             { kind: "clock" },
+            { kind: "clockRadial" },
             { kind: "dateTime" },
             { kind: "timeStatus" },
             { kind: "pitch" },
@@ -283,12 +234,31 @@
           name: "Hide textual metrics",
           condition: { kind: "voltageRadial" }
         },
+        clockRadialRatioThresholdNormal: {
+          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.7,
+          internal: true,
+          name: "ClockRadial: Normal Threshold",
+          condition: { kind: "clockRadial" }
+        },
+        clockRadialRatioThresholdFlat: {
+          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.0,
+          internal: true,
+          name: "ClockRadial: Flat Threshold",
+          condition: { kind: "clockRadial" }
+        },
+        clockRadialHideTextualMetrics: {
+          type: "BOOLEAN",
+          default: false,
+          name: "Hide textual metrics",
+          condition: { kind: "clockRadial" }
+        },
         hideSeconds: {
           type: "BOOLEAN",
           default: false,
           name: "Hide seconds",
           condition: [
             { kind: "clock" },
+            { kind: "clockRadial" },
             { kind: "dateTime" },
             { kind: "timeStatus" }
           ]

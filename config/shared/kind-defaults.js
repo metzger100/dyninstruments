@@ -257,6 +257,7 @@
       regattaTimer: { cap: "REGATTA", unit: "" },
       alarm: { cap: "ALARM", unit: "" },
       clock: { cap: "TIME", unit: "" },
+      clockRadial: { cap: "TIME", unit: "" },
       dateTime: { cap: "", unit: "" },
       timeStatus: { cap: "", unit: "" },
       pitch: { cap: "PITCH", unit: "\u00b0" },

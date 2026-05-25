@@ -12,6 +12,7 @@ describe("config/clusters/vessel.js", function () {
 
     runIifeScript("config/shared/kind-defaults.js", context);
     runIifeScript("config/shared/editable-param-utils.js", context);
+    runIifeScript("config/shared/vessel-voltage-editables.js", context);
     runIifeScript("config/clusters/vessel.js", context);
 
     return context.DyniPlugin.config.clusters.find((c) => c.def && c.def.cluster === "vessel").def;
@@ -59,6 +60,7 @@ describe("config/clusters/vessel.js", function () {
       { kind: "voltageRadial" },
       { kind: "alarm" },
       { kind: "clock" },
+      { kind: "clockRadial" },
       { kind: "dateTime" },
       { kind: "timeStatus" },
       { kind: "pitch" },
@@ -84,6 +86,7 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.hideSeconds.name).toBe("Hide seconds");
     expect(def.editableParameters.hideSeconds.condition).toEqual([
       { kind: "clock" },
+      { kind: "clockRadial" },
       { kind: "dateTime" },
       { kind: "timeStatus" }
     ]);

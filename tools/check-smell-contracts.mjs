@@ -216,6 +216,7 @@ function runDynamicStorekeyClearsRule() {
     "config/shared/environment-depth-editables.js",
     "config/shared/environment-temperature-editables.js",
     "config/shared/environment-editables.js",
+    "config/shared/vessel-voltage-editables.js",
     "config/clusters/environment.js",
     "config/clusters/vessel.js"
   ];
@@ -236,6 +237,7 @@ function runDynamicStorekeyClearsRule() {
     runIife("config/shared/environment-depth-editables.js", ctx);
     runIife("config/shared/environment-temperature-editables.js", ctx);
     runIife("config/shared/environment-editables.js", ctx);
+    runIife("config/shared/vessel-voltage-editables.js", ctx);
     runIife("config/clusters/environment.js", ctx);
     runIife("config/clusters/vessel.js", ctx);
   } catch (e) {

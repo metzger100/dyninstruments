@@ -19,6 +19,7 @@ describe("static cluster configs", function () {
     runIifeScript("config/shared/environment-depth-editables.js", context);
     runIifeScript("config/shared/environment-temperature-editables.js", context);
     runIifeScript("config/shared/environment-editables.js", context);
+    runIifeScript("config/shared/vessel-voltage-editables.js", context);
 
     runIifeScript("config/clusters/course-heading.js", context);
     runIifeScript("config/clusters/default.js", context);
@@ -377,6 +378,7 @@ describe("static cluster configs", function () {
       { kind: "voltageRadial" },
       { kind: "alarm" },
       { kind: "clock" },
+      { kind: "clockRadial" },
       { kind: "dateTime" },
       { kind: "timeStatus" },
       { kind: "pitch" },

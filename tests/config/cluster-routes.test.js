@@ -22,7 +22,8 @@ const SHARED_CONFIG_SCRIPTS = [
   "config/shared/environment-base-editables.js",
   "config/shared/environment-depth-editables.js",
   "config/shared/environment-temperature-editables.js",
-  "config/shared/environment-editables.js"
+  "config/shared/environment-editables.js",
+  "config/shared/vessel-voltage-editables.js"
 ];
 
 const CLUSTER_DEF_SCRIPTS = [
@@ -134,9 +135,9 @@ describe("config/cluster-routes metadata", function () {
 
     expect(clusterRoutes.schemaVersion).toBe(1);
     expect(Array.isArray(routes)).toBe(true);
-    expect(routes).toHaveLength(61);
+    expect(routes).toHaveLength(62);
     expect(byRouteId).toBeTruthy();
-    expect(Object.keys(byRouteId)).toHaveLength(61);
+    expect(Object.keys(byRouteId)).toHaveLength(62);
 
     const seenRouteIds = new Set();
     const seenClusterKinds = new Set();

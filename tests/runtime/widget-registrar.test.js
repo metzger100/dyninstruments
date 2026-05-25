@@ -48,6 +48,7 @@ describe("runtime/widget-registrar.js", function () {
 
     runIifeScript("config/shared/kind-defaults.js", context);
     runIifeScript("config/shared/editable-param-utils.js", context);
+    runIifeScript("config/shared/vessel-voltage-editables.js", context);
     runIifeScript("config/clusters/vessel.js", context);
 
     return context.DyniPlugin.config.clusters.find((c) => c.def && c.def.cluster === "vessel").def;

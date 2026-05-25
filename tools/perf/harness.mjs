@@ -396,6 +396,7 @@ function createHarnessEnvironment(options) {
   runIifeScript(rootDir, "config/shared/environment-depth-editables.js");
   runIifeScript(rootDir, "config/shared/environment-temperature-editables.js");
   runIifeScript(rootDir, "config/shared/environment-editables.js");
+  runIifeScript(rootDir, "config/shared/vessel-voltage-editables.js");
   runIifeScript(rootDir, "config/clusters/course-heading.js");
   runIifeScript(rootDir, "config/clusters/speed.js");
   runIifeScript(rootDir, "config/clusters/environment.js");

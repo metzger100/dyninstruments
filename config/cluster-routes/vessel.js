@@ -60,6 +60,14 @@
     },
     {
       cluster: "vessel",
+      kind: "clockRadial",
+      mapperId: "VesselMapper",
+      rendererId: "ClockRadialWidget",
+      surface: "canvas-dom",
+      shellSizing: { kind: "ratio", aspectRatio: 1 }
+    },
+    {
+      cluster: "vessel",
       kind: "dateTime",
       mapperId: "VesselMapper",
       rendererId: "PositionCoordinateWidget",

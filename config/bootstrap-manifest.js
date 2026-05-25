@@ -39,6 +39,7 @@
     "config/shared/environment-depth-editables.js",
     "config/shared/environment-temperature-editables.js",
     "config/shared/environment-editables.js",
+    "config/shared/vessel-voltage-editables.js",
     "config/clusters/course-heading.js",
     "config/clusters/speed.js",
     "config/clusters/environment.js",
