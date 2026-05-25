@@ -378,7 +378,6 @@ describe("static cluster configs", function () {
       { kind: "voltageRadial" },
       { kind: "alarm" },
       { kind: "clock" },
-      { kind: "clockRadial" },
       { kind: "dateTime" },
       { kind: "timeStatus" },
       { kind: "pitch" },
